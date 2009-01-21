@@ -21,6 +21,9 @@
  */
 #include <stdarg.h>
 #include <string.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SOLINT_S */
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gpsflash.h"
