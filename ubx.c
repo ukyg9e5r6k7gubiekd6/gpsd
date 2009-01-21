@@ -526,7 +526,7 @@ bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned cha
    ok = (count == ((ssize_t)data_len + 8));
    (void)tcdrain(fd);
    /*@ +nullderef @*/
-   return(0);
+   return(ok);
 }
 
 #ifdef ALLOW_RECONFIGURE
