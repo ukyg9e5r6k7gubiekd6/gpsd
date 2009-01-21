@@ -75,7 +75,7 @@ import gps, gpspacket
 # failures that usually look like lines missing from the end of the
 # test output relative to the check file.  This number might have to
 # be adusted upward on faster machines.
-WRITE_PAD = 0.1
+WRITE_PAD = 0.033
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
@@ -335,7 +335,7 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
-    CLOSE_DELAY = 3
+    CLOSE_DELAY = 1
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False):
         "Initialize the test session by launching the daemon."
         self.verbose = verbose
