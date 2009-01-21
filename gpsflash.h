@@ -22,7 +22,9 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+#ifndef S_SPLINT_S
 #include <netinet/in.h>	/* for htonl() under Linux */
+#endif /* S_SPLINT_S */
 
 #include <ctype.h>
 #include <err.h>
@@ -33,7 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
-#include <unistd.h>
 #include <stdbool.h>
 
 struct flashloader_t {

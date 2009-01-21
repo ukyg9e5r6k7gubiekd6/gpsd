@@ -346,7 +346,7 @@ libgps: libgps.c .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
 
 # Report splint warnings
-SPLINTOPTS = -I/usr/include/dbus-1.0/
+SPLINTOPTS = -I/usr/include/dbus-1.0/ +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon and libraries..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
