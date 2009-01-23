@@ -77,7 +77,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else if (session->packet.type == UBX_PACKET) {
 	gpsd_report(LOG_WARN, "UBX packet seen when NMEA expected.\n");
 #ifdef UBX_ENABLE
-	(void)gpsd_switch_driver(session, "uBlox UBX");
+	(void)gpsd_switch_driver(session, "uBlox UBX binary");
 	return ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 #else
 	return 0;
@@ -111,7 +111,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #ifdef UBX_ENABLE
 	    if(strncmp((char *)session->packet.outbuffer, "$GPTXT,01,01,02,MOD", 19)==0) {
 		ubx_catch_model(session, session->packet.outbuffer, session->packet.outbuflen);
-		(void)gpsd_switch_driver(session, "uBlox UBX");
+		(void)gpsd_switch_driver(session, "uBlox UBX binary");
 		return 0;
 	    }
 #endif /* UBX_ENABLE */
@@ -1091,53 +1091,59 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ASHTECH_ENABLE
     &ashtech,
 #endif /* ASHTECHV18_ENABLE */
-#ifdef FV18_ENABLE
-    &fv18,
-#endif /* FV18_ENABLE */
-#ifdef GPSCLOCK_ENABLE
-    &gpsclock,
-#endif /* GPSCLOCK_ENABLE */
-#ifdef GARMIN_ENABLE
-    &garmin,
-#endif /* GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
     &earthmate,
 #endif /* EARTHMATE_ENABLE */
+#ifdef GPSCLOCK_ENABLE
+    &gpsclock,
+#endif /* GPSCLOCK_ENABLE */
+#ifdef GARMIN_ENABLE
+    &garmin,
+#endif /* GARMIN_ENABLE */
+#ifdef MKT3301_ENABLE
+    &mkt3301,
+#endif /*  MKT3301_ENABLE */
+#ifdef OCEANSERVER_ENABLE
+    &oceanServer,
+#endif /* OCEANSERVER_ENABLE */
+#ifdef FV18_ENABLE
+    &fv18,
+#endif /* FV18_ENABLE */
+#ifdef TNT_ENABLE
+    &trueNorth,
+#endif /* TSIP_ENABLE */
 #endif /* NMEA_ENABLE */
-#ifdef ZODIAC_ENABLE
-    &zodiac_binary,
-#endif /* ZODIAC_ENABLE */
-#ifdef NAVCOM_ENABLE
-    &navcom_binary,
-#endif /* NAVCOM_ENABLE */
-#ifdef UBX_ENABLE
-    &ubx_binary,
-#endif /* UBX_ENABLE */
+
+
+#ifdef EVERMORE_ENABLE
+    &evermore_binary,
+#endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE
     &garmin_usb_binary,
     &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */
+#ifdef ITRAX_ENABLE
+    &italk_binary,
+#endif /* ITRAX_ENABLE */
+#ifdef NAVCOM_ENABLE
+    &navcom_binary,
+#endif /* NAVCOM_ENABLE */
 #ifdef SIRF_ENABLE
     &sirf_binary,
 #endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary,
 #endif /* TSIP_ENABLE */
-#ifdef TNT_ENABLE
-    &trueNorth,
-#endif /* TSIP_ENABLE */
-#ifdef OCEANSERVER_ENABLE
-    &oceanServer,
-#endif /* OCEANSERVER_ENABLE */
-#ifdef EVERMORE_ENABLE
-    &evermore_binary,
-#endif /* EVERMORE_ENABLE */
-#ifdef ITRAX_ENABLE
-    &italk_binary,
-#endif /* ITRAX_ENABLE */
+#ifdef UBX_ENABLE
+    &ubx_binary,
+#endif /* UBX_ENABLE */
+#ifdef ZODIAC_ENABLE
+    &zodiac_binary,
+#endif /* ZODIAC_ENABLE */
+
 #ifdef RTCM104V2_ENABLE
     &rtcm104v2,
 #endif /* RTCM104V2_ENABLE */
@@ -1147,9 +1153,6 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef GARMINTXT_ENABLE
     &garmintxt,
 #endif /* GARMINTXT_ENABLE */
-#ifdef MKT3301_ENABLE
-    &mkt3301,
-#endif /*  MKT3301_ENABLE */
     NULL,
 };
 /*@ +nullassign @*/

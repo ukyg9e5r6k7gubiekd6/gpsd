@@ -147,8 +147,17 @@ int main(int argc, char **argv)
 	    lowlevel = true;
 	    break;
         case 'l':		/* list known device types */
-	    for (dp = gpsd_drivers; *dp; dp++)
+	    for (dp = gpsd_drivers; *dp; dp++) {
+		if ((*dp)->mode_switcher != NULL)
+		    (void)fputs("-[bn]\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
+		if ((*dp)->control_send != NULL || !strcmp((*dp)->type_name, "uBlox UBX binary"))
+		    (void)fputs("-c\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
 		(void)puts((*dp)->type_name);
+	    }
 	    exit(0);
 	case 'n':		/* switch to NMEA mode */
 	    to_nmea = true;

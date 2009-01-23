@@ -96,7 +96,8 @@ any way.</para>
 <varlistentry>
 <term>-l</term>
 <listitem>
-<para>List the known device types and exit.</para>
+<para>List a table showing which option switches can be applied
+to which device types, and exit.</para>
 </listitem>
 </varlistentry>
 
