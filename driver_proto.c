@@ -80,6 +80,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     if (data_len != _PROTO__NAVSOL_MSG_LEN)
 	return 0;
 
+    gpsd_report(LOG_IO, "_proto_ NAVSOL - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__SOLUTION_VALID) == 0)
@@ -121,6 +122,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (data_len != UTCTIME_MSG_LEN)
 	return 0;
 
+    gpsd_report(LOG_IO, "_proto_ UTCTIME - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__TIME_VALID) == 0)
@@ -148,6 +150,7 @@ _proto__msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t 
     if (data_len != SVINFO_MSG_LEN )
 	return 0;
 
+    gpsd_report(LOG_IO, "_proto_ SVINFO - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__SVINFO_VALID) == 0)
