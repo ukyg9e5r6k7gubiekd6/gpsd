@@ -764,17 +764,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     /* update the scoreboard structure from the GPS */
     gpsd_report(LOG_RAW+2, "GPS sent %zd new characters\n", newlen);
     if (newlen == -1)	{		/* read error */
-        gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-                    session->gpsdata.gps_device,
-                    timestamp() - session->gpsdata.online);
-        session->gpsdata.online = 0;
-        return 0;
+	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+		    session->gpsdata.gps_device,
+		    timestamp() - session->gpsdata.online);
+	session->gpsdata.online = 0;
+	return 0;
     } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-        gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-                    session->gpsdata.gps_device,
-                    timestamp() - session->gpsdata.online);
-        session->gpsdata.online = 0;
+	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+		    session->gpsdata.gps_device,
+		    timestamp() - session->gpsdata.online);
+	session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
