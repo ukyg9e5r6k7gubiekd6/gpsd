@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
 	case 57600:
 	case 38400:
 	case 28800:
+	case 19200:
 	case 14400:
 	case 9600:
 	case 4800:
@@ -49,7 +50,7 @@ int main(int argc, char **argv) {
 	cfsetispeed(&term, speed);
 	if (tcsetattr(ifd, TCSANOW | TCSAFLUSH, &term) == -1)
 		err(1, "tcsetattr");
-	
+
 	tcflush(ifd, TCIOFLUSH);
 	n = 0;
 	while (1){
