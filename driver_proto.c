@@ -55,16 +55,15 @@ static	gps_mask_t proto_msg_svinfo(struct gps_device_t *, unsigned char *, size_
 /*
  * These methods may be called elsewhere in gpsd
  */
-	ssize_t proto_write(int , unsigned char *, size_t );
-	void proto_set_mode(struct gps_device_t *, speed_t ):
-static	bool proto_probe_detect(struct gps_device_t *)
-static	void proto_probe_wakeup(struct gps_device_t *)
-static	void proto_probe_subtype(struct gps_device_t *, unsigned int )
-static	void proto_configurator(struct gps_device_t *, unsigned int )
-static	bool proto_set_speed(struct gps_device_t *, speed_t )
-static	void proto_set_mode(struct gps_device_t *, int )
-static	void proto_revert(struct gps_device_t *)
-static	void proto_wrapup(struct gps_device_t *)
+static	ssize_t proto_write(struct gps_device_t *, unsigned char *, size_t );
+static	bool proto_probe_detect(struct gps_device_t *);
+static	void proto_probe_wakeup(struct gps_device_t *);
+static	void proto_probe_subtype(struct gps_device_t *, unsigned int );
+static	void proto_configurator(struct gps_device_t *, unsigned int );
+static	bool proto_set_speed(struct gps_device_t *, speed_t );
+static	void proto_set_mode(struct gps_device_t *, int );
+static	void proto_revert(struct gps_device_t *);
+static	void proto_wrapup(struct gps_device_t *);
 
 /*
  * Decode the navigation solution message
@@ -115,6 +114,8 @@ proto_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_l
 static gps_mask_t
 proto_msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
+    double t;
+
     if (data_len != UTCTIME_MSG_LEN)
 	return 0;
 
@@ -125,7 +126,7 @@ proto_msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t data_
 
     tow = GET_MS_TIMEOFWEEK();
     gps_week = GET_WEEKNUMBER();
-    session->context->leap_seconds = GET_GPS_LEAPSECONDS()
+    session->context->leap_seconds = GET_GPS_LEAPSECONDS();
 
     t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
@@ -184,15 +185,15 @@ proto_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t da
  * Write data to the device, doing any required padding or checksumming
  */
 /*@ +charint -usedef -compdef @*/
-static ssize_t proto_write(struct gps_device_t *session, 
-			   unsigned char *msg, size_t msglen) 
+static ssize_t proto_write(struct gps_device_t *session,
+			   unsigned char *msg, size_t msglen)
 {
    bool ok;
 
    /* CONSTRUCT THE MESSAGE */
 
    /* we may need to dump the message */
-   gpsd_report(LOG_IO, "writing proto control type %02x:%s\n", 
+   gpsd_report(LOG_IO, "writing proto control type %02x:%s\n",
 	       msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
    return gpsd_write(session, msg, msglen);
 }
@@ -215,12 +216,12 @@ gps_mask_t proto_dispatch(struct gps_device_t *session, unsigned char *buf, size
 
     /* we may need to dump the raw packet */
     gpsd_report(LOG_RAW, "raw proto packet type 0x%02x length %d: %s\n",
-	buf[0], len, buf2);
+	type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 
    /*
     * XXX The tag field is only 8 bytes; be careful you do not overflow.
     * XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
-    */ 
+    */
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	"PROTO%02x", type);
 
@@ -236,16 +237,6 @@ gps_mask_t proto_dispatch(struct gps_device_t *session, unsigned char *buf, size
     }
 }
 /*@ -charint @*/
-
-/*
- * Switch between NMEA and binary mode, if supported
- */
-static void proto_set_mode(struct gps_device_t *session, speed_t speed)
-{
-    /*
-     * Insert your actual mode switching code here.
-     */
-}
 
 /**********************************************************
  *
@@ -324,6 +315,9 @@ static bool proto_set_speed(struct gps_device_t *session, speed_t speed)
     /* set port operating mode, speed, bits etc. here */
 }
 
+/*
+ * Switch between NMEA and binary mode, if supported
+ */
 static void proto_set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
