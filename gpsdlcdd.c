@@ -157,7 +157,7 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
 
   buffer=vptr;
 
-  for (n=1;n<maxlen;n++) {
+  for (n = 1; n < (ssize_t)maxlen; n++) {
 
     if((rc=read(sockd,&c,1))==1) {
       *buffer++=c;
@@ -250,8 +250,8 @@ static enum deg_str_type deg_type = deg_dd;
 
 /* This gets called once for each new sentence. */
 static void update_lcd(struct gps_data_t *gpsdata,
-                       char *message,
-                       size_t len,
+                       char *message UNUSED,
+                       size_t len UNUSED,
                        int level UNUSED)
 {
   char tmpbuf[255];
@@ -272,14 +272,14 @@ static void update_lcd(struct gps_data_t *gpsdata,
   if (gpsdata->fix.mode >= MODE_2D) {
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
-    sprintf(tmpbuf,"widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    snprintf(tmpbuf, 254, "widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     send_lcd(tmpbuf);
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
-    sprintf(tmpbuf,"widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    snprintf(tmpbuf, 254, "widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     send_lcd(tmpbuf);
 
-    sprintf(tmpbuf,"widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
+    snprintf(tmpbuf, 254, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
             gpsdata->fix.speed*speedfactor, speedunits,
             (int)(gpsdata->fix.track));
     send_lcd(tmpbuf);
@@ -299,14 +299,14 @@ static void update_lcd(struct gps_data_t *gpsdata,
     avgclimb=0.0;
     for(n=0;n<CLIMB;n++) avgclimb+=climb[n];
     avgclimb/=CLIMB;
-    sprintf(tmpbuf,"widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
+    snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
             (int)(gpsdata->fix.altitude*altfactor), altunits, maidenhead, (int)(avgclimb * METERS_TO_FEET * 60));
 #else
-    sprintf(tmpbuf,"widget_set gpsd four 1 4 {%.1f %s  %s}\n",
+    snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%.1f %s  %s}\n",
             gpsdata->fix.altitude*altfactor, altunits, maidenhead);
 #endif
   } else {
-    sprintf(tmpbuf,"widget_set gpsd four 1 4 {n/a}\n");
+    snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {n/a}\n");
   }
   send_lcd(tmpbuf);
 }
