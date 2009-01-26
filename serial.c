@@ -271,7 +271,9 @@ ssize_t gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
 {
      ssize_t status;
      bool ok;
-     if (session && session->context && session->context->readonly)
+     if (session == NULL ||
+	 session->context == NULL ||
+	 session->context->readonly)
 	return 0;
      status = write(session->gpsdata.gps_fd, buf, len);
      ok = (status == (ssize_t)len);
