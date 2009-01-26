@@ -264,6 +264,7 @@ static void update_lcd(struct gps_data_t *gpsdata,
   maidenhead[6]=0;
 #endif
   char *s;
+  int track;
 
   /* Get our location in Maidenhead. */
   latlon2maidenhead(maidenhead,gpsdata->fix.latitude,gpsdata->fix.longitude);
@@ -279,9 +280,14 @@ static void update_lcd(struct gps_data_t *gpsdata,
     snprintf(tmpbuf, 254, "widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     send_lcd(tmpbuf);
 
+    /* As a pilot, a heading of "0" gives me the heebie-jeebies (ie, 0
+       == "invalid heading data", 360 == "North"). */
+    track=(int)(gpsdata->fix.track);
+    if(track == 0) track = 360;
+
     snprintf(tmpbuf, 254, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
-            gpsdata->fix.speed*speedfactor, speedunits,
-            (int)(gpsdata->fix.track));
+             gpsdata->fix.speed*speedfactor, speedunits,
+             track);
     send_lcd(tmpbuf);
 
   } else {
@@ -535,5 +541,4 @@ int main(int argc, char *argv[]) {
     }
 
   }
-
 }
