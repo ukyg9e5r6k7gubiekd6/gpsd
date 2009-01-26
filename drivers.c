@@ -1081,7 +1081,7 @@ static struct gps_type_t mkt3301 = {
 extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary;
-extern struct gps_type_t navcom_binary;
+extern struct gps_type_t navcom_binary, superstar2_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
@@ -1133,6 +1133,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #endif /* NAVCOM_ENABLE */
 #ifdef SIRF_ENABLE
     &sirf_binary,
+#endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+    &superstar2_binary,
 #endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary,

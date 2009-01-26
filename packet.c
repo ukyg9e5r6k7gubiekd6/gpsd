@@ -31,6 +31,7 @@ others apart and distinguish them from baud barf.
 #include <string.h>
 #include <errno.h>
 #include "gpsd_config.h"
+#include "bits.h"
 #include "gpsd.h"
 #include "crc24q.h"
 
@@ -85,10 +86,12 @@ enum {
 #include "packet_states.h"
 };
 
+#define SOH	0x01
 #define DLE	0x10
 #define STX	0x02
 #define ETX	0x03
 
+static unsigned char ctmp;
 static void nextstate(struct gps_packet_t *lexer,
 		      unsigned char c)
 {
@@ -125,6 +128,12 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+	if (c == SOH) {
+	    lexer->state = SUPERSTAR2_LEADER;
+	    break;
+	}
+#endif /* SUPERSTAR2_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
 	if (c == DLE) {
 	    lexer->state = DLE_LEADER;
@@ -469,6 +478,38 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+    case SUPERSTAR2_LEADER:
+	ctmp = c;
+	lexer->state = SUPERSTAR2_ID1;
+	break;
+    case SUPERSTAR2_ID1:
+	if ((ctmp ^ 0xff) == c)
+	    lexer->state = SUPERSTAR2_ID2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case SUPERSTAR2_ID2:
+	lexer->length = c + 4;
+	if (lexer->length <= MAX_PACKET_LENGTH)
+	    lexer->state = SUPERSTAR2_PAYLOAD;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case SUPERSTAR2_PAYLOAD:
+	if (--lexer->length == 0)
+	    lexer->state = SUPERSTAR2_CKSUM1;
+	break;
+    case SUPERSTAR2_CKSUM1:
+	lexer->state = SUPERSTAR2_RECOGNIZED;
+	break;
+    case SUPERSTAR2_RECOGNIZED:
+	if (c == SOH)
+	    lexer->state = SUPERSTAR2_LEADER;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+#endif /* SUPERSTAR2_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
@@ -939,6 +980,29 @@ void packet_parse(struct gps_packet_t *lexer)
 	    break;
 	}
 #endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+	else if (lexer->state == SUPERSTAR2_RECOGNIZED) {
+	    unsigned short a = 0, b, n;
+	    lexer->length = 4 + lexer->inbuffer[3] + 2;
+	    for(n = 0; n < lexer->length - 2; n++)
+		a += lexer->inbuffer[n];
+	    a = htons(a);
+	    b = getbeuw(lexer->inbuffer, lexer->length - 2);
+	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
+			lexer->inbuffer[1], (unsigned int)lexer->length,
+			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length, LOG_RAW));
+	    if (a != b) {
+		gpsd_report(LOG_IO, "REJECT SuperStarII packet type 0x%02x"
+			    "%zd bad checksum 0x%04x, expecting 0x%04x\n",
+			    lexer->inbuffer[1], lexer->length, a, b);
+		lexer->state = GROUND_STATE;
+	    } else {
+		packet_accept(lexer, SUPERSTAR2_PACKET);
+	    }
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* SUPERSTAR2_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	else if (lexer->state == TSIP_RECOGNIZED) {
 	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;

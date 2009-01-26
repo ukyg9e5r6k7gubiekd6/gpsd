@@ -66,6 +66,7 @@ struct gps_packet_t {
 #define RTCM3_PACKET	10
 #define UBX_PACKET	11
 #define GARMINTXT_PACKET	12
+#define SUPERSTAR2_PACKET	13
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -276,6 +277,11 @@ struct gps_device_t {
 #endif /* ALLOW_RECONFIGURE */
 	} sirf;
 #endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+	struct {
+	    unsigned short gps_week;
+	} superstar2;
+#endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
 	struct {
 	    int16_t gps_week;		/* Current GPS week number */

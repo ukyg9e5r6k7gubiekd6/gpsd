@@ -201,8 +201,8 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   dnl traditional way) by hand.
   AC_CHECK_LIB(Xaw8, XawInitializeWidgetSet, XAW_LIBS="-lXaw8",
      AC_CHECK_LIB(Xaw7, XawInitializeWidgetSet, XAW_LIBS="-lXaw7",
-        AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",
-     		     ,${X_PRE_LIBS} ${X11_LIBS}),
+	AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",
+		     ,${X_PRE_LIBS} ${X11_LIBS}),
 		  ${X_PRE_LIBS} ${X11_LIBS}),
 	  ${X_PRE_LIBS} ${X11_LIBS})
   AC_SUBST(XAW_LIBS)
@@ -294,6 +294,19 @@ AC_MSG_CHECKING([for SiRF support])
 if test x"$ac_sirf" = "xyes"; then
     AC_MSG_RESULT([yes])
 	AC_DEFINE([SIRF_ENABLE], 1, [SiRF chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for Novatel SuperStarII support
+AC_ARG_ENABLE(superstar2,
+  AC_HELP_STRING([--enable-superstar2],
+		 [enable SuperStarII chipset support]),
+  [ac_superstar2=$enableval], [ac_superstar2=no])
+AC_MSG_CHECKING([for SuperStarII support])
+if test x"$ac_superstar2" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SUPERSTAR2_ENABLE], 1, [SuperStarII chipset support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -507,7 +520,7 @@ AC_ARG_ENABLE(rtcm104v2,
 		 [disable rtcm104v2 support]),
   [ac_rtcm104v2=$enableval], [ac_rtcm104v2=yes])
 AC_MSG_CHECKING([for rtcm104v2 support])
-if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
+if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_superstar2" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
     ac_rtcm104v2=no
 fi
 if test x"$ac_rtcm104v2" = "xyes"; then
@@ -809,6 +822,7 @@ echo "Navcom                  : $ac_navcom"
 echo "RTCM104V2               : $ac_rtcm104v2"
 echo "RTCM104V3               : $ac_rtcm104v3"
 echo "SiRF                    : $ac_sirf"
+echo "SuperStarII             : $ac_superstar2"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "True North              : $ac_tnt"
@@ -847,6 +861,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_ntrip" = "xno" -a \
     x"$ac_rtcm104v2" = "xno" -a \
     x"$ac_sirf" = "xno" -a \
+    x"$ac_superstar2" = "xno" -a \
     x"$ac_tnt" = "xno" -a \
     x"$ac_oceanserver" = "xno" -a \
     x"$ac_tripmate" = "xno" -a \

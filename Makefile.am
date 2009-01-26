@@ -134,6 +134,7 @@ libgpsd_c_sources = \
 	dgpsip.c \
 	ntrip.c \
 	sirf.c \
+	superstar2.c \
 	report.c \
 	isgps.c \
 	rtcm2.c \

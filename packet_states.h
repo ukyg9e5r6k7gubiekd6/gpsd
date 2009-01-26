@@ -127,6 +127,16 @@
    GARMIN_RECOGNIZED,	/* found end of Garmin packet */
 #endif /* TSIP_ENABLE GARMIN_ENABLE */
 
+#ifdef SUPERSTAR2_ENABLE
+   SUPERSTAR2_LEADER,	/* leading SOH */
+   SUPERSTAR2_ID1,	/* message type */
+   SUPERSTAR2_ID2,	/* message type xor 0xff */
+   SUPERSTAR2_PAYLOAD,	/* length of the actual packet data */
+   SUPERSTAR2_CKSUM1,
+   SUPERSTAR2_CKSUM2,
+   SUPERSTAR2_RECOGNIZED,
+#endif
+
 #ifdef RTCM104V2_ENABLE
    RTCM2_SYNC_STATE,	/* we have sync lock */
    RTCM2_SKIP_STATE,	/* we have sync lock, but this character is bad */

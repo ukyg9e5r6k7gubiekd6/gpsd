@@ -706,6 +706,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "SiRF binary");
 		break;
 #endif /* SIRF_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+	    case SUPERSTAR2_PACKET:
+		(void)gpsd_switch_driver(session, "SuperStarII binary");
+		break;
+#endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
 	    case TSIP_PACKET:
 		(void)gpsd_switch_driver(session, "Trimble TSIP");
