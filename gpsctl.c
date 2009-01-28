@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 	status = 0;
 	if (to_nmea) {
 	    (void)gps_query(gpsdata, "N=0");
-	    if (gpsdata->driver_mode != 0) {
+	    if (gpsdata->driver_mode != MODE_NMEA) {
 		(void)fprintf(stderr, "gpsctl: %s mode change to NMEA failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "N=1");
-	    if (gpsdata->driver_mode != 1) {
+	    if (gpsdata->driver_mode != MODE_BINARY) {
 		(void)fprintf(stderr, "gpsctl: %s mode change to native mode failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
@@ -423,26 +423,17 @@ int main(int argc, char **argv)
 		status = 1;
 	    }
 	    else if (to_nmea) {
-		if (session.gpsdata.driver_mode == 0)
-		    (void)fprintf(stderr, "gpsctl: already in NMEA mode.\n");
-		else {
-		    session.device_type->mode_switcher(&session, MODE_NMEA);
-		    if (session.gpsdata.driver_mode != 0) {
-			(void)fprintf(stderr, "gpsctl: mode change failed\n");
-			status = 1;
-		    }
+		session.device_type->mode_switcher(&session, MODE_NMEA);
+		if (session.gpsdata.driver_mode != MODE_NMEA) {
+		    (void)fprintf(stderr, "gpsctl: mode change failed\n");
+		    status = 1;
 		}
 	    }
 	    else if (to_binary) {
-		if (session.gpsdata.driver_mode == 1) {
-		    (void)fprintf(stderr, "gpsctl: already in native mode.\n");
-		    session.back_to_nmea = false;
-		} else {
-		    session.device_type->mode_switcher(&session, MODE_BINARY);
-		    if (session.gpsdata.driver_mode != 1) {
-			(void)fprintf(stderr, "gpsctl: mode change failed\n");
-			status = 1;
-		    }
+		session.device_type->mode_switcher(&session, MODE_BINARY);
+		if (session.gpsdata.driver_mode != MODE_BINARY) {
+		    (void)fprintf(stderr, "gpsctl: mode change failed\n");
+		    status = 1;
 		}
 	    }
 	}
