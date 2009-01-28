@@ -733,7 +733,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
 	    case UBX_PACKET:
-		(void)gpsd_switch_driver(session, "uBlox UBX");
+		(void)gpsd_switch_driver(session, "uBlox UBX binary");
 		break;
 #endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
