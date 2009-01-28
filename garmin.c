@@ -1001,7 +1001,8 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
     if (mode == 0) {
 	const char *switcher = "\x10\x0A\x02\x26\x00\xCE\x10\x03";
-	int status = (int)gpsd_write(session, switcher, strlen(switcher));
+	// Note hard-coded string length in the next line...
+	int status = (int)gpsd_write(session, switcher, 8);
 	if (status == (int)strlen(switcher)) {
 	    gpsd_report(LOG_IO, "=> GPS: turn off binary %02x %02x %02x... \n"
 			, switcher[0], switcher[1], switcher[2]);
