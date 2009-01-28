@@ -848,7 +848,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';
-	    // FIXME: Add RTCMV3 handking as well.
+	    // FIXME: Add RTCMV3 handling as well.
 #ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
 		rtcm2_dump(&session->gpsdata.rtcm2,
@@ -863,7 +863,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 #endif /* RTCM104V2_ENABLE */
 	    if (buf2[0] != '\0') {
-		gpsd_report(LOG_IO, "<= GPS %s: %s",
+		gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
 			    session->gpsdata.gps_device, buf2);
 		if (session->gpsdata.raw_hook)
 		    session->gpsdata.raw_hook(&session->gpsdata,
