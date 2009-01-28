@@ -266,6 +266,17 @@ static struct gps_type_t nmea = {
  *
  **************************************************************************/
 
+static void garmin_mode_switch(struct gps_device_t *session, int mode)
+/* only does anything iin one direction, going to Garmin binary driver */
+{
+    if (mode == MODE_NMEA) {
+	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
+	(void)nmea_send(session, "$PGRMI,,,,,,,R");
+	(void)usleep(333);	/* standard Garmin settling time */
+	session->gpsdata.driver_mode = MODE_NMEA;
+    }
+}
+
 #ifdef ALLOW_RECONFIGURE
 static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int seq)
 {
@@ -327,7 +338,7 @@ static struct gps_type_t garmin = {
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = NULL,		/* no mode switcher */
+    .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE

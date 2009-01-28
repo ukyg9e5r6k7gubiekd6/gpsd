@@ -999,7 +999,7 @@ static void settle(void)
 static void garmin_switcher(struct gps_device_t *session, int mode)
 {
 #ifdef ALLOW_RECONFIGURE
-    if (mode == 0) {
+    if (mode == MODE_NMEA) {
 	/*@ +charint @*/
 	const char switcher[] = {0x10,0x0A,0x02,0x26,0x00,0xCE,0x10,0x03};
 	// Note hard-coded string length in the next line...
