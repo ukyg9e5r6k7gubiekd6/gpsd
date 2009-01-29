@@ -152,6 +152,10 @@ int main(int argc, char **argv)
 		    (void)fputs("-[bn]\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
+		if ((*dp)->speed_switcher != NULL)
+		    (void)fputs("-s\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
 		if ((*dp)->control_send != NULL || strcmp((*dp)->type_name, "uBlox UBX binary")==0)
 		    (void)fputs("-c\t", stdout);
 		else
