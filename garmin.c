@@ -1028,6 +1028,13 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 #endif /* ALLOW_RECONFIGURE */
 }
 
+static ssize_t garmin_control_send(struct gps_device_t *session, 
+			    char *buf, size_t buflen)
+/* not used by the daemon, it's for gpsctl and friends */
+{
+    return gpsd_write(session, buf, buflen);
+}
+
 /* this is everything we export */
 #ifdef __UNUSED__
 static int GetPacket (struct gps_device_t *session );
@@ -1154,7 +1161,7 @@ struct gps_type_t garmin_usb_binary_old =
     .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
@@ -1181,7 +1188,7 @@ struct gps_type_t garmin_usb_binary =
     .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
@@ -1207,7 +1214,7 @@ struct gps_type_t garmin_ser_binary =
     .type_name      = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
