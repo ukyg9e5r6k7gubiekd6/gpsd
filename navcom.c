@@ -1207,12 +1207,12 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == NAVCOM_PACKET){
 	st = navcom_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = 1;  /* binary */
+	session->gpsdata.driver_mode = MODE_BINARY;  /* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = 0;  /* NMEA */
+	session->gpsdata.driver_mode = MODE_NMEA;  /* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else

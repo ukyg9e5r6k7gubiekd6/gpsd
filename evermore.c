@@ -451,16 +451,16 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
     gpsd_report(LOG_PROG, "evermore_mode(%d), %d\n", mode, session->back_to_nmea ? 1 : 0);
-    if (mode == 0) {
+    if (mode == MODE_NMEA) {
         /* NMEA */
         (void) evermore_protocol(session, 1);
-        session->gpsdata.driver_mode = 0;
+        session->gpsdata.driver_mode = MODE_NMEA;
         (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd */
     } else {
         /* binary */
         (void) evermore_protocol(session, 0);
         session->back_to_nmea = false;
-        session->gpsdata.driver_mode = 1;
+        session->gpsdata.driver_mode = MODE_BINARY;
     }
 }
 

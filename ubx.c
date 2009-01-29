@@ -445,12 +445,12 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 
     if (session->packet.type == UBX_PACKET){
 	st = ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = MODE_BINARY;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = 0;
+	session->gpsdata.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
     } else

@@ -309,7 +309,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'N':
 		    if (sp[2] == '?') 
-			gpsdata->driver_mode = 0;
+			gpsdata->driver_mode = MODE_NMEA;
 		    else
 			gpsdata->driver_mode = (unsigned)atoi(sp+2);
 		    break;
