@@ -91,13 +91,15 @@ enum {
 #define STX	0x02
 #define ETX	0x03
 
-static unsigned char ctmp;
 static void nextstate(struct gps_packet_t *lexer,
 		      unsigned char c)
 {
 #ifdef RTCM104V2_ENABLE
     enum isgpsstat_t	isgpsstat;
 #endif /* RTCM104V2_ENABLE */
+#ifdef SUPERSTAR2_ENABLE
+    static unsigned char ctmp;
+#endif /* SUPERSTAR2_ENABLE */
 /*@ +charint -casebreak @*/
     switch(lexer->state)
     {

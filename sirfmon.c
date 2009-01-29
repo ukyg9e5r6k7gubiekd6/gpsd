@@ -1196,7 +1196,7 @@ int main (int argc, char **argv)
 	(void)refresh();
 	(void)wrefresh(mid2win);
 	(void)wrefresh(mid4win);
-	if (dispmode == 0) {
+	if (!dispmode) {
 	    refresh_rightpanel1();
 	} else {
 	    (void)touchwin(mid19win);
@@ -1224,7 +1224,7 @@ int main (int argc, char **argv)
 	    //(void)refresh();
 	    (void)wrefresh(mid2win);
 	    (void)wrefresh(mid4win);
-	    if (dispmode == 0) {
+	    if (!dispmode) {
 		refresh_rightpanel1();
 	    } else {
 		(void)touchwin(mid19win);
