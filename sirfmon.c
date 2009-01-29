@@ -454,14 +454,13 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               3 x 12 = 36 bytes
 	******************************************************************/
-	(void)touchwin(mid27win);
-	display(mid27win, 1, 14, "                                                                                     ");
-	display(mid27win, 1, 14, "%s", dgpsvec[(int)getub(buf, 1)]);
+	display(mid27win, 1, 14, "%d (%s)", 
+		getub(buf, 1), dgpsvec[(int)getub(buf, 1)]);
 	/*@ -type @*/
+	//(void) wmove(mid27win, 2, 0);
 	for (i = j = 0; i < 12; i++) {
-	    (void)touchwin(mid27win);
 	    if (getub(buf, 16+3*i) != '\0') {
-		(void)wprintw(mid27win, "  %d=%d", getub(buf, 16+3*i), getbesw(buf, 16+3*i+1));
+		//(void)wprintw(mid27win, " %d=%d", getub(buf, 16+3*i), getbesw(buf, 16+3*i+1));
 		j++;
 	    }
 	}
@@ -1055,7 +1054,7 @@ int main (int argc, char **argv)
     mid9win   = newwin(3,  50, 14, 30);
     mid13win  = newwin(3,  50, 17, 30);
     mid19win  = newwin(17, 50,  7, 30);
-    mid27win  = newwin(4,  50, 20, 30);
+    mid27win  = newwin(3,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
     if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
 	|| mid13win==NULL || mid19win==NULL || mid27win==NULL || cmdwin==NULL)
@@ -1169,7 +1168,7 @@ int main (int argc, char **argv)
     (void)wattrset(mid27win, A_BOLD);
     display(mid27win, 1, 1, "DGPS source: ");
     display(mid27win, 1, 31, "Corrections: ");
-    display(mid27win, 3, 8, " Packet type 27 (0x1B) ");
+    display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
 
     (void)wattrset(cmdwin, A_BOLD);
