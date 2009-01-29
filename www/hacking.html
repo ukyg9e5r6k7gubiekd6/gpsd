@@ -87,6 +87,7 @@ file in the source distribution.</p>
 <li><a href="#architecture">Architecture and how to hack it</a></li>
 <li><a href="#autoconfiguration">Autoconfiguration</a></li>
 <li><a href="#error">Error modeling</a></li>
+<li><a href="#ancient">Ancient history</a></li>
 </ol>
 <li><a href="#trouble">Known trouble spots</a></li>
 <ol>
@@ -798,6 +799,18 @@ receiver clock error.  Thus:</p>
 
 <p>Due to multipath uncertainty, Carl says 4.1 is too low and recommends
 a non-DGPS UERE estimate of 8 (95% confidence).  That's what we use.</p>
+
+<h2 id="ancient">Ancient history</h2>
+
+<p>The project is presently kept in a Subversion repository.  Up until
+early 2005 it was kept in CVS, which was mechanically upconverted
+using cvs2svn.</p>
+
+<p>This history has one still-visible consequence.  Subversion
+revisions before about r1812 are actually CVS history.  If you read
+very old portions of the revision log, there are many spans of
+identical comments.  These are places where cvs2svn should have merged
+multiple CVS commits to a single SVN changeset, but did not.</p>
 
 <h1 id="trouble">Known trouble spots</h1>
 
