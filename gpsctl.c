@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 
 	if (reset)
 	{
-	    gpsd_report(LOG_PROG, "gpsctl: cabnnot reset with gpsd running.\n");
+	    gpsd_report(LOG_PROG, "gpsctl: cannot reset with gpsd running.\n");
 	    exit(0);
 	}
 
