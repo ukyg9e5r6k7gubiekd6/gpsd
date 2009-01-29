@@ -57,6 +57,14 @@ static int tsip_write(int fd, unsigned int id, /*@null@*/unsigned char *buf, siz
 #endif /* ALLOW_RECONFIGURE */
 }
 
+static ssize_t tsip_control_send(struct gps_device_t *session, 
+			    char *buf, size_t buflen)
+/* not used by the daemon, it's for gpsctl and friends */
+{
+    return (ssize_t)tsip_write(session->gpsdata.gps_fd, 
+		      (unsigned int)buf[0], (unsigned char *)buf+1, buflen-1);
+}
+
 static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     unsigned char buf[100];
@@ -819,7 +827,7 @@ struct gps_type_t tsip_binary =
     .type_name      = "Trimble TSIP",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = tsip_control_send,/* how to send commands */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
