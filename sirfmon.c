@@ -383,18 +383,20 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid19win, 1, 20, "%d", getub(buf, 5));	/* Alt. hold mode */
 	display(mid19win, 2, 20, "%d", getub(buf, 6));	/* Alt. hold source*/
 	display(mid19win, 3, 20, "%dm", (int)getbeuw(buf, 7));	/* Alt. source input */
-	display(mid19win, 4, 20, "%d", getub(buf, 9));	/* Degraded mode*/
-	display(mid19win, 5, 20, "%dsec", getub(buf, 10));	/* Degraded timeout*/
-	display(mid19win, 6, 20, "%dsec",getub(buf, 11));	/* DR timeout*/
-	display(mid19win, 7, 20, "%c", YESNO(12));/* Track smooth mode*/
-	display(mid19win, 8, 20, "%c", YESNO(13)); /* Static Nav.*/
-	display(mid19win, 9, 20, "0x%x", getub(buf, 14));	/* 3SV Least Squares*/
-	display(mid19win, 10,20, "0x%x", getub(buf, 19));	/* DOP Mask mode*/
-	display(mid19win, 11,20, "0x%x", (int)getbeuw(buf, 20));	/* Nav. Elev. mask*/
-	display(mid19win, 12,20, "0x%x", getub(buf, 22));	/* Nav. Power mask*/
-	display(mid19win, 13,20, "0x%x", getub(buf, 27));	/* DGPS Source*/
-	display(mid19win, 14,20, "0x%x", getub(buf, 28));	/* DGPS Mode*/
-	display(mid19win, 15,20, "%dsec",getub(buf, 29));	/* DGPS Timeout*/
+	if (getub(buf, 9))
+	    display(mid19win, 4, 20, "%dsec", getub(buf, 10));	/* Degraded timeout*/
+	else
+	    display(mid19win, 4, 20, "N/A   ");
+	display(mid19win, 5, 20, "%dsec",getub(buf, 11));	/* DR timeout*/
+	display(mid19win, 6, 20, "%c", YESNO(12));/* Track smooth mode*/
+	display(mid19win, 7, 20, "%c", YESNO(13)); /* Static Nav.*/
+	display(mid19win, 8, 20, "0x%x", getub(buf, 14));	/* 3SV Least Squares*/
+	display(mid19win, 9 ,20, "0x%x", getub(buf, 19));	/* DOP Mask mode*/
+	display(mid19win, 10,20, "0x%x", (int)getbeuw(buf, 20));	/* Nav. Elev. mask*/
+	display(mid19win, 11,20, "0x%x", getub(buf, 22));	/* Nav. Power mask*/
+	display(mid19win, 12,20, "0x%x", getub(buf, 27));	/* DGPS Source*/
+	display(mid19win, 13,20, "0x%x", getub(buf, 28));	/* DGPS Mode*/
+	display(mid19win, 14,20, "%dsec",getub(buf, 29));	/* DGPS Timeout*/
 	display(mid19win, 1, 42, "%c", YESNO(34));/* LP Push-to-Fix */
 	display(mid19win, 2, 42, "%dms", getbeul(buf, 35));	/* LP On Time */
 	display(mid19win, 3, 42, "%d", getbeul(buf, 39));	/* LP Interval */
@@ -1053,7 +1055,7 @@ int main (int argc, char **argv)
     mid7win   = newwin(4,  50, 10, 30);
     mid9win   = newwin(3,  50, 14, 30);
     mid13win  = newwin(3,  50, 17, 30);
-    mid19win  = newwin(17, 50,  7, 30);
+    mid19win  = newwin(16, 50,  7, 30);
     mid27win  = newwin(3,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
     if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
@@ -1103,18 +1105,17 @@ int main (int argc, char **argv)
     display(mid19win, 1, 1, "Alt. hold mode:");
     display(mid19win, 2, 1, "Alt. hold source:");
     display(mid19win, 3, 1, "Alt. source input:");
-    display(mid19win, 4, 1, "Degraded mode:");
-    display(mid19win, 5, 1, "Degraded timeout:");
-    display(mid19win, 6, 1, "DR timeout:");
-    display(mid19win, 7, 1, "Track smooth mode:");
-    display(mid19win, 8, 1, "Static Navigation:");
-    display(mid19win, 9, 1, "3SV Least Squares:");
-    display(mid19win, 10,1, "DOP Mask mode:");
-    display(mid19win, 11,1, "Nav. Elev. mask:");
-    display(mid19win, 12,1, "Nav. Power mask:");
-    display(mid19win, 13,1, "DGPS Source:");
-    display(mid19win, 14,1, "DGPS Mode:");
-    display(mid19win, 15,1, "DGPS Timeout:");
+    display(mid19win, 4, 1, "Degraded timeout:");
+    display(mid19win, 5, 1, "DR timeout:");
+    display(mid19win, 6, 1, "Track smooth mode:");
+    display(mid19win, 7, 1, "Static Navigation:");
+    display(mid19win, 8, 1, "3SV Least Squares:");
+    display(mid19win, 9 ,1, "DOP Mask mode:");
+    display(mid19win, 10,1, "Nav. Elev. mask:");
+    display(mid19win, 11,1, "Nav. Power mask:");
+    display(mid19win, 12,1, "DGPS Source:");
+    display(mid19win, 13,1, "DGPS Mode:");
+    display(mid19win, 14,1, "DGPS Timeout:");
     display(mid19win, 1, 26,"LP Push-to-Fix:");
     display(mid19win, 2, 26,"LP On Time:");
     display(mid19win, 3, 26,"LP Interval:");
@@ -1130,7 +1131,7 @@ int main (int argc, char **argv)
     display(mid19win,13, 26,"Rsp Time Max:");
     display(mid19win,14, 26,"Time/Accu:");
 
-    display(mid19win, 16, 8, " Packet type 19 (0x13) ");
+    display(mid19win, 15, 8, " Packet type 19 (0x13) ");
     (void)wattrset(mid19win, A_NORMAL);
 
     (void)wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
