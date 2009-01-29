@@ -66,12 +66,13 @@ the new speed.</para>
 <application>gpsctl</application> will provide packet headers and
 trailers and checksum as appropriate for binary packet types, and
 whatever checksum and trailer is required for text packet types.  (You
-must include the leading $ for NMEA packets.) When sending to a UBX 
+must include the leading $ for NMEA packets.) When sending to a UBX
 device, the first two bytes of the string supplied will become the
-message class and type, and the remainder the payload. C-style backslash
-escapes in the string, notably \xNN for hex, will be interpreted;
-additionally, \e will be replaced with ESC. This switch implies
-<option>-f</option>.</para>
+message class and type, and the remainder the payload. When sending to
+a Navcom NCT device, the first byte is interpreted as the command ID
+and the rest as payload. C-style backslash escapes in the string,
+notably \xNN for hex, will be interpreted; additionally, \e will be
+replaced with ESC. This switch implies <option>-f</option>.</para>
 </listitem>
 </varlistentry>
 

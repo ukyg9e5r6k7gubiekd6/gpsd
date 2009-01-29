@@ -80,6 +80,23 @@ static u_int8_t checksum(unsigned char *buf, size_t len)
     return csum;
 }
 
+static ssize_t navcom_control_send(struct gps_device_t *session, 
+				char *buf, size_t buflen)
+{
+    unsigned char msg[MAX_PACKET_LENGTH];
+    putbyte(msg, 0, 0x02);
+    putbyte(msg, 1, 0x99);
+    putbyte(msg, 2, 0x66);
+    putbyte(msg, 3, buf[0]);	/* Cmd ID */
+    putleword(msg, 4, buflen+4);	/* Length */
+    memcpy(msg, buf+6, buflen-1);
+    putbyte(msg, 6 + buflen, checksum(msg+3, buflen+5));
+    putbyte(msg, 7 + buflen, 0x03);
+    gpsd_report(LOG_RAW, "Navcom: control dump: %s\n",
+	gpsd_hexdump_wrapper(msg, buflen+9, LOG_RAW));
+    return gpsd_write(session, msg, buflen+9);
+}
+
 static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, size_t len)
 {
     gpsd_report(LOG_RAW, "Navcom: command dump: %s\n",
@@ -1226,7 +1243,7 @@ struct gps_type_t navcom_binary =
     .type_name      = "Navcom binary",  	/* full name of type */
     .trigger	= "\x02\x99\x66",	   /* Every packet begins with this */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
-    .control_send   = NULL,			/* no control sender yet */
+    .control_send   = navcom_control_send,	/* no control sender yet */
     .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = navcom_probe_subtype,	/* subtype probing */
