@@ -115,6 +115,9 @@ def hexdump(s):
     return rep
 
 def fakehook(linenumber, fakegps):
+    if len(fakegps.testload.sentences) == 0:
+        print >>sys.stderr, "fakegps: no sentences in test load."
+        raise SystemExit, 1
     if linenumber % len(fakegps.testload.sentences) == 0:
         if singleshot and linenumber > 0:
             return False
