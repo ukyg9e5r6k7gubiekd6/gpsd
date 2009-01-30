@@ -51,18 +51,14 @@ protocol for it.</para>
 
 <para><application>gpsd</application> should be able to query any GPS
 that speaks either the standard textual NMEA 0183 protocol, or the
-binary Rockwell protocol used by EarthMate and some other GPSes, the
-TSIP binary protocol used by Trimble GPSes, or the binary SiRF
-protocol used by SiRFstar chipsets, or the Garmin binary protocol used
-by the USB version of the Garmin 18 and other Garmin USB GPSes, or the
-binary protocol used by Evermore chipsets, or the extended NMEA used
-by iTrax. <application>gpsd</application> effectively hides the
+(differing) extended NMEA dialects used by MKT-3301, iTrax, Motorola
+OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
+interpret the binary protocols used by EverMore, Garmin, Navcom,
+Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS
+devices. <application>gpsd</application> effectively hides the
 differences among these. It also knows about and uses commands that
-tune the GPS for lower latency, decreased bandwidth usage, or
-increased accuracy on the San Jose Navigation FV18, the Sony CXD2951,
-the uBlox, and the Motorola OnCore GT+. <!-- It can read heading and
-attitude information from the True North Technologies Revolution 2X
-Digital compass. --></para>
+tune these GPSes for lower latency. It can read heading and attitude
+information from the Oceanserver 5000 digital compass.</para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
