@@ -383,7 +383,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid19win, 1, 20, "%d", getub(buf, 5));	/* Alt. hold mode */
 	display(mid19win, 2, 20, "%d", getub(buf, 6));	/* Alt. hold source*/
 	display(mid19win, 3, 20, "%dm", (int)getbeuw(buf, 7));	/* Alt. source input */
-	if (getub(buf, 9))
+	if (getub(buf, 9) != (unsigned char)'\0')
 	    display(mid19win, 4, 20, "%dsec", getub(buf, 10));	/* Degraded timeout*/
 	else
 	    display(mid19win, 4, 20, "N/A   ");
