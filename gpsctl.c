@@ -51,6 +51,77 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
+static ssize_t hex_escapes(/*@out@*/char *cooked, const char *raw)
+/* interpret C-style hex escapes */
+{
+    char c, *cookend;
+
+    /*@ +charint -mustdefine -compdef @*/
+    for (cookend = cooked; *raw != '\0'; raw++)
+	if (*raw != '\\')
+	    *cookend++ = *raw;
+	else {
+	    switch(*++raw) {
+	    case 'b': *cookend++ = '\b'; break;
+	    case 'e': *cookend++ = '\x1b'; break;
+	    case 'f': *cookend++ = '\f'; break;
+	    case 'n': *cookend++ = '\n'; break;
+	    case 'r': *cookend++ = '\r'; break;
+	    case 't': *cookend++ = '\r'; break;
+	    case 'v': *cookend++ = '\v'; break;
+	    case 'x':
+		switch(*++raw) {
+		case '0': c = 0x00; break;
+		case '1': c = 0x10; break;
+		case '2': c = 0x20; break;
+		case '3': c = 0x30; break;
+		case '4': c = 0x40; break;
+		case '5': c = 0x50; break;
+		case '6': c = 0x60; break;
+		case '7': c = 0x70; break;
+		case '8': c = 0x80; break;
+		case '9': c = 0x90; break;
+		case 'A': case 'a': c = 0xa0; break;
+		case 'B': case 'b': c = 0xb0; break;
+		case 'C': case 'c': c = 0xc0; break;
+		case 'D': case 'd': c = 0xd0; break;
+		case 'E': case 'e': c = 0xe0; break;
+		case 'F': case 'f': c = 0xf0; break;
+		default:
+		    return -1;
+		}
+		switch(*++raw) {
+		case '0': c += 0x00; break;
+		case '1': c += 0x01; break;
+		case '2': c += 0x02; break;
+		case '3': c += 0x03; break;
+		case '4': c += 0x04; break;
+		case '5': c += 0x05; break;
+		case '6': c += 0x06; break;
+		case '7': c += 0x07; break;
+		case '8': c += 0x08; break;
+		case '9': c += 0x09; break;
+		case 'A': case 'a': c += 0x0a; break;
+		case 'B': case 'b': c += 0x0b; break;
+		case 'C': case 'c': c += 0x0c; break;
+		case 'D': case 'd': c += 0x0d; break;
+		case 'E': case 'e': c += 0x0e; break;
+		case 'F': case 'f': c += 0x0f; break;
+		default:
+		    return -2;
+		}
+		*cookend++ = c;
+		break;
+	    case '\\': *cookend++ = '\\'; break;
+	    default:
+		return -3;
+	    }
+	}
+    return (ssize_t)(cookend - cooked);
+    /*@ +charint +mustdefine +compdef @*/
+}
+
+
 int main(int argc, char **argv)
 {
     int option, status;
@@ -60,8 +131,8 @@ int main(int argc, char **argv)
     struct gps_data_t *gpsdata = NULL;
     struct gps_type_t *forcetype = NULL;
     struct gps_type_t **dp;
-    char cooked[BUFSIZ], c = '\0', *cookend = NULL;
-    bool err = false;
+    char cooked[BUFSIZ];
+    ssize_t cooklen = 0;
 
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-V] [-t devtype] [-c control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:V")) != -1) {
@@ -72,74 +143,12 @@ int main(int argc, char **argv)
 	case 'c':		/* ship specified control string */
 	    control = optarg;
 	    lowlevel = true;
-	    /*@ +charint @*/
-	    for (cookend = cooked; *control != '\0'; control++)
-		if (*control != '\\')
-		    *cookend++ = *control;
-		else {
-		    switch(*++control) {
-		    case 'b': *cookend++ = '\b'; break;
-		    case 'e': *cookend++ = '\x1b'; break;
-		    case 'f': *cookend++ = '\f'; break;
-		    case 'n': *cookend++ = '\n'; break;
-		    case 'r': *cookend++ = '\r'; break;
-		    case 't': *cookend++ = '\r'; break;
-		    case 'v': *cookend++ = '\v'; break;
-		    case 'x':
-			switch(*++control) {
-			case '0': c = 0x00; break;
-			case '1': c = 0x10; break;
-			case '2': c = 0x20; break;
-			case '3': c = 0x30; break;
-			case '4': c = 0x40; break;
-			case '5': c = 0x50; break;
-			case '6': c = 0x60; break;
-			case '7': c = 0x70; break;
-			case '8': c = 0x80; break;
-			case '9': c = 0x90; break;
-			case 'A': case 'a': c = 0xa0; break;
-			case 'B': case 'b': c = 0xb0; break;
-			case 'C': case 'c': c = 0xc0; break;
-			case 'D': case 'd': c = 0xd0; break;
-			case 'E': case 'e': c = 0xe0; break;
-			case 'F': case 'f': c = 0xf0; break;
-			default:
-			    (void)fprintf(stderr, "gpsctl: invalid hex digit.\n");
-			    err = true;
-			}
-			switch(*++control) {
-			case '0': c += 0x00; break;
-			case '1': c += 0x01; break;
-			case '2': c += 0x02; break;
-			case '3': c += 0x03; break;
-			case '4': c += 0x04; break;
-			case '5': c += 0x05; break;
-			case '6': c += 0x06; break;
-			case '7': c += 0x07; break;
-			case '8': c += 0x08; break;
-			case '9': c += 0x09; break;
-			case 'A': case 'a': c += 0x0a; break;
-			case 'B': case 'b': c += 0x0b; break;
-			case 'C': case 'c': c += 0x0c; break;
-			case 'D': case 'd': c += 0x0d; break;
-			case 'E': case 'e': c += 0x0e; break;
-			case 'F': case 'f': c += 0x0f; break;
-			default:
-			    (void)fprintf(stderr, "gpsctl: invalid hex digit.\n");
-			    err = true;
-			}
-			*cookend++ = c;
-			break;
-		    case '\\': *cookend++ = '\\'; break;
-		    default:
-			(void)fprintf(stderr, "gpsctl: invalid escape\n");
-			err = true;
-		    }
-		}
-	    /*@ +charint @*/
+	    if ((cooklen = hex_escapes(cooked, control)) <= 0) {
+		(void)fprintf(stderr, "gpsctl: invalid escape string (error %d)\n", (int)cooklen);
+		exit(1);
+	    }
 	    break;
 	case 'e':		/* echo specified control string with wrapper */
-	    control = optarg;
 	    lowlevel = true;
 	    echo = true;
 	    break;
@@ -469,7 +478,7 @@ int main(int argc, char **argv)
 		if (!ubx_write(session.gpsdata.gps_fd,
 			       (unsigned)cooked[0], (unsigned)cooked[1],
 			       (unsigned char *)cooked + 2, 
-			       cookend - cooked - 2)) {
+			       (unsigned short)(cooklen - 2))) {
 		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
 		    status = 1;
 		}
@@ -483,7 +492,8 @@ int main(int argc, char **argv)
 		status = 1;
 	    } else {
 		if (session.device_type->control_send(&session, 
-						      cooked, cookend-cooked) == -1) {
+						      cooked, 
+						      (size_t)cooklen) == -1) {
 		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
 		    status = 1;
 		}
