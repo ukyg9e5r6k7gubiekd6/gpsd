@@ -10,7 +10,9 @@
   xgpsspeed no longer depends on Motif. gpsctl can now ship arbitrary
   payloads to a device. It's possible to send binary through the
   control channel with the new "&" command. Experimental new driver
-  for Novatel SuperStarII.
+  for Novatel SuperStarII. The 'g' mode switch command now requires,
+  and returns, 'rtcm104v2' rather than 'rtcm104'; this is design forward
+  for when RTCM104v2 is fully working.
 
 * Sun Feb 17 2008 Chris Kuethe <ckuethe@mail.berlios.de> - 2.37
   The C++ bindings, Garmin USB support, and multiple instances of ntp

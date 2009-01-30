@@ -347,7 +347,7 @@ static struct subscriber_t {
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
-    enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
+    enum {GPS,RTCM104v2,ANY} requires;	/* type of device requested */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
@@ -594,7 +594,7 @@ static bool allocation_policy(struct gps_device_t *channel,
     /* we might have type constraints */
     if (user->requires == ANY)
 	return true;
-    else if (user->requires==RTCM104 && (channel->packet.type==RTCM2_PACKET))
+    else if (user->requires==RTCM104v2 && (channel->packet.type==RTCM2_PACKET))
 	return true;
     else if (user->requires == GPS
 	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
@@ -847,8 +847,8 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	case 'G':
 	    if (*p == '=') {
 		gpsd_report(LOG_INF,"<= client(%d): requesting data type %s\n",sub_index(sub),++p);
-		if (strncasecmp(p, "rtcm104", 7) == 0)
-		    sub->requires = RTCM104;
+		if (strncasecmp(p, "rtcm104v2", 7) == 0)
+		    sub->requires = RTCM104v2;
 		else if (strncasecmp(p, "gps", 3) == 0)
 		    sub->requires = GPS;
 		else
@@ -859,7 +859,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    if (sub->device==NULL||sub->device->packet.type==BAD_PACKET)
 		(void)strlcpy(phrase, ",G=?", BUFSIZ);
 	    else if (sub->device->packet.type == RTCM2_PACKET)
-		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104");
+		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104v2");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
 	    break;
