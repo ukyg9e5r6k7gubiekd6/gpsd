@@ -81,7 +81,7 @@ gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD) $(NCURSES_LIBS)
 
 #
 # Build gpspipe
