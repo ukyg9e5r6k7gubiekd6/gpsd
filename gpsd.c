@@ -442,55 +442,39 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
     ssize_t status;
-    size_t chunklen;
-    char *chunk, *chunkend;
 
-    /* Try to ensure that each sentence is an atomic write */ 
-    for (chunk = buf; *chunk != '\0'; chunk = chunkend+1) {
-	chunkend = strchr(chunk, '\n');
-	if (chunkend == NULL) {
-	    chunklen = strlen(chunk);
-	    chunkend = chunk + chunklen;
-	} else
-	    chunklen = (size_t)(chunkend - chunk + 1);
-
-	if (debuglevel >= 3) {
-	    char *cp, chunk2[MAX_PACKET_LENGTH*3];
-	    if (isprint(chunk[0])) {
-		(void)strlcpy(chunk2, chunk, chunklen);
-		gpsd_report(LOG_IO, "=> client(%d): %s", sub_index(sub), chunk2);
-	    } else {
-		chunk2[0] = '\0';
-		for (cp = chunk; cp < chunk + chunklen; cp++)
-		    (void)snprintf(chunk2 + strlen(chunk2),
-				   sizeof(chunk2)-strlen(chunk2),
-				  "%02x", (unsigned int)(*cp & 0xff));
-		gpsd_report(LOG_IO, "=> client(%d): =%s\r\n", sub_index(sub), chunk2);
-	    }
+    if (debuglevel >= 3) {
+	if (isprint(buf[0]))
+	    gpsd_report(LOG_IO, "=> client(%d): %s", sub_index(sub), buf);
+	else {
+	    char *cp, buf2[MAX_PACKET_LENGTH*3];
+	    buf2[0] = '\0';
+	    for (cp = buf; cp < buf + len; cp++)
+		(void)snprintf(buf2 + strlen(buf2),
+			       sizeof(buf2)-strlen(buf2),
+			      "%02x", (unsigned int)(*cp & 0xff));
+	    gpsd_report(LOG_IO, "=> client(%d): =%s\r\n", sub_index(sub), buf2);
 	}
-
-	status = write(sub->fd, chunk, chunklen);
-	if ((size_t)status == chunklen) {
-	    continue;
-	}
-	else if (status > -1) {
-	    gpsd_report(LOG_INF, "short write disconnecting client(%d)\n",
-		sub_index(sub));
-	    detach_client(sub);
-	    return 0;
-	} else if (errno == EAGAIN || errno == EINTR)
-	    return 0; /* no data written, and errno says to retry */
-	 else if (errno == EBADF)
-	    gpsd_report(LOG_WARN, "client(%d) has vanished.\n", sub_index(sub));
-	else if (errno == EWOULDBLOCK && timestamp() - sub->active > NOREAD_TIMEOUT)
-	    gpsd_report(LOG_INF, "client(%d) timed out.\n", sub_index(sub));
-	else
-	    gpsd_report(LOG_INF, "client(%d) write: %s\n", sub_index(sub), strerror(errno));
-	detach_client(sub);
-	return status;
     }
 
-    return len;
+    status = write(sub->fd, buf, (size_t)len);
+    if (status == len )
+	return status;
+    else if (status > -1) {
+	gpsd_report(LOG_INF, "short write disconnecting client(%d)\n",
+	    sub_index(sub));
+	detach_client(sub);
+	return 0;
+    } else if (errno == EAGAIN || errno == EINTR)
+	return 0; /* no data written, and errno says to retry */
+     else if (errno == EBADF)
+	gpsd_report(LOG_WARN, "client(%d) has vanished.\n", sub_index(sub));
+    else if (errno == EWOULDBLOCK && timestamp() - sub->active > NOREAD_TIMEOUT)
+	gpsd_report(LOG_INF, "client(%d) timed out.\n", sub_index(sub));
+    else
+	gpsd_report(LOG_INF, "client(%d) write: %s\n", sub_index(sub), strerror(errno));
+    detach_client(sub);
+    return status;
 }
 
 static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
