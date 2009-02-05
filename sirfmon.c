@@ -915,7 +915,8 @@ static void onsig(int sig UNUSED)
 int main (int argc, char **argv)
 {
     unsigned int i, v;
-    int len, option;
+    int option;
+    ssize_t len;
     char *p, *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
     char *server=NULL, *port = DEFAULT_GPSD_PORT, *device = NULL;
     char *controlsock = "/var/run/gpsd.sock";
@@ -997,6 +998,7 @@ int main (int argc, char **argv)
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
 
+    assert(device != NULL);
     gpsd_init(&session, &context, device);
     packet_reset(&session.packet);
 
