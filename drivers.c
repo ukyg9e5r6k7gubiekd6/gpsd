@@ -166,12 +166,23 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     switch (seq) {
 #ifdef SIRF_ENABLE
     case 0:
+	/* probe for Garmin serial GPS -- expect $PGRMC followed by data*/
+	(void)nmea_send(session, "$PGRMCE");
+	break;
+#endif /* SIRF_ENABLE */
+#ifdef NMEA_ENABLE
+    case 1:
 	/*
 	 * We used to try to probe for SiRF by issuing "$PSRF105,1"
 	 * and expecting "$Ack Input105.".  But it turns out this
 	 * only works for SiRF-IIs; SiRF-I and SiRF-III don't respond.
 	 * Thus the only reliable probe is to try to flip the SiRF into
 	 * binary mode, cluing in the library to revert it on close.
+	 *
+	 * SiRFs dominate the GPS-mouse market, so we used to put this test 
+	 * first. Unfortunately this causes problems for gpsctl, as it cannot
+	 * select the NMEA driver without switchining the device back to
+	 * binary mode!  Fix this if we ever find a nondisruptive probe string.
 	 */
 	(void)nmea_send(session,
 			"$PSRF100,0,%d,%d,%d,0",
@@ -179,12 +190,6 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 			9-session->gpsdata.stopbits,
 			session->gpsdata.stopbits);
 	session->back_to_nmea = true;
-	break;
-#endif /* SIRF_ENABLE */
-#ifdef NMEA_ENABLE
-    case 1:
-	/* probe for Garmin serial GPS -- expect $PGRMC followed by data*/
-	(void)nmea_send(session, "$PGRMCE");
 	break;
     case 2:
 	/* probe for the FV-18 -- expect $PFEC,GPint followed by data */
