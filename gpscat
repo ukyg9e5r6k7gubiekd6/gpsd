@@ -98,6 +98,7 @@ if __name__ == '__main__':
         if not rawmode:
             getter = gpspacket.new()
             gpspacket.register_report(reporter)
+        seqno = 0
         while True:
             (fd, event) = poller.poll()[0]
             if fd == tty and event == select.POLLIN:
@@ -107,18 +108,21 @@ if __name__ == '__main__':
                         sys.stdout.write(hexdump(buf))
                         buf = ""
                 else:
-                    (type, packet) = getter.get(tty)
+                    (ptype, packet) = getter.get(tty)
                     length = len(packet)
-                    if type == gpspacket.BAD_PACKET:
+                    seqno += 1
+                    # Don't crap out if the first packet is bad, we might
+                    # be seeing an incomplete read from a tty.
+                    if ptype == gpspacket.BAD_PACKET and seqno >= 2:
                         if debuglevel >= BASELEVEL:
-                            sys.stdout.write("gpscat: terminating on bad packet\n") 
+                            sys.stdout.write("gpscat: terminating on bad packet\n")
                         break
                     elif length == 0:
-                        if debuglevel >= BASELEVEL:
-                            sys.stdout.write("gpscat: terminating on zero-length packet\n")
-                        break
+                        continue
                     if typeflag:
-                        sys.stdout.write(`type` + " (" + `length` + "): " + hexdump(packet) + "\n")
+                        sys.stdout.write(`ptype` + " (" + `length` + "): " + hexdump(packet))
+                        if ptype not in (gpspacket.COMMENT_PACKET, gpspacket.NMEA_PACKET,  gpspacket.GARMINTXT_PACKET):
+                            sys.stdout.write("\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")
     except KeyboardInterrupt:
