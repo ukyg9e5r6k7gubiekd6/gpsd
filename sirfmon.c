@@ -19,9 +19,6 @@
  *      Ctrl-S -- freeze display.
  *      Ctrl-Q -- unfreeze display.
  *
- * Note: one of the goals of sirfmon.c is *not* to use the gpsdata structure.  
- * sirfmon is intended to be an independent sanity check on SiRF decoding,
- * so it deliberately doesn't use much of the library. 
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -51,7 +48,7 @@
 #else
 #include <curses.h>
 #endif /* HAVE_NCURSES_H */
-#include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in GPS_PI as well */
+#include "gpsd.h"
 
 #define PUT_ORIGIN	-4
 #include "bits.h"
@@ -114,10 +111,6 @@ static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win, *cmdwin, *debugwin;
 static FILE *logfile;
 
-#define NO_PACKET	0
-#define SIRF_PACKET	1
-#define NMEA_PACKET	2
-
 #define display	(void)mvwprintw
 
 /*****************************************************************************
@@ -126,7 +119,7 @@ static FILE *logfile;
  *
  *****************************************************************************/
 
-static void nmea_add_checksum(char *sentence)
+static void local_nmea_add_checksum(char *sentence)
 /* add NMEA checksum to a possibly  *-terminated sentence */
 {
     unsigned char sum = '\0';
@@ -143,7 +136,7 @@ static void nmea_add_checksum(char *sentence)
     }
 }
 
-static int nmea_send(int fd, const char *fmt, ... )
+static int local_nmea_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
     size_t status;
@@ -154,13 +147,13 @@ static int nmea_send(int fd, const char *fmt, ... )
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     (void)strlcat(buf, "*", BUFLEN);
-    nmea_add_checksum(buf);
+    local_nmea_add_checksum(buf);
     (void)fputs(buf, stderr);		/* so user can watch the baud hunt */
     status = (size_t)write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
 	return (int)status;
     } else {
-	perror("nmea_send");
+	perror("local_nmea_send");
 	return -1;
     }
 }
@@ -243,6 +236,8 @@ static void decode_sirf(unsigned char buf[], int len)
     int i,j,ch,off,cn;
 
     assert(mid27win != NULL);
+    buf += 4;
+    len -= 8;
     switch (buf[0])
     {
     case 0x02:		/* Measured Navigation Data */
@@ -570,12 +565,14 @@ static void decode_sirf(unsigned char buf[], int len)
 	break;
 
     default:
-	(void)wprintw(debugwin, "    0x%02x=", buf[0]);
+	(void)wprintw(debugwin, "    0x%02x=", buf[4]);
 	break;
     }
 
+    buf -= 4;
+    len += 8;
     (void)wprintw(debugwin, "(%d) ", len);
-    for (i = 1; i < len; i++)
+    for (i = 0; i < len; i++)
 	(void)wprintw(debugwin, "%02x",buf[i]);
     (void)wprintw(debugwin, "\n");
 }
@@ -641,7 +638,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
     if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
-	return NO_PACKET;
+	return BAD_PACKET;
     (void)tcflush(devicefd, TCIOFLUSH);
 
     (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
@@ -685,7 +682,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	/*@ -charint @*/
     }
     
-    return NO_PACKET;
+    return BAD_PACKET;
 }
 
 static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
@@ -711,7 +708,7 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		(void)fprintf(stderr, "Switching to SiRF mode...\n");
-		(void)nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
+		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
 		return *ip;
 	    }
 	}
@@ -740,95 +737,50 @@ static void serial_initialize(char *device)
  *
  ******************************************************************************/
 
-static int readbyte(void)
+void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
+/* our version of the logger */
+{
+#if 0
+    if (errlevel <= LOG_IO) {
+	va_list ap;
+	va_start(ap, fmt);
+	(void)vfprintf(stderr, fmt, ap);
+	va_end(ap);
+    }
+#endif
+}
+
+static struct gps_packet_t lexer;
+
+static int readpkt(void)
 {
     /*@ -type -shiftnegative -compdef -nullpass @*/
-    static int cnt = 0,pos = 0;
-    static unsigned char inbuf[BUFLEN];
     struct timeval timeval;
+    fd_set select_set;
+    size_t len;
 
-    if (pos >= cnt) {
-	fd_set select_set;
+    FD_ZERO(&select_set);
+    FD_SET(devicefd,&select_set);
+    if (controlfd < -1)
+	FD_SET(controlfd,&select_set);
+    timeval.tv_sec = 0;
+    timeval.tv_usec = 500000;
+    if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
+	return EOF;
 
-	FD_ZERO(&select_set);
-	FD_SET(devicefd,&select_set);
-	if (controlfd < -1)
-	    FD_SET(controlfd,&select_set);
-	timeval.tv_sec = 0;
-	timeval.tv_usec = 500000;
-	if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
-	    return EOF;
+    if (!FD_ISSET(devicefd,&select_set))
+	return EOF;
 
-	if (!FD_ISSET(devicefd,&select_set))
-	    return EOF;
-
-	(void)usleep(100000);
-
-	if ((cnt = (int)read(devicefd,inbuf,BUFLEN)) <= 0)
-	    return EOF;
-
-	pos = 0;
-    }
+    (void)usleep(100000);
     /*@ +type +shiftnegative +compdef +nullpass @*/
 
-    return (int)inbuf[pos++];
-}
-
-static int readword(void)
-{
-    int byte1,byte2;
-
-    if ((byte1 = readbyte()) == EOF || (byte2 = readbyte()) == EOF)
-	return EOF;
-
-    /*@i@*/return (byte1 << 8) | byte2;
-}
-
-/*@ -globstate @*/
-static int readpkt(unsigned char *buf, size_t buflen)
-{
-    int byte,len,csum,cnt;
-    unsigned char *cp = buf;
-
-    do {
-	while ((byte = readbyte()) != START1)
-	    if (byte == EOF)
-		return EOF;
-    } while ((byte = readbyte()) != START2);
-
-    if ((len = readword()) == EOF || len > BUFLEN)
-	return EOF;
-
-    csum = 0;
-    assert(len < (int)buflen);
-    cnt = len;
-
-    while (cnt-- > 0) {
-	if ((byte = readbyte()) == EOF)
-	    return EOF;
-	*cp++ = (unsigned char)byte;
-	csum += byte;
-    }
-
-    csum &= 0x7fff;
-
-    if (readword() != csum)
-	return EOF;
-
-    if (readbyte() != END1 || readbyte() != END2)
+    len = packet_get(devicefd, &lexer);
+    if (len <= 0)
 	return EOF;
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation -sefparams +charint @*/
-	char outbuf[BUFSIZ];
-	(void)memcpy(outbuf, "\xa0\xa2", 2);
-	outbuf[2] = (len >> 8);
-	outbuf[3] = (len & 0xff);
-	(void)memcpy(outbuf+4, buf, (size_t)len);
-	outbuf[4+len] = (csum >> 8);
-	outbuf[5+len] = (csum & 0xff);
-	(void)memcpy(outbuf+6+len, "\xb0\xb3", 2);
-	assert(fwrite(outbuf, sizeof(char), (size_t)len+8, logfile) >= 1);
+	assert(fwrite(lexer.outbuffer, sizeof(char), lexer.outbuflen, logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
     return len;
@@ -1031,6 +983,9 @@ int main (int argc, char **argv)
     }
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
+
+    memset(&lexer, 0, sizeof(struct gps_packet_t));
+    packet_reset(&lexer);
 
     /* quit cleanly if an assertion fails */
     (void)signal(SIGABRT, onsig);
@@ -1377,8 +1332,8 @@ int main (int argc, char **argv)
 	    (void)sendpkt(buf, 2, device);
 	}
 
-	if ((len = readpkt(buf, sizeof(buf))) != EOF) {
-	    decode_sirf(buf,len);
+	if ((len = readpkt()) > 0 && lexer.outbuflen > 0) {
+	    decode_sirf(lexer.outbuffer,lexer.outbuflen);
 	}
     }
     /*@ +nullpass @*/

@@ -41,10 +41,7 @@ packets coming from a SiRF GPS (the SiRF chipset is the one by far the
 most commonly used in GPS mice and other consumer-grade GPSes, about
 80% of them and rising in early 2005).  This program is primarily
 useful as a diagnostic aid for troubleshooting
-<application>gpsd</application> problems; it deliberately uses decoder
-logic that different from the decoder in the
-<application>gpsd</application> SiRF driver, so behaviors that show up
-in both are unlikely to be due to logic bugs in either.</para>
+<application>gpsd</application> problems.</para>
 
 <para><application>sirfmon</application> accepts an -h option that
 displays a usage message, or a -v option to dump the package
