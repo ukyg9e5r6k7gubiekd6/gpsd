@@ -148,6 +148,7 @@ static int local_nmea_send(int fd, const char *fmt, ... )
     va_end(ap);
     (void)strlcat(buf, "*", BUFLEN);
     local_nmea_add_checksum(buf);
+    (void)fputs("Sending: ", stderr);
     (void)fputs(buf, stderr);		/* so user can watch the baud hunt */
     status = (size_t)write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
@@ -708,7 +709,11 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		(void)fprintf(stderr, "Switching to SiRF mode...\n");
-		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
+		if (*ip == 0)
+		    bps = get_speed(&ttyset);
+		else
+		    bps = *ip;
+		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", bps);
 		return *ip;
 	    }
 	}
