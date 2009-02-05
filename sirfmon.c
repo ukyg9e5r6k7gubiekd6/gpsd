@@ -1326,6 +1326,7 @@ int main (int argc, char **argv)
 	    }
 	}
 
+	/* refresh navigation parameters */
 	if (dispmode && (time(NULL) % 10 == 0)){
 	    putbyte(buf, 0,0x98);
 	    putbyte(buf, 1,0x00);
