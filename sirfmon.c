@@ -84,6 +84,9 @@ static bool serial, subframe_enabled = false;
 static unsigned int stopbits, bps;
 static int debuglevel = 0;
 
+static struct gps_context_t	context;
+static struct gps_device_t	session;
+
 /*@ -nullassign @*/
 static char *verbpat[] =
 {
@@ -756,8 +759,6 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     }
 }
 
-static struct gps_packet_t lexer;
-
 /*@ -globstate @*/
 static ssize_t readpkt(void)
 {
@@ -780,13 +781,15 @@ static ssize_t readpkt(void)
 
     (void)usleep(100000);
 
-    len = packet_get(devicefd, &lexer);
+    len = packet_get(devicefd, &session.packet);
     if (len <= 0)
 	return EOF;
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation -sefparams +charint @*/
-	assert(fwrite(lexer.outbuffer, sizeof(char), lexer.outbuflen, logfile) >= 1);
+	assert(fwrite(session.packet.outbuffer, 
+		      sizeof(char), session.packet.outbuflen, 
+		      logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
     return len;
@@ -994,8 +997,8 @@ int main (int argc, char **argv)
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
 
-    memset(&lexer, 0, sizeof(struct gps_packet_t));
-    packet_reset(&lexer);
+    gpsd_init(&session, &context, device);
+    packet_reset(&session.packet);
 
     /* quit cleanly if an assertion fails */
     (void)signal(SIGABRT, onsig);
@@ -1343,8 +1346,8 @@ int main (int argc, char **argv)
 	    (void)sendpkt(buf, 2, device);
 	}
 
-	if ((len = readpkt()) > 0 && lexer.outbuflen > 0) {
-	    decode_sirf(lexer.outbuffer,lexer.outbuflen);
+	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
+	    decode_sirf(session.packet.outbuffer,session.packet.outbuflen);
 	}
     }
     /*@ +nullpass @*/
