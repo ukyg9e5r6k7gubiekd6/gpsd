@@ -797,7 +797,7 @@ static ssize_t readpkt(void)
 }
 /*@ +globstate @*/
 
-static bool sendpkt(unsigned char *buf, size_t len, char *device)
+static bool sendpkt(unsigned char *buf, size_t len)
 {
     unsigned int csum;
     ssize_t st;
@@ -828,7 +828,7 @@ static bool sendpkt(unsigned char *buf, size_t len, char *device)
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write(controlfd, device, strlen(device)) != -1);
+	    assert(write(controlfd, session.gpsdata.gps_device, strlen(session.gpsdata.gps_device)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
 	}
@@ -1142,9 +1142,9 @@ int main (int argc, char **argv)
 
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
-    	display(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
+    	display(cmdwin, 1, 0, "%s %4d N %d", session.gpsdata.gps_device, bps, stopbits);
     else
-	display(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
+	display(cmdwin, 1, 0, "%s:%s:%s", server, port, session.gpsdata.gps_device);
     (void)wattrset(cmdwin, A_NORMAL);
 
     (void)wmove(debugwin,0, 0);
@@ -1155,7 +1155,7 @@ int main (int argc, char **argv)
     putbyte(buf, 0, 0x84);
     putbyte(buf, 1, 0x0);
     /*@ -compdef @*/
-    (void)sendpkt(buf, 2, device);
+    (void)sendpkt(buf, 2);
     /*@ +compdef @*/
 
     for (;;) {
@@ -1225,7 +1225,7 @@ int main (int argc, char **argv)
 		putbyte(buf, 0, 0x80);
 		putbyte(buf, 23, 12);
 		putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
-		(void)sendpkt(buf, 25, device);
+		(void)sendpkt(buf, 25);
 		break;
 
 	    case 'b':
@@ -1242,10 +1242,11 @@ int main (int argc, char **argv)
 		    putbyte(buf, 6, stopbits);	/* 1 stop bit */
 		    putbyte(buf, 7, 0);		/* no parity */
 		    putbyte(buf, 8, 0);		/* reserved */
-		    (void)sendpkt(buf, 9, device);
+		    (void)sendpkt(buf, 9);
 		    (void)usleep(50000);
 		    (void)set_speed(bps = v, stopbits);
-		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
+		    display(cmdwin, 1, 0, "%s %d N %d", 
+			    session.gpsdata.gps_device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
@@ -1259,7 +1260,7 @@ int main (int argc, char **argv)
 	    case 'c':				/* static navigation */
 		putbyte(buf, 0,0x8f);			/* id */
 		putbyte(buf, 1, atoi(line+1));
-		(void)sendpkt(buf, 2, device);
+		(void)sendpkt(buf, 2);
 		break;
 
 	    case 'd':		/* MID 4 rate change -- not documented */
@@ -1274,7 +1275,7 @@ int main (int argc, char **argv)
 		putbyte(buf, 5, 0);
 		putbyte(buf, 6, 0);
 		putbyte(buf, 7, 0);
-		(void)sendpkt(buf, 8, device);
+		(void)sendpkt(buf, 8);
 		break;
 
 	    case 'l':				/* open logfile */
@@ -1311,7 +1312,7 @@ int main (int argc, char **argv)
 		putbyte(buf, 20,0x00);
 		putbyte(buf, 21,0x01);
 		putbeword(buf, 22,bps);
-		(void)sendpkt(buf, 24, device);
+		(void)sendpkt(buf, 24);
 		goto quit;
 
 	    case 't':				/* poll navigation params */
@@ -1334,7 +1335,7 @@ int main (int argc, char **argv)
 			p++;
 		}
 
-		(void)sendpkt(buf, (size_t)len, device);
+		(void)sendpkt(buf, (size_t)len);
 		break;
 	    }
 	}
@@ -1343,7 +1344,7 @@ int main (int argc, char **argv)
 	if (dispmode && (time(NULL) % 10 == 0)){
 	    putbyte(buf, 0,0x98);
 	    putbyte(buf, 1,0x00);
-	    (void)sendpkt(buf, 2, device);
+	    (void)sendpkt(buf, 2);
 	}
 
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
