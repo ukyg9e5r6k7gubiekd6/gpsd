@@ -232,7 +232,7 @@ static void decode_ecef(double x, double y, double z,
     (void)wprintw(mid2win, "%8.1f",speed);
 }
 
-static void decode_sirf(unsigned char buf[], int len)
+static void decode_sirf(unsigned char buf[], size_t len)
 {
     int i,j,ch,off,cn;
 
@@ -573,7 +573,7 @@ static void decode_sirf(unsigned char buf[], int len)
     buf -= 4;
     len += 8;
     (void)wprintw(debugwin, "(%d) ", len);
-    for (i = 0; i < len; i++)
+    for (i = 0; i < (int)len; i++)
 	(void)wprintw(debugwin, "%02x",buf[i]);
     (void)wprintw(debugwin, "\n");
 }
@@ -757,12 +757,13 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 
 static struct gps_packet_t lexer;
 
-static int readpkt(void)
+/*@ -globstate @*/
+static ssize_t int readpkt(void)
 {
     /*@ -type -shiftnegative -compdef -nullpass @*/
     struct timeval timeval;
     fd_set select_set;
-    size_t len;
+    ssize_t len;
 
     FD_ZERO(&select_set);
     FD_SET(devicefd,&select_set);
@@ -777,7 +778,6 @@ static int readpkt(void)
 	return EOF;
 
     (void)usleep(100000);
-    /*@ +type +shiftnegative +compdef +nullpass @*/
 
     len = packet_get(devicefd, &lexer);
     if (len <= 0)
@@ -789,6 +789,7 @@ static int readpkt(void)
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
     return len;
+    /*@ +type +shiftnegative +compdef +nullpass @*/
 }
 /*@ +globstate @*/
 
