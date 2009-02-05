@@ -714,7 +714,7 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 		else
 		    bps = *ip;
 		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", bps);
-		return *ip;
+		return bps;
 	    }
 	}
     }
