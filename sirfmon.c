@@ -82,6 +82,7 @@ static int gmt_offset;
 static bool dispmode = false;
 static bool serial, subframe_enabled = false;
 static unsigned int stopbits, bps;
+static int debuglevel = 0;
 
 /*@ -nullassign @*/
 static char *verbpat[] =
@@ -745,20 +746,20 @@ static void serial_initialize(char *device)
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
-#if 0
-    if (errlevel <= LOG_IO) {
+    if (errlevel <= debuglevel) {
+	char buf[BUFSIZ];
 	va_list ap;
 	va_start(ap, fmt);
-	(void)vfprintf(stderr, fmt, ap);
+	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
+	(void)wprintw(debugwin, fmt, ap);
     }
-#endif
 }
 
 static struct gps_packet_t lexer;
 
 /*@ -globstate @*/
-static ssize_t int readpkt(void)
+static ssize_t readpkt(void)
 {
     /*@ -type -shiftnegative -compdef -nullpass @*/
     struct timeval timeval;
@@ -922,8 +923,11 @@ int main (int argc, char **argv)
     gmt_offset = (int)tzoffset();
 
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "F:Vh")) != -1) {
+    while ((option = getopt(argc, argv, "D:F:Vh")) != -1) {
 	switch (option) {
+	case 'D':
+	    debuglevel = atoi(optarg);
+	    break;
 	case 'F':
 	    controlsock = optarg;
 	    break;

@@ -65,6 +65,10 @@ control socket to which the program should send device control
 strings.  You must specify a valid pathname of a Unix-domain socket on
 your local filesystem.</para>
 
+<para>The -D option enables packet-getter debugging output and is
+probably only useful to developers of thus code.  Consult the
+packet-getter source code for relevant values.</para>
+
 <para> You will probably need to be root to run this program, as the
 serial devices and control socket it uses are normally
 privileged.</para>
