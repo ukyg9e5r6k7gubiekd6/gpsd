@@ -176,6 +176,11 @@ probe.)</para>
 <para>If no options are given, the program will display a message
 identifying the GPS type of the selected device and exit.</para>
 
+<para>Reset (-r) operations must stand alone; others can be combined.
+Multiple opations will be executed in tis order: mode changes (-b and
+-n) first, speed changes (-s) second, and control-string sends (-c)
+last.</para>
+
 </refsect1>
 
 <refsect1 id='examples'><title>EXAMPLES</title>
@@ -192,9 +197,11 @@ tool can't find a GPSD to work through.</para>
 </varlistentry>
 
 <varlistentry>
-<term></term>
+<term>gpsctl -f -n -s 9600 /dev/ttyUSB0</term>
 <listitem>
-<para></para>
+<para>Use low-level operations (not going through a gpsd instance) to
+switch a GPS to NMEA mode at 9600bps.  The tool will identify the 
+GPS type itself.</para>
 </listitem>
 </varlistentry>
 </variablelist>
