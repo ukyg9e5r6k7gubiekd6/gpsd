@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
+	    gpsd_hexdump_level = debuglevel;
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "gpsctl at svn revision $Rev$\n");
