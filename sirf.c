@@ -185,6 +185,10 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = MODE_NMEA;	/* NMEA */
+	/* 
+	 * anticipatory switching works because the generic packet getter 
+	 * recognizes SiRF packets
+	 */
 	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;

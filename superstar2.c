@@ -475,6 +475,10 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	// superstar2_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); /* send the mode switch control string */
 	session->gpsdata.driver_mode = MODE_NMEA;
+	/* 
+	 * anticipatory switching works because the generic packet getter 
+	 * recognizes superstar2 packets
+	 */
 	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;

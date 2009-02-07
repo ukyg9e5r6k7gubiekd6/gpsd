@@ -327,6 +327,11 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	// _proto__to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); /* send the mode switch control string */
 	session->gpsdata.driver_mode = MODE_NMEA;
+	/* 
+	 * Anticipatory switching works only when the packet getter is the
+	 * generic one and it recognizes packets of the type this driver 
+	 * is expecting.  This should be the normal case.
+	 */
 	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;

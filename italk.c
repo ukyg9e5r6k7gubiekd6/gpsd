@@ -320,9 +320,13 @@ static bool italk_speed(struct gps_device_t *session, speed_t speed)
 
 static void italk_mode(struct gps_device_t *session, int mode)
 {
-    if (mode == 0) {
-	(void)gpsd_switch_driver(session, "Generic NMEA");
+    if (mode == MODE_NMEA) {
 	(void)italk_set_mode(session, session->gpsdata.baudrate, false);
+	/* 
+	 * anticipatory switching works because the generic packet getter 
+	 * recognizes italk packets
+	 */
+	(void)gpsd_switch_driver(session, "Generic NMEA");
 	session->gpsdata.driver_mode = MODE_NMEA;	/* NMEA */
     } else
 	session->gpsdata.driver_mode = MODE_BINARY;	/* binary */
