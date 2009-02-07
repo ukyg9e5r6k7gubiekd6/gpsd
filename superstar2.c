@@ -454,6 +454,7 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
+	(void)gpsd_switch_driver(session, "Generic NMEA");
 	session->gpsdata.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
@@ -474,15 +475,8 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
 	// superstar2_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); /* send the mode switch control string */
-	session->gpsdata.driver_mode = MODE_NMEA;
-	/* 
-	 * anticipatory switching works because the generic packet getter 
-	 * recognizes superstar2 packets
-	 */
-	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;
-	session->gpsdata.driver_mode = MODE_BINARY;
     }
 }
 struct gps_type_t superstar2_binary = {

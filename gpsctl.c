@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     struct gps_type_t **dp;
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
-    int timeout = 2;
+    int timeout = 4;
 
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-c control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:T:V")) != -1) {
@@ -389,30 +389,35 @@ int main(int argc, char **argv)
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
 		(void)fprintf(stderr, 
-			  "gpsctl: %s devices have no mode switch.\n",
-			  session.device_type->type_name);
+			      "gpsctl: %s devices have no mode switch.\n",
+			      session.device_type->type_name);
 		status = 1;
-	    }
-	    else if (to_nmea) {
-		session.device_type->mode_switcher(&session, MODE_NMEA);
-		if (session.gpsdata.driver_mode != MODE_NMEA) {
-		    (void)fprintf(stderr, "gpsctl: mode change failed\n");
-		    status = 1;
+	    } else {
+		int target_mode = to_nmea ? MODE_NMEA : MODE_BINARY;
+
+		session.device_type->mode_switcher(&session, target_mode);
+
+		/* hunt for packet type again (mode might have changed) */
+		if (!echo) {
+		    (void) alarm(timeout);
+		    for (;;) {
+			if (get_packet(&session) == ERROR_SET) {
+			    (void)gpsd_report(LOG_ERROR, "autodetection failed.\n");
+			    exit(2);
+			} else if (session.gpsdata.driver_mode == target_mode)
+			    alarm(0);
+			break;
+		    }
 		}
-	    }
-	    else if (to_binary) {
-		session.device_type->mode_switcher(&session, MODE_BINARY);
-		if (session.gpsdata.driver_mode != MODE_BINARY) {
-		    (void)fprintf(stderr, "gpsctl: mode change failed\n");
-		    status = 1;
-		}
+		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",
+			    device, gpsd_id(&session), session.gpsdata.baudrate);
 	    }
 	}
 	if (speed) {
 	    if (session.device_type->speed_switcher == NULL) {
-		(void)fprintf(stderr, 
-			      "gpsctl: %s devices have no speed switch.\n",
-			      session.device_type->type_name);
+		gpsd_report(LOG_ERROR, 
+			    "%s devices have no speed switch.\n",
+			    session.device_type->type_name);
 		status = 1;
 	    }
 	    else if (!session.device_type->speed_switcher(&session, 
@@ -437,27 +442,28 @@ int main(int argc, char **argv)
 			       (unsigned)cooked[0], (unsigned)cooked[1],
 			       (unsigned char *)cooked + 2, 
 			       (unsigned short)(cooklen - 2))) {
-		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
+		    gpsd_report(LOG_ERROR, "control transmission failed.\n");
 		    status = 1;
 		}
       
 	    } 
 	    /*@ +usedef @*/
 	    else if (session.device_type->control_send == NULL) {
-		(void)fprintf(stderr, 
-			      "gpsctl: %s devices have no control sender.\n",
+		gpsd_report(LOG_ERROR, 
+			      "%s devices have no control sender.\n",
 			      session.device_type->type_name);
 		status = 1;
 	    } else {
 		if (session.device_type->control_send(&session, 
 						      cooked, 
 						      (size_t)cooklen) == -1) {
-		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
+		    gpsd_report(LOG_ERROR, "control transmission failed.\n");
 		    status = 1;
 		}
 	    }
 	}
 	/*@ +compdef @*/
+
 
 	if (forcetype == NULL || !echo) {
 	    /*

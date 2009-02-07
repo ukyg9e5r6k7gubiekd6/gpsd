@@ -128,7 +128,7 @@ its new speed.</para>
 <varlistentry>
 <term>-T</term>
 <listitem>
-<para>Change the sampling timeout. Defaults to 3 seconds, which
+<para>Change the sampling timeout. Defaults to 4 seconds, which
 should always be sufficient to get a packet from a device emitting at 
 the normal rate of 1 per second.</para>
 </listitem>
@@ -190,7 +190,7 @@ last.</para>
 <term><command>gpsctl /dev/ttyUSB0</command></term>
 <listitem>
 <para>Attempt to identify the device on USB serial device 0. Time out
-after the default 3 seconds. Adding the <option>-f</option> will
+after the default number of seconds. Adding the <option>-f</option> will
 force low-level access and suppress the normal complaint when this 
 tool can't find a GPSD to work through.</para>
 </listitem>

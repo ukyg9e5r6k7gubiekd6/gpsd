@@ -184,16 +184,28 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
-	session->gpsdata.driver_mode = MODE_NMEA;	/* NMEA */
-	/* 
-	 * anticipatory switching works because the generic packet getter 
-	 * recognizes SiRF packets
-	 */
-	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;
-	session->gpsdata.driver_mode = MODE_BINARY;	/* binary */
     }
+}
+
+static ssize_t sirf_get(struct gps_device_t *session)
+{
+    ssize_t len = generic_get(session);
+
+    if (session->packet.type == SIRF_PACKET) {
+	session->gpsdata.driver_mode = MODE_BINARY;
+    } else if (session->packet.type == NMEA_PACKET) {
+	session->gpsdata.driver_mode = MODE_NMEA;
+	(void)gpsd_switch_driver(session, "Generic NMEA");
+    } else {
+	/* should never happen */
+	gpsd_report(LOG_PROG, "Unexpected packet type %d\n", 
+		    session->packet.type);
+	(void)gpsd_switch_driver(session, "Generic NMEA");
+    }
+
+    return len;
 }
 
 static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
@@ -988,7 +1000,7 @@ struct gps_type_t sirf_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = sirfbin_configure,/* initialize the device */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = generic_get,	/* use the generic packet getter */
+    .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
