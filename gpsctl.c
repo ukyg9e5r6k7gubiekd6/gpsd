@@ -14,11 +14,19 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <assert.h>
+#include <signal.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
 
 static int debuglevel;
+
+/*
+ * Set this as high or higher than the maximum number of subtype 
+ * probes in drivers.c.
+ */
+#define REDIRECT_SNIFF	15
+
 
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
@@ -51,6 +59,17 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
+static void onsig(int sig)
+{
+    if (sig == SIGALRM) {
+	(void)fputs("gpsctl: device read timed out.\n", stdout);
+	exit(1);
+    } else {
+	(void)printf("gpsctl: killed by signal %d\n", sig);
+	exit(0);
+    }
+}
+
 int main(int argc, char **argv)
 {
     int option, status;
@@ -62,9 +81,10 @@ int main(int argc, char **argv)
     struct gps_type_t **dp;
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
+    int timeout = 2;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-V] [-t devtype] [-c control] [-e] <device>\n"
-    while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-c control] [-e] <device>\n"
+    while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:T:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
@@ -114,6 +134,9 @@ int main(int argc, char **argv)
 	case 't':		/* force the device type */
 	    devtype = optarg;
 	    break;
+	case 'T':		/* force the device type */
+	    timeout = atoi(optarg);
+	    break;
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
 	    break;
@@ -154,6 +177,10 @@ int main(int argc, char **argv)
 	(void)fprintf(stderr, "gpsctl: make up your mind, would you?\n");
 	exit(0);
     }
+
+    (void) signal(SIGINT, onsig);
+    (void) signal(SIGTERM, onsig);
+    (void) signal(SIGQUIT, onsig);
 
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
@@ -286,6 +313,8 @@ int main(int argc, char **argv)
 	/*@ -mustfreeonly -immediatetrans @*/
 	session.context = &context;	/* in case gps_init isn't called */
 
+	(void) alarm(timeout);
+	(void) signal(SIGALRM, onsig);
 	/*
 	 * Unless the user has forced a type and only wants to see the
 	 * string (not send it) we now need to try to open the device
@@ -309,6 +338,9 @@ int main(int argc, char **argv)
 		if (get_packet(&session) == ERROR_SET) {
 		    (void)fprintf(stderr, "gpsctl: autodetection failed.\n");
 		    exit(2);
+		} else {
+		    (void) alarm(0);
+		    break;
 		}
 	    }
 	    gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
@@ -324,12 +356,6 @@ int main(int argc, char **argv)
 	     * ID response telling us that it's really a SiRF or
 	     * something.  If so, the libgpsd(3) layer will automatically
 	     * redispatch to the correct driver type.
-	     */
-#define REDIRECT_SNIFF	10
-	    /*
-	     * This is the number of packets we'll look at.  Setting it
-	     * lower increases the risk that we'll miss a reply to a probe.
-	     * Setting it higher makes this tool slower and more annoying.
 	     */
 	    if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
 		int dummy;

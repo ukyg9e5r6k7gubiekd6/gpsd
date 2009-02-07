@@ -126,6 +126,15 @@ its new speed.</para>
 </varlistentry>
 
 <varlistentry>
+<term>-T</term>
+<listitem>
+<para>Change the sampling timeout. Defaults to 3 seconds, which
+should always be sufficient to get a packet from a device emitting at 
+the normal rate of 1 per second.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>-h</term>
 <listitem>
 <para>Display program usage and exit.</para>
@@ -166,6 +175,29 @@ probe.)</para>
 
 <para>If no options are given, the program will display a message
 identifying the GPS type of the selected device and exit.</para>
+
+</refsect1>
+
+<refsect1 id='examples'><title>EXAMPLES</title>
+
+<variablelist>
+<varlistentry>
+<term><command>gpsctl /dev/ttyUSB0</command></term>
+<listitem>
+<para>Attempt to identify the device on USB serial device 0. Time out
+after the default 3 seconds. Adding the <option>-f</option> will
+force low-level access and suppress the normal complaint when this 
+tool can't find a GPSD to work through.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term></term>
+<listitem>
+<para></para>
+</listitem>
+</varlistentry>
+</variablelist>
 
 </refsect1>
 
