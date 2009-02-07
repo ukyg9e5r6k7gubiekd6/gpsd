@@ -34,6 +34,7 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     if (errlevel <= debuglevel) {
 	va_list ap;
 	va_start(ap, fmt);
+	(void)fputs("gpsctl: ", stderr);
 	(void)vfprintf(stderr, fmt, ap);
 	va_end(ap);
     }
@@ -62,7 +63,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 static void onsig(int sig)
 {
     if (sig == SIGALRM) {
-	(void)fputs("gpsctl: device read timed out.\n", stdout);
+	(void)fputs("gpsctl: packet recognition timed out.\n", stdout);
 	exit(1);
     } else {
 	(void)printf("gpsctl: killed by signal %d\n", sig);
@@ -93,7 +94,8 @@ int main(int argc, char **argv)
 	    control = optarg;
 	    lowlevel = true;
 	    if ((cooklen = hex_escapes(cooked, control)) <= 0) {
-		(void)fprintf(stderr, "gpsctl: invalid escape string (error %d)\n", (int)cooklen);
+		gpsd_report(LOG_ERROR, 
+			    "invalid escape string (error %d)\n", (int)cooklen);
 		exit(1);
 	    }
 	    break;
@@ -162,13 +164,13 @@ int main(int argc, char **argv)
 	    }
 	}
 	if (matchcount == 0)
-	    gpsd_report(LOG_ERROR, "gpsd: no driver type name matches '%s'.\n", devtype);
+	    gpsd_report(LOG_ERROR, "no driver type name matches '%s'.\n", devtype);
 	else if (matchcount == 1) {
 	    assert(forcetype != NULL);
-	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->type_name);
+	    gpsd_report(LOG_PROG, "%s driver selected.\n", forcetype->type_name);
 	} else {
 	    forcetype = NULL;
-	    gpsd_report(LOG_ERROR, "gpsctl: %d driver type names match '%s'.\n",
+	    gpsd_report(LOG_ERROR, "%d driver type names match '%s'.\n",
 			matchcount, devtype);
 	}
     }
@@ -328,8 +330,8 @@ int main(int argc, char **argv)
 	    gpsd_init(&session, &context, device);
 	    gpsd_report(LOG_PROG, "gpsctl: initialization passed.\n");
 	    if (gpsd_activate(&session, false) == -1) {
-		(void)fprintf(stderr, 
-			      "gpsd: activation of device %s failed, errno=%d\n",
+		gpsd_report(LOG_ERROR,
+			      "activation of device %s failed, errno=%d\n",
 			      device, errno);
 		exit(2);
 	    }
@@ -347,7 +349,7 @@ int main(int argc, char **argv)
 			device, gpsd_id(&session), session.gpsdata.baudrate);
 
 	    if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
-		gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
+		gpsd_report(LOG_ERROR, "'%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
 	    }
 
 	    /* 
