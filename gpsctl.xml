@@ -201,6 +201,14 @@ tool can't find a GPSD to work through.</para>
 
 </refsect1>
 
+<refsect1 id='bugs'><title>BUGS</title>
+
+<para>SiRF GPSes can only be identified by the success of an attempt
+to flip them into SiRF binary mode. Thus, the process of probing one of
+these running in NMEA will change its behavior.</para>
+
+</refsect1>
+
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
