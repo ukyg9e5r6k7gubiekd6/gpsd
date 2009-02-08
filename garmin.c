@@ -1159,6 +1159,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
 struct gps_type_t garmin_usb_binary_old =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
+    .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .control_send   = garmin_control_send,	/* send raw bytes */
@@ -1186,6 +1187,7 @@ struct gps_type_t garmin_usb_binary_old =
 struct gps_type_t garmin_usb_binary =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
+    .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .control_send   = garmin_control_send,	/* send raw bytes */
@@ -1212,6 +1214,7 @@ struct gps_type_t garmin_usb_binary =
 struct gps_type_t garmin_ser_binary =
 {
     .type_name      = "Garmin Serial binary",	/* full name of type */
+    .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .control_send   = garmin_control_send,	/* send raw bytes */

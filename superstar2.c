@@ -479,9 +479,12 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 	session->back_to_nmea = false;
     }
 }
+
 struct gps_type_t superstar2_binary = {
     /* Full name of type */
     .type_name		= "SuperStarII binary",
+    /* associated lexer packet type */
+    .packet_type    = SUPERSTAR2_PACKET;
     /* Response string that identifies device (not active) */
     .trigger		= NULL,
     /* Number of satellite channels supported by the device */

@@ -634,6 +634,7 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
 /* This is everything we export */
 struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX binary",    /* Full name of type */
+    .packet_type    = UBX_PACKET,	/* associated lexer packet type */
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .control_send     = NULL,		/* no control sender yet */

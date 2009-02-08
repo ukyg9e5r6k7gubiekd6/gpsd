@@ -346,6 +346,7 @@ static void italk_ping(struct gps_device_t *session)
 struct gps_type_t italk_binary =
 {
     .type_name      = "iTalk binary",	/* full name of type */
+    .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
     .control_send   = italk_write,	/* how to send a control string */
@@ -483,8 +484,9 @@ static void itrax_wrap(struct gps_device_t *session)
 }
 
 /*@ -redef @*/
-static struct gps_type_t itrax = {
+const static struct gps_type_t itrax = {
     .type_name     = "iTrax",		/* full name of type */
+    .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels      = 12,		/* consumer-grade GPS */
     .control_send  = italk_write,	/* how to send a control string */

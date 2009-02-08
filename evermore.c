@@ -491,6 +491,7 @@ static void evermore_wrap(struct gps_device_t *session)
 struct gps_type_t evermore_binary =
 {
     .type_name      = "EverMore binary",	/* full name of type */
+    .packet_type    = NMEA_PACKET,		/* lexer packet type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .control_send   = evermore_write,		/* how to send a control string */

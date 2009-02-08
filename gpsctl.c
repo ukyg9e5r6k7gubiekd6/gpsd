@@ -388,25 +388,30 @@ int main(int argc, char **argv)
 	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
-		(void)fprintf(stderr, 
-			      "gpsctl: %s devices have no mode switch.\n",
+		gpsd_report(LOG_SHOUT, 
+			      "%s devices have no mode switch.\n",
 			      session.device_type->type_name);
 		status = 1;
 	    } else {
 		int target_mode = to_nmea ? MODE_NMEA : MODE_BINARY;
+		int target_type = to_nmea ? NMEA_PACKET : session.device_type->packet_type;
 
+		gpsd_report(LOG_SHOUT, 
+			      "switching to mode %s.\n",
+			    to_nmea ? "NMEA" : "BINARY");
 		session.device_type->mode_switcher(&session, target_mode);
 
 		/* hunt for packet type again (mode might have changed) */
 		if (!echo) {
+		    (void)sleep(1);
 		    (void) alarm(timeout);
 		    for (;;) {
 			if (get_packet(&session) == ERROR_SET) {
-			    (void)gpsd_report(LOG_ERROR, "autodetection failed.\n");
-			    exit(2);
-			} else if (session.gpsdata.driver_mode == target_mode)
+			    continue;
+			} else if (session.packet.type == target_type) {
 			    alarm(0);
-			break;
+			    break;
+			}
 		    }
 		}
 		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",

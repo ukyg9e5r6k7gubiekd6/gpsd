@@ -372,6 +372,8 @@ static void _proto__wrapup(struct gps_device_t *session)
 struct gps_type_t _proto__binary = {
     /* Full name of type */
     .type_name        = "_proto_ binary",
+    /* associated lexer packet type */
+    .packet_type    = NMEA_PACKET;
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

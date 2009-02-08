@@ -991,6 +991,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 struct gps_type_t sirf_binary =
 {
     .type_name      = "SiRF binary",	/* full name of type */
+    .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .control_send   = sirf_control_send,/* how to send a control string */
