@@ -401,7 +401,15 @@ int main(int argc, char **argv)
 			    to_nmea ? "NMEA" : "BINARY");
 		session.device_type->mode_switcher(&session, target_mode);
 
-		/* hunt for packet type again (mode might have changed) */
+		/* 
+		 * Hunt for packet type again (mode might have
+		 * changed).  We've found by experiment that you can't
+		 * close the connection to the device after a mode
+		 * change but before you see a packet of the right
+		 * type come back from it - otherwise you can hit a
+		 * timing window where the mode-change control message
+		 * gets ignored or flushed.
+		 */
 		if (!echo) {
 		    (void)sleep(1);
 		    (void) alarm(timeout);
