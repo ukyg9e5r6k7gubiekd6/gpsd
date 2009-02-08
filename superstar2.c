@@ -484,7 +484,7 @@ struct gps_type_t superstar2_binary = {
     /* Full name of type */
     .type_name		= "SuperStarII binary",
     /* associated lexer packet type */
-    .packet_type    = SUPERSTAR2_PACKET;
+    .packet_type    = SUPERSTAR2_PACKET,
     /* Response string that identifies device (not active) */
     .trigger		= NULL,
     /* Number of satellite channels supported by the device */
