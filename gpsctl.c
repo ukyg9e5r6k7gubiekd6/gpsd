@@ -401,6 +401,7 @@ int main(int argc, char **argv)
 			    to_nmea ? "NMEA" : "BINARY");
 		session.device_type->mode_switcher(&session, target_mode);
 
+
 		/* 
 		 * Hunt for packet type again (mode might have
 		 * changed).  We've found by experiment that you can't
@@ -411,6 +412,8 @@ int main(int argc, char **argv)
 		 * gets ignored or flushed.
 		 */
 		if (!echo) {
+		    /* suppresses probing for subrtpes */
+		    context.readonly = true;
 		    (void)sleep(1);
 		    (void) alarm(timeout);
 		    for (;;) {
@@ -421,6 +424,7 @@ int main(int argc, char **argv)
 			    break;
 			}
 		    }
+		    context.readonly = false;
 		}
 		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",
 			    device, gpsd_id(&session), session.gpsdata.baudrate);
