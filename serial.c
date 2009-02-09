@@ -186,19 +186,21 @@ void gpsd_set_speed(struct gps_device_t *session,
     session->gpsdata.parity = (unsigned int)parity;
     session->gpsdata.stopbits = stopbits;
 
-    /*
-     * The device might need a wakeup string before it will send data.
-     * If we don't know the device type, ship it every driver's wakeup
-     * in hopes it will respond.
-     */
-    if (isatty(session->gpsdata.gps_fd)!=0 && !session->context->readonly) {
-	struct gps_type_t **dp;
-	if (session->device_type == NULL) {
-	    for (dp = gpsd_drivers; *dp; dp++)
-		if ((*dp)->probe_wakeup != NULL)
-		    (*dp)->probe_wakeup(session);
-	} else if (session->device_type->probe_wakeup != NULL)
-	    session->device_type->probe_wakeup(session);
+    if (!session->context->readonly) {
+	/*
+	 * The device might need a wakeup string before it will send data.
+	 * If we don't know the device type, ship it every driver's wakeup
+	 * in hopes it will respond.
+	 */
+	if (isatty(session->gpsdata.gps_fd)!=0 && !session->context->readonly) {
+	    struct gps_type_t **dp;
+	    if (session->device_type == NULL) {
+		for (dp = gpsd_drivers; *dp; dp++)
+		    if ((*dp)->probe_wakeup != NULL)
+			(*dp)->probe_wakeup(session);
+	    } else if (session->device_type->probe_wakeup != NULL)
+		session->device_type->probe_wakeup(session);
+	}
     }
     packet_reset(&session->packet);
 }
