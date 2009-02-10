@@ -490,9 +490,9 @@ unstable-makeregress: gpsd
 # This is how to ship a release to Berlios incomoing.
 # It requires developer access verified via ssh.
 #
-upload-ftp:
-	sha1 gpsd-$(VERSION).tar.gz >gpsd.sum
-	lftp -c "mput gpsd-$(VERSION).tar.gz gpsd.sum" ftp://ftp.berlios.de/incoming
+upload-ftp: dist
+	shasum gpsd-$(VERSION).tar.gz >gpsd.sum
+	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd.sum"
 
 #
 # This is how to tag a release for the SVN repository.
