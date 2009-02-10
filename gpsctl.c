@@ -324,6 +324,8 @@ int main(int argc, char **argv)
 	 * and find out what is actually there.
 	 */
 	if (!(forcetype != NULL && echo)) {
+	    int seq;
+
 	    if (device == NULL) {
 		(void)fprintf(stderr,  "gpsctl: device must be specified for low-level access.\n");
 		exit(1);
@@ -337,11 +339,14 @@ int main(int argc, char **argv)
 		exit(2);
 	    }
 	    /* hunt for packet type and serial parameters */
-	    while (session.device_type == NULL) {
+	    for (seq = 0; session.device_type == NULL; seq++) {
 		if (get_packet(&session) == ERROR_SET) {
-		    (void)fprintf(stderr, "gpsctl: autodetection failed.\n");
+		    gpsd_report(LOG_ERROR,
+				"autodetection failed.\n");
 		    exit(2);
 		} else {
+		    gpsd_report(LOG_IO,
+				"autodectection after %d reads.\n", seq);
 		    (void) alarm(0);
 		    break;
 		}
