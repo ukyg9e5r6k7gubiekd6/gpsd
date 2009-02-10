@@ -292,7 +292,7 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-noinst_HEADERS = ubx.h
+noinst_HEADERS = ubx.h superstar2.h
 nodist_include_HEADERS = gpsd.h
 include_HEADERS = gps.h libgpsmm.h
 
