@@ -1,4 +1,4 @@
-* Mon Jan 26 2009 Chris Kuethe <ckuethe@mail.berlios.de> - 2.38
+* Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.
   Scaling on E error-estimate fields fixed to match O. Listen on
   localhost only by default to avoid security problems; this can be
