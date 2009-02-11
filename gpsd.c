@@ -1441,7 +1441,7 @@ int main(int argc, char *argv[])
     if (getuid() == 0) {
 	errno = 0;
 	if (nice(NICEVAL) != -1 || errno == 0)
-	    gpsd_report (2, "Priority sertting failed.\n");
+	    gpsd_report (2, "Priority setting failed.\n");
 	(void)ntpshm_init(&context, nowait);
     } else {
 	gpsd_report (2, "Unable to start ntpshm.  gpsd must run as root.\n");
