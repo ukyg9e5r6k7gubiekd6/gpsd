@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     struct gps_type_t **dp;
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
-    int timeout = 4;
+    unsigned int timeout = 4;
 
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-c control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:T:V")) != -1) {
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 	    devtype = optarg;
 	    break;
 	case 'T':		/* force the device type */
-	    timeout = atoi(optarg);
+	    timeout = (unsigned)atoi(optarg);
 	    break;
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
@@ -425,14 +425,16 @@ int main(int argc, char **argv)
 			if (get_packet(&session) == ERROR_SET) {
 			    continue;
 			} else if (session.packet.type == target_type) {
-			    alarm(0);
+			    (void)alarm(0);
 			    break;
 			}
 		    }
 		    context.readonly = false;
 		}
+		/*@ -nullpass @*/
 		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",
 			    device, gpsd_id(&session), session.gpsdata.baudrate);
+		/*@ +nullpass @*/
 	    }
 	}
 	if (speed) {
