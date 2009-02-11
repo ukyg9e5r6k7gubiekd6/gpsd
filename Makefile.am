@@ -475,6 +475,27 @@ testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
 # clear how to deal with $(srcdir).
 # TESTS=testregress
 
+# Productions for setting up and performing udev tests.
+#
+# Requires root. Do "udev-install", then "tail -f /var/run/syslog" in
+# another window, then run 'make udev-test', then plug and unplug the
+# GPS ad libitum.  All is well when you get fix reports each time a GPS
+# is plugged in.
+
+udev-install:
+	cp $(srcdir)/gpsd.rules /etc/udev/
+	ln -sf /etc/udev/gpsd.rules /etc/udev/rules.d/025_gpsd.rules
+	cp $(srcdir)/gpsd.hotplug /lib/udev/
+	cp $(srcdir)/gpsd.hotplug.wrapper /lib/udev/
+	chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper
+
+udev-uninstall:
+	rm -f /etc/udev/{gpsd.rules,gpsd.hotplug,gpsd.hotplug.wrapper}
+	rm -f /etc/udev/rules.d/025_gpsd.rules
+
+udev-test:
+	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 4
+
 #
 # Productions for testing unstable drivers.
 #
