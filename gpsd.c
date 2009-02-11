@@ -790,22 +790,36 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	case 'E':
 	    (void)strlcpy(phrase, ",E=", BUFSIZ);
 	    if (assign_channel(sub) && have_fix(sub)) {
-		if (finite(sub->device->gpsdata.epe))
+#if 0
+		/*
+		 * Only unpleasant choices here:
+		 * 1. Always return ? for EPE (what we now do).
+		 * 2. Get this wrong - what we used to do, becvfore
+		 *    noticing that the response genweration for this
+		 *    obsolete command had not been updated to go with
+		 *    fix buffering.
+		 * 3. Lift epe into the gps_fix_t structure, for no
+		 *    functional reason other than this.
+		 *    Unfortunately, this would force a bump in the
+		 *    shared-library version.
+		 */
+		if (isnan(sub->device->gpsdata.epe) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   "%.3f", sub->device->gpsdata.epe);
 		else
+#endif
 		    (void)strlcat(phrase, "?", sizeof(phrase));
-		if (finite(sub->device->gpsdata.fix.eph))
+		if (isnan(sub->fixbuffer.eph) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f", sub->device->gpsdata.fix.eph);
+				   " %.3f", sub->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
-		if (finite(sub->device->gpsdata.fix.epv))
+		if (isnan(sub->fixbuffer.epv) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f", sub->device->gpsdata.fix.epv);
+				   " %.3f", sub->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 	    } else

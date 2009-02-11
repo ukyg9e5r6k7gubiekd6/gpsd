@@ -271,13 +271,15 @@ part will vary and may be absent.</para></listitem>
 <varlistentry>
 <term>e</term>
 <listitem>
-<para>Returns "E=%f %f %f": three estimated position errors in meters
-&mdash; total, horizontal, and vertical (95% confidence
+<para>Returns "E=? %f %f": estimated position errors in meters
+&mdash; horizontal, and vertical (95% confidence
 level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
 them from satellite DOP using fixed figures for expected non-DGPS
-and DGPS range errors in meters.  A value of '?' for any of these
-numbers should be taken to mean that component of DOP is not available.
+and DGPS range errors in meters.  A value of '?' for either of these
+numbers should be taken to mean that component of DOP is not
+available. The ? value is a backwards-compatibility placeholder; some
+early versions of GPSD returned a total error estimate there.
 See also the 'q' command.</para>
 </listitem>
 </varlistentry>
