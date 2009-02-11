@@ -285,13 +285,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			/*@ -nullderef -nullpass -mustfreeonly -dependenttrans @*/
 			char *rc = strdup(sp);
 			char *sp2 = rc;
+			char *ns2 = ns;
 			gpsdata->ndevices = (int)strtol(sp2+2, &sp2, 10);
 			gpsdata->devicelist = (char **)calloc(
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
 			/*@ -nullstate -mustfreefresh @*/
-			gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns));
-			while ((sp2 = strtok_r(NULL, " \r\n",  &ns)))
+			gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns2));
+			while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
 			    gpsdata->devicelist[++i] = strdup(sp2);
 			free(rc);
 			/*@ +nullstate +mustfreefresh @*/
