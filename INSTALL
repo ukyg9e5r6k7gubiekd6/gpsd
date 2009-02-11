@@ -115,7 +115,10 @@ undo this.
 
 (You won't need to "make install" if you installed from a binary package.)
 
-9. Check out the list of supported hardware at 
+9. To enable hotplugging of USB GPSes under Linux, do a 'make udev-install' or
+equivalent to put the appropriate udev rules and wrapper files in plases.
+
+10. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
@@ -125,18 +128,18 @@ line to the table.  Directions are included on that page.
 We can also use updates of the latest version number known to work with
 hardware already supported.
 
-10. Note for small embedded systems and those without threading.  It is
+11. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
 It's also possible to build without Python via --disable-python, in which 
 case you'd build won't make Python libraries and "make install" won't
 try to install Python tools.
 
-11. Note for systems using DBUS: gpsd includes support for shipping fixes
+12. Note for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
 with the option "--enable-dbus" to get it working.
 
-12. The distribution includes a PHP script that you can use to
+13. The distribution includes a PHP script that you can use to
 generate a PHP status page for your GPS.  You will need php and php-gd
 installed.  To install it, copy the file 'gpsd.php' to your HTTP
 document directory.  The first time it's invoked, it will generate a
@@ -144,7 +147,7 @@ file called 'gpsd_config.inc' containing configuration information;
 edit to taste.  Note that for the Google Maps feature work you need
 to set a valid Google API key in your config file.
 
-13. There are regression tests to verify proper operation of gpsd, and
+14. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
 testregress".  It is not necessary to install first.  Python is
