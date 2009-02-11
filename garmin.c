@@ -1167,7 +1167,7 @@ struct gps_type_t garmin_usb_binary_old =
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_usb_configure,	/* eable what we need */
+    .configurator   = NULL,		/* does not allow reconfiguration */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
@@ -1201,7 +1201,7 @@ struct gps_type_t garmin_usb_binary =
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = NULL,		/* no mode switcher */
+    .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
