@@ -580,29 +580,17 @@ static struct gps_type_t tripmate = {
  * Zodiac EarthMate textual mode
  *
  * Note: This is the pre-2003 version using Zodiac binary protocol.
+ * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
  * It has been replaced with a design that uses a SiRF chipset.
  *
  **************************************************************************/
-
-static struct gps_type_t earthmate;
-
-/*
- * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
- */
-
-static void earthmate_close(struct gps_device_t *session)
-{
-    /*@i@*/session->device_type = &earthmate;
-}
 
 static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
-	/*@i@*/session->device_type = &zodiac_binary;
-	zodiac_binary.wrapup = earthmate_close;
-	if (zodiac_binary.probe_subtype) zodiac_binary.probe_subtype(session, seq);
+	gpsd_switch_driver(session, "Zodiac Binary");
     }
 }
 
