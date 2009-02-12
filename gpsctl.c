@@ -63,10 +63,10 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 static void onsig(int sig)
 {
     if (sig == SIGALRM) {
-	(void)fputs("gpsctl: packet recognition timed out.\n", stdout);
+	gpsd_report(LOG_ERROR, "packet recognition timed out.\n", stdout);
 	exit(1);
     } else {
-	(void)printf("gpsctl: killed by signal %d\n", sig);
+	gpsd_report(LOG_ERROR, "killed by signal %d\n", sig);
 	exit(0);
     }
 }
@@ -174,10 +174,10 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_ERROR, "%d driver type names match '%s'.\n",
 			matchcount, devtype);
 	}
-    }
+    
 
     if ((int)to_nmea + (int)to_binary + (int)reset > 1) {
-	(void)fprintf(stderr, "gpsctl: make up your mind, would you?\n");
+	gpsd_report(LOG_ERROR, "make up your mind, would you?\n");
 	exit(0);
     }
 
@@ -198,8 +198,7 @@ int main(int argc, char **argv)
 	    case NL_NOCONNECT: err_str ="can't connect"; break;
 	    default:           err_str ="Unknown"; break;
 	    } 
-	    (void)fprintf(stderr, 
-			  "gpsctl: no gpsd running or network error: %s.\n", 
+	    gpsd_report(LOG_ERROR, "no gpsd running or network error: %s.\n", 
 			  err_str);
 	    lowlevel = true;
 	}
@@ -210,16 +209,16 @@ int main(int argc, char **argv)
 	assert(gpsdata != NULL);
 	(void)gps_query(gpsdata, "K\n");
 	if (gpsdata->ndevices == 0) {
-	    (void)fprintf(stderr, "gpsctl: no devices connected.\n"); 
+	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	} else if (gpsdata->ndevices > 1 && device == NULL) {
-	    (void)fprintf(stderr, 
-			  "gpsctl: multiple devices and no device specified.\n");
+	    gpsd_report(LOG_ERROR, 
+			"multiple devices and no device specified.\n");
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(LOG_PROG, "gpsctl: %d device(s) found.\n", gpsdata->ndevices);
+	gpsd_report(LOG_PROG, "%d device(s) found.\n", gpsdata->ndevices);
 
 	if (gpsdata->ndevices > 1) {
 	    int i;
@@ -227,7 +226,7 @@ int main(int argc, char **argv)
 	    for (i = 0; i < gpsdata->ndevices; i++)
 		if (strcmp(device, gpsdata->devicelist[i]) == 0)
 		    goto foundit;
-	    (void)fprintf(stderr,  "gpsctl: specified device not found.\n");
+	    gpsd_report(LOG_ERROR, "specified device not found.\n");
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	foundit:
@@ -238,14 +237,14 @@ int main(int argc, char **argv)
 	if (speed==NULL && !to_nmea && !to_binary && !reset) {
 	    /* the O is to force a device binding */
 	    (void)gps_query(gpsdata, "OFIB");
-	    gpsd_report(LOG_SHOUT, "gpsctl: %s identified as %s at %d\n",
+	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
 			gpsdata->gps_device,gpsdata->gps_id,gpsdata->baudrate);
 	    exit(0);
 	}
 
 	if (reset)
 	{
-	    gpsd_report(LOG_PROG, "gpsctl: cannot reset with gpsd running.\n");
+	    gpsd_report(LOG_PROG, "cannot reset with gpsd running.\n");
 	    exit(0);
 	}
 
@@ -253,26 +252,26 @@ int main(int argc, char **argv)
 	if (to_nmea) {
 	    (void)gps_query(gpsdata, "N=0");
 	    if (gpsdata->driver_mode != MODE_NMEA) {
-		(void)fprintf(stderr, "gpsctl: %s mode change to NMEA failed\n", gpsdata->gps_device);
+		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: %s mode change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->gps_device);
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "N=1");
 	    if (gpsdata->driver_mode != MODE_BINARY) {
-		(void)fprintf(stderr, "gpsctl: %s mode change to native mode failed\n", gpsdata->gps_device);
+		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: %s mode change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->gps_device);
 	}
 	if (speed != NULL) {
 	    (void)gps_query(gpsdata, "B=%s", speed);
 	    if (atoi(speed) != (int)gpsdata->baudrate) {
-		(void)fprintf( stderr, "gpsctl: %s speed change failed\n", gpsdata->gps_device);
+		gpsd_report(LOG_ERROR, "%s speed change failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: %s speed change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s speed change succeeded\n", gpsdata->gps_device);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
@@ -284,7 +283,7 @@ int main(int argc, char **argv)
 	int i;
 
 	if (device == NULL || forcetype == NULL) {
-		(void)fprintf(stderr,  "gpsctl: device and type must be specified for the reset operation.\n");
+		gpsd_report(LOG_ERROR, "device and type must be specified for the reset operation.\n");
 		exit(1);
 	    }
 
@@ -327,11 +326,11 @@ int main(int argc, char **argv)
 	    int seq;
 
 	    if (device == NULL) {
-		(void)fprintf(stderr,  "gpsctl: device must be specified for low-level access.\n");
+		gpsd_report(LOG_ERROR, "device must be specified for low-level access.\n");
 		exit(1);
 	    }
 	    gpsd_init(&session, &context, device);
-	    gpsd_report(LOG_PROG, "gpsctl: initialization passed.\n");
+	    gpsd_report(LOG_PROG, "initialization passed.\n");
 	    if (gpsd_activate(&session, false) == -1) {
 		gpsd_report(LOG_ERROR,
 			      "activation of device %s failed, errno=%d\n",
@@ -351,7 +350,7 @@ int main(int argc, char **argv)
 		    break;
 		}
 	    }
-	    gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
+	    gpsd_report(LOG_PROG, "%s looks like a %s at %d.\n",
 			device, gpsd_id(&session), session.gpsdata.baudrate);
 
 	    if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
@@ -372,7 +371,7 @@ int main(int argc, char **argv)
 			break;
 		}
 	    }
-	    gpsd_report(LOG_SHOUT, "gpsctl: %s identified as a %s at %d.\n",
+	    gpsd_report(LOG_SHOUT, "%s identified as a %s at %d.\n",
 			device, gpsd_id(&session), session.gpsdata.baudrate);
 	}
 
@@ -446,7 +445,7 @@ int main(int argc, char **argv)
 	    }
 	    else if (!session.device_type->speed_switcher(&session, 
 							  (speed_t)atoi(speed))) {
-		(void)fprintf(stderr, "gpsctl: speed change failed.\n");
+		gpsd_report(LOG_ERROR, "speed change failed.\n");
 		status = 1;
 	    }
 	}
