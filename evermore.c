@@ -488,7 +488,7 @@ static void evermore_wrap(struct gps_device_t *session)
 
 
 /* this is everything we export */
-struct gps_type_t evermore_binary =
+const struct gps_type_t evermore_binary =
 {
     .type_name      = "EverMore binary",	/* full name of type */
     .packet_type    = NMEA_PACKET,		/* lexer packet type */

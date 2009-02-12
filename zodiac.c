@@ -382,7 +382,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     unsigned int id = (unsigned int)((session->packet.outbuffer[3]<<8) | session->packet.outbuffer[2]);
 
     if (session->packet.type != ZODIAC_PACKET) {
-	struct gps_type_t **dp;
+	const struct gps_type_t **dp;
 	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",session->packet.type);
 	// Wrong packet type ? 
 	// Maybe find a trigger just in case it's an Earthmate
@@ -437,7 +437,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 /* caller needs to specify a wrapup function */
 
 /* this is everything we export */
-struct gps_type_t zodiac_binary =
+const struct gps_type_t zodiac_binary =
 {
     .type_name      = "Zodiac binary",	/* full name of type */
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */

@@ -78,8 +78,8 @@ int main(int argc, char **argv)
     bool to_binary = false, to_nmea = false, reset = false; 
     bool lowlevel=false, echo=false;
     struct gps_data_t *gpsdata = NULL;
-    struct gps_type_t *forcetype = NULL;
-    struct gps_type_t **dp;
+    const struct gps_type_t *forcetype = NULL;
+    const struct gps_type_t **dp;
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
     unsigned int timeout = 4;
@@ -458,7 +458,7 @@ int main(int argc, char **argv)
 	     * length.  This means they don't fit well in the model 
 	     * assumed by the driver interface.
 	     */
-	    extern struct gps_type_t ubx_binary;
+	    extern const struct gps_type_t ubx_binary;
 	    /*@ -usedef @*/
 	    if (session.device_type == &ubx_binary) {
 		if (!ubx_write(session.gpsdata.gps_fd,

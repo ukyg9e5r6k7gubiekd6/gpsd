@@ -1156,7 +1156,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
     return (ssize_t)( 0 == GetPacket( session ) ? 1 : 0);
 }
 
-struct gps_type_t garmin_usb_binary_old =
+const struct gps_type_t garmin_usb_binary_old =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
@@ -1184,7 +1184,7 @@ struct gps_type_t garmin_usb_binary_old =
 };
 #endif /* __UNUSED__ */
 
-struct gps_type_t garmin_usb_binary =
+const struct gps_type_t garmin_usb_binary =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
@@ -1211,7 +1211,7 @@ struct gps_type_t garmin_usb_binary =
     .cycle          = 1,		/* updates every second */
 };
 
-struct gps_type_t garmin_ser_binary =
+const struct gps_type_t garmin_ser_binary =
 {
     .type_name      = "Garmin Serial binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */

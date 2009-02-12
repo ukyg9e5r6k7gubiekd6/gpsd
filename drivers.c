@@ -14,8 +14,8 @@
 #include "gpsd.h"
 #include "bits.h"	/* for getbeuw(), to extract big-endiamn words */
 
-extern struct gps_type_t zodiac_binary;
-extern struct gps_type_t ubx_binary;
+extern const struct gps_type_t zodiac_binary;
+extern const struct gps_type_t ubx_binary;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -105,7 +105,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
-	    struct gps_type_t **dp;
+	    const struct gps_type_t **dp;
 
 	    /* maybe this is a trigger string for a driver we know about? */
 #ifdef UBX_ENABLE
@@ -239,7 +239,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
-static struct gps_type_t nmea = {
+static const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* it's the default */
@@ -329,7 +329,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static struct gps_type_t garmin = {
+static const struct gps_type_t garmin = {
     .type_name      = "Garmin Serial",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PGRMC,",	/* Garmin private */
@@ -392,7 +392,7 @@ static void ashtech_ping(struct gps_device_t *session)
 	(void)nmea_send(session, "$PASHQ,RID");
 }
 
-static struct gps_type_t ashtech = {
+static const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
@@ -439,7 +439,7 @@ static void fv18_configure(struct gps_device_t *session, unsigned int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static struct gps_type_t fv18 = {
+static const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
@@ -489,7 +489,7 @@ static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int se
     }
 }
 
-static struct gps_type_t gpsclock = {
+static const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
@@ -547,7 +547,7 @@ static void tripmate_configurator(struct gps_device_t *session, unsigned int seq
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static struct gps_type_t tripmate = {
+static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
     .trigger       ="ASTRAL",			/* tells us to switch */
@@ -590,12 +590,12 @@ static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int s
     if (seq == 0) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
-	gpsd_switch_driver(session, "Zodiac Binary");
+	(void)gpsd_switch_driver(session, "Zodiac Binary");
     }
 }
 
 /*@ -redef @*/
-static struct gps_type_t earthmate = {
+static const struct gps_type_t earthmate = {
     .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger       = "EARTHA",			/* Earthmate trigger string */
@@ -770,7 +770,7 @@ static bool tnt_probe(struct gps_device_t *session)
   return false;
 }
 
-static struct gps_type_t trueNorth = {
+static const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = " TNT1500",
@@ -844,7 +844,7 @@ static void oceanserver_configure(struct gps_device_t *session, unsigned int seq
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static struct gps_type_t oceanServer = {
+static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$C,",
@@ -888,7 +888,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
     return RTCM2_SET;
 }
 
-static struct gps_type_t rtcm104v2 = {
+static const struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
@@ -932,7 +932,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     return RTCM3_SET;
 }
 
-static struct gps_type_t rtcm104v3 = {
+static const struct gps_type_t rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
@@ -973,7 +973,7 @@ static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
 }
 
 
-static struct gps_type_t garmintxt = {
+static const struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
     .packet_type   = RTCM2_PACKET;	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
@@ -1068,7 +1068,7 @@ static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static struct gps_type_t mkt3301 = {
+static const struct gps_type_t mkt3301 = {
     .type_name      = "MKT-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
@@ -1095,14 +1095,14 @@ static struct gps_type_t mkt3301 = {
 };
 #endif /* MKT3301_ENABLE */
 
-extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
-extern struct gps_type_t sirf_binary, tsip_binary;
-extern struct gps_type_t evermore_binary, italk_binary;
-extern struct gps_type_t navcom_binary, superstar2_binary;
+extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
+extern const struct gps_type_t sirf_binary, tsip_binary;
+extern const struct gps_type_t evermore_binary, italk_binary;
+extern const struct gps_type_t navcom_binary, superstar2_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
-static struct gps_type_t *gpsd_driver_array[] = {
+static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea,
 #ifdef ASHTECH_ENABLE
@@ -1176,4 +1176,4 @@ static struct gps_type_t *gpsd_driver_array[] = {
     NULL,
 };
 /*@ +nullassign @*/
-struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];
+const struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

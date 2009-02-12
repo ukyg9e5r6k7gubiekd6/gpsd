@@ -210,7 +210,7 @@ struct gps_type_t {
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
-    /*@relnull@*/struct gps_type_t *device_type;
+    /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
 #ifdef ALLOW_RECONFIGURE
     bool enable_reconfigure;		/* OK to hack GPS settings? */ 
@@ -219,6 +219,7 @@ struct gps_device_t {
     struct termios ttyset, ttyset_old;
     unsigned int baudindex;
     int saved_baud;
+    double cycle;
     struct gps_packet_t packet;
     char subtype[64];			/* firmware version or subtype ID */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
@@ -353,7 +354,7 @@ struct gps_device_t {
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
 /* here are the available GPS drivers */
-extern struct gps_type_t **gpsd_drivers;
+extern const struct gps_type_t **gpsd_drivers;
 
 /* gpsd library internal prototypes */
 extern gps_mask_t nmea_parse_input(struct gps_device_t *);

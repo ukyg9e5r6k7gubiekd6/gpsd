@@ -211,7 +211,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    struct gps_type_t **dp;
+    const struct gps_type_t **dp;
 
     (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
@@ -762,21 +762,21 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    if (!assign_channel(sub) || sub->device->device_type==NULL)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
 	    else {
-		struct gps_type_t *dev = sub->device->device_type;
+		const struct gps_type_t *dev = sub->device->device_type;
 		double mincycle = (dev->cycle_chars * 10.0) / sub->device->gpsdata.baudrate;
 		if (*p == '=' && privileged_user(sub)) {
 		    double cycle = strtod(++p, &p);
 		    if (cycle >= mincycle)
 			if (dev->rate_switcher != NULL)
 			    if (dev->rate_switcher(sub->device, cycle))
-				dev->cycle = cycle;
+				sub->device->cycle = cycle;
 		}
 		if (dev->rate_switcher == NULL)
 		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f", dev->cycle);
+				   ",C=%.2f", sub->device->cycle);
 		else
 		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f %.2f", dev->cycle, mincycle);
+				   ",C=%.2f %.2f", sub->device->cycle, mincycle);
 	    }
 	    break;
 	case 'D':

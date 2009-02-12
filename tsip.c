@@ -822,7 +822,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 }
 
 /* this is everything we export */
-struct gps_type_t tsip_binary =
+const struct gps_type_t tsip_binary =
 {
     .type_name      = "Trimble TSIP",	/* full name of type */
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */

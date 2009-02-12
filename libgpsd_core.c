@@ -27,7 +27,7 @@
 
 int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 {
-    struct gps_type_t **dp;
+    const struct gps_type_t **dp;
 
     gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
     if (session->device_type != NULL &&
@@ -47,6 +47,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
+	    if (session->cycle <= 0)
+		session->cycle = (*dp)->cycle;
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
@@ -247,7 +249,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE
-	struct gps_type_t **dp;
+	const struct gps_type_t **dp;
 
 	/*@ -mustfreeonly @*/
 	for (dp = gpsd_drivers; *dp; dp++) {

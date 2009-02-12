@@ -193,7 +193,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * in hopes it will respond.
 	 */
 	if (isatty(session->gpsdata.gps_fd)!=0 && !session->context->readonly) {
-	    struct gps_type_t **dp;
+	    const struct gps_type_t **dp;
 	    if (session->device_type == NULL) {
 		for (dp = gpsd_drivers; *dp; dp++)
 		    if ((*dp)->probe_wakeup != NULL)

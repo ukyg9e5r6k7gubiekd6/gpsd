@@ -1238,7 +1238,7 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 
 
 /* this is everything we export */
-struct gps_type_t navcom_binary =
+const struct gps_type_t navcom_binary =
 {
     .type_name      = "Navcom binary",  	/* full name of type */
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */

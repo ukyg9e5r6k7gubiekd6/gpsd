@@ -988,7 +988,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 }
 
 /* this is everything we export */
-struct gps_type_t sirf_binary =
+const struct gps_type_t sirf_binary =
 {
     .type_name      = "SiRF binary",	/* full name of type */
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */

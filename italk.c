@@ -343,7 +343,7 @@ static void italk_ping(struct gps_device_t *session)
 #endif /* __not_yet__ */
 
 /* this is everything we export */
-struct gps_type_t italk_binary =
+const struct gps_type_t italk_binary =
 {
     .type_name      = "iTalk binary",	/* full name of type */
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */

@@ -480,7 +480,7 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
     }
 }
 
-struct gps_type_t superstar2_binary = {
+const struct gps_type_t superstar2_binary = {
     /* Full name of type */
     .type_name		= "SuperStarII binary",
     /* associated lexer packet type */
