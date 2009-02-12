@@ -57,7 +57,7 @@ C:
     <paramdef>pthread *<parameter>handler</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>rtcm_unpack</function></funcdef>
+<funcdef>void <function>rtcm2_unpack</function></funcdef>
     <paramdef>struct rtcm_t *<parameter>rtcmp</parameter></paramdef>
     <paramdef>char *<parameter>buf</parameter></paramdef>
 </funcprototype>
@@ -95,6 +95,13 @@ interface that is safe for multiple applications to use simultaneously; it
 is probably the one you want.  The low-level interface is documented
 at
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
+
+<warning>The API described below may change incompatibly at API
+version 4. Take care to conditionalize your code on the major and
+minor API version symbols in <filename>gps.h</filename>; ideally,
+force a compilation failure if the header is not exporting a version
+you recognize.  See the GPSD project website for more information on
+the protocol and API change.</warning>
 
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
@@ -193,8 +200,8 @@ is garbage-collected.</para>
 
 <para>The following is an excerpted and simplified version of the
 libgps interface code from
-<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-The function <function>handle_input()</function> is a trivial pies of
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The function <function>handle_input()</function> is a trivial piece of
 code that calls gps_poll(gpsdata).
 </para>
 

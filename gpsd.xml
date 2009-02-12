@@ -186,8 +186,6 @@ the form "/streamname". So, an example DGPSIP URL could be
 option is not given, <application>gpsd</application> will hunt for a
 DGPSIP server. --></para>
 
-
-
 <para>Internally, the daemon maintains a device list holding the
 pathnames of GPSes known to the daemon. Initially, this list is the
 list of device-name arguments specified on the command line.  That
@@ -200,8 +198,16 @@ specified.</para>
 <para>At any given time, each client will be listening to only one of
 the GPSes on the device list.  By default, a client's device is the
 one that most recently shipped information to the daemon at the time
-the client first requests GPS information (that is, issues any command
-other than F, K, W=0 or R=0).</para>
+the client first requests GPS information.</para>
+
+<warning>It is planned that the command protocol described below will
+change radically at API version 4. It is a bad idea for applications
+to speak this protocol directly: rather, they should use the client
+library
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+and take appropriate care to conditionalize their code on the major
+and minor API version symbols.  See the GPSD project website for more 
+information on the protocol and API change.</warning>
 
 <para>The request protocol for <application>gpsd</application> clients
 is very simple.  Each request normally consists of a single ASCII
@@ -209,6 +215,10 @@ character followed by a newline.  Case of the request character is
 ignored.  Each request returns a line of response text ended by a
 CR/LF.  Requests and responses are as follows, with %f standing for a
 decimal float numeral and %d for decimal integer numeral:</para>
+
+<para>Any command other than L, F, K, W=0 or R=0 is considered a
+request for GPS information and will cause a GPS device to be
+connected to the client's channel.</para>
 
 <variablelist>
 <varlistentry>
