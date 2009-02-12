@@ -63,7 +63,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 static void onsig(int sig)
 {
     if (sig == SIGALRM) {
-	gpsd_report(LOG_ERROR, "packet recognition timed out.\n", stdout);
+	gpsd_report(LOG_ERROR, "packet recognition timed out.\n");
 	exit(1);
     } else {
 	gpsd_report(LOG_ERROR, "killed by signal %d\n", sig);
