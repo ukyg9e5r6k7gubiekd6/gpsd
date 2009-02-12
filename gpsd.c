@@ -893,7 +893,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
-	    (void)snprintf(phrase, sizeof(phrase), ",L=3 " VERSION " abcdefgijklmnopqrstuvwxyz");	//h
+	    (void)snprintf(phrase, sizeof(phrase), ",L=%d %d %s abcdefgijklmnopqrstuvwxyz", GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION, VERSION);	//h
 	    break;
 	case 'M':
 	    if (!assign_channel(sub) && (!sub->device || sub->fixbuffer.mode == MODE_NOT_SEEN))

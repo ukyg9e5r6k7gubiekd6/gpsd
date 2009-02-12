@@ -1,6 +1,7 @@
 * Wed Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39dev
   Fixed potential core dump in C client handling of "K" responses.
   Made device hotplugging work again; had been broken by changes in udev.
+  Introduced major and minor API version symbols into the public interfaces.
 
 * Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.

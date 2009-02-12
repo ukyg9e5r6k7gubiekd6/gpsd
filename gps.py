@@ -5,6 +5,9 @@
 #
 import time, calendar, math, socket, sys, select
 
+api_major_version =	3	# bumped on incompatible changes
+api_minor_version =	1	# bumped on compatible changes
+
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
 

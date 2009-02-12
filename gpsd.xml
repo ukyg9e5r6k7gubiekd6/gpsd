@@ -387,8 +387,10 @@ a name in this list does not guarantee that the device is available.</para>
 
 <varlistentry>
 <term>l</term>
-<listitem><para>Returns three fields: a protocol revision number,
-the gpsd version, and a list of accepted request letters.</para></listitem>
+<listitem><para>Returns four fields: the major protocol/API revision number,
+the minor revision number, the gpsd version, and a list of accepted
+request letters. Note: earlier versions of this command returned only
+three fields, omitting the minor revision number.</para></listitem>
 </varlistentry>
 
 <varlistentry>
