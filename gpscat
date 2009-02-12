@@ -104,9 +104,10 @@ if __name__ == '__main__':
             if fd == tty and event == select.POLLIN:
                 if rawmode:
                     buf += os.read(tty, NMEA_MAX)
-                    if not buf.endswith("\r"):
-                        sys.stdout.write(hexdump(buf))
-                        buf = ""
+                    if not buf.endswith("\n"):
+                        buf = hexdump(buf)
+                    sys.stdout.write(buf)
+                    buf = ""
                 else:
                     (ptype, packet) = getter.get(tty)
                     length = len(packet)
