@@ -106,9 +106,15 @@ void gpsd_set_speed(struct gps_device_t *session,
 
     if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 
+	/* 
+	 * Don't mess with this conditional! Speed zero is supposed to mean
+	 * to leave the port speed at whatever it currently is.
+	 */
 	/*@ignore@*/
-	(void)cfsetispeed(&session->ttyset, rate);
-	(void)cfsetospeed(&session->ttyset, rate);
+	if (rate != B0) {
+	    (void)cfsetispeed(&session->ttyset, rate);
+	    (void)cfsetospeed(&session->ttyset, rate);
+	}
 	/*@end@*/
 	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
 	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
@@ -180,7 +186,8 @@ void gpsd_set_speed(struct gps_device_t *session,
 	(void)usleep(200000);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
-    gpsd_report(LOG_INF, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
+    gpsd_report(LOG_INF, "speed %d, %d%c%d\n", 
+		gpsd_get_speed(&session->ttyset), 9-stopbits, parity, stopbits);
 
     session->gpsdata.baudrate = (unsigned int)speed;
     session->gpsdata.parity = (unsigned int)parity;
