@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_ERROR, "%d driver type names match '%s'.\n",
 			matchcount, devtype);
 	}
-    
+    }    
 
     if ((int)to_nmea + (int)to_binary + (int)reset > 1) {
 	gpsd_report(LOG_ERROR, "make up your mind, would you?\n");
