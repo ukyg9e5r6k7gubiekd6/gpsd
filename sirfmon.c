@@ -69,9 +69,8 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define SNIFF_RETRIES	1200
 
 static int devicefd = -1, controlfd = -1;
-static int nfix,fix[20];
 static int gmt_offset;
-static bool serial, subframe_enabled = false;
+static bool serial;
 static unsigned int stopbits, bps;
 static int debuglevel = 0;
 
@@ -109,7 +108,8 @@ extern bool sendpkt(unsigned char *buf, size_t len);
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
-static bool dispmode = false;
+static bool dispmode = false, subframe_enabled = false;;
+static int nfix,fix[20];
 
 /*@ -nullassign @*/
 static char *verbpat[] =
@@ -801,6 +801,15 @@ static int sirf_sniff(int devicefd)
 
 static void sirf_refresh(bool inloop)
 {
+    unsigned char buf[BUFLEN];
+
+    /* refresh navigation parameters */
+    if (dispmode && (time(NULL) % 10 == 0)){
+	putbyte(buf, 4,0x98);
+	putbyte(buf, 5,0x00);
+	(void)sendpkt(buf, 2);
+    }
+
     (void)wrefresh(mid2win);
     (void)wrefresh(mid4win);
     if (!dispmode) {
@@ -1397,13 +1406,6 @@ int main (int argc, char **argv)
 		(void)sendpkt(buf, (size_t)len);
 		break;
 	    }
-	}
-
-	/* refresh navigation parameters */
-	if (dispmode && (time(NULL) % 10 == 0)){
-	    putbyte(buf, 4,0x98);
-	    putbyte(buf, 5,0x00);
-	    (void)sendpkt(buf, 2);
 	}
 
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
