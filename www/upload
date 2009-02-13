@@ -2,8 +2,10 @@
 #
 # Upload gpsd docs
 #
+# No CGI copy yet, hosting site won't let us send mail
+#
 webdir=shell.berlios.de:/home/groups/gpsd/htdocs
-cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
+#cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
 make html	# Ensure all derived HTML is up to date.
 
@@ -16,7 +18,7 @@ else
 	performance/{*.html,*.txt,*.png} \
 	../TODO ../NEWS \
 	$webdir
-    scp gps_report.cgi $cgidir
+    #scp gps_report.cgi $cgidir
 fi
 
 # To refresh the vendor-docs directory just do this:
