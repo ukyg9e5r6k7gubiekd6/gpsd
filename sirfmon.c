@@ -67,7 +67,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
-static int devicefd = -1, controlfd = -1;
+static int controlfd = -1;
 static int gmt_offset;
 static bool serial;
 static unsigned int stopbits, bps;
@@ -769,7 +769,7 @@ static void sirf_probe(void)
     /*@ +compdef @*/
 }
 
-static int sirf_sniff(int devicefd)
+static int sirf_sniff(void)
 {
     unsigned int	count, state;
     int st;
@@ -778,7 +778,7 @@ static int sirf_sniff(int devicefd)
     /* sniff for NMEA or SiRF packet */
     state = 0;
     for (count = 0; count < SNIFF_RETRIES; count++) {
-	if ((st = (int)read(devicefd, &c, 1)) < 0)
+	if ((st = (int)read(session.gpsdata.gps_fd, &c, 1)) < 0)
 	    return 0;
 	else
 	    count += st;
@@ -993,7 +993,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     unsigned int	rate;
     int bps;
 
-    (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
+    (void)tcflush(session.gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
 
     if (speed != 0) {
 	/*@ +ignoresigns @*/
@@ -1024,9 +1024,9 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     }
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-    if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
+    if (tcsetattr(session.gpsdata.gps_fd, TCSANOW, &ttyset) != 0)
 	return -1;
-    (void)tcflush(devicefd, TCIOFLUSH);
+    (void)tcflush(session.gpsdata.gps_fd, TCIOFLUSH);
 
     bps = get_speed(&ttyset);
     (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
@@ -1055,7 +1055,7 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
 	    if ((bps = set_speed(*ip, stopbits)) == -1)
 		continue;
-	    if ((st = sirf_sniff(devicefd)) == BAD_PACKET)
+	    if ((st = sirf_sniff()) == BAD_PACKET)
 		continue;
 	    if (st == SIRF_PACKET)
 		return bps;
@@ -1071,13 +1071,13 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 
 static void serial_initialize(char *device)
 {
-    if ((controlfd = devicefd = open(device,O_RDWR)) < 0) {
+    if ((controlfd = session.gpsdata.gps_fd = open(device,O_RDWR)) < 0) {
 	perror(device);
 	exit(1);
     }
 
     /* Save original terminal parameters */
-    if (tcgetattr(devicefd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
+    if (tcgetattr(session.gpsdata.gps_fd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
 	(void)fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
@@ -1111,20 +1111,20 @@ static ssize_t readpkt(void)
     ssize_t len;
 
     FD_ZERO(&select_set);
-    FD_SET(devicefd,&select_set);
+    FD_SET(session.gpsdata.gps_fd,&select_set);
     if (controlfd < -1)
 	FD_SET(controlfd,&select_set);
     timeval.tv_sec = 0;
     timeval.tv_usec = 500000;
-    if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
+    if (select(session.gpsdata.gps_fd + 1,&select_set,NULL,NULL,&timeval) < 0)
 	return EOF;
 
-    if (!FD_ISSET(devicefd,&select_set))
+    if (!FD_ISSET(session.gpsdata.gps_fd,&select_set))
 	return EOF;
 
     (void)usleep(100000);
 
-    len = packet_get(devicefd, &session.packet);
+    len = packet_get(session.gpsdata.gps_fd, &session.packet);
     if (len <= 0)
 	return EOF;
 
@@ -1210,8 +1210,8 @@ static void command(char buf[], size_t len, const char *fmt, ... )
     (void)vsnprintf(buf, len, fmt, ap);
     va_end(ap);
 
-    /*@i1@*/assert(write(devicefd, buf, strlen(buf)) != -1);
-    n = read(devicefd, buf, len);
+    /*@i1@*/assert(write(session.gpsdata.gps_fd, buf, strlen(buf)) != -1);
+    n = read(session.gpsdata.gps_fd, buf, len);
     if (n >= 0) {
 	buf[n] = '\0';
 	while (isspace(buf[strlen(buf)-1]))
@@ -1258,6 +1258,7 @@ int main (int argc, char **argv)
 	}
     }
     /*@ +branchstate @*/
+
     /*@ -nullpass -branchstate @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
@@ -1281,17 +1282,19 @@ int main (int argc, char **argv)
 	}
     }
 
+    gpsd_init(&session, &context, NULL);
+
     /*@ -boolops */
     if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
 	if (!server)
 	    server = "127.0.0.1";
 	if (!port)
 	    port = DEFAULT_GPSD_PORT;
-	devicefd = netlib_connectsock(server, port, "tcp");
-	if (devicefd < 0) {
+	session.gpsdata.gps_fd = netlib_connectsock(server, port, "tcp");
+	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr, 
 			  "%s: connection failure on %s:%s, error %d.\n", 
-			  argv[0], server, port, devicefd);
+			  argv[0], server, port, session.gpsdata.gps_fd);
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
@@ -1313,7 +1316,7 @@ int main (int argc, char **argv)
     /*@ +nullpass +branchstate @*/
 
     assert(device != NULL);
-    gpsd_init(&session, &context, device);
+    (void)strlcpy(session.gpsdata.gps_device, device, PATH_MAX);
     packet_reset(&session.packet);
 
     /* quit cleanly if an assertion fails */
@@ -1366,7 +1369,7 @@ int main (int argc, char **argv)
 	(void)wrefresh(cmdwin);
 
 	FD_SET(0,&select_set);
-	FD_SET(devicefd,&select_set);
+	FD_SET(session.gpsdata.gps_fd,&select_set);
 
 	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
 	    break;
@@ -1422,9 +1425,9 @@ int main (int argc, char **argv)
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
-		    assert(write(devicefd, line, strlen(line)) != -1);
+		    assert(write(session.gpsdata.gps_fd, line, strlen(line)) != -1);
 		    /* discard response */
-		    assert(read(devicefd, buf, sizeof(buf)) != -1);
+		    assert(read(session.gpsdata.gps_fd, buf, sizeof(buf)) != -1);
 		    /*@ +sefparams @*/
 		}
 		break;
