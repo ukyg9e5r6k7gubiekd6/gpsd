@@ -84,6 +84,9 @@ static FILE *logfile;
 
 #define display	(void)mvwprintw
 
+// SiRF-specific code will need this.
+extern bool sendpkt(unsigned char *buf, size_t len);
+
 /*****************************************************************************
  *****************************************************************************
  *
@@ -250,7 +253,7 @@ static void decode_ecef(double x, double y, double z,
     (void)wprintw(mid2win, "%8.1f",speed);
 }
 
-static void decode_sirf(unsigned char buf[], size_t len)
+static void sirf_decode(unsigned char buf[], size_t len)
 {
     int i,j,ch,off,cn;
 
@@ -737,80 +740,23 @@ static void sirf_layout(void)
     /*@ +nullpass @*/
 }
 
-/*****************************************************************************
- *****************************************************************************
- *
- * SiRF-dependent stuff ends here (someday)
- *
- *****************************************************************************
- *****************************************************************************/
-
-/*****************************************************************************
- *
- * Serial-line handling
- *
- *****************************************************************************/
-
-static unsigned int get_speed(struct termios* ttyctl)
+static void sirf_probe(void)
 {
-    speed_t code = cfgetospeed(ttyctl);
-    switch (code) {
-    case B0:     return(0);
-    case B300:   return(300);
-    case B1200:  return(1200);
-    case B2400:  return(2400);
-    case B4800:  return(4800);
-    case B9600:  return(9600);
-    case B19200: return(19200);
-    case B38400: return(38400);
-    case B57600: return(57600);
-    default: return(115200);
-    }
+    unsigned char buf[BUFLEN];
+
+    /* probe for version */
+    putbyte(buf, 4, 0x84);
+    putbyte(buf, 5, 0x0);
+    /*@ -compdef @*/
+    (void)sendpkt(buf, 2);
+    /*@ +compdef @*/
 }
 
-static int set_speed(unsigned int speed, unsigned int stopbits)
+static int sirf_sniff(int devicefd)
 {
-    unsigned int	rate, count, state;
+    unsigned int	count, state;
     int st;
     unsigned char	c;
-
-    (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
-
-    if (speed != 0) {
-	/*@ +ignoresigns @*/
-	if (speed < 300)
-	    rate = 0;
-	else if (speed < 1200)
-	    rate =  B300;
-	else if (speed < 2400)
-	    rate =  B1200;
-	else if (speed < 4800)
-	    rate =  B2400;
-	else if (speed < 9600)
-	    rate =  B4800;
-	else if (speed < 19200)
-	    rate =  B9600;
-	else if (speed < 38400)
-	    rate =  B19200;
-	else if (speed < 57600)
-	    rate =  B38400;
-	else
-	    rate =  B57600;
-	/*@ -ignoresigns @*/
-
-	/*@ ignore @*/
-	(void)cfsetispeed(&ttyset, (speed_t)rate);
-	(void)cfsetospeed(&ttyset, (speed_t)rate);
-	/*@ end @*/
-    }
-    ttyset.c_cflag &=~ CSIZE;
-    ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-    if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
-	return BAD_PACKET;
-    (void)tcflush(devicefd, TCIOFLUSH);
-
-    (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
-	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */
     state = 0;
@@ -851,6 +797,97 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     }
 
     return BAD_PACKET;
+}
+
+static void sirf_refresh(bool inloop)
+{
+    (void)wrefresh(mid2win);
+    (void)wrefresh(mid4win);
+    if (!dispmode) {
+	refresh_rightpanel1();
+    } else {
+	(void)touchwin(mid19win);
+	(void)wrefresh(mid19win);
+	(void)redrawwin(mid19win);
+    }
+    if (inloop)
+	(void)wrefresh(mid19win);
+}
+
+/*****************************************************************************
+ *****************************************************************************
+ *
+ * SiRF-dependent stuff ends here (someday)
+ *
+ *****************************************************************************
+ *****************************************************************************/
+
+/*****************************************************************************
+ *
+ * Serial-line handling
+ *
+ *****************************************************************************/
+
+static unsigned int get_speed(struct termios* ttyctl)
+{
+    speed_t code = cfgetospeed(ttyctl);
+    switch (code) {
+    case B0:     return(0);
+    case B300:   return(300);
+    case B1200:  return(1200);
+    case B2400:  return(2400);
+    case B4800:  return(4800);
+    case B9600:  return(9600);
+    case B19200: return(19200);
+    case B38400: return(38400);
+    case B57600: return(57600);
+    default: return(115200);
+    }
+}
+
+static int set_speed(unsigned int speed, unsigned int stopbits)
+{
+    unsigned int	rate;
+
+    (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
+
+    if (speed != 0) {
+	/*@ +ignoresigns @*/
+	if (speed < 300)
+	    rate = 0;
+	else if (speed < 1200)
+	    rate =  B300;
+	else if (speed < 2400)
+	    rate =  B1200;
+	else if (speed < 4800)
+	    rate =  B2400;
+	else if (speed < 9600)
+	    rate =  B4800;
+	else if (speed < 19200)
+	    rate =  B9600;
+	else if (speed < 38400)
+	    rate =  B19200;
+	else if (speed < 57600)
+	    rate =  B38400;
+	else
+	    rate =  B57600;
+	/*@ -ignoresigns @*/
+
+	/*@ ignore @*/
+	(void)cfsetispeed(&ttyset, (speed_t)rate);
+	(void)cfsetospeed(&ttyset, (speed_t)rate);
+	/*@ end @*/
+    }
+    ttyset.c_cflag &=~ CSIZE;
+    ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
+    if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
+	return BAD_PACKET;
+    (void)tcflush(devicefd, TCIOFLUSH);
+
+    (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
+	    get_speed(&ttyset), 9-stopbits, stopbits);
+
+    return sirf_sniff(devicefd);
 }
 
 static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
@@ -959,7 +996,7 @@ static ssize_t readpkt(void)
 }
 /*@ +globstate @*/
 
-static bool sendpkt(unsigned char *buf, size_t len)
+bool sendpkt(unsigned char *buf, size_t len)
 {
     unsigned int csum;
     ssize_t st;
@@ -1186,27 +1223,14 @@ int main (int argc, char **argv)
 
     FD_ZERO(&select_set);
 
-    /* probe for version */
-    putbyte(buf, 4, 0x84);
-    putbyte(buf, 5, 0x0);
-    /*@ -compdef @*/
-    (void)sendpkt(buf, 2);
-    /*@ +compdef @*/
+    sirf_probe();
 
     for (;;) {
 	(void)wmove(cmdwin, 0,0);
 	(void)wprintw(cmdwin, "cmd> ");
 	(void)wclrtoeol(cmdwin);
 	(void)refresh();
-	(void)wrefresh(mid2win);
-	(void)wrefresh(mid4win);
-	if (!dispmode) {
-	    refresh_rightpanel1();
-	} else {
-	    (void)touchwin(mid19win);
-	    (void)wrefresh(mid19win);
-	    (void)redrawwin(mid19win);
-	}
+	sirf_refresh(false);
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
@@ -1226,16 +1250,7 @@ int main (int argc, char **argv)
 	    //(void)move(0,0);
 	    //(void)clrtoeol();
 	    //(void)refresh();
-	    (void)wrefresh(mid2win);
-	    (void)wrefresh(mid4win);
-	    if (!dispmode) {
-		refresh_rightpanel1();
-	    } else {
-		(void)touchwin(mid19win);
-		(void)wrefresh(mid19win);
-		(void)redrawwin(mid19win);
-	    }
-	    (void)wrefresh(mid19win);
+	    sirf_refresh(true);
 	    (void)wrefresh(debugwin);
 	    (void)wrefresh(cmdwin);
 
@@ -1383,7 +1398,7 @@ int main (int argc, char **argv)
 	}
 
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    decode_sirf(session.packet.outbuffer,session.packet.outbuflen);
+	    sirf_decode(session.packet.outbuffer,session.packet.outbuflen);
 	}
     }
     /*@ +nullpass @*/
