@@ -1069,20 +1069,6 @@ static unsigned int hunt_open(unsigned int *pstopbits)
     return 0;
 }
 
-static void serial_initialize(char *device)
-{
-    if ((controlfd = session.gpsdata.gps_fd = open(device,O_RDWR)) < 0) {
-	perror(device);
-	exit(1);
-    }
-
-    /* Save original terminal parameters */
-    if (tcgetattr(session.gpsdata.gps_fd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
-	(void)fputs("Can't sync up with device!\n", stderr);
-	exit(1);
-    }
-}
-
 /******************************************************************************
  *
  * Device-independent I/O routines
@@ -1304,20 +1290,26 @@ int main (int argc, char **argv)
 	else
 	    command((char *)buf, sizeof(buf), "O\r\n");	/* force device allocation */
 	command((char *)buf, sizeof(buf), "F\r\n");
-	device = strdup((char *)buf+7);
+	(void)strlcpy(session.gpsdata.gps_device, (char *)buf+7, PATH_MAX);
 	command((char *)buf, sizeof(buf), "R=2\r\n");
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	serial_initialize(device = arg);
+	(void)strlcpy(session.gpsdata.gps_device, arg, PATH_MAX);
+	if ((controlfd = session.gpsdata.gps_fd = open(arg,O_RDWR)) < 0) {
+	    perror(arg);
+	    exit(1);
+	}
+
+	/* Save original terminal parameters */
+	if (tcgetattr(session.gpsdata.gps_fd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
+	    (void)fputs("Can't sync up with device!\n", stderr);
+	    exit(1);
+	}
 	serial = true;
     }
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
-
-    assert(device != NULL);
-    (void)strlcpy(session.gpsdata.gps_device, device, PATH_MAX);
-    packet_reset(&session.packet);
 
     /* quit cleanly if an assertion fails */
     (void)signal(SIGABRT, onsig);
