@@ -65,7 +65,6 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 static int controlfd = -1;
 static int gmt_offset;
 static bool serial, curses_active;
-static unsigned int stopbits;
 static int debuglevel = 0;
 
 static struct gps_context_t	context;
@@ -1207,8 +1206,8 @@ int main (int argc, char **argv)
     sirf.layout();
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
-    	display(cmdwin, 1, 0, "%s %4d N %d", session.gpsdata.gps_device, 
-		gpsd_get_speed(&session.ttyset), stopbits);
+    	display(cmdwin, 1, 0, "%s %4d N 1", session.gpsdata.gps_device, 
+		gpsd_get_speed(&session.ttyset));
     else
 	display(cmdwin, 1, 0, "%s:%s:%s", server, port, session.gpsdata.gps_device);
     (void)wattrset(cmdwin, A_NORMAL);
@@ -1273,10 +1272,12 @@ int main (int argc, char **argv)
 	    case 'b':
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
-		    sirf.speed(v, stopbits);
-		    (void)gpsd_set_speed(&session, v, 0, stopbits);
-		    display(cmdwin, 1, 0, "%s %d N %d", 
-			    session.gpsdata.gps_device, v ,stopbits);
+		    sirf.speed(v, 1);
+		    (void)gpsd_set_speed(&session, v, 0, 1);
+		    (void)wattrset(cmdwin, A_BOLD);
+		    display(cmdwin, 1, 0, "%s %4d N 1", 
+			    session.gpsdata.gps_device, v);
+		    (void)wattrset(cmdwin, A_NORMAL);
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
