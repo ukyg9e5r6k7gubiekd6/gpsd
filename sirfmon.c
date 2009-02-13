@@ -50,7 +50,6 @@
 #endif /* HAVE_NCURSES_H */
 #include "gpsd.h"
 
-#define PUT_ORIGIN	-4
 #include "bits.h"
 
 #if defined(HAVE_SYS_TIME_H)
@@ -803,18 +802,18 @@ static bool sendpkt(unsigned char *buf, size_t len)
     ssize_t st;
     size_t i;
 
-    putbyte(buf, -4, START1);			/* start of packet */
-    putbyte(buf, -3, START2);
-    putbeword(buf, -2, len);			/* length */
+    putbyte(buf, 0, START1);			/* start of packet */
+    putbyte(buf, 1, START2);
+    putbeword(buf, 2, len);			/* length */
 
     csum = 0;
     for (i = 0; i < len; i++)
 	csum += (int)buf[4 + i];
 
     csum &= 0x7fff;
-    putbeword(buf, len, csum);			/* checksum */
-    putbyte(buf, len + 2,END1);			/* end of packet */
-    putbyte(buf, len + 3,END2);
+    putbeword(buf, len+4, csum);			/* checksum */
+    putbyte(buf, len + 6,END1);			/* end of packet */
+    putbyte(buf, len + 7,END2);
     len += 8;
 
     (void)wprintw(debugwin, ">>>");
@@ -832,7 +831,7 @@ static bool sendpkt(unsigned char *buf, size_t len)
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
 	}
-	st = write(controlfd, buf,len);
+	st = write(controlfd, buf, len);
 	if (!serial)
 	    /* enough room for "ERROR\r\n\0" */
 	    /*@ -sefparams @*/
@@ -1154,8 +1153,8 @@ int main (int argc, char **argv)
     FD_ZERO(&select_set);
 
     /* probe for version */
-    putbyte(buf, 0, 0x84);
-    putbyte(buf, 1, 0x0);
+    putbyte(buf, 4, 0x84);
+    putbyte(buf, 5, 0x0);
     /*@ -compdef @*/
     (void)sendpkt(buf, 2);
     /*@ +compdef @*/
@@ -1224,9 +1223,9 @@ int main (int argc, char **argv)
 	    {
 	    case 'a':		/* toggle 50bps subframe data */
 		(void)memset(buf, '\0', sizeof(buf));
-		putbyte(buf, 0, 0x80);
-		putbyte(buf, 23, 12);
-		putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
+		putbyte(buf, 4, 0x80);
+		putbyte(buf, 27, 12);
+		putbyte(buf, 28, subframe_enabled ? 0x00 : 0x10);
 		(void)sendpkt(buf, 25);
 		break;
 
@@ -1238,12 +1237,12 @@ int main (int argc, char **argv)
 			    goto goodspeed;
 		    break;
 		goodspeed:
-		    putbyte(buf, 0, 0x86);
-		    putbelong(buf, 1, v);		/* new baud rate */
-		    putbyte(buf, 5, 8);		/* 8 data bits */
-		    putbyte(buf, 6, stopbits);	/* 1 stop bit */
-		    putbyte(buf, 7, 0);		/* no parity */
-		    putbyte(buf, 8, 0);		/* reserved */
+		    putbyte(buf, 4, 0x86);
+		    putbelong(buf, 5, v);		/* new baud rate */
+		    putbyte(buf, 9, 8);		/* 8 data bits */
+		    putbyte(buf, 10, stopbits);	/* 1 stop bit */
+		    putbyte(buf, 11, 0);		/* no parity */
+		    putbyte(buf, 12, 0);		/* reserved */
 		    (void)sendpkt(buf, 9);
 		    (void)usleep(50000);
 		    (void)set_speed(bps = v, stopbits);
@@ -1260,8 +1259,8 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'c':				/* static navigation */
-		putbyte(buf, 0,0x8f);			/* id */
-		putbyte(buf, 1, atoi(line+1));
+		putbyte(buf, 4,0x8f);			/* id */
+		putbyte(buf, 5, atoi(line+1));
 		(void)sendpkt(buf, 2);
 		break;
 
@@ -1269,14 +1268,14 @@ int main (int argc, char **argv)
 		v = (unsigned)atoi(line+1);
 		if (v > 30)
 		    break;
-		putbyte(buf, 0,0xa6);
-		putbyte(buf, 1,0);
-		putbyte(buf, 2, 4);	/* satellite picture */
-		putbyte(buf, 3, v);
-		putbyte(buf, 4, 0);
-		putbyte(buf, 5, 0);
-		putbyte(buf, 6, 0);
-		putbyte(buf, 7, 0);
+		putbyte(buf, 4,0xa6);
+		putbyte(buf, 5,0);
+		putbyte(buf, 6, 4);	/* satellite picture */
+		putbyte(buf, 7, v);
+		putbyte(buf, 8, 0);
+		putbyte(buf, 9, 0);
+		putbyte(buf, 10, 0);
+		putbyte(buf, 11, 0);
 		(void)sendpkt(buf, 8);
 		break;
 
@@ -1291,29 +1290,29 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'n':				/* switch to NMEA */
-		putbyte(buf, 0,0x81);			/* id */
-		putbyte(buf, 1,0x02);			/* mode */
-		putbyte(buf, 2,0x01);			/* GGA */
-		putbyte(buf, 3,0x01);
-		putbyte(buf, 4,0x01);			/* GLL */
-		putbyte(buf, 5,0x01);
-		putbyte(buf, 6,0x01);		  	/* GSA */
-		putbyte(buf, 7,0x01);
-		putbyte(buf, 8,0x05);			/* GSV */
-		putbyte(buf, 9,0x01);
-		putbyte(buf, 10,0x01);			/* RNC */
-		putbyte(buf, 11,0x01);
-		putbyte(buf, 12,0x01);			/* VTG */
-		putbyte(buf, 13,0x01);
-		putbyte(buf, 14,0x00);			/* unused fields */
-		putbyte(buf, 15,0x01);
-		putbyte(buf, 16,0x00);
-		putbyte(buf, 17,0x01);
-		putbyte(buf, 18,0x00);
-		putbyte(buf, 19,0x01);
-		putbyte(buf, 20,0x00);
-		putbyte(buf, 21,0x01);
-		putbeword(buf, 22,bps);
+		putbyte(buf, 4,  0x81);			/* id */
+		putbyte(buf, 5,  0x02);			/* mode */
+		putbyte(buf, 6,  0x01);			/* GGA */
+		putbyte(buf, 7,  0x01);
+		putbyte(buf, 8,  0x01);			/* GLL */
+		putbyte(buf, 9,  0x01);
+		putbyte(buf, 10, 0x01);		  	/* GSA */
+		putbyte(buf, 11, 0x01);
+		putbyte(buf, 12, 0x05);			/* GSV */
+		putbyte(buf, 13, 0x01);
+		putbyte(buf, 14, 0x01);			/* RNC */
+		putbyte(buf, 15, 0x01);
+		putbyte(buf, 16, 0x01);			/* VTG */
+		putbyte(buf, 17, 0x01);
+		putbyte(buf, 18, 0x00);			/* unused fields */
+		putbyte(buf, 19, 0x01);
+		putbyte(buf, 20, 0x00);
+		putbyte(buf, 21, 0x01);
+		putbyte(buf, 22, 0x00);
+		putbyte(buf, 23, 0x01);
+		putbyte(buf, 24, 0x00);
+		putbyte(buf, 25, 0x01);
+		putbeword(buf, 26,bps);
 		(void)sendpkt(buf, 24);
 		goto quit;
 
@@ -1344,8 +1343,8 @@ int main (int argc, char **argv)
 
 	/* refresh navigation parameters */
 	if (dispmode && (time(NULL) % 10 == 0)){
-	    putbyte(buf, 0,0x98);
-	    putbyte(buf, 1,0x00);
+	    putbyte(buf, 4,0x98);
+	    putbyte(buf, 5,0x00);
 	    (void)sendpkt(buf, 2);
 	}
 
