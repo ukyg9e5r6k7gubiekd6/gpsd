@@ -270,7 +270,7 @@ static void decode_ecef(double x, double y, double z,
     (void)wprintw(mid2win, "%8.1f",speed);
 }
 
-static void sirf_decode(unsigned char buf[], size_t len)
+static void sirf_analyze(unsigned char buf[], size_t len)
 {
     int i,j,ch,off,cn;
 
@@ -949,7 +949,7 @@ static void sirf_speed(int speed, int stopbits)
 
 const struct mdevice_t sirf = {
     .probe = sirf_probe,
-    .analyze = sirf_decode,
+    .analyze = sirf_analyze,
     .windows = sirf_windows,
     .layout = sirf_layout,
     .repaint = sirf_refresh,
@@ -991,6 +991,7 @@ static unsigned int get_speed(struct termios* ttyctl)
 static int set_speed(unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate;
+    int bps;
 
     (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
 
@@ -1024,13 +1025,13 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
     if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
-	return BAD_PACKET;
+	return -1;
     (void)tcflush(devicefd, TCIOFLUSH);
 
+    bps = get_speed(&ttyset);
     (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
-	    get_speed(&ttyset), 9-stopbits, stopbits);
-
-    return sirf_sniff(devicefd);
+	    bps, 9-stopbits, stopbits);
+    return bps;
 }
 
 static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
@@ -1052,14 +1053,14 @@ static unsigned int hunt_open(unsigned int *pstopbits)
     for (trystopbits = 1; trystopbits <= 2; trystopbits++) {
 	*pstopbits = trystopbits;
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
-	    if ((st = set_speed(*ip, trystopbits)) == SIRF_PACKET)
-		return get_speed(&ttyset);
+	    if ((bps = set_speed(*ip, stopbits)) == -1)
+		continue;
+	    if ((st = sirf_sniff(devicefd)) == BAD_PACKET)
+		continue;
+	    if (st == SIRF_PACKET)
+		return bps;
 	    else if (st == NMEA_PACKET) {
 		(void)fprintf(stderr, "Switching to SiRF mode...\n");
-		if (*ip == 0)
-		    bps = get_speed(&ttyset);
-		else
-		    bps = *ip;
 		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", bps);
 		return bps;
 	    }
