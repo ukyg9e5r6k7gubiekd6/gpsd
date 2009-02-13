@@ -345,7 +345,7 @@ int main(int argc, char **argv)
 		    exit(2);
 		} else {
 		    gpsd_report(LOG_IO,
-				"autodectection after %d reads.\n", seq);
+				"autodetection after %d reads.\n", seq);
 		    (void) alarm(0);
 		    break;
 		}
