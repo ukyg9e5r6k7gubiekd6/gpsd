@@ -86,7 +86,6 @@ struct mdevice_t {
     void (*probe)(void);
     void (*analyze)(unsigned char [], size_t);
     bool (*windows)(void);
-    void (*layout)(void);
     void (*repaint)(bool);
     int (*command)(char[]);
     void (*speed)(int, int);
@@ -583,6 +582,8 @@ static void refresh_rightpanel1(void)
 
 static bool sirf_windows(void)
 {
+    unsigned int i;
+
     mid2win   = newwin(7,  80,  0, 0);
     mid4win   = newwin(15, 30,  7, 0);
     mid6win   = newwin(3,  50,  7, 30);
@@ -591,13 +592,8 @@ static bool sirf_windows(void)
     mid13win  = newwin(3,  50, 17, 30);
     mid19win  = newwin(16, 50,  7, 30);
     mid27win  = newwin(3,  50, 20, 30);
-    return mid2win!=NULL || mid4win!=NULL || mid6win!=NULL || mid9win!=NULL
-	|| mid13win!=NULL || mid19win!=NULL || mid27win!=NULL;
-}
-
-static void sirf_layout(void)
-{
-    unsigned int i;
+    //mid2win!=NULL || mid4win!=NULL || mid6win!=NULL || mid9win!=NULL
+    //|| mid13win!=NULL || mid19win!=NULL || mid27win!=NULL;
 
     /*@ -nullpass @*/
     (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -704,6 +700,8 @@ static void sirf_layout(void)
     display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
     /*@ +nullpass @*/
+
+    return true;
 }
 
 static void sirf_probe(void)
@@ -853,7 +851,6 @@ const struct mdevice_t sirf = {
     .probe = sirf_probe,
     .analyze = sirf_analyze,
     .windows = sirf_windows,
-    .layout = sirf_layout,
     .repaint = sirf_refresh,
     .command = sirf_command,
     .speed = sirf_speed,
@@ -1203,7 +1200,6 @@ int main (int argc, char **argv)
     (void)wsetscrreg(debugwin, 0, LINES-21);
     /*@ +onlytrans @*/
 
-    sirf.layout();
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
     	display(cmdwin, 1, 0, "%s %4d %c %d", 
