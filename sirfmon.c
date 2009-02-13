@@ -922,6 +922,20 @@ static int sirf_command(char line[])
     return COMMAND_UNKNOWN;	/* no match */
 }
 
+static void sirf_speed(int speed, int stopbits)
+{
+    unsigned char buf[BUFLEN];
+
+    putbyte(buf, 4, 0x86);
+    putbelong(buf, 5, speed);		/* new baud rate */
+    putbyte(buf, 9, 8);		/* 8 data bits */
+    putbyte(buf, 10, stopbits);	/* 1 stop bit */
+    putbyte(buf, 11, 0);		/* no parity */
+    putbyte(buf, 12, 0);		/* reserved */
+    (void)sendpkt(buf, 9);
+    (void)usleep(50000);
+}
+
 /*****************************************************************************
  *****************************************************************************
  *
@@ -1379,14 +1393,7 @@ int main (int argc, char **argv)
 			    goto goodspeed;
 		    break;
 		goodspeed:
-		    putbyte(buf, 4, 0x86);
-		    putbelong(buf, 5, v);		/* new baud rate */
-		    putbyte(buf, 9, 8);		/* 8 data bits */
-		    putbyte(buf, 10, stopbits);	/* 1 stop bit */
-		    putbyte(buf, 11, 0);		/* no parity */
-		    putbyte(buf, 12, 0);		/* reserved */
-		    (void)sendpkt(buf, 9);
-		    (void)usleep(50000);
+		    sirf_speed(v, stopbits);
 		    (void)set_speed(bps = v, stopbits);
 		    display(cmdwin, 1, 0, "%s %d N %d", 
 			    session.gpsdata.gps_device,bps,stopbits);
