@@ -202,12 +202,11 @@ the client first requests GPS information.</para>
 
 <warning>It is planned that the command protocol described below will
 change radically at API version 4. It is a bad idea for applications
-to speak this protocol directly: rather, they should use the client
-library
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-and take appropriate care to conditionalize their code on the major
-and minor API version symbols.  See the GPSD project website for more 
-information on the protocol and API change.</warning>
+to speak this protocol directly: rather, they should use the
+<application>libgps</application> client library and take appropriate
+care to conditionalize their code on the major and minor API version
+symbols.  See the GPSD project website for more information on the
+protocol and API change.</warning>
 
 <para>The request protocol for <application>gpsd</application> clients
 is very simple.  Each request normally consists of a single ASCII
