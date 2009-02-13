@@ -8,7 +8,6 @@
  * restart.
  *
  * Useful commands:
- *	n -- switch device to NMEA at current speed and exit.
  *	l -- toggle packet logging
  *	b -- change baud rate.
  *	s -- send hex bytes to device.
@@ -83,6 +82,12 @@ static FILE *logfile;
 
 #define display	(void)mvwprintw
 
+/* these things will go in gpsmon.h someday */
+
+#define COMMAND_TERMINATE	-1
+#define COMMAND_MATCH		1
+#define COMMAND_UNKNOWN		0
+
 // SiRF-specific code will need this.
 extern bool sendpkt(unsigned char *buf, size_t len);
 
@@ -94,6 +99,7 @@ extern bool sendpkt(unsigned char *buf, size_t len);
  * These are the SiRF-specific commands:
  *	a -- toggle receipt of 50BPS subframe data.
  *	c -- set or clear static navigation mode
+ *	n -- switch device to NMEA at current speed and exit.
  *	t -- toggle navigation-parameter display mode
  *
  * Initialiation takes a SiRF chip in NMEA mode to binary mode, if needed.
@@ -845,6 +851,77 @@ static size_t sirf_packet_wrap(unsigned char *buf, size_t len)
     return len;
 }
 
+static int sirf_command(char line[])
+{
+    unsigned char buf[BUFSIZ];
+    int v;
+
+    switch (line[0]) 
+    {
+    case 'a':			/* toggle 50bps subframe data */
+	(void)memset(buf, '\0', sizeof(buf));
+	putbyte(buf, 4, 0x80);
+	putbyte(buf, 27, 12);
+	putbyte(buf, 28, subframe_enabled ? 0x00 : 0x10);
+	(void)sendpkt(buf, 25);
+	return COMMAND_MATCH;
+
+    case 'c':			/* static navigation */
+	putbyte(buf, 4,0x8f);			/* id */
+	putbyte(buf, 5, atoi(line+1));
+	(void)sendpkt(buf, 2);
+	return COMMAND_MATCH;
+
+    case 'd':		/* MID 4 rate change -- not documented */
+	v = (unsigned)atoi(line+1);
+	if (v > 30)
+	    return COMMAND_MATCH;
+	putbyte(buf, 4,0xa6);
+	putbyte(buf, 5,0);
+	putbyte(buf, 6, 4);	/* satellite picture */
+	putbyte(buf, 7, v);
+	putbyte(buf, 8, 0);
+	putbyte(buf, 9, 0);
+	putbyte(buf, 10, 0);
+	putbyte(buf, 11, 0);
+	(void)sendpkt(buf, 8);
+	return COMMAND_MATCH;
+
+    case 'n':			/* switch to NMEA */
+	putbyte(buf, 4,  0x81);			/* id */
+	putbyte(buf, 5,  0x02);			/* mode */
+	putbyte(buf, 6,  0x01);			/* GGA */
+	putbyte(buf, 7,  0x01);
+	putbyte(buf, 8,  0x01);			/* GLL */
+	putbyte(buf, 9,  0x01);
+	putbyte(buf, 10, 0x01);		  	/* GSA */
+	putbyte(buf, 11, 0x01);
+	putbyte(buf, 12, 0x05);			/* GSV */
+	putbyte(buf, 13, 0x01);
+	putbyte(buf, 14, 0x01);			/* RNC */
+	putbyte(buf, 15, 0x01);
+	putbyte(buf, 16, 0x01);			/* VTG */
+	putbyte(buf, 17, 0x01);
+	putbyte(buf, 18, 0x00);			/* unused fields */
+	putbyte(buf, 19, 0x01);
+	putbyte(buf, 20, 0x00);
+	putbyte(buf, 21, 0x01);
+	putbyte(buf, 22, 0x00);
+	putbyte(buf, 23, 0x01);
+	putbyte(buf, 24, 0x00);
+	putbyte(buf, 25, 0x01);
+	putbeword(buf, 26,bps);
+	(void)sendpkt(buf, 24);
+	return COMMAND_TERMINATE;		/* terminate */
+
+    case 't':			/* poll navigation params */
+	dispmode = !dispmode;
+	return COMMAND_MATCH;
+    }
+
+    return COMMAND_UNKNOWN;	/* no match */
+}
+
 /*****************************************************************************
  *****************************************************************************
  *
@@ -1116,7 +1193,7 @@ static void onsig(int sig UNUSED)
 int main (int argc, char **argv)
 {
     unsigned int v;
-    int option;
+    int option, status;
     ssize_t len;
     char *p, *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
     char *server=NULL, *port = DEFAULT_GPSD_PORT, *device = NULL;
@@ -1286,16 +1363,14 @@ int main (int argc, char **argv)
 	    while (*p != '\0' && isspace(*p))
 		p++;
 
+	    status = sirf_command(line);
+	    if (status == COMMAND_TERMINATE)
+		goto quit;
+	    else if (status == COMMAND_MATCH)
+		continue;
+	    assert(status == COMMAND_UNKNOWN);
 	    switch (line[0])
 	    {
-	    case 'a':		/* toggle 50bps subframe data */
-		(void)memset(buf, '\0', sizeof(buf));
-		putbyte(buf, 4, 0x80);
-		putbyte(buf, 27, 12);
-		putbyte(buf, 28, subframe_enabled ? 0x00 : 0x10);
-		(void)sendpkt(buf, 25);
-		break;
-
 	    case 'b':
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
@@ -1325,27 +1400,6 @@ int main (int argc, char **argv)
 		}
 		break;
 
-	    case 'c':				/* static navigation */
-		putbyte(buf, 4,0x8f);			/* id */
-		putbyte(buf, 5, atoi(line+1));
-		(void)sendpkt(buf, 2);
-		break;
-
-	    case 'd':		/* MID 4 rate change -- not documented */
-		v = (unsigned)atoi(line+1);
-		if (v > 30)
-		    break;
-		putbyte(buf, 4,0xa6);
-		putbyte(buf, 5,0);
-		putbyte(buf, 6, 4);	/* satellite picture */
-		putbyte(buf, 7, v);
-		putbyte(buf, 8, 0);
-		putbyte(buf, 9, 0);
-		putbyte(buf, 10, 0);
-		putbyte(buf, 11, 0);
-		(void)sendpkt(buf, 8);
-		break;
-
 	    case 'l':				/* open logfile */
 		if (logfile != NULL) {
 		    (void)wprintw(debugwin, ">>> Logging to %s off", logfile);
@@ -1354,37 +1408,6 @@ int main (int argc, char **argv)
 
 		logfile = fopen(line+1,"a");
 		(void)wprintw(debugwin, ">>> Logging to %s on", logfile);
-		break;
-
-	    case 'n':				/* switch to NMEA */
-		putbyte(buf, 4,  0x81);			/* id */
-		putbyte(buf, 5,  0x02);			/* mode */
-		putbyte(buf, 6,  0x01);			/* GGA */
-		putbyte(buf, 7,  0x01);
-		putbyte(buf, 8,  0x01);			/* GLL */
-		putbyte(buf, 9,  0x01);
-		putbyte(buf, 10, 0x01);		  	/* GSA */
-		putbyte(buf, 11, 0x01);
-		putbyte(buf, 12, 0x05);			/* GSV */
-		putbyte(buf, 13, 0x01);
-		putbyte(buf, 14, 0x01);			/* RNC */
-		putbyte(buf, 15, 0x01);
-		putbyte(buf, 16, 0x01);			/* VTG */
-		putbyte(buf, 17, 0x01);
-		putbyte(buf, 18, 0x00);			/* unused fields */
-		putbyte(buf, 19, 0x01);
-		putbyte(buf, 20, 0x00);
-		putbyte(buf, 21, 0x01);
-		putbyte(buf, 22, 0x00);
-		putbyte(buf, 23, 0x01);
-		putbyte(buf, 24, 0x00);
-		putbyte(buf, 25, 0x01);
-		putbeword(buf, 26,bps);
-		(void)sendpkt(buf, 24);
-		goto quit;
-
-	    case 't':				/* poll navigation params */
-		dispmode = !dispmode;
 		break;
 
 	    case 'q':
