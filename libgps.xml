@@ -96,12 +96,12 @@ is probably the one you want.  The low-level interface is documented
 at
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
 
-<warning>The API described below may change incompatibly at API
+<warning><para>The API described below may change incompatibly at API
 version 4. Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
 force a compilation failure if the header is not exporting a version
 you recognize.  See the GPSD project website for more information on
-the protocol and API change.</warning>
+the protocol and API change.</para></warning>
 
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
