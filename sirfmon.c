@@ -88,6 +88,17 @@ static FILE *logfile;
 #define COMMAND_MATCH		1
 #define COMMAND_UNKNOWN		0
 
+struct mdevice_t {
+    /* capability table for device monitoring */
+    void (*probe)(void);
+    void (*analyze)(unsigned char [], size_t);
+    bool (*windows)(void);
+    void (*layout)(void);
+    void (*repaint)(bool);
+    int (*command)(char[]);
+    void (*speed)(int, int);
+};
+
 // SiRF-specific code will need this.
 extern bool sendpkt(unsigned char *buf, size_t len);
 
@@ -936,6 +947,16 @@ static void sirf_speed(int speed, int stopbits)
     (void)usleep(50000);
 }
 
+const struct mdevice_t sirf = {
+    .probe = sirf_probe,
+    .analyze = sirf_decode,
+    .windows = sirf_windows,
+    .layout = sirf_layout,
+    .repaint = sirf_refresh,
+    .command = sirf_command,
+    .speed = sirf_speed,
+};
+
 /*****************************************************************************
  *****************************************************************************
  *
@@ -1312,7 +1333,7 @@ int main (int argc, char **argv)
 
     /*@ -onlytrans @*/
     cmdwin    = newwin(2,  30, 22, 0);
-    if (!sirf_windows() || cmdwin==NULL)
+    if (!sirf.windows() || cmdwin==NULL)
 	goto quit;
 
     debugwin  = newwin(0,   0, 24, 0);
@@ -1320,7 +1341,7 @@ int main (int argc, char **argv)
     (void)wsetscrreg(debugwin, 0, LINES-21);
     /*@ +onlytrans @*/
 
-    sirf_layout();
+    sirf.layout();
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
     	display(cmdwin, 1, 0, "%s %4d N %d", session.gpsdata.gps_device, bps, stopbits);
@@ -1332,14 +1353,14 @@ int main (int argc, char **argv)
 
     FD_ZERO(&select_set);
 
-    sirf_probe();
+    sirf.probe();
 
     for (;;) {
 	(void)wmove(cmdwin, 0,0);
 	(void)wprintw(cmdwin, "cmd> ");
 	(void)wclrtoeol(cmdwin);
 	(void)refresh();
-	sirf_refresh(false);
+	sirf.repaint(false);
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
@@ -1359,7 +1380,7 @@ int main (int argc, char **argv)
 	    //(void)move(0,0);
 	    //(void)clrtoeol();
 	    //(void)refresh();
-	    sirf_refresh(true);
+	    sirf.repaint(true);
 	    (void)wrefresh(debugwin);
 	    (void)wrefresh(cmdwin);
 
@@ -1377,7 +1398,7 @@ int main (int argc, char **argv)
 	    while (*p != '\0' && isspace(*p))
 		p++;
 
-	    status = sirf_command(line);
+	    status = sirf.command(line);
 	    if (status == COMMAND_TERMINATE)
 		goto quit;
 	    else if (status == COMMAND_MATCH)
@@ -1393,7 +1414,7 @@ int main (int argc, char **argv)
 			    goto goodspeed;
 		    break;
 		goodspeed:
-		    sirf_speed(v, stopbits);
+		    sirf.speed(v, stopbits);
 		    (void)set_speed(bps = v, stopbits);
 		    display(cmdwin, 1, 0, "%s %d N %d", 
 			    session.gpsdata.gps_device,bps,stopbits);
@@ -1439,7 +1460,7 @@ int main (int argc, char **argv)
 	}
 
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    sirf_decode(session.packet.outbuffer,session.packet.outbuflen);
+	    sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
 	}
     }
     /*@ +nullpass @*/
