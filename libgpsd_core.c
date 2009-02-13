@@ -70,7 +70,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 /* initialize GPS polling */
 {
     /*@ -mayaliasunique @*/
-    (void)strlcpy(session->gpsdata.gps_device, device, PATH_MAX);
+    if (device != NULL)
+	(void)strlcpy(session->gpsdata.gps_device, device, PATH_MAX);
     /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
     session->rtcmtime = 0;

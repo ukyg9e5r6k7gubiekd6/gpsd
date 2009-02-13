@@ -3,10 +3,6 @@
  * GPS packet monitor, originally by Rob Janssen, PE1CHL.
  * Heavily hacked by Eric S. Raymond for use with the gpsd project.
  *
- * Autobauds.  The autobauding code is fairly primitive and can
- * sometimes fail to sync properly.  If that happens, just kill and
- * restart.
- *
  * Useful commands:
  *	l -- toggle packet logging
  *	b -- change baud rate.
@@ -38,6 +34,8 @@
 #include <fcntl.h>	/* for O_RDWR */
 #include <stdarg.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <sys/ioctl.h>	/* for O_RDWR */
 
 #include "gpsd_config.h"
 #ifdef HAVE_NCURSES_H
@@ -64,19 +62,15 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 
 #define BUFLEN		2048
 
-/* how many characters to look at when trying to find baud rate lock */
-#define SNIFF_RETRIES	1200
-
 static int controlfd = -1;
 static int gmt_offset;
-static bool serial;
-static unsigned int stopbits, bps;
+static bool serial, curses_active;
+static unsigned int stopbits;
 static int debuglevel = 0;
 
 static struct gps_context_t	context;
 static struct gps_device_t	session;
 
-static struct termios ttyset;
 static WINDOW *cmdwin, *debugwin;
 static FILE *logfile;
 
@@ -118,6 +112,8 @@ extern bool sendpkt(unsigned char *buf, size_t len);
  *****************************************************************************
  *****************************************************************************/
 
+extern const struct gps_type_t sirf_binary;
+
 #define START1		0xa0
 #define START2		0xa2
 #define END1		0xb0
@@ -150,52 +146,6 @@ static char *dgpsvec[] =
     "Beacon",
     "Software",
 };
-
-/*****************************************************************************
- *
- * NMEA command composition
- *
- *****************************************************************************/
-
-static void local_nmea_add_checksum(char *sentence)
-/* add NMEA checksum to a possibly  *-terminated sentence */
-{
-    unsigned char sum = '\0';
-    char c, *p = sentence;
-
-    if (*p == '$') {
-	p++;
-	while ( ((c = *p) != '*') && (c != '\0')) {
-	    sum ^= c;
-	    p++;
-	}
-	*p++ = '*';
-	(void)snprintf(p, 5, "%02X\r\n", (unsigned int)sum);
-    }
-}
-
-static int local_nmea_send(int fd, const char *fmt, ... )
-/* ship a command to the GPS, adding * and correct checksum */
-{
-    size_t status;
-    char buf[BUFLEN];
-    va_list ap;
-
-    va_start(ap, fmt) ;
-    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
-    va_end(ap);
-    (void)strlcat(buf, "*", BUFLEN);
-    local_nmea_add_checksum(buf);
-    (void)fputs("Sending: ", stderr);
-    (void)fputs(buf, stderr);		/* so user can watch the baud hunt */
-    status = (size_t)write(fd, buf, strlen(buf));
-    if (status == strlen(buf)) {
-	return (int)status;
-    } else {
-	perror("local_nmea_send");
-	return -1;
-    }
-}
 
 /*****************************************************************************
  *
@@ -769,53 +719,6 @@ static void sirf_probe(void)
     /*@ +compdef @*/
 }
 
-static int sirf_sniff(void)
-{
-    unsigned int	count, state;
-    int st;
-    unsigned char	c;
-
-    /* sniff for NMEA or SiRF packet */
-    state = 0;
-    for (count = 0; count < SNIFF_RETRIES; count++) {
-	if ((st = (int)read(session.gpsdata.gps_fd, &c, 1)) < 0)
-	    return 0;
-	else
-	    count += st;
-	/*@ +charint @*/
-	if (state == 0) {
-	    if (c == START1)
-		state = 1;
-	    else if (c == '$')
-		state = 2;
-	} else if (state == 1) {
-	    if (c == START2)
-		return SIRF_PACKET;
-	    else if (c == '$')
-		state = 2;
-	    else
-		state = 0;
-	} else if (state == 2) {
-	    if (c == 'G')
-		state = 3;
-	    else if (c == START1)
-		state = 1;
-	    else
-		state = 0;
-	} else if (state == 3) {
-	    if (c == 'P')
-		return NMEA_PACKET;
-	    else if (c == START1)
-		state = 1;
-	    else
-		state = 0;
-	}
-	/*@ -charint @*/
-    }
-
-    return BAD_PACKET;
-}
-
 static void sirf_refresh(bool inloop)
 {
     unsigned char buf[BUFLEN];
@@ -921,7 +824,7 @@ static int sirf_command(char line[])
 	putbyte(buf, 23, 0x01);
 	putbyte(buf, 24, 0x00);
 	putbyte(buf, 25, 0x01);
-	putbeword(buf, 26,bps);
+	putbeword(buf, 26, gpsd_get_speed(&session.ttyset));
 	(void)sendpkt(buf, 24);
 	return COMMAND_TERMINATE;		/* terminate */
 
@@ -965,110 +868,6 @@ const struct mdevice_t sirf = {
  *****************************************************************************
  *****************************************************************************/
 
-/*****************************************************************************
- *
- * Serial-line handling
- *
- *****************************************************************************/
-
-static unsigned int get_speed(struct termios* ttyctl)
-{
-    speed_t code = cfgetospeed(ttyctl);
-    switch (code) {
-    case B0:     return(0);
-    case B300:   return(300);
-    case B1200:  return(1200);
-    case B2400:  return(2400);
-    case B4800:  return(4800);
-    case B9600:  return(9600);
-    case B19200: return(19200);
-    case B38400: return(38400);
-    case B57600: return(57600);
-    default: return(115200);
-    }
-}
-
-static int set_speed(unsigned int speed, unsigned int stopbits)
-{
-    unsigned int	rate;
-    int bps;
-
-    (void)tcflush(session.gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
-
-    if (speed != 0) {
-	/*@ +ignoresigns @*/
-	if (speed < 300)
-	    rate = 0;
-	else if (speed < 1200)
-	    rate =  B300;
-	else if (speed < 2400)
-	    rate =  B1200;
-	else if (speed < 4800)
-	    rate =  B2400;
-	else if (speed < 9600)
-	    rate =  B4800;
-	else if (speed < 19200)
-	    rate =  B9600;
-	else if (speed < 38400)
-	    rate =  B19200;
-	else if (speed < 57600)
-	    rate =  B38400;
-	else
-	    rate =  B57600;
-	/*@ -ignoresigns @*/
-
-	/*@ ignore @*/
-	(void)cfsetispeed(&ttyset, (speed_t)rate);
-	(void)cfsetospeed(&ttyset, (speed_t)rate);
-	/*@ end @*/
-    }
-    ttyset.c_cflag &=~ CSIZE;
-    ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-    if (tcsetattr(session.gpsdata.gps_fd, TCSANOW, &ttyset) != 0)
-	return -1;
-    (void)tcflush(session.gpsdata.gps_fd, TCIOFLUSH);
-
-    bps = get_speed(&ttyset);
-    (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
-	    bps, 9-stopbits, stopbits);
-    return bps;
-}
-
-static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
-
-static unsigned int hunt_open(unsigned int *pstopbits)
-{
-    unsigned int trystopbits;
-    int st;
-    /*
-     * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
-     * 200 (and possibly other USB GPSes) gets completely hosed
-     * in the presence of flow control.  Thus, turn off CRTSCTS.
-     */
-    ttyset.c_cflag &= ~(PARENB | CRTSCTS);
-    ttyset.c_cflag |= CREAD | CLOCAL;
-    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
-    ttyset.c_oflag = (ONLCR);
-
-    for (trystopbits = 1; trystopbits <= 2; trystopbits++) {
-	*pstopbits = trystopbits;
-	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
-	    if ((bps = set_speed(*ip, stopbits)) == -1)
-		continue;
-	    if ((st = sirf_sniff()) == BAD_PACKET)
-		continue;
-	    if (st == SIRF_PACKET)
-		return bps;
-	    else if (st == NMEA_PACKET) {
-		(void)fprintf(stderr, "Switching to SiRF mode...\n");
-		(void)local_nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", bps);
-		return bps;
-	    }
-	}
-    }
-    return 0;
-}
-
 /******************************************************************************
  *
  * Device-independent I/O routines
@@ -1079,12 +878,13 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
     if (errlevel <= debuglevel) {
-	char buf[BUFSIZ];
 	va_list ap;
 	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (!curses_active)
+	    (void)vprintf(fmt, ap);
+	else
+	    (void)wprintw(debugwin, fmt, ap);
 	va_end(ap);
-	(void)wprintw(debugwin, fmt, ap);
     }
 }
 
@@ -1094,7 +894,7 @@ static ssize_t readpkt(void)
     /*@ -type -shiftnegative -compdef -nullpass @*/
     struct timeval timeval;
     fd_set select_set;
-    ssize_t len;
+    gps_mask_t changed;
 
     FD_ZERO(&select_set);
     FD_SET(session.gpsdata.gps_fd,&select_set);
@@ -1110,8 +910,8 @@ static ssize_t readpkt(void)
 
     (void)usleep(100000);
 
-    len = packet_get(session.gpsdata.gps_fd, &session.packet);
-    if (len <= 0)
+    changed = gpsd_poll(&session);
+    if (changed & ERROR_SET)
 	return EOF;
 
     if (logfile != NULL) {
@@ -1121,7 +921,7 @@ static ssize_t readpkt(void)
 		      logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
-    return len;
+    return session.packet.outbuflen;
     /*@ +type +shiftnegative +compdef +nullpass @*/
 }
 /*@ +globstate @*/
@@ -1204,6 +1004,26 @@ static void command(char buf[], size_t len, const char *fmt, ... )
 	    buf[strlen(buf)-1] = '\0';
     }
 }
+
+/*@ -noret @*/
+static gps_mask_t get_packet(struct gps_device_t *session)
+/* try to get a well-formed packet from the GPS */
+{
+    gps_mask_t fieldmask;
+
+    for (;;) {
+	int waiting = 0;
+	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
+	if (waiting == 0) {
+	    (void)usleep(300);
+	    continue;
+	}
+	fieldmask = gpsd_poll(session);
+	if ((fieldmask &~ ONLINE_SET)!=0)
+	    return fieldmask;
+    }
+}
+/*@ +noret @*/
 
 static jmp_buf assertbuf;
 
@@ -1295,17 +1115,63 @@ int main (int argc, char **argv)
 	/*@ +compdef @*/
 	serial = false;
     } else {
+	int seq;
+
 	(void)strlcpy(session.gpsdata.gps_device, arg, PATH_MAX);
-	if ((controlfd = session.gpsdata.gps_fd = open(arg,O_RDWR)) < 0) {
-	    perror(arg);
+	if (gpsd_activate(&session, false) == -1) {
+	    gpsd_report(LOG_ERROR,
+			  "activation of device %s failed, errno=%d\n",
+			  session.gpsdata.gps_device, errno);
+	    exit(2);
+	}
+	/* hunt for packet type and serial parameters */
+	for (seq = 1; session.device_type == NULL; seq++) {
+	    gps_mask_t status = get_packet(&session);
+
+	    if (status & ERROR_SET) {
+		gpsd_report(LOG_ERROR,
+			    "autodetection failed.\n");
+		exit(2);
+	    } else if (status & ONLINE_SET) {
+		gpsd_report(LOG_IO,
+			    "autodetection after %d reads.\n", seq);
+		break;
+	    }
+	}
+	gpsd_report(LOG_PROG, "%s looks like a %s at %d.\n",
+		    session.gpsdata.gps_device, 
+		    gpsd_id(&session), session.gpsdata.baudrate);
+
+	/* This will change when we support more types */
+	if (session.packet.type == NMEA_PACKET) {
+	    sirf_binary.mode_switcher(&session, MODE_BINARY);
+	    gpsd_report(LOG_PROG, "switching to SiRF binary mode.\n");
+	} else if (session.packet.type != SIRF_PACKET) {
+	    gpsd_report(LOG_ERROR, "cannot yet handle packet type %d.\n",
+		       session.packet.type);
 	    exit(1);
 	}
 
-	/* Save original terminal parameters */
-	if (tcgetattr(session.gpsdata.gps_fd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
-	    (void)fputs("Can't sync up with device!\n", stderr);
-	    exit(1);
+	/* 
+	 * If we've identified this as an NMEA device, we have to eat
+	 * packets for a while to see if one of our probes elicits an
+	 * ID response telling us that it's really a SiRF or
+	 * something.  If so, the libgpsd(3) layer will automatically
+	 * redispatch to the correct driver type.
+	 */
+#define REDIRECT_SNIFF 12
+	if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
+	    int dummy;
+	    for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
+		if ((get_packet(&session) & DEVICEID_SET)!=0)
+		    break;
+	    }
 	}
+	gpsd_report(LOG_SHOUT, "%s identified as a %s at %d.\n",
+		    session.gpsdata.gps_device, 
+		    gpsd_id(&session), session.gpsdata.baudrate);
+
+	controlfd = session.gpsdata.gps_fd;
 	serial = true;
     }
     /*@ +boolops */
@@ -1326,6 +1192,7 @@ int main (int argc, char **argv)
     (void)noecho();
     (void)intrflush(stdscr, FALSE);
     (void)keypad(stdscr, true);
+    curses_active = true;
 
     /*@ -onlytrans @*/
     cmdwin    = newwin(2,  30, 22, 0);
@@ -1340,7 +1207,8 @@ int main (int argc, char **argv)
     sirf.layout();
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
-    	display(cmdwin, 1, 0, "%s %4d N %d", session.gpsdata.gps_device, bps, stopbits);
+    	display(cmdwin, 1, 0, "%s %4d N %d", session.gpsdata.gps_device, 
+		gpsd_get_speed(&session.ttyset), stopbits);
     else
 	display(cmdwin, 1, 0, "%s:%s:%s", server, port, session.gpsdata.gps_device);
     (void)wattrset(cmdwin, A_NORMAL);
@@ -1405,15 +1273,10 @@ int main (int argc, char **argv)
 	    case 'b':
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
-		    for (ip=rates; ip<rates+sizeof(rates)/sizeof(rates[0]);ip++)
-			if (v == *ip)
-			    goto goodspeed;
-		    break;
-		goodspeed:
 		    sirf.speed(v, stopbits);
-		    (void)set_speed(bps = v, stopbits);
+		    (void)gpsd_set_speed(&session, v, 0, stopbits);
 		    display(cmdwin, 1, 0, "%s %d N %d", 
-			    session.gpsdata.gps_device,bps,stopbits);
+			    session.gpsdata.gps_device, v ,stopbits);
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
