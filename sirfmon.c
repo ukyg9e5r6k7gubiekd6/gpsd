@@ -1206,8 +1206,11 @@ int main (int argc, char **argv)
     sirf.layout();
     (void)wattrset(cmdwin, A_BOLD);
     if (serial)
-    	display(cmdwin, 1, 0, "%s %4d N 1", session.gpsdata.gps_device, 
-		gpsd_get_speed(&session.ttyset));
+    	display(cmdwin, 1, 0, "%s %4d %c %d", 
+		session.gpsdata.gps_device, 
+		gpsd_get_speed(&session.ttyset),
+		session.gpsdata.parity, 
+		session.gpsdata.stopbits);
     else
 	display(cmdwin, 1, 0, "%s:%s:%s", server, port, session.gpsdata.gps_device);
     (void)wattrset(cmdwin, A_NORMAL);
@@ -1273,10 +1276,14 @@ int main (int argc, char **argv)
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
 		    sirf.speed(v, 1);
-		    (void)gpsd_set_speed(&session, v, 0, 1);
+		    (void)gpsd_set_speed(&session, v, 
+					 session.gpsdata.parity, 
+					 session.gpsdata.stopbits);
 		    (void)wattrset(cmdwin, A_BOLD);
-		    display(cmdwin, 1, 0, "%s %4d N 1", 
-			    session.gpsdata.gps_device, v);
+		    display(cmdwin, 1, 0, "%s %4d %c %d", 
+			    session.gpsdata.gps_device, v,
+					 session.gpsdata.parity, 
+					 session.gpsdata.stopbits);
 		    (void)wattrset(cmdwin, A_NORMAL);
 		} else {
 		    line[0] = 'b';
