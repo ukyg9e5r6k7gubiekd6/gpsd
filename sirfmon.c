@@ -70,7 +70,7 @@ static int debuglevel = 0;
 static struct gps_context_t	context;
 static struct gps_device_t	session;
 
-static WINDOW *cmdwin, *debugwin;
+static WINDOW *statwin, *cmdwin, *debugwin;
 static FILE *logfile;
 
 #define display	(void)mvwprintw
@@ -584,14 +584,14 @@ static bool sirf_windows(void)
 {
     unsigned int i;
 
-    mid2win   = newwin(7,  80,  0, 0);
-    mid4win   = newwin(15, 30,  7, 0);
-    mid6win   = newwin(3,  50,  7, 30);
-    mid7win   = newwin(4,  50, 10, 30);
-    mid9win   = newwin(3,  50, 14, 30);
-    mid13win  = newwin(3,  50, 17, 30);
-    mid19win  = newwin(16, 50,  7, 30);
-    mid27win  = newwin(3,  50, 20, 30);
+    mid2win   = newwin(7,  80,  1, 0);
+    mid4win   = newwin(15, 30,  8, 0);
+    mid6win   = newwin(3,  50,  8, 30);
+    mid7win   = newwin(4,  50, 11, 30);
+    mid9win   = newwin(3,  50, 15, 30);
+    mid13win  = newwin(3,  50, 18, 30);
+    mid19win  = newwin(16, 50,  8, 30);
+    mid27win  = newwin(3,  50, 21, 30);
     if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
 	|| mid13win==NULL || mid19win==NULL || mid27win==NULL)
 	return false;
@@ -1192,7 +1192,8 @@ int main (int argc, char **argv)
     curses_active = true;
 
     /*@ -onlytrans @*/
-    cmdwin    = newwin(2,  30, 22, 0);
+    statwin   = newwin(1,  30, 0, 0);
+    cmdwin    = newwin(1,  0,  0, 30);
     if (!sirf.windows() || cmdwin==NULL)
 	goto quit;
 
@@ -1201,17 +1202,6 @@ int main (int argc, char **argv)
     (void)wsetscrreg(debugwin, 0, LINES-21);
     /*@ +onlytrans @*/
 
-    (void)wattrset(cmdwin, A_BOLD);
-    if (serial)
-    	display(cmdwin, 1, 0, "%s %4d %c %d", 
-		session.gpsdata.gps_device, 
-		gpsd_get_speed(&session.ttyset),
-		session.gpsdata.parity, 
-		session.gpsdata.stopbits);
-    else
-	display(cmdwin, 1, 0, "%s:%s:%s", server, port, session.gpsdata.gps_device);
-    (void)wattrset(cmdwin, A_NORMAL);
-
     (void)wmove(debugwin,0, 0);
 
     FD_ZERO(&select_set);
@@ -1219,6 +1209,18 @@ int main (int argc, char **argv)
     sirf.probe();
 
     for (;;) {
+	(void)wattrset(statwin, A_BOLD);
+	if (serial)
+	    display(statwin, 0, 0, "%s %4d %c %d", 
+		    session.gpsdata.gps_device, 
+		    gpsd_get_speed(&session.ttyset),
+		    session.gpsdata.parity, 
+		    session.gpsdata.stopbits);
+	else
+	    display(statwin, 0, 0, "%s:%s:%s", 
+		    server, port, session.gpsdata.gps_device);
+	(void)wattrset(statwin, A_NORMAL);
+	(void)wrefresh(statwin);
 	(void)wmove(cmdwin, 0,0);
 	(void)wprintw(cmdwin, "cmd> ");
 	(void)wclrtoeol(cmdwin);
@@ -1276,12 +1278,6 @@ int main (int argc, char **argv)
 		    (void)gpsd_set_speed(&session, v, 
 					 session.gpsdata.parity, 
 					 session.gpsdata.stopbits);
-		    (void)wattrset(cmdwin, A_BOLD);
-		    display(cmdwin, 1, 0, "%s %4d %c %d", 
-			    session.gpsdata.gps_device, v,
-					 session.gpsdata.parity, 
-					 session.gpsdata.stopbits);
-		    (void)wattrset(cmdwin, A_NORMAL);
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
