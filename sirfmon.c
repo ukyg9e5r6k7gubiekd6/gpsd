@@ -592,8 +592,9 @@ static bool sirf_windows(void)
     mid13win  = newwin(3,  50, 17, 30);
     mid19win  = newwin(16, 50,  7, 30);
     mid27win  = newwin(3,  50, 20, 30);
-    //mid2win!=NULL || mid4win!=NULL || mid6win!=NULL || mid9win!=NULL
-    //|| mid13win!=NULL || mid19win!=NULL || mid27win!=NULL;
+    if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
+	|| mid13win==NULL || mid19win==NULL || mid27win==NULL)
+	return false;
 
     /*@ -nullpass @*/
     (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
