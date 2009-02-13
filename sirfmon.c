@@ -814,6 +814,28 @@ static void sirf_refresh(bool inloop)
 	(void)wrefresh(mid19win);
 }
 
+static size_t sirf_packet_wrap(unsigned char *buf, size_t len)
+{
+    unsigned int csum;
+    size_t i;
+
+    putbyte(buf, 0, START1);			/* start of packet */
+    putbyte(buf, 1, START2);
+    putbeword(buf, 2, len);			/* length */
+
+    csum = 0;
+    for (i = 0; i < len; i++)
+	csum += (int)buf[4 + i];
+
+    csum &= 0x7fff;
+    putbeword(buf, len+4, csum);			/* checksum */
+    putbyte(buf, len + 6,END1);			/* end of packet */
+    putbyte(buf, len + 7,END2);
+    len += 8;
+
+    return len;
+}
+
 /*****************************************************************************
  *****************************************************************************
  *
@@ -998,23 +1020,10 @@ static ssize_t readpkt(void)
 
 bool sendpkt(unsigned char *buf, size_t len)
 {
-    unsigned int csum;
     ssize_t st;
     size_t i;
 
-    putbyte(buf, 0, START1);			/* start of packet */
-    putbyte(buf, 1, START2);
-    putbeword(buf, 2, len);			/* length */
-
-    csum = 0;
-    for (i = 0; i < len; i++)
-	csum += (int)buf[4 + i];
-
-    csum &= 0x7fff;
-    putbeword(buf, len+4, csum);			/* checksum */
-    putbyte(buf, len + 6,END1);			/* end of packet */
-    putbyte(buf, len + 7,END2);
-    len += 8;
+    len = sirf_packet_wrap(buf, len);
 
     (void)wprintw(debugwin, ">>>");
     for (i = 0; i < len; i++)
