@@ -138,13 +138,13 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
     /*@ -charint -matchanyintegral +initallelements @*/
 }
 
-static bool sirf_speed(int ttyfd, speed_t speed)
+static bool sirf_speed(int ttyfd, speed_t speed, int stopbits)
 /* change speed in binary mode */
 {
     /*@ +charint @*/
    static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
-		     0x86,
-		     0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
+		     0x86,			/* set main serial port */
+		     0x00, 0x00, 0x12, 0xc0,	/* 4800 bps */
 		     0x08,			/* 8 data bits */
 		     0x01,			/* 1 stop bit */
 		     0x00,			/* no parity */
@@ -154,6 +154,8 @@ static bool sirf_speed(int ttyfd, speed_t speed)
 
    msg[7] = (unsigned char)HI(speed);
    msg[8] = (unsigned char)LO(speed);
+   msg[10] = stopbits;
+   //msg[11] = parity;
    return (sirf_write(ttyfd, msg));
 }
 
@@ -984,7 +986,15 @@ static void sirfbin_revert(struct gps_device_t *session)
 
 static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 {
-    return sirf_speed(session->gpsdata.gps_fd, speed);
+    /*
+     * FIXME: Someday, decode the N/O/E parity char in 
+     * session->gpsdata.stopbits and use rthat to set parirty too.  
+     * Not that it's likely to matter, as these always run at 8N1.
+     * But on the off chance some systenms integrator does a wacky thing...
+     */
+    return sirf_speed(session->gpsdata.gps_fd, 
+		      speed,
+		      session->gpsdata.stopbits);
 }
 
 /* this is everything we export */
