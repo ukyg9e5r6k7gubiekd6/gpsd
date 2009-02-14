@@ -182,9 +182,9 @@ MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
-<para>The logic for hunting the GPS's baud rate is vulnerable to
-various sorts of RS232 flakiness. If it hangs for longer than a few
-seconds, kill the program and restart.</para>
+<para>The debug window dump of a control message send to the GPS
+(preceded by '>>>') is payload only, and will not include 
+framing header/trailer bytes or the checksum.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

@@ -92,7 +92,7 @@ struct mdevice_t {
 };
 
 // SiRF-specific code will need this.
-extern bool sendpkt(unsigned char *buf, size_t len);
+extern bool monitor_control_send(unsigned char *buf, size_t len);
 
 /*****************************************************************************
  *****************************************************************************
@@ -111,11 +111,6 @@ extern bool sendpkt(unsigned char *buf, size_t len);
  *****************************************************************************/
 
 extern const struct gps_type_t sirf_binary;
-
-#define START1		0xa0
-#define START2		0xa2
-#define END1		0xb0
-#define END2		0xb3
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
@@ -707,25 +702,17 @@ static bool sirf_windows(void)
 
 static void sirf_probe(void)
 {
-    unsigned char buf[BUFLEN];
-
     /* probe for version */
-    putbyte(buf, 4, 0x84);
-    putbyte(buf, 5, 0x0);
     /*@ -compdef @*/
-    (void)sendpkt(buf, 2);
+    (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
     /*@ +compdef @*/
 }
 
 static void sirf_refresh(bool inloop)
 {
-    unsigned char buf[BUFLEN];
-
     /* refresh navigation parameters */
     if (dispmode && (time(NULL) % 10 == 0)){
-	putbyte(buf, 4,0x98);
-	putbyte(buf, 5,0x00);
-	(void)sendpkt(buf, 2);
+	(void)monitor_control_send((unsigned char *)"\x98\x00", 2);
     }
 
     (void)wrefresh(mid2win);
@@ -741,28 +728,6 @@ static void sirf_refresh(bool inloop)
 	(void)wrefresh(mid19win);
 }
 
-static size_t sirf_packet_wrap(unsigned char *buf, size_t len)
-{
-    unsigned int csum;
-    size_t i;
-
-    putbyte(buf, 0, START1);			/* start of packet */
-    putbyte(buf, 1, START2);
-    putbeword(buf, 2, len);			/* length */
-
-    csum = 0;
-    for (i = 0; i < len; i++)
-	csum += (int)buf[4 + i];
-
-    csum &= 0x7fff;
-    putbeword(buf, len+4, csum);			/* checksum */
-    putbyte(buf, len + 6,END1);			/* end of packet */
-    putbyte(buf, len + 7,END2);
-    len += 8;
-
-    return len;
-}
-
 static int sirf_command(char line[])
 {
     unsigned char buf[BUFSIZ];
@@ -772,58 +737,58 @@ static int sirf_command(char line[])
     {
     case 'a':			/* toggle 50bps subframe data */
 	(void)memset(buf, '\0', sizeof(buf));
-	putbyte(buf, 4, 0x80);
-	putbyte(buf, 27, 12);
-	putbyte(buf, 28, subframe_enabled ? 0x00 : 0x10);
-	(void)sendpkt(buf, 25);
+	putbyte(buf, 0, 0x80);
+	putbyte(buf, 23, 12);
+	putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
+	(void)monitor_control_send(buf, 25);
 	return COMMAND_MATCH;
 
     case 'c':			/* static navigation */
-	putbyte(buf, 4,0x8f);			/* id */
-	putbyte(buf, 5, atoi(line+1));
-	(void)sendpkt(buf, 2);
+	putbyte(buf, 0,0x8f);			/* id */
+	putbyte(buf, 1, atoi(line+1));
+	(void)monitor_control_send(buf, 2);
 	return COMMAND_MATCH;
 
     case 'd':		/* MID 4 rate change -- not documented */
 	v = (unsigned)atoi(line+1);
 	if (v > 30)
 	    return COMMAND_MATCH;
-	putbyte(buf, 4,0xa6);
-	putbyte(buf, 5,0);
-	putbyte(buf, 6, 4);	/* satellite picture */
-	putbyte(buf, 7, v);
-	putbyte(buf, 8, 0);
-	putbyte(buf, 9, 0);
-	putbyte(buf, 10, 0);
-	putbyte(buf, 11, 0);
-	(void)sendpkt(buf, 8);
+	putbyte(buf, 0,0xa6);
+	putbyte(buf, 1,0);
+	putbyte(buf, 2, 4);	/* satellite picture */
+	putbyte(buf, 3, v);
+	putbyte(buf, 4, 0);
+	putbyte(buf, 5, 0);
+	putbyte(buf, 6, 0);
+	putbyte(buf, 7, 0);
+	(void)monitor_control_send(buf, 8);
 	return COMMAND_MATCH;
 
     case 'n':			/* switch to NMEA */
-	putbyte(buf, 4,  0x81);			/* id */
-	putbyte(buf, 5,  0x02);			/* mode */
-	putbyte(buf, 6,  0x01);			/* GGA */
-	putbyte(buf, 7,  0x01);
-	putbyte(buf, 8,  0x01);			/* GLL */
-	putbyte(buf, 9,  0x01);
-	putbyte(buf, 10, 0x01);		  	/* GSA */
+	putbyte(buf, 0,  0x81);			/* id */
+	putbyte(buf, 1,  0x02);			/* mode */
+	putbyte(buf, 2,  0x01);			/* GGA */
+	putbyte(buf, 3,  0x01);
+	putbyte(buf, 4,  0x01);			/* GLL */
+	putbyte(buf, 5,  0x01);
+	putbyte(buf, 6, 0x01);		  	/* GSA */
+	putbyte(buf, 7, 0x01);
+	putbyte(buf, 8, 0x05);			/* GSV */
+	putbyte(buf, 9, 0x01);
+	putbyte(buf, 10, 0x01);			/* RNC */
 	putbyte(buf, 11, 0x01);
-	putbyte(buf, 12, 0x05);			/* GSV */
+	putbyte(buf, 12, 0x01);			/* VTG */
 	putbyte(buf, 13, 0x01);
-	putbyte(buf, 14, 0x01);			/* RNC */
+	putbyte(buf, 14, 0x00);			/* unused fields */
 	putbyte(buf, 15, 0x01);
-	putbyte(buf, 16, 0x01);			/* VTG */
+	putbyte(buf, 16, 0x00);
 	putbyte(buf, 17, 0x01);
-	putbyte(buf, 18, 0x00);			/* unused fields */
+	putbyte(buf, 18, 0x00);
 	putbyte(buf, 19, 0x01);
 	putbyte(buf, 20, 0x00);
 	putbyte(buf, 21, 0x01);
-	putbyte(buf, 22, 0x00);
-	putbyte(buf, 23, 0x01);
-	putbyte(buf, 24, 0x00);
-	putbyte(buf, 25, 0x01);
-	putbeword(buf, 26, gpsd_get_speed(&session.ttyset));
-	(void)sendpkt(buf, 24);
+	putbeword(buf, 22, gpsd_get_speed(&session.ttyset));
+	(void)monitor_control_send(buf, 24);
 	return COMMAND_TERMINATE;		/* terminate */
 
     case 't':			/* poll navigation params */
@@ -909,13 +874,12 @@ static ssize_t readpkt(void)
 }
 /*@ +globstate @*/
 
-bool sendpkt(unsigned char *buf, size_t len)
+bool monitor_control_send(unsigned char *buf, size_t len)
 {
     ssize_t st;
     size_t i;
 
-    len = sirf_packet_wrap(buf, len);
-
+    /* bug: the debug window dump is payload only */
     (void)wprintw(debugwin, ">>>");
     for (i = 0; i < len; i++)
 	(void)wprintw(debugwin, " %02x",buf[i]);
@@ -924,19 +888,31 @@ bool sendpkt(unsigned char *buf, size_t len)
     if (controlfd == -1) 
 	return false;
     else {
+	int savefd;
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
 	    assert(write(controlfd, session.gpsdata.gps_device, strlen(session.gpsdata.gps_device)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
+	    /*
+	     * Ugh...temporarily con the libgpsd layer into using the
+	     * socket descriptor.
+	     */
+	    savefd = session.gpsdata.gps_fd;
+	    session.gpsdata.gps_fd = controlfd;
 	}
-	st = write(controlfd, buf, len);
-	if (!serial)
+
+	len = sirf.driver->control_send(&session, (char *)buf, len);
+
+	if (!serial) {
+	    /* stop pretending now */
+	    session.gpsdata.gps_fd = controlfd;
 	    /* enough room for "ERROR\r\n\0" */
 	    /*@ -sefparams @*/
 	    assert(read(controlfd, buf, 8) != -1);
 	    /*@ +sefparams @*/
+	}
 	return ((size_t)st == len);
     }
 }
@@ -1331,7 +1307,7 @@ int main (int argc, char **argv)
 			p++;
 		}
 
-		(void)sendpkt(buf, (size_t)len);
+		(void)monitor_control_send(buf, (size_t)len);
 		break;
 	    }
 	}
