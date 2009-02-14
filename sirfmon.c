@@ -88,6 +88,7 @@ struct mdevice_t {
     bool (*windows)(void);
     void (*repaint)(bool);
     int (*command)(char[]);
+    int min_y, min_x;
     const struct gps_type_t *driver;
 };
 
@@ -805,6 +806,7 @@ const struct mdevice_t sirf = {
     .windows = sirf_windows,
     .repaint = sirf_refresh,
     .command = sirf_command,
+    .min_y = 23, .min_x = 80,
     .driver = &sirf_binary,
 };
 
@@ -1173,7 +1175,7 @@ int main (int argc, char **argv)
     if (!sirf.windows() || cmdwin==NULL)
 	goto quit;
 
-    debugwin  = newwin(0,   0, 24, 0);
+    debugwin  = newwin(0,   0, sirf.min_y+1, 0);
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);
     /*@ +onlytrans @*/
@@ -1299,15 +1301,17 @@ int main (int argc, char **argv)
 		while (*p != '\0')
 		{
 		    (void)sscanf(p,"%x",&v);
-		    putbyte(buf, len,v);
+		    putbyte(buf, len, v);
 		    len++;
 		    while (*p != '\0' && !isspace(*p))
 			p++;
 		    while (*p != '\0' && isspace(*p))
 			p++;
 		}
-
-		(void)monitor_control_send(buf, (size_t)len);
+		if (sirf.driver->control_send != NULL)
+		    (void)monitor_control_send(buf, (size_t)len);
+		else
+		    error_and_pause("Device type has no control-send method.");
 		break;
 	    }
 	}
