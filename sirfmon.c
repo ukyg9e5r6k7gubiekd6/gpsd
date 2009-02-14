@@ -88,7 +88,7 @@ struct mdevice_t {
     bool (*windows)(void);
     void (*repaint)(bool);
     int (*command)(char[]);
-    void (*speed)(int, int);
+    const struct gps_type_t *driver;
 };
 
 // SiRF-specific code will need this.
@@ -834,27 +834,13 @@ static int sirf_command(char line[])
     return COMMAND_UNKNOWN;	/* no match */
 }
 
-static void sirf_speed(int speed, int stopbits)
-{
-    unsigned char buf[BUFLEN];
-
-    putbyte(buf, 4, 0x86);
-    putbelong(buf, 5, speed);		/* new baud rate */
-    putbyte(buf, 9, 8);		/* 8 data bits */
-    putbyte(buf, 10, stopbits);	/* 1 stop bit */
-    putbyte(buf, 11, 0);		/* no parity */
-    putbyte(buf, 12, 0);		/* reserved */
-    (void)sendpkt(buf, 9);
-    (void)usleep(50000);
-}
-
 const struct mdevice_t sirf = {
     .probe = sirf_probe,
     .analyze = sirf_analyze,
     .windows = sirf_windows,
     .repaint = sirf_refresh,
     .command = sirf_command,
-    .speed = sirf_speed,
+    .driver = &sirf_binary,
 };
 
 /*****************************************************************************
@@ -1000,6 +986,20 @@ static void command(char buf[], size_t len, const char *fmt, ... )
 	while (isspace(buf[strlen(buf)-1]))
 	    buf[strlen(buf)-1] = '\0';
     }
+}
+
+static void error_and_pause(const char *fmt, ...) 
+{
+    va_list ap;
+    va_start(ap, fmt);
+    (void)wmove(cmdwin, 0, 5);
+    (void)wclrtoeol(cmdwin);
+    (void)wattrset(cmdwin, A_BOLD | A_BLINK);
+    (void)wprintw(cmdwin, fmt, ap);
+    (void)wattrset(cmdwin, A_NORMAL);
+    (void)wrefresh(cmdwin);
+    (void)wgetch(cmdwin);
+    va_end(ap);
 }
 
 /*@ -noret @*/
@@ -1274,10 +1274,27 @@ int main (int argc, char **argv)
 	    case 'b':
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
-		    sirf.speed(v, 1);
-		    (void)gpsd_set_speed(&session, v, 
+		    /* Ugh...should have a controlfd slot 
+		     * in the session structure, really
+		     */
+		    if (sirf.driver->speed_switcher) {
+			int dfd = session.gpsdata.gps_fd;
+			session.gpsdata.gps_fd = controlfd;
+			sirf.driver->speed_switcher(&session, v);
+			/*
+			 * See the comment attached to the 'B' command in gpsd.
+			 * Allow the control string time to register at the
+			 * GPS before we do the baud rate switch, which
+			 * effectively trashes the UART's buffer.
+			 */
+			(void)tcdrain(session.gpsdata.gps_fd);
+			(void)usleep(50000);
+			session.gpsdata.gps_fd = dfd;
+			(void)gpsd_set_speed(&session, v, 
 					 session.gpsdata.parity, 
 					 session.gpsdata.stopbits);
+		    } else
+			error_and_pause("Device type has no speed switcher");
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
