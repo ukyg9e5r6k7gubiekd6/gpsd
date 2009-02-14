@@ -66,12 +66,8 @@ strings.  You must specify a valid pathname of a Unix-domain socket on
 your local filesystem.</para>
 
 <para>The -D option enables packet-getter debugging output and is
-probably only useful to developers of thus code.  Consult the
+probably only useful to developers of the GPSD code.  Consult the
 packet-getter source code for relevant values.</para>
-
-<para> You will probably need to be root to run this program, as the
-serial devices and control socket it uses are normally
-privileged.</para>
 
 <para>After startup, the top part of the screen reports the contents
 of several especially interesting packet types.  The bottom half of
@@ -184,7 +180,8 @@ MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
 
 <para>The debug window dump of a control message send to the GPS
 (preceded by '>>>') is payload only, and will not include 
-framing header/trailer bytes or the checksum.</para>
+framing header/trailer bytes or the checksum.  Baud-rate
+change strings aren't displayed at all.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
