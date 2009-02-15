@@ -475,36 +475,41 @@ void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t le
     /*@ -charint */
 }
 
-bool ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len) {
+bool ubx_write(struct gps_device_t *session, 
+	       unsigned int msg_class, unsigned int msg_id, 
+	       unsigned char *msg, unsigned short data_len) 
+{
    unsigned char CK_A, CK_B;
-   unsigned char head_tail[8];
-   ssize_t i, count;
+   ssize_t i, count, msgbuflen;
    bool      ok;
+   char msgbuf[MAX_PACKET_LENGTH+7];
 
    /*@ -type @*/
-   head_tail[0] = 0xb5;
-   head_tail[1] = 0x62;
+   msgbuf[0] = 0xb5;
+   msgbuf[1] = 0x62;
+
+   CK_A = CK_B = 0;
+   msgbuf[2] = msg_class;
+   msgbuf[3] = msg_id;
+   msgbuf[4] = data_len & 0xff;
+   msgbuf[5] = (data_len >> 8) & 0xff;
+
+   (void)memcpy(&msgbuf[6], msg, data_len);
 
    /* calculate CRC */
-   CK_A = CK_B = 0;
-   head_tail[2] = msg_class;
-   head_tail[3] = msg_id;
-   head_tail[4] = data_len & 0xff;
-   head_tail[5] = (data_len >> 8) & 0xff;
-
    for (i = 2; i < 6; i++) {
-	CK_A += head_tail[i];
+	CK_A += msgbuf[i];
 	CK_B += CK_A;
    }
-
    /*@ -nullderef @*/
    for (i = 0; i < data_len; i++) {
 	CK_A += msg[i];
 	CK_B += CK_A;
    }
 
-   head_tail[6] = CK_A;
-   head_tail[7] = CK_B;
+   msgbuf[6 + data_len] = CK_A;
+   msgbuf[7 + data_len] = CK_B;
+   msgbuflen = data_len + 7;
    /*@ +type @*/
 
    gpsd_report(LOG_IO,
@@ -514,17 +519,10 @@ bool ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned in
        CK_A, CK_B);
 
    assert(msg != NULL || data_len == 0);
-   count = write(session->gpsdata.gps_fd, head_tail, 6);
+   count = write(session->gpsdata.gps_fd, 
+		 msgbuf, msgbuflen);
    (void)tcdrain(session->gpsdata.gps_fd);
-   if(data_len)
-       /*@ -nullpass @*/
-       count += write(session->gpsdata.gps_fd, msg, (size_t)data_len);
-       /*@ +nullpass @*/
-   (void)tcdrain(session->gpsdata.gps_fd);
-   count += write(session->gpsdata.gps_fd, &head_tail[6], 2);
-
-   ok = (count == ((ssize_t)data_len + 8));
-   (void)tcdrain(session->gpsdata.gps_fd);
+   ok = (count == (ssize_t)msgbuflen);
    /*@ +nullderef @*/
    return(ok);
 }
