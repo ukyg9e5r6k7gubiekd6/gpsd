@@ -480,8 +480,9 @@ bool ubx_write(struct gps_device_t *session,
 	       unsigned char *msg, unsigned short data_len) 
 {
    unsigned char CK_A, CK_B;
-   ssize_t i, count, msgbuflen;
+   ssize_t i, count;
    bool      ok;
+   size_t msgbuflen;
    char msgbuf[MAX_PACKET_LENGTH+7];
 
    /*@ -type @*/
@@ -494,7 +495,9 @@ bool ubx_write(struct gps_device_t *session,
    msgbuf[4] = data_len & 0xff;
    msgbuf[5] = (data_len >> 8) & 0xff;
 
-   (void)memcpy(&msgbuf[6], msg, data_len);
+   assert(msg != NULL || data_len == 0);
+   if (msg != NULL)
+       (void)memcpy(&msgbuf[6], msg, data_len);
 
    /* calculate CRC */
    for (i = 2; i < 6; i++) {
@@ -518,7 +521,6 @@ bool ubx_write(struct gps_device_t *session,
 	       gpsd_hexdump_wrapper(msg, (size_t)data_len, LOG_IO),
        CK_A, CK_B);
 
-   assert(msg != NULL || data_len == 0);
    count = write(session->gpsdata.gps_fd, 
 		 msgbuf, msgbuflen);
    (void)tcdrain(session->gpsdata.gps_fd);
@@ -530,8 +532,8 @@ bool ubx_write(struct gps_device_t *session,
 static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t data_len)
 /* not used by gpsd, it's for gpsctl and friends */
 {
-    return ubx_write(session, (int)msg[0], (int)msg[1], 
-		     (unsigned char *)msg+2, (size_t)data_len-2); 
+    return ubx_write(session, (unsigned int)msg[0], (unsigned int)msg[1], 
+		     (unsigned char *)msg+2, (unsigned short)(data_len-2)) ? ((ssize_t)(data_len+7)) : -1; 
 }
 
 #ifdef ALLOW_RECONFIGURE

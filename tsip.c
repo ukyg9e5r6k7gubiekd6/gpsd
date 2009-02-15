@@ -44,7 +44,7 @@ static int tsip_write(struct gps_device_t *session,
     *ep++ = '\x03';
     len = (size_t)(ep - (char*)buf); 
     /*@ -charint @*/
-    if (gpsd_write(session, buf2, len) != len)
+    if (gpsd_write(session, buf2, len) != (ssize_t)len)
 	return -1;
 
     return 0;

@@ -152,12 +152,12 @@ static bool sirf_speed(int ttyfd, speed_t speed, int parity, int stopbits)
 		     0x00,			/* no parity */
 		     0x00,			/* reserved */
 		     0x00, 0x00, 0xb0, 0xb3};
-   /*@ -charint @*/
+    /*@ -charint @*/
 
    msg[7] = (unsigned char)HI(speed);
    msg[8] = (unsigned char)LO(speed);
-   msg[10] = stopbits;
-   msg[11] = parity;
+   msg[10] = (unsigned char)stopbits;
+   msg[11] = (unsigned char)parity;
    return (sirf_write(ttyfd, msg));
 }
 
@@ -997,7 +997,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
     return sirf_speed(session->gpsdata.gps_fd, 
 		      speed,
 		      1,
-		      session->gpsdata.stopbits);
+		      (int)session->gpsdata.stopbits);
 }
 
 /* this is everything we export */
