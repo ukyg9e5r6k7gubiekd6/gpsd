@@ -67,6 +67,7 @@ struct gps_packet_t {
 #define UBX_PACKET	11
 #define GARMINTXT_PACKET	12
 #define SUPERSTAR2_PACKET	13
+#define TEXTUAL_PACKET_TYPE(n)	((n)==NMEA_PACKET||(n)==GARMINTXT_PACKET||(n)==COMMENT_PACKET)
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
