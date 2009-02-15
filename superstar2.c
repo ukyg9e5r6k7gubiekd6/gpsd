@@ -37,7 +37,7 @@ static	gps_mask_t superstar2_msg_svinfo(struct gps_device_t *,
 /*
  * These methods may be called elsewhere in gpsd
  */
-static	ssize_t superstar2_write(struct gps_device_t *, char *, size_t );
+static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t );
 static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	void superstar2_configurator(struct gps_device_t *, unsigned int );
 static	bool superstar2_set_speed(struct gps_device_t *, speed_t );
@@ -314,7 +314,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
  * Write data to the device, doing any required padding or checksumming
  */
 static ssize_t
-superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
+superstar2_control_send(struct gps_device_t *session, char *msg, size_t msglen)
 {
    unsigned short c = 0;
    size_t i;
@@ -386,9 +386,9 @@ static unsigned char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
 static void
 superstar2_probe_wakeup(struct gps_device_t *session)
 {
-    superstar2_write(session, link_msg, sizeof(link_msg));
+    superstar2_control_send(session, link_msg, sizeof(link_msg));
     usleep(300000);
-    superstar2_write(session, version_msg, sizeof(version_msg));
+    superstar2_control_send(session, version_msg, sizeof(version_msg));
     return;
 }
 
@@ -397,9 +397,9 @@ superstar2_probe_subtype(struct gps_device_t *session,
 				     unsigned int seq)
 {
     if (seq == 0){
-	superstar2_write(session, link_msg, sizeof(link_msg));
+	superstar2_control_send(session, link_msg, sizeof(link_msg));
 	usleep(300000);
-	superstar2_write(session, version_msg, sizeof(version_msg));
+	superstar2_control_send(session, version_msg, sizeof(version_msg));
     }
     return;
 }
@@ -424,17 +424,17 @@ static void superstar2_configurator(struct gps_device_t *session,
 	/* set high bit to enable continuous output */
 	tmpl_msg[1] = (unsigned char)(message_list[a] | 0x80);
 	tmpl_msg[2] = (unsigned char)(tmpl_msg[1] ^ 0xff);
-	superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
+	superstar2_control_send(session, tmpl_msg, sizeof(tmpl_msg));
 	usleep(20000);
     }
     for(a = 0; message2_list[a] != 0; a++){
 	/* set high bit to enable continuous output */
 	tmpl2_msg[1] = (unsigned char)(message2_list[a] | 0x80);
 	tmpl2_msg[2] = (unsigned char)(tmpl2_msg[1] ^ 0xff);
-	superstar2_write(session, tmpl2_msg, sizeof(tmpl2_msg));
+	superstar2_control_send(session, tmpl2_msg, sizeof(tmpl2_msg));
 	usleep(20000);
     }
-    superstar2_write(session, version_msg, sizeof(version_msg));
+    superstar2_control_send(session, version_msg, sizeof(version_msg));
 }
 
 /*
@@ -490,7 +490,7 @@ const struct gps_type_t superstar2_binary = {
     /* Number of satellite channels supported by the device */
     .channels	 	= 12,
     /* Control string sender - should provide checksum and trailer */
-    .control_send	= superstar2_write,
+    .control_send	= superstar2_control_send,
     /* Startup-time device detector */
     .probe_detect	= NULL,
     /* Wakeup to be done before each baud hunt */

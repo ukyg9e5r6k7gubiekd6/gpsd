@@ -133,7 +133,7 @@
 #define EVERMORE_CHANNELS	12
 
 /*@ +charint -usedef -compdef @*/
-static ssize_t evermore_write(struct gps_device_t *session, char *msg, size_t msglen)
+static ssize_t evermore_control_send(struct gps_device_t *session, char *msg, size_t msglen)
 {
    unsigned int       crc;
    size_t    i, len;
@@ -398,7 +398,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 	    default: return false;
     }
     msg[2] = tmp8;
-    return (evermore_write(session, msg, sizeof(msg)) != -1);
+    return (evermore_control_send(session, msg, sizeof(msg)) != -1);
     /*@ +type @*/
 }
 
@@ -416,7 +416,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
     gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);
     /*@i1@*/tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
-    return (evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config)) != -1);
+    return (evermore_control_send(session, evrm_protocol_config, sizeof(evrm_protocol_config)) != -1);
 }
 
 static bool evermore_nmea_config(struct gps_device_t *session, int mode)
@@ -445,7 +445,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
     evrm_nmeaout_config[6] = tmp8;           /* GPGSV, 1s or 5s */
     /*@i1@*/tmp8 = (mode == 2) ? 1 : 0;   /* NMEA PEMT101 */
     evrm_nmeaout_config[9] = tmp8;           /* PEMT101, 1s or 0s */
-    return (evermore_write(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config)) != -1);
+    return (evermore_control_send(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config)) != -1);
 }
 
 static void evermore_mode(struct gps_device_t *session, int mode)
@@ -494,7 +494,7 @@ const struct gps_type_t evermore_binary =
     .packet_type    = NMEA_PACKET,		/* lexer packet type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = evermore_write,		/* how to send a control string */
+    .control_send   = evermore_control_send,	/* how to send a control string */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = NULL,			/* no subtype probing */

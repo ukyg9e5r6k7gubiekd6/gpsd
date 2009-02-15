@@ -165,7 +165,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
 }
 
 /*@ +charint -usedef -compdef @*/
-static ssize_t italk_write(struct gps_device_t *session, char *msg, size_t msglen) {
+static ssize_t italk_control_send(struct gps_device_t *session, char *msg, size_t msglen) {
    ssize_t      status;
 
    /* CONSTRUCT THE MESSAGE */
@@ -309,7 +309,7 @@ static bool italk_set_mode(struct gps_device_t *session UNUSED,
 
     /* HACK THE MESSAGE */
 
-    return (italk_write(session, msg, sizeof(msg)) != -1);
+    return (italk_control_send(session, msg, sizeof(msg)) != -1);
     /*@ +charint @*/
 }
 
@@ -349,7 +349,7 @@ const struct gps_type_t italk_binary =
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
-    .control_send   = italk_write,	/* how to send a control string */
+    .control_send   = italk_control_send,	/* how to send a control string */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
     .probe_subtype  = NULL,		/* initialize the device */
@@ -489,7 +489,7 @@ const static struct gps_type_t itrax = {
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels      = 12,		/* consumer-grade GPS */
-    .control_send  = italk_write,	/* how to send a control string */
+    .control_send  = italk_control_send,/* how to send a control string */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = itrax_probe_subtype,	/* initialize */
