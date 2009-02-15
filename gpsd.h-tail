@@ -448,7 +448,8 @@ extern void gpsd_wrap(struct gps_device_t *);
 #ifdef UBX_ENABLE
 extern gps_mask_t ubx_parse(struct gps_device_t *session, 
 			    unsigned char *buf, size_t len);
-extern bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, 
+extern bool ubx_write(struct gps_device_t *session,
+		      unsigned int msg_class, unsigned int msg_id, 
 		      /*@null@*/unsigned char *msg, unsigned short data_len);
 extern void ubx_catch_model(struct gps_device_t *session,
 			    unsigned char *buf, size_t len);

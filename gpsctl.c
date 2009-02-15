@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 		    (void)fputs("-s\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
-		if ((*dp)->control_send != NULL || strcmp((*dp)->type_name, "uBlox UBX binary")==0)
+		if ((*dp)->control_send != NULL)
 		    (void)fputs("-c\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
@@ -458,27 +458,7 @@ int main(int argc, char **argv)
 	}
 	/*@ -compdef @*/
 	if (control) {
-	    /* 
-	     * First, handle exceptional cases.  These are GPS chips
-	     * like the Zodiac and UBX in which the packet payload is 
-	     * not contiguous,with class or type fields before the data
-	     * length.  This means they don't fit well in the model 
-	     * assumed by the driver interface.
-	     */
-	    extern const struct gps_type_t ubx_binary;
-	    /*@ -usedef @*/
-	    if (session.device_type == &ubx_binary) {
-		if (!ubx_write(session.gpsdata.gps_fd,
-			       (unsigned)cooked[0], (unsigned)cooked[1],
-			       (unsigned char *)cooked + 2, 
-			       (unsigned short)(cooklen - 2))) {
-		    gpsd_report(LOG_ERROR, "control transmission failed.\n");
-		    status = 1;
-		}
-      
-	    } 
-	    /*@ +usedef @*/
-	    else if (session.device_type->control_send == NULL) {
+	    if (session.device_type->control_send == NULL) {
 		gpsd_report(LOG_ERROR, 
 			      "%s devices have no control sender.\n",
 			      session.device_type->type_name);

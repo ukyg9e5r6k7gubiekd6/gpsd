@@ -225,7 +225,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef UBX_ENABLE
     case 7:
 	/* probe for UBX -- query software version */
-	(void)ubx_write(session->gpsdata.gps_fd, 0x0au, 0x04, NULL, 0);
+	(void)ubx_write(session, 0x0au, 0x04, NULL, 0);
 	break;
 #endif /* UBX_ENABLE */
 #ifdef MKT3301_ENABLE

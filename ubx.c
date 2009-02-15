@@ -37,7 +37,7 @@ static bool have_port_configuration = false;
 static unsigned char original_port_settings[20];
 static unsigned char sbas_in_use;
 
-	bool 		ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
+	bool 		ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
 	gps_mask_t 	ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
 	void 		ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
 static	gps_mask_t 	ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
@@ -414,7 +414,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    for(i=6;i<26;i++)
 		original_port_settings[i-6] = buf[i];				/* copy the original port settings */
 	    buf[14+6] &= ~0x02;							/* turn off NMEA output on this port */
-	    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+	    (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 	    have_port_configuration = true;
 	    break;
 
@@ -475,7 +475,7 @@ void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t le
     /*@ -charint */
 }
 
-bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len) {
+bool ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len) {
    unsigned char CK_A, CK_B;
    unsigned char head_tail[8];
    ssize_t i, count;
@@ -514,19 +514,26 @@ bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned cha
        CK_A, CK_B);
 
    assert(msg != NULL || data_len == 0);
-   count = write(fd, head_tail, 6);
-   (void)tcdrain(fd);
+   count = write(session->gpsdata.gps_fd, head_tail, 6);
+   (void)tcdrain(session->gpsdata.gps_fd);
    if(data_len)
        /*@ -nullpass @*/
-       count += write(fd, msg, (size_t)data_len);
+       count += write(session->gpsdata.gps_fd, msg, (size_t)data_len);
        /*@ +nullpass @*/
-   (void)tcdrain(fd);
-   count += write(fd, &head_tail[6], 2);
+   (void)tcdrain(session->gpsdata.gps_fd);
+   count += write(session->gpsdata.gps_fd, &head_tail[6], 2);
 
    ok = (count == ((ssize_t)data_len + 8));
-   (void)tcdrain(fd);
+   (void)tcdrain(session->gpsdata.gps_fd);
    /*@ +nullderef @*/
    return(ok);
+}
+
+static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t data_len)
+/* not used by gpsd, it's for gpsctl and friends */
+{
+    return ubx_write(session, (int)msg[0], (int)msg[1], 
+		     (unsigned char *)msg+2, (size_t)data_len-2); 
 }
 
 #ifdef ALLOW_RECONFIGURE
@@ -536,7 +543,7 @@ static void ubx_configure(struct gps_device_t *session, unsigned int seq)
 
     gpsd_report(LOG_IO, "UBX configure: %d\n",seq);
 
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
+    (void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
 
     /*@ -type @*/
     msg[0] = 0x03; /* SBAS mode enabled, accept testbed mode */
@@ -547,28 +554,28 @@ static void ubx_configure(struct gps_device_t *session, unsigned int seq)
     msg[5] = 0x00;
     msg[6] = 0x00;
     msg[7] = 0x00;
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x16, msg, 8);
+    (void)ubx_write(session, 0x06u, 0x16, msg, 8);
 
     msg[0] = 0x01; /* class */
     msg[1] = 0x04; /* msg id  = UBX_NAV_DOP */
     msg[2] = 0x01; /* rate */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x06; /* msg id  = NAV-SOL */
     msg[2] = 0x01; /* rate */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x20; /* msg id  = UBX_NAV_TIMEGPS */
     msg[2] = 0x01; /* rate */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x30; /* msg id  = NAV-SVINFO */
     msg[2] = 0x0a; /* rate */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x32; /* msg id  = NAV-SBAS */
     msg[2] = 0x0a; /* rate */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
     /*@ +type @*/
 
 }
@@ -585,7 +592,7 @@ static void ubx_revert(struct gps_device_t *session)
     gpsd_report(LOG_IO, "UBX revert\n");
 
     /* Reverting all in one fast and reliable reset */
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x04, msg, 4); /* CFG-RST */
+    (void)ubx_write(session, 0x06, 0x04, msg, 4); /* CFG-RST */
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -611,7 +618,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 	buf[14] |=  0x01;			/* turn on UBX output on this port */
     }
     /*@ -charint +usedef @*/
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    (void)ubx_write(session, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 }
 
 static bool ubx_speed(struct gps_device_t *session, speed_t speed)
@@ -626,7 +633,7 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     putlelong(buf, 8, speed);
-    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
     /*@ -charint +usedef +compdef */
     return true;
 }
@@ -637,7 +644,7 @@ const struct gps_type_t ubx_binary = {
     .packet_type    = UBX_PACKET,	/* associated lexer packet type */
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 50,             /* Number of satellite channels supported by the device */
-    .control_send     = NULL,		/* no control sender yet */
+    .control_send     = ubx_control_send,	/* no control sender yet */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
     .probe_subtype    = NULL,           /* Initialize the device and get subtype */
