@@ -19,7 +19,7 @@
 #ifdef TSIP_ENABLE
 #define TSIP_CHANNELS	12
 
-static int tsip_write(int fd, unsigned int id, /*@null@*/unsigned char *buf, size_t len)
+static int tsip_write(struct gps_device_t *session, unsigned int id, /*@null@*/unsigned char *buf, size_t len)
 {
 #ifdef ALLOW_RECONFIGURE
     char buf2[BUFSIZ];
@@ -30,23 +30,23 @@ static int tsip_write(int fd, unsigned int id, /*@null@*/unsigned char *buf, siz
     /*@ +charint @*/
     buf2[0] = '\x10';
     buf2[1] = (char)id;
-    if (write(fd,buf2,2) != 2)
+    if (write(session->gpsdata.gps_fd,buf2,2) != 2)
 	return -1;
 
     /*@ -nullderef @*/
     while (len-- > 0) {
 	if (*buf == '\x10')
-	    if (write(fd,buf2,1) != 1)
+	    if (write(session->gpsdata.gps_fd,buf2,1) != 1)
 		return -1;
 
-	if (write(fd,buf++,1) != 1)
+	if (write(session->gpsdata.gps_fd,buf++,1) != 1)
 	    return -1;
     }
     /*@ +nullderef @*/
 
     buf2[1] = '\x03';
     /*@ -charint @*/
-    if (write(fd,buf2,2) != 2)
+    if (write(session->gpsdata.gps_fd,buf2,2) != 2)
 	return -1;
 
     return 0;
@@ -61,7 +61,7 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 			    char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
 {
-    return (ssize_t)tsip_write(session->gpsdata.gps_fd, 
+    return (ssize_t)tsip_write(session, 
 		      (unsigned int)buf[0], (unsigned char *)buf+1, buflen-1);
 }
 
@@ -82,17 +82,17 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 
     case 1:
 	/* Request Software Versions */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x1f, NULL, 0);
+	(void)tsip_write(session, 0x1f, NULL, 0);
 	/* Request Current Time */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x21, NULL, 0);
+	(void)tsip_write(session, 0x21, NULL, 0);
 	/* Request GPS Systems Message */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x28, NULL, 0);
+	(void)tsip_write(session, 0x28, NULL, 0);
 	/* Request Current Datum Values */
 	putbyte(buf,0,0x15);
-	(void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 1);
+	(void)tsip_write(session, 0x8e, buf, 1);
 	/* Request Navigation Configuration */
 	putbyte(buf,0,0x03);
-	(void)tsip_write(session->gpsdata.gps_fd, 0xbb, buf, 1);
+	(void)tsip_write(session, 0xbb, buf, 1);
 	break;
     }
 }
@@ -108,7 +108,7 @@ static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 	putbyte(buf,1,0x02);		/* Velocity: ENU */
 	putbyte(buf,2,0x00);		/* Time: GPS */
 	putbyte(buf,3,0x08);		/* Aux: dBHz */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+	(void)tsip_write(session, 0x35, buf, 4);
     }
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -136,7 +136,7 @@ static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
     putbyte(buf,7,0x02);		/* input protocol (TSIP) */
     putbyte(buf,8,0x02);		/* output protocol (TSIP) */
     putbyte(buf,9,0);			/* reserved */
-    (void)tsip_write(session->gpsdata.gps_fd, 0xbc, buf, 10);
+    (void)tsip_write(session, 0xbc, buf, 10);
 
     return true;	/* it would be nice to error-check this */
 }
@@ -200,7 +200,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /* Request LFwEI Super Packet */
 	    putbyte(buf,0,0x20);
 	    putbyte(buf,1,0x01);		/* enabled */
-	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
 #endif /* USE_SUPERPACKET */
 	break;
@@ -335,7 +335,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    putbyte(buf,1,0x00);		/* Velocity: none (via SP) */
 	    putbyte(buf,2,0x00);		/* Time: GPS */
 	    putbyte(buf,3,0x08);		/* Aux: dBHz */
-	    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+	    (void)tsip_write(session, 0x35, buf, 4);
 	    session->driver.tsip.superpkt = true;
 	}
 #endif /* USE_SUPERPACKET */
@@ -353,12 +353,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /* No LFwEI Super Packet */
 	    putbyte(buf,0,0x20);
 	    putbyte(buf,1,0x00);		/* disabled */
-	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+	    (void)tsip_write(session, 0x8e, buf, 2);
 
 	    /* Request Compact Super Packet */
 	    putbyte(buf,0,0x23);
 	    putbyte(buf,1,0x01);		/* enabled */
-	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
 #endif /* USE_SUPERPACKET */
 	break;
@@ -776,26 +776,26 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
     if ((now - session->driver.tsip.last_41) > 5) {
 	/* Request Current Time */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
+	(void)tsip_write(session, 0x21, buf, 0);
 	session->driver.tsip.last_41 = now;
     }
 
     if ((now - session->driver.tsip.last_6d) > 5) {
 	/* Request GPS Receiver Position Fix Mode */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x24, buf, 0);
+	(void)tsip_write(session, 0x24, buf, 0);
 	session->driver.tsip.last_6d = now;
     }
 
     if ((now - session->driver.tsip.last_5c) >= 5) {
 	/* Request Current Satellite Tracking Status */
 	putbyte(buf,0,0x00);		/* All satellites */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x3c, buf, 1);
+	(void)tsip_write(session, 0x3c, buf, 1);
 	session->driver.tsip.last_5c = now;
     }
 
     if ((now - session->driver.tsip.last_46) > 5) {
 	/* Request Health of Receiver */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x26, buf, 0);
+	(void)tsip_write(session, 0x26, buf, 0);
 	session->driver.tsip.last_46 = now;
     }
 
