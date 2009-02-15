@@ -126,15 +126,17 @@ bool sirf_write(int fd, unsigned char *msg) {
 
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t len) {
     /*@ +charint +matchanyintegral -initallelements @*/
-    static unsigned char buf[MAX_PACKET_LENGTH] = {0xa0, 0xa2,};
+    static unsigned char msgbuf[MAX_PACKET_LENGTH] = {0xa0, 0xa2,};
+    size_t msgbuflen;
 
-    buf[2] = (len >> 8) & 0xff;
-    buf[3] = len & 0xff;
-    memcpy(buf+4, msg, len);
-    buf[len + 6] = 0xb0;
-    buf[len + 7] = 0xb3;
+    msgbuf[2] = (len >> 8) & 0xff;
+    msgbuf[3] = len & 0xff;
+    memcpy(msgbuf+4, msg, len);
+    msgbuf[len + 6] = 0xb0;
+    msgbuf[len + 7] = 0xb3;
+    msgbuflen = len + 8;
 
-    return sirf_write(session->gpsdata.gps_fd, buf) ? (ssize_t)(len + 8) : -1;
+    return sirf_write(session->gpsdata.gps_fd, msgbuf) ? msgbuflen : -1;
     /*@ -charint -matchanyintegral +initallelements @*/
 }
 

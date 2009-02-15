@@ -133,47 +133,49 @@
 #define EVERMORE_CHANNELS	12
 
 /*@ +charint -usedef -compdef @*/
-static ssize_t evermore_control_send(struct gps_device_t *session, char *msg, size_t msglen)
+static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
 {
    unsigned int       crc;
-   size_t    i, len;
-   char stuffed[MAX_PACKET_LENGTH*2], *cp;
+   size_t    i, msglen;
+   char msgbuf[MAX_PACKET_LENGTH*2], *cp;
 
    /*@ +charint +ignoresigns @*/
    /* prepare a DLE-stuffed copy of the message */
-   cp = stuffed;
+   cp = msgbuf;
    *cp++ = 0x10;  /* message starts with DLE STX */
    *cp++ = 0x02;
 
-   len = (size_t)(msglen + 2);   /* msglen < 254 !! */
-   *cp++ = (char)len;   /* message length */
-   if (len == 0x10) *cp++ = 0x10;
+   msglen = (size_t)(len + 2);   /* len < 254 !! */
+   *cp++ = (char)msglen;   /* message length */
+   if (msglen == 0x10) *cp++ = 0x10;
    
    /* payload */
    crc = 0;
-   for (i = 0; i < msglen; i++) {
-       *cp++ = msg[i];
-       if (msg[i] == 0x10) *cp++ = 0x10;
-       crc += msg[i];
+   for (i = 0; i < len; i++) {
+       *cp++ = buf[i];
+       if (buf[i] == 0x10) 
+	   *cp++ = 0x10;
+       crc += buf[i];
    }
 
    crc &= 0xff;
 
    /* enter CRC after payload */
    *cp++ = crc;  
-   if (crc == 0x10) *cp++ = 0x10;
+   if (crc == 0x10)
+       *cp++ = 0x10;
 
    *cp++ = 0x10;   /* message ends with DLE ETX */
    *cp++ = 0x03;
 
-   len = (size_t)(cp - stuffed);
+   msglen = (size_t)(cp - msgbuf);
    /*@ -charint -ignoresigns @*/
 
    /* we may need to dump the message */
-   gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", msg[0], 
-	gpsd_hexdump_wrapper(stuffed, len, LOG_IO));
+   gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", buf[0], 
+	gpsd_hexdump_wrapper(msgbuf, len, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
-   return gpsd_write(session, stuffed, len);
+   return gpsd_write(session, msgbuf, len);
 #else
    return -1;
 #endif /* ALLOW_RECONFIGURE */
