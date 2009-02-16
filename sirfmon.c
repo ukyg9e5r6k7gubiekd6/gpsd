@@ -6,6 +6,7 @@
  * Useful commands:
  *	l -- toggle packet logging
  *	b -- change baud rate.
+ *      n -- change from native t o binary mode orr vice-versa.
  *	s -- send hex bytes to device.
  *	q -- quit, leaving device in binary mode.
  *      Ctrl-S -- freeze display.
@@ -101,9 +102,9 @@ static bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len);
  * SiRF-dependent stuff begins here
  *
  * These are the SiRF-specific commands:
- *	a -- toggle receipt of 50BPS subframe data.
+ *	a -- toggle receipt of 50BPS subframe data (undocumented).
  *	c -- set or clear static navigation mode
- *	n -- switch device to NMEA at current speed and exit.
+ *      d -- MID 4 rate change (undocumented)
  *	t -- toggle navigation-parameter display mode
  *
  * Initialiation takes a SiRF chip in NMEA mode to binary mode, if needed.
@@ -552,12 +553,6 @@ static void sirf_analyze(unsigned char buf[], size_t len)
 	break;
     }
 
-    buf -= 4;
-    len += 8;
-    (void)wprintw(debugwin, "(%d) ", len);
-    for (i = 0; i < (int)len; i++)
-	(void)wprintw(debugwin, "%02x",buf[i]);
-    (void)wprintw(debugwin, "\n");
 }
 
 /*@ -nullpass -globstate @*/
@@ -756,7 +751,7 @@ static int sirf_command(char line[])
 	(void)monitor_control_send(buf, 2);
 	return COMMAND_MATCH;
 
-    case 'd':		/* MID 4 rate change -- not documented */
+    case 'd':		/* MID 4 rate change */
 	v = atoi(line+1);
 	if (v > 30)
 	    return COMMAND_MATCH;
@@ -770,33 +765,6 @@ static int sirf_command(char line[])
 	putbyte(buf, 7, 0);
 	(void)monitor_control_send(buf, 8);
 	return COMMAND_MATCH;
-
-    case 'n':			/* switch to NMEA */
-	putbyte(buf, 0,  0x81);			/* id */
-	putbyte(buf, 1,  0x02);			/* mode */
-	putbyte(buf, 2,  0x01);			/* GGA */
-	putbyte(buf, 3,  0x01);
-	putbyte(buf, 4,  0x01);			/* GLL */
-	putbyte(buf, 5,  0x01);
-	putbyte(buf, 6, 0x01);		  	/* GSA */
-	putbyte(buf, 7, 0x01);
-	putbyte(buf, 8, 0x05);			/* GSV */
-	putbyte(buf, 9, 0x01);
-	putbyte(buf, 10, 0x01);			/* RNC */
-	putbyte(buf, 11, 0x01);
-	putbyte(buf, 12, 0x01);			/* VTG */
-	putbyte(buf, 13, 0x01);
-	putbyte(buf, 14, 0x00);			/* unused fields */
-	putbyte(buf, 15, 0x01);
-	putbyte(buf, 16, 0x00);
-	putbyte(buf, 17, 0x01);
-	putbyte(buf, 18, 0x00);
-	putbyte(buf, 19, 0x01);
-	putbyte(buf, 20, 0x00);
-	putbyte(buf, 21, 0x01);
-	putbeword(buf, 22, gpsd_get_speed(&session.ttyset));
-	(void)monitor_control_send(buf, 24);
-	return COMMAND_TERMINATE;		/* terminate */
 
     case 't':			/* poll navigation params */
 	dispmode = !dispmode;
@@ -882,22 +850,33 @@ static ssize_t readpkt(void)
 }
 /*@ +globstate @*/
 
-static void monitor_dump_send(void)
+static void packet_dump(char *buf, size_t buflen)
 {
     size_t i;
-
-    (void)wprintw(debugwin, ">>>");
-    if (session.msgbuf[0] == '$') {
-	for (i = 0; i < session.msgbuflen; i++)
-	    if (isprint(session.msgbuf[i]))
-		(void)waddch(debugwin, (chtype)session.msgbuf[i]);
+    bool printable = true;
+    for (i = 0; i < buflen; i++)
+	if (!isprint(buf[i]) && !isspace(buf[i]))
+	    printable = false;
+    if (printable) {
+	for (i = 0; i < buflen; i++)
+	    if (isprint(buf[i]))
+		(void)waddch(debugwin, (chtype)buf[i]);
 	    else
-		(void)wprintw(debugwin, "\\x%02x", (unsigned char)session.msgbuf[i]);
-    }else {
-	for (i = 0; i < session.msgbuflen; i++)
-	    (void)wprintw(debugwin, " %02x", (unsigned char)session.msgbuf[i]);
+		(void)wprintw(debugwin, "\\x%02x", (unsigned char)buf[i]);
+    } else {
+	for (i = 0; i < buflen; i++)
+	    (void)wprintw(debugwin, "%02x", (unsigned char)buf[i]);
     }
     (void)wprintw(debugwin, "\n");
+}
+
+
+static void monitor_dump_send(void)
+{
+    (void)wattrset(debugwin, A_BOLD);
+    (void)wprintw(debugwin, ">>>");
+    packet_dump(session.msgbuf, session.msgbuflen);
+    (void)wattrset(debugwin, A_NORMAL);
 }
 
 static bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
@@ -1118,6 +1097,14 @@ int main (int argc, char **argv)
 			  session.gpsdata.gps_device, errno);
 	    exit(2);
 	}
+
+	/* 
+	 * This is a monitoring utility. Disable autoprobing, because
+	 * in some cases (e.g. SiRFs) there is no way to probe a chip
+	 * type without flipping it to native mode.
+	 */
+	context.readonly = true;
+
 	/* hunt for packet type and serial parameters */
 	for (seq = 1; session.device_type == NULL; seq++) {
 	    gps_mask_t valid = get_packet(&session);
@@ -1146,6 +1133,7 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
 
+#if 0
 	/* 
 	 * If we've identified this as an NMEA device, we have to eat
 	 * packets for a while to see if one of our probes elicits an
@@ -1161,6 +1149,7 @@ int main (int argc, char **argv)
 		    break;
 	    }
 	}
+#endif
 	gpsd_report(LOG_SHOUT, "%s identified as a %s at %d.\n",
 		    session.gpsdata.gps_device, 
 		    gpsd_id(&session), session.gpsdata.baudrate);
@@ -1305,6 +1294,38 @@ int main (int argc, char **argv)
 		}
 		break;
 
+	    case 'N':
+		/* if argument not specified, toggle */
+		if (strcspn(line, "01") == strlen(line))
+		    v = (unsigned int)TEXTUAL_PACKET_TYPE(session.packet.type);
+		else
+		    v = (unsigned)atoi(line+1);
+		if (serial) {
+		    // FIXME: some sort of debug window display here?
+		    /* Ugh...should have a controlfd slot 
+		     * in the session structure, really
+		     */
+		    if (sirf.driver->mode_switcher) {
+			int dfd = session.gpsdata.gps_fd;
+			session.gpsdata.gps_fd = controlfd;
+			sirf.driver->mode_switcher(&session, (int)v);
+			monitor_dump_send();
+			(void)tcdrain(session.gpsdata.gps_fd);
+			(void)usleep(50000);
+			session.gpsdata.gps_fd = dfd;
+		    } else
+			error_and_pause("Device type has no mode switcher");
+		} else {
+		    line[0] = 'n';
+		    line[1] = ' ';
+		    line[2] = '0' + v;
+		    /*@ -sefparams @*/
+		    assert(write(session.gpsdata.gps_fd, line, strlen(line)) != -1);
+		    /* discard response */
+		    assert(read(session.gpsdata.gps_fd, buf, sizeof(buf)) != -1);
+		    /*@ +sefparams @*/
+		}
+		break;
 	    case 'l':				/* open logfile */
 		if (logfile != NULL) {
 		    (void)wprintw(debugwin, ">>> Logging to %s off", logfile);
@@ -1342,6 +1363,8 @@ int main (int argc, char **argv)
 
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 	    sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
+	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
+	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
     }
     /*@ +nullpass @*/
