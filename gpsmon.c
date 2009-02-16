@@ -480,12 +480,12 @@ int main (int argc, char **argv)
 	(void)wprintw(cmdwin, "cmd> ");
 	(void)wclrtoeol(cmdwin);
 	(void)refresh();
-	sirf.repaint();
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
+	    //sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
 	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
+	sirf.update(len);
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
