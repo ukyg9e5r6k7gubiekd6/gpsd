@@ -1214,8 +1214,10 @@ int main (int argc, char **argv)
 		    session.gpsdata.parity, 
 		    session.gpsdata.stopbits);
 	else
+	    /*@ -nullpass @*/
 	    display(statwin, 0, 0, "%s:%s:%s", 
 		    server, port, session.gpsdata.gps_device);
+	    /*@ +nullpass @*/
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wrefresh(statwin);
 	(void)wmove(cmdwin, 0,0);
@@ -1289,7 +1291,7 @@ int main (int argc, char **argv)
 			(void)usleep(50000);
 			session.gpsdata.gps_fd = dfd;
 			(void)gpsd_set_speed(&session, v, 
-					 session.gpsdata.parity, 
+					     (unsigned char)session.gpsdata.parity, 
 					 session.gpsdata.stopbits);
 		    } else
 			error_and_pause("Device type has no speed switcher");
