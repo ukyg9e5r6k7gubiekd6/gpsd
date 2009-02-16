@@ -424,27 +424,6 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
 
-#if 0
-	/* 
-	 * If we've identified this as an NMEA device, we have to eat
-	 * packets for a while to see if one of our probes elicits an
-	 * ID response telling us that it's really a SiRF or
-	 * something.  If so, the libgpsd(3) layer will automatically
-	 * redispatch to the correct driver type.
-	 */
-#define REDIRECT_SNIFF 12
-	if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
-	    int dummy;
-	    for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
-		if ((get_packet(&session) & DEVICEID_SET)!=0)
-		    break;
-	    }
-	}
-#endif
-	gpsd_report(LOG_SHOUT, "%s identified as a %s at %d.\n",
-		    session.gpsdata.gps_device, 
-		    gpsd_id(&session), session.gpsdata.baudrate);
-
 	controlfd = session.gpsdata.gps_fd;
 	serial = true;
     }
@@ -471,10 +450,9 @@ int main (int argc, char **argv)
     /*@ -onlytrans @*/
     statwin   = newwin(1,  30, 0, 0);
     cmdwin    = newwin(1,  0,  0, 30);
-    if (!sirf.windows() || cmdwin==NULL)
-	goto quit;
-
     debugwin  = newwin(0,   0, sirf.min_y+1, 0);
+    if (!sirf.windows() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
+	goto quit;
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);
     /*@ +onlytrans @*/
