@@ -6,7 +6,6 @@
 
 struct mdevice_t {
     /* a device-specific capability table for the monitor */
-    void (*probe)(void);		/* to send when we start monitoring */
     void (*analyze)(unsigned char [], size_t);
     bool (*windows)(void);		/* paint legends on wibndows */
     void (*repaint)(bool);		/* now paint the data */

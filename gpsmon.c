@@ -461,8 +461,6 @@ int main (int argc, char **argv)
 
     FD_ZERO(&select_set);
 
-    sirf.probe();
-
     for (;;) {
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
@@ -483,9 +481,15 @@ int main (int argc, char **argv)
 	(void)wclrtoeol(cmdwin);
 	(void)refresh();
 	sirf.repaint(false);
+	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
+	    sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
+	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
+	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
+	}
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
+	/* rest of this invoked only if user has pressed a key */
 	FD_SET(0,&select_set);
 	FD_SET(session.gpsdata.gps_fd,&select_set);
 
@@ -628,12 +632,6 @@ int main (int argc, char **argv)
 		/*@ +compdef @*/
 		break;
 	    }
-	}
-
-	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
-	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
-	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
     }
     /*@ +nullpass @*/

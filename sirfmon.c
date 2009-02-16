@@ -626,15 +626,12 @@ static bool sirf_windows(void)
     /*@ +nullpass @*/
     /*@ -onlytrans @*/
 
-    return true;
-}
-
-static void sirf_probe(void)
-{
     /* probe for version */
     /*@ -compdef @*/
     (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
     /*@ +compdef @*/
+
+    return true;
 }
 
 /*@ -globstate */
@@ -706,7 +703,6 @@ static int sirf_command(char line[])
 }
 
 const struct mdevice_t sirf = {
-    .probe = sirf_probe,
     .analyze = sirf_analyze,
     .windows = sirf_windows,
     .repaint = sirf_refresh,
