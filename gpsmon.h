@@ -8,7 +8,7 @@ struct mdevice_t {
     /* a device-specific capability table for the monitor */
     bool (*initialize)(void);		/* paint legends on windows */
     void (*analyze)(unsigned char [], size_t);
-    void (*repaint)(bool);		/* now paint the data */
+    void (*repaint)(void);		/* now paint the data */
     int (*command)(char[]);		/* interpret device-specfic commands */
     void (*wrap)(void);			/* deallocate storage */
     int min_y, min_x;			/* space required for device info */

@@ -635,7 +635,7 @@ static bool sirf_windows(void)
 }
 
 /*@ -globstate */
-static void sirf_repaint(bool inloop)
+static void sirf_repaint(void)
 {
     /* refresh navigation parameters */
     if (dispmode && (time(NULL) % 10 == 0)){
@@ -652,8 +652,6 @@ static void sirf_repaint(bool inloop)
 	(void)wrefresh(mid19win);
 	(void)redrawwin(mid19win);
     }
-    if (inloop)
-	(void)wrefresh(mid19win);
     /*@ +nullpass -nullderef @*/
 }
 /*@ +globstate */
