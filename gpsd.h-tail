@@ -231,8 +231,10 @@ struct gps_device_t {
     int shmTimeP;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    double mag_var;		/* Magnetic variation in degrees */  
-    bool back_to_nmea;		/* back to NMEA on revert? */
+    double mag_var;			/* Magnetic variation in degrees */  
+    bool back_to_nmea;			/* back to NMEA on revert? */
+    char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
+    size_t msgbuflen;
     /*
      * The rest of this structure is driver-specific private storage.
      * Because the Garmin driver uses a long buffer, you can have

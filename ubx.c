@@ -482,26 +482,24 @@ bool ubx_write(struct gps_device_t *session,
    unsigned char CK_A, CK_B;
    ssize_t i, count;
    bool      ok;
-   size_t msgbuflen;
-   char msgbuf[MAX_PACKET_LENGTH+7];
 
    /*@ -type @*/
-   msgbuf[0] = 0xb5;
-   msgbuf[1] = 0x62;
+   session->msgbuf[0] = 0xb5;
+   session->msgbuf[1] = 0x62;
 
    CK_A = CK_B = 0;
-   msgbuf[2] = msg_class;
-   msgbuf[3] = msg_id;
-   msgbuf[4] = data_len & 0xff;
-   msgbuf[5] = (data_len >> 8) & 0xff;
+   session->msgbuf[2] = msg_class;
+   session->msgbuf[3] = msg_id;
+   session->msgbuf[4] = data_len & 0xff;
+   session->msgbuf[5] = (data_len >> 8) & 0xff;
 
    assert(msg != NULL || data_len == 0);
    if (msg != NULL)
-       (void)memcpy(&msgbuf[6], msg, data_len);
+       (void)memcpy(&session->msgbuf[6], msg, data_len);
 
    /* calculate CRC */
    for (i = 2; i < 6; i++) {
-	CK_A += msgbuf[i];
+	CK_A += session->msgbuf[i];
 	CK_B += CK_A;
    }
    /*@ -nullderef @*/
@@ -510,9 +508,9 @@ bool ubx_write(struct gps_device_t *session,
 	CK_B += CK_A;
    }
 
-   msgbuf[6 + data_len] = CK_A;
-   msgbuf[7 + data_len] = CK_B;
-   msgbuflen = data_len + 7;
+   session->msgbuf[6 + data_len] = CK_A;
+   session->msgbuf[7 + data_len] = CK_B;
+   session->msgbuflen = data_len + 7;
    /*@ +type @*/
 
    gpsd_report(LOG_IO,
@@ -522,9 +520,9 @@ bool ubx_write(struct gps_device_t *session,
        CK_A, CK_B);
 
    count = write(session->gpsdata.gps_fd, 
-		 msgbuf, msgbuflen);
+		 session->msgbuf, session->msgbuflen);
    (void)tcdrain(session->gpsdata.gps_fd);
-   ok = (count == (ssize_t)msgbuflen);
+   ok = (count == (ssize_t)session->msgbuflen);
    /*@ +nullderef @*/
    return(ok);
 }

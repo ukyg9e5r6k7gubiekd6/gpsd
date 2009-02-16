@@ -23,16 +23,15 @@ static int tsip_write(struct gps_device_t *session,
 		      unsigned int id, /*@null@*/unsigned char *buf, size_t len)
 {
 #ifdef ALLOW_RECONFIGURE
-    char buf2[MAX_PACKET_LENGTH*2+1];
     char *ep, *cp;
 
     gpsd_report(LOG_IO, "Sent TSIP packet id 0x%02x: %s\n", id,
 	gpsd_hexdump_wrapper(buf, len, LOG_IO));
 
     /*@ +charint @*/
-    buf2[0] = '\x10';
-    buf2[1] = (char)id;
-    ep = buf2 + 2;
+    session->msgbuf[0] = '\x10';
+    session->msgbuf[1] = (char)id;
+    ep = session->msgbuf + 2;
      /*@ -nullderef @*/
     for (cp = (char *)buf; len-- > 0; cp++) {
 	if (*cp == '\x10')
@@ -42,9 +41,9 @@ static int tsip_write(struct gps_device_t *session,
     /*@ +nullderef @*/
     *ep++ = '\x10';
     *ep++ = '\x03';
-    len = (size_t)(ep - (char*)buf); 
+    session->msgbuflen = (size_t)(ep - (char*)buf); 
     /*@ -charint @*/
-    if (gpsd_write(session, buf2, len) != (ssize_t)len)
+    if (gpsd_write(session,session->msgbuf,session->msgbuflen) != (ssize_t)len)
 	return -1;
 
     return 0;

@@ -136,18 +136,18 @@
 static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
 {
    unsigned int       crc;
-   size_t    i, msglen;
-   char msgbuf[MAX_PACKET_LENGTH*2], *cp;
+   size_t    i;
+   char *cp;
 
    /*@ +charint +ignoresigns @*/
    /* prepare a DLE-stuffed copy of the message */
-   cp = msgbuf;
+   cp = session->msgbuf;
    *cp++ = 0x10;  /* message starts with DLE STX */
    *cp++ = 0x02;
 
-   msglen = (size_t)(len + 2);   /* len < 254 !! */
-   *cp++ = (char)msglen;   /* message length */
-   if (msglen == 0x10) *cp++ = 0x10;
+   session->msgbuflen = (size_t)(len + 2);   /* len < 254 !! */
+   *cp++ = (char)session->msgbuflen;   /* message length */
+   if (session->msgbuflen == 0x10) *cp++ = 0x10;
    
    /* payload */
    crc = 0;
@@ -168,14 +168,11 @@ static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, si
    *cp++ = 0x10;   /* message ends with DLE ETX */
    *cp++ = 0x03;
 
-   msglen = (size_t)(cp - msgbuf);
+   session->msgbuflen = (size_t)(cp - session->msgbuf);
    /*@ -charint -ignoresigns @*/
 
-   /* we may need to dump the message */
-   gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", buf[0], 
-	gpsd_hexdump_wrapper(msgbuf, len, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
-   return gpsd_write(session, msgbuf, len);
+   return gpsd_write(session, session->msgbuf, session->msgbuflen);
 #else
    return -1;
 #endif /* ALLOW_RECONFIGURE */

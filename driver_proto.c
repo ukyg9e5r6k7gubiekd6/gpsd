@@ -197,10 +197,19 @@ static ssize_t _proto__write(struct gps_device_t *session,
 
    /* CONSTRUCT THE MESSAGE */
 
+   /* 
+    * This copy to a public assembly buffer 
+    * enables sirfmon to snoop the control message
+    * acter it has been sent.
+    */
+   session->msgbuflen = msglen;
+   (void)memcpy(session->msgbuf, msg, msglen);
+
    /* we may need to dump the message */
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
    gpsd_report(LOG_IO, "writing _proto_ control type %02x:%s\n",
-	       msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-   return gpsd_write(session, msg, msglen);
+	       msg[0], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
+   return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
 

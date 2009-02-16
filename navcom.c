@@ -83,21 +83,20 @@ static u_int8_t checksum(unsigned char *buf, size_t len)
 static ssize_t navcom_control_send(struct gps_device_t *session, 
 				char *buf, size_t len)
 {
-    unsigned char msgbuf[MAX_PACKET_LENGTH];
-    size_t msgbuflen;
-
-    putbyte(msgbuf, 0, 0x02);
-    putbyte(msgbuf, 1, 0x99);
-    putbyte(msgbuf, 2, 0x66);
-    putbyte(msgbuf, 3, buf[0]);	/* Cmd ID */
-    putleword(msgbuf, 4, len+4);	/* Length */
-    memcpy(msgbuf, buf+6, len-1);
-    putbyte(msgbuf, 6 + len, checksum(msgbuf+3, len+5));
-    putbyte(msgbuf, 7 + len, 0x03);
-    msgbuflen = len+9;
+    /*@ +ignoresigns -mayaliasunique @*/
+    putbyte(session->msgbuf, 0, 0x02);
+    putbyte(session->msgbuf, 1, 0x99);
+    putbyte(session->msgbuf, 2, 0x66);
+    putbyte(session->msgbuf, 3, buf[0]);	/* Cmd ID */
+    putleword(session->msgbuf, 4, len+4);	/* Length */
+    memcpy(session->msgbuf, buf+6, len-1);
+    putbyte(session->msgbuf, 6 + len, checksum(session->msgbuf+3, len+5));
+    putbyte(session->msgbuf, 7 + len, 0x03);
+    session->msgbuflen = len+9;
+    /*@ -ignoresigns +mayaliasunique @*/
     gpsd_report(LOG_RAW, "Navcom: control dump: %s\n",
-	gpsd_hexdump_wrapper(msgbuf, msgbuflen, LOG_RAW));
-    return gpsd_write(session, msgbuf, msgbuflen);
+	gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_RAW));
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 
 static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, size_t len)

@@ -668,6 +668,7 @@ static void Build_Send_USB_Packet( struct gps_device_t *session,
 }
 /* build and send a packet in serial protocol */
 /* layer_id unused */
+// FIXME: This should go through the common message buffer someday
 static void Build_Send_SER_Packet( struct gps_device_t *session,
        uint32_t layer_id UNUSED, uint32_t pkt_id, uint32_t length,
        uint32_t data )
@@ -1032,7 +1033,11 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 			    char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
 {
-    return gpsd_write(session, buf, buflen);
+    /*@ -mayaliasunique **/
+    session->msgbuflen = buflen;
+    (void)memcpy(session->msgbuf, buf, buflen);
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
+    /*@ +mayaliasunique **/
 }
 
 /* this is everything we export */

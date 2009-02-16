@@ -165,21 +165,25 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
 }
 
 /*@ +charint -usedef -compdef @*/
-static ssize_t italk_control_send(struct gps_device_t *session, char *msg, size_t msglen) {
-   ssize_t      status;
+static ssize_t italk_control_send(struct gps_device_t *session, 
+				  char *msg, size_t msglen) 
+{
+    ssize_t      status;
 
-   /* CONSTRUCT THE MESSAGE */
-
-   /* we may need to dump the message */
-   gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
-	msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
+    /*@ -mayaliasunique **/
+    session->msgbuflen = msglen;
+    (void)memcpy(session->msgbuf, msg, msglen);
+    /*@ +mayaliasunique **/
+    /* we may need to dump the message */
+    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
+		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
-   status = write(session->gpsdata.gps_fd, msg, msglen);
-   (void)tcdrain(session->gpsdata.gps_fd);
+    status = write(session->gpsdata.gps_fd, msg, msglen);
+    (void)tcdrain(session->gpsdata.gps_fd);
 #else
-   status = -1;
+    status = -1;
 #endif /* ALLOW_RECONFIGURE */
-   return(status);
+    return(status);
 }
 /*@ -charint +usedef +compdef @*/
 
@@ -403,21 +407,14 @@ const struct gps_type_t italk_binary =
 static int literal_send(int fd, const char *fmt, ... )
 /* ship a raw command to the GPS */
 {
-    int status;
-    char buf[BUFSIZ];
+    ssize_t status;
     va_list ap;
 
     va_start(ap, fmt) ;
-    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+    (void)vsnprintf(session->msgbuf, sizeof(session->msgbuf), fmt, ap);
     va_end(ap);
-    status = (int)write(fd, buf, strlen(buf));
-    if (status == (int)strlen(buf)) {
-	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
-	return status;
-    } else {
-	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
-	return -1;
-    }
+    session->msgbuflen = strlen(session->msgbuf);
+    return gpsd_write(fd, session->msgbuf, session->msgbuflen);
 }
 
 static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)

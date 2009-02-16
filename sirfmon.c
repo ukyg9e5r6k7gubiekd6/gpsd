@@ -93,7 +93,7 @@ struct mdevice_t {
 };
 
 // SiRF-specific code will need this.
-extern bool monitor_control_send(unsigned char *buf, size_t len);
+static bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len);
 
 /*****************************************************************************
  *****************************************************************************
@@ -580,6 +580,7 @@ static bool sirf_windows(void)
 {
     unsigned int i;
 
+    /*@ -onlytrans @*/
     mid2win   = newwin(7,  80,  1, 0);
     mid4win   = newwin(15, 30,  8, 0);
     mid6win   = newwin(3,  50,  8, 30);
@@ -697,6 +698,7 @@ static bool sirf_windows(void)
     display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
     /*@ +nullpass @*/
+    /*@ -onlytrans @*/
 
     return true;
 }
@@ -709,6 +711,7 @@ static void sirf_probe(void)
     /*@ +compdef @*/
 }
 
+/*@ -globstate */
 static void sirf_refresh(bool inloop)
 {
     /* refresh navigation parameters */
@@ -718,6 +721,7 @@ static void sirf_refresh(bool inloop)
 
     (void)wrefresh(mid2win);
     (void)wrefresh(mid4win);
+    /*@ -nullpass -nullderef @*/
     if (!dispmode) {
 	refresh_rightpanel1();
     } else {
@@ -727,7 +731,9 @@ static void sirf_refresh(bool inloop)
     }
     if (inloop)
 	(void)wrefresh(mid19win);
+    /*@ +nullpass -nullderef @*/
 }
+/*@ +globstate */
 
 static int sirf_command(char line[])
 {
@@ -751,7 +757,7 @@ static int sirf_command(char line[])
 	return COMMAND_MATCH;
 
     case 'd':		/* MID 4 rate change -- not documented */
-	v = (unsigned)atoi(line+1);
+	v = atoi(line+1);
 	if (v > 30)
 	    return COMMAND_MATCH;
 	putbyte(buf, 0,0xa6);
@@ -800,7 +806,7 @@ static int sirf_command(char line[])
     return COMMAND_UNKNOWN;	/* no match */
 }
 
-const struct mdevice_t sirf = {
+static const struct mdevice_t sirf = {
     .probe = sirf_probe,
     .analyze = sirf_analyze,
     .windows = sirf_windows,
@@ -876,21 +882,34 @@ static ssize_t readpkt(void)
 }
 /*@ +globstate @*/
 
-bool monitor_control_send(unsigned char *buf, size_t len)
+static void monitor_dump_send(void)
 {
-    ssize_t st;
     size_t i;
 
-    /* bug: the debug window dump is payload only */
     (void)wprintw(debugwin, ">>>");
-    for (i = 0; i < len; i++)
-	(void)wprintw(debugwin, " %02x",buf[i]);
+    if (session.msgbuf[0] == '$') {
+	for (i = 0; i < session.msgbuflen; i++)
+	    if (isprint(session.msgbuf[i]))
+		(void)waddch(debugwin, (chtype)session.msgbuf[i]);
+	    else
+		(void)wprintw(debugwin, "\\x%02x", (unsigned char)session.msgbuf[i]);
+    }else {
+	for (i = 0; i < session.msgbuflen; i++)
+	    (void)wprintw(debugwin, " %02x", (unsigned char)session.msgbuf[i]);
+    }
     (void)wprintw(debugwin, "\n");
+}
+
+static bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
+{
+    monitor_dump_send();
 
     if (controlfd == -1) 
 	return false;
     else {
 	int savefd;
+	ssize_t st;
+
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
@@ -905,7 +924,7 @@ bool monitor_control_send(unsigned char *buf, size_t len)
 	    session.gpsdata.gps_fd = controlfd;
 	}
 
-	len = sirf.driver->control_send(&session, (char *)buf, len);
+	st = sirf.driver->control_send(&session, (char *)buf, len);
 
 	if (!serial) {
 	    /* stop pretending now */
@@ -1040,7 +1059,7 @@ int main (int argc, char **argv)
     }
     /*@ +branchstate @*/
 
-    /*@ -nullpass -branchstate @*/
+    /*@ -nullpass -branchstate -compdef @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
 	colon1 = strchr(arg, ':');
@@ -1101,13 +1120,13 @@ int main (int argc, char **argv)
 	}
 	/* hunt for packet type and serial parameters */
 	for (seq = 1; session.device_type == NULL; seq++) {
-	    gps_mask_t status = get_packet(&session);
+	    gps_mask_t valid = get_packet(&session);
 
-	    if (status & ERROR_SET) {
+	    if (valid & ERROR_SET) {
 		gpsd_report(LOG_ERROR,
 			    "autodetection failed.\n");
 		exit(2);
-	    } else if (status & ONLINE_SET) {
+	    } else if (valid & ONLINE_SET) {
 		gpsd_report(LOG_IO,
 			    "autodetection after %d reads.\n", seq);
 		break;
@@ -1250,6 +1269,7 @@ int main (int argc, char **argv)
 	    switch (line[0])
 	    {
 	    case 'b':
+		monitor_dump_send();
 		if (serial) {
 		    v = (unsigned)atoi(line+1);
 		    /* Ugh...should have a controlfd slot 
@@ -1258,7 +1278,7 @@ int main (int argc, char **argv)
 		    if (sirf.driver->speed_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			sirf.driver->speed_switcher(&session, v);
+			(void)sirf.driver->speed_switcher(&session, v);
 			/*
 			 * See the comment attached to the 'B' command in gpsd.
 			 * Allow the control string time to register at the
@@ -1289,8 +1309,8 @@ int main (int argc, char **argv)
 		    (void)fclose(logfile);
 		}
 
-		logfile = fopen(line+1,"a");
-		(void)wprintw(debugwin, ">>> Logging to %s on", logfile);
+		if ((logfile = fopen(line+1,"a")) != NULL)
+		    (void)wprintw(debugwin, ">>> Logging to %s on", logfile);
 		break;
 
 	    case 'q':
@@ -1298,6 +1318,7 @@ int main (int argc, char **argv)
 
 	    case 's':
 		len = 0;
+		/*@ -compdef @*/
 		while (*p != '\0')
 		{
 		    (void)sscanf(p,"%x",&v);
@@ -1312,6 +1333,7 @@ int main (int argc, char **argv)
 		    (void)monitor_control_send(buf, (size_t)len);
 		else
 		    error_and_pause("Device type has no control-send method.");
+		/*@ +compdef @*/
 		break;
 	    }
 	}

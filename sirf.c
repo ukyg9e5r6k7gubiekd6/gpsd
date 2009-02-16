@@ -125,19 +125,19 @@ bool sirf_write(int fd, unsigned char *msg) {
 }
 
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t len) {
-    /*@ +charint +matchanyintegral -initallelements @*/
-    static unsigned char msgbuf[MAX_PACKET_LENGTH] = {0xa0, 0xa2,};
-    size_t msgbuflen;
+    /*@ +charint +matchanyintegral -initallelements -mayaliasunique @*/
+    session->msgbuf[0] = 0xa0;
+    session->msgbuf[1] = 0xa2;
+    session->msgbuf[2] = (len >> 8) & 0xff;
+    session->msgbuf[3] = len & 0xff;
+    memcpy(session->msgbuf+4, msg, len);
+    session->msgbuf[len + 6] = 0xb0;
+    session->msgbuf[len + 7] = 0xb3;
+    session->msgbuflen = len + 8;
 
-    msgbuf[2] = (len >> 8) & 0xff;
-    msgbuf[3] = len & 0xff;
-    memcpy(msgbuf+4, msg, len);
-    msgbuf[len + 6] = 0xb0;
-    msgbuf[len + 7] = 0xb3;
-    msgbuflen = len + 8;
-
-    return sirf_write(session->gpsdata.gps_fd, msgbuf) ? msgbuflen : -1;
-    /*@ -charint -matchanyintegral +initallelements @*/
+    return sirf_write(session->gpsdata.gps_fd, 
+		      (unsigned char *)session->msgbuf) ? session->msgbuflen : -1;
+    /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 
 static bool sirf_speed(int ttyfd, speed_t speed, int parity, int stopbits)
@@ -990,7 +990,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 {
     /*
      * FIXME: Someday, decode the N/O/E parity char in 
-     * session->gpsdata.stopbits and use that to set parity too.  
+     * session->gpsdata.parity and use that to set parity too.  
      * Not that it's likely to matter, as these always run at 8N1.
      * But on the off chance some systenms integrator does a wacky thing...
      */

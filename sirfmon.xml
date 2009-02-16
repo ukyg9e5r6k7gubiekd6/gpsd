@@ -178,10 +178,11 @@ MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
-<para>The debug window dump of a control message send to the GPS
-(preceded by '>>>') is payload only, and will not include 
-framing header/trailer bytes or the checksum.  Baud-rate
-change strings aren't displayed at all.</para>
+<para>Debug window dumps of control message sends to the GPS (preceded
+by '>>>') are only supported for the following drivers: NMEA, SiRF,
+EverMore, Navcom, UBX, TSIP, iTalk, Garmintxt. This feature will not
+work for Zodiacs and not always work for Garmins in binary
+mode.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

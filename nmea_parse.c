@@ -899,12 +899,14 @@ void nmea_add_checksum(char *sentence)
 ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len UNUSED)
 /* ship a command to the GPS, adding * and correct checksum */
 {
-    if (buf[0] == '$') {
-	(void)strlcat(buf, "*", BUFSIZ);
-	nmea_add_checksum(buf);
+    (void)strlcpy(session->msgbuf, buf, sizeof(session->msgbuf));
+    if (session->msgbuf[0] == '$') {
+	(void)strlcat(session->msgbuf, "*", sizeof(session->msgbuf));
+	nmea_add_checksum(session->msgbuf);
     } else
-	(void)strlcat(buf, "\r\n", BUFSIZ);
-    return gpsd_write(session, buf, strlen(buf));
+	(void)strlcat(session->msgbuf, "\r\n", sizeof(session->msgbuf));
+    session->msgbuflen = strlen(session->msgbuf);
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 
 ssize_t nmea_send(struct gps_device_t *session, const char *fmt, ... )
