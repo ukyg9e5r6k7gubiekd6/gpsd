@@ -416,7 +416,7 @@ int main(int argc, char **argv)
 		 * gets ignored or flushed.
 		 */
 		if (!echo) {
-		    /* suppresses probing for subrtpes */
+		    /* suppresses probing for subtypes */
 		    context.readonly = true;
 		    (void)sleep(1);
 		    (void) alarm(timeout);
