@@ -451,7 +451,7 @@ int main (int argc, char **argv)
     statwin   = newwin(1,  30, 0, 0);
     cmdwin    = newwin(1,  0,  0, 30);
     debugwin  = newwin(0,   0, sirf.min_y+1, 0);
-    if (!sirf.windows() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
+    if (!sirf.initialize() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
 	goto quit;
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);

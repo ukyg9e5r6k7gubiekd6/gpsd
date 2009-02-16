@@ -635,7 +635,7 @@ static bool sirf_windows(void)
 }
 
 /*@ -globstate */
-static void sirf_refresh(bool inloop)
+static void sirf_repaint(bool inloop)
 {
     /* refresh navigation parameters */
     if (dispmode && (time(NULL) % 10 == 0)){
@@ -702,11 +702,24 @@ static int sirf_command(char line[])
     return COMMAND_UNKNOWN;	/* no match */
 }
 
+static void sirf_wrap(void)
+{
+    (void)delwin(mid2win);
+    (void)delwin(mid4win);
+    (void)delwin(mid6win);
+    (void)delwin(mid7win);
+    (void)delwin(mid9win);
+    (void)delwin(mid13win);
+    (void)delwin(mid19win);
+    (void)delwin(mid27win);
+}
+
 const struct mdevice_t sirf = {
+    .initialize = sirf_windows,
     .analyze = sirf_analyze,
-    .windows = sirf_windows,
-    .repaint = sirf_refresh,
+    .repaint = sirf_repaint,
     .command = sirf_command,
+    .wrap = sirf_wrap,
     .min_y = 23, .min_x = 80,
     .driver = &sirf_binary,
 };
