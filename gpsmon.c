@@ -92,7 +92,7 @@ extern struct mdevice_t sirf_mdt;
 
 extern const struct gps_type_t nmea;
 
-static WINDOW *nmeawin, *satwin;
+static WINDOW *nmeawin, *satwin, *gprmcwin;
 static clock_t last_tick, tick_interval;
 
 #define SENTENCELINE 1
@@ -107,7 +107,7 @@ static bool nmea_windows(void)
     (void)syncok(nmeawin, true);
 
     wattrset(nmeawin, A_BOLD);
-    mvwaddstr(nmeawin, SENTENCELINE, 1, "Sentences: ");
+    mvwaddstr(nmeawin, 2, 34, " Sentences ");
     wattrset(nmeawin, A_NORMAL);
     /*@ +onlytrans @*/
 
@@ -120,6 +120,18 @@ static bool nmea_windows(void)
 	display(satwin, (int)(i+2), 1, "%2d",i);
     display(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
+
+    gprmcwin  = derwin(devicewin, 7, 30, 3, 20);
+    (void)wborder(gprmcwin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)syncok(gprmcwin, true);
+    (void)wattrset(gprmcwin, A_BOLD);
+    display(gprmcwin, 1, 1, "Time: ");
+    display(gprmcwin, 2, 1, "Latitude: ");
+    display(gprmcwin, 3, 1, "Longitude: ");
+    display(gprmcwin, 4, 1, "Speed: ");
+    display(gprmcwin, 5, 1, "Course: ");
+    display(gprmcwin, 6, 12, " RMC ");
+    (void)wattrset(gprmcwin, A_NORMAL);
 
     last_tick = timestamp();
 
@@ -150,7 +162,7 @@ static void nmea_update(size_t len)
 		    *--s_end = '.';
 		    *--s_end = '.';
 		}
-	        mvwaddstr(nmeawin, SENTENCELINE, 11, sentences);
+	        mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
 	    }
 
 	    /* 
@@ -165,9 +177,9 @@ static void nmea_update(size_t len)
 
 		tick_interval = now - last_tick;
 		if (findme != NULL) {
-		    mvwchgat(nmeawin, SENTENCELINE, 11, xmax-13, A_NORMAL, 0, NULL);
+		    mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
 		    mvwchgat(nmeawin, 
-		    	 SENTENCELINE, 11+(findme-sentences), 
+		    	 SENTENCELINE, 1+(findme-sentences), 
 		    	 strlen(newid),
 		    	 A_BOLD, 0, NULL);
 		}
@@ -185,6 +197,47 @@ static void nmea_update(size_t len)
 				  session.gpsdata.elevation[i],
 				  session.gpsdata.ss[i]);
 		}
+	    }
+
+	    if (strcmp(newid, "GPRMC") == 0) {
+		char scr[128];
+		if (isnan(session.gpsdata.fix.time)==0) {
+		    (void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
+		} else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwaddstr(gprmcwin, 1, 7, scr);
+
+
+		/* Fill in the latitude. */
+		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
+		    (void)snprintf(scr, sizeof(scr), "%s %c", 
+				   deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
+				   (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
+		} else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwaddstr(gprmcwin, 2, 11, scr);
+
+		/* Fill in the longitude. */
+		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
+		    (void)snprintf(scr, sizeof(scr), "%s %c", 
+				   deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
+				   (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
+		} else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwaddstr(gprmcwin, 3, 11, scr);
+
+		/* Fill in the speed. */
+		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
+		    (void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
+		else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwaddstr(gprmcwin, 4, 11, scr);
+
+		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
+		    (void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
+		else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwprintw(gprmcwin, 5, 11, scr);
 	    }
 	}
     }
