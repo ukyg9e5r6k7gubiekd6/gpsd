@@ -81,7 +81,63 @@ static FILE *logfile;
 #define display	(void)mvwprintw
 
 /* external capability tables */
-extern struct mdevice_t sirf;
+extern struct mdevice_t sirf_mdt;
+
+/******************************************************************************
+ *
+ * The NMEA driver, for generic NMEA devices.
+ *
+ ******************************************************************************/
+
+extern const struct gps_type_t nmea;
+
+static WINDOW *nmeawin;
+
+static bool nmea_windows(void)
+{
+    /*@ -onlytrans @*/
+    nmeawin = newwin(4, 80, 1, 0);
+
+    wattrset(nmeawin, A_BOLD);
+    mvwaddstr(nmeawin, 2, 1, "Sentences: ");
+    wattrset(nmeawin, A_NORMAL);
+
+    (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    /*@ +onlytrans @*/
+
+    return (nmeawin != NULL);
+}
+
+/*@ -globstate */
+static void nmea_update(size_t len)
+{
+    if (len > 0 && session.packet.outbuflen > 0)
+    {
+    }
+
+    (void) wrefresh(nmeawin);
+}
+/*@ +globstate */
+
+static void nmea_wrap(void)
+{
+    (void)delwin(nmeawin);
+}
+
+const struct mdevice_t nmea_mdt = {
+    .initialize = nmea_windows,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 4, .min_x = 80,
+    .driver = &nmea,
+};
+
+const struct mdevice_t *drivers[] = {
+    &nmea_mdt,
+    &sirf_mdt,
+};
+const struct mdevice_t **active = &drivers[1];
 
 /******************************************************************************
  *
@@ -194,7 +250,7 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 	    session.gpsdata.gps_fd = controlfd;
 	}
 
-	st = sirf.driver->control_send(&session, (char *)buf, len);
+	st = (*active)->driver->control_send(&session, (char *)buf, len);
 
 	if (!serial) {
 	    /* stop pretending now */
@@ -414,15 +470,17 @@ int main (int argc, char **argv)
 		    session.gpsdata.gps_device, 
 		    gpsd_id(&session), session.gpsdata.baudrate);
 
+#if 0
 	/* This will change when we support more types */
 	if (session.packet.type == NMEA_PACKET) {
-	    sirf.driver->mode_switcher(&session, MODE_BINARY);
+	    (*active)->driver->mode_switcher(&session, MODE_BINARY);
 	    gpsd_report(LOG_PROG, "switching to SiRF binary mode.\n");
 	} else if (session.packet.type != SIRF_PACKET) {
 	    gpsd_report(LOG_ERROR, "cannot yet handle packet type %d.\n",
 		       session.packet.type);
 	    exit(1);
 	}
+#endif
 
 	controlfd = session.gpsdata.gps_fd;
 	serial = true;
@@ -450,8 +508,8 @@ int main (int argc, char **argv)
     /*@ -onlytrans @*/
     statwin   = newwin(1,  30, 0, 0);
     cmdwin    = newwin(1,  0,  0, 30);
-    debugwin  = newwin(0,   0, sirf.min_y+1, 0);
-    if (!sirf.initialize() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
+    debugwin  = newwin(0,   0, (*active)->min_y+1, 0);
+    if (!(*active)->initialize() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
 	goto quit;
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);
@@ -477,15 +535,15 @@ int main (int argc, char **argv)
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wrefresh(statwin);
 	(void)wmove(cmdwin, 0,0);
-	(void)wprintw(cmdwin, "cmd> ");
+	(void)wprintw(cmdwin, (*active)->driver->type_name);
+	(void)wprintw(cmdwin, "> ");
 	(void)wclrtoeol(cmdwin);
 	(void)refresh();
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    //sirf.analyze(session.packet.outbuffer,session.packet.outbuflen);
 	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
-	sirf.update(len);
+	(*active)->update(len);
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
@@ -497,7 +555,7 @@ int main (int argc, char **argv)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
-	    (void)wmove(cmdwin, 0,5);
+	    (void)wmove(cmdwin, 0,strlen((*active)->driver->type_name)+2);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
 	    /*@ -usedef -compdef @*/
@@ -520,12 +578,14 @@ int main (int argc, char **argv)
 	    while (*p != '\0' && isspace(*p))
 		p++;
 
-	    status = sirf.command(line);
-	    if (status == COMMAND_TERMINATE)
-		goto quit;
-	    else if (status == COMMAND_MATCH)
-		continue;
-	    assert(status == COMMAND_UNKNOWN);
+	    if ((*active)->command != NULL) {
+		status = (*active)->command(line);
+		if (status == COMMAND_TERMINATE)
+		    goto quit;
+		else if (status == COMMAND_MATCH)
+		    continue;
+		assert(status == COMMAND_UNKNOWN);
+	    }
 	    switch (line[0])
 	    {
 	    case 'b':
@@ -535,10 +595,10 @@ int main (int argc, char **argv)
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
 		     */
-		    if (sirf.driver->speed_switcher) {
+		    if ((*active)->driver->speed_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			(void)sirf.driver->speed_switcher(&session, v);
+			(void)(*active)->driver->speed_switcher(&session, v);
 			/*
 			 * See the comment attached to the 'B' command in gpsd.
 			 * Allow the control string time to register at the
@@ -574,10 +634,10 @@ int main (int argc, char **argv)
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
 		     */
-		    if (sirf.driver->mode_switcher) {
+		    if ((*active)->driver->mode_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			sirf.driver->mode_switcher(&session, (int)v);
+			(*active)->driver->mode_switcher(&session, (int)v);
 			monitor_dump_send();
 			(void)tcdrain(session.gpsdata.gps_fd);
 			(void)usleep(50000);
@@ -621,7 +681,7 @@ int main (int argc, char **argv)
 		    while (*p != '\0' && isspace(*p))
 			p++;
 		}
-		if (sirf.driver->control_send != NULL)
+		if ((*active)->driver->control_send != NULL)
 		    (void)monitor_control_send(buf, (size_t)len);
 		else
 		    error_and_pause("Device type has no control-send method.");

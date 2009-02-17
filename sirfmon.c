@@ -149,7 +149,6 @@ static void decode_ecef(double x, double y, double z,
 /*@ -globstate */
 static void sirf_update(size_t len)
 {
-
     if (len > 0 && session.packet.outbuflen > 0)
     {
 	int i,j,ch,off,cn;
@@ -707,7 +706,7 @@ static void sirf_wrap(void)
     (void)delwin(mid27win);
 }
 
-const struct mdevice_t sirf = {
+const struct mdevice_t sirf_mdt = {
     .initialize = sirf_windows,
     .update = sirf_update,
     .command = sirf_command,

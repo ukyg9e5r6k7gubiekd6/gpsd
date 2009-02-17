@@ -239,7 +239,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
-static const struct gps_type_t nmea = {
+const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* it's the default */
