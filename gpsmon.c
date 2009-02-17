@@ -119,13 +119,15 @@ static void nmea_update(size_t len)
 	static char sentences[NMEA_MAX];
 
 	if (session.packet.outbuffer[0] == '$') {
+	    int ymax, xmax;
 	    double now;
 	    char newid[NMEA_MAX];
+	    getmaxyx(nmeawin, ymax, xmax);
 	    (void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
 			  strcspn((char *)session.packet.outbuffer+1, ",")+1);
 	    if (strstr(sentences, newid) == NULL) {
 		char *s_end = sentences + strlen(sentences);
-		if (strlen(sentences) + strlen(newid) < sizeof(sentences)) {
+		if (strlen(sentences) + strlen(newid) < xmax-2) {
 		    *s_end++ = ' '; 
 		    (void)strcpy(s_end, newid);
 		} else {
@@ -149,7 +151,7 @@ static void nmea_update(size_t len)
 		tick_interval = now - last_tick;
 		if (findme != NULL) {
 		    (void)wprintw(debugwin, newid);
-		    mvwchgat(nmeawin, 2, 11, 80, A_NORMAL, 0, NULL);
+		    mvwchgat(nmeawin, 2, 11, xmax-13, A_NORMAL, 0, NULL);
 		    mvwchgat(nmeawin, 
 		    	 2, 11+(findme-sentences), 
 		    	 strlen(newid),
@@ -557,7 +559,7 @@ int main (int argc, char **argv)
     if (!(*active)->initialize() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
 	goto quit;
     (void)scrollok(debugwin, true);
-    (void)wsetscrreg(debugwin, 0, LINES-21);
+    (void)wsetscrreg(debugwin, 0, LINES-(*active)->min_y-1);
     /*@ +onlytrans @*/
 
     (void)wmove(debugwin,0, 0);
