@@ -92,6 +92,7 @@ extern struct mdevice_t sirf_mdt;
 extern const struct gps_type_t nmea;
 
 static WINDOW *nmeawin;
+static clock_t last_tick, tick_interval;
 
 static bool nmea_windows(void)
 {
@@ -105,6 +106,8 @@ static bool nmea_windows(void)
     (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     /*@ +onlytrans @*/
 
+    last_tick = timestamp();
+
     return (nmeawin != NULL);
 }
 
@@ -116,13 +119,13 @@ static void nmea_update(size_t len)
 	static char sentences[NMEA_MAX];
 
 	if (session.packet.outbuffer[0] == '$') {
+	    double now;
 	    char newid[NMEA_MAX];
 	    (void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
 			  strcspn((char *)session.packet.outbuffer+1, ",")+1);
 	    if (strstr(sentences, newid) == NULL) {
 		char *s_end = sentences + strlen(sentences);
 		if (strlen(sentences) + strlen(newid) < sizeof(sentences)) {
-		
 		    *s_end++ = ' '; 
 		    (void)strcpy(s_end, newid);
 		} else {
@@ -132,6 +135,28 @@ static void nmea_update(size_t len)
 		}
 	        mvwaddstr(nmeawin, 2, 11, sentences);
 	    }
+
+	    /* 
+	     * If the interval between this and last update is 
+	     * the longest we've seen yet, boldify the corresponding
+	     * tag.
+	     */
+	    now = timestamp();
+	    if (now > last_tick && (now - last_tick) > tick_interval)
+	    {
+		char *findme = strstr(sentences, newid);
+
+		tick_interval = now - last_tick;
+		if (findme != NULL) {
+		    (void)wprintw(debugwin, newid);
+		    mvwchgat(nmeawin, 2, 11, 80, A_NORMAL, 0, NULL);
+		    mvwchgat(nmeawin, 
+		    	 2, 11+(findme-sentences), 
+		    	 strlen(newid),
+		    	 A_BOLD, 0, NULL);
+		}
+	    }
+	    last_tick = now;
 	}
     }
 
