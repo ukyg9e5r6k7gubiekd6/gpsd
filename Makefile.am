@@ -9,7 +9,7 @@ XMLTO = xmlto
 # Conditionally add programs depending on libraries that may or may not be present.
 #
 if HAVE_NCURSES
-CURSESPROGS = cgps sirfmon
+CURSESPROGS = cgps gpsmon
 endif
 if HAVE_MOTIF
 MOTIF_PROGS = xgps
@@ -96,10 +96,10 @@ gpsdlcdd_SOURCES = gpsdlcdd.c
 gpsdlcdd_LDADD = $(LIBM) libgps.la -lm
 
 #
-# Build sirfmon
+# Build gpsmon
 #
-sirfmon_SOURCES = sirfmon.c gpsmon.c
-sirfmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
+gpsmon_SOURCES = sirfmon.c gpsmon.c
+gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build rtcmdecode
@@ -239,7 +239,7 @@ man_MANS = \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
-	sirfmon.1 \
+	gpsmon.1 \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
 	gpsctl.1 \
@@ -278,7 +278,7 @@ gpsprof.1: gpsprof.xml
 
 gpsfake.1: gpsfake.xml
 
-sirfmon.1: sirfmon.xml
+gpsmon.1: gpsmon.xml
 
 gpspipe.1: gpspipe.xml
 
@@ -317,7 +317,7 @@ EXTRA_DIST = \
 	gpsprof.xml \
 	gpsfake.xml \
 	gpsctl.xml \
-	sirfmon.xml \
+	gpsmon.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
 	rtcm-104.xml \
@@ -366,8 +366,8 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on gpsctl..."
 	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
-	@echo "Running splint on sirfmon..."
-	-splint $(SPLINTOPTS) $(sirfmon_SOURCES)
+	@echo "Running splint on gpsmon..."
+	-splint $(SPLINTOPTS) $(gpsmon_SOURCES)
 	@echo "Running splint on gpspipe..."
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on rtcmdecode..."

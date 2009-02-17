@@ -222,8 +222,8 @@ and fix latency.</dd>
 <dt><a href="gpscat.html">gpscat.1</a></dt>
 <dd>The <code>gpscat</code> tool dumps output from a serial device.</dd>
 
-<dt><a href="sirfmon.html">sirfmon.1</a></dt>
-<dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
+<dt><a href="gpsmon.html">gpsmon.1</a></dt>
+<dd>The <code>gpmon</code> real-time packet monitor and diagnostic tool.</dd>
 
 <dt><a href="gpspipe.html">gpspipe.1</a></dt> <dd>A simple client that
 captures GPS output and/or <code>gpsd</code> reports and sends it to

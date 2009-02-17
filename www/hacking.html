@@ -220,12 +220,12 @@ not accidents, they are essential to ensure that the basic
 GPS-monitoring code is not merely correct but <em>demonstrably</em>
 correct.</p>
 
-<p>We support a tool, <code>sirfmon</code>, which is a low-level
-packet monitor and diagnostic tool for the chipset with 80% market
-share.  sirfmon is capable of tuning some device-specific control
-settings such as the SiRF static-navigation mode.  A future direction
-of the project is to support diagnostic monitoring and tuning for
-other chipsets.</p>
+<p>We support a tool, <code>gpsmon</code>, which is a low-level packet
+monitor and diagnostic tool. <code>gpsmon</code> is capable of tuning
+some device-specific control settings such as the SiRF
+static-navigation mode.  A future direction of the project is to
+support diagnostic monitoring and tuning for our entire range of
+chipsets.</p>
 
 <h2 id="upgrading">The upgrading tools</h2>
 
@@ -1510,7 +1510,7 @@ report on every packet, clear at start-of-cycle" policy.</p>
 
 <h2 id="shipstrings">Allowing clients to ship arbitrary control strings to a GPS</h2>
 
-<p>Tempting &mdash; it would allow us to do sirfmon-like things with the
+<p>Tempting &mdash; it would allow us to do gpsmon-like things with the
 daemon running &mdash; but a bad idea.  It would make denial-of-service 
 attacks on applications using the GPS far too easy.  For example,
 suppose the control string were a baud-rate change?</p>
@@ -1606,7 +1606,7 @@ Each has a different risk profile.</p>
 <h3>1) Exterior code</h3>
 
 <p>Test clients and test tools: <code>xgps</code>, <code>cgps</code>,
-<code>gpsfake</code>, <code>gpsprof</code>, <code>sirfmon</code>, etc.
+<code>gpsfake</code>, <code>gpsprof</code>, <code>gpsmon</code>, etc.
 These are at low risk of breakage and are easy to eyeball-check for
 correctness -- when they go wrong they tend to do so in obvious ways.
 Point errors in a tool don't compromise the other tools or the

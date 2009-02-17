@@ -425,10 +425,10 @@ int main (int argc, char **argv)
 	    controlsock = optarg;
 	    break;
 	case 'V':
-	    (void)printf("sirfmon %s\n", VERSION);
+	    (void)printf("gpsmon %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    (void)fputs("usage:  sirfmon [-?hv] [-F controlsock] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  gpsmon [-?hv] [-F controlsock] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
@@ -531,7 +531,7 @@ int main (int argc, char **argv)
 	if (logfile)
 	    (void)fclose(logfile);
 	(void)endwin();
-	(void)fputs("sirfmon: assertion failure, probable I/O error\n", stderr);
+	(void)fputs("gpsmon: assertion failure, probable I/O error\n", stderr);
 	exit(1);
     }
 

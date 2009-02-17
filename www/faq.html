@@ -102,11 +102,8 @@ rapidly.  If we can't reproduce it, you might get lucky or you might
 not &mdash; and we try hard, but all too often the result is 'not'.</p>
 
 <p>Therefore the most important step you can take is to capture a log
-of some GPS output that reproduces the bug.  If you're using a SiRF
-chip, the 'l' command of sirfmon will help you.  If you're using
-a GPS that emits NMEA, telnetting to port 2947 and enabling raw
-mode will do the trick.  For non-SiRF binary protocols, you will
-have to cat direct from the serial device into a file.</p>
+of some GPS output that reproduces the bug; <code>gpscat</code> will
+help you.</p>
 
 <h3>6. Trim the capture log that reproduces the problem</h3>
 
@@ -371,7 +368,7 @@ of samples.</p>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
 switching on static navigation mode using the 'c' command in
-<code>sirfmon</code>. Static navigation mode will freeze your position
+<code>gpsmon</code>. Static navigation mode will freeze your position
 if your speed is below 1.2 m/s for three seconds, and will begin
 updating your position again when speed exceeds 1.4 m/s. This prevents
 multipath, weak signals, or poor constellation geometry from dragging

@@ -199,7 +199,7 @@ static ssize_t _proto__write(struct gps_device_t *session,
 
    /* 
     * This copy to a public assembly buffer 
-    * enables sirfmon to snoop the control message
+    * enables gpsmon to snoop the control message
     * acter it has been sent.
     */
    session->msgbuflen = msglen;

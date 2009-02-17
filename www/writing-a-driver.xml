@@ -16,6 +16,15 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.4</revnumber>
+      <date>17 February 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr to reflect the renaming of sirfmon to gpsmon,
+         and document the control_send method.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.3</revnumber>
       <date>14 November 2006</date>
       <authorinitials>md</authorinitials>
@@ -601,6 +610,19 @@ binary mode (1).</para>
 to change the maximum number of fixes your device can generate
 in 1 second.</para>
 
+<!-- added by ESR, 2009 -->
+<para><structfield>.control_send</structfield> points to a block of
+code that can take a buffer full of message payload, wrap iit in
+appropriate headers and trailers and checksumming, and ship it to the
+device.  This entry point is not used by gpsd itself; it's for
+diagnotic tools like gpsctl and gpsmon.  Once you've written it,
+though, you may find it useful for implementing the other switcher
+methods and whatever other probe strings you need to send.  Note: if
+possible, assemble your packet in
+<structfield>session->msgbuf</structfield> and put the length in
+<structfield>session->msgbuflen</structfield>; this will allow 
+gpsmon to display the control messages it sends for you.</para>
+
 <para><structfield>.cycle_chars</structfield> is explained in
 <quote>Throughput computation for baud rate changes</quote> in the
 <quote>Hacker's Guide to GPSD</quote> in the general
@@ -725,10 +747,11 @@ working virtually directly with the system hardware. I have documented
 this process in some detail in the hope that it may save some other
 poor soul the trials I went through.</para>
 
+<!-- Mick actually looked at sirfmon -->
 <para>I looked at the code in 
 <quote><filename>serial.c</filename></quote>, 
 <quote><filename>garmin.c</filename></quote> and 
-<quote><filename>sirfmon.c</filename></quote> for inspiration
+<quote><filename>gpsmon.c</filename></quote> for inspiration
 and noticed some important things:</para>
 
 <itemizedlist>
