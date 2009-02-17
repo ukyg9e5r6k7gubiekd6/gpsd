@@ -92,15 +92,17 @@ extern struct mdevice_t sirf_mdt;
 
 extern const struct gps_type_t nmea;
 
-static WINDOW *nmeawin;
+static WINDOW *nmeawin, *satwin;
 static clock_t last_tick, tick_interval;
 
-#define SENTENCELINE 2
+#define SENTENCELINE 1
 
 static bool nmea_windows(void)
 {
+    int i;
+
     /*@ -onlytrans @*/
-    nmeawin = derwin(devicewin, 4, 80, 0, 0);
+    nmeawin = derwin(devicewin, 3,  80, 0, 0);
     (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(nmeawin, true);
 
@@ -108,6 +110,16 @@ static bool nmea_windows(void)
     mvwaddstr(nmeawin, SENTENCELINE, 1, "Sentences: ");
     wattrset(nmeawin, A_NORMAL);
     /*@ +onlytrans @*/
+
+    satwin  = derwin(devicewin, 15, 20, 3, 0);
+    (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)syncok(satwin, true);
+    (void)wattrset(satwin, A_BOLD);
+    display(satwin, 1, 1, " Ch SV  Az El S/N");
+    for (i = 0; i < SIRF_CHANNELS; i++)
+	display(satwin, (int)(i+2), 1, "%2d",i);
+    display(satwin, 14, 7, " GSV ");
+    (void)wattrset(satwin, A_NORMAL);
 
     last_tick = timestamp();
 
@@ -161,6 +173,19 @@ static void nmea_update(size_t len)
 		}
 	    }
 	    last_tick = now;
+
+	    if (strcmp(newid, "GPGSV") == 0) {
+		int i;
+
+		for (i = 0; i < session.gpsdata.satellites; i++) {
+		    (void)wmove(satwin, i+2, 3);
+		    (void)wprintw(satwin, " %3d %3d%3d %3d", 
+				  session.gpsdata.PRN[i],
+				  session.gpsdata.azimuth[i],
+				  session.gpsdata.elevation[i],
+				  session.gpsdata.ss[i]);
+		}
+	    }
 	}
     }
 }
@@ -178,7 +203,7 @@ const struct mdevice_t nmea_mdt = {
     .update = nmea_update,
     .command = NULL,
     .wrap = nmea_wrap,
-    .min_y = 4, .min_x = 80,
+    .min_y = 18, .min_x = 80,
     .driver = &nmea,
 };
 
