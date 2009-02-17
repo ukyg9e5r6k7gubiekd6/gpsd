@@ -113,20 +113,18 @@ static void nmea_update(size_t len)
 {
     if (len > 0 && session.packet.outbuflen > 0)
     {
-	static char sentences[80];
+	static char sentences[NMEA_MAX];
 
 	if (session.packet.outbuffer[0] == '$') {
-	    char *s_end = sentences + strlen(sentences);
-	    char newid[4];
-	    (void)strlcpy(newid, (char *)session.packet.outbuffer + 3, 4);
+	    char newid[NMEA_MAX];
+	    (void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
+			  strcspn((char *)session.packet.outbuffer+1, ",")+1);
 	    if (strstr(sentences, newid) == NULL) {
-		if (strlen(sentences) + 3 < sizeof(sentences)) {
+		char *s_end = sentences + strlen(sentences);
+		if (strlen(sentences) + strlen(newid) < sizeof(sentences)) {
 		
 		    *s_end++ = ' '; 
-		    *s_end++ = session.packet.outbuffer[3];
-		    *s_end++ = session.packet.outbuffer[4];
-		    *s_end++ = session.packet.outbuffer[5];
-		    *s_end++ = '\0';
+		    (void)strcpy(s_end, newid);
 		} else {
 		    *--s_end = '.';
 		    *--s_end = '.';
@@ -136,7 +134,6 @@ static void nmea_update(size_t len)
 	    }
 	}
     }
-
 
     (void) wrefresh(nmeawin);
 }
