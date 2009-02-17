@@ -184,8 +184,9 @@ const struct mdevice_t nmea_mdt = {
 const struct mdevice_t *drivers[] = {
     &nmea_mdt,
     &sirf_mdt,
+    NULL,
 };
-const struct mdevice_t **active = &drivers[1];
+const struct mdevice_t **active;
 
 /******************************************************************************
  *
@@ -403,7 +404,7 @@ static void onsig(int sig UNUSED)
 int main (int argc, char **argv)
 {
     unsigned int v;
-    int option, status;
+    int option, status, last_type = BAD_PACKET;
     ssize_t len;
     char *p, *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
     char *server=NULL, *port = DEFAULT_GPSD_PORT, *device = NULL;
@@ -518,18 +519,6 @@ int main (int argc, char **argv)
 		    session.gpsdata.gps_device, 
 		    gpsd_id(&session), session.gpsdata.baudrate);
 
-#if 0
-	/* This will change when we support more types */
-	if (session.packet.type == NMEA_PACKET) {
-	    (*active)->driver->mode_switcher(&session, MODE_BINARY);
-	    gpsd_report(LOG_PROG, "switching to SiRF binary mode.\n");
-	} else if (session.packet.type != SIRF_PACKET) {
-	    gpsd_report(LOG_ERROR, "cannot yet handle packet type %d.\n",
-		       session.packet.type);
-	    exit(1);
-	}
-#endif
-
 	controlfd = session.gpsdata.gps_fd;
 	serial = true;
     }
@@ -554,14 +543,13 @@ int main (int argc, char **argv)
     curses_active = true;
 
     /*@ -onlytrans @*/
-    statwin   = newwin(1,                  30,                 0, 0);
-    devicewin = newwin((*active)->min_y+1, (*active)->min_x+1, 1, 0);
-    cmdwin    = newwin(1,                  0,                  0, 30);
-    debugwin  = newwin(0,                  0,                  (*active)->min_y+1, 0);
-    if (!(*active)->initialize() || statwin==NULL || cmdwin==NULL || devicewin== NULL || debugwin==NULL)
+    statwin   = newwin(1, 30, 0, 0);
+    cmdwin    = newwin(1, 0,  0, 30);
+    debugwin  = newwin(0, 0,  1, 0);
+    if (statwin==NULL || cmdwin==NULL || debugwin==NULL)
 	goto quit;
     (void)scrollok(debugwin, true);
-    (void)wsetscrreg(debugwin, 0, LINES-(*active)->min_y-1);
+    (void)wsetscrreg(debugwin, 0, LINES-1);
     /*@ +onlytrans @*/
 
     (void)wmove(debugwin,0, 0);
@@ -569,6 +557,7 @@ int main (int argc, char **argv)
     FD_ZERO(&select_set);
 
     for (;;) {
+	char *type_name = active ? (*active)->driver->type_name : "Unknown device";
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
 	    display(statwin, 0, 0, "%s %4d %c %d", 
@@ -582,20 +571,47 @@ int main (int argc, char **argv)
 		    server, port, session.gpsdata.gps_device);
 	    /*@ +nullpass @*/
 	(void)wattrset(statwin, A_NORMAL);
-	(void)wrefresh(statwin);
 	(void)wmove(cmdwin, 0,0);
-	(void)wprintw(cmdwin, (*active)->driver->type_name);
-	(void)wprintw(cmdwin, "> ");
-	(void)wclrtoeol(cmdwin);
-	(void)refresh();
+
+	/* get a packet */
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
-	(*active)->update(len);
+
+	/* switch types on packet receipt */
+	if (session.packet.type != last_type) {
+	    const struct mdevice_t **trial, **newdriver;
+	    last_type = session.packet.type;
+	    newdriver = NULL;
+	    for (trial = drivers; *trial; trial++)
+		if ((*trial)->driver == session.device_type)
+		    newdriver = trial;
+	    if (newdriver) {
+		if (active != NULL) {
+		    (*active)->wrap();
+		    (void)delwin(devicewin);
+		}
+		active = newdriver;
+		devicewin = newwin((*active)->min_y+1, (*active)->min_x+1,1,0);
+		if (!(*active)->initialize())
+		    goto quit;
+		(void)wresize(debugwin, LINES-(*active)->min_y-1, 80);
+		(void)mvwin(debugwin, (*active)->min_y+1, 0);
+		(void)wsetscrreg(debugwin, 0, LINES-(*active)->min_y-2);
+	    }
+	}
+
+	/* refresh all windows */
+	(void)wprintw(cmdwin, type_name);
+	(void)wprintw(cmdwin, "> ");
+	(void)wclrtoeol(cmdwin);
+	if (active != NULL)
+	    (*active)->update(len);
 	(void)wnoutrefresh(statwin);
 	(void)wnoutrefresh(cmdwin);
-	(void)wnoutrefresh(devicewin);
+	if (devicewin != 0)
+	    (void)wnoutrefresh(devicewin);
 	(void)wnoutrefresh(debugwin);
 	(void)doupdate();
 
@@ -642,7 +658,9 @@ int main (int argc, char **argv)
 	    {
 	    case 'b':
 		monitor_dump_send();
-		if (serial) {
+		if (active == NULL)
+		    error_and_pause("No device defined yet");
+		else if (serial) {
 		    v = (unsigned)atoi(line+1);
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
@@ -675,13 +693,15 @@ int main (int argc, char **argv)
 		}
 		break;
 
-	    case 'N':
+	    case 'n':
 		/* if argument not specified, toggle */
 		if (strcspn(line, "01") == strlen(line))
 		    v = (unsigned int)TEXTUAL_PACKET_TYPE(session.packet.type);
 		else
 		    v = (unsigned)atoi(line+1);
-		if (serial) {
+		if (active == NULL)
+		    error_and_pause("No device defined yet");
+		else if (serial) {
 		    // FIXME: some sort of debug window display here?
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
@@ -733,7 +753,9 @@ int main (int argc, char **argv)
 		    while (*p != '\0' && isspace(*p))
 			p++;
 		}
-		if ((*active)->driver->control_send != NULL)
+		if (active == NULL)
+		    error_and_pause("No device defined yet");
+		else if ((*active)->driver->control_send != NULL)
 		    (void)monitor_control_send(buf, (size_t)len);
 		else
 		    error_and_pause("Device type has no control-send method.");
