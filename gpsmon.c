@@ -113,7 +113,30 @@ static void nmea_update(size_t len)
 {
     if (len > 0 && session.packet.outbuflen > 0)
     {
+	static char sentences[80];
+
+	if (session.packet.outbuffer[0] == '$') {
+	    char *s_end = sentences + strlen(sentences);
+	    char newid[4];
+	    (void)strlcpy(newid, (char *)session.packet.outbuffer + 3, 4);
+	    if (strstr(sentences, newid) == NULL) {
+		if (strlen(sentences) + 3 < sizeof(sentences)) {
+		
+		    *s_end++ = ' '; 
+		    *s_end++ = session.packet.outbuffer[3];
+		    *s_end++ = session.packet.outbuffer[4];
+		    *s_end++ = session.packet.outbuffer[5];
+		    *s_end++ = '\0';
+		} else {
+		    *--s_end = '.';
+		    *--s_end = '.';
+		    *--s_end = '.';
+		}
+	        mvwaddstr(nmeawin, 2, 11, sentences);
+	    }
+	}
     }
+
 
     (void) wrefresh(nmeawin);
 }
@@ -137,7 +160,7 @@ const struct mdevice_t *drivers[] = {
     &nmea_mdt,
     &sirf_mdt,
 };
-const struct mdevice_t **active = &drivers[1];
+const struct mdevice_t **active = &drivers[0];
 
 /******************************************************************************
  *
