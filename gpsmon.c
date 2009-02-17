@@ -100,7 +100,7 @@ static void fixframe(WINDOW *win)
 
 extern const struct gps_type_t nmea;
 
-static WINDOW *nmeawin, *satwin, *gprmcwin, *gpgsawin;
+static WINDOW *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
 static clock_t last_tick, tick_interval;
 
 #define SENTENCELINE 1
@@ -141,7 +141,15 @@ static bool nmea_windows(void)
     display(gprmcwin, 6, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpgsawin  = derwin(devicewin, 4, 30, 10, 20);
+    gpggawin  = derwin(devicewin, 3, 30, 10, 20);
+    (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)syncok(gpggawin, true);
+    (void)wattrset(gpggawin, A_BOLD);
+    display(gpggawin, 1, 1, "Altitude: ");
+    display(gpggawin, 2, 12, " GGA ");
+    (void)wattrset(gpggawin, A_NORMAL);
+
+    gpgsawin  = derwin(devicewin, 4, 30, 13, 20);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
@@ -256,6 +264,16 @@ static void nmea_update(size_t len)
 		else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
 		(void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
+	    }
+
+	    if (strcmp(newid, "GPGGA") == 0) {
+		char scr[128];
+		/* Fill in the altitude. */
+		if (session.gpsdata.fix.mode == MODE_3D && isnan(session.gpsdata.fix.altitude)==0)
+		    (void)snprintf(scr, sizeof(scr), "%.1f meters",session.gpsdata.fix.altitude);
+		else
+		    (void)snprintf(scr, sizeof(scr), "n/a");
+		(void)mvwprintw(gpggawin, 1, 11, "%-17s", scr);
 	    }
 
 	    if (strcmp(newid, "GPGSA") == 0) {
