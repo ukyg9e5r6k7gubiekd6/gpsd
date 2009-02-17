@@ -375,26 +375,6 @@ static void error_and_pause(const char *fmt, ...)
     va_end(ap);
 }
 
-/*@ -noret @*/
-static gps_mask_t get_packet(struct gps_device_t *session)
-/* try to get a well-formed packet from the GPS */
-{
-    gps_mask_t fieldmask;
-
-    for (;;) {
-	int waiting = 0;
-	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
-	if (waiting == 0) {
-	    (void)usleep(300);
-	    continue;
-	}
-	fieldmask = gpsd_poll(session);
-	if ((fieldmask &~ ONLINE_SET)!=0)
-	    return fieldmask;
-    }
-}
-/*@ +noret @*/
-
 static jmp_buf assertbuf;
 
 static void onsig(int sig UNUSED)
@@ -485,8 +465,6 @@ int main (int argc, char **argv)
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	int seq;
-
 	(void)strlcpy(session.gpsdata.gps_device, arg, PATH_MAX);
 	if (gpsd_activate(&session, false) == -1) {
 	    gpsd_report(LOG_ERROR,
@@ -495,36 +473,18 @@ int main (int argc, char **argv)
 	    exit(2);
 	}
 
-	/* 
-	 * This is a monitoring utility. Disable autoprobing, because
-	 * in some cases (e.g. SiRFs) there is no way to probe a chip
-	 * type without flipping it to native mode.
-	 */
-	context.readonly = true;
-
-	/* hunt for packet type and serial parameters */
-	for (seq = 1; session.device_type == NULL; seq++) {
-	    gps_mask_t valid = get_packet(&session);
-
-	    if (valid & ERROR_SET) {
-		gpsd_report(LOG_ERROR,
-			    "autodetection failed.\n");
-		exit(2);
-	    } else if (valid & ONLINE_SET) {
-		gpsd_report(LOG_IO,
-			    "autodetection after %d reads.\n", seq);
-		break;
-	    }
-	}
-	gpsd_report(LOG_PROG, "%s looks like a %s at %d.\n",
-		    session.gpsdata.gps_device, 
-		    gpsd_id(&session), session.gpsdata.baudrate);
-
 	controlfd = session.gpsdata.gps_fd;
 	serial = true;
     }
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
+
+    /* 
+     * This is a monitoring utility. Disable autoprobing, because
+     * in some cases (e.g. SiRFs) there is no way to probe a chip
+     * type without flipping it to native mode.
+     */
+    context.readonly = true;
 
     /* quit cleanly if an assertion fails */
     (void)signal(SIGABRT, onsig);
@@ -574,7 +534,7 @@ int main (int argc, char **argv)
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wmove(cmdwin, 0,0);
 
-	/* get a packet */
+	/* get a packet -- calls gpsd_poll */
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
@@ -779,6 +739,7 @@ int main (int argc, char **argv)
     /*@ +nullpass @*/
 
  quit:
+    gpsd_close(&session);
     if (logfile)
 	(void)fclose(logfile);
     (void)endwin();
