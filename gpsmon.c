@@ -129,7 +129,7 @@ static bool nmea_windows(void)
     display(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
 
-    gprmcwin  = derwin(devicewin, 7, 30, 3, 20);
+    gprmcwin  = derwin(devicewin, 8, 30, 3, 20);
     (void)wborder(gprmcwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gprmcwin, true);
     (void)wattrset(gprmcwin, A_BOLD);
@@ -138,10 +138,11 @@ static bool nmea_windows(void)
     display(gprmcwin, 3, 1, "Longitude: ");
     display(gprmcwin, 4, 1, "Speed: ");
     display(gprmcwin, 5, 1, "Course: ");
-    display(gprmcwin, 6, 12, " RMC ");
+    display(gprmcwin, 6, 1, "Status:          FAA: ");
+    display(gprmcwin, 7, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpggawin  = derwin(devicewin, 3, 30, 10, 20);
+    gpggawin  = derwin(devicewin, 3, 30, 11, 20);
     (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpggawin, true);
     (void)wattrset(gpggawin, A_BOLD);
@@ -149,7 +150,7 @@ static bool nmea_windows(void)
     display(gpggawin, 2, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
 
-    gpgsawin  = derwin(devicewin, 4, 30, 13, 20);
+    gpgsawin  = derwin(devicewin, 4, 30, 14, 20);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
@@ -266,6 +267,10 @@ static void nmea_update(size_t len)
 		else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
 		(void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
+
+		/* the status field and FAA code */
+		(void)mvwaddstr(gprmcwin, 6, 11, session.driver.nmea.field[2]);
+		(void)mvwaddstr(gprmcwin, 6, 23, session.driver.nmea.field[12]);
 	    }
 
 	    if (strcmp(newid, "GPGGA") == 0) {

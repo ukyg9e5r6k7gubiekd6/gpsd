@@ -247,6 +247,8 @@ struct gps_device_t {
 	    int part, await;		/* for tracking GSV parts */
 	    struct tm date;
 	    double subseconds;
+	    char *field[NMEA_MAX];
+	    unsigned char fieldcopy[NMEA_MAX+1];
 #ifdef GPSCLOCK_ENABLE
 	    bool ignore_trailing_edge;
 #endif /* GPSCLOCK_ENABLE */

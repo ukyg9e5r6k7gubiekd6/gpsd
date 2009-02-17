@@ -790,12 +790,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #endif /* OCEANSERVER_ENABLE */
 	/*@ +nullassign @*/
     };
-    volatile unsigned char buf[NMEA_MAX+1];
 
     int count;
     gps_mask_t retval = 0;
     unsigned int i;
-    char *p, *field[NMEA_MAX], *s;
+    char *p, *s, *e;
 #ifndef USE_OLD_SPLIT
     volatile char *t;
 #endif
@@ -832,23 +831,24 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #endif
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
-    strncpy((char *)buf, sentence, NMEA_MAX);
+    strncpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
     /* discard the checksum part */
-    for (p = (char *)buf; (*p != '*') && (*p >= ' '); ) ++p;
+    for (p = (char *)session->driver.nmea.fieldcopy; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
+    e = p;
     /* split sentence copy on commas, filling the field array */
 #ifdef USE_OLD_SPLIT
-    for (count = 0, p = (char *)buf; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
+    for (count = 0, p = (char *)session->driver.nmea.fieldcopy; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
 	*p = '\0';
-	field[count] = ++p;
+	session->driver.nmea.field[count] = ++p;
     }
 #else
     count = 0;
     t = p;  /* end of sentence */
-    p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */
+    p = (char *)session->driver.nmea.fieldcopy + 1; /* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
     while((p != NULL) && (p <= t)){
-	field[count] = p; /* we have a field. record it */
+	session->driver.nmea.field[count] = p; /* we have a field. record it */
 	/*@ -compdef @*/
 	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
 	    *p = '\0'; /* replace it with a NUL */
@@ -858,14 +858,19 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	/*@ +compdef @*/
     }
 #endif
+    /* point remaining fields at empty string, just in case */
+    for (i = count; 
+	 i < (unsigned)(sizeof(session->driver.nmea.field)/sizeof(session->driver.nmea.field[0])); 
+	 i++)
+	session->driver.nmea.field[i] = e;
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < (unsigned)(sizeof(nmea_phrase)/sizeof(nmea_phrase[0])); ++i) {
-	s = field[0];
+	s = session->driver.nmea.field[0];
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
 	if (strcmp(nmea_phrase[i].name, s) == 0) {
 	    if (nmea_phrase[i].decoder!=NULL && (count >= nmea_phrase[i].nf)) {
-		retval = (nmea_phrase[i].decoder)(count, field, session);
+		retval = (nmea_phrase[i].decoder)(count, session->driver.nmea.field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
 		session->gpsdata.sentence_length = strlen(sentence);
 	    } else
@@ -874,8 +879,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	}
     }
 #ifdef MKT3301_ENABLE
-    if (strncmp("PMTK", field[0], 4) == 0) /* general handler for MKT3301 vendor specifics */
-	retval = processMKT3301(count, field, session);	
+    if (strncmp("PMTK", session->driver.nmea.field[0], 4) == 0) /* general handler for MKT3301 vendor specifics */
+	retval = processMKT3301(count, session->driver.nmea.field, session);	
 #endif /* MKT3301_ENABLE */
     /*@ +usedef @*/
     return retval;
