@@ -77,6 +77,7 @@ static bool serial, curses_active;
 static int debuglevel = 0;
 static WINDOW *statwin, *cmdwin;
 static FILE *logfile;
+static char *type_name;
 
 #define display	(void)mvwprintw
 
@@ -364,7 +365,7 @@ static void error_and_pause(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    (void)wmove(cmdwin, 0, 5);
+    (void)wmove(cmdwin, 0, strlen(type_name)+2);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
     (void)wprintw(cmdwin, fmt, ap);
@@ -557,7 +558,7 @@ int main (int argc, char **argv)
     FD_ZERO(&select_set);
 
     for (;;) {
-	char *type_name = active ? (*active)->driver->type_name : "Unknown device";
+	type_name = active ? (*active)->driver->type_name : "Unknown device";
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
 	    display(statwin, 0, 0, "%s %4d %c %d", 
