@@ -19,7 +19,7 @@ extern bool monitor_control_send(unsigned char *buf, size_t len);
 
 #define BUFLEN		2048
 
-extern WINDOW *debugwin;
+extern WINDOW *devicewin, *debugwin;
 extern struct gps_context_t	context;
 extern struct gps_device_t	session;
 extern int gmt_offset;

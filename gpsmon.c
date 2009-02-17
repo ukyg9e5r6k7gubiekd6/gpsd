@@ -68,14 +68,14 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 /* These are public */
 struct gps_context_t	context;
 struct gps_device_t	session;
-WINDOW *debugwin;
+WINDOW *devicewin, *debugwin;
 int gmt_offset;
 
 /* These are private */
 static int controlfd = -1;
 static bool serial, curses_active;
 static int debuglevel = 0;
-static WINDOW *statwin, *cmdwin, *devicewin;
+static WINDOW *statwin, *cmdwin;
 static FILE *logfile;
 
 #define display	(void)mvwprintw
@@ -185,7 +185,7 @@ const struct mdevice_t *drivers[] = {
     &nmea_mdt,
     &sirf_mdt,
 };
-const struct mdevice_t **active = &drivers[0];
+const struct mdevice_t **active = &drivers[1];
 
 /******************************************************************************
  *
@@ -593,10 +593,11 @@ int main (int argc, char **argv)
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
 	(*active)->update(len);
-	(void)wrefresh(statwin);
-	(void)wrefresh(cmdwin);
-	(void)wrefresh(devicewin);
-	(void)wrefresh(debugwin);
+	(void)wnoutrefresh(statwin);
+	(void)wnoutrefresh(cmdwin);
+	(void)wnoutrefresh(devicewin);
+	(void)wnoutrefresh(debugwin);
+	(void)doupdate();
 
 	/* rest of this invoked only if user has pressed a key */
 	FD_SET(0,&select_set);

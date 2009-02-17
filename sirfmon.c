@@ -79,6 +79,146 @@ static char *dgpsvec[] =
 
 #define display	(void)mvwprintw
 
+static bool sirf_windows(void)
+{
+    unsigned int i;
+
+    /*@ -onlytrans @*/
+    mid2win   = subwin(devicewin, 7,  80,  1, 0);
+    mid4win   = subwin(devicewin, 15, 30,  8, 0);
+    mid6win   = subwin(devicewin, 3,  50,  8, 30);
+    mid7win   = subwin(devicewin, 4,  50, 11, 30);
+    mid9win   = subwin(devicewin, 3,  50, 15, 30);
+    mid13win  = subwin(devicewin, 3,  50, 18, 30);
+    mid19win  = newwin(16, 50,  8, 30);
+    mid27win  = subwin(devicewin, 3,  50, 21, 30);
+    if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
+	|| mid13win==NULL || mid19win==NULL || mid27win==NULL)
+	return false;
+
+    (void)syncok(mid2win, true);
+    (void)syncok(mid4win, true);
+    (void)syncok(mid6win, true);
+    (void)syncok(mid7win, true);
+    (void)syncok(mid9win, true);
+    (void)syncok(mid13win, true);
+    (void)syncok(mid27win, true);
+
+    /*@ -nullpass @*/
+    (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid2win, A_BOLD);
+    (void)wmove(mid2win, 0,1);
+    display(mid2win, 0, 12, " X "); 
+    display(mid2win, 0, 21, " Y "); 
+    display(mid2win, 0, 30, " Z "); 
+    display(mid2win, 0, 43, " North "); 
+    display(mid2win, 0, 54, " East "); 
+    display(mid2win, 0, 65, " Alt "); 
+
+    (void)wmove(mid2win, 1,1);
+    (void)wprintw(mid2win, "Pos:                            m                                    m");
+    (void)wmove(mid2win, 2,1);
+    (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
+    (void)wmove(mid2win, 3,1);
+    (void)wprintw(mid2win, "Time:                  GPS:                Heading:                  speed m/s");
+    (void)wmove(mid2win, 4,1);
+    (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
+    (void)wmove(mid2win, 5,1);
+    (void)wprintw(mid2win, "Fix:");
+    display(mid2win, 6, 24, " Packet type 2 (0x02) ");
+    (void)wattrset(mid2win, A_NORMAL);
+
+    (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid4win, A_BOLD);
+    display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
+    for (i = 0; i < SIRF_CHANNELS; i++) {
+	display(mid4win, (int)(i+2), 1, "%2d",i);
+    }
+    display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
+    (void)wattrset(mid4win, A_NORMAL);
+
+    (void)wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid19win, A_BOLD);
+    display(mid19win, 1, 1, "Alt. hold mode:");
+    display(mid19win, 2, 1, "Alt. hold source:");
+    display(mid19win, 3, 1, "Alt. source input:");
+    display(mid19win, 4, 1, "Degraded timeout:");
+    display(mid19win, 5, 1, "DR timeout:");
+    display(mid19win, 6, 1, "Track smooth mode:");
+    display(mid19win, 7, 1, "Static Navigation:");
+    display(mid19win, 8, 1, "3SV Least Squares:");
+    display(mid19win, 9 ,1, "DOP Mask mode:");
+    display(mid19win, 10,1, "Nav. Elev. mask:");
+    display(mid19win, 11,1, "Nav. Power mask:");
+    display(mid19win, 12,1, "DGPS Source:");
+    display(mid19win, 13,1, "DGPS Mode:");
+    display(mid19win, 14,1, "DGPS Timeout:");
+    display(mid19win, 1, 26,"LP Push-to-Fix:");
+    display(mid19win, 2, 26,"LP On Time:");
+    display(mid19win, 3, 26,"LP Interval:");
+    display(mid19win, 4, 26,"U. Tasks Enab.:");
+    display(mid19win, 5, 26,"U. Task Inter.:");
+    display(mid19win, 6, 26,"LP Pwr Cyc En:");
+    display(mid19win, 7, 26,"LP Max Acq Srch:");
+    display(mid19win, 8, 26,"LP Max Off Time:");
+    display(mid19win, 9, 26,"APM enabled:");
+    display(mid19win,10, 26,"# of Fixes:");
+    display(mid19win,11, 26,"Time btw Fixes:");
+    display(mid19win,12, 26,"H/V Error Max:");
+    display(mid19win,13, 26,"Rsp Time Max:");
+    display(mid19win,14, 26,"Time/Accu:");
+
+    display(mid19win, 15, 8, " Packet type 19 (0x13) ");
+    (void)wattrset(mid19win, A_NORMAL);
+
+    (void)wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid6win, A_BOLD);
+    display(mid6win, 1, 1, "Version:");
+    display(mid6win, 2, 8, " Packet Type 6 (0x06) ");
+    (void)wattrset(mid6win, A_NORMAL);
+
+    (void)wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid7win, A_BOLD);
+    display(mid7win, 1, 1,  "SVs: ");
+    display(mid7win, 1, 9,  "Drift: ");
+    display(mid7win, 1, 23, "Bias: ");
+    display(mid7win, 2, 1,  "Estimated GPS Time: ");
+    display(mid7win, 3, 8, " Packet type 7 (0x07) ");
+    (void)wattrset(mid7win, A_NORMAL);
+
+    (void)wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid9win, A_BOLD);
+    display(mid9win, 1, 1,  "Max: ");
+    display(mid9win, 1, 13, "Lat: ");
+    display(mid9win, 1, 25, "Time: ");
+    display(mid9win, 1, 39, "MS: ");
+    display(mid9win, 2, 8, " Packet type 9 (0x09) ");
+    (void)wattrset(mid9win, A_NORMAL);
+
+    (void)wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid13win, A_BOLD);
+    display(mid13win, 1, 1, "SVs: ");
+    display(mid13win, 1, 9, "=");
+    display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
+    (void)wattrset(mid13win, A_NORMAL);
+
+    (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid27win, A_BOLD);
+    display(mid27win, 1, 1, "DGPS source: ");
+    display(mid27win, 1, 31, "Corrections: ");
+    display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
+    (void)wattrset(mid27win, A_NORMAL);
+    /*@ +nullpass @*/
+    /*@ -onlytrans @*/
+
+    /* probe for version */
+    /*@ -compdef @*/
+    (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
+    /*@ +compdef @*/
+
+    return true;
+}
+
 static void decode_time(int week, int tow)
 {
     int day = tow / 8640000;
@@ -490,165 +630,19 @@ static void sirf_update(size_t len)
 	}
     }
 
-    /* refresh navigation parameters */
+    /* elicit navigation parameters */
     if (dispmode && (time(NULL) % 10 == 0)){
 	(void)monitor_control_send((unsigned char *)"\x98\x00", 2);
     }
 
-    (void)wrefresh(mid2win);
-    (void)wrefresh(mid4win);
     /*@ -nullpass -nullderef @*/
-    if (!dispmode) {
-	(void)touchwin(mid6win);
-	(void)touchwin(mid7win);
-	(void)touchwin(mid9win);
-	(void)touchwin(mid13win);
-	(void)touchwin(mid27win);
-	(void)wrefresh(mid6win);
-	(void)wrefresh(mid7win);
-	(void)wrefresh(mid9win);
-	(void)wrefresh(mid13win);
-	(void)wrefresh(mid27win);
-    } else {
+    if (dispmode) {
 	(void)touchwin(mid19win);
-	(void)wrefresh(mid19win);
-	(void)redrawwin(mid19win);
+	(void)wnoutrefresh(mid19win);
     }
     /*@ +nullpass -nullderef @*/
 }
 /*@ +globstate */
-
-static bool sirf_windows(void)
-{
-    unsigned int i;
-
-    /*@ -onlytrans @*/
-    mid2win   = newwin(7,  80,  1, 0);
-    mid4win   = newwin(15, 30,  8, 0);
-    mid6win   = newwin(3,  50,  8, 30);
-    mid7win   = newwin(4,  50, 11, 30);
-    mid9win   = newwin(3,  50, 15, 30);
-    mid13win  = newwin(3,  50, 18, 30);
-    mid19win  = newwin(16, 50,  8, 30);
-    mid27win  = newwin(3,  50, 21, 30);
-    if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
-	|| mid13win==NULL || mid19win==NULL || mid27win==NULL)
-	return false;
-
-    /*@ -nullpass @*/
-    (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid2win, A_BOLD);
-    (void)wmove(mid2win, 0,1);
-    display(mid2win, 0, 12, " X "); 
-    display(mid2win, 0, 21, " Y "); 
-    display(mid2win, 0, 30, " Z "); 
-    display(mid2win, 0, 43, " North "); 
-    display(mid2win, 0, 54, " East "); 
-    display(mid2win, 0, 65, " Alt "); 
-
-    (void)wmove(mid2win, 1,1);
-    (void)wprintw(mid2win, "Pos:                            m                                    m");
-    (void)wmove(mid2win, 2,1);
-    (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
-    (void)wmove(mid2win, 3,1);
-    (void)wprintw(mid2win, "Time:                  GPS:                Heading:                  speed m/s");
-    (void)wmove(mid2win, 4,1);
-    (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
-    (void)wmove(mid2win, 5,1);
-    (void)wprintw(mid2win, "Fix:");
-    display(mid2win, 6, 24, " Packet type 2 (0x02) ");
-    (void)wattrset(mid2win, A_NORMAL);
-
-    (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid4win, A_BOLD);
-    display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
-    for (i = 0; i < SIRF_CHANNELS; i++) {
-	display(mid4win, (int)(i+2), 1, "%2d",i);
-    }
-    display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
-    (void)wattrset(mid4win, A_NORMAL);
-
-    (void)wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid19win, A_BOLD);
-    display(mid19win, 1, 1, "Alt. hold mode:");
-    display(mid19win, 2, 1, "Alt. hold source:");
-    display(mid19win, 3, 1, "Alt. source input:");
-    display(mid19win, 4, 1, "Degraded timeout:");
-    display(mid19win, 5, 1, "DR timeout:");
-    display(mid19win, 6, 1, "Track smooth mode:");
-    display(mid19win, 7, 1, "Static Navigation:");
-    display(mid19win, 8, 1, "3SV Least Squares:");
-    display(mid19win, 9 ,1, "DOP Mask mode:");
-    display(mid19win, 10,1, "Nav. Elev. mask:");
-    display(mid19win, 11,1, "Nav. Power mask:");
-    display(mid19win, 12,1, "DGPS Source:");
-    display(mid19win, 13,1, "DGPS Mode:");
-    display(mid19win, 14,1, "DGPS Timeout:");
-    display(mid19win, 1, 26,"LP Push-to-Fix:");
-    display(mid19win, 2, 26,"LP On Time:");
-    display(mid19win, 3, 26,"LP Interval:");
-    display(mid19win, 4, 26,"U. Tasks Enab.:");
-    display(mid19win, 5, 26,"U. Task Inter.:");
-    display(mid19win, 6, 26,"LP Pwr Cyc En:");
-    display(mid19win, 7, 26,"LP Max Acq Srch:");
-    display(mid19win, 8, 26,"LP Max Off Time:");
-    display(mid19win, 9, 26,"APM enabled:");
-    display(mid19win,10, 26,"# of Fixes:");
-    display(mid19win,11, 26,"Time btw Fixes:");
-    display(mid19win,12, 26,"H/V Error Max:");
-    display(mid19win,13, 26,"Rsp Time Max:");
-    display(mid19win,14, 26,"Time/Accu:");
-
-    display(mid19win, 15, 8, " Packet type 19 (0x13) ");
-    (void)wattrset(mid19win, A_NORMAL);
-
-    (void)wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid6win, A_BOLD);
-    display(mid6win, 1, 1, "Version:");
-    display(mid6win, 2, 8, " Packet Type 6 (0x06) ");
-    (void)wattrset(mid6win, A_NORMAL);
-
-    (void)wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid7win, A_BOLD);
-    display(mid7win, 1, 1,  "SVs: ");
-    display(mid7win, 1, 9,  "Drift: ");
-    display(mid7win, 1, 23, "Bias: ");
-    display(mid7win, 2, 1,  "Estimated GPS Time: ");
-    display(mid7win, 3, 8, " Packet type 7 (0x07) ");
-    (void)wattrset(mid7win, A_NORMAL);
-
-    (void)wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid9win, A_BOLD);
-    display(mid9win, 1, 1,  "Max: ");
-    display(mid9win, 1, 13, "Lat: ");
-    display(mid9win, 1, 25, "Time: ");
-    display(mid9win, 1, 39, "MS: ");
-    display(mid9win, 2, 8, " Packet type 9 (0x09) ");
-    (void)wattrset(mid9win, A_NORMAL);
-
-    (void)wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid13win, A_BOLD);
-    display(mid13win, 1, 1, "SVs: ");
-    display(mid13win, 1, 9, "=");
-    display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
-    (void)wattrset(mid13win, A_NORMAL);
-
-    (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)wattrset(mid27win, A_BOLD);
-    display(mid27win, 1, 1, "DGPS source: ");
-    display(mid27win, 1, 31, "Corrections: ");
-    display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
-    (void)wattrset(mid27win, A_NORMAL);
-    /*@ +nullpass @*/
-    /*@ -onlytrans @*/
-
-    /* probe for version */
-    /*@ -compdef @*/
-    (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
-    /*@ +compdef @*/
-
-    return true;
-}
 
 static int sirf_command(char line[])
 {
