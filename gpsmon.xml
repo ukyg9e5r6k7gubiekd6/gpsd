@@ -89,6 +89,19 @@ in the SiRF firmware.</para>
 
 <variablelist>
 <varlistentry>
+<term>i</term>
+<listitem>
+<para>Probe subtype. In normal operation,
+<application>gpsmon</application> does not send configuration strings
+to the device (except for wakeup strings needed to get it to send
+data, if any). This command causes it to send the same sequence of 
+subtype probes that <application>gpsd</application> would.  This might
+flip the device into another mode; in particular, it will flip a
+SiRF chip into binary mode as if you had used the <quote>n</quote> command.</para>
+<para></para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>n</term>
 <listitem>
 <para>With an argument of 0, switch device to NMEA mode at current 

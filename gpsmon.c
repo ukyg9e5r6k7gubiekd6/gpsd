@@ -728,6 +728,17 @@ int main (int argc, char **argv)
 		    /*@ +sefparams @*/
 		}
 		break;
+
+	    case 'i':				/* start probing for subtype */
+		if (active == NULL)
+		    error_and_pause("No driver active");
+		else {
+		    context.readonly = false;
+		    (void)gpsd_switch_driver(&session, 
+					     (*active)->driver->type_name);
+		}
+		break;
+
 	    case 'l':				/* open logfile */
 		if (logfile != NULL) {
 		    (void)wprintw(debugwin, ">>> Logging to %s off", logfile);
