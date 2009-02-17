@@ -75,7 +75,7 @@ int gmt_offset;
 static int controlfd = -1;
 static bool serial, curses_active;
 static int debuglevel = 0;
-static WINDOW *statwin, *cmdwin;
+static WINDOW *statwin, *cmdwin, *devicewin;
 static FILE *logfile;
 
 #define display	(void)mvwprintw
@@ -94,16 +94,18 @@ extern const struct gps_type_t nmea;
 static WINDOW *nmeawin;
 static clock_t last_tick, tick_interval;
 
+#define SENTENCELINE 2
+
 static bool nmea_windows(void)
 {
     /*@ -onlytrans @*/
-    nmeawin = newwin(4, 80, 1, 0);
+    nmeawin = derwin(devicewin, 4, 80, 0, 0);
+    (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(nmeawin, true);
 
     wattrset(nmeawin, A_BOLD);
-    mvwaddstr(nmeawin, 2, 1, "Sentences: ");
+    mvwaddstr(nmeawin, SENTENCELINE, 1, "Sentences: ");
     wattrset(nmeawin, A_NORMAL);
-
-    (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     /*@ +onlytrans @*/
 
     last_tick = timestamp();
@@ -135,7 +137,7 @@ static void nmea_update(size_t len)
 		    *--s_end = '.';
 		    *--s_end = '.';
 		}
-	        mvwaddstr(nmeawin, 2, 11, sentences);
+	        mvwaddstr(nmeawin, SENTENCELINE, 11, sentences);
 	    }
 
 	    /* 
@@ -150,10 +152,9 @@ static void nmea_update(size_t len)
 
 		tick_interval = now - last_tick;
 		if (findme != NULL) {
-		    (void)wprintw(debugwin, newid);
-		    mvwchgat(nmeawin, 2, 11, xmax-13, A_NORMAL, 0, NULL);
+		    mvwchgat(nmeawin, SENTENCELINE, 11, xmax-13, A_NORMAL, 0, NULL);
 		    mvwchgat(nmeawin, 
-		    	 2, 11+(findme-sentences), 
+		    	 SENTENCELINE, 11+(findme-sentences), 
 		    	 strlen(newid),
 		    	 A_BOLD, 0, NULL);
 		}
@@ -161,10 +162,10 @@ static void nmea_update(size_t len)
 	    last_tick = now;
 	}
     }
-
-    (void) wrefresh(nmeawin);
 }
 /*@ +globstate */
+
+#undef SENTENCELINE
 
 static void nmea_wrap(void)
 {
@@ -553,10 +554,11 @@ int main (int argc, char **argv)
     curses_active = true;
 
     /*@ -onlytrans @*/
-    statwin   = newwin(1,  30, 0, 0);
-    cmdwin    = newwin(1,  0,  0, 30);
-    debugwin  = newwin(0,   0, (*active)->min_y+1, 0);
-    if (!(*active)->initialize() || statwin==NULL || cmdwin==NULL || debugwin==NULL)
+    statwin   = newwin(1,                  30,                 0, 0);
+    devicewin = newwin((*active)->min_y+1, (*active)->min_x+1, 1, 0);
+    cmdwin    = newwin(1,                  0,                  0, 30);
+    debugwin  = newwin(0,                  0,                  (*active)->min_y+1, 0);
+    if (!(*active)->initialize() || statwin==NULL || cmdwin==NULL || devicewin== NULL || debugwin==NULL)
 	goto quit;
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-(*active)->min_y-1);
@@ -591,8 +593,10 @@ int main (int argc, char **argv)
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
 	(*active)->update(len);
-	(void)wrefresh(debugwin);
+	(void)wrefresh(statwin);
 	(void)wrefresh(cmdwin);
+	(void)wrefresh(devicewin);
+	(void)wrefresh(debugwin);
 
 	/* rest of this invoked only if user has pressed a key */
 	FD_SET(0,&select_set);
