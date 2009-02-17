@@ -84,6 +84,14 @@ static char *type_name;
 /* external capability tables */
 extern struct mdevice_t sirf_mdt;
 
+static void fixframe(WINDOW *win)
+{
+    int ymax, xmax, ycur, xcur;
+    getyx(win, ycur, xcur);
+    getmaxyx(win, ymax, xmax);
+    (void)mvwaddch(win, ycur, xmax-1, ACS_VLINE);
+}
+
 /******************************************************************************
  *
  * The NMEA driver, for generic NMEA devices.
@@ -92,7 +100,7 @@ extern struct mdevice_t sirf_mdt;
 
 extern const struct gps_type_t nmea;
 
-static WINDOW *nmeawin, *satwin, *gprmcwin;
+static WINDOW *nmeawin, *satwin, *gprmcwin, *gpgsawin;
 static clock_t last_tick, tick_interval;
 
 #define SENTENCELINE 1
@@ -132,6 +140,16 @@ static bool nmea_windows(void)
     display(gprmcwin, 5, 1, "Course: ");
     display(gprmcwin, 6, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
+
+    gpgsawin  = derwin(devicewin, 4, 30, 10, 20);
+    (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)syncok(gpgsawin, true);
+    (void)wattrset(gpgsawin, A_BOLD);
+    display(gpgsawin, 1, 1, "Mode: ");
+    display(gpgsawin, 2, 1, "Sats: ");
+    display(gpgsawin, 1, 12, "HDOP: ");
+    display(gpgsawin, 3, 12, " GSA ");
+    (void)wattrset(gpgsawin, A_NORMAL);
 
     last_tick = timestamp();
 
@@ -215,7 +233,7 @@ static void nmea_update(size_t len)
 				   (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
 		} else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwaddstr(gprmcwin, 2, 11, scr);
+		(void)mvwprintw(gprmcwin, 2, 11, "%-17s", scr);
 
 		/* Fill in the longitude. */
 		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
@@ -224,20 +242,36 @@ static void nmea_update(size_t len)
 				   (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
 		} else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwaddstr(gprmcwin, 3, 11, scr);
+		(void)mvwprintw(gprmcwin, 3, 11, "%-17s", scr);
 
 		/* Fill in the speed. */
 		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
 		    (void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
 		else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwaddstr(gprmcwin, 4, 11, scr);
+		(void)mvwprintw(gprmcwin, 4, 11, "%-17s", scr);
 
 		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
 		    (void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
 		else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gprmcwin, 5, 11, scr);
+		(void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
+	    }
+
+	    if (strcmp(newid, "GPGSA") == 0) {
+		int i;
+		(void)mvwprintw(gpgsawin, 1,7, "%1d", session.gpsdata.fix.mode);
+		(void)wmove(gpgsawin, 2, 7);
+		(void)wclrtoeol(gpgsawin);
+		for (i = 0; i < session.gpsdata.satellites_used; i++) {
+		    (void)wprintw(gpgsawin, "%d ", session.gpsdata.used[i]);
+		}
+		fixframe(gpgsawin);
+		(void)wmove(gpgsawin, 1, 18); 
+		(void)wclrtoeol(gpgsawin);
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
+		fixframe(gpgsawin);
+		//FIXME: VDOP and PDOP too, when we get a GPS that reports 'em.
 	    }
 	}
     }
