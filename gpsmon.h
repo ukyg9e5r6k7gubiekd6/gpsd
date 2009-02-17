@@ -14,8 +14,9 @@ struct mdevice_t {
     const struct gps_type_t *driver;	/* device driver table */
 };
 
-// Device-specific code will need this.
+// Device-specific code will need these.
 extern bool monitor_control_send(unsigned char *buf, size_t len);
+extern void fixframe(WINDOW *win);
 
 #define BUFLEN		2048
 

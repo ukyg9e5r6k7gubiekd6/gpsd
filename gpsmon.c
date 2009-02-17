@@ -84,7 +84,7 @@ static char *type_name;
 /* external capability tables */
 extern struct mdevice_t sirf_mdt;
 
-static void fixframe(WINDOW *win)
+void fixframe(WINDOW *win)
 {
     int ymax, xmax, ycur, xcur;
     getyx(win, ycur, xcur);
@@ -231,8 +231,10 @@ static void nmea_update(size_t len)
 		    (void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
 		} else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwaddstr(gprmcwin, 1, 7, scr);
-
+		(void)wmove(gprmcwin, 1, 7);
+		(void)wclrtoeol(gprmcwin);
+		(void)waddstr(gprmcwin, scr);
+		fixframe(gprmcwin);
 
 		/* Fill in the latitude. */
 		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
