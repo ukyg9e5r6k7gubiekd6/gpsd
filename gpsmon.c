@@ -142,12 +142,15 @@ static bool nmea_windows(void)
     display(gprmcwin, 7, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpggawin  = derwin(devicewin, 3, 30, 11, 20);
+    gpggawin  = derwin(devicewin, 6, 30, 11, 20);
     (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpggawin, true);
     (void)wattrset(gpggawin, A_BOLD);
     display(gpggawin, 1, 1, "Altitude: ");
-    display(gpggawin, 2, 12, " GGA ");
+    display(gpggawin, 2, 1, "Quality:    Sats:   ");
+    display(gpggawin, 3, 1, "HDOP: ");
+    display(gpggawin, 4, 1, "Geoid: ");
+    display(gpggawin, 5, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
 
     gpgsawin  = derwin(devicewin, 7, 30, 3, 50);
@@ -173,6 +176,9 @@ static void nmea_update(size_t len)
     if (len > 0 && session.packet.outbuflen > 0)
     {
 	static char sentences[NMEA_MAX];
+	char **fields;
+
+	fields = session.driver.nmea.field;
 
 	if (session.packet.outbuffer[0] == '$') {
 	    int ymax, xmax;
@@ -272,8 +278,8 @@ static void nmea_update(size_t len)
 		(void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
 
 		/* the status field and FAA code */
-		(void)mvwaddstr(gprmcwin, 6, 11, session.driver.nmea.field[2]);
-		(void)mvwaddstr(gprmcwin, 6, 23, session.driver.nmea.field[12]);
+		(void)mvwaddstr(gprmcwin, 6, 11, fields[2]);
+		(void)mvwaddstr(gprmcwin, 6, 23, fields[12]);
 	    }
 
 	    if (strcmp(newid, "GPGGA") == 0) {
@@ -284,13 +290,15 @@ static void nmea_update(size_t len)
 		else
 		    (void)snprintf(scr, sizeof(scr), "n/a");
 		(void)mvwprintw(gpggawin, 1, 11, "%-17s", scr);
+		(void)mvwprintw(gpggawin, 2, 10, "%1.1s", fields[6]);
+		(void)mvwprintw(gpggawin, 2, 19, "%2.2s", fields[7]);
+		(void)mvwprintw(gpggawin, 3, 10, "%-5.5s", fields[8]);
+		(void)mvwprintw(gpggawin, 4, 10, "%-5.5s", fields[11]);
 	    }
 
 	    if (strcmp(newid, "GPGSA") == 0) {
 		int i;
-		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", 
-				session.driver.nmea.field[1], 
-				session.driver.nmea.field[2]);
+		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
 		(void)wmove(gpgsawin, 2, 7);
 		(void)wclrtoeol(gpgsawin);
 		for (i = 0; i < session.gpsdata.satellites_used; i++) {
