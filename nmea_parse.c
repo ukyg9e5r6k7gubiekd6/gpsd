@@ -63,13 +63,13 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  * Scary timestamp fudging begins here
  *
  * Four sentences, GGA and GLL and RMC and ZDA, contain timestamps.
- * Timestamps always look like hhmmss.ss, with the trailing .ss part
+ * GGA/GLL/RMC timestamps look like hhmmss.ss, with the trailing .ss part
  * optional.  RMC has a date field, in the format ddmmyy.  ZDA has
  * separate fields for day/month/year, with a 4-digit year.  This
  * means that for RMC we must supply a century and for GGA and GLL we
  * must supply a century, year, and day.  We get the missing data from
  * a previous RMC or ZDA; century in RMC is supplied by a constant if
- * there has been no previous RMC.
+ * there has been no previous ZDA.
  *
  **************************************************************************/
 
@@ -121,7 +121,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
     /*
 	RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
      1     225446.33    Time of fix 22:54:46 UTC
-     2     A	    Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
+     2     A	        Status of Fix: A = Autonomous, valid; 
+                        D = Differential, valid; V = invalid
      3,4   4916.45,N    Latitude 49 deg. 16.45 min North
      5,6   12311.12,W   Longitude 123 deg. 11.12 min West
      7     000.5	Speed over ground, Knots
@@ -273,12 +274,12 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	   123519       Fix taken at 12:35:19 UTC
 	   4807.038,N   Latitude 48 deg 07.038' N
 	   01131.324,E  Longitude 11 deg 31.324' E
-	   1	    Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
+	   1	        Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
 	   		3=PPS (Precise Position Service),
 			4=RTK (Real Time Kinematic) with fixed integers,
 			5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
-	   08	   Number of satellites being tracked
-	   0.9	  Horizontal dilution of position
+	   08	        Number of satellites being tracked
+	   0.9	        Horizontal dilution of position
 	   545.4,M      Altitude, Metres above mean sea level
 	   46.9,M       Height of geoid (mean sea level) above WGS84
 			ellipsoid, in Meters
@@ -424,12 +425,12 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 {
     /*
 	GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
-	   2	    Number of sentences for full data
-	   1	    sentence 1 of 2
+	   2	   Number of sentences for full data
+	   1	   Sentence 1 of 2
 	   08	   Total number of satellites in view
 	   01	   Satellite PRN number
 	   40	   Elevation, degrees
-	   083	  Azimuth, degrees
+	   083	   Azimuth, degrees
 	   46	   Signal-to-noise ratio in decibels
 	   <repeat for up to 4 satellites per sentence>
 		There my be up to three GSV sentences in a data packet
