@@ -98,7 +98,7 @@ gpsdlcdd_LDADD = $(LIBM) libgps.la -lm
 #
 # Build gpsmon
 #
-gpsmon_SOURCES = sirfmon.c gpsmon.c
+gpsmon_SOURCES = gpsmon.c nmeamon.c sirfmon.c 
 gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
