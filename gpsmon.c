@@ -142,18 +142,7 @@ static bool nmea_windows(void)
     display(gprmcwin, 7, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpggawin  = derwin(devicewin, 6, 30, 11, 20);
-    (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)syncok(gpggawin, true);
-    (void)wattrset(gpggawin, A_BOLD);
-    display(gpggawin, 1, 1, "Altitude: ");
-    display(gpggawin, 2, 1, "Quality:    Sats:   ");
-    display(gpggawin, 3, 1, "HDOP: ");
-    display(gpggawin, 4, 1, "Geoid: ");
-    display(gpggawin, 5, 12, " GGA ");
-    (void)wattrset(gpggawin, A_NORMAL);
-
-    gpgsawin  = derwin(devicewin, 7, 30, 3, 50);
+    gpgsawin  = derwin(devicewin, 7, 30, 11, 20);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
@@ -164,6 +153,17 @@ static bool nmea_windows(void)
     display(gpgsawin, 5, 1, "PDOP: ");
     display(gpgsawin, 6, 12, " GSA ");
     (void)wattrset(gpgsawin, A_NORMAL);
+
+    gpggawin  = derwin(devicewin, 6, 30, 3, 50);
+    (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)syncok(gpggawin, true);
+    (void)wattrset(gpggawin, A_BOLD);
+    display(gpggawin, 1, 1, "Altitude: ");
+    display(gpggawin, 2, 1, "Quality:    Sats:   ");
+    display(gpggawin, 3, 1, "HDOP: ");
+    display(gpggawin, 4, 1, "Geoid: ");
+    display(gpggawin, 5, 12, " GGA ");
+    (void)wattrset(gpggawin, A_NORMAL);
 
     last_tick = timestamp();
 
@@ -282,6 +282,32 @@ static void nmea_update(size_t len)
 		(void)mvwaddstr(gprmcwin, 6, 23, fields[12]);
 	    }
 
+	    if (strcmp(newid, "GPGSA") == 0) {
+		char scr[128];
+		int i, ymax, xmax;
+		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
+		(void)wmove(gpgsawin, 2, 7);
+		(void)wclrtoeol(gpgsawin);
+		scr[0] = '\0';
+		for (i = 0; i < session.gpsdata.satellites_used; i++) {
+		    (void)snprintf(scr + strlen(scr), sizeof(scr)-strlen(scr), 
+				   "%d ", session.gpsdata.used[i]);
+		}
+		getmaxyx(gpgsawin, ymax, xmax);
+		(void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax-2-7);
+		if (strlen(scr) >= xmax-2) {
+		    mvwaddch(gpgsawin, 2, xmax-2-7, '.');
+		    mvwaddch(gpgsawin, 2, xmax-3-7, '.');
+		    mvwaddch(gpgsawin, 2, xmax-4-7, '.');
+		}
+		fixframe(gpgsawin);
+		(void)wmove(gpgsawin, 3, 7); 
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
+		(void)wmove(gpgsawin, 4, 7); 
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
+		(void)wmove(gpgsawin, 5, 7); 
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
+	    }
 	    if (strcmp(newid, "GPGGA") == 0) {
 		char scr[128];
 		/* Fill in the altitude. */
@@ -294,23 +320,6 @@ static void nmea_update(size_t len)
 		(void)mvwprintw(gpggawin, 2, 19, "%2.2s", fields[7]);
 		(void)mvwprintw(gpggawin, 3, 10, "%-5.5s", fields[8]);
 		(void)mvwprintw(gpggawin, 4, 10, "%-5.5s", fields[11]);
-	    }
-
-	    if (strcmp(newid, "GPGSA") == 0) {
-		int i;
-		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
-		(void)wmove(gpgsawin, 2, 7);
-		(void)wclrtoeol(gpgsawin);
-		for (i = 0; i < session.gpsdata.satellites_used; i++) {
-		    (void)wprintw(gpgsawin, "%d ", session.gpsdata.used[i]);
-		}
-		fixframe(gpgsawin);
-		(void)wmove(gpgsawin, 3, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
-		(void)wmove(gpgsawin, 4, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
-		(void)wmove(gpgsawin, 5, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
 	    }
 	}
     }
