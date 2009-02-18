@@ -399,9 +399,9 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     else
 	mask = MODE_SET;
     gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
-    session->gpsdata.pdop = atof(field[count-3]);
-    session->gpsdata.hdop = atof(field[count-2]);
-    session->gpsdata.vdop = atof(field[count-1]);
+    session->gpsdata.pdop = atof(field[15]);
+    session->gpsdata.hdop = atof(field[16]);
+    session->gpsdata.vdop = atof(field[17]);
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     /* the magic 6 here counts the tag, two mode fields, and the DOP fields */
@@ -835,6 +835,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     strncpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
     /* discard the checksum part */
     for (p = (char *)session->driver.nmea.fieldcopy; (*p != '*') && (*p >= ' '); ) ++p;
+    if (*p == '*')
+	*p++ = ',';	/* otherwise we drop the last field */
     *p = '\0';
     e = p;
     /* split sentence copy on commas, filling the field array */
