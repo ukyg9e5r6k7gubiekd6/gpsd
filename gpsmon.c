@@ -150,14 +150,16 @@ static bool nmea_windows(void)
     display(gpggawin, 2, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
 
-    gpgsawin  = derwin(devicewin, 4, 30, 14, 20);
+    gpgsawin  = derwin(devicewin, 7, 30, 3, 50);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
     display(gpgsawin, 1, 1, "Mode: ");
     display(gpgsawin, 2, 1, "Sats: ");
-    display(gpgsawin, 1, 12, "HDOP: ");
-    display(gpgsawin, 3, 12, " GSA ");
+    display(gpgsawin, 3, 1, "HDOP: ");
+    display(gpgsawin, 4, 1, "VDOP: ");
+    display(gpgsawin, 5, 1, "PDOP: ");
+    display(gpgsawin, 6, 12, " GSA ");
     (void)wattrset(gpgsawin, A_NORMAL);
 
     last_tick = timestamp();
@@ -227,6 +229,7 @@ static void nmea_update(size_t len)
 	    }
 
 	    if (strcmp(newid, "GPRMC") == 0) {
+		/* Not dumped yet: magnetic variation */
 		char scr[128];
 		if (isnan(session.gpsdata.fix.time)==0) {
 		    (void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
@@ -285,18 +288,21 @@ static void nmea_update(size_t len)
 
 	    if (strcmp(newid, "GPGSA") == 0) {
 		int i;
-		(void)mvwprintw(gpgsawin, 1,7, "%1d", session.gpsdata.fix.mode);
+		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", 
+				session.driver.nmea.field[1], 
+				session.driver.nmea.field[2]);
 		(void)wmove(gpgsawin, 2, 7);
 		(void)wclrtoeol(gpgsawin);
 		for (i = 0; i < session.gpsdata.satellites_used; i++) {
 		    (void)wprintw(gpgsawin, "%d ", session.gpsdata.used[i]);
 		}
 		fixframe(gpgsawin);
-		(void)wmove(gpgsawin, 1, 18); 
-		(void)wclrtoeol(gpgsawin);
+		(void)wmove(gpgsawin, 3, 7); 
 		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
-		fixframe(gpgsawin);
-		//FIXME: VDOP and PDOP too, when we get a GPS that reports 'em.
+		(void)wmove(gpgsawin, 4, 7); 
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
+		(void)wmove(gpgsawin, 5, 7); 
+		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
 	    }
 	}
     }
