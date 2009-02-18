@@ -271,17 +271,17 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 {
     /*
 	GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
-	   123519       Fix taken at 12:35:19 UTC
-	   4807.038,N   Latitude 48 deg 07.038' N
-	   01131.324,E  Longitude 11 deg 31.324' E
-	   1	        Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
-	   		3=PPS (Precise Position Service),
-			4=RTK (Real Time Kinematic) with fixed integers,
-			5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
-	   08	        Number of satellites being tracked
-	   0.9	        Horizontal dilution of position
-	   545.4,M      Altitude, Metres above mean sea level
-	   46.9,M       Height of geoid (mean sea level) above WGS84
+	   1     123519       Fix taken at 12:35:19 UTC
+	   2,3   4807.038,N   Latitude 48 deg 07.038' N
+	   4,5   01131.324,E  Longitude 11 deg 31.324' E
+	   6	 1            Fix quality: 0 = invalid, 1 = GPS, 2 = DGPS,
+	        	      3=PPS (Precise Position Service),
+	                      4=RTK (Real Time Kinematic) with fixed integers,
+	                      5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
+	   7     08	      Number of satellites being tracked
+	   8     0.9	      Horizontal dilution of position
+	   9,10  545.4,M      Altitude, Metres above mean sea level
+	   11,12 46.9,M       Height of geoid (mean sea level) above WGS84
 			ellipsoid, in Meters
 	   (empty field) time in seconds since last DGPS update
 	   (empty field) DGPS station ID number (0000-1023)
@@ -441,8 +441,8 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	session->gpsdata.satellites = 0;
 	return ERROR_SET;
     }
-    if (count % 4 != 3){
-	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 3\n", count);
+    if (count % 4 != 0){
+	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites = 0;
 	return ERROR_SET;
