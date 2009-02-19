@@ -1,18 +1,6 @@
 /* $Id$ */
 /*
- * GPS packet monitor
- *
- * A Useful commands:
- *	l -- toggle packet logging
- *	b -- change baud rate.
- *      n -- change from native t o binary mode orr vice-versa.
- *	s -- send hex bytes to device.
- *	q -- quit, leaving device in binary mode.
- *      Ctrl-S -- freeze display.
- *      Ctrl-Q -- unfreeze display.
- *
- * There may be chipset-specific commands associated with monitor-object method 
- * tables, as well.
+ * The generic GPS packet monitor.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -530,44 +518,52 @@ int main (int argc, char **argv)
 	    }
 	    switch (line[0])
 	    {
-	    case 'b':
-		monitor_dump_send();
+	    case 'c':				/* send control packet */
+		len = 0;
+		/*@ -compdef @*/
+		while (*p != '\0')
+		{
+		    (void)sscanf(p,"%x",&v);
+		    putbyte(buf, len, v);
+		    len++;
+		    while (*p != '\0' && !isspace(*p))
+			p++;
+		    while (*p != '\0' && isspace(*p))
+			p++;
+		}
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
-		else if (serial) {
-		    v = (unsigned)atoi(line+1);
-		    /* Ugh...should have a controlfd slot 
-		     * in the session structure, really
-		     */
-		    if ((*active)->driver->speed_switcher) {
-			int dfd = session.gpsdata.gps_fd;
-			session.gpsdata.gps_fd = controlfd;
-			(void)(*active)->driver->speed_switcher(&session, v);
-			/*
-			 * See the comment attached to the 'B' command in gpsd.
-			 * Allow the control string time to register at the
-			 * GPS before we do the baud rate switch, which
-			 * effectively trashes the UART's buffer.
-			 */
-			(void)tcdrain(session.gpsdata.gps_fd);
-			(void)usleep(50000);
-			session.gpsdata.gps_fd = dfd;
-			(void)gpsd_set_speed(&session, v, 
-					     (unsigned char)session.gpsdata.parity, 
-					 session.gpsdata.stopbits);
-		    } else
-			monitor_complain("Device type has no speed switcher");
-		} else {
-		    line[0] = 'b';
-		    /*@ -sefparams @*/
-		    assert(write(session.gpsdata.gps_fd, line, strlen(line)) != -1);
-		    /* discard response */
-		    assert(read(session.gpsdata.gps_fd, buf, sizeof(buf)) != -1);
-		    /*@ +sefparams @*/
+		else if ((*active)->driver->control_send != NULL)
+		    (void)monitor_control_send(buf, (size_t)len);
+		else
+		    monitor_complain("Device type has no control-send method.");
+		/*@ +compdef @*/
+		break;
+
+	    case 'i':				/* start probing for subtype */
+		if (active == NULL)
+		    monitor_complain("No GPS type detected.");
+		else {
+		    if (strcspn(line, "01") == strlen(line))
+			context.readonly = !context.readonly; 
+		    else
+			context.readonly = (atoi(line+1) == 0);
+		    (void)gpsd_switch_driver(&session, 
+					     (*active)->driver->type_name);
 		}
 		break;
 
-	    case 'n':
+	    case 'l':				/* open logfile */
+		if (logfile != NULL) {
+		    (void)wprintw(packetwin, ">>> Logging to %s off", logfile);
+		    (void)fclose(logfile);
+		}
+
+		if ((logfile = fopen(line+1,"a")) != NULL)
+		    (void)wprintw(packetwin, ">>> Logging to %s on", logfile);
+		break;
+
+	    case 'n':		/* change mode */
 		/* if argument not specified, toggle */
 		if (strcspn(line, "01") == strlen(line))
 		    v = (unsigned int)TEXTUAL_PACKET_TYPE(session.packet.type);
@@ -602,52 +598,44 @@ int main (int argc, char **argv)
 		}
 		break;
 
-	    case 'i':				/* start probing for subtype */
-		if (active == NULL)
-		    monitor_complain("No GPS type detected.");
-		else {
-		    if (strcspn(line, "01") == strlen(line))
-			context.readonly = !context.readonly; 
-		    else
-			context.readonly = (atoi(line+1) == 0);
-		    (void)gpsd_switch_driver(&session, 
-					     (*active)->driver->type_name);
-		}
-		break;
-
-	    case 'l':				/* open logfile */
-		if (logfile != NULL) {
-		    (void)wprintw(packetwin, ">>> Logging to %s off", logfile);
-		    (void)fclose(logfile);
-		}
-
-		if ((logfile = fopen(line+1,"a")) != NULL)
-		    (void)wprintw(packetwin, ">>> Logging to %s on", logfile);
-		break;
-
-	    case 'q':
+	    case 'q':				/* quit */
 		goto quit;
 
-	    case 's':
-		len = 0;
-		/*@ -compdef @*/
-		while (*p != '\0')
-		{
-		    (void)sscanf(p,"%x",&v);
-		    putbyte(buf, len, v);
-		    len++;
-		    while (*p != '\0' && !isspace(*p))
-			p++;
-		    while (*p != '\0' && isspace(*p))
-			p++;
-		}
+	    case 's':				/* change speed */
+		monitor_dump_send();
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
-		else if ((*active)->driver->control_send != NULL)
-		    (void)monitor_control_send(buf, (size_t)len);
-		else
-		    monitor_complain("Device type has no control-send method.");
-		/*@ +compdef @*/
+		else if (serial) {
+		    v = (unsigned)atoi(line+1);
+		    /* Ugh...should have a controlfd slot 
+		     * in the session structure, really
+		     */
+		    if ((*active)->driver->speed_switcher) {
+			int dfd = session.gpsdata.gps_fd;
+			session.gpsdata.gps_fd = controlfd;
+			(void)(*active)->driver->speed_switcher(&session, v);
+			/*
+			 * See the comment attached to the 'B' command in gpsd.
+			 * Allow the control string time to register at the
+			 * GPS before we do the baud rate switch, which
+			 * effectively trashes the UART's buffer.
+			 */
+			(void)tcdrain(session.gpsdata.gps_fd);
+			(void)usleep(50000);
+			session.gpsdata.gps_fd = dfd;
+			(void)gpsd_set_speed(&session, v, 
+					     (unsigned char)session.gpsdata.parity, 
+					 session.gpsdata.stopbits);
+		    } else
+			monitor_complain("Device type has no speed switcher");
+		} else {
+		    line[0] = 'b';
+		    /*@ -sefparams @*/
+		    assert(write(session.gpsdata.gps_fd, line, strlen(line)) != -1);
+		    /* discard response */
+		    assert(read(session.gpsdata.gps_fd, buf, sizeof(buf)) != -1);
+		    /*@ +sefparams @*/
+		}
 		break;
 
 	    default:

@@ -119,8 +119,8 @@ const struct monitor_object_t PROTO_mmt = {
     .min_y = 23, .min_x = 80,	/* size of the device window */
     /*
      * The gpsd driver type for your device.  gpsmon will use the mode_switcher
-     * method for 'n', the speed_switcher for 'b', and the control_send method
-     * for 's'.  Additionally, the driver type name will be displayed before
+     * method for 'n', the speed_switcher for 's', and the control_send method
+     * for 'c'.  Additionally, the driver type name will be displayed before
      * the '>' command prompt in the top line of the display.
      */
     .driver = &PROTO,

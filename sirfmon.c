@@ -4,8 +4,8 @@
  *
  * These are the SiRF-specific commands:
  *	a -- toggle receipt of 50BPS subframe data (undocumented).
- *	c -- set or clear static navigation mode
  *      d -- MID 4 rate change (undocumented)
+ *	m -- set or clear static navigation mode
  *	t -- toggle navigation-parameter display mode
  */
 #include <stdio.h>
@@ -646,7 +646,7 @@ static int sirf_command(char line[])
 	(void)monitor_control_send(buf, 25);
 	return COMMAND_MATCH;
 
-    case 'c':			/* static navigation */
+    case 'm':			/* static navigation */
 	putbyte(buf, 0,0x8f);			/* id */
 	putbyte(buf, 1, atoi(line+1));
 	(void)monitor_control_send(buf, 2);
