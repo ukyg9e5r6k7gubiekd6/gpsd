@@ -4,7 +4,7 @@
 #define COMMAND_MATCH		1
 #define COMMAND_UNKNOWN		0
 
-struct mdevice_t {
+struct monitor_object_t {
     /* a device-specific capability table for the monitor */
     bool (*initialize)(void);		/* paint legends on windows */
     void (*update)(size_t);		/* now paint the data */
@@ -20,7 +20,7 @@ extern void fixframe(WINDOW *win);
 
 #define BUFLEN		2048
 
-extern WINDOW *devicewin, *debugwin;
+extern WINDOW *devicewin, *packetwin;
 extern struct gps_device_t	session;
 extern int gmt_offset;
 

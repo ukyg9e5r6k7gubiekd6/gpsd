@@ -28,7 +28,7 @@ static double last_tick, tick_interval;
 
 #define SENTENCELINE 1
 
-static bool nmea_windows(void)
+static bool nmea_initialize(void)
 {
     int i;
 
@@ -258,10 +258,13 @@ static void nmea_update(size_t len)
 static void nmea_wrap(void)
 {
     (void)delwin(nmeawin);
+    (void)delwin(gpgsawin);
+    (void)delwin(gpggawin);
+    (void)delwin(gprmcwin);
 }
 
-const struct mdevice_t nmea_mdt = {
-    .initialize = nmea_windows,
+const struct monitor_object_t nmea_mmt = {
+    .initialize = nmea_initialize,
     .update = nmea_update,
     .command = NULL,
     .wrap = nmea_wrap,

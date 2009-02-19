@@ -11,7 +11,7 @@
  *      Ctrl-S -- freeze display.
  *      Ctrl-Q -- unfreeze display.
  *
- * There may be chipset-specific commands associated with driver method 
+ * There may be chipset-specific commands associated with monitor-object method 
  * tables, as well.
  */
 #include <sys/types.h>
@@ -66,11 +66,11 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define BUFLEN		2048
 
 /* external capability tables */
-extern struct mdevice_t nmea_mdt, sirf_mdt;
+extern struct monitor_object_t nmea_mmt, sirf_mmt;
 
 /* These are public */
 struct gps_device_t	session;
-WINDOW *devicewin, *debugwin;
+WINDOW *devicewin, *packetwin;
 int gmt_offset;
 
 /* These are private */
@@ -82,12 +82,12 @@ static WINDOW *statwin, *cmdwin;
 static FILE *logfile;
 static char *type_name;
 /*@ -nullassign @*/
-static const struct mdevice_t *drivers[] = {
-    &nmea_mdt,
-    &sirf_mdt,
+static const struct monitor_object_t *monitor_objects[] = {
+    &nmea_mmt,
+    &sirf_mmt,
     NULL,
 };
-static const struct mdevice_t **active;
+static const struct monitor_object_t **active;
 /*@ +nullassign @*/
 
 #define display	(void)mvwprintw
@@ -117,7 +117,7 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 	if (!curses_active)
 	    (void)vprintf(fmt, ap);
 	else
-	    (void)wprintw(debugwin, fmt, ap);
+	    (void)wprintw(packetwin, fmt, ap);
 	va_end(ap);
     }
 }
@@ -170,23 +170,23 @@ static void packet_dump(char *buf, size_t buflen)
     if (printable) {
 	for (i = 0; i < buflen; i++)
 	    if (isprint(buf[i]))
-		(void)waddch(debugwin, (chtype)buf[i]);
+		(void)waddch(packetwin, (chtype)buf[i]);
 	    else
-		(void)wprintw(debugwin, "\\x%02x", (unsigned char)buf[i]);
+		(void)wprintw(packetwin, "\\x%02x", (unsigned char)buf[i]);
     } else {
 	for (i = 0; i < buflen; i++)
-	    (void)wprintw(debugwin, "%02x", (unsigned char)buf[i]);
+	    (void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
     }
-    (void)wprintw(debugwin, "\n");
+    (void)wprintw(packetwin, "\n");
 }
 
 
 static void monitor_dump_send(void)
 {
-    (void)wattrset(debugwin, A_BOLD);
-    (void)wprintw(debugwin, ">>>");
+    (void)wattrset(packetwin, A_BOLD);
+    (void)wprintw(packetwin, ">>>");
     packet_dump(session.msgbuf, session.msgbuflen);
-    (void)wattrset(debugwin, A_NORMAL);
+    (void)wattrset(packetwin, A_NORMAL);
 }
 
 bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
@@ -419,14 +419,14 @@ int main (int argc, char **argv)
     /*@ -onlytrans @*/
     statwin   = newwin(1, 30, 0, 0);
     cmdwin    = newwin(1, 0,  0, 30);
-    debugwin  = newwin(0, 0,  1, 0);
-    if (statwin==NULL || cmdwin==NULL || debugwin==NULL)
+    packetwin  = newwin(0, 0,  1, 0);
+    if (statwin==NULL || cmdwin==NULL || packetwin==NULL)
 	goto quit;
-    (void)scrollok(debugwin, true);
-    (void)wsetscrreg(debugwin, 0, LINES-1);
+    (void)scrollok(packetwin, true);
+    (void)wsetscrreg(packetwin, 0, LINES-1);
     /*@ +onlytrans @*/
 
-    (void)wmove(debugwin,0, 0);
+    (void)wmove(packetwin,0, 0);
 
     FD_ZERO(&select_set);
 
@@ -450,30 +450,30 @@ int main (int argc, char **argv)
 
 	/* get a packet -- calls gpsd_poll */
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
-	    (void)wprintw(debugwin, "(%d) ", session.packet.outbuflen);
+	    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	}
 
 	/* switch types on packet receipt */
 	if (session.packet.type != last_type) {
-	    const struct mdevice_t **trial, **newdriver;
+	    const struct monitor_object_t **trial, **newobject;
 	    last_type = session.packet.type;
-	    newdriver = NULL;
-	    for (trial = drivers; *trial; trial++)
+	    newobject = NULL;
+	    for (trial = monitor_objects; *trial; trial++)
 		if ((*trial)->driver == session.device_type)
-		    newdriver = trial;
-	    if (newdriver) {
+		    newobject = trial;
+	    if (newobject) {
 		if (active != NULL) {
 		    (*active)->wrap();
 		    (void)delwin(devicewin);
 		}
-		active = newdriver;
+		active = newobject;
 		devicewin = newwin((*active)->min_y+1, (*active)->min_x+1,1,0);
 		if (!(*active)->initialize())
 		    goto quit;
-		(void)wresize(debugwin, LINES-(*active)->min_y-1, 80);
-		(void)mvwin(debugwin, (*active)->min_y+1, 0);
-		(void)wsetscrreg(debugwin, 0, LINES-(*active)->min_y-2);
+		(void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
+		(void)mvwin(packetwin, (*active)->min_y+1, 0);
+		(void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
 	    }
 	}
 
@@ -487,7 +487,7 @@ int main (int argc, char **argv)
 	(void)wnoutrefresh(cmdwin);
 	if (devicewin != 0)
 	    (void)wnoutrefresh(devicewin);
-	(void)wnoutrefresh(debugwin);
+	(void)wnoutrefresh(packetwin);
 	(void)doupdate();
 
 	/* rest of this invoked only if user has pressed a key */
@@ -504,7 +504,7 @@ int main (int argc, char **argv)
 	    /*@ -usedef -compdef @*/
 	    (void)wgetnstr(cmdwin, line, 80);
 	    (void)noecho();
-	    (void)wrefresh(debugwin);
+	    (void)wrefresh(packetwin);
 	    (void)wrefresh(cmdwin);
 
 	    if ((p = strchr(line,'\r')) != NULL)
@@ -605,7 +605,7 @@ int main (int argc, char **argv)
 
 	    case 'i':				/* start probing for subtype */
 		if (active == NULL)
-		    error_and_pause("No driver active");
+		    error_and_pause("No GPS type detected.");
 		else {
 		    context.readonly = false;
 		    (void)gpsd_switch_driver(&session, 
@@ -615,12 +615,12 @@ int main (int argc, char **argv)
 
 	    case 'l':				/* open logfile */
 		if (logfile != NULL) {
-		    (void)wprintw(debugwin, ">>> Logging to %s off", logfile);
+		    (void)wprintw(packetwin, ">>> Logging to %s off", logfile);
 		    (void)fclose(logfile);
 		}
 
 		if ((logfile = fopen(line+1,"a")) != NULL)
-		    (void)wprintw(debugwin, ">>> Logging to %s on", logfile);
+		    (void)wprintw(packetwin, ">>> Logging to %s on", logfile);
 		break;
 
 	    case 'q':

@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * SiRF driver for the GPS packet monitor.
+ * SiRF object for the GPS packet monitor.
  *
  * These are the SiRF-specific commands:
  *	a -- toggle receipt of 50BPS subframe data (undocumented).
@@ -69,7 +69,7 @@ static char *dgpsvec[] =
 
 #define display	(void)mvwprintw
 
-static bool sirf_windows(void)
+static bool sirf_initialize(void)
 {
     unsigned int i;
 
@@ -314,7 +314,7 @@ static void sirf_update(size_t len)
 		else
 		    (void)wprintw(mid2win, "   ");
 	    }
-	    (void)wprintw(debugwin, "MND 0x02=");
+	    (void)wprintw(packetwin, "MND 0x02=");
 	    break;
 
 	case 0x04:		/* Measured Tracking Data */
@@ -349,7 +349,7 @@ static void sirf_update(size_t len)
 		if (sv == 0)			/* not tracking? */
 		    (void)wprintw(mid4win, "   ");	/* clear other info */
 	    }
-	    (void)wprintw(debugwin, "MTD 0x04=");
+	    (void)wprintw(packetwin, "MTD 0x04=");
 	    break;
 
 #ifdef __UNUSED__
@@ -368,13 +368,13 @@ static void sirf_update(size_t len)
 		printw("%8.5f %10.5f",
 		       (double)getbeul(buf, off+16)/65536,(double)getbeul(buf, off+20)/1024);
 	    }
-	    (void)wprintw(debugwin, "RTD 0x05=");
+	    (void)wprintw(packetwin, "RTD 0x05=");
 	    break;
 #endif /* __UNUSED */
 
 	case 0x06:		/* firmware version */
 	    display(mid6win, 1, 10, "%s",buf + 1);
-	    (void)wprintw(debugwin, "FV  0x06=");
+	    (void)wprintw(packetwin, "FV  0x06=");
 	    break;
 
 	case 0x07:		/* Response - Clock Status Data */
@@ -383,13 +383,13 @@ static void sirf_update(size_t len)
 	    display(mid7win, 1, 16, "%lu", getbeul(buf, 8));	/* Clock drift */
 	    display(mid7win, 1, 29, "%lu", getbeul(buf, 12));	/* Clock Bias */
 	    display(mid7win, 2, 21, "%lu", getbeul(buf, 16));	/* Estimated Time */
-	    (void)wprintw(debugwin, "CSD 0x07=");
+	    (void)wprintw(packetwin, "CSD 0x07=");
 	    break;
 
 	case 0x08:		/* 50 BPS data */
 	    ch = (int)getub(buf, 1);
 	    display(mid4win, ch+2, 27, "Y");
-	    (void)wprintw(debugwin, "50B 0x08=");
+	    (void)wprintw(packetwin, "50B 0x08=");
 	    subframe_enabled = true;
 	    break;
 
@@ -398,15 +398,15 @@ static void sirf_update(size_t len)
 	    display(mid9win, 1, 18, "%.3f",(double)getbeuw(buf, 3)/186);	/*SegStatLat*/
 	    display(mid9win, 1, 31, "%.3f",(double)getbeuw(buf, 5)/186);	/*SegStatTime*/
 	    display(mid9win, 1, 42, "%3d",(int)getbeuw(buf, 7));	/* Last Millisecond */
-	    (void)wprintw(debugwin, "THR 0x09=");
+	    (void)wprintw(packetwin, "THR 0x09=");
 	    break;
 
 	case 0x0b:		/* Command Acknowledgement */
-	    (void)wprintw(debugwin, "ACK 0x0b=");
+	    (void)wprintw(packetwin, "ACK 0x0b=");
 	    break;
 
 	case 0x0c:		/* Command NAcknowledgement */
-	    (void)wprintw(debugwin, "NAK 0x0c=");
+	    (void)wprintw(packetwin, "NAK 0x0c=");
 	    break;
 
 	case 0x0d:		/* Visible List */
@@ -419,7 +419,7 @@ static void sirf_update(size_t len)
 		    (void)wprintw(mid13win, "   ");
 
 	    }
-	    (void)wprintw(debugwin, "VL  0x0d=");
+	    (void)wprintw(packetwin, "VL  0x0d=");
 	    break;
 
 	case 0x13:
@@ -512,7 +512,7 @@ static void sirf_update(size_t len)
 	    }
 	    /*@ +type @*/
 	    display(mid27win, 1, 44, "%d", j);
-	    (void)wprintw(debugwin, "DST 0x1b=");
+	    (void)wprintw(packetwin, "DST 0x1b=");
 	    break;
 
 	case 0x1C:	/* NL Measurement Data */
@@ -522,13 +522,13 @@ static void sirf_update(size_t len)
 	    subframe_enabled = true;
 	    break;
 	case 0x29:	/* Geodetic Navigation Message */
-	    (void)wprintw(debugwin, "GNM 0x29=");
+	    (void)wprintw(packetwin, "GNM 0x29=");
 	    break;
 	case 0x32:	/* SBAS Parameters */
-	    (void)wprintw(debugwin, "SBP 0x32=");
+	    (void)wprintw(packetwin, "SBP 0x32=");
 	    break;
 	case 0x34:	/* PPS Time */
-	    (void)wprintw(debugwin, "PPS 0x34=");
+	    (void)wprintw(packetwin, "PPS 0x34=");
 	    break;
 
 #ifdef __UNUSED__
@@ -590,7 +590,7 @@ static void sirf_update(size_t len)
 		       clk.tv_sec % 3600,clk.tv_usec);
 #endif
 	    }
-	    (void)wprintw(debugwin, "??? 0x62=");
+	    (void)wprintw(packetwin, "??? 0x62=");
 	    break;
 #endif /* __UNUSED__ */
 
@@ -609,12 +609,12 @@ static void sirf_update(size_t len)
 		    break;
 		}
 	    if (j != 0)
-		(void)wprintw(debugwin, "%s\n",buf+1);
-	    (void)wprintw(debugwin, "DD  0xff=");
+		(void)wprintw(packetwin, "%s\n",buf+1);
+	    (void)wprintw(packetwin, "DD  0xff=");
 	    break;
 
 	default:
-	    (void)wprintw(debugwin, "    0x%02x=", buf[4]);
+	    (void)wprintw(packetwin, "    0x%02x=", buf[4]);
 	    break;
 	}
     }
@@ -689,8 +689,8 @@ static void sirf_wrap(void)
     (void)delwin(mid27win);
 }
 
-const struct mdevice_t sirf_mdt = {
-    .initialize = sirf_windows,
+const struct monitor_object_t sirf_mmt = {
+    .initialize = sirf_initialize,
     .update = sirf_update,
     .command = sirf_command,
     .wrap = sirf_wrap,
