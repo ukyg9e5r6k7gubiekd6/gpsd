@@ -448,47 +448,46 @@ int main (int argc, char **argv)
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wmove(cmdwin, 0,0);
 
-	/* get a packet -- calls gpsd_poll */
+	/* get a packet -- calls gpsd_poll() */
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
+	    /* switch types on packet receipt */
+	    if (session.packet.type != last_type) {
+		const struct monitor_object_t **trial, **newobject;
+		last_type = session.packet.type;
+		newobject = NULL;
+		for (trial = monitor_objects; *trial; trial++)
+		    if ((*trial)->driver == session.device_type)
+			newobject = trial;
+		if (newobject) {
+		    if (active != NULL) {
+			(*active)->wrap();
+			(void)delwin(devicewin);
+		    }
+		    active = newobject;
+		    devicewin = newwin((*active)->min_y+1, (*active)->min_x+1,1,0);
+		    if (!(*active)->initialize())
+			goto quit;
+		    (void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
+		    (void)mvwin(packetwin, (*active)->min_y+1, 0);
+		    (void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
+		}
+	    }
+
+	    /* refresh all windows */
+	    (void)wprintw(cmdwin, type_name);
+	    (void)wprintw(cmdwin, "> ");
+	    (void)wclrtoeol(cmdwin);
+	    if (active != NULL && len > 0 && session.packet.outbuflen > 0)
+		(*active)->update();
 	    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
+	    (void)wnoutrefresh(statwin);
+	    (void)wnoutrefresh(cmdwin);
+	    if (devicewin != 0)
+		(void)wnoutrefresh(devicewin);
+	    (void)wnoutrefresh(packetwin);
+	    (void)doupdate();
 	}
-
-	/* switch types on packet receipt */
-	if (session.packet.type != last_type) {
-	    const struct monitor_object_t **trial, **newobject;
-	    last_type = session.packet.type;
-	    newobject = NULL;
-	    for (trial = monitor_objects; *trial; trial++)
-		if ((*trial)->driver == session.device_type)
-		    newobject = trial;
-	    if (newobject) {
-		if (active != NULL) {
-		    (*active)->wrap();
-		    (void)delwin(devicewin);
-		}
-		active = newobject;
-		devicewin = newwin((*active)->min_y+1, (*active)->min_x+1,1,0);
-		if (!(*active)->initialize())
-		    goto quit;
-		(void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
-		(void)mvwin(packetwin, (*active)->min_y+1, 0);
-		(void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
-	    }
-	}
-
-	/* refresh all windows */
-	(void)wprintw(cmdwin, type_name);
-	(void)wprintw(cmdwin, "> ");
-	(void)wclrtoeol(cmdwin);
-	if (active != NULL)
-	    (*active)->update((size_t)len);
-	(void)wnoutrefresh(statwin);
-	(void)wnoutrefresh(cmdwin);
-	if (devicewin != 0)
-	    (void)wnoutrefresh(devicewin);
-	(void)wnoutrefresh(packetwin);
-	(void)doupdate();
 
 	/* rest of this invoked only if user has pressed a key */
 	FD_SET(0,&select_set);

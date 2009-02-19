@@ -56,7 +56,7 @@ static bool PROTO_initialize(void)
     return true;
 }
 
-static void PROTO_update(size_t len)
+static void PROTO_update(void)
 {
     /*
      * Called on each packet received.  The packet will be accessible in 

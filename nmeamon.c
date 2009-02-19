@@ -94,160 +94,158 @@ static bool nmea_initialize(void)
 }
 
 /*@ -globstate -nullpass (splint is confused) */
-static void nmea_update(size_t len)
+static void nmea_update(void)
 {
+    static char sentences[NMEA_MAX];
+    char **fields;
+
     assert(nmeawin!=NULL);
     assert(gpgsawin!=NULL);
     assert(gpggawin!=NULL);
     assert(gprmcwin!=NULL);
-    if (len > 0 && session.packet.outbuflen > 0)
-    {
-	static char sentences[NMEA_MAX];
-	char **fields;
 
-	fields = session.driver.nmea.field;
+    fields = session.driver.nmea.field;
 
-	if (session.packet.outbuffer[0] == (unsigned char)'$') {
-	    int ymax, xmax;
-	    double now;
-	    char newid[NMEA_MAX];
-	    getmaxyx(nmeawin, ymax, xmax);
-	    (void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
-			  strcspn((char *)session.packet.outbuffer+1, ",")+1);
-	    if (strstr(sentences, newid) == NULL) {
-		char *s_end = sentences + strlen(sentences);
-		if ((int)(strlen(sentences) + strlen(newid)) < xmax-2) {
-		    *s_end++ = ' '; 
-		    (void)strcpy(s_end, newid);
-		} else {
-		    *--s_end = '.';
-		    *--s_end = '.';
-		    *--s_end = '.';
-		}
-	        mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
+    if (session.packet.outbuffer[0] == (unsigned char)'$') {
+	int ymax, xmax;
+	double now;
+	char newid[NMEA_MAX];
+	getmaxyx(nmeawin, ymax, xmax);
+	(void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
+		      strcspn((char *)session.packet.outbuffer+1, ",")+1);
+	if (strstr(sentences, newid) == NULL) {
+	    char *s_end = sentences + strlen(sentences);
+	    if ((int)(strlen(sentences) + strlen(newid)) < xmax-2) {
+		*s_end++ = ' '; 
+		(void)strcpy(s_end, newid);
+	    } else {
+		*--s_end = '.';
+		*--s_end = '.';
+		*--s_end = '.';
 	    }
+	    mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
+	}
 
-	    /* 
-	     * If the interval between this and last update is 
-	     * the longest we've seen yet, boldify the corresponding
-	     * tag.
-	     */
-	    now = timestamp();
-	    if (now > last_tick && (now - last_tick) > tick_interval)
-	    {
-		char *findme = strstr(sentences, newid);
+	/* 
+	 * If the interval between this and last update is 
+	 * the longest we've seen yet, boldify the corresponding
+	 * tag.
+	 */
+	now = timestamp();
+	if (now > last_tick && (now - last_tick) > tick_interval)
+	{
+	    char *findme = strstr(sentences, newid);
 
-		tick_interval = now - last_tick;
-		if (findme != NULL) {
-		    mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
-		    mvwchgat(nmeawin, 
-			     SENTENCELINE, 1+(findme-sentences), 
-			     (int)strlen(newid),
-			     A_BOLD, 0, NULL);
-		}
+	    tick_interval = now - last_tick;
+	    if (findme != NULL) {
+		mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
+		mvwchgat(nmeawin, 
+			 SENTENCELINE, 1+(findme-sentences), 
+			 (int)strlen(newid),
+			 A_BOLD, 0, NULL);
 	    }
-	    last_tick = now;
+	}
+	last_tick = now;
 
-	    if (strcmp(newid, "GPGSV") == 0) {
-		int i;
+	if (strcmp(newid, "GPGSV") == 0) {
+	    int i;
 
-		for (i = 0; i < session.gpsdata.satellites; i++) {
-		    (void)wmove(satwin, i+2, 3);
-		    (void)wprintw(satwin, " %3d %3d%3d %3d", 
-				  session.gpsdata.PRN[i],
-				  session.gpsdata.azimuth[i],
-				  session.gpsdata.elevation[i],
-				  session.gpsdata.ss[i]);
-		}
+	    for (i = 0; i < session.gpsdata.satellites; i++) {
+		(void)wmove(satwin, i+2, 3);
+		(void)wprintw(satwin, " %3d %3d%3d %3d", 
+			      session.gpsdata.PRN[i],
+			      session.gpsdata.azimuth[i],
+			      session.gpsdata.elevation[i],
+			      session.gpsdata.ss[i]);
 	    }
+	}
 
-	    if (strcmp(newid, "GPRMC") == 0) {
-		/* Not dumped yet: magnetic variation */
-		char scr[128];
-		if (isnan(session.gpsdata.fix.time)==0) {
-		    (void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
-		} else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)wmove(gprmcwin, 1, 7);
-		(void)wclrtoeol(gprmcwin);
-		(void)waddstr(gprmcwin, scr);
-		fixframe(gprmcwin);
+	if (strcmp(newid, "GPRMC") == 0) {
+	    /* Not dumped yet: magnetic variation */
+	    char scr[128];
+	    if (isnan(session.gpsdata.fix.time)==0) {
+		(void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
+	    } else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)wmove(gprmcwin, 1, 7);
+	    (void)wclrtoeol(gprmcwin);
+	    (void)waddstr(gprmcwin, scr);
+	    fixframe(gprmcwin);
 
-		/* Fill in the latitude. */
-		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
-		    (void)snprintf(scr, sizeof(scr), "%s %c", 
-				   deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
-				   (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
-		} else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gprmcwin, 2, 11, "%-17s", scr);
+	    /* Fill in the latitude. */
+	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
+		(void)snprintf(scr, sizeof(scr), "%s %c", 
+			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
+			       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
+	    } else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)mvwprintw(gprmcwin, 2, 11, "%-17s", scr);
 
-		/* Fill in the longitude. */
-		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
-		    (void)snprintf(scr, sizeof(scr), "%s %c", 
-				   deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
-				   (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
-		} else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gprmcwin, 3, 11, "%-17s", scr);
+	    /* Fill in the longitude. */
+	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
+		(void)snprintf(scr, sizeof(scr), "%s %c", 
+			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
+			       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
+	    } else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)mvwprintw(gprmcwin, 3, 11, "%-17s", scr);
 
-		/* Fill in the speed. */
-		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
-		    (void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
-		else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gprmcwin, 4, 11, "%-17s", scr);
+	    /* Fill in the speed. */
+	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
+		(void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
+	    else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)mvwprintw(gprmcwin, 4, 11, "%-17s", scr);
 
-		if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
-		    (void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
-		else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
+	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
+		(void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
+	    else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
 
-		/* the status field and FAA code */
-		(void)mvwaddstr(gprmcwin, 6, 11, fields[2]);
-		(void)mvwaddstr(gprmcwin, 6, 23, fields[12]);
+	    /* the status field and FAA code */
+	    (void)mvwaddstr(gprmcwin, 6, 11, fields[2]);
+	    (void)mvwaddstr(gprmcwin, 6, 23, fields[12]);
+	}
+
+	if (strcmp(newid, "GPGSA") == 0) {
+	    char scr[128];
+	    int i;
+	    (void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
+	    (void)wmove(gpgsawin, 2, 7);
+	    (void)wclrtoeol(gpgsawin);
+	    scr[0] = '\0';
+	    for (i = 0; i < session.gpsdata.satellites_used; i++) {
+		(void)snprintf(scr + strlen(scr), sizeof(scr)-strlen(scr), 
+			       "%d ", session.gpsdata.used[i]);
 	    }
-
-	    if (strcmp(newid, "GPGSA") == 0) {
-		char scr[128];
-		int i;
-		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
-		(void)wmove(gpgsawin, 2, 7);
-		(void)wclrtoeol(gpgsawin);
-		scr[0] = '\0';
-		for (i = 0; i < session.gpsdata.satellites_used; i++) {
-		    (void)snprintf(scr + strlen(scr), sizeof(scr)-strlen(scr), 
-				   "%d ", session.gpsdata.used[i]);
-		}
-		getmaxyx(gpgsawin, ymax, xmax);
-		(void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax-2-7);
-		if (strlen(scr) >= (size_t)(xmax-2)) {
-		    mvwaddch(gpgsawin, 2, xmax-2-7, (chtype)'.');
-		    mvwaddch(gpgsawin, 2, xmax-3-7, (chtype)'.');
-		    mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
-		}
-		fixframe(gpgsawin);
-		(void)wmove(gpgsawin, 3, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
-		(void)wmove(gpgsawin, 4, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
-		(void)wmove(gpgsawin, 5, 7); 
-		(void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
+	    getmaxyx(gpgsawin, ymax, xmax);
+	    (void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax-2-7);
+	    if (strlen(scr) >= (size_t)(xmax-2)) {
+		mvwaddch(gpgsawin, 2, xmax-2-7, (chtype)'.');
+		mvwaddch(gpgsawin, 2, xmax-3-7, (chtype)'.');
+		mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
 	    }
-	    if (strcmp(newid, "GPGGA") == 0) {
-		char scr[128];
-		/* Fill in the altitude. */
-		if (session.gpsdata.fix.mode == MODE_3D && isnan(session.gpsdata.fix.altitude)==0)
-		    (void)snprintf(scr, sizeof(scr), "%.1f meters",session.gpsdata.fix.altitude);
-		else
-		    (void)snprintf(scr, sizeof(scr), "n/a");
-		(void)mvwprintw(gpggawin, 1, 11, "%-17s", scr);
-		(void)mvwprintw(gpggawin, 2, 10, "%1.1s", fields[6]);
-		(void)mvwprintw(gpggawin, 2, 19, "%2.2s", fields[7]);
-		(void)mvwprintw(gpggawin, 3, 10, "%-5.5s", fields[8]);
-		(void)mvwprintw(gpggawin, 4, 10, "%-5.5s", fields[11]);
-	    }
+	    fixframe(gpgsawin);
+	    (void)wmove(gpgsawin, 3, 7); 
+	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
+	    (void)wmove(gpgsawin, 4, 7); 
+	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
+	    (void)wmove(gpgsawin, 5, 7); 
+	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
+	}
+	if (strcmp(newid, "GPGGA") == 0) {
+	    char scr[128];
+	    /* Fill in the altitude. */
+	    if (session.gpsdata.fix.mode == MODE_3D && isnan(session.gpsdata.fix.altitude)==0)
+		(void)snprintf(scr, sizeof(scr), "%.1f meters",session.gpsdata.fix.altitude);
+	    else
+		(void)snprintf(scr, sizeof(scr), "n/a");
+	    (void)mvwprintw(gpggawin, 1, 11, "%-17s", scr);
+	    (void)mvwprintw(gpggawin, 2, 10, "%1.1s", fields[6]);
+	    (void)mvwprintw(gpggawin, 2, 19, "%2.2s", fields[7]);
+	    (void)mvwprintw(gpggawin, 3, 10, "%-5.5s", fields[8]);
+	    (void)mvwprintw(gpggawin, 4, 10, "%-5.5s", fields[11]);
 	}
     }
 }
