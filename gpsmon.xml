@@ -217,13 +217,14 @@ by '>>>') are only supported for the following drivers: NMEA, SiRF,
 EverMore, Navcom, UBX, TSIP, iTalk, Garmintxt. This feature will not
 work for Zodiacs and not always work for Garmins in binary
 mode.
--->
-<para>This tool used to be called 'sirfmon', and worked only on SiRF
-devices (and the command set has changed to resemble the command
-switches of <command>gpsctl</command>). It now has support for generic NMEA devices; 
-support for other device types is a work in progress. It will behave
-sanely, just dumping packets, when connected to a GPS type it knows
-nothing about.</para>
+--> 
+
+<para>This tool used to be called 'sirfmon', and worked only on
+SiRF devices (and the command set has changed to resemble the command
+switches of <command>gpsctl</command>). It now has support for generic
+NMEA devices; support for other device types is a work in progress. It
+will behave sanely, just dumping packets, when connected to a GPS type
+it knows nothing about.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
