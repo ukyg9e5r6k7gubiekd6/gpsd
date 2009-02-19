@@ -91,23 +91,29 @@ in the SiRF firmware.</para>
 <varlistentry>
 <term>i</term>
 <listitem>
-<para>Probe subtype. In normal operation,
-<application>gpsmon</application> does not send configuration strings
-to the device (except for wakeup strings needed to get it to send
-data, if any). This command causes it to send the same sequence of 
-subtype probes that <application>gpsd</application> would.  This might
-flip the device into another mode; in particular, it will flip a
-SiRF chip into binary mode as if you had used the <quote>n</quote> command.</para>
-<para></para>
+<para>Enable/disable subtype probing and reinitialize the driver. In
+normal operation, <application>gpsmon</application> does not send
+configuration strings to the device (except for wakeup strings needed
+to get it to send data, if any). The command 'i1' causes it to send
+the same sequence of subtype probes that
+<application>gpsd</application> would.  The command 'i0' turns off
+probing; 'i' alone toggles the bit. In either case, the current driver
+is re-selected; if the probe bit is enabled, probes will begin to be
+issued immediately.</para>
+
+<para>Note that enabling probing might flip the device into another
+mode; in particular, it will flip a SiRF chip into binary mode as if
+you had used the <quote>n</quote> command.  This is due to a
+limitation in the SiRF firmware that we can't fix.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>n</term>
 <listitem>
-<para>With an argument of 0, switch device to NMEA mode at current 
-speed; with an argument of 1, change to binary (native) mode. Will
-show an error if the device doesn't have such modes.</para>
-<para></para>
+<para>With an argument of 0, switch device to NMEA mode at current
+speed; with an argument of 1, change to binary (native) mode. With no
+argument, toggle the setting. Will show an error if the device doesn't
+have such modes.</para> <para></para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -206,7 +212,9 @@ mode.
 -->
 <para>This tool used to be called 'sirfmon', and worked only on SiRF
 devices. It now has support for generic NMEA devices; 
-support for other device types is a work in progress,</para>
+support for other device types is a work in progress. It will behave
+sanely, just dumping packets, when connected to a GPS type it knows
+nothing about.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

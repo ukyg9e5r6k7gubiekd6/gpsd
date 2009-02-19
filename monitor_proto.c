@@ -82,6 +82,9 @@ static int PROTO_command(char line[])
      * he/she presses enter the command line will be passed to this function  
      * for interpretation.  Note: packet receipt is suspended while this
      * function is executing.
+     *
+     * This method is optional.  If you set the command method pointer to
+     * NULL, gpsmon will behave sanely, accepting no device-specific commands. 
      */
 
     /* 

@@ -606,7 +606,10 @@ int main (int argc, char **argv)
 		if (active == NULL)
 		    monitor_complain("No GPS type detected.");
 		else {
-		    context.readonly = false;
+		    if (strcspn(line, "01") == strlen(line))
+			context.readonly = !context.readonly; 
+		    else
+			context.readonly = (atoi(line+1) == 0);
 		    (void)gpsd_switch_driver(&session, 
 					     (*active)->driver->type_name);
 		}
