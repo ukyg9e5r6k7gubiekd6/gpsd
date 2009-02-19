@@ -646,6 +646,10 @@ int main (int argc, char **argv)
 		    monitor_complain("Device type has no control-send method.");
 		/*@ +compdef @*/
 		break;
+
+	    default:
+		monitor_complain("Unknown command");
+		break;
 	    }
 	}
     }
