@@ -501,12 +501,13 @@ int main (int argc, char **argv)
 		continue;
 	    /*@ +usedef +compdef @*/
 
-	    p = line;
-
-	    while (*p != '\0' && !isspace(*p))
-		p++;
-	    while (*p != '\0' && isspace(*p))
-		p++;
+	    arg = line;
+	    if (isspace(line[1])) {
+		for (arg = line+2; *arg != '\0' && isspace(*arg); arg++)
+		    arg++;
+		arg++;
+	    } else
+		arg = line + 1;
 
 	    if (active != NULL && (*active)->command != NULL) {
 		status = (*active)->command(line);
@@ -521,15 +522,15 @@ int main (int argc, char **argv)
 	    case 'c':				/* send control packet */
 		len = 0;
 		/*@ -compdef @*/
-		while (*p != '\0')
+		while (*arg != '\0')
 		{
-		    (void)sscanf(p,"%x",&v);
+		    (void)sscanf(arg,"%x",&v);
 		    putbyte(buf, len, v);
 		    len++;
-		    while (*p != '\0' && !isspace(*p))
-			p++;
-		    while (*p != '\0' && isspace(*p))
-			p++;
+		    while (*arg != '\0' && !isspace(*arg))
+			arg++;
+		    while (*arg != '\0' && isspace(*arg))
+			arg++;
 		}
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
@@ -606,7 +607,7 @@ int main (int argc, char **argv)
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
-		    v = (unsigned)atoi(line+1);
+		    v = (unsigned)atoi(arg);
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
 		     */
@@ -637,6 +638,29 @@ int main (int argc, char **argv)
 		    /*@ +sefparams @*/
 		}
 		break;
+
+#if 0
+	    case 't':				/* force device type */
+		if (strlen(arg) > 0) {
+		    int matchcount = 0;
+		    const struct gps_type_t **dp, *forcetype = NULL;
+		    for (dp = gpsd_drivers; *dp; dp++) {
+			if (strstr((*dp)->type_name, line) != NULL) {
+			    forcetype = *dp;
+			    matchcount++;
+			}
+		    }
+		    if (matchcount == 0) {
+			monitor_complain("No type name matches.");
+		    } else if (matchcount == 1) {
+			assert(forcetype != NULL);
+			gpsd_switch_driver(&session, forcetype->type_name);
+		    } else {
+			monitor_complain("Multiple driver type names match.");
+		    }
+		}    
+		break;
+#endif
 
 	    default:
 		monitor_complain("Unknown command");
