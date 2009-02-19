@@ -198,9 +198,6 @@ MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
 <!--
-The 's' command doesn't work for devices with the (obsolete)
-Zodiac chipset.
-
 Debug window dumps of control message sends to the GPS (preceded
 by '>>>') are only supported for the following drivers: NMEA, SiRF,
 EverMore, Navcom, UBX, TSIP, iTalk, Garmintxt. This feature will not
@@ -208,7 +205,7 @@ work for Zodiacs and not always work for Garmins in binary
 mode.
 -->
 <para>This tool used to be called 'sirfmon', and worked only on SiRF
-devices. It now has rudimentary support for generic NMEA devices; 
+devices. It now has support for generic NMEA devices; 
 support for other device types is a work in progress,</para>
 
 </refsect1>
