@@ -88,6 +88,16 @@ in the SiRF firmware.</para>
 <application>gpsmon</application> is running:</para>
 
 <variablelist>
+
+<varlistentry>
+<term>c</term>
+<listitem>
+<para>Send hex bytes to device. Following the 'c' you may type hex
+digit pairs; end with a newline.  These will become the payload of a
+control packet shipped to the device.</para>
+</listitem>
+</varlistentry>
+
 <varlistentry>
 <term>i</term>
 <listitem>
@@ -107,22 +117,7 @@ you had used the <quote>n</quote> command.  This is due to a
 limitation in the SiRF firmware that we can't fix.</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term>n</term>
-<listitem>
-<para>With an argument of 0, switch device to NMEA mode at current
-speed; with an argument of 1, change to binary (native) mode. With no
-argument, toggle the setting. Will show an error if the device doesn't
-have such modes.</para> <para></para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>s</term>
-<listitem>
-<para>Change baud rate. Follow it with a number interpreted as bits
-per second, for example "s9600".</para>
-</listitem>
-</varlistentry>
+
 <varlistentry>
 <term>l</term>
 <listitem>
@@ -135,14 +130,33 @@ portion of the packet stream and they will be stitched together
 correctly.</para>
 </listitem>
 </varlistentry>
+
 <varlistentry>
-<term>c</term>
+<term>n</term>
 <listitem>
-<para>Send hex bytes to device. Following the 'c' you may type hex
-digit pairs; end with a newline.  These will become the payload of a
-control packet shipped to the device.</para>
+<para>With an argument of 0, switch device to NMEA mode at current
+speed; with an argument of 1, change to binary (native) mode. With no
+argument, toggle the setting. Will show an error if the device doesn't
+have such modes.</para> <para></para>
+</listitem>
+
+<varlistentry>
+<term>q</term>
+<listitem>
+<para>Quit <application>gpsmon</application>.  Control-C, or whatever
+your current interrupt chracter is, works as well.</para>
 </listitem>
 </varlistentry>
+
+</varlistentry>
+<varlistentry>
+<term>s</term>
+<listitem>
+<para>Change baud rate. Follow it with a number interpreted as bits
+per second, for example "s9600".</para>
+</listitem>
+</varlistentry>
+
 <varlistentry>
 <term>Ctrl-S</term>
 <listitem>
@@ -155,13 +169,6 @@ control packet shipped to the device.</para>
 <para>Unfreeze display, resume normal operation.</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term>q</term>
-<listitem>
-<para>Quit <application>gpsmon</application>.  Control-C, or whatever
-your current interrupt chracter is, works as well.</para>
-</listitem>
-</varlistentry>
 </variablelist>
 
 <para>The following commands are supported for SiRF GPSes only:</para>
@@ -170,7 +177,7 @@ your current interrupt chracter is, works as well.</para>
 <varlistentry>
 <term>m</term>
 <listitem>
-<para>Set (c1) or clear (c0) static navigation. The SiRF documentation
+<para>Set (m1) or clear (m0) static navigation. The SiRF documentation
 says <quote>Static navigation is a position filter designed to be used
 with motor vehicles.  When the vehicle's velocity falls below a
 threshold, the position and heading are frozen, and velocity is set to
@@ -187,11 +194,11 @@ zero and position changing in large jumps.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>t</term>
+<term>p</term>
 <listitem>
 <para>Toggle navigation-parameter display mode.  Toggles between
 normal display and one that shows selected navigation parameters from
-MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
+MID 19, including the Static Navigation bit toggled by the 'm' command.</para>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -242,10 +249,10 @@ it knows nothing about.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>, based on code
-originally by Rob Janssen, PE1CHL.  This code is part of the gpsd
-toolset; there is a project page for <application>gpsd</application>
-<ulink url="http://gpsd.berlios.de/">here</ulink>.</para>
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This code is
+part of the gpsd toolset; there is a project page for
+<application>gpsd</application> <ulink
+url="http://gpsd.berlios.de/">here</ulink>.</para>
 </refsect1>
 
 </refentry>
