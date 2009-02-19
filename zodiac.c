@@ -55,7 +55,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static ssize_t zodiac_spew(struct gps_device_t *session, int type, unsigned short *dat, int dlen)
+static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, unsigned short *dat, int dlen)
 {
     struct header h;
     int i;
@@ -124,7 +124,7 @@ static ssize_t zodiac_control_send(struct gps_device_t *session,
     unsigned short *shortwords = (unsigned short *)msg;
 
     /* and if len isn't even, it's your own fault */
-    return zodiac_spew(session, shortwords[0], shortwords+1, len/2-1);
+    return zodiac_spew(session, shortwords[0], shortwords+1, (int)(len/2-1));
 }
 
 static void send_rtcm(struct gps_device_t *session,
