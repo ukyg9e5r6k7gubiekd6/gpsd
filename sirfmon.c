@@ -6,7 +6,7 @@
  *	a -- toggle receipt of 50BPS subframe data (undocumented).
  *      d -- MID 4 rate change (undocumented)
  *	m -- set or clear static navigation mode
- *	t -- toggle navigation-parameter display mode
+ *	p -- toggle navigation-parameter display mode
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -638,7 +638,7 @@ static int sirf_command(char line[])
 
     switch (line[0]) 
     {
-    case 'a':			/* toggle 50bps subframe data */
+    case 'A':			/* toggle 50bps subframe data */
 	(void)memset(buf, '\0', sizeof(buf));
 	putbyte(buf, 0, 0x80);
 	putbyte(buf, 23, 12);
@@ -646,13 +646,13 @@ static int sirf_command(char line[])
 	(void)monitor_control_send(buf, 25);
 	return COMMAND_MATCH;
 
-    case 'm':			/* static navigation */
+    case 'M':			/* static navigation */
 	putbyte(buf, 0,0x8f);			/* id */
 	putbyte(buf, 1, atoi(line+1));
 	(void)monitor_control_send(buf, 2);
 	return COMMAND_MATCH;
 
-    case 'd':		/* MID 4 rate change */
+    case 'D':			/* MID 4 rate change (undocumented) */
 	v = atoi(line+1);
 	if (v > 30)
 	    return COMMAND_MATCH;
@@ -667,7 +667,7 @@ static int sirf_command(char line[])
 	(void)monitor_control_send(buf, 8);
 	return COMMAND_MATCH;
 
-    case 't':			/* poll navigation params */
+    case 'P':			/* poll navigation params */
 	dispmode = !dispmode;
 	return COMMAND_MATCH;
     }

@@ -85,6 +85,10 @@ static int PROTO_command(char line[])
      *
      * This method is optional.  If you set the command method pointer to
      * NULL, gpsmon will behave sanely, accepting no device-specific commands. 
+     *
+     * It is a useful convention to use uppercase letters for
+     * driver-specfic commands and leave lowercase ones for the
+     * generic gpsmon ones.
      */
 
     /* 
