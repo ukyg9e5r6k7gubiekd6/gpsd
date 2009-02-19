@@ -927,6 +927,12 @@ existing drivers for clues.</p>
 <p>You can read an implementor's <a href="writing-a-driver.html">Notes
 On Writing A GPSD Driver.</a></para>
 
+<p>There's a second kind of driver architecture for
+<code>gpsmon</code>, the real-timr packet monitor and diagnostic tool.
+It works from monitor-object definitions that include a pointer to the
+device driver for the GPS type you want to monitor.  See
+monitor_proto.c for a prototype and technical details.</p>
+
 <h2 id="notdriver">When not to add a driver</h2>
 
 <p>It is not necessary to add a driver just because your NMEA GPS wants

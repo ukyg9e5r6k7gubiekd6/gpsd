@@ -336,6 +336,7 @@ EXTRA_DIST = \
 	gpspacket.c \
 	gpslib.c \
 	driver_proto.c \
+	monitor_proto.c \
 	logextract \
 	striplog \
 	setup.py \
