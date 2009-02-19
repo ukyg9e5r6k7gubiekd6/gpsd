@@ -74,13 +74,6 @@ the screen is a scrolling hex dump of all packets the GPS is issuing.
 Dump lines beginning &gt;&gt;&gt; represent control packets sent to the
 GPS.</para>
 
-<para>At SiRF firmware level 231, the "UTC" time displayed is not real
-UTC, as it is not leap-second-corrected.  This is due to an inadequacy 
-in the SiRF firmware.</para>
-
-<para>To interpret what you see, you will need a copy of the
-<citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
-
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>
 
@@ -171,6 +164,7 @@ per second, for example "s9600".</para>
 </varlistentry>
 </variablelist>
 
+<refsect2><title>SirF-specific commands</title>
 <para>The following commands are supported for SiRF GPSes only:</para>
 
 <variablelist>
@@ -209,6 +203,14 @@ MID 19, including the Static Navigation bit toggled by the 'M' command.</para>
 </varlistentry>
 </variablelist>
 
+<para>At SiRF firmware level 231, the "UTC" time displayed is not real
+UTC, as it is not leap-second-corrected.  This is due to an inadequacy 
+in the SiRF firmware.</para>
+
+<para>To interpret what you see, you will need a copy of the
+<citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
+
+</refsect2>
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
 
