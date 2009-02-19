@@ -32,6 +32,21 @@
  * as gpsd to dispatch on packet type to select an active device driver.
  * Your monitor object will become the handler for incoming packets whenever
  * the driver your object points at is selected.
+ *
+ * bool monitor_control_send(unsigned char *buf, size_t len)
+ *    Ship a packet payload to the device.  Calls the driver send_control()
+ *    method to add headers/trailers/checksum; also dumps the sent
+ *    packet to the packet window, if the send_control() is playing
+ *    nice by using session.msgbuf to assemble the message.
+ *
+ * void monitor_complain(const char *fmt, ...)
+ *    Post an error message to the command window, wait till user presses a key.
+ *    You get to make sure the message will fit.
+ *
+ * void monitor_fixframe(WINDOW *win)
+ *    Fix the frame of win to the right of the current location by redrawing 
+ *    ACS_VLINE there.  Useful after doing wclrtoeol() and writing on the
+ *    line.
  */
 
 extern const struct gps_type_t PROTO;

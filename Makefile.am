@@ -368,7 +368,7 @@ splint: gpsd.h packet_names.h
 	@echo "Running splint on gpsctl..."
 	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
 	@echo "Running splint on gpsmon..."
-	-splint $(SPLINTOPTS) $(gpsmon_SOURCES)
+	-splint $(SPLINTOPTS) -exportlocal $(gpsmon_SOURCES)
 	@echo "Running splint on gpspipe..."
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on rtcmdecode..."

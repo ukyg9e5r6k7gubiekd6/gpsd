@@ -170,7 +170,7 @@ static void nmea_update(void)
 	    (void)wmove(gprmcwin, 1, 7);
 	    (void)wclrtoeol(gprmcwin);
 	    (void)waddstr(gprmcwin, scr);
-	    fixframe(gprmcwin);
+	    monitor_fixframe(gprmcwin);
 
 	    /* Fill in the latitude. */
 	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
@@ -226,7 +226,7 @@ static void nmea_update(void)
 		mvwaddch(gpgsawin, 2, xmax-3-7, (chtype)'.');
 		mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
 	    }
-	    fixframe(gpgsawin);
+	    monitor_fixframe(gpgsawin);
 	    (void)wmove(gpgsawin, 3, 7); 
 	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
 	    (void)wmove(gpgsawin, 4, 7); 

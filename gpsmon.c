@@ -92,7 +92,7 @@ static const struct monitor_object_t **active;
 
 #define display	(void)mvwprintw
 
-void fixframe(WINDOW *win)
+void monitor_fixframe(WINDOW *win)
 {
     int ymax, xmax, ycur, xcur;
 
@@ -274,7 +274,7 @@ static void command(char buf[], size_t len, const char *fmt, ... )
     }
 }
 
-static void error_and_pause(const char *fmt, ...) 
+void monitor_complain(const char *fmt, ...) 
 {
     va_list ap;
     va_start(ap, fmt);
@@ -533,7 +533,7 @@ int main (int argc, char **argv)
 	    case 'b':
 		monitor_dump_send();
 		if (active == NULL)
-		    error_and_pause("No device defined yet");
+		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    v = (unsigned)atoi(line+1);
 		    /* Ugh...should have a controlfd slot 
@@ -556,7 +556,7 @@ int main (int argc, char **argv)
 					     (unsigned char)session.gpsdata.parity, 
 					 session.gpsdata.stopbits);
 		    } else
-			error_and_pause("Device type has no speed switcher");
+			monitor_complain("Device type has no speed switcher");
 		} else {
 		    line[0] = 'b';
 		    /*@ -sefparams @*/
@@ -574,7 +574,7 @@ int main (int argc, char **argv)
 		else
 		    v = (unsigned)atoi(line+1);
 		if (active == NULL)
-		    error_and_pause("No device defined yet");
+		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    // FIXME: some sort of debug window display here?
 		    /* Ugh...should have a controlfd slot 
@@ -589,7 +589,7 @@ int main (int argc, char **argv)
 			(void)usleep(50000);
 			session.gpsdata.gps_fd = dfd;
 		    } else
-			error_and_pause("Device type has no mode switcher");
+			monitor_complain("Device type has no mode switcher");
 		} else {
 		    line[0] = 'n';
 		    line[1] = ' ';
@@ -604,7 +604,7 @@ int main (int argc, char **argv)
 
 	    case 'i':				/* start probing for subtype */
 		if (active == NULL)
-		    error_and_pause("No GPS type detected.");
+		    monitor_complain("No GPS type detected.");
 		else {
 		    context.readonly = false;
 		    (void)gpsd_switch_driver(&session, 
@@ -639,11 +639,11 @@ int main (int argc, char **argv)
 			p++;
 		}
 		if (active == NULL)
-		    error_and_pause("No device defined yet");
+		    monitor_complain("No device defined yet");
 		else if ((*active)->driver->control_send != NULL)
 		    (void)monitor_control_send(buf, (size_t)len);
 		else
-		    error_and_pause("Device type has no control-send method.");
+		    monitor_complain("Device type has no control-send method.");
 		/*@ +compdef @*/
 		break;
 	    }
