@@ -21,7 +21,6 @@ extern void fixframe(WINDOW *win);
 #define BUFLEN		2048
 
 extern WINDOW *devicewin, *debugwin;
-extern struct gps_context_t	context;
 extern struct gps_device_t	session;
 extern int gmt_offset;
 

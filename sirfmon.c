@@ -8,7 +8,6 @@
  *      d -- MID 4 rate change (undocumented)
  *	t -- toggle navigation-parameter display mode
  */
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +18,6 @@
 #endif /* S_SPLINT_S */
 #include <stdarg.h>
 #include <stdbool.h>
-#include <errno.h>
 #include <assert.h>
 
 #include "gpsd_config.h"
@@ -31,14 +29,6 @@
 #include "gpsd.h"
 
 #include "bits.h"
-
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-
 #include "gpsmon.h"
 
 extern const struct gps_type_t sirf_binary;
@@ -293,7 +283,6 @@ static void sirf_update(size_t len)
     {
 	int i,j,ch,off,cn;
 	unsigned char *buf;
-	size_t len;
 
 	assert(mid27win != NULL);
 	buf = session.packet.outbuffer + 4;

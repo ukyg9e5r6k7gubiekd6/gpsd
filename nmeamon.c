@@ -1,4 +1,3 @@
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +8,6 @@
 #endif /* S_SPLINT_S */
 #include <stdarg.h>
 #include <stdbool.h>
-#include <errno.h>
 #include <assert.h>
 
 #include "gpsd_config.h"
@@ -26,7 +24,7 @@
 extern const struct gps_type_t nmea;
 
 static WINDOW *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
-static clock_t last_tick, tick_interval;
+static double last_tick, tick_interval;
 
 #define SENTENCELINE 1
 
@@ -42,7 +40,6 @@ static bool nmea_windows(void)
     wattrset(nmeawin, A_BOLD);
     mvwaddstr(nmeawin, 2, 34, " Sentences ");
     wattrset(nmeawin, A_NORMAL);
-    /*@ +onlytrans @*/
 
     satwin  = derwin(devicewin, 15, 20, 3, 0);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -89,15 +86,20 @@ static bool nmea_windows(void)
     (void)mvwprintw(gpggawin, 4, 1, "Geoid: ");
     (void)mvwprintw(gpggawin, 5, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
+    /*@ +onlytrans @*/
 
     last_tick = timestamp();
 
     return (nmeawin != NULL);
 }
 
-/*@ -globstate */
+/*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(size_t len)
 {
+    assert(nmeawin!=NULL);
+    assert(gpgsawin!=NULL);
+    assert(gpggawin!=NULL);
+    assert(gprmcwin!=NULL);
     if (len > 0 && session.packet.outbuflen > 0)
     {
 	static char sentences[NMEA_MAX];
@@ -105,7 +107,7 @@ static void nmea_update(size_t len)
 
 	fields = session.driver.nmea.field;
 
-	if (session.packet.outbuffer[0] == '$') {
+	if (session.packet.outbuffer[0] == (unsigned char)'$') {
 	    int ymax, xmax;
 	    double now;
 	    char newid[NMEA_MAX];
@@ -114,7 +116,7 @@ static void nmea_update(size_t len)
 			  strcspn((char *)session.packet.outbuffer+1, ",")+1);
 	    if (strstr(sentences, newid) == NULL) {
 		char *s_end = sentences + strlen(sentences);
-		if (strlen(sentences) + strlen(newid) < xmax-2) {
+		if ((int)(strlen(sentences) + strlen(newid)) < xmax-2) {
 		    *s_end++ = ' '; 
 		    (void)strcpy(s_end, newid);
 		} else {
@@ -139,9 +141,9 @@ static void nmea_update(size_t len)
 		if (findme != NULL) {
 		    mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
 		    mvwchgat(nmeawin, 
-		    	 SENTENCELINE, 1+(findme-sentences), 
-		    	 strlen(newid),
-		    	 A_BOLD, 0, NULL);
+			     SENTENCELINE, 1+(findme-sentences), 
+			     (int)strlen(newid),
+			     A_BOLD, 0, NULL);
 		}
 	    }
 	    last_tick = now;
@@ -209,7 +211,7 @@ static void nmea_update(size_t len)
 
 	    if (strcmp(newid, "GPGSA") == 0) {
 		char scr[128];
-		int i, ymax, xmax;
+		int i;
 		(void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
 		(void)wmove(gpgsawin, 2, 7);
 		(void)wclrtoeol(gpgsawin);
@@ -220,10 +222,10 @@ static void nmea_update(size_t len)
 		}
 		getmaxyx(gpgsawin, ymax, xmax);
 		(void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax-2-7);
-		if (strlen(scr) >= xmax-2) {
-		    mvwaddch(gpgsawin, 2, xmax-2-7, '.');
-		    mvwaddch(gpgsawin, 2, xmax-3-7, '.');
-		    mvwaddch(gpgsawin, 2, xmax-4-7, '.');
+		if (strlen(scr) >= (size_t)(xmax-2)) {
+		    mvwaddch(gpgsawin, 2, xmax-2-7, (chtype)'.');
+		    mvwaddch(gpgsawin, 2, xmax-3-7, (chtype)'.');
+		    mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
 		}
 		fixframe(gpgsawin);
 		(void)wmove(gpgsawin, 3, 7); 
@@ -249,7 +251,7 @@ static void nmea_update(size_t len)
 	}
     }
 }
-/*@ +globstate */
+/*@ +globstate +nullpass */
 
 #undef SENTENCELINE
 

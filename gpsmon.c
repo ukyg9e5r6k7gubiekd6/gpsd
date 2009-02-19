@@ -65,40 +65,42 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 
 #define BUFLEN		2048
 
+/* external capability tables */
+extern struct mdevice_t nmea_mdt, sirf_mdt;
+
 /* These are public */
-struct gps_context_t	context;
 struct gps_device_t	session;
 WINDOW *devicewin, *debugwin;
 int gmt_offset;
 
 /* These are private */
+static struct gps_context_t	context;
 static int controlfd = -1;
 static bool serial, curses_active;
 static int debuglevel = 0;
 static WINDOW *statwin, *cmdwin;
 static FILE *logfile;
 static char *type_name;
-
-#define display	(void)mvwprintw
-
-/* external capability tables */
-extern struct mdevice_t nmea_mdt, sirf_mdt;
-
-void fixframe(WINDOW *win)
-{
-    int ymax, xmax, ycur, xcur;
-    getyx(win, ycur, xcur);
-    getmaxyx(win, ymax, xmax);
-    (void)mvwaddch(win, ycur, xmax-1, ACS_VLINE);
-}
-
-
-const struct mdevice_t *drivers[] = {
+/*@ -nullassign @*/
+static const struct mdevice_t *drivers[] = {
     &nmea_mdt,
     &sirf_mdt,
     NULL,
 };
-const struct mdevice_t **active;
+static const struct mdevice_t **active;
+/*@ +nullassign @*/
+
+#define display	(void)mvwprintw
+
+void fixframe(WINDOW *win)
+{
+    int ymax, xmax, ycur, xcur;
+
+    assert(win!= NULL);
+    getyx(win, ycur, xcur);
+    getmaxyx(win, ymax, xmax);
+    (void)mvwaddch(win, ycur, xmax-1, ACS_VLINE);
+}
 
 /******************************************************************************
  *
@@ -276,7 +278,7 @@ static void error_and_pause(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    (void)wmove(cmdwin, 0, strlen(type_name)+2);
+    (void)wmove(cmdwin, 0, (int)strlen(type_name)+2);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
     (void)wprintw(cmdwin, fmt, ap);
@@ -428,6 +430,7 @@ int main (int argc, char **argv)
 
     FD_ZERO(&select_set);
 
+    /*@ -observertrans @*/
     for (;;) {
 	type_name = active ? (*active)->driver->type_name : "Unknown device";
 	(void)wattrset(statwin, A_BOLD);
@@ -479,7 +482,7 @@ int main (int argc, char **argv)
 	(void)wprintw(cmdwin, "> ");
 	(void)wclrtoeol(cmdwin);
 	if (active != NULL)
-	    (*active)->update(len);
+	    (*active)->update((size_t)len);
 	(void)wnoutrefresh(statwin);
 	(void)wnoutrefresh(cmdwin);
 	if (devicewin != 0)
@@ -495,7 +498,7 @@ int main (int argc, char **argv)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
-	    (void)wmove(cmdwin, 0,strlen((*active)->driver->type_name)+2);
+	    (void)wmove(cmdwin, 0,(int)strlen(type_name)+2);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
 	    /*@ -usedef -compdef @*/
@@ -518,7 +521,7 @@ int main (int argc, char **argv)
 	    while (*p != '\0' && isspace(*p))
 		p++;
 
-	    if ((*active)->command != NULL) {
+	    if (active != NULL && (*active)->command != NULL) {
 		status = (*active)->command(line);
 		if (status == COMMAND_TERMINATE)
 		    goto quit;
@@ -648,6 +651,7 @@ int main (int argc, char **argv)
 	}
     }
     /*@ +nullpass @*/
+    /*@ +observertrans @*/
 
  quit:
     gpsd_close(&session);

@@ -759,6 +759,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
  *
  **************************************************************************/
 
+/*@ -mayaliasunique @*/
 gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
@@ -862,7 +863,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     }
 #endif
     /* point remaining fields at empty string, just in case */
-    for (i = count; 
+    for (i = (unsigned int)count; 
 	 i < (unsigned)(sizeof(session->driver.nmea.field)/sizeof(session->driver.nmea.field[0])); 
 	 i++)
 	session->driver.nmea.field[i] = e;
@@ -888,6 +889,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     /*@ +usedef @*/
     return retval;
 }
+/*@ +mayaliasunique @*/
 #endif /* NMEA_ENABLE */
 
 void nmea_add_checksum(char *sentence)
