@@ -55,7 +55,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *dat, int dlen)
+static ssize_t zodiac_spew(struct gps_device_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
     int i;
@@ -73,8 +73,10 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
 	hlen = sizeof(h);
 	datlen = sizeof(unsigned short) * dlen;
 	if (end_write(session->gpsdata.gps_fd, &h, hlen) != (ssize_t)hlen ||
-	    end_write(session->gpsdata.gps_fd, dat, datlen) != (ssize_t)datlen)
+	    end_write(session->gpsdata.gps_fd, dat, datlen) != (ssize_t)datlen) {
 	    gpsd_report(LOG_RAW, "Reconfigure write failed\n");
+	    return -1;
+	}
     }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -86,6 +88,8 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
 		       " %04x", dat[i]);
 
     gpsd_report(LOG_RAW, "Sent Zodiac packet: %s\n",buf);
+
+    return 0;
 }
 
 static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
@@ -105,13 +109,22 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
     data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
     data[14] = zodiac_checksum(data, 14);
 
-    zodiac_spew(session, 1330, data, 15);
+    (void)zodiac_spew(session, 1330, data, 15);
 #ifdef ALLOW_RECONFIGURE
     return true; /* it would be nice to error-check this */
 #else
     return false;
 #endif /* ALLOW_RECONFIGURE */
 
+}
+
+static ssize_t zodiac_control_send(struct gps_device_t *session, 
+				   char *msg, size_t len) 
+{
+    unsigned short *shortwords = (unsigned short *)msg;
+
+    /* and if len isn't even, it's your own fault */
+    return zodiac_spew(session, shortwords[0], shortwords+1, len/2-1);
 }
 
 static void send_rtcm(struct gps_device_t *session,
@@ -128,7 +141,7 @@ static void send_rtcm(struct gps_device_t *session,
     memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = zodiac_checksum(data, n);
 
-    zodiac_spew(session, 1351, data, n+1);
+    (void)zodiac_spew(session, 1351, data, n+1);
 }
 
 static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
@@ -443,7 +456,7 @@ const struct gps_type_t zodiac_binary =
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = zodiac_control_send,	/* for gpsctl and friends */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no initialization */
