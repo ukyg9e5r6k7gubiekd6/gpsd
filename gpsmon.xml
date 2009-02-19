@@ -179,6 +179,7 @@ per second, for example "s9600".</para>
 <listitem>
 <para>Toggle reporting of 50BPS subframe data.</para>
 </listitem>
+</varlistentry>
 <varlistentry>
 <term>M</term>
 <listitem>
