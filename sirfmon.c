@@ -31,6 +31,7 @@
 #include "bits.h"
 #include "gpsmon.h"
 
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t sirf_binary;
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
@@ -695,5 +696,6 @@ const struct monitor_object_t sirf_mmt = {
     .min_y = 23, .min_x = 80,
     .driver = &sirf_binary,
 };
+#endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */
 
 /* sirfmon.c ends here */

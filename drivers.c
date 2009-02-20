@@ -329,7 +329,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static const struct gps_type_t garmin = {
+const struct gps_type_t garmin = {
     .type_name      = "Garmin Serial",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PGRMC,",	/* Garmin private */

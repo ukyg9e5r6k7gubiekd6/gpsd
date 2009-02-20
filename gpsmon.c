@@ -54,7 +54,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define BUFLEN		2048
 
 /* external capability tables */
-extern struct monitor_object_t nmea_mmt, sirf_mmt;
+extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt;
 
 /* These are public */
 struct gps_device_t	session;
@@ -71,8 +71,15 @@ static FILE *logfile;
 static char *type_name;
 /*@ -nullassign @*/
 static const struct monitor_object_t *monitor_objects[] = {
+#ifdef NMEA_ENABLE
     &nmea_mmt,
+#if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
+    &garmin_mmt,
+#endif /* GARMIN_ENABLE && NMEA_ENABLE */
+#endif /* NMEA_ENABLE */
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
     &sirf_mmt,
+#endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */
     NULL,
 };
 static const struct monitor_object_t **active;

@@ -21,10 +21,17 @@
 #include "bits.h"
 #include "gpsmon.h"
 
+#ifdef NMEA_ENABLE
 extern const struct gps_type_t nmea;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
 static double last_tick, tick_interval;
+
+/*****************************************************************************
+ *
+ * Generic NMEA support
+ *
+ *****************************************************************************/
 
 #define SENTENCELINE 1
 
@@ -285,3 +292,23 @@ const struct monitor_object_t nmea_mmt = {
     .min_y = 21, .min_x = 80,
     .driver = &nmea,
 };
+
+/*****************************************************************************
+ *
+ * Garmin NMEA support
+ *
+ *****************************************************************************/
+
+#if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
+extern const struct gps_type_t garmin;
+
+const struct monitor_object_t garmin_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21, .min_x = 80,
+    .driver = &garmin,
+};
+#endif /* GARMIN_ENABLE && NMEA_ENABLE */
+#endif /* NMEA_ENABLE */
