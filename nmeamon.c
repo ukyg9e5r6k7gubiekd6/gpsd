@@ -1,3 +1,9 @@
+/*
+ * nmeamon.c - gpsmon support for NMEA devices.
+ *
+ * To do: Support for GPGLL, GPRME, GPZDA, OHPR, PASHR NMEA sentences.
+ * Support for Tripmate, Earthmate, True North and Oceanserver devices.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
