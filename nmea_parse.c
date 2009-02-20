@@ -518,7 +518,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
      * If this assumption changes here, it should also change in garmin.c
      * where we scale error estimates from Garmin binary packets, and
-     * in libgpsd_core.c wgere we fenerate $PGRME.
+     * in libgpsd_core.c where we generate $PGRME.
      */
     if ((strcmp(field[2], "M")!=0) ||
 	(strcmp(field[4], "M")!=0) ||
