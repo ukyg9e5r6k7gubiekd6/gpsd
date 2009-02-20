@@ -447,17 +447,23 @@ int main (int argc, char **argv)
 		    if ((*trial)->driver == session.device_type)
 			newobject = trial;
 		if (newobject) {
-		    if (active != NULL) {
-			(*active)->wrap();
-			(void)delwin(devicewin);
+		    if (LINES < (*newobject)->min_y || COLS < (*newobject)->min_x) {
+			monitor_complain("New type requires %dx%d screen",
+					 (*newobject)->min_x, (*newobject)->min_x);
+		    } else {
+			if (active != NULL) {
+			    (*active)->wrap();
+			    (void)delwin(devicewin);
+			}
+			active = newobject;
+			devicewin = newwin((*active)->min_y+1, 
+					   (*active)->min_x+1,1,0);
+			if (!(*active)->initialize())
+			    goto quit;
+			(void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
+			(void)mvwin(packetwin, (*active)->min_y+1, 0);
+			(void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
 		    }
-		    active = newobject;
-		    devicewin = newwin((*active)->min_y+1, (*active)->min_x+1,1,0);
-		    if (!(*active)->initialize())
-			goto quit;
-		    (void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
-		    (void)mvwin(packetwin, (*active)->min_y+1, 0);
-		    (void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
 		}
 	    }
 

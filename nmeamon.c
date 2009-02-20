@@ -82,6 +82,7 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
     (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
     (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
+    (void)mvwprintw(gpgsawin, 4, 12, " GSA ");
     (void)wattrset(gpgsawin, A_NORMAL);
 
     gpggawin  = derwin(devicewin, 9, 30, 6, 50);
@@ -165,15 +166,12 @@ static void nmea_update(void)
     if (session.packet.outbuffer[0] == (unsigned char)'$') {
 	int ymax, xmax;
 	double now;
-	char newid[NMEA_MAX];
 	getmaxyx(nmeawin, ymax, xmax);
-	(void)strlcpy(newid, (char *)session.packet.outbuffer+1, 
-		      strcspn((char *)session.packet.outbuffer+1, ",")+1);
-	if (strstr(sentences, newid) == NULL) {
+	if (strstr(sentences, fields[0]) == NULL) {
 	    char *s_end = sentences + strlen(sentences);
-	    if ((int)(strlen(sentences) + strlen(newid)) < xmax-2) {
+	    if ((int)(strlen(sentences) + strlen(fields[0])) < xmax-2) {
 		*s_end++ = ' '; 
-		(void)strcpy(s_end, newid);
+		(void)strcpy(s_end, fields[0]);
 	    } else {
 		*--s_end = '.';
 		*--s_end = '.';
@@ -190,20 +188,20 @@ static void nmea_update(void)
 	now = timestamp();
 	if (now > last_tick && (now - last_tick) > tick_interval)
 	{
-	    char *findme = strstr(sentences, newid);
+	    char *findme = strstr(sentences, fields[0]);
 
 	    tick_interval = now - last_tick;
 	    if (findme != NULL) {
 		mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
 		mvwchgat(nmeawin, 
 			 SENTENCELINE, 1+(findme-sentences), 
-			 (int)strlen(newid),
+			 (int)strlen(fields[0]),
 			 A_BOLD, 0, NULL);
 	    }
 	}
 	last_tick = now;
 
-	if (strcmp(newid, "GPGSV") == 0) {
+	if (strcmp(fields[0], "GPGSV") == 0) {
 	    int i;
 
 	    for (i = 0; i < session.gpsdata.satellites; i++) {
@@ -216,23 +214,22 @@ static void nmea_update(void)
 	    }
 	}
 
-	if (strcmp(newid, "GPRMC") == 0) {
+	if (strcmp(fields[0], "GPRMC") == 0) {
 	    /* time, lat, lon, course, speed */
 	    (void)mvwaddstr(gprmcwin, 1, 12, fields[1]);
 	    (void)mvwprintw(gprmcwin, 2, 12, "%12s %s", fields[3], fields[4]);
 	    (void)mvwprintw(gprmcwin, 3, 12, "%12s %s", fields[5], fields[6]);
 	    (void)mvwaddstr(gprmcwin, 4, 12, fields[7]);
 	    (void)mvwaddstr(gprmcwin, 5, 12, fields[8]);
-
-	    cooked_pvt();	/* cooked version of PVT */
-
 	    /* the status field, FAA code, and magnetic variation */
 	    (void)mvwaddstr(gprmcwin, 6, 12, fields[2]);
 	    (void)mvwaddstr(gprmcwin, 6, 25, fields[12]);
-	    (void)mvwprintw(gprmcwin, 6, 12, "%-5s%s", fields[10],fields[11]);
+	    (void)mvwprintw(gprmcwin, 7, 12, "%-5s%s", fields[10],fields[11]);
+
+	    cooked_pvt();	/* cooked version of PVT */
 	}
 
-	if (strcmp(newid, "GPGSA") == 0) {
+	if (strcmp(fields[0], "GPGSA") == 0) {
 	    char scr[128];
 	    int i;
 	    (void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
@@ -256,7 +253,7 @@ static void nmea_update(void)
 	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]); 
 	    monitor_fixframe(gpgsawin);
 	}
-	if (strcmp(newid, "GPGGA") == 0) {
+	if (strcmp(fields[0], "GPGGA") == 0) {
 	    (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
 	    (void)mvwprintw(gpggawin, 2, 12, "%-17s", fields[2]);
 	    (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
