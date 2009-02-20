@@ -220,6 +220,7 @@ static void decode_time(int week, int tow)
 
     m = (m - s) / 6000;
 
+    (void)wattrset(mid2win, A_UNDERLINE);
     (void)wmove(mid2win, 3,7);
     (void)wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
     (void)wmove(mid2win, 3, 29);
@@ -228,6 +229,7 @@ static void decode_time(int week, int tow)
     (void)wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100.0));
     (void)wmove(mid2win, 4, 29);
     (void)wprintw(mid2win, "%d", gmt_offset);
+    (void)wattrset(mid2win, A_NORMAL);
 }
 
 static void decode_ecef(double x, double y, double z,
@@ -257,6 +259,7 @@ static void decode_ecef(double x, double y, double z,
     if (heading < 0)
 	heading += 2 * GPS_PI;
 
+    (void)wattrset(mid2win, A_UNDERLINE);
     (void)wmove(mid2win, 1,40);
     (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD_2_DEG*phi),
 				   (double)(RAD_2_DEG*lambda));
@@ -275,6 +278,7 @@ static void decode_ecef(double x, double y, double z,
     (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
     (void)wmove(mid2win, 3,61);
     (void)wprintw(mid2win, "%8.1f",speed);
+    (void)wattrset(mid2win, A_NORMAL);
 }
 
 /*@ -globstate */
@@ -326,7 +330,9 @@ static void sirf_update(void)
 	    off = 8 + 15 * i;
 	    (void)wmove(mid4win, i+2, 3);
 	    sv = (int)getub(buf, off);
+	    (void)wattrset(mid4win, A_UNDERLINE);
 	    (void)wprintw(mid4win, " %3d",sv);
+	    (void)wattrset(mid4win, A_NORMAL);
 
 	    (void)wprintw(mid4win, " %3d%3d %04x",((int)getub(buf, off+1)*3)/2,(int)getub(buf, off+2)/2,(int)getbesw(buf, off+3));
 

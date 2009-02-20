@@ -192,14 +192,19 @@ support in <application>gpsmon</application>.</para>
 </varlistentry>
 </variablelist>
 
-<refsect2><title>Generic NME information and commands</title>
+<refsect2><title>Generic and Garmin NMEA support</title>
 
 <para>All fields are raw data from the GPS except the "Cooked PVT"
 window near top of screen, provided as a sheck.</para>
 
 <para>There are no device-specific commands.</para>
 </refsect2>
-<refsect2><title>SiRF-specific information commands</title>
+
+<refsect2><title>SiRF support</title>
+<para>Most information is raw from the GPS.  Underlined fields are
+derived by translation from ECEF coordinates or application of
+leap-second and local time-zone offsets.</para>
+
 <para>The following commands are supported for SiRF GPSes only:</para>
 
 <variablelist>
