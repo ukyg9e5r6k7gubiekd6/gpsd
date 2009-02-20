@@ -265,15 +265,50 @@ static void command(char buf[], size_t len, const char *fmt, ... )
 void monitor_complain(const char *fmt, ...) 
 {
     va_list ap;
-    va_start(ap, fmt);
     (void)wmove(cmdwin, 0, (int)strlen(type_name)+2);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
-    (void)wprintw(cmdwin, fmt, ap);
+    va_start(ap, fmt) ;
+    (void)vwprintw(cmdwin, fmt, ap);
+    va_end(ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
     (void)wgetch(cmdwin);
-    va_end(ap);
+}
+
+
+static bool switch_type(const struct gps_type_t *devtype)
+{
+    const struct monitor_object_t **trial, **newobject;
+    newobject = NULL;
+    for (trial = monitor_objects; *trial; trial++)
+	if ((*trial)->driver == devtype)
+	    newobject = trial;
+    if (newobject) {
+	if (LINES < (*newobject)->min_y || COLS < (*newobject)->min_x) {
+	    monitor_complain("New type requires %dx%d screen",
+			     (*newobject)->min_x, (*newobject)->min_x);
+	} else {
+	    if (active != NULL) {
+		(*active)->wrap();
+		(void)delwin(devicewin);
+	    }
+	    active = newobject;
+	    devicewin = newwin((*active)->min_y+1, 
+			       (*active)->min_x+1,1,0);
+	    if (!(*active)->initialize()) {
+		monitor_complain("Internal initialization failure - aborting.");
+		return false;
+	    }
+	    (void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
+	    (void)mvwin(packetwin, (*active)->min_y+1, 0);
+	    (void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
+	}
+	return true;
+    }
+
+    monitor_complain("No matching monitor type.");
+    return false;
 }
 
 static jmp_buf assertbuf;
@@ -440,31 +475,9 @@ int main (int argc, char **argv)
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 	    /* switch types on packet receipt */
 	    if (session.packet.type != last_type) {
-		const struct monitor_object_t **trial, **newobject;
 		last_type = session.packet.type;
-		newobject = NULL;
-		for (trial = monitor_objects; *trial; trial++)
-		    if ((*trial)->driver == session.device_type)
-			newobject = trial;
-		if (newobject) {
-		    if (LINES < (*newobject)->min_y || COLS < (*newobject)->min_x) {
-			monitor_complain("New type requires %dx%d screen",
-					 (*newobject)->min_x, (*newobject)->min_x);
-		    } else {
-			if (active != NULL) {
-			    (*active)->wrap();
-			    (void)delwin(devicewin);
-			}
-			active = newobject;
-			devicewin = newwin((*active)->min_y+1, 
-					   (*active)->min_x+1,1,0);
-			if (!(*active)->initialize())
-			    goto quit;
-			(void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
-			(void)mvwin(packetwin, (*active)->min_y+1, 0);
-			(void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
-		    }
-		}
+		if (!switch_type(session.device_type))
+		    goto quit;
 	    }
 
 	    /* refresh all windows */
@@ -645,28 +658,27 @@ int main (int argc, char **argv)
 		}
 		break;
 
-#if 0
 	    case 't':				/* force device type */
 		if (strlen(arg) > 0) {
 		    int matchcount = 0;
 		    const struct gps_type_t **dp, *forcetype = NULL;
 		    for (dp = gpsd_drivers; *dp; dp++) {
-			if (strstr((*dp)->type_name, line) != NULL) {
+			if (strstr((*dp)->type_name, arg) != NULL) {
 			    forcetype = *dp;
 			    matchcount++;
 			}
 		    }
 		    if (matchcount == 0) {
-			monitor_complain("No type name matches.");
+			monitor_complain("No driver type matches '%s'.", arg);
 		    } else if (matchcount == 1) {
 			assert(forcetype != NULL);
-			gpsd_switch_driver(&session, forcetype->type_name);
+			if (switch_type(forcetype))
+			    gpsd_switch_driver(&session, forcetype->type_name);
 		    } else {
-			monitor_complain("Multiple driver type names match.");
+			monitor_complain("Multiple driver type names match '%s'.", arg);
 		    }
 		}    
 		break;
-#endif
 
 	    default:
 		monitor_complain("Unknown command");

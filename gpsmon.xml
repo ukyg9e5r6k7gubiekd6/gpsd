@@ -158,6 +158,18 @@ per second, for example "s9600".</para>
 </varlistentry>
 
 <varlistentry>
+<term>t</term>
+<listitem>
+<para>Force a switch of monitoring type. Follow it with a string that
+is unique to the name of a gpsd driver with monitor support; 
+<application>gpsmon</application> will switch to using that driver
+and display code. Will show an error message if there is no matching
+gpsd driver, or multiple matches, or the unique match has no display
+support in <application>gpsmon</application>.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>Ctrl-S</term>
 <listitem>
 <para>Freeze display, suspend scrolling in debug window.</para>
