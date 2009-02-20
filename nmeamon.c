@@ -305,6 +305,15 @@ const struct monitor_object_t nmea_mmt = {
  *
  *****************************************************************************/
 
+/*
+ * Yes, it's OK for most of these to be clones of the generic NMEA monitor
+ * object except for the pointer to the GPSD driver.  That pointer makes
+ * a difference, as it will automatically enable stuff like speed-switcher
+ * and mode-switcher commands.  It's really only necessary to write a 
+ * separate monitor object if you want to change the device-window
+ * display or implement device-specific commands.
+ */
+
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
 extern const struct gps_type_t garmin;
 
