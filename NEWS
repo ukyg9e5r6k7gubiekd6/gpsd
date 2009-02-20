@@ -5,7 +5,7 @@
   The sirfmon utility is gone, replaced by gpsmon which does the same
   job for multiple GPS types. Fixed a two-year old error in NMEA parsing
   that nobody noticed because its only effect was to trash VDOP values from
-  GSA sentences, anfnd gpsd computes tose with an internal error model 
+  GSA sentences, and gpsd computes those with an internal error model 
   when they look wonky.
 
 * Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
