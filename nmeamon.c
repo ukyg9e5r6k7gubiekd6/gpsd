@@ -311,4 +311,57 @@ const struct monitor_object_t garmin_mmt = {
     .driver = &garmin,
 };
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
+
+#ifdef ASHTECH_ENABLE
+extern const struct gps_type_t ashtech;
+
+const struct monitor_object_t ashtech_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21, .min_x = 80,
+    .driver = &ashtech,
+};
+#endif /* ASHTECH_ENABLE */
+
+#ifdef FV18_ENABLE
+extern const struct gps_type_t fv18;
+
+const struct monitor_object_t fv18_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21, .min_x = 80,
+    .driver = &fv18,
+};
+#endif /* FV18_ENABLE */
+
+#ifdef GPSCLOCK_ENABLE
+extern const struct gps_type_t gpsclock;
+
+const struct monitor_object_t gpsclock_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21, .min_x = 80,
+    .driver = &gpsclock,
+};
+#endif /* GPSCLOCK_ENABLE */
+
+#ifdef MKT3301_ENABLE
+extern const struct gps_type_t mkt3301;
+
+const struct monitor_object_t mkt3301_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21, .min_x = 80,
+    .driver = &mkt3301,
+};
+#endif /* MKT3301_ENABLE */
+
 #endif /* NMEA_ENABLE */

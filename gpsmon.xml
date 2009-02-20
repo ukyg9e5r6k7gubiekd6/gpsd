@@ -192,12 +192,18 @@ support in <application>gpsmon</application>.</para>
 </varlistentry>
 </variablelist>
 
-<refsect2><title>Generic and Garmin NMEA support</title>
+<refsect2><title>NMEA support</title>
+
+<para>(These remarks apply to not just generic NMEA devices
+but all extented NMEA devices for which
+<application>gpsmon</application> presently has support.)</para>
 
 <para>All fields are raw data from the GPS except the "Cooked PVT"
 window near top of screen, provided as a sheck.</para>
 
-<para>There are no device-specific commands.</para>
+<para>There are no device-specific commands. Which generic 
+commands are available may vary by type: examine the output
+of <command>gpsmon -l</command> to learn more.</para>
 </refsect2>
 
 <refsect2><title>SiRF support</title>

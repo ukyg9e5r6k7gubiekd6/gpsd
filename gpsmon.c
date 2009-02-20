@@ -54,7 +54,8 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define BUFLEN		2048
 
 /* external capability tables */
-extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt;
+extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt, ashtech_mmt;
+extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mkt3301_mmt;
 
 /* These are public */
 struct gps_device_t	session;
@@ -76,6 +77,18 @@ static const struct monitor_object_t *monitor_objects[] = {
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
     &garmin_mmt,
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
+#ifdef ASHTECH_ENABLE
+    &ashtech_mmt,
+#endif /* ASHTECH_ENABLE */
+#ifdef FV18_ENABLE
+    &fv18_mmt,
+#endif /* FV18_ENABLE */
+#ifdef GPSCLOCK_ENABLE
+    &gpsclock_mmt,
+#endif /* GPSCLOCK_ENABLE */
+#ifdef MKT3301_ENABLE
+    &mkt3301_mmt,
+#endif /* MKT3301_ENABLE */
 #endif /* NMEA_ENABLE */
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
     &sirf_mmt,
@@ -353,8 +366,7 @@ int main (int argc, char **argv)
 	    exit(0);
         case 'l':		/* list known device types */
 	    for (active = monitor_objects; *active; active++) {
-		(void)fputs((*active)->driver->type_name, stdout);
-		(void)fputs("\ti l", stdout);
+		(void)fputs("i l q ^S ^Q", stdout);
 		(void)fputc(' ', stdout);
 		if ((*active)->driver->mode_switcher != NULL)
 		    (void)fputc('n', stdout);
@@ -370,6 +382,8 @@ int main (int argc, char **argv)
 		    (void)fputc('c', stdout);
 		else
 		    (void)fputc(' ', stdout);
+		(void)fputs("\t", stdout);
+		(void)fputs((*active)->driver->type_name, stdout);
 		(void)fputc('\n', stdout);
 	    }
 	    exit(0);

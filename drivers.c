@@ -392,7 +392,7 @@ static void ashtech_ping(struct gps_device_t *session)
 	(void)nmea_send(session, "$PASHQ,RID");
 }
 
-static const struct gps_type_t ashtech = {
+const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
@@ -439,7 +439,7 @@ static void fv18_configure(struct gps_device_t *session, unsigned int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static const struct gps_type_t fv18 = {
+const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
@@ -489,7 +489,7 @@ static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int se
     }
 }
 
-static const struct gps_type_t gpsclock = {
+const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
@@ -1068,7 +1068,7 @@ static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static const struct gps_type_t mkt3301 = {
+const struct gps_type_t mkt3301 = {
     .type_name      = "MKT-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
