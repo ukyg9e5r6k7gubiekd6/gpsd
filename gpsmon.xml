@@ -256,10 +256,6 @@ MID 19, including the Static Navigation bit toggled by the 'M' command.</para>
 </varlistentry>
 </variablelist>
 
-<para>At SiRF firmware level 231, the "UTC" time displayed is not real
-UTC, as it is not leap-second-corrected.  This is due to an inadequacy 
-in the SiRF firmware.</para>
-
 <para>To interpret what you see, you will need a copy of the
 <citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
 

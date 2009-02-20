@@ -111,7 +111,7 @@ static bool sirf_initialize(void)
     (void)wmove(mid2win, 2,1);
     (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
     (void)wmove(mid2win, 3,1);
-    (void)wprintw(mid2win, "Time:                  GPS:                Heading:                  speed m/s");
+    (void)wprintw(mid2win, "Week+TOW:               Day:                Heading:                  speed m/s");
     (void)wmove(mid2win, 4,1);
     (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
     (void)wmove(mid2win, 5,1);
@@ -220,12 +220,12 @@ static void decode_time(int week, int tow)
 
     m = (m - s) / 6000;
 
-    (void)wattrset(mid2win, A_UNDERLINE);
-    (void)wmove(mid2win, 3,7);
+    (void)wmove(mid2win, 3,10);
     (void)wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
-    (void)wmove(mid2win, 3, 29);
+    (void)wmove(mid2win, 3, 30);
     (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(double)s/100);
     (void)wmove(mid2win, 4, 8);
+    (void)wattrset(mid2win, A_UNDERLINE);
     (void)wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100.0));
     (void)wmove(mid2win, 4, 29);
     (void)wprintw(mid2win, "%d", gmt_offset);
@@ -330,9 +330,7 @@ static void sirf_update(void)
 	    off = 8 + 15 * i;
 	    (void)wmove(mid4win, i+2, 3);
 	    sv = (int)getub(buf, off);
-	    (void)wattrset(mid4win, A_UNDERLINE);
 	    (void)wprintw(mid4win, " %3d",sv);
-	    (void)wattrset(mid4win, A_NORMAL);
 
 	    (void)wprintw(mid4win, " %3d%3d %04x",((int)getub(buf, off+1)*3)/2,(int)getub(buf, off+2)/2,(int)getbesw(buf, off+3));
 
