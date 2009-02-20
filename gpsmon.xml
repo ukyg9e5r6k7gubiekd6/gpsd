@@ -17,7 +17,7 @@
 <cmdsynopsis>
   <command>gpsmon</command>  
       <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-V </arg>
       <arg>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>
 	<group>
@@ -31,6 +31,8 @@
           <arg choice='plain'><replaceable>device</replaceable></arg>
         </group>
       </arg>
+      <arg choice='opt'>-l </arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -50,7 +52,7 @@ to derive climb/sink or error estimates. Nor does it discard
 altitude when fix quality is too low.</para>
 
 <para><application>gpsmon</application> accepts an -h option that
-displays a usage message, or a -v option to dump the package
+displays a usage message, or a -V option to dump the package
 version and exit.</para>
 
 <para>This program may be run in either of two modes, as a client for
@@ -74,6 +76,12 @@ your local filesystem.</para>
 <para>The -D option enables packet-getter debugging output and is
 probably only useful to developers of the GPSD code.  Consult the
 packet-getter source code for relevant values.</para>
+
+<para>The -l option lists a table showing which GPS device tyupes
+<application>gpsmon</application> has built-in support for, and which
+generic commands can be applied to which GPS types, and then
+exits. Note that this does not list type-specific commands associated
+with individual GPS types.</para>
 
 <para>After startup, the top part of the screen reports the contents
 of several especially interesting packet types.  The bottom half of
@@ -161,10 +169,11 @@ per second, for example "s9600".</para>
 <term>t</term>
 <listitem>
 <para>Force a switch of monitoring type. Follow it with a string that
-is unique to the name of a gpsd driver with monitor support; 
-<application>gpsmon</application> will switch to using that driver
-and display code. Will show an error message if there is no matching
-gpsd driver, or multiple matches, or the unique match has no display
+is unique to the name of a gpsd driver with
+<application>gpsmon</application> support;
+<application>gpsmon</application> will switch to using that driver and
+display code. Will show an error message if there is no matching gpsd
+driver, or multiple matches, or the unique match has no display
 support in <application>gpsmon</application>.</para>
 </listitem>
 </varlistentry>

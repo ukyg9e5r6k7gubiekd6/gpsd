@@ -340,7 +340,7 @@ int main (int argc, char **argv)
     gmt_offset = (int)tzoffset();
 
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:F:Vh")) != -1) {
+    while ((option = getopt(argc, argv, "D:F:Vhl")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = atoi(optarg);
@@ -350,6 +350,28 @@ int main (int argc, char **argv)
 	    break;
 	case 'V':
 	    (void)printf("gpsmon %s\n", VERSION);
+	    exit(0);
+        case 'l':		/* list known device types */
+	    for (active = monitor_objects; *active; active++) {
+		(void)fputs((*active)->driver->type_name, stdout);
+		(void)fputs("\ti l", stdout);
+		(void)fputc(' ', stdout);
+		if ((*active)->driver->mode_switcher != NULL)
+		    (void)fputc('n', stdout);
+		else
+		    (void)fputc(' ', stdout);
+		(void)fputc(' ', stdout);
+		if ((*active)->driver->speed_switcher != NULL)
+		    (void)fputc('s', stdout);
+		else
+		    (void)fputc(' ', stdout);
+		(void)fputc(' ', stdout);
+		if ((*active)->driver->control_send != NULL)
+		    (void)fputc('c', stdout);
+		else
+		    (void)fputc(' ', stdout);
+		(void)fputc('\n', stdout);
+	    }
 	    exit(0);
 	case 'h': case '?': default:
 	    (void)fputs("usage:  gpsmon [-?hv] [-F controlsock] [server[:port:[device]]]\n", stderr);
