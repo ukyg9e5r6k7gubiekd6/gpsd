@@ -38,9 +38,16 @@
 
 <para><application>gpsmon</application> is a monitor that watches
 packets coming from a GPS and displays them along with diagnostic
-information. It supports commands trhat can be used to tweak GPS
+information. It supports commands that can be used to tweak GPS
 settings in various ways; some are device-independent, some vary
 with the GPS chipset type.</para>
+
+<para><application>gpsmon</application> differs from a navigation
+client in that it mostly dumps raw data from the GPS, with only enough
+data-massaging to allow checks against expected output.  In
+particular, this tool does not do any interpolation or modeling
+to derive climb/sink or error estimates. Nor does it discard 
+altitude when fix quality is too low.</para>
 
 <para><application>gpsmon</application> accepts an -h option that
 displays a usage message, or a -v option to dump the package

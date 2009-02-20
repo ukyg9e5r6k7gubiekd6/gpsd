@@ -76,15 +76,18 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, 6, 12, " GSA ");
     (void)wattrset(gpgsawin, A_NORMAL);
 
-    gpggawin  = derwin(devicewin, 6, 30, 3, 50);
+    gpggawin  = derwin(devicewin, 9, 30, 3, 50);
     (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpggawin, true);
     (void)wattrset(gpggawin, A_BOLD);
-    (void)mvwprintw(gpggawin, 1, 1, "Altitude: ");
-    (void)mvwprintw(gpggawin, 2, 1, "Quality:    Sats:   ");
-    (void)mvwprintw(gpggawin, 3, 1, "HDOP: ");
-    (void)mvwprintw(gpggawin, 4, 1, "Geoid: ");
-    (void)mvwprintw(gpggawin, 5, 12, " GGA ");
+    (void)mvwprintw(gpggawin, 1, 1, "Time: ");
+    (void)mvwprintw(gpggawin, 2, 1, "Latitude: ");
+    (void)mvwprintw(gpggawin, 3, 1, "Longitude: ");
+    (void)mvwprintw(gpggawin, 4, 1, "Altitude: ");
+    (void)mvwprintw(gpggawin, 5, 1, "Quality:       Sats: ");
+    (void)mvwprintw(gpggawin, 6, 1, "HDOP: ");
+    (void)mvwprintw(gpggawin, 7, 1, "Geoid: ");
+    (void)mvwprintw(gpggawin, 8, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
     /*@ +onlytrans @*/
 
@@ -172,7 +175,7 @@ static void nmea_update(void)
 	    (void)waddstr(gprmcwin, scr);
 	    monitor_fixframe(gprmcwin);
 
-	    /* Fill in the latitude. */
+	    /* Fill in the latitude (cooked). */
 	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
 		(void)snprintf(scr, sizeof(scr), "%s %c", 
 			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
@@ -181,7 +184,7 @@ static void nmea_update(void)
 		(void)snprintf(scr, sizeof(scr), "n/a");
 	    (void)mvwprintw(gprmcwin, 2, 11, "%-17s", scr);
 
-	    /* Fill in the longitude. */
+	    /* Fill in the longitude (cooked). */
 	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
 		(void)snprintf(scr, sizeof(scr), "%s %c", 
 			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
@@ -235,17 +238,14 @@ static void nmea_update(void)
 	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
 	}
 	if (strcmp(newid, "GPGGA") == 0) {
-	    char scr[128];
-	    /* Fill in the altitude. */
-	    if (session.gpsdata.fix.mode == MODE_3D && isnan(session.gpsdata.fix.altitude)==0)
-		(void)snprintf(scr, sizeof(scr), "%.1f meters",session.gpsdata.fix.altitude);
-	    else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)mvwprintw(gpggawin, 1, 11, "%-17s", scr);
-	    (void)mvwprintw(gpggawin, 2, 10, "%1.1s", fields[6]);
-	    (void)mvwprintw(gpggawin, 2, 19, "%2.2s", fields[7]);
-	    (void)mvwprintw(gpggawin, 3, 10, "%-5.5s", fields[8]);
-	    (void)mvwprintw(gpggawin, 4, 10, "%-5.5s", fields[11]);
+	    (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
+	    (void)mvwprintw(gpggawin, 2, 12, "%-17s", fields[2]);
+	    (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
+	    (void)mvwprintw(gpggawin, 4, 12, "%-17s", fields[9]);
+	    (void)mvwprintw(gpggawin, 5, 12, "%1.1s", fields[6]);
+	    (void)mvwprintw(gpggawin, 5, 21, "%2.2s", fields[7]);
+	    (void)mvwprintw(gpggawin, 6, 12, "%-5.5s", fields[8]);
+	    (void)mvwprintw(gpggawin, 7, 12, "%-5.5s", fields[11]);
 	}
     }
 }
