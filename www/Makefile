@@ -8,7 +8,6 @@
 XML = \
 	gpsd.xml \
 	gps.xml \
-	cgpxlogger.xml \
 	libgps.xml \
 	libgpsmm.xml \
 	libgpsd.xml \

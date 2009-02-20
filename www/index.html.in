@@ -144,7 +144,9 @@ buying <a href="wishlist.html"> test hardware and standards</a>.</p>
 
 <p>This web page was last updated on @DATE@.  You can browse the
 project's <a href='NEWS'>news file</a> or <a href='TODO'>to-do
-list</a> here.</p>
+list</a> here.  Note: because of the way this website is maintained, 
+these files may reflect the state of the repository tip (development
+version) rather than the latest released stable version.</p>
 
 <h1 id='downloads'>Downloads and packages</h1>
 
@@ -191,7 +193,10 @@ repository.</li>
 
 <h1 id='documentation'>Documentation</h1>
 
-<p>The following manual pages describe the code:</p>
+<p>The following manual pages describe the code.  Note: because of the
+way this website is maintained, these files will describe the state and
+features of the repository tip (development version) rather than the
+latest stable version.</p>
 
 <dl>
 <dt><a href="gpsd.html">gpsd.1</a></dt>
@@ -223,7 +228,8 @@ and fix latency.</dd>
 <dd>The <code>gpscat</code> tool dumps output from a serial device.</dd>
 
 <dt><a href="gpsmon.html">gpsmon.1</a></dt>
-<dd>The <code>gpmon</code> real-time packet monitor and diagnostic tool.</dd>
+<dd>The <code>gpsmon</code> real-time packet monitor and diagnostic
+tool. (This replaces the <code>sirfmon</code> in older version.)</dd>
 
 <dt><a href="gpspipe.html">gpspipe.1</a></dt> <dd>A simple client that
 captures GPS output and/or <code>gpsd</code> reports and sends it to

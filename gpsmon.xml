@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsmon</refname>
-<refpurpose>monitor and control a SiRF GPS in binary mode</refpurpose>
+<refpurpose>real-time GPS packet monitor and control utility</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -49,7 +49,14 @@ client in that it mostly dumps raw data from the GPS, with only enough
 data-massaging to allow checks against expected output.  In
 particular, this tool does not do any interpolation or modeling
 to derive climb/sink or error estimates. Nor does it discard 
-altitude when fix quality is too low.</para>
+altitude reports when the fix quality is too low.</para>
+
+<para><application>gpsmon</application> is a designed to run in a
+terminal emulator with a minimum 25x80 size; the non-GUI interface is
+a design choice made to accomodate users operating in constrained
+environments and over telnet or ssh connections.  If run in a larger
+window, the size of the packrty-log window will be increased to
+fit.</para>
 
 <para><application>gpsmon</application> accepts an -h option that
 displays a usage message, or a -V option to dump the package
@@ -145,8 +152,9 @@ correctly.</para>
 <para>With an argument of 0, switch device to NMEA mode at current
 speed; with an argument of 1, change to binary (native) mode. With no
 argument, toggle the setting. Will show an error if the device doesn't
-have such modes.</para> <para></para>
+have such modes.</para>
 </listitem>
+</varlistentry>
 
 <varlistentry>
 <term>q</term>
@@ -156,7 +164,6 @@ your current interrupt chracter is, works as well.</para>
 </listitem>
 </varlistentry>
 
-</varlistentry>
 <varlistentry>
 <term>s</term>
 <listitem>
@@ -195,7 +202,7 @@ support in <application>gpsmon</application>.</para>
 <refsect2><title>NMEA support</title>
 
 <para>(These remarks apply to not just generic NMEA devices
-but all extented NMEA devices for which
+but all extended NMEA devices for which
 <application>gpsmon</application> presently has support.)</para>
 
 <para>All fields are raw data from the GPS except the "Cooked PVT"
@@ -280,12 +287,12 @@ work for Zodiacs and not always work for Garmins in binary
 mode.
 --> 
 
-<para>This tool used to be called 'sirfmon', and worked only on
-SiRF devices (and the command set has changed to resemble the command
-switches of <command>gpsctl</command>). It now has support for generic
-NMEA devices; support for other device types is a work in progress. It
-will behave sanely, just dumping packets, when connected to a GPS type
-it knows nothing about.</para>
+<para>This tool used to be called 'sirfmon', and worked only on SiRF
+devices (and the command set has changed to resemble the command
+switches of <application>gpsctl</application>). It now has support for a range
+of NMEA devices as well; support for other (binary-protocol) device
+types is planned. It will behave sanely, just dumping packets, when
+connected to a GPS type it knows nothing about.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
