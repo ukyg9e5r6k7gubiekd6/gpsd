@@ -23,7 +23,7 @@
 
 extern const struct gps_type_t nmea;
 
-static WINDOW *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
+static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
 static double last_tick, tick_interval;
 
 #define SENTENCELINE 1
@@ -33,15 +33,25 @@ static bool nmea_initialize(void)
     int i;
 
     /*@ -onlytrans @*/
-    nmeawin = derwin(devicewin, 3,  80, 0, 0);
+    cookedwin = derwin(devicewin, 3,  80, 0, 0);
+    (void)wborder(cookedwin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(cookedwin, true);
+    wattrset(cookedwin, A_BOLD);
+    mvwaddstr(cookedwin, 1, 1, "Time: ");
+    mvwaddstr(cookedwin, 1, 31, "Lat: ");
+    mvwaddstr(cookedwin, 1, 55, "Lon: ");
+    mvwaddstr(cookedwin, 2, 60, "Lon: ");
+    mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
+    wattrset(cookedwin, A_NORMAL);
+
+    nmeawin = derwin(devicewin, 3,  80, 3, 0);
     (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(nmeawin, true);
-
     wattrset(nmeawin, A_BOLD);
     mvwaddstr(nmeawin, 2, 34, " Sentences ");
     wattrset(nmeawin, A_NORMAL);
 
-    satwin  = derwin(devicewin, 15, 20, 3, 0);
+    satwin  = derwin(devicewin, 15, 20, 6, 0);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(satwin, true);
     (void)wattrset(satwin, A_BOLD);
@@ -51,7 +61,7 @@ static bool nmea_initialize(void)
     (void)mvwprintw(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
 
-    gprmcwin  = derwin(devicewin, 8, 30, 3, 20);
+    gprmcwin  = derwin(devicewin, 9, 30, 6, 20);
     (void)wborder(gprmcwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gprmcwin, true);
     (void)wattrset(gprmcwin, A_BOLD);
@@ -60,23 +70,21 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gprmcwin, 3, 1, "Longitude: ");
     (void)mvwprintw(gprmcwin, 4, 1, "Speed: ");
     (void)mvwprintw(gprmcwin, 5, 1, "Course: ");
-    (void)mvwprintw(gprmcwin, 6, 1, "Status:          FAA: ");
-    (void)mvwprintw(gprmcwin, 7, 12, " RMC ");
+    (void)mvwprintw(gprmcwin, 6, 1, "Status:            FAA: ");
+    (void)mvwprintw(gprmcwin, 7, 1, "MagVar: ");
+    (void)mvwprintw(gprmcwin, 8, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpgsawin  = derwin(devicewin, 7, 30, 11, 20);
+    gpgsawin  = derwin(devicewin, 5, 30, 15, 20);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
     (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
     (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
-    (void)mvwprintw(gpgsawin, 3, 1, "HDOP: ");
-    (void)mvwprintw(gpgsawin, 4, 1, "VDOP: ");
-    (void)mvwprintw(gpgsawin, 5, 1, "PDOP: ");
-    (void)mvwprintw(gpgsawin, 6, 12, " GSA ");
+    (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
     (void)wattrset(gpgsawin, A_NORMAL);
 
-    gpggawin  = derwin(devicewin, 9, 30, 3, 50);
+    gpggawin  = derwin(devicewin, 9, 30, 6, 50);
     (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(gpggawin, true);
     (void)wattrset(gpggawin, A_BOLD);
@@ -96,12 +104,57 @@ static bool nmea_initialize(void)
     return (nmeawin != NULL);
 }
 
+static void cooked_pvt(void)
+{
+    char scr[128];
+
+    if (isnan(session.gpsdata.fix.time)==0) {
+	(void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
+    } else
+	(void)snprintf(scr, sizeof(scr), "n/a");
+    (void)mvwprintw(cookedwin, 1, 7, "%-22s", scr);
+
+
+    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
+	(void)snprintf(scr, sizeof(scr), "%s %c", 
+		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
+		       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
+    } else
+	(void)snprintf(scr, sizeof(scr), "n/a");
+    (void)mvwprintw(cookedwin, 1, 36, "%-17s", scr);
+
+    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
+	(void)snprintf(scr, sizeof(scr), "%s %c", 
+		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
+		       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
+    } else
+	(void)snprintf(scr, sizeof(scr), "n/a");
+    (void)mvwprintw(cookedwin, 1, 60, "%-17s", scr);
+
+#if 0
+    if (isnan(session.gpsdata.fix.track)==0)
+	(void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
+    else
+	(void)snprintf(scr, sizeof(scr), "n/a");
+    (void)mvwprintw(cookedwin, 1, 33, "%-17s", scr);
+
+    /* fill in the course */
+    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
+	(void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
+    else
+	(void)snprintf(scr, sizeof(scr), "n/a");
+    (void)mvwprintw(cookedwin, 5, 11, "%-17s", scr);
+#endif
+}
+
+
 /*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(void)
 {
     static char sentences[NMEA_MAX];
     char **fields;
 
+    assert(cookedwin!=NULL);
     assert(nmeawin!=NULL);
     assert(gpgsawin!=NULL);
     assert(gpggawin!=NULL);
@@ -164,51 +217,19 @@ static void nmea_update(void)
 	}
 
 	if (strcmp(newid, "GPRMC") == 0) {
-	    /* Not dumped yet: magnetic variation */
-	    char scr[128];
-	    if (isnan(session.gpsdata.fix.time)==0) {
-		(void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
-	    } else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)wmove(gprmcwin, 1, 7);
-	    (void)wclrtoeol(gprmcwin);
-	    (void)waddstr(gprmcwin, scr);
-	    monitor_fixframe(gprmcwin);
+	    /* time, lat, lon, course, speed */
+	    (void)mvwaddstr(gprmcwin, 1, 12, fields[1]);
+	    (void)mvwprintw(gprmcwin, 2, 12, "%12s %s", fields[3], fields[4]);
+	    (void)mvwprintw(gprmcwin, 3, 12, "%12s %s", fields[5], fields[6]);
+	    (void)mvwaddstr(gprmcwin, 4, 12, fields[7]);
+	    (void)mvwaddstr(gprmcwin, 5, 12, fields[8]);
 
-	    /* Fill in the latitude (cooked). */
-	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
-		(void)snprintf(scr, sizeof(scr), "%s %c", 
-			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
-			       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
-	    } else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)mvwprintw(gprmcwin, 2, 11, "%-17s", scr);
+	    cooked_pvt();	/* cooked version of PVT */
 
-	    /* Fill in the longitude (cooked). */
-	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
-		(void)snprintf(scr, sizeof(scr), "%s %c", 
-			       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
-			       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
-	    } else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)mvwprintw(gprmcwin, 3, 11, "%-17s", scr);
-
-	    /* Fill in the speed. */
-	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
-		(void)snprintf(scr, sizeof(scr), "%.1f meters/sec", session.gpsdata.fix.speed);
-	    else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)mvwprintw(gprmcwin, 4, 11, "%-17s", scr);
-
-	    if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.track)==0)
-		(void)snprintf(scr, sizeof(scr), "%.1f deg", session.gpsdata.fix.track);
-	    else
-		(void)snprintf(scr, sizeof(scr), "n/a");
-	    (void)mvwprintw(gprmcwin, 5, 11, "%-17s", scr);
-
-	    /* the status field and FAA code */
-	    (void)mvwaddstr(gprmcwin, 6, 11, fields[2]);
-	    (void)mvwaddstr(gprmcwin, 6, 23, fields[12]);
+	    /* the status field, FAA code, and magnetic variation */
+	    (void)mvwaddstr(gprmcwin, 6, 12, fields[2]);
+	    (void)mvwaddstr(gprmcwin, 6, 25, fields[12]);
+	    (void)mvwprintw(gprmcwin, 6, 12, "%-5s%s", fields[10],fields[11]);
 	}
 
 	if (strcmp(newid, "GPGSA") == 0) {
@@ -230,12 +251,10 @@ static void nmea_update(void)
 		mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
 	    }
 	    monitor_fixframe(gpgsawin);
-	    (void)wmove(gpgsawin, 3, 7); 
-	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.hdop);
-	    (void)wmove(gpgsawin, 4, 7); 
-	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.vdop);
-	    (void)wmove(gpgsawin, 5, 7); 
-	    (void)wprintw(gpgsawin, "%2.2f", session.gpsdata.pdop);
+	    (void)mvwprintw(gpgsawin, 3, 8, "%-5s", fields[16]); 
+	    (void)mvwprintw(gpgsawin, 3, 16, "%-5s", fields[17]); 
+	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]); 
+	    monitor_fixframe(gpgsawin);
 	}
 	if (strcmp(newid, "GPGGA") == 0) {
 	    (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
@@ -243,7 +262,7 @@ static void nmea_update(void)
 	    (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
 	    (void)mvwprintw(gpggawin, 4, 12, "%-17s", fields[9]);
 	    (void)mvwprintw(gpggawin, 5, 12, "%1.1s", fields[6]);
-	    (void)mvwprintw(gpggawin, 5, 21, "%2.2s", fields[7]);
+	    (void)mvwprintw(gpggawin, 5, 22, "%2.2s", fields[7]);
 	    (void)mvwprintw(gpggawin, 6, 12, "%-5.5s", fields[8]);
 	    (void)mvwprintw(gpggawin, 7, 12, "%-5.5s", fields[11]);
 	}
@@ -266,6 +285,6 @@ const struct monitor_object_t nmea_mmt = {
     .update = nmea_update,
     .command = NULL,
     .wrap = nmea_wrap,
-    .min_y = 18, .min_x = 80,
+    .min_y = 21, .min_x = 80,
     .driver = &nmea,
 };

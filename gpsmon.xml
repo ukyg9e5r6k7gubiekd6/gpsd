@@ -171,7 +171,14 @@ per second, for example "s9600".</para>
 </varlistentry>
 </variablelist>
 
-<refsect2><title>SirF-specific commands</title>
+<refsect2><title>Generic NME information and commands</title>
+
+<para>All fields are raw data from the GPS except the "Cooked PVT"
+window near top of screen, provided as a sheck.</para>
+
+<para>There are no device-specific commands.</para>
+</refsect2>
+<refsect2><title>SiRF-specific information commands</title>
 <para>The following commands are supported for SiRF GPSes only:</para>
 
 <variablelist>
