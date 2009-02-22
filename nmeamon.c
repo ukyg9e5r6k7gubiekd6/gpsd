@@ -301,9 +301,20 @@ const struct monitor_object_t nmea_mmt = {
 
 /*****************************************************************************
  *
- * Garmin NMEA support
+ * Extended NMEA support
  *
  *****************************************************************************/
+
+static void monitor_nmea_send(const char *fmt, ... )
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    va_end(ap);
+    (void)monitor_control_send((unsigned char *)buf, strlen(buf));
+}
 
 /*
  * Yes, it's OK for most of these to be clones of the generic NMEA monitor
@@ -330,10 +341,62 @@ const struct monitor_object_t garmin_mmt = {
 #ifdef ASHTECH_ENABLE
 extern const struct gps_type_t ashtech;
 
+#define ASHTECH_SPEED_9600 5
+#define ASHTECH_SPEED_57600 8
+
+static int ashtech_command(char line[])
+{
+    switch (line[0]) 
+    {
+    case 'N':		/* normal = 9600, GGA+GSA+GSV+RMC+ZDA */
+	monitor_nmea_send("$PASHS,NME,ALL,A,OFF"); /* silence outbound chatter */
+	monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
+	monitor_nmea_send("$PASHS,NME,GGA,A,ON");
+	monitor_nmea_send("$PASHS,NME,GSA,A,ON");
+	monitor_nmea_send("$PASHS,NME,GSV,A,ON");
+	monitor_nmea_send("$PASHS,NME,RMC,A,ON");
+	monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
+
+	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
+		  ASHTECH_SPEED_9600, ASHTECH_SPEED_9600);
+	sleep(6); /* it takes 4-6 sec for the receiver to reboot */
+	monitor_nmea_send("$PASHS,WAS,ON"); /* enable WAAS */
+	break;
+
+    case 'R':		/* raw = 57600, normal+XPG+POS+SAT+MCA+PBN+SNV */
+	monitor_nmea_send("$PASHS,NME,ALL,A,OFF"); /* silence outbound chatter */
+	monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
+	monitor_nmea_send("$PASHS,NME,GGA,A,ON");
+	monitor_nmea_send("$PASHS,NME,GSA,A,ON");
+	monitor_nmea_send("$PASHS,NME,GSV,A,ON");
+	monitor_nmea_send("$PASHS,NME,RMC,A,ON");
+	monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
+
+	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
+		  ASHTECH_SPEED_57600, ASHTECH_SPEED_9600);
+	sleep(6); /* it takes 4-6 sec for the receiver to reboot */
+	monitor_nmea_send("$PASHS,WAS,ON"); /* enable WAAS */
+
+	monitor_nmea_send("$PASHS,NME,POS,A,ON"); /* Ashtech PVT solution */
+	monitor_nmea_send("$PASHS,NME,SAT,A,ON"); /* Ashtech Satellite status */
+	monitor_nmea_send("$PASHS,NME,MCA,A,ON"); /* MCA measurements */
+	monitor_nmea_send("$PASHS,NME,PBN,A,ON"); /* ECEF PVT solution */
+	monitor_nmea_send("$PASHS,NME,SNV,A,ON,10"); /* Almanac data */
+
+	monitor_nmea_send("$PASHS,NME,XMG,A,ON"); /* exception messages */
+	break;
+
+    default:
+	return COMMAND_UNKNOWN;
+    }
+
+    return COMMAND_UNKNOWN;
+}
+
 const struct monitor_object_t ashtech_mmt = {
     .initialize = nmea_initialize,
     .update = nmea_update,
-    .command = NULL,
+    .command = ashtech_command,
     .wrap = nmea_wrap,
     .min_y = 21, .min_x = 80,
     .driver = &ashtech,
