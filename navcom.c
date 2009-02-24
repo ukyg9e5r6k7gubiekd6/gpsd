@@ -90,7 +90,7 @@ static ssize_t navcom_control_send(struct gps_device_t *session,
     putbyte(session->msgbuf, 3, buf[0]);	/* Cmd ID */
     putleword(session->msgbuf, 4, len+4);	/* Length */
     memcpy(session->msgbuf, buf+6, len-1);
-    putbyte(session->msgbuf, 6 + len, checksum(session->msgbuf+3, len+5));
+    putbyte(session->msgbuf, 6 + len, checksum((unsigned char *)session->msgbuf+3, len+5));
     putbyte(session->msgbuf, 7 + len, 0x03);
     session->msgbuflen = len+9;
     /*@ -ignoresigns +mayaliasunique @*/

@@ -1458,7 +1458,7 @@ int main(int argc, char *argv[])
 	    gpsd_report (2, "Priority setting failed.\n");
 	(void)ntpshm_init(&context, nowait);
     } else {
-	gpsd_report (2, "Unable to start ntpshm.  gpsd must run as root.\n");
+	gpsd_report (LOG_INF, "Unable to start ntpshm.  gpsd must run as root.\n");
     }
 #endif /* NTPSHM_ENABLE */
 
@@ -1466,9 +1466,9 @@ int main(int argc, char *argv[])
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
 	/* the connection could not be started */
-	gpsd_report (2, "unable to connect to the DBUS system bus\n");
+	gpsd_report (LOG_ERROR, "unable to connect to the DBUS system bus\n");
     } else
-	gpsd_report (2, "successfully connected to the DBUS system bus\n");
+	gpsd_report (LOG_PROG, "successfully connected to the DBUS system bus\n");
 #endif /* DBUS_ENABLE */
 
     if (getuid() == 0 && go_background) {
@@ -1492,7 +1492,7 @@ int main(int argc, char *argv[])
 	    if (setgid(stb.st_gid) != 0)
 		gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n", strerror(errno));
 	}
-	pw = getpwnam( GPSD_USER );
+	pw = getpwnam(GPSD_USER);
 	if (pw)
 	    (void)seteuid(pw->pw_uid);
     }
