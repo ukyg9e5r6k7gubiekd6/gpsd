@@ -1781,8 +1781,9 @@ int main(int argc, char *argv[])
 	    }
 #ifdef DBUS_ENABLE
 	    if (changed &~ ONLINE_SET) {
-		    if (changed & (LATLON_SET | MODE_SET))
-			    send_dbus_fix (channel);
+		if (changed & (LATLON_SET | MODE_SET)) {
+		    send_dbus_fix (channel);
+		}
 	    }
 #endif
 	}

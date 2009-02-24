@@ -21,7 +21,6 @@ endif
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 DBUSPROGS = gpxlogger
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 endif
 
 if HAVE_RTCM104V2
@@ -63,6 +62,13 @@ xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(X_LIBS) $
 #
 cgps_SOURCES = cgps.c
 cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
+
+#
+# Build gpxlogger
+#
+gpxlogger_SOURCES = gpxlogger.c
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
+
 
 #
 # Build cgpxlogger
@@ -365,6 +371,8 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint $(SPLINTOPTS) -exportlocal $(xgpsspeed_c_sources)
+	#@echo "Running splint on gpxlogger..."
+	#-splint $(SPLINTOPTS) -exportlocal $(gpxlogger_SOURCES)
 	@echo "Running splint on gpsctl..."
 	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
 	@echo "Running splint on gpsmon..."
