@@ -27,6 +27,7 @@ static time_t tracklimit = 5; /* seconds */
 
 static struct gps_fix_t gpsfix;
 static time_t int_time, old_int_time;
+static char devname[BUFSIZ];
 
 static void print_gpx_trk_start (void)
 {
@@ -64,6 +65,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 			   DBUS_TYPE_DOUBLE, &gpsfix.eps,
 			   DBUS_TYPE_DOUBLE, &gpsfix.climb,
 			   DBUS_TYPE_DOUBLE, &gpsfix.epc,
+			   DBUS_TYPE_STRING, &devname,
 			   DBUS_TYPE_INVALID);
 	
     /* 

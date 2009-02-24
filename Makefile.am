@@ -371,8 +371,6 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint $(SPLINTOPTS) -exportlocal $(xgpsspeed_c_sources)
-	#@echo "Running splint on gpxlogger..."
-	#-splint $(SPLINTOPTS) -exportlocal $(gpxlogger_SOURCES)
 	@echo "Running splint on gpsctl..."
 	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
 	@echo "Running splint on gpsmon..."
