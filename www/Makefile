@@ -23,7 +23,7 @@ XML = \
 	srec.xml
 
 
-html: index.html hardware.html $(XML:.xml=.html)
+html: index.html hardware.html gypsy.html $(XML:.xml=.html)
 
 index.html: index.html.in
 	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html

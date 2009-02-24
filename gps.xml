@@ -248,7 +248,7 @@ created if there's no fix for 5 seconds.</para>
 <refsect1 id='maintainer'><title>AUTHORS</title> 
 
 <para>
-Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond (xgps). 
+Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond,
 Jeff Francis (cgps). Amaury Jacquot <email>sxpert@sxpert.org</email>
 &amp; Petter Reinholdtsen <email>pere@hungry.com</email> (gpxlogger).
 Chris Kuethe <email>chris.kuethe@gmail.com</email> (cgpxlogger).

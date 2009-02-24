@@ -229,7 +229,7 @@ and fix latency.</dd>
 
 <dt><a href="gpsmon.html">gpsmon.1</a></dt>
 <dd>The <code>gpsmon</code> real-time packet monitor and diagnostic
-tool. (This replaces the <code>sirfmon</code> in older version.)</dd>
+tool. (This replaces the <code>sirfmon</code> tool in older versions.)</dd>
 
 <dt><a href="gpspipe.html">gpspipe.1</a></dt> <dd>A simple client that
 captures GPS output and/or <code>gpsd</code> reports and sends it to
