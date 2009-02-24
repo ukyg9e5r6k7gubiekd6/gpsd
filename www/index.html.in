@@ -282,6 +282,12 @@ do, even if you don't yet have a local GPS.</p>
 <dd>If you are new to GPS technology and don't quite understand what
 <code>gpsd</code> is about, you might find this interesting.</dd>
 
+<dt><a href="http://esr.ibiblio.org/?p=801">Why GPSes suck, and what
+to do about it</a></dt>
+<dd>The designer of <code>gpsd</code> 2.0 rants in an at least
+semi-humorous way about everything that's wrong with GPS standards 
+and vendors.</dd>
+
 <dt><a href="replacing-nmea.html">Towards A Better GPS Protocol</a></dt>
 <dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
 it.</dd>
