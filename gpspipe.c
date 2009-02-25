@@ -231,10 +231,10 @@ int main( int argc, char **argv)
 	gpsd_source_spec(argv[optind], &source);
     } else
 	gpsd_source_spec(NULL, &source);
+
     if (source.device != NULL) {
-	(void)fprintf(stderr,
-		      "gpspipe: cannot accept device argument.\n");
-	exit(1);
+	(void)strlcat(buf, "F=", sizeof(buf));
+	(void)strlcat(buf, source.device, sizeof(buf));
     }
 
     /* Daemonize if the user requested it. */
