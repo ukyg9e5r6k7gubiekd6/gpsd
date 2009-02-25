@@ -69,14 +69,26 @@ static void print_gpx_trk_start (void)
     (void)fflush(stdout);
 }
 
-#if 0
-static void write_record(struct gps_data_t *gpsdata)
+static void print_fix(struct gps_fix_t *fix, struct tm *time)
 {
-    track_start();
-    (void)printf("      <trkpt lat=\"%.7f\" ", gpsdata->fix.latitude );
-    (void)printf("lon=\"%.7f\">\n", gpsdata->fix.longitude );
-
-    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
+    (void)printf("   <trkpt lat=\"%f\" lon=\"%f\">\n", 
+		 fix->latitude, fix->longitude);
+    (void)printf("    <ele>%f</ele>\n",
+		 fix->altitude);
+    (void)printf("    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
+		 time->tm_year+1900, time->tm_mon+1, time->tm_mday,
+		 time->tm_hour, time->tm_min, time->tm_sec);
+    if (fix->mode==MODE_NO_FIX)
+	(void)fprintf (stdout, "    <fix>none</fix>\n");
+    else
+	(void)fprintf (stdout, "    <fix>%dd</fix>\n", fix->mode);
+#if 0
+    /*
+     * Can't print this more detailed report because in D-Bus mode
+     * we don't necessarily have access to some of the stuff in gsdata.
+     * Might mean some of this stuff should be promoted.
+     */
+    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= MODE_3D)){
 	/* dgps or pps */
 	if (gpsdata->fix.mode == 4) { /* military pps */
 	    (void)printf("        <fix>pps</fix>\n");
@@ -84,51 +96,23 @@ static void write_record(struct gps_data_t *gpsdata)
 	    (void)printf("        <fix>dgps</fix>\n");
 	}
     } else { /* no dgps or pps */
-	if (gpsdata->fix.mode == 3) {
+	if (gpsdata->fix.mode == MODE_3D) {
 	    (void)printf("        <fix>3d</fix>\n");
-	} else if (gpsdata->fix.mode == 2) {
+	} else if (gpsdata->fix.mode == MODE_2D) {
 	    (void)printf("        <fix>2d</fix>\n");
-	} else if (gpsdata->fix.mode == 1) {
+	} else if (gpsdata->fix.mode == MODE_NOFIX) {
 	    (void)printf("        <fix>none</fix>\n");
 	} /* don't print anything if no fix indicator */
     }
-
-    /* print altitude if we have a fix and it's 3d of some sort */
-    if ((gpsdata->fix.mode >= MODE_3D) && (gpsdata->status >= STATUS_FIX))
-	(void)printf("        <ele>%.2f</ele>\n", gpsdata->fix.altitude);
 
     /* print # satellites used in fix, if reasonable to do so */
     if (gpsdata->fix.mode >= MODE_2D) {
 	(void)printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
 	(void)printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
     }
-
-    if (gpsdata->status >= 1) { /* plausible timestamp */
-	char scr[128];
-	(void)printf("        <time>%s</time>\n",
-		     unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
-    }
-    (void)printf("      </trkpt>\n");
-    (void)fflush(stdout);
-}
 #endif
 
-static void print_fix(struct gps_fix_t *fix, struct tm *time)
-{
-    (void)fprintf(stdout, 
-		  "   <trkpt lat=\"%f\" lon=\"%f\">\n", 
-		  fix->latitude, fix->longitude);
-    (void)fprintf(stdout,
-		  "    <ele>%f</ele>\n",
-		  fix->altitude);
-    (void)fprintf(stdout, "    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
-		  time->tm_year+1900, time->tm_mon+1, time->tm_mday,
-		  time->tm_hour, time->tm_min, time->tm_sec);
-    if (fix->mode==MODE_NO_FIX)
-	(void)fprintf (stdout, "    <fix>none</fix>\n");
-    else
-	(void)fprintf (stdout, "    <fix>%dd</fix>\n", fix->mode);
-    (void)fprintf(stdout, "   </trkpt>\n");
+    (void)printf("   </trkpt>\n");
     (void)fflush (stdout);
 }
 
