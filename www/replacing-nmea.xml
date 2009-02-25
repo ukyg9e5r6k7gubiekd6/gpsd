@@ -40,7 +40,7 @@
       <date>04 January 2005</date>
       <authorinitials>esr</authorinitials>
       <revremark>
-	 Corrected SGPS example, thanks to Kevin Niehage for the bug report.
+	 Initial draft.
       </revremark>
    </revision>
    <revision>
@@ -48,7 +48,7 @@
       <date>11 February 2005</date>
       <authorinitials>esr</authorinitials>
       <revremark>
-	 Initial draft.
+	 Corrected SGPS example, thanks to Kevin Niehage for the bug report.
       </revremark>
    </revision>
    <revision>
@@ -268,6 +268,8 @@ format of the <ulink url='http://www.w3.org/TR/NOTE-datetime'>W3C
 profile of ISO 8601</ulink>, with the timezone required to be Zulu
 (UTC) time.</para>
 
+<sect2><title>GPTPV</title>
+
 <para>The core sentence of SGPS has the following layout:</para>
 
 <orderedlist>
@@ -362,6 +364,9 @@ $GPTPV,2005-02-11T04:40:51.231Z,?,4916.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0
                                 Checksum omitted.
 </programlisting>
 
+</sect2>
+<sect2><title>GPSVU</title>
+
 <para>A second sentence describes GPS satellite status.</para>
 
 <orderedlist>
@@ -406,8 +411,11 @@ last fix, suffix this field with a '!'.
 $GPSVU,2005-02-11T04:40:51.231Z,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
 </programlisting>
 
-<para>A third sentence identifies the device.  It is GPVID, and the
-fields are as follows:</para>
+</sect2>
+<sect2><title>GPVID</title>
+
+<para>A third sentence identifies the device.  It is GPVID for Version
+ID, and the fields are as follows:</para>
 
 <orderedlist>
 <listitem><para>
@@ -450,9 +458,33 @@ of 82.</para>
 $GPVID,2006-11-17T12:29:37Z,1.0,Haicom,H204S,SiRF-II,231.00.00
 </programlisting>
 
+</sect2>
+<sect2><title>GPGSP</title>
+
+<para>With the addition of a fourth sentence, $GPSGP, transition to the 
+new protocol would be easy.  It would have two forms:</para>
+
+<para>$GPSGP,1: directs the receiver to emit GPPVT and GPSVU
+only, if it is not already doing so.</para>
+
+<para>$GPSGP,0: directs the receiver to return to NMEA-classic mode, if
+it is capable of doing so.</para>
+
+<para>An SGPS-conformant receiver is required to respond with
+$GPSGP,timestamp,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0 
+reporting its new mode.</para>
+
+<para>Other listeners can distinguish GPGSP responses from requests
+by checking whether field 1 contains an IS8601 timestamp; an easy way
+to check this is to look for the trailing Z.</para>
+
+</sect2>
+<sect2><title>Other considerations</title>
+
 <para>Finally, SGPS-compliant receivers are required to respond to the
 requests $GPPVT, $GPVSU, and $GPVID (without arguments) with the
 corresponding report based on most recent available data.</para>
+</sect2>
 </sect1>
 
 <sect1><title>Could This Be Adopted?</title>
@@ -467,18 +499,6 @@ trivially derived from data already computed for NMEA reports are
 (a) Climb/sink, and (b) GPSTPV uncertainty fields.  None
 of these should be difficult to derive.</para>
 
-<para>With the addition of a fourth sentence, $GPSGP, transition to the 
-new protocol would be easy.  It would have two forms:</para>
-
-<para>$GPSGP,1: directs the receiver to emit GPPVT and GPSVU
-only, if it is not already doing so.</para>
-
-<para>$GPSGP,0: directs the receiver to return to NMEA-classic mode, if
-it is capable of doing so.</para>
-
-<para>An SGPS-conformant receiver is required to respond with
-$GPSGP,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0 
-reporting its new mode.</para>
 </sect1>
 </article>
 
