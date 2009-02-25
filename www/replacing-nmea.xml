@@ -76,6 +76,15 @@
          Fixed timestamp to Zulu time.  Specified signed latitude.  
       </revremark>
    </revision>
+   <revision>
+      <revnumber>1.4</revnumber>
+      <date>25 February 2009</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+         Fixed GPSGP so the response isn't identical to the send,
+         avoiding problems on multidrop lines.
+      </revremark>
+   </revision>
 </revhistory>
 
 <abstract>
@@ -462,8 +471,9 @@ only, if it is not already doing so.</para>
 <para>$GPSGP,0: directs the receiver to return to NMEA-classic mode, if
 it is capable of doing so.</para>
 
-<para>An SGPS-conformant receiver is required to respond with $GPSGP,x
-where x is 1 or 0 to indicate its new mode.</para>
+<para>An SGPS-conformant receiver is required to respond with
+$GPSGP,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0 
+reporting its new mode.</para>
 </sect1>
 </article>
 
