@@ -440,7 +440,9 @@ extern unsigned char hc(unsigned char);
 bool sirf_write(int fd, unsigned char *msg);
 
 /* application interface */
-extern void gpsd_init(struct gps_device_t *, struct gps_context_t *, char *);
+extern void gpsd_init(struct gps_device_t *, 
+		      struct gps_context_t *, 
+		      /*@null@*/char *);
 extern int gpsd_activate(struct gps_device_t *, bool);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);

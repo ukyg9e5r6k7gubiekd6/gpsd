@@ -114,6 +114,12 @@ there is a second colon-separated suffix, that is taken as a device
 name to be handed to the daemon in an F= command (or
 equivalent).</para>
 
+<para>Not all clients shipped with GPSD are documented here. See also
+the separate manual pages for
+<citerefentry><refentrytitle>gpspipe</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+and
+<citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+
 <refsect2><title>xgps</title>
 
 <para><application>xgps</application> is a simple test client for
