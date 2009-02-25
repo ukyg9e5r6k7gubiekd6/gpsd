@@ -26,9 +26,10 @@ static char *author = "Amaury Jacquot, Chris Kuethe";
 static char *license = "BSD";
 static char *progname;
 
+static time_t int_time, old_int_time;
 static bool intrack = false;
 static bool first = true;
-static time_t tracklimit = 5; /* seconds */
+static time_t timeout = 5; /* seconds */
 
 static void print_gpx_header(void) 
 {
@@ -68,6 +69,50 @@ static void print_gpx_trk_start (void)
     (void)fflush(stdout);
 }
 
+#if 0
+static void write_record(struct gps_data_t *gpsdata)
+{
+    track_start();
+    (void)printf("      <trkpt lat=\"%.7f\" ", gpsdata->fix.latitude );
+    (void)printf("lon=\"%.7f\">\n", gpsdata->fix.longitude );
+
+    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
+	/* dgps or pps */
+	if (gpsdata->fix.mode == 4) { /* military pps */
+	    (void)printf("        <fix>pps</fix>\n");
+	} else { /* civilian dgps or sbas */
+	    (void)printf("        <fix>dgps</fix>\n");
+	}
+    } else { /* no dgps or pps */
+	if (gpsdata->fix.mode == 3) {
+	    (void)printf("        <fix>3d</fix>\n");
+	} else if (gpsdata->fix.mode == 2) {
+	    (void)printf("        <fix>2d</fix>\n");
+	} else if (gpsdata->fix.mode == 1) {
+	    (void)printf("        <fix>none</fix>\n");
+	} /* don't print anything if no fix indicator */
+    }
+
+    /* print altitude if we have a fix and it's 3d of some sort */
+    if ((gpsdata->fix.mode >= MODE_3D) && (gpsdata->status >= STATUS_FIX))
+	(void)printf("        <ele>%.2f</ele>\n", gpsdata->fix.altitude);
+
+    /* print # satellites used in fix, if reasonable to do so */
+    if (gpsdata->fix.mode >= MODE_2D) {
+	(void)printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
+	(void)printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
+    }
+
+    if (gpsdata->status >= 1) { /* plausible timestamp */
+	char scr[128];
+	(void)printf("        <time>%s</time>\n",
+		     unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+    }
+    (void)printf("      </trkpt>\n");
+    (void)fflush(stdout);
+}
+#endif
+
 static void print_fix(struct gps_fix_t *fix, struct tm *time)
 {
     (void)fprintf(stdout, 
@@ -87,10 +132,43 @@ static void print_fix(struct gps_fix_t *fix, struct tm *time)
     (void)fflush (stdout);
 }
 
-static void quit_handler (int signum) {
-	syslog (LOG_INFO, "exiting, signal %d received", signum);
-	print_gpx_footer ();
-	exit (0);
+static void conditionally_log_fix(struct gps_fix_t *gpsfix)
+{
+    int_time = floor(gpsfix->time);
+    if ((int_time != old_int_time) && gpsfix->mode >= MODE_2D) {
+	struct tm 	time;
+	/* 
+	 * Make new track if the jump in time is above
+	 * timeout.  Handle jumps both forward and
+	 * backwards in time.  The clock sometimes jumps
+	 * backward when gpsd is submitting junk on the
+	 * dbus.
+	 */
+	if (fabs(int_time - old_int_time) > timeout && !first) {
+	    print_gpx_trk_end();
+	    intrack = false;
+	}
+
+	if (!intrack) {
+	    print_gpx_trk_start();
+	    intrack = true;
+	    if (first)
+		first = false;
+	}
+		
+	old_int_time = int_time;
+	gmtime_r(&(int_time), &time);
+	print_fix(gpsfix, &time);
+    }
+}
+
+static void quit_handler (int signum) 
+{
+    /* don't clutter the logs on Ctrl-C */
+    if (signum != SIGINT)
+	syslog(LOG_INFO, "exiting, signal %d received", signum);
+    print_gpx_footer ();
+    exit(0);
 }
 
 #ifdef DBUS_ENABLE
@@ -110,7 +188,6 @@ static void quit_handler (int signum) {
 DBusConnection* connection;
 
 static struct gps_fix_t gpsfix;
-static time_t int_time, old_int_time;
 static char devname[BUFSIZ];
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) 
@@ -138,35 +215,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 			   DBUS_TYPE_STRING, &devname,
 			   DBUS_TYPE_INVALID);
 	
-    /* 
-     * we have a fix there - log the point
-     */
-    int_time = floor(gpsfix.time);
-    if ((int_time != old_int_time) && gpsfix.mode >= MODE_2D) {
-	struct tm 	time;
-	/* 
-	 * Make new track if the jump in time is above
-	 * tracklimit.  Handle jumps both forward and
-	 * backwards in time.  The clock sometimes jumps
-	 * backward when gpsd is submitting junk on the
-	 * dbus.
-	 */
-	if (fabs(int_time - old_int_time) > tracklimit && !first) {
-	    print_gpx_trk_end();
-	    intrack = false;
-	}
-
-	if (!intrack) {
-	    print_gpx_trk_start();
-	    intrack = true;
-	    if (first)
-		first = false;
-	}
-		
-	old_int_time = int_time;
-	gmtime_r(&(int_time), &time);
-	print_fix(&gpsfix, &time);
-    }
+    conditionally_log_fix(&gpsfix);
     return DBUS_HANDLER_RESULT_HANDLED;
 }
 
@@ -227,95 +276,23 @@ static int dbus_mainloop(void)
  * Doing it with sockets
  *
  **************************************************************************/
-#define BS 512
 
-#define NUM 8
-
-struct gps_data_t *gpsdata;
 static char *pollstr = "SPAMDQTV\n";
 static char *server = "127.0.0.1";
 static char *port = "2947";
 static char *device = NULL;
-static unsigned int interval = 5;
 static int casoc = 0;
-
-static void track_start(void)
-{
-    if (intrack)
-	return;
-    (void)printf("<!-- track start -->\n  <trk>\n    <trkseg>\n");
-    intrack = true;
-}
-
-static void track_end(void)
-{
-    if (!intrack)
-	return;
-    (void)printf("    </trkseg>\n  </trk>\n<!-- track end -->\n");
-    intrack = false;
-}
-
-static void write_record(struct gps_data_t *gpsdata)
-{
-    track_start();
-    (void)printf("      <trkpt lat=\"%.7f\" ", gpsdata->fix.latitude );
-    (void)printf("lon=\"%.7f\">\n", gpsdata->fix.longitude );
-
-    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
-	/* dgps or pps */
-	if (gpsdata->fix.mode == 4) { /* military pps */
-	    (void)printf("        <fix>pps</fix>\n");
-	} else { /* civilian dgps or sbas */
-	    (void)printf("        <fix>dgps</fix>\n");
-	}
-    } else { /* no dgps or pps */
-	if (gpsdata->fix.mode == 3) {
-	    (void)printf("        <fix>3d</fix>\n");
-	} else if (gpsdata->fix.mode == 2) {
-	    (void)printf("        <fix>2d</fix>\n");
-	} else if (gpsdata->fix.mode == 1) {
-	    (void)printf("        <fix>none</fix>\n");
-	} /* don't print anything if no fix indicator */
-    }
-
-    /* print altitude if we have a fix and it's 3d of some sort */
-    if ((gpsdata->fix.mode >= MODE_3D) && (gpsdata->status >= STATUS_FIX))
-	(void)printf("        <ele>%.2f</ele>\n", gpsdata->fix.altitude);
-
-    /* print # satellites used in fix, if reasonable to do so */
-    if (gpsdata->fix.mode >= MODE_2D) {
-	(void)printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
-	(void)printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
-    }
-
-    if (gpsdata->status >= 1) { /* plausible timestamp */
-	char scr[128];
-	(void)printf("        <time>%s</time>\n",
-		     unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
-    }
-    (void)printf("      </trkpt>\n");
-    (void)fflush(stdout);
-}
 
 static void process(struct gps_data_t *gpsdata,
 	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
 {
-
-    if ((gpsdata->fix.mode > 1) && (gpsdata->status > 0))
-	write_record(gpsdata);
-    else
-	track_end();
-}
-
-static void footer(void)
-{
-    track_end();
-    printf("</gpx>\n");
+    conditionally_log_fix(&gpsdata->fix);
 }
 
 static int socket_mainloop(void)
 {
     fd_set fds;
+    struct gps_data_t *gpsdata;
 
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
@@ -354,6 +331,8 @@ static int socket_mainloop(void)
 
     gps_set_raw_hook(gpsdata, process);
 
+    gps_query(gpsdata, "w+x");
+
     for(;;){
 	int data;
 	struct timeval tv;
@@ -368,16 +347,12 @@ static int socket_mainloop(void)
 	data = select(gpsdata->gps_fd + 1, &fds, NULL, NULL, &tv);
 
 	if (data < 0) {
-	    fprintf(stderr,"%s\n", strerror(errno));
-	    footer();
-	    exit(2);
+	    (void)fprintf(stderr,"%s\n", strerror(errno));
+	    break;
 	}
 	else if (data)
 	    gps_poll(gpsdata);
-
-	(void)sleep(interval);
     }
-    /* NOTREACHED */
     return 0;
 }
 
@@ -390,7 +365,7 @@ static int socket_mainloop(void)
 static void usage(void) 
 {
     fprintf(stderr,
-	    "Usage: %s [-h] [-i interval] [-j casoc] [server[:port:[device]]]\n",
+	    "Usage: %s [-V] [-h] [-i timeout] [-j casoc] [server[:port:[device]]]\n",
 	    progname);
     fprintf(stderr,
 	    "\tdefaults to '%s -i 5 -j 0 127.0.0.1:2947'\n",
@@ -407,12 +382,12 @@ int main (int argc, char** argv)
     while ((ch = getopt(argc, argv, "hi:j:V")) != -1){
 	switch (ch) {
 	case 'i':		/* set polling interfal */
-	    interval = (unsigned int)atoi(optarg);
-	    if (interval < 1)
-		interval = 1;
-	    if (interval >= 3600)
+	    timeout = (unsigned int)atoi(optarg);
+	    if (timeout < 1)
+		timeout = 1;
+	    if (timeout >= 3600)
 		fprintf(stderr,
-			"WARNING: polling interval is an hour or more!\n");
+			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'j':		/* set data smoothing */
 	    casoc = (unsigned int)atoi(optarg);
