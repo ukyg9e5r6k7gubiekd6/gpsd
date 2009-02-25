@@ -194,10 +194,10 @@ a proprietary specification, jealously guarded by IP lawyers.
 software is far more complex than need be, and the protocol tends to
 introduce latencies that vary in an unpredictable way.  The latter is
 a serious problem for aviation and other high-precision GPS
-applications, and probably provided a technical reason for the one major GPS
-vendor (Garmin) has announced that it will drop NMEA 0183 support
-entirely in favor of a tighter binary protocol (we refrain from
-speculating on other less creditable motives for this move).</para>
+applications, and probably provided a technical reason that one major
+GPS vendor (Garmin) dropped NMEA 0183 support entirely in 2004 in
+favor of a tighter binary protocol (we refrain from speculating on
+other less creditable motives for this move).</para>
 </sect1>
 
 <sect1><title>How To Do Better</title>
