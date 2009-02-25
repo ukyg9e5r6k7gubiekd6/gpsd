@@ -2,21 +2,20 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <syslog.h>
 #include <math.h>
 #include <time.h>
 #include <signal.h>
 
-#include <glib.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <dbus/dbus-glib.h>
-
-#include <glib/gprintf.h>
 #include "gpsd_config.h"
 #include "gps.h"
 
-DBusConnection* connection;
+/**************************************************************************
+ *
+ * Transport-layer-independent functions
+ *
+ **************************************************************************/
 
 static char *author = "Amaury Jacquot";
 static char *copyright = "BSD or GPL v 2.0";
@@ -25,14 +24,19 @@ static bool intrack = false;
 static bool first = true;
 static time_t tracklimit = 5; /* seconds */
 
-static struct gps_fix_t gpsfix;
-static time_t int_time, old_int_time;
-static char devname[BUFSIZ];
-
-static void print_gpx_trk_start (void)
+static void print_gpx_header(void) 
 {
-    (void)printf(" <trk>\n");
-    (void)printf("  <trkseg>\n");
+    (void)printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+    (void)printf("<gpx version=\"1.1\" creator=\"navsys logger\"\n");
+    (void)printf("        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+    (void)printf("        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
+    (void)printf("        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
+    (void)printf("        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
+    (void)printf(" <metadata>\n");
+    (void)printf("  <name>NavSys GPS logger dump</name>\n");
+    (void)printf("  <author>%s</author>\n", author);
+    (void)printf("  <copyright>%s</copyright>\n", copyright);
+    (void)printf(" </metadata>\n");
     (void)fflush(stdout);
 }
 
@@ -42,6 +46,66 @@ static void print_gpx_trk_end (void)
     (void)printf(" </trk>\n");
     (void)fflush(stdout);
 }
+
+static void print_gpx_footer (void) 
+{
+    if (intrack)
+	print_gpx_trk_end();
+    (void)printf("</gpx>\n");
+    (void)fclose(stdout);
+}
+
+static void print_gpx_trk_start (void)
+{
+    (void)printf(" <trk>\n");
+    (void)printf("  <trkseg>\n");
+    (void)fflush(stdout);
+}
+
+static void print_fix(struct gps_fix_t *fix, struct tm *time)
+{
+    (void)fprintf(stdout, 
+		  "   <trkpt lat=\"%f\" lon=\"%f\">\n", 
+		  fix->latitude, fix->longitude);
+    (void)fprintf(stdout,
+		  "    <ele>%f</ele>\n",
+		  fix->altitude);
+    (void)fprintf(stdout, "    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
+		  time->tm_year+1900, time->tm_mon+1, time->tm_mday,
+		  time->tm_hour, time->tm_min, time->tm_sec);
+    if (fix->mode==MODE_NO_FIX)
+	(void)fprintf (stdout, "    <fix>none</fix>\n");
+    else
+	(void)fprintf (stdout, "    <fix>%dd</fix>\n", fix->mode);
+    (void)fprintf(stdout, "   </trkpt>\n");
+    (void)fflush (stdout);
+}
+
+static void quit_handler (int signum) {
+	syslog (LOG_INFO, "exiting, signal %d received", signum);
+	print_gpx_footer ();
+	exit (0);
+}
+
+#ifdef DBUS_ENABLE
+/**************************************************************************
+ *
+ * Doing it with D-Bus
+ *
+ **************************************************************************/
+
+#include <glib.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib-lowlevel.h>
+#include <dbus/dbus-glib.h>
+
+#include <glib/gprintf.h>
+
+DBusConnection* connection;
+
+static struct gps_fix_t gpsfix;
+static time_t int_time, old_int_time;
+static char devname[BUFSIZ];
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) 
 {
@@ -94,52 +158,10 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 	}
 		
 	old_int_time = int_time;
-	(void)fprintf(stdout, 
-		      "   <trkpt lat=\"%f\" lon=\"%f\">\n", 
-		      gpsfix.latitude, gpsfix.longitude);
-	(void)fprintf(stdout,
-		       "    <ele>%f</ele>\n",
-		       gpsfix.altitude);
 	gmtime_r(&(int_time), &time);
-	(void)fprintf(stdout, "    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
-		      time.tm_year+1900, time.tm_mon+1, time.tm_mday,
-		      time.tm_hour, time.tm_min, time.tm_sec);
-	if (gpsfix.mode==1)
-	    (void)fprintf (stdout, "    <fix>none</fix>\n");
-	else
-	    (void)fprintf (stdout, "    <fix>%dd</fix>\n", gpsfix.mode);
-	(void)fprintf(stdout, "   </trkpt>\n");
-	(void)fflush (stdout);
+	print_fix(&gpsfix, &time);
     }
     return DBUS_HANDLER_RESULT_HANDLED;
-}
-
-static void print_gpx_header (void) {
-	(void)printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	(void)printf("<gpx version=\"1.1\" creator=\"navsys logger\"\n");
-	(void)printf("        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-	(void)printf("        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
-	(void)printf("        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
-	(void)printf("        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
-	(void)printf(" <metadata>\n");
-	(void)printf("  <name>NavSys GPS logger dump</name>\n");
-	(void)printf("  <author>%s</author>\n", author);
-	(void)printf("  <copyright>%s</copyright>\n", copyright);
-	(void)printf(" </metadata>\n");
-	(void)fflush(stdout);
-}
-
-static void print_gpx_footer (void) {
-	if (intrack)
-	    print_gpx_trk_end();
-	(void)printf("</gpx>\n");
-	(void)fclose(stdout);
-}
-
-static void quit_handler (int signum) {
-	syslog (LOG_INFO, "exiting, signal %d received", signum);
-	print_gpx_footer ();
-	exit (0);
 }
 
 /*
@@ -161,18 +183,10 @@ static DBusHandlerResult signal_handler (
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
-int main (int argc, char** argv) 
+static int dbus_mainloop(void)
 {
     GMainLoop* mainloop;
     DBusError error;
-
-    /* initializes the gpsfix data structure */
-    gps_clear_fix(&gpsfix);
-
-    /* catch all interesting signals */
-    signal (SIGTERM, quit_handler);
-    signal (SIGQUIT, quit_handler);
-    signal (SIGINT, quit_handler);
 
     //openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
     //syslog (LOG_INFO, "---------- STARTED ----------");
@@ -203,4 +217,18 @@ int main (int argc, char** argv)
 
     g_main_loop_run (mainloop);
     return 0;
+}
+#endif /* DBUS_ENABLE */
+
+int main (int argc, char** argv) 
+{
+    /* initializes the gpsfix data structure */
+    gps_clear_fix(&gpsfix);
+
+    /* catch all interesting signals */
+    signal (SIGTERM, quit_handler);
+    signal (SIGQUIT, quit_handler);
+    signal (SIGINT, quit_handler);
+
+    return dbus_mainloop();
 }
