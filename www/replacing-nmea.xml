@@ -83,7 +83,8 @@
       <revremark>
          Fixed GPSGP so the response isn't identical to the send,
          avoiding problems on multidrop lines.  Added SGPS revision
-         field to $GPVID.
+         field to $GPVID. Went back to requiring checksums, because
+         you just know it was going to bite someday otherwise.
       </revremark>
    </revision>
 </revhistory>
@@ -253,9 +254,7 @@ Protocol.</para>
 <para>The protocol consists of sentences, each led by a dollar sign
 and an identifying sentence tag, followed by multiple comma-separated
 textual fields, ended by an asterisk, a CRC32 checksum, and LF/CR.
-The terminating checksum may be omitted, and listeners should accept
-this as an indication that the talker believes the transport layer to
-be reliable. Sentences are at most 256 characters long, counting the
+Sentences are at most 256 characters long, counting the
 trailing CR/LF.</para>
 
 <para>A field that is empty indicates that the talker does not have
@@ -345,7 +344,7 @@ mode field is added to satisfy a U.S. regulator's requirement.</para>
 <para>Here is an example:</para>
 
 <programlisting>
-$GPTPV,2005-02-11T04:40:51.231Z,?,4916.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
+$GPTPV,2005-02-11T04:40:51.231Z,?,4916.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A*31
 
      2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005) 
      ?,                         Timestamp uncertainty will never be reported
@@ -361,7 +360,7 @@ $GPTPV,2005-02-11T04:40:51.231Z,?,4916.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0
      ,                          Climb/sink not reported
      ,                          Climb/sink uncertainty not reported
      A                          FAA mode indicator A (Auto).
-                                Checksum omitted.
+     31                         Checksum.
 </programlisting>
 
 </sect2>
@@ -408,7 +407,7 @@ last fix, suffix this field with a '!'.
 <para>Here is an example:</para>
 
 <programlisting>
-$GPSVU,2005-02-11T04:40:51.231Z,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
+$GPSVU,2005-02-11T04:40:51.231Z,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00*40
 </programlisting>
 
 </sect2>
@@ -455,7 +454,7 @@ of 82.</para>
 <para>Here is an example:</para>
 
 <programlisting>
-$GPVID,2006-11-17T12:29:37Z,1.0,Haicom,H204S,SiRF-II,231.00.00
+$GPVID,2006-11-17T12:29:37Z,1.0,Haicom,H204S,SiRF-II,231.00.00*5C
 </programlisting>
 
 </sect2>
@@ -470,6 +469,13 @@ only, if it is not already doing so.</para>
 <para>$GPSGP,0: directs the receiver to return to NMEA-classic mode, if
 it is capable of doing so.</para>
 
+<para>Example:</para>
+
+<programlisting>
+$GPGSP,1*4E
+</programlisting>
+
+
 <para>An SGPS-conformant receiver is required to respond with
 $GPSGP,timestamp,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0 
 reporting its new mode.</para>
@@ -482,7 +488,7 @@ to check this is to look for the trailing Z.</para>
 <sect2><title>Other considerations</title>
 
 <para>Finally, SGPS-compliant receivers are required to respond to the
-requests $GPPVT, $GPVSU, and $GPVID (without arguments) with the
+requests $GPPVT, $GPVSU, $GPVID, and $GPGSP (without arguments) with the
 corresponding report based on most recent available data.</para>
 </sect2>
 </sect1>
