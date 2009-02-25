@@ -188,11 +188,6 @@ static int dbus_mainloop(void)
     GMainLoop* mainloop;
     DBusError error;
 
-    //openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
-    //syslog (LOG_INFO, "---------- STARTED ----------");
-	
-    print_gpx_header ();
-	
     mainloop = g_main_loop_new (NULL, FALSE);
 
     dbus_error_init (&error);
@@ -230,5 +225,10 @@ int main (int argc, char** argv)
     signal (SIGQUIT, quit_handler);
     signal (SIGINT, quit_handler);
 
+    //openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
+    //syslog (LOG_INFO, "---------- STARTED ----------");
+	
+    print_gpx_header ();
+	
     return dbus_mainloop();
 }
