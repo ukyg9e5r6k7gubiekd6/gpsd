@@ -315,6 +315,9 @@ int main(int argc, char **argv)
 	/*@ -mustfreeonly -immediatetrans @*/
 	session.context = &context;	/* in case gps_init isn't called */
 
+	if (echo)
+	    context.readonly = true;
+
 	(void) alarm(timeout);
 	(void) signal(SIGALRM, onsig);
 	/*
@@ -458,6 +461,8 @@ int main(int argc, char **argv)
 	}
 	/*@ -compdef @*/
 	if (control) {
+	    bool write_enable = context.readonly;
+	    context.readonly = false;
 	    if (session.device_type->control_send == NULL) {
 		gpsd_report(LOG_ERROR, 
 			      "%s devices have no control sender.\n",
@@ -471,6 +476,7 @@ int main(int argc, char **argv)
 		    status = 1;
 		}
 	    }
+	    context.readonly = write_enable;
 	}
 	/*@ +compdef @*/
 
