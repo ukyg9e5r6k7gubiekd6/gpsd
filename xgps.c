@@ -76,9 +76,8 @@ static XtAppContext app;
 static XtIntervalId timeout, gps_timeout;
 static XtInputId gps_input;
 static enum deg_str_type deg_type = deg_dd;
+static struct fixsource_t source;
 
-char *server, *device;
-char *port = DEFAULT_GPSD_PORT;
 bool jitteropt = false;
 
 bool gps_lost;
@@ -810,7 +809,7 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 	char error[128];
 	static bool dialog_posted = false;
 
-	/*@i@*/gpsdata = gps_open(server, port);
+	/*@i@*/gpsdata = gps_open(source.server, source.port);
 	if (!gpsdata) {
 		switch (errno ){
 		case NL_NOSERVICE:
@@ -853,8 +852,8 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 		if (jitteropt)
 		    (void)gps_query(gpsdata, "J=1");
 
-		if (device)
-		    (void)gps_query(gpsdata, "F=%s", device);
+		if (source.device != NULL)
+		    (void)gps_query(gpsdata, "F=%s", source.device);
 
 		(void)gps_query(gpsdata, "w+x");
 
@@ -977,7 +976,6 @@ int
 main(int argc, char *argv[])
 {
 	int option;
-	char *arg = NULL, *colon1, *colon2;
 	char *su, *au;
 
 	/*@ -globstate -onlytrans @*/
@@ -1038,29 +1036,10 @@ altunits_ok:
 		}
 	}
 
-	/*@ -branchstate @*/
 	if (optind < argc) {
-		arg = strdup(argv[optind]);
-		colon1 = strchr(arg, ':');
-		server = arg;
-		if (colon1 != NULL) {
-			if (colon1 == arg)
-				server = NULL;
-			else
-				*colon1 = '\0';
-			port = colon1 + 1;
-			colon2 = strchr(port, ':');
-			if (colon2 != NULL) {
-				if (colon2 == port)
-					port = NULL;
-				else
-					*colon2 = '\0';
-				device = colon2 + 1;
-			}
-		}
-		colon1 = colon2 = NULL;
-	}
-	/*@ +branchstate @*/
+	    gpsd_source_spec(argv[optind], &source);
+	} else
+	    gpsd_source_spec(NULL, &source);
 
 	register_shell(toplevel);
 	build_gui(toplevel);

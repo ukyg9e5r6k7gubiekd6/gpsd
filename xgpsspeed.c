@@ -81,7 +81,7 @@ int main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    struct fixsource_t source;
     char *speedunits;
     Widget base;
 
@@ -108,31 +108,14 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
-    /*@ -branchstate -nullpass @*/
-    if (optind < argc) {
-	arg = strdup(argv[optind]);
-	colon1 = strchr(arg, ':');
-	server = arg;
-	if (colon1 != NULL) {
-	    if (colon1 == arg)
-		server = NULL;
-	    else
-		*colon1 = '\0';
-	    port = colon1 + 1;
-	    colon2 = strchr(port, ':');
-	    if (colon2 != NULL) {
-		if (colon2 == port)
-		    port = NULL;
-	        else
-		    *colon2 = '\0';
-		device = colon2 + 1;
-	    }
-	}
-	colon1 = colon2 = NULL;
-    }
-    /*@ +branchstate @*/
 
-    /*@ -immediatetrans -usedef -observertrans -statictrans @*/
+    /*@ -compdestroy @*/
+    if (optind < argc) {
+	gpsd_source_spec(argv[optind], &source);
+    } else
+	gpsd_source_spec(NULL, &source);
+
+    /*@ -immediatetrans -usedef -observertrans -statictrans -nullpass @*/
     /**** Shell Widget ****/
     (void)XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
@@ -163,7 +146,7 @@ int main(int argc, char **argv)
     tacho = XtCreateManagedWidget("meter", tachometerWidgetClass,base,NULL,0);
     (void)XtRealizeWidget(toplevel);
 
-    if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
+    if (!(gpsdata = gps_open(source.server, source.port))) {
 	(void)fputs("xgpsspeed: no gpsd running or network error\n", stderr);
 	exit(2);
     }
@@ -176,28 +159,15 @@ int main(int argc, char **argv)
 
     gps_set_raw_hook(gpsdata, update_display);
 
-    if (device) {
-	char *channelcmd;
-	size_t l;
-	l = strlen(device)+4;
-
-	if ((channelcmd = (char *)malloc(l)) != NULL){
-	    /*@ -compdef @*/
-	    (void)strlcpy(channelcmd, "F=", l);
-	    (void)strlcpy(channelcmd+2, device, l);
-	    (void)gps_query(gpsdata, channelcmd);
-	    (void)free(channelcmd);
-	    /*@ +compdef @*/
-	}
-    }
+    if (source.device != NULL)
+	(void)gps_query(gpsdata, "F=%s\n", source.device);
 
     (void)gps_query(gpsdata, "w+x\n");
 
     (void)XtAppMainLoop(app);
 
     (void)gps_close(gpsdata);
-    if (arg != NULL)
-	(void)free(arg);
     return 0;
+    /*@ +compdestroy @*/
 }
 /*@ +mustfreefresh @*/

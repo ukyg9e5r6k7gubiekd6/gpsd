@@ -663,7 +663,7 @@ static void usage( char *prog)
 int main(int argc, char *argv[])
 {
   int option;
-  char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+  struct fixsource_t source;
   char *err_str = NULL;
   int c;
 
@@ -708,29 +708,10 @@ int main(int argc, char *argv[])
   }
 
   /* Grok the server, port, and device. */
-  /*@ -branchstate @*/
   if (optind < argc) {
-    arg = strdup(argv[optind]);
-    /*@i@*/colon1 = strchr(arg, ':');
-    server = arg;
-    if (colon1 != NULL) {
-      if (colon1 == arg)
-	server = NULL;
-      else
-	*colon1 = '\0';
-      port = colon1 + 1;
-      colon2 = strchr(port, ':');
-      if (colon2 != NULL) {
-	if (colon2 == port)
-	  port = NULL;
-	else
-	  *colon2 = '\0';
-	device = colon2 + 1;
-      }
-    }
-    colon1 = colon2 = NULL;
-  }
-  /*@ +branchstate @*/
+      gpsd_source_spec(argv[optind], &source);
+  } else
+      gpsd_source_spec(NULL, &source);
 
   /*@ -observertrans @*/
   switch (gpsd_units())
@@ -760,7 +741,7 @@ int main(int argc, char *argv[])
   /*@ +observertrans @*/
 
   /* Open the stream to gpsd. */
-  /*@i@*/gpsdata = gps_open(server, port);
+  /*@i@*/gpsdata = gps_open(source.server, source.port);
   if (!gpsdata) {
     switch ( errno ) {
     case NL_NOSERVICE:  err_str = "can't get service entry"; break;
@@ -782,8 +763,8 @@ int main(int argc, char *argv[])
   misc_timer = status_timer;
 
   /* If the user requested a specific device, try to change to it. */
-  if (device)
-      (void)gps_query(gpsdata, "F=%s\n", device);
+  if (source.device != NULL)
+      (void)gps_query(gpsdata, "F=%s\n", source.device);
 
   /* Here's where updates go until we figure out what we're dealing
      with. */

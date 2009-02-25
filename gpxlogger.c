@@ -261,10 +261,7 @@ static int dbus_mainloop(void)
  *
  **************************************************************************/
 
-static char *pollstr = "SPAMDQTV\n";
-static char *server = "127.0.0.1";
-static char *port = "2947";
-static char *device = NULL;
+struct fixsource_t source;
 static int casoc = 0;
 
 static void process(struct gps_data_t *gpsdata,
@@ -278,7 +275,7 @@ static int socket_mainloop(void)
     fd_set fds;
     struct gps_data_t *gpsdata;
 
-    gpsdata = gps_open(server, port);
+    gpsdata = gps_open(source.server, source.port);
     if (!gpsdata) {
 	char *err_str;
 	switch (errno) {
@@ -312,6 +309,8 @@ static int socket_mainloop(void)
 
     if (casoc)
 	gps_query(gpsdata, "j1\n");
+    if (source.device != NULL)
+	gps_query(gpsdata, "f=%s\n", source.device);
 
     gps_set_raw_hook(gpsdata, process);
 
@@ -323,8 +322,6 @@ static int socket_mainloop(void)
 
 	FD_ZERO(&fds);
 	FD_SET(gpsdata->gps_fd, &fds);
-
-	gps_query(gpsdata, pollstr);
 
 	tv.tv_usec = 250000;
 	tv.tv_sec = 0;
@@ -359,7 +356,6 @@ static void usage(void)
 
 int main (int argc, char** argv) 
 {
-    char *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
     int ch;
 
     progname = argv[0];
@@ -386,38 +382,14 @@ int main (int argc, char** argv)
 	}
     }
 
-    /*@ -nullpass -branchstate -compdef @*/
     if (optind < argc) {
-	arg = strdup(argv[optind]);
-	colon1 = strchr(arg, ':');
-	slash = strchr(arg, '/');
-	server = arg;
-	if (colon1 != NULL) {
-	    if (colon1 == arg)
-		server = NULL;
-	    else
-		*colon1 = '\0';
-	    port = colon1 + 1;
-	    colon2 = strchr(port, ':');
-	    if (colon2 != NULL) {
-		if (colon2 == port)
-		    port = NULL;
-	        else
-		    *colon2 = '\0';
-		device = colon2 + 1;
-	    }
-	}
-    }
-
-    /*@ -boolops */
-    if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
-	if (!server)
-	    server = "127.0.0.1";
-	if (!port)
-	    port = DEFAULT_GPSD_PORT;
-    }
-    /*@ +boolops */
-    /*@ +nullpass +branchstate @*/
+	gpsd_source_spec(argv[optind], &source);
+    } else
+	gpsd_source_spec(NULL, &source);
+#if 0
+    (void)printf("<!-- server: %s port: %s  device: %s -->\n",
+		 source.server, source.port, source.device);
+#endif
 
     /* initializes the gpsfix data structure */
     gps_clear_fix(&gpsfix);
@@ -434,7 +406,7 @@ int main (int argc, char** argv)
 
 #ifdef DBUS_ENABLE
     /* To force socket use in the default way just give a '127.0.0.1' arg */  
-    if (arg != NULL)
+    if (optind < argc)
 	return socket_mainloop();
     else
 	return dbus_mainloop();

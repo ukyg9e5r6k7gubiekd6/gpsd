@@ -618,6 +618,38 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 }
 #endif /* HAVE_LIBPTHREAD */
 
+
+void gpsd_source_spec(const char *arg, struct fixsource_t *source)
+/* standard parsing of a GPS data source spec */
+{
+    source->server = "127.0.0.1";
+    source->port = DEFAULT_GPSD_PORT;
+    source->device = NULL;
+
+    if (arg != NULL) {
+	char *colon1;
+	source->spec = strdup(arg);
+	colon1 = strchr(source->spec, ':');
+
+	if (colon1 != NULL) {
+	    char *colon2;
+	    *colon1 = '\0';
+	    if (colon1 != source->spec)
+		source->server = source->spec;
+	    source->port = colon1 + 1;
+	    colon2 = strchr(source->port, ':');
+	    if (colon2 != NULL) {
+		*colon2 = '\0';
+		source->device = colon2 + 1;
+	    }
+	} else if (strchr(source->spec, '/') != NULL) {
+	    source->device = source->spec;
+	} else {
+	    source->server = source->spec;
+	}
+    }
+}
+
 #ifdef TESTMAIN
 /*
  * A simple command-line exerciser for the library.
