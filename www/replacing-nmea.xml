@@ -82,7 +82,8 @@
       <authorinitials>esr</authorinitials>
       <revremark>
          Fixed GPSGP so the response isn't identical to the send,
-         avoiding problems on multidrop lines.
+         avoiding problems on multidrop lines.  Added SGPS revision
+         field to $GPVID.
       </revremark>
    </revision>
 </revhistory>
@@ -418,19 +419,23 @@ The first field is the required timestamp.
 </para></listitem>
 
 <listitem><para>
-The second field is the vendor name.  
+The second field is the SGPS revision level.  
 </para></listitem>
 
 <listitem><para>
-The third field is the device name or model number.  
+The third field is the vendor name.  
 </para></listitem>
 
 <listitem><para>
-The fourth field is a chipset designation.  
+The fourth field is the device name or model number.  
 </para></listitem>
 
 <listitem><para>
-The fourth field may be empty or a subtype ID, typically a firmware
+The fifth field is a chipset designation.  
+</para></listitem>
+
+<listitem><para>
+The sixth field may be empty or a subtype ID, typically a firmware
 revision level.
 </para></listitem>
 </orderedlist>
@@ -442,7 +447,7 @@ of 82.</para>
 <para>Here is an example:</para>
 
 <programlisting>
-$GPVID,2006-11-17T12:29:37Z,Haicom,H204S,SiRF-II,231.00.00
+$GPVID,2006-11-17T12:29:37Z,1.0,Haicom,H204S,SiRF-II,231.00.00
 </programlisting>
 
 <para>Finally, SGPS-compliant receivers are required to respond to the
