@@ -343,9 +343,8 @@ int main (int argc, char **argv)
     unsigned int v;
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
-    char *p, *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
-    char *server=NULL, *port = DEFAULT_GPSD_PORT, *device = NULL;
-    char *controlsock = "/var/run/gpsd.sock";
+    struct fixsource_t source;
+    char *p, *controlsock = "/var/run/gpsd.sock";
     fd_set select_set;
     unsigned char buf[BUFLEN];
     char line[80];
@@ -394,48 +393,27 @@ int main (int argc, char **argv)
     }
     /*@ +branchstate @*/
 
-    /*@ -nullpass -branchstate -compdef @*/
     if (optind < argc) {
-	arg = strdup(argv[optind]);
-	colon1 = strchr(arg, ':');
-	slash = strchr(arg, '/');
-	server = arg;
-	if (colon1 != NULL) {
-	    if (colon1 == arg)
-		server = NULL;
-	    else
-		*colon1 = '\0';
-	    port = colon1 + 1;
-	    colon2 = strchr(port, ':');
-	    if (colon2 != NULL) {
-		if (colon2 == port)
-		    port = NULL;
-	        else
-		    *colon2 = '\0';
-		device = colon2 + 1;
-	    }
-	}
-    }
+	gpsd_source_spec(argv[optind], &source);
+    } else
+	gpsd_source_spec(NULL, &source);
 
     gpsd_init(&session, &context, NULL);
 
     /*@ -boolops */
-    if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
-	if (!server)
-	    server = "127.0.0.1";
-	if (!port)
-	    port = DEFAULT_GPSD_PORT;
-	session.gpsdata.gps_fd = netlib_connectsock(server, port, "tcp");
+    if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {	
+
+	session.gpsdata.gps_fd = netlib_connectsock(source.server, source.port, "tcp");
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr, 
 			  "%s: connection failure on %s:%s, error %d.\n", 
-			  argv[0], server, port, session.gpsdata.gps_fd);
+			  argv[0], source.server, source.port, session.gpsdata.gps_fd);
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
 	/*@ -compdef @*/
-	if (device)
-	    command((char *)buf, sizeof(buf), "F=%s\r\n", device);
+	if (source.device != NULL)
+	    command((char *)buf, sizeof(buf), "F=%s\r\n", source.device);
 	else
 	    command((char *)buf, sizeof(buf), "O\r\n");	/* force device allocation */
 	command((char *)buf, sizeof(buf), "F\r\n");
@@ -444,7 +422,7 @@ int main (int argc, char **argv)
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	(void)strlcpy(session.gpsdata.gps_device, arg, PATH_MAX);
+	(void)strlcpy(session.gpsdata.gps_device, argv[optind], PATH_MAX);
 	if (gpsd_activate(&session, false) == -1) {
 	    gpsd_report(LOG_ERROR,
 			  "activation of device %s failed, errno=%d\n",
@@ -509,7 +487,7 @@ int main (int argc, char **argv)
 	else
 	    /*@ -nullpass @*/
 	    display(statwin, 0, 0, "%s:%s:%s", 
-		    server, port, session.gpsdata.gps_device);
+		    source.server, source.port, session.gpsdata.gps_device);
 	    /*@ +nullpass @*/
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wmove(cmdwin, 0,0);
@@ -547,6 +525,7 @@ int main (int argc, char **argv)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
+	    char *arg;
 	    (void)wmove(cmdwin, 0,(int)strlen(type_name)+2);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
@@ -716,7 +695,7 @@ int main (int argc, char **argv)
 		    } else if (matchcount == 1) {
 			assert(forcetype != NULL);
 			if (switch_type(forcetype))
-			    gpsd_switch_driver(&session, forcetype->type_name);
+			    (int)gpsd_switch_driver(&session, forcetype->type_name);
 		    } else {
 			monitor_complain("Multiple driver type names match '%s'.", arg);
 		    }

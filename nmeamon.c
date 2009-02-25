@@ -359,7 +359,7 @@ static int ashtech_command(char line[])
 
 	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
 		  ASHTECH_SPEED_9600, ASHTECH_SPEED_9600);
-	sleep(6); /* it takes 4-6 sec for the receiver to reboot */
+	(void)sleep(6); /* it takes 4-6 sec for the receiver to reboot */
 	monitor_nmea_send("$PASHS,WAS,ON"); /* enable WAAS */
 	break;
 
@@ -374,7 +374,7 @@ static int ashtech_command(char line[])
 
 	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
 		  ASHTECH_SPEED_57600, ASHTECH_SPEED_9600);
-	sleep(6); /* it takes 4-6 sec for the receiver to reboot */
+	(void)sleep(6); /* it takes 4-6 sec for the receiver to reboot */
 	monitor_nmea_send("$PASHS,WAS,ON"); /* enable WAAS */
 
 	monitor_nmea_send("$PASHS,NME,POS,A,ON"); /* Ashtech PVT solution */
