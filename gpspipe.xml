@@ -79,7 +79,7 @@ attempting a connection.</para>
 NMEA and gpsd output modes.</para>
 
 <para>-s option causes the collected data to be written to the
-specified serial device with setttings 4800 8N1.  Thus
+specified serial device with settings 4800 8N1.  Thus
 <application>gpspipe</application> can be used with -s and -r options
 to emulate a serial port hardwired to a GPS that
 <application>gpsd</application> is managing.</para>

@@ -225,7 +225,8 @@ and fix latency.</dd>
 <dd>The <code>gpsctl</code> tool for tweaking GPS settings.</dd>
 
 <dt><a href="gpscat.html">gpscat.1</a></dt>
-<dd>The <code>gpscat</code> tool dumps output from a serial device.</dd>
+<dd>The <code>gpscat</code> tool dumps output from a serial
+device. Optionally, it can packetize the data.</dd>
 
 <dt><a href="gpsmon.html">gpsmon.1</a></dt>
 <dd>The <code>gpsmon</code> real-time packet monitor and diagnostic

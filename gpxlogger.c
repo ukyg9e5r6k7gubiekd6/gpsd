@@ -7,6 +7,11 @@
 #include <math.h>
 #include <time.h>
 #include <signal.h>
+#include <getopt.h>
+#include <errno.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #include "gps.h"
@@ -17,8 +22,9 @@
  *
  **************************************************************************/
 
-static char *author = "Amaury Jacquot";
-static char *copyright = "BSD or GPL v 2.0";
+static char *author = "Amaury Jacquot, Chris Kuethe";
+static char *license = "BSD";
+static char *progname;
 
 static bool intrack = false;
 static bool first = true;
@@ -35,7 +41,7 @@ static void print_gpx_header(void)
     (void)printf(" <metadata>\n");
     (void)printf("  <name>NavSys GPS logger dump</name>\n");
     (void)printf("  <author>%s</author>\n", author);
-    (void)printf("  <copyright>%s</copyright>\n", copyright);
+    (void)printf("  <copyright>%s</copyright>\n", license);
     (void)printf(" </metadata>\n");
     (void)fflush(stdout);
 }
@@ -213,10 +219,247 @@ static int dbus_mainloop(void)
     g_main_loop_run (mainloop);
     return 0;
 }
+
 #endif /* DBUS_ENABLE */
+
+/**************************************************************************
+ *
+ * Doing it with sockets
+ *
+ **************************************************************************/
+#define BS 512
+
+#define NUM 8
+
+struct gps_data_t *gpsdata;
+static char *pollstr = "SPAMDQTV\n";
+static char *server = "127.0.0.1";
+static char *port = "2947";
+static char *device = NULL;
+static unsigned int interval = 5;
+static int casoc = 0;
+
+static void track_start(void)
+{
+    if (intrack)
+	return;
+    (void)printf("<!-- track start -->\n  <trk>\n    <trkseg>\n");
+    intrack = true;
+}
+
+static void track_end(void)
+{
+    if (!intrack)
+	return;
+    (void)printf("    </trkseg>\n  </trk>\n<!-- track end -->\n");
+    intrack = false;
+}
+
+static void write_record(struct gps_data_t *gpsdata)
+{
+    track_start();
+    (void)printf("      <trkpt lat=\"%.7f\" ", gpsdata->fix.latitude );
+    (void)printf("lon=\"%.7f\">\n", gpsdata->fix.longitude );
+
+    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
+	/* dgps or pps */
+	if (gpsdata->fix.mode == 4) { /* military pps */
+	    (void)printf("        <fix>pps</fix>\n");
+	} else { /* civilian dgps or sbas */
+	    (void)printf("        <fix>dgps</fix>\n");
+	}
+    } else { /* no dgps or pps */
+	if (gpsdata->fix.mode == 3) {
+	    (void)printf("        <fix>3d</fix>\n");
+	} else if (gpsdata->fix.mode == 2) {
+	    (void)printf("        <fix>2d</fix>\n");
+	} else if (gpsdata->fix.mode == 1) {
+	    (void)printf("        <fix>none</fix>\n");
+	} /* don't print anything if no fix indicator */
+    }
+
+    /* print altitude if we have a fix and it's 3d of some sort */
+    if ((gpsdata->fix.mode >= MODE_3D) && (gpsdata->status >= STATUS_FIX))
+	(void)printf("        <ele>%.2f</ele>\n", gpsdata->fix.altitude);
+
+    /* print # satellites used in fix, if reasonable to do so */
+    if (gpsdata->fix.mode >= MODE_2D) {
+	(void)printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
+	(void)printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
+    }
+
+    if (gpsdata->status >= 1) { /* plausible timestamp */
+	char scr[128];
+	(void)printf("        <time>%s</time>\n",
+		     unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+    }
+    (void)printf("      </trkpt>\n");
+    (void)fflush(stdout);
+}
+
+static void process(struct gps_data_t *gpsdata,
+	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
+{
+
+    if ((gpsdata->fix.mode > 1) && (gpsdata->status > 0))
+	write_record(gpsdata);
+    else
+	track_end();
+}
+
+static void footer(void)
+{
+    track_end();
+    printf("</gpx>\n");
+}
+
+static int socket_mainloop(void)
+{
+    fd_set fds;
+
+    gpsdata = gps_open(server, port);
+    if (!gpsdata) {
+	char *err_str;
+	switch (errno) {
+	case NL_NOSERVICE:
+	    err_str = "can't get service entry";
+	    break;
+	case NL_NOHOST:
+	    err_str = "can't get host entry";
+	    break;
+	case NL_NOPROTO:
+	    err_str = "can't get protocol entry";
+	    break;
+	case NL_NOSOCK:
+	    err_str = "can't create socket";
+	    break;
+	case NL_NOSOCKOPT:
+	    err_str = "error SETSOCKOPT SO_REUSEADDR";
+	    break;
+	case NL_NOCONNECT:
+	    err_str = "can't connect to host";
+	    break;
+	default:
+	    err_str = "Unknown";
+	    break;
+	}
+	fprintf(stderr,
+		"%s: no gpsd running or network error: %d, %s\n",
+		progname, errno, err_str);
+	exit(1);
+    }
+
+    if (casoc)
+	gps_query(gpsdata, "j1\n");
+
+    gps_set_raw_hook(gpsdata, process);
+
+    for(;;){
+	int data;
+	struct timeval tv;
+
+	FD_ZERO(&fds);
+	FD_SET(gpsdata->gps_fd, &fds);
+
+	gps_query(gpsdata, pollstr);
+
+	tv.tv_usec = 250000;
+	tv.tv_sec = 0;
+	data = select(gpsdata->gps_fd + 1, &fds, NULL, NULL, &tv);
+
+	if (data < 0) {
+	    fprintf(stderr,"%s\n", strerror(errno));
+	    footer();
+	    exit(2);
+	}
+	else if (data)
+	    gps_poll(gpsdata);
+
+	(void)sleep(interval);
+    }
+    /* NOTREACHED */
+    return 0;
+}
+
+/**************************************************************************
+ *
+ * Main sequence
+ *
+ **************************************************************************/
+
+static void usage(void) 
+{
+    fprintf(stderr,
+	    "Usage: %s [-h] [-i interval] [-j casoc] [server[:port:[device]]]\n",
+	    progname);
+    fprintf(stderr,
+	    "\tdefaults to '%s -i 5 -j 0 127.0.0.1:2947'\n",
+	    progname);
+    exit(1);
+}
 
 int main (int argc, char** argv) 
 {
+    char *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
+    int ch;
+
+    progname = argv[0];
+    while ((ch = getopt(argc, argv, "hi:j:V")) != -1){
+	switch (ch) {
+	case 'i':		/* set polling interfal */
+	    interval = (unsigned int)atoi(optarg);
+	    if (interval < 1)
+		interval = 1;
+	    if (interval >= 3600)
+		fprintf(stderr,
+			"WARNING: polling interval is an hour or more!\n");
+	    break;
+	case 'j':		/* set data smoothing */
+	    casoc = (unsigned int)atoi(optarg);
+	    casoc = casoc ? 1 : 0;
+	    break;
+	case 'V':
+	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+	    exit(0);
+	default:
+ 	    usage();
+	    /* NOTREACHED */
+	}
+    }
+
+    /*@ -nullpass -branchstate -compdef @*/
+    if (optind < argc) {
+	arg = strdup(argv[optind]);
+	colon1 = strchr(arg, ':');
+	slash = strchr(arg, '/');
+	server = arg;
+	if (colon1 != NULL) {
+	    if (colon1 == arg)
+		server = NULL;
+	    else
+		*colon1 = '\0';
+	    port = colon1 + 1;
+	    colon2 = strchr(port, ':');
+	    if (colon2 != NULL) {
+		if (colon2 == port)
+		    port = NULL;
+	        else
+		    *colon2 = '\0';
+		device = colon2 + 1;
+	    }
+	}
+    }
+
+    /*@ -boolops */
+    if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
+	if (!server)
+	    server = "127.0.0.1";
+	if (!port)
+	    port = DEFAULT_GPSD_PORT;
+    }
+    /*@ +boolops */
+    /*@ +nullpass +branchstate @*/
+
     /* initializes the gpsfix data structure */
     gps_clear_fix(&gpsfix);
 
@@ -229,6 +472,14 @@ int main (int argc, char** argv)
     //syslog (LOG_INFO, "---------- STARTED ----------");
 	
     print_gpx_header ();
-	
-    return dbus_mainloop();
+
+#ifdef DBUS_ENABLE
+    /* To force socket use in the default way just give a '127.0.0.1' arg */  
+    if (arg != NULL)
+	return socket_mainloop();
+    else
+	return dbus_mainloop();
+#else
+    return socket_mainloop();
+#endif
 }

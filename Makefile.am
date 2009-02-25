@@ -20,7 +20,6 @@ endif
 
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
-DBUSPROGS = gpxlogger
 endif
 
 if HAVE_RTCM104V2
@@ -28,7 +27,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger gpsdlcdd
+bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger gpsdlcdd
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid_test
 if HAVE_PYTHON
@@ -68,13 +67,6 @@ cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -l
 #
 gpxlogger_SOURCES = gpxlogger.c
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
-
-
-#
-# Build cgpxlogger
-#
-cgpxlogger_SOURCES = cgpxlogger.c
-cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpsd
@@ -241,7 +233,6 @@ man_MANS = \
 	xgps.1 \
 	xgpsspeed.1 \
 	cgps.1 \
-	cgpxlogger.1 \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
