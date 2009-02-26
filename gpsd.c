@@ -589,6 +589,7 @@ static bool assign_channel(struct subscriber_t *user)
     /* if subscriber has no device... */
     if (was_unassigned) {
 	double most_recent = 0;
+	int fix_quality = 0;
 	struct gps_device_t *channel;
 
 	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
@@ -597,10 +598,22 @@ static bool assign_channel(struct subscriber_t *user)
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
 		if (allocation_filter(channel, user)) {
-		    if (user->device==NULL 
-			|| channel->gpsdata.sentence_time >= most_recent) {
-				user->device = channel;
-				most_recent = channel->gpsdata.sentence_time;
+		    /*
+		     * Grab device if it's:
+		     * (1) The first we've seen,
+		     * (2) Has a better quality fix than we've seen yet,
+		     * (3) Fix of same quality we've seen but more recent.
+		     */
+		    if (user->device == NULL) {
+			user->device = channel;
+			most_recent = channel->gpsdata.sentence_time;
+		    } else if (channel->gpsdata.status > fix_quality) {
+			user->device = channel;
+			fix_quality = channel->gpsdata.status;
+		    } else if (channel->gpsdata.status == fix_quality && 
+			       channel->gpsdata.sentence_time >= most_recent) {
+			user->device = channel;
+			most_recent = channel->gpsdata.sentence_time;
 		    }
 		}
 	    }
