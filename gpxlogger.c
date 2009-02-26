@@ -155,6 +155,8 @@ static void quit_handler (int signum)
     exit(0);
 }
 
+static struct gps_fix_t gpsfix;
+
 #ifdef DBUS_ENABLE
 /**************************************************************************
  *
@@ -171,7 +173,6 @@ static void quit_handler (int signum)
 
 DBusConnection* connection;
 
-static struct gps_fix_t gpsfix;
 static char devname[BUFSIZ];
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) 
