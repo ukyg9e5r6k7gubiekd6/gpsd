@@ -85,6 +85,7 @@
          avoiding problems on multidrop lines.  Added SGPS revision
          field to $GPVID. Went back to requiring checksums, because
          you just know it was going to bite someday otherwise.
+         Changed sentence length limit to 255.
       </revremark>
    </revision>
 </revhistory>
@@ -254,7 +255,7 @@ Protocol.</para>
 <para>The protocol consists of sentences, each led by a dollar sign
 and an identifying sentence tag, followed by multiple comma-separated
 textual fields, ended by an asterisk, a CRC32 checksum, and LF/CR.
-Sentences are at most 256 characters long, counting the
+Sentences are at most 255 characters long, counting the
 trailing CR/LF.</para>
 
 <para>A field that is empty indicates that the talker does not have
@@ -262,10 +263,10 @@ valid information for this field but promises to report it in the future.  A
 field consisting of a question mark (?) indicates that the talker does
 not expect to ever ship valid information for this field.</para>
 
-<para>The first field of every sentence is a full timestamp in the
-format of the <ulink url='http://www.w3.org/TR/NOTE-datetime'>W3C
-profile of ISO 8601</ulink>, with the timezone required to be Zulu
-(UTC) time.</para>
+<para>The first field of every SGPS report sentence is a full
+timestamp in the format of the <ulink
+url='http://www.w3.org/TR/NOTE-datetime'>W3C profile of ISO
+8601</ulink>, with the timezone required to be Zulu (UTC) time.</para>
 
 <sect2><title>GPTPV</title>
 
