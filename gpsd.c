@@ -562,19 +562,13 @@ found:
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
-static bool allocation_policy(struct gps_device_t *channel,
-			      struct subscriber_t *user,
-			      double most_recent)
+static bool allocation_filter(struct gps_device_t *channel,
+			      struct subscriber_t *user)
+/* does specified channel match the user's type criteria? */
 {
-#ifdef __UNUSED__
-    /* only allocate devices that we know the packet type of */
-    if (channel->packet_type == BAD_PACKET)
-	return false;
-#endif /* __UNUSED__ */
-    /* maybe we have already bound a more recently active device */
-    if (user->device!=NULL && channel->gpsdata.sentence_time < most_recent)
-	return false;
-    gpsd_report(LOG_PROG, "User requires %d, channel type is %d\n", user->requires, channel->packet.type);
+    gpsd_report(LOG_PROG, 
+		"User requires %d, channel %ld type is %d\n", 
+		user->requires, channel - channels, channel->packet.type);
     /* we might have type constraints */
     if (user->requires == ANY)
 	return true;
@@ -584,7 +578,7 @@ static bool allocation_policy(struct gps_device_t *channel,
 	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
 	return true;
     else
-	return false;
+	return false;	/* BAD_PACKET case will fall through to here */
 }
 
 #define USER_INDEX (int)(user - subscribers)
@@ -602,9 +596,12 @@ static bool assign_channel(struct subscriber_t *user)
 	/*@ -mustfreeonly @*/
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
-		if (allocation_policy(channel, user, most_recent)) {
-		    user->device = channel;
-		    most_recent = channel->gpsdata.sentence_time;
+		if (allocation_filter(channel, user)) {
+		    if (user->device==NULL 
+			|| channel->gpsdata.sentence_time >= most_recent) {
+				user->device = channel;
+				most_recent = channel->gpsdata.sentence_time;
+		    }
 		}
 	    }
 	/*@ +mustfreeonly @*/
