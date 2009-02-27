@@ -57,6 +57,7 @@ maintainer, we've tried to kick these upstream.</p>
 <h1>Links to Open User-Visible Problems</h1>
 
 <ul>
+<li><a href="#select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</a></li>
 <li><a href="#bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</a></li>
 <li><a href="#pl2303">Linux pl2303 driver on openwrt 2.4 kernel can hang when device is read at unexpected speed</a></li>
 <li><a href="#pthread_create">pthread_create() fails to return when called in background</a></li>
@@ -74,7 +75,6 @@ maintainer, we've tried to kick these upstream.</p>
 
 <ul>
 <li><a href="#startup">Distro-dependent problems with gpsd startup</a></li>
-<li><a href="#select">Buggy pl2303 drivers on Maxc OS X can make select(2) look broken</a></li>
 <li><a href="#openmotif">The 2.3.0-beta version of OpenMotif shipped
 with Fedora Core 5 was buggy.</a></li>
 <li><a href="#pysocket">Python socket library barfs on IPV6 notation in the /etc/hosts file</a></li>
@@ -87,6 +87,19 @@ with Fedora Core 5 was buggy.</a></li>
 
 <h1>Open User-Visible Problems</h1>
 
+<h2 id="select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</h2>
+
+<p>When the fd set being polled includes tty devices (as opposed to
+sockets), select(2) can return 0 and shows no fd with input waiting
+even when data is in fact ready to be read from some of the devices.</p>
+
+<p>The most recent incarnation of this problem was due to a buggy pl2303
+USB-to-serial driver. OS X users should ensure that all their drivers are
+up to date. As of January 2009, this is still a problem - the most recent
+report being a failure of the drivers from osx-pl2303.sourceforge.net on
+OS X 10.5.6. Please try the latest drivers from www.prolific.com.tw before
+reporting hangs on OS X.</p>
+
 <h2 id="bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</h2>
 
 <p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
@@ -95,8 +108,8 @@ Holux and including the GPSlim-236.  This bug may render these GPSes
 catatonic.  The problem seems to be that buggy firmware inside these
 receivers doesn't necessarily keep the Bluetooth serial-port emulation
 and the GPS chip talking at the same baud rate. This problem is not
-unique to <code>gpsd</code> - windows users are warned against using
-SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
+unique to <code>gpsd</code> &mdash; Windows users are warned against using
+SiRFdemo's "Synchronize Protocol/Baud Rate" option on Bluetooth devices.</p>
 
 <p>If this happens, you can sometimes recover by repeatedly sending
 reset messages using <code>gpsctl</p>.  The only guaranteed fix is to
@@ -105,11 +118,11 @@ may have to open the case and unsolder the backup battery so the chip
 forgets its configuration settings.</p>
 
 <p>A separate bug with less severe symptoms afflicts some USB devices.
-The probe strings <tt>gpsd</tt> sends in orderv to determuine device
+The probe strings <tt>gpsd</tt> sends in orderv to determine device
 type and subtype may be more than a device can handle, causing it to
 hang; power-cycling should fix this.  Newer versions of <tt>gpsd</tt>
 break up the probe writes into smaller pieces, interleaving them with
-the first few packet reads, so they are far less likely to ttrigger
+the first few packet reads, so they are far less likely to trigger
 this bug.</p>
 
 <p>Use the -b option of gpsd to prevent it from trying to reconfigure
@@ -180,7 +193,7 @@ building correctly.</p>
 <h1>Fixed Problems</h1>
 
 <p>We document these here in case you're running on an older system.
-They will be removed as they bwcome sufficiently ancient.</p>
+They will be removed as they become sufficiently ancient.</p>
 
 <h2 id="startup">Distro-dependent problems with gpsd startup</h2>
 
@@ -189,19 +202,6 @@ Gentoo bug</a>.  This shows up on other distributions as well, but
 not under Fedora Core.  The Gentoo problem can be fixed by creating a
 /var/run/usb directory; this fix may apply to other distributions as
 well.</p>
-
-<h2 id="select">Buggy pl2303 drivers on Maxc OS X can make select(2) look broken</h2>
-
-<p>When the fd set being polled includes tty devices (as opposed to
-sockets), select(2) can return 0 and shows no fd with input waiting
-even when data is in fact ready to be read from some of the devices.</p>
-
-<p>The most recent incarnation of this problem was due to a buggy pl2303
-USB-to-serial driver. OS X users should ensure that all their drivers are
-up to date. As of January 2009, this is still a problem - the most recent
-report being a failure of the drivers from osx-pl2303.sourceforge.net on
-OS X 10.5.6. Please try the latest drivers from www.prolific.com.tw before
-reporting hangs on OS X.</p>
 
 <h2 id="openmotif">The 2.3.0-beta version of OpenMotif shipped with
 Fedora Core 5 was buggy.</h2>
