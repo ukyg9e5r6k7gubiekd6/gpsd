@@ -126,21 +126,39 @@ for that choice of hosting site was that it was among the first to
 offer Subversion, which was new technology at the time and which 
 Eric and the 1.x developers were all interested in experimenting with.)</p>
 
+<p>In early 2005 the project took another significant turn as Eric
+implemented packet-sniffing and autobauding, threw out all the 
+old configuration options. and factored the daemon into a thin
+multiplexer layer sitting on top of a set of device drivers. Support
+for non-NMEA devices dates from this redesign; SiRF was the first.</p>
+
 <p>In the year between June 2005 and June 2006 the <code>gpsd</code>
 project went from being mostly a solo effort by Eric to attracting a
 flourishing community of developers. Prominent among them are Chris
 Kuethe and Gary Miller, who were given release authority in October
 2006.</p>
 
-<p>As 2006 draws to a close, <code>gpsd</code> now supports several
-vendor binary protocols as well as the original NMEA and Zodiac.  The
-suite of GPS test tools has greatly expanded, and we have implemented
-a rigorous regression-test framework for the daemon itself.  The
-daemon has acquired new features like multi-device capability and
-hotplug autoconfiguration.</p>
+<p>By the end of 2006, <code>gpsd</code> supported several vendor
+binary protocols as well as the original NMEA and Zodiac.  The suite
+of GPS test tools had greatly expanded, and we implemented a rigorous
+regression-test framework for the daemon itself.  The daemon had
+acquired new features like multi-device capability and hotplug
+autoconfiguration.</p>
+
+<p>The daemon's core code has been pretty stable since 2006.  Adding
+drivers for new vendor protocols is a routine process now; we've had
+at least two contributed by people who aren't core GPSD developers.
+In early 2009 Eric cleaned up and rewrote a lot of our test and
+configuration tools; <code>gpsmon</code> dates from this time
+(replacing and generalizing earlier <code>sirfmon</code>).</p>
+
+<p>In 2007-2008 the GPSD project got its first new competition sine
+1.x days, a project called Gypsy positioned directly against what the
+author believes to be our design mistakes. We discuss it <a
+href="gypsy.html">here.</a>.</p>
 
 <p>Further forks of <code>gpsd</code> seem unlikely, as the project is
-now sufficiently large and visible to co-opt developers who might
+now sufficiently large and visible to co-opt most developers who might
 otherwise have forked the old 1.x sources or written a competing
 daemon.</p>
 

@@ -122,7 +122,7 @@ file in the source distribution.</p>
 </ol>
 <li><a href="#designahead">Designing Ahead</a></li>
 <ol>
-<li><a href="#nonpvt">Non-PVT Data</a></li>
+<li><a href="#nonpvt">Non-TPV Data</a></li>
 <li><a href="#protov4">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</a></li>
 </ol>
 <li><a href="#blindalleys">Blind alleys</a></li>
@@ -173,7 +173,8 @@ applications.</p>
 <p>A GPS is a device for delivering fourteen numbers: x, y, z, t, vx,
 vy, vz, and error estimates for each of these seven coordinates.  The
 <code>gpsd</code> daemon's job is to deliver these numbers to user
-applications with minimum fuss.</p>
+applications with minimum fuss.  This is a "TPV" &mdash;
+time-position-velocity report. A GPS is a TPV oracle.</p>
 
 <p>'Minimum fuss' means that the only action the user should have to
 take to enable location service is to plug in a GPS.  The
@@ -570,16 +571,78 @@ typedefs.</p>
 
 <h2 id="architecture">Architecture and how to hack it</h2>
 
-<p><code>gpsd</code> is not a hugely complicated piece of code.
-Essentially, it spins in a loop polling for input from one of three
-sources:</p>
+<p>There are two useful ways to think about the GPSD architecture.
+One is in terms of the layering of the software, the other is in terms
+of the mormal flow of information through it.</p>
+
+<h3>The software-layering view</h3>
+
+<p> The <code>gpsd</code> breaks naturally into four pieces: the
+<b>drivers</b>, the <b>packet sniffer</b>, the <b>core library</b> and
+the <b>multiplexor</b>. We'll describe these from the bottom up.</p>
+
+<p>The <b>drivers</b> are essentially user-space device drivers for
+each kind of chipset we support.  The key entry points are methods to
+parse a data packet into time-poaition-velocity or status information,
+change its mode or baud rate, probe for device subtype, etc. See <a
+href="#drivers">Driver Architecture</a> for more details about
+them.</p>
+
+<p>The <b>packet sniffer</b> is responsible for mining data packets 
+out of serial input streams.  It's basically a state machine that's
+watching for anything that looks like a properly checksummed packet.
+Because devices can hotplug or change modes, the type of packet 
+that will come up the wire from a serial or USB port isn't necessarily
+fixed forever by the first one recognized. </p>
+
+<p>The <b>core library</b> manages a session with a GPS device.  The
+key entry points are (a) Starting a session by opening the device and 
+reading data from it, hunting through baud rates and parity/stopbit
+combinations until the packet sniffer achieves synchronization
+lock with a known packet type, (b) polling the device for a packet, 
+and (b) closing the device and wrapping up the session.</p>
+
+<p>A key feature of the core library is that it's responsible for
+switching each GPS connection to using the correct device driver
+depending on the packet type that the sniffer returns.  This is
+<em>not configured in advance</em> and may change over time, notably
+if the device switches between different reporting protocols (most
+chopserts support NMEA and one or more vendor binary protocols).</p>
+
+<p>Finally, the <b>multiplexor</b> is the part of the daemon that 
+handles client sessions and device assignment.  It is responsible
+for passing TPV reports up to clients, accepting client commands, 
+and responding to hotplug notifications. It is essentially all
+contained in the gpsd.c sourcefile.</p>
+
+<p>The first three components (other than the multiplexor) are linked
+together in a library called libgpsd and can be used separately from
+the multiplexor. Our other tools that talk to GPSes directly, such as
+<code>gpsmon</code> and <code>gpsctl</code>, do it by calling into the
+core library and driver layer directly.</p>
+
+<p>Under some circumstances, the packet sniffer by itself is
+separately useful. <code>gpscat</code> uses it without the rest of the
+lower layer in order to detect and report packet boundaries in raw
+data. So does <code>gpsfake</code>, in order to chunk logfiles so they
+can be fed to a test instance of the daemon packet by packet with
+something approximating realistic timing.</p>
+
+<h3>The data-flow view</h3>
+
+Essentially, <code>gpsd</code> spins in a loop polling for input from
+one of these sources:</p>
 
 <ol>
-<li>A client making requests over a TCP/IP port.</li>
+<li>A set of clients making requests over a TCP/IP port.</li>
 
 <li>A set of GPSes, connected via serial or USB devices.</li>
 
-<li>A DGPS server issuing periodic differential-GPS updates.</li>
+<li>A set of DGPS or NTRIP servers issuing periodic differential-GPS
+updates.</li>
+
+<li>The special control socket used by hotplug scripts and some 
+configuration tools.</p>
 </ol>
 
 <p>The daemon only connects to a GPS when clients are connected to it.
@@ -630,6 +693,21 @@ disconnecting at random times, and the GPS being unplugged and
 replugged, without leaking file descriptors; also arrange for the GPS
 to be powered up when and only when clients are active.</p>
 
+<p>The special control socket is premarily there to be used by
+hotplug facilities like Linux udev. It is intended to be written
+to by scripts activated when a relevant device (basically, a USB
+device with one of a particular set of vendor IDs) is connected to
+or disconnected from the system. On receipt of these messages,
+<code>gpsd</code> may add a device to its pool, or remove one and 
+(if possible) shift clients to a different one.</p>
+
+<p>The reason these scripts have to look for vendor IDs is that USB
+has no GPS class.  Thus, GPSes present the ID of whatever
+serial-to-USB converter chip they happen to be using. Fortunately
+there are fewer types of these in use than there are GPS chipsets;
+in fact, just two of them account for 80% of the USB GPS market 
+and don't seem to be used by other consumer-grade devices.</p>
+
 <h2 id="initialization">Driver initialization and wrapup</h2>
 
 <p>Part of the job <code>gpsd</code> does is to minimize the amount
@@ -667,12 +745,12 @@ to it to be specified.  Presently, here's how the autoconfig
 works.</p>
 
 <ol>
-<li>At each baud rate gpsd grabs packets until it sees either a
-   well-formed and checksum-verified NMEA packet, a well-formed and
-   checksum-verified packet of one of the binary protocols, or it sees
-   one of the two special trigger strings EARTHA or ASTRAL, or it
-   fills a long buffer with garbage (in which case it steps to the
-   next baud rate).</li>
+<li>At each baud rate <code>gpsd</code> grabs packets until the
+   sniffer sees either a well-formed and checksum-verified NMEA
+   packet, a well-formed and checksum-verified packet of one of the
+   binary protocols, or it sees one of the two special trigger strings
+   EARTHA or ASTRAL, or it fills a long buffer with garbage (in which
+   case it steps to the next baud-rate/parity/stop-bit).</li>
 
 <li>If it finds a SiRF packet, it queries the chip for firmware
    version.  If the version is &lt; 231.000 it drops back to SiRF NMEA.
@@ -709,15 +787,14 @@ works.</p>
    on SiRF debugging output in order to detect SiRF chips.</li>
 
 <li>Now gpsd reads NMEA packets.  If it sees a driver trigger string it
-   invokes the matching driver.  Presently there is really only one of
-   these: "$Ack Input 105.\r\n", the response to the SiRF probe. On
-   seeing this, gpsd switches from NMEA to SiRF binary mode, probes
-   for firmware version, and either stays in binary or drops back 
-   to SiRF NMEA.</li>
+   invokes the matching driver.</li>
 </ol>
 
 <p>The outcome is that we know exactly what we're looking at, without any
 driver-type or baud rate options.</p>
+
+<p>(The above sequence of steps may be out pof date.  If so, it will 
+be because we have added more recognized packet types and drivers.)</p>
 
 <h2 id="error">Error modeling</h2>
 
@@ -1116,10 +1193,10 @@ what the O message in GPSD protocol attempts to deliver.</p>
 like this per cycle from our device. That's what we get from the SiRF
 (packet type 02), Zodiac (packet type 1000), Garmin Binary, and iTalk
 (NAV_FIX message) protocols. Garmin and Trimble also implement full
-PVT solutions in a single line of text. These, together, account for
+TPV solutions in a single line of text. These, together, account for
 a share of the GPS market that is 80% and rising in 2006.</p>
 
-<p>Unfortunately, many GPSes actually deliver their PVT reports as a
+<p>Unfortunately, many GPSes actually deliver their TPV reports as a
 collection of sentences in NMEA 0183 (or as packets in a vendor binary
 protocol less well designed than SiRF's) each of which is only a
 partial report.  Here's the most important kind of incompleteness: for
@@ -1130,7 +1207,7 @@ the normal 1-second send cycle.</p>
 <h2 id="mapping">Mapping the design space</h2>
 
 <p>For NMEA devices, then (and for devices speaking similarly mal-designed
-vendor binary protocols) accumulating a complete PVT thus requires
+vendor binary protocols) accumulating a complete TPV thus requires
 decisions about the following sorts of actions:</p>
 
 <ol>
@@ -1145,8 +1222,8 @@ queries explicitly the when-to-ship decision is out of our hands.</li>
 </ol>
 
 <p>In thinking about these decisions, it's useful to consider the set of
-events on which an action like "merge new data into PVT buffer" or
-"clear the PVT data buffer" or "ship report to user" can trigger.</p>
+events on which an action like "merge new data into TPV buffer" or
+"clear the TPV data buffer" or "ship report to user" can trigger.</p>
 
 <ol>
 <li>On receipt of any sentence or packet from the GPS.</li>
@@ -1156,7 +1233,7 @@ events on which an action like "merge new data into PVT buffer" or
 <li>When the timestamp of a sentence or packet differs from the 
    last timestamp recorded.</li>
 
-<li>When some or all of the PVT data has not been refreshed for a
+<li>When some or all of the TPV data has not been refreshed for a
    specified number of seconds.</li>
 </ol>
 
@@ -1189,9 +1266,9 @@ later on about combining buffering with interpolation.</p>
 
 <h3 id="rtcpp">Report then clear per packet</h3>
 
-<p>A device like a SiRF-II that reports all its PVT data in a single
+<p>A device like a SiRF-II that reports all its TPV data in a single
 packet needs no buffering; it should ship to the user on receipt of
-that packet and then invalidate the PVT buffer right afterwards.
+that packet and then invalidate the TPV buffer right afterwards.
 (This is a "report then clear per packet" policy.)</p>
 
 <p>But triggering a buffer clear on every packet would do bad things if 
@@ -1206,7 +1283,7 @@ it gets nothing in response.</p>
 <p>On the other hand, if (say) we knew that an NMEA GPS were always going
 to end its report cycle with GPGGA, it might make sense to buffer 
 all data until GPGGA appears, ship a report afterwards, and then
-clear the PVT buffer.  This would mean shipping just one report 
+clear the TPV buffer.  This would mean shipping just one report 
 per cycle (good) at the cost of introducing some latency into the
 reporting of data the GPS sends earlier in the cycle (bad).  (This
 would be "buffer all, report-then-clear on trigger")</p>
@@ -1238,7 +1315,7 @@ second with accumulating sets of data that only sum up to a complete
 report on the last one.</p>
 
 <p>Another advantage of this policy is that when applied to a device like 
-a SiRF-II or Zodiac chipset that ships only one PVT packet per cycle,
+a SiRF-II or Zodiac chipset that ships only one TPV packet per cycle,
 it collapses to "report then clear per packet".</p>
 
 <p>Here's a disadvantage: the client display, unless it does its own
@@ -1271,17 +1348,17 @@ prevarication on top of that.</p>
 <p>But the conclusive argument against wiring in this policy is that,
 while it can be simulated by buffering data delivered according to a
 clear-every-cycle policy, the reverse is not true.  Under this policy
-there would be no way to distinguish in gpsd's reports between data
-valid now and data held over from a previous cycle; on the other hand,
-under a clear-at-start-of-cycle policy the client can still do
-whatever buffering and smoothing it wants to.</p>
+there would be no way to distinguish in <code>gpsd</code>'s reports
+between data valid now and data held over from a previous cycle; on
+the other hand, under a clear-at-start-of-cycle policy the client can
+still do whatever buffering and smoothing it wants to.</p>
 
 <p>This is the policy gpsd currently follows when J=1 (not the default).</p>
 
 <h3 id="baroeptood">Buffer all, report on every packet, time out old data</h3>
 
 <p>gpsd does not presently keep the sort of per-field ageing data needed 
-to track the age of different PVT fields separately.  But it does know
+to track the age of different TPV fields separately.  But it does know
 how many seconds have elapsed since the last packet receipt &mdash; it uses
 this to tell if the device has dropped offline, by looking for an age
 greater than the cycle time.</p>
@@ -1290,13 +1367,13 @@ greater than the cycle time.</p>
 exactly like "buffer all, report on every packet, never clear data",
 because every piece of data will be refreshed once per cycle.  It will
 have the same sort of prevarication problems as that policy, too.  If
-the device loses lock, the user will see that the PVT data is
+the device loses lock, the user will see that the TPV data is
 undefined only when the timeout expires.</p>
 
 <p>Fine-grained timeouts using per-field aging wouldn't change this 
 picture much.  They'd mainly be useful for matching the timeout 
 on a piece of data to its "natural" lifetime &mdash; usually 1 sec for
-PVT data and 5 sec for satellite-picture data.</p>
+TPV data and 5 sec for satellite-picture data.</p>
 
 <h2 id="noperfect">There is no perfect option</h2>
 
@@ -1306,30 +1383,33 @@ policies would have an additional problem; buffering code with
 complicated flush triggers is notoriously prone to grow bugs near its
 edge cases.</p>
 
-<p>Thus, gpsd has a serious, gnarly data-management problem at its core.
-This problem lurks behind many user bug reports and motivates some of
-the most difficult-to-understand code in the daemon.  And when you
-look hard at the problems posed by the variable sequences of sentences
-in NMEA devices...it gets even nastier.</p>
+<p>Thus, <code>gpsd</code> has a serious, gnarly data-management
+problem at its core.  This problem lurks behind many user bug reports
+and motivates some of the most difficult-to-understand code in the
+daemon.  And when you look hard at the problems posed by the variable
+sequences of sentences in NMEA devices...it gets even nastier.</p>
 
-<p>It's tempting to think that, if we knew the device type in advance, 
+<p>It's tempting to think that, if we knew the device type in advance,
 we could write a state machine adapted to its sentence sequence that
 would do a perfect job of data management.  The trouble with this
 theory is that we'd need separate state machines for each NMEA
-dialect.  That way lies madness &mdash; and an inability to cope gracefully
-with devices never seen before.  Since the zero-configuration design 
-goal means that we can't count on the user or administrator passing 
-device-type information to gpsd in the first place, we avoid this trap.</p>
+dialect.  That way lies madness &mdash; and an inability to cope
+gracefully with devices never seen before.  Since the
+zero-configuration design goal means that we can't count on the user
+or administrator passing device-type information to <code>gpsd</code>
+in the first place, we avoid this trap.</p>
 
-<p>But that means gpsd has to adapt to what it sees coming down the wire.
-At least it can use a different policy for each device driver,
-dispatching once the device type has been identified.</p>
+<p>But that means <code>gpsd</code> has to adapt to what it sees
+coming down the wire.  At least it can use a different policy for each
+device driver, dispatching once the device type has been
+identified.</p>
 
 <h2 id="interpolation">Combining buffering with interpolation: a speculative design</h2>
 
-<p>One possible choice (not let implemented in gpsd or its client
-libraries) would be to combine buffering with interpolation.  Here's a
-speculative design for a client which does its own extrapolation:</p>
+<p>One possible choice (not let implemented in <code>gpsd</code> or
+its client libraries) would be to combine buffering with
+interpolation.  Here's a speculative design for a client which does
+its own extrapolation:</p>
 
 <p>Thread 1: GPS handler.  Sets watcher mode.  Each time a report is
 received, it stores that data along with the result of a call to
@@ -1356,7 +1436,7 @@ a gpsd instance running in a car or boat will have access to
 <p>This section is preliminary design sketches for things we are 
 likely to need to do in the future.</p>
 
-<h2 id="nonpvt">Non-PVT Data</h2>
+<h2 id="nonpvt">Non-TPV Data</h2>
 
 <p>There are <em>lots</em> of other things a sensor wedded to a GPS
 might report that don't fit the position-velocity-time model of the O
@@ -1369,8 +1449,8 @@ report water depth and temperature via NMEA DPT and MTW sentences).</p>
 <p>To cope with this, we could either:</p>
 
 <ol>
-<li>extend the O tuple to report non-PVT kinds of information, or</li>
-<li>define a new set of requests and responses for non-PVT data.</li>
+<li>extend the O tuple to report non-TPV kinds of information, or</li>
+<li>define a new set of requests and responses for non-TPV data.</li>
 </ol>
 
 <p>The simplest way to attack this problem would be to just start adding
@@ -1578,20 +1658,20 @@ it's not worth doing.</p>
 
 <h2 id='subsecond'>Subsecond polling</h2>
 
-<p>gpsd relies on the GPS to periodically send PVT reports to it.  A
+<p>gpsd relies on the GPS to periodically send TPV reports to it.  A
 few GPSes have the capability to change their cycle time so they can
 ship reports more often (gpsd 'c' command). These all send in some
 vendor-binary format; no NMEA GPS I've ever seen allows you to set a
 cycle time of less than a second, if only because at 4800bps, a full
-PVT report takes just under one second in NMEA.</p>
+TPV report takes just under one second in NMEA.</p>
 
-<p>But most GPSes send PVT reports once a second. At 50km/h (31mi/h)
+<p>But most GPSes send TPV reports once a second. At 50km/h (31mi/h)
 that's 13.8 meters change in position between updates, about the same
 as the uncertainty of position under typical conditions.</p>
 
 <p>There is, however, a way to sample some GPSes at higher frequency.  SiRF
 chips, and some others, allow you to shut down periodic notifications
-and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
+and poll them for TPV.  At 57600bps we could poll a NMEA GPS 16 times
 a second, and a SiRF one maybe 18 times a second.</p>
 
 <p>Alas, Chris Kuethe reports: "At least on the SiRF 2 and 3 receivers
