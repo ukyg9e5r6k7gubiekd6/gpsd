@@ -64,7 +64,7 @@ GPSD Frequently Asked Questions
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 <blockquote>
 <p>When you have a problem with gpsd, here are some steps you can take to
-help us resolve the bug as quickly as possible.</p>
+help get your bug resolved as quickly as possible.</p>
 
 <h3>1. Read this whole FAQ first</h3>
 
@@ -133,6 +133,12 @@ whether it holds a clue, send it.</p>
 all, is the firmware version.  You will want that for your report.</p>
 
 <h3 id="logformat">8. Annotate the capture log and send us a copy</h3>
+
+<!-- Note: his is also linked on the hardware page -->
+<p>We'll describe the annotation steps here for completeness, but the
+easiest way to do this is with <a
+href="https://www.mainframe.cx/cgi-bin/gps_report.cgi">our web
+form</a>
 
 <p>A logfile should consist of an identifying header followed by a
 straight unencoded dump of GPS data, whether NMEA or binary. The
@@ -360,9 +366,32 @@ ships it.</p>
 from a GPGSA and all you get is a mode, and then you get GPVTG, but
 you'll always get lat/lon on the next O.</p>
 
-<p>Clients that poll P or A repleatedly won't have a problem; the race
+<p>Clients that poll P or A repeatedly won't have a problem; the race
 effects will show up but be limited to noise in the first few seconds
 of samples.</p>
+
+<h1 id='flakyserial'>My device reports lots of sentences that don't
+look like standard NMEA</h1>
+
+<p>The normal set of NMEA sentences looks like this: GPRMC GPGGA GPGSA
+GPGSV. If you're running at -D4 and seeing a lot of "Unknown sentence"
+errors with text packets that don't match these, it's possible that
+the autobauding code in <code>gpsd</code> sync-locked at the right
+baud rate but wrong parity and stop bits, but garbage packets are
+occasionally making it through the packet sniffer anyway because the
+checksumming is weak. Expecially suspect this if you see a lot of
+doubled characters in the data.</p>
+
+<p>We've seen behavior like this on Trimble devices that ship with
+wacky combinations like 7E1 or 8O1 &mdash; those two modes, in
+particular, are rather likely to produce false sync-locking <em>to
+each other</em>.  The best solution, if possible, is to jumper your
+board so it ships 8N1. The performance of our autobauding code 
+degrades badly when presented with anything else.</p>
+
+<p>If you can't force 8N1, contact the <code>gpsd</code> developers
+directly. This ian weird case that's rare on modern hardware, but we'd
+like to handle it better than we do.</p>
 
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
