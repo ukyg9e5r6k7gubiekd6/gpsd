@@ -61,6 +61,25 @@ GPSD Frequently Asked Questions
 
 <div id="Content">
 
+<ul>
+<li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
+<li><a href='#oldcommands'>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</a><br/>
+<li><a href="singleshot">Why does my single-shot query fail to return fix data?</a><br/>
+<li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
+<li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
+<li><a href='#flicker'>Why does the date field in <code>xgps</code> flicker to "n/a" part of the time even when there's a fix?</a><br/>
+<li><a href='#flicker'>Why does <code>xgps</code> flicker between displaying FIX and NOFIX about once a second?</a><br/>
+<li><a href='#flicker'>Why doesn't <code>gpsd</code> set its J=1 option by default and avoid the flicker problem?</a><br/>
+<li><a href='#kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</a><br/>
+<li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a><br/>
+<li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a><br/>
+<li><a href='#why_migrate'>Why use this version of <code>gpsd</code>?</a><br/>
+<li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
+<li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
+<li><a href='#changes'>How has the <code>gpsd</code> interface changed since 1.x?</a><br/>
+<li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
+</ul>
+
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 <blockquote>
 <p>When you have a problem with gpsd, here are some steps you can take to
@@ -289,7 +308,7 @@ command to it.  Alternatively, running the daemon at -D 4 may reveal
 the version.</p>
 </blockquote>
 
-<h1>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
+<h1 id="oldcommands">Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
 
 <p>To understand what's going on, you need to know that
 <code>gpsd</code> does not immediately assign a client a GPS from its
@@ -369,29 +388,6 @@ you'll always get lat/lon on the next O.</p>
 <p>Clients that poll P or A repeatedly won't have a problem; the race
 effects will show up but be limited to noise in the first few seconds
 of samples.</p>
-
-<h1 id='flakyserial'>My device reports lots of sentences that don't
-look like standard NMEA</h1>
-
-<p>The normal set of NMEA sentences looks like this: GPRMC GPGGA GPGSA
-GPGSV. If you're running at -D4 and seeing a lot of "Unknown sentence"
-errors with text packets that don't match these, it's possible that
-the autobauding code in <code>gpsd</code> sync-locked at the right
-baud rate but wrong parity and stop bits, but garbage packets are
-occasionally making it through the packet sniffer anyway because the
-checksumming is weak. Expecially suspect this if you see a lot of
-doubled characters in the data.</p>
-
-<p>We've seen behavior like this on Trimble devices that ship with
-wacky combinations like 7E1 or 8O1 &mdash; those two modes, in
-particular, are rather likely to produce false sync-locking <em>to
-each other</em>.  The best solution, if possible, is to jumper your
-board so it ships 8N1. The performance of our autobauding code 
-degrades badly when presented with anything else.</p>
-
-<p>If you can't force 8N1, contact the <code>gpsd</code> developers
-directly. This is a weird case that's rare on modern hardware, but we'd
-like to handle it better than we do.</p>
 
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
