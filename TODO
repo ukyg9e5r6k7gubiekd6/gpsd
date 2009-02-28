@@ -28,10 +28,10 @@ to reverse his refusal to send us an eval unit.
 These are used for the 'B' command.
 
 **** superstar2: not implemented (driver is unfinished)
-**** italk: not implemented
-**** tsip: speed switch tested, rejects parity/stopbit setting
+**** italk: not implemented (but could be)
+**** tsip: speed tested, rejects parity/stopbit setting
 **** sirf: speed tested, parity and stop-bit switching not tested
-**** evermore: tested, rejects parity/stopbit setting
+**** evermore: speed tested, rejects parity/stopbit setting
 **** ubx: fully implemented, parity and stop-bit switching not tested
 **** zodiac: fully implemented, not tested
 **** navcom.c: speed tested, rejects parity/stopbit setting

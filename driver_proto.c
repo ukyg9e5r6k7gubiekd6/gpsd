@@ -323,9 +323,14 @@ static gps_mask_t _proto__parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static bool _proto__set_speed(struct gps_device_t *session, speed_t speed)
+static bool _proto__set_speed(struct gps_device_t *session, 
+			      speed_t speed, char parity, int stopbits)
 {
-    /* set port operating mode, speed, bits etc. here */
+    /* 
+     * Set port operating mode, speed, parity, stopbits etc. here.
+     * Note: parity is passed as 'N'/'E'/'O', but you should program 
+     * defensively and allow 0/1/2 as well.
+     */
 }
 
 /*
