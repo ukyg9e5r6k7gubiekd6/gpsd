@@ -655,7 +655,7 @@ int main (int argc, char **argv)
 		    if ((*active)->driver->speed_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			(void)(*active)->driver->speed_switcher(&session, v);
+			(void)(*active)->driver->speed_switcher(&session, v, 'N', 1);
 			/*
 			 * See the comment attached to the 'B' command in gpsd.
 			 * Allow the control string time to register at the

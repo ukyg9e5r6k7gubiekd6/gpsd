@@ -195,7 +195,8 @@ struct gps_type_t {
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
-    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
+    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, 
+				     speed_t speed, char parity, int stopbits);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
 #define MODE_NMEA	0
 #define MODE_BINARY	1

@@ -92,19 +92,36 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, un
     return 0;
 }
 
-static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
+static bool zodiac_speed_switch(struct gps_device_t *session, 
+				speed_t speed, char parity, int stopbits)
 {
     unsigned short data[15];
 
     if (session->driver.zodiac.sn++ > 32767)
 	session->driver.zodiac.sn = 0;
 
+    switch (parity) {
+    case (int)'E':
+    case 2:
+	parity = 2;
+	break;
+    case (int)'O':
+    case 1:
+	parity = 1;
+	break;
+    case (int)'N':
+    case 0:
+    default:
+	parity = 0;
+	break;
+    }
+
     memset(data, 0, sizeof(data));
     /* data is the part of the message starting at word 6 */
     data[0] = session->driver.zodiac.sn;	/* sequence number */
     data[1] = 1;			/* port 1 data valid */
-    data[2] = 1;			/* port 1 character width (8 bits) */
-    data[3] = 0;			/* port 1 stop bits (1 stopbit) */
+    data[2] = parity;			/* port 1 character width (8 bits) */
+    data[3] = (stopbits-1);		/* port 1 stop bits (1 stopbit) */
     data[4] = 0;			/* port 1 parity (none) */
     data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
     data[14] = zodiac_checksum(data, 14);
@@ -115,7 +132,6 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 #else
     return false;
 #endif /* ALLOW_RECONFIGURE */
-
 }
 
 static ssize_t zodiac_control_send(struct gps_device_t *session, 

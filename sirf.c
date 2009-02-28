@@ -154,11 +154,26 @@ static bool sirf_speed(int ttyfd, speed_t speed, int parity, int stopbits)
 		     0x00, 0x00, 0xb0, 0xb3};
     /*@ -charint @*/
 
-   msg[7] = (unsigned char)HI(speed);
-   msg[8] = (unsigned char)LO(speed);
-   msg[10] = (unsigned char)stopbits;
-   msg[11] = (unsigned char)parity;
-   return (sirf_write(ttyfd, msg));
+    switch (parity) {
+    case (int)'E':
+    case 2:
+	parity = 2;
+	break;
+    case (int)'O':
+    case 1:
+	parity = 1;
+	break;
+    case (int)'N':
+    case 0:
+    default:
+	parity = 0;
+	break;
+    }
+    msg[7] = (unsigned char)HI(speed);
+    msg[8] = (unsigned char)LO(speed);
+    msg[10] = (unsigned char)stopbits;
+    msg[11] = (unsigned char)parity;
+    return (sirf_write(ttyfd, msg));
 }
 
 static bool sirf_to_nmea(int ttyfd, speed_t speed)
@@ -986,18 +1001,10 @@ static void sirfbin_revert(struct gps_device_t *session)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
+static bool sirfbin_speed(struct gps_device_t *session, 
+			  speed_t speed, char parity, int stopbits)
 {
-    /*
-     * FIXME: Someday, decode the N/O/E parity char in 
-     * session->gpsdata.parity and use that to set parity too.  
-     * Not that it's likely to matter, as these always run at 8N1.
-     * But on the off chance some systenms integrator does a wacky thing...
-     */
-    return sirf_speed(session->gpsdata.gps_fd, 
-		      speed,
-		      1,
-		      (int)session->gpsdata.stopbits);
+    return sirf_speed(session->gpsdata.gps_fd, speed, parity, stopbits);
 }
 
 /* this is everything we export */

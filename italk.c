@@ -306,8 +306,11 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 }
 
 static bool italk_set_mode(struct gps_device_t *session UNUSED, 
-			      speed_t speed UNUSED, bool mode UNUSED)
+			   speed_t speed UNUSED, 
+			   char parity UNUSED, int stopbits UNUSED, 
+			   bool mode UNUSED)
 {
+#if 0
     /*@ +charint @*/
     char msg[] = {0,};
 
@@ -315,17 +318,25 @@ static bool italk_set_mode(struct gps_device_t *session UNUSED,
 
     return (italk_control_send(session, msg, sizeof(msg)) != -1);
     /*@ +charint @*/
+#endif
+
+    return false;	/* until this actually works */
 }
 
-static bool italk_speed(struct gps_device_t *session, speed_t speed)
+static bool italk_speed(struct gps_device_t *session, 
+			speed_t speed, char parity, int stopbits)
 {
-    return italk_set_mode(session, speed, true);
+    return italk_set_mode(session, speed, parity, stopbits, true);
 }
 
-static void italk_mode(struct gps_device_t *session, int mode)
+static void italk_mode(struct gps_device_t *session,  int mode)
 {
     if (mode == MODE_NMEA) {
-	(void)italk_set_mode(session, session->gpsdata.baudrate, false);
+	(void)italk_set_mode(session, 
+			     session->gpsdata.baudrate,
+			     session->gpsdata.parity,
+			     session->gpsdata.stopbits,
+			     false);
     }
 }
 
@@ -333,7 +344,11 @@ static void italk_mode(struct gps_device_t *session, int mode)
 static void italk_configurator(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0 && session->packet.type == NMEA_PACKET)
-	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
+	(void)italk_set_mode(session, 
+			     session->gpsdata.baudrate, 
+			     session->gpsdata.parity,
+			     session->gpsdata.stopbits,
+			     true);
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -451,7 +466,8 @@ static void itrax_configurator(struct gps_device_t *session, int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static bool itrax_speed(struct gps_device_t *session, speed_t speed)
+static bool itrax_speed(struct gps_device_t *session, 
+			speed_t speed, char parity UNUSED, int stopbits UNUSED)
 /* change the baud rate */
 {
 #ifdef ALLOW_RECONFIGURE

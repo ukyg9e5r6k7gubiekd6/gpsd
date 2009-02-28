@@ -294,11 +294,11 @@ int main(int argc, char **argv)
 	session.device_type = forcetype;
 	(void)gpsd_open(&session);
 	(void)gpsd_set_raw(&session);
-	(void)session.device_type->speed_switcher(&session, 4800);
+	(void)session.device_type->speed_switcher(&session, 4800, 'N', 1);
 	(void)tcdrain(session.gpsdata.gps_fd);
 	for(i = 0; i < (int)(sizeof(speeds) / sizeof(speeds[0])); i++) {
 	    (void)gpsd_set_speed(&session, speeds[i], 'N', 1);
-	    (void)session.device_type->speed_switcher(&session, 4800);
+	    (void)session.device_type->speed_switcher(&session, 4800, 'N', 1);
 	    (void)tcdrain(session.gpsdata.gps_fd);
 	}
 	gpsd_set_speed(&session, 4800, 'N', 1);
@@ -447,7 +447,8 @@ int main(int argc, char **argv)
 		status = 1;
 	    }
 	    else if (session.device_type->speed_switcher(&session, 
-							  (speed_t)atoi(speed))) {
+							 (speed_t)atoi(speed),
+							 'N', 1)) {
 		/*
 		 * See the comment attached to the 'B' command in gpsd.
 		 * Probably not needed here, but it can't hurt.

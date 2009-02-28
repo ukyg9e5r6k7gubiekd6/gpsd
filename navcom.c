@@ -237,65 +237,71 @@ static void navcom_ping(struct gps_device_t *session)
     /*@ +type @*/
 }
 
-static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
+static bool navcom_speed(struct gps_device_t *session, 
+			 unsigned int speed, char parity, int stopbits)
 {
 #ifdef ALLOW_RECONFIGURE
-    u_int8_t port_selection;
-    u_int8_t baud;
-    if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
-	/* We still don't know which port we're connected to */
+    /* parity and stopbit switching aren't implemented */
+    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.parity) {
 	return false;
-    }
-    /*@ +charint @*/
-    switch (speed) {
-	/* NOTE - The spec says that certain baud combinations
-		  on ports A and B are not allowed, those are
-		  1200/115200, 2400/57600, and 2400/115200.
-		  To try and minimise the possibility of those
-		  occurring, we do not allow baud rates below
-		  4800.  We could also disallow 57600 and 115200
-		  to totally prevent this, but I do not consider
-		  that reasonable.  Finding which baud speed the
-		  other port is set at would also be too much
-		  trouble, so we do not do it. */
-	case   4800:
-	    baud = 0x04;
-	    break;
-	case   9600:
-	    baud = 0x06;
-	    break;
-	case  19200:
-	    baud = 0x08;
-	    break;
-	case  38400:
-	    baud = 0x0a;
-	    break;
-	case  57600:
-	    baud = 0x0c;
-	    break;
-	case 115200:
-	    baud = 0x0e;
-	    break;
-	default:
-	    /* Unsupported speed */
+    } else {
+	u_int8_t port_selection;
+	u_int8_t baud;
+	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
+	    /* We still don't know which port we're connected to */
 	    return false;
+	}
+	/*@ +charint @*/
+	switch (speed) {
+	    /* NOTE - The spec says that certain baud combinations
+		      on ports A and B are not allowed, those are
+		      1200/115200, 2400/57600, and 2400/115200.
+		      To try and minimise the possibility of those
+		      occurring, we do not allow baud rates below
+		      4800.  We could also disallow 57600 and 115200
+		      to totally prevent this, but I do not consider
+		      that reasonable.  Finding which baud speed the
+		      other port is set at would also be too much
+		      trouble, so we do not do it. */
+	    case   4800:
+		baud = 0x04;
+		break;
+	    case   9600:
+		baud = 0x06;
+		break;
+	    case  19200:
+		baud = 0x08;
+		break;
+	    case  38400:
+		baud = 0x0a;
+		break;
+	    case  57600:
+		baud = 0x0c;
+		break;
+	    case 115200:
+		baud = 0x0e;
+		break;
+	    default:
+		/* Unsupported speed */
+		return false;
+	}
+	/*@ -charint @*/
+
+	/* Proceed to construct our message */
+	port_selection = session->driver.navcom.physical_port | baud;
+
+	/* Send it off */
+	navcom_cmd_0x11(session, port_selection);
+
+	/* And cheekily return true, even though we have
+	   no way to know if the speed change succeeded
+	   until and if we receive an ACK (message 0x06),
+	   which will be at the new baud speed if the
+	   command was successful.  Bottom line, the client
+	   should requery gpsd to see if the new speed is
+	   different than the old one */
+	return true;
     }
-    /*@ -charint @*/
-
-    /* Proceed to construct our message */
-    port_selection = session->driver.navcom.physical_port | baud;
-
-    /* Send it off */
-    navcom_cmd_0x11(session, port_selection);
-
-    /* And cheekily return true, even though we have
-       no way to know if the speed change succeeded
-       until and if we receive an ACK (message 0x06),
-       which will be at the new baud speed if the
-       command was successful.  Bottom line, the client
-       should requery gpsd to see if the new speed is
-       different than the old one */
-    return true;
 #else
     return false;
 #endif /* ALLOW_RECONFIGURE */

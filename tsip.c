@@ -119,23 +119,30 @@ static void tsip_wrapup(struct gps_device_t *session)
 		   session->driver.tsip.stopbits);
 }
 
-static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
+static bool tsip_speed_switch(struct gps_device_t *session, 
+			      unsigned int speed, 
+			      char parity, int stopbits)
 {
-    unsigned char buf[100];
+    /* parity and stopbit switching are not yet implemented */
+    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.parity) {
+	return false;
+    } else {
+	unsigned char buf[100];
 
-    putbyte(buf,0,0xff);		/* current port */
-    putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
-    putbyte(buf,2,getub(buf,1));	/* output baudrate */
-    putbyte(buf,3,8);			/* character width (8 bits) */
-    putbyte(buf,4,1);			/* parity (odd) */
-    putbyte(buf,5,0);			/* stop bits (1 stopbit) */
-    putbyte(buf,6,0);			/* flow control (none) */
-    putbyte(buf,7,0x02);		/* input protocol (TSIP) */
-    putbyte(buf,8,0x02);		/* output protocol (TSIP) */
-    putbyte(buf,9,0);			/* reserved */
-    (void)tsip_write(session, 0xbc, buf, 10);
+	putbyte(buf,0,0xff);		/* current port */
+	putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
+	putbyte(buf,2,getub(buf,1));	/* output baudrate */
+	putbyte(buf,3,8);			/* character width (8 bits) */
+	putbyte(buf,4,1);			/* parity (odd) */
+	putbyte(buf,5,0);			/* stop bits (1 stopbit) */
+	putbyte(buf,6,0);			/* flow control (none) */
+	putbyte(buf,7,0x02);		/* input protocol (TSIP) */
+	putbyte(buf,8,0x02);		/* output protocol (TSIP) */
+	putbyte(buf,9,0);			/* reserved */
+	(void)tsip_write(session, 0xbc, buf, 10);
 
-    return true;	/* it would be nice to error-check this */
+	return true;	/* it would be nice to error-check this */
+    }
 }
 
 static gps_mask_t tsip_analyze(struct gps_device_t *session)

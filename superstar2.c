@@ -40,7 +40,7 @@ static	gps_mask_t superstar2_msg_svinfo(struct gps_device_t *,
 static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t );
 static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	void superstar2_configurator(struct gps_device_t *, unsigned int );
-static	bool superstar2_set_speed(struct gps_device_t *, speed_t );
+static	bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
 static	void superstar2_set_mode(struct gps_device_t *, int );
 static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	void superstar2_probe_subtype(struct gps_device_t *, unsigned int );
@@ -462,10 +462,11 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static bool superstar2_set_speed(struct gps_device_t *session, speed_t speed)
+static bool superstar2_set_speed(struct gps_device_t *session, 
+				 speed_t speed, char parity, int stopbits)
 {
     /* set port operating mode, speed, bits etc. here */
-    return 0;
+    return false;
 }
 
 /*

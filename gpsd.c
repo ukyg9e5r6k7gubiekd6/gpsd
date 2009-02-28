@@ -729,7 +729,10 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		while (isdigit(*p)) p++;
 #ifdef ALLOW_RECONFIGURE
 		if (sub->device->device_type->speed_switcher)
-		    if (sub->device->device_type->speed_switcher(sub->device, (unsigned)i)) {
+		    if (sub->device->device_type->speed_switcher(sub->device, 
+								 (unsigned)i,
+								 sub->device->gpsdata.parity,
+								 sub->device->gpsdata.stopbits)) {
 			/*
 			 * Allow the control string time to register at the
 			 * GPS before we do the baud rate switch, which

@@ -619,10 +619,12 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     (void)ubx_write(session, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 }
 
-static bool ubx_speed(struct gps_device_t *session, speed_t speed)
+static bool ubx_speed(struct gps_device_t *session, 
+		      speed_t speed, char parity, int stopbits)
 {
     int i;
     unsigned char buf[20];
+    unsigned long usart_mode;
 
     /*@ +charint -usedef -compdef */
     if((!have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
@@ -630,6 +632,27 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
 
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
+    usart_mode = getleul(buf, 4);
+    usart_mode &=~ 0xE00;	/* zero bits 11:9 */
+    switch (parity) {
+    case (int)'E':
+    case 2:
+	usart_mode |= 0x00;
+	break;
+    case (int)'O':
+    case 1:
+	usart_mode |= 0x01;
+	break;
+    case (int)'N':
+    case 0:
+    default:
+	usart_mode |= 0x4;	/* 0x5 would work too */
+	break;
+    }
+    usart_mode &=~ 0x03000;	/* zero bits 13:12 */
+    if (stopbits == 2)
+	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
+    putlelong(buf, 4, usart_mode);
     putlelong(buf, 8, speed);
     (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
     /*@ -charint +usedef +compdef */
