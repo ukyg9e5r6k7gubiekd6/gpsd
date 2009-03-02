@@ -1232,33 +1232,36 @@ speedunits_ok:
 
 altunits_ok:
 
-	while ((option = getopt(argc, argv, "hjl:")) != -1) {
+	while ((option = getopt(argc, argv, "Vhjl:")) != -1) {
 		switch (option) {
+		case 'V':
+		    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+		    exit(0);
 		case 'j':
-			jitteropt = true;
-			continue;
+		    jitteropt = true;
+		    continue;
 		case 'l':
-			switch (optarg[0]) {
-			case 'd':
-				deg_type = deg_dd;
-				continue;
-			case 'm':
-				deg_type = deg_ddmm;
-				continue;
-			case 's':
-				deg_type = deg_ddmmss;
-				continue;
-			default:
-				fprintf(stderr, "Unknown -l argument: %s\n",
-				    optarg);
-				/*@ -casebreak @*/
-			}
+		    switch (optarg[0]) {
+		    case 'd':
+			deg_type = deg_dd;
+			continue;
+		    case 'm':
+			deg_type = deg_ddmm;
+			continue;
+		    case 's':
+			deg_type = deg_ddmmss;
+			continue;
+		    default:
+			fprintf(stderr, "Unknown -l argument: %s\n",
+				optarg);
+			/*@ -casebreak @*/
+		    }
 		case 'h':
 		default:
-		    (void)fputs("usage:  xgps [-hj] [-speedunits "
-			    "{mph,kmh,knots}] [-altunits {ft,meters}] "
-			    "[-l {d|m|s}] [server[:port:[device]]]\n", stderr);
-			exit(1);
+		    (void)fputs("usage:  xgps [-Vhj] [-speedunits "
+				"{mph,kmh,knots}] [-altunits {ft,meters}] "
+				"[-l {d|m|s}] [server[:port:[device]]]\n", stderr);
+		    exit(1);
 		}
 	}
 
