@@ -14,7 +14,7 @@
 
 #if defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE)
 #include "bits.h"
-#include "superstar2.h"
+#include "driver_superstar2.h"
 
 /*
  * These routines are specific to this driver

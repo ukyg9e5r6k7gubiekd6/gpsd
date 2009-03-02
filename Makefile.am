@@ -118,47 +118,47 @@ libgps_la_LDFLAGS = -version-number 17:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgpsd_c_sources = \
-	netlib.c \
-	nmea_parse.c \
-	serial.c \
-	libgpsd_core.c \
-	subframe.c \
-	ntpshm.c \
-	libgps.c \
-	packet.c \
-	gpsutils.c \
-	geoid.c \
+	bits.c \
+	bsd-base64.c \
+	crc24q.c \
 	dgnss.c \
 	dgpsip.c \
-	ntrip.c \
-	sirf.c \
-	superstar2.c \
-	report.c \
-	isgps.c \
-	rtcm2.c \
-	rtcm3.c \
-	srecord.c \
-	bsd-base64.c \
-	strl.c \
+	gpsutils.c \
+	geoid.c \
 	hex.c \
+	isgps.c \
+	libgps.c \
+	libgpsd_core.c \
+	netlib.c \
+	ntpshm.c \
+	ntrip.c \
+	packet.c \
+	report.c \
+	serial.c \
+	srecord.c \
+	strl.c \
+	subframe.c \
 	drivers.c \
-	zodiac.c \
-	ubx.c \
-	garmin.c \
-	garmin_txt.c \
-	tsip.c \
-	evermore.c \
-	italk.c \
-	navcom.c \
-	bits.c \
-	crc24q.c
+	driver_evermore.c \
+	driver_garmin.c \
+	driver_garmin_txt.c \
+	driver_italk.c \
+	driver_navcom.c \
+	driver_nmea.c \
+	driver_rtcm2.c \
+	driver_rtcm3.c \
+	driver_sirf.c \
+	driver_superstar2.c \
+	driver_tsip.c \
+	driver_ubx.c \
+	driver_zodiac.c
 
 libgpsd_h_sources = \
-	italk.h \
+	driver_italk.h \
 	bsd-base64.h \
 	timebase.h \
 	bits.h \
-	rtcm2.h \
+	driver_rtcm2.h \
 	crc24q.h
 
 BUILT_SOURCES = packet_names.h gpsd.h
@@ -173,7 +173,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	cat $(srcdir)/gpsd.h-tail >>gpsd.h
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				rtcm2.h libgpsmm.cpp packet_states.h
+				driver_rtcm2.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
@@ -289,7 +289,7 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-noinst_HEADERS = ubx.h superstar2.h
+noinst_HEADERS = driver_ubx.h driver_superstar2.h
 nodist_include_HEADERS = gpsd.h
 include_HEADERS = gps.h libgpsmm.h
 

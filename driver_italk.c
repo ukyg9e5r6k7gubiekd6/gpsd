@@ -17,7 +17,7 @@
 #if defined(ITRAX_ENABLE) && defined(BINARY_ENABLE)
 
 #include "bits.h"
-#include "italk.h"
+#include "driver_italk.h"
 
 static gps_mask_t italk_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_navfix(struct gps_device_t *, unsigned char *, size_t);
