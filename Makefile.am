@@ -154,11 +154,9 @@ libgpsd_c_sources = \
 	driver_zodiac.c
 
 libgpsd_h_sources = \
-	driver_italk.h \
 	bsd-base64.h \
 	timebase.h \
 	bits.h \
-	driver_rtcm2.h \
 	crc24q.h
 
 BUILT_SOURCES = packet_names.h gpsd.h
@@ -289,7 +287,9 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-noinst_HEADERS = driver_ubx.h driver_superstar2.h
+noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
+	driver_ubx.h gpsmon.h
+
 nodist_include_HEADERS = gpsd.h
 include_HEADERS = gps.h libgpsmm.h
 
