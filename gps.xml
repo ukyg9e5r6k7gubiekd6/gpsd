@@ -70,6 +70,21 @@
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
+  <command>lcdgps</command>  
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-V </arg>
+      <arg choice='opt'>-j </arg>
+      <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
+      <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
+      <group>
+	<replaceable>server</replaceable>
+	  <group> 
+	    <replaceable>:port</replaceable> 
+	      <group><replaceable>:device</replaceable></group>
+	  </group>
+      </group>
+</cmdsynopsis>
+<cmdsynopsis>
   <command>gpxlogger</command>
 </cmdsynopsis>
 <cmdsynopsis>
@@ -212,6 +227,21 @@ Here are the variables and values it checks:</para>
 <para><application>cgps</application> terminates when you send it a
 SIGHUP or SIGINT; given default terminal settings this will happen
 when you type Ctl-C at it.  It will also terminate on 'q'</para>
+
+</refsect2>
+<refsect2><title>lcdgps</title>
+
+<para>A client that passes <application>gpsd</application> data to
+<application>lcdproc</application>, turning your car computer into a
+very expensive and nearly feature-free GPS receiver.  Currentlyassumes
+a 4x40 LCD and writes data formatted to fit that size screen.  Also
+displays 4- or 6-character Maidenhead grid square output.</para>
+
+<para>Options are as for <application>cgps</application>, except: The
+<option>-u</option> sets the display format the units used for
+altitude and speed. The options are: <quote>i</quote> for Imperial
+units (feet/miles-per-hour); <quote>n</quote> for nautical
+(feet/knots); 'm' for metric (meters/kilometers-per-hour).</para>
 
 </refsect2>
 <refsect2><title>gpxlogger</title>

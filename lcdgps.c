@@ -322,7 +322,6 @@ static void usage( char *prog)
   (void)fprintf(stderr,
                 "Usage: %s [-h] [-v] [-V] [-s] [-l {d|m|s}] [-u {i|m|n}] [server[:port:[device]]]\n\n"
                 "  -h          Show this help, then exit\n"
-                "  -v          Show version, then exit\n"
                 "  -V          Show version, then exit\n"
                 "  -s          Sleep for 10 seconds before starting\n"
                 "  -l {d|m|s}  Select lat/lon format\n"
@@ -338,207 +337,185 @@ static void usage( char *prog)
   exit(1);
 }
 
-int main(int argc, char *argv[]) {
-  int option;
-  char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
-  char *err_str = NULL;
+int main(int argc, char *argv[]) 
+{
+    int option, rc;
+    bool nojitter = false;
+    struct fixsource_t source;
+    char *err_str = NULL;
+    struct sockaddr_in localAddr, servAddr;
+    struct hostent *h;
 
-  int rc;
-  struct sockaddr_in localAddr, servAddr;
-  struct hostent *h;
-
-  struct timeval timeout;
-  fd_set rfds;
-  int data;
+    struct timeval timeout;
+    fd_set rfds;
+    int data;
 
 #ifdef CLIMB
-  int n;
-  for(n=0;n<CLIMB;n++) climb[n]=0.0;
+    int n;
+    for(n=0;n<CLIMB;n++) climb[n]=0.0;
 #endif 
 
-  /* Process the options.  Print help if requested. */
-  while ((option = getopt(argc, argv, "hvsl:u:")) != -1) {
-    switch (option) {
-    case 'v':
-    case 'V':
-      (void)fprintf(stderr, "$Id:$\n");
-      exit(0);
-    case 's':
-      sleep(10);
-      continue;
-    case 'l':
-      switch ( optarg[0] ) {
-      case 'd':
-        deg_type = deg_dd;
-        continue;
-      case 'm':
-        deg_type = deg_ddmm;
-        continue;
-      case 's':
-        deg_type = deg_ddmmss;
-        continue;
-      default:
-        (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-        /*@ -casebreak @*/
-      }
-    case 'u':
-      switch ( optarg[0] ) {
-      case 'i':
-        altfactor = METERS_TO_FEET;
-        altunits = "ft";
-        speedfactor = MPS_TO_MPH;
-        speedunits = "mph";
-        continue;
-      case 'n':
-        altfactor = METERS_TO_FEET;
-        altunits = "ft";
-        speedfactor = MPS_TO_KNOTS;
-        speedunits = "knots";
-        continue;
-      case 'm':
-        altfactor = 1;
-        altunits = "m";
-        speedfactor = MPS_TO_KPH;
-        speedunits = "kph";
-        continue;
-      default:
-        (void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
-        /*@ -casebreak @*/
-      }
-    case 'h': default:
-      usage(argv[0]);
-      break;
+    /* Process the options.  Print help if requested. */
+    while ((option = getopt(argc, argv, "Vhjl:su:")) != -1) {
+	switch (option) {
+	case 'V':
+	    (void)fprintf(stderr, "$Id:$\n");
+	    exit(0);
+	case 'h':
+	default:
+	    usage(argv[0]);
+	    break;
+	case 'j':
+	    nojitter = true;
+	    break;
+	case 'l':
+	    switch ( optarg[0] ) {
+	    case 'd':
+		deg_type = deg_dd;
+		continue;
+	    case 'm':
+		deg_type = deg_ddmm;
+		continue;
+	    case 's':
+		deg_type = deg_ddmmss;
+		continue;
+	    default:
+		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
+		/*@ -casebreak @*/
+	    }
+	case 's':
+	    sleep(10);
+	    continue;
+	case 'u':
+	    switch ( optarg[0] ) {
+	    case 'i':
+		altfactor = METERS_TO_FEET;
+		altunits = "ft";
+		speedfactor = MPS_TO_MPH;
+		speedunits = "mph";
+		continue;
+	    case 'n':
+		altfactor = METERS_TO_FEET;
+		altunits = "ft";
+		speedfactor = MPS_TO_KNOTS;
+		speedunits = "knots";
+		continue;
+	    case 'm':
+		altfactor = 1;
+		altunits = "m";
+		speedfactor = MPS_TO_KPH;
+		speedunits = "kph";
+		continue;
+	    default:
+		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
+		/*@ -casebreak @*/
+	    }
+	}
     }
-  }
 
-  /* Grok the server, port, and device. */
-  /*@ -branchstate @*/
+    /* Grok the server, port, and device. */
   if (optind < argc) {
-    arg = strdup(argv[optind]);
-    /*@i@*/colon1 = strchr(arg, ':');
-    server = arg;
-    if (colon1 != NULL) {
-      if (colon1 == arg)
-        server = NULL;
-      else
-        *colon1 = '\0';
-      port = colon1 + 1;
-      colon2 = strchr(port, ':');
-      if (colon2 != NULL) {
-        if (colon2 == port)
-          port = NULL;
-        else
-          *colon2 = '\0';
-        device = colon2 + 1;
-      }
-    }
-    colon1 = colon2 = NULL;
-  }
-  /*@ +branchstate @*/
+      gpsd_source_spec(argv[optind], &source);
+  } else
+      gpsd_source_spec(NULL, &source);
 
-  /* Daemonize... */
-  daemonize();
+    /* Daemonize... */
+    daemonize();
 
-  /* Open the stream to gpsd. */
-  /*@i@*/gpsdata = gps_open(server, port);
-  if (!gpsdata) {
-    switch ( errno ) {
-    case NL_NOSERVICE:        err_str = "can't get service entry"; break;
-    case NL_NOHOST:   err_str = "can't get host entry"; break;
-    case NL_NOPROTO:  err_str = "can't get protocol entry"; break;
-    case NL_NOSOCK:   err_str = "can't create socket"; break;
-    case NL_NOSOCKOPT:        err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
-    case NL_NOCONNECT:        err_str = "can't connect to host"; break;
-    default:                  err_str = "Unknown"; break;
-    }
-    (void)fprintf( stderr,
-                   "cgps: no gpsd running or network error: %d, %s\n",
-                   errno, err_str);
-    exit(2);
-  }
-
-  /* Connect to LCDd */
-  h = gethostbyname(LCDDHOST);
-  if(h==NULL) {
-    printf("%s: unknown host '%s'\n",argv[0],LCDDHOST);
-    exit(1);
-  }
-
-  servAddr.sin_family = h->h_addrtype;
-  memcpy((char *) &servAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
-  servAddr.sin_port = htons(LCDDPORT);
-
-  /* create socket */
-  sd = socket(AF_INET, SOCK_STREAM, 0);
-  if(sd<0) {
-    perror("cannot open socket ");
-    exit(1);
-  }
-
-  /* bind any port number */
-  localAddr.sin_family = AF_INET;
-  localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  localAddr.sin_port = htons(0);
-
-  rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
-  if(rc<0) {
-    printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
-    perror("error ");
-    exit(1);
-  }
-
-  /* connect to server */
-  rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-  if(rc<0) {
-    perror("cannot connect ");
-    exit(1);
-  }
-
-  /* Do the initial field label setup. */
-  reset_lcd();
-
-  /* Here's where updates go. */
-  gps_set_raw_hook(gpsdata, update_lcd);
-
-  /* If the user requested a specific device, try to change to it. */
-  if (device) {
-    char *channelcmd = (char *)malloc(strlen(device)+3);
-
-    if (channelcmd) {
-      /*@i@*/(void)strcpy(channelcmd, "F=");
-      (void)strcpy(channelcmd+2, device);
-      (void)gps_query(gpsdata, channelcmd);
-      (void)free(channelcmd);
-    }
-  }
-
-  /* Turn on jitter buffering. */
-  (void)gps_query(gpsdata, "j=1\n");
-
-  /* Request "w+x" data from gpsd. */
-  (void)gps_query(gpsdata, "w+x\n");
-
-  for (;;) { /* heart of the client */
-
-    /* watch to see when it has input */
-    FD_ZERO(&rfds);
-    FD_SET(gpsdata->gps_fd, &rfds);
-
-    /* wait up to five seconds. */
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
-
-    /* check if we have new information */
-    data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
-
-    if (data == -1) {
-      fprintf( stderr, "cgps: socket error\n");
-      exit(2);
-    }
-    else if( data ) {
-      /* code that calls gps_poll(gpsdata) */
-      (void)gps_poll(gpsdata);
+    /* Open the stream to gpsd. */
+    /*@i@*/gpsdata = gps_open(source.server, source.port);
+    if (!gpsdata) {
+	switch ( errno ) {
+	case NL_NOSERVICE:        err_str = "can't get service entry"; break;
+	case NL_NOHOST:   err_str = "can't get host entry"; break;
+	case NL_NOPROTO:  err_str = "can't get protocol entry"; break;
+	case NL_NOSOCK:   err_str = "can't create socket"; break;
+	case NL_NOSOCKOPT:        err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
+	case NL_NOCONNECT:        err_str = "can't connect to host"; break;
+	default:                  err_str = "Unknown"; break;
+	}
+	(void)fprintf( stderr,
+		       "cgps: no gpsd running or network error: %d, %s\n",
+		       errno, err_str);
+	exit(2);
     }
 
-  }
+    /* Connect to LCDd */
+    h = gethostbyname(LCDDHOST);
+    if(h==NULL) {
+	printf("%s: unknown host '%s'\n",argv[0],LCDDHOST);
+	exit(1);
+    }
+
+    servAddr.sin_family = h->h_addrtype;
+    memcpy((char *) &servAddr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+    servAddr.sin_port = htons(LCDDPORT);
+
+    /* create socket */
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sd<0) {
+	perror("cannot open socket ");
+	exit(1);
+    }
+
+    /* bind any port number */
+    localAddr.sin_family = AF_INET;
+    localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    localAddr.sin_port = htons(0);
+
+    rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
+    if(rc<0) {
+	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
+	perror("error ");
+	exit(1);
+    }
+
+    /* connect to server */
+    rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
+    if(rc<0) {
+	perror("cannot connect ");
+	exit(1);
+    }
+
+    /* Do the initial field label setup. */
+    reset_lcd();
+
+    /* Here's where updates go. */
+    gps_set_raw_hook(gpsdata, update_lcd);
+
+    /* If the user requested a specific device, try to change to it. */
+    if (source.device != NULL) {
+	(void)gps_query(gpsdata, "F=%s\n", source.device);
+    }
+
+    /* Turn on on jitter buffering if requested. */
+    if (nojitter)
+	(void)gps_query(gpsdata, "j=1\n");
+
+    /* Request "w+x" data from gpsd. */
+    (void)gps_query(gpsdata, "w+x\n");
+
+    for (;;) { /* heart of the client */
+
+	/* watch to see when it has input */
+	FD_ZERO(&rfds);
+	FD_SET(gpsdata->gps_fd, &rfds);
+
+	/* wait up to five seconds. */
+	timeout.tv_sec = 5;
+	timeout.tv_usec = 0;
+
+	/* check if we have new information */
+	data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
+
+	if (data == -1) {
+	    fprintf( stderr, "cgps: socket error\n");
+	    exit(2);
+	}
+	else if (data) {
+	    /* code that calls gps_poll(gpsdata) */
+	    (void)gps_poll(gpsdata);
+	}
+
+    }
 }
