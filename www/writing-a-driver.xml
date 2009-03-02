@@ -16,6 +16,15 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.5</revnumber>
+      <date>1 Mar 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr to reflect the parity/stopbits
+         extension of the sopeed_switcher method.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.4</revnumber>
       <date>17 February 2009</date>
       <authorinitials>er</authorinitials>
@@ -56,7 +65,7 @@ gpsd version 2.34 compiled from SVN revision 3884 of November 14th
 this, but the broad principles should still apply. Check what version
 you are using.</para>
 
-<para><application>gpsd</application> supports auto detection, so
+<para><application>gpsd</application> supports autodetection, so
 connect your device and try it; you may be lucky and find it is
 already supported. If you are unlucky, you have to be prepared to do a
 lot of work and research on your own.</para>
@@ -599,8 +608,12 @@ write of the data, which is provided by the default routine
 <function>pass_rtcm</function>. If the device does not
 accept differential data, the value is NULL.</para>
 
+<!-- modified by ESR, 2009 -->
 <para><structfield>.speed_switcher</structfield> points to a block of
-code to change baud rate (if supported).</para>
+code to change baud rate, parity, and stop bits (if supported). If
+your ddevice can support some speed/parity/stopbits combinations but
+not others, it should return false on a mode-change request it can't
+handle.</para>
 
 <para><structfield>.mode_switcher</structfield> points to a block of code
 to change the mode (if supported) between NMEA (mode 0) and our
