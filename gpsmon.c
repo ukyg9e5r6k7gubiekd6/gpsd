@@ -316,7 +316,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 	    active = newobject;
 	    devicewin = newwin((*active)->min_y+1, 
 			       (*active)->min_x+1,1,0);
-	    if (!(*active)->initialize()) {
+	    if ((devicewin == NULL) || !(*active)->initialize()) {
 		monitor_complain("Internal initialization failure - aborting.");
 		return false;
 	    }
@@ -350,7 +350,6 @@ int main (int argc, char **argv)
     char line[80];
 
     gmt_offset = (int)tzoffset();
-
     /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "D:F:Vhl")) != -1) {
 	switch (option) {
@@ -511,7 +510,7 @@ int main (int argc, char **argv)
 	    packet_dump((char *)session.packet.outbuffer,session.packet.outbuflen);
 	    (void)wnoutrefresh(statwin);
 	    (void)wnoutrefresh(cmdwin);
-	    if (devicewin != 0)
+	    if (devicewin != NULL)
 		(void)wnoutrefresh(devicewin);
 	    (void)wnoutrefresh(packetwin);
 	    (void)doupdate();
