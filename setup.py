@@ -24,7 +24,7 @@ if not 'clean' in sys.argv:
             created_files.append(f_name)
 
 gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
-            "rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
+            "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
 
 setup( name="gpsd",
        version="1.0",
