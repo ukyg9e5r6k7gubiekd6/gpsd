@@ -25,7 +25,7 @@ to reverse his refusal to send us an eval unit.
 
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
-These are used for the 'B' command.
+These are used for the 'B' command.  All work for 8N1.
 
 **** superstar2: not implemented (driver is unfinished)
 **** italk: not implemented (but could be)
@@ -35,6 +35,9 @@ These are used for the 'B' command.
 **** ubx: fully implemented, parity and stop-bit switching not tested
 **** zodiac: fully implemented, not tested
 **** navcom.c: speed tested, rejects parity/stopbit setting
+
+SiRF, UBX, and can Zodiac can support non-8N1 modes; these need to be
+tested.
 
 *** Support the D-Bus signals recognized by libgypsy
 

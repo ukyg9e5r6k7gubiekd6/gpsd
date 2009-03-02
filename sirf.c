@@ -145,12 +145,12 @@ static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
 {
     /*@ +charint @*/
    static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
-		     0x86,			/* set main serial port */
-		     0x00, 0x00, 0x12, 0xc0,	/* 4800 bps */
-		     0x08,			/* 8 data bits */
-		     0x01,			/* 1 stop bit */
-		     0x00,			/* no parity */
-		     0x00,			/* reserved */
+		     0x86,			/* byte 4: main serial port */
+		     0x00, 0x00, 0x12, 0xc0,	/* bytes 5-8: 4800 bps */
+		     0x08,			/* byte  9: 8 data bits */
+		     0x01,			/* byte 10: 1 stop bit */
+		     0x00,			/* byte 11: no parity */
+		     0x00,			/* byte 12: reserved pad */
 		     0x00, 0x00, 0xb0, 0xb3};
     /*@ -charint @*/
 

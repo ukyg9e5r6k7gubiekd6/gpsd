@@ -246,6 +246,14 @@ serial modes.  In case of failure, the daemon and GPS will
 continue to communicate at the old speed.  Both forms are rejected
 if more than one client is attached to the channel.</para>
 
+<para>Use this command with caution.  On USB and Bluetooth GPSes it is
+also possible for serial mode setting to fail either because the
+serial adaptor chip does not support non-8N1 modes or because the
+device firmware does not properly synchronize the serrial adaptor chip
+with the UART on the GPS chipset whjen the speed changes. These
+failures can hang your device, possibly requiring a GPS power cycle or (in
+extreme cases) physically disconnecting the NVRAM backup battery.</para>
+
 <para>(Older versions of <application>gpsd</application> supported
 changing speed only.)</para>
 </listitem>

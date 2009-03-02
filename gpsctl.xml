@@ -118,6 +118,14 @@ its new speed.</para>
 <term>-s</term>
 <listitem>
 <para>Set the baud rate at which the GPS emits packets.</para>
+
+<para>Use this option with caution.  On USB and Bluetooth GPSes it is
+also possible for serial mode setting to fail either because the
+serial adaptor chip does not support non-8N1 modes or because the
+device firmware does not properly synchronize the serrial adaptor chip
+with the UART on the GPS chipset whjen the speed changes. These
+failures can hang your device, possibly requiring a GPS power cycle or (in
+extreme cases) physically disconnecting the NVRAM backup battery.</para>
 </listitem>
 </varlistentry>
 

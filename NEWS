@@ -7,6 +7,8 @@
   that nobody noticed because its only effect was to trash VDOP values from
   GSA sentences, and gpsd computes those with an internal error model 
   when they look wonky.  cgpxlogger has been merged into gpxlogger.
+  Speed-setting commands now allow parity and stop-bit setting if the
+  GPS chipset and adaptor can support it.
 
 * Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.
