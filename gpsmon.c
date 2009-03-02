@@ -655,8 +655,8 @@ int main (int argc, char **argv)
 		    modespec = strchr(arg, ':');
 		    /*@ +charint @*/
 		    if (modespec!=NULL) {
-			if (*++modespec !='8') {
-			    monitor_complain("No support for word length != 8.");
+			if (strchr("78", *++modespec) == NULL) {
+			    monitor_complain("No support for that word length.");
 			    break;
 			}
 			parity = *++modespec;

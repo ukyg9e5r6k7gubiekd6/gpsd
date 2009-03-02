@@ -749,7 +749,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		}
 #ifdef ALLOW_RECONFIGURE
 		/* no support for other word sizes yet */
-		if (wordsize == 8 && sub->device->device_type->speed_switcher!=NULL)
+		if (wordsize != (int)(9 - stopbits) && sub->device->device_type->speed_switcher!=NULL)
 		    if (sub->device->device_type->speed_switcher(sub->device, 
 								 speed,
 								 parity,

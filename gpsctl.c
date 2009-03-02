@@ -276,8 +276,8 @@ int main(int argc, char **argv)
 		status = 0;
 		if (modespec!=NULL) {
 		    *modespec = '\0';
-		    if (*++modespec !='8') {
-			gpsd_report(LOG_ERROR, "No support for word lengths != 8.\n");
+		    if (strchr("78", *++modespec) == NULL) {
+			gpsd_report(LOG_ERROR, "No support for that word lengths.\n");
 			status = 1;
 		    }
 		    parity = *++modespec;
@@ -481,8 +481,8 @@ int main(int argc, char **argv)
 	    status = 0;
 	    if (modespec!=NULL) {
 		*modespec = '\0';
-		if (*++modespec !='8') {
-		    gpsd_report(LOG_ERROR, "No support for word lengths != 8.\n");
+		if (strchr("78", *++modespec) == NULL) {
+		    gpsd_report(LOG_ERROR, "No support for that word lengths.\n");
 		    status = 1;
 		}
 		parity = *++modespec;
