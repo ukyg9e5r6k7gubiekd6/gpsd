@@ -342,7 +342,7 @@ EXTRA_DIST = \
 	libgpsd.pc.in \
 	gpscap.ini
 
-CLEANFILES = $(BUILT_SOURCES) floattest *.core $(PYEXTENSIONS)
+CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig

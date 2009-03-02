@@ -23,7 +23,7 @@
  * Hard To Do(tm) on embedded systems, judging by the number of broken
  * ARM toolchains I've seen... :(
  *
- * compile with: gcc -O -o floattest floattest.c
+ * compile with: gcc -O -o test_float test_float.c
  *     (use whatever -O level you like)
  */
 
