@@ -307,17 +307,18 @@ static bool switch_type(const struct gps_type_t *devtype)
     if (newobject) {
 	if (LINES < (*newobject)->min_y || COLS < (*newobject)->min_x) {
 	    monitor_complain("New type requires %dx%d screen",
-			     (*newobject)->min_y, (*newobject)->min_x);
+			     (*newobject)->min_x, (*newobject)->min_y);
 	} else {
 	    if (active != NULL) {
 		(*active)->wrap();
 		(void)delwin(devicewin);
 	    }
 	    active = newobject;
-	    devicewin = newwin((*active)->min_y+1, 
-			       (*active)->min_x+1,1,0);
+	    devicewin = newwin((*active)->min_y,
+			       (*active)->min_x,1,0);
 	    if ((devicewin == NULL) || !(*active)->initialize()) {
-		monitor_complain("Internal initialization failure - aborting.");
+		monitor_complain("Internal initialization failure - screen "
+				 "must be at least 80x24. aborting.");
 		return false;
 	    }
 	    (void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
