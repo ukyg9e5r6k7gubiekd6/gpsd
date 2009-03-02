@@ -26,6 +26,7 @@
 
 #include "bits.h"
 #include "gpsmon.h"
+#include "gpsdclient.h"
 
 #ifdef NMEA_ENABLE
 extern const struct gps_type_t nmea;

@@ -10,7 +10,8 @@
 #include <math.h>
 
 #include "gpsd_config.h"
-#include "gpsd.h"
+#include "gps.h"
+#include "gpsdclient.h"
 
 #ifdef HAVE_SETLOCALE
 #include <locale.h>

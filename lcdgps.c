@@ -58,6 +58,7 @@
 #include <signal.h>
 
 #include "gps.h"
+#include "gpsdclient.h"
 
 /* Macro for declaring function arguments unused. */
 #if defined(__GNUC__)

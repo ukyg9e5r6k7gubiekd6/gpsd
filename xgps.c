@@ -49,8 +49,9 @@
 #include <Xm/Text.h>
 #include <X11/Shell.h>
 
-#include <gpsd_config.h>
-#include <gps.h>
+#include "gpsd_config.h"
+#include "gps.h"
+#include "gpsdclient.h"
 
 /* This code used to live in display.c */
 

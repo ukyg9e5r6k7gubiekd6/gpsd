@@ -595,15 +595,6 @@ struct gps_data_t {
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
 };
 
-struct fixsource_t 
-/* describe a data source */
-{
-    char *spec;		/* pointer to actual storage */
-    char *server;
-    char *port;
-    char *device;
-};
-
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
@@ -611,11 +602,6 @@ int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level));
 int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
-
-enum unit {unspecified, imperial, nautical, metric};
-enum unit gpsd_units(void);
-enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };
-extern /*@observer@*/ char *deg_to_str( enum deg_str_type type,  double f);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
@@ -632,9 +618,6 @@ extern double gpstime_to_unix(int, double);
 extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double wgs84_separation(double, double);
-
-extern void gpsd_source_spec(/*@null@*/const char *fromstring, 
-			     /*@out@*/struct fixsource_t *source);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

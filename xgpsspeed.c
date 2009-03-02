@@ -18,6 +18,7 @@
 
 #include "gpsd_config.h"
 #include "gps.h"
+#include "gpsdclient.h"
 
 #include "xgpsspeed.icon"
 

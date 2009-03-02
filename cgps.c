@@ -105,6 +105,7 @@
 #endif /* HAVE_NCURSES_H */
 
 #include "gps.h"
+#include "gpsdclient.h"
 
 static struct gps_data_t *gpsdata;
 static time_t status_timer;    /* Time of last state change. */

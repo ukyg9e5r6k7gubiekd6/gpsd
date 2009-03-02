@@ -291,7 +291,7 @@ endif
 noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h
 
-nodist_include_HEADERS = gpsd.h
+nodist_include_HEADERS = gpsd.h gpsdclient.h
 include_HEADERS = gps.h libgpsmm.h
 
 EXTRA_DIST = \

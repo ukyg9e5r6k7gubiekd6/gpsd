@@ -38,6 +38,7 @@
 #include <assert.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
+#include "gpsdclient.h"
 
 static int fd_out = 1;		/* output initially goes to standard output */ 
 static void spinner(unsigned int, unsigned int);

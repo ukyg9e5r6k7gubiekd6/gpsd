@@ -43,6 +43,7 @@
 #include <sys/select.h>
 #endif
 
+#include "gpsdclient.h"
 #include "gpsmon.h"
 
 #ifdef S_SPLINT_S
