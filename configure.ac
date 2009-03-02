@@ -131,20 +131,20 @@ AC_C_CONST
 
 AC_MSG_CHECKING([for properly working floating point implementation])
 if test "x$build" = "x$host"; then
-	if eval "$CC $CFLAGS -o floattest ${srcdir}/floattest.c"; then
-		if ./floattest > /dev/null; then
+	if eval "$CC $CFLAGS -o test_float ${srcdir}/test_float.c"; then
+		if ./test_float > /dev/null; then
 			AC_MSG_RESULT([yes])
 		else
 			AC_MSG_RESULT([no])
-			AC_MSG_WARN([We strongly recommend you manually examine the floattest results])
+			AC_MSG_WARN([We strongly recommend you manually examine the test_float results])
 		fi
 	else
-		AC_MSG_RESULT([failure compiling floattest])
+		AC_MSG_RESULT([failure compiling test_float])
 	fi
 else
 	AC_MSG_RESULT([skipped test (cross-compiling)])
 	AC_MSG_WARN([We are cross-compiling, and thus cannot run the floating point test now.
-We strongly recommend running floattest on the target platform.])
+We strongly recommend running test_float on the target platform.])
 fi
 
 

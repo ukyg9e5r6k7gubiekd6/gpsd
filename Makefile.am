@@ -29,7 +29,7 @@ endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger gpsdlcdd
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid_test
+check_PROGRAMS = test_bits test_gpsmm test_packet test_mkgmtime test_geoid
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py gpscap.py
@@ -192,34 +192,34 @@ clean-local:
 	rm -rf build
 
 #
-# Build gpsmm_test
+# Build test_gpsmm
 #
-gpsmm_test_SOURCES = gpsmm_test.cpp
-gpsmm_test_LDADD = $(LIBC) libgps.la -lm
+test_gpsmm_SOURCES = test_gpsmm.cpp
+test_gpsmm_LDADD = $(LIBC) libgps.la -lm
 
 #
-# Build bits_test tester
+# Build test_bits tester
 #
-bits_test_SOURCES = bits_test.c
-bits_test_LDADD = $(LIBC) libgps.la
+test_bits_SOURCES = test_bits.c
+test_bits_LDADD = $(LIBC) libgps.la
 
 #
 # Build packets tester
 #
-packet_test_SOURCES = packet_test.c
-packet_test_LDADD = $(LIBC) libgps.la -lm
+test_packet_SOURCES = test_packet.c
+test_packet_LDADD = $(LIBC) libgps.la -lm
 
 #
 # Build geoid model tester
 #
-geoid_test_SOURCES = geoid_test.c
-geoid_test_LDADD = $(LIBC) libgps.la -lm
+test_geoid_SOURCES = test_geoid.c
+test_geoid_LDADD = $(LIBC) libgps.la -lm
 
 #
 # Build time functions tester
 #
-mkgmtime_test_SOURCES = mkgmtime_test.c
-mkgmtime_test_LDADD = $(LIBC) libgps.la -lm
+test_mkgmtime_SOURCES = test_mkgmtime.c
+test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
 
 if HAVE_XSLT_PROCESSOR
 #
@@ -302,7 +302,7 @@ EXTRA_DIST = \
 	NEWS \
 	AUTHORS \
 	dgpsip-servers \
-	floattest.c \
+	test_float.c \
 	gpsd.php \
 	gpsd.xml \
 	gpsd.h-head \
@@ -372,12 +372,12 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal rtcmdecode.c
 	@echo "Running splint on gpsflash..."
 	-splint $(SPLINTOPTS) $(gpsflash_SOURCES)
-	@echo "Running splint on bits_test test harness..."
-	-splint $(SPLINTOPTS) $(bits_test_SOURCES)
-	@echo "Running splint on packet_test test harness..."
-	-splint $(SPLINTOPTS) $(packet_test_SOURCES)
-	@echo "Running splint on geoid_test test harness..."
-	-splint $(SPLINTOPTS) $(geoid_test_SOURCES)
+	@echo "Running splint on test_bits test harness..."
+	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
+	@echo "Running splint on test_packet test harness..."
+	-splint $(SPLINTOPTS) $(test_packet_SOURCES)
+	@echo "Running splint on test_geoid test harness..."
+	-splint $(SPLINTOPTS) $(test_geoid_SOURCES)
 
 # Bogon-checking the Python tools
 pychecker:
@@ -432,24 +432,24 @@ rtcm-makeregress: rtcmdecode
 	done
 
 # Regression-test the packet getter.
-packet-regress: packet_test
+packet-regress: test_packet
 	@echo "Testing detection of invalid packets..."
-	@$(srcdir)/packet_test | diff -u $(srcdir)/test/packet.test.chk -
+	@$(srcdir)/test_packet | diff -u $(srcdir)/test/packet.test.chk -
 
 # Rebuild the packet-getter regression test
-packet-makeregress: packet_test
+packet-makeregress: test_packet
 	@mkdir -p test
-	$(srcdir)/packet_test >test/packet.test.chk
+	$(srcdir)/test_packet >test/packet.test.chk
 
 # Regression-test the geoid tester.
-geoid-regress: geoid_test
+geoid-regress: test_geoid
 	@echo "Testing the geoid model..."
-	@$(srcdir)/geoid_test 37.371192 122.014965 | diff -u $(srcdir)/test/geoid.test.chk -
+	@$(srcdir)/test_geoid 37.371192 122.014965 | diff -u $(srcdir)/test/geoid.test.chk -
 
 # Rebuild the packet-getter regression test
-geoid-makeregress: geoid_test
+geoid-makeregress: test_geoid
 	@mkdir -p test
-	$(srcdir)/geoid_test 37.371192 122.014965 >test/geoid.test.chk
+	$(srcdir)/test_geoid 37.371192 122.014965 >test/geoid.test.chk
 
 # Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
@@ -460,8 +460,8 @@ undump-regress: rtcmdecode
 	@rm test/undump.test
 
 # Regression-test the calendar functions
-time_regress: mkgmtime_test
-	./mkgmtime_test
+time_regress: test_mkgmtime
+	./test_mkgmtime
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
