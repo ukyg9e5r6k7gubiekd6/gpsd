@@ -37,7 +37,7 @@
  * helper functions.
  */
 
-extern const struct gps_type_t PROTO;
+extern const struct gps_type_t PROTO_binary;
 
 static bool PROTO_initialize(void)
 {
@@ -127,7 +127,7 @@ const struct monitor_object_t PROTO_mmt = {
      * for 'c'.  Additionally, the driver type name will be displayed before
      * the '>' command prompt in the top line of the display.
      */
-    .driver = &PROTO,
+    .driver = &PROTO_binary,
 };
 
 /*
