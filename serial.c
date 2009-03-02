@@ -122,10 +122,12 @@ void gpsd_set_speed(struct gps_device_t *session,
 	switch (parity)
 	{
 	case 'E':
+	case (char)2:
 	    session->ttyset.c_iflag |= INPCK;
 	    session->ttyset.c_cflag |= PARENB;
 	    break;
 	case 'O':
+	case (char)1:
 	    session->ttyset.c_iflag |= INPCK;
 	    session->ttyset.c_cflag |= PARENB | PARODD;
 	    break;
