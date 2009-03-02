@@ -17,7 +17,7 @@ if test "x$try_python" = "xyes"; then
 	fi
 
 	if test "x$PYTHON" = "xnone"; then
-    	AC_MSG_WARN([*** Python interpreter not found, Python support disabled.])
+	AC_MSG_WARN([*** Python interpreter not found, Python support disabled.])
 		ac_python=no
 	fi
 
@@ -367,9 +367,9 @@ fi
 
 dnl check for Novatel SuperStarII support
 AC_ARG_ENABLE(superstar2,
-  AC_HELP_STRING([--enable-superstar2],
-		 [enable SuperStarII chipset support]),
-  [ac_superstar2=$enableval], [ac_superstar2=no])
+  AC_HELP_STRING([--disable-superstar2],
+		 [disable SuperStarII chipset support]),
+  [ac_superstar2=$enableval], [ac_superstar2=yes])
 AC_MSG_CHECKING([for SuperStarII support])
 if test x"$ac_superstar2" = "xyes"; then
     AC_MSG_RESULT([yes])
