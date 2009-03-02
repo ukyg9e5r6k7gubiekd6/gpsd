@@ -128,6 +128,7 @@ libgpsd_c_sources = \
 	hex.c \
 	isgps.c \
 	libgps.c \
+	gpsdclient.c \
 	libgpsd_core.c \
 	netlib.c \
 	ntpshm.c \
