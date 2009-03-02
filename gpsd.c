@@ -725,14 +725,35 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
 #ifndef FIXED_PORT_SPEED
 	    if (assign_channel(sub) && sub->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
-		i = atoi(++p);
-		while (isdigit(*p)) p++;
+		speed_t speed;
+		unsigned int stopbits = sub->device->gpsdata.stopbits;
+		char parity = (char)sub->device->gpsdata.parity;
+		int wordsize = 8;
+
+		speed = (speed_t)atoi(++p);
+		while (isdigit(*p)) 
+		    p++;
+		while (isspace(*p))
+		    p++;
+		if (strchr("78", *p)!= NULL) {
+		    while (isspace(*p))
+			p++;
+		    wordsize = (int)(*p++ - '0');
+		    if (strchr("NOE", *p)!= NULL) {
+			parity = *p++;
+			while (isspace(*p))
+			    p++;
+			if (strchr("12", *p)!=NULL)
+			    stopbits = (unsigned int)(*p - '0');
+		    }
+		}
 #ifdef ALLOW_RECONFIGURE
-		if (sub->device->device_type->speed_switcher)
+		/* no support for other word sizes yet */
+		if (wordsize == 8 && sub->device->device_type->speed_switcher!=NULL)
 		    if (sub->device->device_type->speed_switcher(sub->device, 
-								 (unsigned)i,
-								 sub->device->gpsdata.parity,
-								 sub->device->gpsdata.stopbits)) {
+								 speed,
+								 parity,
+								 (int)stopbits)) {
 			/*
 			 * Allow the control string time to register at the
 			 * GPS before we do the baud rate switch, which
@@ -750,9 +771,8 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 			 */
 			(void)tcdrain(sub->device->gpsdata.gps_fd);
 			(void)usleep(50000);
-			gpsd_set_speed(sub->device, (speed_t)i,
-				(unsigned char)sub->device->gpsdata.parity,
-				sub->device->gpsdata.stopbits);
+			gpsd_set_speed(sub->device, speed,
+				(unsigned char)parity, stopbits);
 		    }
 #endif /* ALLOW_RECONFIGURE */
 	    }

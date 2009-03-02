@@ -266,12 +266,44 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->gps_device);
 	}
 	if (speed != NULL) {
-	    (void)gps_query(gpsdata, "B=%s", speed);
+	    char parity = 'N';
+	    char stopbits = '1';
+	    if (strchr(speed, ':')==NULL)
+		(void)gps_query(gpsdata, "B=%s", speed);
+	    else {
+		char *modespec = strchr(speed, ':');
+		/*@ +charint @*/
+		status = 0;
+		if (modespec!=NULL) {
+		    *modespec = '\0';
+		    if (*++modespec !='8') {
+			gpsd_report(LOG_ERROR, "No support for word lengths != 8.\n");
+			status = 1;
+		    }
+		    parity = *++modespec;
+		    if (strchr("NOE", parity) == NULL) {
+			gpsd_report(LOG_ERROR, "What parity is '%c'?\n", parity);
+			status = 1;
+		    }
+		    stopbits = *++modespec;
+		    if (strchr("12", stopbits) == NULL) {
+			gpsd_report(LOG_ERROR, "Stop bits must be 1 or 2.\n");
+			status = 1;
+		    }
+		}
+		if (status == 0)
+		    (void)gps_query(gpsdata, "B=%s 8 %c %c", 
+				    speed, parity, stopbits);
+	    }
 	    if (atoi(speed) != (int)gpsdata->baudrate) {
-		gpsd_report(LOG_ERROR, "%s speed change failed\n", gpsdata->gps_device);
+		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d\n", 
+			    gpsdata->gps_device,
+			    speed, parity, stopbits);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s speed change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
+			    gpsdata->gps_device,
+			    speed, parity, stopbits);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
@@ -440,24 +472,57 @@ int main(int argc, char **argv)
 	    }
 	}
 	if (speed) {
-	    if (session.device_type->speed_switcher == NULL) {
-		gpsd_report(LOG_ERROR, 
-			    "%s devices have no speed switch.\n",
-			    session.device_type->type_name);
-		status = 1;
+	    char parity = echo ? 'N': session.gpsdata.parity;
+	    int stopbits = echo ? 1 : session.gpsdata.stopbits;
+	    char *modespec;
+
+	    modespec = strchr(speed, ':');
+	    /*@ +charint @*/
+	    status = 0;
+	    if (modespec!=NULL) {
+		*modespec = '\0';
+		if (*++modespec !='8') {
+		    gpsd_report(LOG_ERROR, "No support for word lengths != 8.\n");
+		    status = 1;
+		}
+		parity = *++modespec;
+		if (strchr("NOE", parity) == NULL) {
+		    gpsd_report(LOG_ERROR, "What parity is '%c'?\n", parity);
+		    status = 1;
+		}
+		stopbits = *++modespec;
+		if (strchr("12", parity) == NULL) {
+		    gpsd_report(LOG_ERROR, "Stop bits must be 1 or 2.\n");
+		    status = 1;
+		}
+		stopbits = (int)(stopbits-'0');
 	    }
-	    else if (session.device_type->speed_switcher(&session, 
-							 (speed_t)atoi(speed),
-							 'N', 1)) {
-		/*
-		 * See the comment attached to the 'B' command in gpsd.
-		 * Probably not needed here, but it can't hurt.
-		 */
-		(void)tcdrain(session.gpsdata.gps_fd);
-		(void)usleep(50000);
-	    } else {
-		gpsd_report(LOG_ERROR, "speed change failed.\n");
-		status = 1;
+	    if (status == 0) {
+		if (session.device_type->speed_switcher == NULL) {
+		    gpsd_report(LOG_ERROR, 
+				"%s devices have no speed switch.\n",
+				session.device_type->type_name);
+		    status = 1;
+		}
+		else if (session.device_type->speed_switcher(&session, 
+							     (speed_t)atoi(speed),
+							     parity, 
+							     stopbits)) {
+		    /*
+		     * See the comment attached to the 'B' command in gpsd.
+		     * Probably not needed here, but it can't hurt.
+		     */
+		    (void)tcdrain(session.gpsdata.gps_fd);
+		    (void)usleep(50000);
+		    gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
+			    session.gpsdata.gps_device,
+			    speed, parity, stopbits);
+		} else {
+		    gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d.\n",
+				session.gpsdata.gps_device,
+				speed, parity, stopbits);
+		    status = 1;
+		}
 	    }
 	}
 	/*@ -compdef @*/

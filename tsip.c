@@ -124,7 +124,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
 			      char parity, int stopbits)
 {
     /* parity and stopbit switching are not yet implemented */
-    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.parity) {
+    if (parity!=(char)session->gpsdata.parity || (unsigned int)stopbits!=session->gpsdata.parity) {
 	return false;
     } else {
 	unsigned char buf[100];

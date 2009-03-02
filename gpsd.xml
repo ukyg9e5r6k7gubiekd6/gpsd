@@ -230,12 +230,25 @@ connected to the client's channel.</para>
 <listitem><para>The B command with no argument returns four fields
 giving the parameters of the serial link to the GPS as "B=%d %d %c
 %d"; baud rate, byte size, parity, (N, O or E for no parity, odd, or
-even) and stop bits (1 or 2).  The command "B=%d" sets the baud rate,
-not changing parity or stop bits; watch the response, because it is
+even) and stop bits (1 or 2).</para>
+
+<para>The command "B=%d" sets the baud rate, not changing parity or
+stop bits; The command "B=%d [78] [NOE] [12]" (B followed by
+whiteapace; followed by a numeric speed; followed by one of the digits
+7 or 8; followed by whitespace; followed by one of the letters 'N',
+'O', or 'E'; followed by whitespace; followed by one of the digits '1'
+or 2') sets not only speed but word length, parity, and stop bits.</para>
+
+<para>For both forms, watch the response, because it is
 possible for this to fail if the GPS does not support a
-speed-switching command.  In case of failure, the daemon and GPS will
-continue to communicate at the old speed.  The B= form is rejected
-if more than one client is attached to the channel.</para></listitem>
+speed-switching command or only supports some combinations of
+serial modes.  In case of failure, the daemon and GPS will
+continue to communicate at the old speed.  Both forms are rejected
+if more than one client is attached to the channel.</para>
+
+<para>(Older versions of <application>gpsd</application> supported
+changing speed only.)</para>
+</listitem>
 </varlistentry>
 
 <varlistentry>

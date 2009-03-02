@@ -168,7 +168,11 @@ your current interrupt chracter is, works as well.</para>
 <term>s</term>
 <listitem>
 <para>Change baud rate. Follow it with a number interpreted as bits
-per second, for example "s9600".</para>
+per second, for example "s9600". The speed number may optionally be
+followed by a colon and a wordlength-parity-stopbits specification in
+the traditional style, e.g 8N1 (the default), 7E1, etc.  Some
+devices don't support serial modes other than their default, so
+this command may fail with a message.</para>
 </listitem>
 </varlistentry>
 

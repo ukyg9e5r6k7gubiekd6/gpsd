@@ -140,7 +140,7 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 
-static bool sirf_speed(int ttyfd, speed_t speed, int parity, int stopbits)
+static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
 {
     /*@ +charint @*/
@@ -155,18 +155,18 @@ static bool sirf_speed(int ttyfd, speed_t speed, int parity, int stopbits)
     /*@ -charint @*/
 
     switch (parity) {
-    case (int)'E':
+    case 'E':
     case 2:
-	parity = 2;
+	parity = (char)2;
 	break;
-    case (int)'O':
+    case 'O':
     case 1:
-	parity = 1;
+	parity = (char)1;
 	break;
-    case (int)'N':
+    case 'N':
     case 0:
     default:
-	parity = 0;
+	parity = (char)0;
 	break;
     }
     msg[7] = (unsigned char)HI(speed);

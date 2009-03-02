@@ -334,8 +334,8 @@ static void italk_mode(struct gps_device_t *session,  int mode)
     if (mode == MODE_NMEA) {
 	(void)italk_set_mode(session, 
 			     session->gpsdata.baudrate,
-			     session->gpsdata.parity,
-			     session->gpsdata.stopbits,
+			     (char)session->gpsdata.parity,
+			     (int)session->gpsdata.stopbits,
 			     false);
     }
 }
@@ -346,8 +346,8 @@ static void italk_configurator(struct gps_device_t *session, unsigned int seq)
     if (seq == 0 && session->packet.type == NMEA_PACKET)
 	(void)italk_set_mode(session, 
 			     session->gpsdata.baudrate, 
-			     session->gpsdata.parity,
-			     session->gpsdata.stopbits,
+			     (char)session->gpsdata.parity,
+			     (int)session->gpsdata.stopbits,
 			     true);
 }
 #endif /* ALLOW_RECONFIGURE */

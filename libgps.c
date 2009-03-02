@@ -619,6 +619,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 #endif /* HAVE_LIBPTHREAD */
 
 
+/*@ -observertrans -nullpass -statictrans -mustfreeonly -kepttrans @*/
 void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /* standard parsing of a GPS data source spec */
 {
@@ -649,6 +650,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	}
     }
 }
+/*@ +observertrans +nullpass +statictrans +mustfreeonly +kepttrans @*/
 
 #ifdef TESTMAIN
 /*

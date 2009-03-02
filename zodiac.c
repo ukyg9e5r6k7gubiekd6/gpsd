@@ -101,18 +101,18 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
 	session->driver.zodiac.sn = 0;
 
     switch (parity) {
-    case (int)'E':
+    case 'E':
     case 2:
-	parity = 2;
+	parity = (char)2;
 	break;
-    case (int)'O':
+    case 'O':
     case 1:
-	parity = 1;
+	parity = (char)1;
 	break;
-    case (int)'N':
+    case 'N':
     case 0:
     default:
-	parity = 0;
+	parity = (char)0;
 	break;
     }
 
@@ -120,8 +120,8 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
     /* data is the part of the message starting at word 6 */
     data[0] = session->driver.zodiac.sn;	/* sequence number */
     data[1] = 1;			/* port 1 data valid */
-    data[2] = parity;			/* port 1 character width (8 bits) */
-    data[3] = (stopbits-1);		/* port 1 stop bits (1 stopbit) */
+    data[2] = (unsigned short)parity;	/* port 1 character width (8 bits) */
+    data[3] = (unsigned short)(stopbits-1);		/* port 1 stop bits (1 stopbit) */
     data[4] = 0;			/* port 1 parity (none) */
     data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
     data[14] = zodiac_checksum(data, 14);

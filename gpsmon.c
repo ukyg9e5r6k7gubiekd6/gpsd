@@ -644,30 +644,62 @@ int main (int argc, char **argv)
 		goto quit;
 
 	    case 's':				/* change speed */
-		monitor_dump_send();
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
-		    v = (unsigned)atoi(arg);
+		    speed_t speed;
+		    char parity = (char)session.gpsdata.parity;
+		    unsigned int stopbits = session.gpsdata.stopbits;
+		    char *modespec;
+
+		    modespec = strchr(arg, ':');
+		    /*@ +charint @*/
+		    if (modespec!=NULL) {
+			if (*++modespec !='8') {
+			    monitor_complain("No support for word length != 8.");
+			    break;
+			}
+			parity = *++modespec;
+			if (strchr("NOE", parity) == NULL) {
+			    monitor_complain("What parity is '%c'?.", parity);
+			    break;
+			}
+			stopbits = (unsigned int)*++modespec;
+			if (strchr("12", (char)stopbits) == NULL) {
+			    monitor_complain("Stop bits must be 1 or 2.");
+			    break;
+			}
+			stopbits = (unsigned int)(stopbits-'0');
+		    }
+		    /*@ -charint @*/
+		    speed = (unsigned)atoi(arg);
 		    /* Ugh...should have a controlfd slot 
 		     * in the session structure, really
 		     */
 		    if ((*active)->driver->speed_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			(void)(*active)->driver->speed_switcher(&session, v, 'N', 1);
-			/*
-			 * See the comment attached to the 'B' command in gpsd.
-			 * Allow the control string time to register at the
-			 * GPS before we do the baud rate switch, which
-			 * effectively trashes the UART's buffer.
-			 */
-			(void)tcdrain(session.gpsdata.gps_fd);
-			(void)usleep(50000);
-			session.gpsdata.gps_fd = dfd;
-			(void)gpsd_set_speed(&session, v, 
-					     (unsigned char)session.gpsdata.parity, 
-					 session.gpsdata.stopbits);
+			if ((*active)->driver->speed_switcher(&session, 
+								speed, 
+								parity, 
+							      (int)stopbits)) {
+			    monitor_dump_send();
+			    /*
+			     * See the comment attached to the 'B'
+			     * command in gpsd.  Allow the control
+			     * string time to register at the GPS
+			     * before we do the baud rate switch,
+			     * which effectively trashes the UART's
+			     * buffer.
+			     */
+			    (void)tcdrain(session.gpsdata.gps_fd);
+			    (void)usleep(50000);
+			    session.gpsdata.gps_fd = dfd;
+			    (void)gpsd_set_speed(&session, speed, 
+						 (unsigned char)parity, 
+						 stopbits);
+			} else 
+			    monitor_complain("Speed/mode cobination not supported.");
 		    } else
 			monitor_complain("Device type has no speed switcher");
 		} else {
