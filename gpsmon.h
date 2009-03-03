@@ -21,11 +21,12 @@ struct monitor_object_t {
 // Device-specific may need these.
 extern bool monitor_control_send(unsigned char *buf, size_t len);
 extern void monitor_fixframe(WINDOW *win);
+extern void monitor_log(const char *fmt, ...);
 extern void monitor_complain(const char *fmt, ...);
 
 #define BUFLEN		2048
 
-extern WINDOW *devicewin, *packetwin;
+extern WINDOW *devicewin;
 extern struct gps_device_t	session;
 extern int gmt_offset;
 

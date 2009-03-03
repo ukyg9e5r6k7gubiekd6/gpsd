@@ -61,7 +61,7 @@ extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mkt3301_mmt;
 
 /* These are public */
 struct gps_device_t	session;
-WINDOW *devicewin, *packetwin;
+WINDOW *devicewin;
 int gmt_offset;
 
 /* These are private */
@@ -69,7 +69,7 @@ static struct gps_context_t	context;
 static int controlfd = -1;
 static bool serial, curses_active;
 static int debuglevel = 0;
-static WINDOW *statwin, *cmdwin;
+static WINDOW *statwin, *cmdwin, *packetwin;
 static FILE *logfile;
 static char *type_name;
 /*@ -nullassign @*/
@@ -311,6 +311,16 @@ void monitor_complain(const char *fmt, ...)
     (void)wgetch(cmdwin);
 }
 
+
+void monitor_log(const char *fmt, ...) 
+{
+    if (packetwin != NULL) {
+	va_list ap;
+	va_start(ap, fmt);
+	(void)vwprintw(packetwin, fmt, ap);
+	va_end(ap);
+    }
+}
 
 static bool switch_type(const struct gps_type_t *devtype)
 {

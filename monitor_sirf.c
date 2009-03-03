@@ -318,7 +318,7 @@ static void sirf_update(void)
 	    else
 		(void)wprintw(mid2win, "   ");
 	}
-	(void)wprintw(packetwin, "MND 0x02=");
+	monitor_log("MND 0x02=");
 	break;
 
     case 0x04:		/* Measured Tracking Data */
@@ -353,7 +353,7 @@ static void sirf_update(void)
 	    if (sv == 0)			/* not tracking? */
 		(void)wprintw(mid4win, "   ");	/* clear other info */
 	}
-	(void)wprintw(packetwin, "MTD 0x04=");
+	monitor_log("MTD 0x04=");
 	break;
 
 #ifdef __UNUSED__
@@ -372,13 +372,13 @@ static void sirf_update(void)
 	    printw("%8.5f %10.5f",
 		   (double)getbeul(buf, off+16)/65536,(double)getbeul(buf, off+20)/1024);
 	}
-	(void)wprintw(packetwin, "RTD 0x05=");
+	monitor_log("RTD 0x05=");
 	break;
 #endif /* __UNUSED */
 
     case 0x06:		/* firmware version */
 	display(mid6win, 1, 10, "%s",buf + 1);
-	(void)wprintw(packetwin, "FV  0x06=");
+	monitor_log("FV  0x06=");
 	break;
 
     case 0x07:		/* Response - Clock Status Data */
@@ -387,13 +387,13 @@ static void sirf_update(void)
 	display(mid7win, 1, 16, "%lu", getbeul(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeul(buf, 12));	/* Clock Bias */
 	display(mid7win, 2, 21, "%lu", getbeul(buf, 16));	/* Estimated Time */
-	(void)wprintw(packetwin, "CSD 0x07=");
+	monitor_log("CSD 0x07=");
 	break;
 
     case 0x08:		/* 50 BPS data */
 	ch = (int)getub(buf, 1);
 	display(mid4win, ch+2, 27, "Y");
-	(void)wprintw(packetwin, "50B 0x08=");
+	monitor_log("50B 0x08=");
 	subframe_enabled = true;
 	break;
 
@@ -402,15 +402,15 @@ static void sirf_update(void)
 	display(mid9win, 1, 18, "%.3f",(double)getbeuw(buf, 3)/186);	/*SegStatLat*/
 	display(mid9win, 1, 31, "%.3f",(double)getbeuw(buf, 5)/186);	/*SegStatTime*/
 	display(mid9win, 1, 42, "%3d",(int)getbeuw(buf, 7));	/* Last Millisecond */
-	(void)wprintw(packetwin, "THR 0x09=");
+	monitor_log("THR 0x09=");
 	break;
 
     case 0x0b:		/* Command Acknowledgement */
-	(void)wprintw(packetwin, "ACK 0x0b=");
+	monitor_log("ACK 0x0b=");
 	break;
 
     case 0x0c:		/* Command NAcknowledgement */
-	(void)wprintw(packetwin, "NAK 0x0c=");
+	monitor_log("NAK 0x0c=");
 	break;
 
     case 0x0d:		/* Visible List */
@@ -423,7 +423,7 @@ static void sirf_update(void)
 		(void)wprintw(mid13win, "   ");
 
 	}
-	(void)wprintw(packetwin, "VL  0x0d=");
+	monitor_log("VL  0x0d=");
 	break;
 
     case 0x13:
@@ -516,7 +516,7 @@ static void sirf_update(void)
 	}
 	/*@ +type @*/
 	display(mid27win, 1, 44, "%d", j);
-	(void)wprintw(packetwin, "DST 0x1b=");
+	monitor_log("DST 0x1b=");
 	break;
 
     case 0x1C:	/* NL Measurement Data */
@@ -526,13 +526,13 @@ static void sirf_update(void)
 	subframe_enabled = true;
 	break;
     case 0x29:	/* Geodetic Navigation Message */
-	(void)wprintw(packetwin, "GNM 0x29=");
+	monitor_log("GNM 0x29=");
 	break;
     case 0x32:	/* SBAS Parameters */
-	(void)wprintw(packetwin, "SBP 0x32=");
+	monitor_log("SBP 0x32=");
 	break;
     case 0x34:	/* PPS Time */
-	(void)wprintw(packetwin, "PPS 0x34=");
+	monitor_log("PPS 0x34=");
 	break;
 
 #ifdef __UNUSED__
@@ -594,7 +594,7 @@ static void sirf_update(void)
 		   clk.tv_sec % 3600,clk.tv_usec);
 #endif
 	}
-	(void)wprintw(packetwin, "??? 0x62=");
+	monitor_log("??? 0x62=");
 	break;
 #endif /* __UNUSED__ */
 
@@ -613,12 +613,12 @@ static void sirf_update(void)
 		break;
 	    }
 	if (j != 0)
-	    (void)wprintw(packetwin, "%s\n",buf+1);
-	(void)wprintw(packetwin, "DD  0xff=");
+	    monitor_log("%s\n",buf+1);
+	monitor_log("DD  0xff=");
 	break;
 
     default:
-	(void)wprintw(packetwin, "    0x%02x=", buf[4]);
+	monitor_log("    0x%02x=", buf[4]);
 	break;
     }
 

@@ -48,7 +48,9 @@ static bool PROTO_initialize(void)
      * When you enter it, two windows will be accessible to you; (1)
      * devicewin, just below the status and command line at top of
      * screen, and (2) packetwin, taking up the rest of the screen below
-     * it; packetwin will be enabled for scrolling.
+     * it; packetwin will be enabled for scrolling. Mote, however,
+     * that you cannot update packetwin safely, as it may be NULL
+     * if the screen has no lines left over after allocating devicewin.
      *
      * Use this method to paint windowframes and legends on the
      * freshly initialized device window.  You can also use this
@@ -139,6 +141,10 @@ const struct monitor_object_t PROTO_mmt = {
  *    method to add headers/trailers/checksum; also dumps the sent
  *    packet to the packet window, if the send_control() is playing
  *    nice by using session.msgbuf to assemble the message.
+ *
+ * void monitor_log(const char *fmt, ...)
+ *    Write amessage to the packet window.  Safe if the packet window
+ *    is not on screen.
  *
  * void monitor_complain(const char *fmt, ...)
  *    Post an error message to the command window, wait till user presses a key.
