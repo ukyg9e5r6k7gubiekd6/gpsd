@@ -290,6 +290,13 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
 	case 1029:
+	    rtcm->rtcmtypes.rtcm3_1029.msgnum = (unsigned short)ugrab(12);
+	    rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
+	    rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
+	    rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
+	    rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
+	    n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (unsigned long)ugrab(8);
+            (void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf+9, n);
 	    break;
     }
 #undef sgrab
@@ -487,6 +494,18 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1029:
+	    (void)fprintf(fp, 
+			  "  station_id=%u, seq=%u, mjd=%u sec=%u len=%u units=%u msg=%s\n",
+			  rtcm->rtcmtypes.rtcm3_1029.station_id,
+			  rtcm->rtcmtypes.rtcm3_1029.msgnum,
+			  rtcm->rtcmtypes.rtcm3_1029.mjd,
+			  rtcm->rtcmtypes.rtcm3_1029.sod,
+			  rtcm->rtcmtypes.rtcm3_1029.len,
+			  rtcm->rtcmtypes.rtcm3_1029.unicode_units,
+			  rtcm->rtcmtypes.rtcm3_1029.text);
+	    break;
+
+	default:
 	    (void)fprintf(fp, "    Unknown content\n"); 
 	    break;
     }
