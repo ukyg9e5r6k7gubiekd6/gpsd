@@ -80,7 +80,7 @@ addition to the library.  Applications will commonly use the file
 descriptor to detect incoming data, and this file descriptor will
 change on reconnect.
 
-So I rephrase my wish, and ask for reconnect funcionality in xgps
+So I rephrase my wish, and ask for reconnect functionality in xgps
 instead.  It will make sure the library support reconnects, and also
 provide an example for other clients using the library.
 
