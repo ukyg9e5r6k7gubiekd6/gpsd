@@ -316,9 +316,9 @@ static bool switch_type(const struct gps_type_t *devtype)
 	if ((*trial)->driver == devtype)
 	    newobject = trial;
     if (newobject) {
-	if (LINES < (*newobject)->min_y || COLS < (*newobject)->min_x) {
+	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
 	    monitor_complain("New type requires %dx%d screen",
-			     (*newobject)->min_x, (*newobject)->min_y);
+			     (*newobject)->min_x, (*newobject)->min_y + 1);
 	} else {
 	    if (active != NULL) {
 		(*active)->wrap();
@@ -332,7 +332,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 				 "must be at least 80x24. aborting.");
 		return false;
 	    }
-	    (void)wresize(packetwin, LINES-(*active)->min_y-1, 80);
+	    (void)wresize(packetwin, LINES-(*active)->min_y-1, COLS);
 	    (void)mvwin(packetwin, (*active)->min_y+1, 0);
 	    (void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
 	}
