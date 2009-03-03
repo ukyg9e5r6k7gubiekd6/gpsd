@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Handle the Garmin simple text format supported by some Garmins.
  * Tested with the Garmin eTrex Legend.

@@ -1,4 +1,8 @@
+/* $Id$ */
 /* gpsmon.h -- what monitor capabuilities look like */
+
+#ifndef _GPSD_GPSMON_H_
+#define _GPSD_GPSMON_H_
 
 #define COMMAND_TERMINATE	-1
 #define COMMAND_MATCH		1
@@ -25,4 +29,5 @@ extern WINDOW *devicewin, *packetwin;
 extern struct gps_device_t	session;
 extern int gmt_offset;
 
+#endif /* _GPSD_GPSMON_H_ */
 /* gpsmon.h ends here */

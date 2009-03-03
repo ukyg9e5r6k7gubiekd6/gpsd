@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * nmeamon.c - gpsmon support for NMEA devices.
  *

@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Driver for Navcom receivers using propietary NCT messages, a binary protocol.
  *

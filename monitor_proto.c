@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Prototype file for a gpsmon monitor object.  
  */

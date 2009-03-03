@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Copyright (c) 2005 Jeff Francis <jeff@gritch.org>
  *
@@ -17,7 +18,6 @@
 /*
   Jeff Francis
   jeff@gritch.org
-  $Id:$
 
   A client that passes gpsd data to lcdproc, turning your car computer
   into a very expensive feature-free GPS receiver ;^).  Currently
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
     while ((option = getopt(argc, argv, "Vhjl:su:")) != -1) {
 	switch (option) {
 	case 'V':
-	    (void)fprintf(stderr, "$Id:$\n");
+	    (void)fprintf(stderr, "$Id$\n");
 	    exit(0);
 	case 'h':
 	default:
