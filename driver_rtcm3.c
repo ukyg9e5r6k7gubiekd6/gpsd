@@ -57,8 +57,8 @@ firmware.
 void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
-    unsigned int bitcount = 0;
-    unsigned i;
+    unsigned int n, n2, bitcount = 0;
+    unsigned int i;
     signed long temp;
 
     /*@ -evalorder -sefparams @*/    
@@ -71,7 +71,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
     rtcm->type = (uint)ugrab(12);
 
     switch(rtcm->type) {
-	case 1001:
+    case 1001:	/* GPS Basic RTK, L1 Only */
 	    rtcm->rtcmtypes.rtcm3_1001.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1001.header.tow        = (time_t)ugrab(30);
@@ -95,7 +95,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    }
 	    break;
 
-	case 1002:
+    case 1002:	/* GPS Extended RTK, L1 Only */
 	    rtcm->rtcmtypes.rtcm3_1002.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1002.header.tow        = (time_t)ugrab(30);
@@ -121,7 +121,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    }
 	    break;
 
-	case 1003:
+    case 1003:	/* GPS Basic RTK, L1 & L2 */
 	    rtcm->rtcmtypes.rtcm3_1003.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1003.header.tow        = (time_t)ugrab(30);
@@ -156,7 +156,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    }
 	    break;
 
-	case 1004:
+    case 1004:	/* GPS Extended RTK, L1 & L2 */
 	    rtcm->rtcmtypes.rtcm3_1004.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1004.header.tow        = (time_t)ugrab(30);
@@ -195,7 +195,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    }
 	    break;
 
-	case 1005:
+    case 1005:	/* Stationary Antenna Reference Point, No Height Information */
 	    rtcm->rtcmtypes.rtcm3_1005.station_id = (unsigned short)ugrab(12);
 	    ugrab(6);	/* reserved */
 	    if ((bool)ugrab(1))
@@ -213,7 +213,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	    break;
 
-	case 1006:
+    case 1006:	/* Stationary Antenna Reference Point, with Height Information */
 	    rtcm->rtcmtypes.rtcm3_1006.station_id = (unsigned short)ugrab(12);
 	    ugrab(6);	/* reserved */
 	    if ((bool)ugrab(1))
@@ -232,13 +232,28 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
 	    break;
 
-	case 1007:
+	case 1007:	/* Antenna Descriptor */
+	    rtcm->rtcmtypes.rtcm3_1007.station_id = (unsigned short)ugrab(12);
+	    n = (unsigned long)ugrab(8);
+	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 4, n);
+	    rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
+	    bitcount += 8 * n;
+	    rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
 	    break;
 
-	case 1008:
+	case 1008:	/* Antenna Descriptor & Serial Number */
+	    rtcm->rtcmtypes.rtcm3_1008.station_id = (unsigned short)ugrab(12);
+	    n = (unsigned long)ugrab(8);
+	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 4, n);
+	    rtcm->rtcmtypes.rtcm3_1008.descriptor[n] = '\0';
+	    bitcount += 8 * n;
+	    rtcm->rtcmtypes.rtcm3_1008.setup_id = ugrab(8);
+	    n2 = (unsigned long)ugrab(8);
+	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
+	    rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
 	    break;
 
-	case 1009:
+    case 1009:	/* GLONASS Basic RTK, L1 Only */
 	    break;
 
 	case 1010:
@@ -419,9 +434,20 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1007:
+	    (void)fprintf(fp, 
+			  "  station_id=%u, desc=%s setup-id=%u\n",
+			  rtcm->rtcmtypes.rtcm3_1007.station_id,
+			  rtcm->rtcmtypes.rtcm3_1007.descriptor,
+			  rtcm->rtcmtypes.rtcm3_1007.setup_id);
 	    break;
 
 	case 1008:
+	    (void)fprintf(fp, 
+			  "  station_id=%u, desc=%s setup-id=%u serial=%s\n",
+			  rtcm->rtcmtypes.rtcm3_1008.station_id,
+			  rtcm->rtcmtypes.rtcm3_1008.descriptor,
+			  rtcm->rtcmtypes.rtcm3_1008.setup_id,
+			  rtcm->rtcmtypes.rtcm3_1008.serial);
 	    break;
 
 	case 1009:
