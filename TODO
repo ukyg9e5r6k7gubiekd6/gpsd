@@ -29,15 +29,15 @@ These are used for the 'B' command.  All work for 8N1.
 
 **** superstar2: not implemented (driver is unfinished)
 **** italk: not implemented (but could be)
-**** tsip: speed tested, rejects parity/stopbit setting
+**** tsip: speed tested, parity and stop-bit switching not tested
 **** sirf: speed tested, parity and stop-bit switching not tested
 **** evermore: speed tested, rejects parity/stopbit setting
 **** ubx: fully implemented, parity and stop-bit switching not tested
 **** zodiac: fully implemented, not tested
 **** navcom.c: speed tested, rejects parity/stopbit setting
 
-SiRF, UBX, and can Zodiac can support non-8N1 modes; these need to be
-tested.
+SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
+to be tested.
 
 *** Support the D-Bus signals recognized by libgypsy
 
