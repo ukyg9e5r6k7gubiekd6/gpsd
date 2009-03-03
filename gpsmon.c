@@ -130,7 +130,7 @@ void monitor_fixframe(WINDOW *win)
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
-    if (errlevel <= debuglevel) {
+    if (errlevel <= debuglevel && packetwin!=NULL) {
 	va_list ap;
 	va_start(ap, fmt);
 	if (!curses_active)
@@ -181,31 +181,35 @@ static ssize_t readpkt(void)
 
 static void packet_dump(char *buf, size_t buflen)
 {
-    size_t i;
-    bool printable = true;
-    for (i = 0; i < buflen; i++)
-	if (!isprint(buf[i]) && !isspace(buf[i]))
-	    printable = false;
-    if (printable) {
+    if (packetwin != NULL) {
+	size_t i;
+	bool printable = true;
 	for (i = 0; i < buflen; i++)
-	    if (isprint(buf[i]))
-		(void)waddch(packetwin, (chtype)buf[i]);
-	    else
-		(void)wprintw(packetwin, "\\x%02x", (unsigned char)buf[i]);
-    } else {
-	for (i = 0; i < buflen; i++)
-	    (void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
+	    if (!isprint(buf[i]) && !isspace(buf[i]))
+		printable = false;
+	if (printable) {
+	    for (i = 0; i < buflen; i++)
+		if (isprint(buf[i]))
+		    (void)waddch(packetwin, (chtype)buf[i]);
+		else
+		    (void)wprintw(packetwin, "\\x%02x", (unsigned char)buf[i]);
+	} else {
+	    for (i = 0; i < buflen; i++)
+		(void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
+	}
+	(void)wprintw(packetwin, "\n");
     }
-    (void)wprintw(packetwin, "\n");
 }
 
 
 static void monitor_dump_send(void)
 {
-    (void)wattrset(packetwin, A_BOLD);
-    (void)wprintw(packetwin, ">>>");
-    packet_dump(session.msgbuf, session.msgbuflen);
-    (void)wattrset(packetwin, A_NORMAL);
+    if (packetwin != NULL) {
+	(void)wattrset(packetwin, A_BOLD);
+	(void)wprintw(packetwin, ">>>");
+	packet_dump(session.msgbuf, session.msgbuflen);
+	(void)wattrset(packetwin, A_NORMAL);
+    }
 }
 
 bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
@@ -316,6 +320,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 	if ((*trial)->driver == devtype)
 	    newobject = trial;
     if (newobject) {
+	int leftover;
 	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
 	    monitor_complain("New type requires %dx%d screen",
 			     (*newobject)->min_x, (*newobject)->min_y + 1);
@@ -332,9 +337,20 @@ static bool switch_type(const struct gps_type_t *devtype)
 				 "must be at least 80x24. aborting.");
 		return false;
 	    }
-	    (void)wresize(packetwin, LINES-(*active)->min_y-1, COLS);
-	    (void)mvwin(packetwin, (*active)->min_y+1, 0);
-	    (void)wsetscrreg(packetwin, 0, LINES-(*active)->min_y-2);
+
+	    leftover = LINES-1-(*active)->min_y;
+	    if (leftover <= 0) {
+		(void)delwin(packetwin);
+		packetwin = NULL;
+	    } else if (packetwin == NULL) {
+		packetwin = newwin(leftover, COLS, (*active)->min_y+1, 0);
+		(void)scrollok(packetwin, true);
+		(void)wsetscrreg(packetwin, 0, leftover-1);
+	    } else {
+		(void)wresize(packetwin, leftover, COLS);
+		(void)mvwin(packetwin, (*active)->min_y+1, 0);
+		(void)wsetscrreg(packetwin, 0, leftover-1);
+	    }
 	}
 	return true;
     }
@@ -471,14 +487,16 @@ int main (int argc, char **argv)
     (void)keypad(stdscr, true);
     curses_active = true;
 
+#define CMDWINHEIGHT	1
+
     /*@ -onlytrans @*/
-    statwin   = newwin(1, 30, 0, 0);
-    cmdwin    = newwin(1, 0,  0, 30);
-    packetwin  = newwin(0, 0,  1, 0);
+    statwin   = newwin(CMDWINHEIGHT, 30, 0, 0);
+    cmdwin    = newwin(CMDWINHEIGHT, 0,  0, 30);
+    packetwin  = newwin(0, 0,  CMDWINHEIGHT, 0);
     if (statwin==NULL || cmdwin==NULL || packetwin==NULL)
 	goto quit;
     (void)scrollok(packetwin, true);
-    (void)wsetscrreg(packetwin, 0, LINES-1);
+    (void)wsetscrreg(packetwin, 0, LINES-CMDWINHEIGHT);
     /*@ +onlytrans @*/
 
     (void)wmove(packetwin,0, 0);
@@ -524,7 +542,8 @@ int main (int argc, char **argv)
 	    (void)wnoutrefresh(cmdwin);
 	    if (devicewin != NULL)
 		(void)wnoutrefresh(devicewin);
-	    (void)wnoutrefresh(packetwin);
+	    if (packetwin != NULL)
+		(void)wnoutrefresh(packetwin);
 	    (void)doupdate();
 	}
 
@@ -543,7 +562,8 @@ int main (int argc, char **argv)
 	    /*@ -usedef -compdef @*/
 	    (void)wgetnstr(cmdwin, line, 80);
 	    (void)noecho();
-	    (void)wrefresh(packetwin);
+	    if (packetwin != NULL)
+		(void)wrefresh(packetwin);
 	    (void)wrefresh(cmdwin);
 
 	    if ((p = strchr(line,'\r')) != NULL)
@@ -608,12 +628,14 @@ int main (int argc, char **argv)
 
 	    case 'l':				/* open logfile */
 		if (logfile != NULL) {
-		    (void)wprintw(packetwin, ">>> Logging to %s off", logfile);
+		    if (packetwin != NULL)
+			(void)wprintw(packetwin, ">>> Logging to %s off", logfile);
 		    (void)fclose(logfile);
 		}
 
 		if ((logfile = fopen(line+1,"a")) != NULL)
-		    (void)wprintw(packetwin, ">>> Logging to %s on", logfile);
+		    if (packetwin != NULL)
+			(void)wprintw(packetwin, ">>> Logging to %s on", logfile);
 		break;
 
 	    case 'n':		/* change mode */
