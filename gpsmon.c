@@ -515,7 +515,7 @@ int main (int argc, char **argv)
 
     /*@ -observertrans @*/
     for (;;) {
-	type_name = active ? (*active)->driver->type_name : "Unknown device";
+	type_name = session.device_type ? session->device_type->type_name : "Unknown device";
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
 	    display(statwin, 0, 0, "%s %4d %c %d", 
