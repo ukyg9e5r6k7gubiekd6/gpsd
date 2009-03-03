@@ -98,4 +98,20 @@ typedef enum {
 #define UBX_SOL_VALID_WEEK 0x04
 #define UBX_SOL_VALID_TIME 0x08
 
+/* from UBX_NAV_SVINFO */
+#define UBX_SAT_USED 0x01
+#define UBX_SAT_DGPS 0x02
+#define UBX_SAT_EPHALM 0x04
+#define UBX_SAT_EPHEM 0x08
+#define UBX_SAT_UNHEALTHY 0x10
+
+#define UBX_SIG_IDLE 0
+#define UBX_SIG_SRCH1 1
+#define UBX_SIG_SRCH2 2
+#define UBX_SIG_DETECT 3
+#define UBX_SIG_CDLK 4
+#define UBX_SIG_CDCRLK1 5
+#define UBX_SIG_CDCRLK2 6
+#define UBX_SIG_NAVMSG 7
+
 #endif /* _GPSD_UBX_H_ */
