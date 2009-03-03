@@ -123,6 +123,7 @@ libgpsd_c_sources = \
 	crc24q.c \
 	dgnss.c \
 	dgpsip.c \
+	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
 	hex.c \
@@ -134,7 +135,6 @@ libgpsd_c_sources = \
 	ntpshm.c \
 	ntrip.c \
 	packet.c \
-	report.c \
 	serial.c \
 	srecord.c \
 	strl.c \
