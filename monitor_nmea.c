@@ -186,7 +186,7 @@ static void nmea_update(void)
 	    char *s_end = sentences + strlen(sentences);
 	    if ((int)(strlen(sentences) + strlen(fields[0])) < xmax-2) {
 		*s_end++ = ' '; 
-		(void)strcpy(s_end, fields[0]);
+		(void)strlcpy(s_end, fields[0], NMEA_MAX);
 	    } else {
 		*--s_end = '.';
 		*--s_end = '.';
