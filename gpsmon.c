@@ -56,6 +56,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 
 /* external capability tables */
 extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt, ashtech_mmt;
+extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mkt3301_mmt;
 
 /* These are public */
@@ -94,6 +95,15 @@ static const struct monitor_object_t *monitor_objects[] = {
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
     &sirf_mmt,
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */
+#if defined(UBX_ENABLE) && defined(BINARY_ENABLE)
+    &ubx_mmt,
+#endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */
+#if defined(ITRAX_ENABLE) && defined(BINARY_ENABLE)
+    &italk_mmt,
+#endif /* defined(ITALK_ENABLE) && defined(BINARY_ENABLE) */
+#if defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE)
+    &superstar2_mmt,
+#endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */
     NULL,
 };
 static const struct monitor_object_t **active;

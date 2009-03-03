@@ -96,7 +96,8 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 #
 # Build gpsmon
 #
-gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c
+gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
+	monitor_italk.c monitor_ubx.c monitor_superstar2.c
 gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
