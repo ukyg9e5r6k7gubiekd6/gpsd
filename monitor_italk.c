@@ -92,7 +92,8 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 	cflags = getleuw(buf, 7 + 6);
 	pflags = getleuw(buf, 7 + 8);
 
-	nsv = (getleuw(buf, 7 + 12) + getleuw(buf, 7 + 14) + 1) / 2;
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+	nsv = MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
 	svlist = getleul(buf, 7 + 16) | getleul(buf, 7 + 24);
 
 	hour = getleuw(buf, 7 + 66);
