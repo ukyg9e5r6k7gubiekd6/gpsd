@@ -2,11 +2,6 @@
 /*
  * SiRF object for the GPS packet monitor.
  *
- * These are the SiRF-specific commands:
- *	a -- toggle receipt of 50BPS subframe data (undocumented).
- *      d -- MID 4 rate change (undocumented)
- *	m -- set or clear static navigation mode
- *	p -- toggle navigation-parameter display mode
  */
 #include <stdio.h>
 #include <stdlib.h>
