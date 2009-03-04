@@ -77,8 +77,8 @@ static bool italk_initialize(void)
 
 static void display_itk_navfix(unsigned char *buf, size_t len){
 
-	unsigned int tow, tod, nsec, d;
-	unsigned short gps_week, flags, cflags, pflags, nsv, svlist;
+	unsigned int tow, tod, nsec, d, svlist;
+	unsigned short gps_week, flags, cflags, pflags, nsv;
 	unsigned short year, mon, day, hour, min, sec;
 	double epx, epy, epz, evx, evy, evz;
 	double latitude, longitude;
@@ -141,7 +141,8 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 	(void)mvwaddch(navfixwin, 5, 27, ACS_DEGREE);
 
 	(void)wmove(navfixwin, 7,11);
-	(void)wprintw(navfixwin, "%04u-%02u-%02u %02u:%02u:%02u", year, mon, day, hour, min, sec);
+	(void)wprintw(navfixwin, "%04u-%02u-%02u %02u:%02u:%02u",
+		      year, mon, day, hour, min, sec);
 	(void)wmove(navfixwin, 8,11);
 	(void)wprintw(navfixwin, "%04u+%010.3lf", gps_week, tow/1000.0);
 	(void)wmove(navfixwin, 8,33);
@@ -165,16 +166,16 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 
 	(void)wmove(navfixwin, 11,6);
 	{
-		char prn[4], satlist[40];
+		char prn[4], satlist[38];
 		unsigned int i;
 		satlist[0] = '\0';
 		for(i = 0; i<32; i++){
 			if (svlist & (1<<i)){
 				snprintf(prn, 4, "%u ", i+1);
-				strlcat(satlist, prn, 40);
+				strlcat(satlist, prn, 38);
 			}
 		}
-		(void)wprintw(navfixwin, "%-40s", satlist);
+		(void)wprintw(navfixwin, "%02d = %-38s", nsv, satlist);
 	}
 	wnoutrefresh(navfixwin);
 
@@ -203,6 +204,10 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 		wprintw(satwin, "%3d %3d %2d  %02d %04x %c",
 			prn, az, el, ss, fl,
 			(fl & PRN_FLAG_USE_IN_NAV)? 'Y' : ' ');
+	}
+	for ( ; i < nchan; i++){
+		wmove(satwin, i+2, 4);
+		wprintw(satwin, "                      ");
 	}
 	wnoutrefresh(satwin);
 	return;
