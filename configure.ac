@@ -59,7 +59,7 @@ if test "x$try_python" = "xyes"; then
 					eval `echo unset ac_cv_lib_python$PYTHON_VERSION'___'Py_Finalize | tr '.' '_'`
 
 					save_LIBS=$LIBS
-					LIBS="$LIBS -L$pylibpath"
+					LIBS="$LIBS -L$pylibpath $PYTHON_LIBS"
 					AC_CHECK_LIB(python$PYTHON_VERSION, Py_Finalize, PYTHON_LIBS="-L$pylibpath -lpython$PYTHON_VERSION $PYTHON_DEPS"; ac_python=yes,,$PYTHON_DEPS)
 					LIBS=$save_LIBS
 					if test "x$ac_python" = "xyes"; then
