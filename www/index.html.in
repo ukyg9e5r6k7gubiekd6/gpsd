@@ -71,17 +71,17 @@ all data on the location/course/velocity of the sensors available to
 be queried on TCP port 2947 of the host computer.  With
 <code>gpsd</code>, multiple GPS client applications (such as
 navigational and wardriving software) can share access to GPSes
-without contention or loss of data. Also, gpsd responds to queries
-with a format that is substantially easier to parse than the NMEA 0183
-emitted by most GPSes.  The <code>gpsd</code> distribution includes a
-linkable C service library, a C++ wrapper class, and a Python module
-that developers of <code>gpsd</code>-aware applications can use to
-encapsulate all communication with <code>gpsd</code>.</para>
+without contention or loss of data. Also, <code>gpsd</code> responds
+to queries with a format that is substantially easier to parse than
+the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
+distribution includes a linkable C service library, a C++ wrapper
+class, and a Python module that developers of <code>gpsd</code>-aware
+applications can use to encapsulate all communication with
+<code>gpsd</code>.</para>
 
-<p>Besides <code>gpsd</code> itself, the project provides
-auxiliary tools for diagnostic monitoring and profiling of GPSes 
-and feeding GPS-aware applications specified track data for 
-diagnostic purposes.</p>
+<p>Besides <code>gpsd</code> itself, the project provides auxiliary
+tools for diagnostic monitoring and profiling of GPSes and feeding
+GPS-aware applications GPS logs for diagnostic purposes.</p>
 
 <p>The goal of the <code>gpsd</code> project is to create a solid
 layer of open-source infrastructure for programs running under Linux
@@ -115,6 +115,10 @@ regression-test suite is used to check correct behavior before each
 release.  This care has paid off in an exceptionally low defect rate;
 our first <a href='http://coverity.com'>Coverity</a> scan, in March
 2007, turned up only two errors in over 22,000 LLOC.</p>
+
+<p>Statistics about the code volume, commit history, and contributors
+associated with thias project are <a
+href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 
 <p>Our development platforms are open-source Unixes &mdash; Linux, and
 the *BSD family.  Presently Linux and OpenBSD are directly supported.
