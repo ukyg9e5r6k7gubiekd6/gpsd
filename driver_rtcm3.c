@@ -349,7 +349,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	}
 	break;
 
-    case 1012:
+    case 1012:	/* GLONASS Extended RTK, L1 & L2 */
 	rtcm->rtcmtypes.rtcm3_1012.header.station_id = (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1012.header.tow = (time_t)ugrab(27);
 	rtcm->rtcmtypes.rtcm3_1012.header.sync = (bool)ugrab(1);
@@ -386,7 +386,17 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	}
 	break;
 
-    case 1013:
+    case 1013:	/* System Parameters */
+	rtcm->rtcmtypes.rtcm3_1013.station_id =(unsigned short)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1013.mjd = (unsigned short)ugrab(16);
+	rtcm->rtcmtypes.rtcm3_1013.sod = (unsigned short)ugrab(17);
+	rtcm->rtcmtypes.rtcm3_1013.ncount = (unsigned long)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1013.leapsecs = (unsigned char)ugrab(8);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1013.ncount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].id =  (unsigned short)ugrab(12);
+	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].sync =  (bool)ugrab(1);
+	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].interval =  (unsigned short)ugrab(16);
+	}
 	break;
 
     case 1014:
@@ -672,6 +682,19 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1013:
+	    (void)fprintf(fp,
+			  "  station_id=%u, mjd=%u sec=%u leapsecs=%u ncount=%u\n",
+			  rtcm->rtcmtypes.rtcm3_1013.station_id,
+			  rtcm->rtcmtypes.rtcm3_1013.mjd,
+			  rtcm->rtcmtypes.rtcm3_1013.sod,
+			  rtcm->rtcmtypes.rtcm3_1013.leapsecs,
+			  rtcm->rtcmtypes.rtcm3_1013.ncount);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1013.ncount; i++)
+	    (void)fprintf(fp,
+			  "    id=%u sync=%c interval=%u\n",
+			  rtcm->rtcmtypes.rtcm3_1013.announcements[i].id,
+			  BOOL(rtcm->rtcmtypes.rtcm3_1013.announcements[i].sync),
+			  rtcm->rtcmtypes.rtcm3_1013.announcements[i].interval);
 	    break;
 
 	case 1014:

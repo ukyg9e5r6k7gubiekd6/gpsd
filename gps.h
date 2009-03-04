@@ -362,6 +362,7 @@ struct rtcm3_t {
 	    struct rtcm3_network_rtk_header	header;
 	    struct rtcm3_correction_diff corrections[RTCM3_MAX_SATELLITES];
 	} rtcm3_1017;
+	/* 1018-1029 were in the 3.0 version */
 	struct {
 	    unsigned int ident;		/* Satellite ID */
 	    unsigned int week;		/* GPS Week Number */
