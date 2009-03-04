@@ -185,7 +185,6 @@ struct rtcm2_t {
 
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
-    unsigned int msgnum;	/* Message number */
     unsigned int station_id;	/* Reference Station ID */
     time_t tow;			/* GPS Epoch Time (TOW) in ms, 
 				   or GLONASS Epoch Time in ms */
@@ -217,7 +216,6 @@ struct rtcm3_extended_rtk {
 };
 
 struct rtcm3_network_rtk_header {
-    unsigned int msgnum;	/* Message number */
     unsigned int network_id;	/* Network ID */
     unsigned int subnetwork_id;	/* Subnetwork ID */
     time_t time;		/* GPS Epoch Time (TOW) in ms */
@@ -332,7 +330,6 @@ struct rtcm3_t {
 	    } rtk_data[RTCM3_MAX_SATELLITES];
 	} rtcm3_1012;
 	struct {
-	    unsigned int msgnum;	/* Message number */
 	    unsigned int station_id;	/* Reference Station ID */
 	    unsigned short mjd;		/* Modified Julian Day (MJD) Number */
 	    unsigned int sod;		/* Seconds of Day (UTC) */
@@ -346,7 +343,6 @@ struct rtcm3_t {
 	} rtcm3_1013;
 	/* 1014-1017 were added in the 3.1 version */
 	struct {
-	    unsigned int msgnum;	/* Message number */
 	    unsigned int network_id;	/* Network ID */
 	    unsigned int subnetwork_id;	/* Subnetwork ID */
 	    unsigned char stationcount;	/* # auxiliary stations transmitted */
@@ -367,7 +363,6 @@ struct rtcm3_t {
 	    struct rtcm3_correction_diff corrections[RTCM3_MAX_SATELLITES];
 	} rtcm3_1017;
 	struct {
-	    unsigned int msgnum;	/* Message number */
 	    unsigned int ident;		/* Satellite ID */
 	    unsigned int week;		/* GPS Week Number */
 	    unsigned char sv_accuracy;	/* GPS SV ACCURACY */
@@ -401,7 +396,6 @@ struct rtcm3_t {
 	    bool fit_interval;
 	} rtcm3_1019;
 	struct {
-	    unsigned int msgnum;	/* Message number */
 	    unsigned int ident;		/* Satellite ID */
 	    unsigned short channel;	/* Satellite Frequency Channel Number */
 	    /* ephemeris fields, not scaled */
@@ -440,7 +434,6 @@ struct rtcm3_t {
 	    bool M_l_sub_n;
 	} rtcm3_1020;
 	struct {
-	    unsigned int msgnum;	/* Message number */
 	    unsigned int station_id;	/* Reference Station ID */
 	    unsigned short mjd;		/* Modified Julian Day (MJD) Number */
 	    unsigned int sod;		/* Seconds of Day (UTC) */

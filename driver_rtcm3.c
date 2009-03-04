@@ -72,7 +72,6 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 
     switch(rtcm->type) {
     case 1001:	/* GPS Basic RTK, L1 Only */
-	    rtcm->rtcmtypes.rtcm3_1001.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1001.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcmtypes.rtcm3_1001.header.sync       = (bool)ugrab(1);
@@ -96,7 +95,6 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
     case 1002:	/* GPS Extended RTK, L1 Only */
-	    rtcm->rtcmtypes.rtcm3_1002.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1002.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcmtypes.rtcm3_1002.header.sync       = (bool)ugrab(1);
@@ -122,7 +120,6 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
     case 1003:	/* GPS Basic RTK, L1 & L2 */
-	    rtcm->rtcmtypes.rtcm3_1003.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1003.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcmtypes.rtcm3_1003.header.sync       = (bool)ugrab(1);
@@ -157,7 +154,6 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
     case 1004:	/* GPS Extended RTK, L1 & L2 */
-	    rtcm->rtcmtypes.rtcm3_1004.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1004.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcmtypes.rtcm3_1004.header.sync       = (bool)ugrab(1);
@@ -253,7 +249,8 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
 	    break;
 
-    case 1009:	/* GLONASS Basic RTK, L1 Only */
+	case 1009:	/* GLONASS Basic RTK, L1 Only */
+	    rtcm->rtcmtypes.rtcm3_1009.header.station_id = (unsigned short)ugrab(12);
 	    break;
 
 	case 1010:
@@ -290,7 +287,6 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
 	case 1029:
-	    rtcm->rtcmtypes.rtcm3_1029.msgnum = (unsigned short)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
 	    rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
 	    rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
@@ -319,8 +315,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
     switch(rtcm->type) {
 	case 1001:
 	    (void)fprintf(fp, 
-			  "  #%u station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
-			  rtcm->rtcmtypes.rtcm3_1001.header.msgnum,
+			  "  #station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
 			  rtcm->rtcmtypes.rtcm3_1001.header.station_id,
 			  (int)rtcm->rtcmtypes.rtcm3_1001.header.tow,
 			  BOOL(rtcm->rtcmtypes.rtcm3_1001.header.sync),
@@ -340,8 +335,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 
 	case 1002:
 	    (void)fprintf(fp, 
-			  "  #%u station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
-			  rtcm->rtcmtypes.rtcm3_1002.header.msgnum,
+			  "  #station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
 			  rtcm->rtcmtypes.rtcm3_1002.header.station_id,
 			  (int)rtcm->rtcmtypes.rtcm3_1002.header.tow,
 			  BOOL(rtcm->rtcmtypes.rtcm3_1002.header.sync),
@@ -363,8 +357,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 
 	case 1003:
 	    (void)fprintf(fp,
-			  "  #%u station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
-			  rtcm->rtcmtypes.rtcm3_1003.header.msgnum,
+			  "  #station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u", 
 			  rtcm->rtcmtypes.rtcm3_1003.header.station_id,
 			  (int)rtcm->rtcmtypes.rtcm3_1003.header.tow,
 			  BOOL(rtcm->rtcmtypes.rtcm3_1003.header.sync),
@@ -388,8 +381,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 
 	case 1004:
 	    (void)fprintf(fp, 
-			  "  #%u station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u\n", 
-			  rtcm->rtcmtypes.rtcm3_1004.header.msgnum,
+			  "  #station_id=%u, tow=%d sync=%c smoothing=%c interval=%u satcount=%u\n", 
 			  rtcm->rtcmtypes.rtcm3_1004.header.station_id,
 			  (int)rtcm->rtcmtypes.rtcm3_1004.header.tow,
 			  BOOL(rtcm->rtcmtypes.rtcm3_1004.header.sync),
@@ -494,10 +486,9 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1029:
-	    (void)fprintf(fp, 
-			  "  station_id=%u, seq=%u, mjd=%u sec=%u len=%u units=%u msg=%s\n",
+	    (void)fprintf(fp,
+			  "  station_id=%u, mjd=%u sec=%u len=%u units=%u msg=%s\n",
 			  rtcm->rtcmtypes.rtcm3_1029.station_id,
-			  rtcm->rtcmtypes.rtcm3_1029.msgnum,
 			  rtcm->rtcmtypes.rtcm3_1029.mjd,
 			  rtcm->rtcmtypes.rtcm3_1029.sod,
 			  rtcm->rtcmtypes.rtcm3_1029.len,
