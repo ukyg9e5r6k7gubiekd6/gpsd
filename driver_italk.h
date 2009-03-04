@@ -38,7 +38,7 @@
 /* Host controller software (PD) */
 #define TASK_HOST	31
 
-#define MAX_NR_VISIBLE_PRNS 12
+#define MAX_NR_VISIBLE_PRNS 16
 
 /* iTalk Message IDs - isuite.fastrax.fi/sdk/331/Protocols/PRO_MsgId.html */
 #define ITALK_ACQ_DATA		1

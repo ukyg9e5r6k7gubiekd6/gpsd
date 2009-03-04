@@ -34,15 +34,15 @@ static bool italk_initialize(void)
 	int i;
 
 	/* "heavily inspired" by monitor_nmea.c */
-	if ((satwin  = derwin(devicewin, 15, 27, 0, 0)) == NULL)
+	if ((satwin  = derwin(devicewin, MAX_NR_VISIBLE_PRNS+3, 27, 0, 0)) == NULL)
 		return false;
 	(void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(satwin, true);
 	(void)wattrset(satwin, A_BOLD);
 	display(satwin, 1, 1, "Ch  SV  Az El S/N Flag U");
-	for (i = 0; i < SIRF_CHANNELS; i++)
+	for (i = 0; i < MAX_NR_VISIBLE_PRNS; i++)
 		display(satwin, (int)(i+2), 1, "%2d",i);
-	display(satwin, 14, 7, " PRN_STATUS ");
+	display(satwin, MAX_NR_VISIBLE_PRNS+2, 7, " PRN_STATUS ");
 	(void)wattrset(satwin, A_NORMAL);
 
 	/* "heavily inspired" by monitor_nmea.c */
@@ -188,8 +188,8 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 		return;
 
 	nchan = (unsigned int)getleuw(buf, 7 +50);
-	if (nchan > MAXCHANNELS)
-		nchan = MAXCHANNELS;
+	if (nchan > MAX_NR_VISIBLE_PRNS)
+		nchan = MAX_NR_VISIBLE_PRNS;
 	for (i = 0; i < nchan; i++) {
 		unsigned int off = 7+ 52 + 10 * i;
 		unsigned short fl;
@@ -205,7 +205,7 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 			prn, az, el, ss, fl,
 			(fl & PRN_FLAG_USE_IN_NAV)? 'Y' : ' ');
 	}
-	for ( ; i < nchan; i++){
+	for ( ; i < MAX_NR_VISIBLE_PRNS; i++){
 		wmove(satwin, i+2, 4);
 		wprintw(satwin, "                      ");
 	}
