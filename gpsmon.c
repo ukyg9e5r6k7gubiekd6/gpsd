@@ -401,6 +401,7 @@ int main (int argc, char **argv)
 	    (void)printf("gpsmon %s\n", VERSION);
 	    exit(0);
         case 'l':		/* list known device types */
+	    (void) fputs("General commands available per type. '+' means there are private commands.\n", stdout);
 	    for (active = monitor_objects; *active; active++) {
 		(void)fputs("i l q ^S ^Q", stdout);
 		(void)fputc(' ', stdout);
@@ -418,13 +419,18 @@ int main (int argc, char **argv)
 		    (void)fputc('c', stdout);
 		else
 		    (void)fputc(' ', stdout);
+		(void)fputc(' ', stdout);
+		if ((*active)->command != NULL)
+		    (void)fputc('+', stdout);
+		else
+		    (void)fputc(' ', stdout);
 		(void)fputs("\t", stdout);
 		(void)fputs((*active)->driver->type_name, stdout);
 		(void)fputc('\n', stdout);
 	    }
 	    exit(0);
 	case 'h': case '?': default:
-	    (void)fputs("usage:  gpsmon [-?hv] [-F controlsock] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  gpsmon [-?hVl] [-D debuglevel] [-F controlsock] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }

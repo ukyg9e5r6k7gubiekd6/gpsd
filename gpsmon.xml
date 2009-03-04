@@ -84,7 +84,7 @@ your local filesystem.</para>
 probably only useful to developers of the GPSD code.  Consult the
 packet-getter source code for relevant values.</para>
 
-<para>The -l option lists a table showing which GPS device tyupes
+<para>The -l option lists a table showing which GPS device types
 <application>gpsmon</application> has built-in support for, and which
 generic commands can be applied to which GPS types, and then
 exits. Note that this does not list type-specific commands associated
