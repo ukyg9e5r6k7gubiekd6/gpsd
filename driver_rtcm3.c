@@ -72,228 +72,279 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 
     switch(rtcm->type) {
     case 1001:	/* GPS Basic RTK, L1 Only */
-	    rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1001.header.tow        = (time_t)ugrab(30);
-	    rtcm->rtcmtypes.rtcm3_1001.header.sync       = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1001.header.satcount   = (ushort)ugrab(5);
-	    rtcm->rtcmtypes.rtcm3_1001.header.smoothing  = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1001.header.interval   = (ushort)ugrab(3);
-	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
-		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].ident = (ushort)ugrab(6);
-		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
-	    }
-	    break;
+	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1001.header.tow        = (time_t)ugrab(30);
+	rtcm->rtcmtypes.rtcm3_1001.header.sync       = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1001.header.satcount   = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1001.header.smoothing  = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1001.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	}
+	break;
 
     case 1002:	/* GPS Extended RTK, L1 Only */
-	    rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1002.header.tow        = (time_t)ugrab(30);
-	    rtcm->rtcmtypes.rtcm3_1002.header.sync       = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1002.header.satcount   = (ushort)ugrab(5);
-	    rtcm->rtcmtypes.rtcm3_1002.header.smoothing  = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1002.header.interval   = (ushort)ugrab(3);
-	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
-		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].ident = (ushort)ugrab(6);
-		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
-		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
-		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
-	    }
-	    break;
+	rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1002.header.tow        = (time_t)ugrab(30);
+	rtcm->rtcmtypes.rtcm3_1002.header.sync       = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1002.header.satcount   = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1002.header.smoothing  = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1002.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
+	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	}
+	break;
 
     case 1003:	/* GPS Basic RTK, L1 & L2 */
-	    rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1003.header.tow        = (time_t)ugrab(30);
-	    rtcm->rtcmtypes.rtcm3_1003.header.sync       = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1003.header.satcount   = (ushort)ugrab(5);
-	    rtcm->rtcmtypes.rtcm3_1003.header.smoothing  = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1003.header.interval   = (ushort)ugrab(3);
-	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1003.header.satcount; i++) {
-		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].ident = (ushort)ugrab(6);
-		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
-		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
-	    }
-	    break;
+	rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1003.header.tow        = (time_t)ugrab(30);
+	rtcm->rtcmtypes.rtcm3_1003.header.sync       = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1003.header.satcount   = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1003.header.smoothing  = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1003.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1003.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
+	}
+	break;
 
     case 1004:	/* GPS Extended RTK, L1 & L2 */
-	    rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1004.header.tow        = (time_t)ugrab(30);
-	    rtcm->rtcmtypes.rtcm3_1004.header.sync       = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1004.header.satcount   = (ushort)ugrab(5);
-	    rtcm->rtcmtypes.rtcm3_1004.header.smoothing  = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1004.header.interval   = (ushort)ugrab(3);
-	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1004.header.satcount; i++) {
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].ident = (ushort)ugrab(6);
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.indicator = (bool)ugrab(1);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
-		temp = (long)sgrab(24);
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.pseudorange  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
-		if (temp == INVALID_PSEUDORANGE)
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.rangediff  = 0;
-		else
-		    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.ambiguity = (bool)ugrab(8);
-		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
-	    }
-	    break;
+	rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1004.header.tow        = (time_t)ugrab(30);
+	rtcm->rtcmtypes.rtcm3_1004.header.sync       = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1004.header.satcount   = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1004.header.smoothing  = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1004.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1004.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.indicator = (bool)ugrab(1);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
+	    temp = (unsigned long)ugrab(24);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.ambiguity = (bool)ugrab(8);
+	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	}
+	break;
 
     case 1005:	/* Stationary Antenna Reference Point, No Height Information */
-	    rtcm->rtcmtypes.rtcm3_1005.station_id = (unsigned short)ugrab(12);
-	    ugrab(6);	/* reserved */
-	    if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1005.system = gps;
-	    else if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1005.system = glonass;
-	    else if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1005.system = galileo;
-	    rtcm->rtcmtypes.rtcm3_1005.reference_station = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1005.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    rtcm->rtcmtypes.rtcm3_1005.single_receiver = ugrab(1);
-	    ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1005.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    ugrab(2);
-	    rtcm->rtcmtypes.rtcm3_1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    break;
+	rtcm->rtcmtypes.rtcm3_1005.station_id = (unsigned short)ugrab(12);
+	ugrab(6);	/* reserved */
+	if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1005.system = gps;
+	else if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1005.system = glonass;
+	else if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1005.system = galileo;
+	rtcm->rtcmtypes.rtcm3_1005.reference_station = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1005.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	rtcm->rtcmtypes.rtcm3_1005.single_receiver = ugrab(1);
+	ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1005.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	ugrab(2);
+	rtcm->rtcmtypes.rtcm3_1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	break;
 
     case 1006:	/* Stationary Antenna Reference Point, with Height Information */
-	    rtcm->rtcmtypes.rtcm3_1006.station_id = (unsigned short)ugrab(12);
-	    ugrab(6);	/* reserved */
-	    if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1006.system = gps;
-	    else if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1006.system = glonass;
-	    else if ((bool)ugrab(1))
-		rtcm->rtcmtypes.rtcm3_1006.system = galileo;
-	    rtcm->rtcmtypes.rtcm3_1006.reference_station = (bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    rtcm->rtcmtypes.rtcm3_1006.single_receiver = ugrab(1);
-	    ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1006.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    ugrab(2);
-	    rtcm->rtcmtypes.rtcm3_1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	    rtcm->rtcmtypes.rtcm3_1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
-	    break;
+	rtcm->rtcmtypes.rtcm3_1006.station_id = (unsigned short)ugrab(12);
+	ugrab(6);	/* reserved */
+	if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1006.system = gps;
+	else if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1006.system = glonass;
+	else if ((bool)ugrab(1))
+	    rtcm->rtcmtypes.rtcm3_1006.system = galileo;
+	rtcm->rtcmtypes.rtcm3_1006.reference_station = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	rtcm->rtcmtypes.rtcm3_1006.single_receiver = ugrab(1);
+	ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1006.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	ugrab(2);
+	rtcm->rtcmtypes.rtcm3_1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	rtcm->rtcmtypes.rtcm3_1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
+	break;
 
-	case 1007:	/* Antenna Descriptor */
-	    rtcm->rtcmtypes.rtcm3_1007.station_id = (unsigned short)ugrab(12);
-	    n = (unsigned long)ugrab(8);
-	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 4, n);
-	    rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
-	    bitcount += 8 * n;
-	    rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
-	    break;
+    case 1007:	/* Antenna Descriptor */
+	rtcm->rtcmtypes.rtcm3_1007.station_id = (unsigned short)ugrab(12);
+	n = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 4, n);
+	rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
+	bitcount += 8 * n;
+	rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
+	break;
 
-	case 1008:	/* Antenna Descriptor & Serial Number */
-	    rtcm->rtcmtypes.rtcm3_1008.station_id = (unsigned short)ugrab(12);
-	    n = (unsigned long)ugrab(8);
-	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 4, n);
-	    rtcm->rtcmtypes.rtcm3_1008.descriptor[n] = '\0';
-	    bitcount += 8 * n;
-	    rtcm->rtcmtypes.rtcm3_1008.setup_id = ugrab(8);
-	    n2 = (unsigned long)ugrab(8);
-	    (void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
-	    rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
-	    break;
+    case 1008:	/* Antenna Descriptor & Serial Number */
+	rtcm->rtcmtypes.rtcm3_1008.station_id = (unsigned short)ugrab(12);
+	n = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 4, n);
+	rtcm->rtcmtypes.rtcm3_1008.descriptor[n] = '\0';
+	bitcount += 8 * n;
+	rtcm->rtcmtypes.rtcm3_1008.setup_id = ugrab(8);
+	n2 = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
+	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
+	break;
 
-	case 1009:	/* GLONASS Basic RTK, L1 Only */
-	    rtcm->rtcmtypes.rtcm3_1009.header.station_id = (unsigned short)ugrab(12);
-	    break;
+    case 1009:	/* GLONASS Basic RTK, L1 Only */
+	rtcm->rtcmtypes.rtcm3_1009.header.station_id = (unsigned short)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1009.header.tow = (time_t)ugrab(27);
+	rtcm->rtcmtypes.rtcm3_1009.header.sync = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1009.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1009.header.smoothing = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1009.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.indicator = (bool)ugrab(1);
+	    rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.channel = (ushort)ugrab(5);
+	    temp = (unsigned long)ugrab(25);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	}
+	break;
 
-	case 1010:
-	    break;
+    case 1010:	/* GLONASS Extended RTK, L1 Only */
+	rtcm->rtcmtypes.rtcm3_1010.header.station_id = (unsigned short)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1010.header.tow = (time_t)ugrab(27);
+	rtcm->rtcmtypes.rtcm3_1010.header.sync = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1010.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1010.header.smoothing = (bool)ugrab(1);
+	rtcm->rtcmtypes.rtcm3_1010.header.interval   = (ushort)ugrab(3);
+	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1010.header.satcount; i++) {
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].ident = (ushort)ugrab(6);
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.indicator = (bool)ugrab(1);
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.channel = (ushort)ugrab(5);
+	    temp = (unsigned long)ugrab(25);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.pseudorange  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+	    temp = (long)sgrab(20);
+	    if (temp == INVALID_PSEUDORANGE)
+		rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.rangediff  = 0;
+	    else
+		rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.ambiguity = (bool)ugrab(7);
+	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	}
+	break;
 
-	case 1011:
-	    break;
+    case 1011:
+	break;
 
-	case 1012:
-	    break;
+    case 1012:
+	break;
 
-	case 1013:
-	    break;
+    case 1013:
+	break;
 
-	case 1014:
-	    break;
+    case 1014:
+	break;
 
-	case 1015:
-	    break;
+    case 1015:
+	break;
 
-	case 1016:
-	    break;
+    case 1016:
+	break;
 
-	case 1017:
-	    break;
+    case 1017:
+	break;
 
-	case 1018:
-	    break;
+    case 1018:
+	break;
 
-	case 1019:
-	    break;
+    case 1019:
+	break;
 
-	case 1020:
-	    break;
+    case 1020:
+	break;
 
-	case 1029:
-	    rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
-	    rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
-	    rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
-	    n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (unsigned long)ugrab(8);
-            (void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf+9, n);
-	    break;
+    case 1029:
+	rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
+	rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
+	rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
+	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf+9, n);
+	break;
     }
 #undef sgrab
 #undef ugrab
@@ -450,9 +501,47 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1009:
+	    (void)fprintf(fp, 
+			  "  #station_id=%u, tow=%d sync=%c smooting=%c interval=%u satcount=%u", 
+			  rtcm->rtcmtypes.rtcm3_1009.header.station_id,
+			  (int)rtcm->rtcmtypes.rtcm3_1009.header.tow,
+			  BOOL(rtcm->rtcmtypes.rtcm3_1009.header.sync),
+			  BOOL(rtcm->rtcmtypes.rtcm3_1009.header.smoothing),
+			  rtcm->rtcmtypes.rtcm3_1009.header.interval,
+			  rtcm->rtcmtypes.rtcm3_1009.header.satcount);
+	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u\n", 
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].ident,
+			      CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator),
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.channel,
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff,
+			      INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.locktime));
+	    }		
 	    break;
 
 	case 1010:
+	    (void)fprintf(fp, 
+			  "  #station_id=%u, tow=%d sync=%c smooting=%c interval=%u satcount=%u", 
+			  rtcm->rtcmtypes.rtcm3_1009.header.station_id,
+			  (int)rtcm->rtcmtypes.rtcm3_1009.header.tow,
+			  BOOL(rtcm->rtcmtypes.rtcm3_1009.header.sync),
+			  BOOL(rtcm->rtcmtypes.rtcm3_1009.header.smoothing),
+			  rtcm->rtcmtypes.rtcm3_1009.header.interval,
+			  rtcm->rtcmtypes.rtcm3_1009.header.satcount);
+	    for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n", 
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].ident,
+			      CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator),
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.channel,
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff,
+			      INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.locktime),
+			      INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.ambiguity),
+			      rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR);
+	    }		
 	    break;
 
 	case 1011:
