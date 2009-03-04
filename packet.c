@@ -30,6 +30,9 @@ others apart and distinguish them from baud barf.
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <netinet/in.h>	/* for htons() */
+#include <arpa/inet.h>	/* for htons() */
+
 #include "gpsd_config.h"
 #include "bits.h"
 #include "gpsd.h"
