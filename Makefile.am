@@ -227,12 +227,13 @@ if HAVE_XSLT_PROCESSOR
 #
 # Create Manpages
 #
-man_MANS = \
+BUILT_MANPAGES = \
 	gpsd.8 \
 	gps.1 \
 	xgps.1 \
 	xgpsspeed.1 \
 	cgps.1 \
+	cgpxlogger.1 \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
@@ -244,6 +245,9 @@ man_MANS = \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
+
+man_MANS = \
+	$(BUILT_MANPAGES)
 
 .xml.1:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
@@ -344,7 +348,7 @@ EXTRA_DIST = \
 	libgpsd.pc.in \
 	gpscap.ini
 
-CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS)
+CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
