@@ -26,25 +26,158 @@
 #include "driver_italk.h"
 
 extern const struct gps_type_t italk_binary;
-static WINDOW *satwin;
+static WINDOW *satwin, *navfixwin;
 
+#define display	(void)mvwprintw
 static bool italk_initialize(void)
 {
 	int i;
 
 	/* "heavily inspired" by monitor_nmea.c */
-	if ((satwin  = derwin(devicewin, 15, 27, 6, 0)) == NULL)
+	if ((satwin  = derwin(devicewin, 15, 27, 0, 0)) == NULL)
 		return false;
 	(void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(satwin, true);
 	(void)wattrset(satwin, A_BOLD);
-	(void)mvwprintw(satwin, 1, 1, "Ch  SV  Az El S/N Flag U");
+	display(satwin, 1, 1, "Ch  SV  Az El S/N Flag U");
 	for (i = 0; i < SIRF_CHANNELS; i++)
-		(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
-	(void)mvwprintw(satwin, 14, 7, " PRN_STATUS ");
+		display(satwin, (int)(i+2), 1, "%2d",i);
+	display(satwin, 14, 7, " PRN_STATUS ");
 	(void)wattrset(satwin, A_NORMAL);
 
+	/* "heavily inspired" by monitor_nmea.c */
+	if ((navfixwin = derwin(devicewin, 15,  52,  0, 27)) == NULL)
+		return false;
+	(void)wborder(navfixwin, 0, 0, 0, 0, 0, 0, 0, 0),
+	(void)wattrset(navfixwin, A_BOLD);
+	(void)wmove(navfixwin, 1,1);
+	(void)wprintw(navfixwin, "ECEF Pos:");
+	(void)wmove(navfixwin, 2,1);
+	(void)wprintw(navfixwin, "ECEF Vel:");
+
+	(void)wmove(navfixwin, 4,1);
+	(void)wprintw(navfixwin, "LTP Pos:");
+	(void)wmove(navfixwin, 5,1);
+	(void)wprintw(navfixwin, "LTP Vel:");
+
+	(void)wmove(navfixwin, 7,1);
+	(void)wprintw(navfixwin, "Time UTC:");
+	(void)wmove(navfixwin, 8,1);
+	(void)wprintw(navfixwin, "Time GPS:                  Day:");
+
+	(void)wmove(navfixwin, 10,1);
+	(void)wprintw(navfixwin, "DOP [H]      [V]      [P]      [T]      [G]");
+	(void)wmove(navfixwin, 11,1);
+	(void)wprintw(navfixwin, "Fix:");
+
+	display(navfixwin, 14, 20, " NAV_FIX ");
+	(void)wattrset(navfixwin, A_NORMAL);
 	return true;
+}
+
+static void display_itk_navfix(unsigned char *buf, size_t len){
+
+	unsigned int tow, tod, nsec, d;
+	unsigned short gps_week, flags, cflags, pflags, nsv, svlist;
+	unsigned short year, mon, day, hour, min, sec;
+	double epx, epy, epz, evx, evy, evz;
+	double latitude, longitude;
+	float altitude, speed, track, climb;
+	float hdop, gdop, pdop, vdop, tdop;
+
+	if (len != 296)
+		return;
+
+	flags = getleuw(buf, 7 + 4);
+	cflags = getleuw(buf, 7 + 6);
+	pflags = getleuw(buf, 7 + 8);
+
+	nsv = (getleuw(buf, 7 + 12) + getleuw(buf, 7 + 14) + 1) / 2;
+	svlist = getleul(buf, 7 + 16) | getleul(buf, 7 + 24);
+
+	hour = getleuw(buf, 7 + 66);
+	min = getleuw(buf, 7 + 68);
+	sec = getleuw(buf, 7 + 70);
+	nsec = getleul(buf, 7 + 72);
+	year = getleuw(buf, 7 + 76);
+	mon = getleuw(buf, 7 + 78);
+	day = getleuw(buf, 7 + 80);
+	gps_week = (ushort)getlesw(buf, 7 + 82);
+	tow = getleul(buf, 7 + 84);
+
+	epx = (double)(getlesl(buf, 7 + 96)/100.0);
+	epy = (double)(getlesl(buf, 7 + 100)/100.0);
+	epz = (double)(getlesl(buf, 7 + 104)/100.0);
+	evx = (double)(getlesl(buf, 7 + 186)/1000.0);
+	evy = (double)(getlesl(buf, 7 + 190)/1000.0);
+	evz = (double)(getlesl(buf, 7 + 194)/1000.0);
+
+	latitude = (double)(getlesl(buf, 7 + 144)/1e7);
+	longitude = (double)(getlesl(buf, 7 + 148)/1e7);
+	altitude = (double)(getlesl(buf, 7 + 152)/1e3);
+	climb = (double)(getlesl(buf, 7 + 206)/1e3);
+	speed = (double)(getleul(buf, 7 + 210)/1e3);
+	track = (double)(getleuw(buf, 7 + 214)/1e2);
+
+	hdop = (float)(getleuw(buf, 7 + 56)/100.0);
+	gdop = (float)(getleuw(buf, 7 + 58)/100.0);
+	pdop = (float)(getleuw(buf, 7 + 60)/100.0);
+	vdop = (float)(getleuw(buf, 7 + 62)/100.0);
+	tdop = (float)(getleuw(buf, 7 + 64)/100.0);
+
+	(void)wmove(navfixwin, 1,11);
+	(void)wprintw(navfixwin, "%12.2lf %12.2lf %12.2lfm", epx, epy, epz);
+	(void)wmove(navfixwin, 2,11);
+	(void)wprintw(navfixwin, "%11.2lf %11.2lf %11.2lfm/s", evx, evy, evz);
+
+	(void)wmove(navfixwin, 4,11);
+	(void)wprintw(navfixwin, "%11.8lf   %13.8lf %8.1lfm",
+		      latitude, longitude, altitude);
+	(void)mvwaddch(navfixwin, 4, 22, ACS_DEGREE);
+	(void)mvwaddch(navfixwin, 4, 38, ACS_DEGREE);
+	(void)wmove(navfixwin, 5,11);
+	(void)wprintw(navfixwin, "%6.2lfm/s  %5.1lf  %6.2lfm/s climb",
+		      speed, track, climb);
+	(void)mvwaddch(navfixwin, 5, 27, ACS_DEGREE);
+
+	(void)wmove(navfixwin, 7,11);
+	(void)wprintw(navfixwin, "%04u-%02u-%02u %02u:%02u:%02u", year, mon, day, hour, min, sec);
+	(void)wmove(navfixwin, 8,11);
+	(void)wprintw(navfixwin, "%04u+%010.3lf", gps_week, tow/1000.0);
+	(void)wmove(navfixwin, 8,33);
+	d = (tow/1000) / 86400;
+	tod = (tow/1000) - (d*86400);
+	sec = tod % 60;
+	min = (tod / 60) % 60;
+	hour = tod / 3600;
+	(void)wprintw(navfixwin, "%1d %02d:%02d:%02d", d, hour, min, sec);
+
+	(void)wmove(navfixwin, 10,9);
+	(void)wprintw(navfixwin, "%4.1f", hdop);
+	(void)wmove(navfixwin, 10,18);
+	(void)wprintw(navfixwin, "%4.1f", vdop);
+	(void)wmove(navfixwin, 10,27);
+	(void)wprintw(navfixwin, "%4.1f", pdop);
+	(void)wmove(navfixwin, 10,36);
+	(void)wprintw(navfixwin, "%4.1f", tdop);
+	(void)wmove(navfixwin, 10,45);
+	(void)wprintw(navfixwin, "%4.1f", gdop);
+
+	(void)wmove(navfixwin, 11,6);
+	{
+		char prn[4], satlist[40];
+		unsigned int i;
+		satlist[0] = '\0';
+		for(i = 0; i<32; i++){
+			if (svlist & (1<<i)){
+				snprintf(prn, 4, "%u ", i+1);
+				strlcat(satlist, prn, 40);
+			}
+		}
+		(void)wprintw(navfixwin, "%-40s", satlist);
+	}
+	wnoutrefresh(navfixwin);
+
 }
 
 static void display_itk_prnstatus(unsigned char *buf, size_t len)
@@ -53,9 +186,9 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 	if (len < 62)
 		return;
 
-	nchan = (unsigned int)((len - 10 - 52) / 20);
+	nchan = (unsigned int)((len - 10 - 52) / 10);
 	for (i = 0; i < nchan; i++) {
-		unsigned int off = 7+ 52 + 20 * i;
+		unsigned int off = 7+ 52 + 10 * i;
 		unsigned short fl;
 		unsigned char ss, prn, el, az;
 
@@ -83,6 +216,9 @@ static void italk_update(void)
 	len = session.packet.outbuflen;
 	type = getub(buf, 4);
 	switch (type) {
+		case ITALK_NAV_FIX:
+			display_itk_navfix(buf, len);
+			break;
 		case ITALK_PRN_STATUS:
 			display_itk_prnstatus(buf, len);
 			break;
