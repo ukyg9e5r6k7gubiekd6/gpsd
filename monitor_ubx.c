@@ -32,7 +32,7 @@ static bool ubx_initialize(void)
 	int i;
 
 	/* "heavily inspired" by monitor_nmea.c */
-	if ((satwin  = derwin(devicewin, 19, 28, 3, 0)) == NULL)
+	if ((satwin  = derwin(devicewin, 19, 28, 0, 0)) == NULL)
 		return false;
 	(void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(satwin, true);
