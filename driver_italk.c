@@ -112,8 +112,10 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     gpsd_zero_satellites(&session->gpsdata);
-    nchan = (unsigned int)((len - 10 - 52) / 10);
     nsv = 0;
+    nchan = (unsigned int)getleuw(buf, 7 +50);
+    if (nchan > MAXCHANNELS)
+	    nchan = MAXCHANNELS;
     for (i = st = 0; i < nchan; i++) {
 	unsigned int off = 7+ 52 + 10 * i;
 	unsigned short flags;

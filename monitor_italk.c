@@ -186,7 +186,9 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 	if (len < 62)
 		return;
 
-	nchan = (unsigned int)((len - 10 - 52) / 10);
+	nchan = (unsigned int)getleuw(buf, 7 +50);
+	if (nchan > MAXCHANNELS)
+		nchan = MAXCHANNELS;
 	for (i = 0; i < nchan; i++) {
 		unsigned int off = 7+ 52 + 10 * i;
 		unsigned short fl;
