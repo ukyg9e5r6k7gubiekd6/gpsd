@@ -61,7 +61,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
     unsigned int i;
     signed long temp;
 
-    /*@ -evalorder -sefparams @*/    
+    /*@ -evalorder -sefparams -mayaliasunique @*/    
 #define ugrab(width)	(bitcount += width, ubits(buf, bitcount-width, width))
 #define sgrab(width)	(bitcount += width, sbits(buf, bitcount-width, width))
     assert(ugrab(8) == 0xD3);
@@ -431,7 +431,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
     }
 #undef sgrab
 #undef ugrab
-    /*@ +evalorder +sefparams @*/    
+    /*@ +evalorder +sefparams +mayaliasunique @*/    
 }
 
 void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)

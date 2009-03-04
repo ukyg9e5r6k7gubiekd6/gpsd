@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <math.h>
+#include <assert.h>
 
 #include "gpsd_config.h"
 #include "gps.h"
@@ -126,7 +127,7 @@ enum unit gpsd_units(void)
 	return unspecified;
 }
 
-/*@ -observertrans -nullpass -statictrans -mustfreeonly -kepttrans @*/
+/*@ -observertrans -statictrans -mustfreeonly -branchstate -kepttrans @*/
 void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /* standard parsing of a GPS data source spec */
 {
@@ -137,6 +138,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     if (arg != NULL) {
 	char *colon1;
 	source->spec = strdup(arg);
+	assert(source->spec != NULL);
 	colon1 = strchr(source->spec, ':');
 
 	if (colon1 != NULL) {
@@ -157,7 +159,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	}
     }
 }
-/*@ +observertrans +nullpass +statictrans +mustfreeonly +kepttrans @*/
+/*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 
 /* gpsclient.c ends here */
 

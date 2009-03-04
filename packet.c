@@ -495,7 +495,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case SUPERSTAR2_ID2:
-	lexer->length = c + 4;
+	lexer->length = (size_t)c + 4;
 	if (lexer->length <= MAX_PACKET_LENGTH)
 	    lexer->state = SUPERSTAR2_PAYLOAD;
 	else
@@ -987,12 +987,12 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
 	else if (lexer->state == SUPERSTAR2_RECOGNIZED) {
-	    unsigned short a = 0, b, n;
-	    lexer->length = 4 + lexer->inbuffer[3] + 2;
+	    uint16_t a = 0, b, n;
+	    lexer->length = 4 + (size_t) lexer->inbuffer[3] + 2;
 	    for(n = 0; n < lexer->length - 2; n++)
-		a += lexer->inbuffer[n];
+		a += (uint16_t)lexer->inbuffer[n];
 	    a = htons(a);
-	    b = getbeuw(lexer->inbuffer, lexer->length - 2);
+	    b = (uint16_t)getbeuw(lexer->inbuffer, lexer->length - 2);
 	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
 			lexer->inbuffer[1], (unsigned int)lexer->length,
 			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length, LOG_RAW));
