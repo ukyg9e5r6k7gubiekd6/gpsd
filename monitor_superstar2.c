@@ -46,8 +46,7 @@ static bool superstar2_initialize(void)
 	return true;
 }
 
-void
-display_superstar2_svinfo(unsigned char *buf, size_t data_len)
+static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 {
 	unsigned char i;
 

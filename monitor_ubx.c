@@ -45,7 +45,8 @@ static bool ubx_initialize(void)
 
     return true;
 }
-void display_nav_svinfo(unsigned char *buf, size_t data_len)
+
+static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 {
 	unsigned int i, nchan;
 
@@ -54,7 +55,7 @@ void display_nav_svinfo(unsigned char *buf, size_t data_len)
 
 	nchan = getub(buf, 4);
 	if (nchan > 16)
-		return;
+		nchan = 16;
 
 	for (i = 0; i < nchan; i++) {
 		unsigned int off = 8 + 12 * i;
@@ -63,7 +64,6 @@ void display_nav_svinfo(unsigned char *buf, size_t data_len)
 		short az;
 		unsigned short fl;
 
-		if((int)getub(buf, off+4) == 0) continue;
 		prn = getub(buf, off+1);
 		fl = getleuw(buf, off+2);
 		ss = getub(buf, off+4);
