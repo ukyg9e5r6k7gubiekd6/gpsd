@@ -567,7 +567,7 @@ static bool allocation_filter(struct gps_device_t *channel,
 /* does specified channel match the user's type criteria? */
 {
     gpsd_report(LOG_PROG, 
-		"User requires %d, channel %ld type is %d\n", 
+		"User requires %d, channel %d type is %d\n", 
 		user->requires, channel - channels, channel->packet.type);
     /* we might have type constraints */
     if (user->requires == ANY)
