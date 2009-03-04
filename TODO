@@ -10,6 +10,9 @@ For contribution guidelines and internals documentation, please see
 The list of bugs exposed by gpsd in other software has moved to
 <http://gpsd.berlios.de/upstream-bugs.html>.
 
+See also the GPSD bug tracker at 
+<https://developer.berlios.de/bugs/?group_id=2116>
+
 ** Bugs in gpsd and its clients:
 
 *** Support for the True North magnetic compass is currently broken
@@ -49,7 +52,7 @@ should support the signal set described here:
 *** Command to ship RTCM corrections to a specified device
 
 At the moment, if a GPS accepts RTCM corrections and they are
-available, gpsd ships them to the device from which the GPS is
+available, gpsd ships them to the serial device from which the GPS is
 reporting fix data.  Some GPSes have auxiliary ports for RTCM; 
 there should be a (privileged) command to redirect RTCM connections.
 
@@ -175,8 +178,12 @@ packet-oriented format, rather than a file-oriented format like RINEX.
 *** RTCM3 support.
 
 Previous plans for more RTCM2 support seem to have been overtaken by
-events, e.g. the world moving to RTCM3.  There is an incomplete
-decoder which needs to be finished.
+events, e.g. the world moving to RTCM3. We have support for analyzing
+RTCM3 messages, but it's entirely theoretical - written from the
+standard.  We need to find a pair of files consisting of a
+representative set of RTCM3 sentences and some sort of ASCII dump of
+thgem so we can test whether our analyzer gets all the bitfield
+boundaries right.
 
 *** Do the research to figure out just what is going on with status bits
 
