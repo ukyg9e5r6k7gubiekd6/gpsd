@@ -112,10 +112,10 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     gpsd_zero_satellites(&session->gpsdata);
-    nchan = (unsigned int)((len - 10 - 52) / 20);
+    nchan = (unsigned int)((len - 10 - 52) / 10);
     nsv = 0;
     for (i = st = 0; i < nchan; i++) {
-	unsigned int off = 7+ 52 + 20 * i;
+	unsigned int off = 7+ 52 + 10 * i;
 	unsigned short flags;
 
 	flags = getleuw(buf, off);
