@@ -571,7 +571,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			  "  station_id=%u, desc=%s setup-id=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1007.station_id,
 			  rtcm->rtcmtypes.rtcm3_1007.descriptor,
-			  rtcm->rtcmtypes.rtcm3_1007.setup_id);
+			  INT(rtcm->rtcmtypes.rtcm3_1007.setup_id));
 	    break;
 
 	case 1008:
@@ -579,7 +579,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			  "  station_id=%u, desc=%s setup-id=%u serial=%s\n",
 			  rtcm->rtcmtypes.rtcm3_1008.station_id,
 			  rtcm->rtcmtypes.rtcm3_1008.descriptor,
-			  rtcm->rtcmtypes.rtcm3_1008.setup_id,
+			  INT(rtcm->rtcmtypes.rtcm3_1008.setup_id),
 			  rtcm->rtcmtypes.rtcm3_1008.serial);
 	    break;
 
@@ -597,7 +597,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u\n", 
 			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].ident,
 			      CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator),
-			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.channel,
+			      INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.channel),
 			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.pseudorange,
 			      rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff,
 			      INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.locktime));
@@ -618,7 +618,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n", 
 			      rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].ident,
 			      CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.indicator),
-			      rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.channel,
+			      INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.channel),
 			      rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.pseudorange,
 			      rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.rangediff,
 			      INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.locktime),
@@ -641,7 +641,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u\n", 
 			      rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].ident,
 			      CODE(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.indicator),
-			      rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.channel,
+			      INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.channel),
 			      rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.pseudorange,
 			      rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.rangediff,
 			      INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.locktime),
@@ -666,7 +666,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			      "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n", 
 			      rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].ident,
 			      CODE(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.indicator),
-			      rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.channel,
+			      INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.channel),
 			      rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.pseudorange,
 			      rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.rangediff,
 			      INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.locktime),
@@ -687,8 +687,8 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			  rtcm->rtcmtypes.rtcm3_1013.station_id,
 			  rtcm->rtcmtypes.rtcm3_1013.mjd,
 			  rtcm->rtcmtypes.rtcm3_1013.sod,
-			  rtcm->rtcmtypes.rtcm3_1013.leapsecs,
-			  rtcm->rtcmtypes.rtcm3_1013.ncount);
+			  INT(rtcm->rtcmtypes.rtcm3_1013.leapsecs),
+			  INT(rtcm->rtcmtypes.rtcm3_1013.ncount));
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1013.ncount; i++)
 	    (void)fprintf(fp,
 			  "    id=%u sync=%c interval=%u\n",
@@ -724,9 +724,9 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 			  rtcm->rtcmtypes.rtcm3_1029.station_id,
 			  rtcm->rtcmtypes.rtcm3_1029.mjd,
 			  rtcm->rtcmtypes.rtcm3_1029.sod,
-			  rtcm->rtcmtypes.rtcm3_1029.len,
-			  rtcm->rtcmtypes.rtcm3_1029.unicode_units,
-			  rtcm->rtcmtypes.rtcm3_1029.text);
+			  INT(rtcm->rtcmtypes.rtcm3_1029.len),
+			  INT(rtcm->rtcmtypes.rtcm3_1029.unicode_units),
+			  (char *)rtcm->rtcmtypes.rtcm3_1029.text);
 	    break;
 
 	default:
