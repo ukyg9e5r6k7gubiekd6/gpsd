@@ -36,4 +36,4 @@ sums:
 	sha1sum `find vendor-docs -type f -name "*.pdf" -print` >checksums
 
 clean:
-	rm -f $(XML:.xml=.html) hardware-head.html hardware-tail.html *~
+	rm -f $(XML:.xml=.html) *~
