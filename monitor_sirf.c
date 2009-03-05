@@ -411,7 +411,7 @@ static void sirf_update(void)
 	break;
 
     case 0x0d:		/* Visible List */
-	display(mid13win, 1, 6, "%d",getub(buf, 1));
+	display(mid13win, 1, 6, "%02d",getub(buf, 1));
 	(void)wmove(mid13win, 1, 10);
 	for (i = 0; i < MAXSATS; i++) {
 	    if (i < (int)getub(buf, 1))
