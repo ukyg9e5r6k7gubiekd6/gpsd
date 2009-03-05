@@ -79,7 +79,7 @@ report to computers over a serial or USB link.  The distribution terms
 are extremely evil.  Consequently, nobody on the GPSD project has ever
 looked at it.</dd>
 
-<dt><a href='NMEA.txt'>NMEA sentences</a></dt>
+<dt><a href='standards/NMEA.txt'>NMEA sentences</a></dt>
 <dd>Because the NMEA 0183 standard itself is evil, the GPSD project has
 collated comprehensive information on the prescriptions of that
 standard from various Web resources written by people who have read it
@@ -90,7 +90,7 @@ is the result.</dd>
 <dd>This is one of the sources for the above. Includes some 
 information on vendor-specific quirks that we don't.</dd>
 
-<dt><a href='IS-GPS-200D.pdf'>Navstar Global Positioning Interface
+<dt><a href='http://gpsd.googlecode.com/files/IS-GPS-200D.pdf'>Navstar Global Positioning Interface
 Specification</a></dt>
 <dd>This is the official specification for interpreting radio
 transmission from GPS satellites. You do not need to read this 
@@ -98,14 +98,14 @@ unless you are trying to make sense of the raw 50BPS subframe
 data.  Be warned: though this specification is not evil, it 
 is complex and nasty.</dd>
 
-<dt><a href='sps_performance_standard.pdf'>Standard Positioning Service
-Performance Specification</a></dt>
+<dt><a href='http://gpsd.googlecode.com/files/global-positioning-system-standard-positioning-service-performance-standard-2008.pdf'>Standard Positioning Service
+Performance Specification</a> (2008)</dt>
 <dd>This document defines the levels of performance the U.S. Government makes
-available to civil users through the GPS Standard Positioning Service (SPS).
-The original document is
-<a href='http://www.navcen.uscg.gov/gps/geninfo/2001SPSPerformanceStandardFINAL.pdf'>here</a>.</dd>
+available to civil users through the GPS Standard Positioning Service
+(SPS).  The 2001 version is <a href="http://gpsd.googlecode.com/files/global-positioning-system-standard-positioning-service-performance-standard-2001.pdf">here</a>
+</dd>
 
-<dt><a href='waas_specification.pdf'>WAAS System Specification</a></dt>
+<dt><a href='http://gpsd.googlecode.com/files/specification-for-the-wide-area-augmentation-system-2001.pdf'>WAAS System Specification</a></dt>
 <dd>This is the official specification for the FAA's Wide Area
 Augmentation System. The original document is 
 <a href='http://gps.faa.gov/Library/Data/waas/2892bC2a.pdf'>here</a>.</dd>
@@ -127,7 +127,7 @@ href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=e&amp;parent
 rtcm-104, the specification used for broadcasting differential-gps 
 corrections. Unfortunately, its distribution terms are also evil.</dd>
 
-<dt><a href='galileo_OS_SIS_ICD.pdf'>Galileo Open Service SIS
+<dt><a href='http://gpsd.googlecode.com/files/Galileo-SIS-ICD-Open-Service-draft0.pdf'>Galileo Open Service SIS
 ICD</a></dt> <dd>This is draft 0 of the Galileo Open Service Signal In
 Space Interface Control Document. The latest version of the official
 standard can be requested <a
@@ -150,8 +150,12 @@ XML data format for the interchange of GPS data (waypoints, routes,
 and tracks) between applications and Web services on the Internet. The
 GPSD suite incluses a client, <code>gpxlogger</code>, that makes logs
 in this format.</dd>
+</dl>
 
-<dt><a href='NAVSTAR_Global_Positioning_and_Surveying.pdf'>NAVSTAR
+<h1>GPS operation</h1>
+
+<dl>
+<dt><a href='library/NAVSTAR_Global_Positioning_and_Surveying.pdf'>NAVSTAR
 Global Positioning and Surveying</a></dt>
 <dd>US Army Corps of Engineers, Engineer Manual 1110-1-1003 "provides
 technical specifications and procedural guidance for surveying and
@@ -160,6 +164,15 @@ and quality control standards are defined to establish... uniformity
 in the use of GPS..." This document offers significant insight into
 error modelling; anyone who dares to ask "so how accurate is my GPS?"
 should be gently encouraged to study it.</dd>
+<dt><a href='Worldwide_Beacon_DGPS_Status.pdf'>Worldwide Beacon DGPS Status</a></dt>
+<dd>This paper dates from 1999 and some of the information in it is therefore
+probably out of date.  Nevertheless, it's the best public documentation on the
+history and architecture of the worldwide DGPS beacon system we've found.</dd>
+
+<dt><a href="http://arstechnica.com/articles/paedia/assisted-gps.ars">Inside
+assisted GPS: helping GPS help you</a></dt>
+<dd>Good article on techniques for cutting GPS startup latency and
+increasing precision, mostly focused on assistance via cellphine networks.</dd>
 </dl>
 
 <h1>Vendor protocols</h1>
@@ -189,14 +202,14 @@ for having been so stupid as to demand this.</p>
 <h2>SiRF and SiRF variants</h2>
 
 <dl>
-<dt><a href='vendor-docs/sirf/sirf_binary-2.3.pdf'>SiRF Binary
+<dt><a href='http://gpsd.googlecode.com/files/SiRF-SiRF-v2_3.pdf'>SiRF Binary
 Protocol Reference Manual</a> (2.3, December 2007) <dt>
 <dd>The binary protocol for the chip used by over 80% of
 consumer-grade GPS mice.  For comparsion we also have older versions:
-<a href='vendor-docs/sirf/sirf_binary-1.7.pdf'>1.7</a> (October 2005) and
-<a href='vendor-docs/sirf/sirf_binary-1.6.pdf'>1.6</a> (April 2005) .</dd>
+<a href='http://gpsd.googlecode.com/files/SiRF-SiRF-v1_7.pdf'>1.7</a> (October 2005) and
+<a href='http://gpsd.googlecode.com/files/SiRF-SiRF-v1_6.pdf'>1.6</a> (April 2005) .</dd>
 
-<dt><a href='vendor-docs/sirf/sirf_binary-1.30.pdf'>SiRF GPS Protocol
+<dt><a href='http://gpsd.googlecode.com/files/SiRF-Sectron.pdf'>SiRF GPS Protocol
 Reference Manual</a> (revision 1.30, undated)</dt>
 <dd>This what SiRF gives OEMs as a reference for SiRF's NMEA 0183
 extensions. Notably, it describes the commands for switching to SiRF
@@ -220,16 +233,36 @@ and 3 chips.</dd>
 various SiRF-based units <a href='vendor-docs/sirf/'>here</a>.  Some of
 these document things SiRF no longer describes in its reference.</p>
 
+<h2>Fastrax</h2>
+
+<dl>
+<dt><a href='vendor-docs/fastrax/itrax02-NMEA-1.31.pdf'>NMEA Protocol
+Specification for iTrax02 Evaluation Kit</a> (Rev 1.11, June
+2003)</dt> 
+<dd>Describes the NMEA extensions for the iTrax chipset
+used by Fastrax GPSes. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/fastrax/iTalk-1.5.pdf'>iTALK protocol specification</a>
+(Rev 1.5, March 2002)</dt>
+<dd>Describes the binary protocol for the iTrax chipset used by
+Fastrax GPSes. This documents version 2; version 3, which is not
+actually backward compatible, is documented at the <a
+href='http://isuite.fastrax.fi/sdk/341/index.html'>iSuite
+developer website</a>, Neither iTrax2 is not supported by
+<code>gpsd</code>, iTrax3 is somewhat functional.</dd>
+</dl>
+
 <h2>Garmin</h2>
 
 <dl>
 <dt><a
 href='http://www.garmin.com/manuals/470_GPS16_17TechnicalSpecification.pdf'>
-GPS 16/17 Series Technical Specification (offsite link)</a> (Revision C, October 2005)</dt>
-<dd>Describes the extended NMEA, with GARMIN proprietary sentences PGRMB,
-PGRME, PGRMF, PGRMM, PGRMT, and PGRMV (and optional GPALM sentence), emitted
-by the Garmin GPS16 and 17. For programming purposes, effectively identical
-to their earlier reference on the Garmin 15H and 15L.</dd>
+GPS 16/17 Series Technical Specification (offsite link)</a> (Revision
+C, October 2005)</dt> <dd>Describes the extended NMEA, with GARMIN
+proprietary sentences PGRMB, PGRME, PGRMF, PGRMM, PGRMT, and PGRMV
+(and optional GPALM sentence), emitted by the Garmin GPS16 and 17. For
+programming purposes, effectively identical to their earlier reference
+on the Garmin 15H and 15L.</dd>
 
 <dt><a href="vendor-docs/garmin/IntfSpec.pdf">GARMIN GPS Interface
 Specification</a> (May 2006)</dt> <dd>The binary protocol used by
@@ -238,10 +271,39 @@ href="vendor-docs/garmin/garmin-binary.pdf">December 1999</a> version
 here; comparing them may be useful.  Supported by
 <code>gpsd</code>.</dd>
 
-<dt><a href='vendor-docs/garmin/garmin_simpletext.txt'>Garmin Simple Text Protocol</a></dt>
-<dd>Some digital cameras are alleged to use this very simple textual
-report format.</dd>
+<dt><a href='vendor-docs/garmin/garmin_simpletext.txt'>Garmin Simple
+Text Protocol</a></dt> <dd>Some digital cameras are alleged to use
+this very simple textual report format.</dd>
 </dl>
+
+<h2>Novatel</h2>
+
+<dl>
+<dt><a
+href='vendor-docs/novatel/Novatel_Superstar2.pdf'>Novatel Superstar II User Manual</a></dt> 
+<dd>Describes the OEM board, include some good general overview
+material on GPS technology. Doesn't describe control or reporting
+commands.</dd>
+
+<dt><a
+href="vendor-docs/novatel/L1-Firmware-Reference-Manual.pdf">Superstar-II-Firmware
+Reference Manual</dt> 
+<dd>Describes the Novatel Superstsr II binary protocol. This chipset
+is part-supported by GPSD; the driver is in development.</dd>
+</dl>
+
+<h2>San Jose Navigation</h2>
+
+<dd>
+<dt><a href='vendor-docs/san-jose-navigation/fv-18_manual.pdf'>FV18 user manual</a> (October 2002)</dt>
+<dd>Describes NMEA extensions supported by the San Jose Navigation
+FV-18 GPS chipset. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/san-jose-navigation-fv25_manual.pdf'>FV25 user manual</a> (January 2005)</dt>
+<dd>Describes UBX binary protocol and NMEA extensions supported by the
+San Jose Navigation FV-25 (uBlox ANTARIS) GPS chipset. UBX is now supported
+by <code>gpsd</code>.</dd>
+</dd>
 
 <h2>Trimble</h2>
 
@@ -251,8 +313,8 @@ report format.</dd>
 <dd>Describes the TSIP binary
 protocol. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href="vendor-docs/cmr.pdf">CMR reference</a><dt>
-<dd>Describes the CMR protocol used bt rimble to ship corrections for RTK
+<dt><a href="vendor-docs/ytimble/cmr.pdf">CMR reference</a><dt>
+<dd>Describes the CMR protocol used by rimble to ship corrections for RTK
 (real-time kinematic) GPS. Not yet supported by <code>gpsd</code>.</dd>
 </dl>
 
@@ -274,29 +336,6 @@ may document programming information that the does not.</p>
 <dt><a href='vendor-docs/cxd2951-commands.pdf'>CXD2951 Communication Command Specification</a> (Version 1.7, 2004)</dt>
 <dd>Describes the extension command set supported by the Sony GPS
 CXD2951 chipset. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/fastrax-1.31.pdf'>NMEA Protocol Specification for iTrax02
-Evaluation Kit</a> (Rev 1.31, June 2003)</dt> 
-<dd>Describes the NMEA extensions for the
-iTrax chipset used by Fastrax GPSes. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/iTalk.pdf'>iTALK protocol specification</a>
-(Rev 1.5, March 2002)</dt>
-<dd>Describes the binary protocol for the iTrax chipset used by
-Fastrax GPSes. This document version 2; version 3, which is not
-actually backward compatible, is documented at the <a
-href='http://isuite.fastrax.fi/sdk/341/index.html'>iSuite
-developer website</a>, Neither iTrax2 is not supported by
-<code>gpsd</code>, iTrax3 is somewhat functional.</dd>
-
-<dt><a href='vendor-docs/fv-18_manual.pdf'>FV18 user manual</a> (October 2002)</dt>
-<dd>Describes NMEA extensions supported by the San Jose Navigation
-FV-18 GPS chipset. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/fv25_man.pdf'>FV25 user manual</a> (January 2005)</dt>
-<dd>Describes UBX binary protocol and NMEA extensions supported by the
-San Jose Navigation FV-25 (uBlox ANTARIS) GPS chipset. UBX is now supported
-by <code>gpsd</code>.</dd>
 
 <dt><a href='vendor-docs/GPS-210-Manual-E.pdf'>Holux GM-210 GPS Receiver User's
 Guide</a> (May 2003)</dt>
@@ -343,25 +382,24 @@ NMEA extensions used. <code>gpsd</code> should just work in NMEA mode.</dd>
 <dd>This file documents the proprietary Mediatek NMEA-ish protocol.
 <code>gpsd</code> should just work in NMEA mode.</dd>
 
-<dt><a href='vendor-docs/LS-Binary-Message-Protocol-v1.5.pdf'>LocSense Binary Message Protocol</a> (Version 1.5)</dt>
+<dt><a href='vendor-docs/GT320F-LS-Binary-Message-Protocol-v1.5.pdf'>LocSense Binary Message Protocol</a> (Version 1.5)</dt>
 <dd>This file documents the LocSense binary message protocol. This protocol
 is currently unsupported. <code>gpsd</code> should just work in NMEA mode
 with LocSense based receivers.</dd>
 
-<dt><a href='http://www.tecsys.de/fileadmin/user_upload/pdf/gh79_1an_intant.pdf'>Specifications for GPS Receiver GH-79L4-N</a></dt>
-
+<dt><a href='vendor-docs/furuno-GH-79L4-N.pdf'>Specifications for GPS Receiver GH-79L4-N</a></dt>
 <dd>Technical manual for the Furuno Electric GH-79L4-N.  Probably
 representative for any other GPS using Furuno's chipset, which is
 however not identified.</dd>
 
-<dt><a href='vendor-docs/navcom_96-312001-3001RevK.pdf'>Navcom Technical Reference Manual</a> (rev. K, Aug 2008)</dt>
+<dt><a href='http://gpsd.googlecode.com/files/Navcom%2096-312001-3001%20%28rev%20K%29.pdf'>Navcom Technical Reference Manual</a> (rev. K, Aug 2008)</dt>
 <dd>Technical reference and protocol specifications for Navcom receivers.</dd>
 </dl>
 
 <h2>Obsolete products</h2>
 
 <dl>
-<dt><a href='vendor-docs/zodiac.pdf'>Zodiac Serial Data Interface Specification</a> (Revision 11, September 1996)</dt>
+<dt><a href='vendor-docs/rockwell/zodiac.pdf'>Zodiac Serial Data Interface Specification</a> (Revision 11, September 1996)</dt>
 <dd>Describes the binary protocol used by Rockwell/Conexant Zodiac chipsets.
 Supported by <code>gpsd</code>.  Now obsolete; SiRF ate their lunch.</dd>
 
@@ -397,19 +435,9 @@ ballistic missiles in flight. The complete spec is
 coordinates reported by many vendor binary protocols to ordinary
 geodetic coordinates.</dd>
 
-<dt><a href='http://www.mx-marine.com/downloads/publications/Worldwide_Beacon_DGPS_Status.pdf'>Worldwide Beacon DGPS Status</a></dt>
-<dd>This paper dates from 1999 and some of the information in it is therefore
-probably out of date.  Nevertheless, it's the best public documentation on the
-history and architecture of the worldwide DGPS beacon system we've found.</dd>
-
 <dt><a href="http://williams.best.vwh.net/avform.htm">Aviation 
 Formulary</a></dt>
 <dd>Compendium of formulas related to geodetic navigation, with examples.</dd>
-
-<dt><a href="http://arstechnica.com/articles/paedia/assisted-gps.ars">Inside
-assisted GPS: helping GPS help you</a></dt>
-<dd>Good article on techniques for cutting GPS startup latency and
-increasing precision, mostly focused on assistance via cellphine networks.</dd>
 </dl>
 
 </div>
