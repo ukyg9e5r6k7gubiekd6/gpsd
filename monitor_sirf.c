@@ -118,7 +118,7 @@ static bool sirf_initialize(void)
 
     (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(mid4win, A_BOLD);
-    display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
+    display(mid4win, 1, 1, "Ch PRN  Az El Stat  C/N ? A");
     for (i = 0; i < MAXSATS; i++) {
 	display(mid4win, (int)(i+2), 1, "%2d",i);
     }

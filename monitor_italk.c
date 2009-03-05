@@ -39,7 +39,7 @@ static bool italk_initialize(void)
 	(void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(satwin, true);
 	(void)wattrset(satwin, A_BOLD);
-	display(satwin, 1, 1, "Ch  SV  Az El S/N Flag U");
+	display(satwin, 1, 1, "Ch PRN  Az El S/N Flag U");
 	for (i = 0; i < MAX_NR_VISIBLE_PRNS; i++)
 		display(satwin, (int)(i+2), 1, "%2d",i);
 	display(satwin, MAX_NR_VISIBLE_PRNS+2, 7, " PRN_STATUS ");

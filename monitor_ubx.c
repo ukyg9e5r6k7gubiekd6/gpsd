@@ -37,7 +37,7 @@ static bool ubx_initialize(void)
 	(void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(satwin, true);
 	(void)wattrset(satwin, A_BOLD);
-	(void)mvwprintw(satwin, 1, 1, "Ch  SV  Az  El S/N Flag U");
+	(void)mvwprintw(satwin, 1, 1, "Ch PRN  Az  El S/N Flag U");
 	for (i = 0; i < 16; i++)
 		(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
 	(void)mvwprintw(satwin, 18, 7, " NAV_SVINFO ");
