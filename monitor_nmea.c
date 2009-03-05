@@ -71,7 +71,7 @@ static bool nmea_initialize(void)
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(satwin, true);
     (void)wattrset(satwin, A_BOLD);
-    (void)mvwprintw(satwin, 1, 1, " Ch SV  Az El S/N");
+    (void)mvwprintw(satwin, 1, 1, "Ch PRN  Az El S/N");
     for (i = 0; i < MAXSATS; i++)
 	(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
     (void)mvwprintw(satwin, 14, 7, " GSV ");
