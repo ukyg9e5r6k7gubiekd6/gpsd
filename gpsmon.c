@@ -413,6 +413,11 @@ int main (int argc, char **argv)
 		else
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
+		if ((*active)->driver->rate_switcher != NULL)
+		    (void)fputc('x', stdout);
+		else
+		    (void)fputc(' ', stdout);
+		(void)fputc(' ', stdout);
 		if ((*active)->driver->control_send != NULL)
 		    (void)fputc('x', stdout);
 		else
@@ -605,6 +610,34 @@ int main (int argc, char **argv)
 	    }
 	    switch (line[0])
 	    {
+	    case 'c':				/* change cycle time */
+		if (active == NULL)
+		    monitor_complain("No device defined yet");
+		else if (serial) {
+		    double rate = strtod(arg, NULL);
+		    /* Ugh...should have a controlfd slot 
+		     * in the session structure, really
+		     */
+		    if ((*active)->driver->rate_switcher) {
+			int dfd = session.gpsdata.gps_fd;
+			session.gpsdata.gps_fd = controlfd;
+			if ((*active)->driver->rate_switcher(&session, rate)) {
+			    monitor_dump_send();
+			} else 
+			    monitor_complain("Rate not supported.");
+			session.gpsdata.gps_fd = dfd;
+		    } else
+			monitor_complain("Device type has no rate switcher");
+		} else {
+		    line[0] = 'c';
+		    /*@ -sefparams @*/
+		    assert(write(session.gpsdata.gps_fd, line, strlen(line)) != -1);
+		    /* discard response */
+		    assert(read(session.gpsdata.gps_fd, buf, sizeof(buf)) != -1);
+		    /*@ +sefparams @*/
+		}
+		break;
+
 	    case 'i':				/* start probing for subtype */
 		if (active == NULL)
 		    monitor_complain("No GPS type detected.");
@@ -719,12 +752,12 @@ int main (int argc, char **argv)
 			     */
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
-			    session.gpsdata.gps_fd = dfd;
 			    (void)gpsd_set_speed(&session, speed, 
 						 (unsigned char)parity, 
 						 stopbits);
 			} else 
 			    monitor_complain("Speed/mode cobination not supported.");
+			session.gpsdata.gps_fd = dfd;
 		    } else
 			monitor_complain("Device type has no speed switcher");
 		} else {

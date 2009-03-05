@@ -125,6 +125,15 @@ limitation in the SiRF firmware that we can't fix.</para>
 </varlistentry>
 
 <varlistentry>
+<term>c</term>
+<listitem>
+<para>Change cycle time. Follow it with a number interpreted as a
+cycle time in seconds. Most devices have a fixed cycle time of 1
+second, so this command may fail with a message.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>l</term>
 <listitem>
 <para>Toggle packet logging. If packet logging is on, it will be

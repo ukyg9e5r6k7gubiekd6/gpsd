@@ -74,7 +74,8 @@ static void onsig(int sig)
 int main(int argc, char **argv)
 {
     int option, status;
-    char *err_str, *device = NULL, *speed = NULL, *devtype = NULL, *control = NULL;
+    char *err_str, *device = NULL, *devtype = NULL; 
+    char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
     bool lowlevel=false, echo=false;
     struct gps_data_t *gpsdata = NULL;
@@ -84,11 +85,14 @@ int main(int argc, char **argv)
     ssize_t cooklen = 0;
     unsigned int timeout = 4;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
+#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "befhlnrs:t:x:D:T:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
+	    break;
+	case 'c':
+	    rate = optarg;
 	    break;
 	case 'x':		/* ship specified control string */
 	    control = optarg;
@@ -114,6 +118,10 @@ int main(int argc, char **argv)
 		    (void)fputc('\t', stdout);
 		if ((*dp)->speed_switcher != NULL)
 		    (void)fputs("-s\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
+		if ((*dp)->rate_switcher != NULL)
+		    (void)fputs("-c\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
 		if ((*dp)->control_send != NULL)
@@ -234,7 +242,7 @@ int main(int argc, char **argv)
 	}
 
 	/* if no control operation was specified, just ID the device */
-	if (speed==NULL && !to_nmea && !to_binary && !reset) {
+	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
 	    /* the O is to force a device binding */
 	    (void)gps_query(gpsdata, "OFIB");
 	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
@@ -304,6 +312,9 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
 			    gpsdata->gps_device,
 			    speed, parity, stopbits);
+	}
+	if (rate != NULL) {
+	    gps_query(gpsdata, "C=%\n", rate);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
@@ -524,6 +535,24 @@ int main(int argc, char **argv)
 		    status = 1;
 		}
 	    }
+	}
+	if (rate) {
+	    bool write_enable = context.readonly;
+	    context.readonly = false;
+	    if (session.device_type->rate_switcher == NULL) {
+		gpsd_report(LOG_ERROR, 
+			      "%s devices have no rate switcher.\n",
+			      session.device_type->type_name);
+		status = 1;
+	    } else {
+		double rate_dbl = strtod(rate, NULL);
+
+		if (!session.device_type->rate_switcher(&session, rate_dbl)) {
+		    gpsd_report(LOG_ERROR, "rate switch failed.\n");
+		    status = 1;
+		}
+	    }
+	    context.readonly = write_enable;
 	}
 	/*@ -compdef @*/
 	if (control) {

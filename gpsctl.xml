@@ -60,6 +60,14 @@ the new speed.</para>
 </varlistentry>
 
 <varlistentry>
+<term>-c</term>
+<listitem>
+<para>Change the GPS's cycle time.  Units are seconds.  Note, most
+GPses have a fixeed cycle time of 1 second.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>-e</term>
 <listitem>
 <para>Generate the packet from any other arguments specified and ship
