@@ -485,6 +485,30 @@ static void evermore_configurator(struct gps_device_t *session, unsigned int seq
 #endif /* ALLOW_RECONFIGURE */
 
 
+static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
+/* change the sample rate of the GPS */
+{
+#ifdef ALLOW_RECONFIGURE
+    char evrm_rate_config[] = {
+	    0x84,    /* 1: msg ID, Operating Mode Configuration */
+	    0x02,    /* 2: normal mode with 1PPS */
+	    0x00,    /* 3: navigation update rate */
+	    0x00,    /* 4: RF/GPSBBP On Time */
+    };
+
+    if (rate < 1 || rate > 10) {
+	gpsd_report(LOG_ERROR, "valid rate range is 1-10.\n");
+	return false;
+    } else {
+	evrm_rate_config[2] = (char)trunc(rate);
+	return (evermore_control_send(session, evrm_rate_config, sizeof(evrm_rate_config)) != -1);
+    }
+#else
+    
+    return false;
+#endif /* ALLOW_RECONFIGURE */
+}
+
 static void evermore_wrap(struct gps_device_t *session)
 {
     gpsd_report(LOG_PROG, "evermore_wrap\n");
@@ -511,7 +535,7 @@ const struct gps_type_t evermore_binary =
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
-    .rate_switcher  = NULL,			/* no sample-rate switcher */
+    .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
     .cycle_chars    = -1,			/* ignore, no rate switch */
 #ifdef ALLOW_RECONFIGURE
     .revert         = NULL,			/* reversion code */
