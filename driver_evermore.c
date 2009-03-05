@@ -384,7 +384,7 @@ static bool evermore_speed(struct gps_device_t *session,
     /*@ -type @*/
     gpsd_report(LOG_PROG, "evermore_speed(%d%c%d)\n", speed, parity, stopbits);
     /* parity and stopbit switching aren't available on this chip */
-    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.parity) {
+    if (parity!=(int)session->gpsdata.parity || stopbits!=(int)session->gpsdata.parity) {
 	return false;
     } else {
 	unsigned char tmp8;
