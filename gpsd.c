@@ -1364,6 +1364,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *gps;
 #endif /* RTCM104_SERVICE */
     struct subscriber_t *sub;
+    const struct gps_type_t **dp;
 
 #ifdef PPS_ENABLE
     pthread_mutex_init(&report_mutex, NULL);
@@ -1374,7 +1375,7 @@ int main(int argc, char *argv[])
 #endif
     debuglevel = 0;
     gpsd_hexdump_level = 0;
-    while ((option = getopt(argc, argv, "F:D:S:bGhNnP:V"
+    while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1396,6 +1397,23 @@ int main(int argc, char *argv[])
 	case 'G':
 	    listen_global = true;
 	    break;
+        case 'l':		/* list known device types and exit */
+	    for (dp = gpsd_drivers; *dp; dp++) {
+		if ((*dp)->mode_switcher != NULL)
+		    (void)fputs("n\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
+		if ((*dp)->speed_switcher != NULL)
+		    (void)fputs("b\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
+		if ((*dp)->rate_switcher != NULL)
+		    (void)fputs("c\t", stdout);
+		else
+		    (void)fputc('\t', stdout);
+		(void)puts((*dp)->type_name);
+	    }
+	    exit(0);
 #ifdef RTCM104_SERVICE
 	case 'R':
 	    rtcm_service = optarg;

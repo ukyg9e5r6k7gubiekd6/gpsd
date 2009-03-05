@@ -23,6 +23,7 @@
       <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-b </arg>
+      <arg choice='opt'>-l </arg>
       <arg choice='opt'>-G </arg>
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-N </arg>
@@ -54,11 +55,20 @@ that speaks either the standard textual NMEA 0183 protocol, or the
 (differing) extended NMEA dialects used by MKT-3301, iTrax, Motorola
 OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
 interpret the binary protocols used by EverMore, Garmin, Navcom,
-Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS
-devices. <application>gpsd</application> effectively hides the
-differences among these. It also knows about and uses commands that
-tune these GPSes for lower latency. It can read heading and attitude
-information from the Oceanserver 5000 digital compass.</para>
+Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. It can read
+heading and attitude information from the Oceanserver 5000 digital
+compass.</para>
+
+<para>The GPS protocols supported by your instance of
+<application>gpsd</application> may differ depending on how it was
+compiled; general purppose versions support many, but it can be built
+with protocol subsets down to a singleton for use in constrained
+environments. For a list of the GPS protocols supported by your
+instance, see the output of <command>gpsd -l</command></para>
+
+<para><application>gpsd</application> effectively hides the
+differences among the GPS types it supports. It also knows about and
+uses commands that tune these GPSes for lower latency. </para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
@@ -120,6 +130,14 @@ listen on all addresses (INADDR_ANY) rather than just the loopback
 information is now private to the local machine until the user makes
 an effort to expose this to the world. Listening on the loopback by
 default is a change from previous behaviour.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-l</term>
+<listitem><para>List all drivers compiled into this
+<application>gpsd</application> instance. The letters to the left of
+each driver name are the <application>gpsd</application> 
+control commands supported by that driver.</para>
+</listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
