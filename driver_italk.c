@@ -70,7 +70,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
     #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     session->gpsdata.satellites_used =
-	MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
+	(int)MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
     mask |= USED_SET ;
 
     if (flags & FIX_CONV_DOP_VALID){

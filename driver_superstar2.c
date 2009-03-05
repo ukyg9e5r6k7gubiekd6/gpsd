@@ -81,18 +81,18 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask = ONLINE_SET;
 
     flags = getub(buf, 72);
-    if ((flags & 0x0f) != 3) /* mode 3 is navigation */
+    if ((flags & 0x0f) != 0x03) /* mode 3 is navigation */
 	return mask;
 
     /* extract time data */
-    bzero(&tm, sizeof(tm));
-    tm.tm_hour = getub(buf, 4) & 0x1f;
-    tm.tm_min = getub(buf, 5);
+    (void)memset(&tm, '\0', sizeof(tm));
+    tm.tm_hour = (int)getub(buf, 4) & 0x1f;
+    tm.tm_min = (int)getub(buf, 5);
     d = getled(buf, 6);
     tm.tm_sec = (int)d;
-    tm.tm_mday = getub(buf, 14);
-    tm.tm_mon = getub(buf, 15) - 1;
-    tm.tm_year = getleuw(buf, 16) - 1900;
+    tm.tm_mday = (int)getub(buf, 14);
+    tm.tm_mon = (int)getub(buf, 15) - 1;
+    tm.tm_year = (int)getleuw(buf, 16) - 1900;
     session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	timegm(&tm) + (d - tm.tm_sec);
     mask |= TIME_SET;
@@ -176,7 +176,7 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 	 getlef(buf, 38), getlef(buf, 42), getlef(buf, 46));
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET ;
 
-    session->gpsdata.satellites_used = getub(buf, 79) & 0x0f;
+    session->gpsdata.satellites_used = (int)getub(buf, 79) & 0x0f;
     session->gpsdata.hdop = getleuw(buf, 74) * 0.1;
     session->gpsdata.vdop = getleuw(buf, 76) * 0.1;
     /* other DOP if available */
