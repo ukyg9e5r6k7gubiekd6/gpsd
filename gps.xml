@@ -60,6 +60,7 @@
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-m </arg>
+      <arg choice='opt'>-s </arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
