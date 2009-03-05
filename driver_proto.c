@@ -57,7 +57,7 @@ static	gps_mask_t _proto__msg_svinfo(struct gps_device_t *, unsigned char *, siz
 /*
  * These methods may be called elsewhere in gpsd
  */
-static	ssize_t _proto__write(struct gps_device_t *, char *, size_t );
+static	ssize_t _proto__control_send(struct gps_device_t *, char *, size_t );
 static	bool _proto__probe_detect(struct gps_device_t *);
 static	void _proto__probe_wakeup(struct gps_device_t *);
 static	void _proto__probe_subtype(struct gps_device_t *, unsigned int );
@@ -190,7 +190,7 @@ _proto__msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t 
  * Write data to the device, doing any required padding or checksumming
  */
 /*@ +charint -usedef -compdef @*/
-static ssize_t _proto__write(struct gps_device_t *session,
+static ssize_t _proto__control_send(struct gps_device_t *session,
 			   char *msg, size_t msglen)
 {
    bool ok;
@@ -393,7 +393,7 @@ const struct gps_type_t _proto__binary = {
     /* Number of satellite channels supported by the device */
     .channels         = 12,
     /* Control string sender - should provide checksum and trailer */
-    .control_send     = _proto__write,
+    .control_send     = _proto__control_send,
     /* Startup-time device detector */
     .probe_detect     = _proto__probe_detect,
     /* Wakeup to be done before each baud hunt */
