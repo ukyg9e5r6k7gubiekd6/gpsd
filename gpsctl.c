@@ -84,13 +84,13 @@ int main(int argc, char **argv)
     ssize_t cooklen = 0;
     unsigned int timeout = 4;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-c control] [-e] <device>\n"
-    while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:T:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
+    while ((option = getopt(argc, argv, "befhlnrs:t:x:D:T:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
 	    break;
-	case 'c':		/* ship specified control string */
+	case 'x':		/* ship specified control string */
 	    control = optarg;
 	    lowlevel = true;
 	    if ((cooklen = hex_escapes(cooked, control)) <= 0) {
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 		else
 		    (void)fputc('\t', stdout);
 		if ((*dp)->control_send != NULL)
-		    (void)fputs("-c\t", stdout);
+		    (void)fputs("-x\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
 		(void)puts((*dp)->type_name);

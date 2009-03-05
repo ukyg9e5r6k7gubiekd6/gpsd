@@ -414,7 +414,7 @@ int main (int argc, char **argv)
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
 		if ((*active)->driver->control_send != NULL)
-		    (void)fputc('c', stdout);
+		    (void)fputc('x', stdout);
 		else
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
@@ -605,28 +605,6 @@ int main (int argc, char **argv)
 	    }
 	    switch (line[0])
 	    {
-	    case 'c':				/* send control packet */
-		len = 0;
-		/*@ -compdef @*/
-		while (*arg != '\0')
-		{
-		    (void)sscanf(arg,"%x",&v);
-		    putbyte(buf, len, v);
-		    len++;
-		    while (*arg != '\0' && !isspace(*arg))
-			arg++;
-		    while (*arg != '\0' && isspace(*arg))
-			arg++;
-		}
-		if (active == NULL)
-		    monitor_complain("No device defined yet");
-		else if ((*active)->driver->control_send != NULL)
-		    (void)monitor_control_send(buf, (size_t)len);
-		else
-		    monitor_complain("Device type has no control-send method.");
-		/*@ +compdef @*/
-		break;
-
 	    case 'i':				/* start probing for subtype */
 		if (active == NULL)
 		    monitor_complain("No GPS type detected.");
@@ -779,6 +757,28 @@ int main (int argc, char **argv)
 			monitor_complain("Multiple driver type names match '%s'.", arg);
 		    }
 		}    
+		break;
+
+	    case 'x':				/* send control packet */
+		len = 0;
+		/*@ -compdef @*/
+		while (*arg != '\0')
+		{
+		    (void)sscanf(arg,"%x",&v);
+		    putbyte(buf, len, v);
+		    len++;
+		    while (*arg != '\0' && !isspace(*arg))
+			arg++;
+		    while (*arg != '\0' && isspace(*arg))
+			arg++;
+		}
+		if (active == NULL)
+		    monitor_complain("No device defined yet");
+		else if ((*active)->driver->control_send != NULL)
+		    (void)monitor_control_send(buf, (size_t)len);
+		else
+		    monitor_complain("Device type has no control-send method.");
+		/*@ +compdef @*/
 		break;
 
 	    default:

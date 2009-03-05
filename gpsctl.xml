@@ -21,7 +21,7 @@
 	<arg choice='plain'>-b</arg>
 	<arg choice='plain'>-n</arg>
       </group>
-      <arg choice='opt'>-c <replaceable>control</replaceable></arg>
+      <arg choice='opt'>-x <replaceable>control</replaceable></arg>
       <arg choice='opt'>-e </arg>
       <arg choice='opt'>-f </arg>
       <arg choice='opt'>-l </arg>
@@ -56,27 +56,6 @@ running as root in order to have write access to the device.</para>
 <listitem>
 <para>Put the GPS into binary mode.  After the GPS resets itself, autobaud to 
 the new speed.</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term>-c</term>
-<listitem>
-<para>Send a specified control string to the GPS;
-<application>gpsctl</application> will provide packet headers and
-trailers and checksum as appropriate for binary packet types, and
-whatever checksum and trailer is required for text packet types.  (You
-must include the leading $ for NMEA packets.) When sending to a UBX
-device, the first two bytes of the string supplied will become the
-message class and type, and the remainder the payload. When sending to
-a Navcom NCT or Trimble TSIP device, the first byte is interpreted as
-the command ID and the rest as payload. When sending to a Zodiac
-device, the first two bytes are used as a message ID of type
-little-endian short, and the remainder as payload in byte pairs
-interpreted as little-endian short. C-style backslash escapes in the
-string, notably \xNN for hex, will be interpreted; additionally, \e
-will be replaced with ESC. This switch implies
-<option>-f</option>.</para>
 </listitem>
 </varlistentry>
 
@@ -133,6 +112,27 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 <term>-t</term>
 <listitem>
 <para>Force the device type.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-x</term>
+<listitem>
+<para>Send a specified control string to the GPS;
+<application>gpsctl</application> will provide packet headers and
+trailers and checksum as appropriate for binary packet types, and
+whatever checksum and trailer is required for text packet types.  (You
+must include the leading $ for NMEA packets.) When sending to a UBX
+device, the first two bytes of the string supplied will become the
+message class and type, and the remainder the payload. When sending to
+a Navcom NCT or Trimble TSIP device, the first byte is interpreted as
+the command ID and the rest as payload. When sending to a Zodiac
+device, the first two bytes are used as a message ID of type
+little-endian short, and the remainder as payload in byte pairs
+interpreted as little-endian short. C-style backslash escapes in the
+string, notably \xNN for hex, will be interpreted; additionally, \e
+will be replaced with ESC. This switch implies
+<option>-f</option>.</para>
 </listitem>
 </varlistentry>
 

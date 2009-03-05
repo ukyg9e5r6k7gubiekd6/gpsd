@@ -105,15 +105,6 @@ GPS.</para>
 <variablelist>
 
 <varlistentry>
-<term>c</term>
-<listitem>
-<para>Send hex bytes to device. Following the 'c' you may type hex
-digit pairs; end with a newline.  These will become the payload of a
-control packet shipped to the device.</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
 <term>i</term>
 <listitem>
 <para>Enable/disable subtype probing and reinitialize the driver. In
@@ -194,6 +185,15 @@ is unique to the name of a gpsd driver with
 display code. Will show an error message if there is no matching gpsd
 driver, or multiple matches, or the unique match has no display
 support in <application>gpsmon</application>.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>x</term>
+<listitem>
+<para>Send hex bytes to device. Following the 'c' you may type hex
+digit pairs; end with a newline.  These will become the payload of a
+control packet shipped to the device.</para>
 </listitem>
 </varlistentry>
 
