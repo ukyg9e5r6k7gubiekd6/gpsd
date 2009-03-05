@@ -68,7 +68,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     session->gpsdata.fix.eph = (double)(getlesl(buf, 7 + 252)/100.0);
     session->gpsdata.fix.eps = (double)(getlesl(buf, 7 + 254)/100.0);
 
-    session->gpsdata.satellites_used = 0xffff ^ getub(buf, 7 + 16);
+    #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+    session->gpsdata.satellites_used =
+	MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
     mask |= USED_SET ;
 
     if (flags & FIX_CONV_DOP_VALID){
