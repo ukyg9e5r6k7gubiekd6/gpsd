@@ -65,17 +65,19 @@ static char *dgpsvec[] =
 
 #define display	(void)mvwprintw
 
+#define MAXSATS 	12	/* the most satellites we can dump data on */
+
 static bool sirf_initialize(void)
 {
     unsigned int i;
 
     /*@ -onlytrans @*/
-    mid2win   = subwin(devicewin, 7,  80,  1, 0);
-    mid4win   = subwin(devicewin, 15, 30,  8, 0);
-    mid6win   = subwin(devicewin, 3,  50,  8, 30);
-    mid7win   = subwin(devicewin, 4,  50, 11, 30);
-    mid9win   = subwin(devicewin, 3,  50, 15, 30);
-    mid13win  = subwin(devicewin, 3,  50, 18, 30);
+    mid2win   = subwin(devicewin, 7,         80,  1, 0);
+    mid4win   = subwin(devicewin, MAXSATS+3, 30,  8, 0);
+    mid6win   = subwin(devicewin, 3,         50,  8, 30);
+    mid7win   = subwin(devicewin, 4,         50, 11, 30);
+    mid9win   = subwin(devicewin, 3,         50, 15, 30);
+    mid13win  = subwin(devicewin, 3,         50, 18, 30);
     mid19win  = newwin(16, 50,  8, 30);
     mid27win  = subwin(devicewin, 3,  50, 21, 30);
     if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
@@ -117,7 +119,7 @@ static bool sirf_initialize(void)
     (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(mid4win, A_BOLD);
     display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
-    for (i = 0; i < SIRF_CHANNELS; i++) {
+    for (i = 0; i < MAXSATS; i++) {
 	display(mid4win, (int)(i+2), 1, "%2d",i);
     }
     display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
@@ -307,7 +309,7 @@ static void sirf_update(void)
 	(void)wmove(mid2win, 5,7);
 	nfix = (int)getub(buf, 28);
 	(void)wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
-	for (i = 0; i < SIRF_CHANNELS; i++) {	/* SV list */
+	for (i = 0; i < MAXSATS; i++) {	/* SV list */
 	    if (i < nfix)
 		(void)wprintw(mid2win, "%3d",fix[i] = (int)getub(buf, 29+i));
 	    else
@@ -411,12 +413,11 @@ static void sirf_update(void)
     case 0x0d:		/* Visible List */
 	display(mid13win, 1, 6, "%d",getub(buf, 1));
 	(void)wmove(mid13win, 1, 10);
-	for (i = 0; i < SIRF_CHANNELS; i++) {
+	for (i = 0; i < MAXSATS; i++) {
 	    if (i < (int)getub(buf, 1))
 		(void)wprintw(mid13win, " %2d",getub(buf, 2 + 5 * i));
 	    else
 		(void)wprintw(mid13win, "   ");
-
 	}
 	monitor_log("VL  0x0d=");
 	break;

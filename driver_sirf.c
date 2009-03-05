@@ -345,6 +345,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     return 0;
 }
 
+#define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
+
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;

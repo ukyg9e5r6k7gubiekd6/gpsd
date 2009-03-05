@@ -41,7 +41,8 @@ static double last_tick, tick_interval;
  *
  *****************************************************************************/
 
-#define SENTENCELINE 1
+#define SENTENCELINE	1	/* index of sentences line in the NMEA window */
+#define MAXSATS 	12	/* max satellites we can display */
 
 static bool nmea_initialize(void)
 {
@@ -66,12 +67,12 @@ static bool nmea_initialize(void)
     mvwaddstr(nmeawin, 2, 34, " Sentences ");
     wattrset(nmeawin, A_NORMAL);
 
-    satwin  = derwin(devicewin, 15, 20, 6, 0);
+    satwin  = derwin(devicewin, MAXSATS+3, 20, 6, 0);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)syncok(satwin, true);
     (void)wattrset(satwin, A_BOLD);
     (void)mvwprintw(satwin, 1, 1, " Ch SV  Az El S/N");
-    for (i = 0; i < SIRF_CHANNELS; i++)
+    for (i = 0; i < MAXSATS; i++)
 	(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
     (void)mvwprintw(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
@@ -218,8 +219,9 @@ static void nmea_update(void)
 
 	if (strcmp(fields[0], "GPGSV") == 0) {
 	    int i;
+	    int nsats = (session.gpsdata.satellites < MAXSATS) ? session.gpsdata.satellites : MAXSATS;
 
-	    for (i = 0; i < session.gpsdata.satellites; i++) {
+	    for (i = 0; i < nsats; i++) {
 		(void)wmove(satwin, i+2, 3);
 		(void)wprintw(satwin, " %3d %3d%3d %3d", 
 			      session.gpsdata.PRN[i],
@@ -227,6 +229,11 @@ static void nmea_update(void)
 			      session.gpsdata.elevation[i],
 			      session.gpsdata.ss[i]);
 	    }
+	    /* add overflow mark to the display */
+	    if (nsats <= MAXSATS)
+		(void)mvwaddch(satwin, MAXSATS+2, 18, ACS_HLINE);
+	    else
+		(void)mvwaddch(satwin, MAXSATS+2, 18, ACS_DARROW);
 	}
 
 	if (strcmp(fields[0], "GPRMC") == 0) {
