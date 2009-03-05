@@ -161,8 +161,6 @@ static ssize_t readpkt(void)
     if (!FD_ISSET(session.gpsdata.gps_fd,&select_set))
 	return EOF;
 
-    (void)usleep(100000);
-
     changed = gpsd_poll(&session);
     if (changed & ERROR_SET)
 	return EOF;
