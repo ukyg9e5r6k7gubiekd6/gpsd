@@ -33,6 +33,7 @@ static bool italk_initialize(void)
 {
 	int i;
 
+	/*@ -onlytrans @*/
 	/* "heavily inspired" by monitor_nmea.c */
 	if ((satwin  = derwin(devicewin, MAX_NR_VISIBLE_PRNS+3, 27, 0, 0)) == NULL)
 		return false;
@@ -73,6 +74,7 @@ static bool italk_initialize(void)
 	display(navfixwin, 12, 20, " NAV_FIX ");
 	(void)wattrset(navfixwin, A_NORMAL);
 	return true;
+	/*@ +onlytrans @*/
 }
 
 static void display_itk_navfix(unsigned char *buf, size_t len){

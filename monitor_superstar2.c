@@ -31,6 +31,7 @@ static bool superstar2_initialize(void)
 {
 	int i;
 
+	/*@ -onlytrans @*/
 	/* "heavily inspired" by monitor_nmea.c */
 	if ((satwin  = derwin(devicewin, 15, 27, 7, 0)) == NULL)
 		return false;
@@ -42,6 +43,7 @@ static bool superstar2_initialize(void)
 		(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
 	(void)mvwprintw(satwin, 14, 1, " Satellite Data & Status ");
 	(void)wattrset(satwin, A_NORMAL);
+	/*@ +onlytrans @*/
 
 	return true;
 }

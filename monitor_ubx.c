@@ -31,6 +31,7 @@ static bool ubx_initialize(void)
 {
 	int i;
 
+	/*@ -onlytrans @*/
 	/* "heavily inspired" by monitor_nmea.c */
 	if ((satwin  = derwin(devicewin, 19, 28, 0, 0)) == NULL)
 		return false;
@@ -42,8 +43,9 @@ static bool ubx_initialize(void)
 		(void)mvwprintw(satwin, (int)(i+2), 1, "%2d",i);
 	(void)mvwprintw(satwin, 18, 7, " NAV_SVINFO ");
 	(void)wattrset(satwin, A_NORMAL);
+	/*@ -onlytrans @*/
 
-    return true;
+	return true;
 }
 
 static void display_nav_svinfo(unsigned char *buf, size_t data_len)
