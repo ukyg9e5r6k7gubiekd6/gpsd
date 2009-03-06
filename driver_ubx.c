@@ -527,12 +527,14 @@ bool ubx_write(struct gps_device_t *session,
    return(ok);
 }
 
+#ifdef ALLOW_CONTROLSEND
 static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t data_len)
 /* not used by gpsd, it's for gpsctl and friends */
 {
     return ubx_write(session, (unsigned int)msg[0], (unsigned int)msg[1], 
 		     (unsigned char *)msg+2, (unsigned short)(data_len-2)) ? ((ssize_t)(data_len+7)) : -1; 
 }
+#endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
 static void ubx_configure(struct gps_device_t *session, unsigned int seq)
@@ -665,13 +667,15 @@ const struct gps_type_t ubx_binary = {
     .packet_type    = UBX_PACKET,	/* associated lexer packet type */
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 50,             /* Number of satellite channels supported by the device */
-    .control_send     = ubx_control_send,	/* no control sender yet */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
     .probe_subtype    = NULL,           /* Initialize the device and get subtype */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = NULL,           /* RTCM handler (using default routine) */
+#ifdef ALLOW_CONTROLSEND
+    .control_send     = ubx_control_send,	/* no control sender yet */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator     = ubx_configure,  /* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */

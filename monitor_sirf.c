@@ -199,10 +199,12 @@ static bool sirf_initialize(void)
     /*@ +nullpass @*/
     /*@ -onlytrans @*/
 
+#ifdef ALLOW_CONTROLSEND
     /* probe for version */
     /*@ -compdef @*/
     (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
     /*@ +compdef @*/
+#endif /* ALLOW_CONTROLSEND */
 
     return true;
 }
@@ -618,10 +620,12 @@ static void sirf_update(void)
 	break;
     }
 
+#ifdef ALLOW_CONTROLSEND
     /* elicit navigation parameters */
     if (dispmode && (time(NULL) % 10 == 0)){
 	(void)monitor_control_send((unsigned char *)"\x98\x00", 2);
     }
+#endif /* ALLOW_CONTROLSEND */
 
     /*@ -nullpass -nullderef @*/
     if (dispmode) {
@@ -632,6 +636,7 @@ static void sirf_update(void)
 }
 /*@ +globstate */
 
+#ifdef ALLOW_CONTROLSEND
 static int sirf_command(char line[])
 {
     unsigned char buf[BUFSIZ];
@@ -675,6 +680,7 @@ static int sirf_command(char line[])
 
     return COMMAND_UNKNOWN;	/* no match */
 }
+#endif /* ALLOW_CONTROLSEND */
 
 static void sirf_wrap(void)
 {
@@ -691,7 +697,11 @@ static void sirf_wrap(void)
 const struct monitor_object_t sirf_mmt = {
     .initialize = sirf_initialize,
     .update = sirf_update,
+#ifdef ALLOW_CONTROLSEND
     .command = sirf_command,
+#else
+    .command = NULL,
+#endif /* ALLOW_CONTROLSEND */
     .wrap = sirf_wrap,
     .min_y = 23, .min_x = 80,
     .driver = &sirf_binary,

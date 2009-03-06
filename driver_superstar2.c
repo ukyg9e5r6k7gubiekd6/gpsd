@@ -326,18 +326,6 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    return gpsd_write(session, msg, msglen);
 }
 
-static ssize_t
-superstar2_control_send(struct gps_device_t *session, char *msg, size_t msglen)
-{
-    session->msgbuf[0] = 0x1;	/* SOH */
-    session->msgbuf[1] = msg[0];
-    session->msgbuf[2] = msg[0] ^ 0xff;
-    session->msgbuf[3] = (char)(msglen+1);
-    (void)memcpy(session->msgbuf+4, msg+1, msglen-1);
-    session->msgbuflen = (size_t)(msglen+5);
-    return superstar2_write(session, session->msgbuf, session->msgbuflen);
-}
-
 /**
  * Parse the data from the device
  */
@@ -471,6 +459,21 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_CONTROLSEND
+static ssize_t
+superstar2_control_send(struct gps_device_t *session, char *msg, size_t msglen)
+{
+    session->msgbuf[0] = 0x1;	/* SOH */
+    session->msgbuf[1] = msg[0];
+    session->msgbuf[2] = msg[0] ^ 0xff;
+    session->msgbuf[3] = (char)(msglen+1);
+    (void)memcpy(session->msgbuf+4, msg+1, msglen-1);
+    session->msgbuflen = (size_t)(msglen+5);
+    return superstar2_write(session, session->msgbuf, session->msgbuflen);
+}
+#endif /* ALLOW_CONTROLSEND */
+
+#ifdef ALLOW_RECONFIGURE
 static bool superstar2_set_speed(struct gps_device_t *session, 
 				 speed_t speed, char parity, int stopbits)
 {
@@ -485,6 +488,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 	return (superstar2_write(session, &speed_msg, 7) == 7);
     }
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
@@ -508,8 +512,6 @@ const struct gps_type_t superstar2_binary = {
     .trigger		= NULL,
     /* Number of satellite channels supported by the device */
     .channels	 	= 12,
-    /* Control string sender - should provide checksum and trailer */
-    .control_send	= superstar2_control_send,
     /* Startup-time device detector */
     .probe_detect	= NULL,
     /* Wakeup to be done before each baud hunt */
@@ -522,6 +524,10 @@ const struct gps_type_t superstar2_binary = {
     .parse_packet	= superstar2_parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer	= pass_rtcm,
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and trailer */
+    .control_send	= superstar2_control_send,
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* Enable what reports we need */
     .configurator	= superstar2_configurator,

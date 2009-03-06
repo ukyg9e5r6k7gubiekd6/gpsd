@@ -132,49 +132,6 @@
 
 #define EVERMORE_CHANNELS	12
 
-/*@ +charint -usedef -compdef @*/
-static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
-{
-   unsigned int       crc;
-   size_t    i;
-   char *cp;
-
-   /*@ +charint +ignoresigns @*/
-   /* prepare a DLE-stuffed copy of the message */
-   cp = session->msgbuf;
-   *cp++ = 0x10;  /* message starts with DLE STX */
-   *cp++ = 0x02;
-
-   session->msgbuflen = (size_t)(len + 2);   /* len < 254 !! */
-   *cp++ = (char)session->msgbuflen;   /* message length */
-   if (session->msgbuflen == 0x10) *cp++ = 0x10;
-   
-   /* payload */
-   crc = 0;
-   for (i = 0; i < len; i++) {
-       *cp++ = buf[i];
-       if (buf[i] == 0x10) 
-	   *cp++ = 0x10;
-       crc += buf[i];
-   }
-
-   crc &= 0xff;
-
-   /* enter CRC after payload */
-   *cp++ = crc;  
-   if (crc == 0x10)
-       *cp++ = 0x10;
-
-   *cp++ = 0x10;   /* message ends with DLE ETX */
-   *cp++ = 0x03;
-
-   session->msgbuflen = (size_t)(cp - session->msgbuf);
-   /*@ -charint -ignoresigns @*/
-
-   return gpsd_write(session, session->msgbuf, session->msgbuflen);
-}
-/*@ -charint +usedef +compdef @*/
-
 /*@ +charint @*/
 gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -374,6 +331,51 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_CONTROLSEND
+/*@ +charint -usedef -compdef @*/
+static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
+{
+   unsigned int       crc;
+   size_t    i;
+   char *cp;
+
+   /*@ +charint +ignoresigns @*/
+   /* prepare a DLE-stuffed copy of the message */
+   cp = session->msgbuf;
+   *cp++ = 0x10;  /* message starts with DLE STX */
+   *cp++ = 0x02;
+
+   session->msgbuflen = (size_t)(len + 2);   /* len < 254 !! */
+   *cp++ = (char)session->msgbuflen;   /* message length */
+   if (session->msgbuflen == 0x10) *cp++ = 0x10;
+   
+   /* payload */
+   crc = 0;
+   for (i = 0; i < len; i++) {
+       *cp++ = buf[i];
+       if (buf[i] == 0x10) 
+	   *cp++ = 0x10;
+       crc += buf[i];
+   }
+
+   crc &= 0xff;
+
+   /* enter CRC after payload */
+   *cp++ = crc;  
+   if (crc == 0x10)
+       *cp++ = 0x10;
+
+   *cp++ = 0x10;   /* message ends with DLE ETX */
+   *cp++ = 0x03;
+
+   session->msgbuflen = (size_t)(cp - session->msgbuf);
+   /*@ -charint -ignoresigns @*/
+
+   return gpsd_write(session, session->msgbuf, session->msgbuflen);
+}
+/*@ -charint +usedef +compdef @*/
+#endif /* ALLOW_CONTROLSEND */
+
 #ifdef ALLOW_RECONFIGURE
 static bool evermore_speed(struct gps_device_t *session, 
 			   speed_t speed, char parity, int stopbits)
@@ -516,20 +518,22 @@ const struct gps_type_t evermore_binary =
     .packet_type    = NMEA_PACKET,		/* lexer packet type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = evermore_control_send,	/* how to send a control string */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = NULL,			/* no subtype probing */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = evermore_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = evermore_configurator,	/* switch to binary */
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
     .cycle_chars    = -1,			/* ignore, no rate switch */
-    .revert         = evermore_wrap,		/* reversion code */
+    .revert         = evermore_revert,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,			/* wrapup method */
     .cycle          = 1,			/* updates every second */

@@ -126,6 +126,7 @@ bool sirf_write(int fd, unsigned char *msg) {
    return(ok);
 }
 
+#ifdef ALLOW_CONTROLSEND
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t len) {
     /*@ +charint +matchanyintegral -initallelements -mayaliasunique @*/
     session->msgbuf[0] = 0xa0;
@@ -141,6 +142,7 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
 		      (unsigned char *)session->msgbuf) ? session->msgbuflen : -1;
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
+#endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
 static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
@@ -981,13 +983,15 @@ const struct gps_type_t sirf_binary =
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = sirf_control_send,/* how to send a control string */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
     .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = sirf_control_send,/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = sirfbin_configure,/* initialize the device */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */

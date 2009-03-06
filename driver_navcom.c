@@ -81,25 +81,6 @@ static u_int8_t checksum(unsigned char *buf, size_t len)
     return csum;
 }
 
-static ssize_t navcom_control_send(struct gps_device_t *session, 
-				char *buf, size_t len)
-{
-    /*@ +ignoresigns -mayaliasunique @*/
-    putbyte(session->msgbuf, 0, 0x02);
-    putbyte(session->msgbuf, 1, 0x99);
-    putbyte(session->msgbuf, 2, 0x66);
-    putbyte(session->msgbuf, 3, buf[0]);	/* Cmd ID */
-    putleword(session->msgbuf, 4, len+4);	/* Length */
-    memcpy(session->msgbuf, buf+6, len-1);
-    putbyte(session->msgbuf, 6 + len, checksum((unsigned char *)session->msgbuf+3, len+5));
-    putbyte(session->msgbuf, 7 + len, 0x03);
-    session->msgbuflen = len+9;
-    /*@ -ignoresigns +mayaliasunique @*/
-    gpsd_report(LOG_RAW, "Navcom: control dump: %s\n",
-	gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_RAW));
-    return gpsd_write(session, session->msgbuf, session->msgbuflen);
-}
-
 static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, size_t len)
 {
     gpsd_report(LOG_RAW, "Navcom: command dump: %s\n",
@@ -239,75 +220,6 @@ static void navcom_ping(struct gps_device_t *session)
     navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
     /*@ +type @*/
 }
-
-#ifdef ALLOW_RECONFIGURE
-static bool navcom_speed(struct gps_device_t *session, 
-			 unsigned int speed, char parity, int stopbits)
-{
-    /* parity and stopbit switching aren't implemented */
-    if (parity!=(char)session->gpsdata.parity || stopbits!=(int)session->gpsdata.parity) {
-	return false;
-    } else {
-	u_int8_t port_selection;
-	u_int8_t baud;
-	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
-	    /* We still don't know which port we're connected to */
-	    return false;
-	}
-	/*@ +charint @*/
-	switch (speed) {
-	    /* NOTE - The spec says that certain baud combinations
-		      on ports A and B are not allowed, those are
-		      1200/115200, 2400/57600, and 2400/115200.
-		      To try and minimise the possibility of those
-		      occurring, we do not allow baud rates below
-		      4800.  We could also disallow 57600 and 115200
-		      to totally prevent this, but I do not consider
-		      that reasonable.  Finding which baud speed the
-		      other port is set at would also be too much
-		      trouble, so we do not do it. */
-	    case   4800:
-		baud = 0x04;
-		break;
-	    case   9600:
-		baud = 0x06;
-		break;
-	    case  19200:
-		baud = 0x08;
-		break;
-	    case  38400:
-		baud = 0x0a;
-		break;
-	    case  57600:
-		baud = 0x0c;
-		break;
-	    case 115200:
-		baud = 0x0e;
-		break;
-	    default:
-		/* Unsupported speed */
-		return false;
-	}
-	/*@ -charint @*/
-
-	/* Proceed to construct our message */
-	port_selection = session->driver.navcom.physical_port | baud;
-
-	/* Send it off */
-	navcom_cmd_0x11(session, port_selection);
-
-	/* And cheekily return true, even though we have
-	   no way to know if the speed change succeeded
-	   until and if we receive an ACK (message 0x06),
-	   which will be at the new baud speed if the
-	   command was successful.  Bottom line, the client
-	   should requery gpsd to see if the new speed is
-	   different than the old one */
-	return true;
-    }
-    return false;
-}
-#endif /* ALLOW_RECONFIGURE */
 
 /* Ionosphere and UTC Data */
 static gps_mask_t handle_0x83(struct gps_device_t *session)
@@ -1246,6 +1158,95 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_CONTROLSEND
+static ssize_t navcom_control_send(struct gps_device_t *session, 
+				char *buf, size_t len)
+{
+    /*@ +ignoresigns -mayaliasunique @*/
+    putbyte(session->msgbuf, 0, 0x02);
+    putbyte(session->msgbuf, 1, 0x99);
+    putbyte(session->msgbuf, 2, 0x66);
+    putbyte(session->msgbuf, 3, buf[0]);	/* Cmd ID */
+    putleword(session->msgbuf, 4, len+4);	/* Length */
+    memcpy(session->msgbuf, buf+6, len-1);
+    putbyte(session->msgbuf, 6 + len, checksum((unsigned char *)session->msgbuf+3, len+5));
+    putbyte(session->msgbuf, 7 + len, 0x03);
+    session->msgbuflen = len+9;
+    /*@ -ignoresigns +mayaliasunique @*/
+    gpsd_report(LOG_RAW, "Navcom: control dump: %s\n",
+	gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_RAW));
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
+}
+#endif /* ALLOW_CONTROLSEND */
+
+#ifdef ALLOW_RECONFIGURE
+static bool navcom_speed(struct gps_device_t *session, 
+			 unsigned int speed, char parity, int stopbits)
+{
+    /* parity and stopbit switching aren't implemented */
+    if (parity!=(char)session->gpsdata.parity || stopbits!=(int)session->gpsdata.parity) {
+	return false;
+    } else {
+	u_int8_t port_selection;
+	u_int8_t baud;
+	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
+	    /* We still don't know which port we're connected to */
+	    return false;
+	}
+	/*@ +charint @*/
+	switch (speed) {
+	    /* NOTE - The spec says that certain baud combinations
+		      on ports A and B are not allowed, those are
+		      1200/115200, 2400/57600, and 2400/115200.
+		      To try and minimise the possibility of those
+		      occurring, we do not allow baud rates below
+		      4800.  We could also disallow 57600 and 115200
+		      to totally prevent this, but I do not consider
+		      that reasonable.  Finding which baud speed the
+		      other port is set at would also be too much
+		      trouble, so we do not do it. */
+	    case   4800:
+		baud = 0x04;
+		break;
+	    case   9600:
+		baud = 0x06;
+		break;
+	    case  19200:
+		baud = 0x08;
+		break;
+	    case  38400:
+		baud = 0x0a;
+		break;
+	    case  57600:
+		baud = 0x0c;
+		break;
+	    case 115200:
+		baud = 0x0e;
+		break;
+	    default:
+		/* Unsupported speed */
+		return false;
+	}
+	/*@ -charint @*/
+
+	/* Proceed to construct our message */
+	port_selection = session->driver.navcom.physical_port | baud;
+
+	/* Send it off */
+	navcom_cmd_0x11(session, port_selection);
+
+	/* And cheekily return true, even though we have
+	   no way to know if the speed change succeeded
+	   until and if we receive an ACK (message 0x06),
+	   which will be at the new baud speed if the
+	   command was successful.  Bottom line, the client
+	   should requery gpsd to see if the new speed is
+	   different than the old one */
+	return true;
+    }
+    return false;
+}
+#endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
 const struct gps_type_t navcom_binary =
@@ -1254,13 +1255,15 @@ const struct gps_type_t navcom_binary =
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
     .trigger	    = "\x02\x99\x66",		/* packet leader */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
-    .control_send   = navcom_control_send,	/* no control sender yet */
     .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = navcom_probe_subtype,	/* subtype probing */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = navcom_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = navcom_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,			/* no reconfigure */
     .speed_switcher = navcom_speed,		/* we do change baud rates */

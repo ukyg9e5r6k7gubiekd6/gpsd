@@ -90,55 +90,6 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, un
     return 0;
 }
 
-#ifdef ALLOW_RECONFIGURE
-static bool zodiac_speed_switch(struct gps_device_t *session, 
-				speed_t speed, char parity, int stopbits)
-{
-    unsigned short data[15];
-
-    if (session->driver.zodiac.sn++ > 32767)
-	session->driver.zodiac.sn = 0;
-
-    switch (parity) {
-    case 'E':
-    case 2:
-	parity = (char)2;
-	break;
-    case 'O':
-    case 1:
-	parity = (char)1;
-	break;
-    case 'N':
-    case 0:
-    default:
-	parity = (char)0;
-	break;
-    }
-
-    memset(data, 0, sizeof(data));
-    /* data is the part of the message starting at word 6 */
-    data[0] = session->driver.zodiac.sn;	/* sequence number */
-    data[1] = 1;			/* port 1 data valid */
-    data[2] = (unsigned short)parity;	/* port 1 character width (8 bits) */
-    data[3] = (unsigned short)(stopbits-1);		/* port 1 stop bits (1 stopbit) */
-    data[4] = 0;			/* port 1 parity (none) */
-    data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
-    data[14] = zodiac_checksum(data, 14);
-
-    (void)zodiac_spew(session, 1330, data, 15);
-    return true; /* it would be nice to error-check this */
-}
-#endif /* ALLOW_RECONFIGURE */
-
-static ssize_t zodiac_control_send(struct gps_device_t *session, 
-				   char *msg, size_t len) 
-{
-    unsigned short *shortwords = (unsigned short *)msg;
-
-    /* and if len isn't even, it's your own fault */
-    return zodiac_spew(session, shortwords[0], shortwords+1, (int)(len/2-1));
-}
-
 static void send_rtcm(struct gps_device_t *session,
 		      char *rtcmbuf, size_t rtcmbytes)
 {
@@ -459,7 +410,56 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     }
 }
 
-/* caller needs to specify a wrapup function */
+#ifdef ALLOW_CONTROLSEND
+static ssize_t zodiac_control_send(struct gps_device_t *session, 
+				   char *msg, size_t len) 
+{
+    unsigned short *shortwords = (unsigned short *)msg;
+
+    /* and if len isn't even, it's your own fault */
+    return zodiac_spew(session, shortwords[0], shortwords+1, (int)(len/2-1));
+}
+#endif /* ALLOW_CONTROLSEND */
+
+#ifdef ALLOW_RECONFIGURE
+static bool zodiac_speed_switch(struct gps_device_t *session, 
+				speed_t speed, char parity, int stopbits)
+{
+    unsigned short data[15];
+
+    if (session->driver.zodiac.sn++ > 32767)
+	session->driver.zodiac.sn = 0;
+
+    switch (parity) {
+    case 'E':
+    case 2:
+	parity = (char)2;
+	break;
+    case 'O':
+    case 1:
+	parity = (char)1;
+	break;
+    case 'N':
+    case 0:
+    default:
+	parity = (char)0;
+	break;
+    }
+
+    memset(data, 0, sizeof(data));
+    /* data is the part of the message starting at word 6 */
+    data[0] = session->driver.zodiac.sn;	/* sequence number */
+    data[1] = 1;			/* port 1 data valid */
+    data[2] = (unsigned short)parity;	/* port 1 character width (8 bits) */
+    data[3] = (unsigned short)(stopbits-1);		/* port 1 stop bits (1 stopbit) */
+    data[4] = 0;			/* port 1 parity (none) */
+    data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
+    data[14] = zodiac_checksum(data, 14);
+
+    (void)zodiac_spew(session, 1330, data, 15);
+    return true; /* it would be nice to error-check this */
+}
+#endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
 const struct gps_type_t zodiac_binary =
@@ -468,13 +468,15 @@ const struct gps_type_t zodiac_binary =
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
-    .control_send   = zodiac_control_send,	/* for gpsctl and friends */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no initialization */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = zodiac_control_send,	/* for gpsctl and friends */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* no configuration */
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */

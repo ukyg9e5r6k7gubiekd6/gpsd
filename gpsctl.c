@@ -81,9 +81,11 @@ int main(int argc, char **argv)
     struct gps_data_t *gpsdata = NULL;
     const struct gps_type_t *forcetype = NULL;
     const struct gps_type_t **dp;
+    unsigned int timeout = 4;
+#ifdef ALLOW_CONTROLSEND
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
-    unsigned int timeout = 4;
+#endif /* ALLOW_RECONFIGURE */
 
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "befhlnrs:t:x:D:T:V")) != -1) {
@@ -99,6 +101,7 @@ int main(int argc, char **argv)
 #endif /* ALLOW_RECONFIGURE */
 	    break;
 	case 'x':		/* ship specified control string */
+#ifdef ALLOW_CONTROLSEND
 	    control = optarg;
 	    lowlevel = true;
 	    if ((cooklen = hex_escapes(cooked, control)) <= 0) {
@@ -106,6 +109,9 @@ int main(int argc, char **argv)
 			    "invalid escape string (error %d)\n", (int)cooklen);
 		exit(1);
 	    }
+#else
+	    gpsd_report(LOG_ERROR, "control_send capability has been conditioned out.\n");	    
+#endif /* ALLOW_CONTROLSEND */
 	    break;
 	case 'e':		/* echo specified control string with wrapper */
 	    lowlevel = true;
@@ -130,10 +136,12 @@ int main(int argc, char **argv)
 		else
 		    (void)fputc('\t', stdout);
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
 		if ((*dp)->control_send != NULL)
 		    (void)fputs("-x\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
+#endif /* ALLOW_CONTROLSEND */
 		(void)puts((*dp)->type_name);
 	    }
 	    exit(0);
@@ -578,6 +586,7 @@ int main(int argc, char **argv)
 	    context.readonly = write_enable;
 	}
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
 	/*@ -compdef @*/
 	if (control) {
 	    bool write_enable = context.readonly;
@@ -598,7 +607,7 @@ int main(int argc, char **argv)
 	    context.readonly = write_enable;
 	}
 	/*@ +compdef @*/
-
+#endif /* ALLOW_CONTROLSEND */
 
 	if (forcetype == NULL || !echo) {
 	    /*

@@ -1027,6 +1027,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef ALLOW_CONTROLSEND
 static ssize_t garmin_control_send(struct gps_device_t *session, 
 			    char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
@@ -1037,6 +1038,7 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
     /*@ +mayaliasunique **/
 }
+#endif /* ALLOW_CONTROLSEND */
 
 /* this is everything we export */
 #ifdef __UNUSED__
@@ -1165,13 +1167,15 @@ const struct gps_type_t garmin_usb_binary_old =
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* does not allow reconfiguration */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1191,13 +1195,15 @@ const struct gps_type_t garmin_usb_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,	        /* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1216,13 +1222,15 @@ const struct gps_type_t garmin_ser_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = garmin_control_send,	/* send raw bytes */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
     .get_packet     = generic_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,	        /* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */

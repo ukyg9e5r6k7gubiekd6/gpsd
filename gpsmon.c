@@ -200,6 +200,7 @@ static void packet_dump(char *buf, size_t buflen)
 }
 
 
+#ifdef ALLOW_CONTROLSEND
 static void monitor_dump_send(void)
 {
     if (packetwin != NULL) {
@@ -247,6 +248,7 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 	return ((size_t)st == len);
     }
 }
+#endif /* ALLOW_CONTROLSEND */
 
 /*****************************************************************************
  *
@@ -376,7 +378,9 @@ static void onsig(int sig UNUSED)
 
 int main (int argc, char **argv)
 {
+#ifdef ALLOW_CONTROLSEND
     unsigned int v;
+#endif /* ALLOW_CONTROLSEND */
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
     struct fixsource_t source;
@@ -420,10 +424,12 @@ int main (int argc, char **argv)
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
 		if ((*active)->driver->control_send != NULL)
 		    (void)fputc('x', stdout);
 		else
 		    (void)fputc(' ', stdout);
+#endif /* ALLOW_CONTROLSEND */
 		(void)fputc(' ', stdout);
 		if ((*active)->command != NULL)
 		    (void)fputc('+', stdout);
@@ -800,6 +806,7 @@ int main (int argc, char **argv)
 		}    
 		break;
 
+#ifdef ALLOW_CONTROLSEND
 	    case 'x':				/* send control packet */
 		len = 0;
 		/*@ -compdef @*/
@@ -821,6 +828,7 @@ int main (int argc, char **argv)
 		    monitor_complain("Device type has no control-send method.");
 		/*@ +compdef @*/
 		break;
+#endif /* ALLOW_CONTROLSEND */
 
 	    default:
 		monitor_complain("Unknown command");

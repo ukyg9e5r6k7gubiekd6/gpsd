@@ -314,6 +314,7 @@ const struct monitor_object_t nmea_mmt = {
  *
  *****************************************************************************/
 
+#ifdef ALLOW_CONTROLSEND
 static void monitor_nmea_send(const char *fmt, ... )
 {
     char buf[BUFSIZ];
@@ -324,6 +325,7 @@ static void monitor_nmea_send(const char *fmt, ... )
     va_end(ap);
     (void)monitor_control_send((unsigned char *)buf, strlen(buf));
 }
+#endif /* ALLOW_CONTROLSEND */
 
 /*
  * Yes, it's OK for most of these to be clones of the generic NMEA monitor
@@ -353,6 +355,7 @@ extern const struct gps_type_t ashtech;
 #define ASHTECH_SPEED_9600 5
 #define ASHTECH_SPEED_57600 8
 
+#ifdef ALLOW_CONTROLSEND
 static int ashtech_command(char line[])
 {
     switch (line[0]) 
@@ -401,11 +404,16 @@ static int ashtech_command(char line[])
 
     return COMMAND_UNKNOWN;
 }
+#endif /* ALLOW_CONTROLSEND */
 
 const struct monitor_object_t ashtech_mmt = {
     .initialize = nmea_initialize,
     .update = nmea_update,
+#ifdef ALLOW_CONTROLSEND
     .command = ashtech_command,
+#else
+    .command = NULL,
+#endif /* ALLOW_CONTROLSEND */
     .wrap = nmea_wrap,
     .min_y = 21, .min_x = 80,
     .driver = &ashtech,

@@ -168,25 +168,6 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     return TIME_SET;
 }
 
-/*@ +charint -usedef -compdef @*/
-static ssize_t italk_control_send(struct gps_device_t *session, 
-				  char *msg, size_t msglen) 
-{
-    ssize_t      status;
-
-    /*@ -mayaliasunique **/
-    session->msgbuflen = msglen;
-    (void)memcpy(session->msgbuf, msg, msglen);
-    /*@ +mayaliasunique **/
-    /* we may need to dump the message */
-    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
-		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-    status = write(session->gpsdata.gps_fd, msg, msglen);
-    (void)tcdrain(session->gpsdata.gps_fd);
-    return(status);
-}
-/*@ -charint +usedef +compdef @*/
-
 /*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -305,6 +286,27 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_CONTROLSEND
+/*@ +charint -usedef -compdef @*/
+static ssize_t italk_control_send(struct gps_device_t *session, 
+				  char *msg, size_t msglen) 
+{
+    ssize_t      status;
+
+    /*@ -mayaliasunique **/
+    session->msgbuflen = msglen;
+    (void)memcpy(session->msgbuf, msg, msglen);
+    /*@ +mayaliasunique **/
+    /* we may need to dump the message */
+    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
+		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
+    status = write(session->gpsdata.gps_fd, msg, msglen);
+    (void)tcdrain(session->gpsdata.gps_fd);
+    return(status);
+}
+/*@ -charint +usedef +compdef @*/
+#endif /* ALLOW_CONTROLSEND */
+
 #ifdef ALLOW_RECONFIGURE
 static bool italk_set_mode(struct gps_device_t *session UNUSED, 
 			   speed_t speed UNUSED, 
@@ -368,13 +370,15 @@ const struct gps_type_t italk_binary =
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
-    .control_send   = italk_control_send,	/* how to send a control string */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
     .probe_subtype  = NULL,		/* initialize the device */
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = italk_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = italk_configurator,/* configure the device */
     .speed_switcher = italk_speed,	/* we can change baud rates */
@@ -493,13 +497,15 @@ const static struct gps_type_t itrax = {
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels      = 12,		/* consumer-grade GPS */
-    .control_send  = italk_control_send,/* how to send a control string */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = itrax_probe_subtype,	/* initialize */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = itrax_configurator,/* set synchronous mode */
     .speed_switcher= itrax_speed,	/* how to change speeds */

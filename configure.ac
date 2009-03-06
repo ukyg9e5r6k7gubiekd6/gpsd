@@ -684,7 +684,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for privilege revokation user at compile-time
+dnl check for privilege revocation user at compile-time
 AC_ARG_ENABLE(gpsd-user,
   AC_HELP_STRING([--enable-gpsd-user=username],
 		 [GPSD privilege revokation user]),
@@ -772,6 +772,19 @@ AC_MSG_CHECKING([if device reconfiguration is allowed])
 if test x"$ac_reconfigure" != "xno"; then
     AC_MSG_RESULT([$ac_reconfigure])
 	AC_DEFINE([ALLOW_RECONFIGURE], 1, [Allow gpsd to reconfigure device])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl allow tools to use control_send method
+AC_ARG_ENABLE(controlsend,
+  AC_HELP_STRING([--disable-controlsend],
+		 [do not allow gpsd to change device settings]),
+  [ac_controlsend=$enableval], [ac_controlsend=yes])
+AC_MSG_CHECKING([if control sending is allowed])
+if test x"$ac_controlsend" != "xno"; then
+    AC_MSG_RESULT([$ac_controlsend])
+	AC_DEFINE([ALLOW_CONTROLSEND], 1, [Allow gpsd to controlsend device])
 else
   AC_MSG_RESULT([no])
 fi
@@ -912,6 +925,7 @@ echo "Enable Python support   : $ac_python"
 echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
+echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"
 echo "Build ncurses programs  : $ac_ncurses"
 echo "------------------------------------------"

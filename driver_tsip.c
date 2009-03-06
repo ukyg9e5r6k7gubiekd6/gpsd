@@ -48,14 +48,6 @@ static int tsip_write(struct gps_device_t *session,
     return 0;
 }
 
-static ssize_t tsip_control_send(struct gps_device_t *session, 
-			    char *buf, size_t buflen)
-/* not used by the daemon, it's for gpsctl and friends */
-{
-    return (ssize_t)tsip_write(session, 
-		      (unsigned int)buf[0], (unsigned char *)buf+1, buflen-1);
-}
-
 static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     unsigned char buf[100];
@@ -96,59 +88,6 @@ static void tsip_wrapup(struct gps_device_t *session)
 		   (unsigned char)session->driver.tsip.parity,
 		   session->driver.tsip.stopbits);
 }
-
-#ifdef ALLOW_RECONFIGURE
-static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
-{
-    if (seq == 0) {
-	unsigned char buf[100];
-
-	/* I/O Options */
-	putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
-	putbyte(buf,1,0x02);		/* Velocity: ENU */
-	putbyte(buf,2,0x00);		/* Time: GPS */
-	putbyte(buf,3,0x08);		/* Aux: dBHz */
-	(void)tsip_write(session, 0x35, buf, 4);
-    }
-}
-
-static bool tsip_speed_switch(struct gps_device_t *session, 
-			      unsigned int speed, 
-			      char parity, int stopbits)
-{
-    unsigned char buf[100];
-
-    switch (parity) {
-    case 'E':
-    case 2:
-	parity = (char)2;
-	break;
-    case 'O':
-    case 1:
-	parity = (char)1;
-	break;
-    case 'N':
-    case 0:
-    default:
-	parity = (char)0;
-	break;
-    }
-
-    putbyte(buf,0,0xff);		/* current port */
-    putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
-    putbyte(buf,2,getub(buf,1));	/* output baudrate */
-    putbyte(buf,3,8);			/* character width (8 bits) */
-    putbyte(buf,4,parity);		/* parity (normally odd) */
-    putbyte(buf,5,stopbits-1);		/* stop bits (normally 1 stopbit) */
-    putbyte(buf,6,0);			/* flow control (none) */
-    putbyte(buf,7,0x02);		/* input protocol (TSIP) */
-    putbyte(buf,8,0x02);		/* output protocol (TSIP) */
-    putbyte(buf,9,0);			/* reserved */
-    (void)tsip_write(session, 0xbc, buf, 10);
-
-    return true;	/* it would be nice to error-check this */
-}
-#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t tsip_analyze(struct gps_device_t *session)
 {
@@ -830,6 +769,69 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_CONTROLSEND
+static ssize_t tsip_control_send(struct gps_device_t *session, 
+			    char *buf, size_t buflen)
+/* not used by the daemon, it's for gpsctl and friends */
+{
+    return (ssize_t)tsip_write(session, 
+		      (unsigned int)buf[0], (unsigned char *)buf+1, buflen-1);
+}
+#endif /* ALLOW_CONTROLSEND */
+
+#ifdef ALLOW_RECONFIGURE
+static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
+{
+    if (seq == 0) {
+	unsigned char buf[100];
+
+	/* I/O Options */
+	putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
+	putbyte(buf,1,0x02);		/* Velocity: ENU */
+	putbyte(buf,2,0x00);		/* Time: GPS */
+	putbyte(buf,3,0x08);		/* Aux: dBHz */
+	(void)tsip_write(session, 0x35, buf, 4);
+    }
+}
+
+static bool tsip_speed_switch(struct gps_device_t *session, 
+			      unsigned int speed, 
+			      char parity, int stopbits)
+{
+    unsigned char buf[100];
+
+    switch (parity) {
+    case 'E':
+    case 2:
+	parity = (char)2;
+	break;
+    case 'O':
+    case 1:
+	parity = (char)1;
+	break;
+    case 'N':
+    case 0:
+    default:
+	parity = (char)0;
+	break;
+    }
+
+    putbyte(buf,0,0xff);		/* current port */
+    putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
+    putbyte(buf,2,getub(buf,1));	/* output baudrate */
+    putbyte(buf,3,8);			/* character width (8 bits) */
+    putbyte(buf,4,parity);		/* parity (normally odd) */
+    putbyte(buf,5,stopbits-1);		/* stop bits (normally 1 stopbit) */
+    putbyte(buf,6,0);			/* flow control (none) */
+    putbyte(buf,7,0x02);		/* input protocol (TSIP) */
+    putbyte(buf,8,0x02);		/* output protocol (TSIP) */
+    putbyte(buf,9,0);			/* reserved */
+    (void)tsip_write(session, 0xbc, buf, 10);
+
+    return true;	/* it would be nice to error-check this */
+}
+#endif /* ALLOW_RECONFIGURE */
+
 /* this is everything we export */
 const struct gps_type_t tsip_binary =
 {
@@ -837,13 +839,15 @@ const struct gps_type_t tsip_binary =
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = tsip_control_send,/* how to send commands */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
+#ifdef ALLOW_RECONFIGURE
+    .control_send   = tsip_control_send,/* how to send commands */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = tsip_configurator,/* initial mode sets */
     .speed_switcher = tsip_speed_switch,/* change baud rate */

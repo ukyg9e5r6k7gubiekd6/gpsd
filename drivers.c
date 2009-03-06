@@ -244,13 +244,15 @@ const struct gps_type_t nmea = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = nmea_probe_subtype, /* probe for special types */
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -332,13 +334,15 @@ const struct gps_type_t garmin = {
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no further querying */
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = garmin_nmea_configurator,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -393,13 +397,15 @@ const struct gps_type_t ashtech = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = ashtech_ping,	/* wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = ashtech_configure, /* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -438,13 +444,15 @@ const struct gps_type_t fv18 = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = fv18_configure,	/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -486,13 +494,15 @@ const struct gps_type_t gpsclock = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
     .channels       = 12,		/* not used by this driver */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = gpsclock_probe_subtype, /* to be sent unconditionally */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -542,13 +552,15 @@ static const struct gps_type_t tripmate = {
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
-    .control_send  = nmea_write,		/* how to send control strings */
     .probe_wakeup  = NULL,			/* no wakeup before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = tripmate_probe_subtype,	/* send unconditionally */
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = tripmate_configurator,	/* send unconditionally */
     .speed_switcher= NULL,			/* no speed switcher */
@@ -588,13 +600,15 @@ static const struct gps_type_t earthmate = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup  = NULL,			/* no wakeup to be done before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = earthmate_probe_subtype,	/* switch us to Zodiac mode */
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,			/* no configuration here */
     .speed_switcher= NULL,			/* no speed switcher */
@@ -761,13 +775,15 @@ static const struct gps_type_t trueNorth = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* this will become a real method */
     .probe_detect   = tnt_probe,	/* probe by sending ID query */
     .probe_subtype  = tnt_probe_subtype,/* probe for True North Digital Compass */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* no setting changes */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -833,13 +849,15 @@ static const struct gps_type_t oceanServer = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$C,",
     .channels       = 0,		/* not an actual GPS at all */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,
     .probe_detect   = NULL,
     .probe_subtype  = NULL,
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = oceanserver_configure,
     .speed_switcher = NULL,		/* no speed switcher */
@@ -875,13 +893,15 @@ static const struct gps_type_t rtcm104v2 = {
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
-    .control_send  = NULL,		/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v2_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
@@ -917,13 +937,15 @@ static const struct gps_type_t rtcm104v3 = {
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
-    .control_send  = NULL,		/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v3_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
@@ -956,13 +978,15 @@ static const struct gps_type_t garmintxt = {
     .packet_type   = RTCM2_PACKET;	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = garmintxt_parse_input,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
@@ -1049,13 +1073,15 @@ const struct gps_type_t mkt3301 = {
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
     .channels       = 12,		/* not used by this driver */
-    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = mkt3301_configure,	/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */

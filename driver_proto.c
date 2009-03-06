@@ -187,33 +187,6 @@ _proto__msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t 
 }
 
 /**
- * Write data to the device, doing any required padding or checksumming
- */
-/*@ +charint -usedef -compdef @*/
-static ssize_t _proto__control_send(struct gps_device_t *session,
-			   char *msg, size_t msglen)
-{
-   bool ok;
-
-   /* CONSTRUCT THE MESSAGE */
-
-   /* 
-    * This copy to a public assembly buffer 
-    * enables gpsmon to snoop the control message
-    * acter it has been sent.
-    */
-   session->msgbuflen = msglen;
-   (void)memcpy(session->msgbuf, msg, msglen);
-
-   /* we may need to dump the message */
-    return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_report(LOG_IO, "writing _proto_ control type %02x:%s\n",
-	       msg[0], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
-   return gpsd_write(session, session->msgbuf, session->msgbuflen);
-}
-/*@ -charint +usedef +compdef @*/
-
-/**
  * Parse the data from the device
  */
 /*@ +charint @*/
@@ -294,6 +267,35 @@ static void _proto__probe_subtype(struct gps_device_t *session, unsigned int seq
      * time to respond to each one.
      */
 }
+
+#ifdef ALLOW_CONTROLSEND */
+/**
+ * Write data to the device, doing any required padding or checksumming
+ */
+/*@ +charint -usedef -compdef @*/
+static ssize_t _proto__control_send(struct gps_device_t *session,
+			   char *msg, size_t msglen)
+{
+   bool ok;
+
+   /* CONSTRUCT THE MESSAGE */
+
+   /* 
+    * This copy to a public assembly buffer 
+    * enables gpsmon to snoop the control message
+    * acter it has been sent.
+    */
+   session->msgbuflen = msglen;
+   (void)memcpy(session->msgbuf, msg, msglen);
+
+   /* we may need to dump the message */
+    return gpsd_write(session, session->msgbuf, session->msgbuflen);
+   gpsd_report(LOG_IO, "writing _proto_ control type %02x:%s\n",
+	       msg[0], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
+   return gpsd_write(session, session->msgbuf, session->msgbuflen);
+}
+/*@ -charint +usedef +compdef @*/
+#endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_CONFIGURE
 static void _proto__configurator(struct gps_device_t *session, unsigned int seq)
@@ -394,8 +396,6 @@ const struct gps_type_t _proto__binary = {
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
     .channels         = 12,
-    /* Control string sender - should provide checksum and trailer */
-    .control_send     = _proto__control_send,
     /* Startup-time device detector */
     .probe_detect     = _proto__probe_detect,
     /* Wakeup to be done before each baud hunt */
@@ -408,6 +408,10 @@ const struct gps_type_t _proto__binary = {
     .parse_packet     = _proto__parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer      = pass_rtcm,
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and headers/trailer */
+    .control_send   = __proto__control_send,
+#endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* Enable what reports we need */
     .configurator     = _proto__configurator,
