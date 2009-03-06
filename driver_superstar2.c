@@ -237,16 +237,18 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	/* get info for one channel/satellite */
 	int off = i*5 + 5;
 	unsigned int porn;
-	if ((porn = getub(buf, off) & 0x1f) == 0)
-	    porn = (getub(buf, off+3) >> 1) + 87;
+	if ((porn = (unsigned int)getub(buf, off) & 0x1f) == 0)
+	    porn = (unsigned int)(getub(buf, off+3) >> 1) + 87;
 
 	session->gpsdata.PRN[i]		= (int)porn;
-	session->gpsdata.ss[i]		= getub(buf, off+4);
-	session->gpsdata.elevation[i]	= getsb(buf, off+1);
+	session->gpsdata.ss[i]		= (int)getub(buf, off+4);
+	session->gpsdata.elevation[i]	= (int)getsb(buf, off+1);
 	session->gpsdata.azimuth[i]	= (unsigned short)getub(buf, off+2) + ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
 
+	/*@ +charint @*/
 	if ((getub(buf, off) & 0x60) == 0x60)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	/*@ -charint @*/
 
 	if(session->gpsdata.PRN[i])
 	    st++;
@@ -267,16 +269,16 @@ superstar2_msg_version(struct gps_device_t *session,
     if ((data_len != 101) || ((getub(buf,98) & 0x0f) != 3))
 	return 0;
 
-    snprintf(main_sw, 15, "%s", buf+4);
-    snprintf(hw_part, 15, "%s", buf+18);
-    snprintf(boot_sw, 15, "%s", buf+36);
-    snprintf(ser_num, 14, "%s", buf+73);
+    (void)snprintf(main_sw, 15, "%s", (char *)buf+4);
+    (void)snprintf(hw_part, 15, "%s", (char *)buf+18);
+    (void)snprintf(boot_sw, 15, "%s", (char *)buf+36);
+    (void)snprintf(ser_num, 14, "%s", (char *)buf+73);
 
     gpsd_report(LOG_PROG,
 	"superstar2 #45 - "
 	"hw part %s boot sw %s main sw %s ser num %s\n",
 	hw_part, boot_sw, main_sw, ser_num);
-    strlcpy(session->subtype, main_sw, sizeof(session->subtype));
+    (void)strlcpy(session->subtype, main_sw, sizeof(session->subtype));
     return DEVICEID_SET | ONLINE_SET;
 }
 
@@ -298,13 +300,13 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
 	return ONLINE_SET;
 
     /* extract time data */
-    bzero(&tm, sizeof(tm));
-    tm.tm_mday = getsb(buf, 37);
-    tm.tm_mon = getsb(buf, 38) - 1;
-    tm.tm_year = getlesw(buf, 39) - 1900;
+    (void)memset(&tm, '\0', sizeof(tm));
+    tm.tm_mday = (int)getsb(buf, 37);
+    tm.tm_mon = (int)getsb(buf, 38) - 1;
+    tm.tm_year = (int)getlesw(buf, 39) - 1900;
 
-    tm.tm_hour = getsb(buf, 41);
-    tm.tm_min = getsb(buf, 42);
+    tm.tm_hour = (int)getsb(buf, 41);
+    tm.tm_min = (int)getsb(buf, 42);
     d = getled(buf, 43);
     tm.tm_sec = (int)d;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = timegm(&tm);
@@ -375,6 +377,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
  * Externally called routines below here
  *
  **********************************************************/
+/*@ +charint @*/
 /* canned config messages */
 /* Initiate Link ID# 63 */
 static char link_msg[] = {0x01, 0x3f, 0xc0, 0x08,
@@ -383,13 +386,14 @@ static char link_msg[] = {0x01, 0x3f, 0xc0, 0x08,
 
 /* Request Hardware/Software Identification ID# 45 */
 static char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
+/*@ -charint @*/
 
 static void
 superstar2_probe_wakeup(struct gps_device_t *session)
 {
-    superstar2_write(session, link_msg, sizeof(link_msg));
-    usleep(300000);
-    superstar2_write(session, version_msg, sizeof(version_msg));
+    (void)superstar2_write(session, link_msg, sizeof(link_msg));
+    (void)usleep(300000);
+    (void)superstar2_write(session, version_msg, sizeof(version_msg));
     return;
 }
 
@@ -398,9 +402,9 @@ superstar2_probe_subtype(struct gps_device_t *session,
 				     unsigned int seq)
 {
     if (seq == 0){
-	superstar2_write(session, link_msg, sizeof(link_msg));
-	usleep(300000);
-	superstar2_write(session, version_msg, sizeof(version_msg));
+	(void)superstar2_write(session, link_msg, sizeof(link_msg));
+	(void)usleep(300000);
+	(void)superstar2_write(session, version_msg, sizeof(version_msg));
     }
     return;
 }
@@ -408,6 +412,7 @@ superstar2_probe_subtype(struct gps_device_t *session,
 static void superstar2_configurator(struct gps_device_t *session,
 				    unsigned int seq UNUSED)
 {
+    /*@ +charint @*/
     unsigned char a;
     unsigned char message_list[] = {
 	SUPERSTAR2_NAVSOL_LLA,
@@ -423,19 +428,20 @@ static void superstar2_configurator(struct gps_device_t *session,
 
     for(a = 0; message_list[a] != 0; a++){
 	/* set high bit to enable continuous output */
-	tmpl_msg[1] = (unsigned char)(message_list[a] | 0x80);
-	tmpl_msg[2] = (unsigned char)(tmpl_msg[1] ^ 0xff);
-	superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
-	usleep(20000);
+	tmpl_msg[1] = (char)(message_list[a] | 0x80);
+	tmpl_msg[2] = (char)(tmpl_msg[1] ^ 0xff);
+	(void)superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
+	(void)usleep(20000);
     }
     for(a = 0; message2_list[a] != 0; a++){
 	/* set high bit to enable continuous output */
-	tmpl2_msg[1] = (unsigned char)(message2_list[a] | 0x80);
-	tmpl2_msg[2] = (unsigned char)(tmpl2_msg[1] ^ 0xff);
-	superstar2_write(session, tmpl2_msg, sizeof(tmpl2_msg));
-	usleep(20000);
+	tmpl2_msg[1] = (char)(message2_list[a] | 0x80);
+	tmpl2_msg[2] = (char)(tmpl2_msg[1] ^ 0xff);
+	(void)superstar2_write(session, tmpl2_msg, sizeof(tmpl2_msg));
+	(void)usleep(20000);
     }
-    superstar2_write(session, version_msg, sizeof(version_msg));
+    /*@ -charint @*/
+    (void)superstar2_write(session, version_msg, sizeof(version_msg));
 }
 
 /*
@@ -482,13 +488,15 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.parity) {
+    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 	return false;
-    } else {   
+    } else {
+	/*@ +charint @*/
 	char speed_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
 	speed_msg[4] = (char)(speed / 300);
+	/*@ -charint @*/
 	return (superstar2_write(session, speed_msg, 7) == 7);
     }
 }
@@ -497,11 +505,13 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
+	/*@ +charint @*/
 	char mode_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
 	mode_msg[4] = (char)(session->gpsdata.baudrate / 300);
 	(void)superstar2_write(session, mode_msg, 7);
+	/*@ -charint @*/
     } else {
 	session->back_to_nmea = false;
     }

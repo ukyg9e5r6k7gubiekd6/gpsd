@@ -115,10 +115,10 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 
 	latitude = (double)(getlesl(buf, 7 + 144)/1e7);
 	longitude = (double)(getlesl(buf, 7 + 148)/1e7);
-	altitude = (double)(getlesl(buf, 7 + 152)/1e3);
-	climb = (double)(getlesl(buf, 7 + 206)/1e3);
-	speed = (double)(getleul(buf, 7 + 210)/1e3);
-	track = (double)(getleuw(buf, 7 + 214)/1e2);
+	altitude = (float)(getlesl(buf, 7 + 152)/1e3);
+	climb = (float)(getlesl(buf, 7 + 206)/1e3);
+	speed = (float)(getleul(buf, 7 + 210)/1e3);
+	track = (float)(getleuw(buf, 7 + 214)/1e2);
 
 	hdop = (float)(getleuw(buf, 7 + 56)/100.0);
 	gdop = (float)(getleuw(buf, 7 + 58)/100.0);
@@ -201,16 +201,16 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 		prn = (unsigned char)getleuw(buf, off+4)&0xff;
 		el  = (unsigned char)getlesw(buf, off+6)&0xff;
 		az  = (unsigned char)getlesw(buf, off+8)&0xff;
-		wmove(satwin, i+2, 4);
-		wprintw(satwin, "%3d %3d %2d  %02d %04x %c",
+		(void)wmove(satwin, i+2, 4);
+		(void)wprintw(satwin, "%3d %3d %2d  %02d %04x %c",
 			prn, az, el, ss, fl,
 			(fl & PRN_FLAG_USE_IN_NAV)? 'Y' : ' ');
 	}
 	for ( ; i < MAX_NR_VISIBLE_PRNS; i++){
-		wmove(satwin, i+2, 4);
-		wprintw(satwin, "                      ");
+	    (void)wmove(satwin, (int)i+2, 4);
+		(void)wprintw(satwin, "                      ");
 	}
-	wnoutrefresh(satwin);
+	(void)wnoutrefresh(satwin);
 	return;
 }
 
@@ -242,7 +242,7 @@ static int italk_command(char line[] UNUSED)
 
 static void italk_wrap(void)
 {
-	delwin(satwin);
+	(void)delwin(satwin);
 	return;
 }
 
