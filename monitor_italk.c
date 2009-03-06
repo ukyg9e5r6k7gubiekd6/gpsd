@@ -46,7 +46,7 @@ static bool italk_initialize(void)
 	(void)wattrset(satwin, A_NORMAL);
 
 	/* "heavily inspired" by monitor_nmea.c */
-	if ((navfixwin = derwin(devicewin, 15,  52,  0, 27)) == NULL)
+	if ((navfixwin = derwin(devicewin, 13,  52,  0, 27)) == NULL)
 		return false;
 	(void)wborder(navfixwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(navfixwin, A_BOLD);
@@ -70,7 +70,7 @@ static bool italk_initialize(void)
 	(void)wmove(navfixwin, 11,1);
 	(void)wprintw(navfixwin, "Fix:");
 
-	display(navfixwin, 14, 20, " NAV_FIX ");
+	display(navfixwin, 12, 20, " NAV_FIX ");
 	(void)wattrset(navfixwin, A_NORMAL);
 	return true;
 }
@@ -155,15 +155,15 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 	(void)wprintw(navfixwin, "%1d %02d:%02d:%02d", d, hour, min, sec);
 
 	(void)wmove(navfixwin, 10,9);
-	(void)wprintw(navfixwin, "%4.1f", hdop);
+	(void)wprintw(navfixwin, "%-5.1f", hdop);
 	(void)wmove(navfixwin, 10,18);
-	(void)wprintw(navfixwin, "%4.1f", vdop);
+	(void)wprintw(navfixwin, "%-5.1f", vdop);
 	(void)wmove(navfixwin, 10,27);
-	(void)wprintw(navfixwin, "%4.1f", pdop);
+	(void)wprintw(navfixwin, "%-5.1f", pdop);
 	(void)wmove(navfixwin, 10,36);
-	(void)wprintw(navfixwin, "%4.1f", tdop);
+	(void)wprintw(navfixwin, "%-5.1f", tdop);
 	(void)wmove(navfixwin, 10,45);
-	(void)wprintw(navfixwin, "%4.1f", gdop);
+	(void)wprintw(navfixwin, "%-5.1f", gdop);
 
 	(void)wmove(navfixwin, 11,6);
 	{
