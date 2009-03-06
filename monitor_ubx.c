@@ -69,7 +69,7 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 		ss = getub(buf, off+4);
 		el = getsb(buf, off+5);
 		az = getlesw(buf, off+6);
-		wmove(satwin, i+2, 4);
+		wmove(satwin, (int)(i+2), 4);
 		wprintw(satwin, "%3d %3d %3d  %2d %04x %c",
 			prn, az, el, ss, fl,
 			(fl & UBX_SAT_USED)? 'Y' : ' ');

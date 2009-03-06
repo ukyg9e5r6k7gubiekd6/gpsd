@@ -68,12 +68,12 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 		az = (unsigned short)getub(buf, off+2) +
 		    ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
 		fl = getub(buf, off) & 0xe0;
-		wmove(satwin, i+2, 4);
-		wprintw(satwin, "%3u %3d %2d  %02d %02x %c",
+		(void)wmove(satwin, i+2, 4);
+		(void)wprintw(satwin, "%3u %3d %2d  %02d %02x %c",
 			porn, az, el, ss, fl,
 			((fl & 0x60) == 0x60)? 'Y' : ' ');
 	}
-	wnoutrefresh(satwin);
+	(void)wnoutrefresh(satwin);
 	return;
 }
 

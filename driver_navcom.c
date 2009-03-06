@@ -1244,7 +1244,6 @@ static bool navcom_speed(struct gps_device_t *session,
 	   different than the old one */
 	return true;
     }
-    return false;
 }
 #endif /* ALLOW_RECONFIGURE */
 
