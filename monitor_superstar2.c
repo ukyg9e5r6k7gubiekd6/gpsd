@@ -60,18 +60,22 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 		char el;
 		unsigned short az;
 
+		/*@ +charint */
 		if ((porn = getub(buf, off) & 0x1f) == 0)
 			porn = (getub(buf, off+3) >> 1) + 87;
+		/*@ -charint */
 
 		ss = getub(buf, off+4);
 		el = getsb(buf, off+1);
-		az = (unsigned short)getub(buf, off+2) +
-		    ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
+		az = (unsigned short)(getub(buf, off+2) +
+				      ((getub(buf, off+3) & 0x1) << 1));
 		fl = getub(buf, off) & 0xe0;
 		(void)wmove(satwin, i+2, 4);
+		/*@ +charint */
 		(void)wprintw(satwin, "%3u %3d %2d  %02d %02x %c",
 			porn, az, el, ss, fl,
 			((fl & 0x60) == 0x60)? 'Y' : ' ');
+		/*@ -charint */
 	}
 	(void)wnoutrefresh(satwin);
 	return;

@@ -265,9 +265,11 @@ superstar2_msg_version(struct gps_device_t *session,
 #define SZ 16
     char main_sw[SZ], hw_part[SZ], boot_sw[SZ], ser_num[SZ];
 
+    /*@ +charint @*/
     /* byte 98 is device type, value = 3 means superstar2 */
     if ((data_len != 101) || ((getub(buf,98) & 0x0f) != 3))
 	return 0;
+    /*@ -charint @*/
 
     (void)snprintf(main_sw, 15, "%s", (char *)buf+4);
     (void)snprintf(hw_part, 15, "%s", (char *)buf+18);
@@ -296,8 +298,10 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
 	return 0;
 
     gpsd_report(LOG_PROG, "superstar2 #113 - timing status\n");
+    /*@ +charint @*/
     if ((getub(buf, 55) & 0x30) != 0)
 	return ONLINE_SET;
+    /*@ -charint @*/
 
     /* extract time data */
     (void)memset(&tm, '\0', sizeof(tm));
@@ -310,7 +314,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
     d = getled(buf, 43);
     tm.tm_sec = (int)d;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = timegm(&tm);
-    session->context->leap_seconds = getsb(buf,20);
+    session->context->leap_seconds = (int)getsb(buf,20);
 
     return TIME_SET | ONLINE_SET;
 }
@@ -323,9 +327,9 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    size_t i;
 
    for (i = 0; i < msglen - 2; i++)
-	c += (unsigned char)msg[i];
-//   c = htons(c); // XXX is this needed on big-endian machines?
-   memcpy(msg + msg[3] + 4, &c, 2);
+	c += (unsigned short)msg[i];
+   // c = htons(c); // XXX is this needed on big-endian machines?
+   (void)memcpy(msg + (int)msg[3] + 4, &c, 2);
    gpsd_report(LOG_IO, "writing superstar2 control type %02x len %zu:%s\n",
 	       (unsigned char)msg[1], msglen,
 	       gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
@@ -344,9 +348,9 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     if (len == 0)
 	return 0;
 
-    type = buf[SUPERSTAR2_TYPE_OFFSET];
+    type = (int)buf[SUPERSTAR2_TYPE_OFFSET];
     (void)snprintf(session->gpsdata.tag,
-	sizeof(session->gpsdata.tag), "SS2-%u", (int)type);
+	sizeof(session->gpsdata.tag), "SS2-%d", type);
 
     switch (type)
     {
@@ -473,12 +477,14 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 static ssize_t
 superstar2_control_send(struct gps_device_t *session, char *msg, size_t msglen)
 {
+    /*@ +charint -mayaliasunique @*/
     session->msgbuf[0] = 0x1;	/* SOH */
     session->msgbuf[1] = msg[0];
     session->msgbuf[2] = msg[0] ^ 0xff;
     session->msgbuf[3] = (char)(msglen+1);
     (void)memcpy(session->msgbuf+4, msg+1, msglen-1);
     session->msgbuflen = (size_t)(msglen+5);
+    /*@ -charint +mayaliasunique @*/
     return superstar2_write(session, session->msgbuf, session->msgbuflen);
 }
 #endif /* ALLOW_CONTROLSEND */
@@ -488,7 +494,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
+    if (parity!=(char)session->gpsdata.parity || (unsigned int)stopbits!=session->gpsdata.stopbits) {
 	return false;
     } else {
 	/*@ +charint @*/

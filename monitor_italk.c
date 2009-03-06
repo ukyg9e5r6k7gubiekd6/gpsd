@@ -149,9 +149,9 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 	(void)wmove(navfixwin, 8,33);
 	d = (tow/1000) / 86400;
 	tod = (tow/1000) - (d*86400);
-	sec = tod % 60;
-	min = (tod / 60) % 60;
-	hour = tod / 3600;
+	sec = (unsigned short)tod % 60;
+	min = (unsigned short)(tod / 60) % 60;
+	hour = (unsigned short)tod / 3600;
 	(void)wprintw(navfixwin, "%1d %02d:%02d:%02d", d, hour, min, sec);
 
 	(void)wmove(navfixwin, 10,9);
@@ -172,27 +172,27 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 		satlist[0] = '\0';
 		for(i = 0; i<32; i++){
 			if (svlist & (1<<i)){
-				snprintf(prn, 4, "%u ", i+1);
-				strlcat(satlist, prn, 38);
+				(void)snprintf(prn, 4, "%u ", i+1);
+				(void)strlcat(satlist, prn, 38);
 			}
 		}
 		(void)wprintw(navfixwin, "%02d = %-38s", nsv, satlist);
 	}
-	wnoutrefresh(navfixwin);
+	(void)wnoutrefresh(navfixwin);
 
 }
 
 static void display_itk_prnstatus(unsigned char *buf, size_t len)
 {
-	unsigned int i, nchan;
+	int i, nchan;
 	if (len < 62)
 		return;
 
-	nchan = (unsigned int)getleuw(buf, 7 +50);
+	nchan = (int)getleuw(buf, 7 +50);
 	if (nchan > MAX_NR_VISIBLE_PRNS)
 		nchan = MAX_NR_VISIBLE_PRNS;
 	for (i = 0; i < nchan; i++) {
-		unsigned int off = 7+ 52 + 10 * i;
+		int off = 7+ 52 + 10 * i;
 		unsigned short fl;
 		unsigned char ss, prn, el, az;
 

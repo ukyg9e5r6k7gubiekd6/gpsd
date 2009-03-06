@@ -48,17 +48,17 @@ static bool ubx_initialize(void)
 
 static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 {
-	unsigned int i, nchan;
+	int i, nchan;
 
 	if (data_len < 152 )
 		return;
 
-	nchan = getub(buf, 4);
+	nchan = (int)getub(buf, 4);
 	if (nchan > 16)
 		nchan = 16;
 
 	for (i = 0; i < nchan; i++) {
-		unsigned int off = 8 + 12 * i;
+		int off = 8 + 12 * i;
 		unsigned char ss, prn;
 		char el;
 		short az;
@@ -104,7 +104,7 @@ static int ubx_command(char line[] UNUSED)
 
 static void ubx_wrap(void)
 {
-	delwin(satwin);
+	(void)delwin(satwin);
 	return;
 }
 
