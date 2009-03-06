@@ -659,6 +659,28 @@ static bool ubx_speed(struct gps_device_t *session,
     /*@ -charint +usedef +compdef */
     return true;
 }
+
+static bool ubx_rate(struct gps_device_t *session, double cycletime)
+/* change the sample rate of the GPS */
+{
+    /*@ -type @*/
+    unsigned char msg[6] = {
+	0x00, 0x00,	/* U2: Measurement rate (ms) */
+	0x00, 0x00,	/* U2: Navigation rate (cycles) */
+	0x00, 0x00,	/* U2: Alignment to reference time: 0 = UTC, !0 = GPS */
+    };
+    /*@ +type @*/
+
+    gpsd_report(LOG_IO, "UBX rate change, report every %f secs\n", cycletime);
+
+    /*
+     * Manual says:
+     * Navigation Update Rate (1/s) = 1000 / (NavigationRate * MeausrementRate(ms)).
+     * ???
+     */
+
+    return ubx_write(session, 0x06, 0x08, msg, 6); /* CFG-RATE */
+}
 #endif /* ALLOW_RECONFIGURE */
 
 /* This is everything we export */
@@ -680,7 +702,7 @@ const struct gps_type_t ubx_binary = {
     .configurator     = ubx_configure,  /* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
-    .rate_switcher    = NULL,           /* Message delivery rate switcher */
+    .rate_switcher    = ubx_rate,      /* Message delivery rate switcher */
     .cycle_chars      = -1,             /* Number of chars per report cycle */
     .revert           = ubx_revert,     /* Undo the actions of .configurator */
 #endif /* ALLOW_RECONFIGURE */
