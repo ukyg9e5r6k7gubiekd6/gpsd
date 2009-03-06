@@ -755,7 +755,7 @@ static bool garmin_detect(struct gps_device_t *session)
 
     /* check for garmin USB serial driver -- very Linux-specific */
     if (access("/sys/module/garmin_gps", R_OK) != 0) {
-	gpsd_report(LOG_WARN, "garmin_gps not active.\n");
+	gpsd_report(LOG_WARN, "garmin_gps Linux USB module not active.\n");
 	return false;
     }
     // check for a garmin_gps device in /proc
