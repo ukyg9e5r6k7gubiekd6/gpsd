@@ -403,6 +403,7 @@ int main (int argc, char **argv)
 	    for (active = monitor_objects; *active; active++) {
 		(void)fputs("i l q ^S ^Q", stdout);
 		(void)fputc(' ', stdout);
+#ifdef ALLOW_RECONFIGURE
 		if ((*active)->driver->mode_switcher != NULL)
 		    (void)fputc('n', stdout);
 		else
@@ -418,6 +419,7 @@ int main (int argc, char **argv)
 		else
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
+#endif /* ALLOW_RECONFIGURE */
 		if ((*active)->driver->control_send != NULL)
 		    (void)fputc('x', stdout);
 		else
@@ -610,6 +612,7 @@ int main (int argc, char **argv)
 	    }
 	    switch (line[0])
 	    {
+#ifdef ALLOW_RECONFIGURE
 	    case 'c':				/* change cycle time */
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
@@ -637,6 +640,7 @@ int main (int argc, char **argv)
 		    /*@ +sefparams @*/
 		}
 		break;
+#endif /* ALLOW_RECONFIGURE */
 
 	    case 'i':				/* start probing for subtype */
 		if (active == NULL)
@@ -663,6 +667,7 @@ int main (int argc, char **argv)
 			(void)wprintw(packetwin, ">>> Logging to %s on", logfile);
 		break;
 
+#ifdef ALLOW_RECONFIGURE
 	    case 'n':		/* change mode */
 		/* if argument not specified, toggle */
 		if (strcspn(line, "01") == strlen(line))
@@ -697,10 +702,12 @@ int main (int argc, char **argv)
 		    /*@ +sefparams @*/
 		}
 		break;
+#endif /* ALLOW_RECONFIGURE */
 
 	    case 'q':				/* quit */
 		goto quit;
 
+#ifdef ALLOW_RECONFIGURE
 	    case 's':				/* change speed */
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
@@ -769,6 +776,7 @@ int main (int argc, char **argv)
 		    /*@ +sefparams @*/
 		}
 		break;
+#endif /* ALLOW_RECONFIGURE */
 
 	    case 't':				/* force device type */
 		if (strlen(arg) > 0) {

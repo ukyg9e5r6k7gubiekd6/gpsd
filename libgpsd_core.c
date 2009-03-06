@@ -110,6 +110,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
+#endif /* NTPSHM_ENABLE */
 #ifdef ALLOW_RECONFIGURE
     if (session->enable_reconfigure
 	&& session->device_type != NULL
@@ -117,14 +118,13 @@ void gpsd_deactivate(struct gps_device_t *session)
 	session->device_type->revert(session);
 	session->enable_reconfigure = false;
     }
-#endif /* ALLOW_RECONFIGURE */
     if (session->device_type!=NULL) {
 	if (session->back_to_nmea && session->device_type->mode_switcher!=NULL)
 	    session->device_type->mode_switcher(session, 0);
 	if (session->device_type->wrapup!=NULL)
 	    session->device_type->wrapup(session);
     }
-#endif /* NTPSHM_ENABLE */
+#endif /* ALLOW_RECONFIGURE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
     (void)gpsd_close(session);

@@ -248,17 +248,15 @@ const struct gps_type_t nmea = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = nmea_probe_subtype, /* probe for special types */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,		/* enable what we need */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = NULL,		/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -272,8 +270,9 @@ const struct gps_type_t nmea = {
  *
  **************************************************************************/
 
+#ifdef ALLOW_RECONFIGURE
 static void garmin_mode_switch(struct gps_device_t *session, int mode)
-/* only does anything iin one direction, going to Garmin binary driver */
+/* only does anything in one direction, going to Garmin binary driver */
 {
     if (mode == MODE_BINARY) {
 	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
@@ -283,7 +282,6 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
 static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int seq)
 {
     /*
@@ -338,17 +336,15 @@ const struct gps_type_t garmin = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no further querying */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_nmea_configurator,/* enable what we need */
-#endif /*ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = garmin_nmea_configurator,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /*ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -401,17 +397,15 @@ const struct gps_type_t ashtech = {
     .probe_wakeup   = ashtech_ping,	/* wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = ashtech_configure, /* change its sentence set */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = ashtech_configure, /* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -448,17 +442,15 @@ const struct gps_type_t fv18 = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = fv18_configure,	/* change its sentence set */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = fv18_configure,	/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -498,17 +490,15 @@ const struct gps_type_t gpsclock = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = gpsclock_probe_subtype, /* to be sent unconditionally */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,		/* change its sentence set */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = NULL,		/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* sample rate is fixed */
     .cycle_chars    = -1,		/* sample rate is fixed */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -556,18 +546,16 @@ static const struct gps_type_t tripmate = {
     .probe_wakeup  = NULL,			/* no wakeup before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = tripmate_probe_subtype,	/* send unconditionally */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = tripmate_configurator,	/* send unconditionally */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = tripmate_configurator,	/* send unconditionally */
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .cycle_chars   = -1,			/* no rate switch */
-#ifdef ALLOW_RECONFIGURE
-    .revert	   = NULL,			/* no setting-reversion method */
+    .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup */
     .cycle	   = 1,				/* updates every second */
@@ -604,18 +592,16 @@ static const struct gps_type_t earthmate = {
     .probe_wakeup  = NULL,			/* no wakeup to be done before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = earthmate_probe_subtype,	/* switch us to Zodiac mode */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = NULL,			/* no configuration here */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,			/* no configuration here */
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .cycle_chars   = -1,			/* no rate switch */
-#ifdef ALLOW_RECONFIGURE
-    .revert	   = NULL,			/* no setting-reversion method */
+    .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup code */
     .cycle	   = 1,				/* updates every second */
@@ -779,17 +765,15 @@ static const struct gps_type_t trueNorth = {
     .probe_wakeup   = NULL,		/* this will become a real method */
     .probe_detect   = tnt_probe,	/* probe by sending ID query */
     .probe_subtype  = tnt_probe_subtype,/* probe for True North Digital Compass */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,		/* no setting changes */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = NULL,		/* no setting changes */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -853,17 +837,15 @@ static const struct gps_type_t oceanServer = {
     .probe_wakeup   = NULL,
     .probe_detect   = NULL,
     .probe_subtype  = NULL,
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = oceanserver_configure,
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = oceanserver_configure,
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -897,17 +879,15 @@ static const struct gps_type_t rtcm104v2 = {
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = NULL,		/* no configurator */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v2_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .cycle_chars   = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
@@ -941,17 +921,15 @@ static const struct gps_type_t rtcm104v3 = {
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = NULL,		/* no configurator */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v3_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .cycle_chars   = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
@@ -982,17 +960,15 @@ static const struct gps_type_t garmintxt = {
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = NULL,		/* no configurator */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = garmintxt_parse_input,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,		/* no configurator */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .cycle_chars   = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
@@ -1077,17 +1053,15 @@ const struct gps_type_t mkt3301 = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = mkt3301_configure,	/* change its sentence set */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = mkt3301_configure,	/* change its sentence set */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */

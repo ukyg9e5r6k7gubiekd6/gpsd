@@ -181,12 +181,8 @@ static ssize_t italk_control_send(struct gps_device_t *session,
     /* we may need to dump the message */
     gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
 		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-#ifdef ALLOW_RECONFIGURE
     status = write(session->gpsdata.gps_fd, msg, msglen);
     (void)tcdrain(session->gpsdata.gps_fd);
-#else
-    status = -1;
-#endif /* ALLOW_RECONFIGURE */
     return(status);
 }
 /*@ -charint +usedef +compdef @*/
@@ -309,6 +305,7 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool italk_set_mode(struct gps_device_t *session UNUSED, 
 			   speed_t speed UNUSED, 
 			   char parity UNUSED, int stopbits UNUSED, 
@@ -344,7 +341,6 @@ static void italk_mode(struct gps_device_t *session,  int mode)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
 static void italk_configurator(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0 && session->packet.type == NMEA_PACKET)
@@ -376,17 +372,15 @@ const struct gps_type_t italk_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
     .probe_subtype  = NULL,		/* initialize the device */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = italk_configurator,/* configure the device */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = italk_configurator,/* configure the device */
     .speed_switcher = italk_speed,	/* we can change baud rates */
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
@@ -468,28 +462,21 @@ static void itrax_configurator(struct gps_device_t *session, int seq)
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static bool itrax_speed(struct gps_device_t *session, 
 			speed_t speed, char parity UNUSED, int stopbits UNUSED)
 /* change the baud rate */
 {
-#ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
-#else
     return false;
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool itrax_rate(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
-#ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d\r\n", rate) >= 0;
-#else
-    return false;
-#endif /* ALLOW_RECONFIGURE */
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void itrax_wrap(struct gps_device_t *session)
 /* stop navigation, this cuts the power drain */
@@ -510,17 +497,15 @@ const static struct gps_type_t itrax = {
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = itrax_probe_subtype,	/* initialize */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = itrax_configurator,/* set synchronous mode */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = itrax_configurator,/* set synchronous mode */
     .speed_switcher= itrax_speed,	/* how to change speeds */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = itrax_rate,	/* there's a sample-rate switcher */
-    .cycle_chars   = 438,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
+    .cycle_chars   = 438,		/* change cycle time */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = itrax_wrap,	/* sleep the receiver */

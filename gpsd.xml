@@ -61,7 +61,7 @@ compass.</para>
 
 <para>The GPS protocols supported by your instance of
 <application>gpsd</application> may differ depending on how it was
-compiled; general purppose versions support many, but it can be built
+compiled; general-purpose versions support many, but it can be built
 with protocol subsets down to a singleton for use in constrained
 environments. For a list of the GPS protocols supported by your
 instance, see the output of <command>gpsd -l</command></para>

@@ -516,16 +516,15 @@ const struct gps_type_t superstar2_binary = {
     .probe_wakeup	= superstar2_probe_wakeup,
     /* Initialize the device and get subtype */
     .probe_subtype	= superstar2_probe_subtype,
-#ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
-    .configurator	= superstar2_configurator,
-#endif /* ALLOW_RECONFIGURE */
     /* Packet getter (using default routine) */
     .get_packet		= generic_get,
     /* Parse message packets */
     .parse_packet	= superstar2_parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer	= pass_rtcm,
+#ifdef ALLOW_RECONFIGURE
+    /* Enable what reports we need */
+    .configurator	= superstar2_configurator,
     /* Speed (baudrate) switch */
     .speed_switcher	= superstar2_set_speed,
     /* Switch to NMEA mode */
@@ -534,7 +533,6 @@ const struct gps_type_t superstar2_binary = {
     .rate_switcher	= NULL,
     /* Number of chars per report cycle (not active) */
     .cycle_chars	= -1,
-#ifdef ALLOW_RECONFIGURE
     /* Undo the actions of .configurator */
     .revert		= NULL,
 #endif /* ALLOW_RECONFIGURE */

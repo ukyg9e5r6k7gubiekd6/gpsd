@@ -22,7 +22,6 @@
 static int tsip_write(struct gps_device_t *session, 
 		      unsigned int id, /*@null@*/unsigned char *buf, size_t len)
 {
-#ifdef ALLOW_RECONFIGURE
     char *ep, *cp;
 
     gpsd_report(LOG_IO, "Sent TSIP packet id 0x%02x: %s\n", id,
@@ -47,11 +46,6 @@ static int tsip_write(struct gps_device_t *session,
 	return -1;
 
     return 0;
-#else
-    gpsd_report(LOG_IO, "Not sending TSIP packet id 0x%02x: %s\n", id,
-	gpsd_hexdump_wrapper(buf,len,LOG_IO));
-    return -1;
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static ssize_t tsip_control_send(struct gps_device_t *session, 
@@ -94,6 +88,15 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
+static void tsip_wrapup(struct gps_device_t *session)
+{
+    /* restore saved parity and stopbits when leaving TSIP mode */
+    gpsd_set_speed(session,
+		   session->gpsdata.baudrate,
+		   (unsigned char)session->driver.tsip.parity,
+		   session->driver.tsip.stopbits);
+}
+
 #ifdef ALLOW_RECONFIGURE
 static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 {
@@ -107,16 +110,6 @@ static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 	putbyte(buf,3,0x08);		/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
     }
-}
-#endif /* ALLOW_RECONFIGURE */
-
-static void tsip_wrapup(struct gps_device_t *session)
-{
-    /* restore saved parity and stopbits when leaving TSIP mode */
-    gpsd_set_speed(session,
-		   session->gpsdata.baudrate,
-		   (unsigned char)session->driver.tsip.parity,
-		   session->driver.tsip.stopbits);
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, 
@@ -155,6 +148,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
 
     return true;	/* it would be nice to error-check this */
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t tsip_analyze(struct gps_device_t *session)
 {
@@ -847,17 +841,15 @@ const struct gps_type_t tsip_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = tsip_configurator,/* initial mode sets */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = tsip_configurator,/* initial mode sets */
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switcher */
-#ifdef ALLOW_RECONFIGURE
     .revert         = NULL,		/* FIXME: revert sentence mix */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = tsip_wrapup,	/* restore comms parameters */

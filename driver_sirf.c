@@ -90,12 +90,14 @@ static unsigned char enablemid52[] = {
 static gps_mask_t sirf_msg_debug(unsigned char *, size_t );
 static gps_mask_t sirf_msg_errors(unsigned char *, size_t );
 
-static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
-static gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
-static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
-static gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
-static gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
-static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t);
+#ifdef ALLOW_RECONFIGURE
+static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t);
+#endif /* ALLOW_RECONFIGURE */
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t );
 static gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
 
@@ -140,6 +142,7 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
 {
@@ -207,6 +210,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 	session->back_to_nmea = false;
     }
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static ssize_t sirf_get(struct gps_device_t *session)
 {
@@ -275,6 +279,7 @@ static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
     return 0;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     double fv;
@@ -292,10 +297,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
     } else if (fv < 232) {
 	session->driver.sirf.driverstate |= SIRF_EQ_231;
     } else {
-#ifdef ALLOW_RECONFIGURE
 	gpsd_report(LOG_PROG, "Enabling PPS message...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablemid52);
-#endif /* ALLOW_RECONFIGURE */
 	session->driver.sirf.driverstate |= SIRF_GE_232;
 	session->context->valid |= LEAP_SECOND_VALID;
     }
@@ -305,14 +308,13 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-#ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.baudrate >= 38400){
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
-#endif /* ALLOW_RECONFIGURE */
     return DEVICEID_SET;
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -573,13 +575,13 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
     return mask;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
 
     if (len != 65)
 	return 0;
 
-#ifdef ALLOW_RECONFIGURE
     /* save these to restore them in the revert method */
     session->driver.sirf.nav_parameters_seen = true;
     session->driver.sirf.altitude_hold_mode = getub(buf, 5);
@@ -591,9 +593,9 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char 
     session->driver.sirf.track_smooth_mode = getub(buf, 12);
     gpsd_report(LOG_PROG, "Setting Navigation Parameters\n");
     (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
-#endif /* ALLOW_RECONFIGURE */
     return 0;
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
 {
@@ -722,8 +724,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x05:		/* Raw Tracker Data Out */
 	return 0;
 
+#ifdef ALLOW_RECONFIGURE
     case 0x06:		/* Software Version String */
 	return sirf_msg_swversion(session, buf, len);
+#endif /* ALLOW_RECONFIGURE */
 
     case 0x07:		/* Clock Status Data */
 	gpsd_report(LOG_PROG, "CLK 0x07\n");
@@ -962,13 +966,13 @@ static void sirfbin_revert(struct gps_device_t *session)
     gpsd_report(LOG_PROG, "Reverting navigation parameters...\n");
     (void)sirf_write(session->gpsdata.gps_fd, moderevert);
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static bool sirfbin_speed(struct gps_device_t *session, 
 			  speed_t speed, char parity, int stopbits)
 {
     return sirf_speed(session->gpsdata.gps_fd, speed, parity, stopbits);
 }
+#endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
 const struct gps_type_t sirf_binary =
@@ -981,17 +985,15 @@ const struct gps_type_t sirf_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = sirfbin_configure,/* initialize the device */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = sirfbin_configure,/* initialize the device */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = sirfbin_revert,	/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no close hook */

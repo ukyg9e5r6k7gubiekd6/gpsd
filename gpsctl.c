@@ -92,7 +92,11 @@ int main(int argc, char **argv)
 	    to_binary = true;
 	    break;
 	case 'c':
+#ifdef ALLOW_RECONFIGURE
 	    rate = optarg;
+#else
+	    gpsd_report(LOG_ERROR, "cycle-change capability has been conditioned out.\n");
+#endif /* ALLOW_RECONFIGURE */
 	    break;
 	case 'x':		/* ship specified control string */
 	    control = optarg;
@@ -112,6 +116,7 @@ int main(int argc, char **argv)
 	    break;
         case 'l':		/* list known device types */
 	    for (dp = gpsd_drivers; *dp; dp++) {
+#ifdef ALLOW_RECONFIGURE
 		if ((*dp)->mode_switcher != NULL)
 		    (void)fputs("-[bn]\t", stdout);
 		else
@@ -124,6 +129,7 @@ int main(int argc, char **argv)
 		    (void)fputs("-c\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
+#endif /* ALLOW_RECONFIGURE */
 		if ((*dp)->control_send != NULL)
 		    (void)fputs("-x\t", stdout);
 		else
@@ -132,14 +138,26 @@ int main(int argc, char **argv)
 	    }
 	    exit(0);
 	case 'n':		/* switch to NMEA mode */
+#ifdef ALLOW_RECONFIGURE
 	    to_nmea = true;
+#else
+	    gpsd_report(LOG_ERROR, "speed-change capability has been conditioned out.\n");
+#endif /* ALLOW_RECONFIGURE */
 	    break;
 	case 'r':		/* force-switch to default mode */
+#ifdef ALLOW_RECONFIGURE
 	    reset = true;
 	    lowlevel = false;	/* so we'll abort if the daemon is running */
+#else
+	    gpsd_report(LOG_ERROR, "reset capability has been conditioned out.\n");
+#endif /* ALLOW_RECONFIGURE */
 	    break;
 	case 's':		/* change output baud rate */
+#ifdef ALLOW_RECONFIGURE
 	    speed = optarg;
+#else
+	    gpsd_report(LOG_ERROR, "speed-change capability has been conditioned out.\n");
+#endif /* ALLOW_RECONFIGURE */
 	    break;
 	case 't':		/* force the device type */
 	    devtype = optarg;
@@ -250,13 +268,14 @@ int main(int argc, char **argv)
 	    exit(0);
 	}
 
+	status = 0;
+#ifdef ALLOW_RECONFIGURE
 	if (reset)
 	{
 	    gpsd_report(LOG_PROG, "cannot reset with gpsd running.\n");
 	    exit(0);
 	}
 
-	status = 0;
 	if (to_nmea) {
 	    (void)gps_query(gpsdata, "N=0");
 	    if (gpsdata->driver_mode != MODE_NMEA) {
@@ -314,10 +333,12 @@ int main(int argc, char **argv)
 			    speed, parity, stopbits);
 	}
 	if (rate != NULL) {
-	    gps_query(gpsdata, "C=%\n", rate);
+	    (void)gps_query(gpsdata, "C=%\n", rate);
 	}
+#endif /* ALLOW_RECONFIGURE */
 	(void)gps_close(gpsdata);
 	exit(status);
+#ifdef ALLOW_RECONFIGURE
     } else if (reset) {
 	/* hard reset will go through lower-level operations */
 	const int speeds[] = {2400, 4800, 9600, 19200, 38400, 57600, 115200};
@@ -351,6 +372,7 @@ int main(int argc, char **argv)
 	gpsd_wrap(&session);
 	exit(0);
 	/*@ +mustfreeonly +immediatetrans @*/
+#endif /* ALLOW_RECONFIGURE */
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_context_t	context;	/* start it zeroed */
@@ -435,6 +457,7 @@ int main(int argc, char **argv)
 
 	/* now perform the actual control function */
 	status = 0;
+#ifdef ALLOW_RECOBFIGURE
 	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
@@ -554,6 +577,7 @@ int main(int argc, char **argv)
 	    }
 	    context.readonly = write_enable;
 	}
+#endif /* ALLOW_RECONFIGURE */
 	/*@ -compdef @*/
 	if (control) {
 	    bool write_enable = context.readonly;

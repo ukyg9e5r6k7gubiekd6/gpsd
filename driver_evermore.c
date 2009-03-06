@@ -171,11 +171,7 @@ static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, si
    session->msgbuflen = (size_t)(cp - session->msgbuf);
    /*@ -charint -ignoresigns @*/
 
-#ifdef ALLOW_RECONFIGURE
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
-#else
-   return -1;
-#endif /* ALLOW_RECONFIGURE */
 }
 /*@ -charint +usedef +compdef @*/
 
@@ -378,6 +374,7 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool evermore_speed(struct gps_device_t *session, 
 			   speed_t speed, char parity, int stopbits)
 {
@@ -469,7 +466,6 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
 static void evermore_configurator(struct gps_device_t *session, unsigned int seq)
 {
     gpsd_report(LOG_PROG, "evermore_configurator(%d)\n", seq);
@@ -482,13 +478,12 @@ static void evermore_configurator(struct gps_device_t *session, unsigned int seq
         session->back_to_nmea = true;
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 
 static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
-#ifdef ALLOW_RECONFIGURE
+    /*@ +charint @*/
     char evrm_rate_config[] = {
 	    0x84,    /* 1: msg ID, Operating Mode Configuration */
 	    0x02,    /* 2: normal mode with 1PPS */
@@ -503,17 +498,15 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 	evrm_rate_config[2] = (char)trunc(rate);
 	return (evermore_control_send(session, evrm_rate_config, sizeof(evrm_rate_config)) != -1);
     }
-#else
-    
-    return false;
-#endif /* ALLOW_RECONFIGURE */
+    /*@ -charint @*/
 }
 
-static void evermore_wrap(struct gps_device_t *session)
+static void evermore_revert(struct gps_device_t *session)
 {
-    gpsd_report(LOG_PROG, "evermore_wrap\n");
+    gpsd_report(LOG_PROG, "evermore_revert\n");
     (void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
 }
+#endif /* ALLOW_RECONFIGURE */
 
 
 /* this is everything we export */
@@ -527,20 +520,18 @@ const struct gps_type_t evermore_binary =
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = NULL,			/* no subtype probing */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = evermore_configurator,	/* switch to binary */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = evermore_configurator,	/* switch to binary */
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
     .cycle_chars    = -1,			/* ignore, no rate switch */
-#ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,			/* reversion code */
+    .revert         = evermore_wrap,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = evermore_wrap,		/* wrapup method */
+    .wrapup         = NULL,			/* wrapup method */
     .cycle          = 1,			/* updates every second */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

@@ -295,6 +295,7 @@ static void _proto__probe_subtype(struct gps_device_t *session, unsigned int seq
      */
 }
 
+#ifdef ALLOW_CONFIGURE
 static void _proto__configurator(struct gps_device_t *session, unsigned int seq)
 {
     /* Change sentence mix and set reporting modes as needed */
@@ -359,6 +360,7 @@ static void _proto__revert(struct gps_device_t *session)
     * Reverse what the .configurator method changed.
     */
 }
+#endif /* ALLOW_CONFIGURE */
 
 static void _proto__wrapup(struct gps_device_t *session)
 {
@@ -400,16 +402,15 @@ const struct gps_type_t _proto__binary = {
     .probe_wakeup     = _proto__probe_wakeup,
     /* Initialize the device and get subtype */
     .probe_subtype    = _proto__probe_subtype,
-#ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
-    .configurator     = _proto__configurator,
-#endif /* ALLOW_RECONFIGURE */
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */
     .parse_packet     = _proto__parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer      = pass_rtcm,
+#ifdef ALLOW_RECONFIGURE
+    /* Enable what reports we need */
+    .configurator     = _proto__configurator,
     /* Speed (baudrate) switch */
     .speed_switcher   = _proto__set_speed,
     /* Switch to NMEA mode */
@@ -418,7 +419,6 @@ const struct gps_type_t _proto__binary = {
     .rate_switcher    = NULL,
     /* Number of chars per report cycle (not active) */
     .cycle_chars      = -1,
-#ifdef ALLOW_RECONFIGURE
     /* Undo the actions of .configurator */
     .revert           = _proto__revert,
 #endif /* ALLOW_RECONFIGURE */

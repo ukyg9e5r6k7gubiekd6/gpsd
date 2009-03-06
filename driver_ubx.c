@@ -592,7 +592,6 @@ static void ubx_revert(struct gps_device_t *session)
     /* Reverting all in one fast and reliable reset */
     (void)ubx_write(session, 0x06, 0x04, msg, 4); /* CFG-RST */
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 {
@@ -658,6 +657,7 @@ static bool ubx_speed(struct gps_device_t *session,
     /*@ -charint +usedef +compdef */
     return true;
 }
+#endif /* ALLOW_RECONFIGURE */
 
 /* This is everything we export */
 const struct gps_type_t ubx_binary = {
@@ -669,17 +669,15 @@ const struct gps_type_t ubx_binary = {
     .probe_detect     = NULL,           /* Startup-time device detector */
     .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
     .probe_subtype    = NULL,           /* Initialize the device and get subtype */
-#ifdef ALLOW_RECONFIGURE
-    .configurator     = ubx_configure,  /* Enable what reports we need */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = NULL,           /* RTCM handler (using default routine) */
+#ifdef ALLOW_RECONFIGURE
+    .configurator     = ubx_configure,  /* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
     .rate_switcher    = NULL,           /* Message delivery rate switcher */
     .cycle_chars      = -1,             /* Number of chars per report cycle */
-#ifdef ALLOW_RECONFIGURE
     .revert           = ubx_revert,     /* Undo the actions of .configurator */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup           = NULL,           /* Puts device back to original settings */

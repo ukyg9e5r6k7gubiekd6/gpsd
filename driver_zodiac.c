@@ -67,7 +67,6 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, un
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
-#ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.gps_fd != -1) {
 	size_t hlen, datlen;
 	hlen = sizeof(h);
@@ -78,7 +77,6 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, un
 	    return -1;
 	}
     }
-#endif /* ALLOW_RECONFIGURE */
 
     (void)snprintf(buf, sizeof(buf),
 		   "%04x %04x %04x %04x %04x",
@@ -92,6 +90,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, un
     return 0;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool zodiac_speed_switch(struct gps_device_t *session, 
 				speed_t speed, char parity, int stopbits)
 {
@@ -127,12 +126,9 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
     data[14] = zodiac_checksum(data, 14);
 
     (void)zodiac_spew(session, 1330, data, 15);
-#ifdef ALLOW_RECONFIGURE
     return true; /* it would be nice to error-check this */
-#else
-    return false;
-#endif /* ALLOW_RECONFIGURE */
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static ssize_t zodiac_control_send(struct gps_device_t *session, 
 				   char *msg, size_t len) 
@@ -476,17 +472,15 @@ const struct gps_type_t zodiac_binary =
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no initialization */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,		/* no configuration */
-#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = NULL,		/* no configuration */
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
     .revert	    = NULL,		/* no reversion hook */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* caller might supply a close hook */

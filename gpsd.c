@@ -690,6 +690,7 @@ static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
     /*@ +temptrans +mayaliasunique @*/
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool privileged_user(struct subscriber_t *who)
 /* is this user privileged to change the GPS's behavior? */
 {
@@ -702,6 +703,7 @@ static bool privileged_user(struct subscriber_t *who)
 	    subscribercount++;
     return (subscribercount == 1);
 }
+#endif /* ALLOW_CONFIGURE */
 
 static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
@@ -722,6 +724,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    else
 		(void)strlcpy(phrase, ",A=?", BUFSIZ);
 	    break;
+#ifdef ALLOW_RECONFIGURE
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
 #ifndef FIXED_PORT_SPEED
 	    if (assign_channel(sub) && sub->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
@@ -812,6 +815,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				   ",C=%.2f %.2f", sub->device->cycle, mincycle);
 	    }
 	    break;
+#endif /* ALLOW_RECONFIGURE */
 	case 'D':
 	    (void)strlcpy(phrase, ",D=", BUFSIZ);
 	    if (assign_channel(sub) && isnan(sub->fixbuffer.time)==0)
@@ -934,6 +938,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", sub->fixbuffer.mode);
 	    break;
+#ifdef ALLOW_RECONFIGURE
 	case 'N':
 	    if (!assign_channel(sub) || sub->device->device_type == NULL)
 		(void)strlcpy(phrase, ",N=?", BUFSIZ);
@@ -956,6 +961,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",N=%u", sub->device->gpsdata.driver_mode);
 	    break;
+#endif /* ALLOW_RECONFIGURE */
 	case 'O':
 	    if (!assign_channel(sub) || !have_fix(sub))
 		(void)strlcpy(phrase, ",O=?", BUFSIZ);
@@ -1399,6 +1405,7 @@ int main(int argc, char *argv[])
 	    break;
         case 'l':		/* list known device types and exit */
 	    for (dp = gpsd_drivers; *dp; dp++) {
+#ifdef ALLOW_RECONFIGURE
 		if ((*dp)->mode_switcher != NULL)
 		    (void)fputs("n\t", stdout);
 		else
@@ -1411,6 +1418,7 @@ int main(int argc, char *argv[])
 		    (void)fputs("c\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
+#endif /* ALLOW_RECONFIGURE */
 		(void)puts((*dp)->type_name);
 	    }
 	    exit(0);
