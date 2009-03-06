@@ -69,7 +69,8 @@ static struct gps_context_t	context;
 static int controlfd = -1;
 static bool serial, curses_active;
 static int debuglevel = 0;
-static WINDOW *statwin, *cmdwin, *packetwin;
+static WINDOW *statwin, *cmdwin;
+/*@null@*/static WINDOW *packetwin;
 static FILE *logfile;
 static char *type_name;
 /*@ -nullassign @*/
@@ -348,9 +349,11 @@ static bool switch_type(const struct gps_type_t *devtype)
 		return false;
 	    }
 
+	    /*@ -onlytrans @*/
 	    leftover = LINES-1-(*active)->min_y;
 	    if (leftover <= 0) {
-		(void)delwin(packetwin);
+		if (packetwin != NULL)
+		    (void)delwin(packetwin);
 		packetwin = NULL;
 	    } else if (packetwin == NULL) {
 		packetwin = newwin(leftover, COLS, (*active)->min_y+1, 0);
@@ -361,6 +364,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 		(void)mvwin(packetwin, (*active)->min_y+1, 0);
 		(void)wsetscrreg(packetwin, 0, leftover-1);
 	    }
+	    /*@ +onlytrans @*/
 	}
 	return true;
     }
@@ -551,11 +555,13 @@ int main (int argc, char **argv)
 	/* get a packet -- calls gpsd_poll() */
 	if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 	    /* switch types on packet receipt */
+	    /*@ -nullpass */
 	    if (session.packet.type != last_type) {
 		last_type = session.packet.type;
 		if (!switch_type(session.device_type))
 		    goto quit;
 	    }
+	    /*@ +nullpass */
 
 	    /* refresh all windows */
 	    (void)wprintw(cmdwin, type_name);
