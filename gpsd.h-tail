@@ -203,7 +203,7 @@ struct gps_type_t {
 				     speed_t speed, char parity, int stopbits);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
-    int cycle_chars;
+    int min_cycle;
     /*@null@*/void (*revert)(struct gps_device_t *session);
 #endif /* ALLOW_RECONFIGURE */
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
