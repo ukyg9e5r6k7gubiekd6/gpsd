@@ -1213,7 +1213,6 @@ const struct gps_type_t garmin_usb_binary =
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = garmin_close,	/* close hook */
-    .cycle          = 1,		/* updates every second */
 };
 
 const struct gps_type_t garmin_ser_binary =
@@ -1240,7 +1239,6 @@ const struct gps_type_t garmin_ser_binary =
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,	        /* close hook */
-    .cycle          = 1,		/* updates every second */
 };
 
 #endif /* GARMIN_ENABLE */

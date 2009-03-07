@@ -207,7 +207,6 @@ struct gps_type_t {
     /*@null@*/void (*revert)(struct gps_device_t *session);
 #endif /* ALLOW_RECONFIGURE */
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
-    double cycle;
 };
 
 struct gps_device_t {
@@ -222,7 +221,6 @@ struct gps_device_t {
     struct termios ttyset, ttyset_old;
     unsigned int baudindex;
     int saved_baud;
-    double cycle;
     struct gps_packet_t packet;
     char subtype[64];			/* firmware version or subtype ID */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */

@@ -707,6 +707,5 @@ const struct gps_type_t ubx_binary = {
     .revert           = ubx_revert,     /* Undo the actions of .configurator */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup           = NULL,           /* Puts device back to original settings */
-    .cycle            = 1               /* Number of updates per second */
 };
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

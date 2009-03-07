@@ -566,7 +566,5 @@ const struct gps_type_t superstar2_binary = {
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */
     .wrapup		= NULL,
-    /* Number of updates per second */
-    .cycle		= 1
 };
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

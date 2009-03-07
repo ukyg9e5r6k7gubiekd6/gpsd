@@ -1272,7 +1272,6 @@ const struct gps_type_t navcom_binary =
     .revert	 = NULL,			/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	 = NULL,			/* ignore, no wrapup */
-    .cycle	  = 1,			/* updates every second */
 };
 
 #endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */

@@ -47,8 +47,6 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
-	    if (session->cycle <= 0)
-		session->cycle = (*dp)->cycle;
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
@@ -89,6 +87,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.gdop = NAN;
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
+    session->gpsdata.cycle = session->gpsdata.mincycle = 1; 
 
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -778,7 +777,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.online = 0;
 	return 0;
     } else if (newlen == 0) {		/* no new data */
-	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
+	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.
+cycle+1){
 	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
 		    session->gpsdata.gps_device,
 		    timestamp() - session->gpsdata.online);

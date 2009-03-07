@@ -536,6 +536,5 @@ const struct gps_type_t evermore_binary =
     .revert         = evermore_revert,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,			/* wrapup method */
-    .cycle          = 1,			/* updates every second */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

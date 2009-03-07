@@ -1001,6 +1001,5 @@ const struct gps_type_t sirf_binary =
     .revert	    = sirfbin_revert,	/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no close hook */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

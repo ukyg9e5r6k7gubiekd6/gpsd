@@ -388,7 +388,6 @@ const struct gps_type_t italk_binary =
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
-    .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
 

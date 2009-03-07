@@ -262,7 +262,6 @@ const struct gps_type_t nmea = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
@@ -352,7 +351,6 @@ const struct gps_type_t garmin = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /*ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
@@ -415,7 +413,6 @@ const struct gps_type_t ashtech = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* ASHTECH_ENABLE */
 
@@ -462,7 +459,6 @@ const struct gps_type_t fv18 = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* FV18_ENABLE */
 
@@ -512,7 +508,6 @@ const struct gps_type_t gpsclock = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* GPSCLOCK_ENABLE */
 
@@ -570,7 +565,6 @@ static const struct gps_type_t tripmate = {
     .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup */
-    .cycle	   = 1,				/* updates every second */
 };
 #endif /* TRIPMATE_ENABLE */
 
@@ -618,7 +612,6 @@ static const struct gps_type_t earthmate = {
     .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup code */
-    .cycle	   = 1,				/* updates every second */
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
@@ -911,7 +904,6 @@ static const struct gps_type_t rtcm104v2 = {
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
-    .cycle	   = 1,			/* updates every second */
 };
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
@@ -955,7 +947,6 @@ static const struct gps_type_t rtcm104v3 = {
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
-    .cycle	   = 1,			/* updates every second */
 };
 #endif /* RTCM104V3_ENABLE */
 
@@ -1091,7 +1082,6 @@ const struct gps_type_t mkt3301 = {
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 1,		/* updates every second */
 };
 #endif /* MKT3301_ENABLE */
 

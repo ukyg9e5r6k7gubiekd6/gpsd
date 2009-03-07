@@ -16,6 +16,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.6</revnumber>
+      <date>1 Mar 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr to reflect removal of the cycle member.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.5</revnumber>
       <date>1 Mar 2009</date>
       <authorinitials>er</authorinitials>
@@ -623,7 +631,6 @@ binary mode (1).</para>
 to change the maximum number of fixes your device can generate
 in 1 second.</para>
 
-<!-- added by ESR, 2009 -->
 <para><structfield>.control_send</structfield> points to a block of
 code that can take a buffer full of message payload, wrap iit in
 appropriate headers and trailers and checksumming, and ship it to the
@@ -660,22 +667,23 @@ which is run unconditionally each time the device is to be closed.
 also where you should undo any port parameter changes you made in
 <structfield>.probe_detect</structfield>above.</para>
 
-<para><structfield>.cycle</structfield> is a number giving the number of
+<!-- deleted by ESR, 2009 -->
+<!-- <para><structfield>.cycle</structfield> is a number giving the number of
 fixes per second you can get. Gets updated if you can rate-switch
-and user gives a <application>gpsd</application> 'C' command.</para>
+and user gives a <application>gpsd</application> 'C' command.</para> -->
 
+<!-- modified by ESR, 2009 -->
 <para>The connection between some of the above was confirmed with Eric
 Raymond as follows.</para> <para>The inter-relationship between
 <structfield>.speed_switcher</structfield>,
 <structfield>.rate_switcher</structfield>,
-<structfield>.cycle_chars</structfield> and
-<structfield>.cycle</structfield> is:-</para> <para>If we can change
+<structfield>.cycle_chars</structfield> is:-</para> <para>If we can change
 baud rate (<structfield>.speed_switcher</structfield>) and we can
 alter the rate at which fixes are delivered
 (<structfield>.rate_switcher</structfield>), then we need to know the
 number of characters in a fix string
 (<structfield>.cycle_chars</structfield>) so that we can compute the
-number of fixes/second (<structfield>.cycle</structfield>) we can ask
+minimum reporting cycle time we can ask
 for.</para>
 </sect1>
 

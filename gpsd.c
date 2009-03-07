@@ -805,14 +805,14 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		    if (cycle >= mincycle)
 			if (dev->rate_switcher != NULL)
 			    if (dev->rate_switcher(sub->device, cycle))
-				sub->device->cycle = cycle;
+				sub->device->gpsdata.cycle = cycle;
 		}
 		if (dev->rate_switcher == NULL)
 		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f", sub->device->cycle);
+				   ",C=%.2f", sub->device->gpsdata.cycle);
 		else
-		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f %.2f", sub->device->cycle, mincycle);
+		    (void)snprintf(phrase, sizeof(phrase), ",C=%.2f %.2f", 
+				   sub->device->gpsdata.cycle, mincycle);
 	    }
 	    break;
 #endif /* ALLOW_RECONFIGURE */

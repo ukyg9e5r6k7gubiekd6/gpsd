@@ -857,7 +857,6 @@ const struct gps_type_t tsip_binary =
     .revert         = NULL,		/* FIXME: revert sentence mix */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = tsip_wrapup,	/* restore comms parameters */
-    .cycle          = 1,		/* updates every second */
 };
 
 #endif /* TSIP_ENABLE */

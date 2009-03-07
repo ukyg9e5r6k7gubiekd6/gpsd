@@ -486,7 +486,6 @@ const struct gps_type_t zodiac_binary =
     .revert	    = NULL,		/* no reversion hook */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* caller might supply a close hook */
-    .cycle	    = 1,		/* updates every second */
 };
 
 #endif /* ZODIAC_ENABLE */
