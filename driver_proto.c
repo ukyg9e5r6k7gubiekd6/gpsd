@@ -300,7 +300,11 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 #ifdef ALLOW_CONFIGURE
 static void _proto__configurator(struct gps_device_t *session, unsigned int seq)
 {
-    /* Change sentence mix and set reporting modes as needed */
+    /* 
+     * Change sentence mix and set reporting modes as needed.
+     * If your device has a default cycle time other than 1 second,
+     * set session->device->gpsdata.cycle here.
+     */
 }
 
 /*
