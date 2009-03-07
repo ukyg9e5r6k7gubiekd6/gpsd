@@ -7,7 +7,7 @@
 webdir=shell.berlios.de:/home/groups/gpsd/htdocs
 #cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
-make html	# Ensure all derived HTML is up to date.
+make all	# Ensure all derived HTML and checksums are up to date.
 
 if [ $1 ]
 then
