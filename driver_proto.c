@@ -421,15 +421,13 @@ const struct gps_type_t _proto__binary = {
     .mode_switcher    = _proto__set_mode,
     /* Message delivery rate switcher (not active) */
     .rate_switcher    = NULL,
-    /* Number of chars per report cycle (not active) */
-    .cycle_chars      = -1,
+    /* Minimum cycle time of the device */
+    .min_cycle        = 1,
     /* Undo the actions of .configurator */
     .revert           = _proto__revert,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */
     .wrapup           = _proto__wrapup,
-    /* Number of updates per second */
-    .cycle            = 1
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */
 

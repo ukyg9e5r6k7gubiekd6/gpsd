@@ -1181,11 +1181,10 @@ const struct gps_type_t garmin_usb_binary_old =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = garmin_close,	/* close hook */
-    .cycle          = 1,		/* updates every second */
 };
 #endif /* __UNUSED__ */
 
@@ -1209,7 +1208,7 @@ const struct gps_type_t garmin_usb_binary =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = garmin_close,	/* close hook */
@@ -1235,7 +1234,7 @@ const struct gps_type_t garmin_ser_binary =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,	        /* close hook */

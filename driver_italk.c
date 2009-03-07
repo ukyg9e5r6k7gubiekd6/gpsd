@@ -384,7 +384,7 @@ const struct gps_type_t italk_binary =
     .speed_switcher = italk_speed,	/* we can change baud rates */
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
@@ -492,29 +492,28 @@ static void itrax_wrap(struct gps_device_t *session)
 
 /*@ -redef @*/
 const static struct gps_type_t itrax = {
-    .type_name     = "iTrax",		/* full name of type */
+    .type_name      = "iTrax",		/* full name of type */
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
-    .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
-    .channels      = 12,		/* consumer-grade GPS */
-    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
-    .probe_detect  = NULL,		/* no probe */
-    .probe_subtype = itrax_probe_subtype,	/* initialize */
-    .get_packet    = generic_get,	/* how to get a packet */
-    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
-    .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
+    .trigger        = "$PFST,OK",	/* tells us to switch to Itrax */
+    .channels       = 12,		/* consumer-grade GPS */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = itrax_probe_subtype,	/* initialize */
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
 #ifdef ALLOW_CONTROLSEND
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator  = itrax_configurator,/* set synchronous mode */
-    .speed_switcher= itrax_speed,	/* how to change speeds */
-    .mode_switcher = NULL,		/* no mode switcher */
-    .rate_switcher = itrax_rate,	/* there's a sample-rate switcher */
-    .cycle_chars   = 438,		/* change cycle time */
+    .configurator   = itrax_configurator,/* set synchronous mode */
+    .speed_switcher = itrax_speed,	/* how to change speeds */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = itrax_rate,	/* there's a sample-rate switcher */
+    .min_cycle      = 0,		/* no hard limit */
     .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = itrax_wrap,	/* sleep the receiver */
-    .cycle          = 1,		/* updates every second */
 };
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */

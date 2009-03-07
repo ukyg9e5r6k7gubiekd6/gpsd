@@ -105,7 +105,6 @@ file in the source distribution.</p>
 <li><a href="#reports">Where to put the data you get from the GPS</a></li>
 <li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
 <li><a href="#logfiles">Log files for regression testing</a></li>
-<li><a href="#throughput">Throughput computation for baud rate changes</a></li>
 </ol>
 <li><a href="#buffering">The buffering problem</a></li>
 <ol>
@@ -995,7 +994,7 @@ the null-terminated array in drivers.c.</p>
 it should live in its own C source file named after the driver type.
 Add it to the libgps_c_sources name list in Makefile.am</p>
 
-<p>The easiest way write a driver is probably to copy the driver_proto.c
+<p>The easiest way to write a driver is probably to copy the driver_proto.c
 file in the source distribution, change names appropriately, and write
 the guts of the analyzer and writer functions.  Look in gpsutils.c
 before you do; driver helper functions live there.  Also read some
@@ -1005,7 +1004,7 @@ existing drivers for clues.</p>
 On Writing A GPSD Driver.</a></para>
 
 <p>There's a second kind of driver architecture for
-<code>gpsmon</code>, the real-timr packet monitor and diagnostic tool.
+<code>gpsmon</code>, the real-time packet monitor and diagnostic tool.
 It works from monitor-object definitions that include a pointer to the
 device driver for the GPS type you want to monitor.  See
 monitor_proto.c for a prototype and technical details.</p>
@@ -1150,36 +1149,6 @@ logfile format.</p>
 <p>An ideal log file for regression testing would include an initial
 portion during which the GPS has no fix, a portion during which it has
 a fix but is stationary, and a portion during which it is moving.</p>
-
-<h3 id="throughput">Throughput computation for baud rate changes</h3>
-
-<p>At low baud rates it is possible to try to push more characters of
-NMEA through per cycle than the time to transmit will allow.  Here
-are the maxima to use for computation:</p>
-
-<div>&nbsp;</div>
-
-<table border='1'>
-<tr><td>ZDA       </td><td>36</td></tr>
-<tr><td>GLL       </td><td>47</td></tr>
-<tr><td>GGA       </td><td>82</td></tr>
-<tr><td>VTG       </td><td>46</td></tr>
-<tr><td>RMC       </td><td>77</td></tr>
-<tr><td>GSA       </td><td>67</td></tr>
-<tr><td>GSV       </td><td>60 (per line, thus 180 for a set of 3)</td></tr>
-</table>
-
-<p>The transmit time for a cycle (which must be less than 1 second)
-is the total character count multiplied by 10 and divided by the 
-baud rate.</p>
-
-<p>A typical budget is GGA, RMC, GSA, 3*GSV = 82+75+67+(3*60) = 404.</p>
-
-<p>When you write a driver that includes the capability to change
-sampling rates, you must fill in the cycle_chars member with 
-a maximum character length so the daemon framework code will
-be able to compute when a sample-rate change will work.  If
-you have to estimate this number, err on the high side.</p>
 
 <h1 id="buffering">The buffering problem</h1>
 

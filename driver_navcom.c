@@ -1268,10 +1268,10 @@ const struct gps_type_t navcom_binary =
     .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */
-    .cycle_chars    = -1,			/* ignore, no rate switch */
-    .revert	 = NULL,			/* no reversion code */
+    .min_cycle      = 1,			/* ignore, no rate switch */
+    .revert	    = NULL,			/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	 = NULL,			/* ignore, no wrapup */
+    .wrapup	    = NULL,			/* ignore, no wrapup */
 };
 
 #endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */

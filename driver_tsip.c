@@ -853,7 +853,7 @@ const struct gps_type_t tsip_binary =
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switcher */
+    .min_cycle      = 1,		/* not relevant, no rate switcher */
     .revert         = NULL,		/* FIXME: revert sentence mix */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = tsip_wrapup,	/* restore comms parameters */

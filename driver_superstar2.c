@@ -559,8 +559,8 @@ const struct gps_type_t superstar2_binary = {
     .mode_switcher	= superstar2_set_mode,
     /* Message delivery rate switcher (not active) */
     .rate_switcher	= NULL,
-    /* Number of chars per report cycle (not active) */
-    .cycle_chars	= -1,
+    /* Minimum cycle time (not used) */
+    .min_cycle	        = 1,
     /* Undo the actions of .configurator */
     .revert		= NULL,
 #endif /* ALLOW_RECONFIGURE */

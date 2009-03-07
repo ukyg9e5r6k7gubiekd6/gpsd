@@ -532,7 +532,7 @@ const struct gps_type_t evermore_binary =
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
-    .cycle_chars    = -1,			/* ignore, no rate switch */
+    .min_cycle      = 1,			/* ignore, no rate switch */
     .revert         = evermore_revert,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,			/* wrapup method */

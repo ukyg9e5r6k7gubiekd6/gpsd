@@ -702,8 +702,8 @@ const struct gps_type_t ubx_binary = {
     .configurator     = ubx_configure,  /* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
-    .rate_switcher    = ubx_rate,      /* Message delivery rate switcher */
-    .cycle_chars      = -1,             /* Number of chars per report cycle */
+    .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
+    .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
     .revert           = ubx_revert,     /* Undo the actions of .configurator */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup           = NULL,           /* Puts device back to original settings */

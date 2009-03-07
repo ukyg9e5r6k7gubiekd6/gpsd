@@ -47,6 +47,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
+	    session->gpsdata.mincycle = session->device_type->min_cycle;
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE

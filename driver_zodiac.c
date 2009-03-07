@@ -482,7 +482,7 @@ const struct gps_type_t zodiac_binary =
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no reversion hook */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* caller might supply a close hook */

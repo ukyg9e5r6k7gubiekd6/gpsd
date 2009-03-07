@@ -799,20 +799,18 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
 	    else {
 		const struct gps_type_t *dev = sub->device->device_type;
-		double mincycle = (dev->cycle_chars * 10.0) / sub->device->gpsdata.baudrate;
 		if (*p == '=' && privileged_user(sub)) {
 		    double cycle = strtod(++p, &p);
-		    if (cycle >= mincycle)
-			if (dev->rate_switcher != NULL)
-			    if (dev->rate_switcher(sub->device, cycle))
-				sub->device->gpsdata.cycle = cycle;
+		    if (dev->rate_switcher != NULL && cycle >= dev->min_cycle)
+			if (dev->rate_switcher(sub->device, cycle))
+			    sub->device->gpsdata.cycle = cycle;
 		}
 		if (dev->rate_switcher == NULL)
 		    (void)snprintf(phrase, sizeof(phrase),
 				   ",C=%.2f", sub->device->gpsdata.cycle);
 		else
 		    (void)snprintf(phrase, sizeof(phrase), ",C=%.2f %.2f", 
-				   sub->device->gpsdata.cycle, mincycle);
+				   sub->device->gpsdata.cycle, sub->device->gpsdata.cycle);
 	    }
 	    break;
 #endif /* ALLOW_RECONFIGURE */

@@ -997,7 +997,7 @@ const struct gps_type_t sirf_binary =
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = sirfbin_revert,	/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no close hook */

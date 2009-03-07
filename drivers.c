@@ -258,7 +258,7 @@ const struct gps_type_t nmea = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -347,7 +347,7 @@ const struct gps_type_t garmin = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /*ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -409,7 +409,7 @@ const struct gps_type_t ashtech = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -455,7 +455,7 @@ const struct gps_type_t fv18 = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -504,7 +504,7 @@ const struct gps_type_t gpsclock = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* sample rate is fixed */
-    .cycle_chars    = -1,		/* sample rate is fixed */
+    .min_cycle      = 1,		/* sample rate is fixed */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
@@ -561,7 +561,7 @@ static const struct gps_type_t tripmate = {
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
-    .cycle_chars   = -1,			/* no rate switch */
+    .min_cycle     = 1,				/* no rate switch */
     .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup */
@@ -608,7 +608,7 @@ static const struct gps_type_t earthmate = {
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
-    .cycle_chars   = -1,			/* no rate switch */
+    .min_cycle     = 1,				/* no rate switch */
     .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,			/* no wrapup code */
@@ -757,8 +757,9 @@ static bool tnt_probe(struct gps_device_t *session)
       {
 	  gpsd_report(LOG_PROG, "hunting at speed %d\n", *ip);
 	  gpsd_set_speed(session, *ip, 'N',1);
-	  if (tnt_packet_sniff(session) != BAD_PACKET)
+	  if (tnt_packet_sniff(session) != BAD_PACKET) {
 	      return true;
+	  }
       }
   return false;
 }
@@ -782,11 +783,10 @@ static const struct gps_type_t trueNorth = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 0.5,		/* fixed at 20 samples per second */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 20,		/* updates per second */
 };
 #endif
 
@@ -856,11 +856,10 @@ static const struct gps_type_t oceanServer = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
-    .cycle	    = 20,		/* updates per second */
 };
 #endif
 
@@ -900,7 +899,7 @@ static const struct gps_type_t rtcm104v2 = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .min_cycle     = 1,			/* not relevant, no rate switch */
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
@@ -943,7 +942,7 @@ static const struct gps_type_t rtcm104v3 = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .min_cycle     = 1,			/* not relevant, no rate switch */
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
@@ -983,11 +982,10 @@ static const struct gps_type_t garmintxt = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .min_cycle     = 1,			/* not relevant, no rate switch */
     .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	   = NULL,		/* no wrapup code */
-    .cycle	   = 1,			/* updates every second */
 };
 #endif /* GARMINTXT_ENABLE */
 
@@ -1078,7 +1076,7 @@ const struct gps_type_t mkt3301 = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
     .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup	    = NULL,		/* no wrapup */
