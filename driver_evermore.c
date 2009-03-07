@@ -515,7 +515,7 @@ static void evermore_revert(struct gps_device_t *session)
 const struct gps_type_t evermore_binary =
 {
     .type_name      = "EverMore binary",	/* full name of type */
-    .packet_type    = NMEA_PACKET,		/* lexer packet type */
+    .packet_type    = EVERMORE_PACKET,		/* lexer packet type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
