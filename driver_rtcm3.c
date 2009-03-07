@@ -400,6 +400,14 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1014:
+	rtcm->rtcmtypes.rtcm3_1014.network_id =(int)ugrab(8);
+	rtcm->rtcmtypes.rtcm3_1014.subnetwork_id =(int)ugrab(4);
+	rtcm->rtcmtypes.rtcm3_1014.stationcount =(char)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1014.master_id =(int)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1014.aux_id =(int)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1014.d_lat =(unsigned short)ugrab(20) * ANTENNA_DEGREE_RESOLUTION;
+	rtcm->rtcmtypes.rtcm3_1014.d_lon =(unsigned short)ugrab(21) * ANTENNA_DEGREE_RESOLUTION;
+	rtcm->rtcmtypes.rtcm3_1014.d_alt =(unsigned short)ugrab(23) / 1000;
 	break;
 
     case 1015:
@@ -698,6 +706,16 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1014:
+	    (void)fprintf(fp,
+			  "    netid=%u subnetid=%d statcount=%d master=%d aux=%d lat=%f, lon=%f, alt=%f\n",
+			  rtcm->rtcmtypes.rtcm3_1014.network_id,
+			  rtcm->rtcmtypes.rtcm3_1014.subnetwork_id,
+			  (int)rtcm->rtcmtypes.rtcm3_1014.stationcount,
+			  rtcm->rtcmtypes.rtcm3_1014.master_id,
+			  rtcm->rtcmtypes.rtcm3_1014.aux_id,
+			  rtcm->rtcmtypes.rtcm3_1014.d_lat,
+			  rtcm->rtcmtypes.rtcm3_1014.d_lon,
+			  rtcm->rtcmtypes.rtcm3_1014.d_alt);
 	    break;
 
 	case 1015:
