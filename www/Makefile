@@ -22,8 +22,11 @@ XML = \
 	rtcm-104.xml \
 	srec.xml
 
+all: html sums
 
-html: index.html hardware.html gypsy.html $(XML:.xml=.html)
+html: index.html hardware.html writing-a-driver.html gypsy.html $(XML:.xml=.html)
+
+writing-a-driver.html: writing-a-driver.xml
 
 index.html: index.html.in
 	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
@@ -31,9 +34,8 @@ index.html: index.html.in
 hardware.html: hardware-head.html ../gpscap.ini hardware-tail.html
 	(cat hardware-head.html; (cd ..; python gpscap.py); cat hardware-tail.html) >hardware.html
 
-# Re-do this and upload it when adding new manuals
 sums: 
 	sha1sum `find vendor-docs -type f -name "*.pdf" -print` >checksums
 
 clean:
-	rm -f $(XML:.xml=.html) *~
+	rm -f $(XML:.xml=.html) hardware.html writing-a-driver.html *~
