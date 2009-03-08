@@ -1,24 +1,54 @@
 /* $Id$ */
 /*
- * Handle the Garmin binary packet format supported by the USB Garmins
- * tested with the Garmin 18 and other models.  This driver is NOT for
- * serial port connected Garmins, they provide adequate NMEA support.
+ * This file contains two drivers for Garmin receivers and some code
+ * shared by both drivers.
+ *
+ * One driver "garmin_usb_binary" handles the Garmin binary packet
+ * format supported by the USB Garmins tested with the Garmin 18 and
+ * other models.  (There is also "garmin_usb_binary_old".)
+ *
+ * The other driver "garmin_ser_binary" is for Garmin receivers via a
+ * serial port, whether or not one uses a USB/serial adaptor or a real
+ * serial port.  These receivers provide adequate NMEA support, so it
+ * often makes sense to just put them into NMEA mode.
+ *
+ * On Linux, USB Garmins need the Linux garmin_gps driver and will not
+ * function without it.  This code has been tested and at least at one
+ * time is known to work on big- and little-endian CPUs and 32 and 64
+ * bit cpu modes.
+ *
+ * On other operating systems, it is not clear if garmin_usb_binary
+ * works.
+ *
+ * Documentation for the Garmin protocols can be found via
+ *   http://www.garmin.com/support/commProtocol.html
+ * The file IOSDK.zip contains IntfSpec.pdf, which describes the
+ * protocol in terms of Application, Link, and Physical.  This
+ * identical file is also available at:
+ *   http://www.garmin.com/support/pdf/iop_spec.pdf
+ * An older version of iop_spec.pdf that describes only Serial Binary
+ * is available at:
+ *   http://vancouver-webpages.com/pub/peter/iop_spec.pdf
+ * Information about the GPS 18 
+ *   http://www.garmin.com/manuals/425_TechnicalSpecification.pdf
+ *
+ * There is one Physical protocols for serial which uses DLE/ETX
+ * framing.  There is another physical protocol for USB which relies
+ * on the packetization intrinstic to USB bulk pipes.
+ *
+ * There are several Link protocols; all devices implement L000.
+ * There are then product-specific protocols; most devices implement
+ * L001.  Link protocols are the same and carried over either Physical
+ * protocol.
+ *
+ * Application protocols are named A000 and then with different
+ * 3-digit numbres.  They are carried over Link protocols.
+ *
+ * Thus, much of the higher-level code dealing the data formats is
+ * shared between USB Binary and Serial Binary.
  *
  * This code is partly from the Garmin IOSDK and partly from the
  * sample code in the Linux garmin_gps driver.
- *
- * This code supports both Garmin on a serial port and USB Garmins.
- *
- * USB Garmins need the Linux garmin_gps driver and will not function
- * without it.  This code has been tested and at least at one time is
- * known to work on big- and little-endian CPUs and 32 and 64 bit cpu
- * modes.
- *
- * Protocol info from:
- *	 425_TechnicalSpecification.pdf
- *	 ( formerly GPS18_TechnicalSpecification.pdf )
- *	 iop_spec.pdf
- * http://www.garmin.com/support/commProtocol.html
  *
  * bad code by: Gary E. Miller <gem@rellim.com>
  * all rights abandoned, a thank would be nice if you use this code.
@@ -39,6 +69,10 @@
  * known bugs:
  *      hangs in the fread loop instead of keeping state and returning.
  *      may or may not work on a little-endian machine
+ *
+ * TODO:
+ *
+ *	?? Add probe function for Serial Binary to start PVT output.
  */
 
 #define __USE_POSIX199309 1
