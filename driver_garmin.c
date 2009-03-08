@@ -104,6 +104,7 @@
 
 #define USE_RMD 0
 
+/* Used in Serial Physical Layer */
 #define ETX 0x03
 #define ACK 0x06
 #define DLE 0x10
@@ -719,6 +720,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 	chksum = pkt_id;
 	*buffer++ = (uint8_t)length;
 	chksum += length;
+	/* ??? What is this doing? */
 	if ( 2 == length ) {
 		/* carefull!  no DLE stuffing here! */
 		set_int16(buffer, data);
@@ -732,6 +734,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 		chksum += buffer[2];
 		chksum += buffer[3];
 	}
+	/* ??? How is data copied to the buffer? */
 	buffer += length;
 
 	// Add checksum
