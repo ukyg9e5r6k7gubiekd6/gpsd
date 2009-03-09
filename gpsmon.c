@@ -248,6 +248,36 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 	return (st != -1);
     }
 }
+
+static bool monitor_raw_send(/*@in@*/unsigned char *buf, size_t len)
+{
+    if (controlfd == -1) 
+	return false;
+    else {
+	ssize_t st;
+
+	if (!serial) {
+	    /*@ -sefparams @*/
+	    assert(write(controlfd, "!", 1) != -1);
+	    assert(write(controlfd, session.gpsdata.gps_device, strlen(session.gpsdata.gps_device)) != -1);
+	    assert(write(controlfd, "=", 1) != -1);
+	    /*@ +sefparams @*/
+	}
+
+	st = write(controlfd, (char *)buf, len);
+
+	if (!serial) {
+	    /* enough room for "ERROR\r\n\0" */
+	    /*@ -sefparams @*/
+	    assert(read(controlfd, buf, 8) != -1);
+	    /*@ +sefparams @*/
+	}
+	(void)memcpy(session.msgbuf, buf, len);
+	session.msgbuflen = len;
+	monitor_dump_send();
+	return (st == len);
+    }
+}
 #endif /* ALLOW_CONTROLSEND */
 
 /*****************************************************************************
@@ -826,6 +856,13 @@ int main (int argc, char **argv)
 		}
 		break;
 
+	    case 'X':				/* send raw packet */
+		len = gpsd_hexpack(arg, (char*)buf, strlen(arg));
+		if (len < 0)
+		    monitor_complain("Invalid hex string (error %d)", len);
+		else if (!monitor_raw_send(buf, (size_t)len))
+		    monitor_complain("Raw send failed.");
+		break;
 #endif /* ALLOW_CONTROLSEND */
 
 	    default:

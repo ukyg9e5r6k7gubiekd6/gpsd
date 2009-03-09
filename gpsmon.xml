@@ -200,9 +200,23 @@ support in <application>gpsmon</application>.</para>
 <varlistentry>
 <term>x</term>
 <listitem>
-<para>Send hex bytes to device. Following the command letter you may type hex
-digit pairs; end with a newline.  These will become the payload of a
-control packet shipped to the device.</para>
+<para>Send hex payload to device. Following the command letter you may
+type hex digit pairs; end with a newline.  These will become the
+payload of a control packet shipped to the device. The packet will be
+wrapped with headers, trailers, and checksum appropriate for the
+current driver type. The first one or two bytes of the payload may be
+specially interpreted, see the description of the <option>-x</option>
+of
+<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>X</term>
+<listitem>
+<para>Send raw hex bytes to device. Following the command letter you
+may type hex digit pairs; end with a newline.  These will be shipped 
+to the device.</para>
 </listitem>
 </varlistentry>
 
