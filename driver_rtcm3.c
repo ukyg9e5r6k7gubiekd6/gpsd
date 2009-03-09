@@ -93,6 +93,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 		rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
 	}
+	assert(bitcount == 64 + 58*rtcm->rtcmtypes.rtcm3_1001.header.satcount);
 	break;
 
     case 1002:	/* GPS Extended RTK, L1 Only */
@@ -119,6 +120,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
 	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
+	assert(bitcount == 64 + 74*rtcm->rtcmtypes.rtcm3_1001.header.satcount);
 	break;
 
     case 1003:	/* GPS Basic RTK, L1 & L2 */
@@ -155,6 +157,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 		rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
 	}
+	assert(bitcount == 64 + 101*rtcm->rtcmtypes.rtcm3_1001.header.satcount);
 	break;
 
     case 1004:	/* GPS Extended RTK, L1 & L2 */
@@ -195,6 +198,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.ambiguity = (bool)ugrab(8);
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
+	assert(bitcount == 64 + 125*rtcm->rtcmtypes.rtcm3_1001.header.satcount);
 	break;
 
     case 1005:	/* Stationary Antenna Reference Point, No Height Information */
@@ -213,6 +217,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1005.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	ugrab(2);
 	rtcm->rtcmtypes.rtcm3_1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	assert(bitcount == 152);
 	break;
 
     case 1006:	/* Stationary Antenna Reference Point, with Height Information */
@@ -232,6 +237,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	ugrab(2);
 	rtcm->rtcmtypes.rtcm3_1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	rtcm->rtcmtypes.rtcm3_1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
+	assert(bitcount == 168);
 	break;
 
     case 1007:	/* Antenna Descriptor */
@@ -241,6 +247,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
 	bitcount += 8 * n;
 	rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
+	assert(bitcount == 40 + 8*n);
 	break;
 
     case 1008:	/* Antenna Descriptor & Serial Number */
@@ -253,6 +260,8 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	n2 = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
+	bitcount += 8 * n2;
+	assert(bitcount == 48 + 8*(n+n2));
 	break;
 
     case 1009:	/* GLONASS Basic RTK, L1 Only */
@@ -278,6 +287,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 		rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
 	}
+	assert(bitcount == 61 + 64*rtcm->rtcmtypes.rtcm3_1009.header.satcount);
 	break;
 
     case 1010:	/* GLONASS Extended RTK, L1 Only */
@@ -305,6 +315,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.ambiguity = (bool)ugrab(7);
 	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
+	assert(bitcount == 61 + 79*rtcm->rtcmtypes.rtcm3_1009.header.satcount);
 	break;
 
     case 1011:	/* GLONASS Basic RTK, L1 & L2 */
@@ -347,6 +358,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.ambiguity = (bool)ugrab(7);
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
+	assert(bitcount == 61 + 107*rtcm->rtcmtypes.rtcm3_1009.header.satcount);
 	break;
 
     case 1012:	/* GLONASS Extended RTK, L1 & L2 */
@@ -384,6 +396,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 		rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
 	}
+	assert(bitcount == 61 + 130*rtcm->rtcmtypes.rtcm3_1009.header.satcount);
 	break;
 
     case 1013:	/* System Parameters */
@@ -397,6 +410,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].sync =  (bool)ugrab(1);
 	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].interval =  (unsigned short)ugrab(16);
 	}
+	assert(bitcount == 70 + 29*rtcm->rtcmtypes.rtcm3_1013.ncount);
 	break;
 
     case 1014:
@@ -408,6 +422,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1014.d_lat =(unsigned short)ugrab(20) * ANTENNA_DEGREE_RESOLUTION;
 	rtcm->rtcmtypes.rtcm3_1014.d_lon =(unsigned short)ugrab(21) * ANTENNA_DEGREE_RESOLUTION;
 	rtcm->rtcmtypes.rtcm3_1014.d_alt =(unsigned short)ugrab(23) / 1000;
+	assert(bitcount == 117);
 	break;
 
     case 1015:
@@ -435,6 +450,8 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
 	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf+9, n);
+	bitcount += 8*n;
+	assert(bitcount == 72+8*n);
 	break;
     }
 #undef sgrab
