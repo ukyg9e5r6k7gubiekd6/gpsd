@@ -1119,7 +1119,7 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #endif /* FV18_ENABLE */
 #ifdef TNT_ENABLE
     &trueNorth,
-#endif /* TSIP_ENABLE */
+#endif /* TNT_ENABLE */
 #endif /* NMEA_ENABLE */
 
 
