@@ -814,25 +814,17 @@ int main (int argc, char **argv)
 
 #ifdef ALLOW_CONTROLSEND
 	    case 'x':				/* send control packet */
-		len = 0;
-		/*@ -compdef @*/
-		while (*arg != '\0')
-		{
-		    (void)sscanf(arg,"%x",&v);
-		    putbyte(buf, len, v);
-		    len++;
-		    while (*arg != '\0' && !isspace(*arg))
-			arg++;
-		    while (*arg != '\0' && isspace(*arg))
-			arg++;
-		}
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
-		else if ((*active)->driver->control_send != NULL)
-		    (void)monitor_control_send(buf, (size_t)len);
-		else
-		    monitor_complain("Device type has no control-send method.");
-		/*@ +compdef @*/
+		else {
+		    len = gpsd_hexpack(arg, (char*)buf, len);
+		    if (len == -1)
+			monitor_complain("Invalid hex string");
+		    else if ((*active)->driver->control_send != NULL)
+			(void)monitor_control_send(buf, (size_t)len);
+		    else
+			monitor_complain("Device type has no control-send method.");
+		}
 		break;
 #endif /* ALLOW_CONTROLSEND */
 
