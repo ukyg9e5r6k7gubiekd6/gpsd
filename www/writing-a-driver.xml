@@ -17,6 +17,15 @@
 <revhistory>
    <revision>
       <revnumber>1.6</revnumber>
+      <date>9 Mar 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; libgpsd_core.c no longr requires modification
+	 when you add a driver.
+      </revremark>
+   </revision>
+   <revision>
+      <revnumber>1.6</revnumber>
       <date>1 Mar 2009</date>
       <authorinitials>er</authorinitials>
       <revremark>
@@ -392,11 +401,6 @@ files:</para>
 <entry><para>data type definitions</para></entry>
 </row>
 <row>
-<entry><filename>libgpsd_core.c</filename></entry>
-<entry><para>library to access GPSs at low
-level</para></entry>
-</row>
-<row>
 <entry><filename>packet.c</filename></entry>
 <entry><para>packet sniffing state machine</para></entry>
 </row>
@@ -476,16 +480,6 @@ existing list. The last two changes are two <quote>extern</quote>
 declarations of prototypes in <quote>
 <userinput>**gpsd_drivers</userinput></quote> that the new driver
 needs to interface to the rest of the code.</para>
-
-<para>The function of <quote><filename>libgpsd_core.c</filename>
-</quote> is to provide some low-level entries into <application>
-gpsd</application> from external client software since these cannot
-directly access the GPS or its port when the daemon is running.
-The change is again quite small. It is just an extra entry in the
-<quote><function>gpsd_poll</function></quote> code to include a
-packet switch to the Jupiter-T driver if the packet sniffer finds
-a matching packet.</para>
-
 
 <para>The file <quote><filename>packet.c</filename></quote> is
 the state engine which scans packets as they arrive and tries to

@@ -1064,14 +1064,11 @@ by an elaborate state machine in packet.c.  The purpose of this
 state machine is so gpsd can autobaud and recognize GPS types
 automatically. The other way for a driver to be invoked is for 
 the state machine to recognize a special packet type associated
-with the driver.<p>
+with the driver. It will look through the list of drivers compiled 
+in to find the (first) one that handles that packet type.<p>
 
 <p>If you have to add a new packet type to packet.c, add tests for the
-type to the TESTMAIN code. Also, remember to tell gpsfake how to
-gather the new packet type so it can handle logs for regression
-testing.  The relevant function in gpsfake is packet_get().  It
-doesn't have to deal with garbage or verify checksums, as we assume
-the logfiles will be clean packet sequences.</p>
+type to the TESTMAIN code.</p>
 
 <p>Probe-detect methods are intended for drivers that don't use the packet
 getter because they read from a device with special kernel support.
