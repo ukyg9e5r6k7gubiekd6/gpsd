@@ -141,6 +141,7 @@ libgpsd_c_sources = \
 	strl.c \
 	subframe.c \
 	drivers.c \
+	driver_aivdm.c \
 	driver_evermore.c \
 	driver_garmin.c \
 	driver_garmin_txt.c \

@@ -961,9 +961,14 @@ void packet_parse(struct gps_packet_t *lexer)
 		checksum_ok = (csum[0]==toupper(trailer[1])
 				&& csum[1]==toupper(trailer[2]));
 	    }
-	    if (checksum_ok)
-		packet_accept(lexer, NMEA_PACKET);
-	    else
+	    if (checksum_ok) {
+#ifdef AIVDM_ENABLE
+		if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
+		    packet_accept(lexer, AIVDM_PACKET);
+		else
+#endif /* AIVDM_ENABLE */
+		    packet_accept(lexer, NMEA_PACKET);
+	    } else
 		lexer->state = GROUND_STATE;
 	    packet_discard(lexer);
 	    break;

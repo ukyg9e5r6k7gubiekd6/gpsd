@@ -764,6 +764,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "RTCM104V3");
 		break;
 #endif /* RTCM104V2_ENABLE */
+#ifdef AIVDM_ENABLE
+	    case AIVDM_PACKET:
+		(void)gpsd_switch_driver(session, "AIVDM");
+		break;
+#endif /* AIVDM_ENABLE */
 	    }
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;

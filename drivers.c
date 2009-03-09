@@ -94,6 +94,13 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #endif /* GARMINTXT_ENABLE */
 
+#ifdef AIVDM_ENABLE
+	if (strncmp((char *)session->packet.outbuffer, "!AIVDM", 6)==0) {
+	    (void)gpsd_switch_driver(session, "AIVDM");
+	    return aivdm_parse(session);
+	}
+#endif /* AIVDM_ENABLE */
+
 #ifdef OCEANSERVER_ENABLE
 	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
 		(void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
@@ -1083,6 +1090,7 @@ const struct gps_type_t mkt3301 = {
 };
 #endif /* MKT3301_ENABLE */
 
+extern const struct gps_type_t aivdm;
 extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern const struct gps_type_t sirf_binary, tsip_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
@@ -1120,6 +1128,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef TNT_ENABLE
     &trueNorth,
 #endif /* TNT_ENABLE */
+#ifdef AIVDM_ENABLE
+    &aivdm,
+#endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */
 
 

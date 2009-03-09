@@ -632,6 +632,19 @@ fi
 
 AM_CONDITIONAL([HAVE_NTRIP], [test "$ac_ntrip" = "yes"])
 
+dnl check for AIVDM support
+AC_ARG_ENABLE(aivdm,
+  AC_HELP_STRING([--disable-aivdm],
+		 [disable Aivdm support]),
+  [ac_aivdm=$enableval], [ac_aivdm=yes])
+AC_MSG_CHECKING([for AIVDM support])
+if test x"$ac_aivdm" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([AIVDM_ENABLE], 1, [AIVDM protocol support)])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],
@@ -909,6 +922,7 @@ echo "True North              : $ac_tnt"
 echo "OceanServer             : $ac_oceanserver"
 echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
+echo "AIVDM support           : $ac_aivdm"
 echo "MKT-3301                : $ac_mkt3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
