@@ -10,6 +10,7 @@ URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRequires: ncurses-devel gcc libxslt python
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Prereq: /sbin/chkconfig
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 
 %description 
@@ -30,18 +31,18 @@ and protocol. The daemon will be quiescent when there are no
 clients asking for location information, and copes gracefully when the
 GPS is unplugged and replugged.
 
-%package -n gpsd-devel
+%package devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS
 Group: Development/Libraries
 BuildRequires: pkgconfig >= %{pkgconfig_version}
 Requires: gpsd
 
-%description -n gpsd-devel
+%description devel
 This package provides C header files for the gpsd shared libraries
 that manage access to a GPS for applications; also Python modules.
 You will need to have gpsd installed for it to work.
 
-%package -n gpsd-clients
+%package clients
 Summary: Clients for gpsd with an X interface
 Group: Applications/System
 BuildRequires: lesstif-devel
@@ -50,7 +51,7 @@ BuildRequires: lesstif-devel
 #############################################################################
 BuildRequires: libXaw-devel
 
-%description -n gpsd-clients
+%description clients
 xgps is a simple test client for gpsd with an X interface. It displays
 current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.
@@ -86,6 +87,8 @@ cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb
 cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
+mkdir -p "$RPM_BUILD_ROOT"/etc/rc.d/init.d
+cp etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -105,6 +108,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %doc README INSTALL COPYING
 %attr(755, root, root) %{_sbindir}/gpsd
 %attr(755, root, root) %{_bindir}/gpsctl
+%attr(755, root, root) %{_bindir}/lcdgps
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/gpsmon
 %{_libdir}/libgps.la
@@ -116,10 +120,12 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man1/gpsctl.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
+/etc/rc.d/init.d/gpsd
 %attr(755, root, root) /usr/lib/python*/site-packages/gps.py*
+%attr(755, root, root) /usr/lib/python*/site-packages/gpscap.py*
 #%{_datadir}/gpsd/dgpsip-servers
 
-%files -n gpsd-devel
+%files devel
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING TODO
 %attr(755, root, root) %{_bindir}/gpscat
@@ -128,9 +134,11 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %attr(755, root, root) %{_bindir}/gpsflash
 /usr/lib/python*/site-packages/gpsfake.py*
 /usr/lib/python*/site-packages/gpspacket.so*
+/usr/lib/python*/site-packages/gpslib.so*
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
+%{_includedir}/gpsdclient.h
 %{_mandir}/man1/gpscat.1*
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man1/rtcmdecode.1*
@@ -142,13 +150,13 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man5/srec.5*
 %{_libdir}/pkgconfig/*
 
-%files -n gpsd-clients
+%files clients
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/cgps
 %attr(755, root, root) %{_bindir}/gpspipe
-%attr(755, root, root) %{_bindir}/cgpxlogger
+%attr(755, root, root) %{_bindir}/gpxlogger
 %{_mandir}/man1/gps.1*
 %{_mandir}/man1/cgps.1*
 %{_mandir}/man1/cgpxlogger.1*
@@ -159,6 +167,11 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Sun Mar 8 2009 Michael R. Davis <mrdvt92> - 2.39dev
+- changed gpsdlcdd to lcdgps, sirfmon to gpsmon, cgpxlogger to gpxlogger
+  added gpsdclient.h to devel package
+* Sat Feb 7 2009 Michael R. Davis <mrdvt92> - 2.38 RC4
+- Added gpsdlcdd, gpscap.py*, gpslib.so, init.d/gpsd
 * Tue Jan 1 2008 Eric S. Raymond <esr@snark.thyrsus.com> - 2.36
 - Urgent fix to leap-day calculation affecting dates from today to
   28 Feb on generic NMEA GPSes, Zodiacs, and SirFs emitting message 0x62.
