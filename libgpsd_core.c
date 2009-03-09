@@ -694,82 +694,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->packet.outbuflen>0 && !session->context->readonly && session->device_type->probe_subtype!=NULL)
 	    session->device_type->probe_subtype(session, ++session->packet.counter);
     } else {
+	const struct gps_type_t **dp;
+
 	newlen = generic_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.gps_device,
 		    session->packet.type);
-	if (session->packet.type > COMMENT_PACKET) {
-	    switch (session->packet.type) {
-	    case COMMENT_PACKET:
-		break;
-#ifdef SIRF_ENABLE
-	    case SIRF_PACKET:
-		(void)gpsd_switch_driver(session, "SiRF binary");
-		break;
-#endif /* SIRF_ENABLE */
-#ifdef SUPERSTAR2_ENABLE
-	    case SUPERSTAR2_PACKET:
-		(void)gpsd_switch_driver(session, "SuperStarII binary");
-		break;
-#endif /* SUPERSTAR2_ENABLE */
-#ifdef TSIP_ENABLE
-	    case TSIP_PACKET:
-		(void)gpsd_switch_driver(session, "Trimble TSIP");
-		break;
-#endif /* TSIP_ENABLE */
-#ifdef GARMIN_ENABLE
-	    case GARMIN_PACKET:
-		(void)gpsd_switch_driver(session, "Garmin Serial binary");
-		break;
-#endif /* GARMIN_ENABLE */
-#ifdef NMEA_ENABLE
-	    case NMEA_PACKET:
-		(void)gpsd_switch_driver(session, "Generic NMEA");
-		break;
-#endif /* NMEA_ENABLE */
-#ifdef ZODIAC_ENABLE
-	    case ZODIAC_PACKET:
-		(void)gpsd_switch_driver(session, "Zodiac binary");
-		break;
-#endif /* ZODIAC_ENABLE */
-#ifdef UBX_ENABLE
-	    case UBX_PACKET:
-		(void)gpsd_switch_driver(session, "uBlox UBX binary");
-		break;
-#endif /* UBX_ENABLE */
-#ifdef NAVCOM_ENABLE
-	    case NAVCOM_PACKET:
-		(void)gpsd_switch_driver(session, "Navcom binary");
-		break;
-#endif /* NAVCOM_ENABLE */
-#ifdef EVERMORE_ENABLE
-	    case EVERMORE_PACKET:
-		(void)gpsd_switch_driver(session, "EverMore binary");
-		break;
-#endif /* EVERMORE_ENABLE */
-#ifdef ITRAX_ENABLE
-	    case ITALK_PACKET:
-		(void)gpsd_switch_driver(session, "iTalk binary");
-		break;
-#endif /* ITRAX_ENABLE */
-#ifdef RTCM104V2_ENABLE
-	    case RTCM2_PACKET:
-		(void)gpsd_switch_driver(session, "RTCM104V2");
-		break;
-#endif /* RTCM104V2_ENABLE */
-#ifdef RTCM104V3_ENABLE
-	    case RTCM3_PACKET:
-		(void)gpsd_switch_driver(session, "RTCM104V3");
-		break;
-#endif /* RTCM104V2_ENABLE */
-#ifdef AIVDM_ENABLE
-	    case AIVDM_PACKET:
-		(void)gpsd_switch_driver(session, "AIVDM");
-		break;
-#endif /* AIVDM_ENABLE */
-	    }
+	if (session->packet.type >= COMMENT_PACKET) {
+	    for (dp = gpsd_drivers; *dp; dp++)
+		if (session->packet.type == (*dp)->packet_type) {
+		    gpsd_switch_driver(session, (*dp)->type_name);
+		    break;
+		}
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;
     }
