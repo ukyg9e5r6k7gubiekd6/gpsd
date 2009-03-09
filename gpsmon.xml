@@ -200,7 +200,7 @@ support in <application>gpsmon</application>.</para>
 <varlistentry>
 <term>x</term>
 <listitem>
-<para>Send hex bytes to device. Following the 'c' you may type hex
+<para>Send hex bytes to device. Following the command letter you may type hex
 digit pairs; end with a newline.  These will become the payload of a
 control packet shipped to the device.</para>
 </listitem>
