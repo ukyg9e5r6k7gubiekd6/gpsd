@@ -444,17 +444,18 @@ an existing entry.</para>
 some basic stuff for the NMEA driver and tries to wake up many of the
 other drivers. It needed four small modifications to integrate my
 code. The first was a copy of an existing entry in the generic NMEA
-handler <quote><function>nmea_parse_input</function></quote> to generate
-a debug error if one of my packets was detected when the NMEA driver
-had been selected and switch to my driver instead. The second was a
-pointer to simple command to send a Jupiter-T specific string to the
-GPS at detection time to test if it is a Jupiter-T in <quote>
+handler <quote><function>nmea_parse_input</function></quote> to
+generate a debug error if one of my packets was detected when the NMEA
+driver had been selected and switch to my driver instead (this is no
+longer needed in versions beyond 2,38). The second was a pointer to
+simple command to send a Jupiter-T specific string to the GPS at
+detection time to test if it is a Jupiter-T in <quote>
 <function>nmea_initializer</function></quote>. If it returns the right
 answer (in my case, the manufacturer's PROM header), then the packet
 sniffer should see this and select my driver. The third was a
 (copied/modified) declaration entry in the list of structs known to
-<application>gpsd</application> which is located immediately before and
-is used by the fourth location,
+<application>gpsd</application> which is located immediately before
+and is used by the fourth location,
 <quote>
 <userinput>*gpsd_driver_array[]</userinput></quote>, to
 give the address of the entry point table in my driver.</para>

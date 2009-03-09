@@ -41,70 +41,34 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet.type == COMMENT_PACKET) {
 	return 0;
-    } else if (session->packet.type == SIRF_PACKET) {
-	gpsd_report(LOG_WARN, "SiRF packet seen when NMEA expected.\n");
-#ifdef SIRF_ENABLE
-	(void)gpsd_switch_driver(session, "SiRF binary");
-	return sirf_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-#else
+    } else if (session->packet.type != NMEA_PACKET) {
+	const struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if (session->packet.type == (*dp)->packet_type) {
+		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
+			    (*dp)->type_name);
+		gpsd_switch_driver(session, (*dp)->type_name);
+		return (*dp)->parse_packet(session);
+	    }
+	}
 	return 0;
-#endif /* SIRF_ENABLE */
-    } else if (session->packet.type == EVERMORE_PACKET) {
-	gpsd_report(LOG_WARN, "EverMore packet seen when NMEA expected.\n");
-#ifdef EVERMORE_ENABLE
-	(void)gpsd_switch_driver(session, "EverMore binary");
-	return evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-#else
-	return 0;
-#endif /* EVERMORE_ENABLE */
-    } else if (session->packet.type == NAVCOM_PACKET) {
-  gpsd_report(LOG_WARN, "Navcom packet seen when NMEA expected.\n");
-#ifdef NAVCOM_ENABLE
-	(void)gpsd_switch_driver(session, "Navcom binary");
-	return navcom_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-#else
-	return 0;
-#endif /* NAVCOM_ENABLE */
-} else if (session->packet.type == GARMIN_PACKET) {
-	gpsd_report(LOG_WARN, "Garmin packet seen when NMEA expected.\n");
-#ifdef GARMIN_ENABLE
-	/* we might never see a trigger, have this as a backstop */
-	(void)gpsd_switch_driver(session, "Garmin Serial binary");
-	return garmin_ser_parse(session);
-#else
-	return 0;
-#endif /* GARMIN_ENABLE */
-    } else if (session->packet.type == UBX_PACKET) {
-	gpsd_report(LOG_WARN, "UBX packet seen when NMEA expected.\n");
-#ifdef UBX_ENABLE
-	(void)gpsd_switch_driver(session, "uBlox UBX binary");
-	return ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-#else
-	return 0;
-#endif /* UBX_ENABLE */
-    } else if (session->packet.type == NMEA_PACKET) {
+    } else /* session->packet.type == NMEA_PACKET) */ {
 	gps_mask_t st = 0;
 #ifdef GARMINTXT_ENABLE
 	if (session->packet.outbuflen >= 56) {
-		if ((char) *session->packet.outbuffer == '@') {
+	    if ((char) *session->packet.outbuffer == '@') {
 		/* Garmin Simple Text packet received; it starts with '@' is terminated with \r\n and has length 57 bytes */
-			(void)gpsd_switch_driver(session, "Garmin Simple Text");
-			return garmintxt_parse(session);
-		}
+		(void)gpsd_switch_driver(session, "Garmin Simple Text");
+		return garmintxt_parse(session);
+	    }
 	}
 #endif /* GARMINTXT_ENABLE */
 
-#ifdef AIVDM_ENABLE
-	if (strncmp((char *)session->packet.outbuffer, "!AIVDM", 6)==0) {
-	    (void)gpsd_switch_driver(session, "AIVDM");
-	    return aivdm_parse(session);
-	}
-#endif /* AIVDM_ENABLE */
-
 #ifdef OCEANSERVER_ENABLE
 	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
-		(void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
-		return  1;
+	    (void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
+	    return  1;
 	}
 #endif /* OCEANSERVER_ENABLE */
 
@@ -144,8 +108,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #endif /* NTPSHM_ENABLE */
 	return st;
-    } else
-	return 0;
+    }
 }
 
 static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
