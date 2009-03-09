@@ -214,8 +214,6 @@ static void monitor_dump_send(void)
 
 bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 {
-    monitor_dump_send();
-
     if (controlfd == -1) 
 	return false;
     else {
@@ -246,7 +244,8 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 	    assert(read(controlfd, buf, 8) != -1);
 	    /*@ +sefparams @*/
 	}
-	return ((size_t)st == len);
+	monitor_dump_send();
+	return (st != -1);
     }
 }
 #endif /* ALLOW_CONTROLSEND */
@@ -817,15 +816,16 @@ int main (int argc, char **argv)
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
 		else {
-		    len = gpsd_hexpack(arg, (char*)buf, len);
-		    if (len == -1)
-			monitor_complain("Invalid hex string");
-		    else if ((*active)->driver->control_send != NULL)
-			(void)monitor_control_send(buf, (size_t)len);
-		    else
+		    len = gpsd_hexpack(arg, (char*)buf, strlen(arg));
+		    if (len < 0)
+			monitor_complain("Invalid hex string (error %d)", len);
+		    else if ((*active)->driver->control_send == NULL)
 			monitor_complain("Device type has no control-send method.");
+		    else if (!monitor_control_send(buf, (size_t)len))
+			monitor_complain("Control send failed.");
 		}
 		break;
+
 #endif /* ALLOW_CONTROLSEND */
 
 	    default:
