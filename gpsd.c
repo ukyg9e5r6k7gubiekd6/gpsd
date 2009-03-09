@@ -1335,7 +1335,7 @@ static void handle_control(int sfd, char *buf)
 		/* NOTE: this destroys the original buffer contents */
 		len = (size_t)gpsd_hexpack(eq, eq, len);
 		if (len < 0)
-		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %d)\n", sfd, len);
+		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %ld)\n", sfd, len);
 		else
 		{
 		    gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
