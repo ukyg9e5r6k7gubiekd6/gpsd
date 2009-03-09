@@ -8,7 +8,8 @@
   GSA sentences, and gpsd computes those with an internal error model 
   when they look wonky.  cgpxlogger has been merged into gpxlogger.
   Speed-setting commands now allow parity and stop-bit setting if the
-  GPS chipset and adaptor can support it.
+  GPS chipset and adaptor can support it. Specfile and other packaging
+  paraphenalia now live in a packaging subdirectory.
 
 * Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.

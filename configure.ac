@@ -952,6 +952,6 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_ubx" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
-AC_OUTPUT(Makefile gpsd.spec libgps.pc libgpsd.pc)
+AC_OUTPUT(Makefile packaging/gpsd.spec libgps.pc libgpsd.pc)
 echo "Configure finished, type 'make' to build."
 

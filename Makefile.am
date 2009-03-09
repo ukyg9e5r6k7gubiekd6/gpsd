@@ -329,7 +329,6 @@ EXTRA_DIST = \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
-	gpsd.spec.in \
 	gpsd.spec \
 	gpsd.rules \
 	gpsd.hotplug \
@@ -346,7 +345,9 @@ EXTRA_DIST = \
 	packet_states.h \
 	libgps.pc.in \
 	libgpsd.pc.in \
-	gpscap.ini
+	gpscap.ini \
+	contrib/* \
+	packaging/*
 
 CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
