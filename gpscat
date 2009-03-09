@@ -122,8 +122,7 @@ if __name__ == '__main__':
                         continue
                     if typeflag:
                         sys.stdout.write(`ptype` + " (" + `length` + "): " + hexdump(packet))
-                        if ptype not in (gpspacket.COMMENT_PACKET, gpspacket.NMEA_PACKET,  gpspacket.GARMINTXT_PACKET):
-                            sys.stdout.write("\n")
+                        sys.stdout.write("\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")
     except KeyboardInterrupt:
