@@ -57,7 +57,8 @@ firmware.
 void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
-    unsigned int n, n2, bitcount = 0;
+    unsigned int n, n2;
+    int bitcount = 0;
     unsigned int i;
     signed long temp;
 
@@ -247,7 +248,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
 	bitcount += 8 * n;
 	rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
-	assert(bitcount == 40 + 8*n);
+	assert(bitcount == (int)(40 + 8*n));
 	break;
 
     case 1008:	/* Antenna Descriptor & Serial Number */
@@ -261,7 +262,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
 	bitcount += 8 * n2;
-	assert(bitcount == 48 + 8*(n+n2));
+	assert(bitcount == (int)(48 + 8*(n+n2)));
 	break;
 
     case 1009:	/* GLONASS Basic RTK, L1 Only */
@@ -451,7 +452,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf+9, n);
 	bitcount += 8*n;
-	assert(bitcount == 72+8*n);
+	assert(bitcount == (int)(72+8*n));
 	break;
     }
 #undef sgrab

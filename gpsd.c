@@ -1322,7 +1322,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (buf[0] == '&') {
-	size_t len;
+	ssize_t len;
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -1333,9 +1333,9 @@ static void handle_control(int sfd, char *buf)
 	    len = strlen(eq)+5;
 	    if ((chp = find_device(stash)) != NULL) {
 		/* NOTE: this destroys the original buffer contents */
-		len = (size_t)gpsd_hexpack(eq, eq, len);
+		len = (ssize_t)gpsd_hexpack(eq, eq, len);
 		if (len < 0)
-		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %ld)\n", sfd, len);
+		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %zd)\n", sfd, len);
 		else
 		{
 		    gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
