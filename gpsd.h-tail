@@ -255,6 +255,15 @@ struct gps_device_t {
 #endif /* GPSCLOCK_ENABLE */
 	} nmea;
 #endif /* NMEA_ENABLE */
+#ifdef AIVDM_ENABLE
+	struct {
+	    int part, await;		/* for tracking AIDVM parts */
+	    unsigned char *field[NMEA_MAX];
+	    unsigned char fieldcopy[NMEA_MAX+1];
+	    unsigned char bits[2048];
+	    size_t bitlen;
+	} aivdm;
+#endif /* AIVDM_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef SIRF_ENABLE
 	struct {

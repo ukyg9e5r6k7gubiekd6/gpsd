@@ -37,14 +37,86 @@
 /*@ +charint @*/
 gps_mask_t aivdm_parse(struct gps_device_t *session)
 {
-    gps_mask_t mask = ONLINE_SET;
+    char *sixbits[64] = {
+	"000000", "000001", "000010", "000011", "000100",
+	"000101", "000110", "000111", "001000", "001001",
+	"001010", "001011", "001100", "001101",	"001110",
+	"001111", "010000", "010001", "010010", "010011",
+	"010100", "010101", "010110", "010111",	"011000",
+	"011001", "011010", "011011", "011100",	"011101",
+	"011110", "011111", "100000", "100001",	"100010",
+	"100011", "100100", "100101", "100110",	"100111",
+	"101000", "101001", "101010", "101011",	"101100",
+	"101101", "101110", "101111", "110000",	"110001",
+	"110010", "110011", "110100", "110101",	"110110",
+	"110111", "111000", "111001", "111010",	"111011",
+	"111100", "111101", "111110", "111111",    
+    };
+
+    gps_mask_t mask = ONLINE_SET;    
+    int nfields = 0;    
+    unsigned char *data, *cp = session->driver.aivdm.fieldcopy;    
+    unsigned char ch;
+    int i;
 
     if (session->packet.outbuflen == 0)
 	return 0;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw AIVDM packet length %ld: %s\n", 
+    gpsd_report(LOG_RAW, "raw AIVDM packet length %ld: %s", 
 		session->packet.outbuflen, session->packet.outbuffer);
+
+    /* extract packet fields */
+    (void)strlcpy((char *)session->driver.aivdm.fieldcopy, 
+		  (char*)session->packet.outbuffer,
+		  session->packet.outbuflen);
+    session->driver.aivdm.field[nfields++] = session->packet.outbuffer;
+    for (cp = session->driver.aivdm.fieldcopy; 
+	 cp < session->driver.aivdm.fieldcopy + session->packet.outbuflen;
+	 cp++)
+	if (*cp == ',') {
+	    *cp = '\0';
+	    session->driver.aivdm.field[nfields++] = cp + 1;
+	}
+    session->driver.aivdm.part = atoi((char *)session->driver.aivdm.field[1]);
+    session->driver.aivdm.await = atoi((char *)session->driver.aivdm.field[2]);
+    data = session->driver.aivdm.field[5];
+    gpsd_report(LOG_PROG, "part=%d, awaiting=%d, data=%s\n",
+		session->driver.aivdm.part, session->driver.aivdm.await,
+		data);
+
+    /* assemble the binary data */
+    if (session->driver.aivdm.part == 1) {
+	(void)memset(session->driver.aivdm.bits, '\0', sizeof((char *)session->driver.aivdm.bits));
+	session->driver.aivdm.bitlen = 0;
+    }
+
+    /* wacky 6-bit encoding, shades of FIELDATA */
+    /*@ +charint @*/
+    for (cp = data; cp < data + strlen((char *)data); cp++) {
+	ch = *cp;
+	if (ch < 87)
+	    ch = ch - 48;
+	else
+	    ch = ch - 56;
+	gpsd_report(LOG_RAW+1, "%c: %s\n", *cp, sixbits[ch]);
+	for (i = 5; i >= 0; i--) {
+	    if ((ch >> i) & 0x01) {
+		session->driver.aivdm.bits[session->driver.aivdm.bitlen / 8] |= (1 << (7 - session->driver.aivdm.bitlen % 8));
+	    }
+	    session->driver.aivdm.bitlen++;
+	}
+    }
+    /*@ -charint @*/
+
+    /* time to pass buffered-up data to where it's actually processed? */
+    if (session->driver.aivdm.part == session->driver.aivdm.await) {
+	gpsd_report(LOG_IO, "AIVDM payload %ld: %s\n",
+		    session->driver.aivdm.bitlen,
+		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
+					 (session->driver.aivdm.bitlen + 7)/8, LOG_IO));
+	// FIXME: Real encoding goes here.
+    }
 
    /*
     * XXX The tag field is only 8 bytes; be careful you do not overflow.
