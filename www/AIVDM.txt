@@ -1,0 +1,392 @@
+= AIVDM/AIVDO protocol decoding =
+Eric S. Raymond <esr@thyrsus.com>
+v0.1, March 2009
+
+This document is mastered in asciidoc format.  If you are reading it in HTML,
+you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
+
+== Introduction ==
+
+This is a description of how to decode AIVDM/AIVDO sentences.  It
+is a work in progess, as we have not yet accumulated enough
+information to reverse-engineer the format completely.
+
+AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
+Automatic Identification System. All cargo vessels of more than 300
+tons displacement and all passenger vessels are supposed to carry AIS
+transmitters that periodically broadcast their position and course,
+using TDMA (Time Division Multiple Access) technology similar to the
+way cellphones do to avoid mutual interference.
+
+Technically, AIVDM packets are reports from other ships and AIVDO
+packets are reports from your own ship. AIS receivers capture AIVDM
+squawks and report them as ASCII data packets over serial lines using
+the NMEA 0183 data format and physical network standards.
+
+A lengthy description of AIS, focusing on the goals and history of the
+system, but not describing the data protocols in any detail, can be
+found at [[[1]]].
+
+== Standards ==
+
+The relevant standard is ITU Recommendation M.1371, "Technical
+Characteristics for a Universal Shipborne Automatic. Identification
+System Using Time Division Multiple Access" [[[2]]], issued in 2001. It is
+proprietary, expensive, and surrounded by attack lawyers, which is why
+this document exists.  I have not looked at it.
+
+ITU-R M.1371 is expanded and clarified by "IALA Technical
+Clarifications on Recommendation ITU-R M.1371-1" [[[3]]], which
+is freely available.
+
+== Information Sources ==
+
+The most revealing source on the Web is "Marine Automatic
+Identification System (AIS)" [[[4]]].  Most of the detail information on
+payload formats in this document is derived from it, with additions
+and corrections from other sources.
+
+There's a web form that does sentence decoding at http://rl.se/aivdm.
+
+Open-source AIVDM decoders are in development at the GPSD project 
+http://sourceforge.net/projects/gnuais[gnuais].
+
+== AIVDM/AIVDO Sentence Layer ==
+
+AIVDM/AIVDO is a two-layer protocol.  The outer layer is a variant of
+NMEA 0183, the ancient standard for data interchange in marine
+navigation systems [[[5]]].
+
+Here is a typical AIVDM data packet:
+
+--------------------------------------------------------------------
+!AIVDM,1,1,,B,177KQJ5000G?tO`K>RA1wUbN0TKH,0*5C
+--------------------------------------------------------------------
+
+And here is what the fields mean:
+
+Field 1, !AIVDM, identifies this as ann AIVDM packet.
+
+Field 2 (1 in this example) is the count of fragments in the currently
+accumulating message.  The payload size of each sentence is limited by
+NMEA 0183's 82-character maximum, so it is possible to split a payload
+over several fragment sentences.
+
+Field 3 (1 in this example) is the fragment number of this
+sentence. It will be one-based.  A sentence with a fragment count of
+1 and a fragment number of 1 is complete in itself.
+
+Field 4 (empty in this example) is a sequential message ID for
+multi-sentence messages.
+
+Field 5 (B in this example) is a radio channel code. AIS uses the high
+side of the duplex from two VHF radio channels: AIS Channel A is
+161.975Mhz (87B); AIS Channel B is 162.025Mhz (88B).
+
+Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
+payload. We'll describe how to decode this in later sections.
+
+Field 7 (0*5C) is the NMEA 0183 data-integrity checksum for the sentence,
+preceded by "0*" to aide simpleminded NMEA parsers.  It is computed
+on the entire sentence including the AIVDM tag but excluding the
+leading "!".
+
+For comparison, here is an example of a multifragment sentence with a
+nonempty message ID field:
+
+--------------------------------------------------------------------
+!AIVDM,2,1,3,B,55P5TL01VIaAL@7WKO@mBplU@<PDhh000000001S;AJ::4A80?4i@E53,0*3E
+!AIVDM,2,2,3,B,1@0000000000000,2*55
+--------------------------------------------------------------------
+
+== AIVDM/AIVDO Payload Armoring ==
+
+The data payload is an ASCII-encoded bit vector.  Each character 
+represents six bits of data.  To recover the six bits, subtract 40
+from the ASCII character value; if the result is greater than 40
+subtract 8.
+
+Concatenate all six-bit quantities found in the payload, MSB first.
+This is the binary payload of the sentence.  
+
+== AIVDM/AIVDO Payload Interpretation ==
+
+AIVDM data is encoded as bitfields in the sentence.  The bitfields are
+generally interpreted as big-endian twos-complement integers; when
+signed, the sign bit is the highest.  Many fields have an associated
+divisor which should be applied to convert to the correct units.
+
+Note that many sources use 1-origin numbering for the bits.  We'll
+use 0-origin in this document.
+
+The first 6 bits of the payload (0-5) are the message type.  Message
+types are as follows:
+
+.Message types
+`--`-------------------------------------------------
+01 Position Report with SOTDMA (Self-Organizing TDMA)
+02 Position Report with SOTDMA (Self-Organizing TDMA) (?)
+03 Position Report with ITDMA
+04 Base Station Report
+05 Ship static and voyage related data
+06 Addressed Binary Message
+07 Binary Acknowledge
+08 Binary Broadcast Message
+09 Standard SAR Aircraft position report
+10 UTC and Date inquiry
+11 UTC and Date response
+12 Addressed safety related message
+13 Safety related Acknowledge
+14 Safety related Broadcast Message
+15 Interrogation
+16 Assigned Mode Command
+17 GNSS Binary Broadcast Message
+18 Standard Class B CS Position Report
+19 Extended Class B Equipment Position Report
+20 Data Link Management
+21 Aids-to-navigation Report
+22 Channel Management
+23 Group Assignment Command
+24 Class B CS Static Data Report 
+-----------------------------------------------------
+
+The title for type 2 may not be correct, the source appears erroneous.
+
+In normal operation, an AIS transceiver will send a position report
+(type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
+speed while underway, and every 3 minutes while the vessel is at
+anchor. It will send a type 5 identification every 6 minutes.
+
+Other message types are unusual or rare, and many AIS transponders
+never emit them.
+
+In the field descriptions below, "unknown" simply means I don't yet
+have enough information to describe the data semantics in full.
+
+An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
+for the ship's radio(s).
+
+Type 1, 2 and 3 messages share a common reporting structure for
+navigational information,  This is the information likely to be of
+interest for decoding software.
+
+.Common Navigation fields 
+`-------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+-------------------------------------------------------------------------------
+0-5      6  Message Type             Dimensionless: 1-24
+6-7      2  Repeat Indicator         Unknown
+8-37    30  MMSI                     Dimensionless: 9 decimal digits
+38-41    4  Navigation Satus         Unknown
+42-49    8  Rate of Turn (ROT)       Integer: 0 to 720 degrees per minute 
+                                     Port or starboard indication is unknown
+50-59   10  Speed Over Ground (SOG)  0.1-knot resolution from 0 to 102 knots
+60-60    1  Position Accuracy        Unknown
+61-88   28  Longitude                Minutes/1000 (N/S indication unknown)
+89-115  27  Latitude                 Minutes/1000 (E/W indication unknown)
+116-127 12  Course Over Ground (COG) Relative to true north to 0.1 degree
+128-136  9  True Heading (HDG)       0 to 359 degrees
+137-142  6  Time Stamp (UTC Seconds) UTC time accurate to nearest second
+                                     Encoding is not known.
+143-145  3  Regional RESERVED
+146-147  2  Spare
+-------------------------------------------------------------------------------
+
+=== Type 1: Position Report with SOTDMA ===
+
+Bits 0 to 147 are the common navigational information.  Bits 148-167
+are diagnostic information for the Self-Organizing TDMA radio system.
+
+.Type 1 Diagnostic fields
+`-------`---`------------------------------------------------------------------
+Field   Len Description                       
+-------------------------------------------------------------------------------
+148-148  1  Receiver Autonomous Integrity Monitoring (RAIM)
+149-150  2  SOTDMA Sync State
+151-153  3  SOTDMA Slot Timeout
+154-167 14  SOTDMA Slot Offset
+-------------------------------------------------------------------------------
+
+=== Type 2 ===
+
+We do not yet have information on this message type.  The only on-Web
+source for it appears to incorrectly duplicate a description of type 1 here.
+
+=== Type 3: Position Report with ITDMA ===
+
+Bits 0 to 147 are the common navigational information.  Bits 148-167
+are diagnostic information for the Incremental TDMA radio system.
+
+.Type 3 Diagnostic fields
+`-------`---`------------------------------------------------------------------
+Field   Len Description                       
+-------------------------------------------------------------------------------
+148-150   3 ITDMA Sync State
+151-164  14 ITDMA Slot Increment
+165-166   2 ITDMA Number of Slots
+167-167   1 ITDMA Keep Flag
+-------------------------------------------------------------------------------
+
+=== Type 4: Base Station Report ===
+
+Our description is very incomplete.  I don't know which time fields
+are zero-based versus which are 1-based.  There may be additional bits
+after these in the payload.
+
+`-------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+-------------------------------------------------------------------------------
+0-5      6  Message Type             Dimensionless: 1-24
+6-7      2  Repeat Indicator (?)     Unknown
+8-37    30  MMSI                     Dimensionless: 9 decimal digits
+38-38    1  Unknown
+39-50   12  Year
+51-54    4  Month
+55-59    5  Day
+60-64    5  Hour
+65-70    6  Minute
+71-76    6  Second
+77-77    1  Unknown
+78-105   28 Latitude
+106-132  27 Longitude
+-------------------------------------------------------------------------------
+
+=== Type 5: Ship static and voyage related data ===
+
+`-------`---`-----------------------------`------------------------------------
+Field   Len Description                   Encoding   
+-------------------------------------------------------------------------------
+0-5       6 Message Type                  Dimensionless: 1-24
+6-7       2 Repeat Indicator              Unknown
+8-37     30 MMSI                          Dimensionless: 9 decimal digits
+38-39     2 AIS Version                   Unknown
+40-69    30 IMO Number                    IMO ship identification number
+70-111   42 Call Sign                     7 six-bit characters (?)
+112-231 120 Vessel Name                   20 six-bit characters (?)
+232-239   8 Ship Type                     See table below
+240-248   9 Dimension to Bow              Unsigned integer: Meters
+249-257   9 Dimension to Stern            Unsigned integer: Meters
+258-263   6 Dimension to Port             Unsigned integer: Meters
+264-269   6 Dimension to Starboard        Unsigned integer: Meters
+270-273   4 Position Fix Type             See table below
+274-293  20 ETA at destination            MMDDHHMM, encoding unknown
+293-301   9 Draught                       Unsigned integer: Meters
+302-421 120 Destination                   20 six-bit characters (?)
+422-422   1 DTE
+423-423   1 Spare
+-------------------------------------------------------------------------------
+
+.Codes for Ship Type
+`------`-----------------------------------------------------
+Code   Ship & Cargo Classification
+-------------------------------------------------------------
+20     Wing in ground (WIG), all ships of this type
+21     Wing in ground (WIG), Hazardous category A
+22     Wing in ground (WIG), Hazardous category B
+23     Wing in ground (WIG), Hazardous category C
+24     Wing in ground (WIG), Hazardous category D
+25     Wing in ground (WIG), Reserved for future use
+26     Wing in ground (WIG), Reserved for future use
+27     Wing in ground (WIG), Reserved for future use
+28     Wing in ground (WIG), Reserved for future use
+29     Wing in ground (WIG), Reserved for future use
+30     Fishing
+31     Towing
+32     Towing: length exceeds 200m or breadth exceeds 25m
+33     Dredging or underwater ops
+34     Diving ops
+35     Military ops
+36     Sailing
+37     Pleasure Craft
+38     Reserved
+39     Reserved
+40     High speed craft (HSC), all ships of this type
+41     High speed craft (HSC), Hazardous category A
+42     High speed craft (HSC), Hazardous category B
+43     High speed craft (HSC), Hazardous category C
+44     High speed craft (HSC), Hazardous category D
+45     High speed craft (HSC), Reserved for future use
+46     High speed craft (HSC), Reserved for future use
+47     High speed craft (HSC), Reserved for future use
+48     High speed craft (HSC), Reserved for future use
+49     High speed craft (HSC), No additional information
+50     Pilot Vessel
+51     Search and Rescue vessel
+52     Tug
+53     Port Tender
+54     Anti-pollution equipment
+55     Law Enforcement
+56     Spare - Local Vessel
+57     Spare - Local Vessel
+58     Medical Transport
+59     Ship according to RR Resolution No. 18
+60     Passenger, all ships of this type
+61     Passenger, Hazardous category A
+62     Passenger, Hazardous category B
+63     Passenger, Hazardous category C
+64     Passenger, Hazardous category D
+65     Passenger, Reserved for future use
+66     Passenger, Reserved for future use
+67     Passenger, Reserved for future use
+68     Passenger, Reserved for future use
+69     Passenger, No additional information
+70     Cargo, all ships of this type
+71     Cargo, Hazardous category A
+72     Cargo, Hazardous category B
+73     Cargo, Hazardous category C
+74     Cargo, Hazardous category D
+75     Cargo, Reserved for future use
+76     Cargo, Reserved for future use
+77     Cargo, Reserved for future use
+78     Cargo, Reserved for future use
+79     Cargo, No additional information
+80     Tanker, all ships of this type
+81     Tanker, Hazardous category A
+82     Tanker, Hazardous category B
+83     Tanker, Hazardous category C
+84     Tanker, Hazardous category D
+85     Tanker, Reserved for future use
+86     Tanker, Reserved for future use
+87     Tanker, Reserved for future use
+88     Tanker, Reserved for future use
+89     Tanker, No additional information
+90     Other Type, all ships of this type
+91     Other Type, Hazardous category A
+92     Other Type, Hazardous category B
+93     Other Type, Hazardous category C
+94     Other Type, Hazardous category D
+95     Other Type, Reserved for future use
+96     Other Type, Reserved for future use
+97     Other Type, Reserved for future use
+98     Other Type, Reserved for future use
+99     Other Type, no additional information
+-------------------------------------------------------------
+
+.Position fix type codes
+`----`----------------------------
+Code Position Fix Type
+----------------------------------
+0    Undefined
+1    GPS
+2    GLONASS
+3    Combined GPS/GLONASS
+4    Loran-C
+5    Chayka
+6    Integrated navigation system
+7    Surveyed
+----------------------------------
+
+== References ==
+
+[bibliography]
+- [[[1]]] http://en.wikipedia.org/wiki/Automatic_Identification_System
+
+- [[[2]]] http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371]
+  Included for completeness; I have not looked at it.
+
+- [[[3]]] http://www.navcen.uscg.gov/enav/ais/ITU-R_M1371-1_IALA_Tech_Note1.3.pdf[IALA
+  Technical Clarifications on Recommendation ITU-R M.1371-1]
+
+- [[[4]]] http://www.bosunsmate.org/ais/[Marine Automatic Identification System (AIS)]
+
+- [[[5]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]

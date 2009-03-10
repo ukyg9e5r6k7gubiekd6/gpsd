@@ -31,6 +31,21 @@
 
 #include "bits.h"
 
+struct aivdm_t
+{
+    int	id;
+    union {
+	struct {
+	    unsigned int mmsi;
+	    double latitude, longitude, course;
+	    unsigned int heading;
+	    double sog;
+	    unsigned int turn;
+	} ais01;
+    };
+};
+
+
 /**
  * Parse the data from the device
  */
@@ -58,6 +73,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
     unsigned char *data, *cp = session->driver.aivdm.fieldcopy;    
     unsigned char ch;
     int i;
+    struct aivdm_t ais; 
 
     if (session->packet.outbuflen == 0)
 	return 0;
@@ -115,7 +131,34 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 		    session->driver.aivdm.bitlen,
 		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
 					 (session->driver.aivdm.bitlen + 7)/8, LOG_IO));
-	// FIXME: Real encoding goes here.
+
+#define ugrab(start, width)	ubits((char *)session->driver.aivdm.bits, start, width)
+#define sgrab(start, width)	sbits((char *)session->driver.aivdm.bits, start, width)
+	ais.id = ugrab(0, 6);
+	gpsd_report(LOG_ERROR, "AIVDM message type %d.\n", ais.id);
+	switch (ais.id) {
+	case 1:	/* Position Report with SOTDMA */ {
+	    ais.ais01.mmsi = ugrab(8, 30);
+	    ais.ais01.longitude = ugrab(61, 28) / 600000.0;
+	    ais.ais01.latitude = sgrab(89, 27) / 600000.0;
+	    ais.ais01.course = ugrab(116, 12) / 10.0;
+	    ais.ais01.heading = ugrab(128, 9);
+	    ais.ais01.sog = ugrab(50, 10) / 10.0;
+	    ais.ais01.turn = ugrab(40, 8);
+	    gpsd_report(LOG_INF,
+			"MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed: %f  Coarse:%.5f  Heading: %f  Turn: %d\n",
+			ais.ais01.mmsi, 
+			ais.ais01.latitude, ais.ais01.longitude, 
+			ais.ais01.sog, ais.ais01.course, 
+			ais.ais01.heading, ais.ais01.turn);
+	    break;
+	}
+	default:
+	    gpsd_report(LOG_ERROR, "Unknown AIVDM message type.\n");
+	    break;
+	} 
+#undef sgrab
+#undef ugrab
     }
 
    /*
