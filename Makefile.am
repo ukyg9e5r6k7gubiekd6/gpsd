@@ -330,7 +330,6 @@ EXTRA_DIST = \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
-	gpsd.spec \
 	gpsd.rules \
 	gpsd.hotplug \
 	gpsd.usermap \
