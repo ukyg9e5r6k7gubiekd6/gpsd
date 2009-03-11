@@ -61,6 +61,7 @@ maintainer, we've tried to kick these upstream.</p>
 <li><a href="#bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</a></li>
 <li><a href="#pl2303">Linux pl2303 driver on openwrt 2.4 kernel can hang when device is read at unexpected speed</a></li>
 <li><a href="#pthread_create">pthread_create() fails to return when called in background</a></li>
+<li><a href="#shm_damage">NTPSHM clobbers altitude under 2.4 Linux</a></li>
 </ul>
 
 <h1>Links to Open Toolchain Bugs</h1>
@@ -151,6 +152,20 @@ called when gpsd is in the background then the thread is created fine,
 but it may return!  That freezes the main loop of gpsd. There is a <a
 href="http://marc.info/?l=gpsd-dev&m=120124952704634&w=2">workaround</a>,
 but the nature of the workaround only makes ther bug more mysterious.</p>
+
+<h2 id="shm_damage">NTPSHM clobbers altitude under 2.4 Linux</h2>
+
+<p>We've had one report (in march 2009) of the NTPSHM feature
+clobbering altitude reports, on a Technologic TS-5500 board running a
+customized 2.4.34 kernel using a <code>gpsd</code> built with 2.95.3.
+When NTPSHM was disabled, altitude was reported correctly.</p>
+
+<p>Shared memory was bug-plagued on older Linux kernels; one notorious
+symptom of this was that the emulation of System V IPC worked poorly,
+and we suspect our corruption bug is another symptom.  No such
+misbehavior has been reported from our NTPSHM-using developers under
+2.6.  It is also possible that this is due to some obscure bug in GCC
+or elsewhere in Technologic's cross-development toolchain.</p>
 
 <h1>Open Toolchain Bugs</h1>
 
