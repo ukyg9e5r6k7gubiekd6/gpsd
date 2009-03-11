@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v0.1, March 2009
+v1.0, March 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -8,8 +8,9 @@ you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
 == Introduction ==
 
 This is a description of how to decode AIVDM/AIVDO sentences.  It
-is a work in progess, as we have not yet accumulated enough
-information to reverse-engineer the format completely.
+collects and integrates information from publicly available sources
+amd is intended to assist developers of open-source software for
+interpreting these messages.
 
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
 Automatic Identification System. All cargo vessels of more than 300
@@ -25,37 +26,37 @@ the NMEA 0183 data format and physical network standards.
 
 A lengthy description of AIS, focusing on the goals and history of the
 system, but not describing the data protocols in any detail, can be
-found at [[[1]]].
+found at <<AIS>>.
 
 == Standards ==
 
 The relevant standard is ITU Recommendation M.1371, "Technical
 Characteristics for a Universal Shipborne Automatic. Identification
-System Using Time Division Multiple Access" [[[2]]], issued in 2001. It is
+System Using Time Division Multiple Access" <<ITU1371>>, issued in 2001. It is
 proprietary, expensive, and surrounded by attack lawyers, which is why
 this document exists.  I have not looked at it.
 
 ITU-R M.1371 is expanded and clarified by "IALA Technical
-Clarifications on Recommendation ITU-R M.1371-1" [[[3]]], which
+Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
 == Information Sources ==
 
-The most revealing source on the Web is "Marine Automatic
-Identification System (AIS)" [[[4]]].  Most of the detail information on
-payload formats in this document is derived from it, with additions
-and corrections from other sources.
+Together, the the IALA Technical Clarifications at <<IALA>> and the
+Coast Guard's AIS pages at <<NAVCEN>> descrribe AIS message payloads
+almost completely.  The detail information on payload formats in this
+document is derived from these.  Together, they explain everything
+except the Repeat Indicator found in some messages
+
+The AIVDM ASCII packet format is descrined at <<BOSUN>>.
 
 There's a web form that does sentence decoding at http://rl.se/aivdm.
-
-Open-source AIVDM decoders are in development at the GPSD project 
-http://sourceforge.net/projects/gnuais[gnuais].
 
 == AIVDM/AIVDO Sentence Layer ==
 
 AIVDM/AIVDO is a two-layer protocol.  The outer layer is a variant of
 NMEA 0183, the ancient standard for data interchange in marine
-navigation systems [[[5]]].
+navigation systems, described at <<NMEA>>.
 
 Here is a typical AIVDM data packet:
 
@@ -65,7 +66,7 @@ Here is a typical AIVDM data packet:
 
 And here is what the fields mean:
 
-Field 1, !AIVDM, identifies this as ann AIVDM packet.
+Field 1, !AIVDM, identifies this as an AIVDM packet.
 
 Field 2 (1 in this example) is the count of fragments in the currently
 accumulating message.  The payload size of each sentence is limited by
@@ -87,7 +88,7 @@ Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
 payload. We'll describe how to decode this in later sections.
 
 Field 7 (0*5C) is the NMEA 0183 data-integrity checksum for the sentence,
-preceded by "0*" to aide simpleminded NMEA parsers.  It is computed
+preceded by "0*" to aid simpleminded NMEA parsers.  It is computed
 on the entire sentence including the AIVDM tag but excluding the
 leading "!".
 
@@ -125,7 +126,7 @@ types are as follows:
 .Message types
 `--`-------------------------------------------------
 01 Position Report with SOTDMA (Self-Organizing TDMA)
-02 Position Report with SOTDMA (Self-Organizing TDMA) (?)
+02 Position Report with SOTDMA (Self-Organizing TDMA)
 03 Position Report with ITDMA
 04 Base Station Report
 05 Ship static and voyage related data
@@ -150,136 +151,193 @@ types are as follows:
 24 Class B CS Static Data Report 
 -----------------------------------------------------
 
-The title for type 2 may not be correct, the source appears erroneous.
+The duplication of titles for types 1 and 2 is correct and part of the
+standard.
 
 In normal operation, an AIS transceiver will send a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
 speed while underway, and every 3 minutes while the vessel is at
-anchor. It will send a type 5 identification every 6 minutes.
+anchor and stationary. It will send a type 5 identification every 6
+minutes.   (More detail is at <<IALA>>, part 2.3)
 
 Other message types are unusual or rare, and many AIS transponders
 never emit them.
 
-In the field descriptions below, "unknown" simply means I don't yet
-have enough information to describe the data semantics in full.
-
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).
 
-Type 1, 2 and 3 messages share a common reporting structure for
-navigational information,  This is the information likely to be of
-interest for decoding software.
+Detailed descriptions of message types 1-5 follow.  Information
+sufficient to decode messages 6-24 can be found in <<IALA>>, but
+they are rare or not of general interest so we will not duplicate
+the information here.
 
-.Common Navigation fields 
+=== Types 1, 2 and 3 ===
+
+Type 1, 2 and 3 messages share a common reporting structure for
+navigational information; we'll call in the Common Navigation
+Block. This is the information likely to be of interest for decoding
+software.
+
+.Common Navigation Block
 `-------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
 -------------------------------------------------------------------------------
-0-5      6  Message Type             Dimensionless: 1-24
+0-5      6  Message Type             Unsigned integer: 1-24
 6-7      2  Repeat Indicator         Unknown
-8-37    30  MMSI                     Dimensionless: 9 decimal digits
-38-41    4  Navigation Satus         Unknown
-42-49    8  Rate of Turn (ROT)       Integer: 0 to 720 degrees per minute 
-                                     Port or starboard indication is unknown
-50-59   10  Speed Over Ground (SOG)  0.1-knot resolution from 0 to 102 knots
-60-60    1  Position Accuracy        Unknown
-61-88   28  Longitude                Minutes/1000 (N/S indication unknown)
-89-115  27  Latitude                 Minutes/1000 (E/W indication unknown)
+8-37    30  MMSI                     Unsigned integer: 9 decimal digits
+38-41    4  Navigation Satus         See table below
+42-49    8  Rate of Turn (ROT)       Signed integer: see below
+50-59   10  Speed Over Ground (SOG)  Unsigned integer: see below
+60-60    1  Position Accuracy        See below
+61-88   28  Longitude                Minutes/1000 (see below)
+89-115  27  Latitude                 Minutes/1000 (see below)
 116-127 12  Course Over Ground (COG) Relative to true north to 0.1 degree
-128-136  9  True Heading (HDG)       0 to 359 degrees
-137-142  6  Time Stamp (UTC Seconds) UTC time accurate to nearest second
-                                     Encoding is not known.
+128-136  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
+137-142  6  Time Stamp (UTC Seconds) Second of UTC timestamp (see below).
 143-145  3  Regional RESERVED
 146-147  2  Spare
 -------------------------------------------------------------------------------
 
-=== Type 1: Position Report with SOTDMA ===
+.Navigation status codes
+`-`-------------------------------------------------------------
+0  Under way using engine  
+1  At anchor
+2  Not under command
+3  Restricted manoeuvrability
+4  Constrained by her draught
+5  Moored
+6  Aground
+7  Engaged in Fishing
+8  Under way sailing
+9  Reserved for future amendment of Navigational Status for HSC
+10 Reserved for future amendment of Navigational Status for WIG
+11 Reserved for future use
+12 Reserved for future use
+13 Reserved for future use
+14 Reserved for future use
+15 Not defined (default)
+---------------------------------------------------------------
 
-Bits 0 to 147 are the common navigational information.  Bits 148-167
-are diagnostic information for the Self-Organizing TDMA radio system.
+Turn rate is encoded as follows:
+* 0...126 = turning right at up to 708 degrees per minute or higher
+* 0...-126 = turning left at up to 708 degrees per minute or higher
+* 127 = turning right at more than 50deg/30s (No TI available)
+* -127 = turning left at more than 50deg/30s (No TI available)
+* –128 (80 hex) indicates no turn information available (default)
 
-.Type 1 Diagnostic fields
-`-------`---`------------------------------------------------------------------
-Field   Len Description                       
--------------------------------------------------------------------------------
-148-148  1  Receiver Autonomous Integrity Monitoring (RAIM)
-149-150  2  SOTDMA Sync State
-151-153  3  SOTDMA Slot Timeout
-154-167 14  SOTDMA Slot Offset
--------------------------------------------------------------------------------
+Values between 0 and 708 degrees/min coded by ROTAIS=4.733
+SQRT(ROTsensor) degrees/min where ROTsensor is the Rate of Turn as
+input by an external Rate of Turn Indicator. ROTAIS is rounded to the
+nearest integer value.
 
-=== Type 2 ===
+Speed over ground is in 0.1-knot resolution from 0 to 102 knots.
+value 1023 indicates speed is not available, value 1022 indicates
+102.2 knots or higher.
 
-We do not yet have information on this message type.  The only on-Web
-source for it appears to incorrectly duplicate a description of type 1 here.
+Position accuracy flag indicates the accuracy of the fix.  A value of
+1 indicates a DGPS-quality fix with an accuracy of < 10ms.  0, the
+default, indicates an unaugmented GNSS fix with accuracy > 10m.
 
-=== Type 3: Position Report with ITDMA ===
+Longitude is given in in 1/10000 min . Values up to plus or minus 180
+degrees, East = positive, West = negative.  181 degrees (0x6791AC0
+hex) indicates that longitude is not available and is the default.
 
-Bits 0 to 147 are the common navigational information.  Bits 148-167
-are diagnostic information for the Incremental TDMA radio system.
+Latitude in 1/10 000 min (plus or minus90 degrees, North = positive,
+South = negative, 91 degrees (0x3412140 hex) indicated latitude is not
+available (default).
 
-.Type 3 Diagnostic fields
-`-------`---`------------------------------------------------------------------
-Field   Len Description                       
--------------------------------------------------------------------------------
-148-150   3 ITDMA Sync State
-151-164  14 ITDMA Slot Increment
-165-166   2 ITDMA Number of Slots
-167-167   1 ITDMA Keep Flag
--------------------------------------------------------------------------------
+Seconds in UTC timestamp should be 0-59, except for these special values:
+
+* 60 if time stamp is not available (default)
+* 61 if positioning system is in manual input mode
+* 62 if Electronic Position Fixing System operates in estimated (dead
+     reckoning) mode,
+* 63 if the positioning system is inoperative).
+
+Bits 148-167 are diagnostic information for the radio system.  Consult
+<<IALA>> for detailed description of the latter.  Total of 168 bits,
+occupying one AIVDM sentence.
 
 === Type 4: Base Station Report ===
 
-Our description is very incomplete.  I don't know which time fields
-are zero-based versus which are 1-based.  There may be additional bits
-after these in the payload.
+Total of 168 bits, occupying one AIVDM sentence.
 
-`-------`---`------------------------`-----------------------------------------
-Field   Len Description                       Units
--------------------------------------------------------------------------------
-0-5      6  Message Type             Dimensionless: 1-24
-6-7      2  Repeat Indicator (?)     Unknown
-8-37    30  MMSI                     Dimensionless: 9 decimal digits
-38-38    1  Unknown
-39-50   12  Year
-51-54    4  Month
-55-59    5  Day
-60-64    5  Hour
-65-70    6  Minute
-71-76    6  Second
-77-77    1  Unknown
-78-105   28 Latitude
-106-132  27 Longitude
--------------------------------------------------------------------------------
+The standard uses "EPFD" to designate any Electronic Position Fixing Device.
+
+`-------`----`------------------------`-----------------------------------------
+Field   Len  Description                       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type             Unsigned integer: 1-24
+6-7       2  Repeat Indicator         Unknown
+8-37     30  MMSI                     Unsigned integer: 9 decimal digits
+38-51    14  Year                     UTC, 1-999, 0 = not available (default)
+52-55     4  Month                    1-12; 0 = not available (default)
+56-60     5  Day                      1-31; 0 = not available (default)
+61-65     5  Hour                     0-23; 24 = not available (default)
+66-71     6  Minute                   0-59; 60 = not available (default)
+72-77     6  Second                   0-59; 60 = not available (default)
+78-78     1  Fix quality              As in Common Navigation Block
+79-106   28  Latitude                 As in Common Navigation Block
+107-133  27  Longitude                As in Common Navigation Block
+134-137   4  Type of EPFD             See below
+138-147  10  Spare                    Not used
+148-167  19  SOTDMA state             As in same bits for Type 1
+--------------------------------------------------------------------------------
+
+.EPFD fix type codes
+`----`----------------------------
+Code Position Fix Type
+----------------------------------
+0    Undefined (default)
+1    GPS
+2    GLONASS
+3    Combined GPS/GLONASS
+4    Loran-C
+5    Chayka
+6    Integrated navigation system
+7    Surveyed
+8    Galileo
+----------------------------------
 
 === Type 5: Ship static and voyage related data ===
+
+In the character-string fields, trailing unused characters will be
+represented by "@" (six-bit zero). Total of 424 bits, occupying two 
+AIVDM sentences.
 
 `-------`---`-----------------------------`------------------------------------
 Field   Len Description                   Encoding   
 -------------------------------------------------------------------------------
-0-5       6 Message Type                  Dimensionless: 1-24
+0-5       6 Message Type                  Unsigned integer: 1-24
 6-7       2 Repeat Indicator              Unknown
-8-37     30 MMSI                          Dimensionless: 9 decimal digits
-38-39     2 AIS Version                   Unknown
+8-37     30 MMSI                          Unsigned integer: 9 decimal digits
+38-39     2 AIS Version                   0=<<ITU1371>>, 1-3 = future editions
 40-69    30 IMO Number                    IMO ship identification number
-70-111   42 Call Sign                     7 six-bit characters (?)
-112-231 120 Vessel Name                   20 six-bit characters (?)
+70-111   42 Call Sign                     7 six-bit characters
+112-231 120 Vessel Name                   20 six-bit characters
 232-239   8 Ship Type                     See table below
 240-248   9 Dimension to Bow              Unsigned integer: Meters
 249-257   9 Dimension to Stern            Unsigned integer: Meters
 258-263   6 Dimension to Port             Unsigned integer: Meters
 264-269   6 Dimension to Starboard        Unsigned integer: Meters
-270-273   4 Position Fix Type             See table below
-274-293  20 ETA at destination            MMDDHHMM, encoding unknown
+270-273   4 Position Fix Type             As in Type 4 EPSD codes
+274-277   4 ETA month                     1-12, 0=not available (default)
+278-282   5 ETA day                       1-31, 0=not available (default)
+283-287   5 ETA hour                      0-23, 24=not available (default)
+288-292   5 ETA minute                    0-59, 60= not available (spare)
 293-301   9 Draught                       Unsigned integer: Meters
-302-421 120 Destination                   20 six-bit characters (?)
-422-422   1 DTE
-423-423   1 Spare
+302-421 120 Destination                   20 6-bit characters
+422-422   1 DTE                           0=Data terminal ready, 
+                                          1=Data terminal not ready (default)
+423-423   1 Spare                         Not used
 -------------------------------------------------------------------------------
 
 .Codes for Ship Type
 `------`-----------------------------------------------------
 Code   Ship & Cargo Classification
 -------------------------------------------------------------
+0      Not available (default)
+1-19   Reserved for future use
 20     Wing in ground (WIG), all ships of this type
 21     Wing in ground (WIG), Hazardous category A
 22     Wing in ground (WIG), Hazardous category B
@@ -362,31 +420,20 @@ Code   Ship & Cargo Classification
 99     Other Type, no additional information
 -------------------------------------------------------------
 
-.Position fix type codes
-`----`----------------------------
-Code Position Fix Type
-----------------------------------
-0    Undefined
-1    GPS
-2    GLONASS
-3    Combined GPS/GLONASS
-4    Loran-C
-5    Chayka
-6    Integrated navigation system
-7    Surveyed
-----------------------------------
-
 == References ==
 
 [bibliography]
-- [[[1]]] http://en.wikipedia.org/wiki/Automatic_Identification_System
+- [[[AIS]]] http://en.wikipedia.org/wiki/Automatic_Identification_System[Automatic
+Identification System]
 
-- [[[2]]] http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371]
-  Included for completeness; I have not looked at it.
+- [[[ITU1371]]] http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371]
+  Reference included for completeness; I have not looked at it.
 
-- [[[3]]] http://www.navcen.uscg.gov/enav/ais/ITU-R_M1371-1_IALA_Tech_Note1.3.pdf[IALA
+- [[[IALA]]]  http://www.ialathree.org/iala/pages/AIS/IALATech1.5.pdf[IALA
   Technical Clarifications on Recommendation ITU-R M.1371-1]
 
-- [[[4]]] http://www.bosunsmate.org/ais/[Marine Automatic Identification System (AIS)]
+- [[[NAVCEN]]] http://www.navcen.uscg.gov/enav/ais/[NAVCEN AIS pages]
 
-- [[[5]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
+- [[[BOSUN]]] http://www.bosunsmate.org/ais/[Marine Automatic Identification System (AIS)]
+
+- [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
