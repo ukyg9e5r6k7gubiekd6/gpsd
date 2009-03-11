@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 #	Author: Tilman Koschnick <til@subnetz.org>.
 #
@@ -8,61 +8,63 @@
 # Required-Start:    $syslog $network
 # Required-Stop:     $syslog $network
 # Default-Start:     2 3 4 5
-# Default-Stop:      S 1 0 6
+# Default-Stop:      0 1 6
+# Short-Description: Start the GPS (Global Positioning System) daemon
 ### END INIT INFO
 
+set -e
+
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/gpsd
-NAME=gpsd
-DESC="GPS daemon"
+DAEMON=/usr/sbin/gpsd
+DESC="GPS (Global Positioning System) daemon"
 PIDFILE="/var/run/gpsd.pid"
 SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
 
 test -x $DAEMON || exit 0
 
+. /lib/lsb/init-functions
+
 # include gpsd defaults
 if [ -f /etc/default/gpsd ] ; then
 	. /etc/default/gpsd
 else
-	echo "$NAME: Cannot find /etc/default/gpsd - failed."
+	log_failure_msg "gpsd: error: Cannot find /etc/default/gpsd."
 	exit 1
 fi
-
-set -e
 
 case "$1" in
   start)
 	if [ "x$START_DAEMON" = "xtrue" ] ; then
-		echo -n "Starting $DESC: $NAME"
+		log_daemon_msg "Starting $DESC" "gpsd"
 		start-stop-daemon --start --quiet \
 			--exec $DAEMON -- $DAEMON_OPTS -P $PIDFILE $DEVICES \
-			&& echo "." \
-			|| echo " - failed."
+			&& log_end_msg 0 \
+			|| log_end_msg 1
 	else
-		echo "$NAME is configured not to start automatically at boot time."
-		echo "  To change this, modify /etc/default/gpsd."
+		log_daemon_msg "Not starting $DESC" "gpsd" && log_end_msg 0
 	fi		
 	;;
   stop)
 	if [ "x$START_DAEMON" = "xtrue" ] ; then
-		echo -n "Stopping $DESC: $NAME"
-		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
-		echo "."
+		log_daemon_msg "Stopping $DESC" "gpsd"
+		WARN=$(start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE)
+		log_end_msg 0
+		[ -n "$WARN" ] && log_warning_msg "$WARN"
 	else
-		echo "$NAME is configured not to start automatically at boot time."
-		echo "  To change this, run 'dpkg-reconfigure gpsd'."
+		log_daemon_msg "Not stopping $DESC" "gpsd" && log_end_msg 0
 	fi		
 	;;
   reload|force-reload)
-	echo "$DESC: Resetting connection to GPS device."
-	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE
+	log_action_msg "gpsd: Resetting connection to GPS device" 
+	WARN=$(start-stop-daemon --stop --signal 1 --quiet --oknodo --pidfile $PIDFILE)
+	[ -n "$WARN" ] && log_warning_msg "$WARN"
 	;;
   restart)
 	set +e; $SELF stop; set -e
 		$SELF start
 	;;
   *)
-	N=/etc/init.d/$NAME
+	N=/etc/init.d/gpsd
 	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	exit 1
 	;;
