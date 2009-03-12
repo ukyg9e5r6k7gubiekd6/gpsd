@@ -252,7 +252,7 @@ Seconds in UTC timestamp should be 0-59, except for these special values:
 * 61 if positioning system is in manual input mode
 * 62 if Electronic Position Fixing System operates in estimated (dead
      reckoning) mode,
-* 63 if the positioning system is inoperative).
+* 63 if the positioning system is inoperative.
 
 Bits 148-167 are diagnostic information for the radio system.  Consult
 <<IALA>> for detailed description of the latter.  Total of 168 bits,
@@ -277,8 +277,8 @@ Field   Len  Description                       Units
 66-71     6  Minute                   0-59; 60 = not available (default)
 72-77     6  Second                   0-59; 60 = not available (default)
 78-78     1  Fix quality              As in Common Navigation Block
-79-106   28  Latitude                 As in Common Navigation Block
-107-133  27  Longitude                As in Common Navigation Block
+79-106   28  Longitude                 As in Common Navigation Block
+107-133  27  Latitude                As in Common Navigation Block
 134-137   4  Type of EPFD             See below
 138-147  10  Spare                    Not used
 148-167  19  SOTDMA state             As in same bits for Type 1
