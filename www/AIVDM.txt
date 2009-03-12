@@ -43,12 +43,12 @@ is freely available.
 == Information Sources ==
 
 Together, the the IALA Technical Clarifications at <<IALA>> and the
-Coast Guard's AIS pages at <<NAVCEN>> descrribe AIS message payloads
+Coast Guard's AIS pages at <<NAVCEN>> describe AIS message payloads
 almost completely.  The detail information on payload formats in this
 document is derived from these.  Together, they explain everything
 except the Repeat Indicator found in some messages
 
-The AIVDM ASCII packet format is descrined at <<BOSUN>>.
+The AIVDM ASCII packet format is described at <<BOSUN>>.
 
 There's a web form that does sentence decoding at http://rl.se/aivdm.
 
@@ -152,7 +152,7 @@ types are as follows:
 -----------------------------------------------------
 
 The duplication of titles for types 1 and 2 is correct and part of the
-standard.
+standard (as described in <<IALA>>).
 
 In normal operation, an AIS transceiver will send a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
