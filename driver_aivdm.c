@@ -31,12 +31,6 @@
 
 #include "bits.h"
 
-/* 
- * Overlay this structure on a character buffer to extract data fields.
- * This approach to decoding will fail utterly if your compiler puts
- * internal padding between bitfields in a struct. Shouldn't happen
- * on character-addressable machines. 
- */
 #pragma pack(1)
 struct aivdm_decode_t
 {
