@@ -663,21 +663,24 @@ static bool ubx_speed(struct gps_device_t *session,
 static bool ubx_rate(struct gps_device_t *session, double cycletime)
 /* change the sample rate of the GPS */
 {
+    unsigned short s;
     /*@ -type @*/
     unsigned char msg[6] = {
 	0x00, 0x00,	/* U2: Measurement rate (ms) */
-	0x00, 0x00,	/* U2: Navigation rate (cycles) */
+	0x00, 0x01,	/* U2: Navigation rate (cycles) */
 	0x00, 0x00,	/* U2: Alignment to reference time: 0 = UTC, !0 = GPS */
     };
     /*@ +type @*/
 
-    gpsd_report(LOG_IO, "UBX rate change, report every %f secs\n", cycletime);
+    /* clamp to cycle times that i know work on my receiver */
+    if (cycletime > 1000.0)
+	    cycletime = 1000.0;
+    if (cycletime < 200.0)
+	    cycletime = 200.0;
 
-    /*
-     * Manual says:
-     * Navigation Update Rate (1/s) = 1000 / (NavigationRate * MeausrementRate(ms)).
-     * ???
-     */
+    gpsd_report(LOG_IO, "UBX rate change, report every %f secs\n", cycletime);
+    msg[0] = (unsigned char)(s >> 8);
+    msg[1] = (unsigned char)(s & 0xff);
 
     return ubx_write(session, 0x06, 0x08, msg, 6); /* CFG-RATE */
 }
