@@ -31,20 +31,90 @@
 
 #include "bits.h"
 
-struct aivdm_t
+/* 
+ * Overlay this structure on a character buffer to extract data fields.
+ * This approach to decoding will fail utterly if your compiler puts
+ * internal padding between bitfields in a struct. Shouldn't happen
+ * on character-addressable machines. 
+ */
+#pragma pack(1)
+struct aivdm_decode_t
 {
-    int	id;
+    unsigned	id:6;		/* message type */
+    unsigned    ri:2;		/* Repeat indicator -- not used */
+    unsigned	mmsi:30;	/* MMSI */		
     union {
+	/* Types 1-3 Common navigation info */
 	struct {
-	    unsigned int mmsi;
-	    double latitude, longitude, course;
-	    unsigned int heading;
-	    double sog;
-	    unsigned int turn;
-	} ais01;
+            unsigned status:4;		/* navigation status */
+	    signed rot:8;		/* rate of turn */
+#define AIS_ROT_HARD_LEFT	-127
+#define AIS_ROT_HARD_RIGHT	127
+#define AIS_ROT_NOT_AVAILABLE	128
+	    unsigned sog:10;		/* speed over ground */
+#define AIS_SOG_NOT_AVAILABLE	1023
+#define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
+	    unsigned accuracy:1;	/* position accuracy */
+	    signed longitude:28;	/* longitude */
+#define AIS_LON_NOT_AVAILABLE	181
+	    signed latitude:27;		/* latitude */
+#define AIS_LAT_NOT_AVAILABLE	91
+	    unsigned cog:12;		/* course over ground */
+	    unsigned heading:9;		/* true heading */
+#define AIS_NO_HEADING	511
+	    unsigned utc_second:6;	/* seconds of UTC timestamp */
+#define AIS_SEC_NOT_AVAILABLE	60
+#define AIS_SEC_MANUAL		61
+#define AIS_SEC_ESTIMATED	62
+#define AIS_SEC_INOPERATIVE	63
+	    unsigned regional:3;	/* regional reserved */
+	    /* spares and housekeeping bits follow */ 
+	} type123;
+	/* Type 4 - Base Station Report */
+	struct {
+	    unsigned year:14;		/* UTC year */
+#define AIS_YEAR_NOT_AVAILABLE	0
+	    unsigned month:4;		/* UTC month */
+#define AIS_MONTH_NOT_AVAILABLE	0
+	    unsigned day:5;		/* UTC day */
+#define AIS_DAY_NOT_AVAILABLE	0
+	    unsigned hour:5;		/* UTC hour */
+#define AIS_HOUR_NOT_AVAILABLE	0
+	    unsigned minute:6;		/* UTC minute */
+#define AIS_MINUTE_NOT_AVAILABLE	0
+	    unsigned second:6;		/* UTC second */
+#define AIS_SECOND_NOT_AVAILABLE	0
+	    unsigned quality:1;		/* fix quality */
+	    signed longitude:28;	/* longitude */
+	    signed latitude:27;		/* latitude */
+	    unsigned epfd_type:4;	/* type of position fix deviuce */
+	    /* spares and housekeeping bits follow */ 
+	} type4;
+	/* Type 5 - Ship static and voyage related data */
+	struct {
+	    unsigned ais_version:2;	/* AIS version level */
+	    unsigned imo_id:30;		/* IMO identification */
+	    unsigned long long callsign:42;/* callsign as packed sixbit */ 
+	    unsigned long long ship_name1:60;	/* ship name as packed sixbit */
+	    unsigned long long ship_name2:60;	/* more of it... */
+	    unsigned ship_type:8;	/* ship type code */
+	    unsigned to_bow:9;		/* dimension to bow */
+	    unsigned to_stern:9;	/* dimension to stern */
+	    unsigned to_port:6;		/* dimension to port */
+	    unsigned to_starboard:6;	/* dimension to starboard */
+	    unsigned epfd_type:4;	/* type of position fix deviuce */
+	    unsigned month:4;		/* UTC month */
+	    unsigned day:5;		/* UTC day */
+	    unsigned hour:5;		/* UTC hour */
+	    unsigned minute:5;		/* UTC minute */
+	    unsigned draught:9;		/* draft in meters */
+	    unsigned long long destination1:10;	/* ship destination */
+	    unsigned long long destination2:60;	/* more of it */
+	    unsigned dte:1;
+	    /* spares and housekeeping bits follow */ 
+	} type5;
     };
 };
-
 
 /**
  * Parse the data from the device
@@ -73,7 +143,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
     unsigned char *data, *cp = session->driver.aivdm.fieldcopy;    
     unsigned char ch;
     int i;
-    struct aivdm_t ais; 
+    struct aivdm_decode_t *ais; 
 
     if (session->packet.outbuflen == 0)
 	return 0;
@@ -115,7 +185,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	    ch = ch - 48;
 	else
 	    ch = ch - 56;
-	gpsd_report(LOG_RAW+1, "%c: %s\n", *cp, sixbits[ch]);
+	gpsd_report(LOG_INF, "%c: %s\n", *cp, sixbits[ch]);
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
 		session->driver.aivdm.bits[session->driver.aivdm.bitlen / 8] |= (1 << (7 - session->driver.aivdm.bitlen % 8));
@@ -132,43 +202,50 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
 					 (session->driver.aivdm.bitlen + 7)/8, LOG_IO));
 
-#define ugrab(start, width)	ubits((char *)session->driver.aivdm.bits, start, width)
-#define sgrab(start, width)	sbits((char *)session->driver.aivdm.bits, start, width)
-	ais.id = ugrab(0, 6);
-	gpsd_report(LOG_ERROR, "AIVDM message type %d.\n", ais.id);
-	switch (ais.id) {
-	case 1:	/* Position Report with SOTDMA */ {
-	    ais.ais01.mmsi = ugrab(8, 30);
-	    ais.ais01.longitude = ugrab(61, 28) / 600000.0;
-	    ais.ais01.latitude = sgrab(89, 27) / 600000.0;
-	    ais.ais01.course = ugrab(116, 12) / 10.0;
-	    ais.ais01.heading = ugrab(128, 9);
-	    ais.ais01.sog = ugrab(50, 10) / 10.0;
-	    ais.ais01.turn = ugrab(40, 8);
+	/* the magic moment...*/
+	ais = (struct aivdm_decode_t *)session->driver.aivdm.bits;
+
+	gpsd_report(LOG_INF, "AIVDM message type %d.\n", ais->id);
+	switch (ais->id) {
+	case 1:	/* Position Report */
+	case 2:
+	case 3:
 	    gpsd_report(LOG_INF,
-			"MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed: %f  Coarse:%.5f  Heading: %f  Turn: %d\n",
-			ais.ais01.mmsi, 
-			ais.ais01.latitude, ais.ais01.longitude, 
-			ais.ais01.sog, ais.ais01.course, 
-			ais.ais01.heading, ais.ais01.turn);
+			"MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed: %f  Course:%d  Heading: %d  Turn: %d\n",
+			ais->mmsi, 
+			ais->type123.latitude / 600000.0, 
+			ais->type123.longitude / 600000.0, 
+			ais->type123.sog / 10.0, 
+			ais->type123.cog, 
+			ais->type123.heading, 
+			ais->type123.rot);
+	    break;  
+	case 4:	/* Base Station Report */
+	    gpsd_report(LOG_INF,
+			"MMSI: %09d  Latitude: %.7f  Longitude: %.7f\n",
+			ais->mmsi, 
+			ais->type4.latitude / 600000.0, 
+			ais->type4.longitude / 600000.0);
 	    break;
-	}
+	case 5: /* Ship static and voyage related data */
+	    gpsd_report(LOG_INF,
+			"IMO: %d\n",
+			ais->type5.imo_id);
+	    break;
 	default:
-	    gpsd_report(LOG_ERROR, "Unknown AIVDM message type.\n");
+	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
 	} 
-#undef sgrab
-#undef ugrab
+
+       /*
+	* XXX The tag field is only 8 bytes; be careful you do not overflow.
+	* XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
+	*/
+	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
+	    "AIVDM");
+
+	/* FIXME: actual driver code goes here */
     }
-
-   /*
-    * XXX The tag field is only 8 bytes; be careful you do not overflow.
-    * XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
-    */
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	"AIVDM");
-
-    /* FIXME: actual driver code goes here */
 
     /* not posting any data yet */
     return mask;
