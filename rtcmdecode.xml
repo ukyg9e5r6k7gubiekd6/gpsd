@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>rtcmdecode</refname>
-<refpurpose>decode RTCM104 streams into a readable format</refpurpose>
+<refpurpose>decode RTCM streams into a readable format</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -25,11 +25,11 @@
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para>This tool is a decoder for RTCM-104, an obscure and complicated
+<para>This tool is a decoder for RTCM, an obscure and complicated
 serial protocol used for broadcasting pseudorange corrections from
-differential-GPS reference stations. RTCM-104 is expected on standard
-input; an equivalent, 100%-information-preserving text format is
-written to standard output.</para>
+differential-GPS reference stations. RTCM in either version 2 or 3 is
+expected on standard input; an equivalent, 100%-information-preserving
+text format is written to standard output.</para>
 
 <para>You can use this tool with
 <citerefentry><refentrytitle>nc</refentrytitle><manvolnum>1</manvolnum></citerefentry>
@@ -86,11 +86,11 @@ Maritime Services</ulink> under "Publications".</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
 
-<para>RTCM-104 represents floating-point quantities as an integer
-multiple of a fixed scale factor.  Editing an RTCM-104 dump can
+<para>RTCM2 represents floating-point quantities as an integer
+multiple of a fixed scale factor.  Editing an RTCM2 dump can
 produce numbers that are not an integer multiple of the scale factor
 for their field.  If you do this, the value actually packed into 
-binary RTCM-104 will be rounded down to the nearest scale unit, 
+binary RTCM2 will be rounded down to the nearest scale unit, 
 and dumping will show slightly different numbers than those you 
 entered.</para>
 
