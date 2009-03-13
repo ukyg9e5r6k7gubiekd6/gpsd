@@ -185,12 +185,12 @@ Field   Len Description                       Units
 0-5      6  Message Type             Unsigned integer: 1-24
 6-7      2  Repeat Indicator         Unknown
 8-37    30  MMSI                     Unsigned integer: 9 decimal digits
-38-41    4  Navigation Satus         See table below
+38-41    4  Navigation Status        See table below
 42-49    8  Rate of Turn (ROT)       Signed integer: see below
 50-59   10  Speed Over Ground (SOG)  Unsigned integer: see below
 60-60    1  Position Accuracy        See below
-61-88   28  Longitude                Minutes/1000 (see below)
-89-115  27  Latitude                 Minutes/1000 (see below)
+61-88   28  Longitude                Minutes/10000 (see below)
+89-115  27  Latitude                 Minutes/10000 (see below)
 116-127 12  Course Over Ground (COG) Relative to true north to 0.1 degree
 128-136  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 137-142  6  Time Stamp (UTC Seconds) Second of UTC timestamp (see below).
@@ -203,7 +203,7 @@ Field   Len Description                       Units
 0  Under way using engine  
 1  At anchor
 2  Not under command
-3  Restricted manoeuvrability
+3  Restricted manoeuverability
 4  Constrained by her draught
 5  Moored
 6  Aground
@@ -225,7 +225,7 @@ Turn rate is encoded as follows:
 * -127 = turning left at more than 50deg/30s (No TI available)
 * –128 (80 hex) indicates no turn information available (default)
 
-Values between 0 and 708 degrees/min coded by ROTAIS=4.733
+Values between 0 and 708 degrees/min coded by ROTAIS=4.733 *
 SQRT(ROTsensor) degrees/min where ROTsensor is the Rate of Turn as
 input by an external Rate of Turn Indicator. ROTAIS is rounded to the
 nearest integer value.
