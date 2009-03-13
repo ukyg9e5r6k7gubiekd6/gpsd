@@ -463,6 +463,7 @@ struct ais_t
 #define AIS_SOG_NOT_AVAILABLE	1023
 #define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
 	    bool accuracy;		/* position accuracy */
+#define AIS_LATLON_SCALE	600000.0
 	    int longitude;		/* longitude */
 #define AIS_LON_NOT_AVAILABLE	0x6791AC0
 	    int latitude;		/* latitude */

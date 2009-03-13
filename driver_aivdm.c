@@ -178,10 +178,37 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 			ais->type4.epfd);
 	    break;
 	case 5: /* Ship static and voyage related data */
-	    gpsd_report(LOG_INF,
-			"IMO: %d\n",
-			ais->type5.imo_id);
+	    ais->type5.ais_version  = UBITS(38, 2);
+	    ais->type5.imo_id       = UBITS(40, 30);
+	    ais->type5.ais_version  = UBITS(388, 2);
+	    /*@ +type @*/
+	    for (i = 0; i < sizeof(ais->type5.callsign[i])-1; i++)
+		ais->type5.callsign[i] = '@' + UBITS(70 + 6*i, 6);
+	    ais->type5.callsign[sizeof(ais->type5.callsign[i])-1] = '\0';
+	    for (i = 0; i < sizeof(ais->type5.vessel_name[i])-1; i++)
+		ais->type5.vessel_name[i] = '@' + UBITS(112 + 6*i, 6);
+	    ais->type5.vessel_name[sizeof(ais->type5.vessel_name[i])-1] = '\0';
+	    /*@ -type @*/
+	    ais->type5.ship_type    = UBITS(232, 8);
+	    ais->type5.to_bow       = UBITS(240, 9);
+	    ais->type5.to_stern     = UBITS(249, 9);
+	    ais->type5.to_port      = UBITS(258, 9);
+	    ais->type5.to_starboard = UBITS(264, 9);
+	    ais->type5.epfd         = UBITS(270, 4);
+	    ais->type5.month        = UBITS(274, 4);
+	    ais->type5.day          = UBITS(278, 5);
+	    ais->type5.hour         = UBITS(283, 5);
+	    ais->type5.minute       = UBITS(288, 5);
+	    ais->type5.draught      = UBITS(293, 9);
+	    /*@ +type @*/
+	    for (i = 0; i < sizeof(ais->type5.destination[i])-1; i++)
+		ais->type5.destination[i] = '@' + UBITS(302 + 6*i, 6);
+	    ais->type5.destination[sizeof(ais->type5.destination[i])-1] = '\0';
+	    /*@ -type @*/
+	    ais->type5.dte          = UBITS(422, 1);
+	    ais->type5.spare        = UBITS(423, 1);
 	    break;
+	    
 	default:
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;

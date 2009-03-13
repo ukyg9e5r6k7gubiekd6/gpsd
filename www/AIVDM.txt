@@ -238,13 +238,14 @@ Position accuracy flag indicates the accuracy of the fix.  A value of
 1 indicates a DGPS-quality fix with an accuracy of < 10ms.  0, the
 default, indicates an unaugmented GNSS fix with accuracy > 10m.
 
-Longitude is given in in 1/10000 min . Values up to plus or minus 180
-degrees, East = positive, West = negative.  181 degrees (0x6791AC0
-hex) indicates that longitude is not available and is the default.
+Longitude is given in in 1/10000 min. Values up to plus or minus 180
+degrees, East = positive, West = negative.  A value of 181 degrees
+(0x6791AC0 hex) indicates that longitude is not available and is the
+default.
 
-Latitude in 1/10 000 min (plus or minus90 degrees, North = positive,
-South = negative, 91 degrees (0x3412140 hex) indicated latitude is not
-available (default).
+Latitude is given in in 1/10000 min. Values up to plus or minus 90
+degrees, North = positive, South = negative. A value of 91 degrees (0x3412140
+hex) indicates latitude is not available (default).
 
 Seconds in UTC timestamp should be 0-59, except for these special values:
 
@@ -277,8 +278,8 @@ Field   Len  Description                       Units
 66-71     6  Minute                   0-59; 60 = not available (default)
 72-77     6  Second                   0-59; 60 = not available (default)
 78-78     1  Fix quality              As in Common Navigation Block
-79-106   28  Longitude                 As in Common Navigation Block
-107-133  27  Latitude                As in Common Navigation Block
+79-106   28  Longitude                As in Common Navigation Block
+107-133  27  Latitude                 As in Common Navigation Block
 134-137   4  Type of EPFD             See below
 138-147  10  Spare                    Not used
 148-167  19  SOTDMA state             As in same bits for Type 1
@@ -312,7 +313,7 @@ Field   Len Description                   Encoding
 6-7       2 Repeat Indicator              Unknown
 8-37     30 MMSI                          Unsigned integer: 9 decimal digits
 38-39     2 AIS Version                   0=<<ITU1371>>, 1-3 = future editions
-40-69    30 IMO Number                    IMO ship identification number
+40-69    30 IMO Number                    Unsigned IMO ship ID number
 70-111   42 Call Sign                     7 six-bit characters
 112-231 120 Vessel Name                   20 six-bit characters
 232-239   8 Ship Type                     See table below
@@ -324,7 +325,7 @@ Field   Len Description                   Encoding
 274-277   4 ETA month                     1-12, 0=not available (default)
 278-282   5 ETA day                       1-31, 0=not available (default)
 283-287   5 ETA hour                      0-23, 24=not available (default)
-288-292   5 ETA minute                    0-59, 60= not available (spare)
+288-292   5 ETA minute                    0-59, 60=not available (default)
 293-301   9 Draught                       Unsigned integer: Meters
 302-421 120 Destination                   20 6-bit characters
 422-422   1 DTE                           0=Data terminal ready, 

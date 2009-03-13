@@ -16,7 +16,7 @@
 
 static int verbose = 0;
 static bool scaled = true;
-static bool labeled = true;
+static bool labeled = false;
 
 static struct gps_device_t session;
 static struct gps_context_t context;
@@ -29,46 +29,205 @@ static struct gps_context_t context;
 
 static void  aivdm_dump(struct ais_t *ais, FILE *fp)
 {
-    (void)fprintf(fp, "%d:%d:%09d:", ais->id, ais->ri, ais->mmsi);
+    static char *nav_legends[] = {
+	"Under way using engine",
+	"At anchor",
+	"Not under command",
+	"Restricted manoeuverability",
+	"Constrained by her draught",
+	"Moored",
+	"Aground",
+	"Engaged in fishing",
+	"Under way sailing",
+	"Reserved for HSC",
+	"Reserved for WIG",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Not defined",
+    };
+    static char *epfd_legends[] = {
+	"Undefined",
+	"GPS",
+	"GLONASS",
+	"Combined GPS/GLONASS",
+	"Loran-C",
+	"Chayka",
+	"Integrated navigation system",
+	"Surveyed",
+	"Galileo",
+    };
+
+    if (labeled)
+	(void)fprintf(fp, "type=%d:ri=%d:MMSI=%09d:", ais->id, ais->ri, ais->mmsi);
+    else
+	(void)fprintf(fp, "%d:%d:%09d:", ais->id, ais->ri, ais->mmsi);
     switch (ais->id) {
     case 1:	/* Position Report */
     case 2:
     case 3:
-	(void)fprintf(fp,
-		      "%d:%d:%d:%d:%d:%d:%d:%d:%d\n",
-		      ais->type123.status,
-		      ais->type123.rot,
-		      ais->type123.sog, 
-		      (uint)ais->type123.accuracy,
-		      ais->type123.longitude, 
-		      ais->type123.latitude, 
-		      ais->type123.cog, 
-		      ais->type123.heading, 
-		      ais->type123.utc_second);
+#define TYPE123_UNSCALED_UNLABELED "%u,%d,%u,%u,%d,%d,%u,%u,%u,%x,%d,%x\n"
+#define TYPE123_UNSCALED_LABELED   "st=%u,ROT=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
+#define TYPE123_SCALED_UNLABELED "%s,%s,%.1f,%u,%.4f,%.4f,%u,%u,%u,%x,%d,%x\n"
+#define TYPE123_SCALED_LABELED   "st=%s,ROT=%s,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%u,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
+	if (scaled) {
+	    char rotlegend[10];
+	    float sog;
+
+	    /* 
+	     * Express ROT as nan if not available, 
+	     * "fastleft"/"fastright" for fast turns.
+	     */
+	    if (ais->type123.rot == -128)
+		(void) strlcpy(rotlegend, "nan", sizeof(rotlegend));
+	    else if (ais->type123.rot == -127)
+		(void) strlcpy(rotlegend, "fastleft", sizeof(rotlegend));
+	    else if (ais->type123.rot == 127)
+		(void) strlcpy(rotlegend, "fastright", sizeof(rotlegend));
+	    else
+		(void)snprintf(rotlegend, sizeof(rotlegend),
+			       "%.0f",
+			       ais->type123.rot * ais->type123.rot / 4.733);
+
+	    /* express SOG as nan if value is unknown */
+	    if (ais->type123.sog == AIS_SOG_NOT_AVAILABLE)
+		sog = -1.0;
+	    else
+		sog = ais->type123.sog / 10.0;
+
+	    (void)fprintf(fp,
+			  (labeled ? TYPE123_SCALED_LABELED : TYPE123_SCALED_UNLABELED),
+			      
+			  nav_legends[ais->type123.status],
+			  rotlegend,
+			  sog, 
+			  (uint)ais->type123.accuracy,
+			  ais->type123.longitude / AIS_LATLON_SCALE, 
+			  ais->type123.latitude / AIS_LATLON_SCALE, 
+			  ais->type123.cog, 
+			  ais->type123.heading, 
+			  ais->type123.utc_second,
+			  ais->type123.regional,
+			  ais->type123.spare,
+			  ais->type123.radio);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE123_UNSCALED_LABELED : TYPE123_UNSCALED_UNLABELED),
+			  ais->type123.status,
+			  ais->type123.rot,
+			  ais->type123.sog, 
+			  (uint)ais->type123.accuracy,
+			  ais->type123.longitude,
+			  ais->type123.latitude,
+			  ais->type123.cog, 
+			  ais->type123.heading, 
+			  ais->type123.utc_second,
+			  ais->type123.regional,
+			  ais->type123.spare,
+			  ais->type123.radio);
+	}
+#undef TYPE123_UNSCALED_UNLABELED
+#undef TYPE123_UNSCALED_LABELED
+#undef TYPE123_SCALED_UNLABELED
+#undef TYPE123_SCALED_LABELED
 	break;
     case 4:	/* Base Station Report */
-	(void)fprintf(fp,
-		      "%4d:%02d:%02d:%02d:%02d:%02d:%d:%d:%d:%d\n",
-		      ais->type4.year,
-		      ais->type4.month,
-		      ais->type4.day,
-		      ais->type4.hour,
-		      ais->type4.minute,
-		      ais->type4.second,
-		      (uint)ais->type4.accuracy,
-		      ais->type4.latitude, 
-		      ais->type4.longitude,
-		      ais->type4.epfd);
+#define TYPE4_UNSCALED_UNLABELED "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,%x\n"
+#define TYPE4_UNSCALED_LABELED "%4u:%02u:%02uT%02u:%02u:%02uZ,q=%u,lon=%d,lat=%d,epfd=%u,sp=%u,radio=%x\n"
+#define TYPE4_SCALED_UNLABELED	"%4u:%02u:%02uT%02u:%02u:%02uZ,%u,%.4f,%.4f,%s,%u,%x\n"
+#define TYPE4_SCALED_LABELED "%4u:%02u:%02uT%02u:%02u:%02uZ,q=%u,lon=%.4f,lat=%.4f,epfd=%s,sp=%u,radio=%x\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE4_SCALED_LABELED : TYPE4_SCALED_UNLABELED),
+			  ais->type4.year,
+			  ais->type4.month,
+			  ais->type4.day,
+			  ais->type4.hour,
+			  ais->type4.minute,
+			  ais->type4.second,
+			  (uint)ais->type4.accuracy,
+			  ais->type4.latitude / AIS_LATLON_SCALE, 
+			  ais->type4.longitude / AIS_LATLON_SCALE,
+			  epfd_legends[ais->type4.epfd],
+			  ais->type4.spare,
+			  ais->type4.radio);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE4_UNSCALED_LABELED : TYPE4_UNSCALED_UNLABELED),
+			  ais->type4.year,
+			  ais->type4.month,
+			  ais->type4.day,
+			  ais->type4.hour,
+			  ais->type4.minute,
+			  ais->type4.second,
+			  (uint)ais->type4.accuracy,
+			  ais->type4.latitude, 
+			  ais->type4.longitude,
+			  ais->type4.epfd,
+			  ais->type4.spare,
+			  ais->type4.radio);
+	}
+#undef TYPE4_UNSCALED_UNLABELED
+#undef TYPE4_UNSCALED_LABELED
+#undef TYPE4_SCALED_UNLABELED
+#undef TYPE4_SCALED_LABELED
 	break;
-#if 0
     case 5: /* Ship static and voyage related data */
-	(void)fprintf(fp,
-		      "IMO: %d\n",
-		      ais->type5.imo_id);
+#define TYPE5_UNSCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,eta=%u:%uT%u:%uZ,draught=%u,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_UNSCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
+#define TYPE5_SCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s:%u,eta=%u:%uT%u:%uZ,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_SCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%s,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE5_SCALED_LABELED : TYPE5_SCALED_UNLABELED),
+			  ais->type5.imo_id,
+			  ais->type5.ais_version,
+			  ais->type5.callsign,
+			  ais->type5.vessel_name,
+			  ais->type5.ship_type,
+			  ais->type5.to_bow,
+			  ais->type5.to_stern,
+			  ais->type5.to_port,
+			  ais->type5.to_starboard,
+			  epfd_legends[ais->type5.epfd],
+			  ais->type5.month,
+			  ais->type5.day,
+			  ais->type5.hour,
+			  ais->type5.minute,
+			  ais->type5.draught,
+			  ais->type5.destination,
+			  ais->type5.dte,
+			  ais->type5.spare);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE5_UNSCALED_LABELED : TYPE5_UNSCALED_UNLABELED),
+			  ais->type5.imo_id,
+			  ais->type5.ais_version,
+			  ais->type5.callsign,
+			  ais->type5.vessel_name,
+			  ais->type5.ship_type,
+			  ais->type5.to_bow,
+			  ais->type5.to_stern,
+			  ais->type5.to_port,
+			  ais->type5.to_starboard,
+			  ais->type5.epfd,
+			  ais->type5.month,
+			  ais->type5.day,
+			  ais->type5.hour,
+			  ais->type5.minute,
+			  ais->type5.draught,
+			  ais->type5.destination,
+			  ais->type5.dte,
+			  ais->type5.spare);
+	}
+#undef TYPE5_UNSCALED_UNLABELED
+#undef TYPE5_UNSCALED_LABELED
+#undef TYPE5_SCALED_UNLABELED
+#undef TYPE5_SCALED_LABELED
 	break;
-#endif
     default:
-	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
+	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
 	break;
     }
 }
@@ -204,7 +363,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "def:hpVv:")) != EOF) {
+    while ((c = getopt(argc, argv, "def:hlpuVv:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -222,8 +381,16 @@ int main(int argc, char **argv)
 	    striphdr = true;
 	    break;
 
+	case 'l':
+	    labeled = true;
+	    break;
+
 	case 'p':	/* undocumented, used for regression-testing */
 	    mode = passthrough;
+	    break;
+
+	case 'u':
+	    scaled = false;
 	    break;
 
 	case 'v':
