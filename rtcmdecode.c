@@ -15,6 +15,69 @@
 #include "gpsd.h"
 
 static int verbose = 0;
+static bool scaled = true;
+static bool labeled = true;
+
+static struct gps_device_t session;
+static struct gps_context_t context;
+
+/**************************************************************************
+ *
+ * AIVDM decoding
+ *
+ **************************************************************************/
+
+static void  aivdm_dump(struct ais_t *ais, FILE *fp)
+{
+    (void)fprintf(fp, "%d:%d:%09d:", ais->id, ais->ri, ais->mmsi);
+    switch (ais->id) {
+    case 1:	/* Position Report */
+    case 2:
+    case 3:
+	(void)fprintf(fp,
+		      "%d:%d:%d:%d:%d:%d:%d:%d:%d\n",
+		      ais->type123.status,
+		      ais->type123.rot,
+		      ais->type123.sog, 
+		      (uint)ais->type123.accuracy,
+		      ais->type123.longitude, 
+		      ais->type123.latitude, 
+		      ais->type123.cog, 
+		      ais->type123.heading, 
+		      ais->type123.utc_second);
+	break;
+    case 4:	/* Base Station Report */
+	(void)fprintf(fp,
+		      "%4d:%02d:%02d:%02d:%02d:%02d:%d:%d:%d:%d\n",
+		      ais->type4.year,
+		      ais->type4.month,
+		      ais->type4.day,
+		      ais->type4.hour,
+		      ais->type4.minute,
+		      ais->type4.second,
+		      (uint)ais->type4.accuracy,
+		      ais->type4.latitude, 
+		      ais->type4.longitude,
+		      ais->type4.epfd);
+	break;
+#if 0
+    case 5: /* Ship static and voyage related data */
+	(void)fprintf(fp,
+		      "IMO: %d\n",
+		      ais->type5.imo_id);
+	break;
+#endif
+    default:
+	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
+	break;
+    }
+}
+
+/**************************************************************************
+ *
+ * Generic machinery
+ *
+ **************************************************************************/
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -33,27 +96,34 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 /*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE *fpin, FILE *fpout)
-/* RTCM-104 bits on fpin to dump format on fpout */
+/* binary on fpin to dump format on fpout */
 {
-    struct gps_packet_t lexer;
     struct rtcm2_t rtcm2;
     struct rtcm3_t rtcm3;
     char buf[BUFSIZ];
 
-    packet_reset(&lexer);
-
     for (;;) {
-	if (packet_get(fileno(fpin), &lexer) <= 0 && packet_buffered_input(&lexer) <= 0)
+	if (gpsd_poll(&session) & ERROR_SET) {
+	    gpsd_report(LOG_ERROR,"Error during packet fetch.\n");
 	    break;
-	else if (lexer.type == RTCM2_PACKET) {
-	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
+	}
+	if (session.packet.type == RTCM2_PACKET) {
+	    rtcm2_unpack(&rtcm2, (char *)session.packet.isgps.buf);
 	    rtcm2_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
-	else if (lexer.type == RTCM3_PACKET) {
-	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
+	else if (session.packet.type == RTCM3_PACKET) {
+	    rtcm3_unpack(&rtcm3, (char *)session.packet.outbuffer);
 	    rtcm3_dump(&rtcm3, stdout);
 	}
+	else if (session.packet.type == AIVDM_PACKET) {
+	    aivdm_decode(&session, &session.driver.aivdm.decoded);
+	    puts("FOO!");
+	    aivdm_dump(&session.driver.aivdm.decoded, stdout);
+	} else
+	    gpsd_report(LOG_ERROR, "unknown packet type %d\n", session.packet.type);
+	if (packet_buffered_input(&session.packet) <= 0)
+	    break;
     }
 }
 /*@ +compdestroy +compdef +usedef @*/
@@ -135,7 +205,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "dehpVv:")) != EOF) {
+    while ((c = getopt(argc, argv, "def:hpVv:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -143,6 +213,10 @@ int main(int argc, char **argv)
 
 	case 'e':
 	    mode = doencode;
+	    break;
+
+	case 'f':
+	    (void)freopen(optarg, "r", stdin);
 	    break;
 
 	case 'h':
@@ -169,6 +243,9 @@ int main(int argc, char **argv)
     }
     argc -= optind;
     argv += optind;
+
+    gpsd_init(&session, &context, (char *)NULL);
+    session.gpsdata.gps_fd = fileno(stdin);
 
     /* strip lines with leading # */
     if (striphdr) {

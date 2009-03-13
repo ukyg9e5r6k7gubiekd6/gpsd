@@ -426,7 +426,11 @@ Code   Ship & Cargo Classification
 - [[[AIS]]] http://en.wikipedia.org/wiki/Automatic_Identification_System[Automatic
 Identification System]
 
-- [[[ITU1371]]] http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371]
+- [[[ITU1371]]]
+  http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371:
+  ITU Recommendation on the Technical Characteristics for a Universal
+  Shipborne Automatic Identification System (AIS) using Time Division
+  Multiple Access in the Maritime Mobile Band]. 
   Reference included for completeness; I have not looked at it.
 
 - [[[IALA]]]  http://www.ialathree.org/iala/pages/AIS/IALATech1.5.pdf[IALA
