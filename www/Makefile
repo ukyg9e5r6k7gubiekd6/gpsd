@@ -12,7 +12,7 @@ XML = \
 	libgpsmm.xml \
 	libgpsd.xml \
 	gpsmon.xml \
-	rtcmdecode.xml \
+	gpsdecode.xml \
 	gpsprof.xml \
 	gpsfake.xml \
 	gpsctl.xml \

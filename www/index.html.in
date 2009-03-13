@@ -240,15 +240,15 @@ tool. (This replaces the <code>sirfmon</code> tool in older versions.)</dd>
 captures GPS output and/or <code>gpsd</code> reports and sends it to
 standard output.</dd>
 
-<!--
-<dt><a href="rtcmdecode.html">rtcmdecode.1</a></dt>
-<dd>The <code>rtcmdecode</code> RTCM-104 decoder.</dd>
+<dt><a href="gpsdecode.html">gpsdecode.1</a></dt>
+<dd>The <code>gpsdecode</code> packet decoder.</dd>
 
+<!--
 <dt><a href="gpsflash.html">gpsflash(1)</a></dt>
 <dd>The <code>src</code> GPS firmware uploader..</dd>
 
 <dt><a href="rtcm-104.html">rtcm-104.5</a></dt>
-<dd>The <code>rtcmdecode</code> RTCM104 decoder dump format.</dd>
+<dd>The <code>gpsdecode</code> RTCM104 decoder dump format.</dd>
 
 <dt><a href="srec.html">srec.5</a></dt>
 <dd>The <code>src</code> Motorola S-record and file format.</dd>

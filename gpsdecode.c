@@ -86,7 +86,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	char buf[BUFSIZ];
 	va_list ap;
 
-	(void)strlcpy(buf, "rtcmdecode: ", BUFSIZ);
+	(void)strlcpy(buf, "gpsdecode: ", BUFSIZ);
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
@@ -118,7 +118,6 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
 	else if (session.packet.type == AIVDM_PACKET) {
 	    aivdm_decode(&session, &session.driver.aivdm.decoded);
-	    puts("FOO!");
 	    aivdm_dump(&session.driver.aivdm.decoded, stdout);
 	} else
 	    gpsd_report(LOG_ERROR, "unknown packet type %d\n", session.packet.type);
@@ -161,7 +160,7 @@ static void pass(FILE *fpin, FILE *fpout)
 	    memset(&lexer, 0, sizeof(lexer));
 	    memset(&rtcm, 0, sizeof(rtcm));
 	} else if (status < 0) {
-	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
+	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d\n", status);
 	    exit(1);
 	}
     }
@@ -188,10 +187,10 @@ static void encode(FILE *fpin, FILE *fpout)
 	    if (fwrite(lexer.isgps.buf, 
 		       sizeof(isgps30bits_t), 
 		       (size_t)rtcm.length, fpout) != (size_t)rtcm.length)
-		(void) fprintf(stderr, "rtcmdecode: report write failed.\n");
+		(void) fprintf(stderr, "gpsdecode: report write failed.\n");
 	    memset(&lexer, 0, sizeof(lexer));
 	} else if (status < 0) {
-	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
+	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d\n", status);
 	    exit(1);
 	}
     }
@@ -237,7 +236,7 @@ int main(int argc, char **argv)
 
 	case '?':
 	default:
-	    (void)fputs("rtcmdecode [-v]\n", stderr);
+	    (void)fputs("gpsdecode [-v]\n", stderr);
 	    exit(1);
 	}
     }
@@ -251,7 +250,7 @@ int main(int argc, char **argv)
     if (striphdr) {
 	while ((c = getchar()) == '#')
 	    if (fgets(buf, (int)sizeof(buf), stdin) == NULL)
-		(void)fputs("rtcmdecode: read failed\n", stderr);
+		(void)fputs("gpsdecode: read failed\n", stderr);
 	(void)ungetc(c, stdin);
     }
 
@@ -264,4 +263,4 @@ int main(int argc, char **argv)
     exit(0);
 }
 
-/* rtcmdecode.c ends here */
+/* gpsdecode.c ends here */

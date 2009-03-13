@@ -82,7 +82,7 @@ struct gps_packet_t {
     unsigned counter;			/* packets since last driver switch */
     /*
      * This is not conditionalized on RTCM104_ENABLE because we need to
-     * be able to build rtcmdecode even when RTCM support is not
+     * be able to build gpsdecode even when RTCM support is not
      * configured in the daemon.
      */
     struct {
@@ -340,7 +340,7 @@ struct gps_device_t {
 #endif /* NAVCOM_ENABLE */
 	/*
 	 * This is not conditionalized on RTCM104_ENABLE because we need to
-	 * be able to build rtcmdecode even when RTCM support is not
+	 * be able to build gpsdecode even when RTCM support is not
 	 * configured in the daemon.  It doesn't take up extra space.
 	 */
 	struct {

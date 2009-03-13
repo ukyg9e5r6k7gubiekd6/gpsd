@@ -19,7 +19,7 @@
 corrections from differential-GPS reference stations.  This manual
 page describes some aspects of the RTCM protocol, mainly in order to
 explain the RTCM-104 dump format emitted by
-<citerefentry><refentrytitle>rtcmdecode</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsdecode</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 It describes that dump format completely.</para>
 
 <para>RTCM-104 comes in two major and incompatible flavors, 2.x and

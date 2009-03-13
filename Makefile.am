@@ -23,8 +23,8 @@ INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
 
 if HAVE_RTCM104V2
-RTCM104PROGS = rtcmdecode
-RTCM104PAGES = rtcmdecode.1
+RTCM104PROGS = gpsdecode
+RTCM104PAGES = gpsdecode.1
 endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger lcdgps
@@ -101,10 +101,10 @@ gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build rtcmdecode
+# Build gpsdecode
 #
-rtcmdecode_SOURCES = rtcmdecode.c
-rtcmdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsdecode_SOURCES = gpsdecode.c
+gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpsflash
@@ -284,7 +284,7 @@ gpsmon.1: gpsmon.xml
 
 gpspipe.1: gpspipe.xml
 
-rtcmdecode.1: rtcmdecode.xml
+gpsdecode.1: gpsdecode.xml
 
 rtcm-104.5: rtcm-104.xml
 
@@ -323,7 +323,7 @@ EXTRA_DIST = \
 	gpsctl.xml \
 	gpsmon.xml \
 	gpspipe.xml \
-	rtcmdecode.xml \
+	gpsdecode.xml \
 	rtcm-104.xml \
 	srec.xml \
 	gpsflash.xml \
@@ -375,8 +375,8 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal $(gpsmon_SOURCES)
 	@echo "Running splint on gpspipe..."
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
-	@echo "Running splint on rtcmdecode..."
-	-splint $(SPLINTOPTS) -exportlocal rtcmdecode.c
+	@echo "Running splint on gpsdecode..."
+	-splint $(SPLINTOPTS) -exportlocal gpsdecode.c
 	@echo "Running splint on gpsflash..."
 	-splint $(SPLINTOPTS) $(gpsflash_SOURCES)
 	@echo "Running splint on test_bits test harness..."
@@ -422,20 +422,20 @@ gps-makeregress: gpsd
 #	regress-driver -b test/stable/foo.log
 
 # Regression-test the RTCM decoder.
-rtcm-regress: rtcmdecode
+rtcm-regress: gpsdecode
 	@echo "Testing RTCM decoding..."
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.rtcm2; do \
 		echo "Testing $${f}..."; \
-		$(srcdir)/rtcmdecode <$${f} >test/test.chk; \
+		$(srcdir)/gpsdecode <$${f} >test/test.chk; \
 		diff -ub $${f}.chk test/test.chk; \
 	done; \
 	rm test/test.chk
 
 # Rebuild the RTCM regression tests.
-rtcm-makeregress: rtcmdecode
+rtcm-makeregress: gpsdecode
 	@for f in $(srcdir)/test/*.rtcm2; do \
-		$(srcdir)/rtcmdecode < $${f} > $${f}.chk; \
+		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
 	done
 
 # Regression-test the packet getter.
@@ -459,10 +459,10 @@ geoid-makeregress: test_geoid
 	$(srcdir)/test_geoid 37.371192 122.014965 >test/geoid.test.chk
 
 # Test RTCM encoding using passthrough mode.
-undump-regress: rtcmdecode
+undump-regress: gpsdecode
 	@echo "Testing RTCM encoding..."
 	@mkdir -p test
-	@$(srcdir)/rtcmdecode -p < $(srcdir)/test/undump.sample > test/undump.test
+	@$(srcdir)/gpsdecode -p < $(srcdir)/test/undump.sample > test/undump.test
 	@diff -u $(srcdir)/test/undump.sample test/undump.test
 	@rm test/undump.test
 

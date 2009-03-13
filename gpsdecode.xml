@@ -2,20 +2,20 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='rtcmdecode.1'>
+<refentry id='gpsdecode.1'>
 <refmeta>
-<refentrytitle>rtcmdecode</refentrytitle>
+<refentrytitle>gpsdecode</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>13 Jul 2005</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>rtcmdecode</refname>
+<refname>gpsdecode</refname>
 <refpurpose>decode RTCM or AIVDM streams into a readable format</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>rtcmdecode</command>  
+  <command>gpsdecode</command>  
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
       <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
@@ -44,11 +44,11 @@ decoder dump format for RTCM2 is described in
 these lines go to standard output.</para>
 
 <para>Another supported format is AIVDM.  This is the sentence format
-used by the marine Automatic Identification System.  This can be 
+used by the marine Automatic Identification System.  This can be
 decoded, but not yet encoded.  The dump lines are unscaled integral
-values of AIS packet fields, in the order that they occur in the 
-packet, except that the 19-bit TDMA status fields found at 
-the end of message types 1-4 are are dumped as a single unsigned
+values of AIS packet fields, colon-separated, in the order that they
+occur in the packet, except that the 19-bit TDMA status fields found
+at the end of message types 1-4 are are dumped as a single unsigned
 integer.</para>
 
 </refsect1>
@@ -81,7 +81,7 @@ to developers.</para>
 Standards for Differential NAVSTAR GPS Service</citetitle> RTCM Paper
 194-93/SC 104-STD.</para>
 
-<para>Note that <application>rtcmdecode</application> presently
+<para>Note that <application>gpsdecode</application> presently
 recognizes only the 2.1 level of RTCM; the protocol was revised up to
 a version 2.3 including additional messages relating to GLONASS and
 real-time kinematics before being deprecated in favor of V3. It is

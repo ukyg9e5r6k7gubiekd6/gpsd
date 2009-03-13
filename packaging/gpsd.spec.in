@@ -130,7 +130,7 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %doc README INSTALL COPYING TODO
 %attr(755, root, root) %{_bindir}/gpscat
 %attr(755, root, root) %{_bindir}/gpsfake
-%attr(755, root, root) %{_bindir}/rtcmdecode
+%attr(755, root, root) %{_bindir}/gpsdecode
 %attr(755, root, root) %{_bindir}/gpsflash
 /usr/lib/python*/site-packages/gpsfake.py*
 /usr/lib/python*/site-packages/gpspacket.so*
@@ -141,7 +141,7 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_includedir}/gpsdclient.h
 %{_mandir}/man1/gpscat.1*
 %{_mandir}/man1/gpsfake.1*
-%{_mandir}/man1/rtcmdecode.1*
+%{_mandir}/man1/gpsdecode.1*
 %{_mandir}/man1/gpsflash.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
