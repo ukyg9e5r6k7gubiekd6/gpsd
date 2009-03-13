@@ -35,7 +35,7 @@
 struct aivdm_decode_t
 {
     uint	id;		/* message type */
-    uint    	ri;		/* Repeat indicator -- not used */
+    uint    	ri;		/* Repeat indicator */
     uint	mmsi;	/* MMSI */		
     union {
 	/* Types 1-3 Common navigation info */
@@ -57,13 +57,14 @@ struct aivdm_decode_t
 #define AIS_COG_NOT_AVAILABLE	3600
 	    uint heading;		/* true heading */
 #define AIS_NO_HEADING	511
-	    uint utc_second;	/* seconds of UTC timestamp */
+	    uint utc_second;		/* seconds of UTC timestamp */
 #define AIS_SEC_NOT_AVAILABLE	60
 #define AIS_SEC_MANUAL		61
 #define AIS_SEC_ESTIMATED	62
 #define AIS_SEC_INOPERATIVE	63
-	    uint regional;	/* regional reserved */
-	    /* spares and housekeeping bits follow */ 
+	    uint regional;		/* regional reserved */
+	    uint spare;			/* spare bits */
+	    uint radio;			/* radio state bits */
 	} type123;
 	/* Type 4 - Base Station Report */
 	struct {
@@ -83,7 +84,6 @@ struct aivdm_decode_t
 	    signed longitude;		/* longitude */
 	    signed latitude;		/* latitude */
 	    uint epfd_type;		/* type of position fix device */
-	    /* spares and housekeeping bits follow */ 
 	} type4;
 	/* Type 5 - Ship static and voyage related data */
 	struct {
@@ -180,7 +180,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	    ch = ch - 48;
 	else
 	    ch = ch - 56;
-	gpsd_report(LOG_RAW+1, "%c: %s\n", *cp, sixbits[ch]);
+	gpsd_report(LOG_IO, "%c: %s\n", *cp, sixbits[ch]);
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
 		session->driver.aivdm.bits[session->driver.aivdm.bitlen / 8] |= (1 << (7 - session->driver.aivdm.bitlen % 8));
@@ -204,6 +204,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 #define UBITS(s, l)	ubits((char *)session->driver.aivdm.bits, s, l)
 #define SBITS(s, l)	sbits((char *)session->driver.aivdm.bits, s, l)
 	ais.id = UBITS(0, 6);
+	ais.ri = UBITS(7, 2);
 	ais.mmsi = UBITS(8, 30);
 	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n", 
 		    ais.id, ais.mmsi);
@@ -211,7 +212,6 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
-	    /* Repeat indicator skipped */
 	    ais.type123.status = UBITS(38, 4);
 	    ais.type123.rot = SBITS(42, 8);
 	    uv = UBITS(50, 10);
@@ -219,7 +219,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 		ais.type123.sog = NAN;
 	    else
 		ais.type123.sog = uv / 10.0;
-	    /* position accuracy skipped */
+	    ais.type123.accuracy = UBITS(60, 1);
 	    sv = SBITS(61, 28);
 	    if (sv == AIS_LON_NOT_AVAILABLE)
 		ais.type123.longitude = NAN;
@@ -237,12 +237,15 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 		ais.type123.cog = uv / 10.0;
 	    ais.type123.heading = UBITS(128, 9);
 	    ais.type123.utc_second = UBITS(137, 6);
-	    /* regional and spare */
+	    ais.type123.regional = UBITS(143, 3);
+	    ais.type123.spare = UBITS(146, 2);
+	    ais.type123.radio = UBITS(148, 20);
 	    gpsd_report(LOG_INF,
-			"Nav=%d ROT=%d SOG=%.1f Lon=%.4f Lat=%.4f COG=%.1f TH=%d Sec=%d\n",
+			"Nav=%d ROT=%d SOG=%.1f Q=%d Lon=%.4f Lat=%.4f COG=%.1f TH=%d Sec=%d\n",
 			ais.type123.status,
 			ais.type123.rot,
 			ais.type123.sog, 
+			ais.type123.accuracy,
 			ais.type123.longitude, 
 			ais.type123.latitude, 
 			ais.type123.cog, 
