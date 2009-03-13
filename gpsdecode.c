@@ -60,9 +60,9 @@ static void  aivdm_dump(struct ais_t *ais, FILE *fp)
     };
 
     if (labeled)
-	(void)fprintf(fp, "type=%d:ri=%d:MMSI=%09d:", ais->id, ais->ri, ais->mmsi);
+	(void)fprintf(fp, "type=%d,ri=%d,MMSI=%09d,", ais->id, ais->ri, ais->mmsi);
     else
-	(void)fprintf(fp, "%d:%d:%09d:", ais->id, ais->ri, ais->mmsi);
+	(void)fprintf(fp, "%d,%d,%09d,", ais->id, ais->ri, ais->mmsi);
     switch (ais->id) {
     case 1:	/* Position Report */
     case 2:
@@ -227,6 +227,7 @@ static void  aivdm_dump(struct ais_t *ais, FILE *fp)
 #undef TYPE5_SCALED_LABELED
 	break;
     default:
+	(void)fprintf(fp,"?\n");
 	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
 	break;
     }
@@ -266,7 +267,9 @@ static void decode(FILE *fpin, FILE *fpout)
 	    gpsd_report(LOG_ERROR,"Error during packet fetch.\n");
 	    break;
 	}
-	if (session.packet.type == RTCM2_PACKET) {
+	if (session.packet.type == COMMENT_PACKET)
+	    (void)fputs((char *)session.packet.outbuffer, fpout);
+	else if (session.packet.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)session.packet.isgps.buf);
 	    rtcm2_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
