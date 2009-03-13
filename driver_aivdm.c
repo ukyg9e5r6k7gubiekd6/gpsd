@@ -31,91 +31,11 @@
 
 #include "bits.h"
 
-#pragma pack(1)
-struct aivdm_decode_t
-{
-    uint	id;		/* message type */
-    uint    	ri;		/* Repeat indicator */
-    uint	mmsi;	/* MMSI */		
-    union {
-	/* Types 1-3 Common navigation info */
-	struct {
-            uint status;		/* navigation status */
-	    signed rot;			/* rate of turn */
-#define AIS_ROT_HARD_LEFT	-127
-#define AIS_ROT_HARD_RIGHT	127
-#define AIS_ROT_NOT_AVAILABLE	128
-	    double sog;			/* speed over ground */
-#define AIS_SOG_NOT_AVAILABLE	1023
-#define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
-	    uint accuracy;		/* position accuracy */
-	    double longitude;		/* longitude */
-#define AIS_LON_NOT_AVAILABLE	181
-	    double latitude;		/* latitude */
-#define AIS_LAT_NOT_AVAILABLE	91
-	    double cog;			/* course over ground */
-#define AIS_COG_NOT_AVAILABLE	3600
-	    uint heading;		/* true heading */
-#define AIS_NO_HEADING	511
-	    uint utc_second;		/* seconds of UTC timestamp */
-#define AIS_SEC_NOT_AVAILABLE	60
-#define AIS_SEC_MANUAL		61
-#define AIS_SEC_ESTIMATED	62
-#define AIS_SEC_INOPERATIVE	63
-	    uint regional;		/* regional reserved */
-	    uint spare;			/* spare bits */
-	    uint radio;			/* radio state bits */
-	} type123;
-	/* Type 4 - Base Station Report */
-	struct {
-	    uint year;			/* UTC year */
-#define AIS_YEAR_NOT_AVAILABLE	0
-	    uint month;			/* UTC month */
-#define AIS_MONTH_NOT_AVAILABLE	0
-	    uint day;			/* UTC day */
-#define AIS_DAY_NOT_AVAILABLE	0
-	    uint hour;			/* UTC hour */
-#define AIS_HOUR_NOT_AVAILABLE	0
-	    uint minute;		/* UTC minute */
-#define AIS_MINUTE_NOT_AVAILABLE	0
-	    uint second;		/* UTC second */
-#define AIS_SECOND_NOT_AVAILABLE	0
-	    uint quality;		/* fix quality */
-	    signed longitude;		/* longitude */
-	    signed latitude;		/* latitude */
-	    uint epfd_type;		/* type of position fix device */
-	} type4;
-	/* Type 5 - Ship static and voyage related data */
-	struct {
-	    uint ais_version;			/* AIS version level */
-	    uint imo_id;			/* IMO identification */
-	    unsigned long long callsign:42;	/* callsign as packed sixbit */ 
-	    unsigned long long ship_name1:60;	/* ship name as packed sixbit */
-	    unsigned long long ship_name2:60;	/* more of it... */
-	    uint ship_type;	/* ship type code */
-	    uint to_bow;	/* dimension to bow */
-	    uint to_stern;	/* dimension to stern */
-	    uint to_port;	/* dimension to port */
-	    uint to_starboard;	/* dimension to starboard */
-	    uint epfd_type;	/* type of position fix deviuce */
-	    uint month;		/* UTC month */
-	    uint day;		/* UTC day */
-	    uint hour;		/* UTC hour */
-	    uint minute;	/* UTC minute */
-	    uint draught;	/* draft in meters */
-	    unsigned long long destination1:10;	/* ship destination */
-	    unsigned long long destination2:60;	/* more of it */
-	    uint dte;
-	    /* spares and housekeeping bits follow */ 
-	} type5;
-    };
-};
-
 /**
  * Parse the data from the device
  */
 /*@ +charint @*/
-gps_mask_t aivdm_parse(struct gps_device_t *session)
+bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 {
     char *sixbits[64] = {
 	"000000", "000001", "000010", "000011", "000100",
@@ -133,12 +53,10 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	"111100", "111101", "111110", "111111",    
     };
 
-    gps_mask_t mask = ONLINE_SET;    
     int nfields = 0;    
     unsigned char *data, *cp = session->driver.aivdm.fieldcopy;    
     unsigned char ch;
     int i;
-    struct aivdm_decode_t ais; 
 
     if (session->packet.outbuflen == 0)
 	return 0;
@@ -195,7 +113,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	uint uv;
 	int sv;
 
-	gpsd_report(LOG_IO, "AIVDM payload %ld: %s\n",
+	gpsd_report(LOG_RAW+1, "AIVDM payload %ld: %s\n",
 		    session->driver.aivdm.bitlen,
 		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
 					 (session->driver.aivdm.bitlen + 7)/8, LOG_IO));
@@ -203,89 +121,128 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 
 #define UBITS(s, l)	ubits((char *)session->driver.aivdm.bits, s, l)
 #define SBITS(s, l)	sbits((char *)session->driver.aivdm.bits, s, l)
-	ais.id = UBITS(0, 6);
-	ais.ri = UBITS(7, 2);
-	ais.mmsi = UBITS(8, 30);
+	ais->id = UBITS(0, 6);
+	ais->ri = UBITS(7, 2);
+	ais->mmsi = UBITS(8, 30);
 	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n", 
-		    ais.id, ais.mmsi);
-	switch (ais.id) {
+		    ais->id, ais->mmsi);
+	switch (ais->id) {
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
-	    ais.type123.status = UBITS(38, 4);
-	    ais.type123.rot = SBITS(42, 8);
+	    ais->type123.status = UBITS(38, 4);
+	    ais->type123.rot = SBITS(42, 8);
 	    uv = UBITS(50, 10);
 	    if (uv == AIS_SOG_NOT_AVAILABLE)
-		ais.type123.sog = NAN;
+		ais->type123.sog = NAN;
 	    else
-		ais.type123.sog = uv / 10.0;
-	    ais.type123.accuracy = UBITS(60, 1);
+		ais->type123.sog = uv / 10.0;
+	    ais->type123.accuracy = (bool)UBITS(60, 1);
 	    sv = SBITS(61, 28);
 	    if (sv == AIS_LON_NOT_AVAILABLE)
-		ais.type123.longitude = NAN;
+		ais->type123.longitude = NAN;
 	    else
-		ais.type123.longitude = sv / 600000.0;
+		ais->type123.longitude = sv / 600000.0;
 	    sv = SBITS(89, 27);
 	    if (sv == AIS_LAT_NOT_AVAILABLE)
-		ais.type123.latitude = NAN;
+		ais->type123.latitude = NAN;
 	    else
-		ais.type123.latitude = sv / 600000.0;
+		ais->type123.latitude = sv / 600000.0;
 	    uv = UBITS(116, 12);
 	    if (uv == AIS_COG_NOT_AVAILABLE)
-		ais.type123.cog = NAN;
+		ais->type123.cog = NAN;
 	    else
-		ais.type123.cog = uv / 10.0;
-	    ais.type123.heading = UBITS(128, 9);
-	    ais.type123.utc_second = UBITS(137, 6);
-	    ais.type123.regional = UBITS(143, 3);
-	    ais.type123.spare = UBITS(146, 2);
-	    ais.type123.radio = UBITS(148, 20);
+		ais->type123.cog = uv / 10.0;
+	    ais->type123.heading = UBITS(128, 9);
+	    ais->type123.utc_second = UBITS(137, 6);
+	    ais->type123.regional = UBITS(143, 3);
+	    ais->type123.spare = UBITS(146, 2);
+	    ais->type123.radio = UBITS(148, 20);
 	    gpsd_report(LOG_INF,
 			"Nav=%d ROT=%d SOG=%.1f Q=%d Lon=%.4f Lat=%.4f COG=%.1f TH=%d Sec=%d\n",
-			ais.type123.status,
-			ais.type123.rot,
-			ais.type123.sog, 
-			ais.type123.accuracy,
-			ais.type123.longitude, 
-			ais.type123.latitude, 
-			ais.type123.cog, 
-			ais.type123.heading, 
-			ais.type123.utc_second);
+			ais->type123.status,
+			ais->type123.rot,
+			ais->type123.sog, 
+			(uint)ais->type123.accuracy,
+			ais->type123.longitude, 
+			ais->type123.latitude, 
+			ais->type123.cog, 
+			ais->type123.heading, 
+			ais->type123.utc_second);
 	    break;
-#if 0
 	case 4:	/* Base Station Report */
+	    ais->type4.year = UBITS(38, 41);
+	    ais->type4.month = UBITS(52, 4);
+	    ais->type4.day = UBITS(56, 5);
+	    ais->type4.hour = UBITS(61, 5);
+	    ais->type4.minute = UBITS(66, 6);
+	    ais->type4.second = UBITS(72, 6);
+	    ais->type4.accuracy = (bool)UBITS(78, 1);
+	    sv = SBITS(79, 28);
+	    if (sv == AIS_LON_NOT_AVAILABLE)
+		ais->type4.longitude = NAN;
+	    else
+		ais->type4.longitude = sv / 600000.0;
+	    sv = SBITS(107, 27);
+	    if (sv == AIS_LAT_NOT_AVAILABLE)
+		ais->type4.latitude = NAN;
+	    else
+		ais->type4.latitude = sv / 600000.0;
+	    ais->type4.epfd = UBITS(134, 4);
+	    ais->type4.spare = UBITS(138, 10);
+	    ais->type4.radio = UBITS(148, 19);
 	    gpsd_report(LOG_INF,
-			"Latitude: %.7f  Longitude: %.7f\n",
-			ais.type4.latitude / 600000.0, 
-			ais.type4.longitude / 600000.0);
+			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%.4f  Lon=%.4f epfd=%d\n",
+			ais->type4.year,
+			ais->type4.month,
+			ais->type4.day,
+			ais->type4.hour,
+			ais->type4.minute,
+			ais->type4.second,
+			(uint)ais->type4.accuracy,
+			ais->type4.latitude / 600000.0, 
+			ais->type4.longitude / 600000.0,
+			ais->type4.epfd);
 	    break;
 	case 5: /* Ship static and voyage related data */
 	    gpsd_report(LOG_INF,
 			"IMO: %d\n",
-			ais.type5.imo_id);
+			ais->type5.imo_id);
 	    break;
-#endif
 	default:
-	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais.id);
+	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
 	} 
 #undef SBITS
 #undef UBITS
 
-       /*
-	* XXX The tag field is only 8 bytes; be careful you do not overflow.
-	* XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
-	*/
+	/* data is fully decoded */
+	return true;
+    }
+
+    /* we're still waiting on another sentence */
+    return false;
+}
+/*@ -charint @*/
+
+gps_mask_t aivdm_parse(struct gps_device_t *session)
+{
+    gps_mask_t mask = ONLINE_SET;    
+
+    if (aivdm_decode(session, &session->driver.aivdm.decoded)) {
+	/* 
+	 * XXX The tag field is only 8 bytes, whic will truncate the MMSI; 
+	 * widen it when ready for production.
+	 */
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	    "AIVDM");
+		       "AIS%d", session->driver.aivdm.decoded.mmsi);
 
 	/* FIXME: actual driver code goes here */
     }
-
+    
     /* not posting any data yet */
     return mask;
 }
-/*@ -charint @*/
 
 /* This is everything we export */
 const struct gps_type_t aivdm = {

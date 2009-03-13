@@ -446,6 +446,85 @@ struct rtcm3_t {
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
+struct ais_t
+{
+    uint	id;		/* message type */
+    uint    	ri;		/* Repeat indicator */
+    uint	mmsi;	/* MMSI */		
+    union {
+	/* Types 1-3 Common navigation info */
+	struct {
+            uint status;		/* navigation status */
+	    signed rot;			/* rate of turn */
+#define AIS_ROT_HARD_LEFT	-127
+#define AIS_ROT_HARD_RIGHT	127
+#define AIS_ROT_NOT_AVAILABLE	128
+	    float sog;			/* speed over ground */
+#define AIS_SOG_NOT_AVAILABLE	1023
+#define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
+	    bool accuracy;		/* position accuracy */
+	    float longitude;		/* longitude */
+#define AIS_LON_NOT_AVAILABLE	181
+	    float latitude;		/* latitude */
+#define AIS_LAT_NOT_AVAILABLE	91
+	    float cog;			/* course over ground */
+#define AIS_COG_NOT_AVAILABLE	3600
+	    uint heading;		/* true heading */
+#define AIS_NO_HEADING	511
+	    uint utc_second;		/* seconds of UTC timestamp */
+#define AIS_SEC_NOT_AVAILABLE	60
+#define AIS_SEC_MANUAL		61
+#define AIS_SEC_ESTIMATED	62
+#define AIS_SEC_INOPERATIVE	63
+	    uint regional;		/* regional reserved */
+	    uint spare;			/* spare bits */
+	    uint radio;			/* radio status bits */
+	} type123;
+	/* Type 4 - Base Station Report */
+	struct {
+	    uint year;			/* UTC year */
+#define AIS_YEAR_NOT_AVAILABLE	0
+	    uint month;			/* UTC month */
+#define AIS_MONTH_NOT_AVAILABLE	0
+	    uint day;			/* UTC day */
+#define AIS_DAY_NOT_AVAILABLE	0
+	    uint hour;			/* UTC hour */
+#define AIS_HOUR_NOT_AVAILABLE	0
+	    uint minute;		/* UTC minute */
+#define AIS_MINUTE_NOT_AVAILABLE	0
+	    uint second;		/* UTC second */
+#define AIS_SECOND_NOT_AVAILABLE	0
+	    bool accuracy;		/* fix quality */
+	    float longitude;		/* longitude */
+	    float latitude;		/* latitude */
+	    uint epfd;			/* type of position fix device */
+	    uint spare;			/* spare bits */
+	    uint radio;			/* radio status bits */
+	} type4;
+	/* Type 5 - Ship static and voyage related data */
+	struct {
+	    uint ais_version;		/* AIS version level */
+	    uint imo_id;		/* IMO identification */
+	    char callsign[8];		/* callsign */ 
+	    char vessel_name[21];	/* vessel name */
+	    uint ship_type;		/* ship type code */
+	    uint to_bow;		/* dimension to bow */
+	    uint to_stern;		/* dimension to stern */
+	    uint to_port;		/* dimension to port */
+	    uint to_starboard;		/* dimension to starboard */
+	    uint epfd;			/* type of position fix deviuce */
+	    uint month;			/* UTC month */
+	    uint day;			/* UTC day */
+	    uint hour;			/* UTC hour */
+	    uint minute;		/* UTC minute */
+	    uint draught;		/* draft in meters */
+	    char destination[21];	/* ship destination */
+	    uint dte;			/* data terminal enable */
+	    uint spare;			/* spare bits */
+	} type5;
+    };
+};
+
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
 #define ONLINE_SET	0x00000001u
