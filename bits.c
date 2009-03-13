@@ -8,8 +8,6 @@
  */
 #include <assert.h>
 
-#define DEBUG
-
 #include "bits.h"
 #ifdef DEBUG
 #include <stdio.h>
