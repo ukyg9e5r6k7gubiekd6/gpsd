@@ -262,6 +262,7 @@ struct gps_device_t {
 	    unsigned char fieldcopy[NMEA_MAX+1];
 	    unsigned char bits[2048];
 	    size_t bitlen;
+	    struct ais_t decoded;
 	} aivdm;
 #endif /* AIVDM_ENABLE */
 #ifdef BINARY_ENABLE
@@ -468,7 +469,7 @@ extern bool ubx_write(struct gps_device_t *session,
 		      /*@null@*/unsigned char *msg, unsigned short data_len);
 extern void ubx_catch_model(struct gps_device_t *session,
 			    unsigned char *buf, size_t len);
-extern bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
+extern bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais);
 #endif /* UBX_ENABLE */
 
 #ifdef MKT3301_ENABLE

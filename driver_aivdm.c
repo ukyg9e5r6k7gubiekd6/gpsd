@@ -110,9 +110,6 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 
     /* time to pass buffered-up data to where it's actually processed? */
     if (session->driver.aivdm.part == session->driver.aivdm.await) {
-	uint uv;
-	int sv;
-
 	gpsd_report(LOG_RAW+1, "AIVDM payload %ld: %s\n",
 		    session->driver.aivdm.bitlen,
 		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
@@ -132,34 +129,18 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 	case 3:
 	    ais->type123.status = UBITS(38, 4);
 	    ais->type123.rot = SBITS(42, 8);
-	    uv = UBITS(50, 10);
-	    if (uv == AIS_SOG_NOT_AVAILABLE)
-		ais->type123.sog = NAN;
-	    else
-		ais->type123.sog = uv / 10.0;
+	    ais->type123.sog = UBITS(50, 10);
 	    ais->type123.accuracy = (bool)UBITS(60, 1);
-	    sv = SBITS(61, 28);
-	    if (sv == AIS_LON_NOT_AVAILABLE)
-		ais->type123.longitude = NAN;
-	    else
-		ais->type123.longitude = sv / 600000.0;
-	    sv = SBITS(89, 27);
-	    if (sv == AIS_LAT_NOT_AVAILABLE)
-		ais->type123.latitude = NAN;
-	    else
-		ais->type123.latitude = sv / 600000.0;
-	    uv = UBITS(116, 12);
-	    if (uv == AIS_COG_NOT_AVAILABLE)
-		ais->type123.cog = NAN;
-	    else
-		ais->type123.cog = uv / 10.0;
+	    ais->type123.longitude = SBITS(61, 28);
+	    ais->type123.latitude = SBITS(89, 27);
+	    ais->type123.cog = UBITS(116, 12);
 	    ais->type123.heading = UBITS(128, 9);
 	    ais->type123.utc_second = UBITS(137, 6);
 	    ais->type123.regional = UBITS(143, 3);
 	    ais->type123.spare = UBITS(146, 2);
 	    ais->type123.radio = UBITS(148, 20);
 	    gpsd_report(LOG_INF,
-			"Nav=%d ROT=%d SOG=%.1f Q=%d Lon=%.4f Lat=%.4f COG=%.1f TH=%d Sec=%d\n",
+			"Nav=%d ROT=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
 			ais->type123.status,
 			ais->type123.rot,
 			ais->type123.sog, 
@@ -178,21 +159,13 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 	    ais->type4.minute = UBITS(66, 6);
 	    ais->type4.second = UBITS(72, 6);
 	    ais->type4.accuracy = (bool)UBITS(78, 1);
-	    sv = SBITS(79, 28);
-	    if (sv == AIS_LON_NOT_AVAILABLE)
-		ais->type4.longitude = NAN;
-	    else
-		ais->type4.longitude = sv / 600000.0;
-	    sv = SBITS(107, 27);
-	    if (sv == AIS_LAT_NOT_AVAILABLE)
-		ais->type4.latitude = NAN;
-	    else
-		ais->type4.latitude = sv / 600000.0;
+	    ais->type4.longitude = SBITS(79, 28);
+	    ais->type4.latitude = SBITS(107, 27);
 	    ais->type4.epfd = UBITS(134, 4);
 	    ais->type4.spare = UBITS(138, 10);
 	    ais->type4.radio = UBITS(148, 19);
 	    gpsd_report(LOG_INF,
-			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%.4f  Lon=%.4f epfd=%d\n",
+			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%d  Lon=%d epfd=%d\n",
 			ais->type4.year,
 			ais->type4.month,
 			ais->type4.day,
@@ -200,8 +173,8 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 			ais->type4.minute,
 			ais->type4.second,
 			(uint)ais->type4.accuracy,
-			ais->type4.latitude / 600000.0, 
-			ais->type4.longitude / 600000.0,
+			ais->type4.latitude, 
+			ais->type4.longitude,
 			ais->type4.epfd);
 	    break;
 	case 5: /* Ship static and voyage related data */

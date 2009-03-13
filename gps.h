@@ -459,15 +459,15 @@ struct ais_t
 #define AIS_ROT_HARD_LEFT	-127
 #define AIS_ROT_HARD_RIGHT	127
 #define AIS_ROT_NOT_AVAILABLE	128
-	    float sog;			/* speed over ground */
+	    uint sog;			/* speed over ground in deciknots */
 #define AIS_SOG_NOT_AVAILABLE	1023
 #define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
 	    bool accuracy;		/* position accuracy */
-	    float longitude;		/* longitude */
-#define AIS_LON_NOT_AVAILABLE	181
-	    float latitude;		/* latitude */
-#define AIS_LAT_NOT_AVAILABLE	91
-	    float cog;			/* course over ground */
+	    int longitude;		/* longitude */
+#define AIS_LON_NOT_AVAILABLE	0x6791AC0
+	    int latitude;		/* latitude */
+#define AIS_LAT_NOT_AVAILABLE	0x3412140
+	    uint cog;			/* course over ground */
 #define AIS_COG_NOT_AVAILABLE	3600
 	    uint heading;		/* true heading */
 #define AIS_NO_HEADING	511
@@ -495,8 +495,8 @@ struct ais_t
 	    uint second;		/* UTC second */
 #define AIS_SECOND_NOT_AVAILABLE	0
 	    bool accuracy;		/* fix quality */
-	    float longitude;		/* longitude */
-	    float latitude;		/* latitude */
+	    int longitude;		/* longitude */
+	    int latitude;		/* latitude */
 	    uint epfd;			/* type of position fix device */
 	    uint spare;			/* spare bits */
 	    uint radio;			/* radio status bits */
