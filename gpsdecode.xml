@@ -18,6 +18,8 @@
   <command>gpsdecode</command>  
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
+      <arg choice='opt'>-l</arg>
+      <arg choice='opt'>-u</arg>
       <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V</arg>
 </cmdsynopsis>
@@ -45,34 +47,59 @@ these lines go to standard output.</para>
 
 <para>Another supported format is AIVDM.  This is the sentence format
 used by the marine Automatic Identification System.  This can be
-decoded, but not yet encoded.  The dump lines are unscaled integral
-values of AIS packet fields, colon-separated, in the order that they
-occur in the packet, except that the 19-bit TDMA status fields found
-at the end of message types 1-4 are are dumped as a single unsigned
-integer.</para>
+decoded, but not yet encoded.</para>
+
+<para> The dump lines are values of AIS payload fields,
+comma-separated, in the order that they occur in the payload, There
+are two exceptions: spans of fields expressing a date are emitted as
+an ISO8601 timestamp (look for colons and the trailing Z indicating
+Zulu/UTC time), and the 19-bit group of TDMA status fields found at
+the end of message types 1-4 are are dumped as a single unsigned
+integer in hex. (Unused regional-authority fields are also dumped in
+hex.)</para>
+
+<para>By default, certain scaling and conversion operations are
+performed for the output.  Latitudes and longitudes are scaled to
+decimal degrees rather than the native AIS unit of 1/10000th of a
+minute of arc.  Speeds are scaled to knots rather than tenth-of-knot
+unit.  Navigation status and positioning-system type are dumped
+as text strings rather than IAS numeric codes.  If SOG (speed ovr
+ground) is unavailable, it will be returned as -1 (but the IAS value
+of 102.2 knots for an unknown high speed is left alone). Rate of turn 
+may appear as "nan" if is unavailable, of as one of the strings
+"fastright" or "fastleft" if it is out of the IAS encoding range;
+otherwise it is quadratically mapped back to the turn sensor number
+in degrees per minute</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
-<para>The -d option tells the program to decode packets presented on
-standard input to a text dump on standard output. This is the default
-behavior.</para>
+<para>The <option>-d</option> option tells the program to decode
+packets presented on standard input to a text dump on standard
+output. This is the default behavior.</para>
 
 <para>RTCM2 will be dumped in the format of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
 on standard output. </para>
 
-<para>The -e option option tells the program to encode a text dump in
-the format of
+<para>The <option>-e</option> option option tells the program to
+encode a text dump in the format of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
 to standard output.  Encoding is supported only RTCM2, not for
 RTCM3.</para>
 
-<para>The -V option directs the program to emit its version number,
-then exit.</para>
+<para>The <option>-u</option> suppresses scaling to float quantities
+and text expansion of numeric codes.  A dump with this option is
+lossless.</para>
 
-<para>The -v option sets a verbosity level.  It is mainly of interest
-to developers.</para>
+<para>The <option>-l</option> inserts a mnemonic label, followed by
+an equal sign, before each field in each dump line.</para>
+
+<para>The <option>-V</option> option directs the program to emit its
+version number, then exit.</para>
+
+<para>The <option>-v</option> option sets a verbosity level.  It is
+mainly of interest to developers.</para>
 
 </refsect1>
 <refsect1 id='standard'><title>APPLICABLE STANDARDS</title>
@@ -106,8 +133,7 @@ GPSD project website.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the common
-sentence types 1-5; other packet payloads are dumped as raw
-hex.</para>
+sentence types 1-5. AIVDM encoding is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
 
@@ -119,7 +145,7 @@ binary RTCM2 will be rounded down to the nearest scale unit,
 and dumping will show slightly different numbers than those you 
 entered.</para>
 
-<para>The decoder logic is sufficiently convoluted to confuse some
+<para>The RTCM2 decoder logic is sufficiently convoluted to confuse some
 compiler optimizers, notably in GCC 3.x at -O2, into generating bad
 code.</para>
 
