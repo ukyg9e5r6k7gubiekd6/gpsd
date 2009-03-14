@@ -366,7 +366,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "def:hlpuVv:")) != EOF) {
+    while ((c = getopt(argc, argv, "def:hlpuVD:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -396,8 +396,9 @@ int main(int argc, char **argv)
 	    scaled = false;
 	    break;
 
-	case 'v':
+	case 'D':
 	    verbose = atoi(optarg);
+	    gpsd_hexdump_level = verbose;
 	    break;
 
 	case 'V':

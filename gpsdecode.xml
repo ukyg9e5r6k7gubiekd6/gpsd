@@ -20,7 +20,7 @@
       <arg choice='opt'>-e</arg>
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-u</arg>
-      <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -98,7 +98,7 @@ an equal sign, before each field in each dump line.</para>
 <para>The <option>-V</option> option directs the program to emit its
 version number, then exit.</para>
 
-<para>The <option>-v</option> option sets a verbosity level.  It is
+<para>The <option>-D</option> option sets a debug verbosity level.  It is
 mainly of interest to developers.</para>
 
 </refsect1>

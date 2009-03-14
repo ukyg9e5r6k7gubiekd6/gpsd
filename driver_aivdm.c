@@ -62,7 +62,7 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 	return 0;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw AIVDM packet length %ld: %s", 
+    gpsd_report(LOG_PROG, "AIVDM packet length %ld: %s", 
 		session->packet.outbuflen, session->packet.outbuffer);
 
     /* extract packet fields */
@@ -98,7 +98,7 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 	    ch = ch - 48;
 	else
 	    ch = ch - 56;
-	gpsd_report(LOG_IO, "%c: %s\n", *cp, sixbits[ch]);
+	gpsd_report(LOG_RAW, "%c: %s\n", *cp, sixbits[ch]);
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
 		session->driver.aivdm.bits[session->driver.aivdm.bitlen / 8] |= (1 << (7 - session->driver.aivdm.bitlen % 8));
@@ -110,10 +110,11 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 
     /* time to pass buffered-up data to where it's actually processed? */
     if (session->driver.aivdm.part == session->driver.aivdm.await) {
-	gpsd_report(LOG_RAW+1, "AIVDM payload %ld: %s\n",
-		    session->driver.aivdm.bitlen,
+	size_t clen = (session->driver.aivdm.bitlen + 7)/8;
+	gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
+		    session->driver.aivdm.bitlen, clen,
 		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
-					 (session->driver.aivdm.bitlen + 7)/8, LOG_IO));
+					 clen, LOG_INF));
 
 
 #define UBITS(s, l)	ubits((char *)session->driver.aivdm.bits, s, l)
