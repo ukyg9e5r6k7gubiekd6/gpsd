@@ -86,7 +86,7 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 
     /* assemble the binary data */
     if (session->driver.aivdm.part == 1) {
-	(void)memset(session->driver.aivdm.bits, '\0', sizeof((char *)session->driver.aivdm.bits));
+	(void)memset(session->driver.aivdm.bits, '\0', sizeof(session->driver.aivdm.bits));
 	session->driver.aivdm.bitlen = 0;
     }
 
@@ -231,6 +231,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
     gps_mask_t mask = ONLINE_SET;    
 
     if (aivdm_decode(session, &session->driver.aivdm.decoded)) {
+	mask |= PACKET_SET;
 	/* 
 	 * XXX The tag field is only 8 bytes, whic will truncate the MMSI; 
 	 * widen it when ready for production.

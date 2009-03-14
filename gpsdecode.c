@@ -263,7 +263,9 @@ static void decode(FILE *fpin, FILE *fpout)
     char buf[BUFSIZ];
 
     for (;;) {
-	if (gpsd_poll(&session) & ERROR_SET) {
+	gps_mask_t state = gpsd_poll(&session);
+
+	if (state & ERROR_SET) {
 	    gpsd_report(LOG_ERROR,"Error during packet fetch.\n");
 	    break;
 	}
@@ -279,8 +281,8 @@ static void decode(FILE *fpin, FILE *fpout)
 	    rtcm3_dump(&rtcm3, stdout);
 	}
 	else if (session.packet.type == AIVDM_PACKET) {
-	    aivdm_decode(&session, &session.driver.aivdm.decoded);
-	    aivdm_dump(&session.driver.aivdm.decoded, stdout);
+	    if (state & PACKET_SET)
+		aivdm_dump(&session.driver.aivdm.decoded, stdout);
 	} else
 	    gpsd_report(LOG_ERROR, "unknown packet type %d\n", session.packet.type);
 	if (packet_buffered_input(&session.packet) <= 0)
