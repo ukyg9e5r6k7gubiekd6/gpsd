@@ -1,8 +1,9 @@
 /* $Id$ */
 /*
- * Bitfield extraction functions.  In each, start is a bit index (not a byte
- * index) and width is a bit width (bounded above by the bit width of long 
- * long).
+ * Bitfield extraction functions.  In each, start is a bit index (not
+ * a byte index) and width is a bit width.  The width bounded above by
+ * the bit width of a long long, which s 64 bits in all standard data
+ * models for 64-bit processors.
  *
  * The sbits() function assumes twos-complement arithmetic.
  */
