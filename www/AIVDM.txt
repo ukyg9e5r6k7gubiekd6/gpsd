@@ -125,11 +125,11 @@ types are as follows:
 
 .Message types
 `--`-------------------------------------------------
-01 Position Report with SOTDMA (Self-Organizing TDMA)
-02 Position Report with SOTDMA (Self-Organizing TDMA)
-03 Position Report with ITDMA
+01 Position Report Class A
+02 Position Report Class A (Assigned schedule)
+03 Position Report Class A (Response to interrogation)
 04 Base Station Report
-05 Ship static and voyage related data
+05 Ship and Voyage data
 06 Addressed Binary Message
 07 Binary Acknowledge
 08 Binary Broadcast Message
@@ -150,9 +150,6 @@ types are as follows:
 23 Group Assignment Command
 24 Class B CS Static Data Report 
 -----------------------------------------------------
-
-The duplication of titles for types 1 and 2 is correct and part of the
-standard (as described in <<IALA>>).
 
 In normal operation, an AIS transceiver will send a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
