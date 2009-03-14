@@ -80,11 +80,6 @@ certainly what you want.</para>
 <function>gpsd_init()</function>
 initializes a session structure to hold the data collected by the GPS.</para>
 
-<para>You may optionally specify a DGPS server, either as a string
-containing a server name or a string containining server name followed
-by a colon and a port name or number.  To specify no DGPS, pass the 
-null pointer.</para>
-
 <para>The second argument must be a context structure.  The library 
 will use it for information that need to be shared between sessions; 
 presently this includes the leap-second correction and possibly a
