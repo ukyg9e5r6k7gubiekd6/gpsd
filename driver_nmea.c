@@ -898,7 +898,7 @@ void nmea_add_checksum(char *sentence)
     unsigned char sum = '\0';
     char c, *p = sentence;
 
-    if (*p == '$') {
+    if (*p == '$' || *p == '!') {
 	p++;
     } else {
 	gpsd_report(LOG_ERROR, "Bad NMEA sentence: '%s'\n", sentence);
