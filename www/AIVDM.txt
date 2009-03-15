@@ -42,9 +42,9 @@ Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
 I have been unable to determine what technical standard sets the ASCII
-format for AIS messages; most likely it is <<NMEA>>, which I also have
-not looked at because it is proprietary and expensive and surrounded
-by even more rapacious attack lawyers.
+format for AIS messages; most likely it is NMEA 0183 <<NMEA>>, which I
+also have not looked at because it is proprietary and expensive and
+surrounded by even more rapacious attack lawyers.
 
 == Information Sources ==
 
@@ -56,7 +56,28 @@ except the Repeat Indicator found in some messages.
 
 The AIVDM ASCII packet format is described at <<BOSUN>>.
 
-There's a web form that does sentence decoding at http://rl.se/aivdm.
+Kurt Schwehr is a research scientist at the Center for
+Coastal and Ocean Mapping at the University of New Hamphire. Much of
+his research involves AIS.  His work blog at <<Schwehr>> contains
+sample messages and descriptions of AIS operation in the wild that
+shed light on various obscure corners of the specification.  He has
+explained the otherwise undocumented Ring Indicator field to me by email.
+
+== Open-Source Implementations ==
+
+The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
+sentence decoder. This document was developed to be the specification 
+for it.
+
+<<Schwehr>> includes links to a collection of Python scripts for
+decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
+is research code rather than a production tool.
+
+There is a http://gnuais.sourceforge.net/[GNU AIS] project at
+SourceForge.  It seems intended primarily to work directly
+with AIS radios.
+
+There's a http://rl.se/aivdm[web form] that does sentence decoding.
 
 == AIVDM/AIVDO Sentence Layer ==
 
@@ -139,12 +160,12 @@ types are as follows:
 06 Addressed Binary Message
 07 Binary Acknowledge
 08 Binary Broadcast Message
-09 Standard SAR Aircraft position report
-10 UTC and Date inquiry
-11 UTC and Date response
-12 Addressed safety related message
-13 Safety related Acknowledge
-14 Safety related Broadcast Message
+09 Standard SAR Aircraft Position Report
+10 UTC and Date Inquiry
+11 UTC and Date Response
+12 Addressed Safety Related Message
+13 Safety Related Acknowledge
+14 Safety Related Broadcast Message
 15 Interrogation
 16 Assigned Mode Command
 17 GNSS Binary Broadcast Message
@@ -155,6 +176,8 @@ types are as follows:
 22 Channel Management
 23 Group Assignment Command
 24 Class B CS Static Data Report 
+25 Binary Message, Single Slot
+26 Binary Message, Multiple Slot
 -----------------------------------------------------
 
 In normal operation, an AIS transceiver will send a position report
@@ -170,9 +193,11 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).
 
 Detailed descriptions of message types 1-5 follow.  Information
-sufficient to decode messages 6-24 can be found in <<IALA>>, but
-they are rare or not of general interest so we will not duplicate
-the information here.
+sufficient to decode messages 6-22 can be found in <<IALA>>, but they
+are rare or not of general interest so we will not duplicate the
+information here. Message types 23-24 are listed at <<BOSUN>> with no
+further information; message types 25-26 come from <<Schwehr>>> with
+no further information.
 
 === Types 1, 2 and 3 ===
 
@@ -186,7 +211,7 @@ software.
 Field   Len Description                       Units
 -------------------------------------------------------------------------------
 0-5      6  Message Type             Unsigned integer: 1-24
-6-7      2  Repeat Indicator         Unknown; 3 = "Do not repeat".
+6-7      2  Repeat Indicator         3 = "Do not repeat"; see below..
 8-37    30  MMSI                     Unsigned integer: 9 decimal digits
 38-41    4  Navigation Status        See table below
 42-49    8  Rate of Turn (ROT)       Signed integer: see below
@@ -197,9 +222,16 @@ Field   Len Description                       Units
 116-127 12  Course Over Ground (COG) Relative to true north to 0.1 degree
 128-136  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 137-142  6  Time Stamp (UTC Seconds) Second of UTC timestamp (see below).
-143-145  3  Regional RESERVED
+143-145  3  Regional Reserved
 146-147  2  Spare
 -------------------------------------------------------------------------------
+
+The Repeat Indicator is a directive to an AIS transciever that this
+message should be rebroadcast.  This was intended as a way of getting
+AIS messages around hills and other obstructions in coastal waters,
+but is little used as base station coverage is more effective.  It is
+probably intended that the bit be incremented on each retransmission,
+to a maximum of three hops.
 
 .Navigation status codes
 `-`-------------------------------------------------------------
@@ -257,6 +289,9 @@ Seconds in UTC timestamp should be 0-59, except for these special values:
 * 62 if Electronic Position Fixing System operates in estimated (dead
      reckoning) mode,
 * 63 if the positioning system is inoperative.
+
+The Regional Reserved field is intended for use by local maaritime
+authorities.  It is not known to be in any actual use up to 2009.
 
 Bits 148-167 are diagnostic information for the radio system.  Consult
 <<IALA>> for detailed description of the latter.  Total of 168 bits,
@@ -462,3 +497,5 @@ Identification System]
 
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
+
+- [[[Schwehr]]] http://schwehr.org/blog/[[[Kurt Schwehr's weblog]]]
