@@ -18,9 +18,6 @@ static int verbose = 0;
 static bool scaled = true;
 static bool labeled = false;
 
-static struct gps_device_t session;
-static struct gps_context_t context;
-
 /**************************************************************************
  *
  * AIVDM decoding
@@ -359,37 +356,27 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 /*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE *fpin, FILE *fpout)
-/* binary on fpin to dump format on fpout */
+/* RTCM-104 bits on fpin to dump format on fpout */
 {
+    struct gps_packet_t lexer;
     struct rtcm2_t rtcm2;
     struct rtcm3_t rtcm3;
     char buf[BUFSIZ];
 
-    for (;;) {
-	gps_mask_t state = gpsd_poll(&session);
+    packet_reset(&lexer);
 
-	if (state & ERROR_SET) {
-	    gpsd_report(LOG_ERROR,"Error during packet fetch.\n");
+    for (;;) {
+	if (packet_get(fileno(fpin), &lexer) <= 0 && packet_buffered_input(&lexer) <= 0)
 	    break;
-	}
-	if (session.packet.type == COMMENT_PACKET)
-	    (void)fputs((char *)session.packet.outbuffer, fpout);
-	else if (session.packet.type == RTCM2_PACKET) {
-	    rtcm2_unpack(&rtcm2, (char *)session.packet.isgps.buf);
+	else if (lexer.type == RTCM2_PACKET) {
+	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
 	    rtcm2_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
-	else if (session.packet.type == RTCM3_PACKET) {
-	    rtcm3_unpack(&rtcm3, (char *)session.packet.outbuffer);
+	else if (lexer.type == RTCM3_PACKET) {
+	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
 	    rtcm3_dump(&rtcm3, stdout);
 	}
-	else if (session.packet.type == AIVDM_PACKET) {
-	    if (state & PACKET_SET)
-		aivdm_dump(&session.driver.aivdm.decoded, stdout);
-	} else
-	    gpsd_report(LOG_ERROR, "unknown packet type %d\n", session.packet.type);
-	if (packet_buffered_input(&session.packet) <= 0)
-	    break;
     }
 }
 /*@ +compdestroy +compdef +usedef @*/
@@ -518,9 +505,6 @@ int main(int argc, char **argv)
     }
     argc -= optind;
     argv += optind;
-
-    gpsd_init(&session, &context, (char *)NULL);
-    session.gpsdata.gps_fd = fileno(stdin);
 
     /* strip lines with leading # */
     if (striphdr) {

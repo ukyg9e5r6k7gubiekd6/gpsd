@@ -230,7 +230,6 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
     gps_mask_t mask = ONLINE_SET;    
 
     if (aivdm_decode(session, &session->driver.aivdm.decoded)) {
-	mask |= PACKET_SET;
 	/* 
 	 * XXX The tag field is only 8 bytes, whic will truncate the MMSI; 
 	 * widen it when ready for production.
