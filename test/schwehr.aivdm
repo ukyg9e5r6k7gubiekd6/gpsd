@@ -103,23 +103,3 @@
 #       state_slottimeout:  4
 #       state_slotoffset:   1503
 #
-!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
-#       MessageID:           4
-#       RepeatIndicator:     0
-#       UserID:              3669702
-#       Time_year:           2007
-#       Time_month:          5
-#       Time_day:            14
-#       Time_hour:           19
-#       Time_min:            57
-#       Time_sec:            39
-#       PositionAccuracy:    1
-#       Position_longitude:  -76.35236166666666666666666667
-#       Position_latitude:   36.88376666666666666666666667
-#       fixtype:             7
-#       Spare:               0
-#       RAIM:                False
-#       state_syncstate:     0
-#       state_slottimeout:   4
-#       state_slotoffset:    1503
-#

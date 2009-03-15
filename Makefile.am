@@ -490,7 +490,7 @@ time_regress: test_mkgmtime
 	./test_mkgmtime
 
 # Do all normal regression tests
-testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress undump-regress time_regress
 	@echo "Regressions complete."
 
 # We would like "${MAKE} check" to run the regression tests.  automake
