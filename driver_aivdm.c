@@ -94,10 +94,9 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
     /*@ +charint @*/
     for (cp = data; cp < data + strlen((char *)data); cp++) {
 	ch = *cp;
-	if (ch < 87)
-	    ch = ch - 48;
-	else
-	    ch = ch - 56;
+	ch -= 48;
+	if (ch >= 40)
+	    ch -= 8;
 	gpsd_report(LOG_RAW, "%c: %s\n", *cp, sixbits[ch]);
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
@@ -153,7 +152,7 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 			ais->type123.utc_second);
 	    break;
 	case 4:	/* Base Station Report */
-	    ais->type4.year = UBITS(38, 41);
+	    ais->type4.year = UBITS(38, 14);
 	    ais->type4.month = UBITS(52, 4);
 	    ais->type4.day = UBITS(56, 5);
 	    ais->type4.hour = UBITS(61, 5);
