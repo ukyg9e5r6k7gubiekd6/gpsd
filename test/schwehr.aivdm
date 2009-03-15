@@ -1,0 +1,125 @@
+# Sample AIVDM data sentences provided from real data by Kurt Schwehr
+#
+# Sample sentences of types 1-4.
+#
+!AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A
+#       MessageID:          1
+#       RepeatIndicator:    0
+#       UserID:             371798000
+#       NavigationStatus:   0
+#       ROT:                -127
+#       SOG:                12.3
+#       PositionAccuracy:   1
+#       longitude:          -123.395383333
+#       latitude:           48.38163333333
+#       COG:                224
+#       TrueHeading:        215
+#       TimeStamp:          33
+#       RegionalReserved:   0
+#       Spare:              0
+#       RAIM:               False
+#       state_syncstate:    0
+#       state_slotoffset:   4252
+#
+!AIVDM,1,1,,A,16SteH0P00Jt63hHaa6SagvJ087r,0*42
+#       MessageID:          1
+#       RepeatIndicator:    0
+#       UserID:             440348000
+#       NavigationStatus:   0
+#       ROT:                -128
+#       SOG:                0
+#       PositionAccuracy:   0
+#       longitude:          -70.7582
+#       latitude:           43.08015
+#       COG:                93.4
+#       TrueHeading:        511
+#       TimeStamp:          13
+#       RegionalReserved:   0
+#       Spare:              0
+#       RAIM:               False
+#       state_syncstate:    0
+#       stare_slottimeout:  2
+#       state_slotoffset:   506
+#
+# 2 is really uncommon
+#
+!AIVDM,1,1,,B,25Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*60
+#       MessageID:          2
+#       RepeatIndicator:    0
+#       UserID:             356302000
+#       NavigationStatus:   0
+#       ROT:                127
+#       SOG:                13.9
+#       PositionAccuracy:   0
+#       longitude:          -71.62614333333333333333333333
+#       latitude:           40.39235833333333333333333333
+#       COG:                87.7
+#       TrueHeading:        91
+#       TimeStamp:          41
+#       RegionalReserved:   0
+#       Spare:              0
+#       RAIM:               False
+#       state_syncstate:    0
+#       state_slottimeout:  3
+#       state_slotoffset:   6
+#
+!AIVDM,1,1,,A,38Id705000rRVJhE7cl9n;160000,0*40
+#       MessageID:          3
+#       RepeatIndicator:    0
+#       UserID:             563808000
+#       NavigationStatus:   5
+#       ROT:                0
+#       SOG:                0
+#       PositionAccuracy:   1
+#       longitude:          -76.32753333333333333333333333
+#       latitude:           36.91
+#       COG:                252
+#       TrueHeading:        352
+#       TimeStamp:          35
+#       RegionalReserved:   0
+#       Spare:              0
+#       RAIM:               False
+#       state_syncstate:    0
+#       state_slottimeout:  0
+#       state_slotoffset:   0
+#
+!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
+#       MessageID:          4
+#       RepeatIndicator:    0
+#       UserID:             3669702
+#       Time_year:          2007
+#       Time_month:         5
+#       Time_day:           14
+#       Time_hour:          19
+#       Time_min:           57
+#       Time_sec:           39
+#       PositionAccuracy:   1
+#       Position_longitude: -76.35236166666666666666666667
+#       Position_latitude:  36.88376666666666666666666667
+#       fixtype:            7
+#       Spare:              0
+#       RAIM:               False
+#       state_syncstate:    0
+#       state_slottimeout:  4
+#       state_slotoffset:   1503
+#
+!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
+#       MessageID:           4
+#       RepeatIndicator:     0
+#       UserID:              3669702
+#       Time_year:           2007
+#       Time_month:          5
+#       Time_day:            14
+#       Time_hour:           19
+#       Time_min:            57
+#       Time_sec:            39
+#       PositionAccuracy:    1
+#       Position_longitude:  -76.35236166666666666666666667
+#       Position_latitude:   36.88376666666666666666666667
+#       fixtype:             7
+#       Spare:               0
+#       RAIM:                False
+#       state_syncstate:     0
+#       state_slottimeout:   4
+#       state_slotoffset:    1503
+#

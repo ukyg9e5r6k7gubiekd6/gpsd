@@ -30,15 +30,21 @@ found at <<AIS>>.
 
 == Standards ==
 
-The relevant standard is ITU Recommendation M.1371, "Technical
-Characteristics for a Universal Shipborne Automatic. Identification
-System Using Time Division Multiple Access" <<ITU1371>>, issued in 2001. It is
-proprietary, expensive, and surrounded by attack lawyers, which is why
-this document exists.  I have not looked at it.
+ITU Recommendation M.1371, "Technical Characteristics for a Universal
+Shipborne Automatic. Identification System Using Time Division
+Multiple Access" <<ITU1371>>, issued in 2001, describes the format of
+AIS binary messages. It is proprietary, expensive, and surrounded by
+attack lawyers, which is why this document exists.  I have not looked
+at it.
 
 ITU-R M.1371 is expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
+
+I have been unable to determine what technical standard sets the ASCII
+format for AIS messages; most likely it is <<NMEA>>, which I also have
+not looked at because it is proprietary and expensive and surrounded
+by even more rapacious attack lawyers.
 
 == Information Sources ==
 
@@ -46,7 +52,7 @@ Together, the the IALA Technical Clarifications at <<IALA>> and the
 Coast Guard's AIS pages at <<NAVCEN>> describe AIS message payloads
 almost completely.  The detail information on payload formats in this
 document is derived from these.  Together, they explain everything
-except the Repeat Indicator found in some messages
+except the Repeat Indicator found in some messages.
 
 The AIVDM ASCII packet format is described at <<BOSUN>>.
 
@@ -56,7 +62,7 @@ There's a web form that does sentence decoding at http://rl.se/aivdm.
 
 AIVDM/AIVDO is a two-layer protocol.  The outer layer is a variant of
 NMEA 0183, the ancient standard for data interchange in marine
-navigation systems, described at <<NMEA>>.
+navigation systems; NMEA 0183 is described at <<NMEA>>.
 
 Here is a typical AIVDM data packet:
 
@@ -180,7 +186,7 @@ software.
 Field   Len Description                       Units
 -------------------------------------------------------------------------------
 0-5      6  Message Type             Unsigned integer: 1-24
-6-7      2  Repeat Indicator         Unknown
+6-7      2  Repeat Indicator         Unknown; 3 = "Do not repeat".
 8-37    30  MMSI                     Unsigned integer: 9 decimal digits
 38-41    4  Navigation Status        See table below
 42-49    8  Rate of Turn (ROT)       Signed integer: see below
@@ -242,7 +248,7 @@ default.
 
 Latitude is given in in 1/10000 min. Values up to plus or minus 90
 degrees, North = positive, South = negative. A value of 91 degrees (0x3412140
-hex) indicates latitude is not available (default).
+hex) indicates latitude is not available and is the default.
 
 Seconds in UTC timestamp should be 0-59, except for these special values:
 
@@ -418,6 +424,20 @@ Code   Ship & Cargo Classification
 99     Other Type, no additional information
 -------------------------------------------------------------
 
+== Local extensions ==
+
+Some regional authorities extend the AIS message set.
+
+The St. Lawrence Seaway broadcasts hydrological and lock-scheduling
+messages using special encodings of the binary data of message types 6
+and 8 (described in <<SEAWAY>>, freely available), and safety
+information using types 12 and 14.
+
+The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
+System) which uses extended AIS formats. <<SEAWAY>> says it's
+intercompatible with the St. Lawrence Seaway system; I have not
+been able to find any message documentation, however.
+
 == References ==
 
 [bibliography]
@@ -439,3 +459,6 @@ Identification System]
 - [[[BOSUN]]] http://www.bosunsmate.org/ais/[Marine Automatic Identification System (AIS)]
 
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
+
+- [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
+  Seaway AIS Data Messaging Formats and Specifications]

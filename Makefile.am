@@ -438,6 +438,25 @@ rtcm-makeregress: gpsdecode
 		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
 	done
 
+
+# Regression-test the AIVDM decoder.
+aivdm-regress: gpsdecode
+	@echo "Testing AIVDM decoding..."
+	@mkdir -p test
+	@for f in $(srcdir)/test/*.aivdm; do \
+		echo "Testing $${f}..."; \
+		$(srcdir)/gpsdecode <$${f} >test/test.chk; \
+		diff -ub $${f}.chk test/test.chk; \
+	done; \
+	rm test/test.chk
+
+# Rebuild the AIVDM regression tests.
+aivdm-makeregress: gpsdecode
+	@for f in $(srcdir)/test/*.aivdm; do \
+		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
+	done
+
+
 # Regression-test the packet getter.
 packet-regress: test_packet
 	@echo "Testing detection of invalid packets..."
@@ -471,7 +490,7 @@ time_regress: test_mkgmtime
 	./test_mkgmtime
 
 # Do all normal regression tests
-testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
+testregress: gps-regress rtcm-regress aidvm-regress packet-regress undump-regress time_regress
 	@echo "Regressions complete."
 
 # We would like "${MAKE} check" to run the regression tests.  automake

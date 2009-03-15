@@ -968,8 +968,10 @@ void packet_parse(struct gps_packet_t *lexer)
 		else
 #endif /* AIVDM_ENABLE */
 		    packet_accept(lexer, NMEA_PACKET);
-	    } else
+	    } else {
+		gpsd_report(LOG_WARN, "bad checksum in NMEA packet.\n");
 		lexer->state = GROUND_STATE;
+	    }
 	    packet_discard(lexer);
 	    break;
 	}

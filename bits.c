@@ -30,25 +30,30 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
 	fld <<= BITS_PER_BYTE;
 	fld |= (unsigned char)buf[i];
     }
-#ifdef UDEBUG
-    printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width,
-	   gpsd_hexdump(buf, 12), fld, fld);
-#endif /* UDEBUG */
+#ifdef DEBUG
+    (void)printf("%d:%d from %s:\n", start, width, gpsd_hexdump(buf, 32));
+#endif 
 
+#ifdef DEBUG
+    (void)printf("    segment=0x%llx,", fld);
+#endif /* DEBUG */
     end = (start + width) % BITS_PER_BYTE;
     if (end != 0) {
 	fld >>= (BITS_PER_BYTE - end);
-#ifdef UDEBUG
-	printf("After downshifting by %d bits: 0x%llx = %lld\n", 
-	       BITS_PER_BYTE - end, fld, fld);
+#ifdef DEBUG
+	(void)printf(" after downshifting by %d bits: 0x%llx", 
+		     BITS_PER_BYTE - end, fld);
 #endif /* UDEBUG */
     }
+#ifdef DEBUG
+    (void)printf(" = %lld\n", fld);
+#endif /* UDEBUG */
 
     fld &= ~(-1LL << width);
-#ifdef UDEBUG
-    printf("After selecting out the bottom %u bits: 0x%llx = %lld\n", 
-	   width, fld, fld);
-#endif /* UDEBUG */
+#ifdef DEBUG
+    (void)printf("    after selecting out the bottom %u bits: 0x%llx = %lld\n", 
+		 width, fld, fld);
+#endif /* DEBUG */
 
     return fld;
 }
@@ -58,19 +63,19 @@ signed long long sbits(char buf[], unsigned int start, unsigned int width)
 {
     unsigned long long fld = ubits(buf, start, width);
 
-#ifdef DEBUG
+#ifdef SDEBUG
     (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
-#endif /* DEBUG */
+#endif /* SDEBUG */
     /*@ +relaxtypes */
     if (fld & (1 << (width-1))) {
-#ifdef DEBUG
+#ifdef SDEBUG
 	(void)fprintf(stderr, "%llx is signed\n", fld);
-#endif /* DEBUG */
+#endif /* SDEBUG */
 	fld |= (-1LL << (width-1));
     }
-#ifdef DEBUG
+#ifdef SDEBUG
     (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width, (signed long long)fld);
-#endif /* DEBUG */
+#endif /* SDEBUG */
     return (signed long long)fld;
     /*@ -relaxtypes */
 }
