@@ -3,7 +3,7 @@
  * Bitfield extraction functions.  In each, start is a bit index (not
  * a byte index) and width is a bit width.  The width bounded above by
  * the bit width of a long long, which s 64 bits in all standard data
- * models for 64-bit processors.
+ * models for 32- and 64-bit processors.
  *
  * The sbits() function assumes twos-complement arithmetic.
  */
@@ -44,7 +44,7 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
 #endif /* UDEBUG */
     }
 
-    fld &= ~(0xffffffff << width);
+    fld &= ~(-1LL << width);
 #ifdef UDEBUG
     printf("After selecting out the bottom %u bits: 0x%llx = %lld\n", 
 	   width, fld, fld);
