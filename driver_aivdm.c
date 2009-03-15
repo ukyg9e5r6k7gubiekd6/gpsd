@@ -35,7 +35,7 @@
  * Parse the data from the device
  */
 /*@ +charint @*/
-bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
+bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 {
     char *sixbits[64] = {
 	"000000", "000001", "000010", "000011", "000100",
@@ -54,40 +54,40 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
     };
 
     int nfields = 0;    
-    unsigned char *data, *cp = session->driver.aivdm.fieldcopy;    
+    unsigned char *data, *cp = ais_context->fieldcopy;
+    struct ais_t *ais = &ais_context->decoded;
     unsigned char ch;
     int i;
 
-    if (session->packet.outbuflen == 0)
+    if (buflen == 0)
 	return 0;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_PROG, "AIVDM packet length %ld: %s", 
-		session->packet.outbuflen, session->packet.outbuffer);
+    gpsd_report(LOG_PROG, "AIVDM packet length %ld: %s", buflen, buf);
 
     /* extract packet fields */
-    (void)strlcpy((char *)session->driver.aivdm.fieldcopy, 
-		  (char*)session->packet.outbuffer,
-		  session->packet.outbuflen);
-    session->driver.aivdm.field[nfields++] = session->packet.outbuffer;
-    for (cp = session->driver.aivdm.fieldcopy; 
-	 cp < session->driver.aivdm.fieldcopy + session->packet.outbuflen;
+    (void)strlcpy((char *)ais_context->fieldcopy, 
+		  (char*)buf,
+		  buflen);
+    ais_context->field[nfields++] = (unsigned char *)buf;
+    for (cp = ais_context->fieldcopy; 
+	 cp < ais_context->fieldcopy + buflen;
 	 cp++)
 	if (*cp == ',') {
 	    *cp = '\0';
-	    session->driver.aivdm.field[nfields++] = cp + 1;
+	    ais_context->field[nfields++] = cp + 1;
 	}
-    session->driver.aivdm.part = atoi((char *)session->driver.aivdm.field[1]);
-    session->driver.aivdm.await = atoi((char *)session->driver.aivdm.field[2]);
-    data = session->driver.aivdm.field[5];
+    ais_context->part = atoi((char *)ais_context->field[1]);
+    ais_context->await = atoi((char *)ais_context->field[2]);
+    data = ais_context->field[5];
     gpsd_report(LOG_PROG, "part=%d, awaiting=%d, data=%s\n",
-		session->driver.aivdm.part, session->driver.aivdm.await,
+		ais_context->part, ais_context->await,
 		data);
 
     /* assemble the binary data */
-    if (session->driver.aivdm.part == 1) {
-	(void)memset(session->driver.aivdm.bits, '\0', sizeof(session->driver.aivdm.bits));
-	session->driver.aivdm.bitlen = 0;
+    if (ais_context->part == 1) {
+	(void)memset(ais_context->bits, '\0', sizeof(ais_context->bits));
+	ais_context->bitlen = 0;
     }
 
     /* wacky 6-bit encoding, shades of FIELDATA */
@@ -100,24 +100,24 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 	gpsd_report(LOG_RAW, "%c: %s\n", *cp, sixbits[ch]);
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
-		session->driver.aivdm.bits[session->driver.aivdm.bitlen / 8] |= (1 << (7 - session->driver.aivdm.bitlen % 8));
+		ais_context->bits[ais_context->bitlen / 8] |= (1 << (7 - ais_context->bitlen % 8));
 	    }
-	    session->driver.aivdm.bitlen++;
+	    ais_context->bitlen++;
 	}
     }
     /*@ -charint @*/
 
     /* time to pass buffered-up data to where it's actually processed? */
-    if (session->driver.aivdm.part == session->driver.aivdm.await) {
-	size_t clen = (session->driver.aivdm.bitlen + 7)/8;
+    if (ais_context->part == ais_context->await) {
+	size_t clen = (ais_context->bitlen + 7)/8;
 	gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
-		    session->driver.aivdm.bitlen, clen,
-		    gpsd_hexdump_wrapper(session->driver.aivdm.bits,
+		    ais_context->bitlen, clen,
+		    gpsd_hexdump_wrapper(ais_context->bits,
 					 clen, LOG_INF));
 
 
-#define UBITS(s, l)	ubits((char *)session->driver.aivdm.bits, s, l)
-#define SBITS(s, l)	sbits((char *)session->driver.aivdm.bits, s, l)
+#define UBITS(s, l)	ubits((char *)ais_context->bits, s, l)
+#define SBITS(s, l)	sbits((char *)ais_context->bits, s, l)
 	ais->id = UBITS(0, 6);
 	ais->ri = UBITS(7, 2);
 	ais->mmsi = UBITS(8, 30);
@@ -225,66 +225,4 @@ bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais)
 }
 /*@ -charint @*/
 
-gps_mask_t aivdm_parse(struct gps_device_t *session)
-{
-    gps_mask_t mask = ONLINE_SET;    
-
-    if (aivdm_decode(session, &session->driver.aivdm.decoded)) {
-	/* 
-	 * XXX The tag field is only 8 bytes, whic will truncate the MMSI; 
-	 * widen it when ready for production.
-	 */
-	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		       "AIS%d", session->driver.aivdm.decoded.mmsi);
-
-	/* FIXME: actual driver code goes here */
-    }
-    
-    /* not posting any data yet */
-    return mask;
-}
-
-/* This is everything we export */
-const struct gps_type_t aivdm = {
-    /* Full name of type */
-    .type_name        = "AIVDM",
-    /* associated lexer packet type */
-    .packet_type    = AIVDM_PACKET,
-    /* Response string that identifies device (not active) */
-    .trigger          = NULL,
-    /* Number of satellite channels supported by the device */
-    .channels         = 0,
-    /* Startup-time device detector */
-    .probe_detect     = NULL,
-    /* Wakeup to be done before each baud hunt */
-    .probe_wakeup     = NULL,
-    /* Initialize the device and get subtype */
-    .probe_subtype    = NULL,
-    /* Packet getter (using default routine) */
-    .get_packet       = generic_get,
-    /* Parse message packets */
-    .parse_packet     = aivdm_parse,
-    /* RTCM handler (using default routine) */
-    .rtcm_writer      = NULL,
-#ifdef ALLOW_CONTROLSEND
-    /* Control string sender - should provide checksum and headers/trailer */
-    .control_send   = NULL,
-#endif /* ALLOW_CONTROLSEND */
-#ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
-    .configurator     = NULL,
-    /* Speed (baudrate) switch */
-    .speed_switcher   = NULL,
-    /* Switch to NMEA mode */
-    .mode_switcher    = NULL,
-    /* Message delivery rate switcher (not active) */
-    .rate_switcher    = NULL,
-    /* Minimum cycle time of the device */
-    .min_cycle        = 1,
-    /* Undo the actions of .configurator */
-    .revert           = NULL,
-#endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
-    .wrapup           = NULL,
-};
 #endif /* defined(AIVDM_ENABLE) */

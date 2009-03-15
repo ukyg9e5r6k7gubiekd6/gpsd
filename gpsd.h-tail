@@ -170,6 +170,16 @@ struct gps_context_t {
 #endif /* NTPSHM_ENABLE */
 };
 
+struct aivdm_context_t {
+    /* hold context for decoding AIDVM packet sequences */
+    int part, await;		/* for tracking AIDVM parts in a multipart sequence */
+    unsigned char *field[NMEA_MAX];
+    unsigned char fieldcopy[NMEA_MAX+1];
+    unsigned char bits[2048];
+    size_t bitlen;
+    struct ais_t decoded;
+};
+
 struct gps_device_t;
 
 #if defined (HAVE_SYS_TERMIOS_H)
@@ -256,14 +266,7 @@ struct gps_device_t {
 	} nmea;
 #endif /* NMEA_ENABLE */
 #ifdef AIVDM_ENABLE
-	struct {
-	    int part, await;		/* for tracking AIDVM parts */
-	    unsigned char *field[NMEA_MAX];
-	    unsigned char fieldcopy[NMEA_MAX+1];
-	    unsigned char bits[2048];
-	    size_t bitlen;
-	    struct ais_t decoded;
-	} aivdm;
+	struct aivdm_context_t aivdm;
 #endif /* AIVDM_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef SIRF_ENABLE
@@ -469,14 +472,13 @@ extern bool ubx_write(struct gps_device_t *session,
 		      /*@null@*/unsigned char *msg, unsigned short data_len);
 extern void ubx_catch_model(struct gps_device_t *session,
 			    unsigned char *buf, size_t len);
-extern bool aivdm_decode(struct gps_device_t *session, struct ais_t *ais);
 #endif /* UBX_ENABLE */
-
+#ifdef AIVDM_ENABLE
+extern bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *aivdm_context);
+#endif /* AIVDM_ENABLE */
 #ifdef MKT3301_ENABLE
     extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
 #endif /* MKT3301_ENABLE */
-
-
 
 /* caller should supply this */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)

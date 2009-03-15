@@ -1053,7 +1053,71 @@ const struct gps_type_t mkt3301 = {
 };
 #endif /* MKT3301_ENABLE */
 
-extern const struct gps_type_t aivdm;
+
+#ifdef AIVDM_ENABLE
+gps_mask_t aivdm_parse(struct gps_device_t *session)
+{
+    gps_mask_t mask = ONLINE_SET;    
+
+    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->driver.aivdm)) {
+	/* 
+	 * XXX The tag field is only 8 bytes, which will truncate the MMSI; 
+	 * widen it when ready for production.
+	 */
+	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
+		       "AIS%d", session->driver.aivdm.decoded.mmsi);
+
+	/* FIXME: actual driver code goes here if we're going to report fixes from these */
+    }
+    
+    /* not posting any data yet */
+    return mask;
+}
+
+static const struct gps_type_t aivdm = {
+    /* Full name of type */
+    .type_name        = "AIVDM",
+    /* associated lexer packet type */
+    .packet_type    = AIVDM_PACKET,
+    /* Response string that identifies device (not active) */
+    .trigger          = NULL,
+    /* Number of satellite channels supported by the device */
+    .channels         = 0,
+    /* Startup-time device detector */
+    .probe_detect     = NULL,
+    /* Wakeup to be done before each baud hunt */
+    .probe_wakeup     = NULL,
+    /* Initialize the device and get subtype */
+    .probe_subtype    = NULL,
+    /* Packet getter (using default routine) */
+    .get_packet       = generic_get,
+    /* Parse message packets */
+    .parse_packet     = aivdm_parse,
+    /* RTCM handler (using default routine) */
+    .rtcm_writer      = NULL,
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and headers/trailer */
+    .control_send   = NULL,
+#endif /* ALLOW_CONTROLSEND */
+#ifdef ALLOW_RECONFIGURE
+    /* Enable what reports we need */
+    .configurator     = NULL,
+    /* Speed (baudrate) switch */
+    .speed_switcher   = NULL,
+    /* Switch to NMEA mode */
+    .mode_switcher    = NULL,
+    /* Message delivery rate switcher (not active) */
+    .rate_switcher    = NULL,
+    /* Minimum cycle time of the device */
+    .min_cycle        = 1,
+    /* Undo the actions of .configurator */
+    .revert           = NULL,
+#endif /* ALLOW_RECONFIGURE */
+    /* Puts device back to original settings */
+    .wrapup           = NULL,
+};
+#endif /* AIVDM_ENABLE */
+
 extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern const struct gps_type_t sirf_binary, tsip_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
