@@ -239,6 +239,29 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type9.cog, 
 			ais->type9.utc_second);
 	    break;
+	case 18:	/* Standard Class B CS Position Report */
+	    ais->type18.reserved = UBITS(38, 8);
+	    ais->type18.sog = UBITS(46, 10);
+	    ais->type18.accuracy = (bool)UBITS(56, 1);
+	    ais->type18.longitude = SBITS(57, 28);
+	    ais->type18.latitude = SBITS(85, 27);
+	    ais->type18.cog = UBITS(112, 12);
+	    ais->type18.heading = UBITS(124, 9);
+	    ais->type18.utc_second = UBITS(133, 6);
+	    ais->type18.regional = UBITS(139, 2);
+	    ais->type18.spare = UBITS(141, 5);
+	    ais->type18.radio = UBITS(146, 22);
+	    gpsd_report(LOG_INF,
+			"reserved=%x SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
+			ais->type18.reserved,
+			ais->type18.sog, 
+			(uint)ais->type18.accuracy,
+			ais->type18.longitude, 
+			ais->type18.latitude, 
+			ais->type18.cog, 
+			ais->type18.heading, 
+			ais->type18.utc_second);
+	    break;
 	default:
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
@@ -590,6 +613,46 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE9_UNSCALED_LABELED
 #undef TYPE9_SCALED_UNLABELED
 #undef TYPE9_SCALED_LABELED
+	break;
+    case 18:
+#define TYPE18_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%u,%x,%d,%x\n"
+#define TYPE18_UNSCALED_LABELED   "res=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
+#define TYPE18_SCALED_UNLABELED "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,%x,%d,%x\n"
+#define TYPE18_SCALED_LABELED   "res=%u,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%.1f,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE18_SCALED_LABELED : TYPE18_SCALED_UNLABELED),
+			      
+			  ais->type18.reserved,
+			  ais->type18.sog / 10.0, 
+			  (uint)ais->type18.accuracy,
+			  ais->type18.longitude / AIS_LATLON_SCALE, 
+			  ais->type18.latitude / AIS_LATLON_SCALE, 
+			  ais->type18.cog / 10.0,
+			  ais->type18.heading,
+			  ais->type18.utc_second,
+			  ais->type18.regional,
+			  ais->type18.spare,
+			  ais->type18.radio);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE18_UNSCALED_LABELED : TYPE18_UNSCALED_UNLABELED),
+			  ais->type18.reserved,
+			  ais->type18.sog, 
+			  (uint)ais->type18.accuracy,
+			  ais->type18.longitude,
+			  ais->type18.latitude,
+			  ais->type18.cog, 
+			  ais->type18.heading,
+			  ais->type18.utc_second,
+			  ais->type18.regional,
+			  ais->type18.spare,
+			  ais->type18.radio);
+	}
+#undef TYPE18_UNSCALED_UNLABELED
+#undef TYPE18_UNSCALED_LABELED
+#undef TYPE18_SCALED_UNLABELED
+#undef TYPE18_SCALED_LABELED
 	break;
     default:
 	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);

@@ -132,8 +132,8 @@ GPSD project website.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the common
-sentence types 1-5 and the rarerly encountered type 9. AIVDM encoding
-is not yet supported.</para>
+sentence types 1-5, the rarely encountered type 9, and the uncommon
+type 18. AIVDM encoding is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
 

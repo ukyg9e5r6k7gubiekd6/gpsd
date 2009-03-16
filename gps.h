@@ -539,6 +539,20 @@ struct ais_t
 	    uint spare;			/* spare bits */
 	    uint radio;			/* radio status bits */
 	} type9;
+	/* Type 18 -  */
+	struct {
+	    uint reserved;		/* altitude in meters */
+	    uint sog;			/* speed over ground in deciknots */
+	    bool accuracy;		/* position accuracy */
+	    int longitude;		/* longitude */
+	    int latitude;		/* latitude */
+	    uint cog;			/* course over ground */
+	    uint heading;		/* true heading */
+	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint regional;		/* regional reserved */
+	    uint spare;			/* spare bits */
+	    uint radio;			/* radio status bits */
+	} type18;
     };
 };
 

@@ -192,7 +192,7 @@ never emit them.
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).
 
-Detailed descriptions of message types 1-5 and 9 follow.  Information
+Detailed descriptions of message types 1-5, 9, and 18 follow.  Information
 sufficient to decode messages 6-22 can be found in <<IALA>>, but they
 are rare or not of general interest so we will not duplicate the
 information here. Message types 23-24 are listed at <<BOSUN>> with no
@@ -499,12 +499,37 @@ not available; 4094 indicates 4904 meters or higher.
 
 Speed over ground is in knots, not deciknots as in the common
 navigation block; planes go faster. The special value 1023 indicates
-speed not available, 1022 inicates 1022 knots or higher.
+speed not available, 1022 indicates 1022 knots or higher.
 
 Position Accuracy, Longitude, Latitude, and Course over Ground
 are encoded identically as uin the common navigation block and
 are even at the same bit offsets.  Time stamp has the same special
 values as in the common navigation block, but is at a different offset.
+
+== Type 18: Standard Class B CS Position Report ==
+
+A less detailed report for vessels using Class B transponders.  Omits
+navigational status and rate of turn.  Fields are encoded as in the
+common navigation block.
+
+`-------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+-------------------------------------------------------------------------------
+0-5      6  Message Type             Unsigned integer: 1-24
+6-7      2  Repeat Indicator         3 = "Do not repeat"; see below..
+8-37    30  MMSI                     Unsigned integer: 9 decimal digits
+38-45    8  Regional Reserved
+46-55   10  Speed Over Ground (SOG)  As in common navigation block
+56-56    1  Position Accuracy        See below
+57-84   28  Longitude                Minutes/10000 (see below)
+85-111  27  Latitude                 Minutes/10000 (see below)
+112-123 12  Course Over Ground (COG) Relative to true north to 0.1 degree
+124-132  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
+133-138  6  Time Stamp               Second of UTC timestamp.
+139-141  2  Regional reserved
+141-146  5  Spare
+147-168 22  Radio status
+-------------------------------------------------------------------------------
 
 == Local extensions ==
 
