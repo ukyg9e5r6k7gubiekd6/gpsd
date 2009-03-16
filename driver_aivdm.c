@@ -34,6 +34,26 @@
 /**
  * Parse the data from the device
  */
+
+static void from_sixbit(char *bitvec, int start, int count, char *to)
+{
+    /*@ +type @*/
+    const char sixchr[64] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?";
+    int i;
+
+    /* six-bit to ASCII */
+    for (i = 0; i < count-1; i++)
+	to[i] = sixchr[ubits(bitvec, start + 6*i, 6)];
+    to[count-1] = '\0';
+    /* trim spaces on right end */
+    for (i = count-2; i >= 0; i--)
+	if (to[i] == ' ')
+	    to[i] = '\0';
+	else
+	    break;
+    /*@ -type @*/
+}
+
 /*@ +charint @*/
 bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 {
@@ -52,7 +72,6 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	"110111", "111000", "111001", "111010",	"111011",
 	"111100", "111101", "111110", "111111",    
     };
-
     int nfields = 0;    
     unsigned char *data, *cp = ais_context->fieldcopy;
     struct ais_t *ais = &ais_context->decoded;
@@ -118,6 +137,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 
 #define UBITS(s, l)	ubits((char *)ais_context->bits, s, l)
 #define SBITS(s, l)	sbits((char *)ais_context->bits, s, l)
+#define UCHARS(s, to)	from_sixbit((char *)ais_context->bits, s, sizeof(to), to)
 	ais->id = UBITS(0, 6);
 	ais->ri = UBITS(7, 2);
 	ais->mmsi = UBITS(8, 30);
@@ -180,15 +200,8 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	case 5: /* Ship static and voyage related data */
 	    ais->type5.ais_version  = UBITS(38, 2);
 	    ais->type5.imo_id       = UBITS(40, 30);
-	    ais->type5.ais_version  = UBITS(388, 2);
-	    /*@ +type @*/
-	    for (i = 0; i < sizeof(ais->type5.callsign[i])-1; i++)
-		ais->type5.callsign[i] = '@' + UBITS(70 + 6*i, 6);
-	    ais->type5.callsign[sizeof(ais->type5.callsign[i])-1] = '\0';
-	    for (i = 0; i < sizeof(ais->type5.vessel_name[i])-1; i++)
-		ais->type5.vessel_name[i] = '@' + UBITS(112 + 6*i, 6);
-	    ais->type5.vessel_name[sizeof(ais->type5.vessel_name[i])-1] = '\0';
-	    /*@ -type @*/
+	    UCHARS(70, ais->type5.callsign);
+	    UCHARS(112, ais->type5.vessel_name);
 	    ais->type5.ship_type    = UBITS(232, 8);
 	    ais->type5.to_bow       = UBITS(240, 9);
 	    ais->type5.to_stern     = UBITS(249, 9);
@@ -200,11 +213,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.hour         = UBITS(283, 5);
 	    ais->type5.minute       = UBITS(288, 5);
 	    ais->type5.draught      = UBITS(293, 9);
-	    /*@ +type @*/
-	    for (i = 0; i < sizeof(ais->type5.destination[i])-1; i++)
-		ais->type5.destination[i] = '@' + UBITS(302 + 6*i, 6);
-	    ais->type5.destination[sizeof(ais->type5.destination[i])-1] = '\0';
-	    /*@ -type @*/
+	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);
 	    ais->type5.spare        = UBITS(423, 1);
 	    break;
@@ -213,6 +222,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
 	} 
+#undef UCHARS
 #undef SBITS
 #undef UBITS
 
@@ -475,10 +485,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE4_SCALED_LABELED
 	break;
     case 5: /* Ship static and voyage related data */
-#define TYPE5_UNSCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,eta=%u:%uT%u:%uZ,draught=%u,dest=%s,dte=%u,sp=%u\n"
-#define TYPE5_UNSCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
-#define TYPE5_SCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%s,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s:%u,eta=%u:%uT%u:%uZ,dest=%s,dte=%u,sp=%u\n"
-#define TYPE5_SCALED_UNLABELED "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
+#define TYPE5_SCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%s,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s,eta=%u:%uT%u:%uZ,draught=%.1f,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_SCALED_UNLABELED "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%u:%uT%u:%uZ,%.1f,%s,%u,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (labeled ? TYPE5_SCALED_LABELED : TYPE5_SCALED_UNLABELED),
@@ -496,11 +504,13 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type5.day,
 			  ais->type5.hour,
 			  ais->type5.minute,
-			  ais->type5.draught,
+			  ais->type5.draught / 10.0,
 			  ais->type5.destination,
 			  ais->type5.dte,
 			  ais->type5.spare);
 	} else {
+#define TYPE5_UNSCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,eta=%u:%uT%u:%uZ,draught=%u,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_UNSCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
 	    (void)fprintf(fp,
 			  (labeled ? TYPE5_UNSCALED_LABELED : TYPE5_UNSCALED_UNLABELED),
 			  ais->type5.imo_id,

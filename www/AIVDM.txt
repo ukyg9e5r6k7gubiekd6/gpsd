@@ -254,6 +254,7 @@ to a maximum of three hops.
 ---------------------------------------------------------------
 
 Turn rate is encoded as follows:
+
 * 0...126 = turning right at up to 708 degrees per minute or higher
 * 0...-126 = turning left at up to 708 degrees per minute or higher
 * 127 = turning right at more than 50deg/30s (No TI available)
@@ -340,9 +341,19 @@ Code Position Fix Type
 
 === Type 5: Ship static and voyage related data ===
 
-In the character-string fields, trailing unused characters will be
-represented by "@" (six-bit zero). Total of 424 bits, occupying two 
-AIVDM sentences.
+Message has a total of 424 bits, occupying two AIVDM sentences.
+
+Character-string fields are encoded in a special way. Each six-bit
+segment maps to an ASCII character.  Segments 0-31 map to the
+characters @ through "\_" respectively; segments 32-63 map to ASCII
+characters " " (space) though "?". Lowercase ASCII letters, the
+backtick, right and left curly brackets, pipe bar, tilde and DEL
+cannot be encoded.
+ 
+According to the standard, trailing unused characters will be
+represented by "@" (six-bit zero). It is common to space-fill the 
+fields instead, so a decoder should strip trailing spaces well as
+at-signs.
 
 `-------`---`-----------------------------`------------------------------------
 Field   Len Description                   Encoding   
@@ -498,4 +509,4 @@ Identification System]
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
 
-- [[[Schwehr]]] http://schwehr.org/blog/[[[Kurt Schwehr's weblog]]]
+- [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
