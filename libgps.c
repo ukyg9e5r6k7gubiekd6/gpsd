@@ -83,8 +83,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    /* the following should execute each time we have a good next sp */
 	    for (sp = ns + 5; *sp != '\0'; sp = tp+1) {
 		tp = sp + strcspn(sp, ",\r\n");
-		if (*tp == '\0') tp--;
-		else *tp = '\0';
+		if (*tp == '\0')
+		    tp--;
+		else
+		    *tp = '\0';
 
 		switch (*sp) {
 		case 'A':
@@ -568,15 +570,57 @@ static void dumpline(struct gps_data_t *ud UNUSED, char *buf,
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#include <getopt.h>
+#include <signal.h>
+
+static void onsig(int sig)
+{
+    (void)fprintf(stderr, "libgps: died with signal %d\n", sig);
+    exit(1);
+}
+
+static void unpack_unit_test(void)
+/* torture the unpacking function */
+{
+    struct gps_data_t gpsdata;
+
+    (void)signal(SIGSEGV, onsig);
+    (void)signal(SIGBUS, onsig);
+
+#define RAW_PLUS_WATCHER "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n"
+
+    gps_unpack(RAW_PLUS_WATCHER, &gpsdata);
+    data_dump(&gpsdata, time(NULL));
+}
 
 int main(int argc, char *argv[])
 {
     struct gps_data_t *collect;
     char buf[BUFSIZ];
+    int option;
+    bool unpack_test = false;
 
-    collect = gps_open(NULL, 0);
-    gps_set_raw_hook(collect, dumpline);
-    if (optind < argc) {
+    while ((option = getopt(argc, argv, "uh?")) != -1) {
+	switch (option) {
+	case 'u':
+	    unpack_test = true;
+	    break;
+	case '?':
+	case 'h':
+	default:
+	    (void)fputs("usage: libps [-u]\n", stderr);
+	    exit(1);
+	}
+    }
+
+    if (unpack_test) {
+	unpack_unit_test();
+	return 0;
+    } else if ((collect = gps_open(NULL, 0)) == NULL) {
+	(void)fputs("Daemon is not running.\n", stdout);
+	exit(1);
+    } else if (optind < argc) {
+	gps_set_raw_hook(collect, dumpline);
 	strlcpy(buf, argv[optind], BUFSIZ);
 	strlcat(buf,"\n", BUFSIZ);
 	gps_query(collect, buf);
@@ -584,6 +628,7 @@ int main(int argc, char *argv[])
     } else {
 	int	tty = isatty(0);
 
+	gps_set_raw_hook(collect, dumpline);
 	if (tty)
 	    (void)fputs("This is the gpsd exerciser.\n", stdout);
 	for (;;) {
