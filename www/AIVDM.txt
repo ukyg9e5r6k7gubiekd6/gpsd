@@ -201,7 +201,7 @@ listed at <<BOSUN>> with no further information; message types 25-26
 come from <<Schwehr>>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
-=== Types 1, 2 and 3 ===
+=== Types 1, 2 and 3: Position Report Class A ===
 
 Type 1, 2 and 3 messages share a common reporting structure for
 navigational information; we'll call in the Common Navigation
@@ -508,7 +508,7 @@ are encoded identically as uin the common navigation block and
 are even at the same bit offsets.  Time stamp has the same special
 values as in the common navigation block, but is at a different offset.
 
-== Type 18: Standard Class B CS Position Report ==
+=== Type 18: Standard Class B CS Position Report ===
 
 A less detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
@@ -560,37 +560,37 @@ Here's a sample sentence and field breakdown:
 !AIVDM,1,1,,B,15Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*63,s1234,d-119,T12.34567123,r003669958,1085889680
 -------------------------------------------------------------------------------
 
-Following the “*63” checksum are additional fields delimited by commas.  
+Following the "*63" checksum are additional fields delimited by commas.  
 These fields provide additional metadata about the reception of each AIS  
 broadcast.
 
-The field beginning with the lower case “s” is a Relative Signal  
+The field beginning with the lower case "s" is a Relative Signal  
 Strength Indicator (RSSI) measurement from the receiver. This  
 measurement has a range of 0-65535. This is one of the parameters used  
 internally by the AIS receiver to determine the signal strength value as  
-reported in the field beginning with the lower case “d”. This field only  
+reported in the field beginning with the lower case "d". This field only  
 exists when the AIS receiver provides this data.
 
-The field beginning with a lower case “d” is the signal strength  
+The field beginning with a lower case "d" is the signal strength  
 measurement for this broadcast in dBm. This field only exists when the  
 AIS receiver provides this data.
 
-The field beginning with the upper case “T” is the Time of Arrival  
+The field beginning with the upper case "T" is the Time of Arrival  
 of the received broadcast in seconds from UTC 0. This field only exists  
 when the AIS receiver provides this data.
 
 Another optional field not shown is one that begins with an upper  
-case “S” and represents the slot number in which the reception occurred.  
+case "S" and represents the slot number in which the reception occurred.  
 The field would appear after the checksum and before the station  
 identifier field. This field only exists when the AIS receiver provides  
 this data. Example: S0042
 
-The field beginning with the lower case “r” is a station identifier  
+The field beginning with the lower case "r" is a station identifier  
 field. This field is always provided, regardless of the type of AIS  
 equipment.  (Occasionally a base station identifier will be prefixed with
 "b" instead.)
 
-The last field is a time tag based on the standard “C” programming  
+The last field is a time tag based on the standard C programming  
 language time function. Both date and time to the nearest second can be  
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
