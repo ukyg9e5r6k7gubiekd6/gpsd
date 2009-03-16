@@ -61,15 +61,14 @@ hex.)</para>
 <para>By default, certain scaling and conversion operations are
 performed for the output.  Latitudes and longitudes are scaled to
 decimal degrees rather than the native AIS unit of 1/10000th of a
-minute of arc.  Speeds are scaled to knots rather than tenth-of-knot
+minute of arc.  Ship (but not air) speeds are scaled to knots rather than tenth-of-knot
 unit.  Navigation status and positioning-system type are dumped
-as text strings rather than IAS numeric codes.  If SOG (speed ovr
-ground) is unavailable, it will be returned as -1 (but the IAS value
-of 102.2 knots for an unknown high speed is left alone). Rate of turn 
+as text strings rather than IAS numeric codes. Rate of turn 
 may appear as "nan" if is unavailable, of as one of the strings
 "fastright" or "fastleft" if it is out of the IAS encoding range;
 otherwise it is quadratically mapped back to the turn sensor number
-in degrees per minute</para>
+in degrees per minute. Vessel draughts are conveted to decimal meters
+rather than native AIS decimeters.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -133,17 +132,19 @@ GPSD project website.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the common
-sentence types 1-5. AIVDM encoding is not yet supported.</para>
+sentence types 1-5 and the rarerly encountered type 9. AIVDM encoding
+is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
 
 <para>RTCM2 represents floating-point quantities as an integer
-multiple of a fixed scale factor.  Editing an RTCM2 dump can
-produce numbers that are not an integer multiple of the scale factor
-for their field.  If you do this, the value actually packed into 
-binary RTCM2 will be rounded down to the nearest scale unit, 
-and dumping will show slightly different numbers than those you 
-entered.</para>
+multiple of a fixed scale factor.  Editing an RTCM2 dump can produce
+numbers that are not an integer multiple of the scale factor for their
+field.  If you do this, the value actually packed into binary RTCM2
+will be rounded down to the nearest scale unit, and dumping will show
+slightly different numbers than those you entered.  This bug could be
+fixed by supporting the <option>-u</option> option to suppress
+scaling, but the protocol is noew obsolete.</para>
 
 <para>The RTCM2 decoder logic is sufficiently convoluted to confuse some
 compiler optimizers, notably in GCC 3.x at -O2, into generating bad

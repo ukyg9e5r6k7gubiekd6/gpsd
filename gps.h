@@ -523,6 +523,22 @@ struct ais_t
 	    uint dte;			/* data terminal enable */
 	    uint spare;			/* spare bits */
 	} type5;
+	/* Type 9 - Standard SAR Aircraft Position Report */
+	struct {
+	    uint altitude;		/* altitude in meters */
+#define AIS_ALT_NOT_AVAILABLE	4095
+#define AIS_ALT_FAST_MOVER	4094	/* 4094 meters or higher */
+	    uint sog;			/* speed over ground in deciknots */
+	    bool accuracy;		/* position accuracy */
+	    int longitude;		/* longitude */
+	    int latitude;		/* latitude */
+	    uint cog;			/* course over ground */
+	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint regional;		/* regional reserved */
+	    uint dte;			/* data terminal enable */
+	    uint spare;			/* spare bits */
+	    uint radio;			/* radio status bits */
+	} type9;
     };
 };
 

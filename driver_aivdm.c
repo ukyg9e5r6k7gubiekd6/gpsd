@@ -217,7 +217,28 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.dte          = UBITS(422, 1);
 	    ais->type5.spare        = UBITS(423, 1);
 	    break;
-	    
+	case 9: /* Standard SAR Aircraft Position Report */
+	    ais->type9.altitude = UBITS(38, 12);
+	    ais->type9.sog = UBITS(50, 10);
+	    ais->type9.accuracy = (bool)UBITS(60, 1);
+	    ais->type9.longitude = SBITS(61, 28);
+	    ais->type9.latitude = SBITS(89, 27);
+	    ais->type9.cog = UBITS(116, 12);
+	    ais->type9.utc_second = UBITS(128, 6);
+	    ais->type9.regional = UBITS(134, 8);
+	    ais->type9.dte = UBITS(142, 1);
+	    ais->type9.spare = UBITS(143, 3);
+	    ais->type9.radio = UBITS(146, 22);
+	    gpsd_report(LOG_INF,
+			"Alt=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d Sec=%d\n",
+			ais->type9.altitude,
+			ais->type9.sog, 
+			(uint)ais->type9.accuracy,
+			ais->type9.longitude, 
+			ais->type9.latitude, 
+			ais->type9.cog, 
+			ais->type9.utc_second);
+	    break;
 	default:
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
@@ -384,7 +405,6 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #define TYPE123_SCALED_LABELED   "st=%s,ROT=%s,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%u,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
 	if (scaled) {
 	    char rotlegend[10];
-	    float sog;
 
 	    /* 
 	     * Express ROT as nan if not available, 
@@ -401,18 +421,12 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			       "%.0f",
 			       ais->type123.rot * ais->type123.rot / 4.733);
 
-	    /* express SOG as nan if value is unknown */
-	    if (ais->type123.sog == AIS_SOG_NOT_AVAILABLE)
-		sog = -1.0;
-	    else
-		sog = ais->type123.sog / 10.0;
-
 	    (void)fprintf(fp,
 			  (labeled ? TYPE123_SCALED_LABELED : TYPE123_SCALED_UNLABELED),
 			      
 			  nav_legends[ais->type123.status],
 			  rotlegend,
-			  sog, 
+			  ais->type123.sog / 10.0, 
 			  (uint)ais->type123.accuracy,
 			  ais->type123.longitude / AIS_LATLON_SCALE, 
 			  ais->type123.latitude / AIS_LATLON_SCALE, 
@@ -537,8 +551,47 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE5_SCALED_UNLABELED
 #undef TYPE5_SCALED_LABELED
 	break;
+    case 9:
+#define TYPE9_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%x,%u,%d,%x\n"
+#define TYPE9_UNSCALED_LABELED   "alt=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,sec=%u,reg=%x,dte=%u,sp=%d,radio=%x\n"
+#define TYPE9_SCALED_UNLABELED "%u,%u,%u,%.4f,%.4f,%.1f,%u,%x,%u,%d,%x\n"
+#define TYPE9_SCALED_LABELED   "alt=%u,SOG=%u,fq=%u,lon=%.4f,lat=%.4f,cog=%.1f,sec=%u,reg=%x,dte=%u,sp=%d,radio=%x\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE9_SCALED_LABELED : TYPE9_SCALED_UNLABELED),
+			      
+			  ais->type9.altitude,
+			  ais->type9.sog, 
+			  (uint)ais->type9.accuracy,
+			  ais->type9.longitude / AIS_LATLON_SCALE, 
+			  ais->type9.latitude / AIS_LATLON_SCALE, 
+			  ais->type9.cog / 10.0, 
+			  ais->type9.utc_second,
+			  ais->type9.regional,
+			  ais->type9.dte, 
+			  ais->type9.spare,
+			  ais->type9.radio);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE9_UNSCALED_LABELED : TYPE9_UNSCALED_UNLABELED),
+			  ais->type9.altitude,
+			  ais->type9.sog, 
+			  (uint)ais->type9.accuracy,
+			  ais->type9.longitude,
+			  ais->type9.latitude,
+			  ais->type9.cog, 
+			  ais->type9.utc_second,
+			  ais->type9.regional,
+			  ais->type9.dte, 
+			  ais->type9.spare,
+			  ais->type9.radio);
+	}
+#undef TYPE9_UNSCALED_UNLABELED
+#undef TYPE9_UNSCALED_LABELED
+#undef TYPE9_SCALED_UNLABELED
+#undef TYPE9_SCALED_LABELED
+	break;
     default:
-	(void)fprintf(fp,"?\n");
 	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
 	break;
     }
