@@ -208,10 +208,10 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.to_port      = UBITS(258, 9);
 	    ais->type5.to_starboard = UBITS(264, 9);
 	    ais->type5.epfd         = UBITS(270, 4);
-	    ais->type5.month        = UBITS(274, 4);
-	    ais->type5.day          = UBITS(278, 5);
-	    ais->type5.hour         = UBITS(283, 5);
-	    ais->type5.minute       = UBITS(288, 5);
+	    ais->type5.minute       = UBITS(274, 6);
+	    ais->type5.hour         = UBITS(280, 5);
+	    ais->type5.day          = UBITS(285, 5);
+	    ais->type5.month        = UBITS(290, 4);
 	    ais->type5.draught      = UBITS(293, 9);
 	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);

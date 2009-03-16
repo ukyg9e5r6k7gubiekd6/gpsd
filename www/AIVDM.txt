@@ -371,10 +371,10 @@ Field   Len Description                   Encoding
 258-263   6 Dimension to Port             Unsigned integer: Meters
 264-269   6 Dimension to Starboard        Unsigned integer: Meters
 270-273   4 Position Fix Type             As in Type 4 EPSD codes
-274-277   4 ETA month                     1-12, 0=not available (default)
-278-282   5 ETA day                       1-31, 0=not available (default)
-283-287   5 ETA hour                      0-23, 24=not available (default)
-288-292   5 ETA minute                    0-59, 60=not available (default)
+274-279   6 ETA minute                    0-59, 60=not available (default)
+280-284   5 ETA hour                      0-23, 24=not available (default)
+285-289   5 ETA day                       1-31, 0=not available (default)
+290-292   4 ETA month                     1-12, 0=not available (default)
 293-301   9 Draught                       Unsigned integer: Meters
 302-421 120 Destination                   20 6-bit characters
 422-422   1 DTE                           0=Data terminal ready, 
