@@ -1814,14 +1814,12 @@ int main(int argc, char *argv[])
 			}
 		    }
 		}
-#ifdef RTCM104_SERVICE
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
 		    for (gps = channels; gps < channels + MAXDEVICES; gps++)
 			if (gps->device_type != NULL && gps->device_type->rtcm_writer != NULL)
 			    (void)gps->device_type->rtcm_writer(gps, (char *)channel->outbuffer, channel->outbuflen);
 		}
-#endif /* RTCM104_SERVICE */
 	    }
 
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
