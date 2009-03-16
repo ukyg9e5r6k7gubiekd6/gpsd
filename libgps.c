@@ -80,13 +80,17 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
+	    bool eol = false;
 	    /* the following should execute each time we have a good next sp */
 	    for (sp = ns + 5; *sp != '\0'; sp = tp+1) {
 		tp = sp + strcspn(sp, ",\r\n");
+		eol = *tp == '\r' || *tp == '\n';
 		if (*tp == '\0')
 		    tp--;
 		else
 		    *tp = '\0';
+
+		/* note, there's a bit of kip logic after the switch */
 
 		switch (*sp) {
 		case 'A':
@@ -390,6 +394,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    /*@ -matchanyintegral +formatcode @*/
 		    break;
 		}
+
+		/* 
+		 * Skip to next GPSD when we see \r or \n; 
+		 * we don't want to try interpreting stuff
+		 * in between that might be raw mode data.
+		 */
+		if (eol)
+		    break;
 	    }
 	}
     }
@@ -579,17 +591,18 @@ static void onsig(int sig)
     exit(1);
 }
 
+/* must start zeroed, otherwise the unit test will try to chaser garbage pinter fields. */
+struct gps_data_t gpsdata;
+static char buf[] = "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n";
+
 static void unpack_unit_test(void)
 /* torture the unpacking function */
 {
-    struct gps_data_t gpsdata;
 
     (void)signal(SIGSEGV, onsig);
     (void)signal(SIGBUS, onsig);
 
-#define RAW_PLUS_WATCHER "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n"
-
-    gps_unpack(RAW_PLUS_WATCHER, &gpsdata);
+    gps_unpack(buf, &gpsdata);
     data_dump(&gpsdata, time(NULL));
 }
 
