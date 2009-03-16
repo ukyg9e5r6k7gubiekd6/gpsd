@@ -770,6 +770,24 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	nmea_decoder decoder;
     } nmea_phrase[] = {
 	/*@ -nullassign @*/
+	{"PGRMC", 0,	NULL},		/* ignore Garmin Sensor Config */
+	{"PGRME", 7,	processPGRME},
+	{"PGRMI", 0,	NULL},		/* ignore Garmin Sensor Init */
+	{"PGRMO", 0,	NULL},		/* ignore Garmin Sentence Enable */
+	/*
+	 * Basic sentences must come after the PG* ones, otherwise
+	 * Garmins can get stuck in a loop that looks like this:
+         *
+	 * 1. A Garmin GPS in NMEA mode is detected.
+         *
+	 * 2. PGRMC is sent to reconfigure to Garmin binary mode.  
+         *    If successful, the GPS echoes the phrase.
+         *
+	 * 3. nmea_parse() sees the echo as RMC because the talker ID is 
+         *    ignored, and fails to recognize the echo as PGRMC and ignore it.
+         *
+	 * 4. The mode is changed back to NMEA, resulting in an infinite loop.
+	 */
 	{"RMC", 8,	processGPRMC},
 	{"GGA", 13,	processGPGGA},
 	{"GLL", 7, 	processGPGLL},
@@ -777,10 +795,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"GSV", 0,	processGPGSV},
 	{"VTG", 0, 	NULL},		/* ignore Velocity Track made Good */
 	{"ZDA", 7, 	processGPZDA},
-	{"PGRMC", 0,	NULL},		/* ignore Garmin Sensor Config */
-	{"PGRME", 7,	processPGRME},
-	{"PGRMI", 0,	NULL},		/* ignore Garmin Sensor Init */
-	{"PGRMO", 0,	NULL},		/* ignore Garmin Sentence Enable */
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9,	processTNTHTM},
 #endif /* TNT_ENABLE */
