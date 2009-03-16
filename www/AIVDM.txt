@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.0, March 2009
+v1.1, March 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -42,9 +42,9 @@ Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
 I have been unable to determine what technical standard sets the ASCII
-format for AIS messages; most likely it is NMEA 0183 <<NMEA>>, which I
-also have not looked at because it is proprietary and expensive and
-surrounded by even more rapacious attack lawyers.
+format for AIS messages; most likely it is some version of NMEA 0183
+<<NMEA>>, which I also have not looked at because it is proprietary
+and expensive and surrounded by even more rapacious attack lawyers.
 
 == Information Sources ==
 
@@ -61,7 +61,8 @@ Coastal and Ocean Mapping at the University of New Hamphire. Much of
 his research involves AIS.  His work blog at <<Schwehr>> contains
 sample messages and descriptions of AIS operation in the wild that
 shed light on various obscure corners of the specification.  He has
-explained the otherwise undocumented Ring Indicator field to me by email.
+explained the otherwise undocumented Ring Indicator field and USCG
+extended AIVDM to me by email.
 
 == Open-Source Implementations ==
 
@@ -192,12 +193,13 @@ never emit them.
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).
 
-Detailed descriptions of message types 1-5, 9, and 18 follow.  Information
-sufficient to decode messages 6-22 can be found in <<IALA>>, but they
-are rare or not of general interest so we will not duplicate the
-information here. Message types 23-24 are listed at <<BOSUN>> with no
-further information; message types 25-26 come from <<Schwehr>>> with
-no further information.
+Detailed descriptions of message types 1-5, 9, and 18 follow.
+Information sufficient to decode other message types in the range 6-22
+can be found in <<IALA>>, but they are rare or not of general interest
+so we will not duplicate the information here. Message types 23-24 are
+listed at <<BOSUN>> with no further information; message types 25-26
+come from <<Schwehr>>>, who reports they were added in Version 3 of
+<<ITU1371>>.
 
 === Types 1, 2 and 3 ===
 
@@ -230,8 +232,8 @@ The Repeat Indicator is a directive to an AIS transciever that this
 message should be rebroadcast.  This was intended as a way of getting
 AIS messages around hills and other obstructions in coastal waters,
 but is little used as base station coverage is more effective.  It is
-probably intended that the bit be incremented on each retransmission,
-to a maximum of three hops.
+intended that the bit be incremented on each retransmission, to a
+maximum of three hops.
 
 .Navigation status codes
 `-`-------------------------------------------------------------
@@ -541,9 +543,57 @@ and 8 (described in <<SEAWAY>>, freely available), and safety
 information using types 12 and 14.
 
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
-System) which uses extended AIS formats. <<SEAWAY>> says it's
-intercompatible with the St. Lawrence Seaway system; I have not
-been able to find any message documentation, however.
+System) which uses extended AIS binary formats. <<SEAWAY>> says it's
+intercompatible with the St. Lawrence Seaway system; I have not been
+able to find any message documentation, however.
+
+=== U.S. Coast Guard Extended AIVDM ===
+
+You may occasionally see AIVDM packets with additional comma-separated
+fields following the CRC-32 checksum.  This is a semi-obsolescent
+logging format used by the USCG, which has never documented it well
+and plans to replace it with a new one based on NMEA 4.0.
+
+Here's a sample sentence and field breakdown:
+
+-------------------------------------------------------------------------------
+!AIVDM,1,1,,B,15Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*63,s1234,d-119,T12.34567123,r003669958,1085889680
+-------------------------------------------------------------------------------
+
+Following the “*63” checksum are additional fields delimited by commas.  
+These fields provide additional metadata about the reception of each AIS  
+broadcast.
+
+The field beginning with the lower case “s” is a Relative Signal  
+Strength Indicator (RSSI) measurement from the receiver. This  
+measurement has a range of 0-65535. This is one of the parameters used  
+internally by the AIS receiver to determine the signal strength value as  
+reported in the field beginning with the lower case “d”. This field only  
+exists when the AIS receiver provides this data.
+
+The field beginning with a lower case “d” is the signal strength  
+measurement for this broadcast in dBm. This field only exists when the  
+AIS receiver provides this data.
+
+The field beginning with the upper case “T” is the Time of Arrival  
+of the received broadcast in seconds from UTC 0. This field only exists  
+when the AIS receiver provides this data.
+
+Another optional field not shown is one that begins with an upper  
+case “S” and represents the slot number in which the reception occurred.  
+The field would appear after the checksum and before the station  
+identifier field. This field only exists when the AIS receiver provides  
+this data. Example: S0042
+
+The field beginning with the lower case “r” is a station identifier  
+field. This field is always provided, regardless of the type of AIS  
+equipment.  (Occasionally a base station identifier will be prefixed with
+"b" instead.)
+
+The last field is a time tag based on the standard “C” programming  
+language time function. Both date and time to the nearest second can be  
+derived from this field. This field is always provided, regardless of  
+the type of AIS equipment.
 
 == References ==
 
@@ -571,3 +621,8 @@ Identification System]
   Seaway AIS Data Messaging Formats and Specifications]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
+
+== Change history ==
+
+Version 1.1 adds message breakdopwns for 9 and 18, explanation of the
+Ring Indicator feld, and the explanation of USCG extended AIVDM.
