@@ -627,43 +627,6 @@ struct gps_data_t {
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
-#if 0	/* not yet used or filled in */
-    /* measurement data */
-    double pseudorange[MAXCHANNELS];	/* meters */
-    double deltarange[MAXCHANNELS];	/* meters/sec */
-    double doppler[MAXCHANNELS];	/* Hz */
-    unsigned satstat[MAXCHANNELS];	/* tracking status */
-#define SAT_ACQUIRED	0x01		/* satellite acquired */
-#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
-#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
-#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
-#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
-#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
-#define SAT_FIX_USED	0x40		/* used for position fix */
-#endif
-
-#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
-    /* compass status -- TrueNorth (and any similar) devices only */
-    char headingStatus;
-    char pitchStatus;
-    char rollStatus;
-    double horzField;   /* Magnitude of horizontal magnetic field */
-#endif
-
-#ifdef OCEANSERVER_ENABLE
-    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double magnetic_field_x;
-    double magnetic_field_y;
-    double magnetic_field_z;
-    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double acceleration_field_x;
-    double acceleration_field_y;
-    double acceleration_field_z;
-    double gyro_output_x;
-    double gyro_output_y;
-    double temperature;
-#endif
-
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */
     char	*gps_id;	/* only valid if non-null. */
@@ -698,6 +661,48 @@ struct gps_data_t {
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *, size_t len, int level);/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
+
+    /*
+     * Do not put any configuration-symbol-dependent members
+     * above this point, as we need things to be at stable
+     * offsets.
+     */
+#ifdef OCEANSERVER_ENABLE
+    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double magnetic_field_x;
+    double magnetic_field_y;
+    double magnetic_field_z;
+    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double acceleration_field_x;
+    double acceleration_field_y;
+    double acceleration_field_z;
+    double gyro_output_x;
+    double gyro_output_y;
+    double temperature;
+#endif
+
+#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
+    /* compass status -- TrueNorth (and any similar) devices only */
+    char headingStatus;
+    char pitchStatus;
+    char rollStatus;
+    double horzField;   /* Magnitude of horizontal magnetic field */
+#endif
+
+#if 0	/* not yet used or filled in */
+    /* measurement data */
+    double pseudorange[MAXCHANNELS];	/* meters */
+    double deltarange[MAXCHANNELS];	/* meters/sec */
+    double doppler[MAXCHANNELS];	/* Hz */
+    unsigned satstat[MAXCHANNELS];	/* tracking status */
+#define SAT_ACQUIRED	0x01		/* satellite acquired */
+#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
+#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
+#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
+#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
+#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
+#define SAT_FIX_USED	0x40		/* used for position fix */
+#endif
 };
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
