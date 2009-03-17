@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.1, March 2009
+v1.2, March 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -21,7 +21,7 @@ way cellphones do to avoid mutual interference.
 
 Technically, AIVDM packets are reports from other ships and AIVDO
 packets are reports from your own ship. AIS receivers capture AIVDM
-squawks and report them as ASCII data packets over serial lines using
+squawks and report them as ASCII data packets over serial lines, using
 the NMEA 0183 data format and physical network standards.
 
 A lengthy description of AIS, focusing on the goals and history of the
@@ -54,8 +54,7 @@ rapacious attack lawyers.
 Together, the the IALA Technical Clarifications at <<IALA>> and the
 Coast Guard's AIS pages at <<NAVCEN>> describe AIS message payloads
 almost completely.  The detail information on payload formats in this
-document is derived from these.  Together, they explain everything
-except the Repeat Indicator found in some messages.
+document is derived from these.
 
 Kurt Schwehr is a research scientist at the Center for
 Coastal and Ocean Mapping at the University of New Hamphire. Much of
@@ -675,5 +674,12 @@ Identification System]
 
 == Change history ==
 
-Version 1.1 adds message breakdopwns for 9 and 18, explanation of the
+Version 1.0 was the initial release covering messages 1-3, 4, and 5.
+
+Version 1.1 adds message breakdowns for 9 and 18, explanation of the
 Repeat Indicator feld, and the explanation of USCG extended AIVDM.
+
+Version 1.2 adds information on the the ITU1371 edition 3 maneuver field,
+and the RAIM flag. It also adds an important clarification about
+six-bit decoding.
+
