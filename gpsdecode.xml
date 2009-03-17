@@ -50,24 +50,24 @@ used by the marine Automatic Identification System.  This can be
 decoded, but not yet encoded.</para>
 
 <para> The dump lines are values of AIS payload fields,
-comma-separated, in the order that they occur in the payload, There
-are two exceptions: spans of fields expressing a date are emitted as
-an ISO8601 timestamp (look for colons and the trailing Z indicating
-Zulu/UTC time), and the 19-bit group of TDMA status fields found at
-the end of message types 1-4 are are dumped as a single unsigned
-integer in hex. (Unused regional-authority fields are also dumped in
-hex.)</para>
+comma-separated, in the order that they occur in the payload, spare
+and assigned-mode bits omitted. Spans of fields expressing a date are
+emitted as an ISO8601 timestamp (look for colons and the trailing Z
+indicating Zulu/UTC time), and the 19-bit group of TDMA status fields
+found at the end of message types 1-4 are are dumped as a single
+unsigned integer in hex. (Unused regional-authority fields are also
+dumped in hex.)</para>
 
 <para>By default, certain scaling and conversion operations are
 performed for the output.  Latitudes and longitudes are scaled to
 decimal degrees rather than the native AIS unit of 1/10000th of a
-minute of arc.  Ship (but not air) speeds are scaled to knots rather than tenth-of-knot
-unit.  Navigation status and positioning-system type are dumped
-as text strings rather than IAS numeric codes. Rate of turn 
-may appear as "nan" if is unavailable, of as one of the strings
+minute of arc.  Ship (but not air) speeds are scaled to knots rather
+than tenth-of-knot unit.  Navigation status and positioning-system
+type are dumped as text strings rather than IAS numeric codes. Rate of
+turn may appear as "nan" if is unavailable, of as one of the strings
 "fastright" or "fastleft" if it is out of the IAS encoding range;
-otherwise it is quadratically mapped back to the turn sensor number
-in degrees per minute. Vessel draughts are conveted to decimal meters
+otherwise it is quadratically mapped back to the turn sensor number in
+degrees per minute. Vessel draughts are conveted to decimal meters
 rather than native AIS decimeters.</para>
 
 </refsect1>

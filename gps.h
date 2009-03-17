@@ -477,8 +477,9 @@ struct ais_t
 #define AIS_SEC_MANUAL		61
 #define AIS_SEC_ESTIMATED	62
 #define AIS_SEC_INOPERATIVE	63
-	    uint regional;		/* regional reserved */
+	    uint maneuver;		/* maneuver indicator */
 	    uint spare;			/* spare bits */
+	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type123;
 	/* Type 4 - Base Station Report */
@@ -500,6 +501,7 @@ struct ais_t
 	    int latitude;		/* latitude */
 	    uint epfd;			/* type of position fix device */
 	    uint spare;			/* spare bits */
+	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type4;
 	/* Type 5 - Ship static and voyage related data */
@@ -537,6 +539,8 @@ struct ais_t
 	    uint regional;		/* regional reserved */
 	    uint dte;			/* data terminal enable */
 	    uint spare;			/* spare bits */
+	    bool assigned;		/* assigned-mode flag */
+	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type9;
 	/* Type 18 -  */
@@ -551,6 +555,8 @@ struct ais_t
 	    uint utc_second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
 	    uint spare;			/* spare bits */
+	    bool assigned;		/* assigned-mode flag */
+	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type18;
     };

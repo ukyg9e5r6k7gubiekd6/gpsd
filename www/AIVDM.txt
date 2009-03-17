@@ -41,10 +41,13 @@ ITU-R M.1371 is expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
-I have been unable to determine what technical standard sets the ASCII
-format for AIS messages; most likely it is some version of NMEA 0183
-<<NMEA>>, which I also have not looked at because it is proprietary
-and expensive and surrounded by even more rapacious attack lawyers.
+The ASCII format for AIS messages seems to have been set by IEC-PAS
+61162-100, "Maritime navigation and radiocommunication equipment and
+systems" <<IEC-PAS>>. It is proprietary and I have not looked at it.
+Various public sources indicate that it has been "harmonized" with some
+version of NMEA 0183 <<NMEA>>, which I also have not looked at because
+it too is proprietary and expensive, and surrounded by even more
+rapacious attack lawyers.
 
 == Information Sources ==
 
@@ -54,15 +57,14 @@ almost completely.  The detail information on payload formats in this
 document is derived from these.  Together, they explain everything
 except the Repeat Indicator found in some messages.
 
-The AIVDM ASCII packet format is described at <<BOSUN>>.
-
 Kurt Schwehr is a research scientist at the Center for
 Coastal and Ocean Mapping at the University of New Hamphire. Much of
 his research involves AIS.  His work blog at <<Schwehr>> contains
 sample messages and descriptions of AIS operation in the wild that
 shed light on various obscure corners of the specification.  He has
-explained the otherwise undocumented Ring Indicator field and USCG
-extended AIVDM to me by email.
+explained the otherwise undocumented Repeat Indicator field and USCG
+extended AIVDM to me by email. He also communicated some critical
+information from <<IEC-PAS>>.
 
 == Open-Source Implementations ==
 
@@ -130,10 +132,11 @@ nonempty message ID field:
 
 == AIVDM/AIVDO Payload Armoring ==
 
-The data payload is an ASCII-encoded bit vector.  Each character 
+The data payload is an ASCII-encoded bit vector.  Each character
 represents six bits of data.  To recover the six bits, subtract 40
 from the ASCII character value; if the result is greater than 40
-subtract 8.
+subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
+this encoding begin with "@" (64) end with "W" (87).
 
 Concatenate all six-bit quantities found in the payload, MSB first.
 This is the binary payload of the sentence.  
@@ -187,11 +190,15 @@ speed while underway, and every 3 minutes while the vessel is at
 anchor and stationary. It will send a type 5 identification every 6
 minutes.   (More detail is at <<IALA>>, part 2.3)
 
+Class 8 is in common use for private encrypted messages, such as
+location transmission in military exercises.
+
 Other message types are unusual or rare, and many AIS transponders
 never emit them.
 
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
-for the ship's radio(s).
+for the ship's radio(s).  The first three digits convey information
+about the country in which the ID was issued <<ITU-MID>>.
 
 Detailed descriptions of message types 1-5, 9, and 18 follow.
 Information sufficient to decode other message types in the range 6-22
@@ -224,8 +231,9 @@ Field   Len Description                       Units
 116-127 12  Course Over Ground (COG) Relative to true north to 0.1 degree
 128-136  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 137-142  6  Time Stamp               Second of UTC timestamp (see below).
-143-145  3  Regional Reserved
-146-147  2  Spare
+143-144  2  Maneuver Indicator       See below
+145-147  3  Spare
+148-148  1  RAIM flag                See below
 -------------------------------------------------------------------------------
 
 The Repeat Indicator is a directive to an AIS transciever that this
@@ -259,14 +267,15 @@ Turn rate is encoded as follows:
 
 * 0...126 = turning right at up to 708 degrees per minute or higher
 * 0...-126 = turning left at up to 708 degrees per minute or higher
-* 127 = turning right at more than 50deg/30s (No TI available)
-* -127 = turning left at more than 50deg/30s (No TI available)
+* 127 = turning right at more than 5deg/30s (No TI available)
+* -127 = turning left at more than 5deg/30s (No TI available)
 * –128 (80 hex) indicates no turn information available (default)
 
 Values between 0 and 708 degrees/min coded by ROTAIS=4.733 *
 SQRT(ROTsensor) degrees/min where ROTsensor is the Rate of Turn as
 input by an external Rate of Turn Indicator. ROTAIS is rounded to the
-nearest integer value.
+nearest integer value.  Sign of the field should be preserved when
+squaring it, otherwise the left/right indication will be lost.
 
 Speed over ground is in 0.1-knot resolution from 0 to 102 knots.
 value 1023 indicates speed is not available, value 1022 indicates
@@ -296,7 +305,32 @@ Seconds in UTC timestamp should be 0-59, except for these special values:
 The Regional Reserved field is intended for use by local maaritime
 authorities.  It is not known to be in any actual use up to 2009.
 
-Bits 148-167 are diagnostic information for the radio system.  Consult
+The Maneuver Indicator (143-144) may have these values:
+
+* 0 = Not available (default)
+* 1 = No special maneuver
+* 2 = Special maneuver (such as regional passing arrangement)
+
+The interpretation of bits 143-147 has been a bit unstable. In
+<<IALA>>. and therefore in the original <<[ITU1371>>, they were 
+described like this:
+
+`-------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+-------------------------------------------------------------------------------
+143-145  3  Regional Reserved
+146-147  2  Spare
+-------------------------------------------------------------------------------
+
+The interpretation of 143-144 as a special maneuver field is new in
+revision 3 of <<[ITU1371>>.
+
+The RAIM flag indicates whether Receiver Autonomous Integrity
+Monitoring is being used to check the performance of the EPFD.
+0 = RAIM not in use(default), 1 = RAIM in use.  See <<RAIM>> for
+a detailed description of this flag.
+
+Bits 149-167 are diagnostic information for the radio system.  Consult
 <<IALA>> for detailed description of the latter.  Total of 168 bits,
 occupying one AIVDM sentence.
 
@@ -323,7 +357,8 @@ Field   Len  Description                       Units
 107-133  27  Latitude                 As in Common Navigation Block
 134-137   4  Type of EPFD             See below
 138-147  10  Spare                    Not used
-148-167  19  SOTDMA state             As in same bits for Type 1
+148-148   1  RAIM flag                As for common navigation block
+149-167  19  SOTDMA state             As in same bits for Type 1
 --------------------------------------------------------------------------------
 
 .EPFD fix type codes
@@ -356,6 +391,10 @@ According to the standard, trailing unused characters will be
 represented by "@" (six-bit zero). It is common to space-fill the 
 fields instead, so a decoder should strip trailing spaces well as
 at-signs.
+
+In practice, the information in these fields (especially ETA and
+destination) is not reliable, as it has to be hand-updated by
+humans rather than gathered automatically from sensors.
 
 `-------`---`-----------------------------`------------------------------------
 Field   Len Description                   Encoding   
@@ -493,7 +532,7 @@ Field   Len Description                   Encoding
 142-142  1  DTE                           0=Data terminal ready, 
                                           1=Data terminal not ready (default)
 143-145  3  Spare                         Not used
-146-168 22  Communications sratus         See <<IALA>> for details.
+146-168 22  Communications status         See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
 Altitude is in meters.  The special value 4095 indicates altitude is
@@ -613,7 +652,8 @@ Identification System]
 
 - [[[NAVCEN]]] http://www.navcen.uscg.gov/enav/ais/[NAVCEN AIS pages]
 
-- [[[BOSUN]]] http://www.bosunsmate.org/ais/[Marine Automatic Identification System (AIS)]
+- [[[BOSUN]]] http://www.bosunsmate.org/ais/[Marine Automatic
+  Identification System (AIS)]
 
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
 
@@ -622,7 +662,18 @@ Identification System]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
+-  [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
+   radiocommunication equipment and systems"  The six-bit encoding
+   is described on page 26 of Annex C, Table C-1.  Communicated by 
+   Kurt Schwehr; I have not looked at it.
+
+- [[[ITU-MID]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
+  of Maritime Identification Digits]
+
+- >[[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
+   Integrity Monitoring]
+
 == Change history ==
 
 Version 1.1 adds message breakdopwns for 9 and 18, explanation of the
-Ring Indicator feld, and the explanation of USCG extended AIVDM.
+Repeat Indicator feld, and the explanation of USCG extended AIVDM.

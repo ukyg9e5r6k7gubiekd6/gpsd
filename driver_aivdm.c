@@ -156,9 +156,10 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type123.cog = UBITS(116, 12);
 	    ais->type123.heading = UBITS(128, 9);
 	    ais->type123.utc_second = UBITS(137, 6);
-	    ais->type123.regional = UBITS(143, 3);
-	    ais->type123.spare = UBITS(146, 2);
-	    ais->type123.radio = UBITS(148, 20);
+	    ais->type123.maneuver = UBITS(143, 2);
+	    ais->type123.spare = UBITS(145, 3);
+	    ais->type123.raim = UBITS(148, 1)!=0;
+	    ais->type123.radio = UBITS(149, 20);
 	    gpsd_report(LOG_INF,
 			"Nav=%d ROT=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
 			ais->type123.status,
@@ -183,7 +184,8 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type4.latitude = SBITS(107, 27);
 	    ais->type4.epfd = UBITS(134, 4);
 	    ais->type4.spare = UBITS(138, 10);
-	    ais->type4.radio = UBITS(148, 19);
+	    ais->type4.raim = UBITS(148, 1)!=0;
+	    ais->type4.radio = UBITS(149, 19);
 	    gpsd_report(LOG_INF,
 			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%d  Lon=%d epfd=%d\n",
 			ais->type4.year,
@@ -228,6 +230,8 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type9.regional = UBITS(134, 8);
 	    ais->type9.dte = UBITS(142, 1);
 	    ais->type9.spare = UBITS(143, 3);
+	    ais->type9.assigned = UBITS(144, 1)!=0;
+	    ais->type9.raim = UBITS(145, 1)!=0;
 	    ais->type9.radio = UBITS(146, 22);
 	    gpsd_report(LOG_INF,
 			"Alt=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d Sec=%d\n",
@@ -250,7 +254,9 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type18.utc_second = UBITS(133, 6);
 	    ais->type18.regional = UBITS(139, 2);
 	    ais->type18.spare = UBITS(141, 5);
-	    ais->type18.radio = UBITS(146, 22);
+	    ais->type18.assigned = UBITS(146, 1)!=0;
+	    ais->type18.raim = UBITS(147, 1)!=0;
+	    ais->type18.radio = UBITS(148, 20);
 	    gpsd_report(LOG_INF,
 			"reserved=%x SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
 			ais->type18.reserved,
@@ -456,8 +462,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type123.cog, 
 			  ais->type123.heading, 
 			  ais->type123.utc_second,
-			  ais->type123.regional,
-			  ais->type123.spare,
+			  ais->type123.maneuver,
+			  ais->type123.raim,
 			  ais->type123.radio);
 	} else {
 	    (void)fprintf(fp,
@@ -471,8 +477,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type123.cog, 
 			  ais->type123.heading, 
 			  ais->type123.utc_second,
-			  ais->type123.regional,
-			  ais->type123.spare,
+			  ais->type123.maneuver,
+			  ais->type123.raim,
 			  ais->type123.radio);
 	}
 #undef TYPE123_UNSCALED_UNLABELED
@@ -498,7 +504,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type4.latitude / AIS_LATLON_SCALE, 
 			  ais->type4.longitude / AIS_LATLON_SCALE,
 			  epfd_legends[ais->type4.epfd],
-			  ais->type4.spare,
+			  ais->type4.raim,
 			  ais->type4.radio);
 	} else {
 	    (void)fprintf(fp,
@@ -513,7 +519,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type4.latitude, 
 			  ais->type4.longitude,
 			  ais->type4.epfd,
-			  ais->type4.spare,
+			  ais->type4.raim,
 			  ais->type4.radio);
 	}
 #undef TYPE4_UNSCALED_UNLABELED
@@ -592,7 +598,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type9.utc_second,
 			  ais->type9.regional,
 			  ais->type9.dte, 
-			  ais->type9.spare,
+			  ais->type9.raim,
 			  ais->type9.radio);
 	} else {
 	    (void)fprintf(fp,
@@ -606,7 +612,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type9.utc_second,
 			  ais->type9.regional,
 			  ais->type9.dte, 
-			  ais->type9.spare,
+			  ais->type9.raim,
 			  ais->type9.radio);
 	}
 #undef TYPE9_UNSCALED_UNLABELED
@@ -632,7 +638,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type18.heading,
 			  ais->type18.utc_second,
 			  ais->type18.regional,
-			  ais->type18.spare,
+			  ais->type18.raim,
 			  ais->type18.radio);
 	} else {
 	    (void)fprintf(fp,
@@ -646,7 +652,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type18.heading,
 			  ais->type18.utc_second,
 			  ais->type18.regional,
-			  ais->type18.spare,
+			  ais->type18.raim,
 			  ais->type18.radio);
 	}
 #undef TYPE18_UNSCALED_UNLABELED
