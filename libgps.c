@@ -11,6 +11,7 @@
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
 #include <math.h>
+#include <locale.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
@@ -73,10 +74,22 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 
 /*@ -branchstate -usereleased @*/
 static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
-/* unpack a daemon response into a status structure */
+/* unpack a gpsd response into a status structure, buf must be writeable */
 {
     char *ns, *sp, *tp;
     int i;
+
+    /*
+     * Get the decimal separator for the current application locale.
+     * This looks thread-unsafe, but it's not.  The key is that
+     * character assignment is atomic.
+     */
+    static char decimal_point = '\0';
+    if (decimal_point == '\0') {
+	struct lconv *locale_data = localeconv();
+	if (locale_data != NULL && locale_data->decimal_point[0] != '.')
+	    decimal_point = locale_data->decimal_point[0];
+    }
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
@@ -90,7 +103,22 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		else
 		    *tp = '\0';
 
-		/* note, there's a bit of kip logic after the switch */
+		/*
+		 * The daemon always emits the Anglo-American and SI
+		 * decimal point.  Hack these into whatever the 
+		 * application locale requires if it's not the same.
+		 * This has to happen *after* we grab the next 
+		 * comma-delimited response, or we'll lose horribly
+		 * in locales where the decimal separator is comma.
+		 */
+		if (decimal_point != '\0') {
+		    char *cp;
+		    for (cp = sp; cp < tp; cp++)
+			if (*cp == '.')
+			    *cp = decimal_point;
+		}
+
+		/* note, there's a bit of skip logic after the switch */
 
 		switch (*sp) {
 		case 'A':
