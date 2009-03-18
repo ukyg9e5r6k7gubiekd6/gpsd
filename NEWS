@@ -1,4 +1,4 @@
-* Wed Mar 18 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39dev
+* Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39dev
   Fixed potential core dump in C client handling of "K" responses.
   Made device hotplugging work again; had been broken by changes in udev.
   Introduced major and minor API version symbols into the public interfaces.
@@ -14,7 +14,7 @@
   library now work correctly in locales where the decimal separator is 
   not a period.
 
-* Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
+* Tue Feb 10 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.
   Scaling on E error-estimate fields fixed to match O. Listen on
   localhost only by default to avoid security problems; this can be
@@ -28,7 +28,7 @@
   control channel with the new "&" command. Experimental new driver
   for Novatel SuperStarII. The 'g' mode switch command now requires,
   and returns, 'rtcm104v2' rather than 'rtcm104'; this is design forward
-  for when RTCM104v2 is fully working.
+  for when RTCM104v3 is fully working.
 
 * Sun Feb 17 2008 Chris Kuethe <ckuethe@mail.berlios.de> - 2.37
   The C++ bindings, Garmin USB support, and multiple instances of ntp
