@@ -49,7 +49,9 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     (void)printf(" = %lld\n", fld);
 #endif /* UDEBUG */
 
+    /*@ -shiftimplementation @*/
     fld &= ~(-1LL << width);
+    /*@ +shiftimplementation @*/
 #ifdef DEBUG
     (void)printf("    after selecting out the bottom %u bits: 0x%llx = %lld\n", 
 		 width, fld, fld);
@@ -71,7 +73,9 @@ signed long long sbits(char buf[], unsigned int start, unsigned int width)
 #ifdef SDEBUG
 	(void)fprintf(stderr, "%llx is signed\n", fld);
 #endif /* SDEBUG */
+	/*@ -shiftimplementation @*/
 	fld |= (-1LL << (width-1));
+	/*@ +shiftimplementation @*/
     }
 #ifdef SDEBUG
     (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width, (signed long long)fld);

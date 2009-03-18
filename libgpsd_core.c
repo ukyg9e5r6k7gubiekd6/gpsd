@@ -705,7 +705,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->packet.type >= COMMENT_PACKET) {
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
-		    gpsd_switch_driver(session, (*dp)->type_name);
+		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    break;
 		}
 	} else if (!gpsd_next_hunt_setting(session))

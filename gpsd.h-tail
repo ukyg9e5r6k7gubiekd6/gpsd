@@ -214,7 +214,7 @@ struct gps_type_t {
 				     speed_t speed, char parity, int stopbits);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
-    int min_cycle;
+    double min_cycle;
     /*@null@*/void (*revert)(struct gps_device_t *session);
 #endif /* ALLOW_RECONFIGURE */
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
@@ -421,7 +421,7 @@ extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
 extern int gpsd_hexdump_level;
 extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);
 extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_t, int);
-extern int gpsd_hexpack(char *, char *, size_t);
+extern int gpsd_hexpack(/*@in@*/char *, /*@out@*/char *, size_t);
 extern int hex2bin(char *);
 extern ssize_t hex_escapes(/*@out@*/char *cooked, const char *raw);
 extern void ntpd_link_activate(struct gps_device_t *session);

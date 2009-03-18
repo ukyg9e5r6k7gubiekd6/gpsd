@@ -846,22 +846,26 @@ int main (int argc, char **argv)
 		if (active == NULL)
 		    monitor_complain("No device defined yet");
 		else {
-		    len = gpsd_hexpack(arg, (char*)buf, strlen(arg));
-		    if (len < 0)
-			monitor_complain("Invalid hex string (error %d)", len);
+		    /*@ -compdef @*/
+		    int st = gpsd_hexpack(arg, (char*)buf, strlen(arg));
+		    if (st < 0)
+			monitor_complain("Invalid hex string (error %d)", st);
 		    else if ((*active)->driver->control_send == NULL)
 			monitor_complain("Device type has no control-send method.");
-		    else if (!monitor_control_send(buf, (size_t)len))
+		    else if (!monitor_control_send(buf, (size_t)st))
 			monitor_complain("Control send failed.");
 		}
+		    /*@ +compdef @*/
 		break;
 
 	    case 'X':				/* send raw packet */
+		/*@ -compdef @*/
 		len = (ssize_t)gpsd_hexpack(arg, (char*)buf, strlen(arg));
 		if (len < 0)
 		    monitor_complain("Invalid hex string (error %d)", len);
 		else if (!monitor_raw_send(buf, (size_t)len))
 		    monitor_complain("Raw send failed.");
+		/*@ +compdef @*/
 		break;
 #endif /* ALLOW_CONTROLSEND */
 

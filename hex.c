@@ -56,6 +56,7 @@ int gpsd_hexpack(char *src, char *dst, size_t len){
 /* hex2bin source string to destination - destination can be same as source */ 
     int i, k, l;
 
+    /*@ -mustdefine @*/
     l = (int)(strlen(src) / 2);
     if ((l < 1) || ((size_t)l > len))
 	return -2;
@@ -67,6 +68,7 @@ int gpsd_hexpack(char *src, char *dst, size_t len){
 	else
 	    return -1;
     return l;
+    /*@ +mustdefine @*/
 }
 
 /*@ +charint -shiftimplementation @*/

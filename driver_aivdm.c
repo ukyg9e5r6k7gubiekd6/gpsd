@@ -35,15 +35,20 @@
  * Parse the data from the device
  */
 
-static void from_sixbit(char *bitvec, int start, int count, char *to)
+static void from_sixbit(char *bitvec, uint start, int count, char *to)
 {
     /*@ +type @*/
+#ifdef S_SPLINT_S
+    /* the real string causes a splint internal error */
+    const char sixchr[] = "abcd";
+#else
     const char sixchr[64] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?";
+#endif /* S_SPLINT_S */
     int i;
 
     /* six-bit to ASCII */
     for (i = 0; i < count-1; i++)
-	to[i] = sixchr[ubits(bitvec, start + 6*i, 6)];
+	to[i] = sixchr[ubits(bitvec, start + 6*i, 6U)];
     to[count-1] = '\0';
     /* trim spaces on right end */
     for (i = count-2; i >= 0; i--)
@@ -117,12 +122,14 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	if (ch >= 40)
 	    ch -= 8;
 	gpsd_report(LOG_RAW, "%c: %s\n", *cp, sixbits[ch]);
+	/*@ -shiftnegative @*/
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
 		ais_context->bits[ais_context->bitlen / 8] |= (1 << (7 - ais_context->bitlen % 8));
 	    }
 	    ais_context->bitlen++;
 	}
+	/*@ +shiftnegative @*/
     }
     /*@ -charint @*/
 
@@ -421,9 +428,10 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
     };
 
     if (labeled)
-	(void)fprintf(fp, "type=%d,ri=%d,MMSI=%09d,", ais->id, ais->ri, ais->mmsi);
+	(void)fprintf(fp, "type=%u,ri=%u,MMSI=%09u,", ais->id, ais->ri, ais->mmsi);
     else
-	(void)fprintf(fp, "%d,%d,%09d,", ais->id, ais->ri, ais->mmsi);
+	(void)fprintf(fp, "%u,%u,%09u,", ais->id, ais->ri, ais->mmsi);
+    /*@ -formatconst @*/
     switch (ais->id) {
     case 1:	/* Position Report */
     case 2:
@@ -664,6 +672,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
 	break;
     }
+    /*@ +formatconst @*/
 }
 
 #endif /* defined(AIVDM_ENABLE) */

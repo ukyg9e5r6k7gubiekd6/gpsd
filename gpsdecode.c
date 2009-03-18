@@ -66,8 +66,10 @@ static void decode(FILE *fpin, FILE *fpout)
 	    rtcm3_dump(&rtcm3, stdout);
 	}
 	else if (lexer.type == AIVDM_PACKET) {
+	    /*@ -uniondef */
 	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm))
 		aivdm_dump(&aivdm.decoded, scaled, labeled, stdout);
+	    /*@ +uniondef */
 	}
     }
 }

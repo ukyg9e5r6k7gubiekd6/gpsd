@@ -48,7 +48,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    if (session->packet.type == (*dp)->packet_type) {
 		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
 			    (*dp)->type_name);
-		gpsd_switch_driver(session, (*dp)->type_name);
+		(void)gpsd_switch_driver(session, (*dp)->type_name);
 		return (*dp)->parse_packet(session);
 	    }
 	}
@@ -1065,7 +1065,7 @@ gps_mask_t aivdm_parse(struct gps_device_t *session)
 	 * widen it when ready for production.
 	 */
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		       "AIS%d", session->driver.aivdm.decoded.mmsi);
+		       "AIS%u", session->driver.aivdm.decoded.mmsi);
 
 	/* FIXME: actual driver code goes here if we're going to report fixes from these */
     }

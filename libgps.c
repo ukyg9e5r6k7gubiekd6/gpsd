@@ -72,7 +72,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
     gpsdata->raw_hook = hook;
 }
 
-/*@ -branchstate -usereleased @*/
+/*@ -branchstate -usereleased -mustfreefresh @*/
 static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
 {
@@ -441,7 +441,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	gpsdata->thread_hook(gpsdata, buf, strlen(buf), 1);
 }
 /*@ +nullstate +compdef @*/
-/*@ -branchstate +usereleased @*/
+/*@ -branchstate +usereleased +mustfreefresh @*/
 
 /*
  * return: 0, success

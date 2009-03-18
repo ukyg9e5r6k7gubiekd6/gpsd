@@ -1322,19 +1322,20 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (buf[0] == '&') {
-	ssize_t len;
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
+	    size_t len;
+	    int st;
 	    *eq++ = '\0';
 	    len = strlen(eq)+5;
 	    if ((chp = find_device(stash)) != NULL) {
 		/* NOTE: this destroys the original buffer contents */
-		len = (ssize_t)gpsd_hexpack(eq, eq, len);
-		if (len < 0)
+		st = gpsd_hexpack(eq, eq, len);
+		if (st < 0)
 		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %zd)\n", sfd, len);
 		else
 		{
