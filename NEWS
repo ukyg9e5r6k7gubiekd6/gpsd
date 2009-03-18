@@ -1,4 +1,4 @@
-* Wed Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39dev
+* Wed Mar 18 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39dev
   Fixed potential core dump in C client handling of "K" responses.
   Made device hotplugging work again; had been broken by changes in udev.
   Introduced major and minor API version symbols into the public interfaces.
@@ -10,7 +10,9 @@
   Speed-setting commands now allow parity and stop-bit setting if the
   GPS chipset and adaptor can support it. Specfile and other packaging
   paraphenalia now live in a packaging subdirectory.  rtcmdecode becomes
-  gpsdecode and can now de-armor and dump AIDVM packets.
+  gpsdecode and can now de-armor and dump AIDVM packets. The client
+  library now work correctly in locales where the decimal separator is 
+  not a period.
 
 * Tue Feb 10 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.
