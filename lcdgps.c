@@ -325,6 +325,7 @@ static void usage( char *prog)
                 "  -h          Show this help, then exit\n"
                 "  -V          Show version, then exit\n"
                 "  -s          Sleep for 10 seconds before starting\n"
+                "  -j          Turn on anti-jitter buffering\n"
                 "  -l {d|m|s}  Select lat/lon format\n"
                 "                d = DD.dddddd (default)\n"
                 "                m = DD MM.mmmm'\n"

@@ -650,6 +650,7 @@ static void usage( char *prog)
 		"  -h	  Show this help, then exit\n"
 		"  -V	  Show version, then exit\n"
 		"  -s	  Be silent (don't print raw gpsd data)\n"
+		"  -j	  Turn on anti-jitter buffering\n"
 		"  -l {d|m|s}  Select lat/lon format\n"
 		"		d = DD.dddddd\n"
 		"		m = DD MM.mmmm'\n"
