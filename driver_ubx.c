@@ -679,6 +679,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 	    cycletime = 200.0;
 
     gpsd_report(LOG_IO, "UBX rate change, report every %f secs\n", cycletime);
+    s = (unsigned short)cycletime;
     msg[0] = (unsigned char)(s >> 8);
     msg[1] = (unsigned char)(s & 0xff);
 
