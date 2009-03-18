@@ -275,7 +275,7 @@ static bool monitor_raw_send(/*@in@*/unsigned char *buf, size_t len)
 	(void)memcpy(session.msgbuf, buf, len);
 	session.msgbuflen = len;
 	monitor_dump_send();
-	return (st == len);
+	return (st > 0 && (size_t)st == len);
     }
 }
 #endif /* ALLOW_CONTROLSEND */
@@ -857,7 +857,7 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'X':				/* send raw packet */
-		len = gpsd_hexpack(arg, (char*)buf, strlen(arg));
+		len = (ssize_t)gpsd_hexpack(arg, (char*)buf, strlen(arg));
 		if (len < 0)
 		    monitor_complain("Invalid hex string (error %d)", len);
 		else if (!monitor_raw_send(buf, (size_t)len))
