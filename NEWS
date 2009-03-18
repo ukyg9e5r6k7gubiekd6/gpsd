@@ -1,3 +1,6 @@
+* Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.40dev
+  No news yet.
+
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
   Fixed potential core dump in C client handling of "K" responses.
   Made device hotplugging work again; had been broken by changes in udev.
