@@ -138,7 +138,6 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
-%{_includedir}/gpsdclient.h
 %{_mandir}/man1/gpscat.1*
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man1/gpsdecode.1*
@@ -167,6 +166,8 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Tue Mar 10 2009 Michael R. Davis <mrdvt92> - 2.39dev
+- dropped gpsdclient.h from packaging
 * Sun Mar 8 2009 Michael R. Davis <mrdvt92> - 2.39dev
 - changed gpsdlcdd to lcdgps, sirfmon to gpsmon, cgpxlogger to gpxlogger
   added gpsdclient.h to devel package
