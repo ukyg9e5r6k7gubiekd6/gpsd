@@ -35,9 +35,9 @@
  */
 #define LEAP_SECONDS	14
 
-/* IERS says the next leap-second will be inserted at the end of 2008.
+/* IERS says no leap second will be inserted in June 2009.
  */
-#define START_SUBFRAME	1230785999	/* 31 Dec 2008 23:59:59 */
+#define START_SUBFRAME	1262321999	/* 31 Dec 2009 23:59:59 */
 
 /*
  * This is used only when an NMEA device issues a two-digit year in a GPRMC
