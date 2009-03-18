@@ -547,9 +547,9 @@ unstable-makeregress: gpsd
 
 # Make RPM from the specfile in packaging
 dist-rpm: distdir
-       tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-       rpmbuild -ta $(distdir).tar.gz
-       $(am__remove_distdir)
+	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
+	rpmbuild -ta $(distdir).tar.gz
+	$(am__remove_distdir)
 
 # This is how to ship a release to Berlios incomoing.
 # It requires developer access verified via ssh.
