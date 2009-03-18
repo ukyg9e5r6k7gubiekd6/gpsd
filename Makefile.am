@@ -486,22 +486,22 @@ undump-regress: gpsdecode
 	@rm test/undump.test
 
 # Regression-test the calendar functions
-time_regress: test_mkgmtime
+time-regress: test_mkgmtime
 	./test_mkgmtime
 
 # Regression test the unpacking code in libgps
-unpack_regress: libgps
+unpack-regress: libgps
 	@echo "Testing the clent sentence unpacker..."
 	@$(srcdir)/libgps -u >test/test.chk
 	@diff -u test/unpack.chk test/test.chk
 
 # Build the regressiuin test for the sentence unpacker
-unpack_makeregress: libgps
+unpack-makeregress: libgps
 	@echo "Rebuilding the clent sentence-unpacker test..."
 	@$(srcdir)/libgps -u >test/unpack.chk
 
 # Do all normal regression tests
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress undump-regress time_regress unpack-regress
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress undump-regress time-regress unpack-regress
 	@echo "Regressions complete."
 
 # We would like "${MAKE} check" to run the regression tests.  automake

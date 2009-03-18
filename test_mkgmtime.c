@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 			failed = true;
 			strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
 			printf("test %2d failed. " \
-			       "Time returned from: %s should be %u (but was: %u)\n",
+			       "Time returned from: %s should be %lu (but was: %lu)\n",
 				i, tbuf, tests[i].result, ts);
 		}
 	}
