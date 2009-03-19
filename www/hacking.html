@@ -1457,11 +1457,10 @@ like this:
 &lt;command&gt; ::= &lt;command-id&gt;=&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
 </pre>
 
-<p>Each request shall begin with an introducer character.  This is
-given as '!' here but that could change.  The purpose of the
-introducer is to inform the command parser that extended commands
-follow.  Each request shall end with a newline indication, which 
-may consist of either LF or CR-LF.</p>
+<p>Each request shall begin with an introducer character, '?'. The
+purpose of the introducer is to inform the command parser that
+extended commands follow.  Each request shall end with a newline
+indication, which may consist of either LF or CR-LF.</p>
 
 <p>All requests shall be composed of US-ASCII characters and shall be
 no more than 78 characters in length, exclusive of the trailing
@@ -1498,20 +1497,20 @@ have the same identifier as the command.</p>
 
 <pre>
 # GPSD-NG equivalent of X query request; no arguments 
-!X;
-GPSD!X=0;
+?X;
+GPSD,X=0;
 #
 # GPSD-NG equivalent of B request to set baud rate
-!B=9600;
-GPSD!B=9600;
+?B=9600;
+GPSD,B=9600;
 #
 # GPSD-NG command illustrating multiple commands per request line
-!P;A;
-GPSD!P=75,80;A=1435;
+?P;A;
+GPSD,P=75,80;A=1435;
 #
 # Hypothetical extended command with a multiline response
-!HARDWAREID;
-GPSD!HARDWAREID
+?HARDWAREID;
+GPSD,HARDWAREID
 This is a Foobar 2317 GPS
 Firmware revision 555.55
 ;
@@ -1537,16 +1536,16 @@ fit on a line.</p>
 discussion:</p>
 
 <pre>
-!A .. !Z -&gt; map to the original A..Z gpsd commands
-!almanac -&gt; poll the almanac from the receiver
-!ephemeris -&gt; poll the ephemeris from the receiver
-!assist -&gt; load assistance data (time, position, etc) into the receiver
-!raw -&gt; get a full dump of the last measurement cycle... at least
+?A .. ?Z -&gt; map to the original A..Z gpsd commands
+?almanac -&gt; poll the almanac from the receiver
+?ephemeris -&gt; poll the ephemeris from the receiver
+?assist -&gt; load assistance data (time, position, etc) into the receiver
+?raw -&gt; get a full dump of the last measurement cycle... at least
         clock, doppler, pseudorange and carrier phase.
-!readonly -&gt; get/set read-only mode. no screwing up bluetooth devices
-!listen -&gt; set the daemon's bind address. added privacy for laptop users.
-!port -&gt; set the daemon's port. used by the regression tests, at least.
-!debug -&gt; set/modify the daemon's debug level, including after launch.
+?readonly -&gt; get/set read-only mode. no screwing up bluetooth devices
+?listen -&gt; set the daemon's bind address. added privacy for laptop users.
+?port -&gt; set the daemon's port. used by the regression tests, at least.
+?debug -&gt; set/modify the daemon's debug level, including after launch.
 </pre>
 
 <h1 id="blindalleys">Blind alleys</h1>
