@@ -1464,7 +1464,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef FIXED_PORT_SPEED
-    /* Asssume that if we're running with FIXED_PORT_SPEED we're some sort
+    /* Assume that if we're running with FIXED_PORT_SPEED we're some sort
      * of embedded configuration where we don't want to wait for connect */
     nowait = true;
 #endif
@@ -1946,9 +1946,10 @@ int main(int argc, char *argv[])
 			if (!device_needed && channel->gpsdata.gps_fd > -1) {
 			    if (channel->releasetime == 0) {
 				channel->releasetime = timestamp();
-				gpsd_report(LOG_RAW, "channel %ld released\n", channel-channels);
+				gpsd_report(LOG_PROG, "channel %ld released\n", channel-channels);
 			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
-				gpsd_report(LOG_RAW, "channel %ld closed, unflagging descriptor %d\n", channel-channels, channel->gpsdata.gps_fd);
+				gpsd_report(LOG_PROG, "channel %ld closed\n", channel-channels);
+				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
 				FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 				adjust_max_fd(channel->gpsdata.gps_fd, false);
 				gpsd_deactivate(channel);
