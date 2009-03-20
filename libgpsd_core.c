@@ -282,6 +282,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	session->gpsdata.fix.track = NAN;
 	session->gpsdata.separation = NAN;
 	session->mag_var = NAN;
+	session->releasetime = 0;
 
 	/* clear driver subtype field and private data union */
 	session->subtype[0] = '\0';

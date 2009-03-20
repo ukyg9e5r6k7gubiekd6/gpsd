@@ -1459,13 +1459,12 @@ like this:
 
 <p>Each request shall begin with an introducer character, '?'. The
 purpose of the introducer is to inform the command parser that
-extended commands follow.  Each request shall end with a newline
-indication, which may consist of either LF or CR-LF.</p>
+extended commands follow.  Each request shall end with a period and a
+newline indication, which may consist of either LF or CR-LF.</p>
 
 <p>All requests shall be composed of US-ASCII characters and shall be
 no more than 78 characters in length, exclusive of the trailing
-newline. Each request may consist of one or more semicolon-terminated
-commands. </p>
+newline.</p>
 
 <p>Each command shall begin with a command identifier.  The command
 identifier shall begin with an alphabetic character and consist of
@@ -1483,11 +1482,11 @@ with a comma without confusing gpsd's parser.</p>
 
 <p>If the final argument of a command has a newline immediately after
 a leader equal-sign or separator comma, the content of the argument is a
-multiline continuation.  If a continuation line begins with a ';',
-that ';' is removed before interpretation.  The content of the
+multiline continuation.  If a continuation line begins with a '.',
+that '.' is removed before interpretation.  The content of the
 argument consists of all following lines until a line which is empty
-after ';' (e.g. a line consisting solely of the argument terminator
-';' and a newline).</p>
+after '.' (e.g. a line consisting solely of the argument terminator
+'.' and a LF or CR-LF).</p>
 
 <p>Responses shall have the same format as requests, except that
 responses do not have an introducer. The response to a command shall

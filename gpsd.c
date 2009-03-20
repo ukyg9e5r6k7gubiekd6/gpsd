@@ -69,17 +69,30 @@
 /*
  * Timeout policy.  We can't rely on clients closing connections
  * correctly, so we need timeouts to tell us when it's OK to
- * reclaim client fds.  The assignment timeout fends off programs
+ * reclaim client fds.  ASSIGNMENT_TIMEOUT fends off programs
  * that open connections and just sit there, not issuing a W or
  * doing anything else that triggers a device assignment.  Clients
  * in watcher or raw mode that don't read their data will get dropped
  * when throttled_write() fills up the outbound buffers and the
  * NOREAD_TIMEOUT expires.  Clients in the original polling mode have
- * to be timed out as well.
+ * to be timed out as well.  
+ *
+ * Finally, RELEASE_TIMEOUT sets the amount of time we hold a device
+ * open after the last subscriber closes it; this is nonzero so a
+ * client that does open/query/close will have time to come back and
+ * do another single-shot query, if it wants to, before the device is
+ * actually closed.  The reason this matters is because some Bluetooth
+ * GPSes not only shut down the GPS receiver on close to save battery
+ * power, they actually shut down the Bluetooth RF stage as well and
+ * only re-wake it periodically to see if an attempt to raise the
+ * device is in progress.  The result is that if you close the device
+ * when it's powered up, a re-open can fail with EIO and needs to be
+ * tried repeatedly.  Better to avoid this...
  */
 #define ASSIGNMENT_TIMEOUT	60
-#define POLLER_TIMEOUT  	60*15
 #define NOREAD_TIMEOUT		60*3
+#define POLLER_TIMEOUT  	60*15
+#define RELEASE_TIMEOUT		60
 
 #define QLEN			5
 
@@ -1912,28 +1925,34 @@ int main(int argc, char *argv[])
 	}
 
 	/*
-	 * Close devices with an identified packet type but no remaining
-	 * subscribers.  The reason the test has this particular form is
-	 * so that, immediately after device open, we'll keep reading
-	 * packets until a type is identified even though there are no
-	 * subscribers yet.  We need this to happen so that subscribers
-	 * can later choose a device by packet type.
+	 * Mark devices with an identified packet type but no
+	 * remaining subscribers to be closed.  The reason the test
+	 * has this particular form is so that, immediately after
+	 * device open, we'll keep reading packets until a type is
+	 * identified even though there are no subscribers yet.  We
+	 * need this to happen so that subscribers can later choose a
+	 * device by packet type.
 	 */
 	if (!nowait)
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
 		if (allocated_channel(channel)) {
 		    if (channel->packet.type != BAD_PACKET) {
-			bool need_gps = false;
+			bool device_needed = false;
 
 			for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++)
 			    if (subscribers[cfd].device == channel)
-				need_gps = true;
+				device_needed = true;
 
-			if (!need_gps && channel->gpsdata.gps_fd > -1) {
-			    gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
-			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-			    adjust_max_fd(channel->gpsdata.gps_fd, false);
-			    gpsd_deactivate(channel);
+			if (!device_needed && channel->gpsdata.gps_fd > -1) {
+			    if (channel->releasetime == 0) {
+				channel->releasetime = timestamp();
+				gpsd_report(LOG_RAW, "channel %ld released\n", channel-channels);
+			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
+				gpsd_report(LOG_RAW, "channel %ld closed, unflagging descriptor %d\n", channel-channels, channel->gpsdata.gps_fd);
+				FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+				adjust_max_fd(channel->gpsdata.gps_fd, false);
+				gpsd_deactivate(channel);
+			    }
 			}
 		    }
 		}
