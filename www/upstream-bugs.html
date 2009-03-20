@@ -68,7 +68,6 @@ maintainer, we've tried to kick these upstream.</p>
 
 <ul>
 <li><a href="#libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</a></li>
-<li><a href="#macxlibs">Mac OS 10.5 X library packaging problem</a></li>
 <li><a href="#pyinstall">Defective Python installation in SuSE 10.3rc</a></li>
 </ul>
 
@@ -183,22 +182,6 @@ it should generate -lgps and <em>all</em> instances (rather than just
 the first to be incorporated by other linkage demands) are linked
 in.</p>
 
-<h2 id="macxlibs">Mac OS 10.5 X library packaging problem</h2>
-
-<p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
-because the X SDK libraries and include files are not installed to
-the canonical places.  The workaround is to configure like this:</p>
-
-<pre>
-configure \
-    --x-includes=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/include \
-    --x-libraries=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/lib
-</pre>
-
-<p>We haven't attempted to embed this in our autotools build because
-it looks like the fix would have to change every time the OS version
-number is incremented.</p>
-
 <h2 id="pyinstall">Defective Python installation in SuSE 10.3rc</h2>
 
 <p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
@@ -301,6 +284,14 @@ for a simple test program (<code>floattest.c</code>) is in the
 Subversion repository; if <code>gpsd</code> seems to be producing
 incorrect output, please use this tool to validate your toolchain
 before filing a bug report.</p>
+
+<h2 id="macxlibs">Mac OS 10.5 X library packaging problem</h2>
+
+<p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
+because the X SDK libraries and include files are not installed to the
+canonical places.  This was <a
+href="http://openradar.appspot.com/6498632">filed as a bug</a> with
+Apple and is reported fixed.</p>
 
 <p>&nbsp;</p>
 
