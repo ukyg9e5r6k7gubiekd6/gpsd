@@ -99,7 +99,7 @@ static int maxfd;
 static int debuglevel;
 static bool in_background = false;
 static bool listen_global = false;
-static bool nowait = true;
+static bool nowait = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
