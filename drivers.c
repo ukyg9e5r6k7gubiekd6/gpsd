@@ -55,15 +55,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
     } else /* session->packet.type == NMEA_PACKET) */ {
 	gps_mask_t st = 0;
-#ifdef GARMINTXT_ENABLE
-	if (session->packet.outbuflen >= 56) {
-	    if ((char) *session->packet.outbuffer == '@') {
-		/* Garmin Simple Text packet received; it starts with '@' is terminated with \r\n and has length 57 bytes */
-		(void)gpsd_switch_driver(session, "Garmin Simple Text");
-		return garmintxt_parse(session);
-	    }
-	}
-#endif /* GARMINTXT_ENABLE */
 
 #ifdef OCEANSERVER_ENABLE
 	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
@@ -935,7 +926,7 @@ static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
 
 static const struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
-    .packet_type   = RTCM2_PACKET;	/* associated lexer packet type */
+    .packet_type   = GARMINTXT_PACKET,	/* associated lexer packet type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */

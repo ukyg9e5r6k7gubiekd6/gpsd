@@ -123,7 +123,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* NMEA_ENABLE */
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
 	if (c == '@') {
-	    lexer->state = TNT_LEADER;
+	    lexer->state = GTXT_LEADER;
 	    break;
 	}
 #endif
@@ -263,10 +263,25 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-    case TNT_LEADER:
-	  lexer->state = NMEA_LEADER_END;
+    case GTXT_LEADER:
+        if (c == '\r')
+            /* stay in this state, next character should be '\n' */
+            /* in the theory we can stop search here and don't wait for '\n' */
+            lexer->state = GTXT_LEADER;  
+        else if (c == '\n')
+            /* end of packet found */   
+            lexer->state = GTXT_RECOGNIZED;
+#ifdef TNT_ENABLE
+	else if (c == '*')
+            /* TNT has similar structure like NMEA packet, '*' before optional checksum ends the packet */
+            /* '*' cannot be received from GARMIN working in TEXT mode, use this diference for selection */
+            /* this is not GARMIN TEXT packet, could be TNT */
+            lexer->state = NMEA_LEADER_END;
+#endif /* TNT_ENABLE */
+	else if (!isprint(c))
+	    lexer->state = GROUND_STATE;
 	break;
-#endif
+#endif /* defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) */
     case NMEA_LEADER_END:
 	if (c == '\r')
 	    lexer->state = NMEA_CR;
@@ -1351,6 +1366,19 @@ void packet_parse(struct gps_packet_t *lexer)
 	    break;
 	}
 #endif /* RTCM104V2_ENABLE */
+#ifdef GARMINTXT_ENABLE
+	else if (lexer->state == GTXT_RECOGNIZED) {
+            size_t packetlen = lexer->inbufptr - lexer->inbuffer;
+	    if (57 <= packetlen) {
+		packet_accept(lexer, GARMINTXT_PACKET);
+		packet_discard(lexer);
+                lexer->state = GROUND_STATE;
+		break;
+            } else {
+                lexer->state = GROUND_STATE;
+            }
+        }
+#endif
     } /* while */
 }
 #undef getword

@@ -509,7 +509,7 @@ dnl check for Garmin Simple Text support
 AC_ARG_ENABLE(garmintxt,
   AC_HELP_STRING([--enable-garmintxt],
 		 [enable Garmin Simple Text support]),
-  [ac_garmintxt=$enableval], [ac_garmintxt=no])
+  [ac_garmintxt=$enableval], [ac_garmintxt=yes])
 AC_MSG_CHECKING([for Garmin Simple Text support])
 if test x"$ac_garmintxt" = "xyes"; then
     AC_MSG_RESULT([yes])

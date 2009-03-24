@@ -66,8 +66,9 @@
 #endif /* ZODIAC_ENABLE */
 
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-   TNT_LEADER,          /* saw True North status leader '@' */
+   GTXT_LEADER,         /* saw True North status leader '@' */
                         /* Garmin Simple Text starts with @ leader */
+   GTXT_RECOGNIZED,     /* */
 #endif
 
 #ifdef EVERMORE_ENABLE

@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
  * Handle the Garmin simple text format supported by some Garmins.
- * Tested with the Garmin eTrex Legend.
+ * Tested with the 'Garmin eTrex Legend' device working in 'Text Out' mode.
  *
  * Protocol info from:
  *	 http://gpsd.berlios.de/vendor-docs/garmin/garmin_simpletext.txt
@@ -84,7 +84,7 @@ o | ----------------------- ------- ------------------------
 c | North/South velocity    4       Meters per second in tenths,
 i |     magnitude                   ("1234" = 123.4 m/s)
 t | ----------------------- ------- ------------------------
-y | Vertical velocity       1       'U' (up) or 'D' (down)
+y | Vertical velocity       1       'U' or 'D' (up/down)
   |     direction
   | ----------------------- ------- ------------------------
   | Vertical velocity       4       Meters per second in hundredths,
@@ -157,8 +157,8 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
     char buf[10];
     float sign = 1.0;
     int preflen = (int)strlen(prefix);
-    int offset = 1;    /* assume one character prefix (E,W,S,N,U, D, etc) */
-    int intresult;
+    int offset = 1;    /* assume one character prefix (E,W,S,N,U,D, etc) */
+    long int intresult;
 
     /* splint is buggy here, thinks buf can be a null pointer */
     /*@ -mustdefine -nullderef -nullpass @*/
@@ -169,7 +169,7 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
 
     bzero(buf, (int)sizeof(buf));
     (void) strncpy(buf, data, length);
-    gpsd_report(LOG_RAW, "Decoded string: %s\n", buf);
+    gpsd_report(LOG_RAW+2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
         /* value is not valid, ignore it */
@@ -206,8 +206,8 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
     }
     /*@ +mustdefine +nullderef +nullpass @*/
 
-    intresult = atoi(buf+offset);
-    if (intresult == 0) sign = 0.0; /*  don't create negatove zero */
+    intresult = atol(buf+offset);
+    if (intresult == 0L) sign = 0.0; /*  don't create negative zero */
 
     *result = (double) intresult / dividor * sign;
    
@@ -219,10 +219,10 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
  *       -1: data error
  *       -2: data not valid
 **************************************************************************/
-static int gar_int_decode(const char *data, const size_t length, const int min, const int max, /*@out@*/int *result)
+static int gar_int_decode(const char *data, const size_t length, const unsigned int min, const unsigned int max, /*@out@*/unsigned int *result)
 {
-    char buf[3];
-    int res;
+    char buf[6];
+    unsigned int res;
 
     /*@ -mustdefine @*/
     if (length >= sizeof(buf)) {
@@ -232,7 +232,7 @@ static int gar_int_decode(const char *data, const size_t length, const int min, 
 
     bzero(buf, (int)sizeof(buf));
     (void) strncpy(buf, data, length);
-    gpsd_report(LOG_RAW, "Decoded string: %s\n", buf);
+    gpsd_report(LOG_RAW+2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
         /* value is not valid, ignore it */
@@ -250,7 +250,7 @@ static int gar_int_decode(const char *data, const size_t length, const int min, 
        *result = res;
        return 0; /* SUCCESS */
    } else {
-        gpsd_report(LOG_WARN, "Value %d out of range <%d, %d>\n", res, min, max);
+        gpsd_report(LOG_WARN, "Value %u out of range <%u, %u>\n", res, min, max);
         return -1;
    }
    /*@ +mustdefine +nullpass @*/
@@ -275,18 +275,20 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
 	gpsd_hexdump_wrapper(session->packet.outbuffer,
 	    session->packet.outbuflen, LOG_RAW));
 
-    if (session->packet.outbuflen < 56) {
-        gpsd_report(LOG_WARN, "Message too short, rejected.\n");
+    if (session->packet.outbuflen < 54) {
+        /* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
+        gpsd_report(LOG_WARN, "Message is too short, rejected.\n");
         return ONLINE_SET;	
     }
     
     session->packet.type=GARMINTXT_PACKET;
-    strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);  /* TAG mesage as GTXT, Garmin Simple Text Message; any better idea? */
+    /* TAG message as GTXT, Garmin Simple Text Message */
+    strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);  
 
     mask |= CYCLE_START_SET;  /* only one message, set cycle start */
 
     do {
-        int result;
+        unsigned int result;
         char *buf = (char *)session->packet.outbuffer+1;
         gpsd_report(LOG_PROG, "Timestamp: %.12s\n", buf);
 
@@ -306,62 +308,79 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         if (0 != gar_int_decode(buf+8, 2, 0, 59, &result)) break;
         session->driver.nmea.date.tm_min = result;
         /* second */
-        if (0 != gar_int_decode(buf+10, 2, 0, 59, &result)) break;
+        /* second value can be even 60, occasional leap second */
+        if (0 != gar_int_decode(buf+10, 2, 0, 60, &result)) break; 
         session->driver.nmea.date.tm_sec = result;
         session->driver.nmea.subseconds = 0;
         session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
         mask |= TIME_SET;
     } while (0);
 
+    /* assume that possition is unknown; if the position is known we will fix status information later */
+    session->gpsdata.fix.mode = MODE_NO_FIX;
+    session->gpsdata.status = STATUS_NO_FIX;
+    mask |= MODE_SET | STATUS_SET;
 
     /* process position */
 
     do {
         double lat, lon;
+        unsigned int degfrag;
+        char status;
 
         /* Latitude, [NS]ddmmmmm */
-        if (0 != gar_decode((char *) session->packet.outbuffer+13, 8, "NS", 100000.0, &lat)) break;
-        /* Longitude, [EW]dddmmmmm */
-        if (0 != gar_decode((char *) session->packet.outbuffer+21, 9, "EW", 100000.0, &lon)) break;
+        /* decode degrees of Latitude */
+        if (0 != gar_decode((char *) session->packet.outbuffer+13, 3, "NS", 1.0, &lat)) break;
+        /* decode minutes of Latitude */
+        if (0 != gar_int_decode((char *) session->packet.outbuffer+16, 5, 0, 99999, &degfrag)) break;
+        lat += degfrag * 100.0 / 60.0 / 100000.0;
         session->gpsdata.fix.latitude = lat;
+
+        /* Longitude, [EW]dddmmmmm */
+        /* decode degrees of Longitude */
+        if (0 != gar_decode((char *) session->packet.outbuffer+21, 4, "EW", 1.0, &lon)) break;
+        /* decode minutes of Longitude */
+        if (0 != gar_int_decode((char *) session->packet.outbuffer+25, 5, 0, 99999, &degfrag)) break;
+        lon += degfrag * 100.0 / 60.0 / 100000.0;
         session->gpsdata.fix.longitude = lon;
+
         gpsd_report(LOG_PROG, "Lat: %.5lf, Lon: %.5lf\n", lat, lon);
-        mask |= LATLON_SET;
-    } while (0);
 
     /* fix mode, GPS status, [gGdDS_] */
-    do {
-       char status = (char)session->packet.outbuffer[30];
-       gpsd_report(LOG_PROG, "GPS fix mode: %c\n", status);
+        status = (char)session->packet.outbuffer[30];
+        gpsd_report(LOG_PROG, "GPS fix mode: %c\n", status);
 
         switch (status) {
-        case 'D':
         case 'G':
-        case 'S':  /* DEMO mode, assume 3D position */
+        case 'S':  /* 'S' is DEMO mode, assume 3D position */
             session->gpsdata.fix.mode = MODE_3D;
             session->gpsdata.status = STATUS_FIX;
-            if (status == 'D') session->gpsdata.status = STATUS_DGPS_FIX;
             break;
-        case 'd':
+        case 'D':
+            session->gpsdata.fix.mode = MODE_3D;
+            session->gpsdata.status = STATUS_DGPS_FIX;
+            break;
         case 'g':
             session->gpsdata.fix.mode = MODE_2D;
             session->gpsdata.status = STATUS_FIX;
-            if (status == 'd') session->gpsdata.status = STATUS_DGPS_FIX;
+            break;
+        case 'd':
+            session->gpsdata.fix.mode = MODE_2D;
+            session->gpsdata.status = STATUS_DGPS_FIX;
             break;
         default:
             session->gpsdata.fix.mode = MODE_NO_FIX;
             session->gpsdata.status = STATUS_NO_FIX;
         }
-        mask |= MODE_SET | STATUS_SET;
+        mask |= MODE_SET | STATUS_SET | LATLON_SET;
     } while (0);
 
     /* EPH */
     do {
         double eph;
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
-        eph = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
-        session->gpsdata.fix.eph = eph;
-        gpsd_report(LOG_PROG, "HERR: %.1lf\n", eph);
+        session->gpsdata.fix.eph = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+        gpsd_report(LOG_PROG, "HERR [m]: %.1lf\n", eph);
         mask |= HERR_SET;
     } while (0);
 
