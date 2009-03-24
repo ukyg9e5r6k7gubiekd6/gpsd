@@ -19,17 +19,18 @@ needed_files = ['gpsd.h', 'packet_names.h', 'gpsfake.1', 'gpsprof.1']
 created_files = []
 
 if not 'clean' in sys.argv:
-    abs_builddir = os.environ["abs_builddir"] if "abs_builddir" in os.environ else ""
+    abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
     if not os.path.exists(os.path.join(abs_builddir, 'gpsd_config.h')):
         sys.stderr.write('\nPlease run configure first!\n')
         sys.exit(1)
 
-    cdcmd = ("cd '" + abs_builddir + "' && ") if abs_builddir else ""
+    cdcmd = abs_builddir and ("cd '" + abs_builddir + "' && ") or ""
+    MAKE = ("MAKE" in os.environ) and os.environ["MAKE"] or "make"
     for f_name in needed_files:
         # TODO:  Shouldn't make be run unconditionally in case a
         # dependency of f_name has been updated?
         if not os.path.exists(os.path.join(abs_builddir, f_name)):
-            cmd = cdcmd + "make '" + f_name + "'"
+            cmd = cdcmd + MAKE + " '" + f_name + "'"
             print cmd
             make_out = os.popen(cmd)
             print make_out.read()
