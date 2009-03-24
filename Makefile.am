@@ -190,8 +190,16 @@ if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
 noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
 
-gpspacket.so gpslib.so: gpspacket.c gpslib.c libgps.la
-	(pwd="`pwd`"; cd $(srcdir) && $(PYTHON) setup.py build_ext --build-lib "$$pwd" --build-temp "$$pwd/build" --include-dirs "$$pwd")
+# TODO:  Should the dependency on libgps.la be enforced inside
+# setup.py?  (See the variable 'needed_files' in setup.py.)
+gpspacket.so gpslib.so: gpspacket.c gpslib.c libgps.la setup.py
+	cd '$(srcdir)' && \
+	env abs_builddir='$(abs_builddir)' \
+	    MAKE='$(MAKE)' \
+		$(PYTHON) setup.py build_ext \
+			--build-lib '$(abs_builddir)' \
+			--build-temp '$(abs_builddir)/build' \
+			--include-dirs '$(abs_builddir):.'
 endif
 # Clean up after Python
 clean-local:
@@ -309,6 +317,7 @@ EXTRA_DIST = \
 	libgpsmm.xml \
 	gpsprof.xml \
 	gpsfake.xml \
+	gpscat.xml \
 	gpsctl.xml \
 	gpsmon.xml \
 	gpspipe.xml \
@@ -335,8 +344,15 @@ EXTRA_DIST = \
 	libgps.pc.in \
 	libgpsd.pc.in \
 	gpscap.ini \
-	contrib/* \
-	packaging/*
+	packaging/etc_default_gpsd \
+	packaging/etc_init.d_gpsd \
+	packaging/etc_init.d_gpsd_rpm
+
+dist-hook:
+	$(MKDIR_P) '$(distdir)/contrib' && \
+	cp -p '$(srcdir)/contrib/'* '$(distdir)/contrib'
+distclean-local:
+	rm -rf '$(distdir)/contrib'
 
 CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
