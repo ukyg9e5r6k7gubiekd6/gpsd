@@ -107,4 +107,4 @@ aclocal \
   && autoconf --force \
   && echo Now running configure to configure gpsd \
   && echo "./configure $@" \
-  && ./configure $@
+  && ./configure "$@"

@@ -5,6 +5,27 @@ dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
 
+# ACREQUIRE_BUGFIX
+# ----------------
+# Due to a longstanding Autoconf bug (Autoconf 2.50 to at least 2.63),
+# any macro that is AC_REQUIREd at any point must be AC_REQUIREd
+# *before* it is directly expanded.  The macros below were being
+# directly expanded before being AC_REQUIREd, so we AC_REQUIRE them
+# early to prevent out-of-order expansion problems.  See the threads
+# at:
+# http://lists.gnu.org/archive/html/bug-autoconf/2008-12/msg00039.html
+# http://lists.gnu.org/archive/html/autoconf-patches/2008-12/msg00058.html
+# http://lists.gnu.org/archive/html/bug-autoconf/2009-01/msg00019.html
+# http://lists.gnu.org/archive/html/bug-gnulib/2009-01/msg00247.html
+AC_DEFUN_ONCE([ACREQUIRE_BUGFIX],
+[
+  AC_REQUIRE([AC_PROG_CPP])
+  AC_REQUIRE([AC_PROG_EGREP])
+  AC_REQUIRE([AC_PROG_CC])
+])
+ACREQUIRE_BUGFIX
+# ACREQUIRE_BUGFIX done
+
 AC_ARG_ENABLE(python,
   AC_HELP_STRING([--disable-python],
 		 [disable python scripts and library bindings]),
