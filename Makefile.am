@@ -22,19 +22,22 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
 
+RTCM104PAGES_DIST = gpsdecode.1
 if HAVE_RTCM104V2
 RTCM104PROGS = gpsdecode
-RTCM104PAGES = gpsdecode.1
+RTCM104PAGES = $(RTCM104PAGES_DIST)
 endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = test_bits test_gpsmm test_packet test_mkgmtime test_geoid
+
+PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py gpscap.py
 nodist_python_PYTHON = gpspacket.so gpslib.so
-PYTHONPAGES = gpsprof.1 gpsfake.1 gpscat.1
+PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
 
 #
@@ -224,31 +227,39 @@ test_geoid_LDADD = $(LIBC) libgps.la -lm
 test_mkgmtime_SOURCES = test_mkgmtime.c
 test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
 
-if HAVE_XSLT_PROCESSOR
-#
-# Create Manpages
-#
-BUILT_MANPAGES = \
+MANPAGES_BASE = \
 	gpsd.8 \
 	gps.1 \
 	xgps.1 \
 	xgpsspeed.1 \
 	cgps.1 \
+	lcdgps.1 \
 	cgpxlogger.1 \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
 	gpsmon.1 \
-	$(RTCM104PAGES) \
-	$(PYTHONPAGES) \
 	gpsctl.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
 
+MANPAGES_DIST = \
+	$(MANPAGES_BASE) \
+	$(RTCM104PAGES_DIST) \
+	$(PYTHONPAGES_DIST)
+
 man_MANS = \
-	$(BUILT_MANPAGES)
+	$(MANPAGES_BASE) \
+	$(RTCM104PAGES) \
+	$(PYTHONPAGES)
+
+if HAVE_XSLT_PROCESSOR
+#
+# Create Manpages
+#
+BUILT_MANPAGES = $(MANPAGES_DIST)
 
 .xml.1:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
@@ -262,35 +273,13 @@ man_MANS = \
 .xml.8:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
-gpsd.8: gpsd.xml
+xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: gps.xml
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
-gps.1 xgps.1 xgpsspeed.1 cgps.1 cgpxlogger.1: gps.xml
-
-libgps.3: libgps.xml
-
-libgpsmm.3: libgpsmm.xml
-
-libgpsd.3: libgpsd.xml
-
-gpsctl.1: gpsctl.xml
-
+# TODO:  Is this a typo?  Shouldn't gpscat.1 only depend on
+# gpscat.xml?  If so, this line can be deleted (the dependency will be
+# enforced by the suffix rule above).
 gpscat.1: gpsctl.xml
-
-gpsprof.1: gpsprof.xml
-
-gpsfake.1: gpsfake.xml
-
-gpsmon.1: gpsmon.xml
-
-gpspipe.1: gpspipe.xml
-
-gpsdecode.1: gpsdecode.xml
-
-rtcm-104.5: rtcm-104.xml
-
-srec.5: srec.xml
-
-gpsflash.1: gpsflash.xml
 
 endif
 
@@ -327,7 +316,7 @@ EXTRA_DIST = \
 	rtcm-104.xml \
 	srec.xml \
 	gpsflash.xml \
-	$(man_MANS) \
+	$(MANPAGES_DIST) \
 	xgps.ad \
 	xgpsspeed.ad \
 	gpsd.rules \
