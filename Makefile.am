@@ -496,7 +496,7 @@ time-regress: test_mkgmtime
 
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
-	@echo "Testing the clent sentence unpacker..."
+	@echo "Testing the client-library sentence decoder..."
 	@$(srcdir)/libgps -u >test/test.chk
 	@diff -u test/unpack.chk test/test.chk
 
