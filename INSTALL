@@ -2,9 +2,11 @@ Here are the steps for installing gpsd and verifying its performance:
 
 0. The only prerequisites you will absolutely need to build the suite
 are C and C++ compilers: C for the gpsd daemon itself and its client C
-library, C++ for the C++ client-library wrapper.  Having the following
-optional components on your system will enable various additional
-capabilities and extensions:
+library, C++ for the C++ client-library wrapper.  You will also
+need autotools; automake 1.10 or later and autoconf 2.61 or later
+
+Having the following optional components on your system will enable
+various additional capabilities and extensions:
 
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
@@ -83,7 +85,7 @@ need to do "./autogen.sh --x-includes=/usr/X11R6/include"
 Note: if you are going to use the RTCM-104 support, you should compile
 with gcc4; if you don't have it installed as your default 
 compiler, do this by specifying CC=gcc4 before the autogen.sh
-command.  The rtcm.c file confuses the gcc-3.4.[23] optimizer
+command.  The rtcm2.c file confuses the gcc-3.4.[23] optimizer
 at -O2 level, making it generate incorrect code.
 
 Then run make: libgps.so, gpsd, xgps, and xgpsspeed will be
