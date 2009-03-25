@@ -44,11 +44,12 @@ Bluetooth and <code>gpsd</code>
 
 <div id="Content">
 
-<p>Bluetooth connections work with gpsd by leveraging rfcomm.  Rfcomm
-provides a serial port interface to a BT device and has been designed
-to allow for automated connect/disconnect operations over bluetooth.
-The steps below will allow you to use your BT GPS device automatically
-whenever it is powered on and gpsd is running.</p>
+<p>Bluetooth connections work with <code>gpsd</code> by leveraging the
+rfcomm serial port emulation.  Rfcomm provides a serial port interface
+to a BT device and has been designed to allow for automated
+connect/disconnect operations over Bluetooth.  The steps below will
+allow you to use your BT GPS device automatically whenever it is
+powered on and gpsd is running.</p>
 
 <p>Note that you must be logged in as root for most of these steps.</p>
 
@@ -58,7 +59,7 @@ whenever it is powered on and gpsd is running.</p>
 <img src="bt.png"> on your status bar) you can probably skip these steps.</p>
 
 <ol>
-<li><p>First, the Bluez protcol stack must be installed.  All the
+<li><p>First, the Bluez protocol stack must be installed.  All the
 documentation can be found on <a
 href='http://bluez.sourceforge.net/'>http://bluez.sourceforge.net/</a>.</p></li>
 <li><p>Install bluetooth for your device with the "rfcomm" module to
@@ -164,10 +165,11 @@ a symlink to the gpsd init.d script to a later runlevel.</p></li>
 </pre>
 </ul>
 
-<p>Contributors:</p>
+<h2>Contributors:</h2>
 <ul>
 <li><p>Jean-Michel Bouffard</p></li>
 <li><p>Joshua Layne</p></li>
+<li><p>Lukasz Stelmach</p></li>
 </ul>
 
 </div>
