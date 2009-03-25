@@ -145,9 +145,7 @@ control commands supported by that driver.</para>
 whatever GPS is associated with it. It is thought that some GPSes
 go to a standby mode (drawing less power) before the host machine
 asserts DTR, so waiting for the first actual request might save
-battery power on portable equipment. This option is deprecated as
-it was found to be confusing; gpsd will now always remain connected
-to the configured receivers.</para>
+battery power on portable equipment.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
