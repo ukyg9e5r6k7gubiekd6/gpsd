@@ -50,7 +50,13 @@ to allow for automated connect/disconnect operations over bluetooth.
 The steps below will allow you to use your BT GPS device automatically
 whenever it is powered on and gpsd is running.</p>
 
-<p>Note that you must be logged in as root for most of these steps.
+<p>Note that you must be logged in as root for most of these steps.</p>
+
+<h2>Installation</h2>
+
+<p>If your system comes with Bluetooth tools preinstalled (look for
+<img src="bt.png"> on your status bar) you can probably skip these steps.</p>
+
 <ol>
 <li><p>First, the Bluez protcol stack must be installed.  All the
 documentation can be found on <a
@@ -69,7 +75,11 @@ allow for serial port emulation.</p></li>
 
 <li><p>If the modules have loaded successfully, type "hciconfig" and you 
 should see your BT interface listed under the "hci0" name.</p></li>
+</ol>
 
+<h2>Configuration</h2>
+
+<ol>
 <li><p>Turn on your BT GPS device and scan for remote BT devices:</li>
 <pre>
 	# hciconfig hci0 up
@@ -143,7 +153,7 @@ listening to /dev/rfcomm0</p>
 <p>At this point, your system should be configured to use gpsd with
 your BT GPS device!</p>
 
-<p>Known Issues:</p>
+<h2>Known Issues:</h2>
 <ul>
 <li><p>On system startup, gpsd starts before rfcomm0 is bound by rfcomm
 and fails (at least on some systems) - a workaround for this is to add
