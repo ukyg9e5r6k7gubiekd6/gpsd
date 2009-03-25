@@ -269,7 +269,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %d\n",
+    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %zd\n",
 	session->packet.outbuflen);
     gpsd_report(LOG_RAW, "%s\n",
 	gpsd_hexdump_wrapper(session->packet.outbuffer,
