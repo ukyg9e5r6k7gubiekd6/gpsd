@@ -2,6 +2,22 @@
 # $Id$
 
 CLEANFILES =
+
+# For a detailed explanation of what this ugly code is doing, see
+# http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
+MULTIOUT_RECOVER_DELETED = \
+	if test -f '$@'; then :; else \
+	  trap "rm -rf '$$WITNESS.lock' '$$WITNESS'" HUP INT PIPE TERM; \
+	  if mkdir "$$WITNESS.lock" 2>/dev/null; then \
+	    rm -f "$$WITNESS"; \
+	    $(MAKE) $(AM_MAKEFLAGS) "$$WITNESS"; \
+	    result=$$?; rm -rf "$$WITNESS.lock"; exit $$result; \
+	  else \
+	    while test -d "$$WITNESS.lock"; do sleep 1; done; \
+	    test -f "$$WITNESS"; \
+	  fi; \
+	fi
+
 #SUBDIRS = contrib
 
 XMLTO = xmlto
@@ -191,20 +207,10 @@ if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
 noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
 
-# For a detailed explanation of what this ugly code is doing, see
+# Multiple-outputs hack.  See
 # http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
 $(PYEXTENSIONS): stamp-python-modules
-	@if test -f '$@'; then :; else \
-	  trap 'rm -rf stamp-python-modules.lock stamp-python-modules' HUP INT PIPE TERM; \
-	  if mkdir stamp-python-modules.lock 2>/dev/null; then \
-	    rm -f stamp-python-modules; \
-	    $(MAKE) $(AM_MAKEFLAGS) stamp-python-modules; \
-	    result=$$?; rm -rf stamp-python-modules.lock; exit $$result; \
-	  else \
-	    while test -d stamp-python-modules.lock; do sleep 1; done; \
-	    test -f stamp-python-modules; \
-	  fi; \
-	fi
+	+@WITNESS=stamp-python-modules; $(MULTIOUT_RECOVER_DELETED)
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
 stamp-python-modules: gpspacket.c gpslib.c libgps.la setup.py
@@ -302,22 +308,12 @@ BUILT_MANPAGES = $(MANPAGES_DIST)
 
 # Another instance of the multiple-outputs hack.
 gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: stamp-gps-manpages
-	@if test -f '$@'; then :; else \
-	  trap 'rm -rf stamp-gps-manpages.lock stamp-gps-manpages' HUP INT PIPE TERM; \
-	  if mkdir stamp-gps-manpages.lock 2>/dev/null; then \
-	    rm -f stamp-gps-manpages; \
-	    $(MAKE) $(AM_MAKEFLAGS) stamp-gps-manpages; \
-	    result=$$?; rm -rf stamp-gps-manpages.lock; exit $$result; \
-	  else \
-	    while test -d stamp-gps-manpages.lock; do sleep 1; done; \
-	    test -f stamp-gps-manpages; \
-	  fi; \
-	fi
+	+@WITNESS=stamp-gps-manpages; $(MULTIOUT_RECOVER_DELETED)
 stamp-gps-manpages: gps.xml
-	rm -f '$@' '$@.tmp'
-	echo 'timestamp for $@' > '$@.tmp'
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
-	mv -f '$@.tmp' '$@'
+	@rm -f '$@' '$@.tmp'
+	@echo 'timestamp for $@' > '$@.tmp'
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) '$(srcdir)/gps.xml'
+	@mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
