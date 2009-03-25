@@ -533,6 +533,7 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
     return NULL;
 }
 
+/*@ -nullret @*/
 /*@ -statictrans @*/
 static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 /* open and initialize a new channel block */
@@ -587,13 +588,16 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 	for (chp = channels; chp < channels + MAXDEVICES; chp++)
 	    if (!allocated_channel(chp)) {
 		(void)strlcpy(chp->gpsdata.gps_device, device_name, PATH_MAX);
+		/*@ -mustfreeonly @*/
 		chp->context = NULL;
+		/*@ +mustfreeonly @*/
 		return chp;
 	    }
 	return NULL;
     }
 }
 
+/*@ +nullret @*/
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
@@ -613,8 +617,8 @@ static bool allocation_filter(struct gps_device_t *channel,
     }
 
     gpsd_report(LOG_PROG, 
-		"User requires %d, channel %ld type is %d\n", 
-		user->requires, (long)(channel - channels), channel->packet.type);
+		"User requires %d, channel %d type is %d\n", 
+		user->requires, (int)(channel - channels), channel->packet.type);
     /* we might have type constraints */
     if (user->requires == ANY)
 	return true;
@@ -1979,7 +1983,7 @@ int main(int argc, char *argv[])
 			if (!device_needed && channel->gpsdata.gps_fd > -1) {
 			    if (channel->releasetime == 0) {
 				channel->releasetime = timestamp();
-				gpsd_report(LOG_PROG, "channel %ld released\n", channel-channels);
+				gpsd_report(LOG_PROG, "channel %d released\n", (int)(channel-channels));
 			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
 				gpsd_report(LOG_PROG, "channel %ld closed\n", channel-channels);
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
