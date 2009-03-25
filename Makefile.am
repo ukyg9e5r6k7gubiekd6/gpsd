@@ -1,6 +1,7 @@
 # Automake description for gpsd
 # $Id$
 
+CLEANFILES =
 #SUBDIRS = contrib
 
 XMLTO = xmlto
@@ -190,9 +191,25 @@ if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
 noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
 
+# For a detailed explanation of what this ugly code is doing, see
+# http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
+$(PYEXTENSIONS): stamp-python-modules
+	@if test -f '$@'; then :; else \
+	  trap 'rm -rf stamp-python-modules.lock stamp-python-modules' HUP INT PIPE TERM; \
+	  if mkdir stamp-python-modules.lock 2>/dev/null; then \
+	    rm -f stamp-python-modules; \
+	    $(MAKE) $(AM_MAKEFLAGS) stamp-python-modules; \
+	    result=$$?; rm -rf stamp-python-modules.lock; exit $$result; \
+	  else \
+	    while test -d stamp-python-modules.lock; do sleep 1; done; \
+	    test -f stamp-python-modules; \
+	  fi; \
+	fi
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
-gpspacket.so gpslib.so: gpspacket.c gpslib.c libgps.la setup.py
+stamp-python-modules: gpspacket.c gpslib.c libgps.la setup.py
+	@rm -f '$@' '$@.tmp'
+	@echo 'timestamp for $@' > '$@.tmp'
 	cd '$(srcdir)' && \
 	env abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
@@ -200,6 +217,8 @@ gpspacket.so gpslib.so: gpspacket.c gpslib.c libgps.la setup.py
 			--build-lib '$(abs_builddir)' \
 			--build-temp '$(abs_builddir)/build' \
 			--include-dirs '$(abs_builddir):.'
+	@mv -f '$@.tmp' '$@'
+CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 endif
 # Clean up after Python
 clean-local:
@@ -281,14 +300,25 @@ BUILT_MANPAGES = $(MANPAGES_DIST)
 .xml.8:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
-xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: gps.xml
+# Another instance of the multiple-outputs hack.
+gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: stamp-gps-manpages
+	@if test -f '$@'; then :; else \
+	  trap 'rm -rf stamp-gps-manpages.lock stamp-gps-manpages' HUP INT PIPE TERM; \
+	  if mkdir stamp-gps-manpages.lock 2>/dev/null; then \
+	    rm -f stamp-gps-manpages; \
+	    $(MAKE) $(AM_MAKEFLAGS) stamp-gps-manpages; \
+	    result=$$?; rm -rf stamp-gps-manpages.lock; exit $$result; \
+	  else \
+	    while test -d stamp-gps-manpages.lock; do sleep 1; done; \
+	    test -f stamp-gps-manpages; \
+	  fi; \
+	fi
+stamp-gps-manpages: gps.xml
+	rm -f '$@' '$@.tmp'
+	echo 'timestamp for $@' > '$@.tmp'
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
-
-# TODO:  Is this a typo?  Shouldn't gpscat.1 only depend on
-# gpscat.xml?  If so, this line can be deleted (the dependency will be
-# enforced by the suffix rule above).
-gpscat.1: gpsctl.xml
-
+	mv -f '$@.tmp' '$@'
+CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
 noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
@@ -354,7 +384,7 @@ dist-hook:
 distclean-local:
 	rm -rf '$(distdir)/contrib'
 
-CLEANFILES = $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
+CLEANFILES += $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
