@@ -350,9 +350,9 @@ static int filesock(char *filename)
  */
 
 static struct gps_device_t channels[MAXDEVICES];
-#define allocated_channel(chp)	((chp)->gpsdata.gps_device[0] != '\0')
-#define free_channel(chp)	(chp)->gpsdata.gps_device[0] = '\0'
-#define syncing(chp)	(chp->gpsdata.gps_fd>-1&& chp->packet_type==BAD_PACKET)
+#define allocated_channel(chp)	 ((chp)->gpsdata.gps_device[0] != '\0')
+#define free_channel(chp)	 (chp)->gpsdata.gps_device[0] = '\0'
+#define initialized_channel(chp) ((chp)->context != NULL)
 
 static struct subscriber_t {
     int fd;			/* client file descriptor. -1 if unused */
@@ -552,7 +552,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 
     /* normal case: set up GPS service */
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (!allocated_channel(chp)){
+	if (!allocated_channel(chp) || (strcmp(chp->gpsdata.gps_device, device_name)==0 && !initialized_channel(chp))){
 	    goto found;
 	}
     return NULL;
@@ -572,6 +572,28 @@ found:
     adjust_max_fd(chp->gpsdata.gps_fd, true);
     return chp;
 }
+
+static /*@null@*/ struct gps_device_t *add_device(char *device_name)
+/* add a device to the pool; open it right away if in nowait mode */
+{
+    if (nowait)
+	return open_device(device_name);
+    else {
+	struct gps_device_t *chp;
+	/* 
+	 * Stash the devicename away for probing when the first client connects.
+	 * Zero the context pointer so we know gpsd_init() hasn't been called.
+	 */
+	for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	    if (!allocated_channel(chp)) {
+		(void)strlcpy(chp->gpsdata.gps_device, device_name, PATH_MAX);
+		chp->context = NULL;
+		return chp;
+	    }
+	return NULL;
+    }
+}
+
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
@@ -579,6 +601,17 @@ static bool allocation_filter(struct gps_device_t *channel,
 			      struct subscriber_t *user)
 /* does specified channel match the user's type criteria? */
 {
+    /*
+     * Might be we don't know the device type attached to this yet.
+     * If we don't, open it and sniff packets until we do. 
+     */
+    if (allocated_channel(channel) && !initialized_channel(channel)) {
+	if (open_device(channel->gpsdata.gps_device) == NULL) {
+	    free_channel(channel);
+	    return false;
+	}
+    }
+
     gpsd_report(LOG_PROG, 
 		"User requires %d, channel %ld type is %d\n", 
 		user->requires, (long)(channel - channels), channel->packet.type);
@@ -1312,7 +1345,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF,"<= control(%d): adding %s \n", sfd, stash);
-	    if (open_device(stash))
+	    if (add_device(stash))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -1611,7 +1644,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) {
-	struct gps_device_t *device = open_device(argv[i]);
+	struct gps_device_t *device = add_device(argv[i]);
 	if (!device) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
