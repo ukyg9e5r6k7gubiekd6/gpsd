@@ -1,19 +1,7 @@
 /* 
  * Driver for AIS/AIVDM messages.
  *
- * The relevant standard is "ITU Recommendation M.1371":
- * <http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en.
- * Alas, the distribution terms are evil.
- *
- * Also see "IALA Technical Clarifications on Recommendation ITU-R
- * M.1371-1", at 
- * <http://www.navcen.uscg.gov/enav/ais/ITU-R_M1371-1_IALA_Tech_Note1.3.pdf>
- *
- * The page http://www.bosunsmate.org/ais/ reveals part of what's going on.
- *
- * There's a sentence decoder we can test with at http://rl.se/aivdm
- *
- * Open-source code at http://sourceforge.net/projects/gnuais
+ * See the file AIVDM.txt on the GPSD website for documentation and references.
  */
 #include <sys/types.h>
 #include <stdio.h>
