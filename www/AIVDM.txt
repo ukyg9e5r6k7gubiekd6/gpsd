@@ -669,8 +669,8 @@ Identification System]
 - [[[ITU-MID]]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
   of Maritime Identification Digits]
 
-- >[[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
-   Integrity Monitoring]
+- [[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
+  Integrity Monitoring]
 
 == Change history ==
 
