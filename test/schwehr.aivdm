@@ -127,6 +127,31 @@
 #       dte:              0
 #       Spare:            0
 #
+# DOES NOT PASS yet -- some grief with the data offset.
+# Text decode for this one came from regrouping the binary data dump from Kurt's
+# ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
+# data block.
+#!AIVDM,1,1,,B,6B?n;be:cbapalgc;i6?Ow4,2*4A
+#       MessageID:        6
+#	RepeatIndicator:  1
+#	UserID:           150834090
+#	SeqNum:           3
+#	DestinationID:    313240222
+#	RetransmitFlag:   False
+#	Spare:            0
+#       ApplicationID:    42827
+#	Data:             50:3acbc463dffc4
+#
+# Text decode for this one came from regrouping the binary data dump from Kurt's
+# ais_msg_8.py on one of his test sentences.  It's unknown what's in the binary
+# data block.
+!AIVDM,1,1,,A,85Mwp`1Kf3aCnsNvBWLi=wQuNhA5t43N`5nCuI=p<IBfVqnMgPGs,0*47
+#       MessageID:          8
+#	RepeatIndicator:    0
+#       UserID:             366999712
+#       ApplicationID:      23480
+#       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
+#
 # This sentence is slightly malformed -- extra data at the end.
 !AIVDM,1,1,,B,9wsh:3?h>TdcWHftni=J0d5fs?8WT852,5*74
 #       MessageID:           9
@@ -146,6 +171,7 @@
 #       state_syncstate:     2
 #       state_slottimeout:   3
 #       state_slotoffset:    12839
+#
 !AIVDM,1,1,,A,B52K>;h00Fc>jpUlNV@ikwpUoP06,0*4C
 #       MessageID:          18
 #       RepeatIndicator:    0

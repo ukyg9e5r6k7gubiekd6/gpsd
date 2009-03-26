@@ -216,7 +216,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    break;
         case 6: /* Addressed Binary Message */
 	    ais->type6.seqno          = UBITS(38, 2);
-	    ais->type6.dest_mmsi      = UBITS(40, 69);
+	    ais->type6.dest_mmsi      = UBITS(40, 30);
 	    ais->type6.retransmit     = (bool)UBITS(70, 1);
 	    ais->type6.spare          = UBITS(71, 1);
 	    ais->type6.application_id = UBITS(72, 16);
@@ -262,7 +262,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    break;
         case 12: /* Safety Related Message */
 	    ais->type12.seqno          = UBITS(38, 2);
-	    ais->type12.dest_mmsi      = UBITS(40, 69);
+	    ais->type12.dest_mmsi      = UBITS(40, 30);
 	    ais->type12.retransmit     = (bool)UBITS(70, 1);
 	    ais->type12.spare          = UBITS(71, 1);
 	    from_sixbit((char *)ais_context->bits, 
