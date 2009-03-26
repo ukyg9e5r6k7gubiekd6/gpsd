@@ -47,7 +47,7 @@ endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = test_bits test_gpsmm test_packet test_mkgmtime test_geoid
+check_PROGRAMS = test_float test_bits test_gpsmm test_packet test_mkgmtime test_geoid
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
@@ -230,6 +230,14 @@ endif
 clean-local:
 	rm -rf build
 
+TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid test_mkgmtime
+
+#
+# Build test_float
+#
+test_float_SOURCES = test_float.c
+test_float_LDADD = $(LIBC) libgps.la -lm
+
 #
 # Build test_gpsmm
 #
@@ -380,7 +388,7 @@ dist-hook:
 distclean-local:
 	rm -rf '$(distdir)/contrib'
 
-CLEANFILES += $(BUILT_SOURCES) test_float *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
+CLEANFILES += $(BUILT_SOURCES) $(TESTBINS) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
@@ -526,10 +534,14 @@ unpack-regress: libgps
 	@$(srcdir)/libgps -u >test/test.chk
 	@diff -u test/unpack.chk test/test.chk
 
-# Build the regressiuin test for the sentence unpacker
+# Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
 	@echo "Rebuilding the clent sentence-unpacker test..."
 	@$(srcdir)/libgps -u >test/unpack.chk
+
+# Unit-test the bitfield extractor - not in normal tests
+bits-regress: test_bits
+	test_bits
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress aivdm-regress packet-regress undump-regress time-regress unpack-regress
