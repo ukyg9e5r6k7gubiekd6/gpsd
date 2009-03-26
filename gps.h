@@ -525,6 +525,25 @@ struct ais_t
 	    uint dte;			/* data terminal enable */
 	    uint spare;			/* spare bits */
 	} type5;
+	/* Type 6 - Addressed Binary Message */
+	struct {
+	    uint seqno;			/* sequence number */
+	    uint dest_mmsi;		/* destination MMSI */
+	    bool retransmit;		/* retransmit flag */
+	    uint spare;			/* spare bit(s) */
+	    uint application_id;	/* Application ID */
+#define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
+	    uint bitcount;		/* bit count of the data */
+	    char bitdata[AIS_TYPE6_BINARY_MAX / 8];
+	} type6;
+	/* Type 8 - Broadcast Binary Message */
+	struct {
+	    uint spare;			/* spare bit(s) */
+	    uint application_id;	/* Application ID */
+#define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
+	    uint bitcount;		/* bit count of the data */
+	    char bitdata[AIS_TYPE8_BINARY_MAX / 8];
+	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
 	struct {
 	    uint altitude;		/* altitude in meters */
@@ -543,7 +562,22 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type9;
-	/* Type 18 -  */
+	/* Type 12 - Safety-Related Message */
+	struct {
+	    uint seqno;			/* sequence number */
+	    uint dest_mmsi;		/* destination MMSI */
+	    bool retransmit;		/* retransmit flag */
+	    uint spare;			/* spare bit(s) */
+#define AIS_TYPE12_TEXT_MAX	157	/* 936 bits of six-bit, plus NUL */
+	    char text[AIS_TYPE12_TEXT_MAX];
+	} type12;
+	/* Type 14 - Safety-Related Broadcast Message */
+	struct {
+	    uint spare;			/* spare bit(s) */
+#define AIS_TYPE14_TEXT_MAX	161	/* 952 bits of six-bit, plus NUL */
+	    char text[AIS_TYPE14_TEXT_MAX];
+	} type14;
+	/* Type 18 - Standard Class B CS Position Report */
 	struct {
 	    uint reserved;		/* altitude in meters */
 	    uint sog;			/* speed over ground in deciknots */

@@ -226,6 +226,28 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.dte          = UBITS(422, 1);
 	    ais->type5.spare        = UBITS(423, 1);
 	    break;
+        case 6: /* Addressed Binary Message */
+	    ais->type6.seqno          = UBITS(38, 2);
+	    ais->type6.dest_mmsi      = UBITS(40, 69);
+	    ais->type6.retransmit     = (bool)UBITS(70, 1);
+	    ais->type6.spare          = UBITS(71, 1);
+	    ais->type6.application_id = UBITS(72, 16);
+	    ais->type6.bitcount       = ais_context->bitlen - 88;
+	    (void)memcpy(ais->type6.bitdata, 
+			 (char *)ais_context->bits+11,
+			 (ais->type6.bitcount + 7) / 8);
+	    break;
+        case 7: /* Binary acknowledge */
+	    /* no actual message body, just preamble */
+	    break;
+        case 8: /* Binary Broadcast Message */
+	    ais->type8.spare          = UBITS(38, 2);
+	    ais->type8.application_id = UBITS(40, 16);
+	    ais->type8.bitcount       = ais_context->bitlen - 56;
+	    (void)memcpy(ais->type8.bitdata, 
+			 (char *)ais_context->bits+7,
+			 (ais->type8.bitcount + 7) / 8);
+	    break;
 	case 9: /* Standard SAR Aircraft Position Report */
 	    ais->type9.altitude = UBITS(38, 12);
 	    ais->type9.sog = UBITS(50, 10);
@@ -249,6 +271,24 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type9.latitude, 
 			ais->type9.cog, 
 			ais->type9.utc_second);
+	    break;
+        case 12: /* Safety Related Message */
+	    ais->type12.seqno          = UBITS(38, 2);
+	    ais->type12.dest_mmsi      = UBITS(40, 69);
+	    ais->type12.retransmit     = (bool)UBITS(70, 1);
+	    ais->type12.spare          = UBITS(71, 1);
+	    from_sixbit((char *)ais_context->bits, 
+			72, ais_context->bitlen-72,
+			ais->type12.text);
+	    break;
+        case 13: /* Safety Related Acknowledge */
+	    /* no actual message body, just preamble */
+	    break;
+        case 14: /* Safety Related Broadcast Message */
+	    ais->type14.spare          = UBITS(38, 2);
+	    from_sixbit((char *)ais_context->bits, 
+			40, ais_context->bitlen-40,
+			ais->type14.text);
 	    break;
 	case 18:	/* Standard Class B CS Position Report */
 	    ais->type18.reserved = UBITS(38, 8);
@@ -588,6 +628,36 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE5_SCALED_UNLABELED
 #undef TYPE5_SCALED_LABELED
 	break;
+    case 6:	/* Binary Message */
+#define TYPE6_UNLABELED	"%u,%u,%u,%u,%u:%s\n"
+#define TYPE6_LABELED	"seq=%u,dst=%u,rexmit=%u,appid=%u,data=%u:%s\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE6_LABELED : TYPE6_UNLABELED),
+			  ais->type6.seqno,
+			  ais->type6.dest_mmsi,
+			  ais->type6.retransmit,
+			  ais->type6.application_id,
+			  ais->type6.bitcount,
+			  gpsd_hexdump(ais->type6.bitdata, 
+				       (ais->type6.bitcount+7)/8));
+#undef TYPE6_UNLABELED
+#undef TYPE6_LABELED
+	break;
+    case 7:	/* Binary Acknowledge */
+	(void)fputc('\n', fp);
+	break;
+    case 8:	/* Binary Broadcast Message */
+#define TYPE8_UNLABELED	"%u,%u:%s\n"
+#define TYPE8_LABELED	"appid=%u,data=%u:%s\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE8_LABELED : TYPE8_UNLABELED),
+			  ais->type8.application_id,
+			  ais->type8.bitcount,
+			  gpsd_hexdump(ais->type8.bitdata, 
+				       (ais->type8.bitcount+7)/8));
+#undef TYPE8_UNLABELED
+#undef TYPE8_LABELED
+	break;
     case 9:
 #define TYPE9_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%x,%u,%d,%x\n"
 #define TYPE9_UNSCALED_LABELED   "alt=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,sec=%u,reg=%x,dte=%u,sp=%d,radio=%x\n"
@@ -627,6 +697,30 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE9_UNSCALED_LABELED
 #undef TYPE9_SCALED_UNLABELED
 #undef TYPE9_SCALED_LABELED
+	break;
+    case 12:	/* Safety Related Message */
+#define TYPE12_UNLABELED  "%u,%u,%u,%s\n"
+#define TYPE12_LABELED	"seq=%u,dst=%u,rexmit=%u,text=%s\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE12_LABELED : TYPE12_UNLABELED),
+			  ais->type12.seqno,
+			  ais->type12.dest_mmsi,
+			  ais->type12.retransmit,
+			  ais->type12.text);
+#undef TYPE12_UNLABELED
+#undef TYPE12_LABELED
+	break;
+    case 13:	/* Safety Related Acknowledge */
+	(void)fputc('\n', fp);
+	break;
+    case 14:	/* Safety Related Broadcast Message */
+#define TYPE14_UNLABELED  "%s\n"
+#define TYPE14_LABELED	"text=%s\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE14_LABELED : TYPE14_UNLABELED),
+			  ais->type14.text);
+#undef TYPE14_UNLABELED
+#undef TYPE14_LABELED
 	break;
     case 18:
 #define TYPE18_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%u,%x,%d,%x\n"
