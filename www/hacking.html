@@ -1459,8 +1459,9 @@ like this:
 
 <p>Each request shall begin with an introducer character, '?'. The
 purpose of the introducer is to inform the command parser that
-extended commands follow.  Each request shall end with a period and a
-newline indication, which may consist of either LF or CR-LF.</p>
+extended commands follow.  Each request shall end with a newline
+indication, which may consist of either LF or CR-LF (but note below
+how commands and responses may contain embedded newlines).</p>
 
 <p>All requests shall be composed of US-ASCII characters and shall be
 no more than 78 characters in length, exclusive of the trailing
@@ -1470,15 +1471,13 @@ newline.</p>
 identifier shall begin with an alphabetic character and consist of
 alphanumeric characters.  It shall be followed by an equal sign. The 
 52 command identifiers consisting of a single alphabetic are
-reserved equivalents of the existing GPSD commands.</p>
+reserved equivalents of the old-style GPSD commands.  Command
+identifiers are case-insensitive.</p>
 
 <p>The equal sign may be followed by zero or more comma-separated
-arguments.  Arguments may contain any US-ASCII character other
-than the introducer character, the equal sign, the comma, the semicolon,
-or the hash '#' character (reserved for comments).  Trailing
-zero-length arguments will be ignored; thus, in particular,
-machine-generated requests may semicolon-terminate the final argument 
-with a comma without confusing gpsd's parser.</p>
+arguments.  Arguments may contain any US-ASCII character other than
+the introducer character, the equal sign, the comma, or the hash '#'
+character (reserved for comments).</p>
 
 <p>If the final argument of a command has a newline immediately after
 a leader equal-sign or separator comma, the content of the argument is a
@@ -1489,30 +1488,26 @@ after '.' (e.g. a line consisting solely of the argument terminator
 '.' and a LF or CR-LF).</p>
 
 <p>Responses shall have the same format as requests, except that
-responses do not have an introducer. The response to a command shall
+responses have the introducer '!'. The response to a command shall
 have the same identifier as the command.</p>
 
 <h3>Syntax Examples:</h3>
 
 <pre>
 # GPSD-NG equivalent of X query request; no arguments 
-?X;
-GPSD,X=0;
+?x
+!x=0
 #
 # GPSD-NG equivalent of B request to set baud rate
-?B=9600;
-GPSD,B=9600;
-#
-# GPSD-NG command illustrating multiple commands per request line
-?P;A;
-GPSD,P=75,80;A=1435;
+?b=9600
+!b=9600
 #
 # Hypothetical extended command with a multiline response
-?HARDWAREID;
-GPSD,HARDWAREID
+?id
+!id=
 This is a Foobar 2317 GPS
 Firmware revision 555.55
-;
+.
 </pre>
 
 <p>
@@ -1523,6 +1518,10 @@ Firmware revision 555.55
 commands to be mixed in the same session. Most of the rest of the NG
 design is a minimal adaptation to permit command names of more than
 one letter.</p>
+
+<p>The '!' introducer on new-format responses serves to distinguish
+them from old-style responses that effectively have 'GPSD,' as an
+introducer.
 
 <p>We need a format that supports multiline data, not so much for
 requests as for responses.  This is so we can keep the 78-character
@@ -1540,10 +1539,11 @@ discussion:</p>
 ?ephemeris -&gt; poll the ephemeris from the receiver
 ?assist -&gt; load assistance data (time, position, etc) into the receiver
 ?raw -&gt; get a full dump of the last measurement cycle... at least
-        clock, doppler, pseudorange and carrier phase.
+           clock, doppler, pseudorange and carrier phase.
 ?readonly -&gt; get/set read-only mode. no screwing up bluetooth devices
 ?listen -&gt; set the daemon's bind address. added privacy for laptop users.
-?port -&gt; set the daemon's port. used by the regression tests, at least.
+?port -&gt; set the daemon's control port used by the regression
+            tests, at least.
 ?debug -&gt; set/modify the daemon's debug level, including after launch.
 </pre>
 
