@@ -583,7 +583,7 @@ information using types 12 and 14.
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
 System) which uses extended AIS binary formats. <<SEAWAY>> says it's
 intercompatible with the St. Lawrence Seaway system; I have not been
-able to find any message documentation on PAWSS with whic to verify
+able to find any message documentation on PAWSS with which to verify
 this, however.
 
 === U.S. Coast Guard Extended AIVDM ===
