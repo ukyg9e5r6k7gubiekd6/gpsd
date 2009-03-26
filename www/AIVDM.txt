@@ -666,7 +666,7 @@ Identification System]
    is described on page 26 of Annex C, Table C-1.  Communicated by 
    Kurt Schwehr; I have not looked at it.
 
-- [[[ITU-MID]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
+- [[[ITU-MID]]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
   of Maritime Identification Digits]
 
 - >[[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
