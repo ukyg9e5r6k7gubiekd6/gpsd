@@ -204,13 +204,13 @@ Information sufficient to decode other message types in the range 6-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
 listed at <<BOSUN>> with no further information; message types 25-26
-come from <<Schwehr>>>, who reports they were added in Version 3 of
+come from <<Schwehr>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
 Type 1, 2 and 3 messages share a common reporting structure for
-navigational information; we'll call in the Common Navigation
+navigational information; we'll call it the Common Navigation
 Block. This is the information likely to be of interest for decoding
 software.
 
@@ -270,9 +270,9 @@ Turn rate is encoded as follows:
 * -127 = turning left at more than 5deg/30s (No TI available)
 * –128 (80 hex) indicates no turn information available (default)
 
-Values between 0 and 708 degrees/min coded by ROTAIS=4.733 *
-SQRT(ROTsensor) degrees/min where ROTsensor is the Rate of Turn as
-input by an external Rate of Turn Indicator. ROTAIS is rounded to the
+Values between 0 and 708 degrees/min coded by ROT~AIS~=4.733 *
+SQRT(ROT~sensor~) degrees/min where ROT~sensor~ is the Rate of Turn as
+input by an external Rate of Turn Indicator. ROT~AIS~ is rounded to the
 nearest integer value.  Sign of the field should be preserved when
 squaring it, otherwise the left/right indication will be lost.
 
@@ -311,7 +311,7 @@ The Maneuver Indicator (143-144) may have these values:
 * 2 = Special maneuver (such as regional passing arrangement)
 
 The interpretation of bits 143-147 has been a bit unstable. In
-<<IALA>>. and therefore in the original <<[ITU1371>>, they were 
+<<IALA>>. and therefore in the original <<ITU1371>>, they were 
 described like this:
 
 `-------`---`------------------------`-----------------------------------------
@@ -322,7 +322,7 @@ Field   Len Description                       Units
 -------------------------------------------------------------------------------
 
 The interpretation of 143-144 as a special maneuver field is new in
-revision 3 of <<[ITU1371>>.
+revision 3 of <<ITU1371>>.
 
 The RAIM flag indicates whether Receiver Autonomous Integrity
 Monitoring is being used to check the performance of the EPFD.
@@ -535,7 +535,7 @@ Field   Len Description                   Encoding
 -------------------------------------------------------------------------------
 
 Altitude is in meters.  The special value 4095 indicates altitude is
-not available; 4094 indicates 4904 meters or higher.
+not available; 4094 indicates 4094 meters or higher.
 
 Speed over ground is in knots, not deciknots as in the common
 navigation block; planes go faster. The special value 1023 indicates
@@ -583,7 +583,8 @@ information using types 12 and 14.
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
 System) which uses extended AIS binary formats. <<SEAWAY>> says it's
 intercompatible with the St. Lawrence Seaway system; I have not been
-able to find any message documentation, however.
+able to find any message documentation on PAWSS with whic to verify
+this, however.
 
 === U.S. Coast Guard Extended AIVDM ===
 
