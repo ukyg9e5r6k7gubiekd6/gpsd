@@ -109,8 +109,7 @@ if __name__ == '__main__':
                     sys.stdout.write(buf)
                     buf = ""
                 else:
-                    (ptype, packet) = getter.get(tty)
-                    length = len(packet)
+                    (length, ptype, packet) = getter.get(tty)
                     seqno += 1
                     # Don't crap out if the first packet is bad, we might
                     # be seeing an incomplete read from a tty.
@@ -119,7 +118,7 @@ if __name__ == '__main__':
                             sys.stdout.write("gpscat: terminating on bad packet\n")
                         break
                     elif length == 0:
-                        continue
+                        break
                     if typeflag:
                         sys.stdout.write(`ptype` + " (" + `length` + "): " + hexdump(packet))
                         sys.stdout.write("\n")

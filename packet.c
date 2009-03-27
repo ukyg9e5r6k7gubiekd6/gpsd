@@ -1425,11 +1425,16 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     /* Otherwise, consume from the packet input buffer */
     packet_parse(lexer);
 
-    /*
-     * recvd can still be 0 or -1 at this point even if buffer data 
-     * was consumed.  It could be -1 on a transient read error.
-     */
-    return recvd;
+    /* If we gathered a packet, return its length */
+    if (lexer->outbuflen > 0)
+	return lexer->outbuflen;
+    else
+	/*
+	 * Otherwise recvd is the size of whatever packet fragment we got.
+	 * It can still be 0 or -1 at this point even if buffer data 
+	 * was consumed.
+	 */
+	return recvd;
 }
 
 void packet_reset(struct gps_packet_t *lexer)

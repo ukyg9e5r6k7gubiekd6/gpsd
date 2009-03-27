@@ -51,10 +51,8 @@ static void decode(FILE *fpin, FILE *fpout)
 
     packet_reset(&lexer);
 
-    for (;;) {
-	if (packet_get(fileno(fpin), &lexer) <= 0 && packet_buffered_input(&lexer) <= 0)
-	    break;
-	else if (lexer.type == COMMENT_PACKET)
+    while (packet_get(fileno(fpin), &lexer) > 0) {
+	if (lexer.type == COMMENT_PACKET)
 	    continue;
 	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);

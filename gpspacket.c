@@ -71,25 +71,18 @@ Lexer_init(LexerObject *self)
 static PyObject *
 Lexer_get(LexerObject *self, PyObject *args)
 {
-    ssize_t len, waiting;
+    ssize_t len;
     int fd;
 
     if (!PyArg_ParseTuple(args, "i;missing or invalid file descriptor argument to gpspacket.get", &fd))
         return NULL;
 
-    waiting = packet_buffered_input(&self->lexer);
-
     len = packet_get(fd, &self->lexer);
     if (PyErr_Occurred())
 	return NULL;
 
-    if (len <= 0 && waiting <= 0) {
-	self->lexer.type = EMPTY_PACKET;
-	self->lexer.outbuffer[0] = '\0';
-	self->lexer.outbuflen = 0;
-    }
-
-    return Py_BuildValue("(i, s#)", 
+    return Py_BuildValue("(i, i, s#)",
+			 len,
 			 self->lexer.type, 
 			 self->lexer.outbuffer, 
 			 self->lexer.outbuflen);
@@ -257,7 +250,6 @@ initgpspacket(void)
     m = Py_InitModule3("gpspacket", gpspacket_methods, module_doc);
 
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
-    PyModule_AddIntConstant(m, "EMPTY_PACKET", EMPTY_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
     PyModule_AddIntConstant(m, "NMEA_PACKET", NMEA_PACKET);
     PyModule_AddIntConstant(m, "SIRF_PACKET", SIRF_PACKET);
