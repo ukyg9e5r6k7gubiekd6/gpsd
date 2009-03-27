@@ -567,8 +567,8 @@ Field   Len Description                       Units
 
 === Type 7: Binary Acknowledge ===
 
-Message type 7 is a receipt acknowledgement to the sender of a
-previous message type 6.  Total length varies between 72 and 168
+Message type 7 is a receipt acknowledgement to the senders of a
+previous messages of type 6.  Total length varies between 72 and 168
 bits depending on the number of destination MMSIs included.
 
 `-------`---`------------------------`-----------------------------------------
@@ -666,8 +666,8 @@ Field   Len Description                       Units
 
 === Type 13: Safety-Related Acknowledge ===
 
-Message type 13 is a receipt acknowledgement to the sender of a
-previous message of type 12.  The message layout is identical to
+Message type 13 is a receipt acknowledgement to senders of
+previous messages of type 12.  The message layout is identical to
 a type 7 Binary Acknowledge.
 
 === Type 14: Safety-Related Broadcast Message ===
