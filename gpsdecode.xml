@@ -133,7 +133,7 @@ GPSD project website.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the sentence
-types 1-9, 12-14, and 18. Decoding of types 6, 7, 12, 13, and 14
+types 1-9, 12-14, and 18. Decoding of types 7, 12, 13, and 14
 is unverified. AIVDM encoding is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>

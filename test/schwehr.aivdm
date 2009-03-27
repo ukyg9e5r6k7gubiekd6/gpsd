@@ -127,7 +127,6 @@
 #       dte:              0
 #       Spare:            0
 #
-# DOES NOT PASS yet -- some grief with the data offset.
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
 # data block.
