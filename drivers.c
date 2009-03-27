@@ -41,7 +41,14 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet.type == COMMENT_PACKET) {
 	return 0;
-    } else if (session->packet.type != NMEA_PACKET) {
+	/*
+	 * Dispatching on Garmin packets here causes a nasty configure
+	 * loop. It's not clear this is the right way to break the
+	 * loop or whether it merely evades the problem and breaks
+	 * autoconfiguration, but it will have to do until a Garmin
+	 * expert can grok the problem better.
+	 */
+    } else if (session->packet.type != NMEA_PACKET && session->packet.type != GARMIN_PACKET) {
 	const struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++) {
