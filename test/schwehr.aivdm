@@ -141,6 +141,16 @@
 #       ApplicationID:    42827
 #	Data:             50:3acbc463dffc4
 #
+# Kurt's ais_msg_7.py has a crash bug at version 0.41, 
+# so we don't actually know whether this dump is correct or not --
+# it's just what gpsdecode says now.  Fix this when his code can check it. 
+!AIVDM,1,1,,A,7IiQ4T`UjA9lC;b:M<MWE@,4*01
+#	MessageID:        655901842
+#	MMSI1:            158483613
+#	MMSI2:            321823389
+#	MMSI3:            836359488
+#	MMSI4:            0
+#
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_8.py on one of his test sentences.  It's unknown what's in the binary
 # data block.

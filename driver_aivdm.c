@@ -227,7 +227,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			 (ais->type6.bitcount + 7) / 8);
 	    break;
         case 7: /* Binary acknowledge */
-	    /* no actual message body, just preamble */
+	    for (i = 0; i < sizeof(ais->type7.mmsi)/sizeof(ais->type7.mmsi[0]); i++)
+		if (ais_context->bitlen > 40 + 32*i)
+		    ais->type7.mmsi[i] = UBITS(40 + 32*i, 30);
+	        else
+		    ais->type7.mmsi[i] = 0;
 	    break;
         case 8: /* Binary Broadcast Message */
 	    ais->type8.spare          = UBITS(38, 2);
@@ -271,7 +275,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type12.text);
 	    break;
         case 13: /* Safety Related Acknowledge */
-	    /* no actual message body, just preamble */
+	    for (i = 0; i < sizeof(ais->type13.mmsi)/sizeof(ais->type13.mmsi[0]); i++)
+		if (ais_context->bitlen > 40 + 32*i)
+		    ais->type13.mmsi[i] = UBITS(40 + 32*i, 30);
+	        else
+		    ais->type13.mmsi[i] = 0;
 	    break;
         case 14: /* Safety Related Broadcast Message */
 	    ais->type14.spare          = UBITS(38, 2);
@@ -633,7 +641,16 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE6_LABELED
 	break;
     case 7:	/* Binary Acknowledge */
-	(void)fputc('\n', fp);
+#define TYPE7_UNLABELED  "%u,%u,%u,%u\n"
+#define TYPE7_LABELED	"mmsi1=%u,mmsi2=%u,mmsi3=%u,mmsi4=%u\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE7_LABELED : TYPE7_UNLABELED),
+			  ais->type7.mmsi[0],
+			  ais->type7.mmsi[1],
+			  ais->type7.mmsi[2],
+			  ais->type7.mmsi[3]);
+#undef TYPE7_UNLABELED
+#undef TYPE7_LABELED
 	break;
     case 8:	/* Binary Broadcast Message */
 #define TYPE8_UNLABELED	"%u,%u:%s\n"
@@ -700,7 +717,16 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE12_LABELED
 	break;
     case 13:	/* Safety Related Acknowledge */
-	(void)fputc('\n', fp);
+#define TYPE13_UNLABELED  "%u,%u,%u,%u\n"
+#define TYPE13_LABELED	"mmsi1=%u,mmsi2=%u,mmsi3=%u,mmsi4=%u\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE13_LABELED : TYPE13_UNLABELED),
+			  ais->type13.mmsi[0],
+			  ais->type13.mmsi[1],
+			  ais->type13.mmsi[2],
+			  ais->type13.mmsi[3]);
+#undef TYPE13_UNLABELED
+#undef TYPE13_LABELED
 	break;
     case 14:	/* Safety Related Broadcast Message */
 #define TYPE14_UNLABELED  "%s\n"

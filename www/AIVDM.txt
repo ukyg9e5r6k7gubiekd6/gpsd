@@ -568,7 +568,8 @@ Field   Len Description                       Units
 === Type 7: Binary Acknowledge ===
 
 Message type 7 is a receipt acknowledgement to the sender of a
-previous message type 6.  Total length 38 bits.
+previous message type 6.  Total length varies between 72 and 168
+bits depending on the number of destination MMSIs included.
 
 `-------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
@@ -576,6 +577,15 @@ Field   Len Description                       Units
 0-5       6 Message Type             Unsigned integer: 7
 6-7       2 Repeat Indicator         As in Common Navigation Block
 8-37     30 Source MMSI              Unsigned integer: 9 decimal digits
+38-39     2 Spare                    Not used
+40-69    30 MMSI number 1            Unsigned integer: 9 decimal digits
+70-71     2 Spare                    Not used
+62-101   30 MMSI number 2            Unsigned integer: 9 decimal digits
+102-103   2 Spare                    Not used
+104-133  30 MMSI number 3            Unsigned integer: 9 decimal digits
+134-135   2 Spare                    Not used
+136-165  30 MMSI number 4            Unsigned integer: 9 decimal digits
+166-167   2 Spare                    Not used
 -------------------------------------------------------------------------------
 
 === Type 8: Binary Broadcast Message ===
@@ -654,18 +664,11 @@ Field   Len Description                       Units
                                      Field may be shorter than 936 bits.
 -------------------------------------------------------------------------------
 
-=== Type 13: Binary Acknowledge ===
+=== Type 13: Safety-Related Acknowledge ===
 
 Message type 13 is a receipt acknowledgement to the sender of a
-previous message type 12.  Total length 38 bits.
-
-`-------`---`------------------------`-----------------------------------------
-Field   Len Description                       Units
--------------------------------------------------------------------------------
-0-5       6 Message Type             Unsigned integer: 13
-6-7       2 Repeat Indicator         As in Common Navigation Block
-8-37     30 Source MMSI              Unsigned integer: 9 decimal digits
--------------------------------------------------------------------------------
+previous message of type 12.  The message layout is identical to
+a type 7 Binary Acknowledge.
 
 === Type 14: Safety-Related Broadcast Message ===
 

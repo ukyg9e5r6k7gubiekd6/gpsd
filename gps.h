@@ -536,6 +536,10 @@ struct ais_t
 	    uint bitcount;		/* bit count of the data */
 	    char bitdata[AIS_TYPE6_BINARY_MAX / 8];
 	} type6;
+	/* Type 7 - Binary Acknowledge */
+	struct {
+	    uint mmsi[4];	/* spares ignored, they're only padding here */
+	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
 	    uint spare;			/* spare bit(s) */
@@ -571,6 +575,10 @@ struct ais_t
 #define AIS_TYPE12_TEXT_MAX	157	/* 936 bits of six-bit, plus NUL */
 	    char text[AIS_TYPE12_TEXT_MAX];
 	} type12;
+	/* Type 7 - Safety-Related Acknowledge */
+	struct {
+	    uint mmsi[4];	/* spares ignored, they're only padding here */
+	} type13;
 	/* Type 14 - Safety-Related Broadcast Message */
 	struct {
 	    uint spare;			/* spare bit(s) */
