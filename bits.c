@@ -2,7 +2,7 @@
 /*
  * Bitfield extraction functions.  In each, start is a bit index (not
  * a byte index) and width is a bit width.  The width bounded above by
- * the bit width of a long long, which s 64 bits in all standard data
+ * the bit width of a long long, which is 64 bits in all standard data
  * models for 32- and 64-bit processors.
  *
  * The sbits() function assumes twos-complement arithmetic.
@@ -19,7 +19,7 @@
 #define BITS_PER_BYTE	8
 
 unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
-/* extract a bitfield from the buffer as an unsigned big-endian long long */
+/* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian long long */
 {
     unsigned long long fld = 0;
     unsigned int i;
