@@ -95,10 +95,10 @@ class TestLoad:
         #gpspacket.register_report(reporter)
         type_latch = None
         while True:
-            (ptype, packet) = getter.get(logfp.fileno())
-            if ptype == gpspacket.BAD_PACKET:
+            (len, ptype, packet) = getter.get(logfp.fileno())
+            if len <= 0:
                 break
-            elif ptype == gpspacket.EMPTY_PACKET:
+            elif ptype == gpspacket.BAD_PACKET:
                 break
             elif ptype == gpspacket.COMMENT_PACKET:
                 if "Serial:" in packet:
