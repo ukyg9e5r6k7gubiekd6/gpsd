@@ -1425,7 +1425,24 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     /* Otherwise, consume from the packet input buffer */
     packet_parse(lexer);
 
-    /* If we gathered a packet, return its length */
+    /*
+     * If we gathered a packet, return its length; it will have been
+     * consumed out of the input buffer and moved to the output
+     * buffer.  We don't care whether the read() returned 0 or -1 and
+     * gathered packet data was all buffered or whether ot was partly
+     * just physically read.
+     *
+     * Note: this choice greatly simplifies life for callers of
+     * packet_get(), but means that they cannot tell when a nonzero
+     * return means there was a successful physical read.  They will
+     * thus credit a data source that drops out with being alive 
+     * slightly longer than it actually was.  This is unlikely to
+     * matter as long as any policy timeouts are large compared to
+     * the time required to consume the greatest possible amount 
+     * of buffered input, but if you hack this code you need to
+     * be aware of the issue. It might also slightly affect 
+     * performance profiling.
+     */
     if (lexer->outbuflen > 0)
 	return lexer->outbuflen;
     else
