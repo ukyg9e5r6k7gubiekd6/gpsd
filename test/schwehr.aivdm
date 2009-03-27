@@ -1,7 +1,10 @@
-# Sample AIVDM data sentences provided from real data by Kurt Schwehr
+# Sample AIVDM data sentences provided from real data by Kurt Schwehr.
 #
-# Sample sentences of types 1-4.
+# The text dumps following are (mostly) producerd by the parsers in
+# his noaadata.py toolkit, and are here so they can be eyeball-checked
+# against gpsdecode's output.
 #
+# Type 1:
 !AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A
 #       MessageID:          1
 #       RepeatIndicator:    0
@@ -21,6 +24,7 @@
 #       state_syncstate:    0
 #       state_slotoffset:   4252
 #
+# Type 1:
 !AIVDM,1,1,,A,16SteH0P00Jt63hHaa6SagvJ087r,0*42
 #       MessageID:          1
 #       RepeatIndicator:    0
@@ -41,8 +45,9 @@
 #       stare_slottimeout:  2
 #       state_slotoffset:   506
 #
-# 2 is really uncommon
-#
+# Type 2:
+# Kurt says 2 is really uncommon.  I had to regenerate the CRC32 
+# for this one myself, it was mnissing in Kurt's original.
 !AIVDM,1,1,,B,25Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*60
 #       MessageID:          2
 #       RepeatIndicator:    0
@@ -63,6 +68,7 @@
 #       state_slottimeout:  3
 #       state_slotoffset:   6
 #
+# Type 3:
 !AIVDM,1,1,,A,38Id705000rRVJhE7cl9n;160000,0*40
 #       MessageID:          3
 #       RepeatIndicator:    0
@@ -83,6 +89,7 @@
 #       state_slottimeout:  0
 #       state_slotoffset:   0
 #
+# Type 4:
 !AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
 #       MessageID:          4
 #       RepeatIndicator:    0
@@ -103,6 +110,7 @@
 #       state_slottimeout:  4
 #       state_slotoffset:   1503
 #
+# Type 5:
 !AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C
 !AIVDM,2,2,1,A,88888888880,2*25
 #       MessageID:        5
@@ -127,6 +135,7 @@
 #       dte:              0
 #       Spare:            0
 #
+# Type 6:
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
 # data block.
@@ -141,6 +150,7 @@
 #       ApplicationID:    42827
 #	Data:             50:3acbc463dffc4
 #
+# Type 7:
 # Kurt's ais_msg_7.py has a crash bug at version 0.41, 
 # so we don't actually know whether this dump is correct or not --
 # it's just what gpsdecode says now.  Fix this when his code can check it. 
@@ -151,6 +161,7 @@
 #	MMSI3:            836359488
 #	MMSI4:            0
 #
+# Type 8:
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_8.py on one of his test sentences.  It's unknown what's in the binary
 # data block.
@@ -161,6 +172,7 @@
 #       ApplicationID:      23480
 #       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
 #
+# Type 9:
 # This sentence is slightly malformed -- extra data at the end.
 !AIVDM,1,1,,B,9wsh:3?h>TdcWHftni=J0d5fs?8WT852,5*74
 #       MessageID:           9
@@ -181,6 +193,9 @@
 #       state_slottimeout:   3
 #       state_slotoffset:    12839
 #
+# Type 18:
+# I had to regenerate the CRC32 for this one myself, it was missing
+# in Kurt's original.
 !AIVDM,1,1,,A,B52K>;h00Fc>jpUlNV@ikwpUoP06,0*4C
 #       MessageID:          18
 #       RepeatIndicator:    0
