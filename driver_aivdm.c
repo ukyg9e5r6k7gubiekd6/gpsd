@@ -89,11 +89,12 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    *cp = '\0';
 	    ais_context->field[nfields++] = cp + 1;
 	}
-    ais_context->part = atoi((char *)ais_context->field[1]);
-    ais_context->await = atoi((char *)ais_context->field[2]);
+    ais_context->await = atoi((char *)ais_context->field[1]);
+    ais_context->part = atoi((char *)ais_context->field[2]);
     data = ais_context->field[5];
-    gpsd_report(LOG_PROG, "part=%d, awaiting=%d, data=%s\n",
-		ais_context->part, ais_context->await,
+    gpsd_report(LOG_PROG, "await=%d, part=%d, data=%s\n",
+		ais_context->await,
+		ais_context->part, 
 		data);
 
     /* assemble the binary data */
