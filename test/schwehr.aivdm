@@ -131,7 +131,7 @@
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
 # data block.
-#!AIVDM,1,1,,B,6B?n;be:cbapalgc;i6?Ow4,2*4A
+!AIVDM,1,1,,B,6B?n;be:cbapalgc;i6?Ow4,2*4A
 #       MessageID:        6
 #	RepeatIndicator:  1
 #	UserID:           150834090
