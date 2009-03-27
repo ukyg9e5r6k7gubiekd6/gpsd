@@ -111,6 +111,7 @@ struct unsigned_test {
 /*@ -duplicatequals +ignorequals @*/
 int main(void)
 {
+    /*@ -observertrans -usereleased @*/
     struct unsigned_test *up, unsigned_tests[] = {
 	/* tests using the big buffer */
 	{buf, 0,  1,  0,    "first bit of first byte"},
@@ -129,6 +130,7 @@ int main(void)
     memcpy(buf+8,"\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8",8);
     memcpy(buf+16,"\x40\x09\x21\xfb\x54\x44\x2d\x18",8);
     memcpy(buf+24,"\x40\x49\x0f\xdb",4);
+    /*@ +observertrans +usereleased @*/
 
     (void)fputs("Test data:", stdout);
     for (sp = buf; sp < buf + 28; sp++)

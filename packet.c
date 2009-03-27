@@ -1444,7 +1444,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
      * performance profiling.
      */
     if (lexer->outbuflen > 0)
-	return lexer->outbuflen;
+	return (ssize_t)lexer->outbuflen;
     else
 	/*
 	 * Otherwise recvd is the size of whatever packet fragment we got.
