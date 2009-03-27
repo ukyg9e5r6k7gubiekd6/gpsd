@@ -134,7 +134,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 #define SBITS(s, l)	sbits((char *)ais_context->bits, s, l)
 #define UCHARS(s, to)	from_sixbit((char *)ais_context->bits, s, sizeof(to), to)
 	ais->id = UBITS(0, 6);
-	ais->ri = UBITS(7, 2);
+	ais->ri = UBITS(6, 2);
 	ais->mmsi = UBITS(8, 30);
 	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n", 
 		    ais->id, ais->mmsi);
