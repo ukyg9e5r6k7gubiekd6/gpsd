@@ -140,7 +140,77 @@ The data payload is an ASCII-encoded bit vector.  Each character
 represents six bits of data.  To recover the six bits, subtract 40
 from the ASCII character value; if the result is greater than 40
 subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
-this encoding begin with "@" (64) end with "W" (87).
+this encoding begin with "0" (64) and end with "w" (87); however, the
+intermediate range "X" (58) to "\_" (95) in not used.  
+
+.ASCII payload armoring
+`--------`-------`---------`-------
+ Char    ASCII   Decimal   Bits
+"0"       48      0        000000
+"1"       49      1        000001
+"2"       50      2        000010
+"3"       51      3        000011
+"4"       52      4        000100
+"5"       53      5        000101
+"6"       54      6        000110
+"7"       55      7        000111
+"8"       56      8        001000
+"9"       57      9        001001
+":"       58     10        001010
+";"       59     11        001011
+"<"       60     12        001100
+"="       61     13        001101
+">"       62     14        001110
+"?"       63     15        001111
+"@"       64     16        010000
+"A"       65     17        010001
+"B"       66     18        010010
+"C"       67     19        010011
+"D"       68     20        010100
+"E"       69     21        010101
+"F"       70     22        010110
+"G"       71     23        010111
+"H"       72     24        011000
+"I"       73     25        011001
+"J"       74     26        011010
+"K"       75     27        011011
+"L"       76     28        011100
+"M"       77     29        011101
+"N"       78     30        011110
+"O"       79     31        011111
+"P"       80     32        100000
+"Q"       81     33        100001
+"R"       82     34        100010
+"S"       83     35        100011
+"T"       84     36        100100
+"U"       85     37        100101
+"V"       86     38        100110
+"W"       87     39        100111
+"`"       96     40        101000
+"a"       97     41        101001
+"b"       98     42        101010
+"c"       99     43        101011
+"d"      100     44        101100
+"e"      101     45        101101
+"f"      102     46        101110
+"g"      103     47        101111
+"h"      104     48        110000
+"i"      105     49        110001
+"j"      106     50        110010
+"k"      107     51        110011
+"l"      108     52        110100
+"m"      109     53        110101
+"n"      110     54        110110
+"o"      111     55        110111
+"p"      112     56        111000
+"q"      113     57        111001
+"r"      114     58        111010
+"s"      115     59        111011
+"t"      116     60        111100
+"u"      117     61        111101
+"v"      118     62        111110
+"w"      119     63        111111
+---------------------------------------
 
 Concatenate all six-bit quantities found in the payload, MSB first.
 This is the binary payload of the sentence.  
