@@ -566,8 +566,8 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	/* skip 4 bytes of satellite map */
 	session->gpsdata.fix.altitude = getbesl(buf, 35)*1e-2;
 	/* skip 1 byte of map datum */
-	session->gpsdata.fix.speed = getbesw(buf, 40)*1e-2;
-	session->gpsdata.fix.track = getbesw(buf, 42)*1e-2;
+	session->gpsdata.fix.speed = getbeuw(buf, 40)*1e-2;
+	session->gpsdata.fix.track = getbeuw(buf, 42)*1e-2;
 	/* skip 2 bytes of magnetic variation */
 	session->gpsdata.fix.climb = getbesw(buf, 46)*1e-2;
 	mask |= TIME_SET | SPEED_SET | TRACK_SET;
