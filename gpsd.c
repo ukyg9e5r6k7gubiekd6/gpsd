@@ -1985,7 +1985,7 @@ int main(int argc, char *argv[])
 				channel->releasetime = timestamp();
 				gpsd_report(LOG_PROG, "channel %d released\n", (int)(channel-channels));
 			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
-				gpsd_report(LOG_PROG, "channel %ld closed\n", channel-channels);
+				gpsd_report(LOG_PROG, "channel %d closed\n", (int)(channel-channels));
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
 				FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 				adjust_max_fd(channel->gpsdata.gps_fd, false);
