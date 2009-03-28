@@ -1,5 +1,7 @@
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.40dev
-  No news yet.
+  AIVDM now has tested decoding for message types 1-6, 8, 9, and 18.
+  Fixed a bug that could report wrong sign for course and speed (but 
+  not location) from Sirf binary GND messages.
 
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
   Fixed potential core dump in C client handling of "K" responses.
