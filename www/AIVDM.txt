@@ -15,14 +15,15 @@ interpreting these messages.
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
 Automatic Identification System. All cargo vessels of more than 300
 tons displacement and all passenger vessels are supposed to carry AIS
-transmitters that periodically broadcast their position and course,
+transmitters that periodically squawk their position and course,
 using TDMA (Time Division Multiple Access) technology similar to the
 way cellphones do to avoid mutual interference.
 
-Technically, AIVDM packets are reports from other ships and AIVDO
-packets are reports from your own ship. AIS receivers capture AIVDM
-squawks and report them as ASCII data packets over serial lines, using
-the NMEA 0183 data format and physical network standards.
+AIS receivers capture these squawks and report them as ASCII data
+packets over serial lines, using the NMEA 0183 data format and
+physical network standards. AIS packets have the introducer "!AIVDM"
+or "!AIVDO"; AIVDM packets are reports from other ships and AIVDO
+packets are reports from your own ship.
 
 A lengthy description of AIS, focusing on the goals and history of the
 system, but not describing the data protocols in any detail, can be
@@ -30,12 +31,15 @@ found at <<AIS>>.
 
 == Standards ==
 
+Multiple standards bear on the AIVDM/AIVDO format.  This document
+exists because assembling them into a complete picture is both
+technically difficult and impeded by legal barriers.
+
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
 Shipborne Automatic. Identification System Using Time Division
 Multiple Access" <<ITU1371>>, issued in 2001, describes the format of
 AIS binary messages. It is proprietary, expensive, and surrounded by
-attack lawyers, which is why this document exists.  I have not looked
-at it.
+attack lawyers.  I have not looked at it.
 
 ITU-R M.1371 is expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
@@ -69,7 +73,7 @@ information from <<IEC-PAS>>.
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
 sentence decoder. This document was developed to be the specification 
-for it.
+for it, and it will decode any sentence type described herein.
 
 <<Schwehr>> includes links to a collection of Python scripts for
 decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
@@ -80,6 +84,7 @@ SourceForge.  It seems intended primarily to work directly
 with AIS radios.
 
 There's a http://rl.se/aivdm[web form] that does sentence decoding.
+It only understands message types 1-4.
 
 == AIVDM/AIVDO Sentence Layer ==
 
@@ -165,11 +170,30 @@ are firmware or software errors in the transmission chain.
 Character-string fields within AIVDM/AIVDO messages are encoded in a
 special way, referred to as "six-bit" in the tables below. Each
 six-bit segment maps to an ASCII character.  Segments 0-31 map to the
-characters @ ( ASCII 64) through "\_" (ASCII 95) respectively;
+characters "@" ( ASCII 64) through "\_" (ASCII 95) respectively;
 segments 32-63 map to characters " " (ASCII 32) though "?"  (ASCII
 63). Lowercase ASCII letters, the backtick, right and left curly
 brackets, pipe bar, tilde and DEL cannot be encoded.
- 
+
+`------`---`------`------`---`--------------`------`---`-------`------`---`----
+000000  0  "@"    010000 16  "P"            100000 32  " "     110000 48  "0"
+000001  1  "A"    010001 17  "Q"            100001 33  "!"     110001 49  "1"
+000010  2  "B"    010010 18  "R"            100010 34  """     110010 50  "2"
+000011  3  "C"    010011 19  "S"            100011 35  "\#"    110011 51  "3"
+000100  4  "D"    010100 20  "T"            100100 36  "$"     110100 52  "4"
+000101  5  "E"    010101 21  "U"            100101 37  "%"     110101 53  "5"
+000110  6  "F"    010110 22  "V"            100110 38  "&"     110110 54  "6"
+000111  7  "G"    010111 23  "W"            100111 39  "\'"    110111 55  "7"
+001000  8  "H"    011000 24  "X"            101000 40  "("     111000 56  "8"
+001001  9  "I"    011001 25  "Y"            101001 41  ")"     111001 56  "9"
+001010 10  "J"    011010 26  "Z"            101010 42  "\*"    111010 58  ":"
+001011 11  "K"    011011 27  "["            101011 43  "\+"    111011 59  ";"
+001100 12  "L"    011100 28  "{backslash}"  101100 44  ","     111100 60  "<"
+001101 13  "M"    011101 29  "]"            101101 45  "-"     111101 61  "="
+001110 14  "N"    011110 30  "\^"           101110 46  "."     111110 62  ">"
+001111 15  "O"    011111 31  "\_"           101111 47  "/"     111111 63  "?"
+-----------------------------------------------------------------------------
+
 According to the standard, trailing unused characters in six-bit
 fields will be represented by "@" (six-bit zero). It is common to
 space-fill the fields instead, so a decoder should strip trailing
