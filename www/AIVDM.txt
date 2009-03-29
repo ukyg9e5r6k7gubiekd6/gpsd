@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.3, March 2009
+v1.4, March 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -908,7 +908,7 @@ Identification System]
 - [[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
   Integrity Monitoring]
 
-- [[C2]] http://www.uais.org/AISspecificationCorrigendum2.pdf[AIS
+- [[[C2]]] http://www.uais.org/AISspecificationCorrigendum2.pdf[AIS
   Specification Corrigendum 2]
 
 == Change history ==
@@ -924,3 +924,6 @@ six-bit decoding.
 
 Version 1.3 adds information on message types 6, 7, 12, and 13, and
 attempts to demystify bit-stuffing.
+
+Version 1.4 adds explicit decoding tables for ASCII armoring and
+six-bit ASCII.
