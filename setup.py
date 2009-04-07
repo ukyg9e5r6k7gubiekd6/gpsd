@@ -49,5 +49,5 @@ setup( name="gpsd",
         ],
        py_modules = ['gpsfake','gps', 'leapsecond'],
        data_files=[('bin', ['gpscat','gpsfake','gpsprof']),
-           ('share/man/man1', ['gpsfake.1','gpsprof.1'])]
+           ('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
      )
