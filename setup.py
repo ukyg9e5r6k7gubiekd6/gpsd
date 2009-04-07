@@ -48,6 +48,6 @@ setup( name="gpsd",
     	Extension("gpslib", ["gpslib.c", "geoid.c"])
         ],
        py_modules = ['gpsfake','gps', 'leapsecond'],
-       data_files=[('bin', ['gpsfake','gpsprof']),
+       data_files=[('bin', ['gpscat','gpsfake','gpsprof']),
            ('share/man/man1', ['gpsfake.1','gpsprof.1'])]
      )
