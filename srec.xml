@@ -47,18 +47,18 @@ S9).</para></listitem>
 <varlistentry>
 <term>count</term>
 <listitem><para>A char[2] field. These characters when paired and
-interpreted as a hexadecimal value, display the count of remaining
+interpreted as a big-endian hexadecimal integer, display the count of remaining
 character pairs in the record.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>address</term>
 <listitem><para>A char[4,6, or 8] field. These characters grouped and
-interpreted as a hexadecimal value, display the address at which the
-data field is to be loaded into memory. The length of the field
-depends on the number of bytes necessary to hold the address. A 2-byte
-address uses 4 characters, a 3-byte address uses 6 characters, and a
-4-byte address uses 8 characters.</para></listitem>
+interpreted as a big-endian hexadecimal integer, display the address
+at which the data field is to be loaded into memory. The length of the
+field depends on the number of bytes necessary to hold the address. A
+2-byte address uses 4 characters, a 3-byte address uses 6 characters,
+and a 4-byte address uses 8 characters.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -69,12 +69,12 @@ or descriptive information.</para></listitem>
 </varlistentry>
 
 <varlistentry>
-<term>checksum</term>
+<term>checksum</term> 
 <listitem><para>A char[2] field. These characters when paired and
-interpreted as a hexadecimal value display the least significant byte
-of the ones complement of the sum of the byte values represented by
-the pairs of characters making up the count, the address, and the data
-fields.</para></listitem>
+interpreted as a big-endian hexadecimal integer display the least
+significant byte of the ones complement of the sum of the byte values
+represented by the pairs of characters making up the count, the
+address, and the data fields.</para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -111,51 +111,52 @@ name and description.</para>
 
 <varlistentry>
 <term>S1</term>
-<listitem><para>The type of record field is 'S1' (0x5331). The address field is
-interpreted as a 2-byte address. The data field is composed of memory loadable
-data.</para></listitem>
+<listitem><para>The type of record field is 'S1' (0x5331). The address
+field is interpreted as a 2-byte big-endian address. The data field is
+composed of memory loadable data.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S2</term>
-<listitem><para>The type of record field is 'S2' (0x5332). The address field is
-interpreted as a 3-byte address. The data field is composed of memory loadable
-data.</para></listitem>
+<listitem><para>The type of record field is 'S2' (0x5332). The address
+field is interpreted as a 3-byte big-endian address. The data field is
+composed of memory loadable data.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S3</term>
-<listitem><para>The type of record field is 'S3' (0x5333). The address field is
-interpreted as a 4-byte address. The data field is composed of memory loadable
-data.</para></listitem>
+<listitem><para>The type of record field is 'S3' (0x5333). The address
+field is interpreted as a 4-byte big-endian address. The data field is
+composed of memory loadable data.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S5</term>
-<listitem><para>The type of record field is 'S5' (0x5335). The address field is
-interpreted as a 2-byte value and contains the count of S1, S2, and S3 records
-previously transmitted. There is no data field.</para></listitem>
+<listitem><para>The type of record field is 'S5' (0x5335). The address
+field is interpreted as a 2-byte big-endian value and contains the
+count of S1, S2, and S3 records previously transmitted. There is no
+data field.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S7</term>
 <listitem><para>The type of record field is 'S7' (0x5337). The address
 field contains the starting execution address and is interpreted as a
-4-byte address. There is no data field.</para></listitem>
+4-byte big-endian address. There is no data field.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S8</term>
 <listitem><para>The type of record field is 'S8' (0x5338). The address
 field contains the starting execution address and is interpreted as a
-3-byte address. There is no data field.</para></listitem>
+3-byte big-endian address. There is no data field.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>S9</term>
 <listitem><para>The type of record field is 'S9' (0x5339). The address
 field contains the starting execution address and is interpreted as a
-2-byte address. There is no data field.</para></listitem>
+2-byte big-endian address. There is no data field.</para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -294,7 +295,8 @@ indicating the starting execution address.  </para></listitem>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>From an anonymous web page, itself claiming to have been derived
-from an old Unix manual page. Now maintained by the the GPSD project.
+from an old Unix manual page. Now maintained by the the GPSD
+project, which added endianness clarifications.
 There is a project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 
