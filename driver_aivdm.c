@@ -582,7 +582,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type5.ais_version,
 			  ais->type5.callsign,
 			  ais->type5.vessel_name,
-			  type_legends[ais->type5.ship_type],
+			  (ais->type5.ship_type < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[ais->type5.ship_type] : "INVALID SHIP TYPE",
 			  ais->type5.to_bow,
 			  ais->type5.to_stern,
 			  ais->type5.to_port,
