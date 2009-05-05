@@ -206,7 +206,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
 		if (duration > 499000 && duration < 501000
-#ifdef GPSCLOCK_ENABLE
+#if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
 		  && session->driver.nmea.ignore_trailing_edge
 #endif /* GPSCLOCK_ENABLE */
 		  ) {
