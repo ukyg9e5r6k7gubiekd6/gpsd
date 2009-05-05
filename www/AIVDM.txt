@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.4, March 2009
+v1.5, May 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -121,10 +121,12 @@ side of the duplex from two VHF radio channels: AIS Channel A is
 Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
 payload. We'll describe how to decode this in later sections.
 
-Field 7 (0*5C) is the NMEA 0183 data-integrity checksum for the sentence,
-preceded by "0*" to aid simpleminded NMEA parsers.  It is computed
-on the entire sentence including the AIVDM tag but excluding the
-leading "!".
+Field 7 (0) is the number of fill bits requires to pad the data 
+payload to a 6 bit boundary, ranging from 0 to 5.
+
+The *-separated suffix (*5C) is the NMEA 0183 data-integrity checksum
+for the sentence, preceded by "*".  It is computed on the entire
+sentence including the AIVDM tag but excluding the leading "!".
 
 For comparison, here is an example of a multifragment sentence with a
 nonempty message ID field:
@@ -927,3 +929,6 @@ attempts to demystify bit-stuffing.
 
 Version 1.4 adds explicit decoding tables for ASCII armoring and
 six-bit ASCII.
+
+Version 1.5 corrects the interpretation of field 7 in AIVDM
+ASCII-armored sentences.
