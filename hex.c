@@ -61,12 +61,12 @@ int gpsd_hexpack(char *src, char *dst, size_t len){
     if ((l < 1) || ((size_t)l > len))
 	return -2;
 
-    bzero(dst, (int)len);
     for (i = 0; i < l; i++)
 	if ((k = hex2bin(src+i*2)) != -1)
 	    dst[i] = (char)(k & 0xff);
 	else
 	    return -1;
+    (void)memset(dst+i, '\0', (size_t)(len-i));
     return l;
     /*@ +mustdefine @*/
 }
