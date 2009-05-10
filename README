@@ -98,6 +98,7 @@ modularized. His new features include:
      rate to use and what the GPS's device type is.
    * More new commands: 'I', 'U', 'E', 'B', 'Z'. See the docs.
    * Support for SiRF binary mode.
+   * Support for RTCM104 and AIVDM.
    * Support for multiple devices.
    * Other test tools -- gpsfake, gpscat.
 

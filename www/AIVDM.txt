@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.5, May 2009
+v1.6, May 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -538,11 +538,12 @@ Field   Len Description                   Encoding
 258-263   6 Dimension to Port             Unsigned integer: Meters
 264-269   6 Dimension to Starboard        Unsigned integer: Meters
 270-273   4 Position Fix Type             As in Type 4 EPSD codes
-274-279   6 ETA minute                    0-59, 60=not available (default)
-280-284   5 ETA hour                      0-23, 24=not available (default)
-285-289   5 ETA day                       1-31, 0=not available (default)
-290-292   4 ETA month                     1-12, 0=not available (default)
-293-301   9 Draught                       Unsigned integer: Meters
+
+274-277   4 ETA month                     1-12, 0=not available (default)
+278-282   5 ETA day                       1-31, 0=not available (default)
+283-287   5 ETA hour                      0-23, 24=not available (default)
+288-293   6 ETA minute                    0-59, 60=not available (default)
+294-301   8 Draught                       Unsigned integer: Meters
 302-421 120 Destination                   20 6-bit characters
 422-422   1 DTE                           0=Data terminal ready, 
                                           1=Data terminal not ready (default)
@@ -932,3 +933,6 @@ six-bit ASCII.
 
 Version 1.5 corrects the interpretation of field 7 in AIVDM
 ASCII-armored sentences.
+
+Version 1.6 correects some minor errors in the interpretation of Type
+5 messages.

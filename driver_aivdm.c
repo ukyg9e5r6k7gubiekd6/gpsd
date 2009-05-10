@@ -203,14 +203,14 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.ship_type    = UBITS(232, 8);
 	    ais->type5.to_bow       = UBITS(240, 9);
 	    ais->type5.to_stern     = UBITS(249, 9);
-	    ais->type5.to_port      = UBITS(258, 9);
-	    ais->type5.to_starboard = UBITS(264, 9);
+	    ais->type5.to_port      = UBITS(258, 6);
+	    ais->type5.to_starboard = UBITS(264, 6);
 	    ais->type5.epfd         = UBITS(270, 4);
-	    ais->type5.minute       = UBITS(274, 6);
-	    ais->type5.hour         = UBITS(280, 5);
-	    ais->type5.day          = UBITS(285, 5);
-	    ais->type5.month        = UBITS(290, 4);
-	    ais->type5.draught      = UBITS(293, 9);
+	    ais->type5.month        = UBITS(274, 4);
+	    ais->type5.day          = UBITS(278, 5);
+	    ais->type5.hour         = UBITS(283, 5);
+	    ais->type5.minute       = UBITS(288, 6);
+	    ais->type5.draught      = UBITS(294, 8);
 	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);
 	    ais->type5.spare        = UBITS(423, 1);
@@ -382,16 +382,16 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 	"Reserved for future use",
 	"Reserved for future use",
 	"Reserved for future use",
-	"Wing in ground (WIG), all ships of this type",
-	"Wing in ground (WIG), Hazardous category A",
-	"Wing in ground (WIG), Hazardous category B",
-	"Wing in ground (WIG), Hazardous category C",
-	"Wing in ground (WIG), Hazardous category D",
-	"Wing in ground (WIG), Reserved for future use",
-	"Wing in ground (WIG), Reserved for future use",
-	"Wing in ground (WIG), Reserved for future use",
-	"Wing in ground (WIG), Reserved for future use",
-	"Wing in ground (WIG), Reserved for future use",
+	"Wing in ground (WIG) - all ships of this type",
+	"Wing in ground (WIG) - Hazardous category A",
+	"Wing in ground (WIG) - Hazardous category B",
+	"Wing in ground (WIG) - Hazardous category C",
+	"Wing in ground (WIG) - Hazardous category D",
+	"Wing in ground (WIG) - Reserved for future use",
+	"Wing in ground (WIG) - Reserved for future use",
+	"Wing in ground (WIG) - Reserved for future use",
+	"Wing in ground (WIG) - Reserved for future use",
+	"Wing in ground (WIG) - Reserved for future use",
 	"Fishing",
 	"Towing",
 	"Towing: length exceeds 200m or breadth exceeds 25m",
@@ -402,16 +402,16 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 	"Pleasure Craft",
 	"Reserved",
 	"Reserved",
-	"High speed craft (HSC), all ships of this type",
-	"High speed craft (HSC), Hazardous category A",
-	"High speed craft (HSC), Hazardous category B",
-	"High speed craft (HSC), Hazardous category C",
-	"High speed craft (HSC), Hazardous category D",
-	"High speed craft (HSC), Reserved for future use",
-	"High speed craft (HSC), Reserved for future use",
-	"High speed craft (HSC), Reserved for future use",
-	"High speed craft (HSC), Reserved for future use",
-	"High speed craft (HSC), No additional information",
+	"High speed craft (HSC) - all ships of this type",
+	"High speed craft (HSC) - Hazardous category A",
+	"High speed craft (HSC) - Hazardous category B",
+	"High speed craft (HSC) - Hazardous category C",
+	"High speed craft (HSC) - Hazardous category D",
+	"High speed craft (HSC) - Reserved for future use",
+	"High speed craft (HSC) - Reserved for future use",
+	"High speed craft (HSC) - Reserved for future use",
+	"High speed craft (HSC) - Reserved for future use",
+	"High speed craft (HSC) - No additional information",
 	"Pilot Vessel",
 	"Search and Rescue vessel",
 	"Tug",
@@ -422,46 +422,46 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 	"Spare - Local Vessel",
 	"Medical Transport",
 	"Ship according to RR Resolution No. 18",
-	"Passenger, all ships of this type",
-	"Passenger, Hazardous category A",
-	"Passenger, Hazardous category B",
-	"Passenger, Hazardous category C",
-	"Passenger, Hazardous category D",
-	"Passenger, Reserved for future use",
-	"Passenger, Reserved for future use",
-	"Passenger, Reserved for future use",
-	"Passenger, Reserved for future use",
-	"Passenger, No additional information",
-	"Cargo, all ships of this type",
-	"Cargo, Hazardous category A",
-	"Cargo, Hazardous category B",
-	"Cargo, Hazardous category C",
-	"Cargo, Hazardous category D",
-	"Cargo, Reserved for future use",
-	"Cargo, Reserved for future use",
-	"Cargo, Reserved for future use",
-	"Cargo, Reserved for future use",
-	"Cargo, No additional information",
-	"Tanker, all ships of this type",
-	"Tanker, Hazardous category A",
-	"Tanker, Hazardous category B",
-	"Tanker, Hazardous category C",
-	"Tanker, Hazardous category D",
-	"Tanker, Reserved for future use",
-	"Tanker, Reserved for future use",
-	"Tanker, Reserved for future use",
-	"Tanker, Reserved for future use",
-	"Tanker, No additional information",
-	"Other Type, all ships of this type",
-	"Other Type, Hazardous category A",
-	"Other Type, Hazardous category B",
-	"Other Type, Hazardous category C",
-	"Other Type, Hazardous category D",
-	"Other Type, Reserved for future use",
-	"Other Type, Reserved for future use",
-	"Other Type, Reserved for future use",
-	"Other Type, Reserved for future use",
-	"Other Type, no additional information",
+	"Passenger - all ships of this type",
+	"Passenger - Hazardous category A",
+	"Passenger - Hazardous category B",
+	"Passenger - Hazardous category C",
+	"Passenger - Hazardous category D",
+	"Passenger - Reserved for future use",
+	"Passenger - Reserved for future use",
+	"Passenger - Reserved for future use",
+	"Passenger - Reserved for future use",
+	"Passenger - No additional information",
+	"Cargo - all ships of this type",
+	"Cargo - Hazardous category A",
+	"Cargo - Hazardous category B",
+	"Cargo - Hazardous category C",
+	"Cargo - Hazardous category D",
+	"Cargo - Reserved for future use",
+	"Cargo - Reserved for future use",
+	"Cargo - Reserved for future use",
+	"Cargo - Reserved for future use",
+	"Cargo - No additional information",
+	"Tanker - all ships of this type",
+	"Tanker - Hazardous category A",
+	"Tanker - Hazardous category B",
+	"Tanker - Hazardous category C",
+	"Tanker - Hazardous category D",
+	"Tanker - Reserved for future use",
+	"Tanker - Reserved for future use",
+	"Tanker - Reserved for future use",
+	"Tanker - Reserved for future use",
+	"Tanker - No additional information",
+	"Other Type - all ships of this type",
+	"Other Type - Hazardous category A",
+	"Other Type - Hazardous category B",
+	"Other Type - Hazardous category C",
+	"Other Type - Hazardous category D",
+	"Other Type - Reserved for future use",
+	"Other Type - Reserved for future use",
+	"Other Type - Reserved for future use",
+	"Other Type - Reserved for future use",
+	"Other Type - no additional information",
     };
 
     if (labeled)
@@ -573,8 +573,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE4_SCALED_LABELED
 	break;
     case 5: /* Ship static and voyage related data */
-#define TYPE5_SCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%s,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s,eta=%u:%uT%u:%uZ,draught=%.1f,dest=%s,dte=%u,sp=%u\n"
-#define TYPE5_SCALED_UNLABELED "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%u:%uT%u:%uZ,%.1f,%s,%u,%u\n"
+#define TYPE5_SCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%s,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s,eta=%02u-%02uT%02u:%02uZ,draught=%.1f,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_SCALED_UNLABELED "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%02u-%02uT%02u:%02uZ,%.1f,%s,%u,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (labeled ? TYPE5_SCALED_LABELED : TYPE5_SCALED_UNLABELED),
@@ -597,8 +597,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type5.dte,
 			  ais->type5.spare);
 	} else {
-#define TYPE5_UNSCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,eta=%u:%uT%u:%uZ,draught=%u,dest=%s,dte=%u,sp=%u\n"
-#define TYPE5_UNSCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%u:%uT%u:%uZ,%u,%s,%u,%u\n"
+#define TYPE5_UNSCALED_LABELED "ID=%u,AIS=%u,callsign=%s,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,eta=%02u-%02uT%02u:%02uZ,draught=%u,dest=%s,dte=%u,sp=%u\n"
+#define TYPE5_UNSCALED_UNLABELED "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u,%u\n"
 	    (void)fprintf(fp,
 			  (labeled ? TYPE5_UNSCALED_LABELED : TYPE5_UNSCALED_UNLABELED),
 			  ais->type5.imo_id,

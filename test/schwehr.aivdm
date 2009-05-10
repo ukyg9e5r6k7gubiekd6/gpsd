@@ -126,10 +126,10 @@
 #       dimC:             1
 #       dimD:             31
 #       fixtype:          1
-#       ETAminute:        21
-#       ETAhour:          29
-#       ETAday:           24
-#       ETAmonth:         0
+#       ETAminute:        0
+#       ETAhour:          16
+#       ETAday:           15
+#       ETAmonth:         5
 #       draught:          12.2
 #       destination:      NEW YORK            
 #       dte:              0
