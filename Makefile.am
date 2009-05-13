@@ -364,6 +364,7 @@ EXTRA_DIST = \
 	xgpsspeed.ad \
 	gpsd.rules \
 	gpsd.hotplug \
+	gpsd.hotplug.wrapper \
 	gpsd.usermap \
 	valgrind-audit \
 	valgrind-suppressions \
