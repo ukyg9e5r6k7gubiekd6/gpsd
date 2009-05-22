@@ -124,7 +124,7 @@ payload. We'll describe how to decode this in later sections.
 Field 7 (0) is the number of fill bits requires to pad the data 
 payload to a 6 bit boundary, ranging from 0 to 5.
 
-The *-separated suffix (*5C) is the NMEA 0183 data-integrity checksum
+The \*-separated suffix (\*5C) is the NMEA 0183 data-integrity checksum
 for the sentence, preceded by "*".  It is computed on the entire
 sentence including the AIVDM tag but excluding the leading "!".
 
@@ -143,7 +143,7 @@ represents six bits of data.  To recover the six bits, subtract 40
 from the ASCII character value; if the result is greater than 40
 subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
 this encoding begin with "0" (64) and end with "w" (87); however, the
-intermediate range "X" (58) to "\_" (95) in not used.  
+intermediate range "X" (58) to "\_" (95) is not used.  
 
 .ASCII payload armoring
 `--------`-------`---------`-------
