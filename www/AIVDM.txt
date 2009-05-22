@@ -934,5 +934,5 @@ six-bit ASCII.
 Version 1.5 corrects the interpretation of field 7 in AIVDM
 ASCII-armored sentences.
 
-Version 1.6 correects some minor errors in the interpretation of Type
+Version 1.6 corrects some minor errors in the interpretation of Type
 5 messages.
