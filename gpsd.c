@@ -1385,12 +1385,14 @@ static void handle_control(int sfd, char *buf)
 	    if ((chp = find_device(stash)) != NULL) {
 		/* NOTE: this destroys the original buffer contents */
 		st = gpsd_hexpack(eq, eq, len);
-		if (st < 0)
-		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %zd)\n", sfd, len);
+		if (st <= 0) {
+		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %zd).\n", sfd, st);
+		    ignore_return(write(sfd, "ERROR\n", 6));
+                }
 		else
 		{
-		    gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
-		    ignore_return(write(chp->gpsdata.gps_fd, eq, len));
+		    gpsd_report(LOG_INF,"<= control(%d): writing %d bytes fromhex(%s) to %s\n", sfd, st, eq, stash);
+		    ignore_return(write(chp->gpsdata.gps_fd, eq, st));
 		    ignore_return(write(sfd, "OK\n", 3));
 		}
 	    } else {
