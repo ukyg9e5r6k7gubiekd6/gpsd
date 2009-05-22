@@ -213,3 +213,21 @@
 #       RAIM:               True
 #       CommStateSelector:  1
 #       CommState:          393222
+#
+!AIVDM,1,1,,A,B52KB8h006fu`Q6:g1McCwb5oP06,0*00
+#       MessageID:          18
+#       RepeatIndicator:    0
+#       UserID:             338088483
+#       Reserved1:          0
+#       SOG:                0
+#       PositionAccuracy:   0
+#       longitude:          -70.8111966
+#       latitude:           43.11555833
+#       COG:                171.6
+#       TrueHeading:        511
+#       TimeStamp:          20
+#       RegionalReserved:   0
+#       Spare:              0
+#       RAIM:               True
+#       CommStateSelector:  1
+#       CommState:          393222
