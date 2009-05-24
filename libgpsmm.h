@@ -14,7 +14,7 @@
 
 class gpsmm {
 	public:
-		gpsmm() { };
+		gpsmm();
 		virtual ~gpsmm();
 		struct gps_data_t* open(const char *host,const char *port); //opens the connection with gpsd, MUST call this before any other method
 		struct gps_data_t* open(void); //open() with default values
