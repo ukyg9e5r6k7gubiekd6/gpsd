@@ -1,6 +1,11 @@
 #! /bin/bash
 # $Id$
 
+if [ -r /etc/default/gpsd ]; then
+  . /etc/default/gpsd
+  [ "$USBAUTO" = "true" ] || exit 0
+fi
+
 if [ "$ACTION" == "remove" ] ; then
   if [ $(echo $DEVLINKS | grep -q /dev/gps) ] ; then
     exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
