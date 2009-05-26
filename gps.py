@@ -264,7 +264,7 @@ class gps(gpsdata):
                         self.cycle = -1
                         self.device = None
                     elif len(data.split()) == 2:
-                        (self.cycle, self.mincycle) = map(float, data)
+                        (self.cycle, self.mincycle) = map(float, data.split())
                     else:
                         self.mincycle = self.cycle = float(data)
                 elif cmd == 'D':
