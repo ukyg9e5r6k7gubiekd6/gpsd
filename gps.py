@@ -121,7 +121,7 @@ class gpsdata:
             self.ss = ss
             self.used = used
         def __repr__(self):
-            return "PRN: %3d  E: %3d  Az: %3d  Ss: %d Used: %s" % (
+            return "PRN: %3d  E: %3d  Az: %3d  Ss: %3d  Used: %s" % (
                 self.PRN, self.elevation, self.azimuth, self.ss, "ny"[self.used]
             )
 
@@ -155,8 +155,8 @@ class gpsdata:
         self.devices = []
 
     def __repr__(self):
-        st = "Time: %s (%s)" % (self.utc, self.fix.time)
-        st += "Lat/lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
+        st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
+        st += "Lat/Lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
         if isnan(self.fix.altitude):
             st += "Altitude: ?\n"
         else:
@@ -169,13 +169,13 @@ class gpsdata:
             st += "Track:    ?\n"
         else:
             st += "Track:    %f\n" % (self.fix.track)
-        st += "Status:   STATUS_%s\n" %("NO_FIX","FIX","DGPS_FIX")[self.status]
-        st += "Mode:     MODE_"+("ZERO", "NO_FIX", "2D","3D")[self.fix.mode]+"\n"
+        st += "Status:   STATUS_%s\n" % ("NO_FIX", "FIX", "DGPS_FIX")[self.status]
+        st += "Mode:     MODE_%s\n" % ("ZERO", "NO_FIX", "2D", "3D")[self.fix.mode]
         st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
               (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
         st += "Y: %s satellites in view:\n" % len(self.satellites)
         for sat in self.satellites:
-          st += "    " + repr(sat) + "\n"
+          st += "    %r\n" % sat
         return st
 
 class gps(gpsdata):
