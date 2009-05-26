@@ -524,8 +524,12 @@ def isotime(s):
 
 if __name__ == '__main__':
     import readline
+    args = sys.argv[1:]
+    if len(args) > 2:
+        print 'Usage: gps.py [host [port]]'
+        sys.exit(1)
     print "This is the exerciser for the Python gps interface."
-    session = gps()
+    session = gps(*args)
     session.set_raw_hook(lambda s: sys.stdout.write(s + "\n"))
     try:
         while True:
