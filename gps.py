@@ -306,47 +306,46 @@ class gps(gpsdata):
                         self.fix.mode = MODE_NO_FIX
                     else:
                         self.timings.sentence_tag = fields[0]
-                        def default(i, cnv=float):
+                        def default(i, vbit=0, cnv=float):
                             if fields[i] == '?':
                                 return NaN
                             else:
-                                return cnv(fields[i])
+                                try:
+                                    value = cnv(fields[i])
+                                except ValueError:
+                                    return NaN
+                                self.valid |= vbit
+                                return value
+                        # clear all valid bits that might be set again below
+                        self.valid &= ~(
+                            TIME_SET | TIMERR_SET | LATLON_SET | ALTITUDE_SET |
+                            HERR_SET | VERR_SET | TRACK_SET | SPEED_SET |
+                            CLIMB_SET | SPEEDERR_SET | CLIMBERR_SET | MODE_SET
+                        )
                         self.utc = fields[1]
-                        self.fix.time = default(1)
+                        self.fix.time = default(1, TIME_SET)
                         if not isnan(self.fix.time):
                             self.utc = isotime(self.fix.time)
-                        self.fix.ept = default(2)
-                        self.fix.latitude = default(3)
+                        self.fix.ept = default(2, TIMERR_SET)
+                        self.fix.latitude = default(3, LATLON_SET)
                         self.fix.longitude = default(4)
-                        self.fix.altitude = default(5)
-                        self.fix.eph = default(6)
-                        self.fix.epv = default(7)
-                        self.fix.track = default(8)
-                        self.fix.speed = default(9)
-                        self.fix.climb = default(10)
+                        self.fix.altitude = default(5, ALTITUDE_SET)
+                        self.fix.eph = default(6, HERR_SET)
+                        self.fix.epv = default(7, VERR_SET)
+                        self.fix.track = default(8, TRACK_SET)
+                        self.fix.speed = default(9, SPEED_SET)
+                        self.fix.climb = default(10, CLIMB_SET)
                         self.fix.epd = default(11)
-                        self.fix.eps = default(12)
-                        self.fix.epc = default(13)
+                        self.fix.eps = default(12, SPEEDERR_SET)
+                        self.fix.epc = default(13, CLIMBERR_SET)
                         if len(fields) > 14:
-                            self.fix.mode = default(14, int)
+                            self.fix.mode = default(14, MODE_SET, int)
                         else:
-                            if isnan(self.fix.altitude):
+                            if self.valid & ALTITUDE_SET:
                                 self.fix.mode = MODE_2D
                             else:
                                 self.fix.mode = MODE_3D
-                        self.valid = TIME_SET | TIMERR_SET | LATLON_SET | MODE_SET
-                        if self.fix.mode == MODE_3D:
-                            self.valid |= ALTITUDE_SET | CLIMB_SET
-                        if not isnan(self.fix.eph):
-                            self.valid |= HERR_SET
-                        if not isnan(self.fix.epv):
-                            self.valid |= VERR_SET
-                        if not isnan(self.fix.track):
-                            self.valid |= TRACK_SET | SPEED_SET
-                        if not isnan(self.fix.eps):
-                            self.valid |= SPEEDERR_SET
-                        if not isnan(self.fix.epc):
-                            self.valid |= CLIMBERR_SET
+                            self.valid |= MODE_SET
                 elif cmd == 'P':
                     (self.fix.latitude, self.fix.longitude) = map(float, data.split())
                     self.valid |= LATLON_SET
