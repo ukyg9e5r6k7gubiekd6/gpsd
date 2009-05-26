@@ -244,14 +244,14 @@ class gps(gpsdata):
             for field in fields[1:]:
                 if not field or field[1] != '=':
                     continue
-                cmd = field[0]
+                cmd = field[0].upper()
                 data = field[2:]
                 if data[0] == "?":
                     continue
-                if cmd in ('A', 'a'):
+                if cmd == 'A':
                     self.fix.altitude = float(data)
                     self.valid |= ALTITUDE_SET
-                elif cmd in ('B', 'b'):
+                elif cmd == 'B':
                     if data == '?':
                         self.baudrate = self.stopbits = 0
                         self.device = None
@@ -259,7 +259,7 @@ class gps(gpsdata):
                         (f1, f2, f3, f4) = data.split()
                         self.baudrate = int(f1)
                         self.stopbits = int(f4)
-                elif cmd in ('C', 'c'):
+                elif cmd == 'C':
                     if data == '?':
                         self.cycle = -1
                         self.device = None
@@ -267,40 +267,40 @@ class gps(gpsdata):
                         (self.cycle, self.mincycle) = map(float, data)
                     else:
                         self.mincycle = self.cycle = float(data)
-                elif cmd in ('D', 'd'):
+                elif cmd == 'D':
                     self.utc = data
                     self.fix.time = isotime(self.utc)
                     self.valid |= TIME_SET
-                elif cmd in ('E', 'e'):
+                elif cmd == 'E':
                     parts = data.split()
                     (self.epe, self.fix.eph, self.fix.epv) = map(float, parts)
                     self.valid |= HERR_SET | VERR_SET | PERR_SET
-                elif cmd in ('F', 'f'):
+                elif cmd == 'F':
                     if data == '?':
                         self.device = None
                     else:
                         self.device = data
-                elif cmd in ('I', 'i'):
+                elif cmd == 'I':
                     if data == '?':
                         self.cycle = -1
                         self.gps_id = None
                     else:
                         self.gps_id = data
-                elif cmd in ('K', 'K'):
+                elif cmd == 'K':
                     if data == '?':
                         self.devices = None
                     else:
                         self.devices = data[1:].split()
-                elif cmd in ('M', 'm'):
+                elif cmd == 'M':
                     self.fix.mode = int(data)
                     self.valid |= MODE_SET
-                elif cmd in ('N', 'n'):
+                elif cmd == 'N':
                     if data == '?':
                         self.driver_mode = -1
                         self.device = None
                     else:
                         self.driver_mode = int(data)
-                elif cmd in ('O', 'o'):
+                elif cmd == 'O':
                     fields = data.split()
                     if fields[0] == '?':
                         self.fix.mode = MODE_NO_FIX
@@ -347,34 +347,34 @@ class gps(gpsdata):
                             self.valid |= SPEEDERR_SET
                         if not isnan(self.fix.epc):
                             self.valid |= CLIMBERR_SET
-                elif cmd in ('P', 'p'):
+                elif cmd == 'P':
                     (self.fix.latitude, self.fix.longitude) = map(float, data.split())
                     self.valid |= LATLON_SET
-                elif cmd in ('Q', 'q'):
+                elif cmd == 'Q':
                     parts = data.split()
                     self.satellites_used = int(parts[0])
                     (self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
                     self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
-                elif cmd in ('S', 's'):
+                elif cmd == 'S':
                     self.status = int(data)
                     self.valid |= STATUS_SET
-                elif cmd in ('T', 't'):
+                elif cmd == 'T':
                     self.fix.track = float(data)
                     self.valid |= TRACK_SET
-                elif cmd in ('U', 'u'):
+                elif cmd == 'U':
                     self.fix.climb = float(data)
                     self.valid |= CLIMB_SET
-                elif cmd in ('V', 'v'):
+                elif cmd == 'V':
                     self.fix.speed = float(data)
                     self.valid |= SPEED_SET
-                elif cmd in ('X', 'x'):
+                elif cmd == 'X':
                     if data == '?':
                         self.online = -1
                         self.device = None
                     else:
                         self.online = float(data)
                         self.valid |= ONLINE_SET
-                elif cmd in ('Y', 'y'):
+                elif cmd == 'Y':
                     satellites = data.split(":")
                     prefix = satellites.pop(0).split()
                     self.timings.sentence_tag = prefix.pop(0)
@@ -387,7 +387,7 @@ class gps(gpsdata):
                         newsats.append(gps.satellite(*map(int, satellites[i].split())))
                     self.satellites = newsats
                     self.valid |= SATELLITE_SET
-                elif cmd in ('Z', 'z'):
+                elif cmd == 'Z':
                     self.profiling = (data[0] == '1')
                 elif cmd == '$':
                     self.timings.collect(*data.split())
