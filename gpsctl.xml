@@ -63,7 +63,7 @@ the new speed.</para>
 <term>-c</term>
 <listitem>
 <para>Change the GPS's cycle time.  Units are seconds.  Note, most
-GPses have a fixeed cycle time of 1 second.</para>
+GPSes have a fixed cycle time of 1 second.</para>
 </listitem>
 </varlistentry>
 
