@@ -204,6 +204,28 @@
 #       DestID:           366832740
 #       Spare2:           0
 #
+# Type 11:
+# Message has Coast Guard extended fields following
+!AIVDM,1,1,,B,;4R33:1uUK2F`q?mOt@@GoQ00000,0*5D,s28089,d-103,T39.44353985,x147521,r08TPHI1,1242958962
+#      MessageID:           11
+#      RepeatIndicator:     0
+#      UserID:              304137000
+#      Time_year:           2009
+#      Time_month:          5
+#      Time_day:            22
+#      Time_hour:           2
+#      Time_min:            22
+#      Time_sec:            40
+#      PositionAccuracy:    1
+#      Position_longitude:  -94.40768333333333333333333333
+#      Position_latitude:   28.40911666666666666666666667
+#      fixtype:             1
+#      Spare:               0
+#      RAIM:                False
+#      state_syncstate:     0
+#      state_slottimeout:   0
+#      state_slotoffset:    0
+#
 # Type 18:
 # I had to regenerate the CRC32 for this one myself, it was missing
 # in Kurt's original.
@@ -267,3 +289,27 @@
 #        RAIM:              False
 #        DTE:               0
 #        Spare3:            0
+#
+# Type 24:
+# One pair of type A and Type B messages. Note, these have Coast Guard 
+# extended fields after them.
+!AIVDM,1,1,,B,H5NHcTP<51@4TrM>10584@U<D00,2*77,x337805,b003669710,1241895000
+#       MessageID:         24
+#       RepeatIndicator:   0
+#       UserID:            367405970
+#       partnum:            0
+#       name:   CAPTAIN`S PARADISE
+!AIVDM,1,1,,B,HU2K5NTn13BijklG44oppk103210,0*06,s23294,d-114,T44.21624911,x731910,r13RSMT1,1241894986
+#       MessageID:         24
+#       RepeatIndicator:   2
+#       UserID:            338085242
+#       partnum:            1
+#       shipandcargo: 54
+#       vendorid: ACR1234
+#       callsign: WDD7883
+#       dimA: 8
+#       dimB: 3
+#       dimC: 2
+#       dimD: 1
+#       mothership: 16789633
+#       spare: 0
