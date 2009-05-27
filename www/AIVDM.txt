@@ -281,6 +281,10 @@ divisor which should be applied to convert to the correct units.
 Note that many sources use 1-origin numbering for the bits.  We'll
 use 0-origin in this document.
 
+The message type names are somewhat variable across different public
+sources. Whatever ITU-1371 says should be considered authoritative,
+but the variations I have seen appear to have no practical consequences.
+
 The first 6 bits of the payload (0-5) are the message type.  Message
 types are as follows:
 
@@ -306,7 +310,7 @@ types are as follows:
 18 Standard Class B CS Position Report
 19 Extended Class B Equipment Position Report
 20 Data Link Management
-21 Aids-to-navigation Report
+21 Aid-to-Navigation Report
 22 Channel Management
 23 Group Assignment Command
 24 Class B CS Static Data Report 
@@ -338,7 +342,7 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-14, and 18-19 follow.
+Detailed descriptions of message types 1-14 and 18-19 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
@@ -999,4 +1003,4 @@ ASCII-armored sentences.
 Version 1.6 corrects some minor errors in the interpretation of Type
 5 messages.
 
-Version 1.7 adds description for Type 19 messages.
+Version 1.7 adds description for Type 10, 11, and 19 messages.
