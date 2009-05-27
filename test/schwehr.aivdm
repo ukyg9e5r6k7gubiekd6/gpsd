@@ -233,3 +233,28 @@
 #       RAIM:               True
 #       CommStateSelector:  1
 #       CommState:          393222
+#
+# Type 19:
+!AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
+#        MessageID:         19
+#        RepeatIndicator:   0
+#        UserID:            367059850
+#        Spare:             0
+#        SOG:               8.7
+#        PositionAccuracy:  0
+#        longitude:         -88.8103916667
+#        latitude:          29.543695
+#        COG:               335.9
+#        TrueHeading:       511
+#        TimeStamp:         46
+#        Spare2:            0
+#        name:              CAPT.J.RIMES
+#        shipandcargo:      70
+#        dimA:              5
+#        dimB:              21
+#        dimC:              4
+#        dimD:              4
+#        fixtype:           1
+#        RAIM:              False
+#        DTE:               0
+#        Spare3:            0
