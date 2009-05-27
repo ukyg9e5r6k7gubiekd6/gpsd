@@ -9,7 +9,7 @@ you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
 
 This is a description of how to decode AIVDM/AIVDO sentences.  It
 collects and integrates information from publicly available sources
-amd is intended to assist developers of open-source software for
+and is intended to assist developers of open-source software for
 interpreting these messages.
 
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
