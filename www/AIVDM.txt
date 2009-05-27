@@ -338,7 +338,7 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-9, 11-14, and 18-19 follow.
+Detailed descriptions of message types 1-14, and 18-19 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
@@ -706,7 +706,7 @@ Field   Len Description                       Units
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
-Total number of bits is 168
+Total number of bits is 168.
 
 `-------`---`-----------------------------`------------------------------------
 Field   Len Description                   Encoding   
@@ -739,6 +739,21 @@ Position Accuracy, Longitude, Latitude, and Course over Ground
 are encoded identically as uin the common navigation block and
 are even at the same bit offsets.  Time stamp has the same special
 values as in the common navigation block, but is at a different offset.
+
+=== Type 10: UTC/Date Inquiry ===
+
+Request for UTC/Date information from an AIS base station. Total
+number of bits is 72.
+
+`-------`---`-----------------------------`------------------------------------
+Field   Len Description                   Encoding   
+-------------------------------------------------------------------------------
+0-5      6  Message Type                  Unsigned integer: 9
+6-7      2  Repeat Indicator              As in Common Navigation Block
+8-37    30  Source MMSI                   Unsigned integer: 9 decimal digits
+38-39    2  Spare                         Not used
+40-69   30  Destination MMSI              Unsigned integer: 9 decimal digits
+70-71    2  Spare                         Not used
 
 === Type 11: UTC/Date Response ===
 

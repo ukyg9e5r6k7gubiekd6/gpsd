@@ -482,7 +482,7 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type123;
-	/* Type 4 - Base Station Report */
+	/* Type 4 - Base Station Report & Type 11 - UTC and Date Response */
 	struct {
 	    uint year;			/* UTC year */
 #define AIS_YEAR_NOT_AVAILABLE	0
@@ -566,6 +566,12 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type9;
+	/* Type 10 - UTC/Date Inquiry */
+	struct {
+	    uint spare;
+	    uint dest_mmsi;		/* destination MMSI */
+	    uint spare2;
+	} type10;
 	/* Type 12 - Safety-Related Message */
 	struct {
 	    uint seqno;			/* sequence number */

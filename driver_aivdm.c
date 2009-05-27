@@ -294,6 +294,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type9.cog, 
 			ais->type9.utc_second);
 	    break;
+        case 10: /* UTC/Date inquiry */
+	    ais->type10.spare          = UBITS(38, 2);
+	    ais->type10.dest_mmsi      = UBITS(40, 30);
+	    ais->type10.spare2         = UBITS(70, 2);
+	    break;
         case 12: /* Safety Related Message */
 	    ais->type12.seqno          = UBITS(38, 2);
 	    ais->type12.dest_mmsi      = UBITS(40, 30);
@@ -771,6 +776,17 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE9_UNSCALED_LABELED
 #undef TYPE9_SCALED_UNLABELED
 #undef TYPE9_SCALED_LABELED
+	break;
+    case 10:	/* UTC/Date Inquiry */
+#define TYPE10_UNLABELED  "%x,%u,%x\n"
+#define TYPE10_LABELED	"sp=%x,dst=%u,sp2=%x\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE10_LABELED : TYPE10_UNLABELED),
+			  ais->type10.spare,
+			  ais->type10.dest_mmsi,
+			  ais->type10.spare2);
+#undef TYPE10_UNLABELED
+#undef TYPE10_LABELED
 	break;
     case 12:	/* Safety Related Message */
 #define TYPE12_UNLABELED  "%u,%u,%u,%s\n"
