@@ -794,6 +794,10 @@ A less detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
 common navigation block.  168 bits.
 
+It is reported that ITU 1371-3 introduces bit-by-bit interpretations
+for the Regional Reserved field in this message; I don't yet know what
+they are.
+
 `-------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
 -------------------------------------------------------------------------------

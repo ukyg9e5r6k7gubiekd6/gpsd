@@ -4,6 +4,17 @@
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
  * Decoding of message type 11 has not yet been tested against known-good data.
+ *
+ * The noaadata-0.42 decoder interprets the Regional Reserved field in
+ * message 18 as follows.  The changelog says these are ITU 1371-3
+ * changes; we don't know what they mean yet, so this decoding isn't
+ * done here.
+ *	r['cs_unit']=bool(int(bv[141:142]))
+ *	r['display_flag']=bool(int(bv[142:143]))
+ *	r['dsc_flag']=bool(int(bv[143:144]))
+ *	r['band_flag']=bool(int(bv[144:145]))
+ *	r['msg22_flag']=bool(int(bv[145:146]))
+ *	*
  */
 #include <sys/types.h>
 #include <stdio.h>
