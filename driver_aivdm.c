@@ -2,6 +2,8 @@
  * Driver for AIS/AIVDM messages.
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
+ *
+ * Decoding of message type 11 has not yet been tested against known-good data.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -168,7 +170,8 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type123.heading, 
 			ais->type123.utc_second);
 	    break;
-	case 4:	/* Base Station Report */
+	case 4: 	/* Base Station Report */
+	case 11:	/* UTC/Date Response */
 	    ais->type4.year = UBITS(38, 14);
 	    ais->type4.month = UBITS(52, 4);
 	    ais->type4.day = UBITS(56, 5);
@@ -585,6 +588,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE123_SCALED_LABELED
 	break;
     case 4:	/* Base Station Report */
+    case 11:	/* UTC/Date Response */
 #define TYPE4_UNSCALED_UNLABELED "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,%x\n"
 #define TYPE4_UNSCALED_LABELED "%4u:%02u:%02uT%02u:%02u:%02uZ,q=%u,lon=%d,lat=%d,epfd=%u,sp=%u,radio=%x\n"
 #define TYPE4_SCALED_UNLABELED	"%4u:%02u:%02uT%02u:%02u:%02uZ,%u,%.4f,%.4f,%s,%u,%x\n"

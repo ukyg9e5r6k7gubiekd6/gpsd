@@ -338,7 +338,7 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-9, 12-14, and 18-19 follow.
+Detailed descriptions of message types 1-9, 11-14, and 18-19 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
@@ -740,6 +740,10 @@ are encoded identically as uin the common navigation block and
 are even at the same bit offsets.  Time stamp has the same special
 values as in the common navigation block, but is at a different offset.
 
+=== Type 11: UTC/Date Response ===
+
+Identical to message 4, with the semantics of a response to inquiry.
+
 === Type 12: Safety-Related Message ===
 
 This is a point-to-point text message.  The payload is interpreted as
@@ -815,6 +819,10 @@ A more detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
 common navigation block.  Note that until just before the reserved field
 at bit 139 this is identical to message 18.  312 bits.
+
+In practice, the information in the ship name and dimension fields is
+not reliable, as it has to be hand-entered by humans rather than
+gathered automatically from sensors.
 
 `--------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
