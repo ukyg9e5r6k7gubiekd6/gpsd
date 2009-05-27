@@ -67,7 +67,8 @@ sample messages and descriptions of AIS operation in the wild that
 shed light on various obscure corners of the specification.  He has
 explained the otherwise undocumented Repeat Indicator field and USCG
 extended AIVDM to me by email. He also communicated some critical
-information from <<IEC-PAS>>.
+information from <<IEC-PAS>>, and supplied information about new
+messages and fields in ITU-1371-3.
 
 == Improving This Document ==
 
@@ -86,7 +87,7 @@ document:
 * Field offsets, types, and descriptions for messages 23-26 not
   described in <<IALA>>.
 
-* Sample sentences of types 6-8, 10-18, and 20-26 together with
+* Sample sentences of types 6-8, 10, 12-18, 20-23, and 25-26 together with
   decoded dumps of the field values.
 
 == Open-Source Implementations ==
@@ -362,17 +363,17 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-14 and 18-19 follow.
+Detailed descriptions of message types 1-14, 18-19, and 24 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
 listed at <<BOSUN>> with no further information; message types 25-26
-come from <<Schwehr>>, who reports they were added in Version 3 of
+are reported by <<Schwehr>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
 The field breakdowns in this document have been checked against
 live decoded data rendered by known-good implementations 
-for message types 1-5, 9, 18, and 19.
+for message types 1-5, 9, 11, 18, and 19.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -837,9 +838,11 @@ A less detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
 common navigation block.  168 bits total.
 
-It is reported that ITU 1371-3 introduces bit-by-bit interpretations
-for the Regional Reserved field in this message; I don't yet know what
-they are.
+In <<IALA>> (and ITU 1371-1) bits 141-145 were designated "Spare"; the
+bit-flag semantics given here are from ITU-1371-3 and were
+communicated by Kurt Schwehr.  Kurt warns that "the spec does not do a
+good job of explaining these fields... I don't think that I totally
+understand these fields."
 
 `-------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
@@ -856,7 +859,18 @@ Field   Len Description                       Units
 124-132  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 133-138  6  Time Stamp               Second of UTC timestamp.
 139-140  2  Regional reserved
-141-145  5  Spare
+141-141  1  CS Unit                  0=Class B SOTDMA unit
+                                     1=Class B CS (Carrier Sense) unit
+142-142  1  Display flag             0=No visual display, 1=Has visual display
+                                     (Probably not reliable.)
+143-143  1  DSC Flag                 If 1, unit is attached to a VHF
+                                     voice radio with DSC capability.
+144-144  1  Band flag                Base stations can command units
+                                     to switch frequency.  If this flag
+                                     is 1, the unit can use any part
+				     of the marine channel
+145-145  1  Message 22 flag          If 1, unit can accept a channel
+                                     assignment via Message Type 22.
 146-167 22  Radio status
 -------------------------------------------------------------------------------
 
@@ -961,6 +975,49 @@ more than 20 characters for the name of the A-to-N are needed in
 total. Only the required number of characters should be transmitted,
 i.e. no @-character should be used.", but does not specify how to
 detect end-of-field.
+
+=== Type 24: Class B CS Static Data Report  ===
+
+Equivalent of a Type 5 message for ships using Class B equipment.  A
+"Type 24" may be in part A or part B format; either is 168 bits.
+Parts A and B are expected to be broadcast in adjacent pairs.  The
+interpretation of some fields in Type B format changes depending on
+the range of the Type B MMSI field.
+
+<<IALA>> does not describe this message type; format information
+is thanks to Kurt Schwehr.
+
+`--------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type             Unsigned integer: 19
+6-7       2  Repeat Indicator         As in Common Navigation Block
+8-37     30  MMSI                     Unsigned integer: 9 decimal digits
+38-39     2  Part Number              Unsigned integer: 0-1
+40-159  120  Vessel Name              (Part A) 20 six-bit characters
+160-167   8  Spare                    (Part A)
+40-47     8  Ship Type                (Part B) As in Message Type 5
+48-89    42  Vendor ID                (Part B) 7 six-bit characters: see below
+90-131   42  Call Sign                (Part B) As in Message Type 5
+132-140   9  Dimension to Bow         (Part B) Unsigned integer: Meters
+141-149   9  Dimension to Stern       (Part B) Unsigned integer: Meters
+150-155   6  Dimension to Port        (Part B) Unsigned integer: Meters
+156-161   6  Dimension to Starboard   (Part B) Unsigned integer: Meters
+132-161  30  Mothership MMSI          (Part B) See below
+162-167   8  Spare                    (Part B)
+--------------------------------------------------------------------------------
+
+If the Part Number field is 0, the rest of the message is interpreted
+as a Part A; if it is 1, the rest of the message is interpreted
+as a Part B; values 2 and 3 are not allowed.
+
+The "Vendor ID" field is the name of the AIS equipment vendor.
+
+Interpretation of the 30 bits 132-162 in Part B is variable. If the
+most significant decimal digit of the MMSI is 2, the entry is taken
+to refer to a small attached auxiliary vessel and these 30 bits
+are read as the MMSI of the mother ship.  Otherwise the 30 bits 
+describe vessel dimensions as in Message Type 5.
 
 == Local extensions ==
 
@@ -1090,5 +1147,6 @@ ASCII-armored sentences.
 Version 1.6 corrects some minor errors in the interpretation of Type
 5 messages.
 
-Version 1.7 adds descriptions for Type 10, 11, 19, and 21 messages,
+Version 1.7 adds descriptions for Type 10, 11, 19, 21, and 24
+messages, information about ITU-1371-3 flags in message type 18,
 and the new section on Improving This Document.
