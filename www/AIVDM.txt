@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.6, May 2009
+v1.7, May 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -338,7 +338,7 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-9, 12-14, and 18 follow.
+Detailed descriptions of message types 1-9, 12-14, and 18-19 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
@@ -725,7 +725,7 @@ Field   Len Description                   Encoding
 142-142  1  DTE                           0=Data terminal ready, 
                                           1=Data terminal not ready (default)
 143-145  3  Spare                         Not used
-146-168 22  Communications status         See <<IALA>> for details.
+146-167 22  Communications status         See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
 Altitude is in meters.  The special value 4095 indicates altitude is
@@ -788,7 +788,7 @@ Field   Len Description                       Units
 
 A less detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
-common navigation block.
+common navigation block.  168 bits.
 
 `-------`---`------------------------`-----------------------------------------
 Field   Len Description                       Units
@@ -804,10 +804,45 @@ Field   Len Description                       Units
 112-123 12  Course Over Ground (COG) Relative to true north to 0.1 degree
 124-132  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 133-138  6  Time Stamp               Second of UTC timestamp.
-139-141  2  Regional reserved
-141-146  5  Spare
-147-168 22  Radio status
+139-140  2  Regional reserved
+141-145  5  Spare
+146-167 22  Radio status
 -------------------------------------------------------------------------------
+
+=== Type 19: Extended Class B CS Position Report ===
+
+A more detailed report for vessels using Class B transponders.  Omits
+navigational status and rate of turn.  Fields are encoded as in the
+common navigation block.  Note that until just before the reserved field
+at bit 139 this is identical to message 18.  312 bits.
+
+`--------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type             Unsigned integer: 19
+6-7       2  Repeat Indicator         As in Common Navigation Block
+8-37     30  MMSI                     Unsigned integer: 9 decimal digits
+38-45     8  Regional Reserved
+46-55    10  Speed Over Ground (SOG)  As in common navigation block
+56-56     1  Position Accuracy        See below
+57-84    28  Longitude                Minutes/10000 (see below)
+85-111   27  Latitude                 Minutes/10000 (see below)
+112-123  12  Course Over Ground (COG) Relative to true north to 0.1 degree
+124-132   9  True Heading (HDG)       0 to 359 degrees, 511 = not available
+133-138   6  Time Stamp               Second of UTC timestamp.
+139-142   4  Regional reserved
+143-262 120  Name                     20 6-bit characters 
+263-270   8  Type of ship and cargo   As in Message 5
+271-279   9  Dimension to Bow         Unsigned integer: Meters
+280-288   9  Dimension to Stern       Unsigned integer: Meters
+289-294   6  Dimension to Port        Unsigned integer: Meters
+295-297   6  Dimension to Starboard   Unsigned integer: Meters
+299-301   4  Position Fix Type        As in Type 4 EPSD codes
+302-303   1  RAIM flag                As for common navigation block
+304-305   1  DTE                      0=Data terminal ready, 
+306-306   1  Assigned mode flag       See <<IALA>> for details
+307-311   5  Spare                    Unused, should be zero
+--------------------------------------------------------------------------------
 
 == Local extensions ==
 
@@ -936,3 +971,5 @@ ASCII-armored sentences.
 
 Version 1.6 corrects some minor errors in the interpretation of Type
 5 messages.
+
+Version 1.7 adds description for Type 19 messages.

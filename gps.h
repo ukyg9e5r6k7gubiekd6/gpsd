@@ -601,6 +601,29 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type18;
+	/* Type 19 - Extended Class B CS Position Report */
+	struct {
+	    uint reserved;		/* altitude in meters */
+	    uint sog;			/* speed over ground in deciknots */
+	    bool accuracy;		/* position accuracy */
+	    int longitude;		/* longitude */
+	    int latitude;		/* latitude */
+	    uint cog;			/* course over ground */
+	    uint heading;		/* true heading */
+	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint regional;		/* regional reserved */
+	    char vessel_name[21];	/* ship name */
+	    uint ship_type;		/* ship type code */
+	    uint to_bow;		/* dimension to bow */
+	    uint to_stern;		/* dimension to stern */
+	    uint to_port;		/* dimension to port */
+	    uint to_starboard;		/* dimension to starboard */
+	    uint epfd;			/* type of position fix deviuce */
+	    bool raim;			/* RAIM flag */
+	    bool dte;			/* date terminal enable */
+	    bool assigned;		/* assigned-mode flag */
+	    uint spare;			/* spare bits */
+	} type19;
     };
 };
 

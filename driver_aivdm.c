@@ -40,7 +40,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
     to[count-1] = '\0';
     /* trim spaces on right end */
     for (i = count-2; i >= 0; i--)
-	if (to[i] == ' ')
+	if (to[i] == ' ' || to[i] == '@')
 	    to[i] = '\0';
 	else
 	    break;
@@ -311,8 +311,41 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type18.cog, 
 			ais->type18.heading, 
 			ais->type18.utc_second);
+	    break;	
+	case 19:	/* Extended Class B CS Position Report */
+	    ais->type19.reserved = UBITS(38, 8);
+	    ais->type19.sog = UBITS(46, 10);
+	    ais->type19.accuracy = (bool)UBITS(56, 1);
+	    ais->type19.longitude = SBITS(57, 28);
+	    ais->type19.latitude = SBITS(85, 27);
+	    ais->type19.cog = UBITS(112, 12);
+	    ais->type19.heading = UBITS(124, 9);
+	    ais->type19.utc_second = UBITS(133, 6);
+	    ais->type19.regional = UBITS(139, 4);
+	    UCHARS(143, ais->type19.vessel_name);
+	    ais->type19.ship_type    = UBITS(263, 8);
+	    ais->type19.to_bow       = UBITS(271, 9);
+	    ais->type19.to_stern     = UBITS(280, 9);
+	    ais->type19.to_port      = UBITS(289, 6);
+	    ais->type19.to_starboard = UBITS(295, 6);
+	    ais->type19.epfd         = UBITS(299, 4);
+	    ais->type19.raim = UBITS(302, 1)!=0;
+	    ais->type19.dte = UBITS(305, 1);
+	    ais->type19.assigned = UBITS(306, 1)!=0;
+	    ais->type19.spare = UBITS(307, 5);
+	    gpsd_report(LOG_INF,
+			"reserved=%x SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d name=%s\n",
+			ais->type19.reserved,
+			ais->type19.sog, 
+			(uint)ais->type19.accuracy,
+			ais->type19.longitude, 
+			ais->type19.latitude, 
+			ais->type19.cog, 
+			ais->type19.heading, 
+			ais->type19.utc_second,
+		        ais->type19.vessel_name);
 	    break;
-	default:
+default:
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
 	} 
@@ -776,6 +809,60 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE18_UNSCALED_LABELED
 #undef TYPE18_SCALED_UNLABELED
 #undef TYPE18_SCALED_LABELED
+	break;
+    case 19:
+#define TYPE19_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%u,%x,%s,%u,%u,%u,%u,%u,%u,%d,%x\n"
+#define TYPE19_UNSCALED_LABELED   "res=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,hd=%u,sec=%u,reg=%x,name=%s,type=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,raim=%d,assigned=%x\n"
+#define TYPE19_SCALED_UNLABELED "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,%x,%s,%s,%u.%u.%u.%u,%s,%d,%x\n"
+#define TYPE19_SCALED_LABELED   "res=%u,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%.1f,hd=%u,sec=%u,reg=%x,name=%s,type=%s,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s,raim=%d,assigned=%x\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE19_SCALED_LABELED : TYPE19_SCALED_UNLABELED),
+			      
+			  ais->type19.reserved,
+			  ais->type19.sog / 10.0, 
+			  (uint)ais->type19.accuracy,
+			  ais->type19.longitude / AIS_LATLON_SCALE, 
+			  ais->type19.latitude / AIS_LATLON_SCALE, 
+			  ais->type19.cog / 10.0,
+			  ais->type19.heading,
+			  ais->type19.utc_second,
+			  ais->type19.regional,
+			  ais->type19.vessel_name,
+			  (ais->type19.ship_type < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[ais->type19.ship_type] : "INVALID SHIP TYPE",
+			  ais->type19.to_bow,
+			  ais->type19.to_stern,
+			  ais->type19.to_port,
+			  ais->type19.to_starboard,
+			  epfd_legends[ais->type19.epfd],
+			  ais->type19.raim,
+			  ais->type19.assigned);
+	} else {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE19_UNSCALED_LABELED : TYPE19_UNSCALED_UNLABELED),
+			  ais->type19.reserved,
+			  ais->type19.sog, 
+			  (uint)ais->type19.accuracy,
+			  ais->type19.longitude,
+			  ais->type19.latitude,
+			  ais->type19.cog, 
+			  ais->type19.heading,
+			  ais->type19.utc_second,
+			  ais->type19.regional,
+			  ais->type19.vessel_name,
+			  ais->type19.ship_type,
+			  ais->type19.to_bow,
+			  ais->type19.to_stern,
+			  ais->type19.to_port,
+			  ais->type19.to_starboard,
+			  ais->type19.epfd,
+			  ais->type19.raim,
+			  ais->type19.assigned);
+	}
+#undef TYPE19_UNSCALED_UNLABELED
+#undef TYPE19_UNSCALED_LABELED
+#undef TYPE19_SCALED_UNLABELED
+#undef TYPE19_SCALED_LABELED
 	break;
     default:
 	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
