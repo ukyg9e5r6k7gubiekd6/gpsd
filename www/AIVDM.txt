@@ -69,6 +69,26 @@ explained the otherwise undocumented Repeat Indicator field and USCG
 extended AIVDM to me by email. He also communicated some critical
 information from <<IEC-PAS>>.
 
+== Improving This Document ==
+
+To avoid copyright difficulties, I rely only on freely redistributable
+public documents and paraphrased reports from people who have seen the
+relevant proprietary standards.  If you are such a person, please help
+by reporting the following to be included in future versions of this
+document:
+
+* The meaning of the type field in the Aid-To-Navigation message (type
+  21).
+
+* How the end of the Name Extension field is detected or computed in
+  Type 21 messages.
+
+* Field offsets, types, and descriptions for messages 23-26 not
+  described in <<IALA>>.
+
+* Sample sentences of types 6-8, 10-18, and 20-26 together with
+  decoded dumps of the field values.
+
 == Open-Source Implementations ==
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
@@ -350,11 +370,15 @@ listed at <<BOSUN>> with no further information; message types 25-26
 come from <<Schwehr>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
+The field breakdowns in this document have been checked against
+live decoded data rendered by known-good implementations 
+for message types 1-5, 9, 18, and 19.
+
 === Types 1, 2 and 3: Position Report Class A ===
 
 Type 1, 2 and 3 messages share a common reporting structure for
-navigational information; we'll call it the Common Navigation
-Block. This is the information likely to be of interest for decoding
+navigational information; we'll call it the Common Navigation Block
+(CNB). This is the information likely to be of interest for decoding
 software.
 
 .Common Navigation Block
@@ -721,8 +745,8 @@ Field   Len Description                   Encoding
 38-49   12  Altitude                      Unsigned integer: See below
 50-59   10  SOG                           Unsigned integer: See below
 60-60    1  Position Accuracy             See below
-61-88   28  Longitude                     Minutes/10000 (see below)
-89-115  27  Latitude                      Minutes/10000 (see below)
+61-88   28  Longitude                     Minutes/10000 (as in CNB)
+89-115  27  Latitude                      Minutes/10000 (as in CNB)
 116-127 12  Course Over Ground (COG)      Relative to true north to 0.1 degree
 128-133  6  Time Stamp                    Unsigned integer: UTC second.
 134-141  8  Regional reserved
@@ -811,7 +835,7 @@ Field   Len Description                       Units
 
 A less detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
-common navigation block.  168 bits.
+common navigation block.  168 bits total.
 
 It is reported that ITU 1371-3 introduces bit-by-bit interpretations
 for the Regional Reserved field in this message; I don't yet know what
@@ -826,8 +850,8 @@ Field   Len Description                       Units
 38-45    8  Regional Reserved
 46-55   10  Speed Over Ground (SOG)  As in common navigation block
 56-56    1  Position Accuracy        See below
-57-84   28  Longitude                Minutes/10000 (see below)
-85-111  27  Latitude                 Minutes/10000 (see below)
+57-84   28  Longitude                Minutes/10000 (as in CNB)
+85-111  27  Latitude                 Minutes/10000 (as in CNB)
 112-123 12  Course Over Ground (COG) Relative to true north to 0.1 degree
 124-132  9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 133-138  6  Time Stamp               Second of UTC timestamp.
@@ -840,8 +864,9 @@ Field   Len Description                       Units
 
 A more detailed report for vessels using Class B transponders.  Omits
 navigational status and rate of turn.  Fields are encoded as in the
-common navigation block.  Note that until just before the reserved field
-at bit 139 this is identical to message 18.  312 bits.
+common navigation block and the Type 5 message.  Note that until just
+before the reserved field at bit 139 this is identical to message 18.
+312 bits total.
 
 In practice, the information in the ship name and dimension fields is
 not reliable, as it has to be hand-entered by humans rather than
@@ -856,8 +881,8 @@ Field   Len Description                       Units
 38-45     8  Regional Reserved
 46-55    10  Speed Over Ground (SOG)  As in common navigation block
 56-56     1  Position Accuracy        See below
-57-84    28  Longitude                Minutes/10000 (see below)
-85-111   27  Latitude                 Minutes/10000 (see below)
+57-84    28  Longitude                Minutes/10000 (as in CNB)
+85-111   27  Latitude                 Minutes/10000 (as in CNB)
 112-123  12  Course Over Ground (COG) Relative to true north to 0.1 degree
 124-132   9  True Heading (HDG)       0 to 359 degrees, 511 = not available
 133-138   6  Time Stamp               Second of UTC timestamp.
@@ -874,6 +899,68 @@ Field   Len Description                       Units
 306-306   1  Assigned mode flag       See <<IALA>> for details
 307-311   5  Spare                    Unused, should be zero
 --------------------------------------------------------------------------------
+
+=== Type 21: Aid-to-Navigation Report ===
+
+Identification and location message to be emitted by aids to
+navigation such as buoys and lighthouses.
+
+This message is unusual in that it varies in length depending on the 
+presence and size of the Name Extension field. May vary between 272
+and 360 bits.
+
+`--------`---`------------------------`-----------------------------------------
+Field   Len Description                       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type             Unsigned integer: 19
+6-7       2  Repeat Indicator         As in Common Navigation Block
+8-37     30  MMSI                     Unsigned integer: 9 decimal digits
+38-42     5  Aid type                 See Below
+43-162  120  Name                     Name of the aid to navigation
+163-163   1  Position Accuracy        As in common navigation block
+164-191  28  Longitude                Minutes/10000 (as in CNB)
+192-218  27  Latitude                 Minutes/10000 (as in CNB)
+219-227   9  Dimension to Bow         Unsigned integer: Meters
+228-236   9  Dimension to Stern       Unsigned integer: Meters
+237-242   6  Dimension to Port        Unsigned integer: Meters
+243-248   6  Dimension to Starboard   Unsigned integer: Meters
+249-252   4  Type of EPFD             As in Message Type 4
+253-258   6  UTC Second               As in Message Type 5
+259-259   1  Off-Position Indicator   See Below
+260-267   8  Regional reserved
+268-268   1  RAIM flag                As for common navigation block
+269-269   1  Virtual-aid flag         See Below
+270-270   1  Assigned-mode flag       See <<IALA>> for details
+271-271   1  Spare
+272-360  88  Name Extension           See Below
+--------------------------------------------------------------------------------
+
+According to [[IALA]], the aid type field has values 1-15 for fixed
+and 16-31 for floating aids to navigation. I have not yet found a
+public description of the type codes.
+
+The name field is 6-bit ASCII.  If this field is full (has no trailing @
+characters) the decoder should interpret the Name Extension field
+later in the message and concatenate it to this one to obtain the full name.
+
+<<IALA>> describes bits 219-248 As "Dimension/Reference for Position",
+implying that it is vessel dimensions as in message type 5.
+
+The Off-Position Indicator is for floating Aids-to-Navigation only: 0
+= on position; 1 = off position. Only valid if UTC second is equal to
+or below 59.
+
+The Virtual Aid flag is interpreted as follows: 0 = default = real Aid
+to Navigation at indicated position; 1 = virtual Aide to
+Navigation simulated by nearby AIS station.
+
+If present, the Name Extension consists of packed six-bit ASCII
+characters followed by 0-6 bytes of padding to an 8-bit boundary. The
+<<IALA>> description says "This parameter should be omitted when no
+more than 20 characters for the name of the A-to-N are needed in
+total. Only the required number of characters should be transmitted,
+i.e. no @-character should be used.", but does not specify how to
+detect end-of-field.
 
 == Local extensions ==
 
@@ -1003,4 +1090,5 @@ ASCII-armored sentences.
 Version 1.6 corrects some minor errors in the interpretation of Type
 5 messages.
 
-Version 1.7 adds description for Type 10, 11, and 19 messages.
+Version 1.7 adds descriptions for Type 10, 11, 19, and 21 messages,
+and the new section on Improving This Document.
