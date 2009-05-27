@@ -298,6 +298,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type10.spare          = UBITS(38, 2);
 	    ais->type10.dest_mmsi      = UBITS(40, 30);
 	    ais->type10.spare2         = UBITS(70, 2);
+	    gpsd_report(LOG_INF, "dest=%u\n", ais->type10.dest_mmsi);
 	    break;
         case 12: /* Safety Related Message */
 	    ais->type12.seqno          = UBITS(38, 2);
