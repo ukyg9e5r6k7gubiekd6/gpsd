@@ -214,6 +214,12 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);
 	    ais->type5.spare        = UBITS(423, 1);
+	    gpsd_report(LOG_INF,
+			"AIS=%d callsign=%s, name=%s destination=%s\n",
+			ais->type5.ais_version,
+			ais->type5.callsign,
+			ais->type5.vessel_name,
+			ais->type5.destination);
 	    break;
         case 6: /* Addressed Binary Message */
 	    ais->type6.seqno          = UBITS(38, 2);
@@ -225,6 +231,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    (void)memcpy(ais->type6.bitdata, 
 			 (char *)ais_context->bits+11,
 			 (ais->type6.bitcount + 7) / 8);
+	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%u\n",
+			ais->type6.seqno,
+			ais->type6.dest_mmsi,
+			ais->type6.application_id,
+			ais->type6.bitcount);
 	    break;
         case 7: /* Binary acknowledge */
 	    for (i = 0; i < sizeof(ais->type7.mmsi)/sizeof(ais->type7.mmsi[0]); i++)
@@ -232,6 +243,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		    ais->type7.mmsi[i] = UBITS(40 + 32*i, 30);
 	        else
 		    ais->type7.mmsi[i] = 0;
+	    gpsd_report(LOG_INF, "\n");
 	    break;
         case 8: /* Binary Broadcast Message */
 	    ais->type8.spare          = UBITS(38, 2);
@@ -240,6 +252,9 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    (void)memcpy(ais->type8.bitdata, 
 			 (char *)ais_context->bits+7,
 			 (ais->type8.bitcount + 7) / 8);
+	    gpsd_report(LOG_INF, "id=%u, cnt=%u\n",
+			ais->type8.application_id,
+			ais->type8.bitcount);
 	    break;
 	case 9: /* Standard SAR Aircraft Position Report */
 	    ais->type9.altitude = UBITS(38, 12);
@@ -273,6 +288,9 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    from_sixbit((char *)ais_context->bits, 
 			72, ais_context->bitlen-72,
 			ais->type12.text);
+	    gpsd_report(LOG_INF, "seqno=%d, dest=%u\n",
+			ais->type12.seqno,
+			ais->type12.dest_mmsi);
 	    break;
         case 13: /* Safety Related Acknowledge */
 	    for (i = 0; i < sizeof(ais->type13.mmsi)/sizeof(ais->type13.mmsi[0]); i++)
@@ -280,12 +298,14 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		    ais->type13.mmsi[i] = UBITS(40 + 32*i, 30);
 	        else
 		    ais->type13.mmsi[i] = 0;
+	    gpsd_report(LOG_INF, "\n");
 	    break;
         case 14: /* Safety Related Broadcast Message */
 	    ais->type14.spare          = UBITS(38, 2);
 	    from_sixbit((char *)ais_context->bits, 
 			40, ais_context->bitlen-40,
 			ais->type14.text);
+	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 18:	/* Standard Class B CS Position Report */
 	    ais->type18.reserved = UBITS(38, 8);
