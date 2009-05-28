@@ -331,7 +331,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type18.heading = UBITS(124, 9);
 	    ais->type18.utc_second = UBITS(133, 6);
 	    ais->type18.regional = UBITS(139, 2);
-	    ais->type18.spare = UBITS(141, 5);
+	    ais->type18.cs_flag = UBITS(141, 1)!=0;
+	    ais->type18.display_flag = UBITS(142, 1)!=0;
+	    ais->type18.dsc_flag = UBITS(143, 1)!=0;
+	    ais->type18.band_flag = UBITS(144, 1)!=0;
+	    ais->type18.msg22_flag = UBITS(145, 1)!=0;
 	    ais->type18.assigned = UBITS(146, 1)!=0;
 	    ais->type18.raim = UBITS(147, 1)!=0;
 	    ais->type18.radio = UBITS(148, 20);
@@ -364,7 +368,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type19.to_starboard = UBITS(295, 6);
 	    ais->type19.epfd         = UBITS(299, 4);
 	    ais->type19.raim = UBITS(302, 1)!=0;
-	    ais->type19.dte = UBITS(305, 1);
+	    ais->type19.dte = UBITS(305, 1)!=0;
 	    ais->type19.assigned = UBITS(306, 1)!=0;
 	    ais->type19.spare = UBITS(307, 5);
 	    gpsd_report(LOG_INF,
@@ -870,10 +874,10 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE14_LABELED
 	break;
     case 18:
-#define TYPE18_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%u,%x,%d,%x\n"
-#define TYPE18_UNSCALED_LABELED   "res=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
-#define TYPE18_SCALED_UNLABELED "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,%x,%d,%x\n"
-#define TYPE18_SCALED_LABELED   "res=%u,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%.1f,hd=%u,sec=%u,reg=%x,sp=%d,radio=%x\n"
+#define TYPE18_UNSCALED_UNLABELED "%u,%u,%u,%d,%d,%u,%u,%u,%x,%u,%u,%u,%u,%u,%d,%x\n"
+#define TYPE18_UNSCALED_LABELED   "res=%u,SOG=%u,fq=%u,lon=%d,lat=%d,cog=%u,hd=%u,sec=%u,reg=%x,%cs=u,disp=%u,dsc=%u,band=%u,msg22=%u,raim=%u,radio=%x\n"
+#define TYPE18_SCALED_UNLABELED "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,%x,%u,%u,%u,%u,%u,%u,%x\n"
+#define TYPE18_SCALED_LABELED   "res=%u,SOG=%.1f,fq=%u,lon=%.4f,lat=%.4f,cog=%.1f,hd=%u,sec=%u,reg=%x,cs=%u,disp=%u,dsc=%u,band=%u,msg22=%u,raim=%u,radio=%x\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (labeled ? TYPE18_SCALED_LABELED : TYPE18_SCALED_UNLABELED),
@@ -887,6 +891,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type18.heading,
 			  ais->type18.utc_second,
 			  ais->type18.regional,
+			  ais->type18.cs_flag,
+			  ais->type18.display_flag,
+			  ais->type18.dsc_flag,
+			  ais->type18.band_flag,
+			  ais->type18.msg22_flag,
 			  ais->type18.raim,
 			  ais->type18.radio);
 	} else {
@@ -901,6 +910,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type18.heading,
 			  ais->type18.utc_second,
 			  ais->type18.regional,
+			  ais->type18.cs_flag,
+			  ais->type18.display_flag,
+			  ais->type18.dsc_flag,
+			  ais->type18.band_flag,
+			  ais->type18.msg22_flag,
 			  ais->type18.raim,
 			  ais->type18.radio);
 	}

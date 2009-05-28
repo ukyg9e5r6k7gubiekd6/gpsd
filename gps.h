@@ -611,7 +611,11 @@ struct ais_t
 	    uint heading;		/* true heading */
 	    uint utc_second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
-	    uint spare;			/* spare bits */
+	    bool cs_flag;		/* carrier sense unit flag */
+	    bool display_flag;		/* unit has attached display? */
+	    bool dsc_flag;		/* unit attached to radio with DSC? */
+	    bool band_flag;		/* unit can switch frequency bands? */
+	    bool msg22_flag;		/* can accept Message 22 management? */
 	    bool assigned;		/* assigned-mode flag */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
