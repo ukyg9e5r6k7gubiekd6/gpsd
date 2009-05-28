@@ -3,18 +3,12 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Decoding of message type 11 has not yet been tested against known-good data.
+ * Decodings of message types 11 and 21 have not yet been tested against 
+ * known-good data.
  *
- * The noaadata-0.42 decoder interprets the Regional Reserved field in
- * message 18 as follows.  The changelog says these are ITU 1371-3
- * changes; we don't know what they mean yet, so this decoding isn't
- * done here.
- *	r['cs_unit']=bool(int(bv[141:142]))
- *	r['display_flag']=bool(int(bv[142:143]))
- *	r['dsc_flag']=bool(int(bv[143:144]))
- *	r['band_flag']=bool(int(bv[144:145]))
- *	r['msg22_flag']=bool(int(bv[145:146]))
- *	*
+ * The decoder for message type 18 does not yet grok the ITU-1371-3 flag bits. 
+ *
+ * Message type 21 decoding does not yet handle the Name Extension field.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -385,7 +379,35 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type19.utc_second,
 		        ais->type19.vessel_name);
 	    break;
-default:
+	case 21:	/* Aid-to-Navigation Report */
+	    ais->type21.type = UBITS(38, 5);
+	    UCHARS(43, ais->type21.name);
+	    ais->type21.accuracy     = UBITS(163, 163);
+	    ais->type21.longitude    = UBITS(164, 28);
+	    ais->type21.latitude     = UBITS(192, 27);
+	    ais->type21.to_bow       = UBITS(219, 9);
+	    ais->type21.to_stern     = UBITS(228, 9);
+	    ais->type21.to_port      = UBITS(237, 6);
+	    ais->type21.to_starboard = UBITS(243, 6);
+	    ais->type21.epfd         = UBITS(249, 4);
+	    ais->type21.utc_second   = UBITS(253, 6);
+	    ais->type21.off_position = UBITS(259, 1)!=0;
+	    ais->type21.regional     = UBITS(260, 8);
+	    ais->type21.raim         = UBITS(268, 1)!=0;
+	    ais->type21.virtual_aid  = UBITS(269, 1)!=0;
+	    ais->type21.assigned     = UBITS(270, 1)!=0;
+	    ais->type21.spare        = UBITS(271, 1)!=0;
+	    /* TODO: figure out how to handle Name Extension field */
+	    gpsd_report(LOG_INF,
+			"name=%s Q=%d Lon=%d Lat=%d Sec=%d\n",
+			ais->type21.name,
+			(uint)ais->type19.accuracy,
+			ais->type19.longitude, 
+			ais->type19.latitude, 
+			ais->type19.utc_second);
+	    break;
+	default:
+	    gpsd_report(LOG_INF, "\n");
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
 	    break;
 	} 
@@ -916,8 +938,55 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE19_SCALED_UNLABELED
 #undef TYPE19_SCALED_LABELED
 	break;
+    case 21: /* Ship static and voyage related data */
+#define TYPE21_SCALED_LABELED "type=%u,name=%s,lon=%.4f,lat=%.4f,accuracy=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%s,Sec=%u,regional=%x,raim=%u,virt=%u,sp=%x\n"
+#define TYPE21_SCALED_UNLABELED "%u,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%x,%u,%u,%x\n"
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (labeled ? TYPE21_SCALED_LABELED : TYPE21_SCALED_UNLABELED),
+			  ais->type21.type,
+			  ais->type21.name,
+			  ais->type21.longitude / AIS_LATLON_SCALE, 
+			  ais->type21.latitude / AIS_LATLON_SCALE, 
+			  ais->type21.accuracy,
+			  ais->type21.to_bow,
+			  ais->type21.to_stern,
+			  ais->type21.to_port,
+			  ais->type21.to_starboard,
+			  epfd_legends[ais->type21.epfd],
+			  ais->type21.utc_second,
+			  ais->type21.regional,
+			  ais->type21.raim,
+			  ais->type21.virtual_aid,
+			  ais->type21.spare);
+	} else {
+#define TYPE21_UNSCALED_LABELED "type=%u,name=%s,lon=%d,lat=%d,accuracy=%u,bow=%u,stern=%u,port=%u,starboard=%u,epsd=%u,Sec=%u,regional-%x,raim=%u,virt=%u,sp=%x\n"
+#define TYPE21_UNSCALED_UNLABELED "%u,%s,%d,%d,%u,%u,%u,%u,%u,%u,%x,%u,%u,%x\n"
+	    (void)fprintf(fp,
+			  (labeled ? TYPE21_UNSCALED_LABELED : TYPE21_UNSCALED_UNLABELED),
+			  ais->type21.type,
+			  ais->type21.name,
+			  ais->type21.accuracy,
+			  ais->type21.longitude,
+			  ais->type21.latitude,
+			  ais->type21.to_bow,
+			  ais->type21.to_stern,
+			  ais->type21.to_port,
+			  ais->type21.to_starboard,
+			  ais->type21.epfd,
+			  ais->type21.utc_second,
+			  ais->type21.regional,
+			  ais->type21.raim,
+			  ais->type21.virtual_aid,
+			  ais->type21.spare);
+	}
+#undef TYPE21_UNSCALED_UNLABELED
+#undef TYPE21_UNSCALED_LABELED
+#undef TYPE21_SCALED_UNLABELED
+#undef TYPE21_SCALED_LABELED
+	break;
     default:
-	gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %u.\n",ais->id);
+	(void)fprintf(fp, "unknown AIVDM message content.\n");
 	break;
     }
     /*@ +formatconst @*/

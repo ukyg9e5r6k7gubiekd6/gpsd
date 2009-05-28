@@ -630,6 +630,26 @@ struct ais_t
 	    bool assigned;		/* assigned-mode flag */
 	    uint spare;			/* spare bits */
 	} type19;
+	/* Type 21 - Aids to Navigation Report */
+	struct {
+	    uint type;			/* aid type */
+	    char name[35];		/* name of aid to navigation */
+	    bool accuracy;		/* position accuracy */
+	    int longitude;		/* longitude */
+	    int latitude;		/* latitude */
+	    uint to_bow;		/* dimension to bow */
+	    uint to_stern;		/* dimension to stern */
+	    uint to_port;		/* dimension to port */
+	    uint to_starboard;		/* dimension to starboard */
+	    uint epfd;			/* type of EPFD */
+	    uint utc_second;		/* second of UTC timestamp */
+	    bool off_position;		/* off-position indicator */
+	    uint regional;		/* regional reserved field */
+	    bool raim;			/* RAIM flag */
+	    bool virtual_aid;		/* is virtual station? */
+	    bool assigned;		/* assigned-mode flag */
+	    uint spare;			/* unused */
+	} type21;
     };
 };
 
