@@ -406,6 +406,29 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type19.latitude, 
 			ais->type19.utc_second);
 	    break;
+	case 24:	/* Type 24 - Class B CS Static Data Report */
+	    ais->type24.part = UBITS(38, 2);
+	    switch (ais->type24.part) {
+	    case 0:
+		UCHARS(40, ais->type24.a.vessel_name);
+		ais->type24.a.spare	= UBITS(160, 8);
+		break;
+	    case 1:
+		ais->type24.b.ship_type = UBITS(40, 8);
+		UCHARS(48, ais->type24.b.vendor_id);
+		UCHARS(90, ais->type24.b.callsign);
+		if (AIS_AUXILIARY_MMSI(ais->mmsi))
+		    ais->type24.b.mothership_mmsi   = UBITS(132, 30);
+		else {
+		    ais->type24.b.dim.to_bow        = UBITS(132, 9);
+		    ais->type24.b.dim.to_stern      = UBITS(141, 9);
+		    ais->type24.b.dim.to_port       = UBITS(150, 6);
+		    ais->type24.b.dim.to_starboard  = UBITS(156, 6);
+		}
+		ais->type24.b.spare	    = UBITS(162, 8);
+		break;
+	    }
+	    break;
 	default:
 	    gpsd_report(LOG_INF, "\n");
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->id);
@@ -559,6 +582,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 	"Other Type - no additional information",
     };
 
+#define TYPE_DISPLAY(n) (((n) < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[n] : "INVALID SHIP TYPE")
+
     if (labeled)
 	(void)fprintf(fp, "type=%u,ri=%u,MMSI=%09u,", ais->id, ais->ri, ais->mmsi);
     else
@@ -678,7 +703,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type5.ais_version,
 			  ais->type5.callsign,
 			  ais->type5.vessel_name,
-			  (ais->type5.ship_type < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[ais->type5.ship_type] : "INVALID SHIP TYPE",
+			  TYPE_DISPLAY(ais->type5.ship_type),
 			  ais->type5.to_bow,
 			  ais->type5.to_stern,
 			  ais->type5.to_port,
@@ -903,7 +928,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 			  ais->type19.utc_second,
 			  ais->type19.regional,
 			  ais->type19.vessel_name,
-			  (ais->type19.ship_type < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[ais->type19.ship_type] : "INVALID SHIP TYPE",
+			  TYPE_DISPLAY(ais->type19.ship_type),
 			  ais->type19.to_bow,
 			  ais->type19.to_stern,
 			  ais->type19.to_port,
@@ -984,6 +1009,36 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool labeled, FILE *fp)
 #undef TYPE21_UNSCALED_LABELED
 #undef TYPE21_SCALED_UNLABELED
 #undef TYPE21_SCALED_LABELED
+	break;
+    case 24: /* Class B CS Static Data Report */
+	(void)fprintf(fp, "%u,", ais->type24.part);
+	if (ais->type24.part == 0) {
+	    (void)fprintf(fp, labeled ? "name=%s,spare=%x\n" : "%s,%x\n", 
+			  ais->type24.a.vessel_name, 
+			  ais->type24.a.spare);
+	} else if (ais->type24.part == 1) {
+	    if (scaled) {
+		(void)fprintf(fp, labeled ? "type=%s," : "%s,", 
+			      TYPE_DISPLAY(ais->type24.b.ship_type));
+	    } else {
+		(void)fprintf(fp, labeled ? "type=%u," : "%u,",
+			      ais->type24.b.ship_type);
+	    }
+	    (void)fprintf(fp, labeled ? "vendor_id=%s,callsign=%s," : "%s,%s,",
+			  ais->type24.b.vendor_id,
+			  ais->type24.b.callsign);
+	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+		(void)fprintf(fp, labeled ? "mothership_mmsi=%u\n" : "%u\n",
+			      ais->type24.b.mothership_mmsi);
+	    } else {
+		(void)fprintf(fp, labeled ? "bow=%u,stern=%u,port=%u,starboard=%u\n" : "%u,%u,%u,%u\n",
+			      ais->type24.b.dim.to_bow,
+			      ais->type24.b.dim.to_stern,
+			      ais->type24.b.dim.to_port,
+			      ais->type24.b.dim.to_starboard);
+	    }
+	} else
+	    (void)fprintf(fp, "illegal part value %u.\n", ais->type24.part);
 	break;
     default:
 	(void)fprintf(fp, "unknown AIVDM message content.\n");

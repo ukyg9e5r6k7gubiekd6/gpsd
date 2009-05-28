@@ -373,7 +373,7 @@ are reported by <<Schwehr>>, who reports they were added in Version 3 of
 
 The field breakdowns in this document have been checked against
 live decoded data rendered by known-good implementations 
-for message types 1-5, 9, 11, 18, and 19.
+for message types 1-5, 9, 11, 18, 19, and 24.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -1014,10 +1014,11 @@ as a Part B; values 2 and 3 are not allowed.
 The "Vendor ID" field is the name of the AIS equipment vendor.
 
 Interpretation of the 30 bits 132-162 in Part B is variable. If the
-most significant decimal digit of the MMSI is 2, the entry is taken
-to refer to a small attached auxiliary vessel and these 30 bits
-are read as the MMSI of the mother ship.  Otherwise the 30 bits 
-describe vessel dimensions as in Message Type 5.
+most significant decimal digits of the MMSI are 98 (the MMSI prefix
+for an auxiliary craft), the entry is taken to refer to a small
+attached auxiliary vessel and these 30 bits are read as the MMSI of
+the mother ship.  Otherwise the 30 bits describe vessel dimensions as
+in Message Type 5.
 
 == Local extensions ==
 

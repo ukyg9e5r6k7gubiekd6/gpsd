@@ -13,7 +13,5 @@
 18,0,338087471,0,0.1,0,-74.0721,40.6845,79.6,511,49,0,1,e0006
 18,0,338088483,0,0.0,0,-70.8112,43.1156,171.6,511,20,0,1,e0006
 19,0,367059850,248,8.7,0,-88.8104,29.5437,335.9,511,46,4,CAPT.J.RIMES,Cargo - all ships of this type,5.21.4.4,Undefined,0,0
-gpsdecode: Unparsed AIVDM message type 24.
-24,0,367405970,unknown AIVDM message content.
-gpsdecode: Unparsed AIVDM message type 24.
-24,2,338085242,unknown AIVDM message content.
+24,0,367405970,0,CAPTAIN`S PARADISE,0
+24,2,338085242,1,Anti-pollution equipment,ACR1234,WDD7883,8,3,2,1

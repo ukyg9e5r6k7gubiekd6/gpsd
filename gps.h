@@ -446,6 +446,9 @@ struct rtcm3_t {
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
+/* Is an MMSI number that of an auxiliary associated with a mother ship? */
+#define AIS_AUXILIARY_MMSI(n)	((n) / 100000 == 98)
+
 struct ais_t
 {
     uint	id;		/* message type */
@@ -650,6 +653,31 @@ struct ais_t
 	    bool assigned;		/* assigned-mode flag */
 	    uint spare;			/* unused */
 	} type21;
+	/* Type 24 - Class B CS Static Data Report */
+	struct {
+	    uint part;			/* part number */
+	    union {
+		struct {
+		    char vessel_name[21];	/* vessel name */
+		    uint spare;			/* unused spare bits */
+		} a;
+		struct {
+		    uint ship_type;		/* ship type code */
+		    char vendor_id[8];		/* vendor ID */ 
+		    char callsign[8];		/* callsign */
+		    union {
+			uint mothership_mmsi;	/* MMSI of main vessel */
+			struct {
+			    uint to_bow;	/* dimension to bow */
+			    uint to_stern;	/* dimension to stern */
+			    uint to_port;	/* dimension to port */
+			    uint to_starboard;	/* dimension to starboard */
+			} dim;
+		    };
+		    uint spare;			/* unused spare bits */
+		} b;
+	    };
+	} type24;
     };
 };
 
