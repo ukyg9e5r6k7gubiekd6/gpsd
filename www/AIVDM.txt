@@ -1014,11 +1014,14 @@ as a Part B; values 2 and 3 are not allowed.
 The "Vendor ID" field is the name of the AIS equipment vendor.
 
 Interpretation of the 30 bits 132-162 in Part B is variable. If the
-most significant decimal digits of the MMSI are 98 (the MMSI prefix
-for an auxiliary craft), the entry is taken to refer to a small
-attached auxiliary vessel and these 30 bits are read as the MMSI of
-the mother ship.  Otherwise the 30 bits describe vessel dimensions as
-in Message Type 5.
+MMSI at 8-37 is that of an auxiliary craft, the entry is taken to
+refer to a small attached auxiliary vessel and these 30 bits are read
+as the MMSI of the mother ship.  Otherwise the 30 bits describe vessel
+dimensions as in Message Type 5.
+
+According to [[[MMSI]]], an MMSI is associated with an auxiliary craft
+when it is of the form 98MIDXXXX where the digits 3, 4 and 5 represent
+the MID and X is any figure from 0 to 9.
 
 == Local extensions ==
 
@@ -1124,6 +1127,9 @@ Identification System]
 
 - [[[C2]]] http://www.uais.org/AISspecificationCorrigendum2.pdf[AIS
   Specification Corrigendum 2]
+
+- [[[MMSI]]] http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format[MMSI 
+  Format]
 
 == Change history ==
 

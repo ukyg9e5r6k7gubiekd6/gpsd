@@ -446,8 +446,14 @@ struct rtcm3_t {
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
-/* Is an MMSI number that of an auxiliary associated with a mother ship? */
-#define AIS_AUXILIARY_MMSI(n)	((n) / 100000 == 98)
+/* 
+ * Is an MMSI number that of an auxiliary associated with a mother ship?
+ * We need to be able to test this for decoding AIS Type 24 messages.
+ * According to <http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format>,
+ * auxiliary-craft MMSIs have the form 98MIDXXXX, where MID is a country 
+ * code and XXXX the vessel ID.
+ */
+#define AIS_AUXILIARY_MMSI(n)	((n) / 10000000 == 98)
 
 struct ais_t
 {
