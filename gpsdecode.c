@@ -150,7 +150,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "def:hlpuVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "dhelpuVD:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -158,10 +158,6 @@ int main(int argc, char **argv)
 
 	case 'e':
 	    mode = doencode;
-	    break;
-
-	case 'f':
-	    (void)freopen(optarg, "r", stdin);
 	    break;
 
 	case 'h':
