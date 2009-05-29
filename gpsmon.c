@@ -423,6 +423,7 @@ int main (int argc, char **argv)
     char line[80];
 
     gmt_offset = (int)tzoffset();
+    putenv("TZ=GMT"); // for ctime()
     /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "D:F:Vhl")) != -1) {
 	switch (option) {
