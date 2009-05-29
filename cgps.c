@@ -151,28 +151,37 @@ static float true2magnetic(double lat, double lon, double heading)
   /*@ -evalorder +relaxtypes @*/
   if((lat > 36.0) && (lat < 68.0) &&
      (lon > -10.0) && (lon < 28.0)) {
-    return( 10.4768771667158 - (0.507385322418858 * lon) + (0.00753170031703826 * pow(lon, 2))
-	    - (1.40596203924748e-05 * pow(lon, 3)) - (0.535560699962353 * lat)
-	    + (0.0154348808069955 * lat * lon) - (8.07756425110592e-05 * lat * pow(lon, 2))
-	    + (0.00976887198864442 * pow(lat, 2)) - (0.000259163929798334 * lon * pow(lat, 2))
-	    - (3.69056939266123e-05 * pow(lat, 3)) + heading);
+    heading = ( 10.4768771667158 - (0.507385322418858 * lon) + (0.00753170031703826 * pow(lon, 2))
+                - (1.40596203924748e-05 * pow(lon, 3)) - (0.535560699962353 * lat)
+                + (0.0154348808069955 * lat * lon) - (8.07756425110592e-05 * lat * pow(lon, 2))
+                + (0.00976887198864442 * pow(lat, 2)) - (0.000259163929798334 * lon * pow(lat, 2))
+                - (3.69056939266123e-05 * pow(lat, 3)) + heading);
   }
-  lon=0.0-lon;
   /* USA */
-  if((lat > 24.0) && (lat < 50.0) &&
-     (lon > 66.0) && (lon < 125.0)) {
-    return( (-65.6811) + (0.99 * lat) + (0.0128899 * pow(lat, 2)) - (0.0000905928 * pow(lat, 3)) + (2.87622 * lon)
-	    - (0.0116268 * lat * lon) - (0.00000603925 * lon * pow(lat, 2)) - (0.0389806 * pow(lon, 2))
-	    - (0.0000403488 * lat * pow(lon, 2)) + (0.000168556 * pow(lon, 3)) + heading);
+  else if((lat > 24.0) && (lat < 50.0) &&
+          (lon > 66.0) && (lon < 125.0)) {
+    lon=0.0-lon;
+    heading = ( (-65.6811) + (0.99 * lat) + (0.0128899 * pow(lat, 2)) - (0.0000905928 * pow(lat, 3)) + (2.87622 * lon)
+                - (0.0116268 * lat * lon) - (0.00000603925 * lon * pow(lat, 2)) - (0.0389806 * pow(lon, 2))
+                - (0.0000403488 * lat * pow(lon, 2)) + (0.000168556 * pow(lon, 3)) + heading);
   }
   /* AK */
-  if((lat > 54.0) &&
-     (lon > 130.0) && (lon < 172.0)) {
-    return( 618.854 + (2.76049 * lat) - (0.556206 * pow(lat, 2)) + (0.00251582 * pow(lat, 3)) - (12.7974 * lon)
-	    + (0.408161 * lat * lon) + (0.000434097 * lon * pow(lat, 2)) - (0.00602173 * pow(lon, 2))
-	    - (0.00144712 * lat * pow(lon, 2)) + (0.000222521 * pow(lon, 3)) + heading);
+  else if((lat > 54.0) &&
+          (lon > 130.0) && (lon < 172.0)) {
+    lon=0.0-lon;
+    heading = ( 618.854 + (2.76049 * lat) - (0.556206 * pow(lat, 2)) + (0.00251582 * pow(lat, 3)) - (12.7974 * lon)
+                + (0.408161 * lat * lon) + (0.000434097 * lon * pow(lat, 2)) - (0.00602173 * pow(lon, 2))
+                - (0.00144712 * lat * pow(lon, 2)) + (0.000222521 * pow(lon, 3)) + heading);
+  } else {
+    /* We don't know how to compute magnetic heading for this
+       location. */
+    magnetic_flag=0;
   }
-  magnetic_flag=0;
+
+  /* No negative headings. */
+  if (heading < 0.0)
+    heading += 360.0;
+
   return(heading);
   /*@ +evalorder -relaxtypes @*/
 }
