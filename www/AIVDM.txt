@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.7, May 2009
+v1.8, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -363,7 +363,7 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-14, 18-19, and 24 follow.
+Detailed descriptions of message types 1-14, 18-19, 21, and 24 follow.
 Information sufficient to decode other message types in the range 1-22
 can be found in <<IALA>>, but they are rare or not of general interest
 so we will not duplicate the information here. Message types 23-24 are
@@ -371,9 +371,10 @@ listed at <<BOSUN>> with no further information; message types 25-26
 are reported by <<Schwehr>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
-The field breakdowns in this document have been checked against
-live decoded data rendered by known-good implementations 
-for message types 1-5, 9, 11, 18, 19, and 24.
+The field breakdowns in this document have been checked against live
+decoded data rendered by known-good implementations for message types
+1-5, 9-11, 18-19, and 24.  Described but unchecked are 6, 7, 8, 12,
+13, and 21.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -783,6 +784,7 @@ Field   Len Description                   Encoding
 38-39    2  Spare                         Not used
 40-69   30  Destination MMSI              Unsigned integer: 9 decimal digits
 70-71    2  Spare                         Not used
+-------------------------------------------------------------------------------
 
 === Type 11: UTC/Date Response ===
 
@@ -1157,3 +1159,5 @@ Version 1.6 corrects some minor errors in the interpretation of Type
 Version 1.7 adds descriptions for Type 10, 11, 19, 21, and 24
 messages, information about ITU-1371-3 flags in message type 18,
 and the new section on Improving This Document.
+
+Version 1.8 fixes some broken markup.
