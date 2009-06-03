@@ -45,7 +45,7 @@ RTCM104PROGS = gpsdecode
 RTCM104PAGES = $(RTCM104PAGES_DIST)
 endif
 
-bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash gpxlogger lcdgps
+bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = test_float test_bits test_gpsmm test_packet test_mkgmtime test_geoid
 
@@ -125,12 +125,6 @@ gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 #
 gpsdecode_SOURCES = gpsdecode.c
 gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
-
-#
-# Build gpsflash
-#
-gpsflash_SOURCES = gpsflash.c gpsflash.h sirfflash.c
-gpsflash_LDADD = $(LIBM) libgps.la -lm
 
 #
 # Build shared libraries
@@ -282,7 +276,6 @@ MANPAGES_BASE = \
 	gpsmon.1 \
 	gpsctl.1 \
 	gpspipe.1 \
-	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
 
@@ -358,7 +351,6 @@ EXTRA_DIST = \
 	gpsdecode.xml \
 	rtcm-104.xml \
 	srec.xml \
-	gpsflash.xml \
 	$(MANPAGES_DIST) \
 	xgps.ad \
 	xgpsspeed.ad \
@@ -417,8 +409,6 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on gpsdecode..."
 	-splint $(SPLINTOPTS) -exportlocal gpsdecode.c
-	@echo "Running splint on gpsflash..."
-	-splint $(SPLINTOPTS) $(gpsflash_SOURCES)
 	@echo "Running splint on test_bits test harness..."
 	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
 	@echo "Running splint on test_packet test harness..."
