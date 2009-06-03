@@ -32,7 +32,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 		die "can't run mail: $!\n";
 	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
 	printf M ("[%s]\n", $query->param('model'));
-	foreach $var ( sort qw(submitter vendor packaging techdoc chipset
+	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
                         firmware nmea interface tested rating noconfigure notes 
                         location date interval leader sample_notes)){
 		$val = $query->param($var);
