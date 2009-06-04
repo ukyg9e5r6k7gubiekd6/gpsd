@@ -138,6 +138,60 @@
 </tr>
 </table>
 
+<a name="raw"></a>
+<h2>Raw Measurements and GPSD:</h2>
+
+<p>All gpses require "raw" measurements internally to compute a navigation
+  solution. The ability for users to postprocess these measurements is then
+  a function of firmware and protocol support.</p>
+
+<div>&nbsp;</div>
+
+<table border='1'>
+<tr>
+<th>Receiver</th>
+<th>Raw</th>
+<th>Notes</th>
+</tr>
+<tr>
+<td>NavSync</td>
+<td align="center">No</td>
+<td>I asked them about raw measurements and they told me that a custom firmware build ($$$!) would be required, and that I probably wasn't authorized to get that data.</td>
+</tr>
+<tr>
+<td>SiRF</td>
+<td align="center">Partial</td>
+<td>sirfstar1 has raw data in message 5, sirfstar2 has raw data in message 28, sirfstar3 has some raw data in message 28 but carrier phase is not available. rumor has it that carrier phase is available as a premium feature in superstar3.</td>
+</tr>
+<tr>
+<tr>
+<td>ublox</td>
+<td align="center">Partial</td>
+<td>The RXM-RAW message contains raw data. This is implemented in all Antaris chips. This is only implemented in the timing versions of Antaris4. In ublox5 it is "only available with premium feature raw data".
+</td>
+</tr>
+<tr>
+<td>Novatel SuperStarII</td>
+<td align="center">Partial</td>
+<td>Message #23 contains raw measurements in carrier-phase-enabled firmwares.</td>
+</tr>
+<tr>
+<td>Fastrax</td>
+<td align="center">Yes</td>
+<td>The "PSEUDO" message contains raw measurements</td>
+</tr>
+<tr>
+<td>Trimble</td>
+<td align="center">Yes</td>
+<td>Packet 0x5a contains raw measurements</td>
+</tr>
+<tr>
+<td>Thales AC12</td>
+<td align="center">Yes</td>
+<td>The PASHR,MCA message contains raw measurements.</td>
+</tr>
+</table>
+
 </div>
 
 <hr/>
