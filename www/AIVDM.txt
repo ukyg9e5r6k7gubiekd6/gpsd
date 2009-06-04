@@ -45,6 +45,11 @@ ITU-R M.1371 is expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
+There have been two minor revisions of ITU-R M.1371 since it was
+originally issued.  These add interpretations to packet bitfields that
+were previously marked "spare" and "regional reserved".  I have not
+seen these either, but have been passed information on them.
+
 The ASCII format for AIS messages seems to have been set by IEC-PAS
 61162-100, "Maritime navigation and radiocommunication equipment and
 systems" <<IEC-PAS>>. It is proprietary and I have not looked at it.
@@ -56,7 +61,8 @@ rapacious attack lawyers.
 An effort, <<JSON-AIS>>, has been made to define a standard for
 exchange of unpacked, human-readable AIS data. At present it covers
 only a small subset of the most common AIS messages, but could readily
-be extended to the full set.
+be extended to the full set.  This standard is open and
+redistributable.
 
 == Information Sources ==
 
