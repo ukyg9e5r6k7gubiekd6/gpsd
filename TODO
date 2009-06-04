@@ -140,20 +140,6 @@ GPSD_UNITS environment variable and chooses its UI mode depending on
 whether or not it's running under X.  There is controversy about this 
 proposal on the dev list.
 
-*** SiRF firmware uploader
-
-Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 
-resolved whether SiRF Technology will allow us to ship the 
-binary loader code needed to actually use it.
-
-*** uBlox firmware uploader
-
-uBlox does make firmware updates available on their website and a cursory
-inspection suggests that their flash process should plug directly in to
-gpsflash - they use the same three stage process as SiRF: send a binary
-command to enter programming mode, send a tiny reflash bootstrap program
-and then send the actual firmware image.
-
 *** Industry-standard format dumping of raw satellite data
 
 It would be useful to be able to extract RINEX (or some other standard)
