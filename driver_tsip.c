@@ -40,9 +40,10 @@ static int tsip_write(struct gps_device_t *session,
     /*@ +nullderef @*/
     *ep++ = '\x10';
     *ep++ = '\x03';
-    session->msgbuflen = (size_t)(ep - (char*)buf); 
+    session->msgbuflen = (size_t)(ep - session->msgbuf);
     /*@ -charint @*/
-    if (gpsd_write(session,session->msgbuf,session->msgbuflen) != (ssize_t)len)
+    if (gpsd_write(session,session->msgbuf,session->msgbuflen) !=
+	(ssize_t)session->msgbuflen)
 	return -1;
 
     return 0;
