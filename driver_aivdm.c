@@ -324,7 +324,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	case 18:	/* Standard Class B CS Position Report */
 	    ais->type18.reserved = UBITS(38, 8);
 	    ais->type18.sog = UBITS(46, 10);
-	    ais->type18.accuracy = (bool)UBITS(56, 1);
+	    ais->type18.accuracy = (bool)UBITS(56, 1)!=0;
 	    ais->type18.longitude = SBITS(57, 28);
 	    ais->type18.latitude = SBITS(85, 27);
 	    ais->type18.cog = UBITS(112, 12);
@@ -353,7 +353,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	case 19:	/* Extended Class B CS Position Report */
 	    ais->type19.reserved = UBITS(38, 8);
 	    ais->type19.sog = UBITS(46, 10);
-	    ais->type19.accuracy = (bool)UBITS(56, 1);
+	    ais->type19.accuracy = (bool)UBITS(56, 1)!=0;
 	    ais->type19.longitude = SBITS(57, 28);
 	    ais->type19.latitude = SBITS(85, 27);
 	    ais->type19.cog = UBITS(112, 12);
