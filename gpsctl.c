@@ -465,7 +465,7 @@ int main(int argc, char **argv)
 
 	/* now perform the actual control function */
 	status = 0;
-#ifdef ALLOW_RECOBFIGURE
+#ifdef ALLOW_RECONFIGURE
 	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
