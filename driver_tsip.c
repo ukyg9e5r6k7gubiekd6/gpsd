@@ -820,7 +820,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
     putbyte(buf,0,0xff);		/* current port */
     putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
     putbyte(buf,2,getub(buf,1));	/* output baudrate */
-    putbyte(buf,3,8);			/* character width (8 bits) */
+    putbyte(buf,3,3);			/* character width (8 bits) */
     putbyte(buf,4,parity);		/* parity (normally odd) */
     putbyte(buf,5,stopbits-1);		/* stop bits (normally 1 stopbit) */
     putbyte(buf,6,0);			/* flow control (none) */
