@@ -50,14 +50,15 @@ used by the marine Automatic Identification System.  This can be
 decoded, but not yet encoded.</para>
 
 <para> The dump lines are values of AIS payload fields,
-comma-separated, in the order that they occur in the payload, spare
-and assigned-mode bits omitted. Spans of fields expressing a date are
-emitted as an ISO8601 timestamp (look for colons and the trailing Z
-indicating Zulu/UTC time), and the 19-bit group of TDMA status fields
-found at the end of message types 1-4 are are dumped as a single
-unsigned integer in hex. Unused regional-authority fields are also
-dumped in hex. Variable-length binary fields are dumped as an integer
-bit length, followed by a colon, followed by a hex dump.</para>
+comma-separated, in the order that they occur in the payload. Spans of
+fields expressing a date are emitted as an ISO8601 timestamp (look for
+colons and the trailing Z indicating Zulu/UTC time), and the 19-bit
+group of TDMA status fields found at the end of message types 1-4 are
+are dumped as a single unsigned integer (in hex preceded by
+"0x"). Unused regional-authority fields are also dumped (in hex
+preceded by "0x"). Variable-length binary fields are dumped as an
+integer bit length, followed by a colon, followed by a hex
+dump.</para>
 
 <para>By default, certain scaling and conversion operations are
 performed for the output.  Latitudes and longitudes are scaled to
