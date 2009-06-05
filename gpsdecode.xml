@@ -131,10 +131,50 @@ accessible description can be found onn the references page of the
 GPSD project website.</para>
 
 </refsect1>
+<refsect1 id='json_ais'><title>JSON-AIS compatribility</title> 
+
+<para>The <option>-j</option> dunmp format intends to be a compatible
+superset of the evolving JSON-AIS specification as it existed on 5 Jun
+2009.  The differences. which are designed to upgrade it to a lossless
+format, are as follows:</para>
+
+<itemizedlist>
+<listitem>
+<para>In the common message fields, this implementation does mot 
+emit <emphasis>rxtime</emphasis> or <emphasis>servertime</emphasis>, but
+does emit a <emphasis>repeat</emphasis> member which is the 
+Repeat Indicator field.</para>
+</listitem>
+
+<listitem>
+<para>In message types 1, 2, 3, 18, and 19, JSON-AIS only specifies
+<emphasis>status</emphasis> <emphasis>lat</emphasis>,
+<emphasis>lon</emphasis>, <emphasis>speed</emphasis>,
+<emphasis>course</emphasis>, and <emphasis>heading</emphasis>.</para>
+</listitem>
+
+<listitem>
+<para></para>
+</listitem>
+
+<listitem>
+<para></para>
+</listitem>
+
+<listitem>
+<para></para>
+</listitem>
+
+<listitem>
+<para></para>
+</listitem>
+</itemizedlist>
+
+</refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the sentence
-types 1-9, 12-14, and 18. Decoding of types 7, 12, 13, and 14
+types 1-14, 18-19, 21, and 24. Decoding of types 7, 12, 13, 21, and 14
 is unverified. AIVDM encoding is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
