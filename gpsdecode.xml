@@ -18,7 +18,7 @@
   <command>gpsdecode</command>  
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
-      <arg choice='opt'>-l</arg>
+      <arg choice='opt'>-j</arg>
       <arg choice='opt'>-u</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V</arg>
@@ -92,8 +92,9 @@ RTCM3.</para>
 and text expansion of numeric codes.  A dump with this option is
 lossless.</para>
 
-<para>The <option>-l</option> inserts a mnemonic label, followed by
-an equal sign, before each field in each dump line.</para>
+<para>The <option>-j</option> changes the dump format to JSON, with
+each each field preceded by a quoted label and equal sign and the
+entire dump line wrapped in curly braces.</para>
 
 <para>The <option>-V</option> option directs the program to emit its
 version number, then exit.</para>

@@ -16,7 +16,7 @@
 
 static int verbose = 0;
 static bool scaled = true;
-static bool labeled = false;
+static bool json = false;
 
 /**************************************************************************
  *
@@ -66,7 +66,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	else if (lexer.type == AIVDM_PACKET) {
 	    /*@ -uniondef */
 	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm))
-		aivdm_dump(&aivdm.decoded, scaled, labeled, stdout);
+		aivdm_dump(&aivdm.decoded, scaled, json, stdout);
 	    /*@ +uniondef */
 	}
     }
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "dhelpuVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "dhejpuVD:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -164,8 +164,8 @@ int main(int argc, char **argv)
 	    striphdr = true;
 	    break;
 
-	case 'l':
-	    labeled = true;
+	case 'j':
+	    json = true;
 	    break;
 
 	case 'p':	/* undocumented, used for regression-testing */

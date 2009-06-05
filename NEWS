@@ -3,7 +3,8 @@
   Fixed a bug that could report wrong sign for course and speed (but 
   not location) from SiRF binary GND messages. Abandoned the gpsflash
   subproject since it has become apparent that we can't do it without more
-  vendor cooperation than we're likely to get.
+  vendor cooperation than we're likely to get. gpsdecode can now dump
+  records in JSON (JavaScript Object Format).
 
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
   Fixed potential core dump in C client handling of "K" responses.
