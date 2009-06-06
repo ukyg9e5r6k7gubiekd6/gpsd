@@ -598,7 +598,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 2:
     case 3:
 #define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"rot\"=%u,\"speed\"=%u,\"quality\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"rot\"=%d,\"speed\"=%u,\"quality\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
 #define TYPE123_SCALED_CSV "%s,%s,%.1f,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x\n"
 #define TYPE123_SCALED_JSON   "\"status\"=\"%s\",\"rot\"=%s,\"speed\"=%.1f,\"quality\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"sp\"=%d,\"radio\"=%d}\n"
 	if (scaled) {
@@ -752,7 +752,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 6:	/* Binary Message */
 #define TYPE6_CSV	"%u,%u,%u,%u,%u:%s\n"
-#define TYPE6_JSON	"\"seq\"=%u,\"dst\"=%u,\"rexmit\"=%u,\"appid\"=%u,\"data\"=%u:\"%s\"}\n"
+#define TYPE6_JSON	"\"seq\"=%u,\"dst\"=%u,\"rexmit\"=%u,\"appid\"=%u,\"data\"=\"%u:%s\"}\n"
 	    (void)fprintf(fp,
 			  (json ? TYPE6_JSON : TYPE6_CSV),
 			  ais->type6.seqno,
@@ -779,7 +779,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 8:	/* Binary Broadcast Message */
 #define TYPE8_CSV	"%u,%u:%s\n"
-#define TYPE8_JSON	"\"appid\"=%u,\"data\"=%u:%s}\n"
+#define TYPE8_JSON	"\"appid\"=%u,\"data\"=\"%u:%s\"}\n"
 	    (void)fprintf(fp,
 			  (json ? TYPE8_JSON : TYPE8_CSV),
 			  ais->type8.application_id,
