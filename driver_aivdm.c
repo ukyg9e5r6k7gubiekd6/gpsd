@@ -3,8 +3,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Decodings of message types 11 and 21 have not yet been tested against 
- * known-good data.
+ * Decodings of message types 12, 13, 14, 19, and 21 have not yet been
+ * tested against known-good data.
  *
  * The decoder for message type 18 does not yet grok the ITU-1371-3 flag bits. 
  *
@@ -340,7 +340,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type18.raim = UBITS(147, 1)!=0;
 	    ais->type18.radio = UBITS(148, 20);
 	    gpsd_report(LOG_INF,
-			"reserved=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
+			"reserved=%d speed=%d quality=%d lon=%d lat=%d course=%d heading=%d sec=%d\n",
 			ais->type18.reserved,
 			ais->type18.sog, 
 			(uint)ais->type18.accuracy,
@@ -372,7 +372,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type19.assigned = UBITS(306, 1)!=0;
 	    ais->type19.spare = UBITS(307, 5);
 	    gpsd_report(LOG_INF,
-			"reserved=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d name=%s\n",
+			"reserved=%d speed=%d quality=%d lon=%d lat=%d course=%d heading=%d sec=%d name=%s\n",
 			ais->type19.reserved,
 			ais->type19.sog, 
 			(uint)ais->type19.accuracy,
@@ -403,7 +403,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type21.spare        = UBITS(271, 1)!=0;
 	    /* TODO: figure out how to handle Name Extension field */
 	    gpsd_report(LOG_INF,
-			"name=%s Q=%d Lon=%d Lat=%d Sec=%d\n",
+			"name=%s quality=%d lon=%d lat=%d sec=%d\n",
 			ais->type21.name,
 			(uint)ais->type19.accuracy,
 			ais->type19.longitude, 
@@ -432,6 +432,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		ais->type24.b.spare	    = UBITS(162, 8);
 		break;
 	    }
+	    gpsd_report(LOG_INF, "\n");
 	    break;
 	default:
 	    gpsd_report(LOG_INF, "\n");
@@ -999,7 +1000,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type21.virtual_aid,
 			  ais->type21.spare);
 	} else {
-#define TYPE21_UNSCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%d,\"lat\"=%d,\"accuracy\"=%u,\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"Sec\"=%u,\"regional\"=%d,\"raim\"=%u,\"virt\"=%u,\"spare\"=%d}\n"
+#define TYPE21_UNSCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%d,\"lat\"=%d,\"accuracy\"=%u,\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"sec\"=%u,\"regional\"=%d,\"raim\"=%u,\"virtual\"=%u,\"spare\"=%d}\n"
 #define TYPE21_UNSCALED_CSV "%u,%s,%d,%d,%u,%u,%u,%u,%u,%u,0x%x,%u,%u,0x%x\n"
 	    (void)fprintf(fp,
 			  (json ? TYPE21_UNSCALED_JSON : TYPE21_UNSCALED_CSV),
