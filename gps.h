@@ -457,31 +457,31 @@ typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
 struct ais_t
 {
-    uint	id;		/* message type */
-    uint    	ri;		/* Repeat indicator */
-    uint	mmsi;	/* MMSI */		
+    uint	msgtype;	/* message type */
+    uint    	repeat;		/* Repeat indicator */
+    uint	mmsi;		/* MMSI */		
     union {
 	/* Types 1-3 Common navigation info */
 	struct {
             uint status;		/* navigation status */
-	    signed rot;			/* rate of turn */
-#define AIS_ROT_HARD_LEFT	-127
-#define AIS_ROT_HARD_RIGHT	127
-#define AIS_ROT_NOT_AVAILABLE	128
-	    uint sog;			/* speed over ground in deciknots */
-#define AIS_SOG_NOT_AVAILABLE	1023
-#define AIS_SOG_FAST_MOVER	1022	/* >= 102.2 knots */
+	    signed turn;			/* rate of turn */
+#define AIS_TURN_HARD_LEFT	-127
+#define AIS_TURN_HARD_RIGHT	127
+#define AIS_TURN_NOT_AVAILABLE	128
+	    uint speed;			/* speed over ground in deciknots */
+#define AIS_SPEED_NOT_AVAILABLE	1023
+#define AIS_SPEED_FAST_MOVER	1022	/* >= 102.2 knots */
 	    bool accuracy;		/* position accuracy */
 #define AIS_LATLON_SCALE	600000.0
-	    int longitude;		/* longitude */
+	    int lon;			/* longitude */
 #define AIS_LON_NOT_AVAILABLE	0x6791AC0
-	    int latitude;		/* latitude */
+	    int lat;			/* latitude */
 #define AIS_LAT_NOT_AVAILABLE	0x3412140
-	    uint cog;			/* course over ground */
-#define AIS_COG_NOT_AVAILABLE	3600
+	    uint course;		/* course over ground */
+#define AIS_COURSE_NOT_AVAILABLE	3600
 	    uint heading;		/* true heading */
 #define AIS_NO_HEADING	511
-	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint second;		/* seconds of UTC timestamp */
 #define AIS_SEC_NOT_AVAILABLE	60
 #define AIS_SEC_MANUAL		61
 #define AIS_SEC_ESTIMATED	62
@@ -506,8 +506,8 @@ struct ais_t
 	    uint second;		/* UTC second */
 #define AIS_SECOND_NOT_AVAILABLE	0
 	    bool accuracy;		/* fix quality */
-	    int longitude;		/* longitude */
-	    int latitude;		/* latitude */
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
 	    uint epfd;			/* type of position fix device */
 	    uint spare;			/* spare bits */
 	    bool raim;			/* RAIM flag */
@@ -518,8 +518,8 @@ struct ais_t
 	    uint ais_version;		/* AIS version level */
 	    uint imo_id;		/* IMO identification */
 	    char callsign[8];		/* callsign */ 
-	    char vessel_name[21];	/* vessel name */
-	    uint ship_type;		/* ship type code */
+	    char shipname[21];		/* vessel name */
+	    uint shiptype;		/* ship type code */
 	    uint to_bow;		/* dimension to bow */
 	    uint to_stern;		/* dimension to stern */
 	    uint to_port;		/* dimension to port */
@@ -559,15 +559,15 @@ struct ais_t
 	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
 	struct {
-	    uint altitude;		/* altitude in meters */
+	    uint alt;			/* altitude in meters */
 #define AIS_ALT_NOT_AVAILABLE	4095
 #define AIS_ALT_FAST_MOVER	4094	/* 4094 meters or higher */
-	    uint sog;			/* speed over ground in deciknots */
+	    uint speed;			/* speed over ground in deciknots */
 	    bool accuracy;		/* position accuracy */
-	    int longitude;		/* longitude */
-	    int latitude;		/* latitude */
-	    uint cog;			/* course over ground */
-	    uint utc_second;		/* seconds of UTC timestamp */
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
+	    uint course;		/* course over ground */
+	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
 	    uint dte;			/* data terminal enable */
 	    uint spare;			/* spare bits */
@@ -603,13 +603,13 @@ struct ais_t
 	/* Type 18 - Standard Class B CS Position Report */
 	struct {
 	    uint reserved;		/* altitude in meters */
-	    uint sog;			/* speed over ground in deciknots */
+	    uint speed;			/* speed over ground in deciknots */
 	    bool accuracy;		/* position accuracy */
-	    int longitude;		/* longitude */
-	    int latitude;		/* latitude */
-	    uint cog;			/* course over ground */
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
+	    uint course;		/* course over ground */
 	    uint heading;		/* true heading */
-	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
 	    bool cs_flag;		/* carrier sense unit flag */
 	    bool display_flag;		/* unit has attached display? */
@@ -623,16 +623,16 @@ struct ais_t
 	/* Type 19 - Extended Class B CS Position Report */
 	struct {
 	    uint reserved;		/* altitude in meters */
-	    uint sog;			/* speed over ground in deciknots */
+	    uint speed;			/* speed over ground in deciknots */
 	    bool accuracy;		/* position accuracy */
-	    int longitude;		/* longitude */
-	    int latitude;		/* latitude */
-	    uint cog;			/* course over ground */
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
+	    uint course;		/* course over ground */
 	    uint heading;		/* true heading */
-	    uint utc_second;		/* seconds of UTC timestamp */
+	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
-	    char vessel_name[21];	/* ship name */
-	    uint ship_type;		/* ship type code */
+	    char shipname[21];		/* ship name */
+	    uint shiptype;		/* ship type code */
 	    uint to_bow;		/* dimension to bow */
 	    uint to_stern;		/* dimension to stern */
 	    uint to_port;		/* dimension to port */
@@ -648,14 +648,14 @@ struct ais_t
 	    uint type;			/* aid type */
 	    char name[35];		/* name of aid to navigation */
 	    bool accuracy;		/* position accuracy */
-	    int longitude;		/* longitude */
-	    int latitude;		/* latitude */
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
 	    uint to_bow;		/* dimension to bow */
 	    uint to_stern;		/* dimension to stern */
 	    uint to_port;		/* dimension to port */
 	    uint to_starboard;		/* dimension to starboard */
 	    uint epfd;			/* type of EPFD */
-	    uint utc_second;		/* second of UTC timestamp */
+	    uint second;		/* second of UTC timestamp */
 	    bool off_position;		/* off-position indicator */
 	    uint regional;		/* regional reserved field */
 	    bool raim;			/* RAIM flag */
@@ -668,11 +668,11 @@ struct ais_t
 	    uint part;			/* part number */
 	    union {
 		struct {
-		    char vessel_name[21];	/* vessel name */
+		    char shipname[21];		/* vessel name */
 		    uint spare;			/* unused spare bits */
 		} a;
 		struct {
-		    uint ship_type;		/* ship type code */
+		    uint shiptype;		/* ship type code */
 		    char vendor_id[8];		/* vendor ID */ 
 		    char callsign[8];		/* callsign */
 		    union {

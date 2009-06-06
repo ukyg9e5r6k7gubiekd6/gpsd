@@ -66,7 +66,7 @@ decimal degrees rather than the native AIS unit of 1/10000th of a
 minute of arc.  Ship (but not air) speeds are scaled to knots rather
 than tenth-of-knot unit.  Navigation status and positioning-system
 type are dumped as text strings rather than IAS numeric codes. Rate of
-turn may appear as "nan" if is unavailable, of as one of the strings
+turn may appear as "nan" if is unavailable, or as one of the strings
 "fastright" or "fastleft" if it is out of the IAS encoding range;
 otherwise it is quadratically mapped back to the turn sensor number in
 degrees per minute. Vessel draughts are converted to decimal meters
