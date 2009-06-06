@@ -36,7 +36,7 @@ exists because assembling them into a complete picture is both
 technically difficult and impeded by legal barriers.
 
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
-Shipborne Automatic. Identification System Using Time Division
+Shipborne Automatic Identification System Using Time Division
 Multiple Access" <<ITU1371>>, issued in 2001, describes the format of
 AIS binary messages. It is proprietary, expensive, and surrounded by
 attack lawyers.  I have not looked at it.
@@ -71,15 +71,15 @@ Coast Guard's AIS pages at <<NAVCEN>> describe AIS message payloads
 almost completely.  The detail information on payload formats in this
 document is derived from these.
 
-Kurt Schwehr is a research scientist at the Center for
-Coastal and Ocean Mapping at the University of New Hamphire. Much of
-his research involves AIS.  His work blog at <<Schwehr>> contains
-sample messages and descriptions of AIS operation in the wild that
-shed light on various obscure corners of the specification.  He has
-explained the otherwise undocumented Repeat Indicator field and USCG
-extended AIVDM to me by email. He also communicated some critical
-information from <<IEC-PAS>>, and supplied information about new
-messages and fields in ITU-1371-3.
+Kurt Schwehr is a research scientist at the Center for Coastal and
+Ocean Mapping at the University of New Hamphire. Much of his research
+involves AIS.  His work blog at <<Schwehr>> contains sample messages
+and descriptions of AIS operation in the wild that shed light on
+various obscure corners of the specification.  He has explained the
+otherwise undocumented Repeat Indicator field and USCG extended AIVDM
+to me by email. He also communicated some critical information from
+<<IEC-PAS>>, and supplied information about new messages and fields in
+ITU-1371-3.
 
 == Improving This Document ==
 
@@ -136,8 +136,8 @@ Field 1, !AIVDM, identifies this as an AIVDM packet.
 
 Field 2 (1 in this example) is the count of fragments in the currently
 accumulating message.  The payload size of each sentence is limited by
-NMEA 0183's 82-character maximum, so it is possible to split a payload
-over several fragment sentences.
+NMEA 0183's 82-character maximum, so it is sometimes required to split
+a payload over several fragment sentences.
 
 Field 3 (1 in this example) is the fragment number of this
 sentence. It will be one-based.  A sentence with a fragment count of
@@ -367,8 +367,8 @@ such as the St. Lawrence Seaway and PAWSS.
 
 Classes 12 and 14 are used for safety-related text messaging.
 
-Other message types are unusual or rare, and many AIS transponders
-never emit them.
+In practice, message types other than 1, 3, 4, 5, 18, and 24 are
+unusual or rare; many AIS transponders never emit them.
 
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).  The first three digits convey information
@@ -385,14 +385,14 @@ are reported by <<Schwehr>>, who reports they were added in Version 3 of
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
 1-5, 9-11, 18-19, and 24.  Described but unchecked are 6, 7, 8, 12,
-13, and 21.
+13, 14, and 21.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
 Type 1, 2 and 3 messages share a common reporting structure for
 navigational information; we'll call it the Common Navigation Block
-(CNB). This is the information likely to be of interest for decoding
-software.
+(CNB). This is the information most likely to be of interest for
+decoding software.
 
 .Common Navigation Block
 `-------`---`------------------------`-----------------------------------------
@@ -481,7 +481,7 @@ Seconds in UTC timestamp should be 0-59, except for these special values:
      reckoning) mode,
 * 63 if the positioning system is inoperative.
 
-The Regional Reserved field is intended for use by local maaritime
+The Regional Reserved field is intended for use by local maritime
 authorities.  It is not known to be in any actual use up to 2009.
 
 The Maneuver Indicator (143-144) may have these values:
@@ -747,7 +747,8 @@ Field   Len Description                       Units
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
-Total number of bits is 168.
+Tracking information for search-and-rescue aircraft.  Total number of
+bits is 168.
 
 `-------`---`-----------------------------`------------------------------------
 Field   Len Description                   Encoding   
@@ -777,7 +778,7 @@ navigation block; planes go faster. The special value 1023 indicates
 speed not available, 1022 indicates 1022 knots or higher.
 
 Position Accuracy, Longitude, Latitude, and Course over Ground
-are encoded identically as uin the common navigation block and
+are encoded identically as in the common navigation block and
 are even at the same bit offsets.  Time stamp has the same special
 values as in the common navigation block, but is at a different offset.
 
@@ -1032,7 +1033,7 @@ refer to a small attached auxiliary vessel and these 30 bits are read
 as the MMSI of the mother ship.  Otherwise the 30 bits describe vessel
 dimensions as in Message Type 5.
 
-According to [[[MMSI]]], an MMSI is associated with an auxiliary craft
+According to [[MMSI]], an MMSI is associated with an auxiliary craft
 when it is of the form 98MIDXXXX where the digits 3, 4 and 5 represent
 the MID and X is any figure from 0 to 9.
 
