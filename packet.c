@@ -78,7 +78,7 @@ others apart and distinguish them from baud barf.
  * recognition beyond the headers would make no sense in this
  * application, they'd just add complexity.
  *
- * The NMEA portion of state machine allows the following talker IDs:
+ * The NMEA portion of the state machine allows the following talker IDs:
  *      GP -- Global Positioning System.
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *	IN -- Integrated Navigation (Garmin uses this).
