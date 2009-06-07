@@ -160,7 +160,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type123.heading = UBITS(128, 9);
 	    ais->type123.second = UBITS(137, 6);
 	    ais->type123.maneuver = UBITS(143, 2);
-	    ais->type123.spare = UBITS(145, 3);
+	    //ais->type123.spare = UBITS(145, 3);
 	    ais->type123.raim = UBITS(148, 1)!=0;
 	    ais->type123.radio = UBITS(149, 20);
 	    gpsd_report(LOG_INF,
@@ -187,7 +187,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type4.lon = SBITS(79, 28);
 	    ais->type4.lat = SBITS(107, 27);
 	    ais->type4.epfd = UBITS(134, 4);
-	    ais->type4.spare = UBITS(138, 10);
+	    //ais->type4.spare = UBITS(138, 10);
 	    ais->type4.raim = UBITS(148, 1)!=0;
 	    ais->type4.radio = UBITS(149, 19);
 	    gpsd_report(LOG_INF,
@@ -221,7 +221,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type5.draught      = UBITS(294, 8);
 	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);
-	    ais->type5.spare        = UBITS(423, 1);
+	    //ais->type5.spare        = UBITS(423, 1);
 	    gpsd_report(LOG_INF,
 			"AIS=%d callsign=%s, name=%s destination=%s\n",
 			ais->type5.ais_version,
@@ -233,7 +233,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type6.seqno          = UBITS(38, 2);
 	    ais->type6.dest_mmsi      = UBITS(40, 30);
 	    ais->type6.retransmit     = (bool)UBITS(70, 1);
-	    ais->type6.spare          = UBITS(71, 1);
+	    //ais->type6.spare        = UBITS(71, 1);
 	    ais->type6.application_id = UBITS(72, 16);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
 	    (void)memcpy(ais->type6.bitdata, 
@@ -254,7 +254,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF, "\n");
 	    break;
         case 8: /* Binary Broadcast Message */
-	    ais->type8.spare          = UBITS(38, 2);
+	    //ais->type8.spare        = UBITS(38, 2);
 	    ais->type8.application_id = UBITS(40, 16);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
 	    (void)memcpy(ais->type8.bitdata, 
@@ -274,7 +274,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type9.second = UBITS(128, 6);
 	    ais->type9.regional = UBITS(134, 8);
 	    ais->type9.dte = UBITS(142, 1);
-	    ais->type9.spare = UBITS(143, 3);
+	    //ais->type9.spare = UBITS(143, 3);
 	    ais->type9.assigned = UBITS(144, 1)!=0;
 	    ais->type9.raim = UBITS(145, 1)!=0;
 	    ais->type9.radio = UBITS(146, 22);
@@ -289,16 +289,16 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type9.second);
 	    break;
         case 10: /* UTC/Date inquiry */
-	    ais->type10.spare          = UBITS(38, 2);
+	    //ais->type10.spare        = UBITS(38, 2);
 	    ais->type10.dest_mmsi      = UBITS(40, 30);
-	    ais->type10.spare2         = UBITS(70, 2);
+	    //ais->type10.spare2       = UBITS(70, 2);
 	    gpsd_report(LOG_INF, "dest=%u\n", ais->type10.dest_mmsi);
 	    break;
         case 12: /* Safety Related Message */
 	    ais->type12.seqno          = UBITS(38, 2);
 	    ais->type12.dest_mmsi      = UBITS(40, 30);
 	    ais->type12.retransmit     = (bool)UBITS(70, 1);
-	    ais->type12.spare          = UBITS(71, 1);
+	    //ais->type12.spare        = UBITS(71, 1);
 	    from_sixbit((char *)ais_context->bits, 
 			72, ais_context->bitlen-72,
 			ais->type12.text);
@@ -315,7 +315,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF, "\n");
 	    break;
         case 14: /* Safety Related Broadcast Message */
-	    ais->type14.spare          = UBITS(38, 2);
+	    //ais->type14.spare          = UBITS(38, 2);
 	    from_sixbit((char *)ais_context->bits, 
 			40, ais_context->bitlen-40,
 			ais->type14.text);
@@ -370,7 +370,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type19.raim         = UBITS(302, 1)!=0;
 	    ais->type19.dte          = UBITS(305, 1)!=0;
 	    ais->type19.assigned     = UBITS(306, 1)!=0;
-	    ais->type19.spare        = UBITS(307, 5);
+	    //ais->type19.spare      = UBITS(307, 5);
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d name=%s\n",
 			ais->type19.reserved,
@@ -400,7 +400,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type21.raim         = UBITS(268, 1)!=0;
 	    ais->type21.virtual_aid  = UBITS(269, 1)!=0;
 	    ais->type21.assigned     = UBITS(270, 1)!=0;
-	    ais->type21.spare        = UBITS(271, 1)!=0;
+	    //ais->type21.spare      = UBITS(271, 1);
 	    /* TODO: figure out how to handle Name Extension field */
 	    gpsd_report(LOG_INF,
 			"name=%s accuracy=%d lon=%d lat=%d sec=%d\n",
@@ -415,7 +415,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    switch (ais->type24.part) {
 	    case 0:
 		UCHARS(40, ais->type24.a.shipname);
-		ais->type24.a.spare	= UBITS(160, 8);
+		//ais->type24.a.spare	= UBITS(160, 8);
 		break;
 	    case 1:
 		ais->type24.b.shiptype = UBITS(40, 8);
@@ -429,7 +429,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		    ais->type24.b.dim.to_port       = UBITS(150, 6);
 		    ais->type24.b.dim.to_starboard  = UBITS(156, 6);
 		}
-		ais->type24.b.spare	    = UBITS(162, 8);
+		//ais->type24.b.spare	    = UBITS(162, 8);
 		break;
 	    }
 	    gpsd_report(LOG_INF, "\n");
@@ -599,9 +599,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 2:
     case 3:
 #define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"turn\"=%d,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"turn\"=%d,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"radio\"=%d}\n"
 #define TYPE123_SCALED_CSV "%s,%s,%.1f,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_SCALED_JSON   "\"status\"=\"%s\",\"turn\"=%s,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE123_SCALED_JSON   "\"status\"=\"%s\",\"turn\"=%s,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"radio\"=%d}\n"
 	if (scaled) {
 	    char turnlegend[10];
 
@@ -659,9 +659,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 4:	/* Base Station Report */
     case 11:	/* UTC/Date Response */
 #define TYPE4_UNSCALED_CSV "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,0x%x\n"
-#define TYPE4_UNSCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"epfd\"=%u,\"spare\"=%u,\"radio\"=%d}\n"
+#define TYPE4_UNSCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"epfd\"=%u,\"radio\"=%d}\n"
 #define TYPE4_SCALED_CSV	"%4u:%02u:%02uT%02u:%02u:%02uZ,%u,%.4f,%.4f,%s,%u,0x%x\n"
-#define TYPE4_SCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"epfd\"=\"%s\",\"spare\"=%u,\"radio\"=%d}\n"
+#define TYPE4_SCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"epfd\"=\"%s\",\"radio\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE4_SCALED_JSON : TYPE4_SCALED_CSV),
@@ -699,8 +699,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE4_SCALED_JSON
 	break;
     case 5: /* Ship static and voyage related data */
-#define TYPE5_SCALED_JSON "\"imo_id\"=%u,\"ais_version\"=%u,\"callsign\"=\"%s\",\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=\"%s\",\"eta\"=%02u-%02uT%02u:%02uZ,\"draught\"=%.1f,\"destination\"=\"%s\",\"dte\"=%u,\"spare\"=%u}\n"
-#define TYPE5_SCALED_CSV "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%02u-%02uT%02u:%02uZ,%.1f,%s,%u,%u\n"
+#define TYPE5_SCALED_JSON "\"imo_id\"=%u,\"ais_version\"=%u,\"callsign\"=\"%s\",\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=\"%s\",\"eta\"=%02u-%02uT%02u:%02uZ,\"draught\"=%.1f,\"destination\"=\"%s\",\"dte\"=%u}\n"
+#define TYPE5_SCALED_CSV "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%02u-%02uT%02u:%02uZ,%.1f,%s,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE5_SCALED_JSON : TYPE5_SCALED_CSV),
@@ -720,11 +720,10 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type5.minute,
 			  ais->type5.draught / 10.0,
 			  ais->type5.destination,
-			  ais->type5.dte,
-			  ais->type5.spare);
+			  ais->type5.dte);
 	} else {
-#define TYPE5_UNSCALED_JSON "\"imo_id\"=%u,\"ais_version\"=%u,\"callsign\"=\"%s\",\"shipname\"=\"%s\",\"shiptype\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=%u,\"eta\"=%02u-%02uT%02u:%02uZ,\"draught\"=%u,\"destination\"=\"%s\",\"dte\"=%u,\"spare\"=%u}\n"
-#define TYPE5_UNSCALED_CSV "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u,%u\n"
+#define TYPE5_UNSCALED_JSON "\"imo_id\"=%u,\"ais_version\"=%u,\"callsign\"=\"%s\",\"shipname\"=\"%s\",\"shiptype\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=%u,\"eta\"=%02u-%02uT%02u:%02uZ,\"draught\"=%u,\"destination\"=\"%s\",\"dte\"=%u}\n"
+#define TYPE5_UNSCALED_CSV "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u"
 	    (void)fprintf(fp,
 			  (json ? TYPE5_UNSCALED_JSON : TYPE5_UNSCALED_CSV),
 			  ais->type5.imo_id,
@@ -743,8 +742,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type5.minute,
 			  ais->type5.draught,
 			  ais->type5.destination,
-			  ais->type5.dte,
-			  ais->type5.spare);
+			  ais->type5.dte);
 	}
 #undef TYPE5_UNSCALED_CSV
 #undef TYPE5_UNSCALED_JSON
@@ -792,9 +790,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 9:
 #define TYPE9_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,0x%x,%u,%d,0x%x\n"
-#define TYPE9_UNSCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE9_UNSCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"radio\"=%d}\n"
 #define TYPE9_SCALED_CSV "%u,%u,%u,%.4f,%.4f,%.1f,%u,0x%x,%u,%d,0x%x\n"
-#define TYPE9_SCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE9_SCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"radio\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE9_SCALED_JSON : TYPE9_SCALED_CSV),
@@ -831,13 +829,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE9_SCALED_JSON
 	break;
     case 10:	/* UTC/Date Inquiry */
-#define TYPE10_CSV  "0x%x,%u,0x%x\n"
-#define TYPE10_JSON	"\"spare\"=%d,\"dst\"=%u,\"spare2\"=%d}\n"
+#define TYPE10_CSV  "%u\n"
+#define TYPE10_JSON	"\"dest_mmsi\"=%u}\n"
 	    (void)fprintf(fp,
 			  (json ? TYPE10_JSON : TYPE10_CSV),
-			  ais->type10.spare,
-			  ais->type10.dest_mmsi,
-			  ais->type10.spare2);
+			  ais->type10.dest_mmsi);
 #undef TYPE10_CSV
 #undef TYPE10_JSON
 	break;
@@ -979,8 +975,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE19_SCALED_JSON
 	break;
     case 21: /* Aid to Navigation */
-#define TYPE21_SCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%.4f,\"lat\"=%.4f,\"accuracy\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=\"%s\",\"second\"=%u,\"regional\"=%d,\"off_position\"=%d,\"raim\"=%u,\"virtual_aid\"=%u,\"spare\"=%d}\n"
-#define TYPE21_SCALED_CSV "%u,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%u,0x%x,%u,%u,0x%x\n"
+#define TYPE21_SCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%.4f,\"lat\"=%.4f,\"accuracy\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=\"%s\",\"second\"=%u,\"regional\"=%d,\"off_position\"=%d,\"raim\"=%u,\"virtual_aid\"=%u}\n"
+#define TYPE21_SCALED_CSV "%u,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%u,0x%x,%u,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE21_SCALED_JSON : TYPE21_SCALED_CSV),
@@ -998,11 +994,10 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type21.regional,
 			  ais->type21.off_position,
 			  ais->type21.raim,
-			  ais->type21.virtual_aid,
-			  ais->type21.spare);
+			  ais->type21.virtual_aid);
 	} else {
-#define TYPE21_UNSCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%d,\"lat\"=%d,\"accuracy\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=%u,\"second\"=%u,\"regional\"=%d,\"off_position\"=%d,\"raim\"=%u,\"virtual_aid\"=%u,\"spare\"=%d}\n"
-#define TYPE21_UNSCALED_CSV "%u,%s,%d,%d,%u,%u,%u,%u,%u,%u,%u,0x%x,%u,%u,0x%x\n"
+#define TYPE21_UNSCALED_JSON "\"type\"=%u,\"name\"=\"%s\",\"lon\"=%d,\"lat\"=%d,\"accuracy\"=%u,\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=%u,\"second\"=%u,\"regional\"=%d,\"off_position\"=%d,\"raim\"=%u,\"virtual_aid\"=%u}\n"
+#define TYPE21_UNSCALED_CSV "%u,%s,%d,%d,%u,%u,%u,%u,%u,%u,%u,0x%x,%u,%u\n"
 	    (void)fprintf(fp,
 			  (json ? TYPE21_UNSCALED_JSON : TYPE21_UNSCALED_CSV),
 			  ais->type21.type,
@@ -1019,8 +1014,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type21.regional,
 			  ais->type21.off_position,
 			  ais->type21.raim,
-			  ais->type21.virtual_aid,
-			  ais->type21.spare);
+			  ais->type21.virtual_aid);
 	}
 #undef TYPE21_UNSCALED_CSV
 #undef TYPE21_UNSCALED_JSON
@@ -1030,9 +1024,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 24: /* Class B CS Static Data Report */
 	(void)fprintf(fp, json ? "\"partno\"=%u" : "%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
-	    (void)fprintf(fp, json ? "\"shipname\"=\"%s\",\"spare\"=%d\n" : "%s,0x%x\n", 
-			  ais->type24.a.shipname, 
-			  ais->type24.a.spare);
+	    (void)fprintf(fp, json ? "\"shipname\"=\"%s\"\n" : "%s\n", 
+			  ais->type24.a.shipname);
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
 		(void)fprintf(fp, json ? "\"shiptype\"=\"%s\"," : "%s,", 

@@ -487,7 +487,7 @@ struct ais_t
 #define AIS_SEC_ESTIMATED	62
 #define AIS_SEC_INOPERATIVE	63
 	    uint maneuver;		/* maneuver indicator */
-	    uint spare;			/* spare bits */
+	    //uint spare;		/* spare bits */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type123;
@@ -509,7 +509,7 @@ struct ais_t
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */
 	    uint epfd;			/* type of position fix device */
-	    uint spare;			/* spare bits */
+	    //uint spare;		/* spare bits */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type4;
@@ -532,14 +532,14 @@ struct ais_t
 	    uint draught;		/* draft in meters */
 	    char destination[21];	/* ship destination */
 	    uint dte;			/* data terminal enable */
-	    uint spare;			/* spare bits */
+	    //uint spare;		/* spare bits */
 	} type5;
 	/* Type 6 - Addressed Binary Message */
 	struct {
 	    uint seqno;			/* sequence number */
 	    uint dest_mmsi;		/* destination MMSI */
 	    bool retransmit;		/* retransmit flag */
-	    uint spare;			/* spare bit(s) */
+	    //uint spare;		/* spare bit(s) */
 	    uint application_id;	/* Application ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    uint bitcount;		/* bit count of the data */
@@ -551,7 +551,7 @@ struct ais_t
 	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
-	    uint spare;			/* spare bit(s) */
+	    //uint spare;		/* spare bit(s) */
 	    uint application_id;	/* Application ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    uint bitcount;		/* bit count of the data */
@@ -570,23 +570,23 @@ struct ais_t
 	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
 	    uint dte;			/* data terminal enable */
-	    uint spare;			/* spare bits */
+	    //uint spare;		/* spare bits */
 	    bool assigned;		/* assigned-mode flag */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
 	} type9;
 	/* Type 10 - UTC/Date Inquiry */
 	struct {
-	    uint spare;
+	    //uint spare;
 	    uint dest_mmsi;		/* destination MMSI */
-	    uint spare2;
+	    //uint spare2;
 	} type10;
 	/* Type 12 - Safety-Related Message */
 	struct {
 	    uint seqno;			/* sequence number */
 	    uint dest_mmsi;		/* destination MMSI */
 	    bool retransmit;		/* retransmit flag */
-	    uint spare;			/* spare bit(s) */
+	    //uint spare;		/* spare bit(s) */
 #define AIS_TYPE12_TEXT_MAX	157	/* 936 bits of six-bit, plus NUL */
 	    char text[AIS_TYPE12_TEXT_MAX];
 	} type12;
@@ -596,7 +596,7 @@ struct ais_t
 	} type13;
 	/* Type 14 - Safety-Related Broadcast Message */
 	struct {
-	    uint spare;			/* spare bit(s) */
+	    //uint spare;		/* spare bit(s) */
 #define AIS_TYPE14_TEXT_MAX	161	/* 952 bits of six-bit, plus NUL */
 	    char text[AIS_TYPE14_TEXT_MAX];
 	} type14;
@@ -641,7 +641,7 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    bool dte;			/* date terminal enable */
 	    bool assigned;		/* assigned-mode flag */
-	    uint spare;			/* spare bits */
+	    //uint spare;		/* spare bits */
 	} type19;
 	/* Type 21 - Aids to Navigation Report */
 	struct {
@@ -661,7 +661,7 @@ struct ais_t
 	    bool raim;			/* RAIM flag */
 	    bool virtual_aid;		/* is virtual station? */
 	    bool assigned;		/* assigned-mode flag */
-	    uint spare;			/* unused */
+	    //uint spare;		/* unused */
 	} type21;
 	/* Type 24 - Class B CS Static Data Report */
 	struct {
@@ -669,7 +669,7 @@ struct ais_t
 	    union {
 		struct {
 		    char shipname[21];		/* vessel name */
-		    uint spare;			/* unused spare bits */
+		    //uint spare;		/* unused spare bits */
 		} a;
 		struct {
 		    uint shiptype;		/* ship type code */
@@ -684,7 +684,7 @@ struct ais_t
 			    uint to_starboard;	/* dimension to starboard */
 			} dim;
 		    };
-		    uint spare;			/* unused spare bits */
+		    //uint spare;		/* unused spare bits */
 		} b;
 	    };
 	} type24;
