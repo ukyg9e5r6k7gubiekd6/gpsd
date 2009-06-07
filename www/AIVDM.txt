@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.8, Jun 2009
+v1.9, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -59,10 +59,11 @@ it too is proprietary and expensive, and surrounded by even more
 rapacious attack lawyers.
 
 An effort, <<JSON-AIS>>, has been made to define a standard for
-exchange of unpacked, human-readable AIS data. At present it covers
-only a small subset of the most common AIS messages, but could readily
-be extended to the full set.  This standard is open and
-redistributable.
+exchange of unpacked, human-readable AIS data. At present (edition of
+6 Jun 2009) it covers only a small subset of the most common AIS
+messages, and many data fields in the messages it does dump are
+omitted.  The member names given in the bit-field tables match the
+attributes use in JSON-AIS when JSON-AIS includes that field.
 
 == Information Sources ==
 
@@ -1187,3 +1188,5 @@ messages, information about ITU-1371-3 flags in message type 18,
 and the new section on Improving This Document.
 
 Version 1.8 fixes some broken markup and adds information about JSON-AIS.
+
+Version 1.9 adds more information on JSON and the member names.
