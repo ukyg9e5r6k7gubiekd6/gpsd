@@ -599,9 +599,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 2:
     case 3:
 #define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"turn\"=%d,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
+#define TYPE123_UNSCALED_JSON   "\"status\"=%u,\"turn\"=%d,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
 #define TYPE123_SCALED_CSV "%s,%s,%.1f,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_SCALED_JSON   "\"status\"=\"%s\",\"turn\"=%s,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"sp\"=%d,\"radio\"=%d}\n"
+#define TYPE123_SCALED_JSON   "\"status\"=\"%s\",\"turn\"=%s,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"spare\"=%d,\"radio\"=%d}\n"
 	if (scaled) {
 	    char turnlegend[10];
 
@@ -659,9 +659,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 4:	/* Base Station Report */
     case 11:	/* UTC/Date Response */
 #define TYPE4_UNSCALED_CSV "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,0x%x\n"
-#define TYPE4_UNSCALED_JSON "%4u:%02u:%02uT%02u:%02u:%02uZ,\"q\"=%u,\"lon\"=%d,\"lat\"=%d,\"epfd\"=%u,\"sp\"=%u,\"radio\"=%d}\n"
+#define TYPE4_UNSCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"epfd\"=%u,\"spare\"=%u,\"radio\"=%d}\n"
 #define TYPE4_SCALED_CSV	"%4u:%02u:%02uT%02u:%02u:%02uZ,%u,%.4f,%.4f,%s,%u,0x%x\n"
-#define TYPE4_SCALED_JSON "%4u:%02u:%02uT%02u:%02u:%02uZ,\"q\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"epfd\"=\"%s\",\"sp\"=%u,\"radio\"=%d}\n"
+#define TYPE4_SCALED_JSON "\"timestamp\"=\"%4u:%02u:%02uT%02u:%02u:%02uZ\",\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"epfd\"=\"%s\",\"spare\"=%u,\"radio\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE4_SCALED_JSON : TYPE4_SCALED_CSV),
@@ -792,9 +792,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 9:
 #define TYPE9_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,0x%x,%u,%d,0x%x\n"
-#define TYPE9_UNSCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"sec\"=%u,\"regional\"=%d,\"dte\"=%u,\"sp\"=%d,\"radio\"=%d}\n"
+#define TYPE9_UNSCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"spare\"=%d,\"radio\"=%d}\n"
 #define TYPE9_SCALED_CSV "%u,%u,%u,%.4f,%.4f,%.1f,%u,0x%x,%u,%d,0x%x\n"
-#define TYPE9_SCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"sec\"=%u,\"regional\"=%d,\"dte\"=%u,\"sp\"=%d,\"radio\"=%d}\n"
+#define TYPE9_SCALED_JSON   "\"alt\"=%u,\"SPEED\"=%u,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"second\"=%u,\"regional\"=%d,\"dte\"=%u,\"spare\"=%d,\"radio\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE9_SCALED_JSON : TYPE9_SCALED_CSV),
@@ -876,9 +876,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 18:
 #define TYPE18_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,%u,%u,%u,%u,%d,0x%x\n"
-#define TYPE18_UNSCALED_JSON   "\"reserved\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"cs\"=%u,\"display\"=%u,\"dsc\"=%u,\"band\"=%u,\"msg22\"=%u,\"raim\"=%u,\"radio\"=%d}\n"
+#define TYPE18_UNSCALED_JSON   "\"reserved\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"cs\"=%u,\"display\"=%u,\"dsc\"=%u,\"band\"=%u,\"msg22\"=%u,\"raim\"=%u,\"radio\"=%d}\n"
 #define TYPE18_SCALED_CSV "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,0x%x,%u,%u,%u,%u,%u,%u,0x%x\n"
-#define TYPE18_SCALED_JSON   "\"reserved\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"cs\"=%u,\"display\"=%u,\"dsc\"=%u,\"band\"=%u,\"msg22\"=%u,\"raim\"=%u,\"radio\"=%d}\n"
+#define TYPE18_SCALED_JSON   "\"reserved\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"cs\"=%u,\"display\"=%u,\"dsc\"=%u,\"band\"=%u,\"msg22\"=%u,\"raim\"=%u,\"radio\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE18_SCALED_JSON : TYPE18_SCALED_CSV),
@@ -926,9 +926,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 19:
 #define TYPE19_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%d,0x%x\n"
-#define TYPE19_UNSCALED_JSON   "\"res\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=%u,\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"raim\"=%d,\"assigned\"=%d}\n"
+#define TYPE19_UNSCALED_JSON   "\"res\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=%u,\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"raim\"=%d,\"assigned\"=%d}\n"
 #define TYPE19_SCALED_CSV "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,0x%x,%s,%s,%u.%u.%u.%u,%s,%d,0x%x\n"
-#define TYPE19_SCALED_JSON   "\"res\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"sec\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=\"%s\",\"raim\"=%d,\"assigned\"=%d}\n"
+#define TYPE19_SCALED_JSON   "\"res\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=\"%s\",\"raim\"=%d,\"assigned\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE19_SCALED_JSON : TYPE19_SCALED_CSV),
