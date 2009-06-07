@@ -297,6 +297,12 @@ static void nextstate(struct gps_packet_t *lexer,
     case NMEA_CR:
 	if (c == '\n')
 	    lexer->state = NMEA_RECOGNIZED;
+	/*
+	 * There's a GPS called a Jackson Labs Firefly-1a that emits \r\r\n
+	 * at the end of each sentence.  Don't be confused by this.
+	 */
+	else if (c == '\r')
+	    lexer->state = NMEA_CR;
 	else
 	    lexer->state = GROUND_STATE;
 	break;
