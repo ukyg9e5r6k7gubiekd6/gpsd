@@ -422,7 +422,7 @@ Field   Len Description              Member   Units
                                               511 = not available
 137-142  6  Time Stamp               second   Second of UTC timestamp
 143-144  2  Maneuver Indicator       maneuver See below
-145-147  3  Spare                    spare
+145-147  3  Spare                    
 148-148  1  RAIM flag                raim     See below
 -------------------------------------------------------------------------------
 
@@ -546,7 +546,7 @@ Field   Len  Description      Member   Units
 79-106   28  Longitude        lon      As in Common Navigation Block
 107-133  27  Latitude         lat      As in Common Navigation Block
 134-137   4  Type of EPFD     epfd     See below
-138-147  10  Spare            spare    Not used
+138-147  10  Spare                     Not used
 148-148   1  RAIM flag        raim     As for common navigation block
 149-167  19  SOTDMA state     radio    As in same bits for Type 1
 --------------------------------------------------------------------------------
@@ -599,7 +599,7 @@ Field   Len Description            Member      Encoding
 302-421 120 Destination            destination 20 6-bit characters
 422-422   1 DTE                    dte         0=Data terminal ready, 
                                                1=Not ready (default)
-423-423   1 Spare                  spare       Not used
+423-423   1 Spare                              Not used
 -------------------------------------------------------------------------------
 
 .Codes for Ship Type
@@ -708,7 +708,7 @@ Field   Len Description      Member         Units
 40-69    30 Destination MMSI dest_mmsi      Unsigned integer: 9 digits
 70        1 Retransmit flag  retransmit     0 = no retransmission (default)
                                             1 = retransmitted
-71        1 Spare            spare          Not used
+71        1 Spare                           Not used
 72-87    16 Application ID   application_id Unsigned integer
 88      920 Data             data           Binary data
                                             Field may be shorter than 920 bits.
@@ -750,7 +750,7 @@ Field   Len Description       Member         Units
 0-5       6 Message Type      msgtype        Unsigned integer: 8
 6-7       2 Repeat Indicator  repeat         As in Common Navigation Block
 8-37     30 Source MMSI       mmsi           Unsigned integer: 9 digits
-38-39     1 Spare             spare          Not used
+38-39     1 Spare                            Not used
 40-55    16 Application ID    application_id Unsigned integer
 56      952 Data              data           Binary data
                                              Field may be shorter than 952 bits.
@@ -777,7 +777,7 @@ Field   Len Description        Member     Encoding
 134-141  8  Regional reserved  regional
 142-142  1  DTE                reserved   0=Data terminal ready, 
                                           1=Data terminal not ready (default)
-143-145  3  Spare              spare      Not used
+143-145  3  Spare                         Not used
 146-167 22  Radio status       radio      See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
@@ -804,9 +804,9 @@ Field   Len Description        Member     Encoding
 0-5      6  Message Type       msgtype    Unsigned integer: 9
 6-7      2  Repeat Indicator   repeat     As in Common Navigation Block
 8-37    30  Source MMSI        mmsi       Unsigned integer: 9 digits
-38-39    2  Spare              spare      Not used
+38-39    2  Spare                         Not used
 40-69   30  Destination MMSI   dest_mmsi  Unsigned integer: 9 digits
-70-71    2  Spare              spare2     Not used
+70-71    2  Spare                         Not used
 -------------------------------------------------------------------------------
 
 === Type 11: UTC/Date Response ===
@@ -829,7 +829,7 @@ Field   Len Description        Member      Units
 40-69    30 Destination MMSI   dest_mmsi   Unsigned integer: 9 digits
 70        1 Retransmit flag    retransmit  0 = no retransmission (default)
                                            1 = retransmitted
-71        1 Spare              spare       Not used
+71        1 Spare                          Not used
 72      936 Text               text        1-156 chars of six-bit encoded text.
                                            Field may be shorter than 936 bits.
 -------------------------------------------------------------------------------
@@ -852,7 +852,7 @@ Field   Len Description        Member    Units
 0-5       6 Message Type       msgtype   Unsigned integer: 14
 6-7       2 Repeat Indicator   repeat    As in Common Navigation Block
 8-37     30 Source MMSI        mmsi      Unsigned integer: 9 digits
-38-39     2 Spare              spare     Not used
+38-39     2 Spare                        Not used
 40      968 Text               text      1-161 chars of six-bit encoded text.
                                          Field may be shorter than 936 bits.
 -------------------------------------------------------------------------------
@@ -938,7 +938,7 @@ Field    Len Description            Member        Units
 302-303   1  RAIM flag              raim          As for common navigation block
 304-305   1  DTE                    dte           0=Data terminal ready, 
 306-306   1  Assigned mode flag     assigned      See <<IALA>> for details
-307-311   5  Spare                  spare         Unused, should be zero
+307-311   5  Spare                                Unused, should be zero
 --------------------------------------------------------------------------------
 
 === Type 21: Aid-to-Navigation Report ===
@@ -972,7 +972,7 @@ Field   Len Description             Member       Units
 268-268   1  RAIM flag              raim         As for common navigation block
 269-269   1  Virtual-aid flag       virtual_aid  See Below
 270-270   1  Assigned-mode flag     assigned     See <<IALA>> for details
-271-271   1  Spare                  spare
+271-271   1  Spare                               Not used
 272-360  88  Name Extension                      See Below
 --------------------------------------------------------------------------------
 
@@ -1022,7 +1022,7 @@ Field   Len Description             Member          Units
 8-37     30  MMSI                   mmsi            Unsigned integer: 9 digits
 38-39     2  Part Number            partno          Unsigned integer: 0-1
 40-159  120  Vessel Name            shipname        (Part A) 20 six-bit chars
-160-167   8  Spare                  spare           (Part A)
+160-167   8  Spare                                  (Part A) Not used
 40-47     8  Ship Type              shiptype        (Part B) As in Message Type 5
 48-89    42  Vendor ID              vendor_id       (Part B) 7 six-bit chars
 90-131   42  Call Sign              callsign        (Part B) As in Message Type 5
@@ -1031,7 +1031,7 @@ Field   Len Description             Member          Units
 150-155   6  Dimension to Port      to_port         (Part B) Unsigned int: Meters
 156-161   6  Dimension to Starboard to_starboard    (Part B) Unsigned int: Meters
 132-161  30  Mothership MMSI        mothership_mmsi (Part B) See below
-162-167   8  Spare                  spare           (Part B)
+162-167   8  Spare                                  (Part B) Not used
 --------------------------------------------------------------------------------
 
 If the Part Number field is 0, the rest of the message is interpreted
