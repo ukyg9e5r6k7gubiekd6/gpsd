@@ -6,8 +6,6 @@
  * Decodings of message types 12, 13, 14, 19, and 21 have not yet been
  * tested against known-good data.
  *
- * The decoder for message type 18 does not yet grok the ITU-1371-3 flag bits. 
- *
  * Message type 21 decoding does not yet handle the Name Extension field.
  */
 #include <sys/types.h>
@@ -922,9 +920,9 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	break;
     case 19:
 #define TYPE19_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%d,0x%x\n"
-#define TYPE19_UNSCALED_JSON   "\"res\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=%u,\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"raim\"=%d,\"assigned\"=%d}\n"
+#define TYPE19_UNSCALED_JSON   "\"reserved\"=%u,\"speed\"=%u,\"accuracy\"=%u,\"lon\"=%d,\"lat\"=%d,\"course\"=%u,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=%u,\"to_bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=%u,\"raim\"=%d,\"assigned\"=%d}\n"
 #define TYPE19_SCALED_CSV "%u,%.1f,%u,%.4f,%.4f,%.1f,%u,%u,0x%x,%s,%s,%u.%u.%u.%u,%s,%d,0x%x\n"
-#define TYPE19_SCALED_JSON   "\"res\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"bow\"=%u,\"stern\"=%u,\"port\"=%u,\"starboard\"=%u,\"epsd\"=\"%s\",\"raim\"=%d,\"assigned\"=%d}\n"
+#define TYPE19_SCALED_JSON   "\"reserved\"=%u,\"speed\"=%.1f,\"accuracy\"=%u,\"lon\"=%.4f,\"lat\"=%.4f,\"course\"=%.1f,\"heading\"=%d,\"second\"=%u,\"regional\"=%d,\"shipname\"=\"%s\",\"shiptype\"=\"%s\",\"to_bow\"=%u,\"to_stern\"=%u,\"to_port\"=%u,\"to_starboard\"=%u,\"epsd\"=\"%s\",\"raim\"=%d,\"assigned\"=%d}\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE19_SCALED_JSON : TYPE19_SCALED_CSV),
