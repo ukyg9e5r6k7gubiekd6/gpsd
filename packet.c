@@ -972,15 +972,21 @@ void packet_parse(struct gps_packet_t *lexer)
 #ifdef NMEA_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
-	    char csum[3];
-	    char *trailer = (char *)lexer->inbufptr-5;
-	    if (*trailer == '*') {
+	    char csum[3], *end;
+	    /*
+	     * Back up past any whitespace.  Need to do this because
+	     * at least one GPS (the Firefly 1a) emits \r\r\n
+	     */
+	    for (end = (char *)lexer->inbufptr-1; isspace(*end); end--)
+		continue;
+	    end -= 2;
+	    if (*end == '*') {
 		unsigned int n, crc = 0;
-		for (n = 1; (char *)lexer->inbuffer + n < trailer; n++)
+		for (n = 1; (char *)lexer->inbuffer + n < end; n++)
 		    crc ^= lexer->inbuffer[n];
 		(void)snprintf(csum, sizeof(csum), "%02X", crc);
-		checksum_ok = (csum[0]==toupper(trailer[1])
-				&& csum[1]==toupper(trailer[2]));
+		checksum_ok = (csum[0]==toupper(end[1])
+				&& csum[1]==toupper(end[2]));
 	    }
 	    if (checksum_ok) {
 #ifdef AIVDM_ENABLE
