@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.9, Jun 2009
+v1.10, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -172,7 +172,7 @@ nonempty message ID field:
 == AIVDM/AIVDO Payload Armoring ==
 
 The data payload is an ASCII-encoded bit vector.  Each character
-represents six bits of data.  To recover the six bits, subtract 40
+represents six bits of data.  To recover the six bits, subtract 48
 from the ASCII character value; if the result is greater than 40
 subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
 this encoding begin with "0" (64) and end with "w" (87); however, the
@@ -1158,7 +1158,7 @@ Identification System]
 - [[[MMSI]]] http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format[MMSI 
   Format]
 
-- [[[JSON-AIS]] http://wiki.ham.fi/JSON_AIS.en[JSON AIS transmission protocol]
+- [[[JSON-AIS]]] http://wiki.ham.fi/JSON_AIS.en[JSON AIS transmission protocol]
 
 == Change history ==
 
@@ -1190,3 +1190,5 @@ and the new section on Improving This Document.
 Version 1.8 fixes some broken markup and adds information about JSON-AIS.
 
 Version 1.9 adds more information on JSON and the member names.
+
+Version 1.10 fixes a typo in the formula for undoing 6-bit armoring.
