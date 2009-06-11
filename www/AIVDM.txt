@@ -426,7 +426,7 @@ Field   Len Description              Member   Units
 148-148  1  RAIM flag                raim     See below
 -------------------------------------------------------------------------------
 
-The Repeat Indicator is a directive to an AIS transciever that this
+The Repeat Indicator is a directive to an AIS transceiver that this
 message should be rebroadcast.  This was intended as a way of getting
 AIS messages around hills and other obstructions in coastal waters,
 but is little used as base station coverage is more effective.  It is
@@ -463,8 +463,9 @@ Turn rate is encoded as follows:
 
 Values between 0 and 708 degrees/min coded by ROT~AIS~=4.733 *
 SQRT(ROT~sensor~) degrees/min where ROT~sensor~ is the Rate of Turn as
-input by an external Rate of Turn Indicator. ROT~AIS~ is rounded to the
-nearest integer value.  Sign of the field should be preserved when
+input by an external Rate of Turn Indicator. ROT~AIS~ is rounded to
+the nearest integer value.  Thus, to decode the field value, square it
+and divide by 4.733. Sign of the field value should be preserved when
 squaring it, otherwise the left/right indication will be lost.
 
 Speed over ground is in 0.1-knot resolution from 0 to 102 knots.
@@ -475,14 +476,15 @@ Position accuracy flag indicates the accuracy of the fix.  A value of
 1 indicates a DGPS-quality fix with an accuracy of < 10ms.  0, the
 default, indicates an unaugmented GNSS fix with accuracy > 10m.
 
-Longitude is given in in 1/10000 min. Values up to plus or minus 180
-degrees, East = positive, West = negative.  A value of 181 degrees
-(0x6791AC0 hex) indicates that longitude is not available and is the
-default.
+Longitude is given in in 1/10000 min; divide by 600000.0 to obtain
+degrees. Values up to plus or minus 180 degrees, East = positive, West
+= negative.  A value of 181 degrees (0x6791AC0 hex) indicates that
+longitude is not available and is the default.
 
-Latitude is given in in 1/10000 min. Values up to plus or minus 90
-degrees, North = positive, South = negative. A value of 91 degrees (0x3412140
-hex) indicates latitude is not available and is the default.
+Latitude is given in in 1/10000 min; divide by 600000.0 to obtain
+degrees. Values up to plus or minus 90 degrees, North = positive,
+South = negative. A value of 91 degrees (0x3412140 hex) indicates
+latitude is not available and is the default.
 
 Seconds in UTC timestamp should be 0-59, except for these special values:
 
