@@ -38,16 +38,6 @@ enum isgpsstat_t {
  */
 #define MAX_PACKET_LENGTH	516	/* 7 + 506 + 3 */
 
-/*
- * We used to define the input buffer length as MAX_PACKET_LENGTH*2+1.
- * However, as it turns out, this isn't enough.  We've had a report
- * from one user with a GPS that reports at 20Hz that "sometimes a
- * long/slow context switch will cause the next read from the serial
- * device to be very big. I sometimes see a read of 250 characters or
- * more."
- */
-#define INPUT_BUFFER_LENGTH	1536
-
 struct gps_packet_t {
     /* packet-getter internals */
     int	type;
