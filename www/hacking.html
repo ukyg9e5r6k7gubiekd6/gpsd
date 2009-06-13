@@ -1524,11 +1524,11 @@ they'll just say ?WATCH=+TPV+SKY+STATUS and be done.</p>
 <- !WATCH=GPS#1,+TPV+SKY+STATUS
 #
 # Daemon begins to stream TPVs (like our O report) and SKYs (like Y)
-<- !TVP=GPS#1,MID2,1119197561.890,0.005,46.498203637,7.568074350,1327.780,21.000,124.484,0.0000,0.000,0.000,?,23.56,?,3
+<- !TPV=GPS#1,MID2,1119197561.890,0.005,46.498203637,7.568074350,1327.780,21.000,124.484,0.0000,0.000,0.000,?,23.56,?,3
 <- !SKY=GPS#1,MID4,1119197562.890,7:10,45,196,34,1:29,67,310,40,1:28,59,108,42,1:26,51,304,43,1:8,44,58,41,1:27,16,66,39,1:21,10,301,0,0:
-<- !TVP=GPS#1,MID2,1119197563.890,0.005,46.498208969,7.568087260,1328.596,21.000,124.484,190.3797,0.091,0.085,?,23.60,?,3
-<- !TVP=GPS#1,MID2,1119197564.890,0.005,46.498215161,7.568087260,1329.321,21.000,124.484,0.0000,0.086,0.091,?,23.53,?,3
-<- !TVP=GPS#1,MID2,1119197565.890,0.005,46.498221628,7.568088976,1328.639,21.000,124.484,0.0000,0.086,0.091,?,23.56,?,3
+<- !TPV=GPS#1,MID2,1119197563.890,0.005,46.498208969,7.568087260,1328.596,21.000,124.484,190.3797,0.091,0.085,?,23.60,?,3
+<- !TPV=GPS#1,MID2,1119197564.890,0.005,46.498215161,7.568087260,1329.321,21.000,124.484,0.0000,0.086,0.091,?,23.53,?,3
+<- !TPV=GPS#1,MID2,1119197565.890,0.005,46.498221628,7.568088976,1328.639,21.000,124.484,0.0000,0.086,0.091,?,23.56,?,3
 #
 # Client subscribes to Type 1 AIS reports.  To subscribe to all
 # reports from a device, we would omit the type argument.
@@ -1552,7 +1552,8 @@ one letter.</p>
 
 <p>The '!' introducer on new-format responses serves to distinguish
 them from old-style responses that effectively have 'GPSD,' as an
-introducer.
+introducer.  Clients should be aware that AIVDM data sentences also
+begin with a '!'.
 
 <p>We need a format that supports multiline data, not so much for
 requests as for responses.  This is so we can keep the 78-character
