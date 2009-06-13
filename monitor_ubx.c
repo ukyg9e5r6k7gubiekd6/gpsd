@@ -120,8 +120,8 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 
 static void display_nav_sol(unsigned char *buf, size_t data_len)
 {
-	unsigned short gw;
-	unsigned int tow, flags;
+	unsigned short gw = 0;
+	unsigned int tow = 0, flags;
 	double epx, epy, epz, evx, evy, evz;
 	unsigned char navmode;
 	double t;
@@ -171,9 +171,11 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	wmove(navsolwin, 7, 11);
 	wprintw(navsolwin, "%s", ctime(&tt));
 	wmove(navsolwin, 8, 11);
-	wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow/1000.0));
-	wmove(navsolwin, 8, 36);
-	wprintw(navsolwin, "%d", (tow/86400000) );
+	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
+	    wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow/1000.0));
+	    wmove(navsolwin, 8, 36);
+	    wprintw(navsolwin, "%d", (tow/86400000) );
+	}
 
 	wmove(navsolwin, 10, 12);
 	wprintw(navsolwin, "%7.2f", g.fix.eph);
