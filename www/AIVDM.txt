@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.10, Jun 2009
+v1.11, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -106,7 +106,8 @@ document:
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
 sentence decoder. This document was developed to be the specification 
-for it, and it will decode any sentence type described herein.
+for it, and it will decode all sentence type described herein with
+the temporary exceptions of 15, 16, and 17.
 
 <<Schwehr>> includes links to a collection of Python scripts for
 decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
@@ -375,12 +376,12 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-14, 18-19, 21, and 24 follow.
-Information sufficient to decode other message types in the range 1-22
-can be found in <<IALA>>, but they are rare or not of general interest
-so we will not duplicate the information here. Message types 23-24 are
-listed at <<BOSUN>> with no further information; message types 25-26
-are reported by <<Schwehr>>, who reports they were added in Version 3 of
+Detailed descriptions of message types 1-19, 21, and 24 follow.
+Information sufficient to decode message types 20 and 22 can be found
+in <<IALA>>, but they are rare or not of general interest so we will
+not duplicate the information here. Message types 23-24 are listed at
+<<BOSUN>> with no further information; message types 25-26 are
+reported by <<Schwehr>>, who reports they were added in Version 3 of
 <<ITU1371>>.
 
 The "Member" column in these tables is not derived from any of the ITU
@@ -393,8 +394,8 @@ use.
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-5, 9-11, 18-19, and 24.  Described but unchecked are 6, 7, 8, 12,
-13, 14, and 21.
+1-5, 9-11, 18-19, and 24.  Described but unchecked are 6-8, 12-17, and
+21.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -859,6 +860,124 @@ Field   Len Description        Member    Units
                                          Field may be shorter than 936 bits.
 -------------------------------------------------------------------------------
 
+=== Type 15: Interrogation ===
+
+Message type 15 is used by a base station to query one or two other AIS
+transceivers for status messages of specified types. "Source MMSI" is
+the interrogating station.  88-160 bits depending on the number of queries.
+
+This message is probably not interesting unless you are doing traffic
+analysis of information flow in an AIS station network.  The "slot offset" 
+members are a request for the response to interrogation to occupy
+a particular time division in the TDMA packet layer.
+
+`-------`---`-------------------`---------`-------------------------------------
+Field   Len Description         Member    Units
+--------------------------------------------------------------------------------
+0-5       6 Message Type        msgtype   Unsigned integer: 15
+6-7       2 Repeat Indicator    repeat    As in Common Navigation Block
+8-37     30 Source MMSI         mmsi      Unsigned integer: 9 digits
+38-39     2 Spare                         Not used
+40-69    30 Interrogated MMSI   mmsi1     Unsigned integer: 9 digits
+70-75     6 First message type  type1_1   Unsigned integer
+76-87    12 First slot offset   offset1_1 Unsigned integer
+88-89     2 Spare                         Not used
+90-95     6 Second message type type1_2   Unsigned integer
+96-107   12 Second slot offset  offset1_2 Unsigned integer
+108-109   2 Spare                         Not used
+110-139  30 Interrogated MMSI   mmsi2     Unsigned integer: 9 digits
+140-145   6 First message type  type2_1   Unsigned integer
+146-157  12 First slot offset   offset2_1 Unsigned integer
+158-159   2 Spare                         Not used
+------------------------------------------------------------------------------
+
+There are four use cases for this message.  A decoder must dispatch on
+the length of the data packet to determine which it is seeing:
+
+1. One station is interrogated for one message type.  Length is 88-90 bits.
+
+2. One station is interrogated for two message types, Length is 108-110 bits.
+
+3. Two stations are interrogated for one message type each. Length is
+158-160 bits.  The second message type and second slot offset associated
+with the first queried MMSI should be zeroed.
+
+4. One station is interrogated for two message types, and a second for
+one message type.  Length is 158-160 bits.
+
+The reason the lengths given here vary by up to two bits is that
+<<IALA>> is not consistent about whether it expects trailing spare
+bits to be included in the data packet. The shortest message length is
+given as 88, implying that in case 1 the trailing spare bits 88-89 are
+not expected to be sent.  The longest message length is gven as 160,
+implying that in cases 3 and 4 the trailing spare bits 159-160 are
+expected to be sent.  A robust decoder should check for both possible
+lengths in each case.
+
+=== Type 16: Assigned Mode Command ===
+
+Message type 16 is used by a base station with control authority to
+configure the scheduling of AIS informational messages from
+subordinate stations, either as a frquency per 10-minute interval or
+by specifying the TDMA slot(s) offset on which those messages should
+be transmitted.  It is probably not of interest unless you are
+studying the internal operation of an AIS base station network.
+Length may be 96 or 144 bits.
+
+`-------`---`-------------------`----------`------------------------------------
+Field   Len Description         Member     Units
+--------------------------------------------------------------------------------
+0-5       6 Message Type        msgtype    Unsigned integer: 16
+6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
+8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
+38-39     2 Spare                          Not used
+40-69    30 Destination A MMSI  mmsi1      Unsigned integer: 9 digits
+70-81    12 Offset A            offset1    See <<IALA>>
+82-91    10 Increment A         increment1 See <<IALA>>
+92-121   30 Destination B MMSI  mmsi2      Unsigned integer: 9 digits
+122-133  12 Offset B            offset2    See <<IALA>>
+134-143  10 Increment B         increment2 See <<IALA>>
+------------------------------------------------------------------------------
+
+If the message is 96 bits long, it should be interpreted as an
+assignment for a single station (92 bits) followed by 4 bits of
+padding reserved for future use. If the message is 144 bits long it
+should be interpreted as a channel assignment for two stations; no
+padding follows.
+
+When increment is zero, the offset field is interpreted as the
+frequency with which the subordinate station should report prer
+10-minute interval. When increment is nonzero, reporting interval
+is specified at the level of TDMA slot numbers; see <<IALA>> for the 
+detailed specification.
+
+=== Type 17: GNSS Broadcast Binary Message ===
+
+Message type 17 is used to broadcast differential corrections for GPS.
+The data in the payload is intended to be passed directly to GPS
+receivers capable of accepting such corrections. 80 to 816 bits
+depending on payload size.
+
+`-------`---`-------------------`----------`------------------------------------
+Field   Len Description         Member     Units
+--------------------------------------------------------------------------------
+0-5       6 Message Type        msgtype    Unsigned integer: 16
+6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
+8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
+38-39     2 Spare                          Not used
+40-57    18 Longitude           lon        Minutes/10000 (as in CNB)
+58-74    17 Latitude            lat        Minutes/10000 (as in CNB)
+75-79     5 Spare                          Not used - reserved
+80-815  736 Payload             data       DGNSS correction data
+------------------------------------------------------------------------------
+
+Nore that latitude and longitude are in units of a tenth of a minute;
+otherwise sign interpretation and out-of-band values as in the Common
+Navigation Clock.
+
+The <<IALA>> description of the payload portion subfields has been
+omitted, as it appears to be tied to the now obsolete RTCM2 protocol.
+
 === Type 18: Standard Class B CS Position Report ===
 
 A less detailed report for vessels using Class B transponders.  Omits
@@ -1002,8 +1121,9 @@ characters followed by 0-6 bytes of padding to an 8-bit boundary. The
 <<IALA>> description says "This parameter should be omitted when no
 more than 20 characters for the name of the A-to-N are needed in
 total. Only the required number of characters should be transmitted,
-i.e. no @-character should be used.", but does not specify how to
-detect end-of-field.
+i.e. no @-character should be used."  A decoder can deduce the bit length
+of the name extension field by subtracting 272 from the total message
+bit length.
 
 === Type 24: Class B CS Static Data Report  ===
 
@@ -1048,7 +1168,7 @@ refer to a small attached auxiliary vessel and these 30 bits are read
 as the MMSI of the mother ship.  Otherwise the 30 bits describe vessel
 dimensions as in Message Type 5.
 
-According to [[MMSI]], an MMSI is associated with an auxiliary craft
+According to <<MMSI>>, an MMSI is associated with an auxiliary craft
 when it is of the form 98MIDXXXX where the digits 3, 4 and 5 represent
 the MID and X is any figure from 0 to 9.
 
@@ -1194,3 +1314,5 @@ Version 1.8 fixes some broken markup and adds information about JSON-AIS.
 Version 1.9 adds more information on JSON and the member names.
 
 Version 1.10 fixes a typo in the formula for undoing 6-bit armoring.
+
+Version 1.11 describes message types 15, 16, and 17.
