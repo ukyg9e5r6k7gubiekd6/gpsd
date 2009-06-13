@@ -298,19 +298,19 @@
 #       MessageID:         24
 #       RepeatIndicator:   0
 #       UserID:            367405970
-#       partnum:            0
-#       name:   CAPTAIN`S PARADISE
+#       partnum:           0
+#       name:              CAPTAIN`S PARADISE
 !AIVDM,1,1,,B,HU2K5NTn13BijklG44oppk103210,0*06,s23294,d-114,T44.21624911,x731910,r13RSMT1,1241894986
 #       MessageID:         24
 #       RepeatIndicator:   2
 #       UserID:            338085242
-#       partnum:            1
-#       shipandcargo: 54
-#       vendorid: ACR1234
-#       callsign: WDD7883
-#       dimA: 8
-#       dimB: 3
-#       dimC: 2
-#       dimD: 1
-#       mothership: 16789633
-#       spare: 0
+#       partnum:           1
+#       shipandcargo:      54
+#       vendorid:          ACR1234
+#       callsign:          WDD7883
+#       dimA:              8
+#       dimB:              3
+#       dimC:              2
+#       dimD:              1
+#       mothership:        16789633
+#       spare:             0
