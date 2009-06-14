@@ -118,6 +118,7 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 	return;
 }
 
+/*@ -mustfreeonly -compdestroy @*/
 static void display_nav_sol(unsigned char *buf, size_t data_len)
 {
 	unsigned short gw = 0;
@@ -193,6 +194,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	(void)wprintw(navsolwin, "0x%02x", flags);
 	(void)wnoutrefresh(navsolwin);
 }
+/*@ +mustfreeonly +compdestroy @*/
 
 static void display_nav_dop(unsigned char *buf, size_t data_len)
 {
