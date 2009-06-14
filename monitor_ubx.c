@@ -137,8 +137,8 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
 		tow = getleul(buf, 0);
 		gw = (unsigned short)getlesw(buf, 8);
-		t = gpstime_to_unix(gw, tow/1000.0);
-		tt = t;
+		t = gpstime_to_unix((int)gw, tow/1000.0);
+		tt = (time_t)trunc(t);
 	}
 
 	epx = (double)(getlesl(buf, 12)/100.0);
@@ -153,42 +153,44 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	g.pdop = (double)(getleuw(buf, 44)/100.0);
 	g.satellites_used = (int)getub(buf, 47);
 
-	wmove(navsolwin, 1, 11);
-	wprintw(navsolwin, "%+10.2fm %+10.2fm %+10.2fm", epx, epy, epz);
-	wmove(navsolwin, 2, 11);
-	wprintw(navsolwin, "%+9.2fm/s %+9.2fm/s %+9.2fm/s", evx, evy, evz);
+	(void)wmove(navsolwin, 1, 11);
+	(void)wprintw(navsolwin, "%+10.2fm %+10.2fm %+10.2fm", epx, epy, epz);
+	(void)wmove(navsolwin, 2, 11);
+	(void)wprintw(navsolwin, "%+9.2fm/s %+9.2fm/s %+9.2fm/s", evx, evy, evz);
 
-	wmove(navsolwin, 4, 11);
-	wprintw(navsolwin, "%12.9fo %13.9fo %8.2fm",
+	(void)wmove(navsolwin, 4, 11);
+	(void)wprintw(navsolwin, "%12.9fo %13.9fo %8.2fm",
 		g.fix.latitude, g.fix.longitude, g.fix.altitude);
 	(void)mvwaddch(navsolwin, 4, 23, ACS_DEGREE);
 	(void)mvwaddch(navsolwin, 4, 39, ACS_DEGREE);
-	wmove(navsolwin, 5, 11);
-	wprintw(navsolwin, "%6.2fm/s %5.1fo %6.2fm/s",
+	(void)wmove(navsolwin, 5, 11);
+	(void)wprintw(navsolwin, "%6.2fm/s %5.1fo %6.2fm/s",
 		g.fix.speed, g.fix.track, g.fix.climb);
 	(void)mvwaddch(navsolwin, 5, 26, ACS_DEGREE);
 
-	wmove(navsolwin, 7, 11);
-	wprintw(navsolwin, "%s", ctime(&tt));
-	wmove(navsolwin, 8, 11);
+	(void)wmove(navsolwin, 7, 11);
+	/*@ -compdef @*/
+	(void)wprintw(navsolwin, "%s", ctime(&tt));
+	/*@ +compdef @*/
+	(void)wmove(navsolwin, 8, 11);
 	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
-	    wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow/1000.0));
-	    wmove(navsolwin, 8, 36);
-	    wprintw(navsolwin, "%d", (tow/86400000) );
+	    (void)wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow/1000.0));
+	    (void)wmove(navsolwin, 8, 36);
+	    (void)wprintw(navsolwin, "%d", (tow/86400000) );
 	}
 
-	wmove(navsolwin, 10, 12);
-	wprintw(navsolwin, "%7.2f", g.fix.eph);
-	wmove(navsolwin, 10, 33);
-	wprintw(navsolwin, "%6.2f", g.fix.epv);
-	wmove(navsolwin, 11, 7);
-	wprintw(navsolwin, "%2d", g.satellites_used);
-	wmove(navsolwin, 11, 15);
-	wprintw(navsolwin, "%5.1f", g.pdop);
-	wmove(navsolwin, 11, 25);
-	wprintw(navsolwin, "0x%02x", navmode);
-	wmove(navsolwin, 11, 36);
-	wprintw(navsolwin, "0x%02x", flags);
+	(void)wmove(navsolwin, 10, 12);
+	(void)wprintw(navsolwin, "%7.2f", g.fix.eph);
+	(void)wmove(navsolwin, 10, 33);
+	(void)wprintw(navsolwin, "%6.2f", g.fix.epv);
+	(void)wmove(navsolwin, 11, 7);
+	(void)wprintw(navsolwin, "%2d", g.satellites_used);
+	(void)wmove(navsolwin, 11, 15);
+	(void)wprintw(navsolwin, "%5.1f", g.pdop);
+	(void)wmove(navsolwin, 11, 25);
+	(void)wprintw(navsolwin, "0x%02x", navmode);
+	(void)wmove(navsolwin, 11, 36);
+	(void)wprintw(navsolwin, "0x%02x", flags);
 	(void)wnoutrefresh(navsolwin);
 }
 
