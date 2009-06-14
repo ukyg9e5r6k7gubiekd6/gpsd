@@ -312,11 +312,54 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		    ais->type13.mmsi[i] = 0;
 	    gpsd_report(LOG_INF, "\n");
 	    break;
-        case 14: /* Safety Related Broadcast Message */
+        case 14:	/* Safety Related Broadcast Message */
 	    //ais->type14.spare          = UBITS(38, 2);
 	    from_sixbit((char *)ais_context->bits, 
 			40, ais_context->bitlen-40,
 			ais->type14.text);
+	    gpsd_report(LOG_INF, "\n");
+	    break;
+	case 15:	/* Interrogation */
+	    ais->type15.type1_2 = ais->type15.type2_1 = 0;
+	    //ais->type14.spare         = UBITS(38, 2);
+	    ais->type15.mmsi1		= UBITS(40, 30);
+	    ais->type15.type1_1		= UBITS(70, 6);
+	    ais->type15.type1_1		= UBITS(70, 6);
+	    ais->type15.offset1_1	= UBITS(76, 12);
+	    //ais->type14.spare2        = UBITS(88, 2);
+	    if (ais_context->bitlen > 90) {
+		ais->type15.type1_2	= UBITS(90, 6);
+		ais->type15.offset1_2	= UBITS(96, 12);
+		//ais->type14.spare3    = UBITS(108, 2);
+		if (ais_context->bitlen > 110) {
+		    ais->type15.type2_1	= UBITS(90, 6);
+		    ais->type15.offset2_1	= UBITS(96, 12);
+		    //ais->type14.spare4	= UBITS(108, 2);
+		}
+	    }
+	    gpsd_report(LOG_INF, "\n");
+	    break;
+	case 16:	/* Assigned Mode Command */
+	    ais->type16.mmsi1		= UBITS(40, 30);
+	    ais->type16.offset1		= UBITS(70, 12);
+	    ais->type16.increment1	= UBITS(82, 10);
+	    if (ais_context->bitlen <= 96) 
+		ais->type16.mmsi2 = 0;
+	    else {
+		ais->type16.mmsi2	= UBITS(92, 30);
+		ais->type16.offset2	= UBITS(122, 12);
+		ais->type16.increment2	= UBITS(134, 10);
+	    }
+	    gpsd_report(LOG_INF, "\n");
+	    break;
+	case 17:	/* GNSS Broadcast Binary Message */
+	    //ais->type17.spare         = UBITS(38, 2);
+	    ais->type17.lon		= UBITS(40, 18);
+	    ais->type17.lat		= UBITS(58, 17);
+	    ais->type8.bitcount       = ais_context->bitlen - 56;
+	    (void)memcpy(ais->type17.bitdata, 
+			 (char *)ais_context->bits + 10,
+			 (ais->type8.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 18:	/* Standard Class B CS Position Report */
@@ -862,11 +905,68 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 14:	/* Safety Related Broadcast Message */
 #define TYPE14_CSV  "%s\n"
 #define TYPE14_JSON	"\"text\"=\"%s\"}\n"
-	    (void)fprintf(fp,
-			  (json ? TYPE14_JSON : TYPE14_CSV),
-			  ais->type14.text);
+	(void)fprintf(fp,
+		      (json ? TYPE14_JSON : TYPE14_CSV),
+		      ais->type14.text);
 #undef TYPE14_CSV
 #undef TYPE14_JSON
+	break;
+    case 15:
+#define TYPE15_CSV	"%u,%u,%u,%u,%u,%u,%u,%u"
+#define TYPE15_JSON	"mmsi1=%u,type1_1=%u,offset1_1=%u,type1_2=%u,offset1_2=%u,mmsi2=%u,type2_1=%u,offset2_1=%u"
+	(void)fprintf(fp,
+		      (json ? TYPE15_JSON : TYPE15_CSV),	
+		      ais->type15.mmsi1,
+		      ais->type15.type1_1,
+		      ais->type15.offset1_1,
+		      ais->type15.type1_2,
+		      ais->type15.offset1_2,
+		      ais->type15.mmsi2,
+		      ais->type15.type2_1,
+		      ais->type15.offset2_1);
+#undef TYPE15_CSV
+#undef TYPE15_JSON
+	break;
+    case 16:
+#define TYPE16_CSV	"%u,%u,%u,%u,%u,%u"
+#define TYPE16_JSON	"mmsi1=%u,offset1=%u,increment1=%u,mmsi2=%u,offset2=%u,increment2=%u"
+	(void)fprintf(fp,
+		      (json ? TYPE16_JSON : TYPE16_CSV),	
+		      ais->type16.mmsi1,
+		      ais->type16.offset1,
+		      ais->type16.increment1,
+		      ais->type16.mmsi2,
+		      ais->type16.offset2,
+		      ais->type16.increment2);
+#undef TYPE16_CSV
+#undef TYPE16_JSON
+	break;
+    case 17:
+#define TYPE17_UNSCALED_CSV	"%d,%d,%d:%s"
+#define TYPE17_UNSCALED_JSON	"\"lon\"=%d,\"lat\"=%d,\"data\"=\"%d:%s\""
+#define TYPE17_SCALED_CSV	"%.1f,%.1f,%d:%s"
+#define TYPE17_SCALED_JSON	"\"lon\"=%.1f,\"lat\"=%.1f,\"data\"=\"%d:%s\""
+	if (scaled) {
+	    (void)fprintf(fp,
+			  (json ? TYPE17_SCALED_JSON : TYPE17_SCALED_CSV),
+			  ais->type17.lon / AIS_GNSS_LATLON_SCALE,
+			  ais->type17.lat / AIS_GNSS_LATLON_SCALE,
+			  ais->type17.bitcount,
+			  gpsd_hexdump(ais->type17.bitdata, 
+				       (ais->type17.bitcount+7)/8));
+	} else {
+	    (void)fprintf(fp,
+			  (json ? TYPE17_UNSCALED_JSON : TYPE17_UNSCALED_CSV),
+			  ais->type17.lon,
+			  ais->type17.lat,
+			  ais->type17.bitcount,
+			  gpsd_hexdump(ais->type17.bitdata, 
+				       (ais->type17.bitcount+7)/8));
+	}
+#undef TYPE17_UNSCALED_CSV
+#undef TYPE17_UNSCALED_JSON
+#undef TYPE17_SCALED_CSV
+#undef TYPE17_SCALED_JSON
 	break;
     case 18:
 #define TYPE18_UNSCALED_CSV "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,%u,%u,%u,%u,%d,0x%x\n"

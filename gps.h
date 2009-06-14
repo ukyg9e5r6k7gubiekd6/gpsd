@@ -543,7 +543,7 @@ struct ais_t
 	    uint application_id;	/* Application ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    uint bitcount;		/* bit count of the data */
-	    char bitdata[AIS_TYPE6_BINARY_MAX / 8];
+	    char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
 	} type6;
 	/* Type 7 - Binary Acknowledge */
 	struct {
@@ -555,7 +555,7 @@ struct ais_t
 	    uint application_id;	/* Application ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    uint bitcount;		/* bit count of the data */
-	    char bitdata[AIS_TYPE8_BINARY_MAX / 8];
+	    char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
 	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
 	struct {
@@ -600,6 +600,42 @@ struct ais_t
 #define AIS_TYPE14_TEXT_MAX	161	/* 952 bits of six-bit, plus NUL */
 	    char text[AIS_TYPE14_TEXT_MAX];
 	} type14;
+	/* Type 15 - Interrogation */
+	struct {
+	    //uint spare;		spare bit(s) */
+	    uint mmsi1;
+	    uint type1_1;
+	    uint offset1_1;
+	    //uint spare2;		spare bit(s) */
+	    uint type1_2;
+	    uint offset1_2;
+	    //uint spare3;		spare bit(s) */
+	    uint mmsi2;
+	    uint type2_1;
+	    uint offset2_1;
+	    //uint spare4;		spare bit(s) */
+	} type15;
+	/* Type 16 - Assigned Mode Command */
+	struct {
+	    //uint spare;		spare bit(s) */
+	    uint mmsi1;
+	    uint offset1;
+	    uint increment1;
+	    uint mmsi2;
+	    uint offset2;
+	    uint increment2;
+	} type16;
+	/* Type 17 - GNSS Broadcast Binary Message */
+	struct {
+	    //uint spare;		spare bit(s) */
+#define AIS_GNSS_LATLON_SCALE	600.0
+	    int lon;			/* longitude */
+	    int lat;			/* latitude */
+	    //uint spare2;		spare bit(s) */
+#define AIS_TYPE17_BINARY_MAX	736	/* 920 bits */
+	    uint bitcount;		/* bit count of the data */
+	    char bitdata[(AIS_TYPE17_BINARY_MAX + 7) / 8];
+	} type17;
 	/* Type 18 - Standard Class B CS Position Report */
 	struct {
 	    uint reserved;		/* altitude in meters */

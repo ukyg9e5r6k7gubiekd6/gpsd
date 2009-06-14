@@ -106,8 +106,7 @@ document:
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
 sentence decoder. This document was developed to be the specification 
-for it, and it will decode all sentence type described herein with
-the temporary exceptions of 15, 16, and 17.
+for it, and it will decode all sentence type described herein.
 
 <<Schwehr>> includes links to a collection of Python scripts for
 decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
