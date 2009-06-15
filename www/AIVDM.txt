@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.11, Jun 2009
+v1.12, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -63,14 +63,14 @@ exchange of unpacked, human-readable AIS data. At present (edition of
 6 Jun 2009) it covers only a small subset of the most common AIS
 messages, and many data fields in the messages it does dump are
 omitted.  The member names given in the bit-field tables match the
-attributes use in JSON-AIS when JSON-AIS includes that field.
+attributes used in JSON-AIS when JSON-AIS includes that field.
 
 == Information Sources ==
 
 Together, the the IALA Technical Clarifications at <<IALA>> and the
 Coast Guard's AIS pages at <<NAVCEN>> describe AIS message payloads
 almost completely.  The detail information on payload formats in this
-document is derived from these.
+document is mostly derived from these.
 
 Kurt Schwehr is a research scientist at the Center for Coastal and
 Ocean Mapping at the University of New Hamphire. Much of his research
@@ -90,14 +90,8 @@ relevant proprietary standards.  If you are such a person, please help
 by reporting the following to be included in future versions of this
 document:
 
-* The meaning of the type field in the Aid-To-Navigation message (type
-  21).
-
-* How the end of the Name Extension field is detected or computed in
-  Type 21 messages.
-
-* Field offsets, types, and descriptions for messages 23-26 not
-  described in <<IALA>>.
+* Field offsets, types, and descriptions for messages 23, 25, and 26
+  not described in <<IALA>>.
 
 * Sample sentences of types 6-8, 10, 12-18, 20-23, and 25-26 together with
   decoded dumps of the field values.
@@ -105,8 +99,9 @@ document:
 == Open-Source Implementations ==
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
-sentence decoder. This document was developed to be the specification 
-for it, and it will decode all sentence type described herein.
+sentence decoder. This document was developed to be the specification
+for it, and it will decode all sentence type described herein (except,
+temporarily, 20 and 22).
 
 <<Schwehr>> includes links to a collection of Python scripts for
 decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
@@ -375,12 +370,10 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-19, 21, and 24 follow.
-Information sufficient to decode message types 20 and 22 can be found
-in <<IALA>>, but they are rare or not of general interest so we will
-not duplicate the information here. Message types 23-24 are listed at
-<<BOSUN>> with no further information; message types 25-26 are
-reported by <<Schwehr>>, who reports they were added in Version 3 of
+Detailed descriptions of message types 1-22 and 24 follow. Message
+types 1-22 are derived from <<IALA>>. Message types 23-24 are listed
+at <<BOSUN>> with no further information; message types 25-26 are
+reported by <<Schwehr>>, who observes they were added in Version 3 of
 <<ITU1371>>.
 
 The "Member" column in these tables is not derived from any of the ITU
@@ -394,7 +387,7 @@ use.
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
 1-5, 9-11, 18-19, and 24.  Described but unchecked are 6-8, 12-17, and
-21.
+20-22.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -1061,6 +1054,41 @@ Field    Len Description            Member        Units
 307-311   5  Spare                                Unused, should be zero
 --------------------------------------------------------------------------------
 
+=== Type 20 Data Link Management Message ===
+
+This message is used to pre-allocate TDMA slots within an AIS base
+station network.  It contains no navigational information, and is
+unlikely to be of interest unless you are implementing or studying
+an AIS base station network. Length varies from 72-160 depending on
+the number of slot reservations (1 to 4) in the message.
+
+`--------`---`-----------------`-------------`-----------------------------
+Field    Len Description       Member        Units
+---------------------------------------------------------------------------
+0-5       6  Message Type      msgtype       Unsigned integer: 20
+6-7       2  Repeat Indicator  repeat        As in Common Navigation Block
+8-37     30  MMSI              mmsi          Unsigned integer: 9 digits
+38-39     2  Spare                           Not used
+40-51    12  Offset number 1   offset1       Reserved offset number
+52-55     4  Reserved slots    number1       Consecutive slots
+56-58     3  Time-out          timeout1      Allocation timeout in minutes
+59-69    11  Increment         increment1    Repeat increment
+70-81    12  Offset number 2   offset2       Reserved offset number
+82-85     4  Reserved slots    number2       Consecutive slots
+86-88     3  Time-out          timeout2      Allocation timeout in minutes
+89-99    11  Increment         increment2    Repeat increment
+100-111  12  Offset number 3   offset3       Reserved offset number
+112-115   4  Reserved slots    number3       Consecutive slots
+116-118   3  Time-out          timeout3      Allocation timeout in minutes
+119-129  11  Increment         increment3    Repeat increment
+130-141  12  Offset number 4   offset4       Reserved offset number
+142-145   4  Reserved slots    number4       Consecutive slots
+146-148   3  Time-out          timeout4      Allocation timeout in minutes
+149-159  11  Increment         increment4    Repeat increment
+---------------------------------------------------------------------------
+
+See <<IALA>> for details on the meaning of these fields.
+
 === Type 21: Aid-to-Navigation Report ===
 
 Identification and location message to be emitted by aids to
@@ -1073,7 +1101,7 @@ and 360 bits.
 `--------`---`----------------------`------------`------------------------------
 Field   Len Description             Member       Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type           msgtype      Unsigned integer: 19
+0-5       6  Message Type           msgtype      Unsigned integer: 21
 6-7       2  Repeat Indicator       repeat       As in Common Navigation Block
 8-37     30  MMSI                   mmsi         Unsigned integer: 9 digits
 38-42     5  Aid type               type         See Below
@@ -1097,8 +1125,46 @@ Field   Len Description             Member       Units
 --------------------------------------------------------------------------------
 
 According to <<IALA>>, the aid type field has values 1-15 for fixed
-and 16-31 for floating aids to navigation. I have not yet found a
-public description of the type codes.
+and 16-31 for floating aids to navigation.  The detailed list is as follows:
+
+`----`-------------------------------------------------------------
+Code Definition
+-------------------------------------------------------------------
+0    Default, Type of Aid to Navigation not specified
+1    Reference point
+2    RACON
+3    Fixed structure off shore, such as oil platforms, wind farms,
+     rigs. (Note: This code should identify an obstruction that is
+     fitted with an Aid-to-Navigation AIS station.)
+4    Spare, Reserved for future use.
+5    Light, without sectors
+6    Light, with sectors
+7    Leading Light Front
+8    Leading Light Rear
+9    Beacon, Cardinal N
+10   Beacon, Cardinal E
+11   Beacon, Cardinal S
+12   Beacon, Cardinal W
+13   Beacon, Port hand
+14   Beacon, Starboard hand
+15   Beacon, Preferred Channel port hand
+16   Beacon, Preferred Channel starboard hand
+17   Beacon, Isolated danger
+18   Beacon, Safe water
+19   Beacon, Special mark
+20   Cardinal Mark N
+21   Cardinal Mark E
+22   Cardinal Mark S
+23   Cardinal Mark W
+24   Port hand Mark
+25   Starboard hand Mark
+26   Preferred Channel Port hand
+27   Preferred Channel Starboard hand
+28   Isolated danger
+29   Safe Water
+30   Special Mark
+31   Light Vessel / LANBY / Rigs
+-------------------------------------------------------------------
 
 The name field is 6-bit ASCII.  If this field is full (has no trailing @
 characters) the decoder should interpret the Name Extension field
@@ -1123,6 +1189,37 @@ total. Only the required number of characters should be transmitted,
 i.e. no @-character should be used."  A decoder can deduce the bit length
 of the name extension field by subtracting 272 from the total message
 bit length.
+
+=== Type 22: Channel Management ===
+
+This message is broadcast by a base station to set VHF parameters for
+an AIS coverage region.  It contains no navigational information, and is
+unlikely to be of interest unless you are implementing or studying
+an AIS base station network. Length is 168 bits.
+
+`--------`---`----------------`------------`------------------------------------
+Field   Len Description       Member       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type     msgtype      Unsigned integer: 22
+6-7       2  Repeat Indicator repeat       As in Common Navigation Block
+8-37     30  MMSI             mmsi         Unsigned integer: 9 digits
+38-39     2  Spare                         Not used
+40-51    12  Channel A        channel_a    Channel number
+52-63    12  Channel B        channel_b    Channel number
+64-67     4  Tx/Rx mode       mode         Transmit/receive mode
+68-68     1  Power            power        Low=0, high=1
+69-86    18  NE Longitude     ne_lon       NE corner longitude to 0.1 minutes
+87-103   17  NE Latitude      ne_lat       NE corner latitude to 0.1 minutes
+104-121  18  SW Longitude     sw_lon       SW corner longitude to 0.1 minutes
+122-138  17  SW Latitude      sw_lat       SW corner latitude to 0.1 minutes
+139-139   1  Addressed        addressed    0=Broadcast, 1=Addressed
+140-140   1  Channel A Band   band_a       0=Default, 1=12.5kHz
+141-141   1  Channel A Band   band_a       0=Default, 1=12.5kHz
+142-144   3  Zone size        zonesize     Size of transitional zone
+145-167  23  Spare                         Reserved for future use
+--------------------------------------------------------------------------------
+
+See <<IALA>> for details on the meaning of these fields.
 
 === Type 24: Class B CS Static Data Report  ===
 
@@ -1315,3 +1412,6 @@ Version 1.9 adds more information on JSON and the member names.
 Version 1.10 fixes a typo in the formula for undoing 6-bit armoring.
 
 Version 1.11 describes message types 15, 16, and 17.
+
+Version 1.12 describes messages 20 and 22, and adds navigation aid
+type codes.
