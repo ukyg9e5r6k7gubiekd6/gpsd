@@ -1260,7 +1260,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 		(void)fprintf(fp, json ? "mothership_\"mmsi\":%u}\n" : "%u\n",
 			      ais->type24.b.mothership_mmsi);
 	    } else {
-		(void)fprintf(fp, json ? "\"bow\":%u,\"stern\":%u,\"port\":%u,\"starboard\":%u}\n" : "%u,%u,%u,%u\n",
+		(void)fprintf(fp, json ? "\"to_bow\":%u,\"to_stern\":%u,\"to+port\":%u,\"to_starboard\":%u}\n" : "%u,%u,%u,%u\n",
 			      ais->type24.b.dim.to_bow,
 			      ais->type24.b.dim.to_stern,
 			      ais->type24.b.dim.to_port,
