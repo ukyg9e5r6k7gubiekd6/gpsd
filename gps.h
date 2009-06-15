@@ -709,7 +709,7 @@ struct ais_t
 		} a;
 		struct {
 		    uint shiptype;		/* ship type code */
-		    char vendor_id[8];		/* vendor ID */ 
+		    char vendorid[8];		/* vendor ID */ 
 		    char callsign[8];		/* callsign */
 		    union {
 			uint mothership_mmsi;	/* MMSI of main vessel */

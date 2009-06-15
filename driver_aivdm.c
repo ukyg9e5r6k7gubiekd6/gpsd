@@ -460,7 +460,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 		break;
 	    case 1:
 		ais->type24.b.shiptype = UBITS(40, 8);
-		UCHARS(48, ais->type24.b.vendor_id);
+		UCHARS(48, ais->type24.b.vendorid);
 		UCHARS(90, ais->type24.b.callsign);
 		if (AIS_AUXILIARY_MMSI(ais->mmsi))
 		    ais->type24.b.mothership_mmsi   = UBITS(132, 30);
@@ -525,7 +525,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	"Galileo",
     };
 
-    static char *type_legends[100] = {
+    static char *ship_type_legends[100] = {
 	"Not available",
 	"Reserved for future use",
 	"Reserved for future use",
@@ -628,7 +628,44 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	"Other Type - no additional information",
     };
 
-#define TYPE_DISPLAY(n) (((n) < (sizeof(type_legends)/sizeof(type_legends[0]))) ? type_legends[n] : "INVALID SHIP TYPE")
+#define SHIPTYPE_DISPLAY(n) (((n) < (sizeof(ship_type_legends)/sizeof(ship_type_legends[0]))) ? ship_type_legends[n] : "INVALID SHIP TYPE")
+
+    static char *navaid_type_legends[] = {
+	"Unspcified",
+	"Reference point",
+	"RACON",
+	"Fixed offshore structure",
+	"Spare, Reserved for future use.",
+	"Light, without sectors",
+	"Light, with sectors",
+	"Leading Light Front",
+	"Leading Light Rear",
+	"Beacon, Cardinal N",
+	"Beacon, Cardinal E",
+	"Beacon, Cardinal S",
+	"Beacon, Cardinal W",
+	"Beacon, Port hand",
+	"Beacon, Starboard hand",
+	"Beacon, Preferred Channel port hand",
+	"Beacon, Preferred Channel starboard hand",
+	"Beacon, Isolated danger",
+	"Beacon, Safe water",
+	"Beacon, Special mark",
+	"Cardinal Mark N",
+	"Cardinal Mark E",
+	"Cardinal Mark S",
+	"Cardinal Mark W",
+	"Port hand Mark",
+	"Starboard hand Mark",
+	"Preferred Channel Port hand",
+	"Preferred Channel Starboard hand",
+	"Isolated danger",
+	"Safe Water",
+	"Special Mark",
+	"Light Vessel / LANBY / Rigs",
+    };
+
+#define NAVAIDTYPE_DISPLAY(n) (((n) < (sizeof(navaid_type_legends)/sizeof(navaid_type_legends[0]))) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     if (json)
 	(void)fprintf(fp, "{\"msgtype\":%u,\"repeat\":%u,\"mmsi\":%09u,", ais->msgtype, ais->repeat, ais->mmsi);
@@ -749,7 +786,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type5.ais_version,
 			  ais->type5.callsign,
 			  ais->type5.shipname,
-			  TYPE_DISPLAY(ais->type5.shiptype),
+			  SHIPTYPE_DISPLAY(ais->type5.shiptype),
 			  ais->type5.to_bow,
 			  ais->type5.to_stern,
 			  ais->type5.to_port,
@@ -1037,7 +1074,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type19.second,
 			  ais->type19.regional,
 			  ais->type19.shipname,
-			  TYPE_DISPLAY(ais->type19.shiptype),
+			  SHIPTYPE_DISPLAY(ais->type19.shiptype),
 			  ais->type19.to_bow,
 			  ais->type19.to_stern,
 			  ais->type19.to_port,
@@ -1073,12 +1110,12 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE19_SCALED_JSON
 	break;
     case 21: /* Aid to Navigation */
-#define TYPE21_SCALED_JSON "\"type\":%u,\"name\":\"%s\",\"lon\":%.4f,\"lat\":%.4f,\"accuracy\":%u,\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":\"%s\",\"second\":%u,\"regional\":%d,\"off_position\":%d,\"raim\":%u,\"virtual_aid\":%u}\n"
-#define TYPE21_SCALED_CSV "%u,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%u,0x%x,%u,%u\n"
+#define TYPE21_SCALED_JSON "\"type\":%s,\"name\":\"%s\",\"lon\":%.4f,\"lat\":%.4f,\"accuracy\":%u,\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":\"%s\",\"second\":%u,\"regional\":%d,\"off_position\":%d,\"raim\":%u,\"virtual_aid\":%u}\n"
+#define TYPE21_SCALED_CSV "%s,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%u,0x%x,%u,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE21_SCALED_JSON : TYPE21_SCALED_CSV),
-			  ais->type21.type,
+			  NAVAIDTYPE_DISPLAY(ais->type21.type),
 			  ais->type21.name,
 			  ais->type21.lon / AIS_LATLON_SCALE, 
 			  ais->type21.lat / AIS_LATLON_SCALE, 
@@ -1127,13 +1164,13 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
 		(void)fprintf(fp, json ? "\"shiptype\":\"%s\"," : "%s,", 
-			      TYPE_DISPLAY(ais->type24.b.shiptype));
+			      SHIPTYPE_DISPLAY(ais->type24.b.shiptype));
 	    } else {
 		(void)fprintf(fp, json ? "\"shiptype\":%u," : "%u,",
 			      ais->type24.b.shiptype);
 	    }
-	    (void)fprintf(fp, json ? "\"vendor_id\":\"%s\",\"callsign\":\"%s\"," : "%s,%s,",
-			  ais->type24.b.vendor_id,
+	    (void)fprintf(fp, json ? "\"vendorid\":\"%s\",\"callsign\":\"%s\"," : "%s,%s,",
+			  ais->type24.b.vendorid,
 			  ais->type24.b.callsign);
 	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 		(void)fprintf(fp, json ? "mothership_\"mmsi\":%u}\n" : "%u\n",

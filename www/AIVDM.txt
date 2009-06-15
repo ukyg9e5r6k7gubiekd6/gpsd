@@ -1242,7 +1242,7 @@ Field   Len Description             Member          Units
 40-159  120  Vessel Name            shipname        (Part A) 20 six-bit chars
 160-167   8  Spare                                  (Part A) Not used
 40-47     8  Ship Type              shiptype        (Part B) As in Message Type 5
-48-89    42  Vendor ID              vendor_id       (Part B) 7 six-bit chars
+48-89    42  Vendor ID              vendorid        (Part B) 7 six-bit chars
 90-131   42  Call Sign              callsign        (Part B) As in Message Type 5
 132-140   9  Dimension to Bow       to_bow          (Part B) Unsigned int: Meters
 141-149   9  Dimension to Stern     to_stern        (Part B) Unsigned int: Meters
