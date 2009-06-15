@@ -148,19 +148,19 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
-	    ais->type123.status = UBITS(38, 4);
-	    ais->type123.turn = SBITS(42, 8);
-	    ais->type123.speed = UBITS(50, 10);
-	    ais->type123.accuracy = (bool)UBITS(60, 1);
-	    ais->type123.lon = SBITS(61, 28);
-	    ais->type123.lat = SBITS(89, 27);
-	    ais->type123.course = UBITS(116, 12);
-	    ais->type123.heading = UBITS(128, 9);
-	    ais->type123.second = UBITS(137, 6);
-	    ais->type123.maneuver = UBITS(143, 2);
-	    //ais->type123.spare = UBITS(145, 3);
-	    ais->type123.raim = UBITS(148, 1)!=0;
-	    ais->type123.radio = UBITS(149, 20);
+	    ais->type123.status		= UBITS(38, 4);
+	    ais->type123.turn		= SBITS(42, 8);
+	    ais->type123.speed		= UBITS(50, 10);
+	    ais->type123.accuracy	= (bool)UBITS(60, 1);
+	    ais->type123.lon		= SBITS(61, 28);
+	    ais->type123.lat		= SBITS(89, 27);
+	    ais->type123.course		= UBITS(116, 12);
+	    ais->type123.heading	= UBITS(128, 9);
+	    ais->type123.second		= UBITS(137, 6);
+	    ais->type123.maneuver	= UBITS(143, 2);
+	    //ais->type123.spare	= UBITS(145, 3);
+	    ais->type123.raim		= UBITS(148, 1)!=0;
+	    ais->type123.radio		= UBITS(149, 20);
 	    gpsd_report(LOG_INF,
 			"Nav=%d TURN=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d TH=%d Sec=%d\n",
 			ais->type123.status,
@@ -175,19 +175,19 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    break;
 	case 4: 	/* Base Station Report */
 	case 11:	/* UTC/Date Response */
-	    ais->type4.year = UBITS(38, 14);
-	    ais->type4.month = UBITS(52, 4);
-	    ais->type4.day = UBITS(56, 5);
-	    ais->type4.hour = UBITS(61, 5);
-	    ais->type4.minute = UBITS(66, 6);
-	    ais->type4.second = UBITS(72, 6);
-	    ais->type4.accuracy = (bool)UBITS(78, 1);
-	    ais->type4.lon = SBITS(79, 28);
-	    ais->type4.lat = SBITS(107, 27);
-	    ais->type4.epfd = UBITS(134, 4);
-	    //ais->type4.spare = UBITS(138, 10);
-	    ais->type4.raim = UBITS(148, 1)!=0;
-	    ais->type4.radio = UBITS(149, 19);
+	    ais->type4.year		= UBITS(38, 14);
+	    ais->type4.month		= UBITS(52, 4);
+	    ais->type4.day		= UBITS(56, 5);
+	    ais->type4.hour		= UBITS(61, 5);
+	    ais->type4.minute		= UBITS(66, 6);
+	    ais->type4.second		= UBITS(72, 6);
+	    ais->type4.accuracy		= UBITS(78, 1)!=0;
+	    ais->type4.lon		= SBITS(79, 28);
+	    ais->type4.lat		= SBITS(107, 27);
+	    ais->type4.epfd		= UBITS(134, 4);
+	    //ais->type4.spare		= UBITS(138, 10);
+	    ais->type4.raim		= UBITS(148, 1)!=0;
+	    ais->type4.radio		= UBITS(149, 19);
 	    gpsd_report(LOG_INF,
 			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%d  Lon=%d epfd=%d\n",
 			ais->type4.year,
@@ -263,19 +263,19 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type8.bitcount);
 	    break;
 	case 9: /* Standard SAR Aircraft Position Report */
-	    ais->type9.alt = UBITS(38, 12);
-	    ais->type9.speed = UBITS(50, 10);
-	    ais->type9.accuracy = (bool)UBITS(60, 1);
-	    ais->type9.lon = SBITS(61, 28);
-	    ais->type9.lat = SBITS(89, 27);
-	    ais->type9.course = UBITS(116, 12);
-	    ais->type9.second = UBITS(128, 6);
-	    ais->type9.regional = UBITS(134, 8);
-	    ais->type9.dte = UBITS(142, 1);
-	    //ais->type9.spare = UBITS(143, 3);
-	    ais->type9.assigned = UBITS(144, 1)!=0;
-	    ais->type9.raim = UBITS(145, 1)!=0;
-	    ais->type9.radio = UBITS(146, 22);
+	    ais->type9.alt		= UBITS(38, 12);
+	    ais->type9.speed		= UBITS(50, 10);
+	    ais->type9.accuracy		= (bool)UBITS(60, 1);
+	    ais->type9.lon		= SBITS(61, 28);
+	    ais->type9.lat		= SBITS(89, 27);
+	    ais->type9.course		= UBITS(116, 12);
+	    ais->type9.second		= UBITS(128, 6);
+	    ais->type9.regional		= UBITS(134, 8);
+	    ais->type9.dte		= UBITS(142, 1);
+	    //ais->type9.spare		= UBITS(143, 3);
+	    ais->type9.assigned		= UBITS(144, 1)!=0;
+	    ais->type9.raim		= UBITS(145, 1)!=0;
+	    ais->type9.radio		= UBITS(146, 22);
 	    gpsd_report(LOG_INF,
 			"Alt=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d Sec=%d\n",
 			ais->type9.alt,
@@ -363,23 +363,23 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 18:	/* Standard Class B CS Position Report */
-	    ais->type18.reserved = UBITS(38, 8);
-	    ais->type18.speed = UBITS(46, 10);
-	    ais->type18.accuracy = (bool)UBITS(56, 1)!=0;
-	    ais->type18.lon = SBITS(57, 28);
-	    ais->type18.lat = SBITS(85, 27);
-	    ais->type18.course = UBITS(112, 12);
-	    ais->type18.heading = UBITS(124, 9);
-	    ais->type18.second = UBITS(133, 6);
-	    ais->type18.regional = UBITS(139, 2);
-	    ais->type18.cs_flag = UBITS(141, 1)!=0;
-	    ais->type18.display_flag = UBITS(142, 1)!=0;
-	    ais->type18.dsc_flag = UBITS(143, 1)!=0;
-	    ais->type18.band_flag = UBITS(144, 1)!=0;
-	    ais->type18.msg22_flag = UBITS(145, 1)!=0;
-	    ais->type18.assigned = UBITS(146, 1)!=0;
-	    ais->type18.raim = UBITS(147, 1)!=0;
-	    ais->type18.radio = UBITS(148, 20);
+	    ais->type18.reserved	= UBITS(38, 8);
+	    ais->type18.speed		= UBITS(46, 10);
+	    ais->type18.accuracy	= UBITS(56, 1)!=0;
+	    ais->type18.lon		= SBITS(57, 28);
+	    ais->type18.lat		= SBITS(85, 27);
+	    ais->type18.course		= UBITS(112, 12);
+	    ais->type18.heading		= UBITS(124, 9);
+	    ais->type18.second		= UBITS(133, 6);
+	    ais->type18.regional	= UBITS(139, 2);
+	    ais->type18.cs_flag		= UBITS(141, 1)!=0;
+	    ais->type18.display_flag	= UBITS(142, 1)!=0;
+	    ais->type18.dsc_flag	= UBITS(143, 1)!=0;
+	    ais->type18.band_flag	= UBITS(144, 1)!=0;
+	    ais->type18.msg22_flag	= UBITS(145, 1)!=0;
+	    ais->type18.assigned	= UBITS(146, 1)!=0;
+	    ais->type18.raim		= UBITS(147, 1)!=0;
+	    ais->type18.radio		= UBITS(148, 20);
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d\n",
 			ais->type18.reserved,
@@ -423,6 +423,25 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type19.heading, 
 			ais->type19.second,
 		        ais->type19.shipname);
+	    break;
+	case 20:	/* Data Link Management Message */
+	    //ais->type20.spare		= UBITS(38, 2);
+	    ais->type20.offset1		= UBITS(40, 12);
+	    ais->type20.number1		= UBITS(52, 4);
+	    ais->type20.timeout1	= UBITS(56, 3);
+	    ais->type20.increment1	= UBITS(59, 11);
+	    ais->type20.offset2		= UBITS(70, 12);
+	    ais->type20.number2		= UBITS(82, 4);
+	    ais->type20.timeout2	= UBITS(86, 3);
+	    ais->type20.increment2	= UBITS(89, 11);
+	    ais->type20.offset3		= UBITS(100, 12);
+	    ais->type20.number3		= UBITS(112, 4);
+	    ais->type20.timeout3	= UBITS(116, 3);
+	    ais->type20.increment3	= UBITS(119, 11);
+	    ais->type20.offset4		= UBITS(130, 12);
+	    ais->type20.number4		= UBITS(142, 4);
+	    ais->type20.timeout4	= UBITS(146, 3);
+	    ais->type20.increment4	= UBITS(149, 11);
 	    break;
 	case 21:	/* Aid-to-Navigation Report */
 	    ais->type21.type = UBITS(38, 5);
@@ -1109,6 +1128,30 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE19_SCALED_CSV
 #undef TYPE19_SCALED_JSON
 	break;
+    case 20:	/* Data Link Management Message */
+#define TYPE20_CSV  "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n"
+#define TYPE20_JSON	"\"offset1\":\"%u\",\"number1\":\"%u\"\"timeout1\":\"%u\"\"increment1\":\"%u\",\"offset2\":\"%u\",\"number2\":\"%u\"\"timeout2\":\"%u\",\"increment2\":\"%u\",\"offset3\":\"%u\",\"number3\":\"%u\"\"timeout3\":\"%u\"\"increment3\":\"%u\",\"offset4\":\"%u\",\"number4\":\"%u\"\"timeout4\":\"%u\"\"increment4\":\"%u\"}\n"
+	(void)fprintf(fp,
+		      (json ? TYPE20_JSON : TYPE20_CSV),
+		      ais->type20.offset1,
+		      ais->type20.number1,
+		      ais->type20.timeout1,
+		      ais->type20.increment1,
+		      ais->type20.offset2,
+		      ais->type20.number2,
+		      ais->type20.timeout2,
+		      ais->type20.increment2,
+		      ais->type20.offset3,
+		      ais->type20.number3,
+		      ais->type20.timeout3,
+		      ais->type20.increment3,
+		      ais->type20.offset4,
+		      ais->type20.number4,
+		      ais->type20.timeout4,
+		      ais->type20.increment4);
+#undef TYPE20_CSV
+#undef TYPE20_JSON
+	break;
     case 21: /* Aid to Navigation */
 #define TYPE21_SCALED_JSON "\"type\":%s,\"name\":\"%s\",\"lon\":%.4f,\"lat\":%.4f,\"accuracy\":%u,\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":\"%s\",\"second\":%u,\"regional\":%d,\"off_position\":%d,\"raim\":%u,\"virtual_aid\":%u}\n"
 #define TYPE21_SCALED_CSV "%s,%s,%.4f,%.4f,%u,%u,%u,%u,%u,%s,%u,%u,0x%x,%u,%u\n"
@@ -1155,6 +1198,47 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE21_UNSCALED_JSON
 #undef TYPE21_SCALED_CSV
 #undef TYPE21_SCALED_JSON
+	break;
+    case 22:	/* Channel Management */
+	if (scaled) {
+#define TYPE22_SCALED_CSV  "%u,%u,%u,%u,%f,%f,%f,%f,%u,%u,%u,%u\n"
+#define TYPE22_SCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\"\"mode\":\"%u\"\"power\":\"%u\",\"ne_lon\":\"%f\",\"ne_lat\":\"%f\"\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",\"addressed\":\"%u\",\"band_a\":\"%u\"\"band_b\":\"%u\"\"zonesize\":\":%u}\n"
+	    (void)fprintf(fp,
+			  (json ? TYPE22_SCALED_JSON : TYPE22_SCALED_CSV),
+			  ais->type22.channel_a,
+			  ais->type22.channel_b,
+			  ais->type22.mode,
+			  ais->type22.power,
+			  ais->type22.ne_lon / AIS_CHANNEL_LATLON_SCALE,
+			  ais->type22.ne_lat / AIS_CHANNEL_LATLON_SCALE,
+			  ais->type22.sw_lon / AIS_CHANNEL_LATLON_SCALE,
+			  ais->type22.sw_lat / AIS_CHANNEL_LATLON_SCALE,
+			  ais->type22.addressed,
+			  ais->type22.band_a,
+			  ais->type22.band_b,
+			  ais->type22.zonesize);
+#undef TYPE22_SCALED_CSV
+#undef TYPE22_SCALED_JSON
+	} else {
+#define TYPE22_UNSCALED_CSV  "%u,%u,%u,%u,%d,%d,%d,%d,%u,%u,%u,%u\n"
+#define TYPE22_UNSCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\"\"mode\":\"%u\"\"power\":\"%u\",\"ne_lon\":\"%d\",\"ne_lat\":\"%d\"\"sw_lon\":\"%d\",\"sw_lat\":\"%d\",\"addressed\":\"%u\",\"band_a\":\"%u\"\"band_b\":\"%u\"\"zonesize\":\":%u}\n"
+	    (void)fprintf(fp,
+			  (json ? TYPE22_UNSCALED_JSON : TYPE22_UNSCALED_CSV),
+			  ais->type22.channel_a,
+			  ais->type22.channel_b,
+			  ais->type22.mode,
+			  ais->type22.power,
+			  ais->type22.ne_lon,
+			  ais->type22.ne_lat,
+			  ais->type22.sw_lon,
+			  ais->type22.sw_lat,
+			  ais->type22.addressed,
+			  ais->type22.band_a,
+			  ais->type22.band_b,
+			  ais->type22.zonesize);
+#undef TYPE22_UNSCALED_CSV
+#undef TYPE22_UNSCALED_JSON
+	}
 	break;
     case 24: /* Class B CS Static Data Report */
 	(void)fprintf(fp, json ? "\"partno\":%u" : "%u,", ais->type24.part);

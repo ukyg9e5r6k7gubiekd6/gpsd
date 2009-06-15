@@ -679,6 +679,26 @@ struct ais_t
 	    bool assigned;		/* assigned-mode flag */
 	    //uint spare;		spare bits */
 	} type19;
+	/* Type 20 - Data Link Management Message */
+	struct {
+	    //uint spare;		spare bit(s) */
+	    uint offset1;		/* TDMA slot offset */
+	    uint number1;		/* number of xlots to allocate */
+	    uint timeout1;		/* allocation timeout */
+	    uint increment1;		/* repeat increment */
+	    uint offset2;		/* TDMA slot offset */
+	    uint number2;		/* number of xlots to allocate */
+	    uint timeout2;		/* allocation timeout */
+	    uint increment2;		/* repeat increment */
+	    uint offset3;		/* TDMA slot offset */
+	    uint number3;		/* number of xlots to allocate */
+	    uint timeout3;		/* allocation timeout */
+	    uint increment3;		/* repeat increment */
+	    uint offset4;		/* TDMA slot offset */
+	    uint number4;		/* number of xlots to allocate */
+	    uint timeout4;		/* allocation timeout */
+	    uint increment4;		/* repeat increment */
+	} type20;
 	/* Type 21 - Aids to Navigation Report */
 	struct {
 	    uint type;			/* aid type */
@@ -699,6 +719,23 @@ struct ais_t
 	    bool assigned;		/* assigned-mode flag */
 	    //uint spare;		unused */
 	} type21;
+	/* Type 22 - Channel Management */
+	struct {
+	    //uint spare;		spare bit(s) */
+	    uint channel_a;		/* Channel A number */
+	    uint channel_b;		/* Channel B number */
+	    uint mode;			/* transmit/receive mode */
+	    bool power;			/* high-power flag */
+#define AIS_CHANNEL_LATLON_SCALE	600.0
+	    int ne_lon;			/* NE corner longitude */
+	    int ne_lat;			/* NE corner latitude */
+	    int sw_lon;			/* SW corner longitude */
+	    int sw_lat;			/* SW corner latitude */
+	    bool addressed;		/* addressed vs. broadast flag */
+	    bool band_a;		/* fix 1.5kHz band for channel A */
+	    bool band_b;		/* fix 1.5kHz band for channel B */
+	    uint zonesize;		/* size of transitional zone */
+	} type22;
 	/* Type 24 - Class B CS Static Data Report */
 	struct {
 	    uint part;			/* part number */
