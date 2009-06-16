@@ -728,7 +728,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 		(void) strlcpy(speedlegend, "fast", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
-			       "%.0f", ais->type123.speed / 10.0);
+			       "%.1f", ais->type123.speed / 10.0);
 
 	    (void)fprintf(fp,
 			  (json ? TYPE123_SCALED_JSON : TYPE123_SCALED_CSV),
