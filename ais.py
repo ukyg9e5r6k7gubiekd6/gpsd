@@ -4,21 +4,24 @@
 #
 
 class bitfield:
+    "Object defining the interpretation of an AIS bitfield."
     def __init__(self, name, width, dtype, oob, legend,
                  validator=None, formatter=None):
-        self.name = name
-        self.width = width
-        self.type = dtype
-        self.oob = oob
-        self.legend = legend
+        self.name = name	# Name of field, for internal use and JSON
+        self.width = width	# Bit width
+        self.type = dtype	# Data type: signed, unsigned, or string
+        self.oob = oob		# Out-of-band value to be rendewred as /n/a
+        self.legend = legend	# Human-friendly description of field
         self.validator = validator
         self.formatter = formatter
 
 class spare:
+    "Describes spare bits,, not to be interpreted."
     def __init__(self, width):
         self.width = width
 
 class dispatch:
+    "Describes how to dispatch to a message type variant."
     def __init__(self, fieldname, subtypes):
         self.fieldname = fieldname
         self.subtypes = subtypes
@@ -54,6 +57,9 @@ def cnb_rot_format(n):
     else:
         return str(n * n / 4.733);
 
+def cnb_latlon_format(n):
+    return str(n / 600000.0)
+
 def cnb_speed_format(n):
     if n == 1023:
         return "n/a"
@@ -82,8 +88,10 @@ cnb = (
     bitfield("speed",   10, 'unsigned', 1023,      "Speed Over Ground",
              formatter=cnb_speed_format),
     bitfield("accuracy", 1, 'unsigned', None,      "Position Accuracy"),
-    bitfield("lon",     28, 'signed',   0x6791AC0, "Longitude"),
-    bitfield("lat",     27, 'signed',   0x3412140,  "Latitude"),
+    bitfield("lon",     28, 'signed',   0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",     27, 'signed',   0x3412140,  "Latitude",
+             formatter=cnb_latlon_format),
     bitfield("course",  12, 'unsigned',	0xe10,      "Course Over Ground"),
     bitfield("heading",  9, 'unsigned', 511,        "True Heading"),
     bitfield("second",   6, 'unsigned', None,       "Time Stamp",
@@ -114,8 +122,10 @@ type4 = (
     bitfield("minute",   6,  "unsigned", 60,        "Minute"),
     bitfield("second",   6,  "unsigned", 60,        "Second"),
     bitfield("accuracy", 1,  "unsigned", None,      "Fix quality"),
-    bitfield("lon",     28,  "signed",   0x6791AC0, "Longitude"),
-    bitfield("lat",     27,  "signed",   0x3412140, "Latitude"),
+    bitfield("lon",     28,  "signed",   0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",     27,  "signed",   0x3412140, "Latitude",
+             formatter=cnb_latlon_format),
     bitfield("epfd",     4,  "unsigned", None,      "Type of EPFD",
              formatter=epfd_type_legends),
     spare(10),
