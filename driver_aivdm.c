@@ -697,13 +697,14 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 3:
 #define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%d,0x%x\n"
 #define TYPE123_UNSCALED_JSON   "\"status\":%u,\"turn\":%d,\"speed\":%u,\"accuracy\":%u,\"lon\":%d,\"lat\":%d,\"course\":%u,\"heading\":%d,\"second\":%u,\"regional\":%d,\"radio\":%d}\n"
-#define TYPE123_SCALED_CSV "%s,%s,%.1f,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x\n"
-#define TYPE123_SCALED_JSON   "\"status\":\"%s\",\"turn\":%s,\"speed\":%.1f,\"accuracy\":%u,\"lon\":%.4f,\"lat\":%.4f,\"course\":%u,\"heading\":%d,\"second\":%u,\"regional\":%d,\"radio\":%d}\n"
+#define TYPE123_SCALED_CSV "%s,%s,%s,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x\n"
+#define TYPE123_SCALED_JSON   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,\"accuracy\":%u,\"lon\":%.4f,\"lat\":%.4f,\"course\":%u,\"heading\":%d,\"second\":%u,\"regional\":%d,\"radio\":%d}\n"
 	if (scaled) {
 	    char turnlegend[10];
+	    char speedlegend[10];
 
 	    /* 
-	     * Express TURN as nan if not available, 
+	     * Express turn as nan if not available, 
 	     * "fastleft"/"fastright" for fast turns.
 	     */
 	    if (ais->type123.turn == -128)
@@ -717,12 +718,24 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			       "%.0f",
 			       ais->type123.turn * ais->type123.turn / 4.733);
 
+	    /* 
+	     * Express speed as nan if not available, 
+	     * "fast" for fast movers.
+	     */
+	    if (ais->type123.speed == AIS_SPEED_NOT_AVAILABLE)
+		(void) strlcpy(speedlegend, "nan", sizeof(speedlegend));
+	    else if (ais->type123.speed == AIS_SPEED_FAST_MOVER)
+		(void) strlcpy(speedlegend, "fast", sizeof(speedlegend));
+	    else
+		(void)snprintf(speedlegend, sizeof(speedlegend),
+			       "%.0f", ais->type123.speed / 10.0);
+
 	    (void)fprintf(fp,
 			  (json ? TYPE123_SCALED_JSON : TYPE123_SCALED_CSV),
 			      
 			  nav_legends[ais->type123.status],
 			  turnlegend,
-			  ais->type123.speed / 10.0, 
+			  speedlegend,
 			  (uint)ais->type123.accuracy,
 			  ais->type123.lon / AIS_LATLON_SCALE, 
 			  ais->type123.lat / AIS_LATLON_SCALE, 
