@@ -203,7 +203,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    break;
 	case 5: /* Ship static and voyage related data */
 	    ais->type5.ais_version  = UBITS(38, 2);
-	    ais->type5.imo_id       = UBITS(40, 30);
+	    ais->type5.imo          = UBITS(40, 30);
 	    UCHARS(70, ais->type5.callsign);
 	    UCHARS(112, ais->type5.shipname);
 	    ais->type5.shiptype     = UBITS(232, 8);
@@ -809,12 +809,12 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 #undef TYPE4_SCALED_JSON
 	break;
     case 5: /* Ship static and voyage related data */
-#define TYPE5_SCALED_JSON "\"imo_id\":%u,\"ais_version\":%u,\"callsign\":\"%s\",\"shipname\":\"%s\",\"shiptype\":\"%s\",\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":\"%s\",\"eta\":%02u-%02uT%02u:%02uZ,\"draught\":%.1f,\"destination\":\"%s\",\"dte\":%u}\n"
+#define TYPE5_SCALED_JSON "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\",\"shipname\":\"%s\",\"shiptype\":\"%s\",\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":\"%s\",\"eta\":%02u-%02uT%02u:%02uZ,\"draught\":%.1f,\"destination\":\"%s\",\"dte\":%u}\n"
 #define TYPE5_SCALED_CSV "%u,%u,%s,%s,%s,%u,%u,%u,%u,%s,%02u-%02uT%02u:%02uZ,%.1f,%s,%u\n"
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE5_SCALED_JSON : TYPE5_SCALED_CSV),
-			  ais->type5.imo_id,
+			  ais->type5.imo,
 			  ais->type5.ais_version,
 			  ais->type5.callsign,
 			  ais->type5.shipname,
@@ -832,11 +832,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type5.destination,
 			  ais->type5.dte);
 	} else {
-#define TYPE5_UNSCALED_JSON "\"imo_id\":%u,\"ais_version\":%u,\"callsign\":\"%s\",\"shipname\":\"%s\",\"shiptype\":%u,\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":%u,\"eta\":%02u-%02uT%02u:%02uZ,\"draught\":%u,\"destination\":\"%s\",\"dte\":%u}\n"
+#define TYPE5_UNSCALED_JSON "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\",\"shipname\":\"%s\",\"shiptype\":%u,\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,\"epfd\":%u,\"eta\":%02u-%02uT%02u:%02uZ,\"draught\":%u,\"destination\":\"%s\",\"dte\":%u}\n"
 #define TYPE5_UNSCALED_CSV "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u"
 	    (void)fprintf(fp,
 			  (json ? TYPE5_UNSCALED_JSON : TYPE5_UNSCALED_CSV),
-			  ais->type5.imo_id,
+			  ais->type5.imo,
 			  ais->type5.ais_version,
 			  ais->type5.callsign,
 			  ais->type5.shipname,

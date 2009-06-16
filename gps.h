@@ -516,7 +516,7 @@ struct ais_t
 	/* Type 5 - Ship static and voyage related data */
 	struct {
 	    uint ais_version;		/* AIS version level */
-	    uint imo_id;		/* IMO identification */
+	    uint imo;			/* IMO identification */
 	    char callsign[8];		/* callsign */ 
 	    char shipname[21];		/* vessel name */
 	    uint shiptype;		/* ship type code */
