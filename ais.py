@@ -332,14 +332,27 @@ type10 = (
     spare(2),
    )
 
+type12 = (
+    bitfield("seqno",            2, 'unsigned', None, "Sequence Number"),
+    bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"),
+    bitfield("retransmit",       1, 'unsigned', None, "Retransmit flag"),
+    spare(1),
+    bitfield("text",           936, 'string',   None, "Text"),
+    )
+
+type14 = (
+    spare(1),
+    bitfield("text",           968, 'string',   None, "Text"),
+    )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=11),
+        validator=lambda n: n>0 and n<=14),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
-    dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5,
-                              type6, type7, type8, type9, type10,
-                              type4,]),
+    dispatch('msgtype',      [None,   cnb,    cnb,    cnb,    type4,
+                              type5,  type6, type7,   type8,  type9,
+                              type10, type4, type12,  type7]),
     ]
 
 field_groups = (
