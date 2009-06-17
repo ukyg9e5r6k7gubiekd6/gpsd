@@ -268,13 +268,31 @@ type6 = (
     bitfield("data",           920, 'raw',      None, "Data"),
     )
 
+type7 = (
+    spare(2),
+    bitfield("mmsi1",           30, 'unsigned', 0,    "MMSI number 1"),
+    spare(2),
+    bitfield("mmsi2",           30, 'unsigned', 0,    "MMSI number 2"),
+    spare(2),
+    bitfield("mmsi3",           30, 'unsigned', 0,    "MMSI number 3"),
+    spare(2),
+    bitfield("mmsi1",           30, 'unsigned', 0,    "MMSI number 4"),
+    spare(2),
+    )
+
+type8 = (
+    spare(2),
+    bitfield("application_id",  16, 'unsigned', 0,    "Application ID"),
+    bitfield("data",           952, 'raw',      None, "Data"),
+    )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=6),
+        validator=lambda n: n>0 and n<=8),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5,
-                              type6]),
+                              type6, type7, type8]),
     ]
 
 field_groups = (
@@ -348,7 +366,9 @@ def aivdm_unpack(data, offset, instructions):
     cooked = []
     values = {}
     for inst in instructions:
-        if isinstance(inst, spare):
+        if offset >= data.bitlen:
+            break
+        elif isinstance(inst, spare):
             offset += inst.width
         elif isinstance(inst, dispatch):
             i = values[inst.fieldname]
