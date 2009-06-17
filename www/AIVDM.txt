@@ -780,7 +780,9 @@ Field   Len Description        Member     Encoding
 142-142  1  DTE                reserved   0=Data terminal ready, 
                                           1=Data terminal not ready (default)
 143-145  3  Spare                         Not used
-146-167 22  Radio status       radio      See <<IALA>> for details.
+146-146  1  Assigned           assigned   Assigned-mode flag
+147-147  1  RAIM flag          raim       As for common navigation block
+148-167 20  Radio status       radio      See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
 Altitude is in meters.  The special value 4095 indicates altitude is

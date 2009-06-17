@@ -273,9 +273,9 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type9.regional		= UBITS(134, 8);
 	    ais->type9.dte		= UBITS(142, 1);
 	    //ais->type9.spare		= UBITS(143, 3);
-	    ais->type9.assigned		= UBITS(144, 1)!=0;
-	    ais->type9.raim		= UBITS(145, 1)!=0;
-	    ais->type9.radio		= UBITS(146, 22);
+	    ais->type9.assigned		= UBITS(146, 1)!=0;
+	    ais->type9.raim		= UBITS(147, 1)!=0;
+	    ais->type9.radio		= UBITS(148, 19);
 	    gpsd_report(LOG_INF,
 			"Alt=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d Sec=%d\n",
 			ais->type9.alt,
