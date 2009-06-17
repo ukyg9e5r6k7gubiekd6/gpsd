@@ -9,7 +9,7 @@ class bitfield:
                  validator=None, formatter=None):
         self.name = name	# Name of field, for internal use and JSON
         self.width = width	# Bit width
-        self.type = dtype	# Data type: signed, unsigned, or string
+        self.type = dtype	# Data type: signed, unsigned, string, or raw
         self.oob = oob		# Out-of-band value to be rendewred as /n/a
         self.legend = legend	# Human-friendly description of field
         self.validator = validator
@@ -259,12 +259,22 @@ type5 = (
     spare(1),
     )
 
+type6 = (
+    bitfield("seqno",            2, 'unsigned', None, "Sequence Number"),
+    bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"),
+    bitfield("retransmit",       1, 'unsigned', None, "Retransmit flag"),
+    spare(1),
+    bitfield("application_id",  16, 'unsigned', 0,    "Application ID"),
+    bitfield("data",           920, 'raw',      None, "Data"),
+    )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=5),
+        validator=lambda n: n>0 and n<=6),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
-    dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5]),
+    dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5,
+                              type6]),
     ]
 
 field_groups = (
@@ -286,9 +296,15 @@ BITS_PER_BYTE = 8
 
 class BitVector:
     "Fast bit-vector class based on Python built-in array type."
-    def __init__(self):
+    def __init__(self, data=None, length=None):
         self.bits = array('B')
         self.bitlen = 0
+        if data is not None:
+            self.bits.extend(data)
+            if length is None:
+                self.bitlen = len(data) * 8
+            else:
+                self.bitlen = length
     def from_sixbit(self, data):
         "Initialize bit vector from AIVDM-style six-bit armoring."
         self.bits.extend([0] * len(data))
@@ -318,7 +334,7 @@ class BitVector:
             fld = -(2 ** width - fld)
         return fld
     def __repr__(self):
-        return repr(self.bits)
+        return str(self.bitlen) + ":" + "".join(map(lambda d: "%02x" % d, self.bits[:(self.bitlen + 7)/8]))
 
 class AISUnpackingException:
     def __init__(self, fieldname, value):
@@ -348,11 +364,13 @@ def aivdm_unpack(data, offset, instructions):
                 for i in range(inst.width/6):
                     value += "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
                 value = value.replace("@", " ").rstrip()
+            elif inst.type == 'raw':
+                value = BitVector(data.bits[offset/8:], data.bitlen-offset)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
                 raise AISUnpackingException(inst.name, value)
             offset += inst.width
-            cooked.append((inst.name, value, inst.legend, inst.formatter))
+            cooked.append((inst.name, value, inst.type, inst.legend, inst.formatter))
     return cooked
 
 if __name__ == "__main__":
@@ -401,7 +419,7 @@ if __name__ == "__main__":
             if map(lambda x: x[0], segment) == template:
                 group = formatter(*map(lambda x: x[1], segment))
                 group = (label, group, legend, None)
-                cooked = cooked[:offset] + [group] + cooked[offset+len(template):]
+                cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
         # Report generation
         if not json:
             print ",".join(map(lambda x: str(x[1]), cooked))
