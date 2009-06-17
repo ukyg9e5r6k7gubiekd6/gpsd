@@ -326,13 +326,20 @@ type9 = (
     bitfield("radio",       20, 'unsigned', None,      "Radio status"),
     )
 
+type10 = (
+    spare(2),
+    bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"), 
+    spare(2),
+   )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=9),
+        validator=lambda n: n>0 and n<=11),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5,
-                              type6, type7, type8, type9]),
+                              type6, type7, type8, type9, type10,
+                              type4,]),
     ]
 
 field_groups = (

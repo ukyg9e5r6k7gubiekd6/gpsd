@@ -782,8 +782,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type4.minute,
 			  ais->type4.second,
 			  (uint)ais->type4.accuracy,
-			  ais->type4.lat / AIS_LATLON_SCALE, 
-			  ais->type4.lon / AIS_LATLON_SCALE,
+			  ais->type4.lon / AIS_LATLON_SCALE, 
+			  ais->type4.lat / AIS_LATLON_SCALE,
 			  epfd_legends[ais->type4.epfd],
 			  ais->type4.raim,
 			  ais->type4.radio);
@@ -797,8 +797,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type4.minute,
 			  ais->type4.second,
 			  (uint)ais->type4.accuracy,
-			  ais->type4.lat, 
-			  ais->type4.lon,
+			  ais->type4.lon, 
+			  ais->type4.lat,
 			  ais->type4.epfd,
 			  ais->type4.raim,
 			  ais->type4.radio);
