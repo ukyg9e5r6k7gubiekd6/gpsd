@@ -319,7 +319,7 @@ type9 = (
     bitfield("second",      6,  'unsigned', 60,        "Time Stamp",
              formatter=cnb_second_format),
     bitfield("regional",    8,  'unsigned', None,      "Regional reserved"),
-    bitfield("reserved",    1,  'unsigned', None,      "DTE"),
+    bitfield("dte",         1,  'unsigned', None,      "DTE"),
     spare(3),
     bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
     bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
@@ -345,14 +345,109 @@ type14 = (
     bitfield("text",           968, 'string',   None, "Text"),
     )
 
+type15 = (
+    spare(2),
+    bitfield("mmsi1",     30, 'unsigned', 0, "Interrogated MMSI"),
+    bitfield("type1_1",   6,  'unsigned', 0, "First message type"),
+    bitfield("offset1_1", 12, 'unsigned', 0, "First slot offset"),
+    spare(2),
+    bitfield("type1_2",   6,  'unsigned', 0, "Second message ty"),
+    bitfield("offset1_2", 12, 'unsifned', 0, "Second slot offset"),
+    spare(2),
+    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI"),
+    bitfield("type2_1",   6,  'unsigned', 0, "First message type"),
+    bitfield("offset2_1", 12, 'unsifned', 0, "First slot offset"),
+    spare(2),
+    )
+
+type16 = (
+    spare(2),
+    bitfield("mmsi1",     30, 'unsigned', 0, "Interrogated MMSI"),
+    bitfield("offset1  ", 12, 'unsigned', 0, "First slot offset"),
+    bitfield("increment1",10, 'unsigned', 0, "Slot increment"),
+    spare(2),
+    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI"),
+    bitfield("offset2",   12, 'unsifned', 0, "First slot offset"),
+    bitfield("increment2",10, 'unsigned', 0, "Slot increment"),
+    spare(2),
+    )
+
+def type17_latlon_format(n):
+    return str(n / 600.0)
+
+type17 = (
+    spare(2),
+    bitfield("lon",         18, 'signed',   0x1a838, "Longitude",
+             formatter=type17_latlon_format),
+    bitfield("lat",         17, 'signed',   0xd548,  "Latitude",
+             formatter=type17_latlon_format),
+    spare(2),
+    bitfield("data",      736,  'raw',      None,    "DGNSS data"),
+    )
+
+type18 = (
+    bitfield("reserved",    8,  'unsigned', None,      "Regional reserved"),
+    bitfield("speed",       10, 'unsigned', 1023,      "Speed Over Ground",
+             formatter=cnb_speed_format),
+    bitfield("accuracy",    1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("lon",         28, 'signed',   0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",         27, 'signed',   0x3412140, "Latitude",
+             formatter=cnb_latlon_format),
+    bitfield("course",      12, 'unsigned', 0xE10,     "Course Over Ground",
+             formatter=cnb_course_format),
+    bitfield("heading",     9,  'unsigned', 511,       "True Heading"),
+    bitfield("second",      6,  'unsigned', None,      "Time Stamp",
+             formatter=cnb_second_format),
+    bitfield("regional",    2,  'unsigned', None,      "Regional reserved"),
+    bitfield("cs",          1,  'unsigned', None,      "CS Unit"),
+    bitfield("display",     1,  'unsigned', None,      "Display flag"),
+    bitfield("dsc",         1,  'unsigned', None,      "DSC flag"),
+    bitfield("band",        1,  'unsigned', None,      "Band flag"),
+    bitfield("msg22",       1,  'unsigned', None,      "Message 22 flag"),
+    bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
+    bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
+    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    )
+
+type19 = (
+    bitfield("reserved",    8,  'unsigned', None,      "Regional reserved"),
+    bitfield("speed",       10, 'unsigned', 1023,      "Speed Over Ground",
+             formatter=cnb_speed_format),
+    bitfield("accuracy",    1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("lon",         28, 'signed',   0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",         27, 'signed',   0x3412140, "Latitude",
+             formatter=cnb_latlon_format),
+    bitfield("course",      12, 'unsigned', 0xE10,     "Course Over Ground",
+             formatter=cnb_course_format),
+    bitfield("heading",     9,  'unsigned', 511,       "True Heading"),
+    bitfield("second",      6,  'unsigned', None,      "Time Stamp",
+             formatter=cnb_second_format),
+    bitfield("regional",    4,  'unsigned', None,      "Regional reserved"),
+    bitfield("shipname",  120,  'string',   None,      "Vessel Name"),
+    bitfield("shiptype",    8,  'unsigned', None,      "Ship Type",
+             formatter=ship_type_legends),
+    bitfield("to_bow",      9,  'unsigned', 0,         "Dimension to Bow"),
+    bitfield("to_stern",    9,  'unsigned', 0,         "Dimension to Stern"),
+    bitfield("to_port",     6,  'unsigned', 0,         "Dimension to Port"),
+    bitfield("to_starbord", 6,  'unsigned', 0,         "Dimension to Starboard"),
+    bitfield("epfd",        4,  'unsigned', 0,         "Position Fix Type",
+             formatter=epfd_type_legends),
+    bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
+    bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
+    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=14),
+        validator=lambda n: n>0 and n<=19),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     dispatch('msgtype',      [None,   cnb,    cnb,    cnb,    type4,
-                              type5,  type6, type7,   type8,  type9,
-                              type10, type4, type12,  type7]),
+                              type5,  type6,  type7,   type8,  type9,
+                              type10, type4,  type12,  type7,  type14,
+                              type15, type16, type17,  type18, type19]),
     ]
 
 field_groups = (
