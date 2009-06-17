@@ -68,6 +68,9 @@ def cnb_speed_format(n):
     else:
         return str(n / 10.0);
 
+def cnb_course_format(n):
+    return str(n / 10.0);
+
 def cnb_second_format(n):
     if n == 60:
         return "n/a"
@@ -92,7 +95,8 @@ cnb = (
              formatter=cnb_latlon_format),
     bitfield("lat",     27, 'signed',   0x3412140,  "Latitude",
              formatter=cnb_latlon_format),
-    bitfield("course",  12, 'unsigned',	0xe10,      "Course Over Ground"),
+    bitfield("course",  12, 'unsigned',	0xe10,      "Course Over Ground",
+             formatter=cnb_course_format),
     bitfield("heading",  9, 'unsigned', 511,        "True Heading"),
     bitfield("second",   6, 'unsigned', None,       "Time Stamp",
              formatter=cnb_second_format),
@@ -286,13 +290,49 @@ type8 = (
     bitfield("data",           952, 'raw',      None, "Data"),
     )
 
+def type9_alt_format(n):
+    if n == 4094:
+        return ">=4094"
+    else:
+        return str(n)
+
+def type9_speed_format(n):
+    if n == 1023:
+        return "n/a"
+    elif n == 1022:
+        return "fast"
+    else:
+        return str(n);
+
+type9 = (
+    bitfield("alt",         12, 'unsigned', 4095,      "Altitude",
+             formatter=type9_alt_format),
+    bitfield("speed",       10, 'unsigned', 1023,      "SOG",
+             formatter=type9_speed_format),
+    bitfield("accuracy",    1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("lon",         28, 'signed',   0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",         27, 'signed',   0x3412140, "Latitude",
+             formatter=cnb_latlon_format),
+    bitfield("course",      12, 'unsigned', 0xe10,     "Course Over Ground",
+             formatter=cnb_course_format),
+    bitfield("second",      6,  'unsigned', 60,        "Time Stamp",
+             formatter=cnb_second_format),
+    bitfield("regional",    8,  'unsigned', None,      "Regional reserved"),
+    bitfield("reserved",    1,  'unsigned', None,      "DTE"),
+    spare(3),
+    bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
+    bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
+    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    )
+
 aivdm_decode = [
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=8),
+        validator=lambda n: n>0 and n<=9),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     dispatch('msgtype',      [None, cnb, cnb, cnb, type4, type5,
-                              type6, type7, type8]),
+                              type6, type7, type8, type9]),
     ]
 
 field_groups = (
