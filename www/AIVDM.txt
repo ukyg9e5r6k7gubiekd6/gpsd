@@ -752,7 +752,7 @@ Field   Len Description       Member         Units
 0-5       6 Message Type      msgtype        Unsigned integer: 8
 6-7       2 Repeat Indicator  repeat         As in Common Navigation Block
 8-37     30 Source MMSI       mmsi           Unsigned integer: 9 digits
-38-39     1 Spare                            Not used
+38-39     2 Spare                            Not used
 40-55    16 Application ID    application_id Unsigned integer
 56      952 Data              data           Binary data
                                              Field may be shorter than 952 bits.
