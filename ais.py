@@ -2,9 +2,20 @@
 #
 # A Python AIVDM/AIVDO decoder
 #
+# This decoder works by defining a declarative pseudolanguage in which
+# to describe the process of extracting packed bitfields from an AIS
+# message, a set of tables which are instructions in the pseudolanguage,
+# and a small amount of code for interpreting it.
+
+# Here are the three pseudoinstructions in the pseudolanguage.
 
 class bitfield:
     "Object defining the interpretation of an AIS bitfield."
+    # The only un-obvious detail is the use of the oob (out-of-band)
+    # member.  This isn't used in data extraction, but rather to cut
+    # down on the number of custom formatting hooks.  With this we
+    # handle the case where the field should be reported as an integer
+    # or "n/a".
     def __init__(self, name, width, dtype, oob, legend,
                  validator=None, formatter=None):
         self.name = name	# Name of field, for internal use and JSON
@@ -12,8 +23,8 @@ class bitfield:
         self.type = dtype	# Data type: signed, unsigned, string, or raw
         self.oob = oob		# Out-of-band value to be rendered as n/a
         self.legend = legend	# Human-friendly description of field
-        self.validator = validator
-        self.formatter = formatter
+        self.validator = validator	# Validation checker
+        self.formatter = formatter	# Custom reporting hook.
 
 class spare:
     "Describes spare bits,, not to be interpreted."
@@ -21,12 +32,19 @@ class spare:
         self.width = width
 
 class dispatch:
-    "Describes how to dispatch to a message type variant."
+    "Describes how to dispatch to a message type variant on a subfield value."
     def __init__(self, fieldname, subtypes):
         self.fieldname = fieldname
         self.subtypes = subtypes
     
-# Message-type-specific information begins here.
+# Message-type-specific information begins here. There are four
+# different kinds of things in it: (1) string tables for expanding
+# enumerated-type codes, (2) hook functions, (3) instruction tables,
+# and (4) field group declarations.  This is the part that could, in
+# theory, be generated from a portable higher-level specification in
+# XML; only the hook-functions are actually language-specific, and
+# your XML definition could in theory embed several different ones for
+# code generation in Python, Java, Perl, etc.
 
 cnb_status_legends = (
 	"Under way using engine",
@@ -443,17 +461,38 @@ type19 = (
     bitfield("radio",       20, 'unsigned', None,      "Radio status"),
     )
 
-aivdm_decode = [
+type20 = (
+    spare(2),
+    bitfield("offset1",    12, 'unsigned', 0, "Offset number"),
+    bitfield("number1",     4, 'unsigned', 0, "Reserved slots"),
+    bitfield("timeout1",    3, 'unsigned', 0, "Time-out"),
+    bitfield("increment1", 11, 'unsigned', 0, "Increment"),
+    bitfield("offset2",    12, 'unsigned', 0, "Offset number 2"),
+    bitfield("number2",     4, 'unsigned', 0, "Reserved slots"),
+    bitfield("timeout2",    3, 'unsigned', 0, "Time-out"),
+    bitfield("increment2", 11, 'unsigned', 0, "Increment"),
+    bitfield("offset3",    12, 'unsigned', 0, "Offset number 3"),
+    bitfield("number3",     4, 'unsigned', 0, "Reserved slots"),
+    bitfield("timeout3",    3, 'unsigned', 0, "Time-out"),
+    bitfield("increment3", 11, 'unsigned', 0, "Increment"),
+    bitfield("offset4",    12, 'unsigned', 0, "Offset number 4"),
+    bitfield("number4",     4, 'unsigned', 0, "Reserved slots"),
+    bitfield("timeout4",    3, 'unsigned', 0, "Time-out"),
+    bitfield("increment4", 11, 'unsigned', 0, "Increment"),
+    )
+
+aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
         validator=lambda n: n>0 and n<=19),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
+    # This is the master dispatch on AIS message type
     dispatch('msgtype',      [None,   cnb,    cnb,    cnb,    type4,
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              None, None,   None,    None,   None]),
-    ]
+                              type20, None,   None,    None,   None]),
+    )
 
 field_groups = (
     # This one occurs in message type 4
@@ -466,7 +505,11 @@ field_groups = (
      lambda m, d, h, n, s: "%02d:%02dT%02d:%02d:%02dZ" % (m, d, h, n, s)),
 )
 
-# Message-type-specific information ends here
+# Message-type-specific information ends here.
+#
+# Next, the execution machinery for the pseudolanguage. There isn't much of
+# this: the whole point of the design is to embody most of the information
+# about the AIS format in the pseudoinstruction tables.
 
 from array import array
 
@@ -512,6 +555,7 @@ class BitVector:
             fld = -(2 ** width - fld)
         return fld
     def __repr__(self):
+        "Used for dumping binary data."
         return str(self.bitlen) + ":" + "".join(map(lambda d: "%02x" % d, self.bits[:(self.bitlen + 7)/8]))
 
 class AISUnpackingException:
@@ -550,8 +594,14 @@ def aivdm_unpack(data, offset, instructions):
             if inst.validator and not inst.validator(value):
                 raise AISUnpackingException(inst.name, value)
             offset += inst.width
+            # An important thing about the unpacked representation this
+            # generates is tha it carries forward the meta-information from
+            # the field type definition.  This stuff is then available for
+            # use by report-generating code.
             cooked.append((inst.name, value, inst.type, inst.legend, inst.formatter))
     return cooked
+
+# The rest is just sequencing and report generation.
 
 if __name__ == "__main__":
     import sys, getopt
