@@ -402,15 +402,15 @@ type16 = (
     spare(2),
     )
 
-def type17_latlon_format(n):
+def short_latlon_format(n):
     return str(n / 600.0)
 
 type17 = (
     spare(2),
     bitfield("lon",         18, 'signed',   0x1a838, "Longitude",
-             formatter=type17_latlon_format),
+             formatter=short_latlon_format),
     bitfield("lat",         17, 'signed',   0xd548,  "Latitude",
-             formatter=type17_latlon_format),
+             formatter=short_latlon_format),
     spare(2),
     bitfield("data",      736,  'raw',      None,    "DGNSS data"),
     )
@@ -552,6 +552,27 @@ type21 = (
     bitfield("extension",      88, 'string',    0,         "Name Extension"),
     )
 
+type22 = (
+    spare(2),
+    bitfield("channel_a", 12, 'unsigned',  0,       "Channel A"),
+    bitfield("channel_b", 12, 'unsigned',  0,       "Channel B"),
+    bitfield("mode",       4, 'unsigned',  0,       "Tx/Rx mode"),
+    bitfield("power",      1, 'unsigned',  0,       "Power"),
+    bitfield("ne_lon",    18, 'unsigned',  0x1a838, "NE Longitude",
+             formatter=short_latlon_format),
+    bitfield("ne_lat",    17, 'unsigned',  0xd548,  "NE Latitude",
+             formatter=short_latlon_format),
+    bitfield("sw_lon",    18, 'unsigned',  0x1a838, "SW Longitude",
+             formatter=short_latlon_format),
+    bitfield("sw_lat",    17, 'unsigned',  0xd548,  "SW Latitude",
+             formatter=short_latlon_format),
+    bitfield("addressed",  1, 'unsigned',  0,       "Addressed"),
+    bitfield("band_a",     1, 'unsigned',  0,       "Channel A Band"),
+    bitfield("band_a",     1, 'unsigned',  0,       "Channel A Band"),
+    bitfield("zonesize",   3, 'unsigned',  0,       "Zone size"),
+    spare(23),
+    )
+
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
         validator=lambda n: n>0 and n<=19),
@@ -562,7 +583,7 @@ aivdm_decode = (
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              type20, type21, None,    None,   None]),
+                              type20, type21, type22,    None,   None]),
     )
 
 field_groups = (
