@@ -8,9 +8,7 @@
 # and a small amount of code for interpreting it.
 #
 # Known bugs:
-# 1. Does not aggregate the Type 21 Name Extension field with the Name field.
-# 3. Does not handle the small-boat variant of 24 part B.
-# 2. A subtle problem near certain variable-length messages: CSV
+# *  A subtle problem near certain variable-length messages: CSV
 #    reports will sometimes have fewer fields than expected, because the
 #    unpacker never generates cooked tuples for the omitted part of the
 #    message.  Presently a known issue for types 15 and 16 only.  (Will
@@ -554,7 +552,7 @@ type21 = (
     bitfield("virtual_aid",     1, 'unsigned',  0,         "Virtual-aid flag"),
     bitfield("assigned",        1, 'unsigned',  0,         "Assigned-mode flag"),
     spare(2),
-    bitfield("extension",      88, 'string',    0,         "Name Extension"),
+    bitfield("name",           88, 'string',    0,         "Name Extension"),
     )
 
 type22 = (
@@ -763,6 +761,19 @@ def parse_ais_messages(source, scaled=False):
                 group = formatter(*map(lambda x: x[1], segment))
                 group = (label, group, 'string', legend, None)
                 cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
+        # If there are multiple string fields with the same name,
+        # treat all but the first as extensions; that is, concatenate the values
+        # of the later ones to the first, then delete those tuples.
+        retry = True
+        while retry:
+            retry = False
+            for i in range(len(cooked)):
+                if cooked[i][2] == 'string':
+                    for j in range(i+1, len(cooked)):
+                        if cooked[j][2] == 'string' and cooked[i][0] == cooked[j][0]:
+                            cooked[i][1] += cooked[j][1]
+                            cooked = cooked[:j] + cooked[j+1:]
+                            retry = True
         # Now apply custom formatting hooks.
         if scaled:
             for (i, (name,value,dtype,legend,formatter)) in enumerate(cooked):
