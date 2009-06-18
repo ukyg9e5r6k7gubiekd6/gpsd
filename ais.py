@@ -10,7 +10,7 @@ class bitfield:
         self.name = name	# Name of field, for internal use and JSON
         self.width = width	# Bit width
         self.type = dtype	# Data type: signed, unsigned, string, or raw
-        self.oob = oob		# Out-of-band value to be rendewred as /n/a
+        self.oob = oob		# Out-of-band value to be rendered as n/a
         self.legend = legend	# Human-friendly description of field
         self.validator = validator
         self.formatter = formatter
@@ -131,6 +131,7 @@ type4 = (
     bitfield("lat",     27,  "signed",   0x3412140, "Latitude",
              formatter=cnb_latlon_format),
     bitfield("epfd",     4,  "unsigned", None,      "Type of EPFD",
+             validator=lambda n: n >= 0 and n <= 8,
              formatter=epfd_type_legends),
     spare(10),
     bitfield("raim",     1,  "unsigned", None,      "RAIM flag "),
@@ -246,12 +247,14 @@ type5 = (
     bitfield("callsign",     42, 'string',   None, "Call Sign"),              
     bitfield("shipname",    120, 'string',   None, "Vessel Name"),
     bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
+             validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
     bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
     bitfield("to_port",       6, 'unsigned',    0, "Dimension to Port"),
     bitfield("to_starbord",   6, 'unsigned',    0, "Dimension to Starboard"),
     bitfield("epfd",          4, 'unsigned',    0, "Position Fix Type",
+             validator=lambda n: n >= 0 and n <= 8,
              formatter=epfd_type_legends),
     bitfield("month",         4, 'unsigned',    0, "ETA month"),
     bitfield("day",           5, 'unsigned',    0, "ETA day"),
@@ -427,6 +430,7 @@ type19 = (
     bitfield("regional",    4,  'unsigned', None,      "Regional reserved"),
     bitfield("shipname",  120,  'string',   None,      "Vessel Name"),
     bitfield("shiptype",    8,  'unsigned', None,      "Ship Type",
+             validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("to_bow",      9,  'unsigned', 0,         "Dimension to Bow"),
     bitfield("to_stern",    9,  'unsigned', 0,         "Dimension to Stern"),
@@ -447,7 +451,8 @@ aivdm_decode = [
     dispatch('msgtype',      [None,   cnb,    cnb,    cnb,    type4,
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
-                              type15, type16, type17,  type18, type19]),
+                              type15, type16, type17,  type18, type19,
+                              None, None,   None,    None,   None]),
     ]
 
 field_groups = (
