@@ -8,7 +8,7 @@
 # and a small amount of code for interpreting it.
 #
 # Known bugs:
-# 1. Does not aggregate the Type 21 Name Extension field with the Name field
+# 1. Does not aggregate the Type 21 Name Extension field with the Name field.
 # 2. A subtle problem near certain variable-length messages: CSV
 #    reports will sometimes have fewer fields than expected, because the
 #    unpacker never generates cooked tuples for the omitted part of the
@@ -669,7 +669,7 @@ def aivdm_unpack(data, offset, instructions):
             # generates is tha it carries forward the meta-information from
             # the field type definition.  This stuff is then available for
             # use by report-generating code.
-            cooked.append((inst.name, value, inst.type, inst.legend, inst.formatter))
+            cooked.append([inst.name, value, inst.type, inst.legend, inst.formatter])
     return cooked
 
 # The rest is just sequencing and report generation.
@@ -678,18 +678,21 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "js")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjs")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
 
     scaled = False
     json = False
+    csv = False
     for (switch, val) in options:
         if (switch == '-s'):
             scaled = True
-        if (switch == '-j'):
+        elif (switch == '-j'):
             json = True
+        elif (switch == '-v'):
+            verbose = True
 
     payload = ''
     while True:
@@ -719,11 +722,22 @@ if __name__ == "__main__":
             segment = cooked[offset:offset+len(template)]
             if map(lambda x: x[0], segment) == template:
                 group = formatter(*map(lambda x: x[1], segment))
-                group = (label, group, legend, None)
+                group = (label, group, 'string', legend, None)
                 cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
+        # Now apply custom formatting hooks.
+        if scaled:
+            for (i, (name,value,dtype,legend,formatter)) in enumerate(cooked):
+                if formatter:
+                    if type(formatter) == type(()):
+                        cooked[i][1] = formatter[value]
+                    elif type(formatter) == type(lambda x: x):
+                        cooked[i][1] = formatter(value)
         # Report generation
-        if not json:
+        if json:
+            print "{" + ",".join(map(lambda x: '"' + x[0] + '"=' + str(x[1]), cooked)) + "}"
+        elif csv:
             print ",".join(map(lambda x: str(x[1]), cooked))
         else:
-            print "{" + ",".join(map(lambda x: '"' + x[0] + '"=' + str(x[1]), cooked)) + "}"
-
+            for (name, value, dtype, legend, formatter) in cooked:
+                print "%-25s: %s" % (legend, value)
+            print "%%"
