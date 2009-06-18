@@ -720,33 +720,13 @@ def aivdm_unpack(data, offset, instructions):
             cooked.append([inst.name, value, inst.type, inst.legend, inst.formatter])
     return cooked
 
-# The rest is just sequencing and report generation.
-
-if __name__ == "__main__":
-    import sys, getopt
-
-    try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjs")
-    except getopt.GetoptError, msg:
-        print "ais.py: " + str(msg)
-        raise SystemExit, 1
-
-    scaled = False
-    json = False
-    csv = False
-    for (switch, val) in options:
-        if (switch == '-c'):
-            csv = True
-        elif (switch == '-s'):
-            scaled = True
-        elif (switch == '-j'):
-            json = True
-
+def parse_ais_messages(source, scaled=False):
+    "Generator code - read forever from source stream, parsing AIS messages."
     payload = ''
     while True:
-        line = sys.stdin.readline()
+        line = source.readline()
         if not line:
-            break
+            return
         # Ignore comments
         if line.startswith("#"):
             continue
@@ -780,12 +760,36 @@ if __name__ == "__main__":
                         cooked[i][1] = formatter[value]
                     elif type(formatter) == type(lambda x: x):
                         cooked[i][1] = formatter(value)
-        # Report generation
+        yield cooked
+
+# The rest is just sequencing and report generation.
+
+if __name__ == "__main__":
+    import sys, getopt
+
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjs")
+    except getopt.GetoptError, msg:
+        print "ais.py: " + str(msg)
+        raise SystemExit, 1
+
+    scaled = False
+    json = False
+    csv = False
+    for (switch, val) in options:
+        if (switch == '-c'):
+            csv = True
+        elif (switch == '-s'):
+            scaled = True
+        elif (switch == '-j'):
+            json = True
+
+    for parsed in parse_ais_messages(sys.stdin, scaled):
         if json:
-            print "{" + ",".join(map(lambda x: '"' + x[0] + '"=' + str(x[1]), cooked)) + "}"
+            print "{" + ",".join(map(lambda x: '"' + x[0] + '"=' + str(x[1]), parsed)) + "}"
         elif csv:
-            print ",".join(map(lambda x: str(x[1]), cooked))
+            print ",".join(map(lambda x: str(x[1]), parsed))
         else:
-            for (name, value, dtype, legend, formatter) in cooked:
+            for (name, value, dtype, legend, formatter) in parsed:
                 print "%-25s: %s" % (legend, value)
             print "%%"
