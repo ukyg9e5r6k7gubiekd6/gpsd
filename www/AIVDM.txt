@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.12, Jun 2009
+v1.13, Jun 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -966,15 +966,17 @@ Field   Len Description         Member     Units
 6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
 8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
 38-39     2 Spare                          Not used
-40-57    18 Longitude           lon        Minutes/10000 (as in CNB)
-58-74    17 Latitude            lat        Minutes/10000 (as in CNB)
+40-57    18 Longitude           lon        Minutes/10
+58-74    17 Latitude            lat        Minutes/10
 75-79     5 Spare                          Not used - reserved
 80-815  736 Payload             data       DGNSS correction data
 ------------------------------------------------------------------------------
 
 Nore that latitude and longitude are in units of a tenth of a minute;
-otherwise sign interpretation and out-of-band values as in the Common
-Navigation Clock.
+sign interpretation and out-of-band values are as in the Common
+Navigation Clock.  (Note, howeverm that the hex representastion of
+the out-of-band values differs; it is 181 * 60 * 10 = 0x1a838 for
+longitude, 91 * 60 * 10 = 0xd548 for latitude.)
 
 The <<IALA>> description of the payload portion subfields has been
 omitted, as it appears to be tied to the now obsolete RTCM2 protocol.
@@ -1005,7 +1007,7 @@ Field   Len Description        Member    Units
 112-123 12  Course Over Ground course    Relative to true north to 0.1 degree
 124-132  9  True Heading       heading   0 to 359 degrees, 511 = not available
 133-138  6  Time Stamp         second    Second of UTC timestamp.
-139-140  2  Regional reserved  reserved
+139-140  2  Regional reserved  regional
 141-141  1  CS Unit            cs        0=Class B SOTDMA unit
                                          1=Class B CS (Carrier Sense) unit
 142-142  1  Display flag       display   0=No visual display, 1=Has display
@@ -1018,7 +1020,9 @@ Field   Len Description        Member    Units
 				         of the marine channel
 145-145  1  Message 22 flag    msg22     If 1, unit can accept a channel
                                          assignment via Message Type 22.
-146-167 22  Radio status       radio     See <<IALA>> for details.
+146-146  1  Assigned           assigned  Assigned-mode flag
+147-147  1  RAIM flag          raim      As for common navigation block
+148-167 20  Radio status       radio     See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
 === Type 19: Extended Class B CS Position Report ===
@@ -1039,17 +1043,17 @@ Field    Len Description            Member        Units
 0-5       6  Message Type           msgtype       Unsigned integer: 19
 6-7       2  Repeat Indicator       repeat        As in Common Navigation Block
 8-37     30  MMSI                   mmsi          Unsigned integer: 9 digits
-38-45     8  Regional Reserved      regional
+38-45     8  Regional Reserved      reserved
 46-55    10  Speed Over Ground      speed         As in common navigation block
 56-56     1  Position Accuracy      accuracy      See below
 57-84    28  Longitude              lon           Minutes/10000 (as in CNB)
 85-111   27  Latitude               lat           Minutes/10000 (as in CNB)
 112-123  12  Course Over Ground     course        Relative to true north,
                                                   units of 0.1 degrees0.1 degree
-124-132   9  True Heading           meading       0 to 359 degrees, 
+124-132   9  True Heading           heading       0 to 359 degrees, 
                                                   511 = not available
 133-138   6  Time Stamp             second        Second of UTC timestamp.
-139-142   4  Regional reserved
+139-142   4  Regional reserved      regional
 143-262 120  Name                   shipname      20 6-bit characters 
 263-270   8  Type of ship and cargo shiptype      As in Message 5
 271-279   9  Dimension to Bow       to_bow        Unsigned integer: Meters
@@ -1241,7 +1245,7 @@ the range of the Type B MMSI field.
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.
 
-`--------`---`----------------------`---------------`----------------------------
+`-------`---`----------------------`---------------`----------------------------
 Field   Len Description             Member          Units
 --------------------------------------------------------------------------------
 0-5       6  Message Type           msgtype         Unsigned integer: 19
@@ -1424,3 +1428,6 @@ Version 1.11 describes message types 15, 16, and 17.
 
 Version 1.12 describes messages 20 and 22, and adds navigation aid
 type codes.
+
+Version 1.13 documents more out-of-band values and treats radio status
+blocks more uniformly.
