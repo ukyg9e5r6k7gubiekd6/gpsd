@@ -20,7 +20,7 @@
 # Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
 # Message types 6-8, 12-17, 20-23, and 25-26 have not.
 
-# Here are the three pseudoinstructions in the pseudolanguage.
+# Here are the pseudoinstructions in the pseudolanguage.
 
 class bitfield:
     "Object defining the interpretation of an AIS bitfield."
@@ -46,10 +46,11 @@ class spare:
 
 class dispatch:
     "Describes how to dispatch to a message type variant on a subfield value."
-    def __init__(self, fieldname, subtypes):
-        self.fieldname = fieldname
-        self.subtypes = subtypes
-    
+    def __init__(self, fieldname, subtypes, compute=lambda x: x):
+        self.fieldname = fieldname	# Vakue of view to dispatch on
+        self.subtypes = subtypes	# Possible subtypes to dispatch to
+        self.compute = compute		# Pass value through this pre dispatch
+
 # Message-type-specific information begins here. There are four
 # different kinds of things in it: (1) string tables for expanding
 # enumerated-type codes, (2) hook functions, (3) instruction tables,
@@ -582,17 +583,27 @@ type24a = (
     spare(8),
     )
 
-type24b = (
-    bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
-             validator=lambda n: n >= 0 and n <= 99,
-             formatter=ship_type_legends),
-    bitfield("vendorid",     42, 'string',   None, "Vendor ID"),
+
+type24b1 = (
     bitfield("callsign",     42, 'string',   None, "Call Sign"),              
     bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
     bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
     bitfield("to_port",       6, 'unsigned',    0, "Dimension to Port"),
     bitfield("to_starbord",   6, 'unsigned',    0, "Dimension to Starboard"),
     spare(8),
+    )
+
+type24b2 = (
+    bitfield('mothership_mmsi', 30, 'unsigned',    0, "Mothership MMSI"),
+    spare(8),
+    )
+
+type24b = (
+    bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
+             validator=lambda n: n >= 0 and n <= 99,
+             formatter=ship_type_legends),
+    bitfield("vendorid",     42, 'string',   None, "Vendor ID"),
+    dispatch("mmsi", [type24b1, type24b2], lambda m: 1 if `m`[:2]=='98' else 0),
     )
 
 type24 = (
@@ -684,19 +695,18 @@ class AISUnpackingException:
     def __repr__(self):
         return "Validation on fieldname %s failed (value %s)" % (self.fieldname, self.value)
 
-def aivdm_unpack(data, offset, instructions):
+def aivdm_unpack(data, offset, values, instructions):
     "Unpack fields from data according to instructions."
     cooked = []
-    values = {}
     for inst in instructions:
         if offset >= data.bitlen:
             break
         elif isinstance(inst, spare):
             offset += inst.width
         elif isinstance(inst, dispatch):
-            i = values[inst.fieldname]
+            i = inst.compute(values[inst.fieldname])
             # This is the recursion that lets us handle variant types
-            cooked += aivdm_unpack(data, offset, inst.subtypes[i])
+            cooked += aivdm_unpack(data, offset, values, inst.subtypes[i])
         elif isinstance(inst, bitfield):
             if inst.type == 'unsigned':
                 value = data.ubits(offset, inst.width)
@@ -723,6 +733,7 @@ def aivdm_unpack(data, offset, instructions):
 def parse_ais_messages(source, scaled=False):
     "Generator code - read forever from source stream, parsing AIS messages."
     payload = ''
+    values = {}
     while True:
         line = source.readline()
         if not line:
@@ -743,7 +754,7 @@ def parse_ais_messages(source, scaled=False):
         bits = BitVector()
         bits.from_sixbit(payload)
         # Magic recursive unpacking operation
-        cooked = aivdm_unpack(bits, 0, aivdm_decode)
+        cooked = aivdm_unpack(bits, 0, values, aivdm_decode)
         # We now have a list of tuples containing unpacked fields
         # Collect some field groups into ISO8601 format
         for (offset, template, label, legend, formatter) in field_groups:
@@ -760,6 +771,7 @@ def parse_ais_messages(source, scaled=False):
                         cooked[i][1] = formatter[value]
                     elif type(formatter) == type(lambda x: x):
                         cooked[i][1] = formatter(value)
+        values = {}
         yield cooked
 
 # The rest is just sequencing and report generation.
