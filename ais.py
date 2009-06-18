@@ -6,6 +6,15 @@
 # to describe the process of extracting packed bitfields from an AIS
 # message, a set of tables which are instructions in the pseudolanguage,
 # and a small amount of code for interpreting it.
+#
+# Known bugs:
+# 1. Does not aggregate the Type 21 Name Extension field with the Name field
+# 2. A subtle problem near certain variable-length messages: CSV
+#    reports will sometimes have fewer fields than expected, because the
+#    unpacker never generates cooked tuples for the omitted part of the
+#    message.  Presently a known issue for types 15 and 16 only.  (Will
+#    never affect variable-length messages in which the last field type
+#    is 'string' or 'raw').
 
 # Here are the three pseudoinstructions in the pseudolanguage.
 
@@ -455,6 +464,7 @@ type19 = (
     bitfield("to_port",     6,  'unsigned', 0,         "Dimension to Port"),
     bitfield("to_starbord", 6,  'unsigned', 0,         "Dimension to Starboard"),
     bitfield("epfd",        4,  'unsigned', 0,         "Position Fix Type",
+             validator=lambda n: n >= 0 and n <= 8,
              formatter=epfd_type_legends),
     bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
     bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
@@ -481,6 +491,67 @@ type20 = (
     bitfield("increment4", 11, 'unsigned', 0, "Increment"),
     )
 
+aide_type_legends = (
+	"Unspcified",
+	"Reference point",
+	"RACON",
+	"Fixed offshore structure",
+	"Spare, Reserved for future use.",
+	"Light, without sectors",
+	"Light, with sectors",
+	"Leading Light Front",
+	"Leading Light Rear",
+	"Beacon, Cardinal N",
+	"Beacon, Cardinal E",
+	"Beacon, Cardinal S",
+	"Beacon, Cardinal W",
+	"Beacon, Port hand",
+	"Beacon, Starboard hand",
+	"Beacon, Preferred Channel port hand",
+	"Beacon, Preferred Channel starboard hand",
+	"Beacon, Isolated danger",
+	"Beacon, Safe water",
+	"Beacon, Special mark",
+	"Cardinal Mark N",
+	"Cardinal Mark E",
+	"Cardinal Mark S",
+	"Cardinal Mark W",
+	"Port hand Mark",
+	"Starboard hand Mark",
+	"Preferred Channel Port hand",
+	"Preferred Channel Starboard hand",
+	"Isolated danger",
+	"Safe Water",
+	"Special Mark",
+	"Light Vessel / LANBY / Rigs",
+        )
+
+type21 = (
+    bitfield("type",            5, 'unisigned', 0,         "Aid type",
+             formatter=aide_type_legends),
+    bitfield("name",          120, 'string',    None,      "Name"),
+    bitfield("accuracy",        1, 'unsigned',  0,         "Position Accuracy"),
+    bitfield("lon",            28, 'signed',    0x6791AC0, "Longitude",
+             formatter=cnb_latlon_format),
+    bitfield("lat",            27, 'signed',    0x3412140, "Latitude",
+             formatter=cnb_latlon_format),
+    bitfield("to_bow",          9, 'unsigned',  0,         "Dimension to Bow"),
+    bitfield("to_stern",        9, 'unsigned',  0,         "Dimension to Stern"),
+    bitfield("to_port",         6, 'unsigned',  0,         "Dimension to Port"),
+    bitfield("to_starboard",    6, 'unsigned',  0,         "Dimension to Starboard"),
+    bitfield("epfd",            4, 'unsigned',  0,         "Position Fix Type",
+             validator=lambda n: n >= 0 and n <= 8,
+             formatter=epfd_type_legends),
+    bitfield("second",          6, 'unsigned',  0,         "UTC Second"),
+    bitfield("off_position",    1, 'unsigned',  0,         "Off-Position Indicator"),
+    bitfield("regional",        8, 'unsigned',  0,         "Regional reserved"),
+    bitfield("raim",            1, 'unsigned',  0,         "RAIM flag"),
+    bitfield("virtual_aid",     1, 'unsigned',  0,         "Virtual-aid flag"),
+    bitfield("assigned",        1, 'unsigned',  0,         "Assigned-mode flag"),
+    spare(2),
+    bitfield("extension",      88, 'string',    0,         "Name Extension"),
+    )
+
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
         validator=lambda n: n>0 and n<=19),
@@ -491,7 +562,7 @@ aivdm_decode = (
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              type20, None,   None,    None,   None]),
+                              type20, type21, None,    None,   None]),
     )
 
 field_groups = (
