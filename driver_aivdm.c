@@ -3,8 +3,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Decodings of message types 12, 13, 14, 19, and 21 have not yet been
- * tested against known-good data.
+ * Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
+ * Message types 6-8, 12-17, 20-23, and 25-26 have not.
  *
  * Message type 21 decoding does not yet handle the Name Extension field.
  */
