@@ -9,12 +9,16 @@
 #
 # Known bugs:
 # 1. Does not aggregate the Type 21 Name Extension field with the Name field.
+# 3. Does not handle the small-boat variant of 24 part B.
 # 2. A subtle problem near certain variable-length messages: CSV
 #    reports will sometimes have fewer fields than expected, because the
 #    unpacker never generates cooked tuples for the omitted part of the
 #    message.  Presently a known issue for types 15 and 16 only.  (Will
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
+#
+# Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
+# Message types 6-8, 12-17, 20-23, and 25-26 have not.
 
 # Here are the three pseudoinstructions in the pseudolanguage.
 
@@ -573,9 +577,32 @@ type22 = (
     spare(23),
     )
 
+type24a = (
+    bitfield("shipname",    120, 'string',   None, "Vessel Name"),
+    spare(8),
+    )
+
+type24b = (
+    bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
+             validator=lambda n: n >= 0 and n <= 99,
+             formatter=ship_type_legends),
+    bitfield("vendorid",     42, 'string',   None, "Vendor ID"),
+    bitfield("callsign",     42, 'string',   None, "Call Sign"),              
+    bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
+    bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
+    bitfield("to_port",       6, 'unsigned',    0, "Dimension to Port"),
+    bitfield("to_starbord",   6, 'unsigned',    0, "Dimension to Starboard"),
+    spare(8),
+    )
+
+type24 = (
+    bitfield('partno', 2, 'unsigned', None, "Part Number"),
+    dispatch('partno', [type24a, type24b]),
+    )
+
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n>0 and n<=19),
+        validator=lambda n: n > 0 and n <= 24 and n != 23),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type
@@ -583,7 +610,7 @@ aivdm_decode = (
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              type20, type21, type22,    None,   None]),
+                              type20, type21, type22,  None,   type24]),
     )
 
 field_groups = (
@@ -708,12 +735,12 @@ if __name__ == "__main__":
     json = False
     csv = False
     for (switch, val) in options:
-        if (switch == '-s'):
+        if (switch == '-c'):
+            csv = True
+        elif (switch == '-s'):
             scaled = True
         elif (switch == '-j'):
             json = True
-        elif (switch == '-v'):
-            verbose = True
 
     payload = ''
     while True:
