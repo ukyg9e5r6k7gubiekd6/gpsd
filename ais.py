@@ -764,7 +764,7 @@ def parse_ais_messages(source, scaled=False):
         # If there are multiple string fields with the same name,
         # treat all but the first as extensions; that is, concatenate the values
         # of the later ones to the first, then delete those tuples.
-        # FIXME: Code is untested - wee need a message 21 with extension field
+        # FIXME: Code is untested - we need a message 21 with extension field
         retry = True
         while retry:
             retry = False
