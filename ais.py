@@ -4,7 +4,7 @@
 #
 # This decoder works by defining a declarative pseudolanguage in which
 # to describe the process of extracting packed bitfields from an AIS
-# message, a set of tables which are instructions in the pseudolanguage,
+# message, a set of tables which contain instructions in the pseudolanguage,
 # and a small amount of code for interpreting it.
 #
 # Known bugs:
@@ -45,7 +45,7 @@ class spare:
 class dispatch:
     "Describes how to dispatch to a message type variant on a subfield value."
     def __init__(self, fieldname, subtypes, compute=lambda x: x):
-        self.fieldname = fieldname	# Vakue of view to dispatch on
+        self.fieldname = fieldname	# Value of view to dispatch on
         self.subtypes = subtypes	# Possible subtypes to dispatch to
         self.compute = compute		# Pass value through this pre dispatch
 
@@ -54,7 +54,7 @@ class dispatch:
 # enumerated-type codes, (2) hook functions, (3) instruction tables,
 # and (4) field group declarations.  This is the part that could, in
 # theory, be generated from a portable higher-level specification in
-# XML; only the hook-functions are actually language-specific, and
+# XML; only the hook functions are actually language-specific, and
 # your XML definition could in theory embed several different ones for
 # code generation in Python, Java, Perl, etc.
 
@@ -764,6 +764,7 @@ def parse_ais_messages(source, scaled=False):
         # If there are multiple string fields with the same name,
         # treat all but the first as extensions; that is, concatenate the values
         # of the later ones to the first, then delete those tuples.
+        # FIXME: Code is untested - wee need a message 21 with extension field
         retry = True
         while retry:
             retry = False
@@ -816,3 +817,5 @@ if __name__ == "__main__":
             for (name, value, dtype, legend, formatter) in parsed:
                 print "%-25s: %s" % (legend, value)
             print "%%"
+
+# $Id$
