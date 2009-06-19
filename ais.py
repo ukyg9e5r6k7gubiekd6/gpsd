@@ -47,7 +47,7 @@ class dispatch:
     def __init__(self, fieldname, subtypes, compute=lambda x: x):
         self.fieldname = fieldname	# Value of view to dispatch on
         self.subtypes = subtypes	# Possible subtypes to dispatch to
-        self.compute = compute		# Pass value through this pre dispatch
+        self.compute = compute		# Pass value through this pre-dispatch
 
 # Message-type-specific information begins here. There are four
 # different kinds of things in it: (1) string tables for expanding
@@ -113,6 +113,7 @@ def cnb_second_format(n):
     else:
         return str(n);
 
+# Common Navigation Block is the format for AIS types 1, 2, and 3
 cnb = (
     bitfield("status",   4, 'unsigned', 0,         "Navigation Status",
              formatter=cnb_status_legends),
@@ -722,7 +723,7 @@ def aivdm_unpack(data, offset, values, instructions):
                 raise AISUnpackingException(inst.name, value)
             offset += inst.width
             # An important thing about the unpacked representation this
-            # generates is tha it carries forward the meta-information from
+            # generates is that it carries forward the meta-information from
             # the field type definition.  This stuff is then available for
             # use by report-generating code.
             cooked.append([inst.name, value, inst.type, inst.legend, inst.formatter])
