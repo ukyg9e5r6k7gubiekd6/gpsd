@@ -160,7 +160,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	(void)wprintw(navsolwin, "%+9.2fm/s %+9.2fm/s %+9.2fm/s", evx, evy, evz);
 
 	(void)wmove(navsolwin, 4, 11);
-	(void)wprintw(navsolwin, "%12.9fo %13.9fo %8.2fm",
+	(void)wprintw(navsolwin, "%12.9f  %13.9f  %8.2fm",
 		g.fix.latitude, g.fix.longitude, g.fix.altitude);
 	(void)mvwaddch(navsolwin, 4, 23, ACS_DEGREE);
 	(void)mvwaddch(navsolwin, 4, 39, ACS_DEGREE);
