@@ -726,7 +726,7 @@ def aivdm_unpack(data, offset, values, instructions):
             # generates is that it carries forward the meta-information from
             # the field type definition.  This stuff is then available for
             # use by report-generating code.
-            cooked.append([inst.name, value, inst.type, inst.legend, inst.formatter])
+            cooked.append([inst, value])
     return cooked
 
 def parse_ais_messages(source, scaled=False):
@@ -770,20 +770,20 @@ def parse_ais_messages(source, scaled=False):
         while retry:
             retry = False
             for i in range(len(cooked)):
-                if cooked[i][2] == 'string':
+                if cooked[i][0].type == 'string':
                     for j in range(i+1, len(cooked)):
-                        if cooked[j][2] == 'string' and cooked[i][0] == cooked[j][0]:
+                        if cooked[j][0].type == 'string' and cooked[i][0].name == cooked[j][0].name:
                             cooked[i][1] += cooked[j][1]
                             cooked = cooked[:j] + cooked[j+1:]
                             retry = True
         # Now apply custom formatting hooks.
         if scaled:
-            for (i, (name,value,dtype,legend,formatter)) in enumerate(cooked):
-                if formatter:
-                    if type(formatter) == type(()):
-                        cooked[i][1] = formatter[value]
+            for (i, (inst, value)) in enumerate(cooked):
+                if inst.formatter:
+                    if type(inst.formatter) == type(()):
+                        cooked[i][1] = inst.formatter[value]
                     elif type(formatter) == type(lambda x: x):
-                        cooked[i][1] = formatter(value)
+                        cooked[i][1] = inst.formatter(value)
         values = {}
         yield cooked
 
@@ -815,8 +815,8 @@ if __name__ == "__main__":
         elif csv:
             print ",".join(map(lambda x: str(x[1]), parsed))
         else:
-            for (name, value, dtype, legend, formatter) in parsed:
-                print "%-25s: %s" % (legend, value)
+            for (inst, value) in parsed:
+                print "%-25s: %s" % (inst.legend, value)
             print "%%"
 
 # $Id$
