@@ -779,7 +779,9 @@ def parse_ais_messages(source, scaled=False):
         # Now apply custom formatting hooks.
         if scaled:
             for (i, (inst, value)) in enumerate(cooked):
-                if inst.formatter:
+                if value == inst.oob:
+                    cooked[i][1] = "n/a"
+                elif inst.formatter:
                     if type(inst.formatter) == type(()):
                         cooked[i][1] = inst.formatter[value]
                     elif type(formatter) == type(lambda x: x):
