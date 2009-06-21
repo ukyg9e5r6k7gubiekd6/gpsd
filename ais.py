@@ -29,11 +29,11 @@ class bitfield:
     # or "n/a".
     def __init__(self, name, width, dtype, oob, legend,
                  validator=None, formatter=None):
-        self.name = name	# Name of field, for internal use and JSON
-        self.width = width	# Bit width
-        self.type = dtype	# Data type: signed, unsigned, string, or raw
-        self.oob = oob		# Out-of-band value to be rendered as n/a
-        self.legend = legend	# Human-friendly description of field
+        self.name = name		# Fieldname, for internal use and JSON
+        self.width = width		# Bit width
+        self.type = dtype		# Data type: signed/unsigned/string/raw
+        self.oob = oob			# Out-of-band value to be shown as n/a
+        self.legend = legend		# Human-friendly description of field
         self.validator = validator	# Validation checker
         self.formatter = formatter	# Custom reporting hook.
 
@@ -683,6 +683,8 @@ class BitVector:
         if fld & (1 << (width-1)):
             fld = -(2 ** width - fld)
         return fld
+    def __len__(self):
+        return self.bitlen
     def __repr__(self):
         "Used for dumping binary data."
         return str(self.bitlen) + ":" + "".join(map(lambda d: "%02x" % d, self.bits[:(self.bitlen + 7)/8]))
@@ -698,7 +700,7 @@ def aivdm_unpack(data, offset, values, instructions):
     "Unpack fields from data according to instructions."
     cooked = []
     for inst in instructions:
-        if offset >= data.bitlen:
+        if offset >= len(data):
             break
         elif isinstance(inst, spare):
             offset += inst.width
@@ -717,7 +719,7 @@ def aivdm_unpack(data, offset, values, instructions):
                     value += "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
                 value = value.replace("@", " ").rstrip()
             elif inst.type == 'raw':
-                value = BitVector(data.bits[offset/8:], data.bitlen-offset)
+                value = BitVector(data.bits[offset/8:], len(data)-offset)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
                 raise AISUnpackingException(inst.name, value)
