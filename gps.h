@@ -897,11 +897,14 @@ struct gps_data_t {
     double horzField;   /* Magnitude of horizontal magnetic field */
 #endif
 
-#if 0	/* not yet used or filled in */
-    /* measurement data */
+#ifdef RAW_ENABLE
+    /* raw measurement data */
+    float codephase[MAXCHANNELS];	/* meters */
+    double carrierphase[MAXCHANNELS];	/* meters */
     double pseudorange[MAXCHANNELS];	/* meters */
     double deltarange[MAXCHANNELS];	/* meters/sec */
     double doppler[MAXCHANNELS];	/* Hz */
+    double mtime[MAXCHANNELS];		/* sec */
     unsigned satstat[MAXCHANNELS];	/* tracking status */
 #define SAT_ACQUIRED	0x01		/* satellite acquired */
 #define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */

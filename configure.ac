@@ -823,6 +823,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl enable raw measurements
+AC_ARG_ENABLE(raw,
+  AC_HELP_STRING([--enable-raw],
+		 [enable raw measurement processing]),
+  [ac_raw=$enableval], [ac_raw=yes])
+AC_MSG_CHECKING([for Raw Measurement support])
+if test x"$ac_raw" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([RAW_ENABLE], 1, [Raw Measurement support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
 dnl but no DBUS headers.
@@ -960,6 +973,7 @@ echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"
+echo "Raw Measurements        : $ac_raw"
 echo "	Client Features"
 echo "	---------------"
 echo "Build ncurses programs  : $ac_ncurses"
