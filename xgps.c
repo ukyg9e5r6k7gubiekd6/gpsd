@@ -85,7 +85,7 @@ set_color(String color)
 }
 /*@ +usedef @*/
 
-static void 
+static void
 register_shell(Widget w)
 {
 	appshell = w;
@@ -125,7 +125,7 @@ set_title(char *title)
 }
 
 static void
-pol2cart(double azimuth, double elevation,  
+pol2cart(double azimuth, double elevation,
 	 /*@out@*/int *xout, /*@out@*/int *yout)
 {
 	azimuth *= DEG_2_RAD;
@@ -141,7 +141,7 @@ pol2cart(double azimuth, double elevation,
 static void
 draw_arc(int x, int y, unsigned int diam)
 {
-    (void)XDrawArc(XtDisplay(draww), pixmap, drawGC, 
+    (void)XDrawArc(XtDisplay(draww), pixmap, drawGC,
 		   x - diam / 2, y - diam / 2,        /* x,y */
 		   diam, diam,        /* width, height */
 		   0, 360 * 64);      /* angle1, angle2 */
@@ -192,9 +192,9 @@ draw_graphics(struct gps_data_t *gpsdata)
 
 		/* Now draw the satellites... */
 		for (i = 0; i < gpsdata->satellites; i++) {
-			pol2cart((double)gpsdata->azimuth[i], 
+			pol2cart((double)gpsdata->azimuth[i],
 			    (double)gpsdata->elevation[i], &x, &y);
-			if (gpsdata->ss[i] < 10) 
+			if (gpsdata->ss[i] < 10)
 				set_color("Black");
 			else if (gpsdata->ss[i] < 30)
 				set_color("Red");
@@ -236,12 +236,12 @@ draw_graphics(struct gps_data_t *gpsdata)
 					    y - IDIAM, 2 * IDIAM + 1,
 					    2 * IDIAM + 1, 0, 360 * 64);
 				else
-				    (void)XDrawArc(dpy, pixmap, drawGC, 
+				    (void)XDrawArc(dpy, pixmap, drawGC,
 					    x - IDIAM,
 					    y - IDIAM, 2 * IDIAM + 1,
 					    2 * IDIAM + 1, 0, 360 * 64);
 			}
-			(void)snprintf(buf, sizeof(buf), 
+			(void)snprintf(buf, sizeof(buf),
 				       "%-3d", gpsdata->PRN[i]);
 			set_color("Black");
 			(void)XDrawString(dpy, pixmap, drawGC, x, y+17, buf, 3);
@@ -262,7 +262,7 @@ redraw(Widget widget UNUSED, XtPointer client_data UNUSED, XtPointer call_data)
 
 	(void)XCopyArea(dpy, pixmap, XtWindow(draww), drawGC,
 			cbs->event->xexpose.x, cbs->event->xexpose.y,
-			(unsigned int)cbs->event->xexpose.width, 
+			(unsigned int)cbs->event->xexpose.width,
 			(unsigned int)cbs->event->xexpose.height,
 			cbs->event->xexpose.x, cbs->event->xexpose.y);
 }
@@ -492,7 +492,7 @@ build_gui(Widget toplevel)
 	    XmNchildType,		XmFRAME_TITLE_CHILD,
 	    XmNchildVerticalAlignment,	XmALIGNMENT_CENTER,
 	    NULL);
-	status = XtVaCreateManagedWidget("status", 
+	status = XtVaCreateManagedWidget("status",
 					 xmTextFieldWidgetClass, status_form,
 					 XmNcursorPositionVisible, False,
 					 XmNeditable, False,
@@ -554,7 +554,7 @@ build_gui(Widget toplevel)
 
 	/* the satellite diagram */
 	satellite_diagram = XtVaCreateManagedWidget("satellite_diagram",
-	    xmDrawingAreaWidgetClass,	right, 
+	    xmDrawingAreaWidgetClass,	right,
 	    XmNbackground,		get_pixel(toplevel, "snow"),
 	    XmNheight,			SATDIAG_SIZE + 24,
 	    XmNwidth,			SATDIAG_SIZE,
@@ -831,7 +831,7 @@ build_gui(Widget toplevel)
 	/*@ -type -nullpass @*/
 	delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW",
 	    (Boolean)False);
-	(void)XmAddWMProtocolCallback(toplevel, delw, 
+	(void)XmAddWMProtocolCallback(toplevel, delw,
 		(XtCallbackProc)quit_cb, NULL);
 	/*@ +type +onlytrans @*/
 
@@ -867,7 +867,7 @@ handle_input(XtPointer client_data UNUSED, int *source UNUSED, XtInputId *id UNU
 
 /* runs on each sentence */
 static void
-update_panel(struct gps_data_t *gpsdata, char *message, 
+update_panel(struct gps_data_t *gpsdata, char *message,
 	size_t len UNUSED, int level UNUSED)
 {
 	unsigned int i;
@@ -887,8 +887,8 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 		    "PRN:   Elev:  Azim:  SNR:  Used:");
 		for (i = 0; i < MAXCHANNELS; i++) {
 			if (i < (unsigned int)gpsdata->satellites) {
-				(void)snprintf(s, sizeof(s),  
-				    " %3d    %2d    %3d    %2d      %c", 
+				(void)snprintf(s, sizeof(s),
+				    " %3d    %2d    %3d    %2.0f      %c",
 				    gpsdata->PRN[i], gpsdata->elevation[i],
 				    gpsdata->azimuth[i], gpsdata->ss[i],
 				    gpsdata->used[i] ? 'Y' : 'N');
@@ -954,14 +954,14 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 	} else
 		XmTextFieldSetString(text_7, "n/a");
 	if (isnan(gpsdata->fix.epv)==0) {
-		(void)snprintf(s, sizeof(s), "%f %s", 
+		(void)snprintf(s, sizeof(s), "%f %s",
 		    gpsdata->fix.epv * altunits->factor,
 		    altunits->legend);
 		XmTextFieldSetString(text_8, s);
 	} else
 		XmTextFieldSetString(text_8, "n/a");
 	if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
-		(void)snprintf(s, sizeof(s), "%f %s/sec", 
+		(void)snprintf(s, sizeof(s), "%f %s/sec",
 		    gpsdata->fix.climb * altunits->factor,
 		    altunits->legend);
 		XmTextFieldSetString(text_9, s);
@@ -1106,7 +1106,7 @@ err_dialog(Widget widget, char *s)
 		XmString ok = XmStringCreateLocalized("OK");
 		XtSetArg(args[n], XmNautoUnmanage, False); n++;
 		XtSetArg(args[n], XmNcancelLabelString, ok); n++;
-		dialog = XmCreateInformationDialog(widget, "notice", 
+		dialog = XmCreateInformationDialog(widget, "notice",
 						   args, (Cardinal)n);
 		XtAddCallback(dialog, XmNcancelCallback, dlg_callback, NULL);
 		XtUnmanageChild(XmMessageBoxGetChild(dialog,
@@ -1210,7 +1210,7 @@ main(int argc, char *argv[])
 	    &argc, argv, fallback_resources, NULL);
 
 	su = get_resource(toplevel, "speedunits", "kmh");
-	for (speedunits = speedtable; 
+	for (speedunits = speedtable;
 	    speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
 	    speedunits++)
 		if (strcmp(speedunits->legend, su)==0)
@@ -1222,7 +1222,7 @@ main(int argc, char *argv[])
 speedunits_ok:
 
 	au = get_resource(toplevel, "altunits", "meters");
-	for (altunits = alttable; 
+	for (altunits = alttable;
 	    altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
 	    altunits++)
 		if (strcmp(altunits->legend, au)==0)

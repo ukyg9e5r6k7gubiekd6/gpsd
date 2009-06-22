@@ -249,7 +249,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	for (j = 0; j < ZODIAC_CHANNELS; j++) {
 	    if (session->gpsdata.PRN[j] != prn)
 		continue;
-	    session->gpsdata.ss[j] = (int)getzword(17 + (3 * i));
+	    session->gpsdata.ss[j] = (float)getzword(17 + (3 * i));
 	    break;
 	}
     }

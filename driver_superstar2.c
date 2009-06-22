@@ -243,7 +243,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	    porn = (unsigned int)(getub(buf, off+3) >> 1) + 87;
 
 	session->gpsdata.PRN[i]		= (int)porn;
-	session->gpsdata.ss[i]		= (int)getub(buf, off+4);
+	session->gpsdata.ss[i]		= (float)getub(buf, off+4);
 	session->gpsdata.elevation[i]	= (int)getsb(buf, off+1);
 	session->gpsdata.azimuth[i]	= (unsigned short)getub(buf, off+2) + ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
 

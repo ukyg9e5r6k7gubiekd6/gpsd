@@ -171,7 +171,7 @@ _proto__msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t 
 	int off = GET_CHANNEL_STATUS(i);
 
 	session->gpsdata.PRN[i]		= PRN_THIS_CHANNEL_IS_TRACKING(i);
-	session->gpsdata.ss[i]		= SIGNAL_STRENGTH_FOR_CHANNEL(i);
+	session->gpsdata.ss[i]		= (float)SIGNAL_STRENGTH_FOR_CHANNEL(i);
 	session->gpsdata.elevation[i]	= SV_ELEVATION_FOR_CHANNEL(i);
 	session->gpsdata.azimuth[i]	= SV_AZIMUTH_FOR_CHANNEL(i);
 

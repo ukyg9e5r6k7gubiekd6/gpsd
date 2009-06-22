@@ -464,7 +464,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	session->gpsdata.PRN[session->gpsdata.satellites]       = atoi(field[fldnum++]);
 	session->gpsdata.elevation[session->gpsdata.satellites] = atoi(field[fldnum++]);
 	session->gpsdata.azimuth[session->gpsdata.satellites]   = atoi(field[fldnum++]);
-	session->gpsdata.ss[session->gpsdata.satellites]	= atoi(field[fldnum++]);
+	session->gpsdata.ss[session->gpsdata.satellites]	= (float)atoi(field[fldnum++]);
 	/*
 	 * Incrementing this unconditionally falls afoul of chipsets like
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the

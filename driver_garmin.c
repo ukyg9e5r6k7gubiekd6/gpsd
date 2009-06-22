@@ -514,9 +514,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    session->gpsdata.elevation[j] = (int)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
-	    session->gpsdata.ss[j] = (int)round((float)sats->snr / 100);
-	    if (session->gpsdata.ss[j] < 0) {
-		session->gpsdata.ss[j] = 0;
+	    session->gpsdata.ss[j] = (float)(sats->snr / 100.0);
+	    if (session->gpsdata.ss[j] < 0.0) {
+		session->gpsdata.ss[j] = 0.0;
 	    }
 	    // FIXME: Garmin documents this, but Daniel Dorau
 	    // <daniel.dorau@gmx.de> says the behavior on his GPSMap60CSX

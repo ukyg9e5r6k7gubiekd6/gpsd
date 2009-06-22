@@ -133,16 +133,16 @@ static void cooked_pvt(void)
 
 
     if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.latitude)==0) {
-	(void)snprintf(scr, sizeof(scr), "%s %c", 
-		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)), 
+	(void)snprintf(scr, sizeof(scr), "%s %c",
+		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.latitude)),
 		       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(cookedwin, 1, 36, "%-17s", scr);
 
     if (session.gpsdata.fix.mode >= MODE_2D && isnan(session.gpsdata.fix.longitude)==0) {
-	(void)snprintf(scr, sizeof(scr), "%s %c", 
-		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)), 
+	(void)snprintf(scr, sizeof(scr), "%s %c",
+		       deg_to_str(deg_ddmmss,  fabs(session.gpsdata.fix.longitude)),
 		       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
@@ -186,7 +186,7 @@ static void nmea_update(void)
 	if (strstr(sentences, fields[0]) == NULL) {
 	    char *s_end = sentences + strlen(sentences);
 	    if ((int)(strlen(sentences) + strlen(fields[0])) < xmax-2) {
-		*s_end++ = ' '; 
+		*s_end++ = ' ';
 		(void)strlcpy(s_end, fields[0], NMEA_MAX);
 	    } else {
 		*--s_end = '.';
@@ -196,8 +196,8 @@ static void nmea_update(void)
 	    mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
 	}
 
-	/* 
-	 * If the interval between this and last update is 
+	/*
+	 * If the interval between this and last update is
 	 * the longest we've seen yet, boldify the corresponding
 	 * tag.
 	 */
@@ -209,8 +209,8 @@ static void nmea_update(void)
 	    tick_interval = now - last_tick;
 	    if (findme != NULL) {
 		mvwchgat(nmeawin, SENTENCELINE, 1, xmax-13, A_NORMAL, 0, NULL);
-		mvwchgat(nmeawin, 
-			 SENTENCELINE, 1+(findme-sentences), 
+		mvwchgat(nmeawin,
+			 SENTENCELINE, 1+(findme-sentences),
 			 (int)strlen(fields[0]),
 			 A_BOLD, 0, NULL);
 	    }
@@ -223,7 +223,7 @@ static void nmea_update(void)
 
 	    for (i = 0; i < nsats; i++) {
 		(void)wmove(satwin, i+2, 3);
-		(void)wprintw(satwin, " %3d %3d%3d %3d", 
+		(void)wprintw(satwin, " %3d %3d%3d %3.0f",
 			      session.gpsdata.PRN[i],
 			      session.gpsdata.azimuth[i],
 			      session.gpsdata.elevation[i],
@@ -259,7 +259,7 @@ static void nmea_update(void)
 	    (void)wclrtoeol(gpgsawin);
 	    scr[0] = '\0';
 	    for (i = 0; i < session.gpsdata.satellites_used; i++) {
-		(void)snprintf(scr + strlen(scr), sizeof(scr)-strlen(scr), 
+		(void)snprintf(scr + strlen(scr), sizeof(scr)-strlen(scr),
 			       "%d ", session.gpsdata.used[i]);
 	    }
 	    getmaxyx(gpgsawin, ymax, xmax);
@@ -270,9 +270,9 @@ static void nmea_update(void)
 		mvwaddch(gpgsawin, 2, xmax-4-7, (chtype)'.');
 	    }
 	    monitor_fixframe(gpgsawin);
-	    (void)mvwprintw(gpgsawin, 3, 8, "%-5s", fields[16]); 
-	    (void)mvwprintw(gpgsawin, 3, 16, "%-5s", fields[17]); 
-	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]); 
+	    (void)mvwprintw(gpgsawin, 3, 8, "%-5s", fields[16]);
+	    (void)mvwprintw(gpgsawin, 3, 16, "%-5s", fields[17]);
+	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]);
 	    monitor_fixframe(gpgsawin);
 	}
 	if (strcmp(fields[0], "GPGGA") == 0) {
@@ -331,7 +331,7 @@ static void monitor_nmea_send(const char *fmt, ... )
  * Yes, it's OK for most of these to be clones of the generic NMEA monitor
  * object except for the pointer to the GPSD driver.  That pointer makes
  * a difference, as it will automatically enable stuff like speed-switcher
- * and mode-switcher commands.  It's really only necessary to write a 
+ * and mode-switcher commands.  It's really only necessary to write a
  * separate monitor object if you want to change the device-window
  * display or implement device-specific commands.
  */
@@ -358,7 +358,7 @@ extern const struct gps_type_t ashtech;
 #ifdef ALLOW_CONTROLSEND
 static int ashtech_command(char line[])
 {
-    switch (line[0]) 
+    switch (line[0])
     {
     case 'N':		/* normal = 9600, GGA+GSA+GSV+RMC+ZDA */
 	monitor_nmea_send("$PASHS,NME,ALL,A,OFF"); /* silence outbound chatter */

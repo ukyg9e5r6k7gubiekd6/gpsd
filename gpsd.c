@@ -1243,7 +1243,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		    if (sub->device->gpsdata.PRN[i]) {
 			(void)snprintf(phrase+strlen(phrase),
 				      sizeof(phrase)-strlen(phrase),
-				      "%d %d %d %d %d:",
+				      "%d %d %d %.0f %d:",
 				      sub->device->gpsdata.PRN[i],
 				      sub->device->gpsdata.elevation[i],sub->device->gpsdata.azimuth[i],
 				      sub->device->gpsdata.ss[i],

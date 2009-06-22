@@ -235,7 +235,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		f1 = 0.0;
 	    for (j = 0; j < TSIP_CHANNELS; j++)
 		if (session->gpsdata.PRN[j] == (int)u1) {
-		    session->gpsdata.ss[j] = (int)round(f1);
+		    session->gpsdata.ss[j] = f1;
 		    break;
 		}
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),

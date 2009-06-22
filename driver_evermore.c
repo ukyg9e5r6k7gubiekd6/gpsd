@@ -251,12 +251,12 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	for (i = 0; i < (size_t)session->gpsdata.satellites; i++) {
 	    int prn;
 	    // channel = getub(buf2, 7*i+7+2)
-            prn = (int)getub(buf2, 7*i+7+3);
+	    prn = (int)getub(buf2, 7*i+7+3);
 	    if (prn == 0) continue;  /* satellite record is not valid */
 	    session->gpsdata.PRN[satcnt] = prn;
 	    session->gpsdata.azimuth[satcnt] = (int)getleuw(buf2, 7*i+7+4);
 	    session->gpsdata.elevation[satcnt] = (int)getub(buf2, 7*i+7+6);
-	    session->gpsdata.ss[satcnt] = (int)getub(buf2, 7*i+7+7);
+	    session->gpsdata.ss[satcnt] = (float)getub(buf2, 7*i+7+7);
 	    /*
 	     * Status bits at offset 8:
 	     * bit0 = 1 satellite acquired
@@ -272,11 +272,10 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    }
 
 	    satcnt++;
-		
 	}
 	session->gpsdata.satellites = (int)satcnt;
 	/* that's all the information in this packet */
-	gpsd_report(LOG_PROG, "CSO 0x04: %d satellites used\n", 
+	gpsd_report(LOG_PROG, "CSO 0x04: %d satellites used\n",
 		    session->gpsdata.satellites_used);
 	return TIME_SET | SATELLITE_SET | USED_SET;
 

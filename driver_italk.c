@@ -123,7 +123,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	unsigned short flags;
 
 	flags = getleuw(buf, off);
-	session->gpsdata.ss[i]		= (int)getleuw(buf, off+2)&0xff;
+	session->gpsdata.ss[i]		= (float)(getleuw(buf, off+2)&0xff);
 	session->gpsdata.PRN[i]		= (int)getleuw(buf, off+4)&0xff;
 	session->gpsdata.elevation[i]	= (int)getlesw(buf, off+6)&0xff;
 	session->gpsdata.azimuth[i]	= (int)getlesw(buf, off+8)&0xff;

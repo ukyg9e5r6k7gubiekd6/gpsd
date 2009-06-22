@@ -371,7 +371,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	for (j = 0; j < 10; j++)
 	    cn += (int)getub(buf, off+5+j);
 
-	session->gpsdata.ss[st] = cn/10;
+	session->gpsdata.ss[st] = (float)(cn/10.0);
 	good = session->gpsdata.PRN[st]!=0 &&
 	    session->gpsdata.azimuth[st]!=0 &&
 	    session->gpsdata.elevation[st]!=0;

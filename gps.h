@@ -833,7 +833,7 @@ struct gps_data_t {
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
-    int ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
+    float ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */
@@ -844,7 +844,7 @@ struct gps_data_t {
     /* RTCM-104 data */
     struct rtcm2_t	rtcm2;
     struct rtcm3_t	rtcm3;
-    
+
     /* device list */
     int ndevices;		/* count of available devices */
     char **devicelist;		/* list of pathnames */

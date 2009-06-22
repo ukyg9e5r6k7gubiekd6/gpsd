@@ -193,7 +193,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	unsigned int off = 8 + 12 * i;
 	if((int)getub(buf, off+4) == 0) continue; /* LEA-5H seems to have a bug reporting sats it does not see or hear*/
 	session->gpsdata.PRN[j]		= (int)getub(buf, off+1);
-	session->gpsdata.ss[j]		= (int)getub(buf, off+4);
+	session->gpsdata.ss[j]		= (float)getub(buf, off+4);
 	session->gpsdata.elevation[j]	= (int)getsb(buf, off+5);
 	session->gpsdata.azimuth[j]	= (int)getlesw(buf, off+6);
 	if(session->gpsdata.PRN[j])

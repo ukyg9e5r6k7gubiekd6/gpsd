@@ -472,7 +472,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	bufp += strlen(bufp);
 	if (i < session->gpsdata.satellites)
 	    len -= snprintf(bufp, len,
-		    ",%02d,%02d,%03d,%02d",
+		    ",%02d,%02d,%03d,%02.0f",
 		    session->gpsdata.PRN[i],
 		    session->gpsdata.elevation[i],
 		    session->gpsdata.azimuth[i],
