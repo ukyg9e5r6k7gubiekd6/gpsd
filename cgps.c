@@ -473,10 +473,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (i < gpsdata->satellites) {
 	    (void)snprintf(scr, sizeof(scr),
-			 " %3d    %02d    %03d    %02f      %c",
+			 " %3d    %02d    %03d    %02d      %c",
 			gpsdata->PRN[i],
 			gpsdata->elevation[i], gpsdata->azimuth[i],
-			gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+			(int)gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
 	} else {
 	    (void)strlcpy(scr, "", sizeof(scr));
 	}
@@ -488,10 +488,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 	if (n < display_sats) {
 	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]!=0) || (gpsdata->satellites <= display_sats))) {
 	      (void)snprintf(scr, sizeof(scr),
-			  " %3d    %02d    %03d    %02f      %c",
+			  " %3d    %02d    %03d    %02d      %c",
 			  gpsdata->PRN[i],
 			  gpsdata->elevation[i], gpsdata->azimuth[i],
-			  gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+			  (int)gpsdata->ss[i],gpsdata->used[i] ? 'Y' : 'N');
 	    (void)mvwprintw(satellites, n+2, 1, "%-*s", SATELLITES_WIDTH - 3, scr);
 	    n++;
 	  }
