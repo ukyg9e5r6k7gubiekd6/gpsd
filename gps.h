@@ -11,7 +11,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
-#include <inttypes.h>	/* stdint.h would be smaller but not all have it */ 
+#include <inttypes.h>	/* stdint.h would be smaller but not all have it */
 #include <limits.h>
 #include <time.h>
 #include <signal.h>
@@ -95,7 +95,7 @@ struct gps_fix_t {
 #define MAXCORRECTIONS	18	/* max correction count in type 1 or 9 */
 #define MAXSTATIONS	10	/* maximum stations in almanac, type 5 */
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
-#define MAXHEALTH	(RTCM2_WORDS_MAX-2)	
+#define MAXHEALTH	(RTCM2_WORDS_MAX-2)
 
 #ifndef S_SPLINT_S 
 /*
@@ -459,11 +459,11 @@ struct ais_t
 {
     uint	msgtype;	/* message type */
     uint    	repeat;		/* Repeat indicator */
-    uint	mmsi;		/* MMSI */		
+    uint	mmsi;		/* MMSI */
     union {
 	/* Types 1-3 Common navigation info */
 	struct {
-            uint status;		/* navigation status */
+	    uint status;		/* navigation status */
 	    signed turn;			/* rate of turn */
 #define AIS_TURN_HARD_LEFT	-127
 #define AIS_TURN_HARD_RIGHT	127
@@ -746,7 +746,7 @@ struct ais_t
 		} a;
 		struct {
 		    uint shiptype;		/* ship type code */
-		    char vendorid[8];		/* vendor ID */ 
+		    char vendorid[8];		/* vendor ID */
 		    char callsign[8];		/* callsign */
 		    union {
 			uint mothership_mmsi;	/* MMSI of main vessel */
@@ -787,7 +787,7 @@ struct gps_data_t {
 #define PERR_SET	0x00020000u
 #define ERR_SET		(HERR_SET | VERR_SET | PERR_SET)
 #define SATELLITE_SET	0x00040000u
-#define PSEUDORANGE_SET	0x00080000u
+#define RAW_SET		0x00080000u
 #define USED_SET	0x00100000u
 #define SPEEDERR_SET	0x00200000u
 #define TRACKERR_SET	0x00400000u
@@ -913,7 +913,7 @@ struct gps_data_t {
 #define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
 #define SAT_EPHEMERIS	0x20		/* ephemeris collected */
 #define SAT_FIX_USED	0x40		/* used for position fix */
-#endif
+#endif /* RAW_ENABLE */
 };
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
@@ -925,7 +925,7 @@ int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_dat
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
-extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
+extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  gps_mask_t,
 			  /*@ in @*/struct gps_fix_t *);
 extern unsigned int gps_valid_fields(/*@ in @*/struct gps_fix_t *);
