@@ -258,7 +258,14 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 
 static gps_mask_t handle1003(struct gps_device_t *session)
 {
-    int i;
+    int i, n;
+
+    /* The Polaris (and probably the DAGR) emit some strange variant of
+     * this message which causes gpsd to crash filtering on impossible
+     * number of satellites avoids this */
+    n = (int)getzword(14);
+    if ((n < 0) || (n >12))
+	    return 0;
 
     /* ticks              = getzlong(6); */
     /* sequence           = getzword(8); */
@@ -267,7 +274,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
     session->gpsdata.hdop = (unsigned int)getzword(11) * 1e-2;
     session->gpsdata.vdop = (unsigned int)getzword(12) * 1e-2;
     session->gpsdata.tdop = (unsigned int)getzword(13) * 1e-2;
-    session->gpsdata.satellites = (int)getzword(14);
+    session->gpsdata.satellites = n;
 
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	if (i < session->gpsdata.satellites) {
