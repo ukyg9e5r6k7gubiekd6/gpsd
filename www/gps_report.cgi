@@ -32,8 +32,9 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 		die "can't run mail: $!\n";
 	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
 	printf M ("[%s]\n", $query->param('model'));
+	printf M ("type = device\n");
 	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
-                        firmware nmea interface tested rating noconfigure notes 
+                        firmware nmea interface tested status noconfigure notes 
                         location date interval leader sample_notes)){
 		$val = $query->param($var);
 		printf M ("\t%s = %s\n", $var, $val) if (defined($val) && $val);
@@ -174,7 +175,7 @@ about it in "Technical Notes".</p>
 EOF
 
 
-print $query->radio_group(-name=>'interface',
+print $query->radio_group(-name=>'interfaces',
 			  -values=>['USB', 'Serial', 'Bluetooth', 'TTL',
 				    'Compact Flash', 'RS-232', 'Other'],
 			  -default=>"-",
@@ -225,7 +226,7 @@ EOF
     "other",
     "Other -- See Technical Notes.",
     );
-print $query->radio_group(-name=>'rating',
+print $query->radio_group(-name=>'status',
 			  -values=>['excellent', 'good', 'fair',
 				    'poor', 'broken', 'other'],
 			  -default=>"-",
@@ -407,9 +408,9 @@ if ($query->param("nmea")) {
 } else {
     print "NMEA version not specified.<br/>\n";
 }
-if ($query->param("interface")) {
-    print "Interface type is <code>". escapeHTML($query->param("interface")) ."</code><br/>\n";
-    if ($query->param("interface") eq "USB") {
+if ($query->param("interfaces")) {
+    print "Interface type is <code>". escapeHTML($query->param("interfaces")) ."</code><br/>\n";
+    if ($query->param("interfaces") eq "USB") {
 	if ($query->param("usbchip")) {
 	    print "USB chip is <code>". escapeHTML($query->param("usbchip")) ."</code><br/>\n";
 	} else {
@@ -424,8 +425,8 @@ if ($query->param("tested")) {
 } else {
     print "No GPSD version specified.<br/>\n";
 }
-if ($query->param("rating")) {
-    print "GPSD compatibility is <code>". escapeHTML($query->param("rating")) ."</code><br/>\n";
+if ($query->param("status")) {
+    print "GPSD compatibility is <code>". escapeHTML($query->param("status")) ."</code><br/>\n";
 } else {
     print "No GPSD compatiblity specified.<br/>\n";
 }
