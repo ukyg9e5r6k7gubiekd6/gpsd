@@ -1156,7 +1156,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */;
 		else if ((0x56 == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
-		else if ((0x5a == pkt_id) && (0x1d == packetlen))
+		else if ((0x5a == pkt_id) && ((0x1d <= packetlen) && (0x1e >= packetlen)))
 		    /* pass */;
 		else if ((0x5c == pkt_id) && ((0x1c <= packetlen) && (0x1e >= packetlen)))
 		    /* pass */;
