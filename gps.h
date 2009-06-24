@@ -899,7 +899,7 @@ struct gps_data_t {
 
 #ifdef RAW_ENABLE
     /* raw measurement data */
-    float codephase[MAXCHANNELS];	/* meters */
+    double codephase[MAXCHANNELS];	/* meters */
     double carrierphase[MAXCHANNELS];	/* meters */
     double pseudorange[MAXCHANNELS];	/* meters */
     double deltarange[MAXCHANNELS];	/* meters/sec */

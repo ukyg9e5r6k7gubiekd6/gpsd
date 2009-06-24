@@ -321,6 +321,40 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
     return TIME_SET | ONLINE_SET;
 }
 
+/**
+ * Raw Measurements
+ */
+static gps_mask_t
+superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, size_t data_len UNUSED)
+{
+    gps_mask_t mask = 0;
+#ifdef RAW_ENABLE
+    int i, n;
+    unsigned long ul;
+    double t;
+    union long_double l_d;
+
+    gpsd_report(LOG_PROG, "superstar2 #23 - measurement block\n");
+
+    n = (int)getub(buf, 6); /* number of measurements */
+    t = getled(buf, 7); /* measurement time */
+    for(i = 0; i < n; i++){
+	session->gpsdata.mtime[i] = t;
+	session->gpsdata.PRN[i] = getub(buf, 11*i + 15) & 0x1f;
+	session->gpsdata.ss[i] = getub(buf, 11*i * 15 +1 )/4.0;
+	session->gpsdata.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
+	ul = getleul(buf, 11*i * 15 + 6);
+
+	session->gpsdata.satstat[i] = ul & 0x03L;
+	session->gpsdata.carrierphase[i] = (ul >> 2) & 0x03ffL;
+	session->gpsdata.pseudorange[i] = (ul >> 12);
+    }
+
+    mask |= RAW_SET;
+#endif /* RAW_ENABLE */
+    return mask;
+}
+
 
 static ssize_t
 superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
@@ -330,12 +364,13 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
 
    for (i = 0; i < msglen - 2; i++)
 	c += (unsigned short)msg[i];
+   c += 0x100;
    // c = htons(c); // XXX is this needed on big-endian machines?
    (void)memcpy(msg + (int)msg[3] + 4, &c, 2);
    gpsd_report(LOG_IO, "writing superstar2 control type %02x len %zu:%s\n",
 	       (unsigned char)msg[1], msglen,
 	       gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-   return gpsd_write(session, msg, msglen);
+   return (i = gpsd_write(session, msg, msglen));
 }
 
 /**
@@ -368,6 +403,8 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 	return superstar2_msg_version(session, buf, len);
     case SUPERSTAR2_TIMING: /* Timing Parameters */
 	return superstar2_msg_timing(session, buf, len);
+    case SUPERSTAR2_MEASUREMENT: /* Timing Parameters */
+	return superstar2_msg_measurement(session, buf, len);
 
     default:
 	/* XXX This gets noisy in a hurry. */
@@ -397,8 +434,6 @@ static char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
 static void
 superstar2_probe_wakeup(struct gps_device_t *session)
 {
-    (void)superstar2_write(session, link_msg, sizeof(link_msg));
-    (void)usleep(300000);
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
     return;
 }
@@ -421,30 +456,32 @@ static void superstar2_configurator(struct gps_device_t *session,
     /*@ +charint @*/
     unsigned char a;
     unsigned char message_list[] = {
-	SUPERSTAR2_NAVSOL_LLA,
 	SUPERSTAR2_SVINFO,
 	SUPERSTAR2_TIMING,
-	SUPERSTAR2_NAVSOL_ECEF,
+	SUPERSTAR2_NAVSOL_LLA,
+//	SUPERSTAR2_NAVSOL_ECEF,
 	SUPERSTAR2_DUMMY};
     unsigned char message2_list[] = {
 	SUPERSTAR2_MEASUREMENT,
 	SUPERSTAR2_DUMMY};
     char tmpl_msg[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-    char tmpl2_msg[] = { 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
+    char tmpl2_msg[] = { 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
 
-    for(a = 0; message_list[a] != 0; a++){
-	/* set high bit to enable continuous output */
-	tmpl_msg[1] = (char)(message_list[a] | 0x80);
-	tmpl_msg[2] = (char)(tmpl_msg[1] ^ 0xff);
-	(void)superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
-	(void)usleep(20000);
-    }
+    (void)superstar2_write(session, link_msg, sizeof(link_msg));
+    (void)usleep(300000);
     for(a = 0; message2_list[a] != 0; a++){
 	/* set high bit to enable continuous output */
 	tmpl2_msg[1] = (char)(message2_list[a] | 0x80);
 	tmpl2_msg[2] = (char)(tmpl2_msg[1] ^ 0xff);
 	(void)superstar2_write(session, tmpl2_msg, sizeof(tmpl2_msg));
-	(void)usleep(20000);
+	(void)usleep(100000);
+    }
+    for(a = 0; message_list[a] != 0; a++){
+	/* set high bit to enable continuous output */
+	tmpl_msg[1] = (char)(message_list[a] | 0x80);
+	tmpl_msg[2] = (char)(tmpl_msg[1] ^ 0xff);
+	(void)superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
+	(void)usleep(100000);
     }
     /*@ -charint @*/
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
@@ -492,7 +529,7 @@ superstar2_control_send(struct gps_device_t *session, char *msg, size_t msglen)
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static bool superstar2_set_speed(struct gps_device_t *session, 
+static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
