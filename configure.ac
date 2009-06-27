@@ -30,6 +30,7 @@ AC_ARG_ENABLE(python,
   AC_HELP_STRING([--disable-python],
 		 [disable python scripts and library bindings]),
   [try_python="$enableval"], [try_python="yes"])
+
 if test "x$try_python" = "xyes"; then
 	AM_PATH_PYTHON
 	ac_python=yes
@@ -101,6 +102,8 @@ if test "x$try_python" = "xyes"; then
 			fi
 		fi
 	fi
+else
+	ac_python="no"
 fi
 AM_CONDITIONAL([HAVE_PYTHON], [test x"$ac_python" = xyes])
 
