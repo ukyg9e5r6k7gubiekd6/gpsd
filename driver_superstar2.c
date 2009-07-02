@@ -55,7 +55,7 @@ superstar2_msg_ack(struct gps_device_t *session UNUSED,
     if (data_len == 11)
 	gpsd_report(LOG_PROG,
 		    "superstar2 #126 - "
-		    "ACK 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
+		    "ACK %d %d %d %d %d\n",
 		    buf[5], buf[6], buf[7], buf[8], buf[9]);
     return ONLINE_SET; /* always returns ONLINE_SET, but avoid runt packets */
 }
@@ -367,8 +367,8 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    c += 0x100;
    // c = htons(c); // XXX is this needed on big-endian machines?
    (void)memcpy(msg + (int)msg[3] + 4, &c, 2);
-   gpsd_report(LOG_IO, "writing superstar2 control type %02x len %zu:%s\n",
-	       (unsigned char)msg[1], msglen,
+   gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu:%s\n",
+	       (int)msg[1]&0x7f, msglen,
 	       gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
    return (i = gpsd_write(session, msg, msglen));
 }
@@ -434,6 +434,8 @@ static char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
 static void
 superstar2_probe_wakeup(struct gps_device_t *session)
 {
+    (void)superstar2_write(session, link_msg, sizeof(link_msg));
+    (void)usleep(320000);
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
     return;
 }
@@ -442,49 +444,43 @@ static void
 superstar2_probe_subtype(struct gps_device_t *session,
 				     unsigned int seq)
 {
-    if (seq == 0){
-	(void)superstar2_write(session, link_msg, sizeof(link_msg));
-	(void)usleep(300000);
+    if (seq == 0)
 	(void)superstar2_write(session, version_msg, sizeof(version_msg));
-    }
     return;
 }
 
 static void superstar2_configurator(struct gps_device_t *session,
-				    unsigned int seq UNUSED)
+				    unsigned int seq)
 {
-    /*@ +charint @*/
-    unsigned char a;
-    unsigned char message_list[] = {
-	SUPERSTAR2_SVINFO,
-	SUPERSTAR2_TIMING,
-	SUPERSTAR2_NAVSOL_LLA,
-//	SUPERSTAR2_NAVSOL_ECEF,
-	SUPERSTAR2_DUMMY};
-    unsigned char message2_list[] = {
-	SUPERSTAR2_MEASUREMENT,
-	SUPERSTAR2_DUMMY};
-    char tmpl_msg[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-    char tmpl2_msg[] = { 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
+    unsigned char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
+    unsigned char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
+    unsigned char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
+    unsigned char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
+    unsigned char junk[32];
 
-    (void)superstar2_write(session, link_msg, sizeof(link_msg));
-    (void)usleep(300000);
-    for(a = 0; message2_list[a] != 0; a++){
-	/* set high bit to enable continuous output */
-	tmpl2_msg[1] = (char)(message2_list[a] | 0x80);
-	tmpl2_msg[2] = (char)(tmpl2_msg[1] ^ 0xff);
-	(void)superstar2_write(session, tmpl2_msg, sizeof(tmpl2_msg));
-	(void)usleep(100000);
-    }
-    for(a = 0; message_list[a] != 0; a++){
-	/* set high bit to enable continuous output */
-	tmpl_msg[1] = (char)(message_list[a] | 0x80);
-	tmpl_msg[2] = (char)(tmpl_msg[1] ^ 0xff);
-	(void)superstar2_write(session, tmpl_msg, sizeof(tmpl_msg));
-	(void)usleep(100000);
-    }
-    /*@ -charint @*/
+    if (seq != 0)
+	return;
+
+    (void)superstar2_write(session, timing_msg, sizeof(timing_msg));
+    (void)usleep(100000);
+    (void)read(session->gpsdata.gps_fd, &junk, 32);
+
+    (void)superstar2_write(session, measurement_msg, sizeof(measurement_msg));
+    (void)usleep(100000);
+    (void)read(session->gpsdata.gps_fd, &junk, 32);
+
+    (void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
+    (void)usleep(100000);
+    (void)read(session->gpsdata.gps_fd, &junk, 32);
+
+    (void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
+    (void)usleep(100000);
+    (void)read(session->gpsdata.gps_fd, &junk, 32);
+
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
+    (void)usleep(100000);
+    (void)read(session->gpsdata.gps_fd, &junk, 32);
+
 }
 
 /*
