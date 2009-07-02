@@ -703,7 +703,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.gps_device,
 		    session->packet.type);
-	if (session->packet.type >= COMMENT_PACKET) {
+	if (session->packet.type > COMMENT_PACKET) {
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
