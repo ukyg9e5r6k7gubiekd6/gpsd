@@ -174,9 +174,9 @@ static struct gps_fix_t gpsfix;
 
 DBusConnection* connection;
 
-static char devname[BUFSIZ];
+static char gpsd_devname[BUFSIZ];
 
-static DBusHandlerResult handle_gps_fix (DBusMessage* message) 
+static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 {
     DBusError	error;
 
@@ -198,9 +198,9 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 			   DBUS_TYPE_DOUBLE, &gpsfix.eps,
 			   DBUS_TYPE_DOUBLE, &gpsfix.climb,
 			   DBUS_TYPE_DOUBLE, &gpsfix.epc,
-			   DBUS_TYPE_STRING, &devname,
+			   DBUS_TYPE_STRING, &gpsd_devname,
 			   DBUS_TYPE_INVALID);
-	
+
     conditionally_log_fix(&gpsfix);
     return DBUS_HANDLER_RESULT_HANDLED;
 }
