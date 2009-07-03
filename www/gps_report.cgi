@@ -7,41 +7,73 @@
 use CGI qw(:standard);
 use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 use MIME::Base64;
+use MIME::Lite;
+use Net::SMTP;
+use strict;
 
-$query = new CGI;
+my $query = new CGI;
 print $query->header;
 print $query->start_html(-title=>"GPS Reporting Form",
 			 -background=>"../paper.gif");
 
-$output_sample_file = $query->param('output_sample');
-$output_sample_body = $query->param('output_sample_body');
+my $output_sample_file = $query->param('output_sample');
+my $output_sample_body = $query->param('output_sample_body');
 $output_sample_body = '' unless ($output_sample_body);
 
 do {
 	local $/ = undef;
-	local $x = <$output_sample_file>;
+	my $x = <$output_sample_file>;
 	$output_sample_body = encode_base64($x, "") if ($x);
 };
 
 if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
-	$ENV{'PATH'} = '/usr/bin:/bin';
-#	my $t = time();
-#	open(M, "|mail -s 'new gps report $t' chris.kuethe\@gmail.com") ||
-	open(M, '|mail -s "new gps report" chris.kuethe@gmail.com gpsd-dev@berlios.de') ||
-		die "can't run mail: $!\n";
-	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
-	printf M ("[%s]\n", $query->param('model'));
-	printf M ("type = device\n");
+
+	### mail parameters
+	my $from_address = 'HTTP Server <www@mainframe.cx>';
+	my $to_address = 'chris.kuethe@gmail.com';
+	my $mailhost = '127.0.0.1';
+	my $subject = 'new gps report';
+
+	### Create the multipart container
+	my $email = MIME::Lite->new (
+	    From => $from_address,
+	    To => $to_address,
+	    Subject => $subject,
+	    Type =>'multipart/mixed'
+	) or die "Error creating multipart container: $!\n";
+
+	### build message text
+	my ($var, $val, $msg);
+	$msg = "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
+	$msg .= sprintf("[%s]\n", $query->param('model'));
+	$msg .= sprintf("type = device\n");
 	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
                         firmware nmea interface tested status noconfigure notes 
                         location date interval leader sample_notes)){
 		$val = $query->param($var);
-		printf M ("\t%s = %s\n", $var, $val) if (defined($val) && $val);
+		$msg .= sprintf("\t%s = %s\n", $var, $val) if (defined($val) && $val);
 	}
-	$output = encode_base64(decode_base64($output_sample_body));
-	printf M ("\noutput_sample (base64 encoded):\n%s\n", $output);
-	close(M);
+
+	### Add the text message part
+	$email->attach (
+	    Type => 'TEXT',
+	    Data => $msg,
+	) or die "Error adding the text message part: $!\n";
+
+	### Add the sample
+	$email->attach (
+	    Type => 'application/octet-stream',
+	    Data => decode_base64($output_sample_body),
+	    Filename => 'sample.bin',
+	    Disposition => 'attachment',
+	    Encoding => 'base64'
+	) or die "Error adding sample output: $!\n";
+
+	#MIME::Lite->send('smtp', $mail_host, Timeout=>60, Debug=>1);
+	#$email->send;
+	$email->send('smtp', $mailhost, Timeout=>60, Debug=>1);
+
 	print "new gps report accepted...\n";
 	exit(0);
 }
@@ -212,7 +244,7 @@ print <<EOF;
 
 EOF
 
-%labels=(
+my %labels=(
     "excellent",
     "Excellent -- gpsd recognizes the GPS rapidly and reliably, reports are complete and correct.",
     "good",
