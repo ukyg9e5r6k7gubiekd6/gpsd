@@ -295,6 +295,7 @@ struct gps_device_t {
 	    int16_t gps_week;		/* Current GPS week number */
 	    bool superpkt;		/* Super Packet mode requested */
 	    time_t last_41;		/* Timestamps for packet requests */
+	    time_t last_48;
 	    time_t last_5c;
 	    time_t last_6d;
 	    time_t last_46;

@@ -283,7 +283,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    putbyte(buf,0,0x2c);		/* Position: SP, MSL */
 	    putbyte(buf,1,0x00);		/* Velocity: none (via SP) */
 	    putbyte(buf,2,0x00);		/* Time: GPS */
-	    putbyte(buf,3,0x08);		/* Aux: dBHz */
+	    putbyte(buf,3,0x2c); /* Aux: dBHz, raw, signal, satpos */
 	    (void)tsip_write(session, 0x35, buf, 4);
 	    session->driver.tsip.superpkt = true;
 	}
@@ -733,6 +733,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	/* Request GPS Receiver Position Fix Mode */
 	(void)tsip_write(session, 0x24, buf, 0);
 	session->driver.tsip.last_6d = now;
+    }
+
+    if ((now - session->driver.tsip.last_48) > 60) {
+	/* Request GPS System Message */
+	(void)tsip_write(session, 0x28, buf, 0);
+	session->driver.tsip.last_48 = now;
     }
 
     if ((now - session->driver.tsip.last_5c) >= 5) {
