@@ -31,7 +31,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 
 	### mail parameters
 	my $from_address = 'HTTP Server <www@mainframe.cx>';
-	my $to_address = 'chris.kuethe@gmail.com';
+	my $to_address = 'gpsd-dev@berlios.de';
 	my $mailhost = '127.0.0.1';
 	my $subject = 'new gps report';
 
