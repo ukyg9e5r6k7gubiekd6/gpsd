@@ -137,7 +137,7 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 	if (!curses_active)
 	    (void)vprintf(fmt, ap);
 	else
-	    (void)wprintw(packetwin, fmt, ap);
+	    (void)wprintw(packetwin, (char *)fmt, ap);
 	va_end(ap);
     }
 }
@@ -168,8 +168,8 @@ static ssize_t readpkt(void)
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation -sefparams +charint @*/
-	assert(fwrite(session.packet.outbuffer, 
-		      sizeof(char), session.packet.outbuflen, 
+	assert(fwrite(session.packet.outbuffer,
+		      sizeof(char), session.packet.outbuflen,
 		      logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
@@ -214,7 +214,7 @@ static void monitor_dump_send(void)
 
 bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 {
-    if (controlfd == -1) 
+    if (controlfd == -1)
 	return false;
     else {
 	int savefd;
@@ -251,7 +251,7 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 
 static bool monitor_raw_send(/*@in@*/unsigned char *buf, size_t len)
 {
-    if (controlfd == -1) 
+    if (controlfd == -1)
 	return false;
     else {
 	ssize_t st;
@@ -259,7 +259,8 @@ static bool monitor_raw_send(/*@in@*/unsigned char *buf, size_t len)
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write(controlfd, session.gpsdata.gps_device, strlen(session.gpsdata.gps_device)) != -1);
+	    assert(write(controlfd, session.gpsdata.gps_device,
+			 strlen(session.gpsdata.gps_device)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
 	}
@@ -327,14 +328,14 @@ static void command(char buf[], size_t len, const char *fmt, ... )
     }
 }
 
-void monitor_complain(const char *fmt, ...) 
+void monitor_complain(const char *fmt, ...)
 {
     va_list ap;
     (void)wmove(cmdwin, 0, (int)strlen(type_name)+2);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
     va_start(ap, fmt) ;
-    (void)vwprintw(cmdwin, fmt, ap);
+    (void)vwprintw(cmdwin, (char *)fmt, ap);
     va_end(ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
@@ -342,12 +343,12 @@ void monitor_complain(const char *fmt, ...)
 }
 
 
-void monitor_log(const char *fmt, ...) 
+void monitor_log(const char *fmt, ...)
 {
     if (packetwin != NULL) {
 	va_list ap;
 	va_start(ap, fmt);
-	(void)vwprintw(packetwin, fmt, ap);
+	(void)vwprintw(packetwin, (char *)fmt, ap);
 	va_end(ap);
     }
 }
@@ -438,7 +439,7 @@ int main (int argc, char **argv)
 	case 'V':
 	    (void)printf("gpsmon %s\n", VERSION);
 	    exit(0);
-        case 'l':		/* list known device types */
+	case 'l':		/* list known device types */
 	    (void) fputs("General commands available per type. '+' means there are private commands.\n", stdout);
 	    for (active = monitor_objects; *active; active++) {
 		(void)fputs("i l q ^S ^Q", stdout);
@@ -491,12 +492,12 @@ int main (int argc, char **argv)
     gpsd_init(&session, &context, NULL);
 
     /*@ -boolops */
-    if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {	
+    if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {
 
 	session.gpsdata.gps_fd = netlib_connectsock(source.server, source.port, "tcp");
 	if (session.gpsdata.gps_fd < 0) {
-	    (void)fprintf(stderr, 
-			  "%s: connection failure on %s:%s, error %d.\n", 
+	    (void)fprintf(stderr,
+			  "%s: connection failure on %s:%s, error %d.\n",
 			  argv[0], source.server, source.port, session.gpsdata.gps_fd);
 	    exit(1);
 	}
@@ -526,7 +527,7 @@ int main (int argc, char **argv)
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
 
-    /* 
+    /*
      * This is a monitoring utility. Disable autoprobing, because
      * in some cases (e.g. SiRFs) there is no way to probe a chip
      * type without flipping it to native mode.
@@ -571,14 +572,14 @@ int main (int argc, char **argv)
 	type_name = session.device_type ? session.device_type->type_name : "Unknown device";
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
-	    display(statwin, 0, 0, "%s %4d %c %d", 
-		    session.gpsdata.gps_device, 
+	    display(statwin, 0, 0, "%s %4d %c %d",
+		    session.gpsdata.gps_device,
 		    gpsd_get_speed(&session.ttyset),
-		    session.gpsdata.parity, 
+		    session.gpsdata.parity,
 		    session.gpsdata.stopbits);
 	else
 	    /*@ -nullpass @*/
-	    display(statwin, 0, 0, "%s:%s:%s", 
+	    display(statwin, 0, 0, "%s:%s:%s",
 		    source.server, source.port, session.gpsdata.gps_device);
 	    /*@ +nullpass @*/
 	(void)wattrset(statwin, A_NORMAL);
@@ -662,7 +663,7 @@ int main (int argc, char **argv)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    double rate = strtod(arg, NULL);
-		    /* Ugh...should have a controlfd slot 
+		    /* Ugh...should have a controlfd slot
 		     * in the session structure, really
 		     */
 		    if ((*active)->driver->rate_switcher) {
@@ -670,7 +671,7 @@ int main (int argc, char **argv)
 			session.gpsdata.gps_fd = controlfd;
 			if ((*active)->driver->rate_switcher(&session, rate)) {
 			    monitor_dump_send();
-			} else 
+			} else
 			    monitor_complain("Rate not supported.");
 			session.gpsdata.gps_fd = dfd;
 		    } else
@@ -691,10 +692,10 @@ int main (int argc, char **argv)
 		    monitor_complain("No GPS type detected.");
 		else {
 		    if (strcspn(line, "01") == strlen(line))
-			context.readonly = !context.readonly; 
+			context.readonly = !context.readonly;
 		    else
 			context.readonly = (atoi(line+1) == 0);
-		    (void)gpsd_switch_driver(&session, 
+		    (void)gpsd_switch_driver(&session,
 					     (*active)->driver->type_name);
 		}
 		break;
@@ -722,7 +723,7 @@ int main (int argc, char **argv)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    // FIXME: some sort of debug window display here?
-		    /* Ugh...should have a controlfd slot 
+		    /* Ugh...should have a controlfd slot
 		     * in the session structure, really
 		     */
 		    if ((*active)->driver->mode_switcher) {
@@ -782,15 +783,15 @@ int main (int argc, char **argv)
 		    }
 		    /*@ -charint @*/
 		    speed = (unsigned)atoi(arg);
-		    /* Ugh...should have a controlfd slot 
+		    /* Ugh...should have a controlfd slot
 		     * in the session structure, really
 		     */
 		    if ((*active)->driver->speed_switcher) {
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
-			if ((*active)->driver->speed_switcher(&session, 
-								speed, 
-								parity, 
+			if ((*active)->driver->speed_switcher(&session,
+								speed,
+								parity,
 							      (int)stopbits)) {
 			    monitor_dump_send();
 			    /*
@@ -803,10 +804,10 @@ int main (int argc, char **argv)
 			     */
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
-			    (void)gpsd_set_speed(&session, speed, 
-						 (unsigned char)parity, 
+			    (void)gpsd_set_speed(&session, speed,
+						 (unsigned char)parity,
 						 stopbits);
-			} else 
+			} else
 			    monitor_complain("Speed/mode cobination not supported.");
 			session.gpsdata.gps_fd = dfd;
 		    } else
@@ -841,7 +842,7 @@ int main (int argc, char **argv)
 		    } else {
 			monitor_complain("Multiple driver type names match '%s'.", arg);
 		    }
-		}    
+		}
 		break;
 
 #ifdef ALLOW_CONTROLSEND
