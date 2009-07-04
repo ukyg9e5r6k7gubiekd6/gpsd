@@ -1,5 +1,5 @@
 /* $Id$ */
-/* dgpsip.c -- gather and dispatch DGPS data from DGPSIP servers */
+/* net_dgpsip.c -- gather and dispatch DGPS data from DGPSIP servers */
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
@@ -38,7 +38,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	if (write(context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
-	    context->dgnss_service = dgnss_dgpsip;
+	    context->netgnss_service = netgnss_dgpsip;
 	else
 	    gpsd_report(LOG_ERROR, "hello to DGPS server %s failed\n", dgpsserver);
     } else

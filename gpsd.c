@@ -120,10 +120,10 @@ static struct gps_context_t context = {
     .valid	    = 0,
     .readonly	    = false,
     .sentdgps	    = false,
-    .dgnss_service  = dgnss_none,
+    .netgnss_service  = netgnss_none,
     .fixcnt	    = 0,
     .dsock	    = -1,
-    .dgnss_privdata = NULL,
+    .netgnss_privdata = NULL,
     .rtcmbytes	    = 0,
     .rtcmbuf	    = {'\0'},
     .rtcmtime	    = 0,
@@ -541,9 +541,9 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 {
     struct gps_device_t *chp;
 
-    /* special case: source may be a URL to differential-GPS service */
-    if (dgnss_url(device_name)) {
-	int dsock = dgnss_open(&context, device_name);
+    /* special case: source may be a URI to a remote GNSS or DGPS service */
+    if (netgnss_uri_check(device_name)) {
+	int dsock = netgnss_uri_open(&context, device_name);
 	if (dsock >= 0) {
 	    FD_SET(dsock, &all_fds);
 	    adjust_max_fd(dsock, true);
@@ -1787,7 +1787,7 @@ int main(int argc, char *argv[])
 
 	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds)) {
 	    /* be ready for DGPS reports */
-	    if (dgnss_poll(&context) == -1){
+	    if (netgnss_poll(&context) == -1){
 		FD_CLR(context.dsock, &all_fds);
 		FD_CLR(context.dsock, &rfds);
 		context.dsock = -1;
@@ -1907,7 +1907,7 @@ int main(int argc, char *argv[])
 	if (context.fixcnt > 0 && context.dsock == -1) {
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
 		if (channel->gpsdata.fix.mode > MODE_NO_FIX) {
-		    dgnss_autoconnect(&context,
+		    netgnss_autoconnect(&context,
 				      channel->gpsdata.fix.latitude,
 				      channel->gpsdata.fix.longitude);
 		    break;

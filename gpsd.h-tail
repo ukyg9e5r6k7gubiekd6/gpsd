@@ -139,10 +139,10 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPS report? */
-    enum { dgnss_none, dgnss_dgpsip, dgnss_ntrip } dgnss_service;	/* type of DGNSS service */
+    enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip } netgnss_service;	/* type of DGNSS service */
     int fixcnt;				/* count of good fixes seen */
     int dsock;			        /* socket to DGPSIP server/Ntrip caster */
-    void *dgnss_privdata;		/* DGNSS service specific data */
+    void *netgnss_privdata;		/* DGNSS service specific data */
     ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
@@ -381,11 +381,11 @@ extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
 extern gps_mask_t garmintxt_parse(struct gps_device_t *);
 extern gps_mask_t aivdm_parse(struct gps_device_t *);
 
-extern bool dgnss_url(char *);
-extern int dgnss_open(struct gps_context_t *, char *);
-extern int dgnss_poll(struct gps_context_t *);
-extern void dgnss_report(struct gps_device_t *);
-extern void dgnss_autoconnect(struct gps_context_t *, double, double);
+extern bool netgnss_uri_check(char *);
+extern int netgnss_uri_open(struct gps_context_t *, char *);
+extern int netgnss_poll(struct gps_context_t *);
+extern void netgnss_report(struct gps_device_t *);
+extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 
 extern void rtcm_relay(struct gps_device_t *);
 extern void rtcm2_output_mag(isgps30bits_t *, FILE *);

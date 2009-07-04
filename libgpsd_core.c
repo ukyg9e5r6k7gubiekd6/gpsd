@@ -820,7 +820,7 @@ cycle+1){
 	}
 
 	if (session->gpsdata.fix.mode == MODE_3D)
-	    dgnss_report(session);
+	    netgnss_report(session);
 
 	return session->gpsdata.set;
     }

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* dgnss.c -- common interface to a number of Differential GNSS services */
+/* net_gnss_dispatch.c -- common interface to a number of Network GNSS services */
 
 #include <sys/types.h>
 #ifndef S_SPLINT_S
@@ -12,44 +12,51 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 
-#define DGNSS_PROTO_DGPSIP	"dgpsip://"
-#define DGNSS_PROTO_NTRIP	"ntrip://"
+#define NETGNSS_DGPSIP	"dgpsip://"
+#define NETGNSS_NTRIP	"ntrip://"
+#define NETGNSS_GPSD	"gpsd://"
 
 /* Where to find the list of DGPSIP correction servers, if there is one */
 #define DGPSIP_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
 
-bool dgnss_url(char *name)
-/* is given string a valid URL for DGPS service? */
+bool netgnss_uri_check(char *name)
+/* is given string a valid URI for GNSS/DGPS service? */
 {
     return
-	strncmp(name,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0
-	|| strncmp(name,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0;
+	strncmp(name, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP)) == 0
+	|| strncmp(name, NETGNSS_GPSD, strlen(NETGNSS_GPSD)) == 0
+	|| strncmp(name, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP)) == 0;
 }
 
 
 /*@ -branchstate */
-int dgnss_open(struct gps_context_t *context, char *dgnss_service)
+int netgnss_uri_open(struct gps_context_t *context, char *netgnss_service)
 /* open a connection to a DGNSS service */
 {
 #ifdef NTRIP_ENABLE
-    if (strncmp(dgnss_service,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0)
-	return ntrip_open(context, dgnss_service + strlen(DGNSS_PROTO_NTRIP));
+    if (strncmp(netgnss_service, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP))==0)
+	return ntrip_open(context, netgnss_service + strlen(NETGNSS_NTRIP));
 #endif
 
-    if (strncmp(dgnss_service,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0)
-	return dgpsip_open(context, dgnss_service + strlen(DGNSS_PROTO_DGPSIP));
+    if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP))==0)
+	return dgpsip_open(context, netgnss_service + strlen(NETGNSS_DGPSIP));
+
+#if 0
+    if (strncmp(netgnss_service, NETGNSS_GPSD, strlen(NETGNSS_GPSD))==0)
+	return remotegpsd_open(context, netgnss_service + strlen(NETGNSS_GPSD));
+#endif
 
 #ifndef REQUIRE_DGNSS_PROTO
-    return dgpsip_open(context, dgnss_service);
+    return dgpsip_open(context, netgnss_service);
 #else
     gpsd_report(LOG_ERROR, "Unknown or unspecified DGNSS protocol for service %s\n",
-		dgnss_service);
+		netgnss_service);
     return -1;
 #endif
 }
 /*@ +branchstate */
 
-int dgnss_poll(struct gps_context_t *context)
+int netgnss_poll(struct gps_context_t *context)
 /* poll the DGNSS service for a correction report */
 {
     if (context->dsock > -1) {
@@ -65,20 +72,20 @@ int dgnss_poll(struct gps_context_t *context)
     return 0;
 }
 
-void dgnss_report(struct gps_device_t *session)
+void netgnss_report(struct gps_device_t *session)
 /* may be time to ship a usage report to the DGNSS service */
 {
-    if (session->context->dgnss_service == dgnss_dgpsip)
+    if (session->context->netgnss_service == netgnss_dgpsip)
 	dgpsip_report(session);
 #ifdef NTRIP_ENABLE
-    else if (session->context->dgnss_service == dgnss_ntrip)
+    else if (session->context->netgnss_service == netgnss_ntrip)
 	ntrip_report(session);
 #endif
 }
 
-void dgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
+void netgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
 {
-    if (context->dgnss_service != dgnss_ntrip) {
+    if (context->netgnss_service != netgnss_ntrip) {
 	dgpsip_autoconnect(context, lat, lon, DGPSIP_SERVER_LIST);
     }
 }
