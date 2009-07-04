@@ -455,31 +455,20 @@ static void superstar2_configurator(struct gps_device_t *session,
     unsigned char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
     unsigned char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
     unsigned char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
+    unsigned char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
+    unsigned char iono_utc_msg[] =	{0x01, 0xCB, 0x34, 0x00, 0x00, 0x01};
     unsigned char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
-    unsigned char junk[32];
 
     if (seq != 0)
 	return;
 
     (void)superstar2_write(session, timing_msg, sizeof(timing_msg));
-    (void)usleep(100000);
-    (void)read(session->gpsdata.gps_fd, &junk, 32);
-
     (void)superstar2_write(session, measurement_msg, sizeof(measurement_msg));
-    (void)usleep(100000);
-    (void)read(session->gpsdata.gps_fd, &junk, 32);
-
     (void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
-    (void)usleep(100000);
-    (void)read(session->gpsdata.gps_fd, &junk, 32);
-
     (void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
-    (void)usleep(100000);
-    (void)read(session->gpsdata.gps_fd, &junk, 32);
-
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
-    (void)usleep(100000);
-    (void)read(session->gpsdata.gps_fd, &junk, 32);
+    (void)superstar2_write(session, ephemeris_msg, sizeof(version_msg));
+    (void)superstar2_write(session, iono_utc_msg, sizeof(version_msg));
 
 }
 
