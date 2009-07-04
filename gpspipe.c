@@ -347,10 +347,14 @@ int main( int argc, char **argv)
 		    }
 		}
 	    }
-	} else if (readbytes < 0) {
-	    (void) fprintf(stderr, "gpspipe: read error %s(%d)\n",
+	} else {
+	    if (readbytes < 0) {
+		(void) fprintf(stderr, "gpspipe: read error %s(%d)\n",
 			    strerror(errno), errno);
-	    exit(1);
+		exit(1);
+	    } else {
+		exit(0);
+	    }
 	}
     }
 
