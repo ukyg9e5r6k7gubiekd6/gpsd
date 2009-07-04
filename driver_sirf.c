@@ -138,8 +138,8 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
     session->msgbuf[len + 7] = 0xb3;
     session->msgbuflen = len + 8;
 
-    return sirf_write(session->gpsdata.gps_fd, 
-		      (unsigned char *)session->msgbuf) ? session->msgbuflen : -1;
+    return sirf_write(session->gpsdata.gps_fd,
+		      (unsigned char *)session->msgbuf) ? (int)session->msgbuflen : -1;
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 #endif /* ALLOW_CONTROLSEND */
