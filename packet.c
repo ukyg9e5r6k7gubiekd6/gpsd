@@ -516,17 +516,20 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case SUPERSTAR2_ID2:
-	lexer->length = (size_t)c + 4;
-	if (lexer->length <= MAX_PACKET_LENGTH)
+	lexer->length = (size_t)c; /* how many data bytes follow this byte */
+	if (lexer->length)
 	    lexer->state = SUPERSTAR2_PAYLOAD;
 	else
-	    lexer->state = GROUND_STATE;
+	    lexer->state = SUPERSTAR2_CKSUM1; /* no data, jump to checksum */
 	break;
     case SUPERSTAR2_PAYLOAD:
 	if (--lexer->length == 0)
 	    lexer->state = SUPERSTAR2_CKSUM1;
 	break;
     case SUPERSTAR2_CKSUM1:
+	lexer->state = SUPERSTAR2_CKSUM2;
+	break;
+    case SUPERSTAR2_CKSUM2:
 	lexer->state = SUPERSTAR2_RECOGNIZED;
 	break;
     case SUPERSTAR2_RECOGNIZED:
