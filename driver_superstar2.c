@@ -33,6 +33,10 @@ static	gps_mask_t superstar2_msg_timing(struct gps_device_t *,
 					  unsigned char *, size_t );
 static	gps_mask_t superstar2_msg_svinfo(struct gps_device_t *,
 					 unsigned char *, size_t );
+static	gps_mask_t superstar2_msg_iono_utc(struct gps_device_t *,
+					 unsigned char *, size_t );
+static	gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
+					 unsigned char *, size_t );
 
 /*
  * These methods may be called elsewhere in gpsd
@@ -44,6 +48,8 @@ static	bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
 static	void superstar2_set_mode(struct gps_device_t *, int );
 static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	void superstar2_probe_subtype(struct gps_device_t *, unsigned int );
+static	ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
+
 
 /*
  * Decode the message ACK message
@@ -245,7 +251,8 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	session->gpsdata.PRN[i]		= (int)porn;
 	session->gpsdata.ss[i]		= (float)getub(buf, off+4);
 	session->gpsdata.elevation[i]	= (int)getsb(buf, off+1);
-	session->gpsdata.azimuth[i]	= (unsigned short)getub(buf, off+2) + ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
+	session->gpsdata.azimuth[i]	= (unsigned short)getub(buf, off+2) +
+	    ((unsigned short)(getub(buf, off+3) & 0x1) << 1);
 
 	/*@ +charint @*/
 	if ((getub(buf, off) & 0x60) == 0x60)
@@ -350,9 +357,50 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 	session->gpsdata.pseudorange[i] = (ul >> 12);
     }
 
-    mask |= RAW_SET;
+    mask |= RAW_SET | ONLINE_SET;
 #endif /* RAW_ENABLE */
     return mask;
+}
+
+/* request for ionospheric and utc time data #75 */
+static char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
+
+/**
+ * Ionospheric/UTC parameters
+ */
+static gps_mask_t
+superstar2_msg_iono_utc(struct gps_device_t *session, unsigned char *buf, size_t data_len UNUSED)
+{
+    unsigned int i, u;
+
+    i = (unsigned int)getub(buf, 12);
+    u = (unsigned int)getub(buf, 21);
+    gpsd_report(LOG_PROG,
+		"superstar2 #75 - ionospheric & utc data: iono %s utc %s\n",
+		i ? "ok":"bad",
+		u ? "ok":"bad");
+    session->driver.superstar2.last_iono = time(NULL);
+
+    return ONLINE_SET;
+}
+
+
+/**
+ * Ephemeris
+ */
+static gps_mask_t
+superstar2_msg_ephemeris(struct gps_device_t *session, unsigned char *buf, size_t data_len UNUSED)
+{
+    unsigned int prn;
+    prn = (unsigned int)(getub(buf, 4) & 0x1f);
+    gpsd_report(LOG_PROG,
+		"superstar2 #22 - ephemeris data - prn %u\n", prn);
+
+    /* ephemeris data updates fairly slowly, but when it does, poll UTC */
+    if ((time(NULL) - session->driver.superstar2.last_iono) > 60)
+	(void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+
+    return ONLINE_SET;
 }
 
 
@@ -373,8 +421,6 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    return (i = gpsd_write(session, msg, msglen));
 }
 
-/* request for ionospheric and utc time data #75 */
-static char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
 /**
  * Parse the data from the device
  */
@@ -383,7 +429,6 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 		    size_t len)
 {
     int type;
-    time_t now;
 
     if (len == 0)
 	return 0;
@@ -392,7 +437,6 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     (void)snprintf(session->gpsdata.tag,
 	sizeof(session->gpsdata.tag), "SS2-%d", type);
 
-    now = time(NULL);
     switch (type)
     {
     case SUPERSTAR2_ACK: /* Message Acknowledgement */
@@ -410,15 +454,9 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     case SUPERSTAR2_MEASUREMENT: /* Timing Parameters */
 	return superstar2_msg_measurement(session, buf, len);
     case SUPERSTAR2_IONO_UTC:
-	gpsd_report(LOG_PROG, "superstar2 #75 - ionospheric and utc time data \n");
-	session->driver.superstar2.last_iono = now;
-	return 0;
+	return superstar2_msg_iono_utc(session, buf, len);
     case SUPERSTAR2_EPHEMERIS:
-	gpsd_report(LOG_PROG, "superstar2 #22 - ephemeris data \n");
-	/* ephemeris data updates fairly slowly, but when it does, poll UTC */
-	if ((now - session->driver.superstar2.last_iono) > 60)
-	    (void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
-	return 0;
+	return superstar2_msg_ephemeris(session, buf, len);
 
     default:
 	/* XXX This gets noisy in a hurry. */
