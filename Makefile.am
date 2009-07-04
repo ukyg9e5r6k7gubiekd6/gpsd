@@ -136,8 +136,6 @@ libgpsd_c_sources = \
 	bits.c \
 	bsd-base64.c \
 	crc24q.c \
-	dgnss.c \
-	dgpsip.c \
 	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
@@ -146,9 +144,11 @@ libgpsd_c_sources = \
 	libgps.c \
 	gpsdclient.c \
 	libgpsd_core.c \
+	net_dgpsip.c \
+	net_gnss_dispatch.c \
+	net_ntrip.c \
 	netlib.c \
 	ntpshm.c \
-	ntrip.c \
 	packet.c \
 	serial.c \
 	srecord.c \
