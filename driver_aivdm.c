@@ -1,4 +1,4 @@
-/* 
+/*
  * Driver for AIS/AIVDM messages.
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
@@ -68,9 +68,9 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	"101101", "101110", "101111", "110000",	"110001",
 	"110010", "110011", "110100", "110101",	"110110",
 	"110111", "111000", "111001", "111010",	"111011",
-	"111100", "111101", "111110", "111111",    
+	"111100", "111101", "111110", "111111",   
     };
-    int nfields = 0;    
+    int nfields = 0;   
     unsigned char *data, *cp = ais_context->fieldcopy;
     struct ais_t *ais = &ais_context->decoded;
     unsigned char ch;
@@ -83,11 +83,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
     gpsd_report(LOG_PROG, "AIVDM packet length %ld: %s", buflen, buf);
 
     /* extract packet fields */
-    (void)strlcpy((char *)ais_context->fieldcopy, 
+    (void)strlcpy((char *)ais_context->fieldcopy,
 		  (char*)buf,
 		  buflen);
     ais_context->field[nfields++] = (unsigned char *)buf;
-    for (cp = ais_context->fieldcopy; 
+    for (cp = ais_context->fieldcopy;
 	 cp < ais_context->fieldcopy + buflen;
 	 cp++)
 	if (*cp == ',') {
@@ -99,7 +99,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
     data = ais_context->field[5];
     gpsd_report(LOG_PROG, "await=%d, part=%d, data=%s\n",
 		ais_context->await,
-		ais_context->part, 
+		ais_context->part,
 		data);
 
     /* assemble the binary data */
@@ -142,7 +142,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	ais->msgtype = UBITS(0, 6);
 	ais->repeat = UBITS(6, 2);
 	ais->mmsi = UBITS(8, 30);
-	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n", 
+	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n",
 		    ais->msgtype, ais->mmsi);
 	switch (ais->msgtype) {
 	case 1:	/* Position Report */
@@ -165,12 +165,12 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			"Nav=%d TURN=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d TH=%d Sec=%d\n",
 			ais->type123.status,
 			ais->type123.turn,
-			ais->type123.speed, 
+			ais->type123.speed,
 			(uint)ais->type123.accuracy,
-			ais->type123.lon, 
-			ais->type123.lat, 
-			ais->type123.course, 
-			ais->type123.heading, 
+			ais->type123.lon,
+			ais->type123.lat,
+			ais->type123.course,
+			ais->type123.heading,
 			ais->type123.second);
 	    break;
 	case 4: 	/* Base Station Report */
@@ -197,7 +197,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type4.minute,
 			ais->type4.second,
 			(uint)ais->type4.accuracy,
-			ais->type4.lat, 
+			ais->type4.lat,
 			ais->type4.lon,
 			ais->type4.epfd);
 	    break;
@@ -227,14 +227,14 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type5.shipname,
 			ais->type5.destination);
 	    break;
-        case 6: /* Addressed Binary Message */
+	case 6: /* Addressed Binary Message */
 	    ais->type6.seqno          = UBITS(38, 2);
 	    ais->type6.dest_mmsi      = UBITS(40, 30);
 	    ais->type6.retransmit     = (bool)UBITS(70, 1);
 	    //ais->type6.spare        = UBITS(71, 1);
 	    ais->type6.application_id = UBITS(72, 16);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
-	    (void)memcpy(ais->type6.bitdata, 
+	    (void)memcpy(ais->type6.bitdata,
 			 (char *)ais_context->bits+11,
 			 (ais->type6.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%u\n",
@@ -243,19 +243,19 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type6.application_id,
 			ais->type6.bitcount);
 	    break;
-        case 7: /* Binary acknowledge */
+	case 7: /* Binary acknowledge */
 	    for (i = 0; i < sizeof(ais->type7.mmsi)/sizeof(ais->type7.mmsi[0]); i++)
 		if (ais_context->bitlen > 40 + 32*i)
 		    ais->type7.mmsi[i] = UBITS(40 + 32*i, 30);
-	        else
+		else
 		    ais->type7.mmsi[i] = 0;
 	    gpsd_report(LOG_INF, "\n");
 	    break;
-        case 8: /* Binary Broadcast Message */
+	case 8: /* Binary Broadcast Message */
 	    //ais->type8.spare        = UBITS(38, 2);
 	    ais->type8.application_id = UBITS(40, 16);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
-	    (void)memcpy(ais->type8.bitdata, 
+	    (void)memcpy(ais->type8.bitdata,
 			 (char *)ais_context->bits+7,
 			 (ais->type8.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "id=%u, cnt=%u\n",
@@ -279,42 +279,42 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF,
 			"Alt=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d Sec=%d\n",
 			ais->type9.alt,
-			ais->type9.speed, 
+			ais->type9.speed,
 			(uint)ais->type9.accuracy,
-			ais->type9.lon, 
-			ais->type9.lat, 
-			ais->type9.course, 
+			ais->type9.lon,
+			ais->type9.lat,
+			ais->type9.course,
 			ais->type9.second);
 	    break;
-        case 10: /* UTC/Date inquiry */
+	case 10: /* UTC/Date inquiry */
 	    //ais->type10.spare        = UBITS(38, 2);
 	    ais->type10.dest_mmsi      = UBITS(40, 30);
 	    //ais->type10.spare2       = UBITS(70, 2);
 	    gpsd_report(LOG_INF, "dest=%u\n", ais->type10.dest_mmsi);
 	    break;
-        case 12: /* Safety Related Message */
+	case 12: /* Safety Related Message */
 	    ais->type12.seqno          = UBITS(38, 2);
 	    ais->type12.dest_mmsi      = UBITS(40, 30);
 	    ais->type12.retransmit     = (bool)UBITS(70, 1);
 	    //ais->type12.spare        = UBITS(71, 1);
-	    from_sixbit((char *)ais_context->bits, 
+	    from_sixbit((char *)ais_context->bits,
 			72, ais_context->bitlen-72,
 			ais->type12.text);
 	    gpsd_report(LOG_INF, "seqno=%d, dest=%u\n",
 			ais->type12.seqno,
 			ais->type12.dest_mmsi);
 	    break;
-        case 13: /* Safety Related Acknowledge */
+	case 13: /* Safety Related Acknowledge */
 	    for (i = 0; i < sizeof(ais->type13.mmsi)/sizeof(ais->type13.mmsi[0]); i++)
 		if (ais_context->bitlen > 40 + 32*i)
 		    ais->type13.mmsi[i] = UBITS(40 + 32*i, 30);
-	        else
+		else
 		    ais->type13.mmsi[i] = 0;
 	    gpsd_report(LOG_INF, "\n");
 	    break;
-        case 14:	/* Safety Related Broadcast Message */
+	case 14:	/* Safety Related Broadcast Message */
 	    //ais->type14.spare          = UBITS(38, 2);
-	    from_sixbit((char *)ais_context->bits, 
+	    from_sixbit((char *)ais_context->bits,
 			40, ais_context->bitlen-40,
 			ais->type14.text);
 	    gpsd_report(LOG_INF, "\n");
@@ -343,7 +343,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type16.mmsi1		= UBITS(40, 30);
 	    ais->type16.offset1		= UBITS(70, 12);
 	    ais->type16.increment1	= UBITS(82, 10);
-	    if (ais_context->bitlen <= 96) 
+	    if (ais_context->bitlen <= 96)
 		ais->type16.mmsi2 = 0;
 	    else {
 		ais->type16.mmsi2	= UBITS(92, 30);
@@ -357,7 +357,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type17.lon		= UBITS(40, 18);
 	    ais->type17.lat		= UBITS(58, 17);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
-	    (void)memcpy(ais->type17.bitdata, 
+	    (void)memcpy(ais->type17.bitdata,
 			 (char *)ais_context->bits + 10,
 			 (ais->type8.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "\n");
@@ -383,12 +383,12 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d\n",
 			ais->type18.reserved,
-			ais->type18.speed, 
+			ais->type18.speed,
 			(uint)ais->type18.accuracy,
-			ais->type18.lon, 
-			ais->type18.lat, 
-			ais->type18.course, 
-			ais->type18.heading, 
+			ais->type18.lon,
+			ais->type18.lat,
+			ais->type18.course,
+			ais->type18.heading,
 			ais->type18.second);
 	    break;	
 	case 19:	/* Extended Class B CS Position Report */
@@ -415,14 +415,14 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d name=%s\n",
 			ais->type19.reserved,
-			ais->type19.speed, 
+			ais->type19.speed,
 			(uint)ais->type19.accuracy,
-			ais->type19.lon, 
-			ais->type19.lat, 
-			ais->type19.course, 
-			ais->type19.heading, 
+			ais->type19.lon,
+			ais->type19.lat,
+			ais->type19.course,
+			ais->type19.heading,
 			ais->type19.second,
-		        ais->type19.shipname);
+			ais->type19.shipname);
 	    break;
 	case 20:	/* Data Link Management Message */
 	    //ais->type20.spare		= UBITS(38, 2);
@@ -466,8 +466,8 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			"name=%s accuracy=%d lon=%d lat=%d sec=%d\n",
 			ais->type21.name,
 			(uint)ais->type19.accuracy,
-			ais->type19.lon, 
-			ais->type19.lat, 
+			ais->type19.lon,
+			ais->type19.lat,
 			ais->type19.second);
 	    break;
 	case 24:	/* Type 24 - Class B CS Static Data Report */
@@ -498,7 +498,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF, "\n");
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->msgtype);
 	    break;
-	} 
+	}
 #undef UCHARS
 #undef SBITS
 #undef UBITS
@@ -703,8 +703,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	    char turnlegend[10];
 	    char speedlegend[10];
 
-	    /* 
-	     * Express turn as nan if not available, 
+	    /*
+	     * Express turn as nan if not available,
 	     * "fastleft"/"fastright" for fast turns.
 	     */
 	    if (ais->type123.turn == -128)
@@ -718,8 +718,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			       "%.0f",
 			       ais->type123.turn * ais->type123.turn / 4.733);
 
-	    /* 
-	     * Express speed as nan if not available, 
+	    /*
+	     * Express speed as nan if not available,
 	     * "fast" for fast movers.
 	     */
 	    if (ais->type123.speed == AIS_SPEED_NOT_AVAILABLE)
@@ -732,14 +732,14 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 
 	    (void)fprintf(fp,
 			  (json ? TYPE123_SCALED_JSON : TYPE123_SCALED_CSV),
-			      
+			     
 			  nav_legends[ais->type123.status],
 			  turnlegend,
 			  speedlegend,
 			  (uint)ais->type123.accuracy,
-			  ais->type123.lon / AIS_LATLON_SCALE, 
-			  ais->type123.lat / AIS_LATLON_SCALE, 
-			  ais->type123.course, 
+			  ais->type123.lon / AIS_LATLON_SCALE,
+			  ais->type123.lat / AIS_LATLON_SCALE,
+			  ais->type123.course,
 			  ais->type123.heading,
 			  ais->type123.second,
 			  ais->type123.maneuver,
@@ -750,11 +750,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  (json ? TYPE123_UNSCALED_JSON : TYPE123_UNSCALED_CSV),
 			  ais->type123.status,
 			  ais->type123.turn,
-			  ais->type123.speed, 
+			  ais->type123.speed,
 			  (uint)ais->type123.accuracy,
 			  ais->type123.lon,
 			  ais->type123.lat,
-			  ais->type123.course, 
+			  ais->type123.course,
 			  ais->type123.heading,
 			  ais->type123.second,
 			  ais->type123.maneuver,
@@ -782,7 +782,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type4.minute,
 			  ais->type4.second,
 			  (uint)ais->type4.accuracy,
-			  ais->type4.lon / AIS_LATLON_SCALE, 
+			  ais->type4.lon / AIS_LATLON_SCALE,
 			  ais->type4.lat / AIS_LATLON_SCALE,
 			  epfd_legends[ais->type4.epfd],
 			  ais->type4.raim,
@@ -797,7 +797,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type4.minute,
 			  ais->type4.second,
 			  (uint)ais->type4.accuracy,
-			  ais->type4.lon, 
+			  ais->type4.lon,
 			  ais->type4.lat,
 			  ais->type4.epfd,
 			  ais->type4.raim,
@@ -869,7 +869,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type6.retransmit,
 			  ais->type6.application_id,
 			  ais->type6.bitcount,
-			  gpsd_hexdump(ais->type6.bitdata, 
+			  gpsd_hexdump(ais->type6.bitdata,
 				       (ais->type6.bitcount+7)/8));
 #undef TYPE6_CSV
 #undef TYPE6_JSON
@@ -893,7 +893,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  (json ? TYPE8_JSON : TYPE8_CSV),
 			  ais->type8.application_id,
 			  ais->type8.bitcount,
-			  gpsd_hexdump(ais->type8.bitdata, 
+			  gpsd_hexdump(ais->type8.bitdata,
 				       (ais->type8.bitcount+7)/8));
 #undef TYPE8_CSV
 #undef TYPE8_JSON
@@ -906,30 +906,30 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE9_SCALED_JSON : TYPE9_SCALED_CSV),
-			      
+			     
 			  ais->type9.alt,
-			  ais->type9.speed, 
+			  ais->type9.speed,
 			  (uint)ais->type9.accuracy,
-			  ais->type9.lon / AIS_LATLON_SCALE, 
-			  ais->type9.lat / AIS_LATLON_SCALE, 
-			  ais->type9.course / 10.0, 
+			  ais->type9.lon / AIS_LATLON_SCALE,
+			  ais->type9.lat / AIS_LATLON_SCALE,
+			  ais->type9.course / 10.0,
 			  ais->type9.second,
 			  ais->type9.regional,
-			  ais->type9.dte, 
+			  ais->type9.dte,
 			  ais->type9.raim,
 			  ais->type9.radio);
 	} else {
 	    (void)fprintf(fp,
 			  (json ? TYPE9_UNSCALED_JSON : TYPE9_UNSCALED_CSV),
 			  ais->type9.alt,
-			  ais->type9.speed, 
+			  ais->type9.speed,
 			  (uint)ais->type9.accuracy,
 			  ais->type9.lon,
 			  ais->type9.lat,
-			  ais->type9.course, 
+			  ais->type9.course,
 			  ais->type9.second,
 			  ais->type9.regional,
-			  ais->type9.dte, 
+			  ais->type9.dte,
 			  ais->type9.raim,
 			  ais->type9.radio);
 	}
@@ -1021,7 +1021,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type17.lon / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.lat / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.bitcount,
-			  gpsd_hexdump(ais->type17.bitdata, 
+			  gpsd_hexdump(ais->type17.bitdata,
 				       (ais->type17.bitcount+7)/8));
 	} else {
 	    (void)fprintf(fp,
@@ -1029,7 +1029,7 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  ais->type17.lon,
 			  ais->type17.lat,
 			  ais->type17.bitcount,
-			  gpsd_hexdump(ais->type17.bitdata, 
+			  gpsd_hexdump(ais->type17.bitdata,
 				       (ais->type17.bitcount+7)/8));
 	}
 #undef TYPE17_UNSCALED_CSV
@@ -1045,12 +1045,12 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE18_SCALED_JSON : TYPE18_SCALED_CSV),
-			      
+			     
 			  ais->type18.reserved,
-			  ais->type18.speed / 10.0, 
+			  ais->type18.speed / 10.0,
 			  (uint)ais->type18.accuracy,
-			  ais->type18.lon / AIS_LATLON_SCALE, 
-			  ais->type18.lat / AIS_LATLON_SCALE, 
+			  ais->type18.lon / AIS_LATLON_SCALE,
+			  ais->type18.lat / AIS_LATLON_SCALE,
 			  ais->type18.course / 10.0,
 			  ais->type18.heading,
 			  ais->type18.second,
@@ -1066,11 +1066,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	    (void)fprintf(fp,
 			  (json ? TYPE18_UNSCALED_JSON : TYPE18_UNSCALED_CSV),
 			  ais->type18.reserved,
-			  ais->type18.speed, 
+			  ais->type18.speed,
 			  (uint)ais->type18.accuracy,
 			  ais->type18.lon,
 			  ais->type18.lat,
-			  ais->type18.course, 
+			  ais->type18.course,
 			  ais->type18.heading,
 			  ais->type18.second,
 			  ais->type18.regional,
@@ -1095,12 +1095,12 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	if (scaled) {
 	    (void)fprintf(fp,
 			  (json ? TYPE19_SCALED_JSON : TYPE19_SCALED_CSV),
-			      
+			     
 			  ais->type19.reserved,
-			  ais->type19.speed / 10.0, 
+			  ais->type19.speed / 10.0,
 			  (uint)ais->type19.accuracy,
-			  ais->type19.lon / AIS_LATLON_SCALE, 
-			  ais->type19.lat / AIS_LATLON_SCALE, 
+			  ais->type19.lon / AIS_LATLON_SCALE,
+			  ais->type19.lat / AIS_LATLON_SCALE,
 			  ais->type19.course / 10.0,
 			  ais->type19.heading,
 			  ais->type19.second,
@@ -1118,11 +1118,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 	    (void)fprintf(fp,
 			  (json ? TYPE19_UNSCALED_JSON : TYPE19_UNSCALED_CSV),
 			  ais->type19.reserved,
-			  ais->type19.speed, 
+			  ais->type19.speed,
 			  (uint)ais->type19.accuracy,
 			  ais->type19.lon,
 			  ais->type19.lat,
-			  ais->type19.course, 
+			  ais->type19.course,
 			  ais->type19.heading,
 			  ais->type19.second,
 			  ais->type19.regional,
@@ -1173,8 +1173,8 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
 			  (json ? TYPE21_SCALED_JSON : TYPE21_SCALED_CSV),
 			  NAVAIDTYPE_DISPLAY(ais->type21.type),
 			  ais->type21.name,
-			  ais->type21.lon / AIS_LATLON_SCALE, 
-			  ais->type21.lat / AIS_LATLON_SCALE, 
+			  ais->type21.lon / AIS_LATLON_SCALE,
+			  ais->type21.lat / AIS_LATLON_SCALE,
 			  ais->type21.accuracy,
 			  ais->type21.to_bow,
 			  ais->type21.to_stern,
@@ -1256,11 +1256,11 @@ void  aivdm_dump(struct ais_t *ais, bool scaled, bool json, FILE *fp)
     case 24: /* Class B CS Static Data Report */
 	(void)fprintf(fp, json ? "\"partno\":%u" : "%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
-	    (void)fprintf(fp, json ? "\"shipname\":\"%s\"\n" : "%s\n", 
+	    (void)fprintf(fp, json ? "\"shipname\":\"%s\"\n" : "%s\n",
 			  ais->type24.a.shipname);
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
-		(void)fprintf(fp, json ? "\"shiptype\":\"%s\"," : "%s,", 
+		(void)fprintf(fp, json ? "\"shiptype\":\"%s\"," : "%s,",
 			      SHIPTYPE_DISPLAY(ais->type24.b.shiptype));
 	    } else {
 		(void)fprintf(fp, json ? "\"shiptype\":%u," : "%u,",
