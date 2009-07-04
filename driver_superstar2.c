@@ -373,6 +373,8 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    return (i = gpsd_write(session, msg, msglen));
 }
 
+/* request for ionospheric and utc time data #75 */
+static char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
 /**
  * Parse the data from the device
  */
@@ -381,6 +383,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 		    size_t len)
 {
     int type;
+    time_t now;
 
     if (len == 0)
 	return 0;
@@ -389,6 +392,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     (void)snprintf(session->gpsdata.tag,
 	sizeof(session->gpsdata.tag), "SS2-%d", type);
 
+    now = time(NULL);
     switch (type)
     {
     case SUPERSTAR2_ACK: /* Message Acknowledgement */
@@ -405,6 +409,16 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 	return superstar2_msg_timing(session, buf, len);
     case SUPERSTAR2_MEASUREMENT: /* Timing Parameters */
 	return superstar2_msg_measurement(session, buf, len);
+    case SUPERSTAR2_IONO_UTC:
+	gpsd_report(LOG_PROG, "superstar2 #75 - ionospheric and utc time data \n");
+	session->driver.superstar2.last_iono = now;
+	return 0;
+    case SUPERSTAR2_EPHEMERIS:
+	gpsd_report(LOG_PROG, "superstar2 #22 - ephemeris data \n");
+	/* ephemeris data updates fairly slowly, but when it does, poll UTC */
+	if ((now - session->driver.superstar2.last_iono) > 60)
+	    (void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+	return 0;
 
     default:
 	/* XXX This gets noisy in a hurry. */
@@ -456,7 +470,6 @@ static void superstar2_configurator(struct gps_device_t *session,
     unsigned char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
     unsigned char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
     unsigned char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
-    unsigned char iono_utc_msg[] =	{0x01, 0xCB, 0x34, 0x00, 0x00, 0x01};
     unsigned char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
 
     if (seq != 0)
@@ -467,9 +480,9 @@ static void superstar2_configurator(struct gps_device_t *session,
     (void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
     (void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
     (void)superstar2_write(session, version_msg, sizeof(version_msg));
-    (void)superstar2_write(session, ephemeris_msg, sizeof(version_msg));
-    (void)superstar2_write(session, iono_utc_msg, sizeof(version_msg));
-
+    (void)superstar2_write(session, ephemeris_msg, sizeof(ephemeris_msg));
+    (void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+    session->driver.superstar2.last_iono = time(NULL);
 }
 
 /*

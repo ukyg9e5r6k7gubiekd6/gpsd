@@ -288,6 +288,7 @@ struct gps_device_t {
 #ifdef SUPERSTAR2_ENABLE
 	struct {
 	    unsigned short gps_week;
+	    time_t last_iono;
 	} superstar2;
 #endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
