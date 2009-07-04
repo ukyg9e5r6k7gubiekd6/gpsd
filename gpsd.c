@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
+#include <sys/stat.h>
 #endif /* S_SPLINT_S */
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -1388,7 +1389,7 @@ static void handle_control(int sfd, char *buf)
 		if (st <= 0) {
 		    gpsd_report(LOG_INF,"<= control(%d): invalid hex string (error %d).\n", sfd, st);
 		    ignore_return(write(sfd, "ERROR\n", 6));
-                }
+		}
 		else
 		{
 		    gpsd_report(LOG_INF,"<= control(%d): writing %d bytes fromhex(%s) to %s\n", sfd, st, eq, stash);
@@ -1459,7 +1460,7 @@ int main(int argc, char *argv[])
 	case 'G':
 	    listen_global = true;
 	    break;
-        case 'l':		/* list known device types and exit */
+	case 'l':		/* list known device types and exit */
 	    for (dp = gpsd_drivers; *dp; dp++) {
 #ifdef ALLOW_RECONFIGURE
 		if ((*dp)->mode_switcher != NULL)
