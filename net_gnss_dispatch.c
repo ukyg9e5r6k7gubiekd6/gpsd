@@ -41,10 +41,8 @@ int netgnss_uri_open(struct gps_context_t *context, char *netgnss_service)
     if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP))==0)
 	return dgpsip_open(context, netgnss_service + strlen(NETGNSS_DGPSIP));
 
-#if 0
     if (strncmp(netgnss_service, NETGNSS_GPSD, strlen(NETGNSS_GPSD))==0)
 	return remotegpsd_open(context, netgnss_service + strlen(NETGNSS_GPSD));
-#endif
 
 #ifndef REQUIRE_DGNSS_PROTO
     return dgpsip_open(context, netgnss_service);
@@ -85,7 +83,7 @@ void netgnss_report(struct gps_device_t *session)
 
 void netgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
 {
-    if (context->netgnss_service != netgnss_ntrip) {
+    if (context->netgnss_service == netgnss_dgpsip) {
 	dgpsip_autoconnect(context, lat, lon, DGPSIP_SERVER_LIST);
     }
 }

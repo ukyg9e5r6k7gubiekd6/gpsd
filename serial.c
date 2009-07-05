@@ -219,6 +219,11 @@ int gpsd_open(struct gps_device_t *session)
     struct stat sb;
     mode_t mode = (mode_t)O_RDWR;
 
+    /* short circuit most of this function if we're reading from the net */
+    if (session->context->netgnss_service == netgnss_remotegpsd){
+	session->gpsdata.gps_fd = session->context->dsock;
+	return session->gpsdata.gps_fd;
+    }
     /*@ -boolops -type @*/
     if (session->context->readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
 	mode = (mode_t)O_RDONLY;

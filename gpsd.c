@@ -238,8 +238,9 @@ static void usage(void)
   -h		     	    = help message \n\
   -V			    = emit version and exit.\n\
 A device may be a local serial device for GPS input, or a URL of the form:\n\
-     [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream]\n\
-in which case it specifies an input source for DGPS or ntrip data.\n\
+     {dgpsip|ntrip}://[user:passwd@]host[:port][/stream]\n\
+     gpsd://host[:port][/device][?protocol]\n\
+in which case it specifies an input source for GPSD, DGPS or ntrip data.\n\
 \n\
 The following driver types are compiled into this gpsd instance:\n",
 	   DEFAULT_GPSD_PORT);
@@ -547,8 +548,8 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 	    FD_SET(dsock, &all_fds);
 	    adjust_max_fd(dsock, true);
 	}
-	/* shaky, but only 0 versus nonzero is tested */
-	return &channels[0];
+	if (context.netgnss_service != netgnss_remotegpsd)
+	    return &channels[0]; /* shaky, but only 0 versus nonzero is tested */
     }
 
     /* normal case: set up GPS service */
@@ -1813,7 +1814,7 @@ int main(int argc, char *argv[])
 		continue;
 
 	    /* pass the current RTCM correction to the GPS if new */
-	    if (channel->device_type)
+	    if (channel->device_type && channel->context->netgnss_service != netgnss_remotegpsd)
 		rtcm_relay(channel);
 
 	    /* get data from the device */
