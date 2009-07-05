@@ -2,7 +2,6 @@
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
-#include <sys/stat.h>
 #endif /* S_SPLINT_S */
 #include <sys/un.h>
 #include <netinet/in.h>
