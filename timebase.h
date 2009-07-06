@@ -33,7 +33,7 @@
  * as incorrect as the constant.  Currently this is true only for the
  * Evermore chipset.
  */
-#define LEAP_SECONDS	14
+#define LEAP_SECONDS	15
 
 /* IERS says no leap second will be inserted in June 2009.
  */
