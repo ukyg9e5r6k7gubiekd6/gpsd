@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+/* Macro for declaring function arguments unused. */
+#if defined(__GNUC__)
+#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
+#else /* not __GNUC__ */
+#  define UNUSED
+#endif
+
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
