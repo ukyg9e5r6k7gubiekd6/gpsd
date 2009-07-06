@@ -376,11 +376,11 @@ EXTRA_DIST = \
 	packaging/etc_init.d_gpsd \
 	packaging/etc_init.d_gpsd_rpm
 
-dist-hook:
-	$(MKDIR_P) '$(distdir)/contrib' && \
-	cp -p '$(srcdir)/contrib/'* '$(distdir)/contrib'
-distclean-local:
-	rm -rf '$(distdir)/contrib'
+#dist-hook:
+#	$(MKDIR_P) '$(distdir)/contrib' && \
+#	cp -p '$(srcdir)/contrib/'* '$(distdir)/contrib'
+#distclean-local:
+#	rm -rf '$(distdir)/contrib'
 
 CLEANFILES += $(BUILT_SOURCES) $(TESTBINS) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
