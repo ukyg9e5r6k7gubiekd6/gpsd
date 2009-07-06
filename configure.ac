@@ -243,14 +243,7 @@ AC_CHECK_LIB(pthread, pthread_setcancelstate,
 AC_SUBST(LIBPTHREAD)
 
 AH_VERBATIM([_GNU_SOURCE],
-	  [/* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
-#else /* not __GNUC__ */
-#  define UNUSED
-#endif
-
-/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
+	  [/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif
