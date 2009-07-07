@@ -687,12 +687,14 @@ last sentence was received.</para>
 <term>y</term>
 <listitem>
 <para>Returns Y=, followed by a sentence tag, followed by a timestamp
-(seconds since the Unix epoch, UTC) and a count not more than 12,
-followed by that many quintuples of satellite PRNs, elevation/azimuth
-pairs (elevation an integer formatted as %d in range 0-90, azimuth an
-integer formatted as %d in range 0-359), signal strengths in decibels,
-and 1 or 0 according as the satellite was or was not used in the last
-fix. Each number is followed by one space.</para>
+(seconds since the Unix epoch, UTC) and a count, followed by that many
+quintuples of satellite PRNs, elevation/azimuth pairs (elevation an integer
+formatted as %d in range 0-90, azimuth an integer formatted as %d in range
+0-359), signal strengths in decibels, and 1 or 0 according as the satellite
+was or was not used in the last fix. Each number is followed by one space.
+The count field was formerly limited 12 - this is no longer the case, since
+receivers with more than 12 channels are common and there are enough
+satellites in orbit to have more than 12 usable.</para>
 
 <para>(At protocol level 1, this response had no tag or timestamp.)</para>
 </listitem>
