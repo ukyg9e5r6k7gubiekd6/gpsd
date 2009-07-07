@@ -135,10 +135,10 @@ void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 	to->epc = from->epc;
 }
 
-double timestamp(void) 
+double timestamp(void)
 {
-    struct timeval tv; 
-    (void)gettimeofday(&tv, NULL); 
+    struct timeval tv;
+    (void)gettimeofday(&tv, NULL);
     /*@i1@*/return(tv.tv_sec + tv.tv_usec*1e-6);
 }
 
@@ -201,14 +201,14 @@ double iso8601_to_unix(/*@in@*/char *isotime)
 
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     (void)snprintf(fractstr, sizeof(fractstr), "%.1f", fractional);
-    /* add fractional part, ignore leading 0; "0.2" -> ".2" */ 
+    /* add fractional part, ignore leading 0; "0.2" -> ".2" */
     (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr+1);
     return isotime;
 }
 
 /*
- * The 'week' part of GPS dates are specified in weeks since 0000 on 06 
- * January 1980, with a rollover at 1024.  At time of writing the last 
+ * The 'week' part of GPS dates are specified in weeks since 0000 on 06
+ * January 1980, with a rollover at 1024.  At time of writing the last
  * rollover happened at 0000 22 August 1999.  Time-of-week is in seconds.
  *
  * This code copes with both conventional GPS weeks and the "extended"
@@ -289,7 +289,7 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
     // calculations.  This is prone to happen when the argument points
     // are very close together.  Return NaN so calculations trying
     // to use this will also blow up.
-    if (fabs(a) > 1) 
+    if (fabs(a) > 1)
 	return NAN;
     else
 	return CalcRad((lat1+lat2) / 2) * acos(a);
@@ -297,7 +297,7 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 
 /*****************************************************************************
 
-Carl Carter of SiRF supplied this algorithm for computing DOPs from 
+Carl Carter of SiRF supplied this algorithm for computing DOPs from
 a list of visible satellites (some typos corrected)...
 
 For satellite n, let az(n) = azimuth angle from North and el(n) be elevation.
@@ -340,11 +340,11 @@ Here's how we implement it...
 
 First, each compute element P(i,j) of the 4x4 product A~*A.
 If S(k=1,k=n): f(...) is the sum of f(...) as k varies from 1 to n, then
-applying the definition of matrix product tells us: 
+applying the definition of matrix product tells us:
 
 P(i,j) = S(k=1,k=n): B(i, k) * A(k, j)
 
-But because B is the transpose of A, this reduces to 
+But because B is the transpose of A, this reduces to
 
 P(i,j) = S(k=1,k=n): A(k, i) * A(k, j)
 
@@ -396,9 +396,9 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
   double Det2_13_01 = mat[1][0]*mat[3][1] - mat[1][1]*mat[3][0];
   //double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
   double Det2_13_03 = mat[1][0]*mat[3][3] - mat[1][3]*mat[3][0];
-  //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1];  
+  //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1]; 
   double Det2_13_13 = mat[1][1]*mat[3][3] - mat[1][3]*mat[3][1];
-  //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2];  
+  //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2]; 
   double Det2_23_01 = mat[2][0]*mat[3][1] - mat[2][1]*mat[3][0];
   double Det2_23_02 = mat[2][0]*mat[3][2] - mat[2][2]*mat[3][0];
   double Det2_23_03 = mat[2][0]*mat[3][3] - mat[2][3]*mat[3][0];
@@ -407,15 +407,15 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
   double Det2_23_23 = mat[2][2]*mat[3][3] - mat[2][3]*mat[3][2];
 
   // Find all NECESSARY 3x3 subdeterminants
-  double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02 
-  				+ mat[0][2]*Det2_12_01;
-  //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03 
+  double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02
+				+ mat[0][2]*Det2_12_01;
+  //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03
   //				+ mat[0][3]*Det2_12_01;
   //double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03
   //				+ mat[0][3]*Det2_12_02;
-  //double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13 
+  //double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13
   //				+ mat[0][3]*Det2_12_12;
-  //double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02 
+  //double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02
   //				+ mat[0][2]*Det2_13_01;
   double Det3_013_013 = mat[0][0]*Det2_13_13 - mat[0][1]*Det2_13_03
 				+ mat[0][3]*Det2_13_01;
@@ -423,7 +423,7 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
   //				+ mat[0][3]*Det2_13_02;
   //double Det3_013_123 = mat[0][1]*Det2_13_23 - mat[0][2]*Det2_13_13
   //				+ mat[0][3]*Det2_13_12;
-  //double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02 
+  //double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02
   //				+ mat[0][2]*Det2_23_01;
   //double Det3_023_013 = mat[0][0]*Det2_23_13 - mat[0][1]*Det2_23_03
   //				+ mat[0][3]*Det2_23_01;
@@ -431,20 +431,20 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
 				+ mat[0][3]*Det2_23_02;
   //double Det3_023_123 = mat[0][1]*Det2_23_23 - mat[0][2]*Det2_23_13
   //				+ mat[0][3]*Det2_23_12;
-  double Det3_123_012 = mat[1][0]*Det2_23_12 - mat[1][1]*Det2_23_02 
+  double Det3_123_012 = mat[1][0]*Det2_23_12 - mat[1][1]*Det2_23_02
 				+ mat[1][2]*Det2_23_01;
-  double Det3_123_013 = mat[1][0]*Det2_23_13 - mat[1][1]*Det2_23_03 
+  double Det3_123_013 = mat[1][0]*Det2_23_13 - mat[1][1]*Det2_23_03
 				+ mat[1][3]*Det2_23_01;
-  double Det3_123_023 = mat[1][0]*Det2_23_23 - mat[1][2]*Det2_23_03 
+  double Det3_123_023 = mat[1][0]*Det2_23_23 - mat[1][2]*Det2_23_03
 				+ mat[1][3]*Det2_23_02;
-  double Det3_123_123 = mat[1][1]*Det2_23_23 - mat[1][2]*Det2_23_13 
+  double Det3_123_123 = mat[1][1]*Det2_23_23 - mat[1][2]*Det2_23_13
 				+ mat[1][3]*Det2_23_12;
 
   // Find the 4x4 determinant
   static double det;
-          det =   mat[0][0]*Det3_123_123 
-		- mat[0][1]*Det3_123_023 
-		+ mat[0][2]*Det3_123_013 
+	  det =   mat[0][0]*Det3_123_123
+		- mat[0][1]*Det3_123_023
+		+ mat[0][2]*Det3_123_013
 		- mat[0][3]*Det3_123_012;
 
   // Very small determinants probably reflect floating-point fuzz near zero
@@ -472,7 +472,7 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
   inverse[3][3] =  Det3_012_012 / det;
 
   return true;
-}  
+}
 /*@ +fixedformalarray +mustdefine @*/
 
 gps_mask_t dop(struct gps_data_t *gpsdata)
@@ -514,12 +514,12 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 #endif /* __UNUSED__ */
 
     for (i = 0; i < 4; ++i) { //< rows
-        for (j = 0; j < 4; ++j) { //< cols
-            prod[i][j] = 0.0;
-            for (k = 0; k < n; ++k) {
-                prod[i][j] += satpos[k][i] * satpos[k][j];
-            }
-        }
+	for (j = 0; j < 4; ++j) { //< cols
+	    prod[i][j] = 0.0;
+	    for (k = 0; k < n; ++k) {
+		prod[i][j] += satpos[k][i] * satpos[k][j];
+	    }
+	}
     }
 
 #ifdef __UNUSED__
@@ -545,7 +545,9 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
 #endif /* __UNUSED__ */
     } else {
-	gpsd_report(LOG_WARN, "LOS matrix is singular, can't calculate DOPs.\n");
+	gpsd_report(LOG_INF,
+	    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
+	    gpsdata->gps_device);
 	return 0;
     }
 
