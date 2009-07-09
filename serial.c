@@ -219,9 +219,15 @@ int gpsd_open(struct gps_device_t *session)
     struct stat sb;
     mode_t mode = (mode_t)O_RDWR;
 
-    /* short circuit most of this function if we're reading from the net */
+    /* short circuit most of this function if we're reading from the net
+     * as in the case of gpsd urls. set some nice fake values */
     if (session->context->netgnss_service == netgnss_remotegpsd){
 	session->gpsdata.gps_fd = session->context->dsock;
+	session->saved_baud = 57600;
+	session->gpsdata.baudrate = 57600;
+	session->gpsdata.parity = 'N';
+	session->gpsdata.stopbits = 1;
+	session->context->readonly = 1;
 	return session->gpsdata.gps_fd;
     }
     /*@ -boolops -type @*/
