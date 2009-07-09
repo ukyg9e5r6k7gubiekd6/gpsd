@@ -23,9 +23,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
      * We assume that the chip is presenting clean data that has been
      * parity-checked.
      *
-     * To date this code has been tested only on SiRF and ublox. It's in the
-     * core because other chipsets reporting only GPS time but with 
-     * the capability to read subframe data may want it.
+     * To date this code has been tested on iTrax, SiRF and ublox. It's in
+     * the core because other chipsets reporting only GPS time but with the
+     * capability to read subframe data may want it.
      */
     unsigned int pageid, subframe, data_id, leap;
     gpsd_report(LOG_IO,

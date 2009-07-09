@@ -23,6 +23,7 @@ static gps_mask_t italk_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_navfix(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t decode_itk_subframe(struct gps_device_t *, unsigned char *, size_t);
 
 static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -168,6 +169,40 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     return TIME_SET;
 }
 
+static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned char *buf, size_t len)
+{
+    unsigned short flags, prn, sf;
+    unsigned int words[10];
+
+    if (len != 64){
+	gpsd_report(LOG_PROG,
+		    "ITALK: bad SUBFRAME (len %zu, should be 64)\n", len);
+	return ERROR_SET;
+    }
+
+    flags = getleuw(buf, 7 + 4);
+    prn = getleuw(buf, 7 + 6);
+    sf = getleuw(buf, 7 + 8);
+    gpsd_report(LOG_PROG, "iTalk SUBFRAME prn %u sf %u - decode %s %s\n",
+		prn, sf,
+		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
+		flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
+
+    words[0] = getleul(buf, 7 + 16);
+    words[1] = getleul(buf, 7 + 20);
+    words[2] = getleul(buf, 7 + 24);
+    words[3] = getleul(buf, 7 + 28);
+    words[4] = getleul(buf, 7 + 32);
+    words[5] = getleul(buf, 7 + 36);
+    words[6] = getleul(buf, 7 + 40);
+    words[7] = getleul(buf, 7 + 44);
+    words[8] = getleul(buf, 7 + 48);
+    words[9] = getleul(buf, 7 + 52);
+    /* XXX parity check seems to be needed here. ugh. */
+    gpsd_interpret_subframe(session, words);
+    return ONLINE_SET;
+}
+
 /*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -213,7 +248,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 	gpsd_report(LOG_IO, "iTalk RAW_EPHEMERIS len %zu\n", len);
 	break;
     case ITALK_SUBFRAME:
-	gpsd_report(LOG_IO, "iTalk SUBFRAME len %zu\n", len);
+	mask = decode_itk_subframe(session, buf, len);
 	break;
     case ITALK_BIT_STREAM:
 	gpsd_report(LOG_IO, "iTalk BIT_STREAM len %zu\n", len);
