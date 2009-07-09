@@ -320,13 +320,13 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned int words[10];
+    unsigned int words[10], chan, svid;
 
     if (len != 43)
 	return 0;
 
-    //unsigned int chan = (unsigned int)getub(buf, 1);
-    //unsigned int svid = (unsigned int)getub(buf, 2);
+    chan = (unsigned int)getub(buf, 1);
+    svid = (unsigned int)getub(buf, 2);
     words[0] = (unsigned int)getbeul(buf, 3);
     words[1] = (unsigned int)getbeul(buf, 7);
     words[2] = (unsigned int)getbeul(buf, 11);
