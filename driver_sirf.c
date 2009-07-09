@@ -320,24 +320,31 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned int words[10], chan, svid;
+    unsigned int i, words[10], chan, svid;
 
     if (len != 43)
 	return 0;
 
     chan = (unsigned int)getub(buf, 1);
     svid = (unsigned int)getub(buf, 2);
-    words[0] = (unsigned int)getbeul(buf, 3);
-    words[1] = (unsigned int)getbeul(buf, 7);
-    words[2] = (unsigned int)getbeul(buf, 11);
-    words[3] = (unsigned int)getbeul(buf, 15);
-    words[4] = (unsigned int)getbeul(buf, 19);
-    words[5] = (unsigned int)getbeul(buf, 23);
-    words[6] = (unsigned int)getbeul(buf, 27);
-    words[7] = (unsigned int)getbeul(buf, 31);
-    words[8] = (unsigned int)getbeul(buf, 35);
-    words[9] = (unsigned int)getbeul(buf, 39);
+    words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
+    words[1] = ((unsigned int)getbeul(buf, 7) & 0x3fffffff) >> 6;
+    words[2] = ((unsigned int)getbeul(buf, 11) & 0x3fffffff) >> 6;
+    words[3] = ((unsigned int)getbeul(buf, 15) & 0x3fffffff) >> 6;
+    words[4] = ((unsigned int)getbeul(buf, 19) & 0x3fffffff) >> 6;
+    words[5] = ((unsigned int)getbeul(buf, 23) & 0x3fffffff) >> 6;
+    words[6] = ((unsigned int)getbeul(buf, 27) & 0x3fffffff) >> 6;
+    words[7] = ((unsigned int)getbeul(buf, 31) & 0x3fffffff) >> 6;
+    words[8] = ((unsigned int)getbeul(buf, 35) & 0x3fffffff) >> 6;
+    words[9] = ((unsigned int)getbeul(buf, 39) & 0x3fffffff) >> 6;
     gpsd_report(LOG_PROG, "50B 0x08\n");
+
+    words[0] &= 0xff0000;
+    if (words[0] != 0x8b0000 && words[0] != 0x740000)
+       return ERROR_SET;
+    if (words[0] == 0x740000)
+	for (i = 1; i < 10; i++)
+	    words[i] ^= 0xffffff;
     gpsd_interpret_subframe(session, words);
 
 #ifdef ALLOW_RECONFIGURE
