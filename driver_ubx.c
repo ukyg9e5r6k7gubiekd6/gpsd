@@ -234,6 +234,30 @@ ubx_msg_sbas(unsigned char *buf)
     sbas_in_use = getub(buf, 4);
 }
 
+/*
+ * Raw Subframes
+ */
+static void
+ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
+{
+    unsigned int words[10], chan, svid;
+
+    gpsd_report(LOG_PROG, "UBX_RXM_SFRB\n");
+    chan = (unsigned int)getub(buf, 0);
+    svid = (unsigned int)getub(buf, 1);
+    words[0] = (unsigned int)getleul(buf, 2)  & 0xffffff;
+    words[1] = (unsigned int)getleul(buf, 6)  & 0xffffff;
+    words[2] = (unsigned int)getleul(buf, 10) & 0xffffff;
+    words[3] = (unsigned int)getleul(buf, 14) & 0xffffff;
+    words[4] = (unsigned int)getleul(buf, 18) & 0xffffff;
+    words[5] = (unsigned int)getleul(buf, 22) & 0xffffff;
+    words[6] = (unsigned int)getleul(buf, 26) & 0xffffff;
+    words[7] = (unsigned int)getleul(buf, 30) & 0xffffff;
+    words[8] = (unsigned int)getleul(buf, 34) & 0xffffff;
+    words[9] = (unsigned int)getleul(buf, 38) & 0xffffff;
+    gpsd_interpret_subframe(session, words);
+}
+
 static void
 ubx_msg_inf(unsigned char *buf, size_t data_len)
 {
@@ -338,7 +362,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    gpsd_report(LOG_IO, "UBX_RXM_RAW\n");
 	    break;
 	case UBX_RXM_SFRB:
-	    gpsd_report(LOG_IO, "UBX_RXM_SFRB\n");
+	    ubx_msg_sfrb(session, &buf[6]);
 	    break;
 	case UBX_RXM_SVSI:
 	    gpsd_report(LOG_PROG, "UBX_RXM_SVSI\n");
