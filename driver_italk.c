@@ -187,18 +187,24 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
 		prn, sf,
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
 		flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
+    if (flags & SUBFRAME_WORD_FLAG_MASK)
+	return ONLINE_SET | ERROR_SET; // don't try decode an erroneous packet
 
-    words[0] = getleul(buf, 7 + 16);
-    words[1] = getleul(buf, 7 + 20);
-    words[2] = getleul(buf, 7 + 24);
-    words[3] = getleul(buf, 7 + 28);
-    words[4] = getleul(buf, 7 + 32);
-    words[5] = getleul(buf, 7 + 36);
-    words[6] = getleul(buf, 7 + 40);
-    words[7] = getleul(buf, 7 + 44);
-    words[8] = getleul(buf, 7 + 48);
-    words[9] = getleul(buf, 7 + 52);
-    /* XXX parity check seems to be needed here. ugh. */
+    /*
+     * Timo says "SUBRAME message contains decoded navigation message subframe
+     * words with parity checking done but parity bits still present."
+     */
+    words[0] = (getbeul(buf, 7 + 14) & 0x3fffffff) >> 6;
+    words[1] = (getleul(buf, 7 + 18) & 0x3fffffff) >> 6;
+    words[2] = (getleul(buf, 7 + 22) & 0x3fffffff) >> 6;
+    words[3] = (getleul(buf, 7 + 26) & 0x3fffffff) >> 6;
+    words[4] = (getleul(buf, 7 + 30) & 0x3fffffff) >> 6;
+    words[5] = (getleul(buf, 7 + 34) & 0x3fffffff) >> 6;
+    words[6] = (getleul(buf, 7 + 38) & 0x3fffffff) >> 6;
+    words[7] = (getleul(buf, 7 + 42) & 0x3fffffff) >> 6;
+    words[8] = (getleul(buf, 7 + 46) & 0x3fffffff) >> 6;
+    words[9] = (getleul(buf, 7 + 50) & 0x3fffffff) >> 6;
+
     gpsd_interpret_subframe(session, words);
     return ONLINE_SET;
 }
