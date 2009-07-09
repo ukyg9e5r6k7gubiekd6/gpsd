@@ -662,6 +662,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for GPSD-NG support
+AC_ARG_ENABLE(ng,
+  AC_HELP_STRING([--disable-gpsdng],
+		 [disable GPSD-NG support]),
+  [ac_ng=$enableval], [ac_gpsdng=yes])
+AC_MSG_CHECKING([for GPSD-NG support])
+if test x"$ac_gpsdng" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([GPSDNG_ENABLE], 1, [GPSD-NG support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],
@@ -717,12 +730,12 @@ fi
 dnl check for privilege revocation user at compile-time
 AC_ARG_ENABLE(gpsd-user,
   AC_HELP_STRING([--enable-gpsd-user=username],
-		 [GPSD privilege revokation user]),
+		 [GPSD privilege revocation user]),
   [ac_user=$enableval], [ac_user=nobody])
-AC_MSG_CHECKING([privilege revokation user])
+AC_MSG_CHECKING([privilege revocation user])
 if test x"$ac_user" != "xnobody"; then
     AC_MSG_RESULT([$ac_user])
-	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [GPSD privilege revokation user])
+	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [GPSD privilege revocation user])
 else
   AC_MSG_RESULT([nobody])
 fi
@@ -957,6 +970,7 @@ echo "MKT-3301                : $ac_mkt3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
+echo "GPSD-NG                 : $ac_gpsdng"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac

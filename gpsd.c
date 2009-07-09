@@ -1319,11 +1319,10 @@ static int handle_oldstyle(struct subscriber_t* sub, char *buf, int buflen)
 
 static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 {
-    if (buf[0] != '?')
-	return handle_oldstyle(sub, buf, buflen);
-    else if (strncmp(buf, "?TPV", 4) == 0) {
+#ifdef GPSDNG_ENABLE
+    if (strncmp(buf, "?TPV", 4) == 0) {
 	char reply[BUFSIZ];
-	(void)strlcpy(reply, "{\"class\":\"TPV\",", sizeof(reply));
+	(void)strlcpy(reply, "!TPV={", sizeof(reply));
 	if (assign_channel(sub) && have_fix(sub)) {
 	    (void)snprintf(reply+strlen(reply), 
 			   sizeof(reply)- strlen(reply), 
@@ -1397,12 +1396,13 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 			       sizeof(reply)-strlen(reply),
 			       "\"mode\":%d,", sub->fixbuffer.mode);
 	}
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else if (strncmp(buf, "?SAT", 4) == 0) {
 	char reply[BUFSIZ];
-	(void)strlcpy(reply, "{\"class\":\"SAT\",", sizeof(reply));
+	(void)strlcpy(reply, "!SAT={", sizeof(reply));
 	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
 	    int i, j, used, reported = 0;
 	    (void)snprintf(reply+strlen(reply), 
@@ -1447,14 +1447,18 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
 			    sub->device->gpsdata.satellites, reported);
 	}
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
-    } else {
+    } else  if (buf[0] == '?') {
 #define JSON_ERROR_OBJECT	"{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n"
 	return (int)throttled_write(sub, JSON_ERROR_OBJECT, (ssize_t)strlen(JSON_ERROR_OBJECT));
 #undef JSON_ERROR_OBJECT
     }
+#endif /* GPSDNG_ENABLE */
+    /* fall back to old-style requests */
+    return handle_oldstyle(sub, buf, buflen);
 }
 
 static void handle_control(int sfd, char *buf)

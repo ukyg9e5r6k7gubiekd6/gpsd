@@ -1385,48 +1385,7 @@ reports.  This is a problem; in general, we can't assume that
 a gpsd instance running in a car or boat will have access to
 <code>ntpd</code> or NIST radio time signals.</p>
 
-<h1 id="designahead">Designing Ahead</h1>
-
-<p>This section is preliminary design sketches for things we are 
-likely to need to do in the future.</p>
-
-<h2 id="nonpvt">Non-TPV Data</h2>
-
-<p>There are <em>lots</em> of other things a sensor wedded to a GPS
-might report that don't fit the position-velocity-time model of the O
-report.  Depth of water.  Temperature of water.  Compass heading.
-Roll.  Pitch. Yaw.  We've already had requests to handle some of these
-for NMEA-emitting devices like magnetic compasses (which report
-heading via a proprietary TNTHTM sentence) and fish finders (which
-report water depth and temperature via NMEA DPT and MTW sentences).</p>
-
-<p>To cope with this, we could either:</p>
-
-<ol>
-<li>extend the O tuple to report non-TPV kinds of information, or</li>
-<li>define a new set of requests and responses for non-TPV data.</li>
-</ol>
-
-<p>The simplest way to attack this problem would be to just start adding
-fields to the O response for each new kind of data we get asked to
-handle.  The problem with this is that we could pile up fields forever
-and end up with a monstrously long report most of the fields of
-which are always '?' and some of which are the moral equivalent of 
-"count of the nose hairs on the nearest warthog".</p>
-
-<p>There's a slightly more civilized possibility.  We could add
-optional private-use fields to the O report, the semantics of which
-would be allowed to vary by device.  So, for example, the Hummingbird
-would return water depth in the first private-use field, while the TNT
-would return heading.  Clients would have to know, based on the device
-type as revealed by I, how to interpret and label the data in the
-private-use fields.</p>
-
-<p>If we go for alternative (2), the first consequence is that we
-actually have to implement a next-generation protocol.  The existing GPSD
-protocol is about out of namespace.</p>
-
-<h2 id="protov4">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</h2>
+<h1 id="designahead">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</h1>
 
 <p>There are almost no more letters left in the namespace of the GPSD
 version 3 protocol.  At time of writing in late 2006 we can have one
@@ -1435,15 +1394,19 @@ require a new command/response syntax.  Some posts in the dev-list
 archive refer to this as "Version 4", but that is a rev level we may
 or may not reach before GPSD-NG has to be implemented.</p>
 
-<p>Steps towards defining a new syntax have been taken.  The senior
-developers have agreed on a new protocol with a basic sentence syntax 
-like this:
+<p>Steps towards defining and implementing a new syntax have been
+taken. The new protocol is based on <a
+href="http://www.json.org/">JSON</a> (JavaScript Object Notation).</a>
 
-<pre>
-&lt;request&gt; ::= &lt;introducer&gt; &lt;commands&gt; &lt;newline&gt;
-
-&lt;command&gt; ::= &lt;command-id&gt;=&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
-</pre>
+<p>The major virtue of JSON is its extensibility. There are
+<em>lots</em> of other things a sensor wedded to a GPS might report
+that don't fit the position-velocity-time model of the oldstyle O report.
+Depth of water.  Temperature of water.  Compass heading.  Roll.
+Pitch. Yaw.  We've already had requests to handle some of these for
+NMEA-emitting devices like magnetic compasses (which report heading
+via a proprietary TNTHTM sentence) and fish finders (which report
+water depth and temperature via NMEA DPT and MTW sentences). JSON
+gives a natural way to add ad-hoc fields.</p>
 
 <p>Each request shall begin with an introducer character, '?'. The
 purpose of the introducer is to inform the command parser that
@@ -1457,29 +1420,16 @@ newline.</p>
 
 <p>Each command shall begin with a command identifier.  The command
 identifier shall begin with an alphabetic character and consist of
-alphanumeric characters.  It shall be followed by an equal sign. The 
-52 command identifiers consisting of a single alphabetic are
-reserved equivalents of the old-style GPSD commands.  Command
-identifiers are case-insensitive.</p>
-
-<p>The equal sign may be followed by zero or more comma-separated
-arguments.  Arguments may contain any US-ASCII character other than
-the introducer character, the equal sign, the comma, or the hash '#'
-character (reserved for comments).</p>
-
-<p>If the final argument of a command has a newline immediately after
-a leader equal-sign or separator comma, the content of the argument is a
-multiline continuation.  If a continuation line begins with a '.',
-that '.' is removed before interpretation.  The content of the
-argument consists of all following lines until a line which is empty
-after '.' (e.g. a line consisting solely of the argument terminator
-'.' and a LF or CR-LF).</p>
+alphanumeric characters.  It shall be followed by either an equal sign
+or a line termination (CR-LF or LF).The equal sign, if present, mudt
+be followed by a legal JSON object.</p>
 
 <p>Responses shall have the same format as requests, except that
-responses have the introducer '!'. The response to a command shall
-have the same identifier as the command.</p>
+responses have the introducer '!' and the length limit is 1024
+characters. The response to a command shall have the same identifier
+as the command.</p>
 
-<h3>Syntax Examples:</h3>
+<h2>Syntax Examples:</h2>
 
 <pre>
 # GPSD-NG equivalent of X query request; no arguments 
@@ -1489,13 +1439,6 @@ have the same identifier as the command.</p>
 # GPSD-NG equivalent of B request to set baud rate
 ?b=9600
 !b=9600
-#
-# Hypothetical extended command with a multiline response
-?id
-!id=
-This is a Foobar 2317 GPS
-Firmware revision 555.55
-.
 </pre>
 
 <p>Here's a longer example. Note that this is a far more complex
@@ -1508,14 +1451,12 @@ they'll just say ?WATCH=+TPV+SKY+STATUS and be done.</p>
 # and one RTCM3 correction source. The fields are full name, 
 # service type, and name tag, 
 -> ?DEVICES
--> !DEVICES=
-/dev/ttyUSB0,GPS,GPS#1
-/dev/ttyUSB1,AIS,AIS#1
-/dev/ttyS0,RTCM3,RTCM3#1
-.
+-> !DEVICES=[{"device":"/dev/ttyUSB0","class":"GPS","id":"GPS#1"},
+             {"device":"/dev/ttyUSB1","class":"AIS","id":"AIS#1"},
+             {"device":"/dev/ttyS0","class":"RTCM3","id":"RTCM3#1"}]
 #
 # Client asks the GPS to identify itself.
--> ?ID=GPS#1
+-> ?ID="GPS#1"
 <- !ID=GPS#1,GPS,SiRF,231.000.000ES-01-39
 #
 # Client subscribes to TPV, SKY, and STATUS reports from the GPS.  
@@ -1524,26 +1465,45 @@ they'll just say ?WATCH=+TPV+SKY+STATUS and be done.</p>
 <- !WATCH=GPS#1,+TPV+SKY+STATUS
 #
 # Daemon begins to stream TPVs (like our O report) and SKYs (like Y)
-<- !TPV=GPS#1,MID2,1119197561.890,0.005,46.498203637,7.568074350,1327.780,21.000,124.484,0.0000,0.000,0.000,?,23.56,?,3
-<- !SKY=GPS#1,MID4,1119197562.890,7:10,45,196,34,1:29,67,310,40,1:28,59,108,42,1:26,51,304,43,1:8,44,58,41,1:27,16,66,39,1:21,10,301,0,0:
-<- !TPV=GPS#1,MID2,1119197563.890,0.005,46.498208969,7.568087260,1328.596,21.000,124.484,190.3797,0.091,0.085,?,23.60,?,3
-<- !TPV=GPS#1,MID2,1119197564.890,0.005,46.498215161,7.568087260,1329.321,21.000,124.484,0.0000,0.086,0.091,?,23.53,?,3
-<- !TPV=GPS#1,MID2,1119197565.890,0.005,46.498221628,7.568088976,1328.639,21.000,124.484,0.0000,0.086,0.091,?,23.56,?,3
+# Whitespace between togens is not significant in JSON.
+<- !TPV={"device":"GPS#1","tag":"MID2","time":1119197561.890,
+         "lon":46.498203637,"lat":7.568074350,"alt":1327.780,"eph":21.000,
+         "epv":124.484,"mode":3}
+<- !SKY={"device":"GPS#1","tag":"MID4","time":1119197562.890,"reported":7
+         "satellites":
+         {"PRN":10,"el":45,"az":196,"ss":34,"used":1}
+         {"PRN":29,"el":67,"az":310,"ss":40,"used":1}
+         {"PRN":28,"el":59,"az":108,"ss":42,"used":1}
+         {"PRN":26,"el":51,"az":304,"ss":43,"used":1}
+         {"PRN":8,"el":44,"az":58,"ss":41,"used":1}
+         {"PRN":27,"el":16,"az":66,"ss":39,"used":1}
+         {"PRN":21,"el":10,"az":301,"ss":0,"used":0}]
+<- !TPV={"device":"GPS#1","tag":"MID2","time":1119197563.890,
+         "lon":46.498208969,"lat":7.568087260,"alt":1328.596,
+         "eph":21.000,"epv":124.138,"mode":3}
+<- !TPV={"device":"GPS#1","tag":"MID2","time":1119197564.890,
+         "lon":46.498215161,"lat":7.568087260,"alt":1329.321,
+         "eph":21.000,"epv":124.483,"mode":3}
+<- !TPV={"device":"GPS#1","tag":"MID2","time":1119197565.890,"
+         lon":46.498221628,7"lat":.568088976,"alt":1328.639,
+         "eph":21.000,"epv":124.484,"mode":3}
 #
 # Client subscribes to Type 1 AIS reports.  To subscribe to all
 # reports from a device, we would omit the type argument.
 -> ?WATCH=AIS#1,+1
 <- !WATCH=AIS#1,+1
 #
-# Daemon begins to stream AIVDM Type 1 reports
+# Daemon begins to stream AIS Type 1 reports
 # Fields are: device, message type, timestamp, MMSI, navigation status,
 # ROT, SOG, position accuracy, longitude, latitude, COG, and true heading.
-!AIS=AIS#1,TYPE1,1119197565.890,371798000,0,?,12.3,1,-123.395383333,48.38163333333,224,215
+!AIS={"device=":"AIS#1","type":1,"time":1119197565.890,"mmsi":371798000,
+      "sec":0,"rot":12.3,"speed":-123,"accuracy":true,"lon":395383333,
+      "lat":48.38163333333,"course":224,"heading":215}
 </pre>
 
 <p>
 
-<h3>Rationale:</h3>
+<h2>Rationale:</h2>
 
 <p>The purpose of the introducer is to permit old-style and new-style
 commands to be mixed in the same session. Most of the rest of the NG
@@ -1560,7 +1520,7 @@ requests as for responses.  This is so we can keep the 78-character
 line limit while allowing the daemon to pass back more data than can
 fit on a line.</p>
 
-<h3>Proposed sentences:</h3>
+<h2>Proposed sentences:</h2>
 
 <p>Chris Kuethe has floated the following list requests for
 discussion:</p>
