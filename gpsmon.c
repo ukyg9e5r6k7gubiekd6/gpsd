@@ -156,7 +156,7 @@ static ssize_t readpkt(void)
 	FD_SET(controlfd,&select_set);
     timeval.tv_sec = 0;
     timeval.tv_usec = 500000;
-    if (select(session.gpsdata.gps_fd + 1,&select_set,NULL,NULL,&timeval) < 0)
+    if (select(session.gpsdata.gps_fd + 1,&select_set,NULL,NULL,&timeval) == -1)
 	return EOF;
 
     if (!FD_ISSET(session.gpsdata.gps_fd,&select_set))
@@ -495,7 +495,7 @@ int main (int argc, char **argv)
     if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {
 
 	session.gpsdata.gps_fd = netlib_connectsock(source.server, source.port, "tcp");
-	if (session.gpsdata.gps_fd < 0) {
+	if (session.gpsdata.gps_fd == -1) {
 	    (void)fprintf(stderr,
 			  "%s: connection failure on %s:%s, error %d.\n",
 			  argv[0], source.server, source.port, session.gpsdata.gps_fd);
@@ -617,7 +617,7 @@ int main (int argc, char **argv)
 	FD_SET(0,&select_set);
 	FD_SET(session.gpsdata.gps_fd,&select_set);
 
-	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
+	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) == -1)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {

@@ -663,7 +663,7 @@ static int tnt_packet_sniff(struct gps_device_t *session)
     {
       count = 0;
       (void)tnt_send(session->gpsdata.gps_fd, "@X?");
-      if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) < 0)
+      if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) == -1)
 	  return BAD_PACKET;
       if (count == 0) {
 	  //int delay = 10000000000.0 / session->gpsdata.baudrate;

@@ -177,7 +177,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 
 	memset(&buf[len], 0, (size_t)(blen - len));
 
-	if ((rlen = recv(fd, &buf[len], (size_t)(blen - 1 - len), 0)) < 0) {
+	if ((rlen = recv(fd, &buf[len], (size_t)(blen - 1 - len), 0)) == -1) {
 	    if (errno == EINTR)
 		continue;
 	    return -1;
@@ -284,7 +284,7 @@ static int ntrip_stream_probe(const char *caster,
     int dsock;
     char buf[BUFSIZ];
 
-    if ((dsock = netlib_connectsock(caster, port, "tcp")) < 0) {
+    if ((dsock = netlib_connectsock(caster, port, "tcp")) == -1) {
 	    printf("ntrip stream connect error %d\n", dsock);
 	    return -1;
     }
@@ -358,7 +358,7 @@ static int ntrip_stream_open(const char *caster,
     }
 
     memset(buf, 0, sizeof(buf));
-    if (read(context->dsock, buf, sizeof(buf) - 1) < 0)
+    if (read(context->dsock, buf, sizeof(buf) - 1) == -1)
 	goto close;
 
     /* parse 401 Unauthorized */

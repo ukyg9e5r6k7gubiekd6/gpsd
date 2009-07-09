@@ -278,7 +278,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	type = SOCK_STREAM;
 	/*@i@*/proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
-    if ((s = socket(PF_INET, type, proto)) < 0) {
+    if ((s = socket(PF_INET, type, proto)) == -1) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
 	return -1;
     }
@@ -286,14 +286,14 @@ static int passivesock(char *service, char *protocol, int qlen)
 	gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
-    if (bind(s, (struct sockaddr *) &sin, (int)sizeof(sin)) < 0) {
+    if (bind(s, (struct sockaddr *) &sin, (int)sizeof(sin)) == -1) {
 	gpsd_report(LOG_ERROR, "Can't bind to port %s\n", service);
 	if (errno == EADDRINUSE) {
 		gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
 	}
 	return -1;
     }
-    if (type == SOCK_STREAM && listen(s, qlen) < 0) {
+    if (type == SOCK_STREAM && listen(s, qlen) == -1) {
 	gpsd_report(LOG_ERROR, "Can't listen on port %s\n", service);
 	return -1;
     }
@@ -307,14 +307,14 @@ static int filesock(char *filename)
     int sock;
 
     /*@ -mayaliasunique @*/
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
     (void)strlcpy(addr.sun_path, filename, 104); /* from sys/un.h */
     /*@i1@*/addr.sun_family = AF_UNIX;
     (void)bind(sock, (struct sockaddr *) &addr,  (socklen_t)sizeof(addr));
-    if (listen(sock, QLEN) < 0) {
+    if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;
     }
@@ -1661,7 +1661,7 @@ int main(int argc, char *argv[])
      */
     if (control_socket) {
 	(void)unlink(control_socket);
-	if ((csock = filesock(control_socket)) < 0) {
+	if ((csock = filesock(control_socket)) == -1) {
 	    gpsd_report(LOG_ERROR,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
 	}
@@ -1690,7 +1690,7 @@ int main(int argc, char *argv[])
     if (!gpsd_service)
 	gpsd_service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     /*@ +observertrans @*/
-    if ((msock = passivesock(gpsd_service, "tcp", QLEN)) < 0) {
+    if ((msock = passivesock(gpsd_service, "tcp", QLEN)) == -1) {
 	gpsd_report(LOG_ERR,"command socket create failed, netlib error %d\n",msock);
 	exit(2);
     }
@@ -1700,7 +1700,7 @@ int main(int argc, char *argv[])
     if (!rtcm_service)
 	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
     /*@ +observertrans @*/
-    if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) < 0) {
+    if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) == -1) {
 	gpsd_report(LOG_ERROR,"RTCM104 socket create failed, netlib error %d\n",nsock);
 	exit(2);
     }
@@ -1811,7 +1811,7 @@ int main(int argc, char *argv[])
 	 */
 	/*@ -usedef @*/
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(maxfd+1, &rfds, NULL, NULL, &tv) < 0) {
+	if (select(maxfd+1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
@@ -1844,7 +1844,7 @@ int main(int argc, char *argv[])
 	    char *c_ip;
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
-	    if (ssock < 0)
+	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		struct subscriber_t *client = NULL;
@@ -1880,7 +1880,7 @@ int main(int argc, char *argv[])
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
 
-	    if (ssock < 0)
+	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		struct subscriber_t *client = NULL;
@@ -1914,7 +1914,7 @@ int main(int argc, char *argv[])
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
 
-	    if (ssock < 0)
+	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		gpsd_report(LOG_INF, "control socket connect on %d\n", ssock);

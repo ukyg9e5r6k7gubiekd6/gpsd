@@ -329,7 +329,7 @@ static int socket_mainloop(void)
 	tv.tv_sec = 0;
 	data = select(gpsdata->gps_fd + 1, &fds, NULL, NULL, &tv);
 
-	if (data < 0) {
+	if (data == -1) {
 	    (void)fprintf(stderr,"%s\n", strerror(errno));
 	    break;
 	}

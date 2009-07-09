@@ -32,7 +32,7 @@ static int remotegpsd_device_probe(const char *host,
     int dsock;
     char buf[BUFSIZ];
 
-    if ((dsock = netlib_connectsock(host, port, "tcp")) < 0) {
+    if ((dsock = netlib_connectsock(host, port, "tcp")) == -1) {
 	    gpsd_report(LOG_WARN, "remotegpsd device probe connect error %d\n", dsock);
 	    return -1;
     }

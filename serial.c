@@ -69,7 +69,7 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
 bool gpsd_set_raw(struct gps_device_t *session)
 {
     (void)cfmakeraw(&session->ttyset);
-    if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
+    if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) == -1) {
 	gpsd_report(LOG_ERROR,
 		    "error changing port attributes: %s\n",strerror(errno));
 	return false;
@@ -239,9 +239,9 @@ int gpsd_open(struct gps_device_t *session)
     }
     /*@ +boolops +type @*/
 
-    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, (int)(mode|O_NONBLOCK|O_NOCTTY))) < 0) {
+    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, (int)(mode|O_NONBLOCK|O_NOCTTY))) == -1) {
 	gpsd_report(LOG_ERROR, "device open failed: %s - retrying read-only\n", strerror(errno));
-	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) < 0) {
+	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) == -1) {
 	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n", strerror(errno));
 	    return -1;
 	}

@@ -57,7 +57,7 @@ static void daemonize(void) {
 
   /* Run as my child. */
   pid=fork();
-  if (pid<0) exit(1); /* fork error */
+  if (pid == -1) exit(1); /* fork error */
   if (pid>0) exit(0); /* parent exits */
 
   /* Obtain a new process group. */
@@ -96,7 +96,7 @@ static void open_serial(char* device)
      * Open modem device for reading and writing and not as controlling
      * tty.
      */
-    if ((fd_out = open(device, O_RDWR|O_NOCTTY)) < 0) {
+    if ((fd_out = open(device, O_RDWR|O_NOCTTY)) == -1) {
 	fprintf(stderr, "gpspipe: error opening serial port\n");
 	exit(1);
     }
@@ -271,7 +271,7 @@ int main( int argc, char **argv)
 
     /*@ -nullpass @*/
     sock = netlib_connectsock(source.server, source.port, "tcp");
-    if (sock < 0) {
+    if (sock == -1) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      server, port, strerror(errno), errno);
@@ -348,7 +348,7 @@ int main( int argc, char **argv)
 		}
 	    }
 	} else {
-	    if (readbytes < 0) {
+	    if (readbytes == -1) {
 		(void) fprintf(stderr, "gpspipe: read error %s(%d)\n",
 			    strerror(errno), errno);
 		exit(1);

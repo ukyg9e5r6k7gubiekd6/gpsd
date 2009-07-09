@@ -1170,7 +1170,7 @@ static int GetPacket (struct gps_device_t *session )
 	/*@ ignore @*/
 	delay.tv_sec = 0;
 	delay.tv_nsec = 3330000L;
-	while (nanosleep(&delay, &rem) < 0)
+	while (nanosleep(&delay, &rem) == -1)
 	    continue;
 	/*@ end @*/
     }

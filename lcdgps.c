@@ -121,8 +121,8 @@ static void daemonize(void) {
 
   /* Run as my child. */
   i=fork();
-  if (i<0) exit(1); /* fork error */
-  if (i>0) exit(0); /* parent exits */
+  if (i == -1) exit(1); /* fork error */
+  if (i > 0) exit(0); /* parent exits */
 
   /* Obtain a new process group. */
   setsid();
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
 
     /* create socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sd<0) {
+    if(sd == -1) {
 	perror("cannot open socket ");
 	exit(1);
     }
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
     localAddr.sin_port = htons(0);
 
     rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
-    if(rc<0) {
+    if(rc == -1) {
 	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
 	perror("error ");
 	exit(1);
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
 
     /* connect to server */
     rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-    if(rc<0) {
+    if(rc == -1) {
 	perror("cannot connect ");
 	exit(1);
     }
