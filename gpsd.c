@@ -1433,11 +1433,11 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		    if (sub->device->gpsdata.PRN[i]) {
 			(void)snprintf(reply+strlen(reply),
 				       sizeof(reply)-strlen(reply),
-				       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%d},",
+				       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s},",
 				       sub->device->gpsdata.PRN[i],
 				       sub->device->gpsdata.elevation[i],sub->device->gpsdata.azimuth[i],
 				       sub->device->gpsdata.ss[i],
-				       used);
+				       used ? "true" : "false");
 		    }
 		}
 		reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
