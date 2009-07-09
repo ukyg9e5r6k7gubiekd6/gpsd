@@ -756,7 +756,7 @@ static bool privileged_user(struct subscriber_t *who)
 }
 #endif /* ALLOW_CONFIGURE */
 
-static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
+static int handle_oldstyle(struct subscriber_t* sub, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
@@ -1315,6 +1315,146 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
     (void)strlcat(reply, "\r\n", BUFSIZ);
 
     return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+}
+
+static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
+{
+    if (buf[0] != '?')
+	return handle_oldstyle(sub, buf, buflen);
+    else if (strncmp(buf, "?TPV", 4) == 0) {
+	char reply[BUFSIZ];
+	(void)strlcpy(reply, "{\"class\"=\"TPV\",", sizeof(reply));
+	if (assign_channel(sub) && have_fix(sub)) {
+	    (void)snprintf(reply+strlen(reply), 
+			   sizeof(reply)- strlen(reply), 
+			   "\"tag\"=\"%s\",",
+			   sub->device->gpsdata.tag[0]!='\0' ? sub->device->gpsdata.tag : "-");
+	    if (isnan(sub->fixbuffer.time)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"time\"=%.3f,",
+			       sub->fixbuffer.time);
+	    if (isnan(sub->fixbuffer.ept)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"ept\"=%.3f,",
+			       sub->fixbuffer.ept);
+	    if (isnan(sub->fixbuffer.latitude)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"lat\"=%.9f,",
+			       sub->fixbuffer.latitude);
+	    if (isnan(sub->fixbuffer.longitude)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"lon\"=%.9f,",
+			       sub->fixbuffer.longitude);
+	    if (isnan(sub->fixbuffer.altitude)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"alt\"=%.3f,",
+			       sub->fixbuffer.altitude);
+	    if (isnan(sub->fixbuffer.eph)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			      "\"eph\"=%.3f,",  
+			       sub->fixbuffer.eph);
+	    if (isnan(sub->fixbuffer.epv)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"epv\"=%.3f,",  
+			       sub->fixbuffer.epv);
+	    if (isnan(sub->fixbuffer.track)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"track\"=%.4f,",
+			       sub->fixbuffer.track);
+	    if (isnan(sub->fixbuffer.speed)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"speed\"=%.3f,",
+			       sub->fixbuffer.speed);
+	    if (isnan(sub->fixbuffer.climb)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"climb\"=%.3f,",
+			       sub->fixbuffer.climb);
+	    if (isnan(sub->fixbuffer.epd)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"epd\"=%.4f,",
+			       sub->fixbuffer.epd);
+	    if (isnan(sub->fixbuffer.eps)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"eps\"=%.2f,", sub->fixbuffer.eps);
+	    if (isnan(sub->fixbuffer.epc)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			 "\"epc\"=%.2f,", sub->fixbuffer.epc);
+	    if (sub->fixbuffer.mode > 0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"mode\"=%d,", sub->fixbuffer.mode);
+	}
+	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
+	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+    } else if (strncmp(buf, "?SAT", 4) == 0) {
+	char reply[BUFSIZ];
+	(void)strlcpy(reply, "{\"class\"=\"SAT\",", sizeof(reply));
+	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
+	    int i, j, used, reported = 0;
+	    (void)snprintf(reply+strlen(reply), 
+			   sizeof(reply)- strlen(reply), 
+			   "\"tag\"=\"%s\",",
+			   sub->device->gpsdata.tag[0]!='\0' ? sub->device->gpsdata.tag : "-");
+	    if (isnan(sub->device->gpsdata.sentence_time)==0)
+		(void)snprintf(reply+strlen(reply),
+			       sizeof(reply)-strlen(reply),
+			       "\"time\"=%.3f ",
+			       sub->device->gpsdata.sentence_time);
+	    /* insurance against flaky drivers */
+	    for (i = 0; i < sub->device->gpsdata.satellites; i++)
+		if (sub->device->gpsdata.PRN[i])
+		    reported++;
+	    (void)snprintf(reply+strlen(reply),
+			   sizeof(reply)-strlen(reply),
+			   "\"reported\"=%d,", reported);
+	    if (reported) {
+		(void)strlcat(reply, "\"satellites\"=[", sizeof(reply));
+		for (i = 0; i < reported; i++) {
+		    used = 0;
+		    for (j = 0; j < sub->device->gpsdata.satellites_used; j++)
+			if (sub->device->gpsdata.used[j] == sub->device->gpsdata.PRN[i]) {
+			    used = 1;
+			    break;
+			}
+		    if (sub->device->gpsdata.PRN[i]) {
+			(void)snprintf(reply+strlen(reply),
+				       sizeof(reply)-strlen(reply),
+				       "{\"PRN\"=%d,\"el\"=%d,\"az\"=%d,\"ss\"=%.0f,\"used\"=%d},",
+				       sub->device->gpsdata.PRN[i],
+				       sub->device->gpsdata.elevation[i],sub->device->gpsdata.azimuth[i],
+				       sub->device->gpsdata.ss[i],
+				       used);
+		    }
+		}
+		reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+		(void)strlcat(reply, "],", sizeof(reply));
+	    }
+	    if (sub->device->gpsdata.satellites != reported)
+		gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
+			    sub->device->gpsdata.satellites, reported);
+	}
+	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
+	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+    } else {
+#define JSON_ERROR_OBJECT	"{\"class=ERR\",\"msg\"=\"Unrecognized request\"}\r\n"
+	return (int)throttled_write(sub, JSON_ERROR_OBJECT, (ssize_t)strlen(JSON_ERROR_OBJECT));
+#undef JSON_ERROR_OBJECT
+    }
 }
 
 static void handle_control(int sfd, char *buf)
