@@ -1413,6 +1413,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	if ((errno == EAGAIN) || (errno == EINTR)) {
 #ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+2, "no bytes ready\n");
+	    recvd = 0;
 	    /* fall through, input buffer may be nonempty */
 #endif /* STATE_DEBUG */
 	} else {
