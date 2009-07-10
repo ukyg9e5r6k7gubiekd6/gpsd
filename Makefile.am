@@ -141,6 +141,7 @@ libgpsd_c_sources = \
 	geoid.c \
 	hex.c \
 	isgps.c \
+	json.c \
 	libgps.c \
 	gpsdclient.c \
 	libgpsd_core.c \
@@ -225,7 +226,8 @@ endif
 clean-local:
 	rm -rf build
 
-TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid test_mkgmtime
+TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid \
+	test_mkgmtime test_json
 
 #
 # Build test_float
@@ -262,6 +264,11 @@ test_geoid_LDADD = $(LIBC) libgps.la -lm
 #
 test_mkgmtime_SOURCES = test_mkgmtime.c
 test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
+
+#
+# Build JSON parse tester
+test_json_SOURCES = test_json.c
+test_json_LDADD = $(LIBC) libgps.la -lm
 
 MANPAGES_BASE = \
 	gpsd.8 \
