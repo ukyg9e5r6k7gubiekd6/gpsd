@@ -54,7 +54,9 @@ const char *json_str1 = "{\"device\":\"GPS#1\",\"tag\":\"MID2\",\
 static char buf1[JSON_VAL_MAX+1];
 static char buf2[JSON_VAL_MAX+1];
 static struct gps_fix_t fix;
-bool flag1, flag2;
+static bool flag1, flag2;
+static double dftreal;
+static int dftinteger;
 
 const struct json_attr_t json_attrs_1[] = {
     {"device", string,  .addr.string = buf1},
@@ -65,6 +67,8 @@ const struct json_attr_t json_attrs_1[] = {
     {"alt",    real,    .addr.real = &fix.altitude,  .dflt.real = 0},
     {"eph",    real,    .addr.real = &fix.eph,       .dflt.real = 0},
     {"epv",    real,    .addr.real = &fix.epv,       .dflt.real = 0},
+    {"dftint", integer, .addr.integer = &dftinteger, .dflt.integer = 5},
+    {"dftreal",real,    .addr.real = &dftreal,       .dflt.real = 23.17},
     {"mode",   integer, .addr.integer = &fix.mode,   .dflt.integer = -1},
     {"flag1",  boolean, .addr.boolean = &flag1,},
     {"flag2",  boolean, .addr.boolean = &flag2,},
@@ -85,6 +89,8 @@ int main(int argc, char *argv[])
     ASSERT_REAL("time", fix.time, 1119197561.890);
     ASSERT_REAL("lon", fix.longitude, 46.498203637);
     ASSERT_REAL("lat", fix.latitude, 7.568074350);
+    ASSERT_INTEGER("dftint", dftinteger, 5);	/* did the default work? */
+    ASSERT_REAL("dftreal", dftreal, 23.17);	/* did the default work? */
     ASSERT_BOOLEAN("flag1", flag1, true);
     ASSERT_BOOLEAN("flag2", flag2, false);
 
