@@ -7,6 +7,38 @@
 #include "json.h"
 #include "gps.h"
 
+#define ASSERT_CASE(num, status) \
+    if (status < 0) \
+    { \
+	(void)fprintf(stderr, "case %d FAILED, status %d.\n", num, status); \
+	exit(1); \
+    }
+
+#define ASSERT_STRING(fld, val) \
+    if (strcmp(fld, val)) \
+    {\
+	(void)fprintf(stderr, "string attribute eval failed, value = %s.\n", fld);\
+	exit(1);\
+    }
+
+#define ASSERT_INTEGER(fld, val) \
+    if (fld != val)\
+    {\
+	(void)fprintf(stderr, "integer attribute eval failed, value = %d.\n", fld);\
+	exit(1);\
+    }
+
+/*
+ * Floating point comparisons are iffy, but at least if any of these fail
+ * the output will make it clear whether it was a precision issue
+ */
+#define ASSERT_REAL(fld, val) \
+    if (fld != val)\
+    {\
+	(void)fprintf(stderr, "real attribute eval failed, value = %f.\n", fld);\
+	exit(1);\
+    }
+
 const char *json_str1 = "{\"device\":\"GPS#1\",\"tag\":\"MID2\",\
     \"time\":1119197561.890,\"lon\":46.498203637,\"lat\":7.568074350,\
     \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3}";
@@ -32,30 +64,16 @@ int main(int argc, char *argv[])
 {
     int status;
 
-    status = parse_json(json_str1, json_attrs_1);
-
     (void)fprintf(stderr, "JSON unit test ");
-    if (status < 0)
-    {
-	(void)fprintf(stderr, "case 1 FAILED, status %d.\n", status);
-	exit(1);
-    }
-    if (strcmp(buf1, "GPS#1"))
-    {
-	(void)fprintf(stderr, "string attribute eval failed, value = %s.\n", buf1);
-	exit(1);
-    }
-    if (strcmp(buf2, "MID2"))
-    {
-	(void)fprintf(stderr, "string attribute eval failed, value = %s.\n", buf1);
-	exit(1);
-    }
-    if (fix.mode != 3)
-    {
-	(void)fprintf(stderr, "integer attribute eval failed, value = %d.\n", fix.mode);
-	exit(1);
-    }
 
+    status = parse_json(json_str1, json_attrs_1);
+    ASSERT_CASE(1, status);
+    ASSERT_STRING(buf1, "GPS#1");
+    ASSERT_STRING(buf2, "MID2");
+    ASSERT_INTEGER(fix.mode, 3);
+    ASSERT_REAL(fix.time, 1119197561.890);
+    ASSERT_REAL(fix.longitude, 46.498203637);
+    ASSERT_REAL(fix.latitude, 7.568074350);
 
     (void)fprintf(stderr, "succeeded.\n");
     exit(0);
