@@ -1431,19 +1431,9 @@ as the command.</p>
 
 <h2>Syntax Examples:</h2>
 
-<pre>
-# GPSD-NG equivalent of X query request; no arguments 
-?x
-!x=0
-#
-# GPSD-NG equivalent of B request to set baud rate
-?b=9600
-!b=9600
-</pre>
-
-<p>Here's a longer example. Note that this is a far more complex
-session than most clients will ever perform.  Much more usually
-they'll just say ?WATCH=+TPV+SKY+STATUS and be done.</p>
+<p>Here's an example. Note that this is a far more complex session
+than most clients will ever perform.  Much more usually they'll just
+say ?WATCH={"TPV":true,"SKY":true,"STATUS":true} and be done.</p>
 
 <pre>
 # Client asks daemon what devices are available
@@ -1456,13 +1446,14 @@ they'll just say ?WATCH=+TPV+SKY+STATUS and be done.</p>
              {"device":"/dev/ttyS0","class":"RTCM3","id":"RTCM3#1"}]
 #
 # Client asks the GPS to identify itself.
--> ?ID="GPS#1"
-<- !ID=GPS#1,GPS,SiRF,231.000.000ES-01-39
+-> ?ID={"id"="GPS#1"}
+<- !ID={"id"="GPS#1","class":"GPS",
+        "driver":SiRF,"firmware":"231.000.000ES-01-39"}
 #
 # Client subscribes to TPV, SKY, and STATUS reports from the GPS.  
 # Daemon confirms this is possible. 
--> ?WATCH=GPS#1,+TPV+SKY+STATUS
-<- !WATCH=GPS#1,+TPV+SKY+STATUS
+-> ?WATCH={"TPV":true,"SKY":true,"STATUS":true}
+<- !WATCH={"TPV":true,"SKY":true,"STATUS":true}
 #
 # Daemon begins to stream TPVs (like our O report) and SKYs (like Y)
 # Whitespace between togens is not significant in JSON.

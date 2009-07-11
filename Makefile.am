@@ -47,7 +47,7 @@ endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = test_float test_bits test_gpsmm test_packet test_mkgmtime test_geoid
+check_PROGRAMS = test_float test_bits test_gpsmm test_packet test_mkgmtime test_geoid test_json
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON

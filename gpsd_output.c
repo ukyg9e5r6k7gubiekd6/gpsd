@@ -672,9 +672,9 @@ int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
-    } else if (strncmp(buf, "?SAT", 4) == 0) {
+    } else if (strncmp(buf, "?SKY", 4) == 0) {
 	char reply[BUFSIZ];
-	(void)strlcpy(reply, "!SAT={", sizeof(reply));
+	(void)strlcpy(reply, "!SKY={", sizeof(reply));
 	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
 	    int i, j, used, reported = 0;
 	    (void)snprintf(reply+strlen(reply),

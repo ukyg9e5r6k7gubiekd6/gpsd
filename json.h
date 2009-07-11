@@ -8,13 +8,13 @@ struct json_attr_t {
     enum {integer, real, string, boolean} type;
     union {
 	int *integer;
-	float *real;
-	char **string;
+	double *real;
+	char *string;
 	bool *boolean;
     } addr;
     union {
 	int integer;
-	float real;
+	double real;
 	char string;
 	bool boolean;
     } dflt;
@@ -23,6 +23,6 @@ struct json_attr_t {
 #define JSON_ATTR_MAX	31	/* max charss in JSON attribute name */
 #define JSON_VAL_MAX	63	/* max charss in JSON value part */
 
-int parse_json(char *, struct json_attr_t *);
+int parse_json(const char *, const struct json_attr_t *);
 
 /* json.h ends here */
