@@ -133,6 +133,19 @@ extern void rtcm3_dump(struct rtcm3_t *rtcm, FILE *);
 #define NON_NMEA_ENABLE	
 #endif
 
+struct subscriber_t {
+    int fd;			/* client file descriptor. -1 if unused */
+    double active;		/* when subscriber last polled for data */
+    bool tied;				/* client set device with F */
+    bool watcher;			/* is client in watcher mode? */
+    int raw;				/* is client in raw mode? */
+    enum {GPS,RTCM104v2,ANY} requires;	/* type of device requested */
+    struct gps_fix_t fixbuffer;		/* info to report to the client */
+    struct gps_fix_t oldfix;		/* previous fix for error modeling */
+    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
+    struct gps_device_t *device;	/* device subscriber listens to */
+};
+
 struct gps_context_t {
     int valid;				/* member validity flags */
     bool readonly;			/* if true, never write to device */
@@ -360,6 +373,31 @@ struct gps_device_t {
 #define LOG_RAW 	5	/* raw low-level I/O */
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
+/*
+ * This hackery is intended to support SBCs that are resource-limited
+ * and only need to support one or a few devices each.  It avoids the
+ * space overhead of allocating thousands of unused device structures.
+ * This array fills from the bottom, so as an extreme case you could
+ * reduce LIMITED_MAX_DEVICES to 1.
+ */
+#ifdef LIMITED_MAX_DEVICES
+#define MAXDEVICES	LIMITED_MAX_DEVICES
+#else
+/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
+#define MAXDEVICES	4
+#endif
+
+#ifdef LIMITED_MAX_CLIENTS
+#define MAXSUBSCRIBERS LIMITED_MAX_CLIENTS
+#else
+/* subscriber structure is small enough that there's no need to limit this */
+#define MAXSUBSCRIBERS	FD_SETSIZE
+#endif
+#define sub_index(s) (int)(s - subscribers)
+#define allocated_channel(chp)	 ((chp)->gpsdata.gps_device[0] != '\0')
+#define free_channel(chp)	 (chp)->gpsdata.gps_device[0] = '\0'
+#define initialized_channel(chp) ((chp)->context != NULL)
+
 
 /* here are the available GPS drivers */
 extern const struct gps_type_t **gpsd_drivers;
@@ -436,6 +474,16 @@ extern void ecef_to_wgs84fix(/*@out@*/struct gps_data_t *,
 			     double, double, double, 
 			     double, double, double);
 extern gps_mask_t dop(struct gps_data_t *);
+
+/* sharing between gpsd.c and gpsd_output.c */
+bool privileged_user(struct subscriber_t *);
+bool assign_channel(struct subscriber_t *);
+bool have_fix(struct subscriber_t *);
+char *snarfline(char *, char **);
+int handle_oldstyle(struct subscriber_t *, char *, int);
+int handle_gpsd_request(struct subscriber_t *, char *, int);
+struct gps_device_t *find_device(char *);
+ssize_t throttled_write(struct subscriber_t *, char *, ssize_t);
 
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);
