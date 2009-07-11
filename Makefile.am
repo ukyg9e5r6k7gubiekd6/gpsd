@@ -129,7 +129,7 @@ gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 #
 # Build shared libraries
 #
-libgps_la_LDFLAGS = -version-number 18:0:0
+libgps_la_LDFLAGS = -version-number 19:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgpsd_c_sources = \
