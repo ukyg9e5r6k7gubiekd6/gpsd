@@ -6,8 +6,6 @@
 
 #include "json.h"
 
-#define JSON_DEBUG
-
 int parse_json(const char *cp, const struct json_attr_t *attrs)
 {
     enum {init, await_attr, in_attr, await_value, 
@@ -92,10 +90,10 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	    break;
 	case in_val_string:
 	    if (*cp == '"') {
+		*pval = '\0';
 #ifdef JSONDEBUG
 		(void) printf("Collected string value %s\n", valbuf);
 #endif /* JSONDEBUG */
-		*pval = '\0';
 		state = post_val;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
 		return -5;	/* value too long */
@@ -104,10 +102,10 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	    break;
 	case in_val_token:
 	    if (isspace(*cp) || *cp == ',' || *cp == '}') {
+		*pval = '\0';
 #ifdef JSONDEBUG
 		(void) printf("Collected token value %s\n", valbuf);
 #endif /* JSONDEBUG */
-		*pval = '\0';
 		state = post_val;
 		if (*cp == '}' || *cp == ',')
 		    --cp;
@@ -129,6 +127,9 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 		(void)strcpy(cursor->addr.string, valbuf);
 		break;
 	    case boolean:
+#ifdef JSONDEBUG
+		(void) printf("Boolean value '%s' processed to %d\n", valbuf, !strcmp(valbuf, "true"));
+#endif /* JSONDEBUG */
 		*(cursor->addr.boolean) = (bool)!strcmp(valbuf, "true");
 		break;
 	    }
