@@ -6,13 +6,15 @@
 
 #include "json.h"
 
+#define JSON_DEBUG
+
 int parse_json(const char *cp, const struct json_attr_t *attrs)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
-    struct json_attr_t *cursor;
+    const struct json_attr_t *cursor;
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
@@ -34,6 +36,9 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 
     /* parse input JSON */
     for (; *cp; cp++) {
+#ifdef JSONDEBUG
+	(void) printf("State %d, looking at '%c'\n", state, *cp);
+#endif /* JSONDEBUG */
 	switch (state)
 	{
 	case init:
@@ -58,6 +63,9 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	case in_attr:
 	    if (*cp == '"') {
 		*pattr++ = '\0';
+#ifdef JSONDEBUG
+		(void) printf("Collected attribute name %s\n", attrbuf);
+#endif /* JSONDEBUG */
 		for (cursor = attrs; cursor->attribute != NULL; cursor++)
 		    if (strcmp(cursor->attribute, attrbuf)==0)
 			break;
@@ -68,7 +76,7 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1)
 		return -4;	/* attribute name too long */
 	    else
-		*pattr = *cp;
+		*pattr++ = *cp;
 	    break;
 	case await_value:
 	    if (isspace(*cp) || *cp == ':')
@@ -79,10 +87,15 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	    } else {
 		state = in_val_token;
 		pval = valbuf;
+		*pval++ = *cp;
 	    }
 	    break;
 	case in_val_string:
 	    if (*cp == '"') {
+#ifdef JSONDEBUG
+		(void) printf("Collected string value %s\n", valbuf);
+#endif /* JSONDEBUG */
+		*pval = '\0';
 		state = post_val;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
 		return -5;	/* value too long */
@@ -91,8 +104,12 @@ int parse_json(const char *cp, const struct json_attr_t *attrs)
 	    break;
 	case in_val_token:
 	    if (isspace(*cp) || *cp == ',' || *cp == '}') {
+#ifdef JSONDEBUG
+		(void) printf("Collected token value %s\n", valbuf);
+#endif /* JSONDEBUG */
+		*pval = '\0';
 		state = post_val;
-		if (*cp == '}')
+		if (*cp == '}' || *cp == ',')
 		    --cp;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
 		return -5;	/* value too long */
