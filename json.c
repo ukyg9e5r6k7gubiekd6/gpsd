@@ -6,7 +6,7 @@
 
 #include "json.h"
 
-int parse_json(const char *cp, const struct json_attr_t *attrs)
+int json_read_object(const char *cp, const struct json_attr_t *attrs)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;

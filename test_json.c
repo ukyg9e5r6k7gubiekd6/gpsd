@@ -75,13 +75,31 @@ const struct json_attr_t json_attrs_1[] = {
     {NULL},
 };
 
+const char *json_str2 = "{\"tag\":\"MID4\",\"time\":1119197562.890,\
+         \"reported\":7\
+         \"satellites\":[\
+         {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":1},\
+         {\"PRN\":29,\"el\":67,\"az\":310,\"ss\":40,\"used\":1},\
+         {\"PRN\":28,\"el\":59,\"az\":108,\"ss\":42,\"used\":1},\
+         {\"PRN\":26,\"el\":51,\"az\":304,\"ss\":43,\"used\":1},\
+         {\"PRN\":8,\"el\":44,\"az\":58,\"ss\":41,\"used\":1},\
+         {\"PRN\":27,\"el\":16,\"az\":66,\"ss\":39,\"used\":1},\
+         {\"PRN\":21,\"el\":10,\"az\":301,\"ss\":0,\"used\":0}]}";
+
+const struct json_attr_t json_attrs_2[] = {
+    {"device", string,  .addr.string = buf1},
+    {"tag",    string,  .addr.string = buf2},
+    {"time",   real,    .addr.real = &fix.time,      .dflt.real = 0},
+    // Array definition goes here
+};
+
 int main(int argc, char *argv[])
 {
     int status;
 
     (void)fprintf(stderr, "JSON unit test ");
 
-    status = parse_json(json_str1, json_attrs_1);
+    status = json_read_object(json_str1, json_attrs_1);
     ASSERT_CASE(1, status);
     ASSERT_STRING("device", buf1, "GPS#1");
     ASSERT_STRING("tag", buf2, "MID2");
