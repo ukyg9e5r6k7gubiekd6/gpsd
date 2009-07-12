@@ -7,6 +7,8 @@
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
+int json_read_array(const char *, const struct json_attr_t *, const char **);
+
 int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
@@ -14,6 +16,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
     const struct json_attr_t *cursor;
+    int substatus;
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
@@ -82,6 +85,15 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
 	case await_value:
 	    if (isspace(*cp) || *cp == ':')
 		continue;
+	    else if (*cp == '[') {
+		--cp;
+		if (cursor->type != array)
+		    return -5;	/* saw [ when not expecting array */
+		substatus = json_read_array(cp, cursor->addr.array, &cp);
+		if (substatus < 0)
+		    return substatus;
+	    } else if (cursor->type == array)
+		return -6;	/* array element was specified, but no [ */
 	    else if (*cp == '"') {
 		state = in_val_string;
 		pval = valbuf;
@@ -99,7 +111,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
 #endif /* JSONDEBUG */
 		state = post_val;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
-		return -5;	/* value too long */
+		return -7;	/* value too long */
 	    else
 		*pval++ = *cp;
 	    break;
@@ -113,7 +125,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
 		if (*cp == '}' || *cp == ',')
 		    --cp;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
-		return -5;	/* value too long */
+		return -8;	/* value too long */
 	    else
 		*pval++ = *cp;
 	    break;
@@ -146,10 +158,24 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
 	    else if (*cp == '}')
 		return 0;
 	    else
-		return -6;	/* garbage while expecting comma or } */
+		return -9;	/* garbage while expecting comma or } */
 	    break;
 	}
     }
+
+    if (end != NULL)
+	*end = cp;
+    return 0;
+}
+
+int json_read_array(const char *cp, const struct json_attr_t *attrs, const char **end)
+{
+    while (isspace(*cp))
+	cp++;
+    if (*cp != '[')
+	return -10;	/* didn't find expected array start */
+
+    // Array parsing logic goes here
 
     if (end != NULL)
 	*end = cp;
