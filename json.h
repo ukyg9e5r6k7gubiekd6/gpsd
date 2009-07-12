@@ -3,6 +3,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+struct json_array_t { 
+    struct json_attr_t *subtype;
+    char *baseptr;
+    int element_size;
+};
+
 struct json_attr_t {
     char *attribute;
     enum {integer, real, string, boolean, array} type;
@@ -11,7 +17,7 @@ struct json_attr_t {
 	double *real;
 	char *string;
 	bool *boolean;
-	struct json_attr_t *array;
+	struct json_array_t array;
     } addr;
     union {
 	int integer;
@@ -24,6 +30,6 @@ struct json_attr_t {
 #define JSON_ATTR_MAX	31	/* max charss in JSON attribute name */
 #define JSON_VAL_MAX	63	/* max charss in JSON value part */
 
-int json_read_object(const char *, const struct json_attr_t *, const char **end);
+int json_read_object(const char *, char *, const struct json_attr_t *, const char **end);
 
 /* json.h ends here */

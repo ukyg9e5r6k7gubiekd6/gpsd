@@ -7,9 +7,9 @@
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
-int json_read_array(const char *, const struct json_attr_t *, const char **);
+int json_read_array(const char *, const struct json_array_t *, const char **);
 
-int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
+int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *attrs, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
@@ -89,7 +89,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
 		--cp;
 		if (cursor->type != array)
 		    return -5;	/* saw [ when not expecting array */
-		substatus = json_read_array(cp, cursor->addr.array, &cp);
+		substatus = json_read_array(cp, &cursor->addr.array, &cp);
 		if (substatus < 0)
 		    return substatus;
 	    } else if (cursor->type == array)
@@ -168,7 +168,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
     return 0;
 }
 
-int json_read_array(const char *cp, const struct json_attr_t *attrs, const char **end)
+int json_read_array(const char *cp, const struct json_array_t *attrs, const char **end)
 {
     while (isspace(*cp))
 	cp++;
