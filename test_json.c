@@ -4,8 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gpsd_config.h"
 #include "json.h"
 #include "gps.h"
+
+#include "strl.c"
 
 #define ASSERT_CASE(num, status) \
     if (status < 0) \

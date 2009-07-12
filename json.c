@@ -124,7 +124,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs)
 		*(cursor->addr.real) = atof(valbuf);
 		break;
 	    case string:
-		(void)strcpy(cursor->addr.string, valbuf);
+		(void)strlcpy(cursor->addr.string, valbuf, sizeof(valbuf));
 		break;
 	    case boolean:
 #ifdef JSONDEBUG
