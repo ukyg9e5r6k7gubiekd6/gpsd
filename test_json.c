@@ -115,7 +115,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     (void)fprintf(stderr, "JSON unit test ");
 
-    status = json_read_object(json_str1, json_attrs_1);
+    status = json_read_object(json_str1, json_attrs_1, NULL);
     ASSERT_CASE(1, status);
     ASSERT_STRING("device", buf1, "GPS#1");
     ASSERT_STRING("tag", buf2, "MID2");
@@ -128,7 +128,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_BOOLEAN("flag1", flag1, true);
     ASSERT_BOOLEAN("flag2", flag2, false);
 
-    //status = json_read_object(json_str2, json_attrs_2);
+    //status = json_read_object(json_str2, json_attrs_2, NULL);
     //ASSERT_CASE(2, status);
     //ASSERT_STRING("tag", buf2, "MID4");
     //ASSERT_INTEGER("reported", reported, 7);

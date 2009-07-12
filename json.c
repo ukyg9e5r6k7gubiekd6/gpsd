@@ -4,9 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
-int json_read_object(const char *cp, const struct json_attr_t *attrs)
+int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
@@ -29,6 +30,8 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs)
 	    break;
 	case boolean:
 	    *(cursor->addr.boolean) = cursor->dflt.boolean;
+	    break;
+	case array:	/* silences a compiler warning */
 	    break;
 	}
 
@@ -132,6 +135,9 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs)
 #endif /* JSONDEBUG */
 		*(cursor->addr.boolean) = (bool)!strcmp(valbuf, "true");
 		break;
+	    case array:
+		// FIXME: must actually handle this case
+		break;
 	    }
 	    if (isspace(*cp))
 		continue;
@@ -145,5 +151,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs)
 	}
     }
 
+    if (end != NULL)
+	*end = cp;
     return 0;
 }
