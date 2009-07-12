@@ -96,7 +96,7 @@ const struct json_attr_t json_attrs_2[] = {
     // Array definition goes here
 };
 
-int main(int argc, char *argv[])
+int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int status;
 
