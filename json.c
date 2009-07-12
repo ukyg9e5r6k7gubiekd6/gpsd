@@ -20,23 +20,42 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
-	switch(cursor->type)
-	{
-	case integer:
-	    *(cursor->addr.integer) = cursor->dflt.integer;
-	    break;
-	case real:
-	    *(cursor->addr.real) = cursor->dflt.real;
-	    break;
-	case string:
-	    cursor->addr.string.ptr[0] = '\0';
-	    break;
-	case boolean:
-	    *(cursor->addr.boolean) = cursor->dflt.boolean;
-	    break;
-	case array:	/* silences a compiler warning */
-	    break;
-	}
+	if (baseptr != NULL)
+	    switch(cursor->type)
+	    {
+	    case integer:
+		*((int *)&baseptr[cursor->addr.offset]) = cursor->dflt.integer;
+		break;
+	    case real:
+		*((double *)&baseptr[cursor->addr.offset]) = cursor->dflt.real;
+		break;
+	    case string:
+		baseptr[cursor->addr.offset] = '\0';
+		break;
+	    case boolean:
+		*((bool *)&baseptr[cursor->addr.offset]) = cursor->dflt.boolean;
+		break;
+	    case array:	/* silences a compiler warning */
+		break;
+	    }
+	else
+	    switch(cursor->type)
+	    {
+	    case integer:
+		*(cursor->addr.integer) = cursor->dflt.integer;
+		break;
+	    case real:
+		*(cursor->addr.real) = cursor->dflt.real;
+		break;
+	    case string:
+		cursor->addr.string.ptr[0] = '\0';
+		break;
+	    case boolean:
+		*(cursor->addr.boolean) = cursor->dflt.boolean;
+		break;
+	    case array:	/* silences a compiler warning */
+		break;
+	    }
 
     /* parse input JSON */
     for (; *cp; cp++) {
@@ -51,7 +70,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 	    else if (*cp == '{')
 		state = await_attr;
 	    else
-		return -1;	/* non-whitespace when expecting object start */
+		return JSON_ERR_OBSTART;	/* non-WS when expecting object start */
 	    break;
 	case await_attr:
 	    if (isspace(*cp))
@@ -62,7 +81,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 	    } else if (*cp == '}')
 		break;
 	    else
-		return -2;	/* non-whitespace while expecting attribute */
+		return JSON_ERR_ATTRSTART;	/* non-WS while expecting attribute */
 	    break;
 	case in_attr:
 	    if (*cp == '"') {
@@ -74,11 +93,11 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		    if (strcmp(cursor->attribute, attrbuf)==0)
 			break;
 		if (cursor->attribute == NULL)
-		    return -3;	/* unknown attribute name */
+		    return JSON_ERR_BADATTR;	/* unknown attribute name */
 		state = await_value;
 		pval = valbuf;
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1)
-		return -4;	/* attribute name too long */
+		return JSON_ERR_ATTRLEN;	/* attribute name too long */
 	    else
 		*pattr++ = *cp;
 	    break;
@@ -88,12 +107,12 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 	    else if (*cp == '[') {
 		--cp;
 		if (cursor->type != array)
-		    return -5;	/* saw [ when not expecting array */
+		    return JSON_ERR_NOARRAY;	/* saw [ when not expecting array */
 		substatus = json_read_array(cp, cursor->addr.array, &cp);
 		if (substatus < 0)
 		    return substatus;
 	    } else if (cursor->type == array)
-		return -6;	/* array element was specified, but no [ */
+		return JSON_ERR_NOBRAK;	/* array element was specified, but no [ */
 	    else if (*cp == '"') {
 		state = in_val_string;
 		pval = valbuf;
@@ -110,8 +129,8 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		(void) printf("Collected string value %s\n", valbuf);
 #endif /* JSONDEBUG */
 		state = post_val;
-	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
-		return -7;	/* value too long */
+	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + cursor->addr.string.len - 1)
+		return JSON_ERR_STRLONG;	/* value too long */
 	    else
 		*pval++ = *cp;
 	    break;
@@ -125,32 +144,49 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		if (*cp == '}' || *cp == ',')
 		    --cp;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
-		return -8;	/* value too long */
+		return JSON_ERR_TOKLONG;	/* value too long */
 	    else
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*(cursor->addr.integer) = atoi(valbuf);
-		break;
-	    case real:
-		*(cursor->addr.real) = atof(valbuf);
-		break;
-	    case string:
-		(void)strncpy(cursor->addr.string.ptr, valbuf, cursor->addr.string.len);
-		break;
-	    case boolean:
-#ifdef JSONDEBUG
-		(void) printf("Boolean value '%s' processed to %d\n", valbuf, !strcmp(valbuf, "true"));
-#endif /* JSONDEBUG */
-		*(cursor->addr.boolean) = (bool)!strcmp(valbuf, "true");
-		break;
-	    case array:
-		// FIXME: must actually handle this case
-		break;
-	    }
+	    if (baseptr != NULL)
+		switch(cursor->type)
+		{
+		case integer:
+		    *((int *)&baseptr[cursor->addr.offset]) = atoi(valbuf);
+		    break;
+		case real:
+		    *((double *)&baseptr[cursor->addr.offset]) = atof(valbuf);
+		    break;
+		case string:
+		    return JSON_ERR_SUBSTRING;	/* string in array subojects not supported */
+		case boolean:
+		    *((bool *)&baseptr[cursor->addr.offset]) = (bool)!strcmp(valbuf, "true");
+		    break;
+		case array:	/* silences a compiler warning */
+		    break;
+		}
+	    else
+		switch(cursor->type)
+		{
+		case integer:
+		    *(cursor->addr.integer) = atoi(valbuf);
+		    break;
+		case real:
+		    *(cursor->addr.real) = atof(valbuf);
+		    break;
+		case string:
+		    (void)strncpy(cursor->addr.string.ptr, valbuf, cursor->addr.string.len);
+		    break;
+		case boolean:
+    #ifdef JSONDEBUG
+		    (void) printf("Boolean value '%s' processed to %d\n", valbuf, !strcmp(valbuf, "true"));
+    #endif /* JSONDEBUG */
+		    *(cursor->addr.boolean) = (bool)!strcmp(valbuf, "true");
+		    break;
+		case array:	/* silences a compiler warning */
+		    break;
+		}
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == ',')
@@ -158,7 +194,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 	    else if (*cp == '}')
 		return 0;
 	    else
-		return -9;	/* garbage while expecting comma or } */
+		return JSON_ERR_BADTRAIL;	/* garbage while expecting comma or } */
 	    break;
 	}
     }
@@ -170,12 +206,19 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 
 int json_read_array(const char *cp, const struct json_array_t *attrs, const char **end)
 {
+    int substatus;
+
     while (isspace(*cp))
 	cp++;
     if (*cp != '[')
-	return -10;	/* didn't find expected array start */
+	return JSON_ERR_ARRAYSTART;	/* didn't find expected array start */
 
-    // Array parsing logic goes here
+    for (;;) {
+	while (isspace(*cp))
+	    cp++;
+	if (*cp == ']')
+	    break;
+    }
 
     if (end != NULL)
 	*end = cp;
