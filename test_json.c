@@ -72,8 +72,10 @@ static double dftreal;
 static int dftinteger;
 
 const struct json_attr_t json_attrs_1[] = {
-    {"device", string,  .addr.string = buf1},
-    {"tag",    string,  .addr.string = buf2},
+    {"device", string,  .addr.string.ptr = buf1, 
+			.addr.string.len = sizeof(buf1)},
+    {"tag",    string,  .addr.string.ptr = buf2,
+			.addr.string.len = sizeof(buf1)},
     {"time",   real,    .addr.real = &gpsdata.fix.time,      .dflt.real = 0},
     {"lon",    real,    .addr.real = &gpsdata.fix.longitude, .dflt.real = 0},
     {"lat",    real,    .addr.real = &gpsdata.fix.latitude,  .dflt.real = 0},
@@ -102,8 +104,10 @@ const char *json_str2 = "{\"tag\":\"MID4\",\"time\":1119197562.890,\
 static int reported;
 
 const struct json_attr_t json_attrs_2[] = {
-    {"device",     string,  .addr.string  = buf1},
-    {"tag",        string,  .addr.string  = buf2},
+    {"device",     string,  .addr.string.ptr  = buf1,
+    			    .addr.string.len = sizeof(buf1)},
+    {"tag",        string,  .addr.string.ptr  = buf2,
+    			    .addr.string.len = sizeof(buf2)},
     {"time",       real,    .addr.real    = &gpsdata.fix.time},
     {"reported",   integer, .addr.integer = &reported},
     // Array definition goes here

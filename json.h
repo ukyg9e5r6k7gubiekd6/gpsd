@@ -15,9 +15,12 @@ struct json_attr_t {
     union {
 	int *integer;
 	double *real;
-	char *string;
+	struct {
+	    char *ptr;
+	    int len;
+	} string;
 	bool *boolean;
-	struct json_array_t array;
+	struct json_array_t *array;
     } addr;
     union {
 	int integer;

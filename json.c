@@ -29,7 +29,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 	    *(cursor->addr.real) = cursor->dflt.real;
 	    break;
 	case string:
-	    cursor->addr.string[0] = '\0';
+	    cursor->addr.string.ptr[0] = '\0';
 	    break;
 	case boolean:
 	    *(cursor->addr.boolean) = cursor->dflt.boolean;
@@ -89,7 +89,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		--cp;
 		if (cursor->type != array)
 		    return -5;	/* saw [ when not expecting array */
-		substatus = json_read_array(cp, &cursor->addr.array, &cp);
+		substatus = json_read_array(cp, cursor->addr.array, &cp);
 		if (substatus < 0)
 		    return substatus;
 	    } else if (cursor->type == array)
@@ -139,7 +139,7 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		*(cursor->addr.real) = atof(valbuf);
 		break;
 	    case string:
-		(void)strlcpy(cursor->addr.string, valbuf, sizeof(valbuf));
+		(void)strncpy(cursor->addr.string.ptr, valbuf, cursor->addr.string.len);
 		break;
 	    case boolean:
 #ifdef JSONDEBUG
