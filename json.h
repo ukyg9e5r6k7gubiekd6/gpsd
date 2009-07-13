@@ -34,6 +34,7 @@ struct json_attr_t {
 #define JSON_VAL_MAX	63	/* max charss in JSON value part */
 
 int json_read_object(const char *, const struct json_attr_t *, int, const char **end);
+const char *json_error_string(int);
 
 #define JSON_ERR_OBSTART	-1	/* non-WS when expecting object start */
 #define JSON_ERR_ATTRSTART	-2	/* non-WS when expecting attrib start */

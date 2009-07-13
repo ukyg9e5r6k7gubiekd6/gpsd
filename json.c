@@ -1,5 +1,29 @@
-/* json.c - parse JSON into fixed-extent data structures */
+/****************************************************************************
 
+NAME
+   json.c - parse JSON into fixed-extent data structures
+
+DESCRIPTION
+   This module parses a large subset of JSON (JavaScript Object
+Notation).  Unlike more general JSON parsers, it doesn't use malloc(3)
+and doesn't support polymorphism; you need to give it a set of
+template structures describing the expected shape of the incoming
+JSON, and it will error out if that shape is not matched.  When the
+parse succeds, attribute values will be extracted into static
+locations specified in the template structures.
+
+   The "shape" of a JSON object in the type signature of its attributes 
+(and attribute values, and so on recursively).  This parser is indifferent 
+to the order of attributes at any level, but you have to tell it in advance
+what the type of each attributer value will be and where the parses valu will
+be stored. The tamplate structures may supply default values to be used 
+when an expected attribute is omitte.
+
+   The dialect this parses has two limitations.  First, it cannot recognize 
+the JSON "null" value.  Secondly, arrays may only have objects - not strings or
+integers or floats - as elements.
+
+***************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -203,4 +227,28 @@ breakout:
     if (end != NULL)
 	*end = cp;
     return 0;
+}
+
+const char *json_error_string(int err)
+{
+    const char *errors[] = {
+	"non-whitespace when expecting object start",
+	"non-whitespace when expecting attribute start",
+	"unknown attribute name",
+	"attribute name too long",
+	"saw [ when not expecting array",
+	"array element specified, but no [",
+	"string value too long",
+	"token value too long",
+	"garbage while expecting , or }",
+	"didn't find expected array start",
+	"error while parsing object array",
+	"too many array elements",
+	"garbage while expecting array comma",
+    };
+
+    if (err > -1 || err <= -sizeof(errors)/sizeof(errors[0]))
+	return "unknown JSON parsing error";
+    else
+	return errors[-err-1];
 }
