@@ -64,18 +64,16 @@ const char *json_str1 = "{\"device\":\"GPS#1\",\"tag\":\"MID2\",\
     \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3,\
     \"flag1\":true,\"flag2\":false}";
 
-static char buf1[JSON_VAL_MAX+1];
-static char buf2[JSON_VAL_MAX+1];
 static struct gps_data_t gpsdata;
 static bool flag1, flag2;
 static double dftreal;
 static int dftinteger;
 
 const struct json_attr_t json_attrs_1[] = {
-    {"device", string,  .addr.string.ptr = buf1, 
-			.addr.string.len = sizeof(buf1)},
-    {"tag",    string,  .addr.string.ptr = buf2,
-			.addr.string.len = sizeof(buf1)},
+    {"device", string,  .addr.string.ptr = gpsdata.gps_device, 
+			.addr.string.len = PATH_MAX},
+    {"tag",    string,  .addr.string.ptr = gpsdata.tag,
+			.addr.string.len = MAXTAGLEN},
     {"time",   real,    .addr.real = &gpsdata.fix.time,      .dflt.real = 0},
     {"lon",    real,    .addr.real = &gpsdata.fix.longitude, .dflt.real = 0},
     {"lat",    real,    .addr.real = &gpsdata.fix.latitude,  .dflt.real = 0},
@@ -113,10 +111,10 @@ const struct json_attr_t json_attrs_2_1[] = {
 };
 
 const struct json_attr_t json_attrs_2[] = {
-    {"device",     string,  .addr.string.ptr  = buf1,
-    			    .addr.string.len = sizeof(buf1)},
-    {"tag",        string,  .addr.string.ptr  = buf2,
-    			    .addr.string.len = sizeof(buf2)},
+    {"device",     string,  .addr.string.ptr  = gpsdata.gps_device,
+    			    .addr.string.len = PATH_MAX},
+    {"tag",        string,  .addr.string.ptr  = gpsdata.tag,
+    			    .addr.string.len = MAXTAGLEN},
     {"time",       real,    .addr.real    = &gpsdata.fix.time},
     {"reported",   integer, .addr.integer = &gpsdata.satellites_used},
     {"satellites", array,   .addr.array.subtype = json_attrs_2_1,
@@ -132,8 +130,8 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     status = json_read_object(json_str1, json_attrs_1, 0, NULL);
     ASSERT_CASE(1, status);
-    ASSERT_STRING("device", buf1, "GPS#1");
-    ASSERT_STRING("tag", buf2, "MID2");
+    ASSERT_STRING("device", gpsdata.gps_device, "GPS#1");
+    ASSERT_STRING("tag", gpsdata.tag, "MID2");
     ASSERT_INTEGER("mode", gpsdata.fix.mode, 3);
     ASSERT_REAL("time", gpsdata.fix.time, 1119197561.890);
     ASSERT_REAL("lon", gpsdata.fix.longitude, 46.498203637);
@@ -145,15 +143,17 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     status = json_read_object(json_str2, json_attrs_2, 0, NULL);
     ASSERT_CASE(2, status);
-    ASSERT_STRING("tag", buf2, "MID4");
+    ASSERT_STRING("tag", gpsdata.tag, "MID4");
     ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
     ASSERT_INTEGER("PRN[0]", gpsdata.PRN[0], 10);
     ASSERT_INTEGER("el[0]", gpsdata.elevation[0], 45);
     ASSERT_INTEGER("az[0]", gpsdata.azimuth[0], 196);
+    ASSERT_REAL("ss[0]", gpsdata.ss[0], 34);
     ASSERT_BOOLEAN("used[0]", usedflags[0], true);
     ASSERT_INTEGER("PRN[6]", gpsdata.PRN[6], 21);
     ASSERT_INTEGER("el[6]", gpsdata.elevation[6], 10);
     ASSERT_INTEGER("az[6]", gpsdata.azimuth[6], 301);
+    ASSERT_REAL("ss[6]", gpsdata.ss[6], 0);
     ASSERT_BOOLEAN("used[6]", usedflags[6], false);
 
     (void)fprintf(stderr, "succeeded.\n");
