@@ -89,7 +89,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 		--cp;
 		if (cursor->type != array)
 		    return JSON_ERR_NOARRAY;	/* saw [ when not expecting array */
-		substatus = json_read_array(cp, cursor->addr.array, &cp);
+		substatus = json_read_array(cp, &cursor->addr.array, &cp);
 		if (substatus < 0)
 		    return substatus;
 	    } else if (cursor->type == array)
@@ -164,7 +164,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
     return 0;
 }
 
-int json_read_array(const char *cp, const struct json_array_t *attrs, const char **end)
+int json_read_array(const char *cp, const struct json_array_t *array, const char **end)
 {
     int substatus;
 

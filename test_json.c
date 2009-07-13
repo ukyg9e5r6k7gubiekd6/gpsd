@@ -101,7 +101,13 @@ const char *json_str2 = "{\"tag\":\"MID4\",\"time\":1119197562.890,\
          {\"PRN\":27,\"el\":16,\"az\":66,\"ss\":39,\"used\":1},\
          {\"PRN\":21,\"el\":10,\"az\":301,\"ss\":0,\"used\":0}]}";
 
-static int reported;
+const struct json_attr_t json_attrs_2_1[] = {
+    {"PRN",	   integer, .addr.integer = gpsdata.PRN},
+    {"el",	   integer, .addr.integer = gpsdata.elevation},
+    {"az",	   integer, .addr.integer = gpsdata.azimuth},
+    //{"ss",	   real,    .addr.real = gpsdata.ss},
+    {"used",	   integer, .addr.integer = gpsdata.used},
+};
 
 const struct json_attr_t json_attrs_2[] = {
     {"device",     string,  .addr.string.ptr  = buf1,
@@ -109,8 +115,9 @@ const struct json_attr_t json_attrs_2[] = {
     {"tag",        string,  .addr.string.ptr  = buf2,
     			    .addr.string.len = sizeof(buf2)},
     {"time",       real,    .addr.real    = &gpsdata.fix.time},
-    {"reported",   integer, .addr.integer = &reported},
-    // Array definition goes here
+    {"reported",   integer, .addr.integer = &gpsdata.satellites_used},
+    {"satellites", array,   .addr.array.subtype = json_attrs_2_1,
+                            .addr.array.maxlen = MAXCHANNELS},
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
@@ -135,7 +142,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     //status = json_read_object(json_str2, json_attrs_2, 0, NULL);
     //ASSERT_CASE(2, status);
     //ASSERT_STRING("tag", buf2, "MID4");
-    //ASSERT_INTEGER("reported", reported, 7);
+    //ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
 
     (void)fprintf(stderr, "succeeded.\n");
     exit(0);

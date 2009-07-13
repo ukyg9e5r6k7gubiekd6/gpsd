@@ -4,9 +4,8 @@
 #include <ctype.h>
 
 struct json_array_t { 
-    struct json_attr_t *subtype;
-    char *baseptr;
-    int element_size;
+    const struct json_attr_t *subtype;
+    int maxlen;
 };
 
 struct json_attr_t {
@@ -20,7 +19,7 @@ struct json_attr_t {
 	    int len;
 	} string;
 	bool *boolean;
-	struct json_array_t *array;
+	struct json_array_t array;
 	int offset;
     } addr;
     union {
