@@ -53,7 +53,7 @@ static int remotegpsd_stream_open(const char *host,
 			     struct gps_context_t *context,
 			     struct remotegpsd_stream_t *stream)
 {
-    char buf[BUFSIZ], mode, level;
+    char buf[BUFSIZ], mode = 'R', level = 1;
 
     if (0 == strcmp(stream->protocol, "raw")) {
 	    mode = 'R';
