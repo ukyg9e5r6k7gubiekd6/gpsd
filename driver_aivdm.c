@@ -70,7 +70,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	"110111", "111000", "111001", "111010",	"111011",
 	"111100", "111101", "111110", "111111",   
     };
-    int nfields = 0;   
+    int nfields = 0;
     unsigned char *data, *cp = ais_context->fieldcopy;
     struct ais_t *ais = &ais_context->decoded;
     unsigned char ch;
@@ -80,7 +80,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	return false;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_PROG, "AIVDM packet length %ld: %s", buflen, buf);
+    gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s", buflen, buf);
 
     /* extract packet fields */
     (void)strlcpy((char *)ais_context->fieldcopy,
