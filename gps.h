@@ -841,7 +841,7 @@ struct gps_data_t {
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
-    float ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
+    double ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */
