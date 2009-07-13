@@ -9,7 +9,7 @@
 
 int json_read_array(const char *, const struct json_array_t *, const char **);
 
-int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *attrs, const char **end)
+int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
@@ -20,42 +20,23 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
-	if (baseptr != NULL)
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*((int *)&baseptr[cursor->addr.offset]) = cursor->dflt.integer;
-		break;
-	    case real:
-		*((double *)&baseptr[cursor->addr.offset]) = cursor->dflt.real;
-		break;
-	    case string:
-		baseptr[cursor->addr.offset] = '\0';
-		break;
-	    case boolean:
-		*((bool *)&baseptr[cursor->addr.offset]) = cursor->dflt.boolean;
-		break;
-	    case array:	/* silences a compiler warning */
-		break;
-	    }
-	else
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*(cursor->addr.integer) = cursor->dflt.integer;
-		break;
-	    case real:
-		*(cursor->addr.real) = cursor->dflt.real;
-		break;
-	    case string:
-		cursor->addr.string.ptr[0] = '\0';
-		break;
-	    case boolean:
-		*(cursor->addr.boolean) = cursor->dflt.boolean;
-		break;
-	    case array:	/* silences a compiler warning */
-		break;
-	    }
+	switch(cursor->type)
+	{
+	case integer:
+	    cursor->addr.integer[offset] = cursor->dflt.integer;
+	    break;
+	case real:
+	    cursor->addr.real[offset] = cursor->dflt.real;
+	    break;
+	case string:
+	    cursor->addr.string.ptr[offset] = '\0';
+	    break;
+	case boolean:
+	    cursor->addr.boolean[offset] = cursor->dflt.boolean;
+	    break;
+	case array:	/* silences a compiler warning */
+	    break;
+	}
 
     /* parse input JSON */
     for (; *cp; cp++) {
@@ -149,44 +130,23 @@ int json_read_object(const char *cp, char *baseptr, const struct json_attr_t *at
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    if (baseptr != NULL)
-		switch(cursor->type)
-		{
-		case integer:
-		    *((int *)&baseptr[cursor->addr.offset]) = atoi(valbuf);
-		    break;
-		case real:
-		    *((double *)&baseptr[cursor->addr.offset]) = atof(valbuf);
-		    break;
-		case string:
-		    return JSON_ERR_SUBSTRING;	/* string in array subojects not supported */
-		case boolean:
-		    *((bool *)&baseptr[cursor->addr.offset]) = (bool)!strcmp(valbuf, "true");
-		    break;
-		case array:	/* silences a compiler warning */
-		    break;
-		}
-	    else
-		switch(cursor->type)
-		{
-		case integer:
-		    *(cursor->addr.integer) = atoi(valbuf);
-		    break;
-		case real:
-		    *(cursor->addr.real) = atof(valbuf);
-		    break;
-		case string:
-		    (void)strncpy(cursor->addr.string.ptr, valbuf, cursor->addr.string.len);
-		    break;
-		case boolean:
-    #ifdef JSONDEBUG
-		    (void) printf("Boolean value '%s' processed to %d\n", valbuf, !strcmp(valbuf, "true"));
-    #endif /* JSONDEBUG */
-		    *(cursor->addr.boolean) = (bool)!strcmp(valbuf, "true");
-		    break;
-		case array:	/* silences a compiler warning */
-		    break;
-		}
+	    switch(cursor->type)
+	    {
+	    case integer:
+		cursor->addr.integer[offset] = atoi(valbuf);
+		break;
+	    case real:
+		cursor->addr.real[offset] = atof(valbuf);
+		break;
+	    case string:
+		(void)strncpy(cursor->addr.string.ptr+offset, valbuf, cursor->addr.string.len);
+		break;
+	    case boolean:
+		cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
+		break;
+	    case array:	/* silences a compiler warning */
+		break;
+	    }
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == ',')
