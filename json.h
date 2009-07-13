@@ -35,8 +35,8 @@ struct json_attr_t {
 
 int json_read_object(const char *, const struct json_attr_t *, int, const char **end);
 
-#define JSON_ERR_OBSTART	-1	/* non-WZ when expecting object start */
-#define JSON_ERR_ATTRSTART	-2	/* non-WZ when expecting attrib start */
+#define JSON_ERR_OBSTART	-1	/* non-WS when expecting object start */
+#define JSON_ERR_ATTRSTART	-2	/* non-WS when expecting attrib start */
 #define JSON_ERR_BADATTR	-3	/* unknown attribute name */
 #define JSON_ERR_ATTRLEN	-4	/* attribute name too long */
 #define JSON_ERR_NOARRAY	-5	/* saw [ when not expecting array */
@@ -46,5 +46,7 @@ int json_read_object(const char *, const struct json_attr_t *, int, const char *
 #define JSON_ERR_BADTRAIL	-9	/* garbage while expecting , or } */
 #define JSON_ERR_ARRAYSTART	-10	/* didn't find expected array start */
 #define JSON_ERR_OBJARR 	-11	/* error while parsing object array */
+#define JSON_ERR_SUBTOOLONG	-12	/* too many array elements */
+#define JSON_ERR_BADSUBTRAIL	-13	/* garbage while expecting array comma */
 
 /* json.h ends here */

@@ -90,23 +90,26 @@ const struct json_attr_t json_attrs_1[] = {
     {NULL},
 };
 
+static bool usedflags[MAXCHANNELS];
+
 const char *json_str2 = "{\"tag\":\"MID4\",\"time\":1119197562.890,\
-         \"reported\":7\
+         \"reported\":7,\
          \"satellites\":[\
-         {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":1},\
-         {\"PRN\":29,\"el\":67,\"az\":310,\"ss\":40,\"used\":1},\
-         {\"PRN\":28,\"el\":59,\"az\":108,\"ss\":42,\"used\":1},\
-         {\"PRN\":26,\"el\":51,\"az\":304,\"ss\":43,\"used\":1},\
-         {\"PRN\":8,\"el\":44,\"az\":58,\"ss\":41,\"used\":1},\
-         {\"PRN\":27,\"el\":16,\"az\":66,\"ss\":39,\"used\":1},\
-         {\"PRN\":21,\"el\":10,\"az\":301,\"ss\":0,\"used\":0}]}";
+         {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":true},\
+         {\"PRN\":29,\"el\":67,\"az\":310,\"ss\":40,\"used\":true},\
+         {\"PRN\":28,\"el\":59,\"az\":108,\"ss\":42,\"used\":true},\
+         {\"PRN\":26,\"el\":51,\"az\":304,\"ss\":43,\"used\":true},\
+         {\"PRN\":8,\"el\":44,\"az\":58,\"ss\":41,\"used\":true},\
+         {\"PRN\":27,\"el\":16,\"az\":66,\"ss\":39,\"used\":true},\
+         {\"PRN\":21,\"el\":10,\"az\":301,\"ss\":0,\"used\":false}]}";
 
 const struct json_attr_t json_attrs_2_1[] = {
     {"PRN",	   integer, .addr.integer = gpsdata.PRN},
     {"el",	   integer, .addr.integer = gpsdata.elevation},
     {"az",	   integer, .addr.integer = gpsdata.azimuth},
-    //{"ss",	   real,    .addr.real = gpsdata.ss},
+    {"ss",	   real,    .addr.real = gpsdata.ss},
     {"used",	   integer, .addr.integer = gpsdata.used},
+    {NULL},
 };
 
 const struct json_attr_t json_attrs_2[] = {
@@ -118,6 +121,7 @@ const struct json_attr_t json_attrs_2[] = {
     {"reported",   integer, .addr.integer = &gpsdata.satellites_used},
     {"satellites", array,   .addr.array.subtype = json_attrs_2_1,
                             .addr.array.maxlen = MAXCHANNELS},
+    {NULL},
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
@@ -139,10 +143,14 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_BOOLEAN("flag1", flag1, true);
     ASSERT_BOOLEAN("flag2", flag2, false);
 
-    //status = json_read_object(json_str2, json_attrs_2, 0, NULL);
-    //ASSERT_CASE(2, status);
-    //ASSERT_STRING("tag", buf2, "MID4");
-    //ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
+    status = json_read_object(json_str2, json_attrs_2, 0, NULL);
+    ASSERT_CASE(2, status);
+    ASSERT_STRING("tag", buf2, "MID4");
+    ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
+    ASSERT_INTEGER("PRN[0]", gpsdata.PRN[0], 10);
+    ASSERT_INTEGER("el[0]", gpsdata.elevation[0], 45);
+    ASSERT_INTEGER("az[0]", gpsdata.azimuth[0], 196);
+    //ASSERT_BOOLEAN("used[0]", usedflags[0], true);
 
     (void)fprintf(stderr, "succeeded.\n");
     exit(0);

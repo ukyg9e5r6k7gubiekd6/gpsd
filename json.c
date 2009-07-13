@@ -41,7 +41,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
     /* parse input JSON */
     for (; *cp; cp++) {
 #ifdef JSONDEBUG
-	(void) printf("State %d, looking at '%c'\n", state, *cp);
+	(void) printf("State %d, looking at '%c' (%p)\n", state, *cp, cp);
 #endif /* JSONDEBUG */
 	switch (state)
 	{
@@ -86,12 +86,12 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    if (isspace(*cp) || *cp == ':')
 		continue;
 	    else if (*cp == '[') {
-		--cp;
 		if (cursor->type != array)
 		    return JSON_ERR_NOARRAY;	/* saw [ when not expecting array */
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
 		if (substatus < 0)
 		    return substatus;
+		state = post_val;
 	    } else if (cursor->type == array)
 		return JSON_ERR_NOBRAK;	/* array element was specified, but no [ */
 	    else if (*cp == '"') {
@@ -152,34 +152,54 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    else if (*cp == ',')
 		state = await_attr;
 	    else if (*cp == '}')
-		return 0;
+		goto good_parse;
 	    else
 		return JSON_ERR_BADTRAIL;	/* garbage while expecting comma or } */
 	    break;
 	}
     }
 
+good_parse:
     if (end != NULL)
-	*end = cp;
+	*end = ++cp;
     return 0;
 }
 
 int json_read_array(const char *cp, const struct json_array_t *array, const char **end)
 {
-    int substatus;
+    int substatus, offset;
 
     while (isspace(*cp))
 	cp++;
     if (*cp != '[')
 	return JSON_ERR_ARRAYSTART;	/* didn't find expected array start */
+    else
+	cp++;
 
-    for (;;) {
-	while (isspace(*cp))
+    for (offset = 0; offset < array->maxlen; offset++) {
+#ifdef JSONDEBUG
+	(void) printf("Subarray parse begins.\n");
+#endif /* JSONDEBUG */
+	substatus = json_read_object(cp, array->subtype, offset, &cp);
+#ifdef JSONDEBUG
+	(void) printf("Subarray parse ends.\n");
+#endif /* JSONDEBUG */
+	if (substatus < 0)
+	    return substatus;
+	if (isspace(*cp) || *cp == ':')
 	    cp++;
-	if (*cp == ']')
-	    break;
+	if (*cp == ']') {
+#ifdef JSONDEBUG
+	    (void) printf("End of array found.\n");
+#endif /* JSONDEBUG */
+	    goto breakout;
+	} else if (*cp == ',')
+	    cp++;
+	else
+	    return JSON_ERR_BADSUBTRAIL;
     }
-
+    return JSON_ERR_SUBTOOLONG;
+breakout:
     if (end != NULL)
 	*end = cp;
     return 0;
