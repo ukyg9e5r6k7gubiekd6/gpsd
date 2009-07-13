@@ -108,7 +108,7 @@ const struct json_attr_t json_attrs_2_1[] = {
     {"el",	   integer, .addr.integer = gpsdata.elevation},
     {"az",	   integer, .addr.integer = gpsdata.azimuth},
     {"ss",	   real,    .addr.real = gpsdata.ss},
-    {"used",	   integer, .addr.integer = gpsdata.used},
+    {"used",	   boolean, .addr.boolean = usedflags},
     {NULL},
 };
 
@@ -150,7 +150,11 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_INTEGER("PRN[0]", gpsdata.PRN[0], 10);
     ASSERT_INTEGER("el[0]", gpsdata.elevation[0], 45);
     ASSERT_INTEGER("az[0]", gpsdata.azimuth[0], 196);
-    //ASSERT_BOOLEAN("used[0]", usedflags[0], true);
+    ASSERT_BOOLEAN("used[0]", usedflags[0], true);
+    ASSERT_INTEGER("PRN[6]", gpsdata.PRN[6], 21);
+    ASSERT_INTEGER("el[6]", gpsdata.elevation[6], 10);
+    ASSERT_INTEGER("az[6]", gpsdata.azimuth[6], 301);
+    ASSERT_BOOLEAN("used[6]", usedflags[6], false);
 
     (void)fprintf(stderr, "succeeded.\n");
     exit(0);
