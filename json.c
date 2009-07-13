@@ -15,13 +15,13 @@ locations specified in the template structures.
    The "shape" of a JSON object in the type signature of its attributes 
 (and attribute values, and so on recursively).  This parser is indifferent 
 to the order of attributes at any level, but you have to tell it in advance
-what the type of each attributer value will be and where the parses valu will
+what the type of each attributer value will be and where the parses value will
 be stored. The tamplate structures may supply default values to be used 
-when an expected attribute is omitte.
+when an expected attribute is omitted.
 
    The dialect this parses has two limitations.  First, it cannot recognize 
 the JSON "null" value.  Secondly, arrays may only have objects - not strings or
-integers or floats - as elements.
+integers or floats - as elements. (Floats are actually stored as doubles).
 
 ***************************************************************************/
 #include <stdio.h>
