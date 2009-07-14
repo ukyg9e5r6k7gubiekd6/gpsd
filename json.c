@@ -12,21 +12,23 @@ JSON, and it will error out if that shape is not matched.  When the
 parse succeds, attribute values will be extracted into static
 locations specified in the template structures.
 
-   The "shape" of a JSON object in the type signature of its attributes 
-(and attribute values, and so on recursively).  This parser is indifferent 
-to the order of attributes at any level, but you have to tell it in advance
-what the type of each attributer value will be and where the parses value will
-be stored. The tamplate structures may supply default values to be used 
-when an expected attribute is omitted.
+   The "shape" of a JSON object in the type signature of its
+attributes (and attribute values, and so on recursively down through
+all nestings of objects and arrays).  This parser is indifferent to
+the order of attributes at any level, but you have to tell it in
+advance what the type of each attribute value will be and where the
+parses value will be stored. The tamplate structures may supply
+default values to be used when an expected attribute is omitted.
 
    The dialect this parses has some limitations.  First, it cannot
 recognize the JSON "null" value.  Secondly, arrays may only have
-objects or strings - not strings or integers or floats - as
-elements. (Floats are actually stored as doubles). Third, all elements
-of an array must be of the same type.
+objects or strings - not reals or integers or floats - as elements
+(this limitation could be easily removed if required). Third, all
+elements of an array must be of the same type.
 
-   There are separata entry points for beginning a parse of either 
-JSON object or a JSON array.
+   There are separata entry points for beginning a parse of either
+JSON object or a JSON array. JSON "float" quantities are actually
+stored as doubles.
 
 ***************************************************************************/
 #include <stdio.h>
@@ -117,7 +119,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 		if (cursor->type != array)
 		    return JSON_ERR_NOARRAY;	/* saw [ when not expecting array */
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
-		if (substatus < 0)
+		if (substatus != 0)
 		    return substatus;
 		state = post_val;
 	    } else if (cursor->type == array)
@@ -248,7 +250,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 #ifdef JSONDEBUG
 	    (void) printf("Subarray parse ends.\n");
 #endif /* JSONDEBUG */
-	    if (substatus < 0)
+	    if (substatus != 0)
 		return substatus;
 	    break;
 	case integer:
@@ -281,6 +283,7 @@ breakout:
 const char *json_error_string(int err)
 {
     const char *errors[] = {
+	"unknown error while parsing JSON",
 	"non-whitespace when expecting object start",
 	"non-whitespace when expecting attribute start",
 	"unknown attribute name",
@@ -298,8 +301,8 @@ const char *json_error_string(int err)
 	"error while string parsing",
     };
 
-    if (err > -1 || err <= -sizeof(errors)/sizeof(errors[0]))
-	return "unknown JSON parsing error";
+    if (err <= 0 || err >= sizeof(errors)/sizeof(errors[0]))
+	return errors[0];
     else
-	return errors[-err-1];
+	return errors[err];
 }
