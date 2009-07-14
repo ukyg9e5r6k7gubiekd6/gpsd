@@ -19,9 +19,14 @@ what the type of each attributer value will be and where the parses value will
 be stored. The tamplate structures may supply default values to be used 
 when an expected attribute is omitted.
 
-   The dialect this parses has two limitations.  First, it cannot recognize 
-the JSON "null" value.  Secondly, arrays may only have objects - not strings or
-integers or floats - as elements. (Floats are actually stored as doubles).
+   The dialect this parses has some limitations.  First, it cannot
+recognize the JSON "null" value.  Secondly, arrays may only have
+objects or strings - not strings or integers or floats - as
+elements. (Floats are actually stored as doubles). Third, all elements
+of an array must be of the same type.
+
+   There are separata entry points for beginning a parse of either 
+JSON object or a JSON array.
 
 ***************************************************************************/
 #include <stdio.h>
@@ -30,8 +35,6 @@ integers or floats - as elements. (Floats are actually stored as doubles).
 
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
-
-int json_read_array(const char *, const struct json_array_t *, const char **);
 
 int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset, const char **end)
 {
@@ -58,7 +61,8 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	case boolean:
 	    cursor->addr.boolean[offset] = cursor->dflt.boolean;
 	    break;
-	case array:	/* silences a compiler warning */
+	case object:	/* silences a compiler warning */
+	case array:
 	    break;
 	}
 
@@ -168,7 +172,8 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    case boolean:
 		cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
 		break;
-	    case array:	/* silences a compiler warning */
+	    case object:	/* silences a compiler warning */
+	    case array:
 		break;
 	    }
 	    if (isspace(*cp))
@@ -189,9 +194,14 @@ good_parse:
     return 0;
 }
 
-int json_read_array(const char *cp, const struct json_array_t *array, const char **end)
+int json_read_array(const char *cp, const struct json_array_t *arr, const char **end)
 {
     int substatus, offset;
+    char *tp;
+
+#ifdef JSONDEBUG
+    (void) printf("Entered json_read_array()\n");
+#endif /* JSONDEBUG */
 
     while (isspace(*cp))
 	cp++;
@@ -200,17 +210,56 @@ int json_read_array(const char *cp, const struct json_array_t *array, const char
     else
 	cp++;
 
-    for (offset = 0; offset < array->maxlen; offset++) {
+    tp = arr->arr.strings.store;
+    if (arr->count != NULL)
+	*(arr->count) = 0;
+    for (offset = 0; offset < arr->maxlen; offset++) {
 #ifdef JSONDEBUG
-	(void) printf("Subarray parse begins.\n");
+	(void) printf("Looking at %s\n", cp);
 #endif /* JSONDEBUG */
-	substatus = json_read_object(cp, array->subtype, offset, &cp);
+	switch (arr->element_type)
+	{
+	case string:
+	    if (isspace(*cp))
+		cp++;
+	    if (*cp != '"')
+		return JSON_ERR_BADSTRING;
+	    else
+		++cp;
+	    arr->arr.strings.ptrs[offset] = tp;
+	    for (; tp - arr->arr.strings.store < arr->arr.strings.storelen; tp++)
+		if (*cp == '"') {
+		    ++cp;
+		    *tp++ = '\0';
+		    goto stringend;
+		} else if (*cp == '\0')
+		    return JSON_ERR_BADSTRING;
+	        else {
+		    *tp = *cp++;
+		}
+	    return JSON_ERR_BADSTRING;
+	stringend:
+	    break;
+	case object:
 #ifdef JSONDEBUG
-	(void) printf("Subarray parse ends.\n");
+	    (void) printf("Subarray parse begins.\n");
 #endif /* JSONDEBUG */
-	if (substatus < 0)
-	    return substatus;
-	if (isspace(*cp) || *cp == ':')
+	    substatus = json_read_object(cp, arr->arr.subtype, offset, &cp);
+#ifdef JSONDEBUG
+	    (void) printf("Subarray parse ends.\n");
+#endif /* JSONDEBUG */
+	    if (substatus < 0)
+		return substatus;
+	    break;
+	case integer:
+	case real:
+	case boolean:
+	case array:
+	    return JSON_ERR_SUBTYPE;
+	}
+	if (arr->count != NULL)
+	    (*arr->count)++;
+	if (isspace(*cp))
 	    cp++;
 	if (*cp == ']') {
 #ifdef JSONDEBUG
@@ -245,6 +294,8 @@ const char *json_error_string(int err)
 	"error while parsing object array",
 	"too many array elements",
 	"garbage while expecting array comma",
+	"unsupported array element type",
+	"error while string parsing",
     };
 
     if (err > -1 || err <= -sizeof(errors)/sizeof(errors[0]))

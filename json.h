@@ -3,14 +3,24 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+typedef enum {integer, real, string, boolean, object, array} json_type;
+
 struct json_array_t { 
-    const struct json_attr_t *subtype;
-    int maxlen;
+    json_type element_type;
+    union {
+	const struct json_attr_t *subtype;
+	struct {
+	    char **ptrs;
+	    char *store;
+	    int storelen;
+	} strings;
+    } arr;
+    int *count, maxlen;
 };
 
 struct json_attr_t {
     char *attribute;
-    enum {integer, real, string, boolean, array} type;
+    json_type type;
     union {
 	int *integer;
 	double *real;
@@ -34,6 +44,7 @@ struct json_attr_t {
 #define JSON_VAL_MAX	63	/* max charss in JSON value part */
 
 int json_read_object(const char *, const struct json_attr_t *, int, const char **end);
+int json_read_array(const char *, const struct json_array_t *, const char **);
 const char *json_error_string(int);
 
 #define JSON_ERR_OBSTART	-1	/* non-WS when expecting object start */
@@ -49,5 +60,7 @@ const char *json_error_string(int);
 #define JSON_ERR_OBJARR 	-11	/* error while parsing object array */
 #define JSON_ERR_SUBTOOLONG	-12	/* too many array elements */
 #define JSON_ERR_BADSUBTRAIL	-13	/* garbage while expecting array comma */
+#define JSON_ERR_SUBTYPE	-14	/* unsupported array element type */
+#define JSON_ERR_BADSTRING	-15	/* error while string parsing */
 
 /* json.h ends here */

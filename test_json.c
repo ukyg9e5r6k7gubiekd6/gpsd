@@ -117,9 +117,25 @@ const struct json_attr_t json_attrs_2[] = {
     			    .addr.string.len = MAXTAGLEN},
     {"time",       real,    .addr.real    = &gpsdata.fix.time},
     {"reported",   integer, .addr.integer = &gpsdata.satellites_used},
-    {"satellites", array,   .addr.array.subtype = json_attrs_2_1,
+    {"satellites", array,   .addr.array.element_type = object,
+                            .addr.array.arr.subtype = json_attrs_2_1,
                             .addr.array.maxlen = MAXCHANNELS},
     {NULL},
+};
+
+const char *json_str3 = "[\"foo\",\"bar\",\"baz\"]";
+
+static char *stringptrs[3];
+static char stringstore[256];
+static int stringcount;
+
+const struct json_array_t json_array_3 = {
+    .element_type = string,
+    .arr.strings.ptrs = stringptrs,
+    .arr.strings.store = stringstore,
+    .arr.strings.storelen = sizeof(stringstore),
+    .count = &stringcount,
+    .maxlen = sizeof(stringptrs)/sizeof(stringptrs[0]),
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
@@ -155,6 +171,13 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_INTEGER("az[6]", gpsdata.azimuth[6], 301);
     ASSERT_REAL("ss[6]", gpsdata.ss[6], 0);
     ASSERT_BOOLEAN("used[6]", usedflags[6], false);
+
+    status = json_read_array(json_str3, &json_array_3, NULL);
+    ASSERT_CASE(3, status);
+    assert(stringcount == 3);
+    assert(strcmp(stringptrs[0], "foo") == 0);
+    assert(strcmp(stringptrs[1], "bar") == 0);
+    assert(strcmp(stringptrs[2], "baz") == 0);
 
     (void)fprintf(stderr, "succeeded.\n");
     exit(0);
