@@ -21,11 +21,18 @@
  * driver author to find-and-replace to create a unique namespace for
  * driver functions.
  *
- * If using vi, ":%s/_PROTO_/MYDRIVER/g" and ":%s/_proto_/mydriver/g" should
- * produce a source file that comes very close to being useful. Other places
- * for new driver hooks are gpsd.h-tail, packet_states.h, libgpsd_core.c and
+ * If using vi, ":%s/_PROTO_/MYDRIVER/g" and ":%s/_proto_/mydriver/g"
+ * should produce a source file that comes very close to being useful.
+ * You will also need to add hooks for your new driver to:
+ * Makefile.am
+ * drivers.c
+ * gpsd.h-tail
+ * libgpsd_core.c
  * packet.c
+ * packet_states.h
  *
+ * see http://svn.berlios.de/viewvc/gpsd/trunk/?sortby=date&pathrev=5078
+ * for an example of how a new driver arrived.
  */
 
 #include <sys/types.h>
@@ -62,7 +69,7 @@ static	bool _proto__probe_detect(struct gps_device_t *);
 static	void _proto__probe_wakeup(struct gps_device_t *);
 static	void _proto__probe_subtype(struct gps_device_t *, unsigned int );
 static	void _proto__configurator(struct gps_device_t *, unsigned int );
-static	bool _proto__set_speed(struct gps_device_t *, speed_t );
+static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int );
 static	void _proto__set_mode(struct gps_device_t *, int );
 static	void _proto__revert(struct gps_device_t *);
 static	void _proto__wrapup(struct gps_device_t *);
@@ -142,7 +149,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
  * GPS Satellite Info
  */
 static gps_mask_t
-_proto__msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+_proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned char i, st, nchan, nsv;
     unsigned int tow;
@@ -268,7 +275,7 @@ static void _proto__probe_subtype(struct gps_device_t *session, unsigned int seq
      */
 }
 
-#ifdef ALLOW_CONTROLSEND */
+#ifdef ALLOW_CONTROLSEND
 /**
  * Write data to the device, doing any required padding or checksumming
  */
@@ -297,7 +304,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 /*@ -charint +usedef +compdef @*/
 #endif /* ALLOW_CONTROLSEND */
 
-#ifdef ALLOW_CONFIGURE
+#ifdef ALLOW_RECONFIGURE
 static void _proto__configurator(struct gps_device_t *session, unsigned int seq)
 {
     /* 
@@ -366,7 +373,7 @@ static void _proto__revert(struct gps_device_t *session)
     * Reverse what the .configurator method changed.
     */
 }
-#endif /* ALLOW_CONFIGURE */
+#endif /* ALLOW_RECONFIGURE */
 
 static void _proto__wrapup(struct gps_device_t *session)
 {
@@ -395,7 +402,7 @@ const struct gps_type_t _proto__binary = {
     /* Full name of type */
     .type_name        = "_proto_ binary",
     /* associated lexer packet type */
-    .packet_type    = NMEA_PACKET;
+    .packet_type    = _PROTO__PACKET,
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
@@ -414,7 +421,7 @@ const struct gps_type_t _proto__binary = {
     .rtcm_writer      = pass_rtcm,
 #ifdef ALLOW_CONTROLSEND
     /* Control string sender - should provide checksum and headers/trailer */
-    .control_send   = __proto__control_send,
+    .control_send   = _proto__control_send,
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* Enable what reports we need */
