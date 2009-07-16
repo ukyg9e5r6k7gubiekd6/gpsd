@@ -554,23 +554,30 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* SUPERSTAR2_ENABLE */
 #ifdef ONCORE_ENABLE
     case ONCORE_AT2:
-	if (isupper(c))
+	if (isupper(c)) {
+	    lexer->length = c;
 	    lexer->state = ONCORE_ID1;
-	else
+        } else
 	    lexer->state = GROUND_STATE;
 	break;
     case ONCORE_ID1:
-	if (isalpha(c))
-	    lexer->state = ONCORE_ID2;
-	else
+        if (isalpha(c)) {
+	    lexer->length = 
+		oncore_payload_length((unsigned char) lexer->length,c);
+	    if ((ssize_t) lexer->length != -1) {
+	        lexer->state = ONCORE_PAYLOAD;
+		break;
+	    }
+	}
 	    lexer->state = GROUND_STATE;
 	break;
-    case ONCORE_ID2:
-	    lexer->state = ONCORE_PAYLOAD;
-	break;
     case ONCORE_PAYLOAD:
+	if (--lexer->length == 0)
+	    lexer->state = ONCORE_CHECKSUM;
+	break;
+    case ONCORE_CHECKSUM:
 	if (c != '\r')
-	    lexer->state = ONCORE_PAYLOAD;
+	    lexer->state = GROUND_STATE;
 	else
 	    lexer->state = ONCORE_CR;
 	break;

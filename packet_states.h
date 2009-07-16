@@ -126,12 +126,12 @@
 #endif
 
 #ifdef ONCORE_ENABLE
-   ONCORE_AT2,	/* second @ */
-   ONCORE_ID1,	/* first character of command type */
-   ONCORE_ID2,	/* second character of command type */
-   ONCORE_PAYLOAD,
-   ONCORE_CR,	/* closing CR */
-   ONCORE_RECOGNIZED, /* closing LF */
+   ONCORE_AT2,		/* second @ */
+   ONCORE_ID1,		/* first character of command type */
+   ONCORE_PAYLOAD,	/* payload eating */
+   ONCORE_CHECKSUM,	/* checksum byte */
+   ONCORE_CR,		/* closing CR */
+   ONCORE_RECOGNIZED,	/* closing LF */
 #endif
 
 
