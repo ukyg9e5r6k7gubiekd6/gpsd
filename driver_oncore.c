@@ -1,4 +1,4 @@
-/* $Id: driver_proto.c 5685 2009-06-22 15:39:12Z ckuethe */
+/* $Id$ */
 
 #include <sys/types.h>
 #include <stdio.h>

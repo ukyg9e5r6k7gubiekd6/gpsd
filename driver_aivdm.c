@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Driver for AIS/AIVDM messages.
  *
