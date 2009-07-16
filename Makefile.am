@@ -164,6 +164,7 @@ libgpsd_c_sources = \
 	driver_italk.c \
 	driver_navcom.c \
 	driver_nmea.c \
+	driver_oncore.c \
 	driver_rtcm2.c \
 	driver_rtcm3.c \
 	driver_sirf.c \

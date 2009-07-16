@@ -369,6 +369,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for OnCore support
+AC_ARG_ENABLE(oncore,
+  AC_HELP_STRING([--disable-oncore],
+		 [disable Motorola OnCore chipset support]),
+  [ac_oncore=$enableval], [ac_oncore=yes])
+AC_MSG_CHECKING([for Motorola OnCore support])
+if test x"$ac_oncore" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([ONCORE_ENABLE], 1, [Motorola OnCore chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for SiRF support
 AC_ARG_ENABLE(sirf,
   AC_HELP_STRING([--disable-sirf],
@@ -955,6 +968,7 @@ echo "iTrax                   : $ac_itrax"
 echo "NMEA                    : $ac_nmea"
 echo "NTRIP                   : $ac_ntrip"
 echo "Navcom                  : $ac_navcom"
+echo "OnCore                  : $ac_oncore"
 echo "RTCM104V2               : $ac_rtcm104v2"
 echo "RTCM104V3               : $ac_rtcm104v3"
 echo "SiRF                    : $ac_sirf"
@@ -1001,6 +1015,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_navcom" = "xno" -a \
     x"$ac_nmea" = "xno" -a \
     x"$ac_ntrip" = "xno" -a \
+    x"$ac_oncore" = "xno" -a \
     x"$ac_rtcm104v2" = "xno" -a \
     x"$ac_sirf" = "xno" -a \
     x"$ac_superstar2" = "xno" -a \

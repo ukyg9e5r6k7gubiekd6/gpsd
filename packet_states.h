@@ -65,9 +65,10 @@
    ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
 #endif /* ZODIAC_ENABLE */
 
-#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-   GTXT_LEADER,         /* saw True North status leader '@' */
-                        /* Garmin Simple Text starts with @ leader */
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
+   AT1_LEADER,		/* saw True North status leader '@' */
+			/* Garmin Simple Text starts with @ leader */
+			/* Oncore starts with @ leader */
    GTXT_RECOGNIZED,     /* */
 #endif
 
@@ -114,6 +115,26 @@
    UBX_RECOGNIZED,      /* this is also UBX_CHECKSUM_B */
 #endif
 
+#ifdef SUPERSTAR2_ENABLE
+   SUPERSTAR2_LEADER,	/* leading SOH */
+   SUPERSTAR2_ID1,	/* message type */
+   SUPERSTAR2_ID2,	/* message type xor 0xff */
+   SUPERSTAR2_PAYLOAD,	/* length of the actual packet data */
+   SUPERSTAR2_CKSUM1,
+   SUPERSTAR2_CKSUM2,
+   SUPERSTAR2_RECOGNIZED,
+#endif
+
+#ifdef ONCORE_ENABLE
+   ONCORE_AT2,	/* second @ */
+   ONCORE_ID1,	/* first character of command type */
+   ONCORE_ID2,	/* second character of command type */
+   ONCORE_PAYLOAD,
+   ONCORE_CR,	/* closing CR */
+   ONCORE_RECOGNIZED, /* closing LF */
+#endif
+
+
 /*
  * Packet formats without checksums start here.  We list them last so
  * that if a format with a conflicting structure *and* a checksum can
@@ -127,16 +148,6 @@
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
    GARMIN_RECOGNIZED,	/* found end of Garmin packet */
 #endif /* TSIP_ENABLE GARMIN_ENABLE */
-
-#ifdef SUPERSTAR2_ENABLE
-   SUPERSTAR2_LEADER,	/* leading SOH */
-   SUPERSTAR2_ID1,	/* message type */
-   SUPERSTAR2_ID2,	/* message type xor 0xff */
-   SUPERSTAR2_PAYLOAD,	/* length of the actual packet data */
-   SUPERSTAR2_CKSUM1,
-   SUPERSTAR2_CKSUM2,
-   SUPERSTAR2_RECOGNIZED,
-#endif
 
 #ifdef RTCM104V2_ENABLE
    RTCM2_SYNC_STATE,	/* we have sync lock */

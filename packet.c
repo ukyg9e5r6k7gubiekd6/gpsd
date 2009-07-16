@@ -121,9 +121,9 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* NMEA_ENABLE */
-#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
 	if (c == '@') {
-	    lexer->state = GTXT_LEADER;
+	    lexer->state = AT1_LEADER;
 	    break;
 	}
 #endif
@@ -262,26 +262,39 @@ static void nextstate(struct gps_packet_t *lexer,
 	else
 	    lexer->state = GROUND_STATE;
 	break;
-#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-    case GTXT_LEADER:
-        if (c == '\r')
-            /* stay in this state, next character should be '\n' */
-            /* in the theory we can stop search here and don't wait for '\n' */
-            lexer->state = GTXT_LEADER;  
-        else if (c == '\n')
-            /* end of packet found */   
-            lexer->state = GTXT_RECOGNIZED;
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
+    case AT1_LEADER:
+	switch (c){
+#ifdef ONCORE_ENABLE
+	    case '@':
+		lexer->state = ONCORE_AT2;
+		break;
+#endif /* ONCORE_ENABLE */
 #ifdef TNT_ENABLE
-	else if (c == '*')
-            /* TNT has similar structure like NMEA packet, '*' before optional checksum ends the packet */
-            /* '*' cannot be received from GARMIN working in TEXT mode, use this diference for selection */
-            /* this is not GARMIN TEXT packet, could be TNT */
-            lexer->state = NMEA_LEADER_END;
+	    case '*':
+		/* TNT has similar structure like NMEA packet, '*' before optional checksum ends the packet */
+		/* '*' cannot be received from GARMIN working in TEXT mode, use this diference for selection */
+		/* this is not GARMIN TEXT packet, could be TNT */
+		lexer->state = NMEA_LEADER_END;
+		break;
 #endif /* TNT_ENABLE */
-	else if (!isprint(c))
-	    lexer->state = GROUND_STATE;
+#if defined(GARMINTXT_ENABLE)
+	    case '\r':
+		/* stay in this state, next character should be '\n' */
+		/* in the theory we can stop search here and don't wait for '\n' */
+		lexer->state = AT1_LEADER;
+		break;
+	    case '\n':
+		/* end of packet found */
+		lexer->state = GTXT_RECOGNIZED;
+		break;
+#endif /* GARMINTXT_ENABLE */
+	    default:
+		if (!isprint(c))
+		    lexer->state = GROUND_STATE;
+	}
 	break;
-#endif /* defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) */
+#endif /* defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE) */
     case NMEA_LEADER_END:
 	if (c == '\r')
 	    lexer->state = NMEA_CR;
@@ -539,6 +552,41 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* SUPERSTAR2_ENABLE */
+#ifdef ONCORE_ENABLE
+    case ONCORE_AT2:
+	if (isupper(c))
+	    lexer->state = ONCORE_ID1;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case ONCORE_ID1:
+	if (isalpha(c))
+	    lexer->state = ONCORE_ID2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case ONCORE_ID2:
+	    lexer->state = ONCORE_PAYLOAD;
+	break;
+    case ONCORE_PAYLOAD:
+	if (c != '\r')
+	    lexer->state = ONCORE_PAYLOAD;
+	else
+	    lexer->state = ONCORE_CR;
+	break;
+    case ONCORE_CR:
+	if (c == '\n')
+	    lexer->state = ONCORE_RECOGNIZED;
+	else
+	    lexer->state = ONCORE_PAYLOAD;
+	break;
+    case ONCORE_RECOGNIZED:
+	if (c == '@')
+	    lexer->state = AT1_LEADER;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+#endif /* ONCORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
@@ -1045,6 +1093,29 @@ void packet_parse(struct gps_packet_t *lexer)
 	    break;
 	}
 #endif /* SUPERSTAR2_ENABLE */
+#ifdef ONCORE_ENABLE
+	else if (lexer->state == ONCORE_RECOGNIZED) {
+	    char a, b;
+	    int i, len;
+
+	    len = lexer->inbufptr - lexer->inbuffer;
+	    a = (char)(lexer->inbuffer[len-3]);
+	    b = '\0';
+	    for(i = 2; i < len - 3; i++)
+		b ^= lexer->inbuffer[i];
+	    if (a == b) {
+		gpsd_report(LOG_IO, "Accept OnCore packet @@%c%c len %d\n",
+		    lexer->inbuffer[2], lexer->inbuffer[3], len);
+		packet_accept(lexer, ONCORE_PACKET);
+	    } else {
+		gpsd_report(LOG_IO, "REJECT OnCore packet @@%c%c len %d\n",
+		    lexer->inbuffer[2], lexer->inbuffer[3], len);
+		lexer->state = GROUND_STATE;
+	    }
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* ONCORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	else if (lexer->state == TSIP_RECOGNIZED) {
 	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;

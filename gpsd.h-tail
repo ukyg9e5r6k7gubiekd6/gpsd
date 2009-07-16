@@ -6,7 +6,7 @@
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
-#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITRAX_ENABLE) || defined(UBX_ENABLE)
+#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITRAX_ENABLE) || defined(UBX_ENABLE) || defined(SUPERSTAR2_ENABLE) || defined(ONCORE_ENABLE)
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
@@ -57,6 +57,7 @@ struct gps_packet_t {
 #define GARMINTXT_PACKET	12
 #define SUPERSTAR2_PACKET	13
 #define AIVDM_PACKET	14
+#define ONCORE_PACKET	15
 #define TEXTUAL_PACKET_TYPE(n)	((n)==NMEA_PACKET||(n)==GARMINTXT_PACKET||(n)==COMMENT_PACKET||(n)==AIVDM_PACKET)
     unsigned int state;
     size_t length;
@@ -121,17 +122,6 @@ extern void rtcm3_dump(struct rtcm3_t *rtcm, FILE *);
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
-
-/* Some internal capabilities depend on which drivers we're compiling. */
-#ifdef EARTHMATE_ENABLE
-#define ZODIAC_ENABLE	
-#endif
-#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITRAX_ENABLE)
-#define BINARY_ENABLE	
-#endif
-#if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
-#define NON_NMEA_ENABLE	
-#endif
 
 struct subscriber_t {
     int fd;			/* client file descriptor. -1 if unused */
