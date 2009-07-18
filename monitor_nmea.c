@@ -56,7 +56,6 @@ static bool nmea_initialize(void)
     mvwaddstr(cookedwin, 1, 1, "Time: ");
     mvwaddstr(cookedwin, 1, 31, "Lat: ");
     mvwaddstr(cookedwin, 1, 55, "Lon: ");
-    mvwaddstr(cookedwin, 2, 60, "Lon: ");
     mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
     wattrset(cookedwin, A_NORMAL);
 
