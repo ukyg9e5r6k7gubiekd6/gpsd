@@ -557,15 +557,15 @@ static void nextstate(struct gps_packet_t *lexer,
 	if (isupper(c)) {
 	    lexer->length = c;
 	    lexer->state = ONCORE_ID1;
-        } else
+	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case ONCORE_ID1:
-        if (isalpha(c)) {
-	    lexer->length = 
+	if (isalpha(c)) {
+	    lexer->length =
 		oncore_payload_length((unsigned char) lexer->length,c);
 	    if ((ssize_t) lexer->length != -1) {
-	        lexer->state = ONCORE_PAYLOAD;
+		lexer->state = ONCORE_PAYLOAD;
 		break;
 	    }
 	}
@@ -1580,3 +1580,58 @@ void packet_pushback(struct gps_packet_t *lexer)
     }
 }
 #endif /* __UNUSED */
+
+#ifdef ONCORE_ENABLE
+ssize_t oncore_payload_length(unsigned char id1,unsigned char id2)
+{
+    ssize_t l;
+
+    /* For the packet sniffer to not terminate the message due to
+     * payload data looking like a trailer, the known payload lengths
+     * including the checksum are given.  Return -1 for unknown IDs.
+     */
+
+    switch ((id1 << 8) | id2) {
+    case ('A' << 8) | 'b': l = 10; break; /* GMT offset */
+    case ('A' << 8) | 'w': l =  8; break; /* time mode */
+    case ('A' << 8) | 'c': l = 11; break; /* date */
+    case ('A' << 8) | 'a': l = 10; break; /* time of day */
+    case ('A' << 8) | 'd': l = 11; break; /* latitude */
+    case ('A' << 8) | 'e': l = 11; break; /* longitude */
+    case ('A' << 8) | 'f': l = 15; break; /* height */
+    case ('E' << 8) | 'a': l = 76; break; /* position/status/data */
+    case ('A' << 8) | 'g': l =  8; break; /* satellite mask angle */
+    case ('B' << 8) | 'b': l = 92; break; /* visible satellites status */
+    case ('B' << 8) | 'j': l =  8; break; /* leap seconds pending */
+    case ('A' << 8) | 'q': l =  8; break; /* atmospheric correction mode */
+    case ('A' << 8) | 'p': l = 25; break; /* set user datum / select datum */
+    /* Command "Ao" gives "Ap" response   (select datum) */
+    case ('C' << 8) | 'h': l =  9; break; /* almanac input ("Cb" response) */
+    case ('C' << 8) | 'b': l = 33; break; /* almanac output ("Be" response) */
+    case ('S' << 8) | 'z': l =  8; break; /* system power-on failure */
+    case ('C' << 8) | 'j': l = 294; break; /* receiver ID */
+    case ('F' << 8) | 'a': l =  9; break; /* self-test */
+    case ('C' << 8) | 'f': l =  7; break; /* set-to-defaults */
+    case ('E' << 8) | 'q': l = 96; break; /* ASCII position */
+    case ('A' << 8) | 'u': l = 12; break; /* altitide hold height */
+    case ('A' << 8) | 'v': l =  8; break; /* altitude hold mode */
+    case ('A' << 8) | 'N': l =  8; break; /* velocity filter */
+    case ('A' << 8) | 'O': l =  8; break; /* RTCM report mode */
+    case ('C' << 8) | 'c': l = 80; break; /* ephemeris data input ("Bf") */
+    case ('C' << 8) | 'k': l =  7; break; /* pseudorng correction inp. ("Ce")*/
+    /* Command "Ci" (switch to NMEA, GT versions only) has no response */
+    case ('B' << 8) | 'o': l =  8; break; /* UTC offset status */
+    case ('A' << 8) | 'z': l = 11; break; /* 1PPS cable delay */
+    case ('A' << 8) | 'y': l = 11; break; /* 1PPS offset */
+    case ('A' << 8) | 'P': l =  8; break; /* pulse mode */
+    case ('A' << 8) | 's': l = 20; break; /* position-hold position */
+    case ('A' << 8) | 't': l =  8; break; /* position-hold mode */
+    case ('E' << 8) | 'n': l = 69; break; /* time RAIM setup and status */
+    default:
+	return -1;
+    }
+
+    return l - 6; /* Subtract header and trailer. */
+}
+#endif /* ONCORE_ENABLE */
+
