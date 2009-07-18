@@ -58,6 +58,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt, ashtech_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mkt3301_mmt;
+extern struct monitor_object_t oncore_mmt;
 
 /* These are public */
 struct gps_device_t	session;
