@@ -30,7 +30,6 @@ static	gps_mask_t oncore_msg_svinfo(struct gps_device_t *, unsigned char *, size
  * These methods may be called elsewhere in gpsd
  */
 static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t );
-static	bool oncore_probe_detect(struct gps_device_t *);
 static	void oncore_probe_wakeup(struct gps_device_t *);
 static	void oncore_probe_subtype(struct gps_device_t *, unsigned int );
 static	void oncore_configurator(struct gps_device_t *, unsigned int );
@@ -47,10 +46,10 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 {
     gps_mask_t mask;
     unsigned char flags, mon, day, hour, min, sec;
-    unsigned short year, dop;
+    unsigned short year;
     unsigned int nsec;
     double lat, lon, alt;
-    float speed, track;
+    float speed, track, dop;
 
     if (data_len != 76)
 	return 0;
@@ -78,7 +77,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     alt = getbesl(buf, 23) / 100.0;
     speed = getbeuw(buf, 31) / 100.0;
     track = getbeuw(buf, 33) / 10.0;
-    dop = getbeuw(buf, 35) / 1.0;
+    dop = getbeuw(buf, 35) / 10.0;
     fprintf(stderr, "%lf %lf %.2lfm | %.2fm/s %.1fdeg dop=%.1f\n", lat, lon, alt, speed, track, dop);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET ;
 
@@ -137,7 +136,6 @@ static gps_mask_t
 oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned char i, st, nchan, nsv;
-    unsigned int tow;
 
     if (data_len != 92 )
 	return 0;
@@ -175,19 +173,20 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
     return SATELLITE_SET;
 }
 
+#define ONCTYPE(id2,id3) ((((unsigned int)id2)<<8)|(id3))
+
 /**
  * Parse the data from the device
  */
 /*@ +charint @*/
 gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    size_t i;
-    int type, used, visible;
+    unsigned int type;
 
     if (len == 0)
 	return 0;
 
-    type = buf[2]<<8 | buf[3];
+    type = ONCTYPE(buf[2],buf[3]);
 
     /* we may need to dump the raw packet */
     gpsd_report(LOG_RAW, "raw oncore packet type 0x%04x length %d: %s\n",
@@ -198,19 +197,19 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
     * XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
     */
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	"MOT-%c%c", type>>8, type&0xff);
+	"MOT-%c%c", buf[2], buf[3]);
 
     switch (type)
     {
-    case 'Bb':
+    case ONCTYPE('B','b'):
 	    return oncore_msg_svinfo(session, buf, len);
-    case 'Ea':
+    case ONCTYPE('E','a'):
 	    return oncore_msg_navsol(session, buf, len);
 
     default:
 	/* XXX This gets noisy in a hurry. Change once your driver works */
 	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %d: %s\n",
-	    type>>8, type&0xff, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+	    buf[2], buf[3], len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;
     }
 }
@@ -221,22 +220,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
  * Externally called routines below here
  *
  **********************************************************/
-
-static bool oncore_probe_detect(struct gps_device_t *session)
-{
-   /*
-    * This method is used to elicit a positively identifying
-    * response from a candidate device. Some drivers may use
-    * this to test for the presence of a certain kernel module.
-    */
-   int test, satisfied;
-
-   /* Your testing code here */
-   test=satisfied=0;
-   if (test==satisfied)
-      return true;
-   return false;
-}
 
 static void oncore_probe_wakeup(struct gps_device_t *session)
 {
@@ -268,8 +251,6 @@ static void oncore_probe_subtype(struct gps_device_t *session, unsigned int seq)
 static ssize_t oncore_control_send(struct gps_device_t *session,
 			   char *msg, size_t msglen)
 {
-   bool ok;
-
    /* CONSTRUCT THE MESSAGE */
 
    /* 
@@ -330,6 +311,7 @@ static bool oncore_set_speed(struct gps_device_t *session,
      * Note: parity is passed as 'N'/'E'/'O', but you should program 
      * defensively and allow 0/1/2 as well.
      */
+    return false;
 }
 
 /*
@@ -381,7 +363,7 @@ const struct gps_type_t oncore_binary = {
     /* Number of satellite channels supported by the device */
     .channels         = 12,
     /* Startup-time device detector */
-    .probe_detect     = oncore_probe_detect,
+    .probe_detect     = NULL,
     /* Wakeup to be done before each baud hunt */
     .probe_wakeup     = oncore_probe_wakeup,
     /* Initialize the device and get subtype */
