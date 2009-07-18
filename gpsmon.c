@@ -106,6 +106,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #if defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE)
     &superstar2_mmt,
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */
+#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+    &oncore_mmt,
+#endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
     NULL,
 };
 static const struct monitor_object_t **active;

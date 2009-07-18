@@ -93,7 +93,7 @@ static bool oncore_initialize(void)
     Ea1win  = subwin(devicewin, 5,		80,  1, 0);
     Eawin   = subwin(devicewin, MAXTRACKSATS+3, 27,  6, 0);
     Bbwin   = subwin(devicewin, MAXVISSATS+3,   22,  6, 28);
-    Enwin   = subwin(devicewin, 10,		 9,  6, 51);
+    Enwin   = subwin(devicewin, 10,		29,  6, 51);
     /*@ +onlytrans @*/
 
     if (Ea1win==NULL || Eawin==NULL || Bbwin==NULL || Enwin==NULL)
@@ -106,9 +106,9 @@ static bool oncore_initialize(void)
 
     (void)wborder(Ea1win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(Ea1win, A_BOLD);
-    (void)mvwaddstr(Ea1win, 1, 1, "Time:	                             Lat:              Lon:");
-    (void)mvwaddstr(Ea1win, 2, 1, "Antenna:	     DOP:                 Speed:            Course:");
-    (void)mvwaddstr(Ea1win, 3, 1, "SV/vis:	Status:                                      Alt:");
+    (void)mvwaddstr(Ea1win, 1, 1, "Time:                                     Lat:              Lon:");
+    (void)mvwaddstr(Ea1win, 2, 1, "Antenna:             DOP:                 Speed:            Course:");
+    (void)mvwaddstr(Ea1win, 3, 1, "SV/vis:        Status:                                      Alt:");
     (void)mvwprintw(Ea1win, 4, 4, " @@Ea (pos) ");
     (void)wattrset(Ea1win, A_NORMAL);
 
@@ -180,7 +180,7 @@ static void oncore_update(void)
 	    alt = getbesl(buf, 23) / 100.0;
 	    speed = (float)(getbeuw(buf, 31) / 100.0);
 	    track = (float)(getbeuw(buf, 33) / 10.0);
-	    dop = (float)(getbeuw(buf, 35) / 1.0);
+	    dop = (float)(getbeuw(buf, 35) / 10.0);
 	    dopt = getub(buf, 37);
 	    nvis = getub(buf, 38);
 	    nsat = getub(buf, 39);
