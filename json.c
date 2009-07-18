@@ -302,7 +302,7 @@ const char *json_error_string(int err)
 	"error while string parsing",
     };
 
-    if (err <= 0 || err >= sizeof(errors)/sizeof(errors[0]))
+    if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))
 	return errors[0];
     else
 	return errors[err];
