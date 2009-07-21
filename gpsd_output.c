@@ -21,7 +21,7 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gps.h"
-
+#include "gps_json.h"
 
 /* from gpsd.c */
 extern struct gps_context_t context;
@@ -594,134 +594,25 @@ int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 #ifdef GPSDNG_ENABLE
     if (strncmp(buf, "?TPV", 4) == 0) {
 	char reply[BUFSIZ];
-	(void)strlcpy(reply, "!TPV={", sizeof(reply));
+	(void)strlcpy(reply, "!TPV=", sizeof(reply));
 	if (assign_channel(sub) && have_fix(sub)) {
-	    (void)snprintf(reply+strlen(reply),
-			   sizeof(reply)- strlen(reply),
-			   "\"tag\":\"%s\",",
-			   sub->device->gpsdata.tag[0]!='\0' ? sub->device->gpsdata.tag : "-");
-	    if (isnan(sub->fixbuffer.time)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"time\":%.3f,",
-			       sub->fixbuffer.time);
-	    if (isnan(sub->fixbuffer.ept)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"ept\":%.3f,",
-			       sub->fixbuffer.ept);
-	    if (isnan(sub->fixbuffer.latitude)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"lat\":%.9f,",
-			       sub->fixbuffer.latitude);
-	    if (isnan(sub->fixbuffer.longitude)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"lon\":%.9f,",
-			       sub->fixbuffer.longitude);
-	    if (isnan(sub->fixbuffer.altitude)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"alt\":%.3f,",
-			       sub->fixbuffer.altitude);
-	    if (isnan(sub->fixbuffer.eph)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			      "\"eph\":%.3f,",
-			       sub->fixbuffer.eph);
-	    if (isnan(sub->fixbuffer.epv)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"epv\":%.3f,",
-			       sub->fixbuffer.epv);
-	    if (isnan(sub->fixbuffer.track)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"track\":%.4f,",
-			       sub->fixbuffer.track);
-	    if (isnan(sub->fixbuffer.speed)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"speed\":%.3f,",
-			       sub->fixbuffer.speed);
-	    if (isnan(sub->fixbuffer.climb)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"climb\":%.3f,",
-			       sub->fixbuffer.climb);
-	    if (isnan(sub->fixbuffer.epd)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"epd\":%.4f,",
-			       sub->fixbuffer.epd);
-	    if (isnan(sub->fixbuffer.eps)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"eps\":%.2f,", sub->fixbuffer.eps);
-	    if (isnan(sub->fixbuffer.epc)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			 "\"epc\":%.2f,", sub->fixbuffer.epc);
-	    if (sub->fixbuffer.mode > 0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"mode\":%d,", sub->fixbuffer.mode);
+	    json_tpv_dump(sub->device->gpsdata.tag, &sub->fixbuffer, 
+			  reply+strlen(reply), sizeof(reply)-strlen(reply));
+	} else {
+	    (void)strlcat(reply, "{}", sizeof(reply));
 	}
-	if (reply[strlen(reply)-1] == ',')
-	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
+	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else if (strncmp(buf, "?SKY", 4) == 0) {
 	char reply[BUFSIZ];
-	(void)strlcpy(reply, "!SKY={", sizeof(reply));
+	(void)strlcpy(reply, "!SKY=", sizeof(reply));
 	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
-	    int i, j, used, reported = 0;
-	    (void)snprintf(reply+strlen(reply),
-			   sizeof(reply)- strlen(reply),
-			   "\"tag\":\"%s\",",
-			   sub->device->gpsdata.tag[0]!='\0' ? sub->device->gpsdata.tag : "-");
-	    if (isnan(sub->device->gpsdata.sentence_time)==0)
-		(void)snprintf(reply+strlen(reply),
-			       sizeof(reply)-strlen(reply),
-			       "\"time\":%.3f ",
-			       sub->device->gpsdata.sentence_time);
-	    /* insurance against flaky drivers */
-	    for (i = 0; i < sub->device->gpsdata.satellites; i++)
-		if (sub->device->gpsdata.PRN[i])
-		    reported++;
-	    (void)snprintf(reply+strlen(reply),
-			   sizeof(reply)-strlen(reply),
-			   "\"reported\":%d,", reported);
-	    if (reported) {
-		(void)strlcat(reply, "\"satellites\":[", sizeof(reply));
-		for (i = 0; i < reported; i++) {
-		    used = 0;
-		    for (j = 0; j < sub->device->gpsdata.satellites_used; j++)
-			if (sub->device->gpsdata.used[j] == sub->device->gpsdata.PRN[i]) {
-			    used = 1;
-			    break;
-			}
-		    if (sub->device->gpsdata.PRN[i]) {
-			(void)snprintf(reply+strlen(reply),
-				       sizeof(reply)-strlen(reply),
-				       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s},",
-				       sub->device->gpsdata.PRN[i],
-				       sub->device->gpsdata.elevation[i],sub->device->gpsdata.azimuth[i],
-				       sub->device->gpsdata.ss[i],
-				       used ? "true" : "false");
-		    }
-		}
-		reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-		(void)strlcat(reply, "],", sizeof(reply));
-	    }
-	    if (sub->device->gpsdata.satellites != reported)
-		gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
-			    sub->device->gpsdata.satellites, reported);
+	    json_sky_dump(&sub->device->gpsdata, 
+			  reply+strlen(reply), sizeof(reply)-strlen(reply));
+	} else {
+	    (void)strlcat(reply, "{}", sizeof(reply));
 	}
-	if (reply[strlen(reply)-1] == ',')
-	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
+	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else  if (buf[0] == '?') {
 #define JSON_ERROR_OBJECT	"{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n"

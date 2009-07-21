@@ -18,7 +18,7 @@ attributes (and attribute values, and so on recursively down through
 all nestings of objects and arrays).  This parser is indifferent to
 the order of attributes at any level, but you have to tell it in
 advance what the type of each attribute value will be and where the
-parses value will be stored. The tamplate structures may supply
+parsed value will be stored. The tamplate structures may supply
 default values to be used when an expected attribute is omitted.
 
    The dialect this parses has some limitations.  First, it cannot

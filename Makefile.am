@@ -140,6 +140,7 @@ libgpsd_c_sources = \
 	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
+	gps_json.c \
 	hex.c \
 	isgps.c \
 	json.c \
@@ -329,7 +330,7 @@ CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
 noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
-	driver_ubx.h gpsmon.h gpsdclient.h
+	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h
 
 nodist_include_HEADERS = gpsd.h
 include_HEADERS = gps.h libgpsmm.h
