@@ -147,6 +147,34 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 		    datap->satellites, reported);
 }
 
+int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
+{
+    // FIXME: Add the rest of these fields
+    const struct json_attr_t json_attrs_1[] = {
+	{"device", string,  .addr.string.ptr = gpsdata->gps_device, 
+			    .addr.string.len = sizeof(gpsdata->gps_device)},
+	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
+			    .addr.string.len = sizeof(gpsdata->tag)},
+	{"time",   real,    .addr.real = &gpsdata->fix.time,  
+	                    .dflt.real = NAN},
+	{"lon",    real,    .addr.real = &gpsdata->fix.longitude, 
+	                    .dflt.real = NAN},
+	{"lat",    real,    .addr.real = &gpsdata->fix.latitude,  
+	                    .dflt.real = NAN},
+	{"alt",    real,    .addr.real = &gpsdata->fix.altitude,  
+	                    .dflt.real = NAN},
+	{"eph",    real,    .addr.real = &gpsdata->fix.eph,       
+	                    .dflt.real = NAN},
+	{"epv",    real,    .addr.real = &gpsdata->fix.epv,
+	                    .dflt.real = NAN},
+	{"mode",   integer, .addr.integer = &gpsdata->fix.mode,   
+	                    .dflt.integer = MODE_NOT_SEEN},
+	{NULL},
+    };
+
+    return json_read_object(buf, json_attrs_1, 0, NULL);
+}
+
 int json_sky_read(const char *buf, struct gps_data_t *gpsdata)
 {
     bool usedflags[MAXCHANNELS];

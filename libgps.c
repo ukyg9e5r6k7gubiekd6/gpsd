@@ -15,6 +15,9 @@
 
 #include "gpsd_config.h"
 #include "gpsd.h"
+#ifdef GPSDNG_ENABLE
+#include "gps_json.h"
+#endif /* GPSDNG_ENABLE */
 
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);
@@ -91,346 +94,358 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    decimal_point = locale_data->decimal_point[0];
     }
 
-    for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
-	if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
-	    bool eol = false;
-	    /* the following should execute each time we have a good next sp */
-	    for (sp = ns + 5; *sp != '\0'; sp = tp+1) {
-		tp = sp + strcspn(sp, ",\r\n");
-		eol = *tp == '\r' || *tp == '\n';
-		if (*tp == '\0')
-		    tp--;
-		else
-		    *tp = '\0';
-
-		/*
-		 * The daemon always emits the Anglo-American and SI
-		 * decimal point.  Hack these into whatever the
-		 * application locale requires if it's not the same.
-		 * This has to happen *after* we grab the next
-		 * comma-delimited response, or we'll lose horribly
-		 * in locales where the decimal separator is comma.
-		 */
-		if (decimal_point != '\0') {
-		    char *cp;
-		    for (cp = sp; cp < tp; cp++)
-			if (*cp == '.')
-			    *cp = decimal_point;
-		}
-
-		/* note, there's a bit of skip logic after the switch */
-
-		switch (*sp) {
-		case 'A':
-		    if (sp[2] == '?') {
-			    gpsdata->fix.altitude = NAN;
-		    } else {
-			(void)sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
-			gpsdata->set |= ALTITUDE_SET;
-		    }
-		    break;
-		case 'B':
-		    if (sp[2] == '?') {
-			gpsdata->baudrate = gpsdata->stopbits = 0;
-		    } else
-			(void)sscanf(sp, "B=%u %*d %*s %u",
-			       &gpsdata->baudrate, &gpsdata->stopbits);
-		    break;
-		case 'C':
-		    if (sp[2] == '?')
-			gpsdata->mincycle = gpsdata->cycle = 0;
-		    else {
-			if (sscanf(sp, "C=%lf %lf",
-				     &gpsdata->cycle,
-				   &gpsdata->mincycle) < 2)
-			    gpsdata->mincycle = gpsdata->cycle;
-		    }
-		    break;
-		case 'D':
-		    if (sp[2] == '?')
-			gpsdata->fix.time = NAN;
-		    else {
-			gpsdata->fix.time = iso8601_to_unix(sp+2);
-			gpsdata->set |= TIME_SET;
-		    }
-		    break;
-		case 'E':
-		    gpsdata->epe = gpsdata->fix.eph = gpsdata->fix.epv = NAN;
-		    /* epe should always be present if eph or epv is */
-		    if (sp[2] != '?') {
-			char epe[20], eph[20], epv[20];
-			(void)sscanf(sp, "E=%s %s %s", epe, eph, epv);
-#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
-			    /*@ +floatdouble @*/
-			    gpsdata->epe = DEFAULT(epe);
-			    gpsdata->fix.eph = DEFAULT(eph);
-			    gpsdata->fix.epv = DEFAULT(epv);
-			    /*@ -floatdouble @*/
-#undef DEFAULT
-		    }
-		    break;
-		case 'F':
-		    /*@ -mustfreeonly */
-		    if (sp[2] == '?')
-			gpsdata->gps_device[0] = '\0';
-		    else {
-			/*@ -mayaliasunique @*/
-			strncpy(gpsdata->gps_device, sp+2, PATH_MAX);
-			/*@ +mayaliasunique @*/
-			gpsdata->set |= DEVICE_SET;
-		    }
-		    /*@ +mustfreeonly */
-		    break;
-		case 'I':
-		    /*@ -mustfreeonly */
-		    if (gpsdata->gps_id)
-			free(gpsdata->gps_id);
-		    if (sp[2] == '?')
-			gpsdata->gps_id = NULL;
-		    else {
-			gpsdata->gps_id = strdup(sp+2);
-			gpsdata->set |= DEVICEID_SET;
-		    }
-		    /*@ +mustfreeonly */
-		    break;
-		case 'K':
-		    if (gpsdata->devicelist) {
-			for (i = 0; i < gpsdata->ndevices; i++)
-			    /*@i1@*/(void)free(gpsdata->devicelist[i]);
-			(void)free(gpsdata->devicelist);
-			gpsdata->devicelist = NULL;
-			gpsdata->ndevices = -1;
-			gpsdata->set |= DEVICELIST_SET;
-		    }
-		    if (sp[2] != '?') {
-			/*@ -nullderef -nullpass -mustfreeonly -dependenttrans @*/
-			char *rc = strdup(sp);
-			char *sp2 = rc;
-			char *ns2 = ns;
-			gpsdata->ndevices = (int)strtol(sp2+2, &sp2, 10);
-			gpsdata->devicelist = (char **)calloc(
-			    (size_t)gpsdata->ndevices,
-			    sizeof(char **));
-			/*@ -nullstate -mustfreefresh @*/
-			gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns2));
-			while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
-			    gpsdata->devicelist[++i] = strdup(sp2);
-			free(rc);
-			/*@ +nullstate +mustfreefresh @*/
-			/*@ +nullderef +nullpass +dependenttrans +mustfreeonly @*/
-			gpsdata->set |= DEVICELIST_SET;
-		    }
-		    break;
-		case 'M':
-		    if (sp[2] == '?') {
-			gpsdata->fix.mode = MODE_NOT_SEEN;
-		    } else {
-			gpsdata->fix.mode = atoi(sp+2);
-			gpsdata->set |= MODE_SET;
-		    }
-		    break;
-		case 'N':
-		    if (sp[2] == '?')
-			gpsdata->driver_mode = MODE_NMEA;
+#ifdef GPSDNG_ENABLE
+    /* detect and process a JSON response */
+    if (buf[0] == '!' && (sp = strchr(buf, '='))!=NULL && sp[1] == '{') {
+	if (strncmp(buf, "!TPV=", 5) == 0) {
+	    json_tpv_read(buf+5, gpsdata);
+	} else if (strncmp(buf, "!SKY=", 5) == 0) {
+	    json_sky_read(buf+5, gpsdata);
+	} 
+    } else
+#endif /* GPSDNG_ENABLE */
+    {
+	for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
+	    if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
+		bool eol = false;
+		/* the following should execute each time we have a good next sp */
+		for (sp = ns + 5; *sp != '\0'; sp = tp+1) {
+		    tp = sp + strcspn(sp, ",\r\n");
+		    eol = *tp == '\r' || *tp == '\n';
+		    if (*tp == '\0')
+			tp--;
 		    else
-			gpsdata->driver_mode = (unsigned)atoi(sp+2);
-		    break;
-		case 'O':
-		    if (sp[2] == '?') {
-			gpsdata->set = MODE_SET | STATUS_SET;
-			gpsdata->status = STATUS_NO_FIX;
-			gps_clear_fix(&gpsdata->fix);
-		    } else {
-			struct gps_fix_t nf;
-			char tag[MAXTAGLEN+1], alt[20];
-			char eph[20], epv[20], track[20],speed[20], climb[20];
-			char epd[20], eps[20], epc[20], mode[2];
-			char timestr[20], ept[20], lat[20], lon[20];
-			int st = sscanf(sp+2,
-			       "%8s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
-				tag, timestr, ept, lat, lon,
-				alt, eph, epv, track, speed, climb,
-				epd, eps, epc, mode);
-			if (st >= 14) {
-#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
-			    /*@ +floatdouble @*/
-			    nf.time = DEFAULT(timestr);
-			    nf.latitude = DEFAULT(lat);
-			    nf.longitude = DEFAULT(lon);
-			    nf.ept = DEFAULT(ept);
-			    nf.altitude = DEFAULT(alt);
-			    nf.eph = DEFAULT(eph);
-			    nf.epv = DEFAULT(epv);
-			    nf.track = DEFAULT(track);
-			    nf.speed = DEFAULT(speed);
-			    nf.climb = DEFAULT(climb);
-			    nf.epd = DEFAULT(epd);
-			    nf.eps = DEFAULT(eps);
-			    nf.epc = DEFAULT(epc);
-			    /*@ -floatdouble @*/
-#undef DEFAULT
-			    if (st >= 15)
-				nf.mode = (mode[0] == '?') ? MODE_NOT_SEEN : atoi(mode);
-			    else
-				nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
-			    if (alt[0] != '?')
-				gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
-			    if (isnan(nf.eph)==0)
-				gpsdata->set |= HERR_SET;
-			    if (isnan(nf.epv)==0)
-				gpsdata->set |= VERR_SET;
-			    if (isnan(nf.track)==0)
-				gpsdata->set |= TRACK_SET | SPEED_SET;
-			    if (isnan(nf.eps)==0)
-				gpsdata->set |= SPEEDERR_SET;
-			    if (isnan(nf.epc)==0)
-				gpsdata->set |= CLIMBERR_SET;
-			    gpsdata->fix = nf;
-			    (void)strlcpy(gpsdata->tag, tag, MAXTAGLEN+1);
-			    gpsdata->set |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
-			    gpsdata->status = STATUS_FIX;
-			    gpsdata->set |= STATUS_SET;
-			}
-		    }
-		    break;
-		case 'P':
-		    if (sp[2] == '?') {
-			   gpsdata->fix.latitude = NAN;
-			   gpsdata->fix.longitude = NAN;
-		    } else {
-			(void)sscanf(sp, "P=%lf %lf",
-			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
-			gpsdata->set |= LATLON_SET;
-		    }
-		    break;
-		case 'Q':
-		    if (sp[2] == '?') {
-			   gpsdata->satellites_used = 0;
-			   gpsdata->pdop = 0;
-			   gpsdata->hdop = 0;
-			   gpsdata->vdop = 0;
-		    } else {
-			(void)sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
-			       &gpsdata->satellites_used,
-			       &gpsdata->pdop,
-			       &gpsdata->hdop,
-			       &gpsdata->vdop,
-			       &gpsdata->tdop,
-			       &gpsdata->gdop);
-			gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET;
-		    }
-		    break;
-		case 'S':
-		    if (sp[2] == '?') {
-			gpsdata->status = -1;
-		    } else {
-			gpsdata->status = atoi(sp+2);
-			gpsdata->set |= STATUS_SET;
-		    }
-		    break;
-		case 'T':
-		    if (sp[2] == '?') {
-			gpsdata->fix.track = NAN;
-		    } else {
-			(void)sscanf(sp, "T=%lf", &gpsdata->fix.track);
-			gpsdata->set |= TRACK_SET;
-		    }
-		    break;
-		case 'U':
-		    if (sp[2] == '?') {
-			gpsdata->fix.climb = NAN;
-		    } else {
-			(void)sscanf(sp, "U=%lf", &gpsdata->fix.climb);
-			gpsdata->set |= CLIMB_SET;
-		    }
-		    break;
-		case 'V':
-		    if (sp[2] == '?') {
-			gpsdata->fix.speed = NAN;
-		    } else {
-			(void)sscanf(sp, "V=%lf", &gpsdata->fix.speed);
-			/* V reply is in kt, fix.speed is in metres/sec */
-			gpsdata->fix.speed = gpsdata->fix.speed / MPS_TO_KNOTS;
-			gpsdata->set |= SPEED_SET;
-		    }
-		    break;
-		case 'X':
-		    if (sp[2] == '?')
-			gpsdata->online = -1;
-		    else {
-			(void)sscanf(sp, "X=%lf", &gpsdata->online);
-			gpsdata->set |= ONLINE_SET;
-		    }
-		    break;
-		case 'Y':
-		    if (sp[2] == '?') {
-			gpsdata->satellites = 0;
-		    } else {
-			int j, i1, i2, i3, i5;
-			int PRN[MAXCHANNELS];
-			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
-			int used[MAXCHANNELS];
-			double ss[MAXCHANNELS], f4;
-			char tag[MAXTAGLEN+1], timestamp[21];
+			*tp = '\0';
 
-			(void)sscanf(sp, "Y=%8s %20s %d ",
-			       tag, timestamp, &gpsdata->satellites);
-			(void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
-			if (timestamp[0] != '?') {
-			    gpsdata->sentence_time = atof(timestamp);
+		    /*
+		     * The daemon always emits the Anglo-American and SI
+		     * decimal point.  Hack these into whatever the
+		     * application locale requires if it's not the same.
+		     * This has to happen *after* we grab the next
+		     * comma-delimited response, or we'll lose horribly
+		     * in locales where the decimal separator is comma.
+		     */
+		    if (decimal_point != '\0') {
+			char *cp;
+			for (cp = sp; cp < tp; cp++)
+			    if (*cp == '.')
+				*cp = decimal_point;
+		    }
+
+		    /* note, there's a bit of skip logic after the switch */
+
+		    switch (*sp) {
+		    case 'A':
+			if (sp[2] == '?') {
+				gpsdata->fix.altitude = NAN;
+			} else {
+			    (void)sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
+			    gpsdata->set |= ALTITUDE_SET;
+			}
+			break;
+		    case 'B':
+			if (sp[2] == '?') {
+			    gpsdata->baudrate = gpsdata->stopbits = 0;
+			} else
+			    (void)sscanf(sp, "B=%u %*d %*s %u",
+				   &gpsdata->baudrate, &gpsdata->stopbits);
+			break;
+		    case 'C':
+			if (sp[2] == '?')
+			    gpsdata->mincycle = gpsdata->cycle = 0;
+			else {
+			    if (sscanf(sp, "C=%lf %lf",
+					 &gpsdata->cycle,
+				       &gpsdata->mincycle) < 2)
+				gpsdata->mincycle = gpsdata->cycle;
+			}
+			break;
+		    case 'D':
+			if (sp[2] == '?')
+			    gpsdata->fix.time = NAN;
+			else {
+			    gpsdata->fix.time = iso8601_to_unix(sp+2);
 			    gpsdata->set |= TIME_SET;
 			}
-			for (j = 0; j < gpsdata->satellites; j++) {
-			    PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
+			break;
+		    case 'E':
+			gpsdata->epe = gpsdata->fix.eph = gpsdata->fix.epv = NAN;
+			/* epe should always be present if eph or epv is */
+			if (sp[2] != '?') {
+			    char epe[20], eph[20], epv[20];
+			    (void)sscanf(sp, "E=%s %s %s", epe, eph, epv);
+    #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+				/*@ +floatdouble @*/
+				gpsdata->epe = DEFAULT(epe);
+				gpsdata->fix.eph = DEFAULT(eph);
+				gpsdata->fix.epv = DEFAULT(epv);
+				/*@ -floatdouble @*/
+    #undef DEFAULT
 			}
-			for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites; j++) {
-			    if ((sp != NULL) && ((sp = strchr(sp, ':')) != NULL)) {
-				sp++;
-				(void)sscanf(sp, "%d %d %d %lf %d", &i1, &i2, &i3, &f4, &i5);
-				PRN[j] = i1;
-				elevation[j] = i2; azimuth[j] = i3;
-				ss[j] = f4; used[j] = i5;
-				if (i5 == 1)
-				    gpsdata->satellites_used++;
+			break;
+		    case 'F':
+			/*@ -mustfreeonly */
+			if (sp[2] == '?')
+			    gpsdata->gps_device[0] = '\0';
+			else {
+			    /*@ -mayaliasunique @*/
+			    strncpy(gpsdata->gps_device, sp+2, PATH_MAX);
+			    /*@ +mayaliasunique @*/
+			    gpsdata->set |= DEVICE_SET;
+			}
+			/*@ +mustfreeonly */
+			break;
+		    case 'I':
+			/*@ -mustfreeonly */
+			if (gpsdata->gps_id)
+			    free(gpsdata->gps_id);
+			if (sp[2] == '?')
+			    gpsdata->gps_id = NULL;
+			else {
+			    gpsdata->gps_id = strdup(sp+2);
+			    gpsdata->set |= DEVICEID_SET;
+			}
+			/*@ +mustfreeonly */
+			break;
+		    case 'K':
+			if (gpsdata->devicelist) {
+			    for (i = 0; i < gpsdata->ndevices; i++)
+				/*@i1@*/(void)free(gpsdata->devicelist[i]);
+			    (void)free(gpsdata->devicelist);
+			    gpsdata->devicelist = NULL;
+			    gpsdata->ndevices = -1;
+			    gpsdata->set |= DEVICELIST_SET;
+			}
+			if (sp[2] != '?') {
+			    /*@ -nullderef -nullpass -mustfreeonly -dependenttrans @*/
+			    char *rc = strdup(sp);
+			    char *sp2 = rc;
+			    char *ns2 = ns;
+			    gpsdata->ndevices = (int)strtol(sp2+2, &sp2, 10);
+			    gpsdata->devicelist = (char **)calloc(
+				(size_t)gpsdata->ndevices,
+				sizeof(char **));
+			    /*@ -nullstate -mustfreefresh @*/
+			    gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns2));
+			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
+				gpsdata->devicelist[++i] = strdup(sp2);
+			    free(rc);
+			    /*@ +nullstate +mustfreefresh @*/
+			    /*@ +nullderef +nullpass +dependenttrans +mustfreeonly @*/
+			    gpsdata->set |= DEVICELIST_SET;
+			}
+			break;
+		    case 'M':
+			if (sp[2] == '?') {
+			    gpsdata->fix.mode = MODE_NOT_SEEN;
+			} else {
+			    gpsdata->fix.mode = atoi(sp+2);
+			    gpsdata->set |= MODE_SET;
+			}
+			break;
+		    case 'N':
+			if (sp[2] == '?')
+			    gpsdata->driver_mode = MODE_NMEA;
+			else
+			    gpsdata->driver_mode = (unsigned)atoi(sp+2);
+			break;
+		    case 'O':
+			if (sp[2] == '?') {
+			    gpsdata->set = MODE_SET | STATUS_SET;
+			    gpsdata->status = STATUS_NO_FIX;
+			    gps_clear_fix(&gpsdata->fix);
+			} else {
+			    struct gps_fix_t nf;
+			    char tag[MAXTAGLEN+1], alt[20];
+			    char eph[20], epv[20], track[20],speed[20], climb[20];
+			    char epd[20], eps[20], epc[20], mode[2];
+			    char timestr[20], ept[20], lat[20], lon[20];
+			    int st = sscanf(sp+2,
+				   "%8s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
+				    tag, timestr, ept, lat, lon,
+				    alt, eph, epv, track, speed, climb,
+				    epd, eps, epc, mode);
+			    if (st >= 14) {
+    #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+				/*@ +floatdouble @*/
+				nf.time = DEFAULT(timestr);
+				nf.latitude = DEFAULT(lat);
+				nf.longitude = DEFAULT(lon);
+				nf.ept = DEFAULT(ept);
+				nf.altitude = DEFAULT(alt);
+				nf.eph = DEFAULT(eph);
+				nf.epv = DEFAULT(epv);
+				nf.track = DEFAULT(track);
+				nf.speed = DEFAULT(speed);
+				nf.climb = DEFAULT(climb);
+				nf.epd = DEFAULT(epd);
+				nf.eps = DEFAULT(eps);
+				nf.epc = DEFAULT(epc);
+				/*@ -floatdouble @*/
+    #undef DEFAULT
+				if (st >= 15)
+				    nf.mode = (mode[0] == '?') ? MODE_NOT_SEEN : atoi(mode);
+				else
+				    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
+				if (alt[0] != '?')
+				    gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
+				if (isnan(nf.eph)==0)
+				    gpsdata->set |= HERR_SET;
+				if (isnan(nf.epv)==0)
+				    gpsdata->set |= VERR_SET;
+				if (isnan(nf.track)==0)
+				    gpsdata->set |= TRACK_SET | SPEED_SET;
+				if (isnan(nf.eps)==0)
+				    gpsdata->set |= SPEEDERR_SET;
+				if (isnan(nf.epc)==0)
+				    gpsdata->set |= CLIMBERR_SET;
+				gpsdata->fix = nf;
+				(void)strlcpy(gpsdata->tag, tag, MAXTAGLEN+1);
+				gpsdata->set |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
+				gpsdata->status = STATUS_FIX;
+				gpsdata->set |= STATUS_SET;
 			    }
 			}
-			/*@ -compdef @*/
-			memcpy(gpsdata->PRN, PRN, sizeof(PRN));
-			memcpy(gpsdata->elevation, elevation, sizeof(elevation));
-			memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
-			memcpy(gpsdata->ss, ss, sizeof(ss));
-			memcpy(gpsdata->used, used, sizeof(used));
-			/*@ +compdef @*/
-		    }
-		    gpsdata->set |= SATELLITE_SET;
-		    break;
-		case 'Z':
-		    gpsdata->profiling = (sp[2] == '1');
-		    break;
-		case '$':
-		    if (gpsdata->profiling != true)
 			break;
-		    /*@ +matchanyintegral -formatcode @*/
-		    (void)sscanf(sp, "$=%8s %zd %lf %lf %lf %lf %lf %lf",
-			   gpsdata->tag,
-			   &gpsdata->sentence_length,
-			   &gpsdata->fix.time,
-			   &gpsdata->d_xmit_time,
-			   &gpsdata->d_recv_time,
-			   &gpsdata->d_decode_time,
-			   &gpsdata->poll_time,
-			   &gpsdata->emit_time);
-		    /*@ -matchanyintegral +formatcode @*/
-		    break;
-		}
+		    case 'P':
+			if (sp[2] == '?') {
+			       gpsdata->fix.latitude = NAN;
+			       gpsdata->fix.longitude = NAN;
+			} else {
+			    (void)sscanf(sp, "P=%lf %lf",
+			       &gpsdata->fix.latitude, &gpsdata->fix.longitude);
+			    gpsdata->set |= LATLON_SET;
+			}
+			break;
+		    case 'Q':
+			if (sp[2] == '?') {
+			       gpsdata->satellites_used = 0;
+			       gpsdata->pdop = 0;
+			       gpsdata->hdop = 0;
+			       gpsdata->vdop = 0;
+			} else {
+			    (void)sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
+				   &gpsdata->satellites_used,
+				   &gpsdata->pdop,
+				   &gpsdata->hdop,
+				   &gpsdata->vdop,
+				   &gpsdata->tdop,
+				   &gpsdata->gdop);
+			    gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET;
+			}
+			break;
+		    case 'S':
+			if (sp[2] == '?') {
+			    gpsdata->status = -1;
+			} else {
+			    gpsdata->status = atoi(sp+2);
+			    gpsdata->set |= STATUS_SET;
+			}
+			break;
+		    case 'T':
+			if (sp[2] == '?') {
+			    gpsdata->fix.track = NAN;
+			} else {
+			    (void)sscanf(sp, "T=%lf", &gpsdata->fix.track);
+			    gpsdata->set |= TRACK_SET;
+			}
+			break;
+		    case 'U':
+			if (sp[2] == '?') {
+			    gpsdata->fix.climb = NAN;
+			} else {
+			    (void)sscanf(sp, "U=%lf", &gpsdata->fix.climb);
+			    gpsdata->set |= CLIMB_SET;
+			}
+			break;
+		    case 'V':
+			if (sp[2] == '?') {
+			    gpsdata->fix.speed = NAN;
+			} else {
+			    (void)sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+			    /* V reply is in kt, fix.speed is in metres/sec */
+			    gpsdata->fix.speed = gpsdata->fix.speed / MPS_TO_KNOTS;
+			    gpsdata->set |= SPEED_SET;
+			}
+			break;
+		    case 'X':
+			if (sp[2] == '?')
+			    gpsdata->online = -1;
+			else {
+			    (void)sscanf(sp, "X=%lf", &gpsdata->online);
+			    gpsdata->set |= ONLINE_SET;
+			}
+			break;
+		    case 'Y':
+			if (sp[2] == '?') {
+			    gpsdata->satellites = 0;
+			} else {
+			    int j, i1, i2, i3, i5;
+			    int PRN[MAXCHANNELS];
+			    int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
+			    int used[MAXCHANNELS];
+			    double ss[MAXCHANNELS], f4;
+			    char tag[MAXTAGLEN+1], timestamp[21];
 
-		/*
-		 * Skip to next GPSD when we see \r or \n;
-		 * we don't want to try interpreting stuff
-		 * in between that might be raw mode data.
-		 */
-		if (eol)
-		    break;
+			    (void)sscanf(sp, "Y=%8s %20s %d ",
+				   tag, timestamp, &gpsdata->satellites);
+			    (void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
+			    if (timestamp[0] != '?') {
+				gpsdata->sentence_time = atof(timestamp);
+				gpsdata->set |= TIME_SET;
+			    }
+			    for (j = 0; j < gpsdata->satellites; j++) {
+				PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
+			    }
+			    for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites; j++) {
+				if ((sp != NULL) && ((sp = strchr(sp, ':')) != NULL)) {
+				    sp++;
+				    (void)sscanf(sp, "%d %d %d %lf %d", &i1, &i2, &i3, &f4, &i5);
+				    PRN[j] = i1;
+				    elevation[j] = i2; azimuth[j] = i3;
+				    ss[j] = f4; used[j] = i5;
+				    if (i5 == 1)
+					gpsdata->satellites_used++;
+				}
+			    }
+			    /*@ -compdef @*/
+			    memcpy(gpsdata->PRN, PRN, sizeof(PRN));
+			    memcpy(gpsdata->elevation, elevation, sizeof(elevation));
+			    memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
+			    memcpy(gpsdata->ss, ss, sizeof(ss));
+			    memcpy(gpsdata->used, used, sizeof(used));
+			    /*@ +compdef @*/
+			}
+			gpsdata->set |= SATELLITE_SET;
+			break;
+		    case 'Z':
+			gpsdata->profiling = (sp[2] == '1');
+			break;
+		    case '$':
+			if (gpsdata->profiling != true)
+			    break;
+			/*@ +matchanyintegral -formatcode @*/
+			(void)sscanf(sp, "$=%8s %zd %lf %lf %lf %lf %lf %lf",
+			       gpsdata->tag,
+			       &gpsdata->sentence_length,
+			       &gpsdata->fix.time,
+			       &gpsdata->d_xmit_time,
+			       &gpsdata->d_recv_time,
+			       &gpsdata->d_decode_time,
+			       &gpsdata->poll_time,
+			       &gpsdata->emit_time);
+			/*@ -matchanyintegral +formatcode @*/
+			break;
+		    }
+
+		    /*
+		     * Skip to next GPSD when we see \r or \n;
+		     * we don't want to try interpreting stuff
+		     * in between that might be raw mode data.
+		     */
+		    if (eol)
+			break;
+		}
 	    }
 	}
     }

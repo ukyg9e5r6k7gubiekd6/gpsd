@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Structures for JSON paarsing using only fixed-extent memory */
+/* Structures for JSON parsing using only fixed-extent memory */
 
 #include <stdbool.h>
 #include <ctype.h>
