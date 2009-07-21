@@ -139,11 +139,11 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_INTEGER("az[0]", gpsdata.azimuth[0], 196);
     ASSERT_REAL("ss[0]", gpsdata.ss[0], 34);
     ASSERT_INTEGER("used[0]", gpsdata.used[0], 10);
+    ASSERT_INTEGER("used[5]", gpsdata.used[5], 27);
     ASSERT_INTEGER("PRN[6]", gpsdata.PRN[6], 21);
     ASSERT_INTEGER("el[6]", gpsdata.elevation[6], 10);
     ASSERT_INTEGER("az[6]", gpsdata.azimuth[6], 301);
     ASSERT_REAL("ss[6]", gpsdata.ss[6], 0);
-    //ASSERT_INTEGER("used[6]", gpsdata.used[6], 21);
 
     status = json_read_array(json_str3, &json_array_3, NULL);
     ASSERT_CASE(3, status);
