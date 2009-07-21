@@ -149,13 +149,14 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 
 int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
 {
-    // FIXME: Add the rest of these fields
     const struct json_attr_t json_attrs_1[] = {
 	{"device", string,  .addr.string.ptr = gpsdata->gps_device, 
 			    .addr.string.len = sizeof(gpsdata->gps_device)},
 	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
 			    .addr.string.len = sizeof(gpsdata->tag)},
 	{"time",   real,    .addr.real = &gpsdata->fix.time,  
+	                    .dflt.real = NAN},
+	{"ept",    real,    .addr.real = &gpsdata->fix.ept,       
 	                    .dflt.real = NAN},
 	{"lon",    real,    .addr.real = &gpsdata->fix.longitude, 
 	                    .dflt.real = NAN},
@@ -166,6 +167,18 @@ int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
 	{"eph",    real,    .addr.real = &gpsdata->fix.eph,       
 	                    .dflt.real = NAN},
 	{"epv",    real,    .addr.real = &gpsdata->fix.epv,
+	                    .dflt.real = NAN},
+	{"track",   real,   .addr.real = &gpsdata->fix.track,  
+	                    .dflt.real = NAN},
+	{"speed",   real,   .addr.real = &gpsdata->fix.speed,  
+	                    .dflt.real = NAN},
+	{"climb",   real,   .addr.real = &gpsdata->fix.climb,  
+	                    .dflt.real = NAN},
+	{"epd",    real,    .addr.real = &gpsdata->fix.epd,
+	                    .dflt.real = NAN},
+	{"eps",    real,    .addr.real = &gpsdata->fix.eps,
+	                    .dflt.real = NAN},
+	{"epc",    real,    .addr.real = &gpsdata->fix.epc,
 	                    .dflt.real = NAN},
 	{"mode",   integer, .addr.integer = &gpsdata->fix.mode,   
 	                    .dflt.integer = MODE_NOT_SEEN},
