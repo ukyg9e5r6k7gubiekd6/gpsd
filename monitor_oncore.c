@@ -28,7 +28,7 @@
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t oncore_binary;
 
-static WINDOW *Ea1win, *Eawin, *Bbwin, *Enwin;
+static WINDOW *Ea1win, *Eawin, *Bbwin, *Enwin, *Bowin, *Aswin, *Atwin;
 static unsigned char EaSVlines[8];
 
 static const char *antenna[] =
@@ -80,6 +80,13 @@ static const char *traim_status[] =
     "insufficient"
 };
 
+static const char *pos_hold_mode[] =
+{
+    "off",
+    "on",
+    "survey"
+};
+
 #define ONCTYPE(id2,id3) ((((unsigned int)id2)<<8)|(id3))
 
 #define MAXTRACKSATS 	8	/* the most satellites being tracked */
@@ -94,15 +101,22 @@ static bool oncore_initialize(void)
     Eawin   = subwin(devicewin, MAXTRACKSATS+3, 27,  6, 0);
     Bbwin   = subwin(devicewin, MAXVISSATS+3,   22,  6, 28);
     Enwin   = subwin(devicewin, 10,		29,  6, 51);
+    Bowin   = subwin(devicewin, 4,		11, 17, 0);
+    Atwin   = subwin(devicewin, 5,		 9, 16, 51);
+    Aswin   = subwin(devicewin, 5,		19, 16, 61);
     /*@ +onlytrans @*/
 
-    if (Ea1win==NULL || Eawin==NULL || Bbwin==NULL || Enwin==NULL)
+    if (Ea1win==NULL || Eawin==NULL || Bbwin==NULL || Enwin==NULL
+	|| Bowin==NULL ||Aswin==NULL ||  Atwin==NULL)
 	return false;
 
     (void)syncok(Ea1win,true);
     (void)syncok(Eawin, true);
     (void)syncok(Bbwin, true);
     (void)syncok(Enwin, true);
+    (void)syncok(Bowin, true);
+    (void)syncok(Aswin, true);
+    (void)syncok(Atwin, true);
 
     (void)wborder(Ea1win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(Ea1win, A_BOLD);
@@ -139,6 +153,26 @@ static bool oncore_initialize(void)
     (void)mvwprintw(Enwin, 8, 1, "Time sol sigma:");
     (void)mvwprintw(Enwin, 9, 4, " @@En ");
     (void)wattrset(Enwin, A_NORMAL);
+
+    (void)wborder(Bowin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(Bowin, A_BOLD);
+    (void)mvwprintw(Bowin, 1, 1, "UTC:");
+    (void)mvwprintw(Bowin, 3, 1, " @@Bo ");
+    (void)wattrset(Bowin, A_NORMAL);
+
+    (void)wborder(Atwin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(Atwin, A_BOLD);
+    (void)mvwprintw(Atwin, 1, 1, "PHold:");
+    (void)mvwprintw(Atwin, 4, 1, " @@At ");
+    (void)wattrset(Atwin, A_NORMAL);
+
+    (void)wborder(Aswin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(Aswin, A_BOLD);
+    (void)mvwprintw(Aswin, 1, 1, "Lat:");
+    (void)mvwprintw(Aswin, 2, 1, "Lon:");
+    (void)mvwprintw(Aswin, 3, 1, "Alt:");
+    (void)mvwprintw(Aswin, 4, 4, " @@As ");
+    (void)wattrset(Aswin, A_NORMAL);
 
     memset(EaSVlines, 0, sizeof(EaSVlines));
 
@@ -188,9 +222,9 @@ static void oncore_update(void)
 
 	    (void)mvwprintw(Ea1win, 1, 7, "%04d-%02d-%02d %02d:%02d:%02d.%09d",
 			    year,mon,day,hour,min,sec,nsec);
-	    (void)mvwprintw(Ea1win, 1, 48, "%9.6lf %c",
+	    (void)mvwprintw(Ea1win, 1, 47, "%10.6lf %c",
 			    fabs(lat),lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');
-	    (void)mvwprintw(Ea1win, 1, 67, "%9.6lf %c",
+	    (void)mvwprintw(Ea1win, 1, 66, "%10.6lf %c",
 			    fabs(lon),lat < 0 ? 'W' : lon > 0 ? 'E' : ' ');
 
 	    (void)mvwprintw(Ea1win, 2, 50, "%6.2f m/s",speed);
@@ -276,7 +310,7 @@ static void oncore_update(void)
 		/*@ -boolops @*/
 		for (j = 0; j < 8; j++)
 		    if (EaSVlines[j] == sv &&
-			!(Bblines_mask & (1 << j))) {
+			!(Bblines_mask & (1 << (j+2)))) {
 			Bblines[i] = j+2;
 			Bblines_mask |= 1 << Bblines[i];
 		    }
@@ -289,6 +323,7 @@ static void oncore_update(void)
 		    while (Bblines_mask & (1 << next_line))
 			next_line++;
 		    Bblines[i] = next_line++;
+		    Bblines_mask |= 1 << Bblines[i];
 		}
 	    }
 	    /* Ready to print on precalculated lines. */
@@ -303,11 +338,19 @@ static void oncore_update(void)
 		health = (int)getub(buf,   off+5);
 
 		(void)wmove(Bbwin, (int)Bblines[i], 1);
-		(void)wprintw(Bbwin, "%3d %3d %2d %5d",
+		(void)wprintw(Bbwin, "%3d %3d %2d %5d %c%c",
 			      sv,az,el,doppl,
 			      (health & 0x02) ? 'U' : ' ',  /* unhealthy */
 			      (health & 0x01) ? 'R' : ' '); /* removed   */
 	    }
+
+	    for (i = 2; i < 14; i++) 
+		/*@ -boolops @*/
+	        if (!(Bblines_mask & (1 << i))) {
+		    (void)wmove(Bbwin, (int)i, 1);
+		    (void)wprintw(Bbwin, "                   ");
+		}
+		/*@ +boolops @*/
 	}
 
 	monitor_log("Bb =");
@@ -330,7 +373,7 @@ static void oncore_update(void)
 	    /*@ -predboolothers @*/
 	    (void)mvwprintw(Enwin, 1, 24, "%3s",traim ? "on" : "off");
 	    (void)mvwprintw(Enwin, 2, 18, "%6.1f us",alarm);
-	    (void)mvwprintw(Enwin, 3, 13, "%14s",pps_ctrl[ctrl],ctrl);
+	    (void)mvwprintw(Enwin, 3, 13, "%14s",pps_ctrl[ctrl]);
 	    (void)mvwprintw(Enwin, 4, 24, "%3s",pulse ? "on" : "off");
 	    (void)mvwprintw(Enwin, 5, 24, "%3s",pps_sync[sync]);
 	    (void)mvwprintw(Enwin, 6, 20, "%7s",traim_sol[sol_stat]);
@@ -340,6 +383,51 @@ static void oncore_update(void)
 	}
 
 	monitor_log("En =");
+	break;
+
+    case ONCTYPE('B','o'):
+	{
+	    unsigned char utc_offset;
+
+	    utc_offset = getub(buf, 4);
+
+	    if (utc_offset != (unsigned char) 0)
+	        (void)mvwprintw(Bowin, 2, 2, "GPS%+3d",utc_offset);
+	    else
+	        (void)mvwprintw(Bowin, 2, 2, "unknown",utc_offset);
+	}
+
+	monitor_log("Bo =");
+	break;
+
+    case ONCTYPE('A','t'):
+	{
+	    unsigned char mode;
+
+	    mode = getub(buf, 4);
+
+	    (void)mvwprintw(Atwin, 2, 1, "%6s",pos_hold_mode[mode]);
+	}
+
+	monitor_log("At =");
+	break;
+
+    case ONCTYPE('A','s'):
+	{
+	    double lat, lon, alt;
+
+	    lat = getbesl(buf, 4) / 3600000.0;
+	    lon = getbesl(buf, 8) / 3600000.0;
+	    alt = getbesl(buf, 12) / 100.0;
+
+	    (void)mvwprintw(Aswin, 1, 5, "%10.6lf %c",
+			  fabs(lat),lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');
+	    (void)mvwprintw(Aswin, 2, 5, "%10.6lf %c",
+			  fabs(lon),lat < 0 ? 'W' : lon > 0 ? 'E' : ' ');
+	    (void)mvwprintw(Aswin, 3, 7, "%8.2f m",alt);
+	}
+
+	monitor_log("As =");
 	break;
 
     default:
@@ -359,6 +447,9 @@ static void oncore_wrap(void)
     (void)delwin(Eawin);
     (void)delwin(Bbwin);
     (void)delwin(Enwin);
+    (void)delwin(Bowin);
+    (void)delwin(Atwin);
+    (void)delwin(Aswin);
 }
 
 const struct monitor_object_t oncore_mmt = {

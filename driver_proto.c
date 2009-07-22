@@ -290,7 +290,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
    /* 
     * This copy to a public assembly buffer 
     * enables gpsmon to snoop the control message
-    * acter it has been sent.
+    * after it has been sent.
     */
    session->msgbuflen = msglen;
    (void)memcpy(session->msgbuf, msg, msglen);
