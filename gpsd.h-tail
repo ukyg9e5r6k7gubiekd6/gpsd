@@ -125,19 +125,6 @@ extern ssize_t oncore_payload_length(unsigned char id1,unsigned char id2);
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
-struct subscriber_t {
-    int fd;			/* client file descriptor. -1 if unused */
-    double active;		/* when subscriber last polled for data */
-    bool tied;				/* client set device with F */
-    bool watcher;			/* is client in watcher mode? */
-    int raw;				/* is client in raw mode? */
-    enum {GPS,RTCM104v2,ANY} requires;	/* type of device requested */
-    struct gps_fix_t fixbuffer;		/* info to report to the client */
-    struct gps_fix_t oldfix;		/* previous fix for error modeling */
-    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
-    struct gps_device_t *device;	/* device subscriber listens to */
-};
-
 struct gps_context_t {
     int valid;				/* member validity flags */
     bool readonly;			/* if true, never write to device */
@@ -476,16 +463,6 @@ extern void ecef_to_wgs84fix(/*@out@*/struct gps_data_t *,
 			     double, double, double, 
 			     double, double, double);
 extern gps_mask_t dop(struct gps_data_t *);
-
-/* sharing between gpsd.c and gpsd_output.c */
-bool privileged_user(struct subscriber_t *);
-bool assign_channel(struct subscriber_t *);
-bool have_fix(struct subscriber_t *);
-char *snarfline(char *, char **);
-int handle_oldstyle(struct subscriber_t *, char *, int);
-int handle_gpsd_request(struct subscriber_t *, char *, int);
-struct gps_device_t *find_device(char *);
-ssize_t throttled_write(struct subscriber_t *, char *, ssize_t);
 
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);
