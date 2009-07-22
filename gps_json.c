@@ -21,7 +21,7 @@ representations to gpsd core strctures, and vice_versa.
 void json_tpv_dump(char *tag, struct gps_fix_t *fixp, char *reply, size_t replylen)
 {
     assert(replylen > 2);
-    (void)strncpy(reply, "{", 1);
+    (void)strlcpy(reply, "{", replylen);
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
 		   "\"tag\":\"%s\",",
@@ -102,7 +102,7 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
     assert(replylen > 2);
-    (void)strncpy(reply, "{", 1);
+    (void)strlcpy(reply, "{", replylen);
     (void)snprintf(reply+strlen(reply),
 		   replylen- strlen(reply),
 		   "\"tag\":\"%s\",",
