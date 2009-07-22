@@ -338,6 +338,16 @@ struct gps_device_t {
 	    bool warned;
 	} navcom;
 #endif /* NAVCOM_ENABLE */
+#ifdef ONCORE_ENABLE
+	struct {
+#define ONCORE_VISIBLE_CH 12
+	    int visible;
+	    int PRN[ONCORE_VISIBLE_CH];		/* PRNs of satellite */
+	    int elevation[ONCORE_VISIBLE_CH];	/* elevation of satellite */
+	    int azimuth[ONCORE_VISIBLE_CH];	/* azimuth */
+	} oncore;
+#endif /* ONCORE_ENABLE */
+
 	/*
 	 * This is not conditionalized on RTCM104_ENABLE because we need to
 	 * be able to build gpsdecode even when RTCM support is not

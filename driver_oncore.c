@@ -16,6 +16,17 @@
 
 #include "bits.h"
 
+/*@ +charint @*/
+static char enableEa[]		= { 'E', 'a', 1 };
+static char enableBb[]		= { 'B', 'b', 1 };
+static char getfirmware[] 	= { 'C', 'j' };
+static char enableEn[]		= { 'E', 'n', 1, 0, 100, 100, 1, 0,0,0,0,0,0,0,0,0,0 };
+/*static char enableAt2[] 	= { 'A', 't', 2, };*/
+static char pollAs[]		= { 'A', 's', 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff };
+static char pollAt[]		= { 'A', 't', 0xff };
+static char pollBo[]		= { 'B', 'o', 0x01 };
+/*@ -charint @*/
+
 /*
  * These routines are specific to this driver
  */
@@ -23,15 +34,16 @@
 static	gps_mask_t oncore_parse_input(struct gps_device_t *);
 static	gps_mask_t oncore_dispatch(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
-static	gps_mask_t oncore_msg_utctime(struct gps_device_t *, unsigned char *, size_t );
+static	gps_mask_t oncore_msg_utc_offset(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
+static	gps_mask_t oncore_msg_time_raim(struct gps_device_t *, unsigned char *, size_t );
+static	gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *, size_t );
 
 /*
  * These methods may be called elsewhere in gpsd
  */
 static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t );
 static	void oncore_probe_wakeup(struct gps_device_t *);
-static	void oncore_probe_subtype(struct gps_device_t *, unsigned int );
 static	void oncore_configurator(struct gps_device_t *, unsigned int );
 static	bool oncore_set_speed(struct gps_device_t *, speed_t, char, int );
 static	void oncore_set_mode(struct gps_device_t *, int );
@@ -45,11 +57,13 @@ static gps_mask_t
 oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     gps_mask_t mask;
-    unsigned char flags, mon, day, hour, min, sec;
-    unsigned short year;
-    unsigned int nsec;
+    unsigned char flags;
     double lat, lon, alt;
     float speed, track, dop;
+    unsigned int i, j, st, nsv, off;
+    int Bbused;
+    struct tm unpacked_date;
+    unsigned int nsec;
 
     if (data_len != 76)
 	return 0;
@@ -58,75 +72,161 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     gpsd_report(LOG_IO, "oncore NAVSOL - navigation data\n");
 
     flags = getub(buf, 72);
-    if ((flags & 0xcb) != 0){
-	gpsd_report(LOG_WARN, "oncore NAVSOL no fix - flags 0x%02x\n", flags);
-	return mask;
-    }
 
-    mon = getub(buf, 4);
-    day = getub(buf, 5);
-    year = getbeuw(buf, 6);
-    hour = getub(buf, 8);
-    min = getub(buf, 9);
-    sec = getub(buf, 10);
-    nsec = getbeul(buf, 11);
-    fprintf(stderr, "%u/%u/%u %02u:%02u:%02u.%09u\t", year, mon, day, hour, min, sec, nsec);
+    /*@ -predboolothers @*/
+    if (flags & 0x20) {
+	session->gpsdata.status = STATUS_FIX;
+	session->gpsdata.fix.mode = MODE_3D;
+    } else if (flags & 0x10) {
+	session->gpsdata.status = STATUS_FIX;
+	session->gpsdata.fix.mode = MODE_2D;
+    } else {
+	gpsd_report(LOG_WARN, "oncore NAVSOL no fix - flags 0x%02x\n", flags);
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+	session->gpsdata.status = STATUS_NO_FIX;
+    }
+    mask |= MODE_SET;
+    /*@ +predboolothers @*/
+
+    /* Unless we have seen non-zero utc offset data, the time is GPS time
+     * and not UTC time.  Do not use it.
+     */
+    if (session->context->leap_seconds) {
+	unpacked_date.tm_mon	= (int)getub(buf, 4) - 1;
+	unpacked_date.tm_mday	= (int)getub(buf, 5);
+	unpacked_date.tm_year	= (int)getbeuw(buf, 6) - 1900;
+	unpacked_date.tm_hour	= (int)getub(buf, 8);
+	unpacked_date.tm_min	= (int)getub(buf, 9);
+	unpacked_date.tm_sec	= (int)getub(buf, 10);
+	nsec			= getbeul(buf, 11);
+
+	/*@ -unrecog */
+	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	  (double)timegm(&unpacked_date)+nsec * 1e-9;
+	/*@ +unrecog */
+	mask |= TIME_SET;
+	
+#ifdef NTPSHM_ENABLE
+	/* Only update the NTP time if we've seen the leap-seconds data. 
+	 * Else we may be providing GPS time.
+	 */
+	if (session->context->enable_ntpshm)
+	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.16);
+#endif /* NTPSHM_ENABLE */
+
+	gpsd_report(LOG_IO, "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
+		    unpacked_date.tm_year+1900,
+		    unpacked_date.tm_mon+1,
+		    unpacked_date.tm_mday,
+		    unpacked_date.tm_hour,
+		    unpacked_date.tm_min,
+		    unpacked_date.tm_sec,
+		    nsec);
+    }
 
     lat = getbesl(buf, 15) / 3600000.0;
     lon = getbesl(buf, 19) / 3600000.0;
     alt = getbesl(buf, 23) / 100.0;
-    speed = getbeuw(buf, 31) / 100.0;
-    track = getbeuw(buf, 33) / 10.0;
-    dop = getbeuw(buf, 35) / 10.0;
-    fprintf(stderr, "%lf %lf %.2lfm | %.2fm/s %.1fdeg dop=%.1f\n", lat, lon, alt, speed, track, dop);
+    speed = getbeuw(buf, 31) / 100.0f;
+    track = getbeuw(buf, 33) / 10.0f;
+    dop = getbeuw(buf, 35) / 10.0f;
+
+    gpsd_report(LOG_IO, "oncore NAVSOL - %lf %lf %.2lfm-%.2lfm | %.2fm/s %.1fdeg dop=%.1f\n", lat, lon, alt,wgs84_separation(lat,lon), speed, track, (float )dop);
+    
+    session->gpsdata.fix.latitude	= lat;
+    session->gpsdata.fix.longitude	= lon;
+    session->gpsdata.separation		= wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
+    session->gpsdata.fix.altitude	= alt - session->gpsdata.separation;
+    session->gpsdata.fix.speed		= speed;
+    session->gpsdata.fix.track		= track;
+
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET ;
 
 #if 0
-    session->gpsdata.fix.eph = GET_POSITION_ERROR();
-    session->gpsdata.fix.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
-    session->gpsdata.hdop = GET_HDOP();
-    session->gpsdata.vdop = GET_VDOP();
+    session->gpsdata.hdop		= GET_HDOP();
+    session->gpsdata.vdop		= GET_VDOP();
     /* other DOP if available */
     mask |= HDOP_SET | VDOP_SET | USED_SET;
-
-    session->gpsdata.fix.mode = GET_FIX_MODE();
-    session->gpsdata.status = GET_FIX_STATUS();
-
-    /* CYCLE_START_SET if this message starts a reporting period */
-    mask |= MODE_SET | STATUS_SET | CYCLE_START_SET ;
 #endif
+
+    gpsd_zero_satellites(&session->gpsdata);
+    /* Merge the satellite information from the Bb message. */
+    Bbused = 0;
+    nsv = 0;
+    for (i = st = 0; i < 8; i++) {
+        int sv, mode, sn, status;
+
+	off	= 40 + 4 * i;
+	sv	= (int)getub(buf, off);
+	mode	= (int)getub(buf, off+1);
+	sn	= (int)getub(buf, off+2);
+	status	= (int)getub(buf, off+3);
+
+	gpsd_report(LOG_IO, "%2d %2d %2d %3d %02x\n",i,sv,mode,sn,status);
+
+	if (sn) {
+	    session->gpsdata.PRN[st]	= sv;
+	    session->gpsdata.ss[st]	= (double)sn;
+	    for (j = 0; (int)j < session->driver.oncore.visible; j++)
+	        if (session->driver.oncore.PRN[j] == sv) {
+		    session->gpsdata.elevation[st] = 
+		      session->driver.oncore.elevation[j];
+		    session->gpsdata.azimuth[st] = 
+		      session->driver.oncore.azimuth[j];
+		    Bbused |= 1 << j;
+		    break;
+		}
+	    st++;
+	    if (status & 0x80)
+	      session->gpsdata.used[nsv++] = sv;
+	}	
+    }
+    for (j = 0; (int)j < session->driver.oncore.visible; j++)
+        /*@ -boolops @*/
+        if (!(Bbused & (1 << j))) {
+	    session->gpsdata.PRN[st] = session->driver.oncore.PRN[j];
+	    session->gpsdata.elevation[st] = 
+	      session->driver.oncore.elevation[j];
+	    session->gpsdata.azimuth[st] = 
+	      session->driver.oncore.azimuth[j];
+	    st++;
+	}
+        /*@ +boolops @*/
+    session->gpsdata.satellites_used = (int)nsv;
+    session->gpsdata.satellites = (int)st;
+
+    mask |= SATELLITE_SET | USED_SET;
+    
+    /* Some messages can only be polled.  As they are not so
+     * important, would be enough to poll e.g. one message per cycle.
+     */
+    (void)oncore_control_send(session,pollAs,sizeof(pollAs));
+    (void)oncore_control_send(session,pollAt,sizeof(pollAt));
+    (void)oncore_control_send(session,pollBo,sizeof(pollBo));
+
     return mask;
 }
 
 /**
- * GPS Leap Seconds
+ * GPS Leap Seconds = UTC offset
  */
 static gps_mask_t
-oncore_msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+oncore_msg_utc_offset(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-#if 0
-    double t;
+    int utc_offset;
 
-    if (data_len != UTCTIME_MSG_LEN)
+    if (data_len != 8)
 	return 0;
 
-    gpsd_report(LOG_IO, "oncore UTCTIME - navigation data\n");
-    /* if this protocol has a way to test message validity, use it */
-    flags = GET_FLAGS();
-    if ((flags & ONCORE_TIME_VALID) == 0)
-	return 0;
+    gpsd_report(LOG_IO, "oncore UTCTIME - leap seconds\n");
+    utc_offset = (int)getub(buf, 4);
+    if (utc_offset == 0)
+	return 0; /* that part of almanac not received yet */
 
-    tow = GET_MS_TIMEOFWEEK();
-    gps_week = GET_WEEKNUMBER();
-    session->context->leap_seconds = GET_GPS_LEAPSECONDS();
-
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
-
-    return TIME_SET | ONLINE_SET;
-#endif
-    return 0;
+    session->context->leap_seconds = utc_offset;
+    session->context->valid |= LEAP_SECOND_VALID;
+    return 0; /* no flag for leap seconds update */
 }
 
 /**
@@ -135,42 +235,62 @@ oncore_msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t data
 static gps_mask_t
 oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-    unsigned char i, st, nchan, nsv;
+    unsigned int i, nchan;
+    unsigned int off;
+    int sv, el, az;
+    int j;
 
-    if (data_len != 92 )
+    if (data_len != 92)
 	return 0;
 
     gpsd_report(LOG_IO, "oncore SVINFO - satellite data\n");
-
-    /*
-     * some protocols have a variable length message listing only visible
-     * satellites, even if there are less than the number of channels. others
-     * have a fixed length message and send empty records for idle channels
-     * that are not tracking or searching. whatever the case, nchan should
-     * be set to the number of satellites which might be visible.
-     */
-    nchan = getub(buf, 4);
-    gpsd_zero_satellites(&session->gpsdata);
-    nsv = 0; /* number of actually used satellites */
-    for (i = st = 0; i < nchan; i++) {
+    nchan = (unsigned int)getub(buf, 4);
+    gpsd_report(LOG_IO, "oncore SVINFO - %d satellites:\n",nchan);
+    /* Then we clamp the value to not read outside the table. */
+    if (nchan > 12)
+	nchan = 12;
+    session->driver.oncore.visible = (int)nchan;
+    for (i = 0; i < nchan; i++) {
 	/* get info for one channel/satellite */
-	int off = 5+7*i;
+        off = 5+7*i;
 
-	session->gpsdata.PRN[i]		= getub(buf, off);
-	session->gpsdata.elevation[i]	= getub(buf, off+3);
-	session->gpsdata.azimuth[i]	= getbeuw(buf, off+4);
+	sv     = (int)getub(buf,   off);
+	el     = (int)getub(buf,   off+3);
+	az     = (int)getbeuw(buf, off+4);
 
-	/*
-	if (CHANNEL_USED_IN_SOLUTION(i))
-	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	gpsd_report(LOG_IO, "%2d %2d %2d %3d\n",i,sv,el,az);
 
-	if(session->gpsdata.PRN[i])
-		st++;
-		*/
+	/* Store for use when Ea messages come. */
+	session->driver.oncore.PRN[i]		= sv;
+	session->driver.oncore.elevation[i]	= el;
+	session->driver.oncore.azimuth[i]	= az;
+	/* If it has an entry in the satellite list, update it! */
+	for (j = 0; j < session->gpsdata.satellites; j++)
+	    if (session->gpsdata.PRN[j] == sv) {
+		session->gpsdata.elevation[j]	= el;
+		session->gpsdata.azimuth[j]	= az; 
+	    }
     }
-    session->gpsdata.satellites_used = nsv;
-    session->gpsdata.satellites = st;
+
     return SATELLITE_SET;
+}
+
+/**
+ * GPS Time RAIM
+ */
+static gps_mask_t
+oncore_msg_time_raim(struct gps_device_t *session UNUSED, unsigned char *buf UNUSED, size_t data_len UNUSED)
+{
+    return 0;
+}
+
+/**
+ * GPS Firmware
+ */
+static gps_mask_t
+oncore_msg_firmware(struct gps_device_t *session UNUSED, unsigned char *buf UNUSED, size_t data_len UNUSED)
+{
+    return 0;
 }
 
 #define ONCTYPE(id2,id3) ((((unsigned int)id2)<<8)|(id3))
@@ -189,27 +309,33 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
     type = ONCTYPE(buf[2],buf[3]);
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw oncore packet type 0x%04x length %d: %s\n",
+    gpsd_report(LOG_RAW, "raw oncore packet type 0x%04x length %zd: %s\n",
 	type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 
-   /*
-    * XXX The tag field is only 8 bytes; be careful you do not overflow.
-    * XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
-    */
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	"MOT-%c%c", buf[2], buf[3]);
+	"MOT-%c%c", type>>8, type&0xff);
 
     switch (type)
     {
     case ONCTYPE('B','b'):
-	    return oncore_msg_svinfo(session, buf, len);
+	return oncore_msg_svinfo(session, buf, len);
     case ONCTYPE('E','a'):
-	    return oncore_msg_navsol(session, buf, len);
+	return oncore_msg_navsol(session, buf, len);
+    case ONCTYPE('E','n'):
+	return oncore_msg_time_raim(session, buf, len);
+    case ONCTYPE('C','j'):
+	return oncore_msg_firmware(session, buf, len);
+    case ONCTYPE('B','o'):
+	return oncore_msg_utc_offset(session, buf, len);
+    case ONCTYPE('A','s'):
+	return 0; /* position hold mode */
+    case ONCTYPE('A','t'):
+	return 0; /* position hold position */
 
     default:
 	/* XXX This gets noisy in a hurry. Change once your driver works */
-	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %d: %s\n",
-	    buf[2], buf[3], len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %zd: %s\n",
+	    type>>8, type&0xff, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;
     }
 }
@@ -223,24 +349,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
 
 static void oncore_probe_wakeup(struct gps_device_t *session)
 {
-   /*
-    * Code to make the device ready to communicate. This is
-    * run every time we are about to try a different baud
-    * rate in the autobaud sequence. Only needed if the
-    * device is in some kind of sleeping state. If a wakeup
-    * is not needed this method can be elided and the probe_wakeup
-    * member of the gps_type_t structure can be set to NULL.
-    */
-}
-
-static void oncore_probe_subtype(struct gps_device_t *session, unsigned int seq)
-{
-    /*
-     * Probe for subtypes here. If possible, get the software version and
-     * store it in session->subtype.  The seq values don't actually mean 
-     * anything, but conditionalizing probes on them gives the device 
-     * time to respond to each one.
-     */
+    (void)oncore_control_send(session,getfirmware,sizeof(getfirmware));
 }
 
 #ifdef ALLOW_CONTROLSEND
@@ -249,35 +358,37 @@ static void oncore_probe_subtype(struct gps_device_t *session, unsigned int seq)
  */
 /*@ +charint -usedef -compdef @*/
 static ssize_t oncore_control_send(struct gps_device_t *session,
-			   char *msg, size_t msglen)
+				   char *msg, size_t msglen)
 {
-   /* CONSTRUCT THE MESSAGE */
-
-   /* 
-    * This copy to a public assembly buffer 
-    * enables gpsmon to snoop the control message
-    * acter it has been sent.
-    */
-   session->msgbuflen = msglen;
-   (void)memcpy(session->msgbuf, msg, msglen);
-
-   /* we may need to dump the message */
+    size_t i;
+    char checksum = 0;
+    
+    session->msgbuf[0] = '@';
+    session->msgbuf[1] = '@';
+    for (i = 0; i < msglen; i++) {
+	 checksum ^= session->msgbuf[i+2] = msg[i];
+    }
+    session->msgbuf[msglen + 2] = checksum;
+    session->msgbuf[msglen + 3] = '\r';
+    session->msgbuf[msglen + 4] = '\n';
+    session->msgbuflen = msglen + 5;
+    
+    gpsd_report(LOG_IO, "writing oncore control type %c%c:%s\n",
+		msg[0],msg[1], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_report(LOG_IO, "writing oncore control type %02x:%s\n",
-	       msg[0], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
-   return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void oncore_configurator(struct gps_device_t *session, unsigned int seq)
+static void oncore_configurator(struct gps_device_t *session, unsigned int seq UNUSED)
 {
-    /* 
-     * Change sentence mix and set reporting modes as needed.
-     * If your device has a default cycle time other than 1 second,
-     * set session->device->gpsdata.cycle here.
-     */
+    (void)oncore_control_send(session,enableEa,sizeof(enableEa));
+    (void)oncore_control_send(session,enableBb,sizeof(enableBb));
+    (void)oncore_control_send(session,enableEn,sizeof(enableEn));
+    /*(void)oncore_control_send(session,enableAt2,sizeof(enableAt2));*/
+    /*(void)oncore_control_send(session,pollAs,sizeof(pollAs));*/
+    (void)oncore_control_send(session,pollBo,sizeof(pollBo));
 }
 
 /*
@@ -303,8 +414,10 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static bool oncore_set_speed(struct gps_device_t *session, 
-			      speed_t speed, char parity, int stopbits)
+static bool oncore_set_speed(struct gps_device_t *session UNUSED,
+			     speed_t speed UNUSED,
+			     char parity UNUSED,
+			     int stopbits UNUSED)
 {
     /* 
      * Set port operating mode, speed, parity, stopbits etc. here.
@@ -320,7 +433,8 @@ static bool oncore_set_speed(struct gps_device_t *session,
 static void oncore_set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
-	// oncore_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); /* send the mode switch control string */
+	/* send the mode switch control string */
+	/* oncore_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);*/
 	session->gpsdata.driver_mode = MODE_NMEA;
 	/* 
 	 * Anticipatory switching works only when the packet getter is the
@@ -334,17 +448,15 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void oncore_revert(struct gps_device_t *session)
+static void oncore_revert(struct gps_device_t *session UNUSED)
 {
    /*
     * Reverse what the .configurator method changed.
     */
 }
-#else
-#warning WTF - no ALLOW_RECONFIGURE
 #endif /* ALLOW_RECONFIGURE */
 
-static void oncore_wrapup(struct gps_device_t *session)
+static void oncore_wrapup(struct gps_device_t *session UNUSED)
 {
    /*
     * Do release actions that are independent of whether the .configurator 
@@ -357,7 +469,7 @@ const struct gps_type_t oncore_binary = {
     /* Full name of type */
     .type_name        = "oncore binary",
     /* associated lexer packet type */
-    .packet_type    = ONCORE_PACKET,
+    .packet_type      = ONCORE_PACKET,
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
@@ -367,7 +479,7 @@ const struct gps_type_t oncore_binary = {
     /* Wakeup to be done before each baud hunt */
     .probe_wakeup     = oncore_probe_wakeup,
     /* Initialize the device and get subtype */
-    .probe_subtype    = oncore_probe_subtype,
+    .probe_subtype    = NULL,
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */
