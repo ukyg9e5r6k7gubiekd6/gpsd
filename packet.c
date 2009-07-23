@@ -562,9 +562,9 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
     case ONCORE_ID1:
 	if (isalpha(c)) {
-	    lexer->length =
-		oncore_payload_length((unsigned char) lexer->length,c);
-	    if ((ssize_t) lexer->length != -1) {
+	    lexer->length = 
+		oncore_payload_cksum_length((unsigned char) lexer->length,c);
+	    if (lexer->length != 0) {
 		lexer->state = ONCORE_PAYLOAD;
 		break;
 	    }
@@ -1030,7 +1030,8 @@ void packet_parse(struct gps_packet_t *lexer)
 #ifdef NMEA_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
-	    char csum[3], *end;
+	    char csum[3] = { '0', '0', '0' };
+	    char *end;
 	    /*
 	     * Back up past any whitespace.  Need to do this because
 	     * at least one GPS (the Firefly 1a) emits \r\r\n
@@ -1582,9 +1583,9 @@ void packet_pushback(struct gps_packet_t *lexer)
 #endif /* __UNUSED */
 
 #ifdef ONCORE_ENABLE
-ssize_t oncore_payload_length(unsigned char id1,unsigned char id2)
+size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2)
 {
-    ssize_t l;
+    size_t l;
 
     /* For the packet sniffer to not terminate the message due to
      * payload data looking like a trailer, the known payload lengths
@@ -1630,7 +1631,7 @@ ssize_t oncore_payload_length(unsigned char id1,unsigned char id2)
     case ONCTYPE('A','t'): l =  8; break; /* position-hold mode */
     case ONCTYPE('E','n'): l = 69; break; /* time RAIM setup and status */
     default:
-	return -1;
+	return 0;
     }
 
     return l - 6; /* Subtract header and trailer. */
