@@ -602,7 +602,7 @@ static bool allocation_filter(struct gps_device_t *channel,
 	return true;
     else if (user->requires==RTCM104v2 && (channel->packet.type==RTCM2_PACKET))
 	return true;
-    else if (user->requires==AIS && (channel->packet.type==AIS_PACKET))
+    else if (user->requires==AIS && (channel->packet.type==AIVDM_PACKET))
 	return true;
     else if (user->requires == GPS
 	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
