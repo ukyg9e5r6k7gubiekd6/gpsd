@@ -394,16 +394,16 @@ client was attached, and multiple devices were not supported.)</para>
 <varlistentry>
 <term>g</term>
 <listitem>
-<para>With =, accepts a single argument which may have either of the
-values 'gps' or 'rtcm104v2', with case ignored.  This specifies the
+<para>With =, accepts a single argument which may have any of the
+values 'gps', 'ais', or 'rtcm104v2', with case ignored.  This specifies the
 type of information the client wants and forces a device assignment.
 Without =, forces a device assignment but doesn't force the type.
 This command is optional; if it is not given, the client will be
 bound to whatever available device the daemon finds first.</para>
 
 <para>This command returns either '?' if no device of the specified
-type(s) could be assigned, otherwise a string ('GPS' or 'RTCM104v2')
-identifying the kind of information the attached device
+type(s) could be assigned, otherwise a string ('GPS', 'AIS' or
+'RTCM104v2') identifying the kind of information the attached device
 returns.</para>
 
 <para>(Earlier versions accepted 'RTCM104' and returned 'RTCM104'

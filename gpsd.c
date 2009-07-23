@@ -335,7 +335,7 @@ struct subscriber_t {
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
-    enum {GPS,RTCM104v2,ANY} requires;	/* type of device requested */
+    enum {GPS,AIS,RTCM104v2,ANY} requires;	/* type of device requested */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
@@ -601,6 +601,8 @@ static bool allocation_filter(struct gps_device_t *channel,
     if (user->requires == ANY)
 	return true;
     else if (user->requires==RTCM104v2 && (channel->packet.type==RTCM2_PACKET))
+	return true;
+    else if (user->requires==AIS && (channel->packet.type==AIS_PACKET))
 	return true;
     else if (user->requires == GPS
 	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
@@ -1000,6 +1002,8 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		    sub->requires = RTCM104v2;
 		else if (strncasecmp(p, "gps", 3) == 0)
 		    sub->requires = GPS;
+		else if (strncasecmp(p, "ais", 3) == 0)
+		    sub->requires = AIS;
 		else
 		    sub->requires = ANY;
 		p += strcspn(p, ",\r\n");
