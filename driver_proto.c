@@ -401,8 +401,10 @@ static void _proto__wrapup(struct gps_device_t *session)
 const struct gps_type_t _proto__binary = {
     /* Full name of type */
     .type_name        = "_proto_ binary",
-    /* associated lexer packet type */
-    .packet_type    = _PROTO__PACKET,
+    /* Associated lexer packet type */
+    .packet_type      = _PROTO__PACKET,
+    /* Device class - what kind of data we hand back */
+    .device_class     = GPS,
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

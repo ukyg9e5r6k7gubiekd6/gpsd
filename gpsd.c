@@ -335,7 +335,7 @@ struct subscriber_t {
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
-    enum {GPS,AIS,RTCM104v2,ANY} requires;	/* type of device requested */
+    gnss_type requires;			/* type of device requested */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
@@ -598,14 +598,15 @@ static bool allocation_filter(struct gps_device_t *channel,
 		"User requires %d, channel %d type is %d\n", 
 		user->requires, (int)(channel - channels), channel->packet.type);
     /* we might have type constraints */
-    if (user->requires == ANY)
+    if (user->requires == UNKNOWN)
 	return true;
-    else if (user->requires==RTCM104v2 && (channel->packet.type==RTCM2_PACKET))
+    else if (user->requires== RTCM2 && (channel->device_type->device_class==RTCM2))
 	return true;
-    else if (user->requires==AIS && (channel->packet.type==AIVDM_PACKET))
+    else if (user->requires==RTCM3 && (channel->device_type->device_class==RTCM3))
 	return true;
-    else if (user->requires == GPS
-	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
+    else if (user->requires== AIS && (channel->device_type->device_class==AIS))
+	return true;
+    else if (user->requires == GPS && (channel->device_type->device_class==GPS))
 	return true;
     else
 	return false;	/* BAD_PACKET case will fall through to here */
@@ -999,13 +1000,15 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    if (*p == '=') {
 		gpsd_report(LOG_INF,"<= client(%d): requesting data type %s\n",sub_index(sub),++p);
 		if (strncasecmp(p, "rtcm104v2", 7) == 0)
-		    sub->requires = RTCM104v2;
+		    sub->requires = RTCM2;
+		if (strncasecmp(p, "rtcm104v3", 7) == 0)
+		    sub->requires = RTCM3;
 		else if (strncasecmp(p, "gps", 3) == 0)
 		    sub->requires = GPS;
 		else if (strncasecmp(p, "ais", 3) == 0)
 		    sub->requires = AIS;
 		else
-		    sub->requires = ANY;
+		    sub->requires = UNKNOWN;
 		p += strcspn(p, ",\r\n");
 	    }
 	    (void)assign_channel(sub);
@@ -1389,9 +1392,8 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 {
 #ifdef GPSDNG_ENABLE
+    char reply[BUFSIZ];
     if (strncmp(buf, "?TPV", 4) == 0) {
-	char reply[BUFSIZ];
-	(void)strlcpy(reply, "!TPV=", sizeof(reply));
 	if (assign_channel(sub) && have_fix(sub)) {
 	    json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
 			  reply+strlen(reply), sizeof(reply)-strlen(reply));
@@ -1401,8 +1403,6 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else if (strncmp(buf, "?SKY", 4) == 0) {
-	char reply[BUFSIZ];
-	(void)strlcpy(reply, "!SKY=", sizeof(reply));
 	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
 	    json_sky_dump(&sub->device->gpsdata, 
 			  reply+strlen(reply), sizeof(reply)-strlen(reply));
@@ -1410,6 +1410,37 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    (void)strlcat(reply, "{}", sizeof(reply));
 	}
 	(void)strlcat(reply, "\r\n", sizeof(reply));
+	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+    } else if (strncmp(buf, "?DEVICES", 4) == 0) {
+	int i;
+	(void)strlcpy(reply, "{\"class\"=\"DEVICES\",[", sizeof(reply));
+	for (i = 0; i < MAXDEVICES; i++) {
+	    if (allocated_channel(&channels[i]) && strlen(reply)+strlen(channels[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
+		(void)strlcat(reply, "{\"device\":\"", sizeof(reply));
+		(void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
+		(void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
+		switch(channels[i].device_type->device_class) {
+		case UNKNOWN:
+		    (void)strlcat(reply, "UNKNOWN", sizeof(reply));
+		    break;
+		case GPS:
+		    (void)strlcat(reply, "GPS", sizeof(reply));
+		    break;
+		case RTCM2:
+		    (void)strlcat(reply, "RTCM2", sizeof(reply));
+		    break;	
+		case RTCM3:
+		    (void)strlcat(reply, "RTCM3", sizeof(reply));
+		    break;	
+		case AIS:
+		    (void)strlcat(reply, "AIS", sizeof(reply));
+		    break;	
+		}
+		(void)strlcat(reply, "\"},", sizeof(reply));
+	    }
+	}
+	reply[strlen(reply)-1] = '\0';
+	(void)strlcat(reply, "]}\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else  if (buf[0] == '?') {
 #define JSON_ERROR_OBJECT	"{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n"
@@ -1741,7 +1772,7 @@ int main(int argc, char *argv[])
 		    client->fd = ssock;
 		    client->active = timestamp();
 		    client->tied = false;
-		    client->requires = ANY;
+		    client->requires = UNKNOWN;
 		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
 			c_ip, sub_index(client), ssock);
 		}

@@ -30,6 +30,7 @@ AIVDM.html: AIVDM.txt
 	asciidoc -a toc AIVDM.txt
 
 writing-a-driver.html: writing-a-driver.xml
+	xmlto xhtml-nochunks writing-a-driver.xml
 
 index.html: index.html.in
 	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html

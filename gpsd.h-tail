@@ -174,10 +174,13 @@ struct gps_device_t;
 #define MODE_NMEA	0
 #define MODE_BINARY	1
 
+typedef enum {UNKNOWN, GPS, RTCM2, RTCM3, AIS} gnss_type;
+
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *type_name;
     int packet_type;
+    gnss_type device_class;
     /*@observer@*//*@null@*/char *trigger;
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
