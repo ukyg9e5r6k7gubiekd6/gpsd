@@ -1392,60 +1392,61 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 {
 #ifdef GPSDNG_ENABLE
-    char reply[BUFSIZ];
-    if (strncmp(buf, "?TPV", 4) == 0) {
-	if (assign_channel(sub) && have_fix(sub)) {
-	    json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
-			  reply+strlen(reply), sizeof(reply)-strlen(reply));
-	} else {
-	    (void)strlcat(reply, "{}", sizeof(reply));
-	}
-	(void)strlcat(reply, "\r\n", sizeof(reply));
-	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
-    } else if (strncmp(buf, "?SKY", 4) == 0) {
-	if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
-	    json_sky_dump(&sub->device->gpsdata, 
-			  reply+strlen(reply), sizeof(reply)-strlen(reply));
-	} else {
-	    (void)strlcat(reply, "{}", sizeof(reply));
-	}
-	(void)strlcat(reply, "\r\n", sizeof(reply));
-	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
-    } else if (strncmp(buf, "?DEVICES", 4) == 0) {
-	int i;
-	(void)strlcpy(reply, "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
-	for (i = 0; i < MAXDEVICES; i++) {
-	    if (allocated_channel(&channels[i]) && strlen(reply)+strlen(channels[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
-		(void)strlcat(reply, "{\"name\":\"", sizeof(reply));
-		(void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
-		(void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
-		switch(channels[i].device_type->device_class) {
-		case UNKNOWN:
-		    (void)strlcat(reply, "UNKNOWN", sizeof(reply));
-		    break;
-		case GPS:
-		    (void)strlcat(reply, "GPS", sizeof(reply));
-		    break;
-		case RTCM2:
-		    (void)strlcat(reply, "RTCM2", sizeof(reply));
-		    break;	
-		case RTCM3:
-		    (void)strlcat(reply, "RTCM3", sizeof(reply));
-		    break;	
-		case AIS:
-		    (void)strlcat(reply, "AIS", sizeof(reply));
-		    break;	
-		}
-		(void)strlcat(reply, "\"},", sizeof(reply));
+    if (buf[0] == '?') {
+	char reply[BUFSIZ];
+	if (strncmp(buf, "?TPV", 4) == 0) {
+	    if (assign_channel(sub) && have_fix(sub)) {
+		json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
+			      reply+strlen(reply), sizeof(reply)-strlen(reply));
+	    } else {
+		(void)strlcat(reply, 
+			      "{\"class\":\"TPV\",\"mode\":0}", sizeof(reply));
 	    }
-	}
-	reply[strlen(reply)-1] = '\0';
-	(void)strlcat(reply, "]}\r\n", sizeof(reply));
+	} else if (strncmp(buf, "?SKY", 4) == 0) {
+	    if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
+		json_sky_dump(&sub->device->gpsdata, 
+			      reply+strlen(reply), sizeof(reply)-strlen(reply));
+	    } else {
+		(void)strlcat(reply, 
+			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
+	    }
+	} else if (strncmp(buf, "?DEVICES", 4) == 0) {
+	    int i;
+	    (void)strlcpy(reply, 
+			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
+	    for (i = 0; i < MAXDEVICES; i++) {
+		if (allocated_channel(&channels[i]) && strlen(reply)+strlen(channels[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
+		    (void)strlcat(reply, "{\"name\":\"", sizeof(reply));
+		    (void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
+		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
+		    switch(channels[i].device_type->device_class) {
+		    case UNKNOWN:
+			(void)strlcat(reply, "UNKNOWN", sizeof(reply));
+			break;
+		    case GPS:
+			(void)strlcat(reply, "GPS", sizeof(reply));
+			break;
+		    case RTCM2:
+			(void)strlcat(reply, "RTCM2", sizeof(reply));
+			break;	
+		    case RTCM3:
+			(void)strlcat(reply, "RTCM3", sizeof(reply));
+			break;	
+		    case AIS:
+			(void)strlcat(reply, "AIS", sizeof(reply));
+			break;	
+		    }
+		    (void)strlcat(reply, "\"},", sizeof(reply));
+		}
+	    }
+	    reply[strlen(reply)-1] = '\0';
+	    (void)strlcat(reply, "]}", sizeof(reply));
+	} else
+	    (void)strlcpy(reply, 
+			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n",
+			  sizeof(reply));
+	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
-    } else  if (buf[0] == '?') {
-#define JSON_ERROR_OBJECT	"{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n"
-	return (int)throttled_write(sub, JSON_ERROR_OBJECT, (ssize_t)strlen(JSON_ERROR_OBJECT));
-#undef JSON_ERROR_OBJECT
     }
 #endif /* GPSDNG_ENABLE */
     /* fall back to old-style requests */
