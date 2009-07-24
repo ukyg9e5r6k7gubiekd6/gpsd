@@ -342,6 +342,18 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
     return(buf);
 }
 
+const char *gpsd_type(const struct gps_type_t *dev)
+{
+    switch(dev->device_class) {
+    case UNKNOWN: return "UNKNOWN";
+    case GPS:     return "GPS";
+    case RTCM2:   return "RTCM2";
+    case RTCM3:   return "RTCM3";
+    case AIS:     return "AIS";
+    }
+    return "INTERNAL_ERROR";
+}
+
 #if defined(BINARY_ENABLE) || defined(RTCM104V2_ENABLE) || defined(NTRIP_ENABLE)
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing

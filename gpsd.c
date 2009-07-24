@@ -1397,17 +1397,17 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	if (strncmp(buf, "?TPV", 4) == 0) {
 	    if (assign_channel(sub) && have_fix(sub)) {
 		json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
-			      reply+strlen(reply), sizeof(reply)-strlen(reply));
+			      reply, sizeof(reply));
 	    } else {
-		(void)strlcat(reply, 
+		(void)strlcpy(reply, 
 			      "{\"class\":\"TPV\",\"mode\":0}", sizeof(reply));
 	    }
 	} else if (strncmp(buf, "?SKY", 4) == 0) {
 	    if (assign_channel(sub) && sub->device->gpsdata.satellites > 0) {
 		json_sky_dump(&sub->device->gpsdata, 
-			      reply+strlen(reply), sizeof(reply)-strlen(reply));
+			      reply, sizeof(reply));
 	    } else {
-		(void)strlcat(reply, 
+		(void)strlcpy(reply, 
 			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
 	    }
 	} else if (strncmp(buf, "?DEVICES", 4) == 0) {
