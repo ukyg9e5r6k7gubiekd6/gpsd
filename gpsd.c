@@ -1419,23 +1419,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    (void)strlcat(reply, "{\"name\":\"", sizeof(reply));
 		    (void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
 		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
-		    switch(channels[i].device_type->device_class) {
-		    case UNKNOWN:
-			(void)strlcat(reply, "UNKNOWN", sizeof(reply));
-			break;
-		    case GPS:
-			(void)strlcat(reply, "GPS", sizeof(reply));
-			break;
-		    case RTCM2:
-			(void)strlcat(reply, "RTCM2", sizeof(reply));
-			break;	
-		    case RTCM3:
-			(void)strlcat(reply, "RTCM3", sizeof(reply));
-			break;	
-		    case AIS:
-			(void)strlcat(reply, "AIS", sizeof(reply));
-			break;	
-		    }
+		    (void)strlcat(reply, 
+				  gpsd_type(channels[i].device_type),
+				  sizeof(reply));
 		    (void)strlcat(reply, "\"},", sizeof(reply));
 		}
 	    }
