@@ -1413,10 +1413,10 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     } else if (strncmp(buf, "?DEVICES", 4) == 0) {
 	int i;
-	(void)strlcpy(reply, "{\"class\"=\"DEVICES\",[", sizeof(reply));
+	(void)strlcpy(reply, "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
 	for (i = 0; i < MAXDEVICES; i++) {
 	    if (allocated_channel(&channels[i]) && strlen(reply)+strlen(channels[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
-		(void)strlcat(reply, "{\"device\":\"", sizeof(reply));
+		(void)strlcat(reply, "{\"name\":\"", sizeof(reply));
 		(void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
 		(void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
 		switch(channels[i].device_type->device_class) {

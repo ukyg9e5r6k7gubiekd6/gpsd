@@ -1440,9 +1440,9 @@ say ?WATCH={"TPV":true,"SKY":true,"STATUS":true} and be done.</p>
 # and one RTCM3 correction source. The fields are full name, 
 # service type, and name tag, 
 -> ?DEVICES
--> {"class":"DEVICES",[{"device":"/dev/ttyUSB0","type":"GPS"},
-             {"device":"/dev/ttyUSB1","type":"AIS"},
-             {"device":"/dev/ttyS0","type":"RTCM3"}]
+-> {"class":"DEVICES","devices":[{"name":"/dev/ttyUSB0","type":"GPS"},
+             {"name":"/dev/ttyUSB1","type":"AIS"},
+             {"name":"/dev/ttyS0","type":"RTCM3"}]
 #
 # Client asks the GPS to identify itself.
 -> ?ID={"device":"/dev/ttyUSB0"}
