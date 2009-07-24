@@ -18,14 +18,18 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
-void json_tpv_dump(char *tag, struct gps_fix_t *fixp, char *reply, size_t replylen)
+void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp, char *reply, size_t replylen)
 {
     assert(replylen > 2);
-    (void)strlcpy(reply, "{", replylen);
+    (void)strlcpy(reply, "{\"class\"=\"TPV\",", replylen);
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
 		   "\"tag\":\"%s\",",
-		   tag[0]!='\0' ? tag : "-");
+		   gpsdata->tag[0]!='\0' ? gpsdata->tag : "-");
+    (void)snprintf(reply+strlen(reply),
+		   replylen-strlen(reply),
+		   "\"device\":\"%s\",",
+		   gpsdata->gps_device);
     if (isnan(fixp->time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
@@ -102,11 +106,15 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
     assert(replylen > 2);
-    (void)strlcpy(reply, "{", replylen);
+    (void)strlcpy(reply, "{\"class\"=\"SKY\",", replylen);
     (void)snprintf(reply+strlen(reply),
 		   replylen- strlen(reply),
 		   "\"tag\":\"%s\",",
 		   datap->tag[0]!='\0' ? datap->tag : "-");
+    (void)snprintf(reply+strlen(reply),
+		   replylen-strlen(reply),
+		   "\"device\":\"%s\",",
+		   datap->gps_device);
     if (isnan(datap->sentence_time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),

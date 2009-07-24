@@ -1393,7 +1393,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	char reply[BUFSIZ];
 	(void)strlcpy(reply, "!TPV=", sizeof(reply));
 	if (assign_channel(sub) && have_fix(sub)) {
-	    json_tpv_dump(sub->device->gpsdata.tag, &sub->fixbuffer, 
+	    json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
 			  reply+strlen(reply), sizeof(reply)-strlen(reply));
 	} else {
 	    (void)strlcat(reply, "{}", sizeof(reply));
