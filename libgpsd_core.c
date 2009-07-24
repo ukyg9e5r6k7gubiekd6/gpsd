@@ -796,20 +796,22 @@ cycle+1){
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';
-	    // FIXME: Add RTCMV3 handling as well.
+
+	    /* Some kinds of data is automatically passed through */
 #ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
-		rtcm2_dump(&session->gpsdata.rtcm2,
-			  buf2+strlen(buf2),
-			  (sizeof(buf2)-strlen(buf2)));
-	    else {
+		rtcm2_dump(&session->gpsdata.rtcm2, buf2, sizeof(buf2));
+	    else
 #endif /* RTCM104V2_ENABLE */
+	    // FIXME: Add RTCMv3 handling as well.
+#ifdef AIS_ENABLE
+	    if ((session->gpsdata.set & AIS_SET) != 0)
+		aivdm_dump(&session->gpsdata.ais, buf2, sizeof(buf2));
+	    else
+#endif /* AIS_ENABLE */
 #ifdef BINARY_ENABLE
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
-#ifdef RTCM104V2_ENABLE
-	    }
-#endif /* RTCM104V2_ENABLE */
 	    if (buf2[0] != '\0') {
 		gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
 			    session->gpsdata.gps_device, buf2);

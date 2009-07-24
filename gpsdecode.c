@@ -65,8 +65,11 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
 	else if (lexer.type == AIVDM_PACKET) {
 	    /*@ -uniondef */
-	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm))
-		aivdm_dump(&aivdm.decoded, scaled, json, stdout);
+	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm)){
+		aivdm_dump(&aivdm.decoded, scaled, json, buf, sizeof(buf));
+		(void)fputs(buf, fpout);
+	    }
+	    
 	    /*@ +uniondef */
 	}
     }
