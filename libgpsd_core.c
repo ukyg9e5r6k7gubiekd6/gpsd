@@ -804,12 +804,6 @@ cycle+1){
 	    else
 #endif /* RTCM104V2_ENABLE */
 	    // FIXME: Add RTCMv3 handling as well.
-#ifdef AIVDM_ENABLE
-	    if ((session->gpsdata.set & AIS_SET) != 0)
-		aivdm_dump(&session->driver.aivdm.decoded, 
-			   false, false, buf2, sizeof(buf2));
-	    else
-#endif /* AIVDM_ENABLE */
 #ifdef BINARY_ENABLE
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */

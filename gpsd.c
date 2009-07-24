@@ -1903,6 +1903,14 @@ int main(int argc, char *argv[])
 			    (void)strlcat(cmds, "o", 4);
 			if (changed & SATELLITE_SET)
 			    (void)strlcat(cmds, "y", 4);
+#ifdef AIVDM_ENABLE
+			if ((changed & AIS_SET) != 0) {
+			    char buf2[BUFSIZ];
+			    aivdm_dump(&sub->device->driver.aivdm.decoded, 
+				       false, false, buf2, sizeof(buf2));
+			    (void)throttled_write(sub, buf2, strlen(buf2));
+			}
+#endif /* AIVDM_ENABLE */
 			if (channel->gpsdata.profiling!=0)
 			    (void)strlcat(cmds, "$", 4);
 		    }

@@ -623,7 +623,10 @@ only the first three DOP numbers, omitting time DOP and total DOP.</para>
 GPS. (Non-NMEA GPSes get their communication format translated to NMEA
 on the fly.)  If the device is a source of RTCM-104 corrections, the
 corrections are dumped in the textual format described in
-<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If
+the device is a source of AIS data, AIS packets are dumped in CSV
+form with each field (other than padding fields) dumped as an unscaled
+integer or string, whichever is appropriate.</para>
 
 <para>The command 'r' immediately followed by the digit '1' or the
 plus sign '+' sets raw mode.  The command 'r' immediately followed by

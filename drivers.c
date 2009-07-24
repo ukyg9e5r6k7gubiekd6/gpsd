@@ -1061,12 +1061,10 @@ gps_mask_t aivdm_analyze(struct gps_device_t *);
 
 gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-
-    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->driver.aivdm)) {
-	(void)strlcpy(session->gpsdata.tag,"AIS",sizeof(session->gpsdata.tag));
-    }
-
-    return ONLINE_SET | AIS_SET;
+    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->driver.aivdm))
+	return ONLINE_SET | AIS_SET;
+    else
+	return ONLINE_SET;
 }
 
 static const struct gps_type_t aivdm = {
