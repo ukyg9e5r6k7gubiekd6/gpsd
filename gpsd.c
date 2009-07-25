@@ -1928,13 +1928,19 @@ int main(int argc, char *argv[])
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		/* some listeners may be in watcher mode */
 		if (sub->watcher) {
-		    char cmds[4] = "";
 		    channel->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
+#ifdef OLDSTYLE_ENABLE
+			char cmds[4] = "";
 			if (changed & (LATLON_SET | MODE_SET))
 			    (void)strlcat(cmds, "o", 4);
 			if (changed & SATELLITE_SET)
 			    (void)strlcat(cmds, "y", 4);
+			if (channel->gpsdata.profiling!=0)
+			    (void)strlcat(cmds, "$", 4);
+			if (cmds[0] != '\0')
+			    (void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
+#endif /* OLDSTYLE_ENABLE */
 #ifdef AIVDM_ENABLE
 			if ((changed & AIS_SET) != 0) {
 			    char buf2[BUFSIZ];
@@ -1943,11 +1949,7 @@ int main(int argc, char *argv[])
 			    (void)throttled_write(sub, buf2, strlen(buf2));
 			}
 #endif /* AIVDM_ENABLE */
-			if (channel->gpsdata.profiling!=0)
-			    (void)strlcat(cmds, "$", 4);
 		    }
-		    if (cmds[0] != '\0')
-			(void)handle_gpsd_request(sub, cmds, (int)strlen(cmds));
 		}
 	    }
 #ifdef DBUS_ENABLE
