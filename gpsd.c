@@ -1422,6 +1422,16 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    (void)strlcat(reply, 
 				  gpsd_type(channels[i].device_type),
 				  sizeof(reply));
+		    (void)strlcat(reply, "\",\"driver\":\"", sizeof(reply));
+		    (void)strlcat(reply, 
+				  channels[i].device_type->type_name,
+				  sizeof(reply));
+		    if (channels[i].subtype[0] != '\0') {
+			(void)strlcat(reply, "\",\"subtype\":\"", sizeof(reply));
+			(void)strlcat(reply, 
+				      channels[i].subtype,
+				      sizeof(reply));
+		    }
 		    (void)strlcat(reply, "\"},", sizeof(reply));
 		}
 	    }
