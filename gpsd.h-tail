@@ -174,7 +174,7 @@ struct gps_device_t;
 #define MODE_NMEA	0
 #define MODE_BINARY	1
 
-typedef enum {UNKNOWN, GPS, RTCM2, RTCM3, AIS} gnss_type;
+typedef enum {ANY, GPS, RTCM2, RTCM3, AIS} gnss_type;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */

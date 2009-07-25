@@ -345,7 +345,7 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 const char *gpsd_type(const struct gps_type_t *dev)
 {
     switch(dev->device_class) {
-    case UNKNOWN: return "UNKNOWN";
+    case ANY:     return "UNKNOWN";
     case GPS:     return "GPS";
     case RTCM2:   return "RTCM2";
     case RTCM3:   return "RTCM3";
