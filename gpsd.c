@@ -421,6 +421,7 @@ static void detach_client(struct subscriber_t *sub)
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
+    sub->tied = false;
     sub->watcher = false;
     sub->active = 0;
     /*@i1@*/sub->device = NULL;
@@ -824,6 +825,7 @@ static void handle_control(int sfd, char *buf)
     /*@ +sefparams @*/
 }
 
+#ifdef OLDSTYLE_ENABLE
 static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
@@ -1388,6 +1390,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 
     return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
 }
+#endif /* OLDSTYLE_ENABLE */
 
 static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 {
@@ -1445,8 +1448,10 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     }
 #endif /* GPSDNG_ENABLE */
+#ifdef OLDSTYLE_ENABLE
     /* fall back to old-style requests */
     return handle_oldstyle(sub, buf, buflen);
+#endif /* OLDSTYLE_ENABLE */
 }
 
 /*@ -mustfreefresh @*/

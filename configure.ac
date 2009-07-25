@@ -675,6 +675,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for support for oldstyle protocol
+AC_ARG_ENABLE(oldstyle,
+  AC_HELP_STRING([--disable-oldstyle],
+		 [disable oldstyle (pre-JSON) protocol support]),
+  [ac_oldstyle=$enableval], [ac_oldstyle=yes])
+AC_MSG_CHECKING([for oldstyle support])
+if test x"$ac_oldstyle" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([OLDSTYLE_ENABLE], 1, [oldstyle (pre-JSON) protocol support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for GPSD-NG support
 AC_ARG_ENABLE(gpsdng,
   AC_HELP_STRING([--disable-gpsdng],
@@ -985,6 +998,7 @@ dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
 echo "GPSD-NG                 : $ac_gpsdng"
+echo "Old protocol            : $ac_oldstyle"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac
