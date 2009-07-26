@@ -536,7 +536,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 	    return &channels[0]; /* shaky, but only 0 versus nonzero is tested */
     }
 
-    /* normal case: set up GPS service */
+    /* normal case: set up GPS/RTCM/AIS service */
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
 	if (!allocated_channel(chp) || (strcmp(chp->gpsdata.gps_device, device_name)==0 && !initialized_channel(chp))){
 	    goto found;
@@ -547,7 +547,7 @@ found:
     chp->gpsdata.raw_hook = raw_hook;
     /*
      * Bring the device all the way so we'll sniff packets from it and
-     * discover up front whether it's a GPS source or an RTCM source.
+     * discover up front what its device class is (e.g GPS, RTCM[23], AIS).
      * Otherwise clients trying to bind to a specific type won't know
      * what source types are actually available.  If we're in nowait mode
      * the device has to be configured now; otherwise, it can wait.
@@ -646,10 +646,10 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 		    if (user->device == NULL) {
 			user->device = channel;
 			most_recent = channel->gpsdata.sentence_time;
-		    } else if (channel->gpsdata.status > fix_quality) {
+		    } else if (type == GPS && channel->gpsdata.status > fix_quality) {
 			user->device = channel;
 			fix_quality = channel->gpsdata.status;
-		    } else if (channel->gpsdata.status == fix_quality && 
+		    } else if (type == GPS && channel->gpsdata.status == fix_quality && 
 			       channel->gpsdata.sentence_time >= most_recent) {
 			user->device = channel;
 			most_recent = channel->gpsdata.sentence_time;
