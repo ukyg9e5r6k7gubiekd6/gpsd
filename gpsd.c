@@ -333,7 +333,14 @@ struct subscriber_t {
     int fd;			/* client file descriptor. -1 if unused */
     double active;		/* when subscriber last polled for data */
     bool tied;				/* client set device with F */
-    bool watcher;			/* is client in watcher mode? */
+    int watcher;			/* is client in watcher mode? */
+#define WATCH_NOTHING	0x00
+#define WATCH_OLDSTYLE	0x01
+#define WATCH_TPV	0x02
+#define WATCH_SKY	0x04
+#define WATCH_AIS	0x08
+#define WATCH_RTCM2	0x10
+#define WATCH_RTCM3	0x20
     int raw;				/* is client in raw mode? */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
@@ -422,7 +429,7 @@ static void detach_client(struct subscriber_t *sub)
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
     sub->tied = false;
-    sub->watcher = false;
+    sub->watcher = WATCH_NOTHING;
     sub->active = 0;
     /*@i1@*/sub->device = NULL;
     sub->buffer_policy = casoc;
@@ -480,7 +487,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     va_end(ap);
 
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (sub->watcher != 0 && sub->device == device)
+	if (sub->watcher != WATCH_NOTHING && sub->device == device)
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
 }
 
@@ -673,7 +680,7 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 			user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
-	    if (user->watcher && !user->tied) {
+	    if (user->watcher != WATCH_NOTHING && !user->tied) {
 		/*@ -sefparams @*/
 		ignore_return(write(user->fd, "GPSD,F=", 7));
 		ignore_return(write(user->fd,
@@ -685,7 +692,7 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 	}
     }
 
-    if (user->watcher && was_unassigned) {
+    if (user->watcher != WATCH_NOTHING && was_unassigned) {
 	char buf[NMEA_MAX];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 		       timestamp(), gpsd_id(user->device));
@@ -1262,19 +1269,19 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		sub->watcher = true;
+		sub->watcher = WATCH_OLDSTYLE;
 		(void)assign_channel(sub, ANY);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		sub->watcher = false;
+		sub->watcher = WATCH_NOTHING;
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 		p++;
-	    } else if (sub->watcher!=0) {
-		sub->watcher = false;
+	    } else if (sub->watcher != WATCH_NOTHING) {
+		sub->watcher = WATCH_NOTHING;
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 	    } else {
-		sub->watcher = true;
+		sub->watcher = WATCH_OLDSTYLE;
 		(void)assign_channel(sub, ANY);
 		gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
@@ -1413,7 +1420,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		(void)strlcpy(reply, 
 			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
 	    }
-	} else if (strncmp(buf, "?DEVICES", 4) == 0) {
+	} else if (strncmp(buf, "?DEVICES", 9) == 0) {
 	    int i;
 	    (void)strlcpy(reply, 
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
@@ -1440,9 +1447,47 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    }
 	    reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "]}", sizeof(reply));
+	} else if (strncmp(buf, "?WATCH", 6) == 0) {
+	    if (buf[6] == '=') {
+		int status;
+		bool tpv, sky, rtcm2, rtcm3;
+		const struct json_attr_t watch_attrs[] = {
+		    {"TPV",  boolean,.addr.boolean=&tpv,  .dflt.boolean=false},
+		    {"SKY",  boolean,.addr.boolean=&sky,  .dflt.boolean=false},
+		    {"RTCM2",boolean,.addr.boolean=&rtcm2,.dflt.boolean=false},
+		    {"RTCM3",boolean,.addr.boolean=&rtcm3,.dflt.boolean=false},
+		    {NULL},
+		};
+		status = json_read_object(buf+7, watch_attrs, 0, NULL);
+		if (status != 0) {
+		    (void)snprintf(reply, sizeof(reply),
+				   "{\"class\":ERR\",\"msg\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
+				   json_error_string(status));
+		    /* fall through to status display */
+		} else {
+		    sub->watcher = 0;
+		    if (tpv)
+			sub->watcher |= WATCH_TPV;
+		    if (sky)
+			sub->watcher |= WATCH_SKY;
+		    if (rtcm2)
+			sub->watcher |= WATCH_RTCM2;
+		    if (rtcm3)
+			sub->watcher |= WATCH_RTCM3;
+		}
+		// FIXME: Actual channel-allocation machinery goes here
+	    }
+#define BOOL(var, mask)	((var & mask)!=0 ? "true" : "false")
+	    (void)snprintf(reply, sizeof(reply),
+			  "{\"class\":\"WATCH\",\"TPV\":%s,\"SKY\":%s,\"RTCM2\":%s,\"RTCM3\":%s,}",
+			  BOOL(sub->watcher, WATCH_TPV),
+			  BOOL(sub->watcher, WATCH_SKY),
+			  BOOL(sub->watcher, WATCH_RTCM2),
+			  BOOL(sub->watcher, WATCH_RTCM3));
+#undef BOOL
 	} else
 	    (void)strlcpy(reply, 
-			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}\r\n",
+			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}",
 			  sizeof(reply));
 	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
@@ -1927,28 +1972,51 @@ int main(int argc, char *argv[])
 
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		/* some listeners may be in watcher mode */
-		if (sub->watcher) {
+		if (sub->watcher != WATCH_NOTHING) {
+		    char buf2[BUFSIZ];
 		    channel->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 #ifdef OLDSTYLE_ENABLE
-			char cmds[4] = "";
-			if (changed & (LATLON_SET | MODE_SET))
-			    (void)strlcat(cmds, "o", 4);
-			if (changed & SATELLITE_SET)
-			    (void)strlcat(cmds, "y", 4);
-			if (channel->gpsdata.profiling!=0)
-			    (void)strlcat(cmds, "$", 4);
-			if (cmds[0] != '\0')
-			    (void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
-#endif /* OLDSTYLE_ENABLE */
+			if ((sub->watcher & WATCH_OLDSTYLE) != 0) {
+			    char cmds[4] = "";
+			    if (changed & (LATLON_SET | MODE_SET))
+				(void)strlcat(cmds, "o", 4);
+			    if (changed & SATELLITE_SET)
+				(void)strlcat(cmds, "y", 4);
+			    if (channel->gpsdata.profiling!=0)
+				(void)strlcat(cmds, "$", 4);
+			    if (cmds[0] != '\0')
+				(void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
 #ifdef AIVDM_ENABLE
-			if ((changed & AIS_SET) != 0) {
-			    char buf2[BUFSIZ];
-			    aivdm_dump(&sub->device->driver.aivdm.decoded, 
-				       false, false, buf2, sizeof(buf2));
-			    (void)throttled_write(sub, buf2, strlen(buf2));
-			}
+			    if ((changed & AIS_SET) != 0) {
+				aivdm_dump(&sub->device->driver.aivdm.decoded, 
+					   false, false, buf2, sizeof(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
+			    }
+			} else
+#endif /* OLDSTYLE_ENABLE */
+#ifdef GPSDNG_ENABLE
+			{
+			    if ((sub->watcher & WATCH_TPV)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
+				json_tpv_dump(&sub->device->gpsdata, &sub->fixbuffer, 
+					      buf2, sizeof(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
+			    }
+			    if ((sub->watcher & WATCH_SKY)!=0 && (changed & SATELLITE_SET)!=0) {
+				json_sky_dump(&sub->device->gpsdata,
+					      buf2, sizeof(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
+			    }
+#ifdef AIVDM_ENABLE
+			    if ((sub->watcher & WATCH_AIS)!=0 && (changed & AIS_SET)!=0) {
+				aivdm_dump(&sub->device->driver.aivdm.decoded, 
+					   false, true, buf2, sizeof(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
+#endif /* AIVDM_ENABLE */
+			    }
+			}
+#endif /* GPSDNG_ENABLE */
 		    }
 		}
 	    }
