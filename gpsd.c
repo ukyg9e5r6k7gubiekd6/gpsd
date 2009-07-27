@@ -332,7 +332,9 @@ static int filesock(char *filename)
 struct subscriber_t {
     int fd;			/* client file descriptor. -1 if unused */
     double active;		/* when subscriber last polled for data */
+#ifdef OLDSTYLE_ENABLE
     bool tied;				/* client set device with F */
+#endif /* OLDSTYLE_ENABLE */
     int watcher;			/* is client in watcher mode? */
 #define WATCH_NOTHING	0x00
 #define WATCH_OLDSTYLE	0x01
@@ -428,7 +430,9 @@ static void detach_client(struct subscriber_t *sub)
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
+#ifdef OLDSYLE_ENABLE
     sub->tied = false;
+#endif /* OLDSTYLE_ENABLE */
     sub->watcher = WATCH_NOTHING;
     sub->active = 0;
     /*@i1@*/sub->device = NULL;
@@ -680,6 +684,12 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 			user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
+#ifdef OLDSTYLE_ENABLE
+	    /*
+	     * If user did an explicit F command tying him to a device, 
+	     * he doesn't need a second notofication that the device is
+	     * attached.
+	     */
 	    if (user->watcher != WATCH_NOTHING && !user->tied) {
 		/*@ -sefparams @*/
 		ignore_return(write(user->fd, "GPSD,F=", 7));
@@ -689,6 +699,7 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 		ignore_return(write(user->fd, "\r\n", 2));
 		/*@ +sefparams @*/
 	    }
+#endif /* OLDSTYLE_ENABLE */
 	}
     }
 
@@ -1818,7 +1829,9 @@ int main(int argc, char *argv[])
 		    adjust_max_fd(ssock, true);
 		    client->fd = ssock;
 		    client->active = timestamp();
+#ifdef OLDSTYLE_ENABLE
 		    client->tied = false;
+#endif /* OLDSTYLE_ENABLE */
 		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
 			c_ip, sub_index(client), ssock);
 		}
@@ -1851,7 +1864,9 @@ int main(int argc, char *argv[])
 		    FD_SET(ssock, &all_fds);
 		    adjust_max_fd(ssock, true);
 		    client->active = true;
+#ifdef OLDSTYLE_ENABLE
 		    client->tied = false;
+#endif /* OLDSTYLE_ENABLE */
 		    client->requires = RTCM104;
 		    client->fd = ssock;
 		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
