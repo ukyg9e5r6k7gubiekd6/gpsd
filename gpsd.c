@@ -535,7 +535,7 @@ static void raw_hook(struct gps_data_t *ud,
     struct gps_device_t *devp;
 
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (allocated_channel(devp) && strcmp(devp->gpsdata.gps_device, device_name)==0)
+	if (allocated_device(devp) && strcmp(devp->gpsdata.gps_device, device_name)==0)
 	    return devp;
     return NULL;
 }
@@ -560,7 +560,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 
     /* normal case: set up GPS/RTCM/AIS service */
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (!allocated_channel(devp) || (strcmp(devp->gpsdata.gps_device, device_name)==0 && !initialized_channel(devp))){
+	if (!allocated_device(devp) || (strcmp(devp->gpsdata.gps_device, device_name)==0 && !initialized_device(devp))){
 	    goto found;
 	}
     return NULL;
@@ -593,7 +593,7 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 	 * Zero the context pointer so we know gpsd_init() hasn't been called.
 	 */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	    if (!allocated_channel(devp)) {
+	    if (!allocated_device(devp)) {
 		(void)strlcpy(devp->gpsdata.gps_device, device_name, PATH_MAX);
 		/*@ -mustfreeonly @*/
 		devp->context = NULL;
@@ -608,35 +608,35 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
-static bool allocation_filter(struct gps_device_t *channel,
+static bool allocation_filter(struct gps_device_t *device,
 			      struct subscriber_t *user,
 			      gnss_type type)
-/* does specified channel match the user's type criteria? */
+/* does specified device match the user's type criteria? */
 {
     /*
      * Might be we don't know the device type attached to this yet.
      * If we don't, open it and sniff packets until we do. 
      */
-    if (allocated_channel(channel) && !initialized_channel(channel)) {
-	if (open_device(channel->gpsdata.gps_device) == NULL) {
-	    free_channel(channel);
+    if (allocated_device(device) && !initialized_device(device)) {
+	if (open_device(device->gpsdata.gps_device) == NULL) {
+	    free_device(device);
 	    return false;
 	}
     }
 
     gpsd_report(LOG_PROG, 
-		"User requires %d, channel %d type is %d\n", 
-		type, (int)(channel - devices), channel->packet.type);
+		"User requires %d, device %d type is %d\n", 
+		type, (int)(device - devices), device->packet.type);
     /* we might have type constraints */
     if (type == ANY)
 	return true;
-    else if (type== RTCM2 && (channel->device_type->device_class==RTCM2))
+    else if (type== RTCM2 && (device->device_type->device_class==RTCM2))
 	return true;
-    else if (type==RTCM3 && (channel->device_type->device_class==RTCM3))
+    else if (type==RTCM3 && (device->device_type->device_class==RTCM3))
 	return true;
-    else if (type== AIS && (channel->device_type->device_class==AIS))
+    else if (type== AIS && (device->device_type->device_class==AIS))
 	return true;
-    else if (type == GPS && (channel->device_type->device_class==GPS))
+    else if (type == GPS && (device->device_type->device_class==GPS))
 	return true;
     else
 	return false;	/* BAD_PACKET case will fall through to here */
@@ -658,7 +658,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	/* ...connect him to the most recently active device */
 	/*@ -mustfreeonly @*/
 	for(device = devices; device<devices+MAXDEVICES; device++)
-	    if (allocated_channel(device)) {
+	    if (allocated_device(device)) {
 		if (allocation_filter(device, user, type)) {
 		    /*
 		     * Grab device if it's:
@@ -791,7 +791,7 @@ static void handle_control(int sfd, char *buf)
 		    channels[cfd].device = NULL;
 	    gpsd_wrap(devp);
 	    devp->gpsdata.gps_fd = -1;	/* device is already disconnected */
-	    /*@i@*/free_channel(devp);	/* modifying observer storage */
+	    /*@i@*/free_device(devp);	/* modifying observer storage */
 	    ignore_return(write(sfd, "OK\n", 3));
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
@@ -1072,11 +1072,11 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
-		if (allocated_channel(&devices[i]))
+		if (allocated_device(&devices[i]))
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_channel(&devices[i]) && strlen(phrase)+strlen(devices[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
+		if (allocated_device(&devices[i]) && strlen(phrase)+strlen(devices[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
 		    (void)strlcat(phrase, devices[i].gpsdata.gps_device, BUFSIZ);
 		    (void)strlcat(phrase, " ", BUFSIZ);
 		}
@@ -1455,7 +1455,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    (void)strlcpy(reply, 
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_channel(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
+		if (allocated_device(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
 		    (void)strlcat(reply, "{\"name\":\"", sizeof(reply));
 		    (void)strlcat(reply, devices[i].gpsdata.gps_device, sizeof(reply));
 		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
@@ -1537,14 +1537,14 @@ int main(int argc, char *argv[])
     static gps_mask_t changed;
     static char *gpsd_service = NULL;
     static char *control_socket = NULL;
-    struct gps_device_t *channel;
+    struct gps_device_t *device;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd;
     bool go_background = true;
     struct timeval tv;
     struct subscriber_t *sub;
-    struct channel_t *chp;
+    struct channel_t *channel;
     const struct gps_type_t **dp;
 
 #ifdef PPS_ENABLE
@@ -1713,16 +1713,16 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
 
-    for (chp = channels; chp < channels + sizeof(channels)/sizeof(channels[0]); chp++) {
-	gps_clear_fix(&chp->fixbuffer);
-	gps_clear_fix(&chp->oldfix);
+    for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++) {
+	gps_clear_fix(&channel->fixbuffer);
+	gps_clear_fix(&channel->oldfix);
     }
 
     /* daemon got termination or interrupt signal */
     if ((st = setjmp(restartbuf)) > 0) {
 	/* try to undo all device configurations */
 	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	    if (allocated_channel(&devices[dfd]))
+	    if (allocated_device(&devices[dfd]))
 		(void)gpsd_wrap(&devices[dfd]);
 	}
 	gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
@@ -1868,62 +1868,62 @@ int main(int argc, char *argv[])
 	    }
 
 	/* poll all active devices */
-	for (channel = devices; channel < devices + MAXDEVICES; channel++) {
-	    if (!allocated_channel(channel))
+	for (device = devices; device < devices + MAXDEVICES; device++) {
+	    if (!allocated_device(device))
 		continue;
 
 	    /* pass the current RTCM correction to the GPS if new */
-	    if (channel->device_type && channel->context->netgnss_service != netgnss_remotegpsd)
-		rtcm_relay(channel);
+	    if (device->device_type && device->context->netgnss_service != netgnss_remotegpsd)
+		rtcm_relay(device);
 
 	    /* get data from the device */
 	    changed = 0;
-	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
+	    if (device->gpsdata.gps_fd >= 0 && FD_ISSET(device->gpsdata.gps_fd, &rfds))
 	    {
-		gpsd_report(LOG_RAW+1, "polling %d\n", channel->gpsdata.gps_fd);
-		changed = gpsd_poll(channel);
+		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
+		changed = gpsd_poll(device);
 		if (changed == ERROR_SET) {
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
-		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(channel->gpsdata.gps_fd, false);
-		    gpsd_deactivate(channel);
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, false);
+		    gpsd_deactivate(device);
 		} else if ((changed & ONLINE_SET) == 0) {
-		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(channel->gpsdata.gps_fd, false);
-		    gpsd_deactivate(channel);
-		    notify_watchers(channel, "GPSD,X=0\r\n");
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, false);
+		    gpsd_deactivate(device);
+		    notify_watchers(device, "GPSD,X=0\r\n");
 		}
 		else {
 		    /* handle laggy response to a firmware version query*/
 		    if ((changed & DEVICEID_SET) != 0) {
 			char id[NMEA_MAX];
-			assert(channel->device_type != NULL);
+			assert(device->device_type != NULL);
 			(void)snprintf(id, sizeof(id), "GPSD,I=%s",
-				       channel->device_type->type_name);
-			if (channel->subtype[0] != '\0') {
+				       device->device_type->type_name);
+			if (device->subtype[0] != '\0') {
 			    (void)strlcat(id, " ", sizeof(id));
-			    (void)strlcat(id,channel->subtype,sizeof(id));
+			    (void)strlcat(id,device->subtype,sizeof(id));
 			}
 			(void)strlcat(id, "\r\n", sizeof(id));
-			notify_watchers(channel, id);
+			notify_watchers(device, id);
 		    }
-		    /* copy/merge channel data into subscriber fix buffers */
-		    for (chp = channels;
-			 chp < channels + sizeof(channels)/sizeof(channels[0]);
-			 chp++) {
-			if (chp->device == channel) {
-			    if (chp->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
-				gps_clear_fix(&chp->fixbuffer);
+		    /* copy/merge device data into subscriber fix buffers */
+		    for (channel = channels;
+			 channel < channels + sizeof(channels)/sizeof(channels[0]);
+			 channel++) {
+			if (channel->device == device) {
+			    if (channel->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
+				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
-			    if (chp->fixbuffer.mode > chp->device->gpsdata.fix.mode)
+			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)
 				changed &=~ MODE_SET;
 			    //gpsd_report(LOG_PROG,
-			    //		"transfer mask on %s: %02x\n", chp->device->gpsdata.tag, changed);
-			    gps_merge_fix(&chp->fixbuffer,
+			    //		"transfer mask on %s: %02x\n", channel->channel->gpsdata.tag, changed);
+			    gps_merge_fix(&channel->fixbuffer,
 					  changed,
-					  &chp->device->gpsdata.fix);
-			    gpsd_error_model(chp->device,
-					     &chp->fixbuffer, &chp->oldfix);
+					  &channel->device->gpsdata.fix);
+			    gpsd_error_model(channel->device,
+					     &channel->fixbuffer, &channel->oldfix);
 			}
 		    }
 		}
@@ -1936,11 +1936,15 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	    /* watch all channels */
+	    for (channel = channels; 
+		 channel < channels + sizeof(channels)/sizeof(channels[0]); 
+		 channel++) {
+		struct subscriber_t *sub = CHANNEL_USER(channel);
 		/* some listeners may be in watcher mode */
 		if (sub->watcher != WATCH_NOTHING) {
 		    char buf2[BUFSIZ];
-		    channel->poll_times[sub - subscribers] = timestamp();
+		    channel->device->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 #ifdef OLDSTYLE_ENABLE
 			if ((sub->watcher & WATCH_OLDSTYLE) != 0) {
@@ -1949,13 +1953,13 @@ int main(int argc, char *argv[])
 				(void)strlcat(cmds, "o", 4);
 			    if (changed & SATELLITE_SET)
 				(void)strlcat(cmds, "y", 4);
-			    if (channel->gpsdata.profiling!=0)
+			    if (channel->device->gpsdata.profiling!=0)
 				(void)strlcat(cmds, "$", 4);
 			    if (cmds[0] != '\0')
 				(void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
-				aivdm_dump(&USER_CHANNEL(sub).device->driver.aivdm.decoded, 
+				aivdm_dump(&channel->device->driver.aivdm.decoded, 
 					   false, false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
@@ -1968,18 +1972,18 @@ int main(int argc, char *argv[])
 #ifdef GPSDNG_ENABLE
 			{
 			    if ((sub->watcher & WATCH_TPV)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
-				json_tpv_dump(&USER_CHANNEL(sub).device->gpsdata, &USER_CHANNEL(sub).fixbuffer, 
+				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 			    if ((sub->watcher & WATCH_SKY)!=0 && (changed & SATELLITE_SET)!=0) {
-				json_sky_dump(&USER_CHANNEL(sub).device->gpsdata,
+				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
 			    if ((sub->watcher & WATCH_AIS)!=0 && (changed & AIS_SET)!=0) {
-				aivdm_dump(&USER_CHANNEL(sub).device->driver.aivdm.decoded, 
+				aivdm_dump(&channel->device->driver.aivdm.decoded, 
 					   false, true, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
@@ -2060,25 +2064,25 @@ int main(int argc, char *argv[])
 	 * device by packet type.
 	 */
 	if (!nowait)
-	    for (channel=devices; channel < devices+MAXDEVICES; channel++) {
-		if (allocated_channel(channel)) {
-		    if (channel->packet.type != BAD_PACKET) {
+	    for (device=devices; device < devices+MAXDEVICES; device++) {
+		if (allocated_device(device)) {
+		    if (device->packet.type != BAD_PACKET) {
 			bool device_needed = false;
 
 			for (cfd = 0; cfd < sizeof(channels)/sizeof(channels[0]); cfd++)
-			    if (channels[cfd].device == channel)
+			    if (channels[cfd].device == device)
 				device_needed = true;
 
-			if (!device_needed && channel->gpsdata.gps_fd > -1) {
-			    if (channel->releasetime == 0) {
-				channel->releasetime = timestamp();
-				gpsd_report(LOG_PROG, "channel %d released\n", (int)(channel-devices));
-			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
-				gpsd_report(LOG_PROG, "channel %d closed\n", (int)(channel-devices));
-				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
-				FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-				adjust_max_fd(channel->gpsdata.gps_fd, false);
-				gpsd_deactivate(channel);
+			if (!device_needed && device->gpsdata.gps_fd > -1) {
+			    if (device->releasetime == 0) {
+				device->releasetime = timestamp();
+				gpsd_report(LOG_PROG, "device %d released\n", (int)(device-devices));
+			    } else if (timestamp() - device->releasetime > RELEASE_TIMEOUT) {
+				gpsd_report(LOG_PROG, "device %d closed\n", (int)(device-devices));
+				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", device->gpsdata.gps_fd);
+				FD_CLR(device->gpsdata.gps_fd, &all_fds);
+				adjust_max_fd(device->gpsdata.gps_fd, false);
+				gpsd_deactivate(device);
 			    }
 			}
 		    }
@@ -2093,7 +2097,7 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",signalled);
     /* try to undo all device configurations */
     for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	if (allocated_channel(&devices[dfd]))
+	if (allocated_device(&devices[dfd]))
 	    (void)gpsd_wrap(&devices[dfd]);
     }
 

@@ -386,9 +386,9 @@ struct gps_device_t {
 #define MAXSUBSCRIBERS	FD_SETSIZE
 #endif
 #define sub_index(s) (int)(s - subscribers)
-#define allocated_channel(chp)	 ((chp)->gpsdata.gps_device[0] != '\0')
-#define free_channel(chp)	 (chp)->gpsdata.gps_device[0] = '\0'
-#define initialized_channel(chp) ((chp)->context != NULL)
+#define allocated_device(chp)	 ((chp)->gpsdata.gps_device[0] != '\0')
+#define free_device(chp)	 (chp)->gpsdata.gps_device[0] = '\0'
+#define initialized_device(chp) ((chp)->context != NULL)
 
 
 /* here are the available GPS drivers */
