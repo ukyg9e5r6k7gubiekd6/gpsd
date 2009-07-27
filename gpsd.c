@@ -386,20 +386,20 @@ static void adjust_max_fd(int fd, bool on)
 #endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
 }
 
-static bool have_fix(struct subscriber_t *whoami)
+static bool have_fix(struct chanctl_t *chanctl)
 {
-    if (!whoami->devctl.device) {
+    if (!chanctl->device) {
 	gpsd_report(LOG_PROG, "Client has no device\n");
 	return false;
     }
 #define VALIDATION_COMPLAINT(level, legend) \
 	gpsd_report(level, legend " (status=%d, mode=%d).\n", \
-		    whoami->devctl.device->gpsdata.status, whoami->devctl.fixbuffer.mode)
-    if ((whoami->devctl.device->gpsdata.status == STATUS_NO_FIX) != (whoami->devctl.fixbuffer.mode == MODE_NO_FIX)) {
+		    chanctl->device->gpsdata.status, chanctl->fixbuffer.mode)
+    if ((chanctl->device->gpsdata.status == STATUS_NO_FIX) != (chanctl->fixbuffer.mode == MODE_NO_FIX)) {
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return false;
     }
-    else if (whoami->devctl.device->gpsdata.status > STATUS_NO_FIX && whoami->devctl.fixbuffer.mode > MODE_NO_FIX) {
+    else if (chanctl->device->gpsdata.status > STATUS_NO_FIX && chanctl->fixbuffer.mode > MODE_NO_FIX) {
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
 	return true;
     }
@@ -855,6 +855,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
     struct gps_device_t *newchan;
+    struct chanctl_t *chanctl = &sub->devctl;
 
     (void)strlcpy(reply, "GPSD", BUFSIZ);
     p = buf;
@@ -862,19 +863,19 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (assign_channel(sub, GPS) && have_fix(sub) && sub->devctl.fixbuffer.mode == MODE_3D)
+	    if (assign_channel(sub, GPS) && have_fix(chanctl) && chanctl->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",A=%.3f",
-			sub->devctl.fixbuffer.altitude);
+			chanctl->fixbuffer.altitude);
 	    else
 		(void)strlcpy(phrase, ",A=?", BUFSIZ);
 	    break;
 #ifdef ALLOW_RECONFIGURE
 	case 'B':		/* change baud rate */
 #ifndef FIXED_PORT_SPEED
-	    if (assign_channel(sub, ANY) && sub->devctl.device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
+	    if (assign_channel(sub, ANY) && chanctl->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
 		speed_t speed;
-		unsigned int stopbits = sub->devctl.device->gpsdata.stopbits;
-		char parity = (char)sub->devctl.device->gpsdata.parity;
+		unsigned int stopbits = chanctl->device->gpsdata.stopbits;
+		char parity = (char)chanctl->device->gpsdata.parity;
 		int wordsize = 8;
 
 		speed = (speed_t)atoi(++p);
@@ -896,8 +897,8 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		}
 #ifdef ALLOW_RECONFIGURE
 		/* no support for other word sizes yet */
-		if (wordsize != (int)(9 - stopbits) && sub->devctl.device->device_type->speed_switcher!=NULL)
-		    if (sub->devctl.device->device_type->speed_switcher(sub->devctl.device,
+		if (wordsize != (int)(9 - stopbits) && chanctl->device->device_type->speed_switcher!=NULL)
+		    if (chanctl->device->device_type->speed_switcher(chanctl->device,
 								 speed,
 								 parity,
 								 (int)stopbits)) {
@@ -916,59 +917,59 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 			 * The minimum delay time is probably constant
 			 * across any given type of UART.
 			 */
-			(void)tcdrain(sub->devctl.device->gpsdata.gps_fd);
+			(void)tcdrain(chanctl->device->gpsdata.gps_fd);
 			(void)usleep(50000);
-			gpsd_set_speed(sub->devctl.device, speed,
+			gpsd_set_speed(chanctl->device, speed,
 				(unsigned char)parity, stopbits);
 		    }
 #endif /* ALLOW_RECONFIGURE */
 	    }
 #endif /* FIXED_PORT_SPEED */
-	    if (sub->devctl.device) {
-		if ( sub->devctl.device->gpsdata.parity == 0 ) {
+	    if (chanctl->device) {
+		if ( chanctl->device->gpsdata.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
-			sub->devctl.device->gpsdata.parity = (unsigned)'N';
+			chanctl->device->gpsdata.parity = (unsigned)'N';
 		}
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %u %c %u",
-		    (int)gpsd_get_speed(&sub->devctl.device->ttyset),
-			9 - sub->devctl.device->gpsdata.stopbits,
-			(int)sub->devctl.device->gpsdata.parity,
-			sub->devctl.device->gpsdata.stopbits);
+		    (int)gpsd_get_speed(&chanctl->device->ttyset),
+			9 - chanctl->device->gpsdata.stopbits,
+			(int)chanctl->device->gpsdata.parity,
+			chanctl->device->gpsdata.stopbits);
 	    } else {
 		(void)strlcpy(phrase, ",B=?", BUFSIZ);
 	    }
 	    break;
 	case 'C':
-	    if (!assign_channel(sub, GPS) || sub->devctl.device->device_type==NULL)
+	    if (!assign_channel(sub, GPS) || chanctl->device->device_type==NULL)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
 	    else {
-		const struct gps_type_t *dev = sub->devctl.device->device_type;
+		const struct gps_type_t *dev = chanctl->device->device_type;
 		if (*p == '=' && privileged_user(sub)) {
 		    double cycle = strtod(++p, &p);
 		    if (dev->rate_switcher != NULL && cycle >= dev->min_cycle)
-			if (dev->rate_switcher(sub->devctl.device, cycle))
-			    sub->devctl.device->gpsdata.cycle = cycle;
+			if (dev->rate_switcher(chanctl->device, cycle))
+			    chanctl->device->gpsdata.cycle = cycle;
 		}
 		if (dev->rate_switcher == NULL)
 		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f", sub->devctl.device->gpsdata.cycle);
+				   ",C=%.2f", chanctl->device->gpsdata.cycle);
 		else
 		    (void)snprintf(phrase, sizeof(phrase), ",C=%.2f %.2f",
-				   sub->devctl.device->gpsdata.cycle, sub->devctl.device->gpsdata.cycle);
+				   chanctl->device->gpsdata.cycle, chanctl->device->gpsdata.cycle);
 	    }
 	    break;
 #endif /* ALLOW_RECONFIGURE */
 	case 'D':
 	    (void)strlcpy(phrase, ",D=", BUFSIZ);
-	    if (assign_channel(sub, GPS) && isnan(sub->devctl.fixbuffer.time)==0)
-		(void)unix_to_iso8601(sub->devctl.fixbuffer.time,
+	    if (assign_channel(sub, GPS) && isnan(chanctl->fixbuffer.time)==0)
+		(void)unix_to_iso8601(chanctl->fixbuffer.time,
 				phrase+3, sizeof(phrase)-3);
 	    else
 		(void)strlcat(phrase, "?", BUFSIZ);
 	    break;
 	case 'E':
 	    (void)strlcpy(phrase, ",E=", BUFSIZ);
-	    if (assign_channel(sub, GPS) && have_fix(sub)) {
+	    if (assign_channel(sub, GPS) && have_fix(chanctl)) {
 #if 0
 		/*
 		 * Only unpleasant choices here:
@@ -982,23 +983,23 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		 *    Unfortunately, this would force a bump in the
 		 *    shared-library version.
 		 */
-		if (isnan(sub->devctl.device->gpsdata.epe) == 0)
+		if (isnan(chanctl->device->gpsdata.epe) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   "%.3f", sub->devctl.device->gpsdata.epe);
+				   "%.3f", chanctl->device->gpsdata.epe);
 		else
 #endif
 		    (void)strlcat(phrase, "?", sizeof(phrase));
-		if (isnan(sub->devctl.fixbuffer.eph) == 0)
+		if (isnan(chanctl->fixbuffer.eph) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f", sub->devctl.fixbuffer.eph);
+				   " %.3f", chanctl->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
-		if (isnan(sub->devctl.fixbuffer.epv) == 0)
+		if (isnan(chanctl->fixbuffer.epv) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f", sub->devctl.fixbuffer.epv);
+				   " %.3f", chanctl->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 	    } else
@@ -1010,14 +1011,14 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		p = snarfline(++p, &stash);
 		gpsd_report(LOG_INF,"<= client(%d): switching to %s\n",sub_index(sub),stash);
 		if ((newchan = find_device(stash))) {
-		    /*@i@*/sub->devctl.device = newchan;
+		    /*@i@*/chanctl->device = newchan;
 		    sub->tied = true;
 		}
 	    }
 	    /*@ +branchstate @*/
-	    if (sub->devctl.device != NULL)
+	    if (chanctl->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",F=%s",
-			 sub->devctl.device->gpsdata.gps_device);
+			 chanctl->device->gpsdata.gps_device);
 	    else
 		(void)strlcpy(phrase, ",F=?", BUFSIZ);
 	    break;
@@ -1037,30 +1038,30 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		p += strcspn(p, ",\r\n");
 	    } else
 		(void)assign_channel(sub, ANY);
-	    if (sub->devctl.device==NULL||sub->devctl.device->packet.type==BAD_PACKET)
+	    if (chanctl->device==NULL||chanctl->device->packet.type==BAD_PACKET)
 		(void)strlcpy(phrase, ",G=?", BUFSIZ);
-	    else if (sub->devctl.device->packet.type == RTCM2_PACKET)
+	    else if (chanctl->device->packet.type == RTCM2_PACKET)
 		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104v2");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
 	    break;
 	case 'I':
-	    if (assign_channel(sub, GPS) && sub->devctl.device->device_type!=NULL) {
+	    if (assign_channel(sub, GPS) && chanctl->device->device_type!=NULL) {
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s",
-			       gpsd_id(sub->devctl.device));
+			       gpsd_id(chanctl->device));
 	    } else
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
 	case 'J':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		sub->devctl.buffer_policy = nocasoc;
+		chanctl->buffer_policy = nocasoc;
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		sub->devctl.buffer_policy = casoc;
+		chanctl->buffer_policy = casoc;
 		p++;
 	    }
-	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", sub->devctl.buffer_policy);
+	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", chanctl->buffer_policy);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -1079,151 +1080,151 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    (void)snprintf(phrase, sizeof(phrase), ",L=%d %d %s abcdefgijklmnopqrstuvwxyz", GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION, VERSION);	//h
 	    break;
 	case 'M':
-	    if (!assign_channel(sub, GPS) && (!sub->devctl.device || sub->devctl.fixbuffer.mode == MODE_NOT_SEEN))
+	    if (!assign_channel(sub, GPS) && (!chanctl->device || chanctl->fixbuffer.mode == MODE_NOT_SEEN))
 		(void)strlcpy(phrase, ",M=?", BUFSIZ);
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",M=%d", sub->devctl.fixbuffer.mode);
+		(void)snprintf(phrase, sizeof(phrase), ",M=%d", chanctl->fixbuffer.mode);
 	    break;
 #ifdef ALLOW_RECONFIGURE
 	case 'N':
-	    if (!assign_channel(sub, GPS) || sub->devctl.device->device_type == NULL)
+	    if (!assign_channel(sub, GPS) || chanctl->device->device_type == NULL)
 		(void)strlcpy(phrase, ",N=?", BUFSIZ);
-	    else if (!sub->devctl.device->device_type->mode_switcher)
+	    else if (!chanctl->device->device_type->mode_switcher)
 		(void)strlcpy(phrase, ",N=0", BUFSIZ);
 #ifdef ALLOW_RECONFIGURE
 	    else if (privileged_user(sub) && !context.readonly) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
-		    sub->devctl.device->device_type->mode_switcher(sub->devctl.device, 1);
+		    chanctl->device->device_type->mode_switcher(chanctl->device, 1);
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    sub->devctl.device->device_type->mode_switcher(sub->devctl.device, 0);
+		    chanctl->device->device_type->mode_switcher(chanctl->device, 0);
 		    p++;
 		}
 	    }
 #endif /* ALLOW_RECONFIGURE */
-	    if (!sub->devctl.device)
+	    if (!chanctl->device)
 		(void)snprintf(phrase, sizeof(phrase), ",N=?");
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",N=%u", sub->devctl.device->gpsdata.driver_mode);
+		(void)snprintf(phrase, sizeof(phrase), ",N=%u", chanctl->device->gpsdata.driver_mode);
 	    break;
 #endif /* ALLOW_RECONFIGURE */
 	case 'O':
-	    if (!assign_channel(sub, GPS) || !have_fix(sub))
+	    if (!assign_channel(sub, GPS) || !have_fix(chanctl))
 		(void)strlcpy(phrase, ",O=?", BUFSIZ);
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s",
-			       sub->devctl.device->gpsdata.tag[0]!='\0' ? sub->devctl.device->gpsdata.tag : "-");
-		if (isnan(sub->devctl.fixbuffer.time)==0)
+			       chanctl->device->gpsdata.tag[0]!='\0' ? chanctl->device->gpsdata.tag : "-");
+		if (isnan(chanctl->fixbuffer.time)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
-				   sub->devctl.fixbuffer.time);
+				   chanctl->fixbuffer.time);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.ept)==0)
+		if (isnan(chanctl->fixbuffer.ept)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
-				   sub->devctl.fixbuffer.ept);
+				   chanctl->fixbuffer.ept);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.latitude)==0)
+		if (isnan(chanctl->fixbuffer.latitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.9f",
-				   sub->devctl.fixbuffer.latitude);
+				   chanctl->fixbuffer.latitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.longitude)==0)
+		if (isnan(chanctl->fixbuffer.longitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.9f",
-				   sub->devctl.fixbuffer.longitude);
+				   chanctl->fixbuffer.longitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.altitude)==0)
+		if (isnan(chanctl->fixbuffer.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
-				   sub->devctl.fixbuffer.altitude);
+				   chanctl->fixbuffer.altitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.eph)==0)
+		if (isnan(chanctl->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				  " %.3f",  sub->devctl.fixbuffer.eph);
+				  " %.3f",  chanctl->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.epv)==0)
+		if (isnan(chanctl->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f",  sub->devctl.fixbuffer.epv);
+				   " %.3f",  chanctl->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.track)==0)
+		if (isnan(chanctl->fixbuffer.track)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.4f %.3f",
-				   sub->devctl.fixbuffer.track,
-				   sub->devctl.fixbuffer.speed);
+				   chanctl->fixbuffer.track,
+				   chanctl->fixbuffer.speed);
 		else
 		    (void)strlcat(phrase, " ? ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.climb)==0)
+		if (isnan(chanctl->fixbuffer.climb)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
-				   sub->devctl.fixbuffer.climb);
+				   chanctl->fixbuffer.climb);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.epd)==0)
+		if (isnan(chanctl->fixbuffer.epd)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.4f",
-				   sub->devctl.fixbuffer.epd);
+				   chanctl->fixbuffer.epd);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.eps)==0)
+		if (isnan(chanctl->fixbuffer.eps)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %.2f", sub->devctl.fixbuffer.eps);
+			     " %.2f", chanctl->fixbuffer.eps);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->devctl.fixbuffer.epc)==0)
+		if (isnan(chanctl->fixbuffer.epc)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %.2f", sub->devctl.fixbuffer.epc);
+			     " %.2f", chanctl->fixbuffer.epc);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (sub->devctl.fixbuffer.mode > 0)
+		if (chanctl->fixbuffer.mode > 0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %d", sub->devctl.fixbuffer.mode);
+			     " %d", chanctl->fixbuffer.mode);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 	    }
 	    break;
 	case 'P':
-	    if (assign_channel(sub, GPS) && have_fix(sub))
+	    if (assign_channel(sub, GPS) && have_fix(chanctl))
 		(void)snprintf(phrase, sizeof(phrase), ",P=%.9f %.9f",
-			sub->devctl.fixbuffer.latitude,
-			sub->devctl.fixbuffer.longitude);
+			chanctl->fixbuffer.latitude,
+			chanctl->fixbuffer.longitude);
 	    else
 		(void)strlcpy(phrase, ",P=?", BUFSIZ);
 	    break;
 	case 'Q':
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
 	    if (assign_channel(sub, GPS) &&
-		(isnan(sub->devctl.device->gpsdata.pdop)==0
-		 || isnan(sub->devctl.device->gpsdata.hdop)==0
-		 || isnan(sub->devctl.device->gpsdata.vdop)==0))
+		(isnan(chanctl->device->gpsdata.pdop)==0
+		 || isnan(chanctl->device->gpsdata.hdop)==0
+		 || isnan(chanctl->device->gpsdata.vdop)==0))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
-			sub->devctl.device->gpsdata.satellites_used,
-			ZEROIZE(sub->devctl.device->gpsdata.pdop),
-			ZEROIZE(sub->devctl.device->gpsdata.hdop),
-			ZEROIZE(sub->devctl.device->gpsdata.vdop),
-			ZEROIZE(sub->devctl.device->gpsdata.tdop),
-			ZEROIZE(sub->devctl.device->gpsdata.gdop));
+			chanctl->device->gpsdata.satellites_used,
+			ZEROIZE(chanctl->device->gpsdata.pdop),
+			ZEROIZE(chanctl->device->gpsdata.hdop),
+			ZEROIZE(chanctl->device->gpsdata.vdop),
+			ZEROIZE(chanctl->device->gpsdata.tdop),
+			ZEROIZE(chanctl->device->gpsdata.gdop));
 	    else
 		(void)strlcpy(phrase, ",Q=?", BUFSIZ);
 #undef ZEROIZE
@@ -1232,53 +1233,53 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    if (*p == '=') ++p;
 	    if (*p == '2') {
 		(void)assign_channel(sub, ANY);
-		sub->devctl.raw = 2;
+		chanctl->raw = 2;
 		gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=2");
 		p++;
 	    } else if (*p == '1' || *p == '+') {
 		(void)assign_channel(sub, ANY);
-		sub->devctl.raw = 1;
+		chanctl->raw = 1;
 		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		sub->devctl.raw = 0;
+		chanctl->raw = 0;
 		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 		p++;
-	    } else if (sub->devctl.raw) {
-		sub->devctl.raw = 0;
+	    } else if (chanctl->raw) {
+		chanctl->raw = 0;
 		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 	    } else {
 		(void)assign_channel(sub, ANY);
-		sub->devctl.raw = 1;
+		chanctl->raw = 1;
 		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 	    }
 	    break;
 	case 'S':
 	    if (assign_channel(sub, GPS))
-		(void)snprintf(phrase, sizeof(phrase), ",S=%d", sub->devctl.device->gpsdata.status);
+		(void)snprintf(phrase, sizeof(phrase), ",S=%d", chanctl->device->gpsdata.status);
 	    else
 		(void)strlcpy(phrase, ",S=?", BUFSIZ);
 	    break;
 	case 'T':
-	    if (assign_channel(sub, GPS) && have_fix(sub) && isnan(sub->devctl.fixbuffer.track)==0)
-		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", sub->devctl.fixbuffer.track);
+	    if (assign_channel(sub, GPS) && have_fix(chanctl) && isnan(chanctl->fixbuffer.track)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", chanctl->fixbuffer.track);
 	    else
 		(void)strlcpy(phrase, ",T=?", BUFSIZ);
 	    break;
 	case 'U':
-	    if (assign_channel(sub, GPS) && have_fix(sub) && sub->devctl.fixbuffer.mode == MODE_3D)
-		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", sub->devctl.fixbuffer.climb);
+	    if (assign_channel(sub, GPS) && have_fix(chanctl) && chanctl->fixbuffer.mode == MODE_3D)
+		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", chanctl->fixbuffer.climb);
 	    else
 		(void)strlcpy(phrase, ",U=?", BUFSIZ);
 	    break;
 	case 'V':
-	    if (assign_channel(sub, GPS) && have_fix(sub) && isnan(sub->devctl.fixbuffer.speed)==0)
-		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", sub->devctl.fixbuffer.speed * MPS_TO_KNOTS);
+	    if (assign_channel(sub, GPS) && have_fix(chanctl) && isnan(chanctl->fixbuffer.speed)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", chanctl->fixbuffer.speed * MPS_TO_KNOTS);
 	    else
 		(void)strlcpy(phrase, ",V=?", BUFSIZ);
 	    break;
@@ -1304,101 +1305,101 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    }
 	    break;
 	case 'X':
-	    if (assign_channel(sub, ANY) && sub->devctl.device != NULL)
-		(void)snprintf(phrase, sizeof(phrase), ",X=%f", sub->devctl.device->gpsdata.online);
+	    if (assign_channel(sub, ANY) && chanctl->device != NULL)
+		(void)snprintf(phrase, sizeof(phrase), ",X=%f", chanctl->device->gpsdata.online);
 	    else
 		(void)strlcpy(phrase, ",X=?", BUFSIZ);
 	    break;
 	case 'Y':
-	    if (assign_channel(sub, GPS) && sub->devctl.device->gpsdata.satellites > 0) {
+	    if (assign_channel(sub, GPS) && chanctl->device->gpsdata.satellites > 0) {
 		int used, reported = 0;
 		(void)strlcpy(phrase, ",Y=", BUFSIZ);
-		if (sub->devctl.device->gpsdata.tag[0] != '\0')
-		    (void)strlcat(phrase, sub->devctl.device->gpsdata.tag, BUFSIZ);
+		if (chanctl->device->gpsdata.tag[0] != '\0')
+		    (void)strlcat(phrase, chanctl->device->gpsdata.tag, BUFSIZ);
 		else
 		    (void)strlcat(phrase, "-", BUFSIZ);
-		if (isnan(sub->devctl.device->gpsdata.sentence_time)==0)
+		if (isnan(chanctl->device->gpsdata.sentence_time)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f ",
-				   sub->devctl.device->gpsdata.sentence_time);
+				   chanctl->device->gpsdata.sentence_time);
 		else
 		    (void)strlcat(phrase, " ? ", BUFSIZ);
 		/* insurance against flaky drivers */
-		for (i = 0; i < sub->devctl.device->gpsdata.satellites; i++)
-		    if (sub->devctl.device->gpsdata.PRN[i])
+		for (i = 0; i < chanctl->device->gpsdata.satellites; i++)
+		    if (chanctl->device->gpsdata.PRN[i])
 			reported++;
 		(void)snprintf(phrase+strlen(phrase),
 			       sizeof(phrase)-strlen(phrase),
 			       "%d:", reported);
-		for (i = 0; i < sub->devctl.device->gpsdata.satellites; i++) {
+		for (i = 0; i < chanctl->device->gpsdata.satellites; i++) {
 		    used = 0;
-		    for (j = 0; j < sub->devctl.device->gpsdata.satellites_used; j++)
-			if (sub->devctl.device->gpsdata.used[j] == sub->devctl.device->gpsdata.PRN[i]) {
+		    for (j = 0; j < chanctl->device->gpsdata.satellites_used; j++)
+			if (chanctl->device->gpsdata.used[j] == chanctl->device->gpsdata.PRN[i]) {
 			    used = 1;
 			    break;
 			}
-		    if (sub->devctl.device->gpsdata.PRN[i]) {
+		    if (chanctl->device->gpsdata.PRN[i]) {
 			(void)snprintf(phrase+strlen(phrase),
 				      sizeof(phrase)-strlen(phrase),
 				      "%d %d %d %.0f %d:",
-				      sub->devctl.device->gpsdata.PRN[i],
-				      sub->devctl.device->gpsdata.elevation[i],sub->devctl.device->gpsdata.azimuth[i],
-				      sub->devctl.device->gpsdata.ss[i],
+				      chanctl->device->gpsdata.PRN[i],
+				      chanctl->device->gpsdata.elevation[i],chanctl->device->gpsdata.azimuth[i],
+				      chanctl->device->gpsdata.ss[i],
 				      used);
 		    }
 		}
-		if (sub->devctl.device->gpsdata.satellites != reported)
+		if (chanctl->device->gpsdata.satellites != reported)
 		    gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
-				sub->devctl.device->gpsdata.satellites, reported);
+				chanctl->device->gpsdata.satellites, reported);
 	    } else
 		(void)strlcpy(phrase, ",Y=?", BUFSIZ);
 	    break;
 	case 'Z':
 	    (void)assign_channel(sub, GPS);
 	    if (*p == '=') ++p;
-	    if (sub->devctl.device == NULL) {
+	    if (chanctl->device == NULL) {
 		(void)snprintf(phrase, sizeof(phrase), ",Z=?");
 		p++;
 	    } else if (*p == '1' || *p == '+') {
-		sub->devctl.device->gpsdata.profiling = true;
+		chanctl->device->gpsdata.profiling = true;
 		gpsd_report(LOG_INF, "client(%d) turned on profiling mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		sub->devctl.device->gpsdata.profiling = false;
+		chanctl->device->gpsdata.profiling = false;
 		gpsd_report(LOG_INF, "client(%d) turned off profiling mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
 		p++;
 	    } else {
-		sub->devctl.device->gpsdata.profiling = !sub->devctl.device->gpsdata.profiling;
+		chanctl->device->gpsdata.profiling = !chanctl->device->gpsdata.profiling;
 		gpsd_report(LOG_INF, "client(%d) toggled profiling mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",Z=%d",
-			       (int)sub->devctl.device->gpsdata.profiling);
+			       (int)chanctl->device->gpsdata.profiling);
 	    }
 	    break;
 	case '$':
 	    if (!assign_channel(sub, GPS))
 		(void)strlcpy(phrase, ",$=?", BUFSIZ);
-	    else if (sub->devctl.device->gpsdata.sentence_time!=0)
+	    else if (chanctl->device->gpsdata.sentence_time!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %lf %lf %lf %lf %lf %lf",
-			sub->devctl.device->gpsdata.tag,
-			(int)sub->devctl.device->gpsdata.sentence_length,
-			sub->devctl.device->gpsdata.sentence_time,
-			sub->devctl.device->gpsdata.d_xmit_time - sub->devctl.device->gpsdata.sentence_time,
-			sub->devctl.device->gpsdata.d_recv_time - sub->devctl.device->gpsdata.sentence_time,
-			sub->devctl.device->gpsdata.d_decode_time - sub->devctl.device->gpsdata.sentence_time,
-			sub->devctl.device->poll_times[sub_index(sub)] - sub->devctl.device->gpsdata.sentence_time,
-			timestamp() - sub->devctl.device->gpsdata.sentence_time);
+			chanctl->device->gpsdata.tag,
+			(int)chanctl->device->gpsdata.sentence_length,
+			chanctl->device->gpsdata.sentence_time,
+			chanctl->device->gpsdata.d_xmit_time - chanctl->device->gpsdata.sentence_time,
+			chanctl->device->gpsdata.d_recv_time - chanctl->device->gpsdata.sentence_time,
+			chanctl->device->gpsdata.d_decode_time - chanctl->device->gpsdata.sentence_time,
+			chanctl->device->poll_times[sub_index(sub)] - chanctl->device->gpsdata.sentence_time,
+			timestamp() - chanctl->device->gpsdata.sentence_time);
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d 0 %lf %lf %lf %lf %lf",
-			sub->devctl.device->gpsdata.tag,
-			(int)sub->devctl.device->gpsdata.sentence_length,
-			sub->devctl.device->gpsdata.d_xmit_time,
-			sub->devctl.device->gpsdata.d_recv_time - sub->devctl.device->gpsdata.d_xmit_time,
-			sub->devctl.device->gpsdata.d_decode_time - sub->devctl.device->gpsdata.d_xmit_time,
-			sub->devctl.device->poll_times[sub_index(sub)] - sub->devctl.device->gpsdata.d_xmit_time,
-			timestamp() - sub->devctl.device->gpsdata.d_xmit_time);
+			chanctl->device->gpsdata.tag,
+			(int)chanctl->device->gpsdata.sentence_length,
+			chanctl->device->gpsdata.d_xmit_time,
+			chanctl->device->gpsdata.d_recv_time - chanctl->device->gpsdata.d_xmit_time,
+			chanctl->device->gpsdata.d_decode_time - chanctl->device->gpsdata.d_xmit_time,
+			chanctl->device->poll_times[sub_index(sub)] - chanctl->device->gpsdata.d_xmit_time,
+			timestamp() - chanctl->device->gpsdata.d_xmit_time);
 	    break;
 	case '\r': case '\n':
 	    goto breakout;
@@ -1421,8 +1422,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
     if (buf[0] == '?') {
 	char reply[BUFSIZ];
 	if (strncmp(buf, "?TPV", 4) == 0) {
-	    if (assign_channel(sub, GPS) && have_fix(sub)) {
-		json_tpv_dump(&sub->devctl.device->gpsdata, &sub->devctl.fixbuffer, 
+	    if (assign_channel(sub, GPS) && have_fix(&sub->devctl)) {
+		json_tpv_dump(&sub->devctl.device->gpsdata,&sub->devctl.fixbuffer, 
 			      reply, sizeof(reply));
 	    } else {
 		(void)strlcpy(reply, 
