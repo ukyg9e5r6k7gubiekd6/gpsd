@@ -643,7 +643,8 @@ static bool allocation_filter(struct gps_device_t *channel,
 }
 
 /*@ -branchstate -usedef -globstate @*/
-static bool assign_device(struct subscriber_t *user, gnss_type type)
+static struct channel_t *assign_channel(struct subscriber_t *user, 
+				gnss_type type, struct gps_device_t *forcedev)
 {
 #define USER_INDEX (int)(user - subscribers)
     bool was_unassigned = (USER_CHANNEL(user).device == NULL);
@@ -684,7 +685,7 @@ static bool assign_device(struct subscriber_t *user, gnss_type type)
     if (USER_CHANNEL(user).device == NULL) {
 	gpsd_report(LOG_ERROR, "client(%d): device assignment failed.\n",
 		    USER_INDEX);
-	return false;
+	return NULL;
     }
 
     /* and open that device */
@@ -696,7 +697,7 @@ static bool assign_device(struct subscriber_t *user, gnss_type type)
 
 	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
 			USER_INDEX);
-	    return false;
+	    return NULL;
 	} else {
 	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_device\n",
 			USER_CHANNEL(user).device->gpsdata.gps_fd);
@@ -730,7 +731,7 @@ static bool assign_device(struct subscriber_t *user, gnss_type type)
 	/*@ +sefparams -matchanyintegral @*/
 
     }
-    return true;
+    return &USER_CHANNEL(user);
 #undef USER_INDEX
 }
 /*@ +branchstate +usedef +globstate @*/
@@ -860,8 +861,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
-    struct gps_device_t *newchan;
-    struct channel_t *channel = &USER_CHANNEL(sub);
+    struct channel_t *channel;
 
     (void)strlcpy(reply, "GPSD", BUFSIZ);
     p = buf;
@@ -869,7 +869,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (assign_device(sub, GPS) && have_fix(channel) && channel->fixbuffer.mode == MODE_3D)
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel) && channel->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",A=%.3f",
 			channel->fixbuffer.altitude);
 	    else
@@ -878,7 +878,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 #ifdef ALLOW_RECONFIGURE
 	case 'B':		/* change baud rate */
 #ifndef FIXED_PORT_SPEED
-	    if (assign_device(sub, ANY) && channel->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
+	    if ((channel=assign_channel(sub, ANY, NULL))!= NULL && channel->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
 		speed_t speed;
 		unsigned int stopbits = channel->device->gpsdata.stopbits;
 		char parity = (char)channel->device->gpsdata.parity;
@@ -946,7 +946,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    }
 	    break;
 	case 'C':
-	    if (!assign_device(sub, GPS) || channel->device->device_type==NULL)
+	    if ((channel=assign_channel(sub, GPS, NULL))==NULL || channel->device->device_type==NULL)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
 	    else {
 		const struct gps_type_t *dev = channel->device->device_type;
@@ -967,7 +967,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 #endif /* ALLOW_RECONFIGURE */
 	case 'D':
 	    (void)strlcpy(phrase, ",D=", BUFSIZ);
-	    if (assign_device(sub, GPS) && isnan(channel->fixbuffer.time)==0)
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && isnan(channel->fixbuffer.time)==0)
 		(void)unix_to_iso8601(channel->fixbuffer.time,
 				phrase+3, sizeof(phrase)-3);
 	    else
@@ -975,7 +975,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    break;
 	case 'E':
 	    (void)strlcpy(phrase, ",E=", BUFSIZ);
-	    if (assign_device(sub, GPS) && have_fix(channel)) {
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
 #if 0
 		/*
 		 * Only unpleasant choices here:
@@ -1016,8 +1016,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    if (*p == '=') {
 		p = snarfline(++p, &stash);
 		gpsd_report(LOG_INF,"<= client(%d): switching to %s\n",sub_index(sub),stash);
-		if ((newchan = find_device(stash))) {
-		    /*@i@*/channel->device = newchan;
+		if ((channel = assign_channel(sub, ANY, find_device(stash)))) {
 		    sub->tied = true;
 		}
 	    }
@@ -1032,19 +1031,19 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    if (*p == '=') {
 		gpsd_report(LOG_INF,"<= client(%d): requesting data type %s\n",sub_index(sub),++p);
 		if (strncasecmp(p, "rtcm104v2", 7) == 0)
-		    (void)assign_device(sub, RTCM2);
+		    channel = assign_channel(sub, RTCM2, NULL);
 		if (strncasecmp(p, "rtcm104v3", 7) == 0)
-		    (void)assign_device(sub, RTCM3);
+		    channel = assign_channel(sub, RTCM3, NULL);
 		else if (strncasecmp(p, "gps", 3) == 0)
-		    (void)assign_device(sub, GPS);
+		    channel = assign_channel(sub, GPS, NULL);
 		else if (strncasecmp(p, "ais", 3) == 0)
-		    (void)assign_device(sub, AIS);
+		    channel = assign_channel(sub, AIS, NULL);
 		else
-		    (void)assign_device(sub, ANY);
+		    channel = assign_channel(sub, ANY, NULL);
 		p += strcspn(p, ",\r\n");
 	    } else
-		(void)assign_device(sub, ANY);
-	    if (channel->device==NULL||channel->device->packet.type==BAD_PACKET)
+		channel = assign_channel(sub, ANY, NULL);
+	    if (channel==NULL||channel->device==NULL||channel->device->packet.type==BAD_PACKET)
 		(void)strlcpy(phrase, ",G=?", BUFSIZ);
 	    else if (channel->device->packet.type == RTCM2_PACKET)
 		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104v2");
@@ -1052,7 +1051,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
 	    break;
 	case 'I':
-	    if (assign_device(sub, GPS) && channel->device->device_type!=NULL) {
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->device_type!=NULL) {
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s",
 			       gpsd_id(channel->device));
 	    } else
@@ -1086,14 +1085,14 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    (void)snprintf(phrase, sizeof(phrase), ",L=%d %d %s abcdefgijklmnopqrstuvwxyz", GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION, VERSION);	//h
 	    break;
 	case 'M':
-	    if (!assign_device(sub, GPS) && (!channel->device || channel->fixbuffer.mode == MODE_NOT_SEEN))
+	    if ((channel=assign_channel(sub, GPS, NULL))== NULL && (!channel->device || channel->fixbuffer.mode == MODE_NOT_SEEN))
 		(void)strlcpy(phrase, ",M=?", BUFSIZ);
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", channel->fixbuffer.mode);
 	    break;
 #ifdef ALLOW_RECONFIGURE
 	case 'N':
-	    if (!assign_device(sub, GPS) || channel->device->device_type == NULL)
+	    if ((channel=assign_channel(sub, GPS, NULL))== NULL || channel->device->device_type == NULL)
 		(void)strlcpy(phrase, ",N=?", BUFSIZ);
 	    else if (!channel->device->device_type->mode_switcher)
 		(void)strlcpy(phrase, ",N=0", BUFSIZ);
@@ -1116,7 +1115,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    break;
 #endif /* ALLOW_RECONFIGURE */
 	case 'O':
-	    if (!assign_device(sub, GPS) || !have_fix(channel))
+	    if ((channel=assign_channel(sub, GPS, NULL))== NULL || !have_fix(channel))
 		(void)strlcpy(phrase, ",O=?", BUFSIZ);
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s",
@@ -1211,7 +1210,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    }
 	    break;
 	case 'P':
-	    if (assign_device(sub, GPS) && have_fix(channel))
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel))
 		(void)snprintf(phrase, sizeof(phrase), ",P=%.9f %.9f",
 			channel->fixbuffer.latitude,
 			channel->fixbuffer.longitude);
@@ -1220,7 +1219,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    break;
 	case 'Q':
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
-	    if (assign_device(sub, GPS) &&
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL &&
 		(isnan(channel->device->gpsdata.pdop)==0
 		 || isnan(channel->device->gpsdata.hdop)==0
 		 || isnan(channel->device->gpsdata.vdop)==0))
@@ -1236,88 +1235,91 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 #undef ZEROIZE
 	    break;
 	case 'R':
-	    if (*p == '=') ++p;
-	    if (*p == '2') {
-		(void)assign_device(sub, ANY);
-		channel->raw = 2;
-		gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=2");
-		p++;
-	    } else if (*p == '1' || *p == '+') {
-		(void)assign_device(sub, ANY);
-		channel->raw = 1;
-		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=1");
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		channel->raw = 0;
-		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=0");
-		p++;
-	    } else if (channel->raw) {
-		channel->raw = 0;
-		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=0");
-	    } else {
-		(void)assign_device(sub, ANY);
-		channel->raw = 1;
-		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=1");
+	    if ((channel = assign_channel(sub, ANY, NULL))==NULL)
+		(void)strlcpy(phrase, ",R=?", sizeof(reply));
+	    else {
+		if (*p == '=') ++p;
+		if (*p == '2') {
+		    channel->raw = 2;
+		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=2");
+		    p++;
+		} else if (*p == '1' || *p == '+') {
+		    channel->raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    channel->raw = 0;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
+		    p++;
+		} else if (channel->raw) {
+		    channel->raw = 0;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
+		} else {
+		    channel->raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
+		}
 	    }
 	    break;
 	case 'S':
-	    if (assign_device(sub, GPS))
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",S=%d", channel->device->gpsdata.status);
 	    else
 		(void)strlcpy(phrase, ",S=?", BUFSIZ);
 	    break;
 	case 'T':
-	    if (assign_device(sub, GPS) && have_fix(channel) && isnan(channel->fixbuffer.track)==0)
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel) && isnan(channel->fixbuffer.track)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", channel->fixbuffer.track);
 	    else
 		(void)strlcpy(phrase, ",T=?", BUFSIZ);
 	    break;
 	case 'U':
-	    if (assign_device(sub, GPS) && have_fix(channel) && channel->fixbuffer.mode == MODE_3D)
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel) && channel->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", channel->fixbuffer.climb);
 	    else
 		(void)strlcpy(phrase, ",U=?", BUFSIZ);
 	    break;
 	case 'V':
-	    if (assign_device(sub, GPS) && have_fix(channel) && isnan(channel->fixbuffer.speed)==0)
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel) && isnan(channel->fixbuffer.speed)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", channel->fixbuffer.speed * MPS_TO_KNOTS);
 	    else
 		(void)strlcpy(phrase, ",V=?", BUFSIZ);
 	    break;
 	case 'W':
-	    if (*p == '=') ++p;
-	    if (*p == '1' || *p == '+') {
-		sub->watcher = WATCH_OLDSTYLE;
-		(void)assign_device(sub, ANY);
-		(void)snprintf(phrase, sizeof(phrase), ",W=1");
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		sub->watcher = WATCH_NOTHING;
-		(void)snprintf(phrase, sizeof(phrase), ",W=0");
-		p++;
-	    } else if (sub->watcher != WATCH_NOTHING) {
-		sub->watcher = WATCH_NOTHING;
-		(void)snprintf(phrase, sizeof(phrase), ",W=0");
-	    } else {
-		sub->watcher = WATCH_OLDSTYLE;
-		(void)assign_device(sub, ANY);
-		gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",W=1");
+	    if ((channel = assign_channel(sub, ANY, NULL))==NULL)
+		(void)strlcpy(phrase, ",W=?", sizeof(reply));
+	    else {
+		if (*p == '=') ++p;
+		if (*p == '1' || *p == '+') {
+		    sub->watcher = WATCH_OLDSTYLE;
+		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    sub->watcher = WATCH_NOTHING;
+		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
+		    p++;
+		} else if (sub->watcher != WATCH_NOTHING) {
+		    sub->watcher = WATCH_NOTHING;
+		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
+		} else {
+		    sub->watcher = WATCH_OLDSTYLE;
+		    gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
+		}
 	    }
 	    break;
 	case 'X':
-	    if (assign_device(sub, ANY) && channel->device != NULL)
+	    if ((channel=assign_channel(sub, ANY, NULL))!= NULL && channel->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",X=%f", channel->device->gpsdata.online);
 	    else
 		(void)strlcpy(phrase, ",X=?", BUFSIZ);
 	    break;
 	case 'Y':
-	    if (assign_device(sub, GPS) && channel->device->gpsdata.satellites > 0) {
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 		int used, reported = 0;
 		(void)strlcpy(phrase, ",Y=", BUFSIZ);
 		if (channel->device->gpsdata.tag[0] != '\0')
@@ -1362,30 +1364,33 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		(void)strlcpy(phrase, ",Y=?", BUFSIZ);
 	    break;
 	case 'Z':
-	    (void)assign_device(sub, GPS);
-	    if (*p == '=') ++p;
-	    if (channel->device == NULL) {
-		(void)snprintf(phrase, sizeof(phrase), ",Z=?");
-		p++;
-	    } else if (*p == '1' || *p == '+') {
-		channel->device->gpsdata.profiling = true;
-		gpsd_report(LOG_INF, "client(%d) turned on profiling mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		channel->device->gpsdata.profiling = false;
-		gpsd_report(LOG_INF, "client(%d) turned off profiling mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
-		p++;
-	    } else {
-		channel->device->gpsdata.profiling = !channel->device->gpsdata.profiling;
-		gpsd_report(LOG_INF, "client(%d) toggled profiling mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",Z=%d",
-			       (int)channel->device->gpsdata.profiling);
+	    if ((channel = assign_channel(sub, GPS, NULL))==NULL)
+		(void)strlcpy(phrase, ",Z=?", sizeof(reply));
+	    else {
+		if (*p == '=') ++p;
+		if (channel->device == NULL) {
+		    (void)snprintf(phrase, sizeof(phrase), ",Z=?");
+		    p++;
+		} else if (*p == '1' || *p == '+') {
+		    channel->device->gpsdata.profiling = true;
+		    gpsd_report(LOG_INF, "client(%d) turned on profiling mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",Z=1");
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    channel->device->gpsdata.profiling = false;
+		    gpsd_report(LOG_INF, "client(%d) turned off profiling mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",Z=0");
+		    p++;
+		} else {
+		    channel->device->gpsdata.profiling = !channel->device->gpsdata.profiling;
+		    gpsd_report(LOG_INF, "client(%d) toggled profiling mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",Z=%d",
+				   (int)channel->device->gpsdata.profiling);
+		}
 	    }
 	    break;
 	case '$':
-	    if (!assign_device(sub, GPS))
+	    if ((channel=assign_channel(sub, GPS, NULL))== NULL)
 		(void)strlcpy(phrase, ",$=?", BUFSIZ);
 	    else if (channel->device->gpsdata.sentence_time!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %lf %lf %lf %lf %lf %lf",
@@ -1427,8 +1432,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 #ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
 	char reply[BUFSIZ];
+	struct channel_t *channel;
 	if (strncmp(buf, "?TPV", 4) == 0) {
-	    if (assign_device(sub, GPS) && have_fix(&USER_CHANNEL(sub))) {
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
 		json_tpv_dump(&USER_CHANNEL(sub).device->gpsdata,&USER_CHANNEL(sub).fixbuffer, 
 			      reply, sizeof(reply));
 	    } else {
@@ -1436,7 +1442,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			      "{\"class\":\"TPV\",\"mode\":0}", sizeof(reply));
 	    }
 	} else if (strncmp(buf, "?SKY", 4) == 0) {
-	    if (assign_device(sub, GPS) && USER_CHANNEL(sub).device->gpsdata.satellites > 0) {
+	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 		json_sky_dump(&USER_CHANNEL(sub).device->gpsdata, 
 			      reply, sizeof(reply));
 	    } else {
