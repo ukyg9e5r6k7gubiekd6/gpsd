@@ -355,7 +355,7 @@ struct subscriber_t {
     struct chanctl_t	devctl;
 };
 
-struct gps_device_t channels[MAXDEVICES];
+struct gps_device_t devices[MAXDEVICES];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
 
 static void adjust_max_fd(int fd, bool on)
@@ -521,7 +521,7 @@ static void raw_hook(struct gps_data_t *ud,
 {
     struct gps_device_t *chp;
 
-    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+    for (chp = devices; chp < devices + MAXDEVICES; chp++)
 	if (allocated_channel(chp) && strcmp(chp->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
@@ -542,11 +542,11 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 	    adjust_max_fd(dsock, true);
 	}
 	if (context.netgnss_service != netgnss_remotegpsd)
-	    return &channels[0]; /* shaky, but only 0 versus nonzero is tested */
+	    return &devices[0]; /* shaky, but only 0 versus nonzero is tested */
     }
 
     /* normal case: set up GPS/RTCM/AIS service */
-    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+    for (chp = devices; chp < devices + MAXDEVICES; chp++)
 	if (!allocated_channel(chp) || (strcmp(chp->gpsdata.gps_device, device_name)==0 && !initialized_channel(chp))){
 	    goto found;
 	}
@@ -579,7 +579,7 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 	 * Stash the devicename away for probing when the first client connects.
 	 * Zero the context pointer so we know gpsd_init() hasn't been called.
 	 */
-	for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	for (chp = devices; chp < devices + MAXDEVICES; chp++)
 	    if (!allocated_channel(chp)) {
 		(void)strlcpy(chp->gpsdata.gps_device, device_name, PATH_MAX);
 		/*@ -mustfreeonly @*/
@@ -613,7 +613,7 @@ static bool allocation_filter(struct gps_device_t *channel,
 
     gpsd_report(LOG_PROG, 
 		"User requires %d, channel %d type is %d\n", 
-		type, (int)(channel - channels), channel->packet.type);
+		type, (int)(channel - devices), channel->packet.type);
     /* we might have type constraints */
     if (type == ANY)
 	return true;
@@ -643,7 +643,7 @@ static bool assign_channel(struct subscriber_t *user, gnss_type type)
 	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
 	/* ...connect him to the most recently active device */
 	/*@ -mustfreeonly @*/
-	for(channel = channels; channel<channels+MAXDEVICES; channel++)
+	for(channel = devices; channel<devices+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
 		if (allocation_filter(channel, user, type)) {
 		    /*
@@ -1065,12 +1065,12 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
-		if (allocated_channel(&channels[i]))
+		if (allocated_channel(&devices[i]))
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_channel(&channels[i]) && strlen(phrase)+strlen(channels[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
-		    (void)strlcat(phrase, channels[i].gpsdata.gps_device, BUFSIZ);
+		if (allocated_channel(&devices[i]) && strlen(phrase)+strlen(devices[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
+		    (void)strlcat(phrase, devices[i].gpsdata.gps_device, BUFSIZ);
 		    (void)strlcat(phrase, " ", BUFSIZ);
 		}
 	    }
@@ -1442,21 +1442,21 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    (void)strlcpy(reply, 
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_channel(&channels[i]) && strlen(reply)+strlen(channels[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
+		if (allocated_channel(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
 		    (void)strlcat(reply, "{\"name\":\"", sizeof(reply));
-		    (void)strlcat(reply, channels[i].gpsdata.gps_device, sizeof(reply));
+		    (void)strlcat(reply, devices[i].gpsdata.gps_device, sizeof(reply));
 		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
 		    (void)strlcat(reply, 
-				  gpsd_type(channels[i].device_type),
+				  gpsd_type(devices[i].device_type),
 				  sizeof(reply));
 		    (void)strlcat(reply, "\",\"driver\":\"", sizeof(reply));
 		    (void)strlcat(reply, 
-				  channels[i].device_type->type_name,
+				  devices[i].device_type->type_name,
 				  sizeof(reply));
-		    if (channels[i].subtype[0] != '\0') {
+		    if (devices[i].subtype[0] != '\0') {
 			(void)strlcat(reply, "\",\"subtype\":\"", sizeof(reply));
 			(void)strlcat(reply, 
-				      channels[i].subtype,
+				      devices[i].subtype,
 				      sizeof(reply));
 		    }
 		    (void)strlcat(reply, "\"},", sizeof(reply));
@@ -1735,8 +1735,8 @@ int main(int argc, char *argv[])
     if ((st = setjmp(restartbuf)) > 0) {
 	/* try to undo all device configurations */
 	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	    if (allocated_channel(&channels[dfd]))
-		(void)gpsd_wrap(&channels[dfd]);
+	    if (allocated_channel(&devices[dfd]))
+		(void)gpsd_wrap(&devices[dfd]);
 	}
 	gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
     }
@@ -1923,7 +1923,7 @@ int main(int argc, char *argv[])
 	    }
 
 	/* poll all active devices */
-	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
+	for (channel = devices; channel < devices + MAXDEVICES; channel++) {
 	    if (!allocated_channel(channel))
 		continue;
 
@@ -1985,7 +1985,7 @@ int main(int argc, char *argv[])
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
 		    struct gps_device_t *gps;
-		    for (gps = channels; gps < channels + MAXDEVICES; gps++)
+		    for (gps = devices; gps < devices + MAXDEVICES; gps++)
 			if (gps->device_type != NULL && gps->device_type->rtcm_writer != NULL)
 			    (void)gps->device_type->rtcm_writer(gps, (char *)gps->packet.outbuffer, gps->packet.outbuflen);
 		}
@@ -2052,7 +2052,7 @@ int main(int argc, char *argv[])
 
 #ifdef NOT_FIXED
 	if (context.fixcnt > 0 && context.dsock == -1) {
-	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
+	    for (channel=devices; channel < devices+MAXDEVICES; channel++) {
 		if (channel->gpsdata.fix.mode > MODE_NO_FIX) {
 		    netgnss_autoconnect(&context,
 				      channel->gpsdata.fix.latitude,
@@ -2121,7 +2121,7 @@ int main(int argc, char *argv[])
 	 * device by packet type.
 	 */
 	if (!nowait)
-	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
+	    for (channel=devices; channel < devices+MAXDEVICES; channel++) {
 		if (allocated_channel(channel)) {
 		    if (channel->packet.type != BAD_PACKET) {
 			bool device_needed = false;
@@ -2133,9 +2133,9 @@ int main(int argc, char *argv[])
 			if (!device_needed && channel->gpsdata.gps_fd > -1) {
 			    if (channel->releasetime == 0) {
 				channel->releasetime = timestamp();
-				gpsd_report(LOG_PROG, "channel %d released\n", (int)(channel-channels));
+				gpsd_report(LOG_PROG, "channel %d released\n", (int)(channel-devices));
 			    } else if (timestamp() - channel->releasetime > RELEASE_TIMEOUT) {
-				gpsd_report(LOG_PROG, "channel %d closed\n", (int)(channel-channels));
+				gpsd_report(LOG_PROG, "channel %d closed\n", (int)(channel-devices));
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
 				FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 				adjust_max_fd(channel->gpsdata.gps_fd, false);
@@ -2154,8 +2154,8 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",signalled);
     /* try to undo all device configurations */
     for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	if (allocated_channel(&channels[dfd]))
-	    (void)gpsd_wrap(&channels[dfd]);
+	if (allocated_channel(&devices[dfd]))
+	    (void)gpsd_wrap(&devices[dfd]);
     }
 
     if (control_socket)
