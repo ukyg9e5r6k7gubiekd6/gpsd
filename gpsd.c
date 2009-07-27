@@ -330,7 +330,6 @@ static int filesock(char *filename)
  */
 
 struct channel_t {
-    //struct chanctl_t *next;
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
@@ -535,7 +534,7 @@ static void raw_hook(struct gps_data_t *ud,
 
 /*@ -globstate @*/
 /*@null@*/ /*@observer@*/static struct gps_device_t *find_device(char *device_name)
-/* find the channel block for an existing device name */
+/* find the device block for an existing device name */
 {
     struct gps_device_t *devp;
 
@@ -613,9 +612,7 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
-static bool allocation_filter(struct gps_device_t *device,
-			      struct subscriber_t *user,
-			      gnss_type type)
+static bool allocation_filter(struct gps_device_t *device, gnss_type type)
 /* does specified device match the user's type criteria? */
 {
     /*
@@ -652,6 +649,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 				gnss_type type, struct gps_device_t *forcedev)
 {
 #define USER_INDEX (int)(user - subscribers)
+    struct channel_t *channel;
     bool was_unassigned = (USER_CHANNEL(user).device == NULL);
     /* if subscriber has no device... */
     if (was_unassigned) {
@@ -659,12 +657,12 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	int fix_quality = 0;
 	struct gps_device_t *device;
 
-	gpsd_report(LOG_PROG, "client(%d): assigning device...\n", USER_INDEX);
+	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
 	/* ...connect him to the most recently active device */
 	/*@ -mustfreeonly @*/
 	for(device = devices; device<devices+MAXDEVICES; device++)
 	    if (allocated_device(device)) {
-		if (allocation_filter(device, user, type)) {
+		if (allocation_filter(device, type)) {
 		    /*
 		     * Grab device if it's:
 		     * (1) The first we've seen,
@@ -686,28 +684,29 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	    }
 	/*@ +mustfreeonly @*/
     }
+    channel = &USER_CHANNEL(user);
 
-    if (USER_CHANNEL(user).device == NULL) {
-	gpsd_report(LOG_ERROR, "client(%d): device assignment failed.\n",
+    if (channel->device == NULL) {
+	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n",
 		    USER_INDEX);
 	return NULL;
     }
 
     /* and open that device */
-    if (USER_CHANNEL(user).device->gpsdata.gps_fd != -1)
+    if (channel->device->gpsdata.gps_fd != -1)
 	gpsd_report(LOG_PROG,"client(%d): device %d already active.\n",
-		    USER_INDEX, USER_CHANNEL(user).device->gpsdata.gps_fd);
+		    USER_INDEX, channel->device->gpsdata.gps_fd);
     else {
-	if (gpsd_activate(USER_CHANNEL(user).device, true) < 0) {
+	if (gpsd_activate(channel->device, true) < 0) {
 
 	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
 			USER_INDEX);
 	    return NULL;
 	} else {
 	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_device\n",
-			USER_CHANNEL(user).device->gpsdata.gps_fd);
-	    FD_SET(USER_CHANNEL(user).device->gpsdata.gps_fd, &all_fds);
-	    adjust_max_fd(USER_CHANNEL(user).device->gpsdata.gps_fd, true);
+			channel->device->gpsdata.gps_fd);
+	    FD_SET(channel->device->gpsdata.gps_fd, &all_fds);
+	    adjust_max_fd(channel->device->gpsdata.gps_fd, true);
 #ifdef OLDSTYLE_ENABLE
 	    /*
 	     * If user did an explicit F command tying him to a device, 
@@ -718,8 +717,8 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		/*@ -sefparams @*/
 		ignore_return(write(user->fd, "GPSD,F=", 7));
 		ignore_return(write(user->fd,
-			     USER_CHANNEL(user).device->gpsdata.gps_device,
-				    strlen(USER_CHANNEL(user).device->gpsdata.gps_device)));
+			     channel->device->gpsdata.gps_device,
+				    strlen(channel->device->gpsdata.gps_device)));
 		ignore_return(write(user->fd, "\r\n", 2));
 		/*@ +sefparams @*/
 	    }
@@ -730,13 +729,13 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     if (user->watcher != WATCH_NOTHING && was_unassigned) {
 	char buf[NMEA_MAX];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
-		       timestamp(), gpsd_id(USER_CHANNEL(user).device));
+		       timestamp(), gpsd_id(channel->device));
 	/*@ -sefparams +matchanyintegral @*/
 	ignore_return(write(user->fd, buf, strlen(buf)));
 	/*@ +sefparams -matchanyintegral @*/
 
     }
-    return &USER_CHANNEL(user);
+    return channel;
 #undef USER_INDEX
 }
 /*@ +branchstate +usedef +globstate @*/
