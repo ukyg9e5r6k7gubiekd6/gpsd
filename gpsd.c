@@ -358,7 +358,7 @@ struct gps_device_t devices[MAXDEVICES];
 struct channel_t channels[MAXSUBSCRIBERS];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
 
-// FIXME: all instances need to change for multidevice
+// FIXME: all instances need to change for multichannel operation
 #define USER_CHANNEL(sub)	channels[sub - subscribers]
 #define CHANNEL_USER(chp)	(subscribers + ((chp) - channels))
 
@@ -429,7 +429,7 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 static void detach_client(struct subscriber_t *sub)
 {
     char *c_ip;
-    struct channel_t *chp; 
+    struct channel_t *channel; 
     if (-1 == sub->fd)
 	return;
     c_ip = sock2ip(sub->fd);
@@ -444,12 +444,12 @@ static void detach_client(struct subscriber_t *sub)
 #endif /* OLDSTYLE_ENABLE */
     sub->watcher = WATCH_NOTHING;
     sub->active = 0;
-    for (chp = channels; chp < channels + sizeof(channels)/sizeof(channels[0]); chp++)
-	if (CHANNEL_USER(chp) == sub)
+    for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++)
+	if (CHANNEL_USER(channel) == sub)
 	{
-	    chp->raw = 0;
-	    /*@i1@*/chp->device = NULL;
-	    chp->buffer_policy = casoc;
+	    channel->raw = 0;
+	    /*@i1@*/channel->device = NULL;
+	    channel->buffer_policy = casoc;
 	}
     sub->fd = -1;
 }
@@ -496,7 +496,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
-    struct channel_t *chp;
+    struct channel_t *channel;
     va_list ap;
     char buf[BUFSIZ];
 
@@ -504,12 +504,12 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     (void)vsnprintf(buf, sizeof(buf), sentence, ap);
     va_end(ap);
 
-    for (chp = channels; 
-	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
-	 chp++)
+    for (channel = channels; 
+	 channel < channels + sizeof(channels)/sizeof(channels[0]); 
+	 channel++)
     {
-	struct subscriber_t *sub = CHANNEL_USER(chp);
-	if (chp->device == device && sub->watcher == WATCH_OLDSTYLE)
+	struct subscriber_t *sub = CHANNEL_USER(channel);
+	if (channel->device == device && sub->watcher == WATCH_OLDSTYLE)
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
     }
 }
@@ -518,13 +518,13 @@ static void raw_hook(struct gps_data_t *ud,
 		     char *sentence, size_t len, int level)
 /* hook to be executed on each incoming packet */
 {
-    struct channel_t *chp; 
+    struct channel_t *channel; 
 
-    for (chp = channels; chp < channels + sizeof(channels)/sizeof(channels[0]); chp++) {
+    for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (chp->raw == level && chp->device != NULL &&
-	    strcmp(ud->gps_device, chp->device->gpsdata.gps_device)==0)
-	    (void)throttled_write(CHANNEL_USER(chp), sentence, (ssize_t)len);
+	if (channel->raw == level && channel->device != NULL &&
+	    strcmp(ud->gps_device, channel->device->gpsdata.gps_device)==0)
+	    (void)throttled_write(CHANNEL_USER(channel), sentence, (ssize_t)len);
     }
 }
 
@@ -2004,11 +2004,11 @@ int main(int argc, char *argv[])
 
 #ifdef NOT_FIXED
 	if (context.fixcnt > 0 && context.dsock == -1) {
-	    for (channel=devices; channel < devices+MAXDEVICES; channel++) {
-		if (channel->gpsdata.fix.mode > MODE_NO_FIX) {
+	    for (device=devices; device < devices+MAXDEVICES; device++) {
+		if (device->gpsdata.fix.mode > MODE_NO_FIX) {
 		    netgnss_autoconnect(&context,
-				      channel->gpsdata.fix.latitude,
-				      channel->gpsdata.fix.longitude);
+				      device->gpsdata.fix.latitude,
+				      device->gpsdata.fix.longitude);
 		    break;
 		}
 	    }
@@ -2031,17 +2031,21 @@ int main(int argc, char *argv[])
 		    if (buf[buflen-1] != '\n')
 			buf[buflen++] = '\n';
 		    buf[buflen] = '\0';
-		    gpsd_report(LOG_IO, "<= client(%d): %s", sub_index(sub), buf);
+		    gpsd_report(LOG_IO, 
+				"<= client(%d): %s", sub_index(sub), buf);
 
-		    if (USER_CHANNEL(sub).device){
-			/*
-			 * when a command comes in, to update .active to
-			 * timestamp() so we don't close the connection
-			 * after POLLER_TIMEOUT seconds. This makes
-			 * POLLER_TIMEOUT useful.
-			 */
-			sub->active = USER_CHANNEL(sub).device->poll_times[sub_index(sub)] = timestamp();
-		    }
+		    /*
+		     * when a command comes in, to update .active to
+		     * timestamp() so we don't close the connection
+		     * after POLLER_TIMEOUT seconds. This makes
+		     * POLLER_TIMEOUT useful.
+		     */
+		    sub->active = timestamp();
+		    for (channel = channels; 
+			 channel < channels + sizeof(channels)/sizeof(channels[0]); 
+			 channel++)
+			if (channel->device && CHANNEL_USER(channel) == sub)
+			    channel->device->poll_times[sub_index(sub)] = sub->active;
 		    if (handle_gpsd_request(sub, buf, buflen) < 0)
 			detach_client(sub);
 		}
