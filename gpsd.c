@@ -753,17 +753,19 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 }
 
 #ifdef ALLOW_RECONFIGURE
-static bool privileged_user(struct subscriber_t *who)
-/* is this user privileged to change the GPS's behavior? */
+static bool privileged_channel(struct channel_t *channel)
+/* is this channel privileged to change a device's behavior? */
 {
-    struct subscriber_t *sub;
-    int subscribercount = 0;
+    struct channel_t *chp;
+    int channelcount = 0;
 
     /* grant user privilege if he's the only one listening to the device */
-    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (USER_CHANNEL(sub).device == USER_CHANNEL(who).device)
-	    subscribercount++;
-    return (subscribercount == 1);
+    for (chp = channels; 
+	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
+	 chp++)
+	if (chp->device == channel->device)
+	    channelcount++;
+    return (channelcount == 1);
 }
 #endif /* ALLOW_CONFIGURE */
 
@@ -878,7 +880,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 #ifdef ALLOW_RECONFIGURE
 	case 'B':		/* change baud rate */
 #ifndef FIXED_PORT_SPEED
-	    if ((channel=assign_channel(sub, ANY, NULL))!= NULL && channel->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
+	    if ((channel=assign_channel(sub, ANY, NULL))!= NULL && channel->device->device_type!=NULL && *p=='=' && privileged_channel(channel) && !context.readonly) {
 		speed_t speed;
 		unsigned int stopbits = channel->device->gpsdata.stopbits;
 		char parity = (char)channel->device->gpsdata.parity;
@@ -950,7 +952,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
 	    else {
 		const struct gps_type_t *dev = channel->device->device_type;
-		if (*p == '=' && privileged_user(sub)) {
+		if (*p == '=' && privileged_channel(channel)) {
 		    double cycle = strtod(++p, &p);
 		    if (dev->rate_switcher != NULL && cycle >= dev->min_cycle)
 			if (dev->rate_switcher(channel->device, cycle))
@@ -1097,7 +1099,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    else if (!channel->device->device_type->mode_switcher)
 		(void)strlcpy(phrase, ",N=0", BUFSIZ);
 #ifdef ALLOW_RECONFIGURE
-	    else if (privileged_user(sub) && !context.readonly) {
+	    else if (privileged_channel(channel) && !context.readonly) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
 		    channel->device->device_type->mode_switcher(channel->device, 1);
@@ -1435,7 +1437,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	struct channel_t *channel;
 	if (strncmp(buf, "?TPV", 4) == 0) {
 	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
-		json_tpv_dump(&USER_CHANNEL(sub).device->gpsdata,&USER_CHANNEL(sub).fixbuffer, 
+		json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 			      reply, sizeof(reply));
 	    } else {
 		(void)strlcpy(reply, 
@@ -1443,8 +1445,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    }
 	} else if (strncmp(buf, "?SKY", 4) == 0) {
 	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
-		json_sky_dump(&USER_CHANNEL(sub).device->gpsdata, 
-			      reply, sizeof(reply));
+		json_sky_dump(&channel->device->gpsdata, reply, sizeof(reply));
 	    } else {
 		(void)strlcpy(reply, 
 			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
