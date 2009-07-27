@@ -496,7 +496,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
-    struct subscriber_t *sub;
+    struct chanctl_t *chp;
     va_list ap;
     char buf[BUFSIZ];
 
@@ -504,9 +504,14 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     (void)vsnprintf(buf, sizeof(buf), sentence, ap);
     va_end(ap);
 
-    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (sub->watcher != WATCH_NOTHING && USER_CHANNEL(sub).device == device)
+    for (chp = channels; 
+	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
+	 chp++)
+    {
+	struct subscriber_t *sub = CHANNEL_USER(chp);
+	if (chp->device == device && sub->watcher == WATCH_OLDSTYLE)
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
+    }
 }
 
 static void raw_hook(struct gps_data_t *ud,
@@ -637,10 +642,10 @@ static bool allocation_filter(struct gps_device_t *channel,
 	return false;	/* BAD_PACKET case will fall through to here */
 }
 
-#define USER_INDEX (int)(user - subscribers)
 /*@ -branchstate -usedef -globstate @*/
 static bool assign_device(struct subscriber_t *user, gnss_type type)
 {
+#define USER_INDEX (int)(user - subscribers)
     bool was_unassigned = (USER_CHANNEL(user).device == NULL);
     /* if subscriber has no device... */
     if (was_unassigned) {
@@ -726,16 +731,9 @@ static bool assign_device(struct subscriber_t *user, gnss_type type)
 
     }
     return true;
+#undef USER_INDEX
 }
 /*@ +branchstate +usedef +globstate @*/
-
-#ifdef RTCM104_SERVICE
-static int handle_rtcm_request(struct subscriber_t* sub UNUSED, char *buf UNUSED, int buflen UNUSED)
-/* interpret a client request; cfd is the socket back to the client */
-{
-    return 0;	/* not actually interpreting these yet */
-}
-#endif /* RTCM104_SERVICE */
 
 /*@ observer @*/static char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
@@ -1445,7 +1443,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		(void)strlcpy(reply, 
 			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
 	    }
-	} else if (strncmp(buf, "?DEVCTL.DEVICES", 9) == 0) {
+	} else if (strncmp(buf, "?DEVICES", 9) == 0) {
 	    int i;
 	    (void)strlcpy(reply, 
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
@@ -1531,10 +1529,6 @@ int main(int argc, char *argv[])
     static int st, csock = -1;
     static gps_mask_t changed;
     static char *gpsd_service = NULL;
-#ifdef RTCM104_SERVICE
-    static char *rtcm_service = NULL;
-    static int nsock;
-#endif /* RTCM104_SERVICE */
     static char *control_socket = NULL;
     struct gps_device_t *channel;
     struct sockaddr_in fsin;
@@ -1542,9 +1536,6 @@ int main(int argc, char *argv[])
     int i, option, msock, cfd, dfd;
     bool go_background = true;
     struct timeval tv;
-#ifdef RTCM104_SERVICE
-    struct gps_device_t *gps;
-#endif /* RTCM104_SERVICE */
     struct subscriber_t *sub;
     struct chanctl_t *chp;
     const struct gps_type_t **dp;
@@ -1558,11 +1549,7 @@ int main(int argc, char *argv[])
 #endif
     debuglevel = 0;
     gpsd_hexdump_level = 0;
-    while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V"
-#ifdef RTCM104_SERVICE
-			    "R:"
-#endif /* RTCM104_SERVICE */
-		)) != -1) {
+    while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
@@ -1599,11 +1586,6 @@ int main(int argc, char *argv[])
 		(void)puts((*dp)->type_name);
 	    }
 	    exit(0);
-#ifdef RTCM104_SERVICE
-	case 'R':
-	    rtcm_service = optarg;
-	    break;
-#endif /* RTCM104_SERVICE */
 	case 'S':
 	    gpsd_service = optarg;
 	    break;
@@ -1675,17 +1657,6 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
-#ifdef RTCM104_SERVICE
-    /*@ -observertrans @*/
-    if (!rtcm_service)
-	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
-    /*@ +observertrans @*/
-    if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) == -1) {
-	gpsd_report(LOG_ERROR,"RTCM104 socket create failed, netlib error %d\n",nsock);
-	exit(2);
-    }
-    gpsd_report(LOG_INF, "listening on port %s\n", rtcm_service);
-#endif /* RTCM104_SERVICE */
 
 #ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
@@ -1760,10 +1731,6 @@ int main(int argc, char *argv[])
 
     FD_SET(msock, &all_fds);
     adjust_max_fd(msock, true);
-#ifdef RTCM104_SERVICE
-    FD_SET(nsock, &all_fds);
-    adjust_max_fd(nsock, true);
-#endif /* RTCM104_SERVICE */
     FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
@@ -1853,44 +1820,6 @@ int main(int argc, char *argv[])
 	    }
 	    FD_CLR(msock, &rfds);
 	}
-
-#ifdef RTCM104_SERVICE
-	/* also to RTCM client connections */
-	if (FD_ISSET(nsock, &rfds)) {
-	    char *c_ip;
-	    socklen_t alen = (socklen_t)sizeof(fsin);
-	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
-
-	    if (ssock == -1)
-		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
-	    else {
-		struct subscriber_t *client = NULL;
-		int opts = fcntl(ssock, F_GETFL);
-
-		if (opts >= 0)
-		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		c_ip = sock2ip(ssock);
-		client = allocate_client();
-		if (client == NULL) {
-		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
-			"no subscriber slots available\n", c_ip, ssock);
-		    close(ssock);
-		} else {
-		    FD_SET(ssock, &all_fds);
-		    adjust_max_fd(ssock, true);
-		    client->active = true;
-#ifdef OLDSTYLE_ENABLE
-		    client->tied = false;
-#endif /* OLDSTYLE_ENABLE */
-		    client->requires = RTCM104;
-		    client->fd = ssock;
-		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
-			c_ip, sub_index(client), ssock);
-		}
-	    }
-	    FD_CLR(nsock, &rfds);
-	}
-#endif /* RTCM104_SERVICE */
 
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
@@ -2024,8 +1953,11 @@ int main(int argc, char *argv[])
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
 			    }
-			} else
+			}
 #endif /* OLDSTYLE_ENABLE */
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+			else
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 #ifdef GPSDNG_ENABLE
 			{
 			    if ((sub->watcher & WATCH_TPV)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
@@ -2090,26 +2022,17 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(LOG_IO, "<= client(%d): %s", sub_index(sub), buf);
 
-#ifdef RTCM104_SERVICE
-		    if (sub->requires==RTCM104
-			|| sub->requires==ANY) {
-			if (handle_rtcm_request(sub, buf, buflen) < 0)
-			    detach_client(sub);
-		    } else
-#endif /* RTCM104_SERVICE */
-		    {
-			if (USER_CHANNEL(sub).device){
-			    /*
-			     * when a command comes in, to update .active to
-			     * timestamp() so we don't close the connection
-			     * after POLLER_TIMEOUT seconds. This makes
-			     * POLLER_TIMEOUT useful.
-			     */
-			    sub->active = USER_CHANNEL(sub).device->poll_times[sub_index(sub)] = timestamp();
-			}
-			if (handle_gpsd_request(sub, buf, buflen) < 0)
-			    detach_client(sub);
+		    if (USER_CHANNEL(sub).device){
+			/*
+			 * when a command comes in, to update .active to
+			 * timestamp() so we don't close the connection
+			 * after POLLER_TIMEOUT seconds. This makes
+			 * POLLER_TIMEOUT useful.
+			 */
+			sub->active = USER_CHANNEL(sub).device->poll_times[sub_index(sub)] = timestamp();
 		    }
+		    if (handle_gpsd_request(sub, buf, buflen) < 0)
+			detach_client(sub);
 		}
 	    } else if (USER_CHANNEL(sub).device == NULL && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
 		gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
