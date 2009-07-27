@@ -2054,12 +2054,22 @@ int main(int argc, char *argv[])
 		    if (handle_gpsd_request(sub, buf, buflen) < 0)
 			detach_client(sub);
 		}
-	    } else if (USER_CHANNEL(sub).device == NULL && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
-		gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
-		detach_client(sub);
-	    } else if (USER_CHANNEL(sub).device != NULL && !(sub->watcher || sub->raw>0) && timestamp() - sub->active > POLLER_TIMEOUT) {
-		gpsd_report(LOG_WARN, "client(%d) timed out on command wait.\n", cfd);
-		detach_client(sub);
+	    } else {
+		int devcount = 0;
+		/* count devices attached by this subscriber */
+		for (channel = channels; 
+		     channel < channels + sizeof(channels)/sizeof(channels[0]); 
+		     channel++)
+		    if (channel->device && CHANNEL_USER(channel) == sub)
+			devcount++;
+
+		if (devcount == 0 && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
+		    gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
+		    detach_client(sub);
+		} else if (devcount > 0 && !(sub->watcher || sub->raw>0) && timestamp() - sub->active > POLLER_TIMEOUT) {
+		    gpsd_report(LOG_WARN, "client(%d) timed out on command wait.\n", cfd);
+		    detach_client(sub);
+		}
 	    }
 	}
 
