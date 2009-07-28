@@ -649,8 +649,9 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 				gnss_type type, struct gps_device_t *forcedev)
 {
 #define USER_INDEX (int)(user - subscribers)
-    struct channel_t *channel;
-    bool was_unassigned = (USER_CHANNEL(user).device == NULL);
+    struct channel_t *channel = &USER_CHANNEL(user);
+    bool was_unassigned = (channel->device == NULL);
+
     /* if subscriber has no device... */
     if (was_unassigned) {
 	double most_recent = 0;
@@ -669,22 +670,21 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		     * (2) Has a better quality fix than we've seen yet,
 		     * (3) Fix of same quality we've seen but more recent.
 		     */
-		    if (USER_CHANNEL(user).device == NULL) {
-			USER_CHANNEL(user).device = devp;
+		    if (channel->device == NULL) {
+			channel->device = devp;
 			most_recent = devp->gpsdata.sentence_time;
 		    } else if (type == GPS && devp->gpsdata.status > fix_quality) {
-			USER_CHANNEL(user).device = devp;
+			channel->device = devp;
 			fix_quality = devp->gpsdata.status;
 		    } else if (type == GPS && devp->gpsdata.status == fix_quality && 
 			       devp->gpsdata.sentence_time >= most_recent) {
-			USER_CHANNEL(user).device = devp;
+			channel->device = devp;
 			most_recent = devp->gpsdata.sentence_time;
 		    }
 		}
 	    }
 	/*@ +mustfreeonly @*/
     }
-    channel = &USER_CHANNEL(user);
 
     if (channel->device == NULL) {
 	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n",
