@@ -333,6 +333,7 @@ struct channel_t {
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
+    struct subscriber_t *subscriber;	/* subscriber monitoring this */
     struct gps_device_t *device;	/* device subscriber listens to */
 };
 
@@ -356,10 +357,6 @@ struct subscriber_t {
 struct gps_device_t devices[MAXDEVICES];
 struct channel_t channels[MAXSUBSCRIBERS];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
-
-// FIXME: all instances need to change for multichannel operation
-#define USER_CHANNEL(sub)	channels[sub - subscribers]
-#define CHANNEL_USER(chp)	(subscribers + ((chp) - channels))
 
 static void adjust_max_fd(int fd, bool on)
 /* track the largest fd currently in use */
@@ -445,10 +442,11 @@ static void detach_client(struct subscriber_t *sub)
     sub->active = 0;
     sub->raw = 0;
     for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++)
-	if (CHANNEL_USER(channel) == sub)
+	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
 	    channel->buffer_policy = casoc;
+	    channel->subscriber = NULL;
 	}
     sub->fd = -1;
 }
@@ -507,8 +505,8 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 	 channel < channels + sizeof(channels)/sizeof(channels[0]); 
 	 channel++)
     {
-	struct subscriber_t *sub = CHANNEL_USER(channel);
-	if (channel->device == device && sub->watcher == WATCH_OLDSTYLE)
+	struct subscriber_t *sub = channel->subscriber;
+	if (channel->device == device && sub != NULL && sub->watcher == WATCH_OLDSTYLE)
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
     }
 }
@@ -523,10 +521,10 @@ static void raw_hook(struct gps_data_t *ud,
 	 channel < channels + sizeof(channels)/sizeof(channels[0]); 
 	 channel++) 
     {
-	struct subscriber_t *sub = CHANNEL_USER(channel);
+	struct subscriber_t *sub = channel->subscriber;
 
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (sub->raw == level && channel->device != NULL &&
+	if (sub != NULL && sub->raw == level && channel->device != NULL &&
 	    strcmp(ud->gps_device, channel->device->gpsdata.gps_device)==0)
 	    (void)throttled_write(sub, sentence, (ssize_t)len);
     }
@@ -649,8 +647,36 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 				gnss_type type, struct gps_device_t *forcedev)
 {
 #define USER_INDEX (int)(user - subscribers)
-    struct channel_t *channel = &USER_CHANNEL(user);
-    bool was_unassigned = (channel->device == NULL);
+    struct channel_t *chp, *channel;
+    bool was_unassigned;
+
+    /* search for an already-assigned device with matching type */
+    channel = NULL;
+    for (chp = channels; 
+	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
+	 chp++)
+	if (chp->subscriber == user 
+	    && chp->device != NULL 
+	    && chp->device->device_type != NULL 
+	    && chp->device->device_type->device_class == type)
+	    channel = chp;
+    /* if we didn't find one, allocate a new channel */
+    if (channel == NULL) {
+	gpsd_report(LOG_PROG,"client(%d): attempting channel allocation.\n",
+		    USER_INDEX);
+	for (chp = channels; 
+	     chp < channels + sizeof(channels)/sizeof(channels[0]); 
+	     chp++)
+	    if (chp->subscriber == NULL)
+		channel = chp;
+    }
+    if (channel == NULL) {
+	gpsd_report(LOG_ERROR, "client(%d): channel allocation failed.\n",
+		    USER_INDEX);
+	return NULL;
+    }
+
+    was_unassigned = (channel->device == NULL);
 
     /* if subscriber has no device... */
     if (was_unassigned) {
@@ -726,6 +752,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	}
     }
 
+#ifdef OLDSTYLE_ENABLE
     if (user->watcher != WATCH_NOTHING && was_unassigned) {
 	char buf[NMEA_MAX];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
@@ -733,8 +760,10 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	/*@ -sefparams +matchanyintegral @*/
 	ignore_return(write(user->fd, buf, strlen(buf)));
 	/*@ +sefparams -matchanyintegral @*/
-
     }
+#endif /* OLDSTYLE_ENABLE */
+
+    channel->subscriber = user;
     return channel;
 #undef USER_INDEX
 }
@@ -1944,9 +1973,9 @@ int main(int argc, char *argv[])
 	    for (channel = channels; 
 		 channel < channels + sizeof(channels)/sizeof(channels[0]); 
 		 channel++) {
-		struct subscriber_t *sub = CHANNEL_USER(channel);
+		struct subscriber_t *sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
-		if (sub->watcher != WATCH_NOTHING) {
+		if (sub != NULL && sub->watcher != WATCH_NOTHING) {
 		    char buf2[BUFSIZ];
 		    channel->device->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
@@ -2048,7 +2077,7 @@ int main(int argc, char *argv[])
 		    for (channel = channels; 
 			 channel < channels + sizeof(channels)/sizeof(channels[0]); 
 			 channel++)
-			if (channel->device && CHANNEL_USER(channel) == sub)
+			if (channel->device && channel->subscriber == sub)
 			    channel->device->poll_times[sub_index(sub)] = sub->active;
 		    if (handle_gpsd_request(sub, buf, buflen) < 0)
 			detach_client(sub);
@@ -2059,7 +2088,7 @@ int main(int argc, char *argv[])
 		for (channel = channels; 
 		     channel < channels + sizeof(channels)/sizeof(channels[0]); 
 		     channel++)
-		    if (channel->device && CHANNEL_USER(channel) == sub)
+		    if (channel->device && channel->subscriber == sub)
 			devcount++;
 
 		if (devcount == 0 && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
