@@ -655,14 +655,14 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     if (was_unassigned) {
 	double most_recent = 0;
 	int fix_quality = 0;
-	struct gps_device_t *device;
+	struct gps_device_t *devp;
 
 	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
 	/* ...connect him to the most recently active device */
 	/*@ -mustfreeonly @*/
-	for(device = devices; device<devices+MAXDEVICES; device++)
-	    if (allocated_device(device)) {
-		if (allocation_filter(device, type)) {
+	for(devp = devices; devp < devices + MAXDEVICES; devp++)
+	    if (allocated_device(devp)) {
+		if (allocation_filter(devp, type)) {
 		    /*
 		     * Grab device if it's:
 		     * (1) The first we've seen,
@@ -670,15 +670,15 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		     * (3) Fix of same quality we've seen but more recent.
 		     */
 		    if (USER_CHANNEL(user).device == NULL) {
-			USER_CHANNEL(user).device = device;
-			most_recent = device->gpsdata.sentence_time;
-		    } else if (type == GPS && device->gpsdata.status > fix_quality) {
-			USER_CHANNEL(user).device = device;
-			fix_quality = device->gpsdata.status;
-		    } else if (type == GPS && device->gpsdata.status == fix_quality && 
-			       device->gpsdata.sentence_time >= most_recent) {
-			USER_CHANNEL(user).device = device;
-			most_recent = device->gpsdata.sentence_time;
+			USER_CHANNEL(user).device = devp;
+			most_recent = devp->gpsdata.sentence_time;
+		    } else if (type == GPS && devp->gpsdata.status > fix_quality) {
+			USER_CHANNEL(user).device = devp;
+			fix_quality = devp->gpsdata.status;
+		    } else if (type == GPS && devp->gpsdata.status == fix_quality && 
+			       devp->gpsdata.sentence_time >= most_recent) {
+			USER_CHANNEL(user).device = devp;
+			most_recent = devp->gpsdata.sentence_time;
 		    }
 		}
 	    }
