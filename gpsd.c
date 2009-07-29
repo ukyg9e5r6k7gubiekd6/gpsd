@@ -139,6 +139,8 @@ struct gps_context_t context = {
 };
 /*@ +initallelements +nullassign +nullderef @*/
 
+#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
+
 static volatile sig_atomic_t signalled;
 
 static void onsig(int sig)
@@ -411,7 +413,7 @@ static bool have_fix(struct channel_t *channel)
 static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 {
     int cfd;
-    for (cfd = 0; cfd < sizeof(subscribers)/sizeof(subscribers[0]); cfd++) {
+    for (cfd = 0; cfd < NITEMS(subscribers); cfd++) {
 	if (subscribers[cfd].fd <= 0 ) {
 	    gps_clear_fix(&channels[cfd].fixbuffer);
 	    gps_clear_fix(&channels[cfd].oldfix);
@@ -441,7 +443,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->watcher = WATCH_NOTHING;
     sub->active = 0;
     sub->raw = 0;
-    for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++)
+    for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
@@ -501,9 +503,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     (void)vsnprintf(buf, sizeof(buf), sentence, ap);
     va_end(ap);
 
-    for (channel = channels; 
-	 channel < channels + sizeof(channels)/sizeof(channels[0]); 
-	 channel++)
+    for (channel = channels; channel < channels + NITEMS(channels); channel++)
     {
 	struct subscriber_t *sub = channel->subscriber;
 	if (channel->device == device && sub != NULL && sub->watcher == WATCH_OLDSTYLE)
@@ -517,9 +517,7 @@ static void raw_hook(struct gps_data_t *ud,
 {
     struct channel_t *channel; 
 
-    for (channel = channels; 
-	 channel < channels + sizeof(channels)/sizeof(channels[0]); 
-	 channel++) 
+    for (channel = channels; channel < channels + NITEMS(channels); channel++) 
     {
 	struct subscriber_t *sub = channel->subscriber;
 
@@ -644,9 +642,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
     /* search for an already-assigned device with matching type */
     channel = NULL;
-    for (chp = channels; 
-	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
-	 chp++)
+    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if ((forcedev != NULL && chp->device == forcedev)
 	    ||
 	    (chp->subscriber == user 
@@ -657,9 +653,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     if (channel == NULL) {
 	gpsd_report(LOG_PROG,"client(%d): attempting channel allocation.\n",
 		    USER_INDEX);
-	for (chp = channels; 
-	     chp < channels + sizeof(channels)/sizeof(channels[0]); 
-	     chp++)
+	for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	    if (chp->subscriber == NULL)
 		channel = chp;
     }
@@ -770,9 +764,7 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 {
     struct channel_t *chp;
 
-    for (chp = channels; 
-	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
-	 chp++)
+    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if (chp->subscriber == user 
 	    && chp->device 
 	    && chp->device->device_type->device_class == type) {
@@ -780,7 +772,6 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 	    chp->buffer_policy = casoc;
 	    chp->subscriber = NULL;
 	}
-	    
 }
 #endif /* GPSDNG_ENABLE */
 
@@ -808,9 +799,7 @@ static bool privileged_channel(struct channel_t *channel)
     int channelcount = 0;
 
     /* grant user privilege if he's the only one listening to the device */
-    for (chp = channels; 
-	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
-	 chp++)
+    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if (chp->device == channel->device)
 	    channelcount++;
     return (channelcount == 1);
@@ -834,7 +823,7 @@ static void handle_control(int sfd, char *buf)
 		adjust_max_fd(devp->gpsdata.gps_fd, false);
 	    }
 	    notify_watchers(devp, "GPSD,X=0\r\n");
-	    for (cfd = 0; cfd < sizeof(channels)/sizeof(channels[0]); cfd++)
+	    for (cfd = 0; cfd < NITEMS(channels); cfd++)
 		if (channels[cfd].device == devp)
 		    channels[cfd].device = NULL;
 	    gpsd_wrap(devp);
@@ -1578,7 +1567,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				   json_error_string(status));
 		    goto skipdisplay;
 		} else {
-		    for (i = 0; i < sizeof(typemap)/sizeof(typemap[0]); i++) {
+		    for (i = 0; i < NITEMS(typemap); i++) {
 			if (typemap[i].flag == true) {
 			    if (assign_channel(sub, typemap[i].class, NULL) != NULL)
 				sub->watcher |= typemap[i].mask;
@@ -1590,7 +1579,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		}
 	    }
 	    (void)strlcpy(reply, "{\"class\":\"WATCH\"", sizeof(reply));
-	    for (i = 0; i < sizeof(typemap)/sizeof(typemap[0]); i++)
+	    for (i = 0; i < NITEMS(typemap); i++)
 		(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
 			       "\"%s\":%s,",
 			       watch_attrs[i].attribute,
@@ -1795,7 +1784,7 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
 
-    for (channel = channels; channel < channels + sizeof(channels)/sizeof(channels[0]); channel++) {
+    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
 	gps_clear_fix(&channel->fixbuffer);
 	gps_clear_fix(&channel->oldfix);
     }
@@ -1991,7 +1980,7 @@ int main(int argc, char *argv[])
 		    }
 		    /* copy/merge device data into subscriber fix buffers */
 		    for (channel = channels;
-			 channel < channels + sizeof(channels)/sizeof(channels[0]);
+			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
 			    if (channel->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
@@ -2019,9 +2008,7 @@ int main(int argc, char *argv[])
 	    }
 
 	    /* watch all channels */
-	    for (channel = channels; 
-		 channel < channels + sizeof(channels)/sizeof(channels[0]); 
-		 channel++) {
+	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
 		struct subscriber_t *sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
 		if (sub != NULL && sub->watcher != WATCH_NOTHING) {
@@ -2127,9 +2114,7 @@ int main(int argc, char *argv[])
 		     * POLLER_TIMEOUT useful.
 		     */
 		    sub->active = timestamp();
-		    for (channel = channels; 
-			 channel < channels + sizeof(channels)/sizeof(channels[0]); 
-			 channel++)
+		    for (channel = channels; channel < channels + NITEMS(channels); channel++)
 			if (channel->device && channel->subscriber == sub)
 			    channel->device->poll_times[sub_index(sub)] = sub->active;
 		    if (handle_gpsd_request(sub, buf, buflen) < 0)
@@ -2138,9 +2123,7 @@ int main(int argc, char *argv[])
 	    } else {
 		int devcount = 0;
 		/* count devices attached by this subscriber */
-		for (channel = channels; 
-		     channel < channels + sizeof(channels)/sizeof(channels[0]); 
-		     channel++)
+		for (channel = channels; channel < channels + NITEMS(channels); channel++)
 		    if (channel->device && channel->subscriber == sub)
 			devcount++;
 
@@ -2169,7 +2152,7 @@ int main(int argc, char *argv[])
 		    if (device->packet.type != BAD_PACKET) {
 			bool device_needed = false;
 
-			for (cfd = 0; cfd < sizeof(channels)/sizeof(channels[0]); cfd++)
+			for (cfd = 0; cfd < NITEMS(channels); cfd++)
 			    if (channels[cfd].device == device)
 				device_needed = true;
 
