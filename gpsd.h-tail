@@ -365,31 +365,6 @@ struct gps_device_t {
 #define LOG_RAW 	5	/* raw low-level I/O */
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
-/*
- * This hackery is intended to support SBCs that are resource-limited
- * and only need to support one or a few devices each.  It avoids the
- * space overhead of allocating thousands of unused device structures.
- * This array fills from the bottom, so as an extreme case you could
- * reduce LIMITED_MAX_DEVICES to 1.
- */
-#ifdef LIMITED_MAX_DEVICES
-#define MAXDEVICES	LIMITED_MAX_DEVICES
-#else
-/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
-#define MAXDEVICES	4
-#endif
-
-#ifdef LIMITED_MAX_CLIENTS
-#define MAXSUBSCRIBERS LIMITED_MAX_CLIENTS
-#else
-/* subscriber structure is small enough that there's no need to limit this */
-#define MAXSUBSCRIBERS	FD_SETSIZE
-#endif
-#define sub_index(s) (int)(s - subscribers)
-#define allocated_device(chp)	 ((chp)->gpsdata.gps_device[0] != '\0')
-#define free_device(chp)	 (chp)->gpsdata.gps_device[0] = '\0'
-#define initialized_device(chp) ((chp)->context != NULL)
-
 
 /* here are the available GPS drivers */
 extern const struct gps_type_t **gpsd_drivers;

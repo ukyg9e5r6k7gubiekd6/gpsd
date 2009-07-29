@@ -356,6 +356,31 @@ struct subscriber_t {
     int raw;				/* is client in raw mode? */
 };
 
+/*
+ * This hackery is intended to support SBCs that are resource-limited
+ * and only need to support one or a few devices each.  It avoids the
+ * space overhead of allocating thousands of unused device structures.
+ * This array fills from the bottom, so as an extreme case you could
+ * reduce LIMITED_MAX_DEVICES to 1.
+ */
+#ifdef LIMITED_MAX_DEVICES
+#define MAXDEVICES	LIMITED_MAX_DEVICES
+#else
+/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
+#define MAXDEVICES	4
+#endif
+
+#ifdef LIMITED_MAX_CLIENTS
+#define MAXSUBSCRIBERS LIMITED_MAX_CLIENTS
+#else
+/* subscriber structure is small enough that there's no need to limit this */
+#define MAXSUBSCRIBERS	FD_SETSIZE
+#endif
+#define sub_index(s) (int)(s - subscribers)
+#define allocated_device(devp)	 ((devp)->gpsdata.gps_device[0] != '\0')
+#define free_device(devp)	 (devp)->gpsdata.gps_device[0] = '\0'
+#define initialized_device(devp) ((devp)->context != NULL)
+
 struct gps_device_t devices[MAXDEVICES];
 struct channel_t channels[MAXSUBSCRIBERS];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
@@ -636,7 +661,6 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
 static struct channel_t *assign_channel(struct subscriber_t *user, 
 				gnss_type type, struct gps_device_t *forcedev)
 {
-#define USER_INDEX (int)(user - subscribers)
     struct channel_t *chp, *channel;
     bool was_unassigned;
 
@@ -652,14 +676,14 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     /* if we didn't find one, allocate a new channel */
     if (channel == NULL) {
 	gpsd_report(LOG_PROG,"client(%d): attempting channel allocation.\n",
-		    USER_INDEX);
+		    sub_index(user));
 	for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	    if (chp->subscriber == NULL)
 		channel = chp;
     }
     if (channel == NULL) {
 	gpsd_report(LOG_ERROR, "client(%d): channel allocation failed.\n",
-		    USER_INDEX);
+		    sub_index(user));
 	return NULL;
     }
 
@@ -674,7 +698,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	    int fix_quality = 0;
 	    struct gps_device_t *devp;
 
-	    gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
+	    gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", sub_index(user));
 	    /*@ -mustfreeonly @*/
 	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 		if (allocated_device(devp)) {
@@ -704,19 +728,19 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
     if (channel->device == NULL) {
 	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n",
-		    USER_INDEX);
+		    sub_index(user));
 	return NULL;
     }
 
     /* and open that device */
     if (channel->device->gpsdata.gps_fd != -1)
 	gpsd_report(LOG_PROG,"client(%d): device %d already active.\n",
-		    USER_INDEX, channel->device->gpsdata.gps_fd);
+		    sub_index(user), channel->device->gpsdata.gps_fd);
     else {
 	if (gpsd_activate(channel->device, true) < 0) {
 
 	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
-			USER_INDEX);
+			sub_index(user));
 	    return NULL;
 	} else {
 	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_device\n",
@@ -755,7 +779,6 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
     channel->subscriber = user;
     return channel;
-#undef USER_INDEX
 }
 /*@ +branchstate +usedef +globstate @*/
 
@@ -768,6 +791,8 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 	if (chp->subscriber == user 
 	    && chp->device 
 	    && chp->device->device_type->device_class == type) {
+	    gpsd_report(LOG_PROG, "client(%d): detaching channel %d\n",
+			sub_index(user), (int)(chp-channels));
 	    /*@i1@*/chp->device = NULL;
 	    chp->buffer_policy = casoc;
 	    chp->subscriber = NULL;
@@ -1578,7 +1603,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    }
 		}
 	    }
-	    (void)strlcpy(reply, "{\"class\":\"WATCH\"", sizeof(reply));
+	    (void)strlcpy(reply, "{\"class\":\"WATCH\",", sizeof(reply));
 	    for (i = 0; i < NITEMS(typemap); i++)
 		(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
 			       "\"%s\":%s,",
