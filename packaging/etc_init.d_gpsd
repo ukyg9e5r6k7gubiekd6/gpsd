@@ -1,11 +1,13 @@
 #!/bin/sh
 #
-#	Author: Tilman Koschnick <til@subnetz.org>.
+#	Authors: Tilman Koschnick <til@subnetz.org>
+#                Bernd Zeimetz <bzed@debian.org>
 #
 
 ### BEGIN INIT INFO
 # Provides:          gpsd
-# Required-Start:    $syslog $network
+# Required-Start:    $syslog $network dbus
+# Should-Start:      bluetooth
 # Required-Stop:     $syslog $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
@@ -63,9 +65,12 @@ case "$1" in
 	set +e; $SELF stop; set -e
 		$SELF start
 	;;
+  status)
+	status_of_proc $DAEMON gpsd
+	;;
   *)
 	N=/etc/init.d/gpsd
-	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
 	exit 1
 	;;
 esac
