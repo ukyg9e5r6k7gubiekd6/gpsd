@@ -106,7 +106,6 @@ for (switch, val) in options:
     elif (switch == '-h'):
         sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
         raise SystemExit,0
-logfile = arguments[0]
 
 def hexdump(s):
     rep = ""
@@ -124,7 +123,7 @@ def fakehook(linenumber, fakegps):
         if progress:
             baton.twirl('*\010')
         elif not singleshot:
-            sys.stderr.write("gpsfake: log cycle begins.\n")
+            sys.stderr.write("gpsfake: log cycle of %s begins.\n" % fakegps.name)
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
         ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
@@ -140,9 +139,9 @@ def fakehook(linenumber, fakegps):
     return True
 
 if progress:
-    baton = Baton("Processing %s" % logfile, "done")
+    baton = Baton("Processing %s" % ",".join(arguments), "done")
 else:
-    print >>sys.stderr, "Processing %s" % logfile
+    print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
 test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
 
@@ -153,23 +152,24 @@ if pipe:
         test.progress = sys.stdout.write
 
 try:
-    try:
-        test.gps_add(logfile, speed=speed, pred=fakehook)
-    except gpsfake.TestLoadError, e:
-        sys.stderr.write("gpsfake: " + e.msg + "\n")
-        raise SystemExit, 1
-    except gpsfake.PacketError, e:
-        sys.stderr.write("gpsfake: " + e.msg + "\n")
-        raise SystemExit, 1
-    except gpsfake.DaemonError, e:
-        sys.stderr.write("gpsfake: " + e.msg + "\n")
-        raise SystemExit, 1
-    except IOError, e:
-        sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
-        raise SystemExit, 1
-    except OSError:
-        sys.stderr.write("gpsfake: can't open pty.\n")
-        raise SystemExit, 1
+    for logfile in arguments:
+        try:
+            test.gps_add(logfile, speed=speed, pred=fakehook)
+        except gpsfake.TestLoadError, e:
+            sys.stderr.write("gpsfake: " + e.msg + "\n")
+            raise SystemExit, 1
+        except gpsfake.PacketError, e:
+            sys.stderr.write("gpsfake: " + e.msg + "\n")
+            raise SystemExit, 1
+        except gpsfake.DaemonError, e:
+            sys.stderr.write("gpsfake: " + e.msg + "\n")
+            raise SystemExit, 1
+        except IOError, e:
+            sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
+            raise SystemExit, 1
+        except OSError:
+            sys.stderr.write("gpsfake: can't open pty.\n")
+            raise SystemExit, 1
 
     try:
         test.client_add(init + "\n")
