@@ -86,9 +86,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     /* detect and process a JSON response */
     if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
 	if (strstr(buf, "\"class\":\"TPV\"") == 0) {
-	    json_tpv_read(buf+5, gpsdata);
+	    json_tpv_read(buf, gpsdata);
 	} else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
-	    json_sky_read(buf+5, gpsdata);
+	    json_sky_read(buf, gpsdata);
 	} 
     } else
 #endif /* GPSDNG_ENABLE */
