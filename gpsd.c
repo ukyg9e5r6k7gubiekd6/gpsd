@@ -680,36 +680,39 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
     /* if subscriber has no device... */
     if (was_unassigned) {
-	double most_recent = 0;
-	int fix_quality = 0;
-	struct gps_device_t *devp;
+	if (forcedev != NULL ) {
+	    channel->device = forcedev;
+	} else {
+	    double most_recent = 0;
+	    int fix_quality = 0;
+	    struct gps_device_t *devp;
 
-	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
-	/* ...connect him to the most recently active device */
-	/*@ -mustfreeonly @*/
-	for(devp = devices; devp < devices + MAXDEVICES; devp++)
-	    if (allocated_device(devp)) {
-		if (allocation_filter(devp, type)) {
-		    /*
-		     * Grab device if it's:
-		     * (1) The first we've seen,
-		     * (2) Has a better quality fix than we've seen yet,
-		     * (3) Fix of same quality we've seen but more recent.
-		     */
-		    if (channel->device == NULL) {
-			channel->device = devp;
-			most_recent = devp->gpsdata.sentence_time;
-		    } else if (type == GPS && devp->gpsdata.status > fix_quality) {
-			channel->device = devp;
-			fix_quality = devp->gpsdata.status;
-		    } else if (type == GPS && devp->gpsdata.status == fix_quality && 
-			       devp->gpsdata.sentence_time >= most_recent) {
-			channel->device = devp;
-			most_recent = devp->gpsdata.sentence_time;
+	    gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
+	    /*@ -mustfreeonly @*/
+	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
+		if (allocated_device(devp)) {
+		    if (allocation_filter(devp, type)) {
+			/*
+			 * Grab device if it's:
+			 * (1) The first we've seen,
+			 * (2) Has a better quality fix than we've seen yet,
+			 * (3) Fix of same quality we've seen but more recent.
+			 */
+			if (channel->device == NULL) {
+			    channel->device = devp;
+			    most_recent = devp->gpsdata.sentence_time;
+			} else if (type == GPS && devp->gpsdata.status > fix_quality) {
+			    channel->device = devp;
+			    fix_quality = devp->gpsdata.status;
+			} else if (type == GPS && devp->gpsdata.status == fix_quality && 
+				   devp->gpsdata.sentence_time >= most_recent) {
+			    channel->device = devp;
+			    most_recent = devp->gpsdata.sentence_time;
+			}
 		    }
 		}
-	    }
-	/*@ +mustfreeonly @*/
+	    /*@ +mustfreeonly @*/
+	}
     }
 
     if (channel->device == NULL) {
