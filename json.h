@@ -6,6 +6,8 @@
 
 typedef enum {integer, real, string, boolean, object, array} json_type;
 
+#define nullbool	-1	/* not true, not false */
+
 struct json_array_t { 
     json_type element_type;
     union {

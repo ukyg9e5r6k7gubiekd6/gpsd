@@ -62,7 +62,9 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    cursor->addr.string.ptr[offset] = '\0';
 	    break;
 	case boolean:
-	    cursor->addr.boolean[offset] = cursor->dflt.boolean;
+	    /* nullbool default says not to set the value at all */
+	    if (cursor->dflt.boolean != nullbool)
+		cursor->addr.boolean[offset] = cursor->dflt.boolean;
 	    break;
 	case object:	/* silences a compiler warning */
 	case array:

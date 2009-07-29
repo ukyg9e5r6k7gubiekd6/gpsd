@@ -765,6 +765,25 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 }
 /*@ +branchstate +usedef +globstate @*/
 
+#ifdef GPSDNG_ENABLE
+static void deassign_channel(struct subscriber_t *user, gnss_type type)
+{
+    struct channel_t *chp;
+
+    for (chp = channels; 
+	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
+	 chp++)
+	if (chp->subscriber == user 
+	    && chp->device 
+	    && chp->device->device_type->device_class == type) {
+	    /*@i1@*/chp->device = NULL;
+	    chp->buffer_policy = casoc;
+	    chp->subscriber = NULL;
+	}
+	    
+}
+#endif /* GPSDNG_ENABLE */
+
 /*@ observer @*/static char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
 {
@@ -1507,43 +1526,73 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "]}", sizeof(reply));
 	} else if (strncmp(buf, "?WATCH", 6) == 0) {
+	    struct typemap_t {
+		int mask;
+		gnss_type class;
+		bool flag;
+	    };
+	    /*
+	     * To add new device types to be eligible for watching,
+	     * add a matching pair of lines to the initializers below.
+	     */
+	    static struct typemap_t typemap[] = {
+		{WATCH_TPV,   GPS},
+		{WATCH_SKY,   GPS},
+		{WATCH_RTCM2, RTCM2},
+		{WATCH_RTCM3, RTCM3},
+		{WATCH_AIS,   AIS},
+	    };
+	    const struct json_attr_t watch_attrs[] = {
+		{"TPV",  
+		 boolean,
+		 .addr.boolean=&typemap[0].flag,  
+		 .dflt.boolean=nullbool},
+		{"SKY",  
+		 boolean,
+		 .addr.boolean=&typemap[1].flag,  
+		 .dflt.boolean=nullbool},
+		{"RTCM2",
+		 boolean,
+		 .addr.boolean=&typemap[2].flag,
+		 .dflt.boolean=nullbool},
+		{"RTCM3",
+		 boolean,
+		 .addr.boolean=&typemap[3].flag,
+		 .dflt.boolean=nullbool},
+		{NULL},
+	    };
+	    /*
+	     * You should not have to modify stuff past this line.
+	     */
+	    int i;
 	    if (buf[6] == '=') {
 		int status;
-		bool tpv, sky, rtcm2, rtcm3;
-		const struct json_attr_t watch_attrs[] = {
-		    {"TPV",  boolean,.addr.boolean=&tpv,  .dflt.boolean=false},
-		    {"SKY",  boolean,.addr.boolean=&sky,  .dflt.boolean=false},
-		    {"RTCM2",boolean,.addr.boolean=&rtcm2,.dflt.boolean=false},
-		    {"RTCM3",boolean,.addr.boolean=&rtcm3,.dflt.boolean=false},
-		    {NULL},
-		};
 		status = json_read_object(buf+7, watch_attrs, 0, NULL);
 		if (status != 0) {
 		    (void)snprintf(reply, sizeof(reply),
 				   "{\"class\":ERR\",\"msg\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
-		    /* fall through to status display */
+		    goto skipdisplay;
 		} else {
-		    sub->watcher = 0;
-		    if (tpv)
-			sub->watcher |= WATCH_TPV;
-		    if (sky)
-			sub->watcher |= WATCH_SKY;
-		    if (rtcm2)
-			sub->watcher |= WATCH_RTCM2;
-		    if (rtcm3)
-			sub->watcher |= WATCH_RTCM3;
+		    for (i = 0; i < sizeof(typemap)/sizeof(typemap[0]); i++) {
+			if (typemap[i].flag == true) {
+			    if (assign_channel(sub, typemap[i].class, NULL) != NULL)
+				sub->watcher |= typemap[i].mask;
+			} else if (typemap[i].flag == false) {
+			    deassign_channel(sub, typemap[i].class);
+			    sub->watcher &=~ typemap[i].mask;
+			}
+		    }
 		}
-		// FIXME: Actual channel-allocation machinery goes here
 	    }
-#define BOOL(var, mask)	((var & mask)!=0 ? "true" : "false")
-	    (void)snprintf(reply, sizeof(reply),
-			  "{\"class\":\"WATCH\",\"TPV\":%s,\"SKY\":%s,\"RTCM2\":%s,\"RTCM3\":%s,}",
-			  BOOL(sub->watcher, WATCH_TPV),
-			  BOOL(sub->watcher, WATCH_SKY),
-			  BOOL(sub->watcher, WATCH_RTCM2),
-			  BOOL(sub->watcher, WATCH_RTCM3));
-#undef BOOL
+	    (void)strlcpy(reply, "{\"class\":\"WATCH\"", sizeof(reply));
+	    for (i = 0; i < sizeof(typemap)/sizeof(typemap[0]); i++)
+		(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
+			       "\"%s\":%s,",
+			       watch_attrs[i].attribute,
+			       (sub->watcher & typemap[i].mask)!=0 ? "true" : "false");
+	    (void)strlcat(reply, "}", sizeof(reply));
+	skipdisplay:;
 	} else
 	    (void)strlcpy(reply, 
 			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}",
@@ -2003,17 +2052,20 @@ int main(int argc, char *argv[])
 			    if ((sub->watcher & WATCH_TPV)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
 				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
+				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 			    if ((sub->watcher & WATCH_SKY)!=0 && (changed & SATELLITE_SET)!=0) {
 				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
+				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
 			    if ((sub->watcher & WATCH_AIS)!=0 && (changed & AIS_SET)!=0) {
 				aivdm_dump(&channel->device->driver.aivdm.decoded, 
 					   false, true, buf2, sizeof(buf2));
+				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
 			    }
