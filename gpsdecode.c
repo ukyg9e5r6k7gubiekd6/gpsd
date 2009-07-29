@@ -68,6 +68,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm)){
 		aivdm_dump(&aivdm.decoded, scaled, json, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
+		(void)fputs("\n", fpout);
 	    }
 	    
 	    /*@ +uniondef */

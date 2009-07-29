@@ -1559,6 +1559,10 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		 boolean,
 		 .addr.boolean=&typemap[3].flag,
 		 .dflt.boolean=nullbool},
+		{"AIS",
+		 boolean,
+		 .addr.boolean=&typemap[4].flag,
+		 .dflt.boolean=nullbool},
 		{NULL},
 	    };
 	    /*
@@ -1570,7 +1574,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		status = json_read_object(buf+7, watch_attrs, 0, NULL);
 		if (status != 0) {
 		    (void)snprintf(reply, sizeof(reply),
-				   "{\"class\":ERR\",\"msg\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
+				   "{\"class\":ERR\",\"msg\":\"Invalid WATCH.\",\"error\":\"%s\"}",
 				   json_error_string(status));
 		    goto skipdisplay;
 		} else {
@@ -2039,6 +2043,7 @@ int main(int argc, char *argv[])
 			    if ((changed & AIS_SET) != 0) {
 				aivdm_dump(&channel->device->driver.aivdm.decoded, 
 					   false, false, buf2, sizeof(buf2));
+				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
 			    }
