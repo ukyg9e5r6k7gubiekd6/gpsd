@@ -1549,34 +1549,19 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	     * To add new device types to be eligible for watching,
 	     * add a matching pair of lines to the initializers below.
 	     */
-	    static struct typemap_t typemap[] = {
-		{WATCH_TPV,   GPS},
-		{WATCH_SKY,   GPS},
-		{WATCH_RTCM2, RTCM2},
-		{WATCH_RTCM3, RTCM3},
-		{WATCH_AIS,   AIS},
+	    struct typemap_t typemap[] = {
+		{WATCH_TPV,   GPS,   false},
+		{WATCH_SKY,   GPS,   false},
+		{WATCH_RTCM2, RTCM2, false},
+		{WATCH_RTCM3, RTCM3, false},
+		{WATCH_AIS,   AIS,   false},
 	    };
-	    const struct json_attr_t watch_attrs[] = {
-		{"TPV",  
-		 boolean,
-		 .addr.boolean=&typemap[0].flag,  
-		 .dflt.boolean=nullbool},
-		{"SKY",  
-		 boolean,
-		 .addr.boolean=&typemap[1].flag,  
-		 .dflt.boolean=nullbool},
-		{"RTCM2",
-		 boolean,
-		 .addr.boolean=&typemap[2].flag,
-		 .dflt.boolean=nullbool},
-		{"RTCM3",
-		 boolean,
-		 .addr.boolean=&typemap[3].flag,
-		 .dflt.boolean=nullbool},
-		{"AIS",
-		 boolean,
-		 .addr.boolean=&typemap[4].flag,
-		 .dflt.boolean=nullbool},
+	    struct json_attr_t watch_attrs[] = {
+		{"TPV",   boolean, .addr.boolean=&typemap[0].flag},  
+		{"SKY",   boolean, .addr.boolean=&typemap[1].flag},  
+		{"RTCM2", boolean, .addr.boolean=&typemap[2].flag},
+		{"RTCM3", boolean, .addr.boolean=&typemap[3].flag},
+		{"AIS",   boolean, .addr.boolean=&typemap[4].flag},
 		{NULL},
 	    };
 	    /*
@@ -1585,6 +1570,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    int i;
 	    if (buf[6] == '=') {
 		int status;
+		for (i = 0; i < NITEMS(typemap); i++)
+		    watch_attrs[i].dflt.boolean = (sub->watcher & typemap[i].mask)!=0;
 		status = json_read_object(buf+7, watch_attrs, 0, NULL);
 		if (status != 0) {
 		    (void)snprintf(reply, sizeof(reply),
@@ -1592,6 +1579,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				   json_error_string(status));
 		    goto skipdisplay;
 		} else {
+		    gpsd_report(LOG_PROG, 
+				"client(%d): before, watch mask is 0x%0x.\n",
+				sub_index(sub), sub->watcher);
 		    for (i = 0; i < NITEMS(typemap); i++) {
 			if (typemap[i].flag == true) {
 			    if (assign_channel(sub, typemap[i].class, NULL) != NULL)
@@ -1601,6 +1591,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			    sub->watcher &=~ typemap[i].mask;
 			}
 		    }
+		    gpsd_report(LOG_PROG, 
+				"client(%d): after, watch mask is 0x%0x.\n",
+				sub_index(sub), sub->watcher);
 		}
 	    }
 	    (void)strlcpy(reply, "{\"class\":\"WATCH\",", sizeof(reply));
@@ -1609,6 +1602,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			       "\"%s\":%s,",
 			       watch_attrs[i].attribute,
 			       (sub->watcher & typemap[i].mask)!=0 ? "true" : "false");
+	    reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "}", sizeof(reply));
 	skipdisplay:;
 	} else
