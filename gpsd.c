@@ -630,16 +630,8 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     /* we might have type constraints */
     if (type == ANY)
 	return true;
-    else if (type== RTCM2 && (device->device_type->device_class==RTCM2))
-	return true;
-    else if (type==RTCM3 && (device->device_type->device_class==RTCM3))
-	return true;
-    else if (type== AIS && (device->device_type->device_class==AIS))
-	return true;
-    else if (type == GPS && (device->device_type->device_class==GPS))
-	return true;
     else
-	return false;	/* BAD_PACKET case will fall through to here */
+	return device->device_type->device_class == type;
 }
 
 /*@ -branchstate -usedef -globstate @*/
@@ -655,10 +647,11 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     for (chp = channels; 
 	 chp < channels + sizeof(channels)/sizeof(channels[0]); 
 	 chp++)
-	if (chp->subscriber == user 
-	    && chp->device != NULL 
-	    && chp->device->device_type != NULL 
-	    && chp->device->device_type->device_class == type)
+	if ((forcedev != NULL && chp->device == forcedev)
+	    ||
+	    (chp->subscriber == user 
+	     && chp->device != NULL 
+	     && allocation_filter(chp->device, type)))
 	    channel = chp;
     /* if we didn't find one, allocate a new channel */
     if (channel == NULL) {
