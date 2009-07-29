@@ -82,29 +82,29 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     char *ns, *sp, *tp;
     int i;
 
-    /*
-     * Get the decimal separator for the current application locale.
-     * This looks thread-unsafe, but it's not.  The key is that
-     * character assignment is atomic.
-     */
-    static char decimal_point = '\0';
-    if (decimal_point == '\0') {
-	struct lconv *locale_data = localeconv();
-	if (locale_data != NULL && locale_data->decimal_point[0] != '.')
-	    decimal_point = locale_data->decimal_point[0];
-    }
-
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
-    if (buf[0] == '!' && (sp = strchr(buf, '='))!=NULL && sp[1] == '{') {
-	if (strncmp(buf, "!TPV=", 5) == 0) {
+    if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
+	if (strstr(buf, "\"class\":\"TPV\"") == 0) {
 	    json_tpv_read(buf+5, gpsdata);
-	} else if (strncmp(buf, "!SKY=", 5) == 0) {
+	} else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
 	    json_sky_read(buf+5, gpsdata);
 	} 
     } else
 #endif /* GPSDNG_ENABLE */
     {
+	/*
+	 * Get the decimal separator for the current application locale.
+	 * This looks thread-unsafe, but it's not.  The key is that
+	 * character assignment is atomic.
+	 */
+	static char decimal_point = '\0';
+	if (decimal_point == '\0') {
+	    struct lconv *locale_data = localeconv();
+	    if (locale_data != NULL && locale_data->decimal_point[0] != '.')
+		decimal_point = locale_data->decimal_point[0];
+	}
+
 	for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	    if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
 		bool eol = false;
