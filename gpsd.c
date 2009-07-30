@@ -1503,22 +1503,22 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			      reply, sizeof(reply));
 	    } else {
 		(void)strlcpy(reply, 
-			      "{\"class\":\"TPV\",\"mode\":0}", sizeof(reply));
+			      "{\"class\":\"TPV\"}", sizeof(reply));
 	    }
 	} else if (strncmp(buf, "?SKY", 4) == 0) {
 	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 		json_sky_dump(&channel->device->gpsdata, reply, sizeof(reply));
 	    } else {
-		(void)strlcpy(reply, 
-			      "{\"class\":\"SKY\",\"report\":0}", sizeof(reply));
+		(void)strlcpy(reply,
+			       "{\"class\":\"SKY\"}", sizeof(reply));
 	    }
-	} else if (strncmp(buf, "?DEVICES", 9) == 0) {
+	} else if (strncmp(buf, "?DEVICES", 8) == 0) {
 	    int i;
 	    (void)strlcpy(reply, 
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
 	    for (i = 0; i < MAXDEVICES; i++) {
 		if (allocated_device(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
-		    (void)strlcat(reply, "{\"name\":\"", sizeof(reply));
+		    (void)strlcat(reply, "{\"class\":\"DEVICE\",\"name\":\"", sizeof(reply));
 		    (void)strlcat(reply, devices[i].gpsdata.gps_device, sizeof(reply));
 		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
 		    (void)strlcat(reply, 
@@ -1605,6 +1605,10 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "}", sizeof(reply));
 	skipdisplay:;
+	} else if (strncmp(buf, "?VERSION", 8) == 0) {
+	    (void)snprintf(reply, sizeof(reply),
+			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
+		GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 	} else
 	    (void)strlcpy(reply, 
 			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}",

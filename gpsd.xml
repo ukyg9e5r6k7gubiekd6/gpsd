@@ -78,14 +78,8 @@ When <application>gpsd</application> opens a serial device emitting
 RTCM-104, it automatically recognizes this and uses the device as a
 correction source for all connected GPSes that accept RTCM corrections
 (this is dependent on the type of the GPS; not all GPSes have the
-firmware capability to accept RTCM correction packets).  <!-- If no
-server is specified, <application>gpsd</application> will hunt for
-one.--> See <xref linkend='accuracy'/> and <xref linkend='files'/> for
-discussion.</para>
-
-<!-- para><application>gpsd</application> may itself serve DGPSIP data
-from an attached RTCM-104 source to other instances of
-<application>gpsd</application> connecting on port 2101.</para -->
+firmware capability to accept RTCM correction packets). See 
+<xref linkend='accuracy'/> and <xref linkend='files'/> for discussion.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -193,7 +187,7 @@ with "dgpsip://", DGPSIP will be used; if the URI starts with "gpsd://",
 gps protocols will be used. <application>Gpsd</application> defaults to
 DGPSIP if no protocol is defined. GPSD URIs take an optional argument to
 select the wire protocol: raw, nmea or gpsd - these correspond to "R=2",
-"R=1" and "w=1" modes. For Ntrip services that require authentication, a
+"R=1" and "W=1" modes. For Ntrip services that require authentication, a
 prefix of the form "username:password@" can be added before the name of
 the Ntrip broadcaster.  If a suffix of the service name begins with ":"
 it is interpreted as a port number, overriding the default IANA-assigned
@@ -214,21 +208,33 @@ its search list until they are added by a control-socket command (see
 abort with an error if neither any devices nor a control socket are
 specified.</para>
 
-<para>At any given time, each client will be listening to only one of
-the GPSes on the device list.  By default, a client's device is the
-one that most recently shipped information to the daemon at the time
-the client first requests GPS information.</para>
-
-<warning><para>It is planned that the command protocol described below will
-change radically at API version 4. It is a bad idea for applications
-to speak this protocol directly: rather, they should use the
+<para>Clients communicate with the dameon via textual request and
+responses.  Currently there are two supported protocols, but there
+may be only one in the future. It is a bad idea for applications to
+speak either protocol directly: rather, they should use the
 <application>libgps</application> client library and take appropriate
 care to conditionalize their code on the major and minor API version
-symbols.  See the GPSD project website for more information on the
-protocol and API change.</para></warning>
+symbols.</para>
 
-<para>The request protocol for <application>gpsd</application> clients
-is very simple.  Each request normally consists of a single ASCII
+</refsect1>
+<refsect1 id='old_protocol'><title>OLD PROTOCOL</title>
+
+<warning><para><emphasis>Do not rely on being able to use this
+protocol directly!</emphasis> This protocol has run out of command
+namespace and is not flexible enough to handle report types other than
+for GPS devices.  Thus, it is in the process of being replaced by a
+new, JSON-based protocol documented in a later section; development on
+the old protocol has ceased and support for it may be removed at any
+time after the new one is deemed mature.</para></warning>
+
+<para>Under the old protocol, each client will at any given time be
+listening to only one of the GPSes on the internal device list (this
+restriction is removed under the new JSON-based protocol).  By default, a
+client's device is the one that most recently shipped information to
+the daemon at the time the client first requests GPS
+information.</para>
+
+<para>Each request normally consists of a single ASCII
 character followed by a newline.  Case of the request character is
 ignored.  Each request returns a line of response text ended by a
 CR/LF.  Requests and responses are as follows, with %f standing for a
@@ -744,14 +750,6 @@ string "GPSD" followed by the replies. Examples:</para>
       reply:       "GPSD,V=0.000000,A=37.900000\r\n"
 </screen>
 
-<para>When clients are active but the GPS is not responding,
-<application>gpsd</application> will spin trying to open the GPS
-device once per second.  Thus, it can be left running in background
-and survive having a GPS repeatedly unplugged and plugged back
-in.  When it is properly installed along with hotplug notifier
-scripts feeding it device-add commands, <application>gpsd</application>
-should require no configuration or user action to find devices.</para>
-
 <para>The recommended mode for clients is watcher mode.  In watcher
 mode <application>gpsd</application> ships a line of data to the
 client each time the GPS gets either a fix update or a satellite
@@ -761,18 +759,531 @@ form X=0 or X=%f when the online/offline status of the GPS
 changes, and an I response giving the device type when the
 user is assigned a device.</para>
 
-<para>Clients should be prepared for the possibility that additional
-fields (such as heading or roll/pitch/yaw) may be added to the O
-command, and not treat the occurrence of extra fields as an error.
-The protocol number will be incremented if and when such fields
-are added.</para>
+</refsect1>
+<refsect1 id='new_protocol'><title>NEW PROTOCOL</title>
 
-<para>Sending SIGHUP to a running <application>gpsd</application>
-forces it to close all GPSes and all client connections.  It will then
-attempt to reconnect to any GPSes on its device list and resume
-listening for client connections.  This may be useful if your GPS
-enters a wedged or confused state but can be soft-reset by pulling
-down DTR.</para>
+<para>The new GPSD protocol is built on top of JSON, JaveScript
+Object Notation. Use of this metaprotocol to pass structured
+data between daemon and client avoids the non-extensibility
+problems of the old protocol, and permits a richer set of record types
+to be passed up to clients.</para>
+
+<para>Commands are introduced by "?", followed
+by a mandatory commmand identifier, optionally followed by
+an equal sign "=" and a JSON obsect treated as an argument.
+Responses are JSON objects all of which have a "class" attribute
+the value of which is either the name of the invoking command 
+or the string "ERROR".</para>
+
+<variablelist>
+
+<varlistentry>
+<term>?VERSION</term> 
+<listitem><para>Returns an object with the following attributes:</para>
+
+<table frame="all" pgwide="0"><title>VERSION object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "VERSION"</entry>
+</row>
+<row>
+	<entry>version</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Public version level</entry>
+</row>
+<row>
+	<entry>rev</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Internal revision-control level.</entry>
+</row>
+<row>
+	<entry>api_major</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>API major revision level..</entry>
+</row>
+<row>
+	<entry>api_minor</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>API minor revision level..</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"VERSION","version":"2.40dev","rev":$Id$,"api_major":3,"api_minor":1}
+</programlisting>
+
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?DEVICES</term> 
+<listitem><para>Returns a device list object with the
+following elements:</para>
+
+<table frame="all" pgwide="0"><title>DEVICES object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "DEVICES"</entry>
+</row>
+<row>
+	<entry>devices</entry>
+	<entry>Yes</entry>
+	<entry>list</entry>
+        <entry>List of device descriptions</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>The list components look like this:</para>
+
+<table frame="all" pgwide="0"><title>Device-description object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "DEVICE"</entry>
+</row>
+<row>
+	<entry>name</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Name of the device</entry>
+</row>
+<row>
+	<entry>type</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>type (GPS, RTCM2, RTCM3, AIS)</entry>
+</row>
+<row>
+	<entry>driver</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>GPSD's name for the device driver type.</entry>
+</row>
+<row>
+	<entry>driver</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>GPSD's name for the device driver type.</entry>
+</row>
+<row>
+	<entry>subtype</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Firmware version or other subtype ID. Not always reported.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class"="DEVICES","devices":[
+    {"class":"DEVICE","name":"/dev/pts/1","type":"GPS","driver":"SiRF binary"},
+    {"class":"DEVICE","name":"/dev/pts/3","type":"AIS","driver":"AIVDM"}]}
+</programlisting>
+
+<para>Clients should be aware that, due to the delayed response some
+devices have to a subtype query, the daemon may occasionally ship a
+bare DEVICE object just to get the subtype information to the client.</para>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?TPV</term> 
+<listitem><para>Opens a GPS-class device, if available, and requests a
+time/position/velocity report object in reply. Mainly intended as a
+test command: production clients should use ?WATCH to set up
+report streaming.</para>
+
+<para>This is what a TPV object looks like.  If there is no GPS device
+available, only the "class" field will reliably be present.  Others
+may be reported or not depending on the fix quality.</para>
+
+<table frame="all" pgwide="0"><title>TPV object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "TPV"</entry>
+</row>
+<row>
+	<entry>tag</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Type tag associated with this GPS sentence; from an NMEA
+	device this is just the NMEA sentence type..</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Name of originating device</entry>
+</row>
+<row>
+	<entry>time</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Seconds since the Unix epoch, UTC. May have a
+	fractional part of up to .01sec precision.</entry>
+</row>
+<row>
+	<entry>ept</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated timestamp error (%f, seconds, 95% confidence).</entry>
+</row>
+<row>
+	<entry>lat</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Latitude in degrees: +/- signifies West/East</entry>
+</row>
+<row>
+	<entry>lon</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Longitude in degrees: +/- signifies North/South.</entry>
+</row>
+<row>
+	<entry>alt</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Altitude in meters.</entry>
+</row>
+<row>
+	<entry>eph</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Horizontal circular error in meters, 95% confidence.</entry>
+</row>
+<row>
+	<entry>epv</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated vertical error in meters, 95% confidence.</entry>
+</row>
+<row>
+	<entry>track</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Course over ground, degrees from true north.</entry>
+</row>
+<row>
+	<entry>speed</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Speed over ground, meters per second.</entry>
+</row>
+<row>
+	<entry>climb/sink</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Climb (postive) or sink (negative) rate, meters per 
+	second.</entry>
+</row>
+<row>
+	<entry>epd</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Direction error estinmate in degrees, 95% confifdence.</entry>
+</row>
+<row>
+	<entry>eps</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Speed error estinmate in meters/sec, 95% confifdence.</entry>
+</row>
+<row>
+	<entry>epc</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Climb/sink error estinmate in meters/sec, 95% confifdence.</entry>
+</row>
+<row>
+	<entry>mode</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>NMEA mode: %d, 0=no mode value yet seen, 1=no fix, 2=2D, 3=3D.</entry>
+</row>
+
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"TPV","tag":"MID2","device":"/dev/pts/1",
+    "time":1118327688.280,"ept":0.005,
+    "lat":46.498293369,"lon":7.567411672,"alt":1343.127, 
+    "eph":36.000,"epv":32.321,
+    "track":10.3788,"speed":0.091,"climb":-0.085,"mode":3}
+</programlisting>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?SKY</term> 
+<listitem><para>Opens a GPS-class device, if available, and requests a
+skyview report object in reply. Mainly intended as a test command:
+production clients should use ?WATCH to set up report
+streaming..</para>
+
+<para>This is what a SKY object looks like.  If there is no GPS device
+available, or no skyview has been reported yet, only the "class" field
+will reliably be present.</para>
+
+<table frame="all" pgwide="0"><title>SKY object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "SKY"</entry>
+</row>
+<row>
+	<entry>tag</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Type tag associated with this GPS sentence; from an NMEA
+	device this is just the NMEA sentence type..</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Name of originating device</entry>
+</row>
+<row>
+	<entry>time</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Seconds since the Unix epoch, UTC. May have a
+	fractional part of up to .01sec precision.</entry>
+</row>
+<row>
+	<entry>reported</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Count of satellites in skyview.</entry>
+</row>
+<row>
+	<entry>satellites</entry>
+	<entry>Yes</entry>
+	<entry>list</entry>
+        <entry>List of satellite objects in skyview</entry>
+</row>
+
+</tbody>
+</tgroup>
+</table>
+
+<para>The satellite list objects look like this:</para>
+
+<table frame="all" pgwide="0"><title>Satellite object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>PRN</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>PRN ID of the satellite</entry>
+</row>
+<row>
+	<entry>az</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>Azimuth, degrees from true north.</entry>
+</row>
+<row>
+	<entry>el</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>Elevation in degrees.</entry>
+</row>
+<row>
+	<entry>ss</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>Signal strength in dB.</entry>
+</row>
+<row>
+	<entry>used</entry>
+	<entry>Yes</entry>
+	<entry>boolean</entry>
+        <entry>Used in current solution?</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Note that satellite objects do not have a "class" field.., as
+they are never shipped outside of a SKY object,.</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327688.280
+    "reported":8,"satellites":[
+        {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
+        {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
+        {"PRN":8,"el":66,"az":189,"ss":44,"used":true},
+        {"PRN":29,"el":13,"az":273,"ss":0,"used":false},
+        {"PRN":10,"el":51,"az":304,"ss":29,"used":true},
+        {"PRN":4,"el":15,"az":199,"ss":36,"used":true},
+        {"PRN":2,"el":34,"az":241,"ss":43,"used":true},
+        {"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
+</programlisting>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?WATCH</term> 
+<listitem><para>Requests a report object with class WATCH that lists
+the watch flags for all supported report classes.  If followed by 
+an "=", accepts a WATCH-class object that changes which reports the
+client will see.
+</para>
+
+<table frame="all" pgwide="0"><title>WATCH object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "WATCH"</entry>
+</row>
+<row>
+	<entry>TPV</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Whether to stream TPV objects</entry>
+</row>
+<row>
+	<entry>SKY</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Whether to stream SKY objects</entry>
+</row>
+<row>
+	<entry>RTCM2</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Whether to stream RTCM2 objects (not yet implemented)</entry>
+</row>
+<row>
+	<entry>RTCM3</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Whether to stream RTCM3 objects (not yet implemented)</entry>
+</row>
+<row>
+	<entry>AIS</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Whether to stream AIS objects</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"WATCH",
+    "TPV":true,
+    "SKY":false,"RTCM2":false,"RTCM3":false,"AIS":false}
+</programlisting>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
 
 </refsect1>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
@@ -784,6 +1295,21 @@ Commands to add and remove GPS device paths from the daemon's device
 list must be written to a local Unix-domain socket which will be
 accessible only to programs running as root.  This control socket will
 be located wherever the -F option specifies it.</para>
+
+<para>When clients are active but a GPS is not responding,
+<application>gpsd</application> will spin trying to open the GPS
+device once per second.  Thus, it can be left running in background
+and survive having a GPS repeatedly unplugged and plugged back
+in.  When it is properly installed along with hotplug notifier
+scripts feeding it device-add commands, <application>gpsd</application>
+should require no configuration or user action to find devices.</para>
+
+<para>Sending SIGHUP to a running <application>gpsd</application>
+forces it to close all GPSes and all client connections.  It will then
+attempt to reconnect to any GPSes on its device list and resume
+listening for client connections.  This may be useful if your GPS
+enters a wedged or confused state but can be soft-reset by pulling
+down DTR.</para>
 
 <para>To point <application>gpsd</application> at a device that may be
 a GPS, write to the control socket a plus sign ('+') followed by the
