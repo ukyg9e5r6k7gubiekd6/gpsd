@@ -1624,7 +1624,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    /*
 	     * You should not have to modify stuff past this line.
 	     */
-	    int i;
+	    int i, latch;
 	    if (buf[6] == '=') {
 		int status;
 		for (i = 0; i < NITEMS(typemap); i++)
@@ -1639,15 +1639,25 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    gpsd_report(LOG_PROG, 
 				"client(%d): before, watch mask is 0x%0x, %d possibilities.\n",
 				sub_index(sub), sub->watcher, NITEMS(typemap));
-		    for (i = 0; i < NITEMS(typemap); i++) {
+		    /*
+		     * The latch variable is a blatant hack to ensure
+		     * that if listening to a device class (like GPS)
+		     * was turned on explicitly, it won't be turned off
+		     * later because a false setting on a data type
+		     * wants to turn off that device class.
+		     */
+		    for (latch = i = 0; i < NITEMS(typemap); i++) {
 			gpsd_report(LOG_PROG, 
 				    "checking against typemap[%d]\n",
 				    i);
 			if (typemap[i].flag == true) {
-			    if (assign_channel(sub, typemap[i].class, NULL) != NULL)
+			    if (assign_channel(sub, typemap[i].class, NULL) != NULL) {
 				sub->watcher |= typemap[i].mask;
+				latch |= (1 << typemap[i].class);
+			    }
 			} else if (typemap[i].flag == false) {
-			    deassign_channel(sub, typemap[i].class);
+			    if ((latch & (1 << typemap[i].class))== 0)
+				deassign_channel(sub, typemap[i].class);
 			    sub->watcher &=~ typemap[i].mask;
 			}
 		    }
