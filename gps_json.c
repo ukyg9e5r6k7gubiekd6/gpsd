@@ -237,4 +237,61 @@ int json_sky_read(const char *buf, struct gps_data_t *gpsdata)
     return 0;
 }
 
-/* gpsd_json.h ends here */
+/*
+ * To add new device types to be eligible for watching, bump
+ * NWATCHTYPES add a matching pair of lines to the watchmap
+ * initializer and the watch_attrs initializer.
+ */
+const struct watchmap_t watchmap[NWATCHTYPES] = {
+    {WATCH_TPV,   GPS,   "TPV"},
+    {WATCH_SKY,   GPS,   "SKY"},
+    {WATCH_RTCM2, RTCM2, "RTCM2"},
+    {WATCH_RTCM3, RTCM3, "RTCM3"},
+    {WATCH_AIS,   AIS,   "AIS"},
+};
+
+int json_watch_read(int *watchmask, char *buf)
+{
+    int i, status;
+    bool watchflags[NWATCHTYPES];
+    struct json_attr_t watch_attrs[] = {
+	{"TPV",   boolean, .addr.boolean=&watchflags[0]},  
+	{"SKY",   boolean, .addr.boolean=&watchflags[1]},  
+	{"RTCM2", boolean, .addr.boolean=&watchflags[2]},
+	{"RTCM3", boolean, .addr.boolean=&watchflags[3]},
+	{"AIS",   boolean, .addr.boolean=&watchflags[4]},
+	{NULL},
+    };
+
+    for (i = 0; i < NITEMS(watchmap); i++)
+	watch_attrs[i].dflt.boolean = (*watchmask & watchmap[i].mask)!=0;
+    status = json_read_object(buf, watch_attrs, 0, NULL);
+    if (status == 0) {
+	int i;
+	for (i = 0; i < NITEMS(watchmap); i++) {
+	    if (watchflags[i] == true) {
+		*watchmask |= watchmap[i].mask;
+	    } else if (watchflags[i] == false) {
+		*watchmask &=~ watchmap[i].mask;
+	    }
+	}
+    }
+
+    return status;
+}
+
+void json_watch_dump(int watchmask, char *reply, size_t replylen)
+{
+    int i;
+
+    (void)strlcpy(reply, "{\"class\":\"WATCH\",", replylen);
+    for (i = 0; i < NITEMS(watchmap); i++)
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		       "\"%s\":%s,",
+		       watchmap[i].string,
+		       (watchmask & watchmap[i].mask)!=0 ? "true" : "false");
+    reply[strlen(reply)-1] = '\0';
+    (void)strlcat(reply, "}", replylen);
+}
+
+/* gpsd_json.c ends here */

@@ -115,6 +115,16 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 
 /* Next, declarations for the core library... */
 
+/* watcher mask values */
+#define WATCH_NOTHING	0x00
+#define WATCH_OLDSTYLE	0x01
+#define WATCH_TPV	0x02
+#define WATCH_SKY	0x04
+#define WATCH_AIS	0x08
+#define WATCH_RTCM2	0x10
+#define WATCH_RTCM3	0x20
+#define WATCH_NEWSTYLE	0x3E
+
 /* factors for converting among confidence interval units */
 #define CEP50_SIGMA	1.18
 #define DRMS_SIGMA	1.414
@@ -500,6 +510,8 @@ extern float roundf(float x);
 #define	round(x) ((double)rint(x))
 #define roundf(x) ((float)rintf((double)x))
 #endif /* !HAVE_ROUND */
+
+#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 
 /* OpenBSD and FreeBSD and Cygwin don't seem to have NAN, NetBSD does, others? */
 /* XXX test for this in configure? */

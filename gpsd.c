@@ -144,8 +144,6 @@ struct gps_context_t context = {
 };
 /*@ +initallelements +nullassign +nullderef @*/
 
-#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
-
 static volatile sig_atomic_t signalled;
 
 static void onsig(int sig)
@@ -354,14 +352,6 @@ struct subscriber_t {
     bool new_style_responses;			/* protocol typr desired */
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     int watcher;			/* is client in watcher mode? */
-#define WATCH_NOTHING	0x00
-#define WATCH_OLDSTYLE	0x01
-#define WATCH_TPV	0x02
-#define WATCH_SKY	0x04
-#define WATCH_AIS	0x08
-#define WATCH_RTCM2	0x10
-#define WATCH_RTCM3	0x20
-#define WATCH_NEWSTYLE	0x3E
     int raw;				/* is client in raw mode? */
 };
 
@@ -1563,6 +1553,10 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	char reply[BUFSIZ];
 	struct channel_t *channel;
 
+	/*
+	 * Still to be implemented: equivalents of B C J N R Z $
+	 */
+
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
 	sub->new_style_responses = true;
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
@@ -1610,82 +1604,49 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "]}", sizeof(reply));
 	} else if (strncmp(buf, "?WATCH", 6) == 0) {
-	    struct typemap_t {
-		int mask;
-		gnss_type class;
-		bool flag;
-	    };
-	    /*
-	     * To add new device types to be eligible for watching,
-	     * add a matching pair of lines to the initializers below.
-	     */
-	    struct typemap_t typemap[] = {
-		{WATCH_TPV,   GPS,   false},
-		{WATCH_SKY,   GPS,   false},
-		{WATCH_RTCM2, RTCM2, false},
-		{WATCH_RTCM3, RTCM3, false},
-		{WATCH_AIS,   AIS,   false},
-	    };
-	    struct json_attr_t watch_attrs[] = {
-		{"TPV",   boolean, .addr.boolean=&typemap[0].flag},  
-		{"SKY",   boolean, .addr.boolean=&typemap[1].flag},  
-		{"RTCM2", boolean, .addr.boolean=&typemap[2].flag},
-		{"RTCM3", boolean, .addr.boolean=&typemap[3].flag},
-		{"AIS",   boolean, .addr.boolean=&typemap[4].flag},
-		{NULL},
-	    };
-	    /*
-	     * You should not have to modify stuff past this line.
-	     */
-	    int i, latch;
 	    if (buf[6] == '=') {
-		int status;
-		for (i = 0; i < NITEMS(typemap); i++)
-		    watch_attrs[i].dflt.boolean = (sub->watcher & typemap[i].mask)!=0;
-		status = json_read_object(buf+7, watch_attrs, 0, NULL);
-		if (status != 0) {
-		    (void)snprintf(reply, sizeof(reply),
-				   "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}",
-				   json_error_string(status));
-		    goto skipdisplay;
-		} else {
+		/*
+		 * The latch variable is a blatant hack to ensure
+		 * that if listening to a device class (like GPS)
+		 * was turned on explicitly, it won't be turned
+		 * off later because a 'false' setting on a
+		 * different data type wants to turn off the same
+		 * device class.
+		 */
+		int i, latch;
+		int new_watcher = sub->watcher;
+		int status = json_watch_read(&new_watcher, buf+7);
+
+		if (status == 0) {
 		    gpsd_report(LOG_PROG, 
-				"client(%d): before, watch mask is 0x%0x, %d possibilities.\n",
-				sub_index(sub), sub->watcher, NITEMS(typemap));
-		    /*
-		     * The latch variable is a blatant hack to ensure
-		     * that if listening to a device class (like GPS)
-		     * was turned on explicitly, it won't be turned
-		     * off later because a 'false' setting on a
-		     * different data type wants to turn off the same
-		     * device class.
-		     */
-		    for (latch = i = 0; i < NITEMS(typemap); i++) {
-			if (typemap[i].flag == true) {
-			    if (assign_channel(sub, typemap[i].class, NULL) != NULL) {
-				sub->watcher |= typemap[i].mask;
-				latch |= (1 << typemap[i].class);
+				"client(%d): before applying 0x%0x, watch mask is 0x%0x.\n",
+				sub_index(sub), new_watcher, sub->watcher);
+		    for (i = 0; i < NITEMS(watchmap); i++) {
+			/* ignore mask bits that didn't change */
+			if ((sub->watcher & watchmap[i].mask) == (new_watcher & watchmap[i].mask))
+			    continue;
+			else if ((new_watcher & watchmap[i].mask) != 0) {
+			    if (assign_channel(sub, watchmap[i].class, NULL) != NULL) {
+				sub->watcher |= watchmap[i].mask;
+				latch |= (1 << watchmap[i].class);
 			    }
-			} else if (typemap[i].flag == false) {
-			    if ((latch & (1 << typemap[i].class))== 0)
-				deassign_channel(sub, typemap[i].class);
-			    sub->watcher &=~ typemap[i].mask;
+			} else {
+			    if ((latch & (1 << watchmap[i].class))== 0)
+				deassign_channel(sub, watchmap[i].class);
+			    sub->watcher &=~ watchmap[i].mask;
 			}
-		    }
 		    gpsd_report(LOG_PROG, 
 				"client(%d): after, watch mask is 0x%0x.\n",
 				sub_index(sub), sub->watcher);
+		    }
+		} else {
+		    (void)snprintf(reply, sizeof(reply),
+				   "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
+				   json_error_string(status));
+		    return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
 		}
 	    }
-	    (void)strlcpy(reply, "{\"class\":\"WATCH\",", sizeof(reply));
-	    for (i = 0; i < NITEMS(typemap); i++)
-		(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
-			       "\"%s\":%s,",
-			       watch_attrs[i].attribute,
-			       (sub->watcher & typemap[i].mask)!=0 ? "true" : "false");
-	    reply[strlen(reply)-1] = '\0';
-	    (void)strlcat(reply, "}", sizeof(reply));
-	skipdisplay:;
+	    json_watch_dump(sub->watcher, reply, sizeof(reply));
 	} else if (strncmp(buf, "?VERSION", 8) == 0) {
 	    (void)snprintf(reply, sizeof(reply),
 			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
