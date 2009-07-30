@@ -773,7 +773,7 @@ by a mandatory commmand identifier, optionally followed by
 an equal sign "=" and a JSON obsect treated as an argument.
 Responses are JSON objects all of which have a "class" attribute
 the value of which is either the name of the invoking command 
-or the string "ERROR".</para>
+or one of the strings "DEVICE" or "ERROR".</para>
 
 <variablelist>
 
@@ -868,7 +868,7 @@ following elements:</para>
 </tgroup>
 </table>
 
-<para>The list components look like this:</para>
+<para>The list components have the following elements:</para>
 
 <table frame="all" pgwide="0"><title>Device-description object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -929,9 +929,10 @@ following elements:</para>
     {"class":"DEVICE","name":"/dev/pts/3","type":"AIS","driver":"AIVDM"}]}
 </programlisting>
 
-<para>Clients should be aware that, due to the delayed response some
-devices have to a subtype query, the daemon may occasionally ship a
-bare DEVICE object just to get the subtype information to the client.</para>
+<para>The daemon occasionally ships a bare DEVICE object to the client
+(that is, one not inside a DEVICES wrapper). The data content of these
+objects will be described later in the section covering
+notifications.</para>
 
 </listitem>
 </varlistentry>
@@ -943,7 +944,7 @@ time/position/velocity report object in reply. Mainly intended as a
 test command: production clients should use ?WATCH to set up
 report streaming.</para>
 
-<para>This is what a TPV object looks like.  If there is no GPS device
+<para>Here are the elements of a TPV object.  If there is no GPS device
 available, only the "class" field will reliably be present.  Others
 may be reported or not depending on the fix quality.</para>
 
@@ -1087,7 +1088,7 @@ skyview report object in reply. Mainly intended as a test command:
 production clients should use ?WATCH to set up report
 streaming..</para>
 
-<para>This is what a SKY object looks like.  If there is no GPS device
+<para>Here are the elements of a SKY object.  If there is no GPS device
 available, or no skyview has been reported yet, only the "class" field
 will reliably be present.</para>
 
@@ -1145,7 +1146,7 @@ will reliably be present.</para>
 </tgroup>
 </table>
 
-<para>The satellite list objects look like this:</para>
+<para>The satellite list objects have the following elements:</para>
 
 <table frame="all" pgwide="0"><title>Satellite object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -1221,6 +1222,8 @@ an "=", accepts a WATCH-class object that changes which reports the
 client will see.
 </para>
 
+<para>A WATCH object has the following elements:</para>
+
 <table frame="all" pgwide="0"><title>WATCH object</title>
 <tgroup cols="4" align="left" colsep="1" rowsep="1">
 <thead>
@@ -1284,6 +1287,83 @@ client will see.
 </varlistentry>
 
 </variablelist>
+
+<para>When a client is in watcher mode, the daemon may ship it
+device status notifications.  These notications will be DEVICE
+objects; the table below describes the circumstances and the 
+meaning of the attributes.</para>
+
+<table frame="all" pgwide="0"><title>DEVICE notification object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>When?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>activated</entry>
+	<entry>At device activation and device close time.</entry>
+	<entry>numeric</entry>
+        <entry>Time the device was activated, 
+	or 0 if it is being closed.</entry>
+</row>
+<row>
+	<entry>subtype</entry>
+	<entry>When the daemon sees a delayed response to a probe for
+	subtype or firmware-version information.</entry>
+	<entry>string</entry>
+	<entry>Whatever version information the device returned.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"DEVICE","name":"/dev/pts1","activated":0}
+</programlisting>
+
+<para>The daemon may ship an error object in response to a
+syntactically invalid command line or unknown command. It has
+the following elements:</para>
+
+<table frame="all" pgwide="0"><title>ERROR notification object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "ERROR"</entry>
+</row>
+<row>
+	<entry>message</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+	<entry>Textual error message</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"ERROR","message":"Unrecognized request '?FOO'"}
+</programlisting>
 
 </refsect1>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>

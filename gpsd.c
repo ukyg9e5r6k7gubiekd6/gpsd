@@ -361,6 +361,7 @@ struct subscriber_t {
 #define WATCH_AIS	0x08
 #define WATCH_RTCM2	0x10
 #define WATCH_RTCM3	0x20
+#define WATCH_NEWSTYLE	0x3E
     int raw;				/* is client in raw mode? */
 };
 
@@ -539,7 +540,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
     return status;
 }
 
-static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
+static void notify_watchers(struct gps_device_t *device, int mask, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
     struct channel_t *channel;
@@ -553,9 +554,21 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
     {
 	struct subscriber_t *sub = channel->subscriber;
-	if (channel->device == device && sub != NULL && sub->watcher == WATCH_OLDSTYLE)
+	if (channel->device==device && sub != NULL && (sub->watcher & mask)!=0)
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
     }
+}
+
+static void notify_on_close(struct gps_device_t *device)
+{
+#ifdef OLDSTYLE_ENABLE
+    notify_watchers(device, WATCH_OLDSTYLE, "GPSD,X=0\r\n");
+#endif /* OLDSTYLE_ENABLE */
+#ifdef GPSDNG_ENABLE
+    notify_watchers(device, WATCH_NEWSTYLE, 
+		    "{\"class\":\"DEVICE\",\"name\":\"%s\",\"activated\":0}\r\n",
+		    device->gpsdata.gps_device);
+#endif /* GPSDNG_ENABLE */
 }
 
 static void raw_hook(struct gps_data_t *ud,
@@ -899,7 +912,7 @@ static void handle_control(int sfd, char *buf)
 		FD_CLR(devp->gpsdata.gps_fd, &all_fds);
 		adjust_max_fd(devp->gpsdata.gps_fd, false);
 	    }
-	    notify_watchers(devp, "GPSD,X=0\r\n");
+	    notify_on_close(devp);
 	    for (cfd = 0; cfd < NITEMS(channels); cfd++)
 		if (channels[cfd].device == devp)
 		    channels[cfd].device = NULL;
@@ -1632,7 +1645,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		status = json_read_object(buf+7, watch_attrs, 0, NULL);
 		if (status != 0) {
 		    (void)snprintf(reply, sizeof(reply),
-				   "{\"class\":ERR\",\"msg\":\"Invalid WATCH.\",\"error\":\"%s\"}",
+				   "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}",
 				   json_error_string(status));
 		    goto skipdisplay;
 		} else {
@@ -1642,14 +1655,12 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    /*
 		     * The latch variable is a blatant hack to ensure
 		     * that if listening to a device class (like GPS)
-		     * was turned on explicitly, it won't be turned off
-		     * later because a false setting on a data type
-		     * wants to turn off that device class.
+		     * was turned on explicitly, it won't be turned
+		     * off later because a 'false' setting on a
+		     * different data type wants to turn off the same
+		     * device class.
 		     */
 		    for (latch = i = 0; i < NITEMS(typemap); i++) {
-			gpsd_report(LOG_PROG, 
-				    "checking against typemap[%d]\n",
-				    i);
 			if (typemap[i].flag == true) {
 			    if (assign_channel(sub, typemap[i].class, NULL) != NULL) {
 				sub->watcher |= typemap[i].mask;
@@ -1680,9 +1691,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
 		GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 	} else
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERR\",\"msg\":\"Unrecognized request\"}",
-			  sizeof(reply));
+	    (void)snprintf(reply, sizeof(reply), 
+			  "{\"class\":ERROR\",\"message\":\"Unrecognized request '%s'\"}",
+			  buf);
 	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     }
@@ -2058,21 +2069,36 @@ int main(int argc, char *argv[])
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, false);
 		    gpsd_deactivate(device);
-		    notify_watchers(device, "GPSD,X=0\r\n");
+		    notify_on_close(device);
 		}
 		else {
-		    /* handle laggy response to a firmware version query*/
+		    /* handle laggy response to a firmware version query */
 		    if ((changed & DEVICEID_SET) != 0) {
-			char id[NMEA_MAX];
 			assert(device->device_type != NULL);
-			(void)snprintf(id, sizeof(id), "GPSD,I=%s",
-				       device->device_type->type_name);
-			if (device->subtype[0] != '\0') {
-			    (void)strlcat(id, " ", sizeof(id));
-			    (void)strlcat(id,device->subtype,sizeof(id));
+#ifdef OLDSTYLE_ENABLE
+			{
+			    char id1[NMEA_MAX];
+			    (void)snprintf(id1, sizeof(id1), "GPSD,I=%s",
+					   device->device_type->type_name);
+			    if (device->subtype[0] != '\0') {
+				(void)strlcat(id1, " ", sizeof(id1));
+				(void)strlcat(id1, device->subtype,sizeof(id1));
+			    }
+			    (void)strlcat(id1, "\r\n", sizeof(id1));
+			    notify_watchers(device, WATCH_OLDSTYLE, id1);
 			}
-			(void)strlcat(id, "\r\n", sizeof(id));
-			notify_watchers(device, id);
+#endif /* OLDSTYLE_ENABLE */
+#ifdef GPSDNG_ENABLE
+			{
+			    char id2[NMEA_MAX];
+			    (void)snprintf(id2, sizeof(id2), 
+					   "{\"class\":\"DEVICE\",\"name\":\"%s\",\"subtype\":\"%s\"}",
+					   device->gpsdata.gps_device,
+					   device->subtype);
+			    (void)strlcat(id2, "\r\n", sizeof(id2));
+			    notify_watchers(device, WATCH_NEWSTYLE, id2);
+			}
+#endif /* GPSDNG_ENABLE */
 		    }
 		    /* copy/merge device data into subscriber fix buffers */
 		    for (channel = channels;
