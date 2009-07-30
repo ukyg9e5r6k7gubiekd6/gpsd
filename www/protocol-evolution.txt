@@ -1,0 +1,367 @@
+= GPSD-NG: A Case Study in Protocol Evolution =
+Eric S. Raymond <esr@thyrsus.com>
+v1.0, July 2009
+
+== Introduction ==
+
+GPSD is a service daemon that collects data from serial and USB GPS
+sensors attached to a host machine and presents it in a
+simple-to-parse form on TCP/IP port 2947.  This is a less trivial task
+than it sounds, because GPS sensor interfaces are both highly variable
+and really badly designed (see <a
+href="http://esr.ibiblio.org/?p=801">Why GPSes suck, and what to do
+about it</a> for a description of NMEA 0183 and other horrors).  
+
+In this paper, however, we will be ignoring all the dodgy stuff that
+goes on at GPSD's back end to concentrate on what happens at the front
+- the request-response protocol through which plient programs get
+access to the information that GPSD acquires from its devices and
+internal computations.
+
+The GPSD request-response protocol is approaching its third
+generation, and I think the way it has evolved spotlights some
+interesting design issues and long-term trends in the design of
+network protocols in general.  To anticipate, these trends are: (1)
+changing tradeoffs between bandwidth economy versus extensibility and
+explicitness, (2) a shift from lockstep conversational interfaces to
+event streams, and (3) changes in the "sweet spot" of protocol designs
+due to increasing use of scripting langages.
+
+Carrying these trends forward may even give us a bit of a glimpse at
+the future of protocol design.
+
+== The first version: a simple conversational protocol ==
+
+The very first version of GPSD, back in the mid-1990s, handled
+NMEA GPSes only and was designed with a dead-simple request-reaponse
+protocol.  To get latitude and longitude out of it, you'd connect
+to port 2947 and have a conversation that looked like this:
+
+-------------------------------------------------------------------------
+-> P
+<- GPSD,P=4002.1207 07531.2540 
+-------------------------------------------------------------------------
+
+That is GPSD reporting, the only way it could in the earliest protocol
+version, that I'm at latitude about 40 north and 75 west.
+
+If you are a mathematician or a physicist, you're probably noticing
+some things missing in this report.  Like a timestamp, and a circular
+error estimate, and an altitude.  In fact, it was possible to get some
+these data using the old protocol. You could make a compound request 
+like this:
+
+-------------------------------------------------------------------------
+-> PAD
+<- GPSD,P=4002.1207 07531.2540,A=351.27,D=2009:07:11T11:16Z
+-------------------------------------------------------------------------
+
+For some devices (not all) you could add E and get error estimates.
+Other data such as course and rate of climb/sink might be available
+via other single-letter commands. I say "might be" because in those
+early days GPSD didn't attempt to compute error estimates or velocities
+if the GPS didn't explicitly supply them.  I fixed that, later. but
+this essay is about protocol design so I'm going to ignore all the
+issues associated with the implementation for the rest of the discussion.
+
+The version 1 protocol is squarely in the tradition of classic textual
+Internet protocols, even though it doesn't look much like (say) SMTP
+transactions - requests are simple to emit and responses are easy to
+parse. It was clearly designed with the more specific goal of
+minimizing traffic volume between the daemon and its clients. It
+accomplishes that goal quite well.
+
+== The second version: from conversational to streaming ==
+
+However, when I started work on it it in 2004 there was already
+pressure from the existing userbase to change at least one of the
+protocol's major assumptions - that is, that the client would poll
+whenever it wanted data. It's usually more convenient to be able to say to
+the daemon "Speak!" and have it stream TPV (time/position/velocity)
+reports back at you at the sensor's sampling rate (usually once per
+second).  Especially when, as with GPSD, you have a client library 
+that can spin in a thread picking up the updates and dropping them in a 
+struct somewhere that you specify.
+
+This was the first major feature I implemented.  I called it "watcher
+mode", and it required me to add two commands to the protocol. There
+were already so many single-shot commands defined that we were close
+to running out of letters for new ones; I was able to grab "W" for the
+command that enables or disables watcher mode, but was left with the
+not-exactly-intuitive "O" for the streaming TPV report format.  Here's
+how it looks:
+
+-------------------------------------------------------------------------
+-> W=1
+<- GPSD,W=1
+<- GPSD,O=MID2 1118327700.280 0.005 46.498339529 7.567392712 1342.392 36.000 32.321 10.3787 0.091 -0.085 ? 38.66 ? 3
+<- GPSD,O=MID2 1118327701.280 0.005 46.498339529 7.567392712 1342.392 48.000 32.321 10.3787 0.091 -0.085 ? 50.67 ? 3
+<- GPSD,O=MID2 1118327702.280 0.005 46.498345996 7.567394427 1341.710 36.000 32.321 10.3787 0.091 -0.085 ? 38.64 ? 3
+<- GPSD,O=MID2 1118327703.280 0.005 46.498346855 7.567381517 1341.619 48.000 32.321 10.3787 0.091 -0.085 ? 50.69 ? 3
+<- GPSD,Y=MID4 1118327704.280 8:23 6 84 0 0:28 7 160 0 0:8 66 189 45 1:29 13 273 0 0:10 51 304 0 0:4 15 199 34 1:2 34 241 41 1:27 71 76 42 1:
+<- GPSD,O=MID2 1118327704.280 0.005 46.498346855 7.567381517 1341.619 48.000 32.321 10.3787 0.091 -0.085 ? ? ? 3
+-> W=0
+<- GPSD,W=0
+-------------------------------------------------------------------------
+
+The fields in the O report are tag (an indication of the device
+sentence that produced this report), time, time error estimate,
+longitude, latitude, altitude, horizontal error estimate, vertical
+error estimate, course, speed, climb/sink, error estimates for 
+those last three fields, and mode (an indication of fix quality).  If
+you care about issues like reporting units, read the documentration.
+
+The 'Y' report is a satellite skyview, giving right-ascencion, declination, 
+and signal quality for each of the visible satellites.  GPSes usually report
+this every five minutes.
+
+The 'W', 'O' and 'Y' sentences, together, effectively constituted
+version 2 of the protocol - designed for streaming use. The other
+single-shot commands, though still supported, rapidly became
+obsolescent.
+
+Attentive readers may wonder why I designed a novel 'O' format rather
+that writing the watcher-mode command so that it could specify a
+compound report format (like PADE) every second.  Part of the answer
+is, again, that we were running out of letters to associate with new
+data fields like the error estimates.  I wanted to use up as little of
+the remaining namespace as I could get away with.
+
+Another reason is, I think, that I was still half-consciously thinking
+of bit bandwidth as a scarce resource to be conserved.  I had a bias
+against designs that would associate "extra" name tags with the
+response fields ("A=351.27") even though the longest tagged response
+GPSD could be expected to generate would still be shorter than a
+single Ethernet packet (1509 bytes).
+
+== Pressure builds for a redesign ==
+
+Along about 2006, despite my efforts to conserve the remaining
+namespace, we ran out of letters completely. 'H' is actually still
+left, but at the time I believed we couldn't commit the last letter
+(whatever it was) because we'd need it as an inline switch to a new
+protocol.  I started feeling pressure to actually design a new
+protocol.  Besides running out of command namespace in the old one, a
+couple of things were happening that implied we'd need to define new
+commands.
+
+What had used up the last of the command namespace was multi-device
+support.  Originally, GPSD could only monitor one GPS at a time. I
+re-engineered it so it could monitor multiple GPSes, with GPS streams
+available as data channels to which a client could connect one at a
+time.  I was thinking about use cases like this one: spot two GPSes on
+either end of an oil tanker, use the position delta as a check on
+reported true course.
+
+(For those of you wondering, this wasn't the huge job it may sound
+like.  I had carefully structured GPSD as a relatively small (about
+5.5 KLOC) networking and dispatcher top-level calling a 30 KLOC driver
+and services library, all of which was designed from the get-go to use
+re-entrant structures.  Thus, only the top layer needed to change, and
+at that only about 1 KLOC of it actually did. Building the test
+framework to verify the multidevice code in action was a bigger job.)
+
+Note that the "one at a time" limitation was imposed by the
+protocol design, notably the fact that the 'O' record didn't contain
+the name of the device it was reporting from.  Thus, GPSD could not
+mix reports from different devices without effectively discarding
+information about where they had come from.
+
+Though I had just barely managed to cram in multi-GPS support without
+overrunning the available command space, we were starting to look at
+monitoring multiple <em>kinds</em> of devices in one session - RTCM2
+correction sources and NTRIP were the first examples. (These are both
+protocols that support
+http://www.esri.com/news/arcuser/0103/differential1of2.html[differential
+GPS correction].) My chief lieutenant was muttering about making GPSD
+report raw pseudorange data from the sensors that allow you to get at
+that.  It was abundantly clear that broadening GPSD's scope was going
+to require command-set extensions.
+
+Even though I love designing application protocols only a little-bit
+less than I love designing domain-specific minilanguages, I dragged my
+feet on tackling the GPSD-NG redesign for three years. I had a strong
+feeling that I didn't understand the problem space well enough, and
+that jumping into the effort prematurely might lock in some mistakes
+that I would come to gravely regret later on.
+
+== JSON and the AISonauts ==
+
+What finally got me off the dime in early 2009 were two developments - the
+push of AIS and the pull of JSON.  
+
+AIS is the marine http://www.navcen.uscg.gov/enav/ais/[Automatic
+Identification System]. All the open-source implementations of AIS
+packet decoding I could find were sketchy, incomplete, and not at a
+quality level I was comfortable with.  It quickly became apparent that
+this was due to a paucity of freely available public information about
+the applicable standards.
+
+http://esr.ibiblio.org/?p=888[I fixed that problem] - but having done
+so, I was faced with the problem of just how GPSD is supposed to
+report AIS data packets to clients in a way that can't be confused
+with GPS data.  This brought the GPSD-NG design problem to the front
+burner again.
+
+Fortunately, my AIS-related research also led me to discover
+http://www.json.org/[JSON], aka JavaScript Object Notation.  And JSON
+is <em>really nifty</em>, one of those ideas that seem so simple and
+powerful and obvious once you've seen it that you wonder why it wasn't
+invented sooner.
+
+In brief, JSON is a lightweight and human-readable way to serialize 
+data structures quivalent to Python dictionaries, with attributes
+that can be numbers, strings, booleans, nested dictionary objeccts,
+or variable-extent lists of any of these things.
+
+== GPSD-NG is born ==
+
+I had played with several different protocol design possibilities
+between 2006 and 2009, but none of them really felt right. My
+breakthrough moment in the GPSD-NG design came when I thought this:
+"Suppose all command arguments to GPSD-NG commands, and their
+responses, were self-describing JSON objects?"
+
+In particular, the equivalent of the 'O' command and report shown
+above looks like this in GPSD-NG (with some whitespace added to avoid
+hard-to-read linewraps):
+
+-------------------------------------------------------------------------
+-> ?TPV
+<- {"class":"TPV","tag":"MID50","device":"/dev/pts/1","time":1118327711.280,
+   "ept":0.005,"lat":46.498333338,"lon":7.567392712,"alt":1341.667,
+   "eph":48.000,"epv":32.321,"track":60.9597,"speed":0.161,"climb":-0.074,
+   "eps":50.73,"mode":3}
+-------------------------------------------------------------------------
+
+To really appreciate what you can do with object-valued attributes, 
+however, consider this JSON equivalent of a 'Y' record.  The skyview
+is a sublist of objects, one per satellite in view:
+
+-------------------------------------------------------------------------
+-> ?SKY
+<- {"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327713.280 
+   "reported":8,"satellites":[
+   {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
+   {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
+   {"PRN":8,"el":66,"az":189,"ss":40,"used":true},
+   {"PRN":29,"el":13,"az":273,"ss":0,"used":false},
+   {"PRN":10,"el":51,"az":304,"ss":36,"used":true}, 
+   {"PRN":4,"el":15,"az":199,"ss":27,"used":false},
+   {"PRN":2,"el":34,"az":241,"ss":36,"used":true},
+   {"PRN":27,"el":71,"az":76,"ss":43,"used":true}
+   ]}
+-------------------------------------------------------------------------
+
+These are rather more verbose than the 'O' or 'Y' records, but have several
+compensating advantages:
+
+* Easily extensible.  If we need to add more fields, we just add named
+  attributes.  This is especially nice because...
+* Fields with undefined values can be omitted.  This means extension
+  fields don't weigh down the response format when we aren't using them.
+* It's explicit.  Much easier to read with eyeball than the corresponding
+  'O' record.
+* It includes the name of the device reporting the fix. This opens up
+  some design possibilities I will discuss in more detail in a bit.
+* It includes, up front, a "class" tag that tells client software what it 
+  is, which can be used to drive a parse.
+
+My first key decision was that these benefits are a good trade for the
+increased verbosity.  I had to wrestle with this a bit; I've been programming
+a long time, and (as I mentioned previously) have reflexes from elder 
+days that push me to equate "good" with "requiring minimum computing power
+and bandwidth".  I reminded myself that it's 2009 and machine resources
+are cheap; readability and extensibility are the goals to play for.
+
+Once I had decided that, though, there remained another potential
+blocker.  The implementation languuage of gpsd and its principal client
+library is C.  There are lots of open-source JSON parsers in C out
+there, but they all have the defect of requiring malloc(3) and handing
+back a dynamic data structure that you then have to pointer-walk at
+runtime.
+
+This is a problem, because one of my design rules for gpsd is no use
+of malloc. Memory leaks in long-running service daemons are bad things;
+using only static, fixed-extent data structures is a brutally effective
+strategy for avoiding them. Note, this is only possible because the maximum 
+size of the packets gpsd sees is fairly small, and its algorithms are O(1) 
+in memory utilization.
+
+"Um, wait..." I hear you asking "...why accept that constraint when
+gpsd hasn't had a requirement to parse JSON yet, just emit it as
+responses?"  Because I fully expect gpsd to have to parse structured
+JSON arguments for commands.  Here's an example, which I'll explain fully
+later but right now just hint is the GPSD-NG equivalent of a 'W' command.
+
+-------------------------------------------------------------------------
+?WATCH={"TPV":true,"SKY":true,"AIS":true,"RTCM2":false}
+-------------------------------------------------------------------------
+
+Even had I not anticipated parsing JSON arguments in gpsd, I try to limit
+malloc use in the client libraries as well.  They only use two calloc(3) calls,
+in very careful ways.
+
+So my next challenge was to write and verify a tiny JSON parser that
+is driven by sets of fixed-extent structures - they tell it what shape
+of data to expect and at which static locations to drop the actual
+parsed data; if the shape does not match what's expected, error out.
+Fortunately, I am quite good at this sort of hacking - the
+result, after a day and a half of work, fit in 310 LOC including
+comments (but not including 165 LOC of unit-test code).
+
+== Un-channeling: the power ==
+
+Both gpsd and its C client library could now count on parsing JSON;
+that gave me my infrastructure.  And an extremely strong one one, too;
+the type ontology of JSON is rich enough that I'm not likely to ever
+have to replace it.  Of course this just opened up the next question -
+now that I can readily pass complex objects between gpsd and its
+client libries, what do I actually do with this capability?
+
+The possibility that immediately suggested itself was "get rid of channels".  
+In the old interface, subscribers could only listen to one device at 
+a time - again, this was a consequence of the fact that 'O' and 'Y' 
+reports were designed before multidevice support and didn't include a 
+device field.  JSON reports can easily include a device field and 
+thus need not have this problem.
+
+Instead of a channel-oriented interface, then, how about one where the
+client chooses what classes of message to listen to, and then gets
+them from all devices?
+
+Note, however, that including the device field raises some problems of
+its own. I do most of my gpsd testing with a utility I wrote called
+gpsfake, which feeds one or more specified data logs through pty
+devices so gpsd sees them as serial devices.  Because X also uses pty
+devices for virtual terminals, the device names gpsd running under
+gpsfake sees may depend on random factors like the number of terminal
+emulators I have open.  This is a problem when regression-testing!  At
+some point, this issue is going to require me to write a configuration
+command that suppresses device display.
+
+Now we come back to our previous example:
+
+-------------------------------------------------------------------------
+?WATCH={"TPV":true,"SKY":true,"AIS":true,"RTCM2":false}
+-------------------------------------------------------------------------
+
+This says: "Stream time-position/velocity and skyview and AIS reports
+from all devices at me, but not RTCM2 corrections." The way to add
+more device classes to this is obvious, which is sort of the point -
+nothing like this would have fit in the fixed-length syntax of the old
+pre-JSON protocol.
+
+== The lessons of history ==
+
+In the introduction, I called out three trends appaerent over time in 
+protocol design.  Let's now consider these in more setail.
+
+First, *changing tradeoffs between bandwidth economy versus extensibility and
+explicitness*. 
+
+Second *a shift from lockstep conversational interfaces to
+event streams* 
+
+Third, *changes in the "sweet spot" of protocol designs
+due to increasing use of scripting langages.*
