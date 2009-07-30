@@ -275,7 +275,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 #endif /* SIRF_ENABLE */
 	session->packet.char_counter = 0;
 	session->packet.retry_counter = 0;
-	gpsd_report(LOG_INF, "gpsd_activate(%d): opened GPS (%d)\n", reconfigurable, session->gpsdata.gps_fd);
+	gpsd_report(LOG_INF, "gpsd_activate(%d): opened GPS (fd %d)\n", reconfigurable, session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;

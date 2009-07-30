@@ -106,6 +106,11 @@
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
 
+/*
+ * Manifest names for the gnss_type enum - must be kept synced with it.
+ */
+const char *gnss_type_names[] = {"ANY", "GPS", "RTCM2", "RTCM3", "AIS"};
+
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
@@ -345,6 +350,9 @@ struct subscriber_t {
 #ifdef OLDSTYLE_ENABLE
     bool tied;				/* client set device with F */
 #endif /* OLDSTYLE_ENABLE */
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+    bool new_style_responses;			/* protocol typr desired */
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     int watcher;			/* is client in watcher mode? */
 #define WATCH_NOTHING	0x00
 #define WATCH_OLDSTYLE	0x01
@@ -384,6 +392,20 @@ struct subscriber_t {
 struct gps_device_t devices[MAXDEVICES];
 struct channel_t channels[MAXSUBSCRIBERS];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
+
+/*
+ * If both protocols are enabled, we have to decide what kinds of
+ * notifications to ship based on the protocol type of the last
+ * command.  Otherwise the newstyle() macro evaluates to a constant,
+ * and should be optimized out of condition guards that use it.
+ */
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+#define newstyle(sub)	(sub)->new_style_responses
+#elif defined(OLDSTYLE_ENABLE)
+#define newstyle(sub)	false
+#elif defined(GPSDNG_ENABLE)
+#define newstyle(sub)	true
+#endif
 
 static void adjust_max_fd(int fd, bool on)
 /* track the largest fd currently in use */
@@ -620,6 +642,10 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (!allocated_device(devp)) {
 		(void)strlcpy(devp->gpsdata.gps_device, device_name, PATH_MAX);
+		gpsd_report(LOG_INF,"stashing device %s at slot %d (fd %d)\n",
+			    device_name, 
+			    (int)(devp - devices),
+			    devp->gpsdata.gps_fd);
 		/*@ -mustfreeonly @*/
 		devp->context = NULL;
 		/*@ +mustfreeonly @*/
@@ -648,8 +674,10 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     }
 
     gpsd_report(LOG_PROG, 
-		"User requires %d, device %d type is %d\n", 
-		type, (int)(device - devices), device->packet.type);
+		"user requires %d=%s, device %d=%s emits packet type %d\n", 
+		type, gnss_type_names[type],
+		(int)(device - devices), device->gpsdata.gps_device,
+		device->packet.type);
     /* we might have type constraints */
     if (type == ANY)
 	return true;
@@ -671,19 +699,29 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	    ||
 	    (chp->subscriber == user 
 	     && chp->device != NULL 
-	     && allocation_filter(chp->device, type)))
+	     && allocation_filter(chp->device, type))) {
+	    gpsd_report(LOG_PROG, "client(%d): reusing channel %d (type %s)\n",
+			sub_index(user), 
+			(int)(chp-channels),
+			gnss_type_names[type]);
 	    channel = chp;
+	}
     /* if we didn't find one, allocate a new channel */
     if (channel == NULL) {
-	gpsd_report(LOG_PROG,"client(%d): attempting channel allocation.\n",
-		    sub_index(user));
 	for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	    if (chp->subscriber == NULL)
+	    if (chp->subscriber == NULL) {
 		channel = chp;
+		gpsd_report(LOG_PROG, "client(%d): attaching channel %d (type %s)\n",
+			    sub_index(user), 
+			    (int)(chp-channels),
+			    gnss_type_names[type]);
+		break;
+	    }
     }
     if (channel == NULL) {
-	gpsd_report(LOG_ERROR, "client(%d): channel allocation failed.\n",
-		    sub_index(user));
+	gpsd_report(LOG_ERROR, "client(%d): channel allocation for type %s failed.\n",
+		    sub_index(user),
+		    gnss_type_names[type]);
 	return NULL;
     }
 
@@ -734,8 +772,11 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
     /* and open that device */
     if (channel->device->gpsdata.gps_fd != -1)
-	gpsd_report(LOG_PROG,"client(%d): device %d already active.\n",
-		    sub_index(user), channel->device->gpsdata.gps_fd);
+	gpsd_report(LOG_PROG,"client(%d): device %d (fd=%d, path %s) already active.\n",
+		    sub_index(user), 
+		    (int)(channel->device - devices),
+		    channel->device->gpsdata.gps_fd,
+		    channel->device->gpsdata.gps_device);
     else {
 	if (gpsd_activate(channel->device, true) < 0) {
 
@@ -743,17 +784,17 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 			sub_index(user));
 	    return NULL;
 	} else {
-	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_device\n",
+	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel()\n",
 			channel->device->gpsdata.gps_fd);
 	    FD_SET(channel->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(channel->device->gpsdata.gps_fd, true);
 #ifdef OLDSTYLE_ENABLE
 	    /*
 	     * If user did an explicit F command tying him to a device, 
-	     * he doesn't need a second notofication that the device is
+	     * he doesn't need a second notification that the device is
 	     * attached.
 	     */
-	    if (user->watcher != WATCH_NOTHING && !user->tied) {
+	    if (user->watcher == WATCH_OLDSTYLE && !user->tied) {
 		/*@ -sefparams @*/
 		ignore_return(write(user->fd, "GPSD,F=", 7));
 		ignore_return(write(user->fd,
@@ -766,16 +807,25 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	}
     }
 
-#ifdef OLDSTYLE_ENABLE
-    if (user->watcher != WATCH_NOTHING && was_unassigned) {
+    if (was_unassigned) {
 	char buf[NMEA_MAX];
-	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
-		       timestamp(), gpsd_id(channel->device));
+
+#ifdef OLDSTYLE_ENABLE
+	if (!newstyle(user) && user->watcher)
+	    (void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
+			   timestamp(), gpsd_id(channel->device));
+#endif /* OLDSTYLE_ENABLE */
+#ifdef GPSDNG_ENABLE
+	if (newstyle(user) && was_unassigned)
+	    (void)snprintf(buf, sizeof(buf), "{\"class\":\"DEVICE\",\"device\":\"%s\",\"activated\"=%f}\r\n",
+			   channel->device->gpsdata.gps_device,
+			   timestamp());
+#endif /* GPSDNG_ENABLE */
+
 	/*@ -sefparams +matchanyintegral @*/
 	ignore_return(write(user->fd, buf, strlen(buf)));
 	/*@ +sefparams -matchanyintegral @*/
     }
-#endif /* OLDSTYLE_ENABLE */
 
     channel->subscriber = user;
     return channel;
@@ -791,8 +841,10 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 	if (chp->subscriber == user 
 	    && chp->device 
 	    && chp->device->device_type->device_class == type) {
-	    gpsd_report(LOG_PROG, "client(%d): detaching channel %d\n",
-			sub_index(user), (int)(chp-channels));
+	    gpsd_report(LOG_PROG, "client(%d): detaching channel %d (type %s)\n",
+			sub_index(user), 
+			(int)(chp-channels),
+			gnss_type_names[type]);
 	    /*@i1@*/chp->device = NULL;
 	    chp->buffer_policy = casoc;
 	    chp->subscriber = NULL;
@@ -1497,6 +1549,11 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
     if (buf[0] == '?') {
 	char reply[BUFSIZ];
 	struct channel_t *channel;
+
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+	sub->new_style_responses = true;
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+
 	if (strncmp(buf, "?TPV", 4) == 0) {
 	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
 		json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
@@ -1580,9 +1637,12 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    goto skipdisplay;
 		} else {
 		    gpsd_report(LOG_PROG, 
-				"client(%d): before, watch mask is 0x%0x.\n",
-				sub_index(sub), sub->watcher);
+				"client(%d): before, watch mask is 0x%0x, %d possibilities.\n",
+				sub_index(sub), sub->watcher, NITEMS(typemap));
 		    for (i = 0; i < NITEMS(typemap); i++) {
+			gpsd_report(LOG_PROG, 
+				    "checking against typemap[%d]\n",
+				    i);
 			if (typemap[i].flag == true) {
 			    if (assign_channel(sub, typemap[i].class, NULL) != NULL)
 				sub->watcher |= typemap[i].mask;
@@ -1618,6 +1678,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
     }
 #endif /* GPSDNG_ENABLE */
 #ifdef OLDSTYLE_ENABLE
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+    sub->new_style_responses = false;
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     /* fall back to old-style requests */
     return handle_oldstyle(sub, buf, buflen);
 #endif /* OLDSTYLE_ENABLE */
@@ -1930,7 +1993,7 @@ int main(int argc, char *argv[])
 	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
-		gpsd_report(LOG_INF, "control socket connect on %d\n", ssock);
+		gpsd_report(LOG_INF, "control socket connect on fd %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);
 		adjust_max_fd(ssock, true);
@@ -2182,7 +2245,7 @@ int main(int argc, char *argv[])
 			if (!device_needed && device->gpsdata.gps_fd > -1) {
 			    if (device->releasetime == 0) {
 				device->releasetime = timestamp();
-				gpsd_report(LOG_PROG, "device %d released\n", (int)(device-devices));
+				gpsd_report(LOG_PROG, "device %d (fd %d) released\n", (int)(device-devices), device->gpsdata.gps_fd);
 			    } else if (timestamp() - device->releasetime > RELEASE_TIMEOUT) {
 				gpsd_report(LOG_PROG, "device %d closed\n", (int)(device-devices));
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", device->gpsdata.gps_fd);

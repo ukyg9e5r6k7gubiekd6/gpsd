@@ -687,8 +687,8 @@ mode.</para></listitem>
 <varlistentry>
 <term>x</term>
 <listitem><para>Returns "X=0" if the GPS is offline, "X=%f" if
-online; in the latter case, %f is a timestamp from when the
-last sentence was received.</para>
+online; in the latter case, %f is a timestamp from when the device
+was activated or the last sentence was received.</para>
 
 <para>(At protocol level 1, the nonzero response was always 1.)</para>
 </listitem>
