@@ -2,6 +2,9 @@
 
 #include "json.h"
 
+#define GPS_JSON_COMMAND_MAX	80
+#define GPS_JSON_RESPONSE_MAX	1024
+
 void json_tpv_dump(struct gps_data_t *, struct gps_fix_t *, char *, size_t);
 void json_sky_dump(struct gps_data_t *, char *, size_t);
 int json_tpv_read(const char *, struct gps_data_t *);

@@ -1550,7 +1550,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 {
 #ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
-	char reply[BUFSIZ];
+	char reply[GPS_JSON_RESPONSE_MAX+1];
 	struct channel_t *channel;
 
 	/*

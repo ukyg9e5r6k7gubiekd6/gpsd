@@ -768,12 +768,17 @@ data between daemon and client avoids the non-extensibility
 problems of the old protocol, and permits a richer set of record types
 to be passed up to clients.</para>
 
-<para>Commands are introduced by "?", followed
-by a mandatory commmand identifier, optionally followed by
-an equal sign "=" and a JSON obsect treated as an argument.
-Responses are JSON objects all of which have a "class" attribute
+<para>Commands are introduced by "?", followed by a mandatory commmand
+identifier, optionally followed by an equal sign "=" and a JSON obsect
+treated as an argument.  Each request must end with a newline
+indication, which may consist of either LF or CR-LF. All requests must
+be composed of US-ASCII characters and may be no more than 80
+characters in length, exclusive of the trailing newline.</para>
+
+<para>Responses are JSON objects all of which have a "class" attribute
 the value of which is either the name of the invoking command 
-or one of the strings "DEVICE" or "ERROR".</para>
+or one of the strings "DEVICE" or "ERROR". Their length
+limit is 1024 characters, including trailing newline.</para>
 
 <variablelist>
 

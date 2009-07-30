@@ -1385,18 +1385,18 @@ reports.  This is a problem; in general, we can't assume that
 a gpsd instance running in a car or boat will have access to
 <code>ntpd</code> or NIST radio time signals.</p>
 
-<h1 id="designahead">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</h1>
+<h1 id="designahead">GPSD-NG, the Next-Generation GPSD Protocol</h1>
 
 <p>There are almost no more letters left in the namespace of the GPSD
-version 3 protocol.  At time of writing in late 2006 we can have one
-more command, 'h', and that's it.  After that, extending the set will
+version 3 protocol.  As early as 2006 we had only one more
+command left, 'h', and that was it.  We knew that that, extending the set would
 require a new command/response syntax.  Some posts in the dev-list
-archive refer to this as "Version 4", but that is a rev level we may
-or may not reach before GPSD-NG has to be implemented.</p>
+archive refer to this as "Version 4", but GPSD-NG got implemented.
+well before that major version level was reached </p>
 
-<p>Steps towards defining and implementing a new syntax have been
-taken. The new protocol is based on <a
-href="http://www.json.org/">JSON</a> (JavaScript Object Notation).</a>
+<p>The new protocol has now been implemented and is in testing.  It is
+based on <a href="http://www.json.org/">JSON</a> (JavaScript Object
+Notation).</a>
 
 <p>The major virtue of JSON is its extensibility. There are
 <em>lots</em> of other things a sensor wedded to a GPS might report
@@ -1407,94 +1407,6 @@ NMEA-emitting devices like magnetic compasses (which report heading
 via a proprietary TNTHTM sentence) and fish finders (which report
 water depth and temperature via NMEA DPT and MTW sentences). JSON
 gives a natural way to add ad-hoc fields.</p>
-
-<p>Each request shall begin with an introducer character, '?'. The
-purpose of the introducer is to inform the command parser that
-extended commands follow.  Each request shall end with a newline
-indication, which may consist of either LF or CR-LF (but note below
-how commands and responses may contain embedded newlines).</p>
-
-<p>All requests shall be composed of US-ASCII characters and shall be
-no more than 78 characters in length, exclusive of the trailing
-newline.</p>
-
-<p>Each command shall begin with a command identifier.  The command
-identifier shall begin with an alphabetic character and consist of
-alphanumeric characters.  It shall be followed by either an equal sign
-or a line termination (CR-LF or LF).The equal sign, if present, mudt
-be followed by a legal JSON object.</p>
-
-<p>Responses are JSON objects and thus begin witgh '{'.  Their length
-limit is 1024 characters. The response to a command shall have the
-same "class" field as the command.</p>
-
-<h2>Syntax Examples:</h2>
-
-<p>Here's an example. Note that this is a far more complex session
-than most clients will ever perform.  Much more usually they'll just
-say ?WATCH={"TPV":true,"SKY":true,"STATUS":true} and be done.</p>
-
-<pre>
-# Client asks daemon what devices are available
-# The response tells it there is one GPS, one AIS transceiver, 
-# and one RTCM3 correction source. The fields are full name, 
-# service type, driver name and (possibly) a subtype attribute
-# containing the firmware version. 
--> ?DEVICES
--> {"class":"DEVICES","devices":
-            [{"name":"/dev/ttyUSB0","type":"GPS","driver":"SiRF binary"},
-             {"name":"/dev/ttyUSB1","type":"AIS"},
-             {"name":"/dev/ttyS0","type":"RTCM3"}]
-#
-# Client subscribes to TPV, SKY, and STATUS reports
-# Daemon confirms this is possible. 
--> ?WATCH={"TPV":true,"SKY":true,"STATUS":true}
-<- {"class":"WATCH","TPV":true,"SKY":true,"STATUS":true}
-#
-# Daemon begins to stream TPVs (like our O report) and SKYs (like Y)
-# Whitespace between togens is not significant in JSON.
-<- {"class":"TPV","device":"GPS#1","tag":"MID2","time":1119197561.890,
-         "lon":46.498203637,"lat":7.568074350,"alt":1327.780,"eph":21.000,
-         "epv":124.484,"mode":3}
-<- {"class":"SKY","device":"GPS#1","tag":"MID4","time":1119197562.890,"reported":7
-         "satellites":[
-         {"PRN":10,"el":45,"az":196,"ss":34,"used":1},
-         {"PRN":29,"el":67,"az":310,"ss":40,"used":1},
-         {"PRN":28,"el":59,"az":108,"ss":42,"used":1},
-         {"PRN":26,"el":51,"az":304,"ss":43,"used":1},
-         {"PRN":8,"el":44,"az":58,"ss":41,"used":1},
-         {"PRN":27,"el":16,"az":66,"ss":39,"used":1},
-         {"PRN":21,"el":10,"az":301,"ss":0,"used":0}]}
-<- {"class":"SKY","device":"GPS#1","tag":"MID2","time":1119197563.890,
-         "lon":46.498208969,"lat":7.568087260,"alt":1328.596,
-         "eph":21.000,"epv":124.138,"mode":3}
-<- {"class":"SKY","device":"GPS#1","tag":"MID2","time":1119197564.890,
-         "lon":46.498215161,"lat":7.568087260,"alt":1329.321,
-         "eph":21.000,"epv":124.483,"mode":3}
-<- {"class":"SKY","device":"GPS#1","tag":"MID2","time":1119197565.890,
-         "lon":46.498221628,7"lat":.568088976,"alt":1328.639,
-         "eph":21.000,"epv":124.484,"mode":3}
-#
-# Client subscribes to AIS reports.
--> ?WATCH={"change":"add","AIS":true}
-<- {"class":"WATCH","TPV":true,"SKY":true,"STATUS":true,"AIS":true}
-#
-# Daemon begins to stream AIS reports
-# Class 1 fields are: device, message type, timestamp, MMSI, navigation status,
-# ROT, SOG, position accuracy, longitude, latitude, COG, and true heading.
-{"class":"AIS","device":"/dev/tty/USB1","type":1,"time":1119197565.890,
-      "mmsi":371798000,"sec":0,"rot":12.3,"speed":-123,"accuracy":true,
-      "lon":395383333,"lat":48.38163333333,"course":224,"heading":215}
-</pre>
-
-<p>
-
-<h2>Rationale:</h2>
-
-<p>The purpose of the introducer is to permit old-style and new-style
-commands to be mixed in the same session. Most of the rest of the NG
-design is a minimal adaptation to permit command names of more than
-one letter.</p>
 
 <p>The '{' introducer on JSON responses serves to distinguish
 them from old-style responses that effectively have 'GPSD,' as an
