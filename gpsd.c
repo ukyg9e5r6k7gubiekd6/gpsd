@@ -335,10 +335,9 @@ static int filesock(char *filename)
  */
 
 struct channel_t {
-    int raw;				/* is client in raw mode? */
+    struct chanconfig_t conf;		/* configurable bits */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
-    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
     struct subscriber_t *subscriber;	/* subscriber monitoring this */
     struct gps_device_t *device;	/* device subscriber listens to */
 };
@@ -485,9 +484,9 @@ static void detach_client(struct subscriber_t *sub)
 	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
-	    channel->buffer_policy = casoc;
+	    channel->conf.buffer_policy = casoc;
 	    channel->subscriber = NULL;
-	    channel->raw = 0;
+	    channel->conf.raw = 0;
 	}
     sub->fd = -1;
 }
@@ -569,7 +568,7 @@ static void raw_hook(struct gps_data_t *ud,
     struct channel_t *channel; 
 
     for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-	if (channel->raw == level)
+	if (channel->conf.raw == level)
 	{
 	    struct subscriber_t *sub = channel->subscriber;
 
@@ -852,7 +851,7 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 			(int)(chp-channels),
 			gnss_type_names[type]);
 	    /*@i1@*/chp->device = NULL;
-	    chp->buffer_policy = casoc;
+	    chp->conf.buffer_policy = casoc;
 	    chp->subscriber = NULL;
 	}
 }
@@ -1182,13 +1181,13 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	case 'J':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		channel->buffer_policy = nocasoc;
+		channel->conf.buffer_policy = nocasoc;
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		channel->buffer_policy = casoc;
+		channel->conf.buffer_policy = casoc;
 		p++;
 	    }
-	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", channel->buffer_policy);
+	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", channel->conf.buffer_policy);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -1362,26 +1361,26 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    else {
 		if (*p == '=') ++p;
 		if (*p == '2') {
-		    channel->raw = 2;
+		    channel->conf.raw = 2;
 		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=2");
 		    p++;
 		} else if (*p == '1' || *p == '+') {
-		    channel->raw = 1;
+		    channel->conf.raw = 1;
 		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    channel->raw = 0;
+		    channel->conf.raw = 0;
 		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
 		    p++;
-		} else if (channel->raw) {
-		    channel->raw = 0;
+		} else if (channel->conf.raw) {
+		    channel->conf.raw = 0;
 		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
 		} else {
-		    channel->raw = 1;
+		    channel->conf.raw = 1;
 		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
 		}
@@ -1650,6 +1649,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		}
 	    }
 	    json_watch_dump(sub->watcher, reply, sizeof(reply));
+	} else if (strncmp(buf, "?DEVCONFIG", 10) == 0) {
+
 	} else if (strncmp(buf, "?VERSION", 8) == 0) {
 	    (void)snprintf(reply, sizeof(reply),
 			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
@@ -2069,7 +2070,7 @@ int main(int argc, char *argv[])
 			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
-			    if (channel->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
+			    if (channel->conf.buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
 				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
 			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)
@@ -2212,7 +2213,7 @@ int main(int argc, char *argv[])
 		for (channel = channels; channel < channels + NITEMS(channels); channel++)
 		    if (channel->device && channel->subscriber == sub) {
 			devcount++;
-			if (channel->raw > 0)
+			if (channel->conf.raw > 0)
 			    rawcount++;
 		    }
 

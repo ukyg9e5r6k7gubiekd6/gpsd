@@ -379,6 +379,12 @@ struct gps_device_t {
 /* here are the available GPS drivers */
 extern const struct gps_type_t **gpsd_drivers;
 
+/* isolate this for the request parser */
+struct chanconfig_t {
+    int raw;					/* is client in raw mode? */
+    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
+};
+
 /* gpsd library internal prototypes */
 extern gps_mask_t nmea_parse_input(struct gps_device_t *);
 extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
