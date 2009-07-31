@@ -29,7 +29,7 @@ html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html $(XML
 AIVDM.html: AIVDM.txt
 	asciidoc -a toc AIVDM.txt
 
-protocol-evolution.html:
+protocol-evolution.html: protocol-evolution.txt
 	asciidoc -a toc protocol-evolution.txt
 
 writing-a-driver.html: writing-a-driver.xml

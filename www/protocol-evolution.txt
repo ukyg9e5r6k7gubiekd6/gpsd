@@ -8,9 +8,9 @@ GPSD is a service daemon that collects data from serial and USB GPS
 sensors attached to a host machine and presents it in a
 simple-to-parse form on TCP/IP port 2947.  This is a less trivial task
 than it sounds, because GPS sensor interfaces are both highly variable
-and really badly designed (see <a
-href="http://esr.ibiblio.org/?p=801">Why GPSes suck, and what to do
-about it</a> for a description of NMEA 0183 and other horrors).  
+and really badly designed (see http://esr.ibiblio.org/?p=801[Why GPSes
+suck, and what to do about it] for a description of NMEA 0183 and
+other horrors).
 
 In this paper, however, we will be ignoring all the dodgy stuff that
 goes on at GPSD's back end to concentrate on what happens at the front
@@ -22,10 +22,11 @@ The GPSD request-response protocol is approaching its third
 generation, and I think the way it has evolved spotlights some
 interesting design issues and long-term trends in the design of
 network protocols in general.  To anticipate, these trends are: (1)
-changing tradeoffs between bandwidth economy versus extensibility and
+changing tradeoffs of bandwidth economy versus extensibility and
 explicitness, (2) a shift from lockstep conversational interfaces to
-event streams, and (3) changes in the "sweet spot" of protocol designs
-due to increasing use of scripting langages.
+event streams, (3) changes in the "sweet spot" of protocol designs due
+to increasing use of scripting langages, and (4) protocols built on
+metaprotocols.
 
 Carrying these trends forward may even give us a bit of a glimpse at
 the future of protocol design.
@@ -265,7 +266,7 @@ compensating advantages:
 * It includes the name of the device reporting the fix. This opens up
   some design possibilities I will discuss in more detail in a bit.
 * It includes, up front, a "class" tag that tells client software what it 
-  is, which can be used to drive a parse.
+  is, which can be used to drive a parse.  
 
 My first key decision was that these benefits are a good trade for the
 increased verbosity.  I had to wrestle with this a bit; I've been programming
@@ -352,16 +353,181 @@ more device classes to this is obvious, which is sort of the point -
 nothing like this would have fit in the fixed-length syntax of the old
 pre-JSON protocol.
 
+This is not mere theory. At the time of writing, the ?WATCH command is
+fully implemented in gpsd's Subversion repository, and I expect it to
+ship ready for use in our next release (2.40).  Total time to build
+and test the JSON parsing infrastructure, the GPSD-NG parser, and the
+gpsd internals enhancements needed to support multi-device listening?
+About a working week.
+
 == The lessons of history ==
 
-In the introduction, I called out three trends appaerent over time in 
-protocol design.  Let's now consider these in more setail.
+In the introduction, I called out three trends apparent over time in 
+protocol design.  Let's now consider these in more detail.
 
-First, *changing tradeoffs between bandwidth economy versus extensibility and
+=== Bandwidth economy versus extensibility and explicitness ===
+
+First, I noted *changing tradeoffs of bandwidth economy versus extensibility and
 explicitness*. 
 
-Second *a shift from lockstep conversational interfaces to
-event streams* 
+One way you can compare protocols is by the amount of overhead they
+incur.  In a binary format this is the percentage of the bit stream 
+that goas to magic numbers, framing bits, padding, checksums, and
+the like.  In a textual format the equivalent is the percentage
+of the bitstream devoted to field delimiters, sentence start and 
+sentence-end sentinels, and (in protocols like NMEA 0183) textual
+checksum fields.
+
+Another way you can compare protocols is by implicitness versus 
+explicitness.  In the old GPSD protocol, you know the semantics of a
+request parameter within a request implicitly, by where it is in 
+the order. In GPSD-NG, you know more explicitly because every parameter is a
+name-attribute pair and you can inspect the name.
+
+Extensibility is the degree to which the protocol can have new
+requests, responses, and parameters added without breaking old
+implementations.
+
+In general, *both extensibility and overhead rise with the degree
+of explicitness in the protocol*.  The JSON-based TPV record has
+has much higher overhead than the O record it replaces, but what
+we gain from that is lots and *lots* of extensibility room. We
+win three different ways:
+
+* The command/response namespace in inexhaustibly huge.  
+* Individual requersts and responses can readily be extended by adding
+  new attributes without breaking old implementations.
+* The type ontology of JSON is rich enough to make passing arbitrarily
+  complex data structures through it very easy.
+
+With respect to the tradeoffs between explicitness/extensibility and
+overhead, we're at a very different place on the cost-benefit curves
+today from when the original GPSD protocol was designed.
+
+Communications costs for the pipes that GPSD uses have
+dropped by orders of magnitude in the decade-and-change since GPSD 
+was designed. Thus, squeezing every last bit of overhead out of the
+protocol representation doesn't have the real economic payoff it used to.
+
+Under modern conditions, there is a strong case that implicit,
+tightly-packed protocols are false economy. If (as with the first GPSD
+protocol) they're so inextensible that natural growth in the
+software breaks them, that's a clear down-check.  It's better to design
+for extensibility up front in order to avoid having to throw out 
+a lot of work later on.
+
+The direction this points in for the future is clear, especially 
+in combination with the increasing use of metaprotocols.
+
+=== From lockstep to streaming ===
+
+Second, I noted *a shift from lockstep conversational interfaces to
+event streams*.  
+
+The big change in the second protocol version was watcher
+mode.  One of the possibilities this opens up (and, in fact, it's
+a possibility that the C client library packages for you) is that
+you can put the report interpreter into an asychronous thread that
+magically updates a C struct for you every so often, without 
+the rest of your program having to know or care how that is being
+done (except possibly by waiting a mutex to ensure it doesn't read
+a partially-updated state).
+
+Analogous developments have been visible in other Internet protocols
+over roughly the same period.  Compare, for example, POP3 to IMAP. The
+former is a locktep protocol, the latter designed for streaming - it's
+why IMAP responses have a transaction ID tying them back to the
+requesting command, so responses that are out of order due to
+processing delays can be handled sanely.
+
+Systems software has generally been moving in a similar direction,
+propelled there by distribeted processing and networks with unavodable
+variable delays.  There is a distant, but perceptible, relationship
+between GPSD-NG's request-response objects and the way transactions
+are handled withinn (for example) the X window system.
+
+This trend, too, seems certain to continue, as the Internet becomes
+ever more like one gient distributed computing system.
+
+=== Type ontology recapitulates trends in language design ===
 
 Third, *changes in the "sweet spot" of protocol designs
 due to increasing use of scripting langages.*
+
+The most exciting thing about JSON to me, speaking as an application
+protocol designer, is the rich type ontology - booleans, numbers,
+strings, lists, and dictionaries - and the ability to nest them to any
+level. In an important sense that is orthogonal to raw bandwidfth,
+this makes the pipe wider - it means complex, structured data can more
+readily be passed through with a mininum of complex and bug-prone
+serialization/unserialization code.
+
+The fact that I could build a JSON parser to unpack to fixed-extent C
+structures in 300-odd LOC demonstrates that this effect is a powerful
+code simplifier even when the host language's type ontology is limited
+to fixed-extent types and poorly matched to that of JSON (C lacks not
+only variable-extent lists but also dictionaries).
+
+JSON is built on dictionaries; in fact, every JSON object is a legal
+structure literal in the dictionary-centric Python language (with one
+qualified exception near the JSON null value). It seems like a simple
+idea in 2009, but the apparent simplicity relies on folk knowledge we
+didn't have before Perl introduced dictionaries as a first-class data
+type (c.1986) and Python built an object system around them (after
+1991).
+
+Thus, GPSD-NG (and the JSON it's built on) reflects and recapitulates
+long-term trends in language design, especially those associated with
+the rise of scripting languages and of dictionaries as a  first-class 
+type within them.
+
+This produces several mutually reinforcing feedback loops.  The
+rise of scripting languages makes it easier to use JSON to its full
+potential, if only because deserialization is so trivial.  JSON will
+probably, in turn, promote the use of these languages.
+
+I think, in the future, application protocol designers will become
+progressively less reluctant to rely on being able to pass around
+complex data structures.  JSON distils the standard type ontology of
+modern scripting languages (Perl, Python, Ruby, and progeny) into a
+common data language that is far more expressive than the structs of
+yesteryear.
+
+=== Protocols on top of metaprotocols ===
+
+GPSD-NG is an an application of JSON.  Not a completely pure one; the
+request identifiers, are, for convenience reasons, outside the JSON
+objects. But close enough.
+
+In recent years, metaprotocols have become in important weapon in
+the application-protocol designer's toolkit.  XML, and its
+progeny SOAP and XML-RPC, are the best known metaprotocols. YAML
+(of which JSON is essentially a subset) has a following as well.
+
+Designing on top of a metaprotocol has several advantagesa.  The most
+obvious one is the presence of lots of open-source software to use for
+parsing the metaprotocol.  
+
+But it is probably more important in the long run that it saves one
+from having to reinvent a lot of wheels and ad-hoc representations 
+at the design level.  This effect is muted in XML, which has a weak
+type ontology, but much more pronounced in YAML or JSON.  As a
+relevant example, I didn't have to think three seconds about the right
+representation even for the relatively complex SKY object.
+
+== Envoi ==
+
+Finally, a note of thanks to the JSON developers...
+
+I think JSON does a better job of nailing the optimum in metaprotocols
+than anything I've seen before - its combination of simplicity and
+expressiveness certainly isn't matched by XML, which features an
+unfortunate combination of much higher overhead with a weak type
+ontology.  
+
+I have found JSON pleasant to work with, liberating, and
+thought-provoking; hence this paper. I will certainly reach for this 
+Swiss-army-knife first thing, next time I have to design an
+application protocol.
+
+
