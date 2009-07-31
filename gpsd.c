@@ -76,7 +76,7 @@
  * in watcher or raw mode that don't read their data will get dropped
  * when throttled_write() fills up the outbound buffers and the
  * NOREAD_TIMEOUT expires.  Clients in the original polling mode have
- * to be timed out as well.  
+ * to be timed out as well; that's what POLLER_TIMOUT is for.  
  *
  * Finally, RELEASE_TIMEOUT sets the amount of time we hold a device
  * open after the last subscriber closes it; this is nonzero so a
@@ -335,6 +335,7 @@ static int filesock(char *filename)
  */
 
 struct channel_t {
+    int raw;				/* is client in raw mode? */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
@@ -352,7 +353,6 @@ struct subscriber_t {
     bool new_style_responses;			/* protocol typr desired */
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     int watcher;			/* is client in watcher mode? */
-    int raw;				/* is client in raw mode? */
 };
 
 /*
@@ -375,7 +375,8 @@ struct subscriber_t {
 /* subscriber structure is small enough that there's no need to limit this */
 #define MAXSUBSCRIBERS	FD_SETSIZE
 #endif
-#define sub_index(s) (int)(s - subscribers)
+#define sub_index(s) (int)((s) - subscribers)
+#define channel_index(s) (int)((s) - channels)
 #define allocated_device(devp)	 ((devp)->gpsdata.gps_device[0] != '\0')
 #define free_device(devp)	 (devp)->gpsdata.gps_device[0] = '\0'
 #define initialized_device(devp) ((devp)->context != NULL)
@@ -480,13 +481,13 @@ static void detach_client(struct subscriber_t *sub)
 #endif /* OLDSTYLE_ENABLE */
     sub->watcher = WATCH_NOTHING;
     sub->active = 0;
-    sub->raw = 0;
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
 	    channel->buffer_policy = casoc;
 	    channel->subscriber = NULL;
+	    channel->raw = 0;
 	}
     sub->fd = -1;
 }
@@ -568,14 +569,16 @@ static void raw_hook(struct gps_data_t *ud,
     struct channel_t *channel; 
 
     for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-    {
-	struct subscriber_t *sub = channel->subscriber;
+	if (channel->raw == level)
+	{
+	    struct subscriber_t *sub = channel->subscriber;
 
-	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (sub != NULL && sub->raw == level && channel->device != NULL &&
-	    strcmp(ud->gps_device, channel->device->gpsdata.gps_device)==0)
-	    (void)throttled_write(sub, sentence, (ssize_t)len);
-    }
+	    /* copy raw NMEA sentences from GPS to clients in raw mode */
+	    if (sub != NULL && channel->device != NULL &&
+		strcmp(ud->gps_device, channel->device->gpsdata.gps_device)==0)
+		(void)throttled_write(sub, sentence, (ssize_t)len);
+	    
+	}
 }
 
 /*@ -globstate @*/
@@ -1359,27 +1362,27 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    else {
 		if (*p == '=') ++p;
 		if (*p == '2') {
-		    sub->raw = 2;
-		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
+		    channel->raw = 2;
+		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=2");
 		    p++;
 		} else if (*p == '1' || *p == '+') {
-		    sub->raw = 1;
-		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    channel->raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    sub->raw = 0;
-		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		    channel->raw = 0;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
 		    p++;
-		} else if (sub->raw) {
-		    sub->raw = 0;
-		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		} else if (channel->raw) {
+		    channel->raw = 0;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
 		} else {
-		    sub->raw = 1;
-		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    channel->raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
 		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
 		}
 	    }
@@ -2204,16 +2207,19 @@ int main(int argc, char *argv[])
 			detach_client(sub);
 		}
 	    } else {
-		int devcount = 0;
+		int devcount = 0, rawcount = 0;
 		/* count devices attached by this subscriber */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++)
-		    if (channel->device && channel->subscriber == sub)
+		    if (channel->device && channel->subscriber == sub) {
 			devcount++;
+			if (channel->raw > 0)
+			    rawcount++;
+		    }
 
 		if (devcount == 0 && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
 		    gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
 		    detach_client(sub);
-		} else if (devcount > 0 && !(sub->watcher || sub->raw>0) && timestamp() - sub->active > POLLER_TIMEOUT) {
+		} else if (devcount > 0 && !sub->watcher && rawcount == 0 && timestamp() - sub->active > POLLER_TIMEOUT) {
 		    gpsd_report(LOG_WARN, "client(%d) timed out on command wait.\n", cfd);
 		    detach_client(sub);
 		}
