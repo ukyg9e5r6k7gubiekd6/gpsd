@@ -137,13 +137,19 @@ single Ethernet packet (1509 bytes).
 == Pressure builds for a redesign ==
 
 Along about 2006, despite my efforts to conserve the remaining
-namespace, we ran out of letters completely. 'H' is actually still
-left, but at the time I believed we couldn't commit the last letter
-(whatever it was) because we'd need it as an inline switch to a new
-protocol.  I started feeling pressure to actually design a new
-protocol.  Besides running out of command namespace in the old one, a
-couple of things were happening that implied we'd need to define new
-commands.
+namespace, we ran out of letters completely. As the PADE example
+shows, the protocol parser interprets command words letter
+by latter, so trying to wedge longer commands in by simple 
+fiat wouldn't work. Recruiting non-letter characters as
+command chareacters would have been ugly and only postponed
+the problem a bit, not solved it.
+
+'H' is actually still left, but at the time I believed we couldn't
+commit the last letter (whatever it was) because we'd need it as an
+inline switch to a new protocol.  I started feeling pressure to
+actually design a new protocol.  Besides running out of command
+namespace in the old one, a couple of things were happening that
+implied we'd need to define new commands.
 
 What had used up the last of the command namespace was multi-device
 support.  Originally, GPSD could only monitor one GPS at a time. I
