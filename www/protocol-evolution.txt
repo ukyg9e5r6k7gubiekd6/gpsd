@@ -1,4 +1,4 @@
-= GPSD-NG: A Case Study in Appication Protocol Evolution =
+= GPSD-NG: A Case Study in Application Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
 v1.0, July 2009
 
@@ -14,7 +14,7 @@ other horrors).
 
 In this paper, however, we will be ignoring all the dodgy stuff that
 goes on at GPSD's back end to concentrate on what happens at the front
-- the request-response protocol through which plient programs get
+- the request-response protocol through which client programs get
 access to the information that GPSD acquires from its devices and
 internal computations.
 
@@ -34,7 +34,7 @@ the future of application-protocol design.
 == The first version: a simple conversational protocol ==
 
 The very first version of GPSD, back in the mid-1990s, handled
-NMEA GPSes only and was designed with a dead-simple request-reaponse
+NMEA GPSes only and was designed with a dead-simple request-response
 protocol.  To get latitude and longitude out of it, you'd connect
 to port 2947 and have a conversation that looked like this:
 
@@ -110,11 +110,11 @@ sentence that produced this report), time, time error estimate,
 longitude, latitude, altitude, horizontal error estimate, vertical
 error estimate, course, speed, climb/sink, error estimates for 
 those last three fields, and mode (an indication of fix quality).  If
-you care about issues like reporting units, read the documentration.
+you care about issues like reporting units, read the documentation.
 
-The 'Y' report is a satellite skyview, giving right-ascencion, declination, 
-and signal quality for each of the visible satellites.  GPSes usually report
-this every five minutes.
+The 'Y' report is a satellite skyview, giving right-ascension,
+declination, and signal quality for each of the visible satellites.
+GPSes usually report this every five minutes.
 
 The 'W', 'O' and 'Y' sentences, together, effectively constituted
 version 2 of the protocol - designed for streaming use. The other
@@ -211,8 +211,8 @@ powerful and obvious once you've seen it that you wonder why it wasn't
 invented sooner.
 
 In brief, JSON is a lightweight and human-readable way to serialize 
-data structures quivalent to Python dictionaries, with attributes
-that can be numbers, strings, booleans, nested dictionary objeccts,
+data structures equivalent to Python dictionaries, with attributes
+that can be numbers, strings, booleans, nested dictionary objects,
 or variable-extent lists of any of these things.
 
 == GPSD-NG is born ==
@@ -269,14 +269,15 @@ compensating advantages:
   is, which can be used to drive a parse.  
 
 My first key decision was that these benefits are a good trade for the
-increased verbosity.  I had to wrestle with this a bit; I've been programming
-a long time, and (as I mentioned previously) have reflexes from elder 
-days that push me to equate "good" with "requiring minimum computing power
-and bandwidth".  I reminded myself that it's 2009 and machine resources
-are cheap; readability and extensibility are the goals to play for.
+increased verbosity.  I had to wrestle with this a bit; I've been
+programing a long time, and (as I mentioned previously) have reflexes
+from elder days that push me to equate "good" with "requiring minimum
+computing power and bandwidth".  I reminded myself that it's 2009 and
+machine resources are cheap; readability and extensibility are the goals
+to play for.
 
 Once I had decided that, though, there remained another potential
-blocker.  The implementation languuage of gpsd and its principal client
+blocker.  The implementation language of gpsd and its principal client
 library is C.  There are lots of open-source JSON parsers in C out
 there, but they all have the defect of requiring malloc(3) and handing
 back a dynamic data structure that you then have to pointer-walk at
@@ -318,7 +319,7 @@ that gave me my infrastructure.  And an extremely strong one one, too;
 the type ontology of JSON is rich enough that I'm not likely to ever
 have to replace it.  Of course this just opened up the next question -
 now that I can readily pass complex objects between gpsd and its
-client libries, what do I actually do with this capability?
+client libraries, what do I actually do with this capability?
 
 The possibility that immediately suggested itself was "get rid of channels".  
 In the old interface, subscribers could only listen to one device at 
@@ -395,7 +396,7 @@ we gain from that is lots and *lots* of extensibility room. We
 win three different ways:
 
 * The command/response namespace in inexhaustibly huge.  
-* Individual requersts and responses can readily be extended by adding
+* Individual requests and responses can readily be extended by adding
   new attributes without breaking old implementations.
 * The type ontology of JSON is rich enough to make passing arbitrarily
   complex data structures through it very easy.
@@ -435,32 +436,32 @@ a partially-updated state).
 
 Analogous developments have been visible in other Internet protocols
 over roughly the same period.  Compare, for example, POP3 to IMAP. The
-former is a locktep protocol, the latter designed for streaming - it's
+former is a lockstep protocol, the latter designed for streaming - it's
 why IMAP responses have a transaction ID tying them back to the
 requesting command, so responses that are out of order due to
 processing delays can be handled sanely.
 
 Systems software has generally been moving in a similar direction,
-propelled there by distribeted processing and networks with unavodable
+propelled there by distributed processing and networks with unavoidable
 variable delays.  There is a distant, but perceptible, relationship
 between GPSD-NG's request-response objects and the way transactions
-are handled withinn (for example) the X window system.
+are handled within (for example) the X window system.
 
 This trend, too, seems certain to continue, as the Internet becomes
-ever more like one gient distributed computing system.
+ever more like one giant distributed computing system.
 
 === Type ontology recapitulates trends in language design ===
 
 Third, *changes in the "sweet spot" of protocol designs
-due to increasing use of scripting langages.*
+due to increasing use of scripting languages.*
 
 The most exciting thing about JSON to me, speaking as an application
 protocol designer, is the rich type ontology - booleans, numbers,
 strings, lists, and dictionaries - and the ability to nest them to any
-level. In an important sense that is orthogonal to raw bandwidfth,
+level. In an important sense that is orthogonal to raw bandwidth,
 this makes the pipe wider - it means complex, structured data can more
-readily be passed through with a mininum of complex and bug-prone
-serialization/unserialization code.
+readily be passed through with a minimum of complex and bug-prone
+serialization/deserialization code.
 
 The fact that I could build a JSON parser to unpack to fixed-extent C
 structures in 300-odd LOC demonstrates that this effect is a powerful
@@ -504,7 +505,7 @@ the application-protocol designer's toolkit.  XML, and its
 progeny SOAP and XML-RPC, are the best known metaprotocols. YAML
 (of which JSON is essentially a subset) has a following as well.
 
-Designing on top of a metaprotocol has several advantagesa.  The most
+Designing on top of a metaprotocol has several advantages.  The most
 obvious one is the presence of lots of open-source software to use for
 parsing the metaprotocol.  
 
