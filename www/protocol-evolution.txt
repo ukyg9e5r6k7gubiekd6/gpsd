@@ -1,4 +1,4 @@
-= GPSD-NG: A Case Study in Protocol Evolution =
+= GPSD-NG: A Case Study in Appication Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
 v1.0, July 2009
 
@@ -29,7 +29,7 @@ to increasing use of scripting langages, and (4) protocols built on
 metaprotocols.
 
 Carrying these trends forward may even give us a bit of a glimpse at
-the future of protocol design.
+the future of application-protocol design.
 
 == The first version: a simple conversational protocol ==
 
