@@ -18,15 +18,14 @@ goes on at GPSD's back end to concentrate on what happens at the front
 access to the information that GPSD acquires from its devices and
 internal computations.
 
-The GPSD request-response protocol is approaching its third
-generation, and I think the way it has evolved spotlights some
-interesting design issues and long-term trends in the design of
-network protocols in general.  To anticipate, these trends are: (1)
-changing tradeoffs of bandwidth economy versus extensibility and
-explicitness, (2) a shift from lockstep conversational interfaces to
-event streams, (3) changes in the "sweet spot" of protocol designs due
-to increasing use of scripting langages, and (4) protocols built on
-metaprotocols.
+The GPSD request-response protocol is enterng its third generation of
+design, and I think the way it has evolved spotlights some interesting
+design issues and long-term trends in the design of network protocols
+in general.  To anticipate, these trends are: (1) changing tradeoffs
+of bandwidth economy versus extensibility and explicitness, (2) a
+shift from lockstep conversational interfaces to event streams, (3)
+changes in the "sweet spot" of protocol designs due to increasing use
+of scripting languages, and (4) protocols built on metaprotocols.
 
 Carrying these trends forward may even give us a bit of a glimpse at
 the future of application-protocol design.
@@ -60,7 +59,7 @@ like this:
 For some devices (not all) you could add E and get error estimates.
 Other data such as course and rate of climb/sink might be available
 via other single-letter commands. I say "might be" because in those
-early days GPSD didn't attempt to compute error estimates or velocities
+early days gpsd didn't attempt to compute error estimates or velocities
 if the GPS didn't explicitly supply them.  I fixed that, later. but
 this essay is about protocol design so I'm going to ignore all the
 issues associated with the implementation for the rest of the discussion.
@@ -77,12 +76,12 @@ accomplishes that goal quite well.
 However, when I started work on it it in 2004 there was already
 pressure from the existing userbase to change at least one of the
 protocol's major assumptions - that is, that the client would poll
-whenever it wanted data. It's usually more convenient to be able to say to
-the daemon "Speak!" and have it stream TPV (time/position/velocity)
-reports back at you at the sensor's sampling rate (usually once per
-second).  Especially when, as with GPSD, you have a client library 
-that can spin in a thread picking up the updates and dropping them in a 
-struct somewhere that you specify.
+whenever it wanted data. It's usually more convenient to be able to
+say to the daemon "Speak!" and have it stream TPV
+(time/position/velocity) reports back at you at the sensor's sampling
+rate (usually once per second).  Especially when, as with GPSD, you
+have a client library that can spin in a thread picking up the updates
+and dropping them in a struct somewhere that you specify.
 
 This was the first major feature I implemented.  I called it "watcher
 mode", and it required me to add two commands to the protocol. There
@@ -170,7 +169,7 @@ information about where they had come from.
 
 Though I had just barely managed to cram in multi-GPS support without
 overrunning the available command space, we were starting to look at
-monitoring multiple <em>kinds</em> of devices in one session - RTCM2
+monitoring multiple *kinds* of devices in one session - RTCM2
 correction sources and NTRIP were the first examples. (These are both
 protocols that support
 http://www.esri.com/news/arcuser/0103/differential1of2.html[differential
@@ -179,7 +178,7 @@ report raw pseudorange data from the sensors that allow you to get at
 that.  It was abundantly clear that broadening GPSD's scope was going
 to require command-set extensions.
 
-Even though I love designing application protocols only a little-bit
+Even though I love designing application protocols only a little bit
 less than I love designing domain-specific minilanguages, I dragged my
 feet on tackling the GPSD-NG redesign for three years. I had a strong
 feeling that I didn't understand the problem space well enough, and
@@ -206,7 +205,7 @@ burner again.
 
 Fortunately, my AIS-related research also led me to discover
 http://www.json.org/[JSON], aka JavaScript Object Notation.  And JSON
-is <em>really nifty</em>, one of those ideas that seem so simple and
+is *really nifty*, one of those ideas that seem so simple and
 powerful and obvious once you've seen it that you wonder why it wasn't
 invented sooner.
 
@@ -253,6 +252,10 @@ is a sublist of objects, one per satellite in view:
    {"PRN":27,"el":71,"az":76,"ss":43,"used":true}
    ]}
 -------------------------------------------------------------------------
+
+(Yes, those "el" and "az" operations are elevation and azimuth.  "PRN"
+is the satellite ID; "ss" is signal strength in decibels, and "used"
+is a flag indicating whether the satellite was used in the current solution."
 
 These are rather more verbose than the 'O' or 'Y' records, but have several
 compensating advantages:
@@ -360,6 +363,24 @@ ship ready for use in our next release (2.40).  Total time to build
 and test the JSON parsing infrastructure, the GPSD-NG parser, and the
 gpsd internals enhancements needed to support multi-device listening?
 About a working week.
+
+Just to round out this section, here is an example of what an
+actual AIS transponder report looks like in JSON.  
+
+-------------------------------------------------------------------------
+{"class"="AIS","msgtype":5,"repeat":0,"mmsi":351759000,"imo":9134270,
+   "ais_version":0,"callsign":"3FOF8","shipname":"EVER DIADEM",
+   "shiptype":70,"to_bow":225,"to_stern":70,"to_port":1,"to_starboard":31,
+   "epfd":1,"eta":05-15T14:00Z,"draught":122,"destination":"NEW YORK",
+   "dte":0}
+-------------------------------------------------------------------------
+
+The above is an AIS type 5 message identifying a ship - giving, among
+other things, the ship's name and radio callsign and and destination
+and ETA.  You might get this from an AIS transceiver, if you had one
+hooked up to your host machine; gpsd would recognize those data
+packets coming in and automatically make AIS reports available as 
+an event stream.  
 
 == The lessons of history ==
 
