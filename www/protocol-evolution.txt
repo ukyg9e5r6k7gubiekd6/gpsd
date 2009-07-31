@@ -253,7 +253,7 @@ is a sublist of objects, one per satellite in view:
    ]}
 -------------------------------------------------------------------------
 
-(Yes, those "el" and "az" operations are elevation and azimuth.  "PRN"
+(Yes, those "el" and "az" attributes are elevation and azimuth.  "PRN"
 is the satellite ID; "ss" is signal strength in decibels, and "used"
 is a flag indicating whether the satellite was used in the current solution."
 
@@ -549,7 +549,7 @@ ontology.
 
 I have found JSON pleasant to work with, liberating, and
 thought-provoking; hence this paper. I will certainly reach for this 
-Swiss-army-knife first thing, next time I have to design an
+Swiss-army knife first thing, next time I have to design an
 application protocol.
 
 
