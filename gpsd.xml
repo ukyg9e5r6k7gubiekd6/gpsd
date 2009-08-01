@@ -1291,6 +1291,78 @@ client will see.
 </listitem>
 </varlistentry>
 
+<varlistentry>
+<term>?CONFIGCHAN</term> 
+<listitem>
+<para>
+</para>
+
+<para>A CONFIGCHAN object has the following elements:</para>
+
+<table frame="all" pgwide="0"><title>CONFIGCHAN object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "CONFIGCAN"</entry>
+</row>
+<row>
+	<entry>raw</entry> 
+        <entry>No</entry> 
+        <entry>integer</entry>
+	<entry>Controls 'raw' mode. When this attribute is set
+	to 1 for a channel, <application>gpsd</application> reports
+	the unprocessed data stream from whatever device is attached.
+	(Non-NMEA GPSes get their communication format translated to
+	NMEA on the fly.)  If the device is a source of RTCM2
+	corrections, the corrections are dumped in the textual format
+	described in
+	<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If
+	the device is a source of AIS data, AIS packets are dumped in
+	CSV form with each field (other than padding fields) dumped as
+	an unscaled integer or string, whichever is
+	appropriate.</entry>
+</row>
+<row>
+	<entry>buffer_policy</entry>
+	<entry>No</entry>
+	<entry>integer</entry>
+        <entry>Get or set buffering policy; this only matters for NMEA
+	devices which report fix data in several separate sentences
+	during the poll cycle (and in particular it
+	<emphasis>doesn't</emphasis> matter for SiRF chips).  The
+	default (0) is to clear all fix data at the start of each poll
+	cycle, so until the sentence that reports a given piece of
+	data arrives queries will report ?.  Setting 1 will disable
+	this, retaining data from the previous cycle.  This is a
+	per-user-channel bit, not a per-device one.  The 0 setting is
+	hyper-correct and never displays stale data, but may produce a
+	jittery display; the 1 setting allows stale data but smooths
+	the display.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"CONFIGHAN", "raw":1,"buffer_policy":1}
+</programlisting>
+
+</listitem>
+</varlistentry>
+
 </variablelist>
 
 <para>When a client is in watcher mode, the daemon may ship it

@@ -294,4 +294,39 @@ void json_watch_dump(int watchmask, char *reply, size_t replylen)
     (void)strlcat(reply, "}", replylen);
 }
 
+int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
+{
+    static char devpath[PATH_MAX];
+    int intcasoc;
+    struct json_attr_t chanconfig_attrs[] = {
+	{"device",         string,   .addr.string.ptr=devpath, 
+                                     .addr.string.len=PATH_MAX},
+	{"raw",            integer,  .addr.integer = &ccp->raw,
+	                             .dflt.integer = -1},
+	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
+	                             .dflt.integer = -1},
+	{NULL},
+    };
+    int status;
+
+    *dnp = devpath;
+    status = json_read_object(buf, chanconfig_attrs, 0, NULL);
+    if (status == 0)
+	if (intcasoc != -1)
+	    ccp->buffer_policy = intcasoc;
+    return status;
+}
+
+void json_configchan_dump(struct chanconfig_t *ccp, char *dnp, 
+			  char *reply, size_t replylen)
+{
+    (void)strlcpy(reply, "{\"class\":\"CONFIGCHAN\",", replylen);
+    if (dnp != NULL)
+	(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
+		       "\"device\":\"%s\",", dnp);
+    (void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
+		   "\"raw\":%d,\"buffer_policy\":%d}", 
+		   ccp->raw, ccp->buffer_policy);
+}
+
 /* gpsd_json.c ends here */

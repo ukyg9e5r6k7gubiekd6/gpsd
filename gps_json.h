@@ -11,6 +11,8 @@ int json_tpv_read(const char *, struct gps_data_t *);
 int json_sky_read(const char *, struct gps_data_t *);
 int json_watch_read(int *, char *);
 void json_watch_dump(int, char *, size_t);
+int json_configchan_read(struct chanconfig_t *, char **, char *);
+void json_configchan_dump(struct chanconfig_t *, char *, char *, size_t);
 
 #define NWATCHTYPES	5
 

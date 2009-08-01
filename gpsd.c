@@ -426,6 +426,20 @@ static void adjust_max_fd(int fd, bool on)
 #endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
 }
 
+#ifdef GPSDNG_ENABLE
+static int channel_count(struct subscriber_t *sub)
+{
+    int chancount = 0;
+    struct channel_t *chp;
+
+    for (chp = channels; chp < channels + NITEMS(channels); chp++)
+	if (chp->subscriber == sub)
+	    ++chancount;
+    return chancount;
+}
+
+#endif /* GPSDNG_ENABLE */
+
 static bool have_fix(struct channel_t *channel)
 {
     if (!channel->device) {
@@ -686,6 +700,8 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     /* we might have type constraints */
     if (type == ANY)
 	return true;
+    else if (device->device_type == NULL)
+	return false;
     else
 	return device->device_type->device_class == type;
 }
@@ -1556,7 +1572,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	struct channel_t *channel;
 
 	/*
-	 * Still to be implemented: equivalents of B C J N R Z $
+	 * Still to be implemented: equivalents of B C N Z $
 	 */
 
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
@@ -1645,20 +1661,94 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    (void)snprintf(reply, sizeof(reply),
 				   "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
-		    return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+		    (void)throttled_write(sub, reply, (ssize_t)strlen(reply));
 		}
 	    }
 	    json_watch_dump(sub->watcher, reply, sizeof(reply));
-	} else if (strncmp(buf, "?DEVCONFIG", 10) == 0) {
-
+	} else if (strncmp(buf, "?CONFIGCHAN", 11) == 0) {
+	    if (channel_count(sub) == 0)
+		(void)strlcpy(reply, 
+			      "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
+			      sizeof(reply));
+	    else {
+		struct channel_t *chp;
+		char *pathp = NULL;
+		if (buf[12] == '=') {
+		    int status;
+		    struct chanconfig_t conf;
+		    status = json_configchan_read(&conf, &pathp, buf);
+		    if (status == 0) {
+			for (chp = channels; chp < channels + NITEMS(channels); chp++)
+			    if (chp->subscriber != sub) {
+				gpsd_report(LOG_PROG, 
+					    "client(%d): channel %d (%s) not oened by subscriber.\n",
+					    sub_index(sub),
+					    channel_index(chp),
+					    chp->device->gpsdata.gps_device);
+				continue;
+			    } else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0) {
+				gpsd_report(LOG_PROG, 
+					    "client(%d): channel %d (%s) patch match failure.\n",
+					    sub_index(sub),
+					    channel_index(chp),
+					    chp->device->gpsdata.gps_device);
+				continue;
+			    } else if (conf.buffer_policy != -1 && chp->device->device_type->device_class != GPS) {
+				(void)strlcpy(reply,
+					      "{\"class\":ERROR\",\"message\":\"Attempt to apply buffer policy to a non-GPS device.\"}\r\n",
+					      sizeof(reply));
+				(void)throttled_write(sub, 
+						      reply,(ssize_t)strlen(reply));
+			    } else {
+				/*
+				 * This is the critical bit where we apply
+				 * policy to the channel.
+				 */
+				gpsd_report(LOG_PROG, 
+					    "client(%d): applying policy to channel %d (%s).\n",
+					    sub_index(sub),
+					    channel_index(chp),
+					    chp->device->gpsdata.gps_device);
+				if (conf.raw != -1)
+				    chp->conf.raw = conf.raw;
+				if (conf.buffer_policy != -1)
+				    chp->conf.buffer_policy = conf.buffer_policy;
+			    }
+		    } else 
+			(void)snprintf(reply, sizeof(reply),
+				       "{\"class\":ERROR\",\"message\":\"Invalid CONFIGCHAN.\",\"error\":\"%s\"}\r\n",
+				       json_error_string(status));
+		}
+		/* dump a response for each selected channel */
+		for (chp = channels; chp < channels + NITEMS(channels); chp++)
+		    if (chp->subscriber != sub)
+			continue;
+		    else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0)
+			continue;
+		    else {
+			json_configchan_dump(&chp->conf, 
+					     chp->device->gpsdata.gps_device, 
+					     reply + strlen(reply),
+					     sizeof(reply) - strlen(reply));
+			(void)strlcat(reply, "\r\n", sizeof(reply));
+		    }
+		if (reply[1])	/* avoid extra line termination at end */
+		    reply[strlen(reply)-2] = '\0';
+	    }
 	} else if (strncmp(buf, "?VERSION", 8) == 0) {
 	    (void)snprintf(reply, sizeof(reply),
 			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
-		GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
-	} else
+			   GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
+	} else {
+	    char *end = buf + strlen(buf) -1;
+	    if (*end == '\n')
+		*end-- = '\0';
+	    if (*end == '\r')
+		*end-- = '\0';
 	    (void)snprintf(reply, sizeof(reply), 
 			  "{\"class\":ERROR\",\"message\":\"Unrecognized request '%s'\"}",
 			  buf);
+	}
 	(void)strlcat(reply, "\r\n", sizeof(reply));
 	return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
     }
