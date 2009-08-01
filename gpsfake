@@ -65,7 +65,7 @@ pipe = False
 singleshot = False
 flicker = False
 promptme = False
-init = "w+r+"
+client_init = "w+r+"
 doptions = ""
 verbose = 0
 for (switch, val) in options:
@@ -96,9 +96,9 @@ for (switch, val) in options:
         pipe = True
     elif (switch == '-r'):
         if flicker:
-            init += val
+            client_init += val
         else:
-            init = val
+            client_init = val
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-v'):
@@ -172,7 +172,8 @@ try:
             raise SystemExit, 1
 
     try:
-        test.client_add(init + "\n")
+        if pipe:
+            test.client_add(client_init + "\n")
         test.run()
     except socket.error, msg:
         sys.stderr.write("gpsfake: socket error %s.\n" % msg)
