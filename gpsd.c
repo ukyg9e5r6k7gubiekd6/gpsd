@@ -1673,25 +1673,15 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 	    else {
 		struct channel_t *chp;
 		char *pathp = NULL;
-		if (buf[12] == '=') {
+		if (buf[11] == '=') {
 		    int status;
 		    struct chanconfig_t conf;
-		    status = json_configchan_read(&conf, &pathp, buf);
+		    status = json_configchan_read(&conf, &pathp, buf+12);
 		    if (status == 0) {
 			for (chp = channels; chp < channels + NITEMS(channels); chp++)
 			    if (chp->subscriber != sub) {
-				gpsd_report(LOG_PROG, 
-					    "client(%d): channel %d (%s) not oened by subscriber.\n",
-					    sub_index(sub),
-					    channel_index(chp),
-					    chp->device->gpsdata.gps_device);
 				continue;
 			    } else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0) {
-				gpsd_report(LOG_PROG, 
-					    "client(%d): channel %d (%s) patch match failure.\n",
-					    sub_index(sub),
-					    channel_index(chp),
-					    chp->device->gpsdata.gps_device);
 				continue;
 			    } else if (conf.buffer_policy != -1 && chp->device->device_type->device_class != GPS) {
 				(void)strlcpy(reply,

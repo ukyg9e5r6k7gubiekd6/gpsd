@@ -309,11 +309,13 @@ int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
     };
     int status;
 
-    *dnp = devpath;
     status = json_read_object(buf, chanconfig_attrs, 0, NULL);
-    if (status == 0)
+    if (status == 0) {
 	if (intcasoc != -1)
 	    ccp->buffer_policy = intcasoc;
+	if (devpath[0])
+	    *dnp = devpath;
+    }
     return status;
 }
 
