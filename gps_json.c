@@ -331,4 +331,32 @@ void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
 		   ccp->raw, ccp->buffer_policy);
 }
 
+int json_configdev_read(struct devconfig_t *cdp, char *buf)
+{
+    struct json_attr_t devconfig_attrs[] = {
+	{"device",         string,   .addr.string.ptr=cdp->device, 
+	                             .addr.string.len=sizeof(cdp->device)},
+	{"native",         integer,  .addr.integer = &cdp->native,
+	                             .dflt.integer = -1},
+	{"bps",            integer,  .addr.integer = &cdp->bps,
+	                             .dflt.integer = -1},
+	{"serialmode",     string,   .addr.string.ptr=cdp->serialmode, 
+		                      .addr.string.len=sizeof(cdp->serialmode)},
+	{NULL},
+    };
+
+    return json_read_object(buf, devconfig_attrs, 0, NULL);
+}
+
+void json_configdev_dump(struct devconfig_t *cdp, char *dnp, 
+			  char *reply, size_t replylen)
+{
+    (void)snprintf(reply, sizeof(reply),
+		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%s\",}", 
+		   cdp->device,
+		   cdp->native, 
+		   cdp->bps,
+		   cdp->serialmode);
+}
+
 /* gpsd_json.c ends here */
