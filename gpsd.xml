@@ -1294,8 +1294,13 @@ client will see.
 <varlistentry>
 <term>?CONFIGCHAN</term> 
 <listitem>
-<para>
-</para>
+
+<para>This command sets or elicits a report of per-channel buffering policy
+and the raw bit.  Without arguments, it mtells the daemon to return a 
+CONFIGCHAN object for each channel to which the client is subscribed.
+An argument CONFIGCHAN object changes channel policy.  If the object
+has a "device" attribute, only the channel associated with that device
+is selected.  Otherwise, all subscribed channels are selected.</para>
 
 <para>A CONFIGCHAN object has the following elements:</para>
 
@@ -1315,6 +1320,14 @@ client will see.
 	<entry>Yes</entry>
 	<entry>string</entry>
         <entry>Fixed: "CONFIGCAN"</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Name the device for which the policy change is
+	being described, or to which it is to be applied. If this attribute is
+        omitted, all subscribed channels are selected.</entry>
 </row>
 <row>
 	<entry>raw</entry> 

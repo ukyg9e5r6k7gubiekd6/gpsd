@@ -341,15 +341,14 @@ int json_configdev_read(struct devconfig_t *cdp, char *buf)
 	{"bps",            integer,  .addr.integer = &cdp->bps,
 	                             .dflt.integer = -1},
 	{"serialmode",     string,   .addr.string.ptr=cdp->serialmode, 
-		                      .addr.string.len=sizeof(cdp->serialmode)},
+		                     .addr.string.len=sizeof(cdp->serialmode)},
 	{NULL},
     };
 
     return json_read_object(buf, devconfig_attrs, 0, NULL);
 }
 
-void json_configdev_dump(struct devconfig_t *cdp, char *dnp, 
-			  char *reply, size_t replylen)
+void json_configdev_dump(struct devconfig_t *cdp, char *reply, size_t replylen)
 {
     (void)snprintf(reply, sizeof(reply),
 		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%s\",}", 

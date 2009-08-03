@@ -8,7 +8,7 @@
 struct devconfig_t {
     char	device[PATH_MAX];
     int		native;
-    int		bps;
+    int 	bps;
     char	serialmode[4];
 };
 
@@ -21,7 +21,7 @@ void json_watch_dump(int, char *, size_t);
 int json_configchan_read(struct chanconfig_t *, char **, char *);
 void json_configchan_dump(struct chanconfig_t *, char *, char *, size_t);
 int json_configdev_read(struct devconfig_t *, char *);
-void json_configdev_dump(struct devconfig_t *, char *, char *, size_t);
+void json_configdev_dump(struct devconfig_t *, char *, size_t);
 
 #define NWATCHTYPES	5
 

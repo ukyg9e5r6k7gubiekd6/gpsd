@@ -992,6 +992,58 @@ static void handle_control(int sfd, char *buf)
     /*@ +sefparams @*/
 }
 
+#ifdef ALLOW_RECONFIGURE
+static void set_serial(struct gps_device_t *device, 
+		       speed_t speed, char *modestring)
+/* set serial parameters for a device from a speed and modestring */
+{
+    unsigned int stopbits = device->gpsdata.stopbits;
+    char parity = (char)device->gpsdata.parity;
+    int wordsize = 8;
+
+    if (strchr("78", *modestring)!= NULL) {
+	while (isspace(*modestring))
+	    modestring++;
+	wordsize = (int)(*modestring++ - '0');
+	if (strchr("NOE", *modestring)!= NULL) {
+	    parity = *modestring++;
+	    while (isspace(*modestring))
+		modestring++;
+	    if (strchr("12", *modestring)!=NULL)
+		stopbits = (unsigned int)(*modestring - '0');
+	}
+    }
+
+    /* no support for other word sizes yet */
+    if (wordsize != (int)(9 - stopbits) && device->device_type->speed_switcher!=NULL)
+	if (device->device_type->speed_switcher(device,
+						speed,
+						parity,
+						(int)stopbits)) {
+	    /*
+	     * Deep black magic is required here. We have to
+	     * allow the control string time to register at the
+	     * GPS before we do the baud rate switch, which
+	     * effectively trashes the UART's buffer.
+	     *
+	     * This definitely fails below 40 milliseconds on a
+	     * BU-303b. 50ms is also verified by Chris Kuethe on
+	     *	Pharos iGPS360 + GSW 2.3.1ES + prolific
+	     *	Rayming TN-200 + GSW 2.3.1 + ftdi
+	     *	Rayming TN-200 + GSW 2.3.2 + ftdi
+	     * so it looks pretty solid.
+	     *
+	     * The minimum delay time is probably constant
+	     * across any given type of UART.
+	     */
+	    (void)tcdrain(device->gpsdata.gps_fd);
+	    (void)usleep(50000);
+	    gpsd_set_speed(device, speed,
+			   (unsigned char)parity, stopbits);
+	}
+}
+#endif /* ALLOW_RECONFIGURE */
+
 #ifdef OLDSTYLE_ENABLE
 static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
@@ -1017,54 +1069,14 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 #ifndef FIXED_PORT_SPEED
 	    if ((channel=assign_channel(sub, ANY, NULL))!= NULL && channel->device->device_type!=NULL && *p=='=' && privileged_channel(channel) && !context.readonly) {
 		speed_t speed;
-		unsigned int stopbits = channel->device->gpsdata.stopbits;
-		char parity = (char)channel->device->gpsdata.parity;
-		int wordsize = 8;
 
 		speed = (speed_t)atoi(++p);
 		while (isdigit(*p))
 		    p++;
 		while (isspace(*p))
 		    p++;
-		if (strchr("78", *p)!= NULL) {
-		    while (isspace(*p))
-			p++;
-		    wordsize = (int)(*p++ - '0');
-		    if (strchr("NOE", *p)!= NULL) {
-			parity = *p++;
-			while (isspace(*p))
-			    p++;
-			if (strchr("12", *p)!=NULL)
-			    stopbits = (unsigned int)(*p - '0');
-		    }
-		}
 #ifdef ALLOW_RECONFIGURE
-		/* no support for other word sizes yet */
-		if (wordsize != (int)(9 - stopbits) && channel->device->device_type->speed_switcher!=NULL)
-		    if (channel->device->device_type->speed_switcher(channel->device,
-								 speed,
-								 parity,
-								 (int)stopbits)) {
-			/*
-			 * Allow the control string time to register at the
-			 * GPS before we do the baud rate switch, which
-			 * effectively trashes the UART's buffer.
-			 *
-			 * This definitely fails below 40 milliseconds on a
-			 * BU-303b. 50ms is also verified by Chris Kuethe on
-			 *	Pharos iGPS360 + GSW 2.3.1ES + prolific
-			 *	Rayming TN-200 + GSW 2.3.1 + ftdi
-			 *	Rayming TN-200 + GSW 2.3.2 + ftdi
-			 * so it looks pretty solid.
-			 *
-			 * The minimum delay time is probably constant
-			 * across any given type of UART.
-			 */
-			(void)tcdrain(channel->device->gpsdata.gps_fd);
-			(void)usleep(50000);
-			gpsd_set_speed(channel->device, speed,
-				(unsigned char)parity, stopbits);
-		    }
+		set_serial(channel->device, speed, p); 
 #endif /* ALLOW_RECONFIGURE */
 	    }
 #endif /* FIXED_PORT_SPEED */
@@ -1710,6 +1722,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				       json_error_string(status));
 		}
 		/* dump a response for each selected channel */
+		reply[0] = '\0';
 		for (chp = channels; chp < channels + NITEMS(channels); chp++)
 		    if (chp->subscriber != sub)
 			continue;
@@ -1718,6 +1731,55 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 		    else {
 			json_configchan_dump(&chp->conf, 
 					     chp->device->gpsdata.gps_device, 
+					     reply + strlen(reply),
+					     sizeof(reply) - strlen(reply));
+			(void)strlcat(reply, "\r\n", sizeof(reply));
+		    }
+		if (reply[1])	/* avoid extra line termination at end */
+		    reply[strlen(reply)-2] = '\0';
+	    }
+	} else if (strncmp(buf, "?CONFIGDEV", 10) == 0) {
+	    int chcount = channel_count(sub);
+	    if (chcount == 0)
+		(void)strlcpy(reply, 
+			      "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
+			      sizeof(reply));
+	    else {
+		struct channel_t *chp;
+		struct devconfig_t devconf;
+		devconf.device[0] = '\0';
+		if (buf[10] == '=') {
+		    int status;
+		    status = json_configdev_read(&devconf, buf+11);
+		    if (status != 0)
+ 			(void)snprintf(reply, sizeof(reply),
+				       "{\"class\":ERROR\",\"message\":\"Invalid CONFIGDEV.\",\"error\":\"%s\"}\r\n",
+				       json_error_string(status));
+		    else if (chcount > 1 && devconf.device[0] == '\0')
+ 			(void)snprintf(reply, sizeof(reply),
+				       "{\"class\":ERROR\",\"message\":\"MNo path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
+		    else {
+		    }
+		}
+		/* dump a response for each selected channel */
+		reply[0] = '\0';
+		for (chp = channels; chp < channels + NITEMS(channels); chp++)
+		    if (chp->subscriber != sub)
+			continue;
+		    else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.gps_device, devconf.device)!=0)
+			continue;
+		    else {
+			(void)strlcpy(devconf.device, 
+				     chp->device->gpsdata.gps_device,
+				     sizeof(devconf.device));
+			(void)snprintf(devconf.serialmode, 
+				       sizeof(devconf.serialmode), 
+				       "%u%c%u",
+				       9 - channel->device->gpsdata.stopbits,
+				       (int)channel->device->gpsdata.parity,
+				       channel->device->gpsdata.stopbits);
+			devconf.bps=(int)gpsd_get_speed(&channel->device->ttyset);
+			json_configdev_dump(&devconf, 
 					     reply + strlen(reply),
 					     sizeof(reply) - strlen(reply));
 			(void)strlcat(reply, "\r\n", sizeof(reply));
