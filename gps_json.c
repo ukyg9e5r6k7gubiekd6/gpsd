@@ -158,38 +158,38 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
 {
     const struct json_attr_t json_attrs_1[] = {
-	{"device", string,  .addr.string.ptr = gpsdata->gps_device, 
+	{"device", string,  .addr.string.ptr = gpsdata->gps_device,
 			    .addr.string.len = sizeof(gpsdata->gps_device)},
 	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
 			    .addr.string.len = sizeof(gpsdata->tag)},
-	{"time",   real,    .addr.real = &gpsdata->fix.time,  
-	                    .dflt.real = NAN},
-	{"ept",    real,    .addr.real = &gpsdata->fix.ept,       
-	                    .dflt.real = NAN},
-	{"lon",    real,    .addr.real = &gpsdata->fix.longitude, 
-	                    .dflt.real = NAN},
-	{"lat",    real,    .addr.real = &gpsdata->fix.latitude,  
-	                    .dflt.real = NAN},
-	{"alt",    real,    .addr.real = &gpsdata->fix.altitude,  
-	                    .dflt.real = NAN},
-	{"eph",    real,    .addr.real = &gpsdata->fix.eph,       
-	                    .dflt.real = NAN},
+	{"time",   real,    .addr.real = &gpsdata->fix.time,
+			    .dflt.real = NAN},
+	{"ept",    real,    .addr.real = &gpsdata->fix.ept,
+			    .dflt.real = NAN},
+	{"lon",    real,    .addr.real = &gpsdata->fix.longitude,
+			    .dflt.real = NAN},
+	{"lat",    real,    .addr.real = &gpsdata->fix.latitude,
+			    .dflt.real = NAN},
+	{"alt",    real,    .addr.real = &gpsdata->fix.altitude,
+			    .dflt.real = NAN},
+	{"eph",    real,    .addr.real = &gpsdata->fix.eph,
+			    .dflt.real = NAN},
 	{"epv",    real,    .addr.real = &gpsdata->fix.epv,
-	                    .dflt.real = NAN},
-	{"track",   real,   .addr.real = &gpsdata->fix.track,  
-	                    .dflt.real = NAN},
-	{"speed",   real,   .addr.real = &gpsdata->fix.speed,  
-	                    .dflt.real = NAN},
-	{"climb",   real,   .addr.real = &gpsdata->fix.climb,  
-	                    .dflt.real = NAN},
+			    .dflt.real = NAN},
+	{"track",   real,   .addr.real = &gpsdata->fix.track,
+			    .dflt.real = NAN},
+	{"speed",   real,   .addr.real = &gpsdata->fix.speed,
+			    .dflt.real = NAN},
+	{"climb",   real,   .addr.real = &gpsdata->fix.climb,
+			    .dflt.real = NAN},
 	{"epd",    real,    .addr.real = &gpsdata->fix.epd,
-	                    .dflt.real = NAN},
+			    .dflt.real = NAN},
 	{"eps",    real,    .addr.real = &gpsdata->fix.eps,
-	                    .dflt.real = NAN},
+			    .dflt.real = NAN},
 	{"epc",    real,    .addr.real = &gpsdata->fix.epc,
-	                    .dflt.real = NAN},
-	{"mode",   integer, .addr.integer = &gpsdata->fix.mode,   
-	                    .dflt.integer = MODE_NOT_SEEN},
+			    .dflt.real = NAN},
+	{"mode",   integer, .addr.integer = &gpsdata->fix.mode,
+			    .dflt.integer = MODE_NOT_SEEN},
 	{NULL},
     };
 
@@ -210,7 +210,7 @@ int json_sky_read(const char *buf, struct gps_data_t *gpsdata)
     const struct json_attr_t json_attrs_2[] = {
 	{"device",     string,  .addr.string.ptr  = gpsdata->gps_device,
 				.addr.string.len = PATH_MAX},
-	{"tag",        string,  .addr.string.ptr  = gpsdata->tag,
+	{"tag",	string,  .addr.string.ptr  = gpsdata->tag,
 				.addr.string.len = MAXTAGLEN},
 	{"time",       real,    .addr.real    = &gpsdata->fix.time},
 	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
@@ -255,8 +255,8 @@ int json_watch_read(int *watchmask, char *buf)
     int i, status;
     bool watchflags[NWATCHTYPES];
     struct json_attr_t watch_attrs[] = {
-	{"TPV",   boolean, .addr.boolean=&watchflags[0]},  
-	{"SKY",   boolean, .addr.boolean=&watchflags[1]},  
+	{"TPV",   boolean, .addr.boolean=&watchflags[0]},
+	{"SKY",   boolean, .addr.boolean=&watchflags[1]},
 	{"RTCM2", boolean, .addr.boolean=&watchflags[2]},
 	{"RTCM3", boolean, .addr.boolean=&watchflags[3]},
 	{"AIS",   boolean, .addr.boolean=&watchflags[4]},
@@ -299,12 +299,12 @@ int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
     static char devpath[PATH_MAX];
     int intcasoc;
     struct json_attr_t chanconfig_attrs[] = {
-	{"device",         string,   .addr.string.ptr=devpath, 
-                                     .addr.string.len=PATH_MAX},
-	{"raw",            integer,  .addr.integer = &ccp->raw,
-	                             .dflt.integer = -1},
+	{"device",	 string,   .addr.string.ptr=devpath,
+				     .addr.string.len=PATH_MAX},
+	{"raw",	    integer,  .addr.integer = &ccp->raw,
+				     .dflt.integer = -1},
 	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
-	                             .dflt.integer = -1},
+				     .dflt.integer = -1},
 	{NULL},
     };
     int status;
@@ -319,7 +319,7 @@ int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
     return status;
 }
 
-void json_configchan_dump(struct chanconfig_t *ccp, char *dnp, 
+void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
 			  char *reply, size_t replylen)
 {
     (void)strlcpy(reply, "{\"class\":\"CONFIGCHAN\",", replylen);
@@ -327,21 +327,21 @@ void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
 	(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
 		       "\"device\":\"%s\",", dnp);
     (void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
-		   "\"raw\":%d,\"buffer_policy\":%d}", 
+		   "\"raw\":%d,\"buffer_policy\":%d}",
 		   ccp->raw, ccp->buffer_policy);
 }
 
 int json_configdev_read(struct devconfig_t *cdp, char *buf)
 {
     struct json_attr_t devconfig_attrs[] = {
-	{"device",         string,   .addr.string.ptr=cdp->device, 
-	                             .addr.string.len=sizeof(cdp->device)},
-	{"native",         integer,  .addr.integer = &cdp->native,
-	                             .dflt.integer = -1},
-	{"bps",            integer,  .addr.integer = &cdp->bps,
-	                             .dflt.integer = -1},
-	{"serialmode",     string,   .addr.string.ptr=cdp->serialmode, 
-		                     .addr.string.len=sizeof(cdp->serialmode)},
+	{"device",	string,   .addr.string.ptr=cdp->device,
+				  .addr.string.len=sizeof(cdp->device)},
+	{"native",	integer,  .addr.integer = &cdp->native,
+				  .dflt.integer = -1},
+	{"bps",		integer,  .addr.integer = &cdp->bps,
+				  .dflt.integer = -1},
+	{"serialmode",	string,	  .addr.string.ptr=cdp->serialmode,
+				  .addr.string.len=sizeof(cdp->serialmode)},
 	{NULL},
     };
 
@@ -350,10 +350,10 @@ int json_configdev_read(struct devconfig_t *cdp, char *buf)
 
 void json_configdev_dump(struct devconfig_t *cdp, char *reply, size_t replylen)
 {
-    (void)snprintf(reply, sizeof(reply),
-		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%s\",}", 
+    (void)snprintf(reply, replylen-1,
+		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%s\",}",
 		   cdp->device,
-		   cdp->native, 
+		   cdp->native,
 		   cdp->bps,
 		   cdp->serialmode);
 }
