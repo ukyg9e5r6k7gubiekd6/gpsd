@@ -35,6 +35,8 @@ SYSFS{idVendor}=="067b", SYSFS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/
 SYSFS{idVendor}=="091e", SYSFS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241)
 SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# u-blox AG, u-blox 5 (tested with Navilock NL-402U)
+SYSFS{idVendor}=="1546", SYSFS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
