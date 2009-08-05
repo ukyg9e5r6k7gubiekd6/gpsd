@@ -1775,10 +1775,11 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			(void)snprintf(devconf.serialmode, 
 				       sizeof(devconf.serialmode), 
 				       "%u%c%u",
-				       9 - channel->device->gpsdata.stopbits,
-				       (int)channel->device->gpsdata.parity,
-				       channel->device->gpsdata.stopbits);
-			devconf.bps=(int)gpsd_get_speed(&channel->device->ttyset);
+				       9 - chp->device->gpsdata.stopbits,
+				       (int)chp->device->gpsdata.parity,
+				       chp->device->gpsdata.stopbits);
+			devconf.bps=(int)gpsd_get_speed(&chp->device->ttyset);
+			devconf.native = chp->device->gpsdata.driver_mode;
 			json_configdev_dump(&devconf, 
 					     reply + strlen(reply),
 					     sizeof(reply) - strlen(reply));

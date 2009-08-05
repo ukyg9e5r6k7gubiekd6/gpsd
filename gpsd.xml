@@ -254,12 +254,12 @@ connected to the client's channel.</para>
 <term>b</term>
 <listitem><para>The B command with no argument returns four fields
 giving the parameters of the serial link to the GPS as "B=%d %d %c
-%d"; baud rate, byte size, parity, (N, O or E for no parity, odd, or
+%d"; baud rate, byte size, parity (N, O or E for no parity, odd, or
 even) and stop bits (1 or 2).</para>
 
 <para>The command "B=%d" sets the baud rate, not changing parity or
 stop bits; The command "B=%d [78] [NOE] [12]" (B followed by
-whiteapace; followed by a numeric speed; followed by one of the digits
+whitespace; followed by a numeric speed; followed by one of the digits
 7 or 8; followed by whitespace; followed by one of the letters 'N',
 'O', or 'E'; followed by whitespace; followed by one of the digits '1'
 or 2') sets not only speed but word length, parity, and stop bits.</para>
@@ -1199,7 +1199,7 @@ will reliably be present.</para>
 </table>
 
 <para>Note that satellite objects do not have a "class" field.., as
-they are never shipped outside of a SKY object,.</para>
+they are never shipped outside of a SKY object.</para>
 
 <para>Here's an example:</para>
 
@@ -1319,7 +1319,7 @@ is selected.  Otherwise, all subscribed channels are selected.</para>
 	<entry>class</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Fixed: "CONFIGCAN"</entry>
+        <entry>Fixed: "CONFIGCHAN"</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -1371,6 +1371,93 @@ is selected.  Otherwise, all subscribed channels are selected.</para>
 
 <programlisting>
 {"class":"CONFIGHAN", "raw":1,"buffer_policy":1}
+</programlisting>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?CONFIGDEV</term> 
+<listitem>
+
+<para>This command reports and sets device-specific control bits,
+notably the device's speed and serial mode and the native-mode bit.
+It will be rejected if more than one client is attached to the
+channel.</para>
+
+<para>Pay attention to the response, because it is
+possible for this command to fail if the GPS does not support a
+speed-switching command or only supports some combinations of
+serial modes.  In case of failure, the daemon and GPS will
+continue to communicate at the old speed.</para>
+
+<para>Use this command with caution.  On USB and Bluetooth GPSes it is
+also possible for serial mode setting to fail either because the
+serial adaptor chip does not support non-8N1 modes or because the
+device firmware does not properly synchronize the serrial adaptor chip
+with the UART on the GPS chipset whjen the speed changes. These
+failures can hang your device, possibly requiring a GPS power cycle or (in
+extreme cases) physically disconnecting the NVRAM backup battery.</para>
+
+<para>A CONFIGDEV object has the following elements:</para>
+
+<table frame="all" pgwide="0"><title>CONFIGCHAN object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "CONFIGDEV"</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Name the device for which the control bits are
+	being reported, or for which they are to be applied. This 
+        attribute may be omitted only when there is exactly one 
+        subscribed channel.</entry>
+</row>
+<row>
+	<entry>bps</entry>
+	<entry>No</entry>
+	<entry>integer</entry>
+        <entry>Device speed in bits per second.</entry>
+</row>
+<row>
+	<entry>serialmode</entry> 
+        <entry>No</entry> 
+        <entry>string</entry>
+	<entry><para>Parameters of the serial link to the GPS as
+        "$d%c%d"; byte size, parity (N, O or E for no parity, odd, or
+	even) and stop bits (1 or 2).</para></entry>
+</row>
+<row>
+	<entry>native</entry>
+	<entry>No</entry>
+	<entry>integer</entry>
+        <entry>0 means NMEA mode and 1 means
+	alternate mode (binary if it has one, for SiRF and Evermore chipsets
+	in particular). Attempting to set this mode on a non-GPS
+	device will yield an error.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"CONFIDEV", "speed":4800,"serialmode":"8N1","native":0}
 </programlisting>
 
 </listitem>
