@@ -1363,6 +1363,13 @@ is selected.  Otherwise, all subscribed channels are selected.</para>
 	jittery display; the 1 setting allows stale data but smooths
 	the display.</entry>
 </row>
+<row>
+	<entry>scaled</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>If true, apply scaling divisors to output before
+	dumping; default is false. Applies only to AIS reports.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>

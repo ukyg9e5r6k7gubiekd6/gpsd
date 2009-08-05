@@ -501,6 +501,7 @@ static void detach_client(struct subscriber_t *sub)
 	    channel->conf.buffer_policy = casoc;
 	    channel->subscriber = NULL;
 	    channel->conf.raw = 0;
+	    channel->conf.scaled = false;
 	}
     sub->fd = -1;
 }
@@ -868,6 +869,7 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
 			gnss_type_names[type]);
 	    /*@i1@*/chp->device = NULL;
 	    chp->conf.buffer_policy = casoc;
+	    chp->conf.scaled = false;
 	    chp->subscriber = NULL;
 	}
 }
@@ -1715,6 +1717,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				    chp->conf.raw = conf.raw;
 				if (conf.buffer_policy != -1)
 				    chp->conf.buffer_policy = conf.buffer_policy;
+				if (conf.scaled != nullbool)
+				    chp->conf.scaled = conf.scaled;
 			    }
 		    } else 
 			(void)snprintf(reply, sizeof(reply),
@@ -1757,8 +1761,27 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				       json_error_string(status));
 		    else if (chcount > 1 && devconf.device[0] == '\0')
  			(void)snprintf(reply, sizeof(reply),
-				       "{\"class\":ERROR\",\"message\":\"MNo path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
+				       "{\"class\":ERROR\",\"message\":\"No path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
 		    else {
+			/* we should have exactly one device now */
+			for (chp = channels; chp < channels + NITEMS(channels); chp++)
+			    if (chp->subscriber != sub)
+				continue;
+			    else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.gps_device, devconf.device)!=0)
+				continue;
+			    else {
+				channel = chp;
+				break;
+			    }
+			if (!privileged_channel(channel))
+			    (void)snprintf(reply, sizeof(reply),
+				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
+			else {
+			    /* now that channel is selected, apply changes */
+			    if (devconf.native != channel->device->gpsdata.driver_mode)
+				channel->device->device_type->mode_switcher(channel->device, devconf.native);
+			    // FIXME: change speed and serialmode */
+			}
 		    }
 		}
 		/* dump a response for each selected channel */
@@ -2259,7 +2282,7 @@ int main(int argc, char *argv[])
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
 				aivdm_dump(&channel->device->driver.aivdm.decoded, 
-					   false, false, buf2, sizeof(buf2));
+					   channel->conf.scaled, false, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */

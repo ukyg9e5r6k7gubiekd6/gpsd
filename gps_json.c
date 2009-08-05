@@ -299,12 +299,13 @@ int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
     static char devpath[PATH_MAX];
     int intcasoc;
     struct json_attr_t chanconfig_attrs[] = {
-	{"device",	 string,   .addr.string.ptr=devpath,
+	{"device",	   string,   .addr.string.ptr=devpath,
 				     .addr.string.len=PATH_MAX},
-	{"raw",	    integer,  .addr.integer = &ccp->raw,
+	{"raw",	           integer,  .addr.integer = &ccp->raw,
 				     .dflt.integer = -1},
 	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
 				     .dflt.integer = -1},
+	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
 	{NULL},
     };
     int status;
@@ -327,8 +328,10 @@ void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
 	(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
 		       "\"device\":\"%s\",", dnp);
     (void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
-		   "\"raw\":%d,\"buffer_policy\":%d}",
-		   ccp->raw, ccp->buffer_policy);
+		   "\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}",
+		   ccp->raw, 
+		   ccp->buffer_policy,
+		   ccp->scaled ? "true" : "false");
 }
 
 int json_configdev_read(struct devconfig_t *cdp, char *buf)
