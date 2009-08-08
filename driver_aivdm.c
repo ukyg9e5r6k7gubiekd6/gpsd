@@ -688,7 +688,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (sizeof(navaid_type_legends)/sizeof(navaid_type_legends[0]))) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     if (json)
-	(void)snprintf(buf, buflen, "{\"class\"=\"AIS\",\"msgtype\":%u,\"repeat\":%u,\"mmsi\":%09u,", ais->msgtype, ais->repeat, ais->mmsi);
+	(void)snprintf(buf, buflen, "{\"class\"=\"AIS\",\"msgtype\":%u,\"repeat\":%u,\"mmsi\":\"%09u\",", ais->msgtype, ais->repeat, ais->mmsi);
     else
 	(void)snprintf(buf, buflen, "%u,%u,%09u,", ais->msgtype, ais->repeat, ais->mmsi);
     /*@ -formatconst @*/
