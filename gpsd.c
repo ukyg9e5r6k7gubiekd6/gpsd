@@ -1172,7 +1172,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		}
 	    }
 	    /*@ +branchstate @*/
-	    if (channel->device != NULL)
+	    if (channel == NULL || channel->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",F=%s",
 			 channel->device->gpsdata.gps_device);
 	    else
