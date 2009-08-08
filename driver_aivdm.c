@@ -688,7 +688,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (sizeof(navaid_type_legends)/sizeof(navaid_type_legends[0]))) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     if (json)
-	(void)snprintf(buf, buflen, "{\"class\"=\"AIS\",\"msgtype\":%u,\"repeat\":%u,\"mmsi\":\"%09u\",", ais->msgtype, ais->repeat, ais->mmsi);
+	(void)snprintf(buf, buflen, "{\"class\":\"AIS\",\"msgtype\":%u,\"repeat\":%u,\"mmsi\":\"%09u\",", ais->msgtype, ais->repeat, ais->mmsi);
     else
 	(void)snprintf(buf, buflen, "%u,%u,%09u,", ais->msgtype, ais->repeat, ais->mmsi);
     /*@ -formatconst @*/
@@ -1144,7 +1144,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 	break;
     case 20:	/* Data Link Management Message */
 #define TYPE20_CSV  "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u"
-#define TYPE20_JSON	"\"offset1\":\"%u\",\"number1\":\"%u\"\"timeout1\":\"%u\"\"increment1\":\"%u\",\"offset2\":\"%u\",\"number2\":\"%u\"\"timeout2\":\"%u\",\"increment2\":\"%u\",\"offset3\":\"%u\",\"number3\":\"%u\"\"timeout3\":\"%u\"\"increment3\":\"%u\",\"offset4\":\"%u\",\"number4\":\"%u\"\"timeout4\":\"%u\"\"increment4\":\"%u\"}"
+#define TYPE20_JSON	"\"offset1\":\"%u\",\"number1\":\"%u\",\"timeout1\":\"%u\",\"increment1\":\"%u\",\"offset2\":\"%u\",\"number2\":\"%u\",\"timeout2\":\"%u\",\"increment2\":\"%u\",\"offset3\":\"%u\",\"number3\":\"%u\",\"timeout3\":\"%u\",\"increment3\":\"%u\",\"offset4\":\"%u\",\"number4\":\"%u\",\"timeout4\":\"%u\",\"increment4\":\"%u\"}"
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		      (json ? TYPE20_JSON : TYPE20_CSV),
 		      ais->type20.offset1,
@@ -1216,7 +1216,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
     case 22:	/* Channel Management */
 	if (scaled) {
 #define TYPE22_SCALED_CSV  "%u,%u,%u,%u,%f,%f,%f,%f,%u,%u,%u,%u"
-#define TYPE22_SCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\"\"mode\":\"%u\"\"power\":\"%u\",\"ne_lon\":\"%f\",\"ne_lat\":\"%f\"\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",\"addressed\":\"%u\",\"band_a\":\"%u\"\"band_b\":\"%u\"\"zonesize\":\":%u}"
+#define TYPE22_SCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\",\"mode\":\"%u\",\"power\":\"%u\",\"ne_lon\":\"%f\",\"ne_lat\":\"%f\",\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",\"addressed\":\"%u\",\"band_a\":\"%u\",\"band_b\":\"%u\",\"zonesize\":\":%u}"
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			  (json ? TYPE22_SCALED_JSON : TYPE22_SCALED_CSV),
 			  ais->type22.channel_a,
@@ -1235,7 +1235,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 #undef TYPE22_SCALED_JSON
 	} else {
 #define TYPE22_UNSCALED_CSV  "%u,%u,%u,%u,%d,%d,%d,%d,%u,%u,%u,%u"
-#define TYPE22_UNSCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\"\"mode\":\"%u\"\"power\":\"%u\",\"ne_lon\":\"%d\",\"ne_lat\":\"%d\"\"sw_lon\":\"%d\",\"sw_lat\":\"%d\",\"addressed\":\"%u\",\"band_a\":\"%u\"\"band_b\":\"%u\"\"zonesize\":\":%u}"
+#define TYPE22_UNSCALED_JSON	"\"channel_a\":\"%u\",\"channel_b\":\"%u\",\"mode\":\"%u\",\"power\":\"%u\",\"ne_lon\":\"%d\",\"ne_lat\":\"%d\",\"sw_lon\":\"%d\",\"sw_lat\":\"%d\",\"addressed\":\"%u\",\"band_a\":\"%u\",\"band_b\":\"%u\",\"zonesize\":\":%u}"
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			  (json ? TYPE22_UNSCALED_JSON : TYPE22_UNSCALED_CSV),
 			  ais->type22.channel_a,
@@ -1256,11 +1256,13 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 	break;
     case 24: /* Class B CS Static Data Report */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-		      json ? "\"partno\":%u" : "%u,", ais->type24.part);
+		      json ? "\"partno\":%u," : "%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
 			  json ? "\"shipname\":\"%s\"" : "%s",
 			  ais->type24.a.shipname);
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			   json ? "}" : "");
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
 		(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
