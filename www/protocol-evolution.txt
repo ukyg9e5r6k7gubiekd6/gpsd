@@ -18,7 +18,7 @@ goes on at GPSD's back end to concentrate on what happens at the front
 access to the information that GPSD acquires from its devices and
 internal computations.
 
-The GPSD request-response protocol is enterng its third generation of
+The GPSD request-response protocol is entering its third generation of
 design, and I think the way it has evolved spotlights some interesting
 design issues and long-term trends in the design of network protocols
 in general.  To anticipate, these trends are: (1) changing tradeoffs
@@ -523,7 +523,7 @@ yesteryear.
 
 === Protocols on top of metaprotocols ===
 
-GPSD-NG is an an application of JSON.  Not a completely pure one; the
+GPSD-NG is an application of JSON.  Not a completely pure one; the
 request identifiers, are, for convenience reasons, outside the JSON
 objects. But close enough.
 
