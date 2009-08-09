@@ -1,6 +1,6 @@
 = GPSD-NG: A Case Study in Application Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
-v1.0, July 2009
+v1.1, August 2009
 
 == Introduction ==
 
@@ -279,7 +279,7 @@ compensating advantages:
 
 My first key decision was that these benefits are a good trade for the
 increased verbosity.  I had to wrestle with this a bit; I've been
-programing a long time, and (as I mentioned previously) have reflexes
+programming a long time, and (as I mentioned previously) have reflexes
 from elder days that push me to equate "good" with "requiring minimum
 computing power and bandwidth".  I reminded myself that it's 2009 and
 machine resources are cheap; readability and extensibility are the goals
@@ -345,11 +345,11 @@ Note, however, that including the device field raises some problems of
 its own. I do most of my gpsd testing with a utility I wrote called
 gpsfake, which feeds one or more specified data logs through pty
 devices so gpsd sees them as serial devices.  Because X also uses pty
-devices for virtual terminals, the device names gpsd running under
-gpsfake sees may depend on random factors like the number of terminal
-emulators I have open.  This is a problem when regression-testing!  At
-some point, this issue is going to require me to write a configuration
-command that suppresses device display.
+devices for virtual terminals, the device names that a gpsd instance
+running under gpsfake sees may depend on random factors like the
+number of terminal emulators I have open.  This is a problem when
+regression-testing!  At some point, this issue is going to require me
+to write a configuration command that suppresses device display.
 
 Now we come back to our previous example:
 
@@ -360,7 +360,7 @@ Now we come back to our previous example:
 This says: "Stream time-position/velocity and skyview and AIS reports
 from all devices at me, but not RTCM2 corrections." The way to add
 more device classes to this is obvious, which is sort of the point -
-nothing like this would have fit in the fixed-length syntax of the old
+nothing like this could have fit in the fixed-length syntax of the old
 pre-JSON protocol.
 
 This is not mere theory. At the time of writing, the ?WATCH command is
@@ -374,7 +374,7 @@ Just to round out this section, here is an example of what an
 actual AIS transponder report looks like in JSON.  
 
 -------------------------------------------------------------------------
-{"class"="AIS","msgtype":5,"repeat":0,"mmsi":351759000,"imo":9134270,
+{"class"="AIS","msgtype":5,"repeat":0,"mmsi":"351759000","imo":9134270,
    "ais_version":0,"callsign":"3FOF8","shipname":"EVER DIADEM",
    "shiptype":70,"to_bow":225,"to_stern":70,"to_port":1,"to_starboard":31,
    "epfd":1,"eta":05-15T14:00Z,"draught":122,"destination":"NEW YORK",
@@ -395,8 +395,8 @@ protocol design.  Let's now consider these in more detail.
 
 === Bandwidth economy versus extensibility and explicitness ===
 
-First, I noted *changing tradeoffs of bandwidth economy versus extensibility and
-explicitness*. 
+First, I noted *changing tradeoffs of bandwidth economy versus
+extensibility and explicitness*.
 
 One way you can compare protocols is by the amount of overhead they
 incur.  In a binary format this is the percentage of the bit stream 
@@ -487,7 +487,7 @@ protocol designer, is the rich type ontology - booleans, numbers,
 strings, lists, and dictionaries - and the ability to nest them to any
 level. In an important sense that is orthogonal to raw bandwidth,
 this makes the pipe wider - it means complex, structured data can more
-readily be passed through with a minimum of complex and bug-prone
+readily be passed through with a minimum of fragile and bug-prone
 serialization/deserialization code.
 
 The fact that I could build a JSON parser to unpack to fixed-extent C
@@ -543,15 +543,48 @@ type ontology, but much more pronounced in YAML or JSON.  As a
 relevant example, I didn't have to think three seconds about the right
 representation even for the relatively complex SKY object.
 
+== Paths not taken ==
+
+Following the first public release of this paper, the major questions
+to come up from early readers were "Why not XML?" and "Why not a
+super-efficient packed binary protocol?" 
+
+I would have thought the case against packed binary application
+protocols was obvious from my preceding arguments, but I'll make it
+explicit here: generally, they are even more rigid and inextensible
+than a textual protocol relying on parameter ordering, and hence more
+likely to break as your application evolves. They have significant
+portability issues around things like byte order in numeric fields.
+They are opaque; they cannot be audited or analyzed without bug-prone
+special-purpose tools, adding a forbidding degree of complexity and
+friction to the life-cycle maintenance costs. 
+
+When the type ontology of your application includes only objects like
+strings or numbers that (as opposed to large binary blobs like images)
+have textual representations differing little in size from packed
+binary, there is no case at all for incurring these large overheads.
+
+The case against XML is not as strong. An XML-based protocol at least
+need not be rigidly inextensible and opaque. XML's problem is that,
+while it's a good basis for document interchange, it doesn't naturally
+express the sorts of data structures cooperating applications want to
+pass around.
+
+While such things can be layered over XML with an appropriate schema,
+the apparatus required for schema-aware parsing is necessarily
+complicated and heavyweight - certainly orders of magnitude more so
+than the little JSON parser I wrote. And XML itself is pretty
+heavyweight, too - one's data tends to stagger under the bulk
+of the markup parts.
+
 == Envoi ==
 
 Finally, a note of thanks to the JSON developers...
 
 I think JSON does a better job of nailing the optimum in metaprotocols
 than anything I've seen before - its combination of simplicity and
-expressiveness certainly isn't matched by XML, which features an
-unfortunate combination of much higher overhead with a weak type
-ontology.  
+expressiveness certainly isn't matched by XML, for reasons already
+called out in my discussion of paths not taken.
 
 I have found JSON pleasant to work with, liberating, and
 thought-provoking; hence this paper. I will certainly reach for this 
