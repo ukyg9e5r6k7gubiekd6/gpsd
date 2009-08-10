@@ -649,41 +649,13 @@ found:
      * Bring the device all the way so we'll sniff packets from it and
      * discover up front what its device class is (e.g GPS, RTCM[23], AIS).
      * Otherwise clients trying to bind to a specific type won't know
-     * what source types are actually available.  If we're in nowait mode
-     * the device has to be configured now; otherwise, it can wait.
+     * what source types are actually available.
      */
-    if (gpsd_activate(devp, nowait) < 0)
+    if (gpsd_activate(devp, true) < 0)
 	return NULL;
     FD_SET(devp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(devp->gpsdata.gps_fd, true);
     return devp;
-}
-
-static /*@null@*/ struct gps_device_t *add_device(char *device_name)
-/* add a device to the pool; open it right away if in nowait mode */
-{
-    if (nowait)
-	return open_device(device_name);
-    else {
-	struct gps_device_t *devp;
-	/* 
-	 * Stash the devicename away for probing when the first client connects.
-	 * Zero the context pointer so we know gpsd_init() hasn't been called.
-	 */
-	for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	    if (!allocated_device(devp)) {
-		(void)strlcpy(devp->gpsdata.gps_device, device_name, PATH_MAX);
-		gpsd_report(LOG_INF,"stashing device %s at slot %d (fd %d)\n",
-			    device_name, 
-			    (int)(devp - devices),
-			    devp->gpsdata.gps_fd);
-		/*@ -mustfreeonly @*/
-		devp->context = NULL;
-		/*@ +mustfreeonly @*/
-		return devp;
-	    }
-	return NULL;
-    }
 }
 
 /*@ +nullret @*/
@@ -952,7 +924,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF,"<= control(%d): adding %s \n", sfd, stash);
-	    if (add_device(stash))
+	    if (open_device(stash))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -2083,7 +2055,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) {
-	struct gps_device_t *device = add_device(argv[i]);
+	struct gps_device_t *device = open_device(argv[i]);
 	if (!device) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
