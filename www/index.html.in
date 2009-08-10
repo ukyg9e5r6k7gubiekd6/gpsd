@@ -293,6 +293,11 @@ to do about it</a></dt>
 semi-humorous way about everything that's wrong with GPS standards 
 and vendors.</dd>
 
+<dt><a href="protocol-evolution.html">GPSD-NG: A Case Study in
+Application Protocol Evolution</a></dt>
+<dd>History and evolution of the GPSD-NG protocol, illuminating some
+larger trends in application protocol design..</dd>
+
 <dt><a href="replacing-nmea.html">Towards A Better GPS Protocol</a></dt>
 <dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
 it.</dd>
