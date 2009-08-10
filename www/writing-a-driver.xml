@@ -16,6 +16,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.8</revnumber>
+      <date>9 Aug 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; the device_class experiment failed.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.7</revnumber>
       <date>24 Jul 2009</date>
       <authorinitials>er</authorinitials>
@@ -562,14 +570,6 @@ driver expects to see. This value must be one of those produced by the
 packet sniffer and <emphasis>must be unique to each
 driver</emphasis>. It is used internally to dispatch to the correct
 driver when it collects a complete packet.</para>
-
-<!-- added by ESR, 2009 -->
-<para><structfield>.device_class</structfield> What type of data this
-driver hands back. This value need <emphasis>not</emphasis> be unique
-to each driver.  Usually it will be the enumerated value GPS; other
-passible values are RTCM2, RTCM3, and AIS. This field is directly used
-to implement the 'G' command (old format) and the '?DEVICES' command
-(new format).</para>
 
 <para><structfield>.trigger</structfield> is the unique string that,
 when seen, will confirm your device is present. This will be detected

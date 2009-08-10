@@ -988,7 +988,6 @@ const struct gps_type_t sirf_binary =
 {
     .type_name      = "SiRF binary",	/* full name of type */
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */

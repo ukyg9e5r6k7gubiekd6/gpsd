@@ -59,6 +59,19 @@ struct gps_packet_t {
 #define AIVDM_PACKET	14
 #define ONCORE_PACKET	15
 #define TEXTUAL_PACKET_TYPE(n)	((n)==NMEA_PACKET||(n)==GARMINTXT_PACKET||(n)==COMMENT_PACKET||(n)==AIVDM_PACKET)
+#define PACKET_TYPEMASK(n)	(1 << (n))
+#define GPS_TYPEMASK	(PACKET_TYPEMASK(NMEA_PACKET) |	\
+			 PACKET_TYPEMASK(SIRF_PACKET) |	\
+			 PACKET_TYPEMASK(ZODIAC_PACKET) |	\
+			 PACKET_TYPEMASK(TSIP_PACKET) |		\
+			 PACKET_TYPEMASK(EVERMORE_PACKET) |	\
+			 PACKET_TYPEMASK(ITALK_PACKET) |	\
+			 PACKET_TYPEMASK(GARMIN_PACKET) |	\
+			 PACKET_TYPEMASK(NAVCOM_PACKET) |	\
+			 PACKET_TYPEMASK(UBX_PACKET) |		\
+			 PACKET_TYPEMASK(GARMINTXT_PACKET) |	\
+			 PACKET_TYPEMASK(SUPERSTAR2_PACKET) |	\
+			 PACKET_TYPEMASK(ONCORE_PACKET))
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -190,7 +203,6 @@ struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *type_name;
     int packet_type;
-    gnss_type device_class;
     /*@observer@*//*@null@*/char *trigger;
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
@@ -237,10 +249,11 @@ struct gps_device_t {
     int shmTimeP;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    double mag_var;			/* Magnetic variation in degrees */  
+    double mag_var;			/* magnetic variation in degrees */  
     bool back_to_nmea;			/* back to NMEA on revert? */
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
     size_t msgbuflen;
+    int observed;			/* which packet type`s have we seen? */
     /*
      * The rest of this structure is driver-specific private storage.
      * Because the Garmin driver uses a long buffer, you can have
@@ -260,9 +273,6 @@ struct gps_device_t {
 #endif /* GPSCLOCK_ENABLE */
 	} nmea;
 #endif /* NMEA_ENABLE */
-#ifdef AIVDM_ENABLE
-	struct aivdm_context_t aivdm;
-#endif /* AIVDM_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef SIRF_ENABLE
 	struct {
@@ -363,6 +373,15 @@ struct gps_device_t {
 	} isgps;
 #endif /* BINARY_ENABLE */
     } driver;
+    /*
+     * Auxiliary structures for parsing data that can be interleaved with
+     * GPS sentences. Can't be in the driver union or it will get stepped on.
+     * So far the only case of this is AIS reports, which in marine navigation
+     * systems may come over the same wire with GPS NMEA sentences.
+     */
+#ifdef AIVDM_ENABLE
+    struct aivdm_context_t aivdm;
+#endif /* AIVDM_ENABLE */
 };
 
 /* logging levels */
@@ -442,7 +461,6 @@ extern int hex2bin(char *);
 extern ssize_t hex_escapes(/*@out@*/char *cooked, const char *raw);
 extern void ntpd_link_activate(struct gps_device_t *session);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
-extern const char /*@observer@*/ *gpsd_type(/*@in@*/const struct gps_type_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct gps_fix_t *);
 extern void gpsd_clear_data(struct gps_device_t *);

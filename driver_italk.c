@@ -409,7 +409,6 @@ const struct gps_type_t italk_binary =
 {
     .type_name      = "iTalk binary",	/* full name of type */
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -536,7 +535,6 @@ static void itrax_wrap(struct gps_device_t *session)
 const static struct gps_type_t itrax = {
     .type_name      = "iTrax",		/* full name of type */
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger        = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */

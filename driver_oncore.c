@@ -470,8 +470,6 @@ const struct gps_type_t oncore_binary = {
     .type_name        = "oncore binary",
     /* associated lexer packet type */
     .packet_type      = ONCORE_PACKET,
-    /* device class - what kind of data it hands back */
-    .device_class   = GPS,		/* it's a GPS */
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

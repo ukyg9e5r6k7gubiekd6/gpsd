@@ -403,8 +403,6 @@ const struct gps_type_t _proto__binary = {
     .type_name        = "_proto_ binary",
     /* Associated lexer packet type */
     .packet_type      = _PROTO__PACKET,
-    /* Device class - what kind of data we hand back */
-    .device_class     = GPS,
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

@@ -515,7 +515,6 @@ const struct gps_type_t evermore_binary =
 {
     .type_name      = "EverMore binary",	/* full name of type */
     .packet_type    = EVERMORE_PACKET,		/* lexer packet type */
-    .device_class   = GPS,			/* it's a GPS */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */

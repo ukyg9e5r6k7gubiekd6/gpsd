@@ -472,7 +472,6 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
 const struct gps_type_t zodiac_binary =
 {
     .type_name      = "Zodiac binary",	/* full name of type */
-    .device_class   = GPS,		/* it's a GPS */
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */

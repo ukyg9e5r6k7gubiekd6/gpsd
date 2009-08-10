@@ -73,6 +73,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 	(void)strlcpy(session->gpsdata.gps_device, device, PATH_MAX);
     /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
+    session->observed = 0;
     session->rtcmtime = 0;
     /*@ -temptrans @*/
     session->context = context;
@@ -340,18 +341,6 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 	(void)strlcat(buf, session->subtype, sizeof(buf));
     }
     return(buf);
-}
-
-const char *gpsd_type(const struct gps_type_t *dev)
-{
-    switch(dev->device_class) {
-    case ANY:     return "UNKNOWN";
-    case GPS:     return "GPS";
-    case RTCM2:   return "RTCM2";
-    case RTCM3:   return "RTCM3";
-    case AIS:     return "AIS";
-    }
-    return "INTERNAL_ERROR";
 }
 
 #if defined(BINARY_ENABLE) || defined(RTCM104V2_ENABLE) || defined(NTRIP_ENABLE)
@@ -716,6 +705,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.gps_device,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
+	    session->observed |= PACKET_TYPEMASK(session->packet.type);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);

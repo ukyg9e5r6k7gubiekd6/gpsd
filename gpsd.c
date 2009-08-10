@@ -108,8 +108,19 @@
 
 /*
  * Manifest names for the gnss_type enum - must be kept synced with it.
+ * Also, masks so we can tell what packet types correspond to each class.
  */
-const char *gnss_type_names[] = {"ANY", "GPS", "RTCM2", "RTCM3", "AIS"};
+struct classmap_t {
+    char	*name;
+    int		mask;
+};
+static struct classmap_t classmap[] = {
+    {"ANY",	0},
+    {"GPS",	GPS_TYPEMASK},
+    {"RTCM2",	PACKET_TYPEMASK(RTCM2_PACKET)},
+    {"RTCM3",	PACKET_TYPEMASK(RTCM3_PACKET)},
+    {"AIS",	PACKET_TYPEMASK(AIVDM_PACKET)},
+};
 
 static fd_set all_fds;
 static int maxfd;
@@ -694,17 +705,19 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     }
 
     gpsd_report(LOG_PROG, 
-		"user requires %d=%s, device %d=%s emits packet type %d\n", 
-		type, gnss_type_names[type],
+		"user requires %d=%s, device %d=%s emits packet type %d, observed mask is 0x%0x, checking against 0x%0x\n", 
+		type, classmap[type].name,
 		(int)(device - devices), device->gpsdata.gps_device,
-		device->packet.type);
+		device->packet.type,
+		device->observed,
+		classmap[type].mask);
     /* we might have type constraints */
     if (type == ANY)
 	return true;
     else if (device->device_type == NULL)
 	return false;
     else
-	return device->device_type->device_class == type;
+	return (device->observed & classmap[type].mask) != 0;
 }
 
 /*@ -branchstate -usedef -globstate @*/
@@ -725,7 +738,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	    gpsd_report(LOG_PROG, "client(%d): reusing channel %d (type %s)\n",
 			sub_index(user), 
 			(int)(chp-channels),
-			gnss_type_names[type]);
+			classmap[type].name);
 	    channel = chp;
 	}
     /* if we didn't find one, allocate a new channel */
@@ -736,14 +749,14 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		gpsd_report(LOG_PROG, "client(%d): attaching channel %d (type %s)\n",
 			    sub_index(user), 
 			    (int)(chp-channels),
-			    gnss_type_names[type]);
+			    classmap[type].name);
 		break;
 	    }
     }
     if (channel == NULL) {
 	gpsd_report(LOG_ERROR, "client(%d): channel allocation for type %s failed.\n",
 		    sub_index(user),
-		    gnss_type_names[type]);
+		    classmap[type].name);
 	return NULL;
     }
 
@@ -862,11 +875,11 @@ static void deassign_channel(struct subscriber_t *user, gnss_type type)
     for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if (chp->subscriber == user 
 	    && chp->device 
-	    && chp->device->device_type->device_class == type) {
+	    && (chp->device->observed & classmap[type].mask) != 0) {
 	    gpsd_report(LOG_PROG, "client(%d): detaching channel %d (type %s)\n",
 			sub_index(user), 
 			(int)(chp-channels),
-			gnss_type_names[type]);
+			classmap[type].name);
 	    /*@i1@*/chp->device = NULL;
 	    chp->conf.buffer_policy = casoc;
 	    chp->conf.scaled = false;
@@ -1614,26 +1627,42 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 			  "{\"class\"=\"DEVICES\",\"devices\":[", sizeof(reply));
 	    for (i = 0; i < MAXDEVICES; i++) {
 		if (allocated_device(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < sizeof(reply)-1) {
+		    struct classmap_t *cmp;
 		    (void)strlcat(reply, "{\"class\":\"DEVICE\",\"name\":\"", sizeof(reply));
 		    (void)strlcat(reply, devices[i].gpsdata.gps_device, sizeof(reply));
-		    (void)strlcat(reply, "\",\"type\":\"", sizeof(reply));
-		    (void)strlcat(reply, 
-				  gpsd_type(devices[i].device_type),
-				  sizeof(reply));
-		    (void)strlcat(reply, "\",\"driver\":\"", sizeof(reply));
-		    (void)strlcat(reply, 
-				  devices[i].device_type->type_name,
-				  sizeof(reply));
+		    (void)strlcat(reply, "\",", sizeof(reply));
+		    if (devices[i].observed != 0) {
+			(void)strlcat(reply, "\"type\":[", sizeof(reply));
+			for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
+			    if ((devices[i].observed & cmp->mask) != 0) {
+				(void)strlcat(reply, "\"", sizeof(reply));
+				(void)strlcat(reply, cmp->name, sizeof(reply));
+				(void)strlcat(reply, "\",", sizeof(reply));
+			}
+			if (reply[strlen(reply)-1] == ',')
+			    reply[strlen(reply)-1] = '\0';
+			(void)strlcat(reply, "],", sizeof(reply));
+		    }
+		    if (devices[i].device_type != NULL) {
+			(void)strlcat(reply, "\"driver\":\"", sizeof(reply));
+			(void)strlcat(reply, 
+				      devices[i].device_type->type_name,
+				      sizeof(reply));
+			(void)strlcat(reply, "\",", sizeof(reply));
+		    }
 		    if (devices[i].subtype[0] != '\0') {
 			(void)strlcat(reply, "\",\"subtype\":\"", sizeof(reply));
 			(void)strlcat(reply, 
 				      devices[i].subtype,
 				      sizeof(reply));
 		    }
-		    (void)strlcat(reply, "\"},", sizeof(reply));
+		    if (reply[strlen(reply)-1] == ',')
+			reply[strlen(reply)-1] = '\0';
+		    (void)strlcat(reply, "},", sizeof(reply));
 		}
 	    }
-	    reply[strlen(reply)-1] = '\0';
+	    if (reply[strlen(reply)-1] == ',')
+		reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "]}", sizeof(reply));
 	} else if (strncmp(buf, "?WATCH", 6) == 0) {
 	    if (buf[6] == '=') {
@@ -1697,7 +1726,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, char *buf, int buflen)
 				continue;
 			    } else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0) {
 				continue;
-			    } else if (conf.buffer_policy != -1 && chp->device->device_type->device_class != GPS) {
+			    } else if (conf.buffer_policy != -1 && (chp->device->observed & GPS_TYPEMASK)==0) {
 				(void)strlcpy(reply,
 					      "{\"class\":ERROR\",\"message\":\"Attempt to apply buffer policy to a non-GPS device.\"}\r\n",
 					      sizeof(reply));
@@ -2281,7 +2310,7 @@ int main(int argc, char *argv[])
 				(void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
-				aivdm_dump(&channel->device->driver.aivdm.decoded, 
+				aivdm_dump(&channel->device->aivdm.decoded, 
 					   channel->conf.scaled, false, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
@@ -2308,7 +2337,7 @@ int main(int argc, char *argv[])
 			    }
 #ifdef AIVDM_ENABLE
 			    if ((sub->watcher & WATCH_AIS)!=0 && (changed & AIS_SET)!=0) {
-				aivdm_dump(&channel->device->driver.aivdm.decoded, 
+				aivdm_dump(&channel->device->aivdm.decoded, 
 					   false, true, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));

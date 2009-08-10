@@ -214,7 +214,6 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -304,7 +303,6 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 const struct gps_type_t garmin = {
     .type_name      = "Garmin Serial",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -367,7 +365,6 @@ static void ashtech_ping(struct gps_device_t *session)
 const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_wakeup   = ashtech_ping,	/* wakeup to be done before hunt */
@@ -414,7 +411,6 @@ static void fv18_configure(struct gps_device_t *session, unsigned int seq)
 const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -464,7 +460,6 @@ static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int se
 const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -522,7 +517,6 @@ static void tripmate_configurator(struct gps_device_t *session, unsigned int seq
 static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
-    .device_class  = GPS,			/* it's a GPS */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
     .probe_wakeup  = NULL,			/* no wakeup before hunt */
@@ -570,7 +564,6 @@ static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int s
 static const struct gps_type_t earthmate = {
     .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class  = GPS,			/* it's a GPS */
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
     .probe_wakeup  = NULL,			/* no wakeup to be done before hunt */
@@ -746,7 +739,6 @@ static bool tnt_probe(struct gps_device_t *session)
 static const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
     .probe_wakeup   = NULL,		/* this will become a real method */
@@ -820,7 +812,6 @@ static void oceanserver_configure(struct gps_device_t *session, unsigned int seq
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$C,",
     .channels       = 0,		/* not an actual GPS at all */
     .probe_wakeup   = NULL,
@@ -864,7 +855,6 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 static const struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
-    .device_class  = RTCM2,		/* it's an RTCM source */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
@@ -908,7 +898,6 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 static const struct gps_type_t rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
-    .device_class  = RTCM3,		/* it's an RTCM source */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
@@ -1043,7 +1032,6 @@ static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
 const struct gps_type_t mkt3301 = {
     .type_name      = "MKT-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .device_class   = GPS,		/* it's a GPS */
     .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -1073,7 +1061,7 @@ gps_mask_t aivdm_analyze(struct gps_device_t *);
 
 gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->driver.aivdm))
+    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm))
 	return ONLINE_SET | AIS_SET;
     else
 	return ONLINE_SET;
@@ -1084,8 +1072,6 @@ static const struct gps_type_t aivdm = {
     .type_name        = "AIVDM",
     /* Associated lexer packet type */
     .packet_type      = AIVDM_PACKET,
-    /* Device class, what kind of ata it returns */
-    .device_class     = AIS,
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

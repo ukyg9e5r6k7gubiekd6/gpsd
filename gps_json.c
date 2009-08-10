@@ -239,7 +239,7 @@ int json_sky_read(const char *buf, struct gps_data_t *gpsdata)
 
 /*
  * To add new device types to be eligible for watching, bump
- * NWATCHTYPES add a matching pair of lines to the watchmap
+ * NWATCHTYPES and add a matching pair of lines to the watchmap
  * initializer and the watch_attrs initializer.
  */
 const struct watchmap_t watchmap[NWATCHTYPES] = {

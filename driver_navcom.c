@@ -1252,7 +1252,6 @@ const struct gps_type_t navcom_binary =
 {
     .type_name      = "Navcom binary",  	/* full name of type */
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
-    .device_class   = GPS,			/* it's a GPS */
     .trigger	    = "\x02\x99\x66",		/* packet leader */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
     .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */

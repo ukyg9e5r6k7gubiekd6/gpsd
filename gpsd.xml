@@ -900,15 +900,20 @@ following elements:</para>
 </row>
 <row>
 	<entry>type</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>type (GPS, RTCM2, RTCM3, AIS)</entry>
+	<entry>No</entry>
+	<entry>list of strings</entry>
+        <entry>List of packet types seen (GPS, RTCM2, RTCM3,
+	AIS). Won't be reported if empty, e.g. before
+	<application>gpsd</application> has seen identifiable packets
+	from the device.</entry>
 </row>
 <row>
 	<entry>driver</entry>
-	<entry>Yes</entry>
+	<entry>No</entry>
 	<entry>string</entry>
-        <entry>GPSD's name for the device driver type.</entry>
+        <entry>GPSD's name for the device driver type. Won't be reported before
+	<application>gpsd</application> has seen identifiable packets
+	from the device.</entry>
 </row>
 <row>
 	<entry>driver</entry>
