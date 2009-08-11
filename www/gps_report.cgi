@@ -292,7 +292,7 @@ print <<EOF;
 <h2>Output sample</h2>
 
 <p><em style='color: #ff0000;'>Important!</em> We need a sample of the output
-from your GPS - not the Ggpsd lohfile, just raw output.  We'll use this for
+from your GPS - not the gpsd logfile, just raw output.  We'll use this for
 mechanical regression testing, which is your best guarantee that support for
 your device won't get broken in a future release. Please be advised that these
 logs will be sent to a publicly archived mailing list, and will be available in
