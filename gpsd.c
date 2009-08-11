@@ -1037,7 +1037,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
-    struct channel_t *channel;
+    struct channel_t *channel = NULL;
 
     (void)strlcpy(reply, "GPSD", BUFSIZ);
     p = buf;
@@ -1157,7 +1157,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		}
 	    }
 	    /*@ +branchstate @*/
-	    if (channel == NULL || channel->device != NULL)
+	    if (channel != NULL && channel->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",F=%s",
 			 channel->device->gpsdata.gps_device);
 	    else
@@ -1194,15 +1194,18 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
 	case 'J':
-	    if (*p == '=') ++p;
-	    if (*p == '1' || *p == '+') {
-		channel->conf.buffer_policy = nocasoc;
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		channel->conf.buffer_policy = casoc;
-		p++;
-	    }
-	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", channel->conf.buffer_policy);
+	    if (channel != NULL) {
+		if (*p == '=') ++p;
+		if (*p == '1' || *p == '+') {
+		    channel->conf.buffer_policy = nocasoc;
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    channel->conf.buffer_policy = casoc;
+		    p++;
+		}
+		(void)snprintf(phrase, sizeof(phrase), ",J=%u", channel->conf.buffer_policy);
+	    } else 
+		(void)strlcpy(phrase, ",J=?", BUFSIZ);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -1226,7 +1229,6 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", channel->fixbuffer.mode);
 	    break;
-#ifdef ALLOW_RECONFIGURE
 	case 'N':
 	    if ((channel=assign_channel(sub, GPS, NULL))== NULL || channel->device->device_type == NULL)
 		(void)strlcpy(phrase, ",N=?", BUFSIZ);
@@ -1244,12 +1246,11 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 		}
 	    }
 #endif /* ALLOW_RECONFIGURE */
-	    if (!channel->device)
+	    if (!channel || !channel->device)
 		(void)snprintf(phrase, sizeof(phrase), ",N=?");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",N=%u", channel->device->gpsdata.driver_mode);
 	    break;
-#endif /* ALLOW_RECONFIGURE */
 	case 'O':
 	    if ((channel=assign_channel(sub, GPS, NULL))== NULL || !have_fix(channel))
 		(void)strlcpy(phrase, ",O=?", BUFSIZ);
