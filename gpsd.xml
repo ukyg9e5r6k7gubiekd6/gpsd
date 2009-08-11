@@ -783,7 +783,7 @@ limit is 1024 characters, including trailing newline.</para>
 <variablelist>
 
 <varlistentry>
-<term>?VERSION</term> 
+<term>?VERSION;</term> 
 <listitem><para>Returns an object with the following attributes:</para>
 
 <table frame="all" pgwide="0"><title>VERSION object</title>
@@ -842,7 +842,7 @@ limit is 1024 characters, including trailing newline.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?DEVICES</term> 
+<term>?DEVICES;</term> 
 <listitem><para>Returns a device list object with the
 following elements:</para>
 
@@ -948,7 +948,7 @@ notifications.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?TPV</term> 
+<term>?TPV;</term> 
 <listitem><para>Opens a GPS-class device, if available, and requests a
 time/position/velocity report object in reply. Mainly intended as a
 test command: production clients should use ?WATCH to set up
@@ -1092,7 +1092,7 @@ may be reported or not depending on the fix quality.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?SKY</term> 
+<term>?SKY;</term> 
 <listitem><para>Opens a GPS-class device, if available, and requests a
 skyview report object in reply. Mainly intended as a test command:
 production clients should use ?WATCH to set up report
@@ -1226,11 +1226,11 @@ they are never shipped outside of a SKY object.</para>
 
 <varlistentry>
 <term>?WATCH</term> 
-<listitem><para>Requests a report object with class WATCH that lists
-the watch flags for all supported report classes.  If followed by 
-an "=", accepts a WATCH-class object that changes which reports the
-client will see.
-</para>
+<listitem>
+<para>If followed by ':', requests a report object with class WATCH
+that lists the watch flags for all supported report classes.  If
+followed by an "=", accepts a WATCH-class object that changes which
+reports the client will see.</para>
 
 <para>A WATCH object has the following elements:</para>
 
@@ -1300,12 +1300,13 @@ client will see.
 <term>?CONFIGCHAN</term> 
 <listitem>
 
-<para>This command sets or elicits a report of per-channel buffering policy
-and the raw bit.  Without arguments, it mtells the daemon to return a 
-CONFIGCHAN object for each channel to which the client is subscribed.
-An argument CONFIGCHAN object changes channel policy.  If the object
-has a "device" attribute, only the channel associated with that device
-is selected.  Otherwise, all subscribed channels are selected.</para>
+<para>This command sets or elicits a report of per-channel buffering
+policy and the raw bit.  Without arguments (followed by ':'), it
+mtells the daemon to return a CONFIGCHAN object for each channel to
+which the client is subscribed.  An argument CONFIGCHAN object changes
+channel policy.  If the object has a "device" attribute, only the
+channel associated with that device is selected.  Otherwise, all
+subscribed channels are selected.</para>
 
 <para>A CONFIGCHAN object has the following elements:</para>
 
@@ -1392,9 +1393,10 @@ is selected.  Otherwise, all subscribed channels are selected.</para>
 <term>?CONFIGDEV</term> 
 <listitem>
 
-<para>This command reports and sets device-specific control bits,
-notably the device's speed and serial mode and the native-mode bit.
-It will be rejected if more than one client is attached to the
+<para>This command reports (when followed by ':') or sets (when
+followed by by '=' and a CONFIGDEV object) device-specific control
+bits, notably the device's speed and serial mode and the native-mode
+bit.  It will be rejected if more than one client is attached to the
 channel.</para>
 
 <para>Pay attention to the response, because it is
@@ -1633,7 +1635,7 @@ position error of its own.</para>
 
 <para>DGPS correction will reduce UERE by a factor of 4, provided you
 are within about 100mi (160km) of a DGPS ground station from which you
-are eceiving corrections.</para>
+are receiving corrections.</para>
 
 <para>On a 4800bps connection, the time latency of fixes provided by
 <application>gpsd</application> will be one second or less 95% of the
@@ -1923,4 +1925,3 @@ url="http://gpsd.berlios.de/">here</ulink>.</para>
 </refsect1>
 
 </refentry>
-

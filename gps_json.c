@@ -18,7 +18,8 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
-void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp, char *reply, size_t replylen)
+void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
+		   char *reply, size_t replylen)
 {
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
@@ -155,7 +156,7 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 		    datap->satellites, reported);
 }
 
-int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
+int json_tpv_read(const char *buf, struct gps_data_t *gpsdata, const char **endptr)
 {
     const struct json_attr_t json_attrs_1[] = {
 	{"device", string,  .addr.string.ptr = gpsdata->gps_device,
@@ -196,7 +197,7 @@ int json_tpv_read(const char *buf, struct gps_data_t *gpsdata)
     return json_read_object(buf, json_attrs_1, 0, NULL);
 }
 
-int json_sky_read(const char *buf, struct gps_data_t *gpsdata)
+int json_sky_read(const char *buf, struct gps_data_t *gpsdata, const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
     const struct json_attr_t json_attrs_2_1[] = {
@@ -250,7 +251,7 @@ const struct watchmap_t watchmap[NWATCHTYPES] = {
     {WATCH_AIS,   AIS,   "AIS"},
 };
 
-int json_watch_read(int *watchmask, char *buf)
+int json_watch_read(int *watchmask, const char *buf, const char **endptr)
 {
     int i, status;
     bool watchflags[NWATCHTYPES];
@@ -265,7 +266,7 @@ int json_watch_read(int *watchmask, char *buf)
 
     for (i = 0; i < NITEMS(watchmap); i++)
 	watch_attrs[i].dflt.boolean = (*watchmask & watchmap[i].mask)!=0;
-    status = json_read_object(buf, watch_attrs, 0, NULL);
+    status = json_read_object(buf, watch_attrs, 0, endptr);
     if (status == 0) {
 	int i;
 	for (i = 0; i < NITEMS(watchmap); i++) {
@@ -294,7 +295,8 @@ void json_watch_dump(int watchmask, char *reply, size_t replylen)
     (void)strlcat(reply, "}", replylen);
 }
 
-int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
+int json_configchan_read(struct chanconfig_t *ccp, const char **dnp, 
+			 const char *buf, const char **endptr)
 {
     static char devpath[PATH_MAX];
     int intcasoc;
@@ -310,7 +312,7 @@ int json_configchan_read(struct chanconfig_t *ccp, char **dnp, char *buf)
     };
     int status;
 
-    status = json_read_object(buf, chanconfig_attrs, 0, NULL);
+    status = json_read_object(buf, chanconfig_attrs, 0, endptr);
     if (status == 0) {
 	if (intcasoc != -1)
 	    ccp->buffer_policy = intcasoc;
@@ -334,7 +336,7 @@ void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
 		   ccp->scaled ? "true" : "false");
 }
 
-int json_configdev_read(struct devconfig_t *cdp, char *buf)
+int json_configdev_read(struct devconfig_t *cdp, const char *buf, const char **endptr)
 {
     struct json_attr_t devconfig_attrs[] = {
 	{"device",	string,   .addr.string.ptr=cdp->device,
@@ -348,7 +350,7 @@ int json_configdev_read(struct devconfig_t *cdp, char *buf)
 	{NULL},
     };
 
-    return json_read_object(buf, devconfig_attrs, 0, NULL);
+    return json_read_object(buf, devconfig_attrs, 0, endptr);
 }
 
 void json_configdev_dump(struct devconfig_t *cdp, char *reply, size_t replylen)

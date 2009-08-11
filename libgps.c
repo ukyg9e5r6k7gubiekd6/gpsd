@@ -84,11 +84,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
+    /* FIXME: Needs top handle multiple responses per line. */
     if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
 	if (strstr(buf, "\"class\":\"TPV\"") == 0) {
-	    json_tpv_read(buf, gpsdata);
+	    json_tpv_read(buf, gpsdata, NULL);
 	} else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
-	    json_sky_read(buf, gpsdata);
+	    json_sky_read(buf, gpsdata, NULL);
 	} 
     } else
 #endif /* GPSDNG_ENABLE */
