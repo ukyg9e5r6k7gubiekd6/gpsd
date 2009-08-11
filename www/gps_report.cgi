@@ -49,8 +49,8 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	$msg .= sprintf("[%s]\n", $query->param('model'));
 	$msg .= sprintf("type = device\n");
 	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
-                        firmware nmea interface tested status noconfigure notes 
-                        location date interval leader sample_notes)){
+                        firmware nmea interface tested rating noconfigure 
+                        location date interval leader notes sample_notes)){
 		$val = $query->param($var);
 		$msg .= sprintf("\t%s = %s\n", $var, $val) if (defined($val) && $val);
 	}
@@ -258,7 +258,7 @@ my %labels=(
     "other",
     "Other -- See Technical Notes.",
     );
-print $query->radio_group(-name=>'status',
+print $query->radio_group(-name=>'rating',
 			  -values=>['excellent', 'good', 'fair',
 				    'poor', 'broken', 'other'],
 			  -default=>"-",
@@ -291,12 +291,12 @@ print <<EOF;
 <hr/>
 <h2>Output sample</h2>
 
-<p><em style='color: #ff0000;'>Important!</em> We need a sample of the
-output from your GPS.  We'll use this for mechanical regression testing,
-which is your best guarantee that support for your device won't get
-broken in a future release. Please be advised that these logs will be
-sent to a publicly archived mailing list, and will be available in the
-public SVN repository.</p>
+<p><em style='color: #ff0000;'>Important!</em> We need a sample of the output
+from your GPS - not the Ggpsd lohfile, just raw output.  We'll use this for
+mechanical regression testing, which is your best guarantee that support for
+your device won't get broken in a future release. Please be advised that these
+logs will be sent to a publicly archived mailing list, and will be available in
+the public SVN repository.</p>
 
 <p>Almost all GPS receivers will simply start throwing data to your port
 immediately when they're plugged in. You should normally be able to capture
@@ -457,8 +457,8 @@ if ($query->param("tested")) {
 } else {
     print "No GPSD version specified.<br/>\n";
 }
-if ($query->param("status")) {
-    print "GPSD compatibility is <code>". escapeHTML($query->param("status")) ."</code><br/>\n";
+if ($query->param("rating")) {
+    print "GPSD compatibility is <code>". escapeHTML($query->param("rating")) ."</code><br/>\n";
 } else {
     print "No GPSD compatiblity specified.<br/>\n";
 }
