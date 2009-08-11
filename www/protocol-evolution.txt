@@ -233,7 +233,7 @@ above looks like this in GPSD-NG (with some whitespace added to avoid
 hard-to-read linewraps):
 
 -------------------------------------------------------------------------
--> ?TPV
+-> ?TPV;
 <- {"class":"TPV","tag":"MID50","device":"/dev/pts/1","time":1118327711.280,
    "ept":0.005,"lat":46.498333338,"lon":7.567392712,"alt":1341.667,
    "eph":48.000,"epv":32.321,"track":60.9597,"speed":0.161,"climb":-0.074,
@@ -245,7 +245,7 @@ however, consider this JSON equivalent of a 'Y' record.  The skyview
 is a sublist of objects, one per satellite in view:
 
 -------------------------------------------------------------------------
--> ?SKY
+-> ?SKY;
 <- {"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327713.280 
    "reported":8,"satellites":[
    {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
