@@ -88,15 +88,15 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 
                 ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
                 namefield = dev
-                if self.has_option(dev, "reference"):
-                    namefield = "<a href='%s'>%s</a>" % (self.get(dev, "reference"), dev)
+                if self.has_option(dev, "techdoc"):
+                    namefield = "<a href='%s'>%s</a>" % (self.get(dev, "techdoc"), dev)
                 if self.has_option(dev, "discontinued"):
                     namefield = namefield + "&nbsp;<img title='Device discontinued' src='discontinued.png'/>"
                 ofp.write("<td>%s</td>\n" % namefield)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
                 engine = self.get(dev, "engine")
-                if self.has_option(engine, "reference"):
-                    engine = "<a href='%s'>%s</a>" % (self.get(engine, "reference"), engine)
+                if self.has_option(engine, "techdoc"):
+                    engine = "<a href='%s'>%s</a>" % (self.get(engine, "techdoc"), engine)
                 if self.has_option(dev, "subtype"):
                     engine += " (" + self.get(dev, "subtype") + ")"
                 ofp.write("<td>%s</td>\n" % engine)
