@@ -18,7 +18,6 @@ XML = \
 	gpsctl.xml \
 	gpscat.xml \
 	gpspipe.xml \
-	gpsflash.xml \
 	rtcm-104.xml \
 	srec.xml
 
