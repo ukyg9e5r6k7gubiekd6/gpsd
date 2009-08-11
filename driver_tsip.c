@@ -837,6 +837,51 @@ static bool tsip_speed_switch(struct gps_device_t *session,
 
     return true;	/* it would be nice to error-check this */
 }
+
+static void tsip_mode(struct gps_device_t *session, int mode)
+{
+    unsigned char buf[16];
+
+    if (mode == MODE_NMEA) {
+        /* First turn on the NMEA messages we want */
+
+        putbyte(buf,0,0x00);		/* subcode 0 */
+        putbyte(buf,1,0x01);            /* 1-second fix interval */
+        putbyte(buf,2,0x00);		/* Reserved */
+        putbyte(buf,3,0x00);		/* Reserved */
+        putbyte(buf,4,0x01);		/* 0=RMC, 1-7=Reserved */
+        putbyte(buf,5,0x19);		/* 0=GGA, 1=GGL, 2=VTG, 3=GSV, */
+                                        /* 4=GSA, 5=ZDA, 6-7=Reserved  */
+
+        (void)tsip_write(session, 0x7A, buf, 6);
+
+        /* Now switch to NMEA mode */
+
+        memset(buf, 0, sizeof(buf));
+
+        putbyte(buf,0,0xff);		/* current port */
+        putbyte(buf,1,0x06);            /* 4800 bps input */
+        putbyte(buf,2,0x06);		/* 4800 bps output */
+        putbyte(buf,3,0x03);		/* 8 data bits */
+        putbyte(buf,4,0x00);		/* No parity */
+        putbyte(buf,5,0x00);		/* 1 stop bit */
+        putbyte(buf,6,0x00);		/* No flow control */
+        putbyte(buf,7,0x02);		/* Input protocol TSIP */
+        putbyte(buf,8,0x04);		/* Output protocol NMEA */
+        putbyte(buf,9,0x00);		/* Reserved */
+
+        (void)tsip_write(session, 0xBC, buf, 10);
+
+    } else if (mode == MODE_BINARY) {
+        /* The speed switcher also puts us back in TSIP, so call it */
+        /* with the default 9600 8O1. */
+	// FIXME: Should preserve the current speed.
+        tsip_speed_switch(session, 9600, 'O', 1);
+
+    } else {
+        gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);
+    }
+}
 #endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
@@ -858,7 +903,7 @@ const struct gps_type_t tsip_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = tsip_configurator,/* initial mode sets */
     .speed_switcher = tsip_speed_switch,/* change baud rate */
-    .mode_switcher  = NULL,		/* no mode switcher */
+    .mode_switcher  = tsip_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
     .revert         = NULL,		/* FIXME: revert sentence mix */
