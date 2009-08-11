@@ -1567,13 +1567,10 @@ list must be written to a local Unix-domain socket which will be
 accessible only to programs running as root.  This control socket will
 be located wherever the -F option specifies it.</para>
 
-<para>When clients are active but a GPS is not responding,
-<application>gpsd</application> will spin trying to open the GPS
-device once per second.  Thus, it can be left running in background
-and survive having a GPS repeatedly unplugged and plugged back
-in.  When it is properly installed along with hotplug notifier
-scripts feeding it device-add commands, <application>gpsd</application>
-should require no configuration or user action to find devices.</para>
+<para>When <application>gpsd</application> is properly installed along
+with hotplug notifier scripts feeding it device-add commands over the
+control socket, <application>gpsd</application> should require no
+configuration or user action to find devices.</para>
 
 <para>Sending SIGHUP to a running <application>gpsd</application>
 forces it to close all GPSes and all client connections.  It will then
