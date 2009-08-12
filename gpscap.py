@@ -128,7 +128,14 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "nmea"):
                     nmea = self.get(dev, "nmea")
                 ofp.write("<td>%s</td>\n" % nmea)
-                ofp.write("<td>%s</td>\n" % self.get(dev, "notes"))
+                if self.has_option(dev, "notes"):
+                    notes = self.get(dev, "notes")
+                else:
+                    notes = ""
+                if self.has_option(dev, "submitter"):
+                    notes += " Reported by %s." % self.get(dev, "submitter")
+                notes = notes.replace("@", "&#x40;").replace("<", "&lt;").replace(">", "&gt;")
+                ofp.write("<td>%s</td>\n" % notes)
                 ofp.write("</tr>\n")
         ofp.write("</table>\n")
 
