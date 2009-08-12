@@ -1032,7 +1032,7 @@ static void set_serial(struct gps_device_t *device,
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef OLDSTYLE_ENABLE
-static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
+static int handle_oldstyle(struct subscriber_t *sub, char *buf)
 /* interpret a client request; cfd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
@@ -1041,7 +1041,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 
     (void)strlcpy(reply, "GPSD", BUFSIZ);
     p = buf;
-    while (*p != '\0' && p - buf < buflen) {
+    while (*p != '\0') {
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
@@ -1564,8 +1564,7 @@ static int handle_oldstyle(struct subscriber_t *sub, char *buf, int buflen)
 }
 #endif /* OLDSTYLE_ENABLE */
 
-static int handle_gpsd_request(struct subscriber_t *sub, 
-			       const char *buf, int buflen)
+static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 {
 #ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
@@ -1591,7 +1590,6 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 			      "{\"class\":\"TPV\"}", sizeof(reply));
 	    }
 	    buf += 5;
-	    buflen -= 5;
 	} else if (strncmp(buf, "?SKY;", 5) == 0) {
 	    if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 		json_sky_dump(&channel->device->gpsdata, reply, sizeof(reply));
@@ -1600,7 +1598,6 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 			       "{\"class\":\"SKY\"}", sizeof(reply));
 	    }
 	    buf += 5;
-	    buflen -= 5;
 	} else if (strncmp(buf, "?DEVICES;", 9) == 0) {
 	    int i;
 	    (void)strlcpy(reply, 
@@ -1645,11 +1642,9 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 		reply[strlen(reply)-1] = '\0';
 	    (void)strlcat(reply, "]}", sizeof(reply));
 	    buf += 9;
-	    buflen -= 9;
 	} else if (strncmp(buf, "?WATCH", 6) == 0 && (buf[6] == ';' || buf[6] == '=')) {
 	    if (buf[6] == ';') {
 		buf += 7;
-		buflen -= 7;
 	    } else {
 		/*
 		 * The latch variable is a blatant hack to ensure
@@ -1691,7 +1686,6 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 				   json_error_string(status));
 		    (void)throttled_write(sub, reply, (ssize_t)strlen(reply));
 		}
-		buflen -= (end - buf);
 		buf = end;
 	    }
 	    json_watch_dump(sub->watcher, reply, sizeof(reply));
@@ -1699,7 +1693,7 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 	    if (channel_count(sub) == 0) {
 		for (buf = buf + 10; ;end++) {
 		    if (*buf == '}' || *buf == ';' || *buf == '\0')
-			buflen -= 1;
+			continue;
 		}
 		(void)strlcpy(reply, 
 			      "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
@@ -1767,7 +1761,7 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 	    if (chcount == 0) {
 		for (buf = buf + 10; ;end++) {
 		    if (*buf == '}' || *buf == ';' || *buf == '\0')
-			buflen -= 1;
+			continue;
 		}
 		(void)strlcpy(reply, 
 			      "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
@@ -1839,7 +1833,6 @@ static int handle_gpsd_request(struct subscriber_t *sub,
 	    (void)snprintf(reply, sizeof(reply),
 			   "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
 			   GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
-		buflen -= 9;
 		buf += 9;
 	} else {
 	    end = buf + strlen(buf) - 1;
@@ -1858,7 +1851,7 @@ static int handle_gpsd_request(struct subscriber_t *sub,
     sub->new_style_responses = false;
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     /* fall back to old-style requests */
-    return handle_oldstyle(sub, (char *)buf, buflen);
+    return handle_oldstyle(sub, (char *)buf);
 #endif /* OLDSTYLE_ENABLE */
 }
 
@@ -2302,7 +2295,7 @@ int main(int argc, char *argv[])
 			    if (channel->device->gpsdata.profiling!=0)
 				(void)strlcat(cmds, "$", 4);
 			    if (cmds[0] != '\0')
-				(void)handle_oldstyle(sub, cmds, (int)strlen(cmds));
+				(void)handle_oldstyle(sub, cmds);
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
 				aivdm_dump(&channel->device->aivdm.decoded, 
@@ -2385,7 +2378,7 @@ int main(int argc, char *argv[])
 				"<= client(%d): %s", sub_index(sub), buf);
 
 		    /*
-		     * When a command comes in, update subsceriber.active to
+		     * When a command comes in, update subscriber.active to
 		     * timestamp() so we don't close the connection
 		     * after POLLER_TIMEOUT seconds. This makes
 		     * POLLER_TIMEOUT useful.
@@ -2394,7 +2387,7 @@ int main(int argc, char *argv[])
 		    for (channel = channels; channel < channels + NITEMS(channels); channel++)
 			if (channel->device && channel->subscriber == sub)
 			    channel->device->poll_times[sub_index(sub)] = sub->active;
-		    if (handle_gpsd_request(sub, buf, buflen) < 0)
+		    if (handle_gpsd_request(sub, buf) < 0)
 			detach_client(sub);
 		}
 	    } else {
