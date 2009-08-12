@@ -18,7 +18,7 @@
 <para>RTCM-104 is a family of serial protocols used for broadcasting pseudorange
 corrections from differential-GPS reference stations.  This manual
 page describes some aspects of the RTCM protocol, mainly in order to
-explain the RTCM-104 dump format emitted by
+explain the RTCM-104 dump formats emitted by
 <citerefentry><refentrytitle>gpsdecode</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 It describes that dump format completely.</para>
 
@@ -70,7 +70,7 @@ payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
 algorithm.</para>
 
 </refsect1>
-<refsect1 id='dump-format2'><title>RTCM2 DUMP FORMAT</title>
+<refsect1 id='sager-dump-format2'><title>SAGER RTCM2 DUMP FORMAT</title>
 
 <para>For each message, the header is listed first, followed by zero
 or more lines containing the specific data for that message, followed
@@ -82,7 +82,7 @@ newline.</para>
 <refsect2><title>Header message (H)</title>
 
 <literallayout>
-H &lt;message type&gt; &lt;reference station id&gt; &lt;modified z_count&gt; &lt;sequence no&gt;
+H &lt;message type&gt; &lt;reference station id&gt; &lt;modified z_count&gt; &lt;sequence number&gt;
   &lt;message length&gt; &lt;station health&gt; [T &lt;useful length&gt;]
 </literallayout>
 
@@ -451,6 +451,20 @@ of the incoming data.
 For &lt;type&gt; = sync_bit this indicates the bit position in the
 serial data stream which is a word boundary.
 -->
+
+</refsect1>
+<refsect1 id='json-dump-format2'><title>JSON RTCM2 DUMP FORMAT</title>
+
+<para>Fields are dumped in the order and with the conversions
+described above, except that they are wrapped in a single JSON
+object per message and appear as attributes of that object.  Arrays of
+satellite, station, and constellation statistics become arrays of
+JSON sub-objects.</para>
+
+<para>(One exception: The zcount field included in the Sager-format
+per-satellite reports in type 1 and 9 messages is omitted from the 
+JSON version, asit is redundant with the zcount attribute of the
+parent object.)</para>
 
 </refsect1>
 <refsect1 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>

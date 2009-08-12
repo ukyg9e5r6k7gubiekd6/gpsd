@@ -802,7 +802,7 @@ cycle+1){
 	    /* Some kinds of data is automatically passed through */
 #ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
-		rtcm2_dump(&session->gpsdata.rtcm2, buf2, sizeof(buf2));
+		rtcm2_sager_dump(&session->gpsdata.rtcm2, buf2, sizeof(buf2));
 	    else
 #endif /* RTCM104V2_ENABLE */
 	    // FIXME: Add RTCMv3 handling as well.

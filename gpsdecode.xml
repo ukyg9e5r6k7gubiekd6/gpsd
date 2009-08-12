@@ -41,36 +41,13 @@ corrections from differential-GPS reference stations. You can use this
 mode of the tool with
 <citerefentry><refentrytitle>nc</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 to examine RTCM feeds from DGPSIP servers or Ntrip broadcasters. The
-decoder dump format for RTCM2 is described in
+decoder dump formats for RTCM2 are described in
 <citerefentry><refentrytitle>rtcm</refentrytitle><manvolnum>5</manvolnum></citerefentry>;
 these lines go to standard output.</para>
 
 <para>Another supported format is AIVDM.  This is the sentence format
 used by the marine Automatic Identification System.  This can be
 decoded, but not yet encoded.</para>
-
-<para> The dump lines are values of AIS payload fields,
-comma-separated, in the order that they occur in the payload. Spans of
-fields expressing a date are emitted as an ISO8601 timestamp (look for
-colons and the trailing Z indicating Zulu/UTC time), and the 19-bit
-group of TDMA status fields found at the end of message types 1-4 are
-are dumped as a single unsigned integer (in hex preceded by
-"0x"). Unused regional-authority fields are also dumped (in hex
-preceded by "0x"). Variable-length binary fields are dumped as an
-integer bit length, followed by a colon, followed by a hex
-dump.</para>
-
-<para>By default, certain scaling and conversion operations are
-performed for the output.  Latitudes and longitudes are scaled to
-decimal degrees rather than the native AIS unit of 1/10000th of a
-minute of arc.  Ship (but not air) speeds are scaled to knots rather
-than tenth-of-knot unit.  Navigation status and positioning-system
-type are dumped as text strings rather than IAS numeric codes. Rate of
-turn may appear as "nan" if is unavailable, or as one of the strings
-"fastright" or "fastleft" if it is out of the IAS encoding range;
-otherwise it is quadratically mapped back to the turn sensor number in
-degrees per minute. Vessel draughts are converted to decimal meters
-rather than native AIS decimeters.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -79,15 +56,15 @@ rather than native AIS decimeters.</para>
 packets presented on standard input to a text dump on standard
 output. This is the default behavior.</para>
 
-<para>RTCM2 will be dumped in the format of
+<para>RTCM2 will be dumped in one of the formats of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
 on standard output. </para>
 
 <para>The <option>-e</option> option option tells the program to
 encode a text dump in the format of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-to standard output.  Encoding is supported only RTCM2, not for
-RTCM3.</para>
+to standard output.  Encoding is supported only for RTCM2, not for
+RTCM3 or AIS.</para>
 
 <para>The <option>-u</option> suppresses scaling to float quantities
 and text expansion of numeric codes.  A dump with this option is
@@ -104,6 +81,39 @@ version number, then exit.</para>
 mainly of interest to developers.</para>
 
 </refsect1>
+<refsect1 id='json_ais'><title>AIS DUMP FORMATS</title> 
+
+<para>Without the <option>-j</option> option, dump lines are values of AIS
+payload fields, comma-separated, in the order that they occur in the
+payload. Spans of fields expressing a date are emitted as an ISO8601
+timestamp (look for colons and the trailing Z indicating Zulu/UTC
+time), and the 19-bit group of TDMA status fields found at the end of
+message types 1-4 are are dumped as a single unsigned integer (in hex
+preceded by "0x"). Unused regional-authority fields are also dumped
+(in hex preceded by "0x"). Variable-length binary fields are dumped as
+an integer bit length, followed by a colon, followed by a hex
+dump.</para>
+
+<para>By default, certain scaling and conversion operations are
+performed for the output.  Latitudes and longitudes are scaled to
+decimal degrees rather than the native AIS unit of 1/10000th of a
+minute of arc.  Ship (but not air) speeds are scaled to knots rather
+than tenth-of-knot unit.  Navigation status and positioning-system
+type are dumped as text strings rather than IAS numeric codes. Rate of
+turn may appear as "nan" if is unavailable, or as one of the strings
+"fastright" or "fastleft" if it is out of the IAS encoding range;
+otherwise it is quadratically mapped back to the turn sensor number in
+degrees per minute. Vessel draughts are converted to decimal meters
+rather than native AIS decimeters.</para>
+
+<para>With the <option>-j</option> option, the AIS dump format changes
+to JSON.  Data fields are handled as described above in scaled and
+unscaled modes, but are values attached to JSON attributes as
+described in <cite><ulink
+url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO protocol
+decoding</ulink></cite>.</para>
+
+</refsect1>
 <refsect1 id='standard'><title>APPLICABLE STANDARDS</title>
 
 <para>The applicable standard for V2 is <citetitle>RTCM Recommended
@@ -114,7 +124,7 @@ Standards for Differential NAVSTAR GPS Service</citetitle> RTCM Paper
 recognizes only the 2.1 level of RTCM; the protocol was revised up to
 a version 2.3 including additional messages relating to GLONASS and
 real-time kinematics before being deprecated in favor of V3. It is
-now obsolete.</para>
+now semi-obsolete.</para>
 
 <para>The applicable standard for V3 is <citetitle>RTCM Standard
 10403.1 for Differential GNSS Services - Version 3</citetitle> RTCM
@@ -127,55 +137,17 @@ Commission for Maritime Services</ulink> under "Publications".</para>
 <para>The applicable standard for AIVDM is <citetitle>ITU-R M.1371:
 ITU Recommendation on the Technical Characteristics for a Universal
 Shipborne Automatic Identification System (AIS) using Time Division
-Multiple Access in the Maritime Mobile Band</citetitle>,. A more
-accessible description can be found onn the references page of the
+Multiple Access in the Maritime Mobile Band</citetitle>, A more
+accessible description can be found at <cite><ulink
+url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO protocol
+decoding</ulink></cite> on the references page of the
 GPSD project website.</para>
-
-</refsect1>
-<refsect1 id='json_ais'><title>JSON-AIS compatribility</title> 
-
-<para>The <option>-j</option> dunmp format intends to be a compatible
-superset of the evolving JSON-AIS specification as it existed on 5 Jun
-2009.  The differences. which are designed to upgrade it to a lossless
-format, are as follows:</para>
-
-<itemizedlist>
-<listitem>
-<para>In the common message fields, this implementation does mot 
-emit <emphasis>rxtime</emphasis> or <emphasis>servertime</emphasis>, but
-does emit a <emphasis>repeat</emphasis> member which is the 
-Repeat Indicator field.</para>
-</listitem>
-
-<listitem>
-<para>In message types 1, 2, 3, 18, and 19, JSON-AIS only specifies
-<emphasis>status</emphasis> <emphasis>lat</emphasis>,
-<emphasis>lon</emphasis>, <emphasis>speed</emphasis>,
-<emphasis>course</emphasis>, and <emphasis>heading</emphasis>.</para>
-</listitem>
-
-<listitem>
-<para></para>
-</listitem>
-
-<listitem>
-<para></para>
-</listitem>
-
-<listitem>
-<para></para>
-</listitem>
-
-<listitem>
-<para></para>
-</listitem>
-</itemizedlist>
 
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
 <para>AIDVM decoding presently only parses fields for the sentence
-types 1-14, 18-19, 21, and 24. Decoding of types 7, 12, 13, 21, and 14
+types 1-21 and 24. Decoding of types 6-8, 12-17, and 20-21
 is unverified. AIVDM encoding is not yet supported.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
@@ -187,7 +159,7 @@ field.  If you do this, the value actually packed into binary RTCM2
 will be rounded down to the nearest scale unit, and dumping will show
 slightly different numbers than those you entered.  This bug could be
 fixed by supporting the <option>-u</option> option to suppress
-scaling, but the protocol is now obsolete.</para>
+scaling.</para>
 
 <para>The RTCM2 decoder logic is sufficiently convoluted to confuse some
 compiler optimizers, notably in GCC 3.x at -O2, into generating bad
@@ -216,4 +188,3 @@ url="http://gpsd.berlios.de/">here</ulink>.</para>
 </refsect1>
 
 </refentry>
-

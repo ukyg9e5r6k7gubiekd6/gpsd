@@ -56,7 +56,10 @@ static void decode(FILE *fpin, FILE *fpout)
 	    continue;
 	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
-	    rtcm2_dump(&rtcm2, buf, sizeof(buf));
+	    if (json)
+		rtcm2_json_dump(&rtcm2, buf, sizeof(buf));
+	    else
+		rtcm2_sager_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
 	else if (lexer.type == RTCM3_PACKET) {
@@ -105,7 +108,7 @@ static void pass(FILE *fpin, FILE *fpout)
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
 	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
 	    (void)rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    (void)rtcm2_dump(&rtcm, buf, sizeof(buf));
+	    (void)rtcm2_sager_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	    memset(&lexer, 0, sizeof(lexer));
 	    memset(&rtcm, 0, sizeof(rtcm));

@@ -453,7 +453,7 @@ enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
 			c);
 }
 
-void rtcm2_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     unsigned int n;
@@ -552,6 +552,126 @@ void rtcm2_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     }
 
     (void)strlcat(buf, ".\n", buflen);
+}
+
+void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
+/* dump the contents of a parsed RTCM104 message as JSON */
+{
+    unsigned int n;
+
+    (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",\"type\":%u,\"station_id\":%u,\"zcount\":%0.1f,\"seqnum\":%u,\"length\":%u,\"station_health\":%u,",
+	   rtcm->type,
+	   rtcm->refstaid,
+	   rtcm->zcount,
+	   rtcm->seqnum,
+	   rtcm->length,
+	   rtcm->stathlth);
+
+    switch (rtcm->type) {
+    case 1:
+    case 9:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"reported\":%u,\"satellites\":[", rtcm->msg_data.ranges.nentries);
+	for (n = 0; n < rtcm->msg_data.ranges.nentries; n++) {
+	    struct rangesat_t *rsp = &rtcm->msg_data.ranges.sat[n];
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
+			   rsp->ident,
+			   rsp->udre,
+			   rsp->issuedata,
+			   rsp->rangerr,
+			   rsp->rangerate);
+	}
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
+
+    case 3:
+	if (rtcm->msg_data.ecef.valid)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f",
+			   rtcm->msg_data.ecef.x, 
+			   rtcm->msg_data.ecef.y,
+			   rtcm->msg_data.ecef.z);
+	break;
+
+    case 4:
+	if (rtcm->msg_data.reference.valid)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"system\":%s,\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dx\":%.1f",
+			   (rtcm->msg_data.reference.system==gps) ? "GPS"
+			   : ((rtcm->msg_data.reference.system==glonass) ? "GLONASS"
+			      : "UNKNOWN"),
+			   rtcm->msg_data.reference.sense,
+			   rtcm->msg_data.reference.datum,
+			   rtcm->msg_data.reference.dx,
+			   rtcm->msg_data.reference.dy,
+			   rtcm->msg_data.reference.dz);
+	break;
+
+    case 5:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"reported\":%u,\"satellites\":[", 
+		       rtcm->msg_data.conhealth.nentries);
+	for (n = 0; n < rtcm->msg_data.conhealth.nentries; n++) {
+	    struct consat_t *csp = &rtcm->msg_data.conhealth.sat[n];
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "{\"ident\":%2u,\"iodl\":%1u,\"health\":%1u,\"snr\":%2d,\"health_en\":%1u,\"new_data\":%1u,\"los_warning\":%1u,\"los_warning\":%2u},",
+			   csp->ident,
+			   (unsigned)csp->iodl,
+			   (unsigned)csp->health,
+			   csp->snr,
+			   (unsigned)csp->health_en,
+			   (unsigned)csp->new_data,
+			   (unsigned)csp->los_warning,
+			   csp->tou);
+	}
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
+
+    case 6: 			/* NOP msg */
+	break;
+
+    case 7:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"reported\":%u,\"satellites\":[", rtcm->msg_data.almanac.nentries);
+	for (n = 0; n < rtcm->msg_data.almanac.nentries; n++) {
+	    struct station_t *ssp = &rtcm->msg_data.almanac.station[n];
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "{\"latitude\":%.4f,\"longitude\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u}",
+			   ssp->latitude,
+			   ssp->longitude,
+			   ssp->range,
+			   ssp->frequency,
+			   ssp->health,
+			   ssp->station_id,
+			   ssp->bitrate);
+	}
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
+    case 16:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"message\":\"%s\"\n", rtcm->msg_data.message);
+	break;
+
+    default:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"length\":%u,\"satellites\":[", rtcm->length);
+	for (n = 0; n < rtcm->length; n++)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"0x%08x\",", rtcm->msg_data.words[n]);
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
+    }
+
+    (void)strlcat(buf, "}\r\n", buflen);
 }
 
 int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
