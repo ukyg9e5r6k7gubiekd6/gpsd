@@ -768,13 +768,13 @@ data between daemon and client avoids the non-extensibility
 problems of the old protocol, and permits a richer set of record types
 to be passed up to clients.</para>
 
-<para>Commands are introduced by "?", followed by a mandatory command
-identifier, followed either by a terminating ';' or by an equal sign
-"=" and a JSON object treated as an argument.  A request line may
-include multiple commands.  Any newline indication (either LF or
-CR-LF) after the end of a command is ignored. All request lines must
-be composed of US-ASCII characters and may be no more than 80
-characters in length, exclusive of the trailing newline.</para>
+<para>A request line is introduced by "?" and may include multiple
+commands.  Commands begin with a command identifier, followed either
+by a terminating ';' or by an equal sign "=" and a JSON object treated
+as an argument.  Any ';' or newline indication (either LF or CR-LF)
+after the end of a command is ignored. All request lines must be
+composed of US-ASCII characters and may be no more than 80 characters
+in length, exclusive of the trailing newline.</para>
 
 <para>Responses are JSON objects all of which have a "class" attribute
 the value of which is either the name of the invoking command 

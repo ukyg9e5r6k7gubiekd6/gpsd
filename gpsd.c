@@ -1580,7 +1580,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     /*
      * Still to be implemented: equivalents of B C N Z $
      */
-    if (strncmp(buf, "?TPV;", 5) == 0) {
+    if (strncmp(buf, "TPV;", 4) == 0) {
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
 	    json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 			  reply, replylen);
@@ -1588,16 +1588,16 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    (void)strlcpy(reply, 
 			  "{\"class\":\"TPV\"}", replylen);
 	}
-	buf += 5;
-    } else if (strncmp(buf, "?SKY;", 5) == 0) {
+	buf += 4;
+    } else if (strncmp(buf, "SKY;", 4) == 0) {
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 	    json_sky_dump(&channel->device->gpsdata, reply, replylen);
 	} else {
 	    (void)strlcpy(reply,
 			  "{\"class\":\"SKY\"}", replylen);
 	}
-	buf += 5;
-    } else if (strncmp(buf, "?DEVICES;", 9) == 0) {
+	buf += 4;
+    } else if (strncmp(buf, "DEVICES;", 8) == 0) {
 	int i;
 	(void)strlcpy(reply, 
 		      "{\"class\"=\"DEVICES\",\"devices\":[", replylen);
@@ -1640,10 +1640,11 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	if (reply[strlen(reply)-1] == ',')
 	    reply[strlen(reply)-1] = '\0';
 	(void)strlcat(reply, "]}", replylen);
-	buf += 9;
-    } else if (strncmp(buf, "?WATCH", 6) == 0 && (buf[6] == ';' || buf[6] == '=')) {
-	if (buf[6] == ';') {
-	    buf += 7;
+	buf += 8;
+    } else if (strncmp(buf, "WATCH", 5) == 0 && (buf[5] == ';' || buf[5] == '=')) {
+	buf += 5;
+	if (*buf == ';') {
+	    ++buf;
 	} else {
 	    /*
 	     * The latch variable is a blatant hack to ensure
@@ -1655,8 +1656,9 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	     */
 	    int i, latch;
 	    int new_watcher = sub->watcher;
-	    int status = json_watch_read(&new_watcher, buf+7, &end);
-
+	    int status = json_watch_read(&new_watcher, ++buf, &end);
+	    if (*end == ';')
+		++end;
 	    if (status == 0) {
 		gpsd_report(LOG_PROG, 
 			    "client(%d): before applying 0x%0x, watch mask is 0x%0x.\n",
@@ -1688,12 +1690,16 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    buf = end;
 	}
 	json_watch_dump(sub->watcher, reply, replylen);
-    } else if (strncmp(buf, "?CONFIGCHAN", 11) == 0 && (buf[11] == ';' || buf[11] == '=')) {
+    } else if (strncmp(buf, "CONFIGCHAN", 10) == 0 && (buf[10] == ';' || buf[10] == '=')) {
+	buf += 10;
 	if (channel_count(sub) == 0) {
-	    for (buf = buf + 10; ;end++) {
-		if (*buf == '}' || *buf == ';' || *buf == '\0')
-		    continue;
+	    for (; *buf ; buf++) {
+		if (*buf == '\0')
+		    goto stringend1;
+		else if (*buf == '}' || *buf == ';')
+		    break;
 		++buf;
+	    stringend1:;
 	    }
 	    (void)strlcpy(reply, 
 			  "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
@@ -1701,10 +1707,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	} else {
 	    struct channel_t *chp;
 	    const char *pathp = NULL;
-	    if (buf[11] == '=') {
+	    if (*buf == '=') {
 		int status;
 		struct chanconfig_t conf;
-		status = json_configchan_read(&conf, &pathp, buf+12, &buf);
+		status = json_configchan_read(&conf, &pathp, buf+1, &end);
+		if (*end == ';')
+		    ++end;
 		if (status == 0) {
 		    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 			if (chp->subscriber != sub) {
@@ -1715,8 +1723,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    (void)strlcpy(reply,
 					  "{\"class\":ERROR\",\"message\":\"Attempt to apply buffer policy to a non-GPS device.\"}\r\n",
 					  replylen);
-			    (void)throttled_write(sub, 
-						  reply,(ssize_t)strlen(reply));
 			} else {
 			    /*
 			     * This is the critical bit where we apply
@@ -1735,18 +1741,23 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 				chp->conf.scaled = conf.scaled;
 			}
 		} else 
-		    (void)snprintf(reply, replylen,
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":ERROR\",\"message\":\"Invalid CONFIGCHAN.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
+		buf = end;
 	    }
 	    /* dump a response for each selected channel */
-	    reply[0] = '\0';
 	    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 		if (chp->subscriber != sub)
 		    continue;
 		else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0)
 		    continue;
 		else {
+		    gpsd_report(LOG_PROG, 
+				"client(%d): dumping policy for channel %d (%s).\n",
+				sub_index(sub),
+				channel_index(chp),
+				chp->device->gpsdata.gps_device);
 		    json_configchan_dump(&chp->conf, 
 					 chp->device->gpsdata.gps_device, 
 					 reply + strlen(reply),
@@ -1756,13 +1767,17 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    if (reply[1])	/* avoid extra line termination at end */
 		reply[strlen(reply)-2] = '\0';
 	}
-    } else if (strncmp(buf, "?CONFIGDEV", 10) == 0 && (buf[10] == ';' || buf[10] == '=')) {
+    } else if (strncmp(buf, "CONFIGDEV", 9) == 0 && (buf[9] == ';' || buf[9] == '=')) {
 	int chcount = channel_count(sub);
+	buf += 9;
 	if (chcount == 0) {
-	    for (buf = buf + 10; ;end++) {
-		if (*buf == '}' || *buf == ';' || *buf == '\0')
-		    continue;
+	    for (; *buf ; buf++) {
+		if (*buf == '\0')
+		    goto stringend2;
+		else if (*buf == '}' || *buf == ';')
+		    break;
 		++buf;
+	    stringend2:;
 	    }
 	    (void)strlcpy(reply, 
 			  "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
@@ -1771,15 +1786,17 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    struct channel_t *chp;
 	    struct devconfig_t devconf;
 	    devconf.device[0] = '\0';
-	    if (buf[10] == '=') {
+	    if (*buf == '=') {
 		int status;
-		status = json_configdev_read(&devconf, buf+11, &buf);
+		status = json_configdev_read(&devconf, buf+1, &end);
+		if (*end == ';')
+		    ++end;
 		if (status != 0)
 		    (void)snprintf(reply, replylen,
 				   "{\"class\":ERROR\",\"message\":\"Invalid CONFIGDEV.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
 		else if (chcount > 1 && devconf.device[0] == '\0')
-		    (void)snprintf(reply, replylen,
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":ERROR\",\"message\":\"No path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
 		else {
 		    /* we should have exactly one device now */
@@ -1793,7 +1810,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    break;
 			}
 		    if (!privileged_channel(channel))
-			(void)snprintf(reply, replylen,
+			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		    else {
 			/* now that channel is selected, apply changes */
@@ -1802,9 +1819,9 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			// FIXME: change speed and serialmode */
 		    }
 		}
+		buf = end;
 	    }
 	    /* dump a response for each selected channel */
-	    reply[0] = '\0';
 	    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 		if (chp->subscriber != sub)
 		    continue;
@@ -1830,17 +1847,17 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    if (reply[1])	/* avoid extra line termination at end */
 		reply[strlen(reply)-2] = '\0';
 	}
-    } else if (strncmp(buf, "?VERSION;", 9) == 0) {
-	(void)snprintf(reply, replylen,
+    } else if (strncmp(buf, "VERSION;", 8) == 0) {
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		       "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
 		       GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
-	buf += 9;
+	buf += 8;
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
 	if (isspace(*errend))
 	    --errend;
-	(void)snprintf(reply, replylen, 
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply), 
 		       "{\"class\":ERROR\",\"message\":\"Unrecognized request '%.*s'\"}",
 		       (int)(errend-buf), buf);
 	buf += strlen(buf);
@@ -1861,12 +1878,11 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 #ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
 	const char *end;
-	for (; *buf; buf++) {
-	    if (buf[0] == '?') {
+	for (end = ++buf; *buf; buf = end)
+	    if (isspace(*buf))
+		end = buf + 1;
+	    else
 		handle_newstyle_request(sub, buf, &end, reply, sizeof(reply));
-		buf = end-1;
-	    }
-	}
     }
 #endif /* GPSDNG_ENABLE */
 #ifdef OLDSTYLE_ENABLE
