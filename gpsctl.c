@@ -551,8 +551,9 @@ int main(int argc, char **argv)
 							     parity, 
 							     stopbits)) {
 		    /*
-		     * See the comment attached to the 'B' command in gpsd.
-		     * Probably not needed here, but it can't hurt.
+		     * See the 'deep black magic' comment in
+		     * gpsd.c:set_serial() Probably not needed here,
+		     * but it can't hurt.
 		     */
 		    (void)tcdrain(session.gpsdata.gps_fd);
 		    (void)usleep(50000);
