@@ -382,6 +382,7 @@ class gps(gpsdata):
         return an empty string."""
         if self.eof or not self.waiting():
             yield ''
+        # Accumulate input
         while self.waiting():
             buf = self.sock.recv(512)
             if buf:
@@ -390,11 +391,13 @@ class gps(gpsdata):
                 self.eof = True
                 break
         lines = self.buf.split('\r\n')
+        if lines and not lines[-1]:
+            lines.pop()
+        # Now yield it line by line
         for l in lines[:]:
             if l:
-                yield l
+                yield l + "\r\n"
                 del lines[0]
-        self.buf = '\r\n'.join(lines)
 
     def readstanzas(self):
         """Read a possibly multi-line response.
