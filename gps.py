@@ -407,13 +407,17 @@ class gps(gpsdata):
             if self.eof:
                 yield ''
             if frag:
-                stanza.append(frag)
-                if stanza[0][0] not in 'H' or '=' in stanza[0]:
+                # Old-style protocol line or raw GPS data or JSON object
+                if '=' in frag or frag[0] in "!${":
                     yield frag
                     stanza = []
-                if frag == '.':
+                # End of Sager-format RTCM2 dump
+                elif frag == '.':
                     yield '\r\n'.join(stanza)
                     stanza = []
+                # Body of Sager-format RTCM2 dump
+                else:
+                    stanza.append(frag)
 
     def poll(self):
         """Wait for and read data being streamed from gpsd.
