@@ -149,7 +149,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	 *
 	 * SiRFs dominate the GPS-mouse market, so we used to put this test 
 	 * first. Unfortunately this causes problems for gpsctl, as it cannot
-	 * select the NMEA driver without switchining the device back to
+	 * select the NMEA driver without switching the device back to
 	 * binary mode!  Fix this if we ever find a nondisruptive probe string.
 	 */
 	(void)nmea_send(session,
