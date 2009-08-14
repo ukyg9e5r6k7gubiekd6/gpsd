@@ -801,11 +801,11 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	     */
 	    if (user->watcher == WATCH_OLDSTYLE && !user->tied) {
 		/*@ -sefparams @*/
-		ignore_return(write(user->fd, "GPSD,F=", 7));
-		ignore_return(write(user->fd,
-			     channel->device->gpsdata.gps_device,
-				    strlen(channel->device->gpsdata.gps_device)));
-		ignore_return(write(user->fd, "\r\n", 2));
+		throttled_write(user, "GPSD,F=", 7);
+		throttled_write(user,
+				channel->device->gpsdata.gps_device,
+				strlen(channel->device->gpsdata.gps_device));
+		throttled_write(user, "\r\n", 2);
 		/*@ +sefparams @*/
 	    }
 #endif /* OLDSTYLE_ENABLE */
@@ -815,6 +815,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     if (was_unassigned) {
 	char buf[NMEA_MAX];
 
+	buf[0] = '\0';
 #ifdef OLDSTYLE_ENABLE
 	if (!newstyle(user) && user->watcher)
 	    (void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
@@ -826,9 +827,9 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 			   channel->device->gpsdata.gps_device,
 			   timestamp());
 #endif /* GPSDNG_ENABLE */
-
 	/*@ -sefparams +matchanyintegral @*/
-	ignore_return(write(user->fd, buf, strlen(buf)));
+	if (buf[0])
+	    throttled_write(user, buf, strlen(buf));
 	/*@ +sefparams -matchanyintegral @*/
     }
 
