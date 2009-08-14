@@ -37,9 +37,10 @@ case $mode in
 		$do gpsfake -s 38400 -1 -p $opts ${f} | egrep -v "${GPSFILTER}" >$dir/test.chk;
 		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d'
 		diff -ub ${f}.chk $dir/test.chk >$dir/diff
-		diff -ub ${f}.chk $dir/test-trunc.chk >>$dir/diff
-		if test -s $dir/diff; then :; else
+		diff -ub ${f}.chk $dir/test-trunc.chk >$dir/diff-trunc
+		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
 		    errors=`expr $errors + 1`;
+		    cat $dir/diff
 		fi;
 	    else
 		echo "*** No check log $f.chk exists"
@@ -47,7 +48,7 @@ case $mode in
 	    fi
 	    total=`expr $total + 1`;
         done; 
-	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/diff; 
+	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/diff $dir/diff-trunc; 
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
