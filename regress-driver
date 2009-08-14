@@ -24,7 +24,7 @@ done
 shift $(($OPTIND - 1))
 
 # Enables us to turn debugging up high without screwing up the diff checks
-GPSFILTER='^GPSD,X|^gpsd:|^gpsfake:|^GPS DATA'
+GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d"
 
 case $mode in
     regress)
@@ -34,7 +34,7 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -p $opts ${f} | egrep -v "${GPSFILTER}" >$dir/test.chk;
+		$do gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >$dir/test.chk;
 		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d'
 		diff -ub ${f}.chk $dir/test.chk >$dir/diff
 		diff -ub ${f}.chk $dir/test-trunc.chk >$dir/diff-trunc
@@ -70,7 +70,7 @@ case $mode in
     build)
 	echo "Rebuilding regressions..."
         for f in $*; do
-            gpsfake -s 38400 -1 -b -p $opts ${f} | egrep -v "${GPSFILTER}" >${f}.chk;
+            gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER} >${f}.chk;
         done
         exit 0
         ;;

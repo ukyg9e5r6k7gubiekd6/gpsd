@@ -389,7 +389,7 @@ class gps(gpsdata):
         if not self.response:
             return -1
         if self.verbose:
-            sys.stderr.write("GPS DATA %s\n" % repr(self.response))
+            sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
         self.timings.c_recv_time = time.time()
         self.__unpack(self.response)
         if self.profiling:
