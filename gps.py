@@ -186,8 +186,7 @@ class gps(gpsdata):
     def __init__(self, host="127.0.0.1", port="2947", verbose=0):
         gpsdata.__init__(self)
         self.sock = None        # in case we blow up in connect
-        self.eof = False
-        self.buf = ''
+        self.sockfile = None
         self.connect(host, port)
         self.verbose = verbose
         self.raw_hook = None
@@ -210,12 +209,14 @@ class gps(gpsdata):
         #if self.debuglevel > 0: print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
+        self.sockfile = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
                 #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
+                self.sockfile = self.sock.makefile()
             except socket.error, msg:
                 #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
@@ -228,15 +229,18 @@ class gps(gpsdata):
         self.raw_hook = hook
 
     def close(self):
+        if self.sockfile:
+            self.sockfile.close()
         if self.sock:
             self.sock.close()
         self.sock = None
+        self.sockfile = None
 
     def __del__(self):
         self.close()
 
     def __unpack(self, buf):
-        """Unpack a daemon response into the instance members"""
+        # unpack a daemon response into the instance members
         self.fix.time = 0.0
         fields = buf.strip().split(",")
         if fields[0] == "GPSD":
@@ -369,85 +373,42 @@ class gps(gpsdata):
             self.raw_hook(buf);
 
     def waiting(self):
-        """Return True if data is ready for the client."""
-        try:
-            (winput, woutput, wexceptions) = select.select([self.sock], [], [], 0)
-        except select.error, socket.error:
-            self.eof = True
-            return False
-        return len(winput) > 0
-
-    def readlines(self):
-        """Yield the next few complete lines. If no data is available,
-        return an empty string."""
-        if self.eof or not self.waiting():
-            yield ''
-        # Accumulate input
-        while self.waiting():
-            buf = self.sock.recv(512)
-            if buf:
-                self.buf += buf
-            else:
-                self.eof = True
-                break
-        lines = self.buf.split('\r\n')
-        if lines and not lines[-1]:
-            lines.pop()
-        # Now yield it line by line
-        for l in lines[:]:
-            if l:
-                yield l + "\r\n"
-                del lines[0]
-
-    def readstanzas(self):
-        """Read a possibly multi-line response.
-        Currently used for RTCM2 H responses."""
-        stanza = []
-        for frag in self.readlines():
-            if self.eof:
-                yield ''
-            if frag:
-                # Old-style protocol line or raw GPS data or JSON object
-                if '=' in frag or frag[0] in "!${":
-                    yield frag
-                    stanza = []
-                # End of Sager-format RTCM2 dump
-                elif frag == '.':
-                    yield '\r\n'.join(stanza)
-                    stanza = []
-                # Body of Sager-format RTCM2 dump
-                else:
-                    stanza.append(frag)
+        "Return True if data is ready for the client."
+        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
+        return winput != []
 
     def poll(self):
-        """Wait for and read data being streamed from gpsd.
-        Return values: -1 on EOF, 1 on no more data, 0 otherwise"""
-        for self.response in self.readstanzas():
-            if self.eof:
-                return -1
-            if not self.response:
-                return 1
-            if self.verbose:
-                sys.stderr.write("GPS DATA %s\n" % `self.response`)
-            self.timings.c_recv_time = time.time()
-            self.__unpack(self.response)
-            if self.profiling:
-                if self.timings.sentence_time != '?':
-                    basetime = self.timings.sentence_time
-                else:
-                    basetime = self.timings.d_xmit_time
-                self.timings.c_decode_time = time.time() - basetime
-                self.timings.c_recv_time -= basetime
+        "Wait for and read data being streamed from gpsd."
+        self.response = self.sockfile.readline()
+        if self.response.startswith("H") and "=" not in self.response:
+            while True:
+                frag = self.sockfile.readline()
+                self.response += frag
+                if frag.startswith("."):
+                    break
+        if not self.response:
+            return -1
+        if self.verbose:
+            sys.stderr.write("GPS DATA %s\n" % repr(self.response))
+        self.timings.c_recv_time = time.time()
+        self.__unpack(self.response)
+        if self.profiling:
+            if self.timings.sentence_time != '?':
+                basetime = self.timings.sentence_time
+            else:
+                basetime = self.timings.d_xmit_time
+            self.timings.c_decode_time = time.time() - basetime
+            self.timings.c_recv_time -= basetime
         return 0
 
     def send(self, commands):
-        """Ship commands to the daemon."""
+        "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
         self.sock.send(commands)
 
     def query(self, commands):
-        """Send a command, get back a response."""
+        "Send a command, get back a response."
         self.send(commands)
         return self.poll()
 
