@@ -1689,12 +1689,10 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 				"client(%d): after, watch mask is 0x%0x.\n",
 				sub_index(sub), sub->watcher);
 		}
-	    } else {
+	    } else
 		(void)snprintf(reply, replylen,
 			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
 			       json_error_string(status));
-		(void)throttled_write(sub, reply, (ssize_t)strlen(reply));
-	    }
 	    buf = end;
 	}
 	json_watch_dump(sub->watcher, reply, replylen);
