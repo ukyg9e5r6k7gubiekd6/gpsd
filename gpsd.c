@@ -1708,8 +1708,8 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		++buf;
 	    stringend1:;
 	    }
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
+	    (void)strlcat(reply, 
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perform CONFIGCHAN, no channels attached.\"}\r\n",
 			  replylen);
 	} else {
 	    struct channel_t *chp;
@@ -1786,8 +1786,8 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		++buf;
 	    stringend2:;
 	    }
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No channels attached.\"}",
+	    (void)strlcat(reply, 
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perfgorm CONFIGDEV, no channels attached.\"}\r\n",
 			  replylen);
 	} else {
 	    struct channel_t *chp;
