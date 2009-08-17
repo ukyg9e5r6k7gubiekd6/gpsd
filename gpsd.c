@@ -576,8 +576,15 @@ static void notify_watchers(struct gps_device_t *device, int mask, char *sentenc
     }
 }
 
-static void notify_on_close(struct gps_device_t *device)
+static void deactivate_device(struct gps_device_t *device)
 {
+    int cfd;
+
+    for (cfd = 0; cfd < NITEMS(channels); cfd++)
+	if (channels[cfd].device == device) {
+	    channels[cfd].device = NULL;
+	    channels[cfd].subscriber = NULL;
+	}
 #ifdef OLDSTYLE_ENABLE
     notify_watchers(device, WATCH_OLDSTYLE, "GPSD,X=0\r\n");
 #endif /* OLDSTYLE_ENABLE */
@@ -586,6 +593,11 @@ static void notify_on_close(struct gps_device_t *device)
 		    "{\"class\":\"DEVICE\",\"name\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.gps_device);
 #endif /* GPSDNG_ENABLE */
+    if (device->gpsdata.gps_fd != -1) {
+	gpsd_deactivate(device);
+	device->gpsdata.gps_fd = -1;	/* device is already disconnected */
+    }
+    /*@i@*/free_device(device);	/* modifying observer storage */
 }
 
 static void raw_hook(struct gps_data_t *ud,
@@ -875,7 +887,6 @@ static void handle_control(int sfd, char *buf)
 {
     char	*p, *stash, *eq;
     struct gps_device_t	*devp;
-    int cfd;
 
     /*@ -sefparams @*/
     if (buf[0] == '-') {
@@ -886,13 +897,7 @@ static void handle_control(int sfd, char *buf)
 		FD_CLR(devp->gpsdata.gps_fd, &all_fds);
 		adjust_max_fd(devp->gpsdata.gps_fd, false);
 	    }
-	    notify_on_close(devp);
-	    for (cfd = 0; cfd < NITEMS(channels); cfd++)
-		if (channels[cfd].device == devp)
-		    channels[cfd].device = NULL;
-	    gpsd_wrap(devp);
-	    devp->gpsdata.gps_fd = -1;	/* device is already disconnected */
-	    /*@i@*/free_device(devp);	/* modifying observer storage */
+	    deactivate_device(devp);
 	    ignore_return(write(sfd, "OK\n", 3));
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
@@ -2131,12 +2136,11 @@ int main(int argc, char *argv[])
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, false);
-		    gpsd_deactivate(device);
+		    deactivate_device(device);
 		} else if ((changed & ONLINE_SET) == 0) {
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, false);
-		    gpsd_deactivate(device);
-		    notify_on_close(device);
+		    deactivate_device(device);
 		}
 		else {
 		    /* we may need to add device to new-style watcher lists */
@@ -2365,7 +2369,7 @@ int main(int argc, char *argv[])
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", device->gpsdata.gps_fd);
 				FD_CLR(device->gpsdata.gps_fd, &all_fds);
 				adjust_max_fd(device->gpsdata.gps_fd, false);
-				gpsd_deactivate(device);
+				deactivate_device(device);
 			    }
 			}
 		    }
