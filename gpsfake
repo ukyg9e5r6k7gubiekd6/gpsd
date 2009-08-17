@@ -65,8 +65,7 @@ pipe = False
 singleshot = False
 flicker = False
 promptme = False
-#client_init = '?WATCH={"raw":1}'
-client_init = "w+r+"
+client_init = '?WATCH={"raw":1}'
 doptions = ""
 verbose = 0
 for (switch, val) in options:
