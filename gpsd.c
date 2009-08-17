@@ -2139,6 +2139,12 @@ int main(int argc, char *argv[])
 		    notify_on_close(device);
 		}
 		else {
+		    /* we may need to add device to new-style watcher lists */
+		    if ((changed & DEVICE_SET) != 0) {
+			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
+			    if ((sub->watcher & WATCH_NEWSTYLE)!=0)
+				(void)assign_channel(sub, ANY, device);
+			    }
 		    /* handle laggy response to a firmware version query */
 		    if ((changed & DEVICEID_SET) != 0) {
 			assert(device->device_type != NULL);
