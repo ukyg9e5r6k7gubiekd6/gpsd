@@ -683,6 +683,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
     ssize_t newlen;
+    bool first_sync = false;
 
     gps_clear_fix(&session->gpsdata.fix);
 
@@ -706,6 +707,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
 	    session->observed |= PACKET_TYPEMASK(session->packet.type);
+	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
@@ -752,8 +754,16 @@ cycle+1){
 	session->gpsdata.sentence_length = session->packet.outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
 
+	/* 
+	 * If this is the first time we've achieved sync on this device, that's
+	 * a significant event that the caller needs to know about.  Using
+	 * DEVICE_SET this way is a bit shaky but we're short of bits in
+	 * the flag mask (client library uses it differently).
+	 */
+	if (first_sync)
+	    received |= DEVICE_SET;
+
 	/* Get data from current packet into the fix structure */
-	received = 0;
 	if (session->packet.type != COMMENT_PACKET)
 	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 		received = session->device_type->parse_packet(session);
