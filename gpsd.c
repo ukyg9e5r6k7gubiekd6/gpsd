@@ -1088,7 +1088,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 				   ",C=%.2f", channel->device->gpsdata.cycle);
 		else
 		    (void)snprintf(phrase, sizeof(phrase), ",C=%.2f %.2f",
-				   channel->device->gpsdata.cycle, channel->device->gpsdata.cycle);
+				   channel->device->gpsdata.cycle, channel->device->gpsdata.mincycle);
 	    }
 	    break;
 #endif /* ALLOW_RECONFIGURE */
@@ -1718,18 +1718,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.gps_device, devconf.device)!=0)
 		    continue;
 		else {
-		    (void)strlcpy(devconf.device, 
-				  chp->device->gpsdata.gps_device,
-				  sizeof(devconf.device));
-		    (void)snprintf(devconf.serialmode, 
-				   sizeof(devconf.serialmode), 
-				   "%u%c%u",
-				   9 - chp->device->gpsdata.stopbits,
-				   (int)chp->device->gpsdata.parity,
-				   chp->device->gpsdata.stopbits);
-		    devconf.bps=(int)gpsd_get_speed(&chp->device->ttyset);
-		    devconf.native = chp->device->gpsdata.driver_mode;
-		    json_configdev_dump(&devconf, 
+		    json_configdev_dump(chp->device, 
 					reply + strlen(reply),
 					replylen - strlen(reply));
 		    (void)strlcat(reply, "\r\n", replylen);

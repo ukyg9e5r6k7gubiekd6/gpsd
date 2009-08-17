@@ -1381,6 +1381,20 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 	in particular). Attempting to set this mode on a non-GPS
 	device will yield an error.</entry>
 </row>
+<row>
+	<entry>cycle</entry>
+	<entry>No</entry>
+	<entry>real</entry>
+        <entry>Device cycle time in seconds.</entry>
+</row>
+<row>
+	<entry>min_cycle</entry>
+	<entry>No</entry>
+	<entry>real</entry>
+        <entry>Device minimum cycle time in seconds. Reported from 
+	?CONFIGDEV when (and only when) the rate is switchable. It is 
+	read-only and not settable.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>
