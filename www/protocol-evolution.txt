@@ -1,6 +1,6 @@
 = GPSD-NG: A Case Study in Application Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
-v1.1, August 2009
+v1.2, August 2009
 
 == Introduction ==
 
@@ -303,10 +303,10 @@ in memory utilization.
 gpsd hasn't had a requirement to parse JSON yet, just emit it as
 responses?"  Because I fully expect gpsd to have to parse structured
 JSON arguments for commands.  Here's an example, which I'll explain fully
-later but right now just hint is the GPSD-NG equivalent of a 'W' command.
+later but right now just hint at the GPSD-NG equivalent of a 'W+R+J+' command.
 
 -------------------------------------------------------------------------
-?WATCH={"TPV":true,"SKY":true,"AIS":true,"RTCM2":false}
+?WATCH={"raw":true,"buffer_policy":1"}
 -------------------------------------------------------------------------
 
 Even had I not anticipated parsing JSON arguments in gpsd, I try to limit
@@ -354,14 +354,13 @@ to write a configuration command that suppresses device display.
 Now we come back to our previous example:
 
 -------------------------------------------------------------------------
-?WATCH={"TPV":true,"SKY":true,"AIS":true,"RTCM2":false}
+?WATCH={"raw":true,"buffer_policy":1"}
 -------------------------------------------------------------------------
 
-This says: "Stream time-position/velocity and skyview and AIS reports
-from all devices at me, but not RTCM2 corrections." The way to add
-more device classes to this is obvious, which is sort of the point -
-nothing like this could have fit in the fixed-length syntax of the old
-pre-JSON protocol.
+This says: "Stream all reports from all devices at me, setting raw
+mode and buffering policy 1." The way to add more controls to this is
+obvious, which is sort of the point - nothing like this could have fit
+in the fixed-length syntax of the old pre-JSON protocol.
 
 This is not mere theory. At the time of writing, the ?WATCH command is
 fully implemented in gpsd's Subversion repository, and I expect it to

@@ -1228,10 +1228,11 @@ they are never shipped outside of a SKY object.</para>
 <varlistentry>
 <term>?WATCH</term> 
 <listitem>
-<para>If followed by ':', requests a report object with class WATCH
-that lists the watch flags for all supported report classes.  If
-followed by an "=", accepts a WATCH-class object that changes which
-reports the client will see.</para>
+
+<para>This command sets watcher mode/. It also sets or elicits a
+report of per-subscriber buffering policy and the raw bit.  An
+argument WATCH object changes the subscriber's policy. The respunce
+describes the subscriber's policy.</para>
 
 <para>A WATCH object has the following elements:</para>
 
@@ -1251,90 +1252,6 @@ reports the client will see.</para>
 	<entry>Yes</entry>
 	<entry>string</entry>
         <entry>Fixed: "WATCH"</entry>
-</row>
-<row>
-	<entry>TPV</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>Whether to stream TPV objects</entry>
-</row>
-<row>
-	<entry>SKY</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>Whether to stream SKY objects</entry>
-</row>
-<row>
-	<entry>RTCM2</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>Whether to stream RTCM2 objects (not yet implemented)</entry>
-</row>
-<row>
-	<entry>RTCM3</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>Whether to stream RTCM3 objects (not yet implemented)</entry>
-</row>
-<row>
-	<entry>AIS</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>Whether to stream AIS objects</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
-
-<para>Here's an example:</para>
-
-<programlisting>
-{"class":"WATCH",
-    "TPV":true,
-    "SKY":false,"RTCM2":false,"RTCM3":false,"AIS":false}
-</programlisting>
-
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term>?CONFIGCHAN</term> 
-<listitem>
-
-<para>This command sets or elicits a report of per-channel buffering
-policy and the raw bit.  Without arguments (followed by ':'), it
-mtells the daemon to return a CONFIGCHAN object for each channel to
-which the client is subscribed.  An argument CONFIGCHAN object changes
-channel policy.  If the object has a "device" attribute, only the
-channel associated with that device is selected.  Otherwise, all
-subscribed channels are selected.</para>
-
-<para>A CONFIGCHAN object has the following elements:</para>
-
-<table frame="all" pgwide="0"><title>CONFIGCHAN object</title>
-<tgroup cols="4" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>Name</entry>
-	<entry>Always?</entry>
-	<entry>Type</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>class</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Fixed: "CONFIGCHAN"</entry>
-</row>
-<row>
-	<entry>device</entry>
-	<entry>No</entry>
-	<entry>string</entry>
-        <entry>Name the device for which the policy change is
-	being described, or to which it is to be applied. If this attribute is
-        omitted, all subscribed channels are selected.</entry>
 </row>
 <row>
 	<entry>raw</entry> 
@@ -1364,8 +1281,7 @@ subscribed channels are selected.</para>
 	default (0) is to clear all fix data at the start of each poll
 	cycle, so until the sentence that reports a given piece of
 	data arrives queries will report ?.  Setting 1 will disable
-	this, retaining data from the previous cycle.  This is a
-	per-user-channel bit, not a per-device one.  The 0 setting is
+	this, retaining data from the previous cycle.  The 0 setting is
 	hyper-correct and never displays stale data, but may produce a
 	jittery display; the 1 setting allows stale data but smooths
 	the display.</entry>

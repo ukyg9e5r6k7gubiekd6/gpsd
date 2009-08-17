@@ -238,71 +238,11 @@ int json_sky_read(const char *buf, struct gps_data_t *gpsdata, const char **endp
     return 0;
 }
 
-/*
- * To add new device types to be eligible for watching, bump
- * NWATCHTYPES and add a matching pair of lines to the watchmap
- * initializer and the watch_attrs initializer.
- */
-const struct watchmap_t watchmap[NWATCHTYPES] = {
-    {WATCH_TPV,   GPS,   "TPV"},
-    {WATCH_SKY,   GPS,   "SKY"},
-    {WATCH_RTCM2, RTCM2, "RTCM2"},
-    {WATCH_RTCM3, RTCM3, "RTCM3"},
-    {WATCH_AIS,   AIS,   "AIS"},
-};
-
-int json_watch_read(int *watchmask, const char *buf, const char **endptr)
-{
-    int i, status;
-    bool watchflags[NWATCHTYPES];
-    struct json_attr_t watch_attrs[] = {
-	{"TPV",   boolean, .addr.boolean=&watchflags[0]},
-	{"SKY",   boolean, .addr.boolean=&watchflags[1]},
-	{"RTCM2", boolean, .addr.boolean=&watchflags[2]},
-	{"RTCM3", boolean, .addr.boolean=&watchflags[3]},
-	{"AIS",   boolean, .addr.boolean=&watchflags[4]},
-	{NULL},
-    };
-
-    for (i = 0; i < NITEMS(watchmap); i++)
-	watch_attrs[i].dflt.boolean = (*watchmask & watchmap[i].mask)!=0;
-    status = json_read_object(buf, watch_attrs, 0, endptr);
-    if (status == 0) {
-	int i;
-	for (i = 0; i < NITEMS(watchmap); i++) {
-	    if (watchflags[i] == true) {
-		*watchmask |= watchmap[i].mask;
-	    } else if (watchflags[i] == false) {
-		*watchmask &=~ watchmap[i].mask;
-	    }
-	}
-    }
-
-    return status;
-}
-
-void json_watch_dump(int watchmask, char *reply, size_t replylen)
-{
-    int i;
-
-    (void)strlcpy(reply, "{\"class\":\"WATCH\",", replylen);
-    for (i = 0; i < NITEMS(watchmap); i++)
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       "\"%s\":%s,",
-		       watchmap[i].string,
-		       (watchmask & watchmap[i].mask)!=0 ? "true" : "false");
-    reply[strlen(reply)-1] = '\0';
-    (void)strlcat(reply, "}", replylen);
-}
-
-int json_configchan_read(struct chanconfig_t *ccp, const char **dnp, 
+int json_watch_read(struct policy_t *ccp,
 			 const char *buf, const char **endptr)
 {
-    static char devpath[PATH_MAX];
     int intcasoc;
     struct json_attr_t chanconfig_attrs[] = {
-	{"device",	   string,   .addr.string.ptr=devpath,
-				     .addr.string.len=PATH_MAX},
 	{"raw",	           integer,  .addr.integer = &ccp->raw,
 				     .dflt.integer = -1},
 	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
@@ -316,21 +256,14 @@ int json_configchan_read(struct chanconfig_t *ccp, const char **dnp,
     if (status == 0) {
 	if (intcasoc != -1)
 	    ccp->buffer_policy = intcasoc;
-	if (devpath[0])
-	    *dnp = devpath;
     }
     return status;
 }
 
-void json_configchan_dump(struct chanconfig_t *ccp, char *dnp,
-			  char *reply, size_t replylen)
+void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 {
-    (void)strlcpy(reply, "{\"class\":\"CONFIGCHAN\",", replylen);
-    if (dnp != NULL)
-	(void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
-		       "\"device\":\"%s\",", dnp);
-    (void)snprintf(reply+strlen(reply), sizeof(reply)-strlen(reply),
-		   "\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}",
+    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		   "{\"class\":\"WATCH\",\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}",
 		   ccp->raw, 
 		   ccp->buffer_policy,
 		   ccp->scaled ? "true" : "false");

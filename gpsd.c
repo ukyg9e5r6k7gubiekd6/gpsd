@@ -346,7 +346,6 @@ static int filesock(char *filename)
  */
 
 struct channel_t {
-    struct chanconfig_t conf;		/* configurable bits */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     struct subscriber_t *subscriber;	/* subscriber monitoring this */
@@ -359,8 +358,9 @@ struct subscriber_t {
 #ifdef OLDSTYLE_ENABLE
     bool tied;				/* client set device with F */
 #endif /* OLDSTYLE_ENABLE */
+    struct policy_t policy;		/* configurable bits */
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
-    bool new_style_responses;			/* protocol typr desired */
+    bool new_style_responses;			/* protocol type desired */
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
     int watcher;			/* is client in watcher mode? */
 };
@@ -505,14 +505,15 @@ static void detach_client(struct subscriber_t *sub)
 #endif /* OLDSTYLE_ENABLE */
     sub->watcher = WATCH_NOTHING;
     sub->active = 0;
+    sub->policy.buffer_policy = casoc;
+    sub->policy.raw = 0;
+    sub->policy.scaled = false;
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
-	    channel->conf.buffer_policy = casoc;
 	    channel->subscriber = NULL;
-	    channel->conf.raw = 0;
-	    channel->conf.scaled = false;
+	    
 	}
     sub->fd = -1;
 }
@@ -594,7 +595,7 @@ static void raw_hook(struct gps_data_t *ud,
     struct channel_t *channel; 
 
     for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-	if (channel->conf.raw == level)
+	if (channel->subscriber != NULL && channel->subscriber->policy.raw == level)
 	{
 	    struct subscriber_t *sub = channel->subscriber;
 
@@ -699,7 +700,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     struct channel_t *chp, *channel;
     bool was_unassigned;
 
-    /* search for an already-assigned device with matching type */
+    /* search for an already-assigned device with matching type or device */
     channel = NULL;
     for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if ((forcedev != NULL && chp->device == forcedev)
@@ -837,27 +838,6 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
     return channel;
 }
 /*@ +branchstate +usedef +globstate @*/
-
-#ifdef GPSDNG_ENABLE
-static void deassign_channel(struct subscriber_t *user, gnss_type type)
-{
-    struct channel_t *chp;
-
-    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	if (chp->subscriber == user 
-	    && chp->device 
-	    && (chp->device->observed & classmap[type].mask) != 0) {
-	    gpsd_report(LOG_PROG, "client(%d): detaching channel %d (type %s)\n",
-			sub_index(user), 
-			(int)(chp-channels),
-			classmap[type].name);
-	    /*@i1@*/chp->device = NULL;
-	    chp->conf.buffer_policy = casoc;
-	    chp->conf.scaled = false;
-	    chp->subscriber = NULL;
-	}
-}
-#endif /* GPSDNG_ENABLE */
 
 /*@ observer @*/static char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
@@ -1205,18 +1185,15 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		(void)strlcpy(phrase, ",I=?", sizeof(phrase));
 	    break;
 	case 'J':
-	    if (channel != NULL) {
-		if (*p == '=') ++p;
-		if (*p == '1' || *p == '+') {
-		    channel->conf.buffer_policy = nocasoc;
-		    p++;
-		} else if (*p == '0' || *p == '-') {
-		    channel->conf.buffer_policy = casoc;
-		    p++;
-		}
-		(void)snprintf(phrase, sizeof(phrase), ",J=%u", channel->conf.buffer_policy);
-	    } else 
-		(void)strlcpy(phrase, ",J=?", sizeof(phrase));
+	    if (*p == '=') ++p;
+	    if (*p == '1' || *p == '+') {
+		sub->policy.buffer_policy = nocasoc;
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		sub->policy.buffer_policy = casoc;
+		p++;
+	    }
+	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", sub->policy.buffer_policy);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -1383,34 +1360,30 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 #undef ZEROIZE
 	    break;
 	case 'R':
-	    if ((channel = mandatory_assign_channel(sub, ANY, NULL))==NULL)
-		(void)strlcpy(phrase, ",R=?", sizeof(phrase));
-	    else {
-		if (*p == '=') ++p;
-		if (*p == '2') {
-		    channel->conf.raw = 2;
-		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode on channel %d\n", sub_index(sub), channel_index(channel));
-		    (void)snprintf(phrase, sizeof(phrase), ",R=2");
-		    p++;
-		} else if (*p == '1' || *p == '+') {
-		    channel->conf.raw = 1;
-		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
-		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
-		    p++;
-		} else if (*p == '0' || *p == '-') {
-		    channel->conf.raw = 0;
-		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
-		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
-		    p++;
-		} else if (channel->conf.raw) {
-		    channel->conf.raw = 0;
-		    gpsd_report(LOG_INF, "client(%d) turned off raw mode on channel %d\n", sub_index(sub), channel_index(channel));
-		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
-		} else {
-		    channel->conf.raw = 1;
-		    gpsd_report(LOG_INF, "client(%d) turned on raw mode on channel %d\n", sub_index(sub), channel_index(channel));
-		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
-		}
+	    if (*p == '=') ++p;
+	    if (*p == '2') {
+		sub->policy.raw = 2;
+		gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
+		(void)snprintf(phrase, sizeof(phrase), ",R=2");
+		p++;
+	    } else if (*p == '1' || *p == '+') {
+		sub->policy.raw = 1;
+		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		(void)snprintf(phrase, sizeof(phrase), ",R=1");
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		sub->policy.raw = 0;
+		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		(void)snprintf(phrase, sizeof(phrase), ",R=0");
+		p++;
+	    } else if (sub->policy.raw) {
+		sub->policy.raw = 0;
+		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		(void)snprintf(phrase, sizeof(phrase), ",R=0");
+	    } else {
+		sub->policy.raw = 1;
+		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 	    }
 	    break;
 	case 'S':
@@ -1651,129 +1624,37 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	(void)strlcat(reply, "]}", replylen);
 	buf += 8;
     } else if (strncmp(buf, "WATCH", 5) == 0 && (buf[5] == ';' || buf[5] == '=')) {
+	struct gps_device_t *devp;
 	buf += 5;
 	if (*buf == ';') {
 	    ++buf;
 	} else {
-	    /*
-	     * The latch variable is a blatant hack to ensure
-	     * that if listening to a device class (like GPS)
-	     * was turned on explicitly, it won't be turned
-	     * off later because a 'false' setting on a
-	     * different data type wants to turn off the same
-	     * device class.
-	     */
-	    int i, latch;
-	    int new_watcher = sub->watcher;
-	    int status = json_watch_read(&new_watcher, ++buf, &end);
-	    if (*end == ';')
-		++end;
+	    int status;
+	    struct policy_t policy;
+	    status = json_watch_read(&policy, buf+1, &end);
 	    if (status == 0) {
-		gpsd_report(LOG_PROG, 
-			    "client(%d): before applying 0x%0x, watch mask is 0x%0x.\n",
-			    sub_index(sub), new_watcher, sub->watcher);
-		for (i = 0; i < NITEMS(watchmap); i++) {
-		    /* ignore mask bits that didn't change */
-		    if ((sub->watcher & watchmap[i].mask) == (new_watcher & watchmap[i].mask))
-			continue;
-		    else if ((new_watcher & watchmap[i].mask) != 0) {
-			if (assign_channel(sub, watchmap[i].class, NULL) != NULL) {
-			    sub->watcher |= watchmap[i].mask;
-			    latch |= (1 << watchmap[i].class);
-			}
-		    } else {
-			if ((latch & (1 << watchmap[i].class))== 0)
-			    deassign_channel(sub, watchmap[i].class);
-			sub->watcher &=~ watchmap[i].mask;
-		    }
-		    gpsd_report(LOG_PROG, 
-				"client(%d): after, watch mask is 0x%0x.\n",
-				sub_index(sub), sub->watcher);
-		}
-	    } else
-		(void)snprintf(reply, replylen,
+		if (*end == ';')
+		    ++end;
+		if (policy.raw != -1)
+		    sub->policy.raw = policy.raw;
+		if (policy.buffer_policy != -1)
+		    sub->policy.buffer_policy = policy.buffer_policy;
+		if (policy.scaled != nullbool)
+		    sub->policy.scaled = policy.scaled;
+	    } else 
+		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
 			       json_error_string(status));
 	    buf = end;
 	}
-	json_watch_dump(sub->watcher, reply, replylen);
-    } else if (strncmp(buf, "CONFIGCHAN", 10) == 0 && (buf[10] == ';' || buf[10] == '=')) {
-	buf += 10;
-	if (channel_count(sub) == 0) {
-	    for (; *buf ; buf++) {
-		if (*buf == '\0')
-		    goto stringend1;
-		else if (*buf == '}' || *buf == ';')
-		    break;
-		++buf;
-	    stringend1:;
-	    }
-	    (void)strlcat(reply, 
-			  "{\"class\":\"ERROR\",\"message\":\"Can't perform CONFIGCHAN, no channels attached.\"}\r\n",
-			  replylen);
-	} else {
-	    struct channel_t *chp;
-	    const char *pathp = NULL;
-	    if (*buf == '=') {
-		int status;
-		struct chanconfig_t conf;
-		status = json_configchan_read(&conf, &pathp, buf+1, &end);
-		if (*end == ';')
-		    ++end;
-		if (status == 0) {
-		    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-			if (chp->subscriber != sub) {
-			    continue;
-			} else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0) {
-			    continue;
-			} else if (conf.buffer_policy != -1 && (chp->device->observed & GPS_TYPEMASK)==0) {
-			    (void)strlcpy(reply,
-					  "{\"class\":ERROR\",\"message\":\"Attempt to apply buffer policy to a non-GPS device.\"}\r\n",
-					  replylen);
-			} else {
-			    /*
-			     * This is the critical bit where we apply
-			     * policy to the channel.
-			     */
-			    gpsd_report(LOG_PROG, 
-					"client(%d): applying policy to channel %d (%s).\n",
-					sub_index(sub),
-					channel_index(chp),
-					chp->device->gpsdata.gps_device);
-			    if (conf.raw != -1)
-				chp->conf.raw = conf.raw;
-			    if (conf.buffer_policy != -1)
-				chp->conf.buffer_policy = conf.buffer_policy;
-			    if (conf.scaled != nullbool)
-				chp->conf.scaled = conf.scaled;
-			}
-		} else 
-		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":ERROR\",\"message\":\"Invalid CONFIGCHAN.\",\"error\":\"%s\"}\r\n",
-				   json_error_string(status));
-		buf = end;
-	    }
-	    /* dump a response for each selected channel */
-	    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-		if (chp->subscriber != sub)
-		    continue;
-		else if (pathp != NULL && chp->device && strcmp(chp->device->gpsdata.gps_device, pathp)!=0)
-		    continue;
-		else {
-		    gpsd_report(LOG_PROG, 
-				"client(%d): dumping policy for channel %d (%s).\n",
-				sub_index(sub),
-				channel_index(chp),
-				chp->device->gpsdata.gps_device);
-		    json_configchan_dump(&chp->conf, 
-					 chp->device->gpsdata.gps_device, 
-					 reply + strlen(reply),
-					 replylen - strlen(reply));
-		    (void)strlcat(reply, "\r\n", replylen);
-		}
-	    if (reply[1])	/* avoid extra line termination at end */
-		reply[strlen(reply)-2] = '\0';
-	}
+	/* key side effect: watch all devices */
+	sub->watcher |= WATCH_NEWSTYLE;
+	for(devp = devices; devp < devices + MAXDEVICES; devp++)
+	    (void)assign_channel(sub, ANY, devp);
+	/* dump all devices */
+	json_watch_dump(&sub->policy, 
+			     reply + strlen(reply),
+			     replylen - strlen(reply));
     } else if (strncmp(buf, "CONFIGDEV", 9) == 0 && (buf[9] == ';' || buf[9] == '=')) {
 	int chcount = channel_count(sub);
 	buf += 9;
@@ -2300,7 +2181,7 @@ int main(int argc, char *argv[])
 			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
-			    if (channel->conf.buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
+			    if (channel->subscriber->policy.buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
 				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
 			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)
@@ -2348,7 +2229,7 @@ int main(int argc, char *argv[])
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
 				aivdm_dump(&channel->device->aivdm.decoded, 
-					   channel->conf.scaled, false, buf2, sizeof(buf2));
+					   sub->policy.scaled, false, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
@@ -2360,20 +2241,20 @@ int main(int argc, char *argv[])
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 #ifdef GPSDNG_ENABLE
 			{
-			    if ((sub->watcher & WATCH_TPV)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
+			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
 				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
-			    if ((sub->watcher & WATCH_SKY)!=0 && (changed & SATELLITE_SET)!=0) {
+			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & SATELLITE_SET)!=0) {
 				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
-			    if ((sub->watcher & WATCH_AIS)!=0 && (changed & AIS_SET)!=0) {
+			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & AIS_SET)!=0) {
 				aivdm_dump(&channel->device->aivdm.decoded, 
 					   false, true, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
@@ -2445,7 +2326,7 @@ int main(int argc, char *argv[])
 		for (channel = channels; channel < channels + NITEMS(channels); channel++)
 		    if (channel->device && channel->subscriber == sub) {
 			devcount++;
-			if (channel->conf.raw > 0)
+			if (channel->subscriber->policy.raw > 0)
 			    rawcount++;
 		    }
 
