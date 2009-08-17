@@ -24,7 +24,12 @@ done
 shift $(($OPTIND - 1))
 
 # Enables us to turn debugging up high without screwing up the diff checks
-GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d"
+# First expression filters out device notifications on old protocol.
+# Second and third filter out gpsd log messages.
+# Fouth filters out gps.py verbose loggging
+# Fifth filters out new-style WATCH commands
+# Sixth filters out device fields in new-style responses.
+GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e s/\"device\":[^,]*,//"
 
 case $mode in
     regress)
@@ -77,7 +82,7 @@ case $mode in
     view)
         echo "Viewing..."
         for f in $*; do
-            $do gpsfake -s 38400 -1 -b -p $opts ${f}
+            $do gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER}
         done
         exit 0
         ;;
