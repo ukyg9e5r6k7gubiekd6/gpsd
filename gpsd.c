@@ -1650,7 +1650,8 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	/* key side effect: watch all devices */
 	sub->watcher |= WATCH_NEWSTYLE;
 	for(devp = devices; devp < devices + MAXDEVICES; devp++)
-	    (void)assign_channel(sub, ANY, devp);
+	    if (allocated_device(devp))
+		(void)assign_channel(sub, ANY, devp);
 	/* dump all devices */
 	json_watch_dump(&sub->policy, 
 			     reply + strlen(reply),
