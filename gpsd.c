@@ -71,7 +71,7 @@
  * Timeout policy.  We can't rely on clients closing connections
  * correctly, so we need timeouts to tell us when it's OK to
  * reclaim client fds.  ASSIGNMENT_TIMEOUT fends off programs
- * that open connections and just sit there, not issuing a W or
+ * that open connections and just sit there, not issuing a WATCH or
  * doing anything else that triggers a device assignment.  Clients
  * in watcher or raw mode that don't read their data will get dropped
  * when throttled_write() fills up the outbound buffers and the
@@ -1652,7 +1652,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	for(devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (allocated_device(devp))
 		(void)assign_channel(sub, ANY, devp);
-	/* dump all devices */
+	/* display the user's policy */
 	json_watch_dump(&sub->policy, 
 			     reply + strlen(reply),
 			     replylen - strlen(reply));
@@ -1705,7 +1705,8 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			/* now that channel is selected, apply changes */
 			if (devconf.native != channel->device->gpsdata.driver_mode)
 			    channel->device->device_type->mode_switcher(channel->device, devconf.native);
-			// FIXME: change speed and serialmode */
+			set_serial(channel->device, 
+				   (speed_t)devconf.bps, devconf.serialmode);
 		    }
 		}
 		buf = end;
