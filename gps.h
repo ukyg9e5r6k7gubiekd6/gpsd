@@ -834,7 +834,7 @@ struct gps_data_t {
     int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
 
-    /* redundant with the estimate elments in the fix structure */
+    /* redundant with the estimate elements in the fix structure */
     double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
