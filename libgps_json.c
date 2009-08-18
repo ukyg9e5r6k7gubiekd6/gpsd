@@ -5,7 +5,7 @@ NAME
 
 DESCRIPTION
    This module uses the generic JSON parser to get data from JSON
-representations to libgps strctures.
+representations to libgps structures.
 
 ***************************************************************************/
 
@@ -21,6 +21,7 @@ representations to libgps strctures.
 static int json_tpv_read(const char *buf, 
 			 struct gps_data_t *gpsdata, const char **endptr)
 {
+    int status;
     const struct json_attr_t json_attrs_1[] = {
 	{"device", string,  .addr.string.ptr = gpsdata->gps_device,
 			    .addr.string.len = sizeof(gpsdata->gps_device)},
@@ -57,7 +58,41 @@ static int json_tpv_read(const char *buf,
 	{NULL},
     };
 
-    return json_read_object(buf, json_attrs_1, 0, NULL);
+    status = json_read_object(buf, json_attrs_1, 0, NULL);
+
+    if (status == 0) {
+	gpsdata->status = STATUS_FIX;
+	gpsdata->set = STATUS_SET;
+	if (isnan(gpsdata->fix.time) == 0)
+	    gpsdata->set |= TIME_SET;
+	if (isnan(gpsdata->fix.ept) == 0)
+	    gpsdata->set |= TIMERR_SET;
+	if (isnan(gpsdata->fix.longitude) == 0)
+	    gpsdata->set |= LATLON_SET;
+	if (isnan(gpsdata->fix.altitude) == 0)
+	    gpsdata->set |= ALTITUDE_SET;
+	if (isnan(gpsdata->fix.eph)==0)
+	    gpsdata->set |= HERR_SET;
+	if (isnan(gpsdata->fix.epv)==0)
+	    gpsdata->set |= VERR_SET;
+	if (isnan(gpsdata->fix.track)==0)
+	    gpsdata->set |= TRACK_SET;
+	if (isnan(gpsdata->fix.speed)==0)
+	    gpsdata->set |= SPEED_SET;
+	if (isnan(gpsdata->fix.climb)==0)
+	    gpsdata->set |= CLIMB_SET;
+	if (isnan(gpsdata->fix.epd)==0)
+	    gpsdata->set |= TRACKERR_SET;
+	if (isnan(gpsdata->fix.eps)==0)
+	    gpsdata->set |= SPEEDERR_SET;
+	if (isnan(gpsdata->fix.epc)==0)
+	    gpsdata->set |= CLIMBERR_SET;
+	if (isnan(gpsdata->fix.epc)==0)
+	    gpsdata->set |= CLIMBERR_SET;
+	if (gpsdata->fix.mode != MODE_NOT_SEEN)
+	    gpsdata->set |= MODE_SET;
+    }
+    return status;
 }
 
 static int json_sky_read(const char *buf, 
@@ -99,11 +134,12 @@ static int json_sky_read(const char *buf,
 	}
     }
 
+    gpsdata->set |= SATELLITE_SET;
     return 0;
 }
 
 void libgps_json_unpack(char *buf, struct gps_data_t *gpsdata)
-/* the only entry point - punpack a JSON object into C structs */
+/* the only entry point - unpack a JSON object into C structs */
 {
     if (strstr(buf, "\"class\":\"TPV\"") == 0) {
 	json_tpv_read(buf, gpsdata, NULL);
