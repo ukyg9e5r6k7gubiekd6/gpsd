@@ -841,7 +841,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
 	if (newstyle(user) && was_unassigned)
-	    (void)snprintf(buf, sizeof(buf), "{\"class\":\"DEVICE\",\"device\":\"%s\",\"activated\"=%f}\r\n",
+	    (void)snprintf(buf, sizeof(buf), "{\"class\":\"DEVICE\",\"device\":\"%s\",\"activated\":%2.2f}\r\n",
 			   channel->device->gpsdata.gps_device,
 			   timestamp());
 #endif /* GPSDNG_ENABLE */

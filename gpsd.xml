@@ -900,6 +900,12 @@ following elements:</para>
         <entry>Name of the device</entry>
 </row>
 <row>
+	<entry>activated</entry>
+	<entry>At device activation and device close time.</entry>
+	<entry>numeric</entry>
+        <entry>Time the device last sent data.</entry>
+</row>
+<row>
 	<entry>type</entry>
 	<entry>No</entry>
 	<entry>list of strings</entry>

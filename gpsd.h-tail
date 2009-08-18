@@ -152,7 +152,7 @@ struct classmap_t {
     char	*name;
     int		mask;
 };
-#define CLASSMAP_NITEMS	5;
+#define CLASSMAP_NITEMS	5
 struct classmap_t classmap[CLASSMAP_NITEMS];
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */

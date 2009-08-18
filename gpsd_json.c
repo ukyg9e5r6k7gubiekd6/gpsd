@@ -163,6 +163,8 @@ void json_device_dump(struct gps_device_t *device,
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"name\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.gps_device, replylen);
     (void)strlcat(reply, "\",", replylen);
+    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		   "\"activated\":%2.2f", device->gpsdata.online);
     if (device->observed != 0) {
 	(void)strlcat(reply, "\"type\":[", replylen);
 	for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
