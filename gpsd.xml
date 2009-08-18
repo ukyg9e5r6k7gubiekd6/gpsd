@@ -942,8 +942,8 @@ following elements:</para>
 
 <programlisting>
 {"class"="DEVICES","devices":[
-    {"class":"DEVICE","name":"/dev/pts/1","type":"GPS","driver":"SiRF binary"},
-    {"class":"DEVICE","name":"/dev/pts/3","type":"AIS","driver":"AIVDM"}]}
+    {"class":"DEVICE","path":"/dev/pts/1","type":["GPS"],"driver":"SiRF binary"},
+    {"class":"DEVICE","path":"/dev/pts/3","type":["AIS"],"driver":"AIVDM"}]}
 </programlisting>
 
 <para>The daemon occasionally ships a bare DEVICE object to the client
