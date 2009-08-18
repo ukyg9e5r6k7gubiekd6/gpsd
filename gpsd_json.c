@@ -156,6 +156,43 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 		    datap->satellites, reported);
 }
 
+void json_device_dump(struct gps_device_t *device,
+		     char *reply, size_t replylen)
+{
+    struct classmap_t *cmp;
+    (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"name\":\"", replylen);
+    (void)strlcat(reply, device->gpsdata.gps_device, replylen);
+    (void)strlcat(reply, "\",", replylen);
+    if (device->observed != 0) {
+	(void)strlcat(reply, "\"type\":[", replylen);
+	for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
+	    if ((device->observed & cmp->mask) != 0) {
+		(void)strlcat(reply, "\"", replylen);
+		(void)strlcat(reply, cmp->name, replylen);
+		(void)strlcat(reply, "\",", replylen);
+	    }
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';
+	(void)strlcat(reply, "],", replylen);
+    }
+    if (device->device_type != NULL) {
+	(void)strlcat(reply, "\"driver\":\"", replylen);
+	(void)strlcat(reply, 
+		      device->device_type->type_name,
+		      replylen);
+	(void)strlcat(reply, "\",", replylen);
+    }
+    if (device->subtype[0] != '\0') {
+	(void)strlcat(reply, "\",\"subtype\":\"", replylen);
+	(void)strlcat(reply, 
+		      device->subtype,
+		      replylen);
+    }
+    if (reply[strlen(reply)-1] == ',')
+	reply[strlen(reply)-1] = '\0';
+    (void)strlcat(reply, "}", replylen);
+}
+
 int json_watch_read(struct policy_t *ccp,
 			 const char *buf, const char **endptr)
 {

@@ -110,11 +110,7 @@
  * Manifest names for the gnss_type enum - must be kept synced with it.
  * Also, masks so we can tell what packet types correspond to each class.
  */
-struct classmap_t {
-    char	*name;
-    int		mask;
-};
-static struct classmap_t classmap[] = {
+struct classmap_t classmap[CLASSMAP_NITEMS] = {
     {"ANY",	0},
     {"GPS",	GPS_TYPEMASK},
     {"RTCM2",	PACKET_TYPEMASK(RTCM2_PACKET)},
@@ -1562,10 +1558,28 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 #endif /* OLDSTYLE_ENABLE */
 
 #ifdef GPSDNG_ENABLE
+static void json_devicelist_dump(char *reply, size_t replylen)
+{
+    struct gps_device_t *devp;
+    (void)strlcpy(reply, 
+		  "{\"class\"=\"DEVICES\",\"devices\":[", replylen);
+    for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	if (allocated_device(devp) && strlen(reply)+strlen(devp->gpsdata.gps_device)+3 < replylen-1) {
+	    json_device_dump(devp,
+			     reply+strlen(reply), replylen-strlen(reply));
+	    (void)strlcat(reply, ",", replylen);
+	}
+
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';
+	(void)strlcat(reply, "]}", replylen);
+}
+
 static void handle_newstyle_request(struct subscriber_t *sub, 
 				    const char *buf, const char **after,
 				    char *reply, size_t replylen)
 {
+    struct gps_device_t *devp;
     struct channel_t *channel;
     const char *end;
 
@@ -1577,6 +1591,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
      * Still to be implemented: equivalents of Z $
      */
     if (strncmp(buf, "TPV;", 4) == 0) {
+	buf += 4;
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {
 	    json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 			  reply, replylen);
@@ -1584,61 +1599,18 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    (void)strlcpy(reply, 
 			  "{\"class\":\"TPV\"}", replylen);
 	}
-	buf += 4;
     } else if (strncmp(buf, "SKY;", 4) == 0) {
+	buf += 4;
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 	    json_sky_dump(&channel->device->gpsdata, reply, replylen);
 	} else {
 	    (void)strlcpy(reply,
 			  "{\"class\":\"SKY\"}", replylen);
 	}
-	buf += 4;
     } else if (strncmp(buf, "DEVICES;", 8) == 0) {
-	int i;
-	(void)strlcpy(reply, 
-		      "{\"class\"=\"DEVICES\",\"devices\":[", replylen);
-	for (i = 0; i < MAXDEVICES; i++) {
-	    if (allocated_device(&devices[i]) && strlen(reply)+strlen(devices[i].gpsdata.gps_device)+3 < replylen-1) {
-		struct classmap_t *cmp;
-		(void)strlcat(reply, "{\"class\":\"DEVICE\",\"name\":\"", replylen);
-		(void)strlcat(reply, devices[i].gpsdata.gps_device, replylen);
-		(void)strlcat(reply, "\",", replylen);
-		if (devices[i].observed != 0) {
-		    (void)strlcat(reply, "\"type\":[", replylen);
-		    for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
-			if ((devices[i].observed & cmp->mask) != 0) {
-			    (void)strlcat(reply, "\"", replylen);
-			    (void)strlcat(reply, cmp->name, replylen);
-			    (void)strlcat(reply, "\",", replylen);
-			}
-		    if (reply[strlen(reply)-1] == ',')
-			reply[strlen(reply)-1] = '\0';
-		    (void)strlcat(reply, "],", replylen);
-		}
-		if (devices[i].device_type != NULL) {
-		    (void)strlcat(reply, "\"driver\":\"", replylen);
-		    (void)strlcat(reply, 
-				  devices[i].device_type->type_name,
-				  replylen);
-		    (void)strlcat(reply, "\",", replylen);
-		}
-		if (devices[i].subtype[0] != '\0') {
-		    (void)strlcat(reply, "\",\"subtype\":\"", replylen);
-		    (void)strlcat(reply, 
-				  devices[i].subtype,
-				  replylen);
-		}
-		if (reply[strlen(reply)-1] == ',')
-		    reply[strlen(reply)-1] = '\0';
-		(void)strlcat(reply, "},", replylen);
-	    }
-	}
-	if (reply[strlen(reply)-1] == ',')
-	    reply[strlen(reply)-1] = '\0';
-	(void)strlcat(reply, "]}", replylen);
 	buf += 8;
+	json_devicelist_dump(reply, replylen);
     } else if (strncmp(buf, "WATCH", 5) == 0 && (buf[5] == ';' || buf[5] == '=')) {
-	struct gps_device_t *devp;
 	buf += 5;
 	if (*buf == ';') {
 	    ++buf;

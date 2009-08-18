@@ -141,15 +141,18 @@ static int json_sky_read(const char *buf,
 static int json_devices_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
+    char names[GPS_JSON_DEVICES_MAX][PATH_MAX];
     const struct json_attr_t json_attrs_subdevices[] = {
 	// FIXME: Parse device records, too.
+	{"name",   string,  .addr.string.ptr = gpsdata->gps_device,
+			    .addr.string.len = sizeof(gpsdata->gps_device)},
 	{NULL},
     };
     // FIXME: Can we abolish the hard limit on the number of devices? 
     const struct json_attr_t json_attrs_devices[] = {
 	{"devices",    array,   .addr.array.element_type = object,
 				.addr.array.arr.subtype = json_attrs_subdevices,
-				.addr.array.maxlen = 4},
+				.addr.array.maxlen = GPS_JSON_DEVICES_MAX},
 	{NULL},
     };
     int status;

@@ -147,6 +147,14 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
+/* the map of device class names */
+struct classmap_t {
+    char	*name;
+    int		mask;
+};
+#define CLASSMAP_NITEMS	5;
+struct classmap_t classmap[CLASSMAP_NITEMS];
+
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
 struct gps_context_t {
@@ -486,9 +494,6 @@ extern int bin2srec(unsigned int, unsigned int, unsigned int, unsigned char *, u
 extern int srec_hdr(unsigned int, unsigned char *, unsigned char *);
 extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
-
-/* exported bits for the GPS flasher */
-bool sirf_write(int fd, unsigned char *msg);
 
 /* application interface */
 extern void gpsd_init(struct gps_device_t *, 
