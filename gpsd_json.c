@@ -160,7 +160,7 @@ void json_device_dump(struct gps_device_t *device,
 		     char *reply, size_t replylen)
 {
     struct classmap_t *cmp;
-    (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"name\":\"", replylen);
+    (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.gps_device, replylen);
     (void)strlcat(reply, "\",", replylen);
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),

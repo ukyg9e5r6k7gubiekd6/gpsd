@@ -1076,13 +1076,19 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 
 		gps_set_raw_hook(gpsdata, update_panel);
 
+#ifdef OLDSTYLE_ENABLE
 		if (jitteropt)
 		    (void)gps_query(gpsdata, "J=1");
-
 		if (source.device != NULL)
 		    (void)gps_query(gpsdata, "F=%s", source.device);
-
 		(void)gps_query(gpsdata, "w+x");
+#else
+		// FIXME: Not yet implementing equivalent of F
+		if (jitteropt)
+		    (void)gps_query(gpsdata, "?watch={\"buffer_policy\":1};");
+		else
+		    (void)gps_query(gpsdata, "?watch={\"buffer_policy\":0};");
+#endif /* OLDSTYLE */
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
 		    (XtPointer)XtInputReadMask, handle_input, NULL);

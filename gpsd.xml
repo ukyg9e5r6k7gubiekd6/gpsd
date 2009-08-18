@@ -894,10 +894,10 @@ following elements:</para>
         <entry>Fixed: "DEVICE"</entry>
 </row>
 <row>
-	<entry>name</entry>
+	<entry>path</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Name of the device</entry>
+        <entry>Pathname of the device</entry>
 </row>
 <row>
 	<entry>activated</entry>
@@ -1433,6 +1433,12 @@ meaning of the attributes.</para>
 </thead>
 <tbody>
 <row>
+	<entry>path</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Pathname of the cevice.</entry>
+</row>
+<row>
 	<entry>activated</entry>
 	<entry>At device activation and device close time.</entry>
 	<entry>numeric</entry>
@@ -1453,7 +1459,7 @@ meaning of the attributes.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"DEVICE","name":"/dev/pts1","activated":0}
+{"class":"DEVICE","path":"/dev/pts1","activated":0}
 </programlisting>
 
 <para>The daemon may ship an error object in response to a

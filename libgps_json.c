@@ -59,7 +59,7 @@ static int json_tpv_read(const char *buf,
 	{NULL},
     };
 
-    status = json_read_object(buf, json_attrs_1, 0, NULL);
+    status = json_read_object(buf, json_attrs_1, 0, endptr);
 
     if (status == 0) {
 	gpsdata->status = STATUS_FIX;
@@ -126,7 +126,7 @@ static int json_sky_read(const char *buf,
     for (i = 0; i < MAXCHANNELS; i++)
 	usedflags[i] = false;
 
-    status = json_read_object(buf, json_attrs_2, 0, NULL);
+    status = json_read_object(buf, json_attrs_2, 0, endptr);
     if (status != 0)
 	return status;
 
@@ -140,7 +140,29 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
-static int json_devices_read(const char *buf, 
+static int json_device_read(const char *buf, 
+			     struct gps_data_t *gpsdata, const char **endptr)
+{
+    const struct json_attr_t json_attrs_device[] = {
+	{"class",      check,   .dflt.check = "DEVICE"},
+	{"path",       string,  .addr.string.ptr  = gpsdata->gps_device,
+				.addr.string.len = PATH_MAX},
+	{"activated",  real,    .addr.real    = &gpsdata->fix.time},
+	// type (list), driver, subtype
+	{NULL},
+    };
+    int status;
+
+    status = json_read_object(buf, json_attrs_device, 0, endptr);
+    if (status != 0)
+	return status;
+
+    gpsdata->set |= DEVICE_SET;
+    return 0;
+}
+
+#ifdef __UNUSED_
+static int json_devicelist_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
     char names[GPS_JSON_DEVICES_MAX][PATH_MAX];
@@ -160,7 +182,7 @@ static int json_devices_read(const char *buf,
     };
     int status;
 
-    status = json_read_object(buf, json_attrs_devices, 0, NULL);
+    status = json_read_object(buf, json_attrs_devices, 0, endptr);
     if (status != 0)
 	return status;
 
@@ -169,6 +191,7 @@ static int json_devices_read(const char *buf,
     gpsdata->ndevices = *json_attrs_devices[0].addr.array.count;
     return 0;
 }
+#endif
 
 int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into C structs */
@@ -177,8 +200,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return json_tpv_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
 	return json_sky_read(buf, gpsdata, NULL);
-    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
-	return json_devices_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
+	return json_device_read(buf, gpsdata, NULL);
     } else
 	return -1;
 }
