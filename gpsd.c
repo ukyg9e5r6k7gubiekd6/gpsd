@@ -658,6 +658,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 found:
     gpsd_init(devp, &context, device_name);
     devp->gpsdata.raw_hook = raw_hook;
+#ifdef OLDSTYLE_ENABLE
     /*
      * Bring the device all the way so we'll sniff packets from it and
      * discover up front what its device class is (e.g GPS, RTCM[23], AIS).
@@ -666,6 +667,14 @@ found:
      */
     if (gpsd_activate(devp, true) < 0)
 	return NULL;
+#else
+    /*
+     * If we're running new protocol only there's no 'g' command
+     * and thus we don't need to know device classes in advance.
+     */
+    if (gpsd_activate(devp, false) < 0)
+	return NULL;
+#endif /* OLDSTYLE_ENABLE */
     FD_SET(devp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(devp->gpsdata.gps_fd, true);
     return devp;
