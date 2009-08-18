@@ -1742,7 +1742,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	}
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":$Id$,\"api_major\":%d,\"api_minor\":%d}", 
+		       "{\"class\":\"VERSION\",\"version\":\"" VERSION "\",\"rev\":\"$Id$\",\"api_major\":%d,\"api_minor\":%d}", 
 		       GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 	buf += 8;
     } else {
