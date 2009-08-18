@@ -140,11 +140,12 @@ libgpsd_c_sources = \
 	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
-	gps_json.c \
+	gpsd_json.c \
 	hex.c \
 	isgps.c \
 	json.c \
 	libgps.c \
+	libgps_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
 	net_dgpsip.c \

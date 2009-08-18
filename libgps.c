@@ -75,17 +75,6 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
     gpsdata->raw_hook = hook;
 }
 
-#ifdef GPSDNG_ENABLE
-static void gps_json_unpack(char *buf, struct gps_data_t *gpsdata)
-{
-    if (strstr(buf, "\"class\":\"TPV\"") == 0) {
-	json_tpv_read(buf, gpsdata, NULL);
-    } else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
-	json_sky_read(buf, gpsdata, NULL);
-    } 
-}
-#endif /* GPSDNG_ENABLE */
-
 /*@ -branchstate -usereleased -mustfreefresh @*/
 static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
@@ -96,7 +85,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
     if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
-	gps_json_unpack(buf, gpsdata);
+	libgps_json_unpack(buf, gpsdata);
     }
 #endif /* GPSDNG_ENABLE */
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
