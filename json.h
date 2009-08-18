@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-typedef enum {integer, real, string, boolean, object, array} json_type;
+typedef enum {integer, real, string, boolean, object, array, check} json_type;
 
 #define nullbool	-1	/* not true, not false */
 
@@ -38,8 +38,8 @@ struct json_attr_t {
     union {
 	int integer;
 	double real;
-	char string;
 	bool boolean;
+	char *check;
     } dflt;
 };
 
@@ -65,5 +65,6 @@ const char *json_error_string(int);
 #define JSON_ERR_BADSUBTRAIL	13	/* garbage while expecting array comma */
 #define JSON_ERR_SUBTYPE	14	/* unsupported array element type */
 #define JSON_ERR_BADSTRING	15	/* error while string parsing */
+#define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
 
 /* json.h ends here */

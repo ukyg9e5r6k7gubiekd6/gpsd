@@ -85,7 +85,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
     if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
-	libgps_json_unpack(buf, gpsdata);
+	(void)libgps_json_unpack(buf, gpsdata);
     }
 #endif /* GPSDNG_ENABLE */
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)

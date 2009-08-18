@@ -23,6 +23,7 @@ static int json_tpv_read(const char *buf,
 {
     int status;
     const struct json_attr_t json_attrs_1[] = {
+	{"class",  check,   .dflt.check = "TPV"},
 	{"device", string,  .addr.string.ptr = gpsdata->gps_device,
 			    .addr.string.len = sizeof(gpsdata->gps_device)},
 	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
@@ -108,6 +109,7 @@ static int json_sky_read(const char *buf,
 	{NULL},
     };
     const struct json_attr_t json_attrs_2[] = {
+	{"class",      check,   .dflt.check = "SKY"},
 	{"device",     string,  .addr.string.ptr  = gpsdata->gps_device,
 				.addr.string.len = PATH_MAX},
 	{"tag",	       string,  .addr.string.ptr  = gpsdata->tag,
@@ -150,6 +152,7 @@ static int json_devices_read(const char *buf,
     };
     // FIXME: Can we abolish the hard limit on the number of devices? 
     const struct json_attr_t json_attrs_devices[] = {
+        {"class",      check,   .dflt.check = "DEVICES"},
 	{"devices",    array,   .addr.array.element_type = object,
 				.addr.array.arr.subtype = json_attrs_subdevices,
 				.addr.array.maxlen = GPS_JSON_DEVICES_MAX},
@@ -167,16 +170,17 @@ static int json_devices_read(const char *buf,
     return 0;
 }
 
-void libgps_json_unpack(char *buf, struct gps_data_t *gpsdata)
+int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into C structs */
 {
-    if (strstr(buf, "\"class\":\"TPV\"") == 0) {
-	json_tpv_read(buf, gpsdata, NULL);
-    } else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
-	json_sky_read(buf, gpsdata, NULL);
-    } else if (strstr(buf, "\"class\":\"DEVICES\"") == 0) {
-	json_devices_read(buf, gpsdata, NULL);
-    } 
+    if (strstr(buf, "\"class\":\"TPV\"") != 0) {
+	return json_tpv_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
+	return json_sky_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
+	return json_devices_read(buf, gpsdata, NULL);
+    } else
+	return -1;
 }
 
 /* libgps_json.c ends here */

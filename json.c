@@ -46,7 +46,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
     const struct json_attr_t *cursor;
-    int substatus;
+    int substatus, maxlen;
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
@@ -68,6 +68,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    break;
 	case object:	/* silences a compiler warning */
 	case array:
+	case check:
 	    break;
 	}
 
@@ -137,13 +138,17 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    }
 	    break;
 	case in_val_string:
+	    if (cursor->type == string)
+		maxlen = cursor->addr.string.len - 1;
+	    else if (cursor->type == check)
+		maxlen = strlen(cursor->dflt.check);
 	    if (*cp == '"') {
 		*pval = '\0';
 #ifdef JSONDEBUG
 		(void) printf("Collected string value %s\n", valbuf);
 #endif /* JSONDEBUG */
 		state = post_val;
-	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + cursor->addr.string.len - 1)
+	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + maxlen)
 		return JSON_ERR_STRLONG;	/* value too long */
 	    else
 		*pval++ = *cp;
@@ -177,6 +182,9 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    case boolean:
 		cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
 		break;
+	    case check:
+		if (strcmp(cursor->dflt.check, valbuf)!=0)
+		    return JSON_ERR_CHECKFAIL;
 	    case object:	/* silences a compiler warning */
 	    case array:
 		break;
@@ -260,6 +268,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	case real:
 	case boolean:
 	case array:
+	case check:
 	    return JSON_ERR_SUBTYPE;
 	}
 	if (arr->count != NULL)
@@ -302,6 +311,7 @@ const char *json_error_string(int err)
 	"garbage while expecting array comma",
 	"unsupported array element type",
 	"error while string parsing",
+	"check attribute not matched",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))

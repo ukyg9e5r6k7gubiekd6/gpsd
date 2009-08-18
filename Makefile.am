@@ -542,6 +542,10 @@ unpack-makeregress: libgps
 	@echo "Rebuilding the clent sentence-unpacker test..."
 	@$(srcdir)/libgps -u >test/unpack.chk
 
+# Unit-test the JSON parsing
+json-regress: test_json
+	test_json
+
 # Unit-test the bitfield extractor - not in normal tests
 bits-regress: test_bits
 	test_bits

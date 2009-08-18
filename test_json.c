@@ -6,16 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include "gpsd_config.h"
-#include "gps.h"
+#include "gpsd.h"
 #include "gps_json.h"
 
 #include "strl.c"
 
 static void ASSERT_CASE(int num, int status)
 {
-    if (status < 0)
+    if (status != 0)
     { 
-	(void)fprintf(stderr, "case %d FAILED, status %d.\n", num, status);
+	(void)fprintf(stderr, "case %d FAILED, status %d (%s).\n", num, status, json_error_string(status));
 	exit(1);
     }
 }
@@ -24,7 +24,7 @@ static void ASSERT_STRING(char *attr, char *fld, char *val)
 {
     if (strcmp(fld, val))
     {
-	(void)fprintf(stderr, "'%s' attribute eval failed, value = %s.\n", attr, fld);
+	(void)fprintf(stderr, "'%s' string attribute eval failed, value = %s.\n", attr, fld);
 	exit(1);
     }
 }
@@ -33,7 +33,7 @@ static void ASSERT_INTEGER(char *attr, int fld, int val)
 {
     if (fld != val)
     {
-	(void)fprintf(stderr, "'%s' attribute eval failed, value = %d.\n", attr, fld);
+	(void)fprintf(stderr, "'%s' integer attribute eval failed, value = %d.\n", attr, fld);
 	exit(1);
     }
 }
@@ -42,7 +42,7 @@ static void ASSERT_BOOLEAN(char *attr, bool fld, bool val)
 {
     if (fld != val)
     {
-	(void)fprintf(stderr, "'%s' attribute eval failed, value = %s.\n", attr, fld ? "true" : "false");
+	(void)fprintf(stderr, "'%s' boolean attribute eval failed, value = %s.\n", attr, fld ? "true" : "false");
 	exit(1);
     }
 }
@@ -55,7 +55,7 @@ static void ASSERT_REAL(char *attr, double fld, double val)
 {
     if (fld != val)
     {
-	(void)fprintf(stderr, "'%s' attribute eval failed, value = %f.\n", attr, fld);
+	(void)fprintf(stderr, "'%s' real attribute eval failed, value = %f.\n", attr, fld);
 	exit(1);
     }
 }
@@ -64,14 +64,15 @@ static struct gps_data_t gpsdata;
 
 /* Case 1: TPV report */
 
-const char *json_str1 = "{\"device\":\"GPS#1\",\"tag\":\"MID2\",\
+const char *json_str1 = "{\"class\":\"TPV\",\
+    \"device\":\"GPS#1\",\"tag\":\"MID2\",				\
     \"time\":1119197561.890,\"lon\":46.498203637,\"lat\":7.568074350,\
-    \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3,\
-    \"flag1\":true,\"flag2\":false}";
+    \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3}";
 
 /* Case 2: SKY report */
 
-const char *json_str2 = "{\"tag\":\"MID4\",\"time\":1119197562.890,\
+const char *json_str2 = "{\"class\":\"SKY\",\
+         \"tag\":\"MID4\",\"time\":1119197562.890,   \
          \"reported\":7,\
          \"satellites\":[\
          {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":true},\
@@ -121,7 +122,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     (void)fprintf(stderr, "JSON unit test ");
 
-    status = json_tpv_read(json_str1, &gpsdata);
+    status = libgps_json_unpack(json_str1, &gpsdata);
     ASSERT_CASE(1, status);
     ASSERT_STRING("device", gpsdata.gps_device, "GPS#1");
     ASSERT_STRING("tag", gpsdata.tag, "MID2");
@@ -130,7 +131,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_REAL("lon", gpsdata.fix.longitude, 46.498203637);
     ASSERT_REAL("lat", gpsdata.fix.latitude, 7.568074350);
 
-    status = json_sky_read(json_str2, &gpsdata);
+    status = libgps_json_unpack(json_str2, &gpsdata);
     ASSERT_CASE(2, status);
     ASSERT_STRING("tag", gpsdata.tag, "MID4");
     ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
