@@ -233,6 +233,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    /*@ +nullstate +mustfreefresh @*/
 			    /*@ +nullderef +nullpass +dependenttrans +mustfreeonly @*/
 			    gpsdata->set |= DEVICELIST_SET;
+			    gpsdata->devicelist_time = timestamp();
 			}
 			break;
 		    case 'M':

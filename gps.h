@@ -855,6 +855,7 @@ struct gps_data_t {
     struct rtcm3_t	rtcm3;
 
     /* device list */
+    double devicelist_time;	/* time devicelist was reported */
     int ndevices;		/* count of available devices */
     char **devicelist;		/* list of pathnames */
 

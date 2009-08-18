@@ -1574,7 +1574,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 
     /*
-     * Still to be implemented: equivalents of B C N Z $
+     * Still to be implemented: equivalents of Z $
      */
     if (strncmp(buf, "TPV;", 4) == 0) {
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && have_fix(channel)) {

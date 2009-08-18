@@ -138,6 +138,32 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
+static int json_devices_read(const char *buf, 
+			     struct gps_data_t *gpsdata, const char **endptr)
+{
+    const struct json_attr_t json_attrs_subdevices[] = {
+	// FIXME: Parse device records, too.
+	{NULL},
+    };
+    // FIXME: Can we abolish the hard limit on the number of devices? 
+    const struct json_attr_t json_attrs_devices[] = {
+	{"devices",    array,   .addr.array.element_type = object,
+				.addr.array.arr.subtype = json_attrs_subdevices,
+				.addr.array.maxlen = 4},
+	{NULL},
+    };
+    int status;
+
+    status = json_read_object(buf, json_attrs_devices, 0, NULL);
+    if (status != 0)
+	return status;
+
+    gpsdata->devicelist_time = timestamp();
+    gpsdata->set |= DEVICELIST_SET;
+    gpsdata->ndevices = *json_attrs_devices[0].addr.array.count;
+    return 0;
+}
+
 void libgps_json_unpack(char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into C structs */
 {
@@ -145,6 +171,8 @@ void libgps_json_unpack(char *buf, struct gps_data_t *gpsdata)
 	json_tpv_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
 	json_sky_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"DEVICES\"") == 0) {
+	json_devices_read(buf, gpsdata, NULL);
     } 
 }
 
