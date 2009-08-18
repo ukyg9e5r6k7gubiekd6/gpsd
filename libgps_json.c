@@ -172,12 +172,11 @@ static int json_devicelist_read(const char *buf,
 			    .addr.string.len = sizeof(gpsdata->gps_device)},
 	{NULL},
     };
-    // FIXME: Can we abolish the hard limit on the number of devices? 
     const struct json_attr_t json_attrs_devices[] = {
         {"class",      check,   .dflt.check = "DEVICES"},
 	{"devices",    array,   .addr.array.element_type = object,
 				.addr.array.arr.subtype = json_attrs_subdevices,
-				.addr.array.maxlen = GPS_JSON_DEVICES_MAX},
+				.addr.array.maxlen = MAXDEVICES_PER_USER},
 	{NULL},
     };
     int status;
@@ -186,9 +185,9 @@ static int json_devicelist_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->devicelist_time = timestamp();
+    gpsdata->devices.time = timestamp();
     gpsdata->set |= DEVICELIST_SET;
-    gpsdata->ndevices = *json_attrs_devices[0].addr.array.count;
+    gpsdata->devices.ndevices = *json_attrs_devices[0].addr.array.count;
     return 0;
 }
 #endif

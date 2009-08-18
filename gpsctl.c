@@ -243,23 +243,23 @@ int main(int argc, char **argv)
 	assert(gpsdata != NULL);
 	// FIXME: Requires old protocol
 	(void)gps_query(gpsdata, "K\n");
-	if (gpsdata->ndevices == 0) {
+	if (gpsdata->devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(gpsdata);
 	    exit(1);
-	} else if (gpsdata->ndevices > 1 && device == NULL) {
+	} else if (gpsdata->devices.ndevices > 1 && device == NULL) {
 	    gpsd_report(LOG_ERROR, 
 			"multiple devices and no device specified.\n");
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(LOG_PROG, "%d device(s) found.\n", gpsdata->ndevices);
+	gpsd_report(LOG_PROG, "%d device(s) found.\n", gpsdata->devices.ndevices);
 
-	if (gpsdata->ndevices > 1) {
+	if (gpsdata->devices.ndevices > 1) {
 	    int i;
 	    assert(device != NULL);
-	    for (i = 0; i < gpsdata->ndevices; i++)
-		if (strcmp(device, gpsdata->devicelist[i]) == 0)
+	    for (i = 0; i < gpsdata->devices.ndevices; i++)
+		if (strcmp(device, gpsdata->devices.list[i].path) == 0)
 		    goto foundit;
 	    gpsd_report(LOG_ERROR, "specified device not found.\n");
 	    (void)gps_close(gpsdata);

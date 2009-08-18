@@ -102,7 +102,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t 
 static gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
 
 
-bool sirf_write(int fd, unsigned char *msg) {
+static bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
    size_t    i, len;
    bool      ok;

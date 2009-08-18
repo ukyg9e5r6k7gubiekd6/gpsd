@@ -346,15 +346,15 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
     n = (int)getub(buf, 6); /* number of measurements */
     t = getled(buf, 7); /* measurement time */
     for(i = 0; i < n; i++){
-	session->gpsdata.mtime[i] = t;
+	session->gpsdata.raw.mtime[i] = t;
 	session->gpsdata.PRN[i] = getub(buf, 11*i + 15) & 0x1f;
 	session->gpsdata.ss[i] = getub(buf, 11*i * 15 +1 )/4.0;
-	session->gpsdata.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
+	session->gpsdata.raw.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
 	ul = getleul(buf, 11*i * 15 + 6);
 
-	session->gpsdata.satstat[i] = ul & 0x03L;
-	session->gpsdata.carrierphase[i] = (ul >> 2) & 0x03ffL;
-	session->gpsdata.pseudorange[i] = (ul >> 12);
+	session->gpsdata.raw.satstat[i] = ul & 0x03L;
+	session->gpsdata.raw.carrierphase[i] = (ul >> 2) & 0x03ffL;
+	session->gpsdata.raw.pseudorange[i] = (ul >> 12);
     }
 
     mask |= RAW_SET | ONLINE_SET;

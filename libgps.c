@@ -57,14 +57,6 @@ int gps_close(struct gps_data_t *gpsdata)
 	gpsdata->gps_id = NULL;
     }
     gpsdata->gps_device[0] = '\0';
-    if (gpsdata->devicelist) {
-	int i;
-	for (i = 0; i < gpsdata->ndevices; i++)
-	    /*@i1@*/(void)free(gpsdata->devicelist[i]);
-	(void)free(gpsdata->devicelist);
-	gpsdata->devicelist = NULL;
-	gpsdata->ndevices = -1;
-    }
     /*@i@*/(void)free(gpsdata);
     return retval;
 }
@@ -208,32 +200,23 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			/*@ +mustfreeonly */
 			break;
 		    case 'K':
-			if (gpsdata->devicelist) {
-			    for (i = 0; i < gpsdata->ndevices; i++)
-				/*@i1@*/(void)free(gpsdata->devicelist[i]);
-			    (void)free(gpsdata->devicelist);
-			    gpsdata->devicelist = NULL;
-			    gpsdata->ndevices = -1;
-			    gpsdata->set |= DEVICELIST_SET;
-			}
 			if (sp[2] != '?') {
-			    /*@ -nullderef -nullpass -mustfreeonly -dependenttrans @*/
 			    char *rc = strdup(sp);
 			    char *sp2 = rc;
 			    char *ns2 = ns;
-			    gpsdata->ndevices = (int)strtol(sp2+2, &sp2, 10);
-			    gpsdata->devicelist = (char **)calloc(
-				(size_t)gpsdata->ndevices,
-				sizeof(char **));
-			    /*@ -nullstate -mustfreefresh @*/
-			    gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns2));
+			    memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
+			    gpsdata->devices.ndevices = (int)strtol(sp2+2, &sp2, 10);
+			    strlcpy(gpsdata->devices.list[i=0].path,
+				    strtok_r(sp2+1," \r\n", &ns2),
+				    sizeof(gpsdata->devices.list[i=0].path));
 			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
-				gpsdata->devicelist[++i] = strdup(sp2);
+				if (i < MAXDEVICES_PER_USER-1)
+				    (void)strlcpy(gpsdata->devices.list[++i].path, 
+						 sp2,
+						 sizeof(gpsdata->devices.list[i=0].path));
 			    free(rc);
-			    /*@ +nullstate +mustfreefresh @*/
-			    /*@ +nullderef +nullpass +dependenttrans +mustfreeonly @*/
 			    gpsdata->set |= DEVICELIST_SET;
-			    gpsdata->devicelist_time = timestamp();
+			    gpsdata->devices.time = timestamp();
 			}
 			break;
 		    case 'M':
@@ -611,9 +594,9 @@ static void data_dump(struct gps_data_t *collect, time_t now)
 	printf("GPSD ID is %s\n", collect->gps_id);
     if (collect->set & DEVICELIST_SET) {
 	int i;
-	printf("%d devices:\n", collect->ndevices);
-	for (i = 0; i < collect->ndevices; i++) {
-	    printf("%d: %s\n", collect->ndevices, collect->devicelist[i]);
+	printf("%d devices:\n", collect->devices.ndevices);
+	for (i = 0; i < collect->devices.ndevices; i++) {
+	    printf("%d: %s\n", collect->devices.ndevices, collect->devices.list[i].path);
 	}
     }
 
@@ -659,10 +642,19 @@ int main(int argc, char *argv[])
     int option;
     bool unpack_test = false;
 
-    while ((option = getopt(argc, argv, "uh?")) != -1) {
+    while ((option = getopt(argc, argv, "uhs?")) != -1) {
 	switch (option) {
 	case 'u':
 	    unpack_test = true;
+	    break;
+	case 's':
+	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd\n",
+		     sizeof(struct rtcm2_t),
+		     sizeof(struct rtcm3_t),
+		     sizeof(struct ais_t),
+		     sizeof(struct compass_t),
+		     sizeof(struct rawdata_t),
+		     sizeof(collect->devices));
 	    break;
 	case '?':
 	case 'h':

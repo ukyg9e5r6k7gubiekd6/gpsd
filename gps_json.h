@@ -4,7 +4,6 @@
 
 #define GPS_JSON_COMMAND_MAX	80
 #define GPS_JSON_RESPONSE_MAX	1024
-#define GPS_JSON_DEVICES_MAX	4
 
 struct devconfig_t {
     char	device[PATH_MAX];

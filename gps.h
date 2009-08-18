@@ -772,6 +772,49 @@ struct ais_t
     };
 };
 
+#define MAXDEVICES_PER_USER	4
+
+struct device_t {
+    char path[PATH_MAX];
+};
+
+struct compass_t {
+    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double magnetic_field_x;
+    double magnetic_field_y;
+    double magnetic_field_z;
+    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double acceleration_field_x;
+    double acceleration_field_y;
+    double acceleration_field_z;
+    double gyro_output_x;
+    double gyro_output_y;
+    double temperature;
+    /* compass status -- TrueNorth (and any similar) devices only */
+    char headingStatus;
+    char pitchStatus;
+    char rollStatus;
+    double horzField;   /* Magnitude of horizontal magnetic field */
+};
+
+struct rawdata_t {
+    /* raw measurement data */
+    double codephase[MAXCHANNELS];	/* meters */
+    double carrierphase[MAXCHANNELS];	/* meters */
+    double pseudorange[MAXCHANNELS];	/* meters */
+    double deltarange[MAXCHANNELS];	/* meters/sec */
+    double doppler[MAXCHANNELS];	/* Hz */
+    double mtime[MAXCHANNELS];		/* sec */
+    unsigned satstat[MAXCHANNELS];	/* tracking status */
+#define SAT_ACQUIRED	0x01		/* satellite acquired */
+#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
+#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
+#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
+#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
+#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
+#define SAT_FIX_USED	0x40		/* used for position fix */
+};
+
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
 #define ONLINE_SET	0x00000001u
@@ -811,12 +854,12 @@ struct gps_data_t {
 #define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
-				 * Note: gpsd clears this flag when sentences
+				 * Note: gpsd clears this time when sentences
 				 * fail to show up within the GPS's normal
 				 * send cycle time. If the host-to-GPS 
 				 * link is lossy enough to drop entire
-				 * sentences, this flag will be
-				 * prone to false negatives.
+				 * sentences, this field will be
+				 * prone to false zero values.
 				 */
 
     struct gps_fix_t	fix;		/* accumulated PVT data */
@@ -845,19 +888,25 @@ struct gps_data_t {
     double ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
     /* where and what gpsd thinks the device is */
-    char	gps_device[PATH_MAX];	/* only valid if non-null. */
-    char	*gps_id;	/* only valid if non-null. */
+    char	 gps_device[PATH_MAX];	/* only valid if non-null. */
+    char	 *gps_id;		/* only valid if non-null. */
     unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
-    unsigned int driver_mode;	/* whether driver is in native mode or not */
+    double       cycle, mincycle;	/* refresh cycle time in seconds */
+    unsigned int driver_mode;		/* is driver in native mode or not? */
 
-    /* RTCM-104 data */
-    struct rtcm2_t	rtcm2;
-    struct rtcm3_t	rtcm3;
-
-    /* device list */
-    double devicelist_time;	/* time devicelist was reported */
-    int ndevices;		/* count of available devices */
-    char **devicelist;		/* list of pathnames */
+    /* pack things that are never reported together to reduce structure size */ 
+    union {
+	struct rtcm2_t	rtcm2;
+	struct rtcm3_t	rtcm3;
+	struct ais_t ais;
+	struct compass_t compass;
+	struct rawdata_t raw;
+	struct {
+	    double time;
+	    int ndevices;
+	    struct device_t list[MAXDEVICES_PER_USER];
+	} devices;
+    };
 
     /* profiling data for last sentence */
     bool profiling;		/* profiling enabled? */
@@ -872,58 +921,10 @@ struct gps_data_t {
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
 
-    /* reporting cycle time and minimum */
-    double cycle, mincycle;	/* refresh cycle time in seconds */
-
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *, size_t len, int level);/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
-
-    /*
-     * Do not put any configuration-symbol-dependent members
-     * above this point, as we need things to be at stable
-     * offsets.
-     */
-#ifdef OCEANSERVER_ENABLE
-    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double magnetic_field_x;
-    double magnetic_field_y;
-    double magnetic_field_z;
-    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double acceleration_field_x;
-    double acceleration_field_y;
-    double acceleration_field_z;
-    double gyro_output_x;
-    double gyro_output_y;
-    double temperature;
-#endif
-
-#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
-    /* compass status -- TrueNorth (and any similar) devices only */
-    char headingStatus;
-    char pitchStatus;
-    char rollStatus;
-    double horzField;   /* Magnitude of horizontal magnetic field */
-#endif
-
-#ifdef RAW_ENABLE
-    /* raw measurement data */
-    double codephase[MAXCHANNELS];	/* meters */
-    double carrierphase[MAXCHANNELS];	/* meters */
-    double pseudorange[MAXCHANNELS];	/* meters */
-    double deltarange[MAXCHANNELS];	/* meters/sec */
-    double doppler[MAXCHANNELS];	/* Hz */
-    double mtime[MAXCHANNELS];		/* sec */
-    unsigned satstat[MAXCHANNELS];	/* tracking status */
-#define SAT_ACQUIRED	0x01		/* satellite acquired */
-#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
-#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
-#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
-#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
-#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
-#define SAT_FIX_USED	0x40		/* used for position fix */
-#endif /* RAW_ENABLE */
 };
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
