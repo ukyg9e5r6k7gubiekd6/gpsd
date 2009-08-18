@@ -773,9 +773,10 @@ struct ais_t
 };
 
 #define MAXDEVICES_PER_USER	4
+#define GPS_PATH_MAX		64	/* dev files usually have short names */
 
 struct device_t {
-    char path[PATH_MAX];
+    char path[GPS_PATH_MAX];
 };
 
 struct compass_t {

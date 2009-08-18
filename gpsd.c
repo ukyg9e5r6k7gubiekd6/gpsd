@@ -388,7 +388,7 @@ struct subscriber_t {
 #define initialized_device(devp) ((devp)->context != NULL)
 
 struct gps_device_t devices[MAXDEVICES];
-struct channel_t channels[MAXSUBSCRIBERS];
+struct channel_t channels[MAXSUBSCRIBERS*MAXDEVICES_PER_USER];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
 
 /*

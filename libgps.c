@@ -655,7 +655,7 @@ int main(int argc, char *argv[])
 		     sizeof(struct compass_t),
 		     sizeof(struct rawdata_t),
 		     sizeof(collect->devices));
-	    break;
+	    exit(0);
 	case '?':
 	case 'h':
 	default:

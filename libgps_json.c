@@ -145,9 +145,9 @@ static int json_device_read(const char *buf,
 {
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,   .dflt.check = "DEVICE"},
-	{"path",       string,  .addr.string.ptr  = gpsdata->gps_device,
-				.addr.string.len = PATH_MAX},
-	{"activated",  real,    .addr.real    = &gpsdata->fix.time},
+	{"path",       string,  .addr.string.ptr  = gpsdata->devices.list[0].path,
+				.addr.string.len = GPS_PATH_MAX},
+	{"activated",  real,    .addr.real    = &gpsdata->devices.time},
 	// type (list), driver, subtype
 	{NULL},
     };
