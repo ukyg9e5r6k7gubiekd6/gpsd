@@ -75,6 +75,17 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
     gpsdata->raw_hook = hook;
 }
 
+#ifdef GPSDNG_ENABLE
+static void gps_json_unpack(char *buf, struct gps_data_t *gpsdata)
+{
+    if (strstr(buf, "\"class\":\"TPV\"") == 0) {
+	json_tpv_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
+	json_sky_read(buf, gpsdata, NULL);
+    } 
+}
+#endif /* GPSDNG_ENABLE */
+
 /*@ -branchstate -usereleased -mustfreefresh @*/
 static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
@@ -84,15 +95,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
-    /* FIXME: Needs top handle multiple responses per line. */
     if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
-	if (strstr(buf, "\"class\":\"TPV\"") == 0) {
-	    json_tpv_read(buf, gpsdata, NULL);
-	} else if (strstr(buf, "\"class\":\"SKY\"") == 0) {
-	    json_sky_read(buf, gpsdata, NULL);
-	} 
-    } else
+	gps_json_unpack(buf, gpsdata);
+    }
 #endif /* GPSDNG_ENABLE */
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+    else
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+#ifdef OLDSTYLE_ENABLE
     {
 	/*
 	 * Get the decimal separator for the current application locale.
@@ -175,13 +185,13 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] != '?') {
 			    char epe[20], eph[20], epv[20];
 			    (void)sscanf(sp, "E=%s %s %s", epe, eph, epv);
-    #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 				/*@ +floatdouble @*/
 				gpsdata->epe = DEFAULT(epe);
 				gpsdata->fix.eph = DEFAULT(eph);
 				gpsdata->fix.epv = DEFAULT(epv);
 				/*@ -floatdouble @*/
-    #undef DEFAULT
+#undef DEFAULT
 			}
 			break;
 		    case 'F':
@@ -450,6 +460,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    }
 	}
     }
+#endif /* GPSDNG_ENABLE */
 
 /*@ -nullstate -compdef @*/
     if (gpsdata->raw_hook)

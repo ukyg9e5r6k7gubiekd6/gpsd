@@ -1388,7 +1388,7 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
         <entry>Device cycle time in seconds.</entry>
 </row>
 <row>
-	<entry>min_cycle</entry>
+	<entry>mincycle</entry>
 	<entry>No</entry>
 	<entry>real</entry>
         <entry>Device minimum cycle time in seconds. Reported from 

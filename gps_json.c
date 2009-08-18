@@ -211,7 +211,7 @@ int json_sky_read(const char *buf, struct gps_data_t *gpsdata, const char **endp
     const struct json_attr_t json_attrs_2[] = {
 	{"device",     string,  .addr.string.ptr  = gpsdata->gps_device,
 				.addr.string.len = PATH_MAX},
-	{"tag",	string,  .addr.string.ptr  = gpsdata->tag,
+	{"tag",	       string,  .addr.string.ptr  = gpsdata->tag,
 				.addr.string.len = MAXTAGLEN},
 	{"time",       real,    .addr.real    = &gpsdata->fix.time},
 	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
@@ -281,6 +281,8 @@ int json_configdev_read(struct devconfig_t *cdp, const char *buf, const char **e
 	{"serialmode",	string,	  .addr.string.ptr=cdp->serialmode,
 				  .addr.string.len=sizeof(cdp->serialmode)},
 	{"cycle",	real,     .addr.real = &cdp->cycle,
+				  .dflt.real = NAN},
+	{"mincycle",	real,     .addr.real = &cdp->mincycle,
 				  .dflt.real = NAN},
 	{NULL},
     };
