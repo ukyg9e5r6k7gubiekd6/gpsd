@@ -27,6 +27,9 @@ objects or strings - not reals or integers or floats - as elements
 (this limitation could be easily removed if required). Third, all
 elements of an array must be of the same type.
 
+   There's a way to map arrays of strings to arrays of enumerated values
+by supplying a lookup table.
+
    There are separata entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
@@ -66,7 +69,8 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    if (cursor->dflt.boolean != nullbool)
 		cursor->addr.boolean[offset] = cursor->dflt.boolean;
 	    break;
-	case object:	/* silences a compiler warning */
+	case enumerated:	/* silences a compiler warning */
+	case object:
 	case array:
 	case check:
 	    break;
@@ -185,7 +189,8 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    case check:
 		if (strcmp(cursor->dflt.check, valbuf)!=0)
 		    return JSON_ERR_CHECKFAIL;
-	    case object:	/* silences a compiler warning */
+	    case enumerated:	/* silences a compiler warning */
+	    case object:
 	    case array:
 		break;
 	    }
@@ -211,6 +216,8 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 {
     int substatus, offset;
     char *tp;
+    char enumbuf[JSON_VAL_MAX+1];
+    const struct json_enum_t *mp;
 
 #ifdef JSONDEBUG
     (void) printf("Entered json_read_array()\n");
@@ -252,6 +259,33 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 		}
 	    return JSON_ERR_BADSTRING;
 	stringend:
+	    break;
+	case enumerated:
+	    if (isspace(*cp))
+		cp++;
+	    if (*cp != '"')
+		return JSON_ERR_BADSTRING;
+	    else
+		++cp;
+	    for (tp = enumbuf; tp < enumbuf + sizeof(enumbuf) -1; tp++)
+		if (*cp == '"') {
+		    ++cp;
+		    *tp++ = '\0';
+		    goto enumend;
+		} else if (*cp == '\0')
+		    return JSON_ERR_BADSTRING;
+	        else {
+		    *tp = *cp++;
+		}
+	    return JSON_ERR_BADSTRING;
+	enumend:
+	    for (mp = arr->arr.enumerated.map; mp->name != NULL; mp++)
+		if (strcmp(mp->name, enumbuf) == 0) {
+		    arr->arr.enumerated.store[offset] = mp->value;
+		    goto foundit;
+		}
+	    return JSON_ERR_BADENUM;
+	foundit:;
 	    break;
 	case object:
 #ifdef JSONDEBUG
@@ -312,6 +346,7 @@ const char *json_error_string(int err)
 	"unsupported array element type",
 	"error while string parsing",
 	"check attribute not matched",
+	"invalid enumerated value",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))
