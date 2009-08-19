@@ -170,7 +170,7 @@ void json_device_dump(struct gps_device_t *device,
 	for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
 	    if ((device->observed & cmp->packetmask) != 0) 
 		mask |= cmp->typemask;
-	if (flags != 0)
+	if (mask != 0)
 	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 			   "\"flags\":%d,", mask);
     }
