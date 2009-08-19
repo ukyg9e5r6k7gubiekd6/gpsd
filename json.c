@@ -27,13 +27,17 @@ objects or strings - not reals or integers or floats - as elements
 (this limitation could be easily removed if required). Third, all
 elements of an array must be of the same type.
 
-   There's a way to map arrays of strings to bit vectors by supplying a 
-string lookup table mapping strings to bitmasks.  This may be useful for
-converting JSON string property lists to C-friendly bit vectors.
-
    There are separata entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
+
+   The only really opaque part of the interface is structobjects.
+This is a way to parse a list of objects to a set of modifications to
+a corresponding array of C structs.  The trick is that the array
+object initialization has to specify both the C struct array's base
+address and the stride length (the size of the C struct.  If you
+initialize the offset fields with the correct offsetof() calls,
+everything will work.
 
 ***************************************************************************/
 #include <stdio.h>
