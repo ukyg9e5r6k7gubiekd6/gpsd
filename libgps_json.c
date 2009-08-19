@@ -12,6 +12,7 @@ representations to libgps structures.
 #include <math.h>
 #include <assert.h>
 #include <string.h>
+#include <stddef.h>
 #include <stdio.h>
 
 #include "gpsd_config.h"
@@ -140,15 +141,16 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
+static  const struct json_enum_t datatype_map[] = {
+    {"GPS", 	DEV_GPS},
+    {"RTCM2",	DEV_RTCM2},
+    {"RTCM3",	DEV_RTCM3},
+    {"AIS", 	DEV_AIS},
+};
+
 static int json_device_read(const char *buf, 
 			     struct device_t *dev, const char **endptr)
 {
-    const struct json_enum_t datatype_map[] = {
-	{"GPS", 	DEV_GPS},
-	{"RTCM2",	DEV_RTCM2},
-	{"RTCM3",	DEV_RTCM3},
-	{"AIS", 	DEV_AIS},
-    };
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	{"path",       string,     .addr.string.ptr  = dev->path,
@@ -172,22 +174,32 @@ static int json_device_read(const char *buf,
     return 0;
 }
 
-#ifdef __UNUSED_
 static int json_devicelist_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
-    char names[GPS_JSON_DEVICES_MAX][PATH_MAX];
     const struct json_attr_t json_attrs_subdevices[] = {
-	// FIXME: Parse device records, too.
-	{"name",   string,  .addr.string.ptr = gpsdata->gps_device,
-			    .addr.string.len = sizeof(gpsdata->gps_device)},
+	{"class",      check,      .dflt.check = "DEVICE"},
+	{"path",       string,     .addr.offset = offsetof(struct device_t, path),
+	                           .addr.string.len = sizeof(gpsdata->devices.list[0].path)},
+	{"activated",  real,       .addr.offset = offsetof(struct device_t, activated)},
+	// FIXME: This won't work
+	{"type",       array,  	   .addr.array.element_type = flags,
+	                           .addr.array.arr.flags.map = datatype_map,
+                                   .addr.array.arr.flags.bits=&gpsdata->devices.list[0].datatypes},
+	{"driver",     string,     .addr.offset = offsetof(struct device_t, driver),
+	                           .addr.string.len = sizeof(gpsdata->devices.list[0].driver)},
+	{"subtype",    string,     .addr.offset = offsetof(struct device_t, subtype),
+	                           .addr.string.len = sizeof(gpsdata->devices.list[0].subtype)},
 	{NULL},
     };
     const struct json_attr_t json_attrs_devices[] = {
-        {"class",      check,   .dflt.check = "DEVICES"},
-	{"devices",    array,   .addr.array.element_type = object,
-				.addr.array.arr.objects.subtype = json_attrs_subdevices,
-				.addr.array.maxlen = MAXDEVICES_PER_USER},
+        {"class",   check,   .dflt.check = "DEVICES"},
+        {"devices", array,  .addr.array.element_type = structobject,
+	            .addr.array.arr.objects.base = (char*)gpsdata->devices.list,
+                    .addr.array.arr.objects.stride = sizeof(struct device_t),
+                    .addr.array.arr.objects.subtype = json_attrs_subdevices,
+	            .addr.array.count = &gpsdata->devices.ndevices,
+	            .addr.array.maxlen = NITEMS(gpsdata->devices.list)},
 	{NULL},
     };
     int status;
@@ -201,7 +213,6 @@ static int json_devicelist_read(const char *buf,
     gpsdata->devices.ndevices = *json_attrs_devices[0].addr.array.count;
     return 0;
 }
-#endif
 
 int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into C structs */
@@ -215,6 +226,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
+    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
+	return json_devicelist_read(buf, gpsdata, NULL);
     } else
 	return -1;
 }

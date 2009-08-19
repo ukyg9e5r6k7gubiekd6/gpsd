@@ -155,7 +155,7 @@ const struct json_attr_t json_attrs_6[] = {
                       .addr.array.arr.objects.stride = sizeof(struct dumbstruct_t),
                       .addr.array.arr.objects.subtype = json_attrs_6_subtype,
                       .addr.array.count = &dumbcount,
-    .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
+                      .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
     {NULL},
 };
 
