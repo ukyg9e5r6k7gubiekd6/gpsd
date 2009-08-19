@@ -774,9 +774,16 @@ struct ais_t
 
 #define MAXDEVICES_PER_USER	4
 #define GPS_PATH_MAX		64	/* dev files usually have short names */
+#define TYPES_PER_DEVICE	4
 
 struct device_t {
     char path[GPS_PATH_MAX];
+    int ndatatypes;
+    int datatypes[TYPES_PER_DEVICE];
+#define DEV_GPS 	1
+#define DEV_RTCM2	2
+#define DEV_RTCM3	3
+#define DEV_AIS 	4
     char driver[64];
     char subtype[64];
     double activated;

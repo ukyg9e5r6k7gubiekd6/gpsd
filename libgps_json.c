@@ -143,16 +143,26 @@ static int json_sky_read(const char *buf,
 static int json_device_read(const char *buf, 
 			     struct device_t *dev, const char **endptr)
 {
+    const struct json_enum_t datatype_map[] = {
+	{"GPS", 	DEV_GPS},
+	{"RTCM2",	DEV_RTCM2},
+	{"RTCM3",	DEV_RTCM3},
+	{"AIS", 	DEV_AIS},
+    };
     const struct json_attr_t json_attrs_device[] = {
-	{"class",      check,   .dflt.check = "DEVICE"},
-	{"path",       string,  .addr.string.ptr  = dev->path,
-	                        .addr.string.len = sizeof(dev->path)},
-	{"activated",  real,    .addr.real    = &dev->activated},
-	// type (list)
-	{"driver",     string,  .addr.string.ptr  = dev->driver,
-	                        .addr.string.len = sizeof(dev->driver)},
-	{"subtype",    string,  .addr.string.ptr  = dev->subtype,
-	                        .addr.string.len = sizeof(dev->subtype)},
+	{"class",      check,      .dflt.check = "DEVICE"},
+	{"path",       string,     .addr.string.ptr  = dev->path,
+	                           .addr.string.len = sizeof(dev->path)},
+	{"activated",  real,       .addr.real    = &dev->activated},
+	{"type",       array,  	   .addr.array.element_type = enumerated,
+	                           .addr.array.arr.enumerated.map = datatype_map,
+                                   .addr.array.arr.enumerated.store = dev->datatypes,
+                                   .addr.array.maxlen = sizeof(dev->datatypes)/sizeof(dev->datatypes[0]),
+	                           .addr.array.count = &dev->ndatatypes},
+	{"driver",     string,     .addr.string.ptr  = dev->driver,
+	                           .addr.string.len = sizeof(dev->driver)},
+	{"subtype",    string,     .addr.string.ptr  = dev->subtype,
+	                           .addr.string.len = sizeof(dev->subtype)},
 	{NULL},
     };
     int status;
