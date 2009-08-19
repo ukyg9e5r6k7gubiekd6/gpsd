@@ -72,8 +72,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		if (cursor->dflt.boolean != nullbool)
 		    cursor->addr.boolean[offset] = cursor->dflt.boolean;
 		break;
-	    case flags:	/* silences a compiler warning */
-	    case object:
+	    case object:/* silences a compiler warning */
 	    case structobject:
 	    case array:
 	    case check:
@@ -98,8 +97,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		if (cursor->dflt.boolean != nullbool)
 		   *((bool *)lptr) = cursor->dflt.boolean;
 		break;
-	    case flags:	/* silences a compiler warning */
-	    case object:
+	    case object:	/* silences a compiler warning */
 	    case structobject:
 	    case array:
 	    case check:
@@ -219,8 +217,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case boolean:
 		    cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
 		    break;
-		case flags:	/* silences a compiler warning */
-		case structobject:
+		case structobject:	/* silences a compiler warning */
 		case object:
 		case array:
 		    break;
@@ -246,8 +243,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case boolean:
 		    *((bool *)lptr) = (bool)!strcmp(valbuf, "true");
 		    break;
-		case flags:	/* silences a compiler warning */
-		case object:
+		case object:	/* silences a compiler warning */
 		case structobject:
 		case array:
 		    break;
@@ -279,8 +275,6 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 {
     int substatus, offset;
     char *tp;
-    char enumbuf[JSON_VAL_MAX+1];
-    const struct json_enum_t *mp;
 
 #ifdef JSONDEBUG
     (void) printf("Entered json_read_array()\n");
@@ -294,11 +288,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	cp++;
 
     tp = arr->arr.strings.store;
-    if (arr->arr.flags.bits != NULL)
-	*arr->arr.flags.bits = 0;
     if (arr->count != NULL)
 	*(arr->count) = 0;
-    for (offset = 0; arr->element_type == flags || offset < arr->maxlen; offset++) {
+    for (offset = 0; offset < arr->maxlen; offset++) {
 #ifdef JSONDEBUG
 	(void) printf("Looking at %s\n", cp);
 #endif /* JSONDEBUG */
@@ -324,33 +316,6 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 		}
 	    return JSON_ERR_BADSTRING;
 	stringend:
-	    break;
-	case flags:
-	    if (isspace(*cp))
-		cp++;
-	    if (*cp != '"')
-		return JSON_ERR_BADSTRING;
-	    else
-		++cp;
-	    for (tp = enumbuf; tp < enumbuf + sizeof(enumbuf) -1; tp++)
-		if (*cp == '"') {
-		    ++cp;
-		    *tp++ = '\0';
-		    goto enumend;
-		} else if (*cp == '\0')
-		    return JSON_ERR_BADSTRING;
-	        else {
-		    *tp = *cp++;
-		}
-	    return JSON_ERR_BADSTRING;
-	enumend:
-	    for (mp = arr->arr.flags.map; mp->name != NULL; mp++)
-		if (strcmp(mp->name, enumbuf) == 0) {
-		    *arr->arr.flags.bits |= mp->mask;
-		    goto foundit;
-		}
-	    return JSON_ERR_BADENUM;
-	foundit:;
 	    break;
 	case object:
 	case structobject:
