@@ -116,25 +116,9 @@ const struct json_attr_t json_attrs_4[] = {
     {NULL},
 };
 
-/* Case 5: test parsing arrays of enumerated types */
+/* Case 5: test DEVICE parsing */
 
-const char *json_str5 = "[\"FOO\",\"BAR\",\"BAZ\"]";
-const struct json_enum_t enum_table[] = {{"BAR", 6}, {"FOO", 3}, {"BAZ", 14}, {NULL}};
-
-static int enumstore[256];
-static int enumcount;
-
-const struct json_array_t json_array_5 = {
-    .element_type = enumerated,
-    .arr.enumerated.map = enum_table,
-    .arr.enumerated.store = enumstore,
-    .maxlen = sizeof(enumstore)/sizeof(enumstore[0]),
-    .count = &enumcount,
-};
-
-/* Case 6: test DEVICE parsing */
-
-const char *json_str6 = "{\"class\":\"DEVICE\",\
+const char *json_str5 = "{\"class\":\"DEVICE\",\
            \"path\":\"/dev/ttyUSB0\",\
            \"type\":[\"GPS\",\"AIS\"],\
            \"driver\":\"Foonly\",\"subtype\":\"Foonly Frob\"\
@@ -184,19 +168,10 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_BOOLEAN("flag1", flag1, true);
     ASSERT_BOOLEAN("flag2", flag2, false);
 
-    status = json_read_array(json_str5, &json_array_5, NULL);
+    status = libgps_json_unpack(json_str5, &gpsdata);
     ASSERT_CASE(5, status);
-    ASSERT_INTEGER("enumcount", enumcount, 3);
-    ASSERT_INTEGER("enumstore[0]", enumstore[0], 3);
-    ASSERT_INTEGER("enumstore[1]", enumstore[1], 6);
-    ASSERT_INTEGER("enumstore[2]", enumstore[2], 14);
-
-    status = libgps_json_unpack(json_str6, &gpsdata);
-    ASSERT_CASE(6, status);
     ASSERT_STRING("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
-    ASSERT_INTEGER("ndatatypes", gpsdata.devices.list[0].ndatatypes, 2);
-    ASSERT_INTEGER("datatypes[0]",gpsdata.devices.list[0].datatypes[0],DEV_GPS);
-    ASSERT_INTEGER("datatypes[1]",gpsdata.devices.list[0].datatypes[1],DEV_AIS);
+    ASSERT_INTEGER("datatypes",gpsdata.devices.list[0].datatypes,DEV_GPS|DEV_AIS);
     ASSERT_STRING("driver", gpsdata.devices.list[0].driver, "Foonly");
 
     (void)fprintf(stderr, "succeeded.\n");

@@ -5,13 +5,13 @@
 #include <ctype.h>
 
 typedef enum {integer, real, string, boolean, 
-	      enumerated, object, array, check} json_type;
+	      flags, object, array, check} json_type;
 
 #define nullbool	-1	/* not true, not false */
 
 struct json_enum_t {
     char	*name;
-    int		value;
+    int		mask;
 };
 
 struct json_array_t { 
@@ -25,9 +25,8 @@ struct json_array_t {
 	} strings;
 	struct {
 	    const struct json_enum_t *map;
-	    int *store;
-	    int storelen;
-	} enumerated;
+	    int *bits;
+	} flags;
     } arr;
     int *count, maxlen;
 };
@@ -77,6 +76,6 @@ const char *json_error_string(int);
 #define JSON_ERR_SUBTYPE	14	/* unsupported array element type */
 #define JSON_ERR_BADSTRING	15	/* error while string parsing */
 #define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
-#define JSON_ERR_BADENUM	17	/* invalid enumerated value */
+#define JSON_ERR_BADENUM	17	/* invalid flag token */
 
 /* json.h ends here */

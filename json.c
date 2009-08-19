@@ -27,8 +27,8 @@ objects or strings - not reals or integers or floats - as elements
 (this limitation could be easily removed if required). Third, all
 elements of an array must be of the same type.
 
-   There's a way to map arrays of strings to arrays of enumerated values
-by supplying a lookup table.
+   There's a way to map arrays of strings to bit vectors by supplying a 
+bitmask lookup table.
 
    There are separata entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
@@ -69,7 +69,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    if (cursor->dflt.boolean != nullbool)
 		cursor->addr.boolean[offset] = cursor->dflt.boolean;
 	    break;
-	case enumerated:	/* silences a compiler warning */
+	case flags:	/* silences a compiler warning */
 	case object:
 	case array:
 	case check:
@@ -189,7 +189,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset
 	    case check:
 		if (strcmp(cursor->dflt.check, valbuf)!=0)
 		    return JSON_ERR_CHECKFAIL;
-	    case enumerated:	/* silences a compiler warning */
+	    case flags:	/* silences a compiler warning */
 	    case object:
 	    case array:
 		break;
@@ -231,9 +231,11 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	cp++;
 
     tp = arr->arr.strings.store;
+    if (arr->arr.flags.bits != NULL)
+	*arr->arr.flags.bits = 0;
     if (arr->count != NULL)
 	*(arr->count) = 0;
-    for (offset = 0; offset < arr->maxlen; offset++) {
+    for (offset = 0; arr->element_type == flags || offset < arr->maxlen; offset++) {
 #ifdef JSONDEBUG
 	(void) printf("Looking at %s\n", cp);
 #endif /* JSONDEBUG */
@@ -260,7 +262,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	    return JSON_ERR_BADSTRING;
 	stringend:
 	    break;
-	case enumerated:
+	case flags:
 	    if (isspace(*cp))
 		cp++;
 	    if (*cp != '"')
@@ -279,9 +281,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 		}
 	    return JSON_ERR_BADSTRING;
 	enumend:
-	    for (mp = arr->arr.enumerated.map; mp->name != NULL; mp++)
+	    for (mp = arr->arr.flags.map; mp->name != NULL; mp++)
 		if (strcmp(mp->name, enumbuf) == 0) {
-		    arr->arr.enumerated.store[offset] = mp->value;
+		    *arr->arr.flags.bits |= mp->mask;
 		    goto foundit;
 		}
 	    return JSON_ERR_BADENUM;
@@ -346,7 +348,7 @@ const char *json_error_string(int err)
 	"unsupported array element type",
 	"error while string parsing",
 	"check attribute not matched",
-	"invalid enumerated value",
+	"invalid flag token",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))
