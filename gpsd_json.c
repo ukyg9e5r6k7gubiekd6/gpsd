@@ -164,18 +164,15 @@ void json_device_dump(struct gps_device_t *device,
     (void)strlcat(reply, device->gpsdata.gps_device, replylen);
     (void)strlcat(reply, "\",", replylen);
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "\"activated\":%2.2f", device->gpsdata.online);
+		   "\"activated\":%2.2f,", device->gpsdata.online);
     if (device->observed != 0) {
-	(void)strlcat(reply, "\"type\":[", replylen);
+	int mask = 0;
 	for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
-	    if ((device->observed & cmp->mask) != 0) {
-		(void)strlcat(reply, "\"", replylen);
-		(void)strlcat(reply, cmp->name, replylen);
-		(void)strlcat(reply, "\",", replylen);
-	    }
-	if (reply[strlen(reply)-1] == ',')
-	    reply[strlen(reply)-1] = '\0';
-	(void)strlcat(reply, "],", replylen);
+	    if ((device->observed & cmp->packetmask) != 0) 
+		mask |= cmp->typemask;
+	if (flags != 0)
+	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			   "\"flags\":%d,", mask);
     }
     if (device->device_type != NULL) {
 	(void)strlcat(reply, "\"driver\":\"", replylen);
@@ -185,10 +182,11 @@ void json_device_dump(struct gps_device_t *device,
 	(void)strlcat(reply, "\",", replylen);
     }
     if (device->subtype[0] != '\0') {
-	(void)strlcat(reply, "\",\"subtype\":\"", replylen);
+	(void)strlcat(reply, "\"subtype\":\"", replylen);
 	(void)strlcat(reply, 
 		      device->subtype,
 		      replylen);
+	(void)strlcat(reply, "\",", replylen);
     }
     if (reply[strlen(reply)-1] == ',')
 	reply[strlen(reply)-1] = '\0';

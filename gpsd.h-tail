@@ -150,7 +150,8 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 /* the map of device class names */
 struct classmap_t {
     char	*name;
-    int		mask;
+    int		typemask;
+    int		packetmask;
 };
 #define CLASSMAP_NITEMS	5
 struct classmap_t classmap[CLASSMAP_NITEMS];

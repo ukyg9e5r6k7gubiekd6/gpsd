@@ -111,11 +111,11 @@
  * Also, masks so we can tell what packet types correspond to each class.
  */
 struct classmap_t classmap[CLASSMAP_NITEMS] = {
-    {"ANY",	0},
-    {"GPS",	GPS_TYPEMASK},
-    {"RTCM2",	PACKET_TYPEMASK(RTCM2_PACKET)},
-    {"RTCM3",	PACKET_TYPEMASK(RTCM3_PACKET)},
-    {"AIS",	PACKET_TYPEMASK(AIVDM_PACKET)},
+    {"ANY",	0,          0},
+    {"GPS",	SEEN_GPS,   GPS_TYPEMASK},
+    {"RTCM2",	SEEN_RTCM2, PACKET_TYPEMASK(RTCM2_PACKET)},
+    {"RTCM3",	SEEN_RTCM3, PACKET_TYPEMASK(RTCM3_PACKET)},
+    {"AIS",	SEEN_AIS,   PACKET_TYPEMASK(AIVDM_PACKET)},
 };
 
 static fd_set all_fds;
@@ -700,14 +700,14 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
 		(int)(device - devices), device->gpsdata.gps_device,
 		device->packet.type,
 		device->observed,
-		classmap[type].mask);
+		classmap[type].typemask);
     /* we might have type constraints */
     if (type == ANY)
 	return true;
     else if (device->device_type == NULL)
 	return false;
     else
-	return (device->observed & classmap[type].mask) != 0;
+	return (device->observed & classmap[type].typemask) != 0;
 }
 
 /*@ -branchstate -usedef -globstate @*/

@@ -906,10 +906,11 @@ following elements:</para>
         <entry>Time the device last sent data.</entry>
 </row>
 <row>
-	<entry>type</entry>
+	<entry>flags</entry>
 	<entry>No</entry>
-	<entry>list of strings</entry>
-        <entry>List of packet types seen (GPS, RTCM2, RTCM3,
+	<entry>integer</entry>
+        <entry>Bit vector of property flags.  Currently defined flags are:
+        describe packet types seen so far (GPS, RTCM2, RTCM3,
 	AIS). Won't be reported if empty, e.g. before
 	<application>gpsd</application> has seen identifiable packets
 	from the device.</entry>
@@ -938,12 +939,46 @@ following elements:</para>
 </tgroup>
 </table>
 
+<table frame="all" pgwide="0"><title>Device flags</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>C #define</entry>
+	<entry>Value</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>SEEN_GPS</entry>
+	<entry>0x01</entry>
+	<entry>GPS data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_RTCM2</entry>
+	<entry>0x02</entry>
+	<entry>RTCM2 data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_RTCM3</entry>
+	<entry>0x04</entry>
+	<entry>RTCM3 data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_AIS</entry>
+	<entry>0x08</entry>
+	<entry>GPS data has been seen on this device</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
 <para>Here's an example:</para>
 
 <programlisting>
 {"class"="DEVICES","devices":[
-    {"class":"DEVICE","path":"/dev/pts/1","type":["GPS"],"driver":"SiRF binary"},
-    {"class":"DEVICE","path":"/dev/pts/3","type":["AIS"],"driver":"AIVDM"}]}
+    {"class":"DEVICE","path":"/dev/pts/1","flags":1,"driver":"SiRF binary"},
+    {"class":"DEVICE","path":"/dev/pts/3","flags":4,"driver":"AIVDM"}]}
 </programlisting>
 
 <para>The daemon occasionally ships a bare DEVICE object to the client

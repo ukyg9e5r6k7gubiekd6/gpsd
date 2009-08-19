@@ -778,7 +778,7 @@ struct ais_t
 
 struct device_t {
     char path[GPS_PATH_MAX];
-    int datatypes;
+    int flags;
 #define SEEN_GPS 	0x01
 #define SEEN_RTCM2	0x02
 #define SEEN_RTCM3	0x04
