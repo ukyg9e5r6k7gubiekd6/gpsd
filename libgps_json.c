@@ -59,7 +59,7 @@ static int json_tpv_read(const char *buf,
 	{NULL},
     };
 
-    status = json_read_object(buf, json_attrs_1, 0, endptr);
+    status = json_read_object(buf, json_attrs_1, endptr);
 
     if (status == 0) {
 	gpsdata->status = STATUS_FIX;
@@ -126,7 +126,7 @@ static int json_sky_read(const char *buf,
     for (i = 0; i < MAXCHANNELS; i++)
 	usedflags[i] = false;
 
-    status = json_read_object(buf, json_attrs_2, 0, endptr);
+    status = json_read_object(buf, json_attrs_2, endptr);
     if (status != 0)
 	return status;
 
@@ -165,7 +165,7 @@ static int json_device_read(const char *buf,
     };
     int status;
 
-    status = json_read_object(buf, json_attrs_device, 0, endptr);
+    status = json_read_object(buf, json_attrs_device, endptr);
     if (status != 0)
 	return status;
 
@@ -192,7 +192,7 @@ static int json_devicelist_read(const char *buf,
     };
     int status;
 
-    status = json_read_object(buf, json_attrs_devices, 0, endptr);
+    status = json_read_object(buf, json_attrs_devices, endptr);
     if (status != 0)
 	return status;
 

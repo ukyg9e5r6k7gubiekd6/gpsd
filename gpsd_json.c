@@ -209,7 +209,7 @@ int json_watch_read(struct policy_t *ccp,
     };
     int status;
 
-    status = json_read_object(buf, chanconfig_attrs, 0, endptr);
+    status = json_read_object(buf, chanconfig_attrs, endptr);
     if (status == 0) {
 	if (intcasoc != -1)
 	    ccp->buffer_policy = intcasoc;
@@ -244,7 +244,7 @@ int json_configdev_read(struct devconfig_t *cdp, const char *buf, const char **e
 	{NULL},
     };
 
-    return json_read_object(buf, devconfig_attrs, 0, endptr);
+    return json_read_object(buf, devconfig_attrs, endptr);
 }
 
 void json_configdev_dump(struct gps_device_t *devp, char *reply, size_t replylen)

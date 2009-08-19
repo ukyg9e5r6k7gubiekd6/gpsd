@@ -161,7 +161,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert(strcmp(stringptrs[1], "bar") == 0);
     assert(strcmp(stringptrs[2], "baz") == 0);
 
-    status = json_read_object(json_str4, json_attrs_4, 0, NULL);
+    status = json_read_object(json_str4, json_attrs_4, NULL);
     ASSERT_CASE(4, status);
     ASSERT_INTEGER("dftint", dftinteger, 5);	/* did the default work? */
     ASSERT_REAL("dftreal", dftreal, 23.17);	/* did the default work? */

@@ -42,7 +42,7 @@ stored as doubles.
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
-int json_read_object(const char *cp, const struct json_attr_t *attrs, int offset, const char **end)
+static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
@@ -293,7 +293,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 #ifdef JSONDEBUG
 	    (void) printf("Subarray parse begins.\n");
 #endif /* JSONDEBUG */
-	    substatus = json_read_object(cp, arr->arr.subtype, offset, &cp);
+	    substatus = json_internal_read_object(cp, arr->arr.subtype, offset, &cp);
 #ifdef JSONDEBUG
 	    (void) printf("Subarray parse ends.\n");
 #endif /* JSONDEBUG */
@@ -326,6 +326,11 @@ breakout:
     if (end != NULL)
 	*end = cp;
     return 0;
+}
+
+int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
+{
+    return json_internal_read_object(cp, attrs, 0, end);
 }
 
 const char *json_error_string(int err)
