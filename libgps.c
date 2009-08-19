@@ -620,7 +620,7 @@ static void onsig(int sig)
     exit(1);
 }
 
-/* must start zeroed, otherwise the unit test will try to chaser garbage pinter fields. */
+/* must start zeroed, otherwise the unit test will try to chase garbage pinter fields. */
 struct gps_data_t gpsdata;
 static char buf[] = "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n";
 
@@ -648,13 +648,14 @@ int main(int argc, char *argv[])
 	    unpack_test = true;
 	    break;
 	case 's':
-	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd\n",
+	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd version=%zd\n",
 		     sizeof(struct rtcm2_t),
 		     sizeof(struct rtcm3_t),
 		     sizeof(struct ais_t),
 		     sizeof(struct compass_t),
 		     sizeof(struct rawdata_t),
-		     sizeof(collect->devices));
+		     sizeof(collect->devices),
+		     sizeof(struct version_t));
 	    exit(0);
 	case '?':
 	case 'h':

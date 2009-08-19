@@ -788,6 +788,12 @@ struct device_t {
     double activated;
 };
 
+struct version_t {
+    char release[64];		/* external version */
+    char rev[64];		/* internal revision ID */
+    int api_major, api_minor;	/* API major and minor versions */
+};
+
 struct compass_t {
     double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
     double magnetic_field_x;
@@ -916,6 +922,7 @@ struct gps_data_t {
 	    int ndevices;
 	    struct device_t list[MAXDEVICES_PER_USER];
 	} devices;
+	struct version_t version;
     };
 
     /* profiling data for last sentence */

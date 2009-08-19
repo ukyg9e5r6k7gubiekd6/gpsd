@@ -805,10 +805,10 @@ limit is 1024 characters, including trailing newline.</para>
         <entry>Fixed: "VERSION"</entry>
 </row>
 <row>
-	<entry>version</entry>
+	<entry>release</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Public version level</entry>
+        <entry>Public release level</entry>
 </row>
 <row>
 	<entry>rev</entry>

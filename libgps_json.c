@@ -202,8 +202,31 @@ static int json_devicelist_read(const char *buf,
     return 0;
 }
 
+static int json_version_read(const char *buf, 
+			     struct gps_data_t *gpsdata, const char **endptr)
+{
+    const struct json_attr_t json_attrs_version[] = {
+        {"class",     check,   .dflt.check = "VERSION"},
+	{"release",   string,  .addr.string.ptr  = gpsdata->version.release,
+	                       .addr.string.len = sizeof(gpsdata->version.release)},
+	{"rev",       string,  .addr.string.ptr  = gpsdata->version.rev,
+	                       .addr.string.len = sizeof(gpsdata->version.rev)},
+	{"api_major", integer, .addr.integer = &gpsdata->version.api_major},
+	{"api_minor", integer, .addr.integer = &gpsdata->version.api_minor},
+	{NULL},
+    };
+    int status;
+
+    status = json_read_object(buf, json_attrs_version, endptr);
+    if (status != 0)
+	return status;
+
+    gpsdata->set |= DEVICELIST_SET;
+    return 0;
+}
+
 int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
-/* the only entry point - unpack a JSON object into C structs */
+/* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
     if (strstr(buf, "\"class\":\"TPV\"") != 0) {
 	return json_tpv_read(buf, gpsdata, NULL);
@@ -216,6 +239,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return status;
     } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
 	return json_devicelist_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
+	return json_version_read(buf, gpsdata, NULL);
     } else
 	return -1;
 }

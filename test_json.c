@@ -121,7 +121,7 @@ const struct json_attr_t json_attrs_4[] = {
 
 const char *json_str5 = "{\"class\":\"DEVICE\",\
            \"path\":\"/dev/ttyUSB0\",\
-           \"type\":[\"GPS\",\"AIS\"],\
+           \"flags\":5,\
            \"driver\":\"Foonly\",\"subtype\":\"Foonly Frob\"\
            }";
 
@@ -158,6 +158,12 @@ const struct json_attr_t json_attrs_6[] = {
                       .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
     {NULL},
 };
+
+/* Case 7: test parsing of version response */
+
+const char *json_str7 = "{\"class\":\"VERSION\",\
+           \"release\":\"2.40dev\",\"rev\":\"dummy-revision\",\
+           \"api_major\":3,\"api_minor\":1}";
 
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
@@ -206,7 +212,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     status = libgps_json_unpack(json_str5, &gpsdata);
     ASSERT_CASE(5, status);
     ASSERT_STRING("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
-    ASSERT_INTEGER("datatypes",gpsdata.devices.list[0].datatypes,SEEN_GPS|SEEN_AIS);
+    ASSERT_INTEGER("flags",gpsdata.devices.list[0].flags, 5);
     ASSERT_STRING("driver", gpsdata.devices.list[0].driver, "Foonly");
 
     status = json_read_object(json_str6, json_attrs_6, NULL);
@@ -223,6 +229,13 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_INTEGER("dumbstruck[1].count", dumbstruck[1].count, 1);
     ASSERT_INTEGER("dumbstruck[2].count", dumbstruck[2].count, 4);
     ASSERT_INTEGER("dumbstruck[3].count", dumbstruck[3].count, 1);
+
+    status = libgps_json_unpack(json_str7, &gpsdata);
+    ASSERT_CASE(7, status);
+    ASSERT_STRING("release", gpsdata.version.release, "2.40dev");
+    ASSERT_STRING("rev", gpsdata.version.rev, "dummy-revision");
+    ASSERT_INTEGER("api_major", gpsdata.version.api_major, 3);
+    ASSERT_INTEGER("api_minor", gpsdata.version.api_minor, 1);
 
     (void)fprintf(stderr, "succeeded.\n");
 
