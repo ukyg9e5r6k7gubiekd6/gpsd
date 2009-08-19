@@ -43,7 +43,6 @@ struct json_attr_t {
 	} string;
 	bool *boolean;
 	struct json_array_t array;
-	int offset;
     } addr;
     union {
 	int integer;
