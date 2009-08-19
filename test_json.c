@@ -206,7 +206,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     status = libgps_json_unpack(json_str5, &gpsdata);
     ASSERT_CASE(5, status);
     ASSERT_STRING("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
-    ASSERT_INTEGER("datatypes",gpsdata.devices.list[0].datatypes,DEV_GPS|DEV_AIS);
+    ASSERT_INTEGER("datatypes",gpsdata.devices.list[0].datatypes,SEEN_GPS|SEEN_AIS);
     ASSERT_STRING("driver", gpsdata.devices.list[0].driver, "Foonly");
 
     status = json_read_object(json_str6, json_attrs_6, NULL);

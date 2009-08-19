@@ -779,10 +779,10 @@ struct ais_t
 struct device_t {
     char path[GPS_PATH_MAX];
     int datatypes;
-#define DEV_GPS 	0x01
-#define DEV_RTCM2	0x02
-#define DEV_RTCM3	0x04
-#define DEV_AIS 	0x08
+#define SEEN_GPS 	0x01
+#define SEEN_RTCM2	0x02
+#define SEEN_RTCM3	0x04
+#define SEEN_AIS 	0x08
     char driver[64];
     char subtype[64];
     double activated;

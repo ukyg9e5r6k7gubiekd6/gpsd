@@ -142,10 +142,10 @@ static int json_sky_read(const char *buf,
 }
 
 static  const struct json_enum_t datatype_map[] = {
-    {"GPS", 	DEV_GPS},
-    {"RTCM2",	DEV_RTCM2},
-    {"RTCM3",	DEV_RTCM3},
-    {"AIS", 	DEV_AIS},
+    {"GPS", 	SEEN_GPS},
+    {"RTCM2",	SEEN_RTCM2},
+    {"RTCM3",	SEEN_RTCM3},
+    {"AIS", 	SEEN_AIS},
 };
 
 static int json_device_read(const char *buf, 
