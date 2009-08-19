@@ -28,7 +28,8 @@ objects or strings - not reals or integers or floats - as elements
 elements of an array must be of the same type.
 
    There's a way to map arrays of strings to bit vectors by supplying a 
-bitmask lookup table.
+string lookup table mapping strings to bitmasks.  This may be useful for
+converting JSON string property lists to C-friendly bit vectors.
 
    There are separata entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
@@ -42,7 +43,7 @@ stored as doubles.
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
-static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, int offset, const char **end)
+static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
@@ -53,27 +54,57 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
-	switch(cursor->type)
-	{
-	case integer:
-	    cursor->addr.integer[offset] = cursor->dflt.integer;
-	    break;
-	case real:
-	    cursor->addr.real[offset] = cursor->dflt.real;
-	    break;
-	case string:
-	    cursor->addr.string.ptr[offset] = '\0';
-	    break;
-	case boolean:
-	    /* nullbool default says not to set the value at all */
-	    if (cursor->dflt.boolean != nullbool)
-		cursor->addr.boolean[offset] = cursor->dflt.boolean;
-	    break;
-	case flags:	/* silences a compiler warning */
-	case object:
-	case array:
-	case check:
-	    break;
+	if (parent == NULL || parent->element_type != structobject) 
+	    /* ordinary case - use the address in the cursor structure */
+	    switch(cursor->type)
+	    {
+	    case integer:
+		cursor->addr.integer[offset] = cursor->dflt.integer;
+		break;
+	    case real:
+		cursor->addr.real[offset] = cursor->dflt.real;
+		break;
+	    case string:
+		cursor->addr.string.ptr[offset] = '\0';
+		break;
+	    case boolean:
+		/* nullbool default says not to set the value at all */
+		if (cursor->dflt.boolean != nullbool)
+		    cursor->addr.boolean[offset] = cursor->dflt.boolean;
+		break;
+	    case flags:	/* silences a compiler warning */
+	    case object:
+	    case structobject:
+	    case array:
+	    case check:
+		break;
+	    }
+        else {
+	    /* tricky case - hacking a member in an array of structures */
+	    char *lptr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
+	    switch(cursor->type)
+	    {
+	    case integer:
+		*((int *)lptr) = cursor->dflt.integer;
+		break;
+	    case real:
+		*((double *)lptr) = cursor->dflt.real;
+		break;
+	    case string:
+		lptr[0] = '\0';
+		break;
+	    case boolean:
+		/* nullbool default says not to set the value at all */
+		if (cursor->dflt.boolean != nullbool)
+		   *((bool *)lptr) = cursor->dflt.boolean;
+		break;
+	    case flags:	/* silences a compiler warning */
+	    case object:
+	    case structobject:
+	    case array:
+	    case check:
+		break;
+	    }
 	}
 
     /* parse input JSON */
@@ -172,27 +203,59 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    switch(cursor->type)
-	    {
-	    case integer:
-		cursor->addr.integer[offset] = atoi(valbuf);
-		break;
-	    case real:
-		cursor->addr.real[offset] = atof(valbuf);
-		break;
-	    case string:
-		(void)strncpy(cursor->addr.string.ptr+offset, valbuf, cursor->addr.string.len);
-		break;
-	    case boolean:
-		cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
-		break;
-	    case check:
-		if (strcmp(cursor->dflt.check, valbuf)!=0)
-		    return JSON_ERR_CHECKFAIL;
-	    case flags:	/* silences a compiler warning */
-	    case object:
-	    case array:
-		break;
+	    if (parent == NULL || parent->element_type != structobject) {
+		/* ordinary case - use the address in the cursor structure */
+		switch(cursor->type)
+		{
+		case integer:
+		    cursor->addr.integer[offset] = atoi(valbuf);
+		    break;
+		case real:
+		    cursor->addr.real[offset] = atof(valbuf);
+		    break;
+		case string:
+		    (void)strncpy(cursor->addr.string.ptr+offset, valbuf, cursor->addr.string.len);
+		    break;
+		case boolean:
+		    cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
+		    break;
+		case flags:	/* silences a compiler warning */
+		case structobject:
+		case object:
+		case array:
+		    break;
+		case check:
+		    if (strcmp(cursor->dflt.check, valbuf)!=0)
+			return JSON_ERR_CHECKFAIL;
+		    break;
+		}
+	    } else {
+		/* tricky case - hacking a member in an array of structures */
+		char *lptr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
+		switch(cursor->type)
+		{
+		case integer:
+		    *((int *)lptr) = atoi(valbuf);
+		    break;
+		case real:
+		    *((double *)lptr) = atof(valbuf);
+		    break;
+		case string:
+		    (void)strncpy(lptr, valbuf, cursor->addr.string.len);
+		    break;
+		case boolean:
+		    *((bool *)lptr) = (bool)!strcmp(valbuf, "true");
+		    break;
+		case flags:	/* silences a compiler warning */
+		case object:
+		case structobject:
+		case array:
+		    break;
+		case check:
+		    if (strcmp(cursor->dflt.check, valbuf)!=0)
+			return JSON_ERR_CHECKFAIL;
+		    break;
+		}
 	    }
 	    if (isspace(*cp))
 		continue;
@@ -290,10 +353,11 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	foundit:;
 	    break;
 	case object:
+	case structobject:
 #ifdef JSONDEBUG
 	    (void) printf("Subarray parse begins.\n");
 #endif /* JSONDEBUG */
-	    substatus = json_internal_read_object(cp, arr->arr.subtype, offset, &cp);
+	    substatus = json_internal_read_object(cp, arr->arr.objects.subtype, arr, offset, &cp);
 #ifdef JSONDEBUG
 	    (void) printf("Subarray parse ends.\n");
 #endif /* JSONDEBUG */
@@ -330,7 +394,7 @@ breakout:
 
 int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
 {
-    return json_internal_read_object(cp, attrs, 0, end);
+    return json_internal_read_object(cp, attrs, NULL, 0, end);
 }
 
 const char *json_error_string(int err)

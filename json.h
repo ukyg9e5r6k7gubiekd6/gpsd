@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 typedef enum {integer, real, string, boolean, 
-	      flags, object, array, check} json_type;
+	      flags, object, structobject, array, check} json_type;
 
 #define nullbool	-1	/* not true, not false */
 
@@ -17,7 +17,11 @@ struct json_enum_t {
 struct json_array_t { 
     json_type element_type;
     union {
-	const struct json_attr_t *subtype;
+	struct {
+	    const struct json_attr_t *subtype;
+	    char *base;
+	    size_t stride;
+	} objects;
 	struct {
 	    char **ptrs;
 	    char *store;
@@ -43,6 +47,7 @@ struct json_attr_t {
 	} string;
 	bool *boolean;
 	struct json_array_t array;
+	size_t offset;
     } addr;
     union {
 	int integer;

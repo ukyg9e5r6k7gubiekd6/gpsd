@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
@@ -124,6 +125,40 @@ const char *json_str5 = "{\"class\":\"DEVICE\",\
            \"driver\":\"Foonly\",\"subtype\":\"Foonly Frob\"\
            }";
 
+/* Case 6: test parsing of subobject list into array of structures */
+
+const char *json_str6 = "{\"parts\":[\
+           {\"name\":\"Urgle\", \"flag\":true, \"count\":3},\
+           {\"name\":\"Burgle\",\"flag\":false,\"count\":1},\
+           {\"name\":\"Witter\",\"flag\":true, \"count\":4},\
+           {\"name\":\"Thud\",  \"flag\":false,\"count\":1}]}";
+
+struct dumbstruct_t {
+    char name[64];
+    bool flag;
+    int count;
+};
+static struct dumbstruct_t dumbstruck[5];
+static int dumbcount;
+
+const struct json_attr_t json_attrs_6_subtype[] = {
+    {"name",  string,  .addr.offset = offsetof(struct dumbstruct_t, name),
+                       .addr.string.len = 64},
+    {"flag",  boolean, .addr.offset = offsetof(struct dumbstruct_t, flag),},
+    {"count", integer, .addr.offset = offsetof(struct dumbstruct_t, count),},
+    {NULL},
+};
+
+const struct json_attr_t json_attrs_6[] = {
+    {"parts", array,  .addr.array.element_type = structobject,
+                      .addr.array.arr.objects.base = (char*)&dumbstruck,
+                      .addr.array.arr.objects.stride = sizeof(struct dumbstruct_t),
+                      .addr.array.arr.objects.subtype = json_attrs_6_subtype,
+                      .addr.array.count = &dumbcount,
+    .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
+    {NULL},
+};
+
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int status;
@@ -173,6 +208,21 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     ASSERT_STRING("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
     ASSERT_INTEGER("datatypes",gpsdata.devices.list[0].datatypes,DEV_GPS|DEV_AIS);
     ASSERT_STRING("driver", gpsdata.devices.list[0].driver, "Foonly");
+
+    status = json_read_object(json_str6, json_attrs_6, NULL);
+    ASSERT_CASE(6, status);
+    ASSERT_STRING("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
+    ASSERT_STRING("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
+    ASSERT_STRING("dumbstruck[2].name", dumbstruck[2].name, "Witter");
+    ASSERT_STRING("dumbstruck[3].name", dumbstruck[3].name, "Thud");
+    ASSERT_BOOLEAN("dumbstruck[0].flag", dumbstruck[0].flag, true);
+    ASSERT_BOOLEAN("dumbstruck[1].flag", dumbstruck[1].flag, false);
+    ASSERT_BOOLEAN("dumbstruck[2].flag", dumbstruck[2].flag, true);
+    ASSERT_BOOLEAN("dumbstruck[3].flag", dumbstruck[3].flag, false);
+    ASSERT_INTEGER("dumbstruck[0].count", dumbstruck[0].count, 3);
+    ASSERT_INTEGER("dumbstruck[1].count", dumbstruck[1].count, 1);
+    ASSERT_INTEGER("dumbstruck[2].count", dumbstruck[2].count, 4);
+    ASSERT_INTEGER("dumbstruck[3].count", dumbstruck[3].count, 1);
 
     (void)fprintf(stderr, "succeeded.\n");
 

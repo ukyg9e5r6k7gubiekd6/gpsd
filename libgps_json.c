@@ -117,7 +117,7 @@ static int json_sky_read(const char *buf,
 	{"time",       real,    .addr.real    = &gpsdata->fix.time},
 	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
 	{"satellites", array,   .addr.array.element_type = object,
-				.addr.array.arr.subtype = json_attrs_2_1,
+				.addr.array.arr.objects.subtype = json_attrs_2_1,
 				.addr.array.maxlen = MAXCHANNELS},
 	{NULL},
     };
@@ -186,7 +186,7 @@ static int json_devicelist_read(const char *buf,
     const struct json_attr_t json_attrs_devices[] = {
         {"class",      check,   .dflt.check = "DEVICES"},
 	{"devices",    array,   .addr.array.element_type = object,
-				.addr.array.arr.subtype = json_attrs_subdevices,
+				.addr.array.arr.objects.subtype = json_attrs_subdevices,
 				.addr.array.maxlen = MAXDEVICES_PER_USER},
 	{NULL},
     };
