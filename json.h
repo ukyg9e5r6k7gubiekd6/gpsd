@@ -43,8 +43,8 @@ struct json_attr_t {
     } dflt;
 };
 
-#define JSON_ATTR_MAX	31	/* max charss in JSON attribute name */
-#define JSON_VAL_MAX	63	/* max charss in JSON value part */
+#define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */
+#define JSON_VAL_MAX	63	/* max chars in JSON value part */
 
 int json_read_object(const char *, const struct json_attr_t *, int, const char **end);
 int json_read_array(const char *, const struct json_array_t *, const char **);

@@ -141,14 +141,18 @@ static int json_sky_read(const char *buf,
 }
 
 static int json_device_read(const char *buf, 
-			     struct gps_data_t *gpsdata, const char **endptr)
+			     struct device_t *dev, const char **endptr)
 {
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,   .dflt.check = "DEVICE"},
-	{"path",       string,  .addr.string.ptr  = gpsdata->devices.list[0].path,
-				.addr.string.len = GPS_PATH_MAX},
-	{"activated",  real,    .addr.real    = &gpsdata->devices.time},
-	// type (list), driver, subtype
+	{"path",       string,  .addr.string.ptr  = dev->path,
+	                        .addr.string.len = sizeof(dev->path)},
+	{"activated",  real,    .addr.real    = &dev->activated},
+	// type (list)
+	{"driver",     string,  .addr.string.ptr  = dev->driver,
+	                        .addr.string.len = sizeof(dev->driver)},
+	{"subtype",    string,  .addr.string.ptr  = dev->subtype,
+	                        .addr.string.len = sizeof(dev->subtype)},
 	{NULL},
     };
     int status;
@@ -157,7 +161,6 @@ static int json_device_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set |= DEVICE_SET;
     return 0;
 }
 
@@ -200,7 +203,10 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
 	return json_sky_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
-	return json_device_read(buf, gpsdata, NULL);
+	int status = json_device_read(buf, &gpsdata->devices.list[0], NULL);
+	if (status == 0)
+	    gpsdata->set |= DEVICE_SET;
+	return status;
     } else
 	return -1;
 }

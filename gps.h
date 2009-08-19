@@ -777,6 +777,9 @@ struct ais_t
 
 struct device_t {
     char path[GPS_PATH_MAX];
+    char driver[64];
+    char subtype[64];
+    double activated;
 };
 
 struct compass_t {
