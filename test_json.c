@@ -12,7 +12,7 @@
 
 #include "strl.c"
 
-static void ASSERT_CASE(int num, int status)
+static void assert_case(int num, int status)
 {
     if (status != 0)
     { 
@@ -21,7 +21,7 @@ static void ASSERT_CASE(int num, int status)
     }
 }
 
-static void ASSERT_STRING(char *attr, char *fld, char *val)
+static void assert_string(char *attr, char *fld, char *val)
 {
     if (strcmp(fld, val))
     {
@@ -30,7 +30,7 @@ static void ASSERT_STRING(char *attr, char *fld, char *val)
     }
 }
 
-static void ASSERT_INTEGER(char *attr, int fld, int val)
+static void assert_integer(char *attr, int fld, int val)
 {
     if (fld != val)
     {
@@ -39,7 +39,7 @@ static void ASSERT_INTEGER(char *attr, int fld, int val)
     }
 }
 
-static void ASSERT_BOOLEAN(char *attr, bool fld, bool val)
+static void assert_boolean(char *attr, bool fld, bool val)
 {
     if (fld != val)
     {
@@ -52,7 +52,7 @@ static void ASSERT_BOOLEAN(char *attr, bool fld, bool val)
  * Floating point comparisons are iffy, but at least if any of these fail
  * the output will make it clear whether it was a precision issue
  */
-static void ASSERT_REAL(char *attr, double fld, double val)
+static void assert_real(char *attr, double fld, double val)
 {
     if (fld != val)
     {
@@ -63,16 +63,17 @@ static void ASSERT_REAL(char *attr, double fld, double val)
 
 static struct gps_data_t gpsdata;
 
+#ifdef GPSDNG_ENABLE
 /* Case 1: TPV report */
 
-const char *json_str1 = "{\"class\":\"TPV\",\
+static const char json_str1[] = "{\"class\":\"TPV\",\
     \"device\":\"GPS#1\",\"tag\":\"MID2\",				\
     \"time\":1119197561.890,\"lon\":46.498203637,\"lat\":7.568074350,\
     \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3}";
 
 /* Case 2: SKY report */
 
-const char *json_str2 = "{\"class\":\"SKY\",\
+static const char *json_str2 = "{\"class\":\"SKY\",\
          \"tag\":\"MID4\",\"time\":1119197562.890,   \
          \"reported\":7,\
          \"satellites\":[\
@@ -86,13 +87,13 @@ const char *json_str2 = "{\"class\":\"SKY\",\
 
 /* Case 3: String list syntax */
 
-const char *json_str3 = "[\"foo\",\"bar\",\"baz\"]";
+static const char *json_str3 = "[\"foo\",\"bar\",\"baz\"]";
 
 static char *stringptrs[3];
 static char stringstore[256];
 static int stringcount;
 
-const struct json_array_t json_array_3 = {
+static const struct json_array_t json_array_3 = {
     .element_type = string,
     .arr.strings.ptrs = stringptrs,
     .arr.strings.store = stringstore,
@@ -103,13 +104,13 @@ const struct json_array_t json_array_3 = {
 
 /* Case 4: test defaulting of unspecified attributes */
 
-const char *json_str4 = "{\"flag1\":true,\"flag2\":false}";
+static const char *json_str4 = "{\"flag1\":true,\"flag2\":false}";
 
 static bool flag1, flag2;
 static double dftreal;
 static int dftinteger;
 
-const struct json_attr_t json_attrs_4[] = {
+static const struct json_attr_t json_attrs_4[] = {
     {"dftint", integer, .addr.integer = &dftinteger, .dflt.integer = 5},
     {"dftreal",real,    .addr.real = &dftreal,       .dflt.real = 23.17},
     {"flag1",  boolean, .addr.boolean = &flag1,},
@@ -119,7 +120,7 @@ const struct json_attr_t json_attrs_4[] = {
 
 /* Case 5: test DEVICE parsing */
 
-const char *json_str5 = "{\"class\":\"DEVICE\",\
+static const char *json_str5 = "{\"class\":\"DEVICE\",\
            \"path\":\"/dev/ttyUSB0\",\
            \"flags\":5,\
            \"driver\":\"Foonly\",\"subtype\":\"Foonly Frob\"\
@@ -127,7 +128,7 @@ const char *json_str5 = "{\"class\":\"DEVICE\",\
 
 /* Case 6: test parsing of subobject list into array of structures */
 
-const char *json_str6 = "{\"parts\":[\
+static const char *json_str6 = "{\"parts\":[\
            {\"name\":\"Urgle\", \"flag\":true, \"count\":3},\
            {\"name\":\"Burgle\",\"flag\":false,\"count\":1},\
            {\"name\":\"Witter\",\"flag\":true, \"count\":4},\
@@ -141,7 +142,7 @@ struct dumbstruct_t {
 static struct dumbstruct_t dumbstruck[5];
 static int dumbcount;
 
-const struct json_attr_t json_attrs_6_subtype[] = {
+static const struct json_attr_t json_attrs_6_subtype[] = {
     {"name",  string,  .addr.offset = offsetof(struct dumbstruct_t, name),
                        .addr.string.len = 64},
     {"flag",  boolean, .addr.offset = offsetof(struct dumbstruct_t, flag),},
@@ -149,7 +150,7 @@ const struct json_attr_t json_attrs_6_subtype[] = {
     {NULL},
 };
 
-const struct json_attr_t json_attrs_6[] = {
+static const struct json_attr_t json_attrs_6[] = {
     {"parts", array,  .addr.array.element_type = structobject,
                       .addr.array.arr.objects.base = (char*)&dumbstruck,
                       .addr.array.arr.objects.stride = sizeof(struct dumbstruct_t),
@@ -161,81 +162,85 @@ const struct json_attr_t json_attrs_6[] = {
 
 /* Case 7: test parsing of version response */
 
-const char *json_str7 = "{\"class\":\"VERSION\",\
+static const char *json_str7 = "{\"class\":\"VERSION\",\
            \"release\":\"2.40dev\",\"rev\":\"dummy-revision\",\
            \"api_major\":3,\"api_minor\":1}";
 
+#endif /* GPSDNG_ENABLE */
+
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
-    int status;
+    int status = 0;
 
     (void)fprintf(stderr, "JSON unit test ");
 
+#ifdef GPSDNG_ENABLE
     status = libgps_json_unpack(json_str1, &gpsdata);
-    ASSERT_CASE(1, status);
-    ASSERT_STRING("device", gpsdata.gps_device, "GPS#1");
-    ASSERT_STRING("tag", gpsdata.tag, "MID2");
-    ASSERT_INTEGER("mode", gpsdata.fix.mode, 3);
-    ASSERT_REAL("time", gpsdata.fix.time, 1119197561.890);
-    ASSERT_REAL("lon", gpsdata.fix.longitude, 46.498203637);
-    ASSERT_REAL("lat", gpsdata.fix.latitude, 7.568074350);
+    assert_case(1, status);
+    assert_string("device", gpsdata.gps_device, "GPS#1");
+    assert_string("tag", gpsdata.tag, "MID2");
+    assert_integer("mode", gpsdata.fix.mode, 3);
+    assert_real("time", gpsdata.fix.time, 1119197561.890);
+    assert_real("lon", gpsdata.fix.longitude, 46.498203637);
+    assert_real("lat", gpsdata.fix.latitude, 7.568074350);
 
     status = libgps_json_unpack(json_str2, &gpsdata);
-    ASSERT_CASE(2, status);
-    ASSERT_STRING("tag", gpsdata.tag, "MID4");
-    ASSERT_INTEGER("reported", gpsdata.satellites_used, 7);
-    ASSERT_INTEGER("PRN[0]", gpsdata.PRN[0], 10);
-    ASSERT_INTEGER("el[0]", gpsdata.elevation[0], 45);
-    ASSERT_INTEGER("az[0]", gpsdata.azimuth[0], 196);
-    ASSERT_REAL("ss[0]", gpsdata.ss[0], 34);
-    ASSERT_INTEGER("used[0]", gpsdata.used[0], 10);
-    ASSERT_INTEGER("used[5]", gpsdata.used[5], 27);
-    ASSERT_INTEGER("PRN[6]", gpsdata.PRN[6], 21);
-    ASSERT_INTEGER("el[6]", gpsdata.elevation[6], 10);
-    ASSERT_INTEGER("az[6]", gpsdata.azimuth[6], 301);
-    ASSERT_REAL("ss[6]", gpsdata.ss[6], 0);
+    assert_case(2, status);
+    assert_string("tag", gpsdata.tag, "MID4");
+    assert_integer("reported", gpsdata.satellites_used, 7);
+    assert_integer("PRN[0]", gpsdata.PRN[0], 10);
+    assert_integer("el[0]", gpsdata.elevation[0], 45);
+    assert_integer("az[0]", gpsdata.azimuth[0], 196);
+    assert_real("ss[0]", gpsdata.ss[0], 34);
+    assert_integer("used[0]", gpsdata.used[0], 10);
+    assert_integer("used[5]", gpsdata.used[5], 27);
+    assert_integer("PRN[6]", gpsdata.PRN[6], 21);
+    assert_integer("el[6]", gpsdata.elevation[6], 10);
+    assert_integer("az[6]", gpsdata.azimuth[6], 301);
+    assert_real("ss[6]", gpsdata.ss[6], 0);
 
     status = json_read_array(json_str3, &json_array_3, NULL);
-    ASSERT_CASE(3, status);
+    assert_case(3, status);
     assert(stringcount == 3);
     assert(strcmp(stringptrs[0], "foo") == 0);
     assert(strcmp(stringptrs[1], "bar") == 0);
     assert(strcmp(stringptrs[2], "baz") == 0);
 
     status = json_read_object(json_str4, json_attrs_4, NULL);
-    ASSERT_CASE(4, status);
-    ASSERT_INTEGER("dftint", dftinteger, 5);	/* did the default work? */
-    ASSERT_REAL("dftreal", dftreal, 23.17);	/* did the default work? */
-    ASSERT_BOOLEAN("flag1", flag1, true);
-    ASSERT_BOOLEAN("flag2", flag2, false);
+    assert_case(4, status);
+    assert_integer("dftint", dftinteger, 5);	/* did the default work? */
+    assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
+    assert_boolean("flag1", flag1, true);
+    assert_boolean("flag2", flag2, false);
 
     status = libgps_json_unpack(json_str5, &gpsdata);
-    ASSERT_CASE(5, status);
-    ASSERT_STRING("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
-    ASSERT_INTEGER("flags",gpsdata.devices.list[0].flags, 5);
-    ASSERT_STRING("driver", gpsdata.devices.list[0].driver, "Foonly");
+    assert_case(5, status);
+    assert_string("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
+    assert_integer("flags",gpsdata.devices.list[0].flags, 5);
+    assert_string("driver", gpsdata.devices.list[0].driver, "Foonly");
 
     status = json_read_object(json_str6, json_attrs_6, NULL);
-    ASSERT_CASE(6, status);
-    ASSERT_STRING("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
-    ASSERT_STRING("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
-    ASSERT_STRING("dumbstruck[2].name", dumbstruck[2].name, "Witter");
-    ASSERT_STRING("dumbstruck[3].name", dumbstruck[3].name, "Thud");
-    ASSERT_BOOLEAN("dumbstruck[0].flag", dumbstruck[0].flag, true);
-    ASSERT_BOOLEAN("dumbstruck[1].flag", dumbstruck[1].flag, false);
-    ASSERT_BOOLEAN("dumbstruck[2].flag", dumbstruck[2].flag, true);
-    ASSERT_BOOLEAN("dumbstruck[3].flag", dumbstruck[3].flag, false);
-    ASSERT_INTEGER("dumbstruck[0].count", dumbstruck[0].count, 3);
-    ASSERT_INTEGER("dumbstruck[1].count", dumbstruck[1].count, 1);
-    ASSERT_INTEGER("dumbstruck[2].count", dumbstruck[2].count, 4);
-    ASSERT_INTEGER("dumbstruck[3].count", dumbstruck[3].count, 1);
+    assert_case(6, status);
+    assert_string("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
+    assert_string("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
+    assert_string("dumbstruck[2].name", dumbstruck[2].name, "Witter");
+    assert_string("dumbstruck[3].name", dumbstruck[3].name, "Thud");
+    assert_boolean("dumbstruck[0].flag", dumbstruck[0].flag, true);
+    assert_boolean("dumbstruck[1].flag", dumbstruck[1].flag, false);
+    assert_boolean("dumbstruck[2].flag", dumbstruck[2].flag, true);
+    assert_boolean("dumbstruck[3].flag", dumbstruck[3].flag, false);
+    assert_integer("dumbstruck[0].count", dumbstruck[0].count, 3);
+    assert_integer("dumbstruck[1].count", dumbstruck[1].count, 1);
+    assert_integer("dumbstruck[2].count", dumbstruck[2].count, 4);
+    assert_integer("dumbstruck[3].count", dumbstruck[3].count, 1);
 
     status = libgps_json_unpack(json_str7, &gpsdata);
-    ASSERT_CASE(7, status);
-    ASSERT_STRING("release", gpsdata.version.release, "2.40dev");
-    ASSERT_STRING("rev", gpsdata.version.rev, "dummy-revision");
-    ASSERT_INTEGER("api_major", gpsdata.version.api_major, 3);
-    ASSERT_INTEGER("api_minor", gpsdata.version.api_minor, 1);
+    assert_case(7, status);
+    assert_string("release", gpsdata.version.release, "2.40dev");
+    assert_string("rev", gpsdata.version.rev, "dummy-revision");
+    assert_integer("api_major", gpsdata.version.api_major, 3);
+    assert_integer("api_minor", gpsdata.version.api_minor, 1);
+#endif /* GPSDNG_ENABLE */
 
     (void)fprintf(stderr, "succeeded.\n");
 
