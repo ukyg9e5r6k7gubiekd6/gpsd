@@ -412,6 +412,14 @@ class gps(gpsdata):
         self.send(commands)
         return self.poll()
 
+    def stream(self):
+        "Ask gpsd to stream reports at your client."
+        if self.raw_hook:
+            arg = 'w+r+'
+        else:
+            arg = 'w+'
+        return self.query(arg)
+
 # some multipliers for interpreting GPS output
 METERS_TO_FEET  = 3.2808399
 METERS_TO_MILES = 0.00062137119

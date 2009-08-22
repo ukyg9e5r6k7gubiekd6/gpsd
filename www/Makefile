@@ -31,6 +31,9 @@ AIVDM.html: AIVDM.txt
 protocol-evolution.html: protocol-evolution.txt
 	asciidoc -a toc protocol-evolution.txt
 
+protocol-transition.html: protocol-transition.txt
+	asciidoc -a toc protocol-transition.txt
+
 writing-a-driver.html: writing-a-driver.xml
 	xmlto xhtml-nochunks writing-a-driver.xml
 
@@ -44,4 +47,4 @@ sums:
 	sha1sum `find vendor-docs -type f -name "*.pdf" -print` >checksums
 
 clean:
-	rm -f $(XML:.xml=.html) hardware.html writing-a-driver.html *~
+	rm -f $(XML:.xml=.html) hardware.html protocol-evolution.html protocol-transition.html writing-a-driver.html *~

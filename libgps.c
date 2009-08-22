@@ -493,6 +493,16 @@ int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     return gps_poll(gpsdata);
 }
 
+int gps_stream(struct gps_data_t *gpsdata)
+/* ask gpsd to stream reports at you, hiding the command details */
+{
+#ifdef OLDSTYLE_ENABLE
+    return gps_query(gpsdata, "w+x");
+#else
+    return gps_query(gpsdata, "?WATCH={}");
+#endif
+}
+
 #ifdef HAVE_LIBPTHREAD
 static /*@null@*/void *poll_gpsd(void *args)
 /* helper for the thread launcher */

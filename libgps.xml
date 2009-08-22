@@ -61,6 +61,10 @@ C:
     <paramdef>struct rtcm_t *<parameter>rtcmp</parameter></paramdef>
     <paramdef>char *<parameter>buf</parameter></paramdef>
 </funcprototype>
+<funcprototype>
+<funcdef>int <function>gps_stream</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+</funcprototype>
 <funcsynopsisinfo>
 
 Python:
@@ -71,7 +75,7 @@ session = gps.gps(host="127.0.0.1", port="2947")
 
 session.set_raw_hook(raw_hook)
 
-session.query(commands)
+session.stream()
 
 session.poll()
 
@@ -138,6 +142,14 @@ It may have % elements as for
 which will be filled in from any following arguments.
 This function returns a 0 on success, or a -1 if there was a
 Unix-level read error.</para>
+
+<para><function>gps_stream()</function> asks
+<application>gpsd</application> to stream the reports it has at you,
+to be made available whenn you poll.  It is preferable to the
+older-style (pre-2.39) way of doing this,
+<function>gps_query()</function> with a "w+" argument, because it
+insulates your code from whether your client library and your
+<application>gpsd</application> are using old or new protocol.</para>
 
 <para><function>gps_set_raw_hook()</function> takes a function you
 specify and run it (synchronously) on the raw data pulled by a
