@@ -68,7 +68,7 @@ unusual configuration commands. Here are the exceptions:
   need to know.
 
 * Your application code referenced struct gpsdata_t members that no 
-  longer exist. This will be obvious because your compilation qill
+  longer exist. This will be obvious because your compilation will
   fail.  Later in this document you will learn how to fix it.
 
 You can probably ignore the rest of this document, unless
@@ -168,14 +168,34 @@ The difference is that before, the API locked you to one device during
 the life of the session.  Now it potentially has to deal with a *set* 
 of devices, treated symmetrically.
 
-There are several reasons this change is a good idea.  One is that it
+There are multiple reasons this change is a good idea.  One is that it
 makes coping with devices being hotplugged in or out completely
 trivial from the client's point of view - it can just choose to ignore
 the fact that the device IDs in the reports have changed.  Also, the
-channel-management hair in the interface goes away.
+channel-management hair in the interface goes away. Also, it means
+that clients can treat identically the cases where (a) you have one
+device reporting different kinds of data (e.g. a marine navigation
+system reporting both GPS and AIS) and (b) you have several devices
+reporting different kinds of data.
 
 === From lockstep to streaming ===
 
 A subtler change has to do with the difference between a lockstep 
 or conversational interface and a streaming, stateless one.
 
+In the earliest versions of GPSD, clients requested various pieces of
+data by command. After each request, they would need to wait until a
+response came back.  Then, watcher mode was added.  By saying "w+",
+you could ask gpsd to stream GPS reports at you whenever it got them.
+
+In the new protocol, streaming is (almost) all there is.  Every
+report coming up from the daemon is tagged with its device and type.
+Instead of issuing commands and then ewaiting for specific responses, 
+clients should expect any kind of report at any time and merge it
+into client-local storage (libgps does this for you).
+
+This change is necessary to cope with devices that may send (for
+example) mixed GPS and AIS data. In the future, the stream from
+gpsd could include other kinds of data, such as the take from
+a digital compass, water-temperature sensors, or even aircraft
+transponders.
