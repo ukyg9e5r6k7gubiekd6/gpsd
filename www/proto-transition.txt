@@ -68,7 +68,7 @@ unusual configuration commands. Here are the exceptions:
   need to know.
 
 * Your application code referenced struct gpsdata_t members that no 
-  longer exist. This will be onvious because your compilation qill
+  longer exist. This will be obvious because your compilation qill
   fail.  Later in this document you will learn how to fix it.
 
 You can probably ignore the rest of this document, unless
@@ -79,26 +79,103 @@ as you contemplate the trials awaiting the non-virtuous.
 If you are non-virtuous - that is, you rolled your own client-side
 interface - you've had years of warning that this choice would 
 fail to insulate you from protocol details and cost you pain in the
-future -- and that future is now.  In the remainder of this document
-we will try to help you minimize it.
+future -- and that future is now.  
+
+In the remainder of this document we will try to help you minimize it.
+The main strategy for doing so is to *use libgps (or its functional
+equivalents in languages other than C)*.  Scrap your hand-rolled
+interface code now.  When you use libgps, compatibility issues
+become *our* problem to solve rather than *yours*.
+
+== When the bough breaks ==
+
+Even virtuous clients have to worry about version skew. Supposing you
+have used libgps and not done anything exotic, you will still have
+problems if the client library you linked and the instance of gpsd it
+speaks to are using different protocols.
+
+We're working to minimize problems by scheduling the changes like
+this:
+
+1. In 2.40 (shipping sometime in the fourth quarter of 2009), we will
+roll out a daemon that speaks both old and new protocols and a client
+library that speaks old protocol by default - that is, under the hood
+gps_stream() stll says "w+" rather than "?WATCH".
+
+2. When we have reason to believe all major Linux distros have 
+deployed 2.40, we will change the client library to ship "?WATCH"
+by default.  This is likely to happen in late 2010.
+
+3. At some point in the far future, we will disable old protocol
+in the default builds of both client and daemon.  This is
+probably three years or more out.
+
+The possible failure modes are pretty obvious.  Transitions are
+difficult.  We're essentially relying on the distribution integrators
+to ship libgps and gpsd updates at the same time, with sane
+package dependencies. If that goes smoothly, applications may
+not even notice the changes.  We can hope...
 
 == On not doing things by halves ==
 
 At the same time that pressure has been building to redesign the
 protocol, we've been gaining experience in gpsd's application domain
 that has made us rethink some of the assumptions behind the old one.
-As a result, the new protocol is not an exact superset of the old one.
-It reflects a slightly different way of carving up the behavior space
-in gpsd's application domain.
 
-A practical consequence of this is that the shape of struct
-gpsdata_t, the client-side interface structure, has changed in
-some significant ways.
+Since we knew we were going to have a forced compatibility break at the
+wire-protocol level anyway, we decided not to do things by halves.  One
+big break - in the application model, struct gpsdata_t, and the
+wire protocol behind it - is better than three or four spread out
+over a period of time.  
+
+As a result, the new protocol is not an exact superset of the old one.
+It reflects a different way of carving up the behavior space in gpsd's
+application domain.  And the shape of struct gpsdata_t, the
+client-side interface structure, has changed in corresponding ways.
 
 Accordingly, there are three things a client developer will need to
 understand about the new protocol.  The first is theory: how its model
 of the gpsd application domain is different. The second is practice:
 how to issue new-style commands and interpret responses. The third, if
-you have reliad on the structure tin a way that now breaks your
+you have relied on the structure in a way that now breaks your
 compile, is how that structure has changed.
+
+== How the theory has changed ==
+
+=== Channels are gone ===
+
+In old protocol, when you requested data from the daemon, it would
+search for a device supplying the kind of data you had told it you
+wanted (GPS, by default) and connect your listening channel to *that
+single device*. The association between channel and device was set
+when channel was first bound to device and implicit; reports weren't
+labeled with the device name. You could request a specific device if
+you wanted to.
+
+In the new protocol, channels are gone.  You tell gpsd to stream
+reports at you; thereafter, every time an attached GPS or other device
+generates a report, you'll get it.  There may be multiple devices
+reporting; each report will come labeled with the name of the
+originating device, and that name will be left in your client
+structure along with the rest of the new data.
+
+In both protocols, when you poll gpsd and get data the client library
+takes care of interpreting what comes up the wire from the daemon, and
+merges the resulting data into your client structure (struct
+gpsdata_t).  
+
+The difference is that before, the API locked you to one device during
+the life of the session.  Now it potentially has to deal with a *set* 
+of devices, treated symmetrically.
+
+There are several reasons this change is a good idea.  One is that it
+makes coping with devices being hotplugged in or out completely
+trivial from the client's point of view - it can just choose to ignore
+the fact that the device IDs in the reports have changed.  Also, the
+channel-management hair in the interface goes away.
+
+=== From lockstep to streaming ===
+
+A subtler change has to do with the difference between a lockstep 
+or conversational interface and a streaming, stateless one.
 
