@@ -1,0 +1,104 @@
+= Moving to GPSD-NG: a Guide from Client Developers =
+Eric S. Raymond <esr@thyrsus.com>
+v1.0, August 2009
+
+== Why a new protocol? ==
+
+GPSD is moving to a new request/response protocol.  This move has been
+forced upon us because the old one ran out of namespace.  It was
+designed with case-insensitive single-character command/response
+codes. 25 of 26 ASCII alphabetics were already in use by 2006, and
+there have been functional challenges accumulating over the last three
+years that will require several more request/response codes - things
+like reporting AIS data, reporting raw pseudoranges, and reporting
+RTCM3.  
+
+Yes, we could as a desperate expedient have pressed non-alphabetic
+printables into service - but the result would have looked like
+line noise and only delayed the day of reckoning.  Instead, we're
+writing a new protocol that is upward-compatible with the old one 
+in that you can mix old and new syntax.
+
+The old protocol will continue to be available for some time, but not
+indefinitely.  Eventually we're going to want to shed the code
+complexity and overhead of maintaining both protocols at once. This
+will happen sooner than it otherwise might han because gpsd is in
+part targeted for SBCs and other constrained environments where 
+shaving a few K off the runtime image can actually matter.  When
+it comes to keeping the codebase lean and mean, we try harder.
+
+We'll try to make the transition easy, but the sooner you start it 
+the less pain you are likely to experience.  The rest of this
+document will explain both theory and practice, and give you
+specific questions on how to fix client code.
+
+== Virtue is rewarded ==
+
+Since 2004, the way you were *supposed* to be using gpsd was through
+one of the the libgps client libraries (in C or Python). If you have
+been doing it right, you have been telling gpsd to stream data at you
+with the 'w' command, via application code probably looked something
+like this:
+
+-------------------------------------------------------------------
+
+   gpsdata = gps_open(source.server, source.port);
+
+   (void)gps_query(gpsdata, "w+x\n");
+
+   // This is in your application's main event loop somewhere.
+   // It polls gpsd for new data.
+   ... gps_poll(gpsdata) ...
+   
+   gps_close()
+
+-------------------------------------------------------------------
+
+If you have been virtuous, you need only to make one small change to
+your code.  Replace the gps_query() call with gps_stream() and add a note
+to your documentation that you now require gpsd version 2.40 or later.
+
+There. You're probably done, unless you relied on some parts of 
+struct gpsdata_t that application developers usually don't or issued
+unusual configuration commands. Here are the exceptions:
+
+* You issued other gps_query() commands, such as "J=1".  If so,
+  you'll need to learn how to say them in new protocol. That
+  is not difficult, and this document will cover what you
+  need to know.
+
+* Your application code referenced struct gpsdata_t members that no 
+  longer exist. This will be onvious because your compilation qill
+  fail.  Later in this document you will learn how to fix it.
+
+You can probably ignore the rest of this document, unless
+either (a) you want to learn about gpsd's new capabilities so you
+can use them in creative ways, or (b) you want to caper with unholy glee 
+as you contemplate the trials awaiting the non-virtuous.
+
+If you are non-virtuous - that is, you rolled your own client-side
+interface - you've had years of warning that this choice would 
+fail to insulate you from protocol details and cost you pain in the
+future -- and that future is now.  In the remainder of this document
+we will try to help you minimize it.
+
+== On not doing things by halves ==
+
+At the same time that pressure has been building to redesign the
+protocol, we've been gaining experience in gpsd's application domain
+that has made us rethink some of the assumptions behind the old one.
+As a result, the new protocol is not an exact superset of the old one.
+It reflects a slightly different way of carving up the behavior space
+in gpsd's application domain.
+
+A practical consequence of this is that the shape of struct
+gpsdata_t, the client-side interface structure, has changed in
+some significant ways.
+
+Accordingly, there are three things a client developer will need to
+understand about the new protocol.  The first is theory: how its model
+of the gpsd application domain is different. The second is practice:
+how to issue new-style commands and interpret responses. The third, if
+you have reliad on the structure tin a way that now breaks your
+compile, is how that structure has changed.
+
