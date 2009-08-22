@@ -1270,7 +1270,7 @@ they are never shipped outside of a SKY object.</para>
 <term>?WATCH</term> 
 <listitem>
 
-<para>This command sets watcher mode/. It also sets or elicits a
+<para>This command sets watcher mode. It also sets or elicits a
 report of per-subscriber buffering policy and the raw bit.  An
 argument WATCH object changes the subscriber's policy. The respunce
 describes the subscriber's policy.</para>
@@ -1341,7 +1341,7 @@ describes the subscriber's policy.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"CONFIGHAN", "raw":1,"buffer_policy":1}
+{"class":"WATCH", "raw":1,"buffer_policy":1."scaled":true}
 </programlisting>
 
 </listitem>

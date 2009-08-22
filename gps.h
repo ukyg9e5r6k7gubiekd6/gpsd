@@ -772,28 +772,6 @@ struct ais_t
     };
 };
 
-#define MAXDEVICES_PER_USER	4
-#define GPS_PATH_MAX		64	/* dev files usually have short names */
-#define TYPES_PER_DEVICE	4
-
-struct device_t {
-    char path[GPS_PATH_MAX];
-    int flags;
-#define SEEN_GPS 	0x01
-#define SEEN_RTCM2	0x02
-#define SEEN_RTCM3	0x04
-#define SEEN_AIS 	0x08
-    char driver[64];
-    char subtype[64];
-    double activated;
-};
-
-struct version_t {
-    char release[64];		/* external version */
-    char rev[64];		/* internal revision ID */
-    int api_major, api_minor;	/* API major and minor versions */
-};
-
 struct compass_t {
     double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
     double magnetic_field_x;
@@ -830,6 +808,38 @@ struct rawdata_t {
 #define SAT_EPHEMERIS	0x20		/* ephemeris collected */
 #define SAT_FIX_USED	0x40		/* used for position fix */
 };
+
+/* following structures are for representing new-protocol responses */
+
+#define MAXDEVICES_PER_USER	4
+#define GPS_PATH_MAX		64	/* dev files usually have short names */
+#define TYPES_PER_DEVICE	4
+
+struct version_t {
+    char release[64];		/* external version */
+    char rev[64];		/* internal revision ID */
+    int api_major, api_minor;	/* API major and minor versions */
+};
+
+struct device_t {
+    char path[GPS_PATH_MAX];
+    int flags;
+#define SEEN_GPS 	0x01
+#define SEEN_RTCM2	0x02
+#define SEEN_RTCM3	0x04
+#define SEEN_AIS 	0x08
+    char driver[64];
+    char subtype[64];
+    double activated;
+};
+
+struct watch_t {
+    int	raw;
+    int buffer_polixy;
+    bool scaled;
+};
+
+/* this is the main structure that includes all previous substructures */
 
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
@@ -912,17 +922,19 @@ struct gps_data_t {
 
     /* pack things that are never reported together to reduce structure size */ 
     union {
+	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
 	struct rtcm3_t	rtcm3;
 	struct ais_t ais;
 	struct compass_t compass;
 	struct rawdata_t raw;
+	/* "artificial" structures for various protocol responses */
+	struct version_t version;
 	struct {
 	    double time;
 	    int ndevices;
 	    struct device_t list[MAXDEVICES_PER_USER];
 	} devices;
-	struct version_t version;
     };
 
     /* profiling data for last sentence */
@@ -967,6 +979,9 @@ extern double gpstime_to_unix(int, double);
 extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double wgs84_separation(double, double);
+
+/* this only needs to be visible for the unit tests */
+extern int gps_unpack(char *, struct gps_data_t *);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

@@ -68,7 +68,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 }
 
 /*@ -branchstate -usereleased -mustfreefresh @*/
-static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
+int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
 {
     char *ns, *sp, *tp;
@@ -440,6 +440,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	gpsdata->raw_hook(gpsdata, buf, strlen(buf),  1);
     if (gpsdata->thread_hook)
 	gpsdata->thread_hook(gpsdata, buf, strlen(buf), 1);
+
+    return 0;
 }
 /*@ +nullstate +compdef @*/
 /*@ -branchstate +usereleased +mustfreefresh @*/
@@ -455,6 +457,7 @@ int gps_poll(struct gps_data_t *gpsdata)
     char	buf[BUFSIZ];
     ssize_t	n;
     double received = 0;
+    int status;
 
     /* the daemon makes sure that every read is NUL-terminated */
     n = read(gpsdata->gps_fd, buf, sizeof(buf)-1);
@@ -465,13 +468,13 @@ int gps_poll(struct gps_data_t *gpsdata)
     buf[n] = '\0';
 
     received = gpsdata->online = timestamp();
-    gps_unpack(buf, gpsdata);
+    status = gps_unpack(buf, gpsdata);
     if (gpsdata->profiling)
     {
 	gpsdata->c_decode_time = received - gpsdata->fix.time;
 	gpsdata->c_recv_time = timestamp() - gpsdata->fix.time;
     }
-    return 0;
+    return status;
 }
 
 int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
@@ -620,18 +623,17 @@ static void onsig(int sig)
     exit(1);
 }
 
-/* must start zeroed, otherwise the unit test will try to chase garbage pinter fields. */
+/* must start zeroed, otherwise the unit test will try to chase garbage pointer fields. */
 struct gps_data_t gpsdata;
 static char buf[] = "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n";
 
 static void unpack_unit_test(void)
 /* torture the unpacking function */
 {
-
     (void)signal(SIGSEGV, onsig);
     (void)signal(SIGBUS, onsig);
 
-    gps_unpack(buf, &gpsdata);
+    (void)gps_unpack(buf, &gpsdata);
     data_dump(&gpsdata, time(NULL));
 }
 
