@@ -493,20 +493,28 @@ int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     return gps_poll(gpsdata);
 }
 
-int gps_stream(struct gps_data_t *gpsdata)
+int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
+    char buf[GPS_JSON_COMMAND_MAX];
+
 #ifdef OLDSTYLE_ENABLE
-    if (gpsdata->raw_hook != NULL)
-	return gps_query(gpsdata, "w+r+x");
-    else
-	return gps_query(gpsdata, "w+x");
+    (void)strlcpy(buf, "w+x", sizeof(buf));
+    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	(void)strlcat(buf, "r+", sizeof(buf));
+    if (flags & WATCH_NOJITTER)
+	(void)strlcat(buf, "j+", sizeof(buf));
 #else
-    if (gpsdata->raw_hook != NULL)
-	return gps_query(gpsdata, "?WATCH={\"raw\":1}");
-    else
-	return gps_query(gpsdata, "?WATCH={}");
+    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
+    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	(void)strlcat(buf, "\"raw\":1", sizeof(buf));
+    if (flags & WATCH_NOJITTER)
+	(void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
+    if (flags & WATCH_SCALED)
+	(void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
+    (void)strlcat(buf, "};", sizeof(buf));
 #endif
+    return gps_query(gpsdata, buf);
 }
 
 #ifdef HAVE_LIBPTHREAD

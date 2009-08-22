@@ -52,6 +52,10 @@ MODE_3D = 3
 MAXCHANNELS = 12
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
+WATCH_RAW	= 0x01
+WATCH_NOJITTER	= 0x02
+WATCH_SCALED	= 0x04
+
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 NMEA_MAX = 86
 
@@ -412,12 +416,13 @@ class gps(gpsdata):
         self.send(commands)
         return self.poll()
 
-    def stream(self):
+    def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
-        if self.raw_hook:
-            arg = 'w+r+'
-        else:
-            arg = 'w+'
+        arg = "w+x"
+        if self.raw_hook or (flags & WATCH_RAW):
+            arg += 'r+'
+        if self.raw_hook or (flags & WATCH_NOJITTER):
+            arg += 'j+'
         return self.query(arg)
 
 # some multipliers for interpreting GPS output

@@ -956,11 +956,16 @@ struct gps_data_t {
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
 };
 
+/* mode flags for gps_stream() */
+#define WATCH_RAW	0x01u
+#define WATCH_NOJITTER	0x02u
+#define WATCH_SCALED	0x04u
+
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
 int gps_poll(struct gps_data_t *gpsdata);
-int gps_stream(struct gps_data_t *gpsdata);
+int gps_stream(struct gps_data_t *gpsdata, unsigned int flags);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level));
 int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);

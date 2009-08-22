@@ -199,3 +199,60 @@ example) mixed GPS and AIS data. In the future, the stream from
 gpsd could include other kinds of data, such as the take from
 a digital compass, water-temperature sensors, or even aircraft
 transponders.
+
+== How the command set has changed == 
+
+If your code issues old-protocol commands A, D, E, M, P, T, U, or V,
+it is a wretched hive of scum and villainy that probably hasn't
+changed since before the introduction of "w".  You are using the
+oldest single-shot commands and will have to rewrite your interface
+significantly, as the new protocol does not support equivalents.  Use
+libgps.
+
+If your code issues B, C, or N commands, they need to change to
+?CONFIGDEV commands.  See the protocol reference for details.
+
+The old 'F' and 'G' commands do not have equivalents.  It would be
+possible to implement these, but we probably won't do it unless there is
+actual demand.  Consider teaching your client to ignore fix updates
+when they don't have a specified "device" or "class" tag, respectively.
+
+The old 'I' command has no equivalent. You probably issued it as part
+of an initialization string, hoping that a subtype string would later
+show up in gps_id so you could post it somewhere.  In the new
+protocol, when a device sends back subtype information the daemon
+ships the client an object of class DEVICE with a device tag and
+subtype fields.  Watch for that and process appropriately.
+
+The old 'J' command has been replaced by an optional attribute in
+?WATCH.  Include the WATCH_NOJITTER mask in the argument of
+gps_stream().
+
+The old 'K' command is replaced by ?DEVICES.
+
+The old 'L' command is replaced by ?VERSION.
+
+The old 'O' command is replaced by ?TPV'.  Note: it is possible
+this command will be removed in the final version of the new
+protocol.  Do not rely on it.
+
+The old 'Q' and 'S' commands doe not have exact equivalents.  We will
+implement an option to have the TPV response include DOPS and status
+if there is demand for them.
+
+The old 'R' command has been replaced by an optional attribute in
+?WATCH.  Include the WATCH_RAW mask in the argument of
+gps_stream(), or set a raw hook before alling gps_stream().
+
+The old 'W' command has been replaced by ?WATCH. Calll gps_stream()
+with whatever option you want to set.
+
+The old 'X' command is gone.  Instead, you will see an object of
+class DEVICE from the daemon whenever a device is opened or closes.
+
+The old 'Y' command is replaced by ?SKY. Note: it is possible
+this command will be removed in the final version of the new
+protocol.  Do not rely on it.
+
+The old 'Z' and '$' commands, used by the developers for profiling, 
+have no equivalents.  We'll implement them if we need them.
