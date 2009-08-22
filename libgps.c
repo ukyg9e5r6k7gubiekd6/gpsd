@@ -497,9 +497,15 @@ int gps_stream(struct gps_data_t *gpsdata)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
 #ifdef OLDSTYLE_ENABLE
-    return gps_query(gpsdata, "w+x");
+    if (gpsdata->raw_hook != NULL)
+	return gps_query(gpsdata, "w+r+x");
+    else
+	return gps_query(gpsdata, "w+x");
 #else
-    return gps_query(gpsdata, "?WATCH={}");
+    if (gpsdata->raw_hook != NULL)
+	return gps_query(gpsdata, "?WATCH={\"raw\":1}");
+    else
+	return gps_query(gpsdata, "?WATCH={}");
 #endif
 }
 

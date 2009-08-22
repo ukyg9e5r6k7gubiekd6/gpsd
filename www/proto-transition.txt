@@ -81,10 +81,10 @@ interface - you've had years of warning that this choice would
 fail to insulate you from protocol details and cost you pain in the
 future -- and that future is now.  
 
-In the remainder of this document we will try to help you minimize it.
-The main strategy for doing so is to *use libgps (or its functional
-equivalents in languages other than C)*.  Scrap your hand-rolled
-interface code now.  When you use libgps, compatibility issues
+In the remainder of this document we will try to help you minimize the
+pain.  The main strategy for doing so is to *use libgps* (or its
+functional equivalents in languages other than C).  Scrap your
+hand-rolled interface code!  When you use libgps, compatibility issues
 become *our* problem to solve rather than *yours*.
 
 == When the bough breaks ==
