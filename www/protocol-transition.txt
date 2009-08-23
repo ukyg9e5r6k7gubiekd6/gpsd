@@ -1,4 +1,4 @@
-= Moving to GPSD-NG: a Guide from Client Developers =
+= Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
 v1.0, August 2009
 

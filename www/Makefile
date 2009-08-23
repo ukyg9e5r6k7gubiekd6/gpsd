@@ -23,7 +23,7 @@ XML = \
 
 all: html sums
 
-html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html $(XML:.xml=.html)
+html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html $(XML:.xml=.html) protocol-evolution.html protocol-transition.html
 
 AIVDM.html: AIVDM.txt
 	asciidoc -a toc AIVDM.txt

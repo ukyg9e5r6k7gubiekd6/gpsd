@@ -298,7 +298,7 @@ Application Protocol Evolution</a></dt>
 <dd>History and evolution of the GPSD-NG protocol, illuminating some
 larger trends in application protocol design.</dd>
 
-<dt><a href="protocol-transition.html">Moving to GPSD-NG: a Guide from Client Developers</a></dt>
+<dt><a href="protocol-transition.html">Moving to GPSD-NG: a Guide for Client Developers</a></dt>
 <dd>A practical explanation of GPSD-NG, and how to move to it as painlessly as 
 possible.</dd>
 
