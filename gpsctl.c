@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 	    // FIXME: Requires old protocol
 	    (void)gps_query(gpsdata, "OFIB");
 	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
-			gpsdata->gps_device,gpsdata->gps_id,gpsdata->baudrate);
+			gpsdata->dev.path,gpsdata->dev.subtype,gpsdata->dev.baudrate);
 	    exit(0);
 	}
 
@@ -287,17 +287,17 @@ int main(int argc, char **argv)
 	    exit(0);
 	}
 
-	if (to_nmea) {
-#ifdef OLDSTYLE_ENABLE
-	    (void)gps_query(gpsdata, "N=0");
-#else
-	    (void)gps_query(gpsdata, "?CONFIGDEV={\"mode\":0}\r\n"); 
-#endif /* OLDSTYLE_ENABLE */
-	    if (gpsdata->driver_mode != MODE_NMEA) {
-		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->gps_device);
+	   if (to_nmea) {
+   #ifdef OLDSTYLE_ENABLE
+	       (void)gps_query(gpsdata, "N=0");
+   #else
+	       (void)gps_query(gpsdata, "?CONFIGDEV={\"mode\":0}\r\n"); 
+   #endif /* OLDSTYLE_ENABLE */
+	       if (gpsdata->dev.driver_mode != MODE_NMEA) {
+		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	else if (to_binary) {
 #ifdef OLDSTYLE_ENABLE
@@ -305,11 +305,11 @@ int main(int argc, char **argv)
 #else
 	    (void)gps_query(gpsdata, "?CONFIGDEV={\"mode\":1}\r\n");
 #endif /* OLDSTYLE_ENABLE */
-	    if (gpsdata->driver_mode != MODE_BINARY) {
-		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->gps_device);
+	    if (gpsdata->dev.driver_mode != MODE_BINARY) {
+		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->dev.path);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	if (speed != NULL) {
 	    char parity = 'N';
@@ -352,14 +352,14 @@ int main(int argc, char **argv)
 #endif /* OLDSTYLE_ENABLE */
 				    speed, parity, stopbits);
 	    }
-	    if (atoi(speed) != (int)gpsdata->baudrate) {
+	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
 		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d\n", 
-			    gpsdata->gps_device,
+			    gpsdata->dev.path,
 			    speed, parity, stopbits);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
-			    gpsdata->gps_device,
+			    gpsdata->dev.path,
 			    speed, parity, stopbits);
 	}
 	if (rate != NULL) {
@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 	/*@ -mustfreeonly -immediatetrans @*/
 	session.context = &context;
 	gpsd_tty_init(&session);
-	(void)strlcpy(session.gpsdata.gps_device, device, sizeof(session.gpsdata.gps_device));
+	(void)strlcpy(session.gpsdata.dev.path, device, sizeof(session.gpsdata.dev.path));
 	session.device_type = forcetype;
 	(void)gpsd_open(&session);
 	(void)gpsd_set_raw(&session);
@@ -455,7 +455,7 @@ int main(int argc, char **argv)
 		}
 	    }
 	    gpsd_report(LOG_PROG, "%s looks like a %s at %d.\n",
-			device, gpsd_id(&session), session.gpsdata.baudrate);
+			device, gpsd_id(&session), session.gpsdata.dev.baudrate);
 
 	    if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
 		gpsd_report(LOG_ERROR, "'%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
@@ -476,7 +476,7 @@ int main(int argc, char **argv)
 		}
 	    }
 	    gpsd_report(LOG_SHOUT, "%s identified as a %s at %d.\n",
-			device, gpsd_id(&session), session.gpsdata.baudrate);
+			device, gpsd_id(&session), session.gpsdata.dev.baudrate);
 	}
 
 	/* if no control operation was specified, we're done */
@@ -537,13 +537,13 @@ int main(int argc, char **argv)
 		}
 		/*@ -nullpass @*/
 		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",
-			    device, gpsd_id(&session), session.gpsdata.baudrate);
+			    device, gpsd_id(&session), session.gpsdata.dev.baudrate);
 		/*@ +nullpass @*/
 	    }
 	}
 	if (speed) {
-	    char parity = echo ? 'N': session.gpsdata.parity;
-	    int stopbits = echo ? 1 : session.gpsdata.stopbits;
+	    char parity = echo ? 'N': session.gpsdata.dev.parity;
+	    int stopbits = echo ? 1 : session.gpsdata.dev.stopbits;
 	    char *modespec;
 
 	    modespec = strchr(speed, ':');
@@ -586,11 +586,11 @@ int main(int argc, char **argv)
 		    (void)tcdrain(session.gpsdata.gps_fd);
 		    (void)usleep(50000);
 		    gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
-			    session.gpsdata.gps_device,
+			    session.gpsdata.dev.path,
 			    speed, parity, stopbits);
 		} else {
 		    gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d.\n",
-				session.gpsdata.gps_device,
+				session.gpsdata.dev.path,
 				speed, parity, stopbits);
 		    status = 1;
 		}

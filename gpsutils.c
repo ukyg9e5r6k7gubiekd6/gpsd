@@ -547,7 +547,7 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     } else {
 	gpsd_report(LOG_INF,
 	    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
-	    gpsdata->gps_device);
+	    gpsdata->dev.path);
 	return 0;
     }
 

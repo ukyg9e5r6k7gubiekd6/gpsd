@@ -535,13 +535,13 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
     if (session->packet.type == SUPERSTAR2_PACKET){
 	st = superstar2_dispatch(session, session->packet.outbuffer,
 				 session->packet.length);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
 	(void)gpsd_switch_driver(session, "Generic NMEA");
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -569,7 +569,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=(char)session->gpsdata.parity || (unsigned int)stopbits!=session->gpsdata.stopbits) {
+    if (parity!=(char)session->gpsdata.dev.parity || (unsigned int)stopbits!=session->gpsdata.dev.stopbits) {
 	return false;
     } else {
 	/*@ +charint @*/
@@ -590,7 +590,7 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 	char mode_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
-	mode_msg[4] = (char)(session->gpsdata.baudrate / 300);
+	mode_msg[4] = (char)(session->gpsdata.dev.baudrate / 300);
 	(void)superstar2_write(session, mode_msg, 7);
 	/*@ -charint @*/
     } else {

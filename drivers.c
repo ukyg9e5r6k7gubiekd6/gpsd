@@ -154,9 +154,9 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	 */
 	(void)nmea_send(session,
 			"$PSRF100,0,%d,%d,%d,0",
-			session->gpsdata.baudrate,
-			9-session->gpsdata.stopbits,
-			session->gpsdata.stopbits);
+			session->gpsdata.dev.baudrate,
+			9-session->gpsdata.dev.stopbits,
+			session->gpsdata.dev.stopbits);
 	session->back_to_nmea = true;
 	break;
     case 2:
@@ -251,7 +251,7 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
 	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
 	(void)nmea_send(session, "$PGRMI,,,,,,,R");
 	(void)usleep(333);	/* standard Garmin settling time */
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
 

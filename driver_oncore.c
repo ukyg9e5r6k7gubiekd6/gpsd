@@ -402,12 +402,12 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == ONCORE_PACKET){
 	st = oncore_dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -435,7 +435,7 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	/* send the mode switch control string */
 	/* oncore_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);*/
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	/* 
 	 * Anticipatory switching works only when the packet getter is the
 	 * generic one and it recognizes packets of the type this driver 
@@ -444,7 +444,7 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
 	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
 

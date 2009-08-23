@@ -207,7 +207,7 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
-	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
+	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.dev.baudrate);
     } else {
 	session->back_to_nmea = false;
     }
@@ -219,9 +219,9 @@ static ssize_t sirf_get(struct gps_device_t *session)
     ssize_t len = generic_get(session);
 
     if (session->packet.type == SIRF_PACKET) {
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
     } else if (session->packet.type == NMEA_PACKET) {
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	/* should never happen */
@@ -310,7 +310,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-    if (session->gpsdata.baudrate >= 38400){
+    if (session->gpsdata.dev.baudrate >= 38400){
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
@@ -348,7 +348,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     gpsd_interpret_subframe(session, words);
 
 #ifdef ALLOW_RECONFIGURE
-    if (session->gpsdata.baudrate < 38400){
+    if (session->gpsdata.dev.baudrate < 38400){
 	gpsd_report(LOG_PROG, "Disabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
     }
@@ -884,12 +884,12 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
     if (session->packet.type == SIRF_PACKET){
 	st = sirf_parse(session, session->packet.outbuffer,
 			session->packet.outbuflen);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -904,7 +904,7 @@ static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
     if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
 	(void)nmea_send(session,
-		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
+		  "$PSRF100,0,%d,8,1,0", session->gpsdata.dev.baudrate);
     }
     /* do this every time*/
     {

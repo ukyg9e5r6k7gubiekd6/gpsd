@@ -831,6 +831,9 @@ struct device_t {
     char driver[64];
     char subtype[64];
     double activated;
+    unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
+    double       cycle, mincycle;	/* refresh cycle time in seconds */
+    unsigned int driver_mode;		/* is driver in native mode or not? */
 };
 
 struct watch_t {
@@ -913,12 +916,7 @@ struct gps_data_t {
     int azimuth[MAXCHANNELS];	/* azimuth */
     double ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
-    /* where and what gpsd thinks the device is */
-    char	 gps_device[PATH_MAX];	/* only valid if non-null. */
-    char	 *gps_id;		/* only valid if non-null. */
-    unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
-    double       cycle, mincycle;	/* refresh cycle time in seconds */
-    unsigned int driver_mode;		/* is driver in native mode or not? */
+    struct device_t dev;	/* device that shipped last update */
 
     /* pack things that are never reported together to reduce structure size */ 
     union {

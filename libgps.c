@@ -52,11 +52,6 @@ int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     int retval = close(gpsdata->gps_fd);
-    if (gpsdata->gps_id) {
-	(void)free(gpsdata->gps_id);
-	gpsdata->gps_id = NULL;
-    }
-    gpsdata->gps_device[0] = '\0';
     /*@i@*/(void)free(gpsdata);
     return retval;
 }
@@ -137,19 +132,19 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    case 'B':
 			if (sp[2] == '?') {
-			    gpsdata->baudrate = gpsdata->stopbits = 0;
+			    gpsdata->dev.baudrate = gpsdata->dev.stopbits = 0;
 			} else
 			    (void)sscanf(sp, "B=%u %*d %*s %u",
-				   &gpsdata->baudrate, &gpsdata->stopbits);
+				   &gpsdata->dev.baudrate, &gpsdata->dev.stopbits);
 			break;
 		    case 'C':
 			if (sp[2] == '?')
-			    gpsdata->mincycle = gpsdata->cycle = 0;
+			    gpsdata->dev.mincycle = gpsdata->dev.cycle = 0;
 			else {
 			    if (sscanf(sp, "C=%lf %lf",
-					 &gpsdata->cycle,
-				       &gpsdata->mincycle) < 2)
-				gpsdata->mincycle = gpsdata->cycle;
+					 &gpsdata->dev.cycle,
+				       &gpsdata->dev.mincycle) < 2)
+				gpsdata->dev.mincycle = gpsdata->dev.cycle;
 			}
 			break;
 		    case 'D':
@@ -175,13 +170,12 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #undef DEFAULT
 			}
 			break;
-		    case 'F':
-			/*@ -mustfreeonly */
+		    case 'F': /*@ -mustfreeonly */
 			if (sp[2] == '?')
-			    gpsdata->gps_device[0] = '\0';
+			    gpsdata->dev.path[0] = '\0';
 			else {
 			    /*@ -mayaliasunique @*/
-			    strncpy(gpsdata->gps_device, sp+2, PATH_MAX);
+			    strncpy(gpsdata->dev.path, sp+2, PATH_MAX);
 			    /*@ +mayaliasunique @*/
 			    gpsdata->set |= DEVICE_SET;
 			}
@@ -189,12 +183,10 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    case 'I':
 			/*@ -mustfreeonly */
-			if (gpsdata->gps_id)
-			    free(gpsdata->gps_id);
 			if (sp[2] == '?')
-			    gpsdata->gps_id = NULL;
+			    gpsdata->dev.subtype[0] = '\0';
 			else {
-			    gpsdata->gps_id = strdup(sp+2);
+			    (void)strlcpy(gpsdata->dev.subtype, sp+2, sizeof(gpsdata->dev.subtype));
 			    gpsdata->set |= DEVICEID_SET;
 			}
 			/*@ +mustfreeonly */
@@ -229,9 +221,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    case 'N':
 			if (sp[2] == '?')
-			    gpsdata->driver_mode = MODE_NMEA;
+			    gpsdata->dev.driver_mode = MODE_NMEA;
 			else
-			    gpsdata->driver_mode = (unsigned)atoi(sp+2);
+			    gpsdata->dev.driver_mode = (unsigned)atoi(sp+2);
 			break;
 		    case 'O':
 			if (sp[2] == '?') {
@@ -616,9 +608,9 @@ static void data_dump(struct gps_data_t *collect, time_t now)
 	}
     }
     if (collect->set & DEVICE_SET)
-	printf("Device is %s\n", collect->gps_device);
+	printf("Device is %s\n", collect->dev.path);
     if (collect->set & DEVICEID_SET)
-	printf("GPSD ID is %s\n", collect->gps_id);
+	printf("GPSD ID is %s\n", collect->dev.subtype);
     if (collect->set & DEVICELIST_SET) {
 	int i;
 	printf("%d devices:\n", collect->devices.ndevices);

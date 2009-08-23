@@ -104,7 +104,7 @@ void gpsd_set_speed(struct gps_device_t *session,
     else
       rate =  B115200;
 
-    if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
+    if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.dev.parity || stopbits!=session->gpsdata.dev.stopbits) {
 
 	/* 
 	 * Don't mess with this conditional! Speed zero is supposed to mean
@@ -191,9 +191,9 @@ void gpsd_set_speed(struct gps_device_t *session,
     gpsd_report(LOG_INF, "speed %d, %d%c%d\n", 
 		gpsd_get_speed(&session->ttyset), 9-stopbits, parity, stopbits);
 
-    session->gpsdata.baudrate = (unsigned int)speed;
-    session->gpsdata.parity = (unsigned int)parity;
-    session->gpsdata.stopbits = stopbits;
+    session->gpsdata.dev.baudrate = (unsigned int)speed;
+    session->gpsdata.dev.parity = (unsigned int)parity;
+    session->gpsdata.dev.stopbits = stopbits;
 
     if (!session->context->readonly) {
 	/*
@@ -224,24 +224,24 @@ int gpsd_open(struct gps_device_t *session)
     if (session->context->netgnss_service == netgnss_remotegpsd){
 	session->gpsdata.gps_fd = session->context->dsock;
 	session->saved_baud = 57600;
-	session->gpsdata.baudrate = 57600;
-	session->gpsdata.parity = 'N';
-	session->gpsdata.stopbits = 1;
+	session->gpsdata.dev.baudrate = 57600;
+	session->gpsdata.dev.parity = 'N';
+	session->gpsdata.dev.stopbits = 1;
 	session->context->readonly = 1;
 	return session->gpsdata.gps_fd;
     }
     /*@ -boolops -type @*/
-    if (session->context->readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
+    if (session->context->readonly || ((stat(session->gpsdata.dev.path, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
 	mode = (mode_t)O_RDONLY;
-	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
+	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.dev.path);
     } else {
-	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
+	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.dev.path);
     }
     /*@ +boolops +type @*/
 
-    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, (int)(mode|O_NONBLOCK|O_NOCTTY))) == -1) {
+    if ((session->gpsdata.gps_fd = open(session->gpsdata.dev.path, (int)(mode|O_NONBLOCK|O_NOCTTY))) == -1) {
 	gpsd_report(LOG_ERROR, "device open failed: %s - retrying read-only\n", strerror(errno));
-	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) == -1) {
+	if ((session->gpsdata.gps_fd = open(session->gpsdata.dev.path, O_RDONLY|O_NONBLOCK|O_NOCTTY)) == -1) {
 	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n", strerror(errno));
 	    return -1;
 	}
@@ -329,13 +329,13 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	session->packet.retry_counter = 0;
 	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))-1) {
 	    session->baudindex = 0;
-	    if (session->gpsdata.stopbits++ >= 2)
+	    if (session->gpsdata.dev.stopbits++ >= 2)
 		return false;			/* hunt is over, no sync */
 	}
 	gpsd_set_speed(session,
 		       rates[session->baudindex],
-		       (unsigned char)session->gpsdata.parity,
-		       session->gpsdata.stopbits);
+		       (unsigned char)session->gpsdata.dev.parity,
+		       session->gpsdata.dev.stopbits);
     }
 
     return true;	/* keep hunting */

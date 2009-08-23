@@ -47,7 +47,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
-	    session->gpsdata.mincycle = session->device_type->min_cycle;
+	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
@@ -70,7 +70,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 {
     /*@ -mayaliasunique @*/
     if (device != NULL)
-	(void)strlcpy(session->gpsdata.gps_device, device, PATH_MAX);
+	(void)strlcpy(session->gpsdata.dev.path, device, sizeof(session->gpsdata.dev.path));
     /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
     session->observed = 0;
@@ -89,7 +89,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.gdop = NAN;
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
-    session->gpsdata.cycle = session->gpsdata.mincycle = 1; 
+    session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1; 
 
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -127,7 +127,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     }
 #endif /* ALLOW_RECONFIGURE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
-		session->gpsdata.gps_device, session->gpsdata.gps_fd);
+		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
 }
 
@@ -164,7 +164,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	} else {
 	    gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
 			((pps_device==TIOCM_CAR) ? "DCD" : "CTS"),
-			  session->gpsdata.gps_device, state);
+			  session->gpsdata.dev.path, state);
 	    laststate = state;
 	    unchanged = 0;
 	}
@@ -703,7 +703,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
-		    session->gpsdata.gps_device,
+		    session->gpsdata.dev.path,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
 	    session->observed |= PACKET_TYPEMASK(session->packet.type);
@@ -721,15 +721,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     gpsd_report(LOG_RAW+2, "GPS sent %zd new characters\n", newlen);
     if (newlen == -1)	{		/* read error */
 	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-		    session->gpsdata.gps_device,
+		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = 0;
 	return 0;
     } else if (newlen == 0) {		/* no new data */
-	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.
-cycle+1){
+	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.dev.cycle+1){
 	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-		    session->gpsdata.gps_device,
+		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = 0;
 	    return 0;
@@ -737,14 +736,14 @@ cycle+1){
 	    return ONLINE_SET;
     } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
 	gpsd_report(LOG_RAW+3, "New data on %s, not yet a packet\n",
-			    session->gpsdata.gps_device);
+			    session->gpsdata.dev.path);
 	return ONLINE_SET;
     } else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
-			    session->gpsdata.gps_device);
+			    session->gpsdata.dev.path);
 	/*@ -nullstate @*/
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata,
@@ -821,7 +820,7 @@ cycle+1){
 #endif /* BINARY_ENABLE */
 	    if (buf2[0] != '\0') {
 		gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-			    session->gpsdata.gps_device, buf2);
+			    session->gpsdata.dev.path, buf2);
 		if (session->gpsdata.raw_hook)
 		    session->gpsdata.raw_hook(&session->gpsdata,
 					      buf2, strlen(buf2), 1);

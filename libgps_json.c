@@ -25,8 +25,8 @@ static int json_tpv_read(const char *buf,
     int status;
     const struct json_attr_t json_attrs_1[] = {
 	{"class",  check,   .dflt.check = "TPV"},
-	{"device", string,  .addr.string.ptr = gpsdata->gps_device,
-			    .addr.string.len = sizeof(gpsdata->gps_device)},
+	{"device", string,  .addr.string.ptr = gpsdata->dev.path,
+			    .addr.string.len = sizeof(gpsdata->dev.path)},
 	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
 			    .addr.string.len = sizeof(gpsdata->tag)},
 	{"time",   real,    .addr.real = &gpsdata->fix.time,
@@ -111,7 +111,7 @@ static int json_sky_read(const char *buf,
     };
     const struct json_attr_t json_attrs_2[] = {
 	{"class",      check,   .dflt.check = "SKY"},
-	{"device",     string,  .addr.string.ptr  = gpsdata->gps_device,
+	{"device",     string,  .addr.string.ptr  = gpsdata->dev.path,
 				.addr.string.len = PATH_MAX},
 	{"tag",	       string,  .addr.string.ptr  = gpsdata->tag,
 				.addr.string.len = MAXTAGLEN},
@@ -146,7 +146,8 @@ static int json_device_read(const char *buf,
 {
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
-	{"path",       string,     .addr.string.ptr  = dev->path,
+	
+        {"path",       string,     .addr.string.ptr  = dev->path,
 	                           .addr.string.len = sizeof(dev->path)},
 	{"activated",  real,       .addr.real = &dev->activated},
 	{"flags",      integer,    .addr.integer = &dev->flags},

@@ -59,9 +59,9 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	/* XXX Thunderbolts and Copernicus use 8N1... which isn't exactly a */
 	/* XXX good idea due to the fragile wire format.   We must divine a */
 	/* XXX clever heuristic to decide if the parity change is required. */
-	session->driver.tsip.parity = session->gpsdata.parity;
-	session->driver.tsip.stopbits = session->gpsdata.stopbits;
-	gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
+	session->driver.tsip.parity = session->gpsdata.dev.parity;
+	session->driver.tsip.stopbits = session->gpsdata.dev.stopbits;
+	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	break;
 
     case 1:
@@ -85,7 +85,7 @@ static void tsip_wrapup(struct gps_device_t *session)
 {
     /* restore saved parity and stopbits when leaving TSIP mode */
     gpsd_set_speed(session,
-		   session->gpsdata.baudrate,
+		   session->gpsdata.dev.baudrate,
 		   (unsigned char)session->driver.tsip.parity,
 		   session->driver.tsip.stopbits);
 }
@@ -763,13 +763,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == TSIP_PACKET){
 	st = tsip_analyze(session);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #ifdef EVERMORE_ENABLE
     } else if (session->packet.type == EVERMORE_PACKET) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
 	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #endif /* EVERMORE_ENABLE */
     } else
@@ -824,7 +824,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
     }
 
     putbyte(buf,0,0xff);		/* current port */
-    putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
+    putbyte(buf,1,(round(log((double)speed/300)/M_LN2))+2); /* input dev.baudrate */
     putbyte(buf,2,getub(buf,1));	/* output baudrate */
     putbyte(buf,3,3);			/* character width (8 bits) */
     putbyte(buf,4,parity);		/* parity (normally odd) */

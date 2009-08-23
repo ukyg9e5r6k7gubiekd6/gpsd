@@ -469,12 +469,12 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 
     if (session->packet.type == UBX_PACKET){
 	st = ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = MODE_BINARY;
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = MODE_NMEA;
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -631,7 +631,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
-	putlelong(buf, 8, session->gpsdata.baudrate);
+	putlelong(buf, 8, session->gpsdata.dev.baudrate);
 
     if (mode == 0) {
 	buf[14] &= ~0x01;			/* turn off UBX output on this port */

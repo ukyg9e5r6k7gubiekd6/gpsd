@@ -383,8 +383,8 @@ struct subscriber_t {
 #endif
 #define sub_index(s) (int)((s) - subscribers)
 #define channel_index(s) (int)((s) - channels)
-#define allocated_device(devp)	 ((devp)->gpsdata.gps_device[0] != '\0')
-#define free_device(devp)	 (devp)->gpsdata.gps_device[0] = '\0'
+#define allocated_device(devp)	 ((devp)->gpsdata.dev.path[0] != '\0')
+#define free_device(devp)	 (devp)->gpsdata.dev.path[0] = '\0'
 #define initialized_device(devp) ((devp)->context != NULL)
 
 struct gps_device_t devices[MAXDEVICES];
@@ -587,7 +587,7 @@ static void deactivate_device(struct gps_device_t *device)
 #ifdef GPSDNG_ENABLE
     notify_watchers(device, WATCH_NEWSTYLE, 
 		    "{\"class\":\"DEVICE\",\"name\":\"%s\",\"activated\":0}\r\n",
-		    device->gpsdata.gps_device);
+		    device->gpsdata.dev.path);
 #endif /* GPSDNG_ENABLE */
     if (device->gpsdata.gps_fd != -1) {
 	gpsd_deactivate(device);
@@ -609,7 +609,7 @@ static void raw_hook(struct gps_data_t *ud,
 
 	    /* copy raw NMEA sentences from GPS to clients in raw mode */
 	    if (sub != NULL && channel->device != NULL &&
-		strcmp(ud->gps_device, channel->device->gpsdata.gps_device)==0)
+		strcmp(ud->dev.path, channel->device->gpsdata.dev.path)==0)
 		(void)throttled_write(sub, sentence, (ssize_t)len);
 	    
 	}
@@ -622,7 +622,7 @@ static void raw_hook(struct gps_data_t *ud,
     struct gps_device_t *devp;
 
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (allocated_device(devp) && strcmp(devp->gpsdata.gps_device, device_name)==0)
+	if (allocated_device(devp) && strcmp(devp->gpsdata.dev.path, device_name)==0)
 	    return devp;
     return NULL;
 }
@@ -647,7 +647,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 
     /* normal case: set up GPS/RTCM/AIS service */
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (!allocated_device(devp) || (strcmp(devp->gpsdata.gps_device, device_name)==0 && !initialized_device(devp))){
+	if (!allocated_device(devp) || (strcmp(devp->gpsdata.dev.path, device_name)==0 && !initialized_device(devp))){
 	    goto found;
 	}
     return NULL;
@@ -688,7 +688,7 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
      * If we don't, open it and sniff packets until we do. 
      */
     if (allocated_device(device) && !initialized_device(device)) {
-	if (open_device(device->gpsdata.gps_device) == NULL) {
+	if (open_device(device->gpsdata.dev.path) == NULL) {
 	    free_device(device);
 	    return false;
 	}
@@ -697,7 +697,7 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     gpsd_report(LOG_PROG, 
 		"user requires %d=%s, device %d=%s emits packet type %d, observed mask is 0x%0x, checking against 0x%0x\n", 
 		type, classmap[type].name,
-		(int)(device - devices), device->gpsdata.gps_device,
+		(int)(device - devices), device->gpsdata.dev.path,
 		device->packet.type,
 		device->observed,
 		classmap[type].typemask);
@@ -799,7 +799,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		    sub_index(user), 
 		    (int)(channel->device - devices),
 		    channel->device->gpsdata.gps_fd,
-		    channel->device->gpsdata.gps_device);
+		    channel->device->gpsdata.dev.path);
     else {
 	if (gpsd_activate(channel->device, true) < 0) {
 
@@ -821,8 +821,8 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 		/*@ -sefparams @*/
 		throttled_write(user, "GPSD,F=", 7);
 		throttled_write(user,
-				channel->device->gpsdata.gps_device,
-				strlen(channel->device->gpsdata.gps_device));
+				channel->device->gpsdata.dev.path,
+				strlen(channel->device->gpsdata.dev.path));
 		throttled_write(user, "\r\n", 2);
 		/*@ +sefparams @*/
 	    }
@@ -842,7 +842,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 #ifdef GPSDNG_ENABLE
 	if (newstyle(user) && was_unassigned)
 	    (void)snprintf(buf, sizeof(buf), "{\"class\":\"DEVICE\",\"device\":\"%s\",\"activated\":%2.2f}\r\n",
-			   channel->device->gpsdata.gps_device,
+			   channel->device->gpsdata.dev.path,
 			   timestamp());
 #endif /* GPSDNG_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
@@ -973,8 +973,8 @@ static void set_serial(struct gps_device_t *device,
 		       speed_t speed, char *modestring)
 /* set serial parameters for a device from a speed and modestring */
 {
-    unsigned int stopbits = device->gpsdata.stopbits;
-    char parity = (char)device->gpsdata.parity;
+    unsigned int stopbits = device->gpsdata.dev.stopbits;
+    char parity = (char)device->gpsdata.dev.parity;
     int wordsize = 8;
 
     if (strchr("78", *modestring)!= NULL) {
@@ -1069,15 +1069,15 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    }
 #endif /* FIXED_PORT_SPEED */
 	    if (channel->device) {
-		if ( channel->device->gpsdata.parity == 0 ) {
+		if ( channel->device->gpsdata.dev.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
-			channel->device->gpsdata.parity = (unsigned)'N';
+			channel->device->gpsdata.dev.parity = (unsigned)'N';
 		}
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %u %c %u",
 		    (int)gpsd_get_speed(&channel->device->ttyset),
-			9 - channel->device->gpsdata.stopbits,
-			(int)channel->device->gpsdata.parity,
-			channel->device->gpsdata.stopbits);
+			9 - channel->device->gpsdata.dev.stopbits,
+			(int)channel->device->gpsdata.dev.parity,
+			channel->device->gpsdata.dev.stopbits);
 	    } else {
 		(void)strlcpy(phrase, ",B=?", sizeof(phrase));
 	    }
@@ -1091,14 +1091,14 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		    double cycle = strtod(++p, &p);
 		    if (dev->rate_switcher != NULL && cycle >= dev->min_cycle)
 			if (dev->rate_switcher(channel->device, cycle))
-			    channel->device->gpsdata.cycle = cycle;
+			    channel->device->gpsdata.dev.cycle = cycle;
 		}
 		if (dev->rate_switcher == NULL)
 		    (void)snprintf(phrase, sizeof(phrase),
-				   ",C=%.2f", channel->device->gpsdata.cycle);
+				   ",C=%.2f", channel->device->gpsdata.dev.cycle);
 		else
 		    (void)snprintf(phrase, sizeof(phrase), ",C=%.2f %.2f",
-				   channel->device->gpsdata.cycle, channel->device->gpsdata.mincycle);
+				   channel->device->gpsdata.dev.cycle, channel->device->gpsdata.dev.mincycle);
 	    }
 	    break;
 #endif /* ALLOW_RECONFIGURE */
@@ -1160,7 +1160,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    /*@ +branchstate @*/
 	    if (channel != NULL && channel->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",F=%s",
-			 channel->device->gpsdata.gps_device);
+			 channel->device->gpsdata.dev.path);
 	    else
 		(void)strlcpy(phrase, ",F=?", sizeof(phrase));
 	    break;
@@ -1211,8 +1211,8 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_device(&devices[i]) && strlen(phrase)+strlen(devices[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
-		    (void)strlcat(phrase, devices[i].gpsdata.gps_device, sizeof(phrase));
+		if (allocated_device(&devices[i]) && strlen(phrase)+strlen(devices[i].gpsdata.dev.path)+1 < sizeof(phrase)) {
+		    (void)strlcat(phrase, devices[i].gpsdata.dev.path, sizeof(phrase));
 		    (void)strlcat(phrase, " ", sizeof(phrase));
 		}
 	    }
@@ -1247,7 +1247,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    if (!channel || !channel->device)
 		(void)snprintf(phrase, sizeof(phrase), ",N=?");
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",N=%u", channel->device->gpsdata.driver_mode);
+		(void)snprintf(phrase, sizeof(phrase), ",N=%u", channel->device->gpsdata.dev.driver_mode);
 	    break;
 	case 'O':
 	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))== NULL || !have_fix(channel))
@@ -1564,7 +1564,7 @@ static void json_devicelist_dump(char *reply, size_t replylen)
     (void)strlcpy(reply, 
 		  "{\"class\"=\"DEVICES\",\"devices\":[", replylen);
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (allocated_device(devp) && strlen(reply)+strlen(devp->gpsdata.gps_device)+3 < replylen-1) {
+	if (allocated_device(devp) && strlen(reply)+strlen(devp->gpsdata.dev.path)+3 < replylen-1) {
 	    json_device_dump(devp,
 			     reply+strlen(reply), replylen-strlen(reply));
 	    (void)strlcat(reply, ",", replylen);
@@ -1678,7 +1678,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 			if (chp->subscriber != sub)
 			    continue;
-			else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.gps_device, devconf.device)!=0)
+			else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.device)!=0)
 			    continue;
 			else {
 			    channel = chp;
@@ -1689,7 +1689,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		    else {
 			/* now that channel is selected, apply changes */
-			if (devconf.native != channel->device->gpsdata.driver_mode)
+			if (devconf.native != channel->device->gpsdata.dev.driver_mode)
 			    channel->device->device_type->mode_switcher(channel->device, devconf.native);
 			set_serial(channel->device, 
 				   (speed_t)devconf.bps, devconf.serialmode);
@@ -1701,7 +1701,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 		if (chp->subscriber != sub)
 		    continue;
-		else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.gps_device, devconf.device)!=0)
+		else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.device)!=0)
 		    continue;
 		else {
 		    json_configdev_dump(chp->device, 
@@ -2151,7 +2151,7 @@ int main(int argc, char *argv[])
 			    char id2[NMEA_MAX];
 			    (void)snprintf(id2, sizeof(id2), 
 					   "{\"class\":\"DEVICE\",\"name\":\"%s\",\"subtype\":\"%s\"}",
-					   device->gpsdata.gps_device,
+					   device->gpsdata.dev.path,
 					   device->subtype);
 			    (void)strlcat(id2, "\r\n", sizeof(id2));
 			    notify_watchers(device, WATCH_NEWSTYLE, id2);

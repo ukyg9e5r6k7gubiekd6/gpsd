@@ -382,7 +382,7 @@ static bool evermore_speed(struct gps_device_t *session,
     /*@ -type @*/
     gpsd_report(LOG_PROG, "evermore_speed(%d%c%d)\n", speed, parity, stopbits);
     /* parity and stopbit switching aren't available on this chip */
-    if (parity!=(int)session->gpsdata.parity || stopbits!=(int)session->gpsdata.parity) {
+    if (parity!=(int)session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
 	return false;
     } else {
 	unsigned char tmp8;
@@ -457,13 +457,13 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
         /* NMEA */
         (void) evermore_protocol(session, 1);
-        session->gpsdata.driver_mode = MODE_NMEA;
+        session->gpsdata.dev.driver_mode = MODE_NMEA;
         (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd */
     } else {
         /* binary */
         (void) evermore_protocol(session, 0);
         session->back_to_nmea = false;
-        session->gpsdata.driver_mode = MODE_BINARY;
+        session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
 

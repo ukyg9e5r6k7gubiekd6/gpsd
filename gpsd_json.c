@@ -30,7 +30,7 @@ void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp,
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
 		   "\"device\":\"%s\",",
-		   gpsdata->gps_device);
+		   gpsdata->dev.path);
     if (isnan(fixp->time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
@@ -115,7 +115,7 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
 		   "\"device\":\"%s\",",
-		   datap->gps_device);
+		   datap->dev.path);
     if (isnan(datap->sentence_time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
@@ -161,7 +161,7 @@ void json_device_dump(struct gps_device_t *device,
 {
     struct classmap_t *cmp;
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
-    (void)strlcat(reply, device->gpsdata.gps_device, replylen);
+    (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		   "\"activated\":%2.2f,", device->gpsdata.online);
@@ -249,13 +249,13 @@ void json_configdev_dump(struct gps_device_t *devp, char *reply, size_t replylen
 {
     (void)snprintf(reply, replylen,
 		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%u%c%u\",\"cycle\":%2.2f",
-		   devp->gpsdata.gps_device,
-		   devp->gpsdata.driver_mode,
+		   devp->gpsdata.dev.path,
+		   devp->gpsdata.dev.driver_mode,
 		   (int)gpsd_get_speed(&devp->ttyset),
-		   9 - devp->gpsdata.stopbits,
-		   (int)devp->gpsdata.parity,
-		   devp->gpsdata.stopbits,
-		   devp->gpsdata.cycle);
+		   9 - devp->gpsdata.dev.stopbits,
+		   (int)devp->gpsdata.dev.parity,
+		   devp->gpsdata.dev.stopbits,
+		   devp->gpsdata.dev.cycle);
     if (devp->device_type->rate_switcher != NULL)
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		       ",\"mincycle\":%2.2f",

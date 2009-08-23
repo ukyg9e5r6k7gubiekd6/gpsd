@@ -1146,12 +1146,12 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == NAVCOM_PACKET){
 	st = navcom_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = MODE_BINARY;  /* binary */
+	session->gpsdata.dev.driver_mode = MODE_BINARY;  /* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = MODE_NMEA;  /* NMEA */
+	session->gpsdata.dev.driver_mode = MODE_NMEA;  /* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -1184,7 +1184,7 @@ static bool navcom_speed(struct gps_device_t *session,
 			 unsigned int speed, char parity, int stopbits)
 {
     /* parity and stopbit switching aren't implemented */
-    if (parity!=(char)session->gpsdata.parity || stopbits!=(int)session->gpsdata.parity) {
+    if (parity!=(char)session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
 	return false;
     } else {
 	u_int8_t port_selection;

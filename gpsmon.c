@@ -227,7 +227,7 @@ bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write(controlfd, session.gpsdata.gps_device, strlen(session.gpsdata.gps_device)) != -1);
+	    assert(write(controlfd, session.gpsdata.dev.path, strlen(session.gpsdata.dev.path)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
 	    /*
@@ -263,8 +263,8 @@ static bool monitor_raw_send(/*@in@*/unsigned char *buf, size_t len)
 	if (!serial) {
 	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write(controlfd, session.gpsdata.gps_device,
-			 strlen(session.gpsdata.gps_device)) != -1);
+	    assert(write(controlfd, session.gpsdata.dev.path,
+			 strlen(session.gpsdata.dev.path)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
 	    /*@ +sefparams @*/
 	}
@@ -512,16 +512,16 @@ int main (int argc, char **argv)
 	else
 	    command((char *)buf, sizeof(buf), "O\r\n");	/* force device allocation */
 	command((char *)buf, sizeof(buf), "F\r\n");
-	(void)strlcpy(session.gpsdata.gps_device, (char *)buf+7, PATH_MAX);
+	(void)strlcpy(session.gpsdata.dev.path, (char *)buf+7, PATH_MAX);
 	command((char *)buf, sizeof(buf), "R=2\r\n");
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	(void)strlcpy(session.gpsdata.gps_device, argv[optind], PATH_MAX);
+	(void)strlcpy(session.gpsdata.dev.path, argv[optind], PATH_MAX);
 	if (gpsd_activate(&session, false) == -1) {
 	    gpsd_report(LOG_ERROR,
 			  "activation of device %s failed, errno=%d\n",
-			  session.gpsdata.gps_device, errno);
+			  session.gpsdata.dev.path, errno);
 	    exit(2);
 	}
 
@@ -577,14 +577,14 @@ int main (int argc, char **argv)
 	(void)wattrset(statwin, A_BOLD);
 	if (serial)
 	    display(statwin, 0, 0, "%s %4d %c %d",
-		    session.gpsdata.gps_device,
+		    session.gpsdata.dev.path,
 		    gpsd_get_speed(&session.ttyset),
-		    session.gpsdata.parity,
-		    session.gpsdata.stopbits);
+		    session.gpsdata.dev.parity,
+		    session.gpsdata.dev.stopbits);
 	else
 	    /*@ -nullpass @*/
 	    display(statwin, 0, 0, "%s:%s:%s",
-		    source.server, source.port, session.gpsdata.gps_device);
+		    source.server, source.port, session.gpsdata.dev.path);
 	    /*@ +nullpass @*/
 	(void)wattrset(statwin, A_NORMAL);
 	(void)wmove(cmdwin, 0,0);
@@ -762,8 +762,8 @@ int main (int argc, char **argv)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    speed_t speed;
-		    char parity = (char)session.gpsdata.parity;
-		    unsigned int stopbits = session.gpsdata.stopbits;
+		    char parity = (char)session.gpsdata.dev.parity;
+		    unsigned int stopbits = session.gpsdata.dev.stopbits;
 		    char *modespec;
 
 		    modespec = strchr(arg, ':');
