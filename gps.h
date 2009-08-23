@@ -846,6 +846,7 @@ struct policy_t {
 
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
+    /* must double up on some of these to keep it to 32 bits */
 #define ONLINE_SET	0x00000001u
 #define TIME_SET	0x00000002u
 #define TIMERR_SET	0x00000004u
@@ -859,7 +860,8 @@ struct gps_data_t {
 #define HDOP_SET  	0x00000400u
 #define VDOP_SET  	0x00000800u
 #define PDOP_SET  	0x00001000u
-#define TDOP_SET	0x00002000u
+#define TDOP_SET	0x00002000u	/* only used in the daemon */
+#define VERSION_SET	0x00002000u	/* only used in client library */
 #define GDOP_SET	0x00004000u
 #define DOP_SET		(HDOP_SET|VDOP_SET|PDOP_SET|TDOP_SET|GDOP_SET)
 #define HERR_SET	0x00008000u
@@ -936,6 +938,7 @@ struct gps_data_t {
 	    int ndevices;
 	    struct devconfig_t list[MAXDEVICES_PER_USER];
 	} devices;
+	char error[80];
     };
 
     /* profiling data for last sentence */

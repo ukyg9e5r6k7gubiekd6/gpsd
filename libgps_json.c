@@ -222,7 +222,26 @@ static int json_version_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set |= DEVICELIST_SET;
+    gpsdata->set |= VERSION_SET;
+    return 0;
+}
+
+static int json_error_read(const char *buf, 
+			     struct gps_data_t *gpsdata, const char **endptr)
+{
+    const struct json_attr_t json_attrs_error[] = {
+        {"class",     check,   .dflt.check = "ERROR"},
+	{"message",   string,  .addr.string.ptr  = gpsdata->error,
+	                       .addr.string.len = sizeof(gpsdata->error)},
+	{NULL},
+    };
+    int status;
+
+    status = json_read_object(buf, json_attrs_error, endptr);
+    if (status != 0)
+	return status;
+
+    gpsdata->set |= ERR_SET;
     return 0;
 }
 
@@ -254,6 +273,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {
+	return json_error_read(buf, gpsdata, NULL);
     } else
 	return -1;
 }

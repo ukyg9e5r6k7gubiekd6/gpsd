@@ -832,6 +832,9 @@ limit is 1024 characters, including trailing newline.</para>
 </tgroup>
 </table>
 
+<para>When the C client library parses a response of this kind, it
+will assert the VERSION_SET bit in the top-level set member.</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
@@ -972,6 +975,9 @@ following elements:</para>
 </tbody>
 </tgroup>
 </table>
+
+<para>When the C client library parses a response of this kind, it
+will assert the DEVICELIST_SET bit in the top-level set member.</para>
 
 <para>Here's an example:</para>
 
@@ -1121,6 +1127,10 @@ may be reported or not depending on the fix quality.</para>
 </tgroup>
 </table>
 
+<para>When the C client library parses a response of this kind, it
+will assert validity bits in the top-level set member for each
+field actrually received; see gps.h for bitmask names and values.</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
@@ -1248,6 +1258,9 @@ will reliably be present.</para>
 <para>Note that satellite objects do not have a "class" field.., as
 they are never shipped outside of a SKY object.</para>
 
+<para>When the C client library parses a SKY response, it
+will assert the SATELLITE_SET bit in the top-level set member.</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
@@ -1337,6 +1350,9 @@ describes the subscriber's policy.</para>
 </tbody>
 </tgroup>
 </table>
+
+<para>When the C client library parses a response of this kind, it
+will assert the POLICY_SET bit in the top-level set member.</para>
 
 <para>Here's an example:</para>
 
@@ -1440,6 +1456,9 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 </tgroup>
 </table>
 
+<para>When the C client library parses a response of this kind, it
+will assert the CONFIGDEV_SET bit in the top-level set member.</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
@@ -1491,6 +1510,9 @@ meaning of the attributes.</para>
 </tgroup>
 </table>
 
+<para>When the C client library parses a response of this kind, it
+will assert the DEVICE_SET bit in the top-level set member.</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
@@ -1534,6 +1556,11 @@ the following elements:</para>
 {"class":"ERROR","message":"Unrecognized request '?FOO'"}
 </programlisting>
 
+<para>When the C client library parses a response of this kind, it
+will assert the ERR_SET bit in the top-level set member.</para>
+
+<para>When the C client library parses a response of this kind, it
+will assert the DEVICELIST_SET bit in the top-level set member.</para>
 </refsect1>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
 
