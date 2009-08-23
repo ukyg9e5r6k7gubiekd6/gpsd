@@ -111,11 +111,12 @@
  * Also, masks so we can tell what packet types correspond to each class.
  */
 struct classmap_t classmap[CLASSMAP_NITEMS] = {
-    {"ANY",	0,          0},
-    {"GPS",	SEEN_GPS,   GPS_TYPEMASK},
-    {"RTCM2",	SEEN_RTCM2, PACKET_TYPEMASK(RTCM2_PACKET)},
-    {"RTCM3",	SEEN_RTCM3, PACKET_TYPEMASK(RTCM3_PACKET)},
-    {"AIS",	SEEN_AIS,   PACKET_TYPEMASK(AIVDM_PACKET)},
+    /* name	typemask	packetmask */
+    {"ANY",	0,       	0},
+    {"GPS",	SEEN_GPS, 	GPS_TYPEMASK},
+    {"RTCM2",	SEEN_RTCM2,	PACKET_TYPEMASK(RTCM2_PACKET)},
+    {"RTCM3",	SEEN_RTCM3,	PACKET_TYPEMASK(RTCM3_PACKET)},
+    {"AIS",	SEEN_AIS,  	PACKET_TYPEMASK(AIVDM_PACKET)},
 };
 
 static fd_set all_fds;
@@ -689,6 +690,7 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
      */
     if (allocated_device(device) && !initialized_device(device)) {
 	if (open_device(device->gpsdata.dev.path) == NULL) {
+	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
 	    free_device(device);
 	    return false;
 	}
@@ -707,7 +709,7 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
     else if (device->device_type == NULL)
 	return false;
     else
-	return (device->observed & classmap[type].typemask) != 0;
+	return (device->observed & classmap[type].packetmask) != 0;
 }
 
 /*@ -branchstate -usedef -globstate @*/
@@ -1026,8 +1028,8 @@ static struct channel_t *mandatory_assign_channel(struct subscriber_t *user,
 {
     struct channel_t *channel = assign_channel(user, type, forcedev);
     if (channel == NULL)
-	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n",
-		    sub_index(user));
+	gpsd_report(LOG_ERROR, "client(%d): channel assignment (type %d=%s) failed.\n",
+		    sub_index(user), type, classmap[type].name);
     return channel;
 }
 
