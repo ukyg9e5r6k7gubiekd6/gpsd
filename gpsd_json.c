@@ -193,8 +193,9 @@ void json_device_dump(struct gps_device_t *device,
     (void)strlcat(reply, "}", replylen);
 }
 
-int json_watch_read(struct policy_t *ccp,
-			 const char *buf, const char **endptr)
+int json_watch_read(const char *buf, 
+		    struct policy_t *ccp,
+		    const char **endptr)
 {
     int intcasoc;
     struct json_attr_t chanconfig_attrs[] = {
@@ -224,7 +225,9 @@ void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 		   ccp->scaled ? "true" : "false");
 }
 
-int json_configdev_read(struct devconfig_t *cdp, const char *buf, const char **endptr)
+int json_configdev_read(const char *buf, 
+			struct devconfig_t *cdp, 
+			const char **endptr)
 {
     int status;
     char serialmode[4];

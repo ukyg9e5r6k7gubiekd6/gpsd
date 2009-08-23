@@ -264,7 +264,7 @@ static int dbus_mainloop(void)
  **************************************************************************/
 
 struct fixsource_t source;
-static int casoc = 0;
+static int lcasoc = 0;
 
 static void process(struct gps_data_t *gpsdata,
 	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
@@ -309,7 +309,7 @@ static int socket_mainloop(void)
 	exit(1);
     }
 
-    if (casoc)
+    if (lcasoc)
 	gps_query(gpsdata, "j1\n");
     if (source.device != NULL)
 	gps_query(gpsdata, "f=%s\n", source.device);
@@ -372,8 +372,8 @@ int main (int argc, char** argv)
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'j':		/* set data smoothing */
-	    casoc = (unsigned int)atoi(optarg);
-	    casoc = casoc ? 1 : 0;
+	    lcasoc = (unsigned int)atoi(optarg);
+	    lcasoc = lcasoc ? 1 : 0;
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");

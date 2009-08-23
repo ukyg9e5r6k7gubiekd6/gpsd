@@ -836,10 +836,10 @@ struct devconfig_t {
     int driver_mode;		/* is driver in native mode or not? */
 };
 
-struct watch_t {
-    int	raw;
-    int buffer_polixy;
-    bool scaled;
+struct policy_t {
+    int raw;					/* is client in raw mode? */
+    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
+    bool scaled;				/* perform report scaling? */
 };
 
 /* this is the main structure that includes all previous substructures */
@@ -864,7 +864,8 @@ struct gps_data_t {
 #define DOP_SET		(HDOP_SET|VDOP_SET|PDOP_SET|TDOP_SET|GDOP_SET)
 #define HERR_SET	0x00008000u
 #define VERR_SET	0x00010000u
-#define PERR_SET	0x00020000u
+#define PERR_SET	0x00020000u	/* only used in the daemon */
+#define POLICY_SET	0x00020000u	/* only used in client library */
 #define ERR_SET		(HERR_SET | VERR_SET | PERR_SET)
 #define SATELLITE_SET	0x00040000u
 #define RAW_SET		0x00080000u
@@ -929,6 +930,7 @@ struct gps_data_t {
 	struct rawdata_t raw;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
+	struct policy_t policy;
 	struct {
 	    double time;
 	    int ndevices;

@@ -1617,7 +1617,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	} else {
 	    int status;
 	    struct policy_t policy;
-	    status = json_watch_read(&policy, buf+1, &end);
+	    status = json_watch_read(buf+1, &policy, &end);
 	    if (status == 0) {
 		if (*end == ';')
 		    ++end;
@@ -1663,7 +1663,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    devconf.path[0] = '\0';
 	    if (*buf == '=') {
 		int status;
-		status = json_configdev_read(&devconf, buf+1, &end);
+		status = json_configdev_read(buf+1, &devconf, &end);
 		if (*end == ';')
 		    ++end;
 		if (status != 0)

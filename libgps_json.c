@@ -230,7 +230,6 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
     int status;
-    // FIXME: Still need to parse WATCH
     if (strstr(buf, "\"class\":\"TPV\"") != 0) {
 	return json_tpv_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
@@ -240,6 +239,12 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
+    } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
+	status = json_watch_read(buf, &gpsdata->policy, NULL);
+	if (status == 0)
+	    gpsdata->set |= POLICY_SET;
+	return status;
+
     } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
 	return json_devicelist_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"CONFIGDEV\"") != 0) {
