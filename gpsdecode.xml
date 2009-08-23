@@ -109,9 +109,9 @@ rather than native AIS decimeters.</para>
 <para>With the <option>-j</option> option, the AIS dump format changes
 to JSON.  Data fields are handled as described above in scaled and
 unscaled modes, but are values attached to JSON attributes as
-described in <cite><ulink
+described in <citetitle><ulink
 url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO protocol
-decoding</ulink></cite>.</para>
+decoding</ulink></citetitle>.</para>
 
 </refsect1>
 <refsect1 id='standard'><title>APPLICABLE STANDARDS</title>
@@ -138,9 +138,9 @@ Commission for Maritime Services</ulink> under "Publications".</para>
 ITU Recommendation on the Technical Characteristics for a Universal
 Shipborne Automatic Identification System (AIS) using Time Division
 Multiple Access in the Maritime Mobile Band</citetitle>, A more
-accessible description can be found at <cite><ulink
+accessible description can be found at <citetitle><ulink
 url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO protocol
-decoding</ulink></cite> on the references page of the
+decoding</ulink></citetitle> on the references page of the
 GPSD project website.</para>
 
 </refsect1>
