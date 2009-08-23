@@ -666,14 +666,15 @@ int main(int argc, char *argv[])
 	    unpack_test = true;
 	    break;
 	case 's':
-	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd version=%zd\n",
-		     sizeof(struct rtcm2_t),
-		     sizeof(struct rtcm3_t),
-		     sizeof(struct ais_t),
-		     sizeof(struct compass_t),
-		     sizeof(struct rawdata_t),
-		     sizeof(collect->devices),
-		     sizeof(struct version_t));
+	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
+			 sizeof(struct rtcm2_t),
+			 sizeof(struct rtcm3_t),
+			 sizeof(struct ais_t),
+			 sizeof(struct compass_t),
+			 sizeof(struct rawdata_t),
+			 sizeof(collect->devices),
+			 sizeof(struct policy_t),
+			 sizeof(struct version_t));
 	    exit(0);
 	case '?':
 	case 'h':
