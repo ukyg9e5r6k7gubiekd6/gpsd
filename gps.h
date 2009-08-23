@@ -821,7 +821,7 @@ struct version_t {
     int api_major, api_minor;	/* API major and minor versions */
 };
 
-struct device_t {
+struct devconfig_t {
     char path[GPS_PATH_MAX];
     int flags;
 #define SEEN_GPS 	0x01
@@ -831,9 +831,9 @@ struct device_t {
     char driver[64];
     char subtype[64];
     double activated;
-    unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
+    int baudrate, parity, stopbits;	/* RS232 link parameters */
     double       cycle, mincycle;	/* refresh cycle time in seconds */
-    unsigned int driver_mode;		/* is driver in native mode or not? */
+    int driver_mode;		/* is driver in native mode or not? */
 };
 
 struct watch_t {
@@ -916,7 +916,7 @@ struct gps_data_t {
     int azimuth[MAXCHANNELS];	/* azimuth */
     double ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
-    struct device_t dev;	/* device that shipped last update */
+    struct devconfig_t dev;	/* device that shipped last update */
 
     /* pack things that are never reported together to reduce structure size */ 
     union {
@@ -931,7 +931,7 @@ struct gps_data_t {
 	struct {
 	    double time;
 	    int ndevices;
-	    struct device_t list[MAXDEVICES_PER_USER];
+	    struct devconfig_t list[MAXDEVICES_PER_USER];
 	} devices;
     };
 

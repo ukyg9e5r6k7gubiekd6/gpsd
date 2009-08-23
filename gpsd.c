@@ -1660,7 +1660,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	} else {
 	    struct channel_t *chp;
 	    struct devconfig_t devconf;
-	    devconf.device[0] = '\0';
+	    devconf.path[0] = '\0';
 	    if (*buf == '=') {
 		int status;
 		status = json_configdev_read(&devconf, buf+1, &end);
@@ -1670,7 +1670,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    (void)snprintf(reply, replylen,
 				   "{\"class\":ERROR\",\"message\":\"Invalid CONFIGDEV.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
-		else if (chcount > 1 && devconf.device[0] == '\0')
+		else if (chcount > 1 && devconf.path[0] == '\0')
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":ERROR\",\"message\":\"No path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
 		else {
@@ -1678,7 +1678,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 			if (chp->subscriber != sub)
 			    continue;
-			else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.device)!=0)
+			else if (devconf.path[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.path)!=0)
 			    continue;
 			else {
 			    channel = chp;
@@ -1688,11 +1688,15 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		    else {
+			char serialmode[3];
 			/* now that channel is selected, apply changes */
-			if (devconf.native != channel->device->gpsdata.dev.driver_mode)
-			    channel->device->device_type->mode_switcher(channel->device, devconf.native);
+			if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode)
+			    channel->device->device_type->mode_switcher(channel->device, devconf.driver_mode);
+			serialmode[0] = devconf.parity;
+			serialmode[1] = '0' + devconf.stopbits;
+			serialmode[2] = '\0';
 			set_serial(channel->device, 
-				   (speed_t)devconf.bps, devconf.serialmode);
+				   (speed_t)devconf.baudrate, serialmode);
 		    }
 		}
 		buf = end;
@@ -1701,7 +1705,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    for (chp = channels; chp < channels + NITEMS(channels); chp++)
 		if (chp->subscriber != sub)
 		    continue;
-		else if (devconf.device[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.device)!=0)
+		else if (devconf.path[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.path)!=0)
 		    continue;
 		else {
 		    json_configdev_dump(chp->device, 

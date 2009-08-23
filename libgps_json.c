@@ -142,7 +142,7 @@ static int json_sky_read(const char *buf,
 }
 
 static int json_device_read(const char *buf, 
-			     struct device_t *dev, const char **endptr)
+			     struct devconfig_t *dev, const char **endptr)
 {
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
@@ -171,13 +171,13 @@ static int json_devicelist_read(const char *buf,
 {
     const struct json_attr_t json_attrs_subdevices[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
-	{"path",       string,     .addr.offset = offsetof(struct device_t, path),
+	{"path",       string,     .addr.offset = offsetof(struct devconfig_t, path),
 	                           .addr.string.len = sizeof(gpsdata->devices.list[0].path)},
-	{"activated",  real,       .addr.offset = offsetof(struct device_t, activated)},
-	{"flags",      array,  	   .addr.offset = offsetof(struct device_t, flags)},
-	{"driver",     string,     .addr.offset = offsetof(struct device_t, driver),
+	{"activated",  real,       .addr.offset = offsetof(struct devconfig_t, activated)},
+	{"flags",      array,  	   .addr.offset = offsetof(struct devconfig_t, flags)},
+	{"driver",     string,     .addr.offset = offsetof(struct devconfig_t, driver),
 	                           .addr.string.len = sizeof(gpsdata->devices.list[0].driver)},
-	{"subtype",    string,     .addr.offset = offsetof(struct device_t, subtype),
+	{"subtype",    string,     .addr.offset = offsetof(struct devconfig_t, subtype),
 	                           .addr.string.len = sizeof(gpsdata->devices.list[0].subtype)},
 	{NULL},
     };
@@ -185,7 +185,7 @@ static int json_devicelist_read(const char *buf,
         {"class",   check,   .dflt.check = "DEVICES"},
         {"devices", array,  .addr.array.element_type = structobject,
 	            .addr.array.arr.objects.base = (char*)gpsdata->devices.list,
-                    .addr.array.arr.objects.stride = sizeof(struct device_t),
+                    .addr.array.arr.objects.stride = sizeof(struct devconfig_t),
                     .addr.array.arr.objects.subtype = json_attrs_subdevices,
 	            .addr.array.count = &gpsdata->devices.ndevices,
 	            .addr.array.maxlen = NITEMS(gpsdata->devices.list)},

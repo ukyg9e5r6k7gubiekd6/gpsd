@@ -260,7 +260,7 @@ have no equivalents.  We'll implement them if we need them.
 == How the gps_data_t structure has changed == 
 
 The client libary's reporting structure, struct gpsdata_t, has a new
-substructure (struct device_t) named "dev" that groups together
+substructure (struct devconfig_t) named "dev" that groups together
 information about the device that shipped the last update to the
 client.  The members of this structure replace several top-level
 struct gpsdata members in older versions.
@@ -279,6 +279,6 @@ considered valid only when DEVICE_SET is on in the top-level set
 member (note: this flag is not reliably set yet, work in progress).
 
 The top-level members ndevices and devicelist (used only on the client
-side) have been replaced by an array of struct device_t structures.
+side) have been replaced by an array of struct devconfig_t structures.
 Storage for pathnames is no longer dynamically allocated, but rather
 lives in a union with several other substructures.
