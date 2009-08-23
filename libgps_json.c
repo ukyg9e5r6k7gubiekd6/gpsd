@@ -229,17 +229,24 @@ static int json_version_read(const char *buf,
 int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
+    int status;
+    // FIXME: Still need to parse WATCH
     if (strstr(buf, "\"class\":\"TPV\"") != 0) {
 	return json_tpv_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
 	return json_sky_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
-	int status = json_device_read(buf, &gpsdata->devices.list[0], NULL);
+	status = json_device_read(buf, &gpsdata->devices.list[0], NULL);
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
     } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
 	return json_devicelist_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"CONFIGDEV\"") != 0) {
+	status = json_configdev_read(buf, &gpsdata->dev, NULL);
+	if (status == 0)
+	    gpsdata->set |= CONFIGDEV_SET;
+	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, NULL);
     } else

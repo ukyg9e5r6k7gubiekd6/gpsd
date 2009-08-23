@@ -275,8 +275,8 @@ top-level set member.
 
 The dev members baudrate, parity, stopbits, cycle, mincycle, and
 driver_mode replace older top-level members.  They should be
-considered valid only when DEVICE_SET is on in the top-level set
-member (note: this flag is not reliably set yet, work in progress).
+considered valid only when CONFIGDEV_SET is on in the top-level set
+member.
 
 The top-level members ndevices and devicelist (used only on the client
 side) have been replaced by an array of struct devconfig_t structures.

@@ -876,7 +876,8 @@ struct gps_data_t {
 #define DEVICELIST_SET	0x02000000u
 #define DEVICEID_SET	0x04000000u
 #define ERROR_SET	0x08000000u
-#define CYCLE_START_SET	0x10000000u
+#define CYCLE_START_SET	0x10000000u	/* only used in client library */
+#define CONFIGDEV_SET	0x10000000u	/* only used in the daemon */
 #define RTCM2_SET	0x20000000u
 #define RTCM3_SET	0x40000000u
 #define AIS_SET 	0x80000000u
