@@ -832,6 +832,9 @@ limit is 1024 characters, including trailing newline.</para>
 </tgroup>
 </table>
 
+<para>The daemon ships a VERSION response to each client when the
+client first connects to it.</para>
+
 <para>When the C client library parses a response of this kind, it
 will assert the VERSION_SET bit in the top-level set member.</para>
 

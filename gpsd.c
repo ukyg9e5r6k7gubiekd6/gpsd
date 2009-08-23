@@ -1717,10 +1717,8 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		reply[strlen(reply)-2] = '\0';
 	}
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id$\",\"api_major\":%d,\"api_minor\":%d}", 
-		       GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 	buf += 8;
+	json_version_dump(reply + strlen(reply), replylen - strlen(reply));
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
@@ -2031,6 +2029,9 @@ int main(int argc, char *argv[])
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    char *c_ip;
+#ifdef GPSDNG_ENABLE
+	    char announce[GPS_JSON_RESPONSE_MAX];
+#endif /* GPSDNG_ENABLE */
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock == -1)
@@ -2057,7 +2058,12 @@ int main(int argc, char *argv[])
 		    client->tied = false;
 #endif /* OLDSTYLE_ENABLE */
 		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
-			c_ip, sub_index(client), ssock);
+			c_ip, sub_index(client), ssock);	
+#ifdef GPSDNG_ENABLE
+		    json_version_dump(announce, sizeof(announce));
+		    (void)strlcat(announce, "\r\n", sizeof(announce));
+		    (void)throttled_write(client, announce, strlen(announce));
+#endif /* GPSDNG_ENABLE */
 		}
 	    }
 	    FD_CLR(msock, &rfds);

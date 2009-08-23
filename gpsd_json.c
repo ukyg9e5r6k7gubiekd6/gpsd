@@ -18,6 +18,13 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
+void json_version_dump(char *reply, size_t replylen)
+{
+    (void)snprintf(reply, replylen,
+		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"api_major\":%d,\"api_minor\":%d}", 
+		   GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
+}
+
 void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
 		   char *reply, size_t replylen)
 {

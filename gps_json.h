@@ -7,6 +7,7 @@
 
 int json_watch_read(const char *, struct policy_t *, const char **);
 int json_configdev_read(const char *, struct devconfig_t *, const char **);
+void json_version_dump(char *reply, size_t replylen);
 void json_tpv_dump(struct gps_data_t *, struct gps_fix_t *, char *, size_t);
 void json_sky_dump(struct gps_data_t *, char *, size_t);
 void json_device_dump(struct gps_device_t *, char *, size_t);
