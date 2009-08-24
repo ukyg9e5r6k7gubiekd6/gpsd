@@ -490,23 +490,44 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
+    if ((flags & WATCH_ENABLE) != 0) {
 #ifdef OLDSTYLE_ENABLE
-    (void)strlcpy(buf, "w+x", sizeof(buf));
-    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
-	(void)strlcat(buf, "r+", sizeof(buf));
-    if (flags & WATCH_NOJITTER)
-	(void)strlcat(buf, "j+", sizeof(buf));
+	(void)strlcpy(buf, "w+x", sizeof(buf));
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	    (void)strlcat(buf, "r+", sizeof(buf));
+	if (flags & WATCH_NOJITTER)
+	    (void)strlcat(buf, "j+", sizeof(buf));
 #else
-    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
-    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
-	(void)strlcat(buf, "\"raw\":1", sizeof(buf));
-    if (flags & WATCH_NOJITTER)
-	(void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
-    if (flags & WATCH_SCALED)
-	(void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
-    (void)strlcat(buf, "};", sizeof(buf));
+	(void)strlcpy(buf, "?WATCH={", sizeof(buf));
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	    (void)strlcat(buf, "\"raw\":1", sizeof(buf));
+	if (flags & WATCH_NOJITTER)
+	    (void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
+	if (flags & WATCH_SCALED)
+	    (void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
+	(void)strlcat(buf, "};", sizeof(buf));
 #endif
-    return gps_query(gpsdata, buf);
+	return gps_query(gpsdata, buf);
+    } else if ((flags & WATCH_DISABLE) != 0) {
+#ifdef OLDSTYLE_ENABLE
+	(void)strlcpy(buf, "w-", sizeof(buf));
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	    (void)strlcat(buf, "r-", sizeof(buf));
+	if (flags & WATCH_NOJITTER)
+	    (void)strlcat(buf, "j-", sizeof(buf));
+#else
+	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	if (flags & WATCH_NOJITTER)
+	    (void)strlcat(buf, "\"buffer_policy\"=1,", sizeof(buf));
+	if (flags & WATCH_SCALED)
+	    (void)strlcat(buf, "\"buffer_policy\"=1,", sizeof(buf));
+	(void)strlcat(buf, "};", sizeof(buf));
+#endif
+	return gps_query(gpsdata, buf);
+    }
+    return 0;
 }
 
 #ifdef HAVE_LIBPTHREAD
@@ -538,7 +559,7 @@ int gps_set_callback(struct gps_data_t *gpsdata,
 		     pthread_t *handler)
 /* set an asynchronous callback and launch a thread for it */
 {
-    (void)gps_query(gpsdata,"w+\n");	/* ensure gpsd is in watcher mode, so we'll have data to read */
+    (void)gps_stream(gpsdata, WATCH_ENABLE);	/* ensure gpsd is in watcher mode, so we'll have data to read */
     if (gpsdata->thread_hook != NULL) {
 	gpsdata->thread_hook = callback;
 	return 0;
@@ -561,7 +582,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
     /*@i1@*/pthread_join(*handler, NULL);	/* wait for thread to actually terminate */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
-	/*@i1@*/(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
+	/*@i1@*/(void)gps_stream(gpsdata, WATCH_DISABLE);	/* disable watcher mode */
     return res;
     /*@ +nullstate @*/
 }

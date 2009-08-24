@@ -1081,9 +1081,9 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 		gps_set_raw_hook(gpsdata, update_panel);
 
 		if (jitteropt)
-		    (void)gps_query(gpsdata, "?WATCH={\"buffer_policy\":1};");
+		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":1};");
 		else
-		    (void)gps_query(gpsdata, "?WATCH={\"buffer_policy\":0};");
+		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":0};");
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
 		    (XtPointer)XtInputReadMask, handle_input, NULL);

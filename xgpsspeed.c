@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
     gps_set_raw_hook(gpsdata, update_display);
 
-    (void)gps_stream(gpsdata, 0);
+    (void)gps_stream(gpsdata, WATCH_ENABLE);
 
     (void)XtAppMainLoop(app);
 

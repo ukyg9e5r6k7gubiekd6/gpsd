@@ -1311,6 +1311,13 @@ describes the subscriber's policy.</para>
         <entry>Fixed: "WATCH"</entry>
 </row>
 <row>
+	<entry>enable</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Eanable (true) or disable (false) watcher mode. Default
+	is true.</entry>
+</row>
+<row>
 	<entry>raw</entry> 
         <entry>No</entry> 
         <entry>integer</entry>

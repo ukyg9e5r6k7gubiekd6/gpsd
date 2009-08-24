@@ -206,6 +206,8 @@ int json_watch_read(const char *buf,
 {
     int intcasoc;
     struct json_attr_t chanconfig_attrs[] = {
+	{"enable",         boolean,  .addr.boolean = &ccp->watch,
+                                     .dflt.boolean = true},
 	{"raw",	           integer,  .addr.integer = &ccp->raw,
 				     .dflt.integer = -1},
 	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
@@ -226,7 +228,8 @@ int json_watch_read(const char *buf,
 void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 {
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "{\"class\":\"WATCH\",\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}",
+		   "{\"enable\":%s,\"class\":\"WATCH\",\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}",
+		   ccp->watch ? "true" : "false",
 		   ccp->raw, 
 		   ccp->buffer_policy,
 		   ccp->scaled ? "true" : "false");
