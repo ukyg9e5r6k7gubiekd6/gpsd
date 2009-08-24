@@ -118,8 +118,9 @@ static int json_sky_read(const char *buf,
 	{"time",       real,    .addr.real    = &gpsdata->fix.time},
 	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
 	{"satellites", array,   .addr.array.element_type = object,
-				.addr.array.arr.objects.subtype = json_attrs_2_1,
-				.addr.array.maxlen = MAXCHANNELS},
+				.addr.array.arr.objects.subtype=json_attrs_2_1,
+	                        .addr.array.maxlen = MAXCHANNELS,
+	                        .addr.array.count = &gpsdata->satellites},
 	{NULL},
     };
     int status, i, j;

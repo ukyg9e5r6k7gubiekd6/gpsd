@@ -71,7 +71,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 #ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
-    if (buf[0] == '{' && (sp = strchr(buf, '='))!= NULL) {
+    if (buf[0] == '{') {
 	(void)libgps_json_unpack(buf, gpsdata);
     }
 #endif /* GPSDNG_ENABLE */

@@ -126,7 +126,7 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
     if (isnan(datap->sentence_time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"time\":%.3f ",
+		       "\"time\":%.3f,",
 		       datap->sentence_time);
     /* insurance against flaky drivers */
     for (i = 0; i < datap->satellites; i++)
