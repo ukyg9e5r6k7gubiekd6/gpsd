@@ -22,23 +22,23 @@ in that you can mix old and new syntax.
 The old protocol will continue to be available for some time, but not
 indefinitely.  Eventually we're going to want to shed the code
 complexity and overhead of maintaining both protocols at once. This
-will happen sooner than it otherwise might han because gpsd is in
+will happen sooner than it otherwise might have because gpsd is in
 part targeted for SBCs and other constrained environments where 
 shaving a few K off the runtime image can actually matter.  When
 it comes to keeping the codebase lean and mean, we try harder.
 
-We'll try to make the transition easy, but the sooner you start it 
-the less pain you are likely to experience.  The rest of this
-document will explain both theory and practice, and give you
-specific questions on how to fix client code.
+We'll try to make the transition easy, but we cannot guarantee no
+problems. The sooner you start adapting your code, the less pain you
+are likely to experience.  The rest of this document will explain both
+theory and practice, and give you specific questions on how to fix
+client code.
 
 == Virtue is rewarded ==
 
 Since 2004, the way you were *supposed* to be using gpsd was through
-one of the the libgps client libraries (in C or Python). If you have
-been doing it right, you have been telling gpsd to stream data at you
-with the 'w' command, via application code probably looked something
-like this:
+one of the client libraries (in C or Python). If you have been doing
+it right, you have been telling gpsd to stream data at you with the
+'w' command, via application code probably looked something like this:
 
 -------------------------------------------------------------------
 
@@ -55,21 +55,31 @@ like this:
 -------------------------------------------------------------------
 
 If you have been virtuous, you need only to make one small change to
-your code.  Replace the gps_query() call with gps_stream() and add a note
-to your documentation that you now require gpsd version 2.40 or later.
+your code.  Replace the gps_query() call with:
+
+-------------------------------------------------------------------
+gps_stream(gpsdata, WATCH_ENABLE) 
+-------------------------------------------------------------------
+
+This will tell whatever version of the client library your application
+dynamically links to emit shat it should under the hood, either okd
+or new protocol. Unless a target system carries a version of the
+libgps shared library different from the gpsd version, everything
+should work and continue to work through future updates.
 
 There. You're probably done, unless you relied on some parts of 
 struct gpsdata_t that application developers usually don't or issued
 unusual configuration commands. Here are the exceptions:
 
 * You issued other gps_query() commands, such as "J=1".  If so,
-  you'll need to learn how to say them in new protocol. That
+  you'll need to learn how to say them in the new API. That
   is not difficult, and this document will cover what you
   need to know.
 
-* Your application code referenced struct gpsdata_t members that no 
+* Your application code referenced struct gpsdata_t members that no
   longer exist. This will be obvious because your compilation will
-  fail.  Later in this document you will learn how to fix it.
+  fail.  Later in this document you will learn how to fix thes
+  problems.
 
 You can probably ignore the rest of this document, unless
 either (a) you want to learn about gpsd's new capabilities so you
@@ -100,7 +110,7 @@ this:
 1. In 2.40 (shipping sometime in the fourth quarter of 2009), we will
 roll out a daemon that speaks both old and new protocols and a client
 library that speaks old protocol by default - that is, under the hood
-gps_stream() stll says "w+" rather than "?WATCH".
+gps_stream() still says "w+" rather than "?WATCH".
 
 2. When we have reason to believe all major Linux distros have 
 deployed 2.40, we will change the client library to ship "?WATCH"
@@ -108,7 +118,7 @@ by default.  This is likely to happen in late 2010.
 
 3. At some point in the far future, we will disable old protocol
 in the default builds of both client and daemon.  This is
-probably three years or more out.
+probably at least three years or more out.
 
 The possible failure modes are pretty obvious.  Transitions are
 difficult.  We're essentially relying on the distribution integrators
@@ -204,7 +214,7 @@ transponders.
 
 If your code issues old-protocol commands A, D, E, M, P, T, U, or V,
 it is a wretched hive of scum and villainy that probably hasn't
-changed since before the introduction of "w".  You are using the
+changed since before the introduction of "W".  You are using the
 oldest single-shot commands and will have to rewrite your interface
 significantly, as the new protocol does not support equivalents.  Use
 libgps.
@@ -230,14 +240,16 @@ gps_stream().
 
 The old 'K' command is replaced by ?DEVICES.
 
-The old 'L' command is replaced by ?VERSION.
+The old 'L' command is replaced by ?VERSION.  Note that the daemon now
+ships a version response to each client on connect, so it will
+probably never be necessaery for you to issue A ?VERSION request.
 
 The old 'O' command is replaced by ?TPV'.  Note: it is possible
 this command will be removed in the final version of the new
 protocol.  Do not rely on it.
 
 The old 'Q' and 'S' commands doe not have exact equivalents.  We will
-implement an option to have the TPV response include DOPS and status
+implement an option to have the TPV response include DOPs and status
 if there is demand for them.
 
 The old 'R' command has been replaced by an optional attribute in
@@ -248,7 +260,7 @@ The old 'W' command has been replaced by ?WATCH. Calll gps_stream()
 with whatever option you want to set.
 
 The old 'X' command is gone.  Instead, you will see an object of
-class DEVICE from the daemon whenever a device is opened or closes.
+class DEVICE from the daemon whenever a device is opened or closed.
 
 The old 'Y' command is replaced by ?SKY. Note: it is possible
 this command will be removed in the final version of the new
@@ -280,5 +292,7 @@ member.
 
 The top-level members ndevices and devicelist (used only on the client
 side) have been replaced by an array of struct devconfig_t structures.
-Storage for pathnames is no longer dynamically allocated, but rather
-lives in a union with several other substructures.
+Data in this structure should be considered valid only when
+DEVICELIST_SET is on in the top-level set member.  Storage for
+pathnames is no longer dynamically allocated, but rather lives in a
+union with several other substructures.
