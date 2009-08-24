@@ -36,7 +36,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 
-    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) == -1) {
+    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	(void)free(gpsdata);
 	return NULL;
