@@ -109,6 +109,10 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    }
 	}
 
+#ifdef JSONDEBUG
+    (void) printf("JSON parse begins.\n");
+#endif /* JSONDEBUG */
+
     /* parse input JSON */
     for (; *cp; cp++) {
 #ifdef JSONDEBUG
@@ -121,8 +125,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		continue;
 	    else if (*cp == '{')
 		state = await_attr;
-	    else
-		return JSON_ERR_OBSTART;	/* non-WS when expecting object start */
+	    else {
+#ifdef JSONDEBUG
+		(void) printf("Non-WS when expecting object start.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_OBSTART;
+	    }
 	    break;
 	case await_attr:
 	    if (isspace(*cp))
@@ -132,8 +140,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		pattr = attrbuf;
 	    } else if (*cp == '}')
 		break;
-	    else
-		return JSON_ERR_ATTRSTART;	/* non-WS while expecting attribute */
+	    else {
+#ifdef JSONDEBUG
+		(void) printf("Non-WS when expecting attribute.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_ATTRSTART;
+	    }
 	    break;
 	case in_attr:
 	    if (*cp == '"') {
@@ -144,28 +156,42 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		for (cursor = attrs; cursor->attribute != NULL; cursor++)
 		    if (strcmp(cursor->attribute, attrbuf)==0)
 			break;
-		if (cursor->attribute == NULL)
-		    return JSON_ERR_BADATTR;	/* unknown attribute name */
+		if (cursor->attribute == NULL) {
+#ifdef JSONDEBUG
+		    (void) printf("Unknown attribute name.\n");
+#endif /* JSONDEBUG */
+		    return JSON_ERR_BADATTR;
+		}
 		state = await_value;
 		pval = valbuf;
-	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1)
-		return JSON_ERR_ATTRLEN;	/* attribute name too long */
-	    else
+	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1) {
+#ifdef JSONDEBUG
+		(void) printf("Attribute name too long.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_ATTRLEN;
+	    } else
 		*pattr++ = *cp;
 	    break;
 	case await_value:
 	    if (isspace(*cp) || *cp == ':')
 		continue;
 	    else if (*cp == '[') {
-		if (cursor->type != array)
-		    return JSON_ERR_NOARRAY;	/* saw [ when not expecting array */
+		if (cursor->type != array) {
+#ifdef JSONDEBUG
+		    (void) printf("Saw [ when not expecting array.\n");
+#endif /* JSONDEBUG */
+		    return JSON_ERR_NOARRAY;
+		}
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
 		if (substatus != 0)
 		    return substatus;
 		state = post_val;
-	    } else if (cursor->type == array)
-		return JSON_ERR_NOBRAK;	/* array element was specified, but no [ */
-	    else if (*cp == '"') {
+	    } else if (cursor->type == array) {
+#ifdef JSONDEBUG
+		(void) printf("Array element was specified, but no [.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_NOBRAK;
+	    } else if (*cp == '"') {
 		state = in_val_string;
 		pval = valbuf;
 	    } else {
@@ -185,23 +211,29 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		(void) printf("Collected string value %s\n", valbuf);
 #endif /* JSONDEBUG */
 		state = post_val;
-	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + maxlen)
-		return JSON_ERR_STRLONG;	/* value too long */
-	    else
+	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + maxlen) {
+#ifdef JSONDEBUG
+		(void) printf("String value too long.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_STRLONG;	/*  */
+	    } else
 		*pval++ = *cp;
 	    break;
 	case in_val_token:
 	    if (isspace(*cp) || *cp == ',' || *cp == '}') {
 		*pval = '\0';
 #ifdef JSONDEBUG
-		(void) printf("Collected token value %s\n", valbuf);
+		(void) printf("Collected token value %s.\n", valbuf);
 #endif /* JSONDEBUG */
 		state = post_val;
 		if (*cp == '}' || *cp == ',')
 		    --cp;
-	    } else if (pval > valbuf + JSON_VAL_MAX - 1)
-		return JSON_ERR_TOKLONG;	/* value too long */
-	    else
+	    } else if (pval > valbuf + JSON_VAL_MAX - 1) {
+#ifdef JSONDEBUG
+		(void) printf("Token value too long.\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_TOKLONG;
+	    } else
 		*pval++ = *cp;
 	    break;
 	case post_val:
@@ -226,8 +258,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case array:
 		    break;
 		case check:
-		    if (strcmp(cursor->dflt.check, valbuf)!=0)
+		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
+#ifdef JSONDEBUG
+			(void) printf("Required attribute value %s not present.\n", cursor->dflt.check);
+#endif /* JSONDEBUG */
 			return JSON_ERR_CHECKFAIL;
+		    }
 		    break;
 		}
 	    } else {
@@ -252,8 +288,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case array:
 		    break;
 		case check:
-		    if (strcmp(cursor->dflt.check, valbuf)!=0)
+		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
+#ifdef JSONDEBUG
+			(void) printf("Required attribute vakue %s not present.\n", cursor->dflt.check);
+#endif /* JSONDEBUG */
 			return JSON_ERR_CHECKFAIL;
+		    }
 		    break;
 		}
 	    }
@@ -263,8 +303,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		state = await_attr;
 	    else if (*cp == '}')
 		goto good_parse;
-	    else
-		return JSON_ERR_BADTRAIL;	/* garbage while expecting comma or } */
+	    else {
+#ifdef JSONDEBUG
+		(void) printf("Garbage while expecting comma or }\n");
+#endif /* JSONDEBUG */
+		return JSON_ERR_BADTRAIL;
+	    }
 	    break;
 	}
     }
@@ -272,6 +316,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 good_parse:
     if (end != NULL)
 	*end = ++cp;
+#ifdef JSONDEBUG
+    (void) printf("JSON parse ends.\n");
+#endif /* JSONDEBUG */
     return 0;
 }
 
@@ -286,9 +333,12 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 
     while (isspace(*cp))
 	cp++;
-    if (*cp != '[')
-	return JSON_ERR_ARRAYSTART;	/* didn't find expected array start */
-    else
+    if (*cp != '[') {
+#ifdef JSONDEBUG
+	(void) printf("Didn't find expected array start\n");
+#endif /* JSONDEBUG */
+	return JSON_ERR_ARRAYSTART;
+    }else
 	cp++;
 
     tp = arr->arr.strings.store;
@@ -313,23 +363,23 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 		    ++cp;
 		    *tp++ = '\0';
 		    goto stringend;
-		} else if (*cp == '\0')
+		} else if (*cp == '\0') {
+#ifdef JSONDEBUG
+		    (void) printf("Bad string syntax in string list.\n");
+#endif /* JSONDEBUG */
 		    return JSON_ERR_BADSTRING;
-	        else {
+	        } else {
 		    *tp = *cp++;
 		}
+#ifdef JSONDEBUG
+	    (void) printf("Bad string syntax in string list.\n");
+#endif /* JSONDEBUG */
 	    return JSON_ERR_BADSTRING;
 	stringend:
 	    break;
 	case object:
 	case structobject:
-#ifdef JSONDEBUG
-	    (void) printf("Subarray parse begins.\n");
-#endif /* JSONDEBUG */
 	    substatus = json_internal_read_object(cp, arr->arr.objects.subtype, arr, offset, &cp);
-#ifdef JSONDEBUG
-	    (void) printf("Subarray parse ends.\n");
-#endif /* JSONDEBUG */
 	    if (substatus != 0)
 		return substatus;
 	    break;
@@ -338,6 +388,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	case boolean:
 	case array:
 	case check:
+#ifdef JSONDEBUG
+	    (void) printf("Invalid array subtype.\n");
+#endif /* JSONDEBUG */
 	    return JSON_ERR_SUBTYPE;
 	}
 	if (arr->count != NULL)
@@ -351,13 +404,23 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	    goto breakout;
 	} else if (*cp == ',')
 	    cp++;
-	else
+	else {
+#ifdef JSONDEBUG
+	    (void) printf("Bad trailing syntax on array.\n");
+#endif /* JSONDEBUG */
 	    return JSON_ERR_BADSUBTRAIL;
+	}
     }
+#ifdef JSONDEBUG
+    (void) printf("Too many elements in array.\n");
+#endif /* JSONDEBUG */
     return JSON_ERR_SUBTOOLONG;
 breakout:
     if (end != NULL)
 	*end = cp;
+#ifdef JSONDEBUG
+    (void) printf("leaving json_read_array() with %d elements\n", *arr->count);
+#endif /* JSONDEBUG */
     return 0;
 }
 
