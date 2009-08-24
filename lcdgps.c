@@ -74,6 +74,7 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
 ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
 int send_lcd(char *buf);
 
+static struct fixsource_t source;
 static struct gps_data_t *gpsdata;
 static float altfactor = METERS_TO_FEET;
 static float speedfactor = MPS_TO_MPH;
@@ -267,6 +268,10 @@ static void update_lcd(struct gps_data_t *gpsdata,
   char *s;
   int track;
 
+  /* this is where we implement source-device filtering */
+  if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+      return;
+
   /* Get our location in Maidenhead. */
   latlon2maidenhead(maidenhead,gpsdata->fix.latitude,gpsdata->fix.longitude);
 
@@ -343,7 +348,6 @@ int main(int argc, char *argv[])
 {
     int option, rc;
     bool nojitter = false;
-    struct fixsource_t source;
     char *err_str = NULL;
     struct sockaddr_in localAddr, servAddr;
     struct hostent *h;
@@ -485,17 +489,12 @@ int main(int argc, char *argv[])
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_lcd);
 
-    /* If the user requested a specific device, try to change to it. */
-    if (source.device != NULL) {
-	(void)gps_query(gpsdata, "F=%s\n", source.device);
-    }
-
-    /* Turn on on jitter buffering if requested. */
+    /* tell the daemon to stream us updates */
     if (nojitter)
-	(void)gps_query(gpsdata, "j=1\n");
+	gps_stream(gpsdata, WATCH_ENABLE | WATCH_NOJITTER);
+    else
+	gps_stream(gpsdata, WATCH_ENABLE);
 
-    /* Request "w+x" data from gpsd. */
-    (void)gps_query(gpsdata, "w+x\n");
 
     for (;;) { /* heart of the client */
 

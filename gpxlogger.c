@@ -269,6 +269,10 @@ static int lcasoc = 0;
 static void process(struct gps_data_t *gpsdata,
 	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
 {
+    /* this is where we implement source-device filtering */
+    if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+	return;
+
     conditionally_log_fix(&gpsdata->fix);
 }
 
@@ -309,14 +313,11 @@ static int socket_mainloop(void)
 	exit(1);
     }
 
-    if (lcasoc)
-	gps_query(gpsdata, "j1\n");
-    if (source.device != NULL)
-	gps_query(gpsdata, "f=%s\n", source.device);
-
     gps_set_raw_hook(gpsdata, process);
-
-    gps_query(gpsdata, "w+x");
+    if (lcasoc)
+	gps_stream(gpsdata, WATCH_ENABLE | WATCH_NOJITTER);
+    else
+	gps_stream(gpsdata, WATCH_ENABLE);
 
     for(;;){
 	int data;

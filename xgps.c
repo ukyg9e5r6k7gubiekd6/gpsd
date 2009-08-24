@@ -1080,10 +1080,14 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 
 		gps_set_raw_hook(gpsdata, update_panel);
 
+		/* 
+		 * We could use gps_stream() here, but coding it this way 
+		 * gives us a forced test of new protocol.
+		 */
 		if (jitteropt)
-		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":1};");
+		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":1,\"raw\":1};");
 		else
-		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":0};");
+		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":0,\"raw\":1};");
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
 		    (XtPointer)XtInputReadMask, handle_input, NULL);
