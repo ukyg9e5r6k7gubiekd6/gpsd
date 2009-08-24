@@ -516,7 +516,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
     if ((session->gpsdata.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
 	mask |= HDOP_SET;
 
-    if (session->driver.sirf.driverstate & SIRF_GE_232) {
+    if (session->gpsdata.fix.mode > MODE_NO_FIX && session->driver.sirf.driverstate & SIRF_GE_232) {
 	struct tm unpacked_date;
 	double subseconds;
 	/*
@@ -538,7 +538,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * of geoid separation now.
 	 *
 	 * UTC is left all zeros in 231 and older firmware versions, 
-	 * and misdocumented in the Protocol Reference (version 1.4).
+	 * and misdocumented in version 1.4 of the Protocol Reference.
 	 *            Documented:        Real:
 	 * UTC year       2               2
 	 * UTC month      1               1
@@ -547,6 +547,9 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * UTC minute     2               1
 	 * UTC second     2               2
 	 *                11              8
+	 *
+	 * Documentation of this field was corrected in the 1.6 version
+	 * of the protocol manual.
 	 */
 	unpacked_date.tm_year = (int)getbeuw(buf, 11)-1900;
 	unpacked_date.tm_mon = (int)getub(buf, 13)-1;
