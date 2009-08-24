@@ -574,6 +574,7 @@ static void notify_watchers(struct gps_device_t *device, int mask, char *sentenc
 }
 
 static void deactivate_device(struct gps_device_t *device)
+/* deactivate device, but leave it in the pool (do not free it) */
 {
     int cfd;
 
@@ -594,7 +595,6 @@ static void deactivate_device(struct gps_device_t *device)
 	gpsd_deactivate(device);
 	device->gpsdata.gps_fd = -1;	/* device is already disconnected */
     }
-    /*@i@*/free_device(device);	/* modifying observer storage */
 }
 
 static void raw_hook(struct gps_data_t *ud,
