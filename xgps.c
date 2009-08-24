@@ -875,6 +875,12 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 	XmString string[MAXCHANNELS + 1];
 	char s[128], *latlon, *sp;
 
+#ifdef GPSDNG_ENABLE
+	/* this is where we implement source-device filtering */
+	if (gpsdata->dev.path[0] && source.device[0] && strcmp(source.device, gpsdata->dev.path) != 0)
+	    return;
+#endif /* GPSDNG_ENABLE */
+
 	/* the raw data sisplay */
 	if (message[0] != '\0')
 		while (isspace(*(sp = message + strlen(message) - 1)))
@@ -1083,11 +1089,10 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 		    (void)gps_query(gpsdata, "F=%s", source.device);
 		(void)gps_query(gpsdata, "w+x");
 #else
-		// FIXME: Not yet implementing equivalent of F
 		if (jitteropt)
-		    (void)gps_query(gpsdata, "?watch={\"buffer_policy\":1};");
+		    (void)gps_query(gpsdata, "?WATCH={\"buffer_policy\":1};");
 		else
-		    (void)gps_query(gpsdata, "?watch={\"buffer_policy\":0};");
+		    (void)gps_query(gpsdata, "?WATCH={\"buffer_policy\":0};");
 #endif /* OLDSTYLE */
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
