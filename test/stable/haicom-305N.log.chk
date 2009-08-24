@@ -1,4 +1,3 @@
-{"class":"DEVICE","activated":1251108216.75}
 $GPGSV,3,3,12,24,58,220,,26,17,053,,29,20,063,,30,60,311,44*7F
 {"class":"SKY","tag":"GSV","time":0.000,"reported":4,"satellites":[{"PRN":24,"el":58,"az":220,"ss":0,"used":false},{"PRN":26,"el":17,"az":53,"ss":0,"used":false},{"PRN":29,"el":20,"az":63,"ss":0,"used":false},{"PRN":30,"el":60,"az":311,"ss":44,"used":false}]}
 $GPRMC,095255.810,V,2712.6404,S,15303.1201,E,0.00,0.00,080407,,,A*6E
