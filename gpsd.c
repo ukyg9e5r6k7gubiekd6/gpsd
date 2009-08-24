@@ -1564,7 +1564,7 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 {
     struct gps_device_t *devp;
     (void)strlcpy(reply, 
-		  "{\"class\"=\"DEVICES\",\"devices\":[", replylen);
+		  "{\"class\":\"DEVICES\",\"devices\":[", replylen);
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (allocated_device(devp) && strlen(reply)+strlen(devp->gpsdata.dev.path)+3 < replylen-1) {
 	    json_device_dump(devp,

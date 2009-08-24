@@ -175,7 +175,7 @@ static int json_devicelist_read(const char *buf,
 	{"path",       string,     .addr.offset = offsetof(struct devconfig_t, path),
 	                           .addr.string.len = sizeof(gpsdata->devices.list[0].path)},
 	{"activated",  real,       .addr.offset = offsetof(struct devconfig_t, activated)},
-	{"flags",      array,  	   .addr.offset = offsetof(struct devconfig_t, flags)},
+	{"flags",      integer,	   .addr.offset = offsetof(struct devconfig_t, flags)},
 	{"driver",     string,     .addr.offset = offsetof(struct devconfig_t, driver),
 	                           .addr.string.len = sizeof(gpsdata->devices.list[0].driver)},
 	{"subtype",    string,     .addr.offset = offsetof(struct devconfig_t, subtype),
@@ -183,7 +183,7 @@ static int json_devicelist_read(const char *buf,
 	{NULL},
     };
     const struct json_attr_t json_attrs_devices[] = {
-        {"class",   check,   .dflt.check = "DEVICES"},
+        {"class",   check,  .dflt.check = "DEVICES"},
         {"devices", array,  .addr.array.element_type = structobject,
 	            .addr.array.arr.objects.base = (char*)gpsdata->devices.list,
                     .addr.array.arr.objects.stride = sizeof(struct devconfig_t),
@@ -200,7 +200,6 @@ static int json_devicelist_read(const char *buf,
 
     gpsdata->devices.time = timestamp();
     gpsdata->set |= DEVICELIST_SET;
-    gpsdata->devices.ndevices = *json_attrs_devices[0].addr.array.count;
     return 0;
 }
 
@@ -254,6 +253,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return json_tpv_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
 	return json_sky_read(buf, gpsdata, NULL);
+    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
+	return json_devicelist_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
 	status = json_device_read(buf, &gpsdata->devices.list[0], NULL);
 	if (status == 0)
@@ -265,8 +266,6 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	    gpsdata->set |= POLICY_SET;
 	return status;
 
-    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
-	return json_devicelist_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"CONFIGDEV\"") != 0) {
 	status = json_configdev_read(buf, &gpsdata->dev, NULL);
 	if (status == 0)
