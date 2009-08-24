@@ -1,3 +1,4 @@
+{"class":"DEVICE","activated":1251108133.43}
 $GPGGA,143447,4629.8972,N,00734.0447,E,1,05,2.40,1342.40,M,48.183,M,,*7C
 $GPRMC,143447,A,4629.8972,N,00734.0447,E,0.1776,10.379,090605,,*17
 $GPGSA,A,3,08,10,04,02,27,,,,,,,,0.0,2.4,0.0*3E
@@ -8,7 +9,7 @@ $PGRME,1.28,M,2.33,M,0.00,M*17
 {"class":"TPV","tag":"GND","time":1118327687.280,"ept":0.005,"lat":46.498294800,"lon":7.567406900,"alt":1342.402,"eph":2.660,"epv":4.830,"track":10.3788,"speed":0.091,"climb":-0.085,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,44,29,13,273,00*74
 $GPGSV,2,2,08,10,51,304,29,04,15,199,36,02,34,241,43,27,71,076,43*7C
-{"class":"SKY","tag":"MID4","time":1118327688.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":44,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":29,"used":true},{"PRN":4,"el":15,"az":199,"ss":36,"used":true},{"PRN":2,"el":34,"az":241,"ss":43,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327688.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":44,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":29,"used":true},{"PRN":4,"el":15,"az":199,"ss":36,"used":true},{"PRN":2,"el":34,"az":241,"ss":43,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 $GPGGA,143448,4629.8976,N,00734.0447,E,1,05,2.40,1343.13,M,48.183,M,,*70
 $GPRMC,143448,A,4629.8976,N,00734.0447,E,0.1776,10.379,090605,,*1C
 $GPGSA,A,3,08,10,04,02,27,,,,,,,,1.9,2.4,1.4*33
@@ -53,7 +54,7 @@ $PGRME,1.28,M,2.33,M,17.34,M*26
 {"class":"TPV","tag":"GND","time":1118327692.280,"ept":0.005,"lat":46.498318900,"lon":7.567400700,"alt":1343.122,"eph":2.650,"epv":4.840,"track":10.3788,"speed":0.091,"climb":-0.085,"eps":38.66,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,45,29,13,273,00*75
 $GPGSV,2,2,08,10,51,304,29,04,15,199,37,02,34,241,42,27,71,076,42*7D
-{"class":"SKY","tag":"MID4","time":1118327693.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":29,"used":true},{"PRN":4,"el":15,"az":199,"ss":37,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":42,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327693.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":29,"used":true},{"PRN":4,"el":15,"az":199,"ss":37,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":42,"used":true}]}
 $GPGGA,143453,4629.8992,N,00734.0441,E,1,05,2.40,1343.12,M,48.183,M,,*77
 $GPRMC,143453,A,4629.8992,N,00734.0441,E,0.1776,10.379,090605,,*1A
 $GPGSA,A,3,08,10,04,02,27,,,,,,,,1.9,2.4,1.4*33
@@ -99,7 +100,7 @@ $PGRME,1.28,M,2.33,M,17.34,M*26
 {"class":"TPV","tag":"GND","time":1118327697.280,"ept":0.005,"lat":46.498336600,"lon":7.567394900,"alt":1343.075,"eph":2.660,"epv":4.840,"track":10.3787,"speed":0.091,"climb":-0.085,"eps":38.65,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,46,29,13,273,00*76
 $GPGSV,2,2,08,10,51,304,31,04,15,199,37,02,34,241,42,27,71,076,43*75
-{"class":"SKY","tag":"MID4","time":1118327698.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":46,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":31,"used":true},{"PRN":4,"el":15,"az":199,"ss":37,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327698.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":46,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":31,"used":true},{"PRN":4,"el":15,"az":199,"ss":37,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 $GPGGA,143458,4629.9004,N,00734.0436,E,1,05,2.40,1342.39,M,48.183,M,,*73
 $GPRMC,143458,A,4629.9004,N,00734.0436,E,0.1776,10.379,090605,,*16
 $GPGSA,A,3,08,10,04,02,27,,,,,,,,1.9,2.4,1.4*33
@@ -145,7 +146,7 @@ $PGRME,1.29,M,2.33,M,0.00,M*16
 {"class":"TPV","tag":"GND","time":1118327702.280,"ept":0.005,"lat":46.498346300,"lon":7.567385500,"alt":1341.619,"eph":2.680,"epv":4.840,"track":10.3787,"speed":0.091,"climb":-0.085,"eps":50.69,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,45,29,13,273,00*75
 $GPGSV,2,2,08,10,51,304,00,04,15,199,34,02,34,241,42,27,71,076,43*74
-{"class":"SKY","tag":"MID4","time":1118327703.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":0,"used":false},{"PRN":4,"el":15,"az":199,"ss":34,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327703.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":0,"used":false},{"PRN":4,"el":15,"az":199,"ss":34,"used":true},{"PRN":2,"el":34,"az":241,"ss":42,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 $GPGGA,143503,4629.9008,N,00734.0429,E,1,04,3.20,1341.62,M,48.183,M,,*75
 $GPRMC,143503,A,4629.9008,N,00734.0429,E,0.1776,10.379,090605,,*1B
 $GPGSA,A,3,08,04,02,27,,,,,,,,,1.9,3.2,1.4*35
@@ -189,7 +190,7 @@ $PGRME,1.29,M,2.33,M,17.34,M*27
 {"class":"TPV","tag":"GND","time":1118327707.280,"ept":0.005,"lat":46.498343900,"lon":7.567383600,"alt":1340.211,"eph":2.670,"epv":4.830,"track":10.3787,"speed":0.091,"climb":-0.085,"eps":50.69,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,45,29,13,273,00*75
 $GPGSV,2,2,08,10,51,304,23,04,15,199,38,02,34,241,40,27,71,076,41*79
-{"class":"SKY","tag":"MID4","time":1118327708.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":23,"used":false},{"PRN":4,"el":15,"az":199,"ss":38,"used":true},{"PRN":2,"el":34,"az":241,"ss":40,"used":true},{"PRN":27,"el":71,"az":76,"ss":41,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327708.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":45,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":23,"used":false},{"PRN":4,"el":15,"az":199,"ss":38,"used":true},{"PRN":2,"el":34,"az":241,"ss":40,"used":true},{"PRN":27,"el":71,"az":76,"ss":41,"used":true}]}
 $GPGGA,143508,4629.9004,N,00734.0429,E,1,05,2.40,1340.89,M,48.183,M,,*70
 $GPRMC,143508,A,4629.9004,N,00734.0429,E,0.1776,10.379,090605,,*1C
 $GPGSA,A,3,08,10,04,02,27,,,,,,,,1.9,2.4,1.4*33
@@ -235,7 +236,7 @@ $PGRME,1.30,M,2.38,M,17.34,M*24
 {"class":"TPV","tag":"GND","time":1118327712.280,"ept":0.005,"lat":46.498319700,"lon":7.567394900,"alt":1342.349,"eph":2.700,"epv":4.950,"track":157.5287,"speed":0.800,"climb":0.013,"eps":59.73,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,40,29,13,273,00*70
 $GPGSV,2,2,08,10,51,304,36,04,15,199,27,02,34,241,36,27,71,076,43*70
-{"class":"SKY","tag":"MID4","time":1118327713.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":40,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":36,"used":true},{"PRN":4,"el":15,"az":199,"ss":27,"used":false},{"PRN":2,"el":34,"az":241,"ss":36,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327713.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":40,"used":true},{"PRN":29,"el":13,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":36,"used":true},{"PRN":4,"el":15,"az":199,"ss":27,"used":false},{"PRN":2,"el":34,"az":241,"ss":36,"used":true},{"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 $GPGGA,143513,4629.8992,N,00734.0434,E,1,04,3.80,1343.03,M,48.183,M,,*7C
 $GPRMC,143513,A,4629.8992,N,00734.0434,E,0.7149,141.014,090605,,*2C
 $GPGSA,A,3,08,10,02,27,,,,,,,,,1.9,3.8,1.4*3A
@@ -280,4 +281,4 @@ $PGRME,1.45,M,2.46,M,17.34,M*2F
 {"class":"TPV","tag":"GND","time":1118327717.280,"ept":0.005,"lat":46.498291400,"lon":7.567401000,"alt":1344.444,"eph":3.010,"epv":5.100,"track":0.0000,"speed":0.000,"climb":0.000,"eps":45.02,"mode":3}
 $GPGSV,2,1,08,23,06,084,00,28,07,160,00,08,66,189,41,29,14,273,00*76
 $GPGSV,2,2,08,10,51,304,35,04,15,199,23,02,34,241,37,27,71,075,41*77
-{"class":"SKY","tag":"MID4","time":1118327718.280 "reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":41,"used":true},{"PRN":29,"el":14,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":35,"used":true},{"PRN":4,"el":15,"az":199,"ss":23,"used":true},{"PRN":2,"el":34,"az":241,"ss":37,"used":false},{"PRN":27,"el":71,"az":75,"ss":41,"used":true}]}
+{"class":"SKY","tag":"MID4","time":1118327718.280,"reported":8,"satellites":[{"PRN":23,"el":6,"az":84,"ss":0,"used":false},{"PRN":28,"el":7,"az":160,"ss":0,"used":false},{"PRN":8,"el":66,"az":189,"ss":41,"used":true},{"PRN":29,"el":14,"az":273,"ss":0,"used":false},{"PRN":10,"el":51,"az":304,"ss":35,"used":true},{"PRN":4,"el":15,"az":199,"ss":23,"used":true},{"PRN":2,"el":34,"az":241,"ss":37,"used":false},{"PRN":27,"el":71,"az":75,"ss":41,"used":true}]}
