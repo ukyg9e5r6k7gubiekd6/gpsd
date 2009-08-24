@@ -177,7 +177,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 #ifdef GPSDNG_ENABLE
     status = libgps_json_unpack(json_str1, &gpsdata);
     assert_case(1, status);
-    assert_string("device", gpsdata.gps_device, "GPS#1");
+    assert_string("device", gpsdata.dev.path, "GPS#1");
     assert_string("tag", gpsdata.tag, "MID2");
     assert_integer("mode", gpsdata.fix.mode, 3);
     assert_real("time", gpsdata.fix.time, 1119197561.890);
@@ -221,6 +221,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     status = json_read_object(json_str6, json_attrs_6, NULL);
     assert_case(6, status);
+    assert_integer("dumbcount", dumbcount, 4);
     assert_string("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
     assert_string("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
     assert_string("dumbstruck[2].name", dumbstruck[2].name, "Witter");
