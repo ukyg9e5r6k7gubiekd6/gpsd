@@ -32,10 +32,7 @@ struct json_attr_t {
     union {
 	int *integer;
 	double *real;
-	struct {
-	    char *ptr;
-	    int len;
-	} string;
+	char *string;
 	bool *boolean;
 	struct json_array_t array;
 	size_t offset;
@@ -46,6 +43,7 @@ struct json_attr_t {
 	bool boolean;
 	char *check;
     } dflt;
+    size_t len;
 };
 
 #define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */
@@ -72,5 +70,6 @@ const char *json_error_string(int);
 #define JSON_ERR_BADSTRING	15	/* error while string parsing */
 #define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
 #define JSON_ERR_BADENUM	17	/* invalid flag token */
+#define JSON_ERR_NOPARSTR	18	/* can't support strings in aparalle. arrays */
 
 /* json.h ends here */

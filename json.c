@@ -31,13 +31,21 @@ elements of an array must be of the same type.
 JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
 
-   The only really opaque part of the interface is structobjects.
-This is a way to parse a list of objects to a set of modifications to
-a corresponding array of C structs.  The trick is that the array
-object initialization has to specify both the C struct array's base
-address and the stride length (the size of the C struct.  If you
-initialize the offset fields with the correct offsetof() calls,
-everything will work.
+   This paraer processes object arrays in one of two different ways,
+defending on whether the array subtype is declared as object or structobject.
+
+   Object arrays take one base address per object subfield, and are 
+mapped into parallel C arrays (one per subfield).  Strings are not
+supported in this kind of array, as the don't have a "natural" size
+to use as an offset multiplier.
+
+   Structobjects arrays are a way to parse a list of objects to a set
+of modifications to a corresponding array of C structs.  The trick is
+that the array object initialization has to specify both the C struct
+array's base address and the stride length (the size of the C struct.
+If you initialize the offset fields with the correct offsetof() calls,
+everything will work. Strings are suppported but all string storage
+has to be inline in the struct.
 
 ***************************************************************************/
 #include <stdio.h>
@@ -69,7 +77,10 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		cursor->addr.real[offset] = cursor->dflt.real;
 		break;
 	    case string:
-		cursor->addr.string.ptr[offset] = '\0';
+		if (offset > 0)
+		    return JSON_ERR_NOPARSTR;
+		else
+		    cursor->addr.string[0] = '\0';
 		break;
 	    case boolean:
 		/* nullbool default says not to set the value at all */
@@ -202,7 +213,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    break;
 	case in_val_string:
 	    if (cursor->type == string)
-		maxlen = cursor->addr.string.len - 1;
+		maxlen = cursor->len - 1;
 	    else if (cursor->type == check)
 		maxlen = strlen(cursor->dflt.check);
 	    if (*cp == '"') {
@@ -248,7 +259,10 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		    cursor->addr.real[offset] = atof(valbuf);
 		    break;
 		case string:
-		    (void)strncpy(cursor->addr.string.ptr+offset, valbuf, cursor->addr.string.len);
+		    if (offset > 0)
+			return JSON_ERR_NOPARSTR;
+		    else
+			(void)strncpy(cursor->addr.string, valbuf, cursor->len);
 		    break;
 		case boolean:
 		    cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
@@ -278,7 +292,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		    *((double *)lptr) = atof(valbuf);
 		    break;
 		case string:
-		    (void)strncpy(lptr, valbuf, cursor->addr.string.len);
+		    (void)strncpy(lptr, valbuf, cursor->len);
 		    break;
 		case boolean:
 		    *((bool *)lptr) = (bool)!strcmp(valbuf, "true");
@@ -450,6 +464,7 @@ const char *json_error_string(int err)
 	"error while string parsing",
 	"check attribute not matched",
 	"invalid flag token",
+	"can't support strings in aparalle. arrays",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))

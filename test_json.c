@@ -144,7 +144,7 @@ static int dumbcount;
 
 static const struct json_attr_t json_attrs_6_subtype[] = {
     {"name",  string,  .addr.offset = offsetof(struct dumbstruct_t, name),
-                       .addr.string.len = 64},
+                       .len = 64},
     {"flag",  boolean, .addr.offset = offsetof(struct dumbstruct_t, flag),},
     {"count", integer, .addr.offset = offsetof(struct dumbstruct_t, count),},
     {NULL},
