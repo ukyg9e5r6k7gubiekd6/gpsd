@@ -687,6 +687,7 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (!allocated_device(devp)) {
 		gpsd_init(devp, &context, device_name);
+		devp->gpsdata.raw_hook = raw_hook;
 		gpsd_report(LOG_INF,"stashing device %s at slot %d\n",
 			    device_name, 
 			    (int)(devp - devices));
@@ -839,7 +840,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	     * he doesn't need a second notification that the device is
 	     * attached.
 	     */
-	    if (user->policy.watcher && !user->tied) {
+	    if (!newstyle(user) && user->policy.watcher && !user->tied) {
 		/*@ -sefparams @*/
 		throttled_write(user, "GPSD,F=", 7);
 		throttled_write(user,
@@ -1642,38 +1643,27 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    ++buf;
 	} else {
 	    int status;
-	    struct policy_t policy;
-	    status = json_watch_read(buf+1, &policy, &end);
+	    status = json_watch_read(buf+1, &sub->policy, &end);
 	    if (status == 0) {
 		if (*end == ';')
 		    ++end;
-		if (policy.watcher != nullbool) {
-		    sub->policy.watcher = policy.watcher;
-		    if (sub->policy.watcher)
-			for(devp = devices; devp < devices + MAXDEVICES; devp++)
-			    if (allocated_device(devp))
-				(void)assign_channel(sub, ANY, devp);
-		}
-		if (policy.raw != -1)
-		    sub->policy.raw = policy.raw;
-		if (policy.buffer_policy != -1)
-		    sub->policy.buffer_policy = policy.buffer_policy;
-		if (policy.scaled != nullbool)
-		    sub->policy.scaled = policy.scaled;
+		if (sub->policy.watcher)
+		    for(devp = devices; devp < devices + MAXDEVICES; devp++)
+			if (allocated_device(devp))
+			    (void)assign_channel(sub, ANY, devp);
 	    } else 
 		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
 			       json_error_string(status));
 	    buf = end;
 	}
-	/* key side effect: watch all devices */
 	/* display the user's policy */
 	json_watch_dump(&sub->policy, 
 			     reply + strlen(reply),
 			     replylen - strlen(reply));
-    } else if (strncmp(buf, "DEVICE", 9) == 0 && (buf[9] == ';' || buf[9] == '=')) {
+    } else if (strncmp(buf, "DEVICE", 6) == 0 && (buf[6] == ';' || buf[6] == '=')) {
 	int chcount = channel_count(sub);
-	buf += 9;
+	buf += 6;
 	if (chcount == 0) {
 	    for (; *buf ; buf++) {
 		if (*buf == '\0')
