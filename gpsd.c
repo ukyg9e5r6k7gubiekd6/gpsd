@@ -676,6 +676,27 @@ found:
     return devp;
 }
 
+static /*@null@*/ struct gps_device_t *add_device(char *device_name)
+/* add a device to the pool; open it right away if in nowait mode */
+{
+    if (nowait)
+	return open_device(device_name);
+    else {
+	struct gps_device_t *devp;
+	/* stash devicename away for probing when the first client connects */
+	for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	    if (!allocated_device(devp)) {
+		gpsd_init(devp, &context, device_name);
+		gpsd_report(LOG_INF,"stashing device %s at slot %d\n",
+			    device_name, 
+			    (int)(devp - devices));
+		devp->gpsdata.gps_fd = -1;
+		return devp;
+	    }
+	return NULL;
+    }
+}
+
 /*@ +nullret @*/
 /*@ +statictrans @*/
 /*@ +globstate @*/
@@ -914,7 +935,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF,"<= control(%d): adding %s \n", sfd, stash);
-	    if (open_device(stash))
+	    if (add_device(stash))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -1983,7 +2004,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) {
-	struct gps_device_t *device = open_device(argv[i]);
+	struct gps_device_t *device = add_device(argv[i]);
 	if (!device) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
