@@ -837,7 +837,7 @@ struct devconfig_t {
 };
 
 struct policy_t {
-    bool watch;					/* is watcher mode on? */
+    bool watcher;				/* is watcher mode on? */
     int raw;					/* dump raw data? */
     enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
     bool scaled;				/* perform report scaling? */

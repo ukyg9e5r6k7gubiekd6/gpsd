@@ -359,7 +359,6 @@ struct subscriber_t {
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
     bool new_style_responses;			/* protocol type desired */
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
-    int watcher;			/* is client in watcher mode? */
 };
 
 /*
@@ -500,9 +499,9 @@ static void detach_client(struct subscriber_t *sub)
 #ifdef OLDSYLE_ENABLE
     sub->tied = false;
 #endif /* OLDSTYLE_ENABLE */
-    sub->watcher = WATCH_NOTHING;
     sub->active = 0;
     sub->policy.buffer_policy = casoc;
+    sub->policy.watcher = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
@@ -554,7 +553,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
     return status;
 }
 
-static void notify_watchers(struct gps_device_t *device, int mask, char *sentence, ...)
+static void notify_watchers(struct gps_device_t *device, bool newstyle, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
     struct channel_t *channel;
@@ -568,7 +567,7 @@ static void notify_watchers(struct gps_device_t *device, int mask, char *sentenc
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
     {
 	struct subscriber_t *sub = channel->subscriber;
-	if (channel->device==device && sub != NULL && (sub->watcher & mask)!=0)
+	if (channel->device==device && sub != NULL && (newstyle(sub) == newstyle))
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
     }
 }
@@ -584,10 +583,10 @@ static void deactivate_device(struct gps_device_t *device)
 	    channels[cfd].subscriber = NULL;
 	}
 #ifdef OLDSTYLE_ENABLE
-    notify_watchers(device, WATCH_OLDSTYLE, "GPSD,X=0\r\n");
+    notify_watchers(device, false, "GPSD,X=0\r\n");
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
-    notify_watchers(device, WATCH_NEWSTYLE, 
+    notify_watchers(device, true, 
 		    "{\"class\":\"DEVICE\",\"name\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* GPSDNG_ENABLE */
@@ -819,7 +818,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	     * he doesn't need a second notification that the device is
 	     * attached.
 	     */
-	    if (user->watcher == WATCH_OLDSTYLE && !user->tied) {
+	    if (user->policy.watcher && !user->tied) {
 		/*@ -sefparams @*/
 		throttled_write(user, "GPSD,F=", 7);
 		throttled_write(user,
@@ -837,7 +836,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 
 	buf[0] = '\0';
 #ifdef OLDSTYLE_ENABLE
-	if (!newstyle(user) && user->watcher)
+	if (!newstyle(user) && user->policy.watcher)
 	    (void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 			   timestamp(), gpsd_id(channel->device));
 #endif /* OLDSTYLE_ENABLE */
@@ -1040,6 +1039,10 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
     char phrase[BUFSIZ], *p, *stash;
     int i, j;
     struct channel_t *channel = NULL;
+
+#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+    sub->new_style_responses = false;
+#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 
     (void)strlcpy(reply, "GPSD", replylen);
     replylen -= 4;
@@ -1428,18 +1431,18 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    else {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
-		    sub->watcher = WATCH_OLDSTYLE;
+		    sub->policy.watcher = true;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    sub->watcher = WATCH_NOTHING;
+		    sub->policy.watcher = false;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		    p++;
-		} else if (sub->watcher != WATCH_NOTHING) {
-		    sub->watcher = WATCH_NOTHING;
+		} else if (sub->policy.watcher) {
+		    sub->policy.watcher = false;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		} else {
-		    sub->watcher = WATCH_OLDSTYLE;
+		    sub->policy.watcher = true;
 		    gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		}
@@ -1623,6 +1626,13 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    if (status == 0) {
 		if (*end == ';')
 		    ++end;
+		if (policy.watcher != nullbool) {
+		    sub->policy.watcher = policy.watcher;
+		    if (sub->policy.watcher)
+			for(devp = devices; devp < devices + MAXDEVICES; devp++)
+			    if (allocated_device(devp))
+				(void)assign_channel(sub, ANY, devp);
+		}
 		if (policy.raw != -1)
 		    sub->policy.raw = policy.raw;
 		if (policy.buffer_policy != -1)
@@ -1636,10 +1646,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    buf = end;
 	}
 	/* key side effect: watch all devices */
-	sub->watcher |= WATCH_NEWSTYLE;
-	for(devp = devices; devp < devices + MAXDEVICES; devp++)
-	    if (allocated_device(devp))
-		(void)assign_channel(sub, ANY, devp);
 	/* display the user's policy */
 	json_watch_dump(&sub->policy, 
 			     reply + strlen(reply),
@@ -1733,9 +1739,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     }
     (void)strlcat(reply, "\r\n", replylen);
     *after = buf;
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
-    sub->new_style_responses = false;
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 }
 #endif /* GPSDNG_ENABLE */
 
@@ -2139,7 +2142,7 @@ int main(int argc, char *argv[])
 		    /* we may need to add device to new-style watcher lists */
 		    if ((changed & DEVICE_SET) != 0) {
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-			    if ((sub->watcher & WATCH_NEWSTYLE)!=0)
+			    if (sub->policy.watcher && newstyle(sub))
 				(void)assign_channel(sub, ANY, device);
 			    }
 		    /* handle laggy response to a firmware version query */
@@ -2155,7 +2158,7 @@ int main(int argc, char *argv[])
 				(void)strlcat(id1, device->subtype,sizeof(id1));
 			    }
 			    (void)strlcat(id1, "\r\n", sizeof(id1));
-			    notify_watchers(device, WATCH_OLDSTYLE, id1);
+			    notify_watchers(device, false, id1);
 			}
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
@@ -2166,7 +2169,7 @@ int main(int argc, char *argv[])
 					   device->gpsdata.dev.path,
 					   device->subtype);
 			    (void)strlcat(id2, "\r\n", sizeof(id2));
-			    notify_watchers(device, WATCH_NEWSTYLE, id2);
+			    notify_watchers(device, true, id2);
 			}
 #endif /* GPSDNG_ENABLE */
 		    }
@@ -2203,12 +2206,12 @@ int main(int argc, char *argv[])
 	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
 		struct subscriber_t *sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
-		if (sub != NULL && sub->watcher != WATCH_NOTHING) {
+		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
 		    channel->device->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 #ifdef OLDSTYLE_ENABLE
-			if ((sub->watcher & WATCH_OLDSTYLE) != 0) {
+			if (!newstyle(sub)) {
 			    char cmds[4] = "";
 			    if (changed & (LATLON_SET | MODE_SET))
 				(void)strlcat(cmds, "o", 4);
@@ -2235,20 +2238,20 @@ int main(int argc, char *argv[])
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 #ifdef GPSDNG_ENABLE
 			{
-			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & (LATLON_SET | MODE_SET))!=0) {
+			    if (sub->policy.watcher && newstyle(sub) && (changed & (LATLON_SET | MODE_SET))!=0) {
 				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
-			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & SATELLITE_SET)!=0) {
+			    if (sub->policy.watcher && newstyle(sub) && (changed & SATELLITE_SET)!=0) {
 				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
-			    if ((sub->watcher & WATCH_NEWSTYLE)!=0 && (changed & AIS_SET)!=0) {
+			    if (sub->policy.watcher && newstyle(sub) && (changed & AIS_SET)!=0) {
 				aivdm_dump(&channel->device->aivdm.decoded, 
 					   false, true, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
@@ -2327,7 +2330,7 @@ int main(int argc, char *argv[])
 		if (devcount == 0 && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
 		    gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
 		    detach_client(sub);
-		} else if (devcount > 0 && !sub->watcher && rawcount == 0 && timestamp() - sub->active > POLLER_TIMEOUT) {
+		} else if (devcount > 0 && !sub->policy.watcher && rawcount == 0 && timestamp() - sub->active > POLLER_TIMEOUT) {
 		    gpsd_report(LOG_WARN, "client(%d) timed out on command wait.\n", cfd);
 		    detach_client(sub);
 		}
