@@ -142,44 +142,6 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
-static int json_device_read(const char *buf, 
-			     struct devconfig_t *dev, const char **endptr)
-{
-    char serialmode[4];
-    const struct json_attr_t json_attrs_device[] = {
-	{"class",      check,      .dflt.check = "DEVICE"},
-	
-        {"path",       string,     .addr.string  = dev->path,
-	                           .len = sizeof(dev->path)},
-	{"activated",  real,       .addr.real = &dev->activated},
-	{"flags",      integer,    .addr.integer = &dev->flags},
-	{"driver",     string,     .addr.string  = dev->driver,
-	                           .len = sizeof(dev->driver)},
-	{"subtype",    string,     .addr.string  = dev->subtype,
-	                           .len = sizeof(dev->subtype)},
-	{"native",     integer,    .addr.integer = &dev->driver_mode,
-				   .dflt.integer = -1},
-	{"bps",	       integer,    .addr.integer = &dev->baudrate,
-				   .dflt.integer = -1},
-	{"parity",     string,	   .addr.string=serialmode,
-				   .len=sizeof(serialmode)},
-	{"stopbits",   integer,    .addr.integer = &dev->stopbits,
-				   .dflt.integer = -1},
-	{"cycle",      real,       .addr.real = &dev->cycle,
-				   .dflt.real = NAN},
-	{"mincycle",   real,       .addr.real = &dev->mincycle,
-				   .dflt.real = NAN},
-	{NULL},
-    };
-    int status;
-
-    status = json_read_object(buf, json_attrs_device, endptr);
-    if (status != 0)
-	return status;
-
-    return 0;
-}
-
 static int json_devicelist_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
@@ -201,7 +163,7 @@ static int json_devicelist_read(const char *buf,
 	 .dflt.character = 'N'},
 	{"stopbits",   integer,    .addr.offset = offsetof(struct devconfig_t, stopbits),
 				   .dflt.integer = -1},
-	{"cycle",      real,       .addr.real = offsetof(struct devconfig_t, cycle),
+	{"cycle",      real,       .addr.offset = offsetof(struct devconfig_t, cycle),
 				   .dflt.real = NAN},
 	{"mincycle",   real,       .addr.offset = offsetof(struct devconfig_t, mincycle),
 				   .dflt.real = NAN},
@@ -294,11 +256,6 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	    gpsdata->set |= POLICY_SET;
 	return status;
 
-    } else if (strstr(buf, "\"class\":\"CONFIGDEV\"") != 0) {
-	status = json_configdev_read(buf, &gpsdata->dev, NULL);
-	if (status == 0)
-	    gpsdata->set |= CONFIGDEV_SET;
-	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, NULL);
     } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {

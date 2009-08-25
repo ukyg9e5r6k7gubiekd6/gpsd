@@ -163,6 +163,44 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 		    datap->satellites, reported);
 }
 
+int json_device_read(const char *buf, 
+			     struct devconfig_t *dev, const char **endptr)
+{
+    char serialmode[4];
+    const struct json_attr_t json_attrs_device[] = {
+	{"class",      check,      .dflt.check = "DEVICE"},
+	
+        {"path",       string,     .addr.string  = dev->path,
+	                           .len = sizeof(dev->path)},
+	{"activated",  real,       .addr.real = &dev->activated},
+	{"flags",      integer,    .addr.integer = &dev->flags},
+	{"driver",     string,     .addr.string  = dev->driver,
+	                           .len = sizeof(dev->driver)},
+	{"subtype",    string,     .addr.string  = dev->subtype,
+	                           .len = sizeof(dev->subtype)},
+	{"native",     integer,    .addr.integer = &dev->driver_mode,
+				   .dflt.integer = -1},
+	{"bps",	       integer,    .addr.integer = &dev->baudrate,
+				   .dflt.integer = -1},
+	{"parity",     string,	   .addr.string=serialmode,
+				   .len=sizeof(serialmode)},
+	{"stopbits",   integer,    .addr.integer = &dev->stopbits,
+				   .dflt.integer = -1},
+	{"cycle",      real,       .addr.real = &dev->cycle,
+				   .dflt.real = NAN},
+	{"mincycle",   real,       .addr.real = &dev->mincycle,
+				   .dflt.real = NAN},
+	{NULL},
+    };
+    int status;
+
+    status = json_read_object(buf, json_attrs_device, endptr);
+    if (status != 0)
+	return status;
+
+    return 0;
+}
+
 void json_device_dump(struct gps_device_t *device,
 		     char *reply, size_t replylen)
 {
@@ -242,69 +280,6 @@ void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 		   ccp->raw, 
 		   ccp->buffer_policy,
 		   ccp->scaled ? "true" : "false");
-}
-
-int json_configdev_read(const char *buf, 
-			struct devconfig_t *cdp, 
-			const char **endptr)
-{
-    int status;
-    char serialmode[4];
-    struct json_attr_t devconfig_attrs[] = {
-	{"device",	string,   .addr.string=cdp->path,
-				  .len=sizeof(cdp->path)},
-	{"native",	integer,  .addr.integer = &cdp->driver_mode,
-				  .dflt.integer = -1},
-	{"bps",		integer,  .addr.integer = &cdp->baudrate,
-				  .dflt.integer = -1},
-	{"serialmode",	string,	  .addr.string=serialmode,
-				  .len=sizeof(serialmode)},
-	{"cycle",	real,     .addr.real = &cdp->cycle,
-				  .dflt.real = NAN},
-	{"mincycle",	real,     .addr.real = &cdp->mincycle,
-				  .dflt.real = NAN},
-	{NULL},
-    };
-
-    status = json_read_object(buf, devconfig_attrs, endptr);
-
-    if (status == 0) {
-	int wordsize = 8;
-	char *modestring = serialmode;
-
-	if (strchr("78", *modestring)!= NULL) {
-	    while (isspace(*modestring))
-		modestring++;
-	    wordsize = (int)(*modestring++ - '0');
-	    if (strchr("NOE", *modestring)!= NULL) {
-		cdp->parity = *modestring++;
-		while (isspace(*modestring))
-		    modestring++;
-		if (strchr("12", *modestring)!=NULL)
-		    cdp->stopbits = (unsigned int)(*modestring - '0');
-	    }
-	}
-    }
-
-    return status;
-}
-
-void json_configdev_dump(struct gps_device_t *devp, char *reply, size_t replylen)
-{
-    (void)snprintf(reply, replylen,
-		   "{\"class\":\"CONFIGDEV\",\"device\":\"%s\",\"native\":%d,\"bps\":%d,\"serialmode\":\"%u%c%u\",\"cycle\":%2.2f",
-		   devp->gpsdata.dev.path,
-		   devp->gpsdata.dev.driver_mode,
-		   (int)gpsd_get_speed(&devp->ttyset),
-		   9 - devp->gpsdata.dev.stopbits,
-		   (int)devp->gpsdata.dev.parity,
-		   devp->gpsdata.dev.stopbits,
-		   devp->gpsdata.dev.cycle);
-    if (devp->device_type->rate_switcher != NULL)
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       ",\"mincycle\":%2.2f",
-		       devp->device_type->min_cycle);
-    (void)strlcat(reply, "}", replylen);
 }
 
 /* gpsd_json.c ends here */

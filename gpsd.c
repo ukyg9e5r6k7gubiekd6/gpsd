@@ -1644,7 +1644,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	json_watch_dump(&sub->policy, 
 			     reply + strlen(reply),
 			     replylen - strlen(reply));
-    } else if (strncmp(buf, "CONFIGDEV", 9) == 0 && (buf[9] == ';' || buf[9] == '=')) {
+    } else if (strncmp(buf, "DEVICE", 9) == 0 && (buf[9] == ';' || buf[9] == '=')) {
 	int chcount = channel_count(sub);
 	buf += 9;
 	if (chcount == 0) {
@@ -1657,7 +1657,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    stringend2:;
 	    }
 	    (void)strlcat(reply, 
-			  "{\"class\":\"ERROR\",\"message\":\"Can't perfgorm CONFIGDEV, no channels attached.\"}\r\n",
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perfgorm DEVICE configuration, no channels attached.\"}\r\n",
 			  replylen);
 	} else {
 	    struct channel_t *chp;
@@ -1665,16 +1665,16 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    devconf.path[0] = '\0';
 	    if (*buf == '=') {
 		int status;
-		status = json_configdev_read(buf+1, &devconf, &end);
+		status = json_device_read(buf+1, &devconf, &end);
 		if (*end == ';')
 		    ++end;
 		if (status != 0)
 		    (void)snprintf(reply, replylen,
-				   "{\"class\":ERROR\",\"message\":\"Invalid CONFIGDEV.\",\"error\":\"%s\"}\r\n",
+				   "{\"class\":ERROR\",\"message\":\"Invalid DEVICE.\",\"error\":\"%s\"}\r\n",
 				   json_error_string(status));
 		else if (chcount > 1 && devconf.path[0] == '\0')
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":ERROR\",\"message\":\"No path specified in CONFIGDEV, but multiple channels are subscribed.\"}\r\n");
+				   "{\"class\":ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
 		else {
 		    /* we should have exactly one device now */
 		    for (chp = channels; chp < channels + NITEMS(channels); chp++)
@@ -1710,7 +1710,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		else if (devconf.path[0] != '\0' && chp->device && strcmp(chp->device->gpsdata.dev.path, devconf.path)!=0)
 		    continue;
 		else {
-		    json_configdev_dump(chp->device, 
+		    json_device_dump(chp->device, 
 					reply + strlen(reply),
 					replylen - strlen(reply));
 		    (void)strlcat(reply, "\r\n", replylen);

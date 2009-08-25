@@ -55,8 +55,6 @@ has to be inline in the struct.
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
-#define JSONDEBUG
-
 static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 

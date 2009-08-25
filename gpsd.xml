@@ -880,105 +880,6 @@ following elements:</para>
 </tgroup>
 </table>
 
-<para>The list components have the following elements:</para>
-
-<table frame="all" pgwide="0"><title>Device-description object</title>
-<tgroup cols="3" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>Name</entry>
-	<entry>Always?</entry>
-	<entry>Type</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>class</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Fixed: "DEVICE"</entry>
-</row>
-<row>
-	<entry>path</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Pathname of the device</entry>
-</row>
-<row>
-	<entry>activated</entry>
-	<entry>At device activation and device close time.</entry>
-	<entry>numeric</entry>
-        <entry>Time the device last sent data.</entry>
-</row>
-<row>
-	<entry>flags</entry>
-	<entry>No</entry>
-	<entry>integer</entry>
-        <entry>Bit vector of property flags.  Currently defined flags are:
-        describe packet types seen so far (GPS, RTCM2, RTCM3,
-	AIS). Won't be reported if empty, e.g. before
-	<application>gpsd</application> has seen identifiable packets
-	from the device.</entry>
-</row>
-<row>
-	<entry>driver</entry>
-	<entry>No</entry>
-	<entry>string</entry>
-        <entry>GPSD's name for the device driver type. Won't be reported before
-	<application>gpsd</application> has seen identifiable packets
-	from the device.</entry>
-</row>
-<row>
-	<entry>driver</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>GPSD's name for the device driver type.</entry>
-</row>
-<row>
-	<entry>subtype</entry>
-	<entry>No</entry>
-	<entry>string</entry>
-        <entry>Firmware version or other subtype ID. Not always reported.</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
-
-<table frame="all" pgwide="0"><title>Device flags</title>
-<tgroup cols="3" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>C #define</entry>
-	<entry>Value</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>SEEN_GPS</entry>
-	<entry>0x01</entry>
-	<entry>GPS data has been seen on this device</entry>
-</row>
-<row>
-	<entry>SEEN_RTCM2</entry>
-	<entry>0x02</entry>
-	<entry>RTCM2 data has been seen on this device</entry>
-</row>
-<row>
-	<entry>SEEN_RTCM3</entry>
-	<entry>0x04</entry>
-	<entry>RTCM3 data has been seen on this device</entry>
-</row>
-<row>
-	<entry>SEEN_AIS</entry>
-	<entry>0x08</entry>
-	<entry>GPS data has been seen on this device</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
-
 <para>When the C client library parses a response of this kind, it
 will assert the DEVICELIST_SET bit in the top-level set member.</para>
 
@@ -1374,14 +1275,14 @@ will assert the POLICY_SET bit in the top-level set member.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?CONFIGDEV</term> 
+<term>?DEVICE</term> 
 <listitem>
 
-<para>This command reports (when followed by ':') or sets (when
-followed by by '=' and a CONFIGDEV object) device-specific control
-bits, notably the device's speed and serial mode and the native-mode
-bit.  It will be rejected if more than one client is attached to the
-channel.</para>
+<para>This command reports (when followed by ';') the state of a
+device, or sets (when followed by '=' and a DEVICE object)
+device-specific control bits, notably the device's speed and serial
+mode and the native-mode bit.  The parameter-setting form will be rejected if
+more than one client is attached to the channel.</para>
 
 <para>Pay attention to the response, because it is
 possible for this command to fail if the GPS does not support a
@@ -1389,15 +1290,16 @@ speed-switching command or only supports some combinations of
 serial modes.  In case of failure, the daemon and GPS will
 continue to communicate at the old speed.</para>
 
-<para>Use this command with caution.  On USB and Bluetooth GPSes it is
-also possible for serial mode setting to fail either because the
-serial adaptor chip does not support non-8N1 modes or because the
-device firmware does not properly synchronize the serrial adaptor chip
-with the UART on the GPS chipset whjen the speed changes. These
-failures can hang your device, possibly requiring a GPS power cycle or (in
-extreme cases) physically disconnecting the NVRAM backup battery.</para>
+<para>Use the parameter-setting form with caution.  On USB and
+Bluetooth GPSes it is also possible for serial mode setting to fail
+either because the serial adaptor chip does not support non-8N1 modes
+or because the device firmware does not properly synchronize the
+serrial adaptor chip with the UART on the GPS chipset whjen the speed
+changes. These failures can hang your device, possibly requiring a GPS
+power cycle or (in extreme cases) physically disconnecting the NVRAM
+backup battery.</para>
 
-<para>A CONFIGDEV object has the following elements:</para>
+<para>A DEVICE object has the following elements:</para>
 
 <table frame="all" pgwide="0"><title>CONFIGCHAN object</title>
 <tgroup cols="4" align="left" colsep="1" rowsep="1">
@@ -1414,7 +1316,7 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 	<entry>class</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Fixed: "CONFIGDEV"</entry>
+        <entry>Fixed: "DEVICE"</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -1426,18 +1328,54 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
         subscribed channel.</entry>
 </row>
 <row>
+	<entry>activated</entry>
+	<entry>At device activation and device close time.</entry>
+	<entry>numeric</entry>
+        <entry>Time the device was activated, 
+	or 0 if it is being closed.</entry>
+</row>
+<row>
+	<entry>flags</entry>
+	<entry>No</entry>
+	<entry>integer</entry>
+        <entry>Bit vector of property flags.  Currently defined flags are:
+        describe packet types seen so far (GPS, RTCM2, RTCM3,
+	AIS). Won't be reported if empty, e.g. before
+	<application>gpsd</application> has seen identifiable packets
+	from the device.</entry>
+</row>
+<row>
+	<entry>driver</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>GPSD's name for the device driver type. Won't be reported before
+	<application>gpsd</application> has seen identifiable packets
+	from the device.</entry>
+</row>
+<row>
+	<entry>subtype</entry>
+	<entry>When the daemon sees a delayed response to a probe for
+	subtype or firmware-version information.</entry>
+	<entry>string</entry>
+	<entry>Whatever version information the device returned.</entry>
+</row>
+<row>
 	<entry>bps</entry>
 	<entry>No</entry>
 	<entry>integer</entry>
         <entry>Device speed in bits per second.</entry>
 </row>
 <row>
-	<entry>serialmode</entry> 
-        <entry>No</entry> 
+	<entry>parity</entry> 
+        <entry>Yes</entry> 
         <entry>string</entry>
-	<entry><para>Parameters of the serial link to the GPS as
-        "$d%c%d"; byte size, parity (N, O or E for no parity, odd, or
-	even) and stop bits (1 or 2).</para></entry>
+	<entry><para>N, O or E for no parity, odd, or even.</para></entry>
+</row>
+<row>
+	<entry>stopbits</entry> 
+        <entry>Yes</entry> 
+        <entry>string</entry>
+	<entry><para>Stop bits (1 or 2).</para></entry>
 </row>
 <row>
 	<entry>native</entry>
@@ -1466,13 +1404,50 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 </tgroup>
 </table>
 
+<para>The contents of the flags field should be interpreted as follows:</para>
+
+<table frame="all" pgwide="0"><title>Device flags</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>C #define</entry>
+	<entry>Value</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>SEEN_GPS</entry>
+	<entry>0x01</entry>
+	<entry>GPS data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_RTCM2</entry>
+	<entry>0x02</entry>
+	<entry>RTCM2 data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_RTCM3</entry>
+	<entry>0x04</entry>
+	<entry>RTCM3 data has been seen on this device</entry>
+</row>
+<row>
+	<entry>SEEN_AIS</entry>
+	<entry>0x08</entry>
+	<entry>GPS data has been seen on this device</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+
 <para>When the C client library parses a response of this kind, it
-will assert the CONFIGDEV_SET bit in the top-level set member.</para>
+will assert the DEVICE_SET bit in the top-level set member.</para>
 
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"CONFIDEV", "speed":4800,"serialmode":"8N1","native":0}
+{"class":"DEVICE", "speed":4800,"serialmode":"8N1","native":0}
 </programlisting>
 
 </listitem>
@@ -1501,20 +1476,6 @@ meaning of the attributes.</para>
 	<entry>Yes</entry>
 	<entry>string</entry>
         <entry>Pathname of the cevice.</entry>
-</row>
-<row>
-	<entry>activated</entry>
-	<entry>At device activation and device close time.</entry>
-	<entry>numeric</entry>
-        <entry>Time the device was activated, 
-	or 0 if it is being closed.</entry>
-</row>
-<row>
-	<entry>subtype</entry>
-	<entry>When the daemon sees a delayed response to a probe for
-	subtype or firmware-version information.</entry>
-	<entry>string</entry>
-	<entry>Whatever version information the device returned.</entry>
 </row>
 </tbody>
 </tgroup>
@@ -1568,9 +1529,6 @@ the following elements:</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert the ERR_SET bit in the top-level set member.</para>
-
-<para>When the C client library parses a response of this kind, it
-will assert the DEVICELIST_SET bit in the top-level set member.</para>
 </refsect1>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
 

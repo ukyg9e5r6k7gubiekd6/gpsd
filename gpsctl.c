@@ -297,7 +297,7 @@ int main(int argc, char **argv)
 	}
 
 	   if (to_nmea) {
-	       (void)gps_query(gpsdata, "?CONFIGDEV={\"device\":%s,\"mode\":0}\r\n", device); 
+	       (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":0}\r\n", device); 
 	       if (gpsdata->dev.driver_mode != MODE_NMEA) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
 		status = 1;
@@ -305,7 +305,7 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	else if (to_binary) {
-	    (void)gps_query(gpsdata, "?CONFIGDEV={\"device\":%s,\"mode\":1}\r\n", device);
+	    (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":1}\r\n", device);
 	    if (gpsdata->dev.driver_mode != MODE_BINARY) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->dev.path);
 		status = 1;
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
 		(void)gps_query(gpsdata,
-				"?CONFIGDEV={\"device\":%s,\"bps\":%s}\r\n", 
+				"?DEVICE={\"device\":%s,\"bps\":%s}\r\n", 
 				device, speed);
 	    else {
 		char *modespec = strchr(speed, ':');
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(gpsdata, 
-				    "?CONFIGDEV={\"device\":%s,\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
+				    "?DEVICE={\"device\":%s,\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
 				    device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
@@ -357,7 +357,7 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(gpsdata, 
-			    "?CONFIGDEV={\"device\":%s,\"cycle\":%s}\n", 
+			    "?DEVICE={\"device\":%s,\"cycle\":%s}\n", 
 			    device, rate);
 	}
 #endif /* ALLOW_RECONFIGURE */

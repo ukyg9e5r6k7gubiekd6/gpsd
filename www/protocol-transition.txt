@@ -78,7 +78,7 @@ unusual configuration commands. Here are the exceptions:
 
 * Your application code referenced struct gpsdata_t members that no
   longer exist. This will be obvious because your compilation will
-  fail.  Later in this document you will learn how to fix thes
+  fail.  Later in this document you will learn how to fix these
   problems.
 
 You can probably ignore the rest of this document, unless
@@ -220,7 +220,7 @@ significantly, as the new protocol does not support equivalents.  Use
 libgps.
 
 If your code issues B, C, or N commands, they need to change to
-?CONFIGDEV commands.  See the protocol reference for details.
+?DEVICE commands.  See the protocol reference for details.
 
 The old 'F' and 'G' commands do not have equivalents.  It would be
 possible to implement these, but we probably won't do it unless there is
@@ -279,7 +279,7 @@ struct gpsdata members in older versions.
 
 Most notably, the gps_device member has been replaced by dev.path.
 It is valid after every response with a device tag (DEVICE, TPV, SKY,
-AIS, RTCM2, RTCM3, CONFIGDEV).
+AIS, RTCM2, RTCM3).
 
 The top-level gps_id member is replaced by dev.subtype.  This data
 should be considered valid only when DEVICEID_SET is on in the
@@ -287,7 +287,7 @@ top-level set member.
 
 The dev members baudrate, parity, stopbits, cycle, mincycle, and
 driver_mode replace older top-level members.  They should be
-considered valid only when CONFIGDEV_SET is on in the top-level set
+considered valid only when DEVICE_SET is on in the top-level set
 member.
 
 The top-level members ndevices and devicelist (used only on the client
