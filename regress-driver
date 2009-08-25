@@ -27,10 +27,11 @@ shift $(($OPTIND - 1))
 # First expression filters out device notifications on old protocol.
 # Second and third filter out gpsd log messages.
 # Fouth filters out gps.py verbose loggging
-# Fifth filters out new-style WATCH commands
-# Sixth filters out DEVICE responses
-# Seventh filters out device fields in new-style responses.
-GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e s/\"device\":[^,]*,//"
+# Fifth filters out new-style WATCH responses
+# Sixth filters out new-style DEVICE responses
+# Seventh filters out new-style VERSION responses
+# Eighth filters out device fields in new-style responses.
+GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/\"device\":[^,]*,//"
 
 case $mode in
     regress)
