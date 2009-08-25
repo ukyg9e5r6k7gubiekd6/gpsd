@@ -25,10 +25,10 @@ static int json_tpv_read(const char *buf,
     int status;
     const struct json_attr_t json_attrs_1[] = {
 	{"class",  check,   .dflt.check = "TPV"},
-	{"device", string,  .addr.string.ptr = gpsdata->dev.path,
-			    .addr.string.len = sizeof(gpsdata->dev.path)},
-	{"tag",    string,  .addr.string.ptr = gpsdata->tag,
-			    .addr.string.len = sizeof(gpsdata->tag)},
+	{"device", string,  .addr.string = gpsdata->dev.path,
+			    .len = sizeof(gpsdata->dev.path)},
+	{"tag",    string,  .addr.string = gpsdata->tag,
+			    .len = sizeof(gpsdata->tag)},
 	{"time",   real,    .addr.real = &gpsdata->fix.time,
 			    .dflt.real = NAN},
 	{"ept",    real,    .addr.real = &gpsdata->fix.ept,
@@ -111,10 +111,10 @@ static int json_sky_read(const char *buf,
     };
     const struct json_attr_t json_attrs_2[] = {
 	{"class",      check,   .dflt.check = "SKY"},
-	{"device",     string,  .addr.string.ptr  = gpsdata->dev.path,
-				.addr.string.len = PATH_MAX},
-	{"tag",	       string,  .addr.string.ptr  = gpsdata->tag,
-				.addr.string.len = MAXTAGLEN},
+	{"device",     string,  .addr.string  = gpsdata->dev.path,
+				.len = PATH_MAX},
+	{"tag",	       string,  .addr.string  = gpsdata->tag,
+				.len = MAXTAGLEN},
 	{"time",       real,    .addr.real    = &gpsdata->fix.time},
 	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
 	{"satellites", array,   .addr.array.element_type = object,
@@ -148,14 +148,14 @@ static int json_device_read(const char *buf,
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	
-        {"path",       string,     .addr.string.ptr  = dev->path,
-	                           .addr.string.len = sizeof(dev->path)},
+        {"path",       string,     .addr.string  = dev->path,
+	                           .len = sizeof(dev->path)},
 	{"activated",  real,       .addr.real = &dev->activated},
 	{"flags",      integer,    .addr.integer = &dev->flags},
-	{"driver",     string,     .addr.string.ptr  = dev->driver,
-	                           .addr.string.len = sizeof(dev->driver)},
-	{"subtype",    string,     .addr.string.ptr  = dev->subtype,
-	                           .addr.string.len = sizeof(dev->subtype)},
+	{"driver",     string,     .addr.string  = dev->driver,
+	                           .len = sizeof(dev->driver)},
+	{"subtype",    string,     .addr.string  = dev->subtype,
+	                           .len = sizeof(dev->subtype)},
 	{NULL},
     };
     int status;
@@ -173,13 +173,13 @@ static int json_devicelist_read(const char *buf,
     const struct json_attr_t json_attrs_subdevices[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	{"path",       string,     .addr.offset = offsetof(struct devconfig_t, path),
-	                           .addr.string.len = sizeof(gpsdata->devices.list[0].path)},
+	                           .len = sizeof(gpsdata->devices.list[0].path)},
 	{"activated",  real,       .addr.offset = offsetof(struct devconfig_t, activated)},
 	{"flags",      integer,	   .addr.offset = offsetof(struct devconfig_t, flags)},
 	{"driver",     string,     .addr.offset = offsetof(struct devconfig_t, driver),
-	                           .addr.string.len = sizeof(gpsdata->devices.list[0].driver)},
+	                           .len = sizeof(gpsdata->devices.list[0].driver)},
 	{"subtype",    string,     .addr.offset = offsetof(struct devconfig_t, subtype),
-	                           .addr.string.len = sizeof(gpsdata->devices.list[0].subtype)},
+	                           .len = sizeof(gpsdata->devices.list[0].subtype)},
 	{NULL},
     };
     const struct json_attr_t json_attrs_devices[] = {
@@ -194,6 +194,7 @@ static int json_devicelist_read(const char *buf,
     };
     int status;
 
+    memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
     status = json_read_object(buf, json_attrs_devices, endptr);
     if (status != 0)
 	return status;
@@ -208,16 +209,17 @@ static int json_version_read(const char *buf,
 {
     const struct json_attr_t json_attrs_version[] = {
         {"class",     check,   .dflt.check = "VERSION"},
-	{"release",   string,  .addr.string.ptr  = gpsdata->version.release,
-	                       .addr.string.len = sizeof(gpsdata->version.release)},
-	{"rev",       string,  .addr.string.ptr  = gpsdata->version.rev,
-	                       .addr.string.len = sizeof(gpsdata->version.rev)},
+	{"release",   string,  .addr.string  = gpsdata->version.release,
+	                       .len = sizeof(gpsdata->version.release)},
+	{"rev",       string,  .addr.string  = gpsdata->version.rev,
+	                       .len = sizeof(gpsdata->version.rev)},
 	{"api_major", integer, .addr.integer = &gpsdata->version.api_major},
 	{"api_minor", integer, .addr.integer = &gpsdata->version.api_minor},
 	{NULL},
     };
     int status;
 
+    memset(&gpsdata->version, '\0', sizeof(gpsdata->version));
     status = json_read_object(buf, json_attrs_version, endptr);
     if (status != 0)
 	return status;
@@ -231,12 +233,13 @@ static int json_error_read(const char *buf,
 {
     const struct json_attr_t json_attrs_error[] = {
         {"class",     check,   .dflt.check = "ERROR"},
-	{"message",   string,  .addr.string.ptr  = gpsdata->error,
-	                       .addr.string.len = sizeof(gpsdata->error)},
+	{"message",   string,  .addr.string  = gpsdata->error,
+	                       .len = sizeof(gpsdata->error)},
 	{NULL},
     };
     int status;
 
+    memset(&gpsdata->error, '\0', sizeof(gpsdata->error));
     status = json_read_object(buf, json_attrs_error, endptr);
     if (status != 0)
 	return status;

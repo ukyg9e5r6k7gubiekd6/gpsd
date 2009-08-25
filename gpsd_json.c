@@ -242,14 +242,14 @@ int json_configdev_read(const char *buf,
     int status;
     char serialmode[4];
     struct json_attr_t devconfig_attrs[] = {
-	{"device",	string,   .addr.string.ptr=cdp->path,
-				  .addr.string.len=sizeof(cdp->path)},
+	{"device",	string,   .addr.string=cdp->path,
+				  .len=sizeof(cdp->path)},
 	{"native",	integer,  .addr.integer = &cdp->driver_mode,
 				  .dflt.integer = -1},
 	{"bps",		integer,  .addr.integer = &cdp->baudrate,
 				  .dflt.integer = -1},
-	{"serialmode",	string,	  .addr.string.ptr=serialmode,
-				  .addr.string.len=sizeof(serialmode)},
+	{"serialmode",	string,	  .addr.string=serialmode,
+				  .len=sizeof(serialmode)},
 	{"cycle",	real,     .addr.real = &cdp->cycle,
 				  .dflt.real = NAN},
 	{"mincycle",	real,     .addr.real = &cdp->mincycle,
