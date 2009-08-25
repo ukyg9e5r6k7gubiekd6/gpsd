@@ -145,6 +145,7 @@ static int json_sky_read(const char *buf,
 static int json_device_read(const char *buf, 
 			     struct devconfig_t *dev, const char **endptr)
 {
+    char serialmode[4];
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	
@@ -156,6 +157,18 @@ static int json_device_read(const char *buf,
 	                           .len = sizeof(dev->driver)},
 	{"subtype",    string,     .addr.string  = dev->subtype,
 	                           .len = sizeof(dev->subtype)},
+	{"native",     integer,    .addr.integer = &dev->driver_mode,
+				   .dflt.integer = -1},
+	{"bps",	       integer,    .addr.integer = &dev->baudrate,
+				   .dflt.integer = -1},
+	{"parity",     string,	   .addr.string=serialmode,
+				   .len=sizeof(serialmode)},
+	{"stopbits",   integer,    .addr.integer = &dev->stopbits,
+				   .dflt.integer = -1},
+	{"cycle",      real,       .addr.real = &dev->cycle,
+				   .dflt.real = NAN},
+	{"mincycle",   real,       .addr.real = &dev->mincycle,
+				   .dflt.real = NAN},
 	{NULL},
     };
     int status;
@@ -180,6 +193,18 @@ static int json_devicelist_read(const char *buf,
 	                           .len = sizeof(gpsdata->devices.list[0].driver)},
 	{"subtype",    string,     .addr.offset = offsetof(struct devconfig_t, subtype),
 	                           .len = sizeof(gpsdata->devices.list[0].subtype)},
+	{"native",     integer,    .addr.offset = offsetof(struct devconfig_t, driver_mode),
+				   .dflt.integer = -1},
+	{"bps",	       integer,    .addr.offset = offsetof(struct devconfig_t, baudrate),
+				   .dflt.integer = -1},
+	{"parity",     character,  .addr.offset = offsetof(struct devconfig_t, parity),
+	 .dflt.character = 'N'},
+	{"stopbits",   integer,    .addr.offset = offsetof(struct devconfig_t, stopbits),
+				   .dflt.integer = -1},
+	{"cycle",      real,       .addr.real = offsetof(struct devconfig_t, cycle),
+				   .dflt.real = NAN},
+	{"mincycle",   real,       .addr.offset = offsetof(struct devconfig_t, mincycle),
+				   .dflt.real = NAN},
 	{NULL},
     };
     const struct json_attr_t json_attrs_devices[] = {

@@ -27,7 +27,6 @@ static int debuglevel;
  */
 #define REDIRECT_SNIFF	15
 
-
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
@@ -240,9 +239,21 @@ int main(int argc, char **argv)
 
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
+	struct devconfig_t *devlistp;
 	assert(gpsdata != NULL);
-	// FIXME: Requires old protocol
-	(void)gps_query(gpsdata, "K\n");
+	(void)gps_poll(gpsdata);
+	if ((gpsdata->set & DEVICELIST_SET) != 0) {
+	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
+	    (void)gps_close(gpsdata);
+	    exit(1);
+	}
+	(void)gps_query(gpsdata, "?DEVICES;\n");
+	if ((gpsdata->set & DEVICELIST_SET) == 0) {
+	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
+	    (void)gps_close(gpsdata);
+	    exit(1);
+	}
+
 	if (gpsdata->devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(gpsdata);
@@ -253,9 +264,11 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(LOG_PROG, "%d device(s) found.\n", gpsdata->devices.ndevices);
+	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata->devices.ndevices);
 
-	if (gpsdata->devices.ndevices > 1) {
+	if (gpsdata->devices.ndevices == 1)
+	    devlistp = &gpsdata->devices.list[0];
+	else {
 	    int i;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata->devices.ndevices; i++)
@@ -265,17 +278,13 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	foundit:
-	    // FIXME: Requires old protocol
-	    (void)gps_query(gpsdata, "F=%s", device);
+	    devlistp = &gpsdata->devices.list[i];
 	}
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    /* the O is to force a device binding */
-	    // FIXME: Requires old protocol
-	    (void)gps_query(gpsdata, "OFIB");
 	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
-			gpsdata->dev.path,gpsdata->dev.subtype,gpsdata->dev.baudrate);
+			devlistp->path, devlistp->driver, devlistp->baudrate);
 	    exit(0);
 	}
 
@@ -288,11 +297,7 @@ int main(int argc, char **argv)
 	}
 
 	   if (to_nmea) {
-   #ifdef OLDSTYLE_ENABLE
-	       (void)gps_query(gpsdata, "N=0");
-   #else
-	       (void)gps_query(gpsdata, "?CONFIGDEV={\"mode\":0}\r\n"); 
-   #endif /* OLDSTYLE_ENABLE */
+	       (void)gps_query(gpsdata, "?CONFIGDEV={\"device\":%s,\"mode\":0}\r\n", device); 
 	       if (gpsdata->dev.driver_mode != MODE_NMEA) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
 		status = 1;
@@ -300,11 +305,7 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	else if (to_binary) {
-#ifdef OLDSTYLE_ENABLE
-	    (void)gps_query(gpsdata, "N=1");
-#else
-	    (void)gps_query(gpsdata, "?CONFIGDEV={\"mode\":1}\r\n");
-#endif /* OLDSTYLE_ENABLE */
+	    (void)gps_query(gpsdata, "?CONFIGDEV={\"device\":%s,\"mode\":1}\r\n", device);
 	    if (gpsdata->dev.driver_mode != MODE_BINARY) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->dev.path);
 		status = 1;
@@ -314,14 +315,10 @@ int main(int argc, char **argv)
 	if (speed != NULL) {
 	    char parity = 'N';
 	    char stopbits = '1';
-	    if (strchr(speed, ':')==NULL)
-		(void)gps_query(gpsdata, "B=%s",
-#ifdef OLDSTYLE_ENABLE
-				"B=%s", 			    
-#else
-				"?CONFIGDEV={\"bps\":%s}", 
-#endif /* OLDSTYLE_ENABLE */
-				speed);
+	    if (strchr(speed, ':') == NULL)
+		(void)gps_query(gpsdata,
+				"?CONFIGDEV={\"device\":%s,\"bps\":%s}\r\n", 
+				device, speed);
 	    else {
 		char *modespec = strchr(speed, ':');
 		/*@ +charint @*/
@@ -345,12 +342,8 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(gpsdata, 
-#ifdef OLDSTYLE_ENABLE
-				    "B=%s 8 %c %c\n",
-#else
-				    "?CONFIGDEV={\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
-#endif /* OLDSTYLE_ENABLE */
-				    speed, parity, stopbits);
+				    "?CONFIGDEV={\"device\":%s,\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
+				    device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
 		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d\n", 
@@ -364,12 +357,8 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(gpsdata, 
-#ifdef OLDSTYLE_ENABLE
-			    "C=%s\n", 			    
-#else
-			    "?CONFIGDEV={\"cycle\":%s}\n", 
-#endif /* OLDSTYLE_ENABLE */
-			    rate);
+			    "?CONFIGDEV={\"device\":%s,\"cycle\":%s}\n", 
+			    device, rate);
 	}
 #endif /* ALLOW_RECONFIGURE */
 	(void)gps_close(gpsdata);

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-typedef enum {integer, real, string, boolean, 
+typedef enum {integer, real, string, boolean, character,
 	      object, structobject, array, check} json_type;
 
 #define nullbool	-1	/* not true, not false */
@@ -34,6 +34,7 @@ struct json_attr_t {
 	double *real;
 	char *string;
 	bool *boolean;
+	char *character;
 	struct json_array_t array;
 	size_t offset;
     } addr;
@@ -41,6 +42,7 @@ struct json_attr_t {
 	int integer;
 	double real;
 	bool boolean;
+	char character;
 	char *check;
     } dflt;
     size_t len;

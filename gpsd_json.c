@@ -189,14 +189,23 @@ void json_device_dump(struct gps_device_t *device,
 	(void)strlcat(reply, "\",", replylen);
     }
     if (device->subtype[0] != '\0') {
-	(void)strlcat(reply, "\"subtype\":\"", replylen);
+	(void)strlcat(reply, "\"subtype\":\",", replylen);
 	(void)strlcat(reply, 
 		      device->subtype,
 		      replylen);
 	(void)strlcat(reply, "\",", replylen);
     }
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';
+    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
+		   device->gpsdata.dev.driver_mode,
+		   (int)gpsd_get_speed(&device->ttyset),
+		   (int)device->gpsdata.dev.parity,
+		   device->gpsdata.dev.stopbits,
+		   device->gpsdata.dev.cycle);
+    if (device->device_type->rate_switcher != NULL)
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		       ",\"mincycle\":%2.2f",
+		       device->device_type->min_cycle);
     (void)strlcat(reply, "}", replylen);
 }
 

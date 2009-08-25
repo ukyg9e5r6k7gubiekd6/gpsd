@@ -55,6 +55,8 @@ has to be inline in the struct.
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
+#define JSONDEBUG
+
 static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
@@ -87,6 +89,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		if (cursor->dflt.boolean != nullbool)
 		    cursor->addr.boolean[offset] = cursor->dflt.boolean;
 		break;
+	    case character:
+		cursor->addr.character[offset] = cursor->dflt.character;
+		break;
 	    case object:/* silences a compiler warning */
 	    case structobject:
 	    case array:
@@ -111,6 +116,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		/* nullbool default says not to set the value at all */
 		if (cursor->dflt.boolean != nullbool)
 		   *((bool *)lptr) = cursor->dflt.boolean;
+		break;
+	    case character:
+		lptr[0] = cursor->dflt.character;
 		break;
 	    case object:	/* silences a compiler warning */
 	    case structobject:
@@ -267,6 +275,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case boolean:
 		    cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
 		    break;
+		case character:
+		    if (strlen(valbuf) > 1)
+			return JSON_ERR_STRLONG;
+		    else
+			cursor->addr.character[offset] = valbuf[0];
+		    break;
 		case structobject:	/* silences a compiler warning */
 		case object:
 		case array:
@@ -296,6 +310,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		    break;
 		case boolean:
 		    *((bool *)lptr) = (bool)!strcmp(valbuf, "true");
+		    break;
+		case character:
+		    if (strlen(valbuf) > 1)
+			return JSON_ERR_STRLONG;
+		    else
+			lptr[0] = valbuf[0];
 		    break;
 		case object:	/* silences a compiler warning */
 		case structobject:
@@ -400,6 +420,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	case integer:
 	case real:
 	case boolean:
+	case character:
 	case array:
 	case check:
 #ifdef JSONDEBUG
