@@ -966,6 +966,7 @@ struct gps_data_t {
 #define WATCH_RAW	0x02u
 #define WATCH_NOJITTER	0x04u
 #define WATCH_SCALED	0x08u
+#define WATCH_NEWSTYLE	0x10u	/* for test purposes only - will go away */
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);

@@ -1075,19 +1075,17 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 		}
 		gps_timeout = XtAppAddTimeOut(app, 1000, handle_gps, app);
 	} else {
+	        gps_mask_t mask;
 		timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);
 		timer = time(NULL);
 
 		gps_set_raw_hook(gpsdata, update_panel);
 
-		/* 
-		 * We could use gps_stream() here, but coding it this way 
-		 * gives us a forced test of new protocol.
-		 */
+		// WATCH_NEWSTYLE forces new protocol, for test purposes 
+		mask = WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE;
 		if (jitteropt)
-		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":1,\"raw\":1};");
-		else
-		    (void)gps_query(gpsdata, "?WATCH={\"enable\":true,\"buffer_policy\":0,\"raw\":1};");
+		    mask |= WATCH_NOJITTER;
+		(void)gps_stream(gpsdata, mask);
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
 		    (XtPointer)XtInputReadMask, handle_input, NULL);
