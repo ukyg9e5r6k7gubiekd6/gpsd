@@ -26,12 +26,17 @@ shift $(($OPTIND - 1))
 # Enables us to turn debugging up high without screwing up the diff checks
 # First expression filters out device notifications on old protocol.
 # Second and third filter out gpsd log messages.
-# Fouth filters out gps.py verbose loggging
+# Fourth filters out gps.py verbose loggging
 # Fifth filters out new-style WATCH responses
 # Sixth filters out new-style DEVICE responses
 # Seventh filters out new-style VERSION responses
 # Eighth filters out device fields in new-style responses.
 GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/\"device\":[^,]*,//"
+
+# Use ALTFILTER to set up custom filtering when a regression test fails
+# This example filters out altitude and some fields computed by gpsd's error modeling - these are fragile in the prsence of changes 
+# to the fix-buffering logic. Note that as the last attribute mode needs to be handled.
+#ALTFILTER="-e s/\"alt\":[^,]*,// -e s/\"ep[vhs]\":[-+0-9.]*// -e s/,\"mode\":[^}]*//"
 
 case $mode in
     regress)
@@ -41,10 +46,12 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >$dir/test.chk;
-		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d'
-		diff -ub ${f}.chk $dir/test.chk >$dir/diff
-		diff -ub ${f}.chk $dir/test-trunc.chk >$dir/diff-trunc
+		$do gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
+		$do sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER}
+		$do sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER}
+		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER}
+		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff
+		diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc
 		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
 		    errors=`expr $errors + 1`;
 		    cat $dir/diff
@@ -55,7 +62,7 @@ case $mode in
 	    fi
 	    total=`expr $total + 1`;
         done; 
-	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/diff $dir/diff-trunc; 
+	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/test-whole.chk $dir/diff $dir/diff-trunc; 
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
