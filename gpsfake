@@ -140,7 +140,7 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     if progress:
-        baton = Baton("Proc***essing %s" % ",".join(arguments), "done")
+        baton = Baton("Processing %s" % ",".join(arguments), "done")
     else:
         print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
@@ -175,7 +175,12 @@ if __name__ == '__main__':
         try:
             if pipe:
                 test.client_add(client_init + "\n")
-                time.sleep(1)	# Give daemon time to get ready for the feeds.
+                # Give daemon time to get ready for the feeds.
+                # Without a delay here there's a window for test
+                # sentences to arrive before the watch takes effect.
+                # This needs to increase if leading sentences in
+                # test loads aren't being process.
+                time.sleep(1)
             test.run()
         except socket.error, msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)

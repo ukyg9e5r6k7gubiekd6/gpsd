@@ -338,6 +338,9 @@ class TestSession:
     CLOSE_DELAY = 1
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False):
         "Initialize the test session by launching the daemon."
+        self.prefix = prefix
+        self.port = port
+        self.options = options
         self.verbose = verbose
         self.predump = predump
         self.daemon = DaemonInstance()
@@ -353,13 +356,14 @@ class TestSession:
             self.port = gps.GPSD_PORT
         self.progress = lambda x: None
         self.reporter = lambda x: None
-        for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
-            signal.signal(sig, lambda signal, frame: self.cleanup())
-        self.daemon.spawn(background=True, prefix=prefix, port=self.port, options=options)
-        self.daemon.wait_pid()
         self.default_predicate = None
         self.fd_set = []
         self.threadlock = None
+    def spawn(self):
+        for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, lambda signal, frame: self.cleanup())
+        self.daemon.spawn(background=True, prefix=self.prefix, port=self.port, options=self.options)
+        self.daemon.wait_pid()
     def set_predicate(self, pred):
         "Set a default go predicate for the session."
         self.default_predicate = pred

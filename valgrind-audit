@@ -11,6 +11,7 @@ test = gpsfake.TestSession(prefix=invocation, options="-D %d" % debuglevel)
 test.progress = sys.stderr.write
 
 try:
+    test.spawn()
     print "\n*** Test #1: Normal single-client-session behavior."
     print "**** Add a GPS.\n"
     gps1 = test.gps_add("test/bu303-moving.log")
