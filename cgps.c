@@ -754,18 +754,9 @@ int main(int argc, char *argv[])
   /* Open the stream to gpsd. */
   /*@i@*/gpsdata = gps_open(source.server, source.port);
   if (!gpsdata) {
-    switch ( errno ) {
-    case NL_NOSERVICE:  err_str = "can't get service entry"; break;
-    case NL_NOHOST:     err_str = "can't get host entry"; break;
-    case NL_NOPROTO:    err_str = "can't get protocol entry"; break;
-    case NL_NOSOCK:     err_str = "can't create socket"; break;
-    case NL_NOSOCKOPT:  err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
-    case NL_NOCONNECT:  err_str = "can't connect to host"; break;
-    default:		    err_str = "Unknown"; break;
-    }
     (void)fprintf( stderr,
 		   "cgps: no gpsd running or network error: %d, %s\n",
-		   errno, err_str);
+		   errno, netlib_errstr(errno));
     exit(2);
   }
 

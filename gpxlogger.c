@@ -283,33 +283,9 @@ static int socket_mainloop(void)
 
     gpsdata = gps_open(source.server, source.port);
     if (!gpsdata) {
-	char *err_str;
-	switch (errno) {
-	case NL_NOSERVICE:
-	    err_str = "can't get service entry";
-	    break;
-	case NL_NOHOST:
-	    err_str = "can't get host entry";
-	    break;
-	case NL_NOPROTO:
-	    err_str = "can't get protocol entry";
-	    break;
-	case NL_NOSOCK:
-	    err_str = "can't create socket";
-	    break;
-	case NL_NOSOCKOPT:
-	    err_str = "error SETSOCKOPT SO_REUSEADDR";
-	    break;
-	case NL_NOCONNECT:
-	    err_str = "can't connect to host";
-	    break;
-	default:
-	    err_str = "Unknown";
-	    break;
-	}
 	fprintf(stderr,
 		"%s: no gpsd running or network error: %d, %s\n",
-		progname, errno, err_str);
+		progname, errno, netlib_errstr(errno));
 	exit(1);
     }
 

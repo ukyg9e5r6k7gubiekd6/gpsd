@@ -172,8 +172,7 @@ static ssize_t readpkt(void)
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation -sefparams +charint @*/
-	assert(fwrite(session.packet.outbuffer,
-		      sizeof(char), session.packet.outbuflen,
+	assert(fwrite(session.packet.outbuffer,		      sizeof(char), session.packet.outbuflen,
 		      logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
@@ -499,14 +498,15 @@ int main (int argc, char **argv)
     if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {
 
 	session.gpsdata.gps_fd = netlib_connectsock(source.server, source.port, "tcp");
-	if (session.gpsdata.gps_fd == -1) {
+	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
-			  "%s: connection failure on %s:%s, error %d.\n",
-			  argv[0], source.server, source.port, session.gpsdata.gps_fd);
+			  "%s: connection failure on %s:%s, error %d = %s.\n",
+			  argv[0], source.server, source.port, session.gpsdata.gps_fd, netlib_errstr(session.gpsdata.gps_fd));
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
 	/*@ -compdef @*/
+	// FIXME: This code needs to become protocol-agnostic
 	if (source.device != NULL)
 	    command((char *)buf, sizeof(buf), "F=%s\r\n", source.device);
 	else

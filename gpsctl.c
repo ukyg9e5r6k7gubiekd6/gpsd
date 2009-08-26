@@ -73,7 +73,7 @@ static void onsig(int sig)
 int main(int argc, char **argv)
 {
     int option, status;
-    char *err_str, *device = NULL, *devtype = NULL; 
+    char *device = NULL, *devtype = NULL; 
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
     bool lowlevel=false, echo=false;
@@ -222,17 +222,8 @@ int main(int argc, char **argv)
 	/* Try to open the stream to gpsd. */
 	/*@i@*/gpsdata = gps_open(NULL, NULL);
 	if (gpsdata == NULL) {
-	    switch (errno) {
-	    case NL_NOSERVICE: err_str ="can't get service entry"; break;
-	    case NL_NOHOST:    err_str ="can't get host entry"; break;
-	    case NL_NOPROTO:   err_str ="can't get protocol entry"; break;
-	    case NL_NOSOCK:    err_str ="can't create socket"; break;
-	    case NL_NOSOCKOPT: err_str ="error SETSOCKOPT SO_REUSEADDR"; break;
-	    case NL_NOCONNECT: err_str ="can't connect"; break;
-	    default:           err_str ="Unknown"; break;
-	    } 
 	    gpsd_report(LOG_ERROR, "no gpsd running or network error: %s.\n", 
-			  err_str);
+			netlib_errstr(errno));
 	    lowlevel = true;
 	}
     }

@@ -462,6 +462,7 @@ extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_
 extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct gps_fix_t *);
 extern void gpsd_clear_data(struct gps_device_t *);
 extern int netlib_connectsock(const char *, const char *, const char *);
+extern char /*@observer@*/ *netlib_errstr(const int);
 extern char /*@observer@*/ *sock2ip(int);
 
 extern void ntpshm_init(struct gps_context_t *, bool);

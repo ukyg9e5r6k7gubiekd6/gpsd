@@ -588,6 +588,14 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 }
 #endif /* HAVE_LIBPTHREAD */
 
+extern char /*@observer@*/ *gps_errstr(const int err)
+{
+    /* 
+     * We might ad out own error codes in the future, e.g for
+     * protocol compatibility checks
+     */
+    return netlib_errstr(err); 
+}
 
 #ifdef TESTMAIN
 /*

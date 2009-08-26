@@ -66,6 +66,10 @@ C:
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>unsigned int<parameter>flags</parameter></paramdef>
 </funcprototype>
+<funcprototype>
+<funcdef>char *<function>gps_errstr</function></funcdef>
+    <paramdef>int <parameter>err</parameter></paramdef>
+</funcprototype>
 <funcsynopsisinfo>
 
 Python:
@@ -183,6 +187,10 @@ calling <function>gps_close()</function>.
 function previously set with <function>gps_set_callback()</function>.
 After the invocation of this function no operation will be done when
 new data arrives.</para>
+
+<para><function>gps_errstr()</function> returns an ASCII string (in
+English) describing the error indicated by a nonzero return value from
+<function>gps_open()</function>.</para>
 
 <para>Consult <filename>gps.h</filename> to learn more about the data members 
 and associated timestamps.  Note that information will accumulate

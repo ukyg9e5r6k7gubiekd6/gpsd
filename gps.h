@@ -969,13 +969,14 @@ struct gps_data_t {
 #define WATCH_NEWSTYLE	0x10u	/* for test purposes only - will go away */
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
-int gps_close(struct gps_data_t *);
-int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
-int gps_poll(struct gps_data_t *gpsdata);
-int gps_stream(struct gps_data_t *gpsdata, unsigned int flags);
-void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level));
-int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
-int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
+extern int gps_close(struct gps_data_t *);
+extern int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
+extern int gps_poll(struct gps_data_t *gpsdata);
+extern int gps_stream(struct gps_data_t *gpsdata, unsigned int flags);
+extern void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level));
+extern int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
+extern int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
+extern char /*@observer@*/ *gps_errstr(const int);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
@@ -1018,7 +1019,7 @@ extern int gps_unpack(char *, struct gps_data_t *);
 #define NL_NOPROTO	-3	/* can't get protocol entry */
 #define NL_NOSOCK	-4	/* can't create socket */
 #define NL_NOSOCKOPT	-5	/* error SETSOCKOPT SO_REUSEADDR */
-#define NL_NOCONNECT	-6	/* can't connect to host */
+#define NL_NOCONNECT	-6	/* can't connect to host/socket pair */
 
 #define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
 #define DEFAULT_RTCM_PORT	"2101"	/* IANA assignment */

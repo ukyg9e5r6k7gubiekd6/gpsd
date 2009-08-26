@@ -1036,40 +1036,16 @@ get_resource(Widget w, char *name, char *default_value)
 void
 handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 {
-	char *err_str = NULL;
 	char error[128];
 	static bool dialog_posted = false;
 
 	/*@i@*/gpsdata = gps_open(source.server, source.port);
 	if (!gpsdata) {
-		switch (errno ){
-		case NL_NOSERVICE:
-			err_str = "can't get service entry";
-			break;
-		case NL_NOHOST:
-			err_str = "can't get host entry";
-			break;
-		case NL_NOPROTO:
-			err_str = "can't get protocol entry";
-			break;
-		case NL_NOSOCK:
-			err_str = "can't create socket";
-			break;
-		case NL_NOSOCKOPT:
-			err_str = "error SETSOCKOPT SO_REUSEADDR";
-			break;
-		case NL_NOCONNECT:
-			err_str = "can't connect to host";
-			break;
-		default:
-			err_str = "Unknown";
-			break;
-		}
 		if (!gps_lost && !dialog_posted) {
 			(void)snprintf(error, sizeof(error),
 			    "No GPS data available.\n\n%s\n\n"
 			    "Check the connection to gpsd and if "
-			    "gpsd is running.", err_str);
+			    "gpsd is running.", gps_errstr(errno));
 			(void)err_dialog(toplevel, error);
 			dialog_posted = true;
 		}
