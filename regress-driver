@@ -35,7 +35,7 @@ GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATC
 
 case $mode in
     regress)
-        echo "Testing the daemon..."
+        echo "Testing the daemon..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
             dir=`dirname $f`
@@ -65,7 +65,7 @@ case $mode in
         fi
         ;;
     superraw)
-        echo "Testing super-raw mode..."
+        echo "Testing super-raw mode..." >&2
         for f in $*; do
             dir=`dirname $f`
             $do gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
@@ -75,14 +75,14 @@ case $mode in
         done; rm $dir/test[12].chk
         ;;
     build)
-	echo "Rebuilding regressions..."
+	echo "Rebuilding regressions..." >&2
         for f in $*; do
             gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER} >${f}.chk;
         done
         exit 0
         ;;
     view)
-        echo "Viewing..."
+        echo "Viewing..." >&2
         for f in $*; do
             $do gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER}
         done
