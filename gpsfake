@@ -138,50 +138,52 @@ def fakehook(linenumber, fakegps):
         baton.twirl()
     return True
 
-if progress:
-    baton = Baton("Processing %s" % ",".join(arguments), "done")
-else:
-    print >>sys.stderr, "Processing %s" % ",".join(arguments)
+if __name__ == '__main__':
+    if progress:
+        baton = Baton("Proc***essing %s" % ",".join(arguments), "done")
+    else:
+        print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
-test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
+    test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
 
-if pipe:
-    test.reporter = sys.stdout.write
-    if verbose:
-        progress = False
-        test.progress = sys.stdout.write
-
-try:
-    for logfile in arguments:
-        try:
-            test.gps_add(logfile, speed=speed, pred=fakehook)
-        except gpsfake.TestLoadError, e:
-            sys.stderr.write("gpsfake: " + e.msg + "\n")
-            raise SystemExit, 1
-        except gpsfake.PacketError, e:
-            sys.stderr.write("gpsfake: " + e.msg + "\n")
-            raise SystemExit, 1
-        except gpsfake.DaemonError, e:
-            sys.stderr.write("gpsfake: " + e.msg + "\n")
-            raise SystemExit, 1
-        except IOError, e:
-            sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
-            raise SystemExit, 1
-        except OSError:
-            sys.stderr.write("gpsfake: can't open pty.\n")
-            raise SystemExit, 1
+    if pipe:
+        test.reporter = sys.stdout.write
+        if verbose:
+            progress = False
+            test.progress = sys.stdout.write
+            print "Foo!"
 
     try:
-        if pipe:
-            test.client_add(client_init + "\n")
-        test.run()
-    except socket.error, msg:
-        sys.stderr.write("gpsfake: socket error %s.\n" % msg)
-        raise SystemExit, 1
-finally:
-    test.cleanup();
+        for logfile in arguments:
+            try:
+                test.gps_add(logfile, speed=speed, pred=fakehook)
+            except gpsfake.TestLoadError, e:
+                sys.stderr.write("gpsfake: " + e.msg + "\n")
+                raise SystemExit, 1
+            except gpsfake.PacketError, e:
+                sys.stderr.write("gpsfake: " + e.msg + "\n")
+                raise SystemExit, 1
+            except gpsfake.DaemonError, e:
+                sys.stderr.write("gpsfake: " + e.msg + "\n")
+                raise SystemExit, 1
+            except IOError, e:
+                sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
+                raise SystemExit, 1
+            except OSError:
+                sys.stderr.write("gpsfake: can't open pty.\n")
+                raise SystemExit, 1
 
-if progress:
-    baton.end()
+        try:
+            if pipe:
+                test.client_add(client_init + "\n")
+            test.run()
+        except socket.error, msg:
+            sys.stderr.write("gpsfake: socket error %s.\n" % msg)
+            raise SystemExit, 1
+    finally:
+        test.cleanup();
+
+    if progress:
+        baton.end()
 
 # gpsfake ends here
