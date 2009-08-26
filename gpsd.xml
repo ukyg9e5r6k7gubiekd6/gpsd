@@ -451,8 +451,7 @@ bit, not a per-device one.  The j=0 setting is hyper-correct and never
 displays stale data, but may produce a jittery display; the j=1 setting
 allows stale data but smooths the display.</para>
 
-<para>(At protocol level below 3, there was no J command.  Note, this
-command is experimental and its semantics are subject to change.)</para>
+<para>(At protocol level below 3, there was no J command.)</para>
 </listitem>
 </varlistentry>
 
@@ -1813,6 +1812,12 @@ Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the
 start of its update cycle (which most consumer-grade NMEA GPSes do
 not) and it is after 2099, then the century part of the dates
 <application>gpsd</application> delivers will be wrong.</para>
+
+<para>Generation of position error estimates (eph, epv, epd, eps, epc)
+from the incomplete data handed back by GPS reporting protocols
+involves both a lot of mathematical black art and fragile
+device-dependent assumptions.  This code has been bug-prone in tbe
+past and problems may still lurk there.</para>
 
 </refsect1>
 <refsect1 id='files'><title>FILES</title>

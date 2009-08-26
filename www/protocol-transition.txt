@@ -62,7 +62,7 @@ gps_stream(gpsdata, WATCH_ENABLE)
 -------------------------------------------------------------------
 
 This will tell whatever version of the client library your application
-dynamically links to emit shat it should under the hood, either okd
+dynamically links to emit shat it should under the hood, either old
 or new protocol. Unless a target system carries a version of the
 libgps shared library different from the gpsd version, everything
 should work and continue to work through future updates.
@@ -210,6 +210,10 @@ gpsd could include other kinds of data, such as the take from
 a digital compass, water-temperature sensors, or even aircraft
 transponders.
 
+I said "almost" because there are two single-shot commands left,
+?TPV and ?SKY.  These still exist mainly for test purposes and
+may be removed in the future.
+
 == How the command set has changed == 
 
 If your code issues old-protocol commands A, D, E, M, P, T, U, or V,
@@ -242,7 +246,7 @@ The old 'K' command is replaced by ?DEVICES.
 
 The old 'L' command is replaced by ?VERSION.  Note that the daemon now
 ships a version response to each client on connect, so it will
-probably never be necessaery for you to issue A ?VERSION request.
+probably never be necessary for you to issue a ?VERSION request.
 
 The old 'O' command is replaced by ?TPV'.  Note: it is possible
 this command will be removed in the final version of the new
@@ -256,7 +260,7 @@ The old 'R' command has been replaced by an optional attribute in
 ?WATCH.  Include the WATCH_RAW mask in the argument of
 gps_stream(), or set a raw hook before alling gps_stream().
 
-The old 'W' command has been replaced by ?WATCH. Calll gps_stream()
+The old 'W' command has been replaced by ?WATCH. Call gps_stream()
 with whatever option you want to set.
 
 The old 'X' command is gone.  Instead, you will see an object of
@@ -294,5 +298,5 @@ The top-level members ndevices and devicelist (used only on the client
 side) have been replaced by an array of struct devconfig_t structures.
 Data in this structure should be considered valid only when
 DEVICELIST_SET is on in the top-level set member.  Storage for
-pathnames is no longer dynamically allocated, but rather lives in a
-union with several other substructures.
+pathnames is no longer dynamically allocated, but static; to save
+space, it lives in a union with several other substructures.
