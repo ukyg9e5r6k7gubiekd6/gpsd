@@ -151,8 +151,7 @@ if __name__ == '__main__':
         if verbose:
             progress = False
             test.progress = sys.stdout.write
-            print "Foo!"
-
+    test.spawn()
     try:
         for logfile in arguments:
             try:
@@ -176,6 +175,7 @@ if __name__ == '__main__':
         try:
             if pipe:
                 test.client_add(client_init + "\n")
+                time.sleep(1)	# Give daemon time to get ready for the feeds.
             test.run()
         except socket.error, msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
