@@ -40,6 +40,7 @@ int json_rtcm2_read(const char *buf,
 	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
 
     int status, satcount;
+
     const struct json_attr_t rtcm1_satellite[] = {
 	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
 	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
@@ -83,9 +84,20 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+    const struct json_attr_t rtcm5_satellite[] = {
+	{"ident",       uinteger, STRUCTOBJECT(struct consat_t, ident)},
+	{"iodl",        boolean,  STRUCTOBJECT(struct consat_t, iodl)},
+	{"health",      uinteger, STRUCTOBJECT(struct consat_t, health)},
+	{"health_en",   boolean,  STRUCTOBJECT(struct consat_t, health_en)},
+	{"new_data",    boolean,  STRUCTOBJECT(struct consat_t, new_data)},
+	{"los_warning", boolean,  STRUCTOBJECT(struct consat_t, los_warning)},
+	{"tou",         uinteger, STRUCTOBJECT(struct consat_t, tou)},
+	{NULL},
+    };
     const struct json_attr_t json_rtcm5[] = {
-	// FIXME
 	RTCM2_HEADER
+        {"satellites", array,	STRUCTARRAY(rtcm2->conhealth.sat, 
+				   rtcm5_satellite, &satcount)},
 	{NULL},
     };
 
@@ -130,6 +142,8 @@ int json_rtcm2_read(const char *buf,
 	status = json_read_object(buf, json_rtcm4, endptr);
     } else if (strstr(buf, "\"type\":5") != NULL)
 	status = json_read_object(buf, json_rtcm5, endptr);
+	if (status == 0)
+	    rtcm2->conhealth.nentries = (unsigned)satcount;
     else if (strstr(buf, "\"type\":6") != NULL)
 	status = json_read_object(buf, json_rtcm6, endptr);
     else if (strstr(buf, "\"type\":7") != NULL)

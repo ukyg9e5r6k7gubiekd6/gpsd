@@ -617,7 +617,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
 	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%2u,\"iodl\":%1u,\"health\":%1u,\"snr\":%2d,\"health_en\":%1u,\"new_data\":%1u,\"los_warning\":%1u,\"los_warning\":%2u},",
+			   "{\"ident\":%2u,\"iodl\":%1u,\"health\":%1u,\"snr\":%2d,\"health_en\":%1u,\"new_data\":%1u,\"los_warning\":%1u,\"tou\":%2u},",
 			   csp->ident,
 			   (unsigned)csp->iodl,
 			   (unsigned)csp->health,
