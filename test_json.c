@@ -109,12 +109,14 @@ static const char *json_str4 = "{\"flag1\":true,\"flag2\":false}";
 static bool flag1, flag2;
 static double dftreal;
 static int dftinteger;
+static int dftuinteger;
 
 static const struct json_attr_t json_attrs_4[] = {
-    {"dftint", integer, .addr.integer = &dftinteger, .dflt.integer = 5},
-    {"dftreal",real,    .addr.real = &dftreal,       .dflt.real = 23.17},
-    {"flag1",  boolean, .addr.boolean = &flag1,},
-    {"flag2",  boolean, .addr.boolean = &flag2,},
+    {"dftint",  integer, .addr.integer = &dftinteger, .dflt.integer = -5},
+    {"dftuint", integer, .addr.uinteger = &dftuinteger, .dflt.uinteger = 10},
+    {"dftreal", real,    .addr.real = &dftreal,       .dflt.real = 23.17},
+    {"flag1",   boolean, .addr.boolean = &flag1,},
+    {"flag2",   boolean, .addr.boolean = &flag2,},
     {NULL},
 };
 
@@ -208,7 +210,8 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     status = json_read_object(json_str4, json_attrs_4, NULL);
     assert_case(4, status);
-    assert_integer("dftint", dftinteger, 5);	/* did the default work? */
+    assert_integer("dftint", dftinteger, -5);	/* did the default work? */
+    assert_integer("dftuint", dftuinteger, 10);	/* did the default work? */
     assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
     assert_boolean("flag1", flag1, true);
     assert_boolean("flag2", flag2, false);

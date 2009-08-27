@@ -73,6 +73,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    case integer:
 		cursor->addr.integer[offset] = cursor->dflt.integer;
 		break;
+	    case uinteger:
+		cursor->addr.uinteger[offset] = cursor->dflt.uinteger;
+		break;
 	    case real:
 		cursor->addr.real[offset] = cursor->dflt.real;
 		break;
@@ -103,6 +106,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    {
 	    case integer:
 		*((int *)lptr) = cursor->dflt.integer;
+		break;
+	    case uinteger:
+		*((unsigned int *)lptr) = cursor->dflt.uinteger;
 		break;
 	    case real:
 		*((double *)lptr) = cursor->dflt.real;
@@ -261,6 +267,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		case integer:
 		    cursor->addr.integer[offset] = atoi(valbuf);
 		    break;
+		case uinteger:
+		    cursor->addr.uinteger[offset] = (unsigned)atoi(valbuf);
+		    break;
 		case real:
 		    cursor->addr.real[offset] = atof(valbuf);
 		    break;
@@ -299,6 +308,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		{
 		case integer:
 		    *((int *)lptr) = atoi(valbuf);
+		    break;
+		case uinteger:
+		    *((int *)lptr) = (unsigned)atoi(valbuf);
 		    break;
 		case real:
 		    *((double *)lptr) = atof(valbuf);
