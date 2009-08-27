@@ -80,15 +80,14 @@ const char *json_error_string(int);
  * Use the following macros to declare template initializers for structobject 
  * arrays.  Writing the equivalents out by hand is error-prone.
  *
- * STRUCTOBJECT takes a type t (one of the enumerated scalar field types 
- * above), a structure name s, and a fieldname f in s.  
+ * STRUCTOBJECT takes a structure name s, and a fieldname f in s. 
  *
  * STRUCTARRAY takes the name of a structure array, a pointer to a an 
  * initializer defining the subobject type, and the address of an integer to
  * store the length in. 
  */
-#define STRUCTOBJECT(t, s, f)	.type = t, .addr.offset = offsetof(s, f)
-#define STRUCTARRAY(a, e, n)	.type = array, \
+#define STRUCTOBJECT(s, f)	.addr.offset = offsetof(s, f)
+#define STRUCTARRAY(a, e, n) \
 	.addr.array.element_type = structobject, \
 	.addr.array.arr.objects.subtype = e, \
 	.addr.array.arr.objects.base = (char*)a, \

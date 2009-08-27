@@ -41,16 +41,16 @@ int json_rtcm2_read(const char *buf,
 
     int status, satcount;
     const struct json_attr_t rtcm1_satellite[] = {
-	{"ident",     STRUCTOBJECT(uinteger, struct rangesat_t, ident)},
-	{"udre",      STRUCTOBJECT(uinteger, struct rangesat_t, udre)},
-	{"issuedata", STRUCTOBJECT(real, struct rangesat_t, issuedata)},
-	{"rangerr",   STRUCTOBJECT(real, struct rangesat_t, rangerr)},
-	{"rangerate", STRUCTOBJECT(real, struct rangesat_t, rangerate)},
+	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
+	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
+	{"issuedata", real,     STRUCTOBJECT(struct rangesat_t, issuedata)},
+	{"rangerr",   real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
+	{"rangerate", real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
 	{NULL},
     };
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
-        {"satellites", STRUCTARRAY(rtcm2->ranges.sat, 
+        {"satellites", array,	STRUCTARRAY(rtcm2->ranges.sat, 
 				   rtcm1_satellite, &satcount)},
 	{NULL},
     };
