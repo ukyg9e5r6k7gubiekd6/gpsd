@@ -285,7 +285,7 @@ static int socket_mainloop(void)
     if (!gpsdata) {
 	fprintf(stderr,
 		"%s: no gpsd running or network error: %d, %s\n",
-		progname, errno, netlib_errstr(errno));
+		progname, errno, gps_errstr(errno));
 	exit(1);
     }
 

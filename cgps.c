@@ -756,7 +756,7 @@ int main(int argc, char *argv[])
   if (!gpsdata) {
     (void)fprintf( stderr,
 		   "cgps: no gpsd running or network error: %d, %s\n",
-		   errno, netlib_errstr(errno));
+		   errno, gps_errstr(errno));
     exit(2);
   }
 
