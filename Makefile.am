@@ -146,6 +146,7 @@ libgpsd_c_sources = \
 	json.c \
 	libgps.c \
 	libgps_json.c \
+	rtcm2_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
 	net_dgpsip.c \

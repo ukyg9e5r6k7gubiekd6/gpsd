@@ -12,6 +12,7 @@ void json_tpv_dump(struct gps_data_t *, struct gps_fix_t *, char *, size_t);
 void json_sky_dump(struct gps_data_t *, char *, size_t);
 void json_device_dump(struct gps_device_t *, char *, size_t);
 void json_watch_dump(struct policy_t *, char *, size_t);
+int json_rtcm2_read(const char *, char *, size_t, struct rtcm2_t *, const char **);
 int libgps_json_unpack(const char *, struct gps_data_t *);
 
 /* gps_json.h ends here */
