@@ -1,6 +1,6 @@
 # Synthetic test load for the RTCM104 undumper.
 # Has examples of each message type in it.
-H	9	268	249.6	0	5	0
+H	1	268	249.6	0	5	0
 S	13	0	3	249.6	-26.120	0.068
 S	2	0	73	249.6	1.160	-0.080
 S	8	0	22	249.6	23.760	0.028
