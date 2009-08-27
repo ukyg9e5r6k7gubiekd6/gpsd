@@ -114,7 +114,11 @@ struct gps_fix_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
-    typedef enum {gps, glonass, galileo, unknown} navsystem;
+/* enumerated values for "system" fields */
+#define NAVSYSTEM_UNKNOWN	0
+#define NAVSYSTEM_GPS   	1
+#define NAVSYSTEM_GLONASS	2
+#define NAVSYSTEM_GALILEO	3
 
 struct rtcm2_t {
     /* header contents */
@@ -143,8 +147,11 @@ struct rtcm2_t {
 	} ecef;
 	struct {		/* data from type 4 messages */
 	    bool valid;		/* is message well-formed? */
-	    navsystem system;
-	    enum {local, global, invalid} sense;
+	    int system;
+	    int sense;
+#define SENSE_INVALID	0
+#define SENSE_LOCAL   	1
+#define SENSE_GLOBAL	2
 	    char datum[6];
 	    double dx, dy, dz;
 	} reference;
@@ -282,14 +289,14 @@ struct rtcm3_t {
 	} rtcm3_1004;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
-	    navsystem system;		/* Which system is it? */
+	    int system;			/* Which system is it? */
 	    bool reference_station;	/* Reference-station indicator */
 	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */
 	} rtcm3_1005;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
-	    navsystem system;		/* Which system is it? */
+	    int system;		/* Which system is it? */
 	    bool reference_station;	/* Reference-station indicator */
 	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */

@@ -147,9 +147,9 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
 	    tp->msg_data.reference.system =
-		    (m->w3.dgnss==0) ? gps :
-			    ((m->w3.dgnss==1) ? glonass : unknown);
-	    tp->msg_data.reference.sense = (m->w3.dat != 0) ? global : local;
+		    (m->w3.dgnss==0) ? NAVSYSTEM_GPS :
+			    ((m->w3.dgnss==1) ? NAVSYSTEM_GLONASS : NAVSYSTEM_UNKNOWN);
+	    tp->msg_data.reference.sense = (m->w3.dat != 0) ? SENSE_GLOBAL : SENSE_LOCAL;
 	    if (m->w3.datum_alpha_char1){
 		tp->msg_data.reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
 	    }
@@ -171,7 +171,7 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 		tp->msg_data.reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
 		tp->msg_data.reference.dz = m->w6.dz * DXYZ_SCALE;
 	    } else 
-		tp->msg_data.reference.sense = invalid;
+		tp->msg_data.reference.sense = SENSE_INVALID;
 	}
 	break;
     case 5:
@@ -325,7 +325,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
 	    m->w3.dgnss = tp->msg_data.reference.system;
-	    m->w3.dat = (unsigned)(tp->msg_data.reference.sense == global);
+	    m->w3.dat = (unsigned)(tp->msg_data.reference.sense == SENSE_GLOBAL);
 	    /*@ -predboolothers -type @*/
 	    if (tp->msg_data.reference.datum[0])
 		m->w3.datum_alpha_char1 = tp->msg_data.reference.datum[0];
@@ -348,7 +348,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	    else
 		m->w4.datum_sub_div_char3 = 0;
 	    /*@ +predboolothers +type @*/
-	    if (tp->msg_data.reference.system != unknown) {
+	    if (tp->msg_data.reference.system != NAVSYSTEM_UNKNOWN) {
 		m->w5.dx = (uint)round(tp->msg_data.reference.dx / DXYZ_SCALE);
 		uval = (uint)round(tp->msg_data.reference.dy / DXYZ_SCALE);
 		m->w5.dy_h = uval >> 8;
@@ -495,8 +495,8 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	if (rtcm->msg_data.reference.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "D\t%s\t%1d\t%s\t%.1f\t%.1f\t%.1f\n",
-			   (rtcm->msg_data.reference.system==gps) ? "GPS"
-			   : ((rtcm->msg_data.reference.system==glonass) ? "GLONASS"
+			   (rtcm->msg_data.reference.system==NAVSYSTEM_GPS) ? "GPS"
+			   : ((rtcm->msg_data.reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
 			      : "UNKNOWN"),
 			   rtcm->msg_data.reference.sense,
 			   rtcm->msg_data.reference.datum,
@@ -599,9 +599,9 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 4:
 	if (rtcm->msg_data.reference.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"system\":%s,\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dx\":%.1f",
-			   (rtcm->msg_data.reference.system==gps) ? "GPS"
-			   : ((rtcm->msg_data.reference.system==glonass) ? "GLONASS"
+			   "\"system\":%s,\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f",
+			   (rtcm->msg_data.reference.system==NAVSYSTEM_GPS) ? "GPS"
+			   : ((rtcm->msg_data.reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
 			      : "UNKNOWN"),
 			   rtcm->msg_data.reference.sense,
 			   rtcm->msg_data.reference.datum,
@@ -745,12 +745,12 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	    return -5;
 	else {
 	    if (strcmp(buf2, "GPS") == 0)
-		rtcmp->msg_data.reference.system = gps;
+		rtcmp->msg_data.reference.system = NAVSYSTEM_GPS;
 	    else if (strcmp(buf2, "GLONASS") == 0)
-		rtcmp->msg_data.reference.system = glonass;
+		rtcmp->msg_data.reference.system = NAVSYSTEM_GLONASS;
 	    else
-		rtcmp->msg_data.reference.system = unknown;
-	    rtcmp->msg_data.reference.sense = (v == 1) ? global : ((v == 0) ? local : invalid);
+		rtcmp->msg_data.reference.system = NAVSYSTEM_UNKNOWN;
+	    rtcmp->msg_data.reference.sense = (v == 1) ? SENSE_GLOBAL : ((v == 0) ? SENSE_LOCAL : SENSE_INVALID);
 	    rtcmp->msg_data.reference.valid = true;
 	    return 0;
 	}
