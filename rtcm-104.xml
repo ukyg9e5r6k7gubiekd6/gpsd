@@ -6,7 +6,7 @@
 <refmeta>
 <refentrytitle>rtcm-104</refentrytitle>
 <manvolnum>5</manvolnum>
-<refmiscinfo class='date'>12 Jul 2005</refmiscinfo>
+<refmiscinfo class='date'>27 Aug 2009</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>rtcm-104</refname>
@@ -463,17 +463,14 @@ JSON sub-objects.</para>
 
 <para>(One exception: The zcount field included in the Sager-format
 per-satellite reports in type 1 and 9 messages is omitted from the 
-JSON version, asit is redundant with the zcount attribute of the
+JSON version, as it is redundant with the zcount attribute of the
 parent object.)</para>
 
 </refsect1>
 <refsect1 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>
 
-<para>RTCM104v3 messages are too complex to be dumped in a fully 
-invertible form without a structural markup at least as complex as
-XML or YAML.  Accordingly, the dump format has been designed to be
-its own documentation at the expense of reparsability, and is
-not described here.</para>
+<para>The support for RTCM104v3 dumping is still incomplete and
+buggy. Anyone interested in it should read the source code.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
@@ -497,7 +494,7 @@ no trailing sentinel line after each stanza of the dump.</para>
 
 <para>Much of the portion of this text describing RTCM2 was originally
 written by John Sager <email>john.sager@btinternet.com</email> in
-association with his RTCM decoder. Other material comes from the GPSD
+association with his RTCM2 decoder. Other material comes from the GPSD
 project.  There is a project page for <application>gpsd</application>
 <ulink url="http://gpsd.berlios.de/">here</ulink>.</para>
 

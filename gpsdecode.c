@@ -13,6 +13,7 @@
 
 #include "gpsd_config.h"
 #include "gpsd.h"
+#include "gps_json.h"
 
 static int verbose = 0;
 static bool scaled = true;
@@ -102,7 +103,7 @@ static void pass(FILE *fpin, FILE *fpout)
 	else if (buf[0] == '.')
 	    continue;
 
-	status = rtcm2_undump(&rtcm, buf);
+	status = rtcm2_sager_undump(&rtcm, buf);
 
 	if (status == 0) {
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
@@ -131,9 +132,15 @@ static void encode(FILE *fpin, FILE *fpout)
     memset(&lexer, 0, sizeof(lexer));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
+	char dummypath[PATH_MAX];
 
-	status = rtcm2_undump(&rtcm, buf);
-
+	if (buf[0] == '{')
+	    status = json_rtcm2_read(buf, 
+				     dummypath, sizeof(dummypath),
+				     &rtcm,
+				     NULL);
+	else
+	    status = rtcm2_sager_undump(&rtcm, buf);
 	if (status == 0) {
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
 	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);

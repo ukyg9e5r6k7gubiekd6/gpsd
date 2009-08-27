@@ -670,7 +670,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     (void)strlcat(buf, "}\r\n", buflen);
 }
 
-int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
+int rtcm2_sager_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 /* merge a line of data into an RTCM structure, return 0 if done */
 {
     int fldcount, v;

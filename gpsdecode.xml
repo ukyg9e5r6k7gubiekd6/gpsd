@@ -61,17 +61,17 @@ output. This is the default behavior.</para>
 on standard output. </para>
 
 <para>The <option>-e</option> option option tells the program to
-encode a text dump in the format of
+encode a text dump in one of the formats of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
 to standard output.  Encoding is supported only for RTCM2, not for
 RTCM3 or AIS.</para>
 
-<para>The <option>-u</option> suppresses scaling to float quantities
+<para>The <option>-u</option> suppresses scaling of AIS data to float quantities
 and text expansion of numeric codes.  A dump with this option is
 lossless.</para>
 
 <para>The <option>-j</option> changes the dump format to JSON, with
-each each field preceded by a quoted label and equal sign and the
+each each field preceded by a quoted label and colon and the
 entire dump line wrapped in curly braces.</para>
 
 <para>The <option>-V</option> option directs the program to emit its
