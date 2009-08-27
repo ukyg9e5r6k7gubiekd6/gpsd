@@ -197,34 +197,38 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 
-	    if (cycle > 199000 && cycle < 201000 ) {
+#define min_interval(center) ((center) * 9 / 10)
+#define max_interval(center) ((center) * 11 / 10)
+#define in_interval(x, center) ((x) > min_interval(center) && (x) < max_interval(center))
+
+	    if (in_interval(cycle, 200000)) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
-		if (duration > 45000)
-		    (void)ntpshm_pps(session, &tv);
+		if (duration > min_interval(160000))
+		    (void)ntpshm_pps(session, &tv, 5);
 		gpsd_report(LOG_RAW, "5Hz PPS pulse. cycle: %d, duration: %d\n",
 			cycle, duration);
-	    } else if (cycle > 999000 && cycle < 1001000 ) {
+	    } else if (in_interval(cycle, 1000000)) {
 		/* looks like PPS pulse or square wave */
-		if (duration > 499000 && duration < 501000
+		if (in_interval(duration, 500000)
 #if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
 		  && session->driver.nmea.ignore_trailing_edge
 #endif /* GPSCLOCK_ENABLE */
 		  ) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
-			 (void)ntpshm_pps(session, &tv);
+			 (void)ntpshm_pps(session, &tv, 1);
 		    }
-		} else {
+		} else if (duration > min_interval(800000)) {
 		    /* looks like PPS pulse */
-		    (void)ntpshm_pps(session, &tv);
+		    (void)ntpshm_pps(session, &tv, 1);
 		}
 		gpsd_report(LOG_RAW, "PPS pulse. cycle: %d, duration: %d\n",
 			cycle, duration);
 
-	    } else if (cycle > 1999000 && cycle < 2001000) {
+	    } else if (in_interval(cycle, 2000000)) {
 		/* looks like 0.5 Hz square wave */
-		(void)ntpshm_pps(session, &tv);
+		(void)ntpshm_pps(session, &tv, 1);
 		gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
 			cycle, duration);
 	    } else {
@@ -235,6 +239,10 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
 	}
 	/*@ -boolint @*/
+
+#undef min_interval
+#undef max_interval
+#undef in_interval
 
 	pulse[state] = tv;
     }

@@ -22,9 +22,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#define PPS_MAX_OFFSET	100000		/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	500000		/* microseconds for lost lock */
-
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0		/* SHM driver unit number (0..3) */
 
@@ -151,10 +148,11 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
 #ifdef PPS_ENABLE
 /* put NTP shared memory info based on received PPS pulse */
 
-int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
+int ntpshm_pps(struct gps_device_t *session, struct timeval *tv, int rate)
 {
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
+    int usecs;
     double offset;
     long l_offset;
 
@@ -168,36 +166,28 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 #ifdef S_SPLINT_S	/* avoids an internal error in splint 3.1.1 */
     l_offset = 0;
 #else
-    l_offset = shmTime->receiveTimeStampSec - shmTime->clockTimeStampSec;
+    l_offset = tv->tv_sec - shmTime->receiveTimeStampSec;
 #endif
-    /*@ -ignorequals @*/
     l_offset *= 1000000;
-    l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
-    /*@ +ignorequals @*/
-    if (labs( l_offset ) > PUT_MAX_OFFSET) {
+    l_offset += tv->tv_usec - shmTime->receiveTimeStampUSec;
+
+    if (l_offset > 1000000 / rate || l_offset < 0) {
         gpsd_report(LOG_RAW, "ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
     }
-    /*@ -ignorequals @*/
 
-    if (tv->tv_usec < PPS_MAX_OFFSET) {
-	seconds = (time_t)tv->tv_sec;
-	offset = (double)tv->tv_usec / 1000000.0;
-    } else {
-	if (tv->tv_usec > (1000000 - PPS_MAX_OFFSET)) {
-	    seconds = (time_t)(tv->tv_sec + 1);
-	    offset = 1 - ((double)tv->tv_usec / 1000000.0);
-	} else {
-	    shmTimeP->precision = -1;	/* lost lock */
-	    gpsd_report(LOG_INF, "ntpshm_pps: lost PPS lock\n");
-	    return -1;
-	}
-    }
+    usecs = shmTime->clockTimeStampUSec + 1000000 / rate;
+    seconds = shmTime->clockTimeStampSec + usecs / 1000000;;
+    usecs %= 1000000;
+
+    offset = tv->tv_sec - seconds + (tv->tv_usec - usecs) / 1e6;
+    if (offset < 0.0)
+	    offset = -offset;
 
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
-    shmTimeP->clockTimeStampUSec = 0;
+    shmTimeP->clockTimeStampUSec = usecs;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
