@@ -39,10 +39,23 @@ int json_rtcm2_read(const char *buf,
 	{"length",         uinteger, .addr.uinteger = &rtcm2->length}, \
 	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
 
-    int status;
+    int status, satcount;
+    const struct json_attr_t json_rtcm1_satellite[] = {
+	{"ident",     uinteger, .addr.offset=offsetof(struct rangesat_t, ident)},
+	{"udre",      uinteger, .addr.offset=offsetof(struct rangesat_t, udre)},
+	{"issuedata", real,     .addr.offset=offsetof(struct rangesat_t, issuedata)},
+	{"rangerr",   real,     .addr.offset=offsetof(struct rangesat_t, rangerr)},
+	{"rangerate", real,     .addr.offset=offsetof(struct rangesat_t, rangerate)},
+	{NULL},
+    };
     const struct json_attr_t json_rtcm1[] = {
-	// FIXME
 	RTCM2_HEADER
+        {"satellites", array,  .addr.array.element_type = structobject,
+	            .addr.array.arr.objects.base = (char*)rtcm2->ranges.sat,
+                    .addr.array.arr.objects.stride = sizeof(rtcm2->ranges.sat[0]),
+                    .addr.array.arr.objects.subtype = json_rtcm1_satellite,
+	            .addr.array.count = &satcount,
+	            .addr.array.maxlen = NITEMS(rtcm2->ranges.sat)},
 	{NULL},
     };
 
@@ -109,9 +122,11 @@ int json_rtcm2_read(const char *buf,
 
     memset(rtcm2, '\0', sizeof(struct rtcm2_t));
 
-    if (strstr(buf, "\"type\":1") != NULL || strstr(buf, "\"type\":9") != NULL)
+    if (strstr(buf, "\"type\":1")!=NULL || strstr(buf, "\"type\":9")!=NULL) {
 	status = json_read_object(buf, json_rtcm1, endptr);
-    else if (strstr(buf, "\"type\":3") != NULL)
+	if (status == 0)
+	    rtcm2->ranges.nentries = (unsigned)satcount;
+    } else if (strstr(buf, "\"type\":3") != NULL)
 	status = json_read_object(buf, json_rtcm3, endptr);
     else if (strstr(buf, "\"type\":4") != NULL) {
 	status = json_read_object(buf, json_rtcm4, endptr);
