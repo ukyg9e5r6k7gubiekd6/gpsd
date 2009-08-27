@@ -474,13 +474,17 @@ rtcm-regress: gpsdecode
 		diff -ub $${f}.chk test/test.chk; \
 	done; \
 	rm test/test.chk
+	@echo "Testing RTCM encoding..."
+	@mkdir -p test
+	@$(srcdir)/gpsdecode -p < $(srcdir)/test/undump.sample > test/undump.test
+	@diff -u $(srcdir)/test/undump.sample test/undump.test
+	@rm test/undump.test
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
 	@for f in $(srcdir)/test/*.rtcm2; do \
 		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
 	done
-
 
 # Regression-test the AIVDM decoder.
 aivdm-regress: gpsdecode
@@ -520,14 +524,6 @@ geoid-makeregress: test_geoid
 	@mkdir -p test
 	$(srcdir)/test_geoid 37.371192 122.014965 >test/geoid.test.chk
 
-# Test RTCM encoding using passthrough mode.
-undump-regress: gpsdecode
-	@echo "Testing RTCM encoding..."
-	@mkdir -p test
-	@$(srcdir)/gpsdecode -p < $(srcdir)/test/undump.sample > test/undump.test
-	@diff -u $(srcdir)/test/undump.sample test/undump.test
-	@rm test/undump.test
-
 # Regression-test the calendar functions
 time-regress: test_mkgmtime
 	./test_mkgmtime
@@ -552,7 +548,7 @@ bits-regress: test_bits
 	test_bits
 
 # Do all normal regression tests
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress undump-regress time-regress unpack-regress
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
 # We would like "${MAKE} check" to run the regression tests.  automake

@@ -114,11 +114,14 @@ struct gps_fix_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
-/* enumerated values for "system" fields */
-#define NAVSYSTEM_UNKNOWN	0
-#define NAVSYSTEM_GPS   	1
-#define NAVSYSTEM_GLONASS	2
-#define NAVSYSTEM_GALILEO	3
+/* 
+ * Values for "system" fields.  Note, the encoding logic is senstive to the 
+ * actual values of these; it's not sufficient that they're distinct.
+ */
+#define NAVSYSTEM_GPS   	0
+#define NAVSYSTEM_GLONASS	1
+#define NAVSYSTEM_GALILEO	2
+#define NAVSYSTEM_UNKNOWN	3
 
 struct rtcm2_t {
     /* header contents */
@@ -150,8 +153,8 @@ struct rtcm2_t {
 	    int system;
 	    int sense;
 #define SENSE_INVALID	0
-#define SENSE_LOCAL   	1
-#define SENSE_GLOBAL	2
+#define SENSE_GLOBAL	1
+#define SENSE_LOCAL   	2
 	    char datum[6];
 	    double dx, dy, dz;
 	} reference;
