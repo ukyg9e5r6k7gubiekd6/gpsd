@@ -128,13 +128,17 @@ static void encode(FILE *fpin, FILE *fpout)
     char buf[BUFSIZ];
     struct gps_packet_t lexer;
     struct rtcm2_t rtcm;
+    int lineno = 0;
 
     memset(&lexer, 0, sizeof(lexer));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 	char dummypath[PATH_MAX];
 
-	if (buf[0] == '{')
+	++lineno;
+	if (buf[0] == '#')
+	    continue;
+	else if (buf[0] == '{')
 	    status = json_rtcm2_read(buf, 
 				     dummypath, sizeof(dummypath),
 				     &rtcm,
@@ -150,7 +154,7 @@ static void encode(FILE *fpin, FILE *fpout)
 		(void) fprintf(stderr, "gpsdecode: report write failed.\n");
 	    memset(&lexer, 0, sizeof(lexer));
 	} else if (status < 0) {
-	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d\n", status);
+	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d on line %d\n", status, lineno);
 	    exit(1);
 	}
     }
