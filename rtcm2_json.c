@@ -52,7 +52,7 @@ int json_rtcm2_read(const char *buf,
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
         {"satellites", array,	STRUCTARRAY(rtcm2->ranges.sat, 
-				   rtcm1_satellite, &satcount)},
+					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
 
@@ -97,7 +97,7 @@ int json_rtcm2_read(const char *buf,
     const struct json_attr_t json_rtcm5[] = {
 	RTCM2_HEADER
         {"satellites", array,	STRUCTARRAY(rtcm2->conhealth.sat, 
-				   rtcm5_satellite, &satcount)},
+					    rtcm5_satellite, &satcount)},
 	{NULL},
     };
 
@@ -107,9 +107,20 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+    const struct json_attr_t rtcm7_satellite[] = {
+	{"latitude",    real,     STRUCTOBJECT(struct station_t, latitude)},
+	{"longitude",   real,     STRUCTOBJECT(struct station_t, longitude)},
+	{"range",       uinteger, STRUCTOBJECT(struct station_t, range)},
+	{"frequency",   real,     STRUCTOBJECT(struct station_t, frequency)},
+	{"health",      uinteger, STRUCTOBJECT(struct station_t, health)},
+	{"station_id",  uinteger, STRUCTOBJECT(struct station_t, station_id)},
+	{"bitrate",     uinteger, STRUCTOBJECT(struct station_t, bitrate)},
+	{NULL},
+    };
     const struct json_attr_t json_rtcm7[] = {
-	// FIXME
 	RTCM2_HEADER
+        {"satellites", array,	STRUCTARRAY(rtcm2->almanac.station, 
+					    rtcm7_satellite, &satcount)},
 	{NULL},
     };
 
@@ -148,6 +159,8 @@ int json_rtcm2_read(const char *buf,
 	status = json_read_object(buf, json_rtcm6, endptr);
     else if (strstr(buf, "\"type\":7") != NULL)
 	status = json_read_object(buf, json_rtcm7, endptr);
+	if (status == 0)
+	    rtcm2->almanac.nentries = (unsigned)satcount;
     else if (strstr(buf, "\"type\":16") != NULL)
 	status = json_read_object(buf, json_rtcm16, endptr);
     else
