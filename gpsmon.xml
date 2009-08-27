@@ -44,6 +44,13 @@ information. It supports commands that can be used to tweak GPS
 settings in various ways; some are device-independent, some vary
 with the GPS chipset type.</para>
 
+<para>This tool used to be called 'sirfmon', and worked only on SiRF
+devices (and the command set has changed to resemble the command
+switches of <application>gpsctl</application>). It now has support for a range
+of NMEA devices as well; support for other (binary-protocol) device
+types is planned. It will behave sanely, just dumping packets, when
+connected to a GPS type it knows nothing about.</para>
+
 <para><application>gpsmon</application> differs from a navigation
 client in that it mostly dumps raw data from the GPS, with only enough
 data-massaging to allow checks against expected output.  In
@@ -310,6 +317,11 @@ MID 19, including the Static Navigation bit toggled by the 'M' command.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
+<para>If you run <application>gpsmon</application> in client mode,
+and kill the daemon while <application>gpsmon</application> is
+still running, <application>gpsmon</application> will hang.
+Don't do that...</para>
+
 <!--
 Debug window dumps of control message sends to the GPS (preceded
 by '>>>') are only supported for the following drivers: NMEA, SiRF,
@@ -317,13 +329,6 @@ EverMore, Navcom, UBX, TSIP, iTalk, Garmintxt. This feature will not
 work for Zodiacs and not always work for Garmins in binary
 mode.
 --> 
-
-<para>This tool used to be called 'sirfmon', and worked only on SiRF
-devices (and the command set has changed to resemble the command
-switches of <application>gpsctl</application>). It now has support for a range
-of NMEA devices as well; support for other (binary-protocol) device
-types is planned. It will behave sanely, just dumping packets, when
-connected to a GPS type it knows nothing about.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
