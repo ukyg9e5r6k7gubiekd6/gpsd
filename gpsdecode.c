@@ -82,75 +82,28 @@ static void decode(FILE *fpin, FILE *fpout)
 /*@ +compdestroy +compdef +usedef @*/
 
 /*@ -compdestroy @*/
-static void pass(FILE *fpin, FILE *fpout)
-/* dump format on stdin to dump format on stdout (self-inversion test) */
-{
-    char buf[BUFSIZ];
-    struct gps_packet_t lexer;
-    struct rtcm2_t rtcm;
-
-    memset(&lexer, 0, sizeof(lexer));
-    memset(&rtcm, 0, sizeof(rtcm));
-    while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
-	int status;
-
-	/* pass through comment lines without interpreting */
-	if (buf[0] == '#') {
-	    (void)fputs(buf, fpout);
-	    continue;
-	}
-	/* ignore trailer lines as we'll regenerate these */
-	else if (buf[0] == '.')
-	    continue;
-
-	status = rtcm2_sager_undump(&rtcm, buf);
-
-	if (status == 0) {
-	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
-	    (void)rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    (void)rtcm2_sager_dump(&rtcm, buf, sizeof(buf));
-	    (void)fputs(buf, fpout);
-	    memset(&lexer, 0, sizeof(lexer));
-	    memset(&rtcm, 0, sizeof(rtcm));
-	} else if (status < 0) {
-	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d\n", status);
-	    exit(1);
-	}
-    }
-}
-/*@ +compdestroy @*/
-
-/*@ -compdestroy @*/
 static void encode(FILE *fpin, FILE *fpout)
 /* dump format on fpin to RTCM-104 on fpout */
 {
     char buf[BUFSIZ];
+    struct gps_data_t gpsdata;
     struct gps_packet_t lexer;
-    struct rtcm2_t rtcm;
     int lineno = 0;
 
     memset(&lexer, 0, sizeof(lexer));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
-	char dummypath[PATH_MAX];
 
 	++lineno;
 	if (buf[0] == '#')
 	    continue;
-	else if (buf[0] == '{')
-	    status = json_rtcm2_read(buf, 
-				     dummypath, sizeof(dummypath),
-				     &rtcm,
-				     NULL);
-	else
-	    status = rtcm2_sager_undump(&rtcm, buf);
-	if (status == 0) {
+	status = gps_unpack(buf, &gpsdata);
+	if (status == 0 && (gpsdata.set & RTCM2_SET) != 0) { 
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
+	    (void)rtcm2_repack(&gpsdata.rtcm2, lexer.isgps.buf);
 	    if (fwrite(lexer.isgps.buf, 
 		       sizeof(isgps30bits_t), 
-		       (size_t)rtcm.length, fpout) != (size_t)rtcm.length)
+		       (size_t)gpsdata.rtcm2.length, fpout) != (size_t)gpsdata.rtcm2.length)
 		(void) fprintf(stderr, "gpsdecode: report write failed.\n");
 	    memset(&lexer, 0, sizeof(lexer));
 	} else if (status < 0) {
@@ -166,9 +119,9 @@ int main(int argc, char **argv)
     char buf[BUFSIZ];
     int c;
     bool striphdr = false;
-    enum {doencode, dodecode, passthrough} mode = dodecode;
+    enum {doencode, dodecode} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "dhejpuVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "dhejuVD:")) != EOF) {
 	switch (c) {
 	case 'd':
 	    mode = dodecode;
@@ -184,10 +137,6 @@ int main(int argc, char **argv)
 
 	case 'j':
 	    json = true;
-	    break;
-
-	case 'p':	/* undocumented, used for regression-testing */
-	    mode = passthrough;
 	    break;
 
 	case 'u':
@@ -220,9 +169,7 @@ int main(int argc, char **argv)
 	(void)ungetc(c, stdin);
     }
 
-    if (mode == passthrough)
-	pass(stdin, stdout);
-    else if (mode == doencode)
+    if (mode == doencode)
 	encode(stdin, stdout);
     else
 	decode(stdin, stdout);

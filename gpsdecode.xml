@@ -63,8 +63,8 @@ on standard output. </para>
 <para>The <option>-e</option> option option tells the program to
 encode a text dump in one of the formats of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-to standard output.  Encoding is supported only for RTCM2, not for
-RTCM3 or AIS.</para>
+to standard output. This option is a placeholder: support for RTCM2
+encoding from the Sager format has been removed</para>
 
 <para>The <option>-u</option> suppresses scaling of AIS data to float quantities
 and text expansion of numeric codes.  A dump with this option is

@@ -474,11 +474,6 @@ rtcm-regress: gpsdecode
 		diff -ub $${f}.chk test/test.chk; \
 	done; \
 	rm test/test.chk
-	@echo "Testing RTCM encoding..."
-	@mkdir -p test
-	@$(srcdir)/gpsdecode -p < $(srcdir)/test/undump.sample > test/undump.test
-	@diff -u $(srcdir)/test/undump.sample test/undump.test
-	@rm test/undump.test
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
