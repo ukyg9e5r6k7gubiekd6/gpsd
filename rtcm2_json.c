@@ -39,13 +39,15 @@ int json_rtcm2_read(const char *buf,
 	{"length",         uinteger, .addr.uinteger = &rtcm2->length}, \
 	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
 
+#define STRUCTOBJECT(s, f)	.addr.offset=offsetof(s, f)
+
     int status, satcount;
     const struct json_attr_t json_rtcm1_satellite[] = {
-	{"ident",     uinteger, .addr.offset=offsetof(struct rangesat_t, ident)},
-	{"udre",      uinteger, .addr.offset=offsetof(struct rangesat_t, udre)},
-	{"issuedata", real,     .addr.offset=offsetof(struct rangesat_t, issuedata)},
-	{"rangerr",   real,     .addr.offset=offsetof(struct rangesat_t, rangerr)},
-	{"rangerate", real,     .addr.offset=offsetof(struct rangesat_t, rangerate)},
+	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
+	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
+	{"issuedata", real,     STRUCTOBJECT(struct rangesat_t, issuedata)},
+	{"rangerr",   real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
+	{"rangerate", real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
 	{NULL},
     };
     const struct json_attr_t json_rtcm1[] = {
@@ -118,6 +120,7 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+#undef STRUCTOBJECT
 #undef RTCM2_HEADER
 
     memset(rtcm2, '\0', sizeof(struct rtcm2_t));
