@@ -570,8 +570,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     switch (rtcm->type) {
     case 1:
     case 9:
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"reported\":%u,\"satellites\":[", rtcm->ranges.nentries);
+	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->ranges.nentries; n++) {
 	    struct rangesat_t *rsp = &rtcm->ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -611,9 +610,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 5:
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"reported\":%u,\"satellites\":[", 
-		       rtcm->conhealth.nentries);
+	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
 	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -636,8 +633,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 7:
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"reported\":%u,\"satellites\":[", rtcm->almanac.nentries);
+	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->almanac.nentries; n++) {
 	    struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
