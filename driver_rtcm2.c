@@ -94,33 +94,33 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    tp->msg_data.ranges.sat[n].ident      = m->w3.satident1;
-		    tp->msg_data.ranges.sat[n].udre       = m->w3.udre1;
-		    tp->msg_data.ranges.sat[n].issuedata  = m->w4.issuedata1;
-		    tp->msg_data.ranges.sat[n].rangerr    = m->w3.pc1 * 
+		    tp->ranges.sat[n].ident      = m->w3.satident1;
+		    tp->ranges.sat[n].udre       = m->w3.udre1;
+		    tp->ranges.sat[n].issuedata  = m->w4.issuedata1;
+		    tp->ranges.sat[n].rangerr    = m->w3.pc1 * 
 			(m->w3.scale1 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate  = m->w4.rangerate1 * 
+		    tp->ranges.sat[n].rangerate  = m->w4.rangerate1 * 
 					(m->w3.scale1 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 4) {
-		    tp->msg_data.ranges.sat[n].ident      = m->w4.satident2;
-		    tp->msg_data.ranges.sat[n].udre       = m->w4.udre2;
-		    tp->msg_data.ranges.sat[n].issuedata  = m->w6.issuedata2;
-		    tp->msg_data.ranges.sat[n].rangerr    = m->w5.pc2 * 
+		    tp->ranges.sat[n].ident      = m->w4.satident2;
+		    tp->ranges.sat[n].udre       = m->w4.udre2;
+		    tp->ranges.sat[n].issuedata  = m->w6.issuedata2;
+		    tp->ranges.sat[n].rangerr    = m->w5.pc2 * 
 			(m->w4.scale2 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate  = m->w5.rangerate2 * 
+		    tp->ranges.sat[n].rangerate  = m->w5.rangerate2 * 
 			(m->w4.scale2 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 5) {
-		    tp->msg_data.ranges.sat[n].ident       = m->w6.satident3;
-		    tp->msg_data.ranges.sat[n].udre        = m->w6.udre3;
-		    tp->msg_data.ranges.sat[n].issuedata   = m->w7.issuedata3;
+		    tp->ranges.sat[n].ident       = m->w6.satident3;
+		    tp->ranges.sat[n].udre        = m->w6.udre3;
+		    tp->ranges.sat[n].issuedata   = m->w7.issuedata3;
 		    /*@ -shiftimplementation @*/
-		    tp->msg_data.ranges.sat[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
+		    tp->ranges.sat[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
 					(m->w6.scale3 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate   = m->w7.rangerate3 * 
+		    tp->ranges.sat[n].rangerate   = m->w7.rangerate3 * 
 					(m->w6.scale3 ? RRLARGE : RRSMALL);
 		    /*@ +shiftimplementation @*/
 		    n++;
@@ -128,55 +128,55 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 		len -= 5;
 		m++;
 	    }
-	    tp->msg_data.ranges.nentries = n;
+	    tp->ranges.nentries = n;
 	}
 	break;
     case 3:
         {
 	    struct rtcm2_msg3    *m = &msg->msg_type.type3;
 
-	    if ((tp->msg_data.ecef.valid = len >= 4)) {
-		tp->msg_data.ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
-		tp->msg_data.ecef.y = ((m->w4.y_h<<16)|(m->w5.y_l))*XYZ_SCALE;
-		tp->msg_data.ecef.z = ((m->w5.z_h<<24)|(m->w6.z_l))*XYZ_SCALE;
+	    if ((tp->ecef.valid = len >= 4)) {
+		tp->ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
+		tp->ecef.y = ((m->w4.y_h<<16)|(m->w5.y_l))*XYZ_SCALE;
+		tp->ecef.z = ((m->w5.z_h<<24)|(m->w6.z_l))*XYZ_SCALE;
 	    }
 	}
 	break;
     case 4:
-	if ((tp->msg_data.reference.valid = len >= 2)){
+	if ((tp->reference.valid = len >= 2)){
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
-	    tp->msg_data.reference.system =
+	    tp->reference.system =
 		    (m->w3.dgnss==0) ? NAVSYSTEM_GPS :
 			    ((m->w3.dgnss==1) ? NAVSYSTEM_GLONASS : NAVSYSTEM_UNKNOWN);
-	    tp->msg_data.reference.sense = (m->w3.dat != 0) ? SENSE_GLOBAL : SENSE_LOCAL;
+	    tp->reference.sense = (m->w3.dat != 0) ? SENSE_GLOBAL : SENSE_LOCAL;
 	    if (m->w3.datum_alpha_char1){
-		tp->msg_data.reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
+		tp->reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
 	    }
 	    if (m->w3.datum_alpha_char2){
-		tp->msg_data.reference.datum[n++] = (char)(m->w3.datum_alpha_char2);
+		tp->reference.datum[n++] = (char)(m->w3.datum_alpha_char2);
 	    }
 	    if (m->w4.datum_sub_div_char1){
-		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char1);
+		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char1);
 	    }
 	    if (m->w4.datum_sub_div_char2){
-		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char2);
+		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char2);
 	    }
 	    if (m->w4.datum_sub_div_char3){
-		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
+		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
 	    }
-	    tp->msg_data.reference.datum[n++] = '\0';
+	    tp->reference.datum[n++] = '\0';
 	    if (len >= 4) {
-		tp->msg_data.reference.dx = m->w5.dx * DXYZ_SCALE;
-		tp->msg_data.reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
-		tp->msg_data.reference.dz = m->w6.dz * DXYZ_SCALE;
+		tp->reference.dx = m->w5.dx * DXYZ_SCALE;
+		tp->reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
+		tp->reference.dz = m->w6.dz * DXYZ_SCALE;
 	    } else 
-		tp->msg_data.reference.sense = SENSE_INVALID;
+		tp->reference.sense = SENSE_INVALID;
 	}
 	break;
     case 5:
 	for (n = 0; n < (unsigned)len; n++) {
-	    struct consat_t *csp = &tp->msg_data.conhealth.sat[n];
+	    struct consat_t *csp = &tp->conhealth.sat[n];
 	    struct b_health_t *m = &msg->msg_type.type5.health[n];
 
 	    csp->ident = m->sat_id;
@@ -188,11 +188,11 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	    csp->los_warning = m->loss_warn!=0;
 	    csp->tou = m->time_unhealthy*TU_SCALE;
 	}
-	tp->msg_data.conhealth.nentries = n;
+	tp->conhealth.nentries = n;
 	break;
     case 7:
 	for (w = 0; w < (unsigned)len; w++) {
-	    struct station_t *np = &tp->msg_data.almanac.station[n];
+	    struct station_t *np = &tp->almanac.station[n];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
 	    np->latitude = mp->w3.lat * LA_SCALE;
@@ -204,7 +204,7 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	    np->bitrate = tx_speed[mp->w5.bit_rate];
 	    n++;
 	}
-	tp->msg_data.almanac.nentries = (unsigned)(len/3);
+	tp->almanac.nentries = (unsigned)(len/3);
 	break;
     case 16:
 	/*@ -boolops @*/
@@ -212,22 +212,22 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	    if (!msg->msg_type.type16.txt[w].byte1) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte1);
+	    tp->message[n++] = (char)(msg->msg_type.type16.txt[w].byte1);
 	    if (!msg->msg_type.type16.txt[w].byte2) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte2);
+	    tp->message[n++] = (char)(msg->msg_type.type16.txt[w].byte2);
 	    if (!msg->msg_type.type16.txt[w].byte3) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte3);
+	    tp->message[n++] = (char)(msg->msg_type.type16.txt[w].byte3);
 	}
 	/*@ +boolops @*/
-	tp->msg_data.message[n++] = '\0';
+	tp->message[n++] = '\0';
 	break;
 
     default:
-	memcpy(tp->msg_data.words, msg->msg_type.rtcm2_msgunk, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
+	memcpy(tp->words, msg->msg_type.rtcm2_msgunk, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 }
@@ -257,7 +257,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    struct rangesat_t *ssp = &tp->msg_data.ranges.sat[n];
+		    struct rangesat_t *ssp = &tp->ranges.sat[n];
 		    m->w3.satident1 = ssp->ident;
 		    m->w3.udre1 = ssp->udre;
 		    m->w4.issuedata1 = ssp->issuedata;
@@ -270,7 +270,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 		    n++;
 		}
 		if (len >= 4) {
-		    struct rangesat_t *ssp = &tp->msg_data.ranges.sat[n];
+		    struct rangesat_t *ssp = &tp->ranges.sat[n];
 		    m->w4.satident2 = ssp->ident;
 		    m->w4.udre2 = ssp->udre;
 		    m->w6.issuedata2 = ssp->issuedata;
@@ -283,7 +283,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 		    n++;
 		}
 		if (len >= 5) {
-		    struct rangesat_t *ssp = &tp->msg_data.ranges.sat[n];
+		    struct rangesat_t *ssp = &tp->ranges.sat[n];
 		    m->w6.satident3 = ssp->ident;
 		    m->w6.udre3 = ssp->udre;
 		    m->w7.issuedata3 = ssp->issuedata;
@@ -302,15 +302,15 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 		len -= 5;
 		m++;
 	    }
-	    tp->msg_data.ranges.nentries = n;
+	    tp->ranges.nentries = n;
 	}
 	break;
     case 3:	/* R */
-	if (tp->msg_data.ecef.valid) {
+	if (tp->ecef.valid) {
 	    struct rtcm2_msg3    *m = &msg->msg_type.type3;
-	    unsigned x = (unsigned) round(tp->msg_data.ecef.x / XYZ_SCALE);
-	    unsigned y = (unsigned) round(tp->msg_data.ecef.y / XYZ_SCALE);
-	    unsigned z = (unsigned) round(tp->msg_data.ecef.z / XYZ_SCALE);
+	    unsigned x = (unsigned) round(tp->ecef.x / XYZ_SCALE);
+	    unsigned y = (unsigned) round(tp->ecef.y / XYZ_SCALE);
+	    unsigned z = (unsigned) round(tp->ecef.z / XYZ_SCALE);
 
 	    m->w4.x_l = x & 0xff;
 	    m->w3.x_h = x >> 8;
@@ -321,45 +321,45 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	}
 	break;
     case 4:	/* D */
-	if (tp->msg_data.reference.valid) {
+	if (tp->reference.valid) {
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
-	    m->w3.dgnss = tp->msg_data.reference.system;
-	    m->w3.dat = (unsigned)(tp->msg_data.reference.sense == SENSE_GLOBAL);
+	    m->w3.dgnss = tp->reference.system;
+	    m->w3.dat = (unsigned)(tp->reference.sense == SENSE_GLOBAL);
 	    /*@ -predboolothers -type @*/
-	    if (tp->msg_data.reference.datum[0])
-		m->w3.datum_alpha_char1 = tp->msg_data.reference.datum[0];
+	    if (tp->reference.datum[0])
+		m->w3.datum_alpha_char1 = tp->reference.datum[0];
 	    else
 		m->w3.datum_alpha_char1 = 0;
-	    if (tp->msg_data.reference.datum[1])
-		m->w3.datum_alpha_char2 = tp->msg_data.reference.datum[1];
+	    if (tp->reference.datum[1])
+		m->w3.datum_alpha_char2 = tp->reference.datum[1];
 	    else
 		m->w3.datum_alpha_char2 = 0;
-	    if (tp->msg_data.reference.datum[2])
-		m->w4.datum_sub_div_char1 = tp->msg_data.reference.datum[2];
+	    if (tp->reference.datum[2])
+		m->w4.datum_sub_div_char1 = tp->reference.datum[2];
 	    else
 		m->w4.datum_sub_div_char1 = 0;
-	    if (tp->msg_data.reference.datum[3])
-		m->w4.datum_sub_div_char2 = tp->msg_data.reference.datum[3];
+	    if (tp->reference.datum[3])
+		m->w4.datum_sub_div_char2 = tp->reference.datum[3];
 	    else
 		m->w4.datum_sub_div_char2 = 0;
-	    if (tp->msg_data.reference.datum[4])
-		m->w4.datum_sub_div_char3 = tp->msg_data.reference.datum[4];
+	    if (tp->reference.datum[4])
+		m->w4.datum_sub_div_char3 = tp->reference.datum[4];
 	    else
 		m->w4.datum_sub_div_char3 = 0;
 	    /*@ +predboolothers +type @*/
-	    if (tp->msg_data.reference.system != NAVSYSTEM_UNKNOWN) {
-		m->w5.dx = (uint)round(tp->msg_data.reference.dx / DXYZ_SCALE);
-		uval = (uint)round(tp->msg_data.reference.dy / DXYZ_SCALE);
+	    if (tp->reference.system != NAVSYSTEM_UNKNOWN) {
+		m->w5.dx = (uint)round(tp->reference.dx / DXYZ_SCALE);
+		uval = (uint)round(tp->reference.dy / DXYZ_SCALE);
 		m->w5.dy_h = uval >> 8;
 		m->w6.dy_l = uval & 0xff;
-		m->w6.dz = (uint)round(tp->msg_data.reference.dz / DXYZ_SCALE);
+		m->w6.dz = (uint)round(tp->reference.dz / DXYZ_SCALE);
 	    }
 	}
 	break;
     case 5:	/* C */
 	for (n = 0; n < (unsigned)len; n++) {
-	    struct consat_t *csp = &tp->msg_data.conhealth.sat[n];
+	    struct consat_t *csp = &tp->conhealth.sat[n];
 	    struct b_health_t *m = &msg->msg_type.type5.health[n];
 
 	    m->sat_id = csp->ident;
@@ -374,7 +374,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	break;
     case 7:	/* A */
 	for (w = 0; w < (RTCM2_WORDS_MAX - 2)/ 3; w++) {
-	    struct station_t *np = &tp->msg_data.almanac.station[n++];
+	    struct station_t *np = &tp->almanac.station[n++];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
 	    mp->w3.lat = (int) round(np->latitude / LA_SCALE);
@@ -398,30 +398,30 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	    if (mp->w5.bit_rate == 0)
 		return false;
 	}
-	tp->msg_data.almanac.nentries = n;
+	tp->almanac.nentries = n;
 	break;
     case 16:	/* T */
 	/*@ -boolops @*/
 	for (w = 0; w < RTCM2_WORDS_MAX - 2; w++){
-	    if (!tp->msg_data.message[n]) {
+	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte1 = (unsigned)tp->msg_data.message[n++];
-	    if (!tp->msg_data.message[n]) {
+	    msg->msg_type.type16.txt[w].byte1 = (unsigned)tp->message[n++];
+	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte2 = (unsigned)tp->msg_data.message[n++];
-	    if (!tp->msg_data.message[n]) {
+	    msg->msg_type.type16.txt[w].byte2 = (unsigned)tp->message[n++];
+	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte3 = (unsigned)tp->msg_data.message[n++];
+	    msg->msg_type.type16.txt[w].byte3 = (unsigned)tp->message[n++];
 	}
 	msg->w2.frmlen = w+1;
 	/*@ +boolops @*/
 	break;
 
     default:	/* U */
-	memcpy(msg->msg_type.rtcm2_msgunk, tp->msg_data.words, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
+	memcpy(msg->msg_type.rtcm2_msgunk, tp->words, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 
@@ -469,8 +469,8 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     switch (rtcm->type) {
     case 1:
     case 9:
-	for (n = 0; n < rtcm->msg_data.ranges.nentries; n++) {
-	    struct rangesat_t *rsp = &rtcm->msg_data.ranges.sat[n];
+	for (n = 0; n < rtcm->ranges.nentries; n++) {
+	    struct rangesat_t *rsp = &rtcm->ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   rsp->ident,
@@ -483,31 +483,31 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 3:
-	if (rtcm->msg_data.ecef.valid)
+	if (rtcm->ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "R\t%.2f\t%.2f\t%.2f\n",
-			   rtcm->msg_data.ecef.x, 
-			   rtcm->msg_data.ecef.y,
-			   rtcm->msg_data.ecef.z);
+			   rtcm->ecef.x, 
+			   rtcm->ecef.y,
+			   rtcm->ecef.z);
 	break;
 
     case 4:
-	if (rtcm->msg_data.reference.valid)
+	if (rtcm->reference.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "D\t%s\t%1d\t%s\t%.1f\t%.1f\t%.1f\n",
-			   (rtcm->msg_data.reference.system==NAVSYSTEM_GPS) ? "GPS"
-			   : ((rtcm->msg_data.reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
+			   (rtcm->reference.system==NAVSYSTEM_GPS) ? "GPS"
+			   : ((rtcm->reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
 			      : "UNKNOWN"),
-			   rtcm->msg_data.reference.sense,
-			   rtcm->msg_data.reference.datum,
-			   rtcm->msg_data.reference.dx,
-			   rtcm->msg_data.reference.dy,
-			   rtcm->msg_data.reference.dz);
+			   rtcm->reference.sense,
+			   rtcm->reference.datum,
+			   rtcm->reference.dx,
+			   rtcm->reference.dy,
+			   rtcm->reference.dz);
 	break;
 
     case 5:
-	for (n = 0; n < rtcm->msg_data.conhealth.nentries; n++) {
-	    struct consat_t *csp = &rtcm->msg_data.conhealth.sat[n];
+	for (n = 0; n < rtcm->conhealth.nentries; n++) {
+	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
 			   csp->ident,
@@ -526,8 +526,8 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 7:
-	for (n = 0; n < rtcm->msg_data.almanac.nentries; n++) {
-	    struct station_t *ssp = &rtcm->msg_data.almanac.station[n];
+	for (n = 0; n < rtcm->almanac.nentries; n++) {
+	    struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "A\t%.4f\t%.4f\t%u\t%.1f\t%u\t%u\t%u\n",
 			   ssp->latitude,
@@ -541,13 +541,13 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "T\t\"%s\"\n", rtcm->msg_data.message);
+		       "T\t\"%s\"\n", rtcm->message);
 	break;
 
     default:
 	for (n = 0; n < rtcm->length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "U\t0x%08x\n", rtcm->msg_data.words[n]);
+			   "U\t0x%08x\n", rtcm->words[n]);
 	break;
     }
 
@@ -571,9 +571,9 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 1:
     case 9:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"reported\":%u,\"satellites\":[", rtcm->msg_data.ranges.nentries);
-	for (n = 0; n < rtcm->msg_data.ranges.nentries; n++) {
-	    struct rangesat_t *rsp = &rtcm->msg_data.ranges.sat[n];
+		       "\"reported\":%u,\"satellites\":[", rtcm->ranges.nentries);
+	for (n = 0; n < rtcm->ranges.nentries; n++) {
+	    struct rangesat_t *rsp = &rtcm->ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
 			   rsp->ident,
@@ -588,34 +588,34 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 3:
-	if (rtcm->msg_data.ecef.valid)
+	if (rtcm->ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f",
-			   rtcm->msg_data.ecef.x, 
-			   rtcm->msg_data.ecef.y,
-			   rtcm->msg_data.ecef.z);
+			   rtcm->ecef.x, 
+			   rtcm->ecef.y,
+			   rtcm->ecef.z);
 	break;
 
     case 4:
-	if (rtcm->msg_data.reference.valid)
+	if (rtcm->reference.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"system\":%s,\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f",
-			   (rtcm->msg_data.reference.system==NAVSYSTEM_GPS) ? "GPS"
-			   : ((rtcm->msg_data.reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
+			   (rtcm->reference.system==NAVSYSTEM_GPS) ? "GPS"
+			   : ((rtcm->reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
 			      : "UNKNOWN"),
-			   rtcm->msg_data.reference.sense,
-			   rtcm->msg_data.reference.datum,
-			   rtcm->msg_data.reference.dx,
-			   rtcm->msg_data.reference.dy,
-			   rtcm->msg_data.reference.dz);
+			   rtcm->reference.sense,
+			   rtcm->reference.datum,
+			   rtcm->reference.dx,
+			   rtcm->reference.dy,
+			   rtcm->reference.dz);
 	break;
 
     case 5:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"reported\":%u,\"satellites\":[", 
-		       rtcm->msg_data.conhealth.nentries);
-	for (n = 0; n < rtcm->msg_data.conhealth.nentries; n++) {
-	    struct consat_t *csp = &rtcm->msg_data.conhealth.sat[n];
+		       rtcm->conhealth.nentries);
+	for (n = 0; n < rtcm->conhealth.nentries; n++) {
+	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%2u,\"iodl\":%1u,\"health\":%1u,\"snr\":%2d,\"health_en\":%1u,\"new_data\":%1u,\"los_warning\":%1u,\"los_warning\":%2u},",
 			   csp->ident,
@@ -637,9 +637,9 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
     case 7:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"reported\":%u,\"satellites\":[", rtcm->msg_data.almanac.nentries);
-	for (n = 0; n < rtcm->msg_data.almanac.nentries; n++) {
-	    struct station_t *ssp = &rtcm->msg_data.almanac.station[n];
+		       "\"reported\":%u,\"satellites\":[", rtcm->almanac.nentries);
+	for (n = 0; n < rtcm->almanac.nentries; n++) {
+	    struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"latitude\":%.4f,\"longitude\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u}",
 			   ssp->latitude,
@@ -656,7 +656,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"message\":\"%s\"\n", rtcm->msg_data.message);
+		       "\"message\":\"%s\"\n", rtcm->message);
 	break;
 
     default:
@@ -664,7 +664,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 		       "\"length\":%u,\"satellites\":[", rtcm->length);
 	for (n = 0; n < rtcm->length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"0x%08x\",", rtcm->msg_data.words[n]);
+			   "\"0x%08x\",", rtcm->words[n]);
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)strlcat(buf, "]", buflen);
@@ -700,7 +700,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
     case 1:
     case 9:
 	{
-	    struct rangesat_t *rsp = &rtcmp->msg_data.ranges.sat[rtcmp->msg_data.ranges.nentries++];
+	    struct rangesat_t *rsp = &rtcmp->ranges.sat[rtcmp->ranges.nentries++];
 	    /* we ignore the third (zcount) field, it's in the parent */
 	    fldcount = sscanf(buf,
 			      "S\t%u\t%u\t%u\t%*f\t%lf\t%lf\n",
@@ -711,7 +711,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 			      &rsp->rangerate);
 	    if (fldcount != 5 || (rtcmp->type != 1 && rtcmp->type != 9))
 		return (int)(-rtcmp->type-1);
-	    else if (rtcmp->msg_data.ranges.nentries != rtcmp->length*3/5)
+	    else if (rtcmp->ranges.nentries != rtcmp->length*3/5)
 		return (int)(rtcmp->type+1);
 	    else
 		return 0;
@@ -721,13 +721,13 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
     case 3:
 	fldcount = sscanf(buf,
 			  "R\t%lf\t%lf\t%lf\n",
-			  &rtcmp->msg_data.ecef.x, 
-			  &rtcmp->msg_data.ecef.y,
-			  &rtcmp->msg_data.ecef.z);
+			  &rtcmp->ecef.x, 
+			  &rtcmp->ecef.y,
+			  &rtcmp->ecef.z);
 	if (fldcount != 3 || rtcmp->type != 3)
 	    return -4;
 	else {
-	    rtcmp->msg_data.ecef.valid = true;
+	    rtcmp->ecef.valid = true;
 	    return 0;
 	}
 	//break;
@@ -737,28 +737,28 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 			   "D\t%1023s\t%1d\t%5s\t%lf\t%lf\t%lf\n",
 			  buf2,
 			  &v,
-			  (char *)&rtcmp->msg_data.reference.datum,
-			  &rtcmp->msg_data.reference.dx,
-			  &rtcmp->msg_data.reference.dy,
-			  &rtcmp->msg_data.reference.dz);
+			  (char *)&rtcmp->reference.datum,
+			  &rtcmp->reference.dx,
+			  &rtcmp->reference.dy,
+			  &rtcmp->reference.dz);
 	if (fldcount != 6 || rtcmp->type != 4)
 	    return -5;
 	else {
 	    if (strcmp(buf2, "GPS") == 0)
-		rtcmp->msg_data.reference.system = NAVSYSTEM_GPS;
+		rtcmp->reference.system = NAVSYSTEM_GPS;
 	    else if (strcmp(buf2, "GLONASS") == 0)
-		rtcmp->msg_data.reference.system = NAVSYSTEM_GLONASS;
+		rtcmp->reference.system = NAVSYSTEM_GLONASS;
 	    else
-		rtcmp->msg_data.reference.system = NAVSYSTEM_UNKNOWN;
-	    rtcmp->msg_data.reference.sense = (v == 1) ? SENSE_GLOBAL : ((v == 0) ? SENSE_LOCAL : SENSE_INVALID);
-	    rtcmp->msg_data.reference.valid = true;
+		rtcmp->reference.system = NAVSYSTEM_UNKNOWN;
+	    rtcmp->reference.sense = (v == 1) ? SENSE_GLOBAL : ((v == 0) ? SENSE_LOCAL : SENSE_INVALID);
+	    rtcmp->reference.valid = true;
 	    return 0;
 	}
 	//break;
 
     case 5:
 	{
-	    struct consat_t *csp = &rtcmp->msg_data.conhealth.sat[rtcmp->msg_data.conhealth.nentries++];
+	    struct consat_t *csp = &rtcmp->conhealth.sat[rtcmp->conhealth.nentries++];
 	    unsigned int iodl, new_data, los_warning;
 
 	    fldcount = sscanf(buf,
@@ -776,7 +776,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	    csp->los_warning = los_warning > 0;
 	    if (fldcount != 8 || rtcmp->type != 5)
 		return -6;
-	    else if (rtcmp->msg_data.conhealth.nentries < rtcmp->length)
+	    else if (rtcmp->conhealth.nentries < rtcmp->length)
 		return 6;
 	    else
 		return 0;
@@ -792,7 +792,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 
     case 7:
 	{
-	    struct station_t *ssp = &rtcmp->msg_data.almanac.station[rtcmp->msg_data.almanac.nentries++];
+	    struct station_t *ssp = &rtcmp->almanac.station[rtcmp->almanac.nentries++];
 	    fldcount = sscanf(buf,
 			      "A\t%lf\t%lf\t%u\t%lf\t%u\t%u\t%u\n",
 			      &ssp->latitude,
@@ -804,7 +804,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 			      &ssp->bitrate);
 	    if (fldcount != 7 || rtcmp->type != 7)
 		return 8;
-	    else if (rtcmp->msg_data.almanac.nentries < rtcmp->length/3)
+	    else if (rtcmp->almanac.nentries < rtcmp->length/3)
 		return 8;
 	    else
 		return 0;
@@ -812,7 +812,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	//break;
 
     case 16:
-	fldcount = sscanf(buf, "T\t\"%[^\"]\"\n", rtcmp->msg_data.message);
+	fldcount = sscanf(buf, "T\t\"%[^\"]\"\n", rtcmp->message);
 	if (fldcount != 1)
 	    return 16;
 	else
@@ -820,10 +820,10 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	//break;
 
     default:
-	for (n = 0; n < DIMENSION(rtcmp->msg_data.words); n++)
-	    if (rtcmp->msg_data.words[n] == 0)
+	for (n = 0; n < DIMENSION(rtcmp->words); n++)
+	    if (rtcmp->words[n] == 0)
 		break;
-	if (n >= DIMENSION(rtcmp->msg_data.words))
+	if (n >= DIMENSION(rtcmp->words))
 	    return 0;
 	else {
 	    unsigned int u;
@@ -831,7 +831,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	    if (fldcount != 1)
 		return (int)(-rtcmp->type-1);
 	    else {
-		rtcmp->msg_data.words[n] = (isgps30bits_t)u;
+		rtcmp->words[n] = (isgps30bits_t)u;
 		if (n == rtcmp->length-1)
 		    return 0;
 		else

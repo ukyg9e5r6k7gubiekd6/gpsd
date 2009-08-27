@@ -188,7 +188,7 @@ struct rtcm2_t {
 	char message[(RTCM2_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */
 	isgps30bits_t	words[RTCM2_WORDS_MAX-2];
-    } msg_data;
+    };
 };
 
 /* RTCM3 report structures begin here */
