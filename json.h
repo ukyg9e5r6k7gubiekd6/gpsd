@@ -76,4 +76,24 @@ const char *json_error_string(int);
 #define JSON_ERR_BADENUM	17	/* invalid flag token */
 #define JSON_ERR_NOPARSTR	18	/* can't support strings in aparalle. arrays */
 
+/*
+ * Use the following macros to declare template initializers for structobject 
+ * arrays.  Writing the equivalents out by hand is error-prone.
+ *
+ * STRUCTOBJECT takes a type t (one of the enumerated scalar field types 
+ * above), a structure name s, and a fieldname f in s.  
+ *
+ * STRUCTARRAY takes the name of a structure array, a pointer to a an 
+ * initializer defining the subobject type, and the address of an integer to
+ * store the length in. 
+ */
+#define STRUCTOBJECT(t, s, f)	.type = t, .addr.offset = offsetof(s, f)
+#define STRUCTARRAY(a, e, n)	.type = array, \
+	.addr.array.element_type = structobject, \
+	.addr.array.arr.objects.subtype = e, \
+	.addr.array.arr.objects.base = (char*)a, \
+	.addr.array.arr.objects.stride = sizeof(a[0]), \
+	.addr.array.count = n, \
+	.addr.array.maxlen = NITEMS(a)
+
 /* json.h ends here */

@@ -428,6 +428,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 		return substatus;
 	    break;
 	case integer:
+	case uinteger:
 	case real:
 	case boolean:
 	case character:

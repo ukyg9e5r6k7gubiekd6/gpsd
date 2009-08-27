@@ -39,25 +39,19 @@ int json_rtcm2_read(const char *buf,
 	{"length",         uinteger, .addr.uinteger = &rtcm2->length}, \
 	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
 
-#define STRUCTOBJECT(s, f)	.addr.offset=offsetof(s, f)
-
     int status, satcount;
-    const struct json_attr_t json_rtcm1_satellite[] = {
-	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
-	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
-	{"issuedata", real,     STRUCTOBJECT(struct rangesat_t, issuedata)},
-	{"rangerr",   real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
-	{"rangerate", real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
+    const struct json_attr_t rtcm1_satellite[] = {
+	{"ident",     STRUCTOBJECT(uinteger, struct rangesat_t, ident)},
+	{"udre",      STRUCTOBJECT(uinteger, struct rangesat_t, udre)},
+	{"issuedata", STRUCTOBJECT(real, struct rangesat_t, issuedata)},
+	{"rangerr",   STRUCTOBJECT(real, struct rangesat_t, rangerr)},
+	{"rangerate", STRUCTOBJECT(real, struct rangesat_t, rangerate)},
 	{NULL},
     };
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
-        {"satellites", array,  .addr.array.element_type = structobject,
-	            .addr.array.arr.objects.base = (char*)rtcm2->ranges.sat,
-                    .addr.array.arr.objects.stride = sizeof(rtcm2->ranges.sat[0]),
-                    .addr.array.arr.objects.subtype = json_rtcm1_satellite,
-	            .addr.array.count = &satcount,
-	            .addr.array.maxlen = NITEMS(rtcm2->ranges.sat)},
+        {"satellites", STRUCTARRAY(rtcm2->ranges.sat, 
+				   rtcm1_satellite, &satcount)},
 	{NULL},
     };
 
@@ -120,6 +114,7 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+#undef STRUCTARRAY
 #undef STRUCTOBJECT
 #undef RTCM2_HEADER
 
