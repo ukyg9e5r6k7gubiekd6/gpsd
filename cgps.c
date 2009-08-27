@@ -675,7 +675,6 @@ int main(int argc, char *argv[])
 {
   int option;
   struct fixsource_t source;
-  char *err_str = NULL;
   int c;
 
   struct timeval timeout;

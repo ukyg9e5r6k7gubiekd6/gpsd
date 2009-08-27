@@ -759,7 +759,7 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
     case 5:
 	{
 	    struct consat_t *csp = &rtcmp->conhealth.sat[rtcmp->conhealth.nentries++];
-	    unsigned int iodl, new_data, los_warning;
+	    unsigned int iodl, health_en, new_data, los_warning;
 
 	    fldcount = sscanf(buf,
 			      "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
@@ -767,12 +767,13 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 			      &iodl,
 			      &csp->health,
 			      &csp->snr,
-			      &csp->health_en,
+			      &health_en,
 			      &new_data,
 			      &los_warning,
 			      &csp->tou);
 	    csp->iodl = iodl > 0;
 	    csp->new_data = new_data > 0;
+	    csp->health_en = health_en > 0;
 	    csp->los_warning = los_warning > 0;
 	    if (fldcount != 8 || rtcmp->type != 5)
 		return -6;
