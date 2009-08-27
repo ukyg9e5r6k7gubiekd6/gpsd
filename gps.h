@@ -167,7 +167,7 @@ struct rtcm2_t {
 #define HEALTH_DONOTUSE		(3)	/* Do not use this radiobeacon */
 	       int snr;			/* signal-to-noise ratio, dB */
 #define SNR_BAD	-1			/* not reported */
-		unsigned int health_en;	/* health enabled */
+		bool health_en; 	/* health enabled */
 		bool new_data;		/* new data? */
 		bool los_warning;	/* line-of-sight warning */
 		unsigned int tou;	/* time to unhealth, seconds */
