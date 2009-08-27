@@ -47,11 +47,11 @@ case $mode in
 	    if [ -r $f.chk ]
 	    then
 		$do gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
-		$do sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER}
-		$do sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER}
-		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER}
-		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff
-		diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc
+		$do sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
+		$do sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
+		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
+		$do diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
+		$do diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc;
 		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
 		    errors=`expr $errors + 1`;
 		    cat $dir/diff
