@@ -109,7 +109,7 @@ static const char *json_str4 = "{\"flag1\":true,\"flag2\":false}";
 static bool flag1, flag2;
 static double dftreal;
 static int dftinteger;
-static int dftuinteger;
+static unsigned int dftuinteger;
 
 static const struct json_attr_t json_attrs_4[] = {
     {"dftint",  integer, .addr.integer = &dftinteger, .dflt.integer = -5},
@@ -167,6 +167,21 @@ static const struct json_attr_t json_attrs_6[] = {
 static const char *json_str7 = "{\"class\":\"VERSION\",\
            \"release\":\"2.40dev\",\"rev\":\"dummy-revision\",\
            \"api_major\":3,\"api_minor\":1}";
+
+/* Case 8: test parsing arrays of enumerated types */
+
+const char *json_str8 = "{\"fee\":\"FOO\",\"fie\":\"BAR\",\"foe\":\"BAZ\"}";
+const struct json_enum_t enum_table[] = {
+    {"BAR", 6}, {"FOO", 3}, {"BAZ", 14}, {NULL}
+};
+
+static int fee, fie, foe;
+static const struct json_attr_t json_attrs_8[] = {
+    {"fee",  integer, .addr.integer = &fee, .map=enum_table},
+    {"fie",  integer, .addr.integer = &fie, .map=enum_table},
+    {"foe",  integer, .addr.integer = &foe, .map=enum_table},
+    {NULL},
+};
 
 #endif /* GPSDNG_ENABLE */
 
@@ -244,6 +259,13 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_string("rev", gpsdata.version.rev, "dummy-revision");
     assert_integer("api_major", gpsdata.version.api_major, 3);
     assert_integer("api_minor", gpsdata.version.api_minor, 1);
+
+    status = json_read_object(json_str8, json_attrs_8, NULL);
+    assert_case(8, status);
+    assert_integer("fee", fee, 3);
+    assert_integer("fie", fie, 6);
+    assert_integer("foe", foe, 14);
+
 #endif /* GPSDNG_ENABLE */
 
     (void)fprintf(stderr, "succeeded.\n");

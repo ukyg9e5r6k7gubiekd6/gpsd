@@ -9,6 +9,11 @@ typedef enum {integer, uinteger, real, string, boolean, character,
 
 #define nullbool	-1	/* not true, not false */
 
+struct json_enum_t {
+    char	*name;
+    int		value;
+};
+
 struct json_array_t { 
     json_type element_type;
     union {
@@ -48,6 +53,7 @@ struct json_attr_t {
 	char *check;
     } dflt;
     size_t len;
+    const struct json_enum_t *map;
 };
 
 #define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */
@@ -74,8 +80,8 @@ const char *json_error_string(int);
 #define JSON_ERR_BADSTRING	15	/* error while string parsing */
 #define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
 #define JSON_ERR_NOPARSTR	17	/* can't support strings in parallel arrays */
-#define JSON_ERR_MISC		18	/* other data conversion error */
-
+#define JSON_ERR_BADENUM	18	/* invalid enumerated value */
+#define JSON_ERR_MISC		19	/* other data conversion error */
 
 /*
  * Use the following macros to declare template initializers for structobject 

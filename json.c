@@ -63,6 +63,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
     const struct json_attr_t *cursor;
     int substatus, maxlen;
+    const struct json_enum_t *mp;
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
@@ -228,6 +229,8 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		maxlen = cursor->len - 1;
 	    else if (cursor->type == check)
 		maxlen = strlen(cursor->dflt.check);
+	    else if (cursor->map != NULL)
+		maxlen = sizeof(valbuf)-1;
 	    if (*cp == '"') {
 		*pval = '\0';
 #ifdef JSONDEBUG
@@ -260,6 +263,15 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		*pval++ = *cp;
 	    break;
 	case post_val:
+	    if (cursor->map != 0) {
+		for (mp = cursor->map; mp->name != NULL; mp++)
+		    if (strcmp(mp->name, valbuf) == 0) {
+			goto foundit;
+		    }
+		return JSON_ERR_BADENUM;
+	    foundit:
+		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
+	    }
 	    if (parent == NULL || parent->element_type != structobject) {
 		/* ordinary case - use the address in the cursor structure */
 		switch(cursor->type)
