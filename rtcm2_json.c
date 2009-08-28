@@ -122,8 +122,8 @@ int json_rtcm2_read(const char *buf,
     };
 
     const struct json_attr_t rtcm7_satellite[] = {
-	{"latitude",    real,     STRUCTOBJECT(struct station_t, latitude)},
-	{"longitude",   real,     STRUCTOBJECT(struct station_t, longitude)},
+	{"lat",         real,     STRUCTOBJECT(struct station_t, latitude)},
+	{"lon",         real,     STRUCTOBJECT(struct station_t, longitude)},
 	{"range",       uinteger, STRUCTOBJECT(struct station_t, range)},
 	{"frequency",   real,     STRUCTOBJECT(struct station_t, frequency)},
 	{"health",      uinteger, STRUCTOBJECT(struct station_t, health)},

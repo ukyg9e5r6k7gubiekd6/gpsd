@@ -647,7 +647,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	for (n = 0; n < rtcm->almanac.nentries; n++) {
 	    struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"latitude\":%.4f,\"longitude\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u},",
+			   "{\"lat\":%.4f,\"lon\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u},",
 			   ssp->latitude,
 			   ssp->longitude,
 			   ssp->range,

@@ -399,7 +399,7 @@ decoding software.
 `-------`---`------------------------`--------`--------------------------------
 Field   Len Description              Member   Units
 -------------------------------------------------------------------------------
-0-5      6  Message Type             msgtype  Unsigned integer: 1-3
+0-5      6  Message Type             type     Unsigned integer: 1-3
 6-7      2  Repeat Indicator         repeat   3 = "Do not repeat"; see below..
 8-37    30  MMSI                     mmsi     Unsigned integer: 9 digits
 38-41    4  Navigation Status        status   See table below
@@ -530,7 +530,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 `-------`----`----------------`--------`----------------------------------------
 Field   Len  Description      Member   Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type     msgtype  Unsigned integer: 4
+0-5       6  Message Type     type     Unsigned integer: 4
 6-7       2  Repeat Indicator repeat   Unknown
 8-37     30  MMSI             mmsi     Unsigned integer: 9 digits
 38-51    14  Year             year     UTC, 1-999, 0 = not available (default)
@@ -574,7 +574,7 @@ humans rather than gathered automatically from sensors.
 `-------`---`----------------------`------------`------------------------------
 Field   Len Description            Member       Encoding   
 -------------------------------------------------------------------------------
-0-5       6 Message Type           msgtype      Unsigned integer: 5
+0-5       6 Message Type           type         Unsigned integer: 5
 6-7       2 Repeat Indicator       repeat       Message repeat count
 8-37     30 MMSI                   mmsi         Unsigned integer: 9 digits
 38-39     2 AIS Version            ais_version  0=<<ITU1371>>, 
@@ -703,7 +703,7 @@ payloads).
 `-------`---`----------------`--------------`-----------------------------------
 Field   Len Description      Member         Units
 --------------------------------------------------------------------------------
-0-5       6 Message Type     msgtype        Unsigned integer: 6
+0-5       6 Message Type     type           Unsigned integer: 6
 6-7       2 Repeat Indicator repeat         As in Common Navigation Block
 8-37     30 Source MMSI      mmsi           Unsigned integer: 9 digits
 38-39     2 Sequence Number  seqno          Unsigned integer 0-3
@@ -725,7 +725,7 @@ bits depending on the number of destination MMSIs included.
 `-------`---`----------------`--------`-----------------------------------------
 Field   Len Description      Member   Units
 --------------------------------------------------------------------------------
-0-5       6 Message Type     msgtype  Unsigned integer: 7
+0-5       6 Message Type     type     Unsigned integer: 7
 6-7       2 Repeat Indicator repeat   As in Common Navigation Block
 8-37     30 Source MMSI      mmsi     Unsigned integer: 9 digits
 38-39     2 Spare                     Not used
@@ -749,7 +749,7 @@ maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 `-------`---`-----------------`--------------`---------------------------------
 Field   Len Description       Member         Units
 -------------------------------------------------------------------------------
-0-5       6 Message Type      msgtype        Unsigned integer: 8
+0-5       6 Message Type      type           Unsigned integer: 8
 6-7       2 Repeat Indicator  repeat         As in Common Navigation Block
 8-37     30 Source MMSI       mmsi           Unsigned integer: 9 digits
 38-39     2 Spare                            Not used
@@ -766,7 +766,7 @@ bits is 168.
 `-------`---`------------------`----------`------------------------------------
 Field   Len Description        Member     Encoding   
 -------------------------------------------------------------------------------
-0-5      6  Message Type       msgtype    Unsigned integer: 9
+0-5      6  Message Type       type       Unsigned integer: 9
 6-7      2  Repeat Indicator   repeat     As in Common Navigation Block
 8-37    30  MMSI               mmsi       Unsigned integer: 9 digits
 38-49   12  Altitude           alt        Unsigned integer: See below
@@ -805,7 +805,7 @@ number of bits is 72.
 `-------`---`------------------`----------`------------------------------------
 Field   Len Description        Member     Encoding   
 -------------------------------------------------------------------------------
-0-5      6  Message Type       msgtype    Unsigned integer: 9
+0-5      6  Message Type       type       Unsigned integer: 9
 6-7      2  Repeat Indicator   repeat     As in Common Navigation Block
 8-37    30  Source MMSI        mmsi       Unsigned integer: 9 digits
 38-39    2  Spare                         Not used
@@ -826,7 +826,7 @@ six-bit text.  This message is variable in length up to a maximum of
 `-------`---`------------------`-----------`-----------------------------------
 Field   Len Description        Member      Units
 -------------------------------------------------------------------------------
-0-5       6 Message Type       msgtype     Unsigned integer: 12
+0-5       6 Message Type       type        Unsigned integer: 12
 6-7       2 Repeat Indicator   repeat      As in Common Navigation Block
 8-37     30 Source MMSI        mmsi        Unsigned integer: 9 digits
 38-39     2 Sequence Number    seqno       Unsigned integer 0-3
@@ -853,7 +853,7 @@ six-bit text.  This message is variable in length up to a maximum of
 `-------`---`------------------`---------`-------------------------------------
 Field   Len Description        Member    Units
 -------------------------------------------------------------------------------
-0-5       6 Message Type       msgtype   Unsigned integer: 14
+0-5       6 Message Type       type      Unsigned integer: 14
 6-7       2 Repeat Indicator   repeat    As in Common Navigation Block
 8-37     30 Source MMSI        mmsi      Unsigned integer: 9 digits
 38-39     2 Spare                        Not used
@@ -875,7 +875,7 @@ a particular time division in the TDMA packet layer.
 `-------`---`-------------------`---------`-------------------------------------
 Field   Len Description         Member    Units
 --------------------------------------------------------------------------------
-0-5       6 Message Type        msgtype   Unsigned integer: 15
+0-5       6 Message Type        type      Unsigned integer: 15
 6-7       2 Repeat Indicator    repeat    As in Common Navigation Block
 8-37     30 Source MMSI         mmsi      Unsigned integer: 9 digits
 38-39     2 Spare                         Not used
@@ -928,7 +928,7 @@ Length may be 96 or 144 bits.
 `-------`---`-------------------`----------`------------------------------------
 Field   Len Description         Member     Units
 --------------------------------------------------------------------------------
-0-5       6 Message Type        msgtype    Unsigned integer: 16
+0-5       6 Message Type        type       Unsigned integer: 16
 6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
 8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
 38-39     2 Spare                          Not used
@@ -962,7 +962,7 @@ depending on payload size.
 `-------`---`-------------------`----------`------------------------------------
 Field   Len Description         Member     Units
 --------------------------------------------------------------------------------
-0-5       6 Message Type        msgtype    Unsigned integer: 16
+0-5       6 Message Type        type       Unsigned integer: 16
 6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
 8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
 38-39     2 Spare                          Not used
@@ -996,7 +996,7 @@ understand these fields."
 `-------`---`------------------`---------`-------------------------------------
 Field   Len Description        Member    Units
 -------------------------------------------------------------------------------
-0-5      6  Message Type       msgtype   Unsigned integer: 18
+0-5      6  Message Type       type      Unsigned integer: 18
 6-7      2  Repeat Indicator   repeat    As in Common Navigation Block
 8-37    30  MMSI               mmsi      Unsigned integer: 9 digits
 38-45    8  Regional Reserved  reserved
@@ -1040,7 +1040,7 @@ gathered automatically from sensors.
 `--------`---`----------------------`-------------`-----------------------------
 Field    Len Description            Member        Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type           msgtype       Unsigned integer: 19
+0-5       6  Message Type           type          Unsigned integer: 19
 6-7       2  Repeat Indicator       repeat        As in Common Navigation Block
 8-37     30  MMSI                   mmsi          Unsigned integer: 9 digits
 38-45     8  Regional Reserved      reserved
@@ -1078,7 +1078,7 @@ the number of slot reservations (1 to 4) in the message.
 `--------`---`-----------------`-------------`-----------------------------
 Field    Len Description       Member        Units
 ---------------------------------------------------------------------------
-0-5       6  Message Type      msgtype       Unsigned integer: 20
+0-5       6  Message Type      type          Unsigned integer: 20
 6-7       2  Repeat Indicator  repeat        As in Common Navigation Block
 8-37     30  MMSI              mmsi          Unsigned integer: 9 digits
 38-39     2  Spare                           Not used
@@ -1114,7 +1114,7 @@ and 360 bits.
 `--------`---`----------------------`------------`------------------------------
 Field   Len Description             Member       Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type           msgtype      Unsigned integer: 21
+0-5       6  Message Type           type         Unsigned integer: 21
 6-7       2  Repeat Indicator       repeat       As in Common Navigation Block
 8-37     30  MMSI                   mmsi         Unsigned integer: 9 digits
 38-42     5  Aid type               type         See Below
@@ -1213,7 +1213,7 @@ an AIS base station network. Length is 168 bits.
 `--------`---`----------------`------------`------------------------------------
 Field   Len Description       Member       Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type     msgtype      Unsigned integer: 22
+0-5       6  Message Type     type         Unsigned integer: 22
 6-7       2  Repeat Indicator repeat       As in Common Navigation Block
 8-37     30  MMSI             mmsi         Unsigned integer: 9 digits
 38-39     2  Spare                         Not used
@@ -1248,7 +1248,7 @@ is thanks to Kurt Schwehr.
 `-------`---`----------------------`---------------`----------------------------
 Field   Len Description             Member          Units
 --------------------------------------------------------------------------------
-0-5       6  Message Type           msgtype         Unsigned integer: 19
+0-5       6  Message Type           type            Unsigned integer: 19
 6-7       2  Repeat Indicator       repeat          As in CNB
 8-37     30  MMSI                   mmsi            Unsigned integer: 9 digits
 38-39     2  Part Number            partno          Unsigned integer: 0-1
