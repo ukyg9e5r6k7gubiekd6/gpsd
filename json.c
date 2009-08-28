@@ -32,7 +32,8 @@ JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
 
    This paraer processes object arrays in one of two different ways,
-defending on whether the array subtype is declared as object or structobject.
+defending on whether the array subtype is declared as object or
+structobject.
 
    Object arrays take one base address per object subfield, and are 
 mapped into parallel C arrays (one per subfield).  Strings are not
@@ -55,6 +56,35 @@ has to be inline in the struct.
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
 
+static char *json_target_address(const struct json_attr_t *cursor, 
+			       const struct json_array_t *parent, 
+			       int offset)
+{
+    if (parent == NULL || parent->element_type != structobject) { 
+	/* ordinary case - use the address in the cursor structure */
+	switch(cursor->type)
+	{
+	case integer:
+	    return (char *)&cursor->addr.integer[offset];
+	case uinteger:
+	    return (char *)&cursor->addr.uinteger[offset];
+	case real:
+	    return (char *)&cursor->addr.real[offset];
+	case string:
+	    return cursor->addr.string;
+	case boolean:
+	    return (char *)&cursor->addr.boolean[offset];
+	case character:
+	    return (char *)&cursor->addr.character[offset];
+	default:
+	    return NULL;
+	}
+    }
+    else
+	/* tricky case - hacking a member in an array of structures */
+	return parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
+}
+
 static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
@@ -64,74 +94,42 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
     const struct json_attr_t *cursor;
     int substatus, maxlen;
     const struct json_enum_t *mp;
+    char *lptr;
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
-    for (cursor = attrs; cursor->attribute != NULL; cursor++)
-	if (parent == NULL || parent->element_type != structobject) 
-	    /* ordinary case - use the address in the cursor structure */
-	    switch(cursor->type)
-	    {
-	    case integer:
-		cursor->addr.integer[offset] = cursor->dflt.integer;
-		break;
-	    case uinteger:
-		cursor->addr.uinteger[offset] = cursor->dflt.uinteger;
-		break;
-	    case real:
-		cursor->addr.real[offset] = cursor->dflt.real;
-		break;
-	    case string:
-		if (offset > 0)
-		    return JSON_ERR_NOPARSTR;
-		else
-		    cursor->addr.string[0] = '\0';
-		break;
-	    case boolean:
-		/* nullbool default says not to set the value at all */
-		if (cursor->dflt.boolean != nullbool)
-		    cursor->addr.boolean[offset] = cursor->dflt.boolean;
-		break;
-	    case character:
-		cursor->addr.character[offset] = cursor->dflt.character;
-		break;
-	    case object:/* silences a compiler warning */
-	    case structobject:
-	    case array:
-	    case check:
-		break;
-	    }
-        else {
-	    /* tricky case - hacking a member in an array of structures */
-	    char *lptr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*((int *)lptr) = cursor->dflt.integer;
-		break;
-	    case uinteger:
-		*((unsigned int *)lptr) = cursor->dflt.uinteger;
-		break;
-	    case real:
-		*((double *)lptr) = cursor->dflt.real;
-		break;
-	    case string:
-		lptr[0] = '\0';
-		break;
-	    case boolean:
-		/* nullbool default says not to set the value at all */
-		if (cursor->dflt.boolean != nullbool)
-		   *((bool *)lptr) = cursor->dflt.boolean;
-		break;
-	    case character:
-		lptr[0] = cursor->dflt.character;
-		break;
-	    case object:	/* silences a compiler warning */
-	    case structobject:
-	    case array:
-	    case check:
-		break;
-	    }
+    for (cursor = attrs; cursor->attribute != NULL; cursor++) {
+	lptr = json_target_address(cursor, parent, offset);
+	switch(cursor->type)
+	{
+	case integer:
+	    *((int *)lptr) = cursor->dflt.integer;
+	    break;
+	case uinteger:
+	    *((unsigned int *)lptr) = cursor->dflt.uinteger;
+	    break;
+	case real:
+	    *((double *)lptr) = cursor->dflt.real;
+	    break;
+	case string:
+	    if (parent != NULL && parent->element_type != structobject && offset > 0)
+		return JSON_ERR_NOPARSTR;
+	    lptr[0] = '\0';
+	    break;
+	case boolean:
+	    /* nullbool default says not to set the value at all */
+	    if (cursor->dflt.boolean != nullbool)
+		*((bool *)lptr) = cursor->dflt.boolean;
+	    break;
+	case character:
+	    lptr[0] = cursor->dflt.character;
+	    break;
+	case object:	/* silences a compiler warning */
+	case structobject:
+	case array:
+	case check:
+	    break;
 	}
+    }
 
 #ifdef JSONDEBUG
     (void) printf("JSON parse begins.\n");
@@ -272,86 +270,44 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    foundit:
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
 	    }
-	    if (parent == NULL || parent->element_type != structobject) {
-		/* ordinary case - use the address in the cursor structure */
-		switch(cursor->type)
-		{
-		case integer:
-		    cursor->addr.integer[offset] = atoi(valbuf);
-		    break;
-		case uinteger:
-		    cursor->addr.uinteger[offset] = (unsigned)atoi(valbuf);
-		    break;
-		case real:
-		    cursor->addr.real[offset] = atof(valbuf);
-		    break;
-		case string:
-		    if (offset > 0)
-			return JSON_ERR_NOPARSTR;
-		    else
-			(void)strncpy(cursor->addr.string, valbuf, cursor->len);
-		    break;
-		case boolean:
-		    cursor->addr.boolean[offset] = (bool)!strcmp(valbuf, "true");
-		    break;
-		case character:
-		    if (strlen(valbuf) > 1)
-			return JSON_ERR_STRLONG;
-		    else
-			cursor->addr.character[offset] = valbuf[0];
-		    break;
-		case structobject:	/* silences a compiler warning */
-		case object:
-		case array:
-		    break;
-		case check:
-		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
+	    lptr = json_target_address(cursor, parent, offset);
+	    switch(cursor->type)
+	    {
+	    case integer:
+		*((int *)lptr) = atoi(valbuf);
+		break;
+	    case uinteger:
+		*((int *)lptr) = (unsigned)atoi(valbuf);
+		break;
+	    case real:
+		*((double *)lptr) = atof(valbuf);
+		break;
+	    case string:
+		if (parent != NULL && parent->element_type != structobject && offset > 0)
+		    return JSON_ERR_NOPARSTR;
+		(void)strncpy(lptr, valbuf, cursor->len);
+		break;
+	    case boolean:
+		*((bool *)lptr) = (bool)!strcmp(valbuf, "true");
+		break;
+	    case character:
+		if (strlen(valbuf) > 1)
+		    return JSON_ERR_STRLONG;
+		else
+		    lptr[0] = valbuf[0];
+		break;
+	    case object:	/* silences a compiler warning */
+	    case structobject:
+	    case array:
+		break;
+	    case check:
+		if (strcmp(cursor->dflt.check, valbuf)!=0) {
 #ifdef JSONDEBUG
-			(void) printf("Required attribute value %s not present.\n", cursor->dflt.check);
+		    (void) printf("Required attribute vakue %s not present.\n", cursor->dflt.check);
 #endif /* JSONDEBUG */
-			return JSON_ERR_CHECKFAIL;
-		    }
-		    break;
+		    return JSON_ERR_CHECKFAIL;
 		}
-	    } else {
-		/* tricky case - hacking a member in an array of structures */
-		char *lptr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
-		switch(cursor->type)
-		{
-		case integer:
-		    *((int *)lptr) = atoi(valbuf);
-		    break;
-		case uinteger:
-		    *((int *)lptr) = (unsigned)atoi(valbuf);
-		    break;
-		case real:
-		    *((double *)lptr) = atof(valbuf);
-		    break;
-		case string:
-		    (void)strncpy(lptr, valbuf, cursor->len);
-		    break;
-		case boolean:
-		    *((bool *)lptr) = (bool)!strcmp(valbuf, "true");
-		    break;
-		case character:
-		    if (strlen(valbuf) > 1)
-			return JSON_ERR_STRLONG;
-		    else
-			lptr[0] = valbuf[0];
-		    break;
-		case object:	/* silences a compiler warning */
-		case structobject:
-		case array:
-		    break;
-		case check:
-		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
-#ifdef JSONDEBUG
-			(void) printf("Required attribute vakue %s not present.\n", cursor->dflt.check);
-#endif /* JSONDEBUG */
-			return JSON_ERR_CHECKFAIL;
-		    }
-		    break;
-		}
+		break;
 	    }
 	    if (isspace(*cp))
 		continue;
