@@ -656,8 +656,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     default:
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"length\":%u,\"satellites\":[", rtcm->length);
+	(void)strlcat(buf, "\"data\":[", buflen);
 	for (n = 0; n < rtcm->length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"0x%08x\",", rtcm->words[n]);

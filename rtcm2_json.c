@@ -27,6 +27,10 @@ int json_rtcm2_read(const char *buf,
 		    const char **endptr)
 {
 
+    static char *stringptrs[NITEMS(rtcm2->words)];
+    static char stringstore[sizeof(rtcm2->words)*2];
+    static int stringcount;
+
 #define RTCM2_HEADER \
 	{"class",          check,    .dflt.check = "RTCM2"}, \
 	{"type",           uinteger, .addr.uinteger = &rtcm2->type}, \
@@ -131,9 +135,14 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
-    const struct json_attr_t json_rtcm_fallback[] = {
-	// FIXME
+    const struct json_attr_t json_rtcm2_fallback[] = {
 	RTCM2_HEADER
+	{"data",         array, .addr.array.element_type = string,
+	                        .addr.array.arr.strings.ptrs = stringptrs,
+	                        .addr.array.arr.strings.store = stringstore,
+	                        .addr.array.arr.strings.storelen = sizeof(stringstore),
+	                        .addr.array.count = &stringcount,
+	                        .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
 
@@ -163,8 +172,22 @@ int json_rtcm2_read(const char *buf,
 	    rtcm2->almanac.nentries = (unsigned)satcount;
     else if (strstr(buf, "\"type\":16") != NULL)
 	status = json_read_object(buf, json_rtcm16, endptr);
-    else
-	status = json_read_object(buf, json_rtcm_fallback, endptr);
+    else {
+	int n;
+	status = json_read_object(buf, json_rtcm2_fallback, endptr);
+	for (n = 0; n < NITEMS(rtcm2->words); n++)
+	    if (n >= stringcount) {
+		rtcm2->words[n] = 0;
+	    } else {
+		unsigned int u;
+		int fldcount = sscanf(stringptrs[n], "U\t0x%08x\n", &u);
+		if (fldcount != 1)
+		return JSON_ERR_MISC;
+	    else
+		rtcm2->words[n] = (isgps30bits_t)u;
+	}
+	
+    }
     if (status != 0)
 	return status;
     return 0;

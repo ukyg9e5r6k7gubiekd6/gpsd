@@ -495,8 +495,8 @@ const char *json_error_string(int err)
 	"unsupported array element type",
 	"error while string parsing",
 	"check attribute not matched",
-	"invalid flag token",
-	"can't support strings in aparalle. arrays",
+	"can't support strings in parallel arrays",
+	"other data conversion error",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))

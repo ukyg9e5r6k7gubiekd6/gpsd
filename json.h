@@ -73,8 +73,9 @@ const char *json_error_string(int);
 #define JSON_ERR_SUBTYPE	14	/* unsupported array element type */
 #define JSON_ERR_BADSTRING	15	/* error while string parsing */
 #define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
-#define JSON_ERR_BADENUM	17	/* invalid flag token */
-#define JSON_ERR_NOPARSTR	18	/* can't support strings in aparalle. arrays */
+#define JSON_ERR_NOPARSTR	17	/* can't support strings in parallel arrays */
+#define JSON_ERR_MISC		18	/* other data conversion error */
+
 
 /*
  * Use the following macros to declare template initializers for structobject 
