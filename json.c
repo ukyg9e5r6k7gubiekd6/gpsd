@@ -185,6 +185,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		    return JSON_ERR_BADATTR;
 		}
 		state = await_value;
+		if (cursor->type == string)
+		    maxlen = cursor->len - 1;
+		else if (cursor->type == check)
+		    maxlen = strlen(cursor->dflt.check);
+		else if (cursor->map != NULL)
+		    maxlen = sizeof(valbuf)-1;
 		pval = valbuf;
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1) {
 #ifdef JSONDEBUG
@@ -223,14 +229,8 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    }
 	    break;
 	case in_val_string:
-	    if (cursor->type == string)
-		maxlen = cursor->len - 1;
-	    else if (cursor->type == check)
-		maxlen = strlen(cursor->dflt.check);
-	    else if (cursor->map != NULL)
-		maxlen = sizeof(valbuf)-1;
 	    if (*cp == '"') {
-		*pval = '\0';
+		*pval++ = '\0';
 #ifdef JSONDEBUG
 		(void) printf("Collected string value %s\n", valbuf);
 #endif /* JSONDEBUG */
@@ -266,6 +266,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		    if (strcmp(mp->name, valbuf) == 0) {
 			goto foundit;
 		    }
+#ifdef JSONDEBUG
+		(void) printf("Invalid enumeated value string %s.\n", valbuf);
+#endif /* JSONDEBUG */
 		return JSON_ERR_BADENUM;
 	    foundit:
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
@@ -464,6 +467,7 @@ const char *json_error_string(int err)
 	"error while string parsing",
 	"check attribute not matched",
 	"can't support strings in parallel arrays",
+	"invalid enumerated value",
 	"other data conversion error",
     };
 
