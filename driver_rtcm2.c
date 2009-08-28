@@ -618,20 +618,22 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 5:
+#define SHOWBOOL(x)	((x)?"true":"false")
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
 	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%2u,\"iodl\":%1u,\"health\":%1u,\"snr\":%2d,\"health_en\":%1u,\"new_data\":%1u,\"los_warning\":%1u,\"tou\":%2u},",
+			   "{\"ident\":%u,\"iodl\":%s,\"health\":%1u,\"snr\":%d,\"health_en\":%s,\"new_data\":%s,\"los_warning\":%s,\"tou\":%u},",
 			   csp->ident,
-			   (unsigned)csp->iodl,
+			   SHOWBOOL(csp->iodl),
 			   (unsigned)csp->health,
 			   csp->snr,
-			   (unsigned)csp->health_en,
-			   (unsigned)csp->new_data,
-			   (unsigned)csp->los_warning,
+			   SHOWBOOL(csp->health_en),
+			   SHOWBOOL(csp->new_data),
+			   SHOWBOOL(csp->los_warning),
 			   csp->tou);
 	}
+#undef SHOWBOOL
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)strlcat(buf, "]", buflen);

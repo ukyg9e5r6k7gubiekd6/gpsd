@@ -180,7 +180,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 			break;
 		if (cursor->attribute == NULL) {
 #ifdef JSONDEBUG
-		    (void) printf("Unknown attribute name.\n");
+		    (void) printf("Unknown attribute name '%s'.\n", attrbuf);
 #endif /* JSONDEBUG */
 		    return JSON_ERR_BADATTR;
 		}

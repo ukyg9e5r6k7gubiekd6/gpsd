@@ -472,8 +472,11 @@ rtcm-regress: gpsdecode
 		echo "Testing $${f}..."; \
 		$(srcdir)/gpsdecode <$${f} >test/test.chk; \
 		diff -ub $${f}.chk test/test.chk; \
-	done; \
-	rm test/test.chk
+	done;
+	@echo "Testing idempotency of JSON dump/decode for RTCM2"
+	@gpsdecode -e -j <test/synthetic-rtcm2.json >test.chk
+	@grep -v '^#' test/synthetic-rtcm2.json | diff -ub - test.chk
+	@rm test/test.chk
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
