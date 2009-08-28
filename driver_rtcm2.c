@@ -596,7 +596,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 3:
 	if (rtcm->ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f",
+			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,",
 			   rtcm->ecef.x, 
 			   rtcm->ecef.y,
 			   rtcm->ecef.z);
@@ -605,7 +605,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 4:
 	if (rtcm->reference.valid) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f",
+			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f,",
 			   rtcm->reference.system >= NITEMS(navsysnames) 
 			   ? "UNKNOWN"
 			   : navsysnames[rtcm->reference.system],
@@ -645,7 +645,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	for (n = 0; n < rtcm->almanac.nentries; n++) {
 	    struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"latitude\":%.4f,\"longitude\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u}",
+			   "{\"latitude\":%.4f,\"longitude\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u},",
 			   ssp->latitude,
 			   ssp->longitude,
 			   ssp->range,
@@ -660,7 +660,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"message\":\"%s\"\n", rtcm->message);
+		       "\"message\":\"%s\"", rtcm->message);
 	break;
 
     default:
@@ -674,6 +674,8 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     }
 
+    if (buf[strlen(buf)-1] == ',')
+	buf[strlen(buf)-1] = '\0';
     (void)strlcat(buf, "}\r\n", buflen);
 }
 

@@ -96,9 +96,9 @@ static void encode(FILE *fpin, bool repack, FILE *fpout)
 	++lineno;
 	if (inbuf[0] == '#')
 	    continue;
-	status = gps_unpack(inbuf, &gpsdata);
-	if (status < 0) {
-	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d on line %d\n", status, lineno);
+	status = libgps_json_unpack(inbuf, &gpsdata);
+	if (status != 0) {
+	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d (%s) on line %d\n", status, json_error_string(status), lineno);
 	    exit(1);
 	} if ((gpsdata.set & RTCM2_SET) != 0) { 
 	    if (repack) {

@@ -62,7 +62,6 @@ int json_rtcm2_read(const char *buf,
 
     const struct json_attr_t json_rtcm3[] = {
 	RTCM2_HEADER
-        {"valid",          boolean, .addr.boolean = &rtcm2->reference.valid},
 	{"x",              real,    .addr.real = &rtcm2->ecef.x,
 			            .dflt.real = NAN},
 	{"y",              real,    .addr.real = &rtcm2->ecef.y,
@@ -162,27 +161,32 @@ int json_rtcm2_read(const char *buf,
 
     memset(rtcm2, '\0', sizeof(struct rtcm2_t));
 
-    if (strstr(buf, "\"type\":1")!=NULL || strstr(buf, "\"type\":9")!=NULL) {
+    if (strstr(buf, "\"type\":1,")!=NULL || strstr(buf, "\"type\":9,")!=NULL) {
 	status = json_read_object(buf, json_rtcm1, endptr);
 	if (status == 0)
 	    rtcm2->ranges.nentries = (unsigned)satcount;
-    } else if (strstr(buf, "\"type\":3") != NULL)
+    } else if (strstr(buf, "\"type\":3,") != NULL) {
 	status = json_read_object(buf, json_rtcm3, endptr);
-    else if (strstr(buf, "\"type\":4") != NULL) {
+	if (status == 0) {
+	    rtcm2->ecef.valid = (isnan(rtcm2->ecef.x)==0)&&(isnan(rtcm2->ecef.y)==0)&&(isnan(rtcm2->ecef.z)==0);
+	}
+    } else if (strstr(buf, "\"type\":4,") != NULL) {
 	status = json_read_object(buf, json_rtcm4, endptr);
-    } else if (strstr(buf, "\"type\":5") != NULL)
+	if (status == 0)
+	    rtcm2->reference.valid = (isnan(rtcm2->reference.dx)==0)&&(isnan(rtcm2->reference.dy)==0)&&(isnan(rtcm2->reference.dz)==0);
+    } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_rtcm5, endptr);
 	if (status == 0)
 	    rtcm2->conhealth.nentries = (unsigned)satcount;
-    else if (strstr(buf, "\"type\":6") != NULL)
+    } else if (strstr(buf, "\"type\":6,") != NULL) {
 	status = json_read_object(buf, json_rtcm6, endptr);
-    else if (strstr(buf, "\"type\":7") != NULL)
+    } else if (strstr(buf, "\"type\":7,") != NULL) {
 	status = json_read_object(buf, json_rtcm7, endptr);
 	if (status == 0)
 	    rtcm2->almanac.nentries = (unsigned)satcount;
-    else if (strstr(buf, "\"type\":16") != NULL)
+    } else if (strstr(buf, "\"type\":16,") != NULL) {
 	status = json_read_object(buf, json_rtcm16, endptr);
-    else {
+    } else {
 	int n;
 	status = json_read_object(buf, json_rtcm2_fallback, endptr);
 	for (n = 0; n < NITEMS(rtcm2->words); n++)
@@ -190,7 +194,7 @@ int json_rtcm2_read(const char *buf,
 		rtcm2->words[n] = 0;
 	    } else {
 		unsigned int u;
-		int fldcount = sscanf(stringptrs[n], "U\t0x%08x\n", &u);
+		int fldcount = sscanf(stringptrs[n], "0x%08x\n", &u);
 		if (fldcount != 1)
 		return JSON_ERR_MISC;
 	    else
@@ -198,9 +202,7 @@ int json_rtcm2_read(const char *buf,
 	}
 	
     }
-    if (status != 0)
-	return status;
-    return 0;
+    return status;
 }
 
 /* rtcm2_json.c ends here */
