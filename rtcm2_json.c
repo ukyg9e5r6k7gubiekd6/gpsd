@@ -156,8 +156,6 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
-#undef STRUCTARRAY
-#undef STRUCTOBJECT
 #undef RTCM2_HEADER
 
     memset(rtcm2, '\0', sizeof(struct rtcm2_t));
