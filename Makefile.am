@@ -491,7 +491,7 @@ aivdm-regress: gpsdecode
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.aivdm; do \
 		echo "Testing $${f}..."; \
-		$(srcdir)/gpsdecode <$${f} >test/test.chk; \
+		$(srcdir)/gpsdecode -u -c <$${f} >test/test.chk; \
 		diff -ub $${f}.chk test/test.chk; \
 	done; \
 	rm test/test.chk
@@ -499,7 +499,7 @@ aivdm-regress: gpsdecode
 # Rebuild the AIVDM regression tests.
 aivdm-makeregress: gpsdecode
 	@for f in $(srcdir)/test/*.aivdm; do \
-		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
+		$(srcdir)/gpsdecode -u -c <$${f} > $${f}.chk; \
 	done
 
 # Regression-test the packet getter.

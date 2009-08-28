@@ -40,6 +40,308 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
+static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
+{
+    (void)snprintf(buf, buflen, "%u,%u,%09u,", ais->type,ais->repeat,ais->mmsi);
+    /*@ -formatconst @*/
+    switch (ais->type) {
+    case 1:	/* Position Report */
+    case 2:
+    case 3:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%d,%u,%u,%d,%d,%u,%d,%u,0x%x,%d,0x%x",
+		       ais->type123.status,
+		       ais->type123.turn,
+		       ais->type123.speed,
+		       (uint)ais->type123.accuracy,
+		       ais->type123.lon,
+		       ais->type123.lat,
+		       ais->type123.course,
+		       ais->type123.heading,
+		       ais->type123.second,
+		       ais->type123.maneuver,
+		       ais->type123.raim,
+		       ais->type123.radio);
+	break;
+    case 4:	/* Base Station Report */
+    case 11:	/* UTC/Date Response */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,0x%x",
+		       ais->type4.year,
+		       ais->type4.month,
+		       ais->type4.day,
+		       ais->type4.hour,
+		       ais->type4.minute,
+		       ais->type4.second,
+		       (uint)ais->type4.accuracy,
+		       ais->type4.lon,
+		       ais->type4.lat,
+		       ais->type4.epfd,
+		       ais->type4.raim,
+		       ais->type4.radio);
+	break;
+    case 5: /* Ship static and voyage related data */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u",
+		       ais->type5.imo,
+		       ais->type5.ais_version,
+		       ais->type5.callsign,
+		       ais->type5.shipname,
+		       ais->type5.shiptype,
+		       ais->type5.to_bow,
+		       ais->type5.to_stern,
+		       ais->type5.to_port,
+		       ais->type5.to_starboard,
+		       ais->type5.epfd,
+		       ais->type5.month,
+		       ais->type5.day,
+		       ais->type5.hour,
+		       ais->type5.minute,
+		       ais->type5.draught,
+		       ais->type5.destination,
+		       ais->type5.dte);
+	break;
+    case 6:	/* Binary Message */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%u:%s",
+		       ais->type6.seqno,
+		       ais->type6.dest_mmsi,
+		       ais->type6.retransmit,
+		       ais->type6.application_id,
+		       ais->type6.bitcount,
+		       gpsd_hexdump(ais->type6.bitdata,
+				       (ais->type6.bitcount+7)/8));
+	break;
+    case 7:	/* Binary Acknowledge */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u",
+		       ais->type7.mmsi[0],
+		       ais->type7.mmsi[1],
+		       ais->type7.mmsi[2],
+		       ais->type7.mmsi[3]);
+	break;
+    case 8:	/* Binary Broadcast Message */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u:%s",
+		       ais->type8.application_id,
+		       ais->type8.bitcount,
+		       gpsd_hexdump(ais->type8.bitdata,
+				       (ais->type8.bitcount+7)/8));
+	break;
+    case 9:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%d,%d,%u,%u,0x%x,%u,%d,0x%x",
+		       ais->type9.alt,
+		       ais->type9.speed,
+		       (uint)ais->type9.accuracy,
+		       ais->type9.lon,
+		       ais->type9.lat,
+		       ais->type9.course,
+		       ais->type9.second,
+		       ais->type9.regional,
+		       ais->type9.dte,
+		       ais->type9.raim,
+		       ais->type9.radio);
+	break;
+    case 10:	/* UTC/Date Inquiry */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u",
+		       ais->type10.dest_mmsi);
+	break;
+    case 12:	/* Safety Related Message */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%s",
+		       ais->type12.seqno,
+		       ais->type12.dest_mmsi,
+		       ais->type12.retransmit,
+		       ais->type12.text);
+	break;
+    case 13:	/* Safety Related Acknowledge */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u",
+		       ais->type13.mmsi[0],
+		       ais->type13.mmsi[1],
+		       ais->type13.mmsi[2],
+		       ais->type13.mmsi[3]);
+	break;
+    case 14:	/* Safety Related Broadcast Message */
+#define TYPE14_CSV  "%s"
+#define TYPE14_JSON	"\"text\":\"%s\"}"
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		      (json ? TYPE14_JSON : TYPE14_CSV),
+		      ais->type14.text);
+#undef TYPE14_CSV
+#undef TYPE14_JSON
+	break;
+    case 15:
+#define TYPE15_CSV	"%u,%u,%u,%u,%u,%u,%u,%u"
+#define TYPE15_JSON	"mmsi1=%u,type1_1=%u,offset1_1=%u,type1_2=%u,offset1_2=%u,mmsi2=%u,type2_1=%u,offset2_1=%u"
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		      (json ? TYPE15_JSON : TYPE15_CSV),	
+		      ais->type15.mmsi1,
+		      ais->type15.type1_1,
+		      ais->type15.offset1_1,
+		      ais->type15.type1_2,
+		      ais->type15.offset1_2,
+		      ais->type15.mmsi2,
+		      ais->type15.type2_1,
+		      ais->type15.offset2_1);
+	break;
+    case 16:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%u,%u",
+		       ais->type16.mmsi1,
+		       ais->type16.offset1,
+		       ais->type16.increment1,
+		       ais->type16.mmsi2,
+		       ais->type16.offset2,
+		       ais->type16.increment2);
+	break;
+    case 17:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%d,%d,%d:%s",
+		       ais->type17.lon,
+		       ais->type17.lat,
+		       ais->type17.bitcount,
+		       gpsd_hexdump(ais->type17.bitdata,
+				       (ais->type17.bitcount+7)/8));
+	break;
+    case 18:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,%u,%u,%u,%u,%d,0x%x",
+		       ais->type18.reserved,
+		       ais->type18.speed,
+		       (uint)ais->type18.accuracy,
+		       ais->type18.lon,
+		       ais->type18.lat,
+		       ais->type18.course,
+		       ais->type18.heading,
+		       ais->type18.second,
+		       ais->type18.regional,
+		       ais->type18.cs_flag,
+		       ais->type18.display_flag,
+		       ais->type18.dsc_flag,
+		       ais->type18.band_flag,
+		       ais->type18.msg22_flag,
+		       ais->type18.raim,
+		       ais->type18.radio);
+	break;
+    case 19:
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%d,0x%x",
+		       ais->type19.reserved,
+		       ais->type19.speed,
+		       (uint)ais->type19.accuracy,
+		       ais->type19.lon,
+		       ais->type19.lat,
+		       ais->type19.course,
+		       ais->type19.heading,
+		       ais->type19.second,
+		       ais->type19.regional,
+		       ais->type19.shipname,
+		       ais->type19.shiptype,
+		       ais->type19.to_bow,
+		       ais->type19.to_stern,
+		       ais->type19.to_port,
+		       ais->type19.to_starboard,
+		       ais->type19.epfd,
+		       ais->type19.raim,
+		       ais->type19.assigned);
+	break;
+    case 20:	/* Data Link Management Message */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+		       ais->type20.offset1,
+		       ais->type20.number1,
+		       ais->type20.timeout1,
+		       ais->type20.increment1,
+		       ais->type20.offset2,
+		       ais->type20.number2,
+		       ais->type20.timeout2,
+		       ais->type20.increment2,
+		       ais->type20.offset3,
+		       ais->type20.number3,
+		       ais->type20.timeout3,
+		       ais->type20.increment3,
+		       ais->type20.offset4,
+		       ais->type20.number4,
+		       ais->type20.timeout4,
+		       ais->type20.increment4);
+	break;
+    case 21: /* Aid to Navigation */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%s,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,0x%x,%u,%u",
+		       ais->type21.type,
+		       ais->type21.name,
+		       ais->type21.accuracy,
+		       ais->type21.lon,
+		       ais->type21.lat,
+		       ais->type21.to_bow,
+		       ais->type21.to_stern,
+		       ais->type21.to_port,
+		       ais->type21.to_starboard,
+		       ais->type21.epfd,
+		       ais->type21.second,
+		       ais->type21.regional,
+		       ais->type21.off_position,
+		       ais->type21.raim,
+		       ais->type21.virtual_aid);
+	break;
+    case 22:	/* Channel Management */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%d,%d,%d,%d,%u,%u,%u,%u",
+		       ais->type22.channel_a,
+		       ais->type22.channel_b,
+		       ais->type22.mode,
+		       ais->type22.power,
+		       ais->type22.ne_lon,
+		       ais->type22.ne_lat,
+		       ais->type22.sw_lon,
+		       ais->type22.sw_lat,
+		       ais->type22.addressed,
+		       ais->type22.band_a,
+		       ais->type22.band_b,
+		       ais->type22.zonesize);
+	break;
+    case 24: /* Class B CS Static Data Report */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
+		      "%u,", ais->type24.part);
+	if (ais->type24.part == 0) {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
+			  "%s",
+			  ais->type24.a.shipname);
+	} else if (ais->type24.part == 1) {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			   "%u,",
+			   ais->type24.b.shiptype);
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			  "%s,%s,",
+			  ais->type24.b.vendorid,
+			  ais->type24.b.callsign);
+	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			      "%u",
+			      ais->type24.b.mothership_mmsi);
+	    } else {
+		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			      "%u,%u,%u,%u",
+			      ais->type24.b.dim.to_bow,
+			      ais->type24.b.dim.to_stern,
+			      ais->type24.b.dim.to_port,
+			      ais->type24.b.dim.to_starboard);
+	    }
+	} else
+	    (void)snprintf(buf+strlen(buf),
+			  buflen-strlen(buf), "illegal part value %u", ais->type24.part);
+	break;
+    default:
+	(void)snprintf(buf+strlen(buf),
+		      buflen-strlen(buf), "unknown AIVDM message content.");
+	break;
+    }
+    /*@ +formatconst @*/
+}
+
 /*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE *fpin, FILE *fpout)
 /* RTCM or AIS packets on fpin to dump format on fpout */
@@ -127,8 +429,12 @@ int main(int argc, char **argv)
     int c;
     enum {doencode, dodecode} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "dejpuVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejpuVD:")) != EOF) {
 	switch (c) {
+	case 'c':
+	    json = false;
+	    break;
+
 	case 'd':
 	    mode = dodecode;
 	    break;
