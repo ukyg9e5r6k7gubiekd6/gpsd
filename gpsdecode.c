@@ -372,7 +372,10 @@ static void decode(FILE *fpin, FILE *fpout)
 	else if (lexer.type == AIVDM_PACKET) {
 	    /*@ -uniondef */
 	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm)){
-		aivdm_dump(&aivdm.decoded, scaled, json, buf, sizeof(buf));
+		if (!json)
+		    aivdm_csv_dump(&aivdm.decoded, buf, sizeof(buf));
+		else
+		    aivdm_dump(&aivdm.decoded, scaled, json, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 		(void)fputs("\n", fpout);
 	    }
@@ -415,7 +418,7 @@ static void encode(FILE *fpin, bool repack, FILE *fpout)
 		memset(&lexer, 0, sizeof(lexer));
 	    } else {
 		/* this works */
-		char outbuf[BUFSIZ]; 
+		char outbuf[BUFSIZ];
 		rtcm2_json_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
 		(void)fputs(outbuf, fpout);
 	    }
