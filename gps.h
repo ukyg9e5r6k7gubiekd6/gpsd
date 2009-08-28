@@ -475,7 +475,7 @@ typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
 struct ais_t
 {
-    uint	msgtype;	/* message type */
+    uint	type;		/* message type */
     uint    	repeat;		/* Repeat indicator */
     uint	mmsi;		/* MMSI */
     union {

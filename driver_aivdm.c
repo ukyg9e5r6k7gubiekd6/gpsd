@@ -140,12 +140,12 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 #define UBITS(s, l)	ubits((char *)ais_context->bits, s, l)
 #define SBITS(s, l)	sbits((char *)ais_context->bits, s, l)
 #define UCHARS(s, to)	from_sixbit((char *)ais_context->bits, s, sizeof(to), to)
-	ais->msgtype = UBITS(0, 6);
+	ais->type = UBITS(0, 6);
 	ais->repeat = UBITS(6, 2);
 	ais->mmsi = UBITS(8, 30);
 	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n",
-		    ais->msgtype, ais->mmsi);
-	switch (ais->msgtype) {
+		    ais->type, ais->mmsi);
+	switch (ais->type) {
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
@@ -497,7 +497,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    break;
 	default:
 	    gpsd_report(LOG_INF, "\n");
-	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->msgtype);
+	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->type);
 	    break;
 	}
 #undef UCHARS
@@ -688,11 +688,11 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (sizeof(navaid_type_legends)/sizeof(navaid_type_legends[0]))) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     if (json)
-	(void)snprintf(buf, buflen, "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,\"mmsi\":\"%09u\",", ais->msgtype, ais->repeat, ais->mmsi);
+	(void)snprintf(buf, buflen, "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,\"mmsi\":\"%09u\",", ais->type, ais->repeat, ais->mmsi);
     else
-	(void)snprintf(buf, buflen, "%u,%u,%09u,", ais->msgtype, ais->repeat, ais->mmsi);
+	(void)snprintf(buf, buflen, "%u,%u,%09u,", ais->type, ais->repeat, ais->mmsi);
     /*@ -formatconst @*/
-    switch (ais->msgtype) {
+    switch (ais->type) {
     case 1:	/* Position Report */
     case 2:
     case 3:

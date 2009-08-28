@@ -134,6 +134,7 @@ libgps_la_LDFLAGS = -version-number 19:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgpsd_c_sources = \
+	ais_json.c \
 	bits.c \
 	bsd-base64.c \
 	crc24q.c \
@@ -146,7 +147,6 @@ libgpsd_c_sources = \
 	json.c \
 	libgps.c \
 	libgps_json.c \
-	rtcm2_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
 	net_dgpsip.c \
@@ -157,6 +157,7 @@ libgpsd_c_sources = \
 	ntpshm.c \
 	packet.c \
 	serial.c \
+	rtcm2_json.c \
 	srecord.c \
 	strl.c \
 	subframe.c \
