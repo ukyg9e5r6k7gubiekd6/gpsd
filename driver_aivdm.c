@@ -696,10 +696,10 @@ void aivdm_dump(struct ais_t *ais, bool scaled, bool json, char *buf, size_t buf
     case 1:	/* Position Report */
     case 2:
     case 3:
-#define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%d,0x%x"
-#define TYPE123_UNSCALED_JSON   "\"status\":%u,\"turn\":%d,\"speed\":%u,\"accuracy\":%u,\"lon\":%d,\"lat\":%d,\"course\":%u,\"heading\":%d,\"second\":%u,\"regional\":%d,\"radio\":%d}"
-#define TYPE123_SCALED_CSV "%s,%s,%s,%u,%.4f,%.4f,%u,%u,%u,0x%x,%d,0x%x"
-#define TYPE123_SCALED_JSON   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,\"accuracy\":%u,\"lon\":%.4f,\"lat\":%.4f,\"course\":%u,\"heading\":%d,\"second\":%u,\"regional\":%d,\"radio\":%d}"
+#define TYPE123_UNSCALED_CSV "%u,%d,%u,%u,%d,%d,%u,%d,%u,0x%x,%d,0x%x"
+#define TYPE123_UNSCALED_JSON   "\"status\":%u,\"turn\":%d,\"speed\":%u,\"accuracy\":%u,\"lon\":%d,\"lat\":%d,\"course\":%u,\"heading\":%d,\"second\":%u,\"maneuver\":%d,\"raim\":%u,\"radio\":%d}"
+#define TYPE123_SCALED_CSV "%s,%s,%s,%u,%.4f,%.4f,%u,%d,%u,0x%x,%d,0x%x"
+#define TYPE123_SCALED_JSON   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,\"accuracy\":%u,\"lon\":%.4f,\"lat\":%.4f,\"course\":%u,\"heading\":%d,\"second\":%u,\"maneuver\":%d,\"raim\":%u,\"radio\":%d}"
 	if (scaled) {
 	    char turnlegend[10];
 	    char speedlegend[10];
