@@ -72,10 +72,20 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+    /*
+     * Beware! Needs to stay synchronized with a corresponding
+     * nam,e array in the RTCM2 JSON dump code. This interpretation of
+     * NAVSYSTEM_GALILEO is assumed from RTCM3, it's not actually
+     * documented in RTCM 2.1.
+     */
+    const struct json_enum_t system_table[] = {
+	{"GPS", 0}, {"GLONASS", 1}, {"GALILEO", 2}, {"UNKNOWN", 2}, {NULL}
+    };
     const struct json_attr_t json_rtcm4[] = {
 	RTCM2_HEADER
         {"valid",          boolean, .addr.boolean = &rtcm2->reference.valid},
-	{"system",         integer, .addr.integer = &rtcm2->reference.system},
+	{"system",         integer, .addr.integer = &rtcm2->reference.system,
+	                            .map=system_table},
 	{"sense",          integer, .addr.integer = &rtcm2->reference.sense},
 	{"datum",          string,  .addr.string = rtcm2->reference.datum,
 	                            .len = sizeof(rtcm2->reference.datum)},

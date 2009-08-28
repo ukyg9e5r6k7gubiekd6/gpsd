@@ -453,6 +453,13 @@ enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
 			c);
 }
 
+/*
+ * Beware! Needs to stay synchronized with a JSON enumeration map in
+ * the parser. This interpretation of NAVSYSTEM_GALILEO is assumed
+ * from RTCM3, it's not actually documented in RTCM 2.1.
+ */
+static char *navsysnames[] = {"GPS", "GLONASS", "GALILEO"};
+
 void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
@@ -596,17 +603,18 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 4:
-	if (rtcm->reference.valid)
+	if (rtcm->reference.valid) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"system\":%s,\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f",
-			   (rtcm->reference.system==NAVSYSTEM_GPS) ? "GPS"
-			   : ((rtcm->reference.system==NAVSYSTEM_GLONASS) ? "GLONASS"
-			      : "UNKNOWN"),
+			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f",
+			   rtcm->reference.system >= NITEMS(navsysnames) 
+			   ? "UNKNOWN"
+			   : navsysnames[rtcm->reference.system],
 			   rtcm->reference.sense,
 			   rtcm->reference.datum,
 			   rtcm->reference.dx,
 			   rtcm->reference.dy,
 			   rtcm->reference.dz);
+	}
 	break;
 
     case 5:
