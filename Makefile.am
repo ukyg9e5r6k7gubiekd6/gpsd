@@ -498,7 +498,6 @@ aivdm-makeregress: gpsdecode
 		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
 	done
 
-
 # Regression-test the packet getter.
 packet-regress: test_packet
 	@echo "Testing detection of invalid packets..."
@@ -528,6 +527,7 @@ unpack-regress: libgps
 	@echo "Testing the client-library sentence decoder..."
 	@$(srcdir)/libgps -u >test/test.chk
 	@diff -u test/unpack.chk test/test.chk
+	@rm -f test/test.chk
 
 # Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
