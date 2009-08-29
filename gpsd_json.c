@@ -208,42 +208,46 @@ void json_device_dump(struct gps_device_t *device,
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
-    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "\"activated\":%2.2f,", device->gpsdata.online);
-    if (device->observed != 0) {
-	int mask = 0;
-	for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
-	    if ((device->observed & cmp->packetmask) != 0) 
-		mask |= cmp->typemask;
-	if (mask != 0)
-	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			   "\"flags\":%d,", mask);
-    }
-    if (device->device_type != NULL) {
-	(void)strlcat(reply, "\"driver\":\"", replylen);
-	(void)strlcat(reply, 
-		      device->device_type->type_name,
-		      replylen);
-	(void)strlcat(reply, "\",", replylen);
-    }
-    if (device->subtype[0] != '\0') {
-	(void)strlcat(reply, "\"subtype\":\",", replylen);
-	(void)strlcat(reply, 
-		      device->subtype,
-		      replylen);
-	(void)strlcat(reply, "\",", replylen);
-    }
-    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
-		   device->gpsdata.dev.driver_mode,
-		   (int)gpsd_get_speed(&device->ttyset),
-		   (int)device->gpsdata.dev.parity,
-		   device->gpsdata.dev.stopbits,
-		   device->gpsdata.dev.cycle);
-    if (device->device_type->rate_switcher != NULL)
+    if (device->gpsdata.online > 0) {
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       ",\"mincycle\":%2.2f",
-		       device->device_type->min_cycle);
+		       "\"activated\":%2.2f,", device->gpsdata.online);
+	if (device->observed != 0) {
+	    int mask = 0;
+	    for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
+		if ((device->observed & cmp->packetmask) != 0) 
+		    mask |= cmp->typemask;
+	    if (mask != 0)
+		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			       "\"flags\":%d,", mask);
+	}
+	if (device->device_type != NULL) {
+	    (void)strlcat(reply, "\"driver\":\"", replylen);
+	    (void)strlcat(reply, 
+			  device->device_type->type_name,
+			  replylen);
+	    (void)strlcat(reply, "\",", replylen);
+	}
+	if (device->subtype[0] != '\0') {
+	    (void)strlcat(reply, "\"subtype\":\",", replylen);
+	    (void)strlcat(reply, 
+			  device->subtype,
+			  replylen);
+	    (void)strlcat(reply, "\",", replylen);
+	}
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
+		       device->gpsdata.dev.driver_mode,
+		       (int)gpsd_get_speed(&device->ttyset),
+		       (int)device->gpsdata.dev.parity,
+		       device->gpsdata.dev.stopbits,
+		       device->gpsdata.dev.cycle);
+	if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
+	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			   ",\"mincycle\":%2.2f",
+			   device->device_type->min_cycle);
+    }
+    if (reply[strlen(reply)-1] == ',')
+	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}", replylen);
 }
 
