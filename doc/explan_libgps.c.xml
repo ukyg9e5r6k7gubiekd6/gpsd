@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: libgps.c 4377 2007-06-02 14:52:38Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>char *deg_to_str( enum deg_str_type type,  double f)</function></entry>
@@ -73,12 +79,6 @@
   <entry><para>A simple command line parser and endless loop to exercise the daemon when debugging.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: libgps.c 4377 2007-06-02 14:52:38Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

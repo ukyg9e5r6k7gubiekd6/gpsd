@@ -5,17 +5,17 @@
 <colspec colname='c2'></colspec>
 <spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
 
-<tbody>
-<row>
-  <entry><para>This file only contains macros that convert data variables from the native format of the device output (MSB-first or LSB-first) into a standard form for <function>gpsd</function> use. This makes data parsing consistent regardless of the underlying format. If the device driver file makes no deliberate selection, the default is to assume the device emits data in big-endian (network byte) order.</para></entry>
-</row>
-</tbody>
-
 <tfoot>
 <row>
   <entry spanname='s1' align='left'>Notes based on <function>$Id: bits.h 4030 2006-11-30 07:29:25Z esr $</function></entry>
 </row>
 </tfoot>
+
+<tbody>
+<row>
+  <entry><para>This file only contains macros that convert data variables from the native format of the device output (MSB-first or LSB-first) into a standard form for <function>gpsd</function> use. This makes data parsing consistent regardless of the underlying format. If the device driver file makes no deliberate selection, the default is to assume the device emits data in big-endian (network byte) order.</para></entry>
+</row>
+</tbody>
 
 </tgroup>
 </informaltable>

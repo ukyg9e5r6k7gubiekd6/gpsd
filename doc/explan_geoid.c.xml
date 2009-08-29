@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: geoid.c 4257 2007-01-18 03:56:43Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static double bilinear(double x1, double y1, double x2, double y2, double x, double y, double z11, double z12, double z21, double z22)</function></entry>
@@ -33,12 +39,6 @@
   <entry><para>This is a local test routine which exercises the other code for debugging purposes. It is normally shut off by an <function>#ifdef</function>.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: geoid.c 4257 2007-01-18 03:56:43Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

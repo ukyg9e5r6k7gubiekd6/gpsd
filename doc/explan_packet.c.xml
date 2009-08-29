@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: packet.c 4377 2007-06-02 14:52:38Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static void nextstate(struct gps_packet_t *lexer, unsigned char c)</function></entry>
@@ -30,7 +36,7 @@
 </row>
 <row>
   <entry><function>ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)</function></entry>
-  <entry><para>Call the <function>nextstate()</function> function to process the available data and set the recognition state correctly.<para>When a packet is matched to a driver, call <function>packet_accept()</function> and <function>packet_discard()</function> to handle the packet. If it is not matched, call <function>packet_discard()</function> and set the state to <quote>GROUND_STATE</quote></para> Return the number of characters handled.</para></entry>
+  <entry><para>Call the <function>nextstate()</function> function to process the available data and set the recognition state correctly.</para><para>When a packet is matched to a driver, call <function>packet_accept()</function> and <function>packet_discard()</function> to handle the packet. If it is not matched, call <function>packet_discard()</function> and set the state to <quote>GROUND_STATE</quote></para><para>Return the number of characters handled.</para></entry>
 </row>
 <row>
   <entry><function>ssize_t packet_get(int fd, struct gps_packet_t *lexer)</function></entry>
@@ -45,12 +51,6 @@
   <entry><para>This pushes back the last packet from the output buffer to the input buffer, provided doing so would not overflow the input buffer.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: packet.c 4377 2007-06-02 14:52:38Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: ntpshm.c 4412 2007-08-21 15:48:02Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static struct shmTime *getShmTime(int unit)</function></entry>
@@ -37,12 +43,6 @@
   <entry><para>This code is only available if the 1PPS function is compiled in.</para><para>The shared memory structures are checked for validity and if not valid, a 0 is returned.</para><para>The time received is then checked to be within 100 milliseconds of the PC's internal time and if not, a -1 is returned.</para><para></para><para>The time received is then checked to be within 500 milliseconds of the second boundary and if not, the shared memory structure is advised that lock is lost and a -1 is returned.</para><para>If good, the time is stored in the shared memory and 1 is returned.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: ntpshm.c 4412 2007-08-21 15:48:02Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

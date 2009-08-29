@@ -5,17 +5,17 @@
 <colspec colname='c2'></colspec>
 <spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
 
-<tbody>
-<row>
-  <entry><para>This is a dummy file to use as a skeleton for writing a new driver. The driver is heavily commented, so refer to the source code.</para></entry>
-</row>
-</tbody>
-
 <tfoot>
 <row>
   <entry spanname='s1' align='left'>Notes based on <function>$Id: driver_proto.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
 </row>
 </tfoot>
+
+<tbody>
+<row>
+  <entry><para>This is a dummy file to use as a skeleton for writing a new driver. The driver is heavily commented, so refer to the source code.</para></entry>
+</row>
+</tbody>
 
 </tgroup>
 </informaltable>

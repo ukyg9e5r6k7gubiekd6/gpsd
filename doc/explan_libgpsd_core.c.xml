@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: libgpsd_core.c 4284 2007-01-27 07:27:42Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>int gpsd_switch_driver(struct gps_device_t *session, char* typename)</function></entry>
@@ -81,12 +87,6 @@
   <entry><para>Zero the status data for all satellites.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: libgpsd_core.c 4284 2007-01-27 07:27:42Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

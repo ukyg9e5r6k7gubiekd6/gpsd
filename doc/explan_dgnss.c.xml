@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: dgnss.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>bool dgnss_url(char *name)</function></entry>
@@ -37,12 +43,6 @@
   <entry><para>If there is a DGNSS connection report in the context buffer, pass it to the caller. If the transaction fails, generate an error log, otherwise, update the session timestamp.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: dgnss.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: ntrip.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static char *ntrip_field_iterate(char *start, char *prev, const char *eol)</function></entry>
@@ -45,12 +51,6 @@
   <entry><para>If we have not contacted the server already and we have at least 10 fixes, send a report to the server and set the flag, so we don't do it again.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: ntrip.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

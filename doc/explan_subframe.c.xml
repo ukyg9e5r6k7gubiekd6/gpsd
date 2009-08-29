@@ -11,18 +11,18 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: subframe.c 3770 2006-11-02 05:07:11Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])</function></entry>
   <entry><para>Extracts leap-second from RTCM-104 subframe data.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: subframe.c 3770 2006-11-02 05:07:11Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

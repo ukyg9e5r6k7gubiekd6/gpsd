@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: isgps.c 4065 2006-12-04 05:31:59Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static unsigned char parity_array[]</function></entry>
@@ -37,12 +43,6 @@
   <entry><para>Ship an IS-GPS-200 message to standard output in Magnavox format.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: isgps.c 4065 2006-12-04 05:31:59Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

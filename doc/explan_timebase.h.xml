@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: timebase.h 4040 2006-12-01 03:41:42Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>LEAP_SECONDS</function></entry>
@@ -25,12 +31,6 @@
   <entry><para>Currently 2000</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: timebase.h 4040 2006-12-01 03:41:42Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

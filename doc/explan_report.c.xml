@@ -11,18 +11,18 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: report.c 3666 2006-10-26 23:11:51Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>void gpsd_report(int errlevel UNUSED, const char *fmt, ... )</function></entry>
   <entry><para>Provides the outputting of strings to stderr for anyone who needs it. Used extensively by many functions to report errors or progress. Responds according to the <function>errlevel</function> argument, which is filled by the DEBUG command line argument, so that the verbosity of output is conditional on the user's wishes at runtime.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: report.c 3666 2006-10-26 23:11:51Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

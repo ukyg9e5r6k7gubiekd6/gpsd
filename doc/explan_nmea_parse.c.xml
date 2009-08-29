@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: nmea_parse.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>static void do_lat_lon(char *field[], struct gps_data_t *out)</function></entry>
@@ -73,12 +79,6 @@
   <entry><para>Read the incoming data into a buffer, reserving the last 5 bytes (at least) for the terminating data.</para><para>If the buffer starts with a '$', asssume it is an NMEA sentence and call <function>nmea_add_checksum</function>. Otherwise, just add a CR+LF.</para><para>Write the buffer to the device, stashing the byte count returned. Wait until all output is sent.</para><para>Check the returned value against the number of bytes in the buffer. If they are equal, return the stashed count. If not, return -1.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: nmea_parse.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

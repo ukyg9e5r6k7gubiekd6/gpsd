@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd.h-tail 4383 2007-06-03 21:11:37Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry spanname='s1' align='left'><para>This file is created at <function>configure</function> time by combining <function>gpsd.h-head</function>, certain configuration options from the auto-generated file <function>gpsd_configure.h</function> and <function>gpsd.h-tail</function>. This file (<function>gpsd.h</function>) should not be edited directly, neither should <function>gpsd.h-head</function>. You should only edit <function>gpsd.h-tail</function> as needed.</para></entry>
@@ -32,12 +38,6 @@
   <entry><para>This is the data belonging to a session (global state) and also private storage for the session's associated device driver (if needed). 1 per <application>gpsd</application> session.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd.h-tail 4383 2007-06-03 21:11:37Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

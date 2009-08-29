@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: gps.h 4369 2007-06-01 19:23:17Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>struct gps_fix_t {}</function></entry>
@@ -25,12 +31,6 @@
   <entry><para>This contains ALL the data available from the daemon; the actual fix, status flags, headings etc. Basically any good stuff that we might want goes here.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gps.h 4369 2007-06-01 19:23:17Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

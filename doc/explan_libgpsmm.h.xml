@@ -5,17 +5,17 @@
 <colspec colname='c2'></colspec>
 <spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
 
-<tbody>
-<row>
-  <entry><para>Headers for <function>libgpsmm.cpp</function>.</para></entry>
-</row>
-</tbody>
-
 <tfoot>
 <row>
   <entry spanname='s1' align='left'>Notes based on <function>$Id: libgpsmm.h 3666 2006-10-26 23:11:51Z ckuethe $</function></entry>
 </row>
 </tfoot>
+
+<tbody>
+<row>
+  <entry><para>Headers for <function>libgpsmm.cpp</function>.</para></entry>
+</row>
+</tbody>
 
 </tgroup>
 </informaltable>

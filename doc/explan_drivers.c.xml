@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: drivers.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>ssize_t generic_get(struct gps_device_t *session)</function></entry>
@@ -41,12 +47,6 @@
   <entry><para>The last important thing in this code is an array of addresses, one for each compiled-in driver. This address gets us to the <quote>capabilities</quote> table in the bottom of each driver where we find what functions a driver supports and the entry address for each function.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: drivers.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

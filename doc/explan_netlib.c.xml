@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4376 2007-06-02 06:29:26Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>int netlib_connectsock(const char *host, const char *service, const char *protocol)</function></entry>
@@ -21,12 +27,6 @@
   <entry><para>This makes a call to <function>getpeername</function> using the spplied fd. On success, the returned string is the ip address in dotted notation. On error, "&lt;unknown&gt;" is returned.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4376 2007-06-02 06:29:26Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: serial.c 4405 2007-07-27 16:16:09Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>void gpsd_tty_init(struct gps_device_t *session)</function></entry>
@@ -54,12 +60,6 @@
 Set the HUPCL flag in the original data, write the old data to the port, close the fd and clear that fd number from the session data.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: serial.c 4405 2007-07-27 16:16:09Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

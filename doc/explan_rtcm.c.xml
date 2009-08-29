@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: rtcm.c 4364 2007-05-31 08:43:23Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>void rtcm_unpack(struct rtcm_t *tp, char *buf)</function></entry>
@@ -45,12 +51,6 @@
   <entry><para>Ship an RTCM message in the format emitted by Magnavox DGPS receivers.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: rtcm.c 4364 2007-05-31 08:43:23Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

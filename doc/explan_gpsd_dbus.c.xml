@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd_dbus.c 3666 2006-10-26 23:11:51Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>int initialize_dbus_connection(void)</function></entry>
@@ -21,12 +27,6 @@
   <entry><para>Sends the current fix data for this channel via dbus</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd_dbus.c 3666 2006-10-26 23:11:51Z ckuethe $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>

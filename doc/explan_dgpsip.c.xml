@@ -11,6 +11,12 @@
 </row>
 </thead>
 
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: dgpsip.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
+</row>
+</tfoot>
+
 <tbody>
 <row>
   <entry><function>int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)</function></entry>
@@ -29,12 +35,6 @@
   <entry><para>This function takes a list of servers and tries to get a connection to the closest one relative to our location. If no servers are within 1600 km or none are in the list, the dsock value is set to -2 to lock out the function.</para></entry>
 </row>
 </tbody>
-
-<tfoot>
-<row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: dgpsip.c 3771 2006-11-02 05:15:20Z esr $</function></entry>
-</row>
-</tfoot>
 
 </tgroup>
 </informaltable>
