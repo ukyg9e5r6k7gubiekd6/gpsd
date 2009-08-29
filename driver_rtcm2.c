@@ -618,22 +618,22 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 5:
-#define SHOWBOOL(x)	((x)?"true":"false")
+#define JSON_BOOL(x)	((x)?"true":"false")
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
 	    struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"iodl\":%s,\"health\":%1u,\"snr\":%d,\"health_en\":%s,\"new_data\":%s,\"los_warning\":%s,\"tou\":%u},",
 			   csp->ident,
-			   SHOWBOOL(csp->iodl),
+			   JSON_BOOL(csp->iodl),
 			   (unsigned)csp->health,
 			   csp->snr,
-			   SHOWBOOL(csp->health_en),
-			   SHOWBOOL(csp->new_data),
-			   SHOWBOOL(csp->los_warning),
+			   JSON_BOOL(csp->health_en),
+			   JSON_BOOL(csp->new_data),
+			   JSON_BOOL(csp->los_warning),
 			   csp->tou);
 	}
-#undef SHOWBOOL
+#undef JSON_BOOL
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)strlcat(buf, "]", buflen);

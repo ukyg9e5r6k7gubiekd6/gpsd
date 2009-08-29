@@ -265,7 +265,7 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
     } else if (strstr(buf, "\"class\":\"AIS\"") != 0) {
 	status = json_ais_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
-				 &gpsdata->rtcm2, NULL);
+				 &gpsdata->ais, NULL);
 	if (status == 0)
 	    gpsdata->set |= AIS_SET;
 	return status;

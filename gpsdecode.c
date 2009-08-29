@@ -43,7 +43,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
     (void)snprintf(buf, buflen, "%u,%u,%09u,", ais->type,ais->repeat,ais->mmsi);
-    /*@ -formatconst @*/
     switch (ais->type) {
     case 1:	/* Position Report */
     case 2:
@@ -165,27 +164,21 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type13.mmsi[3]);
 	break;
     case 14:	/* Safety Related Broadcast Message */
-#define TYPE14_CSV  "%s"
-#define TYPE14_JSON	"\"text\":\"%s\"}"
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		      (json ? TYPE14_JSON : TYPE14_CSV),
-		      ais->type14.text);
-#undef TYPE14_CSV
-#undef TYPE14_JSON
+		       "%s", 
+		       ais->type14.text);
 	break;
     case 15:
-#define TYPE15_CSV	"%u,%u,%u,%u,%u,%u,%u,%u"
-#define TYPE15_JSON	"mmsi1=%u,type1_1=%u,offset1_1=%u,type1_2=%u,offset1_2=%u,mmsi2=%u,type2_1=%u,offset2_1=%u"
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		      (json ? TYPE15_JSON : TYPE15_CSV),	
-		      ais->type15.mmsi1,
-		      ais->type15.type1_1,
-		      ais->type15.offset1_1,
-		      ais->type15.type1_2,
-		      ais->type15.offset1_2,
-		      ais->type15.mmsi2,
-		      ais->type15.type2_1,
-		      ais->type15.offset2_1);
+		       "%u,%u,%u,%u,%u,%u,%u,%u",
+		       ais->type15.mmsi1,
+		       ais->type15.type1_1,
+		       ais->type15.offset1_1,
+		       ais->type15.type1_2,
+		       ais->type15.offset1_2,
+		       ais->type15.mmsi2,
+		       ais->type15.type2_1,
+		       ais->type15.offset2_1);
 	break;
     case 16:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -339,7 +332,6 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		      buflen-strlen(buf), "unknown AIVDM message content.");
 	break;
     }
-    /*@ +formatconst @*/
 }
 
 /*@ -compdestroy -compdef -usedef @*/
@@ -375,7 +367,7 @@ static void decode(FILE *fpin, FILE *fpout)
 		if (!json)
 		    aivdm_csv_dump(&aivdm.decoded, buf, sizeof(buf));
 		else
-		    aivdm_dump(&aivdm.decoded, scaled, json, buf, sizeof(buf));
+		    aivdm_dump(&aivdm.decoded, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 		(void)fputs("\n", fpout);
 	    }
