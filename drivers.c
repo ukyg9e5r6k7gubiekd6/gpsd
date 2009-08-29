@@ -1057,13 +1057,12 @@ const struct gps_type_t mkt3301 = {
 
 
 #ifdef AIVDM_ENABLE
-gps_mask_t aivdm_analyze(struct gps_device_t *);
-
-gps_mask_t aivdm_analyze(struct gps_device_t *session)
+static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm))
+    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm)) {
+	
 	return ONLINE_SET | AIS_SET;
-    else
+    }else
 	return ONLINE_SET;
 }
 
