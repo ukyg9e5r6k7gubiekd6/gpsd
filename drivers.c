@@ -1059,11 +1059,18 @@ const struct gps_type_t mkt3301 = {
 #ifdef AIVDM_ENABLE
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-    if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm)) {
+    if (session->packet.type == AIVDM_PACKET){
+	if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm)) {
 	
-	return ONLINE_SET | AIS_SET;
-    }else
-	return ONLINE_SET;
+	    return ONLINE_SET | AIS_SET;
+	}else
+	    return ONLINE_SET;
+#ifdef NMEA_ENABLE
+    } else if (session->packet.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->packet.outbuffer, session);
+#endif /* NMEA_ENABLE */
+    } else
+	return 0;
 }
 
 static const struct gps_type_t aivdm = {
