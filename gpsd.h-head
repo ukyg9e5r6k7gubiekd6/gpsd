@@ -1,5 +1,4 @@
 /* gpsd.h -- fundamental types and structures for the gpsd library */
-/* This file is generated.  Do not hand-hack it! */
 
 /* $Id$ */
 #ifndef _GPSD_H_

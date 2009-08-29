@@ -503,7 +503,7 @@ extern void ubx_catch_model(struct gps_device_t *,
 #endif /* UBX_ENABLE */
 #ifdef AIVDM_ENABLE
 extern bool aivdm_decode(char *, size_t, struct aivdm_context_t *);
-extern void  aivdm_dump(struct ais_t *, bool, bool, char *, size_t);
+extern void  aivdm_dump(struct ais_t *, bool, char *, size_t);
 #endif /* AIVDM_ENABLE */
 #ifdef MKT3301_ENABLE
     extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
