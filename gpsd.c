@@ -1645,7 +1645,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    int status;
 	    status = json_watch_read(buf+1, &sub->policy, &end);
 	    if (status == 0) {
-		if (*end != NULL && *end == ';')
+		if (end != NULL && *end == ';')
 		    ++end;
 		if (sub->policy.watcher)
 		    for(devp = devices; devp < devices + MAXDEVICES; devp++)
