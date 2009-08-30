@@ -806,54 +806,54 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 5: /* Ship static and voyage related data */
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
-			  "\"shipname\":\"%s\",\"shiptype\":\"%s\","
+			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
+			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
 			   "\"eta\":\"%02u-%02uT%02u:%02uZ\",\""
 			   "draught\":%.1f,\"destination\":\"%s\",\"dte\":%u}",
-			  ais->type5.imo,
-			  ais->type5.ais_version,
-			  ais->type5.callsign,
-			  ais->type5.shipname,
-			  SHIPTYPE_DISPLAY(ais->type5.shiptype),
-			  ais->type5.to_bow,
-			  ais->type5.to_stern,
-			  ais->type5.to_port,
-			  ais->type5.to_starboard,
-			  epfd_legends[ais->type5.epfd],
-			  ais->type5.month,
-			  ais->type5.day,
-			  ais->type5.hour,
-			  ais->type5.minute,
-			  ais->type5.draught / 10.0,
-			  ais->type5.destination,
-			  ais->type5.dte);
+			   ais->type5.imo,
+			   ais->type5.ais_version,
+			   json_stringify(ais->type5.callsign),
+			   json_stringify(ais->type5.shipname),
+			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
+			   ais->type5.to_bow,
+			   ais->type5.to_stern,
+			   ais->type5.to_port,
+			   ais->type5.to_starboard,
+			   epfd_legends[ais->type5.epfd],
+			   ais->type5.month,
+			   ais->type5.day,
+			   ais->type5.hour,
+			   ais->type5.minute,
+			   ais->type5.draught / 10.0,
+			   json_stringify(ais->type5.destination),
+			   ais->type5.dte);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
-			  "\"shipname\":\"%s\",\"shiptype\":%u,"
-			  "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			  "\"to_starboard\":%u,\"epfd\":%u,"
-			  "\"eta\":\"%02u-%02uT%02u:%02uZ\","
+			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
+			   "\"shipname\":\"%s\",\"shiptype\":%u,"
+			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
+			   "\"to_starboard\":%u,\"epfd\":%u,"
+			   "\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			   "\"draught\":%u,\"destination\":\"%s\",\"dte\":%u}",
-			  ais->type5.imo,
-			  ais->type5.ais_version,
-			  ais->type5.callsign,
-			  ais->type5.shipname,
-			  ais->type5.shiptype,
-			  ais->type5.to_bow,
-			  ais->type5.to_stern,
-			  ais->type5.to_port,
-			  ais->type5.to_starboard,
-			  ais->type5.epfd,
-			  ais->type5.month,
-			  ais->type5.day,
-			  ais->type5.hour,
-			  ais->type5.minute,
-			  ais->type5.draught,
-			  ais->type5.destination,
-			  ais->type5.dte);
+			   ais->type5.imo,
+			   ais->type5.ais_version,
+			   json_stringify(ais->type5.callsign),
+			   json_stringify(ais->type5.shipname),
+			   ais->type5.shiptype,
+			   ais->type5.to_bow,
+			   ais->type5.to_stern,
+			   ais->type5.to_port,
+			   ais->type5.to_starboard,
+			   ais->type5.epfd,
+			   ais->type5.month,
+			   ais->type5.day,
+			   ais->type5.hour,
+			   ais->type5.minute,
+			   ais->type5.draught,
+			   json_stringify(ais->type5.destination),
+			   ais->type5.dte);
 	}
 	break;
     case 6:	/* Binary Message */

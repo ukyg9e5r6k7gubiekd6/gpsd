@@ -18,6 +18,22 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
+char *json_stringify(char *str)
+/* escape double quotes inside a JSON string */
+{
+    static char stb[JSON_VAL_MAX*2+1];
+    char *sp, *tp;
+
+    tp = stb;
+    for (sp = str; *sp; sp++) {
+	if (*sp == '"')
+	    *tp++ = '\\';
+	*tp++ = *sp;
+    }
+
+    return stb;
+}
+
 void json_version_dump(char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,

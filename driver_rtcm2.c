@@ -662,7 +662,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"message\":\"%s\"", rtcm->message);
+		       "\"message\":\"%s\"", json_stringify(rtcm->message));
 	break;
 
     default:
