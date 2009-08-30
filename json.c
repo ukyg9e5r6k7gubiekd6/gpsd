@@ -320,7 +320,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    else if (*cp == ',')
 		state = await_attr;
 	    else if (*cp == '}')
-		goto good_parse;
+		state = init;
 	    else {
 #ifdef JSONDEBUG
 		(void) printf("Garbage while expecting comma or }\n");
@@ -331,9 +331,8 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	}
     }
 
-good_parse:
     if (end != NULL)
-	*end = ++cp;
+	*end = cp;
 #ifdef JSONDEBUG
     (void) printf("JSON parse ends.\n");
 #endif /* JSONDEBUG */
