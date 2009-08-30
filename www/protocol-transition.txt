@@ -198,7 +198,7 @@ data by command. After each request, they would need to wait until a
 response came back.  Then, watcher mode was added.  By saying "w+",
 you could ask gpsd to stream GPS reports at you whenever it got them.
 
-In the new protocol, streaming is (almost) all there is.  Every
+In the new protocol, streaming is almost all there is.  Every
 report coming up from the daemon is tagged with its device and type.
 Instead of issuing commands and then ewaiting for specific responses, 
 clients should expect any kind of report at any time and merge it
@@ -209,10 +209,6 @@ example) mixed GPS and AIS data. In the future, the stream from
 gpsd could include other kinds of data, such as the take from
 a digital compass, water-temperature sensors, or even aircraft
 transponders.
-
-I said "almost" because there are two single-shot commands left,
-?TPV and ?SKY.  These still exist mainly for test purposes and
-may be removed in the future.
 
 == How the command set has changed == 
 
@@ -248,9 +244,8 @@ The old 'L' command is replaced by ?VERSION.  Note that the daemon now
 ships a version response to each client on connect, so it will
 probably never be necessary for you to issue a ?VERSION request.
 
-The old 'O' command is replaced by ?TPV'.  Note: it is possible
-this command will be removed in the final version of the new
-protocol.  Do not rely on it.
+The old 'O' and 'Y' commands are gone.  Use ?WATCH and sample the
+stream instead.
 
 The old 'Q' and 'S' commands doe not have exact equivalents.  We will
 implement an option to have the TPV response include DOPs and status
@@ -265,10 +260,6 @@ with whatever option you want to set.
 
 The old 'X' command is gone.  Instead, you will see an object of
 class DEVICE from the daemon whenever a device is opened or closed.
-
-The old 'Y' command is replaced by ?SKY. Note: it is possible
-this command will be removed in the final version of the new
-protocol.  Do not rely on it.
 
 The old 'Z' and '$' commands, used by the developers for profiling, 
 have no equivalents.  We'll implement them if we need them.

@@ -1618,32 +1618,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     /*
      * Still to be implemented: equivalents of Z $
      */
-    if (strncmp(buf, "TPV;", 4) == 0) {
-	buf += 4;
-	if ((channel=assign_channel(sub, GPS, NULL)) == NULL) {
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No devices available for TPV.\"}",
-			  replylen);
-	} else if (have_fix(channel))
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No fix.\"}",
-			  replylen);
-	else
-	    json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
-			  reply, replylen);
-    } else if (strncmp(buf, "SKY;", 4) == 0) {
-	buf += 4;
-	if ((channel=assign_channel(sub, GPS, NULL)) == NULL) {
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No chammels available for SKY.\"}",
-			  replylen);
-	} else if (channel->device->gpsdata.satellites <= 0)
-	    (void)strlcpy(reply, 
-			  "{\"class\":ERROR\",\"message\":\"No fix.\"}",
-			  replylen);
-	else
-	    json_sky_dump(&channel->device->gpsdata, reply, replylen);
-    } else if (strncmp(buf, "DEVICES;", 8) == 0) {
+    if (strncmp(buf, "DEVICES;", 8) == 0) {
 	buf += 8;
 	json_devicelist_dump(reply, replylen);
     } else if (strncmp(buf, "WATCH", 5) == 0 && (buf[5] == ';' || buf[5] == '=')) {

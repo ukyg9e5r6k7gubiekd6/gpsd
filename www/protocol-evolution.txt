@@ -228,13 +228,12 @@ breakthrough moment in the GPSD-NG design came when I thought this:
 "Suppose all command arguments to GPSD-NG commands, and their
 responses, were self-describing JSON objects?"
 
-In particular, the equivalent of the 'O' command and report shown
-above looks like this in GPSD-NG (with some whitespace added to avoid
-hard-to-read linewraps):
+In particular, the equivalent of the 'O' report shown above looks like
+this in GPSD-NG (with some whitespace added to avoid hard-to-read
+linewraps):
 
 -------------------------------------------------------------------------
--> ?TPV;
-<- {"class":"TPV","tag":"MID50","device":"/dev/pts/1","time":1118327711.280,
+{"class":"TPV","tag":"MID50","device":"/dev/pts/1","time":1118327711.280,
    "ept":0.005,"lat":46.498333338,"lon":7.567392712,"alt":1341.667,
    "eph":48.000,"epv":32.321,"track":60.9597,"speed":0.161,"climb":-0.074,
    "eps":50.73,"mode":3}
@@ -245,8 +244,7 @@ however, consider this JSON equivalent of a 'Y' record.  The skyview
 is a sublist of objects, one per satellite in view:
 
 -------------------------------------------------------------------------
--> ?SKY;
-<- {"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327713.280 
+{"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327713.280 
    "reported":8,"satellites":[
    {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
    {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
@@ -306,7 +304,7 @@ JSON arguments for commands.  Here's an example, which I'll explain fully
 later but right now just hint at the GPSD-NG equivalent of a 'W+R+J+' command.
 
 -------------------------------------------------------------------------
-?WATCH={"raw":true,"buffer_policy":1"}
+?WATCH={"raw":1,"buffer_policy":1}
 -------------------------------------------------------------------------
 
 Even had I not anticipated parsing JSON arguments in gpsd, I try to limit

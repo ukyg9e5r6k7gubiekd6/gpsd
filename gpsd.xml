@@ -780,134 +780,15 @@ the value of which is either the name of the invoking command
 or one of the strings "DEVICE" or "ERROR". Their length
 limit is 1024 characters, including trailing newline.</para>
 
+<para>Here are the most important responses:</para>
+
 <variablelist>
-
 <varlistentry>
-<term>?VERSION;</term> 
-<listitem><para>Returns an object with the following attributes:</para>
-
-<table frame="all" pgwide="0"><title>VERSION object</title>
-<tgroup cols="4" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>Name</entry>
-	<entry>Always?</entry>
-	<entry>Type</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>class</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Fixed: "VERSION"</entry>
-</row>
-<row>
-	<entry>release</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Public release level</entry>
-</row>
-<row>
-	<entry>rev</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Internal revision-control level.</entry>
-</row>
-<row>
-	<entry>api_major</entry>
-	<entry>Yes</entry>
-	<entry>numeric</entry>
-        <entry>API major revision level..</entry>
-</row>
-<row>
-	<entry>api_minor</entry>
-	<entry>Yes</entry>
-	<entry>numeric</entry>
-        <entry>API minor revision level..</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
-
-<para>The daemon ships a VERSION response to each client when the
-client first connects to it.</para>
-
-<para>When the C client library parses a response of this kind, it
-will assert the VERSION_SET bit in the top-level set member.</para>
-
-<para>Here's an example:</para>
-
-<programlisting>
-{"class":"VERSION","version":"2.40dev","rev":$Id$,"api_major":3,"api_minor":1}
-</programlisting>
-
-
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term>?DEVICES;</term> 
-<listitem><para>Returns a device list object with the
-following elements:</para>
-
-<table frame="all" pgwide="0"><title>DEVICES object</title>
-<tgroup cols="3" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>Name</entry>
-	<entry>Always?</entry>
-	<entry>Type</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>class</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Fixed: "DEVICES"</entry>
-</row>
-<row>
-	<entry>devices</entry>
-	<entry>Yes</entry>
-	<entry>list</entry>
-        <entry>List of device descriptions</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
-
-<para>When the C client library parses a response of this kind, it
-will assert the DEVICELIST_SET bit in the top-level set member.</para>
-
-<para>Here's an example:</para>
-
-<programlisting>
-{"class"="DEVICES","devices":[
-    {"class":"DEVICE","path":"/dev/pts/1","flags":1,"driver":"SiRF binary"},
-    {"class":"DEVICE","path":"/dev/pts/3","flags":4,"driver":"AIVDM"}]}
-</programlisting>
-
-<para>The daemon occasionally ships a bare DEVICE object to the client
-(that is, one not inside a DEVICES wrapper). The data content of these
-objects will be described later in the section covering
-notifications.</para>
-
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term>?TPV;</term> 
-<listitem><para>Opens a GPS-class device, if available, and requests a
-time/position/velocity report object in reply. Mainly intended as a
-test command: production clients should use ?WATCH to set up
-report streaming.</para>
-
-<para>Here are the elements of a TPV object.  If there is no GPS device
-available, only the "class" field will reliably be present.  Others
-may be reported or not depending on the fix quality.</para>
+<term>TPV</term> 
+<listitem>
+<para>A TPV object is a time-position-velocity report. The "class" and "mode"
+fields will reliably be present.  Others may be reported or not
+depending on the fix quality.</para>
 
 <table frame="all" pgwide="0"><title>TPV object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -1047,15 +928,11 @@ field actrually received; see gps.h for bitmask names and values.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?SKY;</term> 
-<listitem><para>Opens a GPS-class device, if available, and requests a
-skyview report object in reply. Mainly intended as a test command:
-production clients should use ?WATCH to set up report
-streaming..</para>
-
-<para>Here are the elements of a SKY object.  If there is no GPS device
-available, or no skyview has been reported yet, only the "class" field
-will reliably be present.</para>
+<term>SKY</term> 
+<listitem>
+<para>A SKY object reports a sky view of the GPS satellite positions.
+If there is no GPS device available, or no skyview has been reported
+yet, only the "class" field will reliably be present.</para>
 
 <table frame="all" pgwide="0"><title>SKY object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -1178,6 +1055,128 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
         {"PRN":2,"el":34,"az":241,"ss":43,"used":true},
         {"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 </programlisting>
+
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+<para>And here are the commands:</para>
+
+<variablelist>
+
+<varlistentry>
+<term>?VERSION;</term> 
+<listitem><para>Returns an object with the following attributes:</para>
+
+<table frame="all" pgwide="0"><title>VERSION object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "VERSION"</entry>
+</row>
+<row>
+	<entry>release</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Public release level</entry>
+</row>
+<row>
+	<entry>rev</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Internal revision-control level.</entry>
+</row>
+<row>
+	<entry>api_major</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>API major revision level..</entry>
+</row>
+<row>
+	<entry>api_minor</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>API minor revision level..</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>The daemon ships a VERSION response to each client when the
+client first connects to it.</para>
+
+<para>When the C client library parses a response of this kind, it
+will assert the VERSION_SET bit in the top-level set member.</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"VERSION","version":"2.40dev","rev":$Id$,"api_major":3,"api_minor":1}
+</programlisting>
+
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?DEVICES;</term> 
+<listitem><para>Returns a device list object with the
+following elements:</para>
+
+<table frame="all" pgwide="0"><title>DEVICES object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "DEVICES"</entry>
+</row>
+<row>
+	<entry>devices</entry>
+	<entry>Yes</entry>
+	<entry>list</entry>
+        <entry>List of device descriptions</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>When the C client library parses a response of this kind, it
+will assert the DEVICELIST_SET bit in the top-level set member.</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class"="DEVICES","devices":[
+    {"class":"DEVICE","path":"/dev/pts/1","flags":1,"driver":"SiRF binary"},
+    {"class":"DEVICE","path":"/dev/pts/3","flags":4,"driver":"AIVDM"}]}
+</programlisting>
+
+<para>The daemon occasionally ships a bare DEVICE object to the client
+(that is, one not inside a DEVICES wrapper). The data content of these
+objects will be described later in the section covering
+notifications.</para>
 
 </listitem>
 </varlistentry>
