@@ -588,7 +588,7 @@ static void deactivate_device(struct gps_device_t *device)
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
     notify_watchers(device, true, 
-		    "{\"class\":\"DEVICE\",\"name\":\"%s\",\"activated\":0}\r\n",
+		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* GPSDNG_ENABLE */
     if (device->gpsdata.gps_fd != -1) {
@@ -865,9 +865,7 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
 	if (newstyle(user) && was_unassigned)
-	    (void)snprintf(buf, sizeof(buf), "{\"class\":\"DEVICE\",\"device\":\"%s\",\"activated\":%2.2f}\r\n",
-			   channel->device->gpsdata.dev.path,
-			   timestamp());
+	    json_device_dump(channel->device, buf, sizeof(buf));
 #endif /* GPSDNG_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
 	if (buf[0])
