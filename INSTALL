@@ -98,23 +98,15 @@ home directory or to the system-wide X app-defaults directory.
 4. Start gpsd.  You'll need to give it as an argument a path to 
 a serial or USB port with a GPS attached to it.
 
-5. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
-device it will query.  If you need to change the device, use 'f='
-to do so (see the manual page for details). Now plug in your GPS.
+5. Once gpsd is running, telnet to port 2947. You should see a
+greeting line that's a JSON object describing GPSD's version.
+Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
-6. Type "wr" to start raw and watcher modes.  You should see NMEA data
-(text lines beginning with $) spewing out.  You will also see lines
-with a GPSD prefix; these are sentence translations in GPSD protocol.
-
-Note that until your GPS has acquired a fix, typing "p" to get position
-will only return this:
-
-GPSD,P=?
-
-This response does not mean that gpsd is broken or that the GPS is not
-sending data, merely that gpsd has not yet seen any *valid* position data.
-You will have to wait for the GPS to acquire satellite lock.  If you have 
-raw or watcher mode on, it should be obvious when you get a lock.
+6. Type '?WATCH={"raw:1"};' to start raw and watcher modes.  You
+should see NMEA data (text lines beginning with $) spewing out.  You
+will also see lines beginning with '{' that are JSON objects
+representing reports from your GPS; these are packet translations in
+GPSD protocol.
 
 7. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
