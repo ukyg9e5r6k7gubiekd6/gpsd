@@ -766,6 +766,17 @@ else
   AC_MSG_RESULT([nobody])
 fi
 
+dnl check for privilege revocation group at compile-time
+AC_ARG_ENABLE(gpsd-group,
+  AC_HELP_STRING([--enable-gpsd-group=groupname],
+		 [GPSD privilege revocation group, use if /dev/ttyS0 not found]),
+  [ac_group=$enableval])
+AC_MSG_CHECKING([privilege revokation group])
+if test x"$ac_user" != "xnobody"; then
+    AC_MSG_RESULT([$ac_group])
+	AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [GPSD privilege revokation group])
+fi
+
 dnl check for port speed fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
   AC_HELP_STRING([--enable-fixed-port-speed=nnn],
@@ -848,7 +859,7 @@ fi
 dnl allow tools to use control_send method
 AC_ARG_ENABLE(controlsend,
   AC_HELP_STRING([--disable-controlsend],
-		 [do not allow gpsd to change device settings]),
+		 [do not allow gpsctl/gpsmon to change device settings]),
   [ac_controlsend=$enableval], [ac_controlsend=yes])
 AC_MSG_CHECKING([if control sending is allowed])
 if test x"$ac_controlsend" != "xno"; then

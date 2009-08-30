@@ -45,7 +45,10 @@ gpsd requires two things: (1) that GPS devices have group read and
 write enabled, and (2) all of them are have the same group ID as a 
 prototypical device, typically /dev/ttyS0 under Linux or /dev/tty00
 under *BSD. It does not actually matter what the owning group is, 
-as gpsd will look this up on startup.
+as gpsd will look this up on startup.  Alternatively, (3), you can
+set a fallback group with the enable-gpsd-group in case the prototype
+is not found: this should be the "dialout" group (or functional equivalent) 
+that has write access to serial devices.
 
 Before dropping privileges, gpsd will ensure that it has access to
 devices given to it on the command line by forcing their group read

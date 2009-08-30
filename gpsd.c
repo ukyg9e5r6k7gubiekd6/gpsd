@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <pwd.h>
+#include <grp.h>
 #include <stdbool.h>
 #include <math.h>
 
@@ -1955,6 +1956,13 @@ int main(int argc, char *argv[])
 	    if (setgid(stb.st_gid) != 0)
 		gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n", strerror(errno));
 	}
+#ifdef GPSD_GROUP
+	else {
+		struct group *grp = getgrnam(GPSD_GROUP);
+		if (grp)
+			(void)setgid(grp->gr_gid);
+	}
+#endif
 	pw = getpwnam(GPSD_USER);
 	if (pw)
 	    (void)seteuid(pw->pw_uid);
