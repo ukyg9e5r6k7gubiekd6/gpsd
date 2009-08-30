@@ -38,8 +38,8 @@ have the wrong device.  Look again.
 
 2. Ensure that device permissions will enable gpsd to read from and
 write to GPS devices even after it drops root privileges.  If you are
-running Fedora Core you can skip this step, as the stock configuration
-has the right properties.
+running Fedora Core or Ubuntu you can skip this step, as the stock
+configuration has the right properties.
 
 gpsd requires two things: (1) that GPS devices have group read and
 write enabled, and (2) all of them are have the same group ID as a 
