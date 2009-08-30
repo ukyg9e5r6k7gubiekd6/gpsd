@@ -99,39 +99,40 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
     *end = NULL;	/* give it a well-defined value on parse failure */
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
-    for (cursor = attrs; cursor->attribute != NULL; cursor++) {
-	lptr = json_target_address(cursor, parent, offset);
-	switch(cursor->type)
-	{
-	case integer:
-	    *((int *)lptr) = cursor->dflt.integer;
-	    break;
-	case uinteger:
-	    *((unsigned int *)lptr) = cursor->dflt.uinteger;
-	    break;
-	case real:
-	    *((double *)lptr) = cursor->dflt.real;
-	    break;
-	case string:
-	    if (parent != NULL && parent->element_type != structobject && offset > 0)
-		return JSON_ERR_NOPARSTR;
-	    lptr[0] = '\0';
-	    break;
-	case boolean:
-	    /* nullbool default says not to set the value at all */
-	    if (cursor->dflt.boolean != nullbool)
-		*((bool *)lptr) = cursor->dflt.boolean;
-	    break;
-	case character:
-	    lptr[0] = cursor->dflt.character;
-	    break;
-	case object:	/* silences a compiler warning */
-	case structobject:
-	case array:
-	case check:
-	    break;
+    for (cursor = attrs; cursor->attribute != NULL; cursor++) 
+	if (!cursor->nodefault) {
+	    lptr = json_target_address(cursor, parent, offset);
+	    switch(cursor->type)
+	    {
+	    case integer:
+		*((int *)lptr) = cursor->dflt.integer;
+		break;
+	    case uinteger:
+		*((unsigned int *)lptr) = cursor->dflt.uinteger;
+		break;
+	    case real:
+		*((double *)lptr) = cursor->dflt.real;
+		break;
+	    case string:
+		if (parent != NULL && parent->element_type != structobject && offset > 0)
+		    return JSON_ERR_NOPARSTR;
+		lptr[0] = '\0';
+		break;
+	    case boolean:
+		/* nullbool default says not to set the value at all */
+		if (cursor->dflt.boolean != nullbool)
+		    *((bool *)lptr) = cursor->dflt.boolean;
+		break;
+	    case character:
+		lptr[0] = cursor->dflt.character;
+		break;
+	    case object:	/* silences a compiler warning */
+	    case structobject:
+	    case array:
+	    case check:
+		break;
+	    }
 	}
-    }
 
 #ifdef JSONDEBUG
     (void) printf("JSON parse begins.\n");

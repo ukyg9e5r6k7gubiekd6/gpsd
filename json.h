@@ -54,6 +54,7 @@ struct json_attr_t {
     } dflt;
     size_t len;
     const struct json_enum_t *map;
+    bool nodefault; 
 };
 
 #define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */

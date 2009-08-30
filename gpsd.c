@@ -2045,9 +2045,6 @@ int main(int argc, char *argv[])
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    char *c_ip;
-#ifdef GPSDNG_ENABLE
-	    char announce[GPS_JSON_RESPONSE_MAX];
-#endif /* GPSDNG_ENABLE */
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock == -1)
@@ -2066,6 +2063,9 @@ int main(int argc, char *argv[])
 			"no subscriber slots available\n", c_ip, ssock);
 		    (void)close(ssock);
 		} else {
+#ifdef GPSDNG_ENABLE
+		    char announce[GPS_JSON_RESPONSE_MAX];
+#endif /* GPSDNG_ENABLE */
 		    FD_SET(ssock, &all_fds);
 		    adjust_max_fd(ssock, true);
 		    client->fd = ssock;
