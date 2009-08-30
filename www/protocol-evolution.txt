@@ -299,7 +299,7 @@ in memory utilization.
 
 "Um, wait..." I hear you asking "...why accept that constraint when
 gpsd hasn't had a requirement to parse JSON yet, just emit it as
-responses?"  Because I fully expect gpsd to have to parse structured
+responses?"  Because I fully expected gpsd to have to parse structured
 JSON arguments for commands.  Here's an example, which I'll explain fully
 later but right now just hint at the GPSD-NG equivalent of a 'W+R+J+' command.
 
@@ -307,9 +307,10 @@ later but right now just hint at the GPSD-NG equivalent of a 'W+R+J+' command.
 ?WATCH={"raw":1,"buffer_policy":1}
 -------------------------------------------------------------------------
 
-Even had I not anticipated parsing JSON arguments in gpsd, I try to limit
-malloc use in the client libraries as well.  They only use two calloc(3) calls,
-in very careful ways.
+Even had I not anticipated parsing JSON arguments in gpsd, I try to
+limit malloc use in the client libraries as well.  Before the
+new-protocol implementation only used two calloc(3) calls, in very
+careful ways. Now they use none at all.
 
 So my next challenge was to write and verify a tiny JSON parser that
 is driven by sets of fixed-extent structures - they tell it what shape
