@@ -1453,31 +1453,9 @@ will assert the DEVICE_SET bit in the top-level set member.</para>
 
 </variablelist>
 
-<para>When a client is in watcher mode, the daemon may ship it
-device status notifications.  These notications will be DEVICE
-objects; the table below describes the circumstances and the 
-meaning of the attributes.</para>
-
-<table frame="all" pgwide="0"><title>DEVICE notification object</title>
-<tgroup cols="4" align="left" colsep="1" rowsep="1">
-<thead>
-<row>
-	<entry>Name</entry>
-	<entry>When?</entry>
-	<entry>Type</entry>
-	<entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-	<entry>path</entry>
-	<entry>Yes</entry>
-	<entry>string</entry>
-        <entry>Pathname of the cevice.</entry>
-</row>
-</tbody>
-</tgroup>
-</table>
+<para>When a client is in watcher mode, the daemon will ship it DEVICE
+notifications when a device is added to the pool or
+deactivated.</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert the DEVICE_SET bit in the top-level set member.</para>

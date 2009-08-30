@@ -693,6 +693,12 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 			    device_name, 
 			    (int)(devp - devices));
 		devp->gpsdata.gps_fd = -1;
+#ifdef GPSDNG_ENABLE
+		notify_watchers(devp, true, 
+				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%ld}\r\n",
+				devp->gpsdata.dev.path,
+				timestamp());
+#endif /* GPSDNG_ENABLE */
 		return devp;
 	    }
 	return NULL;
