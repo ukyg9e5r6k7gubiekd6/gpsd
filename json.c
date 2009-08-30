@@ -151,7 +151,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 
     /* parse input JSON */
     for (; *cp; cp++) {
-	json_debug_trace(("State %s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
+	json_debug_trace(("State %-14s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
 	switch (state)
 	{
 	case init:
@@ -302,9 +302,10 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		continue;
 	    else if (*cp == ',')
 		state = await_attr;
-	    else if (*cp == '}')
-		state = init;
-	    else {
+	    else if (*cp == '}') {
+		++cp;
+		goto good_parse;
+	    } else {
 		json_debug_trace(("Garbage while expecting comma or }\n"));
 		return JSON_ERR_BADTRAIL;
 	    }
@@ -312,6 +313,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	}
     }
 
+good_parse:
     if (end != NULL)
 	*end = cp;
     json_debug_trace(("JSON parse ends.\n"));
