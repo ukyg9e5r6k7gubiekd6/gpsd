@@ -513,7 +513,7 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 }
 /*@ -charint @*/
 
-void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
+void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 {
     static char *nav_legends[] = {
 	"Under way using engine",
@@ -814,8 +814,8 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "draught\":%.1f,\"destination\":\"%s\",\"dte\":%u}",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(ais->type5.callsign),
-			   json_stringify(ais->type5.shipname),
+			   ais->type5.callsign,
+			   ais->type5.shipname,
 			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
 			   ais->type5.to_bow,
 			   ais->type5.to_stern,
@@ -827,7 +827,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type5.hour,
 			   ais->type5.minute,
 			   ais->type5.draught / 10.0,
-			   json_stringify(ais->type5.destination),
+			   ais->type5.destination,
 			   ais->type5.dte);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -839,8 +839,8 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"draught\":%u,\"destination\":\"%s\",\"dte\":%u}",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(ais->type5.callsign),
-			   json_stringify(ais->type5.shipname),
+			   ais->type5.callsign,
+			   ais->type5.shipname,
 			   ais->type5.shiptype,
 			   ais->type5.to_bow,
 			   ais->type5.to_stern,
@@ -852,7 +852,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type5.hour,
 			   ais->type5.minute,
 			   ais->type5.draught,
-			   json_stringify(ais->type5.destination),
+			   ais->type5.destination,
 			   ais->type5.dte);
 	}
 	break;

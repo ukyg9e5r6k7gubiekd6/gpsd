@@ -2246,7 +2246,7 @@ int main(int argc, char *argv[])
 			    }
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET) != 0) {
-				aivdm_dump(&channel->device->aivdm.decoded, 
+				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   sub->policy.scaled, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
@@ -2273,7 +2273,7 @@ int main(int argc, char *argv[])
 			    }
 #ifdef AIVDM_ENABLE
 			    if (sub->policy.watcher && newstyle(sub) && (changed & AIS_SET)!=0) {
-				aivdm_dump(&channel->device->aivdm.decoded, 
+				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   false, buf2, sizeof(buf2));
 				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));

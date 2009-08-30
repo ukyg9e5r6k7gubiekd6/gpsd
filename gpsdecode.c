@@ -367,7 +367,7 @@ static void decode(FILE *fpin, FILE *fpout)
 		if (!json)
 		    aivdm_csv_dump(&aivdm.decoded, buf, sizeof(buf));
 		else
-		    aivdm_dump(&aivdm.decoded, scaled, buf, sizeof(buf));
+		    aivdm_json_dump(&aivdm.decoded, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 		(void)fputs("\n", fpout);
 	    }
