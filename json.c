@@ -95,6 +95,12 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_val_token, post_val} state = 0;
+#ifdef JSONDEBUG
+    char *statenames[] = {
+	"init", "await_attr", "in_attr", "await_value", 
+	"in_val_string", "in_val_token", "post_val"
+	};
+#endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
     const struct json_attr_t *cursor;
@@ -145,7 +151,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 
     /* parse input JSON */
     for (; *cp; cp++) {
-	json_debug_trace(("State %d, looking at '%c' (%p)\n", state, *cp, cp));
+	json_debug_trace(("State %s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
 	switch (state)
 	{
 	case init:
