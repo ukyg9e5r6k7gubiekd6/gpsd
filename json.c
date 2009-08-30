@@ -96,7 +96,8 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
     const struct json_enum_t *mp;
     char *lptr;
 
-    *end = NULL;	/* give it a well-defined value on parse failure */
+    if (end != NULL)
+	*end = NULL;	/* give it a well-defined value on parse failure */
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++) 
