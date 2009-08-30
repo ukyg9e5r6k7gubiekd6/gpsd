@@ -787,7 +787,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
-			   "\"accuracy\"%s,\"lon\":%d,\"lat\":%d,"
+			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"epfd\":%u,\"raim\":%s,\"radio\":%d}",
 			   ais->type4.year,
 			   ais->type4.month,
@@ -810,7 +810,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			  "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
-			   "\"eta\":%02u-%02uT%02u:%02uZ,\""
+			   "\"eta\":\"%02u-%02uT%02u:%02uZ\",\""
 			   "draught\":%.1f,\"destination\":\"%s\",\"dte\":%u}",
 			  ais->type5.imo,
 			  ais->type5.ais_version,
@@ -835,7 +835,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			  "\"shipname\":\"%s\",\"shiptype\":%u,"
 			  "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			  "\"to_starboard\":%u,\"epfd\":%u,"
-			  "\"eta\":%02u-%02uT%02u:%02uZ,"
+			  "\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			   "\"draught\":%u,\"destination\":\"%s\",\"dte\":%u}",
 			  ais->type5.imo,
 			  ais->type5.ais_version,
@@ -888,7 +888,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 9:
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\"%s,"
+			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"second\":%u,\"regional\":%d,\"dte\":%u,"
 			   "\"raim\":%s,\"radio\":%d}",
@@ -905,7 +905,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type9.radio);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\"%s,"
+			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"second\":%u,\"regional\":%d,\"dte\":%u,"
 			   "\"raim\":%s,\"radio\":%d}",
@@ -995,7 +995,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 18:
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\"%s,"
+			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
 			   "\"cs\":%u,\"display\":%u,\"dsc\":%u,\"band\":%u,"
@@ -1018,7 +1018,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type18.radio);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"reserved\":%u,\"speed\":%u,\"accuracy\"%s,"
+			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
 			   "\"cs\":%u,\"display\":%u,\"dsc\":%u,\"band\":%u,"
@@ -1044,7 +1044,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 19:
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\"%s,"
+			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
@@ -1071,7 +1071,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type19.assigned);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"reserved\":%u,\"speed\":%u,\"accuracy\"%s,"
+			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
@@ -1100,11 +1100,11 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 20:	/* Data Link Management Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "\"offset1\":\"%u\",\"number1\":\"%u\""
+		       "\"offset1\":\"%u\",\"number1\":\"%u\","
 		       "\"timeout1\":\"%u\",\"increment1\":\"%u\","
-		       "\"offset2\":\"%u\",\"number2\":\"%u\""
+		       "\"offset2\":\"%u\",\"number2\":\"%u\","
 		       "\"timeout2\":\"%u\",\"increment2\":\"%u\","
-		       "\"offset3\":\"%u\",\"number3\":\"%u\""
+		       "\"offset3\":\"%u\",\"number3\":\"%u\","
 		       "\"timeout3\":\"%u\",\"increment3\":\"%u\","
 		       "\"offset4\":\"%u\",\"number4\":\"%u\","
 		       "\"timeout4\":\"%u\",\"increment4\":\"%u\"}",
@@ -1129,7 +1129,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"type\":%s,\"name\":\"%s\",\"lon\":%.4f,"
-			   "\"lat\":%.4f,\"accuracy\"%s,\"to_bow\":%u,"
+			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
 			   "\"second\":%u,\"regional\":%d,"
@@ -1152,7 +1152,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   JSON_BOOL(ais->type21.virtual_aid));
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"type\":%u,\"name\":\"%s\",\"accuracy\"%s,"
+			   "\"type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
 			   "\"epfd\":%u,\"second\":%u,\"regional\":%d,"
@@ -1223,7 +1223,7 @@ void aivdm_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 		      "\"partno\":%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-			  "\"shipname\":\"%s\"",
+			  "\"shipname\":\"%s\"}",
 			  ais->type24.a.shipname);
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
