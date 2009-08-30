@@ -1625,15 +1625,17 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			  reply, replylen);
 	} else {
 	    (void)strlcpy(reply, 
-			  "{\"class\":\"TPV\"}", replylen);
+			  "{\"class\":ERROR\",\"message\":\"No chammels available for TPV.\"}",
+			  replylen);
 	}
     } else if (strncmp(buf, "SKY;", 4) == 0) {
 	buf += 4;
 	if ((channel=assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
 	    json_sky_dump(&channel->device->gpsdata, reply, replylen);
 	} else {
-	    (void)strlcpy(reply,
-			  "{\"class\":\"SKY\"}", replylen);
+	    (void)strlcpy(reply, 
+			  "{\"class\":ERROR\",\"message\":\"No chammels available for SKY.\"}",
+			  replylen);
 	}
     } else if (strncmp(buf, "DEVICES;", 8) == 0) {
 	buf += 8;
@@ -1654,7 +1656,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    (void)assign_channel(sub, ANY, devp);
 	    } else 
 		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH.\",\"error\":\"%s\"}\r\n",
+			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH: %s\"}",
 			       json_error_string(status));
 	    buf = end;
 	}
@@ -1675,7 +1677,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    stringend2:;
 	    }
 	    (void)strlcat(reply, 
-			  "{\"class\":\"ERROR\",\"message\":\"Can't perfgorm DEVICE configuration, no channels attached.\"}\r\n",
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no channels attached.\"}\r\n",
 			  replylen);
 	} else {
 	    struct channel_t *chp;
@@ -1688,7 +1690,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    ++end;
 		if (status != 0)
 		    (void)snprintf(reply, replylen,
-				   "{\"class\":ERROR\",\"message\":\"Invalid DEVICE.\",\"error\":\"%s\"}\r\n",
+				   "{\"class\":ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
 				   json_error_string(status));
 		else if (chcount > 1 && devconf.path[0] == '\0')
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
@@ -1706,7 +1708,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			}
 		    if (!privileged_channel(channel))
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
+				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}");
 		    else {
 			char serialmode[3];
 			/* now that channel is selected, apply changes */
