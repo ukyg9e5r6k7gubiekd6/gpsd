@@ -863,10 +863,6 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	    (void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 			   timestamp(), gpsd_id(channel->device));
 #endif /* OLDSTYLE_ENABLE */
-#ifdef GPSDNG_ENABLE
-	if (newstyle(user) && was_unassigned)
-	    json_device_dump(channel->device, buf, sizeof(buf));
-#endif /* GPSDNG_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
 	if (buf[0])
 	    throttled_write(user, buf, strlen(buf));
