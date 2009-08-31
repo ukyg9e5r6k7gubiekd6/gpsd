@@ -47,6 +47,10 @@ C++:
 <funcdef>int <function>del_callback</function></funcdef>
     <paramdef>void</paramdef>
 </funcprototype>
+<funcprototype>
+<funcdef>struct gps_data_t *<function>stream</function></funcdef>
+    <paramdef>unsigned int<parameter>flags</parameter></paramdef>
+</funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
 

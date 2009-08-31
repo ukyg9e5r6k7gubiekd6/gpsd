@@ -42,14 +42,16 @@ of mode switch we should be uttering.
 
 ** To do:
 
-*** Cleanup after the big prorocol rewrite
+*** Cleanup after the big protocol rewrite
 
 **** ?DEVICE testing
 
 The ?DEVICE invocations corresponding to old B, C, and N still need
 testing on live devices.
 
-**** The Python and C++ client libraries presently speak only old protocol.
+**** The Python client library presently speaks only old protocol.
+
+**** The regreession-test driver's raw-mode test relies on old protocol.
 
 **** gpsmon's client mode still relies on old protocol
 
