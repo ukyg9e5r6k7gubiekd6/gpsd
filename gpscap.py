@@ -1,6 +1,6 @@
 """
 
-gpscap - GPS capability dictionary class.
+gpscap - GPS/AIS capability dictionary class.
 
 """
 import ConfigParser
@@ -67,6 +67,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 </tr>
 """
         vhead = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
+        hotpluggables = ("pl2303", "CP2101")
         ofp.write(thead % (len(self.devices), len(self.vendors)))
         for vendor in self.vendors:
             ofp.write(vhead % (self.get(vendor, "vendor_site"), vendor))
@@ -114,15 +115,17 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "noconfigure"):
                     testfield += "<img title='Requires -b option' src='noconfigure.png'>"
                 if self.get(dev, "status") == "excellent":
-                    testfield += "<img src='star.png'><img src='star.png'><img src='star.png'><img src='star.png'>"
+                    testfield += "<img src='star.png'/><img src='star.png'/><img src='star.png'/><img src='star.png'/>"
                 elif self.get(dev, "status") == "good":
-                    testfield += "<img src='star.png'><img src='star.png'><img src='star.png'>"
+                    testfield += "<img src='star.png'/><img src='star.png/'><img src='star.png'/>"
                 elif self.get(dev, "status") == "fair":
-                    testfield += "<img src='star.png'><img src='star.png'>"
+                    testfield += "<img src='star.png'/><img src='star.png'/>"
                 elif self.get(dev, "status") == "poor":
-                    testfield += "<img src='star.png'>"
+                    testfield += "<img src='star.png'/>"
                 elif self.get(dev, "status") == "broken":
-                    testfield += "<img title='Device is broken' src='bomb.png'>"
+                    testfield += "<img title='Device is broken' src='bomb.png'/>"
+                if self.has_option(dev, "usbchip") and self.get(dev, "usbchip") in hotpluggables:
+                    testfield += "<img src='hotplug.png'/>"
                 ofp.write("<td>%s</td>\n" % testfield)
                 nmea = "&nbsp;"
                 if self.has_option(dev, "nmea"):
