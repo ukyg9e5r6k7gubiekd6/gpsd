@@ -1600,7 +1600,7 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 
 	if (reply[strlen(reply)-1] == ',')
 	    reply[strlen(reply)-1] = '\0';
-	(void)strlcat(reply, "]}", replylen);
+	(void)strlcat(reply, "]}\r\n", replylen);
 }
 
 static void handle_newstyle_request(struct subscriber_t *sub, 
@@ -1641,7 +1641,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    (void)assign_channel(sub, ANY, devp);
 	    } else 
 		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH: %s\"}",
+			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
 			       json_error_string(status));
 	}
 	/* display the user's policy */
@@ -1667,7 +1667,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    channel = NULL;
 	    if (status != 0) {
 		(void)snprintf(reply, replylen, 
-			       "{\"class\":ERROR\",\"message\":\"Invalid DEVICE: %s\"}",
+			       "{\"class\":ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
 			       json_error_string(status));
 		goto bailout;
 	    } else {
@@ -1675,19 +1675,19 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    /* user specified a path, try to assign it */
 		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL)
 			(void)snprintf(reply, replylen, 
-				       "{\"class\":ERROR\",\"message\":\"Can't open %s.\"}",
+				       "{\"class\":ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
 		} else {
 		    /* no path specified */
 		    int chcount = channel_count(sub);
 		    if (chcount == 0) {
 			(void)strlcat(reply, 
-			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no channels attached.\"}",
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no channels attached.\"}\r\n",
 			  replylen);
 			goto bailout;
 		    } else if (chcount > 1) {
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}");
+				   "{\"class\":ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
 			goto bailout;
 		    } else {
 			/* we should have exactly one device now */
@@ -1700,7 +1700,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    assert(channel != NULL);
 		    if (!privileged_channel(channel))
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}");
+				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		    else {
 			char serialmode[3];
 			double cycle;
@@ -1733,10 +1733,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		json_device_dump(channel->device, 
 				    reply + strlen(reply),
 				    replylen - strlen(reply));
-		(void)strlcat(reply, "\r\n", replylen);
 	    }
-	if (reply[1])	/* avoid extra line termination at end */
-	    reply[strlen(reply)-2] = '\0';
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
 	json_version_dump(reply + strlen(reply), replylen - strlen(reply));
@@ -1746,12 +1743,11 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	if (isspace(*errend))
 	    --errend;
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply), 
-		       "{\"class\":ERROR\",\"message\":\"Unrecognized request '%.*s'\"}",
+		       "{\"class\":ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
 		       (int)(errend-buf), buf);
 	buf += strlen(buf);
     }
 	bailout:
-    (void)strlcat(reply, "\r\n", replylen);
     *after = buf;
 }
 #endif /* GPSDNG_ENABLE */
@@ -2186,10 +2182,9 @@ int main(int argc, char *argv[])
 			{
 			    char id2[NMEA_MAX];
 			    (void)snprintf(id2, sizeof(id2), 
-					   "{\"class\":\"DEVICE\",\"name\":\"%s\",\"subtype\":\"%s\"}",
+					   "{\"class\":\"DEVICE\",\"path\":\"%s\",\"subtype\":\"%s\"}\r\n",
 					   device->gpsdata.dev.path,
 					   device->subtype);
-			    (void)strlcat(id2, "\r\n", sizeof(id2));
 			    notify_watchers(device, true, id2);
 			}
 #endif /* GPSDNG_ENABLE */
@@ -2248,7 +2243,6 @@ int main(int argc, char *argv[])
 			    if ((changed & AIS_SET) != 0) {
 				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   sub->policy.scaled, buf2, sizeof(buf2));
-				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
 			    }
@@ -2262,20 +2256,17 @@ int main(int argc, char *argv[])
 			    if (sub->policy.watcher && newstyle(sub) && (changed & (LATLON_SET | MODE_SET))!=0) {
 				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
-				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 			    if (sub->policy.watcher && newstyle(sub) && (changed & SATELLITE_SET)!=0) {
 				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
-				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
 			    if (sub->policy.watcher && newstyle(sub) && (changed & AIS_SET)!=0) {
 				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   false, buf2, sizeof(buf2));
-				(void)strlcat(buf2, "\r\n", sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 #endif /* AIVDM_ENABLE */
 			    }
