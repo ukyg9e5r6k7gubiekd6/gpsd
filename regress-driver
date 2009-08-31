@@ -9,7 +9,7 @@ export PATH
 
 mode=regress
 opts=""
-while getopts strbvo:n opt
+while getopts strbvo opt
 do
     case $opt in
 	s) mode=regress ;;	# Run regression tests
@@ -18,7 +18,6 @@ do
 	b) mode=build ;;	# Rebuild regression check files
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
-	n) do=echo ;;		# Just echo commands, don't do them
     esac
 done
 shift $(($OPTIND - 1))
@@ -46,12 +45,12 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
-		$do sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
-		$do sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
-		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
-		$do diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
-		$do diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc;
+		gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
+		sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
+		sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
+		sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
+		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
+		diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc;
 		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
 		    errors=`expr $errors + 1`;
 		    cat $dir/diff
@@ -62,7 +61,7 @@ case $mode in
 	    fi
 	    total=`expr $total + 1`;
         done; 
-	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/test-whole.chk $dir/diff $dir/diff-trunc; 
+	rm -f $dir/test.chk $dir/test-trunc.chk $dir/test-whole.chk $dir/diff $dir/diff-trunc; 
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
@@ -76,10 +75,10 @@ case $mode in
         for f in $*; do
             dir=`dirname $f`
 	    # FIXME: Dependency on old protocol
-            $do gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
+            gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
             | ./striplog -1 >$dir/test1.chk;
-            $do ./striplog <$${f} >$dir/test2.chk;
-            $do cmp $dir/test[12].chk;
+            ./striplog <$${f} >$dir/test2.chk;
+            cmp $dir/test[12].chk;
         done; rm $dir/test[12].chk
         ;;
     build)
@@ -92,7 +91,7 @@ case $mode in
     view)
         echo "Viewing..." >&2
         for f in $*; do
-            $do gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER}
+            gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER}
         done
         exit 0
         ;;
