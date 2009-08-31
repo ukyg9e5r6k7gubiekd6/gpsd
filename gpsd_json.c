@@ -18,20 +18,21 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
-char *json_stringify(char *str)
+char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 /* escape double quotes inside a JSON string */
 {
-    static char stb[JSON_VAL_MAX*2+1];
-    char *sp, *tp;
+    const char *sp;
+    char *tp;
 
-    tp = stb;
-    for (sp = str; *sp; sp++) {
+    tp = to;
+    for (sp = from; *sp && tp - to <= len-1; sp++) {
 	if (*sp == '"')
 	    *tp++ = '\\';
 	*tp++ = *sp;
     }
+    *tp = '\0';
 
-    return stb;
+    return to;
 }
 
 void json_version_dump(char *reply, size_t replylen)
@@ -220,6 +221,7 @@ int json_device_read(const char *buf,
 void json_device_dump(struct gps_device_t *device,
 		     char *reply, size_t replylen)
 {
+    char buf1[JSON_VAL_MAX*2+1];
     struct classmap_t *cmp;
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
@@ -246,7 +248,7 @@ void json_device_dump(struct gps_device_t *device,
 	if (device->subtype[0] != '\0') {
 	    (void)strlcat(reply, "\"subtype\":\",", replylen);
 	    (void)strlcat(reply, 
-			  json_stringify(device->subtype),
+			  json_stringify(buf1, sizeof(buf1), device->subtype),
 			  replylen);
 	    (void)strlcat(reply, "\",", replylen);
 	}
@@ -306,6 +308,7 @@ void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
+    char buf1[JSON_VAL_MAX*2+1];
     /*
      * Beware! Needs to stay synchronized with a JSON enumeration map in
      * the parser. This interpretation of NAVSYSTEM_GALILEO is assumed
@@ -411,7 +414,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"message\":\"%s\"", json_stringify(rtcm->message));
+		       "\"message\":\"%s\"", json_stringify(buf, sizeof(buf1), rtcm->message));
 	break;
 
     default:
@@ -435,6 +438,10 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
 void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 {
+    char buf1[JSON_VAL_MAX*2+1];
+    char buf2[JSON_VAL_MAX*2+1];
+    char buf3[JSON_VAL_MAX*2+1];
+
     static char *nav_legends[] = {
 	"Under way using engine",
 	"At anchor",
@@ -735,8 +742,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"dte\":%u}\r\n",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(ais->type5.callsign),
-			   json_stringify(ais->type5.shipname),
+			   json_stringify(buf1, sizeof(buf1), ais->type5.callsign),
+			   json_stringify(buf2, sizeof(buf2), ais->type5.shipname),
 			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
 			   ais->type5.to_bow,
 			   ais->type5.to_stern,
@@ -748,7 +755,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type5.hour,
 			   ais->type5.minute,
 			   ais->type5.draught / 10.0,
-			   json_stringify(ais->type5.destination),
+			   json_stringify(buf3, sizeof(buf3), ais->type5.destination),
 			   ais->type5.dte);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -761,8 +768,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"dte\":%u}\r\n",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(ais->type5.callsign),
-			   json_stringify(ais->type5.shipname),
+			   json_stringify(buf1, sizeof(buf1), ais->type5.callsign),
+			   json_stringify(buf2, sizeof(buf2), ais->type5.shipname),
 			   ais->type5.shiptype,
 			   ais->type5.to_bow,
 			   ais->type5.to_stern,
@@ -774,7 +781,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type5.hour,
 			   ais->type5.minute,
 			   ais->type5.draught,
-			   json_stringify(ais->type5.destination),
+			   json_stringify(buf3, sizeof(buf3), ais->type5.destination),
 			   ais->type5.dte);
 	}
 	break;
@@ -855,7 +862,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type12.seqno,
 			   ais->type12.dest_mmsi,
 			   ais->type12.retransmit,
-			   json_stringify(ais->type12.text));
+			   json_stringify(buf1, sizeof(buf1), ais->type12.text));
 	break;
     case 13:	/* Safety Related Acknowledge */
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -868,7 +875,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 14:	/* Safety Related Broadcast Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "\"text\":\"%s\"}\r\n",
-		       json_stringify(ais->type14.text));
+		       json_stringify(buf1, sizeof(buf1), ais->type14.text));
 	break;
     case 15:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -1058,7 +1065,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
 			   NAVAIDTYPE_DISPLAY(ais->type21.type),
-			   json_stringify(ais->type21.name),
+			   json_stringify(buf1, sizeof(buf1), ais->type21.name),
 			   ais->type21.lon / AIS_LATLON_SCALE,
 			   ais->type21.lat / AIS_LATLON_SCALE,
 			   JSON_BOOL(ais->type21.accuracy),
@@ -1146,7 +1153,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	if (ais->type24.part == 0) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
 			  "\"shipname\":\"%s\"}",
-			   json_stringify(ais->type24.a.shipname));
+			   json_stringify(buf1, sizeof(buf1), ais->type24.a.shipname));
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
 		(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
