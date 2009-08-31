@@ -973,7 +973,9 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 		XmTextFieldSetString(text_9, "n/a");
 	if (gpsdata->set & DEVICEID_SET) {
 		(void)strlcpy(s, "xgps: ", sizeof(s));
-		(void)strlcpy(s+6, gpsdata->dev.subtype, sizeof(s)-6);
+		(void)strlcat(s, gpsdata->dev.driver, sizeof(s));
+		(void)strlcat(s, " ", sizeof(s));
+		(void)strlcat(s, gpsdata->dev.subtype, sizeof(s));
 		set_title(s);
 	}
 	if (gpsdata->online == 0) {
