@@ -1,17 +1,16 @@
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.40dev
-  AIVDM now has tested decoding for message types 1-6, 8, 9-11, 18,
-  and 24.  Fixed a bug that could report wrong sign for course and
+  GPSD-NG, the new JSON-based command protocol, is now deployed; as a
+  consequence, AIS is now fully supported in both daemon and client;
+  message types 1-6, 8, 9-11, 18, and 24 are all decoded and available
+  to clients.  Fixed a bug that could report wrong sign for course and
   speed (but not location) from SiRF binary GND messages. Abandoned
   the gpsflash subproject since it has become apparent that we can't
   do it without more vendor cooperation than we're likely to
-  get. gpsdecode can now dump records in JSON (JavaScript Object
-  Format), and a trial version of the GPSD-NG protocol baased on JSON
-  is available for testing. Increase major version of shared library
-  due to significant API change. Added new driver for Motorola Oncore
-  receivers, with help from Håkan Johansson. Gpsd can now connect to
-  remote gpsds via a gpsd:// url. gpsd can now dump decoded AIS data
-  from an AIVDM source.  gpsfake can now accwept multiple logfiles,
-  interleaving test centences from each.
+  get. Increase major version of shared library due to significant API
+  change. Added new driver for Motorola Oncore receivers, with help
+  from Håkan Johansson. Gpsd can now connect to remote gpsds via a
+  gpsd:// url.  gpsfake can now accept multiple logfiles,
+  interleaving test sentences from each.
 
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
   Fixed potential core dump in C client handling of "K" responses.

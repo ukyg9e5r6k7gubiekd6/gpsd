@@ -66,11 +66,11 @@
 <h1>About <code>gpsd</code></h1>
 
 <p><code>gpsd</code> is a service daemon that monitors one or more
-GPSes attached to a host computer through serial or USB ports, making
-all data on the location/course/velocity of the sensors available to
-be queried on TCP port 2947 of the host computer.  With
-<code>gpsd</code>, multiple GPS client applications (such as
-navigational and wardriving software) can share access to GPSes
+GPSes or AIS receivers attached to a host computer through serial or
+USB ports, making all data on the location/course/velocity of the
+sensors available to be queried on TCP port 2947 of the host computer.
+With <code>gpsd</code>, multiple location-aware client applications (such as
+navigational and wardriving software) can share access to receivers
 without contention or loss of data. Also, <code>gpsd</code> responds
 to queries with a format that is substantially easier to parse than
 the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
@@ -80,8 +80,8 @@ applications can use to encapsulate all communication with
 <code>gpsd</code>.</para>
 
 <p>Besides <code>gpsd</code> itself, the project provides auxiliary
-tools for diagnostic monitoring and profiling of GPSes and feeding
-GPS-aware applications GPS logs for diagnostic purposes.</p>
+tools for diagnostic monitoring and profiling of receivers and feeding
+location-aware applications GPS/AIS logs for diagnostic purposes.</p>
 
 <p>The goal of the <code>gpsd</code> project is to create a solid
 layer of open-source infrastructure for programs running under Linux
@@ -105,7 +105,7 @@ configuration.  Binary packages for this program install hotplug
 scripts that do the right thing when a USB device goes active,
 launching <code>gpsd</code> if needed and telling <code>gpsd</code>
 which device to read data from.  Then, <code>gpsd</code> deduces a
-baud rate and GPS type by looking at the data stream.</p>
+baud rate and GPS/AIS type by looking at the data stream.</p>
 
 <p><code>gpsd</code> is high-quality, carefully-audited code.  It is
 regularly checked with the standard mode of <a
