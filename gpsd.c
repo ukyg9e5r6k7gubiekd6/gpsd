@@ -2083,7 +2083,6 @@ int main(int argc, char *argv[])
 			c_ip, sub_index(client), ssock);	
 #ifdef GPSDNG_ENABLE
 		    json_version_dump(announce, sizeof(announce));
-		    (void)strlcat(announce, "\r\n", sizeof(announce));
 		    (void)throttled_write(client, announce, strlen(announce));
 #endif /* GPSDNG_ENABLE */
 		}

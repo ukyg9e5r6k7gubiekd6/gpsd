@@ -38,7 +38,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 void json_version_dump(char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"api_major\":%d,\"api_minor\":%d}", 
+		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"api_major\":%d,\"api_minor\":%d}\r\n", 
 		   GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 }
 
@@ -1152,7 +1152,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 		      "\"partno\":%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-			  "\"shipname\":\"%s\"}",
+			  "\"shipname\":\"%s\"}\r\n",
 			   json_stringify(buf1, sizeof(buf1), ais->type24.a.shipname));
 	} else if (ais->type24.part == 1) {
 	    if (scaled) {
@@ -1170,7 +1170,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			  ais->type24.b.callsign);
 	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			      "mothership_\"mmsi\":%u}",
+			      "mothership_\"mmsi\":%u}\r\n",
 			      ais->type24.b.mothership_mmsi);
 	    } else {
 		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
