@@ -377,7 +377,7 @@ EXTRA_DIST = \
 	gpsd.usermap \
 	valgrind-audit \
 	valgrind-suppressions \
-	gpspacket.c \
+	gpspacke.c \
 	gpslib.c \
 	driver_proto.c \
 	monitor_proto.c \
