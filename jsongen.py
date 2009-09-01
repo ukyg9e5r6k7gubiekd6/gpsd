@@ -2,21 +2,47 @@
 #
 # Never hand-hack what you can generate...
 #
-# This code senerate template declarations for AIS-JSON parsing from a
+# This code generates template declarations for AIS-JSON parsing from a
 # declarative specification of a JSON structure - and generate those
 # declarative specification from the Python format strings for
 # dumping the structures
 #
 import sys, getopt
 
-# Make shared field names to data types 
+# Map shared field names to data types 
 typemap = {
     "raim":"boolean",
     "accuracy":"boolean",
     "timestamp":"string",
     }
 
+#
+# Here is the information that makes it all work - attribute, type, and
+# defult information for all fields.  We can generate either a JSON
+# parser template spec or the C code for the correspondong dump functio
+# from this informstion. Doing it this way guarantees consistency.
+#
 ais_specs = (
+    {
+    "initname" : "json_ais1",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type123",
+    "fieldmap":(
+        # fieldname   type        default
+        ('status',   'uinteger', '0'),
+        ('turn',     'integer',  'AIS_TURN_NOT_AVAILABLE'),
+        ('speed',    'uinteger', 'SPEED_NOT_AVAILABLE'),
+        ('accuracy', 'boolean',  'false'),
+        ('lon',      'integer',  'AIS_LON_NOT_AVAILABLE'),
+        ('lat',      'integer',  'AIS_LAT_NOT_AVAILABLE'),
+        ('course',   'uinteger', 'AIS_COURSE_NOT_AVAILABLE'),
+        ('heading',  'integer',  'AIS_HEADING_NOT_AVAILABLE'),
+        ('second',   'uinteger', 'AIS_SEC_NOT_AVAILABLE'),
+        ('maneuver', 'integer',  'AIS_SEC_INOPERATIVE'),
+        ('raim',     'boolean', ' false'),
+        ('radio',    'integer', ' 0'),
+        ),
+    },
     {
     "initname" : "json_ais4",
     "header": "\tAIS_HEADER,",
@@ -37,7 +63,7 @@ ais_specs = (
     
 def generate(spec):
     print "    const struct json_attr_t %s[] = {" % spec["initname"]
-    if spec["header"]:
+    if "header" in spec:
         print spec["header"]
     for (attr, itype, default) in spec["fieldmap"]:
         structname = spec["structname"]
@@ -45,13 +71,13 @@ def generate(spec):
             deref = ""
         else:
             deref = "&"
-        if attr in spec["stringbuffered"]:
+        if attr in spec.get("stringbuffered", []):
             target = attr
         else:
             target = structname + "." + attr
         print '\t{"%s",%s%s,%s.addr.%s = %s%s,' % \
-               (attr, " "*(12-len(attr)),itype, " "*(12-len(itype)), itype, deref, target)
-        leader = " " * 37
+               (attr, " "*(12-len(attr)),itype, " "*(10-len(itype)), itype, deref, target)
+        leader = " " * 35
         if itype == "string":
             print leader + ".maxlen = sizeof(%s)}," % target
         else:
@@ -60,7 +86,6 @@ def generate(spec):
     print """\
 	{NULL},
     };
-
 """
 
 def string_to_specifier(strspec):
@@ -72,13 +97,20 @@ def string_to_specifier(strspec):
         "f": "real",
         "a": "string",
         }
+    dftmap = {
+        "integer":  "0",
+        "uinteger": "0",
+        "real":     "0.0",
+        "string":   "None",
+        "boolean":  "false"
+        }
     strspec = strspec.strip()
     if strspec[-1] == "}":
         strspec = strspec[:-1]
     else:
         print "Missing terminating }"
         sys.exit(1)
-    print '"fieldmap":('
+    print '    "fieldmap":('
     for item in strspec.split(","):
         if "timestamp" in item:
             (attr, itype) = ("timestamp", "string")
@@ -93,15 +125,18 @@ def string_to_specifier(strspec):
                 itype = typemap[attr]
             if fmt[-1] in fmtmap:
                 itype = fmtmap[fmt[-1]]
-        print "    " + `(attr, itype)` + ","
-    print "    )"
+        print "        " + `(attr, itype, dftmap[itype])` + ","
+    print "        )"
 
 
-# Edit into this global the string spec you need to convert
+# Give this global the string spec you need to convert.
+# We do it this mildly odd way only becaue passing Python multiline
+# string literals on the command line is inconvenient.
 stringspec = \
-"\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","\
-     "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"\
-     "\"epfd\":%u,\"raim\":%s,\"radio\":%d}\r\n"
+           "\"status\":%u,\"turn\":%d,\"speed\":%u,"\
+           "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"\
+           "\"course\":%u,\"heading\":%d,\"second\":%u,"\
+           "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}"
 
 if __name__ == '__main__':
     try:
