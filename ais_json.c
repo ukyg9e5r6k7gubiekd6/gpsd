@@ -45,12 +45,13 @@ int json_ais_read(const char *buf,
     if (strstr(buf, "\"type\":1,")!=NULL || strstr(buf, "\"type\":2,")!=NULL || strstr(buf, "\"type\":3,")!=NULL) {
 	status = json_read_object(buf, json_ais1, endptr);
     } else if (strstr(buf, "\"type\":4,") != NULL || strstr(buf, "\"type\":11,")!=NULL) {
-	// FIXME: Needs processing to handle timestamp
+	// FIXME: Needs processing to handle timestamp field
 	status = json_read_object(buf, json_ais4, endptr);
-	// FIXME: Needs processing to handle eta
+	// FIXME: Needs processing to handle eta field
     } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_ais5, endptr);
     } else if (strstr(buf, "\"type\":6,") != NULL) {
+	// FIXME: requires postprocessing of data field
 	status = json_read_object(buf, json_ais6, endptr);
     } else if (strstr(buf, "\"type\":7,") != NULL || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
@@ -85,6 +86,10 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":22,") != NULL) {
 	status = json_read_object(buf, json_ais22, endptr);
     } else if (strstr(buf, "\"type\":24,") != NULL) {
+	/* 
+	 * Note: the parser doesn't check that attributes corresponding 
+	 * to union fields aren't stepping on each other.
+	 */
 	status = json_read_object(buf, json_ais24, endptr);
     } else {
 	return JSON_ERR_MISC;

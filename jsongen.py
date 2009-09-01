@@ -3,7 +3,7 @@
 # Never hand-hack what you can generate...
 #
 # This code generates template declarations for AIS-JSON parsing from a
-# declarative specification of a JSON structure - and generate those
+# declarative specification of a JSON structure - and generates those
 # declarative specification from the Python format strings for
 # dumping the structures
 #
