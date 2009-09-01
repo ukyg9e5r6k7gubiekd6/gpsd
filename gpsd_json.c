@@ -1005,7 +1005,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
-			   "\"to_bow\":%u,\"stern\":%u,\"port\":%u,"
+			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"
 			   "\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,

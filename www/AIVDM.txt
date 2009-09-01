@@ -974,7 +974,7 @@ Field   Len Description         Member     Units
 
 Nore that latitude and longitude are in units of a tenth of a minute;
 sign interpretation and out-of-band values are as in the Common
-Navigation Clock.  (Note, howeverm that the hex representastion of
+Navigation Clock.  (Note, however, that the hex representation of
 the out-of-band values differs; it is 181 \* 60 \* 10 = 0x1a838 for
 longitude, 91 \* 60 \* 10 = 0xd548 for latitude.)
 
