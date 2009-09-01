@@ -19,8 +19,6 @@ representations to libgps structures.
 #include "gpsd.h"
 #include "gps_json.h"
 
-/* common fields in every AIS message */
-
 int json_ais_read(const char *buf, 
 		    char *path, size_t pathlen,
 		    struct ais_t *ais, 

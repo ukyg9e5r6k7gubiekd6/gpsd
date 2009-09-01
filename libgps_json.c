@@ -252,9 +252,9 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	if (status == 0)
 	    gpsdata->set |= POLICY_SET;
 	return status;
-
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, NULL);
+#ifdef RTCM104V2_ENABLE
     } else if (strstr(buf, "\"class\":\"RTCM2\"") != 0) {
 	status = json_rtcm2_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
@@ -262,6 +262,8 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	if (status == 0)
 	    gpsdata->set |= RTCM2_SET;
 	return status;
+#endif /* RTCM104V2_ENABLE */
+#ifdef AIVDM_ENABLE
     } else if (strstr(buf, "\"class\":\"AIS\"") != 0) {
 	status = json_ais_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
@@ -269,6 +271,7 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	if (status == 0)
 	    gpsdata->set |= AIS_SET;
 	return status;
+#endif /* AIVDM_ENABLE */
     } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {
 	return json_error_read(buf, gpsdata, NULL);
     } else
