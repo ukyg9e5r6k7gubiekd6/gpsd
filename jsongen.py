@@ -19,7 +19,7 @@ ais_specs = (
     {
     "initname" : "json_ais1",
     "header": "\tAIS_HEADER,",
-    "structname": "ais->type123",
+    "structname": "ais->type1",
     "fieldmap":(
         # fieldname   type        default
         ('status',   'uinteger', '0'),
@@ -36,6 +36,7 @@ ais_specs = (
         ('radio',    'integer',  '0'),
         ),
     },
+    # Message types 2 and 3 duplicate 1
     {
     "initname" : "json_ais4",
     "header": "\tAIS_HEADER,",
@@ -140,6 +141,7 @@ ais_specs = (
         ('dest_mmsi',     'uinteger',      '0'),
         ),
     },
+    # Message type 11 duplicates 4
     {
     "initname" : "json_ais12",
     "header": "\tAIS_HEADER,",
@@ -164,17 +166,128 @@ ais_specs = (
         ('mmsi4',         'uinteger',      '0'),
         ),
     },
+    {
+    "initname" : "json_ais14",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type14",
+    "fieldmap":(
+        # fieldname       type             default
+        ('text',          'string',        None),
+        ),
+    },
+    {
+    "initname" : "json_ais15",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type15",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('type1_1',       'uinteger',      '0'),
+        ('offset1_1',     'uinteger',      '0'),
+        ('type1_2',       'uinteger',      '0'),
+        ('offset1_2',     'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('type2_1',       'uinteger',      '0'),
+        ('offset2_1',     'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais16",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type16",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('offset1',       'uinteger',      '0'),
+        ('increment1',    'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('offset2',       'uinteger',      '0'),
+        ('increment2',    'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais17",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type17",
+    "fieldmap":(
+        # fieldname       type             default
+        ('lon',           'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('data',          'string',        None),
+        ),
+    },
+    {
+    "initname" : "json_ais18",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type18",
+    "fieldmap":(
+        # fieldname       type             default
+        ('reserved',      'uinteger',      '0'),
+        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
+        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
+        ('regional',      'integer',       '0'),
+        ('cs',            'boolean',       'false'),
+        ('display',       'boolean',       'false'),
+        ('dsc',           'boolean',       'false'),
+        ('band',          'boolean',       'false'),
+        ('msg22',         'boolean',       'false'),
+        ('raim',          'boolean',       'false'),
+        ('radio',         'integer',       '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais19",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type19",
+    "fieldmap":(
+        # fieldname       type             default
+        ('reserved',      'uinteger',      '0'),
+        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
+        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'bAIS_SEC_NOT_AVAILABLE'),
+        ('regional',      'integer',       '0'),
+        ('shipname',      'string',        None),
+        ('shiptype',      'uinteger',      '0'),
+        ('to_bow',        'uinteger',      '0'),
+        ('stern',         'uinteger',      '0'),
+        ('port',          'uinteger',      '0'),
+        ('starboard',     'uinteger',      '0'),
+        ('epfd',          'uinteger',      '0'),
+        ('raim',          'boolean',       'false'),
+        ('dte',           'integer',       '1'),
+        ('assigned',      'boolean',       'false'),
+        ),
+    },
 )
 
 # Give this global the string spec you need to convert with -g
 # We do it this mildly odd way only because passing Python multiline
 # string literals on the command line is inconvenient.
 stringspec = \
-           "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n"
+           "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"\
+           "\"lon\":%d,\"lat\":%d,\"course\":%u,"\
+           "\"heading\":%d,\"second\":%u,\"regional\":%d,"\
+           "\"shipname\":\"%s\",\"shiptype\":%u,"\
+           "\"to_bow\":%u,\"stern\":%u,\"port\":%u,"\
+           "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"\
+           "\"dte\":%s,\"assigned\":%s}\r\n"
 
 # You should not need to modify anything below this liine.
 
 def generate(spec):
+    print """/*
+ * This is code generated by jsongen.py. Do not hand-hack it.
+ */
+"""
     outboard = []
     for (attr, itype, default) in spec["fieldmap"]:
         if attr in spec.get("stringbuffered", []):

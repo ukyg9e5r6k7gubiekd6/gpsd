@@ -660,16 +660,18 @@ struct ais_t
 	    uint speed;			/* speed over ground in deciknots */
 	    bool accuracy;		/* position accuracy */
 	    int lon;			/* longitude */
+#define AIS_GNS_LON_NOT_AVAILABLE	0x1a838
 	    int lat;			/* latitude */
+#define AIS_GNS_LAT_NOT_AVAILABLE	0xd548
 	    uint course;		/* course over ground */
 	    uint heading;		/* true heading */
 	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
-	    bool cs_flag;		/* carrier sense unit flag */
-	    bool display_flag;		/* unit has attached display? */
-	    bool dsc_flag;		/* unit attached to radio with DSC? */
-	    bool band_flag;		/* unit can switch frequency bands? */
-	    bool msg22_flag;		/* can accept Message 22 management? */
+	    bool cs;     		/* carrier sense unit flag */
+	    bool display;		/* unit has attached display? */
+	    bool dsc;   		/* unit attached to radio with DSC? */
+	    bool band;   		/* unit can switch frequency bands? */
+	    bool msg22;	        	/* can accept Message 22 management? */
 	    bool assigned;		/* assigned-mode flag */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */

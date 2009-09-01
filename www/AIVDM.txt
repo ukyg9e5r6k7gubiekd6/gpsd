@@ -975,8 +975,8 @@ Field   Len Description         Member     Units
 Nore that latitude and longitude are in units of a tenth of a minute;
 sign interpretation and out-of-band values are as in the Common
 Navigation Clock.  (Note, howeverm that the hex representastion of
-the out-of-band values differs; it is 181 * 60 * 10 = 0x1a838 for
-longitude, 91 * 60 * 10 = 0xd548 for latitude.)
+the out-of-band values differs; it is 181 \* 60 \* 10 = 0x1a838 for
+longitude, 91 \* 60 \* 10 = 0xd548 for latitude.)
 
 The <<IALA>> description of the payload portion subfields has been
 omitted, as it appears to be tied to the now obsolete RTCM2 protocol.

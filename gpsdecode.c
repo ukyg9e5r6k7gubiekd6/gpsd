@@ -211,17 +211,17 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type18.heading,
 		       ais->type18.second,
 		       ais->type18.regional,
-		       ais->type18.cs_flag,
-		       ais->type18.display_flag,
-		       ais->type18.dsc_flag,
-		       ais->type18.band_flag,
-		       ais->type18.msg22_flag,
+		       ais->type18.cs,
+		       ais->type18.display,
+		       ais->type18.dsc,
+		       ais->type18.band,
+		       ais->type18.msg22,
 		       ais->type18.raim,
 		       ais->type18.radio);
 	break;
     case 19:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%d,0x%x",
+		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%d,%u,%u",
 		       ais->type19.reserved,
 		       ais->type19.speed,
 		       (uint)ais->type19.accuracy,
@@ -239,6 +239,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type19.to_starboard,
 		       ais->type19.epfd,
 		       ais->type19.raim,
+		       ais->type19.dte,
 		       ais->type19.assigned);
 	break;
     case 20:	/* Data Link Management Message */

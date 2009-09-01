@@ -877,11 +877,11 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 		       "\"text\":\"%s\"}\r\n",
 		       json_stringify(buf1, sizeof(buf1), ais->type14.text));
 	break;
-    case 15:
+    case 15:	/* Interrogation */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "mmsi1=%u,\"type1_1\"=%u,\"offset1_1\"=%u,"
-		       "\"type1_2\"=%u,\"offset1_2\"=%u,\"mmsi2\"=%u,"
-		       "\"type2_1\"=%u,\"offset2_1\"=%u}\r\n",
+		       "mmsi1:%u,\"type1_1\":%u,\"offset1_1\":%u,"
+		       "\"type1_2\":%u,\"offset1_2\":%u,\"mmsi2\":%u,"
+		       "\"type2_1\":%u,\"offset2_1\":%u}\r\n",
 		      ais->type15.mmsi1,
 		      ais->type15.type1_1,
 		      ais->type15.offset1_1,
@@ -893,8 +893,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "\"mmsi1\"=%u,\"offset1\"=%u,\"increment1\"=%u,"
-		       "\"mmsi2\"=%u,\"offset2\"=%u,\"increment2\"=%u}\r\n",
+		       "\"mmsi1\":%u,\"offset1\":%u,\"increment1\":%u,"
+		       "\"mmsi2\":%u,\"offset2\":%u,\"increment2\":%u}\r\n",
 		       ais->type16.mmsi1,
 		       ais->type16.offset1,
 		       ais->type16.increment1,
@@ -927,8 +927,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
-			   "\"cs\":%u,\"display\":%u,\"dsc\":%u,\"band\":%u,"
-			   "\"msg22\":%u,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"cs\":%s,\"display\":%s,\"dsc\":%s,\"band\":%s,"
+			   "\"msg22\":%s,\"raim\":%s,\"radio\":%d}\r\n",
 			   ais->type18.reserved,
 			   ais->type18.speed / 10.0,
 			   JSON_BOOL(ais->type18.accuracy),
@@ -938,11 +938,11 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type18.heading,
 			   ais->type18.second,
 			   ais->type18.regional,
-			   ais->type18.cs_flag,
-			   ais->type18.display_flag,
-			   ais->type18.dsc_flag,
-			   ais->type18.band_flag,
-			   ais->type18.msg22_flag,
+			   JSON_BOOL(ais->type18.cs),
+			   JSON_BOOL(ais->type18.display),
+			   JSON_BOOL(ais->type18.dsc),
+			   JSON_BOOL(ais->type18.band),
+			   JSON_BOOL(ais->type18.msg22),
 			   JSON_BOOL(ais->type18.raim),
 			   ais->type18.radio);
 	} else {
@@ -950,8 +950,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
-			   "\"cs\":%u,\"display\":%u,\"dsc\":%u,\"band\":%u,"
-			   "\"msg22\":%u,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"cs\":%s,\"display\":%s,\"dsc\":%s,\"band\":%s,"
+			   "\"msg22\":%s,\"raim\":%s,\"radio\":%d}\r\n",
 			   ais->type18.reserved,
 			   ais->type18.speed,
 			   JSON_BOOL(ais->type18.accuracy),
@@ -961,11 +961,11 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type18.heading,
 			   ais->type18.second,
 			   ais->type18.regional,
-			   ais->type18.cs_flag,
-			   ais->type18.display_flag,
-			   ais->type18.dsc_flag,
-			   ais->type18.band_flag,
-			   ais->type18.msg22_flag,
+			   JSON_BOOL(ais->type18.cs),
+			   JSON_BOOL(ais->type18.display),
+			   JSON_BOOL(ais->type18.dsc),
+			   JSON_BOOL(ais->type18.band),
+			   JSON_BOOL(ais->type18.msg22),
 			   JSON_BOOL(ais->type18.raim),
 			   ais->type18.radio);
 	}
@@ -979,7 +979,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\",\"raim\":%s,"
-			   "\"assigned\":%d}\r\n",
+			   "\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,
 			   ais->type19.speed / 10.0,
 			   JSON_BOOL(ais->type19.accuracy),
@@ -997,7 +997,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type19.to_starboard,
 			   epfd_legends[ais->type19.epfd],
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.assigned);
+			   ais->type19.dte,
+			   JSON_BOOL(ais->type19.assigned));
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
@@ -1006,7 +1007,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
 			   "\"to_bow\":%u,\"stern\":%u,\"port\":%u,"
 			   "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"
-			   "\"assigned\":%d}\r\n",
+			   "\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,
 			   ais->type19.speed,
 			   JSON_BOOL(ais->type19.accuracy),
@@ -1024,7 +1025,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type19.to_starboard,
 			   ais->type19.epfd,
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.assigned);
+			   ais->type19.dte,
+			   JSON_BOOL(ais->type19.assigned));
 	}
 	break;
     case 20:	/* Data Link Management Message */

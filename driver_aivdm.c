@@ -372,11 +372,11 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    ais->type18.heading		= UBITS(124, 9);
 	    ais->type18.second		= UBITS(133, 6);
 	    ais->type18.regional	= UBITS(139, 2);
-	    ais->type18.cs_flag		= UBITS(141, 1)!=0;
-	    ais->type18.display_flag	= UBITS(142, 1)!=0;
-	    ais->type18.dsc_flag	= UBITS(143, 1)!=0;
-	    ais->type18.band_flag	= UBITS(144, 1)!=0;
-	    ais->type18.msg22_flag	= UBITS(145, 1)!=0;
+	    ais->type18.cs		= UBITS(141, 1)!=0;
+	    ais->type18.display 	= UBITS(142, 1)!=0;
+	    ais->type18.dsc     	= UBITS(143, 1)!=0;
+	    ais->type18.band    	= UBITS(144, 1)!=0;
+	    ais->type18.msg22   	= UBITS(145, 1)!=0;
 	    ais->type18.assigned	= UBITS(146, 1)!=0;
 	    ais->type18.raim		= UBITS(147, 1)!=0;
 	    ais->type18.radio		= UBITS(148, 20);
