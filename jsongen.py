@@ -253,7 +253,7 @@ ais_specs = (
         ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
         ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
         ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
-        ('second',        'uinteger',      'bAIS_SEC_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
         ('regional',      'integer',       '0'),
         ('shipname',      'string',        None),
         ('shiptype',      'uinteger',      '0'),
@@ -267,19 +267,202 @@ ais_specs = (
         ('assigned',      'boolean',       'false'),
         ),
     },
+    {
+    "initname" : "json_ais20",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type20",
+    "fieldmap":(
+        # fieldname       type             default
+        ('offset1',       'uinteger',      '0'),
+        ('number1',       'uinteger',      '0'),
+        ('timeout1',      'uinteger',      '0'),
+        ('increment1',    'uinteger',      '0'),
+        ('offset2',       'uinteger',      '0'),
+        ('number2',       'uinteger',      '0'),
+        ('timeout2',      'uinteger',      '0'),
+        ('increment2',    'uinteger',      '0'),
+        ('offset3',       'uinteger',      '0'),
+        ('number3',       'uinteger',      '0'),
+        ('timeout3',      'uinteger',      '0'),
+        ('increment3',    'uinteger',      '0'),
+        ('offset4',       'uinteger',      '0'),
+        ('number4',       'uinteger',      '0'),
+        ('timeout4',      'uinteger',      '0'),
+        ('increment4',    'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais15",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type15",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('type1_1',       'uinteger',      '0'),
+        ('offset1_1',     'uinteger',      '0'),
+        ('type1_2',       'uinteger',      '0'),
+        ('offset1_2',     'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('type2_1',       'uinteger',      '0'),
+        ('offset2_1',     'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais16",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type16",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('offset1',       'uinteger',      '0'),
+        ('increment1',    'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('offset2',       'uinteger',      '0'),
+        ('increment2',    'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais17",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type17",
+    "fieldmap":(
+        # fieldname       type             default
+        ('lon',           'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('data',          'string',        None),
+        ),
+    },
+    {
+    "initname" : "json_ais18",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type18",
+    "fieldmap":(
+        # fieldname       type             default
+        ('reserved',      'uinteger',      '0'),
+        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
+        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
+        ('regional',      'integer',       '0'),
+        ('cs',            'boolean',       'false'),
+        ('display',       'boolean',       'false'),
+        ('dsc',           'boolean',       'false'),
+        ('band',          'boolean',       'false'),
+        ('msg22',         'boolean',       'false'),
+        ('raim',          'boolean',       'false'),
+        ('radio',         'integer',       '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais19",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type19",
+    "fieldmap":(
+        # fieldname       type             default
+        ('reserved',      'uinteger',      '0'),
+        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
+        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
+        ('regional',      'integer',       '0'),
+        ('shipname',      'string',        None),
+        ('shiptype',      'uinteger',      '0'),
+        ('to_bow',        'uinteger',      '0'),
+        ('stern',         'uinteger',      '0'),
+        ('port',          'uinteger',      '0'),
+        ('starboard',     'uinteger',      '0'),
+        ('epfd',          'uinteger',      '0'),
+        ('raim',          'boolean',       'false'),
+        ('dte',           'integer',       '1'),
+        ('assigned',      'boolean',       'false'),
+        ),
+    },
+    {
+    "initname" : "json_ais20",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type20",
+    "fieldmap":(
+        # fieldname       type             default
+        ('offset1',       'uinteger',      '0'),
+        ('number1',       'uinteger',      '0'),
+        ('timeout1',      'uinteger',      '0'),
+        ('increment1',    'uinteger',      '0'),
+        ('offset2',       'uinteger',      '0'),
+        ('number2',       'uinteger',      '0'),
+        ('timeout2',      'uinteger',      '0'),
+        ('increment2',    'uinteger',      '0'),
+        ('offset3',       'uinteger',      '0'),
+        ('number3',       'uinteger',      '0'),
+        ('timeout3',      'uinteger',      '0'),
+        ('increment3',    'uinteger',      '0'),
+        ('offset4',       'uinteger',      '0'),
+        ('number4',       'uinteger',      '0'),
+        ('timeout4',      'uinteger',      '0'),
+        ('increment4',    'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais21",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type21",
+    "fieldmap":(
+        # fieldname       type             default
+        ('type',          'uinteger',      '0'),
+        ('name',          'string',        None),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('to_bow',        'uinteger',      '0'),
+        ('to_stern',      'uinteger',      '0'),
+        ('to_port',       'uinteger',      '0'),
+        ('to_starboard',  'uinteger',      '0'),
+        ('epfd',          'uinteger',      '0'),
+        ('second',        'uinteger',      '0'),
+        ('regional',      'integer',       '0'),
+        ('off_position',  'boolean',       'false'),
+        ('raim',          'boolean',       'false'),
+        ('virtual_aid',   'boolean',       'false'),
+        ),
+    },
+    {
+    "initname" : "json_ais22",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type22",
+    "fieldmap":(
+        # fieldname       type             default
+        ('channel_a',     'uinteger',      '0'),
+        ('channel_b',     'uinteger',      '0'),
+        ('mode',          'uinteger',      '0'),
+        ('power',         'boolean',       'false'),
+        ('ne_lon',        'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('ne_lat',        'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('sw_lon',        'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('sw_lat',        'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('addressed',     'boolean',       'false'),
+        ('band_a',        'boolean',       'false'),
+        ('band_b',        'boolean',       'false'),
+        ('zonesize',      'uinteger',      '0'),
+        ),
+    },
 )
+
 
 # Give this global the string spec you need to convert with -g
 # We do it this mildly odd way only because passing Python multiline
 # string literals on the command line is inconvenient.
 stringspec = \
-           "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"\
-           "\"lon\":%d,\"lat\":%d,\"course\":%u,"\
-           "\"heading\":%d,\"second\":%u,\"regional\":%d,"\
-           "\"shipname\":\"%s\",\"shiptype\":%u,"\
-           "\"to_bow\":%u,\"stern\":%u,\"port\":%u,"\
-           "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"\
-           "\"dte\":%s,\"assigned\":%s}\r\n"
+           "\"channel_a\":%u,\"channel_b\":%u,"\
+           "\"mode\":%u,\"power\":%u,"\
+           "\"ne_lon\":%d,\"ne_lat\":%d,"\
+           "\"sw_lon\":%d,\"sw_lat\":%d,"\
+           "\"addressed\":%s,\"band_a\":%s,"\
+           "\"band_b\":%s,\"zonesize\":\":%u}\r\n"
 
 # You should not need to modify anything below this liine.
 

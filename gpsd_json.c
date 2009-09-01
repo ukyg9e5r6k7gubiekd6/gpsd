@@ -1031,14 +1031,14 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 20:	/* Data Link Management Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "\"offset1\":\"%u\",\"number1\":\"%u\","
-		       "\"timeout1\":\"%u\",\"increment1\":\"%u\","
-		       "\"offset2\":\"%u\",\"number2\":\"%u\","
-		       "\"timeout2\":\"%u\",\"increment2\":\"%u\","
-		       "\"offset3\":\"%u\",\"number3\":\"%u\","
-		       "\"timeout3\":\"%u\",\"increment3\":\"%u\","
-		       "\"offset4\":\"%u\",\"number4\":\"%u\","
-		       "\"timeout4\":\"%u\",\"increment4\":\"%u\"}\r\n",
+		       "\"offset1\":%u,\"number1\":%u,"
+		       "\"timeout1\":%u,\"increment1\":%u,"
+		       "\"offset2\":%u,\"number2\":%u,"
+		       "\"timeout2\":%u,\"increment2\":%u,"
+		       "\"offset3\":%u,\"number3\":%u,"
+		       "\"timeout3\":%u,\"increment3\":%u,"
+		       "\"offset4\":%u,\"number4\":%u,"
+		       "\"timeout4\":%u,\"increment4\":%u}\r\n",
 		       ais->type20.offset1,
 		       ais->type20.number1,
 		       ais->type20.timeout1,
@@ -1087,8 +1087,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
 			   "\"epfd\":%u,\"second\":%u,\"regional\":%d,"
-			   "\"off_position\":%d,\"raim\":%s,"
-			   "\"virtual_aid\":%u}\r\n",
+			   "\"off_position\":%s,\"raim\":%s,"
+			   "\"virtual_aid\":%s}\r\n",
 			   ais->type21.type,
 			   ais->type21.name,
 			   JSON_BOOL(ais->type21.accuracy),
@@ -1101,52 +1101,52 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type21.epfd,
 			   ais->type21.second,
 			   ais->type21.regional,
-			   ais->type21.off_position,
+			   JSON_BOOL(ais->type21.off_position),
 			   JSON_BOOL(ais->type21.raim),
-			   ais->type21.virtual_aid);
+			   JSON_BOOL(ais->type21.virtual_aid));
 	}
 	break;
     case 22:	/* Channel Management */
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"channel_a\":\"%u\",\"channel_b\":\"%u\","
-			   "\"mode\":\"%u\",\"power\":\"%u\","
+			   "\"channel_a\":%u,\"channel_b\":%u,"
+			   "\"mode\":%u,\"power\":%s,"
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
-			   "\"addressed\":\"%u\",\"band_a\":\"%u\","
-			   "\"band_b\":\"%u\",\"zonesize\":\":%u}\r\n",
-			  ais->type22.channel_a,
-			  ais->type22.channel_b,
-			  ais->type22.mode,
-			  ais->type22.power,
-			  ais->type22.ne_lon / AIS_CHANNEL_LATLON_SCALE,
-			  ais->type22.ne_lat / AIS_CHANNEL_LATLON_SCALE,
-			  ais->type22.sw_lon / AIS_CHANNEL_LATLON_SCALE,
-			  ais->type22.sw_lat / AIS_CHANNEL_LATLON_SCALE,
-			  ais->type22.addressed,
-			  ais->type22.band_a,
-			  ais->type22.band_b,
-			  ais->type22.zonesize);
+			   "\"addressed\":%s,\"band_a\":%s,"
+			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
+			   ais->type22.channel_a,
+			   ais->type22.channel_b,
+			   ais->type22.mode,
+			   JSON_BOOL(ais->type22.power),
+			   ais->type22.ne_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.ne_lat / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.sw_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.sw_lat / AIS_CHANNEL_LATLON_SCALE,
+			   JSON_BOOL(ais->type22.addressed),
+			   JSON_BOOL(ais->type22.band_a),
+			   JSON_BOOL(ais->type22.band_b),
+			   ais->type22.zonesize);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"channel_a\":\"%u\",\"channel_b\":\"%u\","
-			   "\"mode\":\"%u\",\"power\":\"%u\","
-			   "\"ne_lon\":\"%d\",\"ne_lat\":\"%d\","
-			   "\"sw_lon\":\"%d\",\"sw_lat\":\"%d\","
-			   "\"addressed\":\"%u\",\"band_a\":\"%u\","
-			   "\"band_b\":\"%u\",\"zonesize\":\":%u}\r\n",
-			  ais->type22.channel_a,
-			  ais->type22.channel_b,
-			  ais->type22.mode,
-			  ais->type22.power,
-			  ais->type22.ne_lon,
-			  ais->type22.ne_lat,
-			  ais->type22.sw_lon,
-			  ais->type22.sw_lat,
-			  ais->type22.addressed,
-			  ais->type22.band_a,
-			  ais->type22.band_b,
-			  ais->type22.zonesize);
+			   "\"channel_a\":%u,\"channel_b\":%u,"
+			   "\"mode\":%u,\"power\":%s,"
+			   "\"ne_lon\":%d,\"ne_lat\":%d,"
+			   "\"sw_lon\":%d,\"sw_lat\":%d,"
+			   "\"addressed\":%s,\"band_a\":%s,"
+			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
+			   ais->type22.channel_a,
+			   ais->type22.channel_b,
+			   ais->type22.mode,
+			   JSON_BOOL(ais->type22.power),
+			   ais->type22.ne_lon,
+			   ais->type22.ne_lat,
+			   ais->type22.sw_lon,
+			   ais->type22.sw_lat,
+			   JSON_BOOL(ais->type22.addressed),
+			   JSON_BOOL(ais->type22.band_a),
+			   JSON_BOOL(ais->type22.band_b),
+			   ais->type22.zonesize);
 	}
 	break;
     case 24: /* Class B CS Static Data Report */

@@ -1234,6 +1234,10 @@ Field   Len Description       Member       Units
 
 See <<IALA>> for details on the meaning of these fields.
 
+Note that the 'not available' values for longitudesc and latitudes
+match the short ones used in message 17, nit the long ones used in the
+common navigation block and elsewhere. 
+
 === Type 24: Class B CS Static Data Report  ===
 
 Equivalent of a Type 5 message for ships using Class B equipment.  A
