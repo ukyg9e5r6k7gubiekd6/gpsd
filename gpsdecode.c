@@ -49,18 +49,18 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 3:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "%u,%d,%u,%u,%d,%d,%u,%d,%u,0x%x,%d,0x%x",
-		       ais->type123.status,
-		       ais->type123.turn,
-		       ais->type123.speed,
-		       (uint)ais->type123.accuracy,
-		       ais->type123.lon,
-		       ais->type123.lat,
-		       ais->type123.course,
-		       ais->type123.heading,
-		       ais->type123.second,
-		       ais->type123.maneuver,
-		       ais->type123.raim,
-		       ais->type123.radio);
+		       ais->type1.status,
+		       ais->type1.turn,
+		       ais->type1.speed,
+		       (uint)ais->type1.accuracy,
+		       ais->type1.lon,
+		       ais->type1.lat,
+		       ais->type1.course,
+		       ais->type1.heading,
+		       ais->type1.second,
+		       ais->type1.maneuver,
+		       ais->type1.raim,
+		       ais->type1.radio);
 	break;
     case 4:	/* Base Station Report */
     case 11:	/* UTC/Date Response */
@@ -106,7 +106,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       ais->type6.retransmit,
-		       ais->type6.application_id,
+		       ais->type6.app_id,
 		       ais->type6.bitcount,
 		       gpsd_hexdump(ais->type6.bitdata,
 				       (ais->type6.bitcount+7)/8));
@@ -122,7 +122,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 8:	/* Binary Broadcast Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "%u,%u:%s",
-		       ais->type8.application_id,
+		       ais->type8.app_id,
 		       ais->type8.bitcount,
 		       gpsd_hexdump(ais->type8.bitdata,
 				       (ais->type8.bitcount+7)/8));

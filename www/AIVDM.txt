@@ -711,7 +711,7 @@ Field   Len Description      Member         Units
 70        1 Retransmit flag  retransmit     0 = no retransmission (default)
                                             1 = retransmitted
 71        1 Spare                           Not used
-72-87    16 Application ID   application_id Unsigned integer
+72-87    16 Application ID   app_id         Unsigned integer
 88      920 Data             data           Binary data
                                             Field may be shorter than 920 bits.
 -------------------------------------------------------------------------------
@@ -753,7 +753,7 @@ Field   Len Description       Member         Units
 6-7       2 Repeat Indicator  repeat         As in Common Navigation Block
 8-37     30 Source MMSI       mmsi           Unsigned integer: 9 digits
 38-39     2 Spare                            Not used
-40-55    16 Application ID    application_id Unsigned integer
+40-55    16 Application ID    app_id         Unsigned integer
 56      952 Data              data           Binary data
                                              Field may be shorter than 952 bits.
 -------------------------------------------------------------------------------

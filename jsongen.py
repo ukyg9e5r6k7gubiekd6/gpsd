@@ -57,7 +57,7 @@ ais_specs = (
     "header": "\tAIS_HEADER,",
     "structname": "ais->type5",
     "fieldmap":(
-        # fieldname   type        default
+        # fieldname        type            default
         ('imo',           'uinteger',      '0'),
         ('ais_version',   'uinteger',      '0'),
         ('callsign',      'string',        None),
@@ -75,28 +75,112 @@ ais_specs = (
         ),
     "stringbuffered":("eta",),
     },
+    {
+    "initname" : "json_ais6",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type6",
+    "fieldmap":(
+        # fieldname       type             default
+        ('seqno',         'uinteger',      '0'),
+        ('dest_mmsi',     'uinteger',      '0'),
+        ('retransmit',    'uinteger',      '0'),
+        ('app_id',        'uinteger',      '0'),
+        ('data',          'string',        None),
+        ),
+    "stringbuffered":("data",),
+    },
+    {
+    "initname" : "json_ais7",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type7",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('mmsi3',         'uinteger',      '0'),
+        ('mmsi4',         'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais8",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type8",
+    "fieldmap":(
+        # fieldname       type             default
+        ('app_id',        'uinteger',      '0'),
+        ('data',          'string',        None),
+        ),
+    "stringbuffered":("data",),
+    },
+    {
+    "initname" : "json_ais9",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type9",
+    "fieldmap":(
+        # fieldname       type             default
+        ('alt',           'uinteger',      'AIS_ALT_NOT_AVAILABLE'),
+        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
+        ('accuracy',      'boolean',       'false'),
+        ('lon',           'real',          'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'real',          'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'real',          'AIS_COURSE_NOT_AVAILABLE'),
+        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
+        ('regional',      'integer',       '0'),
+        ('dte',           'uinteger',      '1'),
+        ('raim',          'boolean',       'false'),
+        ('radio',         'integer',       '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais10",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type10",
+    "fieldmap":(
+        # fieldname       type             default
+        ('dest_mmsi',     'uinteger',      '0'),
+        ),
+    },
+    {
+    "initname" : "json_ais12",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type12",
+    "fieldmap":(
+        # fieldname       type             default
+        ('seq',           'uinteger',      '0'),
+        ('dst',           'uinteger',      '0'),
+        ('rexmit',        'uinteger',      '0'),
+        ('text',          'string',        None),
+        ),
+    },
+    {
+    "initname" : "json_ais13",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type13",
+    "fieldmap":(
+        # fieldname       type             default
+        ('mmsi1',         'uinteger',      '0'),
+        ('mmsi2',         'uinteger',      '0'),
+        ('mmsi3',         'uinteger',      '0'),
+        ('mmsi4',         'uinteger',      '0'),
+        ),
+    },
 )
 
-# Map shared field names to data types 
-overrides = {
-    "raim":"boolean",
-    "accuracy":"boolean",
-    }
-
 # Give this global the string spec you need to convert with -g
-# We do it this mildly odd way only becaue passing Python multiline
+# We do it this mildly odd way only because passing Python multiline
 # string literals on the command line is inconvenient.
 stringspec = \
-           "\"seqno\":%u,\"dest_mmsi\":%u,"\
-           "\"retransmit\":%u,\"application_id\":%u,"\
-           "\"data\":\"%u:%s\"}\r\n"
+           "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n"
 
 # You should not need to modify anything below this liine.
 
 def generate(spec):
+    outboard = []
     for (attr, itype, default) in spec["fieldmap"]:
         if attr in spec.get("stringbuffered", []):
-            print "    char %s[JSON_VAL_MAX+1];" % attr
+            if attr not in outboard:
+                print "    char %s[JSON_VAL_MAX+1];" % attr
+                outboard.append(attr)
     print "    const struct json_attr_t %s[] = {" % spec["initname"]
     if "header" in spec:
         print spec["header"]
@@ -130,6 +214,7 @@ def string_to_specifier(strspec):
         "d": "integer",
         "u": "uinteger",
         "f": "real",
+        "s": "boolean",	# Only booleans print as unquoted strings
         "\"": "string",
         }
     dftmap = {
@@ -153,8 +238,6 @@ def string_to_specifier(strspec):
             attr = attr[1:]
         if attr[-1] == '"':
             attr = attr[:-1]
-        if attr in overrides:
-            itype = overrides[attr]
         dflt = dftmap[itype]
         if dflt is not None:
             dflt = `dflt`

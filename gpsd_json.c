@@ -632,64 +632,64 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	     * Express turn as nan if not available,
 	     * "fastleft"/"fastright" for fast turns.
 	     */
-	    if (ais->type123.turn == -128)
+	    if (ais->type1.turn == -128)
 		(void) strlcpy(turnlegend, "nan", sizeof(turnlegend));
-	    else if (ais->type123.turn == -127)
+	    else if (ais->type1.turn == -127)
 		(void) strlcpy(turnlegend, "fastleft", sizeof(turnlegend));
-	    else if (ais->type123.turn == 127)
+	    else if (ais->type1.turn == 127)
 		(void) strlcpy(turnlegend, "fastright", sizeof(turnlegend));
 	    else
 		(void)snprintf(turnlegend, sizeof(turnlegend),
 			       "%.0f",
-			       ais->type123.turn * ais->type123.turn / 4.733);
+			       ais->type1.turn * ais->type1.turn / 4.733);
 
 	    /*
 	     * Express speed as nan if not available,
 	     * "fast" for fast movers.
 	     */
-	    if (ais->type123.speed == AIS_SPEED_NOT_AVAILABLE)
+	    if (ais->type1.speed == AIS_SPEED_NOT_AVAILABLE)
 		(void) strlcpy(speedlegend, "nan", sizeof(speedlegend));
-	    else if (ais->type123.speed == AIS_SPEED_FAST_MOVER)
+	    else if (ais->type1.speed == AIS_SPEED_FAST_MOVER)
 		(void) strlcpy(speedlegend, "fast", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
-			       "%.1f", ais->type123.speed / 10.0);
+			       "%.1f", ais->type1.speed / 10.0);
 
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"course\":%u,\"heading\":%d,\"second\":%u,"
 			   "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}\r\n",
-			   nav_legends[ais->type123.status],
+			   nav_legends[ais->type1.status],
 			   turnlegend,
 			   speedlegend,
-			   JSON_BOOL(ais->type123.accuracy),
-			   ais->type123.lon / AIS_LATLON_SCALE,
-			   ais->type123.lat / AIS_LATLON_SCALE,
-			   ais->type123.course,
-			   ais->type123.heading,
-			   ais->type123.second,
-			   ais->type123.maneuver,
-			   JSON_BOOL(ais->type123.raim),
-			   ais->type123.radio);
+			   JSON_BOOL(ais->type1.accuracy),
+			   ais->type1.lon / AIS_LATLON_SCALE,
+			   ais->type1.lat / AIS_LATLON_SCALE,
+			   ais->type1.course,
+			   ais->type1.heading,
+			   ais->type1.second,
+			   ais->type1.maneuver,
+			   JSON_BOOL(ais->type1.raim),
+			   ais->type1.radio);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"status\":%u,\"turn\":%d,\"speed\":%u,"
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"course\":%u,\"heading\":%d,\"second\":%u,"
 			   "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}\r\n",
-			   ais->type123.status,
-			   ais->type123.turn,
-			   ais->type123.speed,
-			   JSON_BOOL(ais->type123.accuracy),
-			   ais->type123.lon,
-			   ais->type123.lat,
-			   ais->type123.course,
-			   ais->type123.heading,
-			   ais->type123.second,
-			   ais->type123.maneuver,
-			   JSON_BOOL(ais->type123.raim),
-			   ais->type123.radio);
+			   ais->type1.status,
+			   ais->type1.turn,
+			   ais->type1.speed,
+			   JSON_BOOL(ais->type1.accuracy),
+			   ais->type1.lon,
+			   ais->type1.lat,
+			   ais->type1.course,
+			   ais->type1.heading,
+			   ais->type1.second,
+			   ais->type1.maneuver,
+			   JSON_BOOL(ais->type1.raim),
+			   ais->type1.radio);
 	}
 	break;
     case 4:	/* Base Station Report */
@@ -788,12 +788,12 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 6:	/* Binary Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
-		       "\"retransmit\":%u,\"application_id\":%u,"
+		       "\"retransmit\":%u,\"app_id\":%u,"
 		       "\"data\":\"%u:%s\"}\r\n",
 		       ais->type6.seqno,
 			  ais->type6.dest_mmsi,
 			  ais->type6.retransmit,
-			  ais->type6.application_id,
+			  ais->type6.app_id,
 			  ais->type6.bitcount,
 			  gpsd_hexdump(ais->type6.bitdata,
 				       (ais->type6.bitcount+7)/8));
@@ -808,8 +808,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 8:	/* Binary Broadcast Message */
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"appid\":%u,\"data\":\"%u:%s\"}\r\n",  
-			  ais->type8.application_id,
+			   "\"app_id\":%u,\"data\":\"%u:%s\"}\r\n",  
+			  ais->type8.app_id,
 			  ais->type8.bitcount,
 			  gpsd_hexdump(ais->type8.bitdata,
 				       (ais->type8.bitcount+7)/8));

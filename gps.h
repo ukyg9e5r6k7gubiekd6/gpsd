@@ -508,7 +508,7 @@ struct ais_t
 	    //uint spare;		spare bits */
 	    bool raim;			/* RAIM flag */
 	    uint radio;			/* radio status bits */
-	} type123;
+	} type1;
 	/* Type 4 - Base Station Report & Type 11 - UTC and Date Response */
 	struct {
 	    uint year;			/* UTC year */
@@ -558,7 +558,7 @@ struct ais_t
 	    uint dest_mmsi;		/* destination MMSI */
 	    bool retransmit;		/* retransmit flag */
 	    //uint spare;		spare bit(s) */
-	    uint application_id;	/* Application ID */
+	    uint app_id;        	/* Application ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    uint bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
@@ -570,7 +570,7 @@ struct ais_t
 	/* Type 8 - Broadcast Binary Message */
 	struct {
 	    //uint spare;		spare bit(s) */
-	    uint application_id;	/* Application ID */
+	    uint app_id;        	/* Application ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    uint bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
