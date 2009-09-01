@@ -10,10 +10,9 @@
 import sys, getopt
 
 # Map shared field names to data types 
-typemap = {
+overrides = {
     "raim":"boolean",
     "accuracy":"boolean",
-    "timestamp":"string",
     }
 
 #
@@ -76,7 +75,7 @@ def generate(spec):
         else:
             target = structname + "." + attr
         print '\t{"%s",%s%s,%s.addr.%s = %s%s,' % \
-               (attr, " "*(12-len(attr)),itype, " "*(10-len(itype)), itype, deref, target)
+               (attr, " "*(12-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
         leader = " " * 35
         if itype == "string":
             print leader + ".maxlen = sizeof(%s)}," % target
@@ -95,7 +94,7 @@ def string_to_specifier(strspec):
         "d": "integer",
         "u": "uinteger",
         "f": "real",
-        "a": "string",
+        "\"": "string",
         }
     dftmap = {
         "integer":  "0",
@@ -112,20 +111,15 @@ def string_to_specifier(strspec):
         sys.exit(1)
     print '    "fieldmap":('
     for item in strspec.split(","):
-        if "timestamp" in item:
-            (attr, itype) = ("timestamp", "string")
-        else:
-            itype = None
-            (attr, fmt) = item.split(":")
-            if attr[0] == '"':
-                attr = attr[1:]
-            if attr[-1] == '"':
-                attr = attr[:-1]
-            if attr in typemap:
-                itype = typemap[attr]
-            if fmt[-1] in fmtmap:
-                itype = fmtmap[fmt[-1]]
-        print "        " + `(attr, itype, dftmap[itype])` + ","
+        itype = fmtmap[item[-1]]
+        attr = item[:item.find(":")]
+        if attr[0] == '"':
+            attr = attr[1:]
+        if attr[-1] == '"':
+            attr = attr[:-1]
+        if attr in overrides:
+            itype = overrides[attr]
+        print "        (%s,%s%s,%s%s)," % (attr, " "*(14-len(attr)), itype, " "*(14-len(itype)), dftmap[itype])
     print "        )"
 
 
@@ -133,10 +127,14 @@ def string_to_specifier(strspec):
 # We do it this mildly odd way only becaue passing Python multiline
 # string literals on the command line is inconvenient.
 stringspec = \
-           "\"status\":%u,\"turn\":%d,\"speed\":%u,"\
-           "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"\
-           "\"course\":%u,\"heading\":%d,\"second\":%u,"\
-           "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}"
+			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","\
+			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","\
+			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"\
+			   "\"to_starboard\":%u,\"epfd\":\"%u\","\
+			   "\"eta\":\"%02u-%02uT%02u:%02uZ\","\
+			   "\"draught\":%.1f,\"destination\":\"%s\","\
+			   "\"dte\":%u}\r\n"
+
 
 if __name__ == '__main__':
     try:

@@ -498,7 +498,7 @@ struct ais_t
 	    uint course;		/* course over ground */
 #define AIS_COURSE_NOT_AVAILABLE	3600
 	    uint heading;		/* true heading */
-#define AIS_NO_HEADING	511
+#define AIS_HEADING_NOT_AVAILABLE	511
 	    uint second;		/* seconds of UTC timestamp */
 #define AIS_SEC_NOT_AVAILABLE	60
 #define AIS_SEC_MANUAL		61

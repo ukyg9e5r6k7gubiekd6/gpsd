@@ -737,8 +737,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
-			   "\"eta\":\"%02u-%02uT%02u:%02uZ\",\""
-			   "draught\":%.1f,\"destination\":\"%s\","
+			   "\"eta\":\"%02u-%02uT%02u:%02uZ\","
+			   "\"draught\":%.1f,\"destination\":\"%s\","
 			   "\"dte\":%u}\r\n",
 			   ais->type5.imo,
 			   ais->type5.ais_version,

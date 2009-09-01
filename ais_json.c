@@ -39,18 +39,6 @@ int json_ais_read(const char *buf,
 
     const struct json_attr_t json_ais1[] = {
 	AIS_HEADER
-	{"status",         uinteger, .addr.uinteger = &ais->type123.status},
-	{"turn",           integer,  .addr.integer = &ais->type123.turn},
-	{"speed",          uinteger, .addr.uinteger = &ais->type123.speed},
-	{"accuracy",       boolean,  .addr.boolean = &ais->type123.accuracy},
-	{"lon",            integer,  .addr.integer = &ais->type123.lon},
-	{"lat",            integer,  .addr.integer = &ais->type123.lat},
-	{"course",         uinteger, .addr.uinteger = &ais->type123.course},
-	{"heading",        uinteger, .addr.uinteger = &ais->type123.heading},
-	{"second",         uinteger, .addr.uinteger = &ais->type123.second},
-	{"maneuver",       uinteger, .addr.uinteger = &ais->type123.maneuver},
-	{"raim",           boolean,  .addr.boolean = &ais->type123.raim},
-	{"radio",          uinteger, .addr.uinteger = &ais->type123.radio},
 	{NULL},
     };
 
