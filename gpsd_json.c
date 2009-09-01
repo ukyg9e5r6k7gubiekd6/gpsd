@@ -658,8 +658,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
-			   "\"course\":%u,\"heading\":%d,\"second\":%u,"
-			   "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
+			   "\"maneuver\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   nav_legends[ais->type1.status],
 			   turnlegend,
 			   speedlegend,
@@ -676,8 +676,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"status\":%u,\"turn\":%d,\"speed\":%u,"
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
-			   "\"course\":%u,\"heading\":%d,\"second\":%u,"
-			   "\"maneuver\":%d,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
+			   "\"maneuver\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type1.status,
 			   ais->type1.turn,
 			   ais->type1.speed,
@@ -698,7 +698,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
-			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
 			   ais->type4.month,
 			   ais->type4.day,
@@ -715,7 +715,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
-			   "\"epfd\":%u,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"epfd\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
 			   ais->type4.month,
 			   ais->type4.day,
@@ -799,12 +799,13 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 				       (ais->type6.bitcount+7)/8));
 	break;
     case 7:	/* Binary Acknowledge */
+    case 13:	/* Safety Related Acknowledge */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n",  
-		       ais->type7.mmsi[0],
-		       ais->type7.mmsi[1],
-		       ais->type7.mmsi[2],
-		       ais->type7.mmsi[3]);
+		       ais->type7.mmsi1,
+		       ais->type7.mmsi2,
+		       ais->type7.mmsi3,
+		       ais->type7.mmsi4);
 	break;
     case 8:	/* Binary Broadcast Message */
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -819,8 +820,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"alt\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
-			   "\"second\":%u,\"regional\":%d,\"dte\":%u,"
-			   "\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
+			   "\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type9.alt,
 			   ais->type9.speed,
 			   JSON_BOOL(ais->type9.accuracy),
@@ -836,8 +837,8 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
-			   "\"second\":%u,\"regional\":%d,\"dte\":%u,"
-			   "\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
+			   "\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type9.alt,
 			   ais->type9.speed,
 			   JSON_BOOL(ais->type9.accuracy),
@@ -858,19 +859,11 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 12:	/* Safety Related Message */
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"seq\":%u,\"dst\":%u,\"rexmit\":%u,\"text\":\"%s\"}\r\n",  
+			   "\"seqno\":%u,\"dest_mmsi\":%u,\"retransmit\":%s,\"text\":\"%s\"}\r\n",  
 			   ais->type12.seqno,
 			   ais->type12.dest_mmsi,
-			   ais->type12.retransmit,
+			   JSON_BOOL(ais->type12.retransmit),
 			   json_stringify(buf1, sizeof(buf1), ais->type12.text));
-	break;
-    case 13:	/* Safety Related Acknowledge */
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n",  
-			   ais->type13.mmsi[0],
-			   ais->type13.mmsi[1],
-			   ais->type13.mmsi[2],
-			   ais->type13.mmsi[3]);
 	break;
     case 14:	/* Safety Related Broadcast Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -926,9 +919,9 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
-			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
+			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"cs\":%s,\"display\":%s,\"dsc\":%s,\"band\":%s,"
-			   "\"msg22\":%s,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"msg22\":%s,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type18.reserved,
 			   ais->type18.speed / 10.0,
 			   JSON_BOOL(ais->type18.accuracy),
@@ -949,9 +942,9 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
-			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
+			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"cs\":%s,\"display\":%s,\"dsc\":%s,\"band\":%s,"
-			   "\"msg22\":%s,\"raim\":%s,\"radio\":%d}\r\n",
+			   "\"msg22\":%s,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type18.reserved,
 			   ais->type18.speed,
 			   JSON_BOOL(ais->type18.accuracy),
@@ -975,7 +968,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
-			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
+			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\",\"raim\":%s,"
@@ -1003,7 +996,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
-			   "\"heading\":%d,\"second\":%u,\"regional\":%d,"
+			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
 			   "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"
@@ -1063,7 +1056,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
-			   "\"second\":%u,\"regional\":%d,"
+			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
 			   NAVAIDTYPE_DISPLAY(ais->type21.type),
@@ -1086,7 +1079,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
-			   "\"epfd\":%u,\"second\":%u,\"regional\":%d,"
+			   "\"epfd\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
 			   ais->type21.type,
@@ -1151,7 +1144,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 24: /* Class B CS Static Data Report */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-		      "\"partno\":%u,", ais->type24.part);
+		      "\"part\":%u,", ais->type24.part);
 	if (ais->type24.part == 0) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
 			  "\"shipname\":\"%s\"}\r\n",

@@ -565,7 +565,11 @@ struct ais_t
 	} type6;
 	/* Type 7 - Binary Acknowledge */
 	struct {
-	    uint mmsi[4];	/* spares ignored, they're only padding here */
+	    uint mmsi1;
+	    uint mmsi2;
+	    uint mmsi3;
+	    uint mmsi4;
+	    /* spares ignored, they're only padding here */
 	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
@@ -608,10 +612,6 @@ struct ais_t
 #define AIS_TYPE12_TEXT_MAX	157	/* 936 bits of six-bit, plus NUL */
 	    char text[AIS_TYPE12_TEXT_MAX];
 	} type12;
-	/* Type 7 - Safety-Related Acknowledge */
-	struct {
-	    uint mmsi[4];	/* spares ignored, they're only padding here */
-	} type13;
 	/* Type 14 - Safety-Related Broadcast Message */
 	struct {
 	    //uint spare;		spare bit(s) */
@@ -695,7 +695,7 @@ struct ais_t
 	    uint to_starboard;		/* dimension to starboard */
 	    uint epfd;			/* type of position fix deviuce */
 	    bool raim;			/* RAIM flag */
-	    bool dte;			/* date terminal enable */
+	    uint dte;    		/* date terminal enable */
 	    bool assigned;		/* assigned-mode flag */
 	    //uint spare;		spare bits */
 	} type19;

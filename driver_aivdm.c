@@ -244,13 +244,21 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type6.bitcount);
 	    break;
 	case 7: /* Binary acknowledge */
-	    for (i = 0; i < sizeof(ais->type7.mmsi)/sizeof(ais->type7.mmsi[0]); i++)
+	case 13: /* Safety Related Acknowledge */
+	{
+	    unsigned int mmsi[4];
+	    for (i = 0; i < sizeof(mmsi)/sizeof(mmsi[0]); i++)
 		if (ais_context->bitlen > 40 + 32*i)
-		    ais->type7.mmsi[i] = UBITS(40 + 32*i, 30);
+		    mmsi[i] = UBITS(40 + 32*i, 30);
 		else
-		    ais->type7.mmsi[i] = 0;
+		    mmsi[i] = 0;
+	    ais->type7.mmsi1 = mmsi[0];
+	    ais->type7.mmsi2 = mmsi[1];
+	    ais->type7.mmsi3 = mmsi[2];
+	    ais->type7.mmsi4 = mmsi[3];
 	    gpsd_report(LOG_INF, "\n");
 	    break;
+	}
 	case 8: /* Binary Broadcast Message */
 	    //ais->type8.spare        = UBITS(38, 2);
 	    ais->type8.app_id =       UBITS(40, 16);
@@ -303,14 +311,6 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 	    gpsd_report(LOG_INF, "seqno=%d, dest=%u\n",
 			ais->type12.seqno,
 			ais->type12.dest_mmsi);
-	    break;
-	case 13: /* Safety Related Acknowledge */
-	    for (i = 0; i < sizeof(ais->type13.mmsi)/sizeof(ais->type13.mmsi[0]); i++)
-		if (ais_context->bitlen > 40 + 32*i)
-		    ais->type13.mmsi[i] = UBITS(40 + 32*i, 30);
-		else
-		    ais->type13.mmsi[i] = 0;
-	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 14:	/* Safety Related Broadcast Message */
 	    //ais->type14.spare          = UBITS(38, 2);

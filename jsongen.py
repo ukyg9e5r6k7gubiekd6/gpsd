@@ -24,16 +24,16 @@ ais_specs = (
         # fieldname   type        default
         ('status',   'uinteger', '0'),
         ('turn',     'integer',  'AIS_TURN_NOT_AVAILABLE'),
-        ('speed',    'uinteger', 'SPEED_NOT_AVAILABLE'),
+        ('speed',    'uinteger', 'AIS_SPEED_NOT_AVAILABLE'),
         ('accuracy', 'boolean',  'false'),
         ('lon',      'integer',  'AIS_LON_NOT_AVAILABLE'),
         ('lat',      'integer',  'AIS_LAT_NOT_AVAILABLE'),
         ('course',   'uinteger', 'AIS_COURSE_NOT_AVAILABLE'),
-        ('heading',  'integer',  'AIS_HEADING_NOT_AVAILABLE'),
+        ('heading',  'uinteger', 'AIS_HEADING_NOT_AVAILABLE'),
         ('second',   'uinteger', 'AIS_SEC_NOT_AVAILABLE'),
-        ('maneuver', 'integer',  'AIS_SEC_INOPERATIVE'),
+        ('maneuver', 'uinteger', 'AIS_SEC_INOPERATIVE'),
         ('raim',     'boolean',  'false'),
-        ('radio',    'integer',  '0'),
+        ('radio',    'uinteger', '0'),
         ),
     },
     # Message types 2 and 3 duplicate 1
@@ -49,7 +49,7 @@ ais_specs = (
         ('lat',       'integer',  "AIS_LAT_NOT_AVAILABLE"),
         ('epfd',      'uinteger', "0"),
         ('raim',      'boolean',  "false"),
-        ('radio',     'integer',  "0"),
+        ('radio',     'uinteger', "0"),
         ),
     "stringbuffered":("timestamp",),
     },
@@ -63,14 +63,14 @@ ais_specs = (
         ('ais_version',   'uinteger',      '0'),
         ('callsign',      'string',        None),
         ('shipname',      'string',        None),
-        ('shiptype',      'string',        None),
+        ('shiptype',      'uinteger',      '0'),
         ('to_bow',        'uinteger',      '0'),
         ('to_stern',      'uinteger',      '0'),
         ('to_port',       'uinteger',      '0'),
         ('to_starboard',  'uinteger',      '0'),
-        ('epfd',          'string',        None),
+        ('epfd',          'uinteger',      '0'),
         ('eta',           'string',        None),
-        ('draught',       'real',          '0.0'),
+        ('draught',       'uinteger',      '0'),
         ('destination',   'string',        None),
         ('dte',           'uinteger',      '1'),
         ),
@@ -84,7 +84,7 @@ ais_specs = (
         # fieldname       type             default
         ('seqno',         'uinteger',      '0'),
         ('dest_mmsi',     'uinteger',      '0'),
-        ('retransmit',    'uinteger',      '0'),
+        ('retransmit',    'boolean',       'false'),
         ('app_id',        'uinteger',      '0'),
         ('data',          'string',        None),
         ),
@@ -122,14 +122,14 @@ ais_specs = (
         ('alt',           'uinteger',      'AIS_ALT_NOT_AVAILABLE'),
         ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
         ('accuracy',      'boolean',       'false'),
-        ('lon',           'real',          'AIS_LON_NOT_AVAILABLE'),
-        ('lat',           'real',          'AIS_LAT_NOT_AVAILABLE'),
-        ('course',        'real',          'AIS_COURSE_NOT_AVAILABLE'),
+        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
+        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
+        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
         ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
-        ('regional',      'integer',       '0'),
+        ('regional',      'uinteger',      '0'),
         ('dte',           'uinteger',      '1'),
         ('raim',          'boolean',       'false'),
-        ('radio',         'integer',       '0'),
+        ('radio',         'uinteger',      '0'),
         ),
     },
     {
@@ -148,24 +148,13 @@ ais_specs = (
     "structname": "ais->type12",
     "fieldmap":(
         # fieldname       type             default
-        ('seq',           'uinteger',      '0'),
-        ('dst',           'uinteger',      '0'),
-        ('rexmit',        'uinteger',      '0'),
+        ('seqno',         'uinteger',      '0'),
+        ('dest_mmsi',     'uinteger',      '0'),
+        ('retransmit',    'boolean',       '0'),
         ('text',          'string',        None),
         ),
     },
-    {
-    "initname" : "json_ais13",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type13",
-    "fieldmap":(
-        # fieldname       type             default
-        ('mmsi1',         'uinteger',      '0'),
-        ('mmsi2',         'uinteger',      '0'),
-        ('mmsi3',         'uinteger',      '0'),
-        ('mmsi4',         'uinteger',      '0'),
-        ),
-    },
+    # Message type 13 duplicates 7 
     {
     "initname" : "json_ais14",
     "header": "\tAIS_HEADER,",
@@ -215,6 +204,7 @@ ais_specs = (
         ('lat',           'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
         ('data',          'string',        None),
         ),
+    "stringbuffered":("data",),
     },
     {
     "initname" : "json_ais18",
@@ -228,16 +218,16 @@ ais_specs = (
         ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
         ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
         ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
-        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('heading',       'uinteger',      'AIS_HEADING_NOT_AVAILABLE'),
         ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
-        ('regional',      'integer',       '0'),
+        ('regional',      'uinteger',      '0'),
         ('cs',            'boolean',       'false'),
         ('display',       'boolean',       'false'),
         ('dsc',           'boolean',       'false'),
         ('band',          'boolean',       'false'),
         ('msg22',         'boolean',       'false'),
         ('raim',          'boolean',       'false'),
-        ('radio',         'integer',       '0'),
+        ('radio',         'uinteger',      '0'),
         ),
     },
     {
@@ -252,9 +242,9 @@ ais_specs = (
         ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
         ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
         ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
-        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
+        ('heading',       'uinteger',      'AIS_HEADING_NOT_AVAILABLE'),
         ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
-        ('regional',      'integer',       '0'),
+        ('regional',      'uinteger',      '0'),
         ('shipname',      'string',        None),
         ('shiptype',      'uinteger',      '0'),
         ('to_bow',        'uinteger',      '0'),
@@ -263,123 +253,7 @@ ais_specs = (
         ('to_starboard',  'uinteger',      '0'),
         ('epfd',          'uinteger',      '0'),
         ('raim',          'boolean',       'false'),
-        ('dte',           'integer',       '1'),
-        ('assigned',      'boolean',       'false'),
-        ),
-    },
-    {
-    "initname" : "json_ais20",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type20",
-    "fieldmap":(
-        # fieldname       type             default
-        ('offset1',       'uinteger',      '0'),
-        ('number1',       'uinteger',      '0'),
-        ('timeout1',      'uinteger',      '0'),
-        ('increment1',    'uinteger',      '0'),
-        ('offset2',       'uinteger',      '0'),
-        ('number2',       'uinteger',      '0'),
-        ('timeout2',      'uinteger',      '0'),
-        ('increment2',    'uinteger',      '0'),
-        ('offset3',       'uinteger',      '0'),
-        ('number3',       'uinteger',      '0'),
-        ('timeout3',      'uinteger',      '0'),
-        ('increment3',    'uinteger',      '0'),
-        ('offset4',       'uinteger',      '0'),
-        ('number4',       'uinteger',      '0'),
-        ('timeout4',      'uinteger',      '0'),
-        ('increment4',    'uinteger',      '0'),
-        ),
-    },
-    {
-    "initname" : "json_ais15",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type15",
-    "fieldmap":(
-        # fieldname       type             default
-        ('mmsi1',         'uinteger',      '0'),
-        ('type1_1',       'uinteger',      '0'),
-        ('offset1_1',     'uinteger',      '0'),
-        ('type1_2',       'uinteger',      '0'),
-        ('offset1_2',     'uinteger',      '0'),
-        ('mmsi2',         'uinteger',      '0'),
-        ('type2_1',       'uinteger',      '0'),
-        ('offset2_1',     'uinteger',      '0'),
-        ),
-    },
-    {
-    "initname" : "json_ais16",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type16",
-    "fieldmap":(
-        # fieldname       type             default
-        ('mmsi1',         'uinteger',      '0'),
-        ('offset1',       'uinteger',      '0'),
-        ('increment1',    'uinteger',      '0'),
-        ('mmsi2',         'uinteger',      '0'),
-        ('offset2',       'uinteger',      '0'),
-        ('increment2',    'uinteger',      '0'),
-        ),
-    },
-    {
-    "initname" : "json_ais17",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type17",
-    "fieldmap":(
-        # fieldname       type             default
-        ('lon',           'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
-        ('lat',           'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
-        ('data',          'string',        None),
-        ),
-    },
-    {
-    "initname" : "json_ais18",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type18",
-    "fieldmap":(
-        # fieldname       type             default
-        ('reserved',      'uinteger',      '0'),
-        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
-        ('accuracy',      'boolean',       'false'),
-        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
-        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
-        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
-        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
-        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
-        ('regional',      'integer',       '0'),
-        ('cs',            'boolean',       'false'),
-        ('display',       'boolean',       'false'),
-        ('dsc',           'boolean',       'false'),
-        ('band',          'boolean',       'false'),
-        ('msg22',         'boolean',       'false'),
-        ('raim',          'boolean',       'false'),
-        ('radio',         'integer',       '0'),
-        ),
-    },
-    {
-    "initname" : "json_ais19",
-    "header": "\tAIS_HEADER,",
-    "structname": "ais->type19",
-    "fieldmap":(
-        # fieldname       type             default
-        ('reserved',      'uinteger',      '0'),
-        ('speed',         'uinteger',      'AIS_SPEED_NOT_AVAILABLE'),
-        ('accuracy',      'boolean',       'false'),
-        ('lon',           'integer',       'AIS_LON_NOT_AVAILABLE'),
-        ('lat',           'integer',       'AIS_LAT_NOT_AVAILABLE'),
-        ('course',        'uinteger',      'AIS_COURSE_NOT_AVAILABLE'),
-        ('heading',       'integer',       'AIS_HEADING_NOT_AVAILABLE'),
-        ('second',        'uinteger',      'AIS_SEC_NOT_AVAILABLE'),
-        ('regional',      'integer',       '0'),
-        ('shipname',      'string',        None),
-        ('shiptype',      'uinteger',      '0'),
-        ('to_bow',        'uinteger',      '0'),
-        ('stern',         'uinteger',      '0'),
-        ('port',          'uinteger',      '0'),
-        ('starboard',     'uinteger',      '0'),
-        ('epfd',          'uinteger',      '0'),
-        ('raim',          'boolean',       'false'),
-        ('dte',           'integer',       '1'),
+        ('dte',           'uinteger',      '1'),
         ('assigned',      'boolean',       'false'),
         ),
     },
@@ -424,7 +298,7 @@ ais_specs = (
         ('to_starboard',  'uinteger',      '0'),
         ('epfd',          'uinteger',      '0'),
         ('second',        'uinteger',      '0'),
-        ('regional',      'integer',       '0'),
+        ('regional',      'uinteger',      '0'),
         ('off_position',  'boolean',       'false'),
         ('raim',          'boolean',       'false'),
         ('virtual_aid',   'boolean',       'false'),
@@ -457,7 +331,7 @@ ais_specs = (
     "structname": "ais->type24",
     "fieldmap":(
         # fieldname             type             default
-        ('partno',              'uinteger',      '0'),
+        ('part',                'uinteger',      '0'),
         ('a.shipname',          'string',        None),	# Part A
         ('b.shiptype',          'uinteger',      '0'),	# Part B
         ('b.vendorid',          'string',        None),	# Part B
@@ -505,7 +379,7 @@ def generate(spec):
                (attr, " "*(12-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
         leader = " " * 35
         if itype == "string":
-            print leader + ".maxlen = sizeof(%s)}," % target
+            print leader + ".len = sizeof(%s)}," % target
         else:
             print leader + ".dflt.%s = %s}," % (itype, default)
 
@@ -559,24 +433,38 @@ def string_to_specifier(strspec):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "g")
+        # The --ais and --target= options are (required) placeho;lders.
+        # In the future, this script will generate more different kinds
+        # of code.
+        (options, arguments) = getopt.getopt(sys.argv[1:], "g", ["ais", "target="])
     except getopt.GetoptError, msg:
         print "jsongen.py: " + str(msg)
         raise SystemExit, 1
 
     specify = False
+    spec = None
+    target = None
     for (switch, val) in options:
-        if (switch == '-g'):
+        if switch == '-g':
             specify = True
+        elif switch == '--ais':
+            spec = ais_specs
+        elif switch == '--target':
+            target = val
+
+    if not specify and (not target or not spec):
+        print "jsongen.py: must specify type and target."
+        sys,exit(1)
+
 
     if specify:
         string_to_specifier(stringspec)
     else:
         print """/*
- * This is code generated by jsongen.py. Do not hand-hack it.
+ * This is code generated by jsongen.py. Do not hand-hack it!
  */
 """
         outboard = []
-        for description in ais_specs:
+        for description in spec:
             generate(description)
         print "/* Generated code ends. */"

@@ -184,23 +184,30 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-BUILT_SOURCES = packet_names.h gpsd.h
+BUILT_SOURCES = packet_names.h gpsd.h ais_json.i
 
 packet_names.h: packet_states.h
+	rm -f $(srcdir)/packet_names.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
+	chmod a-w $(srcdir)/packet_names.h
 
 gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
-	rm -f gpsd.h
+	rm -f $(srcdir)/gpsd.h
 	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h
 	cat $(srcdir)/gpsd.h-head >>gpsd.h
 	grep VERSION  gpsd_config.h >>gpsd.h
 	grep ENABLE gpsd_config.h >>gpsd.h
 	cat $(srcdir)/gpsd.h-tail >>gpsd.h
-	chmod a-w gpsd.h
+	chmod a-w $(srcdir)/gpsd.h
+
+ais_json.i: jsongen.py
+	rm -f $(srcdir)/ais_json.i
+	jsongen.py --ais --target=parser >ais_json.i
+	chmod a-w $(srcdir)/ais_json.i
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h libgpsmm.cpp packet_states.h
-nodist_libgps_la_SOURCES = packet_names.h
+nodist_libgps_la_SOURCES = packet_names.h ais_json.i
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #

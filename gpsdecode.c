@@ -112,12 +112,13 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 				       (ais->type6.bitcount+7)/8));
 	break;
     case 7:	/* Binary Acknowledge */
+    case 13:	/* Safety Related Acknowledge */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "%u,%u,%u,%u",
-		       ais->type7.mmsi[0],
-		       ais->type7.mmsi[1],
-		       ais->type7.mmsi[2],
-		       ais->type7.mmsi[3]);
+		       ais->type7.mmsi1,
+		       ais->type7.mmsi2,
+		       ais->type7.mmsi3,
+		       ais->type7.mmsi4);
 	break;
     case 8:	/* Binary Broadcast Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
@@ -154,14 +155,6 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type12.dest_mmsi,
 		       ais->type12.retransmit,
 		       ais->type12.text);
-	break;
-    case 13:	/* Safety Related Acknowledge */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "%u,%u,%u,%u",
-		       ais->type13.mmsi[0],
-		       ais->type13.mmsi[1],
-		       ais->type13.mmsi[2],
-		       ais->type13.mmsi[3]);
 	break;
     case 14:	/* Safety Related Broadcast Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
