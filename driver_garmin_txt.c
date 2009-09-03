@@ -379,7 +379,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     do {
         double eph;
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
-        session->gpsdata.fix.eph = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+        session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
         gpsd_report(LOG_PROG, "HERR [m]: %.1lf\n", eph);
         mask |= HERR_SET;
     } while (0);

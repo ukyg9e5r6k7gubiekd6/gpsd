@@ -523,13 +523,14 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     if ((strcmp(field[2], "M")!=0) ||
 	(strcmp(field[4], "M")!=0) ||
 	(strcmp(field[6], "M")!=0)){
-	    session->gpsdata.fix.eph =
+	    session->gpsdata.fix.epx =
+	    session->gpsdata.fix.epy =
 	    session->gpsdata.fix.epv =
 	    session->gpsdata.epe = 100;
 	    return ERROR_SET;
     }
 
-    session->gpsdata.fix.eph = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+    session->gpsdata.fix.epx = session->gpsdata.fix.epy = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
     session->gpsdata.fix.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
     session->gpsdata.epe = atof(field[5]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 

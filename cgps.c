@@ -107,6 +107,12 @@
 #include "gps.h"
 #include "gpsdclient.h"
 
+/*
+ * FIXME: use here is a minor bug, should report epx and epy separately.
+ * How to mix together epx and epy to get a horizontal circular error.
+ */
+#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
+
 static struct gps_data_t *gpsdata;
 static time_t status_timer;    /* Time of last state change. */
 static time_t misc_timer;    /* Misc use timer. */
@@ -605,9 +611,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 
+      // FIXME: Report both epx and epy!
       /* Fill in the estimated horizontal position error. */
-      if (isnan(gpsdata->fix.eph)==0)
-	(void)snprintf(scr, sizeof(scr), "+/- %d %s", (int) (gpsdata->fix.eph * altfactor), altunits);
+      if (isnan(gpsdata->fix.epx)==0 && isnan(gpsdata->fix.epx)==0)
+	  (void)snprintf(scr, sizeof(scr), "+/- %d %s", (int) (EMIX(gpsdata->fix.epx,gpsdata->fix.epy) * altfactor), altunits);
       else
         (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);

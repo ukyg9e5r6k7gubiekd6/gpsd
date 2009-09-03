@@ -53,6 +53,12 @@
 #include "gps.h"
 #include "gpsdclient.h"
 
+/*
+ * FIXME: use here is a minor bug, should report epx and epy separately.
+ * How to mix together epx and epy to get a horizontal circular error.
+ */
+#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
+
 /* This code used to live in display.c */
 
 #define RM		20
@@ -950,9 +956,10 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 		XmTextFieldSetString(text_6, s);
 	} else
 		XmTextFieldSetString(text_6, "n/a");
-	if (isnan(gpsdata->fix.eph)==0) {
+	/* FIXME: Someday report epx and epy */
+	if (isnan(gpsdata->fix.epx)==0) {
 		(void)snprintf(s, sizeof(s), "%f %s",
-		    gpsdata->fix.eph * altunits->factor,
+		    EMIX(gpsdata->fix.epx, gpsdata->fix.epy) * altunits->factor,
 		    altunits->legend);
 		XmTextFieldSetString(text_7, s);
 	} else

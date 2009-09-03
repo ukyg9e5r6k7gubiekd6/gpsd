@@ -101,7 +101,8 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     ecef_to_wgs84fix(&session->gpsdata, Px, Py, Pz, Vx, Vy, Vz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
-    session->gpsdata.fix.eph = GET_POSITION_ERROR();
+    session->gpsdata.fix.epx = GET_LONGITUDE_ERROR();
+    session->gpsdata.fix.epy = GET_LATITUDE_ERROR();
     session->gpsdata.fix.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
     session->gpsdata.hdop = GET_HDOP();

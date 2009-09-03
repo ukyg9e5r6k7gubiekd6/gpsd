@@ -149,7 +149,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	evy = (double)(getlesl(buf, 32)/100.0);
 	evz = (double)(getlesl(buf, 36)/100.0);
 	ecef_to_wgs84fix(&g, epx, epy, epz, evx, evy, evz);
-	g.fix.eph = (double)(getlesl(buf, 24)/100.0);
+	g.fix.epx = g.fix.epy = (double)(getlesl(buf, 24)/100.0);
 	g.fix.eps = (double)(getlesl(buf, 40)/100.0);
 	g.pdop = (double)(getleuw(buf, 44)/100.0);
 	g.satellites_used = (int)getub(buf, 47);
@@ -180,8 +180,9 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	    (void)wprintw(navsolwin, "%d", (tow/86400000) );
 	}
 
+	/* relies on the fact that expx and epy are aet to same value */
 	(void)wmove(navsolwin, 10, 12);
-	(void)wprintw(navsolwin, "%7.2f", g.fix.eph);
+	(void)wprintw(navsolwin, "%7.2f", g.fix.epx);
 	(void)wmove(navsolwin, 10, 33);
 	(void)wprintw(navsolwin, "%6.2f", g.fix.epv);
 	(void)wmove(navsolwin, 11, 7);

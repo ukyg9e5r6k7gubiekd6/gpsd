@@ -80,11 +80,15 @@ void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp,
 		       replylen-strlen(reply),
 		       "\"alt\":%.3f,",
 		       fixp->altitude);
-    if (isnan(fixp->eph)==0)
+    if (isnan(fixp->epx)==0 && isnan(fixp->epy)==0)
+	/* 
+	 * FIXME - mixing epx and epy back together so we can
+	 * check that we're regression-compatible with old output.
+	 */
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"eph\":%.3f,",
-		       fixp->eph);
+		       EMIX(fixp->epx, fixp->epy));
     if (isnan(fixp->epv)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),

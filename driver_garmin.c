@@ -392,7 +392,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// If this assumption changes here, it should also change in
 	// nmea_parse.c where we analyze PGRME.
 	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE/CEP50_SIGMA);
-	session->gpsdata.fix.eph = pvt->eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->gpsdata.fix.epx = session->gpsdata.fix.epy = pvt->eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/CEP50_SIGMA);
 
 	// convert lat/lon to directionless speed

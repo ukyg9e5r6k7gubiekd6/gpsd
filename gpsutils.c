@@ -25,7 +25,8 @@ void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
     fixp->climb = NAN;
     fixp->altitude = NAN;
     fixp->ept = NAN;
-    fixp->eph = NAN;
+    fixp->epx = NAN;
+    fixp->epy = NAN;
     fixp->epv = NAN;
     fixp->epd = NAN;
     fixp->eps = NAN;
@@ -52,7 +53,7 @@ unsigned int gps_valid_fields(/*@in@*/struct gps_fix_t *fixp)
 	valid |= CLIMB_SET;
     if (isnan(fixp->ept) == 0)
 	valid |= TIMERR_SET;
-    if (isnan(fixp->eph) == 0)
+    if (isnan(fixp->epx) == 0 && isnan(fixp->epy) == 0)
 	valid |= HERR_SET;
     if (isnan(fixp->epv) == 0)
 	valid |= VERR_SET;
@@ -125,8 +126,10 @@ void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 	to->climb = from->climb;
     if ((transfer & TIMERR_SET)!=0)
 	to->ept = from->ept;
-    if ((transfer & HERR_SET)!=0)
-	to->eph = from->eph;
+    if ((transfer & HERR_SET)!=0) {
+	to->epx = from->epx;
+	to->epy = from->epy;
+    }
     if ((transfer & VERR_SET)!=0)
 	to->epv = from->epv;
     if ((transfer & SPEEDERR_SET)!=0)

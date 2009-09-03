@@ -852,10 +852,16 @@ depending on the fix quality.</para>
         <entry>Altitude in meters.</entry>
 </row>
 <row>
-	<entry>eph</entry>
+	<entry>epx</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Horizontal circular error in meters, 95% confidence.</entry>
+        <entry>Longitude error estimate in meters, 95% confidence.</entry>
+</row>
+<row>
+	<entry>epy</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Latitude error estimate in meters, 95% confidence.</entry>
 </row>
 <row>
 	<entry>epv</entry>

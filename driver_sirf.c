@@ -477,6 +477,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 {
     unsigned short navtype;
     gps_mask_t mask = 0;
+    double eph;
 
     if (len != 91)
 	return 0;
@@ -505,8 +506,10 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
     if (session->gpsdata.fix.latitude!=0 && session->gpsdata.fix.latitude!=0)
 	mask |= LATLON_SET;
 
-    if ((session->gpsdata.fix.eph =  getbesl(buf, 50)*1e-2) > 0)
+    if ((eph =  getbesl(buf, 50)*1e-2) > 0) {
+	session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph;
 	mask |= HERR_SET;
+    }
     if ((session->gpsdata.fix.epv =  getbesl(buf, 54)*1e-2) > 0)
 	mask |= VERR_SET;
     if ((session->gpsdata.fix.eps =  getbesw(buf, 62)*1e-2) > 0)

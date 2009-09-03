@@ -74,8 +74,9 @@ struct gps_fix_t {
 #define MODE_3D  	3	/* good for altitude/climb too */
     double ept;		/* Expected time uncertainty */
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
+    double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
-    double eph;  	/* Horizontal position uncertainty, meters */
+    double epx;  	/* Longitude position uncertainty, meters */
     double altitude;	/* Altitude in meters (valid if mode == 3) */
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */

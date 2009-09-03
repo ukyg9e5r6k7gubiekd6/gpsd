@@ -39,7 +39,9 @@ static int json_tpv_read(const char *buf,
 			    .dflt.real = NAN},
 	{"alt",    real,    .addr.real = &gpsdata->fix.altitude,
 			    .dflt.real = NAN},
-	{"eph",    real,    .addr.real = &gpsdata->fix.eph,
+	{"epx",    real,    .addr.real = &gpsdata->fix.epx,
+			    .dflt.real = NAN},
+	{"epy",    real,    .addr.real = &gpsdata->fix.epy,
 			    .dflt.real = NAN},
 	{"epv",    real,    .addr.real = &gpsdata->fix.epv,
 			    .dflt.real = NAN},
@@ -73,7 +75,7 @@ static int json_tpv_read(const char *buf,
 	    gpsdata->set |= LATLON_SET;
 	if (isnan(gpsdata->fix.altitude) == 0)
 	    gpsdata->set |= ALTITUDE_SET;
-	if (isnan(gpsdata->fix.eph)==0)
+	if (isnan(gpsdata->fix.epx)==0 && isnan(gpsdata->fix.epy)==0)
 	    gpsdata->set |= HERR_SET;
 	if (isnan(gpsdata->fix.epv)==0)
 	    gpsdata->set |= VERR_SET;

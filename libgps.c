@@ -156,7 +156,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			}
 			break;
 		    case 'E':
-			gpsdata->epe = gpsdata->fix.eph = gpsdata->fix.epv = NAN;
+			gpsdata->epe = gpsdata->fix.epx = gpsdata->fix.epy = gpsdata->fix.epv = NAN;
 			/* epe should always be present if eph or epv is */
 			if (sp[2] != '?') {
 			    char epe[20], eph[20], epv[20];
@@ -164,7 +164,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 				/*@ +floatdouble @*/
 				gpsdata->epe = DEFAULT(epe);
-				gpsdata->fix.eph = DEFAULT(eph);
+				gpsdata->fix.epx = DEFAULT(eph);
+				gpsdata->fix.epy = DEFAULT(eph);
 				gpsdata->fix.epv = DEFAULT(epv);
 				/*@ -floatdouble @*/
 #undef DEFAULT
@@ -249,7 +250,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				nf.longitude = DEFAULT(lon);
 				nf.ept = DEFAULT(ept);
 				nf.altitude = DEFAULT(alt);
-				nf.eph = DEFAULT(eph);
+				/* designed before we split eph into epx+epy */
+				nf.epx = nf.epy = DEFAULT(eph);
 				nf.epv = DEFAULT(epv);
 				nf.track = DEFAULT(track);
 				nf.speed = DEFAULT(speed);
@@ -265,7 +267,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
 				if (alt[0] != '?')
 				    gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
-				if (isnan(nf.eph)==0)
+				if (isnan(nf.epx)==0 && isnan(nf.epy)==0)
 				    gpsdata->set |= HERR_SET;
 				if (isnan(nf.epv)==0)
 				    gpsdata->set |= VERR_SET;

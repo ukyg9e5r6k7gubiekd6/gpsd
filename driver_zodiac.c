@@ -181,8 +181,11 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->mag_var		   = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
     session->gpsdata.fix.climb     = ((short)getzword(38)) * 1e-2;
     /* map_datum                   = getzword(39); */
-    /* manual says these are 1-sigma */
-    session->gpsdata.fix.eph       = (int)getzlong(40) * 1e-2 * GPSD_CONFIDENCE;
+    /* 
+     * The manual says these are 1-sigma.  Device reports only eph, circular
+     * error; no harm in assigning it to both x and y components.
+     */
+    session->gpsdata.fix.epx = session->gpsdata.fix.epy = (int)getzlong(40) * 1e-2 * GPSD_CONFIDENCE;
     session->gpsdata.fix.epv       = (int)getzlong(42) * 1e-2 * GPSD_CONFIDENCE;
     session->gpsdata.fix.ept       = (int)getzlong(44) * 1e-2 * GPSD_CONFIDENCE;
     session->gpsdata.fix.eps       = (int)getzword(46) * 1e-2 * GPSD_CONFIDENCE;

@@ -1161,11 +1161,19 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		else
 #endif
 		    (void)strlcat(phrase, "?", sizeof(phrase));
-		if (isnan(channel->fixbuffer.eph) == 0)
+		/*
+		 * Old protocol only has a slot for a horizontal error
+		 * estimate - it was designed before we knew of the
+		 * NMEA 3.0 $GPGBS sentence.  Most drivers other than
+		 * NMEA 3.0 will just set epx and epy to the same circular 
+		 * error estimate anyway.
+		 */
+		if (isnan(channel->fixbuffer.epx) == 0 && isnan(channel->fixbuffer.epy) == 0) {
+		    double eph = EMIX(channel->fixbuffer.epx, channel->fixbuffer.epy);
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.3f", channel->fixbuffer.eph);
-		else
+				   " %.3f", eph);
+		} else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 		if (isnan(channel->fixbuffer.epv) == 0)
 		    (void)snprintf(phrase+strlen(phrase),
@@ -1318,11 +1326,19 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 				   channel->fixbuffer.altitude);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
-		if (isnan(channel->fixbuffer.eph)==0)
+		/*
+		 * Old protocol only has a slot for a horizontal error
+		 * estimate - it was designed before we knew of the
+		 * NMEA 3.0 $GPGBS sentence.  Most drivers other than
+		 * NMEA 3.0 will just set epx and epy to the same circular 
+		 * error estimate anyway.
+		 */
+		if (isnan(channel->fixbuffer.epx)==0 && isnan(channel->fixbuffer.epy)==0) {
+		    double eph = EMIX(channel->fixbuffer.epx, channel->fixbuffer.epy);
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				  " %.3f",  channel->fixbuffer.eph);
-		else
+				  " %.3f",  eph);
+		} else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 		if (isnan(channel->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase),

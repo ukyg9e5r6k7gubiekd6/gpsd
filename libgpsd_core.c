@@ -541,7 +541,9 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
-    if (finite(session->gpsdata.fix.eph)
+    /* FIXME: this is buggy - should probably be &&s here */
+    if (finite(session->gpsdata.fix.epx)
+	|| finite(session->gpsdata.fix.epy)
 	|| finite(session->gpsdata.fix.epv)
 	|| finite(session->gpsdata.epe)) {
 	/*
@@ -551,7 +553,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	 */
 	(void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,M,%.2f,M,%.2f,M",
-	    ZEROIZE(session->gpsdata.fix.eph * (CEP50_SIGMA/GPSD_CONFIDENCE)),
+	    ZEROIZE(EMIX(session->gpsdata.fix.epx, session->gpsdata.fix.epy) * (CEP50_SIGMA/GPSD_CONFIDENCE)),
 	    ZEROIZE(session->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE)),
 	    ZEROIZE(session->gpsdata.epe * (CEP50_SIGMA/GPSD_CONFIDENCE)));
 	nmea_add_checksum(bufp);
@@ -613,8 +615,11 @@ void gpsd_error_model(struct gps_device_t *session,
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
-		fix->eph = session->gpsdata.hdop * h_uere;
+	if (isnan(fix->epx)!=0 && finite(session->gpsdata.hdop)!=0)
+		fix->epx = session->gpsdata.hdop * h_uere;
+
+	if (isnan(fix->epy)!=0 && finite(session->gpsdata.hdop)!=0)
+		fix->epy = session->gpsdata.hdop * h_uere;
 
 	if ((fix->mode >= MODE_3D)
 		&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
@@ -633,11 +638,11 @@ void gpsd_error_model(struct gps_device_t *session,
 	if (isnan(fix->eps)!=0)
 	{
 	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
-			&& isnan(oldfix->eph)==0 && isnan(oldfix->eph)==0
+			&& isnan(oldfix->epx)==0 && isnan(oldfix->epy)==0
 			&& isnan(oldfix->time)==0 && isnan(oldfix->time)==0
 			&& fix->time > oldfix->time) {
 		double t = fix->time-oldfix->time;
-		double e = oldfix->eph + fix->eph;
+		double e = EMIX(oldfix->epx,oldfix->epy) + EMIX(fix->epx,fix->epy);
 		fix->eps = e/t;
 	    } else
 		fix->eps = NAN;
@@ -671,8 +676,8 @@ void gpsd_error_model(struct gps_device_t *session,
 		double adj = earth_distance(
 		    oldfix->latitude, oldfix->longitude,
 		    fix->latitude, fix->longitude);
-		if (isnan(adj)==0 && adj > fix->eph) {
-		    double opp = fix->eph;
+		if (isnan(adj)==0 && adj > EMIX(fix->epx, fix->epy)) {
+		    double opp = EMIX(fix->epx, fix->epy);
 		    double hyp = sqrt(adj*adj + opp*opp);
 		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
 		}

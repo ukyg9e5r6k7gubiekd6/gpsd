@@ -69,7 +69,7 @@ static struct gps_data_t gpsdata;
 static const char json_str1[] = "{\"class\":\"TPV\",\
     \"device\":\"GPS#1\",\"tag\":\"MID2\",				\
     \"time\":1119197561.890,\"lon\":46.498203637,\"lat\":7.568074350,\
-    \"alt\":1327.780,\"eph\":21.000,\"epv\":124.484,\"mode\":3}";
+    \"alt\":1327.780,\"epx\":21.000,\"epy\":23.000,\"epv\":124.484,\"mode\":3}";
 
 /* Case 2: SKY report */
 

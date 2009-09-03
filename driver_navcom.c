@@ -483,7 +483,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* splint apparently gets confused about C promotion rules. */
     /* "Assignment of arbitrary unsigned integral type to double" on these */
 #ifndef S_SPLINT_S
-    session->gpsdata.fix.eph = fom/100.0*1.96/*Two sigma*/;
+    session->gpsdata.fix.epx = session->gpsdata.fix.epy = fom/100.0*1.96/*Two sigma*/;
     /* FIXME - Which units is tfom in (spec doesn't say) and
 	       which units does gpsd require? (docs don't say) */
     session->gpsdata.fix.ept = tfom*1.96/*Two sigma*/;
@@ -525,10 +525,11 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
 		vel_north*VEL_RES, vel_east*VEL_RES, vel_up*VEL_RES,
 		session->gpsdata.fix.track, session->gpsdata.fix.speed);
+    /* relies on the fact that expcx and epy are set to same value */
     gpsd_report(LOG_IO,
 		"Navcom: hrms = %f, vrms = %f, gdop = %f, pdop = %f, "
 		"hdop = %f, vdop = %f, tdop = %f\n",
-		session->gpsdata.fix.eph, session->gpsdata.fix.epv,
+		session->gpsdata.fix.epx, session->gpsdata.fix.epv,
 		session->gpsdata.gdop, session->gpsdata.pdop,
 		session->gpsdata.hdop, session->gpsdata.vdop,
 		session->gpsdata.tdop);
