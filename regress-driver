@@ -46,9 +46,9 @@ case $mode in
 	    if [ -r $f.chk ]
 	    then
 		gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
-		sed <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
-		sed <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
-		sed <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
+		sed -n <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
+		sed -n <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
+		sed -n <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
 		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
 		diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc;
 		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
