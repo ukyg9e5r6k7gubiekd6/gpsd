@@ -1010,7 +1010,7 @@ static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
 6  NMEA_SEN_GRS,  GPGRS   interval - GNSS Range Residuals
 7  NMEA_SEN_GST,  GPGST   interval - GNSS Pseudorange Errors Statistics
 13 NMEA_SEN_MALM, PMTKALM interval - GPS almanac information
-14 NMEA_SEN_MEPH, PMTKEPH interval - GPS ephmeris information
+14 NMEA_SEN_MEPH, PMTKEPH interval - GPS ephemeris information
 15 NMEA_SEN_MDGP, PMTKDGP interval - GPS differential correction information
 16 NMEA_SEN_MDBG, PMTKDBG interval – MTK debug information
 17 NMEA_SEN_ZDA,  GPZDA   interval - Time & Date
