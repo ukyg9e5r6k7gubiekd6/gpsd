@@ -55,7 +55,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 {
     unsigned short gw;
     unsigned int tow, flags;
-    double epx, epy, epz, evx, evy, evz, eph;
+    double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
     gps_mask_t mask;
     double t;
@@ -115,7 +115,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     else if (session->gpsdata.fix.mode != MODE_NO_FIX)
 	session->gpsdata.status = STATUS_FIX;
 
-    mask |= MODE_SET | STATUS_SET | CYCLE_START_SET | USED_SET ;
+    session->cycle_state = cycle_start;
+    mask |= MODE_SET | STATUS_SET | USED_SET ;
 
     return mask;
 }

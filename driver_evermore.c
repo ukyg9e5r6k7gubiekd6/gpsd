@@ -195,7 +195,8 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    session->gpsdata.status,
 		    visible,
 		    used);
-	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET | CYCLE_START_SET;
+	session->cycle_state = cycle_start;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype), 
 		       "%3.2f", version);

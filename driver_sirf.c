@@ -468,7 +468,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 #endif /* NTPSHM_ENABLE */
 	/* fix quality data */
 	session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET | CYCLE_START_SET;
+	session->cycle_state = cycle_start;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET;
     }
     return mask;
 }

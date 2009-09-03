@@ -113,8 +113,13 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.fix.mode = GET_FIX_MODE();
     session->gpsdata.status = GET_FIX_STATUS();
 
-    /* CYCLE_START_SET if this message starts a reporting period */
-    mask |= MODE_SET | STATUS_SET | CYCLE_START_SET ;
+    /*
+     * Set cycle_state to the value cycle_start to clue the daemon
+     * in about when to clear fix information.  Set it to cycle_end
+     * when the sentence is reliably the last in a reporting cycle.
+     */
+    session->cycle_state = STATE;
+    mask |= MODE_SET | STATUS_SET;
 
     return mask;
 }

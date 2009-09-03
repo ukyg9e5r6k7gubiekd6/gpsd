@@ -266,7 +266,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
 		    session->gpsdata.fix.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
+	session->cycle_state = cycle_start;
+	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
 	if (len != 3)
@@ -485,7 +486,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
 		    session->gpsdata.fix.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
+	session->cycle_state = cycle_start;
+	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
 	/*@ +charint @*/
@@ -562,7 +564,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->driver.tsip.gps_week = s4;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
+	    session->cycle_state = cycle_start;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    break;
 	case 0x23:	/* Compact Super Packet */
 	    /* XXX CSK sez "i don't trust this to not be oversized either." */
@@ -614,7 +617,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.fix.track += 360.0;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
+	    session->cycle_state = cycle_start;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    break;
 
 
@@ -693,7 +697,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		      session->gpsdata.fix.longitude,
 		      session->gpsdata.fix.altitude);
 
-	  mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET | STATUS_SET | MODE_SET;
+	  session->cycle_state = cycle_start;
+	  mask |= LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET;
 	  break;
 
 

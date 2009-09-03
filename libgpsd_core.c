@@ -754,6 +754,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
+	session->cycle_state = cycle_undefined;
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
 			    session->gpsdata.dev.path);

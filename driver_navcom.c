@@ -540,9 +540,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
+    session->cycle_state = cycle_start;
     return LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
-	| TIMERR_SET | DOP_SET | CYCLE_START_SET;
+	| TIMERR_SET | DOP_SET;
 }
 
 /* Packed Ephemeris Data */

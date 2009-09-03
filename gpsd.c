@@ -2209,7 +2209,7 @@ int main(int argc, char *argv[])
 			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
-			    if (channel->subscriber->policy.buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
+			    if (channel->subscriber->policy.buffer_policy == casoc && channel->device->cycle_state == cycle_start)
 				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
 			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)

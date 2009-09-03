@@ -285,8 +285,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     /* TAG message as GTXT, Garmin Simple Text Message */
     strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);  
 
-    mask |= CYCLE_START_SET;  /* only one message, set cycle start */
-
+    session->cycle_state = cycle_start;  /* only one message, set cycle start */
     do {
         unsigned int result;
         char *buf = (char *)session->packet.outbuffer+1;
