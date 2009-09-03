@@ -155,7 +155,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state = cycle_start;
+		session->cycle_state |= CYCLE_START;
 		gpsd_report(LOG_PROG, "GPRMC starts a reporting cycle.\n");
 	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
@@ -234,7 +234,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	    mask = TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state = cycle_start;
+		session->cycle_state |= CYCLE_START;
 		gpsd_report(LOG_PROG, "GPGLL starts a reporting cycle.\n");
 	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
@@ -299,7 +299,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state = cycle_start;
+		session->cycle_state |= CYCLE_START;
 		gpsd_report(LOG_PROG, "GPGGA starts a reporting cycle.\n");
 	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
@@ -587,7 +587,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     session->driver.nmea.date.tm_mday = atoi(field[2]);
     session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
     if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-	session->cycle_state = cycle_start;
+	session->cycle_state |= CYCLE_START;
 	gpsd_report(LOG_PROG, "GPZDA starts a reporting cycle.\n");
     }
     session->gpsdata.sentence_time = session->gpsdata. fix.time;
@@ -720,7 +720,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 			       "%s ver %s", field[2], field[3]);
 		return 0;
 	} else if (0 == strcmp("POS", field[1])){ /* 3D Position */
-		session->cycle_state = cycle_start;
+		session->cycle_state |= CYCLE_START;
 		mask |= MODE_SET | STATUS_SET;
 		if (0 == strlen(field[2])){
 			/* empty first field means no 3D fix is available */

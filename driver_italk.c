@@ -45,7 +45,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->gpsdata.fix.mode = MODE_NO_FIX;
-    session->cycle_state = cycle_start;
+    session->cycle_state |= CYCLE_START;
     mask =  ONLINE_SET | MODE_SET | STATUS_SET;
 
     /* just bail out if this fix is not marked valid */

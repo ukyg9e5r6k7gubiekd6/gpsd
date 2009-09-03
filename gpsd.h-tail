@@ -258,7 +258,10 @@ struct gps_device_t {
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
     size_t msgbuflen;
     int observed;			/* which packet type`s have we seen? */
-    enum {cycle_undefined, cycle_start, cycle_end} cycle_state;
+    int cycle_state;
+#define CYCLE_START		0x01	/* sentence starts a reporting cycle */
+#define CYCLE_END		0x02	/* sentence ends a reporting cycle */
+#define CYCLE_END_RELIABLE	0x04	/* does this device set end reliably? */
     /*
      * The rest of this structure is driver-specific private storage.
      * Because the Garmin driver uses a long buffer, you can have

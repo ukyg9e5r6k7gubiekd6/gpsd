@@ -144,7 +144,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 		session->gpsdata.fix.mode = MODE_NO_FIX;
     }
 
-    session->cycle_state = cycle_start;
+    session->cycle_state |= CYCLE_START;
     mask |= MODE_SET | STATUS_SET ;
 
     return mask;
@@ -218,7 +218,7 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 		session->gpsdata.fix.mode = MODE_NO_FIX;
     }
 
-    session->cycle_state = cycle_start;
+    session->cycle_state |= CYCLE_START;
     mask |= MODE_SET | STATUS_SET;
 
     return mask;

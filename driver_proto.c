@@ -211,6 +211,13 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
     if (len == 0)
 	return 0;
 
+    /*
+     * Set this if the driver reliably signals end of cycle.
+     * The core library zeroes it just before it calls each driver's
+     * packet analyzer.
+     */
+    session->cycle_state = CYCLE_END_RELIABLE;
+
     type = GET_MESSAGE_TYPE();
 
     /* we may need to dump the raw packet */

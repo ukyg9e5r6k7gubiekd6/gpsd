@@ -468,7 +468,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->leap_sec
 	    , pvt->grmn_days);
 
-	session->cycle_state = cycle_start;
+	session->cycle_state |= CYCLE_START;
 	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
 	break;
     case GARMIN_PKTID_RMD_DATA:

@@ -266,7 +266,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
 		    session->gpsdata.fix.altitude);
-	session->cycle_state = cycle_start;
+	session->cycle_state |= CYCLE_START;
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
@@ -486,7 +486,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
 		    session->gpsdata.fix.altitude);
-	session->cycle_state = cycle_start;
+	session->cycle_state |= CYCLE_START;
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
@@ -564,7 +564,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->driver.tsip.gps_week = s4;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
-	    session->cycle_state = cycle_start;
+	    session->cycle_state |= CYCLE_START;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    break;
 	case 0x23:	/* Compact Super Packet */
@@ -617,7 +617,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.fix.track += 360.0;
-	    session->cycle_state = cycle_start;
+	    session->cycle_state |= CYCLE_START;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    break;
 
@@ -697,7 +697,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		      session->gpsdata.fix.longitude,
 		      session->gpsdata.fix.altitude);
 
-	  session->cycle_state = cycle_start;
+	  session->cycle_state |= CYCLE_START;
 	  mask |= LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET;
 	  break;
 
