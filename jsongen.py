@@ -331,16 +331,15 @@ ais_specs = (
     "structname": "ais->type24",
     "fieldmap":(
         # fieldname             type             default
-        ('part',                'uinteger',      '0'),
-        ('a.shipname',          'string',        None),	# Part A
-        ('b.shiptype',          'uinteger',      '0'),	# Part B
-        ('b.vendorid',          'string',        None),	# Part B
-        ('b.callsign',          'string',        None),	# Part B
-        ('b.mothership_mmsi',   'uinteger',      '0'),	# Part B
-        ('b.dim.to_bow',        'uinteger',      '0'),	# Part B
-        ('b.dim.to_stern',      'uinteger',      '0'),	# Part B
-        ('b.dim.to_port',       'uinteger',      '0'),	# Part B
-        ('b.dim.to_starboard',  'uinteger',      '0'),	# Part B
+        ('shipname',          'string',        None),	# Part A
+        ('shiptype',          'uinteger',      '0'),	# Part B
+        ('vendorid',          'string',        None),	# Part B
+        ('callsign',          'string',        None),	# Part B
+        ('mothership_mmsi',   'uinteger',      '0'),	# Part B
+        ('dim.to_bow',        'uinteger',      '0'),	# Part B
+        ('dim.to_stern',      'uinteger',      '0'),	# Part B
+        ('dim.to_port',       'uinteger',      '0'),	# Part B
+        ('dim.to_starboard',  'uinteger',      '0'),	# Part B
         ),
     },
 )

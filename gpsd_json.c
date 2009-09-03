@@ -1149,40 +1149,34 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 	break;
     case 24: /* Class B CS Static Data Report */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-		      "\"part\":%u,", ais->type24.part);
-	if (ais->type24.part == 0) {
+		       "\"shipname\":\"%s\",",
+		       json_stringify(buf1,sizeof(buf1), ais->type24.shipname));
+	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-			  "\"shipname\":\"%s\"}\r\n",
-			   json_stringify(buf1, sizeof(buf1), ais->type24.a.shipname));
-	} else if (ais->type24.part == 1) {
-	    if (scaled) {
-		(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-			      "\"shiptype\":\"%s\",",
-			      SHIPTYPE_DISPLAY(ais->type24.b.shiptype));
-	    } else {
-		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			      "\"shiptype\":%u,",
-			      ais->type24.b.shiptype);
-	    }
+			  "\"shiptype\":\"%s\",",
+			  SHIPTYPE_DISPLAY(ais->type24.shiptype));
+	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
-			  ais->type24.b.vendorid,
-			  ais->type24.b.callsign);
-	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
-		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			      "mothership_\"mmsi\":%u}\r\n",
-			      ais->type24.b.mothership_mmsi);
-	    } else {
-		(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			      "\"to_bow\":%u,\"to_stern\":%u,"
-			      "\"to_port\":%u,\"to_starboard\":%u}\r\n",
-			      ais->type24.b.dim.to_bow,
-			      ais->type24.b.dim.to_stern,
-			      ais->type24.b.dim.to_port,
-			      ais->type24.b.dim.to_starboard);
-	    }
-	} else
-	    (void) strlcat(buf, "}\r\n", buflen);
+			  "\"shiptype\":%u,",
+			  ais->type24.shiptype);
+	}
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		      "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
+		      ais->type24.vendorid,
+		      ais->type24.callsign);
+	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			  "mothership_\"mmsi\":%u}\r\n",
+			  ais->type24.mothership_mmsi);
+	} else {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			  "\"to_bow\":%u,\"to_stern\":%u,"
+			  "\"to_port\":%u,\"to_starboard\":%u}\r\n",
+			  ais->type24.dim.to_bow,
+			  ais->type24.dim.to_stern,
+			  ais->type24.dim.to_port,
+			  ais->type24.dim.to_starboard);
+	}
 	break;
     default:
 	    (void) strlcat(buf, "}\r\n", buflen);

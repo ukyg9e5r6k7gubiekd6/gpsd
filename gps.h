@@ -537,7 +537,8 @@ struct ais_t
 	    uint ais_version;		/* AIS version level */
 	    uint imo;			/* IMO identification */
 	    char callsign[8];		/* callsign */ 
-	    char shipname[21];		/* vessel name */
+#define AIS_SHIPNAME_MAXLEN	20
+	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
 	    uint shiptype;		/* ship type code */
 	    uint to_bow;		/* dimension to bow */
 	    uint to_stern;		/* dimension to stern */
@@ -688,7 +689,7 @@ struct ais_t
 	    uint heading;		/* true heading */
 	    uint second;		/* seconds of UTC timestamp */
 	    uint regional;		/* regional reserved */
-	    char shipname[21];		/* ship name */
+	    char shipname[AIS_SHIPNAME_MAXLEN+1];		/* ship name */
 	    uint shiptype;		/* ship type code */
 	    uint to_bow;		/* dimension to bow */
 	    uint to_stern;		/* dimension to stern */
@@ -759,27 +760,18 @@ struct ais_t
 	} type22;
 	/* Type 24 - Class B CS Static Data Report */
 	struct {
-	    uint part;			/* part number */
+	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
+	    uint shiptype;		/* ship type code */
+	    char vendorid[8];		/* vendor ID */
+	    char callsign[8];		/* callsign */
 	    union {
+		uint mothership_mmsi;	/* MMSI of main vessel */
 		struct {
-		    char shipname[21];		/* vessel name */
-		    //uint spare;		unused spare bits */
-		} a;
-		struct {
-		    uint shiptype;		/* ship type code */
-		    char vendorid[8];		/* vendor ID */
-		    char callsign[8];		/* callsign */
-		    union {
-			uint mothership_mmsi;	/* MMSI of main vessel */
-			struct {
-			    uint to_bow;	/* dimension to bow */
-			    uint to_stern;	/* dimension to stern */
-			    uint to_port;	/* dimension to port */
-			    uint to_starboard;	/* dimension to starboard */
-			} dim;
-		    };
-		    //uint spare;		unused spare bits */
-		} b;
+		    uint to_bow;	/* dimension to bow */
+		    uint to_stern;	/* dimension to stern */
+		    uint to_port;	/* dimension to port */
+		    uint to_starboard;	/* dimension to starboard */
+		} dim;
 	    };
 	} type24;
     };

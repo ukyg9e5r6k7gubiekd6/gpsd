@@ -2239,12 +2239,33 @@ int main(int argc, char *argv[])
 		/* some listeners may be in watcher mode */
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
+		    int state = channel->device->cycle_state;
 		    channel->device->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
+			bool report_fix = false;
+			if ((state & CYCLE_END_RELIABLE)!=0) {
+			    /*
+			     * Driver return reliable end of cycle, 
+			     * report only when that is signaled.
+			     */
+			    if ((state & CYCLE_END)!=0)
+				report_fix = true;
+			} else if (changed & (LATLON_SET | MODE_SET))
+			    /*
+			     * No reliable end of cycle.  Must report
+			     * every time a sentence changes position
+			     * or mode. Likely to cause display jitter
+			     * if buffer policy is casoc.
+			     */
+			    report_fix = true;
+#ifdef DBUS_ENABLE
+			if (report_fix) {
+			    send_dbus_fix(channel);
+#endif /* DBUS_ENABLE */
 #ifdef OLDSTYLE_ENABLE
 			if (!newstyle(sub)) {
 			    char cmds[4] = "";
-			    if (changed & (LATLON_SET | MODE_SET))
+			    if (report_fix)
 				(void)strlcat(cmds, "o", 4);
 			    if (changed & SATELLITE_SET)
 				(void)strlcat(cmds, "y", 4);
@@ -2255,48 +2276,38 @@ int main(int argc, char *argv[])
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
-			    if ((changed & AIS_SET) != 0) {
+			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
 				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   sub->policy.scaled, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
-#endif /* AIVDM_ENABLE */
 			    }
+#endif /* AIVDM_ENABLE */
 			}
 #endif /* OLDSTYLE_ENABLE */
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
-			else
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 #ifdef GPSDNG_ENABLE
-			{
-			    if (sub->policy.watcher && newstyle(sub) && (changed & (LATLON_SET | MODE_SET))!=0) {
+			if (newstyle(sub)) { 		  
+			    if (report_fix) {
 				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
-			    if (sub->policy.watcher && newstyle(sub) && (changed & SATELLITE_SET)!=0) {
+			    if ((changed & SATELLITE_SET)!=0) {
 				json_sky_dump(&channel->device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef AIVDM_ENABLE
-			    if (sub->policy.watcher && newstyle(sub) && (changed & AIS_SET)!=0) {
+			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
 				aivdm_json_dump(&channel->device->aivdm.decoded, 
 					   false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
-#endif /* AIVDM_ENABLE */
 			    }
 			}
+#endif /* AIVDM_ENABLE */
 #endif /* GPSDNG_ENABLE */
 		    }
 		}
 	    }
-#ifdef DBUS_ENABLE
-	    if (changed &~ ONLINE_SET) {
-		if (changed & (LATLON_SET | MODE_SET)) {
-		    send_dbus_fix (channel);
-		}
-	    }
-#endif
 	}
 
 #ifdef NOT_FIXED

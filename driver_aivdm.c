@@ -471,23 +471,25 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
 			ais->type19.second);
 	    break;
 	case 24:	/* Type 24 - Class B CS Static Data Report */
-	    ais->type24.part = UBITS(38, 2);
-	    switch (ais->type24.part) {
+	    switch (UBITS(38, 2)) {
 	    case 0:
-		UCHARS(40, ais->type24.a.shipname);
+		UCHARS(40, ais_context->shipname);
 		//ais->type24.a.spare	= UBITS(160, 8);
-		break;
+		return false;	/* data only partially decoded */
 	    case 1:
-		ais->type24.b.shiptype = UBITS(40, 8);
-		UCHARS(48, ais->type24.b.vendorid);
-		UCHARS(90, ais->type24.b.callsign);
+		(void)strlcpy(ais->type24.shipname, 
+			      ais_context->shipname,
+			      sizeof(ais_context->shipname));
+		ais->type24.shiptype = UBITS(40, 8);
+		UCHARS(48, ais->type24.vendorid);
+		UCHARS(90, ais->type24.callsign);
 		if (AIS_AUXILIARY_MMSI(ais->mmsi))
-		    ais->type24.b.mothership_mmsi   = UBITS(132, 30);
+		    ais->type24.mothership_mmsi   = UBITS(132, 30);
 		else {
-		    ais->type24.b.dim.to_bow        = UBITS(132, 9);
-		    ais->type24.b.dim.to_stern      = UBITS(141, 9);
-		    ais->type24.b.dim.to_port       = UBITS(150, 6);
-		    ais->type24.b.dim.to_starboard  = UBITS(156, 6);
+		    ais->type24.dim.to_bow        = UBITS(132, 9);
+		    ais->type24.dim.to_stern      = UBITS(141, 9);
+		    ais->type24.dim.to_port       = UBITS(150, 6);
+		    ais->type24.dim.to_starboard  = UBITS(156, 6);
 		}
 		//ais->type24.b.spare	    = UBITS(162, 8);
 		break;
