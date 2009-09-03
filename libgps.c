@@ -169,6 +169,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->fix.epv = DEFAULT(epv);
 				/*@ -floatdouble @*/
 #undef DEFAULT
+				gpsdata->set |= PERR_SET | HERR_SET | VERR_SET;
 			}
 			break;
 		    case 'F': /*@ -mustfreeonly */
@@ -309,7 +310,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				   &gpsdata->vdop,
 				   &gpsdata->tdop,
 				   &gpsdata->gdop);
-			    gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET;
+			    gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET | GDOP_SET | TDOP_SET;
 			}
 			break;
 		    case 'S':
