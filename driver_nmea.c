@@ -97,8 +97,6 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->driver.nmea.subseconds = atof(hhmmss+4) - session->driver.nmea.date.tm_sec;
 }
 
-#undef DD
-
 /**************************************************************************
  *
  * Compare GPS timestamps for equality.  Depends on the fact that the
@@ -537,6 +535,39 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     return HERR_SET | VERR_SET | PERR_SET;
 }
 
+static gps_mask_t processGPGBS(int c UNUSED, char *field[], struct gps_device_t *session)
+/* NMEA 3.0 Estimated Position Error */
+{
+    /*
+      $GPGBS,082941.00,2.4,1.5,3.9,25,,-43.7,27.5*65
+      1) UTC time of the fix associated with this sentence (hhmmss.ss)
+      2) Expected error in latitude (meters)
+      3) Expected error in longitude (meters)
+      4) Expected error in altitude (meters)
+      5) PRN of most likely failed satellite
+      6) Probability of missed detection for most likely failed satellite
+      7) Estimate of bias in meters on most likely failed satellite
+      8) Standard deviation of bias estimate
+      9) Checksum
+     */
+    /* check that we're associated with the current fix */
+    gpsd_report(LOG_PROG, "$GPGBS handling entered.\n");
+    if (session->driver.nmea.date.tm_hour == DD(field[1])
+		&& session->driver.nmea.date.tm_min == DD(field[1]+2)
+		&& session->driver.nmea.date.tm_sec == DD(field[1]+4)) {
+	session->gpsdata.fix.epy = atof(field[2]);
+	session->gpsdata.fix.epx = atof(field[3]);
+	session->gpsdata.fix.epv = atof(field[4]);
+	gpsd_report(LOG_PROG, 
+		    "$GPGBS estimates: epx=%2.1f epy=%2.1f epv=%2.1f.\n",
+		    session->gpsdata.fix.epx, session->gpsdata.fix.epy, session->gpsdata.fix.epv);
+	return HERR_SET | VERR_SET;
+    } else {
+	gpsd_report(LOG_PROG, "second in $GPGBS error estimates doesn't match.\n");
+	return 0;
+    }
+}
+
 static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t *session)
 /* Time & Date */
 {
@@ -796,6 +827,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"GSV", 0,	processGPGSV},
 	{"VTG", 0, 	NULL},		/* ignore Velocity Track made Good */
 	{"ZDA", 7, 	processGPZDA},
+	{"GBS", 7,	processGPGBS},
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9,	processTNTHTM},
 #endif /* TNT_ENABLE */
