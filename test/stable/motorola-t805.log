@@ -1,14 +1,11 @@
 # Name: Motorola T805
 # Chipset: SiRF III f
-# Cycle-time: ?
-# Start-of-cycle: ?
 # Pause-noted: Y
 # Well-behaved: Y
 # Submitted-by: "Olivier Lahaye"=20
 # Date: 18 Dec 2007
 # Location: Nozay, 48.66564N2.24812E
 #
-# mode ?
 # Lines up to but not including the first GPGLL are
 # `cat /dev/ttyACM0` at startup=20
 # Following lines are

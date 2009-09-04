@@ -3,8 +3,6 @@
 # Description: a handheld from about 2000.
 # Cycle-time: 2s
 # Start-of-cycle: GPRMC
-# Pause-noted: ?
-# Well-behaved: N
 #
 # Note that the GPGLL timestamp has a 1-second offset
 # from the GPRMC and GPGGA timestamps. Appears to take 2 fixes
