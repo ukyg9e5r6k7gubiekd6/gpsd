@@ -45,11 +45,35 @@ int json_ais_read(const char *buf,
     if (strstr(buf, "\"type\":1,")!=NULL || strstr(buf, "\"type\":2,")!=NULL || strstr(buf, "\"type\":3,")!=NULL) {
 	status = json_read_object(buf, json_ais1, endptr);
     } else if (strstr(buf, "\"type\":4,") != NULL || strstr(buf, "\"type\":11,")!=NULL) {
-	// FIXME: Needs processing to handle timestamp field
 	status = json_read_object(buf, json_ais4, endptr);
-	// FIXME: Needs processing to handle eta field
+	if (status == 0) {
+	    ais->type4.year   = AIS_YEAR_NOT_AVAILABLE;
+	    ais->type4.month  = AIS_MONTH_NOT_AVAILABLE;
+	    ais->type4.day    = AIS_DAY_NOT_AVAILABLE;
+	    ais->type4.hour   = AIS_HOUR_NOT_AVAILABLE;
+	    ais->type4.minute = AIS_MINUTE_NOT_AVAILABLE;
+	    ais->type4.second = AIS_SECOND_NOT_AVAILABLE;
+	    (void)sscanf(timestamp, "%4u-%02u-%02uT%02u:%02u:%02uZ",
+			 &ais->type4.year,
+			 &ais->type4.month,
+			 &ais->type4.day,
+			 &ais->type4.hour,
+			 &ais->type4.minute,
+			 &ais->type4.second);
+	}
     } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_ais5, endptr);
+	if (status == 0) {
+	    ais->type5.month  = AIS_MONTH_NOT_AVAILABLE;
+	    ais->type5.day    = AIS_DAY_NOT_AVAILABLE;
+	    ais->type5.hour   = AIS_HOUR_NOT_AVAILABLE;
+	    ais->type5.minute = AIS_MINUTE_NOT_AVAILABLE;
+	    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
+			 &ais->type5.month,
+			 &ais->type5.day,
+			 &ais->type5.hour,
+			 &ais->type5.minute);
+	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
 	// FIXME: requires postprocessing of data field
 	status = json_read_object(buf, json_ais6, endptr);
@@ -86,10 +110,6 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":22,") != NULL) {
 	status = json_read_object(buf, json_ais22, endptr);
     } else if (strstr(buf, "\"type\":24,") != NULL) {
-	/* 
-	 * Note: the parser doesn't check that attributes corresponding 
-	 * to union fields aren't stepping on each other.
-	 */
 	status = json_read_object(buf, json_ais24, endptr);
     } else {
 	return JSON_ERR_MISC;

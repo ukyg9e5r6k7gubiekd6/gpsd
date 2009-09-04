@@ -718,7 +718,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type4.radio);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
+			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"epfd\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,

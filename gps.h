@@ -519,11 +519,11 @@ struct ais_t
 	    uint day;			/* UTC day */
 #define AIS_DAY_NOT_AVAILABLE	0
 	    uint hour;			/* UTC hour */
-#define AIS_HOUR_NOT_AVAILABLE	0
+#define AIS_HOUR_NOT_AVAILABLE	24
 	    uint minute;		/* UTC minute */
-#define AIS_MINUTE_NOT_AVAILABLE	0
+#define AIS_MINUTE_NOT_AVAILABLE	60
 	    uint second;		/* UTC second */
-#define AIS_SECOND_NOT_AVAILABLE	0
+#define AIS_SECOND_NOT_AVAILABLE	60
 	    bool accuracy;		/* fix quality */
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */
