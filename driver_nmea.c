@@ -844,18 +844,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     gps_mask_t retval = 0;
     unsigned int i;
     char *p, *s, *e;
-#ifndef USE_OLD_SPLIT
     volatile char *t;
-#endif
-#ifdef __UNUSED__
-    unsigned char sum;
-
-    if (!nmea_checksum(sentence+1, &sum)) {
-	gpsd_report(LOG_ERROR, "Bad NMEA checksum: '%s' should be %02X\n",
-		   sentence, sum);
-	return 0;
-    }
-#endif /* __ UNUSED__ */
 
     /*
      * We've had reports that on the Garmin GPS-10 the device sometimes
@@ -870,30 +859,18 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	return ONLINE_SET;
     }
 
-#ifdef BREAK_REGRESSIONS
-    /* trim trailing CR/LF */
-    for (i = 0; i < strlen(sentence); i++)
-	if ((sentence[i] == '\r') || (sentence[i] == '\n')){
-	    sentence[i] = '\0';
-	    break;
-	}
-#endif
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
     strncpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
     /* discard the checksum part */
-    for (p = (char *)session->driver.nmea.fieldcopy; (*p != '*') && (*p >= ' '); ) ++p;
+    for (p = (char *)session->driver.nmea.fieldcopy; (*p!='*') && (*p >=' '); ) 
+	++p;
     if (*p == '*')
 	*p++ = ',';	/* otherwise we drop the last field */
     *p = '\0';
     e = p;
+
     /* split sentence copy on commas, filling the field array */
-#ifdef USE_OLD_SPLIT
-    for (count = 0, p = (char *)session->driver.nmea.fieldcopy; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
-	*p = '\0';
-	session->driver.nmea.field[count] = ++p;
-    }
-#else
     count = 0;
     t = p;  /* end of sentence */
     p = (char *)session->driver.nmea.fieldcopy + 1; /* beginning of tag, 'G' not '$' */
@@ -908,12 +885,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	}
 	/*@ +compdef @*/
     }
-#endif
+
     /* point remaining fields at empty string, just in case */
     for (i = (unsigned int)count; 
 	 i < (unsigned)(sizeof(session->driver.nmea.field)/sizeof(session->driver.nmea.field[0])); 
 	 i++)
 	session->driver.nmea.field[i] = e;
+
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < (unsigned)(sizeof(nmea_phrase)/sizeof(nmea_phrase[0])); ++i) {
 	s = session->driver.nmea.field[0];
@@ -929,8 +907,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	    break;
 	}
     }
+
+    /* general handler for MKT3301 vendor specifics */
 #ifdef MKT3301_ENABLE
-    if (strncmp("PMTK", session->driver.nmea.field[0], 4) == 0) /* general handler for MKT3301 vendor specifics */
+    if (strncmp("PMTK", session->driver.nmea.field[0], 4) == 0)
 	retval = processMKT3301(count, session->driver.nmea.field, session);	
 #endif /* MKT3301_ENABLE */
     /*@ +usedef @*/
