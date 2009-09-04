@@ -1254,9 +1254,20 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    }
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
+#ifdef __UNUSED__
+       /*
+	* L command disabled because the change from 2 to 3 fields in
+	* this command gave Kismet severe indigestion.  Kismet
+	* shouldn't be using this command, but there's no point in
+	* fighting with Dragorn.  We'll just disable it.  The client
+	* library could never parse the response anyway, so the only
+	* people who lose are the ones opening a socket direct to the
+	* daemon and doing depreacated single-shot queries.
+	*/
 	case 'L':
 	    (void)snprintf(phrase, sizeof(phrase), ",L=%d %d %s abcdefgijklmnopqrstuvwxyz", GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION, VERSION);	//h
 	    break;
+#endif /* UNUSED */
 	case 'M':
 	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))== NULL && (!channel->device || channel->fixbuffer.mode == MODE_NOT_SEEN))
 		(void)strlcpy(phrase, ",M=?", sizeof(phrase));
