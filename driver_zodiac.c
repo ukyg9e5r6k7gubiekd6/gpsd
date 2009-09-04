@@ -125,6 +125,7 @@ static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
 #define getzlong(n)	getlongz(session->packet.outbuffer, n)
 
 static gps_mask_t handle1000(struct gps_device_t *session)
+/* time-position-velocity report */
 {
     double subseconds;
     struct tm unpacked_date;
@@ -261,6 +262,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 }
 
 static gps_mask_t handle1003(struct gps_device_t *session)
+/* skyview report */
 {
     int i, n;
 
@@ -301,6 +303,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 }
 
 static void handle1005(struct gps_device_t *session UNUSED)
+/* fix quality report */
 {
     /* ticks              = getzlong(6); */
     /* sequence           = getzword(8); */
@@ -334,6 +337,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 }
 
 static gps_mask_t handle1011(struct gps_device_t *session)
+/* version report */
 {
     /*
      * This is UNTESTED -- but harmless if buggy.  Added to support
@@ -349,6 +353,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
 
 
 static void handle1108(struct gps_device_t *session)
+/* leap-second correction report */
 {
     /* ticks              = getzlong(6); */
     /* sequence           = getzword(8); */
@@ -401,8 +406,11 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     (void)snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"%u",id);
 
+    session->cycle_state = CYCLE_END_RELIABLE;
+
     switch (id) {
     case 1000:
+	session->cycle_state = CYCLE_END;
 	return handle1000(session);
     case 1002:
 	return handle1002(session);
