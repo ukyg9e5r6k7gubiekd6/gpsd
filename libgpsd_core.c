@@ -824,9 +824,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	    /* Some kinds of data is automatically passed through */
 #ifdef RTCM104V2_ENABLE
-	    if ((session->gpsdata.set & RTCM2_SET) != 0)
-		rtcm2_sager_dump(&session->gpsdata.rtcm2, buf2, sizeof(buf2));
-	    else
+	    if ((session->gpsdata.set & RTCM2_SET) == 0)
 #endif /* RTCM104V2_ENABLE */
 	    // FIXME: Add RTCMv3 handling as well.
 #ifdef BINARY_ENABLE

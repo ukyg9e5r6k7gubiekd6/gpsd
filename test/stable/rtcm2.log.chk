@@ -1,24 +1,5 @@
-H	9	268	252.0	3	5	0
-S	27	0	62	252.0	-39.680	-0.016
-S	7	0	15	252.0	25.660	0.026
-S	26	0	128	252.0	12.840	0.118
-.
-H	9	268	252.6	4	5	0
-S	13	0	3	252.6	-25.940	0.066
-S	2	0	73	252.6	0.920	-0.080
-S	8	0	22	252.6	23.820	0.014
-.
-H	9	268	253.8	5	4	0
-S	19	0	186	253.8	-59.520	-0.224
-S	11	1	2	253.8	-39.260	0.206
-.
-H	9	268	255.0	6	5	0
-S	27	0	62	255.0	-39.700	-0.018
-S	7	0	15	255.0	25.740	0.026
-S	26	0	128	255.0	13.240	0.128
-.
-H	9	268	255.6	7	5	0
-S	2	0	73	255.6	0.680	-0.092
-S	13	0	3	255.6	-25.680	0.084
-S	8	0	22	255.6	23.880	0.000
-.
+{"class":"RTCM2","type":9,"station_id":268,"zcount":252.0,"seqnum":3,"length":5,"station_health":0,"satellites":[{"ident":27,"udre":0,"issuedata":62,"rangerr":-39.680,"rangerate":-0.016},{"ident":7,"udre":0,"issuedata":15,"rangerr":25.660,"rangerate":0.026},{"ident":26,"udre":0,"issuedata":128,"rangerr":12.840,"rangerate":0.118}]}
+{"class":"RTCM2","type":9,"station_id":268,"zcount":252.6,"seqnum":4,"length":5,"station_health":0,"satellites":[{"ident":13,"udre":0,"issuedata":3,"rangerr":-25.940,"rangerate":0.066},{"ident":2,"udre":0,"issuedata":73,"rangerr":0.920,"rangerate":-0.080},{"ident":8,"udre":0,"issuedata":22,"rangerr":23.820,"rangerate":0.014}]}
+{"class":"RTCM2","type":9,"station_id":268,"zcount":253.8,"seqnum":5,"length":4,"station_health":0,"satellites":[{"ident":19,"udre":0,"issuedata":186,"rangerr":-59.520,"rangerate":-0.224},{"ident":11,"udre":1,"issuedata":2,"rangerr":-39.260,"rangerate":0.206}]}
+{"class":"RTCM2","type":9,"station_id":268,"zcount":255.0,"seqnum":6,"length":5,"station_health":0,"satellites":[{"ident":27,"udre":0,"issuedata":62,"rangerr":-39.700,"rangerate":-0.018},{"ident":7,"udre":0,"issuedata":15,"rangerr":25.740,"rangerate":0.026},{"ident":26,"udre":0,"issuedata":128,"rangerr":13.240,"rangerate":0.128}]}
+{"class":"RTCM2","type":9,"station_id":268,"zcount":255.6,"seqnum":7,"length":5,"station_health":0,"satellites":[{"ident":2,"udre":0,"issuedata":73,"rangerr":0.680,"rangerate":-0.092},{"ident":13,"udre":0,"issuedata":3,"rangerr":-25.680,"rangerate":0.084},{"ident":8,"udre":0,"issuedata":22,"rangerr":23.880,"rangerate":0.000}]}

@@ -492,7 +492,7 @@ rtcm-regress: gpsdecode
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
 	@for f in $(srcdir)/test/*.rtcm2; do \
-		$(srcdir)/gpsdecode < $${f} > $${f}.chk; \
+		$(srcdir)/gpsdecode -j < $${f} > $${f}.chk; \
 	done
 
 # Regression-test the AIVDM decoder.
