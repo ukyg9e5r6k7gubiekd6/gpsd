@@ -18,7 +18,7 @@ used to help determine if a given antenna placement is appropriate for
 some purpose. This tool requires about 24hrs worth of "Y" messages and
 outputs an image of accumulated SV position and signal strength. It is
 sometimes entertaining to "see" occulted SVs using multipath. You must
-have the PHP-GD installed to use this script.
+have the PHP-GD library installed to use this script.
 
 ashctl might be used to reset an uncooperative Ashtech receiver to
 a usable state. For whatever reason sometimes they do not respond to
@@ -34,10 +34,6 @@ maxsats.pl analyzes a collection of "Y" messages and outputs records
 describing periods of excellent visibility (ie. 10 or more PRNs tracked).
 With over 30 SVs on orbit, there are periods where 14 PRNs are above the
 horizon, 13 are tracking, and at least 12 are actually used in a solution.
-
-gpsdlcdd.c is a lcdproc client for gpsd that turns your car computer
-into a rudimentary GPS receiver (provided you have at least a 4x40 LCD
-screen plugged in and configured to work with lcdproc).
 
 lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If

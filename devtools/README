@@ -3,15 +3,21 @@ but not necessarily shipped in the tarball or binary distributions If you're
 viewing it with Emacs, you can try doing Ctl-C Ctl-t browse through
 the outline headers.  Ctl-C Ctl-a will unfold them again.
 
+** ais.py
+
+AIS packet decoder in Python.  Useful as a check on the C code.
+
+** fakecompare
+
+Compare the results from running gpsfake on a logfile between this
+machine and a remote one.  Especially useful when remote and local
+have different word lengths.
+
 ** findbreakage
 
 Starting from a specified SVN revision number, this Python program runs 
 regression tests forward until something fails.  It uses a binary search, so
 convergence should be very rapid.
-
-** hackcomment
-
-Alters the change comment attached to a specified SVN revision.
 
 ** leapsecond.py
 
@@ -22,24 +28,15 @@ Gets the current leap-second correction forom IERS and/or the USNO.
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 
 to gpsfake. (This one goes in the tarball.)
 
-** regress-driver
-
-Runs or rebuilds the regression-test set.
-
 ** regress-builder
 
 This script runs an exhaustive test on combinations of compilation options, 
-looking for ones 
+looking for ones that break the build.
 
 ** striplog
 
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do
-this itself now, so this script has a lot of dust on it.  (This one
-goes in the tarball.)
-
-** www/upload
-
-Refresh the project website.  Doesn't require shipper.
+this itself now, so this script has a lot of dust on it. 
 
 
 

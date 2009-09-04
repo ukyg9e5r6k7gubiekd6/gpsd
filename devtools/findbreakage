@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+#
+# Run a binary search on the specified range of revisions to find out
+# where the regression tests break.
+#
+import sys, os, commands, re
+
+def do_or_die(cmd):
+    (status, output) = commands.getstatusoutput(cmd)
+    print output
+    if os.WIFSIGNALED(status) or os.WEXITSTATUS(status):
+        print "*** '%s' failed."
+        raise SystemExit, 1
+    else:
+        return output
+
+def regresstest(rev):
+    do_or_die("svn -r %d up" % rev)
+    output = do_or_die("make testregress")
+    return not ("\n-" in output or "\n+" in output)
+
+if __name__ == '__main__':
+    tail = int(sys.argv[1])
+    print "*** findbreakage will start from revision", tail
+    m = re.search("At revision ([0-9]+)", do_or_die("svn up"))
+    if not m:
+        print "*** Clean up outstanding changes before running this."
+        raise SystemExit, 1
+    head = int(m.group(1))
+    print "*** Head revision is", head
+    # Invariant: head is always a failed revision, tail a passed one
+    while head > tail + 1:
+        midpoint = (head + tail) / 2
+        if regresstest(midpoint):
+            tail = midpoint
+        else:
+            head = midpoint
+    print "*** Revision %d is the culprit." % head
