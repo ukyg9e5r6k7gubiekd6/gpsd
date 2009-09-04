@@ -57,12 +57,12 @@ testing on live devices.
 
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
-**** Client-side support for AIS-JSON
+**** Remaining AIS issues
 
-While gpsd will ship AIS JSON when attached to a transceiver, the C
-client library doen't unpack the JSON into the C structs defined in
-gps.h as yet. This should be a relatively simple coding job, maybe two
-man-days of work counting time to build the unit tests.
+***** Unit tests for client-side JSON parsing.
+***** Client-side JSON parse should undo json_stringify()'s backslash-stuffing.
+***** For safety, json_stringify() should slashify all nonprintables.
+***** Client side must interpret hexdumps in messages 6, 8, and 17.
 
 **** Client-side support for RTCM3-JSON
 
@@ -73,7 +73,7 @@ in some sort of readable textual format.)
 
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
-These are used for the 'B' command.  All work for 8N1.
+These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
 
 **** superstar2: not implemented (driver is unfinished)
 **** italk: not implemented (but could be)
