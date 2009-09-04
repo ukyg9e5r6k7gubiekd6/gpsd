@@ -550,6 +550,16 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[], struct gps_device_t 
       8) Standard deviation of bias estimate
       9) Checksum
      */
+
+    /*
+     * We believe that when a device emits this NMEA 3.0 sentence,
+     * we can rely on it to be after all fix reports in the cycle.
+     * Therefore, set a latch variable indicating that end-of-cycle
+     * is now reliable and set that mask in cycle_state.
+     */
+    session->driver.nmea.cycle_end_reliable = true;
+    session->cycle_state |= CYCLE_END;
+
     /* check that we're associated with the current fix */
     if (session->driver.nmea.date.tm_hour == DD(field[1])
 		&& session->driver.nmea.date.tm_min == DD(field[1]+2)
@@ -914,6 +924,16 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	retval = processMKT3301(count, session->driver.nmea.field, session);	
 #endif /* MKT3301_ENABLE */
     /*@ +usedef @*/
+
+    /* we might have a reliable end-of-cycle */
+    if (session->driver.nmea.cycle_end_reliable)
+	session->cycle_state |= CYCLE_END_RELIABLE;
+
+    gpsd_report(LOG_WARN, "At %s, end-of-cycle=%c, reliable=%c.\n",
+		session->driver.nmea.field[0],
+		(session->cycle_state & CYCLE_END) ? 'y' : 'n',
+		(session->cycle_state & CYCLE_END_RELIABLE) ? 'y' : 'n');
+
     return retval;
 }
 /*@ +mayaliasunique @*/

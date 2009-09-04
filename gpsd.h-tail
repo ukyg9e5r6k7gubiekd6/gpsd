@@ -269,6 +269,7 @@ struct gps_device_t {
 	    double subseconds;
 	    char *field[NMEA_MAX];
 	    unsigned char fieldcopy[NMEA_MAX+1];
+	    bool cycle_end_reliable;
 #ifdef GPSCLOCK_ENABLE
 	    bool ignore_trailing_edge;
 #endif /* GPSCLOCK_ENABLE */
