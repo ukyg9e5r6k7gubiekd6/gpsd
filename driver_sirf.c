@@ -520,12 +520,12 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
     if ((session->gpsdata.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
 	mask |= HDOP_SET;
 
-    if (session->gpsdata.fix.mode > MODE_NO_FIX && session->driver.sirf.driverstate & SIRF_GE_232) {
+    if ((session->gpsdata.fix.mode > MODE_NO_FIX) && (session->driver.sirf.driverstate & SIRF_GE_232)) {
 	struct tm unpacked_date;
 	double subseconds;
 	/*
-	 * Many versions of the SiRF protocol manual don't document 
-	 * this sentence at all.  Those that do may incorrectly
+	 * Early versions of the SiRF protocol manual don't document 
+	 * this sentence at all.  Some that do incorrectly
 	 * describe UTC Day, Hour, and Minute as 2-byte quantities,
 	 * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
 	 *
