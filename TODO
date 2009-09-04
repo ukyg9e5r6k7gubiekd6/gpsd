@@ -59,10 +59,9 @@ testing on live devices.
 
 **** Remaining AIS issues
 
-***** Unit tests for client-side JSON parsing.
+***** Unit tests for client-side AIS JSON parsing.
 ***** Client-side JSON parse should undo json_stringify()'s backslash-stuffing.
 ***** For safety, json_stringify() should slashify all nonprintables.
-***** Client side must interpret hexdumps in messages 6, 8, and 17.
 
 **** Client-side support for RTCM3-JSON
 

@@ -13,11 +13,22 @@ representations to libgps structures.
 #include <assert.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gps_json.h"
+
+static void lenhex_unpack(const char *from, 
+			  unsigned *plen, char *to, size_t maxlen)
+{
+    char *colon = strchr(from, ':');
+
+    *plen = (unsigned)atoi(from);
+    if (colon != NULL)
+	gpsd_hexpack(colon+1, to, maxlen);
+}
 
 int json_ais_read(const char *buf, 
 		    char *path, size_t pathlen,
@@ -75,13 +86,17 @@ int json_ais_read(const char *buf,
 			 &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
-	// FIXME: requires postprocessing of data field
 	status = json_read_object(buf, json_ais6, endptr);
+	if (status == 0)
+	    lenhex_unpack(data, &ais->type6.bitcount, 
+			 ais->type6.bitdata, sizeof(ais->type6.bitdata));
     } else if (strstr(buf, "\"type\":7,") != NULL || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
     } else if (strstr(buf, "\"type\":8,") != NULL) {
-	// FIXME: requires postprocessing of data field
 	status = json_read_object(buf, json_ais8, endptr);
+	if (status == 0)
+	    lenhex_unpack(data, &ais->type8.bitcount, 
+			 ais->type8.bitdata, sizeof(ais->type8.bitdata));
     } else if (strstr(buf, "\"type\":9,") != NULL) {
 	status = json_read_object(buf, json_ais9, endptr);
     } else if (strstr(buf, "\"type\":10,") != NULL) {
@@ -95,8 +110,10 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":16,") != NULL) {
 	status = json_read_object(buf, json_ais16, endptr);
     } else if (strstr(buf, "\"type\":17,") != NULL) {
-	// FIXME: requires postprocessing of data field
 	status = json_read_object(buf, json_ais17, endptr);
+	if (status == 0)
+	    lenhex_unpack(data, &ais->type17.bitcount, 
+			 ais->type17.bitdata, sizeof(ais->type17.bitdata));
     } else if (strstr(buf, "\"type\":18,") != NULL) {
 	status = json_read_object(buf, json_ais18, endptr);
     } else if (strstr(buf, "\"type\":18,") != NULL) {
