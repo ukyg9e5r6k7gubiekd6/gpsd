@@ -541,23 +541,26 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
-    /* FIXME: this is buggy - should probably be &&s here */
     if (finite(session->gpsdata.fix.epx)
-	|| finite(session->gpsdata.fix.epy)
-	|| finite(session->gpsdata.fix.epv)
-	|| finite(session->gpsdata.epe)) {
-	/*
-	 * Output PGRME only if realistic.  Note: we're converting back to
-	 * our guess about Garmin's confidence units here, make sure this
-	 * stays consistent with the in-conversion in nmea_parse.c!
-	 */
+	&& finite(session->gpsdata.fix.epy)
+	&& finite(session->gpsdata.fix.epv)
+	&& finite(session->gpsdata.epe)) {
+	struct tm tm;
+	time_t intfixtime;
+
+	tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
+	if (isnan(session->gpsdata.fix.time)==0) {
+	    intfixtime = (time_t)session->gpsdata.fix.time;
+	    (void)gmtime_r(&intfixtime, &tm);
+	}
 	(void)snprintf(bufp, len-strlen(bufp),
-	    "$PGRME,%.2f,M,%.2f,M,%.2f,M",
-	    ZEROIZE(EMIX(session->gpsdata.fix.epx, session->gpsdata.fix.epy) * (CEP50_SIGMA/GPSD_CONFIDENCE)),
-	    ZEROIZE(session->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE)),
-	    ZEROIZE(session->gpsdata.epe * (CEP50_SIGMA/GPSD_CONFIDENCE)));
+		       "$GPGBS,%02d%02d%02d,%.2f,M,%.2f,M,%.2f,M",
+		       tm.tm_hour, tm.tm_min, tm.tm_sec,
+		       ZEROIZE(session->gpsdata.fix.epx),
+		       ZEROIZE(session->gpsdata.fix.epy),
+		       ZEROIZE(session->gpsdata.fix.epv));
 	nmea_add_checksum(bufp);
-     }
+    }
 #undef ZEROIZE
 }
 
