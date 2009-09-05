@@ -24,13 +24,6 @@ fix the driver yourself and send us the patch, contact Bill Powell
 <bpowell@tntc.com> at True North Technologies and tell him he needs
 to reverse his refusal to send us an eval unit.
 
-*** gpsd eating the processor?
-
-We've had a report that trunk gpsd eats the processor in some
-situations, apparently due to spinning in a repeating open-close 
-loop on some devices.  I've never seen this; the person who
-reported the bug mentined it on #gpsd but has since gone silent.
-
 *** SiRF 15-second lag
 
 The tendency of SiRF chips to lag real-time by 15 seconds or so
