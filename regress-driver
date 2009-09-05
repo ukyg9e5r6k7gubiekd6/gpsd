@@ -40,6 +40,7 @@ GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATC
 case $mode in
     regress)
         echo "Testing the daemon..." >&2
+	trap 'rm -f $dir/test.chk $dir/test-whole.chk $dir/test-trunk.chk $dir/log-copy.chk $dir/diff $dir/diff-trunc; exit 1' 0 1 2 15
         errors=0; total=0; notfound=0;
         for f in $*; do
             dir=`dirname $f`
@@ -61,7 +62,6 @@ case $mode in
 	    fi
 	    total=`expr $total + 1`;
         done; 
-	rm -f $dir/test.chk $dir/test-trunc.chk $dir/test-whole.chk $dir/diff $dir/diff-trunc; 
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
