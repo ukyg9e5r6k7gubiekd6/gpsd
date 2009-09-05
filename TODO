@@ -44,8 +44,6 @@ testing on live devices.
 
 **** The Python client library presently speaks only old protocol.
 
-**** The regression-test driver's raw-mode test relies on old protocol.
-
 **** gpsmon's client mode still relies on old protocol
 
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).

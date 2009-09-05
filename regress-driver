@@ -74,8 +74,7 @@ case $mode in
         echo "Testing super-raw mode..." >&2
         for f in $*; do
             dir=`dirname $f`
-	    # FIXME: Dependency on old protocol
-            gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
+            gpsfake -s 38400 -1 -b -p -r '{"class":"WATCH","enable":False,"raw":1}' $opts ${f} \
             | ./striplog -1 >$dir/test1.chk;
             ./striplog <$${f} >$dir/test2.chk;
             cmp $dir/test[12].chk;
