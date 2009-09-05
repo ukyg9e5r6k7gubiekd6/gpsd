@@ -826,11 +826,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    buf2[0] = '\0';
 
 	    /* Some kinds of data is automatically passed through */
-#ifdef RTCM104V2_ENABLE
-	    if ((session->gpsdata.set & RTCM2_SET) == 0)
-#endif /* RTCM104V2_ENABLE */
-	    // FIXME: Add RTCMv3 handling as well.
 #ifdef BINARY_ENABLE
+#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
+	    if ((session->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
+#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
 	    if (buf2[0] != '\0') {
