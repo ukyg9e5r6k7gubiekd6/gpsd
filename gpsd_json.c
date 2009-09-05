@@ -13,22 +13,56 @@ representations to gpsd core strctures, and vice_versa.
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gps_json.h"
 
 char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
-/* escape double quotes inside a JSON string */
+/* escape double quotes and control characters inside a JSON string */
 {
     const char *sp;
     char *tp;
 
     tp = to;
-    for (sp = from; *sp && tp - to <= len-1; sp++) {
-	if (*sp == '"')
+    /* 
+     * The limit is len-6 here because we need to be leave room for
+     * each character to generate an up to 6-character Java-style
+     * escape
+     */
+    for (sp = from; *sp && tp - to < len-5; sp++) {
+	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
-	*tp++ = *sp;
+	    switch (*sp) {
+	    case '/':
+		*tp++ = '/';
+		break;
+	    case '\b':
+		*tp++ = 'b';
+		break;
+	    case '\f':
+		*tp++ = 'f';
+		break;
+	    case '\n':
+		*tp++ = 'n';
+		break;
+	    case '\r':
+		*tp++ = 'r';
+		break;
+	    case '\t':
+		*tp++ = 't';
+		break;
+	    default:
+		/* ugh, we'd prefer a C-style escape here, but this is JSON */
+		(void)snprintf(tp, 5, "%u04x", *sp);
+		tp += strlen(tp);
+	    }
+	} else {
+	    if (*sp == '"')
+		*tp++ = '\\';
+	    *tp++ = *sp;
+	}
     }
     *tp = '\0';
 

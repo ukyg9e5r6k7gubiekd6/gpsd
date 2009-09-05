@@ -109,7 +109,8 @@ class gpsfix:
         self.time = NaN
         self.ept = NaN
         self.latitude = self.longitude = 0.0
-        self.eph = NaN
+        self.epx = NaN
+        self.epy = NaN
         self.altitude = NaN         # Meters
         self.epv = NaN
         self.track = NaN            # Degrees from true north
@@ -276,7 +277,8 @@ class gps(gpsdata):
                     self.valid |= TIME_SET
                 elif cmd == 'E':
                     parts = data.split()
-                    (self.epe, self.fix.eph, self.fix.epv) = map(float, parts)
+                    (self.epe, eph, self.fix.epv) = map(float, parts)
+                    self.epx = self.epy = eph
                     self.valid |= HERR_SET | VERR_SET | PERR_SET
                 elif cmd == 'F':
                     self.device = data
@@ -319,7 +321,7 @@ class gps(gpsdata):
                         self.fix.latitude = default(3, LATLON_SET)
                         self.fix.longitude = default(4)
                         self.fix.altitude = default(5, ALTITUDE_SET)
-                        self.fix.eph = default(6, HERR_SET)
+                        self.fix.epx = self.epy = default(6, HERR_SET)
                         self.fix.epv = default(7, VERR_SET)
                         self.fix.track = default(8, TRACK_SET)
                         self.fix.speed = default(9, SPEED_SET)

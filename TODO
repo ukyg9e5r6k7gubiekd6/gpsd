@@ -51,7 +51,7 @@ testing on live devices.
 
 **** The Python client library presently speaks only old protocol.
 
-**** The regreession-test driver's raw-mode test relies on old protocol.
+**** The regression-test driver's raw-mode test relies on old protocol.
 
 **** gpsmon's client mode still relies on old protocol
 
@@ -60,8 +60,7 @@ testing on live devices.
 **** Remaining AIS issues
 
 ***** Unit tests for client-side AIS JSON parsing.
-***** Client-side JSON parse should undo json_stringify()'s backslash-stuffing.
-***** For safety, json_stringify() should slashify all nonprintables.
+***** Client-side JSON parse should interpret JSON escapes
 
 **** Client-side support for RTCM3-JSON
 
