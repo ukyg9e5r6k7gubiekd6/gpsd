@@ -94,7 +94,7 @@ static char *json_target_address(const struct json_attr_t *cursor,
 static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
-	  in_val_string, in_val_token, post_val} state = 0;
+	  in_val_string, in_escape, in_val_token, post_val} state = 0;
 #ifdef JSONDEBUG
     char *statenames[] = {
 	"init", "await_attr", "in_attr", "await_value", 
@@ -103,8 +103,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 #endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
+    char uescape[5];	/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
-    int substatus, maxlen;
+    int substatus, maxlen, n;
     const struct json_enum_t *mp;
     char *lptr;
 
@@ -227,7 +228,9 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 	    }
 	    break;
 	case in_val_string:
-	    if (*cp == '"') {
+	    if (*cp == '\\')
+		state = in_escape;
+	    else if (*cp == '"') {
 		*pval++ = '\0';
 		json_debug_trace(("Collected string value %s\n", valbuf));
 		state = post_val;
@@ -236,6 +239,36 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		return JSON_ERR_STRLONG;	/*  */
 	    } else
 		*pval++ = *cp;
+	    break;
+	case in_escape:
+	    switch(*cp) {
+	    case 'b':
+		*pval++ = '\b';
+		break;
+	    case 'f':
+		*pval++ = '\f';
+		break;
+	    case 'n':
+		*pval++ = '\n';
+		break;
+	    case 'r':
+		*pval++ = '\r';
+		break;
+	    case 't':
+		*pval++ = '\t';
+		break;
+	    case 'u':
+		for (n = 0; n < 4 && cp[n] != '\0'; n++)
+		    uescape[n] = *cp++;
+		--cp;
+		(void)sscanf(uescape, "%04x", &n);
+		*pval++ = (char)n;	/* will truncate values above 0xff */
+		break;
+	    default:	/* handles double quote and solidus */
+		*pval++ = *cp;
+		break;
+	    }
+	    state = in_val_string;
 	    break;
 	case in_val_token:
 	    if (isspace(*cp) || *cp == ',' || *cp == '}') {

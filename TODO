@@ -51,7 +51,6 @@ testing on live devices.
 **** Remaining AIS issues
 
 ***** Unit tests for client-side AIS JSON parsing.
-***** Client-side JSON parse should interpret JSON escapes
 
 **** Client-side support for RTCM3-JSON
 

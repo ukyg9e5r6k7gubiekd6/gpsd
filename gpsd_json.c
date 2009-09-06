@@ -35,9 +35,6 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
-	    case '/':
-		*tp++ = '/';
-		break;
 	    case '\b':
 		*tp++ = 'b';
 		break;
