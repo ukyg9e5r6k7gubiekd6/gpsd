@@ -500,8 +500,8 @@ aivdm-regress: gpsdecode
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.aivdm; do \
 		echo "Testing $${f}..."; \
-		$(srcdir)/gpsdecode -u -c <$${f} >test/test.chk; \
-		diff -ub $${f}.chk test/test.chk; \
+		$(srcdir)/gpsdecode -u -c <$${f} >$(srcdir)/test/test.chk; \
+		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done; \
 	rm test/test.chk
 
