@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+#
+# Report on which status masks are used in the daemon vs. the client-side
+# library.  Warning: both the symbol list and the source list could be stale
+# when you run this next - best to regenerate them.
+
+import commands, glob
+
+masks = (
+    "ONLINE_SET ",
+    "TIME_SET",
+    "TIMERR_SET",
+    "LATLON_SET",
+    "ALTITUDE_SET",
+    "SPEED_SET",
+    "TRACK_SET",
+    "CLIMB_SET",
+    "STATUS_SET",
+    "MODE_SET",
+    "HDOP_SET",
+    "VDOP_SET",
+    "PDOP_SET",
+    "TDOP_SET",
+    "VERSION_SET",
+    "GDOP_SET",
+    "HERR_SET",
+    "VERR_SET",
+    "PERR_SET",
+    "POLICY_SET",
+    "SATELLITE_SET",
+    "RAW_SET",
+    "USED_SET",
+    "SPEEDERR_SET",
+    "TRACKERR_SET",
+    "CLIMBERR_SET",
+    "DEVICE_SET",
+    "DEVICELIST_SET",
+    "DEVICEID_SET",
+    "ERROR_SET",
+    "CYCLE_START",
+    "RTCM2_SET",
+    "RTCM3_SET",
+    "AIS_SET",
+)
+
+def in_library(flag):
+    return commands.getstatus("grep %s libgps.c libgps_json.c") == 0
+
+daemonfiles = " ".join(['serial.c', 'rtcm2_json.c', 'driver_garmin_txt.c', 'driver_zodiac.c', 'monitor_italk.c', 'bits.c', 'net_gnss_dispatch.c', 'crc24q.c', 'ntpshm.c', 'driver_rtcm3.c', 'subframe.c', 'net_remotegpsd.c', 'driver_garmin.c', 'driver_nmea.c', 'libgpsd_core.c', 'driver_superstar2.c', 'drivers.c', 'driver_aivdm.c', 'strl.c', 'gpsd_json.c', 'driver_rtcm2.c', 'gpsd_report.c', 'driver_ubx.c', 'gpspacket.c', 'driver_sirf.c', 'hex.c', 'ais_json.c', 'driver_tsip.c', 'bsd-base64.c', 'gpsd_dbus.c', 'monitor_sirf.c', 'net_ntrip.c', 'gpsutils.c', 'netlib.c', 'driver_proto.c', 'driver_navcom.c', 'gpsctl.c', 'driver_oncore.c', 'geoid.c','srecord.c', 'packet.c', 'driver_evermore.c', 'net_dgpsip.c', 'driver_italk.c', 'json.c', 'gpsd.c', 'isgps.c'])
+
+
+def in_library(flag):
+    (status, output) = commands.getstatusoutput("grep %s libgps.c libgps_json.c" % flag)
+    return status == 0
+
+def in_daemon(flag):
+    (status, output) = commands.getstatusoutput("grep %s %s" % (flag, daemonfiles))
+    return status == 0
+
+for flag in masks:
+    print "%-14s	%8s %8s" % (flag, in_library(flag), in_daemon(flag))

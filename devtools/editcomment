@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Emacs-edit the change comment at the revision level specified as $1.
+# Only works if you have developer ssh access to the repo.
+
+svn -r $1 log | sed -e "/^-/d" -e "/^r[0-9]/d" -e '1d' -e '$d' >/tmp/hackcommentemacsclient /tmp/hackcomment
+scp /tmp/hackcomment "shell.berlios.de:~"
+ssh svn.berlios.de "svnadmin setlog --bypass-hooks  /svnroot/repos/gpsd -r $1 ~/hackcomment; rm hackcomment"

@@ -7,6 +7,15 @@ the outline headers.  Ctl-C Ctl-a will unfold them again.
 
 AIS packet decoder in Python.  Useful as a check on the C code.
 
+** aidvmtable
+
+Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
+
+** editcomment
+
+Edit the change comment at the revision level specified as $1.
+Only works if you have developer ssh access to the repo.
+
 ** fakecompare
 
 Compare the results from running gpsfake on a logfile between this
@@ -26,12 +35,22 @@ Gets the current leap-second correction forom IERS and/or the USNO.
 ** logextract
 
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 
-to gpsfake. (This one goes in the tarball.)
+to gpsfake.
+
+** maskaudit
+
+# Report on which status masks are used in the daemon vs. the client-side
+# library.
 
 ** regress-builder
 
 This script runs an exhaustive test on combinations of compilation options, 
 looking for ones that break the build.
+
+** regressdiff
+
+Walk through a pair of textfiles looking for where they begin to differ.
+May be useful for comparing logs when regression tests break.
 
 ** striplog
 

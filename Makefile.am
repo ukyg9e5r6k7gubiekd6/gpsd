@@ -388,7 +388,6 @@ EXTRA_DIST = \
 	gpslib.c \
 	driver_proto.c \
 	monitor_proto.c \
-	logextract \
 	setup.py \
 	packet_states.h \
 	libgps.pc.in \
