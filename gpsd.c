@@ -2294,8 +2294,8 @@ int main(int argc, char *argv[])
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
-				aivdm_json_dump(&channel->device->aivdm.decoded, 
-					   sub->policy.scaled, buf2, sizeof(buf2));
+				aivdm_json_dump(&channel->device->gpsdata.ais, 
+						sub->policy.scaled, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* AIVDM_ENABLE */
@@ -2321,8 +2321,8 @@ int main(int argc, char *argv[])
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
-				aivdm_json_dump(&channel->device->aivdm.decoded, 
-					   false, buf2, sizeof(buf2));
+				aivdm_json_dump(&channel->device->gpsdata.ais, 
+						false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 			}

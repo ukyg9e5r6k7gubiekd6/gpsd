@@ -328,6 +328,7 @@ static void decode(FILE *fpin, FILE *fpout)
     struct gps_packet_t lexer;
     struct rtcm2_t rtcm2;
     struct rtcm3_t rtcm3;
+    struct ais_t ais;
     struct aivdm_context_t aivdm;
     char buf[BUFSIZ];
 
@@ -350,11 +351,11 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
 	else if (lexer.type == AIVDM_PACKET) {
 	    /*@ -uniondef */
-	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm)){
+	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm, &ais)){
 		if (!json)
-		    aivdm_csv_dump(&aivdm.decoded, buf, sizeof(buf));
+		    aivdm_csv_dump(&ais, buf, sizeof(buf));
 		else
-		    aivdm_json_dump(&aivdm.decoded, scaled, buf, sizeof(buf));
+		    aivdm_json_dump(&ais, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 		(void)fputs("\n", fpout);
 	    }
@@ -401,6 +402,10 @@ static void encode(FILE *fpin, bool repack, FILE *fpout)
 		rtcm2_json_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
 		(void)fputs(outbuf, fpout);
 	    }
+	} if ((gpsdata.set & AIS_SET) != 0) { 
+	    char outbuf[BUFSIZ];
+	    aivdm_json_dump(&gpsdata.ais, false, outbuf, sizeof(outbuf));
+	    (void)fputs(outbuf, fpout);
 	}
     }
 }

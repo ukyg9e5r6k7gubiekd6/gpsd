@@ -53,7 +53,8 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 }
 
 /*@ +charint @*/
-bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
+bool aivdm_decode(char *buf, size_t buflen, 
+		  struct aivdm_context_t *ais_context, struct ais_t *ais)
 {
     char *sixbits[64] = {
 	"000000", "000001", "000010", "000011", "000100",
@@ -72,7 +73,6 @@ bool aivdm_decode(char *buf, size_t buflen, struct aivdm_context_t *ais_context)
     };
     int nfields = 0;
     unsigned char *data, *cp = ais_context->fieldcopy;
-    struct ais_t *ais = &ais_context->decoded;
     unsigned char ch;
     int i;
 

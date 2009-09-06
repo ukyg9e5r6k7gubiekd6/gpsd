@@ -1061,7 +1061,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
     if (session->packet.type == AIVDM_PACKET){
 	session->cycle_state = CYCLE_END_RELIABLE;
-	if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm)) {
+	if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm, &session->gpsdata.ais)) {
 	    session->cycle_state = CYCLE_END;
 	    return ONLINE_SET | AIS_SET;
 	}else
