@@ -202,7 +202,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 
 ais_json.i: jsongen.py
 	rm -f $(srcdir)/ais_json.i
-	jsongen.py --ais --target=parser >ais_json.i
+	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i
 	chmod a-w $(srcdir)/ais_json.i
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
