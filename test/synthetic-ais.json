@@ -1,0 +1,22 @@
+# Synthetic test load designed to exercise the AIS JSON parser
+# These are JSON dumps of the packets in the Schwehr testload,
+# with synthetic messages 12 and 14 added  
+# FIXME: Needs a more complete set of test sentences.
+{"class":"AIS","type":1,"repeat":0,"mmsi":371798000,"status":0,"turn":-127,"speed":123,"accuracy":true,"lon":-74037230,"lat":29028980,"course":2240,"heading":215,"second":33,"maneuver":0,"raim":false,"radio":68034}
+{"class":"AIS","type":1,"repeat":0,"mmsi":440348000,"status":0,"turn":-128,"speed":0,"accuracy":false,"lon":-42454920,"lat":25848090,"course":934,"heading":511,"second":13,"maneuver":0,"raim":false,"radio":66548}
+{"class":"AIS","type":2,"repeat":0,"mmsi":356302000,"status":0,"turn":127,"speed":139,"accuracy":false,"lon":-42975686,"lat":24235415,"course":877,"heading":91,"second":41,"maneuver":0,"raim":false,"radio":98316}
+{"class":"AIS","type":3,"repeat":0,"mmsi":563808000,"status":5,"turn":0,"speed":0,"accuracy":true,"lon":-45796520,"lat":22146000,"course":2520,"heading":352,"second":35,"maneuver":0,"raim":false,"radio":0}
+{"class":"AIS","type":4,"repeat":0,"mmsi":003669702,"timestamp":"2007-05-14T19:57:39Z","accuracy":true,"lon":-45811417,"lat":22130260,"epfd":7,"raim":false,"radio":67039}
+{"class":"AIS","type":5,"repeat":0,"mmsi":351759000,"imo":9134270,"ais_version":0,"callsign":"3FOF8","shipname":"EVER DIADEM","shiptype":70,"to_bow":225,"to_stern":70,"to_port":1,"to_starboard":31,"epfd":1,"eta":"05-15T14:00Z","draught":122,"destination":"NEW YORK","dte":0}
+{"class":"AIS","type":6,"repeat":1,"mmsi":150834090,"seqno":3,"dest_mmsi":313240222,"retransmit":0,"app_id":42827,"data":"50:eb2f118f7ff100"}
+{"class":"AIS","type":7,"repeat":1,"mmsi":655901842,"mmsi1":158483613,"mmsi2":321823389,"mmsi3":836359488,"mmsi4":0}
+{"class":"AIS","type":8,"repeat":0,"mmsi":366999712,"app_id":23480,"data":"256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb"}
+{"class":"AIS","type":9,"repeat":3,"mmsi":1069287948,"alt":4032,"speed":932,"accuracy":true,"lon":106380055,"lat":63811893,"course":2562,"second":48,"regional":91,"dte":1,"raim":false,"radio":424211}
+{"class":"AIS","type":10,"repeat":0,"mmsi":366814480,"dest_mmsi":366832740}
+{"class":"AIS","type":11,"repeat":0,"mmsi":304137000,"timestamp":"2009-05-22T02:22:40Z","accuracy":true,"lon":-56644610,"lat":17045470,"epfd":1,"raim":false,"radio":0}
+{"class":"AIS","type":12,"repeat":0,"mmsi":304137000,"seqno":23,"dest_mmsi":304137023,"retransmit":false,"text":"THIS IS A SYNTHETIC TEST MESSAGE"}
+{"class":"AIS","type":14,"repeat":0,"mmsi":304137000,"text":"THIS IS A SYNTHETIC BROADCAST MESSAGE"}
+{"class":"AIS","type":18,"repeat":0,"mmsi":338087471,"reserved":0,"speed":1,"accuracy":false,"lon":-44443279,"lat":24410724,"course":796,"heading":511,"second":49,"regional":0,"cs":true,"display":false,"dsc":true,"band":true,"msg22":true,"raim":true,"radio":917510}
+{"class":"AIS","type":18,"repeat":0,"mmsi":338088483,"reserved":0,"speed":0,"accuracy":false,"lon":-42486718,"lat":25869335,"course":1716,"heading":511,"second":20,"regional":0,"cs":true,"display":false,"dsc":true,"band":true,"msg22":true,"raim":true,"radio":917510}
+{"class":"AIS","type":19,"repeat":0,"mmsi":367059850,"reserved":248,"speed":87,"accuracy":false,"lon":-53286235,"lat":17726217,"course":3359,"heading":511,"second":46,"regional":4,"shipname":"CAPT.J.RIMES","shiptype":70,"to_bow":5,"to_stern":21,"to_port":4,"to_starboard":4,"epfd":0,"raim":false,"dte":0,"assigned":false}
+{"class":"AIS","type":24,"repeat":2,"mmsi":338085242,"shipname":"CAPTAIN`S PARADISE","shiptype":54,"vendorid":"ACR1234","callsign":"WDD7883","to_bow":8,"to_stern":3,"to_port":2,"to_starboard":1}

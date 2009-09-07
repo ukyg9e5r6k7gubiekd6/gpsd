@@ -48,10 +48,6 @@ testing on live devices.
 
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
-**** Remaining AIS issues
-
-***** Unit tests for client-side AIS JSON parsing.
-
 **** Client-side support for RTCM3-JSON
 
 RTCM3 support is nonexistent due to a lack of suitable test loads.
@@ -74,6 +70,17 @@ These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
 
 SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
 to be tested.
+
+*** Scrap the pure-Python gps.py and write a new Python binding using ctypes
+
+The pure-Python gps.py has tended to develop version skew with the C
+library. That should be fixed.
+
+*** Rewrite xgps
+
+The Motif/Lesstif dependency is a pain in the butt, the code is a 
+maintainability problem, and we'd like to extend it to display AIS
+messages. Probably the thing to do is write something pygtk-based.
 
 *** Support the D-Bus signals recognized by libgypsy
 

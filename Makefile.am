@@ -501,8 +501,11 @@ aivdm-regress: gpsdecode
 		echo "Testing $${f}..."; \
 		$(srcdir)/gpsdecode -u -c <$${f} >$(srcdir)/test/test.chk; \
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
-	done; \
-	rm test/test.chk
+	done;
+	@echo "Testing idempotency of JSON dump/decode for AIS"
+	@gpsdecode -e -j <test/synthetic-ais.json >test.chk
+	@grep -v '^#' test/synthetic-ais.json | diff -ub - test.chk
+	@rm test/test.chk
 
 # Rebuild the AIVDM regression tests.
 aivdm-makeregress: gpsdecode
