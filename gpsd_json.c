@@ -871,7 +871,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   ais->type9.radio);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"alt\":%u,\"SPEED\":%u,\"accuracy\":%s,"
+			   "\"alt\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
 			   "\"raim\":%s,\"radio\":%u}\r\n",
@@ -1035,7 +1035,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			   "\"starboard\":%u,\"epfd\":%u,\"raim\":%s,"
+			   "\"to_starboard\":%u,\"epfd\":%u,\"raim\":%s,"
 			   "\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,
 			   ais->type19.speed,
