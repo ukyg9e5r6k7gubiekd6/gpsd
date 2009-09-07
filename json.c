@@ -103,6 +103,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 #endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
+    bool value_quoted;
     char uescape[5];	/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
     int substatus, maxlen, n;
@@ -219,13 +220,11 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		json_debug_trace(("Array element was specified, but no [.\n"));
 		return JSON_ERR_NOBRAK;
 	    } else if (*cp == '"') {
-		if (cursor->type != string) { 
-		    json_debug_trace(("Saw string quote when expecting non-string.\n"));
-		    return JSON_ERR_QNONSTRING;
-		}		    
+		value_quoted = true;
 		state = in_val_string;
 		pval = valbuf;
 	    } else {
+		value_quoted = false;
 		state = in_val_token;
 		pval = valbuf;
 		*pval++ = *cp;
@@ -288,12 +287,20 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		*pval++ = *cp;
 	    break;
 	case post_val:
+	    if (value_quoted && (cursor->type != string && cursor->type != check && cursor->map == 0)) { 
+		json_debug_trace(("Saw quoted value when expecting non-string.\n"));
+		return JSON_ERR_QNONSTRING;
+	    }		    
+	    if (!value_quoted && (cursor->type == string || cursor->type == check || cursor->map != 0)) { 
+		json_debug_trace(("Didn't see quoted value when expecting string.\n"));
+		return JSON_ERR_NONQSTRING;
+	    }		    
 	    if (cursor->map != 0) {
 		for (mp = cursor->map; mp->name != NULL; mp++)
 		    if (strcmp(mp->name, valbuf) == 0) {
 			goto foundit;
 		    }
-		json_debug_trace(("Invalid enumeated value string %s.\n", valbuf));
+		json_debug_trace(("Invalid enumerated value string %s.\n", valbuf));
 		return JSON_ERR_BADENUM;
 	    foundit:
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
@@ -468,7 +475,8 @@ const char *json_error_string(int err)
 	"check attribute not matched",
 	"can't support strings in parallel arrays",
 	"invalid enumerated value",
-	"saw string quote when expecting nonstring",
+	"saw quoted value when expecting nonstring",
+	"didn't see quoted value when expecting string",
 	"other data conversion error",
     };
 
