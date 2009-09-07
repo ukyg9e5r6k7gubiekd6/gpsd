@@ -82,7 +82,8 @@ const char *json_error_string(int);
 #define JSON_ERR_CHECKFAIL	16	/* check attribute not matched */
 #define JSON_ERR_NOPARSTR	17	/* can't support strings in parallel arrays */
 #define JSON_ERR_BADENUM	18	/* invalid enumerated value */
-#define JSON_ERR_MISC		19	/* other data conversion error */
+#define JSON_ERR_QNONSTRING	19	/* saw string quote when expecting ns */
+#define JSON_ERR_MISC		20	/* other data conversion error */
 
 /*
  * Use the following macros to declare template initializers for structobject 

@@ -98,7 +98,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 #ifdef JSONDEBUG
     char *statenames[] = {
 	"init", "await_attr", "in_attr", "await_value", 
-	"in_val_string", "in_val_token", "post_val"
+	"in_val_string", "in_escape", "in_val_token", "post_val"
 	};
 #endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
@@ -219,6 +219,10 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		json_debug_trace(("Array element was specified, but no [.\n"));
 		return JSON_ERR_NOBRAK;
 	    } else if (*cp == '"') {
+		if (cursor->type != string) { 
+		    json_debug_trace(("Saw string quote when expecting non-string.\n"));
+		    return JSON_ERR_QNONSTRING;
+		}		    
 		state = in_val_string;
 		pval = valbuf;
 	    } else {
@@ -464,6 +468,7 @@ const char *json_error_string(int err)
 	"check attribute not matched",
 	"can't support strings in parallel arrays",
 	"invalid enumerated value",
+	"saw string quote when expecting nonstring",
 	"other data conversion error",
     };
 
