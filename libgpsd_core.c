@@ -755,7 +755,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			    session->gpsdata.dev.path);
 	return ONLINE_SET;
     } else {
-	gps_mask_t received, dopmask = 0;
+	gps_mask_t received = 0, dopmask = 0;
 	session->gpsdata.online = timestamp();
 	session->cycle_state = 0;
 
@@ -782,7 +782,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* Get data from current packet into the fix structure */
 	if (session->packet.type != COMMENT_PACKET)
 	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
-		received = session->device_type->parse_packet(session);
+		received |= session->device_type->parse_packet(session);
 
 	/*
 	 * Compute fix-quality data from the satellite positions.
