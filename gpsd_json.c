@@ -393,7 +393,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 4:
 	if (rtcm->reference.valid) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":%s,\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f,",
+			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":\"%s\",\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f,",
 			   rtcm->reference.system >= NITEMS(navsysnames) 
 			   ? "UNKNOWN"
 			   : navsysnames[rtcm->reference.system],
@@ -652,7 +652,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 
     (void)snprintf(buf, buflen, 
 		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"
-		   "\"mmsi\":\"%09u\",", 
+		   "\"mmsi\":%09u,", 
 		   ais->type, ais->repeat, ais->mmsi);
 
 #define JSON_BOOL(x)	((x)?"true":"false")
