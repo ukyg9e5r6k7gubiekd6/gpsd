@@ -319,6 +319,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		      buflen-strlen(buf), "unknown AIVDM message content.");
 	break;
     }
+    (void)strlcat(buf, "\r\n", buflen);
 }
 
 /*@ -compdestroy -compdef -usedef @*/
@@ -357,7 +358,6 @@ static void decode(FILE *fpin, FILE *fpout)
 		else
 		    aivdm_json_dump(&ais, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
-		(void)fputs("\n", fpout);
 	    }
 	    
 	    /*@ +uniondef */
