@@ -561,7 +561,7 @@ typedefs.</p>
 
 <p>There are two useful ways to think about the GPSD architecture.
 One is in terms of the layering of the software, the other is in terms
-of the mormal flow of information through it.</p>
+of the normal flow of information through it.</p>
 
 <h3>The software-layering view</h3>
 
@@ -581,7 +581,7 @@ out of serial input streams.  It's basically a state machine that's
 watching for anything that looks like a properly checksummed packet.
 Because devices can hotplug or change modes, the type of packet 
 that will come up the wire from a serial or USB port isn't necessarily
-fixed forever by the first one recognized. </p>
+fixed forever by the first one recognized.</p>
 
 <p>The <b>core library</b> manages a session with a GPS device.  The
 key entry points are (a) Starting a session by opening the device and 
@@ -905,7 +905,7 @@ is so you can use it to set the system clock.</p>
 <h2 id="hotplug">Hotplug interface problems</h2>
 
 <p>The hotplug interface works pretty nicely for telling gpsd which
-device to look at, at least on my FC3/FC4/FC5 Linux machines.  The fly
+device to look at, at least on Fedora and Ubuntu Linux machines.  The fly
 in the ointment is that we're using a deprecated version of the
 interface, the old-style /etc/hotplug version with usermap files.</p>
 

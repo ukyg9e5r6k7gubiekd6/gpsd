@@ -2256,7 +2256,7 @@ int main(int argc, char *argv[])
 			bool report_fix = false;
 			if ((state & CYCLE_END_RELIABLE)!=0) {
 			    /*
-			     * Driver return reliable end of cycle, 
+			     * Driver returns reliable end of cycle, 
 			     * report only when that is signaled.
 			     */
 			    if ((state & CYCLE_END)!=0)
