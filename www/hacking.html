@@ -460,10 +460,11 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 
 <p>For debugging purposes, it may be helpful to configure with
 &#x2D;&#x2D;disable-shared.  This turns off all the shared-library crud, making
-it somewhat easier to use gdb.</p>
+it somewhat easier to use gdb. (Don't forget to set CFLAGS=-g in the
+configure environment)</p>
 
 <p>There is a script called <code>logextract</code> in the
-distribution that you can use to strip clean NMEA out of the log files
+source distribution that you can use to strip clean NMEA out of the log files
 produced by <code>gpsd</code>.  This can be useful if someone ships
 you a log that they allege caused <code>gpsd</code> to misbehave.</p>
 

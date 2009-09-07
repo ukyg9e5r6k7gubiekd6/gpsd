@@ -22,7 +22,7 @@ test_mkgmtime
 test_geoid
 test_json
 # Other generated files
-*.html
+./*.html
 *.[1358]
 *.pyc
 *.pc
