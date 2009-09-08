@@ -44,6 +44,7 @@ device will break the NMEA cycle detector.
 import sys, getopt, json
 
 verbose = 0
+suppress_regular = False
 
 class analyze_error:
     def __init__(self, filename, lineno, msg):
@@ -156,7 +157,7 @@ def analyze(fp, stages):
             if float(this.time) > float(next.time):
                 events.append(event(">"))
                 out_of_order = True
-    if out_of_order:
+    if out_of_order and verbose:
         sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
     if "events" in stages:
         print "Event list:"
@@ -205,7 +206,8 @@ def analyze(fp, stages):
             regular = True
     # Should know now if cycle is regular
     if regular:
-        print "%s: has a regular cycle %s." % (filename, " ".join(tags(bursts[0])))
+        if not suppress_regular:
+            print "%s: has a regular cycle %s." % (filename, " ".join(tags(bursts[0])))
     else:
         # If it was not the case that all cycles matched, then we need
         # a minimum of 6 cycles because the first and last might be
@@ -214,13 +216,15 @@ def analyze(fp, stages):
         if tags(events).count("<") < 6:
             sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % fp.name)
             return
-        print "%s: has a split or variable cycle." % filename
+        if verbose > 0:
+            print "%s: has a split or variable cycle." % filename
         cycle_enders = []
         for burst in bursts:
             if burst[-1].tag not in cycle_enders:
                 cycle_enders.append(burst[-1].tag)
         if len(cycle_enders) == 1:
-            print "%s: has a fixed end-of-cycle sentence %s." % (filename, cycle_enders[0])
+            if not suppress_regular:
+                print "%s: has a fixed end-of-cycle sentence %s." % (filename, cycle_enders[0])
         else:
             print "%s: has multiple cycle-enders %s." % (filename, " ".join(cycle_enders))
         # Sanity check
@@ -235,12 +239,14 @@ def analyze(fp, stages):
 if __name__ == "__main__":
     stages = ""
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:v")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:sv")
         for (switch, val) in options:
             if (switch == '-d'):		# Debug
                 stages = val
             elif (switch == '-v'):		# Verbose
                 verbose += 1
+            elif (switch == '-s'):		# Suppress logs with no problems
+                suppress_regular = True
     except getopt.GetoptError, msg:
         print "cycle_analyzer: " + str(msg)
         raise SystemExit, 1
