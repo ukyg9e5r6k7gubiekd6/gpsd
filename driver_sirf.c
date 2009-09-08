@@ -809,7 +809,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 #endif /* ALLOW_RECONFIGURE */
 
     case 0x1b:		/* DGPS status (undocumented) */
-	gpsd_report(LOG_PROG, "DGPSF%s\n",
+	gpsd_report(LOG_PROG, "DGPSF 0x1b %s\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
