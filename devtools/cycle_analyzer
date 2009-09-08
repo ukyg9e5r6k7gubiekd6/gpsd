@@ -56,17 +56,21 @@ class analyze_error:
 def extract_from_nmea(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from an NMEA sentence"
     hhmmss = {
-        "$GPRMC": 1,
-        "$GPGLL": 5,
-        "$GPGGA": 1,
-        "$GPGBS": 1,
-        "$GPZDA": 1,
-        "$PASHR": 4,
+        "RMC": 1,
+        "GLL": 5,
+        "GGA": 1,
+        "GBS": 1,
+        "ZDA": 1,
+        "PASHR": 4,
         }
     fields = line.split(",")
-    tag = fields[0][1:]
-    if fields[0] in hhmmss:
-        timestamp = fields[hhmmss[fields[0]]]
+    tag = fields[0]
+    if tag.startswith("$GP") or tag.startswith("$IN"):
+        tag = tag[3:]
+    elif tag[0] == "$":
+        tag = tag[1:]
+    if tag in hhmmss:
+        timestamp = fields[hhmmss[tag]]
         return [(tag, timestamp)]
     else:
         return []
@@ -134,11 +138,6 @@ def analyze(fp, stages):
             out_of_order = True
     if out_of_order:
         sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
-    # We need 6 cycles because the first and last might be incomplete, and we
-    # need at least 4 cycles in the middle to have two full ones om
-    # split-cycle devices like old Garmins.
-    if events.count("<") < 6:
-        sys.stderr.write("%s: has fewer than 6 cycles.\n" % fp.name)
     if "events" in stages:
         print "Event list:"
         for event in events:
@@ -156,6 +155,12 @@ def analyze(fp, stages):
         print "Burst list:"
         for burst in bursts:
             print burst
+    # We need 6 cycles because the first and last might be incomplete, and we
+    # need at least 4 cycles in the middle to have two full ones om
+    # split-cycle devices like old Garmins.
+    if events.count("<") < 6:
+        sys.stderr.write("%s: has fewer than 6 cycles.\n" % fp.name)
+        return
     # Trim off first and last bursts, which are likely incomplete.
     bursts = bursts[1:-1]
     if "trim" in stages:
@@ -184,10 +189,10 @@ def analyze(fp, stages):
         pathological = []
         for ender in cycle_enders:
             for burst in bursts:
-                if ender in burst and not ender == burst[-1]:
+                if ender in burst and not ender == burst[-1] and not ender in pathological:
                     pathological.append(ender)
         if pathological:
-            print "%s: cycle-enders %s also occur in mid-cycle!." % (filename, " ".join(pathological))
+            print "%s: cycle-enders %s also occur in mid-cycle!" % (filename, " ".join(pathological))
 
 if __name__ == "__main__":
     stages = ""

@@ -11,6 +11,10 @@ AIS packet decoder in Python.  Useful as a check on the C code.
 
 Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
 
+** cycle_analyzer
+
+Finds end-of-cycle sentences from GPS output logs.
+
 ** editcomment
 
 Edit the change comment at the revision level specified as $1.
