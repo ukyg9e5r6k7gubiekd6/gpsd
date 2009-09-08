@@ -89,6 +89,8 @@ def analyze(fp, stage):
     for i in range(len(sequence)-1):
         (this_tag, this_time) = sequence[i]
         (next_tag, next_time) = sequence[i+1]
+        if float(this_time) == 0:
+            continue
         events.append(this_tag)
         if float(this_time) < float(next_time):
             events.append("-")
@@ -96,9 +98,26 @@ def analyze(fp, stage):
             out_of_order = True
     if out_of_order:
         sys.stderr.write("cycle_analyzer: some timestamps occur out of order in %s\n" % fp.name)
+    # We need 6 cycles because the first and last might be incomplete, and we
+    # need at least 4 cycles in the middle to have two full ones om
+    # split-cycle devices like old Garmins.
+    if events.count("-") < 6:
+        sys.stderr.write("cycle_analyzer: fewer than 5 cycles in\n" % fp.name)
     if stage == "events":
         for event in events:
             print event
+    # Now group events into bursts
+    bursts = []
+    current = []
+    for event in events + ['-']:
+        if event == '-':
+            bursts.append(tuple(current))
+            current = []
+        else:
+            current.append(event)
+    if stage == "bursts":
+        for burst in bursts:
+            print burst
     # FIXME: more analysis goes here
 
 if __name__ == "__main__":
