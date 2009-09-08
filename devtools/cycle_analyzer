@@ -112,7 +112,8 @@ def extract_timestamped_sentences(fp):
             elif line.startswith("{"):
                 filetype = "JSON"
             else:
-                raise analyze_error(fp.name, lineno, "unknown sentence type.")
+                print "%s: unknown sentence type." % fp.name
+                return []
             if verbose:
                 print "%s: is %s" % (fp.name, filetype)
         # The reason for this odd logic is that we want to oock onto
@@ -132,7 +133,10 @@ def extract_timestamped_sentences(fp):
 def analyze(fp, stages):
     "Analyze the cycle sequence of a device from its output logs."
     # First, extract tags and timestamps
+    regular = False
     sequence = extract_timestamped_sentences(fp)
+    if not sequence:
+        return
     if "sequence" in stages:
         print "Raw tag/timestamp sequence"
         for e in sequence:
@@ -140,17 +144,18 @@ def analyze(fp, stages):
     # Then, do cycle detection
     events = []
     out_of_order = False
-    for i in range(len(sequence)-1):
+    for i in range(len(sequence)):
         this = sequence[i]
-        next = sequence[i+1]
-        if float(this.time) == 0:
+        if this.time == "" or float(this.time) == 0:
             continue
         events.append(this)
-        if float(this.time) < float(next.time):
-            events.append(event("<"))
-        if float(this.time) > float(next.time):
-            events.append(event(">"))
-            out_of_order = True
+        if i < len(sequence)-1:
+            next = sequence[i+1]
+            if float(this.time) < float(next.time):
+                events.append(event("<"))
+            if float(this.time) > float(next.time):
+                events.append(event(">"))
+                out_of_order = True
     if out_of_order:
         sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
     if "events" in stages:
@@ -170,27 +175,45 @@ def analyze(fp, stages):
         print "Burst list:"
         for burst in bursts:
             print burst
-    # We need 6 cycles because the first and last might be incomplete, and we
-    # need at least 4 cycles in the middle to have two full ones om
-    # split-cycle devices like old Garmins.
-    if tags(events).count("<") < 6:
-        sys.stderr.write("%s: has fewer than 6 cycles.\n" % fp.name)
+    # We need 4 cycles because the first and last might be incomplete.
+    if tags(events).count("<") < 4:
+        sys.stderr.write("%s: has fewer than 4 cycles.\n" % fp.name)
         return
-    # Trim off first and last bursts, which are likely incomplete.
-    bursts = bursts[1:-1]
-    if "trim" in stages:
-        "After trimming:"
-        for burst in bursts:
-            print burst
-    # Now the actual clique analysis
+    # First try at detecting a regular cycle
     unequal = False
     for i in range(len(bursts)-1):
         if tags(bursts[i]) != tags(bursts[i+1]):
             unequal = True
             break
     if not unequal:
+        # All bursts looked the same
+        regular = True
+    else:
+        # Trim off first and last bursts, which are likely incomplete.
+        bursts = bursts[1:-1]
+        if "trim" in stages:
+            "After trimming:"
+            for burst in bursts:
+                print burst
+        # Now the actual clique analysis
+        unequal = False
+        for i in range(len(bursts)-1):
+            if tags(bursts[i]) != tags(bursts[i+1]):
+                unequal = True
+                break
+        if not unequal:
+            regular = True
+    # Should know now if cycle is regular
+    if regular:
         print "%s: has a regular cycle %s." % (filename, " ".join(tags(bursts[0])))
     else:
+        # If it was not the case that all cycles matched, then we need
+        # a minimum of 6 cycles because the first and last might be
+        # incomplete, and we need at least 4 cycles in the middle to
+        # have two full ones on split-cycle devices like old Garmins.
+        if tags(events).count("<") < 6:
+            sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % fp.name)
+            return
         print "%s: has a split or variable cycle." % filename
         cycle_enders = []
         for burst in bursts:
