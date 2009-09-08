@@ -53,6 +53,20 @@ class analyze_error:
     def __str__(self):
         return '"%s", line %d: %s' % (self.filename, self.lineno, self.msg)
 
+class event:
+    def __init__(self, tag, time=0):
+        self.tag = tag
+        self.time = time
+    def __str__(self):
+        if self.time == 0:
+            return self.tag
+        else:
+            return self.tag + ":" + self.time
+    __repr__ = __str__
+
+def tags(lst):
+    return map(lambda x: x.tag, lst)
+
 def extract_from_nmea(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from an NMEA sentence"
     hhmmss = {
@@ -71,7 +85,7 @@ def extract_from_nmea(filename, lineno, line):
         tag = tag[1:]
     if tag in hhmmss:
         timestamp = fields[hhmmss[tag]]
-        return [(tag, timestamp)]
+        return [event(tag, timestamp)]
     else:
         return []
 
@@ -114,43 +128,44 @@ def extract_timestamped_sentences(fp):
             sequence + extract_from_json(fp.name, lineno, line)
     return sequence
 
+
 def analyze(fp, stages):
     "Analyze the cycle sequence of a device from its output logs."
     # First, extract tags and timestamps
     sequence = extract_timestamped_sentences(fp)
     if "sequence" in stages:
         print "Raw tag/timestamp sequence"
-        for (tag, timestamp) in sequence:
-            print "%s: %s" % (tag, timestamp)
+        for e in sequence:
+            print e
     # Then, do cycle detection
     events = []
     out_of_order = False
     for i in range(len(sequence)-1):
-        (this_tag, this_time) = sequence[i]
-        (next_tag, next_time) = sequence[i+1]
-        if float(this_time) == 0:
+        this = sequence[i]
+        next = sequence[i+1]
+        if float(this.time) == 0:
             continue
-        events.append(this_tag)
-        if float(this_time) < float(next_time):
-            events.append("<")
-        if float(this_time) > float(next_time):
-            events.append(">")
+        events.append(this)
+        if float(this.time) < float(next.time):
+            events.append(event("<"))
+        if float(this.time) > float(next.time):
+            events.append(event(">"))
             out_of_order = True
     if out_of_order:
         sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
     if "events" in stages:
         print "Event list:"
-        for event in events:
-            print event
+        for e in events:
+            print e
     # Now group events into bursts
     bursts = []
     current = []
-    for event in events + ['<']:
-        if event == '<':
+    for e in events + [event('<')]:
+        if e.tag == '<':
             bursts.append(tuple(current))
             current = []
         else:
-            current.append(event)
+            current.append(e)
     if "bursts" in stages:
         print "Burst list:"
         for burst in bursts:
@@ -158,7 +173,7 @@ def analyze(fp, stages):
     # We need 6 cycles because the first and last might be incomplete, and we
     # need at least 4 cycles in the middle to have two full ones om
     # split-cycle devices like old Garmins.
-    if events.count("<") < 6:
+    if tags(events).count("<") < 6:
         sys.stderr.write("%s: has fewer than 6 cycles.\n" % fp.name)
         return
     # Trim off first and last bursts, which are likely incomplete.
@@ -170,17 +185,17 @@ def analyze(fp, stages):
     # Now the actual clique analysis
     unequal = False
     for i in range(len(bursts)-1):
-        if bursts[i] != bursts[i+1]:
+        if tags(bursts[i]) != tags(bursts[i+1]):
             unequal = True
             break
     if not unequal:
-        print "%s: has a regular cycle %s." % (filename, " ".join(bursts[0]))
+        print "%s: has a regular cycle %s." % (filename, " ".join(tags(bursts[0])))
     else:
         print "%s: has a split or variable cycle." % filename
         cycle_enders = []
         for burst in bursts:
-            if burst[-1] not in cycle_enders:
-                cycle_enders.append(burst[-1])
+            if burst[-1].tag not in cycle_enders:
+                cycle_enders.append(burst[-1].tag)
         if len(cycle_enders) == 1:
             print "%s: has a fixed end-of-cycle sentence %s." % (filename, cycle_enders[0])
         else:
@@ -189,7 +204,7 @@ def analyze(fp, stages):
         pathological = []
         for ender in cycle_enders:
             for burst in bursts:
-                if ender in burst and not ender == burst[-1] and not ender in pathological:
+                if ender in tags(burst) and not ender == burst[-1].tag and not ender in pathological:
                     pathological.append(ender)
         if pathological:
             print "%s: cycle-enders %s also occur in mid-cycle!" % (filename, " ".join(pathological))
