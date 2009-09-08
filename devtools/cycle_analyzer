@@ -75,7 +75,6 @@ def extract_from_nmea(filename, lineno, line):
         "GLL": 5,
         "GGA": 1,
         "GBS": 1,
-        "ZDA": 1,
         "PASHR": 4,
         }
     fields = line.split(",")
@@ -92,8 +91,12 @@ def extract_from_nmea(filename, lineno, line):
 
 def extract_from_json(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from a JSON dump of a sentence"
-    # FIXME: Analyze JSON sentences
-    raise analyze_error(filename, lineno, "JSON analsis not yet implemented.")
+    if not line.startstwith("{"):
+        return []
+    sentence = json.loads(line)
+    if "tag" not in sentence or sentence["tag"] not in ("RMC","GLL","GGA","GBS","PASHR") or "time" not in sentence:
+        return []
+    return [event(sentence["tag"], sentence["time"])]
 
 def extract_timestamped_sentences(fp):
     "Do the basic work of extracting tags and timestamps"
