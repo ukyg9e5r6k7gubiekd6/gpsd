@@ -76,11 +76,12 @@ def extract_timestamped_sentences(fp):
             return []
     return sequence
 
-def analyze(fp, stage):
+def analyze(fp, stages):
     "Analyze the cycle sequence of a device from its output logs."
     # First, extract tags and timestamps
     sequence = extract_timestamped_sentences(fp)
-    if stage == "extract":
+    if "sequence" in stages:
+        print "Raw tag/timestamp sequence"
         for (tag, timestamp) in sequence:
             print "%s: %s" % (tag, timestamp)
     # Then, do cycle detection
@@ -103,7 +104,8 @@ def analyze(fp, stage):
     # split-cycle devices like old Garmins.
     if events.count("-") < 6:
         sys.stderr.write("cycle_analyzer: fewer than 5 cycles in\n" % fp.name)
-    if stage == "events":
+    if "events" in stages:
+        print "Event list:"
         for event in events:
             print event
     # Now group events into bursts
@@ -115,18 +117,25 @@ def analyze(fp, stage):
             current = []
         else:
             current.append(event)
-    if stage == "bursts":
+    if "bursts" in stages:
+        "Burst list:"
+        for burst in bursts:
+            print burst
+    # Trim off first and last bursts, which are likely incomplete.
+    bursts = bursts[1:-1]
+    if "trim" in stages:
+        "After trimming:"
         for burst in bursts:
             print burst
     # FIXME: more analysis goes here
 
 if __name__ == "__main__":
-    stage = None
+    stages = ""
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "s:v")
         for (switch, val) in options:
             if (switch == '-s'):
-                stage = val		# Stop at specicified stage
+                stages = val		# Stop at specicified stage
             elif (switch == '-v'):
                 verbose += 1
     except getopt.GetoptError, msg:
@@ -137,7 +146,7 @@ if __name__ == "__main__":
         if arguments:
             for filename in arguments:
                 fp = open(filename)
-                analyze(fp, stage)
+                analyze(fp, stages)
                 fp.close()
         else:
             analyze(sys.stdin)
