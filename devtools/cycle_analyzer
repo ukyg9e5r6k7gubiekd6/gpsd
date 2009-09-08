@@ -78,10 +78,27 @@ def extract_timestamped_sentences(fp):
 
 def analyze(fp, stage):
     "Analyze the cycle sequence of a device from its output logs."
+    # First, extract tags and timestamps
     sequence = extract_timestamped_sentences(fp)
     if stage == "extract":
         for (tag, timestamp) in sequence:
             print "%s: %s" % (tag, timestamp)
+    # Then, do cycle detection
+    events = []
+    out_of_order = False
+    for i in range(len(sequence)-1):
+        (this_tag, this_time) = sequence[i]
+        (next_tag, next_time) = sequence[i+1]
+        events.append(this_tag)
+        if float(this_time) < float(next_time):
+            events.append("-")
+        if float(this_time) < float(next_time):
+            out_of_order = True
+    if out_of_order:
+        sys.stderr.write("cycle_analyzer: some timestamps occur out of order in %s\n" % fp.name)
+    if stage == "events":
+        for event in events:
+            print event
     # FIXME: more analysis goes here
 
 if __name__ == "__main__":
