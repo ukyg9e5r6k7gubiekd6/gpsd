@@ -1,9 +1,46 @@
 #!/usr/bin/env python
-#
-# Analyze one or more NMEA or JSON files to determine the cycle sequence of
-# sentences. JSON files must have been emitted by a driver without the
-# CYCLE_END_RELIABLE capability, otherwise the results will be meaningless.
+"""
+cycle_analyzer - perform cycle analysis on GPS log files
 
+This tool analyzes one or more NMEA or JSON files to determine the
+cycle sequence of sentences. JSON files must be reports from a gpsd
+driver which is without the CYCLE_END_RELIABLE capability and
+therefore ships every sentence containing a fix; otherwise the results
+will be meaningless.
+
+One purpose of this tool is to determine the end-of-cycle sentence
+that a binary-protocol device emits, so the result can be patched into
+the driver as a CYCLE_END_RELIABLE capability.  To get this, apply the
+tool to the JSON output from the driver (a log file beginning with a
+JSON sentence).  It will ignore everything but tag and timestamp
+fields, and will also ignore any NMEA in the file.
+
+Another purpose is to sanity-check the assumptions of the NMEA end-of-cycle
+detector. If a device has a regular reporting cycle with a constant
+end-of-cycle sentence, this tool will confirm that.  Otherwise, it will
+perform various checks attempting to find an end-of-cycle marker and report
+on what it finds.
+
+When cycle_analyzer reports a split- or variable-cycle device, some arguments
+to the -d switch can dump various analysis stages so you can get a better
+idea what is going on.  These are:
+
+   sequence - the entire sequence of dump tag/timestamp pairs from the log
+   events   - show how those reduce to event sequences
+   bursts   - show how sentences are grouped into bursts
+   trim     - show the burst list after the end bursts have been removed 
+
+In an event sequence, a '<' is a nornal start of cycle where the
+timestamp increments. A '>' is where the timestamp actually
+*decreases* between a a sentence and the one that follows. The NMEA
+cycle-end detector will ignore the '>' event; it sometimes occurs when
+GPZDA starts a cycle, but has no effect on where the asctual end of
+fix reporting is.
+
+If you see a message saying 'cycle-enders ... also occur in mid-cycle', the
+device will break the NMEA cycle detector.
+
+"""
 import sys, getopt, json
 
 verbose = 0
@@ -13,8 +50,8 @@ class analyze_error:
         self.filename = filename
         self.lineno = lineno
         self.msg = msg
-    def str(self):
-        return '"%s", line %d: %s' % (filename, lineno, msg)
+    def __str__(self):
+        return '"%s", line %d: %s' % (self.filename, self.lineno, self.msg)
 
 def extract_from_nmea(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from an NMEA sentence"
@@ -57,9 +94,9 @@ def extract_timestamped_sentences(fp):
             elif line.startswith("{"):
                 filetype = "JSON"
             else:
-                raise analyze_error(fp.name, lineno, "unknown file type.")
+                raise analyze_error(fp.name, lineno, "unknown sentence type.")
             if verbose:
-                print "cycle_analyzer: %s is %s" % (fp.name, filetype)
+                print "%s: is %s" % (fp.name, filetype)
         # The reason for this odd logic is that we want to oock onto
         # either (a) analyzing NMEA only, or (b) analyzing JSON only
         # and ignoring NMEA, depending on which kind the first data
@@ -71,9 +108,6 @@ def extract_timestamped_sentences(fp):
             sequence += extract_from_nmea(fp.name, lineno, line)
         elif filetype == "JSON" and line.startswith("{"):
             sequence + extract_from_json(fp.name, lineno, line)
-        else:
-            sys.stderr.write("cycle_analyzer: non-NMEA, non-JSON data %s.\n" % line)
-            return []
     return sequence
 
 def analyze(fp, stages):
@@ -94,16 +128,17 @@ def analyze(fp, stages):
             continue
         events.append(this_tag)
         if float(this_time) < float(next_time):
-            events.append("-")
-        if float(this_time) < float(next_time):
+            events.append("<")
+        if float(this_time) > float(next_time):
+            events.append(">")
             out_of_order = True
     if out_of_order:
-        sys.stderr.write("cycle_analyzer: some timestamps occur out of order in %s\n" % fp.name)
+        sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
     # We need 6 cycles because the first and last might be incomplete, and we
     # need at least 4 cycles in the middle to have two full ones om
     # split-cycle devices like old Garmins.
-    if events.count("-") < 6:
-        sys.stderr.write("cycle_analyzer: fewer than 5 cycles in\n" % fp.name)
+    if events.count("<") < 6:
+        sys.stderr.write("%s: has fewer than 6 cycles.\n" % fp.name)
     if "events" in stages:
         print "Event list:"
         for event in events:
@@ -111,14 +146,14 @@ def analyze(fp, stages):
     # Now group events into bursts
     bursts = []
     current = []
-    for event in events + ['-']:
-        if event == '-':
+    for event in events + ['<']:
+        if event == '<':
             bursts.append(tuple(current))
             current = []
         else:
             current.append(event)
     if "bursts" in stages:
-        "Burst list:"
+        print "Burst list:"
         for burst in bursts:
             print burst
     # Trim off first and last bursts, which are likely incomplete.
@@ -127,16 +162,41 @@ def analyze(fp, stages):
         "After trimming:"
         for burst in bursts:
             print burst
-    # FIXME: more analysis goes here
+    # Now the actual clique analysis
+    unequal = False
+    for i in range(len(bursts)-1):
+        if bursts[i] != bursts[i+1]:
+            unequal = True
+            break
+    if not unequal:
+        print "%s: has a regular cycle %s." % (filename, " ".join(bursts[0]))
+    else:
+        print "%s: has a split or variable cycle." % filename
+        cycle_enders = []
+        for burst in bursts:
+            if burst[-1] not in cycle_enders:
+                cycle_enders.append(burst[-1])
+        if len(cycle_enders) == 1:
+            print "%s: has a fixed end-of-cycle sentence %s." % (filename, cycle_enders[0])
+        else:
+            print "%s: has multiple cycle-enders %s." % (filename, " ".join(cycle_enders))
+        # Sanity check
+        pathological = []
+        for ender in cycle_enders:
+            for burst in bursts:
+                if ender in burst and not ender == burst[-1]:
+                    pathological.append(ender)
+        if pathological:
+            print "%s: cycle-enders %s also occur in mid-cycle!." % (filename, " ".join(pathological))
 
 if __name__ == "__main__":
     stages = ""
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "s:v")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:v")
         for (switch, val) in options:
-            if (switch == '-s'):
-                stages = val		# Stop at specicified stage
-            elif (switch == '-v'):
+            if (switch == '-d'):		# Debug
+                stages = val
+            elif (switch == '-v'):		# Verbose
                 verbose += 1
     except getopt.GetoptError, msg:
         print "cycle_analyzer: " + str(msg)
@@ -151,6 +211,6 @@ if __name__ == "__main__":
         else:
             analyze(sys.stdin)
     except analyze_error, e:
-        print e
+        print str(e)
         raise SystemExit, 1
         
