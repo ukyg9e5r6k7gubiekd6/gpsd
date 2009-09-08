@@ -21,6 +21,7 @@ information on the following topics:
 * Corrected DPT titling
 * Common talker IDs
 * Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
+* Sentence PASHR from [PASHR].
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -1786,6 +1787,34 @@ ZDL - Time and Distance to Variable Point
 
 Vendor extensions (this list is very incomplete):
 
+------------------------------------------------------------------------------
+
+ PASHR - RT300 proprietary roll and pitch sentence
+
+ $PASHR,hhmmss.sss,hhh.hh,T,rrr.rr,ppp.pp,xxx.xx,a.aaa,b.bbb,c.ccc,d,e*hh<CR><LF>
+ 
+Field number:
+ 
+  1)  hhmmss.sss – UTC time
+  2)  hhh.hh – Heading in degrees
+  3)  T – flag to indicate that the Heading is True Heading (i.e. to True North)
+  4)  rrr.rr – Roll Angle in degrees
+  5)  ppp.pp – Pitch Angle in degrees
+  6)  xxx.xx – Heave
+  7)  a.aaa – Roll Angle Accuracy Estimate (Stdev) in degrees
+  8)  b.bbb – Pitch Angle Accuracy Estimate (Stdev) in degrees
+  9)  c.ccc – Heading Angle Accuracy Estimate (Stdev) in degrees
+  10) d – Aiding Status
+  11) e – IMU Status
+  12) hh – Checksum
+
+[PASHR] describes this sentence as NMEA, though other sources say it is Ashtech 
+proprietary and describe a different format.
+ 
+Example: $PASHR,085335.000,224.19,T,-01.26,+00.83,+00.00,0.101,0.113,0.267,1,0*06
+
+------------------------------------------------------------------------------
+
  PGRME - Garmin Estimated Error
 
         1  2  3  4  5  6  7
@@ -1944,3 +1973,7 @@ Sources:
 [GLOBALSAT]
     "NMEA (National Marine Electronics Association) 0183 Protocol"
     http://www.usglobalsat.com/faq_details/NMEA.htm
+
+[PASHR]
+    "News - NMEA PASHR Output Format Added"
+    http://www.oxts.com/default.asp?pageRef=76&newsID=69
