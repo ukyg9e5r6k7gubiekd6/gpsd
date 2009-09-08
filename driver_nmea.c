@@ -107,6 +107,17 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 
 #define GPS_TIME_EQUAL(a, b) (fabs((a) - (b)) < 0.01)
 
+static void register_sentence_time(const char *tag, 
+				   struct gps_device_t *session)
+{
+    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
+	session->cycle_state |= CYCLE_START;
+	gpsd_report(LOG_PROG, "%s starts a reporting cycle.\n", tag);
+    }
+    session->gpsdata.sentence_time = session->gpsdata.fix.time;
+}
+
 /**************************************************************************
  *
  * NMEA sentence handling begins here
@@ -152,13 +163,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	if (count > 9) {
 	    merge_hhmmss(field[1], session);
 	    merge_ddmmyy(field[9], session);
+	    register_sentence_time("RMC", session);
 	    mask |= TIME_SET;
-	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state |= CYCLE_START;
-		gpsd_report(LOG_PROG, "GPRMC starts a reporting cycle.\n");
-	    }
-	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[3], &session->gpsdata);
 	mask |= LATLON_SET;
@@ -231,13 +237,8 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	if (session->driver.nmea.date.tm_year == 0)
 	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
+	    register_sentence_time("GLL", session);
 	    mask = TIME_SET;
-	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state |= CYCLE_START;
-		gpsd_report(LOG_PROG, "GPGLL starts a reporting cycle.\n");
-	    }
-	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[1], &session->gpsdata);
 	mask |= LATLON_SET;
@@ -296,13 +297,8 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	if (session->driver.nmea.date.tm_year == 0)
 	    gpsd_report(LOG_WARN, "can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
+	    register_sentence_time("GGA", session);
 	    mask |= TIME_SET;
-	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-		session->cycle_state |= CYCLE_START;
-		gpsd_report(LOG_PROG, "GPGGA starts a reporting cycle.\n");
-	    }
-	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[2], &session->gpsdata);
 	mask |= LATLON_SET;
@@ -595,12 +591,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
     session->driver.nmea.date.tm_mon = atoi(field[3])-1;
     session->driver.nmea.date.tm_mday = atoi(field[2]);
-    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
-	session->cycle_state |= CYCLE_START;
-	gpsd_report(LOG_PROG, "GPZDA starts a reporting cycle.\n");
-    }
-    session->gpsdata.sentence_time = session->gpsdata. fix.time;
+    register_sentence_time("ZDA", session);
     return mask;
 }
 
@@ -924,6 +915,14 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	retval = processMKT3301(count, session->driver.nmea.field, session);	
 #endif /* MKT3301_ENABLE */
     /*@ +usedef @*/
+
+    /*
+     * The end-of-cycle detector.  This code depends on just one assumption:
+     * if a sentence with a timestamp occurs just before start of cycle, then
+     * it never occurs in a non-end position (that is, before a sentence
+     * with the same timestamp).
+     */
+    /* FIXME: implementatiin goes here */
 
     /* we might have a reliable end-of-cycle */
     if (session->driver.nmea.cycle_end_reliable)
