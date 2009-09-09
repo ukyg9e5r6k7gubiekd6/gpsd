@@ -462,9 +462,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
     /* could change if the set of messages we enable does */
     session->cycle_state = CYCLE_END_RELIABLE;
     if (msgid == 0x0106)
-	session->cycle_state |= CYCLE_START;
-    else if (msgid == 0x0130)
-	session->cycle_state |= CYCLE_END;
+	session->cycle_state |= CYCLE_START | CYCLE_END;
 	    
     return mask | ONLINE_SET;
 }

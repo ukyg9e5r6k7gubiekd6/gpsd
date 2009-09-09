@@ -540,7 +540,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    session->cycle_state |= CYCLE_START;
     return LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
 	| TIMERR_SET | DOP_SET;
@@ -1108,6 +1107,16 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "0x%02x",cmd_id);
+
+    /*
+     * Only one message, at start of cycle, sends actual fix data, so
+     * we can treat it as end-of-cycle too. For correctness, and in case
+     * the reports ever merge data from other sentences, we should
+     * find out what the actual cycle-ender is.
+     */
+    session->cycle_state |= CYCLE_END_RELIABLE;
+    if (cmd_id == 0xb1)
+	session->cycle_state |= CYCLE_START | CYCLE_END;
 
     switch (cmd_id)
     {

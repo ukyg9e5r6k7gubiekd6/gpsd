@@ -467,7 +467,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 #endif /* NTPSHM_ENABLE */
 	/* fix quality data */
 	session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	session->cycle_state |= CYCLE_START | CYCLE_END | CYCLE_END_RELIABLE;
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET;
     }
     return mask;
@@ -753,6 +752,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
+
+    /* could change if the set of messages we enable does */
+    session->cycle_state = CYCLE_END_RELIABLE;
+    if (buf[0] == (unsigned char)0x02 || (unsigned char)0x62)
+	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch (buf[0])
     {

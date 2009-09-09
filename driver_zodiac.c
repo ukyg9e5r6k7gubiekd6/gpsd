@@ -407,15 +407,19 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     (void)snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"%u",id);
 
-    /* normal cycle for these devices is 1001 1002 */
+    /* 
+     * Normal cycle for these devices is 1001 1002.
+     * We cound 1001 as end of cycle because 1002 doesn't
+     * carry fix information.
+     */
     session->cycle_state = CYCLE_END_RELIABLE;
+    if (id == 1000)
+	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch (id) {
     case 1000:
-	session->cycle_state = CYCLE_END;
 	return handle1000(session);
     case 1002:
-	/* actual cycle end, but conveys no fix information */
 	return handle1002(session);
     case 1003:
 	return handle1003(session);

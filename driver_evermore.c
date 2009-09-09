@@ -137,7 +137,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 {
     unsigned char buf2[MAX_PACKET_LENGTH], *cp, *tp;
     size_t i, datalen;
-    unsigned int used, visible, satcnt;
+    unsigned int type, used, visible, satcnt;
     double version;
     gps_mask_t mask = 0;
 
@@ -161,15 +161,27 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	tp++;
     }
 
+    type = getub(buf2, 1);
+
     /*@ -usedef -compdef @*/
     gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %zd: %s\n",
-	buf2[0], datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_RAW));
+	type, datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_RAW));
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "EID%d",(int)buf2[0]);
+		   "EID%u", type);
 
-    switch (getub(buf2, 1))
+    /*
+     * Only one message sends actual fix data, so we can treat it as
+     * both start-of-cycle and end-of-cycle. For correctness, and in
+     * case the reports ever merge data from other sentences, we
+     * should find out what the actual cycle-ender is.
+     */
+    session->cycle_state |= CYCLE_END_RELIABLE;
+    if (type == 0x02)
+	session->cycle_state |= CYCLE_START | CYCLE_END;
+
+    switch (type)
     {
     case 0x02:	/* Navigation Data Output */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
@@ -195,7 +207,6 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    session->gpsdata.status,
 		    visible,
 		    used);
-	session->cycle_state |= CYCLE_START;
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype), 

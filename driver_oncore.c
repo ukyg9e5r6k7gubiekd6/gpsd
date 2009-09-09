@@ -315,6 +315,16 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	"MOT-%c%c", type>>8, type&0xff);
 
+    /*
+     * Only one message sends actual fix data, so we can treat it as
+     * both start-of-cycle and end-of-cycle. For correctness, and in
+     * case the reports ever merge data from other sentences, we
+     * should find out what the actual cycle-ender is.
+     */
+    session->cycle_state |= CYCLE_END_RELIABLE;
+    if (type == ONCTYPE('E','a'))
+	session->cycle_state |= CYCLE_START | CYCLE_END;
+
     switch (type)
     {
     case ONCTYPE('B','b'):

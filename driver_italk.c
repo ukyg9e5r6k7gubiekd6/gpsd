@@ -224,6 +224,12 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
     gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %zu: %s\n",
 	type, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
 
+    session->cycle_state = CYCLE_END_RELIABLE;
+    if (type == ITALK_NAV_FIX)
+	session->cycle_state |= CYCLE_START;
+    else if (type == ITALK_PRN_STATUS)
+	session->cycle_state |= CYCLE_END;
+
     switch (type)
     {
     case ITALK_NAV_FIX:

@@ -27,8 +27,10 @@ static	gps_mask_t superstar2_msg_ack(struct gps_device_t *,
 				      unsigned char *, size_t );
 static	gps_mask_t superstar2_msg_navsol_lla(struct gps_device_t *,
 					     unsigned char *, size_t );
+#ifdef __UNUSED__
 static	gps_mask_t superstar2_msg_navsol_ecef(struct gps_device_t *,
 					      unsigned char *, size_t );
+#endif /* __UNUSED__ */
 static	gps_mask_t superstar2_msg_timing(struct gps_device_t *,
 					  unsigned char *, size_t );
 static	gps_mask_t superstar2_msg_svinfo(struct gps_device_t *,
@@ -144,11 +146,17 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 		session->gpsdata.fix.mode = MODE_NO_FIX;
     }
 
-    session->cycle_state |= CYCLE_START;
     mask |= MODE_SET | STATUS_SET ;
 
     return mask;
 }
+
+#ifdef __UNUSED__
+/*
+ * This is duplicative with navsol_lla. By suppressing evaluation of it,
+ * we gain the desirable feature that the fix update is atomic and 
+ * exactly once per cycle.
+ */
 
 static gps_mask_t
 superstar2_msg_navsol_ecef(struct gps_device_t *session,
@@ -218,11 +226,11 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 		session->gpsdata.fix.mode = MODE_NO_FIX;
     }
 
-    session->cycle_state |= CYCLE_START;
     mask |= MODE_SET | STATUS_SET;
 
     return mask;
 }
+#endif /* __UNUSED__ */
 
 /**
  * GPS Satellite Info
@@ -437,6 +445,16 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     (void)snprintf(session->gpsdata.tag,
 	sizeof(session->gpsdata.tag), "SS2-%d", type);
 
+    /*
+     * Only one message sends actual fix data, so we can treat it as
+     * both start-of-cycle and end-of-cycle. For correctness, and in
+     * case the reports ever merge data from other sentences, we
+     * should find out what the actual cycle-ender is.
+     */
+    session->cycle_state |= CYCLE_END_RELIABLE;
+    if (type == SUPERSTAR2_NAVSOL_LLA)
+	session->cycle_state |= CYCLE_START | CYCLE_END;
+
     switch (type)
     {
     case SUPERSTAR2_ACK: /* Message Acknowledgement */
@@ -445,8 +463,10 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 	return superstar2_msg_svinfo(session, buf, len);
     case SUPERSTAR2_NAVSOL_LLA: /* Navigation Data */
 	return superstar2_msg_navsol_lla(session, buf, len);
+#ifdef __UNUSED__
     case SUPERSTAR2_NAVSOL_ECEF: /* Navigation Data */
 	return superstar2_msg_navsol_ecef(session, buf, len);
+#endif /* __UNUSED__ */
     case SUPERSTAR2_VERSION: /* Hardware/Software Version */
 	return superstar2_msg_version(session, buf, len);
     case SUPERSTAR2_TIMING: /* Timing Parameters */

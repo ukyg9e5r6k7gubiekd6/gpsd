@@ -217,6 +217,10 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
      * packet analyzer.
      */
     session->cycle_state = CYCLE_END_RELIABLE;
+    if (msgid == MY_START_OF_CYCLE)
+	session->cycle_state |= CYCLE_START;
+    else if (msgid == MY_END_OF_CYCLE)
+	session->cycle_state |= CYCLE_END;
 
     type = GET_MESSAGE_TYPE();
 
