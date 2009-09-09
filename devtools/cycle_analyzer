@@ -6,20 +6,22 @@ This tool analyzes one or more NMEA or JSON files to determine the
 cycle sequence of sentences. JSON files must be reports from a gpsd
 driver which is without the CYCLE_END_RELIABLE capability and
 therefore ships every sentence containing a fix; otherwise the results
-will be meaningless.
+will be meaningless because only the end-of-cycle sentences will show
+in the JSON.
 
 One purpose of this tool is to determine the end-of-cycle sentence
 that a binary-protocol device emits, so the result can be patched into
 the driver as a CYCLE_END_RELIABLE capability.  To get this, apply the
-tool to the JSON output from the driver (a log file beginning with a
-JSON sentence).  It will ignore everything but tag and timestamp
-fields, and will also ignore any NMEA in the file.
+tool to the JSON output from the driver using the -j switch.  It will
+ignore everything but tag and timestamp fields, and will also ignore
+any NMEA in the file.
 
-Another purpose is to sanity-check the assumptions of the NMEA end-of-cycle
-detector. If a device has a regular reporting cycle with a constant
-end-of-cycle sentence, this tool will confirm that.  Otherwise, it will
-perform various checks attempting to find an end-of-cycle marker and report
-on what it finds.
+Another purpose is to sanity-check the assumptions of the NMEA
+end-of-cycle detector. For this purpose, run without -j; if a device
+has a regular reporting cycle with a constant end-of-cycle sentence,
+this tool will confirm that.  Otherwise, it will perform various
+checks attempting to find an end-of-cycle marker and report on what it
+finds.
 
 When cycle_analyzer reports a split- or variable-cycle device, some arguments
 to the -d switch can dump various analysis stages so you can get a better
