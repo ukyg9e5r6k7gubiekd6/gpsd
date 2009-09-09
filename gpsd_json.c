@@ -655,7 +655,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 
     (void)snprintf(buf, buflen, 
 		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"
-		   "\"mmsi\":%09u,", 
+		   "\"mmsi\":%u,", 
 		   ais->type, ais->repeat, ais->mmsi);
 
 #define JSON_BOOL(x)	((x)?"true":"false")

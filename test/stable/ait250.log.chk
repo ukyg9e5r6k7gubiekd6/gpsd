@@ -17,12 +17,12 @@ $GPGBS,194909.00,3.0,1.9,4.2,,,,*40
 {"class":"AIS","type":1,"repeat":0,"mmsi":245618000,"status":0,"turn":0,"speed":0,"accuracy":false,"lon":2757910,"lat":31482660,"course":3550,"heading":96,"second":8,"maneuver":0,"raim":false,"radio":4564}
 $GPRMC,194910.00,A,5241.99782,N,00517.56453,E,0.006,,010809,,,A*7F
 !AIVDO,1,1,,,B3aC3LP00063afWRNp`03wU5wP06,0*45
-{"class":"AIS","type":20,"repeat":0,"mmsi":002442024,"offset1":285,"number1":2,"timeout1":7,"increment1":1125,"offset2":0,"number2":0,"timeout2":0,"increment2":0,"offset3":0,"number3":0,"timeout3":0,"increment3":0,"offset4":0,"number4":0,"timeout4":0,"increment4":0}
+{"class":"AIS","type":20,"repeat":0,"mmsi":2442024,"offset1":285,"number1":2,"timeout1":7,"increment1":1125,"offset2":0,"number2":0,"timeout2":0,"increment2":0,"offset3":0,"number3":0,"timeout3":0,"increment3":0,"offset4":0,"number4":0,"timeout4":0,"increment4":0}
 $GPGBS,194910.00,3.0,1.9,4.2,,,,*48
 {"class":"TPV","tag":"GBS","time":1249156150.000,"ept":0.005,"lat":52.699963667,"lon":5.292742167,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.003,"mode":2}
 {"class":"AIS","type":1,"repeat":0,"mmsi":211315540,"status":7,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":63,"maneuver":0,"raim":false,"radio":266648}
 $GPRMC,194911.00,A,5241.99772,N,00517.56430,E,0.020,229.98,010809,,,A*66
-{"class":"AIS","type":4,"repeat":0,"mmsi":002442024,"timestamp":"0000-00-00T24:60:60Z","accuracy":true,"lon":3059000,"lat":31586500,"epfd":7,"raim":false,"radio":229796}
+{"class":"AIS","type":4,"repeat":0,"mmsi":2442024,"timestamp":"0000-00-00T24:60:60Z","accuracy":true,"lon":3059000,"lat":31586500,"epfd":7,"raim":false,"radio":229796}
 {"class":"AIS","type":1,"repeat":0,"mmsi":305235000,"status":5,"turn":5,"speed":99,"accuracy":true,"lon":2845500,"lat":31458600,"course":2810,"heading":282,"second":11,"maneuver":0,"raim":false,"radio":66386}
 !AIVDO,1,1,,,B3aC3LP00063aeWRNpV?gwUUwP06,0*4B
 $GPGBS,194911.00,3.0,1.9,4.2,,,,*49
@@ -51,7 +51,7 @@ $GPRMC,194916.00,A,5241.99726,N,00517.56385,E,0.007,,010809,,,A*7A
 !AIVDO,1,1,,,B3aC3LP00063ac7RNp@03w`5wP06,0*35
 $GPGBS,194916.00,3.0,1.9,4.2,,,,*4E
 {"class":"TPV","tag":"GBS","time":1249156156.000,"ept":0.005,"lat":52.699954333,"lon":5.292730833,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.004,"mode":2}
-{"class":"AIS","type":1,"repeat":0,"mmsi":000000004,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":319968}
+{"class":"AIS","type":1,"repeat":0,"mmsi":4,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":319968}
 $GPRMC,194917.00,A,5241.99721,N,00517.56389,E,0.003,,010809,,,A*74
 !AIVDO,1,1,,,B3aC3LP00063ac7RNp@03w`UwP06,0*55
 $GPGBS,194917.00,3.0,1.9,4.2,,,,*4F
@@ -90,13 +90,13 @@ $GPRMC,194924.00,A,5241.99705,N,00517.56425,E,0.006,,010809,,,A*76
 $GPGBS,194924.00,3.0,1.9,4.2,,,,*4F
 {"class":"TPV","tag":"GBS","time":1249156164.000,"ept":0.005,"lat":52.699950833,"lon":5.292737500,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.003,"mode":2}
 !AIVDO,1,1,,,B3aC3LP00063ae7RNp803wd5wP06,0*4F
-{"class":"AIS","type":1,"repeat":0,"mmsi":000000004,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":266636}
+{"class":"AIS","type":1,"repeat":0,"mmsi":4,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":266636}
 {"class":"AIS","type":1,"repeat":0,"mmsi":244630024,"status":5,"turn":-128,"speed":67,"accuracy":false,"lon":3263528,"lat":31521978,"course":277,"heading":511,"second":23,"maneuver":1,"raim":false,"radio":52616}
 $GPRMC,194925.00,A,5241.99714,N,00517.56429,E,0.002,,010809,,,A*7F
 $GPGBS,194925.00,3.0,1.9,4.2,,,,*4E
 {"class":"TPV","tag":"GBS","time":1249156165.000,"ept":0.005,"lat":52.699952333,"lon":5.292738167,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.001,"mode":2}
 !AIVDO,1,1,,,B3aC3LP00063ae7RNp<03wdUwP06,0*2B
-{"class":"AIS","type":20,"repeat":0,"mmsi":002442024,"offset1":1385,"number1":2,"timeout1":7,"increment1":1125,"offset2":0,"number2":0,"timeout2":0,"increment2":0,"offset3":0,"number3":0,"timeout3":0,"increment3":0,"offset4":0,"number4":0,"timeout4":0,"increment4":0}
+{"class":"AIS","type":20,"repeat":0,"mmsi":2442024,"offset1":1385,"number1":2,"timeout1":7,"increment1":1125,"offset2":0,"number2":0,"timeout2":0,"increment2":0,"offset3":0,"number3":0,"timeout3":0,"increment3":0,"offset4":0,"number4":0,"timeout4":0,"increment4":0}
 $GPRMC,194926.00,A,5241.99718,N,00517.56440,E,0.010,,010809,,,A*7C
 $GPGBS,194926.00,3.0,1.9,4.2,,,,*4D
 {"class":"TPV","tag":"GBS","time":1249156166.000,"ept":0.005,"lat":52.699953000,"lon":5.292740000,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.005,"mode":2}
@@ -110,7 +110,7 @@ $GPRMC,194928.00,A,5241.99730,N,00517.56469,E,0.005,,010809,,,A*77
 $GPGBS,194928.00,3.0,1.9,4.2,,,,*43
 {"class":"TPV","tag":"GBS","time":1249156168.000,"ept":0.005,"lat":52.699955000,"lon":5.292744833,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.003,"mode":2}
 !AIVDO,1,1,,,B3aC3LP00063ag7RNpD03wf5sP06,0*37
-{"class":"AIS","type":1,"repeat":0,"mmsi":000000004,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":266630}
+{"class":"AIS","type":1,"repeat":0,"mmsi":4,"status":15,"turn":-128,"speed":1023,"accuracy":false,"lon":108600000,"lat":54600000,"course":3600,"heading":511,"second":60,"maneuver":0,"raim":false,"radio":266630}
 $GPRMC,194929.00,A,5241.99738,N,00517.56482,E,0.002,,010809,,,A*7C
 $GPGBS,194929.00,3.0,1.9,4.2,,,,*42
 {"class":"TPV","tag":"GBS","time":1249156169.000,"ept":0.005,"lat":52.699956333,"lon":5.292747000,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.001,"mode":2}
@@ -120,7 +120,7 @@ $GPRMC,194930.00,A,5241.99745,N,00517.56492,E,0.006,,010809,,,A*7B
 $GPGBS,194930.00,3.0,1.9,4.2,,,,*4A
 {"class":"TPV","tag":"GBS","time":1249156170.000,"ept":0.005,"lat":52.699957500,"lon":5.292748667,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.003,"mode":2}
 !AIVDO,1,1,,,B3aC3LP00063ahWRNpH03wg5sP06,0*55
-{"class":"AIS","type":4,"repeat":0,"mmsi":002442024,"timestamp":"0000-00-00T24:60:60Z","accuracy":true,"lon":3059000,"lat":31586500,"epfd":7,"raim":false,"radio":230546}
+{"class":"AIS","type":4,"repeat":0,"mmsi":2442024,"timestamp":"0000-00-00T24:60:60Z","accuracy":true,"lon":3059000,"lat":31586500,"epfd":7,"raim":false,"radio":230546}
 $GPRMC,194931.00,A,5241.99750,N,00517.56500,E,0.002,,010809,,,A*70
 $GPGBS,194931.00,3.0,1.9,4.2,,,,*4B
 {"class":"TPV","tag":"GBS","time":1249156171.000,"ept":0.005,"lat":52.699958333,"lon":5.292750000,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.001,"mode":2}
