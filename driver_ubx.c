@@ -115,7 +115,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     else if (session->gpsdata.fix.mode != MODE_NO_FIX)
 	session->gpsdata.status = STATUS_FIX;
 
-    session->cycle_state |= CYCLE_START;
     mask |= MODE_SET | STATUS_SET | USED_SET ;
 
     return mask;
@@ -460,6 +459,13 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	   "0x%04hx", msgid);
 
+    /* could change if the set of messages we enable does */
+    session->cycle_state = CYCLE_END_RELIABLE;
+    if (msgid == 0x0106)
+	session->cycle_state |= CYCLE_START;
+    else if (msgid == 0x0130)
+	session->cycle_state |= CYCLE_END;
+	    
     return mask | ONLINE_SET;
 }
 /*@ -charint @*/
