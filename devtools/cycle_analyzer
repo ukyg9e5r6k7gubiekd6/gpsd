@@ -45,6 +45,7 @@ import sys, getopt, json
 
 verbose = 0
 suppress_regular = False
+parse_json = False
 
 class analyze_error:
     def __init__(self, filename, lineno, msg):
@@ -93,10 +94,15 @@ def extract_from_json(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from a JSON dump of a sentence"
     if not line.startswith("{"):
         return []
-    sentence = json.loads(line)
-    if "tag" not in sentence or sentence["tag"] not in ("RMC","GLL","GGA","GBS","PASHR") or "time" not in sentence:
+    try:
+        sentence = json.loads(line)
+        if "tag" not in sentence or sentence["tag"] not in ("RMC","GLL","GGA","GBS","PASHR") or "time" not in sentence:
+            return []
+        return [event(sentence["tag"], sentence["time"])]
+    except ValueError, e:
+        print line.rstrip()
+        print e
         return []
-    return [event(sentence["tag"], sentence["time"])]
 
 def extract_timestamped_sentences(fp):
     "Do the basic work of extracting tags and timestamps"
@@ -109,7 +115,7 @@ def extract_timestamped_sentences(fp):
         lineno += 1
         if line.startswith("#"):
             continue
-        if not json and line.startswith("$"):
+        if not parse_json and line.startswith("$"):
             sequence += extract_from_nmea(fp.name, lineno, line)
         elif json and line.startswith("{"):
             sequence + extract_from_json(fp.name, lineno, line)
@@ -228,7 +234,7 @@ if __name__ == "__main__":
             if (switch == '-d'):		# Debug
                 stages = val
             elif (switch == '-j'):		# Interpret JSON, not NMEA
-                json = True
+                parse_json = True
             elif (switch == '-v'):		# Verbose
                 verbose += 1
             elif (switch == '-s'):		# Suppress logs with no problems

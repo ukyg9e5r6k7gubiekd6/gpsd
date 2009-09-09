@@ -207,9 +207,12 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 			       used ? "true" : "false");
 	    }
 	}
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "]", replylen-strlen(reply));
     }
+    if (reply[strlen(reply)-1] == ',')
+	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", replylen-strlen(reply));
     if (datap->satellites != reported)
 	gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
