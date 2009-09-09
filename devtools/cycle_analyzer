@@ -9,6 +9,11 @@ therefore ships every sentence containing a fix; otherwise the results
 will be meaningless because only the end-of-cycle sentences will show
 in the JSON.
 
+If a filename argument ends with '.log', and the sentence type in it
+is not recognizable, this tool adds '.chk' to the name and tries again
+assuming the latter is a JSON dump.  Thus, invoking it again *.log in
+a directory full of check files will do the right thing.
+
 One purpose of this tool is to determine the end-of-cycle sentence
 that a binary-protocol device emits, so the result can be patched into
 the driver as a CYCLE_END_RELIABLE capability.  To get this, apply the
@@ -44,7 +49,7 @@ device will confuse the NMEA cycle detector, leading to more reports per cycle
 than the ideal.
 
 """
-import sys, getopt, json
+import sys, os, getopt, json
 
 verbose = 0
 suppress_regular = False
@@ -106,7 +111,7 @@ def extract_from_json(filename, lineno, line):
         print e
         return []
 
-def extract_timestamped_sentences(fp):
+def extract_timestamped_sentences(fp, json_parse=parse_json):
     "Do the basic work of extracting tags and timestamps"
     sequence = []
     lineno = 0
@@ -119,9 +124,9 @@ def extract_timestamped_sentences(fp):
             continue
         if line[0] not in ("$", "!", "{"):
             raise analyze_error(fp.name, "unknown sentence type.")
-        if not parse_json and line.startswith("$"):
+        if not json_parse and line.startswith("$"):
             sequence += extract_from_nmea(fp.name, lineno, line)
-        elif parse_json and line.startswith("{"):
+        elif json_parse and line.startswith("{"):
             sequence += extract_from_json(fp.name, lineno, line)
     return sequence
 
@@ -200,7 +205,7 @@ def analyze(sequence, name):
     # Should know now if cycle is regular
     if regular:
         if not suppress_regular:
-            print "%s: has a regular cycle %s." % (filename, " ".join(tags(bursts[0])))
+            print "%s: has a regular cycle %s." % (name, " ".join(tags(bursts[0])))
     else:
         # If it was not the case that all cycles matched, then we need
         # a minimum of 6 cycles because the first and last might be
@@ -210,16 +215,16 @@ def analyze(sequence, name):
             sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % name)
             return
         if verbose > 0:
-            print "%s: has a split or variable cycle." % filename
+            print "%s: has a split or variable cycle." % name
         cycle_enders = []
         for burst in bursts:
             if burst[-1].tag not in cycle_enders:
                 cycle_enders.append(burst[-1].tag)
         if len(cycle_enders) == 1:
             if not suppress_regular:
-                print "%s: has a fixed end-of-cycle sentence %s." % (filename, cycle_enders[0])
+                print "%s: has a fixed end-of-cycle sentence %s." % (name, cycle_enders[0])
         else:
-            print "%s: has multiple cycle-enders %s." % (filename, " ".join(cycle_enders))
+            print "%s: has multiple cycle-enders %s." % (name, " ".join(cycle_enders))
         # Sanity check
         pathological = []
         for ender in cycle_enders:
@@ -227,7 +232,7 @@ def analyze(sequence, name):
                 if ender in tags(burst) and not ender == burst[-1].tag and not ender in pathological:
                     pathological.append(ender)
         if pathological:
-            print "%s: cycle-enders %s also occur in mid-cycle!" % (filename, " ".join(pathological))
+            print "%s: cycle-enders %s also occur in mid-cycle!" % (name, " ".join(pathological))
 
 if __name__ == "__main__":
     stages = ""
@@ -254,7 +259,15 @@ if __name__ == "__main__":
                     sequence = extract_timestamped_sentences(fp)
                     analyze(sequence, filename)
                 except analyze_error, e:
-                    print e
+                    if filename.endswith(".log") and os.path.exists(filename+".chk"):
+                        fp2 = open(filename+".chk")
+                        try:
+                            sequence = extract_timestamped_sentences(fp2, json_parse=True)
+                            analyze(sequence, filename+".chk")
+                        finally:
+                            fp2.close()
+                    else:
+                        print e
                 fp.close()
         else:
             sequence = extract_timestamped_sentences(sys.stdin)
