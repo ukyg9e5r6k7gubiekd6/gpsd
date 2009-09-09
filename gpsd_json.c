@@ -66,7 +66,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
     return to;
 }
 
-void json_version_dump(/*@out*/char *reply, size_t replylen)
+void json_version_dump(/*@out@*/char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
 		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"api_major\":%d,\"api_minor\":%d}\r\n", 
@@ -223,6 +223,7 @@ int json_device_read(const char *buf,
 			     struct devconfig_t *dev, const char **endptr)
 {
     char serialmode[4];
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	
@@ -248,6 +249,7 @@ int json_device_read(const char *buf,
 				   .dflt.real = NAN},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status;
 
     status = json_read_object(buf, json_attrs_device, endptr);
@@ -313,6 +315,7 @@ int json_watch_read(const char *buf,
 		    const char **endptr)
 {
     int intcasoc;
+    /*@ -fullinitblock @*/
     struct json_attr_t chanconfig_attrs[] = {
 	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
                                      .dflt.boolean = true},
@@ -323,6 +326,7 @@ int json_watch_read(const char *buf,
 	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status;
 
     status = json_read_object(buf, chanconfig_attrs, endptr);

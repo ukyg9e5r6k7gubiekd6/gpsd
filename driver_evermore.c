@@ -155,6 +155,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     datalen -= 2;
 
+    /*@ -usedef @*/
     for (i = 0; i < (size_t)datalen; i++) {
 	*tp = *cp++;
 	if (*tp == 0x10) cp++;
@@ -162,6 +163,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     }
 
     type = getub(buf2, 1);
+    /*@ +usedef @*/
 
     /*@ -usedef -compdef @*/
     gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %zd: %s\n",

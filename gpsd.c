@@ -515,7 +515,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->fd = -1;
 }
 
-static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
+static ssize_t throttled_write(struct subscriber_t *sub, char *buf, size_t len)
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
     ssize_t status;
@@ -534,8 +534,8 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 	}
     }
 
-    status = write(sub->fd, buf, (size_t)len);
-    if (status == len )
+    status = write(sub->fd, buf, len);
+    if (status == (ssize_t)len)
 	return status;
     else if (status > -1) {
 	gpsd_report(LOG_INF, "short write disconnecting client(%d)\n",
@@ -570,7 +570,7 @@ static void notify_watchers(struct gps_device_t *device, bool newstyle, char *se
 	struct subscriber_t *sub = channel->subscriber;
 	/*@-boolcompare@*/
 	if (channel->device==device && sub != NULL && (newstyle(sub) == newstyle))
-	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
+	    (void)throttled_write(sub, buf, strlen(buf));
 	/*@+boolcompare@*/
     }
 }
@@ -613,7 +613,7 @@ static void raw_hook(struct gps_data_t *ud,
 	    /* copy raw NMEA sentences from GPS to clients in raw mode */
 	    if (sub != NULL && channel->device != NULL &&
 		strcmp(ud->dev.path, channel->device->gpsdata.dev.path)==0)
-		(void)throttled_write(sub, sentence, (ssize_t)len);
+		(void)throttled_write(sub, sentence, len);
 	    
 	}
 }

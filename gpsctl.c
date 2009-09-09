@@ -288,12 +288,12 @@ int main(int argc, char **argv)
 	}
 
 	if (to_nmea) {
-	       (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":0}\r\n", device); 
-	       if (gpsdata->dev.driver_mode != MODE_NMEA) {
-		   gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
-		   status = 1;
-	       } else
-		   gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
+	    (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":0}\r\n", device); 
+	    if (gpsdata->dev.driver_mode != MODE_NMEA) {
+		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
+		status = 1;
+	    } else
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":1}\r\n", device);

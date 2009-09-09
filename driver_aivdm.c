@@ -237,7 +237,7 @@ bool aivdm_decode(char *buf, size_t buflen,
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)ais_context->bits+11,
 			 (ais->type6.bitcount + 7) / 8);
-	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%u\n",
+	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%zd\n",
 			ais->type6.seqno,
 			ais->type6.dest_mmsi,
 			ais->type6.app_id,
@@ -252,10 +252,12 @@ bool aivdm_decode(char *buf, size_t buflen,
 		    mmsi[i] = UBITS(40 + 32*i, 30);
 		else
 		    mmsi[i] = 0;
+	    /*@ -usedef @*/
 	    ais->type7.mmsi1 = mmsi[0];
 	    ais->type7.mmsi2 = mmsi[1];
 	    ais->type7.mmsi3 = mmsi[2];
 	    ais->type7.mmsi4 = mmsi[3];
+	    /*@ +usedef @*/
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	}
@@ -266,7 +268,7 @@ bool aivdm_decode(char *buf, size_t buflen,
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)ais_context->bits+7,
 			 (ais->type8.bitcount + 7) / 8);
-	    gpsd_report(LOG_INF, "id=%u, cnt=%u\n",
+	    gpsd_report(LOG_INF, "id=%u, cnt=%zd\n",
 			ais->type8.app_id,
 			ais->type8.bitcount);
 	    break;

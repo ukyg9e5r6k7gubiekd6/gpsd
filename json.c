@@ -63,7 +63,7 @@ has to be inline in the struct.
 #endif /* JSONDEBUG */
 
 static char *json_target_address(const struct json_attr_t *cursor, 
-			       const struct json_array_t *parent, 
+				 /*@null@*/const struct json_array_t *parent, 
 			       int offset)
 {
     if (parent == NULL || parent->element_type != structobject) { 
@@ -91,7 +91,11 @@ static char *json_target_address(const struct json_attr_t *cursor,
 	return parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
 }
 
-static int json_internal_read_object(const char *cp, const struct json_attr_t *attrs, const struct json_array_t *parent, int offset, const char **end)
+static int json_internal_read_object(const char *cp, 
+				     const struct json_attr_t *attrs, 
+				     const struct json_array_t *parent, 
+				     int offset, 
+				     /*@null@*/const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_escape, in_val_token, post_val} state = 0;
@@ -448,7 +452,9 @@ breakout:
     return 0;
 }
 
-int json_read_object(const char *cp, const struct json_attr_t *attrs, const char **end)
+int json_read_object(const char *cp, 
+		     const struct json_attr_t *attrs, 
+		     /*@null@*/const char **end)
 {
     return json_internal_read_object(cp, attrs, NULL, 0, end);
 }

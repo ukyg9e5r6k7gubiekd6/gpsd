@@ -20,15 +20,17 @@ representations to libgps structures.
 #include "gpsd.h"
 #include "gps_json.h"
 
+/*@ -mustdefine @*/
 static void lenhex_unpack(const char *from, 
 			  size_t *plen, /*@out@*/char *to, size_t maxlen)
 {
     char *colon = strchr(from, ':');
 
-    *plen = (unsigned)atoi(from);
+    *plen = (size_t)atoi(from);
     if (colon != NULL)
 	(void)gpsd_hexpack(colon+1, to, maxlen);
 }
+/*@ +mustdefine @*/
 
 int json_ais_read(const char *buf, 
 		    char *path, size_t pathlen,

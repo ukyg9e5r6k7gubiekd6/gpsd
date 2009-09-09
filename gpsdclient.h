@@ -9,7 +9,7 @@ struct fixsource_t
     char *spec;		/* pointer to actual storage */
     char *server;
     char *port;
-    char *device;
+    /*@null@*/char *device;
 };
 
 enum unit {unspecified, imperial, nautical, metric};

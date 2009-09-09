@@ -40,9 +40,9 @@ static int remotegpsd_device_probe(const char *host,
 	    gpsd_report(LOG_WARN, "remotegpsd device probe write error %d\n", dsock);
 	    return -1;
     }
-    ret = read(dsock, buf, sizeof(buf));
+    ret = (int)read(dsock, buf, sizeof(buf));
     (void)close(dsock);
-    if (strlen(devpath) && (NULL == strstr(buf, devpath)))
+    if (strlen(devpath) > 0 && (NULL == strstr(buf, devpath)))
 	return 1;
     else
 	return 0;
