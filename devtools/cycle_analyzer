@@ -51,12 +51,11 @@ suppress_regular = False
 parse_json = False
 
 class analyze_error:
-    def __init__(self, filename, lineno, msg):
+    def __init__(self, filename, msg):
         self.filename = filename
-        self.lineno = lineno
         self.msg = msg
-    def __str__(self):
-        return '"%s", line %d: %s' % (self.filename, self.lineno, self.msg)
+    def __repr__(self):
+        return '%s: %s' % (self.filename, self.msg)
 
 class event:
     def __init__(self, tag, time=0):
@@ -119,19 +118,17 @@ def extract_timestamped_sentences(fp):
         if line.startswith("#"):
             continue
         if line[0] not in ("$", "!", "{"):
-            print "%s: unknown sentence type." % fp.name
-            return []
+            raise analyze_error(fp.name, "unknown sentence type.")
         if not parse_json and line.startswith("$"):
             sequence += extract_from_nmea(fp.name, lineno, line)
         elif parse_json and line.startswith("{"):
             sequence += extract_from_json(fp.name, lineno, line)
     return sequence
 
-def analyze(fp, stages):
+def analyze(sequence, name):
     "Analyze the cycle sequence of a device from its output logs."
     # First, extract tags and timestamps
     regular = False
-    sequence = extract_timestamped_sentences(fp)
     if not sequence:
         return
     if "sequence" in stages:
@@ -154,7 +151,7 @@ def analyze(fp, stages):
                 events.append(event(">"))
                 out_of_order = True
     if out_of_order and verbose:
-        sys.stderr.write("%s: has some timestamps out of order.\n" % fp.name)
+        sys.stderr.write("%s: has some timestamps out of order.\n" % name)
     if "events" in stages:
         print "Event list:"
         for e in events:
@@ -174,7 +171,7 @@ def analyze(fp, stages):
             print burst
     # We need 4 cycles because the first and last might be incomplete.
     if tags(events).count("<") < 4:
-        sys.stderr.write("%s: has fewer than 4 cycles.\n" % fp.name)
+        sys.stderr.write("%s: has fewer than 4 cycles.\n" % name)
         return
     # First try at detecting a regular cycle
     unequal = False
@@ -210,7 +207,7 @@ def analyze(fp, stages):
         # incomplete, and we need at least 4 cycles in the middle to
         # have two full ones on split-cycle devices like old Garmins.
         if tags(events).count("<") < 6:
-            sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % fp.name)
+            sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % name)
             return
         if verbose > 0:
             print "%s: has a split or variable cycle." % filename
@@ -253,10 +250,15 @@ if __name__ == "__main__":
         if arguments:
             for filename in arguments:
                 fp = open(filename)
-                analyze(fp, stages)
+                try:
+                    sequence = extract_timestamped_sentences(fp)
+                except analyze_error, e:
+                    print e
+                analyze(sequence, filename)
                 fp.close()
         else:
-            analyze(sys.stdin)
+            sequence = extract_timestamped_sentences(sys.stdin)
+            analyze(sequence, "standard input")
     except analyze_error, e:
         print str(e)
         raise SystemExit, 1
