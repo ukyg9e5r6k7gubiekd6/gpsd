@@ -881,7 +881,7 @@ static void tsip_mode(struct gps_device_t *session, int mode)
         /* The speed switcher also puts us back in TSIP, so call it */
         /* with the default 9600 8O1. */
 	// FIXME: Should preserve the current speed.
-        tsip_speed_switch(session, 9600, 'O', 1);
+        (void)tsip_speed_switch(session, 9600, 'O', 1);
 
     } else {
         gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);

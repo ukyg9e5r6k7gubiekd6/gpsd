@@ -562,7 +562,7 @@ struct ais_t
 	    //uint spare;		spare bit(s) */
 	    uint app_id;        	/* Application ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
-	    uint bitcount;		/* bit count of the data */
+	    size_t bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
 	} type6;
 	/* Type 7 - Binary Acknowledge */
@@ -578,7 +578,7 @@ struct ais_t
 	    //uint spare;		spare bit(s) */
 	    uint app_id;        	/* Application ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
-	    uint bitcount;		/* bit count of the data */
+	    size_t bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
 	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
@@ -653,7 +653,7 @@ struct ais_t
 	    int lat;			/* latitude */
 	    //uint spare2;		spare bit(s) */
 #define AIS_TYPE17_BINARY_MAX	736	/* 920 bits */
-	    uint bitcount;		/* bit count of the data */
+	    size_t bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE17_BINARY_MAX + 7) / 8];
 	} type17;
 	/* Type 18 - Standard Class B CS Position Report */

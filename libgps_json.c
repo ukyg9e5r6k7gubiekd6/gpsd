@@ -23,6 +23,7 @@ static int json_tpv_read(const char *buf,
 			 struct gps_data_t *gpsdata, const char **endptr)
 {
     int status;
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	{"class",  check,   .dflt.check = "TPV"},
 	{"device", string,  .addr.string = gpsdata->dev.path,
@@ -61,6 +62,7 @@ static int json_tpv_read(const char *buf,
 			    .dflt.integer = MODE_NOT_SEEN},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
 
     status = json_read_object(buf, json_attrs_1, endptr);
 
@@ -103,6 +105,7 @@ static int json_sky_read(const char *buf,
 			 struct gps_data_t *gpsdata, const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_2_1[] = {
 	{"PRN",	   integer, .addr.integer = gpsdata->PRN},
 	{"el",	   integer, .addr.integer = gpsdata->elevation},
@@ -125,6 +128,7 @@ static int json_sky_read(const char *buf,
 	                        .addr.array.count = &gpsdata->satellites},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status, i, j;
 
     for (i = 0; i < MAXCHANNELS; i++)
@@ -147,6 +151,7 @@ static int json_sky_read(const char *buf,
 static int json_devicelist_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_subdevices[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
 	{"path",       string,     STRUCTOBJECT(struct devconfig_t, path),
@@ -178,6 +183,7 @@ static int json_devicelist_read(const char *buf,
 					&gpsdata->devices.ndevices)},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status;
 
     memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
@@ -193,6 +199,7 @@ static int json_devicelist_read(const char *buf,
 static int json_version_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_version[] = {
         {"class",     check,   .dflt.check = "VERSION"},
 	{"release",   string,  .addr.string  = gpsdata->version.release,
@@ -203,6 +210,7 @@ static int json_version_read(const char *buf,
 	{"api_minor", integer, .addr.integer = &gpsdata->version.api_minor},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status;
 
     memset(&gpsdata->version, '\0', sizeof(gpsdata->version));
@@ -217,12 +225,14 @@ static int json_version_read(const char *buf,
 static int json_error_read(const char *buf, 
 			     struct gps_data_t *gpsdata, const char **endptr)
 {
+    /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_error[] = {
         {"class",     check,   .dflt.check = "ERROR"},
 	{"message",   string,  .addr.string  = gpsdata->error,
 	                       .len = sizeof(gpsdata->error)},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
     int status;
 
     memset(&gpsdata->error, '\0', sizeof(gpsdata->error));

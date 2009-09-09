@@ -45,6 +45,7 @@ int json_rtcm2_read(const char *buf,
 
     int status, satcount;
 
+    /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1_satellite[] = {
 	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
 	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
@@ -155,6 +156,7 @@ int json_rtcm2_read(const char *buf,
 	                        .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
+    /*@ +fullinitblock @*/
 
 #undef RTCM2_HEADER
 

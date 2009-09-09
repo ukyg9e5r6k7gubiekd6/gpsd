@@ -371,7 +371,10 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 }
 
 /* request for ionospheric and utc time data #75 */
+/*@ +charint @*/
 static char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
+/*@ -charint @*/
+
 
 /**
  * Ionospheric/UTC parameters
@@ -524,11 +527,13 @@ superstar2_probe_subtype(struct gps_device_t *session,
 static void superstar2_configurator(struct gps_device_t *session,
 				    unsigned int seq)
 {
+    /*@ +charint @*/
     char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
     char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
     char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
     char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
     char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
+    /*@ -charint @*/
 
     if (seq != 0)
 	return;

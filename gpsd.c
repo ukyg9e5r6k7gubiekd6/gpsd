@@ -346,8 +346,8 @@ static int filesock(char *filename)
 struct channel_t {
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
-    struct subscriber_t *subscriber;	/* subscriber monitoring this */
-    struct gps_device_t *device;	/* device subscriber listens to */
+    /*@null@*/struct subscriber_t *subscriber;	/* subscriber monitoring this */
+    /*@null@*/struct gps_device_t *device;	/* device subscriber listens to */
 };
 
 struct subscriber_t {
@@ -509,7 +509,7 @@ static void detach_client(struct subscriber_t *sub)
 	if (channel->subscriber == sub)
 	{
 	    /*@i1@*/channel->device = NULL;
-	    channel->subscriber = NULL;
+	    /*@i1@*/channel->subscriber = NULL;
 	    
 	}
     sub->fd = -1;
@@ -568,8 +568,10 @@ static void notify_watchers(struct gps_device_t *device, bool newstyle, char *se
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
     {
 	struct subscriber_t *sub = channel->subscriber;
+	/*@-boolcompare@*/
 	if (channel->device==device && sub != NULL && (newstyle(sub) == newstyle))
 	    (void)throttled_write(sub, buf, (ssize_t)strlen(buf));
+	/*@+boolcompare@*/
     }
 }
 
@@ -630,7 +632,7 @@ static void raw_hook(struct gps_data_t *ud,
 
 /*@ -nullret @*/
 /*@ -statictrans @*/
-static /*@null@*/ struct gps_device_t *open_device(char *device_name)
+static bool open_device(char *device_name)
 /* open and initialize a new channel block */
 {
     struct gps_device_t *devp;
@@ -643,7 +645,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 	    adjust_max_fd(dsock, true);
 	}
 	if (context.netgnss_service != netgnss_remotegpsd)
-	    return &devices[0]; /* shaky, but only 0 versus nonzero is tested */
+	    return true;
     }
 
     /* normal case: set up GPS/RTCM/AIS service */
@@ -651,7 +653,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 	if (!allocated_device(devp) || (strcmp(devp->gpsdata.dev.path, device_name)==0 && !initialized_device(devp))){
 	    goto found;
 	}
-    return NULL;
+    return false;
 found:
     gpsd_init(devp, &context, device_name);
     devp->gpsdata.raw_hook = raw_hook;
@@ -663,21 +665,21 @@ found:
      * what source types are actually available.
      */
     if (gpsd_activate(devp, true) < 0)
-	return NULL;
+	return false;
 #else
     /*
      * If we're running new protocol only there's no 'g' command
      * and thus we don't need to know device classes in advance.
      */
     if (gpsd_activate(devp, false) < 0)
-	return NULL;
+	return false;
 #endif /* OLDSTYLE_ENABLE */
     FD_SET(devp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(devp->gpsdata.gps_fd, true);
-    return devp;
+    return true;
 }
 
-static /*@null@*/ struct gps_device_t *add_device(char *device_name)
+static bool add_device(char *device_name)
 /* add a device to the pool; open it right away if in nowait mode */
 {
     if (nowait)
@@ -699,9 +701,9 @@ static /*@null@*/ struct gps_device_t *add_device(char *device_name)
 				devp->gpsdata.dev.path,
 				timestamp());
 #endif /* GPSDNG_ENABLE */
-		return devp;
+		return true;
 	    }
-	return NULL;
+	return false;
     }
 }
 
@@ -717,7 +719,7 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
      * If we don't, open it and sniff packets until we do. 
      */
     if (allocated_device(device) && !initialized_device(device)) {
-	if (open_device(device->gpsdata.dev.path) == NULL) {
+	if (!open_device(device->gpsdata.dev.path)) {
 	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
 	    free_device(device);
 	    return false;
@@ -741,8 +743,9 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
 }
 
 /*@ -branchstate -usedef -globstate @*/
-static struct channel_t *assign_channel(struct subscriber_t *user, 
-				gnss_type type, struct gps_device_t *forcedev)
+static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user, 
+						  gnss_type type, 
+						  /*@null@*/struct gps_device_t *forcedev)
 {
     struct channel_t *chp, *channel;
     bool was_unassigned;
@@ -1046,7 +1049,8 @@ static void set_serial(struct gps_device_t *device,
 
 #ifdef OLDSTYLE_ENABLE
 static struct channel_t *mandatory_assign_channel(struct subscriber_t *user, 
-				gnss_type type, struct gps_device_t *forcedev)
+						  gnss_type type, 
+						  /*@null@*/struct gps_device_t *forcedev)
 {
     struct channel_t *channel = assign_channel(user, type, forcedev);
     if (channel == NULL)
@@ -2027,8 +2031,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) {
-	struct gps_device_t *device = add_device(argv[i]);
-	if (!device) {
+	if (!add_device(argv[i])) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
     }
@@ -2162,7 +2165,7 @@ int main(int argc, char *argv[])
 		continue;
 
 	    /* pass the current RTCM correction to the GPS if new */
-	    if (device->device_type && device->context->netgnss_service != netgnss_remotegpsd)
+	    if (device->device_type!=NULL && device->context->netgnss_service != netgnss_remotegpsd)
 		rtcm_relay(device);
 
 	    /* get data from the device */

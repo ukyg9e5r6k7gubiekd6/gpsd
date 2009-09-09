@@ -66,7 +66,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
     return to;
 }
 
-void json_version_dump(char *reply, size_t replylen)
+void json_version_dump(/*@out*/char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
 		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"api_major\":%d,\"api_minor\":%d}\r\n", 
@@ -659,6 +659,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
 		   ais->type, ais->repeat, ais->mmsi);
 
 #define JSON_BOOL(x)	((x)?"true":"false")
+    /*@ -formatcode @*/
     switch (ais->type) {
     case 1:	/* Position Report */
     case 2:
@@ -828,7 +829,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
 		       "\"retransmit\":%u,\"app_id\":%u,"
-		       "\"data\":\"%u:%s\"}\r\n",
+		       "\"data\":\"%zd:%s\"}\r\n",
 		       ais->type6.seqno,
 			  ais->type6.dest_mmsi,
 			  ais->type6.retransmit,
@@ -848,7 +849,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
 	break;
     case 8:	/* Binary Broadcast Message */
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"app_id\":%u,\"data\":\"%u:%s\"}\r\n",  
+			   "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",  
 			  ais->type8.app_id,
 			  ais->type8.bitcount,
 			  gpsd_hexdump(ais->type8.bitdata,
@@ -937,7 +938,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
     case 17:
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%u:%s\"}\r\n",
+			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%zd:%s\"}\r\n",
 			  ais->type17.lon / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.lat / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.bitcount,
@@ -945,7 +946,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
 				       (ais->type17.bitcount+7)/8));
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"lon\":%d,\"lat\":%d,\"data\":\"%u:%s\"}\r\n",
+			   "\"lon\":%d,\"lat\":%d,\"data\":\"%zd:%s\"}\r\n",
 			  ais->type17.lon,
 			  ais->type17.lat,
 			  ais->type17.bitcount,
@@ -1216,6 +1217,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
 	    (void) strlcat(buf, "}\r\n", buflen);
 	break;
     }
+    /*@ +formatcode @*/
 #undef SHOW_BOOL
 }
 

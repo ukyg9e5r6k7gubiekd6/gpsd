@@ -21,7 +21,7 @@ representations to libgps structures.
 #include "gps_json.h"
 
 static void lenhex_unpack(const char *from, 
-			  unsigned *plen, char *to, size_t maxlen)
+			  size_t *plen, /*@out@*/char *to, size_t maxlen)
 {
     char *colon = strchr(from, ':');
 
