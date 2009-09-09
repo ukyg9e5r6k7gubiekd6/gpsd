@@ -224,6 +224,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 }
 
 static gps_mask_t handle1002(struct gps_device_t *session)
+/* satellite signal quality report */
 {
     int i, j, status, prn;
 
@@ -406,6 +407,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     (void)snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"%u",id);
 
+    /* normal cycle for these devices is 1001 1002 */
     session->cycle_state = CYCLE_END_RELIABLE;
 
     switch (id) {
@@ -413,6 +415,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	session->cycle_state = CYCLE_END;
 	return handle1000(session);
     case 1002:
+	/* actual cycle end, but conveys no fix information */
 	return handle1002(session);
     case 1003:
 	return handle1003(session);
