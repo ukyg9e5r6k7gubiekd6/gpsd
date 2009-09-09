@@ -96,9 +96,9 @@ def extract_from_json(filename, lineno, line):
         return []
     try:
         sentence = json.loads(line)
-        if "tag" not in sentence or sentence["tag"] not in ("RMC","GLL","GGA","GBS","PASHR") or "time" not in sentence:
+        if u"time" not in sentence:
             return []
-        return [event(sentence["tag"], sentence["time"])]
+        return [event(sentence[u"tag"].encode("iso-8859-1"), "%.2f" % sentence[u"time"])]
     except ValueError, e:
         print line.rstrip()
         print e
@@ -115,10 +115,13 @@ def extract_timestamped_sentences(fp):
         lineno += 1
         if line.startswith("#"):
             continue
+        if line[0] not in ("$", "!", "{"):
+            print "%s: unknown sentence type." % fp.name
+            return []
         if not parse_json and line.startswith("$"):
             sequence += extract_from_nmea(fp.name, lineno, line)
-        elif json and line.startswith("{"):
-            sequence + extract_from_json(fp.name, lineno, line)
+        elif parse_json and line.startswith("{"):
+            sequence += extract_from_json(fp.name, lineno, line)
     return sequence
 
 def analyze(fp, stages):
