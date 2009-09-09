@@ -252,9 +252,9 @@ if __name__ == "__main__":
                 fp = open(filename)
                 try:
                     sequence = extract_timestamped_sentences(fp)
+                    analyze(sequence, filename)
                 except analyze_error, e:
                     print e
-                analyze(sequence, filename)
                 fp.close()
         else:
             sequence = extract_timestamped_sentences(sys.stdin)
