@@ -416,7 +416,7 @@ static ssize_t
 superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
 {
    unsigned short c = 0;
-   size_t i;
+   ssize_t i;
 
    for (i = 0; i < msglen - 2; i++)
 	c += (unsigned short)msg[i];

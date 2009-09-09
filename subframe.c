@@ -67,6 +67,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	{
 	char str[24];
 	int j = 0;
+	/*@ -type @*/
 	str[j++] = (words[2] >> 8) & 0xff;
 	str[j++] = (words[2]) & 0xff;
 
@@ -97,6 +98,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	str[j++] = (words[9] >> 16) & 0xff;
 	str[j++] = (words[9] >> 8) & 0xff;
 	str[j++] = '\0';
+	/*@ +type @*/
 	gpsd_report(LOG_INF, "gps system message is %s\n", str);
 	}
 	break;

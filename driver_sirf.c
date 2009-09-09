@@ -865,6 +865,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x29:		/* Geodetic Navigation Information */
 	gpsd_report(LOG_PROG, "GND 0x29: %s\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	return 0;
 
     case 0x32:		/* SBAS corrections */
 	return 0;

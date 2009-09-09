@@ -27,7 +27,7 @@ static void lenhex_unpack(const char *from,
 
     *plen = (unsigned)atoi(from);
     if (colon != NULL)
-	gpsd_hexpack(colon+1, to, maxlen);
+	(void)gpsd_hexpack(colon+1, to, maxlen);
 }
 
 int json_ais_read(const char *buf, 
@@ -45,7 +45,6 @@ int json_ais_read(const char *buf,
 	{"mmsi",           uinteger, .addr.uinteger = &ais->mmsi}
 
     int status;
-
 
 #include "ais_json.i"	/* JSON parser template structures */
 

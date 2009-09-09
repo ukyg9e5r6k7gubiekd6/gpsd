@@ -42,7 +42,7 @@ static void update_display(struct gps_data_t *gpsdata,
 			   char *buf UNUSED, size_t len UNUSED, int level UNUSED)
 {
     /* this is where we implement source-device filtering */
-    if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+    if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
 	return;
     else {
 	int temp_int = (int)rint(gpsdata->fix.speed * speedfactor);

@@ -62,7 +62,7 @@ struct json_attr_t {
 
 int json_read_object(const char *, const struct json_attr_t *, const char **);
 int json_read_array(const char *, const struct json_array_t *, const char **);
-const char *json_error_string(int);
+const /*@observer@*/char *json_error_string(int);
 
 #define JSON_ERR_OBSTART	1	/* non-WS when expecting object start */
 #define JSON_ERR_ATTRSTART	2	/* non-WS when expecting attrib start */

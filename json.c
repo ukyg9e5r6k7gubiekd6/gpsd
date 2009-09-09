@@ -312,7 +312,7 @@ static int json_internal_read_object(const char *cp, const struct json_attr_t *a
 		*((int *)lptr) = atoi(valbuf);
 		break;
 	    case uinteger:
-		*((int *)lptr) = (unsigned)atoi(valbuf);
+		*((unsigned int *)lptr) = (unsigned)atoi(valbuf);
 		break;
 	    case real:
 		*((double *)lptr) = atof(valbuf);
@@ -453,7 +453,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs, const char
     return json_internal_read_object(cp, attrs, NULL, 0, end);
 }
 
-const char *json_error_string(int err)
+const /*@observer@*/char *json_error_string(int err)
 {
     const char *errors[] = {
 	"unknown error while parsing JSON",

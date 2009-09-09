@@ -90,13 +90,13 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 char /*@observer@*/ *netlib_errstr(const int err)
 {
     switch (err) {
-    case NL_NOSERVICE:  return "can't get service entry"; break;
-    case NL_NOHOST:     return "can't get host entry"; break;
-    case NL_NOPROTO:    return "can't get protocol entry"; break;
-    case NL_NOSOCK:     return "can't create socket"; break;
-    case NL_NOSOCKOPT:  return "error SETSOCKOPT SO_REUSEADDR"; break;
-    case NL_NOCONNECT:  return "can't connect to host/port pair"; break;
-    default:		return "unknown error"; break;
+    case NL_NOSERVICE:  return "can't get service entry";
+    case NL_NOHOST:     return "can't get host entry";
+    case NL_NOPROTO:    return "can't get protocol entry";
+    case NL_NOSOCK:     return "can't create socket";
+    case NL_NOSOCKOPT:  return "error SETSOCKOPT SO_REUSEADDR";
+    case NL_NOCONNECT:  return "can't connect to host/port pair";
+    default:		return "unknown error";
     }
 }
 

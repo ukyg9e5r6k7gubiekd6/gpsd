@@ -134,7 +134,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] == '?') {
 			    gpsdata->dev.baudrate = gpsdata->dev.stopbits = 0;
 			} else
-			    (void)sscanf(sp, "B=%u %*d %*s %u",
+			    (void)sscanf(sp, "B=%d %*d %*s %u",
 				   &gpsdata->dev.baudrate, &gpsdata->dev.stopbits);
 			break;
 		    case 'C':

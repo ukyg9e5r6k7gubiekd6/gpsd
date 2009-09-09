@@ -849,11 +849,11 @@ static struct channel_t *assign_channel(struct subscriber_t *user,
 	     */
 	    if (!newstyle(user) && user->policy.watcher && !user->tied) {
 		/*@ -sefparams @*/
-		throttled_write(user, "GPSD,F=", 7);
-		throttled_write(user,
+		(void)throttled_write(user, "GPSD,F=", 7);
+		(void)throttled_write(user,
 				channel->device->gpsdata.dev.path,
 				strlen(channel->device->gpsdata.dev.path));
-		throttled_write(user, "\r\n", 2);
+		(void)throttled_write(user, "\r\n", 2);
 		/*@ +sefparams @*/
 	    }
 #endif /* OLDSTYLE_ENABLE */
@@ -2246,7 +2246,7 @@ int main(int argc, char *argv[])
 
 	    /* watch all channels */
 	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		struct subscriber_t *sub = channel->subscriber;
+		sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];

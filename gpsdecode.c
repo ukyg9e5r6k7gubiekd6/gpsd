@@ -48,7 +48,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 2:
     case 3:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "%u,%d,%u,%u,%d,%d,%u,%d,%u,0x%x,%d,0x%x",
+		       "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,0x%x",
 		       ais->type1.status,
 		       ais->type1.turn,
 		       ais->type1.speed,
@@ -59,7 +59,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type1.heading,
 		       ais->type1.second,
 		       ais->type1.maneuver,
-		       ais->type1.raim,
+		       (uint)ais->type1.raim,
 		       ais->type1.radio);
 	break;
     case 4:	/* Base Station Report */
@@ -76,7 +76,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type4.lon,
 		       ais->type4.lat,
 		       ais->type4.epfd,
-		       ais->type4.raim,
+		       (uint)ais->type4.raim,
 		       ais->type4.radio);
 	break;
     case 5: /* Ship static and voyage related data */
@@ -185,7 +185,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 17:
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "%d,%d,%d:%s",
+		       "%d,%d,%u:%s",
 		       ais->type17.lon,
 		       ais->type17.lat,
 		       ais->type17.bitcount,

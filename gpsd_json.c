@@ -475,7 +475,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
+void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX*2+1];
     char buf2[JSON_VAL_MAX*2+1];
@@ -937,7 +937,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
     case 17:
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%d:%s\"}\r\n",
+			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%u:%s\"}\r\n",
 			  ais->type17.lon / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.lat / AIS_GNSS_LATLON_SCALE,
 			  ais->type17.bitcount,
@@ -945,7 +945,7 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, char *buf, size_t buflen)
 				       (ais->type17.bitcount+7)/8));
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"lon\":%d,\"lat\":%d,\"data\":\"%d:%s\"}\r\n",
+			   "\"lon\":%d,\"lat\":%d,\"data\":\"%u:%s\"}\r\n",
 			  ais->type17.lon,
 			  ais->type17.lat,
 			  ais->type17.bitcount,

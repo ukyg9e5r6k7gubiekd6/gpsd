@@ -763,7 +763,7 @@ int main (int argc, char **argv)
 		else if (serial) {
 		    speed_t speed;
 		    char parity = (char)session.gpsdata.dev.parity;
-		    unsigned int stopbits = session.gpsdata.dev.stopbits;
+		    unsigned int stopbits = (unsigned int)session.gpsdata.dev.stopbits;
 		    char *modespec;
 
 		    modespec = strchr(arg, ':');

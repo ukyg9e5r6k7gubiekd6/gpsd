@@ -227,7 +227,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->gpsdata.dev.baudrate = 57600;
 	session->gpsdata.dev.parity = 'N';
 	session->gpsdata.dev.stopbits = 1;
-	session->context->readonly = 1;
+	session->context->readonly = true;
 	return session->gpsdata.gps_fd;
     }
     /*@ -boolops -type @*/
