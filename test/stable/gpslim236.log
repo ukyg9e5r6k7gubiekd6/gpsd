@@ -1,7 +1,5 @@
 # Name: Holux GPSlim 236
 # Chipset: SiRF-III
-# Cycle-time: 1s
-# Start-of-cycle: GGA
 # Submitted-by:  "Kévin REDON" <kevredon@gmail.com>
 # Date: 22 Jul 2006 
 $GPGGA,185244.000,4854.2575,N,00219.9816,E,1,05,1.7,124.4,M,47.3,M,,0000*56

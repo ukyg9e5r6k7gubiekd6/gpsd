@@ -1,7 +1,5 @@
 # Name: Garmin Geko 201
 # Chipset: Garmin proprietary
-# Cycle-time: 2s
-# Start-of-cycle: GPRMC
 # Submitted-by: "Jose Luis Domingo Lopez" <gps@24x7linux.com>
 # Date: 14 Jun 2005
 # Location: Madrid, Madrid, Spain (ES), 40.39N 03.64E

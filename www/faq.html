@@ -167,8 +167,6 @@ Here is the beginning of one log file I already have:</p>
 <pre>
 # Name: Magellan eXplorist 210
 # Chipset: unknown
-# Cycle-time: 1-second
-# Start-of-cycle: $GPGLL
 # Submitted-by: "Paul B van den Berg" <paulberg@wanadoo.nl>
 # Date: 20 May 2006
 # Location: Groningen, NL, 53.2N 6.6E
@@ -207,15 +205,11 @@ $GPGSV,3,2,10,29,26,162,,18,24,255,42,22,24,298,44,28,10,056,*75
 $GPGSV,3,3,10,14,09,319,,11,03,016,,136,27,157,,124,28,162,*71
 </pre>
 
-<p>The way to fill in the Name, Cycle-Time, Submitted-by, and Date
+<p>The way to fill in the Name, Submitted-by, and Date
 headers should be pretty obvious.</p>
 
 <p>Chipset should include the name and (if possible) model and/or
 firmware revision  of the chipset in the GPS.</p>
-
-<p>Start-of-cycle should be the name of the NMEA sentence (or, in a
-packet protocol, the numeric type ID of the packet) that is emitted
-first in each cycle.</p>
 
 <p>Please also include a Location header giving your city,
 state/province, country code, and a rough latitude/longitude.</p>

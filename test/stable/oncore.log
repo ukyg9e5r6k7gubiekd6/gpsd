@@ -1,6 +1,4 @@
 # Name: Oncore GT+
-# Cycle-time: 1s
-# Start-of-cycle: GPGGA
 # Submitted-by: Wojciech Kazubski <wk@ire.pw.edu.pl>
 # Date: 12 Apr 2005
 $GPGSV,3,1,09,02,33,299,27,04,43,242,26,08,12,202,,13,85,356,*70

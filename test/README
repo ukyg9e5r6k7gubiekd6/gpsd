@@ -8,7 +8,6 @@ Structured headers are as follows:
 # Chipset: chipset name and (if possible) firmware revision level.
 # Description: product description (optional)
 # Cycle time: sampling interval, time to repeat a sentence in seconds
-# Start-of-cycle: sentence that begins each cycle
 # Submitted-by: who sent it
 # Date: when it was received
 # Location: city, state/province, country, approximate lat/lon

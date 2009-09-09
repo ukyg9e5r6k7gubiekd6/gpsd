@@ -1,7 +1,5 @@
 # Name: Magellan eXplorist 210
 # Chipset: unknown
-# Cycle-time: 1s
-# Start-of-cycle: $GPGLL
 # Submitted-by: "Paul B van den Berg" <paulberg@wanadoo.nl>
 # Date: 20 May 2006
 # Location: Groningen, NL, 53.2N6.6E

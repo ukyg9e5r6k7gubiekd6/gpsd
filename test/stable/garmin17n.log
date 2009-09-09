@@ -1,7 +1,5 @@
 # Name: Garmin 17N
 # Chipset: 
-# Cycle-time: 1s
-# Start-of-cycle: GPRMC
 # Submitted-by: Wojciech Kazubski <wk@ire.pw.edu.pl>
 # Comment: Only emits GPRMC when it has a fix.
 # Date: 12 Mar 2005

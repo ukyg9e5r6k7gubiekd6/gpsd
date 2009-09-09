@@ -50,7 +50,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	$msg .= sprintf("type = device\n");
 	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
                         firmware nmea interface tested rating noconfigure 
-                        location date interval leader notes sample_notes)){
+                        location date notes sample_notes)){
 		$val = $query->param($var);
 		$msg .= sprintf("\t%s = %s\n", $var, $val) if (defined($val) && $val);
 	}
@@ -350,31 +350,6 @@ print"<em>Date:</em>",$query->textfield(-name=>"date", -size=>72);
 
 print <<EOF;
 
-<p>If the receiver is a GPS, the default sampling interval in seconds (not
-relevant for AIS receivers).  This will usually be 1.  For SiRF chips it's
-always 1 and you can leave it blank; it's mainly interesting for NMEA devices
-with unknown chipsets.</p>
-
-EOF
-
-print"<em>Sampling interval:</em>",$query->textfield(-name=>"interval",
-						     -size=>6);
-
-print <<EOF;
-
-<p>First sentence in the GPS's reporting cycle (not relevant or AIS
-receivers).  Leave this blank for SiRF devices; it is mainly interesting for
-NMEA devices with unknown chipsets.  You may be able to read it from the
-manual; if not, slowing the GPS to 4800 will probably make the intercycle pause
-visible.</p>
-
-EOF
-
-print"<em>First sentence:</em>",$query->textfield(-name=>"leader",
-						  -size=>20);
-
-print <<EOF;
-
 <p>Finally, add any notes you want to about how the sample was taken.  One
 good thing to put here would a description of how the unit was moving while the
 log was being captured.  If the sentence mix changes between "fix" and "no fix"
@@ -487,18 +462,6 @@ if ($query->param("date")) {
 } else {
     print "No sample date specified.<br/>\n";
 }
-
-if ($query->param("interval")) {
-    print "Sampling interval <code>". escapeHTML($query->param("interval")) ."</code><br/>\n";
-} else {
-    print "No sampling interval specified.<br/>\n";
-}
-if ($query->param("leader")) {
-    print "Leading sentence <code>". escapeHTML($query->param("leader")) ."</code><br/>\n";
-} else {
-    print "No leading sentence specified.<br/>\n";
-}
-
 
 if ($query->param("sample_notes")) {
     print "Notes on the sample have been entered.";

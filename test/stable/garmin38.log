@@ -1,6 +1,4 @@
 # Name: Garmin 38
-# Cycle-time: 2s
-# Start-of-cycle: GPRMC
 # Submitted-by: "Pascal F. Martin" <pascal.martin@cox.net>
 # Date: 18 Mar 2005
 $PGRME,19.2,M,28.7,M,34.6,M*18

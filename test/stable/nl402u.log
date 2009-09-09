@@ -1,6 +1,5 @@
 # Name: NL-402U USB Empfänger
 # Chipset: u-blox5 GPS & GALILEO SuperSense®
-# Cycle-time: 1s
 # Submitted-by: Klaus Plöger k.ploeger@gastradata.de
 # Date: 2008:07:24
 $GPTXT,01,01,02,u-blox ag - www.u-blox.com*50

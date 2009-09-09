@@ -1,7 +1,5 @@
 # Name: Garmin 25LP
 # Chipset: Garmin proprietary, emits NMEA 2.0
-# Cycle-time: 1s
-# Start-of-cycle: GPRMC
 # Submitted-by: Daniele Giangrazi <daniele.giangrazi@elital.net>
 # Date: 22 Mar 2005
 $GPRMC,120316,V,4221.4394,N,01321.9948,E,000.0,000.0,150305,001.4,E*63

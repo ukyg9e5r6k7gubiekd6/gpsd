@@ -1,7 +1,5 @@
 # Name: Blumax GPS-009
 # Chipset: SiRF Star III (according to data sheet)
-# Cycle-time: 1-second
-# Start-of-cycle: $GPZDA
 # Submitted-by: Hartmut Holzgraefe <hartmut@php.net>
 # Date: 18 July 2008
 # Location: Bielefeld, DE,  52=B0 01' N, 08=B0 31' O

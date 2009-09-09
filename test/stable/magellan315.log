@@ -1,6 +1,4 @@
 # Name: Magellan 315
-# Cycle-time: 1s
-# Start-of-cycle: GPGLL
 # Submitted-by: Ángel Marqués Mateu <amarques@cgf.upv.es>
 # Date: 12 Mar 2005
 $GPGLL,3908.8199,N,00023.0832,W,120824.758,A*22

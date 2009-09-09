@@ -1,7 +1,5 @@
 # Name: San Jose Navigation FV-M11
 # Chipset: MKT-3301
-# Cycle-time: 1-second
-# Start-of-cycle: $GPGGA
 # Submitted-by: "Henk Fijnvandraat" 
 # Date: 23 August 2008
 # Location: Enschede, NL, 52.21N 6.88E
