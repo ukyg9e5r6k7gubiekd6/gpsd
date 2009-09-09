@@ -36,11 +36,12 @@ In an event sequence, a '<' is a nornal start of cycle where the
 timestamp increments. A '>' is where the timestamp actually
 *decreases* between a a sentence and the one that follows. The NMEA
 cycle-end detector will ignore the '>' event; it sometimes occurs when
-GPZDA starts a cycle, but has no effect on where the asctual end of
+GPZDA starts a cycle, but has no effect on where the actual end of
 fix reporting is.
 
 If you see a message saying 'cycle-enders ... also occur in mid-cycle', the
-device will break the NMEA cycle detector.
+device will confuse the NMEA cycle detector, leading to more reports per cycle
+than the ideal.
 
 """
 import sys, getopt, json
