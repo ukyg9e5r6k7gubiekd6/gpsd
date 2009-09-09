@@ -454,13 +454,6 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     nmea_add_checksum(bufp);
 }
 
-static void gpsd_binary_fix_dump(struct gps_device_t *session,
-				 char bufp[], size_t len)
-{
-    gpsd_position_fix_dump(session, bufp, len);
-    gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
-}
-
 static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 				char bufp[], size_t len)
 {
@@ -567,8 +560,10 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 static void gpsd_binary_dump(struct gps_device_t *session,
 			      char bufp[], size_t len)
 {
-    if ((session->gpsdata.set & LATLON_SET) != 0)
-	gpsd_binary_fix_dump(session, bufp+strlen(bufp), len-strlen(bufp));
+    if ((session->gpsdata.set & LATLON_SET) != 0) {
+	gpsd_position_fix_dump(session, bufp, len);
+	gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
+    }
     if ((session->gpsdata.set & (DOP_SET | ERR_SET)) != 0)
 	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
     if ((session->gpsdata.set & SATELLITE_SET) != 0)

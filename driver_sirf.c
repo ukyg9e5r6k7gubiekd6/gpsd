@@ -93,7 +93,6 @@ static gps_mask_t sirf_msg_errors(unsigned char *, size_t );
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t);
-static gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t);
 #ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t);
@@ -468,12 +467,37 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 #endif /* NTPSHM_ENABLE */
 	/* fix quality data */
 	session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	session->cycle_state |= CYCLE_START;
+	session->cycle_state |= CYCLE_START | CYCLE_END | CYCLE_END_RELIABLE;
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET;
     }
     return mask;
 }
 
+#ifdef __UNUSED__
+/***************************************************************************
+ We've stopped interpreting GND (0x29) for the following reasons:
+
+1) Versions of SiRF firmware still in wide circulation (and likely to be
+   so fotr a while) don't report a valid time field, leading to annoying
+   twice-per-second jitter in client displays.
+
+2) What we wanted out of this that MND didn't give us was horizontal and 
+   vertical error estimates. But we have to do our own error estimation by 
+   computing DOPs from the skyview covariance matrix anyway, because we
+   want separate epx and epy errors a la NMEA 3.0.
+
+3) The fix-merge logic in gpsd.c is (unavoidably) NMEA-centric and
+   thinks multiple sentences in one cycle should be treated as
+   incremental updates.  This leads to various silly results when (as
+   in GND) a subsequent sentence is (a) intended to be a complete fix
+   in itself, and (b) frequently broken.
+
+4) Ignoring this dodgy sentence allows us to go to a nice clean single
+   fix update per cycle.
+
+Code left in place in case we need to reverse this decision.
+
+***************************************************************************/
 static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned short navtype;
@@ -590,6 +614,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
     }
     return mask;
 }
+#endif /* __UNUSED__ */
 
 #ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -834,7 +859,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
-	return sirf_msg_geodetic(session, buf, len);
+	gpsd_report(LOG_PROG, "GND 0x29: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 
     case 0x32:		/* SBAS corrections */
 	return 0;
