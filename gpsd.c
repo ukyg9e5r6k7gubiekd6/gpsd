@@ -644,8 +644,6 @@ static bool open_device(char *device_name)
 	    FD_SET(dsock, &all_fds);
 	    adjust_max_fd(dsock, true);
 	}
-	if (context.netgnss_service != netgnss_remotegpsd)
-	    return true;
     }
 
     /* normal case: set up GPS/RTCM/AIS service */
@@ -2187,7 +2185,7 @@ int main(int argc, char *argv[])
 		continue;
 
 	    /* pass the current RTCM correction to the GPS if new */
-	    if (device->device_type!=NULL && device->context->netgnss_service != netgnss_remotegpsd)
+	    if (device->device_type!=NULL)
 		rtcm_relay(device);
 
 	    /* get data from the device */

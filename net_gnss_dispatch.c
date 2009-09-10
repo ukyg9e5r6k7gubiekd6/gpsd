@@ -14,7 +14,6 @@
 
 #define NETGNSS_DGPSIP	"dgpsip://"
 #define NETGNSS_NTRIP	"ntrip://"
-#define NETGNSS_GPSD	"gpsd://"
 
 /* Where to find the list of DGPSIP correction servers, if there is one */
 #define DGPSIP_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
@@ -24,7 +23,6 @@ bool netgnss_uri_check(char *name)
 {
     return
 	strncmp(name, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP)) == 0
-	|| strncmp(name, NETGNSS_GPSD, strlen(NETGNSS_GPSD)) == 0
 	|| strncmp(name, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP)) == 0;
 }
 
@@ -40,9 +38,6 @@ int netgnss_uri_open(struct gps_context_t *context, char *netgnss_service)
 
     if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP))==0)
 	return dgpsip_open(context, netgnss_service + strlen(NETGNSS_DGPSIP));
-
-    if (strncmp(netgnss_service, NETGNSS_GPSD, strlen(NETGNSS_GPSD))==0)
-	return remotegpsd_open(context, netgnss_service + strlen(NETGNSS_GPSD));
 
 #ifndef REQUIRE_DGNSS_PROTO
     return dgpsip_open(context, netgnss_service);

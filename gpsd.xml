@@ -182,21 +182,18 @@ Normally, a data source is the name of a local serial device from
 which the daemon may expect GPS data.</para>
 
 <para>A data source name may also be a URI pointing to a specific
-network GNSS service (GPSD server, DGPSIP server or Ntrip broadcaster).
-If the URI starts with "ntrip://" Ntrip will be used; if the URI starts
-with "dgpsip://", DGPSIP will be used; if the URI starts with "gpsd://",
-GPS protocols will be used. <application>gpsd</application> defaults to
-DGPSIP if no protocol is defined. GPSD URIs take an optional argument to
-select the wire protocol: raw, nmea or gpsd - these correspond to "R=2",
-"R=1" and "W=1" modes. For Ntrip services that require authentication, a
-prefix of the form "username:password@" can be added before the name of
-the Ntrip broadcaster.  If a suffix of the service name begins with ":"
-it is interpreted as a port number, overriding the default IANA-assigned
-port of 2101.  For Ntrip service you must specify which stream to use;
-the stream is given in the form "/streamname". !n example DGPSIP URI could
-be "dgpsip://dgpsip.example.com" and a Ntrip URI could be
-"ntrip://foo:bar@ntrip.example.com:80/example-stream". A gpsd URI could be
-"gpsd://gpsd.example.com:12000/dev/gps1?raw". <!-- If this
+network GNSS service (a DGPSIP server or Ntrip broadcaster).  If the
+URI starts with "ntrip://" Ntrip will be used; if the URI starts with
+"dgpsip://", DGPSIP will be used. <application>gpsd</application>
+defaults to DGPSIP if no protocol is defined. For Ntrip services that
+require authentication, a prefix of the form "username:password@" can
+be added before the name of the Ntrip broadcaster.  If a suffix of the
+service name begins with ":" it is interpreted as a port number,
+overriding the default IANA-assigned port of 2101.  For Ntrip service
+you must specify which stream to use; the stream is given in the form
+"/streamname". !n example DGPSIP URI could be
+"dgpsip://dgpsip.example.com" and a Ntrip URI could be
+"ntrip://foo:bar@ntrip.example.com:80/example-stream".  <!-- If this
 option is not given, <application>gpsd</application> will hunt for a
 DGPSIP server. --></para>
 

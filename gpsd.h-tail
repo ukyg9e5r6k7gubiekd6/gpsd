@@ -149,7 +149,7 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPS report? */
-    enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip, netgnss_remotegpsd } netgnss_service;	/* type of GNSS service */
+    enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip} netgnss_service;	/* type of GNSS service */
     int fixcnt;				/* count of good fixes seen */
     int dsock;			        /* socket to DGPSIP server/Ntrip caster */
     void *netgnss_privdata;		/* DGNSS service specific data */
@@ -431,8 +431,6 @@ extern void dgpsip_autoconnect(struct gps_context_t *,
 			       double, double, const char *);
 extern int ntrip_open(struct gps_context_t *, char *);
 extern void ntrip_report(struct gps_device_t *);
-extern int remotegpsd_open(struct gps_context_t *, char *);
-extern void remotegpsd_report(struct gps_device_t *);
 
 extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
