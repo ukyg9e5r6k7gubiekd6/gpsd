@@ -355,7 +355,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
     t = getled(buf, 7); /* measurement time */
     for(i = 0; i < n; i++){
 	session->gpsdata.raw.mtime[i] = t;
-	session->gpsdata.PRN[i] = getub(buf, 11*i + 15) & 0x1f;
+	session->gpsdata.PRN[i] = (int)getub(buf, 11*i + 15) & 0x1f;
 	session->gpsdata.ss[i] = getub(buf, 11*i * 15 +1 )/4.0;
 	session->gpsdata.raw.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
 	ul = getleul(buf, 11*i * 15 + 6);
@@ -594,7 +594,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=(char)session->gpsdata.dev.parity || stopbits!=session->gpsdata.dev.stopbits) {
+    if (parity!=(char)session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.stopbits) {
 	return false;
     } else {
 	/*@ +charint @*/

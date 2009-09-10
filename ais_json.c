@@ -130,6 +130,7 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":24,") != NULL) {
 	status = json_read_object(buf, json_ais24, endptr);
     } else {
+	*endptr = NULL;
 	return JSON_ERR_MISC;
     }
     return status;

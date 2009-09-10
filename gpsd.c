@@ -873,7 +873,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 			   timestamp(), gpsd_id(channel->device));
 #endif /* OLDSTYLE_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
-	if (buf[0])
+	if (buf[0]!='\0')
 	    (void)throttled_write(user, buf, strlen(buf));
 	/*@ +sefparams -matchanyintegral @*/
     }
@@ -1048,7 +1048,7 @@ static void set_serial(struct gps_device_t *device,
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef OLDSTYLE_ENABLE
-static struct channel_t *mandatory_assign_channel(struct subscriber_t *user, 
+static /*null*/struct channel_t *mandatory_assign_channel(struct subscriber_t *user, 
 						  gnss_type type, 
 						  /*@null@*/struct gps_device_t *forcedev)
 {
@@ -1070,6 +1070,15 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
     sub->new_style_responses = false;
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+
+    /*
+     * After each channel assignment, it must be the case that eother the
+     * the turned channel pointer is null or points to a channel block with 
+     * a nonzero device field.  The dataflow analysis splint does is not
+     * quite good enough to catch this, alas, so we need to temporarily 
+     * disable its null-dereference check.
+     */
+    /*@ -nullderef @*/
 
     (void)strlcpy(reply, "GPSD", replylen);
     replylen -= 4;
@@ -1298,7 +1307,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    if (!channel || !channel->device)
 		(void)snprintf(phrase, sizeof(phrase), ",N=?");
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",N=%u", channel->device->gpsdata.dev.driver_mode);
+		(void)snprintf(phrase, sizeof(phrase), ",N=%d", channel->device->gpsdata.dev.driver_mode);
 	    break;
 	case 'O':
 	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))== NULL || !have_fix(channel))
@@ -1612,6 +1621,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
     }
  breakout:
     (void)strlcat(reply, "\r\n", replylen);
+    /*@ +nullderef @*/
     return true;
 }
 #endif /* OLDSTYLE_ENABLE */
@@ -1702,7 +1712,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			       json_error_string(status));
 		goto bailout;
 	    } else {
-		if (devconf.path[0]) {
+		if (devconf.path[0]!='\0') {
 		    /* user specified a path, try to assign it */
 		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL)
 			(void)snprintf(reply, replylen, 
@@ -1758,7 +1768,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	    if (channel->subscriber != sub)
 		continue;
-	    else if (devconf.path[0] != '\0' && channel->device && strcmp(channel->device->gpsdata.dev.path, devconf.path)!=0)
+	    else if (devconf.path[0] != '\0' && channel->device!=NULL && strcmp(channel->device->gpsdata.dev.path, devconf.path)!=0)
 		continue;
 	    else {
 		json_device_dump(channel->device, 

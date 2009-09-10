@@ -53,7 +53,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 }
 
 /*@ +charint @*/
-bool aivdm_decode(char *buf, size_t buflen, 
+bool aivdm_decode(const char *buf, size_t buflen, 
 		  struct aivdm_context_t *ais_context, struct ais_t *ais)
 {
     char *sixbits[64] = {
@@ -83,9 +83,7 @@ bool aivdm_decode(char *buf, size_t buflen,
     gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s", buflen, buf);
 
     /* extract packet fields */
-    (void)strlcpy((char *)ais_context->fieldcopy,
-		  (char*)buf,
-		  buflen);
+    (void)strlcpy((char *)ais_context->fieldcopy, buf, buflen);
     ais_context->field[nfields++] = (unsigned char *)buf;
     for (cp = ais_context->fieldcopy;
 	 cp < ais_context->fieldcopy + buflen;

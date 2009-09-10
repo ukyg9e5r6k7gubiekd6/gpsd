@@ -31,7 +31,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
      * each character to generate an up to 6-character Java-style
      * escape
      */
-    for (sp = from; *sp && tp - to < len-5; sp++) {
+    for (sp = from; *sp && tp - to < (int)len-5; sp++) {
 	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
@@ -73,7 +73,7 @@ void json_version_dump(/*@out@*/char *reply, size_t replylen)
 		   GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION);
 }
 
-void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
+void json_tpv_dump(const struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
 		   char *reply, size_t replylen)
 {
     assert(replylen > 2);
@@ -163,7 +163,7 @@ void json_tpv_dump(struct gps_data_t *gpsdata, struct gps_fix_t *fixp,
     (void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
 }
 
-void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
+void json_sky_dump(const struct gps_data_t *datap, char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
     assert(replylen > 2);
@@ -220,7 +220,8 @@ void json_sky_dump(struct gps_data_t *datap, char *reply, size_t replylen)
 }
 
 int json_device_read(const char *buf, 
-			     struct devconfig_t *dev, const char **endptr)
+		     /*@out@*/struct devconfig_t *dev, 
+		     /*@out null@*/const char **endptr)
 {
     char serialmode[4];
     /*@ -fullinitblock @*/
@@ -237,12 +238,12 @@ int json_device_read(const char *buf,
 	                           .len = sizeof(dev->subtype)},
 	{"native",     integer,    .addr.integer = &dev->driver_mode,
 				   .dflt.integer = -1},
-	{"bps",	       integer,    .addr.integer = &dev->baudrate,
-				   .dflt.integer = -1},
+	{"bps",	       uinteger,   .addr.uinteger = &dev->baudrate,
+				   .dflt.uinteger = 0},
 	{"parity",     string,	   .addr.string=serialmode,
 				   .len=sizeof(serialmode)},
-	{"stopbits",   integer,    .addr.integer = &dev->stopbits,
-				   .dflt.integer = -1},
+	{"stopbits",   uinteger,   .addr.uinteger = &dev->stopbits,
+				   .dflt.uinteger = 1},
 	{"cycle",      real,       .addr.real = &dev->cycle,
 				   .dflt.real = NAN},
 	{"mincycle",   real,       .addr.real = &dev->mincycle,
@@ -259,7 +260,7 @@ int json_device_read(const char *buf,
     return 0;
 }
 
-void json_device_dump(struct gps_device_t *device,
+void json_device_dump(const struct gps_device_t *device,
 		     char *reply, size_t replylen)
 {
     char buf1[JSON_VAL_MAX*2+1];
@@ -311,8 +312,8 @@ void json_device_dump(struct gps_device_t *device,
 }
 
 int json_watch_read(const char *buf, 
-		    struct policy_t *ccp,
-		    const char **endptr)
+		    /*@out@*/struct policy_t *ccp,
+		    /*@out null@*/const char **endptr)
 {
     int intcasoc;
     /*@ -fullinitblock @*/
@@ -337,7 +338,7 @@ int json_watch_read(const char *buf,
     return status;
 }
 
-void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
+void json_watch_dump(const struct policy_t *ccp, char *reply, size_t replylen)
 {
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}\r\n",
@@ -348,7 +349,7 @@ void json_watch_dump(struct policy_t *ccp, char *reply, size_t replylen)
 }
 
 #if defined(RTCM104V2_ENABLE)
-void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
     char buf1[JSON_VAL_MAX*2+1];
@@ -374,7 +375,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 9:
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->ranges.nentries; n++) {
-	    struct rangesat_t *rsp = &rtcm->ranges.sat[n];
+	    const struct rangesat_t *rsp = &rtcm->ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
 			   rsp->ident,
@@ -416,7 +417,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 #define JSON_BOOL(x)	((x)?"true":"false")
 	(void)strlcat(buf, "\"satellites\":[", buflen);
     for (n = 0; n < rtcm->conhealth.nentries; n++) {
-	struct consat_t *csp = &rtcm->conhealth.sat[n];
+	const struct consat_t *csp = &rtcm->conhealth.sat[n];
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "{\"ident\":%u,\"iodl\":%s,\"health\":%1u,\"snr\":%d,\"health_en\":%s,\"new_data\":%s,\"los_warning\":%s,\"tou\":%u},",
 		       csp->ident,
@@ -440,7 +441,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 7:
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->almanac.nentries; n++) {
-	    struct station_t *ssp = &rtcm->almanac.station[n];
+	    const struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"lat\":%.4f,\"lon\":%.4f,\"range\":%u,\"frequency\":%.1f,\"health\":%u,\"station_id\":%u,\"bitrate\":%u},",
 			   ssp->latitude,
@@ -479,7 +480,7 @@ void rtcm2_json_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t buflen)
+void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX*2+1];
     char buf2[JSON_VAL_MAX*2+1];

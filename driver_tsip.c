@@ -376,9 +376,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.elevation[i] = (int)round(d1);
 		session->gpsdata.azimuth[i] = (int)round(d2);
 	    } else {
-		session->gpsdata.PRN[i] = 0;
-		session->gpsdata.ss[i] = session->gpsdata.elevation[i] 
+		session->gpsdata.PRN[i] = session->gpsdata.elevation[i] 
 		    = session->gpsdata.azimuth[i] = 0;
+		session->gpsdata.ss[i] = 0.0;
 	    }
 	    if (++i == session->gpsdata.satellites)
 		mask |= SATELLITE_SET;		/* last of the series */

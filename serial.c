@@ -49,7 +49,7 @@ void cfmakeraw(struct termios *termios_p)
 }
 #endif /* defined(__CYGWIN__) */
 
-speed_t gpsd_get_speed(struct termios* ttyctl)
+speed_t gpsd_get_speed(const struct termios* ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
     switch (code) {

@@ -104,15 +104,14 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *,
 			      size_t,
 			      unsigned int);
 extern unsigned int isgps_parity(isgps30bits_t);
-extern void isgps_output_magnavox(isgps30bits_t *, unsigned int, FILE *);
+extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 
 extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
-extern void rtcm2_sager_dump(struct rtcm2_t *, /*@out@*/char[], size_t);
-extern void rtcm2_json_dump(struct rtcm2_t *, /*@out@*/char[], size_t);
+extern void rtcm2_sager_dump(const struct rtcm2_t *, /*@out@*/char[], size_t);
+extern void rtcm2_json_dump(const struct rtcm2_t *, /*@out@*/char[], size_t);
 extern int rtcm2_undump(/*@out@*/struct rtcm2_t *, char *);
 extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
 extern bool rtcm2_repack(struct rtcm2_t *, isgps30bits_t *);
-extern void rtcm2_output_magnavox(isgps30bits_t *, FILE *);
 
 extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
 extern void rtcm3_dump(struct rtcm3_t *rtcm, FILE *);
@@ -441,7 +440,7 @@ extern ssize_t gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, unsigned char, unsigned int);
-extern speed_t gpsd_get_speed(struct termios *);
+extern speed_t gpsd_get_speed(const struct termios *);
 extern void gpsd_assert_sync(struct gps_device_t *);
 extern void gpsd_close(struct gps_device_t *);
 
@@ -499,8 +498,8 @@ extern void ubx_catch_model(struct gps_device_t *,
 			    unsigned char *, size_t);
 #endif /* UBX_ENABLE */
 #ifdef AIVDM_ENABLE
-extern bool aivdm_decode(char *, size_t, struct aivdm_context_t *, struct ais_t *);
-extern void  aivdm_json_dump(struct ais_t *, bool, /*@out@*/char *, size_t);
+extern bool aivdm_decode(const char *, size_t, struct aivdm_context_t *, struct ais_t *);
+extern void  aivdm_json_dump(const struct ais_t *, bool, /*@out@*/char *, size_t);
 #endif /* AIVDM_ENABLE */
 #ifdef MKT3301_ENABLE
     extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);

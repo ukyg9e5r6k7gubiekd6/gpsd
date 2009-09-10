@@ -21,7 +21,7 @@ representations to libgps structures.
 
 static int json_tpv_read(const char *buf, 
 			 struct gps_data_t *gpsdata, 
-			 /*@null@*/const char **endptr)
+			 /*@out null@*/const char **endptr)
 {
     int status;
     /*@ -fullinitblock @*/
@@ -104,7 +104,7 @@ static int json_tpv_read(const char *buf,
 
 static int json_sky_read(const char *buf, 
 			 struct gps_data_t *gpsdata, 
-			 /*@null@*/const char **endptr)
+			 /*@out null@*/const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
     /*@ -fullinitblock @*/
@@ -152,7 +152,7 @@ static int json_sky_read(const char *buf,
 
 static int json_devicelist_read(const char *buf, 
 				struct gps_data_t *gpsdata, 
-				/*@null@*/const char **endptr)
+				/*@out null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_subdevices[] = {
@@ -201,7 +201,7 @@ static int json_devicelist_read(const char *buf,
 
 static int json_version_read(const char *buf, 
 			     struct gps_data_t *gpsdata, 
-			     /*@null@*/const char **endptr)
+			     /*@out null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_version[] = {
@@ -228,7 +228,7 @@ static int json_version_read(const char *buf,
 
 static int json_error_read(const char *buf, 
 			   struct gps_data_t *gpsdata, 
-			   /*@null@*/const char **endptr)
+			   /*@out null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_error[] = {

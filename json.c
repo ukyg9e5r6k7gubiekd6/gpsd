@@ -95,7 +95,7 @@ static int json_internal_read_object(const char *cp,
 				     const struct json_attr_t *attrs, 
 				     const struct json_array_t *parent, 
 				     int offset, 
-				     /*@null@*/const char **end)
+				     /*@out null@*/const char **end)
 {
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_escape, in_val_token, post_val} state = 0;
@@ -373,6 +373,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
     int substatus, offset;
     char *tp;
 
+    if (end != NULL)
+	*end = NULL;	/* give it a well-defined value on parse failure */
+
     json_debug_trace(("Entered json_read_array()\n"));
 
     while (isspace(*cp))
@@ -454,7 +457,7 @@ breakout:
 
 int json_read_object(const char *cp, 
 		     const struct json_attr_t *attrs, 
-		     /*@null@*/const char **end)
+		     /*@out null@*/const char **end)
 {
     return json_internal_read_object(cp, attrs, NULL, 0, end);
 }

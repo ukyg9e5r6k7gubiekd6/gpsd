@@ -453,7 +453,7 @@ enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
 			c);
 }
 
-void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm2_sager_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     unsigned int n;
@@ -470,7 +470,7 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
     case 1:
     case 9:
 	for (n = 0; n < rtcm->ranges.nentries; n++) {
-	    struct rangesat_t *rsp = &rtcm->ranges.sat[n];
+	    const struct rangesat_t *rsp = &rtcm->ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   rsp->ident,
@@ -507,7 +507,7 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
     case 5:
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
-	    struct consat_t *csp = &rtcm->conhealth.sat[n];
+	    const struct consat_t *csp = &rtcm->conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
 			   csp->ident,
@@ -527,7 +527,7 @@ void rtcm2_sager_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
     case 7:
 	for (n = 0; n < rtcm->almanac.nentries; n++) {
-	    struct station_t *ssp = &rtcm->almanac.station[n];
+	    const struct station_t *ssp = &rtcm->almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "A\t%.4f\t%.4f\t%u\t%.1f\t%u\t%u\t%u\n",
 			   ssp->latitude,

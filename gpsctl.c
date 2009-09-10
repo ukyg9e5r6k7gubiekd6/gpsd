@@ -257,9 +257,10 @@ int main(int argc, char **argv)
 	}
 	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata->devices.ndevices);
 
-	if (gpsdata->devices.ndevices == 1)
+	if (gpsdata->devices.ndevices == 1) {
 	    devlistp = &gpsdata->devices.list[0];
-	else {
+	    device = devlistp->path;
+	} else {
 	    int i;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata->devices.ndevices; i++)
