@@ -62,7 +62,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
     gpsdata->raw_hook = hook;
 }
 
-/*@ -branchstate -usereleased -mustfreefresh @*/
+/*@ -branchstate -usereleased -mustfreefresh -nullstate@*/
 int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
 {
@@ -194,24 +194,27 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			/*@ +mustfreeonly */
 			break;
 		    case 'K':
+			/*@ -nullpass -mustfreeonly -dependenttrans@*/
 			if (sp[2] != '?') {
 			    char *rc = strdup(sp);
 			    char *sp2 = rc;
 			    char *ns2 = ns;
 			    memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
 			    gpsdata->devices.ndevices = (int)strtol(sp2+2, &sp2, 10);
-			    (void)strlcpy(gpsdata->devices.list[i=0].path,
+			    (void)strlcpy(gpsdata->devices.list[0].path,
 				    strtok_r(sp2+1," \r\n", &ns2),
-				    sizeof(gpsdata->devices.list[i=0].path));
-			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
+				    sizeof(gpsdata->devices.list[0].path));
+			    i = 0;
+			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2))!=NULL)
 				if (i < MAXDEVICES_PER_USER-1)
 				    (void)strlcpy(gpsdata->devices.list[++i].path, 
 						 sp2,
-						 sizeof(gpsdata->devices.list[i=0].path));
+						 sizeof(gpsdata->devices.list[0].path));
 			    free(rc);
 			    gpsdata->set |= DEVICELIST_SET;
 			    gpsdata->devices.time = timestamp();
 			}
+			/*@ +nullpass +mustfreeonly +dependenttrans@*/
 			break;
 		    case 'M':
 			if (sp[2] == '?') {
@@ -431,7 +434,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 #endif /* GPSDNG_ENABLE */
 
-/*@ -nullstate -compdef @*/
+/*@ -compdef @*/
     if (gpsdata->raw_hook)
 	gpsdata->raw_hook(gpsdata, buf, strlen(buf),  1);
     if (gpsdata->thread_hook)
@@ -439,8 +442,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
     return 0;
 }
-/*@ +nullstate +compdef @*/
-/*@ -branchstate +usereleased +mustfreefresh @*/
+/*@ +compdef @*/
+/*@ -branchstate +usereleased +mustfreefresh +nullstate@*/
 
 /*
  * return: 0, success

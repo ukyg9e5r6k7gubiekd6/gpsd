@@ -22,6 +22,7 @@ representations to gpsd core strctures, and vice_versa.
 char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {
+    /*@-temptrans@*/
     const char *sp;
     char *tp;
 
@@ -64,6 +65,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
     *tp = '\0';
 
     return to;
+    /*@+temptrans@*/
 }
 
 void json_version_dump(/*@out@*/char *reply, size_t replylen)
@@ -247,6 +249,7 @@ void json_device_dump(const struct gps_device_t *device,
 			  replylen);
 	    (void)strlcat(reply, "\",", replylen);
 	}
+	/*@-mustfreefresh@*/
 	if (device->subtype[0] != '\0') {
 	    (void)strlcat(reply, "\"subtype\":\",", replylen);
 	    (void)strlcat(reply, 
@@ -254,6 +257,7 @@ void json_device_dump(const struct gps_device_t *device,
 			  replylen);
 	    (void)strlcat(reply, "\",", replylen);
 	}
+	/*@+mustfreefresh@*/
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 		       device->gpsdata.dev.driver_mode,
@@ -274,12 +278,14 @@ void json_device_dump(const struct gps_device_t *device,
 void json_watch_dump(const struct policy_t *ccp, 
 		     /*@out@*/char *reply, size_t replylen)
 {
+    /*@-compdef@*/
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}\r\n",
 		   ccp->watcher ? "true" : "false",
 		   ccp->raw, 
 		   ccp->buffer_policy,
 		   ccp->scaled ? "true" : "false");
+    /*@+compdef@*/
 }
 
 #if defined(RTCM104V2_ENABLE)

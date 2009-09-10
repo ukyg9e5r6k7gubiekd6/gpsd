@@ -747,6 +747,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 						  gnss_type type, 
 						  /*@null@*/struct gps_device_t *forcedev)
 {
+    /*@-temptrans@*/
     struct channel_t *chp, *channel;
     bool was_unassigned;
 
@@ -880,6 +881,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 
     channel->subscriber = user;
     return channel;
+    /*@+temptrans@*/
 }
 /*@ +branchstate +usedef +globstate @*/
 
@@ -1058,6 +1060,14 @@ static /*@null@*/struct channel_t *mandatory_assign_channel(struct subscriber_t 
     return channel;
 }
 
+/*
+ * After each channel assignment, it must be the case that eother the
+ * the turned channel pointer is null or points to a channel block with 
+ * a nonzero device field.  The dataflow analysis splint does is not
+ * quite good enough to catch this, alas, so we need to temporarily 
+ * disable its null-dereference check.
+ */
+/*@ -nullderef -nullpass -mustfreefresh @*/
 static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 			    /*@out@*/char *reply, size_t replylen)
 /* interpret a client request; cfd is the socket back to the client */
@@ -1069,15 +1079,6 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
     sub->new_style_responses = false;
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
-
-    /*
-     * After each channel assignment, it must be the case that eother the
-     * the turned channel pointer is null or points to a channel block with 
-     * a nonzero device field.  The dataflow analysis splint does is not
-     * quite good enough to catch this, alas, so we need to temporarily 
-     * disable its null-dereference check.
-     */
-    /*@ -nullderef -nullpass @*/
 
     (void)strlcpy(reply, "GPSD", replylen);
     replylen -= 4;
@@ -1616,9 +1617,9 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
     }
  breakout:
     (void)strlcat(reply, "\r\n", replylen);
-    /*@ +nullderef +nullpass @*/
     return true;
 }
+/*@ +nullderef +nullpass +mustfreefresh @*/
 #endif /* OLDSTYLE_ENABLE */
 
 #ifdef GPSDNG_ENABLE
@@ -1645,7 +1646,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 {
     struct gps_device_t *devp;
     struct channel_t *channel;
-    const char *end;
+    const char *end = NULL;
 
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
     sub->new_style_responses = true;
@@ -1658,6 +1659,11 @@ static void handle_newstyle_request(struct subscriber_t *sub,
      * declare it @null@ and use -compdef around the JSON reader calls.
      */
     /*@-compdef@*/
+    /*
+     * See above...
+     */
+    /*@-nullderef -nullpass@*/
+
 
     /*
      * Still to be implemented: equivalents of Z $
@@ -1709,6 +1715,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		buf = end;
 	    }
 	    channel = NULL;
+	    /*@-branchstate@*/
 	    if (status != 0) {
 		(void)snprintf(reply, replylen, 
 			       "{\"class\":ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
@@ -1765,6 +1772,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    }
 		}
 	    }
+	    /*@+branchstate@*/
 	}
 	/* dump a response for each selected channel */
 	for (channel = channels; channel < channels + NITEMS(channels); channel++)
@@ -1792,6 +1800,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     }
 	bailout:
     *after = buf;
+    /*@+nullderef +nullpass@*/
     /*@+compdef@*/
 }
 #endif /* GPSDNG_ENABLE */
@@ -2232,6 +2241,7 @@ int main(int argc, char *argv[])
 #endif /* GPSDNG_ENABLE */
 		    }
 		    /* copy/merge device data into subscriber fix buffers */
+		    /*@-nullderef -nullpass@*/
 		    for (channel = channels;
 			 channel < channels + NITEMS(channels);
 			 channel++) {
@@ -2250,6 +2260,7 @@ int main(int argc, char *argv[])
 					     &channel->fixbuffer, &channel->oldfix);
 			}
 		    }
+		    /*@+nullderef -nullpass@*/
 		}
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
@@ -2264,6 +2275,7 @@ int main(int argc, char *argv[])
 	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
 		sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
+		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
 		    int state = channel->device->cycle_state;
@@ -2346,6 +2358,7 @@ int main(int argc, char *argv[])
 #endif /* GPSDNG_ENABLE */
 		    }
 		}
+		/*@-nullderef@*/
 	    }
 	}
 

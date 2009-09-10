@@ -62,6 +62,7 @@ has to be inline in the struct.
 # define json_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* JSONDEBUG */
 
+/*@-immediatetrans -dependenttrans -usereleased -compdef@*/
 static /*@null@*/char *json_target_address(const struct json_attr_t *cursor, 
 				 /*@null@*/const struct json_array_t *parent, 
 			       int offset)
@@ -90,14 +91,15 @@ static /*@null@*/char *json_target_address(const struct json_attr_t *cursor,
 	/* tricky case - hacking a member in an array of structures */
 	return parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
 }
+/*@-immediatetrans -dependenttrans +usereleased +compdef@*/
 
 static int json_internal_read_object(const char *cp, 
 				     const struct json_attr_t *attrs, 
-				     const struct json_array_t *parent, 
+				     /*@null@*/const struct json_array_t *parent, 
 				     int offset, 
 				     /*@null@*/const char **end)
 {
-    /*@ -nullstate -nullderef -mustfreefresh @*/
+    /*@ -nullstate -nullderef -mustfreefresh -nullpass -usedef @*/
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_escape, in_val_token, post_val} state = 0;
 #ifdef JSONDEBUG
@@ -116,6 +118,12 @@ static int json_internal_read_object(const char *cp,
     const struct json_enum_t *mp;
     char *lptr;
 
+#ifdef S_SPLINT_S
+    /* prevents gripes about buffers not being completely defined */
+    memset(valbuf, '\0', sizeof(valbuf));
+    memset(attrbuf, '\0', sizeof(attrbuf));
+#endif /* S_SPLINT_S */
+
     if (end != NULL)
 	*end = NULL;	/* give it a well-defined value on parse failure */
 
@@ -123,7 +131,6 @@ static int json_internal_read_object(const char *cp,
     for (cursor = attrs; cursor->attribute != NULL; cursor++) 
 	if (!cursor->nodefault) {
 	    lptr = json_target_address(cursor, parent, offset);
-	    /*@-nullderef@*/
 	    switch(cursor->type)
 	    {
 	    case integer:
@@ -156,7 +163,6 @@ static int json_internal_read_object(const char *cp,
 	    case check:
 		break;
 	    }
-	    /*@+nullderef@*/
 	}
 
     json_debug_trace(("JSON parse begins.\n"));
@@ -316,7 +322,6 @@ static int json_internal_read_object(const char *cp,
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
 	    }
 	    lptr = json_target_address(cursor, parent, offset);
-	    /*@-nullderef@*/
 	    switch(cursor->type)
 	    {
 	    case integer:
@@ -353,7 +358,6 @@ static int json_internal_read_object(const char *cp,
 		}
 		break;
 	    }
-	    /*@+nullderef@*/
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == ',')
@@ -374,11 +378,12 @@ good_parse:
 	*end = cp;
     json_debug_trace(("JSON parse ends.\n"));
     return 0;
-    /*@ +nullstate +nullderef +mustfreefresh @*/
+    /*@ +nullstate +nullderef +mustfreefresh +nullpass +usedef @*/
 }
 
 int json_read_array(const char *cp, const struct json_array_t *arr, const char **end)
 {
+    /*@-nullstate -onlytrans@*/
     int substatus, offset;
     char *tp;
 
@@ -462,6 +467,7 @@ breakout:
 	*end = cp;
     json_debug_trace(("leaving json_read_array() with %d elements\n", *arr->count));
     return 0;
+    /*@+nullstate +onlytrans@*/
 }
 
 int json_read_object(const char *cp, 
