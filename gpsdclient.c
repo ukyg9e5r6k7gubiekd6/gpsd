@@ -2,7 +2,9 @@
 /* gpsclient.c -- support functions for GPSD clients */
 #include <sys/time.h>
 #include <stdio.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

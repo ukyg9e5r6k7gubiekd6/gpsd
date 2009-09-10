@@ -3,7 +3,9 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>

@@ -39,11 +39,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <math.h>
 #include <errno.h>
 #include <sys/select.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 
 #include <sys/time.h> /* select() */
 #include <sys/stat.h>

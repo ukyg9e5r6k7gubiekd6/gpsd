@@ -6,7 +6,9 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <syslog.h>
 #include <signal.h>
@@ -2000,6 +2002,7 @@ int main(int argc, char *argv[])
 	 * It requires that all GPS devices have their group read/write
 	 * permissions set.
 	 */
+	/*@-type@*/
 	if ((optind<argc&&stat(argv[optind], &stb)==0)||stat(PROTO_TTY,&stb)==0) {
 	    gpsd_report(LOG_PROG, "changing to group %d\n", stb.st_gid);
 	    if (setgid(stb.st_gid) != 0)
@@ -2015,6 +2018,7 @@ int main(int argc, char *argv[])
 	pw = getpwnam(GPSD_USER);
 	if (pw)
 	    (void)seteuid(pw->pw_uid);
+	/*@+type@*/
     }
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());

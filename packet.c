@@ -27,7 +27,9 @@ others apart and distinguish them from baud barf.
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
 #include <netinet/in.h>	/* for htons() */

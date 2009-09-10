@@ -4,9 +4,9 @@
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
+#include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 
 #include "gpsd_config.h"

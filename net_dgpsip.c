@@ -3,9 +3,9 @@
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
+#include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <sys/time.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
