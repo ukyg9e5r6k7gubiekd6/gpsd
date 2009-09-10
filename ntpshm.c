@@ -181,7 +181,11 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv, int rate)
     seconds = shmTime->clockTimeStampSec + usecs / 1000000;
     usecs %= 1000000;
 
-    offset = tv->tv_sec - seconds + (tv->tv_usec - usecs) / 1000000.0;
+    /* 
+     * Curiously, splint complains "Assignment of long int to double"
+     * about the following...
+     */
+    /*@i1@*/offset = tv->tv_sec - seconds + (tv->tv_usec - usecs) / 1000000.0;
     if (offset < 0.0)
 	    offset = -offset;
 
