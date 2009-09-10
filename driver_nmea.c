@@ -759,7 +759,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 			session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);
 			session->gpsdata.azimuth[i] = atoi(field[3+i*5+1]);
 			session->gpsdata.elevation[i] = atoi(field[3+i*5+2]);
-			session->gpsdata.ss[i] = atoi(field[3+i*5+3]);
+			session->gpsdata.ss[i] = atof(field[3+i*5+3]);
 			if (field[3+i*5+4][0] == 'U')
 				session->gpsdata.used[u++] = p;
 		}

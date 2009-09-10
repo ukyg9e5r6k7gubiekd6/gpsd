@@ -295,7 +295,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
     gpsd_report(LOG_IO, "PrintSERPacket(, %#02x, %#02x, )\n", pkt_id, pkt_len);
 
     session->cycle_state = CYCLE_END_RELIABLE;
-    if (pkt_id == GARMIN_PKTID_PVT_DATA)
+    if ((int)pkt_id == GARMIN_PKTID_PVT_DATA)
 	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch( pkt_id ) {

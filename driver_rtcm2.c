@@ -182,7 +182,7 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	    csp->ident = m->sat_id;
 	    csp->iodl = m->issue_of_data_link!=0;
 	    csp->health = m->data_health;
-	    /*@i@*/csp->snr = (m->cn0?(m->cn0+CNR_OFFSET):SNR_BAD);
+	    /*@i@*/csp->snr = (uint)(m->cn0?(m->cn0+CNR_OFFSET):SNR_BAD);
 	    csp->health_en = m->health_enable!=0;
 	    csp->new_data = m->new_nav_data!=0;
 	    csp->los_warning = m->loss_warn!=0;
@@ -324,7 +324,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	if (tp->reference.valid) {
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
-	    m->w3.dgnss = tp->reference.system;
+	    m->w3.dgnss = (unsigned)tp->reference.system;
 	    m->w3.dat = (unsigned)(tp->reference.sense == SENSE_GLOBAL);
 	    /*@ -predboolothers -type @*/
 	    if (tp->reference.datum[0])
@@ -366,7 +366,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	    m->issue_of_data_link = (unsigned)csp->iodl;
 	    m->data_health = csp->health;
 	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : (unsigned)csp->snr-CNR_OFFSET;
-	    m->health_enable = csp->health_en;
+	    m->health_enable = (unsigned)csp->health_en;
 	    m->new_nav_data = (unsigned)csp->new_data;
 	    m->loss_warn = (unsigned)csp->los_warning;
 	    m->time_unhealthy = (unsigned)(csp->tou / TU_SCALE);

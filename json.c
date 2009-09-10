@@ -62,7 +62,7 @@ has to be inline in the struct.
 # define json_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* JSONDEBUG */
 
-static char *json_target_address(const struct json_attr_t *cursor, 
+static /*@null@*/char *json_target_address(const struct json_attr_t *cursor, 
 				 /*@null@*/const struct json_array_t *parent, 
 			       int offset)
 {

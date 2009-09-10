@@ -178,7 +178,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv, int rate)
     }
 
     usecs = shmTime->clockTimeStampUSec + 1000000 / rate;
-    seconds = shmTime->clockTimeStampSec + usecs / 1000000;;
+    seconds = shmTime->clockTimeStampSec + usecs / 1000000;
     usecs %= 1000000;
 
     offset = tv->tv_sec - seconds + (tv->tv_usec - usecs) / 1e6;

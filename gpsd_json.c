@@ -52,7 +52,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 		break;
 	    default:
 		/* ugh, we'd prefer a C-style escape here, but this is JSON */
-		(void)snprintf(tp, 5, "%u04x", *sp);
+		(void)snprintf(tp, 5, "%u04x", (uint)*sp);
 		tp += strlen(tp);
 	    }
 	} else {
@@ -832,14 +832,14 @@ void aivdm_json_dump(struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t 
     case 6:	/* Binary Message */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
-		       "\"retransmit\":%u,\"app_id\":%u,"
+		       "\"retransmit\":%s,\"app_id\":%u,"
 		       "\"data\":\"%zd:%s\"}\r\n",
 		       ais->type6.seqno,
-			  ais->type6.dest_mmsi,
-			  ais->type6.retransmit,
-			  ais->type6.app_id,
-			  ais->type6.bitcount,
-			  gpsd_hexdump(ais->type6.bitdata,
+		       ais->type6.dest_mmsi,
+		       JSON_BOOL(ais->type6.retransmit),
+		       ais->type6.app_id,
+		       ais->type6.bitcount,
+		       gpsd_hexdump(ais->type6.bitdata,
 				       (ais->type6.bitcount+7)/8));
 	break;
     case 7:	/* Binary Acknowledge */

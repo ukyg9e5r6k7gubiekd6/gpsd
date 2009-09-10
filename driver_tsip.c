@@ -59,8 +59,8 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	/* XXX Thunderbolts and Copernicus use 8N1... which isn't exactly a */
 	/* XXX good idea due to the fragile wire format.   We must divine a */
 	/* XXX clever heuristic to decide if the parity change is required. */
-	session->driver.tsip.parity = session->gpsdata.dev.parity;
-	session->driver.tsip.stopbits = session->gpsdata.dev.stopbits;
+	session->driver.tsip.parity = (uint)session->gpsdata.dev.parity;
+	session->driver.tsip.stopbits = (uint)session->gpsdata.dev.stopbits;
 	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	break;
 
@@ -372,12 +372,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
 		session->gpsdata.PRN[i] = (int)u1;
-		session->gpsdata.ss[i] = (int)round(f1);
+		session->gpsdata.ss[i] = f1;
 		session->gpsdata.elevation[i] = (int)round(d1);
 		session->gpsdata.azimuth[i] = (int)round(d2);
 	    } else {
-		session->gpsdata.PRN[i] = session->gpsdata.ss[i] =
-		session->gpsdata.elevation[i] = session->gpsdata.azimuth[i] = 0;
+		session->gpsdata.PRN[i] = 0;
+		session->gpsdata.ss[i] = session->gpsdata.elevation[i] 
+		    = session->gpsdata.azimuth[i] = 0;
 	    }
 	    if (++i == session->gpsdata.satellites)
 		mask |= SATELLITE_SET;		/* last of the series */

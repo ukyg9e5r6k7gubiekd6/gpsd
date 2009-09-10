@@ -50,8 +50,8 @@ union long_double {
 #define getlesl(buf, off)	((int32_t)(((u_int16_t)getleuw((buf),  (off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
 #define getleul(buf, off)	((u_int32_t)(((u_int16_t)getleuw((buf),(off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
 
-#define putleword(buf, off, w) do {putbyte(buf, (off)+1, (w) >> 8); putbyte(buf, (off), (w));} while (0)
-#define putlelong(buf, off, l) do {putleword(buf, (off)+2, (l) >> 16); putleword(buf, (off), (l));} while (0)
+#define putleword(buf, off, w) do {putbyte(buf, (off)+1, (uint)(w) >> 8); putbyte(buf, (off), (w));} while (0)
+#define putlelong(buf, off, l) do {putleword(buf, (off)+2, (uint)(l) >> 16); putleword(buf, (off), (l));} while (0)
 #define getlesL(buf, off)	((int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
 #define getleuL(buf, off)	((u_int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
 

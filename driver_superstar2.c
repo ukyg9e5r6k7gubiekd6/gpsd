@@ -594,7 +594,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=(char)session->gpsdata.dev.parity || (unsigned int)stopbits!=session->gpsdata.dev.stopbits) {
+    if (parity!=(char)session->gpsdata.dev.parity || stopbits!=session->gpsdata.dev.stopbits) {
 	return false;
     } else {
 	/*@ +charint @*/

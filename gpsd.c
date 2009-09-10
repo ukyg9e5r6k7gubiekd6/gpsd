@@ -787,7 +787,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 
     /* if subscriber has no device... */
     if (was_unassigned) {
-	if (forcedev != NULL ) {
+	if (forcedev != NULL) {
 	    channel->device = forcedev;
 	} else {
 	    double most_recent = 0;
@@ -874,7 +874,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 #endif /* OLDSTYLE_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
 	if (buf[0])
-	    throttled_write(user, buf, strlen(buf));
+	    (void)throttled_write(user, buf, strlen(buf));
 	/*@ +sefparams -matchanyintegral @*/
     }
 
@@ -1805,7 +1805,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 	    return -1;
 #endif /* OLDSTYLE_ENABLE */
 
-    return (int)throttled_write(sub, reply, (ssize_t)strlen(reply));
+    return (int)throttled_write(sub, reply, strlen(reply));
 }
 
 /*@ -mustfreefresh @*/

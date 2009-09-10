@@ -134,7 +134,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] == '?') {
 			    gpsdata->dev.baudrate = gpsdata->dev.stopbits = 0;
 			} else
-			    (void)sscanf(sp, "B=%d %*d %*s %u",
+			    (void)sscanf(sp, "B=%d %*d %*s %d",
 				   &gpsdata->dev.baudrate, &gpsdata->dev.stopbits);
 			break;
 		    case 'C':
@@ -200,7 +200,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    char *ns2 = ns;
 			    memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
 			    gpsdata->devices.ndevices = (int)strtol(sp2+2, &sp2, 10);
-			    strlcpy(gpsdata->devices.list[i=0].path,
+			    (void)strlcpy(gpsdata->devices.list[i=0].path,
 				    strtok_r(sp2+1," \r\n", &ns2),
 				    sizeof(gpsdata->devices.list[i=0].path));
 			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2)))
@@ -496,13 +496,13 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
     if ((flags & WATCH_ENABLE) != 0) {
 #ifdef OLDSTYLE_ENABLE
 	(void)strlcpy(buf, "w+x", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "r+", sizeof(buf));
 	if (flags & WATCH_NOJITTER)
 	    (void)strlcat(buf, "j+", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1", sizeof(buf));
 	if (flags & WATCH_NOJITTER)
 	    (void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
@@ -514,13 +514,13 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
     } else if ((flags & WATCH_DISABLE) != 0) {
 #ifdef OLDSTYLE_ENABLE
 	(void)strlcpy(buf, "w-", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "r-", sizeof(buf));
 	if (flags & WATCH_NOJITTER)
 	    (void)strlcat(buf, "j-", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW))
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
 	if (flags & WATCH_NOJITTER)
 	    (void)strlcat(buf, "\"buffer_policy\"=1,", sizeof(buf));
