@@ -1001,7 +1001,7 @@ static void set_serial(struct gps_device_t *device,
 /* set serial parameters for a device from a speed and modestring */
 {
     unsigned int stopbits = device->gpsdata.dev.stopbits;
-    char parity = (char)device->gpsdata.dev.parity;
+    char parity = device->gpsdata.dev.parity;
     int wordsize = 8;
 
     if (strchr("78", *modestring)!= NULL) {
@@ -1041,14 +1041,13 @@ static void set_serial(struct gps_device_t *device,
 	     */
 	    (void)tcdrain(device->gpsdata.gps_fd);
 	    (void)usleep(50000);
-	    gpsd_set_speed(device, speed,
-			   (unsigned char)parity, stopbits);
+	    gpsd_set_speed(device, speed, parity, stopbits);
 	}
 }
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef OLDSTYLE_ENABLE
-static /*null*/struct channel_t *mandatory_assign_channel(struct subscriber_t *user, 
+static /*@null@*/struct channel_t *mandatory_assign_channel(struct subscriber_t *user, 
 						  gnss_type type, 
 						  /*@null@*/struct gps_device_t *forcedev)
 {
@@ -1060,7 +1059,7 @@ static /*null*/struct channel_t *mandatory_assign_channel(struct subscriber_t *u
 }
 
 static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
-			    char *reply, size_t replylen)
+			    /*@out@*/char *reply, size_t replylen)
 /* interpret a client request; cfd is the socket back to the client */
 {
     char phrase[BUFSIZ], *p, *stash;
@@ -1078,7 +1077,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
      * quite good enough to catch this, alas, so we need to temporarily 
      * disable its null-dereference check.
      */
-    /*@ -nullderef @*/
+    /*@ -nullderef -nullpass @*/
 
     (void)strlcpy(reply, "GPSD", replylen);
     replylen -= 4;
@@ -1110,14 +1109,10 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    }
 #endif /* FIXED_PORT_SPEED */
 	    if (channel->device) {
-		if ( channel->device->gpsdata.dev.parity == 0 ) {
-			/* zero parity breaks the next snprintf */
-			channel->device->gpsdata.dev.parity = (unsigned)'N';
-		}
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %u %c %u",
 		    (int)gpsd_get_speed(&channel->device->ttyset),
 			9 - channel->device->gpsdata.dev.stopbits,
-			(int)channel->device->gpsdata.dev.parity,
+			channel->device->gpsdata.dev.parity,
 			channel->device->gpsdata.dev.stopbits);
 	    } else {
 		(void)strlcpy(phrase, ",B=?", sizeof(phrase));
@@ -1621,7 +1616,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
     }
  breakout:
     (void)strlcat(reply, "\r\n", replylen);
-    /*@ +nullderef @*/
+    /*@ +nullderef +nullpass @*/
     return true;
 }
 #endif /* OLDSTYLE_ENABLE */
@@ -1744,7 +1739,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		    else {
 			char serialmode[3];
-			double cycle;
 			const struct gps_type_t *dt = channel->device->device_type;
 
 			/* now that channel is selected, apply changes */
@@ -1759,7 +1753,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    && isnan(devconf.cycle)!=0 
 			    && devconf.cycle >= dt->min_cycle)
 			if (dt->rate_switcher(channel->device, devconf.cycle))
-			    channel->device->gpsdata.dev.cycle = cycle;
+			    channel->device->gpsdata.dev.cycle = devconf.cycle;
 		    }
 		}
 	    }
@@ -1801,7 +1795,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 #ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
 	const char *end;
-	for (end = ++buf; *buf; buf = end)
+	for (end = ++buf; *buf!='\0'; buf = end)
 	    if (isspace(*buf))
 		end = buf + 1;
 	    else

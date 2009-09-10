@@ -762,7 +762,7 @@ int main (int argc, char **argv)
 		    monitor_complain("No device defined yet");
 		else if (serial) {
 		    speed_t speed;
-		    char parity = (char)session.gpsdata.dev.parity;
+		    char parity = session.gpsdata.dev.parity;
 		    unsigned int stopbits = (unsigned int)session.gpsdata.dev.stopbits;
 		    char *modespec;
 
@@ -794,8 +794,8 @@ int main (int argc, char **argv)
 			int dfd = session.gpsdata.gps_fd;
 			session.gpsdata.gps_fd = controlfd;
 			if ((*active)->driver->speed_switcher(&session,
-								speed,
-								parity,
+							      speed,
+							      parity,
 							      (int)stopbits)) {
 			    monitor_dump_send();
 			    /*
@@ -809,7 +809,7 @@ int main (int argc, char **argv)
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			    (void)gpsd_set_speed(&session, speed,
-						 (unsigned char)parity,
+						 parity,
 						 stopbits);
 			} else
 			    monitor_complain("Speed/mode cobination not supported.");

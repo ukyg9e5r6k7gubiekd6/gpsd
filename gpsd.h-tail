@@ -315,7 +315,8 @@ struct gps_device_t {
 	    time_t last_5c;
 	    time_t last_6d;
 	    time_t last_46;
-	    unsigned int parity, stopbits; /* saved RS232 link parameters */
+	    unsigned int stopbits; /* saved RS232 link parameter */
+	    char parity;
 	} tsip;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
@@ -439,7 +440,7 @@ extern bool gpsd_set_raw(struct gps_device_t *);
 extern ssize_t gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
-extern void gpsd_set_speed(struct gps_device_t *, speed_t, unsigned char, unsigned int);
+extern void gpsd_set_speed(struct gps_device_t *, speed_t, char, unsigned int);
 extern speed_t gpsd_get_speed(const struct termios *);
 extern void gpsd_assert_sync(struct gps_device_t *);
 extern void gpsd_close(struct gps_device_t *);

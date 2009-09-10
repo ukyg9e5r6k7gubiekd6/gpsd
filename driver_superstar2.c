@@ -421,7 +421,7 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
    unsigned short c = 0;
    ssize_t i;
 
-   for (i = 0; i < msglen - 2; i++)
+   for (i = 0; i < (ssize_t)(msglen - 2); i++)
 	c += (unsigned short)msg[i];
    c += 0x100;
    // c = htons(c); // XXX is this needed on big-endian machines?
@@ -594,7 +594,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
      /* parity and stopbit switching aren't available on this chip */
-    if (parity!=(char)session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.stopbits) {
+    if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.stopbits) {
 	return false;
     } else {
 	/*@ +charint @*/

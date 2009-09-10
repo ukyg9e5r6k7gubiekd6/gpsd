@@ -43,7 +43,7 @@ int json_rtcm2_read(const char *buf,
 	{"length",         uinteger, .addr.uinteger = &rtcm2->length}, \
 	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
 
-    int status, satcount;
+    int status = 0, satcount = 0;
 
     /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1_satellite[] = {

@@ -79,7 +79,7 @@ bool gpsd_set_raw(struct gps_device_t *session)
 }
 
 void gpsd_set_speed(struct gps_device_t *session,
-		   speed_t speed, unsigned char parity, unsigned int stopbits)
+		   speed_t speed, char parity, unsigned int stopbits)
 {
     speed_t	rate;
 
@@ -104,7 +104,7 @@ void gpsd_set_speed(struct gps_device_t *session,
     else
       rate =  B115200;
 
-    if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.dev.parity || stopbits!=session->gpsdata.dev.stopbits) {
+    if (rate!=cfgetispeed(&session->ttyset) || parity!=session->gpsdata.dev.parity || stopbits!=session->gpsdata.dev.stopbits) {
 
 	/* 
 	 * Don't mess with this conditional! Speed zero is supposed to mean
@@ -192,7 +192,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 		gpsd_get_speed(&session->ttyset), 9-stopbits, parity, stopbits);
 
     session->gpsdata.dev.baudrate = (unsigned int)speed;
-    session->gpsdata.dev.parity = (unsigned int)parity;
+    session->gpsdata.dev.parity = parity;
     session->gpsdata.dev.stopbits = stopbits;
 
     if (!session->context->readonly) {
@@ -334,7 +334,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	}
 	gpsd_set_speed(session,
 		       rates[session->baudindex],
-		       (unsigned char)session->gpsdata.dev.parity,
+		       session->gpsdata.dev.parity,
 		       session->gpsdata.dev.stopbits);
     }
 

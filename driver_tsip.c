@@ -59,7 +59,7 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	/* XXX Thunderbolts and Copernicus use 8N1... which isn't exactly a */
 	/* XXX good idea due to the fragile wire format.   We must divine a */
 	/* XXX clever heuristic to decide if the parity change is required. */
-	session->driver.tsip.parity = (uint)session->gpsdata.dev.parity;
+	session->driver.tsip.parity = session->gpsdata.dev.parity;
 	session->driver.tsip.stopbits = (uint)session->gpsdata.dev.stopbits;
 	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	break;
@@ -86,7 +86,7 @@ static void tsip_wrapup(struct gps_device_t *session)
     /* restore saved parity and stopbits when leaving TSIP mode */
     gpsd_set_speed(session,
 		   session->gpsdata.dev.baudrate,
-		   (unsigned char)session->driver.tsip.parity,
+		   session->driver.tsip.parity,
 		   session->driver.tsip.stopbits);
 }
 

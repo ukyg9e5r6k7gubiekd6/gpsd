@@ -31,7 +31,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
      * each character to generate an up to 6-character Java-style
      * escape
      */
-    for (sp = from; *sp && tp - to < (int)len-5; sp++) {
+    for (sp = from; *sp && (tp - to < ((int)len-5)); sp++) {
 	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
@@ -223,7 +223,6 @@ int json_device_read(const char *buf,
 		     /*@out@*/struct devconfig_t *dev, 
 		     /*@out null@*/const char **endptr)
 {
-    char serialmode[4];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      check,      .dflt.check = "DEVICE"},
@@ -240,8 +239,8 @@ int json_device_read(const char *buf,
 				   .dflt.integer = -1},
 	{"bps",	       uinteger,   .addr.uinteger = &dev->baudrate,
 				   .dflt.uinteger = 0},
-	{"parity",     string,	   .addr.string=serialmode,
-				   .len=sizeof(serialmode)},
+	{"parity",     character,  .addr.character = &dev->parity,
+                                   .dflt.character = 'N'},
 	{"stopbits",   uinteger,   .addr.uinteger = &dev->stopbits,
 				   .dflt.uinteger = 1},
 	{"cycle",      real,       .addr.real = &dev->cycle,
@@ -298,7 +297,7 @@ void json_device_dump(const struct gps_device_t *device,
 		       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 		       device->gpsdata.dev.driver_mode,
 		       (int)gpsd_get_speed(&device->ttyset),
-		       (int)device->gpsdata.dev.parity,
+		       device->gpsdata.dev.parity,
 		       device->gpsdata.dev.stopbits,
 		       device->gpsdata.dev.cycle);
 	if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
@@ -619,7 +618,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	"Other Type - no additional information",
     };
 
-#define SHIPTYPE_DISPLAY(n) (((n) < (sizeof(ship_type_legends)/sizeof(ship_type_legends[0]))) ? ship_type_legends[n] : "INVALID SHIP TYPE")
+#define SHIPTYPE_DISPLAY(n) (((n) < (uint)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
 
     static char *navaid_type_legends[] = {
 	"Unspcified",
@@ -656,7 +655,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	"Light Vessel / LANBY / Rigs",
     };
 
-#define NAVAIDTYPE_DISPLAY(n) (((n) < (sizeof(navaid_type_legends)/sizeof(navaid_type_legends[0]))) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
+#define NAVAIDTYPE_DISPLAY(n) (((n) < (uint)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     (void)snprintf(buf, buflen, 
 		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"

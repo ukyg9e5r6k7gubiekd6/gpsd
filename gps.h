@@ -836,7 +836,8 @@ struct devconfig_t {
     char driver[64];
     char subtype[64];
     double activated;
-    uint baudrate, parity, stopbits;	/* RS232 link parameters */
+    uint baudrate, stopbits;		/* RS232 link parameters */
+    char parity;			/* 'N', 'O', or 'E' */
     double cycle, mincycle;     	/* refresh cycle time in seconds */
     int driver_mode;    		/* is driver in native mode or not? */
 };

@@ -196,7 +196,7 @@ static int json_internal_read_object(const char *cp,
 		}
 		state = await_value;
 		if (cursor->type == string)
-		    maxlen = cursor->len - 1;
+		    maxlen = (int)cursor->len - 1;
 		else if (cursor->type == check)
 		    maxlen = strlen(cursor->dflt.check);
 		else if (cursor->map != NULL)
@@ -327,7 +327,7 @@ static int json_internal_read_object(const char *cp,
 		(void)strncpy(lptr, valbuf, cursor->len);
 		break;
 	    case boolean:
-		*((bool *)lptr) = (bool)!strcmp(valbuf, "true");
+		*((bool *)lptr) = (strcmp(valbuf, "true") == 0);
 		break;
 	    case character:
 		if (strlen(valbuf) > 1)

@@ -134,7 +134,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] == '?') {
 			    gpsdata->dev.baudrate = gpsdata->dev.stopbits = 0;
 			} else
-			    (void)sscanf(sp, "B=%d %*d %*s %d",
+			    (void)sscanf(sp, "B=%u %*d %*s %u",
 				   &gpsdata->dev.baudrate, &gpsdata->dev.stopbits);
 			break;
 		    case 'C':
@@ -374,7 +374,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->set |= TIME_SET;
 			    }
 			    for (j = 0; j < gpsdata->satellites; j++) {
-				PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
+				PRN[j]=elevation[j]=azimuth[j]=used[j]=0;
+				ss[j]=0.0;
 			    }
 			    for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites; j++) {
 				if ((sp != NULL) && ((sp = strchr(sp, ':')) != NULL)) {
