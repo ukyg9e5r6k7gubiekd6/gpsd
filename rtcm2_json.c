@@ -24,7 +24,7 @@ representations to libgps structures.
 int json_rtcm2_read(const char *buf, 
 		    char *path, size_t pathlen,
 		    struct rtcm2_t *rtcm2, 
-		    const char **endptr)
+		    /*@null@*/const char **endptr)
 {
 
     static char *stringptrs[NITEMS(rtcm2->words)];
@@ -54,12 +54,14 @@ int json_rtcm2_read(const char *buf,
 	{"rangerate", real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
 	{NULL},
     };
+    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
         {"satellites", array,	STRUCTARRAY(rtcm2->ranges.sat, 
 					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
+    /*@+type@*/
 
     const struct json_attr_t json_rtcm3[] = {
 	RTCM2_HEADER
@@ -109,12 +111,14 @@ int json_rtcm2_read(const char *buf,
 	{"tou",         uinteger, STRUCTOBJECT(struct consat_t, tou)},
 	{NULL},
     };
+    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm5[] = {
 	RTCM2_HEADER
         {"satellites", array,	STRUCTARRAY(rtcm2->conhealth.sat, 
 					    rtcm5_satellite, &satcount)},
 	{NULL},
     };
+    /*@+type@*/
 
     const struct json_attr_t json_rtcm6[] = {
 	RTCM2_HEADER
@@ -132,12 +136,14 @@ int json_rtcm2_read(const char *buf,
 	{"bitrate",     uinteger, STRUCTOBJECT(struct station_t, bitrate)},
 	{NULL},
     };
+    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm7[] = {
 	RTCM2_HEADER
         {"satellites", array,	STRUCTARRAY(rtcm2->almanac.station, 
 					    rtcm7_satellite, &satcount)},
 	{NULL},
     };
+    /*@+type@*/
 
     const struct json_attr_t json_rtcm16[] = {
 	RTCM2_HEADER
@@ -146,6 +152,7 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+    /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm2_fallback[] = {
 	RTCM2_HEADER
 	{"data",         array, .addr.array.element_type = string,
@@ -156,6 +163,7 @@ int json_rtcm2_read(const char *buf,
 	                        .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
+    /*@+type@*/
     /*@ +fullinitblock @*/
 
 #undef RTCM2_HEADER

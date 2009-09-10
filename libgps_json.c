@@ -19,9 +19,17 @@ representations to libgps structures.
 #include "gpsd.h"
 #include "gps_json.h"
 
+/*
+ * There's a splint limitation that parameters can be declared
+ * @out@ or @null@ but not, apparently, both.  This collides with
+ * the (admittedly tricky) way we use endptr. The workaround is to
+ * declare it @null@ and use -compdef around the JSON reader calls.
+ */
+/*@-compdef@*/
+
 static int json_tpv_read(const char *buf, 
 			 struct gps_data_t *gpsdata, 
-			 /*@out null@*/const char **endptr)
+			 /*@null@*/const char **endptr)
 {
     int status;
     /*@ -fullinitblock @*/
@@ -104,7 +112,7 @@ static int json_tpv_read(const char *buf,
 
 static int json_sky_read(const char *buf, 
 			 struct gps_data_t *gpsdata, 
-			 /*@out null@*/const char **endptr)
+			 /*@null@*/const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
     /*@ -fullinitblock @*/
@@ -152,7 +160,7 @@ static int json_sky_read(const char *buf,
 
 static int json_devicelist_read(const char *buf, 
 				struct gps_data_t *gpsdata, 
-				/*@out null@*/const char **endptr)
+				/*@null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_subdevices[] = {
@@ -179,6 +187,7 @@ static int json_devicelist_read(const char *buf,
 				   .dflt.real = NAN},
 	{NULL},
     };
+    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_attrs_devices[] = {
         {"class",   check,  .dflt.check = "DEVICES"},
         {"devices", array,  STRUCTARRAY(gpsdata->devices.list,
@@ -186,6 +195,7 @@ static int json_devicelist_read(const char *buf,
 					&gpsdata->devices.ndevices)},
 	{NULL},
     };
+    /*@+type@*/
     /*@ +fullinitblock @*/
     int status;
 
@@ -201,7 +211,7 @@ static int json_devicelist_read(const char *buf,
 
 static int json_version_read(const char *buf, 
 			     struct gps_data_t *gpsdata, 
-			     /*@out null@*/const char **endptr)
+			     /*@null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_version[] = {
@@ -228,7 +238,7 @@ static int json_version_read(const char *buf,
 
 static int json_error_read(const char *buf, 
 			   struct gps_data_t *gpsdata, 
-			   /*@out null@*/const char **endptr)
+			   /*@null@*/const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_error[] = {
@@ -294,5 +304,6 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
     } else
 	return -1;
 }
+/*@+compdef@*/
 
 /* libgps_json.c ends here */

@@ -225,7 +225,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] == '?')
 			    gpsdata->dev.driver_mode = MODE_NMEA;
 			else
-			    gpsdata->dev.driver_mode = (unsigned)atoi(sp+2);
+			    gpsdata->dev.driver_mode = atoi(sp+2);
 			break;
 		    case 'O':
 			if (sp[2] == '?') {

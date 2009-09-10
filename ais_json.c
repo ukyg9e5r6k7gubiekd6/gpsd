@@ -33,10 +33,12 @@ static void lenhex_unpack(const char *from,
 /*@ +mustdefine @*/
 
 int json_ais_read(const char *buf, 
-		    char *path, size_t pathlen,
-		    struct ais_t *ais, 
-		    const char **endptr)
+		  char *path, size_t pathlen,
+		  struct ais_t *ais, 
+		  /*@null@*/const char **endptr)
 {
+    /*@-compdef@*//* splint is confused by storage declared in the .i file */
+    /*@-nullstate@*/
 
 #define AIS_HEADER \
 	{"class",          check,    .dflt.check = "AIS"}, \
@@ -130,9 +132,11 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":24,") != NULL) {
 	status = json_read_object(buf, json_ais24, endptr);
     } else {
-	*endptr = NULL;
+	if (endptr != NULL)
+	    *endptr = NULL;
 	return JSON_ERR_MISC;
     }
+    /*@+compdef +nullstate@*/
     return status;
 }
 

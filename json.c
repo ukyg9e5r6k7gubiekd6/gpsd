@@ -95,8 +95,9 @@ static int json_internal_read_object(const char *cp,
 				     const struct json_attr_t *attrs, 
 				     const struct json_array_t *parent, 
 				     int offset, 
-				     /*@out null@*/const char **end)
+				     /*@null@*/const char **end)
 {
+    /*@ -nullstate -nullderef -mustfreefresh @*/
     enum {init, await_attr, in_attr, await_value, 
 	  in_val_string, in_escape, in_val_token, post_val} state = 0;
 #ifdef JSONDEBUG
@@ -111,6 +112,7 @@ static int json_internal_read_object(const char *cp,
     char uescape[5];	/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
     int substatus, maxlen, n;
+    unsigned int u;
     const struct json_enum_t *mp;
     char *lptr;
 
@@ -121,6 +123,7 @@ static int json_internal_read_object(const char *cp,
     for (cursor = attrs; cursor->attribute != NULL; cursor++) 
 	if (!cursor->nodefault) {
 	    lptr = json_target_address(cursor, parent, offset);
+	    /*@-nullderef@*/
 	    switch(cursor->type)
 	    {
 	    case integer:
@@ -139,8 +142,10 @@ static int json_internal_read_object(const char *cp,
 		break;
 	    case boolean:
 		/* nullbool default says not to set the value at all */
+		/*@+boolint@*/
 		if (cursor->dflt.boolean != nullbool)
 		    *((bool *)lptr) = cursor->dflt.boolean;
+		/*@-boolint@*/
 		break;
 	    case character:
 		lptr[0] = cursor->dflt.character;
@@ -151,12 +156,13 @@ static int json_internal_read_object(const char *cp,
 	    case check:
 		break;
 	    }
+	    /*@+nullderef@*/
 	}
 
     json_debug_trace(("JSON parse begins.\n"));
 
     /* parse input JSON */
-    for (; *cp; cp++) {
+    for (; *cp!='\0'; cp++) {
 	json_debug_trace(("State %-14s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
 	switch (state)
 	{
@@ -198,9 +204,9 @@ static int json_internal_read_object(const char *cp,
 		if (cursor->type == string)
 		    maxlen = (int)cursor->len - 1;
 		else if (cursor->type == check)
-		    maxlen = strlen(cursor->dflt.check);
+		    maxlen = (int)strlen(cursor->dflt.check);
 		else if (cursor->map != NULL)
-		    maxlen = sizeof(valbuf)-1;
+		    maxlen = (int)sizeof(valbuf)-1;
 		pval = valbuf;
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1) {
 		json_debug_trace(("Attribute name too long.\n"));
@@ -268,8 +274,8 @@ static int json_internal_read_object(const char *cp,
 		for (n = 0; n < 4 && cp[n] != '\0'; n++)
 		    uescape[n] = *cp++;
 		--cp;
-		(void)sscanf(uescape, "%04x", &n);
-		*pval++ = (char)n;	/* will truncate values above 0xff */
+		(void)sscanf(uescape, "%04x", &u);
+		*pval++ = (char)u;	/* will truncate values above 0xff */
 		break;
 	    default:	/* handles double quote and solidus */
 		*pval++ = *cp;
@@ -310,6 +316,7 @@ static int json_internal_read_object(const char *cp,
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
 	    }
 	    lptr = json_target_address(cursor, parent, offset);
+	    /*@-nullderef@*/
 	    switch(cursor->type)
 	    {
 	    case integer:
@@ -346,6 +353,7 @@ static int json_internal_read_object(const char *cp,
 		}
 		break;
 	    }
+	    /*@+nullderef@*/
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == ',')
@@ -366,6 +374,7 @@ good_parse:
 	*end = cp;
     json_debug_trace(("JSON parse ends.\n"));
     return 0;
+    /*@ +nullstate +nullderef +mustfreefresh @*/
 }
 
 int json_read_array(const char *cp, const struct json_array_t *arr, const char **end)
@@ -457,7 +466,7 @@ breakout:
 
 int json_read_object(const char *cp, 
 		     const struct json_attr_t *attrs, 
-		     /*@out null@*/const char **end)
+		     /*@null@*/const char **end)
 {
     return json_internal_read_object(cp, attrs, NULL, 0, end);
 }

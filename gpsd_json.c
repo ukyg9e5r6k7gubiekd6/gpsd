@@ -31,7 +31,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
      * each character to generate an up to 6-character Java-style
      * escape
      */
-    for (sp = from; *sp && (tp - to < ((int)len-5)); sp++) {
+    for (sp = from; *sp!='\0' && ((tp - to) < ((int)len-5)); sp++) {
 	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
@@ -74,7 +74,7 @@ void json_version_dump(/*@out@*/char *reply, size_t replylen)
 }
 
 void json_tpv_dump(const struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
-		   char *reply, size_t replylen)
+		   /*@out@*/char *reply, size_t replylen)
 {
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
@@ -163,7 +163,8 @@ void json_tpv_dump(const struct gps_data_t *gpsdata, struct gps_fix_t *fixp,
     (void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
 }
 
-void json_sky_dump(const struct gps_data_t *datap, char *reply, size_t replylen)
+void json_sky_dump(const struct gps_data_t *datap, 
+		   /*@out@*/char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
     assert(replylen > 2);
@@ -219,48 +220,8 @@ void json_sky_dump(const struct gps_data_t *datap, char *reply, size_t replylen)
 		    datap->satellites, reported);
 }
 
-int json_device_read(const char *buf, 
-		     /*@out@*/struct devconfig_t *dev, 
-		     /*@out null@*/const char **endptr)
-{
-    /*@ -fullinitblock @*/
-    const struct json_attr_t json_attrs_device[] = {
-	{"class",      check,      .dflt.check = "DEVICE"},
-	
-        {"path",       string,     .addr.string  = dev->path,
-	                           .len = sizeof(dev->path)},
-	{"activated",  real,       .addr.real = &dev->activated},
-	{"flags",      integer,    .addr.integer = &dev->flags},
-	{"driver",     string,     .addr.string  = dev->driver,
-	                           .len = sizeof(dev->driver)},
-	{"subtype",    string,     .addr.string  = dev->subtype,
-	                           .len = sizeof(dev->subtype)},
-	{"native",     integer,    .addr.integer = &dev->driver_mode,
-				   .dflt.integer = -1},
-	{"bps",	       uinteger,   .addr.uinteger = &dev->baudrate,
-				   .dflt.uinteger = 0},
-	{"parity",     character,  .addr.character = &dev->parity,
-                                   .dflt.character = 'N'},
-	{"stopbits",   uinteger,   .addr.uinteger = &dev->stopbits,
-				   .dflt.uinteger = 1},
-	{"cycle",      real,       .addr.real = &dev->cycle,
-				   .dflt.real = NAN},
-	{"mincycle",   real,       .addr.real = &dev->mincycle,
-				   .dflt.real = NAN},
-	{NULL},
-    };
-    /*@ +fullinitblock @*/
-    int status;
-
-    status = json_read_object(buf, json_attrs_device, endptr);
-    if (status != 0)
-	return status;
-
-    return 0;
-}
-
 void json_device_dump(const struct gps_device_t *device,
-		     char *reply, size_t replylen)
+		     /*@out@*/char *reply, size_t replylen)
 {
     char buf1[JSON_VAL_MAX*2+1];
     struct classmap_t *cmp;
@@ -310,34 +271,8 @@ void json_device_dump(const struct gps_device_t *device,
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
-int json_watch_read(const char *buf, 
-		    /*@out@*/struct policy_t *ccp,
-		    /*@out null@*/const char **endptr)
-{
-    int intcasoc;
-    /*@ -fullinitblock @*/
-    struct json_attr_t chanconfig_attrs[] = {
-	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
-                                     .dflt.boolean = true},
-	{"raw",	           integer,  .addr.integer = &ccp->raw,
-	                             .nodefault = true},
-	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
-				     .dflt.integer = -1},
-	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
-	{NULL},
-    };
-    /*@ +fullinitblock @*/
-    int status;
-
-    status = json_read_object(buf, chanconfig_attrs, endptr);
-    if (status == 0) {
-	if (intcasoc != -1)
-	    ccp->buffer_policy = intcasoc;
-    }
-    return status;
-}
-
-void json_watch_dump(const struct policy_t *ccp, char *reply, size_t replylen)
+void json_watch_dump(const struct policy_t *ccp, 
+		     /*@out@*/char *reply, size_t replylen)
 {
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}\r\n",
@@ -351,6 +286,7 @@ void json_watch_dump(const struct policy_t *ccp, char *reply, size_t replylen)
 void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
+    /*@-mustfreefresh@*/
     char buf1[JSON_VAL_MAX*2+1];
     /*
      * Beware! Needs to stay synchronized with a JSON enumeration map in
@@ -474,6 +410,7 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
     if (buf[strlen(buf)-1] == ',')
 	buf[strlen(buf)-1] = '\0';
     (void)strlcat(buf, "}\r\n", buflen);
+    /*@+mustfreefresh@*/
 }
 #endif /* defined(RTCM104V2_ENABLE) */
 
@@ -663,7 +600,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 		   ais->type, ais->repeat, ais->mmsi);
 
 #define JSON_BOOL(x)	((x)?"true":"false")
-    /*@ -formatcode @*/
+    /*@ -formatcode -mustfreefresh @*/
     switch (ais->type) {
     case 1:	/* Position Report */
     case 2:
@@ -1221,10 +1158,77 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	    (void) strlcat(buf, "}\r\n", buflen);
 	break;
     }
-    /*@ +formatcode @*/
+    /*@ +formatcode +mustfreefresh @*/
 #undef SHOW_BOOL
 }
 
 #endif /* defined(AIVDM_ENABLE) */
+
+int json_device_read(const char *buf, 
+		     /*@out@*/struct devconfig_t *dev, 
+		     /*@null@*/const char **endptr)
+{
+    /*@ -fullinitblock @*/
+    const struct json_attr_t json_attrs_device[] = {
+	{"class",      check,      .dflt.check = "DEVICE"},
+	
+        {"path",       string,     .addr.string  = dev->path,
+	                           .len = sizeof(dev->path)},
+	{"activated",  real,       .addr.real = &dev->activated},
+	{"flags",      integer,    .addr.integer = &dev->flags},
+	{"driver",     string,     .addr.string  = dev->driver,
+	                           .len = sizeof(dev->driver)},
+	{"subtype",    string,     .addr.string  = dev->subtype,
+	                           .len = sizeof(dev->subtype)},
+	{"native",     integer,    .addr.integer = &dev->driver_mode,
+				   .dflt.integer = -1},
+	{"bps",	       uinteger,   .addr.uinteger = &dev->baudrate,
+				   .dflt.uinteger = 0},
+	{"parity",     character,  .addr.character = &dev->parity,
+                                   .dflt.character = 'N'},
+	{"stopbits",   uinteger,   .addr.uinteger = &dev->stopbits,
+				   .dflt.uinteger = 1},
+	{"cycle",      real,       .addr.real = &dev->cycle,
+				   .dflt.real = NAN},
+	{"mincycle",   real,       .addr.real = &dev->mincycle,
+				   .dflt.real = NAN},
+	{NULL},
+    };
+    /*@ +fullinitblock @*/
+    int status;
+
+    status = json_read_object(buf, json_attrs_device, endptr);
+    if (status != 0)
+	return status;
+
+    return 0;
+}
+
+int json_watch_read(const char *buf, 
+		    /*@out@*/struct policy_t *ccp,
+		    /*@null@*/const char **endptr)
+{
+    int intcasoc = -1;
+    /*@ -fullinitblock @*/
+    struct json_attr_t chanconfig_attrs[] = {
+	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
+                                     .dflt.boolean = true},
+	{"raw",	           integer,  .addr.integer = &ccp->raw,
+	                             .nodefault = true},
+	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
+				     .dflt.integer = -1},
+	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
+	{NULL},
+    };
+    /*@ +fullinitblock @*/
+    int status;
+
+    status = json_read_object(buf, chanconfig_attrs, endptr);
+    if (status == 0) {
+	if (intcasoc != -1)
+	    ccp->buffer_policy = intcasoc;
+    }
+    return status;
+}
 
 /* gpsd_json.c ends here */

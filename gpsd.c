@@ -1652,6 +1652,14 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 #endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 
     /*
+     * There's a splint limitation that parameters can be declared
+     * @out@ or @null@ but not, apparently, both.  This collides with
+     * the (admittedly tricky) way we use endptr. The workaround is to
+     * declare it @null@ and use -compdef around the JSON reader calls.
+     */
+    /*@-compdef@*/
+
+    /*
      * Still to be implemented: equivalents of Z $
      */
     if (strncmp(buf, "DEVICES;", 8) == 0) {
@@ -1784,6 +1792,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     }
 	bailout:
     *after = buf;
+    /*@+compdef@*/
 }
 #endif /* GPSDNG_ENABLE */
 
@@ -2380,7 +2389,7 @@ int main(int argc, char *argv[])
 		     */
 		    sub->active = timestamp();
 		    for (channel = channels; channel < channels + NITEMS(channels); channel++)
-			if (channel->device && channel->subscriber == sub)
+			if (channel->device!=NULL && channel->subscriber == sub)
 			    channel->device->poll_times[sub_index(sub)] = sub->active;
 		    if (handle_gpsd_request(sub, buf) < 0)
 			detach_client(sub);
@@ -2389,7 +2398,7 @@ int main(int argc, char *argv[])
 		int devcount = 0, rawcount = 0;
 		/* count devices attached by this subscriber */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++)
-		    if (channel->device && channel->subscriber == sub) {
+		    if (channel->device!=NULL && channel->subscriber == sub) {
 			devcount++;
 			if (channel->subscriber->policy.raw > 0)
 			    rawcount++;
