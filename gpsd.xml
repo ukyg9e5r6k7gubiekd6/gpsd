@@ -41,9 +41,10 @@
 
 <para><application>gpsd</application> is a monitor daemon that watches
 a TCP/IP port (2947 by default), waiting for applications to request
-information from GPSes or differential-GPS radios attached to the host
-machine.  Each GPS or radio is expected to be direct-connected to the
-host via a USB or RS232C serial port.  The port may be specified to
+information from GPSes, differential-GPS radios, or AIS receivers
+attached to the host machine.  Each GPS, DGPS radio, or AIS receiver
+is expected to be direct-connected to the host via a USB or RS232C
+serial port.  The port may be specified to
 <application>gpsd</application> at startup, or it may be set via a
 command shipped down a local control socket (e.g. by a USB hotplug
 script). Given a GPS device by either means,
@@ -184,7 +185,7 @@ which the daemon may expect GPS data.</para>
 network GNSS service (GPSD server, DGPSIP server or Ntrip broadcaster).
 If the URI starts with "ntrip://" Ntrip will be used; if the URI starts
 with "dgpsip://", DGPSIP will be used; if the URI starts with "gpsd://",
-gps protocols will be used. <application>Gpsd</application> defaults to
+GPS protocols will be used. <application>gpsd</application> defaults to
 DGPSIP if no protocol is defined. GPSD URIs take an optional argument to
 select the wire protocol: raw, nmea or gpsd - these correspond to "R=2",
 "R=1" and "W=1" modes. For Ntrip services that require authentication, a
