@@ -71,11 +71,6 @@ These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
 SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
 to be tested.
 
-*** Scrap the pure-Python gps.py and write a new Python binding using ctypes
-
-The pure-Python gps.py has tended to develop version skew with the C
-library. That should be fixed.
-
 *** Rewrite xgps
 
 The Motif/Lesstif dependency is a pain in the butt, the code is a 
@@ -138,6 +133,7 @@ This is Berlios FR #3789.
 *** Full Python wrapper for libgpsd
 
 This would be useful for test code of all kinds.
+
 *** Per-driver restore of changed config settings on exit.
 
 This is a solved problem for generic NMEA, EverMore, TripMate,
