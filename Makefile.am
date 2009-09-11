@@ -434,8 +434,12 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
 	@echo "Running splint on test_packet test harness..."
 	-splint $(SPLINTOPTS) $(test_packet_SOURCES)
+	@echo "Running splint on test_mkgmtime test harness..."
+	-splint $(SPLINTOPTS) $(test_mkgmtime_SOURCES)
 	@echo "Running splint on test_geoid test harness..."
 	-splint $(SPLINTOPTS) $(test_geoid_SOURCES)
+	@echo "Running splint on test_json test harness..."
+	-splint $(SPLINTOPTS) $(test_json_SOURCES)
 
 # Bogon-checking the Python tools
 pychecker:

@@ -39,13 +39,24 @@ static void assert_integer(char *attr, int fld, int val)
     }
 }
 
+static void assert_uinteger(char *attr, uint fld, uint val)
+{
+    if (fld != val)
+    {
+	(void)fprintf(stderr, "'%s' integer attribute eval failed, value = %u.\n", attr, fld);
+	exit(1);
+    }
+}
+
 static void assert_boolean(char *attr, bool fld, bool val)
 {
+    /*@-boolcompare@*/
     if (fld != val)
     {
 	(void)fprintf(stderr, "'%s' boolean attribute eval failed, value = %s.\n", attr, fld ? "true" : "false");
 	exit(1);
     }
+    /*@+boolcompare@*/
 }
 
 /*
@@ -60,6 +71,8 @@ static void assert_real(char *attr, double fld, double val)
 	exit(1);
     }
 }
+
+/*@ -fullinitblock @*/
 
 static struct gps_data_t gpsdata;
 
@@ -93,6 +106,7 @@ static char *stringptrs[3];
 static char stringstore[256];
 static int stringcount;
 
+/*@-type@*/
 static const struct json_array_t json_array_3 = {
     .element_type = string,
     .arr.strings.ptrs = stringptrs,
@@ -101,6 +115,7 @@ static const struct json_array_t json_array_3 = {
     .count = &stringcount,
     .maxlen = sizeof(stringptrs)/sizeof(stringptrs[0]),
 };
+/*@+type@*/
 
 /* Case 4: test defaulting of unspecified attributes */
 
@@ -144,6 +159,7 @@ struct dumbstruct_t {
 static struct dumbstruct_t dumbstruck[5];
 static int dumbcount;
 
+/*@-type@*/
 static const struct json_attr_t json_attrs_6_subtype[] = {
     {"name",  string,  .addr.offset = offsetof(struct dumbstruct_t, name),
                        .len = 64},
@@ -161,6 +177,7 @@ static const struct json_attr_t json_attrs_6[] = {
                       .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
     {NULL},
 };
+/*@+type@*/
 
 /* Case 7: test parsing of version response */
 
@@ -170,8 +187,8 @@ static const char *json_str7 = "{\"class\":\"VERSION\",\
 
 /* Case 8: test parsing arrays of enumerated types */
 
-const char *json_str8 = "{\"fee\":\"FOO\",\"fie\":\"BAR\",\"foe\":\"BAZ\"}";
-const struct json_enum_t enum_table[] = {
+static const char *json_str8 = "{\"fee\":\"FOO\",\"fie\":\"BAR\",\"foe\":\"BAZ\"}";
+static const struct json_enum_t enum_table[] = {
     {"BAR", 6}, {"FOO", 3}, {"BAZ", 14}, {NULL}
 };
 
@@ -182,6 +199,7 @@ static const struct json_attr_t json_attrs_8[] = {
     {"foe",  integer, .addr.integer = &foe, .map=enum_table},
     {NULL},
 };
+/*@ +fullinitblock @*/
 
 #endif /* GPSDNG_ENABLE */
 
@@ -226,7 +244,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     status = json_read_object(json_str4, json_attrs_4, NULL);
     assert_case(4, status);
     assert_integer("dftint", dftinteger, -5);	/* did the default work? */
-    assert_integer("dftuint", dftuinteger, 10);	/* did the default work? */
+    assert_uinteger("dftuint", dftuinteger, 10);	/* did the default work? */
     assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
     assert_boolean("flag1", flag1, true);
     assert_boolean("flag2", flag2, false);

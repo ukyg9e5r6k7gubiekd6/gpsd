@@ -6,7 +6,8 @@
 
 #include "gps.h"
 
-struct {
+/*@-type@*/
+static struct {
 	struct tm t;
 	time_t result;
 } tests[] = {
@@ -73,7 +74,9 @@ struct {
 	{{  59,  59, 23, 31,  11,  115,  0,   0,     0,      0,    0, }, 1451606399 }, /* month wrap */
 	{{   0,   0,  0,  1,   0,  116,  0,   0,     0,      0,    0, }, 1451606400 }, /* month wrap */
 };
+/*@-type@*/
 
+/*@+longunsignedintegral*/
 int main(int argc, char *argv[])
 {
 	int i;
@@ -81,7 +84,7 @@ int main(int argc, char *argv[])
 	time_t ts;
 	bool failed = false;
 
-	setenv("TZ", "GMT", 1);
+	(void)setenv("TZ", "GMT", 1);
 
 	for (i = 0; i < (int)(sizeof(tests)/sizeof(tests[0])); i++) {
 #if 0	/* use this to calculate with glibc */
@@ -91,12 +94,13 @@ int main(int argc, char *argv[])
 #endif
 		if (ts != tests[i].result) {
 			failed = true;
-			strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
-			printf("test %2d failed. " \
+			(void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
+			(void)printf("test %2d failed. "		\
 			       "Time returned from: %s should be %lu (but was: %lu)\n",
 				i, tbuf, tests[i].result, ts);
 		}
 	}
 	return (int)failed;
 }
+/*@-longunsignedintegral*/
 
