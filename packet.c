@@ -32,8 +32,10 @@ others apart and distinguish them from baud barf.
 #endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
 #include <netinet/in.h>	/* for htons() */
 #include <arpa/inet.h>	/* for htons() */
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #include "bits.h"

@@ -1,10 +1,9 @@
 /* $Id$ */
 #include <sys/types.h>
 #include "gpsd_config.h"
-#ifdef HAVE_SYS_SOCKET_H
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif /* S_SPLINT_S */
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -12,13 +11,14 @@
 #ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#ifndef S_SPLINT_S
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/ip.h>
-#endif /* S_SPLINT_S */
 #endif
+#endif /* S_SPLINT_S */
+#ifndef S_SPLINT_S
 #include <netdb.h>
 #include <arpa/inet.h>
+#endif /* S_SPLINT_S */
 #include <errno.h>
 #include <stdlib.h>
 #ifndef S_SPLINT_S

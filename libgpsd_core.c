@@ -10,7 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifndef S_SPLINT_S
 #include <netdb.h>
+#endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>

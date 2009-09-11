@@ -1,12 +1,6 @@
 /* $Id$ */
 #include <sys/types.h>
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
-#endif /* S_SPLINT_S */
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <stdlib.h>
@@ -16,7 +10,13 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
+#ifndef S_SPLINT_S
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
+#endif /* S_SPLINT_S */
 #include <stdarg.h>
 #include <setjmp.h>
 #include <stdio.h>

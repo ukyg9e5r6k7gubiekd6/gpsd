@@ -54,9 +54,11 @@
 #include <fcntl.h>
 #include <termios.h>
 
+#ifndef S_SPLINT_S
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#endif /* S_SPLINT_S */
 #include <errno.h>
 
 #include <signal.h>
