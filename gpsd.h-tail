@@ -263,11 +263,23 @@ struct gps_device_t {
 #ifdef NMEA_ENABLE
 	struct {
 	    int part, await;		/* for tracking GSV parts */
-	    struct tm date;
-	    double subseconds;
+	    struct tm date;		/* date part of last sentence time */
+	    double subseconds;		/* subsec part of last sentence time */
 	    char *field[NMEA_MAX];
 	    unsigned char fieldcopy[NMEA_MAX+1];
-	    bool cycle_end_reliable;
+	    /*
+	     * State for the cycle-tracking machinery.
+	     * The reason these timestamps are separate from the
+	     * general sentence timestamps is that we can
+	     * use the minutes and seconds part of a sentence
+	     * with an incomplete timestasmp (like GGA) for
+	     * end-cycle recognition, even if we don't have a previous
+	     * RMC or ZDA that lets us get full time from it.
+	     */
+	    double this_frac_time, last_frac_time;
+	    bool latch_frac_time;
+	    unsigned int lasttag;
+	    unsigned int cycle_enders;
 #ifdef GPSCLOCK_ENABLE
 	    bool ignore_trailing_edge;
 #endif /* GPSCLOCK_ENABLE */
