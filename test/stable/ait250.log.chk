@@ -3,7 +3,6 @@ $GPRMC,194907.00,A,5241.99815,N,00517.56525,E,0.005,,010809,,,A*7B
 !AIVDO,1,1,,,B3aC3LP00063aj7RNpl03wSUwP06,0*43
 {"class":"AIS","type":1,"repeat":0,"mmsi":258774000,"status":0,"turn":12,"speed":124,"accuracy":false,"lon":2656698,"lat":31492809,"course":3030,"heading":310,"second":3,"maneuver":0,"raim":false,"radio":426224}
 $GPGBS,194907.00,3.0,1.9,4.2,,,,*4E
-{"class":"TPV","tag":"GBS","time":1249156147.000,"ept":0.005,"lat":52.699969167,"lon":5.292754167,"epx":1.900,"epy":3.000,"epv":4.200,"track":0.0000,"speed":0.003,"mode":2}
 $GPRMC,194908.00,A,5241.99805,N,00517.56503,E,0.003,,010809,,,A*77
 !AIVDO,1,1,,,B3aC3LP00063ai7RNph03wT5wP06,0*23
 {"class":"AIS","type":3,"repeat":0,"mmsi":257646000,"status":5,"turn":0,"speed":0,"accuracy":false,"lon":2866000,"lat":31440700,"course":2710,"heading":348,"second":8,"maneuver":0,"raim":false,"radio":0}

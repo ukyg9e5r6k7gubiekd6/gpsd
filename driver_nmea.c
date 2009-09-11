@@ -146,6 +146,12 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
      */
     gps_mask_t mask = 0;
 
+    if (count > 9) {
+	merge_hhmmss(field[1], session);
+	merge_ddmmyy(field[9], session);
+	mask |= TIME_SET;
+	register_fractional_time(field[1], session);
+    }
     if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
 	if (session->gpsdata.status != STATUS_NO_FIX) {
@@ -159,12 +165,6 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	/* set something nz, so it won't look like an unknown sentence */
 	mask |= ONLINE_SET;
     } else if (strcmp(field[2], "A")==0) {
-	if (count > 9) {
-	    merge_hhmmss(field[1], session);
-	    merge_ddmmyy(field[9], session);
-	    mask |= TIME_SET;
-	    register_fractional_time(field[1], session);
-	}
 	do_lat_lon(&field[3], &session->gpsdata);
 	mask |= LATLON_SET;
 	session->gpsdata.fix.speed = atof(field[7]) * KNOTS_TO_MPS;
@@ -228,17 +228,17 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
     char *status = field[7];
     gps_mask_t mask = ERROR_SET;
 
+    merge_hhmmss(field[5], session);
+    register_fractional_time(field[5], session);
+    if (session->driver.nmea.date.tm_year == 0)
+	gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
+    else {
+	mask = TIME_SET;
+    }
     if (strcmp(field[6], "A")==0 && (count < 8 || *status != 'N')) {
 	int newstatus = session->gpsdata.status;
 
 	mask = 0;
-	merge_hhmmss(field[5], session);
-	register_fractional_time(field[5], session);
-	if (session->driver.nmea.date.tm_year == 0)
-	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
-	else {
-	    mask = TIME_SET;
-	}
 	do_lat_lon(&field[1], &session->gpsdata);
 	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
@@ -940,6 +940,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
      */
     if (session->driver.nmea.latch_frac_time)
     {
+	gpsd_report(LOG_PROG, 
+		    "%s has a timestamp %f.\n", 
+		    session->driver.nmea.field[0], session->driver.nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL(session->driver.nmea.this_frac_time, session->driver.nmea.last_frac_time)) {
 	    uint lasttag = session->driver.nmea.lasttag;
 	    session->cycle_state |= CYCLE_START;
@@ -952,7 +955,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	     */
 	    if (lasttag > 0 && (session->driver.nmea.cycle_enders & (1 << lasttag))==0) {
 		session->driver.nmea.cycle_enders |= (1 << lasttag);
-		gpsd_report(LOG_SHOUT, 
+		gpsd_report(LOG_PROG, 
 			    "tagged %s as a cycle ender.\n", 
 			    nmea_phrase[lasttag-1].name);
 	    }
