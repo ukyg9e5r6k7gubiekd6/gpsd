@@ -24,23 +24,24 @@ MODE_SET        = 0x00000200
 HDOP_SET        = 0x00000400
 VDOP_SET        = 0x00000800
 PDOP_SET        = 0x00001000
-TDOP_SET        = 0x00002000
+VERSION_SET     = 0x00002000
 GDOP_SET        = 0x00004000
 HERR_SET        = 0x00008000
 VERR_SET        = 0x00010000
-PERR_SET        = 0x00020000
+POLICY_SET      = 0x00020000
 SATELLITE_SET   = 0x00040000
-SPEEDERR_SET    = 0x00080000
-TRACKERR_SET    = 0x00100000
-CLIMBERR_SET    = 0x00200000
-DEVICE_SET      = 0x00400000
-DEVICELIST_SET  = 0x00800000
-DEVICEID_SET    = 0x01000000
-ERROR_SET       = 0x02000000
-CYCLE_START_SET = 0x04000000
-RTCM2_SET       = 0x20000000
-RTCM3_SET       = 0x40000000
-AIS_SET         = 0x80000000
+RAW_SET         = 0x00080000
+USED_SET        = 0x00100000
+SPEEDERR_SET    = 0x00200000
+TRACKERR_SET    = 0x00400000
+CLIMBERR_SET    = 0x00800000
+DEVICE_SET      = 0x01000000
+DEVICELIST_SET  = 0x02000000
+DEVICEID_SET    = 0x04000000
+ERROR_SET       = 0x08000000
+RTCM2_SET       = 0x10000000
+RTCM3_SET       = 0x20000000
+AIS_SET         = 0x40000000
 FIX_SET         = (TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
 
 STATUS_NO_FIX = 0
@@ -55,7 +56,6 @@ SIGNAL_STRENGTH_UNKNOWN = NaN
 WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
 WATCH_RAW	= 0x02
-WATCH_NOJITTER	= 0x04
 WATCH_SCALED	= 0x08
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
@@ -426,15 +426,11 @@ class gps(gpsdata):
             arg = "w+x"
             if self.raw_hook or (flags & WATCH_RAW):
                 arg += 'r+'
-            if self.raw_hook or (flags & WATCH_NOJITTER):
-                arg += 'j+'
                 return self.query(arg)
         elif flags & WATCH_DISABLE:
             arg = "w-"
             if self.raw_hook or (flags & WATCH_RAW):
                 arg += 'r-'
-            if self.raw_hook or (flags & WATCH_NOJITTER):
-                arg += 'j-'
                 return self.query(arg)
 
 # some multipliers for interpreting GPS output
