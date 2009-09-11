@@ -327,9 +327,9 @@ static int filesock(char *filename)
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
-    (void)strlcpy(addr.sun_path, filename, 104); /* from sys/un.h */
-    /*@i1@*/addr.sun_family = AF_UNIX;
-    (void)bind(sock, (struct sockaddr *) &addr,  (socklen_t)sizeof(addr));
+    /*@i1@*/(void)strlcpy(addr.sun_path, filename, 104); /* from sys/un.h */
+    addr.sun_family = AF_UNIX;
+    (void)bind(sock, (struct sockaddr *) &addr, (int)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;

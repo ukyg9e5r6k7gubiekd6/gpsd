@@ -778,7 +778,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    session->gpsdata.PRN[i] = (int)prn;
 	    session->gpsdata.elevation[i] = (int)ele;
 	    session->gpsdata.azimuth[i] = (int)azm;
-	    /*@i1@*/s = session->gpsdata.ss[i++] = (float)(p2_snr ? p2_snr : ca_snr) / 4.0;
+	    /*@i4@*/s = session->gpsdata.ss[i++] = (float)(p2_snr ? p2_snr : ca_snr) / 4.0;
 	}
 	gpsd_report(LOG_IO,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "

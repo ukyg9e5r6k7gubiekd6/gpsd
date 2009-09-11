@@ -50,8 +50,10 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 
     if ((phe = gethostbyname(host)))
 	memcpy((char *) &sin.sin_addr, phe->h_addr, phe->h_length);
+#ifndef S_SPLINT_S
     else if ((sin.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
 	return NL_NOHOST;
+#endif /* S_SPLINT_S */
 
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {

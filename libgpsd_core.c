@@ -332,7 +332,7 @@ void ntpd_link_activate(struct gps_device_t *session)
      */
     if (session->shmindex >= 0 && session->context->shmTimePPS)
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
-	    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+	    (void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
@@ -719,7 +719,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
-	    /*@i1@*/session->observed |= PACKET_TYPEMASK(session->packet.type);
+	    /*@i2@*/session->observed |= PACKET_TYPEMASK(session->packet.type);
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
