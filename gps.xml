@@ -24,7 +24,6 @@
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
@@ -56,7 +55,6 @@
   <command>cgps</command>  
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
@@ -74,7 +72,6 @@
   <command>lcdgps</command>  
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
@@ -92,7 +89,6 @@
   <command>gpxlogger</command>  
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>
       <group>
 	<replaceable>server</replaceable>
@@ -114,15 +110,6 @@ options and then exit.</para>
 
 <para>The <option>-V</option> option causes each client to dump the package
 version and exit.</para>
-
-<para>The <option>-j</option> option, where present, tells the daemon
-to hold fix data across cycles, eliminating jitter from NMEA devices
-that emit several partial reports.  The downside is that with this
-switch on the client will occasionally report stale or invalid data
-held over from a previous cycle.  This option is ineffective, and not
-needed, on SiRFs and most other non-NMEA GPSes.  See also the
-discussion of the J command in
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>.</para>
 
 <para> The <option>-l</option> option, when present, sets the format
 of latitude and longitude reports.  The value 'd' produces decimal

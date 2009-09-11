@@ -1,16 +1,15 @@
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.40dev
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
-  consequence, AIS is now fully supported in both daemon and client;
-  message types 1-6, 8, 9-11, 18, and 24 are all decoded and available
-  to clients.  Fixed a bug that could report wrong sign for course and
-  speed (but not location) from SiRF binary GND messages. Abandoned
-  the gpsflash subproject since it has become apparent that we can't
-  do it without more vendor cooperation than we're likely to
+  consequence, AIS is now fully supported in both daemon and client.
+  Detection of end of a fix-reporting cycle is now reliable;
+  accordingly data is accumulated from cycle start and the "J"
+  (nojitter) opoption on both server and client side is gone. We have
+  abandoned the gpsflash subproject since it has become apparent that
+  we can't do it without more vendor cooperation than we're likely to
   get. Increase major version of shared library due to significant API
   change. Added new driver for Motorola Oncore receivers, with help
-  from Håkan Johansson. Gpsd can now connect to remote gpsds via a
-  gpsd:// url.  gpsfake can now accept multiple logfiles,
-  interleaving test sentences from each.  gpsd noe accepts error 
+  from Håkan Johansson. gpsfake can now accept multiple logfiles,
+  interleaving test sentences from each.  gpsd noe accepts error
   estimates from the NMEA $GPGBS sentence.
 
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39

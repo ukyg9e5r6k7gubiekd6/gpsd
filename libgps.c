@@ -504,16 +504,12 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 	(void)strlcpy(buf, "w+x", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "r+", sizeof(buf));
-	if (flags & WATCH_NOJITTER)
-	    (void)strlcat(buf, "j+", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1", sizeof(buf));
-	if (flags & WATCH_NOJITTER)
-	    (void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
 	if (flags & WATCH_SCALED)
-	    (void)strlcat(buf, "\"buffer_policy\"=1", sizeof(buf));
+	    (void)strlcat(buf, "\"scaled\":true", sizeof(buf));
 	(void)strlcat(buf, "};", sizeof(buf));
 #endif
 	return gps_query(gpsdata, buf);
@@ -522,16 +518,12 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 	(void)strlcpy(buf, "w-", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "r-", sizeof(buf));
-	if (flags & WATCH_NOJITTER)
-	    (void)strlcat(buf, "j-", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
-	if (flags & WATCH_NOJITTER)
-	    (void)strlcat(buf, "\"buffer_policy\"=1,", sizeof(buf));
 	if (flags & WATCH_SCALED)
-	    (void)strlcat(buf, "\"buffer_policy\"=1,", sizeof(buf));
+	    (void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
 	(void)strlcat(buf, "};", sizeof(buf));
 #endif
 	return gps_query(gpsdata, buf);

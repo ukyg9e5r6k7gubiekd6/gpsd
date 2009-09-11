@@ -503,7 +503,6 @@ static void detach_client(struct subscriber_t *sub)
     sub->tied = false;
 #endif /* OLDSTYLE_ENABLE */
     sub->active = 0;
-    sub->policy.buffer_policy = casoc;
     sub->policy.watcher = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
@@ -1238,17 +1237,6 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 			       gpsd_id(channel->device));
 	    } else
 		(void)strlcpy(phrase, ",I=?", sizeof(phrase));
-	    break;
-	case 'J':
-	    if (*p == '=') ++p;
-	    if (*p == '1' || *p == '+') {
-		sub->policy.buffer_policy = nocasoc;
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		sub->policy.buffer_policy = casoc;
-		p++;
-	    }
-	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", sub->policy.buffer_policy);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -2248,7 +2236,7 @@ int main(int argc, char *argv[])
 			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
-			    if (channel->subscriber->policy.buffer_policy == casoc && (channel->device->cycle_state & CYCLE_START)!=0)
+			    if ((channel->device->cycle_state & CYCLE_START)!=0)
 				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
 			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)

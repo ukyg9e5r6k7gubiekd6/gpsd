@@ -280,10 +280,9 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"buffer_policy\":%d,\"scaled\":%s}\r\n",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"scaled\":%s}\r\n",
 		   ccp->watcher ? "true" : "false",
 		   ccp->raw, 
-		   ccp->buffer_policy,
 		   ccp->scaled ? "true" : "false");
     /*@+compdef@*/
 }
@@ -1214,15 +1213,12 @@ int json_watch_read(const char *buf,
 		    /*@out@*/struct policy_t *ccp,
 		    /*@null@*/const char **endptr)
 {
-    int intcasoc = -1;
     /*@ -fullinitblock @*/
     struct json_attr_t chanconfig_attrs[] = {
 	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
                                      .dflt.boolean = true},
 	{"raw",	           integer,  .addr.integer = &ccp->raw,
 	                             .nodefault = true},
-	{"buffer_policy",  integer,  .addr.integer = &intcasoc,
-				     .dflt.integer = -1},
 	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
 	{NULL},
     };
@@ -1230,10 +1226,6 @@ int json_watch_read(const char *buf,
     int status;
 
     status = json_read_object(buf, chanconfig_attrs, endptr);
-    if (status == 0) {
-	if (intcasoc != -1)
-	    ccp->buffer_policy = intcasoc;
-    }
     return status;
 }
 

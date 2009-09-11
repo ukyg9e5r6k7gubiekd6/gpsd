@@ -138,12 +138,6 @@ This is Berlios FR #3789.
 *** Full Python wrapper for libgpsd
 
 This would be useful for test code of all kinds.
-
-*** New features for xgps.
-
-Add J option checkbox.  Maybe embed the speedometer widget from
-xgpspeed in some of the unused space and nuke xgpsspeed.
-
 *** Per-driver restore of changed config settings on exit.
 
 This is a solved problem for generic NMEA, EverMore, TripMate,

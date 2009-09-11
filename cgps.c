@@ -127,7 +127,6 @@ static WINDOW *datawin, *satellites, *messages;
 static int raw_flag=0;
 static int silent_flag=0;
 static int magnetic_flag=0;
-static int fixclear_flag=0;
 static int compass_flag=0;
 static int got_gps_type=0;
 static char gps_type[26];
@@ -666,7 +665,6 @@ static void usage( char *prog)
 		"  -h	  Show this help, then exit\n"
 		"  -V	  Show version, then exit\n"
 		"  -s	  Be silent (don't print raw gpsd data)\n"
-		"  -j	  Turn on anti-jitter buffering\n"
 		"  -l {d|m|s}  Select lat/lon format\n"
 		"		d = DD.dddddd\n"
 		"		m = DD MM.mmmm'\n"
@@ -689,16 +687,13 @@ int main(int argc, char *argv[])
   int data;
 
   /* Process the options.  Print help if requested. */
-  while ((option = getopt(argc, argv, "hVl:sjm")) != -1) {
+  while ((option = getopt(argc, argv, "hVl:sm")) != -1) {
     switch (option) {
     case 'm':
       magnetic_flag=1;
       break;
     case 's':
       silent_flag=1;
-      break;
-    case 'j':
-      fixclear_flag=1;
       break;
     case 'V':
       (void)fprintf(stderr, "SVN ID: $Id$ \n");
@@ -797,12 +792,6 @@ int main(int argc, char *argv[])
     }
   }
 
-  /* If the user has requested the 'j' option (buffering), make the
-     request of gpsd before we continue. */
-  if(fixclear_flag==1 && compass_flag==0) {
-    (void)gps_query(gpsdata, "j=1\n");
-  }
-
   /* Fire up curses. */
   (void)initscr();
   (void)noecho();
@@ -864,17 +853,6 @@ int main(int argc, char *argv[])
 	silent_flag=1;
       } else {
 	silent_flag=0;
-      }
-      break;
-
-      /* Toggle fix clear. */
-    case 'j':
-      if(fixclear_flag==0) {
-	fixclear_flag=1;
-	(void)gps_query(gpsdata, "j=1\n");
-      } else {
-	fixclear_flag=0;
-	(void)gps_query(gpsdata, "j=0\n");
       }
       break;
 

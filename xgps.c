@@ -311,8 +311,6 @@ static XtInputId gps_input;
 static enum deg_str_type deg_type = deg_dd;
 static struct fixsource_t source;
 
-bool jitteropt = false;
-
 bool gps_lost;
 
 /*@ -nullassign @*/
@@ -1068,8 +1066,6 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 
 		// WATCH_NEWSTYLE forces new protocol, for test purposes 
 		mask = WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE;
-		if (jitteropt)
-		    mask |= WATCH_NOJITTER;
 		(void)gps_stream(gpsdata, mask);
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
@@ -1221,14 +1217,11 @@ speedunits_ok:
 
 altunits_ok:
 
-	while ((option = getopt(argc, argv, "Vhjl:")) != -1) {
+	while ((option = getopt(argc, argv, "Vhl:")) != -1) {
 		switch (option) {
 		case 'V':
 		    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 		    exit(0);
-		case 'j':
-		    jitteropt = true;
-		    continue;
 		case 'l':
 		    switch (optarg[0]) {
 		    case 'd':

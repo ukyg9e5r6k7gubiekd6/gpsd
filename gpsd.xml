@@ -436,24 +436,6 @@ received from the GPS, because its type is not yet known.</para></listitem>
 </varlistentry>
 
 <varlistentry>
-<term>j</term>
-<listitem>
-<para>Get or set buffering policy; this only matters for NMEA devices
-which report fix data in several separate sentences during the poll
-cycle (and in particular it <emphasis>doesn't</emphasis> matter for
-SiRF chips).  The default (j=0) is to clear all fix data at the start
-of each poll cycle, so until the sentence that reports a given piece
-of data arrives queries will report ?.  Setting j=1 will disable this,
-retaining data from the previous cycle.  This is a per-user-channel
-bit, not a per-device one.  The j=0 setting is hyper-correct and never
-displays stale data, but may produce a jittery display; the j=1 setting
-allows stale data but smooths the display.</para>
-
-<para>(At protocol level below 3, there was no J command.)</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
 <term>k</term>
 <listitem><para>Returns a line consisting of "K=" followed by an
 integer count of of all GPS devices known to
@@ -723,6 +705,11 @@ notice.</para></listitem>
 </varlistentry>
 
 </variablelist>
+
+<para>The "J" command present in earlier version of the protocol is
+now ignored and a no-op. Internal changes in the daemon (which can now
+detect the end of a fix-reporting cycle reliably) have made it
+unnecessary).</para>
 
 <para>Note that a response consisting of just ? following the =
 means that there is no valid data available.  This may mean either
@@ -1238,22 +1225,6 @@ describes the subscriber's policy.</para>
 	appropriate.</entry>
 </row>
 <row>
-	<entry>buffer_policy</entry>
-	<entry>No</entry>
-	<entry>integer</entry>
-        <entry>Get or set buffering policy; this only matters for NMEA
-	devices which report fix data in several separate sentences
-	during the poll cycle (and in particular it
-	<emphasis>doesn't</emphasis> matter for SiRF chips).  The
-	default (0) is to clear all fix data at the start of each poll
-	cycle, so until the sentence that reports a given piece of
-	data arrives queries will report ?.  Setting 1 will disable
-	this, retaining data from the previous cycle.  The 0 setting is
-	hyper-correct and never displays stale data, but may produce a
-	jittery display; the 1 setting allows stale data but smooths
-	the display.</entry>
-</row>
-<row>
 	<entry>scaled</entry>
 	<entry>No</entry>
 	<entry>boolean</entry>
@@ -1270,7 +1241,7 @@ will assert the POLICY_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"WATCH", "raw":1,"buffer_policy":1."scaled":true}
+{"class":"WATCH", "raw":1,"scaled":true}
 </programlisting>
 
 </listitem>

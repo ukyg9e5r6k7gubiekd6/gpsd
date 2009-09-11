@@ -845,7 +845,6 @@ struct devconfig_t {
 struct policy_t {
     bool watcher;				/* is watcher mode on? */
     int raw;					/* dump raw data? */
-    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
     bool scaled;				/* perform report scaling? */
 };
 
@@ -969,8 +968,7 @@ struct gps_data_t {
 #define WATCH_DISABLE	0x00u
 #define WATCH_ENABLE	0x01u
 #define WATCH_RAW	0x02u
-#define WATCH_NOJITTER	0x04u
-#define WATCH_SCALED	0x08u
+#define WATCH_SCALED	0x04u
 #define WATCH_NEWSTYLE	0x10u	/* for test purposes only - will go away */
 
 extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);

@@ -353,7 +353,6 @@ static void usage( char *prog)
 int main(int argc, char *argv[]) 
 {
     int option, rc;
-    bool nojitter = false;
     struct sockaddr_in localAddr, servAddr;
     struct hostent *h;
 
@@ -367,7 +366,7 @@ int main(int argc, char *argv[])
 #endif 
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "Vhjl:su:")) != -1) {
+    while ((option = getopt(argc, argv, "Vhl:su:")) != -1) {
 	switch (option) {
 	case 'V':
 	    (void)fprintf(stderr, "$Id$\n");
@@ -375,9 +374,6 @@ int main(int argc, char *argv[])
 	case 'h':
 	default:
 	    usage(argv[0]);
-	    break;
-	case 'j':
-	    nojitter = true;
 	    break;
 	case 'l':
 	    switch ( optarg[0] ) {
@@ -484,13 +480,7 @@ int main(int argc, char *argv[])
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_lcd);
-
-    /* tell the daemon to stream us updates */
-    if (nojitter)
-	gps_stream(gpsdata, WATCH_ENABLE | WATCH_NOJITTER);
-    else
-	gps_stream(gpsdata, WATCH_ENABLE);
-
+    gps_stream(gpsdata, WATCH_ENABLE);
 
     for (;;) { /* heart of the client */
 

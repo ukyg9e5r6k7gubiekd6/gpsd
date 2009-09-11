@@ -264,7 +264,6 @@ static int dbus_mainloop(void)
  **************************************************************************/
 
 struct fixsource_t source;
-static int lcasoc = 0;
 
 static void process(struct gps_data_t *gpsdata,
 	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
@@ -290,10 +289,7 @@ static int socket_mainloop(void)
     }
 
     gps_set_raw_hook(gpsdata, process);
-    if (lcasoc)
-	gps_stream(gpsdata, WATCH_ENABLE | WATCH_NOJITTER);
-    else
-	gps_stream(gpsdata, WATCH_ENABLE);
+    gps_stream(gpsdata, WATCH_ENABLE);
 
     for(;;){
 	int data;
@@ -338,7 +334,7 @@ int main (int argc, char** argv)
     int ch;
 
     progname = argv[0];
-    while ((ch = getopt(argc, argv, "hi:j:V")) != -1){
+    while ((ch = getopt(argc, argv, "hi:V")) != -1){
 	switch (ch) {
 	case 'i':		/* set polling interfal */
 	    timeout = (unsigned int)atoi(optarg);
@@ -347,10 +343,6 @@ int main (int argc, char** argv)
 	    if (timeout >= 3600)
 		fprintf(stderr,
 			"WARNING: track timeout is an hour or more!\n");
-	    break;
-	case 'j':		/* set data smoothing */
-	    lcasoc = (unsigned int)atoi(optarg);
-	    lcasoc = lcasoc ? 1 : 0;
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
