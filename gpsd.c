@@ -1693,6 +1693,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
+	    /* first, select a device to operate on */
 	    struct channel_t *chp;
 	    int status = json_device_read(buf+1, &devconf, &end);
 	    if (end == NULL)
@@ -1712,10 +1713,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    } else {
 		if (devconf.path[0]!='\0') {
 		    /* user specified a path, try to assign it */
-		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL)
+		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL) {
 			(void)snprintf(reply, replylen, 
 				       "{\"class\":ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
+			goto bailout;
+		    }
 		} else {
 		    /* no path specified */
 		    int chcount = channel_count(sub);
@@ -1736,28 +1739,38 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 				break;
 			}
 		    }
-		    assert(channel != NULL);
-		    if (!privileged_channel(channel))
-			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				       "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
-		    else {
-			char serialmode[3];
-			const struct gps_type_t *dt = channel->device->device_type;
+		}
+		assert(channel != NULL);
+		if (!privileged_channel(channel))
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+				   "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
+		else {
+		    char serialmode[3];
+		    const struct gps_type_t *dt = channel->device->device_type;
 
-			/* now that channel is selected, apply changes */
-			if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode)
-			    dt->mode_switcher(channel->device, devconf.driver_mode);
-			serialmode[0] = devconf.parity;
-			serialmode[1] = '0' + devconf.stopbits;
-			serialmode[2] = '\0';
-			set_serial(channel->device, 
-				   (speed_t)devconf.baudrate, serialmode);
-			if (dt->rate_switcher != NULL 
-			    && isnan(devconf.cycle)!=0 
-			    && devconf.cycle >= dt->min_cycle)
-			if (dt->rate_switcher(channel->device, devconf.cycle))
-			    channel->device->gpsdata.dev.cycle = devconf.cycle;
-		    }
+		    /* interpret defaults */
+		    if (devconf.baudrate == DEVDEFAULT_BPS)
+			devconf.baudrate = (uint)gpsd_get_speed(&channel->device->ttyset);
+		    if (devconf.parity == DEVDEFAULT_PARITY)
+			devconf.stopbits=channel->device->gpsdata.dev.stopbits;
+		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)
+			devconf.stopbits=channel->device->gpsdata.dev.stopbits;
+		    if (isnan(devconf.cycle))
+			devconf.cycle=channel->device->gpsdata.dev.cycle;
+
+		    /* now that channel is selected, apply changes */
+		    if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode)
+			dt->mode_switcher(channel->device, devconf.driver_mode);
+		    serialmode[0] = devconf.parity;
+		    serialmode[1] = '0' + devconf.stopbits;
+		    serialmode[2] = '\0';
+		    set_serial(channel->device, 
+			       (speed_t)devconf.baudrate, serialmode);
+		    if (dt->rate_switcher != NULL 
+			&& isnan(devconf.cycle)!=0 
+			&& devconf.cycle >= dt->min_cycle)
+		    if (dt->rate_switcher(channel->device, devconf.cycle))
+			channel->device->gpsdata.dev.cycle = devconf.cycle;
 		}
 	    }
 	    /*@+branchstate@*/

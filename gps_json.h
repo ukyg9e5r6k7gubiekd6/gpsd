@@ -22,4 +22,10 @@ int json_ais_read(const char *, char *, size_t, struct ais_t *,
 		  /*@null@*/const char **);
 int libgps_json_unpack(const char *, struct gps_data_t *);
 
+/* these values don't matter in themselves, they just have to be out-of-band */
+#define DEVDEFAULT_BPS  	0
+#define DEVDEFAULT_PARITY	'X'
+#define DEVDEFAULT_STOPBITS	3
+#define DEVDEFAULT_NATIVE	-1
+
 /* gps_json.h ends here */
