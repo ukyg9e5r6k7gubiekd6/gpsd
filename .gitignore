@@ -29,6 +29,10 @@ test_json
 *.log
 *.sum
 *.i
+*.o
+*.lo
+*.so
+*.la
 gpsd.h
 gpsd_config.h.in
 gpsd_config.h
