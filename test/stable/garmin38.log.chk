@@ -1,6 +1,6 @@
 $PGRME,19.2,M,28.7,M,34.6,M*18
 $GPGLL,3348.452,N,11821.142,W,142214,A*3B
-{"class":"TPV","tag":"GLL","ept":0.005,"lat":33.807533333,"lon":-118.352366667,"mode":2}
+{"class":"TPV","tag":"GLL","lat":33.807533333,"lon":-118.352366667,"mode":2}
 $PGRMZ,125,f,3*1D
 $PGRMM,NAD83*29
 $GPBOD,,T,,M,,*47
