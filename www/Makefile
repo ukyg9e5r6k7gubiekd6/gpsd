@@ -21,7 +21,7 @@ XML = \
 	rtcm-104.xml \
 	srec.xml
 
-all: html sums
+all: html
 
 html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html $(XML:.xml=.html) protocol-evolution.html protocol-transition.html
 
@@ -42,9 +42,6 @@ index.html: index.html.in
 
 hardware.html: hardware-head.html ../gpscap.ini hardware-tail.html
 	(cat hardware-head.html; (cd ..; python gpscap.py); cat hardware-tail.html) >hardware.html
-
-sums: 
-	sha1sum `find vendor-docs -type f -name "*.pdf" -print` >checksums
 
 clean:
 	rm -f $(XML:.xml=.html) hardware.html protocol-evolution.html protocol-transition.html writing-a-driver.html *~
