@@ -1679,7 +1679,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			    (void)assign_channel(sub, ANY, devp);
 	    } else 
 		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			       "{\"class\":ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
+			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
 			       json_error_string(status));
 	}
 	/* display the user's policy */
@@ -1707,7 +1707,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    /*@-branchstate@*/
 	    if (status != 0) {
 		(void)snprintf(reply, replylen, 
-			       "{\"class\":ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
+			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
 			       json_error_string(status));
 		goto bailout;
 	    } else {
@@ -1715,7 +1715,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    /* user specified a path, try to assign it */
 		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL) {
 			(void)snprintf(reply, replylen, 
-				       "{\"class\":ERROR\",\"message\":\"Can't open %s.\"}\r\n",
+				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
 			goto bailout;
 		    }
@@ -1729,7 +1729,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			goto bailout;
 		    } else if (chcount > 1) {
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
+				   "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
 			goto bailout;
 		    } else {
 			/* we should have exactly one device now */
@@ -1743,7 +1743,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		assert(channel != NULL);
 		if (!privileged_channel(channel))
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
+				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
 		else {
 		    char serialmode[3];
 		    const struct gps_type_t *dt = channel->device->device_type;
@@ -1795,7 +1795,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	if (isspace(*errend))
 	    --errend;
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply), 
-		       "{\"class\":ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
+		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
 		       (int)(errend-buf), buf);
 	buf += strlen(buf);
     }
