@@ -510,9 +510,7 @@ const struct gps_type_t zodiac_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no reversion hook */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* caller might supply a close hook */
 };
 
 #endif /* ZODIAC_ENABLE */

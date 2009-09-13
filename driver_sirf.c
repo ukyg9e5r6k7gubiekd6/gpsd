@@ -939,81 +939,80 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 #ifdef ALLOW_RECONFIGURE
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event != event_configure || session->packet.counter != 0)
-	return;
-    if (session->packet.type == NMEA_PACKET) {
-	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
-	(void)nmea_send(session,
-		  "$PSRF100,0,%d,8,1,0", session->gpsdata.dev.baudrate);
+    if (event == event_configure || session->packet.counter == 0) {
+	if (session->packet.type == NMEA_PACKET) {
+	    gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
+	    (void)nmea_send(session,
+			    "$PSRF100,0,%d,8,1,0", session->gpsdata.dev.baudrate);
+	}
+	/* do this every time*/
+	{
+	    /*@ +charint @*/
+	    static unsigned char navparams[] = {0xa0, 0xa2, 0x00, 0x02,
+						0x98, 0x00,
+						0x00, 0x00, 0xb0, 0xb3};
+	    static unsigned char dgpscontrol[] = {0xa0, 0xa2, 0x00, 0x07,
+						  0x85, 0x01, 0x00, 0x00,
+						  0x00, 0x00, 0x00,
+						  0x00, 0x00, 0xb0, 0xb3};
+	    static unsigned char sbasparams[] = {0xa0, 0xa2, 0x00, 0x06,
+						 0xaa, 0x00, 0x01, 0x00,
+						 0x00, 0x00,
+						 0x00, 0x00, 0xb0, 0xb3};
+	    static unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
+						   0x84, 0x00,
+						   0x00, 0x00, 0xb0, 0xb3};
+	    static unsigned char requestecef[] = {0xa0, 0xa2, 0x00, 0x08,
+						  0xa6, 0x00, 0x02, 0x01,
+						  0x00, 0x00, 0x00, 0x00,
+						  0x00, 0x00, 0xb0, 0xb3};
+	    static unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08,
+						     0xa6, 0x00, 0x04, 0x03,
+						     0x00, 0x00, 0x00, 0x00,
+						     0x00, 0x00, 0xb0, 0xb3};
+	    /*@ -charint @*/
+	    gpsd_report(LOG_PROG, "Requesting periodic ecef reports...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, requestecef);
+	    gpsd_report(LOG_PROG, "Requesting periodic tracker reports...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, requesttracker);
+	    gpsd_report(LOG_PROG, "Setting DGPS control to use SBAS...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
+	    gpsd_report(LOG_PROG, "Setting SBAS to auto/integrity mode...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, sbasparams);
+	    gpsd_report(LOG_PROG, "Probing for firmware version...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, versionprobe);
+	    gpsd_report(LOG_PROG, "Requesting navigation parameters...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, navparams);
+	}
     }
-    /* do this every time*/
-    {
-	/*@ +charint @*/
-	static unsigned char navparams[] = {0xa0, 0xa2, 0x00, 0x02,
-					    0x98, 0x00,
-					    0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char dgpscontrol[] = {0xa0, 0xa2, 0x00, 0x07,
-				 0x85, 0x01, 0x00, 0x00,
-				 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char sbasparams[] = {0xa0, 0xa2, 0x00, 0x06,
-				 0xaa, 0x00, 0x01, 0x00,
-				 0x00, 0x00,
-				 0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
-				 0x84, 0x00,
-				 0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char requestecef[] = {0xa0, 0xa2, 0x00, 0x08,
-				       0xa6, 0x00, 0x02, 0x01,
-				       0x00, 0x00, 0x00, 0x00,
-				       0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08,
-					  0xa6, 0x00, 0x04, 0x03,
-					  0x00, 0x00, 0x00, 0x00,
-					  0x00, 0x00, 0xb0, 0xb3};
-	/*@ -charint @*/
-	gpsd_report(LOG_PROG, "Requesting periodic ecef reports...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, requestecef);
-	gpsd_report(LOG_PROG, "Requesting periodic tracker reports...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, requesttracker);
-	gpsd_report(LOG_PROG, "Setting DGPS control to use SBAS...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
-	gpsd_report(LOG_PROG, "Setting SBAS to auto/integrity mode...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, sbasparams);
-	gpsd_report(LOG_PROG, "Probing for firmware version...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, versionprobe);
-	gpsd_report(LOG_PROG, "Requesting navigation parameters...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, navparams);
-    }
-}
+    if (event == event_revert) {
 
-static void sirfbin_revert(struct gps_device_t *session)
-{
-    /*@ +charint @*/
-    static unsigned char moderevert[] = {0xa0, 0xa2, 0x00, 0x0e,
-			      0x88,
-			      0x00, 0x00,	/* pad bytes */
-			      0x00,		/* degraded mode */
-			      0x00, 0x00,	/* pad bytes */
-			      0x00, 0x00,	/* altitude source */
-			      0x00,		/* altitude hold mode */
-			      0x00,		/* use last computed alt */
-			      0x00,		/* reserved */
-			      0x00,		/* degraded mode timeout */
-			      0x00,		/* dead reckoning timeout */
-			      0x00,		/* track smoothing */
-			      0x00, 0x00, 0xb0, 0xb3};
-    /*@ -charint -shiftimplementation @*/
-    putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
-    putbeword(moderevert, 10, session->driver.sirf.altitude_source_input);
-    putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
-    putbyte(moderevert, 13, session->driver.sirf.altitude_hold_source);
-    putbyte(moderevert, 15, session->driver.sirf.degraded_timeout);
-    putbyte(moderevert, 16, session->driver.sirf.dr_timeout);
-    putbyte(moderevert, 17, session->driver.sirf.track_smooth_mode);
-    /*@ +shiftimplementation @*/
-    gpsd_report(LOG_PROG, "Reverting navigation parameters...\n");
-    (void)sirf_write(session->gpsdata.gps_fd, moderevert);
+	/*@ +charint @*/
+	static unsigned char moderevert[] = {0xa0, 0xa2, 0x00, 0x0e,
+					     0x88,
+					     0x00, 0x00,	/* pad bytes */
+					     0x00,		/* degraded mode */
+					     0x00, 0x00,	/* pad bytes */
+					     0x00, 0x00,	/* altitude source */
+					     0x00,		/* altitude hold mode */
+					     0x00,		/* use last computed alt */
+					     0x00,		/* reserved */
+					     0x00,		/* degraded mode timeout */
+					     0x00,		/* dead reckoning timeout */
+					     0x00,		/* track smoothing */
+					     0x00, 0x00, 0xb0, 0xb3};
+	/*@ -charint -shiftimplementation @*/
+	putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
+	putbeword(moderevert, 10, session->driver.sirf.altitude_source_input);
+	putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
+	putbyte(moderevert, 13, session->driver.sirf.altitude_hold_source);
+	putbyte(moderevert, 15, session->driver.sirf.degraded_timeout);
+	putbyte(moderevert, 16, session->driver.sirf.dr_timeout);
+	putbyte(moderevert, 17, session->driver.sirf.track_smooth_mode);
+	/*@ +shiftimplementation @*/
+	gpsd_report(LOG_PROG, "Reverting navigation parameters...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, moderevert);
+    }
 }
 
 static bool sirfbin_speed(struct gps_device_t *session, 
@@ -1044,8 +1043,6 @@ const struct gps_type_t sirf_binary =
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = sirfbin_revert,	/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no close hook */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

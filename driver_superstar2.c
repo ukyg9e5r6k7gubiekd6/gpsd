@@ -652,10 +652,6 @@ const struct gps_type_t superstar2_binary = {
     .rate_switcher	= NULL,
     /* Minimum cycle time (not used) */
     .min_cycle	        = 1,
-    /* Undo the actions of event_configure */
-    .revert		= NULL,
 #endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
-    .wrapup		= NULL,
 };
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

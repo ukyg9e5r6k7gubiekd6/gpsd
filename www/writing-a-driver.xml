@@ -638,6 +638,19 @@ number is set to zero and passed to both these calls.
 <listitem><para>
 Whenever a full packet is received, with event type 'event_probe_subtype'.
 </para></listitem>
+
+<listitem><para>
+When the device is closed, with event type 'event_revert'.  (Closes
+happen when all clients have disconnected and the
+<quote><option>-n</option> </quote> switch is not active.) The premise
+is that there may be a special mode you initialized the device into
+for <application>gpsd</application> operation which should be turned
+off otherwise. It allows for changing the device to a low power mode,
+for instance.  Any changes you made when 'configure_event' fitred
+should be undone here.This is also where you should undo any port
+parameter changes you made in <structfield>.probe_detect</structfield>above.
+</para></listitem>
+
 </itemizedlist>
 
 <para>The 'event_probe_subtype' event is normally used to send probe
@@ -705,30 +718,6 @@ possible, assemble your packet in
 <structfield>session->msgbuflen</structfield>; this will allow 
 gpsmon to display the control messages it sends for you.</para>
 
-<!-- deleted by ESR, 2009 -->
-<!-- <para><structfield>.cycle_chars</structfield> is explained in
-<quote>Throughput computation for baud rate changes</quote> in the
-<quote>Hacker's Guide to GPSD</quote> in the general
-documentation. It's only necessary to fill this in if you have
-<structfield>.rate_switcher</structfield> capability</para> -->
-
-<para><structfield>.revert</structfield> points to a block of
-code that is conditionally run each time the device is closed if
-device reconfiguration was enabled.  (Closes happen when all clients
-have disconnected and the <quote><option>-n</option> </quote> switch
-is not active.) The premise is that there may be a special mode you
-initialized the device into for <application>gpsd</application>
-operation which should be turned off otherwise. It allows for changing
-the device to a low power mode, for instance.  Any changes you made in
-the <structfield>.configurator</structfield> method should be undone 
-here.</para>
-
-<para><structfield>.wrapup</structfield> points to a block of code
-which is run unconditionally each time the device is to be closed.
-(Closes happen when all clients have disconnected and the
-<quote><option>-n</option> </quote> switch is not active.) This is
-also where you should undo any port parameter changes you made in
-<structfield>.probe_detect</structfield>above.</para>
 </sect1>
 
 <sect1><title>Details of the driver parser</title>

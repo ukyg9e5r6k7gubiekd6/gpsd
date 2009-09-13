@@ -492,10 +492,8 @@ const struct gps_type_t oncore_binary = {
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
     /* Undo actions at configure_event time */
-    .revert           = NULL,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */
-    .wrapup           = NULL,
 };
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 

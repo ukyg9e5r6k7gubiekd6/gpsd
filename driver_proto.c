@@ -72,8 +72,6 @@ static	void _proto__probe_wakeup(struct gps_device_t *);
 static	void _proto__event_hook(struct gps_device_t *, event_t);
 static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int);
 static	void _proto__set_mode(struct gps_device_t *, int);
-static	void _proto__revert(struct gps_device_t *);
-static	void _proto__wrapup(struct gps_device_t *);
 
 /*
  * Decode the navigation solution message
@@ -317,7 +315,7 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
     /*
      * Remember that session->packet.counter is available when yoo write
-     these hooks; session->packet.counter == 0 is often a useful condition.
+     * these hooks; session->packet.counter == 0 is often a useful condition.
      */
     if (event == event_configure) {
 	/* 
@@ -332,6 +330,15 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	 * anything, but conditionalizing probes on them gives the device 
 	 * time to respond to each one.
 	 */
+    } else if (event == event_revert) {
+	/*
+	 * Reverse whatever was done art configure_event time.
+	 */
+    } else if (event == event_wrapup) {
+       /*
+	* Do release actions that are independent of whether the
+	* event_configure hook ran or not.
+	*/
     }
 }
 
@@ -387,21 +394,10 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = MODE_BINARY;
     }
 }
-
-static void _proto__revert(struct gps_device_t *session)
-{
-   /*
-    * Reverse whatever was done art configure_event time.
-    */
-}
 #endif /* ALLOW_RECONFIGURE */
 
 static void _proto__wrapup(struct gps_device_t *session)
 {
-   /*
-    * Do release actions that are independent of whether the event_configure 
-    * hook ran or not.
-    */
 }
 
 /* The methods in this code take parameters and have */
@@ -453,11 +449,7 @@ const struct gps_type_t _proto__binary = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
-    /* Undo the actions at configure_event time */
-    .revert           = _proto__revert,
 #endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
-    .wrapup           = _proto__wrapup,
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */
 

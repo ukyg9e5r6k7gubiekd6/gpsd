@@ -234,9 +234,7 @@ const struct gps_type_t nmea = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
@@ -324,9 +322,7 @@ const struct gps_type_t garmin = {
     .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /*ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
@@ -385,9 +381,7 @@ const struct gps_type_t ashtech = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif /* ASHTECH_ENABLE */
 
@@ -430,9 +424,7 @@ const struct gps_type_t fv18 = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif /* FV18_ENABLE */
 
@@ -478,9 +470,7 @@ const struct gps_type_t gpsclock = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* sample rate is fixed */
     .min_cycle      = 1,		/* sample rate is fixed */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif /* GPSCLOCK_ENABLE */
 
@@ -530,9 +520,7 @@ static const struct gps_type_t tripmate = {
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .min_cycle     = 1,				/* no rate switch */
-    .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	   = NULL,			/* no wrapup */
 };
 #endif /* TRIPMATE_ENABLE */
 
@@ -568,7 +556,7 @@ static const struct gps_type_t earthmate = {
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
 #ifdef ALLOW_CONTROLSEND
-    .control_send   = nmea_write,	/* how to send control strings */
+    .control_send  = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     .event_hook    = earthmate_event_hook,	/* no configuration here */
@@ -576,9 +564,7 @@ static const struct gps_type_t earthmate = {
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .min_cycle     = 1,				/* no rate switch */
-    .revert	   = NULL,			/* no reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	   = NULL,			/* no wrapup code */
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
@@ -752,9 +738,7 @@ static const struct gps_type_t trueNorth = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .min_cycle      = 0.5,		/* fixed at 20 samples per second */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif
 
@@ -824,9 +808,7 @@ static const struct gps_type_t oceanServer = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif
 
@@ -866,9 +848,7 @@ static const struct gps_type_t rtcm104v2 = {
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-    .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	   = NULL,		/* no wrapup code */
 };
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
@@ -908,9 +888,7 @@ static const struct gps_type_t rtcm104v3 = {
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-    .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	   = NULL,		/* no wrapup code */
 };
 #endif /* RTCM104V3_ENABLE */
 
@@ -947,9 +925,7 @@ static const struct gps_type_t garmintxt = {
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-    .revert	   = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	   = NULL,		/* no wrapup code */
 };
 #endif /* GARMINTXT_ENABLE */
 
@@ -1040,9 +1016,7 @@ const struct gps_type_t mkt3301 = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert	    = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup	    = NULL,		/* no wrapup */
 };
 #endif /* MKT3301_ENABLE */
 
@@ -1099,11 +1073,7 @@ static const struct gps_type_t aivdm = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
-    /* Undo the actions of configure_event */
-    .revert           = NULL,
 #endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
-    .wrapup           = NULL,
 };
 #endif /* AIVDM_ENABLE */
 

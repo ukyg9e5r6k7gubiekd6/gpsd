@@ -120,15 +120,13 @@ void gpsd_deactivate(struct gps_device_t *session)
 #ifdef ALLOW_RECONFIGURE
     if (session->enable_reconfigure
 	&& session->device_type != NULL
-	&& session->device_type->revert != NULL) {
-	session->device_type->revert(session);
+	&& session->device_type->event_hook != NULL) {
+	session->device_type->event_hook(session, event_revert);
 	session->enable_reconfigure = false;
     }
     if (session->device_type!=NULL) {
 	if (session->back_to_nmea && session->device_type->mode_switcher!=NULL)
 	    session->device_type->mode_switcher(session, 0);
-	if (session->device_type->wrapup!=NULL)
-	    session->device_type->wrapup(session);
     }
 #endif /* ALLOW_RECONFIGURE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",

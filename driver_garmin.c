@@ -875,14 +875,9 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 	      , GARMIN_PKTID_L001_COMMAND_DATA, 2, CMND_START_RM_DATA);
 #endif
     }
-}
-
-static void garmin_close(struct gps_device_t *session UNUSED)
-{
-    /* FIXME -- do we need to put the garmin to sleep?  or is closing the port
-       sufficient? */
-    gpsd_report(LOG_PROG, "garmin_close()\n");
-    return;
+    if (event == event_revert)
+	/* FIXME: is any action needed, or is closing the port sufficient? */
+	gpsd_report(LOG_PROG, "garmin_close()\n");
 }
 
 #define Send_ACK()    Build_Send_SER_Packet(session, 0, ACK, 0, 0)
@@ -1224,9 +1219,7 @@ const struct gps_type_t garmin_usb_binary_old =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = garmin_close,	/* close hook */
 };
 #endif /* __UNUSED__ */
 
@@ -1250,9 +1243,7 @@ const struct gps_type_t garmin_usb_binary =
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = garmin_close,	/* close hook */
 };
 
 const struct gps_type_t garmin_ser_binary =
@@ -1275,9 +1266,7 @@ const struct gps_type_t garmin_ser_binary =
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,	        /* close hook */
 };
 
 #endif /* GARMIN_ENABLE */

@@ -434,9 +434,7 @@ const struct gps_type_t italk_binary =
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-    .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* no close hook */
 };
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
 
@@ -559,9 +557,7 @@ const static struct gps_type_t itrax = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = itrax_rate,	/* there's a sample-rate switcher */
     .min_cycle      = 0,		/* no hard limit */
-    .revert         = NULL,		/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = itrax_wrap,	/* sleep the receiver */
 };
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */

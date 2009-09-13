@@ -610,21 +610,20 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 	/*@ +type @*/
     }
-}
+    if (event == event_revert)
+    {
+	/*@ -type @*/
+	unsigned char msg[4] = {
+	    0x00, 0x00,	/* hotstart */
+	    0x01,		/* controlled software reset */
+	    0x00};		/* reserved */
+	/*@ +type @*/
 
-static void ubx_revert(struct gps_device_t *session)
-{
-    /*@ -type @*/
-    unsigned char msg[4] = {
-	0x00, 0x00,	/* hotstart */
-	0x01,		/* controlled software reset */
-	0x00};		/* reserved */
-    /*@ +type @*/
+	gpsd_report(LOG_IO, "UBX revert\n");
 
-    gpsd_report(LOG_IO, "UBX revert\n");
-
-    /* Reverting all in one fast and reliable reset */
-    (void)ubx_write(session, 0x06, 0x04, msg, 4); /* CFG-RST */
+	/* Reverting all in one fast and reliable reset */
+	(void)ubx_write(session, 0x06, 0x04, msg, 4); /* CFG-RST */
+    }
 }
 
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
@@ -739,8 +738,6 @@ const struct gps_type_t ubx_binary = {
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
-    .revert           = ubx_revert,     /* Undo the actions of event_configure */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup           = NULL,           /* Puts device back to original settings */
 };
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

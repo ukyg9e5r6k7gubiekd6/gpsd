@@ -494,6 +494,10 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
         (void) evermore_mode(session, 1); /* switch GPS to binary mode */
         session->back_to_nmea = true;
     }
+    if (event == event_revert) {
+	gpsd_report(LOG_PROG, "evermore_revert\n");
+	(void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
+    }
 }
 
 
@@ -516,12 +520,6 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 	return (evermore_control_send(session, evrm_rate_config, sizeof(evrm_rate_config)) != -1);
     }
     /*@ -charint @*/
-}
-
-static void evermore_revert(struct gps_device_t *session)
-{
-    gpsd_report(LOG_PROG, "evermore_revert\n");
-    (void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -547,8 +545,6 @@ const struct gps_type_t evermore_binary =
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
     .min_cycle      = 1,			/* ignore, no rate switch */
-    .revert         = evermore_revert,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,			/* wrapup method */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

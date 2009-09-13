@@ -51,15 +51,6 @@ static int tsip_write(struct gps_device_t *session,
     return 0;
 }
 
-static void tsip_wrapup(struct gps_device_t *session)
-{
-    /* restore saved parity and stopbits when leaving TSIP mode */
-    gpsd_set_speed(session,
-		   session->gpsdata.dev.baudrate,
-		   session->driver.tsip.parity,
-		   session->driver.tsip.stopbits);
-}
-
 static gps_mask_t tsip_analyze(struct gps_device_t *session)
 {
     int i, j, len, count;
@@ -808,6 +799,13 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 	}
     }
+    if (event == event_revert) {
+	/* restore saved parity and stopbits when leaving TSIP mode */
+	gpsd_set_speed(session,
+		   session->gpsdata.dev.baudrate,
+		   session->driver.tsip.parity,
+		   session->driver.tsip.stopbits);
+    }
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, 
@@ -914,9 +912,7 @@ const struct gps_type_t tsip_binary =
     .mode_switcher  = tsip_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
-    .revert         = NULL,		/* FIXME: revert sentence mix */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = tsip_wrapup,	/* restore comms parameters */
 };
 
 #endif /* TSIP_ENABLE */
