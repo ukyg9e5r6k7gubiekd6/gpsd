@@ -985,7 +985,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session->gpsdata.gps_fd, navparams);
 	}
     }
-    if (event == event_revert) {
+    if (event == event_deactivate) {
 
 	/*@ +charint @*/
 	static unsigned char moderevert[] = {0xa0, 0xa2, 0x00, 0x0e,

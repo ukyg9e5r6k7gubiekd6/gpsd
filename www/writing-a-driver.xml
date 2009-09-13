@@ -642,13 +642,13 @@ Whenever a full packet is received, with event type 'event_probe_subtype'.
 </para></listitem>
 
 <listitem><para>
-When the device is closed, with event type 'event_revert'.  (Closes
+When the device is closed, with event type 'event_deactivate'.  (Closes
 happen when all clients have disconnected and the
 <quote><option>-n</option> </quote> switch is not active.) The premise
 is that there may be a special mode you initialized the device into
 for <application>gpsd</application> operation which should be turned
 off otherwise. It allows for changing the device to a low power mode,
-for instance.  Any changes you made when 'configure_event' fitred
+for instance.  Any changes you made when 'event_configure' fired
 should be undone here. This is also where you should undo any port
 parameter changes you made in <structfield>.probe_detect</structfield>above.
 </para></listitem>

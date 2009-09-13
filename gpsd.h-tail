@@ -197,7 +197,7 @@ typedef enum {
     event_wakeup,
     event_configure, 
     event_probe_subtype, 
-    event_revert
+    event_deactivate,
 } event_t;
 
 struct gps_type_t {

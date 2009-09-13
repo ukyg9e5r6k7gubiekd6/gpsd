@@ -610,7 +610,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 	/*@ +type @*/
     }
-    if (event == event_revert)
+    if (event == event_deactivate)
     {
 	/*@ -type @*/
 	unsigned char msg[4] = {

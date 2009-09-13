@@ -484,12 +484,12 @@ const struct gps_type_t gpsclock = {
 #ifdef ALLOW_RECONFIGURE
 static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 {
-    /* stop it sending PRWIZCH */
-    if (event == event_configure && session->packet.counter == 0)
-	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     if (event == event_probe_subtype && session->packet.counter == 0)
 	(void)nmea_send(session, "$IIGPQ,ASTRAL");
+    /* stop it sending PRWIZCH */
+    if (event == event_configure && session->packet.counter == 0)
+	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
 }
 #endif /* ALLOW_RECONFIGURE */
 

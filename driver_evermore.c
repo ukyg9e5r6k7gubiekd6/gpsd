@@ -494,7 +494,7 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
         (void) evermore_mode(session, 1); /* switch GPS to binary mode */
         session->back_to_nmea = true;
     }
-    if (event == event_revert) {
+    if (event == event_deactivate) {
 	gpsd_report(LOG_PROG, "evermore_revert\n");
 	(void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
     }

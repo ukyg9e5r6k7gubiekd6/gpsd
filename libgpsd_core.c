@@ -121,7 +121,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     if (session->enable_reconfigure
 	&& session->device_type != NULL
 	&& session->device_type->event_hook != NULL) {
-	session->device_type->event_hook(session, event_revert);
+	session->device_type->event_hook(session, event_deactivate);
 	session->enable_reconfigure = false;
     }
     if (session->device_type!=NULL) {

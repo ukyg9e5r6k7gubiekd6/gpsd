@@ -799,7 +799,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 	}
     }
-    if (event == event_revert) {
+    if (event == event_deactivate) {
 	/* restore saved parity and stopbits when leaving TSIP mode */
 	gpsd_set_speed(session,
 		   session->gpsdata.dev.baudrate,

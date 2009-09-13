@@ -875,7 +875,7 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 	      , GARMIN_PKTID_L001_COMMAND_DATA, 2, CMND_START_RM_DATA);
 #endif
     }
-    if (event == event_revert)
+    if (event == event_deactivate)
 	/* FIXME: is any action needed, or is closing the port sufficient? */
 	gpsd_report(LOG_PROG, "garmin_close()\n");
 }

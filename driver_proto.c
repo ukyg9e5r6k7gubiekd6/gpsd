@@ -301,7 +301,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
     /*
-     * Remember that session->packet.counter is available when yoo write
+     * Remember that session->packet.counter is available when you write
      * these hooks; session->packet.counter == 0 is often a useful condition.
      */
     if (event == event_wakeup) {
@@ -325,7 +325,7 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	 * anything, but conditionalizing probes on them gives the device 
 	 * time to respond to each one.
 	 */
-    } else if (event == event_revert) {
+    } else if (event == event_deactivate) {
 	/*
 	 * Reverse whatever was done art configure_event time.
 	 */
