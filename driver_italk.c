@@ -393,9 +393,10 @@ static void italk_mode(struct gps_device_t *session,  int mode)
     }
 }
 
-static void italk_configurator(struct gps_device_t *session, unsigned int seq)
+static void italk_configurator(struct gps_device_t *session, 
+			       event_t event, unsigned int seq)
 {
-    if (seq == 0 && session->packet.type == NMEA_PACKET)
+    if (event == event_configure && seq == 0 && session->packet.type == NMEA_PACKET)
 	(void)italk_set_mode(session, 
 			     session->gpsdata.dev.baudrate, 
 			     (char)session->gpsdata.dev.parity,
@@ -422,7 +423,6 @@ const struct gps_type_t italk_binary =
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
-    .probe_subtype  = NULL,		/* initialize the device */
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
@@ -506,10 +506,11 @@ static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void itrax_configurator(struct gps_device_t *session, int seq)
+static void itrax_configurator(struct gps_device_t 
+			       event_t event, *session, int seq)
 /* set synchronous mode */
 {
-    if (seq == 0) {
+    if (event == event_configure && seq == 0) {
 	(void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
 	(void)literal_send(session->gpsdata.gps_fd,
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
@@ -548,7 +549,6 @@ const static struct gps_type_t itrax = {
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
-    .probe_subtype  = itrax_probe_subtype,	/* initialize */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */

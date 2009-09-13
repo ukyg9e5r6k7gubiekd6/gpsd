@@ -498,7 +498,6 @@ const struct gps_type_t zodiac_binary =
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
-    .probe_subtype  = NULL,		/* no initialization */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */

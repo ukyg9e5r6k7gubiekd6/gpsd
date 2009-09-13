@@ -937,9 +937,10 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
+static void sirfbin_configure(struct gps_device_t *session, 
+			      event_t event, unsigned int seq)
 {
-    if (seq != 0)
+    if (event != event_configure || seq != 0)
 	return;
     if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
@@ -1032,7 +1033,6 @@ const struct gps_type_t sirf_binary =
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
-    .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
     .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */

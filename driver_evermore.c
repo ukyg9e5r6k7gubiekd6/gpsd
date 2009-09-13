@@ -483,12 +483,13 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void evermore_configurator(struct gps_device_t *session, unsigned int seq)
+static void evermore_configurator(struct gps_device_t *session, 
+				  event_t event, unsigned int seq)
 {
     gpsd_report(LOG_PROG, "evermore_configurator(%d)\n", seq);
-    (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd (GPGSV every 5s) */
-    if (seq == 0) {
+    if (event == event_configure && seq == 0) {
         if (session->packet.type == NMEA_PACKET) {
+	    (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd (GPGSV every 5s) */
 	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
         }
         (void) evermore_mode(session, 1); /* switch GPS to binary mode */
@@ -535,7 +536,6 @@ const struct gps_type_t evermore_binary =
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
-    .probe_subtype  = NULL,			/* no subtype probing */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */

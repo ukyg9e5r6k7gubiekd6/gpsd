@@ -45,13 +45,13 @@ static	gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
 /*
  * These methods may be called elsewhere in gpsd
  */
-static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t );
+static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t);
 static	void superstar2_probe_wakeup(struct gps_device_t *);
-static	void superstar2_configurator(struct gps_device_t *, unsigned int );
+static	void superstar2_configurator(struct gps_device_t *, 
+				     event_t, unsigned int);
 static	bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
-static	void superstar2_set_mode(struct gps_device_t *, int );
+static	void superstar2_set_mode(struct gps_device_t *, int);
 static	void superstar2_probe_wakeup(struct gps_device_t *);
-static	void superstar2_probe_subtype(struct gps_device_t *, unsigned int );
 static	ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
 
 
@@ -517,37 +517,33 @@ superstar2_probe_wakeup(struct gps_device_t *session)
     return;
 }
 
-static void
-superstar2_probe_subtype(struct gps_device_t *session,
-				     unsigned int seq)
-{
-    if (seq == 0)
-	(void)superstar2_write(session, version_msg, sizeof(version_msg));
-    return;
-}
-
 static void superstar2_configurator(struct gps_device_t *session,
+				    event_t event,
 				    unsigned int seq)
 {
-    /*@ +charint @*/
-    char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
-    char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
-    char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
-    char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
-    char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
-    /*@ -charint @*/
-
     if (seq != 0)
 	return;
 
-    (void)superstar2_write(session, timing_msg, sizeof(timing_msg));
-    (void)superstar2_write(session, measurement_msg, sizeof(measurement_msg));
-    (void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
-    (void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
-    (void)superstar2_write(session, version_msg, sizeof(version_msg));
-    (void)superstar2_write(session, ephemeris_msg, sizeof(ephemeris_msg));
-    (void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
-    session->driver.superstar2.last_iono = time(NULL);
+    if (event == event_configure) {
+	/*@ +charint @*/
+	char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
+	char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
+	char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
+	char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
+	char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
+	/*@ -charint @*/
+
+	(void)superstar2_write(session, timing_msg, sizeof(timing_msg));
+	(void)superstar2_write(session, measurement_msg, sizeof(measurement_msg));
+	(void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
+	(void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
+	(void)superstar2_write(session, version_msg, sizeof(version_msg));
+	(void)superstar2_write(session, ephemeris_msg, sizeof(ephemeris_msg));
+	(void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+	session->driver.superstar2.last_iono = time(NULL);
+    }
+    if (event == event_probe_subtype)
+	(void)superstar2_write(session, version_msg, sizeof(version_msg));
 }
 
 /*
@@ -638,8 +634,6 @@ const struct gps_type_t superstar2_binary = {
     .probe_detect	= NULL,
     /* Wakeup to be done before each baud hunt */
     .probe_wakeup	= superstar2_probe_wakeup,
-    /* Initialize the device and get subtype */
-    .probe_subtype	= superstar2_probe_subtype,
     /* Packet getter (using default routine) */
     .get_packet		= generic_get,
     /* Parse message packets */

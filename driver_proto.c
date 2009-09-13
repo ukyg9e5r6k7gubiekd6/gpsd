@@ -66,13 +66,12 @@ static	gps_mask_t _proto__msg_svinfo(struct gps_device_t *, unsigned char *, siz
 /*
  * These methods may be called elsewhere in gpsd
  */
-static	ssize_t _proto__control_send(struct gps_device_t *, char *, size_t );
+static	ssize_t _proto__control_send(struct gps_device_t *, char *, size_t);
 static	bool _proto__probe_detect(struct gps_device_t *);
 static	void _proto__probe_wakeup(struct gps_device_t *);
-static	void _proto__probe_subtype(struct gps_device_t *, unsigned int );
-static	void _proto__configurator(struct gps_device_t *, unsigned int );
-static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int );
-static	void _proto__set_mode(struct gps_device_t *, int );
+static	void _proto__configurator(struct gps_device_t *, event_t, unsigned int);
+static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int);
+static	void _proto__set_mode(struct gps_device_t *, int);
 static	void _proto__revert(struct gps_device_t *);
 static	void _proto__wrapup(struct gps_device_t *);
 
@@ -284,16 +283,6 @@ static void _proto__probe_wakeup(struct gps_device_t *session)
     */
 }
 
-static void _proto__probe_subtype(struct gps_device_t *session, unsigned int seq)
-{
-    /*
-     * Probe for subtypes here. If possible, get the software version and
-     * store it in session->subtype.  The seq values don't actually mean 
-     * anything, but conditionalizing probes on them gives the device 
-     * time to respond to each one.
-     */
-}
-
 #ifdef ALLOW_CONTROLSEND
 /**
  * Write data to the device, doing any required padding or checksumming
@@ -324,13 +313,23 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void _proto__configurator(struct gps_device_t *session, unsigned int seq)
+static void _proto__configurator(struct gps_device_t *session, 
+				 event_t event, unsigned int seq)
 {
-    /* 
-     * Change sentence mix and set reporting modes as needed.
-     * If your device has a default cycle time other than 1 second,
-     * set session->device->gpsdata.cycle here.
-     */
+    if (event == event_configure) {
+	/* 
+	 * Change sentence mix and set reporting modes as needed.
+	 * If your device has a default cycle time other than 1 second,
+	 * set session->device->gpsdata.cycle here.
+	 */
+    } else if (event == event_probe_subtype) {
+	/*
+	 * Probe for subtypes here. If possible, get the software version and
+	 * store it in session->subtype.  The seq values don't actually mean 
+	 * anything, but conditionalizing probes on them gives the device 
+	 * time to respond to each one.
+	 */
+    }
 }
 
 /*
@@ -430,8 +429,6 @@ const struct gps_type_t _proto__binary = {
     .probe_detect     = _proto__probe_detect,
     /* Wakeup to be done before each baud hunt */
     .probe_wakeup     = _proto__probe_wakeup,
-    /* Initialize the device and get subtype */
-    .probe_subtype    = _proto__probe_subtype,
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */
@@ -443,7 +440,7 @@ const struct gps_type_t _proto__binary = {
     .control_send   = _proto__control_send,
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
+    /* configuration hook for various events */
     .configurator     = _proto__configurator,
     /* Speed (baudrate) switch */
     .speed_switcher   = _proto__set_speed,

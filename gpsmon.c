@@ -842,7 +842,7 @@ int main (int argc, char **argv)
 		    } else if (matchcount == 1) {
 			assert(forcetype != NULL);
 			if (switch_type(forcetype))
-			    (int)gpsd_switch_driver(&session, forcetype->type_name);
+			    (void)gpsd_switch_driver(&session, forcetype->type_name);
 		    } else {
 			monitor_complain("Multiple driver type names match '%s'.", arg);
 		    }

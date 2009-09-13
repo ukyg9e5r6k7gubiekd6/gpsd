@@ -38,7 +38,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->type_name);
 	if (session->enable_reconfigure
 		&& session->device_type->configurator != NULL)
-	    session->device_type->configurator(session, 0);
+	    session->device_type->configurator(session, event_configure, 0);
 #endif /* ALLOW_RECONFIGURE */
 	return 0;
     }
@@ -50,13 +50,15 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
-	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
-		session->device_type->probe_subtype(session, session->packet.counter = 0);
+	    if (!session->context->readonly && session->device_type->configurator != NULL)
+		session->device_type->configurator(session, 
+							 event_probe_subtype,
+							 session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (session->enable_reconfigure
 			&& session->device_type->configurator != NULL) {
 		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->type_name);
-		session->device_type->configurator(session, 0);
+		session->device_type->configurator(session, event_configure, 0);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
@@ -300,12 +302,14 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	memset(&session->driver, '\0', sizeof(session->driver));
 	/* if we know the device type, probe for subtype and configure it */
 	if (session->device_type != NULL) {
-	    if (!session->context->readonly && session->device_type->probe_subtype !=NULL)
-		session->device_type->probe_subtype(session, session->packet.counter = 0);
+	    if (!session->context->readonly && session->device_type->configurator !=NULL)
+		session->device_type->configurator(session,
+						   event_probe_subtype,
+						   session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (reconfigurable) {
 		if (session->device_type->configurator != NULL)
-		    session->device_type->configurator(session, session->packet.counter);
+		    session->device_type->configurator(session, event_configure, session->packet.counter);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	}
@@ -707,8 +711,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	if (session->packet.outbuflen>0 && !session->context->readonly && session->device_type->probe_subtype!=NULL)
-	    session->device_type->probe_subtype(session, ++session->packet.counter);
+	if (session->packet.outbuflen>0 && !session->context->readonly && session->device_type->configurator!=NULL)
+	    session->device_type->configurator(session, 
+					       event_probe_subtype,
+					       ++session->packet.counter);
     } else {
 	const struct gps_type_t **dp;
 

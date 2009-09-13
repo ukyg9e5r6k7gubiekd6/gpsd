@@ -17,6 +17,14 @@
 <revhistory>
    <revision>
       <revnumber>1.8</revnumber>
+      <date>12 Sep 2009</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; cinfigurator and probe_subtype have merged.
+      </revremark>
+   </revision>
+   <revision>
+      <revnumber>1.8</revnumber>
       <date>9 Aug 2009</date>
       <authorinitials>er</authorinitials>
       <revremark>
@@ -597,24 +605,54 @@ document I discuss my work to implement this function.</para>
 that wakes up the device when the main auto-baud hunt loop in
 the daemon offers a new speed to probe at.</para>
 
-<para><structfield>.probe_subtype</structfield> points to a block of
-code that will be executed whenever the device-driver type is switched
-(with second argument 0) or whenever a full packet is received (with
-second argument being the sequence number of the packet).  It is
-normally used to send probe strings that are expected to elicit a
-later response that will reveal the subtype of the driver.  If this
-function fetches driver subtype information immediately, it should
-store information about the software version in member
-<quote><filename>subtype</filename></quote> of the driver data
-structure <userinput>struct gps_device_t *session</userinput>.</para>
+<para><structfield>.configurator</structfield> points to a block of
+code that will be executed on and after various events, distinguished by a 
+second argument that specifies the event type.  It also gets a scond
+argument which may be a packet sequence number.  The configurator hook
+is called in the following circumstances:</para>
 
-<para><structfield>.configurator</structfield> points to a block of code
-that should set up the device to deliver the correct set of sentences
-to supply the parser with the data needed by 
-<filename>gpsd</filename>. Like the
-<structfield>.probe_subtype</structfield> method, a second sequence
-number argument allows you to intersperse your configuration sends 
-with early packet receipts.</para>
+<itemizedlist>
+<listitem><para> 
+Whenever a call to gpsd_switch_driver() sets a
+device's driver to a different type, with event type
+'event_probe_subtype' and sequence number zero.
+</para></listitem>
+
+<listitem><para> 
+Whenever gpsd_switch_driver() is called, with event
+type 'configurator' and sequence number zero, <emphasis>even if no driver
+change occurs</emphasis>. (Thus, when rhe driver type changes, the
+configurator hook is called twice with two different event types. _  
+</para></listitem>
+
+<listitem><para> 
+When a device is reactivated &mdash; that is, reopened after being
+been cloesed because no clients were listening to it.  If the
+device's type is known, the configurator is called with the
+event argument set to 'event_probe_subtype'. Then, if the second
+argument has specified that the device is to be configured, it is
+called again with the even type 'event_configure'. The packet sequence 
+number is set to zero and passed to both these calls.  
+</para></listitem>
+
+<listitem><para>
+Whenever a full packet is received, with event type 'event_probe_subtype'
+and the second argument being the sequence number of the packet since
+the last driver switch (1 or greater).
+</para></listitem>
+</itemizedlist>
+
+<para>The 'event_probe_subtype' event is normally used to send probe
+strings that are expected to elicit a later response that will reveal
+the subtype of the driver.  If this function fetches driver subtype
+information immediately, it should store information about the
+software version in member <quote><filename>subtype</filename></quote>
+of the driver data structure <userinput>struct gps_device_t
+*session</userinput>.</para>
+
+<para>The 'event_configure' event should set up the device to deliver
+the correct set of sentences to supply the parser with the data needed
+by <filename>gpsd</filename>.</para>
 
 <para><structfield>.get_packet</structfield> points to a block of code
 that actually gets the packets from the serial stream. You will

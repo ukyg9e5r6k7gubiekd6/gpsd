@@ -46,7 +46,7 @@ static	gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *, si
  */
 static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t );
 static	void oncore_probe_wakeup(struct gps_device_t *);
-static	void oncore_configurator(struct gps_device_t *, unsigned int );
+static	void oncore_configurator(struct gps_device_t *, event_t, unsigned int );
 static	bool oncore_set_speed(struct gps_device_t *, speed_t, char, int );
 static	void oncore_set_mode(struct gps_device_t *, int );
 static	void oncore_revert(struct gps_device_t *);
@@ -393,14 +393,17 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void oncore_configurator(struct gps_device_t *session, unsigned int seq UNUSED)
+static void oncore_configurator(struct gps_device_t *session, 
+				event_t event, unsigned int seq UNUSED)
 {
-    (void)oncore_control_send(session,enableEa,sizeof(enableEa));
-    (void)oncore_control_send(session,enableBb,sizeof(enableBb));
-    (void)oncore_control_send(session,enableEn,sizeof(enableEn));
-    /*(void)oncore_control_send(session,enableAt2,sizeof(enableAt2));*/
-    /*(void)oncore_control_send(session,pollAs,sizeof(pollAs));*/
-    (void)oncore_control_send(session,pollBo,sizeof(pollBo));
+    if (event == event_configure) {
+	(void)oncore_control_send(session,enableEa,sizeof(enableEa));
+	(void)oncore_control_send(session,enableBb,sizeof(enableBb));
+	(void)oncore_control_send(session,enableEn,sizeof(enableEn));
+	/*(void)oncore_control_send(session,enableAt2,sizeof(enableAt2));*/
+	/*(void)oncore_control_send(session,pollAs,sizeof(pollAs));*/
+	(void)oncore_control_send(session,pollBo,sizeof(pollBo));
+    }
 }
 
 /*
@@ -490,8 +493,6 @@ const struct gps_type_t oncore_binary = {
     .probe_detect     = NULL,
     /* Wakeup to be done before each baud hunt */
     .probe_wakeup     = oncore_probe_wakeup,
-    /* Initialize the device and get subtype */
-    .probe_subtype    = NULL,
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */

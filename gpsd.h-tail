@@ -193,6 +193,7 @@ struct gps_device_t;
 #define MODE_BINARY	1
 
 typedef enum {ANY, GPS, RTCM2, RTCM3, AIS} gnss_type;
+typedef enum {event_configure, event_probe_subtype} event_t;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
@@ -202,7 +203,6 @@ struct gps_type_t {
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
-    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
@@ -210,7 +210,8 @@ struct gps_type_t {
     /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE 
-    /*@null@*/void (*configurator)(struct gps_device_t *session, unsigned int seq);
+    /*@null@*/void (*configurator)(struct gps_device_t *session, 
+				   event_t event, unsigned int seq);
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, 
 				     speed_t speed, char parity, int stopbits);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);

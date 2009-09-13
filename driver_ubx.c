@@ -568,47 +568,49 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t 
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void ubx_configure(struct gps_device_t *session, unsigned int seq)
+static void ubx_configure(struct gps_device_t *session, 
+			  event_t event, unsigned int seq)
 {
-    unsigned char msg[32];
+    if (event == event_configure) {
+	unsigned char msg[32];
 
-    gpsd_report(LOG_IO, "UBX configure: %d\n",seq);
+	gpsd_report(LOG_IO, "UBX configure: %d\n",seq);
 
-    (void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
+	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
 
-    /*@ -type @*/
-    msg[0] = 0x03; /* SBAS mode enabled, accept testbed mode */
-    msg[1] = 0x07; /* SBAS usage: range, differential corrections and integrity */
-    msg[2] = 0x03; /* use the maximun search range: 3 channels */
-    msg[3] = 0x00; /* PRN numbers to search for all set to 0 => auto scan */
-    msg[4] = 0x00;
-    msg[5] = 0x00;
-    msg[6] = 0x00;
-    msg[7] = 0x00;
-    (void)ubx_write(session, 0x06u, 0x16, msg, 8);
+	/*@ -type @*/
+	msg[0] = 0x03; /* SBAS mode enabled, accept testbed mode */
+	msg[1] = 0x07; /* SBAS usage: range, differential corrections and integrity */
+	msg[2] = 0x03; /* use the maximun search range: 3 channels */
+	msg[3] = 0x00; /* PRN numbers to search for all set to 0 => auto scan */
+	msg[4] = 0x00;
+	msg[5] = 0x00;
+	msg[6] = 0x00;
+	msg[7] = 0x00;
+	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
 
-    msg[0] = 0x01; /* class */
-    msg[1] = 0x04; /* msg id  = UBX_NAV_DOP */
-    msg[2] = 0x01; /* rate */
-    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
-    msg[0] = 0x01; /* class */
-    msg[1] = 0x06; /* msg id  = NAV-SOL */
-    msg[2] = 0x01; /* rate */
-    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
-    msg[0] = 0x01; /* class */
-    msg[1] = 0x20; /* msg id  = UBX_NAV_TIMEGPS */
-    msg[2] = 0x01; /* rate */
-    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
-    msg[0] = 0x01; /* class */
-    msg[1] = 0x30; /* msg id  = NAV-SVINFO */
-    msg[2] = 0x0a; /* rate */
-    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
-    msg[0] = 0x01; /* class */
-    msg[1] = 0x32; /* msg id  = NAV-SBAS */
-    msg[2] = 0x0a; /* rate */
-    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
-    /*@ +type @*/
-
+	msg[0] = 0x01; /* class */
+	msg[1] = 0x04; /* msg id  = UBX_NAV_DOP */
+	msg[2] = 0x01; /* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01; /* class */
+	msg[1] = 0x06; /* msg id  = NAV-SOL */
+	msg[2] = 0x01; /* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01; /* class */
+	msg[1] = 0x20; /* msg id  = UBX_NAV_TIMEGPS */
+	msg[2] = 0x01; /* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01; /* class */
+	msg[1] = 0x30; /* msg id  = NAV-SVINFO */
+	msg[2] = 0x0a; /* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01; /* class */
+	msg[1] = 0x32; /* msg id  = NAV-SBAS */
+	msg[2] = 0x0a; /* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	/*@ +type @*/
+    }
 }
 
 static void ubx_revert(struct gps_device_t *session)
@@ -726,7 +728,6 @@ const struct gps_type_t ubx_binary = {
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
-    .probe_subtype    = NULL,           /* Initialize the device and get subtype */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = NULL,           /* RTCM handler (using default routine) */

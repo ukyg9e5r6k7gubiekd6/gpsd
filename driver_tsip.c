@@ -51,38 +51,6 @@ static int tsip_write(struct gps_device_t *session,
     return 0;
 }
 
-static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
-{
-    unsigned char buf[100];
-
-    switch (seq) {
-    case 0:
-	/* TSIP is ODD parity 1 stopbit, save original values and change it */
-	/* XXX Thunderbolts and Copernicus use 8N1... which isn't exactly a */
-	/* XXX good idea due to the fragile wire format.   We must divine a */
-	/* XXX clever heuristic to decide if the parity change is required. */
-	session->driver.tsip.parity = session->gpsdata.dev.parity;
-	session->driver.tsip.stopbits = (uint)session->gpsdata.dev.stopbits;
-	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
-	break;
-
-    case 1:
-	/* Request Software Versions */
-	(void)tsip_write(session, 0x1f, NULL, 0);
-	/* Request Current Time */
-	(void)tsip_write(session, 0x21, NULL, 0);
-	/* Request GPS Systems Message */
-	(void)tsip_write(session, 0x28, NULL, 0);
-	/* Request Current Datum Values */
-	putbyte(buf,0,0x15);
-	(void)tsip_write(session, 0x8e, buf, 1);
-	/* Request Navigation Configuration */
-	putbyte(buf,0,0x03);
-	(void)tsip_write(session, 0xbb, buf, 1);
-	break;
-    }
-}
-
 static void tsip_wrapup(struct gps_device_t *session)
 {
     /* restore saved parity and stopbits when leaving TSIP mode */
@@ -795,9 +763,11 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
+static void tsip_configurator(struct gps_device_t *session, 
+			      event_t event,
+			      unsigned int seq)
 {
-    if (seq == 0) {
+    if (event == event_configure && seq == 0) {
 	unsigned char buf[100];
 
 	/* I/O Options */
@@ -806,6 +776,39 @@ static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 	putbyte(buf,2,0x00);		/* Time: GPS */
 	putbyte(buf,3,0x08);		/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
+    }
+    if (event == event_probe_subtype && seq == 0) {
+	unsigned char buf[100];
+
+	switch (seq) {
+	case 0:
+	    /* 
+	     * TSIP is ODD parity 1 stopbit, save original values and
+	     * change it XXX Thunderbolts and Copernicus use
+	     * 8N1... which isn't exactly a XXX good idea due to the
+	     * fragile wire format.  We must divine a XXX clever
+	     * heuristic to decide if the parity change is required.
+	     */
+	    session->driver.tsip.parity = session->gpsdata.dev.parity;
+	    session->driver.tsip.stopbits = (uint)session->gpsdata.dev.stopbits;
+	    gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
+	    break;
+
+	case 1:
+	    /* Request Software Versions */
+	    (void)tsip_write(session, 0x1f, NULL, 0);
+	    /* Request Current Time */
+	    (void)tsip_write(session, 0x21, NULL, 0);
+	    /* Request GPS Systems Message */
+	    (void)tsip_write(session, 0x28, NULL, 0);
+	    /* Request Current Datum Values */
+	    putbyte(buf,0,0x15);
+	    (void)tsip_write(session, 0x8e, buf, 1);
+	    /* Request Navigation Configuration */
+	    putbyte(buf,0,0x03);
+	    (void)tsip_write(session, 0xbb, buf, 1);
+	    break;
+	}
     }
 }
 
@@ -901,7 +904,6 @@ const struct gps_type_t tsip_binary =
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
-    .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
