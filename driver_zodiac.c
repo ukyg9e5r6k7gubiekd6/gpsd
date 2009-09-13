@@ -505,7 +505,7 @@ const struct gps_type_t zodiac_binary =
     .control_send   = zodiac_control_send,	/* for gpsctl and friends */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,		/* no configuration */
+    .event_hook   = NULL,		/* no configuration */
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */

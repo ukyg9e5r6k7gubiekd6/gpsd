@@ -483,11 +483,10 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void evermore_configurator(struct gps_device_t *session, 
-				  event_t event, unsigned int seq)
+static void evermore_event_hook(struct gps_device_t *session, event_t event)
 {
-    gpsd_report(LOG_PROG, "evermore_configurator(%d)\n", seq);
-    if (event == event_configure && seq == 0) {
+    if (event == event_configure && session->packet.counter == 0) {
+	gpsd_report(LOG_PROG, "evermore_event_hook\n");
         if (session->packet.type == NMEA_PACKET) {
 	    (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd (GPGSV every 5s) */
 	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
@@ -543,7 +542,7 @@ const struct gps_type_t evermore_binary =
     .control_send   = evermore_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = evermore_configurator,	/* switch to binary */
+    .event_hook     = evermore_event_hook,	/* handle config events */
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */

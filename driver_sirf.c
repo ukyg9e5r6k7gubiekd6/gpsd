@@ -937,10 +937,9 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void sirfbin_configure(struct gps_device_t *session, 
-			      event_t event, unsigned int seq)
+static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event != event_configure || seq != 0)
+    if (event != event_configure || session->packet.counter != 0)
 	return;
     if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
@@ -1040,7 +1039,7 @@ const struct gps_type_t sirf_binary =
     .control_send   = sirf_control_send,/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = sirfbin_configure,/* initialize the device */
+    .event_hook     = sirfbin_event_hook,/* initialize the device */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */

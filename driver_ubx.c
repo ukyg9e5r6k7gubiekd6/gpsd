@@ -568,13 +568,12 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t 
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void ubx_configure(struct gps_device_t *session, 
-			  event_t event, unsigned int seq)
+static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure) {
+    if (event == event_configure && session->packet.counter == 0) {
 	unsigned char msg[32];
 
-	gpsd_report(LOG_IO, "UBX configure: %d\n",seq);
+	gpsd_report(LOG_IO, "UBX configure: %d\n", session->packet.counter);
 
 	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
 
@@ -735,12 +734,12 @@ const struct gps_type_t ubx_binary = {
     .control_send     = ubx_control_send,	/* no control sender yet */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator     = ubx_configure,  /* Enable what reports we need */
+    .event_hook       = ubx_event_hook,	/* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
-    .revert           = ubx_revert,     /* Undo the actions of .configurator */
+    .revert           = ubx_revert,     /* Undo the actions of event_configure */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup           = NULL,           /* Puts device back to original settings */
 };

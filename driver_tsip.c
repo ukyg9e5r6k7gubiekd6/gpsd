@@ -763,11 +763,9 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void tsip_configurator(struct gps_device_t *session, 
-			      event_t event,
-			      unsigned int seq)
+static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && seq == 0) {
+    if (event == event_configure && session->packet.counter == 0) {
 	unsigned char buf[100];
 
 	/* I/O Options */
@@ -777,10 +775,10 @@ static void tsip_configurator(struct gps_device_t *session,
 	putbyte(buf,3,0x08);		/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
     }
-    if (event == event_probe_subtype && seq == 0) {
+    if (event == event_probe_subtype) {
 	unsigned char buf[100];
 
-	switch (seq) {
+	switch (session->packet.counter) {
 	case 0:
 	    /* 
 	     * TSIP is ODD parity 1 stopbit, save original values and
@@ -911,7 +909,7 @@ const struct gps_type_t tsip_binary =
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = tsip_configurator,/* initial mode sets */
+    .event_hook     = tsip_event_hook,	/* initial mode sets */
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = tsip_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */

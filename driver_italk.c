@@ -393,10 +393,9 @@ static void italk_mode(struct gps_device_t *session,  int mode)
     }
 }
 
-static void italk_configurator(struct gps_device_t *session, 
-			       event_t event, unsigned int seq)
+static void italk_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && seq == 0 && session->packet.type == NMEA_PACKET)
+    if (event == event_configure && session->packet.counter == 0 && session->packet.type == NMEA_PACKET)
 	(void)italk_set_mode(session, 
 			     session->gpsdata.dev.baudrate, 
 			     (char)session->gpsdata.dev.parity,
@@ -430,7 +429,7 @@ const struct gps_type_t italk_binary =
     .control_send   = italk_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = italk_configurator,/* configure the device */
+    .event_hook     = italk_event_hook,	/* handle configure events */
     .speed_switcher = italk_speed,	/* we can change baud rates */
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
@@ -506,11 +505,10 @@ static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void itrax_configurator(struct gps_device_t 
-			       event_t event, *session, int seq)
+static void itrax_configurator(struct gps_device_t event_t event, *session)
 /* set synchronous mode */
 {
-    if (event == event_configure && seq == 0) {
+    if (event == event_configure && session.packet_counter == 0) {
 	(void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
 	(void)literal_send(session->gpsdata.gps_fd,
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
@@ -556,7 +554,7 @@ const static struct gps_type_t itrax = {
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = itrax_configurator,/* set synchronous mode */
+    .event_hook     = event_hook,	/* set synchronous mode */
     .speed_switcher = itrax_speed,	/* how to change speeds */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = itrax_rate,	/* there's a sample-rate switcher */

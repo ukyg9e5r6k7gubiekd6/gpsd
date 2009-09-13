@@ -854,10 +854,9 @@ static bool garmin_detect(struct gps_device_t *session)
     return true;
 }
 
-static void garmin_configurator(struct gps_device_t *session, 
-				event_t event, unsigned int seq)
+static void garmin_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_probe_subtype && seq == 0) {
+    if (event == event_probe_subtype && session->packet.counter == 0) {
 	// Tell the device to send product data
 	gpsd_report(LOG_PROG, "Get Garmin Product Data\n");
 	Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
@@ -1220,7 +1219,7 @@ const struct gps_type_t garmin_usb_binary_old =
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_configurator,	/* enable what we need */
+    .event_hook     = garmin_event_hook,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
@@ -1246,7 +1245,7 @@ const struct gps_type_t garmin_usb_binary =
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_configurator,      /* enable what we need */
+    .event_hook     = garmin_event_hook,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
@@ -1271,7 +1270,7 @@ const struct gps_type_t garmin_ser_binary =
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL,	        /* enable what we need */
+    .event_hook     = NULL,	        /* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */

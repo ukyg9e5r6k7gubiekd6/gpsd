@@ -69,7 +69,7 @@ static	gps_mask_t _proto__msg_svinfo(struct gps_device_t *, unsigned char *, siz
 static	ssize_t _proto__control_send(struct gps_device_t *, char *, size_t);
 static	bool _proto__probe_detect(struct gps_device_t *);
 static	void _proto__probe_wakeup(struct gps_device_t *);
-static	void _proto__configurator(struct gps_device_t *, event_t, unsigned int);
+static	void _proto__event_hook(struct gps_device_t *, event_t);
 static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int);
 static	void _proto__set_mode(struct gps_device_t *, int);
 static	void _proto__revert(struct gps_device_t *);
@@ -313,9 +313,12 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void _proto__configurator(struct gps_device_t *session, 
-				 event_t event, unsigned int seq)
+static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
+    /*
+     * Remember that session->packet.counter is available when yoo write
+     these hooks; session->packet.counter == 0 is often a useful condition.
+     */
     if (event == event_configure) {
 	/* 
 	 * Change sentence mix and set reporting modes as needed.
@@ -388,7 +391,7 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 static void _proto__revert(struct gps_device_t *session)
 {
    /*
-    * Reverse what the .configurator method changed.
+    * Reverse whatever was done art configure_event time.
     */
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -396,8 +399,8 @@ static void _proto__revert(struct gps_device_t *session)
 static void _proto__wrapup(struct gps_device_t *session)
 {
    /*
-    * Do release actions that are independent of whether the .configurator 
-    * method ran or not.
+    * Do release actions that are independent of whether the event_configure 
+    * hook ran or not.
     */
 }
 
@@ -441,7 +444,7 @@ const struct gps_type_t _proto__binary = {
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* configuration hook for various events */
-    .configurator     = _proto__configurator,
+    .event_hook       = _proto__event_hook,
     /* Speed (baudrate) switch */
     .speed_switcher   = _proto__set_speed,
     /* Switch to NMEA mode */
@@ -450,7 +453,7 @@ const struct gps_type_t _proto__binary = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
-    /* Undo the actions of .configurator */
+    /* Undo the actions at configure_event time */
     .revert           = _proto__revert,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */

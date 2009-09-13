@@ -186,11 +186,10 @@ static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selectio
 }
 #endif /* ALLOW_RECONFIGURE */
 
-static void navcom_configurator(struct gps_device_t *session, 
-				event_t event, unsigned int seq)
+static void navcom_event_hook(struct gps_device_t *session, event_t event)
 {
     /* Request the following messages: */
-    if (event == event_probe_subtype && seq==0) {
+    if (event == event_probe_subtype && session->packet.counter == 0) {
 	/*@ +charint @*/
 	navcom_cmd_0x1c(session, 0x01, 5);      /* Blink LEDs on receiver */
 	navcom_cmd_0x20(session, 0xae, 0x1770); /* Identification Block - send every 10 min*/
@@ -1277,7 +1276,7 @@ const struct gps_type_t navcom_binary =
     .control_send   = navcom_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = navcom_configurator,	/* configuration logic */
+    .event_hook     = navcom_event_hook,	/* configuration logic */
     .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */

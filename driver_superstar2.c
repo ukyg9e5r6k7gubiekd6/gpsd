@@ -47,8 +47,7 @@ static	gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
  */
 static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t);
 static	void superstar2_probe_wakeup(struct gps_device_t *);
-static	void superstar2_configurator(struct gps_device_t *, 
-				     event_t, unsigned int);
+static	void superstar2_event_hook(struct gps_device_t *, event_t);
 static	bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
 static	void superstar2_set_mode(struct gps_device_t *, int);
 static	void superstar2_probe_wakeup(struct gps_device_t *);
@@ -517,11 +516,9 @@ superstar2_probe_wakeup(struct gps_device_t *session)
     return;
 }
 
-static void superstar2_configurator(struct gps_device_t *session,
-				    event_t event,
-				    unsigned int seq)
+static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (seq != 0)
+    if (session->packet.counter != 0)
 	return;
 
     if (event == event_configure) {
@@ -646,7 +643,7 @@ const struct gps_type_t superstar2_binary = {
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* Enable what reports we need */
-    .configurator	= superstar2_configurator,
+    .event_hook		= superstar2_event_hook,
     /* Speed (baudrate) switch */
     .speed_switcher	= superstar2_set_speed,
     /* Switch to NMEA mode */
@@ -655,7 +652,7 @@ const struct gps_type_t superstar2_binary = {
     .rate_switcher	= NULL,
     /* Minimum cycle time (not used) */
     .min_cycle	        = 1,
-    /* Undo the actions of .configurator */
+    /* Undo the actions of event_configure */
     .revert		= NULL,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */

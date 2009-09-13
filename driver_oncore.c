@@ -44,13 +44,11 @@ static	gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *, si
 /*
  * These methods may be called elsewhere in gpsd
  */
-static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t );
+static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t);
 static	void oncore_probe_wakeup(struct gps_device_t *);
-static	void oncore_configurator(struct gps_device_t *, event_t, unsigned int );
-static	bool oncore_set_speed(struct gps_device_t *, speed_t, char, int );
-static	void oncore_set_mode(struct gps_device_t *, int );
-static	void oncore_revert(struct gps_device_t *);
-static	void oncore_wrapup(struct gps_device_t *);
+static	void oncore_event_hook(struct gps_device_t *, event_t);
+static	bool oncore_set_speed(struct gps_device_t *, speed_t, char, int);
+static	void oncore_set_mode(struct gps_device_t *, int);
 
 /*
  * Decode the navigation solution message
@@ -393,10 +391,9 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static void oncore_configurator(struct gps_device_t *session, 
-				event_t event, unsigned int seq UNUSED)
+static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure) {
+    if (event == event_configure && session->packet.counter == 0) {
 	(void)oncore_control_send(session,enableEa,sizeof(enableEa));
 	(void)oncore_control_send(session,enableBb,sizeof(enableBb));
 	(void)oncore_control_send(session,enableEn,sizeof(enableEn));
@@ -404,29 +401,6 @@ static void oncore_configurator(struct gps_device_t *session,
 	/*(void)oncore_control_send(session,pollAs,sizeof(pollAs));*/
 	(void)oncore_control_send(session,pollBo,sizeof(pollBo));
     }
-}
-
-/*
- * This is the entry point to the driver. When the packet sniffer recognizes
- * a packet for this driver, it calls this method which passes the packet to
- * the binary processor or the nmea processor, depending on the session type.
- */
-static gps_mask_t oncore_parse_input(struct gps_device_t *session)
-{
-    gps_mask_t st;
-
-    if (session->packet.type == ONCORE_PACKET){
-	st = oncore_dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
-#ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.dev.driver_mode = MODE_NMEA;
-	return st;
-#endif /* NMEA_ENABLE */
-    } else
-	return 0;
 }
 
 static bool oncore_set_speed(struct gps_device_t *session UNUSED,
@@ -462,21 +436,24 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
-
-static void oncore_revert(struct gps_device_t *session UNUSED)
-{
-   /*
-    * Reverse what the .configurator method changed.
-    */
-}
 #endif /* ALLOW_RECONFIGURE */
 
-static void oncore_wrapup(struct gps_device_t *session UNUSED)
+static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
-   /*
-    * Do release actions that are independent of whether the .configurator 
-    * method ran or not.
-    */
+    gps_mask_t st;
+
+    if (session->packet.type == ONCORE_PACKET){
+	st = oncore_dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
+	return st;
+#ifdef NMEA_ENABLE
+    } else if (session->packet.type == NMEA_PACKET) {
+	st = nmea_parse((char *)session->packet.outbuffer, session);
+	session->gpsdata.dev.driver_mode = MODE_NMEA;
+	return st;
+#endif /* NMEA_ENABLE */
+    } else
+	return 0;
 }
 
 /* This is everything we export */
@@ -505,7 +482,7 @@ const struct gps_type_t oncore_binary = {
 #endif /* ALLOW_CONTROLSEND */
 #ifdef ALLOW_RECONFIGURE
     /* Enable what reports we need */
-    .configurator     = oncore_configurator,
+    .event_hook     = oncore_event_hook,
     /* Speed (baudrate) switch */
     .speed_switcher   = oncore_set_speed,
     /* Switch to NMEA mode */
@@ -514,11 +491,11 @@ const struct gps_type_t oncore_binary = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
-    /* Undo the actions of .configurator */
-    .revert           = oncore_revert,
+    /* Undo actions at configure_event time */
+    .revert           = NULL,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */
-    .wrapup           = oncore_wrapup,
+    .wrapup           = NULL,
 };
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 
