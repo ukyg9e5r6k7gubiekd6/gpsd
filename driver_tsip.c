@@ -353,6 +353,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (len != (17 + count))
 	    break;
 	session->driver.tsip.last_6d = now;		/* keep timestamp for request */
+#ifdef __UNUSED__
+	/*
+	 * This looks right, but it sets a spurious mode value when
+	 * the satelliite constellation looks good to the chip but no
+	 * actual fix has yet been acquired.  We should set the mode
+	 * field (which controls gpsd's fix reporting) only from sentences
+	 * that convey actual fix information, like 0x20, othewise we
+	 * get resyults like trigerring ther error modeler.
+	 */
 	switch (u1 & 7)				/* dimension */
 	{
 	case 3:
@@ -368,6 +377,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    break;
 	}
+	mask |= MODE_SET;
+#endif /* __UNUSED__ */
 	session->gpsdata.satellites_used = count;
 	session->gpsdata.pdop = getbef(buf,1);
 	session->gpsdata.hdop = getbef(buf,5);
@@ -392,7 +403,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.pdop, session->gpsdata.hdop,
 	    session->gpsdata.vdop, session->gpsdata.tdop,
 	    session->gpsdata.gdop);
-	mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET | USED_SET;
+	mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | USED_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
 	break;
@@ -773,9 +784,9 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	case 0:
 	    /* 
 	     * TSIP is ODD parity 1 stopbit, save original values and
-	     * change it XXX Thunderbolts and Copernicus use
-	     * 8N1... which isn't exactly a XXX good idea due to the
-	     * fragile wire format.  We must divine a XXX clever
+	     * change it Thunderbolts and Copernicus use
+	     * 8N1... which isn't exactly a good idea due to the
+	     * fragile wire format.  We must divine a clever
 	     * heuristic to decide if the parity change is required.
 	     */
 	    session->driver.tsip.parity = session->gpsdata.dev.parity;
