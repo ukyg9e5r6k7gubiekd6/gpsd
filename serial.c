@@ -207,10 +207,10 @@ void gpsd_set_speed(struct gps_device_t *session,
 	    const struct gps_type_t **dp;
 	    if (session->device_type == NULL) {
 		for (dp = gpsd_drivers; *dp; dp++)
-		    if ((*dp)->probe_wakeup != NULL)
-			(*dp)->probe_wakeup(session);
-	    } else if (session->device_type->probe_wakeup != NULL)
-		session->device_type->probe_wakeup(session);
+		    if ((*dp)->event_hook != NULL)
+			(*dp)->event_hook(session, event_wakeup);
+	    } else if (session->device_type->event_hook != NULL)
+		session->device_type->event_hook(session, event_wakeup);
 	}
     }
     packet_reset(&session->packet);

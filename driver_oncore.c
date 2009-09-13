@@ -45,7 +45,6 @@ static	gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *, si
  * These methods may be called elsewhere in gpsd
  */
 static	ssize_t oncore_control_send(struct gps_device_t *, char *, size_t);
-static	void oncore_probe_wakeup(struct gps_device_t *);
 static	void oncore_event_hook(struct gps_device_t *, event_t);
 static	bool oncore_set_speed(struct gps_device_t *, speed_t, char, int);
 static	void oncore_set_mode(struct gps_device_t *, int);
@@ -357,11 +356,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
  *
  **********************************************************/
 
-static void oncore_probe_wakeup(struct gps_device_t *session)
-{
-    (void)oncore_control_send(session,getfirmware,sizeof(getfirmware));
-}
-
 #ifdef ALLOW_CONTROLSEND
 /**
  * Write data to the device, doing any required padding or checksumming
@@ -393,6 +387,9 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
 #ifdef ALLOW_RECONFIGURE
 static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (event == event_wakeup)
+	(void)oncore_control_send(session,getfirmware,sizeof(getfirmware));
+
     if (event == event_configure && session->packet.counter == 0) {
 	(void)oncore_control_send(session,enableEa,sizeof(enableEa));
 	(void)oncore_control_send(session,enableBb,sizeof(enableBb));
@@ -469,20 +466,14 @@ const struct gps_type_t oncore_binary = {
     /* Startup-time device detector */
     .probe_detect     = NULL,
     /* Wakeup to be done before each baud hunt */
-    .probe_wakeup     = oncore_probe_wakeup,
-    /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */
     .parse_packet     = oncore_parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer      = pass_rtcm,
-#ifdef ALLOW_CONTROLSEND
-    /* Control string sender - should provide checksum and headers/trailer */
-    .control_send   = oncore_control_send,
-#endif /* ALLOW_CONTROLSEND */
-#ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
+    /* Fire on various lifetime events */
     .event_hook     = oncore_event_hook,
+#ifdef ALLOW_RECONFIGURE
     /* Speed (baudrate) switch */
     .speed_switcher   = oncore_set_speed,
     /* Switch to NMEA mode */
@@ -493,7 +484,10 @@ const struct gps_type_t oncore_binary = {
     .min_cycle        = 1,
     /* Undo actions at configure_event time */
 #endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and headers/trailer */
+    .control_send   = oncore_control_send,
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 

@@ -898,21 +898,20 @@ const struct gps_type_t tsip_binary =
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
+    .event_hook     = tsip_event_hook,	/* ifire on various lifetime events */
 #ifdef ALLOW_RECONFIGURE
-    .control_send   = tsip_control_send,/* how to send commands */
-#endif /* ALLOW_CONTROLSEND */
-#ifdef ALLOW_RECONFIGURE
-    .event_hook     = tsip_event_hook,	/* initial mode sets */
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = tsip_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_RECONFIGURE
+    .control_send   = tsip_control_send,/* how to send commands */
+#endif /* ALLOW_CONTROLSEND */
 };
 
 #endif /* TSIP_ENABLE */

@@ -601,10 +601,6 @@ original settings for later restoration, probably by
 <structfield>.wrapup</structfield> mentioned below. Later in this
 document I discuss my work to implement this function.</para>
 
-<para><structfield>.probe_wakeup</structfield> points to a block of code
-that wakes up the device when the main auto-baud hunt loop in
-the daemon offers a new speed to probe at.</para>
-
 <para><structfield>.event_hook</structfield> points to a block of
 code that will be executed on and after various events, distinguished by a 
 second argument that specifies the event type.  It also gets a scond
@@ -612,6 +608,12 @@ argument which may be a packet sequence number.  The event_hook hook
 is called in the following circumstances:</para>
 
 <itemizedlist>
+
+<listitem><para> 
+When the main auto-baud hunt loop in the daemon offers a new speed to
+probe at, with event argument 'event_wakeup'.
+</para></listitem>
+
 <listitem><para> 
 Whenever a call to gpsd_switch_driver() sets a
 device's driver to a different type, with event type
@@ -627,7 +629,7 @@ configurator hook is called twice with two different event types. _
 
 <listitem><para> 
 When a device is reactivated &mdash; that is, reopened after being
-been cloesed because no clients were listening to it.  If the
+been closed because no clients were listening to it.  If the
 device's type is known, the configurator is called with the
 event argument set to 'event_probe_subtype'. Then, if the second
 argument has specified that the device is to be configured, it is
@@ -647,7 +649,7 @@ is that there may be a special mode you initialized the device into
 for <application>gpsd</application> operation which should be turned
 off otherwise. It allows for changing the device to a low power mode,
 for instance.  Any changes you made when 'configure_event' fitred
-should be undone here.This is also where you should undo any port
+should be undone here. This is also where you should undo any port
 parameter changes you made in <structfield>.probe_detect</structfield>above.
 </para></listitem>
 

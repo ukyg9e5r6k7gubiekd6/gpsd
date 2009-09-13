@@ -188,6 +188,22 @@ static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selectio
 
 static void navcom_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (event == event_wakeup) {
+        /* NOTE - This allows us to know into which of the unit's various
+	   serial ports we are connected.
+	   Its value gets updated every time we receive a 0x06 (Ack)
+	   message.  Note that if commands are being fed into the
+	   unit from more than one port (which is entirely possible
+	   although not necessarily a bright idea), there is a good
+	   chance that we might misidentify our port */
+	/*@ -type @*/
+	session->driver.navcom.physical_port = 0xFF;
+
+	navcom_cmd_0x1c(session, 0x02, 0);      /* Test Support Block */
+	navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
+	navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
+	/*@ +type @*/
+    }
     /* Request the following messages: */
     if (event == event_probe_subtype && session->packet.counter == 0) {
 	/*@ +charint @*/
@@ -203,24 +219,6 @@ static void navcom_event_hook(struct gps_device_t *session, event_t event)
 	navcom_cmd_0x20(session, 0xef, 0x0bb8); /* Clock Drift - send every 5 min */
 	/*@ -charint @*/
     }
-}
-
-static void navcom_ping(struct gps_device_t *session)
-{
-/* NOTE - This allows us to know into which of the unit's various
-	  serial ports we are connected.
-	  Its value gets updated every time we receive a 0x06 (Ack)
-	  message.  Note that if commands are being fed into the
-	  unit from more than one port (which is entirely possible
-	  although not necessarily a bright idea), there is a good
-	  chance that we might misidentify our port */
-    /*@ -type @*/
-    session->driver.navcom.physical_port = 0xFF;
-
-    navcom_cmd_0x1c(session, 0x02, 0);      /* Test Support Block */
-    navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
-    navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
-    /*@ +type @*/
 }
 
 /* Ionosphere and UTC Data */
@@ -1267,21 +1265,20 @@ const struct gps_type_t navcom_binary =
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
     .trigger	    = "\x02\x99\x66",		/* packet leader */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
-    .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = navcom_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = navcom_control_send,	/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = navcom_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = navcom_event_hook,	/* configuration logic */
     .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */
     .min_cycle      = 1,			/* ignore, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = navcom_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 };
 
 #endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */

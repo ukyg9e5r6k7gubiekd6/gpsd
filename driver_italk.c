@@ -420,21 +420,20 @@ const struct gps_type_t italk_binary =
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = italk_control_send,	/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = italk_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = italk_event_hook,	/* handle configure events */
     .speed_switcher = italk_speed,	/* we can change baud rates */
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = italk_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
 
@@ -543,21 +542,20 @@ const static struct gps_type_t itrax = {
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
     .trigger        = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels       = 12,		/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = event_hook,	/* lietime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = event_hook,	/* set synchronous mode */
     .speed_switcher = itrax_speed,	/* how to change speeds */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = itrax_rate,	/* there's a sample-rate switcher */
     .min_cycle      = 0,		/* no hard limit */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 };
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */

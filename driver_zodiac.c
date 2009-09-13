@@ -496,21 +496,20 @@ const struct gps_type_t zodiac_binary =
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = zodiac_control_send,	/* for gpsctl and friends */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = NULL,		/* no configuration */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook   = NULL,		/* no configuration */
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = zodiac_control_send,	/* for gpsctl and friends */
+#endif /* ALLOW_CONTROLSEND */
 };
 
 #endif /* ZODIAC_ENABLE */

@@ -46,11 +46,9 @@ static	gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
  * These methods may be called elsewhere in gpsd
  */
 static	ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t);
-static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	void superstar2_event_hook(struct gps_device_t *, event_t);
 static	bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
 static	void superstar2_set_mode(struct gps_device_t *, int);
-static	void superstar2_probe_wakeup(struct gps_device_t *);
 static	ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
 
 
@@ -507,17 +505,16 @@ static char link_msg[] = {0x01, 0x3f, 0xc0, 0x08,
 static char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
 /*@ -charint @*/
 
-static void
-superstar2_probe_wakeup(struct gps_device_t *session)
-{
-    (void)superstar2_write(session, link_msg, sizeof(link_msg));
-    (void)usleep(320000);
-    (void)superstar2_write(session, version_msg, sizeof(version_msg));
-    return;
-}
-
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (event == event_wakeup)
+    {
+	(void)superstar2_write(session, link_msg, sizeof(link_msg));
+	(void)usleep(320000);
+	(void)superstar2_write(session, version_msg, sizeof(version_msg));
+	return;
+    }
+
     if (session->packet.counter != 0)
 	return;
 
@@ -629,21 +626,15 @@ const struct gps_type_t superstar2_binary = {
     .channels	 	= 12,
     /* Startup-time device detector */
     .probe_detect	= NULL,
-    /* Wakeup to be done before each baud hunt */
-    .probe_wakeup	= superstar2_probe_wakeup,
     /* Packet getter (using default routine) */
     .get_packet		= generic_get,
     /* Parse message packets */
     .parse_packet	= superstar2_parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer	= pass_rtcm,
-#ifdef ALLOW_CONTROLSEND
-    /* Control string sender - should provide checksum and trailer */
-    .control_send	= superstar2_control_send,
-#endif /* ALLOW_CONTROLSEND */
-#ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
+    /* Fire on various lifetime events */
     .event_hook		= superstar2_event_hook,
+#ifdef ALLOW_RECONFIGURE
     /* Speed (baudrate) switch */
     .speed_switcher	= superstar2_set_speed,
     /* Switch to NMEA mode */
@@ -653,5 +644,9 @@ const struct gps_type_t superstar2_binary = {
     /* Minimum cycle time (not used) */
     .min_cycle	        = 1,
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and trailer */
+    .control_send	= superstar2_control_send,
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

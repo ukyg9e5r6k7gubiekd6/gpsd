@@ -68,7 +68,6 @@ static	gps_mask_t _proto__msg_svinfo(struct gps_device_t *, unsigned char *, siz
  */
 static	ssize_t _proto__control_send(struct gps_device_t *, char *, size_t);
 static	bool _proto__probe_detect(struct gps_device_t *);
-static	void _proto__probe_wakeup(struct gps_device_t *);
 static	void _proto__event_hook(struct gps_device_t *, event_t);
 static	bool _proto__set_speed(struct gps_device_t *, speed_t, char, int);
 static	void _proto__set_mode(struct gps_device_t *, int);
@@ -269,18 +268,6 @@ static bool _proto__probe_detect(struct gps_device_t *session)
    return false;
 }
 
-static void _proto__probe_wakeup(struct gps_device_t *session)
-{
-   /*
-    * Code to make the device ready to communicate. This is
-    * run every time we are about to try a different baud
-    * rate in the autobaud sequence. Only needed if the
-    * device is in some kind of sleeping state. If a wakeup
-    * is not needed this method can be elided and the probe_wakeup
-    * member of the gps_type_t structure can be set to NULL.
-    */
-}
-
 #ifdef ALLOW_CONTROLSEND
 /**
  * Write data to the device, doing any required padding or checksumming
@@ -317,6 +304,14 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
      * Remember that session->packet.counter is available when yoo write
      * these hooks; session->packet.counter == 0 is often a useful condition.
      */
+    if (event == event_wakeup) {
+       /*
+	* Code to make the device ready to communicate. This is
+	* run every time we are about to try a different baud
+	* rate in the autobaud sequence. Only needed if the
+	* device is in some kind of sleeping state.
+	*/
+    }
     if (event == event_configure) {
 	/* 
 	 * Change sentence mix and set reporting modes as needed.
@@ -426,21 +421,15 @@ const struct gps_type_t _proto__binary = {
     .channels         = 12,
     /* Startup-time device detector */
     .probe_detect     = _proto__probe_detect,
-    /* Wakeup to be done before each baud hunt */
-    .probe_wakeup     = _proto__probe_wakeup,
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
     /* Parse message packets */
     .parse_packet     = _proto__parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer      = pass_rtcm,
-#ifdef ALLOW_CONTROLSEND
-    /* Control string sender - should provide checksum and headers/trailer */
-    .control_send   = _proto__control_send,
-#endif /* ALLOW_CONTROLSEND */
-#ifdef ALLOW_RECONFIGURE
-    /* configuration hook for various events */
+    /* fire on various lifetime events */
     .event_hook       = _proto__event_hook,
+#ifdef ALLOW_RECONFIGURE
     /* Speed (baudrate) switch */
     .speed_switcher   = _proto__set_speed,
     /* Switch to NMEA mode */
@@ -450,6 +439,10 @@ const struct gps_type_t _proto__binary = {
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    /* Control string sender - should provide checksum and headers/trailer */
+    .control_send   = _proto__control_send,
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */
 

@@ -1029,20 +1029,19 @@ const struct gps_type_t sirf_binary =
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = sirf_control_send,/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = sirfbin_event_hook,/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = sirfbin_event_hook,/* initialize the device */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = sirf_control_send,/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

@@ -725,19 +725,18 @@ const struct gps_type_t ubx_binary = {
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */
-    .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = NULL,           /* RTCM handler (using default routine) */
-#ifdef ALLOW_CONTROLSEND
-    .control_send     = ubx_control_send,	/* no control sender yet */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook       = ubx_event_hook,	/* Fiew in variious lifetime events */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook       = ubx_event_hook,	/* Enable what reports we need */
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send     = ubx_control_send,	/* no control sender yet */
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

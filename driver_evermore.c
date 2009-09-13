@@ -531,20 +531,19 @@ const struct gps_type_t evermore_binary =
     .packet_type    = EVERMORE_PACKET,		/* lexer packet type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = evermore_control_send,	/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = evermore_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = evermore_event_hook,	/* handle config events */
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
     .min_cycle      = 1,			/* ignore, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = evermore_control_send,	/* how to send a control string */
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

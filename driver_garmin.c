@@ -1205,21 +1205,20 @@ const struct gps_type_t garmin_usb_binary_old =
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = garmin_event_hook,/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = garmin_event_hook,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 };
 #endif /* __UNUSED__ */
 
@@ -1229,21 +1228,20 @@ const struct gps_type_t garmin_usb_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = garmin_event_hook,/* lifetime ebent handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = garmin_event_hook,/* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 };
 
 const struct gps_type_t garmin_ser_binary =
@@ -1252,21 +1250,20 @@ const struct gps_type_t garmin_ser_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .get_packet     = generic_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
-#ifdef ALLOW_CONTROLSEND
-    .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+    .event_hook     = NULL,	        /* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .event_hook     = NULL,	        /* enable what we need */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
 };
 
 #endif /* GARMIN_ENABLE */
