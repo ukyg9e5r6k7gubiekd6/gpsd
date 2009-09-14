@@ -41,20 +41,20 @@ GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATC
 case $mode in
     regress)
         echo "Testing the daemon..." >&2
-	trap 'rm -f $dir/test.chk $dir/test-whole.chk $dir/test-trunk.chk $dir/log-copy.chk $dir/diff $dir/diff-trunc; exit $errors' 0 1 2 15
         errors=0; total=0; notfound=0;
         for f in $*; do
             dir=`dirname $f`
+	    trap 'rm -f $dir/test.chk $dir/log-copy.chk $dir/diff; exit $errors' 0 1 2 15
 	    if [ -r $f.chk ]
 	    then
 		gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
 		sed -n <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
-		sed -n <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
-		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
+		diff -ub $dir/log-copy.chk $dir/test.chk >$dir/diff;
 		if test -s $dir/diff; then
 		    errors=`expr $errors + 1`;
 		    cat $dir/diff
 		fi;
+		rm -f $dir/test.chk $dir/log-copy.chk $dir/diff
 	    else
 		echo "*** No check log $f.chk exists"
 		notfound=`expr $notfound + 1`;
