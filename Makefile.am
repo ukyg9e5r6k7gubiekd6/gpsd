@@ -155,6 +155,7 @@ libgpsd_c_sources = \
 	netlib.c \
 	ntpshm.c \
 	packet.c \
+	pseudonmea.c \
 	serial.c \
 	rtcm2_json.c \
 	srecord.c \
