@@ -566,7 +566,6 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
     tdop = sqrt(inv[3][3]);
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
-    mask = 0;
 
     gpsd_report(LOG_PROG, "DOPS computed/reported: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
 		hdop, dop->hdop,
@@ -578,25 +577,20 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     /*@ -usedef @*/
     if (isnan(dop->hdop)!=0) {
 	dop->hdop = hdop;
-	mask |= HDOP_SET;
     }
     if (isnan(dop->vdop)!=0) {
 	dop->vdop = vdop;
-	mask |= VDOP_SET;
     }
     if (isnan(dop->pdop)!=0) {
 	dop->pdop = pdop;
-	mask |= PDOP_SET;
     }
     if (isnan(dop->tdop)!=0) {
 	dop->tdop = tdop;
-	mask |= TDOP_SET;
     }
     if (isnan(dop->gdop)!=0) {
 	dop->gdop = gdop;
-	mask |= GDOP_SET;
     }
     /*@ +usedef @*/
 
-    return mask;
+    return DOP_SET;
 }

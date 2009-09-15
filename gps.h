@@ -868,16 +868,11 @@ struct gps_data_t {
 #define CLIMB_SET	0x00000080u
 #define STATUS_SET	0x00000100u
 #define MODE_SET	0x00000200u
-#define HDOP_SET  	0x00000400u
-#define VDOP_SET  	0x00000800u
-#define PDOP_SET  	0x00001000u
-#define TDOP_SET	0x00002000u	/* only used in the daemon */
-#define VERSION_SET	0x00002000u	/* only used in client library */
-#define GDOP_SET	0x00004000u
-#define DOP_SET		(HDOP_SET|VDOP_SET|PDOP_SET|TDOP_SET|GDOP_SET)
-#define HERR_SET	0x00008000u
-#define VERR_SET	0x00010000u
-#define PERR_SET	0x00020000u	/* only used in the daemon */
+#define DOP_SET  	0x00000400u
+#define VERSION_SET	0x00000800u	/* only used in client library */
+#define HERR_SET	0x00001000u
+#define VERR_SET	0x00002000u
+#define PERR_SET	0x00004000u	/* only used in the daemon */
 #define POLICY_SET	0x00020000u	/* only used in client library */
 #define ERR_SET		(HERR_SET | VERR_SET | PERR_SET)
 #define SATELLITE_SET	0x00040000u

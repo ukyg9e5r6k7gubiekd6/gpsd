@@ -468,8 +468,9 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	}
 #endif /* NTPSHM_ENABLE */
 	/* fix quality data */
+	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.hdop = (double)getub(buf, 20)/5.0;
-	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_SET;
     }
     return mask;
 }
@@ -542,8 +543,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	mask |= SPEEDERR_SET;
 
     /* HDOP should be available at byte 89, but in 231 it's zero. */
-    if ((session->gpsdata.dop.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
-	mask |= HDOP_SET;
+    //session->gpsdata.dop.hdop = (unsigned int)getub(buf, 89) * 0.2;
 
     if ((session->gpsdata.fix.mode > MODE_NO_FIX) && (session->driver.sirf.driverstate & SIRF_GE_232)) {
 	struct tm unpacked_date;
@@ -649,7 +649,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 
     /* this packet is only sent by uBlox firmware from version 1.32 */
     mask = LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
-	STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
+	STATUS_SET | MODE_SET | DOP_SET;
     session->gpsdata.fix.latitude = getbesl(buf, 1) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getbesl(buf, 5) * RAD_2_DEG * 1e-8;
     session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
@@ -698,6 +698,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	session->context->valid |= LEAP_SECOND_VALID;
     }
 
+    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.gdop = (int)getub(buf, 34) / 5.0;
     session->gpsdata.dop.pdop = (int)getub(buf, 35) / 5.0;
     session->gpsdata.dop.hdop = (int)getub(buf, 36) / 5.0;

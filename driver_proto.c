@@ -107,7 +107,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.dop.hdop = GET_HDOP();
     session->gpsdata.dop.vdop = GET_VDOP();
     /* other DOP if available */
-    mask |= HDOP_SET | VDOP_SET | USED_SET;
+    mask |= DOP_SET;
 
     session->gpsdata.fix.mode = GET_FIX_MODE();
     session->gpsdata.status = GET_FIX_STATUS();

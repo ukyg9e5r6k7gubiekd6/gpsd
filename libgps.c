@@ -315,7 +315,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				   &gpsdata->dop.vdop,
 				   &gpsdata->dop.tdop,
 				   &gpsdata->dop.gdop);
-			    gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET | GDOP_SET | TDOP_SET;
+			    gpsdata->set |= DOP_SET;
 			}
 			break;
 		    case 'S':
@@ -624,7 +624,7 @@ static void data_dump(struct gps_data_t *collect, time_t now)
     if (collect->fix.mode & MODE_SET)
 	printf("M: mode: %d (%s)\n",
 	   collect->fix.mode, mode_values[collect->fix.mode]);
-    if (collect->fix.mode & (HDOP_SET | VDOP_SET | PDOP_SET))
+    if (collect->fix.mode & DOP_SET)
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
 	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
