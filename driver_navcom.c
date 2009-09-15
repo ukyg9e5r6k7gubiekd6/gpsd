@@ -492,25 +492,16 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
        and this value seems to agree with the output from other software */
     session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
 
-    if (gdop == DOP_UNDEFINED)
-	session->gpsdata.dop.gdop = NAN;
-    else
+    clear_dop(&session->gpsdata.dop);
+    if (gdop != DOP_UNDEFINED)
 	session->gpsdata.dop.gdop = gdop/10.0;
-    if (pdop == DOP_UNDEFINED)
-	session->gpsdata.dop.pdop = NAN;
-    else
+    if (pdop != DOP_UNDEFINED)
 	session->gpsdata.dop.pdop = pdop/10.0;
-    if (hdop == DOP_UNDEFINED)
-	session->gpsdata.dop.hdop = NAN;
-    else
+    if (hdop != DOP_UNDEFINED)
 	session->gpsdata.dop.hdop = hdop/10.0;
-    if (vdop == DOP_UNDEFINED)
-	session->gpsdata.dop.vdop = NAN;
-    else
+    if (vdop != DOP_UNDEFINED)
 	session->gpsdata.dop.vdop = vdop/10.0;
-    if (tdop == DOP_UNDEFINED)
-	session->gpsdata.dop.tdop = NAN;
-    else
+    if (tdop != DOP_UNDEFINED)
 	session->gpsdata.dop.tdop = tdop/10.0;
 #endif /* S_SPLINT_S */
 

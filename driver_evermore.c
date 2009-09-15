@@ -222,6 +222,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
+	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.gdop = (double)getub(buf2, 8)*0.1;
 	session->gpsdata.dop.pdop = (double)getub(buf2, 9)*0.1;
 	session->gpsdata.dop.hdop = (double)getub(buf2, 10)*0.1;

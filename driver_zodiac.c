@@ -278,6 +278,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 
     /* ticks              = getzlong(6); */
     /* sequence           = getzword(8); */
+    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.gdop = (unsigned int)getzword(9) * 1e-2;
     session->gpsdata.dop.pdop = (unsigned int)getzword(10) * 1e-2;
     session->gpsdata.dop.hdop = (unsigned int)getzword(11) * 1e-2;

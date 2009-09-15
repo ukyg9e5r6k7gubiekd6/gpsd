@@ -131,6 +131,7 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (data_len != 18)
 	return 0;
 
+    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.gdop = (double)(getleuw(buf, 4)/100.0);
     session->gpsdata.dop.pdop = (double)(getleuw(buf, 6)/100.0);
     session->gpsdata.dop.tdop = (double)(getleuw(buf, 8)/100.0);
