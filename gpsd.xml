@@ -867,10 +867,10 @@ depending on the fix quality.</para>
         <entry>Speed over ground, meters per second.</entry>
 </row>
 <row>
-	<entry>climb/sink</entry>
+	<entry>climb</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Climb (postive) or sink (negative) rate, meters per 
+        <entry>Climb (positive) or sink (negative) rate, meters per 
 	second.</entry>
 </row>
 <row>
