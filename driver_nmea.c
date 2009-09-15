@@ -745,7 +745,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 		session->gpsdata.dop.tdop = atof(field[17]);
 		mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 		mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
-		mask |= PDOP_SET;
+		mask |= DOP_SET;
 	} else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
 		int i, n, p, u;
 		n = session->gpsdata.satellites = atoi(field[2]);
