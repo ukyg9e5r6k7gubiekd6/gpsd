@@ -103,6 +103,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.fix.epy = GET_LATITUDE_ERROR();
     session->gpsdata.fix.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
+    dop_clear(&session->gpsdata.dop);
     session->gpsdata.dop.hdop = GET_HDOP();
     session->gpsdata.dop.vdop = GET_VDOP();
     /* other DOP if available */

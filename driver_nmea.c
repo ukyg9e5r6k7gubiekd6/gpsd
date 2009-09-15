@@ -392,6 +392,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     else
 	mask = MODE_SET;
     gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
+    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.pdop = atof(field[15]);
     session->gpsdata.dop.hdop = atof(field[16]);
     session->gpsdata.dop.vdop = atof(field[17]);
