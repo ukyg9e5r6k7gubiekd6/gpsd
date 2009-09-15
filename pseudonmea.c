@@ -172,34 +172,37 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 {
     int	i, j;
     char *bufp2 = bufp;
+    bool used_valid = (session->gpsdata.set & USED_SET)!= 0;
 
-    (void)snprintf(bufp, len-strlen(bufp),
-		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
-    j = 0;
-    for (i = 0; i < session->device_type->channels; i++) {
-	if (session->gpsdata.used[i]) {
-	    bufp += strlen(bufp);
-	    (void)snprintf(bufp, len-strlen(bufp),
-			   "%02d,", session->gpsdata.used[i]);
-	    j++;
-	}
-    }
-    for (i = j; i < session->device_type->channels; i++) {
-	bufp += strlen(bufp);
-	(void)strlcpy(bufp, ",", len);
-    }
-    bufp += strlen(bufp);
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
-    if (session->gpsdata.fix.mode == MODE_NO_FIX)
-	(void)strlcat(bufp, ",,,", len);
-    else
+    if ((session->gpsdata.set & MODE_SET) != 0) {
 	(void)snprintf(bufp, len-strlen(bufp),
-		       "%.1f,%.1f,%.1f*",
-		       ZEROIZE(session->gpsdata.dop.pdop),
-		       ZEROIZE(session->gpsdata.dop.hdop),
-		       ZEROIZE(session->gpsdata.dop.vdop));
-    nmea_add_checksum(bufp2);
-    bufp += strlen(bufp);
+		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
+	j = 0;
+	for (i = 0; i < session->device_type->channels; i++) {
+	    if (session->gpsdata.used[i]) {
+		bufp += strlen(bufp);
+		(void)snprintf(bufp, len-strlen(bufp),
+			       "%02d,", used_valid ? session->gpsdata.used[i] : 0);
+		j++;
+	    }
+	}
+	for (i = j; i < session->device_type->channels; i++) {
+	    bufp += strlen(bufp);
+	    (void)strlcpy(bufp, ",", len);
+	}
+	bufp += strlen(bufp);
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
+	if (session->gpsdata.fix.mode == MODE_NO_FIX)
+	    (void)strlcat(bufp, ",,,", len);
+	else
+	    (void)snprintf(bufp, len-strlen(bufp),
+			   "%.1f,%.1f,%.1f*",
+			   ZEROIZE(session->gpsdata.dop.pdop),
+			   ZEROIZE(session->gpsdata.dop.hdop),
+			   ZEROIZE(session->gpsdata.dop.vdop));
+	nmea_add_checksum(bufp2);
+	bufp += strlen(bufp);
+    }
     if (finite(session->gpsdata.fix.epx)
 	&& finite(session->gpsdata.fix.epy)
 	&& finite(session->gpsdata.fix.epv)
@@ -225,12 +228,13 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 
 void gpsd_binary_dump(struct gps_device_t *session,
 			      char bufp[], size_t len)
+/* the only entry point - dump a device state in pseudo-NMEA */
 {
     if ((session->gpsdata.set & LATLON_SET) != 0) {
 	gpsd_position_fix_dump(session, bufp, len);
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
     }
-    if ((session->gpsdata.set & (DOP_SET | ERR_SET)) != 0)
+    if ((session->gpsdata.set & (DOP_SET | USED_SET | ERR_SET)) != 0)
 	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
     if ((session->gpsdata.set & SATELLITE_SET) != 0)
 	gpsd_binary_satellite_dump(session,bufp+strlen(bufp),len-strlen(bufp));
