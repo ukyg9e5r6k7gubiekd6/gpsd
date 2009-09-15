@@ -791,7 +791,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->gpsdata.fix.mode > MODE_NO_FIX
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
 		    && session->gpsdata.satellites > 0) {
-	    dopmask = dop(&session->gpsdata);
+	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
 	session->gpsdata.set = ONLINE_SET | dopmask | received;

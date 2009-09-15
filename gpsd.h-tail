@@ -483,7 +483,9 @@ extern int ntpshm_pps(struct gps_device_t *,struct timeval *, int rate);
 extern void ecef_to_wgs84fix(/*@out@*/struct gps_data_t *,
 			     double, double, double, 
 			     double, double, double);
-extern gps_mask_t dop(struct gps_data_t *);
+extern void clear_dop(/*@out@*/struct dop_t *);
+extern gps_mask_t fill_dop(/*@in@*/const struct gps_data_t *gpsdata, 
+			   struct dop_t *dop);
 
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);

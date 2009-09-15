@@ -388,6 +388,11 @@ driver.
 
 ******************************************************************************/
 
+void clear_dop(/*@out@*/struct dop_t *dop)
+{
+    dop->vdop = dop->tdop = dop->hdop = dop->pdop = dop->gdop = NAN;
+}
+
 /*@ -fixedformalarray -mustdefine @*/
 static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
 {
@@ -480,7 +485,7 @@ static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
 }
 /*@ +fixedformalarray +mustdefine @*/
 
-gps_mask_t dop(struct gps_data_t *gpsdata)
+gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 {
     double prod[4][4];
     double inv[4][4];
@@ -564,31 +569,31 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     mask = 0;
 
     gpsd_report(LOG_PROG, "DOPS computed/reported: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
-		hdop, gpsdata->dop.hdop,
-		vdop, gpsdata->dop.vdop,
-		pdop, gpsdata->dop.pdop,
-		tdop, gpsdata->dop.tdop,
-		gdop, gpsdata->dop.gdop);
+		hdop, dop->hdop,
+		vdop, dop->vdop,
+		pdop, dop->pdop,
+		tdop, dop->tdop,
+		gdop, dop->gdop);
 
     /*@ -usedef @*/
-    if (isnan(gpsdata->dop.hdop)!=0) {
-	gpsdata->dop.hdop = hdop;
+    if (isnan(dop->hdop)!=0) {
+	dop->hdop = hdop;
 	mask |= HDOP_SET;
     }
-    if (isnan(gpsdata->dop.vdop)!=0) {
-	gpsdata->dop.vdop = vdop;
+    if (isnan(dop->vdop)!=0) {
+	dop->vdop = vdop;
 	mask |= VDOP_SET;
     }
-    if (isnan(gpsdata->dop.pdop)!=0) {
-	gpsdata->dop.pdop = pdop;
+    if (isnan(dop->pdop)!=0) {
+	dop->pdop = pdop;
 	mask |= PDOP_SET;
     }
-    if (isnan(gpsdata->dop.tdop)!=0) {
-	gpsdata->dop.tdop = tdop;
+    if (isnan(dop->tdop)!=0) {
+	dop->tdop = tdop;
 	mask |= TDOP_SET;
     }
-    if (isnan(gpsdata->dop.gdop)!=0) {
-	gpsdata->dop.gdop = gdop;
+    if (isnan(dop->gdop)!=0) {
+	dop->gdop = gdop;
 	mask |= GDOP_SET;
     }
     /*@ +usedef @*/
