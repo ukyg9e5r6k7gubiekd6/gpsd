@@ -703,12 +703,13 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     u_int8_t sats_visible = getub(buf, 12);
     u_int8_t sats_tracked = getub(buf, 13);
     u_int8_t sats_used = getub(buf, 14);
-    u_int8_t pdop = getub(buf, 15);
+    //u_int8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
     session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
 	    - session->context->leap_seconds;
-    session->gpsdata.dop.pdop = (int)pdop / 10.0;
+    /* Give this driver a single point of truth about DOPs */
+    //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
     /* Satellite count */
     session->gpsdata.satellites = (int)sats_visible;
@@ -783,7 +784,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	/*@ +predboolothers -charint @*/
     }
 
-    return PDOP_SET | SATELLITE_SET | STATUS_SET;
+    return SATELLITE_SET | STATUS_SET;
 }
 
 /* Raw Meas. Data Block */
