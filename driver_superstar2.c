@@ -120,7 +120,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     session->gpsdata.dop.hdop = getleuw(buf,66) * 0.1;
     session->gpsdata.dop.vdop = getleuw(buf,68) * 0.1;
     /* other DOP if available */
-    mask |= HDOP_SET | VDOP_SET | USED_SET;
+    mask |= DOP_SET | USED_SET;
 
     flags = getub(buf,70);
     switch (flags & 0x1f) {
