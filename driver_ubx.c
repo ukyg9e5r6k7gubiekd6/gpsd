@@ -93,9 +93,9 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     session->gpsdata.fix.epx = session->gpsdata.fix.epy = (double)(getlesl(buf, 24)/100.0);
     session->gpsdata.fix.eps = (double)(getlesl(buf, 40)/100.0);
-    session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
+    /* Better to have a single point of truth about DOPs */
+    //session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
-    mask |= PDOP_SET ;
 
     navmode = getub(buf, 10);
     switch (navmode){
