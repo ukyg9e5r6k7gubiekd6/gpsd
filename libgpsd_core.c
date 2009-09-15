@@ -87,11 +87,11 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.set &=~ (FIX_SET | DOP_SET);
-    session->gpsdata.hdop = NAN;
-    session->gpsdata.vdop = NAN;
-    session->gpsdata.pdop = NAN;
-    session->gpsdata.tdop = NAN;
-    session->gpsdata.gdop = NAN;
+    session->gpsdata.dop.hdop = NAN;
+    session->gpsdata.dop.vdop = NAN;
+    session->gpsdata.dop.pdop = NAN;
+    session->gpsdata.dop.tdop = NAN;
+    session->gpsdata.dop.gdop = NAN;
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1; 
@@ -395,11 +395,11 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 		session->gpsdata.status,
 		session->gpsdata.satellites_used);
-	if (isnan(session->gpsdata.hdop))
+	if (isnan(session->gpsdata.dop.hdop))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
-			   "%.2f,",session->gpsdata.hdop);
+			   "%.2f,",session->gpsdata.dop.hdop);
 	if (isnan(session->gpsdata.fix.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
@@ -533,9 +533,9 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     else
 	(void)snprintf(bufp, len-strlen(bufp),
 		       "%.1f,%.1f,%.1f*",
-		       ZEROIZE(session->gpsdata.pdop),
-		       ZEROIZE(session->gpsdata.hdop),
-		       ZEROIZE(session->gpsdata.vdop));
+		       ZEROIZE(session->gpsdata.dop.pdop),
+		       ZEROIZE(session->gpsdata.dop.hdop),
+		       ZEROIZE(session->gpsdata.dop.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
     if (finite(session->gpsdata.fix.epx)
@@ -617,18 +617,18 @@ void gpsd_error_model(struct gps_device_t *session,
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->epx)!=0 && finite(session->gpsdata.hdop)!=0)
-		fix->epx = session->gpsdata.hdop * h_uere;
+	if (isnan(fix->epx)!=0 && finite(session->gpsdata.dop.hdop)!=0)
+		fix->epx = session->gpsdata.dop.hdop * h_uere;
 
-	if (isnan(fix->epy)!=0 && finite(session->gpsdata.hdop)!=0)
-		fix->epy = session->gpsdata.hdop * h_uere;
+	if (isnan(fix->epy)!=0 && finite(session->gpsdata.dop.hdop)!=0)
+		fix->epy = session->gpsdata.dop.hdop * h_uere;
 
 	if ((fix->mode >= MODE_3D)
-		&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
-	    fix->epv = session->gpsdata.vdop * v_uere;
+		&& isnan(fix->epv)!=0 && finite(session->gpsdata.dop.vdop)!=0)
+	    fix->epv = session->gpsdata.dop.vdop * v_uere;
 
-	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.pdop)!=0)
-	    session->gpsdata.epe = session->gpsdata.pdop * p_uere;
+	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.dop.pdop)!=0)
+	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
 	else
 	    session->gpsdata.epe = NAN;
 

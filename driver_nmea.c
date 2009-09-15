@@ -392,9 +392,9 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     else
 	mask = MODE_SET;
     gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
-    session->gpsdata.pdop = atof(field[15]);
-    session->gpsdata.hdop = atof(field[16]);
-    session->gpsdata.vdop = atof(field[17]);
+    session->gpsdata.dop.pdop = atof(field[15]);
+    session->gpsdata.dop.hdop = atof(field[16]);
+    session->gpsdata.dop.vdop = atof(field[17]);
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     /* the magic 6 here counts the tag, two mode fields, and the DOP fields */
@@ -743,10 +743,10 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 		session->gpsdata.fix.track = atof(field[11]);
 		session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
 		session->gpsdata.fix.climb = atof(field[13]);
-		session->gpsdata.pdop = atof(field[14]);
-		session->gpsdata.hdop = atof(field[15]);
-		session->gpsdata.vdop = atof(field[16]);
-		session->gpsdata.tdop = atof(field[17]);
+		session->gpsdata.dop.pdop = atof(field[14]);
+		session->gpsdata.dop.hdop = atof(field[15]);
+		session->gpsdata.dop.vdop = atof(field[16]);
+		session->gpsdata.dop.tdop = atof(field[17]);
 		mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 		mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 		mask |= (PDOP_SET | HDOP_SET | VDOP_SET | TDOP_SET);

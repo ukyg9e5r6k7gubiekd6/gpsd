@@ -222,11 +222,11 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
-	session->gpsdata.gdop = (double)getub(buf2, 8)*0.1;
-	session->gpsdata.pdop = (double)getub(buf2, 9)*0.1;
-	session->gpsdata.hdop = (double)getub(buf2, 10)*0.1;
-	session->gpsdata.vdop = (double)getub(buf2, 11)*0.1;
-	session->gpsdata.tdop = (double)getub(buf2, 12)*0.1;
+	session->gpsdata.dop.gdop = (double)getub(buf2, 8)*0.1;
+	session->gpsdata.dop.pdop = (double)getub(buf2, 9)*0.1;
+	session->gpsdata.dop.hdop = (double)getub(buf2, 10)*0.1;
+	session->gpsdata.dop.vdop = (double)getub(buf2, 11)*0.1;
+	session->gpsdata.dop.tdop = (double)getub(buf2, 12)*0.1;
 	switch (getub(buf2, 13)) {
 	case 0:	/* no position fix */
 	case 1:	/* manual calls this "1D navigation" */

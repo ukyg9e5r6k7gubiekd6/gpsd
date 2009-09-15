@@ -380,12 +380,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	mask |= MODE_SET;
 #endif /* __UNUSED__ */
 	session->gpsdata.satellites_used = count;
-	session->gpsdata.pdop = getbef(buf,1);
-	session->gpsdata.hdop = getbef(buf,5);
-	session->gpsdata.vdop = getbef(buf,9);
-	session->gpsdata.tdop = getbef(buf,13);
+	session->gpsdata.dop.pdop = getbef(buf,1);
+	session->gpsdata.dop.hdop = getbef(buf,5);
+	session->gpsdata.dop.vdop = getbef(buf,9);
+	session->gpsdata.dop.tdop = getbef(buf,13);
 	/*@ -evalorder @*/
-	session->gpsdata.gdop = sqrt(pow(session->gpsdata.pdop,2)+pow(session->gpsdata.tdop,2));
+	session->gpsdata.dop.gdop = sqrt(pow(session->gpsdata.dop.pdop,2)+pow(session->gpsdata.dop.tdop,2));
 	/*@ +evalorder @*/
 
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
@@ -400,9 +400,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.fix.mode, session->gpsdata.satellites_used,buf2);
 	gpsd_report(LOG_INF,
 	    "Sat info: DOP P=%.1f H=%.1f V=%.1f T=%.1f G=%.1f\n",
-	    session->gpsdata.pdop, session->gpsdata.hdop,
-	    session->gpsdata.vdop, session->gpsdata.tdop,
-	    session->gpsdata.gdop);
+	    session->gpsdata.dop.pdop, session->gpsdata.dop.hdop,
+	    session->gpsdata.dop.vdop, session->gpsdata.dop.tdop,
+	    session->gpsdata.dop.gdop);
 	mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | USED_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */

@@ -796,6 +796,11 @@ struct compass_t {
     double horzField;   /* Magnitude of horizontal magnetic field */
 };
 
+struct dop_t {
+    /* Dilution of precision factors */
+    double pdop, hdop, vdop, tdop, gdop;
+};
+
 struct rawdata_t {
     /* raw measurement data */
     double codephase[MAXCHANNELS];	/* meters */
@@ -912,7 +917,7 @@ struct gps_data_t {
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
-    double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
+    struct dop_t dop;
 
     /* redundant with the estimate elements in the fix structure */
     double epe;  /* spherical position error, 95% confidence (meters)  */

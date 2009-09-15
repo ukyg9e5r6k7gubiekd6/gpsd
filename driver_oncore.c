@@ -143,8 +143,8 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 
 #if 0
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
-    session->gpsdata.hdop		= GET_HDOP();
-    session->gpsdata.vdop		= GET_VDOP();
+    session->gpsdata.dop.hdop		= GET_HDOP();
+    session->gpsdata.dop.vdop		= GET_VDOP();
     /* other DOP if available */
     mask |= HDOP_SET | VDOP_SET | USED_SET;
 #endif

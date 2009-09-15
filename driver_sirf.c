@@ -468,7 +468,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	}
 #endif /* NTPSHM_ENABLE */
 	/* fix quality data */
-	session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
+	session->gpsdata.dop.hdop = (double)getub(buf, 20)/5.0;
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET;
     }
     return mask;
@@ -542,7 +542,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	mask |= SPEEDERR_SET;
 
     /* HDOP should be available at byte 89, but in 231 it's zero. */
-    if ((session->gpsdata.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
+    if ((session->gpsdata.dop.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
 	mask |= HDOP_SET;
 
     if ((session->gpsdata.fix.mode > MODE_NO_FIX) && (session->driver.sirf.driverstate & SIRF_GE_232)) {
@@ -698,11 +698,11 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	session->context->valid |= LEAP_SECOND_VALID;
     }
 
-    session->gpsdata.gdop = (int)getub(buf, 34) / 5.0;
-    session->gpsdata.pdop = (int)getub(buf, 35) / 5.0;
-    session->gpsdata.hdop = (int)getub(buf, 36) / 5.0;
-    session->gpsdata.vdop = (int)getub(buf, 37) / 5.0;
-    session->gpsdata.tdop = (int)getub(buf, 38) / 5.0;
+    session->gpsdata.dop.gdop = (int)getub(buf, 34) / 5.0;
+    session->gpsdata.dop.pdop = (int)getub(buf, 35) / 5.0;
+    session->gpsdata.dop.hdop = (int)getub(buf, 36) / 5.0;
+    session->gpsdata.dop.vdop = (int)getub(buf, 37) / 5.0;
+    session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
     return mask;
 }

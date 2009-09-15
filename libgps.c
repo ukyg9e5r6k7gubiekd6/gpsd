@@ -304,17 +304,17 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    case 'Q':
 			if (sp[2] == '?') {
 			       gpsdata->satellites_used = 0;
-			       gpsdata->pdop = 0;
-			       gpsdata->hdop = 0;
-			       gpsdata->vdop = 0;
+			       gpsdata->dop.pdop = 0;
+			       gpsdata->dop.hdop = 0;
+			       gpsdata->dop.vdop = 0;
 			} else {
 			    (void)sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
 				   &gpsdata->satellites_used,
-				   &gpsdata->pdop,
-				   &gpsdata->hdop,
-				   &gpsdata->vdop,
-				   &gpsdata->tdop,
-				   &gpsdata->gdop);
+				   &gpsdata->dop.pdop,
+				   &gpsdata->dop.hdop,
+				   &gpsdata->dop.vdop,
+				   &gpsdata->dop.tdop,
+				   &gpsdata->dop.gdop);
 			    gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET | GDOP_SET | TDOP_SET;
 			}
 			break;
@@ -627,7 +627,7 @@ static void data_dump(struct gps_data_t *collect, time_t now)
     if (collect->fix.mode & (HDOP_SET | VDOP_SET | PDOP_SET))
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
-	   collect->pdop, collect->hdop, collect->vdop);
+	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
 
     if (collect->set & SATELLITE_SET) {
 	int i;

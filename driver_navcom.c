@@ -493,25 +493,25 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
 
     if (gdop == DOP_UNDEFINED)
-	session->gpsdata.gdop = NAN;
+	session->gpsdata.dop.gdop = NAN;
     else
-	session->gpsdata.gdop = gdop/10.0;
+	session->gpsdata.dop.gdop = gdop/10.0;
     if (pdop == DOP_UNDEFINED)
-	session->gpsdata.pdop = NAN;
+	session->gpsdata.dop.pdop = NAN;
     else
-	session->gpsdata.pdop = pdop/10.0;
+	session->gpsdata.dop.pdop = pdop/10.0;
     if (hdop == DOP_UNDEFINED)
-	session->gpsdata.hdop = NAN;
+	session->gpsdata.dop.hdop = NAN;
     else
-	session->gpsdata.hdop = hdop/10.0;
+	session->gpsdata.dop.hdop = hdop/10.0;
     if (vdop == DOP_UNDEFINED)
-	session->gpsdata.vdop = NAN;
+	session->gpsdata.dop.vdop = NAN;
     else
-	session->gpsdata.vdop = vdop/10.0;
+	session->gpsdata.dop.vdop = vdop/10.0;
     if (tdop == DOP_UNDEFINED)
-	session->gpsdata.tdop = NAN;
+	session->gpsdata.dop.tdop = NAN;
     else
-	session->gpsdata.tdop = tdop/10.0;
+	session->gpsdata.dop.tdop = tdop/10.0;
 #endif /* S_SPLINT_S */
 
     gpsd_report(LOG_PROG, "Navcom: received packet type 0xb1 (PVT Report)\n");
@@ -530,9 +530,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"Navcom: hrms = %f, vrms = %f, gdop = %f, pdop = %f, "
 		"hdop = %f, vdop = %f, tdop = %f\n",
 		session->gpsdata.fix.epx, session->gpsdata.fix.epv,
-		session->gpsdata.gdop, session->gpsdata.pdop,
-		session->gpsdata.hdop, session->gpsdata.vdop,
-		session->gpsdata.tdop);
+		session->gpsdata.dop.gdop, session->gpsdata.dop.pdop,
+		session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
+		session->gpsdata.dop.tdop);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -717,7 +717,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Timestamp and PDOP */
     session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
 	    - session->context->leap_seconds;
-    session->gpsdata.pdop = (int)pdop / 10.0;
+    session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
     /* Satellite count */
     session->gpsdata.satellites = (int)sats_visible;

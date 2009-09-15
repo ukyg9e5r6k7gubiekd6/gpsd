@@ -116,8 +116,8 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
     session->gpsdata.satellites_used = (int)getub(buf,71) & 0x0f;
-    session->gpsdata.hdop = getleuw(buf,66) * 0.1;
-    session->gpsdata.vdop = getleuw(buf,68) * 0.1;
+    session->gpsdata.dop.hdop = getleuw(buf,66) * 0.1;
+    session->gpsdata.dop.vdop = getleuw(buf,68) * 0.1;
     /* other DOP if available */
     mask |= HDOP_SET | VDOP_SET | USED_SET;
 
@@ -196,8 +196,8 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET ;
 
     session->gpsdata.satellites_used = (int)getub(buf, 79) & 0x0f;
-    session->gpsdata.hdop = getleuw(buf, 74) * 0.1;
-    session->gpsdata.vdop = getleuw(buf, 76) * 0.1;
+    session->gpsdata.dop.hdop = getleuw(buf, 74) * 0.1;
+    session->gpsdata.dop.vdop = getleuw(buf, 76) * 0.1;
     /* other DOP if available */
     mask |= HDOP_SET | VDOP_SET | USED_SET;
 

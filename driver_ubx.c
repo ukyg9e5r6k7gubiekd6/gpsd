@@ -93,7 +93,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     session->gpsdata.fix.epx = session->gpsdata.fix.epy = (double)(getlesl(buf, 24)/100.0);
     session->gpsdata.fix.eps = (double)(getlesl(buf, 40)/100.0);
-    session->gpsdata.pdop = (double)(getleuw(buf, 44)/100.0);
+    session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
     mask |= PDOP_SET ;
 
@@ -131,11 +131,11 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (data_len != 18)
 	return 0;
 
-    session->gpsdata.gdop = (double)(getleuw(buf, 4)/100.0);
-    session->gpsdata.pdop = (double)(getleuw(buf, 6)/100.0);
-    session->gpsdata.tdop = (double)(getleuw(buf, 8)/100.0);
-    session->gpsdata.vdop = (double)(getleuw(buf, 10)/100.0);
-    session->gpsdata.hdop = (double)(getleuw(buf, 12)/100.0);
+    session->gpsdata.dop.gdop = (double)(getleuw(buf, 4)/100.0);
+    session->gpsdata.dop.pdop = (double)(getleuw(buf, 6)/100.0);
+    session->gpsdata.dop.tdop = (double)(getleuw(buf, 8)/100.0);
+    session->gpsdata.dop.vdop = (double)(getleuw(buf, 10)/100.0);
+    session->gpsdata.dop.hdop = (double)(getleuw(buf, 12)/100.0);
 
     return DOP_SET;
 }

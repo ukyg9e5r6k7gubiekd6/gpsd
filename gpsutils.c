@@ -564,31 +564,31 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     mask = 0;
 
     gpsd_report(LOG_PROG, "DOPS computed/reported: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
-		hdop, gpsdata->hdop,
-		vdop, gpsdata->vdop,
-		pdop, gpsdata->pdop,
-		tdop, gpsdata->tdop,
-		gdop, gpsdata->gdop);
+		hdop, gpsdata->dop.hdop,
+		vdop, gpsdata->dop.vdop,
+		pdop, gpsdata->dop.pdop,
+		tdop, gpsdata->dop.tdop,
+		gdop, gpsdata->dop.gdop);
 
     /*@ -usedef @*/
-    if (isnan(gpsdata->hdop)!=0) {
-	gpsdata->hdop = hdop;
+    if (isnan(gpsdata->dop.hdop)!=0) {
+	gpsdata->dop.hdop = hdop;
 	mask |= HDOP_SET;
     }
-    if (isnan(gpsdata->vdop)!=0) {
-	gpsdata->vdop = vdop;
+    if (isnan(gpsdata->dop.vdop)!=0) {
+	gpsdata->dop.vdop = vdop;
 	mask |= VDOP_SET;
     }
-    if (isnan(gpsdata->pdop)!=0) {
-	gpsdata->pdop = pdop;
+    if (isnan(gpsdata->dop.pdop)!=0) {
+	gpsdata->dop.pdop = pdop;
 	mask |= PDOP_SET;
     }
-    if (isnan(gpsdata->tdop)!=0) {
-	gpsdata->tdop = tdop;
+    if (isnan(gpsdata->dop.tdop)!=0) {
+	gpsdata->dop.tdop = tdop;
 	mask |= TDOP_SET;
     }
-    if (isnan(gpsdata->gdop)!=0) {
-	gpsdata->gdop = gdop;
+    if (isnan(gpsdata->dop.gdop)!=0) {
+	gpsdata->dop.gdop = gdop;
 	mask |= GDOP_SET;
     }
     /*@ +usedef @*/

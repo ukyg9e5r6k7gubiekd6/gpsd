@@ -1407,16 +1407,16 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	case 'Q':
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
 	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))!= NULL &&
-		(isnan(channel->device->gpsdata.pdop)==0
-		 || isnan(channel->device->gpsdata.hdop)==0
-		 || isnan(channel->device->gpsdata.vdop)==0))
+		(isnan(channel->device->gpsdata.dop.pdop)==0
+		 || isnan(channel->device->gpsdata.dop.hdop)==0
+		 || isnan(channel->device->gpsdata.dop.vdop)==0))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
 			channel->device->gpsdata.satellites_used,
-			ZEROIZE(channel->device->gpsdata.pdop),
-			ZEROIZE(channel->device->gpsdata.hdop),
-			ZEROIZE(channel->device->gpsdata.vdop),
-			ZEROIZE(channel->device->gpsdata.tdop),
-			ZEROIZE(channel->device->gpsdata.gdop));
+			ZEROIZE(channel->device->gpsdata.dop.pdop),
+			ZEROIZE(channel->device->gpsdata.dop.hdop),
+			ZEROIZE(channel->device->gpsdata.dop.vdop),
+			ZEROIZE(channel->device->gpsdata.dop.tdop),
+			ZEROIZE(channel->device->gpsdata.dop.gdop));
 	    else
 		(void)strlcpy(phrase, ",Q=?", sizeof(phrase));
 #undef ZEROIZE
