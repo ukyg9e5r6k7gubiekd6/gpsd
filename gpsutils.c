@@ -491,7 +491,6 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     double inv[4][4];
     double satpos[MAXCHANNELS][4];
     double hdop, vdop, pdop, tdop, gdop;
-    gps_mask_t mask;
     int i, j, k, n;
 
 #ifdef __UNUSED__
