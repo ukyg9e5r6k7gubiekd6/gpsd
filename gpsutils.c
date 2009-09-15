@@ -390,7 +390,7 @@ driver.
 
 void clear_dop(/*@out@*/struct dop_t *dop)
 {
-    dop->vdop = dop->tdop = dop->hdop = dop->pdop = dop->gdop = NAN;
+    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop = dop->gdop = NAN;
 }
 
 /*@ -fixedformalarray -mustdefine @*/
@@ -490,7 +490,7 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     double prod[4][4];
     double inv[4][4];
     double satpos[MAXCHANNELS][4];
-    double hdop, vdop, pdop, tdop, gdop;
+    double xdop, ydop, hdop, vdop, pdop, tdop, gdop;
     int i, j, k, n;
 
 #ifdef __UNUSED__
@@ -560,13 +560,17 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 	return 0;
     }
 
+    xdop = sqrt(inv[0][0]);
+    ydop = sqrt(inv[1][1]);
     hdop = sqrt(inv[0][0] + inv[1][1]);
     vdop = sqrt(inv[2][2]);
     pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
     tdop = sqrt(inv[3][3]);
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 
-    gpsd_report(LOG_PROG, "DOPS computed/reported: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
+    gpsd_report(LOG_PROG, "DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
+		xdop, dop->xdop,
+		ydop, dop->ydop,
 		hdop, dop->hdop,
 		vdop, dop->vdop,
 		pdop, dop->pdop,
@@ -574,6 +578,12 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 		gdop, dop->gdop);
 
     /*@ -usedef @*/
+    if (isnan(dop->xdop)!=0) {
+	dop->xdop = xdop;
+    }
+    if (isnan(dop->ydop)!=0) {
+	dop->ydop = ydop;
+    }
     if (isnan(dop->hdop)!=0) {
 	dop->hdop = hdop;
     }

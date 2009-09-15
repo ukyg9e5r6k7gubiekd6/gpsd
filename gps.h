@@ -798,7 +798,7 @@ struct compass_t {
 
 struct dop_t {
     /* Dilution of precision factors */
-    double pdop, hdop, vdop, tdop, gdop;
+    double xdop, ydop, pdop, hdop, vdop, tdop, gdop;
 };
 
 struct rawdata_t {

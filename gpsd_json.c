@@ -184,6 +184,34 @@ void json_sky_dump(const struct gps_data_t *datap,
 		       replylen-strlen(reply),
 		       "\"time\":%.3f,",
 		       datap->sentence_time);
+    if (isnan(datap->dop.xdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"xdop\":%.2f,", datap->dop.xdop);
+    if (isnan(datap->dop.ydop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"ydop\":%.2f,", datap->dop.ydop);
+    if (isnan(datap->dop.vdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"xdop\":%.2f,", datap->dop.vdop);
+    if (isnan(datap->dop.tdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"tdop\":%.2f,", datap->dop.tdop);
+    if (isnan(datap->dop.hdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"hdop\":%.2f,", datap->dop.hdop);
+    if (isnan(datap->dop.gdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"gdop\":%.2f,", datap->dop.gdop);
+    if (isnan(datap->dop.pdop)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"pdop\":%.2f,", datap->dop.pdop);
     /* insurance against flaky drivers */
     for (i = 0; i < datap->satellites; i++)
 	if (datap->PRN[i])

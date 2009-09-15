@@ -963,6 +963,70 @@ yet, only the "class" field will reliably be present.</para>
 	fractional part of up to .01sec precision.</entry>
 </row>
 <row>
+	<entry>xdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Longitudinal dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>ydop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Latitudinal dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>vdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Altitude dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>tdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Time dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>hdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Horizontal dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get a
+	circular error estimate.</entry>
+</row>
+<row>
+	<entry>pdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Spherical dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>gdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Hyperspherical dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>xdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Longitudinal dilution of precision, a dimensionsless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
 	<entry>reported</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
@@ -978,6 +1042,18 @@ yet, only the "class" field will reliably be present.</para>
 </tbody>
 </tgroup>
 </table>
+
+<para>Many devices compute dilution of precision factors but do nit
+include them in their reports.  Many that do report DOPs report only
+<structfieldname>hdop</structfieldname>, two-dimensial circular
+error. <application>gpsd</application> always passes through whatever
+the device actually reports, then attempts to fill in other DOPs by
+calculating the appropriate determinants in a covariance matrix based
+on the satellite view. DOPs may be missing if some of these
+determinants are singular. It can even happen that the device reports
+an error estimate in meters when the correspoding DOP is unavailable;
+some devices use more sophisticated error modeling than the
+covariance calculation.</para>
 
 <para>The satellite list objects have the following elements:</para>
 
@@ -1036,6 +1112,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 
 <programlisting>
 {"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327688.280
+    "xdop":1.55,"hdop":1.24,"pdop":1.99,
     "reported":8,"satellites":[
         {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
         {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
