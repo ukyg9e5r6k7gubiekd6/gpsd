@@ -84,7 +84,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	session->gpsdata.dop.pdop = (double)(getleuw(buf, 7 + 60)/100.0);
 	session->gpsdata.dop.vdop = (double)(getleuw(buf, 7 + 62)/100.0);
 	session->gpsdata.dop.tdop = (double)(getleuw(buf, 7 + 64)/100.0);
-	mask |= HDOP_SET | GDOP_SET | PDOP_SET | VDOP_SET | TDOP_SET;
+	mask |= DOP_SET;
     }
 
     if ((pflags & FIX_FLAG_MASK_INVALID) == 0 && (flags & FIXINFO_FLAG_VALID) != 0){

@@ -404,13 +404,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	if (prn > 0)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
     }
-    mask |= USED_SET;
-    if (strlen(field[count-3]) > 0)
-	mask |= HDOP_SET;
-    if (strlen(field[count-2]) > 0)
-	mask |= VDOP_SET;
-    if (strlen(field[count-1]) > 0)
-	mask |= HDOP_SET;
+    mask |= DOP_SET | USED_SET;
     return mask;
 }
 

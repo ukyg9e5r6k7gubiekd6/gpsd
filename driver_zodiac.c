@@ -303,7 +303,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	    session->gpsdata.elevation[i] = 0;
 	}
     }
-    return SATELLITE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
+    return SATELLITE_SET | DOP_SET;
 }
 
 static void handle1005(struct gps_device_t *session UNUSED)

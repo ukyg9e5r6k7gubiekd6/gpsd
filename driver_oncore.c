@@ -147,7 +147,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     session->gpsdata.dop.hdop		= GET_HDOP();
     session->gpsdata.dop.vdop		= GET_VDOP();
     /* other DOP if available */
-    mask |= HDOP_SET | VDOP_SET | USED_SET;
+    mask |= DOP_SET | USED_SET;
 #endif
 
     gpsd_zero_satellites(&session->gpsdata);
