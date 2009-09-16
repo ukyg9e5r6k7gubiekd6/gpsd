@@ -205,7 +205,11 @@ static void navcom_event_hook(struct gps_device_t *session, event_t event)
 	/*@ +type @*/
     }
     /* Request the following messages: */
-    if (event == event_probe_subtype && session->packet.counter == 0) {
+    /*
+     * FIXME: It might not be necessary to call this on reactivate.
+     * Experiment to see if the holds its settings through a close.
+     */
+    if (event == event_identified || event == event_reactivate) {
 	/*@ +charint @*/
 	navcom_cmd_0x1c(session, 0x01, 5);      /* Blink LEDs on receiver */
 	navcom_cmd_0x20(session, 0xae, 0x1770); /* Identification Block - send every 10 min*/

@@ -391,7 +391,11 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
     if (event == event_wakeup)
 	(void)oncore_control_send(session,getfirmware,sizeof(getfirmware));
 
-    if (event == event_configure && session->packet.counter == 0) {
+    /*
+     * FIXME: It might not be necessary to call this on reactivate.
+     * Experiment to see if the holds its settings through a close.
+     */
+    if (event == event_configure && event == event_reactivate) {
 	(void)oncore_control_send(session,enableEa,sizeof(enableEa));
 	(void)oncore_control_send(session,enableBb,sizeof(enableBb));
 	(void)oncore_control_send(session,enableEn,sizeof(enableEn));

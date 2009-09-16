@@ -767,7 +767,8 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 #ifdef ALLOW_RECONFIGURE
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && session->packet.counter == 0) {
+    /* FIXME: Resending this might not be needed on reactivation */
+    if (event == event_identified && event == event_reactivate) {
 	unsigned char buf[100];
 
 	/* I/O Options */
@@ -777,7 +778,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	putbyte(buf,3,0x08);		/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
     }
-    if (event == event_probe_subtype) {
+    if (event == event_configure) {
 	unsigned char buf[100];
 
 	switch (session->packet.counter) {

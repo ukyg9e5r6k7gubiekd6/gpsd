@@ -113,7 +113,11 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_probe_subtype) {
+    /*
+     * This is where we try to tickle NMEA devices into erevrealing their
+     * inner natures.
+     */
+    if (event == event_configure) {
 	/* change this guard if the probe count goes up */ 
 	if (session->packet.counter <= 8)
 	    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n", session->packet.counter);
@@ -255,11 +259,16 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
     }
 }
 
+
 static void garmin_nmea_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure) {
+    if (event == event_driver_switch) {
+	/* forces a reconfigure as the following packets come in */
+	session->packet.counter = 0;
+    } if (event == event_configure) {
 	/*
-	 * Receivers like the Garmin GPS-10 don't handle having having a lot of
+	 * And here's that reconfigure.  It's spplit up like this because
+	 * receivers like the Garmin GPS-10 don't handle having having a lot of
 	 * probes shoved at them very well.
 	 */
 	switch (session->packet.counter) {
@@ -336,7 +345,8 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup)
 	(void)nmea_send(session, "$PASHQ,RID");
-    if (event == event_configure && session->packet.counter == 0) {
+    /* FIXME: Do we need to do this on reactivate as well? */
+    if (event == event_identified) {
 	/* turn WAAS on. can't hurt... */
 	(void)nmea_send(session, "$PASHS,WAS,ON");
 	/* reset to known output state */
@@ -392,8 +402,10 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
     /*
      * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
      * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
+     * It's possible we might not need to redo this on event_reactivate,
+     * but doing so is safe and cheap.
      */
-    if (event == event_configure && session->packet.counter == 0)
+    if (event == event_configure && event == event_reactivate)
 	(void)nmea_send(session,
 		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
 }
@@ -438,7 +450,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
      * Michael St. Laurent <mikes@hartwellcorp.com> reports that you have to
      * ignore the trailing PPS edge when extracting time from this chip.
      */
-    if (event == event_probe_subtype && session->packet.counter == 0) {
+    if (event == event_identified && event == event_reactivate) {
 	gpsd_report(LOG_INF, "PPS trailing edge will be ignored");
 	session->driver.nmea.ignore_trailing_edge = true;
     }
@@ -485,10 +497,10 @@ const struct gps_type_t gpsclock = {
 static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    if (event == event_probe_subtype && session->packet.counter == 0)
+    if (event == event_identified)
 	(void)nmea_send(session, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
-    if (event == event_configure && session->packet.counter == 0)
+    if (event == event_identified || event == event_reactivate)
 	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -528,7 +540,7 @@ static const struct gps_type_t tripmate = {
 
 static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_probe_subtype && session->packet.counter == 0) {
+    if (event == event_identified) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
 	(void)gpsd_switch_driver(session, "Zodiac Binary");
@@ -657,7 +669,7 @@ static int tnt_packet_sniff(struct gps_device_t *session)
 
 static void tnt_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_probe_subtype && session->packet_counter == 0) {
+    if (event == event_identified) {
 	// Send codes to start the flow of data
 	//tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
 	//tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
@@ -972,7 +984,8 @@ static void mkt3301_event_hook(struct gps_device_t *session, event_t event)
 "$PMTK314,1,1,1,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0"
 
 */
-    if(event == event_configure && session->packet.counter == 0) {
+    /* FIXME: Do we need to resend this on reactivation? */
+    if(event == event_identified) {
 	(void)nmea_send(session,"$PMTK320,0"); /* power save off */
 	(void)nmea_send(session,"$PMTK300,1000,0,0,0.0,0.0"); /* Fix interval */
 	(void)nmea_send(session,"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");

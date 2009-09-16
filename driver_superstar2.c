@@ -517,10 +517,12 @@ static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 	return;
     }
 
-    if (session->packet.counter != 0)
-	return;
+    /* query firmware version */
+    if (event == event_identified)
+	(void)superstar2_write(session, version_msg, sizeof(version_msg));
 
-    if (event == event_configure) {
+    /* FIXME: check to see if this really needs to be resent on reactivation */ 
+    if (event == event_identified || event == event_reactivate) {
 	/*@ +charint @*/
 	char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
 	char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
@@ -538,8 +540,6 @@ static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 	(void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
 	session->driver.superstar2.last_iono = time(NULL);
     }
-    if (event == event_probe_subtype)
-	(void)superstar2_write(session, version_msg, sizeof(version_msg));
 }
 
 /*

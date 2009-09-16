@@ -195,9 +195,11 @@ struct gps_device_t;
 typedef enum {ANY, GPS, RTCM2, RTCM3, AIS} gnss_type;
 typedef enum {
     event_wakeup,
+    event_identified,
     event_configure, 
-    event_probe_subtype, 
+    event_driver_switch,
     event_deactivate,
+    event_reactivate,
 } event_t;
 
 struct gps_type_t {

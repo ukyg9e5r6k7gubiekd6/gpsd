@@ -30,20 +30,11 @@
 int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 {
     const struct gps_type_t **dp;
+    bool identified = (session->device_type != NULL);
 
     gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
-    if (session->device_type != NULL &&
-	strcmp(session->device_type->type_name, type_name) == 0) {
-#ifdef ALLOW_RECONFIGURE
-	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->type_name);
-	/* FIXME: Probably wrong to zero the packet counter here */
-	session->packet.counter = 0;
-	if (session->enable_reconfigure
-		&& session->device_type->event_hook != NULL)
-	    session->device_type->event_hook(session, event_configure);
-#endif /* ALLOW_RECONFIGURE */
+    if (identified && strcmp(session->device_type->type_name, type_name) == 0)
 	return 0;
-    }
 
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
@@ -52,16 +43,9 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
-	    session->packet.counter = 0;
-	    if (!session->context->readonly && session->device_type->event_hook != NULL)
-		session->device_type->event_hook(session, event_probe_subtype);
-#ifdef ALLOW_RECONFIGURE
-	    if (session->enable_reconfigure
-			&& session->device_type->event_hook != NULL) {
-		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->type_name);
-		session->device_type->event_hook(session, event_configure);
-	    }
-#endif /* ALLOW_RECONFIGURE */
+	    /* reconfiguration might be required */
+	    if (identified && session->device_type->event_hook != NULL)
+		session->device_type->event_hook(session, event_driver_switch);
 	    return 1;
 	}
     gpsd_report(LOG_ERROR, "invalid GPS type \"%s\".\n", type_name);
@@ -296,21 +280,17 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	session->mag_var = NAN;
 	session->releasetime = 0;
 
-	/* clear driver subtype field and private data union */
-	session->subtype[0] = '\0';
+	/* clear the private data union */
 	memset(&session->driver, '\0', sizeof(session->driver));
-	session->packet.counter = 0;
-	/* if we know the device type, probe for subtype and configure it */
-	if (session->device_type != NULL) {
-	    if (!session->context->readonly && session->device_type->event_hook !=NULL)
-		session->device_type->event_hook(session, event_probe_subtype);
-#ifdef ALLOW_RECONFIGURE
-	    if (reconfigurable) {
-		if (session->device_type->event_hook != NULL)
-		    session->device_type->event_hook(session, event_configure);
-	    }
-#endif /* ALLOW_RECONFIGURE */
-	}
+	/*
+	 * We might know the device's type, but we shoudn't assume it has
+	 * retained its settings.  A revert hook might well have undone 
+	 * them on the previous close.  Fire a reactivate event so drivers 
+	 * can do something about this if they choose.
+	 */
+	if (session->device_type != NULL 
+	    	&& session->device_type->event_hook != NULL)
+	    session->device_type->event_hook(session, event_reactivate);
     }
 
     return session->gpsdata.gps_fd;
@@ -486,9 +466,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	++session->packet.counter;
-	if (session->packet.outbuflen>0 && !session->context->readonly && session->device_type->event_hook!=NULL)
-	    session->device_type->event_hook(session, event_probe_subtype);
+	gpsd_report(LOG_RAW,
+		    "%s is known to be %s\n",
+		    session->gpsdata.dev.path,
+		    session->device_type->type_name);
     } else {
 	const struct gps_type_t **dp;
 
@@ -511,8 +492,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(LOG_RAW+2, "GPS sent %zd new characters\n", newlen);
-    if (newlen == -1)	{		/* read error */
+    gpsd_report(LOG_RAW+2, "%s sent %zd new characters\n", 
+		session->gpsdata.dev.path, newlen);
+   if (newlen == -1)	{		/* read error */
 	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
 		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);
@@ -543,9 +525,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->gpsdata.raw_hook(&session->gpsdata,
 				      (char *)session->packet.outbuffer,
 				      (size_t)session->packet.outbuflen, 2);
-	/*@ -nullstate @*/
+
+	/* collect profiling data */
 	session->gpsdata.sentence_length = session->packet.outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
+
+	/* track the packet count since achieving sync on the device */
+	if (first_sync)
+	    session->packet.counter = 0;
+	else
+	    session->packet.counter++;
+
+	/* fire the configure hook */
+	if (session->device_type->event_hook != NULL)
+	    session->device_type->event_hook(session, event_configure);
 
 	/* 
 	 * If this is the first time we've achieved sync on this device, that's

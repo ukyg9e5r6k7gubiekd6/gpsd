@@ -486,17 +486,17 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 
 static void evermore_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && session->packet.counter == 0) {
-	gpsd_report(LOG_PROG, "evermore_event_hook\n");
+    /*
+     * FIXME: It might not be necessary to call this on reactivate.
+     * Experiment to see if the holds its settings through a close.
+     */
+    if (event == event_identified || event == event_reactivate) {
         if (session->packet.type == NMEA_PACKET) {
 	    (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd (GPGSV every 5s) */
-	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
-        }
+        } 
         (void) evermore_mode(session, 1); /* switch GPS to binary mode */
         session->back_to_nmea = true;
-    }
-    if (event == event_deactivate) {
-	gpsd_report(LOG_PROG, "evermore_revert\n");
+    } else if (event == event_deactivate) {
 	(void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
     }
 }

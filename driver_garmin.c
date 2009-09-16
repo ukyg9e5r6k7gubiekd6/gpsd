@@ -856,7 +856,11 @@ static bool garmin_detect(struct gps_device_t *session)
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_probe_subtype && session->packet.counter == 0) {
+    /*
+     * FIXME: It might not be necessary to call this on reactivate.
+     * Experiment to see if the holds its settings through a close.
+     */
+    if (event == event_identified || event == event_reactivate) {
 	// Tell the device to send product data
 	gpsd_report(LOG_PROG, "Get Garmin Product Data\n");
 	Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL

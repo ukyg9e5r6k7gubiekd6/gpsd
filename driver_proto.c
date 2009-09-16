@@ -301,10 +301,6 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 #ifdef ALLOW_RECONFIGURE
 static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
-    /*
-     * Remember that session->packet.counter is available when you write
-     * these hooks; session->packet.counter == 0 is often a useful condition.
-     */
     if (event == event_wakeup) {
        /*
 	* Code to make the device ready to communicate. This is
@@ -313,27 +309,45 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	* device is in some kind of sleeping state.
 	*/
     }
+    if (event == event_identified) {
+	/*
+	 * Fires when the first full packet is recognized from a
+	 * previously unidentified device.  The session packet counter
+	 * is zeroed.  If your device has a default cycle time other
+	 * than 1 second, set session->device->gpsdata.cycle here. If
+	 * possible, get the software version and store it in
+	 * session->subtype.
+	 */
+    }
     if (event == event_configure) {
 	/* 
 	 * Change sentence mix and set reporting modes as needed.
-	 * If your device has a default cycle time other than 1 second,
-	 * set session->device->gpsdata.cycle here.
+	 * Called immediately after event_identified fires, then just
+	 * after every packet received thereafter, but you probably
+	 * only want to take actions on the first few packets after
+	 * the session packet counter has been zeroed,
+	 *
+	 * Remember that session->packet.counter is available when you
+	 * write this hook; you can use this fact to interleave configuration
+	 * sends with the first few packet reads, which is useful for
+	 * devices with small receive buffers.
 	 */
-    } else if (event == event_probe_subtype) {
+    } else if (event == event_driver_switch) {
 	/*
-	 * Probe for subtypes here. If possible, get the software version and
-	 * store it in session->subtype.  The seq values don't actually mean 
-	 * anything, but conditionalizing probes on them gives the device 
-	 * time to respond to each one.
+	 * Fires when the driver on a device is changed *after* it
+	 * has been identified.
 	 */
     } else if (event == event_deactivate) {
 	/*
-	 * Reverse whatever was done art configure_event time.
+	 * Fires when the device is deactivated.  Usr this to revert
+	 * whatever was done at event_identify and event_configure
+	 * time.
 	 */
-    } else if (event == event_wrapup) {
+    } else if (event == event_reactivate) {
        /*
-	* Do release actions that are independent of whether the
-	* event_configure hook ran or not.
+	* Fires when a device is reactivated after having been closed.  
+	* Use this hook for re-establishing device settings that
+	* it doesn't hold through closes.
 	*/
     }
 }

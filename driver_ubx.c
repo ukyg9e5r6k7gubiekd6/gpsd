@@ -571,7 +571,7 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t 
 #ifdef ALLOW_RECONFIGURE
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && session->packet.counter == 0) {
+    if (event == event_identified && event == event_reactivate) {
 	unsigned char msg[32];
 
 	gpsd_report(LOG_IO, "UBX configure: %d\n", session->packet.counter);
