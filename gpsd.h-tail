@@ -44,18 +44,18 @@ struct gps_packet_t {
 #define BAD_PACKET      	-1
 #define COMMENT_PACKET  	0
 #define NMEA_PACKET     	1
-#define GARMINTXT_PACKET	2
-#define MAX_TEXTUAL_TYPE	2	/* increment this as necessary */
-#define SIRF_PACKET     	3
-#define ZODIAC_PACKET   	4
-#define TSIP_PACKET     	5
-#define EVERMORE_PACKET 	6
-#define ITALK_PACKET    	7
-#define GARMIN_PACKET   	8
-#define NAVCOM_PACKET   	9
-#define UBX_PACKET      	10
-#define SUPERSTAR2_PACKET	11
-#define AIVDM_PACKET    	12
+#define AIVDM_PACKET    	2
+#define GARMINTXT_PACKET	3
+#define MAX_TEXTUAL_TYPE	3	/* increment this as necessary */
+#define SIRF_PACKET     	4
+#define ZODIAC_PACKET   	5
+#define TSIP_PACKET     	6
+#define EVERMORE_PACKET 	7
+#define ITALK_PACKET    	8
+#define GARMIN_PACKET   	9
+#define NAVCOM_PACKET   	10
+#define UBX_PACKET      	11
+#define SUPERSTAR2_PACKET	12
 #define ONCORE_PACKET   	13
 #define MAX_PACKET_TYPE		13	/* increment this as necessary */
 #define RTCM2_PACKET    	14
