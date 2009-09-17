@@ -1744,6 +1744,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		if (!privileged_channel(channel))
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
+		else if (channel->device == NULL)
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+				   "{\"class\":\"ERROR\",\"message\":\"Channel has no device (possible internal error).\"}\r\n");
+		else if (channel->device->device_type == NULL)
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n", channel->device->gpsdata.dev.path);
 		else {
 		    char serialmode[3];
 		    const struct gps_type_t *dt = channel->device->device_type;
