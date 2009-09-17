@@ -62,6 +62,7 @@ struct gps_packet_t {
 #define RTCM3_PACKET    	15
 #define TEXTUAL_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_TEXTUAL_TYPE))
 #define GPS_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_PACKET_TYPE))
+#define LOSSLESS_PACKET_TYPE(n)	(((n)>=RTCM2_PACKET) && ((n)<=RTCM3_PACKET))
 #define PACKET_TYPEMASK(n)	(1 << (n))
 #define GPS_TYPEMASK	(((2<<(MAX_PACKET_TYPE+1))-1) &~ PACKET_TYPEMASK(COMMENT_PACKET))
     unsigned int state;

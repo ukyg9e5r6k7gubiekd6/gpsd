@@ -2210,16 +2210,23 @@ int main(int argc, char *argv[])
 			    (void)throttled_write(channel->subscriber, 
 						  (char *)device->packet.outbuffer, 
 						  device->packet.outbuflen);
+			} else if (LOSSLESS_PACKET_TYPE(device->packet.type)) {
+			    /*
+			     * Some binary packet types never
+			     * get dumped, at raw level 1 because
+			     * they don't need to be. For RTCM2
+			     * and RTCM3, our report sentences
+			     * correspond 1-1 with the raw data
+			     * and are lossless.
+			     */
+			    continue;
 			} else {
 			    char buf2[MAX_PACKET_LENGTH*3+2];
 
 			    buf2[0] = '\0';
 
 #ifdef BINARY_ENABLE
-#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
-			    if ((device->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
-#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
-				gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
+			    gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
 			    if (buf2[0] != '\0') {
 				gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
