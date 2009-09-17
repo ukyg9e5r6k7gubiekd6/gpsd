@@ -1618,8 +1618,12 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 		  "{\"class\":\"DEVICES\",\"devices\":[", replylen);
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (allocated_device(devp) && strlen(reply)+strlen(devp->gpsdata.dev.path)+3 < replylen-1) {
+	    char *cp;
 	    json_device_dump(devp,
 			     reply+strlen(reply), replylen-strlen(reply));
+	    cp = reply + strlen(reply);
+	    *--cp = '\0';
+	    *--cp = '\0';
 	    (void)strlcat(reply, ",", replylen);
 	}
 
