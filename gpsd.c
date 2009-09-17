@@ -2191,33 +2191,33 @@ int main(int argc, char *argv[])
 
 		/* raw hook and relaying functions */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-		    if (channel->subscriber != NULL && channel->subscriber->policy.raw > 0)
-		    {
-			/* 
-			 * NMEA and other textual sentences are simply copied
-			 * to all clients in raw mode.
-			 */
-			if (channel->subscriber != NULL && channel->device != NULL &&
-			    strcmp(device->gpsdata.dev.path, channel->device->gpsdata.dev.path)==0) {
-			    if (TEXTUAL_PACKET_TYPE(device->packet.type)) {
-				(void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
-			    } else {
-				char buf2[MAX_PACKET_LENGTH*3+2];
+		    if (channel->subscriber != NULL 
+			&& channel->subscriber->policy.raw > 0
+			&& channel->device != NULL &&
+			strcmp(device->gpsdata.dev.path, channel->device->gpsdata.dev.path)==0) {
+			if (TEXTUAL_PACKET_TYPE(device->packet.type)) {
+			    /* 
+			     * NMEA and other textual sentences
+			     * are simply copied to all clients in
+			     * raw mode.
+			     */
+			    (void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
+			} else {
+			    char buf2[MAX_PACKET_LENGTH*3+2];
 
-				buf2[0] = '\0';
+			    buf2[0] = '\0';
 
-				/* Some kinds of data is automatically passed through */
+			    /* Some kinds of data is automatically passed through */
 #ifdef BINARY_ENABLE
 #if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
-				if ((device->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
+			    if ((device->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
 #endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
-				    gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
+				gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
-				if (buf2[0] != '\0') {
-				    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-						device->gpsdata.dev.path, buf2);
-				    (void)throttled_write(channel->subscriber, buf2, strlen(buf2));
-				}
+			    if (buf2[0] != '\0') {
+				gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
+					    device->gpsdata.dev.path, buf2);
+				(void)throttled_write(channel->subscriber, buf2, strlen(buf2));
 			    }
 			}
 		    }
