@@ -85,6 +85,11 @@ void gpsd_set_speed(struct gps_device_t *session,
 {
     speed_t	rate;
 
+    /*
+     * Yes, you can set speeds that aren't in the hunt loop.  If you
+     * do this, and you aren't on Linux where boad rate is preserved
+     * across port closings, you've screwed yourself. Don't do that!
+     */
     if (speed < 300)
 	rate = B0;
     else if (speed < 1200)
@@ -110,7 +115,13 @@ void gpsd_set_speed(struct gps_device_t *session,
 
 	/* 
 	 * Don't mess with this conditional! Speed zero is supposed to mean
-	 * to leave the port speed at whatever it currently is.
+	 * to leave the port speed at whatever it currently is. This leads
+	 * to excellent behavior on Linux, which preserves baudrate across
+	 * serial device closes - it means that if you've opended this 
+	 * device before you typically don't have to hunt at all because
+	 * it's still at the same speed you left it - you'll typically
+	 * get packet lock within 1.5 seconds.  Alas, the BSDs and OS X
+	 * aren't so nice.
 	 */
 	/*@ignore@*/
 	if (rate != B0) {
