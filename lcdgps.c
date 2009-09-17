@@ -259,8 +259,7 @@ static enum deg_str_type deg_type = deg_dd;
 /* This gets called once for each new sentence. */
 static void update_lcd(struct gps_data_t *gpsdata,
                        char *message UNUSED,
-                       size_t len UNUSED,
-                       int level UNUSED)
+                       size_t len UNUSED)
 {
   char tmpbuf[255];
 #ifdef CLIMB

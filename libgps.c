@@ -59,7 +59,7 @@ int gps_close(struct gps_data_t *gpsdata)
 }
 
 void gps_set_raw_hook(struct gps_data_t *gpsdata,
-		      void (*hook)(struct gps_data_t *, char *, size_t len, int level))
+		      void (*hook)(struct gps_data_t *, char *, size_t len))
 {
     gpsdata->raw_hook = hook;
 }
@@ -438,9 +438,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 /*@ -compdef @*/
     if (gpsdata->raw_hook)
-	gpsdata->raw_hook(gpsdata, buf, strlen(buf),  1);
+	gpsdata->raw_hook(gpsdata, buf, strlen(buf));
     if (gpsdata->thread_hook)
-	gpsdata->thread_hook(gpsdata, buf, strlen(buf), 1);
+	gpsdata->thread_hook(gpsdata, buf, strlen(buf));
 
     return 0;
 }
@@ -556,7 +556,7 @@ static /*@null@*/void *poll_gpsd(void *args)
 }
 
 int gps_set_callback(struct gps_data_t *gpsdata,
-		     void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level),
+		     void (*callback)(struct gps_data_t *sentence, char *buf, size_t len),
 		     pthread_t *handler)
 /* set an asynchronous callback and launch a thread for it */
 {
@@ -651,8 +651,8 @@ static void data_dump(struct gps_data_t *collect, time_t now)
 
 }
 
-static void dumpline(struct gps_data_t *ud UNUSED, char *buf,
-		     size_t ulen UNUSED, int level UNUSED)
+static void dumpline(struct gps_data_t *ud UNUSED, 
+		     char *buf, size_t ulen UNUSED)
 {
     puts(buf);
 }

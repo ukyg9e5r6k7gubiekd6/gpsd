@@ -600,14 +600,13 @@ static void deactivate_device(struct gps_device_t *device)
     }
 }
 
-static void raw_hook(struct gps_data_t *ud,
-		     char *sentence, size_t len, int level)
+static void internal_raw_hook(struct gps_data_t *ud, char *sentence, size_t len)
 /* hook to be executed on each incoming packet */
 {
     struct channel_t *channel; 
 
     for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-	if (channel->subscriber != NULL && channel->subscriber->policy.raw == level)
+	if (channel->subscriber != NULL)
 	{
 	    struct subscriber_t *sub = channel->subscriber;
 
@@ -617,6 +616,33 @@ static void raw_hook(struct gps_data_t *ud,
 		(void)throttled_write(sub, sentence, len);
 	    
 	}
+}
+
+static void raw_hook(struct gps_device_t *session, char *data, size_t len)
+{
+    /* also copy the sentence up to clients in raw mode */
+    if (session->packet.type == NMEA_PACKET) {
+	internal_raw_hook(&session->gpsdata, data, len);
+    } else {
+	char buf2[MAX_PACKET_LENGTH*3+2];
+
+	buf2[0] = '\0';
+
+	/* Some kinds of data is automatically passed through */
+#ifdef BINARY_ENABLE
+#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
+	if ((session->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
+#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
+	    gpsd_pseudonmea_dump(session, buf2, sizeof(buf2));
+#endif /* BINARY_ENABLE */
+	if (buf2[0] != '\0') {
+	    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
+			session->gpsdata.dev.path, buf2);
+	    internal_raw_hook(&session->gpsdata, buf2, strlen(buf2));
+	}
+    }
+    if (session->gpsdata.fix.mode == MODE_3D)
+	netgnss_report(session);
 }
 
 /*@ -globstate @*/
@@ -655,7 +681,6 @@ static bool open_device(char *device_name)
     return false;
 found:
     gpsd_init(devp, &context, device_name);
-    devp->gpsdata.raw_hook = raw_hook;
 #ifdef OLDSTYLE_ENABLE
     /*
      * Bring the device all the way so we'll sniff packets from it and
@@ -689,7 +714,6 @@ static bool add_device(char *device_name)
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (!allocated_device(devp)) {
 		gpsd_init(devp, &context, device_name);
-		devp->gpsdata.raw_hook = raw_hook;
 		gpsd_report(LOG_INF,"stashing device %s at slot %d\n",
 			    device_name, 
 			    (int)(devp - devices));
@@ -2209,6 +2233,9 @@ int main(int argc, char *argv[])
 	    {
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
+		raw_hook(device,
+			 (char *)device->packet.outbuffer,
+			 (size_t)device->packet.outbuflen);
 		if (changed == ERROR_SET) {
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);

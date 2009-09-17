@@ -174,7 +174,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     char *bufp2 = bufp;
     bool used_valid = (session->gpsdata.set & USED_SET)!= 0;
 
-    if ((session->gpsdata.set & MODE_SET) != 0) {
+    if (session->device_type!=NULL && (session->gpsdata.set & MODE_SET) != 0) {
 	(void)snprintf(bufp, len-strlen(bufp),
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
@@ -226,7 +226,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 #undef ZEROIZE
 }
 
-void gpsd_binary_dump(struct gps_device_t *session,
+void gpsd_pseudonmea_dump(struct gps_device_t *session,
 			      char bufp[], size_t len)
 /* the only entry point - dump a device state in pseudo-NMEA */
 {

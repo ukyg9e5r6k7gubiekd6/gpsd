@@ -871,8 +871,7 @@ handle_input(XtPointer client_data UNUSED, int *source UNUSED, XtInputId *id UNU
 
 /* runs on each sentence */
 static void
-update_panel(struct gps_data_t *gpsdata, char *message,
-	size_t len UNUSED, int level UNUSED)
+update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 {
 	unsigned int i;
 	int newstate;

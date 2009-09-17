@@ -81,6 +81,9 @@ unusual configuration commands. Here are the exceptions:
   fail.  Later in this document you will learn how to fix these
   problems.
 
+* You set a per-packet raw hook.  This feature was documented
+  incorrectly.  It no longer takes a level argument.
+
 You can probably ignore the rest of this document, unless
 either (a) you want to learn about gpsd's new capabilities so you
 can use them in creative ways, or (b) you want to caper with unholy glee 
@@ -198,11 +201,11 @@ data by command. After each request, they would need to wait until a
 response came back.  Then, watcher mode was added.  By saying "w+",
 you could ask gpsd to stream GPS reports at you whenever it got them.
 
-In the new protocol, streaming is almost all there is.  Every
-report coming up from the daemon is tagged with its device and type.
-Instead of issuing commands and then ewaiting for specific responses, 
-clients should expect any kind of report at any time and merge it
-into client-local storage (libgps does this for you).
+In the new protocol, streaming is all there is.  Every report coming
+up from the daemon is tagged with its device and type.  Instead of
+issuing commands and then ewaiting for specific responses, clients
+should expect any kind of report at any time and merge it into
+client-local storage (libgps does this for you).
 
 This change is necessary to cope with devices that may send (for
 example) mixed GPS and AIS data. In the future, the stream from
@@ -244,7 +247,7 @@ The old 'L' command is replaced by ?VERSION.  Note that the daemon now
 ships a version response to each client on connect, so it will
 probably never be necessary for you to issue a ?VERSION request.
 
-The old 'M' command has no equivalent.  Mode is reported in the TVP response.
+The old 'M' command has no equivalent.  Mode is reported in the TPV response.
 
 The old 'O' and 'Y' commands are gone.  Use ?WATCH and sample the
 stream instead.
@@ -294,3 +297,6 @@ Data in this structure should be considered valid only when
 DEVICELIST_SET is on in the top-level set member.  Storage for
 pathnames is no longer dynamically allocated, but static; to save
 space, it lives in a union with several other substructures.
+
+The signature of the raw_hook member has changed.  It no longer takes
+the final 'leve' argument, which libgps had always set to 1.

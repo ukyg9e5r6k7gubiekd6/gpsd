@@ -520,11 +520,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
 			    session->gpsdata.dev.path);
-	/*@ -nullstate @*/
-	if (session->gpsdata.raw_hook)
-	    session->gpsdata.raw_hook(&session->gpsdata,
-				      (char *)session->packet.outbuffer,
-				      (size_t)session->packet.outbuflen, 2);
 
 	/* collect profiling data */
 	session->gpsdata.sentence_length = session->packet.outbuflen;
@@ -582,37 +577,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->context->fixcnt++;
 
 	session->gpsdata.d_decode_time = timestamp();
-
-	/* also copy the sentence up to clients in raw mode */
-	if (session->packet.type == NMEA_PACKET) {
-	    if (session->gpsdata.raw_hook)
-		session->gpsdata.raw_hook(&session->gpsdata,
-					  (char *)session->packet.outbuffer,
-					  strlen((char *)session->packet.outbuffer),
-					  1);
-	} else {
-	    char buf2[MAX_PACKET_LENGTH*3+2];
-
-	    buf2[0] = '\0';
-
-	    /* Some kinds of data is automatically passed through */
-#ifdef BINARY_ENABLE
-#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
-	    if ((session->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
-#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
-		gpsd_binary_dump(session, buf2, sizeof(buf2));
-#endif /* BINARY_ENABLE */
-	    if (buf2[0] != '\0') {
-		gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-			    session->gpsdata.dev.path, buf2);
-		if (session->gpsdata.raw_hook)
-		    session->gpsdata.raw_hook(&session->gpsdata,
-					      buf2, strlen(buf2), 1);
-	    }
-	}
-
-	if (session->gpsdata.fix.mode == MODE_3D)
-	    netgnss_report(session);
 
 	return session->gpsdata.set;
     }

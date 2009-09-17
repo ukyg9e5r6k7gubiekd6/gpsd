@@ -266,7 +266,7 @@ static int dbus_mainloop(void)
 struct fixsource_t source;
 
 static void process(struct gps_data_t *gpsdata,
-	     char *buf UNUSED, size_t len UNUSED, int level UNUSED)
+	     char *buf UNUSED, size_t len UNUSED)
 {
     /* this is where we implement source-device filtering */
     if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)

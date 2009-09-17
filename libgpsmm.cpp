@@ -53,7 +53,7 @@ struct gps_data_t* gpsmm::poll(void) {
 	}
 }
 
-int gpsmm::set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level)) {
+int gpsmm::set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, size_t len)) {
 	handler = new pthread_t;
 	return gps_set_callback(gps_data,hook,handler);
 }

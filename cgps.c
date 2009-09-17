@@ -222,8 +222,7 @@ static enum deg_str_type deg_type = deg_dd;
    update_compass_panel(). */
 static void update_probe(struct gps_data_t *gpsdata,
 		       char *message,
-		       size_t len UNUSED ,
-		       int level UNUSED)
+		       size_t len UNUSED)
 {
   /* Send an 'i' once per second until we figure out what the GPS
      device is. */
@@ -401,8 +400,7 @@ static void windowsetup(void){
 /* This gets called once for each new compass sentence. */
 static void update_compass_panel(struct gps_data_t *gpsdata,
 			char *message,
-			size_t len UNUSED ,
-			int level UNUSED)
+			size_t len UNUSED)
 {
   char scr[128];
   /* Print time/date. */
@@ -462,8 +460,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 /* This gets called once for each new GPS sentence. */
 static void update_gps_panel(struct gps_data_t *gpsdata,
 			char *message,
-			size_t len UNUSED ,
-			int level UNUSED)
+			size_t len UNUSED)
 {
   int i,n;
   int newstate;
