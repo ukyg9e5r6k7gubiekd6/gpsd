@@ -2202,12 +2202,19 @@ int main(int argc, char *argv[])
 			     * raw mode.
 			     */
 			    (void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
+			} else if (channel->subscriber->policy.raw > 1) {
+			    /*
+			     * Also, simply copy if user has
+			     * specified super-raw mode.
+			     */
+			    (void)throttled_write(channel->subscriber, 
+						  (char *)device->packet.outbuffer, 
+						  device->packet.outbuflen);
 			} else {
 			    char buf2[MAX_PACKET_LENGTH*3+2];
 
 			    buf2[0] = '\0';
 
-			    /* Some kinds of data is automatically passed through */
 #ifdef BINARY_ENABLE
 #if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
 			    if ((device->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
