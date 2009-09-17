@@ -2193,15 +2193,14 @@ int main(int argc, char *argv[])
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) 
 		    if (channel->subscriber != NULL && channel->subscriber->policy.raw > 0)
 		    {
-			sub = channel->subscriber;
-
-			/* copy raw NMEA sentences from GPS to clients in raw mode */
-			if (sub != NULL && channel->device != NULL &&
+			/* 
+			 * NMEA and other textual sentences are simply copied
+			 * to all clients in raw mode.
+			 */
+			if (channel->subscriber != NULL && channel->device != NULL &&
 			    strcmp(device->gpsdata.dev.path, channel->device->gpsdata.dev.path)==0) {
-
-			    /* also copy the sentence up to clients in raw mode */
-			    if (device->packet.type == NMEA_PACKET) {
-				(void)throttled_write(sub, (char *)device->packet.outbuffer, device->packet.outbuflen);
+			    if (TEXTUAL_PACKET_TYPE(device->packet.type)) {
+				(void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
 			    } else {
 				char buf2[MAX_PACKET_LENGTH*3+2];
 
@@ -2217,7 +2216,7 @@ int main(int argc, char *argv[])
 				if (buf2[0] != '\0') {
 				    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
 						device->gpsdata.dev.path, buf2);
-				    (void)throttled_write(sub, buf2, strlen(buf2));
+				    (void)throttled_write(channel->subscriber, buf2, strlen(buf2));
 				}
 			    }
 			}
