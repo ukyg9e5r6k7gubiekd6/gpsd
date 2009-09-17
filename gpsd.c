@@ -606,7 +606,7 @@ static void internal_raw_hook(struct gps_data_t *ud, char *sentence, size_t len)
     struct channel_t *channel; 
 
     for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-	if (channel->subscriber != NULL)
+	if (channel->subscriber != NULL && channel->subscriber->policy.raw > 0)
 	{
 	    struct subscriber_t *sub = channel->subscriber;
 
