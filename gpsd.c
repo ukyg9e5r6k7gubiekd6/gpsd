@@ -600,51 +600,6 @@ static void deactivate_device(struct gps_device_t *device)
     }
 }
 
-static void internal_raw_hook(struct gps_data_t *ud, char *sentence, size_t len)
-/* hook to be executed on each incoming packet */
-{
-    struct channel_t *channel; 
-
-    for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-	if (channel->subscriber != NULL && channel->subscriber->policy.raw > 0)
-	{
-	    struct subscriber_t *sub = channel->subscriber;
-
-	    /* copy raw NMEA sentences from GPS to clients in raw mode */
-	    if (sub != NULL && channel->device != NULL &&
-		strcmp(ud->dev.path, channel->device->gpsdata.dev.path)==0)
-		(void)throttled_write(sub, sentence, len);
-	    
-	}
-}
-
-static void raw_hook(struct gps_device_t *session, char *data, size_t len)
-{
-    /* also copy the sentence up to clients in raw mode */
-    if (session->packet.type == NMEA_PACKET) {
-	internal_raw_hook(&session->gpsdata, data, len);
-    } else {
-	char buf2[MAX_PACKET_LENGTH*3+2];
-
-	buf2[0] = '\0';
-
-	/* Some kinds of data is automatically passed through */
-#ifdef BINARY_ENABLE
-#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
-	if ((session->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
-#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
-	    gpsd_pseudonmea_dump(session, buf2, sizeof(buf2));
-#endif /* BINARY_ENABLE */
-	if (buf2[0] != '\0') {
-	    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-			session->gpsdata.dev.path, buf2);
-	    internal_raw_hook(&session->gpsdata, buf2, strlen(buf2));
-	}
-    }
-    if (session->gpsdata.fix.mode == MODE_3D)
-	netgnss_report(session);
-}
-
 /*@ -globstate @*/
 /*@null@*/ /*@observer@*/static struct gps_device_t *find_device(char *device_name)
 /* find the device block for an existing device name */
@@ -2233,9 +2188,44 @@ int main(int argc, char *argv[])
 	    {
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
-		raw_hook(device,
-			 (char *)device->packet.outbuffer,
-			 (size_t)device->packet.outbuflen);
+
+		/* raw hook and relaying functions */
+		for (channel = channels; channel < channels + NITEMS(channels); channel++) 
+		    if (channel->subscriber != NULL && channel->subscriber->policy.raw > 0)
+		    {
+			sub = channel->subscriber;
+
+			/* copy raw NMEA sentences from GPS to clients in raw mode */
+			if (sub != NULL && channel->device != NULL &&
+			    strcmp(device->gpsdata.dev.path, channel->device->gpsdata.dev.path)==0) {
+
+			    /* also copy the sentence up to clients in raw mode */
+			    if (device->packet.type == NMEA_PACKET) {
+				(void)throttled_write(sub, (char *)device->packet.outbuffer, device->packet.outbuflen);
+			    } else {
+				char buf2[MAX_PACKET_LENGTH*3+2];
+
+				buf2[0] = '\0';
+
+				/* Some kinds of data is automatically passed through */
+#ifdef BINARY_ENABLE
+#if defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE)
+				if ((device->gpsdata.set & (RTCM2_SET | RTCM3_SET)) == 0)
+#endif /* defined(RTCM104V2_ENABLE) || defined(RTCM104V3_ENABLE) */
+				    gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
+#endif /* BINARY_ENABLE */
+				if (buf2[0] != '\0') {
+				    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
+						device->gpsdata.dev.path, buf2);
+				    (void)throttled_write(sub, buf2, strlen(buf2));
+				}
+			    }
+			}
+		    }
+
+		if (device->gpsdata.fix.mode == MODE_3D)
+		    netgnss_report(device);
+
 		if (changed == ERROR_SET) {
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
@@ -2252,7 +2242,7 @@ int main(int argc, char *argv[])
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
 			    if (sub->policy.watcher && newstyle(sub))
 				(void)assign_channel(sub, ANY, device);
-			    }
+		    }
 		    /* handle laggy response to a firmware version query */
 		    if ((changed & DEVICEID_SET) != 0) {
 			assert(device->device_type != NULL);
