@@ -74,8 +74,8 @@ case $mode in
         for f in $*; do
             dir=`dirname $f`
             gpsfake -s 38400 -1 -b -p -r '{"class":"WATCH","enable":False,"raw":2}' $opts ${f} \
-            | ./striplog -1 >$dir/test1.chk;
-            ./striplog <$${f} >$dir/test2.chk;
+            | ./devtools/striplog -1 >$dir/test1.chk;
+            ./devtools/striplog <${f} >$dir/test2.chk;
             cmp $dir/test[12].chk;
         done; rm $dir/test[12].chk
         ;;
