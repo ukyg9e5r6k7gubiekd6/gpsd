@@ -234,8 +234,8 @@ static int json_version_read(const char *buf,
 	                       .len = sizeof(gpsdata->version.release)},
 	{"rev",       string,  .addr.string  = gpsdata->version.rev,
 	                       .len = sizeof(gpsdata->version.rev)},
-	{"api_major", integer, .addr.integer = &gpsdata->version.api_major},
-	{"api_minor", integer, .addr.integer = &gpsdata->version.api_minor},
+	{"proto_major", integer, .addr.integer = &gpsdata->version.proto_major},
+	{"proto_minor", integer, .addr.integer = &gpsdata->version.proto_minor},
 	{NULL},
     };
     /*@ +fullinitblock @*/

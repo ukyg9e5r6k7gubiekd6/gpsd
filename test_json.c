@@ -183,7 +183,7 @@ static const struct json_attr_t json_attrs_6[] = {
 
 static const char *json_str7 = "{\"class\":\"VERSION\",\
            \"release\":\"2.40dev\",\"rev\":\"dummy-revision\",\
-           \"api_major\":3,\"api_minor\":1}";
+           \"proto_major\":3,\"proto_minor\":1}";
 
 /* Case 8: test parsing arrays of enumerated types */
 
@@ -275,8 +275,8 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_case(7, status);
     assert_string("release", gpsdata.version.release, "2.40dev");
     assert_string("rev", gpsdata.version.rev, "dummy-revision");
-    assert_integer("api_major", gpsdata.version.api_major, 3);
-    assert_integer("api_minor", gpsdata.version.api_minor, 1);
+    assert_integer("proto_major", gpsdata.version.proto_major, GPSD_PROTO_MAJOR_VERSION);
+    assert_integer("proto_minor", gpsdata.version.proto_minor, GPSD_PROTO_MINOR_VERSION);
 
     status = json_read_object(json_str8, json_attrs_8, NULL);
     assert_case(8, status);

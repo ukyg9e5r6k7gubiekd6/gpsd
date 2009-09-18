@@ -30,7 +30,7 @@ extern "C" {
 /*
  * Unless otherwise noted, all function signatures and types and
  * constants and structure layouts exposed here are correct for all
- * versions up to and including this one.
+ * 3.x versions up to and including this one.
  */
 #define GPSD_API_MAJOR_VERSION	3	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -828,7 +828,7 @@ struct rawdata_t {
 struct version_t {
     char release[64];		/* external version */
     char rev[64];		/* internal revision ID */
-    int api_major, api_minor;	/* API major and minor versions */
+    int proto_major, proto_minor;	/* API major and minor versions */
 };
 
 struct devconfig_t {
