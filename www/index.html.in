@@ -3,7 +3,7 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="Author" content="Remco Treffkorn">
-   <meta name="Description" content="gpsd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
+   <meta name="Description" content="gpsd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format.">
    <meta name="Keywords" content="GPS, translator, GIS">
    <!-- the following is a verification tag for Google Analytics -->
    <meta name="verify-v1" content="kb4f3qxJPMaOltYTpJHnvbnteza1PHO4EhrRIfcq2gk=" />
@@ -35,6 +35,7 @@
     <a href="references.html">References</a><br/>
     <a href="compatibility">Application Compatibility</a>
     <a href="history.html">History</a><br/>
+    <a href="future.html">Future</a><br/>
 
     <div>&nbsp;</div>
 

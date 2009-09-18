@@ -1045,15 +1045,14 @@ yet, only the "class" field will reliably be present.</para>
 
 <para>Many devices compute dilution of precision factors but do nit
 include them in their reports.  Many that do report DOPs report only
-<structfieldname>hdop</structfieldname>, two-dimensial circular
-error. <application>gpsd</application> always passes through whatever
-the device actually reports, then attempts to fill in other DOPs by
-calculating the appropriate determinants in a covariance matrix based
-on the satellite view. DOPs may be missing if some of these
-determinants are singular. It can even happen that the device reports
-an error estimate in meters when the correspoding DOP is unavailable;
-some devices use more sophisticated error modeling than the
-covariance calculation.</para>
+HDOP, two-dimensial circular error. <application>gpsd</application>
+always passes through whatever the device actually reports, then
+attempts to fill in other DOPs by calculating the appropriate
+determinants in a covariance matrix based on the satellite view. DOPs
+may be missing if some of these determinants are singular. It can even
+happen that the device reports an error estimate in meters when the
+correspoding DOP is unavailable; some devices use more sophisticated
+error modeling than the covariance calculation.</para>
 
 <para>The satellite list objects have the following elements:</para>
 

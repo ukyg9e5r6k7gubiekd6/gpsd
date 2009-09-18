@@ -1,0 +1,113 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Remco Treffkorn">
+   <meta name="Description" content="GPSd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <link rel="stylesheet" href="main.css" type="text/css"/>
+   <title>Future of the GPSD project</title>
+</head>
+<body>
+
+<div id="Header">
+Future of the GPS project
+</div>
+
+<div id="Menu">
+    <img src="gpsd-logo-small.png"/><br />
+    <a href="index.html">Home</a><br/>
+    <a href="index.html#news">News</a><br/>
+    <a href="index.html#downloads">Downloads</a><br/>
+    <a href="index.html#mailing-lists">Mailing lists</a><br/>
+    <a href="index.html#documentation">Documentation</a><br/>
+    <a href="faq.html">FAQ</a><br/>
+    <a href="xgps-sample.html">Screenshots</a><br/>
+    <a href="index.html#recipes">Recipes</a><br/>
+    <a href="index.html#others">Other GPSDs</a><br/>
+    <a href="hardware.html">Hardware</a><br/>
+    <a href="for-vendors.html">For GPS Vendors</a><br/>
+    <a href="wishlist.html">Wish List</a><br/>
+    <a href="hall-of-shame.html">Hall of Shame</a><br/>
+    <a href="hacking.html">Hacker's Guide</a><br/>
+    <a href="references.html">References</a><br/>
+    <a href="compatibility">Application Compatibility</a>
+    <a href="history.html">History</a><br/>
+    History<br/>
+
+    <div>&nbsp;</div>
+
+    <a href='http://www.catb.org/hacker-emblem/'><img
+    src='http://www.catb.org/hacker-emblem/glider.png'
+    alt='hacker emblem' /></a><br />
+
+    <hr/>
+    <script type="text/javascript"><!--
+    google_ad_client = "pub-1458586455084261";
+    google_ad_width = 160;
+    google_ad_height = 600;
+    google_ad_format = "160x600_as";
+    google_ad_type = "text";
+    google_ad_channel = "";
+    //--></script>
+    <script type="text/javascript"
+      src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+    <hr/>
+
+    <a href="http://validator.w3.org/check/referer"><img
+          src="http://www.w3.org/Icons/valid-xhtml10"
+          alt="Valid XHTML 1.0!" height="31" width="88" /></a>
+</div>
+<div id="Content">
+<p>This page is our roadmp for future features and releases.</p>
+
+<h2>The new GPSD protocol</h2>
+
+<p>As of mid-September 2009, we are wrapping up a three-month siege of
+intense work on a top-to-bottom redesign of GPSD's wire protocol.
+While this brings many benefits (including, immediately, the ability
+to interpret and report on the output of marine AIS receivers) it
+poses some significant deployment challenges as well.</p>
+
+<p>Over the next few releases we're going to be preoccupied with 
+<a href="protocol-transition.html">managing the transition to the
+new protocol.</a>. Here is our tentative release schedule:</p>
+
+<dl>
+<dt>2.40 &mdash; Before end of September</dt>
+<dd><p>New client API freezes. Wire protocol still considered unstable.</p></dd>
+
+<dt>2.41 &mdash; Before end of 2009</dt>
+<dd><p>Wire protocol freezes (no incompatible changes going forward from
+this point). Old protocol support will be removed from the daemon, but
+not from the library.</p></dd>
+
+<dt>2.42 &mdash; Jan-Feb 2010</dt>
+<dd><p>Cleanup release, if needed.</p></dd>
+
+<dt>3.0  &mdash; Some time in the first quarter of 2010</dt>
+<dd><p>Old protocol support will be removed from the library.</p></dd>
+</dl>
+
+<h2>Changing hosting sites</h2>
+
+<p>We're presently (September 2009) hosted at <a
+href="http://developer.berlios.de">berlios.de</a>, but find that it
+has become extremely flaky of late (logins failing due to broken SSL
+certs is the most recent symptom).  We plan to change sites before
+2009 is over, probably to Googlecode where one of our developers has
+face-to-face access to the administrators.</p>
+
+<h2>Changing version-control systems</h2>
+
+<p>Sometime after we move house, we'll change version-control systems
+as well.  Subversion has seved us well for five years, but we want to
+move to a 3G system to make off-net development easier.  No decision
+has been matde yet, but the top candidates are Mercurial and git.</p>
+
+</div>
+<hr/>
+<script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+</body>
+</html>
