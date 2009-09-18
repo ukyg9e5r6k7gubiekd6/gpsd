@@ -102,11 +102,10 @@ void gpsd_deactivate(struct gps_device_t *session)
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 #ifdef ALLOW_RECONFIGURE
-    if (session->enable_reconfigure
+    if (!session->context->readonly
 	&& session->device_type != NULL
 	&& session->device_type->event_hook != NULL) {
 	session->device_type->event_hook(session, event_deactivate);
-	session->enable_reconfigure = false;
     }
     if (session->device_type!=NULL) {
 	if (session->back_to_nmea && session->device_type->mode_switcher!=NULL)
@@ -239,7 +238,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 #endif /* PPS_ENABLE */
 
 /*@ -branchstate @*/
-int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
+int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
     if (gpsd_open(session) < 0)
@@ -261,9 +260,6 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
     foundit:
-#ifdef ALLOW_RECONFIGURE
-	session->enable_reconfigure = reconfigurable;
-#endif /* ALLOW_RECONFIGURE */
 #endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
@@ -271,7 +267,9 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 #endif /* SIRF_ENABLE */
 	session->packet.char_counter = 0;
 	session->packet.retry_counter = 0;
-	gpsd_report(LOG_INF, "gpsd_activate(%d): opened GPS (fd %d)\n", reconfigurable, session->gpsdata.gps_fd);
+	gpsd_report(LOG_INF, 
+		    "gpsd_activate(): opened GPS (fd %d)\n", 
+		    session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;

@@ -637,23 +637,8 @@ static bool open_device(char *device_name)
     return false;
 found:
     gpsd_init(devp, &context, device_name);
-#ifdef OLDSTYLE_ENABLE
-    /*
-     * Bring the device all the way so we'll sniff packets from it and
-     * discover up front what its device class is (e.g GPS, RTCM[23], AIS).
-     * Otherwise clients trying to bind to a specific type won't know
-     * what source types are actually available.
-     */
-    if (gpsd_activate(devp, true) < 0)
+    if (gpsd_activate(devp) < 0)
 	return false;
-#else
-    /*
-     * If we're running new protocol only there's no 'g' command
-     * and thus we don't need to know device classes in advance.
-     */
-    if (gpsd_activate(devp, false) < 0)
-	return false;
-#endif /* OLDSTYLE_ENABLE */
     FD_SET(devp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(devp->gpsdata.gps_fd, true);
     return true;
@@ -814,7 +799,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 		    channel->device->gpsdata.gps_fd,
 		    channel->device->gpsdata.dev.path);
     else {
-	if (gpsd_activate(channel->device, true) < 0) {
+	if (gpsd_activate(channel->device) < 0) {
 
 	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
 			sub_index(user));

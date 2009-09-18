@@ -235,9 +235,6 @@ struct gps_device_t {
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
-#ifdef ALLOW_RECONFIGURE
-    bool enable_reconfigure;		/* OK to hack GPS settings? */ 
-#endif /* ALLOW_RECONFIGURE */
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
     struct termios ttyset, ttyset_old;
     unsigned int baudindex;
@@ -509,7 +506,7 @@ extern unsigned char hc(unsigned char);
 extern void gpsd_init(struct gps_device_t *, 
 		      struct gps_context_t *, 
 		      /*@null@*/char *);
-extern int gpsd_activate(struct gps_device_t *, bool);
+extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);

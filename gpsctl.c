@@ -416,7 +416,7 @@ int main(int argc, char **argv)
 	    }
 	    gpsd_init(&session, &context, device);
 	    gpsd_report(LOG_PROG, "initialization passed.\n");
-	    if (gpsd_activate(&session, false) == -1) {
+	    if (gpsd_activate(&session) == -1) {
 		gpsd_report(LOG_ERROR,
 			      "activation of device %s failed, errno=%d\n",
 			      device, errno);
