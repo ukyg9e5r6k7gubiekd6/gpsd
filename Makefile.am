@@ -612,7 +612,7 @@ dist-rpm: distdir
 	rpmbuild -ta $(distdir).tar.gz
 	$(am__remove_distdir)
 
-# This is how to ship a release to Berlios incomoing.
+# This is how to ship a release to Berlios incoming.
 # It requires developer access verified via ssh.
 #
 upload-ftp: dist
