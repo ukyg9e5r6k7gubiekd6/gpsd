@@ -848,9 +848,10 @@ struct devconfig_t {
 };
 
 struct policy_t {
-    bool watcher;				/* is watcher mode on? */
-    int raw;					/* dump raw data? */
-    bool scaled;				/* perform report scaling? */
+    bool watcher;			/* is watcher mode on? */
+    bool nmea;				/* requesting dumping as NMEA */
+    int raw;				/* dump raw data? */
+    bool scaled;			/* perform report scaling? */
 };
 
 /* this is the main structure that includes all previous substructures */

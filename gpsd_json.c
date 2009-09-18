@@ -308,8 +308,9 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"raw\":%d,\"scaled\":%s}\r\n",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s}\r\n",
 		   ccp->watcher ? "true" : "false",
+		   ccp->nmea ? "true" : "false",
 		   ccp->raw, 
 		   ccp->scaled ? "true" : "false");
     /*@+compdef@*/
@@ -1246,6 +1247,8 @@ int json_watch_read(const char *buf,
 	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
                                      .dflt.boolean = true},
 	{"raw",	           integer,  .addr.integer = &ccp->raw,
+	                             .nodefault = true},
+	{"nmea",	   boolean,  .addr.boolean = &ccp->nmea,
 	                             .nodefault = true},
 	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
 	{NULL},

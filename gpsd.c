@@ -504,6 +504,7 @@ static void detach_client(struct subscriber_t *sub)
 #endif /* OLDSTYLE_ENABLE */
     sub->active = 0;
     sub->policy.watcher = false;
+    sub->policy.nmea = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
@@ -1408,21 +1409,25 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		(void)snprintf(phrase, sizeof(phrase), ",R=2");
 		p++;
 	    } else if (*p == '1' || *p == '+') {
-		sub->policy.raw = 1;
+		sub->policy.nmea = true;
+		sub->policy.raw = 0;
 		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		sub->policy.raw = 0;
+		sub->policy.nmea = false;
 		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 		p++;
-	    } else if (sub->policy.raw) {
+	    } else if (sub->policy.nmea) {
+		sub->policy.nmea = false;
 		sub->policy.raw = 0;
 		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 	    } else {
-		sub->policy.raw = 1;
+		sub->policy.nmea = true;
+		sub->policy.raw = 0;
 		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 	    }
@@ -2190,47 +2195,74 @@ int main(int argc, char *argv[])
 		changed = gpsd_poll(device);
 
 		/* raw hook and relaying functions */
-		for (channel = channels; channel < channels + NITEMS(channels); channel++) 
-		    if (channel->subscriber != NULL 
-			&& channel->subscriber->policy.raw > 0
-			&& channel->device != NULL &&
-			strcmp(device->gpsdata.dev.path, channel->device->gpsdata.dev.path)==0) {
-			if (TEXTUAL_PACKET_TYPE(device->packet.type)) {
-			    /* 
-			     * NMEA and other textual sentences
-			     * are simply copied to all clients in
-			     * raw mode.
-			     */
+		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
+		    if (channel->subscriber == NULL 
+			|| channel->device == NULL 
+			|| strcmp(device->gpsdata.dev.path, 
+				  channel->device->gpsdata.dev.path)!=0)
+			continue;
+
+		    /* 
+		     * NMEA and other textual sentences are simply
+		     * copied to all clients that are in raw or nmea
+		     * mode.
+		     */
+		    if (TEXTUAL_PACKET_TYPE(device->packet.type)
+			&& (channel->subscriber->policy.raw > 0 || channel->subscriber->policy.nmea)) {
 			    (void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
-			} else if (channel->subscriber->policy.raw > 1) {
-			    /*
-			     * Also, simply copy if user has
-			     * specified super-raw mode.
-			     */
+			    continue;
+		    }
+
+		    /*
+		     * Also, simply copy if user has specified
+		     * super-raw mode.
+		     */
+		    if (channel->subscriber->policy.raw > 1) {
 			    (void)throttled_write(channel->subscriber, 
 						  (char *)device->packet.outbuffer, 
 						  device->packet.outbuflen);
-#ifdef BINARY_ENABLE
-			} else if (LOSSLESS_PACKET_TYPE(device->packet.type)) {
-			    /*
-			     * Some binary packet types never
-			     * get dumped, at raw level 1 because
-			     * they don't need to be. For RTCM2
-			     * and RTCM3, our report sentences
-			     * correspond 1-1 with the raw data
-			     * and are lossless.
-			     */
 			    continue;
-			} else {
-			    char buf2[MAX_PACKET_LENGTH*3+2];
-			    gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
-			    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-					device->gpsdata.dev.path, buf2);
-			    (void)throttled_write(channel->subscriber, 
+		    }
+#ifdef BINARY_ENABLE
+		    /*
+		     * Maybe the user wants a binary packet hexdumped.
+		     */
+		    if (newstyle(channel->subscriber) && channel->subscriber->policy.raw==1) {
+			char *hd = gpsd_hexdump((char*)device->packet.outbuffer, 
+					       device->packet.outbuflen);
+			/*
+			 * Ugh...depends on knowing the length of gpsd_hexdump's
+			 * entrepreneur.
+			 */
+			(void) strlcat(hd, "\r\n", MAX_PACKET_LENGTH*2+1);
+			(void)throttled_write(channel->subscriber, 
+						  hd, strlen(hd));
+		    }
+
+		    /* some packet types should not fall through */
+		    if (LOSSLESS_PACKET_TYPE(device->packet.type)) {
+			/*
+			 * Some binary packet types never
+			 * get dumped at raw level 1 because
+			 * they don't need to be. For RTCM2
+			 * and RTCM3, our report sentences
+			 * correspond 1-1 with the raw data
+			 * and are lossless.
+			 */
+			continue;
+		    }
+
+		    /* binary GPS packet, pseudo-NMEA dumping enabled */
+		    if (channel->subscriber->policy.nmea) {
+			char buf2[MAX_PACKET_LENGTH*3+2];
+			gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
+			gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
+				    device->gpsdata.dev.path, buf2);
+			(void)throttled_write(channel->subscriber, 
 						  buf2, strlen(buf2));
 #endif /* BINARY_ENABLE */
 			}
-		    }
+		}
 
 		if (device->gpsdata.fix.mode == MODE_3D)
 		    netgnss_report(device);

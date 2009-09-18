@@ -608,12 +608,7 @@ only the first three DOP numbers, omitting time DOP and total DOP.</para>
 <listitem><para>Sets or toggles 'raw' mode. Return "R=0" or "R=1" or
 "R=2". In raw mode you read the NMEA data stream from each
 GPS. (Non-NMEA GPSes get their communication format translated to NMEA
-on the fly.)  If the device is a source of RTCM-104 corrections, the
-corrections are dumped in the textual format described in
-<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If
-the device is a source of AIS data, AIS packets are dumped in CSV
-form with each field (other than padding fields) dumped as an unscaled
-integer or string, whichever is appropriate.</para>
+on the fly.)</para>
 
 <para>The command 'r' immediately followed by the digit '1' or the
 plus sign '+' sets raw mode.  The command 'r' immediately followed by
@@ -738,10 +733,15 @@ string "GPSD" followed by the replies. Examples:</para>
 mode <application>gpsd</application> ships a line of data to the
 client each time the GPS gets either a fix update or a satellite
 picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
-response.  Additionally, watching clients get notifications in the
-form X=0 or X=%f when the online/offline status of the GPS
-changes, and an I response giving the device type when the
-user is assigned a device.</para>
+response. If the device is a source of RTCM-104 corrections, the
+corrections are dumped in the Sager dump format described in
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. <!--
+If the device is a source of AIS data, AIS packets are dumped in CSV
+form with each field (other than padding fields) dumped as an unscaled
+integer or string, whichever is appropriate.--> Additionally, watching
+clients get notifications in the form X=0 or X=%f when the
+online/offline status of the GPS changes, and an I response giving the
+device type when the user is assigned a device.</para>
 
 </refsect1>
 <refsect1 id='new_protocol'><title>NEW PROTOCOL</title>
@@ -1285,21 +1285,23 @@ describes the subscriber's policy.</para>
 	is true.</entry>
 </row>
 <row>
+	<entry>nmea</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Eanable (true) or disable (false) dumping of binary
+	packets as pseudo-NMEA. Default
+	is false.</entry>
+</row>
+<row>
 	<entry>raw</entry> 
         <entry>No</entry> 
         <entry>integer</entry>
-	<entry>Controls 'raw' mode. When this attribute is set
-	to 1 for a channel, <application>gpsd</application> reports
-	the unprocessed data stream from whatever device is attached.
-	(Non-NMEA GPSes get their communication format translated to
-	NMEA on the fly.)  If the device is a source of RTCM2
-	corrections, the corrections are dumped in the textual format
-	described in
-	<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If
-	the device is a source of AIS data, AIS packets are dumped in
-	CSV form with each field (other than padding fields) dumped as
-	an unscaled integer or string, whichever is
-	appropriate.</entry>
+
+	<entry>Controls 'raw' mode. When this attribute is set to 1
+	for a channel, <application>gpsd</application> reports the
+	unprocessed NMEA or AIVDM data stream from whatever device is attached.
+	Binary GPS packets are hex-dumped.  RTCM2 and RTCM3
+        packets are not dumped in raw mode.</entry>
 </row>
 <row>
 	<entry>scaled</entry>
@@ -1311,6 +1313,14 @@ describes the subscriber's policy.</para>
 </tbody>
 </tgroup>
 </table>
+
+<para>In Watcher mode, GPS reports are dumpred as TPV and SKY
+responses.  If the device is a source of RTCM2 corrections, the
+corrections are dumped in the JSON format described in
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If
+the device is a source of AIS data, AIS packets are dumped in JSON
+form with each field (other than padding fields) dumped as an
+integer or string, whichever is appropriate.</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert the POLICY_SET bit in the top-level set member.</para>
