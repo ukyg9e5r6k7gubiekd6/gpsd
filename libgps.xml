@@ -28,6 +28,12 @@ C:
     <paramdef>char * <parameter>port</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcdef>int <function>gps_open_r</function></funcdef>
+    <paramdef>char *<parameter>server</parameter></paramdef>
+    <paramdef>char * <parameter>port</parameter></paramdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>int <function>gps_query</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>char *<parameter>fmt</parameter>...</paramdef>
@@ -121,6 +127,11 @@ attached to
 <function>gps_open()</function> returns NULL on errors.  errno is
 set depending on the error returned from the the socket layer; see
 <filename>gps.h</filename> for values and explanations.</para>
+
+<para><function>gps_open_r()</function> is a reentrent-friendly
+version That put the session storage where you wish to allocate it.
+It returns 0 on success and -1 on failure, with errno set
+appropriately.</para>
 
 <para><function>gps_close()</function> ends the session.
 NB: ending the session does not destroy any threads created to handle

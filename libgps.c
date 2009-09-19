@@ -25,14 +25,12 @@
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
 
-struct gps_data_t *gps_open(const char *host, const char *port)
-/* open a connection to a gpsd daemon */
+int gps_open_r(const char *host, const char *port, 
+	       /*@out@*/struct gps_data_t *gpsdata)
 {
-    struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
-
     /*@ -branchstate @*/
     if (!gpsdata)
-	return NULL;
+	return -1;
     if (!host)
 	host = "127.0.0.1";
     if (!port)
@@ -40,21 +38,32 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
-	(void)free(gpsdata);
-	return NULL;
+	return -1;
     }
 
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
-    return gpsdata;
+    return 0;
     /*@ +branchstate @*/
 }
+
+/*@-compmempass -immediatetrans@*/
+struct gps_data_t *gps_open(const char *host, const char *port)
+/* open a connection to a gpsd daemon */
+{
+    static struct gps_data_t gpsdata;
+    if (gps_open_r(host, port, &gpsdata) == -1)
+	return NULL;
+    else
+	return &gpsdata; 
+}
+/*@+compmempass +immediatetrans@*/
 
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     int retval = close(gpsdata->gps_fd);
-    /*@i@*/(void)free(gpsdata);
+    gpsdata->gps_fd = -1;
     return retval;
 }
 
