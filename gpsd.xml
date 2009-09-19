@@ -1309,11 +1309,19 @@ describes the subscriber's policy.</para>
         <entry>If true, apply scaling divisors to output before
 	dumping; default is false. Applies only to AIS reports.</entry>
 </row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>If present, limit watching to the specifuied device
+	rather than all devices.  Useful with raw and NMEA modes
+	in which device responses aren't tagged.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>
 
-<para>In Watcher mode, GPS reports are dumpred as TPV and SKY
+<para>In watcher mode, GPS reports are dumpred as TPV and SKY
 responses.  If the device is a source of RTCM2 corrections, the
 corrections are dumped in the JSON format described in
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>. If

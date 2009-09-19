@@ -507,6 +507,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.nmea = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
+    sub->policy.devpath[0] = '\0';
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	if (channel->subscriber == sub)
 	{
@@ -515,6 +516,7 @@ static void detach_client(struct subscriber_t *sub)
 	    
 	}
     sub->fd = -1;
+    /*@+mustfreeonly@*/
 }
 
 static ssize_t throttled_write(struct subscriber_t *sub, char *buf, size_t len)
@@ -1645,15 +1647,28 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    ++end;
 		buf = end;
 	    }
-	    if (status == 0) {
-		if (sub->policy.watcher)
+	    if (status != 0) {
+		(void)snprintf(reply, replylen,
+			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
+			       json_error_string(status));
+	    } else if (sub->policy.watcher) {
+		if (sub->policy.devpath[0] == '\0') {
+		    /* assign all devices */
 		    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 			if (allocated_device(devp))
 			    (void)assign_channel(sub, ANY, devp);
-	    } else 
-		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
-			       json_error_string(status));
+		} else {
+		    devp = find_device(sub->policy.devpath);
+		    if (devp == NULL) {
+			(void)snprintf(reply, replylen,
+				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n", sub->policy.devpath); 
+			goto bailout;
+		    } else if (assign_channel(sub, ANY, devp) == NULL)
+			(void)snprintf(reply, replylen,
+				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n", sub->policy.devpath); 
+			goto bailout;
+		    }
+		}
 	}
 	/* display the user's policy */
 	json_watch_dump(&sub->policy, 
@@ -2266,7 +2281,7 @@ int main(int argc, char *argv[])
 		    /* we may need to add device to new-style watcher lists */
 		    if ((changed & DEVICE_SET) != 0) {
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-			    if (sub->policy.watcher && newstyle(sub))
+			    if (sub->policy.watcher && newstyle(sub) && sub->policy.devpath[0] == '\0')
 				(void)assign_channel(sub, ANY, device);
 		    }
 		    /* handle laggy response to a firmware version query */

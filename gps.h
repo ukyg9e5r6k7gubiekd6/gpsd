@@ -851,7 +851,8 @@ struct policy_t {
     bool watcher;			/* is watcher mode on? */
     bool nmea;				/* requesting dumping as NMEA */
     int raw;				/* dump raw data? */
-    bool scaled;			/* perform report scaling? */
+    bool scaled;			/* perform report scaling? */ 
+    char devpath[GPS_PATH_MAX];		/* specific device to watch */   
 };
 
 /* this is the main structure that includes all previous substructures */

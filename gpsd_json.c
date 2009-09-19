@@ -307,12 +307,18 @@ void json_watch_dump(const struct policy_t *ccp,
 		     /*@out@*/char *reply, size_t replylen)
 {
     /*@-compdef@*/
-    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s}\r\n",
+    (void)snprintf(reply, replylen,
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,",
 		   ccp->watcher ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
 		   ccp->raw, 
 		   ccp->scaled ? "true" : "false");
+    if (ccp->devpath[0] != '\0')
+	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+		       "\"device\":%s,", ccp->devpath);
+    if (reply[strlen(reply)-1] == ',')
+	reply[strlen(reply)-1] = '\0';
+    (void)strlcat(reply, "}\r\n", replylen-strlen(reply));
     /*@+compdef@*/
 }
 
@@ -1251,6 +1257,8 @@ int json_watch_read(const char *buf,
 	{"nmea",	   boolean,  .addr.boolean = &ccp->nmea,
 	                             .nodefault = true},
 	{"scaled",         boolean,  .addr.boolean = &ccp->scaled},
+	{"device",         string,   .addr.string = ccp->devpath,
+	                             .len = sizeof(ccp->devpath)},
 	{NULL},
     };
     /*@ +fullinitblock @*/
