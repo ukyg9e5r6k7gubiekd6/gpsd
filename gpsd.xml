@@ -1313,9 +1313,10 @@ describes the subscriber's policy.</para>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>If present, limit watching to the specifuied device
+        <entry>If present, enable watching only of the specified device
 	rather than all devices.  Useful with raw and NMEA modes
-	in which device responses aren't tagged.</entry>
+	in which device responses aren't tagged. Has no effect when
+	used with enable:false.</entry>
 </row>
 </tbody>
 </tgroup>
