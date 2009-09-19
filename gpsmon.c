@@ -312,25 +312,6 @@ static long tzoffset(void)
     return res;
 }
 
-static void command(char buf[], size_t len, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    va_list ap;
-    ssize_t n;
-
-    va_start(ap, fmt) ;
-    (void)vsnprintf(buf, len, fmt, ap);
-    va_end(ap);
-
-    /*@i1@*/assert(write(session.gpsdata.gps_fd, buf, strlen(buf)) != -1);
-    n = read(session.gpsdata.gps_fd, buf, len);
-    if (n >= 0) {
-	buf[n] = '\0';
-	while (isspace(buf[strlen(buf)-1]))
-	    buf[strlen(buf)-1] = '\0';
-    }
-}
-
 void monitor_complain(const char *fmt, ...)
 {
     va_list ap;
@@ -507,12 +488,12 @@ int main (int argc, char **argv)
 	/*@ -compdef @*/
 	// FIXME: This code needs to become protocol-agnostic
 	if (source.device != NULL)
-	    command((char *)buf, sizeof(buf), "F=%s\r\n", source.device);
+	    gps_query(&session.gpsdata, "F=%s\r\n", source.device);
 	else
-	    command((char *)buf, sizeof(buf), "O\r\n");	/* force device allocation */
-	command((char *)buf, sizeof(buf), "F\r\n");
+	    gps_query(&session.gpsdata, "O\r\n");	/* force device allocation */
+	gps_query(&session.gpsdata, "F\r\n");
 	(void)strlcpy(session.gpsdata.dev.path, (char *)buf+7, PATH_MAX);
-	command((char *)buf, sizeof(buf), "R=2\r\n");
+	gps_query(&session.gpsdata, "R=2\r\n");
 	/*@ +compdef @*/
 	serial = false;
     } else {
