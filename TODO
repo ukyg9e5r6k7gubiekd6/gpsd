@@ -39,8 +39,6 @@ of mode switch we should be uttering.
 
 **** The Python client library presently speaks only old protocol.
 
-**** gpsmon's client mode still relies on old protocol
-
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
 **** Client-side support for RTCM3-JSON

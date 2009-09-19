@@ -486,14 +486,10 @@ int main (int argc, char **argv)
 	}
 	controlfd = open(controlsock, O_RDWR);
 	/*@ -compdef @*/
-	// FIXME: This code needs to become protocol-agnostic
 	if (source.device != NULL)
-	    gps_query(&session.gpsdata, "F=%s\r\n", source.device);
+	    gps_query(&session.gpsdata, "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n", source.device);
 	else
-	    gps_query(&session.gpsdata, "O\r\n");	/* force device allocation */
-	gps_query(&session.gpsdata, "F\r\n");
-	(void)strlcpy(session.gpsdata.dev.path, (char *)buf+7, PATH_MAX);
-	gps_query(&session.gpsdata, "R=2\r\n");
+	    gps_query(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
 	/*@ +compdef @*/
 	serial = false;
     } else {
