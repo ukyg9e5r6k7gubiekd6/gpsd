@@ -495,9 +495,8 @@ int main (int argc, char **argv)
     gpsd_init(&session, &context, NULL);
 
     /*@ -boolops */
-    if (optind>=argc || source.device==NULL || strchr(argv[optind], ':')!=NULL) {
-
-	session.gpsdata.gps_fd = netlib_connectsock(source.server, source.port, "tcp");
+    if (optind>=argc||source.device==NULL||strchr(argv[optind], ':')!=NULL) {
+	(void)gps_open_r(source.server, source.port, &session.gpsdata);
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
 			  "%s: connection failure on %s:%s, error %d = %s.\n",
