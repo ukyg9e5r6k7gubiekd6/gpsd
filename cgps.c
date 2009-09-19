@@ -831,11 +831,7 @@ int main(int argc, char *argv[])
 	die(1);
     }
 
-    /* Check for user input.
-
-     TODO: Restrict the allowed keys based on device type (ie, 'j'
-     makes no sense for a True North compass).  No doubt there will be
-     other examples as cgps grows more bells and whistles. */
+    /* Check for user input. */
     c=wgetch(datawin);
 
     switch ( c ) {
