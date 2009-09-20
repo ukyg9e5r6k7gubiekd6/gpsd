@@ -28,7 +28,7 @@ HERR_SET       	= 0x00001000
 VERR_SET       	= 0x00002000
 PERR_SET       	= 0x00004000
 POLICY_SET     	= 0x00020000
-ERR_SET        	= (HERR_SET|VERR_SET|PERR_SET
+ERR_SET        	= (HERR_SET|VERR_SET|PERR_SET)
 SATELLITE_SET  	= 0x00040000
 RAW_SET        	= 0x00080000
 USED_SET       	= 0x00100000
@@ -42,7 +42,7 @@ ERROR_SET      	= 0x08000000
 RTCM2_SET      	= 0x10000000
 RTCM3_SET      	= 0x20000000
 AIS_SET        	= 0x40000000
-FIX_SET        	= (TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET
+FIX_SET        	= (TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
 
 STATUS_NO_FIX = 0
 STATUS_FIX = 1
@@ -57,9 +57,6 @@ WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
 WATCH_RAW	= 0x02
 WATCH_SCALED	= 0x08
-
-# The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
-NMEA_MAX = 86
 
 GPSD_PORT = 2947
 
@@ -522,21 +519,33 @@ def isotime(s):
         raise TypeError
 
 if __name__ == '__main__':
-    import readline
-    args = sys.argv[1:]
-    if len(args) > 2:
+    import readline, getopt
+    (options, arguments) = getopt.getopt(sys.argv[1:], "w")
+    streaming = False
+    for (switch, val) in options:
+        if (switch == '-w'):
+            streaming = True    
+    if len(arguments) > 2:
         print 'Usage: gps.py [host [port]]'
         sys.exit(1)
-    print "This is the exerciser for the Python gps interface."
-    session = gps(*args)
-    session.set_raw_hook(lambda s: sys.stdout.write(s + "\n"))
-    try:
+
+    if streaming:
+        session = gps(*arguments)
+        session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
+        session.stream(WATCH_ENABLE)
         while True:
-            commands = raw_input("> ")
-            session.query(commands+"\n")
+            session.poll()
             print session
-    except EOFError:
-        print "Goodbye!"
-    del session
+    else:
+        print "This is the exerciser for the Python gps interface."
+        session = gps(*arguments)
+        session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
+        try:
+            while True:
+                session.query(raw_input("> "))
+                print session
+        except EOFError:
+            print "Goodbye!"
+        del session
 
 # gps.py ends here

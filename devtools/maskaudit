@@ -44,7 +44,9 @@ if __name__ == '__main__':
                 print "%-14s	%8s %8s" % (flag, source.in_library(flag), source.in_daemon(flag))
         if pythonize:
             for (d, v) in source.masks:
-                print "%-15s\t= %s" % (d, v[:-1])
+                if v[-1] == 'u':
+                    v = v[:-1]
+                print "%-15s\t= %s" % (d, v)
     except KeyboardInterrupt:
         pass
 
