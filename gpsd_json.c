@@ -71,7 +71,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 void json_version_dump(/*@out@*/char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id: gpsd.c 5957 2009-08-23 15:45:54Z esr $\",\"proto_major\":%d,\"proto_minor\":%d}\r\n", 
+		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id$\",\"proto_major\":%d,\"proto_minor\":%d}\r\n", 
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
