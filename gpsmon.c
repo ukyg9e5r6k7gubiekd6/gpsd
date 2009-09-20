@@ -485,12 +485,10 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
-	/*@ -compdef @*/
 	if (source.device != NULL)
 	    (void)gps_query(&session.gpsdata, "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n", source.device);
 	else
 	    (void)gps_query(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
-	/*@ +compdef @*/
 	serial = false;
     } else {
 	(void)strlcpy(session.gpsdata.dev.path, argv[optind], PATH_MAX);
