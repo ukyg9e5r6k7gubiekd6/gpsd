@@ -120,7 +120,7 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_mandir}/man1/gpsctl.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
-/etc/rc.d/init.d/gpsd
+%attr(755, root, root) /etc/rc.d/init.d/gpsd
 %attr(755, root, root) /usr/lib/python*/site-packages/gps.py*
 %attr(755, root, root) /usr/lib/python*/site-packages/gpscap.py*
 #%{_datadir}/gpsd/dgpsip-servers
