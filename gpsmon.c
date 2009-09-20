@@ -487,9 +487,9 @@ int main (int argc, char **argv)
 	controlfd = open(controlsock, O_RDWR);
 	/*@ -compdef @*/
 	if (source.device != NULL)
-	    gps_query(&session.gpsdata, "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n", source.device);
+	    (void)gps_query(&session.gpsdata, "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n", source.device);
 	else
-	    gps_query(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
+	    (void)gps_query(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
 	/*@ +compdef @*/
 	serial = false;
     } else {
