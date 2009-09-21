@@ -1812,7 +1812,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 	    if (isspace(*buf))
 		end = buf + 1;
 	    else
-		handle_newstyle_request(sub, buf, &end, reply, sizeof(reply));
+		handle_newstyle_request(sub, buf, &end, 
+					reply+strlen(reply), sizeof(reply)-strlen(reply));
     }
 #endif /* GPSDNG_ENABLE */
 #ifdef OLDSTYLE_ENABLE
