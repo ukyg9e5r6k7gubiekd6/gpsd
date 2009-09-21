@@ -2342,15 +2342,17 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    /* watch all channels */
+	    /* watch all channels associated with this device */
 	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
+		if (device != channel->device)
+		    continue;
 		sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
 		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
-		    int state = channel->device->cycle_state;
-		    channel->device->poll_times[sub - subscribers] = timestamp();
+		    int state = device->cycle_state;
+		    device->poll_times[sub - subscribers] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 			bool report_fix = false;
 			if ((state & CYCLE_END_RELIABLE)!=0) {
@@ -2379,7 +2381,7 @@ int main(int argc, char *argv[])
 				(void)strlcat(cmds, "o", 4);
 			    if (changed & SATELLITE_SET)
 				(void)strlcat(cmds, "y", 4);
-			    if (channel->device->gpsdata.profiling!=0)
+			    if (device->gpsdata.profiling!=0)
 				(void)strlcat(cmds, "$", 4);
 			    if (cmds[0] != '\0') {
 				(void)handle_oldstyle(sub, cmds, buf2, sizeof(buf2));
@@ -2387,13 +2389,13 @@ int main(int argc, char *argv[])
 			    }
 #ifdef RTCM104V2_ENABLE
 			    if ((changed & RTCM2_SET) != 0) {
-				rtcm2_sager_dump(&channel->device->gpsdata.rtcm2, buf2, sizeof(buf2));
+				rtcm2_sager_dump(&device->gpsdata.rtcm2, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
-				aivdm_json_dump(&channel->device->gpsdata.ais, 
+				aivdm_json_dump(&device->gpsdata.ais, 
 						sub->policy.scaled, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
@@ -2403,24 +2405,24 @@ int main(int argc, char *argv[])
 #ifdef GPSDNG_ENABLE
 			if (newstyle(sub)) { 		  
 			    if (report_fix) {
-				json_tpv_dump(&channel->device->gpsdata, &channel->fixbuffer, 
+				json_tpv_dump(&device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 			    if ((changed & SATELLITE_SET)!=0) {
-				json_sky_dump(&channel->device->gpsdata,
+				json_sky_dump(&device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef RTCM104V2_ENABLE
 			    if ((changed & RTCM2_SET) != 0) {
-				rtcm2_json_dump(&channel->device->gpsdata.rtcm2, buf2, sizeof(buf2));
+				rtcm2_json_dump(&device->gpsdata.rtcm2, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
 			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
-				aivdm_json_dump(&channel->device->gpsdata.ais, 
+				aivdm_json_dump(&device->gpsdata.ais, 
 						false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
