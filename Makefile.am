@@ -500,15 +500,15 @@ rtcm-makeregress: gpsdecode
 # Regression-test the AIVDM decoder.
 aivdm-regress: gpsdecode
 	@echo "Testing AIVDM decoding..."
-	@mkdir -p test
+	@mkdir -p $(srcdir)/test
 	@for f in $(srcdir)/test/*.aivdm; do \
 		echo "Testing $${f}..."; \
 		$(srcdir)/gpsdecode -u -c <$${f} >$(srcdir)/test/test.chk; \
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test.chk
-	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test.chk
+	@gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
+	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test/test.chk
 	@rm $(srcdir)/test/test.chk
 
 # Rebuild the AIVDM regression tests.
