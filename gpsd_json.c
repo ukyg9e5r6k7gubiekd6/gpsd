@@ -279,7 +279,7 @@ void json_device_dump(const struct gps_device_t *device,
 	}
 	/*@-mustfreefresh@*/
 	if (device->subtype[0] != '\0') {
-	    (void)strlcat(reply, "\"subtype\":\",", replylen);
+	    (void)strlcat(reply, "\"subtype\":\"", replylen);
 	    (void)strlcat(reply, 
 			  json_stringify(buf1, sizeof(buf1), device->subtype),
 			  replylen);

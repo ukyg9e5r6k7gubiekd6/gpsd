@@ -2303,11 +2303,8 @@ int main(int argc, char *argv[])
 #endif /* OLDSTYLE_ENABLE */
 #ifdef GPSDNG_ENABLE
 			{
-			    char id2[NMEA_MAX];
-			    (void)snprintf(id2, sizeof(id2), 
-					   "{\"class\":\"DEVICE\",\"path\":\"%s\",\"subtype\":\"%s\"}\r\n",
-					   device->gpsdata.dev.path,
-					   device->subtype);
+			    char id2[GPS_JSON_RESPONSE_MAX];
+			    json_device_dump(device, id2, sizeof(id2));
 			    notify_watchers(device, true, id2);
 			}
 #endif /* GPSDNG_ENABLE */
