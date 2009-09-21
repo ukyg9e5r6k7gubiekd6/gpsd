@@ -401,7 +401,6 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     for (i = 0; i < (int)session->packet.outbuflen; i++)
 	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
 		       "%02x", (unsigned int)session->packet.outbuffer[i]);
-    (void)strlcat(buf, "\n", BUFSIZ);
     gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length %zd: %s\n",
 		id, session->packet.outbuflen, buf);
 

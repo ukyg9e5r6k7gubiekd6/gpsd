@@ -2366,8 +2366,7 @@ int main(int argc, char *argv[])
 			    /*
 			     * No reliable end of cycle.  Must report
 			     * every time a sentence changes position
-			     * or mode. Likely to cause display jitter
-			     * if buffer policy is casoc.
+			     * or mode. Likely to cause display jitter.
 			     */
 			    report_fix = true;
 #ifdef DBUS_ENABLE
