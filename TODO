@@ -46,6 +46,8 @@ of mode switch we should be uttering.
 
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
+**** Profiling features (Z and $) need to be ported from the old protocol.
+
 **** Client-side support for RTCM3-JSON
 
 RTCM3 support is nonexistent due to a lack of suitable test loads.

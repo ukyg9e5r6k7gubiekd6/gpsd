@@ -511,10 +511,12 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
     if ((flags & WATCH_ENABLE) != 0) {
 #ifdef OLDSTYLE_ENABLE
 	(void)strlcpy(buf, "w+x", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
+	if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
 	    (void)strlcat(buf, "r+", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={", sizeof(buf));
+	if (flags & WATCH_NMEA)
+	    (void)strlcat(buf, "\"nmea\":true", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1", sizeof(buf));
 	if (flags & WATCH_SCALED)
@@ -529,6 +531,8 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 	    (void)strlcat(buf, "r-", sizeof(buf));
 #else
 	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
+	if (flags & WATCH_NMEA)
+	    (void)strlcat(buf, "\"nmea\":false", sizeof(buf));
 	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
 	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
 	if (flags & WATCH_SCALED)

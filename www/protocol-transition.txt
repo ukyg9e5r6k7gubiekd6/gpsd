@@ -72,7 +72,8 @@ struct gpsdata_t that application developers usually don't or issued
 unusual configuration commands. Here are the exceptions:
 
 * You issued other gps_query() commands, such as "J=1".  If so,
-  you'll need to learn how to say them in the new API. That
+  you'll need to learn how to say them in the new API (the J command
+  itself is dead, and you can just remove it entirely). That
   is not difficult, and this document will cover what you
   need to know.
 

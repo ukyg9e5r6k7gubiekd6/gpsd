@@ -967,10 +967,11 @@ struct gps_data_t {
 };
 
 /* mode flags for gps_stream() */
-#define WATCH_DISABLE	0x00u
-#define WATCH_ENABLE	0x01u
-#define WATCH_RAW	0x02u
-#define WATCH_SCALED	0x04u
+#define WATCH_DISABLE	0x00u	/* disable watching */
+#define WATCH_ENABLE	0x01u	/* enable outputs in gpsd format */
+#define WATCH_NMEA	0x02u	/* enable output in NMEA */
+#define WATCH_RAW	0x04u	/* enable output of raw packets in hex */
+#define WATCH_SCALED	0x08u	/* scale output to floats, when applicable */ 
 #define WATCH_NEWSTYLE	0x10u	/* for test purposes only - will go away */
 
 extern int gps_open_r(const char *host, const char *port, 

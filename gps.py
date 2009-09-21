@@ -55,7 +55,8 @@ SIGNAL_STRENGTH_UNKNOWN = NaN
 
 WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
-WATCH_RAW	= 0x02
+WATCH_NMEA	= 0x02
+WATCH_RAW	= 0x04
 WATCH_SCALED	= 0x08
 
 GPSD_PORT = 2947
@@ -401,10 +402,10 @@ class gps(gpsdata):
         self.timings.c_recv_time = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);
-        if self.response.startswith("{"):
-            self.__json_unpack(self.response)
-        else:
-            self.__oldstyle_unpack(self.response)
+        #if self.response.startswith("{"):
+        #    self.__json_unpack(self.response)
+        #else:
+        self.__oldstyle_unpack(self.response)
         if self.profiling:
             if self.timings.sentence_time != '?':
                 basetime = self.timings.sentence_time
@@ -429,12 +430,12 @@ class gps(gpsdata):
         "Ask gpsd to stream reports at your client."
         if flags & WATCH_ENABLE:
             arg = "w+x"
-            if self.raw_hook or (flags & WATCH_RAW):
+            if self.raw_hook or (flags & WATCH_NMEA):
                 arg += 'r+'
                 return self.query(arg)
         elif flags & WATCH_DISABLE:
             arg = "w-"
-            if self.raw_hook or (flags & WATCH_RAW):
+            if self.raw_hook or (flags & WATCH_NMEA):
                 arg += 'r-'
                 return self.query(arg)
 
