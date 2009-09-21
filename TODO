@@ -33,6 +33,11 @@ not been able to verify any of them.  Note, this is not properly
 a gpsd problem, but it may well be there is some sort
 of mode switch we should be uttering.
 
+*** Driver issues
+**** TSIP: Needs END_CYCLE_RELIABLE capability.
+**** uBlox-lea-4h.log.chk: Time value in TPVs looks like garbage.
+**** uBlox-lea-4t.log.chk: ubx driver is dumping garbage values in GSA. 
+
 ** To do:
 
 *** Cleanup after the big protocol rewrite
