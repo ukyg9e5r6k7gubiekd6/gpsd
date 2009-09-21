@@ -3,7 +3,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, calendar, math, socket, sys, select
+import time, calendar, math, socket, sys, select, json
 
 api_major_version = 3   # bumped on incompatible changes
 api_minor_version = 1   # bumped on compatible changes
@@ -243,7 +243,7 @@ class gps(gpsdata):
     def __del__(self):
         self.close()
 
-    def __unpack(self, buf):
+    def __oldstyle_unpack(self, buf):
         # unpack a daemon response into the instance members
         self.fix.time = 0.0
         fields = buf.strip().split(",")
@@ -374,8 +374,11 @@ class gps(gpsdata):
                     self.profiling = (data[0] == '1')
                 elif cmd == '$':
                     self.timings.collect(*data.split())
-        if self.raw_hook:
-            self.raw_hook(buf);
+
+    def __json_unpack(self, buf):
+        jsondict = json.loads(buf)
+        print jsondict
+        pass
 
     def waiting(self):
         "Return True if data is ready for the client."
@@ -396,7 +399,12 @@ class gps(gpsdata):
         if self.verbose:
             sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
         self.timings.c_recv_time = time.time()
-        self.__unpack(self.response)
+        if self.raw_hook:
+            self.raw_hook(self.response);
+        if self.response.startswith("{"):
+            self.__json_unpack(self.response)
+        else:
+            self.__oldstyle_unpack(self.response)
         if self.profiling:
             if self.timings.sentence_time != '?':
                 basetime = self.timings.sentence_time
@@ -535,7 +543,8 @@ if __name__ == '__main__':
         session.stream(WATCH_ENABLE)
         while True:
             session.poll()
-            print session
+            if session.valid:
+                print session
     else:
         print "This is the exerciser for the Python gps interface."
         session = gps(*arguments)
