@@ -84,6 +84,8 @@ others apart and distinguish them from baud barf.
  *
  * The NMEA portion of the state machine allows the following talker IDs:
  *      GP -- Global Positioning System.
+ *      GN -- GLONASS, accoring to IEIC 61162
+ *      GL -- Mixed GPS and GLONASS data, according to IEIC 61162
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *	IN -- Integrated Navigation (Garmin uses this).
  *
@@ -237,7 +239,11 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_PUB_LEAD:
-	if (c == 'P')
+	/*
+	 * $GP == GPS, $GN = GLONASS only, $GL = mixed GPS and GLONASS,
+	 * according to NMEA (IEIC 61162) DRAFT 02/06/2009.
+	 */
+	if (c == 'P' || c == 'N' || c == 'L')
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;
