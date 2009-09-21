@@ -1782,13 +1782,13 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    }
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
-	json_version_dump(reply + strlen(reply), replylen - strlen(reply));
+	json_version_dump(reply, replylen);
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
 	if (isspace(*errend))
 	    --errend;
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply), 
+	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
 		       (int)(errend-buf), buf);
 	buf += strlen(buf);
