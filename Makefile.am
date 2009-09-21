@@ -483,13 +483,13 @@ rtcm-regress: gpsdecode
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.rtcm2; do \
 		echo "Testing $${f}..."; \
-		$(srcdir)/gpsdecode <$${f} >test/test.chk; \
-		diff -ub $${f}.chk test/test.chk; \
+		$(srcdir)/gpsdecode <$${f} >$(srcdir)/test/test.chk; \
+		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for RTCM2"
-	@gpsdecode -e -j <test/synthetic-rtcm2.json >test.chk
-	@grep -v '^#' test/synthetic-rtcm2.json | diff -ub - test.chk
-	@rm test/test.chk
+	@gpsdecode -e -j <test/synthetic-rtcm2.json >$(srcdir)/test/test.chk
+	@grep -v '^#' test/synthetic-rtcm2.json | diff -ub - $(srcdir)/test/test.chk
+	@rm $(srcdir)/test/test.chk
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
@@ -507,9 +507,9 @@ aivdm-regress: gpsdecode
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@gpsdecode -e -j <test/synthetic-ais.json >test.chk
-	@grep -v '^#' test/synthetic-ais.json | diff -ub - test.chk
-	@rm test/test.chk
+	@gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test.chk
+	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test.chk
+	@rm $(srcdir)/test/test.chk
 
 # Rebuild the AIVDM regression tests.
 aivdm-makeregress: gpsdecode
@@ -524,8 +524,8 @@ packet-regress: test_packet
 
 # Rebuild the packet-getter regression test
 packet-makeregress: test_packet
-	@mkdir -p test
-	$(srcdir)/test_packet >test/packet.test.chk
+	@mkdir -p $(srcdir)/test
+	$(srcdir)/test_packet >$(srcdir)/test/packet.test.chk
 
 # Regression-test the geoid tester.
 geoid-regress: test_geoid
@@ -534,8 +534,8 @@ geoid-regress: test_geoid
 
 # Rebuild the packet-getter regression test
 geoid-makeregress: test_geoid
-	@mkdir -p test
-	$(srcdir)/test_geoid 37.371192 122.014965 >test/geoid.test.chk
+	@mkdir -p $(srcdir)/test
+	$(srcdir)/test_geoid 37.371192 122.014965 >$(srcdir)/test/geoid.test.chk
 
 # Regression-test the calendar functions
 time-regress: test_mkgmtime
@@ -544,14 +544,14 @@ time-regress: test_mkgmtime
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
 	@echo "Testing the client-library sentence decoder..."
-	@$(srcdir)/libgps -u >test/test.chk
-	@diff -u test/unpack.chk test/test.chk
-	@rm -f test/test.chk
+	@$(srcdir)/libgps -u >$(srcdir)/test/test.chk
+	@diff -u test/unpack.chk $(srcdir)/test/test.chk
+	@rm -f $(srcdir)/test/test.chk
 
 # Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
 	@echo "Rebuilding the clent sentence-unpacker test..."
-	@$(srcdir)/libgps -u >test/unpack.chk
+	@$(srcdir)/libgps -u >$(srcdir)/test/unpack.chk
 
 # Unit-test the JSON parsing
 json-regress: test_json
