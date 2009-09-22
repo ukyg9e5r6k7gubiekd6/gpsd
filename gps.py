@@ -108,6 +108,19 @@ class version:
     def __repr__(self):
         return "<version: release='%(release)s', proto=%(proto_major)s.%(proto_minor)s, rev='%(rev)s'>" % self.__dict__
 
+class device:
+    def __init__(self):
+        self.path = None
+        self.activated = 0
+        self.subtype = None
+        self.driver_mode = 0
+        self.bps = 0
+        self.serialmode = '8N1'
+        self.cycle = 0
+        self.mincycle = 0
+    def __repr__(self):
+        return "<device path='%(path)s, activated=%(activated)s', bps=%(bps)s, serialmode=%(serialmode)s>" % self.__dict__
+
 class gpsfix:
     def __init__(self):
         self.mode = MODE_NO_FIX
@@ -174,15 +187,10 @@ class gpsdata:
         self.satellites = []            # satellite objects in view
         self.await = self.parts = 0
 
-        self.gps_id = None
-        self.driver_mode = 0
         self.profiling = False
         self.timings = gpstimings()
-        self.baudrate = 0
-        self.stopbits = 0
-        self.cycle = 0
-        self.mincycle = 0
-        self.device = None
+        self.device = device()
+
         self.devices = []
 
     def __repr__(self):
@@ -274,14 +282,14 @@ class gps(gpsdata):
                     self.valid |= ALTITUDE_SET
                 elif cmd == 'B':
                     parts = data.split()
-                    self.baudrate = int(parts[0])
-                    self.stopbits = int(parts[3])
+                    self.device.bps = int(parts[0])
+                    self.device.serialmode = parts[1]+parts[2]+parts[3]
                 elif cmd == 'C':
                     parts = data.split()
                     if len(parts) == 2:
-                        (self.cycle, self.mincycle) = map(float, parts)
+                        (self.device.cycle, self.device.mincycle) = map(float, parts)
                     else:
-                        self.mincycle = self.cycle = float(data)
+                        self.device.mincycle = self.device.cycle = float(data)
                 elif cmd == 'D':
                     self.utc = data
                     self.fix.time = isotime(self.utc)
@@ -301,7 +309,7 @@ class gps(gpsdata):
                     self.fix.mode = int(data)
                     self.valid |= MODE_SET
                 elif cmd == 'N':
-                    self.driver_mode = int(data)
+                    self.device.driver_mode = int(data)
                 elif cmd == 'O':
                     fields = data.split()
                     if fields[0] == '?':
@@ -390,7 +398,6 @@ class gps(gpsdata):
                     self.timings.collect(*data.split())
         return self.valid
 
-
     def __json_unpack(self, buf):
         def ascify(d):
             "De-Unicodify everything so we can copy dicts into Python objects."
@@ -399,23 +406,39 @@ class gps(gpsdata):
                 ka = k.encode("ascii")
                 if type(v) == type(u"x"):
                     va = v.encode("ascii")
+                elif type(v) == type({}):
+                    va = asciify(v)
                 else:
                     va = v
                 t[ka] = va
             return t
-        jo = ascify(json.loads(buf, encoding="ascii"))
-        if jo.get("class") == "VERSION":
+        def default(k, dflt, vbit=0):
+            if k not in self.data:
+                return dflt
+            else:
+                self.valid |= vbit
+                return self.data[k]
+        self.data = ascify(json.loads(buf, encoding="ascii"))
+        if self.data.get("class") == "VERSION":
             self.valid = ONLINE_SET | VERSION_SET
-            self.version = version(**jo)
+            self.version = version(**self.data)
+            self.version.gpsdata = self
             return self.version
-        elif jo.get("class") == "TPV":
-            self.timings.sentence_tag = jo["tag"]
-            def default(k, dflt, vbit=0):
-                if k not in jo:
-                    return dflt
-                else:
-                    self.valid |= vbit
-                    return jo[k]
+        elif self.data.get("class") == "DEVICE":
+            self.valid = ONLINE_SET | DEVICE_SET
+            self.device = device()
+            self.device.gpsdata = self
+            self.device.path        = self.data["path"]
+            self.device.activated   = default("activated", None) 
+            self.device.subtype     = default("subtype", None) 
+            self.device.driver_mode = default("native", 0)
+            self.device.serialmode  = default("serialmode", "8N1")
+            self.device.cycle       = default("cycle",    NaN)
+            self.device.mincycle    = default("mincycle", NaN)
+            return self.device
+        elif self.data.get("class") == "TPV":
+            self.fix.gpsdata = self
+            self.timings.sentence_tag = self.data["tag"]
             # clear all valid bits that might be set again below
             self.valid &= ~(
                 TIME_SET | TIMERR_SET | LATLON_SET | ALTITUDE_SET |
@@ -441,10 +464,12 @@ class gps(gpsdata):
             self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
             self.fix.mode =      default("mode",  0,   MODE_SET)
             return self.fix
-        elif jo.get("class") == "SKY":
-            return jo
+        elif self.data.get("class") == "SKY":
+            return self.data	# FIXME
+        elif self.data.get("class") == "WATCH":
+            return self.data	# FIXME
         else:
-            return jo
+            return self.data
 
     def waiting(self):
         "Return True if data is ready for the client."

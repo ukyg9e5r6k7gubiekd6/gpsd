@@ -1387,7 +1387,7 @@ backup battery.</para>
         <entry>Fixed: "DEVICE"</entry>
 </row>
 <row>
-	<entry>device</entry>
+	<entry>path</entry>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Name the device for which the control bits are
