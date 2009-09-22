@@ -133,6 +133,19 @@ class satellite:
             self.PRN, self.elevation, self.azimuth, self.ss, "ny"[self.used]
         )
 
+class skyview:
+    def __init__(self):
+        self.satellites = []
+        self.satellites_used = 0        # Satellites used in last fix
+        self.xdop = self.ydop = self.pdop = self.hdop = self.vdop = self.tdop = self.gdop = 0.0
+    def __repr__(self):
+        st = "Quality:  %d x=%2.2f y=%2.2f p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
+              (self.satellites_used, self.xdop, self.ydop, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
+        st += "Y: %s satellites in view:\n" % len(self.satellites)
+        for sat in self.satellites:
+          st += "    %r\n" % sat
+        return st
+
 class gpsfix:
     def __init__(self):
         self.mode = MODE_NO_FIX
@@ -179,12 +192,9 @@ class gpsdata:
         self.status = STATUS_NO_FIX
         self.utc = ""
 
-        self.satellites_used = 0        # Satellites used in last fix
-        self.pdop = self.hdop = self.vdop = self.tdop = self.gdop = 0.0
-
         self.epe = 0.0
 
-        self.satellites = []            # satellite objects in view
+        self.satellites = skyview()            # satellite objects in view
         self.await = self.parts = 0
 
         self.profiling = False
@@ -361,9 +371,11 @@ class gps(gpsdata):
                     self.valid |= LATLON_SET
                 elif cmd == 'Q':
                     parts = data.split()
-                    self.satellites_used = int(parts[0])
-                    (self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
-                    self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
+                    self.satellites.satellites_used = int(parts[0])
+                    (self.skyview.pdop, self.skyview.hdop, \
+                     self.skyview.vdop, self.skyview.tdop, \
+                     self.skyview.gdop) = map(float, parts[1:])
+                    self.valid |= DOP_SET | USED_SET
                 elif cmd == 'S':
                     self.status = int(data)
                     self.valid |= STATUS_SET
@@ -467,7 +479,17 @@ class gps(gpsdata):
             self.fix.mode =      default("mode",  0,   MODE_SET)
             return self.fix
         elif self.data.get("class") == "SKY":
-            return self.data	# FIXME
+            self.skyview = skyview()
+            self.skyview.gpsdata = self
+            for attrp in "xyvhpg":
+                setattr(self.skyview, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
+            for sat in self.data['satellites']:
+                self.skyview.satellites.append(satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
+            self.skyview.used = 0
+            for sat in self.skyview.satellites:
+                if sat.used:
+                    self.skyview.used += 1
+            return self.skyview
         elif self.data.get("class") == "WATCH":
             return self.data	# FIXME
         else:
