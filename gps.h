@@ -746,7 +746,7 @@ struct ais_t
 	    //uint spare;		spare bit(s) */
 	    uint channel_a;		/* Channel A number */
 	    uint channel_b;		/* Channel B number */
-	    uint mode;			/* transmit/receive mode */
+	    uint txrx;			/* transmit/receive mode */
 	    bool power;			/* high-power flag */
 #define AIS_CHANNEL_LATLON_SCALE	600.0
 	    int ne_lon;			/* NE corner longitude */
@@ -758,6 +758,21 @@ struct ais_t
 	    bool band_b;		/* fix 1.5kHz band for channel B */
 	    uint zonesize;		/* size of transitional zone */
 	} type22;
+	/* Type 23 - Group Assignment Command */
+	struct {
+	    //uint spare;		spare bit(s) */
+	    int ne_lon;			/* NE corner longitude */
+	    int ne_lat;			/* NE corner latitude */
+	    int sw_lon;			/* SW corner longitude */
+	    int sw_lat;			/* SW corner latitude */
+	    uint stationtype;		/* station type code */
+	    uint shiptype;		/* ship type code */
+	    //uint spare2;		spare bit(s) */
+	    uint txrx;			/* transmit-enable code */
+	    uint interval;		/* report interval */
+	    uint quiet;			/* quiet time */
+	    //uint spare3;		spare bit(s) */
+	} type23;
 	/* Type 24 - Class B CS Static Data Report */
 	struct {
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */

@@ -472,7 +472,32 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			ais->type19.lat,
 			ais->type19.second);
 	    break;
-	case 24:	/* Type 24 - Class B CS Static Data Report */
+	case 22:	/* Channel Management */
+	    ais->type22.channel_a    = UBITS(40, 12);
+	    ais->type22.channel_b    = UBITS(52, 12);
+	    ais->type22.txrx         = UBITS(64, 4);
+	    ais->type22.power        = UBITS(68, 1);
+	    ais->type22.ne_lon       = UBITS(69, 18);
+	    ais->type22.ne_lat       = UBITS(87, 17);
+	    ais->type22.sw_lon       = UBITS(104, 18);
+	    ais->type22.sw_lat       = UBITS(122, 17);
+	    ais->type22.addressed    = UBITS(139, 1);
+	    ais->type22.band_a       = UBITS(140, 1);
+	    ais->type22.band_b       = UBITS(141, 1);
+	    ais->type22.zonesize     = UBITS(142, 3);
+	    break;
+	case 23:	/* Group Assignment Command */
+	    ais->type23.ne_lon       = UBITS(40, 18);
+	    ais->type23.ne_lat       = UBITS(58, 17);
+	    ais->type23.sw_lon       = UBITS(75, 18);
+	    ais->type23.sw_lat       = UBITS(93, 17);
+	    ais->type23.stationtype  = UBITS(110, 4);
+	    ais->type23.shiptype     = UBITS(114, 8);
+	    ais->type23.txrx         = UBITS(144, 4);
+	    ais->type23.interval     = UBITS(146, 4);
+	    ais->type23.quiet        = UBITS(150, 4);
+	    break;
+	case 24:	/* Class B CS Static Data Report */
 	    switch (UBITS(38, 2)) {
 	    case 0:
 		UCHARS(40, ais_context->shipname);

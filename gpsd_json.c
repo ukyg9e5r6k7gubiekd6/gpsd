@@ -597,6 +597,27 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 
 #define SHIPTYPE_DISPLAY(n) (((n) < (uint)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
 
+    static char *station_type_legends[16] = {
+	"All types of mobiles",
+	"Reserved for future use",
+	"All types of Class B mobile stations",
+	"SAR airborne mobile station",
+	"Aid to Navigation station",
+	"Class B shipborne mobile station",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+    };
+
+#define STATIONTYPE_DISPLAY(n) (((n) < (uint)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
+
     static char *navaid_type_legends[] = {
 	"Unspcified",
 	"Reference point",
@@ -1124,14 +1145,14 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"channel_a\":%u,\"channel_b\":%u,"
-			   "\"mode\":%u,\"power\":%s,"
+			   "\"txrx\":%u,\"power\":%s,"
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
 			   "\"addressed\":%s,\"band_a\":%s,"
 			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
-			   ais->type22.mode,
+			   ais->type22.txrx,
 			   JSON_BOOL(ais->type22.power),
 			   ais->type22.ne_lon / AIS_CHANNEL_LATLON_SCALE,
 			   ais->type22.ne_lat / AIS_CHANNEL_LATLON_SCALE,
@@ -1144,14 +1165,14 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"channel_a\":%u,\"channel_b\":%u,"
-			   "\"mode\":%u,\"power\":%s,"
+			   "\"txrx\":%u,\"power\":%s,"
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,"
 			   "\"addressed\":%s,\"band_a\":%s,"
 			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
-			   ais->type22.mode,
+			   ais->type22.txrx,
 			   JSON_BOOL(ais->type22.power),
 			   ais->type22.ne_lon,
 			   ais->type22.ne_lat,
@@ -1163,7 +1184,38 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type22.zonesize);
 	}
 	break;
-    case 24: /* Class B CS Static Data Report */
+    case 23:	/* Group Assignment Command */
+	if (scaled) {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
+			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
+			   "\"stationtype\":%s,\"shiptype\":%s,"
+			   "\"interval\":%u,\"quiet\":%u\r\n",
+			   ais->type23.ne_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type23.ne_lat / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type23.sw_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type23.sw_lat / AIS_CHANNEL_LATLON_SCALE,
+			   STATIONTYPE_DISPLAY(ais->type23.stationtype),
+			   SHIPTYPE_DISPLAY(ais->type23.shiptype),
+			   ais->type23.interval,
+			   ais->type23.quiet);
+	} else {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+			   "\"ne_lon\":%d,\"ne_lat\":%d,"
+			   "\"sw_lon\":%d,\"sw_lat\":%d,"
+			   "\"stationtype\":%u,\"shiptype\":%u,"
+			   "\"interval\":%u,\"quiet\":%u\r\n",
+			   ais->type23.ne_lon,
+			   ais->type23.ne_lat,
+			   ais->type23.sw_lon,
+			   ais->type23.sw_lat,
+			   ais->type23.stationtype,
+			   ais->type23.shiptype,
+			   ais->type23.interval,
+			   ais->type23.quiet);
+	}
+	break;
+    case 24:	/* Class B CS Static Data Report */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
 		       "\"shipname\":\"%s\",",
 		       json_stringify(buf1,sizeof(buf1), ais->type24.shipname));

@@ -280,7 +280,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       "%u,%u,%u,%u,%d,%d,%d,%d,%u,%u,%u,%u",
 		       ais->type22.channel_a,
 		       ais->type22.channel_b,
-		       ais->type22.mode,
+		       ais->type22.txrx,
 		       (uint)ais->type22.power,
 		       ais->type22.ne_lon,
 		       ais->type22.ne_lat,
@@ -290,6 +290,19 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       (uint)ais->type22.band_a,
 		       (uint)ais->type22.band_b,
 		       ais->type22.zonesize);
+	break;
+    case 23:	/* Group Management Command*/
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%d,%d,%d,%d,%u,%u,%u,%u,%u",
+		       ais->type23.ne_lon,
+		       ais->type23.ne_lat,
+		       ais->type23.sw_lon,
+		       ais->type23.sw_lat,
+		       ais->type23.stationtype,
+		       ais->type23.shiptype,
+		       ais->type23.txrx,
+		       ais->type23.interval,
+		       ais->type23.quiet);
 	break;
     case 24: /* Class B CS Static Data Report */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 

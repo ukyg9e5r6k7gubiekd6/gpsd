@@ -1222,7 +1222,7 @@ Field    Len Description      Member       Units
 38-39     2  Spare                         Not used
 40-51    12  Channel A        channel_a    Channel number
 52-63    12  Channel B        channel_b    Channel number
-64-67     4  Tx/Rx mode       mode         Transmit/receive mode
+64-67     4  Tx/Rx mode       txrx         Transmit/receive mode
 68-68     1  Power            power        Low=0, high=1
 69-86    18  NE Longitude     ne_lon       NE corner longitude to 0.1 minutes
 87-103   17  NE Latitude      ne_lat       NE corner latitude to 0.1 minutes
@@ -1230,7 +1230,7 @@ Field    Len Description      Member       Units
 122-138  17  SW Latitude      sw_lat       SW corner latitude to 0.1 minutes
 139-139   1  Addressed        addressed    0=Broadcast, 1=Addressed
 140-140   1  Channel A Band   band_a       0=Default, 1=12.5kHz
-141-141   1  Channel A Band   band_a       0=Default, 1=12.5kHz
+141-141   1  Channel B Band   band_b       0=Default, 1=12.5kHz
 142-144   3  Zone size        zonesize     Size of transitional zone
 145-167  23  Spare                         Reserved for future use
 --------------------------------------------------------------------------------
@@ -1245,7 +1245,7 @@ common navigation block and elsewhere.
 
 This message is intended to be broadcast by a competent authority (an
 AIS network-control base station) to set to set operational parameters
-for all mobile stations in an AIS coverage region.   Length is 160 bits.
+for all mobile stations in an AIS coverage region. Length is 160 bits.
 
 This message contains no navigational information, and is unlikely to
 be of interest unless you are implementing or studying an AIS base
@@ -1271,8 +1271,9 @@ Field    Len Description      Member       Units
 154-159   6  Spare
 --------------------------------------------------------------------------------
 
-The target set of mobikle stations is specified by the station-type
-and ship-type fields.
+The target set of mobile stations is specified by the station-type and
+ship-type fields. An addressed (non-broadcast) message 22 overrides a
+message 23, but a message 23 ovewrrides a broadcast message 22.
 
 Note that the 'not available' values for longitudesc and latitudes
 match the short ones used in messages 17 and 22, not the long ones

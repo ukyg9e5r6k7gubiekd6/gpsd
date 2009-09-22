@@ -312,7 +312,7 @@ ais_specs = (
         # fieldname       type             default
         ('channel_a',     'uinteger',      '0'),
         ('channel_b',     'uinteger',      '0'),
-        ('mode',          'uinteger',      '0'),
+        ('txrx',          'uinteger',      '0'),
         ('power',         'boolean',       'false'),
         ('ne_lon',        'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
         ('ne_lat',        'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
@@ -324,7 +324,23 @@ ais_specs = (
         ('zonesize',      'uinteger',      '0'),
         ),
     },
-    # Structure of mesage 23 is a mystery
+    {
+    "initname" : "json_ais23",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type23",
+    "fieldmap":(
+        # fieldname       type             default
+        ('ne_lon',        'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('ne_lat',        'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('sw_lon',        'integer',       'AIS_GNS_LON_NOT_AVAILABLE'),
+        ('sw_lat',        'integer',       'AIS_GNS_LAT_NOT_AVAILABLE'),
+        ('stationtype',   'uinteger',      '0'),
+        ('shiptype',      'uinteger',      '0'),
+        ('txrx',          'uinteger',      '0'),
+        ('interval',      'uinteger',      '0'),
+        ('quiet',         'uinteger',      '0'),
+        ),
+    },
     {
     "initname" : "json_ais24",
     "header": "\tAIS_HEADER,",

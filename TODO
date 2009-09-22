@@ -42,8 +42,6 @@ of mode switch we should be uttering.
 
 *** Cleanup after the big protocol rewrite
 
-**** The Python client library presently speaks only old protocol.
-
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
 **** Profiling features (Z and $) need to be ported from the old protocol.

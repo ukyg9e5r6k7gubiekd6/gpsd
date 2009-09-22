@@ -128,6 +128,8 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":21,") != NULL) {
 	status = json_read_object(buf, json_ais21, endptr);
     } else if (strstr(buf, "\"type\":22,") != NULL) {
+	status = json_read_object(buf, json_ais23, endptr);
+    } else if (strstr(buf, "\"type\":23,") != NULL) {
 	status = json_read_object(buf, json_ais22, endptr);
     } else if (strstr(buf, "\"type\":24,") != NULL) {
 	status = json_read_object(buf, json_ais24, endptr);
