@@ -121,6 +121,18 @@ class device:
     def __repr__(self):
         return "<device path='%(path)s, activated=%(activated)s', bps=%(bps)s, serialmode=%(serialmode)s>" % self.__dict__
 
+class satellite:
+    def __init__(self, PRN, elevation, azimuth, ss, used=None):
+        self.PRN = PRN
+        self.elevation = elevation
+        self.azimuth = azimuth
+        self.ss = ss
+        self.used = used
+    def __repr__(self):
+        return "PRN: %3d  E: %3d  Az: %3d  Ss: %3d  Used: %s" % (
+            self.PRN, self.elevation, self.azimuth, self.ss, "ny"[self.used]
+        )
+
 class gpsfix:
     def __init__(self):
         self.mode = MODE_NO_FIX
@@ -156,18 +168,6 @@ class gpsfix:
 
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
-
-    class satellite:
-        def __init__(self, PRN, elevation, azimuth, ss, used=None):
-            self.PRN = PRN
-            self.elevation = elevation
-            self.azimuth = azimuth
-            self.ss = ss
-            self.used = used
-        def __repr__(self):
-            return "PRN: %3d  E: %3d  Az: %3d  Ss: %3d  Used: %s" % (
-                self.PRN, self.elevation, self.azimuth, self.ss, "ny"[self.used]
-            )
 
     def __init__(self):
         # Initialize all data members 
@@ -399,7 +399,7 @@ class gps(gpsdata):
         return self.valid
 
     def __json_unpack(self, buf):
-        def ascify(d):
+        def asciify(d):
             "De-Unicodify everything so we can copy dicts into Python objects."
             t = {}
             for (k, v) in d.items():
@@ -408,6 +408,8 @@ class gps(gpsdata):
                     va = v.encode("ascii")
                 elif type(v) == type({}):
                     va = asciify(v)
+                elif type(v) == type([]):
+                    va = map(asciify, v)
                 else:
                     va = v
                 t[ka] = va
@@ -418,7 +420,7 @@ class gps(gpsdata):
             else:
                 self.valid |= vbit
                 return self.data[k]
-        self.data = ascify(json.loads(buf, encoding="ascii"))
+        self.data = asciify(json.loads(buf, encoding="ascii"))
         if self.data.get("class") == "VERSION":
             self.valid = ONLINE_SET | VERSION_SET
             self.version = version(**self.data)
