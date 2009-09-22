@@ -484,8 +484,9 @@ class gps(gpsdata):
             self.skyview.gpsdata = self
             for attrp in "xyvhpg":
                 setattr(self.skyview, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
-            for sat in self.data['satellites']:
-                self.skyview.satellites.append(satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
+            if "satellites" in self.data:
+                for sat in self.data['satellites']:
+                    self.skyview.satellites.append(satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
             self.skyview.used = 0
             for sat in self.skyview.satellites:
                 if sat.used:
