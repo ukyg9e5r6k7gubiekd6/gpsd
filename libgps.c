@@ -175,8 +175,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 				/*@ +floatdouble @*/
 				gpsdata->epe = DEFAULT(epe);
-				gpsdata->fix.epx = DEFAULT(eph);
-				gpsdata->fix.epy = DEFAULT(eph);
+				gpsdata->fix.epx = DEFAULT(eph)/sqrt(2);
+				gpsdata->fix.epy = DEFAULT(eph)/sqrt(2);
 				gpsdata->fix.epv = DEFAULT(epv);
 				/*@ -floatdouble @*/
 #undef DEFAULT
