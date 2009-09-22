@@ -1205,10 +1205,13 @@ bit length.
 
 === Type 22: Channel Management ===
 
-This message is broadcast by a base station to set VHF parameters for
-an AIS coverage region.  It contains no navigational information, and is
-unlikely to be of interest unless you are implementing or studying
-an AIS base station network. Length is 168 bits.
+This message is broadcast by a competent authority (an AIS network
+control base station) to set VHF parameters for an AIS coverage
+region.  Length is 168 bits.
+
+This message contains no navigational information, and is unlikely to be of
+interest unless you are implementing or studying an AIS base station
+network. 
 
 `--------`---`----------------`------------`------------------------------------
 Field    Len Description      Member       Units
@@ -1240,9 +1243,13 @@ common navigation block and elsewhere.
 
 === Type 23: Group Assignment Command ===
 
+This message is intended to be broadcast by a competent authority (an
+AIS network-control base station) to set to set operational parameters
+for all mobile stations in an AIS coverage region.   Length is 160 bits.
+
 This message contains no navigational information, and is unlikely to
 be of interest unless you are implementing or studying an AIS base
-station network. Length is 160 bits.
+station network.
 
 `--------`---`----------------`------------`------------------------------------
 Field    Len Description      Member       Units
@@ -1256,19 +1263,32 @@ Field    Len Description      Member       Units
 75-92    18  SW Longitude     sw_lon       Same as type 22
 93-109   17  SW Latitude      sw_lat       Same as type 22
 110-113   4  Station Type     station_type Unsigned Integer, see below
-<114-121   8  Ship Type        ship_type    As for Message type 5
+114-121   8  Ship Type        ship_type    As for Message type 5
 122-143  22  Spare
-144-145   2  Tx/Rx Mode       txrx         Transmit/receive mode
-146-149   4  Report Interval  interval     See Below
+144-145   2  Tx/Rx Mode       txrx         Transmit/receive mode; see below,
+146-149   4  Report Interval  interval     Station report interval; see Below
 150-153   4  Quiet Time       quiet        0 = none, 1-15 quiet time in minutes
 154-159   6  Spare
 --------------------------------------------------------------------------------
 
-See <<IEC62287>> for details on the meaning of these fields.
+The target set of mobikle stations is specified by the station-type
+and ship-type fields.
 
 Note that the 'not available' values for longitudesc and latitudes
 match the short ones used in messages 17 and 22, not the long ones
 used in the common navigation block and elsewhere.
+
+The txrx field tells the affected stations which channel or
+channels they may transmit on.  The optiobs erefer to the same A and B
+VHF channels as in Message Type 22. The field is interpreted as follows:
+
+.Tranmit-Mode Table
+`---`-----------------------------
+0 = TxA/TxB, RxA/RxB (default)
+1 = TxA, RxA/RxB
+2 = TxB, RxA/RxB
+3 = Reserved for Future Use
+----------------------------------
 
 .Station Type Table
 `-----`----------------------------------------------
@@ -1281,6 +1301,11 @@ used in the common navigation block and elsewhere.
 6-9   Regional use and inland waterways
 10-15 Reserved for future use
 ------------------------------------------------------
+
+Reporting Interval is a 4 bit unsigned integer, how often to report
+while within the area specified by this message. When the dual-channel
+operation is suspended by Tx/Rx mode command 1 or 2, the reporting
+interval is twice the interval given in the table.
 
 .Interval Table
 `-----`----------------------------------------------
@@ -1297,6 +1322,12 @@ used in the common navigation block and elsewhere.
 10    Next Longer Reporting Interval
 11-15 Reserved for future use
 ------------------------------------------------------
+
+Quiet Time is a 4 bit unsigned integer specifying how many minutes
+affected stations are to remain silent. If a class B station receives
+a quiet time command, it will continue to schedule nominal
+transmission time periods, but is not to transmit message 18 or 24
+during the quiet period.
 
 === Type 24: Class B CS Static Data Report  ===
 
