@@ -58,6 +58,7 @@ WATCH_ENABLE	= 0x01
 WATCH_NMEA	= 0x02
 WATCH_RAW	= 0x04
 WATCH_SCALED	= 0x08
+WATCH_NEWSTYLE	= 0x10
 
 GPSD_PORT = 2947
 
@@ -101,6 +102,12 @@ class gpstimings:
             self.c_decode_time
         )
 
+class version:
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+    def __repr__(self):
+        return "<version: release='%(release)s', proto=%(proto_major)s.%(proto_minor)s, rev='%(rev)s'>" % self.__dict__
+
 class gpsfix:
     def __init__(self):
         self.mode = MODE_NO_FIX
@@ -117,6 +124,22 @@ class gpsfix:
         self.epd = NaN
         self.eps = NaN
         self.epc = NaN
+    def __repr__(self):
+        st = "Time:     %s (%s)\n" % (isotime(self.time), self.time)
+        st += "Lat/Lon:  %f %f\n" % (self.latitude, self.longitude)
+        if isnan(self.altitude):
+            st += "Altitude: ?\n"
+        else:
+            st += "Altitude: %f\n" % (self.altitude)
+        if isnan(self.speed):
+            st += "Speed:    ?\n"
+        else:
+            st += "Speed:    %f\n" % (self.speed)
+        if isnan(self.track):
+            st += "Track:    ?\n"
+        else:
+            st += "Track:    %f\n" % (self.track)
+        return st
 
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
@@ -163,20 +186,7 @@ class gpsdata:
         self.devices = []
 
     def __repr__(self):
-        st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
-        st += "Lat/Lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
-        if isnan(self.fix.altitude):
-            st += "Altitude: ?\n"
-        else:
-            st += "Altitude: %f\n" % (self.fix.altitude)
-        if isnan(self.fix.speed):
-            st += "Speed:    ?\n"
-        else:
-            st += "Speed:    %f\n" % (self.fix.speed)
-        if isnan(self.fix.track):
-            st += "Track:    ?\n"
-        else:
-            st += "Track:    %f\n" % (self.fix.track)
+        st = repr(self.fix)
         st += "Status:   STATUS_%s\n" % ("NO_FIX", "FIX", "DGPS_FIX")[self.status]
         st += "Mode:     MODE_%s\n" % ("ZERO", "NO_FIX", "2D", "3D")[self.fix.mode]
         st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
@@ -195,6 +205,9 @@ class gps(gpsdata):
         self.connect(host, port)
         self.verbose = verbose
         self.raw_hook = None
+
+    def __iter__(self):
+        return self
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -375,19 +388,71 @@ class gps(gpsdata):
                     self.profiling = (data[0] == '1')
                 elif cmd == '$':
                     self.timings.collect(*data.split())
+        return self.valid
+
 
     def __json_unpack(self, buf):
-        jsondict = json.loads(buf)
-        print jsondict
-        pass
+        def ascify(d):
+            "De-Unicodify everything so we can copy dicts into Python objects."
+            t = {}
+            for (k, v) in d.items():
+                ka = k.encode("ascii")
+                if type(v) == type(u"x"):
+                    va = v.encode("ascii")
+                else:
+                    va = v
+                t[ka] = va
+            return t
+        jo = ascify(json.loads(buf, encoding="ascii"))
+        if jo.get("class") == "VERSION":
+            self.valid = ONLINE_SET | VERSION_SET
+            self.version = version(**jo)
+            return self.version
+        elif jo.get("class") == "TPV":
+            self.timings.sentence_tag = jo["tag"]
+            def default(k, dflt, vbit=0):
+                if k not in jo:
+                    return dflt
+                else:
+                    self.valid |= vbit
+                    return jo[k]
+            # clear all valid bits that might be set again below
+            self.valid &= ~(
+                TIME_SET | TIMERR_SET | LATLON_SET | ALTITUDE_SET |
+                HERR_SET | VERR_SET | TRACK_SET | SPEED_SET |
+                CLIMB_SET | SPEEDERR_SET | CLIMBERR_SET | MODE_SET
+            )
+            self.utc = None
+            self.fix.time = default("time", NaN, TIME_SET)
+            if not isnan(self.fix.time):
+                self.utc = isotime(self.fix.time)
+            self.fix.ept =       default("ept",   NaN, TIMERR_SET)
+            self.fix.latitude =  default("lat",   NaN, LATLON_SET)
+            self.fix.longitude = default("lon",   NaN)
+            self.fix.altitude =  default("alt",   NaN, ALTITUDE_SET)
+            self.fix.epx =       default("epx",   NaN, HERR_SET)
+            self.fix.epy =       default("epy",   NaN, HERR_SET)
+            self.fix.epv =       default("epv",   NaN, VERR_SET)
+            self.fix.track =     default("track", NaN, TRACK_SET)
+            self.fix.speed =     default("speed", NaN, SPEED_SET)
+            self.fix.climb =     default("climb", NaN, CLIMB_SET)
+            self.fix.epd =       default("epd",   NaN)
+            self.fix.eps =       default("eps",   NaN, SPEEDERR_SET)
+            self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
+            self.fix.mode =      default("mode",  0,   MODE_SET)
+            return self.fix
+        elif jo.get("class") == "SKY":
+            return jo
+        else:
+            return jo
 
     def waiting(self):
         "Return True if data is ready for the client."
         (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
         return winput != []
 
-    def poll(self):
-        "Wait for and read data being streamed from gpsd."
+    def next(self):
+        "Get the next response object from gpsd abd return it."
         self.response = self.sockfile.readline()
         if self.response.startswith("H") and "=" not in self.response:
             while True:
@@ -396,16 +461,16 @@ class gps(gpsdata):
                 if frag.startswith("."):
                     break
         if not self.response:
-            return -1
+            raise StopIteration
         if self.verbose:
             sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
         self.timings.c_recv_time = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);
-        #if self.response.startswith("{"):
-        #    self.__json_unpack(self.response)
-        #else:
-        self.__oldstyle_unpack(self.response)
+        if self.response.startswith("{") and "class" in self.response:
+            data = self.__json_unpack(self.response)
+        else:
+            data = self.__oldstyle_unpack(self.response)
         if self.profiling:
             if self.timings.sentence_time != '?':
                 basetime = self.timings.sentence_time
@@ -413,7 +478,15 @@ class gps(gpsdata):
                 basetime = self.timings.d_xmit_time
             self.timings.c_decode_time = time.time() - basetime
             self.timings.c_recv_time -= basetime
-        return 0
+        return data
+
+    def poll(self):
+        "Poll for data from the GPS."
+        try:
+            self.next()
+            return 0
+        except StopIteration:
+            return -1
 
     def send(self, commands):
         "Ship commands to the daemon."
@@ -428,16 +501,27 @@ class gps(gpsdata):
 
     def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
-        if flags & WATCH_ENABLE:
-            arg = "w+x"
-            if self.raw_hook or (flags & WATCH_NMEA):
-                arg += 'r+'
-                return self.query(arg)
-        elif flags & WATCH_DISABLE:
-            arg = "w-"
-            if self.raw_hook or (flags & WATCH_NMEA):
-                arg += 'r-'
-                return self.query(arg)
+        if flags & WATCH_NEWSTYLE:
+            if flags & WATCH_ENABLE:
+                arg = '?WATCH={"enable":true'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += ',"nmea":true'
+            elif flags & WATCH_DISABLE:
+                arg = '?WATCH={"enable":false'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += ',"nmea":false'
+            return self.send(arg + "}")
+        else:
+            if flags & WATCH_ENABLE:
+                arg = 'w+'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += 'r+'
+                    return self.send(arg)
+            elif flags & WATCH_DISABLE:
+                arg = "w-"
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += 'r-'
+                    return self.send(arg)
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET  = 3.2808399
@@ -513,7 +597,7 @@ def isotime(s):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-        return date + "." + `msec`[2:]
+        return date + "." + ("%.2f" % msec)[2:]
     elif type(s) == type(""):
         if s[-1] == "Z":
             s = s[:-1]
@@ -540,16 +624,14 @@ if __name__ == '__main__':
 
     if streaming:
         session = gps(*arguments)
-        session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
-        session.stream(WATCH_ENABLE)
-        while True:
-            session.poll()
-            if session.valid:
-                print session
+        #session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
+        session.stream(WATCH_ENABLE | WATCH_NEWSTYLE)
+        for event in session:
+            print event
     else:
         print "This is the exerciser for the Python gps interface."
         session = gps(*arguments)
-        session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
+        #session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
         try:
             while True:
                 session.query(raw_input("> "))
