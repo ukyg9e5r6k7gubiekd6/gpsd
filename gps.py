@@ -12,6 +12,7 @@ NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
 
 # Don't hand-hack this list, it's generated.
+# Not all of these are actually used in the Python client code.
 ONLINE_SET     	= 0x00000001
 TIME_SET       	= 0x00000002
 TIMERR_SET     	= 0x00000004
@@ -444,7 +445,7 @@ class gps(gpsdata):
             self.device.gpsdata = self
             self.device.path        = self.data["path"]
             self.device.activated   = default("activated", None) 
-            self.device.subtype     = default("subtype", None) 
+            self.device.subtype     = default("subtype", None, DEVICEID_SET) 
             self.device.driver_mode = default("native", 0)
             self.device.serialmode  = default("serialmode", "8N1")
             self.device.cycle       = default("cycle",    NaN)
@@ -490,9 +491,9 @@ class gps(gpsdata):
                 if sat.used:
                     self.skyview.used += 1
             return self.skyview
-        elif self.data.get("class") == "WATCH":
-            return self.data	# FIXME
         else:
+            # Other classes, including RTCM2, AIS, WATCH and DEVICELIST,
+            # fall through to here.
             return self.data
 
     def waiting(self):
