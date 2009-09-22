@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.13, Jun 2009
+v1.14, Sep 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -369,11 +369,11 @@ An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
 
-Detailed descriptions of message types 1-22 and 24 follow. Message
-types 1-22 are derived from <<IALA>>. Message types 23-24 are listed
-at <<BOSUN>> with no further information; message types 25-26 are
-reported by <<Schwehr>>, who observes they were added in Version 3 of
-<<ITU1371>>.
+Detailed descriptions of message types 1-24 follow. Message types 1-22
+are derived from <<IALA>>. Message type 23 was decribed to me by Mike
+Greene based on <<IEC62287>>.  Message type 24 are listed at <<BOSUN>>
+with no further information; message types 25-26 are reported by
+<<Schwehr>>, who observes they were added in Version 3 of <<ITU1371>>.
 
 The "Member" column in these tables is not derived from any of the ITU
 standards or amendments.  I have invented it in order to be able to
@@ -1191,7 +1191,7 @@ The Off-Position Indicator is for floating Aids-to-Navigation only: 0
 or below 59.
 
 The Virtual Aid flag is interpreted as follows: 0 = default = real Aid
-to Navigation at indicated position; 1 = virtual Aide to
+to Navigation at indicated position; 1 = virtual Aid to
 Navigation simulated by nearby AIS station.
 
 If present, the Name Extension consists of packed six-bit ASCII
@@ -1211,7 +1211,7 @@ unlikely to be of interest unless you are implementing or studying
 an AIS base station network. Length is 168 bits.
 
 `--------`---`----------------`------------`------------------------------------
-Field   Len Description       Member       Units
+Field    Len Description      Member       Units
 --------------------------------------------------------------------------------
 0-5       6  Message Type     type         Unsigned integer: 22
 6-7       2  Repeat Indicator repeat       As in Common Navigation Block
@@ -1235,8 +1235,68 @@ Field   Len Description       Member       Units
 See <<IALA>> for details on the meaning of these fields.
 
 Note that the 'not available' values for longitudesc and latitudes
-match the short ones used in message 17, nit the long ones used in the
+match the short ones used in message 17, not the long ones used in the
 common navigation block and elsewhere. 
+
+=== Type 23: Group Assignment Command ===
+
+This message contains no navigational information, and is unlikely to
+be of interest unless you are implementing or studying an AIS base
+station network. Length is 160 bits.
+
+`--------`---`----------------`------------`------------------------------------
+Field    Len Description      Member       Units
+--------------------------------------------------------------------------------
+0-5       6  Message Type     type         Unsigned Integer: 23
+6-7       2  Repeat Indicator repeat       As in Common Navigation Block
+8-37     30  MMSI             mmsi         Unsigned Integer: 9 digits
+38-39     2  Spare
+40-57    18  NE Longitude     ne_lon       Same as type 22
+58-74    17  NE Latitude      ne_lat       Same as type 22
+75-92    18  SW Longitude     sw_lon       Same as type 22
+93-109   17  SW Latitude      sw_lat       Same as type 22
+110-113   4  Station Type     station_type Unsigned Integer, see below
+<114-121   8  Ship Type        ship_type    As for Message type 5
+122-143  22  Spare
+144-145   2  Tx/Rx Mode       txrx         Transmit/receive mode
+146-149   4  Report Interval  interval     See Below
+150-153   4  Quiet Time       quiet        0 = none, 1-15 quiet time in minutes
+154-159   6  Spare
+--------------------------------------------------------------------------------
+
+See <<IEC62287>> for details on the meaning of these fields.
+
+Note that the 'not available' values for longitudesc and latitudes
+match the short ones used in messages 17 and 22, not the long ones
+used in the common navigation block and elsewhere.
+
+.Station Type Table
+`-----`----------------------------------------------
+0     All types of mobiles (default)
+1     Reserved for future use
+2     All types of Class B mobile stations
+3     SAR airborne mobile station
+4     Aid to Navigation station
+5     Class B shipborne mobile station (IEC62287 only)
+6-9   Regional use and inland waterways
+10-15 Reserved for future use
+------------------------------------------------------
+
+.Interval Table
+`-----`----------------------------------------------
+0     As given by the autonomous mode
+1     10 Minutes
+2     6 Minutes
+3     3 Minutes
+4     1 Minute
+5     30 Seconds
+6     15 Seconds
+7     10 Seconds
+8     5 Seconds
+9     Next Shorter Reporting Interval
+10    Next Longer Reporting Interval
+11-15 Reserved for future use
+------------------------------------------------------
 
 === Type 24: Class B CS Static Data Report  ===
 
@@ -1381,6 +1441,11 @@ Identification System]
    is described on page 26 of Annex C, Table C-1.  Communicated by 
    Kurt Schwehr; I have not looked at it.
 
+- [[[IEC 62287]]] "Maritime Navigation and Radiocommunication
+  Equipment and Systems – Class B Shipborne Equipment of the
+  Automatic Identification System (AIS)" Communicated by Mike Greene;
+  I have not looked at it.
+
 - [[[ITU-MID]]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
   of Maritime Identification Digits]
 
@@ -1435,3 +1500,5 @@ type codes.
 
 Version 1.13 documents more out-of-band values and treats radio status
 blocks more uniformly.
+
+Version 1.14 documents AIS message type 23.
