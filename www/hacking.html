@@ -482,40 +482,42 @@ only, suspicion should focus here.</p>
 
 <h2 id="profiling">Profiling</h2>
 
-<p>There is a barely-documented Z command in the daemon will cause it to emit
-a $ clause on every request.  The $ clause contains four
-space-separated fields:</p>
+<p>There is a barely-documented timing policy flag in the WATCH
+command that will cause it to emit a TIMING object on every sentence.
+(These were the Z command and the $ sentence in the old protocol.)
+The TIMING clause contains the following attributed:</p>
 
 <ol>
-<li>An identifing sentence tag.</li>
+<li>tag: An identifing sentence tag.</li>
 
-<li>The character length of the sentence containing the timestamp data.</li>
+<li>len: The character length of the sentence containing the timestamp
+    data.</li>
 
-<li>The timestamp associated with the sentence, in seconds since
+<li>basetime: The timestamp associated with the sentence, in seconds since
     the Unix epoch (this time <em>is</em> leap-second corrected, like UTC).
     This timestamp may be zero.  If nonzero, it is the base time for
     the packet.</li>
 
-<li>An offset from the timestamp telling when gpsd believes the
+<li>xmit: An offset from the timestamp telling when gpsd believes the
     transmission of the current packet started (this is actually 
     recorded just before the first read of the new packet).  If
     the sentence timestamp was zero, this offset is a full timestamp 
     and the base time of the packet.</li>
 
-<li>An offset from the base time telling when <code>gpsd</code>
+<li>recv: An offset from the base time telling when <code>gpsd</code>
     received the last bytes of the packet.</li>
 
-<li>An offset from the base time telling when gpsd decoded the data.</li>
+<li>decode: An offset from the base time telling when gpsd decoded the
+    data.</li>
 
-<li>An offset from the base time taken just before encoding the
+<li>poll: An offset from the base time taken just before encoding the
     response &mdash; effectively, when gpsd was polled to transmit the 
     data.</li>
 
-<li>An offset from the base time telling when <code>gpsd</code> transmitted 
-    the data.</li>
+<li>An offset from the base time to the time of the TIMING emission.</li>
 </ol>
 
-<p>The Z figures measure components of the latency between the GPS's
+<p>The TIMING figures measure components of the latency between the GPS's
 time measurement and when the sentence data became available to the
 client. For it to be meaningful, the GPS has to ship timestamps with
 sub-second precision. SiRF-II and Evermore chipsets ship times with
