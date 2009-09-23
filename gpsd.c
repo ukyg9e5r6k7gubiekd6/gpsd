@@ -507,6 +507,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.nmea = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
+    sub->policy.timing = false;
     sub->policy.devpath[0] = '\0';
     for (channel = channels; channel < channels + NITEMS(channels); channel++)
 	if (channel->subscriber == sub)
@@ -1627,10 +1628,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
      */
     /*@-nullderef -nullpass@*/
 
-
-    /*
-     * Still to be implemented: equivalents of Z $
-     */
     if (strncmp(buf, "DEVICES;", 8) == 0) {
 	buf += 8;
 	json_devicelist_dump(reply, replylen);
@@ -2202,6 +2199,31 @@ int main(int argc, char *argv[])
 			|| strcmp(device->gpsdata.dev.path, 
 				  channel->device->gpsdata.dev.path)!=0)
 			continue;
+
+		    if (channel->subscriber->policy.timing) {
+			char phrase[GPS_JSON_RESPONSE_MAX];
+			if (channel->device->gpsdata.sentence_time!=0)
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+					   channel->device->gpsdata.tag,
+					   (int)channel->device->gpsdata.sentence_length,
+					   channel->device->gpsdata.sentence_time,
+					   channel->device->gpsdata.d_xmit_time - channel->device->gpsdata.sentence_time,
+					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.sentence_time,
+					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.sentence_time,
+					   channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.sentence_time,
+					   timestamp() - channel->device->gpsdata.sentence_time);
+			else
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+					   channel->device->gpsdata.tag,
+					   (int)channel->device->gpsdata.sentence_length,
+					   channel->device->gpsdata.d_xmit_time,
+					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.d_xmit_time,
+					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.d_xmit_time,
+					   channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.d_xmit_time,
+					   timestamp() - channel->device->gpsdata.d_xmit_time);
+			(void)throttled_write(channel->subscriber,
+					      phrase, strlen(phrase));
+		    }
 
 		    /* 
 		     * NMEA and other textual sentences are simply

@@ -867,6 +867,7 @@ struct policy_t {
     bool nmea;				/* requesting dumping as NMEA */
     int raw;				/* dump raw data? */
     bool scaled;			/* perform report scaling? */ 
+    bool timing;			/* send per-sentence timing info */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */   
 };
 

@@ -1322,6 +1322,10 @@ describes the subscriber's policy.</para>
 </tgroup>
 </table>
 
+<para>There is an additional boolean "timing" attribute which is 
+undodumented because that portion iof the interface is considered
+unstable and for developer use only.</para>
+
 <para>In watcher mode, GPS reports are dumpred as TPV and SKY
 responses.  If the device is a source of RTCM2 corrections, the
 corrections are dumped in the JSON format described in

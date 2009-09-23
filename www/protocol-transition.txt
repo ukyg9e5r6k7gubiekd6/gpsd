@@ -269,7 +269,7 @@ The old 'X' command is gone.  Instead, you will see an object of
 class DEVICE from the daemon whenever a device is opened or closed.
 
 The old 'Z' and '$' commands, used by the developers for profiling, 
-have no equivalents.  We'll implement them if we need them.
+have equivalents, presently undocumented.
 
 == How the gps_data_t structure has changed == 
 
