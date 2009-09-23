@@ -403,7 +403,7 @@ def generate(spec):
     };
 """
 
-# No code for gernerating dump functions yet.
+# No code for generating dump functions yet.
 # When we do this, remembeer that we have to suppress dump function
 # generation from any spec with a union dot in the field names;
 # those will have to be coded by hand.
