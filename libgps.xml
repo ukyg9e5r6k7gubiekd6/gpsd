@@ -267,8 +267,9 @@ streaming-oriented wire protocol behind this library, it is extremely
 unwise to assume that the first transmission from the damon after a
 command is shipped to it will be the reponse to command.</para>
 
-<para> Using <function>gps_send()</function> ties your code to the
-GPSD wire protocol and is not recommended.</para> 
+<para>If you must send commands to the daemon explicity, use
+<function>gps_send()</function> but beware that this ties your code to
+the GPSD wire protocol. It is not recommended.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

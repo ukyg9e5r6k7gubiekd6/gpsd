@@ -308,7 +308,7 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,t\"timing\":%s",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s",
 		   ccp->watcher ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
 		   ccp->raw, 
