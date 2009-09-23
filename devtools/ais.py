@@ -14,6 +14,7 @@
 #    message.  Presently a known issue for types 15 and 16 only.  (Will
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
+# * Does not join the type 21 name extension field to the name fields.
 #
 # Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
 # Message types 6-8, 12-17, 20-22, 23, and 25-26 have not.
