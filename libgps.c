@@ -498,7 +498,7 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
 	(void)strlcat(buf, "\n", BUFSIZ);
-    if (write(gpsdata->gps_fd, buf, strlen(buf)) == (size_t)strlen(buf))
+    if (write(gpsdata->gps_fd, buf, strlen(buf)) == (ssize_t)strlen(buf))
 	return 0;
     else
 	return -1;
