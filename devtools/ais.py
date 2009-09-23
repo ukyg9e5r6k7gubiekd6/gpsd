@@ -761,9 +761,6 @@ def aivdm_unpack(data, offset, values, instructions):
                 value = value.replace("@", " ").rstrip()
             elif inst.type == 'raw':
                 value = BitVector(data.bits[offset/8:], len(data)-offset)
-            else:
-                print >>sys.stderr, "ais.py: unknown bitfield type %s" % inst.type
-                sys.exit(0)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
                 raise AISUnpackingException(inst.name, value)
@@ -845,7 +842,7 @@ if __name__ == "__main__":
 
     for parsed in parse_ais_messages(sys.stdin, scaled):
         if json:
-            print "{" + ",".join(map(lambda x: '"' + x[0] + '"=' + str(x[1]), parsed)) + "}"
+            print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
         elif csv:
             print ",".join(map(lambda x: str(x[1]), parsed))
         else:
