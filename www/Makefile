@@ -23,10 +23,13 @@ XML = \
 
 all: html
 
-html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html $(XML:.xml=.html) protocol-evolution.html protocol-transition.html
+html: index.html hardware.html writing-a-driver.html gypsy.html AIVDM.html NMEA.html $(XML:.xml=.html) protocol-evolution.html protocol-transition.html
 
 AIVDM.html: AIVDM.txt
 	asciidoc -a toc AIVDM.txt
+
+NMEA.html: NMEA.txt
+	asciidoc -a toc NMEA.txt
 
 protocol-evolution.html: protocol-evolution.txt
 	asciidoc -a toc protocol-evolution.txt
