@@ -6,8 +6,6 @@
  *
  * Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
  * Message types 6-8, 12-17, 20-23, and 25-26 have not.
- *
- * Message type 21 decoding does not yet handle the Name Extension field.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -447,7 +445,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    break;
 	case 21:	/* Aid-to-Navigation Report */
 	    ais->type21.type = UBITS(38, 5);
-	    UCHARS(43, ais->type21.name);
+	    from_sixbit((char *)ais_context->bits, 
+			43, 20, ais->type21.name);
+	    if (strlen(ais->type21.name) == 20 && ais_context->bitlen > 272)
+		from_sixbit((char *)ais_context->bits, 
+			    272, (ais_context->bitlen - 272)/6, 
+			    ais->type21.name+20);
 	    ais->type21.accuracy     = UBITS(163, 163);
 	    ais->type21.lon          = UBITS(164, 28);
 	    ais->type21.lat          = UBITS(192, 27);
