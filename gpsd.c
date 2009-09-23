@@ -2210,7 +2210,7 @@ int main(int argc, char *argv[])
 					   channel->device->gpsdata.d_xmit_time - channel->device->gpsdata.sentence_time,
 					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.sentence_time,
 					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.sentence_time,
-					   channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.sentence_time,
+					   channel->device->poll_times[subscriber_index(channel->subscriber)] - channel->device->gpsdata.sentence_time,
 					   timestamp() - channel->device->gpsdata.sentence_time);
 			else
 			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
@@ -2219,7 +2219,7 @@ int main(int argc, char *argv[])
 					   channel->device->gpsdata.d_xmit_time,
 					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.d_xmit_time,
 					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.d_xmit_time,
-					   channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.d_xmit_time,
+					   channel->device->poll_times[subscriber_index(channel->subscriber)] - channel->device->gpsdata.d_xmit_time,
 					   timestamp() - channel->device->gpsdata.d_xmit_time);
 			(void)throttled_write(channel->subscriber,
 					      phrase, strlen(phrase));
