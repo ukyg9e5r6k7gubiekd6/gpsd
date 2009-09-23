@@ -34,13 +34,7 @@ C:
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcprototype>
 <funcdef>int <function>gps_send</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>char *<parameter>fmt</parameter>...</paramdef>
-</funcprototype>
-<funcprototype>
-<funcdef>int <function>gps_query</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>char *<parameter>fmt</parameter>...</paramdef>
 </funcprototype>
@@ -94,9 +88,10 @@ session = gps.gps(host="127.0.0.1", port="2947")
 
 session.set_raw_hook(raw_hook)
 
-session.stream()
+session.stream(WATCH_ENABLE)
 
-session.poll()
+for report in session:
+    process(report)
 
 del session
 
@@ -124,7 +119,7 @@ version 4. Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
 force a compilation failure if the header is not exporting a version
 you recognize.  See the GPSD project website for more information on
-the protocol and API change.</para></warning>
+the protocol and API changes.</para></warning>
 
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
@@ -147,17 +142,15 @@ undefined behavior.  Currently it will leak a thread, and in the
 future might result in aborting the program.
 </para>
 
-<para><function>gps_send()</function> writes a command to the
-daemon, accepts a one-line response, and updates parts of the GPS-data
-structure that correspond to data changed since the last call.  The
-second argument must be a format string containing elements from the command
-set documented at
+<para><function>gps_send()</function> writes a command to the daemon.
+The second argument must be a format string containing elements from
+the command set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-It may have % elements as for 
+It may have % elements as for
 <citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-which will be filled in from any following arguments.
-This function returns a -1 if there was a Unix-level write error,
-otherwise 0.</para>
+which will be filled in from any following arguments.  This function
+returns a -1 if there was a Unix-level write error, otherwise
+0.</para>
 
 <para><function>gps_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
@@ -166,18 +159,6 @@ query response (the return value is as for a query).
 received structure.  This function does a blocking read waiting for
 data from the daemon; it returns 0 for success, or -1 on a Unix-level
 read error. </para>
-
-<para><function>gps_query()</function> writes a command to the daemon,
-accepts a one-line response, and updates parts of the GPS-data
-structure that correspond to data changed since the last call.  The
-second argument must be a format string containing elements from the
-command set documented at
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-It may have % elements as for
-<citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-which will be filled in from any following arguments.  This function
-returns a 0 on success, or a -1 if there was a Unix-level read
-error.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
@@ -276,6 +257,18 @@ code that calls gps_poll(gpsdata).
     (void)gps_close(gpsdata);
 </programlisting>
 
+</refsect1>
+
+<refsect1 id='compatibility'><title>COMPATIBILITY</title>
+
+<para>The <function>gps_query()</function> supported in major versions
+1 and 2 of this library has been removed.  With the new
+streaming-oriented wire protocol behind this library, it is extremely
+unwise to assume that the first transmission from the damon after a
+command is shipped to it will be the reponse to command.</para>
+
+<para> Using <function>gps_send()</function> ties your code to the
+GPSD wire protocol and is not recommended.</para> 
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

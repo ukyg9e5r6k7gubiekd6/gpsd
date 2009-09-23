@@ -504,22 +504,6 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
 }
 
-int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
-/* query a gpsd instance for new data */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    va_start(ap, fmt);
-    (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
-    va_end(ap);
-    if (buf[strlen(buf)-1] != '\n')
-	(void)strlcat(buf, "\n", BUFSIZ);
-    if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0)
-	return -1;
-    return gps_poll(gpsdata);
-}
-
 int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 /* ask gpsd to stream reports at you, hiding the command details */
 {

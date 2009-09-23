@@ -95,9 +95,8 @@ At the moment, when a gpsd client using libgps is connected to the
 gpsd server, and the server is restarted, the client loses the
 connection and do not update any more.
 
-It would be nice if the gps_poll() and gps_query() would try to
-reconnect to the server if the read() and write() calls on the tcp
-socket fail.
+It would be nice if gps_poll() would try to reconnect to the server if
+the read() and write() calls on the tcp socket fail.
 
 To test this, start gpsd first (/etc/init.d/gpsd start), xgps second,
 and then restart gpsd (/etc/init.d/gpsd restart).  The xgps client

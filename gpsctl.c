@@ -59,6 +59,22 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
+static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
+/* query a gpsd instance for new data */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
+    va_end(ap);
+    if (buf[strlen(buf)-1] != '\n')
+	(void)strlcat(buf, "\n", BUFSIZ);
+    if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0)
+	return -1;
+    return gps_poll(gpsdata);
+}
+
 static void onsig(int sig)
 {
     if (sig == SIGALRM) {
