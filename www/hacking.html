@@ -598,7 +598,9 @@ switching each GPS connection to using the correct device driver
 depending on the packet type that the sniffer returns.  This is
 <em>not configured in advance</em> and may change over time, notably
 if the device switches between different reporting protocols (most
-chopserts support NMEA and one or more vendor binary protocols).</p>
+chipsets support NMEA and one or more vendor binary protocols, and
+devices like AIS receivers may report packets in two different 
+protcols on the same wire).</p>
 
 <p>Finally, the <b>multiplexor</b> is the part of the daemon that 
 handles client sessions and device assignment.  It is responsible
@@ -616,7 +618,7 @@ core library and driver layer directly.</p>
 separately useful. <code>gpscat</code> uses it without the rest of the
 lower layer in order to detect and report packet boundaries in raw
 data. So does <code>gpsfake</code>, in order to chunk logfiles so they
-can be fed to a test instance of the daemon packet by packet with
+can be fed to a test instance of the daemon packet-by-packet with
 something approximating realistic timing.</p>
 
 <h3>The data-flow view</h3>
@@ -720,12 +722,12 @@ disconnected).  This is why <code>gpsd_deactivate()</code> and
 <code>gpsd_wrap() are separate entry points.</code></p>
 
 <p><code>gpsd</code> has to configure some kinds of GPS devices when
-it recognizes them; <code>gpsd_activate()</code> does this by calling
-the <code>.configurator</code> method each time the device is activated.
-<code>gpsd</code> tries to clean up after itself, restoring settings
-that were changed by the configurator method; this is done by 
-<code>gpsd_deactivate()</code>, which calls the <code>.revert</code>
-method of the driver.</p>
+it recognizes them; this is what the <code>event_identify</code> and
+<code>event_configure</code> hooks are for.  <code>gpsd</code> tries
+to clean up after itself, restoring settings that were changed by the
+configurator method; this is done by <code>gpsd_deactivate()</code>,
+which fires the <code>deactivate</code> event so the druver can revert
+settings.</p>
 
 <h2 id="autoconfiguration">Autoconfiguration</h2>
 
