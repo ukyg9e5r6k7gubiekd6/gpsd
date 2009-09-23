@@ -16,7 +16,7 @@
 #    is 'string' or 'raw').
 #
 # Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
-# Message types 6-8, 12-17, 20-23, and 25-26 have not.
+# Message types 6-8, 12-17, 20-22, 23, and 25-26 have not.
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
@@ -531,7 +531,7 @@ aide_type_legends = (
         )
 
 type21 = (
-    bitfield("type",            5, 'unisigned', 0,         "Aid type",
+    bitfield("type",            5, 'unsigned',  0,         "Aid type",
              formatter=aide_type_legends),
     bitfield("name",          120, 'string',    None,      "Name"),
     bitfield("accuracy",        1, 'unsigned',  0,         "Position Accuracy"),
@@ -552,7 +552,7 @@ type21 = (
     bitfield("raim",            1, 'unsigned',  0,         "RAIM flag"),
     bitfield("virtual_aid",     1, 'unsigned',  0,         "Virtual-aid flag"),
     bitfield("assigned",        1, 'unsigned',  0,         "Assigned-mode flag"),
-    spare(2),
+    spare(1),
     bitfield("name",           88, 'string',    0,         "Name Extension"),
     )
 
@@ -560,7 +560,7 @@ type22 = (
     spare(2),
     bitfield("channel_a", 12, 'unsigned',  0,       "Channel A"),
     bitfield("channel_b", 12, 'unsigned',  0,       "Channel B"),
-    bitfield("mode",       4, 'unsigned',  0,       "Tx/Rx mode"),
+    bitfield("txrx",       4, 'unsigned',  0,       "Tx/Rx mode"),
     bitfield("power",      1, 'unsigned',  0,       "Power"),
     bitfield("ne_lon",    18, 'unsigned',  0x1a838, "NE Longitude",
              formatter=short_latlon_format),
@@ -575,6 +575,47 @@ type22 = (
     bitfield("band_a",     1, 'unsigned',  0,       "Channel A Band"),
     bitfield("zonesize",   3, 'unsigned',  0,       "Zone size"),
     spare(23),
+    )
+
+station_type_legends = (
+	"All types of mobiles",
+	"Reserved for future use",
+	"All types of Class B mobile stations",
+	"SAR airborne mobile station",
+	"Aid to Navigation station",
+	"Class B shipborne mobile station",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Regional use and inland waterways",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+	"Reserved for future use",
+        )
+
+type23 = (
+    spare(2),
+    bitfield("ne_lon",    18, 'unsigned',  0x1a838, "NE Longitude",
+             formatter=short_latlon_format),
+    bitfield("ne_lat",    17, 'unsigned',  0xd548,  "NE Latitude",
+             formatter=short_latlon_format),
+    bitfield("sw_lon",    18, 'unsigned',  0x1a838, "SW Longitude",
+             formatter=short_latlon_format),
+    bitfield("sw_lat",    17, 'unsigned',  0xd548,  "SW Latitude",
+             formatter=short_latlon_format),
+    bitfield("stationtype",9,'unsigned',   0,       "Station Type",
+             validator=lambda n: n >= 0 and n <= 31,
+             formatter=station_type_legends),
+    bitfield("shiptype",  9, 'unsigned',   0,       "Ship Type",
+             validator=lambda n: n >= 0 and n <= 99,
+             formatter=ship_type_legends),
+    spare(22),
+    bitfield("txrx",       2, 'unsigned',  0,       "Tx/Rx mode"),
+    bitfield("interval",   4, 'unsigned',  0,       "Reporting interval"),
+    bitfield("txrx",       4, 'unsigned',  0,       "Quiet time"),
     )
 
 type24a = (
@@ -620,7 +661,7 @@ aivdm_decode = (
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              type20, type21, type22,  None,   type24]),
+                              type20, type21, type22,  type23, type24]),
     )
 
 field_groups = (
@@ -720,6 +761,9 @@ def aivdm_unpack(data, offset, values, instructions):
                 value = value.replace("@", " ").rstrip()
             elif inst.type == 'raw':
                 value = BitVector(data.bits[offset/8:], len(data)-offset)
+            else:
+                print >>sys.stderr, "ais.py: unknown bitfield type %s" % inst.type
+                sys.exit(0)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
                 raise AISUnpackingException(inst.name, value)
@@ -764,20 +808,6 @@ def parse_ais_messages(source, scaled=False):
                 group = formatter(*map(lambda x: x[1], segment))
                 group = (label, group, 'string', legend, None)
                 cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
-        # If there are multiple string fields with the same name,
-        # treat all but the first as extensions; that is, concatenate the values
-        # of the later ones to the first, then delete those tuples.
-        # FIXME: Code is untested - we need a message 21 with extension field
-        retry = True
-        while retry:
-            retry = False
-            for i in range(len(cooked)):
-                if cooked[i][0].type == 'string':
-                    for j in range(i+1, len(cooked)):
-                        if cooked[j][0].type == 'string' and cooked[i][0].name == cooked[j][0].name:
-                            cooked[i][1] += cooked[j][1]
-                            cooked = cooked[:j] + cooked[j+1:]
-                            retry = True
         # Now apply custom formatting hooks.
         if scaled:
             for (i, (inst, value)) in enumerate(cooked):
