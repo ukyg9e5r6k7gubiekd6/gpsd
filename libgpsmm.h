@@ -18,7 +18,7 @@ class gpsmm {
 		virtual ~gpsmm();
 		struct gps_data_t* open(const char *host,const char *port); //opens the connection with gpsd, MUST call this before any other method
 		struct gps_data_t* open(void); //open() with default values
-		struct gps_data_t* query(const char *request); //put a command to gpsd and return the updated struct
+		struct gps_data_t* send(const char *request); //put a command to gpsd and return the updated struct
 		struct gps_data_t* stream(int); //set watcher and policy flags
 		struct gps_data_t* poll(void); //block until gpsd returns new data, then return the updated struct
 		int set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, size_t len)); //set a callback funcition, called each time new data arrives

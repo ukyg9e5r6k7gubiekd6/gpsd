@@ -34,8 +34,8 @@ struct gps_data_t* gpsmm::stream(int flags) {
 	}
 }
 
-struct gps_data_t* gpsmm::query(const char *request) {
-	if (gps_query(gps_data,request)==-1) {
+struct gps_data_t* gpsmm::send(const char *request) {
+	if (gps_send(gps_data,request)==-1) {
 		return NULL;
 	}
 	else {

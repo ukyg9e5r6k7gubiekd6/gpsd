@@ -994,6 +994,7 @@ extern int gps_open_r(const char *host, const char *port,
 		      /*@out@*/struct gps_data_t *gpsdata);
 extern /*@null@*/struct gps_data_t *gps_open(const char *host,const char *port);
 extern int gps_close(struct gps_data_t *);
+extern int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... );
 extern int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
 extern int gps_poll(struct gps_data_t *gpsdata);
 extern int gps_stream(struct gps_data_t *gpsdata, unsigned int flags);

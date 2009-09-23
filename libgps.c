@@ -487,6 +487,23 @@ int gps_poll(struct gps_data_t *gpsdata)
     return status;
 }
 
+int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
+/* query a gpsd instance for new data */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
+    va_end(ap);
+    if (buf[strlen(buf)-1] != '\n')
+	(void)strlcat(buf, "\n", BUFSIZ);
+    if (write(gpsdata->gps_fd, buf, strlen(buf)) == srlen(buf))
+	return 0;
+    else
+	return -1;
+}
+
 int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 /* query a gpsd instance for new data */
 {
@@ -523,7 +540,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 	    (void)strlcat(buf, "\"scaled\":true", sizeof(buf));
 	(void)strlcat(buf, "};", sizeof(buf));
 #endif
-	return gps_query(gpsdata, buf);
+	return gps_send(gpsdata, buf);
     } else if ((flags & WATCH_DISABLE) != 0) {
 #ifdef OLDSTYLE_ENABLE
 	(void)strlcpy(buf, "w-", sizeof(buf));
@@ -539,7 +556,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
 	    (void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
 	(void)strlcat(buf, "};", sizeof(buf));
 #endif
-	return gps_query(gpsdata, buf);
+	return gps_send(gpsdata, buf);
     }
     return 0;
 }
@@ -737,7 +754,8 @@ int main(int argc, char *argv[])
 	gps_set_raw_hook(collect, dumpline);
 	strlcpy(buf, argv[optind], BUFSIZ);
 	strlcat(buf,"\n", BUFSIZ);
-	gps_query(collect, buf);
+	gps_send(collect, buf);
+	gps_poll(&collect);
 	data_dump(collect, time(NULL));
     } else {
 	int	tty = isatty(0);
@@ -754,7 +772,8 @@ int main(int argc, char *argv[])
 		break;
 	    }
 	    collect->set = 0;
-	    gps_query(collect, buf);
+	    gps_send(collect, buf);
+	    gps_poll(&collect);
 	    data_dump(collect, time(NULL));
 	}
     }

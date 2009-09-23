@@ -34,6 +34,12 @@ C:
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcprototype>
+<funcdef>int <function>gps_send</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>char *<parameter>fmt</parameter>...</paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>int <function>gps_query</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>char *<parameter>fmt</parameter>...</paramdef>
@@ -141,6 +147,18 @@ undefined behavior.  Currently it will leak a thread, and in the
 future might result in aborting the program.
 </para>
 
+<para><function>gps_send()</function> writes a command to the
+daemon, accepts a one-line response, and updates parts of the GPS-data
+structure that correspond to data changed since the last call.  The
+second argument must be a format string containing elements from the command
+set documented at
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It may have % elements as for 
+<citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+which will be filled in from any following arguments.
+This function returns a -1 if there was a Unix-level write error,
+otherwise 0.</para>
+
 <para><function>gps_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).
@@ -149,17 +167,17 @@ received structure.  This function does a blocking read waiting for
 data from the daemon; it returns 0 for success, or -1 on a Unix-level
 read error. </para>
 
-<para><function>gps_query()</function> writes a command to the
-daemon, accepts a one-line response, and updates parts of the GPS-data
+<para><function>gps_query()</function> writes a command to the daemon,
+accepts a one-line response, and updates parts of the GPS-data
 structure that correspond to data changed since the last call.  The
-second argument must be a format string containing letters from the command
-set documented at
+second argument must be a format string containing elements from the
+command set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-It may have % elements as for 
+It may have % elements as for
 <citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-which will be filled in from any following arguments.
-This function returns a 0 on success, or a -1 if there was a
-Unix-level read error.</para>
+which will be filled in from any following arguments.  This function
+returns a 0 on success, or a -1 if there was a Unix-level read
+error.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
@@ -249,7 +267,7 @@ code that calls gps_poll(gpsdata).
 
     gps_set_raw_hook(gpsdata, update_panel);
 	
-    (void)gps_query(gpsdata, "w+x\n");
+    (void)gps_stream(gpsdata, WATCH_ENABLE);
 
     (void)XtAppAddInput(app, gpsdata->gps_fd, 
 		  (XtPointer)XtInputReadMask, handle_input, NULL);

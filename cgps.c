@@ -227,7 +227,7 @@ static void update_probe(struct gps_data_t *gpsdata,
   /* Send an 'i' once per second until we figure out what the GPS
      device is. */
   if(time(NULL)-misc_timer > 2) {
-    (void)gps_query(gpsdata, "i\n");
+    (void)gps_send(gpsdata, "i\n");
     (void)fprintf(stderr,"Probing...\n");
     misc_timer=time(NULL);
   }
@@ -764,14 +764,14 @@ int main(int argc, char *argv[])
 
   /* If the user requested a specific device, try to change to it. */
   if (source.device != NULL)
-      (void)gps_query(gpsdata, "F=%s\n", source.device);
+      (void)gps_send(gpsdata, "F=%s\n", source.device);
 
   /* Here's where updates go until we figure out what we're dealing
      with. */
   gps_set_raw_hook(gpsdata, update_probe);
 
   /* Tell me what you are... */
-  (void)gps_query(gpsdata, "i\n");
+  (void)gps_send(gpsdata, "i\n");
 
   /* Loop for ten seconds looking for a device.  If none found, give
      up and assume "unknown" device type. */
@@ -805,7 +805,7 @@ int main(int argc, char *argv[])
   }
 
   /* Request "w+x" data from gpsd. */
-  (void)gps_query(gpsdata, "w+x\n");
+  (void)gps_send(gpsdata, "w+x\n");
 
   /* heart of the client */
   for (;;) {

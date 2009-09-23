@@ -263,13 +263,14 @@ The old 'R' command has been replaced by an optional attribute in
 gps_stream(), or set a raw hook before alling gps_stream().
 
 The old 'W' command has been replaced by ?WATCH. Call gps_stream()
-with whatever option you want to set.
+with whatever options you want to set.
 
 The old 'X' command is gone.  Instead, you will see an object of
 class DEVICE from the daemon whenever a device is opened or closed.
 
 The old 'Z' and '$' commands, used by the developers for profiling, 
-have equivalents, presently undocumented.
+have equivalents, which are presently considered unstable and thus
+are undocumented.
 
 == How the gps_data_t structure has changed == 
 
@@ -301,3 +302,8 @@ space, it lives in a union with several other substructures.
 
 The signature of the raw_hook member has changed.  It no longer takes
 the final 'leve' argument, which libgps had always set to 1.
+
+== Python client library changes ==
+
+There is a gps_stream() entry point like the one in the C library.
+gps_query() is deprecated.
