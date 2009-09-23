@@ -90,8 +90,8 @@ relevant proprietary standards.  If you are such a person, please help
 by reporting the following to be included in future versions of this
 document:
 
-* Field offsets, types, and descriptions for messages 23, 25, and 26
-  not described in <<IALA>>.
+* Field offsets, types, and descriptions for messages 25 and 26. which
+  are not described in <<IALA>>.
 
 * Sample sentences of types 6-8, 10, 12-18, 20-23, and 25-26 together with
   decoded dumps of the field values.
@@ -349,10 +349,10 @@ In normal operation, an AIS transceiver will send a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
 speed while underway, and every 3 minutes while the vessel is at
 anchor and stationary. It will send a type 5 identification every 6
-minutes.   (More detail is at <<IALA>>, part 2.3)
+minutes. (More detail is at <<IALA>>, part 2.3)
 
 Class 6 is used for unencrypted structured extension messages by local
-authorities such as the St. Lawrence Seaway and The U.S Coast Goard's 
+authorities such as the St. Lawrence Seaway and the U.S Coast Guard's 
 PAWSS.
 
 Class 8 is in common use for private encrypted messages, such as
@@ -377,16 +377,15 @@ with no further information; message types 25-26 are reported by
 
 The "Member" column in these tables is not derived from any of the ITU
 standards or amendments.  I have invented it in order to be able to
-describe a lossless textual encoding of AIS sentences.  These names
-are also chosen for suitability as structure/object member names in
-computer languages, so that application programming interfaces across
-different languages can have a common and readily intelligible set to
-use.
+describe a lossless textual encoding of AIS sentences in JSON.  These
+names are also chosen for suitability as structure/object member names
+in computer languages, so that application programming interfaces
+across different languages can have a common and readily intelligible
+set to use.
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-5, 9-11, 18-19, and 24.  Described but unchecked are 6-8, 12-17, and
-20-22.
+1-11, 18-19, and 24.  Described but unchecked are 12-17 and 20-23.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -1179,9 +1178,10 @@ Code Definition
 31   Light Vessel / LANBY / Rigs
 -------------------------------------------------------------------
 
-The name field is 6-bit ASCII.  If this field is full (has no trailing @
-characters) the decoder should interpret the Name Extension field
-later in the message and concatenate it to this one to obtain the full name.
+The name field is 6-bit ASCII.  If this field is full (has no trailing
+@ characters) the decoder should interpret the Name Extension field
+later in the message (no more than 14 6-bit characters) and
+concatenate it to this one to obtain the full name.
 
 <<IALA>> describes bits 219-248 As "Dimension/Reference for Position",
 implying that it is vessel dimensions as in message type 5.

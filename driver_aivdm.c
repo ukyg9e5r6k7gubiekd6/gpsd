@@ -4,8 +4,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
- * Message types 6-8, 12-17, 20-23, and 25-26 have not.
+ * Message types 1-11, 18-19, and 24 have been tested against live data.
+ * Message types 12-17 and 20-23 have not.
  */
 #include <sys/types.h>
 #include <stdio.h>
