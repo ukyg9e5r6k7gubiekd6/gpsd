@@ -371,9 +371,10 @@ about the country in which the ID was issued <<ITU-MID>>.
 
 Detailed descriptions of message types 1-24 follow. Message types 1-22
 are derived from <<IALA>>. Message type 23 was decribed to me by Mike
-Greene based on <<IEC62287>>.  Message type 24 are listed at <<BOSUN>>
-with no further information; message types 25-26 are reported by
-<<Schwehr>>, who observes they were added in Version 3 of <<ITU1371>>.
+Greene based on <<IEC62287>>.  Message type 24 was described to me by
+<<Schwehr>>, whose Python toolkit decodes it. Message types 25-26 are
+reported by <<Schwehr>>, who observes they were added in Version 3 of
+<<ITU1371>>.
 
 The "Member" column in these tables is not derived from any of the ITU
 standards or amendments.  I have invented it in order to be able to
@@ -1458,9 +1459,6 @@ Identification System]
 
 - [[[NAVCEN]]] http://www.navcen.uscg.gov/enav/ais/[NAVCEN AIS pages]
 
-- [[[BOSUN]]] http://www.bosunsmate.org/ais/[Marine Automatic
-  Identification System (AIS)]
-
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
 
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
@@ -1533,4 +1531,4 @@ type codes.
 Version 1.13 documents more out-of-band values and treats radio status
 blocks more uniformly.
 
-Version 1.14 documents AIS message type 23.
+Version 1.14 documents message 23.
