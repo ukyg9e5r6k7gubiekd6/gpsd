@@ -4,8 +4,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Message types 1-11, 18-19, and 24 have been tested against live data.
- * Message types 12-17 and 20-23 have not.
+ * Message types 1-11, 18-19, 21, and 24 have been tested against live data.
+ * Message types 12-17, 20, and 22-23 have not.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -446,14 +446,14 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 21:	/* Aid-to-Navigation Report */
 	    ais->type21.type = UBITS(38, 5);
 	    from_sixbit((char *)ais_context->bits, 
-			43, 20, ais->type21.name);
+			43, 21, ais->type21.name);
 	    if (strlen(ais->type21.name) == 20 && ais_context->bitlen > 272)
 		from_sixbit((char *)ais_context->bits, 
 			    272, (ais_context->bitlen - 272)/6, 
 			    ais->type21.name+20);
-	    ais->type21.accuracy     = UBITS(163, 163);
-	    ais->type21.lon          = UBITS(164, 28);
-	    ais->type21.lat          = UBITS(192, 27);
+	    ais->type21.accuracy     = UBITS(163, 1);
+	    ais->type21.lon          = SBITS(164, 28);
+	    ais->type21.lat          = SBITS(192, 27);
 	    ais->type21.to_bow       = UBITS(219, 9);
 	    ais->type21.to_stern     = UBITS(228, 9);
 	    ais->type21.to_port      = UBITS(237, 6);
@@ -466,7 +466,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type21.virtual_aid  = UBITS(269, 1)!=0;
 	    ais->type21.assigned     = UBITS(270, 1)!=0;
 	    //ais->type21.spare      = UBITS(271, 1);
-	    /* TODO: figure out how to handle Name Extension field */
 	    gpsd_report(LOG_INF,
 			"name=%s accuracy=%d lon=%d lat=%d sec=%d\n",
 			ais->type21.name,
@@ -480,20 +479,20 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type22.channel_b    = UBITS(52, 12);
 	    ais->type22.txrx         = UBITS(64, 4);
 	    ais->type22.power        = UBITS(68, 1);
-	    ais->type22.ne_lon       = UBITS(69, 18);
-	    ais->type22.ne_lat       = UBITS(87, 17);
-	    ais->type22.sw_lon       = UBITS(104, 18);
-	    ais->type22.sw_lat       = UBITS(122, 17);
+	    ais->type22.ne_lon       = SBITS(69, 18);
+	    ais->type22.ne_lat       = SBITS(87, 17);
+	    ais->type22.sw_lon       = SBITS(104, 18);
+	    ais->type22.sw_lat       = SBITS(122, 17);
 	    ais->type22.addressed    = UBITS(139, 1);
 	    ais->type22.band_a       = UBITS(140, 1);
 	    ais->type22.band_b       = UBITS(141, 1);
 	    ais->type22.zonesize     = UBITS(142, 3);
 	    break;
 	case 23:	/* Group Assignment Command */
-	    ais->type23.ne_lon       = UBITS(40, 18);
-	    ais->type23.ne_lat       = UBITS(58, 17);
-	    ais->type23.sw_lon       = UBITS(75, 18);
-	    ais->type23.sw_lat       = UBITS(93, 17);
+	    ais->type23.ne_lon       = SBITS(40, 18);
+	    ais->type23.ne_lat       = SBITS(58, 17);
+	    ais->type23.sw_lon       = SBITS(75, 18);
+	    ais->type23.sw_lat       = SBITS(93, 17);
 	    ais->type23.stationtype  = UBITS(110, 4);
 	    ais->type23.shiptype     = UBITS(114, 8);
 	    ais->type23.txrx         = UBITS(144, 4);

@@ -291,6 +291,30 @@
 #        DTE:               0
 #        Spare3:            0
 #
+# Type 21:
+# Has a Name Extensiin field
+!AIVDM,2,1,5,B,E1mg=5J1T4W0h97aRh6ba84<h2d;W:Te=eLvH50```q,0*46
+!AIVDM,2,2,5,B,:D44QDlp0C1DU00,2*36
+#        Message Type: 21
+#        Repeat Indicator: 0
+#        MMSI: 123456789
+#        Aid Type: 20
+#        Name: CHINA ROSE MURPHY EXPRESS ALERT
+#        Position Accuracy: 0
+#        Longitude: -122.698591667
+#        Latitude: 47.9206183333
+#        Dimension to Bow: 5
+#        Dimension to Stern: 5
+#        Dimension to Port: 5
+#        Dimension to Starboard: 5
+#        Type of EPFD: GPS
+#        UTC Second: 50
+#        Off-Position Indicator: 0
+#        Regional Reserved: 165
+#        RAIM Flag: 0
+#        Virtual-Aid Flag: 0
+#        Assigned-Mode Flag: 0
+#
 # Type 24:
 # One pair of type A and Type B messages. Note, these have Coast Guard 
 # extended fields after them.
