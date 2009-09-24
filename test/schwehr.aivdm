@@ -48,7 +48,7 @@
 #
 # Type 2:
 # Kurt says 2 is really uncommon.  I had to regenerate the CRC32 
-# for this one myself, it was mnissing in Kurt's original.
+# for this one myself, it was missing in Kurt's original.
 !AIVDM,1,1,,B,25Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*60
 #       MessageID:          2
 #       RepeatIndicator:    0
@@ -112,9 +112,7 @@
 #       state_slotoffset:   1503
 #
 # Type 5:
-# Kurt's decode for this was incorrect, it got the subfield order in the ETA
-# timestamp backwards.  I have corrected it here and in the decoder. (He
-# fixed the bug in noaadata-0.42.)
+# From Kurt Schwehr
 !AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C
 !AIVDM,2,2,1,A,88888888880,2*25
 #       MessageID:        5
@@ -140,6 +138,7 @@
 #       Spare:            0
 #
 # Type 6:
+# From Kurt Schwehr
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
 # data block.
@@ -155,9 +154,7 @@
 #	Data:             50:3acbc463dffc4
 #
 # Type 7:
-# Kurt's ais_msg_7.py has a crash bug at version 0.41, 
-# so we don't actually know whether this dump is correct or not --
-# it's just what gpsdecode says now.  Fix this when his code can check it. 
+# From Kurt Schwehr
 !AIVDM,1,1,,A,7IiQ4T`UjA9lC;b:M<MWE@,4*01
 #	SourceMMSI:       655901842
 #	MMSI1:            158483613
@@ -187,6 +184,7 @@
 #       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
 #
 # Type 9:
+# From Kurt Schwehr
 # This sentence is slightly malformed -- extra data at the end.
 !AIVDM,1,1,,B,9wsh:3?h>TdcWHftni=J0d5fs?8WT852,5*74
 #       MessageID:           9
@@ -208,6 +206,7 @@
 #       state_slotoffset:    12839
 #
 # Type 10:
+# From Kurt Schwehr
 !AIVDM,1,1,,B,:5MlU41GMK6@,0*6C
 #       MessageID:        10
 #       RepeatIndicator:  0
@@ -217,6 +216,7 @@
 #       Spare2:           0
 #
 # Type 10:
+# From Mike Greene
 !AIVDM,1,1,,B,:6TMCD1GOS60,0*5B,s36310,d-081,T59.01777335
 #       Message Type:     10
 #       Repeat Indicator: 0
@@ -224,6 +224,7 @@
 #       Destination MMSI: 366972000
 #
 # Type 11:
+# From Kurt Schwehr
 # Message has Coast Guard extended fields following
 !AIVDM,1,1,,B,;4R33:1uUK2F`q?mOt@@GoQ00000,0*5D,s28089,d-103,T39.44353985,x147521,r08TPHI1,1242958962
 #      MessageID:           11
@@ -246,6 +247,7 @@
 #      state_slotoffset:    0
 #
 # Type 15:
+# From Mike Greene
 !AIVDM,1,1,,A,?5OP=l00052HD00,2*5B
 #       Message Type:       15
 #       Repeat Indicator:   0
@@ -255,6 +257,7 @@
 #       First Slot Offset:  0
 #
 # Type 18:
+# From Kurt Schwehr
 # I had to regenerate the CRC32 for this one myself, it was missing
 # in Kurt's original.
 !AIVDM,1,1,,A,B52K>;h00Fc>jpUlNV@ikwpUoP06,0*4C
@@ -274,7 +277,8 @@
 #       RAIM:               True
 #       CommStateSelector:  1
 #       CommState:          393222
-#
+# Type 18:
+# From Kurt Schwehr
 !AIVDM,1,1,,A,B52KB8h006fu`Q6:g1McCwb5oP06,0*00
 #       MessageID:          18
 #       RepeatIndicator:    0
@@ -292,8 +296,32 @@
 #       RAIM:               True
 #       CommStateSelector:  1
 #       CommState:          393222
+# Type 18:
+# From Kurt Schwehr
+!AIVDM,1,1,,B,B5O6hr00<veEKmUaMFdEow`UWP06,0*4F
+#       Message Type:       18
+#       Repeat Indicator:   0
+#       MMSI:               368161000
+#       Speed Over Ground:  51
+#       Position Accuracy:  1
+#       Longitude:          -72.2338483333
+#       Latitude:           39.480925
+#       Course Over Ground: 349
+#       True Heading:       511
+#       Time Stamp:         17
+#       CS Unit:            1
+#       Display Flag:       0
+#       DSC Flag:           1
+#       Band Flag:          1
+#       Message 22 Flag:    0
+#       Assigned-Mode Flag: 0
+#       RAIM:               1
+#       Sync State:         3
+#       Slot Time-Out:      0
+#       Sub Message:        6
 #
 # Type 19:
+# From Mike Greene
 !AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
 #        MessageID:         19
 #        RepeatIndicator:   0
@@ -319,6 +347,7 @@
 #        Spare3:            0
 #
 # Type 20 (1 offset)
+# From Mike Greene
 !AIVDM,1,1,,A,Dh3OvjB8IN>4,0*1D
 #        Message Type: 20
 #        Repeat Indicator: 3
@@ -329,6 +358,7 @@
 #        Increment 1: 225
 #
 # Type 20 (3 offsets):
+# From Mike Greene
 !AIVDM,1,1,,B,D030p8@2tN?b<`O6DmQO6D0,2*5D
 #        Message Type: 20
 #        Repeat Indicator: 0
@@ -347,7 +377,8 @@
 #        Increment 3: 1125
 #
 # Type 21:
-# Has a Name Extensiin field
+# Has a Name Extension field
+# From Mike Greene
 !AIVDM,2,1,5,B,E1mg=5J1T4W0h97aRh6ba84<h2d;W:Te=eLvH50```q,0*46
 !AIVDM,2,2,5,B,:D44QDlp0C1DU00,2*36
 #        Message Type: 21
