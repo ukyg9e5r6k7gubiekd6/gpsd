@@ -4,8 +4,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Message types 1-11, 18-19, 21, and 24 have been tested against live data.
- * Message types 12-17, 20, and 22-23 have not.
+ * Message types 1-11, 15, 18-21, and 24 have been tested against live data.
+ * Message types 12-14, 16-17, and 22-23 have not.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -320,7 +320,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 15:	/* Interrogation */
-	    ais->type15.type1_2 = ais->type15.type2_1 = 0;
+	    (void)memset(&ais->type15, '\0', sizeof(ais->type15));
 	    //ais->type14.spare         = UBITS(38, 2);
 	    ais->type15.mmsi1		= UBITS(40, 30);
 	    ais->type15.type1_1		= UBITS(70, 6);

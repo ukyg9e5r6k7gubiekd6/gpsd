@@ -1,7 +1,8 @@
-# Sample AIVDM data sentences provided from real data by Kurt Schwehr.
+# Sample AIVDM data sentences provided from real data by Kurt Schwehr
+# and Mike Greene.
 #
 # The text dumps following are (mostly) producerd by the parsers in
-# his noaadata.py toolkit, and are here so they can be eyeball-checked
+# Kurt's noaadata.py toolkit, and are here so they can be eyeball-checked
 # against gpsdecode's output.
 #
 # Type 1:
@@ -227,6 +228,15 @@
 #      state_slottimeout:   0
 #      state_slotoffset:    0
 #
+# Type 15:
+!AIVDM,1,1,,A,?5OP=l00052HD00,2*5B
+#       Message Type:       15
+#       Repeat Indicator:   0
+#       MMSI:               368578000
+#       Destination MMSI:   5158
+#       First Message Type: 5
+#       First Slot Offset:  0
+#
 # Type 18:
 # I had to regenerate the CRC32 for this one myself, it was missing
 # in Kurt's original.
@@ -290,6 +300,34 @@
 #        RAIM:              False
 #        DTE:               0
 #        Spare3:            0
+#
+# Type 20 (1 offset)
+!AIVDM,1,1,,A,Dh3OvjB8IN>4,0*1D
+#        Message Type: 20
+#        Repeat Indicator: 3
+#        MMSI: 3669705
+#        Offset 1: 2182
+#        Reserved Slots 1: 5
+#        Timeout 1: 7
+#        Increment 1: 225
+#
+# Type 20 (3 offsets):
+!AIVDM,1,1,,B,D030p8@2tN?b<`O6DmQO6D0,2*5D
+#        Message Type: 20
+#        Repeat Indicator: 0
+#        MMSI: 3160097
+#        Offset 1: 47
+#        Reserved Slots 1: 1
+#        Timeout 1: 7
+#        Increment 1: 250
+#        Offset 2: 2250
+#        Reserved Slots 2: 1
+#        Timeout 2: 7
+#        Increment 2: 1125
+#        Offset 3: 856
+#        Reserved Slots 3: 5
+#        Timeout 3: 7
+#        Increment 3: 1125
 #
 # Type 21:
 # Has a Name Extensiin field

@@ -16,8 +16,8 @@
 #    is 'string' or 'raw').
 # * Does not join the type 21 name extension field to the name fields.
 #
-# Message types 1-5, 9-11, 18-19, and 24 have been tested against live data.
-# Message types 6-8, 12-17, 20-22, 23, and 25-26 have not.
+# Message types 1-11, 15, 18-21, and 24 have been tested against live data.
+# Message types 12-14, 16-17, 22-23, and 25-26 have not.
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
