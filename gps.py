@@ -59,6 +59,7 @@ WATCH_NMEA	= 0x02
 WATCH_RAW	= 0x04
 WATCH_SCALED	= 0x08
 WATCH_NEWSTYLE	= 0x10
+WATCH_OLDSTYLE	= 0x20
 
 GPSD_PORT = 2947
 
@@ -177,25 +178,19 @@ class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
 
     def __init__(self):
-        # Initialize all data members 
-        self.online = 0                 # NZ if GPS on, zero if not
-
         self.valid = 0
         self.fix = gpsfix()
 
+        # Old style interface
+        self.online = 0                 # NZ if GPS on, zero if not (old style)
         self.status = STATUS_NO_FIX
-        self.utc = ""
-
         self.epe = 0.0
+        self.devices = []
 
-        self.satellites = skyview()            # satellite objects in view
-        self.await = self.parts = 0
-
-        self.profiling = False
+        # New style interface
+        self.satellites = skyview()     # satellite objects in view
         self.timings = gpstimings()
         self.device = device()
-
-        self.devices = []
 
     def __repr__(self):
         st = repr(self.fix)
@@ -217,9 +212,12 @@ class gps(gpsdata):
         self.connect(host, port)
         self.verbose = verbose
         self.mode = mode
-        if mode:
-            self.stream(mode)
         self.raw_hook = None
+        self.profiling = False
+        self.newstyle = False
+        if mode:
+            self.poll()		# Only needed to set self.newstyl
+            self.stream(mode)
 
     def __iter__(self):
         return self
@@ -298,8 +296,7 @@ class gps(gpsdata):
                     else:
                         self.device.mincycle = self.device.cycle = float(data)
                 elif cmd == 'D':
-                    self.utc = data
-                    self.fix.time = isotime(self.utc)
+                    self.fix.time = isotime(data)
                     self.valid |= TIME_SET
                 elif cmd == 'E':
                     parts = data.split()
@@ -339,10 +336,7 @@ class gps(gpsdata):
                             HERR_SET | VERR_SET | TRACK_SET | SPEED_SET |
                             CLIMB_SET | SPEEDERR_SET | CLIMBERR_SET | MODE_SET
                         )
-                        self.utc = fields[1]
                         self.fix.time = default(1, TIME_SET)
-                        if not isnan(self.fix.time):
-                            self.utc = isotime(self.fix.time)
                         self.fix.ept = default(2, TIMERR_SET)
                         self.fix.latitude = default(3, LATLON_SET)
                         self.fix.longitude = default(4)
@@ -445,12 +439,8 @@ class gps(gpsdata):
         elif self.data.get("class") == "TPV":
             self.fix.gpsdata = self
             self.timings.sentence_tag = self.data["tag"]
-            # clear all valid bits that might be set again below
             self.valid = ONLINE_SET
-            self.utc = None
             self.fix.time = default("time", NaN, TIME_SET)
-            if not isnan(self.fix.time):
-                self.utc = isotime(self.fix.time)
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)
             self.fix.latitude =  default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)
@@ -510,6 +500,7 @@ class gps(gpsdata):
             self.raw_hook(self.response);
         if self.response.startswith("{") and "class" in self.response:
             data = self.__json_unpack(self.response)
+            self.newstyle = True
         else:
             data = self.__oldstyle_unpack(self.response)
         if self.profiling:
@@ -547,6 +538,15 @@ class gps(gpsdata):
 
     def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
+        if (flags & (WATCH_NEWSTYLE|WATCH_OLDSTYLE)) == 0:
+            # If we're looking at a daemon that speakds JSON, this
+            # should have been set when we saw the initial VERSION
+            # response.  Note, however, that this requires at
+            # least one poll() before stream() is called
+            if self.newstyle:
+                flags |= WATCH_NEWSTYLE
+            else:
+                flags |= WATCH_OLDSTYLE
         if flags & WATCH_NEWSTYLE:
             if flags & WATCH_ENABLE:
                 arg = '?WATCH={"enable":true'
@@ -557,7 +557,7 @@ class gps(gpsdata):
                 if self.raw_hook or (flags & WATCH_NMEA):
                     arg += ',"nmea":false'
             return self.send(arg + "}")
-        else:
+        elif flags & WATCH_OLDSTYLE:
             if flags & WATCH_ENABLE:
                 arg = 'w+'
                 if self.raw_hook or (flags & WATCH_NMEA):

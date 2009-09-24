@@ -125,10 +125,6 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 
 /* Next, declarations for the core library... */
 
-/* watcher mask values */
-#define WATCH_NOTHING	0x00
-#define WATCH_OLDSTYLE	0x01
-
 /* factors for converting among confidence interval units */
 #define CEP50_SIGMA	1.18
 #define DRMS_SIGMA	1.414

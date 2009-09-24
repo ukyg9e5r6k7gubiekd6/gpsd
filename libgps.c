@@ -43,6 +43,7 @@ int gps_open_r(const char *host, const char *port,
 
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
+    gpsdata->newstyle = false;
     return 0;
     /*@ +branchstate @*/
 }
@@ -84,6 +85,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     /* detect and process a JSON response */
     if (buf[0] == '{') {
 	(void)libgps_json_unpack(buf, gpsdata);
+	gpsdata->newstyle = true;
     }
 #endif /* GPSDNG_ENABLE */
 #if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
@@ -509,38 +511,44 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
+    if ((flags & (WATCH_NEWSTYLE|WATCH_OLDSTYLE))== 0) {
+	if (gpsdata->newstyle)
+	    flags |= WATCH_NEWSTYLE;
+        else
+	    flags |= WATCH_OLDSTYLE;
+    }
     if ((flags & WATCH_ENABLE) != 0) {
-#ifdef OLDSTYLE_ENABLE
-	(void)strlcpy(buf, "w+x", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
-	    (void)strlcat(buf, "r+", sizeof(buf));
-#else
-	(void)strlcpy(buf, "?WATCH={", sizeof(buf));
-	if (flags & WATCH_NMEA)
-	    (void)strlcat(buf, "\"nmea\":true", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
-	    (void)strlcat(buf, "\"raw\":1", sizeof(buf));
-	if (flags & WATCH_SCALED)
-	    (void)strlcat(buf, "\"scaled\":true", sizeof(buf));
-	(void)strlcat(buf, "};", sizeof(buf));
-#endif
-	return gps_send(gpsdata, buf);
+	if ((flags & WATCH_OLDSTYLE) != 0) {
+	    (void)strlcpy(buf, "w+x", sizeof(buf));
+	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
+		(void)strlcat(buf, "r+", sizeof(buf));
+	} else if ((flags & WATCH_NEWSTYLE) != 0) {
+	    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
+	    if (flags & WATCH_NMEA)
+		(void)strlcat(buf, "\"nmea\":true", sizeof(buf));
+	    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
+		(void)strlcat(buf, "\"raw\":1", sizeof(buf));
+	    if (flags & WATCH_SCALED)
+		(void)strlcat(buf, "\"scaled\":true", sizeof(buf));
+	    (void)strlcat(buf, "};", sizeof(buf));
+	}
+	/*@i1@*/return gps_send(gpsdata, buf);
     } else if ((flags & WATCH_DISABLE) != 0) {
-#ifdef OLDSTYLE_ENABLE
-	(void)strlcpy(buf, "w-", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
-	    (void)strlcat(buf, "r-", sizeof(buf));
-#else
-	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
-	if (flags & WATCH_NMEA)
-	    (void)strlcat(buf, "\"nmea\":false", sizeof(buf));
-	if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
-	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
-	if (flags & WATCH_SCALED)
-	    (void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
-	(void)strlcat(buf, "};", sizeof(buf));
-#endif
-	return gps_send(gpsdata, buf);
+	if ((flags & WATCH_OLDSTYLE) != 0) {
+	    (void)strlcpy(buf, "w-", sizeof(buf));
+	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
+		(void)strlcat(buf, "r-", sizeof(buf));
+	} else if ((flags & WATCH_NEWSTYLE) != 0) {
+	    (void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
+	    if (flags & WATCH_NMEA)
+		(void)strlcat(buf, "\"nmea\":false", sizeof(buf));
+	    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
+		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	    if (flags & WATCH_SCALED)
+		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+	    (void)strlcat(buf, "};", sizeof(buf));
+	}
+	/*@i1@*/return gps_send(gpsdata, buf);
     }
     return 0;
 }
