@@ -250,7 +250,7 @@ code that calls gps_poll(gpsdata).
 
     gps_set_raw_hook(gpsdata, update_panel);
 	
-    (void)gps_stream(gpsdata, WATCH_ENABLE);
+    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
 
     (void)XtAppAddInput(app, gpsdata->gps_fd, 
 		  (XtPointer)XtInputReadMask, handle_input, NULL);
