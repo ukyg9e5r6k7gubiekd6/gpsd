@@ -26,7 +26,7 @@ struct gps_data_t* gpsmm::open(const char *host, const char *port) {
 }
 
 struct gps_data_t* gpsmm::stream(int flags) {
-	if (gps_stream(gps_data,flags)==-1) {
+  if (gps_stream(gps_data,flags, NULL)==-1) {
 		return NULL;
 	}
 	else {

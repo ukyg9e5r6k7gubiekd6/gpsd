@@ -73,6 +73,7 @@ C:
 <funcdef>int <function>gps_stream</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>unsigned int<parameter>flags</parameter></paramdef>
+    <paramdef>void *<parameter>data</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>char *<function>gps_errstr</function></funcdef>
@@ -169,7 +170,8 @@ insulates your code from whether your client library and your
 <application>gpsd</application> are using old or new protocol.
 The second argument is a flag mask that sets various policy bits; 
 see gps.h for description.  Calling <function>gps_stream()</function>
-more than once with different flag masks is allowed. </para>
+more than once with different flag masks is allowed.The third
+argument is not presently used but reserved for expansion.</para>
 
 <para><function>gps_set_raw_hook()</function> takes a function you
 specify and run it (synchronously) on the raw data pulled by a

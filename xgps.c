@@ -1065,7 +1065,7 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 
 		// WATCH_NEWSTYLE forces new protocol, for test purposes 
 		mask = WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE;
-		(void)gps_stream(gpsdata, mask);
+		(void)gps_stream(gpsdata, mask, NULL);
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
 		    (XtPointer)XtInputReadMask, handle_input, NULL);

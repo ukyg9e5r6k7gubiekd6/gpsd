@@ -479,7 +479,7 @@ int main(int argc, char *argv[])
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_lcd);
-    gps_stream(gpsdata, WATCH_ENABLE);
+    gps_stream(gpsdata, WATCH_ENABLE, NULL);
 
     for (;;) { /* heart of the client */
 

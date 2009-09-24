@@ -58,11 +58,11 @@ If you have been virtuous, you need only to make one small change to
 your code.  Replace the gps_query() call with:
 
 -------------------------------------------------------------------
-gps_stream(gpsdata, WATCH_ENABLE) 
+gps_stream(gpsdata, WATCH_ENABLE, NULL) 
 -------------------------------------------------------------------
 
 This will tell whatever version of the client library your application
-dynamically links to emit shat it should under the hood, either old
+dynamically links to emit what it should under the hood, either old
 or new protocol. Unless a target system carries a version of the
 libgps shared library different from the gpsd version, everything
 should work and continue to work through future updates.
@@ -107,22 +107,6 @@ Even virtuous clients have to worry about version skew. Supposing you
 have used libgps and not done anything exotic, you will still have
 problems if the client library you linked and the instance of gpsd it
 speaks to are using different protocols.
-
-We're working to minimize problems by scheduling the changes like
-this:
-
-1. In 2.40 (shipping sometime in the fourth quarter of 2009), we will
-roll out a daemon that speaks both old and new protocols and a client
-library that speaks old protocol by default - that is, under the hood
-gps_stream() still says "w+" rather than "?WATCH".
-
-2. When we have reason to believe all major Linux distros have 
-deployed 2.40, we will change the client library to ship "?WATCH"
-by default.  This is likely to happen in late 2010.
-
-3. At some point in the far future, we will disable old protocol
-in the default builds of both client and daemon.  This is
-probably at least three years or more out.
 
 The possible failure modes are pretty obvious.  Transitions are
 difficult.  We're essentially relying on the distribution integrators

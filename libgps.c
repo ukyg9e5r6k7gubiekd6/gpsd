@@ -504,7 +504,7 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
 }
 
-int gps_stream(struct gps_data_t *gpsdata, unsigned int flags)
+int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
     char buf[GPS_JSON_COMMAND_MAX];
@@ -574,7 +574,7 @@ int gps_set_callback(struct gps_data_t *gpsdata,
 		     pthread_t *handler)
 /* set an asynchronous callback and launch a thread for it */
 {
-    (void)gps_stream(gpsdata, WATCH_ENABLE);	/* ensure gpsd is in watcher mode, so we'll have data to read */
+    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);	/* ensure gpsd is in watcher mode, so we'll have data to read */
     if (gpsdata->thread_hook != NULL) {
 	gpsdata->thread_hook = callback;
 	return 0;
@@ -597,7 +597,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
     /*@i2@*/pthread_join(*handler, NULL);	/* wait for thread to actually terminate */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
-	/*@i1@*/(void)gps_stream(gpsdata, WATCH_DISABLE);	/* disable watcher mode */
+	/*@i1@*/(void)gps_stream(gpsdata, WATCH_DISABLE, NULL);	/* disable watcher mode */
     return res;
     /*@ +nullstate @*/
 }
