@@ -264,7 +264,7 @@ transmission from the damon after a command is shipped to it will be
 the reponse to command.  If you must send explicit
 commands to the daemon, use gps_send() and handle the response in
 your main event-polling loop - but beware, as using gps_send()
-ties your code to the GPSD wirte protocol and is not recommended.
+ties your code to the GPSD wire protocol and is not recommended.
 
 The client library's reporting structure, struct gpsdata_t, has a new
 substructure (struct devconfig_t) named "dev" that groups together
@@ -305,8 +305,8 @@ the final 'level' argument, which libgps had always set to 1.
 
 There is a new stream() method analogous to the gps_stream() call in
 the C library.  As in the C library, the query() method is gone, for
-the same reasons.  The send() method, new in version 3 of the C API,
-has been a Python gps-class method all along.
+the same reasons.  The gps_send() entry point, new in version 3 of the C API,
+has had a corresponding Python gps-class send() method all along.
 
 Fix information is still bundled in a gpsfix object that is a member
 of the gps class instance.  The 'valid' member still holds *_SET
@@ -328,7 +328,7 @@ structures, the new Python gps module does not in general create
 encapsulation classes for them except where a layer of interpretation
 is otherwise required to mimic old behavior (in particular, the
 setting of the 'valid' member).  This is true for the DEVICE, TPV,
-and SKY reports.
+SKY, and TIMING reports.
 
 You will access all other responses (including VERSION reports, AIS
 reports, RTCM reports, WATCH responses and device lists) simply by
@@ -344,7 +344,25 @@ for report in gps(mode=WATCH_ENABLE):
 
 ----------------------------------------------------------------------
 
-Each call to the iterator yields a report structure.  It may be
-a gpsfix object (if the read response was a TPV), a skyview
-object (if the response was a SKY) a device object (if the response
-was a DEVICE) or simply the dictionary built from the JSON response.
+Or. if you need to intersperse other processing in a main event loop,
+like this:
+
+----------------------------------------------------------------------
+
+session = gps(mode=WATCH_ENABLE)
+try:
+    while True:
+        # Do stuff
+        report = session.next()
+except StopIteration:
+    print "GPSD has terminated"
+
+----------------------------------------------------------------------
+
+Each call to the iterator yields a report structure.  It may be a
+gpsfix object (if the read response was a TPV), a skyview object (if
+the response was a SKY) a device object (if the response was a
+DEVICE), a timings object (if the response was a TIMING) or simply the
+dictionary built from the JSON response (all other responses.  If the
+daemon terminates, the iterator next() method will raise StopIteration
+and the loop will terminate.
