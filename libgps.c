@@ -739,7 +739,7 @@ int main(int argc, char *argv[])
 	strlcpy(buf, argv[optind], BUFSIZ);
 	strlcat(buf,"\n", BUFSIZ);
 	gps_send(collect, buf);
-	gps_poll(&collect);
+	gps_poll(collect);
 	data_dump(collect, time(NULL));
     } else {
 	int	tty = isatty(0);
@@ -757,7 +757,7 @@ int main(int argc, char *argv[])
 	    }
 	    collect->set = 0;
 	    gps_send(collect, buf);
-	    gps_poll(&collect);
+	    gps_poll(collect);
 	    data_dump(collect, time(NULL));
 	}
     }
