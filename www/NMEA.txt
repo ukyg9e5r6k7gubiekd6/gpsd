@@ -853,9 +853,15 @@ Field Number:
 2. Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
 3. ID of 1st satellite used for fix
 4. ID of 2nd satellite used for fix
-
-...
-
+5. ID of 3rd satellite used for fix
+6. ID of 4th satellite used for fix
+7. ID of 5th satellite used for fix
+8. ID of 6th satellite used for fix
+9. ID of 7th satellite used for fix
+10. ID of 8th satellite used for fix
+11. ID of 9th satellite used for fix
+12. ID of 10th satellite used for fix
+13. ID of 11th satellite used for fix
 14. ID of 12th satellite used for fix
 15. PDOP
 16. HDOP
@@ -1343,11 +1349,19 @@ Field Number:
 (Some fields are missing from this description.)
 
 Field Number: 
-
+1. Unknown
+2. Unknown
+3. Unknown
+4. Unknown
+5. Unknown
+6. Unknown
+7. Unknown
+8. Unknown
 9. Cursor Range From Own Ship
 10. Cursor Bearing Degrees Clockwise From Zero
 11. Range Scale
 12. Range Units
+13  Unknown
 14. Checksum
 
 
@@ -1369,8 +1383,7 @@ Field Number:
      you're heading to, then all the rest
 4. Waypoint ID
 
-x. More Waypoints
-n. Checksum
+More waypoints follow.  Last field is a checksum as usual.
 
 The Garmin 65 and possibly other units report a $GPR00 in the same format.
 
@@ -1787,9 +1800,9 @@ Field Number:
 2. Measurement Data
 3. Units of measurement
 4. Name of transducer
-x. More of the same
-n. Checksum
 
+There may be any number of quadruplets like this, each describing a
+sensor.  The last field will be a checksum as usual.
 
 === XTE - Cross-Track Error, Measured ===
 
