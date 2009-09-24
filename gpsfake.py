@@ -405,7 +405,8 @@ class TestSession:
         self.progress("gpsfake: client_query(%d, %s)\n" % (id, `commands`))
         for obj in self.runqueue:
             if isinstance(obj, gps.gps) and obj.id == id:
-                obj.query(commands)
+                obj.send(commands)
+                obj.poll()
                 return obj.response
         return None
     def client_remove(self, cid):
@@ -518,7 +519,7 @@ class TestSession:
         "Arrange for client to ship specified commands when it goes active."
         client.enqueued = ""
         if not self.threadlock:
-            client.query(commands)
+            client.send(commands)
         else:
             client.enqueued = commands
     def start(self):

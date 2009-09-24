@@ -24,7 +24,7 @@ CLIMB_SET      	= 0x00000080
 STATUS_SET     	= 0x00000100
 MODE_SET       	= 0x00000200
 DOP_SET        	= 0x00000400
-VERSION_SET    	= 0x00000800
+#VERSION_SET    	= 0x00000800
 HERR_SET       	= 0x00001000
 VERR_SET       	= 0x00002000
 PERR_SET       	= 0x00004000
@@ -101,12 +101,6 @@ class gpstimings:
             self.c_recv_time,
             self.c_decode_time
         )
-
-class version:
-    def __init__(self, **kw):
-        self.__dict__.update(kw)
-    def __repr__(self):
-        return "<version: release='%(release)s', proto=%(proto_major)s.%(proto_minor)s, rev='%(rev)s'>" % self.__dict__
 
 class device:
     def __init__(self):
@@ -216,12 +210,15 @@ class gpsdata:
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="127.0.0.1", port="2947", verbose=0):
+    def __init__(self, host="127.0.0.1", port="2947", verbose=0, mode=0):
         gpsdata.__init__(self)
         self.sock = None        # in case we blow up in connect
         self.sockfile = None
         self.connect(host, port)
         self.verbose = verbose
+        self.mode = mode
+        if mode:
+            self.stream(mode)
         self.raw_hook = None
 
     def __iter__(self):
@@ -433,12 +430,7 @@ class gps(gpsdata):
                 self.valid |= vbit
                 return self.data[k]
         self.data = asciify(json.loads(buf, encoding="ascii"))
-        if self.data.get("class") == "VERSION":
-            self.valid = ONLINE_SET | VERSION_SET
-            self.version = version(**self.data)
-            self.version.gpsdata = self
-            return self.version
-        elif self.data.get("class") == "DEVICE":
+        if self.data.get("class") == "DEVICE":
             self.valid = ONLINE_SET | DEVICE_SET
             self.device = device()
             self.device.gpsdata = self
@@ -454,11 +446,7 @@ class gps(gpsdata):
             self.fix.gpsdata = self
             self.timings.sentence_tag = self.data["tag"]
             # clear all valid bits that might be set again below
-            self.valid &= ~(
-                TIME_SET | TIMERR_SET | LATLON_SET | ALTITUDE_SET |
-                HERR_SET | VERR_SET | TRACK_SET | SPEED_SET |
-                CLIMB_SET | SPEEDERR_SET | CLIMBERR_SET | MODE_SET
-            )
+            self.valid = ONLINE_SET
             self.utc = None
             self.fix.time = default("time", NaN, TIME_SET)
             if not isnan(self.fix.time):
@@ -490,6 +478,7 @@ class gps(gpsdata):
             for sat in self.skyview.satellites:
                 if sat.used:
                     self.skyview.used += 1
+            self.valid = ONLINE_SET | SATELLITE_SET
             return self.skyview
         else:
             # Other classes, including RTCM2, AIS, WATCH and DEVICELIST,
@@ -543,11 +532,6 @@ class gps(gpsdata):
         if not commands.endswith("\n"):
             commands += "\n"
         self.sock.send(commands)
-
-    def query(self, commands):
-        "Send a command, get back a response."
-        self.send(commands)
-        return self.poll()
 
     def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
@@ -684,7 +668,8 @@ if __name__ == '__main__':
         #session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
         try:
             while True:
-                session.query(raw_input("> "))
+                session.send(raw_input("> "))
+                session.poll()
                 print session
         except EOFError:
             print "Goodbye!"

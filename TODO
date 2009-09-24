@@ -44,12 +44,7 @@ of mode switch we should be uttering.
 
 **** cgps.c still relies on old protocol (that's Jeff Francis's problem).
 
-**** Client-side support for RTCM3-JSON
-
-RTCM3 support is nonexistent due to a lack of suitable test loads.
-(We have binary RTCM3; what we need is a *pair* of files, one that
-is binary RTCM3 and the other that is the identical content dumped
-in some sort of readable textual format.)
+**** gpsprof still requires old protocol
 
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
@@ -193,7 +188,7 @@ events, e.g. the world moving to RTCM3. We have support for analyzing
 RTCM3 messages, but it's entirely theoretical - written from the
 standard.  We need to find a pair of files consisting of a
 representative set of RTCM3 sentences and some sort of ASCII dump of
-thgem so we can test whether our analyzer gets all the bitfield
+them so we can test whether our analyzer gets all the bitfield
 boundaries right.
 
 *** Do the research to figure out just what is going on with status bits

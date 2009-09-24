@@ -258,16 +258,15 @@ are undocumented.
 
 == How the C API and gps_data_t structure has changed == 
 
-
 The gps_query() entry point is gone.  With the new streaming-oriented
 wire protocol, it is extremely unwise to assume that the first
 transmission from the damon after a command is shipped to it will be
 the reponse to command.  If you must send explicit
 commands to the daemon, use gps_send() and handle the response in
-your main event-polling loop - but bewared, as using gps_send()
+your main event-polling loop - but beware, as using gps_send()
 ties your code to the GPSD wirte protocol and is not recommended.
 
-The client libary's reporting structure, struct gpsdata_t, has a new
+The client library's reporting structure, struct gpsdata_t, has a new
 substructure (struct devconfig_t) named "dev" that groups together
 information about the device that shipped the last update to the
 client.  The members of this structure replace several top-level
@@ -293,10 +292,59 @@ DEVICELIST_SET is on in the top-level set member.  Storage for
 pathnames is no longer dynamically allocated, but static; to save
 space, it lives in a union with several other substructures.
 
+There is a new substructure, dop, which holds the
+dilution-of-precision factors that were previously individual members
+of the gpsdata structure. Two new DOPs, xdop and ydop, are available;
+these express dilution of precisopn in longitude and latitude,
+respectively.
+
 The signature of the raw_hook member has changed.  It no longer takes
 the final 'level' argument, which libgps had always set to 1.
 
 == Python client library changes ==
 
-There is a gps_stream() entry point like the one in the C library.
-gps_query() is gone.
+There is a new stream() method analogous to the gps_stream() call in
+the C library.  As in the C library, the query() method is gone, for
+the same reasons.  The send() method, new in version 3 of the C API,
+has been a Python gps-class method all along.
+
+Fix information is still bundled in a gpsfix object that is a member
+of the gps class instance.  The 'valid' member still holds *_SET
+bitmasks with the same values as those in the C library, flagging
+which pieces of data were refreshed in the last poll.
+
+Some other data which was previously held in individual members of the
+gps class after being shipped up from the daemon now lives in
+subobjects.  Notably, the Dilution of Precision factors (DOPs) and the
+satellite list now live in a subobject named "skyview". Also, the
+serial-mode device parameters now live in a subobject called 'device'.
+
+The dictionary built from the last JSON object received from the
+daemon is always available as the 'data' member of GPS.  Look at
+the value of its "class" key to determine its type.
+
+Because JSON objects are so similar in their behavior to Python data
+structures, the new Python gps module does not in general create
+encapsulation classes for them except where a layer of interpretation
+is otherwise required to mimic old behavior (in particular, the
+setting of the 'valid' member).  This is true for the DEVICE, TPV,
+and SKY reports.
+
+You will access all other responses (including VERSION reports, AIS
+reports, RTCM reports, WATCH responses and device lists) simply by
+looking at the 'data' member after a poll.
+
+The new gps class is an iterator factory. The recommended way to use
+the new interface is like this:
+
+----------------------------------------------------------------------
+
+for report in gps(mode=WATCH_ENABLE):
+    process(report)
+
+----------------------------------------------------------------------
+
+Each call to the iterator yields a report structure.  It may be
+a gpsfix object (if the read response was a TPV), a skyview
+object (if the response was a SKY) a device object (if the response
+was a DEVICE) or simply the dictionary built from the JSON response.

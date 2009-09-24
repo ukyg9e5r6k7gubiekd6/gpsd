@@ -386,6 +386,7 @@ formatters = (spaceplot, uninstrumented, rawplot, splitplot, cycle)
 
 def plotframe(await, fname, speed, threshold, title):
     "Return a string containing a GNUplot script "
+    # FIXME: Has dependency on old protocol
     if fname:
         for formatter in formatters:
             if formatter.name == fname:
@@ -401,12 +402,13 @@ def plotframe(await, fname, speed, threshold, title):
         sys.exit(1)
     try:
         if speed:
-            session.query("b=%d\n" % speed)
+            session.send("b=%d\n" % speed)
+            session.poll()
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
-        session.query("w+bci\n")
+        session.send("w+bci\n")
         if formatter not in (spaceplot, uninstrumented):
-            session.query("z+\n")
+            session.send("z+\n")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
@@ -429,7 +431,7 @@ def plotframe(await, fname, speed, threshold, title):
                 countdown -= 1
         baton.end()
     finally:
-        session.query("w-z-\n")
+        session.send("w-z-\n")
     command = plotter.plot(title, session)
     del session
     return command
