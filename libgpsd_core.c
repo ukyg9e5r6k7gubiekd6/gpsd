@@ -500,10 +500,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	return 0;
     } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.dev.cycle+1){
-	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+	    gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
 		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);
-	session->gpsdata.online = 0;
+	    session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
@@ -512,7 +512,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			    session->gpsdata.dev.path);
 	return ONLINE_SET;
     } else {				/* we have recognized a packet */
-	gps_mask_t received = 0, dopmask = 0;
+	gps_mask_t received = PACKET_SET, dopmask = 0;
 	session->gpsdata.online = timestamp();
 	session->cycle_state = 0;
 

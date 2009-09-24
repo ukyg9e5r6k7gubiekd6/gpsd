@@ -2192,18 +2192,20 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
 
+		/* must have a full packet to continue */
+		if ((changed & PACKET_SET) == 0)
+		    continue;
+
 		/* raw hook and relaying functions */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		    if (channel->subscriber == NULL 
-			|| channel->device == NULL 
-			|| strcmp(device->gpsdata.dev.path, 
-				  channel->device->gpsdata.dev.path)!=0)
+		    if (channel->subscriber==NULL || channel->device != device) 
 			continue;
 
 		    if (channel->subscriber->policy.timing) {
 			char phrase[GPS_JSON_RESPONSE_MAX];
 			if (channel->device->gpsdata.sentence_time!=0)
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+					   channel->device->gpsdata.dev.path,
 					   channel->device->gpsdata.tag,
 					   (int)channel->device->gpsdata.sentence_length,
 					   channel->device->gpsdata.sentence_time,
@@ -2213,7 +2215,8 @@ int main(int argc, char *argv[])
 					   channel->device->poll_times[sub_index(channel->subscriber)] - channel->device->gpsdata.sentence_time,
 					   timestamp() - channel->device->gpsdata.sentence_time);
 			else
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+					   channel->device->gpsdata.dev.path,
 					   channel->device->gpsdata.tag,
 					   (int)channel->device->gpsdata.sentence_length,
 					   channel->device->gpsdata.d_xmit_time,

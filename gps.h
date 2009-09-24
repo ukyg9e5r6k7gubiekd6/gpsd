@@ -875,7 +875,6 @@ struct policy_t {
 
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
-    /* must double up on some of these to keep it to 32 bits */
 #define ONLINE_SET	0x00000001u
 #define TIME_SET	0x00000002u
 #define TIMERR_SET	0x00000004u
@@ -906,6 +905,7 @@ struct gps_data_t {
 #define RTCM2_SET	0x10000000u
 #define RTCM3_SET	0x20000000u
 #define AIS_SET 	0x40000000u
+#define PACKET_SET	0x80000000u	/* only used in the daemon */
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
