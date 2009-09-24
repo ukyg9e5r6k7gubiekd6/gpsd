@@ -70,7 +70,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
-    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
+    session->gpsdata.set = 0;
     session->gpsdata.dop.hdop = NAN;
     session->gpsdata.dop.vdop = NAN;
     session->gpsdata.dop.pdop = NAN;
