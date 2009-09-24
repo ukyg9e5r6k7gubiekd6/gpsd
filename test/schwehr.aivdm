@@ -183,6 +183,16 @@
 #       ApplicationID:      23480
 #       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
 #
+# Type 8:
+# From Mike Greene
+!AIVDM,2,1,6,B,85MwpIiKf6<M7FdjukGh=9B73IpCcMckto=3DlNcU6:,0*04
+!AIVDM,2,2,5,A,?59R6P573,0*25
+#       Message Type:       8
+#       Repeat Indicator:   0
+#       MMSI:               366999655
+#       Application ID:     23480
+#       Binary Data:        256:631d1d6b32f735f03494870d9e13addaf3f373435347ab94628f1498868051c3
+#
 # Type 9:
 # From Kurt Schwehr
 # This sentence is slightly malformed -- extra data at the end.
