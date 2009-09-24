@@ -159,11 +159,21 @@
 # so we don't actually know whether this dump is correct or not --
 # it's just what gpsdecode says now.  Fix this when his code can check it. 
 !AIVDM,1,1,,A,7IiQ4T`UjA9lC;b:M<MWE@,4*01
-#	MessageID:        655901842
+#	SourceMMSI:       655901842
 #	MMSI1:            158483613
 #	MMSI2:            321823389
 #	MMSI3:            836359488
 #	MMSI4:            0
+#
+# Type 7:
+# This was from Mike Greene and had a dump attached.
+!AIVDM,1,1,,B,7`0Pv1L:Ac8rbgPKHA8`P,2*56
+#        Message Type:    7
+#        RepeatIndicator: 2
+#        SourceMMSI:      537411077
+#        MMSI1:           43101326
+#        MMSI2:           717096664
+#        MMSI3:           76161024
 #
 # Type 8:
 # Text decode for this one came from regrouping the binary data dump from Kurt's
@@ -205,6 +215,13 @@
 #       Spare1:           0
 #       DestID:           366832740
 #       Spare2:           0
+#
+# Type 10:
+!AIVDM,1,1,,B,:6TMCD1GOS60,0*5B,s36310,d-081,T59.01777335
+#       Message Type:     10
+#       Repeat Indicator: 0
+#       MMSI:             440882000
+#       Destination MMSI: 366972000
 #
 # Type 11:
 # Message has Coast Guard extended fields following
