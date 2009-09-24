@@ -3,7 +3,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, calendar, math, socket, sys, select, json
+import time, calendar, math, socket, sys, select, json, copy
 
 api_major_version = 3   # bumped on incompatible changes
 api_minor_version = 1   # bumped on compatible changes
@@ -490,8 +490,8 @@ class gps(gpsdata):
         (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
         return winput != []
 
-    def next(self):
-        "Get the next response object from gpsd abd return it."
+    def blocking_next(self):
+        "Get the next response object and return it, or none if no data awaits."
         self.response = self.sockfile.readline()
         if self.response.startswith("H") and "=" not in self.response:
             while True:
@@ -499,10 +499,12 @@ class gps(gpsdata):
                 self.response += frag
                 if frag.startswith("."):
                     break
-        if not self.response:
-            raise StopIteration
         if self.verbose:
             sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
+        # This condition will trigger if the daemon terminates
+        # while the client is reading.
+        if not self.response:
+            raise StopIteration 
         self.timings.c_recv_time = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);
@@ -517,14 +519,24 @@ class gps(gpsdata):
                 basetime = self.timings.d_xmit_time
             self.timings.c_decode_time = time.time() - basetime
             self.timings.c_recv_time -= basetime
+            data = self.timings
         return data
 
-    def poll(self):
-        "Poll for data from the GPS."
+    def next(self):
+        "Get a copy of the next response from the daemon."
         try:
-            self.next()
+            report = self.blocking_next()
+            if report:
+                return copy.copy(report)
+        except (socket.error, StopIteration):
+            raise StopIteration
+
+    def poll(self):
+        "Poll for data from the daemon."
+        try:
+            self.blocking_next()
             return 0
-        except StopIteration:
+        except (socket.error, StopIteration):
             return -1
 
     def send(self, commands):
@@ -625,7 +637,9 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
-    if type(s) == type(1):
+    if isnan(s):
+        return None
+    elif type(s) == type(1):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
     elif type(s) == type(1.0):
         date = int(s)
@@ -647,17 +661,21 @@ def isotime(s):
 
 if __name__ == '__main__':
     import readline, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "w")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "vw")
     streaming = False
+    verbose = False
     for (switch, val) in options:
         if (switch == '-w'):
             streaming = True    
+        elif (switch == '-v'):
+            verbose = True    
     if len(arguments) > 2:
         print 'Usage: gps.py [host [port]]'
         sys.exit(1)
 
     if streaming:
         session = gps(*arguments)
+        session.verbose = verbose
         #session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
         session.stream(WATCH_ENABLE | WATCH_NEWSTYLE)
         for event in session:
@@ -665,6 +683,7 @@ if __name__ == '__main__':
     else:
         print "This is the exerciser for the Python gps interface."
         session = gps(*arguments)
+        session.verbose = verbose
         #session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
         try:
             while True:
