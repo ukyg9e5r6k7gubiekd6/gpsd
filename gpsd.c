@@ -1518,55 +1518,6 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    } else
 		(void)strlcpy(phrase, ",Y=?", sizeof(phrase));
 	    break;
-	case 'Z':
-	    if ((channel = mandatory_assign_channel(sub, GPS, NULL))==NULL)
-		(void)strlcpy(phrase, ",Z=?", sizeof(phrase));
-	    else {
-		if (*p == '=') ++p;
-		if (channel->device == NULL) {
-		    (void)snprintf(phrase, sizeof(phrase), ",Z=?");
-		    p++;
-		} else if (*p == '1' || *p == '+') {
-		    channel->device->gpsdata.profiling = true;
-		    gpsd_report(LOG_INF, "client(%d) turned on profiling mode\n", sub_index(sub));
-		    (void)snprintf(phrase, sizeof(phrase), ",Z=1");
-		    p++;
-		} else if (*p == '0' || *p == '-') {
-		    channel->device->gpsdata.profiling = false;
-		    gpsd_report(LOG_INF, "client(%d) turned off profiling mode\n", sub_index(sub));
-		    (void)snprintf(phrase, sizeof(phrase), ",Z=0");
-		    p++;
-		} else {
-		    channel->device->gpsdata.profiling = !channel->device->gpsdata.profiling;
-		    gpsd_report(LOG_INF, "client(%d) toggled profiling mode\n", sub_index(sub));
-		    (void)snprintf(phrase, sizeof(phrase), ",Z=%d",
-				   (int)channel->device->gpsdata.profiling);
-		}
-	    }
-	    break;
-	case '$':
-	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))== NULL)
-		(void)strlcpy(phrase, ",$=?", sizeof(phrase));
-	    else if (channel->device->gpsdata.sentence_time!=0)
-		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %lf %lf %lf %lf %lf %lf",
-			channel->device->gpsdata.tag,
-			(int)channel->device->gpsdata.sentence_length,
-			channel->device->gpsdata.sentence_time,
-			channel->device->gpsdata.d_xmit_time - channel->device->gpsdata.sentence_time,
-			channel->device->gpsdata.d_recv_time - channel->device->gpsdata.sentence_time,
-			channel->device->gpsdata.d_decode_time - channel->device->gpsdata.sentence_time,
-			channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.sentence_time,
-			timestamp() - channel->device->gpsdata.sentence_time);
-	    else
-		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d 0 %lf %lf %lf %lf %lf",
-			channel->device->gpsdata.tag,
-			(int)channel->device->gpsdata.sentence_length,
-			channel->device->gpsdata.d_xmit_time,
-			channel->device->gpsdata.d_recv_time - channel->device->gpsdata.d_xmit_time,
-			channel->device->gpsdata.d_decode_time - channel->device->gpsdata.d_xmit_time,
-			channel->device->poll_times[sub_index(sub)] - channel->device->gpsdata.d_xmit_time,
-			timestamp() - channel->device->gpsdata.d_xmit_time);
-	    break;
 	case '\r': case '\n':
 	    goto breakout;
 	}

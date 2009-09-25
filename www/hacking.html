@@ -484,8 +484,7 @@ only, suspicion should focus here.</p>
 
 <p>There is a barely-documented timing policy flag in the WATCH
 command that will cause it to emit a TIMING object on every sentence.
-(These were the Z command and the $ sentence in the old protocol.)
-The TIMING clause contains the following attributed:</p>
+The TIMING response contains the following attributed:</p>
 
 <ol>
 <li>tag: An identifing sentence tag.</li>
@@ -493,7 +492,7 @@ The TIMING clause contains the following attributed:</p>
 <li>len: The character length of the sentence containing the timestamp
     data.</li>
 
-<li>basetime: The timestamp associated with the sentence, in seconds since
+<li>timebase: The timestamp associated with the sentence, in seconds since
     the Unix epoch (this time <em>is</em> leap-second corrected, like UTC).
     This timestamp may be zero.  If nonzero, it is the base time for
     the packet.</li>
@@ -514,12 +513,12 @@ The TIMING clause contains the following attributed:</p>
     response &mdash; effectively, when gpsd was polled to transmit the 
     data.</li>
 
-<li>An offset from the base time to the time of the TIMING emission.</li>
+<li>elapsed: An offset from the base time to the time of the TIMING emission.</li>
 </ol>
 
 <p>The TIMING figures measure components of the latency between the GPS's
 time measurement and when the sentence data became available to the
-client. For it to be meaningful, the GPS has to ship timestamps with
+client. For them to be meaningful, the GPS has to ship timestamps with
 sub-second precision. SiRF-II and Evermore chipsets ship times with
 millisecond resolution.  Your machine's time reference must also be
 accurate to subsecond precision; I recommend using <code>ntpd</code>,
@@ -531,7 +530,7 @@ timestamps by the fact that the last read of a packet may grab a few
 bytes of the next one.</p>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
-that uses the Z command to collect profiling information from a
+that uses the timing support to collect profiling information from a
 running GPS instance.  You can use this to measure the latency at each
 stage &mdash; GPS to daemon, daemon to client library &mdash; and to
 estimate the portion of the latency induced by serial transmit time.

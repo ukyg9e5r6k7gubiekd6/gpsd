@@ -63,37 +63,6 @@ WATCH_OLDSTYLE	= 0x20
 
 GPSD_PORT = 2947
 
-class gpstimings:
-    def __init__(self):
-        self.sentence_tag = ""
-        self.sentence_length = 0
-        self.sentence_time = 0.0
-        self.d_xmit_time = 0.0
-        self.d_recv_time = 0.0
-        self.d_decode_time = 0.0
-        self.emit_time = 0.0
-        self.poll_time = 0.0
-        self.c_recv_time = 0.0
-        self.c_decode_time = 0.0
-    def d_received(self):
-        if self.sentence_time:
-            return self.d_recv_time + self.sentence_time
-        else:
-            return self.d_recv_time + self.d_xmit_time
-    def __str__(self):
-        return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" % (
-            self.sentence_tag,
-            self.sentence_length,
-            self.sentence_time,
-            self.d_xmit_time,
-            self.d_recv_time,
-            self.d_decode_time,
-            self.poll_time,
-            self.emit_time,
-            self.c_recv_time,
-            self.c_decode_time
-        )
-
 class device:
     def __init__(self):
         self.path = None
@@ -180,7 +149,6 @@ class gpsdata:
 
         # New style interface
         self.satellites = skyview()     # satellite objects in view
-        self.timings = gpstimings()
         self.device = device()
 
     def __repr__(self):
@@ -310,7 +278,6 @@ class gps(gpsdata):
                     if fields[0] == '?':
                         self.fix.mode = MODE_NO_FIX
                     else:
-                        self.timings.sentence_tag = fields[0]
                         def default(i, vbit=0, cnv=float):
                             if fields[i] == '?':
                                 return NaN
@@ -376,37 +343,12 @@ class gps(gpsdata):
                 elif cmd == 'Y':
                     satellites = data.split(":")
                     prefix = satellites.pop(0).split()
-                    self.timings.sentence_tag = prefix.pop(0)
-                    self.timings.sentence_time = prefix.pop(0)
-                    if self.timings.sentence_time != "?":
-                        self.timings.sentence_time = float(self.timings.sentence_time)
                     d1 = int(prefix.pop(0))
                     newsats = []
                     for i in range(d1):
                         newsats.append(gps.satellite(*map(int, satellites[i].split())))
                     self.satellites = newsats
                     self.valid |= SATELLITE_SET
-                elif cmd == 'Z':
-                    self.profiling = (data[0] == '1')
-                elif cmd == '$':
-                    (tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time) = data.split()
-                    self.sentence_tag = tag
-                    self.sentence_length = int(length)
-                    self.sentence_time = float(sentence_time)
-                    self.d_xmit_time = float(xmit_time)
-                    self.d_recv_time = float(recv_time)
-                    self.d_decode_time = float(decode_time)
-                    self.poll_time = float(poll_time)
-                    self.emit_time = float(emit_time)
-                    if self.timings.sentence_time != 0:
-                        basetime = self.timings.sentence_time
-                    else:
-                        basetime = self.timings.d_xmit_time
-                    self.timings.c_decode_time = time.time() - basetime
-                    self.timings.c_recv_time = self.received - basetime
-            data = self.timings
-
-
         return self.valid
 
     def __json_unpack(self, buf):
@@ -446,7 +388,6 @@ class gps(gpsdata):
             return self.device
         elif self.data.get("class") == "TPV":
             self.fix.gpsdata = self
-            self.timings.sentence_tag = self.data["tag"]
             self.valid = ONLINE_SET
             self.fix.time = default("time", NaN, TIME_SET)
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)

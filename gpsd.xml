@@ -684,27 +684,16 @@ satellites in orbit to have more than 12 usable.</para>
 <para>(At protocol level 1, this response had no tag or timestamp.)</para>
 </listitem>
 </varlistentry>
-
-<varlistentry>
-<term>z</term> <listitem><para>The Z command returns daemon profiling
-information of interest to <application>gpsd</application>
-developers. The format of this string is subject to change without
-notice.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term>$</term> <listitem><para>The $ command returns daemon profiling
-information of interest to <application>gpsd</application>
-developers. The format of this string is subject to change without
-notice.</para></listitem>
-</varlistentry>
-
 </variablelist>
 
 <para>The "J" command present in earlier version of the protocol is
 now ignored and a no-op. Internal changes in the daemon (which can now
 detect the end of a fix-reporting cycle reliably) have made it
 unnecessary).</para>
+
+<para>The "Z" command and "$" response, previously documented only
+with a warning that they were subject to change without notice, have 
+been removed.</para>
 
 <para>Note that a response consisting of just ? following the =
 means that there is no valid data available.  This may mean either
