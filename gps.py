@@ -80,15 +80,6 @@ class gpstimings:
             return self.d_recv_time + self.sentence_time
         else:
             return self.d_recv_time + self.d_xmit_time
-    def collect(self, tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
-        self.sentence_tag = tag
-        self.sentence_length = int(length)
-        self.sentence_time = float(sentence_time)
-        self.d_xmit_time = float(xmit_time)
-        self.d_recv_time = float(recv_time)
-        self.d_decode_time = float(decode_time)
-        self.poll_time = float(poll_time)
-        self.emit_time = float(emit_time)
     def __str__(self):
         return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" % (
             self.sentence_tag,
@@ -398,7 +389,15 @@ class gps(gpsdata):
                 elif cmd == 'Z':
                     self.profiling = (data[0] == '1')
                 elif cmd == '$':
-                    self.timings.collect(*data.split())
+                    (tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time) = data.split()
+                    self.sentence_tag = tag
+                    self.sentence_length = int(length)
+                    self.sentence_time = float(sentence_time)
+                    self.d_xmit_time = float(xmit_time)
+                    self.d_recv_time = float(recv_time)
+                    self.d_decode_time = float(decode_time)
+                    self.poll_time = float(poll_time)
+                    self.emit_time = float(emit_time)
         return self.valid
 
     def __json_unpack(self, buf):
