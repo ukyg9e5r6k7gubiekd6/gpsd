@@ -398,6 +398,15 @@ class gps(gpsdata):
                     self.d_decode_time = float(decode_time)
                     self.poll_time = float(poll_time)
                     self.emit_time = float(emit_time)
+                    if self.timings.sentence_time != 0:
+                        basetime = self.timings.sentence_time
+                    else:
+                        basetime = self.timings.d_xmit_time
+                    self.timings.c_decode_time = time.time() - basetime
+                    self.timings.c_recv_time = self.received - basetime
+            data = self.timings
+
+
         return self.valid
 
     def __json_unpack(self, buf):
@@ -469,6 +478,14 @@ class gps(gpsdata):
                     self.skyview.used += 1
             self.valid = ONLINE_SET | SATELLITE_SET
             return self.skyview
+        elif self.data.get("class") == "TIMING":
+            if self.data["timebase"] != 0:
+                basetime = self.data["timebase"]
+            else:
+                basetime = self.data["xmit"]
+            self.data["c_recv"] = self.received - basetime
+            self.data["c_decode"] = time.time() - basetime
+            return self.data
         else:
             # Other classes, including RTCM2, AIS, WATCH and DEVICELIST,
             # fall through to here.
@@ -494,7 +511,7 @@ class gps(gpsdata):
         # while the client is reading.
         if not self.response:
             raise StopIteration 
-        self.timings.c_recv_time = time.time()
+        self.received = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);
         if self.response.startswith("{") and "class" in self.response:
@@ -502,14 +519,6 @@ class gps(gpsdata):
             self.newstyle = True
         else:
             data = self.__oldstyle_unpack(self.response)
-        if self.profiling:
-            if self.timings.sentence_time != '?':
-                basetime = self.timings.sentence_time
-            else:
-                basetime = self.timings.d_xmit_time
-            self.timings.c_decode_time = time.time() - basetime
-            self.timings.c_recv_time -= basetime
-            data = self.timings
         return data
 
     def next(self):
