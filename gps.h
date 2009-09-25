@@ -906,6 +906,7 @@ struct gps_data_t {
 #define RTCM3_SET	0x20000000u
 #define AIS_SET 	0x40000000u
 #define PACKET_SET	0x80000000u	/* only used in the daemon */
+#define DATA_SET	~(ONLINE_SET|PACKET_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences

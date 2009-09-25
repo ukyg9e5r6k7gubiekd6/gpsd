@@ -512,7 +512,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			    session->gpsdata.dev.path);
 	return ONLINE_SET;
     } else {				/* we have recognized a packet */
-	gps_mask_t received = 0, dopmask = 0;
+	gps_mask_t received = PACKET_SET, dopmask = 0;
 	session->gpsdata.online = timestamp();
 	session->cycle_state = 0;
 

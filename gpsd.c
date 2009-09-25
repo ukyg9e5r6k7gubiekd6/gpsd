@@ -2192,6 +2192,10 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
 
+                /* must have a full packet to continue */
+                if ((changed & PACKET_SET) == 0)
+                    continue;
+
 		/* raw hook and relaying functions */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
 		    if (channel->subscriber == NULL || channel->device == NULL || channel->device != device) 
@@ -2372,7 +2376,7 @@ int main(int argc, char *argv[])
 		    char buf2[BUFSIZ];
 		    int state = device->cycle_state;
 		    device->poll_times[sub - subscribers] = timestamp();
-		    if (changed &~ ONLINE_SET) {
+		    if (changed & DATA_SET) {
 			bool report_fix = false;
 			if ((state & CYCLE_END_RELIABLE)!=0) {
 			    /*
