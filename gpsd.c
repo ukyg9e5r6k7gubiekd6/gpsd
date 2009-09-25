@@ -2194,10 +2194,7 @@ int main(int argc, char *argv[])
 
 		/* raw hook and relaying functions */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		    if (channel->subscriber == NULL 
-			|| channel->device == NULL 
-			|| strcmp(device->gpsdata.dev.path, 
-				  channel->device->gpsdata.dev.path)!=0)
+		    if (channel->subscriber == NULL || channel->device == NULL || channel->device != device) 
 			continue;
 
 		    if (channel->subscriber->policy.timing) {
