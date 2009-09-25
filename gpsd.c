@@ -2192,13 +2192,12 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
 
-		/* must have a full packet to continue */
-		if ((changed & PACKET_SET) == 0)
-		    continue;
-
 		/* raw hook and relaying functions */
 		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		    if (channel->subscriber==NULL || channel->device != device) 
+		    if (channel->subscriber == NULL 
+			|| channel->device == NULL 
+			|| strcmp(device->gpsdata.dev.path, 
+				  channel->device->gpsdata.dev.path)!=0)
 			continue;
 
 		    if (channel->subscriber->policy.timing) {
