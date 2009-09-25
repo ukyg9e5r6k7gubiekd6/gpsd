@@ -58,6 +58,7 @@ WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
 WATCH_RAW	= 0x02
 WATCH_SCALED	= 0x08
+WATCH_OLDSTYLE	= 0x20
 
 GPSD_PORT = 2947
 
@@ -147,13 +148,16 @@ class gpsdata:
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="127.0.0.1", port="2947", verbose=0):
+    def __init__(self, host="127.0.0.1", port="2947", verbose=0, mode=0):
         gpsdata.__init__(self)
         self.sock = None        # in case we blow up in connect
         self.sockfile = None
         self.connect(host, port)
         self.verbose = verbose
         self.raw_hook = None
+        self.newstyle = False
+        if mode:
+            self.stream(mode)
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -327,6 +331,8 @@ class gps(gpsdata):
                     self.valid |= SATELLITE_SET
 
     def __json_unpack(self, buf):
+        self.newstyle = True
+        # FIXME: Real interpretation code goes here
         jsondict = json.loads(buf)
         pass
 
@@ -362,23 +368,38 @@ class gps(gpsdata):
             commands += "\n"
         self.sock.send(commands)
 
-    def query(self, commands):
-        "Send a command, get back a response."
-        self.send(commands)
-        return self.poll()
-
     def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
-        if flags & WATCH_ENABLE:
-            arg = "w+x"
-            if self.raw_hook or (flags & WATCH_RAW):
-                arg += 'r+'
-                return self.query(arg)
-        elif flags & WATCH_DISABLE:
-            arg = "w-"
-            if self.raw_hook or (flags & WATCH_RAW):
-                arg += 'r-'
-                return self.query(arg)
+        if (flags & (WATCH_NEWSTYLE|WATCH_OLDSTYLE)) == 0:
+            # If we're looking at a daemon that speakds JSON, this
+            # should have been set when we saw the initial VERSION
+            # response.  Note, however, that this requires at
+            # least one poll() before stream() is called
+            if self.newstyle:
+                flags |= WATCH_NEWSTYLE
+            else:
+                flags |= WATCH_OLDSTYLE
+        if flags & WATCH_NEWSTYLE:
+            if flags & WATCH_ENABLE:
+                arg = '?WATCH={"enable":true'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += ',"nmea":true'
+            elif flags & WATCH_DISABLE:
+                arg = '?WATCH={"enable":false'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += ',"nmea":false'
+            return self.send(arg + "}")
+        elif flags & WATCH_OLDSTYLE:
+            if flags & WATCH_ENABLE:
+                arg = 'w+'
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += 'r+'
+                    return self.send(arg)
+            elif flags & WATCH_DISABLE:
+                arg = "w-"
+                if self.raw_hook or (flags & WATCH_NMEA):
+                    arg += 'r-'
+                    return self.send(arg)
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET  = 3.2808399
