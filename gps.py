@@ -105,16 +105,15 @@ class gpsdata:
         self.utc = ""
 
         self.satellites_used = 0        # Satellites used in last fix
-        self.pdop = self.hdop = self.vdop = self.tdop = self.gdop = 0.0
+        self.xdop = self.ydop = self.vdop = self.tdop = 0
+        self.pdop = self.hdop = self.gdop = 0.0
 
         self.epe = 0.0
 
         self.satellites = []            # satellite objects in view
-        self.await = self.parts = 0
 
         self.gps_id = None
         self.driver_mode = 0
-        self.profiling = False
         self.baudrate = 0
         self.stopbits = 0
         self.cycle = 0
@@ -146,6 +145,16 @@ class gpsdata:
           st += "    %r\n" % sat
         return st
 
+class dictwrapper:
+    "Wrapper that yields both class and dictionary behavior,"
+    def __init__(self, **dict):
+        self.__dict__ = dict
+    def __getitem__(self, key):
+        "Emulate dictionary, for new-style interface."
+        return self.__dict__[key]
+    def __str__(self):
+        return "<dictwrapper: " + str(self.__dict__) + ">"
+
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
     def __init__(self, host="127.0.0.1", port="2947", verbose=0, mode=0):
@@ -158,6 +167,9 @@ class gps(gpsdata):
         self.newstyle = False
         if mode:
             self.stream(mode)
+
+    def __iter__(self):
+        return self
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -208,7 +220,7 @@ class gps(gpsdata):
         self.close()
 
     def __oldstyle_unpack(self, buf):
-        # unpack a daemon response into the instance members
+        # unpack a daemon response into the gps instance members
         self.fix.time = 0.0
         fields = buf.strip().split(",")
         if fields[0] == "GPSD":
@@ -332,9 +344,74 @@ class gps(gpsdata):
 
     def __json_unpack(self, buf):
         self.newstyle = True
-        # FIXME: Real interpretation code goes here
-        jsondict = json.loads(buf)
-        pass
+        def asciify(d):
+            "De-Unicodify everything so we can copy dicts into Python objects."
+            t = {}
+            for (k, v) in d.items():
+                ka = k.encode("ascii")
+                if type(v) == type(u"x"):
+                    va = v.encode("ascii")
+                elif type(v) == type({}):
+                    va = asciify(v)
+                elif type(v) == type([]):
+                    va = map(asciify, v)
+                else:
+                    va = v
+                t[ka] = va
+            return t
+        self.data = asciify(json.loads(buf, encoding="ascii"))
+        # The rest is backwards compatibility for the old interface
+        def default(k, dflt, vbit=0):
+            if k not in self.data:
+                return dflt
+            else:
+                self.valid |= vbit
+                return self.data[k]
+        if self.data.get("class") == "DEVICE":
+            self.valid = ONLINE_SET | DEVICE_SET
+            self.path        = self.data["path"]
+            self.activated   = default("activated", None) 
+            self.gps_id      = default("subtype", None, DEVICEID_SET) 
+            self.driver_mode = default("native", 0)
+            self.baudrate    = default("bps", 0)
+            self.serialmode  = default("serialmode", "8N1")
+            self.cycle       = default("cycle",    NaN)
+            self.mincycle    = default("mincycle", NaN)
+        elif self.data.get("class") == "TPV":
+            self.valid = ONLINE_SET
+            self.fix.time = default("time", NaN, TIME_SET)
+            self.fix.ept =       default("ept",   NaN, TIMERR_SET)
+            self.fix.latitude =  default("lat",   NaN, LATLON_SET)
+            self.fix.longitude = default("lon",   NaN)
+            self.fix.altitude =  default("alt",   NaN, ALTITUDE_SET)
+            self.fix.epx =       default("epx",   NaN, HERR_SET)
+            self.fix.epy =       default("epy",   NaN, HERR_SET)
+            self.fix.epv =       default("epv",   NaN, VERR_SET)
+            self.fix.track =     default("track", NaN, TRACK_SET)
+            self.fix.speed =     default("speed", NaN, SPEED_SET)
+            self.fix.climb =     default("climb", NaN, CLIMB_SET)
+            self.fix.epd =       default("epd",   NaN)
+            self.fix.eps =       default("eps",   NaN, SPEEDERR_SET)
+            self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
+            self.fix.mode =      default("mode",  0,   MODE_SET)
+        elif self.data.get("class") == "SKY":
+            for attrp in "xyvhpg":
+                setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
+            if "satellites" in self.data:
+                for sat in self.data['satellites']:
+                    self.satellites.append(gps.satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
+            self.satellites_used = 0
+            for sat in self.satellites:
+                if sat.used:
+                    self.satellites_used += 1
+            self.valid = ONLINE_SET | SATELLITE_SET
+        elif self.data.get("class") == "TIMING":
+            if self.data["timebase"] != 0:
+                basetime = self.data["timebase"]
+            else:
+                basetime = self.data["xmit"]
+            self.data["c_recv"] = self.received - basetime
+            self.data["c_decode"] = time.time() - basetime
 
     def waiting(self):
         "Return True if data is ready for the client."
@@ -350,17 +427,26 @@ class gps(gpsdata):
                 self.response += frag
                 if frag.startswith("."):
                     break
+        # Can happen if daemon terminates while we're reading.
         if not self.response:
             return -1
         if self.verbose:
             sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
+        self.received = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);
+        # This code can go away when we remove oldstyle protocol
         if self.response.startswith("{"):
             self.__json_unpack(self.response)
         else:
             self.__oldstyle_unpack(self.response)
         return 0
+
+    def next(self):
+        "Get next object (new-style interface)."
+        if self.poll() == -1:
+            raise StopIteration
+        return dictwrapper(self.data)
 
     def send(self, commands):
         "Ship commands to the daemon."
