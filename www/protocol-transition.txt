@@ -308,34 +308,14 @@ the C library.  As in the C library, the query() method is gone, for
 the same reasons.  The gps_send() entry point, new in version 3 of the C API,
 has had a corresponding Python gps-class send() method all along.
 
-Fix information is still bundled in a gpsfix object that is a member
-of the gps class instance.  The 'valid' member still holds *_SET
-bitmasks with the same values as those in the C library, flagging
-which pieces of data were refreshed in the last poll.
+The pre-existing interface using the poll() method and self.valid is
+still available and should work compatibly with a daemon speaking
+JSON. However, data from the new responses (WATCH, VERSION, AIS, and
+TIMING in particular) will be available only through the self.data
+member.
 
-Some other data which was previously held in individual members of the
-gps class after being shipped up from the daemon now lives in
-subobjects.  Notably, the Dilution of Precision factors (DOPs) and the
-satellite list now live in a subobject named "skyview". Also, the
-serial-mode device parameters now live in a subobject called 'device'.
-
-The dictionary built from the last JSON object received from the
-daemon is always available as the 'data' member of GPS.  Look at
-the value of its "class" key to determine its type.
-
-Because JSON objects are so similar in their behavior to Python data
-structures, the new Python gps module does not in general create
-encapsulation classes for them except where a layer of interpretation
-is otherwise required to mimic old behavior (in particular, the
-setting of the 'valid' member).  This is true for the DEVICE, TPV,
-SKY, and TIMING reports.
-
-You will access all other responses (including VERSION reports, AIS
-reports, RTCM reports, WATCH responses and device lists) simply by
-looking at the 'data' member after a poll.
-
-The new gps class is an iterator factory. The recommended way to use
-the new interface is like this:
+The preferred way to use the new gps class is as an iterator
+factory, like this:
 
 ----------------------------------------------------------------------
 
@@ -354,15 +334,20 @@ try:
     while True:
         # Do stuff
         report = session.next()
+	# Do more stuff
 except StopIteration:
     print "GPSD has terminated"
 
 ----------------------------------------------------------------------
 
-Each call to the iterator yields a report structure.  It may be a
-gpsfix object (if the read response was a TPV), a skyview object (if
-the response was a SKY) a device object (if the response was a
-DEVICE), a timings object (if the response was a TIMING) or simply the
-dictionary built from the JSON response (all other responses.  If the
-daemon terminates, the iterator next() method will raise StopIteration
-and the loop will terminate.
+Each call to the iterator yields a report structure until the daemon
+terminates, at which point the iterator next() method will raise
+StopIteration and the loop will terminate.
+
+The report object returned by next() can be accessed either as a dictionary
+or as an object.  As a dictionary, it is the raw contents of the last
+JSON response re-encoded in plain ASCII.  For convenience, you may
+also access it as an object with members for each attribute in the
+dictionary.  It is especially useful to know that the object will 
+always have a "class" member giving the response type (TPV, SKY,
+DEVICE, etc.) as a string.
