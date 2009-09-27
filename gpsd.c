@@ -2138,7 +2138,7 @@ int main(int argc, char *argv[])
 		    if (channel->subscriber->policy.timing) {
 			char phrase[GPS_JSON_RESPONSE_MAX];
 			if (channel->device->gpsdata.sentence_time!=0)
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"elapsed\":%lf}\r\n",
 					   channel->device->gpsdata.dev.path,
 					   channel->device->gpsdata.tag,
 					   (int)channel->device->gpsdata.sentence_length,
@@ -2146,17 +2146,15 @@ int main(int argc, char *argv[])
 					   channel->device->gpsdata.d_xmit_time - channel->device->gpsdata.sentence_time,
 					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.sentence_time,
 					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.sentence_time,
-					   channel->device->poll_times[sub_index(channel->subscriber)] - channel->device->gpsdata.sentence_time,
 					   timestamp() - channel->device->gpsdata.sentence_time);
 			else
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"poll\":%lf,\"elapsed\":%lf}\r\n",
+			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"elapsed\":%lf}\r\n",
 					   channel->device->gpsdata.dev.path,
 					   channel->device->gpsdata.tag,
 					   (int)channel->device->gpsdata.sentence_length,
 					   channel->device->gpsdata.d_xmit_time,
 					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.d_xmit_time,
 					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.d_xmit_time,
-					   channel->device->poll_times[sub_index(channel->subscriber)] - channel->device->gpsdata.d_xmit_time,
 					   timestamp() - channel->device->gpsdata.d_xmit_time);
 			(void)throttled_write(channel->subscriber,
 					      phrase, strlen(phrase));
@@ -2307,7 +2305,6 @@ int main(int argc, char *argv[])
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
 		    int state = device->cycle_state;
-		    device->poll_times[sub - subscribers] = timestamp();
 		    if (changed & DATA_SET) {
 			bool report_fix = false;
 			if ((state & CYCLE_END_RELIABLE)!=0) {
@@ -2426,9 +2423,6 @@ int main(int argc, char *argv[])
 		     * POLLER_TIMEOUT useful.
 		     */
 		    sub->active = timestamp();
-		    for (channel = channels; channel < channels + NITEMS(channels); channel++)
-			if (channel->device!=NULL && channel->subscriber == sub)
-			    channel->device->poll_times[sub_index(sub)] = sub->active;
 		    if (handle_gpsd_request(sub, buf) < 0)
 			detach_client(sub);
 		}

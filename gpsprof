@@ -195,13 +195,12 @@ class rawplot:
                 e1 = timings.d_xmit_time
             else:
                 e1 = 0
-            res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+            res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
                 % (timings.sentence_tag,
                    timings.sentence_length,
                    e1, 
                    timings.d_recv_time,
                    timings.d_decode_time,
-                   timings.poll_time,
                    timings.emit_time,
                    timings.c_recv_time,
                    timings.c_decode_time)
@@ -215,7 +214,6 @@ plot \
      "-" using 0:9 title "D2 = Client decode time" with impulses, \
      "-" using 0:8 title "T2 =     TCP/IP latency" with impulses, \
      "-" using 0:7 title "E2 = Daemon encode time" with impulses, \
-     "-" using 0:6 title "W  =     Poll wait time" with impulses, \
      "-" using 0:5 title "D1 = Daemon decode time" with impulses, \
      "-" using 0:4 title "T1 =         RS232 time" with impulses, \
      "-" using 0:3 title "E1 =        GPS latency" with impulses
@@ -246,10 +244,10 @@ class splitplot:
                   session.stopbits, session.cycle)
         for s in splitplot.sentences:
             res += "%8s\t" % s
-        for hn in ("T1", "D1", "W", "E2", "T2", "D2", "length"):
+        for hn in ("T1", "D1", "E2", "T2", "D2", "length"):
             res += "%8s\t" % hn
         res += "tag\n# "
-        for s in tuple(splitplot.sentences) + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
+        for s in tuple(splitplot.sentences) + ("T1", "D1", "E2", "T2", "D2", "length"):
             res += "---------\t"
         return res + "--------\n"
     def data(self, session):
@@ -264,10 +262,9 @@ class splitplot:
                     res += "%2.6f\t" % e1
                 else:
                     res += "-       \t"
-            res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
+            res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
                      % (timings.d_recv_time,
                         timings.d_decode_time,
-                        timings.poll_time,
                         timings.emit_time,
                         timings.c_recv_time,
                         timings.c_decode_time,
@@ -283,7 +280,6 @@ plot \\
      "-" using 0:%d title "D2 = Client decode time" with impulses, \\
      "-" using 0:%d title "T2 = TCP/IP latency" with impulses, \\
      "-" using 0:%d title "E2 = Daemon encode time" with impulses, \\
-     "-" using 0:%d title "W  = Poll wait time" with impulses, \\
      "-" using 0:%d title "D1 = Daemon decode time" with impulses, \\
      "-" using 0:%d title "T1 = RS3232 time" with impulses, \\
 '''

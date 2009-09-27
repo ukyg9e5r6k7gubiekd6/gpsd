@@ -27,14 +27,16 @@
   <year>2005</year>
   <holder role="mailto:esr@thyrsus.com">Eric S. Raymond</holder> 
 </copyright>
-<!-- legalnotice>
-  <title>Copyright</title>
-  <para>Permission is granted to copy, distribute and/or modify
-  this document under the terms of the Open Publication License,
-  version 2.0.</para>
-</legalnotice -->
 
 <revhistory>
+   <revision>
+      <revnumber>1.2</revnumber>
+      <date>27 September 2009</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Endnote about the big protocol change.
+      </revremark>
+   </revision>
    <revision>
       <revnumber>1.1</revnumber>
       <date>4 January 2008</date>
@@ -267,12 +269,12 @@ with
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 a tool built for this purpose and included in the distribution.</para>
 
-<para>One of the effects of building with --enable-profiling is that a 
-form of the B command that normally just reports the RS232 parameters
-can be used to set them (it ships a SiRF-II control string to
-the GPS and then changes the line settings).  I discovered that 
-something in the SiRF-II/PL2303 combination chokes on line speeds
-of 19200 and up.</para>
+<para>One of the effects of building with
+&ndash;&ndash;enable-profiling is that a form of the B command that
+normally just reports the RS232 parameters can be used to set them (it
+ships a SiRF-II control string to the GPS and then changes the line
+settings).  I discovered that something in the SiRF-II/PL2303
+combination chokes on line speeds of 19200 and up.</para>
 
 <para>Another effect is to enable a Z command to switch on profiling.
 When profiling is on, each time 
@@ -481,6 +483,13 @@ latency of the system from 0.5 to 0.25sec. This would be right at the
 edge of the SiRF-II's performance envelope.</para>
 
 </sect2>
+</sect1>
+<sect1><title>2009 Update</title>
+
+<para>One consequence of the new gpsd wire protocol is that client
+applications no longer poll the daemon.  This means the "W' statistic
+is always zero, and is no longer collected when timing sentences.</para>
+
 </sect1>
 </article>
 

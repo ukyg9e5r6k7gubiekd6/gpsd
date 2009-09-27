@@ -451,7 +451,21 @@ class gps(gpsdata):
         "Get next object (new-style interface)."
         if self.poll() == -1:
             raise StopIteration
-        return dictwrapper(**self.data)
+        # There are a few things we need to stash away for later use
+        payload = dictwrapper(**self.data)
+        if self.data["class"] == "VERSION":
+            self.version = payload
+        elif self.data["class"] == "DEVICE":
+            if "driver" in self.data:
+                if "driver" in data:
+                    self.driver = self.data["driver"]
+                if "subtype" in data:
+                    self.subtype = self.data["subtype"]
+                if self.driver:
+                    self.gps_id = self.driver
+                    if self.subtype:
+                        self.gps_id += self.subtype
+        return payload
 
     def send(self, commands):
         "Ship commands to the daemon."
