@@ -371,8 +371,12 @@ class gps(gpsdata):
         if self.data.get("class") == "DEVICE":
             self.valid = ONLINE_SET | DEVICE_SET
             self.path        = self.data["path"]
-            self.activated   = default("activated", None) 
-            self.gps_id      = default("subtype", None, DEVICEID_SET) 
+            self.activated   = default("activated", None)
+            driver = default("driver", None, DEVICEID_SET) 
+            subtype = default("subtype", None, DEVICEID_SET) 
+            self.gps_id      = driver
+            if subtype:
+                self.gps_id += " " + subtype
             self.driver_mode = default("native", 0)
             self.baudrate    = default("bps", 0)
             self.serialmode  = default("serialmode", "8N1")
