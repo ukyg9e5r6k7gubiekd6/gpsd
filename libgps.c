@@ -17,9 +17,7 @@
 
 #include "gpsd_config.h"
 #include "gpsd.h"
-#ifdef GPSDNG_ENABLE
 #include "gps_json.h"
-#endif /* GPSDNG_ENABLE */
 
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);
@@ -81,17 +79,15 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     char *ns, *sp, *tp;
     int i;
 
-#ifdef GPSDNG_ENABLE
     /* detect and process a JSON response */
     if (buf[0] == '{') {
 	(void)libgps_json_unpack(buf, gpsdata);
-	gpsdata->newstyle = true;
-    }
-#endif /* GPSDNG_ENABLE */
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
-    else
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
 #ifdef OLDSTYLE_ENABLE
+	gpsdata->newstyle = true;
+#endif /* OLDSTYLE_ENABLE */
+    }
+#ifdef OLDSTYLE_ENABLE
+    else
     {
 	/*
 	 * Get the decimal separator for the current application locale.
@@ -445,7 +441,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    }
 	}
     }
-#endif /* GPSDNG_ENABLE */
+#endif /* OLDSTYLE_ENABLE */
 
 /*@ -compdef @*/
     if (gpsdata->raw_hook)

@@ -688,19 +688,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for GPSD-NG support
-AC_ARG_ENABLE(gpsdng,
-  AC_HELP_STRING([--disable-gpsdng],
-		 [disable GPSD-NG support]),
-  [ac_gpsdng=$enableval], [ac_gpsdng=yes])
-AC_MSG_CHECKING([for GPSD-NG support])
-if test x"$ac_gpsdng" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([GPSDNG_ENABLE], 1, [GPSD-NG support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],

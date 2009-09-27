@@ -359,9 +359,9 @@ struct subscriber_t {
     bool tied;				/* client set device with F */
 #endif /* OLDSTYLE_ENABLE */
     struct policy_t policy;		/* configurable bits */
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+#if defined(OLDSTYLE_ENABLE)
     bool new_style_responses;			/* protocol type desired */
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+#endif /* defined(OLDSTYLE_ENABLE) */
 };
 
 /*
@@ -400,11 +400,9 @@ struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file desc
  * command.  Otherwise the newstyle() macro evaluates to a constant,
  * and should be optimized out of condition guards that use it.
  */
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+#if defined(OLDSTYLE_ENABLE)
 #define newstyle(sub)	(sub)->new_style_responses
-#elif defined(OLDSTYLE_ENABLE)
-#define newstyle(sub)	false
-#elif defined(GPSDNG_ENABLE)
+#else
 #define newstyle(sub)	true
 #endif
 
@@ -436,7 +434,6 @@ static void adjust_max_fd(int fd, bool on)
 #endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
 }
 
-#ifdef GPSDNG_ENABLE
 static int channel_count(struct subscriber_t *sub)
 {
     int chancount = 0;
@@ -447,8 +444,6 @@ static int channel_count(struct subscriber_t *sub)
 	    ++chancount;
     return chancount;
 }
-
-#endif /* GPSDNG_ENABLE */
 
 static bool have_fix(struct channel_t *channel)
 {
@@ -593,11 +588,9 @@ static void deactivate_device(struct gps_device_t *device)
 #ifdef OLDSTYLE_ENABLE
     notify_watchers(device, false, "GPSD,X=0\r\n");
 #endif /* OLDSTYLE_ENABLE */
-#ifdef GPSDNG_ENABLE
     notify_watchers(device, true, 
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
-#endif /* GPSDNG_ENABLE */
     if (device->gpsdata.gps_fd != -1) {
 	gpsd_deactivate(device);
 	device->gpsdata.gps_fd = -1;	/* device is already disconnected */
@@ -662,12 +655,10 @@ static bool add_device(char *device_name)
 			    device_name, 
 			    (int)(devp - devices));
 		devp->gpsdata.gps_fd = -1;
-#ifdef GPSDNG_ENABLE
 		notify_watchers(devp, true, 
 				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%ld}\r\n",
 				devp->gpsdata.dev.path,
 				timestamp());
-#endif /* GPSDNG_ENABLE */
 		return true;
 	    }
 	return false;
@@ -1043,9 +1034,9 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
     int i, j;
     struct channel_t *channel = NULL;
 
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+#if defined(OLDSTYLE_ENABLE)
     sub->new_style_responses = false;
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+#endif /* defined(OLDSTYLE_ENABLE) */
 
     (void)strlcpy(reply, "GPSD", replylen);
     replylen -= 4;
@@ -1533,7 +1524,6 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 /*@ +nullderef +nullpass +mustfreefresh @*/
 #endif /* OLDSTYLE_ENABLE */
 
-#ifdef GPSDNG_ENABLE
 static void json_devicelist_dump(char *reply, size_t replylen)
 {
     struct gps_device_t *devp;
@@ -1563,9 +1553,9 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     struct channel_t *channel;
     const char *end = NULL;
 
-#if defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE)
+#if defined(OLDSTYLE_ENABLE)
     sub->new_style_responses = true;
-#endif /* defined(OLDSTYLE_ENABLE) && defined(GPSDNG_ENABLE) */
+#endif /* defined(OLDSTYLE_ENABLE) */
 
     /*
      * There's a splint limitation that parameters can be declared
@@ -1746,14 +1736,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
     /*@+nullderef +nullpass@*/
     /*@+compdef@*/
 }
-#endif /* GPSDNG_ENABLE */
 
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 {
     char reply[GPS_JSON_RESPONSE_MAX+1];
 
     reply[0] = '\0';
-#ifdef GPSDNG_ENABLE
     if (buf[0] == '?') {
 	const char *end;
 	for (end = ++buf; *buf!='\0'; buf = end)
@@ -1763,7 +1751,6 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 		handle_newstyle_request(sub, buf, &end, 
 					reply+strlen(reply), sizeof(reply)-strlen(reply));
     }
-#endif /* GPSDNG_ENABLE */
 #ifdef OLDSTYLE_ENABLE
     /* fall back to old-style requests */
     if (buf[0] != '\0')
@@ -2067,9 +2054,7 @@ int main(int argc, char *argv[])
 			"no subscriber slots available\n", c_ip, ssock);
 		    (void)close(ssock);
 		} else {
-#ifdef GPSDNG_ENABLE
 		    char announce[GPS_JSON_RESPONSE_MAX];
-#endif /* GPSDNG_ENABLE */
 		    FD_SET(ssock, &all_fds);
 		    adjust_max_fd(ssock, true);
 		    client->fd = ssock;
@@ -2079,10 +2064,8 @@ int main(int argc, char *argv[])
 #endif /* OLDSTYLE_ENABLE */
 		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
 			c_ip, sub_index(client), ssock);	
-#ifdef GPSDNG_ENABLE
 		    json_version_dump(announce, sizeof(announce));
 		    (void)throttled_write(client, announce, strlen(announce));
-#endif /* GPSDNG_ENABLE */
 		}
 	    }
 	    FD_CLR(msock, &rfds);
@@ -2277,13 +2260,11 @@ int main(int argc, char *argv[])
 			    notify_watchers(device, false, id1);
 			}
 #endif /* OLDSTYLE_ENABLE */
-#ifdef GPSDNG_ENABLE
 			{
 			    char id2[GPS_JSON_RESPONSE_MAX];
 			    json_device_dump(device, id2, sizeof(id2));
 			    notify_watchers(device, true, id2);
 			}
-#endif /* GPSDNG_ENABLE */
 		    }
 		    /* copy/merge device data into subscriber fix buffers */
 		    /*@-nullderef -nullpass@*/
@@ -2375,7 +2356,6 @@ int main(int argc, char *argv[])
 #endif /* AIVDM_ENABLE */
 			}
 #endif /* OLDSTYLE_ENABLE */
-#ifdef GPSDNG_ENABLE
 			if (newstyle(sub)) { 		  
 			    if (report_fix) {
 				json_tpv_dump(&device->gpsdata, &channel->fixbuffer, 
@@ -2401,7 +2381,6 @@ int main(int argc, char *argv[])
 			    }
 			}
 #endif /* AIVDM_ENABLE */
-#endif /* GPSDNG_ENABLE */
 		    }
 		}
 		/*@-nullderef@*/

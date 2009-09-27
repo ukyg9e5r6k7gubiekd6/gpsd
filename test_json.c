@@ -76,7 +76,6 @@ static void assert_real(char *attr, double fld, double val)
 
 static struct gps_data_t gpsdata;
 
-#ifdef GPSDNG_ENABLE
 /* Case 1: TPV report */
 
 static const char json_str1[] = "{\"class\":\"TPV\",\
@@ -201,15 +200,12 @@ static const struct json_attr_t json_attrs_8[] = {
 };
 /*@ +fullinitblock @*/
 
-#endif /* GPSDNG_ENABLE */
-
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int status = 0;
 
     (void)fprintf(stderr, "JSON unit test ");
 
-#ifdef GPSDNG_ENABLE
     status = libgps_json_unpack(json_str1, &gpsdata);
     assert_case(1, status);
     assert_string("device", gpsdata.dev.path, "GPS#1");
@@ -283,8 +279,6 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_integer("fee", fee, 3);
     assert_integer("fie", fie, 6);
     assert_integer("foe", foe, 14);
-
-#endif /* GPSDNG_ENABLE */
 
     (void)fprintf(stderr, "succeeded.\n");
 
