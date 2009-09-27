@@ -58,6 +58,7 @@ WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
 WATCH_RAW	= 0x02
 WATCH_SCALED	= 0x08
+WATCH_NEWSTYLE	= 0x10
 WATCH_OLDSTYLE	= 0x20
 
 GPSD_PORT = 2947
@@ -147,8 +148,8 @@ class gpsdata:
 
 class dictwrapper:
     "Wrapper that yields both class and dictionary behavior,"
-    def __init__(self, **dict):
-        self.__dict__ = dict
+    def __init__(self, **ddict):
+        self.__dict__ = ddict
     def __getitem__(self, key):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]
@@ -335,7 +336,7 @@ class gps(gpsdata):
                 elif cmd == 'Y':
                     satellites = data.split(":")
                     prefix = satellites.pop(0).split()
-                    d1 = int(prefix.pop(0))
+                    d1 = int(prefix.pop())
                     newsats = []
                     for i in range(d1):
                         newsats.append(gps.satellite(*map(int, satellites[i].split())))
@@ -446,7 +447,7 @@ class gps(gpsdata):
         "Get next object (new-style interface)."
         if self.poll() == -1:
             raise StopIteration
-        return dictwrapper(self.data)
+        return dictwrapper(**self.data)
 
     def send(self, commands):
         "Ship commands to the daemon."
@@ -589,11 +590,9 @@ if __name__ == '__main__':
     if streaming:
         session = gps(*arguments)
         session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
-        session.stream(WATCH_ENABLE)
-        while True:
-            session.poll()
-            if session.valid:
-                print session
+        session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
+        for report in session:
+            print report
     else:
         print "This is the exerciser for the Python gps interface."
         session = gps(*arguments)
