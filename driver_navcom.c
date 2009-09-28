@@ -197,8 +197,6 @@ static void navcom_event_hook(struct gps_device_t *session, event_t event)
 	   although not necessarily a bright idea), there is a good
 	   chance that we might misidentify our port */
 	/*@ -type @*/
-	session->driver.navcom.physical_port = 0xFF;
-
 	navcom_cmd_0x1c(session, 0x02, 0);      /* Test Support Block */
 	navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
 	navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
@@ -1194,7 +1192,7 @@ static bool navcom_speed(struct gps_device_t *session,
     if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
 	return false;
     } else {
-	u_int8_t port_selection;
+	u_int8_t port, port_selection;
 	u_int8_t baud;
 	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
 	    /* We still don't know which port we're connected to */
@@ -1237,7 +1235,8 @@ static bool navcom_speed(struct gps_device_t *session,
 	/*@ -charint @*/
 
 	/* Proceed to construct our message */
-	port_selection = session->driver.navcom.physical_port | baud;
+	port = session->driver.navcom.physical_port; 
+	port_selection = (port ? port : 0xff) | baud;
 
 	/* Send it off */
 	navcom_cmd_0x11(session, port_selection);
