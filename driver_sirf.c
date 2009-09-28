@@ -762,7 +762,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-	if (session->driver.sirf.driverstate & UBLOX)
+	if ((session->driver.sirf.driverstate & UBLOX)==0)
 	    return sirf_msg_navsol(session, buf, len);
 	else {
 	    gpsd_report(LOG_PROG, "MND 0x02 skipped, uBlox flag is on. %0x\n", session->driver.sirf.driverstate);
