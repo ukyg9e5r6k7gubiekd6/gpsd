@@ -1236,7 +1236,7 @@ static bool navcom_speed(struct gps_device_t *session,
 
 	/* Proceed to construct our message */
 	port = session->driver.navcom.physical_port; 
-	port_selection = (port ? port : 0xff) | baud;
+	/*@i1@*/port_selection = (port ? port : (u_int8_t)0xff) | baud;
 
 	/* Send it off */
 	navcom_cmd_0x11(session, port_selection);
