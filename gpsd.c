@@ -819,23 +819,28 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 		/*@ +sefparams @*/
 	    }
 #endif /* OLDSTYLE_ENABLE */
+	    if (newstyle(user) && user->policy.watcher) {
+		char buf[GPS_JSON_RESPONSE_MAX];
+		json_device_dump(channel->device, buf, sizeof(buf));
+		(void)throttled_write(user, buf, strlen(buf));
+	    }
 	}
     }
 
+#ifdef OLDSTYLE_ENABLE
     if (was_unassigned) {
 	char buf[NMEA_MAX];
 
 	buf[0] = '\0';
-#ifdef OLDSTYLE_ENABLE
 	if (!newstyle(user) && user->policy.watcher)
 	    (void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 			   timestamp(), gpsd_id(channel->device));
-#endif /* OLDSTYLE_ENABLE */
 	/*@ -sefparams +matchanyintegral @*/
 	if (buf[0]!='\0')
 	    (void)throttled_write(user, buf, strlen(buf));
 	/*@ +sefparams -matchanyintegral @*/
     }
+#endif /* OLDSTYLE_ENABLE */
 
     channel->subscriber = user;
     return channel;
