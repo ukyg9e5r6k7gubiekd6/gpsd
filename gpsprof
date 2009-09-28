@@ -191,19 +191,19 @@ class rawplot:
     def data(self, session):
         res = ""
         for timings in self.stats:
-            if timings.sentence_time:
-                e1 = timings.d_xmit_time
+            if timings.timebase:
+                e1 = timings.xmit
             else:
                 e1 = 0
             res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
-                % (timings.sentence_tag,
-                   timings.sentence_length,
+                % (timings.tag,
+                   timings.len,
                    e1, 
-                   timings.d_recv_time,
-                   timings.d_decode_time,
-                   timings.emit_time,
-                   timings.c_recv_time,
-                   timings.c_decode_time)
+                   timings.recv,
+                   timings.decode,
+                   timings.xmit,
+                   timings.c_recv,
+                   timings.c_decode)
         return res
     def plot(self, file, session):
         fmt = '''
@@ -234,8 +234,8 @@ class splitplot:
         self.stats = []
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
-        if session.timings.sentence_tag not in self.sentences:
-            self.sentences.append(session.timings.sentence_tag)
+        if session.timings.tag not in self.sentences:
+            self.sentences.append(session.timings.tag)
         return True
     def header(self, session):
         res = "# Split latency data, %s, %s, %dN%d, cycle %ds\n#" % \
@@ -253,23 +253,23 @@ class splitplot:
     def data(self, session):
         res = ""
         for timings in self.stats:
-            if timings.sentence_time:
-                e1 = timings.d_xmit_time
+            if timings.timebase:
+                e1 = timings.xmit
             else:
                 e1 = 0
             for s in splitplot.sentences:
-                if s == timings.sentence_tag:
+                if s == timings.tag:
                     res += "%2.6f\t" % e1
                 else:
                     res += "-       \t"
             res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
-                     % (timings.d_recv_time,
-                        timings.d_decode_time,
-                        timings.emit_time,
-                        timings.c_recv_time,
-                        timings.c_decode_time,
-                        timings.sentence_length,
-                        timings.sentence_tag)
+                     % (timings.recv,
+                        timings.decode,
+                        timings.xmit,
+                        timings.c_recv,
+                        timings.c_decode,
+                        timings.len,
+                        timings.tag)
         return res
     def plot(self, title, session):
         fixed = '''
@@ -319,16 +319,16 @@ class cycle:
         last_seen = {}
         for timing in self.stats:
             # Throw out everything but the leader in each GSV group
-            if timing.sentence_tag[-3:] == "GSV" and last_command[-3:] == "GSV":
+            if timing.tag[-3:] == "GSV" and last_command[-3:] == "GSV":
                 continue
-            last_command = timing.sentence_tag
+            last_command = timing.tag
             # Record timings
             received = timing.d_received()
-            if not timing.sentence_tag in intervals:
-                intervals[timing.sentence_tag] = []
-            if timing.sentence_tag in last_seen:
-                intervals[timing.sentence_tag].append(roundoff(received - last_seen[timing.sentence_tag])) 
-            last_seen[timing.sentence_tag] = received
+            if not timing.tag in intervals:
+                intervals[timing.tag] = []
+            if timing.tag in last_seen:
+                intervals[timing.tag].append(roundoff(received - last_seen[timing.tag])) 
+            last_seen[timing.tag] = received
 
         # Step three: get command frequencies and the basic send cycle time
         frequencies = {}
@@ -396,38 +396,53 @@ def plotframe(await, fname, speed, threshold, title):
     except socket.error:
         sys.stderr.write("gpsprof: gpsd unreachable.\n")
         sys.exit(1)
+    # Initialize
+    session.poll()
+    if session.version == None:
+        print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
+        sys.exit(1)
+    session.send("?DEVICES;")
+    while session.poll() != -1:
+        if session.data["class"] == "DEVICES":
+            break
+    if len(session.data.devices) != 1:
+        print >>sys.stderr, "gpsprof: exactly one device must be attached."
+        sys.exit(1)
+    path = session.data.devices[0]["path"]
+    # Set parameters
+    if speed:
+        session.send('?DEVICE={"path":"%s","bps:":%d}' % (path, speed))
+        session.poll()
+        if session.baudrate != speed:
+            sys.stderr.write("gpsprof: baud rate change failed.\n")
+    options = ""
+    if formatter not in (spaceplot, uninstrumented):
+        options = ',"timing:true"'
     try:
-        if speed:
-            session.send("b=%d\n" % speed)
-            session.poll()
-            if session.baudrate != speed:
-                sys.stderr.write("gpsprof: baud rate change failed.\n")
-        session.send("w+bci\n")
-        if formatter not in (spaceplot, uninstrumented):
-            session.send("z+\n")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
+        session.send('?WATCH={"enable":true%s}' % options)
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
         basetime = time.time()
         while countdown > 0:
-            if session.poll() == None:
+            if session.poll() == -1:
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()
-            if session.fix.mode <= gps.MODE_NO_FIX:
-                continue
-            if countdown == await:
-                sys.stderr.write("first fix in %.2fsec, gathering samples..." % (time.time()-basetime,))
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.
-            if threshold and session.timings.c_decode_time > session.cycle * threshold:
+            if threshold and time.time()-basetime < session.cycle * threshold:
                 continue
+            if session.fix.mode <= gps.MODE_NO_FIX:
+                continue
+            if countdown == await:
+                sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
             if plotter.gather(session):
                 countdown -= 1
         baton.end()
     finally:
-        session.send("w-z-\n")
+        session.send('?WATCH={"enable":false,"timing":false}')
     command = plotter.plot(title, session)
     del session
     return command

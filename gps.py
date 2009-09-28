@@ -123,6 +123,7 @@ class gpsdata:
         self.devices = []
 
         self.version = None
+        self.timings = None
 
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
@@ -152,6 +153,10 @@ class dictwrapper:
     "Wrapper that yields both class and dictionary behavior,"
     def __init__(self, **ddict):
         self.__dict__ = ddict
+    def get(self, k, d=None):
+        return self.__dict__.get(k, d)
+    def keys(self):
+        return self.__dict__.keys()
     def __getitem__(self, key):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]
@@ -362,16 +367,16 @@ class gps(gpsdata):
                     va = v
                 t[ka] = va
             return t
-        self.data = asciify(json.loads(buf, encoding="ascii"))
+        self.data = dictwrapper(**asciify(json.loads(buf, encoding="ascii")))
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
-            if k not in self.data:
+            if k not in self.data.keys():
                 return dflt
             else:
                 self.valid |= vbit
                 return self.data[k]
         if self.data.get("class") == "VERSION":
-            self.version = dictwrapper(**self.data)
+            self.version = self.data
         elif self.data.get("class") == "DEVICE":
             self.valid = ONLINE_SET | DEVICE_SET
             self.path        = self.data["path"]
@@ -406,7 +411,7 @@ class gps(gpsdata):
         elif self.data.get("class") == "SKY":
             for attrp in "xyvhpg":
                 setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
-            if "satellites" in self.data:
+            if "satellites" in self.data.keys():
                 for sat in self.data['satellites']:
                     self.satellites.append(gps.satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
             self.satellites_used = 0
@@ -421,6 +426,7 @@ class gps(gpsdata):
                 basetime = self.data["xmit"]
             self.data["c_recv"] = self.received - basetime
             self.data["c_decode"] = time.time() - basetime
+            self.timings = self.data
 
     def waiting(self):
         "Return True if data is ready for the client."
@@ -469,6 +475,13 @@ class gps(gpsdata):
                     self.gps_id = self.driver
                     if self.subtype:
                         self.gps_id += self.subtype
+        elif self.data["class"] == "TIMING":
+            if payload.timebase != 0:
+                basetime = payload.timebase
+            else:
+                basetime = payload.xmit
+            payload.c_recv = self.received - basetime
+            payload.c_decode = time.time() - basetime
         return payload
 
     def send(self, commands):
