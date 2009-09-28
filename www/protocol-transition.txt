@@ -310,9 +310,12 @@ has had a corresponding Python gps-class send() method all along.
 
 The pre-existing interface using the poll() method and self.valid is
 still available and should work compatibly with a daemon speaking
-JSON. However, data from the new responses (WATCH, VERSION, AIS, and
-TIMING in particular) will be available only through the self.data
-member.
+JSON. One new feature has been added; after a VERSION response (which
+a JSON-speaking instance of gpsd should emitwhen a connection is
+opened) the version member of the session will be an object containing
+version information. However, data from the new responses (WATCH,
+VERSION, AIS, and TIMING in particular) will be available only through
+the self.data member.
 
 The preferred way to use the new gps class is as an iterator
 factory, like this:

@@ -370,7 +370,9 @@ class gps(gpsdata):
             else:
                 self.valid |= vbit
                 return self.data[k]
-        if self.data.get("class") == "DEVICE":
+        if self.data.get("class") == "VERSION":
+            self.version = dictwrapper(**self.data)
+        elif self.data.get("class") == "DEVICE":
             self.valid = ONLINE_SET | DEVICE_SET
             self.path        = self.data["path"]
             self.activated   = default("activated", None)
