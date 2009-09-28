@@ -340,6 +340,9 @@ basically <code>xgps</code> with a more modern look and feel.
 <p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
+<p>There's a Perl client library <a
+href="http://search.cpan.org/dist/Net-GPSD3/">on CPAN.</a></p>
+
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 
 <p>There's a <a
