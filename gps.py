@@ -122,6 +122,8 @@ class gpsdata:
         self.device = None
         self.devices = []
 
+        self.version = None
+
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
         st += "Lat/Lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
