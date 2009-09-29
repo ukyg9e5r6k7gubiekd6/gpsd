@@ -181,25 +181,25 @@ class rawplot:
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle)
-        res += "# tag    len    "
-        for hn in ("xmit", "recv", "decode", "emit", "c_recv", "c_decode"):
-            res += "%-19s" % hn
-        res += "\n#------- -----"
-        for i in range(0, 6):
-            res += "  " + ("-" * 17)
+        res += "# tag    len    xmit                  "
+        for hn in ("T1", "D1", "E2", "T2", "D2"):
+            res += "%-13s" % hn
+        res += "\n#------- -----  --------------------"
+        for i in range(0, 5):
+            res += "  " + ("-" * 11)
         return res + "\n"
     def data(self, session):
         res = ""
         for timings in self.stats:
-            res += "% 8s  %4d  %2.6f  %2.6f  %2.6f  %2.6f  %2.6f  %2.6f\n" \
+            res += "% 8s  %4d  %2.9f  %2.9f  %2.9f  %2.9f  %2.9f  %2.9f\n" \
                 % (timings.tag,
                    timings.len,
                    timings.xmit, 
-                   timings.recv,
-                   timings.decode,
-                   timings.emit,
-                   timings.c_recv,
-                   timings.c_decode)
+                   timings.recv - timings.xmit,
+                   timings.decode - timings.recv,
+                   timings.emit - timings.decode,
+                   timings.c_recv - timings.emit,
+                   timings.c_decode - timings.c_recv)
         return res
     def plot(self, file, session):
         fmt = '''
@@ -207,18 +207,17 @@ set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \
-     "-" using 0:9 title "D2 = Client decode time" with impulses, \
-     "-" using 0:8 title "T2 =     TCP/IP latency" with impulses, \
-     "-" using 0:7 title "E2 = Daemon encode time" with impulses, \
+     "-" using 0:8 title "D2 = Client decode time" with impulses, \
+     "-" using 0:7 title "T2 =     TCP/IP latency" with impulses, \
+     "-" using 0:6 title "E2 = Daemon encode time" with impulses, \
      "-" using 0:5 title "D1 = Daemon decode time" with impulses, \
-     "-" using 0:4 title "T1 =         RS232 time" with impulses, \
-     "-" using 0:3 title "E1 =        GPS latency" with impulses
+     "-" using 0:4 title "T1 =         RS232 time" with impulses
 '''
         res = fmt % (title,
                       session.gps_id, session.baudrate,
                       session.stopbits, session.cycle)
         res += self.header(session)
-        for dummy in range(0, 7):
+        for dummy in range(0, 5):
             res += self.data(session) + "e\n"
         return res
 
