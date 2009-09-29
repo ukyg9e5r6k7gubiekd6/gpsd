@@ -2289,6 +2289,9 @@ int main(int argc, char *argv[])
 		    int state = device->cycle_state;
 		    if (changed & DATA_SET) {
 			bool report_fix = false;
+			gpsd_report(LOG_PROG,
+				    "Changed mask: %s\n", 
+				    gpsd_maskdump(changed));
 			if ((state & CYCLE_END_RELIABLE)!=0) {
 			    /*
 			     * Driver returns reliable end of cycle, 

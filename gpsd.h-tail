@@ -537,6 +537,8 @@ __attribute__((__format__(__printf__, 2, 3))) void gpsd_report(int, const char *
 # else /* not a new enough GCC, use the unprotected prototype */
 void gpsd_report(int, const char *, ...);
 #endif
+extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
+
 
 #ifdef S_SPLINT_S
 extern bool finite(double);

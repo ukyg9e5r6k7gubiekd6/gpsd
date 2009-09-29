@@ -149,6 +149,7 @@ libgpsd_c_sources = \
 	libgps_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
+	maskdump.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
 	net_ntrip.c \
@@ -184,7 +185,7 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-BUILT_SOURCES = packet_names.h gpsd.h ais_json.i
+BUILT_SOURCES = packet_names.h gpsd.h ais_json.i maskdump.c
 
 packet_names.h: packet_states.h
 	rm -f $(srcdir)/packet_names.h
@@ -204,6 +205,11 @@ ais_json.i: jsongen.py
 	rm -f $(srcdir)/ais_json.i
 	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i
 	chmod a-w $(srcdir)/ais_json.i
+
+maskdump.c: gpsd.h-tail devtools/maskaudit
+	rm -f $(srcdir)/maskdump.c
+	$(srcdir)/devtools/maskaudit -c >maskdump.c
+	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h libgpsmm.cpp packet_states.h
