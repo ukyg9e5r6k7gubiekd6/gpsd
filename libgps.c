@@ -459,11 +459,6 @@ int gps_poll(struct gps_data_t *gpsdata)
 
     received = gpsdata->online = timestamp();
     status = gps_unpack(buf, gpsdata);
-    if (gpsdata->profiling)
-    {
-	gpsdata->c_decode_time = received - gpsdata->fix.time;
-	gpsdata->c_recv_time = timestamp() - gpsdata->fix.time;
-    }
     return status;
 }
 

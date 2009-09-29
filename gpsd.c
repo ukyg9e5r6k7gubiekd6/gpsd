@@ -2337,8 +2337,6 @@ int main(int argc, char *argv[])
 				(void)strlcat(cmds, "o", 4);
 			    if (changed & SATELLITE_SET)
 				(void)strlcat(cmds, "y", 4);
-			    if (device->gpsdata.profiling!=0)
-				(void)strlcat(cmds, "$", 4);
 			    if (cmds[0] != '\0') {
 				(void)handle_oldstyle(sub, cmds, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
