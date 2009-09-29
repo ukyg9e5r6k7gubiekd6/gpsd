@@ -2140,31 +2140,6 @@ int main(int argc, char *argv[])
 		    if (channel->subscriber == NULL || channel->device == NULL || channel->device != device) 
 			continue;
 
-		    if (channel->subscriber->policy.timing) {
-			char phrase[GPS_JSON_RESPONSE_MAX];
-			if (channel->device->gpsdata.sentence_time!=0)
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":%lf,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"elapsed\":%lf}\r\n",
-					   channel->device->gpsdata.dev.path,
-					   channel->device->gpsdata.tag,
-					   (int)channel->device->gpsdata.sentence_length,
-					   channel->device->gpsdata.sentence_time,
-					   channel->device->gpsdata.d_xmit_time - channel->device->gpsdata.sentence_time,
-					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.sentence_time,
-					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.sentence_time,
-					   timestamp() - channel->device->gpsdata.sentence_time);
-			else
-			    (void)snprintf(phrase, sizeof(phrase), "{\"class\":\"TIMING\",\"device\":\"%s\",\"tag\":%s,\"len\":%d,\"timebase\":0,\"xmit\":%lf,\"recv\":%lf,\"decode\":%lf,\"elapsed\":%lf}\r\n",
-					   channel->device->gpsdata.dev.path,
-					   channel->device->gpsdata.tag,
-					   (int)channel->device->gpsdata.sentence_length,
-					   channel->device->gpsdata.d_xmit_time,
-					   channel->device->gpsdata.d_recv_time - channel->device->gpsdata.d_xmit_time,
-					   channel->device->gpsdata.d_decode_time - channel->device->gpsdata.d_xmit_time,
-					   timestamp() - channel->device->gpsdata.d_xmit_time);
-			(void)throttled_write(channel->subscriber,
-					      phrase, strlen(phrase));
-		    }
-
 		    /* 
 		     * NMEA and other textual sentences are simply
 		     * copied to all clients that are in raw or nmea
@@ -2356,7 +2331,8 @@ int main(int argc, char *argv[])
 #endif /* AIVDM_ENABLE */
 			}
 #endif /* OLDSTYLE_ENABLE */
-			if (newstyle(sub)) { 		  
+			if (newstyle(sub)) {
+			    buf2[0] = '\0';
 			    if (report_fix) {
 				json_tpv_dump(&device->gpsdata, &channel->fixbuffer, 
 					      buf2, sizeof(buf2));
@@ -2379,8 +2355,27 @@ int main(int argc, char *argv[])
 						false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
-			}
 #endif /* AIVDM_ENABLE */
+
+#ifdef TIMING_ENABLE
+			    if (buf2[0] != '\0' && sub->policy.timing) {
+				(void)snprintf(buf2, sizeof(buf2), 
+					       "{\"class\":\"TIMING\","
+					       "\"tag\":%s,\"len\":%d,"
+					       "\"xmit\":%lf,\"recv\":%lf,"
+					       "\"decode\":%lf,"
+					       "\"emit\":%lf}\r\n",
+					       device->gpsdata.tag,
+					       (int)device->packet.outbuflen,
+					       device->d_xmit_time,
+					       device->d_recv_time,
+					       device->d_decode_time,
+					       timestamp());
+				(void)throttled_write(channel->subscriber,
+						      buf2, strlen(buf2));
+			    }
+#endif /* TIMING_ENABLE */
+			}
 		    }
 		}
 		/*@-nullderef@*/

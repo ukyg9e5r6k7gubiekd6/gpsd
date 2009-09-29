@@ -944,8 +944,17 @@ struct gps_data_t {
 
     struct devconfig_t dev;	/* device that shipped last update */
 
-    /* pack things that are never reported together to reduce structure size */ 
+    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
+    double sentence_time;	/* sentence timestamp (not the fix time!) */
+
+    /* hook functions */
+    int gps_fd;			/* socket or file descriptor to GPS */
+    void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
+    void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
+
+    /* Private data - mmay be changed or removed */
     union {
+	/* pack things never reported together to reduce structure size */ 
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
 	struct rtcm3_t	rtcm3;
@@ -963,25 +972,6 @@ struct gps_data_t {
 	char error[80];
     };
 
-    /* profiling data for last sentence */
-    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
-    size_t sentence_length;	/* character count of last sentence */
-    double sentence_time;	/* sentence timestamp */
-    double d_read_time;		/* Time of first sentence read that got data */
-    double d_xmit_time;		/* beginning of sentence transmission */
-    double d_recv_time;		/* daemon receipt time (-> E1+T1) */
-    double d_decode_time;	/* daemon end-of-decode time (-> D1) */
-    double poll_time;		/* daemon poll time (-> W) */
-    double emit_time;		/* emission time (-> E2) */
-    double c_recv_time;		/* client receipt time (-> T2) */
-    double c_decode_time;	/* client end-of-decode time (-> D2) */
-
-    /* hook functions */
-    int gps_fd;			/* socket or file descriptor to GPS */
-    void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
-    void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
-
-    /* Private data - mmay be changed or removed */
     bool newstyle;		/* have we seen a JSON response */
 };
 

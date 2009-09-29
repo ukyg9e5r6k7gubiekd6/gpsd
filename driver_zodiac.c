@@ -220,7 +220,6 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     gpsd_report(LOG_INF, "Separation: %f\n", getzword(33) * 1e-2);
 #endif
 
-    session->gpsdata.sentence_length = 55;
     session->cycle_state |= CYCLE_START;
     return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET; /* |HERR_SET|VERR_SET|SPEEDERR_SET */
 }

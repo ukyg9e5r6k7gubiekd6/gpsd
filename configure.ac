@@ -675,6 +675,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for latency timing support
+AC_ARG_ENABLE(timing,
+  AC_HELP_STRING([--disable-timing],
+		 [disable latency timing support]),
+  [ac_timing=$enableval], [ac_timing=yes])
+AC_MSG_CHECKING([for latency timing support])
+if test x"$ac_timing" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([TIMING_ENABLE], 1, [latency timing support)])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for support for oldstyle protocol
 AC_ARG_ENABLE(oldstyle,
   AC_HELP_STRING([--disable-oldstyle],
@@ -991,6 +1004,7 @@ echo "OceanServer             : $ac_oceanserver"
 echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
 echo "AIVDM support           : $ac_aivdm"
+echo "Timing support          : $ac_timing"
 echo "MKT-3301                : $ac_mkt3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"

@@ -457,13 +457,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->gpsdata.fix);
 
+#ifdef TIMING_ENABLE
     if (session->packet.outbuflen == 0)
-	session->gpsdata.d_read_time = timestamp();
+	session->d_xmit_time = timestamp();
+#endif /* TIMING_ENABLE */
 
     /* can we get a full packet from the device? */
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
-	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW,
 		    "%s is known to be %s\n",
 		    session->gpsdata.dev.path,
@@ -472,7 +473,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	const struct gps_type_t **dp;
 
 	newlen = generic_get(session);
-	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.dev.path,
@@ -519,9 +519,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
 			    session->gpsdata.dev.path);
 
-	/* collect profiling data */
-	session->gpsdata.sentence_length = session->packet.outbuflen;
-	session->gpsdata.d_recv_time = timestamp();
+#ifdef TIMING_ENABLE
+	session->d_recv_time = timestamp();
+#endif /* TIMING_ENABLE */
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync)
@@ -574,7 +574,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if ((session->gpsdata.set & LATLON_SET )!=0 && session->gpsdata.status > STATUS_NO_FIX)
 	    session->context->fixcnt++;
 
-	session->gpsdata.d_decode_time = timestamp();
+#ifdef TIMING_ENABLE
+	session->d_decode_time = timestamp();
+#endif /* TIMING_ENABLE */
 
 	return session->gpsdata.set;
     }

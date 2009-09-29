@@ -420,12 +420,8 @@ class gps(gpsdata):
                     self.satellites_used += 1
             self.valid = ONLINE_SET | SATELLITE_SET
         elif self.data.get("class") == "TIMING":
-            if self.data["timebase"] != 0:
-                basetime = self.data["timebase"]
-            else:
-                basetime = self.data["xmit"]
-            self.data["c_recv"] = self.received - basetime
-            self.data["c_decode"] = time.time() - basetime
+            self.data["c_recv"] = self.received
+            self.data["c_decode"] = time.time()
             self.timings = self.data
 
     def waiting(self):
@@ -476,12 +472,8 @@ class gps(gpsdata):
                     if self.subtype:
                         self.gps_id += self.subtype
         elif self.data["class"] == "TIMING":
-            if payload.timebase != 0:
-                basetime = payload.timebase
-            else:
-                basetime = payload.xmit
-            payload.c_recv = self.received - basetime
-            payload.c_decode = time.time() - basetime
+            payload.c_recv = self.received
+            payload.c_decode = time.time()
         return payload
 
     def send(self, commands):

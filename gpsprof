@@ -382,7 +382,6 @@ formatters = (spaceplot, uninstrumented, rawplot, splitplot, cycle)
 
 def plotframe(await, fname, speed, threshold, title):
     "Return a string containing a GNUplot script "
-    # FIXME: Has dependency on old protocol
     if fname:
         for formatter in formatters:
             if formatter.name == fname:
@@ -435,6 +434,10 @@ def plotframe(await, fname, speed, threshold, title):
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()
+            if session.data["class"] == "WATCH":
+                if "timing" in options and not session.data.get("timing"):
+                    sys.stderr.write("gpsprof: timing is not enabled.\n")
+                    sys.exit(1)
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.

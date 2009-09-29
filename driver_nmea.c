@@ -900,7 +900,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	    if (nmea_phrase[i].decoder!=NULL && (count >= nmea_phrase[i].nf)) {
 		retval = (nmea_phrase[i].decoder)(count, session->driver.nmea.field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
-		session->gpsdata.sentence_length = strlen(sentence);
 		/*
 		 * Must force this to be nz, as we're gong to rely on a zero
 		 * value to mean "no previous tag" later.

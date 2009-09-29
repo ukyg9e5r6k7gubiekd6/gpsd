@@ -396,6 +396,15 @@ struct gps_device_t {
 #ifdef AIVDM_ENABLE
     struct aivdm_context_t aivdm;
 #endif /* AIVDM_ENABLE */
+
+#ifdef TIMING_ENABLE
+    /* profiling data for last sentence */
+    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
+    double d_xmit_time;		/* beginning of sentence transmission */
+    double d_recv_time;		/* daemon receipt time (-> E1+T1) */
+    double d_decode_time;	/* daemon end-of-decode time (-> D1) */
+    double emit_time;		/* emission time (-> E2) */
+#endif /* TIMING_ENABLE */
 };
 
 /* logging levels */
