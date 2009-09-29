@@ -457,9 +457,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->gpsdata.fix);
 
-    if (session->packet.inbuflen==0)
-	session->gpsdata.d_xmit_time = timestamp();
-
     /* can we get a full packet from the device? */
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
