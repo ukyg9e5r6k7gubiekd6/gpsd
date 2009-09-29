@@ -408,7 +408,13 @@ def plotframe(await, fname, speed, threshold, title):
     if len(session.data.devices) != 1:
         print >>sys.stderr, "gpsprof: exactly one device must be attached."
         sys.exit(1)
-    path = session.data.devices[0]["path"]
+    device = session.data.devices[0]
+    path = device["path"]
+    session.baudrate = device["bps"] 
+    session.parity = device["bps"] 
+    session.stopbits = device["stopbits"] 
+    session.cycle = device["cycle"]
+    session.gps_id = device["driver"]
     # Set parameters
     if speed:
         session.send('?DEVICE={"path":"%s","bps:":%d}' % (path, speed))
