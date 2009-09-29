@@ -967,6 +967,7 @@ struct gps_data_t {
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
     size_t sentence_length;	/* character count of last sentence */
     double sentence_time;	/* sentence timestamp */
+    double d_read_time;		/* Time of first sentence read that got data */
     double d_xmit_time;		/* beginning of sentence transmission */
     double d_recv_time;		/* daemon receipt time (-> E1+T1) */
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */
