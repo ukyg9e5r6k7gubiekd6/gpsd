@@ -103,20 +103,11 @@ plain text rather than a gnuplot script.)</para>
 <varlistentry>
 <term>RS232 time</term>
 <listitem>
-<para>Minimum time required to send the sentence from the GPS to
-<application>gpsd</application>. This is computed, not measured, 
-and may be an underestimate.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>Other line latency</term>
-<listitem>
-<para>The transmission latency between the GPS and 
-<application>gpsd</application> not accounted for by RS232 time.
-Total line latency (the sum of this bar and RS232 time)
-is measured; it begins with the GPS sentence's timestamp and ends with 
-a timestamp that <application>gpsd</application> generates at 
-sentence-reading time, before it is decoded.</para>
+<para>Time required to send the sentence from the GPS to
+<application>gpsd</application>. This measured from the time of 
+the last zero-length read before the packet to when the packet sniffer
+recognizes a complete sentence, so there is a small aountt of
+computational overhead mixed in.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -154,12 +145,6 @@ title.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>
-
-</refsect1>
-<refsect1 id='bugs'><title>BUGS AND LIMITAIONS</title>
-
-<para>Probably overestimates TCP/IP latency somewhat, as that includes the
-Python interpreter's decode time. A C client would be faster.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

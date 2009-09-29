@@ -248,21 +248,17 @@ class splitplot:
     def data(self, session):
         res = ""
         for timings in self.stats:
-            if timings.timebase:
-                e1 = timings.xmit
-            else:
-                e1 = 0
             for s in splitplot.sentences:
                 if s == timings.tag:
-                    res += "%2.6f\t" % e1
+                    res += "%2.6f\t" % timings.xmit
                 else:
                     res += "-       \t"
             res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
-                     % (timings.recv,
-                        timings.decode,
-                        timings.xmit,
-                        timings.c_recv,
-                        timings.c_decode,
+                     % (timings.recv - timings.xmit,
+                        timings.decode - timings.recv,
+                        timings.emit - timings.decode,
+                        timings.c_recv - timings.emit,
+                        timings.c_decode - timings.c_recv,
                         timings.len,
                         timings.tag)
         return res
@@ -271,29 +267,28 @@ class splitplot:
 set autoscale
 set key below
 set key title "Filtered latency data, %s, %s, %dN%d, cycle %ds"
-plot \\
-     "-" using 0:%d title "D2 = Client decode time" with impulses, \\
-     "-" using 0:%d title "T2 = TCP/IP latency" with impulses, \\
-     "-" using 0:%d title "E2 = Daemon encode time" with impulses, \\
-     "-" using 0:%d title "D1 = Daemon decode time" with impulses, \\
-     "-" using 0:%d title "T1 = RS3232 time" with impulses, \\
+plot \
+     "-" using 0:%d title "D2 = Client decode time" with impulses, \
+     "-" using 0:%d title "T2 = TCP/IP latency" with impulses, \
+     "-" using 0:%d title "E2 = Daemon encode time" with impulses, \
+     "-" using 0:%d title "D1 = Daemon decode time" with impulses, \
+     "-" using 0:%d title "T1 = RS3232 time" with impulses, \
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
                        session.gps_id, session.baudrate,
                        session.stopbits, session.cycle,
-                       sc+6,
                        sc+5,
                        sc+4,
                        sc+3,
                        sc+2,
                        sc+1)
         for i in range(sc):
-            fmt += '     "-" using 0:%d title "%s" with impulses, \\\n' % \
+            fmt += '     "-" using 0:%d title "%s" with impulses,' % \
                    (i+1, self.sentences[i])
-        res = fmt[:-4] + "\n"
+        res = fmt[:-1] + "\n"
         res += self.header(session)
-        for dummy in range(sc+6):
+        for dummy in range(sc+5):
             res += self.data(session) + "e\n"
         return res
 
