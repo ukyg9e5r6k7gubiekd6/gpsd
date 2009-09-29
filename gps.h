@@ -964,7 +964,6 @@ struct gps_data_t {
     };
 
     /* profiling data for last sentence */
-    bool profiling;		/* profiling enabled? */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
     size_t sentence_length;	/* character count of last sentence */
     double sentence_time;	/* sentence timestamp */
