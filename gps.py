@@ -160,8 +160,12 @@ class dictwrapper:
     def __getitem__(self, key):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]
+    def __setitem__(self, key, val):
+        "Emulate dictionary, for new-style interface."
+        self.__dict__[key] = val
     def __str__(self):
         return "<dictwrapper: " + str(self.__dict__) + ">"
+    __repr__ = __str__
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."

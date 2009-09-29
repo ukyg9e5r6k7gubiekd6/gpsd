@@ -2361,7 +2361,7 @@ int main(int argc, char *argv[])
 			    if (buf2[0] != '\0' && sub->policy.timing) {
 				(void)snprintf(buf2, sizeof(buf2), 
 					       "{\"class\":\"TIMING\","
-					       "\"tag\":%s,\"len\":%d,"
+					       "\"tag\":\"%s\",\"len\":%d,"
 					       "\"xmit\":%lf,\"recv\":%lf,"
 					       "\"decode\":%lf,"
 					       "\"emit\":%lf}\r\n",

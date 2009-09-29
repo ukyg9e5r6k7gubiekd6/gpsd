@@ -181,27 +181,23 @@ class rawplot:
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle)
-        res += "#"
-        for hn in ("tag", "T1", "E1", "D1", "W", "E2", "T2", "D2"):
-            res += "%8s\t" % hn
-        res += "\n#"
-        for i in range(0, 7):
-            res += "--------\t"
-        return res + "--------\n"
+        res += "# tag    len    "
+        for hn in ("xmit", "recv", "decode", "emit", "c_recv", "c_decode"):
+            res += "%-19s" % hn
+        res += "\n#------- -----"
+        for i in range(0, 6):
+            res += "  " + ("-" * 17)
+        return res + "\n"
     def data(self, session):
         res = ""
         for timings in self.stats:
-            if timings.timebase:
-                e1 = timings.xmit
-            else:
-                e1 = 0
-            res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+            res += "% 8s  %4d  %2.6f  %2.6f  %2.6f  %2.6f  %2.6f  %2.6f\n" \
                 % (timings.tag,
                    timings.len,
-                   e1, 
+                   timings.xmit, 
                    timings.recv,
                    timings.decode,
-                   timings.xmit,
+                   timings.emit,
                    timings.c_recv,
                    timings.c_decode)
         return res
@@ -391,7 +387,7 @@ def plotframe(await, fname, speed, threshold, title):
             sys.stderr.write("gpsprof: no such formatter.\n")
             sys.exit(1)
     try:
-        session = gps.gps()
+        session = gps.gps(verbose=verbose)
     except socket.error:
         sys.stderr.write("gpsprof: gpsd unreachable.\n")
         sys.exit(1)
@@ -422,7 +418,7 @@ def plotframe(await, fname, speed, threshold, title):
             sys.stderr.write("gpsprof: baud rate change failed.\n")
     options = ""
     if formatter not in (spaceplot, uninstrumented):
-        options = ',"timing:true"'
+        options = ',"timing":true'
     try:
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         session.send('?WATCH={"enable":true%s}' % options)
@@ -458,13 +454,14 @@ def plotframe(await, fname, speed, threshold, title):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:v")
         formatter = "space"
         raw = False
         speed = 0
         title = time.ctime()
         threshold = 0
         await = 100
+        verbose = False
         for (switch, val) in options:
             if (switch == '-f'):
                 formatter = val
@@ -476,6 +473,8 @@ if __name__ == '__main__':
                 speed = int(val)
             elif (switch == '-t'):
                 title = val
+            elif (switch == '-v'):
+                verbose = True
             elif (switch == '-h'):
                 sys.stderr.write(\
                     "usage: gpsprof [-h] [-m threshold] [-n samplecount] \n"
