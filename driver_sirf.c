@@ -406,16 +406,8 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    (void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
     }
 #endif /* NTPSHM_ENABLE */
-    /*
-     * The freaking brain-dead SiRF chip doesn't obey its own
-     * rate-control command for 04, at least at firmware rev. 231, 
-     * so we have to do our own rate-limiting here...
-     */
     gpsd_report(LOG_PROG, "MTD 0x04: %d satellites\n", st);
-    if ((session->driver.sirf.satcounter++ % 5) != 0)
-	return 0;
-    else
-	return TIME_SET | SATELLITE_SET;
+    return TIME_SET | SATELLITE_SET;
 }
 
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)

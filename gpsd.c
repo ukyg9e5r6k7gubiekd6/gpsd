@@ -2170,7 +2170,7 @@ int main(int argc, char *argv[])
 					       device->packet.outbuflen);
 			/*
 			 * Ugh...depends on knowing the length of gpsd_hexdump's
-			 * entrepreneur.
+			 * buffer.
 			 */
 			(void) strlcat(hd, "\r\n", MAX_PACKET_LENGTH*2+1);
 			(void)throttled_write(channel->subscriber, 
@@ -2194,12 +2194,14 @@ int main(int argc, char *argv[])
 		    if (channel->subscriber->policy.nmea) {
 			char buf2[MAX_PACKET_LENGTH*3+2];
 			gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
-			gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
+			if (buf2[0]!= '\0') {
+			    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
 				    device->gpsdata.dev.path, buf2);
-			(void)throttled_write(channel->subscriber, 
+			    (void)throttled_write(channel->subscriber, 
 						  buf2, strlen(buf2));
-#endif /* BINARY_ENABLE */
 			}
+		    }
+#endif /* BINARY_ENABLE */
 		}
 
 		if (device->gpsdata.fix.mode == MODE_3D)
