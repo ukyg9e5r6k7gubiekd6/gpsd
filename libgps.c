@@ -410,24 +410,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			}
 			gpsdata->set |= SATELLITE_SET;
 			break;
-		    case 'Z':
-			gpsdata->profiling = (sp[2] == '1');
-			break;
-		    case '$':
-			if (gpsdata->profiling != true)
-			    break;
-			/*@ +matchanyintegral -formatcode @*/
-			(void)sscanf(sp, "$=%8s %zd %lf %lf %lf %lf %lf %lf",
-			       gpsdata->tag,
-			       &gpsdata->sentence_length,
-			       &gpsdata->fix.time,
-			       &gpsdata->d_xmit_time,
-			       &gpsdata->d_recv_time,
-			       &gpsdata->d_decode_time,
-			       &gpsdata->poll_time,
-			       &gpsdata->emit_time);
-			/*@ -matchanyintegral +formatcode @*/
-			break;
 		    }
 
 		    /*
