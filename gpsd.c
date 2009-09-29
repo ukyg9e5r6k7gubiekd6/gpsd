@@ -2304,7 +2304,7 @@ int main(int argc, char *argv[])
 			     */
 			    report_fix = true;
 #ifdef DBUS_ENABLE
-			if (report_fix) {
+			if (report_fix)
 			    send_dbus_fix(channel);
 #endif /* DBUS_ENABLE */
 #ifdef OLDSTYLE_ENABLE
