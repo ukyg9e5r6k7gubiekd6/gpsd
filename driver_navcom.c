@@ -391,6 +391,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #define VEL_RES (0.0009765625)
     double track;
     uint8_t fom, gdop, pdop, hdop, vdop, tdop, tfom;
+    double eph;
     /* This value means "undefined" */
 #define DOP_UNDEFINED (255)
 
@@ -480,19 +481,13 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     vdop = getub(buf, 44);
     tdop = getub(buf, 45);
     tfom = getub(buf, 46);
-    /*@ +type @*/
 
-    /* splint apparently gets confused about C promotion rules. */
-    /* "Assignment of arbitrary unsigned integral type to double" on these */
-#ifndef S_SPLINT_S
-    session->gpsdata.fix.epx = session->gpsdata.fix.epy = fom/100.0*1.96/*Two sigma*/;
-    /* FIXME - Which units is tfom in (spec doesn't say) and
-	       which units does gpsd require? (docs don't say) */
-    session->gpsdata.fix.ept = tfom*1.96/*Two sigma*/;
-    /* FIXME This cannot possibly be right */
-    /* I cannot find where to get VRMS from in the Navcom output, though,
-       and this value seems to agree with the output from other software */
-    session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
+    /* Get two-sigma horizontal circular error estimate */
+    eph = fom/100.0 * 1.96;
+    /* approximate epx and epy errors from it */
+    session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph/sqrt(2);
+    /* FIXME - Which units is tfom in (spec doesn't say) */
+    session->gpsdata.fix.ept = tfom * 1.96	/*Two sigma*/;
 
     clear_dop(&session->gpsdata.dop);
     if (gdop != DOP_UNDEFINED)
@@ -505,7 +500,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	session->gpsdata.dop.vdop = vdop/10.0;
     if (tdop != DOP_UNDEFINED)
 	session->gpsdata.dop.tdop = tdop/10.0;
-#endif /* S_SPLINT_S */
+    /*@ +type @*/
 
     gpsd_report(LOG_PROG, "Navcom: received packet type 0xb1 (PVT Report)\n");
     gpsd_report(LOG_IO, "Navcom: navigation mode %s (0x%02x) - %s - %s\n",
@@ -518,7 +513,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
 		vel_north*VEL_RES, vel_east*VEL_RES, vel_up*VEL_RES,
 		session->gpsdata.fix.track, session->gpsdata.fix.speed);
-    /* relies on the fact that expcx and epy are set to same value */
+    /* relies on the fact that expx and epy are set to same value */
     gpsd_report(LOG_IO,
 		"Navcom: hrms = %f, vrms = %f, gdop = %f, pdop = %f, "
 		"hdop = %f, vdop = %f, tdop = %f\n",

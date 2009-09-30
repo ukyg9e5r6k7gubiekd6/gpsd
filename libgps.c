@@ -264,7 +264,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				nf.ept = DEFAULT(ept);
 				nf.altitude = DEFAULT(alt);
 				/* designed before we split eph into epx+epy */
-				nf.epx = nf.epy = DEFAULT(eph);
+				nf.epx = nf.epy = DEFAULT(eph)/sqrt(2);
 				nf.epv = DEFAULT(epv);
 				nf.track = DEFAULT(track);
 				nf.speed = DEFAULT(speed);

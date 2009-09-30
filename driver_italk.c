@@ -32,7 +32,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     unsigned int tow;
     unsigned short gps_week, flags, cflags, pflags;
     gps_mask_t mask = 0;
-    double epx, epy, epz, evx, evy, evz;
+    double epx, epy, epz, evx, evy, evz, eph;
     double t;
 
     if (len != 296){
@@ -69,7 +69,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     evz = (double)(getlesl(buf, 7 + 194)/1000.0);
     ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
-    session->gpsdata.fix.epx = session->gpsdata.fix.epy = (double)(getlesl(buf, 7 + 252)/100.0);
+    eph = (double)(getlesl(buf, 7 + 252)/100.0);
+    /* eph is a circular error, sqrt(epx**2 + epy**2) */
+    session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph/sqrt(2);
     session->gpsdata.fix.eps = (double)(getlesl(buf, 7 + 254)/100.0);
 
     #define MAX(a,b) (((a) > (b)) ? (a) : (b))

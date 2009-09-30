@@ -524,7 +524,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	mask |= LATLON_SET;
 
     if ((eph =  getbesl(buf, 50)*1e-2) > 0) {
-	session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph;
+	session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph/sqrt(2);
 	mask |= HERR_SET;
     }
     if ((session->gpsdata.fix.epv =  getbesl(buf, 54)*1e-2) > 0)

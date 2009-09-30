@@ -349,6 +349,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	gpsd_report(LOG_INF, "Garmin Product Desc: %s\n"
 		, &buf[4]);
 	mask |= DEVICEID_SET;
+	gpsd_report(LOG_DATA, "PRODUCT_DATA: subtype=%s mask=%s\n",
+		    session->subtype, gpsd_maskdump(mask));
 	break;
     case GARMIN_PKTID_PVT_DATA:
 	gpsd_report(LOG_PROG, "Appl, PVT Data Sz: %d\n", pkt_len);
@@ -398,7 +400,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// If this assumption changes here, it should also change in
 	// nmea_parse.c where we analyze PGRME.
 	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE/CEP50_SIGMA);
-	session->gpsdata.fix.epx = session->gpsdata.fix.epy = pvt->eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	/* eph is a circular error, sqrt(epx**2 + epy**2) */
+	session->gpsdata.fix.epx = session->gpsdata.fix.epy = pvt->eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/CEP50_SIGMA);
 
 	// convert lat/lon to directionless speed

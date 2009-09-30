@@ -378,7 +378,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     do {
         double eph;
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
-        session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	/* eph is a circular error, sqrt(epx**2 + epy**2) */
+        session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
         mask |= HERR_SET;
     } while (0);
 

@@ -539,7 +539,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     }
     else 
     {
-	session->gpsdata.fix.epx = session->gpsdata.fix.epy = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->gpsdata.fix.epx = session->gpsdata.fix.epy = atof(field[1]) * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	session->gpsdata.fix.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	session->gpsdata.epe = atof(field[5]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	mask = HERR_SET | VERR_SET | PERR_SET;
