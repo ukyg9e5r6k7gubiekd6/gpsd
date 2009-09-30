@@ -290,7 +290,6 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
     mask = STATUS_SET;
     if (session->gpsdata.status > STATUS_NO_FIX) {
 	char *altitude;
-	double oldfixtime = session->gpsdata.fix.time;
 
 	merge_hhmmss(field[1], session);
 	register_fractional_time(field[1], session);
@@ -314,8 +313,6 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 		mask |= MODE_SET;
 	    }
 	} else {
-	    double oldaltitude = session->gpsdata.fix.altitude;
-
 	    session->gpsdata.fix.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
 	    /*
@@ -329,19 +326,6 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 		session->gpsdata.fix.mode = MODE_3D;
 		mask |= MODE_SET;
 	    }
-
-	    /*
-	     * Compute climb/sink in the simplest possible way.
-	     * This substitutes for the climb report provided by
-	     * SiRF and Garmin chips, which might have some smoothing
-	     * going on.
-	     */
-	    if (isnan(oldaltitude)!=0 || session->gpsdata.fix.time==oldfixtime)
-		session->gpsdata.fix.climb = 0;
-	    else {
-		session->gpsdata.fix.climb = (session->gpsdata.fix.altitude-oldaltitude)/(session->gpsdata.fix.time-oldfixtime);
-	    }
-	    mask |= CLIMB_SET;
 	}
 	if (strlen(field[11]) > 0) {
 	   session->gpsdata.separation = atof(field[11]);

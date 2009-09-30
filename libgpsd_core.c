@@ -362,6 +362,21 @@ void gpsd_error_model(struct gps_device_t *session,
     v_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? V_UERE_WITH_DGPS : V_UERE_NO_DGPS);
     p_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
+
+    /*
+     * OK, this is not an error computation, but
+     * we're at the right place in the architrcture for it.
+     * Compute climb/sink in the simplest possible way.
+     * FIXME: Someday we should compute speed here too.
+     */
+    if (fix->mode>=MODE_3D && oldfix->mode>=MODE_3D && isnan(fix->climb)!=0) {
+	if (fix->time == oldfix->time)
+	    fix->climb = 0;
+	else if (isnan(fix->altitude)==0 && isnan(oldfix->altitude)==0) {
+	    fix->climb = (fix->altitude-oldfix->altitude)/(fix->time-oldfix->time);
+	}
+    }
+
     /*
      * Field reports match the theoretical prediction that
      * expected time error should be half the resolution of
