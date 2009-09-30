@@ -413,7 +413,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
      * We cound 1001 as end of cycle because 1002 doesn't
      * carry fix information.
      */
-    session->cycle_state = CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (id == 1000)
 	session->cycle_state |= (CYCLE_START | CYCLE_END);
 

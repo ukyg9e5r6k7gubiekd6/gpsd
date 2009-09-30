@@ -181,7 +181,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
      * case the reports ever merge data from other sentences, we
      * should find out what the actual cycle-ender is.
      */
-    session->cycle_state |= CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (type == 0x02)
 	session->cycle_state |= CYCLE_START | CYCLE_END;
 

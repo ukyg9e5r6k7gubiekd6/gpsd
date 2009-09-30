@@ -288,7 +288,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);  
 
     /* only one message, set cycle start */
-    session->cycle_state |= CYCLE_END_RELIABLE | CYCLE_START | CYCLE_END;
+    session->cycle_end_reliable = true | CYCLE_START | CYCLE_END;
     do {
         unsigned int result;
         char *buf = (char *)session->packet.outbuffer+1;

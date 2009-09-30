@@ -514,6 +514,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {				/* we have recognized a packet */
 	gps_mask_t received = PACKET_SET, dopmask = 0;
 	session->gpsdata.online = timestamp();
+	/* FIXME: probably the wrong place to set these.... */ 
 	session->cycle_state = 0;
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",

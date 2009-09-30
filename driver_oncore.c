@@ -321,7 +321,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
      * case the reports ever merge data from other sentences, we
      * should find out what the actual cycle-ender is.
      */
-    session->cycle_state |= CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (type == ONCTYPE('E','a'))
 	session->cycle_state |= CYCLE_START | CYCLE_END;
 

@@ -968,7 +968,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 
     /* we might have a reliable end-of-cycle */
     if (session->driver.nmea.cycle_enders != 0)
-	session->cycle_state |= CYCLE_END_RELIABLE;
+	session->cycle_end_reliable = true;
 
     return retval;
 }

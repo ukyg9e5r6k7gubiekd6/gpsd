@@ -463,7 +463,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	   "0x%04hx", msgid);
 
     /* could change if the set of messages we enable does */
-    session->cycle_state = CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (msgid == 0x0106)
 	session->cycle_state |= CYCLE_START | CYCLE_END;
 	    

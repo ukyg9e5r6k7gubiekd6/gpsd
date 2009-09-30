@@ -747,7 +747,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		   "MID%d",(int)buf[0]);
 
     /* could change if the set of messages we enable does */
-    session->cycle_state = CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (buf[0] == (unsigned char)0x02 || buf[0] == (unsigned char)0x62)
 	session->cycle_state |= (CYCLE_START | CYCLE_END);
 

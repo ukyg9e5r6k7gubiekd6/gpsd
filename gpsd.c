@@ -2286,18 +2286,17 @@ int main(int argc, char *argv[])
 		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[BUFSIZ];
-		    int state = device->cycle_state;
 		    if (changed & DATA_SET) {
 			bool report_fix = false;
 			gpsd_report(LOG_PROG,
 				    "Changed mask: %s\n", 
 				    gpsd_maskdump(changed));
-			if ((state & CYCLE_END_RELIABLE)!=0) {
+			if (device->cycle_end_reliable) {
 			    /*
 			     * Driver returns reliable end of cycle, 
 			     * report only when that is signaled.
 			     */
-			    if ((state & CYCLE_END)!=0)
+			    if ((device->cycle_state & CYCLE_END)!=0)
 				report_fix = true;
 			} else if (changed & (LATLON_SET | MODE_SET))
 			    /*
@@ -2327,13 +2326,6 @@ int main(int argc, char *argv[])
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* RTCM104V2_ENABLE */
-#ifdef AIVDM_ENABLE
-			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
-				aivdm_json_dump(&device->gpsdata.ais, 
-						sub->policy.scaled, buf2, sizeof(buf2));
-				(void)throttled_write(sub, buf2, strlen(buf2));
-			    }
-#endif /* AIVDM_ENABLE */
 			}
 #endif /* OLDSTYLE_ENABLE */
 			if (newstyle(sub)) {
@@ -2355,7 +2347,7 @@ int main(int argc, char *argv[])
 			    }
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
-			    if ((changed & AIS_SET)!=0 && (state & CYCLE_END)!=0) {
+			    if ((changed & AIS_SET)!=0) {
 				aivdm_json_dump(&device->gpsdata.ais, 
 						false, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));

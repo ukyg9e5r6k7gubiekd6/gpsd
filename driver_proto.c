@@ -215,7 +215,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
      * The core library zeroes it just before it calls each driver's
      * packet analyzer.
      */
-    session->cycle_state = CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (msgid == MY_START_OF_CYCLE)
 	session->cycle_state |= CYCLE_START;
     else if (msgid == MY_END_OF_CYCLE)

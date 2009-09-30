@@ -455,7 +455,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
      * case the reports ever merge data from other sentences, we
      * should find out what the actual cycle-ender is.
      */
-    session->cycle_state |= CYCLE_END_RELIABLE;
+    session->cycle_end_reliable = true;
     if (type == SUPERSTAR2_NAVSOL_LLA)
 	session->cycle_state |= CYCLE_START | CYCLE_END;
 
