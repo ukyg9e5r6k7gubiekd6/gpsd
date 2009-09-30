@@ -58,7 +58,10 @@ if __name__ == '__main__':
             maxout = 0
             for (d, v) in source.primitive_masks:
                 if source.in_daemon(d):
-                    maxout += len(d) - len("_SET") + 1
+                    stem = d
+                    if stem.endswith("_SET"):
+                        stem = stem[:-4]
+                    maxout += len(stem) + 1
             print """/* This code is generated.  Do not hand-hack it! */
 #include <stdio.h>
 #include <string.h>
@@ -74,7 +77,10 @@ const char *gpsd_maskdump(gps_mask_t set)
         const char      *name;
     } *sp, names[] = {"""  % (maxout + 1,)
             for (flag, value) in source.primitive_masks:
-                print "        {%s,\t\"%s\"}," % (flag, flag[:-4])
+                stem = flag
+                if stem.endswith("_SET"):
+                    stem = stem[:-4]
+                print "        {%s,\t\"%s\"}," % (flag, stem)
             print '''\
     };
 
