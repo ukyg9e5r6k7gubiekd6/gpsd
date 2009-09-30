@@ -101,6 +101,22 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	    session->gpsdata.status = STATUS_FIX;
     }
 
+    gpsd_report(LOG_DATA, "NAV_FIX: time=%.2f, lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.dop.gdop,
+		session->gpsdata.dop.pdop,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.dop.tdop,
+		gpsd_maskdump(mask));
     return mask;
 }
 
@@ -109,41 +125,53 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     unsigned int i, tow, nsv, nchan, st;
     unsigned short gps_week;
     double t;
+    gps_mask_t mask;
 
     if (len < 62){
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%zu)\n", len);
-	return ERROR_SET;
+	mask = ERROR_SET;
     }
+    else
+    {
+	gps_week = getleuw(buf, 7 + 4);
+	tow = getleul(buf, 7 + 6);
+	t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
+	session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
-    gps_week = getleuw(buf, 7 + 4);
-    tow = getleul(buf, 7 + 6);
-    t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
-
-    gpsd_zero_satellites(&session->gpsdata);
-    nsv = 0;
-    nchan = (unsigned int)getleuw(buf, 7 +50);
-    if (nchan > MAX_NR_VISIBLE_PRNS)
+	gpsd_zero_satellites(&session->gpsdata);
+	nsv = 0;
+	nchan = (unsigned int)getleuw(buf, 7 +50);
+	if (nchan > MAX_NR_VISIBLE_PRNS)
 	    nchan = MAX_NR_VISIBLE_PRNS;
-    for (i = st = 0; i < nchan; i++) {
-	unsigned int off = 7+ 52 + 10 * i;
-	unsigned short flags;
+	for (i = st = 0; i < nchan; i++) {
+	    unsigned int off = 7+ 52 + 10 * i;
+	    unsigned short flags;
 
-	flags = getleuw(buf, off);
-	session->gpsdata.ss[i]		= (float)(getleuw(buf, off+2)&0xff);
-	session->gpsdata.PRN[i]		= (int)getleuw(buf, off+4)&0xff;
-	session->gpsdata.elevation[i]	= (int)getlesw(buf, off+6)&0xff;
-	session->gpsdata.azimuth[i]	= (int)getlesw(buf, off+8)&0xff;
-	if (session->gpsdata.PRN[i]){
-	    st++;
-	    if (flags & PRN_FLAG_USE_IN_NAV)
-		session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	    flags = getleuw(buf, off);
+	    session->gpsdata.ss[i]		= (float)(getleuw(buf, off+2)&0xff);
+	    session->gpsdata.PRN[i]		= (int)getleuw(buf, off+4)&0xff;
+	    session->gpsdata.elevation[i]	= (int)getlesw(buf, off+6)&0xff;
+	    session->gpsdata.azimuth[i]	= (int)getlesw(buf, off+8)&0xff;
+	    if (session->gpsdata.PRN[i]){
+		st++;
+		if (flags & PRN_FLAG_USE_IN_NAV)
+		    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	    }
 	}
-    }
-    session->gpsdata.satellites = (int)st;
-    session->gpsdata.satellites_used = (int)nsv;
+	session->gpsdata.satellites = (int)st;
+	session->gpsdata.satellites_used = (int)nsv;
+	mask = USED_SET | SATELLITE_SET | TIME_SET;;
 
-    return USED_SET | SATELLITE_SET | TIME_SET;
+	// FIXME: should dump skyview here as well
+	gpsd_report(LOG_DATA,
+		    "PRN_STATUS: time=%.2f reported%d used=%d mask=%s\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.satellites,
+		    session->gpsdata.satellites_used,
+		    gpsd_maskdump(mask));
+    }
+
+    return mask;
 }
 
 static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -172,6 +200,9 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
+    gpsd_report(LOG_DATA,
+		"UTC_IONO_MODEL: time=%.2f mask=TIME_SET\n",
+		session->gpsdata.fix.time);
     return TIME_SET;
 }
 

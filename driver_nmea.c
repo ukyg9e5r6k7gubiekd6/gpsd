@@ -186,7 +186,9 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	}
     }
 
-    gpsd_report(LOG_DATA, "RMC: time=%.2f, lat=%.2f lon=.2%f speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
+    gpsd_report(LOG_DATA, 
+		"RMC: time=%.2f, lat=%.2f lon=.2%f "
+		"speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -808,7 +810,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 				session->gpsdata.used[u++] = p;
 		}
 		session->gpsdata.satellites_used = u;
-		// FIXNE: Should dump satellites here as well
+		// FIXME: Should dump satellites here as well
 		gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
 			    session->gpsdata.satellites_used, 
 			    gpsd_maskdump(mask));

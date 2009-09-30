@@ -478,6 +478,23 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->grmn_days);
 
 	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
+	gpsd_report(LOG_DATA,
+		    "PVT_DATA: time=%.2f, lat=%.2f lon=.2%f "
+		    "speed=%.2f track=%.2f climb=%.2f "
+		    "epx=%.2f epy=%.2f epv=%.2f "
+		    "mode=%d status=%d mask=%s\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.fix.latitude,
+		    session->gpsdata.fix.longitude,
+		    session->gpsdata.fix.speed,
+		    session->gpsdata.fix.track,
+		    session->gpsdata.fix.climb,
+		    session->gpsdata.fix.epx,
+		    session->gpsdata.fix.epy,
+		    session->gpsdata.fix.epv,
+		    session->gpsdata.fix.mode,
+		    session->gpsdata.status,
+		    gpsd_maskdump(mask));
 	break;
     case GARMIN_PKTID_RMD_DATA:
     case GARMIN_PKTID_RMD41_DATA:
@@ -540,6 +557,12 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 
 	}
 	mask |= SATELLITE_SET | USED_SET;
+	// FIXME: should dump skyview here as well
+	gpsd_report(LOG_DATA,
+		    "SAT_DATA: reported%d used=%d mask=%s\n",
+		    session->gpsdata.satellites,
+		    session->gpsdata.satellites_used,
+		    gpsd_maskdump(mask));
 	break;
     case GARMIN_PKTID_PROTOCOL_ARRAY:
 	// this packet is never requested, it just comes, in some case
