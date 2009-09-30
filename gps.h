@@ -890,22 +890,22 @@ struct gps_data_t {
 #define HERR_SET	0x00001000u
 #define VERR_SET	0x00002000u
 #define PERR_SET	0x00004000u	/* only used in the daemon */
-#define POLICY_SET	0x00020000u	/* only used in client library */
+#define POLICY_SET	0x00008000u	/* only used in client library */
 #define ERR_SET		(HERR_SET|VERR_SET|PERR_SET)
-#define SATELLITE_SET	0x00040000u
-#define RAW_SET		0x00080000u
-#define USED_SET	0x00100000u
-#define SPEEDERR_SET	0x00200000u
-#define TRACKERR_SET	0x00400000u
-#define CLIMBERR_SET	0x00800000u
-#define DEVICE_SET	0x01000000u
-#define DEVICELIST_SET	0x02000000u
-#define DEVICEID_SET	0x04000000u
-#define ERROR_SET	0x08000000u
-#define RTCM2_SET	0x10000000u
-#define RTCM3_SET	0x20000000u
-#define AIS_SET 	0x40000000u
-#define PACKET_SET	0x80000000u	/* only used in the daemon */
+#define SATELLITE_SET	0x00010000u
+#define RAW_SET		0x00020000u
+#define USED_SET	0x00040000u
+#define SPEEDERR_SET	0x00080000u
+#define TRACKERR_SET	0x00100000u
+#define CLIMBERR_SET	0x00200000u
+#define DEVICE_SET	0x00400000u
+#define DEVICELIST_SET	0x00800000u
+#define DEVICEID_SET	0x01000000u
+#define ERROR_SET	0x02000000u
+#define RTCM2_SET	0x04000000u
+#define RTCM3_SET	0x08000000u
+#define AIS_SET 	0x10000000u
+#define PACKET_SET	0x20000000u	/* only used in the daemon */
 #define DATA_SET	~(ONLINE_SET|PACKET_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
