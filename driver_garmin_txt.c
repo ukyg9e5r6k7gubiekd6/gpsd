@@ -346,11 +346,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         lon += degfrag * 100.0 / 60.0 / 100000.0;
         session->gpsdata.fix.longitude = lon;
 
-        gpsd_report(LOG_PROG, "Lat: %.5lf, Lon: %.5lf\n", lat, lon);
-
-    /* fix mode, GPS status, [gGdDS_] */
+	/* fix mode, GPS status, [gGdDS_] */
         status = (char)session->packet.outbuffer[30];
-        gpsd_report(LOG_PROG, "GPS fix mode: %c\n", status);
 
         switch (status) {
         case 'G':
@@ -382,7 +379,6 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double eph;
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
         session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
-        gpsd_report(LOG_PROG, "HERR [m]: %.1lf\n", eph);
         mask |= HERR_SET;
     } while (0);
 
@@ -391,7 +387,6 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double alt;
         if (0 != gar_decode((char *) session->packet.outbuffer+34, 6, "+-", 1.0, &alt)) break;
         session->gpsdata.fix.altitude = alt;
-        gpsd_report(LOG_PROG, "Altitude [m]: %.1lf\n", alt);
         mask |= ALTITUDE_SET;
     } while (0);
 
@@ -402,11 +397,9 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         if (0 != gar_decode((char *) session->packet.outbuffer+45, 5, "NS", 10.0, &nsvel)) break;
         speed = sqrt(ewvel * ewvel + nsvel * nsvel); /* is this correct formula? Result is in mps */
         session->gpsdata.fix.speed = speed;
-        gpsd_report(LOG_PROG, "Velocity [mps]: %.1lf\n", speed);
         track = atan2(ewvel, nsvel) * RAD_2_DEG;  /* is this correct formula? Result is in degrees */
         if (track < 0.0) track += 360.0;
         session->gpsdata.fix.track = track;
-        gpsd_report(LOG_PROG, "Heading [degree]: %.1lf\n", track);
         mask |= SPEED_SET | TRACK_SET;
     } while (0);
 
@@ -416,10 +409,22 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double climb;
         if (0 != gar_decode((char *) session->packet.outbuffer+50, 5, "UD", 100.0, &climb)) break;
         session->gpsdata.fix.climb = climb; /* climb in mps */
-        gpsd_report(LOG_PROG, "Climb [mps]: %.2lf\n", climb);
         mask |= CLIMB_SET;
     } while (0);
 
+    gpsd_report(LOG_DATA, "GTXT: time=%.2f, lat=%.2f lon=.2%f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.epx,
+		session->gpsdata.fix.epy,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		gpsd_maskdump(mask));
     return mask;	
 }
 

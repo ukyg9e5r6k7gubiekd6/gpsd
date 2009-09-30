@@ -194,7 +194,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 			 getlesl(buf2, 8)*1.0, getlesl(buf2, 12)*1.0, getlesl(buf2, 16)*1.0,
 			 getlesw(buf2, 20)/10.0, getlesw(buf2, 22)/10.0, getlesw(buf2, 24)/10.0);
 	used = getub(buf2, 26) & 0x0f;
-	visible = (getub(buf2, 26) & 0xf0) >> 4;
+	//visible = (getub(buf2, 26) & 0xf0) >> 4;
 	version = getleuw(buf2, 27)/100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
@@ -205,18 +205,23 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    session->gpsdata.fix.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
-	gpsd_report(LOG_PROG, "NDO 0x02: version %3.2f, mode=%d, status=%d, visible=%d, used=%d\n",
-		    version,
-		    session->gpsdata.fix.mode,
-		    session->gpsdata.status,
-		    visible,
-		    used);
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype), 
 		       "%3.2f", version);
 	    mask |= DEVICEID_SET;
 	}
+	gpsd_report(LOG_DATA, "NDO 0x02: time=%.2f, lat=%.2f lon=.2%f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s' mask=%s\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.fix.latitude,
+		    session->gpsdata.fix.longitude,
+		    session->gpsdata.fix.altitude,
+		    session->gpsdata.fix.speed,
+		    session->gpsdata.fix.track,
+		    session->gpsdata.fix.climb,
+		    session->gpsdata.fix.mode,
+		    session->gpsdata.dev.subtype,
+		    gpsd_maskdump(mask));
 	return mask;
 
     case 0x04:	/* DOP Data Output */
@@ -248,10 +253,17 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    break;
 	}
 	/* that's all the information in this packet */
-	gpsd_report(LOG_PROG, "DDO 0x04: mode=%d, status=%d\n", 
+	mask = TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
+	gpsd_report(LOG_DATA, "DDO 0x04: gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mode=%d, status=%d mask=%s\n", 
+		    session->gpsdata.dop.gdop,
+		    session->gpsdata.dop.pdop,
+		    session->gpsdata.dop.hdop,
+		    session->gpsdata.dop.vdop,
+		    session->gpsdata.dop.tdop,
 		    session->gpsdata.fix.mode,
-		    session->gpsdata.status);
-	return TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
+		    session->gpsdata.status,
+		    gpsd_maskdump(mask));
+	return mask;
 
     case 0x06:	/* Channel Status Output */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
@@ -292,9 +304,13 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	}
 	session->gpsdata.satellites = (int)satcnt;
 	/* that's all the information in this packet */
-	gpsd_report(LOG_PROG, "CSO 0x04: %d satellites used\n",
-		    session->gpsdata.satellites_used);
-	return TIME_SET | SATELLITE_SET | USED_SET;
+	mask = TIME_SET | SATELLITE_SET | USED_SET;
+	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d reported=%d mask=%s\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.satellites_used,
+		    session->gpsdata.satellites,
+		    gpsd_maskdump(mask));
+	return mask;
 
     case 0x08:	/* Measurement Data Output */
 	/* clock offset is a manufacturer diagnostic */
@@ -305,7 +321,8 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* FIXME: read full statellite status for each channel */
 	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
-	gpsd_report(LOG_PROG, "MDO 0x04:\n");
+	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask=TIME_SET\n",
+		    session->gpsdata.fix.time);
 	return TIME_SET;
 
     case 0x20:	/* LogConfig Info, could be used as a probe for EverMore GPS */
@@ -324,7 +341,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     default:
 	gpsd_report(LOG_WARN,
-	    "unknown EverMore packet id 0x%02x, length %zd: %s\n", buf2[0],
+	    "unknown EverMore packet EID 0x%02x, length %zd: %s\n", buf2[0],
 	    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
 	return 0;
     }
