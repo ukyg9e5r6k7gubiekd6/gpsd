@@ -368,6 +368,7 @@ static gps_mask_t handle_0x15(struct gps_device_t *session)
 /* PVT Block */
 static gps_mask_t handle_0xb1(struct gps_device_t *session)
 {
+    gps_mask_t mask;
     unsigned int n;
     unsigned char *buf = session->packet.outbuffer + 3;
     uint16_t week;
@@ -510,14 +511,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
 		vel_north*VEL_RES, vel_east*VEL_RES, vel_up*VEL_RES,
 		session->gpsdata.fix.track, session->gpsdata.fix.speed);
-    /* relies on the fact that expx and epy are set to same value */
-    gpsd_report(LOG_IO,
-		"Navcom: hrms = %f, vrms = %f, gdop = %f, pdop = %f, "
-		"hdop = %f, vdop = %f, tdop = %f\n",
-		session->gpsdata.fix.epx, session->gpsdata.fix.epv,
-		session->gpsdata.dop.gdop, session->gpsdata.dop.pdop,
-		session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
-		session->gpsdata.dop.tdop);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -525,9 +518,33 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    return LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
+    mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
 	| TIMERR_SET | DOP_SET;
+    gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=.2%f alt=%.f "
+		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
+		"epx=%.2f epy=%.2f epv=%.2f "
+		"gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f "
+		"mask=LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
+		"USED|HERR|VERR|TIMERR|DOP\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.fix.epx, 
+		session->gpsdata.fix.epy, 
+		session->gpsdata.fix.epv,
+		session->gpsdata.dop.gdop,
+		session->gpsdata.dop.pdop,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.dop.tdop);
+    return mask;
 }
 
 /* Packed Ephemeris Data */
@@ -695,7 +712,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     u_int8_t eng_status = getub(buf, 9);
     u_int16_t sol_status = getleuw(buf, 10);
     u_int8_t sats_visible = getub(buf, 12);
-    u_int8_t sats_tracked = getub(buf, 13);
+    //u_int8_t sats_tracked = getub(buf, 13);
     u_int8_t sats_used = getub(buf, 14);
     //u_int8_t pdop = getub(buf, 15);
 
@@ -723,10 +740,6 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     }
 
     /*@ -predboolothers @*/
-    gpsd_report(LOG_PROG,
-	       "Navcom: received packet type 0x86 (Channel Status) "
-	       "- satellites: visible = %u, tracked = %u, used = %u\n",
-	       sats_visible, sats_tracked, sats_used);
     gpsd_report(LOG_IO,
 	       "Navcom: engine status = 0x%x, almanac = %s, time = 0x%x, pos = 0x%x\n",
 	       eng_status&0x07, (eng_status&0x08?"valid":"invalid"),
@@ -778,6 +791,9 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	/*@ +predboolothers -charint @*/
     }
 
+    gpsd_report(LOG_DATA, 
+	       "CS 0x86: reported=%d, used=%d, mask=SATELLITE|STATUS\n",
+	       session->gpsdata.satellites, session->gpsdata.satellites_used);
     return SATELLITE_SET | STATUS_SET;
 }
 
@@ -1060,14 +1076,14 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
 	    - session->context->leap_seconds;
 
-    gpsd_report(LOG_PROG,
-		"Navcom: received packet type 0xef (Clock Drift and Offset)\n");
     gpsd_report(LOG_IO,
 		"Navcom: oscillator temp. = %d, nav. status = 0x%02x, "
 		"nav. clock offset = %f, nav. clock drift = %f, "
 		"osc. filter drift est. = %f, acc.time slew value = %d\n",
 		osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 		osc_filter_drift_est, time_slew);
+    gpsd_report(LOG_DATA,
+		"CDO 0xef: time=%.2f mask=TIME\n", session->gpsdata.fix.time);
     return TIME_SET;
 }
 

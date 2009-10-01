@@ -196,6 +196,18 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     (void)oncore_control_send(session,pollAt,sizeof(pollAt));
     (void)oncore_control_send(session,pollBo,sizeof(pollBo));
 
+    gpsd_report(LOG_DATA, "NAVSOL: time=%.2f lat=%.2f lon=.2%f alt=.2%f speed=%.2f track=%.2f mode=%d status=%d reported=%d used=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.satellites_used,
+		session->gpsdata.satellites,
+		gpsd_maskdump(mask));
     return mask;
 }
 
@@ -263,6 +275,8 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    }
     }
 
+    // FIXME: Shhould dump satelluite info here
+    gpsd_report(LOG_DATA, "SVINFO: mask=SATELLITE\n");
     return SATELLITE_SET;
 }
 

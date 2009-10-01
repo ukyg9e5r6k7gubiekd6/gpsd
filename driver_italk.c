@@ -164,11 +164,10 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 
 	// FIXME: should dump skyview here as well
 	gpsd_report(LOG_DATA,
-		    "PRN_STATUS: time=%.2f reported%d used=%d mask=%s\n",
+		    "PRN_STATUS: time=%.2f reported%d used=%d mask=USED|SATELLITE|TIME\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites,
-		    session->gpsdata.satellites_used,
-		    gpsd_maskdump(mask));
+		    session->gpsdata.satellites_used);
     }
 
     return mask;
@@ -201,7 +200,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     gpsd_report(LOG_DATA,
-		"UTC_IONO_MODEL: time=%.2f mask=TIME_SET\n",
+		"UTC_IONO_MODEL: time=%.2f mask=TIME\n",
 		session->gpsdata.fix.time);
     return TIME_SET;
 }

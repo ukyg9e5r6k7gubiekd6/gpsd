@@ -270,7 +270,8 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	mask |= STATUS_SET;
     }
 
-    gpsd_report(LOG_DATA, "GLL: time=%.2f, lat=%.2f lon=.2%f mode=%d status=%d mask=%s\n",
+    gpsd_report(LOG_DATA, 
+		"GLL: time=%.2f lat=%.2f lon=.2%f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -349,7 +350,8 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	   session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude,session->gpsdata.fix.longitude);
 	}
     }
-    gpsd_report(LOG_DATA, "GGA: time=%.2f, lat=%.2f lon=.2%f alt=.2%f mode=%d status=%d mask=%s\n",
+    gpsd_report(LOG_DATA, 
+		"GGA: time=%.2f lat=%.2f lon=.2%f alt=.2%f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -414,7 +416,8 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	}
 	mask |= DOP_SET | USED_SET;
 	/* FIXME: perhaps dump the satellite vector here? */
-	gpsd_report(LOG_DATA, "GPGSA: mode=%d used=%d pdop=.2%f hdop=.2%f vdop=.2%f mask=%s\n",
+	gpsd_report(LOG_DATA, 
+		    "GPGSA: mode=%d used=%d pdop=.2%f hdop=.2%f vdop=.2%f mask=%s\n",
 		    session->gpsdata.fix.mode,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.dop.pdop,
@@ -616,7 +619,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
     session->driver.nmea.date.tm_mon = atoi(field[3])-1;
     session->driver.nmea.date.tm_mday = atoi(field[2]);
-    gpsd_report(LOG_DATA, "ZDA: time=%.2f, mask=%s\n",
+    gpsd_report(LOG_DATA, "ZDA: time=%.2f mask=%s\n",
 		session->gpsdata.fix.time,
 		gpsd_maskdump(TIME_SET));
     return TIME_SET;
@@ -740,83 +743,82 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
 #ifdef ASHTECH_ENABLE
 static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t *session)
 {
-	gps_mask_t mask;
-	mask = ONLINE_SET;
+    gps_mask_t mask;
+    mask = ONLINE_SET;
 
-	if (0 == strcmp("RID", field[1])){ /* Receiver ID */
-		(void)snprintf(session->subtype, sizeof(session->subtype)-1,
-			       "%s ver %s", field[2], field[3]);
-		gpsd_report(LOG_DATA, "PASHR,RID: subtype=%s mask=%s\n",
-			    session->subtype, gpsd_maskdump(mask));
-		return mask;
-	} else if (0 == strcmp("POS", field[1])){ /* 3D Position */
-		session->cycle_state |= CYCLE_START;
-		mask |= MODE_SET | STATUS_SET;
-		if (0 == strlen(field[2])){
-			/* empty first field means no 3D fix is available */
-			session->gpsdata.status = STATUS_NO_FIX;
-			session->gpsdata.fix.mode = MODE_NO_FIX;
-			return mask;
-		}
-
-		/* if we make it this far, we at least have a 3D fix */
-		session->gpsdata.fix.mode = MODE_3D;
-		if (1 == atoi(field[2]))
-			session->gpsdata.status = STATUS_DGPS_FIX;
-		else
-			session->gpsdata.status = STATUS_FIX;
-
-		session->gpsdata.satellites_used = atoi(field[3]);
-		merge_hhmmss(field[4], session);
-		register_fractional_time(field[4], session);
-		do_lat_lon(&field[5], &session->gpsdata);
-		session->gpsdata.fix.altitude = atof(field[9]);
-		session->gpsdata.fix.track = atof(field[11]);
-		session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
-		session->gpsdata.fix.climb = atof(field[13]);
-		clear_dop(&session->gpsdata.dop);
-		session->gpsdata.dop.pdop = atof(field[14]);
-		session->gpsdata.dop.hdop = atof(field[15]);
-		session->gpsdata.dop.vdop = atof(field[16]);
-		session->gpsdata.dop.tdop = atof(field[17]);
-		mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
-		mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
-		mask |= DOP_SET;
-		gpsd_report(LOG_DATA, "PASHR,POS: time=%.2f, lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
-			    session->gpsdata.fix.time,
-			    session->gpsdata.fix.latitude,
-			    session->gpsdata.fix.longitude,
-			    session->gpsdata.fix.altitude,
-			    session->gpsdata.fix.speed,
-			    session->gpsdata.fix.track,
-			    session->gpsdata.fix.climb,
-			    session->gpsdata.fix.mode,
-			    session->gpsdata.status,
-			    session->gpsdata.dop.pdop,
-			    session->gpsdata.dop.hdop,
-			    session->gpsdata.dop.vdop,
-			    session->gpsdata.dop.tdop,
-			    gpsd_maskdump(mask));
-	} else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
-		int i, n, p, u;
-		n = session->gpsdata.satellites = atoi(field[2]);
-		u = 0;
-		for (i = 0; i < n; i++){
-			session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);
-			session->gpsdata.azimuth[i] = atoi(field[3+i*5+1]);
-			session->gpsdata.elevation[i] = atoi(field[3+i*5+2]);
-			session->gpsdata.ss[i] = atof(field[3+i*5+3]);
-			if (field[3+i*5+4][0] == 'U')
-				session->gpsdata.used[u++] = p;
-		}
-		session->gpsdata.satellites_used = u;
-		// FIXME: Should dump satellites here as well
-		gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
-			    session->gpsdata.satellites_used, 
-			    gpsd_maskdump(mask));
-		mask |= SATELLITE_SET | USED_SET;
-	}
+    if (0 == strcmp("RID", field[1])){ /* Receiver ID */
+	(void)snprintf(session->subtype, sizeof(session->subtype)-1,
+		       "%s ver %s", field[2], field[3]);
+	gpsd_report(LOG_DATA, "PASHR,RID: subtype=%s mask=ONLINE\n",
+		    session->subtype);
 	return mask;
+    } else if (0 == strcmp("POS", field[1])){ /* 3D Position */
+	session->cycle_state |= CYCLE_START;
+	mask |= MODE_SET | STATUS_SET;
+	if (0 == strlen(field[2])){
+	    /* empty first field means no 3D fix is available */
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	} else {
+	    /* if we make it this far, we at least have a 3D fix */
+	    session->gpsdata.fix.mode = MODE_3D;
+	    if (1 == atoi(field[2]))
+		session->gpsdata.status = STATUS_DGPS_FIX;
+	    else
+		session->gpsdata.status = STATUS_FIX;
+
+	    session->gpsdata.satellites_used = atoi(field[3]);
+	    merge_hhmmss(field[4], session);
+	    register_fractional_time(field[4], session);
+	    do_lat_lon(&field[5], &session->gpsdata);
+	    session->gpsdata.fix.altitude = atof(field[9]);
+	    session->gpsdata.fix.track = atof(field[11]);
+	    session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
+	    session->gpsdata.fix.climb = atof(field[13]);
+	    clear_dop(&session->gpsdata.dop);
+	    session->gpsdata.dop.pdop = atof(field[14]);
+	    session->gpsdata.dop.hdop = atof(field[15]);
+	    session->gpsdata.dop.vdop = atof(field[16]);
+	    session->gpsdata.dop.tdop = atof(field[17]);
+	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
+	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
+	    mask |= DOP_SET;
+	    gpsd_report(LOG_DATA, "PASHR,POS: time=%.2f lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+			session->gpsdata.fix.time,
+			session->gpsdata.fix.latitude,
+			session->gpsdata.fix.longitude,
+			session->gpsdata.fix.altitude,
+			session->gpsdata.fix.speed,
+			session->gpsdata.fix.track,
+			session->gpsdata.fix.climb,
+			session->gpsdata.fix.mode,
+			session->gpsdata.status,
+			session->gpsdata.dop.pdop,
+			session->gpsdata.dop.hdop,
+			session->gpsdata.dop.vdop,
+			session->gpsdata.dop.tdop,
+			gpsd_maskdump(mask));
+	}
+    } else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
+	int i, n, p, u;
+	n = session->gpsdata.satellites = atoi(field[2]);
+	u = 0;
+	for (i = 0; i < n; i++){
+	    session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);
+	    session->gpsdata.azimuth[i] = atoi(field[3+i*5+1]);
+	    session->gpsdata.elevation[i] = atoi(field[3+i*5+2]);
+	    session->gpsdata.ss[i] = atof(field[3+i*5+3]);
+	    if (field[3+i*5+4][0] == 'U')
+		session->gpsdata.used[u++] = p;
+	}
+	session->gpsdata.satellites_used = u;
+	// FIXME: Should dump satellites here as well
+	gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
+		    session->gpsdata.satellites_used, 
+		    gpsd_maskdump(mask));
+	mask |= SATELLITE_SET | USED_SET;
+    }
+    return mask;
 }
 #endif /* ASHTECH_ENABLE */
 

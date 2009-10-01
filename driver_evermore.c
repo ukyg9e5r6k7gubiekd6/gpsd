@@ -254,15 +254,14 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	}
 	/* that's all the information in this packet */
 	mask = TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
-	gpsd_report(LOG_DATA, "DDO 0x04: gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mode=%d, status=%d mask=%s\n", 
+	gpsd_report(LOG_DATA, "DDO 0x04: gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mode=%d, status=%d mask=TIME| DOP|MODE|STATUS\n", 
 		    session->gpsdata.dop.gdop,
 		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,
 		    session->gpsdata.dop.vdop,
 		    session->gpsdata.dop.tdop,
 		    session->gpsdata.fix.mode,
-		    session->gpsdata.status,
-		    gpsd_maskdump(mask));
+		    session->gpsdata.status);
 	return mask;
 
     case 0x06:	/* Channel Status Output */
@@ -305,11 +304,10 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	session->gpsdata.satellites = (int)satcnt;
 	/* that's all the information in this packet */
 	mask = TIME_SET | SATELLITE_SET | USED_SET;
-	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d reported=%d mask=%s\n",
+	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d reported=%d mask=TIME|SATELLITE|USED\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_used,
-		    session->gpsdata.satellites,
-		    gpsd_maskdump(mask));
+		    session->gpsdata.satellites);
 	return mask;
 
     case 0x08:	/* Measurement Data Output */
@@ -321,7 +319,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* FIXME: read full statellite status for each channel */
 	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
-	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask=TIME_SET\n",
+	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask=TIME\n",
 		    session->gpsdata.fix.time);
 	return TIME_SET;
 

@@ -120,6 +120,20 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->cycle_state = STATE;
     mask |= MODE_SET | STATUS_SET;
 
+    /* 
+     * At the end of each packet-cracking function, report at LOG_DATA level
+     * the fields it potentially set and the transfer mask. Doing this
+     * makes it relatively easy to track down data-management problems.
+     */
+    gpsd_report(LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=.2%f alt=.2%f mode=%d status=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		gpsd_maskdump(mask));
+
     return mask;
 }
 
@@ -195,6 +209,9 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     }
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites = st;
+    gpsd_report(LOG_DATA, 
+	       "SVINFO: reported=%d used=%d mask=SATELLITE|USED\n",
+	       session->gpsdata.satellites, session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
 }
 
