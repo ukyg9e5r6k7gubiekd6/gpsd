@@ -341,10 +341,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    = session->gpsdata.azimuth[i] = 0;
 		session->gpsdata.ss[i] = 0.0;
 	    }
-	    if (++i == session->gpsdata.satellites)
+	    if (++i == session->gpsdata.satellites_visible)
 		mask |= SATELLITE_SET;		/* last of the series */
-	    if (i > session->gpsdata.satellites)
-		session->gpsdata.satellites = i;
+	    if (i > session->gpsdata.satellites_visible)
+		session->gpsdata.satellites_visible = i;
 	}
 	break;
     case 0x6d:		/* All-In-View Satellite Selection */

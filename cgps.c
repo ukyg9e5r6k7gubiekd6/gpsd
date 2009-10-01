@@ -470,10 +470,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
      xgps.c.  Note that the satellite list may be truncated based on
      available screen size, or may only show satellites used for the
      fix.  */
-  if (gpsdata->satellites!=0) {
+  if (gpsdata->satellites_visible!=0) {
     if (display_sats >= MAX_POSSIBLE_SATS) {
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
-	if (i < gpsdata->satellites) {
+	if (i < gpsdata->satellites_visible) {
 	    (void)snprintf(scr, sizeof(scr),
 			 " %3d    %02d    %03d    %02d      %c",
 			gpsdata->PRN[i],
@@ -488,7 +488,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
       n=0;
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (n < display_sats) {
-	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]!=0) || (gpsdata->satellites <= display_sats))) {
+	  if ((i < gpsdata->satellites_visible) && ((gpsdata->used[i]!=0) || (gpsdata->satellites_visible <= display_sats))) {
 	      (void)snprintf(scr, sizeof(scr),
 			  " %3d    %02d    %03d    %02d      %c",
 			  gpsdata->PRN[i],

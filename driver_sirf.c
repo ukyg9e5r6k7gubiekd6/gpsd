@@ -395,7 +395,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	if (good!=0)
 	    st += 1;
     }
-    session->gpsdata.satellites = st;
+    session->gpsdata.satellites_visible = st;
 #ifdef NTPSHM_ENABLE
     if (st > 3) {
 	if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_1)==0)

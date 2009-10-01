@@ -161,7 +161,7 @@ draw_graphics(struct gps_data_t *gpsdata)
 	int i, x, y;
 	char buf[20];
 
-	if (gpsdata->satellites != 0) {
+	if (gpsdata->satellites_visible != 0) {
 		i = (int)min(width, height);
 
 		set_color("White");
@@ -197,7 +197,7 @@ draw_graphics(struct gps_data_t *gpsdata)
 		(void)XDrawString(dpy, pixmap, drawGC, x - 5, y, "W", 1);
 
 		/* Now draw the satellites... */
-		for (i = 0; i < gpsdata->satellites; i++) {
+		for (i = 0; i < gpsdata->satellites_visible; i++) {
 			pol2cart((double)gpsdata->azimuth[i],
 			    (double)gpsdata->elevation[i], &x, &y);
 			if (gpsdata->ss[i] < 10)
@@ -889,11 +889,11 @@ update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 	XmTextFieldSetString(status, message);
 
 	/* This is for the satellite status display */
-	if (gpsdata->satellites) {
+	if (gpsdata->satellites_visible) {
 		string[0] = XmStringCreateSimple(
 		    "PRN:   Elev:  Azim:  SNR:  Used:");
 		for (i = 0; i < MAXCHANNELS; i++) {
-			if (i < (unsigned int)gpsdata->satellites) {
+			if (i < (unsigned int)gpsdata->satellites_visible) {
 				(void)snprintf(s, sizeof(s),
 				    " %3d    %2d    %3d    %2.0f      %c",
 				    gpsdata->PRN[i], gpsdata->elevation[i],

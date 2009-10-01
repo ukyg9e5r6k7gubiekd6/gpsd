@@ -569,7 +569,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if (session->gpsdata.fix.mode > MODE_NO_FIX
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
-		    && session->gpsdata.satellites > 0) {
+		    && session->gpsdata.satellites_visible > 0) {
 	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
@@ -611,6 +611,6 @@ void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
     (void)memset(out->elevation, 0, sizeof(out->elevation));
     (void)memset(out->azimuth,	 0, sizeof(out->azimuth));
     (void)memset(out->ss,	 0, sizeof(out->ss));
-    out->satellites = 0;
+    out->satellites_visible = 0;
 }
 

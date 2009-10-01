@@ -272,7 +272,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	    st++;
     }
     session->gpsdata.satellites_used = nsv;
-    session->gpsdata.satellites = st;
+    session->gpsdata.satellites_visible = st;
     return SATELLITE_SET | USED_SET | ONLINE_SET;
 }
 

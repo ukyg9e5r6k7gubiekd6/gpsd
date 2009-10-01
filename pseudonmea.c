@@ -127,25 +127,25 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     char *bufp2 = bufp;
     bufp[0] = '\0';
 
-    for( i = 0 ; i < session->gpsdata.satellites; i++ ) {
+    for( i = 0 ; i < session->gpsdata.satellites_visible; i++ ) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
 	    bufp2 = bufp;
 	    len -= snprintf(bufp, len,
 		    "$GPGSV,%d,%d,%02d",
-		    ((session->gpsdata.satellites-1) / 4) + 1,
+		    ((session->gpsdata.satellites_visible-1) / 4) + 1,
 		    (i / 4) + 1,
-		    session->gpsdata.satellites);
+		    session->gpsdata.satellites_visible);
 	}
 	bufp += strlen(bufp);
-	if (i < session->gpsdata.satellites)
+	if (i < session->gpsdata.satellites_visible)
 	    len -= snprintf(bufp, len,
 		    ",%02d,%02d,%03d,%02.0f",
 		    session->gpsdata.PRN[i],
 		    session->gpsdata.elevation[i],
 		    session->gpsdata.azimuth[i],
 		    session->gpsdata.ss[i]);
-	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
+	if (i % 4 == 3 || i == session->gpsdata.satellites_visible-1) {
 	    nmea_add_checksum(bufp2);
 	    len -= 5;
 	}

@@ -209,7 +209,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ +predboolothers */
 	j++;
     }
-    session->gpsdata.satellites = (int)st;
+    session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
     return SATELLITE_SET | USED_SET;
 }

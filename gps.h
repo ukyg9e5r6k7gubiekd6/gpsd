@@ -936,7 +936,7 @@ struct gps_data_t {
     double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
-    int satellites;		/* # of satellites in view */
+    int satellites_visible;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */

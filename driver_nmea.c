@@ -446,13 +446,13 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     int n, fldnum;
     if (count <= 3) {
 	gpsd_zero_satellites(&session->gpsdata);
-	session->gpsdata.satellites = 0;
+	session->gpsdata.satellites_visible = 0;
 	return ERROR_SET;
     }
     if (count % 4 != 0){
 	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
 	gpsd_zero_satellites(&session->gpsdata);
-	session->gpsdata.satellites = 0;
+	session->gpsdata.satellites_visible = 0;
 	return ERROR_SET;
     }
 
@@ -464,27 +464,27 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	gpsd_zero_satellites(&session->gpsdata);
 
     for (fldnum = 4; fldnum < count; ) {
-	if (session->gpsdata.satellites >= MAXCHANNELS) {
+	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_report(LOG_ERROR, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
 	}
-	session->gpsdata.PRN[session->gpsdata.satellites]       = atoi(field[fldnum++]);
-	session->gpsdata.elevation[session->gpsdata.satellites] = atoi(field[fldnum++]);
-	session->gpsdata.azimuth[session->gpsdata.satellites]   = atoi(field[fldnum++]);
-	session->gpsdata.ss[session->gpsdata.satellites]	= (float)atoi(field[fldnum++]);
+	session->gpsdata.PRN[session->gpsdata.satellites_visible]       = atoi(field[fldnum++]);
+	session->gpsdata.elevation[session->gpsdata.satellites_visible] = atoi(field[fldnum++]);
+	session->gpsdata.azimuth[session->gpsdata.satellites_visible]   = atoi(field[fldnum++]);
+	session->gpsdata.ss[session->gpsdata.satellites_visible]	= (float)atoi(field[fldnum++]);
 	/*
 	 * Incrementing this unconditionally falls afoul of chipsets like
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the
 	 * last sentence in a GPGSV set if the number of satellites is not
 	 * a multiple of 4.
 	 */
-	if (session->gpsdata.PRN[session->gpsdata.satellites] != 0)
-	    session->gpsdata.satellites++;
+	if (session->gpsdata.PRN[session->gpsdata.satellites_visible] != 0)
+	    session->gpsdata.satellites_visible++;
     }
-    if (session->driver.nmea.part == session->driver.nmea.await && atoi(field[3]) != session->gpsdata.satellites)
+    if (session->driver.nmea.part == session->driver.nmea.await && atoi(field[3]) != session->gpsdata.satellites_visible)
 	gpsd_report(LOG_WARN, "GPGSV field 3 value of %d != actual count %d\n",
-		    atoi(field[3]), session->gpsdata.satellites);
+		    atoi(field[3]), session->gpsdata.satellites_visible);
 
     /* not valid data until we've seen a complete set of parts */
     if (session->driver.nmea.part < session->driver.nmea.await) {
@@ -500,7 +500,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
      * elevations).  This behavior was observed under SiRF firmware
      * revision 231.000.000_A2.
      */
-    for (n = 0; n < session->gpsdata.satellites; n++)
+    for (n = 0; n < session->gpsdata.satellites_visible; n++)
 	if (session->gpsdata.azimuth[n] != 0)
 	    goto sane;
     gpsd_report(LOG_WARN, "Satellite data no good (%d of %d).\n", 
@@ -801,7 +801,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	}
     } else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
 	int i, n, p, u;
-	n = session->gpsdata.satellites = atoi(field[2]);
+	n = session->gpsdata.satellites_visible = atoi(field[2]);
 	u = 0;
 	for (i = 0; i < n; i++){
 	    session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);

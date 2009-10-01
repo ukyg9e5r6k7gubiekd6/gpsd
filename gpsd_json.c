@@ -213,7 +213,7 @@ void json_sky_dump(const struct gps_data_t *datap,
 		       replylen-strlen(reply),
 		       "\"pdop\":%.2f,", datap->dop.pdop);
     /* insurance against flaky drivers */
-    for (i = 0; i < datap->satellites; i++)
+    for (i = 0; i < datap->satellites_visible; i++)
 	if (datap->PRN[i])
 	    reported++;
     (void)snprintf(reply+strlen(reply),
@@ -245,9 +245,9 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (reply[strlen(reply)-1] == ',')
 	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", replylen-strlen(reply));
-    if (datap->satellites != reported)
+    if (datap->satellites_visible != reported)
 	gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
-		    datap->satellites, reported);
+		    datap->satellites_visible, reported);
 }
 
 void json_device_dump(const struct gps_device_t *device,

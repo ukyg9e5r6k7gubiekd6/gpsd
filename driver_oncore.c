@@ -185,7 +185,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	}
         /*@ +boolops @*/
     session->gpsdata.satellites_used = (int)nsv;
-    session->gpsdata.satellites = (int)st;
+    session->gpsdata.satellites_visible = (int)st;
 
     mask |= SATELLITE_SET | USED_SET;
     
@@ -206,7 +206,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 		session->gpsdata.fix.mode,
 		session->gpsdata.status,
 		session->gpsdata.satellites_used,
-		session->gpsdata.satellites,
+		session->gpsdata.satellites_visible,
 		gpsd_maskdump(mask));
     return mask;
 }
@@ -268,7 +268,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
 	session->driver.oncore.elevation[i]	= el;
 	session->driver.oncore.azimuth[i]	= az;
 	/* If it has an entry in the satellite list, update it! */
-	for (j = 0; j < session->gpsdata.satellites; j++)
+	for (j = 0; j < session->gpsdata.satellites_visible; j++)
 	    if (session->gpsdata.PRN[j] == sv) {
 		session->gpsdata.elevation[j]	= el;
 		session->gpsdata.azimuth[j]	= az; 

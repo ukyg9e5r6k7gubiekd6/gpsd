@@ -723,7 +723,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
     /* Satellite count */
-    session->gpsdata.satellites = (int)sats_visible;
+    session->gpsdata.satellites_visible = (int)sats_visible;
     session->gpsdata.satellites_used = (int)sats_used;
 
     /* Fix mode */
@@ -793,7 +793,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     gpsd_report(LOG_DATA, 
 	       "CS 0x86: reported=%d, used=%d, mask=SATELLITE|STATUS\n",
-	       session->gpsdata.satellites, session->gpsdata.satellites_used);
+	       session->gpsdata.satellites_visible, session->gpsdata.satellites_used);
     return SATELLITE_SET | STATUS_SET;
 }
 

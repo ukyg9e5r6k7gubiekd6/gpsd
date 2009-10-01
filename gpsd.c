@@ -1470,7 +1470,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		(void)strlcpy(phrase, ",X=?", sizeof(phrase));
 	    break;
 	case 'Y':
-	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites > 0) {
+	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))!= NULL && channel->device->gpsdata.satellites_visible > 0) {
 		int used, reported = 0;
 		(void)strlcpy(phrase, ",Y=", sizeof(phrase));
 		if (channel->device->gpsdata.tag[0] != '\0')
@@ -1485,13 +1485,13 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		else
 		    (void)strlcat(phrase, " ? ", sizeof(phrase));
 		/* insurance against flaky drivers */
-		for (i = 0; i < channel->device->gpsdata.satellites; i++)
+		for (i = 0; i < channel->device->gpsdata.satellites_visible; i++)
 		    if (channel->device->gpsdata.PRN[i])
 			reported++;
 		(void)snprintf(phrase+strlen(phrase),
 			       sizeof(phrase)-strlen(phrase),
 			       "%d:", reported);
-		for (i = 0; i < channel->device->gpsdata.satellites; i++) {
+		for (i = 0; i < channel->device->gpsdata.satellites_visible; i++) {
 		    used = 0;
 		    for (j = 0; j < channel->device->gpsdata.satellites_used; j++)
 			if (channel->device->gpsdata.used[j] == channel->device->gpsdata.PRN[i]) {
@@ -1508,9 +1508,9 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 				      used);
 		    }
 		}
-		if (channel->device->gpsdata.satellites != reported)
+		if (channel->device->gpsdata.satellites_visible != reported)
 		    gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
-				channel->device->gpsdata.satellites, reported);
+				channel->device->gpsdata.satellites_visible, reported);
 	    } else
 		(void)strlcpy(phrase, ",Y=?", sizeof(phrase));
 	    break;

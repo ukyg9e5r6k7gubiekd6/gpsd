@@ -369,7 +369,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    case 'Y':
 			if (sp[2] == '?') {
-			    gpsdata->satellites = 0;
+			    gpsdata->satellites_visible = 0;
 			} else {
 			    int j, i1, i2, i3, i5;
 			    int PRN[MAXCHANNELS];
@@ -379,17 +379,17 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    char tag[MAXTAGLEN+1], timestamp[21];
 
 			    (void)sscanf(sp, "Y=%8s %20s %d ",
-				   tag, timestamp, &gpsdata->satellites);
+				   tag, timestamp, &gpsdata->satellites_visible);
 			    (void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			    if (timestamp[0] != '?') {
 				gpsdata->sentence_time = atof(timestamp);
 				gpsdata->set |= TIME_SET;
 			    }
-			    for (j = 0; j < gpsdata->satellites; j++) {
+			    for (j = 0; j < gpsdata->satellites_visible; j++) {
 				PRN[j]=elevation[j]=azimuth[j]=used[j]=0;
 				ss[j]=0.0;
 			    }
-			    for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites; j++) {
+			    for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites_visible; j++) {
 				if ((sp != NULL) && ((sp = strchr(sp, ':')) != NULL)) {
 				    sp++;
 				    (void)sscanf(sp, "%d %d %d %lf %d", &i1, &i2, &i3, &f4, &i5);
@@ -627,8 +627,8 @@ static void data_dump(struct gps_data_t *collect, time_t now)
     if (collect->set & SATELLITE_SET) {
 	int i;
 
-	printf("Y: satellites in view: %d\n", collect->satellites);
-	for (i = 0; i < collect->satellites; i++) {
+	printf("Y: satellites in view: %d\n", collect->satellites_visible);
+	for (i = 0; i < collect->satellites_visible; i++) {
 	    printf("    %2.2d: %2.2d %3.3d %3.0f %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
     }

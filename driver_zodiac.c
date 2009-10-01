@@ -283,10 +283,10 @@ static gps_mask_t handle1003(struct gps_device_t *session)
     session->gpsdata.dop.hdop = (unsigned int)getzword(11) * 1e-2;
     session->gpsdata.dop.vdop = (unsigned int)getzword(12) * 1e-2;
     session->gpsdata.dop.tdop = (unsigned int)getzword(13) * 1e-2;
-    session->gpsdata.satellites = n;
+    session->gpsdata.satellites_visible = n;
 
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
-	if (i < session->gpsdata.satellites) {
+	if (i < session->gpsdata.satellites_visible) {
 	    session->gpsdata.PRN[i] = (int)getzword(15 + (3 * i));
 	    session->gpsdata.azimuth[i] = (int)(((short)getzword(16 + (3 * i))) * RAD_2_DEG * 1e-4);
 	    if (session->gpsdata.azimuth[i] < 0)

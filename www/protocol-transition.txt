@@ -292,6 +292,10 @@ DEVICELIST_SET is on in the top-level set member.  Storage for
 pathnames is no longer dynamically allocated, but static; to save
 space, it lives in a union with several other substructures.
 
+The top-level member "satellites" has been changed to
+"satellites_visible". The ambiguity in that name had actually induced
+a bug or two.
+
 There is a new substructure, dop, which holds the
 dilution-of-precision factors that were previously individual members
 of the gpsdata structure. Two new DOPs, xdop and ydop, are available;

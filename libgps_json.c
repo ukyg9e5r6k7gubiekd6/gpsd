@@ -149,7 +149,7 @@ static int json_sky_read(const char *buf,
 	{"satellites", array,   .addr.array.element_type = object,
 				.addr.array.arr.objects.subtype=json_attrs_2_1,
 	                        .addr.array.maxlen = MAXCHANNELS,
-	                        .addr.array.count = &gpsdata->satellites},
+	                        .addr.array.count = &gpsdata->satellites_visible},
 	{NULL},
     };
     /*@ +fullinitblock @*/

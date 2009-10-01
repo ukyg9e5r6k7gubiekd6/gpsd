@@ -218,7 +218,7 @@ static void nmea_update(void)
 
 	if (strcmp(fields[0], "GPGSV") == 0) {
 	    int i;
-	    int nsats = (session.gpsdata.satellites < MAXSATS) ? session.gpsdata.satellites : MAXSATS;
+	    int nsats = (session.gpsdata.satellites_visible < MAXSATS) ? session.gpsdata.satellites_visible : MAXSATS;
 
 	    for (i = 0; i < nsats; i++) {
 		(void)wmove(satwin, i+2, 3);

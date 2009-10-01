@@ -552,7 +552,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 		session->gpsdata.used[session->gpsdata.satellites_used++]
 		    = (int)sats->svid;
 	    }
-	    session->gpsdata.satellites++;
+	    session->gpsdata.satellites_visible++;
 	    j++;
 
 	}
@@ -560,7 +560,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// FIXME: should dump skyview here as well
 	gpsd_report(LOG_DATA,
 		    "SAT_DATA: reported=%d used=%d mask=%s\n",
-		    session->gpsdata.satellites,
+		    session->gpsdata.satellites_visible,
 		    session->gpsdata.satellites_used,
 		    gpsd_maskdump(mask));
 	break;

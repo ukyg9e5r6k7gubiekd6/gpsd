@@ -267,16 +267,17 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     case 0x06:	/* Channel Status Output */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
-	session->gpsdata.satellites = (int)getub(buf2, 8);
+	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
-	if (session->gpsdata.satellites > 12) {
+	if (session->gpsdata.satellites_visible > 12) {
 		gpsd_report(LOG_WARN, "Warning: EverMore packet has information about %d satellites!\n",
-				session->gpsdata.satellites);
+				session->gpsdata.satellites_visible);
 	}
-	if (session->gpsdata.satellites > EVERMORE_CHANNELS) session->gpsdata.satellites = EVERMORE_CHANNELS;
+	if (session->gpsdata.satellites_visible > EVERMORE_CHANNELS) 
+	    session->gpsdata.satellites_visible = EVERMORE_CHANNELS;
 	satcnt = 0;
-	for (i = 0; i < (size_t)session->gpsdata.satellites; i++) {
+	for (i = 0; i < (size_t)session->gpsdata.satellites_visible; i++) {
 	    int prn;
 	    // channel = getub(buf2, 7*i+7+2)
 	    prn = (int)getub(buf2, 7*i+7+3);
@@ -301,13 +302,13 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
 	    satcnt++;
 	}
-	session->gpsdata.satellites = (int)satcnt;
+	session->gpsdata.satellites_visible = (int)satcnt;
 	/* that's all the information in this packet */
 	mask = TIME_SET | SATELLITE_SET | USED_SET;
 	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d reported=%d mask=TIME|SATELLITE|USED\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_used,
-		    session->gpsdata.satellites);
+		    session->gpsdata.satellites_visible);
 	return mask;
 
     case 0x08:	/* Measurement Data Output */
