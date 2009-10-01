@@ -25,9 +25,6 @@
  * 0xd3: LBM DSP Status Block
  * 0xef: Clock Drift and Offset
  *
- * FIXME - I'm not too sure of the way I have computed the vertical positional error
- *	 I have used FOM as a scaling factor for VDOP, thusly VRMS = FOM/HDOP*VDOP
- *
  * By Diego Berge. Contact via web form at http://www.navlost.eu/contact
  *
  */
