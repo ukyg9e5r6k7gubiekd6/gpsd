@@ -87,7 +87,6 @@ static const char json_str1[] = "{\"class\":\"TPV\",\
 
 static const char *json_str2 = "{\"class\":\"SKY\",\
          \"tag\":\"MID4\",\"time\":1119197562.890,   \
-         \"reported\":7,\
          \"satellites\":[\
          {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":true},\
          {\"PRN\":29,\"el\":67,\"az\":310,\"ss\":40,\"used\":true},\
@@ -218,7 +217,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     status = libgps_json_unpack(json_str2, &gpsdata);
     assert_case(2, status);
     assert_string("tag", gpsdata.tag, "MID4");
-    assert_integer("reported", gpsdata.satellites_used, 7);
+    assert_integer("used", gpsdata.satellites_used, 6);
     assert_integer("PRN[0]", gpsdata.PRN[0], 10);
     assert_integer("el[0]", gpsdata.elevation[0], 45);
     assert_integer("az[0]", gpsdata.azimuth[0], 196);

@@ -1016,12 +1016,6 @@ yet, only the "class" field will reliably be present.</para>
 	error estimate.</entry>
 </row>
 <row>
-	<entry>reported</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Count of satellites in skyview.</entry>
-</row>
-<row>
 	<entry>satellites</entry>
 	<entry>Yes</entry>
 	<entry>list</entry>
@@ -1101,7 +1095,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 <programlisting>
 {"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327688.280
     "xdop":1.55,"hdop":1.24,"pdop":1.99,
-    "reported":8,"satellites":[
+    "satellites":[
         {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
         {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
         {"PRN":8,"el":66,"az":189,"ss":44,"used":true},

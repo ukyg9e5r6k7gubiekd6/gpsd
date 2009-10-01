@@ -216,9 +216,6 @@ void json_sky_dump(const struct gps_data_t *datap,
     for (i = 0; i < datap->satellites_visible; i++)
 	if (datap->PRN[i])
 	    reported++;
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
-		   "\"reported\":%d,", reported);
     if (reported) {
 	(void)strlcat(reply, "\"satellites\":[", replylen);
 	for (i = 0; i < reported; i++) {

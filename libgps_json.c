@@ -145,7 +145,6 @@ static int json_sky_read(const char *buf,
 	                        .dflt.real = NAN},
 	{"gdop",       real,    .addr.real    = &gpsdata->dop.gdop,
 	                        .dflt.real = NAN},
-	{"reported",   integer, .addr.integer = &gpsdata->satellites_used},
 	{"satellites", array,   .addr.array.element_type = object,
 				.addr.array.arr.objects.subtype=json_attrs_2_1,
 	                        .addr.array.maxlen = MAXCHANNELS,
@@ -162,9 +161,11 @@ static int json_sky_read(const char *buf,
     if (status != 0)
 	return status;
 
+    gpsdata->satellites_used = 0;
     for (i = j = 0; i < MAXCHANNELS; i++) {
 	if (usedflags[i]) {
 	    gpsdata->used[j++] = gpsdata->PRN[i];
+	    gpsdata->satellites_used++;
 	}
     }
 
