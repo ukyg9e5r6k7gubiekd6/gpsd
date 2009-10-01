@@ -129,6 +129,7 @@ static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
 static gps_mask_t handle1000(struct gps_device_t *session)
 /* time-position-velocity report */
 {
+    gps_mask_t mask;
     double subseconds;
     struct tm unpacked_date;
     /* ticks                      = getzlong(6); */
@@ -221,7 +222,20 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 #endif
 
     session->cycle_state |= CYCLE_START;
-    return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET; /* |HERR_SET|VERR_SET|SPEEDERR_SET */
+    mask = TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
+    gpsd_report(LOG_DATA, 
+		"1000: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		gpsd_maskdump(mask));
+    return mask;
 }
 
 static gps_mask_t handle1002(struct gps_device_t *session)
@@ -260,6 +274,10 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
+    gpsd_report(LOG_DATA, 
+		"1002: visible=%d used=%d mask=SATELLITE|USED\n",
+		session->gpsdata.satellites_visible, 
+		session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
 }
 
@@ -302,6 +320,14 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	    session->gpsdata.elevation[i] = 0;
 	}
     }
+    gpsd_report(LOG_DATA, "NAVDOP: visible=%d gdop=%.2f pdop=.2%f "
+		"hdop=.2%f vdop=.2%f tdop=.2%f mask=SATELLITE|DOP\n",
+		session->gpsdata.satellites_visible,
+		session->gpsdata.dop.gdop,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.dop.pdop,
+		session->gpsdata.dop.tdop);
     return SATELLITE_SET | DOP_SET;
 }
 
@@ -350,7 +376,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
     getstringz(session->subtype,
 	      session->packet.outbuffer,
 	      19, 28);	/* software version field */
-    gpsd_report(LOG_INF, "Software version: %s\n", session->subtype);
+    gpsd_report(LOG_DATA, "1011: subtype=%s mask=DEVICEID\n", session->subtype);
     return DEVICEID_SET;
 }
 
