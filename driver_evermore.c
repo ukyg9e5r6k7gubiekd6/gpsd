@@ -305,7 +305,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	session->gpsdata.satellites_visible = (int)satcnt;
 	/* that's all the information in this packet */
 	mask = TIME_SET | SATELLITE_SET | USED_SET;
-	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d reported=%d mask=TIME|SATELLITE|USED\n",
+	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d visible=%d mask=TIME|SATELLITE|USED\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.satellites_visible);

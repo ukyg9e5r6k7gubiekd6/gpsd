@@ -186,7 +186,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     /*@ +charint @*/
     nchan = getub(buf, 4);
     if (nchan > MAXCHANNELS){
-	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >%d reported",MAXCHANNELS);
+	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >%d reported visible",MAXCHANNELS);
 	return 0;
     }
     /*@ -charint @*/

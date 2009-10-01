@@ -792,7 +792,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     }
 
     gpsd_report(LOG_DATA, 
-	       "CS 0x86: reported=%d, used=%d, mask=SATELLITE|STATUS\n",
+	       "CS 0x86: visible=%d, used=%d, mask=SATELLITE|STATUS\n",
 	       session->gpsdata.satellites_visible, session->gpsdata.satellites_used);
     return SATELLITE_SET | STATUS_SET;
 }

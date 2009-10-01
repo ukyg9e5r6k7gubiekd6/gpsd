@@ -210,7 +210,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites = st;
     gpsd_report(LOG_DATA, 
-	       "SVINFO: reported=%d used=%d mask=SATELLITE|USED\n",
+	       "SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
 	       session->gpsdata.satellites, session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
 }

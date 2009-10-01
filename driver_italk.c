@@ -164,7 +164,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 
 	// FIXME: should dump skyview here as well
 	gpsd_report(LOG_DATA,
-		    "PRN_STATUS: time=%.2f reported%d used=%d mask=USED|SATELLITE|TIME\n",
+		    "PRN_STATUS: time=%.2f visible=%d used=%d mask=USED|SATELLITE|TIME\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_visible,
 		    session->gpsdata.satellites_used);
