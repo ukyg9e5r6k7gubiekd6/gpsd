@@ -290,7 +290,6 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
     if (len < 20)
 	return 0;
 
-    gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
     (void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
     fv = atof((char *)(buf+1));
     if (fv < 231) {
@@ -315,6 +314,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
+    gpsd_report(LOG_DATA, "FV 0x06: subtype='%s' mask=DEVEICEID\n", 
+	session->subtype);
     return DEVICEID_SET;
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -406,7 +407,8 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    (void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
     }
 #endif /* NTPSHM_ENABLE */
-    gpsd_report(LOG_PROG, "MTD 0x04: %d satellites\n", st);
+    gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask=SATELLITE\n",
+	session->gpsdata.satellites_visible);
     return TIME_SET | SATELLITE_SET;
 }
 
@@ -461,7 +463,20 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
     /* fix quality data */
     clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.hdop = (double)getub(buf, 20)/5.0;
-    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_SET;
+    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_SET;
+    gpsd_report(LOG_DATA, 
+		"MND 0x02: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.satellites_used,
+		gpsd_maskdump(mask));
     return mask;
 }
 
@@ -581,7 +596,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    (double)timegm(&unpacked_date)+subseconds;
 	/*@ +compdef +unrecog */
-	gpsd_report(LOG_PROG, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
+	gpsd_report(LOG_PROG, "GND 0x29 UTC: %lf\n", session->gpsdata.fix.time);
 #ifdef NTPSHM_ENABLE
 	if (session->gpsdata.fix.mode > MODE_NO_FIX && unpacked_date.tm_year != 0) {
 	    if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_1) == 0)
@@ -603,6 +618,17 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	if (session->gpsdata.fix.mode == MODE_3D)
 	    mask |= ALTITUDE_SET | CLIMB_SET;
     }
+    gpsd_report(LOG_DATA, 
+		"GND 0x29: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f mode=%d status=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		gpsd_maskdump(mask));
     return mask;
 }
 #endif /* __UNUSED__ */
@@ -695,6 +721,22 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
     session->gpsdata.dop.vdop = (int)getub(buf, 37) / 5.0;
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
+    gpsd_report(LOG_DATA, "EMD 0x62: time=%.2f lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.dop.gdop,
+		session->gpsdata.dop.pdop,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.dop.tdop,
+		gpsd_maskdump(mask));
     return mask;
 }
 
