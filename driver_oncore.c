@@ -141,15 +141,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET ;
 
-#if 0
-    session->gpsdata.satellites_used = GET_SATELLITES_USED();
-    clear_dop(&session->gpsdata.dop);
-    session->gpsdata.dop.hdop		= GET_HDOP();
-    session->gpsdata.dop.vdop		= GET_VDOP();
-    /* other DOP if available */
-    mask |= DOP_SET | USED_SET;
-#endif
-
     gpsd_zero_satellites(&session->gpsdata);
     /* Merge the satellite information from the Bb message. */
     Bbused = 0;
