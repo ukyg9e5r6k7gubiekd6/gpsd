@@ -64,7 +64,7 @@ superstar2_msg_ack(struct gps_device_t *session UNUSED,
 		    "superstar2 #126 - "
 		    "ACK %d %d %d %d %d\n",
 		    buf[5], buf[6], buf[7], buf[8], buf[9]);
-    return ONLINE_SET; /* always returns ONLINE_SET, but avoid runt packets */
+    return 0;
 }
 
 /*
@@ -85,7 +85,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 	return 0;
 
     gpsd_report(LOG_PROG, "superstar2 #20 - user navigation data\n");
-    mask = ONLINE_SET;
+    mask = 0;
 
     /*@ +charint @*/
     flags = getub(buf, 72);
@@ -147,7 +147,21 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     }
 
     mask |= MODE_SET | STATUS_SET ;
-
+    gpsd_report(LOG_DATA, 
+		"NAVSOL_LLA: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f hdop=%.2f used=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.satellites_used,
+		gpsd_maskdump(mask));
     return mask;
 }
 
@@ -172,7 +186,7 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 	return 0;
 
     gpsd_report(LOG_PROG, "superstar2 #21 - ecef navigation data\n");
-    mask = ONLINE_SET;
+    mask = 0;
 
     /*@ +charint @*/
     flags = getub(buf, 79) & 0x1f;
@@ -228,7 +242,21 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
     }
 
     mask |= MODE_SET | STATUS_SET;
-
+    gpsd_report(LOG_DATA, 
+		"NAVSOL_LLA: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f vdop=%.2f used=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.satellites_used,
+		gpsd_maskdump(mask));
     return mask;
 }
 #endif /* __UNUSED__ */
@@ -273,7 +301,11 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     }
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
-    return SATELLITE_SET | USED_SET | ONLINE_SET;
+    gpsd_report(LOG_DATA, 
+	       "SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
+	       session->gpsdata.satellites_visible, 
+		session->gpsdata.satellites_used);
+    return SATELLITE_SET | USED_SET;
 }
 
 static gps_mask_t
@@ -299,7 +331,9 @@ superstar2_msg_version(struct gps_device_t *session,
 	"hw part %s boot sw %s main sw %s ser num %s\n",
 	hw_part, boot_sw, main_sw, ser_num);
     (void)strlcpy(session->subtype, main_sw, sizeof(session->subtype));
-    return DEVICEID_SET | ONLINE_SET;
+    gpsd_report(LOG_DATA, "VERSION: subtype='%s' mask=DEVEICEID\n", 
+	session->subtype);
+    return DEVICEID_SET;
 }
 
 /**
@@ -308,6 +342,7 @@ superstar2_msg_version(struct gps_device_t *session,
 static gps_mask_t
 superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
+    gps_mask_t mask;
     union long_double l_d;
     double d;
     struct tm tm;
@@ -318,23 +353,26 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
     gpsd_report(LOG_PROG, "superstar2 #113 - timing status\n");
     /*@ +charint @*/
     if ((getub(buf, 55) & 0x30) != 0)
-	return ONLINE_SET;
+	mask = 0;
     /*@ -charint @*/
+    else {
+	/* extract time data */
+	(void)memset(&tm, '\0', sizeof(tm));
+	tm.tm_mday = (int)getsb(buf, 37);
+	tm.tm_mon = (int)getsb(buf, 38) - 1;
+	tm.tm_year = (int)getlesw(buf, 39) - 1900;
 
-    /* extract time data */
-    (void)memset(&tm, '\0', sizeof(tm));
-    tm.tm_mday = (int)getsb(buf, 37);
-    tm.tm_mon = (int)getsb(buf, 38) - 1;
-    tm.tm_year = (int)getlesw(buf, 39) - 1900;
-
-    tm.tm_hour = (int)getsb(buf, 41);
-    tm.tm_min = (int)getsb(buf, 42);
-    d = getled(buf, 43);
-    tm.tm_sec = (int)d;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = timegm(&tm);
-    session->context->leap_seconds = (int)getsb(buf,20);
-
-    return TIME_SET | ONLINE_SET;
+	tm.tm_hour = (int)getsb(buf, 41);
+	tm.tm_min = (int)getsb(buf, 42);
+	d = getled(buf, 43);
+	tm.tm_sec = (int)d;
+	session->gpsdata.fix.time = timegm(&tm);
+	session->context->leap_seconds = (int)getsb(buf,20);
+	mask = TIME_SET;
+    }
+    gpsd_report(LOG_DATA, "TIMING: time=%.2f mask=TIME\n", 
+		session->gpsdata.fix.time);
+    return mask;
 }
 
 /**
@@ -366,7 +404,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 	session->gpsdata.raw.pseudorange[i] = (double)(ul >> 12);
     }
 
-    mask |= RAW_SET | ONLINE_SET;
+    mask |= RAW_SET;
 #endif /* RAW_ENABLE */
     return mask;
 }
@@ -393,7 +431,7 @@ superstar2_msg_iono_utc(struct gps_device_t *session, unsigned char *buf, size_t
 		u ? "ok":"bad");
     session->driver.superstar2.last_iono = time(NULL);
 
-    return ONLINE_SET;
+    return 0;
 }
 
 

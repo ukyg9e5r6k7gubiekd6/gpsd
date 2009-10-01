@@ -66,7 +66,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	return 0;
 
     flags = (unsigned int)getub(buf, 11);
-    mask =  ONLINE_SET;
+    mask = 0;
     if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
 	tow = getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
@@ -118,7 +118,19 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	session->gpsdata.status = STATUS_FIX;
 
     mask |= MODE_SET | STATUS_SET | USED_SET ;
-
+    gpsd_report(LOG_DATA, 
+		"NAVSOL: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
+		session->gpsdata.fix.time,
+		session->gpsdata.fix.latitude,
+		session->gpsdata.fix.longitude,
+		session->gpsdata.fix.altitude,
+		session->gpsdata.fix.track,
+		session->gpsdata.fix.speed,
+		session->gpsdata.fix.climb,
+		session->gpsdata.fix.mode,
+		session->gpsdata.status,
+		session->gpsdata.satellites_used,
+		gpsd_maskdump(mask));
     return mask;
 }
 
@@ -137,7 +149,13 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.dop.tdop = (double)(getleuw(buf, 8)/100.0);
     session->gpsdata.dop.vdop = (double)(getleuw(buf, 10)/100.0);
     session->gpsdata.dop.hdop = (double)(getleuw(buf, 12)/100.0);
-
+    gpsd_report(LOG_DATA, "NAVDOP: gdop=%.2f pdop=.2%f "
+		"hdop=.2%f vdop=.2%f tdop=.2%f mask=DOP\n",
+		session->gpsdata.dop.gdop,
+		session->gpsdata.dop.hdop,
+		session->gpsdata.dop.vdop,
+		session->gpsdata.dop.pdop,
+		session->gpsdata.dop.tdop);
     return DOP_SET;
 }
 
@@ -163,9 +181,11 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 	session->context->leap_seconds = (int)getub(buf, 10);
 
     t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
+    session->gpsdata.fix.time = t;
 
-    return TIME_SET | ONLINE_SET;
+    gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask=TIME\n",
+		session->gpsdata.fix.time);
+    return TIME_SET;
 }
 
 /**
@@ -211,6 +231,10 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     }
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
+    gpsd_report(LOG_DATA, 
+	       "SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
+	       session->gpsdata.satellites_visible, 
+	       session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
 }
 
