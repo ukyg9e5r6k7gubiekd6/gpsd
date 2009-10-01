@@ -179,11 +179,11 @@ void json_sky_dump(const struct gps_data_t *datap,
 		   replylen-strlen(reply),
 		   "\"device\":\"%s\",",
 		   datap->dev.path);
-    if (isnan(datap->sentence_time)==0)
+    if (isnan(datap->skyview_time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"time\":%.3f,",
-		       datap->sentence_time);
+		       datap->skyview_time);
     if (isnan(datap->dop.xdop)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),

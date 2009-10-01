@@ -508,6 +508,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     gpsd_zero_satellites(&session->gpsdata);
     return ERROR_SET;
   sane:
+    session->gpsdata.skyview_time = timestamp();
     gpsd_report(LOG_DATA, "GSV: Satellite data OK (%d of %d).\n", 
 		session->driver.nmea.part, session->driver.nmea.await);
     // FIXME: Dump satellite state at LOG_DATA level on final sentence
@@ -812,10 +813,10 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 		session->gpsdata.used[u++] = p;
 	}
 	session->gpsdata.satellites_used = u;
-	// FIXME: Should dump satellites here as well
 	gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
 		    session->gpsdata.satellites_used, 
 		    gpsd_maskdump(mask));
+	session->gpsdata.skyview_time = timestamp();
 	mask |= SATELLITE_SET | USED_SET;
     }
     return mask;
@@ -1019,7 +1020,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 			session->driver.nmea.field[0]);
 	    session->cycle_state = CYCLE_END;
 	}
-	session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	session->driver.nmea.lasttag = thistag;
     }
 

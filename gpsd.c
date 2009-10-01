@@ -766,14 +766,14 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 			 */
 			if (channel->device == NULL) {
 			    channel->device = devp;
-			    most_recent = devp->gpsdata.sentence_time;
+			    most_recent = devp->gpsdata.fix.time;
 			} else if (type == GPS && devp->gpsdata.status > fix_quality) {
 			    channel->device = devp;
 			    fix_quality = devp->gpsdata.status;
 			} else if (type == GPS && devp->gpsdata.status == fix_quality && 
-				   devp->gpsdata.sentence_time >= most_recent) {
+				   devp->gpsdata.fix.time >= most_recent) {
 			    channel->device = devp;
-			    most_recent = devp->gpsdata.sentence_time;
+			    most_recent = devp->gpsdata.fix.time;
 			}
 		    }
 		}
@@ -1477,11 +1477,11 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		    (void)strlcat(phrase, channel->device->gpsdata.tag, sizeof(phrase));
 		else
 		    (void)strlcat(phrase, "-", sizeof(phrase));
-		if (isnan(channel->device->gpsdata.sentence_time)==0)
+		if (isnan(channel->device->gpsdata.skyview_time)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f ",
-				   channel->device->gpsdata.sentence_time);
+				   channel->device->gpsdata.skyview_time);
 		else
 		    (void)strlcat(phrase, " ? ", sizeof(phrase));
 		/* insurance against flaky drivers */

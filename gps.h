@@ -936,6 +936,7 @@ struct gps_data_t {
     double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
+    double skyview_time;	/* skyview timestamp */
     int satellites_visible;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
@@ -945,7 +946,6 @@ struct gps_data_t {
     struct devconfig_t dev;	/* device that shipped last update */
 
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
-    double sentence_time;	/* sentence timestamp (not the fix time!) */
 
     /* hook functions */
     int gps_fd;			/* socket or file descriptor to GPS */

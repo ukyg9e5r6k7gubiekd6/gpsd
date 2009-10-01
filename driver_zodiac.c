@@ -157,7 +157,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_sec = (int)getzword(24);
     subseconds = (int)getzlong(25) / 1e9;
     /*@ -compdef */
-    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+    session->gpsdata.fix.time =
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
@@ -274,6 +274,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
+    session->gpsdata.skyview_time = timestamp();
     gpsd_report(LOG_DATA, 
 		"1002: visible=%d used=%d mask=SATELLITE|USED\n",
 		session->gpsdata.satellites_visible, 
@@ -320,6 +321,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	    session->gpsdata.elevation[i] = 0;
 	}
     }
+    session->gpsdata.skyview_time = timestamp();
     gpsd_report(LOG_DATA, "NAVDOP: visible=%d gdop=%.2f pdop=.2%f "
 		"hdop=.2%f vdop=.2%f tdop=.2%f mask=SATELLITE|DOP\n",
 		session->gpsdata.satellites_visible,

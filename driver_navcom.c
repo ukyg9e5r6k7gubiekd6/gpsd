@@ -282,8 +282,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     }
     /*@ -relaxtypes -charint @*/
 
-    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
-	    - session->context->leap_seconds;
+    //gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0x83 (Ionosphere and UTC Data)\n");
@@ -414,7 +413,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Timestamp */
     week = (uint16_t)getleuw(buf, 3);
     tow = (uint32_t)getleul(buf, 5);
-    session->gpsdata.fix.time = session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
+    session->gpsdata.fix.time = gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 
     /* Satellites used */
     sats_used = (uint32_t)getleul(buf, 9);
@@ -717,8 +716,8 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //u_int8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
-    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
-	    - session->context->leap_seconds;
+    session->gpsdata.skyview_time = 
+	gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
@@ -886,8 +885,8 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->gpsdata.fix.eph = hrms*1.96;
 	session->gpsdata.fix.epv = alt_sd*1.96;
 #endif /*  __UNUSED__ */
-	session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
-		- session->context->leap_seconds;
+	session->gpsdata.fix.time = 
+	    gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO,
@@ -1050,8 +1049,8 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 static gps_mask_t handle_0xef(struct gps_device_t *session)
 {
     unsigned char *buf = session->packet.outbuffer + 3;
-    u_int16_t week = getleuw(buf, 3);
-    u_int32_t tow = getleul(buf, 5);
+    //u_int16_t week = getleuw(buf, 3);
+    //u_int32_t tow = getleul(buf, 5);
     int8_t osc_temp = getsb(buf, 9);
     u_int8_t nav_status = getub(buf, 10);
     union long_double l_d;
@@ -1073,8 +1072,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 	osc_filter_drift_est = NAN;
     }
 
-    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
-	    - session->context->leap_seconds;
+    //gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 
     gpsd_report(LOG_IO,
 		"Navcom: oscillator temp. = %d, nav. status = 0x%02x, "
@@ -1084,7 +1082,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 		osc_filter_drift_est, time_slew);
     gpsd_report(LOG_DATA,
 		"CDO 0xef: time=%.2f mask=TIME\n", session->gpsdata.fix.time);
-    return TIME_SET;
+    return 0;
 }
 
 

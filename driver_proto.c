@@ -159,7 +159,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
 
     t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
+    session->gpsdata.fix.time = t;
 
     return TIME_SET | ONLINE_SET;
 }
@@ -207,6 +207,8 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	if(session->gpsdata.PRN[i])
 		st++;
     }
+    /* if the satellite-info setence gives you UTC time, use it */
+    session->gpsdata.skyview_time = timestamp();
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
     gpsd_report(LOG_DATA, 

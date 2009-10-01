@@ -57,7 +57,6 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     gps_week = (ushort)getlesw(buf, 7 + 82);
     tow = getleul(buf, 7 + 84);
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = t;
     session->gpsdata.fix.time = t;
     mask |= TIME_SET;
 
@@ -136,7 +135,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	gps_week = getleuw(buf, 7 + 4);
 	tow = getleul(buf, 7 + 6);
 	t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
-	session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
+	session->gpsdata.skyview_time = t;
 
 	gpsd_zero_satellites(&session->gpsdata);
 	nsv = 0;
@@ -160,11 +159,10 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	}
 	session->gpsdata.satellites_visible = (int)st;
 	session->gpsdata.satellites_used = (int)nsv;
-	mask = USED_SET | SATELLITE_SET | TIME_SET;;
+	mask = USED_SET | SATELLITE_SET;;
 
-	// FIXME: should dump skyview here as well
 	gpsd_report(LOG_DATA,
-		    "PRN_STATUS: time=%.2f visible=%d used=%d mask=USED|SATELLITE|TIME\n",
+		    "PRN_STATUS: time=%.2f visible=%d used=%d mask=USED|SATELLITE\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_visible,
 		    session->gpsdata.satellites_used);
@@ -197,7 +195,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     gps_week = getleuw(buf, 7 + 36);
     tow = getleul(buf, 7 + 38);
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
+    session->gpsdata.fix.time = t;
 
     gpsd_report(LOG_DATA,
 		"UTC_IONO_MODEL: time=%.2f mask=TIME\n",

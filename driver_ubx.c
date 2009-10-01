@@ -73,13 +73,12 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	session->driver.ubx.gps_week = gw;
 
 	t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
-	session->gpsdata.sentence_time = t;
 	session->gpsdata.fix.time = t;
 	mask |= TIME_SET;
 #ifdef NTPSHM_ENABLE
 	/* TODO overhead */
 	if (session->context->enable_ntpshm)
-	    (void)ntpshm_put(session, session->gpsdata.sentence_time);
+	    (void)ntpshm_put(session, t);
 #endif
     }
 
@@ -194,15 +193,18 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-    unsigned int i, j, tow, nchan, nsv, st;
+    unsigned int i, j, nchan, nsv, st;
 
     if (data_len < 152 ) {
 	gpsd_report(LOG_PROG, "runt svinfo (datalen=%zd)\n", data_len);
 	return 0;
     }
+#if 0
+    // Alas, this sentence doesn't supply GPS week
     tow = getleul(buf, 0);
-//    session->gpsdata.sentence_time = gpstime_to_unix(gps_week, tow) 
-//				- session->context->leap_seconds;
+    session->gpsdata.skyview_time = gpstime_to_unix(gps_week,week, tow) 
+	- session->context->leap_seconds;
+#endif
     /*@ +charint @*/
     nchan = getub(buf, 4);
     if (nchan > MAXCHANNELS){
@@ -229,6 +231,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ +predboolothers */
 	j++;
     }
+    session->gpsdata.skyview_time = timestamp();
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
     gpsd_report(LOG_DATA, 

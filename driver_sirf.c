@@ -368,7 +368,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	return 0;
 
     gpsd_zero_satellites(&session->gpsdata);
-    session->gpsdata.sentence_time
+    session->gpsdata.skyview_time
 	    = gpstime_to_unix(getbesw(buf, 1), getbeul(buf, 3)*1e-2) - session->context->leap_seconds;
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
@@ -404,12 +404,12 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 		session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
 	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_1))
-	    (void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
+	    (void)ntpshm_put(session,session->gpsdata.skyview_time+0.8);
     }
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask=SATELLITE\n",
 	session->gpsdata.satellites_visible);
-    return TIME_SET | SATELLITE_SET;
+    return SATELLITE_SET;
 }
 
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -447,7 +447,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 		navtype,session->gpsdata.status,session->gpsdata.fix.mode);
     /* byte 20 is HDOP, see below */
     /* byte 21 is "mode 2", not clear how to interpret that */
-    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+    session->gpsdata.fix.time =
 	gpstime_to_unix(getbesw(buf, 22), getbeul(buf, 24)*1e-2) -
 	session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
@@ -593,7 +593,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	unpacked_date.tm_sec = 0;
 	subseconds = getbeuw(buf, 17)*1e-3;
 	/*@ -compdef -unrecog */
-	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	session->gpsdata.fix.time =
 	    (double)timegm(&unpacked_date)+subseconds;
 	/*@ +compdef +unrecog */
 	gpsd_report(LOG_PROG, "GND 0x29 UTC: %lf\n", session->gpsdata.fix.time);
@@ -700,7 +700,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	unpacked_date.tm_sec = 0;
 	subseconds = ((unsigned short)getbeuw(buf, 32))*1e-3;
 	/*@ -compdef */
-	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	session->gpsdata.fix.time =
 	    (double)mkgmtime(&unpacked_date)+subseconds;
 	/*@ +compdef */
 #ifdef NTPSHM_ENABLE
@@ -757,7 +757,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
 	unpacked_date.tm_year = (int)getbeuw(buf, 6) - 1900;
 	/*@ -compdef */
-	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	session->gpsdata.fix.time =
 	    (double)mkgmtime(&unpacked_date);
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeuw(buf, 8);

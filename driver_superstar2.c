@@ -102,7 +102,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
     tm.tm_year = (int)getleuw(buf, 16) - 1900;
-    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+    session->gpsdata.fix.time =
 	timegm(&tm) + (d - tm.tm_sec);
     mask |= TIME_SET;
 
@@ -199,7 +199,7 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
     session->driver.superstar2.gps_week = getleuw(buf, 12);
     tm = gpstime_to_unix((int)session->driver.superstar2.gps_week, tow) -
 	session->context->leap_seconds;
-    session->gpsdata.fix.time = session->gpsdata.sentence_time = tm;
+    session->gpsdata.fix.time = tm;
     mask |= TIME_SET;
 
     /* extract the earth-centered, earth-fixed (ECEF) solution */
@@ -299,6 +299,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	if(session->gpsdata.PRN[i])
 	    st++;
     }
+    session->gpsdata.skyview_time = timestamp();
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
     gpsd_report(LOG_DATA, 

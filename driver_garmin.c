@@ -365,7 +365,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
 	session->gpsdata.fix.time
-	  = session->gpsdata.sentence_time
 	  = (double)time_l;
 	gpsd_report(LOG_PROG, "time_l: %ld\n", (long int)time_l);
 
@@ -556,8 +555,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    j++;
 
 	}
+	session->gpsdata.skyview_time = timestamp();
 	mask |= SATELLITE_SET | USED_SET;
-	// FIXME: should dump skyview here as well
 	gpsd_report(LOG_DATA,
 		    "SAT_DATA: visible=%d used=%d mask=%s\n",
 		    session->gpsdata.satellites_visible,

@@ -100,8 +100,8 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	nsec			= getbeul(buf, 11);
 
 	/*@ -unrecog */
-	session->gpsdata.fix.time = session->gpsdata.sentence_time =
-	  (double)timegm(&unpacked_date)+nsec * 1e-9;
+	session->gpsdata.fix.time =
+	    (double)timegm(&unpacked_date)+nsec * 1e-9;
 	/*@ +unrecog */
 	mask |= TIME_SET;
 	
@@ -184,6 +184,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    st++;
 	}
         /*@ +boolops @*/
+    session->gpsdata.skyview_time = session->gpsdata.fix.time;
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 
@@ -275,7 +276,6 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    }
     }
 
-    // FIXME: Shhould dump satelluite info here
     gpsd_report(LOG_DATA, "SVINFO: mask=SATELLITE\n");
     return SATELLITE_SET;
 }

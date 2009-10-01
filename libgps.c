@@ -382,7 +382,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				   tag, timestamp, &gpsdata->satellites_visible);
 			    (void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			    if (timestamp[0] != '?') {
-				gpsdata->sentence_time = atof(timestamp);
 				gpsdata->set |= TIME_SET;
 			    }
 			    for (j = 0; j < gpsdata->satellites_visible; j++) {

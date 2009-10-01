@@ -126,13 +126,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 
-	    session->gpsdata.sentence_time = gpstime_to_unix((int)s1, f1) - f2;
 
 #ifdef NTPSHM_ENABLE
+	    d1 = gpstime_to_unix((int)s1, f1) - f2;
 	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.075);
+		(void)ntpshm_put(session,d1+0.075);
 #endif
-	    mask |= TIME_SET;
 	}
 	gpsd_report(LOG_INF, "GPS Time %f %d %f\n",f1,s1,f2);
 	break;
@@ -218,7 +217,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f1 = getbef(buf,12);			/* clock bias */
 	f2 = getbef(buf,16);			/* time-of-fix */
 	if (session->driver.tsip.gps_week) {
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f2) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
@@ -341,8 +340,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    = session->gpsdata.azimuth[i] = 0;
 		session->gpsdata.ss[i] = 0.0;
 	    }
-	    if (++i == session->gpsdata.satellites_visible)
+	    if (++i == session->gpsdata.satellites_visible) {
+		session->gpsdata.skyview_time = timestamp();
 		mask |= SATELLITE_SET;		/* last of the series */
+	    }
 	    if (i > session->gpsdata.satellites_visible)
 		session->gpsdata.satellites_visible = i;
 	}
@@ -450,7 +451,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	d1 = getbed(buf,24);			/* clock bias */
 	f1 = getbef(buf,32);			/* time-of-fix */
 	if (session->driver.tsip.gps_week) {
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f1) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
@@ -535,7 +536,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    session->driver.tsip.gps_week = s4;
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
 	    session->cycle_state |= CYCLE_START;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
@@ -560,7 +561,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s1, ul1 * 1e-3) - session->context->leap_seconds;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
@@ -610,11 +611,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)s2;
 	    session->context->valid |= LEAP_SECOND_VALID;
 
-	    session->gpsdata.fix.time =  session->gpsdata.sentence_time =
+	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s1, (double)ul1) - (double)s2;
 #ifdef NTPSHM_ENABLE
 	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.075);
+		(void)ntpshm_put(session,session->gpsdata.fix.time+0.075);
 #endif
 	    mask |= TIME_SET;
 	  }
