@@ -246,3 +246,5 @@ $GPGSV,3,2,09,06,39,195,46,09,40,115,46,14,48,286,47,25,09,307,36*71
 $GPGSV,3,3,09,30,67,295,50*49
 {"class":"SKY","tag":"GSV","time":1118785464.000,"xdop":3.00,"hdop":2.00,"pdop":3.60,"satellites":[{"PRN":1,"el":20,"az":319,"ss":41,"used":true},{"PRN":2,"el":18,"az":92,"ss":40,"used":true},{"PRN":4,"el":9,"az":49,"ss":36,"used":true},{"PRN":5,"el":60,"az":46,"ss":48,"used":true},{"PRN":6,"el":39,"az":195,"ss":46,"used":true},{"PRN":9,"el":40,"az":115,"ss":46,"used":true},{"PRN":14,"el":48,"az":286,"ss":47,"used":true},{"PRN":25,"el":9,"az":307,"ss":36,"used":true},{"PRN":30,"el":67,"az":295,"ss":50,"used":true}]}
 $GPGLL,4023.9621,N,00339.1630,W,214424,V,S*51
+{"class":"TPV","tag":"GLL","time":1118785464.000,"ept":0.005,"lat":40.399368333,"lon":-3.652716667,"alt":695.700,"epv":69.000,"climb":0.000,"mode":3}
+$GPBOD,,T,,M,,*
