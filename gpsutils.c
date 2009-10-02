@@ -35,6 +35,7 @@ void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
     fixp->epc = NAN;
 }
 
+#ifdef __UNUSED__
 unsigned int gps_valid_fields(/*@in@*/struct gps_fix_t *fixp)
 {
     unsigned int valid = 0;
@@ -102,6 +103,7 @@ char *gps_show_transfer(int transfer)
     return showbuf;
 /*@ +statictrans @*/
 }
+#endif /* __UNUSED__ */
 
 void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 		   gps_mask_t transfer,
