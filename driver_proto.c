@@ -125,7 +125,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * the fields it potentially set and the transfer mask. Doing this
      * makes it relatively easy to track down data-management problems.
      */
-    gpsd_report(LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=.2%f alt=.2%f mode=%d status=%d mask=%s\n",
+    gpsd_report(LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,

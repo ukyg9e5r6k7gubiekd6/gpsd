@@ -118,7 +118,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 
     mask |= MODE_SET | STATUS_SET | USED_SET ;
     gpsd_report(LOG_DATA, 
-		"NAVSOL: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
+		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -148,8 +148,8 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.dop.tdop = (double)(getleuw(buf, 8)/100.0);
     session->gpsdata.dop.vdop = (double)(getleuw(buf, 10)/100.0);
     session->gpsdata.dop.hdop = (double)(getleuw(buf, 12)/100.0);
-    gpsd_report(LOG_DATA, "NAVDOP: gdop=%.2f pdop=.2%f "
-		"hdop=.2%f vdop=.2%f tdop=.2%f mask={DOP}\n",
+    gpsd_report(LOG_DATA, "NAVDOP: gdop=%.2f pdop=%.2f "
+		"hdop=%.2f vdop=%.2f tdop=%.2f mask={DOP}\n",
 		session->gpsdata.dop.gdop,
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,

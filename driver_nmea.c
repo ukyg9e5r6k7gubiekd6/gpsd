@@ -187,7 +187,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
     }
 
     gpsd_report(LOG_DATA, 
-		"RMC: time=%.2f, lat=%.2f lon=.2%f "
+		"RMC: time=%.2f, lat=%.2f lon=%.2f "
 		"speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
@@ -271,7 +271,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
     }
 
     gpsd_report(LOG_DATA, 
-		"GLL: time=%.2f lat=%.2f lon=.2%f mode=%d status=%d mask=%s\n",
+		"GLL: time=%.2f lat=%.2f lon=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -351,7 +351,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	}
     }
     gpsd_report(LOG_DATA, 
-		"GGA: time=%.2f lat=%.2f lon=.2%f alt=.2%f mode=%d status=%d mask=%s\n",
+		"GGA: time=%.2f lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -417,7 +417,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	mask |= DOP_SET | USED_SET;
 	/* FIXME: perhaps dump the satellite vector here? */
 	gpsd_report(LOG_DATA, 
-		    "GPGSA: mode=%d used=%d pdop=.2%f hdop=.2%f vdop=.2%f mask=%s\n",
+		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f mask=%s\n",
 		    session->gpsdata.fix.mode,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.dop.pdop,
@@ -784,7 +784,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
-	    gpsd_report(LOG_DATA, "PASHR,POS: time=%.2f lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+	    gpsd_report(LOG_DATA, "PASHR,POS: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
 			session->gpsdata.fix.time,
 			session->gpsdata.fix.latitude,
 			session->gpsdata.fix.longitude,

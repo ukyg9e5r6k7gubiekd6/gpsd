@@ -465,7 +465,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
     session->gpsdata.dop.hdop = (double)getub(buf, 20)/5.0;
     mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_SET;
     gpsd_report(LOG_DATA, 
-		"MND 0x02: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
+		"MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -619,7 +619,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	    mask |= ALTITUDE_SET | CLIMB_SET;
     }
     gpsd_report(LOG_DATA, 
-		"GND 0x29: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f mode=%d status=%d mask=%s\n",
+		"GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -721,7 +721,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
     session->gpsdata.dop.vdop = (int)getub(buf, 37) / 5.0;
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
-    gpsd_report(LOG_DATA, "EMD 0x62: time=%.2f lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+    gpsd_report(LOG_DATA, "EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,

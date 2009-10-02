@@ -478,7 +478,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 
 	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
 	gpsd_report(LOG_DATA,
-		    "PVT_DATA: time=%.2f, lat=%.2f lon=.2%f "
+		    "PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		    "speed=%.2f track=%.2f climb=%.2f "
 		    "epx=%.2f epy=%.2f epv=%.2f "
 		    "mode=%d status=%d mask=%s\n",

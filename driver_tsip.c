@@ -562,8 +562,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->cycle_state |= CYCLE_START;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    gpsd_report(LOG_DATA, 
-		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=.2%f alt=.2%f "
-		"speed=%.2f track=.2%f climb=.2%f "
+		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
@@ -629,8 +629,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->cycle_state |= CYCLE_START;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET; 
 	    gpsd_report(LOG_DATA, 
-		"SP-CSP 0x23: time=%.2f lat=%.2f lon=.2%f alt=.2%f "
-		"speed=%.2f track=.2%f climb=.2%f "
+		"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,

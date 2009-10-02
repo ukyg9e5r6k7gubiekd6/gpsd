@@ -224,7 +224,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->cycle_state |= CYCLE_START;
     mask = TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
     gpsd_report(LOG_DATA, 
-		"1000: time=%.2f lat=%.2f lon=.2%f alt=.2%f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
+		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -322,8 +322,8 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	}
     }
     session->gpsdata.skyview_time = NAN;
-    gpsd_report(LOG_DATA, "NAVDOP: visible=%d gdop=%.2f pdop=.2%f "
-		"hdop=.2%f vdop=.2%f tdop=.2%f mask={SATELLITE|DOP}\n",
+    gpsd_report(LOG_DATA, "NAVDOP: visible=%d gdop=%.2f pdop=%.2f "
+		"hdop=%.2f vdop=%.2f tdop=%.2f mask={SATELLITE|DOP}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.dop.gdop,
 		session->gpsdata.dop.hdop,

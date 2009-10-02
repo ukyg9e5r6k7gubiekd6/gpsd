@@ -520,10 +520,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
 	| TIMERR_SET | DOP_SET;
-    gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=.2%f alt=%.f "
+    gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
 		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
 		"epx=%.2f epy=%.2f epv=%.2f "
-		"gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f "
+		"gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f "
 		"mask={LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
 		"USED|HERR|VERR|TIMERR|DOP}\n",
 		session->gpsdata.fix.time,

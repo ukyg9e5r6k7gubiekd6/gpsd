@@ -211,7 +211,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		       "%3.2f", version);
 	    mask |= DEVICEID_SET;
 	}
-	gpsd_report(LOG_DATA, "NDO 0x02: time=%.2f, lat=%.2f lon=.2%f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s' mask=%s\n",
+	gpsd_report(LOG_DATA, "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s' mask=%s\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
@@ -254,7 +254,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	}
 	/* that's all the information in this packet */
 	mask = TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
-	gpsd_report(LOG_DATA, "DDO 0x04: gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mode=%d, status=%d mask={TIME| DOP|MODE|STATUS}\n", 
+	gpsd_report(LOG_DATA, "DDO 0x04: gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mode=%d, status=%d mask={TIME| DOP|MODE|STATUS}\n", 
 		    session->gpsdata.dop.gdop,
 		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,

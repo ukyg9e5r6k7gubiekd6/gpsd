@@ -413,7 +413,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         mask |= CLIMB_SET;
     } while (0);
 
-    gpsd_report(LOG_DATA, "GTXT: time=%.2f, lat=%.2f lon=.2%f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",
+    gpsd_report(LOG_DATA, "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,

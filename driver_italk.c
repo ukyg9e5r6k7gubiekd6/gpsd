@@ -100,7 +100,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	    session->gpsdata.status = STATUS_FIX;
     }
 
-    gpsd_report(LOG_DATA, "NAV_FIX: time=%.2f, lat=%.2f lon=.2%f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f mask=%s\n",
+    gpsd_report(LOG_DATA, "NAV_FIX: time=%.2f, lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
