@@ -208,11 +208,11 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 		st++;
     }
     /* if the satellite-info setence gives you UTC time, use it */
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = NaN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
     gpsd_report(LOG_DATA, 
-		"SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
+		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible, 
 		session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;

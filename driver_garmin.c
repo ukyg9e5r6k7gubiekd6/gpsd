@@ -555,7 +555,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    j++;
 
 	}
-	session->gpsdata.skyview_time = timestamp();
+	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_SET;
 	gpsd_report(LOG_DATA,
 		    "SAT_DATA: visible=%d used=%d mask=%s\n",

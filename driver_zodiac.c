@@ -248,8 +248,8 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
-    /* gps_week                   = getzword(10); */
-    /* gps_seconds                = getzlong(11); */
+    int gps_week                   = getzword(10);
+    int gps_seconds                = getzlong(11);
     /* gps_nanoseconds            = getzlong(13); */
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	/*@ -type @*/
@@ -274,9 +274,9 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = gpstime_to_unix(gps_week, gps_seconds);
     gpsd_report(LOG_DATA, 
-		"1002: visible=%d used=%d mask=SATELLITE|USED\n",
+		"1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible, 
 		session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
@@ -321,9 +321,9 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	    session->gpsdata.elevation[i] = 0;
 	}
     }
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = NAN;
     gpsd_report(LOG_DATA, "NAVDOP: visible=%d gdop=%.2f pdop=.2%f "
-		"hdop=.2%f vdop=.2%f tdop=.2%f mask=SATELLITE|DOP\n",
+		"hdop=.2%f vdop=.2%f tdop=.2%f mask={SATELLITE|DOP}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.dop.gdop,
 		session->gpsdata.dop.hdop,
@@ -378,7 +378,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
     getstringz(session->subtype,
 	      session->packet.outbuffer,
 	      19, 28);	/* software version field */
-    gpsd_report(LOG_DATA, "1011: subtype=%s mask=DEVICEID\n", session->subtype);
+    gpsd_report(LOG_DATA, "1011: subtype=%s mask={DEVICEID}\n", session->subtype);
     return DEVICEID_SET;
 }
 

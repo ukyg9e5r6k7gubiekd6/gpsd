@@ -524,8 +524,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
 		"epx=%.2f epy=%.2f epv=%.2f "
 		"gdop=.2%f pdop=.2%f hdop=.2%f vdop=.2%f tdop=.2%f "
-		"mask=LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
-		"USED|HERR|VERR|TIMERR|DOP\n",
+		"mask={LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
+		"USED|HERR|VERR|TIMERR|DOP}\n",
 		session->gpsdata.fix.time,
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
@@ -791,7 +791,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     }
 
     gpsd_report(LOG_DATA, 
-	       "CS 0x86: visible=%d, used=%d, mask=SATELLITE|STATUS\n",
+	       "CS 0x86: visible=%d, used=%d, mask={SATELLITE|STATUS}\n",
 	       session->gpsdata.satellites_visible, session->gpsdata.satellites_used);
     return SATELLITE_SET | STATUS_SET;
 }
@@ -1081,7 +1081,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 		osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 		osc_filter_drift_est, time_slew);
     gpsd_report(LOG_DATA,
-		"CDO 0xef: time=%.2f mask=TIME\n", session->gpsdata.fix.time);
+		"CDO 0xef: time=%.2f mask={TIME}\n", session->gpsdata.fix.time);
     return 0;
 }
 

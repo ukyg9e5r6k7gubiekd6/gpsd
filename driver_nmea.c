@@ -508,7 +508,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     gpsd_zero_satellites(&session->gpsdata);
     return ERROR_SET;
   sane:
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = NAN;
     gpsd_report(LOG_DATA, "GSV: Satellite data OK (%d of %d).\n", 
 		session->driver.nmea.part, session->driver.nmea.await);
     // FIXME: Dump satellite state at LOG_DATA level on final sentence
@@ -745,12 +745,12 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
 static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t *session)
 {
     gps_mask_t mask;
-    mask = ONLINE_SET;
+    mask = 0;
 
     if (0 == strcmp("RID", field[1])){ /* Receiver ID */
 	(void)snprintf(session->subtype, sizeof(session->subtype)-1,
 		       "%s ver %s", field[2], field[3]);
-	gpsd_report(LOG_DATA, "PASHR,RID: subtype=%s mask=ONLINE\n",
+	gpsd_report(LOG_DATA, "PASHR,RID: subtype=%s mask={}\n",
 		    session->subtype);
 	return mask;
     } else if (0 == strcmp("POS", field[1])){ /* 3D Position */
@@ -816,7 +816,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
 		    session->gpsdata.satellites_used, 
 		    gpsd_maskdump(mask));
-	session->gpsdata.skyview_time = timestamp();
+	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_SET;
     }
     return mask;

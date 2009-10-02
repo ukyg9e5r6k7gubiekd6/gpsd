@@ -276,7 +276,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    }
     }
 
-    gpsd_report(LOG_DATA, "SVINFO: mask=SATELLITE\n");
+    gpsd_report(LOG_DATA, "SVINFO: mask={SATELLITE}\n");
     return SATELLITE_SET;
 }
 

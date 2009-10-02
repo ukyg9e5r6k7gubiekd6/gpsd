@@ -314,7 +314,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
-    gpsd_report(LOG_DATA, "FV 0x06: subtype='%s' mask=DEVEICEID\n", 
+    gpsd_report(LOG_DATA, "FV 0x06: subtype='%s' mask={DEVEICEID}\n", 
 	session->subtype);
     return DEVICEID_SET;
 }
@@ -407,7 +407,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    (void)ntpshm_put(session,session->gpsdata.skyview_time+0.8);
     }
 #endif /* NTPSHM_ENABLE */
-    gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask=SATELLITE\n",
+    gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask={SATELLITE}\n",
 	session->gpsdata.satellites_visible);
     return SATELLITE_SET;
 }

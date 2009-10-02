@@ -299,11 +299,11 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	if(session->gpsdata.PRN[i])
 	    st++;
     }
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = NAN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
     gpsd_report(LOG_DATA, 
-	       "SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
+	       "SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 	       session->gpsdata.satellites_visible, 
 		session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;
@@ -332,7 +332,7 @@ superstar2_msg_version(struct gps_device_t *session,
 	"hw part %s boot sw %s main sw %s ser num %s\n",
 	hw_part, boot_sw, main_sw, ser_num);
     (void)strlcpy(session->subtype, main_sw, sizeof(session->subtype));
-    gpsd_report(LOG_DATA, "VERSION: subtype='%s' mask=DEVEICEID\n", 
+    gpsd_report(LOG_DATA, "VERSION: subtype='%s' mask={DEVEICEID}\n", 
 	session->subtype);
     return DEVICEID_SET;
 }
@@ -371,7 +371,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
 	session->context->leap_seconds = (int)getsb(buf,20);
 	mask = TIME_SET;
     }
-    gpsd_report(LOG_DATA, "TIMING: time=%.2f mask=TIME\n", 
+    gpsd_report(LOG_DATA, "TIMING: time=%.2f mask={TIME}\n", 
 		session->gpsdata.fix.time);
     return mask;
 }

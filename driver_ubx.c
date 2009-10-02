@@ -149,7 +149,7 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.dop.vdop = (double)(getleuw(buf, 10)/100.0);
     session->gpsdata.dop.hdop = (double)(getleuw(buf, 12)/100.0);
     gpsd_report(LOG_DATA, "NAVDOP: gdop=%.2f pdop=.2%f "
-		"hdop=.2%f vdop=.2%f tdop=.2%f mask=DOP\n",
+		"hdop=.2%f vdop=.2%f tdop=.2%f mask={DOP}\n",
 		session->gpsdata.dop.gdop,
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
@@ -182,7 +182,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
     t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.fix.time = t;
 
-    gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask=TIME\n",
+    gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->gpsdata.fix.time);
     return TIME_SET;
 }
@@ -202,7 +202,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 #if 0
     // Alas, this sentence doesn't supply GPS week
     tow = getleul(buf, 0);
-    session->gpsdata.skyview_time = gpstime_to_unix(gps_week,week, tow) 
+    session->gpsdata.skyview_time = gpstime_to_unix(gps_week, tow) 
 	- session->context->leap_seconds;
 #endif
     /*@ +charint @*/
@@ -231,11 +231,11 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ +predboolothers */
 	j++;
     }
-    session->gpsdata.skyview_time = timestamp();
+    session->gpsdata.skyview_time = NAN;
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
     gpsd_report(LOG_DATA, 
-	       "SVINFO: visible=%d used=%d mask=SATELLITE|USED\n",
+	       "SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 	       session->gpsdata.satellites_visible, 
 	       session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_SET;

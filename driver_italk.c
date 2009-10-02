@@ -162,7 +162,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	mask = USED_SET | SATELLITE_SET;;
 
 	gpsd_report(LOG_DATA,
-		    "PRN_STATUS: time=%.2f visible=%d used=%d mask=USED|SATELLITE\n",
+		    "PRN_STATUS: time=%.2f visible=%d used=%d mask={USED|SATELLITE}\n",
 		    session->gpsdata.fix.time,
 		    session->gpsdata.satellites_visible,
 		    session->gpsdata.satellites_used);
@@ -198,7 +198,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     session->gpsdata.fix.time = t;
 
     gpsd_report(LOG_DATA,
-		"UTC_IONO_MODEL: time=%.2f mask=TIME\n",
+		"UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
 		session->gpsdata.fix.time);
     return TIME_SET;
 }
