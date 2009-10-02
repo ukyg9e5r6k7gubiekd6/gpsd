@@ -47,8 +47,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->gpsdata.fix.mode = MODE_NO_FIX;
-    session->cycle_state |= CYCLE_START;
-    mask =  ONLINE_SET | MODE_SET | STATUS_SET;
+    mask =  ONLINE_SET | MODE_SET | STATUS_SET | CLEAR_SET;
 
     /* just bail out if this fix is not marked valid */
     if (0 != (pflags & FIX_FLAG_MASK_INVALID) || 0 == (flags & FIXINFO_FLAG_VALID))
@@ -258,20 +257,16 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 	type, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
 
     session->cycle_end_reliable = true;
-    if (type == ITALK_NAV_FIX)
-	session->cycle_state |= CYCLE_START;
-    else if (type == ITALK_PRN_STATUS)
-	session->cycle_state |= CYCLE_END;
 
     switch (type)
     {
     case ITALK_NAV_FIX:
 	gpsd_report(LOG_IO, "iTalk NAV_FIX len %zu\n", len);
-	mask = decode_itk_navfix(session, buf, len);
+	mask = CLEAR_SET | decode_itk_navfix(session, buf, len);
 	break;
     case ITALK_PRN_STATUS:
 	gpsd_report(LOG_IO, "iTalk PRN_STATUS len %zu\n", len);
-	mask = decode_itk_prnstatus(session, buf, len);
+	mask = REPORT_SET | decode_itk_prnstatus(session, buf, len);
 	break;
     case ITALK_UTC_IONO_MODEL:
 	gpsd_report(LOG_IO, "iTalk UTC_IONO_MODEL len %zu\n", len);

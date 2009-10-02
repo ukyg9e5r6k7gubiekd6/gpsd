@@ -790,14 +790,12 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     /* could change if the set of messages we enable does */
     session->cycle_end_reliable = true;
-    if (buf[0] == (unsigned char)0x02 || buf[0] == (unsigned char)0x62)
-	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
 	if ((session->driver.sirf.driverstate & UBLOX)==0)
-	    return sirf_msg_navsol(session, buf, len);
+	    return sirf_msg_navsol(session, buf, len) | (CLEAR_SET | REPORT_SET);
 	else {
 	    gpsd_report(LOG_PROG, "MND 0x02 skipped, uBlox flag is on.\n");
 	    return 0;
@@ -936,7 +934,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x62:		/* uBlox Extended Measured Navigation Data */
 	gpsd_report(LOG_PROG, "uBlox EMND 0x62: %s.\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
-	return sirf_msg_ublox(session, buf, len);
+	return sirf_msg_ublox(session, buf, len) | (CLEAR_SET | REPORT_SET);
 
     case 0x80:		/* Initialize Data Source */
 	gpsd_report(LOG_PROG, "INIT 0x80: %s\n",

@@ -288,7 +288,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);  
 
     /* only one message, set cycle start */
-    session->cycle_end_reliable = true | CYCLE_START | CYCLE_END;
+    session->cycle_end_reliable = true;
     do {
         unsigned int result;
         char *buf = (char *)session->packet.outbuffer+1;
@@ -321,7 +321,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     /* assume that possition is unknown; if the position is known we will fix status information later */
     session->gpsdata.fix.mode = MODE_NO_FIX;
     session->gpsdata.status = STATUS_NO_FIX;
-    mask |= MODE_SET | STATUS_SET;
+    mask |= MODE_SET | STATUS_SET | CLEAR_SET | REPORT_SET;
 
     /* process position */
 

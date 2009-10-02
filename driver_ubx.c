@@ -332,6 +332,8 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
     if (len < 6)    /* the packet at least contains a head of six bytes */
 	return 0;
 
+    session->cycle_end_reliable = true;
+	    
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
     data_len = (size_t)getlesw(buf, 4);
@@ -352,7 +354,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    break;
 	case UBX_NAV_SOL:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
-	    mask = ubx_msg_nav_sol(session, &buf[6], data_len);
+	    mask = ubx_msg_nav_sol(session, &buf[6], data_len) | (CLEAR_SET | REPORT_SET);
 	    break;
 	case UBX_NAV_POSUTM:
 	    gpsd_report(LOG_IO, "UBX_NAV_POSUTM\n");
@@ -489,11 +491,6 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	   "0x%04hx", msgid);
 
-    /* could change if the set of messages we enable does */
-    session->cycle_end_reliable = true;
-    if (msgid == 0x0106)
-	session->cycle_state |= CYCLE_START | CYCLE_END;
-	    
     return mask | ONLINE_SET;
 }
 /*@ -charint @*/

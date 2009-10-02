@@ -1108,15 +1108,7 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "0x%02x",cmd_id);
 
-    /*
-     * Only one message, at start of cycle, sends actual fix data, so
-     * we can treat it as end-of-cycle too. For correctness, and in case
-     * the reports ever merge data from other sentences, we should
-     * find out what the actual cycle-ender is.
-     */
     session->cycle_end_reliable = true;
-    if (cmd_id == 0xb1)
-	session->cycle_state |= CYCLE_START | CYCLE_END;
 
     switch (cmd_id)
     {
@@ -1135,7 +1127,7 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
     case 0xb0:
 	return handle_0xb0(session);
     case 0xb1:
-	return handle_0xb1(session);
+	return handle_0xb1(session) | (CLEAR_SET | REPORT_SET);
     case 0xb5:
 	return handle_0xb5(session);
     case 0xd3:

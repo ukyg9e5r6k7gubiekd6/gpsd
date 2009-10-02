@@ -488,15 +488,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     (void)snprintf(session->gpsdata.tag,
 	sizeof(session->gpsdata.tag), "SS2-%d", type);
 
-    /*
-     * Only one message sends actual fix data, so we can treat it as
-     * both start-of-cycle and end-of-cycle. For correctness, and in
-     * case the reports ever merge data from other sentences, we
-     * should find out what the actual cycle-ender is.
-     */
     session->cycle_end_reliable = true;
-    if (type == SUPERSTAR2_NAVSOL_LLA)
-	session->cycle_state |= CYCLE_START | CYCLE_END;
 
     switch (type)
     {
@@ -505,7 +497,7 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
     case SUPERSTAR2_SVINFO: /* Satellite Visibility Data */
 	return superstar2_msg_svinfo(session, buf, len);
     case SUPERSTAR2_NAVSOL_LLA: /* Navigation Data */
-	return superstar2_msg_navsol_lla(session, buf, len);
+	return superstar2_msg_navsol_lla(session, buf, len) | (CLEAR_SET | REPORT_SET);
 #ifdef __UNUSED__
     case SUPERSTAR2_NAVSOL_ECEF: /* Navigation Data */
 	return superstar2_msg_navsol_ecef(session, buf, len);

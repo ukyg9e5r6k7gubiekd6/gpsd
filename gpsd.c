@@ -2252,7 +2252,7 @@ int main(int argc, char *argv[])
 			 channel < channels + NITEMS(channels);
 			 channel++) {
 			if (channel->device == device) {
-			    if ((channel->device->cycle_state & CYCLE_START)!=0)
+			    if ((changed & CLEAR_SET)!=0)
 				gps_clear_fix(&channel->fixbuffer);
 			    /* don't downgrade mode if holding previous fix */
 			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)
@@ -2296,7 +2296,7 @@ int main(int argc, char *argv[])
 			     * Driver returns reliable end of cycle, 
 			     * report only when that is signaled.
 			     */
-			    if ((device->cycle_state & CYCLE_END)!=0)
+			    if ((changed & REPORT_SET)!=0)
 				report_fix = true;
 			} else if (changed & (LATLON_SET | MODE_SET))
 			    /*

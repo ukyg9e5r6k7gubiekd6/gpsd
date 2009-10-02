@@ -221,7 +221,6 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     gpsd_report(LOG_INF, "Separation: %f\n", getzword(33) * 1e-2);
 #endif
 
-    session->cycle_state |= CYCLE_START;
     mask = TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
     gpsd_report(LOG_DATA, 
 		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
@@ -243,14 +242,16 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 {
     int i, j, status, prn;
 
-    session->gpsdata.satellites_used = 0;
-    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
+    /*@+charint@*/
     int gps_week                   = getzword(10);
     int gps_seconds                = getzlong(11);
     /* gps_nanoseconds            = getzlong(13); */
+    /*@-charint@*/
+    session->gpsdata.satellites_used = 0;
+    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	/*@ -type @*/
 	session->driver.zodiac.Zv[i] = status = (int)getzword(15 + (3 * i));
@@ -274,7 +275,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    session->gpsdata.skyview_time = gpstime_to_unix(gps_week, gps_seconds);
+    session->gpsdata.skyview_time = gpstime_to_unix(gps_week, (double)gps_seconds);
     gpsd_report(LOG_DATA, 
 		"1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible, 
@@ -438,16 +439,14 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     /* 
      * Normal cycle for these devices is 1001 1002.
-     * We cound 1001 as end of cycle because 1002 doesn't
+     * We count 1001 as end of cycle because 1002 doesn't
      * carry fix information.
      */
     session->cycle_end_reliable = true;
-    if (id == 1000)
-	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch (id) {
     case 1000:
-	return handle1000(session);
+	return handle1000(session) | (CLEAR_SET | REPORT_SET);
     case 1002:
 	return handle1002(session);
     case 1003:

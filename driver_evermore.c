@@ -175,15 +175,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "EID%u", type);
 
-    /*
-     * Only one message sends actual fix data, so we can treat it as
-     * both start-of-cycle and end-of-cycle. For correctness, and in
-     * case the reports ever merge data from other sentences, we
-     * should find out what the actual cycle-ender is.
-     */
     session->cycle_end_reliable = true;
-    if (type == 0x02)
-	session->cycle_state |= CYCLE_START | CYCLE_END;
 
     switch (type)
     {
@@ -222,7 +214,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    session->gpsdata.fix.mode,
 		    session->gpsdata.dev.subtype,
 		    gpsd_maskdump(mask));
-	return mask;
+	return mask | CLEAR_SET | REPORT_SET;
 
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.fix.time =

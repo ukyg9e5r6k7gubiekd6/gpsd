@@ -754,8 +754,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 		    session->subtype);
 	return mask;
     } else if (0 == strcmp("POS", field[1])){ /* 3D Position */
-	session->cycle_state |= CYCLE_START;
-	mask |= MODE_SET | STATUS_SET;
+	mask |= MODE_SET | STATUS_SET | CLEAR_SET;
 	if (0 == strlen(field[2])){
 	    /* empty first field means no 3D fix is available */
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -998,7 +997,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 		    session->driver.nmea.field[0], session->driver.nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL(session->driver.nmea.this_frac_time, session->driver.nmea.last_frac_time)) {
 	    uint lasttag = session->driver.nmea.lasttag;
-	    session->cycle_state |= CYCLE_START;
+	    retval |= CLEAR_SET;
 	    gpsd_report(LOG_PROG, 
 			"%s starts a reporting cycle.\n", 
 			session->driver.nmea.field[0]);
@@ -1018,7 +1017,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	    gpsd_report(LOG_PROG, 
 			"%s ends a reporting cycle.\n", 
 			session->driver.nmea.field[0]);
-	    session->cycle_state = CYCLE_END;
+	    retval |= REPORT_SET;
 	}
 	session->driver.nmea.lasttag = thistag;
     }

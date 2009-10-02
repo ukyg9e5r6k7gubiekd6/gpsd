@@ -113,12 +113,11 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.status = GET_FIX_STATUS();
 
     /*
-     * Set cycle_state to the value cycle_start to clue the daemon
-     * in about when to clear fix information.  Set it to cycle_end
-     * when the sentence is reliably the last in a reporting cycle.
+     * Mix in CLEAE_SET to clue the daemon in about when to clear fix
+     * information.  Mix in REPORT_SET when the sentence is reliably
+     * the last in a reporting cycle.
      */
-    session->cycle_state = STATE;
-    mask |= MODE_SET | STATUS_SET;
+    mask |= MODE_SET | STATUS_SET | REPORT_SET;
 
     /* 
      * At the end of each packet-cracking function, report at LOG_DATA level
@@ -225,7 +224,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     size_t i;
-    int type, used, visible;
+    int type, used, visible, retmask = 0;
 
     if (len == 0)
 	return 0;
@@ -237,9 +236,9 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
      */
     session->cycle_end_reliable = true;
     if (msgid == MY_START_OF_CYCLE)
-	session->cycle_state |= CYCLE_START;
+	retmask |= CLEAR_SET;
     else if (msgid == MY_END_OF_CYCLE)
-	session->cycle_state |= CYCLE_END;
+	retmask |= REPORT_SET;
 
     type = GET_MESSAGE_TYPE();
 

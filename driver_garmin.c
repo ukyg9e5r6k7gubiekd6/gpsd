@@ -297,8 +297,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
     gpsd_report(LOG_IO, "PrintSERPacket(, %#02x, %#02x, )\n", pkt_id, pkt_len);
 
     session->cycle_end_reliable = true;
-    if ((int)pkt_id == GARMIN_PKTID_PVT_DATA)
-	session->cycle_state |= (CYCLE_START | CYCLE_END);
 
     switch( pkt_id ) {
     case ACK:
@@ -476,7 +474,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->leap_sec
 	    , pvt->grmn_days);
 
-	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
+	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET | CLEAR_SET | REPORT_SET;
 	gpsd_report(LOG_DATA,
 		    "PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		    "speed=%.2f track=%.2f climb=%.2f "
