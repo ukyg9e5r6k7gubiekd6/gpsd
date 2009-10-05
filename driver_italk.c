@@ -262,11 +262,11 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
     {
     case ITALK_NAV_FIX:
 	gpsd_report(LOG_IO, "iTalk NAV_FIX len %zu\n", len);
-	mask = CLEAR_SET | decode_itk_navfix(session, buf, len);
+	mask = decode_itk_navfix(session, buf, len) | (CLEAR_SET|REPORT_SET);
 	break;
     case ITALK_PRN_STATUS:
 	gpsd_report(LOG_IO, "iTalk PRN_STATUS len %zu\n", len);
-	mask = REPORT_SET | decode_itk_prnstatus(session, buf, len);
+	mask = decode_itk_prnstatus(session, buf, len);
 	break;
     case ITALK_UTC_IONO_MODEL:
 	gpsd_report(LOG_IO, "iTalk UTC_IONO_MODEL len %zu\n", len);
