@@ -146,7 +146,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
      */
     gps_mask_t mask = 0;
 
-    if (count > 9) {
+    if (count > 9 && field[1]!='\0' && field[9]!='\0') {
 	merge_hhmmss(field[1], session);
 	merge_ddmmyy(field[9], session);
 	mask |= TIME_SET;
@@ -238,17 +238,19 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
     char *status = field[7];
     gps_mask_t mask = ERROR_SET;
 
-    merge_hhmmss(field[5], session);
-    register_fractional_time(field[5], session);
-    if (session->driver.nmea.date.tm_year == 0)
-	gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
-    else {
-	mask = TIME_SET;
+    if (field[5][0]!='\0') {
+	merge_hhmmss(field[5], session);
+	register_fractional_time(field[5], session);
+	if (session->driver.nmea.date.tm_year == 0)
+	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
+	else {
+	    mask = TIME_SET;
+	}
     }
     if (strcmp(field[6], "A")==0 && (count < 8 || *status != 'N')) {
 	int newstatus = session->gpsdata.status;
 
-	mask = 0;
+	mask &=~ ERROR_SET;
 	do_lat_lon(&field[1], &session->gpsdata);
 	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
@@ -609,21 +611,33 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
       5) Local zone description, 00 to +- 13 hours
       6) Local zone minutes description, apply same sign as local hours
       7) Checksum
+
+      Note: some devices, like the uBlox ANTARIS 4h, are known to ship ZDAs
+      with some fields blank under poorly-understood circumstances (probably
+      when they don't have satellite lock yet). 
      */
-    merge_hhmmss(field[1], session);
-    /*
-     * We don't register fractional time here becaause want to leave
-     * ZDA out of end-of-cycle detection. Some devices sensibly emit it only
-     * when they have a fix, so watching for it can make them look
-     * like they have a variable fix reporting cycle.
-     */
-    session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
-    session->driver.nmea.date.tm_mon = atoi(field[3])-1;
-    session->driver.nmea.date.tm_mday = atoi(field[2]);
+    gps_mask_t mask;
+
+    if (field[1][0]=='\0' &&field[2][0]=='\0' && field[3][0]=='\0' && field[4][0]=='\0') {
+	gpsd_report(LOG_WARN, "malformed ZDA\n");
+	mask = ERROR_SET;
+    } else {
+	merge_hhmmss(field[1], session);
+	/*
+	 * We don't register fractional time here because want to leave
+	 * ZDA out of end-of-cycle detection. Some devices sensibly emit it only
+	 * when they have a fix, so watching for it can make them look
+	 * like they have a variable fix reporting cycle.
+	 */
+	session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
+	session->driver.nmea.date.tm_mon = atoi(field[3])-1;
+	session->driver.nmea.date.tm_mday = atoi(field[2]);
+	mask = TIME_SET;
+    };
     gpsd_report(LOG_DATA, "ZDA: time=%.2f mask=%s\n",
 		session->gpsdata.fix.time,
-		gpsd_maskdump(TIME_SET));
-    return TIME_SET;
+		gpsd_maskdump(mask));
+    return mask;
 }
 
 #ifdef TNT_ENABLE
