@@ -8,7 +8,7 @@
  */
 #include "libgpsmm.h"
 
-gpsmm::gpsmm() : gps_data(0) { }
+gpsmm::gpsmm() : gps_data(0) { gps_data = NULL; }
 
 struct gps_data_t* gpsmm::open(void) {
 	return open("127.0.0.1",DEFAULT_GPSD_PORT);
