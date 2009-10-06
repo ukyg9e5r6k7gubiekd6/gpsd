@@ -467,15 +467,19 @@ static bool have_fix(struct channel_t *channel)
 #undef VALIDATION_COMPLAINT
 }
 
+#define UNALLOCATED_FD	-1
+
 static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 {
-    int cfd;
-    for (cfd = 0; cfd < NITEMS(subscribers); cfd++) {
-	if (subscribers[cfd].fd <= 0 ) {
-	    gps_clear_fix(&channels[cfd].fixbuffer);
-	    gps_clear_fix(&channels[cfd].oldfix);
-	    subscribers[cfd].fd = cfd; /* mark subscriber as allocated */
-	    return &subscribers[cfd];
+    int si;
+
+    assert(UNALLOCATED_FD != 0);
+    for (si = 0; si < NITEMS(subscribers); si++) {
+	if (subscribers[si].fd == UNALLOCATED_FD) {
+	    gps_clear_fix(&channels[si].fixbuffer);
+	    gps_clear_fix(&channels[si].oldfix);
+	    subscribers[si].fd = 0;	/* mark subscriber as allocated */
+	    return &subscribers[si];
 	}
     }
     return NULL;
@@ -485,7 +489,7 @@ static void detach_client(struct subscriber_t *sub)
 {
     char *c_ip;
     struct channel_t *channel; 
-    if (-1 == sub->fd)
+    if (sub->fd == UNALLOCATED_FD)
 	return;
     c_ip = sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
@@ -511,7 +515,7 @@ static void detach_client(struct subscriber_t *sub)
 	    /*@i1@*/channel->subscriber = NULL;
 	    
 	}
-    sub->fd = -1;
+    sub->fd = UNALLOCATED_FD;
     /*@+mustfreeonly@*/
 }
 
@@ -712,15 +716,15 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
     /* search for an already-assigned device with matching type or device */
     channel = NULL;
     for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	if ((forcedev != NULL && chp->device == forcedev)
-	    ||
-	    (chp->subscriber == user 
+	if (((forcedev == NULL || chp->device == forcedev)
+	     && chp->subscriber == user 
 	     && chp->device != NULL 
 	     && allocation_filter(chp->device, type))) {
-	    gpsd_report(LOG_PROG, "client(%d): reusing channel %d (type %s)\n",
+	    gpsd_report(LOG_INF, "client(%d): reusing channel %d (type %s), forced device %s\n",
 			sub_index(user), 
 			(int)(chp-channels),
-			classmap[type].name);
+			classmap[type].name,
+			forcedev != NULL ? "true" : "false");
 	    channel = chp;
 	}
     /* if we didn't find one, allocate a new channel */
@@ -728,7 +732,7 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	    if (chp->subscriber == NULL) {
 		channel = chp;
-		gpsd_report(LOG_PROG, "client(%d): attaching channel %d (type %s)\n",
+		gpsd_report(LOG_INF, "client(%d): attaching channel %d (type %s)\n",
 			    sub_index(user), 
 			    (int)(chp-channels),
 			    classmap[type].name);
@@ -1963,6 +1967,8 @@ int main(int argc, char *argv[])
 	gps_clear_fix(&channel->fixbuffer);
 	gps_clear_fix(&channel->oldfix);
     }
+    for (i = 0; i < NITEMS(subscribers); i++)
+	subscribers[i].fd = UNALLOCATED_FD; 
 
     /* daemon got termination or interrupt signal */
     if ((st = setjmp(restartbuf)) > 0) {
