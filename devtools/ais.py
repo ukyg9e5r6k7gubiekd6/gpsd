@@ -292,7 +292,7 @@ type5 = (
     bitfield("day",           5, 'unsigned',    0, "ETA day"),
     bitfield("hour",          5, 'unsigned',   24, "ETA hour"),
     bitfield("minute",        6, 'unsigned',   60, "ETA minute"),
-    bitfield("second",        8, 'unsigned',    0, "Draught"),
+    bitfield("draught",       8, 'unsigned',    0, "Draught"),
     bitfield("destination", 120, 'string',   None, "Destination"),
     bitfield("dte",           1, 'unsigned', None, "DTE"),
     spare(1),
