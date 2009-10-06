@@ -552,11 +552,9 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 	    gpsd_report(LOG_RAW, "%f %f %f %f\n",
 			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
 	}
-	gpsd_report(LOG_INF, "HDOP: reported = %f, computed = %f\n",
-		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
 #endif /* __UNUSED__ */
     } else {
-	gpsd_report(LOG_INF,
+	gpsd_report(LOG_DATA,
 	    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
 	    gpsdata->dev.path);
 	return 0;
@@ -570,7 +568,7 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     tdop = sqrt(inv[3][3]);
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 
-    gpsd_report(LOG_PROG, "DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
+    gpsd_report(LOG_DATA, "DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
 		xdop, dop->xdop,
 		ydop, dop->ydop,
 		hdop, dop->hdop,
