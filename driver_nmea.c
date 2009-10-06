@@ -99,12 +99,16 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->driver.nmea.subseconds = atof(hhmmss+4) - session->driver.nmea.date.tm_sec;
 }
 
-static void register_fractional_time(const char *fld,
+static void register_fractional_time(const char *tag, const char *fld,
 				     struct gps_device_t *session)
 {
-    session->driver.nmea.last_frac_time = session->driver.nmea.this_frac_time;
-    session->driver.nmea.this_frac_time = atof(fld);
-    session->driver.nmea.latch_frac_time = true;
+    if (fld[0]!='\0') {
+	session->driver.nmea.last_frac_time=session->driver.nmea.this_frac_time;
+	session->driver.nmea.this_frac_time = atof(fld);
+	session->driver.nmea.latch_frac_time = true;
+	gpsd_report(LOG_DATA, "%s: registers fractional time %.2f\n", 
+		    tag, session->driver.nmea.this_frac_time);
+    }
 }
 
 /**************************************************************************
@@ -146,11 +150,11 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
      */
     gps_mask_t mask = 0;
 
-    if (count > 9 && field[1]!='\0' && field[9]!='\0') {
+    if (count > 9 && field[1][0]!='\0' && field[9][0]!='\0') {
 	merge_hhmmss(field[1], session);
 	merge_ddmmyy(field[9], session);
 	mask |= TIME_SET;
-	register_fractional_time(field[1], session);
+	register_fractional_time(field[0], field[1], session);
     }
     if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
@@ -187,9 +191,9 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
     }
 
     gpsd_report(LOG_DATA, 
-		"RMC: time=%.2f, lat=%.2f lon=%.2f "
+		"RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
 		"speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
+		field[9], field[1],
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
 		session->gpsdata.fix.speed,
@@ -240,9 +244,9 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 
     if (field[5][0]!='\0') {
 	merge_hhmmss(field[5], session);
-	register_fractional_time(field[5], session);
+	register_fractional_time(field[0], field[5], session);
 	if (session->driver.nmea.date.tm_year == 0)
-	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
+	    gpsd_report(LOG_WARN, "can't use GLL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
 	}
@@ -273,8 +277,8 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
     }
 
     gpsd_report(LOG_DATA, 
-		"GLL: time=%.2f lat=%.2f lon=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
+		"GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d mask=%s\n",
+		field[5],
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
 		session->gpsdata.fix.mode,
@@ -311,7 +315,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	char *altitude;
 
 	merge_hhmmss(field[1], session);
-	register_fractional_time(field[1], session);
+	register_fractional_time(field[0], field[1], session);
 	if (session->driver.nmea.date.tm_year == 0)
 	    gpsd_report(LOG_WARN, "can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
@@ -353,8 +357,8 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	}
     }
     gpsd_report(LOG_DATA, 
-		"GGA: time=%.2f lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
+		"GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
+		field[1],
 		session->gpsdata.fix.latitude,
 		session->gpsdata.fix.longitude,
 		session->gpsdata.fix.altitude,
@@ -578,7 +582,7 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[], struct gps_device_t 
      */
 
     /* register fractional time for end-of-cycle detection */
-    register_fractional_time(field[1], session);
+    register_fractional_time(field[0], field[1], session);
 
     /* check that we're associated with the current fix */
     if (session->driver.nmea.date.tm_hour == DD(field[1])
@@ -618,7 +622,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
      */
     gps_mask_t mask;
 
-    if (field[1][0]=='\0' &&field[2][0]=='\0' && field[3][0]=='\0' && field[4][0]=='\0') {
+    if (field[1][0]=='\0' || field[2][0]=='\0' || field[3][0]=='\0' || field[4][0]=='\0') {
 	gpsd_report(LOG_WARN, "malformed ZDA\n");
 	mask = ERROR_SET;
     } else {
@@ -634,8 +638,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
 	session->driver.nmea.date.tm_mday = atoi(field[2]);
 	mask = TIME_SET;
     };
-    gpsd_report(LOG_DATA, "ZDA: time=%.2f mask=%s\n",
-		session->gpsdata.fix.time,
+    gpsd_report(LOG_DATA, "ZDA: mask=%s\n",
 		gpsd_maskdump(mask));
     return mask;
 }
@@ -783,7 +786,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 
 	    session->gpsdata.satellites_used = atoi(field[3]);
 	    merge_hhmmss(field[4], session);
-	    register_fractional_time(field[4], session);
+	    register_fractional_time(field[0], field[4], session);
 	    do_lat_lon(&field[5], &session->gpsdata);
 	    session->gpsdata.fix.altitude = atof(field[9]);
 	    session->gpsdata.fix.track = atof(field[11]);
@@ -797,8 +800,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
-	    gpsd_report(LOG_DATA, "PASHR,POS: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
-			session->gpsdata.fix.time,
+	    gpsd_report(LOG_DATA, "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
+			field[4],
 			session->gpsdata.fix.latitude,
 			session->gpsdata.fix.longitude,
 			session->gpsdata.fix.altitude,
@@ -990,8 +993,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     /*@ +usedef @*/
 
     /* timestamp recording for fixes happens here */
-    if ((retval & TIME_SET)!=0)
+    if ((retval & TIME_SET)!=0) {
 	session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+	gpsd_report(LOG_DATA, "%s computed time is %2f\n", 
+		    session->driver.nmea.field[0],
+		    session->gpsdata.fix.time);
+    }
 
     /*
      * The end-of-cycle detector.  This code depends on just one
@@ -1007,7 +1014,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     if (session->driver.nmea.latch_frac_time)
     {
 	gpsd_report(LOG_PROG, 
-		    "%s has a timestamp %f.\n", 
+		    "%s reporting cycle started on %.2f.\n", 
 		    session->driver.nmea.field[0], session->driver.nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL(session->driver.nmea.this_frac_time, session->driver.nmea.last_frac_time)) {
 	    uint lasttag = session->driver.nmea.lasttag;
