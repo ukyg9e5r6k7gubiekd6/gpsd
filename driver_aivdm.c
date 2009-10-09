@@ -56,6 +56,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 bool aivdm_decode(const char *buf, size_t buflen, 
 		  struct aivdm_context_t *ais_context, struct ais_t *ais)
 {
+#ifdef __UNUSED_DEBUG__
     char *sixbits[64] = {
 	"000000", "000001", "000010", "000011", "000100",
 	"000101", "000110", "000111", "001000", "001001",
@@ -71,6 +72,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	"110111", "111000", "111001", "111010",	"111011",
 	"111100", "111101", "111110", "111111",   
     };
+#endif /* __UNUSED_DEBUG__ */
     int nfields = 0;
     unsigned char *data, *cp = ais_context->fieldcopy;
     unsigned char ch;
@@ -113,7 +115,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	ch -= 48;
 	if (ch >= 40)
 	    ch -= 8;
+#ifdef __UNUSED_DEBUG__
 	gpsd_report(LOG_RAW, "%c: %s\n", *cp, sixbits[ch]);
+#endif /* __UNUSED_DEBUG__ */
 	/*@ -shiftnegative @*/
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
