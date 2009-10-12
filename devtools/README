@@ -3,6 +3,7 @@ but not necessarily shipped in the tarball or binary distributions If you're
 viewing it with Emacs, you can try doing Ctl-C Ctl-t browse through
 the outline headers.  Ctl-C Ctl-a will unfold them again.
 
+
 ** ais.py
 
 AIS packet decoder in Python.  Useful as a check on the C code.
@@ -61,6 +62,11 @@ May be useful for comparing logs when regression tests break.
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do
 this itself now, so this script has a lot of dust on it. 
 
+** COMMITTERS
+
+Email addreesses for all committers up to October 2009 - required for
+good-quality git conversion of the SVN archive. When we switch to a
+DVCS permanently this file will probably go away.
 
 
 

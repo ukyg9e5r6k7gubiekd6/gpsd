@@ -1,0 +1,16 @@
+# Use this to map SVN author names to network-wide identities as
+# reqyuired by git and other distributes VCSes.  This file will go
+# away once we fully convert to one of these.
+(no author) = cvs2svn
+bzed = Bernd Zeimetz <bernd@bzed.de>
+ckuethe = Chris Kuethe <chris.kuethe@gmail.com>
+dbrashear = Derrick Brashear <shadow@gmail.com>
+djb = Derrick Brashear <shadow@gmail.com>
+esr = Eric S. Raymond <esr@thyrsus.com>
+garyemiller = Gary E. Miller <gem@rellim.com>
+gdt = Greg Troxel <gdt@ir.bbn.com>
+jfrancis = Jeff Francis <jeff@gritch.org>
+marr = Bill Marr <marr@copper.net>
+mick_durkin = Mick Durkin <mick.durkin@saunalahti.fi>
+nelson = Russ Nelson <nelson@crynwr.com>
+remco = Remco Treffkorn <remco@rvt.com>
