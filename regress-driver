@@ -30,7 +30,7 @@ shift $(($OPTIND - 1))
 # Sixth filters out new-style DEVICE responses
 # Seventh filters out new-style VERSION responses
 # Eighth filters out device fields in new-style responses.
-GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/\"device\":[^,]*,//"
+GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/,\"device\":[^,}]*//"
 
 # Use ALTFILTER to set up custom filtering when a regression test fails
 # This example filters out altitude and some fields computed by gpsd's error 
