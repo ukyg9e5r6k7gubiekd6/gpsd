@@ -355,7 +355,7 @@ struct gps_device_t {
 #endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
 	struct {
-	    u_int8_t physical_port;
+	    uint8_t physical_port;
 	    bool warned;
 	} navcom;
 #endif /* NAVCOM_ENABLE */

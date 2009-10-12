@@ -48,33 +48,33 @@
 #include "bits.h"
 
 /* Have data which is 24 bits long */
-#define getlesl24(buf,off)  (int32_t)(((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
-#define getleul24(buf,off) (u_int32_t)(((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
+#define getlesl24(buf,off)  (int32_t)(((uint32_t)getub((buf), (off)+2)<<24 | (uint32_t)getub((buf), (off)+1)<<16 | (uint32_t)getub((buf), (off))<<8)>>8)
+#define getleul24(buf,off) (uint32_t)(((uint32_t)getub((buf), (off)+2)<<24 | (uint32_t)getub((buf), (off)+1)<<16 | (uint32_t)getub((buf), (off))<<8)>>8)
 
 /* And just to be difficult, Navcom is little endian but the GPS data stream
    is big endian.  Some messages contain raw GPS data */
-#define getlesw_be(buf, off)	(int16_t)((((u_int16_t)getub(buf, (off)) << 8) \
-				    | (u_int16_t)getub(buf, (off)+1)))
-#define getleuw_be(buf, off)	(u_int16_t)((((u_int16_t)getub(buf, (off)) << 8) \
-				    | (u_int16_t)getub(buf, (off)+1)))
-#define getlesl_be(buf, off)	(int32_t)((((u_int16_t)getleuw_be(buf, (off)) << 16) \
+#define getlesw_be(buf, off)	(int16_t)((((uint16_t)getub(buf, (off)) << 8) \
+				    | (uint16_t)getub(buf, (off)+1)))
+#define getleuw_be(buf, off)	(uint16_t)((((uint16_t)getub(buf, (off)) << 8) \
+				    | (uint16_t)getub(buf, (off)+1)))
+#define getlesl_be(buf, off)	(int32_t)((((uint16_t)getleuw_be(buf, (off)) << 16) \
 				    | getleuw_be(buf, (off)+2)))
-#define getleul_be(buf, off)	(u_int32_t)((((u_int16_t)getleuw_be(buf, (off)) << 16) \
+#define getleul_be(buf, off)	(uint32_t)((((uint16_t)getleuw_be(buf, (off)) << 16) \
 				    | getleuw_be(buf, (off)+2)))
-#define getlesL_be(buf, off)	(int64_t)((((u_int64_t)getleul_be(buf, (off)) << 32) \
+#define getlesL_be(buf, off)	(int64_t)((((uint64_t)getleul_be(buf, (off)) << 32) \
 				    | getleul_be(buf, (off)+4)))
-#define getleuL_be(buf, off)	(u_int64_t)((((u_int64_t)getleul_be(buf, (off)) << 32) \
+#define getleuL_be(buf, off)	(uint64_t)((((uint64_t)getleul_be(buf, (off)) << 32) \
 				    | getleul_be(buf, (off)+4)))
-#define getlesl24_be(buf,off)     (int32_t)(((u_int32_t)getub((buf), (off))<<24 \
-				    | (u_int32_t)getub((buf), (off)+1)<<16 \
-				    | (u_int32_t)getub((buf), (off)+2)<<8)>>8)
+#define getlesl24_be(buf,off)     (int32_t)(((uint32_t)getub((buf), (off))<<24 \
+				    | (uint32_t)getub((buf), (off)+1)<<16 \
+				    | (uint32_t)getub((buf), (off)+2)<<8)>>8)
 
 #define NAVCOM_CHANNELS	12
 
-static u_int8_t checksum(unsigned char *buf, size_t len)
+static uint8_t checksum(unsigned char *buf, size_t len)
 {
     size_t n;
-    u_int8_t csum = (u_int8_t)0x00;
+    uint8_t csum = (uint8_t)0x00;
     for(n = 0; n < len; n++)
       csum ^= buf[n];
     return csum;
@@ -88,7 +88,7 @@ static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, si
 }
 
 /* Data Request */
-static void navcom_cmd_0x20(struct gps_device_t *session, u_int8_t block_id, u_int16_t rate)
+static void navcom_cmd_0x20(struct gps_device_t *session, uint8_t block_id, uint16_t rate)
 {
     unsigned char msg[18];
     putbyte(msg, 0, 0x02);
@@ -135,7 +135,7 @@ static void UNUSED navcom_cmd_0x3f(struct gps_device_t *session)
 }
 
 /* Test Support Block - Blinks the LEDs */
-static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode, u_int8_t length)
+static void navcom_cmd_0x1c(struct gps_device_t *session, uint8_t mode, uint8_t length)
 {
     unsigned char msg[12];
     putbyte(msg, 0, 0x02);
@@ -159,7 +159,7 @@ static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode, u_int8_
 
 #ifdef ALLOW_RECONFIGURE
 /* Serial Port Configuration */
-static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selection)
+static void navcom_cmd_0x11(struct gps_device_t *session, uint8_t port_selection)
 {
     /* NOTE - We only allow changing one port at a time,
        although the message supports doing both at once. */
@@ -252,8 +252,8 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
 /* 2^16 */
 #define SF_BETA3 (65536)
     unsigned char *buf = session->packet.outbuffer + 3;
-    u_int16_t week = getleuw(buf, 3);
-    u_int32_t tow = getleul(buf, 5);
+    uint16_t week = getleuw(buf, 3);
+    uint32_t tow = getleul(buf, 5);
     int8_t alpha0 = getsb(buf, 9);
     int8_t alpha1 = getsb(buf, 10);
     int8_t alpha2 = getsb(buf, 11);
@@ -264,11 +264,11 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     int8_t beta3 = getsb(buf, 16);
     int32_t a1 = getlesl(buf, 17);
     int32_t a0 = getlesl(buf, 21);
-    u_int8_t tot = getub(buf, 25);
-    u_int8_t wnt = getub(buf, 26);
+    uint8_t tot = getub(buf, 25);
+    uint8_t wnt = getub(buf, 26);
     int8_t dtls = getsb(buf, 27);
-    u_int8_t wnlsf = getub(buf, 28);
-    u_int8_t dn = getub(buf, 29);
+    uint8_t wnlsf = getub(buf, 28);
+    uint8_t dn = getub(buf, 29);
     int8_t dtlsf = getsb(buf, 30);
 
     /*@ +charint +relaxtypes @*/
@@ -326,8 +326,8 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
 static gps_mask_t handle_0x06(struct gps_device_t *session)
 {
     unsigned char *buf = session->packet.outbuffer + 3;
-    u_int8_t cmd_id = getub(buf, 3);
-    u_int8_t port = getub(buf, 4);
+    uint8_t cmd_id = getub(buf, 3);
+    uint8_t port = getub(buf, 4);
     session->driver.navcom.physical_port = port; /* This tells us which serial port was used last */
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0x06 (Acknowledgement (without error))\n");
@@ -346,12 +346,12 @@ static gps_mask_t handle_0x15(struct gps_device_t *session)
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t msg_len = (size_t)getleuw(buf, 1);
     /*@ -type @*/
-    u_int8_t port, cmd_id = getub(buf, 3);
+    uint8_t port, cmd_id = getub(buf, 3);
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0x15 (Negative Acknowledge)\n");
     for (n=4; n<(msg_len-2); n+=2) {
-	u_int8_t err_id = getub(buf, n);
-	u_int8_t err_desc = getub(buf, n+1);
+	uint8_t err_id = getub(buf, n);
+	uint8_t err_desc = getub(buf, n+1);
 	gpsd_report(LOG_IO,
 		    "Navcom: error id = 0x%02x, error description = 0x%02x\n",
 		   err_id, err_desc);
@@ -594,39 +594,39 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 #define SF_IDOT      (.000000000000113686837721616029)
 
     unsigned char *buf = session->packet.outbuffer + 3;
-    u_int8_t prn = getub(buf, 3);
-    u_int16_t week = getleuw(buf, 4);
-    u_int32_t tow = getleul(buf, 6);
-    u_int16_t iodc = getleuw(buf, 10);
+    uint8_t prn = getub(buf, 3);
+    uint16_t week = getleuw(buf, 4);
+    uint32_t tow = getleul(buf, 6);
+    uint16_t iodc = getleuw(buf, 10);
     /* And now the fun starts... everything that follows is
        raw GPS data minus parity */
     /* Subframe 1, words 3 to 10 minus parity */
-    u_int16_t wn = (getleuw_be(buf, 12)&0xffc0)>>6;
-    u_int8_t cl2 = (getub(buf, 13)&0x30)>>4;
-    u_int8_t ura = getub(buf, 13)&0x0f;
-    u_int8_t svh = (getub(buf, 14)&0xfc)>>2;
+    uint16_t wn = (getleuw_be(buf, 12)&0xffc0)>>6;
+    uint8_t cl2 = (getub(buf, 13)&0x30)>>4;
+    uint8_t ura = getub(buf, 13)&0x0f;
+    uint8_t svh = (getub(buf, 14)&0xfc)>>2;
     /* We already have IODC from earlier in the message, so
        we do not decode again */
-/*    u_int16_t iodc = (getub(buf, 14)&0x03)<<8;*/
-    u_int8_t l2pd = (getub(buf, 15)&0x80)>>7;
+/*    uint16_t iodc = (getub(buf, 14)&0x03)<<8;*/
+    uint8_t l2pd = (getub(buf, 15)&0x80)>>7;
     int8_t tgd = getsb(buf, 26);
 /*    iodc |= getub(buf, 27);*/
-    u_int16_t toc = getleuw_be(buf, 28);
+    uint16_t toc = getleuw_be(buf, 28);
     int8_t af2 = getsb(buf, 30);
     int16_t af1 = getlesw_be(buf, 31);
     /*@ -shiftimplementation @*/
     int32_t af0 = getlesl24_be(buf, 33)>>2;
     /*@ +shiftimplementation @*/
     /* Subframe 2, words 3 to 10 minus parity */
-    u_int8_t iode = getub(buf, 36);
+    uint8_t iode = getub(buf, 36);
     int16_t crs = getlesw_be(buf, 37);
     int16_t delta_n = getlesw_be(buf, 39);
     int32_t m0 = getlesl_be(buf, 41);
     int16_t cuc = getlesw_be(buf, 45);
-    u_int32_t e = getleul_be(buf, 47);
+    uint32_t e = getleul_be(buf, 47);
     int16_t cus = getlesw_be(buf, 51);
-    u_int32_t sqrt_a = getleul_be(buf, 53);
-    u_int16_t toe = getleuw_be(buf, 57);
+    uint32_t sqrt_a = getleul_be(buf, 53);
+    uint16_t toe = getleuw_be(buf, 57);
     /* NOTE - Fit interval & AODO not collected */
     /* Subframe 3, words 3 to 10 minus parity */
     int16_t cic = getlesw_be(buf, 60);
@@ -702,18 +702,18 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 static gps_mask_t handle_0x86(struct gps_device_t *session)
 {
     size_t n, i;
-    u_int8_t prn, tracking_status, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
-    u_int16_t azm, dgps_age;
+    uint8_t prn, tracking_status, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
+    uint16_t azm, dgps_age;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t msg_len = (size_t)getleuw(buf, 1);
-    u_int16_t week = getleuw(buf, 3);
-    u_int32_t tow = getleul(buf, 5);
-    u_int8_t eng_status = getub(buf, 9);
-    u_int16_t sol_status = getleuw(buf, 10);
-    u_int8_t sats_visible = getub(buf, 12);
-    //u_int8_t sats_tracked = getub(buf, 13);
-    u_int8_t sats_used = getub(buf, 14);
-    //u_int8_t pdop = getub(buf, 15);
+    uint16_t week = getleuw(buf, 3);
+    uint32_t tow = getleul(buf, 5);
+    uint8_t eng_status = getub(buf, 9);
+    uint16_t sol_status = getleuw(buf, 10);
+    uint8_t sats_visible = getub(buf, 12);
+    //uint8_t sats_tracked = getub(buf, 13);
+    uint8_t sats_used = getub(buf, 14);
+    //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
     session->gpsdata.skyview_time = 
@@ -804,10 +804,10 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     size_t n;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t msg_len = (size_t)getleuw(buf, 1);
-    u_int16_t week = getleuw(buf, 3);
-    u_int32_t tow = getleul(buf, 5);
-    u_int8_t tm_slew_acc = getub(buf, 9);
-    u_int8_t status = getub(buf, 10);
+    uint16_t week = getleuw(buf, 3);
+    uint32_t tow = getleul(buf, 5);
+    uint8_t tm_slew_acc = getub(buf, 9);
+    uint8_t status = getub(buf, 10);
 
     char time_str[24];
     (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow/1000.0), time_str, sizeof(time_str));
@@ -823,16 +823,16 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 		(status&0x40?"stable":"not stable"), status&0x0f);
     /*@ +predboolothers @*/
     for (n=11; n<msg_len-1; n+=16) {
-	u_int8_t sv_status = getub(buf, n);
-	u_int8_t ch_status = getub(buf, n+1);
-	u_int32_t ca_pseudorange = getleul(buf, n+2);
+	uint8_t sv_status = getub(buf, n);
+	uint8_t ch_status = getub(buf, n+1);
+	uint32_t ca_pseudorange = getleul(buf, n+2);
 	/* integer division by 16 is a sign-preserving right shift of 4 bits */
 	int32_t l1_phase = getlesl24(buf, n+6) / 16;
-	u_int8_t l1_slips = (u_int8_t)(getlesl24(buf, n+6) & 0x0f);
+	uint8_t l1_slips = (uint8_t)(getlesl24(buf, n+6) & 0x0f);
 	int16_t p1_ca_pseudorange = getlesw(buf, n+9);
 	int16_t p2_ca_pseudorange = getlesw(buf, n+11);
 	int32_t l2_phase = getlesl24(buf, n+13) / 16;
-	u_int8_t l2_slips = (u_int8_t)(getlesl24(buf, n+13) & 0x0f);
+	uint8_t l2_slips = (uint8_t)(getlesl24(buf, n+13) & 0x0f);
 	/*@ -predboolothers +charint @*/
 	double c1 = (sv_status&0x80? (double)ca_pseudorange/16.0*LAMBDA_L1 : NAN);
 	double l1 = (sv_status&0x80? (double)ca_pseudorange/16.0 + (double)l1_phase/256.0 : NAN);
@@ -864,8 +864,8 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
     if(sizeof(double) == 8) {
 	union long_double l_d;
 	unsigned char *buf = session->packet.outbuffer + 3;
-	u_int16_t week = getleuw(buf, 3);
-	u_int32_t tow = getleul(buf, 5);
+	uint16_t week = getleuw(buf, 3);
+	uint32_t tow = getleul(buf, 5);
 	double rms = getled(buf, 9);
 #ifdef __UNUSED__
 	/* Reason why it's unused is these figures do not agree
@@ -922,24 +922,24 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
     char *engconfstr, *asicstr;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t    msg_len = (size_t)getleuw(buf, 1);
-    u_int8_t  engconf = getub(buf, 3);
-    u_int8_t  asic    = getub(buf, 4);
-    u_int8_t swvermaj = getub(buf, 5);
-    u_int8_t swvermin = getub(buf, 6);
-    u_int16_t dcser   = getleuw(buf, 7);
-    u_int8_t  dcclass = getub(buf, 9);
-    u_int16_t rfcser  = getleuw(buf, 10);
-    u_int8_t  rfcclass= getub(buf, 12);
+    uint8_t  engconf = getub(buf, 3);
+    uint8_t  asic    = getub(buf, 4);
+    uint8_t swvermaj = getub(buf, 5);
+    uint8_t swvermin = getub(buf, 6);
+    uint16_t dcser   = getleuw(buf, 7);
+    uint8_t  dcclass = getub(buf, 9);
+    uint16_t rfcser  = getleuw(buf, 10);
+    uint8_t  rfcclass= getub(buf, 12);
     /*@ -stringliteralnoroomfinalnull -type @*/
-    u_int8_t  softtm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-    u_int8_t  bootstr[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-    u_int8_t  ioptm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    uint8_t  softtm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    uint8_t  bootstr[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    uint8_t  ioptm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     /*@ +stringliteralnoroomfinalnull +type @*/
-    u_int8_t  iopvermaj  = (u_int8_t)0x00;
-    u_int8_t  iopvermin  = (u_int8_t)0x00;
-    u_int8_t  picver = (u_int8_t)0x00;
-    u_int8_t  slsbn = (u_int8_t)0x00;
-    u_int8_t  iopsbn = (u_int8_t)0x00;
+    uint8_t  iopvermaj  = (uint8_t)0x00;
+    uint8_t  iopvermin  = (uint8_t)0x00;
+    uint8_t  picver = (uint8_t)0x00;
+    uint8_t  slsbn = (uint8_t)0x00;
+    uint8_t  iopsbn = (uint8_t)0x00;
     memcpy(softtm, &buf[13], 16);
     memcpy(bootstr, &buf[29], 16);
     if (msg_len == 0x0037) { /* No IOP */
@@ -1049,10 +1049,10 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 static gps_mask_t handle_0xef(struct gps_device_t *session)
 {
     unsigned char *buf = session->packet.outbuffer + 3;
-    //u_int16_t week = getleuw(buf, 3);
-    //u_int32_t tow = getleul(buf, 5);
+    //uint16_t week = getleuw(buf, 3);
+    //uint32_t tow = getleul(buf, 5);
     int8_t osc_temp = getsb(buf, 9);
-    u_int8_t nav_status = getub(buf, 10);
+    uint8_t nav_status = getub(buf, 10);
     union long_double l_d;
     double nav_clock_offset;
     union int_float i_f;
@@ -1190,8 +1190,8 @@ static bool navcom_speed(struct gps_device_t *session,
     if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
 	return false;
     } else {
-	u_int8_t port, port_selection;
-	u_int8_t baud;
+	uint8_t port, port_selection;
+	uint8_t baud;
 	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
 	    /* We still don't know which port we're connected to */
 	    return false;
@@ -1234,7 +1234,7 @@ static bool navcom_speed(struct gps_device_t *session,
 
 	/* Proceed to construct our message */
 	port = session->driver.navcom.physical_port; 
-	/*@i1@*/port_selection = (port ? port : (u_int8_t)0xff) | baud;
+	/*@i1@*/port_selection = (port ? port : (uint8_t)0xff) | baud;
 
 	/* Send it off */
 	navcom_cmd_0x11(session, port_selection);

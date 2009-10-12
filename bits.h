@@ -41,30 +41,30 @@ union long_double {
 
 /* these are independent of byte order */
 #define getsb(buf, off)	((int8_t)buf[(off)-(GET_ORIGIN)])
-#define getub(buf, off)	((u_int8_t)buf[(off)-(GET_ORIGIN)])
+#define getub(buf, off)	((uint8_t)buf[(off)-(GET_ORIGIN)])
 #define putbyte(buf,off,b) do {buf[(off)-(PUT_ORIGIN)] = (unsigned char)(b);} while (0)
 
 /* little-endian access */
-#define getlesw(buf, off)	((int16_t)(((u_int16_t)getub((buf),   (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
-#define getleuw(buf, off)	((u_int16_t)(((u_int16_t)getub((buf), (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
-#define getlesl(buf, off)	((int32_t)(((u_int16_t)getleuw((buf),  (off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
-#define getleul(buf, off)	((u_int32_t)(((u_int16_t)getleuw((buf),(off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
+#define getlesw(buf, off)	((int16_t)(((uint16_t)getub((buf),   (off)+1) << 8) | (uint16_t)getub((buf), (off))))
+#define getleuw(buf, off)	((uint16_t)(((uint16_t)getub((buf), (off)+1) << 8) | (uint16_t)getub((buf), (off))))
+#define getlesl(buf, off)	((int32_t)(((uint16_t)getleuw((buf),  (off)+2) << 16) | (uint16_t)getleuw((buf), (off))))
+#define getleul(buf, off)	((uint32_t)(((uint16_t)getleuw((buf),(off)+2) << 16) | (uint16_t)getleuw((buf), (off))))
 
 #define putleword(buf, off, w) do {putbyte(buf, (off)+1, (uint)(w) >> 8); putbyte(buf, (off), (w));} while (0)
 #define putlelong(buf, off, l) do {putleword(buf, (off)+2, (uint)(l) >> 16); putleword(buf, (off), (l));} while (0)
-#define getlesL(buf, off)	((int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
-#define getleuL(buf, off)	((u_int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
+#define getlesL(buf, off)	((int64_t)(((uint64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
+#define getleuL(buf, off)	((uint64_t)(((uint64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
 
 #define getlef(buf, off)	(i_f.i = getlesl(buf, off), i_f.f)
 #define getled(buf, off)	(l_d.l = getlesL(buf, off), l_d.d)
 
 /* SiRF and most other GPS protocols use big-endian (network byte order) */
-#define getbesw(buf, off)	((int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
-#define getbeuw(buf, off)	((u_int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
-#define getbesl(buf, off)	((int32_t)(((u_int16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
-#define getbeul(buf, off)	((u_int32_t)(((u_int16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
-#define getbesL(buf, off)	((int64_t)(((u_int64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
-#define getbeuL(buf, off)	((u_int64_t)(((u_int64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
+#define getbesw(buf, off)	((int16_t)(((uint16_t)getub(buf, (off)) << 8) | (uint16_t)getub(buf, (off)+1)))
+#define getbeuw(buf, off)	((uint16_t)(((uint16_t)getub(buf, (off)) << 8) | (uint16_t)getub(buf, (off)+1)))
+#define getbesl(buf, off)	((int32_t)(((uint16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
+#define getbeul(buf, off)	((uint32_t)(((uint16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
+#define getbesL(buf, off)	((int64_t)(((uint64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
+#define getbeuL(buf, off)	((uint64_t)(((uint64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
 
 #define putbeword(buf,off,w) do {putbyte(buf, (off) ,(w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
 #define putbelong(buf,off,l) do {putbeword(buf, (off) ,(l) >> 16); putbeword(buf, (off)+2, (l));} while (0)

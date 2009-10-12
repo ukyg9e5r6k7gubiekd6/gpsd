@@ -1415,12 +1415,12 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif /* EVERMORE_ENABLE */
 /* XXX CSK */
 #ifdef ITRAX_ENABLE
-#define getib(j) ((u_int8_t)lexer->inbuffer[(j)])
-#define getiw(i) ((u_int16_t)(((u_int16_t)getib((i)+1) << 8) | (u_int16_t)getib((i))))
+#define getib(j) ((uint8_t)lexer->inbuffer[(j)])
+#define getiw(i) ((uint16_t)(((uint16_t)getib((i)+1) << 8) | (uint16_t)getib((i))))
 
 	else if (lexer->state == ITALK_RECOGNIZED) {
-	    volatile u_int16_t len, n, csum, xsum, tmpw;
-	    volatile u_int32_t tmpdw;
+	    volatile uint16_t len, n, csum, xsum, tmpw;
+	    volatile uint32_t tmpdw;
 
 	    /* number of words */
 	    len = (unsigned short)(lexer->inbuffer[6] &0xff);

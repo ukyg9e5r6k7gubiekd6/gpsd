@@ -56,10 +56,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
-    u_int8_t u1,u2,u3,u4,u5;
+    uint8_t u1,u2,u3,u4,u5;
     int16_t s1,s2,s3,s4;
     int32_t sl1,sl2,sl3;
-    u_int32_t ul1,ul2;
+    uint32_t ul1,ul2;
     float f1,f2,f3,f4,f5;
     double d1,d2,d3,d4,d5;
     union int_float i_f;
@@ -172,7 +172,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->driver.tsip.last_46 = now;
 	u1 = getub(buf,0);			/* Status code */
 	u2 = getub(buf,1);			/* Antenna/Battery */
-	if (u1 != (u_int8_t)0) {
+	if (u1 != (uint8_t)0) {
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
 	}
@@ -238,7 +238,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u3 = getub(buf,2);			/* Status 2 */
 	gpsd_report(LOG_INF, "Machine ID %02x %02x %02x\n",u1,u2,u3);
 #if USE_SUPERPACKET
-	if ((u3 & 0x01) != (u_int8_t)0 && !session->driver.tsip.superpkt) {
+	if ((u3 & 0x01) != (uint8_t)0 && !session->driver.tsip.superpkt) {
 	    gpsd_report(LOG_PROG, "Switching to Super Packet mode\n");
 
 	    /* set new I/O Options for Super Packet output */
@@ -260,7 +260,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u4 = getub(buf,3);			/* Aux */
 	gpsd_report(LOG_INF, "IO Options %02x %02x %02x %02x\n",u1,u2,u3,u4);
 #if USE_SUPERPACKET
-	if ((u1 & 0x20) != (u_int8_t)0) {	/* Output Super Packets? */
+	if ((u1 & 0x20) != (uint8_t)0) {	/* Output Super Packets? */
 	    /* No LFwEI Super Packet */
 	    putbyte(buf,0,0x20);
 	    putbyte(buf,1,0x00);		/* disabled */
@@ -521,7 +521,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 						/* PRN/IODE data follows */
 	    gpsd_report(LOG_RAW, "LFwEI %d %d %d %u %d %u %u %x %x %u %u %d\n",s1,s2,s3,ul1,sl1,ul2,sl2,u1,u2,u3,u4,s4);
 
-	    if ((u1 & 0x01) != (u_int8_t)0)	/* check velocity scaling */
+	    if ((u1 & 0x01) != (uint8_t)0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
@@ -540,11 +540,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.fix.altitude  = sl2 * 1e-3 - session->gpsdata.separation;;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if ((u2 & 0x01) == (u_int8_t)0) {	/* Fix Available */
+	    if ((u2 & 0x01) == (uint8_t)0) {	/* Fix Available */
 		session->gpsdata.status = STATUS_FIX;
-		if ((u2 & 0x02) != (u_int8_t)0)	/* DGPS Corrected */
+		if ((u2 & 0x02) != (uint8_t)0)	/* DGPS Corrected */
 		    session->gpsdata.status = STATUS_DGPS_FIX;
-		if ((u2 & 0x04) != (u_int8_t)0)	/* Fix Dimension */
+		if ((u2 & 0x04) != (uint8_t)0)	/* Fix Dimension */
 		    session->gpsdata.fix.mode = MODE_2D;
 		else
 		    session->gpsdata.fix.mode = MODE_3D;
@@ -597,11 +597,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)s1, ul1 * 1e-3) - session->context->leap_seconds;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if ((u2 & 0x01) == (u_int8_t)0) {	/* Fix Available */
+	    if ((u2 & 0x01) == (uint8_t)0) {	/* Fix Available */
 		session->gpsdata.status = STATUS_FIX;
-		if ((u2 & 0x02) != (u_int8_t)0)	/* DGPS Corrected */
+		if ((u2 & 0x02) != (uint8_t)0)	/* DGPS Corrected */
 		    session->gpsdata.status = STATUS_DGPS_FIX;
-		if ((u2 & 0x04) != (u_int8_t)0)	/* Fix Dimension */
+		if ((u2 & 0x04) != (uint8_t)0)	/* Fix Dimension */
 		    session->gpsdata.fix.mode = MODE_2D;
 		else
 		    session->gpsdata.fix.mode = MODE_3D;
@@ -611,7 +611,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.fix.longitude -= 360.0;
 	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
 	    session->gpsdata.fix.altitude  = sl3 * 1e-3 - session->gpsdata.separation;;
-	    if ((u2 & 0x20) != (u_int8_t)0)	/* check velocity scaling */
+	    if ((u2 & 0x20) != (uint8_t)0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
@@ -683,7 +683,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	  u1 = getub(buf, 12);			/* GPS Decoding Status */
 	  u2 = getub(buf, 1);			/* Reciever Mode */
-	  if (u1 != (u_int8_t)0) {
+	  if (u1 != (uint8_t)0) {
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
 	  }
