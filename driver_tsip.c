@@ -21,7 +21,7 @@
 #ifdef TSIP_ENABLE
 #define TSIP_CHANNELS	12
 
-static int tsip_write(struct gps_device_t *session, 
+static int tsip_write(struct gps_device_t *session,
 		      unsigned int id, /*@null@*/unsigned char *buf, size_t len)
 {
     char *ep, *cp;
@@ -344,7 +344,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.elevation[i] = (int)round(d1);
 		session->gpsdata.azimuth[i] = (int)round(d2);
 	    } else {
-		session->gpsdata.PRN[i] = session->gpsdata.elevation[i] 
+		session->gpsdata.PRN[i] = session->gpsdata.elevation[i]
 		    = session->gpsdata.azimuth[i] = 0;
 		session->gpsdata.ss[i] = 0.0;
 	    }
@@ -410,9 +410,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    "mask=%s\n",
 		    session->gpsdata.status,
 		    session->gpsdata.satellites_used,
-		    session->gpsdata.dop.pdop, 
+		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,
-		    session->gpsdata.dop.vdop, 
+		    session->gpsdata.dop.vdop,
 		    session->gpsdata.dop.tdop,
 		    session->gpsdata.dop.gdop,
 		    gpsd_maskdump(mask));
@@ -557,8 +557,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->driver.tsip.gps_week = s4;
 	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET; 
-	    gpsd_report(LOG_DATA, 
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET;
+	    gpsd_report(LOG_DATA,
 		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
@@ -623,8 +623,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.fix.track += 360.0;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET; 
-	    gpsd_report(LOG_DATA, 
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET;
+	    gpsd_report(LOG_DATA,
 		"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
@@ -803,11 +803,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 }
 
 #ifdef ALLOW_CONTROLSEND
-static ssize_t tsip_control_send(struct gps_device_t *session, 
+static ssize_t tsip_control_send(struct gps_device_t *session,
 			    char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
 {
-    return (ssize_t)tsip_write(session, 
+    return (ssize_t)tsip_write(session,
 		      (unsigned int)buf[0], (unsigned char *)buf+1, buflen-1);
 }
 #endif /* ALLOW_CONTROLSEND */
@@ -831,7 +831,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 
 	switch (session->packet.counter) {
 	case 0:
-	    /* 
+	    /*
 	     * TSIP is ODD parity 1 stopbit, save original values and
 	     * change it Thunderbolts and Copernicus use
 	     * 8N1... which isn't exactly a good idea due to the
@@ -868,8 +868,8 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-static bool tsip_speed_switch(struct gps_device_t *session, 
-			      unsigned int speed, 
+static bool tsip_speed_switch(struct gps_device_t *session,
+			      unsigned int speed,
 			      char parity, int stopbits)
 {
     unsigned char buf[100];
@@ -910,43 +910,43 @@ static void tsip_mode(struct gps_device_t *session, int mode)
     unsigned char buf[16];
 
     if (mode == MODE_NMEA) {
-        /* First turn on the NMEA messages we want */
+	/* First turn on the NMEA messages we want */
 
-        putbyte(buf,0,0x00);		/* subcode 0 */
-        putbyte(buf,1,0x01);            /* 1-second fix interval */
-        putbyte(buf,2,0x00);		/* Reserved */
-        putbyte(buf,3,0x00);		/* Reserved */
-        putbyte(buf,4,0x01);		/* 0=RMC, 1-7=Reserved */
-        putbyte(buf,5,0x19);		/* 0=GGA, 1=GGL, 2=VTG, 3=GSV, */
-                                        /* 4=GSA, 5=ZDA, 6-7=Reserved  */
+	putbyte(buf,0,0x00);		/* subcode 0 */
+	putbyte(buf,1,0x01);	    /* 1-second fix interval */
+	putbyte(buf,2,0x00);		/* Reserved */
+	putbyte(buf,3,0x00);		/* Reserved */
+	putbyte(buf,4,0x01);		/* 0=RMC, 1-7=Reserved */
+	putbyte(buf,5,0x19);		/* 0=GGA, 1=GGL, 2=VTG, 3=GSV, */
+					/* 4=GSA, 5=ZDA, 6-7=Reserved  */
 
-        (void)tsip_write(session, 0x7A, buf, 6);
+	(void)tsip_write(session, 0x7A, buf, 6);
 
-        /* Now switch to NMEA mode */
+	/* Now switch to NMEA mode */
 
-        memset(buf, 0, sizeof(buf));
+	memset(buf, 0, sizeof(buf));
 
-        putbyte(buf,0,0xff);		/* current port */
-        putbyte(buf,1,0x06);            /* 4800 bps input */
-        putbyte(buf,2,0x06);		/* 4800 bps output */
-        putbyte(buf,3,0x03);		/* 8 data bits */
-        putbyte(buf,4,0x00);		/* No parity */
-        putbyte(buf,5,0x00);		/* 1 stop bit */
-        putbyte(buf,6,0x00);		/* No flow control */
-        putbyte(buf,7,0x02);		/* Input protocol TSIP */
-        putbyte(buf,8,0x04);		/* Output protocol NMEA */
-        putbyte(buf,9,0x00);		/* Reserved */
+	putbyte(buf,0,0xff);		/* current port */
+	putbyte(buf,1,0x06);	    /* 4800 bps input */
+	putbyte(buf,2,0x06);		/* 4800 bps output */
+	putbyte(buf,3,0x03);		/* 8 data bits */
+	putbyte(buf,4,0x00);		/* No parity */
+	putbyte(buf,5,0x00);		/* 1 stop bit */
+	putbyte(buf,6,0x00);		/* No flow control */
+	putbyte(buf,7,0x02);		/* Input protocol TSIP */
+	putbyte(buf,8,0x04);		/* Output protocol NMEA */
+	putbyte(buf,9,0x00);		/* Reserved */
 
-        (void)tsip_write(session, 0xBC, buf, 10);
+	(void)tsip_write(session, 0xBC, buf, 10);
 
     } else if (mode == MODE_BINARY) {
-        /* The speed switcher also puts us back in TSIP, so call it */
-        /* with the default 9600 8O1. */
+	/* The speed switcher also puts us back in TSIP, so call it */
+	/* with the default 9600 8O1. */
 	// FIXME: Should preserve the current speed.
-        (void)tsip_speed_switch(session, 9600, 'O', 1);
+	(void)tsip_speed_switch(session, 9600, 'O', 1);
 
     } else {
-        gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);
+	gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);
     }
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -956,7 +956,7 @@ const struct gps_type_t tsip_binary =
 {
     .type_name      = "Trimble TSIP",	/* full name of type */
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */
-    .trigger        = NULL,		/* no trigger */
+    .trigger	= NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use the generic packet getter */
