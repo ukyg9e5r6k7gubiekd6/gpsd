@@ -206,9 +206,9 @@ ais_json.i: jsongen.py
 	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i
 	chmod a-w $(srcdir)/ais_json.i
 
-maskdump.c: gpsd.h-tail devtools/maskaudit
+maskdump.c: gpsd.h-tail maskaudit.py
 	rm -f $(srcdir)/maskdump.c
-	$(srcdir)/devtools/maskaudit -c >maskdump.c
+	$(srcdir)/maskaudit.py -c >maskdump.c
 	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
@@ -358,13 +358,14 @@ include_HEADERS = gps.h libgpsmm.h
 # tarball in order for 'make diat-rpm' to work.
 EXTRA_DIST = \
 	autogen.sh \
-	jsongen.py \
 	README \
 	INSTALL \
 	COPYING \
 	TODO \
 	NEWS \
 	AUTHORS \
+	jsongen.py \
+	maskaudit.py \
 	dgpsip-servers \
 	test_float.c \
 	gpsd.php \
