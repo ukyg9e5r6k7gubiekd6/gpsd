@@ -63,6 +63,7 @@ maintainer, we've tried to kick these upstream.</p>
 <li><a href="#pl2303">Linux pl2303 driver on openwrt 2.4 kernel can hang when device is read at unexpected speed</a></li>
 <li><a href="#pthread_create">pthread_create() fails to return when called in background</a></li>
 <li><a href="#shm_damage">NTPSHM clobbers altitude under 2.4 Linux</a></li>
+<li><a href="#udev">Linux kernel doesn't generate udev close events</a></li>
 </ul>
 
 <h1>Links to Open Toolchain Bugs</h1>
@@ -166,6 +167,15 @@ and we suspect our corruption bug is another symptom.  No such
 misbehavior has been reported from our NTPSHM-using developers under
 2.6.  It is also possible that this is due to some obscure bug in GCC
 or elsewhere in Technologic's cross-development toolchain.</p>
+
+<h2 id="udev">Linux kernel doesn't generate udev close events</h2>
+
+<p>One user has reported that the GPSD hotplug wrapper is not being
+invoked on unplug of a USB receiver, because the kernel never actually
+generates a remove event when closing an open serial device.
+Apparently this is a <a
+href="http://www.linuxquestions.org/questions/programming-9/udev-not-called-to-remove-open-usb-serial-device-585603/">well-known
+bug</a> that will <a href="http://lkml.indiana.edu/hypermail/linux/kernel/0907.2/01845.html">not be easily fixed</a>.</p>
 
 <h1>Open Toolchain Bugs</h1>
 
