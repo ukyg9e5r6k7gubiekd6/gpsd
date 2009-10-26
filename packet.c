@@ -1423,7 +1423,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    volatile uint32_t tmpdw;
 
 	    /* number of words */
-	    len = (unsigned short)(lexer->inbuffer[6] &0xff);
+	    len = (uint16_t)(lexer->inbuffer[6] &0xff);
 
 	    /*@ -type @*/
 	    /* initialize all my registers */

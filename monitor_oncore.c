@@ -201,13 +201,13 @@ static void oncore_update(void)
 	    unsigned char dopt, nvis, nsat, status;
 	    char statusbuf[64]; /* 6+9+3+3+10+5+7+12+1=56 */
 
-	    mon = getub(buf, 4);
-	    day = getub(buf, 5);
-	    year = getbeuw(buf, 6);
-	    hour = getub(buf, 8);
-	    min = getub(buf, 9);
-	    sec = getub(buf, 10);
-	    nsec = getbeul(buf, 11);
+	    mon = (unsigned char)getub(buf, 4);
+	    day = (unsigned char)getub(buf, 5);
+	    year = (unsigned short)getbeuw(buf, 6);
+	    hour = (unsigned char)getub(buf, 8);
+	    min = (unsigned char)getub(buf, 9);
+	    sec = (unsigned char)getub(buf, 10);
+	    nsec = (unsigned int)getbeul(buf, 11);
 
 	    lat = getbesl(buf, 15) / 3600000.0;
 	    lon = getbesl(buf, 19) / 3600000.0;
@@ -215,10 +215,10 @@ static void oncore_update(void)
 	    speed = (float)(getbeuw(buf, 31) / 100.0);
 	    track = (float)(getbeuw(buf, 33) / 10.0);
 	    dop = (float)(getbeuw(buf, 35) / 10.0);
-	    dopt = getub(buf, 37);
-	    nvis = getub(buf, 38);
-	    nsat = getub(buf, 39);
-	    status = getub(buf, 72);
+	    dopt = (unsigned char)getub(buf, 37);
+	    nvis = (unsigned char)getub(buf, 38);
+	    nsat = (unsigned char)getub(buf, 39);
+	    status = (unsigned char)getub(buf, 72);
 
 	    (void)mvwprintw(Ea1win, 1, 7, "%04d-%02d-%02d %02d:%02d:%02d.%09d",
 			    year,mon,day,hour,min,sec,nsec);
@@ -260,10 +260,10 @@ static void oncore_update(void)
 	    unsigned char sv, mode, sn, status;
 
 	    off = 40 + 4 * i;
-	    sv     = getub(buf, off);
-	    mode   = getub(buf, off+1);
-	    sn     = getub(buf, off+2);
-	    status = getub(buf, off+3);
+	    sv     = (unsigned char)getub(buf, off);
+	    mode   = (unsigned char)getub(buf, off+1);
+	    sn     = (unsigned char)getub(buf, off+2);
+	    status = (unsigned char)getub(buf, off+3);
 	    (void)wmove(Eawin, (int)(i+2), 3);
 	    (void)wprintw(Eawin, " %3d",sv);
 	    EaSVlines[i] = sv;
@@ -306,7 +306,7 @@ static void oncore_update(void)
 	    Bblines_mask = 0;
 	    for (i = 0; i < ch; i++) {
 		off = 5 + 7 * i;
-		sv = getub(buf, off);
+		sv = (unsigned char)getub(buf, off);
 		/*@ -boolops @*/
 		for (j = 0; j < 8; j++)
 		    if (EaSVlines[j] == sv &&
@@ -331,7 +331,7 @@ static void oncore_update(void)
 		int doppl, el, az, health;
 
 		off = 5 + 7 * i;
-		sv     = getub(buf,   off);
+		sv     = (unsigned char)getub(buf,   off);
 		doppl  = (int)getbesw(buf, off+1);
 		el     = (int)getub(buf,   off+3);
 		az     = (int)getbeuw(buf, off+4);
@@ -361,13 +361,13 @@ static void oncore_update(void)
 	    unsigned char traim, ctrl, pulse, sync, sol_stat, status;
 	    float alarm, sigma;
 
-	    traim	= getub(buf, 5);
+	    traim	= (unsigned char)getub(buf, 5);
 	    alarm	= (float)(getbeuw(buf, 6) / 10.);
-	    ctrl	= getub(buf, 8);
-	    pulse	= getub(buf, 9);
-	    sync	= getub(buf, 10);
-	    sol_stat	= getub(buf, 11);
-	    status      = getub(buf, 12);
+	    ctrl	= (unsigned char)getub(buf, 8);
+	    pulse	= (unsigned char)getub(buf, 9);
+	    sync	= (unsigned char)getub(buf, 10);
+	    sol_stat	= (unsigned char)getub(buf, 11);
+	    status      = (unsigned char)getub(buf, 12);
 	    sigma       = (float)(getbeuw(buf, 13));
 
 	    /*@ -predboolothers @*/
@@ -389,7 +389,7 @@ static void oncore_update(void)
 	{
 	    unsigned char utc_offset;
 
-	    utc_offset = getub(buf, 4);
+	    utc_offset = (unsigned char)getub(buf, 4);
 
 	    if (utc_offset != (unsigned char) 0)
 	        (void)mvwprintw(Bowin, 2, 2, "GPS%+3d",utc_offset);
@@ -404,7 +404,7 @@ static void oncore_update(void)
 	{
 	    unsigned char mode;
 
-	    mode = getub(buf, 4);
+	    mode = (unsigned char)getub(buf, 4);
 
 	    (void)mvwprintw(Atwin, 2, 1, "%6s",pos_hold_mode[mode]);
 	}

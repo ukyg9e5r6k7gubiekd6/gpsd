@@ -308,7 +308,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* (int)getleuw(buf2, 8);  clock offset, 29000..29850 ?? */
 	session->gpsdata.fix.time = 
 	    gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
-	visible = getub(buf2, 10);
+	visible = (unsigned char)getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
 	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */

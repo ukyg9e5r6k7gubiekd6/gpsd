@@ -41,9 +41,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	return -1;
     }
 
-    flags = getleuw(buf, 7 + 4);
-    cflags = getleuw(buf, 7 + 6);
-    pflags = getleuw(buf, 7 + 8);
+    flags = (ushort)getleuw(buf, 7 + 4);
+    cflags = (ushort)getleuw(buf, 7 + 6);
+    pflags = (ushort)getleuw(buf, 7 + 8);
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->gpsdata.fix.mode = MODE_NO_FIX;
@@ -54,7 +54,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	return mask;
 
     gps_week = (ushort)getlesw(buf, 7 + 82);
-    tow = getleul(buf, 7 + 84);
+    tow = (uint)getleul(buf, 7 + 84);
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.fix.time = t;
     mask |= TIME_SET;
@@ -131,8 +131,8 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     }
     else
     {
-	gps_week = getleuw(buf, 7 + 4);
-	tow = getleul(buf, 7 + 6);
+	gps_week = (ushort)getleuw(buf, 7 + 4);
+	tow = (uint)getleul(buf, 7 + 6);
 	t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
 	session->gpsdata.skyview_time = t;
 
@@ -145,7 +145,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	    unsigned int off = 7+ 52 + 10 * i;
 	    unsigned short flags;
 
-	    flags = getleuw(buf, off);
+	    flags = (ushort)getleuw(buf, off);
 	    session->gpsdata.ss[i]		= (float)(getleuw(buf, off+2)&0xff);
 	    session->gpsdata.PRN[i]		= (int)getleuw(buf, off+4)&0xff;
 	    session->gpsdata.elevation[i]	= (int)getlesw(buf, off+6)&0xff;
@@ -183,7 +183,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
 	return ERROR_SET;
     }
 
-    flags = getleuw(buf, 7);
+    flags = (ushort)getleuw(buf, 7);
     if (0 == (flags & UTC_IONO_MODEL_UTCVALID))
 	return 0;
 
@@ -191,8 +191,8 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     if (session->context->leap_seconds < leap)
 	session->context->leap_seconds = leap;
 
-    gps_week = getleuw(buf, 7 + 36);
-    tow = getleul(buf, 7 + 38);
+    gps_week = (ushort)getleuw(buf, 7 + 36);
+    tow = (uint)getleul(buf, 7 + 38);
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.fix.time = t;
 
@@ -213,9 +213,9 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
 	return ERROR_SET;
     }
 
-    flags = getleuw(buf, 7 + 4);
-    prn = getleuw(buf, 7 + 6);
-    sf = getleuw(buf, 7 + 8);
+    flags = (ushort)getleuw(buf, 7 + 4);
+    prn = (ushort)getleuw(buf, 7 + 6);
+    sf = (ushort)getleuw(buf, 7 + 8);
     gpsd_report(LOG_PROG, "iTalk SUBFRAME prn %u sf %u - decode %s %s\n",
 		prn, sf,
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
@@ -227,6 +227,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
      * Timo says "SUBRAME message contains decoded navigation message subframe
      * words with parity checking done but parity bits still present."
      */
+    /*@-type@*/
     words[0] = (getbeul(buf, 7 + 14) & 0x3fffffff) >> 6;
     words[1] = (getleul(buf, 7 + 18) & 0x3fffffff) >> 6;
     words[2] = (getleul(buf, 7 + 22) & 0x3fffffff) >> 6;
@@ -237,6 +238,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
     words[7] = (getleul(buf, 7 + 42) & 0x3fffffff) >> 6;
     words[8] = (getleul(buf, 7 + 46) & 0x3fffffff) >> 6;
     words[9] = (getleul(buf, 7 + 50) & 0x3fffffff) >> 6;
+    /*@+type@*/
 
     gpsd_interpret_subframe(session, words);
     return ONLINE_SET;

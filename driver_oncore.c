@@ -70,7 +70,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     mask = ONLINE_SET;
     gpsd_report(LOG_IO, "oncore NAVSOL - navigation data\n");
 
-    flags = getub(buf, 72);
+    flags = (unsigned char)getub(buf, 72);
 
     /*@ -predboolothers @*/
     if (flags & 0x20) {
@@ -97,7 +97,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	unpacked_date.tm_hour	= (int)getub(buf, 8);
 	unpacked_date.tm_min	= (int)getub(buf, 9);
 	unpacked_date.tm_sec	= (int)getub(buf, 10);
-	nsec			= getbeul(buf, 11);
+	nsec			= (uint)getbeul(buf, 11);
 
 	/*@ -unrecog */
 	session->gpsdata.fix.time =
@@ -123,12 +123,14 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 		    nsec);
     }
 
-    lat = getbesl(buf, 15) / 3600000.0;
-    lon = getbesl(buf, 19) / 3600000.0;
-    alt = getbesl(buf, 23) / 100.0;
+    /*@-type@*/
+    lat = getbesl(buf, 15) / 3600000.0f;
+    lon = getbesl(buf, 19) / 3600000.0f;
+    alt = getbesl(buf, 23) / 100.0f;
     speed = getbeuw(buf, 31) / 100.0f;
     track = getbeuw(buf, 33) / 10.0f;
     dop = getbeuw(buf, 35) / 10.0f;
+    /*@+type@*/
 
     gpsd_report(LOG_IO, "oncore NAVSOL - %lf %lf %.2lfm-%.2lfm | %.2fm/s %.1fdeg dop=%.1f\n", lat, lon, alt,wgs84_separation(lat,lon), speed, track, (float )dop);
     

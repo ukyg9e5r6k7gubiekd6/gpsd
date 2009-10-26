@@ -402,7 +402,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	/*@ +charint @*/
 	for (i = 0; i < count; i++)
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
-			" %d",session->gpsdata.used[i] = getub(buf,17 + i));
+			   " %d",session->gpsdata.used[i] = (int)getub(buf,17 + i));
 	/*@ -charint @*/
 	gpsd_report(LOG_DATA, "AIVSS: 0x6d "
 		    "status=%d used=%d "
@@ -484,9 +484,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
 	/*@ +charint @*/
+	u1 = (uint8_t)getub(buf,0);
 	(void)snprintf(session->gpsdata.tag+strlen(session->gpsdata.tag),
 		       sizeof(session->gpsdata.tag)-strlen(session->gpsdata.tag),
-		       "%02x", u1 = getub(buf,0));
+		       "%02x", (uint)u1);
 	/*@ -charint @*/
 	switch (u1)				/* sub-packet ID */
 	{
@@ -607,7 +608,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.mode = MODE_3D;
 	    }
 	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
-	    if ((session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG) > 180.0)
+	    session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
+	    if (session->gpsdata.fix.longitude > 180.0)
 		session->gpsdata.fix.longitude -= 360.0;
 	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
 	    session->gpsdata.fix.altitude  = sl3 * 1e-3 - session->gpsdata.separation;;

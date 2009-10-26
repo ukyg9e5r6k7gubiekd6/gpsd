@@ -717,7 +717,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     /* Timestamp and PDOP */
     session->gpsdata.skyview_time = 
-	gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
+	gpstime_to_unix((int)week, tow/1000.0f) - session->context->leap_seconds;
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
@@ -774,7 +774,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    session->gpsdata.PRN[i] = (int)prn;
 	    session->gpsdata.elevation[i] = (int)ele;
 	    session->gpsdata.azimuth[i] = (int)azm;
-	    /*@i4@*/s = session->gpsdata.ss[i++] = (float)(p2_snr ? p2_snr : ca_snr) / 4.0;
+	    /*@i3@*/s = session->gpsdata.ss[i++] = (float)(p2_snr ? p2_snr : ca_snr) / 4.0;
 	}
 	gpsd_report(LOG_IO,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "
@@ -886,7 +886,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->gpsdata.fix.epv = alt_sd*1.96;
 #endif /*  __UNUSED__ */
 	session->gpsdata.fix.time = 
-	    gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
+	    gpstime_to_unix((int)week, tow/1000.0f) - session->context->leap_seconds;
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO,
@@ -919,6 +919,7 @@ static gps_mask_t handle_0xd3(struct gps_device_t *session UNUSED)
 /* Identification Block */
 static gps_mask_t handle_0xae(struct gps_device_t *session)
 {
+    /*@-modobserver@*/
     char *engconfstr, *asicstr;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t    msg_len = (size_t)getleuw(buf, 1);
@@ -1043,6 +1044,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 	     rfcser, rfcclass);
     /*@ +formattype @*/
     return DEVICEID_SET;
+    /*@+modobserver@*/
 }
 
 /* Clock Drift and Offset */
@@ -1096,9 +1098,9 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
     if (len == 0)
 	return 0;
 
-    cmd_id = getub(buf, 3);
+    cmd_id = (unsigned char)getub(buf, 3);
     payload = &buf[6];
-    msg_len = getleuw(buf, 4);
+    msg_len = (uint)getleuw(buf, 4);
 
     /*@ -usedef -compdef @*/
     gpsd_report(LOG_RAW, "Navcom: packet type 0x%02x, length %d: %s\n",
@@ -1192,7 +1194,7 @@ static bool navcom_speed(struct gps_device_t *session,
     } else {
 	uint8_t port, port_selection;
 	uint8_t baud;
-	if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
+	if (session->driver.navcom.physical_port == (uint8_t)0xFF) {
 	    /* We still don't know which port we're connected to */
 	    return false;
 	}

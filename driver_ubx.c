@@ -68,7 +68,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     flags = (unsigned int)getub(buf, 11);
     mask = 0;
     if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
-	tow = getleul(buf, 0);
+	tow = (unsigned int)getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
 	session->driver.ubx.gps_week = gw;
 
@@ -96,7 +96,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     //session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
 
-    navmode = getub(buf, 10);
+    navmode = (unsigned char)getub(buf, 10);
     switch (navmode){
     case UBX_MODE_TMONLY:
     case UBX_MODE_3D:
@@ -170,8 +170,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (data_len != 16)
 	return 0;
 
-    tow = getleul(buf, 0);
-    gw = (uint)getlesw(buf, 8);
+    tow = (unsigned int)getleul(buf, 0);
+    gw = (unsigned int)getlesw(buf, 8);
     if (gw > session->driver.ubx.gps_week)
 	session->driver.ubx.gps_week = gw;
 
@@ -206,7 +206,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	- session->context->leap_seconds;
 #endif
     /*@ +charint @*/
-    nchan = getub(buf, 4);
+    nchan = (unsigned int)getub(buf, 4);
     if (nchan > MAXCHANNELS){
 	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >%d reported visible",MAXCHANNELS);
 	return 0;
@@ -261,7 +261,7 @@ ubx_msg_sbas(unsigned char *buf)
 #endif
 /* really 'in_use' depends on the sats info, EGNOS is still in test */
 /* In WAAS areas one might also check for the type of corrections indicated */
-    sbas_in_use = getub(buf, 4);
+    sbas_in_use = (unsigned char)getub(buf, 4);
 }
 
 /*
@@ -689,7 +689,7 @@ static bool ubx_speed(struct gps_device_t *session,
 
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
-    usart_mode = getleul(buf, 4);
+    usart_mode = (ulong)getleul(buf, 4);
     usart_mode &=~ 0xE00;	/* zero bits 11:9 */
     switch (parity) {
     case (int)'E':

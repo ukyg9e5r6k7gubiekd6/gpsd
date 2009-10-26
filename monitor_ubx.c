@@ -104,9 +104,9 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 		short az;
 		unsigned short fl;
 
-		prn = getub(buf, off+1);
-		fl = getleuw(buf, off+2);
-		ss = getub(buf, off+4);
+		prn = (unsigned char)getub(buf, off+1);
+		fl = (unsigned short)getleuw(buf, off+2);
+		ss = (unsigned char)getub(buf, off+4);
 		el = getsb(buf, off+5);
 		az = getlesw(buf, off+6);
 		(void)wmove(satwin, (int)(i+2), 4);
@@ -132,11 +132,11 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	if (data_len != 52)
 		return;
 
-	navmode = getub(buf, 10);
+	navmode = (unsigned char)getub(buf, 10);
 	flags = (unsigned int)getub(buf, 11);
 
 	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
-		tow = getleul(buf, 0);
+	    tow = (unsigned int)getleul(buf, 0);
 		gw = (unsigned short)getlesw(buf, 8);
 		t = gpstime_to_unix((int)gw, tow/1000.0);
 		tt = (time_t)trunc(t);

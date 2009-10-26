@@ -642,13 +642,13 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char 
 
     /* save these to restore them in the revert method */
     session->driver.sirf.nav_parameters_seen = true;
-    session->driver.sirf.altitude_hold_mode = getub(buf, 5);
-    session->driver.sirf.altitude_hold_source = getub(buf, 6);
+    session->driver.sirf.altitude_hold_mode = (unsigned char)getub(buf, 5);
+    session->driver.sirf.altitude_hold_source = (unsigned char)getub(buf, 6);
     session->driver.sirf.altitude_source_input = getbesw(buf, 7);
-    session->driver.sirf.degraded_mode = getub(buf, 9);
-    session->driver.sirf.degraded_timeout = getub(buf, 10);
-    session->driver.sirf.dr_timeout = getub(buf, 11);
-    session->driver.sirf.track_smooth_mode = getub(buf, 12);
+    session->driver.sirf.degraded_mode = (unsigned char)getub(buf, 9);
+    session->driver.sirf.degraded_timeout = (unsigned char)getub(buf, 10);
+    session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
+    session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
     gpsd_report(LOG_PROG, "Setting Navigation Parameters\n");
     (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
     return 0;

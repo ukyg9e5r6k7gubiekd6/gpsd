@@ -63,15 +63,15 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 		unsigned short az;
 
 		/*@ +charint */
-		if ((porn = getub(buf, off) & 0x1f) == 0)
-			porn = (getub(buf, off+3) >> 1) + 87;
+		if ((porn = (unsigned char)getub(buf, off) & 0x1f) == 0)
+		    porn = ((unsigned char)getub(buf, off+3) >> 1) + 87;
 		/*@ -charint */
 
-		ss = getub(buf, off+4);
+		ss = (unsigned char)getub(buf, off+4);
 		el = getsb(buf, off+1);
 		az = (unsigned short)(getub(buf, off+2) +
 				      ((getub(buf, off+3) & 0x1) << 1));
-		fl = getub(buf, off) & 0xe0;
+		fl = (unsigned char)getub(buf, off) & 0xe0;
 		(void)wmove(satwin, i+2, 4);
 		/*@ +charint */
 		(void)wprintw(satwin, "%3u %3d %2d  %02d %02x %c",

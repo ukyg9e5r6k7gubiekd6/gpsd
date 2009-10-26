@@ -90,23 +90,23 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 	if (len != 296)
 		return;
 
-	flags = getleuw(buf, 7 + 4);
-	cflags = getleuw(buf, 7 + 6);
-	pflags = getleuw(buf, 7 + 8);
+	flags = (ushort)getleuw(buf, 7 + 4);
+	cflags = (ushort)getleuw(buf, 7 + 6);
+	pflags = (ushort)getleuw(buf, 7 + 8);
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-	nsv = MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
-	svlist = getleul(buf, 7 + 16) | getleul(buf, 7 + 24);
+	nsv = (ushort)MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
+	svlist = (ushort)getleul(buf, 7 + 16) | getleul(buf, 7 + 24);
 
-	hour = getleuw(buf, 7 + 66);
-	min = getleuw(buf, 7 + 68);
-	sec = getleuw(buf, 7 + 70);
-	nsec = getleul(buf, 7 + 72);
-	year = getleuw(buf, 7 + 76);
-	mon = getleuw(buf, 7 + 78);
-	day = getleuw(buf, 7 + 80);
+	hour = (ushort)getleuw(buf, 7 + 66);
+	min = (ushort)getleuw(buf, 7 + 68);
+	sec = (ushort)getleuw(buf, 7 + 70);
+	nsec = (ushort)getleul(buf, 7 + 72);
+	year = (ushort)getleuw(buf, 7 + 76);
+	mon = (ushort)getleuw(buf, 7 + 78);
+	day = (ushort)getleuw(buf, 7 + 80);
 	gps_week = (ushort)getlesw(buf, 7 + 82);
-	tow = getleul(buf, 7 + 84);
+	tow = (ushort)getleul(buf, 7 + 84);
 
 	epx = (double)(getlesl(buf, 7 + 96)/100.0);
 	epy = (double)(getlesl(buf, 7 + 100)/100.0);
@@ -198,7 +198,7 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 		unsigned short fl;
 		unsigned char ss, prn, el, az;
 
-		fl  = getleuw(buf, off);
+		fl  = (unsigned short)getleuw(buf, off);
 		ss  = (unsigned char)getleuw(buf, off+2)&0xff;
 		prn = (unsigned char)getleuw(buf, off+4)&0xff;
 		el  = (unsigned char)getlesw(buf, off+6)&0xff;
@@ -224,7 +224,7 @@ static void italk_update(void)
 
 	buf = session.packet.outbuffer;
 	len = session.packet.outbuflen;
-	type = getub(buf, 4);
+	type = (unsigned char)getub(buf, 4);
 	switch (type) {
 		case ITALK_NAV_FIX:
 			display_itk_navfix(buf, len);

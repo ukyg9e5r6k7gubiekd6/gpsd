@@ -138,6 +138,7 @@ int main(void)
     (void)putc('\n', stdout);
 
     /* big-endian test */
+    /*@-type@*/
     printf("Big-endian:\n");
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
@@ -157,10 +158,12 @@ int main(void)
     uL2 = getbeuL(buf, 8);
     f1 = getbef(buf, 24);
     d1 = getbed(buf, 16);
+    /*@+type@*/
     bedumpall();
 
     /* little-endian test */
     printf("Little-endian:\n");
+    /*@-type@*/
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
@@ -179,6 +182,7 @@ int main(void)
     uL2 = getleuL(buf, 8);
     f1 = getlef(buf, 24);
     d1 = getled(buf, 16);
+    /*@+type@*/
     ledumpall();
 
 

@@ -88,7 +88,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask = 0;
 
     /*@ +charint @*/
-    flags = getub(buf, 72);
+    flags = (unsigned char)getub(buf, 72);
     if ((flags & 0x0f) != 0x03) /* mode 3 is navigation */
 	return mask;
     /*@ -charint @*/
@@ -117,12 +117,12 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 
     session->gpsdata.satellites_used = (int)getub(buf,71) & 0x0f;
     clear_dop(&session->gpsdata.dop);
-    session->gpsdata.dop.hdop = getleuw(buf,66) * 0.1;
-    session->gpsdata.dop.vdop = getleuw(buf,68) * 0.1;
+    /*@i3@*/session->gpsdata.dop.hdop = getleuw(buf,66) * 0.1;
+    /*@i3@*/session->gpsdata.dop.vdop = getleuw(buf,68) * 0.1;
     /* other DOP if available */
     mask |= DOP_SET | USED_SET;
 
-    flags = getub(buf,70);
+    flags = (unsigned char)getub(buf,70);
     switch (flags & 0x1f) {
 	    case 2:
 		session->gpsdata.fix.mode = MODE_3D;
@@ -398,7 +398,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 	session->gpsdata.PRN[i] = (int)getub(buf, 11*i + 15) & 0x1f;
 	session->gpsdata.ss[i] = (double)getub(buf, 11*i * 15 +1 )/4.0;
 	session->gpsdata.raw.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
-	ul = getleul(buf, 11*i * 15 + 6);
+	ul = (ulong)getleul(buf, 11*i * 15 + 6);
 
 	session->gpsdata.raw.satstat[i] = (unsigned int)(ul & 0x03L);
 	session->gpsdata.raw.carrierphase[i] = (double)((ul >> 2) & 0x03ffL);
