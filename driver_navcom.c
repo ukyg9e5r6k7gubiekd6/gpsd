@@ -716,8 +716,10 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
+    /*@ ignore @*//*@ splint is confused @*/
     session->gpsdata.skyview_time = 
 	gpstime_to_unix((int)week, tow/1000.0f) - session->context->leap_seconds;
+    /*@ end @*/
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
@@ -885,8 +887,10 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->gpsdata.fix.eph = hrms*1.96;
 	session->gpsdata.fix.epv = alt_sd*1.96;
 #endif /*  __UNUSED__ */
+	/*@ ignore @*//*@ splint is confused @*/
 	session->gpsdata.fix.time = 
 	    gpstime_to_unix((int)week, tow/1000.0f) - session->context->leap_seconds;
+	/*@ end @*/
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO,

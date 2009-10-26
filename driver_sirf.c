@@ -368,8 +368,10 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	return 0;
 
     gpsd_zero_satellites(&session->gpsdata);
+    /*@ ignore @*//*@ splint is confused @*/
     session->gpsdata.skyview_time
 	    = gpstime_to_unix(getbesw(buf, 1), getbeul(buf, 3)*1e-2) - session->context->leap_seconds;
+    /*@ end @*/
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
 	bool good;
@@ -447,9 +449,11 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 		navtype,session->gpsdata.status,session->gpsdata.fix.mode);
     /* byte 20 is HDOP, see below */
     /* byte 21 is "mode 2", not clear how to interpret that */
+    /*@ ignore @*//*@ splint is confused @*/
     session->gpsdata.fix.time =
 	gpstime_to_unix(getbesw(buf, 22), getbeul(buf, 24)*1e-2) -
 	session->context->leap_seconds;
+    /*@ end @*/
 #ifdef NTPSHM_ENABLE
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_2) == 0)

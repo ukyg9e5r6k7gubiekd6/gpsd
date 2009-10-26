@@ -535,7 +535,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.fix.track += 360.0;
 	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
-	    if ((session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG) > 180.0)
+	    /*@i1@*/session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
+	    if (session->gpsdata.fix.longitude > 180.0)
 		session->gpsdata.fix.longitude -= 360.0;
 	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
 	    session->gpsdata.fix.altitude  = sl2 * 1e-3 - session->gpsdata.separation;;
@@ -556,8 +557,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    session->driver.tsip.gps_week = s4;
+	    /*@ ignore @*//*@ splint is confused @*/
 	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
+	    /*@ end @*/
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET;
 	    gpsd_report(LOG_DATA,
 		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
@@ -594,8 +597,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
+	    /*@ ignore @*//*@ splint is confused @*/
 	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s1, ul1 * 1e-3) - session->context->leap_seconds;
+	    /*@ end @*/
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t)0) {	/* Fix Available */
@@ -608,7 +613,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.mode = MODE_3D;
 	    }
 	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
-	    session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
+	    /*@i1@*/session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
 	    if (session->gpsdata.fix.longitude > 180.0)
 		session->gpsdata.fix.longitude -= 360.0;
 	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
