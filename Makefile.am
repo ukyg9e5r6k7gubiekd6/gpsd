@@ -354,6 +354,8 @@ noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
 nodist_include_HEADERS = gpsd.h
 include_HEADERS = gps.h libgpsmm.h
 
+# Note: packaging/gpsd.spec is generated, but it needs to be in the
+# tarball in order for 'make diat-rpm' to work.
 EXTRA_DIST = \
 	autogen.sh \
 	jsongen.py \
@@ -400,6 +402,7 @@ EXTRA_DIST = \
 	libgps.pc.in \
 	libgpsd.pc.in \
 	gpscap.ini \
+	packaging/gpsd.spec \
 	packaging/etc_default_gpsd \
 	packaging/etc_init.d_gpsd \
 	packaging/etc_init.d_gpsd_rpm
