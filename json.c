@@ -110,10 +110,10 @@ static int json_internal_read_object(const char *cp,
 #endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
     char valbuf[JSON_VAL_MAX+1], *pval = NULL;
-    bool value_quoted;
+    bool value_quoted = false;
     char uescape[5];	/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
-    int substatus, maxlen, n;
+    int substatus, n, maxlen = 0;
     unsigned int u;
     const struct json_enum_t *mp;
     char *lptr;
