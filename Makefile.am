@@ -356,6 +356,7 @@ include_HEADERS = gps.h libgpsmm.h
 
 EXTRA_DIST = \
 	autogen.sh \
+	jsongen.py \
 	README \
 	INSTALL \
 	COPYING \
