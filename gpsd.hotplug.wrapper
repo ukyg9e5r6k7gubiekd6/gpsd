@@ -3,7 +3,6 @@
 
 if [ -r /etc/default/gpsd ]; then
   . /etc/default/gpsd
-  [ "$START_DAEMON" = "true" ] || exit 0
   [ "$USBAUTO" = "true" ] || exit 0
 fi
 
