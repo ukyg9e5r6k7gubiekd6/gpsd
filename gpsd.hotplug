@@ -6,7 +6,9 @@
 # purposes.
 import sys, time, os, syslog, glob, socket, stat
 
-CONTROL_SOCKET = "/var/run/gpsd.sock"
+CONTROL_SOCKET = os.getenv('GPSD_SOCKET') or "/var/run/gpsd.sock"
+GPSD_OPTIONS = os.getenv('GPSD_OPTIONS') or ""
+
 WHEREAMI = __file__
 
 def gpsd_control_connect():
@@ -33,7 +35,7 @@ def gpsd_control(action, argument):
     if connect:
         syslog.syslog("reached a running gpsd")
     elif action == 'add':
-        gpsdcmd = "gpsd -F " + CONTROL_SOCKET
+        gpsdcmd = "gpsd %s -F %s" (GPSD_OPTIONS, CONTROL_SOCKET)
         syslog.syslog("launching %s" % gpsdcmd)
         os.system(gpsdcmd)
         connect = gpsd_control_connect()
