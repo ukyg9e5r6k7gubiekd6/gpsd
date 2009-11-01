@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 # $Id$
 
 if [ -r /etc/default/gpsd ]; then
@@ -7,7 +7,7 @@ if [ -r /etc/default/gpsd ]; then
   [ "$USBAUTO" = "true" ] || exit 0
 fi
 
-if [ "$ACTION" == "remove" ] ; then
+if [ "$ACTION" = "remove" ] ; then
   if [ $(echo $DEVLINKS | grep -q /dev/gps) ] ; then
     exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
   fi
@@ -19,7 +19,7 @@ wait_for_file() {
     [ -e "$1" ] && return 0
     local count=0
     while sleep 1; do
-        let count=count+1
+        count=$(( $count + 1 ))
          [ -e "$1" ] && return 0
         if [ $count -gt 60 ]; then
             return 1
