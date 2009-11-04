@@ -566,7 +566,7 @@ bool ubx_write(struct gps_device_t *session,
 
    session->msgbuf[6 + data_len] = CK_A;
    session->msgbuf[7 + data_len] = CK_B;
-   session->msgbuflen = data_len + 7;
+   session->msgbuflen = data_len + 8;
    /*@ +type @*/
 
    gpsd_report(LOG_IO,
