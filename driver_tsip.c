@@ -98,6 +98,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     gpsd_report(LOG_IO, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
     (void)time(&now);
 
+    session->cycle_end_reliable = true;
     switch (id) {
     case 0x13:		/* Packet Received */
 	u1 = getub(buf,0);
@@ -221,7 +222,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f2) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
-	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET;
+	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET | REPORT_SET;
 	gpsd_report(LOG_DATA, "SPPLLA 0x4a "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
 		    session->gpsdata.fix.time,
@@ -473,7 +474,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->gpsdata.fix.latitude,
 		    session->gpsdata.fix.longitude,
 		    session->gpsdata.fix.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET;
+	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET | REPORT_SET;
 	gpsd_report(LOG_DATA, "DPPLLA 0x84 "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
 		    session->gpsdata.fix.time,
@@ -561,7 +562,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.fix.time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
 	    /*@ end @*/
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET | REPORT_SET;
 	    gpsd_report(LOG_DATA,
 		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
@@ -630,7 +631,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.fix.track += 360.0;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET | REPORT_SET;
 	    gpsd_report(LOG_DATA,
 		"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
@@ -719,7 +720,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 	  }
 
-	  mask |= LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | CLEAR_SET;
+	  mask |= LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | CLEAR_SET | REPORT_SET;
 	  gpsd_report(LOG_DATA, "SP-TPS 0xac "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
 		    session->gpsdata.fix.time,
