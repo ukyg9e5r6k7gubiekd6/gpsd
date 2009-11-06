@@ -195,7 +195,7 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (isnan(datap->dop.vdop)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"xdop\":%.2f,", datap->dop.vdop);
+		       "\"zdop\":%.2f,", datap->dop.vdop);
     if (isnan(datap->dop.tdop)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
