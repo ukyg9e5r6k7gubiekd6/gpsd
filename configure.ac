@@ -255,6 +255,7 @@ dnl Check for X libraries
 ac_x="no"
 if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   then
+  X_LIBS=-lX11
   AC_CHECK_HEADERS(X11/xpm.h xpm.h)
   if test x"$ac_cv_header_X11_xpm_h" = "xno" &&
      test x"$ac_cv_header_xpm_h" = "xno"; then
@@ -267,7 +268,6 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   LIBS="$LIBS $X_EXTRA_LIBS"
   CFLAGS="$CFLAGS $X_CFLAGS"
   CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-  LDFLAGS="$LDFLAGS $X_LIBS"
   AC_SUBST(X_LIBS)
   AC_SUBST(X11_LIBS)
   AC_SUBST(X_PRE_LIBS)
