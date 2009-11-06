@@ -96,6 +96,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <signal.h>
+#include <stdbool.h>
 
 #include "gpsd_config.h"
 #ifdef HAVE_NCURSES_H
@@ -115,7 +116,6 @@
 
 static struct gps_data_t *gpsdata;
 static time_t status_timer;    /* Time of last state change. */
-static time_t misc_timer;    /* Misc use timer. */
 static int state = 0;   /* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 static float altfactor = METERS_TO_FEET;
 static float speedfactor = MPS_TO_MPH;
@@ -124,11 +124,11 @@ static char *speedunits = "mph";
 
 static WINDOW *datawin, *satellites, *messages;
 
-static int raw_flag=0;
-static int silent_flag=0;
-static int magnetic_flag=0;
-static int compass_flag=0;
-static int got_gps_type=0;
+static bool got_gps_type=false;
+static bool raw_flag=false;
+static bool silent_flag=false;
+static bool magnetic_flag=false;
+static bool compass_flag=false;
 static char gps_type[26];
 static int window_length;
 static int display_sats;
@@ -180,7 +180,7 @@ static float true2magnetic(double lat, double lon, double heading)
   } else {
     /* We don't know how to compute magnetic heading for this
        location. */
-    magnetic_flag=0;
+    magnetic_flag=false;
   }
 
   /* No negative headings. */
@@ -217,35 +217,6 @@ static void die(int sig UNUSED)
 
 static enum deg_str_type deg_type = deg_dd;
 
-/* This gets called once for each new sentence until we figure out
-   what's going on and switch to either update_gps_panel() or
-   update_compass_panel(). */
-static void update_probe(struct gps_data_t *gpsdata,
-		       char *message,
-		       size_t len UNUSED)
-{
-  /* Send an 'i' once per second until we figure out what the GPS
-     device is. */
-  if(time(NULL)-misc_timer > 2) {
-    (void)gps_send(gpsdata, "i\n");
-    (void)fprintf(stderr,"Probing...\n");
-    misc_timer=time(NULL);
-  }
-
-  assert(message != NULL);
-  if(strncmp(message,"GPSD,I=",6)==0) {
-    message+=7;
-    (void)strlcpy(gps_type, message, sizeof(gps_type));
-    got_gps_type=1;
-    /* If we're hooked to a compass, we display an entirely different
-       screen and label the data much differently. */
-    if(strstr(message,"True North")) {
-      compass_flag=1;
-    }
-  }
-}
-
-
 /*@ -globstate @*/
 static void windowsetup(void){
   /* Set the window sizes per the following criteria:
@@ -271,12 +242,12 @@ static void windowsetup(void){
 
   getmaxyx(stdscr,ysize,xsize);
 
-  if(compass_flag==1) {
+  if(compass_flag) {
     if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
-      raw_flag = 0;
+      raw_flag = false;
       window_length = MIN_COMPASS_DATAWIN_SIZE;
     } else if(ysize > MIN_COMPASS_DATAWIN_SIZE) {
-      raw_flag = 1;
+      raw_flag = true;
       window_length = MIN_COMPASS_DATAWIN_SIZE;
     } else {
       (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_COMPASS_DATAWIN_SIZE);
@@ -288,23 +259,23 @@ static void windowsetup(void){
     }
   } else {
     if(ysize == MAX_SATWIN_SIZE) {
-      raw_flag = 0;
+      raw_flag = false;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize == MAX_SATWIN_SIZE + 1) {
-      raw_flag = 1;
+      raw_flag = true;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize > MAX_SATWIN_SIZE + 2) {
-      raw_flag = 1;
+      raw_flag = true;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize > MIN_GPS_DATAWIN_SIZE) {
-      raw_flag = 0;
-      window_length = ysize - raw_flag;
-      display_sats = window_length - SATWIN_OVERHEAD - raw_flag;
+      raw_flag = false;
+      window_length = ysize - (int)raw_flag;
+      display_sats = window_length - SATWIN_OVERHEAD - (int)raw_flag;
     } else if(ysize == MIN_GPS_DATAWIN_SIZE) {
-      raw_flag = 0;
+      raw_flag = false;
       window_length = MIN_GPS_DATAWIN_SIZE;
       display_sats = window_length - SATWIN_OVERHEAD - 1;
     } else {
@@ -318,13 +289,13 @@ static void windowsetup(void){
   }
 
   /* Set up the screen for either a compass or a gps receiver. */
-  if(compass_flag==1) {
+  if(compass_flag) {
     /* We're a compass, set up accordingly. */
 
     /*@ -onlytrans @*/
     datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
     (void)nodelay(datawin,(bool)TRUE);
-    if(raw_flag==1) {
+    if(raw_flag) {
       messages   = newwin(0, 0, window_length, 0);
 
       /*@ +onlytrans @*/
@@ -352,7 +323,7 @@ static void windowsetup(void){
     datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
     satellites = newwin(window_length, SATELLITES_WIDTH, 0, DATAWIN_WIDTH);
     (void)nodelay(datawin,(bool)TRUE);
-    if(raw_flag==1) {
+    if(raw_flag) {
       messages   = newwin(ysize - (window_length), xsize, window_length, 0);
 
       /*@ +onlytrans @*/
@@ -439,19 +410,19 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in receiver type. */
-  if(got_gps_type==1)
+  if(got_gps_type)
     (void)snprintf(scr, sizeof(scr), "%s",gps_type);
   else
     (void)snprintf(scr, sizeof(scr), "unknown");
   (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Be quiet if the user requests silence. */
-  if(silent_flag==0 && raw_flag==1) {
+  if(!silent_flag && raw_flag) {
     (void)wprintw(messages, "%s\n", message);
   }
 
   (void)wrefresh(datawin);
-  if(raw_flag==1) {
+  if(raw_flag) {
     (void)wrefresh(messages);
   }
 }
@@ -551,7 +522,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
   /* Fill in the heading. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-    if(magnetic_flag==0) {
+    if(!magnetic_flag) {
       (void)snprintf(scr, sizeof(scr), "%.1f deg (true)", gpsdata->fix.track);
     } else {
       (void)snprintf(scr, sizeof(scr), "%.1f deg (mag) ", true2magnetic(gpsdata->fix.latitude, gpsdata->fix.longitude, gpsdata->fix.track));
@@ -590,7 +561,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the receiver type. */
-  if(got_gps_type==1) {
+  if(got_gps_type) {
     (void)snprintf(scr, sizeof(scr), "%s",gps_type);
   } else {
     (void)snprintf(scr, sizeof(scr), "unknown");
@@ -638,7 +609,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     }
 
   /* Be quiet if the user requests silence. */
-  if(silent_flag==0 && raw_flag==1) {
+  if(!silent_flag && raw_flag) {
     (void)wprintw(messages, "%s\n", message);
   }
 
@@ -650,7 +621,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
   (void)wrefresh(datawin);
   (void)wrefresh(satellites);
-  if(raw_flag==1) {
+  if(raw_flag) {
     (void)wrefresh(messages);
   }
 }
@@ -673,6 +644,40 @@ static void usage( char *prog)
   exit(1);
 }
 
+/*
+ * No protocol dependencies above this line
+ */
+
+static time_t misc_timer;    /* Misc use timer. */
+
+/* This gets called once for each new sentence until we figure out
+   what's going on and switch to either update_gps_panel() or
+   update_compass_panel(). */
+static void update_probe(struct gps_data_t *gpsdata,
+		       char *message,
+		       size_t len UNUSED)
+{
+  /* Send an 'i' once per second until we figure out what the GPS
+     device is. */
+  if(time(NULL)-misc_timer > 2) {
+    (void)gps_send(gpsdata, "i\n");
+    (void)fprintf(stderr,"Probing...\n");
+    misc_timer=time(NULL);
+  }
+
+  assert(message != NULL);
+  if(strncmp(message,"GPSD,I=",6)==0) {
+    message+=7;
+    (void)strlcpy(gps_type, message, sizeof(gps_type));
+    got_gps_type=true;
+    /* If we're hooked to a compass, we display an entirely different
+       screen and label the data much differently. */
+    if(strstr(message,"True North")) {
+      compass_flag=true;
+    }
+  }
+}
+
 int main(int argc, char *argv[])
 {
   int option;
@@ -687,10 +692,10 @@ int main(int argc, char *argv[])
   while ((option = getopt(argc, argv, "hVl:sm")) != -1) {
     switch (option) {
     case 'm':
-      magnetic_flag=1;
+      magnetic_flag=true;
       break;
     case 's':
-      silent_flag=1;
+      silent_flag=true;
       break;
     case 'V':
       (void)fprintf(stderr, "SVN ID: $Id$ \n");
@@ -785,7 +790,7 @@ int main(int argc, char *argv[])
     /* Give up after ten seconds. */
     if(time(NULL)-status_timer >= 10) {
       (void)strlcpy(gps_type, "unknown", sizeof(gps_type));
-      got_gps_type=1;
+      got_gps_type=true;
     }
   }
 
@@ -798,7 +803,7 @@ int main(int argc, char *argv[])
   windowsetup();
 
   /* Here's where updates go now that things are established. */
-  if(compass_flag==1) {
+  if(compass_flag) {
     gps_set_raw_hook(gpsdata, update_compass_panel);
   } else {
     gps_set_raw_hook(gpsdata, update_gps_panel);
@@ -842,11 +847,7 @@ int main(int argc, char *argv[])
 
       /* Toggle spewage of raw gpsd data. */
     case 's':
-      if(silent_flag==0) {
-	silent_flag=1;
-      } else {
-	silent_flag=0;
-      }
+	silent_flag = !silent_flag;
       break;
 
       /* Clear the spewage area. */
