@@ -240,7 +240,8 @@ stamp-python-modules: gpspacket.c gpslib.c libgps.la setup.py
 		$(PYTHON) setup.py build_ext \
 			--build-lib '$(srcdir)' \
 			--build-temp '$(srcdir)/build' \
-			--include-dirs '$(srcdir):.'
+			--include-dirs '$(srcdir):.'\
+			--mangenerator '$(MANGENERATOR)'
 	@mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 endif

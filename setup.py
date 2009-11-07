@@ -18,6 +18,16 @@ import sys
 needed_files = ['gpsd.h', 'packet_names.h', 'gpscat.1', 'gpsfake.1', 'gpsprof.1']
 created_files = []
 
+manpages = []
+try:
+    where = sys.argv.index('--mangenerator')
+    # Doesn't matter what it is, just that we have one
+    if sys.argv[where+1]:
+        manpages=[('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
+    sys.argv = sys.argv[:where] + sys.argv[where+2:]
+except ValueError:
+    print "No XML processor, omitting manual-page installation."
+
 if not 'clean' in sys.argv:
     abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
     if not os.path.exists(os.path.join(abs_builddir, 'gpsd_config.h')):
@@ -48,6 +58,5 @@ setup( name="gpsd",
     	Extension("gpslib", ["gpslib.c", "geoid.c"])
         ],
        py_modules = ['gpsfake','gps', 'leapsecond'],
-       data_files=[('bin', ['gpscat','gpsfake','gpsprof']),
-           ('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
+       data_files=[('bin', ['gpscat','gpsfake','gpsprof'])] + manpages
      )
