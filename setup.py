@@ -24,8 +24,11 @@ try:
     # Doesn't matter what it is, just that we have one
     if sys.argv[where+1]:
         manpages=[('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
+        print "Installing manual pages, generator is", sys.argv[where+1]
     sys.argv = sys.argv[:where] + sys.argv[where+2:]
 except ValueError:
+    pass
+if not manpages:
     print "No XML processor, omitting manual-page installation."
 
 if not 'clean' in sys.argv:
