@@ -1737,7 +1737,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	    --errend;
 	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
-		       (int)(errend-buf), buf);
+		       (int)(errend-buf+1), buf);
 	buf += strlen(buf);
     }
 	bailout:
