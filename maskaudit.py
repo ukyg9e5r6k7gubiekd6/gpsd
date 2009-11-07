@@ -73,26 +73,26 @@ const char *gpsd_maskdump(gps_mask_t set)
 {
     static char buf[%d];
     const struct {
-        gps_mask_t      mask;
-        const char      *name;
+	gps_mask_t      mask;
+	const char      *name;
     } *sp, names[] = {"""  % (maxout + 3,)
             for (flag, value) in source.primitive_masks:
                 stem = flag
                 if stem.endswith("_SET"):
                     stem = stem[:-4]
-                print "        {%s,\t\"%s\"}," % (flag, stem)
+                print "\t{%s,\t\"%s\"}," % (flag, stem)
             print '''\
     };
 
+    bzero(buf, sizeof(buf));
     buf[0] = '{';
-    buf[1] = '\\0';
     for (sp = names; sp < names + sizeof(names)/sizeof(names[0]); sp++)
-        if ((set & sp->mask)!=0) {
-            (void)strlcat(buf, sp->name, sizeof(buf));
-            (void)strlcat(buf, "|", sizeof(buf));
-        }
-    if (buf[0] != \'\\0\')
-        buf[strlen(buf)-1] = \'\\0\';
+	if ((set & sp->mask)!=0) {
+	    (void)strlcat(buf, sp->name, sizeof(buf));
+	    (void)strlcat(buf, "|", sizeof(buf));
+	}
+    if (buf[1] != \'\\0\')
+	buf[strlen(buf)-1] = \'\\0\';
     (void)strlcat(buf, "}", sizeof(buf));
     return buf;
 }
