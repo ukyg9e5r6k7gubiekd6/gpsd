@@ -1,78 +1,159 @@
 #!/bin/sh
-#
-#	Authors: Tilman Koschnick <til@subnetz.org>
-#                Bernd Zeimetz <bzed@debian.org>
-#
-
 ### BEGIN INIT INFO
 # Provides:          gpsd
-# Required-Start:    $syslog $network dbus
-# Should-Start:      bluetooth
-# Required-Stop:     $syslog $network
+# Required-Start:    $remote_fs $syslog $network
+# Should-Start:      bluetooth dbus udev
+# Required-Stop:     $remote_fs $syslog $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start the GPS (Global Positioning System) daemon
+# Short-Description: GPS (Global Positioning System) daemon start/stop script
+# Description:       Start/Stop script for the gpsd service daemon,
+#                    which is able to monitor one or more GPS devices
+#                    connected to a host computer, making all data on
+#                    the location and movements of the sensors available
+#                    to be queried on TCP port 2947.
 ### END INIT INFO
 
-set -e
+# Author: Bernd Zeimetz <bzed@debian.org>
+#
+# Please remove the "Author" lines above and replace them
+# with your own name if you copy and modify this script.
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/sbin/gpsd
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="GPS (Global Positioning System) daemon"
-PIDFILE="/var/run/gpsd.pid"
-SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
+NAME=gpsd
+DAEMON=/usr/sbin/$NAME
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
 
-test -x $DAEMON || exit 0
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
 
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+if [ -z "$GPSD_SOCKET" ] && [ -z "$DEVICES" ]; then
+	GPSD_SOCKET=/var/run/gpsd.sock
+fi
+
+if [ -n "$GPSD_SOCKET" ]; then
+        GPSD_OPTIONS="$GPSD_OPTIONS -F $GPSD_SOCKET"
+fi
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
 . /lib/lsb/init-functions
 
-# include gpsd defaults
-if [ -f /etc/default/gpsd ] ; then
-	. /etc/default/gpsd
-else
-	log_failure_msg "gpsd: error: Cannot find /etc/default/gpsd."
-	exit 1
-fi
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+		|| return 1
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
+		$GPSD_OPTIONS -P $PIDFILE $DEVICES \
+		|| return 2
+}
+
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+	# Return
+	#   0 if daemon has been stopped
+	#   1 if daemon was already stopped
+	#   2 if daemon could not be stopped
+	#   other if a failure occurred
+	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+	RETVAL="$?"
+	[ "$RETVAL" = 2 ] && return 2
+	# Many daemons don't delete their pidfiles when they exit.
+	rm -f $PIDFILE
+	return "$RETVAL"
+}
+
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+	#
+	# If the daemon can reload its configuration without
+	# restarting (for example, when it is sent a SIGHUP),
+	# then implement that here.
+	#
+	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+	return 0
+}
 
 case "$1" in
   start)
-	if [ "x$START_DAEMON" = "xtrue" ] ; then
-		log_daemon_msg "Starting $DESC" "gpsd"
-		start-stop-daemon --start --quiet \
-			--exec $DAEMON -- $DAEMON_OPTS -P $PIDFILE $DEVICES \
-			&& log_end_msg 0 \
-			|| log_end_msg 1
+        if [ "$START_DAEMON" = "true" ]; then
+		[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+		do_start
+		case "$?" in
+			0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+			2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+		esac
 	else
-		log_daemon_msg "Not starting $DESC" "gpsd" && log_end_msg 0
-	fi		
+		[ "$VERBOSE" != no ] && \
+			log_daemon_msg "Not starting $DESC" "$NAME" && \
+			log_end_msg 0
+	fi
 	;;
   stop)
-	if [ "x$START_DAEMON" = "xtrue" ] ; then
-		log_daemon_msg "Stopping $DESC" "gpsd"
-		WARN=$(start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE)
-		log_end_msg 0
-		[ -n "$WARN" ] && log_warning_msg "$WARN"
-	else
-		log_daemon_msg "Not stopping $DESC" "gpsd" && log_end_msg 0
-	fi		
-	;;
-  reload|force-reload)
-	log_action_msg "gpsd: Resetting connection to GPS device" 
-	WARN=$(start-stop-daemon --stop --signal 1 --quiet --oknodo --pidfile $PIDFILE)
-	[ -n "$WARN" ] && log_warning_msg "$WARN"
-	;;
-  restart)
-	set +e; $SELF stop; set -e
-		$SELF start
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
 	;;
   status)
-	status_of_proc $DAEMON gpsd
+       status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+       ;;
+  reload|force-reload)
+	log_daemon_msg "Reloading $DESC" "$NAME"
+	do_reload
+	log_end_msg $?
+	;;
+  restart)
+	#
+	# If the "reload" option is implemented then remove the
+	# 'force-reload' alias
+	#
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+	 	# Failed to stop
+		log_end_msg 1
+		;;
+	esac
 	;;
   *)
-	N=/etc/init.d/gpsd
-	echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
-	exit 1
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	exit 3
 	;;
 esac
 
-exit 0
+:
