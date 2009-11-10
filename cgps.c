@@ -657,11 +657,16 @@ static void update_probe(struct gps_data_t *gpsdata,
 		       char *message,
 		       size_t len UNUSED)
 {
+  int ret;
+
   /* Send an 'i' once per second until we figure out what the GPS
      device is. */
   if(time(NULL)-misc_timer > 2) {
-    (void)gps_send(gpsdata, "i\n");
     (void)fprintf(stderr,"Probing...\n");
+    ret = gps_send(gpsdata, "i\n");
+    if ( ret ) {
+        (void)fprintf(stderr,"Probing send failed\n");
+    }
     misc_timer=time(NULL);
   }
 
@@ -687,6 +692,7 @@ int main(int argc, char *argv[])
   struct timeval timeout;
   fd_set rfds;
   int data;
+  int ret;
 
   /* Process the options.  Print help if requested. */
   while ((option = getopt(argc, argv, "hVl:sm")) != -1) {
@@ -768,15 +774,22 @@ int main(int argc, char *argv[])
   misc_timer = status_timer;
 
   /* If the user requested a specific device, try to change to it. */
-  if (source.device != NULL)
-      (void)gps_send(gpsdata, "F=%s\n", source.device);
+  if (source.device != NULL) {
+      ret = gps_send(gpsdata, "F=%s\n", source.device);
+      if ( ret ) {
+          (void)fprintf(stderr,"Device change send failed\n");
+      }
+  }
 
   /* Here's where updates go until we figure out what we're dealing
      with. */
   gps_set_raw_hook(gpsdata, update_probe);
 
   /* Tell me what you are... */
-  (void)gps_send(gpsdata, "i\n");
+  ret = gps_send(gpsdata, "i\n");
+  if ( ret ) {
+      (void)fprintf(stderr,"Probing send failed\n");
+  }
 
   /* Loop for ten seconds looking for a device.  If none found, give
      up and assume "unknown" device type. */
@@ -810,7 +823,10 @@ int main(int argc, char *argv[])
   }
 
   /* Request "w+x" data from gpsd. */
-  (void)gps_send(gpsdata, "w+x\n");
+  ret = gps_send(gpsdata, "w+x\n");
+  if ( ret ) {
+      (void)fprintf(stderr,"w+x send failed\n");
+  }
 
   /* heart of the client */
   for (;;) {
