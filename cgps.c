@@ -663,7 +663,7 @@ static void update_probe(struct gps_data_t *gpsdata,
      device is. */
   if(time(NULL)-misc_timer > 2) {
     (void)fprintf(stderr,"Probing...\n");
-    ret = gps_send(gpsdata, "i\n");
+    ret = gps_send(gpsdata, "I\n");
     if ( ret ) {
         (void)fprintf(stderr,"Probing send failed\n");
     }
@@ -795,16 +795,39 @@ int main(int argc, char *argv[])
      up and assume "unknown" device type. */
   while(got_gps_type==0) {
 
-    /* Sleep for one second. */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
-    (int)select(0,NULL,NULL,NULL,&timeout);
-
     /* Give up after ten seconds. */
     if(time(NULL)-status_timer >= 10) {
       (void)strlcpy(gps_type, "unknown", sizeof(gps_type));
       got_gps_type=true;
     }
+
+    /* watch to see when it has input */
+    FD_ZERO(&rfds);
+    FD_SET(gpsdata->gps_fd, &rfds);
+
+    /* Sleep for one second. */
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
+    /* check if we have new information */
+    data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
+
+    if (data == -1) {
+      fprintf( stderr, "cgps: socket error 1\n");
+      exit(2);
+    } else if( data ) {
+      /* code that calls gps_poll(gpsdata) */
+      if (gps_poll(gpsdata) != 0) {
+        fprintf( stderr, "cgps: socket error 2\n");
+	die(1);
+      }
+    }
+
+    ret = gps_send(gpsdata, "I\n");
+    if ( ret ) {
+      (void)fprintf(stderr,"Probing send failed\n");
+    }
+
   }
 
   /* Fire up curses. */
@@ -843,13 +866,14 @@ int main(int argc, char *argv[])
     data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
 
     if (data == -1) {
-      fprintf( stderr, "cgps: socket error\n");
+      fprintf( stderr, "cgps: socket error 3\n");
       exit(2);
-    }
-    else if( data ) {
+    } else if( data ) {
       /* code that calls gps_poll(gpsdata) */
-      if (gps_poll(gpsdata) != 0)
+      if (gps_poll(gpsdata) != 0) {
+        fprintf( stderr, "cgps: socket error 4\n");
 	die(1);
+      }
     }
 
     /* Check for user input. */
