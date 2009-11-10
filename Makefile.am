@@ -310,6 +310,7 @@ MANPAGES_BASE = \
 	rtcm-104.5 \
 	srec.5
 
+if HAVE_XSLT_PROCESSOR
 MANPAGES_DIST = \
 	$(MANPAGES_BASE) \
 	$(RTCM104PAGES_DIST) \
@@ -320,7 +321,6 @@ man_MANS = \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES)
 
-if HAVE_XSLT_PROCESSOR
 #
 # Create Manpages
 #

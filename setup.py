@@ -15,7 +15,7 @@ import sys
 # These dependencies are enforced here and not in the Makefile to make
 # it easier to build the Python parts without building everything else
 # (the user can run 'python setup.py' without having to run 'make').
-needed_files = ['gpsd.h', 'packet_names.h', 'gpscat.1', 'gpsfake.1', 'gpsprof.1']
+needed_files = ['gpsd.h', 'packet_names.h']
 created_files = []
 
 manpages = []
