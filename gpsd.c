@@ -1599,7 +1599,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
 			       json_error_string(status));
-		gpsd_report(LOG_ERROR, reply);
+		gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 	    } else if (sub->policy.watcher) {
 		if (sub->policy.devpath[0] == '\0') {
 		    /* assign all devices */
@@ -1611,12 +1611,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    if (devp == NULL) {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n", sub->policy.devpath); 
-	                gpsd_report(LOG_ERROR, reply);
+	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
 		    } else if (assign_channel(sub, ANY, devp) == NULL)
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n", sub->policy.devpath); 
-	                gpsd_report(LOG_ERROR, reply);
+	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
 		    }
 		}
@@ -1648,7 +1648,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen, 
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
 			       json_error_string(status));
-	        gpsd_report(LOG_ERROR, reply);
+	        gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 		goto bailout;
 	    } else {
 		if (devconf.path[0]!='\0') {
@@ -1657,7 +1657,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			(void)snprintf(reply, replylen, 
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
-	                gpsd_report(LOG_ERROR, reply);
+	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
 		    }
 		} else {
@@ -1667,12 +1667,12 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			(void)strlcat(reply, 
 			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no channels attached.\"}\r\n",
 			  replylen);
-	                gpsd_report(LOG_ERROR, reply);
+	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
 		    } else if (chcount > 1) {
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
-	                gpsd_report(LOG_ERROR, reply);
+	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
 		    } else {
 			/* we should have exactly one device now */
@@ -1746,7 +1746,7 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
 		       (int)(errend-buf+1), buf);
-	gpsd_report(LOG_ERROR, reply);
+	gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 	buf += strlen(buf);
     }
 	bailout:
