@@ -84,7 +84,7 @@ const char *gpsd_maskdump(gps_mask_t set)
             print '''\
     };
 
-    memset(buf, '\0', sizeof(buf));
+    memset(buf, '\\0', sizeof(buf));
     buf[0] = '{';
     for (sp = names; sp < names + sizeof(names)/sizeof(names[0]); sp++)
 	if ((set & sp->mask)!=0) {
