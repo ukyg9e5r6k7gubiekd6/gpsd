@@ -100,12 +100,12 @@ static int json_internal_read_object(const char *cp,
 				     /*@null@*/const char **end)
 {
     /*@ -nullstate -nullderef -mustfreefresh -nullpass -usedef @*/
-    enum {init, await_attr, in_attr, await_value, 
-	  in_val_string, in_escape, in_val_token, post_val} state = 0;
+    enum {init, await_attr, in_attr, await_value, in_val_string, 
+	  in_escape, in_val_token, post_val, post_array} state = 0;
 #ifdef JSONDEBUG
     char *statenames[] = {
-	"init", "await_attr", "in_attr", "await_value", 
-	"in_val_string", "in_escape", "in_val_token", "post_val"
+	"init", "await_attr", "in_attr", "await_value", "in_val_string", 
+	"in_escape", "in_val_token", "post_val", "post_array",
 	};
 #endif /* JSONDEBUG */
     char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
@@ -231,7 +231,7 @@ static int json_internal_read_object(const char *cp,
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
 		if (substatus != 0)
 		    return substatus;
-		state = post_val;
+		state = post_array;
 	    } else if (cursor->type == array) {
 		json_debug_trace(("Array element was specified, but no [.\n"));
 		return JSON_ERR_NOBRAK;
@@ -358,6 +358,8 @@ static int json_internal_read_object(const char *cp,
 		}
 		break;
 	    }
+	    /* FALL THROUGH */
+	case post_array:
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == ',')
