@@ -1063,8 +1063,7 @@ handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 
 		gps_set_raw_hook(gpsdata, update_panel);
 
-		// WATCH_NEWSTYLE forces new protocol, for test purposes 
-		mask = WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE;
+		mask = WATCH_ENABLE|WATCH_RAW;
 		(void)gps_stream(gpsdata, mask, NULL);
 
 		gps_input = XtAppAddInput(app, gpsdata->gps_fd,
