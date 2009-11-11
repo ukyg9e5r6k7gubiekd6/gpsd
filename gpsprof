@@ -65,12 +65,12 @@ class spaceplot:
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
-        else:
-            self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
-            # Sort fixes by distance from centroid
-            self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
-            # Convert fixes to offsets from centroid in meters
-            self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+	# centroid is just arithemtic avg of lat,lon
+        self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
+        # Sort fixes by distance from centroid
+        self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
+        # Convert fixes to offsets from centroid in meters
+        self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
         # Compute CEP(50%)
         cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
         alt_sum = 0
