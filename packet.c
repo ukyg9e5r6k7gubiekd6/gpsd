@@ -1136,7 +1136,21 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif /* ONCORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	else if (lexer->state == TSIP_RECOGNIZED) {
+	    unsigned int pos, dlecnt;
 	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;
+#ifdef TSIP_ENABLE
+	    /* don't count stuffed DLEs in the length */
+	    dlecnt = 0;
+	    for (pos = 0; pos < packetlen; pos ++)
+		if (lexer->inbuffer[pos] == DLE)
+		    dlecnt ++;
+	    if (dlecnt > 2) {
+		dlecnt -= 2;
+		dlecnt /= 2;
+		gpsd_report(LOG_RAW, "Unstuffed %d DLEs\n", dlecnt);
+		packetlen -= dlecnt;
+	    }
+#endif /* TSIP_ENABLE */
 	    if ( packetlen < 5) {
 		lexer->state = GROUND_STATE;
 	    } else {
@@ -1204,11 +1218,17 @@ void packet_parse(struct gps_packet_t *lexer)
 		 * 0x45, Software Version Information, data length 10
 		 * 0x46, Health of Receiver, data length 2
 		 * 0x48, GPS System Messages
+		 * 0x49, Almanac Health Page
 		 * 0x4a, LLA Position, data length 20
 		 * 0x4b, Machine Code Status, data length 3
+		 * 0x4c, Operating Parameters Report
+		 * 0x54, One Satellite Bias
 		 * 0x56, Velocity Fix (ENU), data length 20
+		 * 0x57, Last Computed Fix Report
 		 * 0x5a, Raw Measurements
+		 * 0x5b, Satellite Ephemeris Status
 		 * 0x5c, Satellite Tracking Status, data length 24
+		 * 0x5e, Additional Fix Status Report
 		 * 0x6d, All-In-View Satellite Selection, data length 16+numSV
 		 * 0x82, Differential Position Fix Mode, data length 1
 		 * 0x83, Double Precision XYZ, data length 36
@@ -1230,7 +1250,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */;
 		else if ((0x41 == pkt_id) && ((0x0e == packetlen) || (0x0f == packetlen)))
 		    /* pass */;
-		else if ((0x42 == pkt_id) && (0x14 == packetlen ))
+		else if ((0x42 == pkt_id) && (0x14 == packetlen))
 		    /* pass */;
 		else if ((0x43 == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
@@ -1240,17 +1260,29 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */;
 		else if ((0x48 == pkt_id) && (0x1a == packetlen))
 		    /* pass */;
+		else if ((0x49 == pkt_id) && (0x24 == packetlen))
+		    /* pass */;
 		else if ((0x4a == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
 		else if ((0x4b == pkt_id) && (0x07 == packetlen))
+		    /* pass */;
+		else if ((0x4c == pkt_id) && (0x15 == packetlen))
+		    /* pass */;
+		else if ((0x54 == pkt_id) && (0x10 == packetlen))
 		    /* pass */;
 		else if ((0x55 == pkt_id) && (0x08 == packetlen))
 		    /* pass */;
 		else if ((0x56 == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
+		else if ((0x57 == pkt_id) && (0x0c == packetlen))
+		    /* pass */;
 		else if ((0x5a == pkt_id) && ((0x1d <= packetlen) && (0x1f >= packetlen)))
 		    /* pass */;
+		else if ((0x5b == pkt_id) && (0x24 == packetlen))
+		    /* pass */;
 		else if ((0x5c == pkt_id) && ((0x1c <= packetlen) && (0x1e >= packetlen)))
+		    /* pass */;
+		else if ((0x5e == pkt_id) && (0x06 == packetlen))
 		    /* pass */;
 		else if ((0x5f == pkt_id) && (70 == packetlen))
 		    /* pass */;
