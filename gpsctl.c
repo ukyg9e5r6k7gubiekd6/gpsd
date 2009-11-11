@@ -313,6 +313,7 @@ int main(int argc, char **argv)
 	    exit(0);
 	}
 
+	/*@-boolops@*/
 	if (to_nmea) {
 	    (void)gps_query(gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device); 
 	    if ((gpsdata->set & ERR_SET) || (gpsdata->dev.driver_mode != MODE_NMEA)) {
@@ -329,6 +330,7 @@ int main(int argc, char **argv)
 	    } else
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
+	/*@+boolops@*/
 	if (speed != NULL) {
 	    char parity = 'N';
 	    char stopbits = '1';

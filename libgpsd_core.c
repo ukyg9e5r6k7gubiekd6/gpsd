@@ -143,7 +143,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	state = (int)((state & pps_device) != 0);
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	cycle = timediff(tv, pulse[state]);
-	duration = timediff(tv, pulse[state == 0]);
+	duration = timediff(tv, pulse[(int)(state == 0)]);
 #undef timediff
 
 	if (state == laststate) {

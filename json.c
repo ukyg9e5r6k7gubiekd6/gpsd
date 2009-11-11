@@ -358,7 +358,7 @@ static int json_internal_read_object(const char *cp,
 		}
 		break;
 	    }
-	    /* FALL THROUGH */
+	    /*@fallthrough@*/
 	case post_array:
 	    if (isspace(*cp))
 		continue;

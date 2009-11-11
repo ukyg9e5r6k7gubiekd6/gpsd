@@ -95,10 +95,10 @@ enum {
 #include "packet_states.h"
 };
 
-#define SOH	0x01
-#define DLE	0x10
-#define STX	0x02
-#define ETX	0x03
+#define SOH	(unsigned char)0x01
+#define DLE	(unsigned char)0x10
+#define STX	(unsigned char)0x02
+#define ETX	(unsigned char)0x03
 
 static void nextstate(struct gps_packet_t *lexer,
 		      unsigned char c)
@@ -1141,7 +1141,7 @@ void packet_parse(struct gps_packet_t *lexer)
 #ifdef TSIP_ENABLE
 	    /* don't count stuffed DLEs in the length */
 	    dlecnt = 0;
-	    for (pos = 0; pos < packetlen; pos ++)
+	    for (pos = 0; pos < (unsigned int)packetlen; pos ++)
 		if (lexer->inbuffer[pos] == DLE)
 		    dlecnt ++;
 	    if (dlecnt > 2) {
