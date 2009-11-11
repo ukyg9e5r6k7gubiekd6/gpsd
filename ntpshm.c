@@ -131,6 +131,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     (void)gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
+    shmTime->valid = 0;
     shmTime->count++;
     shmTime->clockTimeStampSec = (time_t)seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
@@ -198,6 +199,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	}
     }
 
+    shmTimeP->valid = 0;
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = 0;
