@@ -925,6 +925,21 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl C++ bindings
+AC_ARG_ENABLE(libgpsmm,
+  AC_HELP_STRING([--disable-libgpsmm],
+		 [don't build C++ bindings]),
+  [ac_libgpsmm=$enableval], [ac_libgpsmm=yes])
+AC_MSG_CHECKING([for C++ support])
+if test x"$ac_libgpsmm" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([LIBGPSMM_ENABLE], 1, [C++ support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL([LIBGPSMM_ENABLE], [test x"$ac_libgpsmm" = x"yes"])
+
 dnl Test for XSLT processor (xsltproc or xmlto)
 AC_CHECK_PROG(WITH_XSLTPROC,[xsltproc],[yes],[no])
 MANGENERATOR=
@@ -1023,6 +1038,7 @@ echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"
+echo "C++ binding             : $ac_libgpsmm"
 echo "Raw Measurements        : $ac_raw"
 echo "	Client Features"
 echo "	---------------"

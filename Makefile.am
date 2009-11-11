@@ -47,7 +47,11 @@ endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = test_float test_bits test_gpsmm test_packet test_mkgmtime test_geoid test_json
+
+check_PROGRAMS = test_float test_bits test_packet test_mkgmtime test_geoid test_json
+if LIBGPSMM_ENABLE
+check_PROGRAMS += test_gpsmm
+endif
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
@@ -212,7 +216,15 @@ maskdump.c: gpsd.h-tail maskaudit.py
 	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				driver_rtcm2.h libgpsmm.cpp packet_states.h
+				driver_rtcm2.h packet_states.h
+
+if LIBGPSMM_ENABLE
+libgps_la_SOURCES += libgpsmm.cpp
+libgps_la_LINK = /bin/sh ./libtool --tag=CXX --mode=link g++ -o $@
+else
+libgps_la_LINK = /bin/sh ./libtool --tag=CC --mode=link gcc -o $@
+endif
+
 nodist_libgps_la_SOURCES = packet_names.h ais_json.i
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
@@ -249,8 +261,13 @@ endif
 clean-local:
 	rm -rf build
 
+if LIBGPSMM_ENABLE
 TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid \
 	test_mkgmtime test_json
+else
+TESTBINS = test_float test_bits test_packet test_geoid \
+	test_mkgmtime test_json
+endif
 
 #
 # Build test_float
@@ -258,11 +275,13 @@ TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid \
 test_float_SOURCES = test_float.c
 test_float_LDADD = $(LIBC) libgps.la -lm
 
+if LIBGPSMM_ENABLE
 #
 # Build test_gpsmm
 #
 test_gpsmm_SOURCES = test_gpsmm.cpp
 test_gpsmm_LDADD = $(LIBC) libgps.la -lm
+endif
 
 #
 # Build test_bits tester
@@ -353,7 +372,12 @@ noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h
 
 nodist_include_HEADERS = gpsd.h
+
+if LIBGPSMM_ENABLE
 include_HEADERS = gps.h libgpsmm.h
+else
+include_HEADERS = gps.h
+endif
 
 # Note: packaging/gpsd.spec is generated, but it needs to be in the
 # tarball in order for 'make diat-rpm' to work.
