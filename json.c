@@ -303,7 +303,7 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    if (value_quoted && (cursor->type != string && cursor->type != check && cursor->map == 0)) { 
+	    if (value_quoted && (cursor->type != string && cursor->type != character && cursor->type != check && cursor->map == 0)) { 
 		json_debug_trace(("Saw quoted value when expecting non-string.\n"));
 		return JSON_ERR_QNONSTRING;
 	    }		    
