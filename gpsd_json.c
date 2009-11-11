@@ -284,7 +284,7 @@ void json_device_dump(const struct gps_device_t *device,
 	}
 	/*@+mustfreefresh@*/
 	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       "\"native\":%d,\"bps\":%d,\"parity\":%c,\"stopbits\":%u,\"cycle\":%2.2f",
+		       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 		       device->gpsdata.dev.driver_mode,
 		       (int)gpsd_get_speed(&device->ttyset),
 		       device->gpsdata.dev.parity,
