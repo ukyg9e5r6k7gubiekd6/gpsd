@@ -192,7 +192,7 @@ static int json_devicelist_read(const char *buf,
 				   .dflt.integer = -1},
 	{"bps",	       integer,    STRUCTOBJECT(struct devconfig_t, baudrate),
 				   .dflt.integer = -1},
-	{"parity",     character,  STRUCTOBJECT(struct devconfig_t, parity),
+	{"parity",     string,     STRUCTOBJECT(struct devconfig_t, parity),
 	                           .dflt.character = 'N'},
 	{"stopbits",   integer,    STRUCTOBJECT(struct devconfig_t, stopbits),
 				   .dflt.integer = -1},
@@ -216,8 +216,9 @@ static int json_devicelist_read(const char *buf,
 
     memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
     status = json_read_object(buf, json_attrs_devices, endptr);
-    if (status != 0)
+    if (status != 0) {
 	return status;
+    }
 
     gpsdata->devices.time = timestamp();
     gpsdata->set |= DEVICELIST_SET;
