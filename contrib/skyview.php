@@ -39,7 +39,7 @@ $sky = array();
 $fd = @fopen($argv[1], 'r');
 while (!feof($fd)){
 	$line = fgets($fd);
-	if (preg_match('/,Y=\S+ [0-9\.]+ (\d+):/', $line, $m)){
+	if (preg_match('/,Y=\S+ [0-9\.\?]+ (\d+):/', $line, $m)){
 		$n = $m[1];	
 		$s = explode(':', $line);
 		for($i = 1; $i <= $n; $i++){
