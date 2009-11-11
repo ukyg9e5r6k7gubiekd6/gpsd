@@ -141,9 +141,17 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
 
 	state = (int)((state & pps_device) != 0);
+#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
+	cycle = timediff(tv, pulse[state]);
+	duration = timediff(tv, pulse[state == 0]);
+#undef timediff
 
 	if (state == laststate) {
-	    if (++unchanged == 10) {
+	    /* some pulses may be so short that state never changes */
+	    if ( 999900 < cycle && 1000100 > cycle ) {
+		duration = 0;
+	        unchanged = 0;
+	    } else if (++unchanged == 10) {
 		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor terminates\n");
 		break;
 	    }
@@ -156,7 +164,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	}
 
 	/*@ +boolint @*/
-	if ( session->context->fixcnt > 3 ) {
+	if ( 3 < session->context->fixcnt ) {
 	    /* Garmin doc says PPS is valid after four good fixes. */
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
@@ -171,6 +179,10 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	     * Some GPS instead output a square wave that is 0.5 Hz and each
 	     * edge denotes the start of a second.
 	     *
+	     * Some GPS, like the Globalsat MR-350P, output a 1uS pulse.
+	     * The pulse is so short that TIOCMIWAIT sees a state change
+	     * but by the time TIOCMGET is called the pulse is gone.
+	     *
 	     * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
 	     * square wave where the leading edge is the start of a second
 	     *
@@ -178,10 +190,6 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	     * 40ms which gives a 160ms pulse before going high.
 	     *
 	     */
-#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	    cycle = timediff(tv, pulse[state]);
-	    duration = timediff(tv, pulse[state == 0]);
-#undef timediff
 
 	    if (cycle > 199000 && cycle < 201000 ) {
 		/* 5Hz cycle */
