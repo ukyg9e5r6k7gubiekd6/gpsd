@@ -242,12 +242,13 @@ static void usage(void)
 {
     const struct gps_type_t **dp;
 
-    (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
+    (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-G] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
   -b		     	    = bluetooth-safe: open data sources read-only\n\
   -n			    = don't wait for client connects to poll GPS\n\
   -N			    = don't go into background\n\
   -F sockfile		    = specify control socket location\n\
+  -G         		    = make gpsd listen on INADDR_ANY\n\
   -P pidfile	      	    = set file to record process ID \n\
   -D integer (default 0)    = set debug level \n\
   -S integer (default %s) = set port for daemon \n\
