@@ -70,8 +70,11 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
 	(void)strlcat(buf, "\n", BUFSIZ);
-    if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0)
+    if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
+	gpsd_report(LOG_ERROR, "gps_query(), write failed\n");
 	return -1;
+    }
+    gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
     return gps_poll(gpsdata);
 }
 
