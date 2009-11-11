@@ -64,6 +64,7 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 {
     char buf[BUFSIZ];
     va_list ap;
+    int ret;
 
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
@@ -75,7 +76,12 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
-    return gps_poll(gpsdata);
+    ret = gps_poll(gpsdata);
+    if ( ERR_SET & gpsdata->set) {
+	    gpsd_report(LOG_ERROR, "gps_query() error\n");
+    }
+    return ret;
+
 }
 
 static void onsig(int sig)
