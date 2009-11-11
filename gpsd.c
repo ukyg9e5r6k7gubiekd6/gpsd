@@ -1916,10 +1916,14 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
 
 #ifdef NTPSHM_ENABLE
-    errno = 0;
-    if (nice(NICEVAL) == -1 && errno != 0)
-	gpsd_report (LOG_INF, "Priority setting failed.\n");
-    (void)ntpshm_init(&context, nowait);
+    if (getuid() == 0) {
+	errno = 0;
+	if (nice(NICEVAL) != -1 || errno == 0)
+	    gpsd_report (2, "Priority setting failed.\n");
+	(void)ntpshm_init(&context, nowait);
+    } else {
+	gpsd_report (LOG_INF, "Unable to start ntpshm.  gpsd must run as root.\n");
+    }
 #endif /* NTPSHM_ENABLE */
 
 #ifdef DBUS_ENABLE
