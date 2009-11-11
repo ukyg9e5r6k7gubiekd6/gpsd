@@ -6,6 +6,9 @@
  */
 
 #include <sys/types.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -75,7 +78,7 @@ void ntpshm_init(struct gps_context_t *context, bool enablepps)
     int i;
 
     for (i = 0; i < NTPSHMSEGS; i++)
-	context->shmTime[i] = getShmTime(i);
+	context->shmTime[i] = (i >= 2 || getuid() == 0) ? getShmTime(i) : NULL;
     memset(context->shmTimeInuse,0,sizeof(context->shmTimeInuse));
 # ifdef PPS_ENABLE
     context->shmTimePPS = enablepps;
