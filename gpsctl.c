@@ -77,7 +77,7 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
     ret = gps_poll(gpsdata);
-    if ( ERR_SET & gpsdata->set) {
+    if (ERR_SET & gpsdata->set) {
 	gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
     }
     return ret;
@@ -314,16 +314,16 @@ int main(int argc, char **argv)
 	}
 
 	if (to_nmea) {
-	    (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":0}\r\n", device); 
-	    if (gpsdata->dev.driver_mode != MODE_NMEA) {
+	    (void)gps_query(gpsdata, "?DEVICE={\"path\":\"%s\",\"mode\":0}\r\n", device); 
+	    if ((gpsdata->set & ERR_SET) || (gpsdata->dev.driver_mode != MODE_NMEA)) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
 	}
 	else if (to_binary) {
-	    (void)gps_query(gpsdata, "?DEVICE={\"device\":%s,\"mode\":1}\r\n", device);
-	    if (gpsdata->dev.driver_mode != MODE_BINARY) {
+	    (void)gps_query(gpsdata, "?DEVICE={\"path\":\"%s\",\"mode\":1}\r\n", device);
+	    if ((gpsdata->set & ERR_SET) || (gpsdata->dev.driver_mode != MODE_BINARY)) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->dev.path);
 		status = 1;
 	    } else
