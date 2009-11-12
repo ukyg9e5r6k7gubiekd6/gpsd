@@ -926,10 +926,18 @@ else
 fi
 
 dnl C++ bindings
+if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
+    ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
+    (test "X$CXX" != "Xg++"))) ; then
+  ISCXX="yes"
+else
+  ISCXX="no"
+fi
+
 AC_ARG_ENABLE(libgpsmm,
   AC_HELP_STRING([--disable-libgpsmm],
 		 [don't build C++ bindings]),
-  [ac_libgpsmm=$enableval], [ac_libgpsmm=yes])
+  [ac_libgpsmm=$enableval], [ac_libgpsmm=$ISCXX])
 AC_MSG_CHECKING([for C++ support])
 if test x"$ac_libgpsmm" = "xyes"; then
     AC_MSG_RESULT([yes])
@@ -1038,13 +1046,13 @@ echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"
-echo "C++ binding             : $ac_libgpsmm"
 echo "Raw Measurements        : $ac_raw"
 echo "	Client Features"
 echo "	---------------"
 echo "Build ncurses programs  : $ac_ncurses"
 echo "Enable X11 support      : $ac_x"
 echo "Enable Python support   : $ac_python"
+echo "Enable C++ support      : $ac_libgpsmm"
 echo "------------------------------------------"
 
 if test "xdummy" = "xdummy" -a \
