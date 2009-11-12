@@ -150,12 +150,12 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
-	    if ( 999900 < cycle && 1000100 > cycle ) {
+	    if ( 999000 < cycle && 1001000 > cycle ) {
 		duration = 0;
 	        unchanged = 0;
 	    } else if (++unchanged == 10) {
-		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor terminates\n");
-		break;
+		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
+		sleep(10);
 	    }
 	} else {
 	    gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
