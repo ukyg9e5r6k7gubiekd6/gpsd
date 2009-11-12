@@ -954,7 +954,7 @@ struct gps_data_t {
     void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
 
-    /* Private data - mmay be changed or removed */
+    /* Private data - may be changed or removed */
     union {
 	/* pack things never reported together to reduce structure size */ 
 	/* unusual forms of sensor data that might come up the pipe */ 
