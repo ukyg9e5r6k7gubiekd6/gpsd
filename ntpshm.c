@@ -131,6 +131,20 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     (void)gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
+    /* we use the shmTime mode 1 protocol
+     *
+     * ntpd does this:
+     *
+     * reads valid.  
+     * IFF valid is 1
+     *    reads count
+     *    reads values
+     *    reads count
+     *    IFF count unchanged
+     *        use values
+     *    clear valid
+     *    
+     */
     shmTime->valid = 0;
     shmTime->count++;
     shmTime->clockTimeStampSec = (time_t)seconds;
@@ -199,12 +213,27 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	}
     }
 
+    /* we use the shmTime mode 1 protocol
+     *
+     * ntpd does this:
+     *
+     * reads valid.  
+     * IFF valid is 1
+     *    reads count
+     *    reads values
+     *    reads count
+     *    IFF count unchanged
+     *        use values
+     *    clear valid
+     *    
+     */
     shmTimeP->valid = 0;
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = 0;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
+    /* this is more a jitter/dispersion than precision, but still useful */
     shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     shmTimeP->count++;
     shmTimeP->valid = 1;
