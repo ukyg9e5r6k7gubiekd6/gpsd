@@ -207,41 +207,51 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	     *
 	     */
 
-	    if (cycle < 199000 ) {
+	    if (199000 > cycle) {
 		// too short to even be a 5Hz pulse
 		log = "Too short for 5Hz\n";
-	    } else if ( cycle < 201000 ) {
+	    } else if (201000 > cycle) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
-		if (duration > 45000) {
+		if (45000 > duration) {
 		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
 		    ok = 1;
 		    log = "5Hz PPS pulse\n";
 		}
-	    } else if (cycle < 999000 ) {
+	    } else if (999000 > cycle) {
 		    log = "Too long for 5Hz, too short for 1Hz\n";
-	    } else if ( cycle < 1001000 ) {
+	    } else if (1001000 > cycle) {
 		/* looks like PPS pulse or square wave */
-		if (duration > 499000 && duration < 501000
+
+#if 0
+/* huh? */
 #if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
-		  && session->driver.nmea.ignore_trailing_edge
+		 && session->driver.nmea.ignore_trailing_edge 
 #endif /* GPSCLOCK_ENABLE */
-		  ) {
+#endif
+
+		if (0 == duration) {
+		    ok = 1;
+		    log = "PPS invisible pulse\n";
+		} else if (499000 > duration) {
+		    /* end of the short "half" of the cycle */
+		    /* aka the trailing edge */
+		    log = "PPS 1Hz trailing edge\n";
+		} else if (501000 > duration) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
 		        ok = 1;
 		        log = "PPS square\n";
 		    }
 		} else {
-		    /* looks like PPS pulse */
-		    /* BUG: if no ignore_trailing edge this is 2x a sec */
-		    /* BUG: which edge is the leading edge? */
+		    /* end of the long "half" of the cycle */
+		    /* aka the leading edge */
 		    ok = 1;
-		    log = "PPS pulse\n";
+		    log = "PPS 1Hz leading edge\n";
 		}
-	    } else if (cycle < 1999000 ) {
+	    } else if (1999000 > cycle) {
 		log = "Too long for 1Hz, too short for 2Hz\n";
-	    } else if ( cycle < 2001000) {
+	    } else if (2001000 > cycle) {
 		/* looks like 0.5 Hz square wave */
 		ok = 1;
 		log = "PPS square wave\n";
