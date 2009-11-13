@@ -172,6 +172,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    laststate = state;
 	    unchanged = 0;
 	}
+	pulse[state] = tv;
 	if ( unchanged ) {
 	    // strange, try again
 	    continue;
@@ -273,7 +274,6 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
 	}
 
-	pulse[state] = tv;
     }
 
     return NULL;
