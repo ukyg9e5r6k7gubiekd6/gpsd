@@ -125,6 +125,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
     int pps_device = TIOCM_CAR;
+    int ok = 0;
 
 #if defined(PPS_ON_CTS)
     pps_device = TIOCM_CTS;
@@ -148,12 +149,14 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 #undef timediff
         /*@ -boolint @*/
 
+	ok = 0;
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
 	    if ( 999000 < cycle && 1001000 > cycle ) {
 		duration = 0;
 	        unchanged = 0;
 	    } else if (++unchanged == 10) {
+	        unchanged = 0;
 		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
 		sleep(10);
 	    }
@@ -164,6 +167,12 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    laststate = state;
 	    unchanged = 0;
 	}
+	if ( unchanged ) {
+	    // strange, try again
+	    continue;
+	}
+	gpsd_report(LOG_INF, "PPS: cycle: %d, duration: %d\n",
+	    cycle, duration);
 
 	/*@ +boolint @*/
 	if ( 3 < session->context->fixcnt ) {
@@ -196,10 +205,11 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    if (cycle > 199000 && cycle < 201000 ) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
-		if (duration > 45000)
-		    (void)ntpshm_pps(session, &tv);
-		gpsd_report(LOG_RAW, "5Hz PPS pulse. cycle: %d, duration: %d\n",
-			cycle, duration);
+		if (duration > 45000) {
+		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
+		    ok = 1;
+		    gpsd_report(LOG_RAW, "5Hz PPS pulse");
+		}
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
 		if (duration > 499000 && duration < 501000
@@ -209,28 +219,30 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		  ) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
-			 (void)ntpshm_pps(session, &tv);
+		        ok = 1;
+		        gpsd_report(LOG_RAW, "PPS square\n");
 		    }
 		} else {
 		    /* looks like PPS pulse */
-		    (void)ntpshm_pps(session, &tv);
+		    /* BUG: if no ignore_trailing edge this is 2x a sec */
+		    ok = 1;
+		    gpsd_report(LOG_RAW, "PPS pulse\n");
 		}
-		gpsd_report(LOG_RAW, "PPS pulse. cycle: %d, duration: %d\n",
-			cycle, duration);
-
 	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
-		(void)ntpshm_pps(session, &tv);
-		gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
-			cycle, duration);
-	    } else {
-		gpsd_report(LOG_INF, "PPS pulse rejected.  cycle: %d, duration: %d\n",
-			cycle, duration);
+		ok = 1;
+		gpsd_report(LOG_RAW, "PPS square wave\n");
 	    }
 	} else {
-		gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
+	    /* not a good fix, but a test for an otherwise good PPS 
+	     * would go here */
 	}
 	/*@ -boolint @*/
+	if ( ok ) {
+	    (void)ntpshm_pps(session, &tv);
+	} else {
+	    gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
+	}
 
 	pulse[state] = tv;
     }
