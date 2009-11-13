@@ -26,7 +26,7 @@
 #include <sys/shm.h>
 
 #define PPS_MAX_OFFSET	100000		/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	500000		/* microseconds for lost lock */
+#define PUT_MAX_OFFSET	1000000		/* microseconds for lost lock */
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0		/* SHM driver unit number (0..3) */
@@ -193,7 +193,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
     /*@ +ignorequals @*/
     if (labs( l_offset ) > PUT_MAX_OFFSET) {
-        gpsd_report(LOG_RAW, "ntpshm_pps: not in locking range: %ld\n"
+        gpsd_report(LOG_RAW, "PPS ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
     }
@@ -208,7 +208,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	    offset = 1 - ((double)tv->tv_usec / 1000000.0);
 	} else {
 	    shmTimeP->precision = -1;	/* lost lock */
-	    gpsd_report(LOG_INF, "ntpshm_pps: lost PPS lock\n");
+	    gpsd_report(LOG_INF, "PPS ntpshm_pps: lost PPS lock\n");
 	    return -1;
 	}
     }
@@ -238,7 +238,8 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
-    gpsd_report(LOG_RAW, "ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
+    gpsd_report(LOG_RAW
+        , "PPS ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
 	, (unsigned long)seconds, (unsigned long)tv->tv_sec
         , (unsigned long)tv->tv_usec, shmTimeP->precision);
     return 1;
