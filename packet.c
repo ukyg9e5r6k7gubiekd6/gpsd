@@ -1136,9 +1136,9 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif /* ONCORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	else if (lexer->state == TSIP_RECOGNIZED) {
-	    unsigned int pos, dlecnt;
 	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;
 #ifdef TSIP_ENABLE
+	    unsigned int pos, dlecnt;
 	    /* don't count stuffed DLEs in the length */
 	    dlecnt = 0;
 	    for (pos = 0; pos < (unsigned int)packetlen; pos ++)
