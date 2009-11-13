@@ -207,15 +207,20 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	     *
 	     */
 
-	    if (cycle > 199000 && cycle < 201000 ) {
+	    if (cycle < 199000 ) {
+		// too short to even be a 5Hz pulse
+		log = "Too short for 5Hz\n";
+	    } else if ( cycle < 201000 ) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
 		if (duration > 45000) {
 		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
 		    ok = 1;
-		    log = "5Hz PPS pulse";
+		    log = "5Hz PPS pulse\n";
 		}
-	    } else if (cycle > 999000 && cycle < 1001000 ) {
+	    } else if (cycle < 999000 ) {
+		    log = "Too long for 5Hz, too short for 1Hz\n";
+	    } else if ( cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
 		if (duration > 499000 && duration < 501000
 #if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
@@ -230,13 +235,18 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		} else {
 		    /* looks like PPS pulse */
 		    /* BUG: if no ignore_trailing edge this is 2x a sec */
+		    /* BUG: which edge is the leading edge? */
 		    ok = 1;
 		    log = "PPS pulse\n";
 		}
-	    } else if (cycle > 1999000 && cycle < 2001000) {
+	    } else if (cycle < 1999000 ) {
+		log = "Too long for 1Hz, too short for 2Hz\n";
+	    } else if ( cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		ok = 1;
 		log = "PPS square wave\n";
+	    } else {
+		log = "Too long for 2Hz\n";
 	    }
 	} else {
 	    /* not a good fix, but a test for an otherwise good PPS 
