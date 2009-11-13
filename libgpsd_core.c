@@ -214,7 +214,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    } else if (201000 > cycle) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
-		if (45000 > duration) {
+		if (100000 > duration) {
 		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
 		    ok = 1;
 		    log = "5Hz PPS pulse\n";
