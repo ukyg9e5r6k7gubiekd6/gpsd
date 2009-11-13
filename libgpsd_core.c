@@ -125,7 +125,6 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
     int pps_device = TIOCM_CAR;
-    int ok = 0;
 
 #if defined(PPS_ON_CTS)
     pps_device = TIOCM_CTS;
@@ -135,7 +134,14 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
+        int ok = 0;
+	char *log = NULL;
+
 	(void)gettimeofday(&tv,NULL);
+
+	ok = 0;
+	log = NULL;
+
 	/*@ +ignoresigns */
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
 	    break;
@@ -149,7 +155,6 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 #undef timediff
         /*@ -boolint @*/
 
-	ok = 0;
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
 	    if ( 999000 < cycle && 1001000 > cycle ) {
@@ -208,7 +213,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		if (duration > 45000) {
 		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
 		    ok = 1;
-		    gpsd_report(LOG_RAW, "5Hz PPS pulse");
+		    log = "5Hz PPS pulse";
 		}
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
@@ -220,28 +225,32 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
 		        ok = 1;
-		        gpsd_report(LOG_RAW, "PPS square\n");
+		        log = "PPS square\n";
 		    }
 		} else {
 		    /* looks like PPS pulse */
 		    /* BUG: if no ignore_trailing edge this is 2x a sec */
 		    ok = 1;
-		    gpsd_report(LOG_RAW, "PPS pulse\n");
+		    log = "PPS pulse\n";
 		}
 	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		ok = 1;
-		gpsd_report(LOG_RAW, "PPS square wave\n");
+		log = "PPS square wave\n";
 	    }
 	} else {
 	    /* not a good fix, but a test for an otherwise good PPS 
 	     * would go here */
+	    log = "PPS no fix.\n";
 	}
 	/*@ -boolint @*/
-	if ( ok ) {
+	if ( NULL != log ) {
+	    gpsd_report(LOG_RAW, log);
+	}
+	if ( 0 != ok ) {
 	    (void)ntpshm_pps(session, &tv);
 	} else {
-	    gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
+	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
 	}
 
 	pulse[state] = tv;
