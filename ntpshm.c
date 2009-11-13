@@ -57,16 +57,16 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
     int shmid=shmget ((key_t)(NTPD_BASE+unit),
 		      sizeof (struct shmTime), IPC_CREAT|0644);
     if (shmid == -1) {
-	gpsd_report(LOG_ERROR, "shmget failed\n");
+	gpsd_report(LOG_ERROR, "NTPD shmget fail: %s\n", strerror(errno));
 	return NULL;
     } else {
 	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
 	/*@ -mustfreefresh */
 	if ((int)(long)p == -1) {
-	    gpsd_report(LOG_ERROR, "shmat failed\n");
+	    gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n", strerror(errno));
 	    return NULL;
 	}
-	gpsd_report(LOG_PROG, "shmat(%d,0,0) succeeded\n", shmid);
+	gpsd_report(LOG_PROG, "NTPD shmat(%d,0,0) succeeded\n", shmid);
 	return p;
 	/*@ +mustfreefresh */
     }
