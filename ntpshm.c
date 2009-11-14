@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <errno.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
@@ -159,9 +160,9 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     shmTime->count++;
     shmTime->valid = 1;
 
-    gpsd_report(LOG_RAW, "ntpshm_put: Clock: %lu @ %lu.%06lu\n"
-	, (unsigned long)seconds, (unsigned long)tv.tv_sec
-        , (unsigned long)tv.tv_usec);
+    gpsd_report(LOG_RAW, "NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu\n"
+	, (unsigned long)seconds , (unsigned long)microseconds
+	, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
     return 1;
 }
@@ -173,44 +174,28 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
+    /* FIXME, microseconds needs to be set for 5Hz PPS */
+    unsigned long microseconds = 0;
     double offset;
     long l_offset;
 
-    if (session->shmindex < 0 || session->shmTimeP < 0 ||
+    if ( 0 > session->shmindex ||  0 > session->shmTimeP ||
 	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
 	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
     /* check if received time messages are within locking range */
 
-#ifdef S_SPLINT_S	/* avoids an internal error in splint 3.1.1 */
-    l_offset = 0;
-#else
-    l_offset = shmTime->receiveTimeStampSec - shmTime->clockTimeStampSec;
-#endif
-    /*@ -ignorequals @*/
-    l_offset *= 1000000;
-    l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
-    /*@ +ignorequals @*/
-    if (labs( l_offset ) > PUT_MAX_OFFSET) {
-        gpsd_report(LOG_RAW, "PPS ntpshm_pps: not in locking range: %ld\n"
-		, (long)l_offset);
-	return -1;
-    }
-    /*@ -ignorequals @*/
-
     if (tv->tv_usec < PPS_MAX_OFFSET) {
 	seconds = (time_t)tv->tv_sec;
 	offset = (double)tv->tv_usec / 1000000.0;
+    } else if (tv->tv_usec > (1000000 - PPS_MAX_OFFSET)) {
+	seconds = (time_t)(tv->tv_sec + 1);
+	offset = 1 - ((double)tv->tv_usec / 1000000.0);
     } else {
-	if (tv->tv_usec > (1000000 - PPS_MAX_OFFSET)) {
-	    seconds = (time_t)(tv->tv_sec + 1);
-	    offset = 1 - ((double)tv->tv_usec / 1000000.0);
-	} else {
-	    shmTimeP->precision = -1;	/* lost lock */
-	    gpsd_report(LOG_INF, "PPS ntpshm_pps: lost PPS lock\n");
-	    return -1;
-	}
+	shmTimeP->precision = -1;	/* lost lock */
+	gpsd_report(LOG_INF, "PPS ntpshm_pps: lost PPS lock\n");
+	return -1;
     }
 
     /* we use the shmTime mode 1 protocol
@@ -230,7 +215,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->valid = 0;
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
-    shmTimeP->clockTimeStampUSec = 0;
+    shmTimeP->clockTimeStampUSec = microseconds;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     /* this is more a jitter/dispersion than precision, but still useful */
@@ -239,9 +224,10 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->valid = 1;
 
     gpsd_report(LOG_RAW
-        , "PPS ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
-	, (unsigned long)seconds, (unsigned long)tv->tv_sec
-        , (unsigned long)tv->tv_usec, shmTimeP->precision);
+        , "PPS ntpshm_pps: clock: %lu.%03lu @ %lu.%06lu, precision %d\n"
+	, (unsigned long)seconds, (unsigned long)microseconds
+	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
+	, shmTimeP->precision);
     return 1;
 }
 #endif /* PPS_ENABLE */

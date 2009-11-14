@@ -124,13 +124,16 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
     int cycle,duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
-    int pps_device = TIOCM_CAR;
 
 #if defined(PPS_ON_CTS)
-    pps_device = TIOCM_CTS;
+    int pps_device = TIOCM_CTS;
+    #define pps_device_str "CTS"
+#else
+    int pps_device = TIOCM_CAR;
+    #define pps_device_str "DCD"
 #endif
 
-    gpsd_report(LOG_PROG, "Create Thread gpsd_ppsmonitor\n");
+    gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
@@ -160,14 +163,18 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    if ( 999000 < cycle && 1001000 > cycle ) {
 		duration = 0;
 	        unchanged = 0;
+	        gpsd_report(LOG_RAW, 
+			"PPS pps-detect (%s) on %s invisible pulse\n",
+			pps_device_str, session->gpsdata.dev.path);
 	    } else if (++unchanged == 10) {
 	        unchanged = 0;
-		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
+		gpsd_report(LOG_WARN, 
+	"PPS TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
 		sleep(10);
 	    }
 	} else {
-	    gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
-			((pps_device==TIOCM_CAR) ? "DCD" : "CTS"),
+	    gpsd_report(LOG_RAW, "PPS pps-detect (%s) on %s changed to %d\n",
+			  pps_device_str,
 			  session->gpsdata.dev.path, state);
 	    laststate = state;
 	    unchanged = 0;
@@ -177,8 +184,9 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    // strange, try again
 	    continue;
 	}
-	gpsd_report(LOG_INF, "PPS: cycle: %d, duration: %d\n",
-	    cycle, duration);
+	gpsd_report(LOG_INF, "PPS cycle: %d, duration: %d @ %lu.%06lu\n",
+	    cycle, duration,
+	    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
 	/*@ +boolint @*/
 	if ( 3 < session->context->fixcnt ) {
@@ -215,7 +223,8 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
 		if (100000 > duration) {
-		    /* BUG: how does ntpd know what 1/5 of a second to use?? */
+		    /* BUG: how does the code know to tell ntpd 
+		     * which 1/5 of a second to use?? */
 		    ok = 1;
 		    log = "5Hz PPS pulse\n";
 		}
