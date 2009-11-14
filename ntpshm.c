@@ -184,19 +184,29 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
-    /* check if received time messages are within locking range */
+    /* PPS has no seconds attached to it.
+     * check to see if we have a fresh timestamp from the
+     * GPS serial input then use that */
 
-    if (tv->tv_usec < PPS_MAX_OFFSET) {
-	seconds = (time_t)tv->tv_sec;
-	offset = (double)tv->tv_usec / 1000000.0;
-    } else if (tv->tv_usec > (1000000 - PPS_MAX_OFFSET)) {
-	seconds = (time_t)(tv->tv_sec + 1);
-	offset = 1 - ((double)tv->tv_usec / 1000000.0);
-    } else {
-	shmTimeP->precision = -1;	/* lost lock */
-	gpsd_report(LOG_INF, "PPS ntpshm_pps: lost PPS lock\n");
+    /* FIXME, does not handle 5Hz yet */
+
+#ifdef S_SPLINT_S      /* avoids an internal error in splint 3.1.1 */
+    l_offset = 0;
+#else
+    l_offset = tv->tv_sec - shmTime->receiveTimeStampSec;
+#endif
+    /*@ -ignorequals @*/
+    l_offset *= 1000000;
+    l_offset += tv->tv_usec - shmTime->receiveTimeStampUSec;
+    if ( 0 > l_offset || 1000000 < l_offset ) {
+	gpsd_report(LOG_RAW, "PPS ntpshm_pps: no current GPS seconds: %ld\n"
+	    , (long)l_offset);
 	return -1;
     }
+
+    seconds = shmTime->clockTimeStampSec + 1;
+    offset = fabs(((tv->tv_sec - seconds) + (tv->tv_usec - 0) / 1000000.0));
+
 
     /* we use the shmTime mode 1 protocol
      *
@@ -218,13 +228,14 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->clockTimeStampUSec = microseconds;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
-    /* this is more a jitter/dispersion than precision, but still useful */
+    /* this is more an offset jitter/dispersion than precision, 
+     * but still useful */
     shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
     gpsd_report(LOG_RAW
-        , "PPS ntpshm_pps: clock: %lu.%03lu @ %lu.%06lu, precision %d\n"
+        , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, precision %d\n"
 	, (unsigned long)seconds, (unsigned long)microseconds
 	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
 	, shmTimeP->precision);
