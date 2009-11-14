@@ -207,12 +207,12 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	    (void)ubx_write(session, 0x0au, 0x04, NULL, 0);
 	    break;
 #endif /* UBX_ENABLE */
-#ifdef MKT3301_ENABLE
+#ifdef MTK3301_ENABLE
 	case 9:
-	    /* probe for MKT-3301 -- expect $PMTK705 */
+	    /* probe for MTK-3301 -- expect $PMTK705 */
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
-#endif /* MKT3301_ENABLE */
+#endif /* MTK3301_ENABLE */
 	default:
 	    break;
 	}
@@ -926,15 +926,15 @@ static const struct gps_type_t garmintxt = {
 };
 #endif /* GARMINTXT_ENABLE */
 
-#ifdef MKT3301_ENABLE
+#ifdef MTK3301_ENABLE
 /**************************************************************************
  *
- * MKT-3301
+ * MTK-3301
  *
  **************************************************************************/
-const char* mkt_reasons[4] = {"Invalid", "Unsupported", "Valid but Failed", "Valid success"};
+const char* mtk_reasons[4] = {"Invalid", "Unsupported", "Valid but Failed", "Valid success"};
 
-gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session)
+gps_mask_t processMTK3301(int c UNUSED, char *field[], struct gps_device_t *session)
 {
     int msg, reason;
     gps_mask_t mask;
@@ -950,11 +950,11 @@ gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *sess
 	case 001: /* ACK / NACK */
 	    reason = atoi(field[2]);
 	    if(atoi(field[1]) == -1)
-		gpsd_report(LOG_WARN, "MKT NACK: unknown sentence\n");
+		gpsd_report(LOG_WARN, "MTK NACK: unknown sentence\n");
 	    else if(reason < 3)
-		gpsd_report(LOG_WARN, "MKT NACK: %s, reason: %s\n", field[1], mkt_reasons[reason]);
+		gpsd_report(LOG_WARN, "MTK NACK: %s, reason: %s\n", field[1], mtk_reasons[reason]);
 	    else
-		gpsd_report(LOG_WARN, "MKT ACK: %s\n", field[1]);
+		gpsd_report(LOG_WARN, "MTK ACK: %s\n", field[1]);
 	    break;
 	default:
 	    return 0; /* ignore */
@@ -963,7 +963,7 @@ gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *sess
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void mkt3301_event_hook(struct gps_device_t *session, event_t event)
+static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 {
 /*
 0  NMEA_SEN_GLL,  GPGLL   interval - Geographic Position - Latitude longitude
@@ -995,16 +995,16 @@ static void mkt3301_event_hook(struct gps_device_t *session, event_t event)
 }
 #endif /* ALLOW_RECONFIGURE */
 
-const struct gps_type_t mkt3301 = {
-    .type_name      = "MKT-3301",	/* full name of type */
+const struct gps_type_t mtk3301 = {
+    .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
+    .trigger	    = "$PMTK705,",	/* MTK-3301s send firmware release name and version */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
-    .event_hook     = mkt3301_event_hook,	/* lifetime event handler */
+    .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
@@ -1015,7 +1015,7 @@ const struct gps_type_t mkt3301 = {
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
 };
-#endif /* MKT3301_ENABLE */
+#endif /* MTK3301_ENABLE */
 
 
 #ifdef AIVDM_ENABLE
@@ -1095,9 +1095,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef GARMIN_ENABLE
     &garmin,
 #endif /* GARMIN_ENABLE */
-#ifdef MKT3301_ENABLE
-    &mkt3301,
-#endif /*  MKT3301_ENABLE */
+#ifdef MTK3301_ENABLE
+    &mtk3301,
+#endif /*  MTK3301_ENABLE */
 #ifdef OCEANSERVER_ENABLE
     &oceanServer,
 #endif /* OCEANSERVER_ENABLE */

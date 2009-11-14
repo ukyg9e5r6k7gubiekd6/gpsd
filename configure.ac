@@ -583,17 +583,17 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for MKT-3301 support
-AC_ARG_ENABLE(mkt3301,
-  AC_HELP_STRING([--disable-mkt3301],
-		 [disable MKT-3301 support]),
-  [ac_mkt3301=$enableval], [ac_mkt3301=yes])
-AC_MSG_CHECKING([for MKT-3301 support])
-if test x"$ac_mkt3301" = "xyes"; then
+dnl check for MTK-3301 support
+AC_ARG_ENABLE(mtk3301,
+  AC_HELP_STRING([--disable-mtk3301],
+		 [disable MTK-3301 support]),
+  [ac_mtk3301=$enableval], [ac_mtk3301=yes])
+AC_MSG_CHECKING([for MTK-3301 support])
+if test x"$ac_mtk3301" = "xyes"; then
     ac_nmea=yes
     AC_MSG_RESULT([yes])
-	AC_DEFINE([MKT3301_ENABLE], 1, [MKT-3301 support])
-	AC_DEFINE([NMEA_ENABLE], 1, [MKT-3301 requires NMEA support])
+	AC_DEFINE([MTK3301_ENABLE], 1, [MTK-3301 support])
+	AC_DEFINE([NMEA_ENABLE], 1, [MTK-3301 requires NMEA support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -1028,7 +1028,7 @@ echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
 echo "AIVDM support           : $ac_aivdm"
 echo "Timing support          : $ac_timing"
-echo "MKT-3301                : $ac_mkt3301"
+echo "MTK-3301                : $ac_mtk3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"

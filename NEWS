@@ -34,7 +34,7 @@
   localhost only by default to avoid security problems; this can be
   overridden with the -G command-line option. The packet-state machine
   can now recognize RTCM3 packets, though support is not yet complete.
-  Added support for ublox5 and mkt-3301 devices. Add a wrapper around
+  Added support for ublox5 and mtk-3301 devices. Add a wrapper around
   gpsd_hexdump to save CPU. Lots of little fixes to various packet
   parsers. Always keep the device open: "-n" is not optional any more.
   xgpsspeed no longer depends on Motif. gpsctl can now ship arbitrary

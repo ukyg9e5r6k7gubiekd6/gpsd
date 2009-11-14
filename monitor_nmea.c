@@ -445,17 +445,17 @@ const struct monitor_object_t gpsclock_mmt = {
 };
 #endif /* GPSCLOCK_ENABLE */
 
-#ifdef MKT3301_ENABLE
-extern const struct gps_type_t mkt3301;
+#ifdef MTK3301_ENABLE
+extern const struct gps_type_t mtk3301;
 
-const struct monitor_object_t mkt3301_mmt = {
+const struct monitor_object_t mtk3301_mmt = {
     .initialize = nmea_initialize,
     .update = nmea_update,
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21, .min_x = 80,
-    .driver = &mkt3301,
+    .driver = &mtk3301,
 };
-#endif /* MKT3301_ENABLE */
+#endif /* MTK3301_ENABLE */
 
 #endif /* NMEA_ENABLE */
