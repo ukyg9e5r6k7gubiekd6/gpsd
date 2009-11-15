@@ -175,7 +175,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
     /* FIXME, microseconds needs to be set for 5Hz PPS */
-    unsigned long microseconds = 0;
+    time_t microseconds = 0;
     double offset;
     long l_offset;
 
@@ -205,7 +205,8 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     }
 
     seconds = shmTime->clockTimeStampSec + 1;
-    offset = fabs(((tv->tv_sec - seconds) + (tv->tv_usec - 0) / 1000000.0));
+    offset = fabs((tv->tv_sec - seconds)
+    	+((double)(tv->tv_usec - 0)/1000000.0));
 
 
     /* we use the shmTime mode 1 protocol
