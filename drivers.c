@@ -43,14 +43,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet.type == COMMENT_PACKET) {
 	return 0;
-	/*
-	 * Dispatching on Garmin packets here causes a nasty configure
-	 * loop. It's not clear this is the right way to break the
-	 * loop or whether it merely evades the problem and breaks
-	 * autoconfiguration, but it will have to do until a Garmin
-	 * expert can grok the problem better.
-	 */
-    } else if (session->packet.type != NMEA_PACKET && session->packet.type != GARMIN_PACKET) {
+    } else if (session->packet.type != NMEA_PACKET ) {
 	const struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++) {
@@ -314,8 +307,8 @@ static void garmin_nmea_event_hook(struct gps_device_t *session, event_t event)
 #endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t garmin = {
-    .type_name      = "Garmin Serial",	/* full name of type */
-    .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
+    .type_name      = "Garmin NMEA",	/* full name of type */
+    .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
