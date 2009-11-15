@@ -72,7 +72,9 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #endif /* OCEANSERVER_ENABLE */
 
-	gpsd_report(LOG_IO, "<= GPS: %s", session->packet.outbuffer);
+	/* some packets do not end in \n, so make sure at least one
+	 * for good loggin */
+	gpsd_report(LOG_IO, "<= GPS: %s\n", session->packet.outbuffer);
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
