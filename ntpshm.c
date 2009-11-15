@@ -237,7 +237,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     gpsd_report(LOG_RAW
         , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, precision %d\n"
-	, (unsigned long)seconds, (unsigned long)microseconds
+	, (unsigned long)seconds, (unsigned long)microseconds/1000
 	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
 	, shmTimeP->precision);
     return 1;
