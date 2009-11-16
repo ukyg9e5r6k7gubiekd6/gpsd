@@ -1300,6 +1300,8 @@ int json_watch_read(const char *buf,
 {
     /*@ -fullinitblock @*/
     struct json_attr_t chanconfig_attrs[] = {
+	{"class",          check,    .dflt.check = "WATCH"},
+	
 	{"enable",         boolean,  .addr.boolean = &ccp->watcher,
                                      .dflt.boolean = true},
 	{"raw",	           integer,  .addr.integer = &ccp->raw,
