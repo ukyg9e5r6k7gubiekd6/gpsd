@@ -131,38 +131,39 @@ static int json_internal_read_object(const char *cp,
     for (cursor = attrs; cursor->attribute != NULL; cursor++) 
 	if (!cursor->nodefault) {
 	    lptr = json_target_address(cursor, parent, offset);
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*((int *)lptr) = cursor->dflt.integer;
-		break;
-	    case uinteger:
-		*((unsigned int *)lptr) = cursor->dflt.uinteger;
-		break;
-	    case real:
-		*((double *)lptr) = cursor->dflt.real;
-		break;
-	    case string:
-		if (parent != NULL && parent->element_type != structobject && offset > 0)
-		    return JSON_ERR_NOPARSTR;
-		lptr[0] = '\0';
-		break;
-	    case boolean:
-		/* nullbool default says not to set the value at all */
-		/*@+boolint@*/
-		if (cursor->dflt.boolean != nullbool)
-		    *((bool *)lptr) = cursor->dflt.boolean;
-		/*@-boolint@*/
-		break;
-	    case character:
-		lptr[0] = cursor->dflt.character;
-		break;
-	    case object:	/* silences a compiler warning */
-	    case structobject:
-	    case array:
-	    case check:
-		break;
-	    }
+	    if (lptr != NULL)
+		switch(cursor->type)
+		{
+		case integer:
+		    *((int *)lptr) = cursor->dflt.integer;
+		    break;
+		case uinteger:
+		    *((unsigned int *)lptr) = cursor->dflt.uinteger;
+		    break;
+		case real:
+		    *((double *)lptr) = cursor->dflt.real;
+		    break;
+		case string:
+		    if (parent != NULL && parent->element_type != structobject && offset > 0)
+			return JSON_ERR_NOPARSTR;
+		    lptr[0] = '\0';
+		    break;
+		case boolean:
+		    /* nullbool default says not to set the value at all */
+		    /*@+boolint@*/
+		    if (cursor->dflt.boolean != nullbool)
+			*((bool *)lptr) = cursor->dflt.boolean;
+		    /*@-boolint@*/
+		    break;
+		case character:
+		    lptr[0] = cursor->dflt.character;
+		    break;
+		case object:	/* silences a compiler warning */
+		case structobject:
+		case array:
+		case check:
+		    break;
+		}
 	}
 
     json_debug_trace(("JSON parse begins.\n"));
@@ -322,57 +323,58 @@ static int json_internal_read_object(const char *cp,
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
 	    }
 	    lptr = json_target_address(cursor, parent, offset);
-	    switch(cursor->type)
-	    {
-	    case integer:
-		*((int *)lptr) = atoi(valbuf);
-		break;
-	    case uinteger:
-		*((unsigned int *)lptr) = (unsigned)atoi(valbuf);
-		break;
-	    case real:
-		*((double *)lptr) = atof(valbuf);
-		break;
-	    case string:
-		if (parent != NULL && parent->element_type != structobject && offset > 0)
-		    return JSON_ERR_NOPARSTR;
-		(void)strncpy(lptr, valbuf, cursor->len);
-		break;
-	    case boolean:
-		*((bool *)lptr) = (strcmp(valbuf, "true") == 0);
-		break;
-	    case character:
-		if (strlen(valbuf) > 1)
-		    return JSON_ERR_STRLONG;
-		else
-		    lptr[0] = valbuf[0];
-		break;
-	    case object:	/* silences a compiler warning */
-	    case structobject:
-	    case array:
-		break;
-	    case check:
-		if (strcmp(cursor->dflt.check, valbuf)!=0) {
-		    json_debug_trace(("Required attribute vakue %s not present.\n", cursor->dflt.check));
-		    return JSON_ERR_CHECKFAIL;
+	    if (lptr != NULL)
+		switch(cursor->type)
+		{
+		case integer:
+		    *((int *)lptr) = atoi(valbuf);
+		    break;
+		case uinteger:
+		    *((unsigned int *)lptr) = (unsigned)atoi(valbuf);
+		    break;
+		case real:
+		    *((double *)lptr) = atof(valbuf);
+		    break;
+		case string:
+		    if (parent != NULL && parent->element_type != structobject && offset > 0)
+			return JSON_ERR_NOPARSTR;
+		    (void)strncpy(lptr, valbuf, cursor->len);
+		    break;
+		case boolean:
+		    *((bool *)lptr) = (strcmp(valbuf, "true") == 0);
+		    break;
+		case character:
+		    if (strlen(valbuf) > 1)
+			return JSON_ERR_STRLONG;
+		    else
+			lptr[0] = valbuf[0];
+		    break;
+		case object:	/* silences a compiler warning */
+		case structobject:
+		case array:
+		    break;
+		case check:
+		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
+			json_debug_trace(("Required attribute vakue %s not present.\n", cursor->dflt.check));
+			return JSON_ERR_CHECKFAIL;
+		    }
+		    break;
+		}
+		/*@fallthrough@*/
+	    case post_array:
+		if (isspace(*cp))
+		    continue;
+		else if (*cp == ',')
+		    state = await_attr;
+		else if (*cp == '}') {
+		    ++cp;
+		    goto good_parse;
+		} else {
+		    json_debug_trace(("Garbage while expecting comma or }\n"));
+		    return JSON_ERR_BADTRAIL;
 		}
 		break;
 	    }
-	    /*@fallthrough@*/
-	case post_array:
-	    if (isspace(*cp))
-		continue;
-	    else if (*cp == ',')
-		state = await_attr;
-	    else if (*cp == '}') {
-		++cp;
-		goto good_parse;
-	    } else {
-		json_debug_trace(("Garbage while expecting comma or }\n"));
-		return JSON_ERR_BADTRAIL;
-	    }
-	    break;
-	}
     }
 
 good_parse:
