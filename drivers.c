@@ -988,6 +988,18 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session,"$PMTK313,1"); /* SBAS enable */
     }
 }
+static void mtk3301_rate_switcher(struct gps_device_t *session, double rate)
+{
+	unsigned int milliseconds = 1000 * rate;
+	if(rate > 1)
+		milliseconds=1000;
+	else if(rate < 0.2)
+		milliseconds=200;
+	
+	char buf[78];
+	snprintf(buf, 78, "$PMTK300,%u,0,0,0,0", milliseconds);
+	(void)nmea_send(session,buf); /* Fix interval */
+}
 #endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t mtk3301 = {
@@ -1003,8 +1015,8 @@ const struct gps_type_t mtk3301 = {
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
-    .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .rate_switcher  = mtk3301_rate_switcher,		/* sample rate switcher */
+    .min_cycle      = 0.2,		/* max 5Hz */
 #endif /* ALLOW_RECONFIGURE */
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */

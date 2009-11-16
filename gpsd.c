@@ -1696,7 +1696,6 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		else {
 		    char serialmode[3];
 		    const struct gps_type_t *dt = channel->device->device_type;
-
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
 			devconf.baudrate = (uint)gpsd_get_speed(&channel->device->ttyset);
@@ -1708,18 +1707,21 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 			devconf.cycle=channel->device->gpsdata.dev.cycle;
 
 		    /* now that channel is selected, apply changes */
-		    if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode)
+		    if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode
+				&& devconf.driver_mode != DEVDEFAULT_NATIVE
+				&& dt->mode_switcher != NULL)
 			dt->mode_switcher(channel->device, devconf.driver_mode);
-		    serialmode[0] = devconf.parity;
+		    
+			serialmode[0] = devconf.parity;
 		    serialmode[1] = '0' + devconf.stopbits;
 		    serialmode[2] = '\0';
 		    set_serial(channel->device, 
 			       (speed_t)devconf.baudrate, serialmode);
-		    if (dt->rate_switcher != NULL 
-			&& isnan(devconf.cycle)!=0 
+			if (dt->rate_switcher != NULL 
+			&& isnan(devconf.cycle)==0
 			&& devconf.cycle >= dt->min_cycle)
-		    if (dt->rate_switcher(channel->device, devconf.cycle))
-			channel->device->gpsdata.dev.cycle = devconf.cycle;
+				if (dt->rate_switcher(channel->device, devconf.cycle))
+					channel->device->gpsdata.dev.cycle = devconf.cycle;
 		}
 	    }
 	    /*@+branchstate@*/
