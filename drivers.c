@@ -990,15 +990,15 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 }
 static void mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 {
-	unsigned int milliseconds = 1000 * rate;
-	if(rate > 1)
-		milliseconds=1000;
-	else if(rate < 0.2)
-		milliseconds=200;
+    char buf[78];
+    /*@i1@*/unsigned int milliseconds = 1000 * rate;
+    if(rate > 1)
+	milliseconds=1000;
+    else if(rate < 0.2)
+	milliseconds=200;
 	
-	char buf[78];
-	snprintf(buf, 78, "$PMTK300,%u,0,0,0,0", milliseconds);
-	(void)nmea_send(session,buf); /* Fix interval */
+    (void)snprintf(buf, 78, "$PMTK300,%u,0,0,0,0", milliseconds);
+    (void)nmea_send(session,buf); /* Fix interval */
 }
 #endif /* ALLOW_RECONFIGURE */
 

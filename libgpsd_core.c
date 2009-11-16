@@ -545,7 +545,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
-	    session->observed |= PACKET_TYPEMASK(session->packet.type);
+	    /*@i2@*/session->observed |= PACKET_TYPEMASK(session->packet.type);
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {

@@ -204,9 +204,11 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	return -1;
     }
 
+    /*@+relaxtypes@*/
     seconds = shmTime->clockTimeStampSec + 1;
     offset = fabs((tv->tv_sec - seconds)
     	+((double)(tv->tv_usec - 0)/1000000.0));
+    /*@-relaxtypes@*/
 
 
     /* we use the shmTime mode 1 protocol
@@ -226,7 +228,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->valid = 0;
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
-    shmTimeP->clockTimeStampUSec = microseconds;
+    shmTimeP->clockTimeStampUSec = (int)microseconds;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     /* this is more an offset jitter/dispersion than precision, 
