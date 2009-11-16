@@ -67,29 +67,40 @@ static /*@null@*/char *json_target_address(const struct json_attr_t *cursor,
 				 /*@null@*/const struct json_array_t *parent, 
 			       int offset)
 {
+    char *targetaddr = NULL; 
     if (parent == NULL || parent->element_type != structobject) { 
 	/* ordinary case - use the address in the cursor structure */
 	switch(cursor->type)
 	{
 	case integer:
-	    return (char *)&cursor->addr.integer[offset];
+	    targetaddr = (char *)&cursor->addr.integer[offset];
+	    break;
 	case uinteger:
-	    return (char *)&cursor->addr.uinteger[offset];
+	    targetaddr = (char *)&cursor->addr.uinteger[offset];
+	    break;
 	case real:
-	    return (char *)&cursor->addr.real[offset];
+	    targetaddr = (char *)&cursor->addr.real[offset];
+	    break;
 	case string:
-	    return cursor->addr.string;
+	    targetaddr = cursor->addr.string;
+	    break;
 	case boolean:
-	    return (char *)&cursor->addr.boolean[offset];
+	    targetaddr = (char *)&cursor->addr.boolean[offset];
+	    break;
 	case character:
-	    return (char *)&cursor->addr.character[offset];
+	    targetaddr = (char *)&cursor->addr.character[offset];
+	    break;
 	default:
-	    return NULL;
+	    targetaddr = NULL;
+	    break;
 	}
     }
     else
 	/* tricky case - hacking a member in an array of structures */
-	return parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
+	targetaddr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
+    json_debug_trace(("Target address for %s is %p\n", 
+		      cursor->attribute, targetaddr));
+    return targetaddr;
 }
 /*@-immediatetrans -dependenttrans +usereleased +compdef@*/
 
