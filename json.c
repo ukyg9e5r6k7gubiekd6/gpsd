@@ -18,7 +18,7 @@ attributes (and attribute values, and so on recursively down through
 all nestings of objects and arrays).  This parser is indifferent to
 the order of attributes at any level, but you have to tell it in
 advance what the type of each attribute value will be and where the
-parsed value will be stored. The tamplate structures may supply
+parsed value will be stored. The template structures may supply
 default values to be used when an expected attribute is omitted.
 
    The dialect this parses has some limitations.  First, it cannot
@@ -31,7 +31,7 @@ elements of an array must be of the same type.
 JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
 
-   This paraer processes object arrays in one of two different ways,
+   This parser processes object arrays in one of two different ways,
 defending on whether the array subtype is declared as object or
 structobject.
 
@@ -43,7 +43,7 @@ to use as an offset multiplier.
    Structobjects arrays are a way to parse a list of objects to a set
 of modifications to a corresponding array of C structs.  The trick is
 that the array object initialization has to specify both the C struct
-array's base address and the stride length (the size of the C struct.
+array's base address and the stride length (the size of the C struct).
 If you initialize the offset fields with the correct offsetof() calls,
 everything will work. Strings are suppported but all string storage
 has to be inline in the struct.
