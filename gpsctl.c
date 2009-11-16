@@ -336,7 +336,7 @@ int main(int argc, char **argv)
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
 		(void)gps_query(gpsdata,
-				"?DEVICE={\"device\":%s,\"bps\":%s}\r\n", 
+				"?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
 				device, speed);
 	    else {
 		char *modespec = strchr(speed, ':');
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(gpsdata, 
-				    "?DEVICE={\"device\":%s,\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
+				    "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
 				    device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(gpsdata, 
-			    "?DEVICE={\"device\":%s,\"cycle\":%s}\n", 
+			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n", 
 			    device, rate);
 	}
 #endif /* ALLOW_RECONFIGURE */
