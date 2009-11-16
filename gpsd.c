@@ -1926,7 +1926,8 @@ int main(int argc, char *argv[])
 	    gpsd_report (2, "Priority setting failed.\n");
 	(void)ntpshm_init(&context, nowait);
     } else {
-	gpsd_report (LOG_INF, "Unable to start ntpshm.  gpsd must run as root.\n");
+	gpsd_report (LOG_INF
+	    , "NTPD Unable to start ntpshm.  gpsd must run as root.\n");
     }
 #endif /* NTPSHM_ENABLE */
 
