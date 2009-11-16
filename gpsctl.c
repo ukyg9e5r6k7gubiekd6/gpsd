@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 #endif /* ALLOW_RECONFIGURE */
 
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
-    while ((option = getopt(argc, argv, "befhlnrs:t:x:D:T:V")) != -1) {
+    while ((option = getopt(argc, argv, "bec:fhlnrs:t:x:D:T:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
