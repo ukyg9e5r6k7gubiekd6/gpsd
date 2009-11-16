@@ -529,6 +529,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->d_xmit_time = timestamp();
 #endif /* TIMING_ENABLE */
 
+    if (session->packet.type >= COMMENT_PACKET)
+	/*@i2@*/session->observed |= PACKET_TYPEMASK(session->packet.type);
+
     /* can we get a full packet from the device? */
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
@@ -545,7 +548,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
-	    /*@i2@*/session->observed |= PACKET_TYPEMASK(session->packet.type);
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {
