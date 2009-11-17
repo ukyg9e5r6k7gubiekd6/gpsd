@@ -315,7 +315,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-    if (session->gpsdata.dev.baudrate >= 38400){
+    if (session->gpsdata.dev.baudrate >= 38400) {
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
@@ -474,7 +474,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 #ifdef NTPSHM_ENABLE
     if (session->gpsdata.fix.mode <= MODE_NO_FIX) {
 	    gpsd_report(LOG_PROG, "NTPD no fix, mode: %d\n", 
-	        session->gpsdata.fix.mode);
+			session->gpsdata.fix.mode);
     } else {
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_GPS_2)) {
 	    gpsd_report(LOG_PROG, "NTPD SEEN_GPS_2\n");
