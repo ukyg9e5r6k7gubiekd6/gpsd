@@ -15,8 +15,8 @@
 #include "gpsd.h"
 #include "timebase.h"
 
-#ifdef MKT3301_ENABLE
-extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
+#ifdef MTK3301_ENABLE
+extern gps_mask_t processMTK3301(int c UNUSED, char *field[], struct gps_device_t *session);
 #endif /* MKT3301_ENABLE */
 
 #ifdef NMEA_ENABLE
