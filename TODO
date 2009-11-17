@@ -39,10 +39,6 @@ of mode switch we should be uttering.
 
 ** To do:
 
-*** Cleanup after the big protocol rewrite
-
-**** cgps.c still relies on old protocol (that's Jeff Francis's problem).
-
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
 These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.

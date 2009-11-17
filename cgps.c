@@ -129,6 +129,7 @@ static float altfactor = METERS_TO_FEET;
 static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
+static struct fixsource_t source;
 
 static WINDOW *datawin, *satellites, *messages;
 
@@ -454,6 +455,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   int newstate;
   char scr[128];
 
+  /* this is where we implement source-device filtering */
+  if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+      return;
+
   /* This is for the satellite status display.  Originally lifted from
      xgps.c.  Note that the satellite list may be truncated based on
      available screen size, or may only show satellites used for the
@@ -674,7 +679,6 @@ int main(int argc, char *argv[])
   struct timeval timeout;
   fd_set rfds;
   int data;
-  int ret;
 
   /* Process the options.  Print help if requested. */
   while ((option = getopt(argc, argv, "hVl:sm")) != -1) {
@@ -751,14 +755,6 @@ int main(int argc, char *argv[])
     exit(2);
   }
 
-  /* If the user requested a specific device, try to change to it. */
-  if (source.device != NULL) {
-      ret = gps_send(gpsdata, "F=%s\n", source.device);
-      if ( ret ) {
-          (void)fprintf(stderr,"Device change send failed\n");
-      }
-  }
-
   /* Fire up curses. */
   (void)initscr();
   (void)noecho();
@@ -777,11 +773,7 @@ int main(int argc, char *argv[])
     gps_set_raw_hook(gpsdata, update_gps_panel);
   }
 
-  /* Request "w+x" data from gpsd. */
-  ret = gps_send(gpsdata, "w+x\n");
-  if ( ret ) {
-      (void)fprintf(stderr,"w+x send failed\n");
-  }
+  (void)gps_stream(gpsdata, WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE, NULL);
 
   /* heart of the client */
   for (;;) {
