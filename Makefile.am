@@ -481,7 +481,8 @@ splint: gpsd.h packet_names.h
 # Re-indenting to a uniform style would be nice, and we leave this hear
 # as a rough guide to the project style, but it turns out that indent is
 # an excessively blunt instrument.  As of 2.2.10 it doesn't honor -nfca
-# and produces loads of spurious changes to splint directives.
+# and produces loads of spurious changes to splint directives.  Nor does
+# it seem to honor -npcs.
 indent:
 	chmod u+w maskdump.c
 	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
