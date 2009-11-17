@@ -98,8 +98,8 @@ static /*@null@*/char *json_target_address(const struct json_attr_t *cursor,
     else
 	/* tricky case - hacking a member in an array of structures */
 	targetaddr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
-    json_debug_trace(("Target address for %s is %p\n", 
-		      cursor->attribute, targetaddr));
+    json_debug_trace(("Target address for %s (offset %d) is %p\n", 
+		      cursor->attribute, offset, targetaddr));
     return targetaddr;
 }
 /*@-immediatetrans -dependenttrans +usereleased +compdef@*/
@@ -177,11 +177,11 @@ static int json_internal_read_object(const char *cp,
 		}
 	}
 
-    json_debug_trace(("JSON parse begins.\n"));
+    json_debug_trace(("JSON parse of '%s' begins.\n", cp));
 
     /* parse input JSON */
     for (; *cp!='\0'; cp++) {
-	json_debug_trace(("State %-14s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
+	//json_debug_trace(("State %-14s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
 	switch (state)
 	{
 	case init:
@@ -215,7 +215,7 @@ static int json_internal_read_object(const char *cp,
 		    if (strcmp(cursor->attribute, attrbuf)==0)
 			break;
 		if (cursor->attribute == NULL) {
-		    json_debug_trace(("Unknown attribute name '%s'.\n", attrbuf));
+		    json_debug_trace(("Unknown attribute name '%s' (attributes begin with '%s').\n", attrbuf, attrs->attribute));
 		    return JSON_ERR_BADATTR;
 		}
 		state = await_value;
@@ -489,7 +489,9 @@ int json_read_object(const char *cp,
 		     const struct json_attr_t *attrs, 
 		     /*@null@*/const char **end)
 {
+    json_debug_trace(("json_read_object() sees '%s'\n", cp));
     return json_internal_read_object(cp, attrs, NULL, 0, end);
+    json_debug_trace(("json_read_object() finished\n"));
 }
 
 const /*@observer@*/char *json_error_string(int err)
