@@ -325,6 +325,7 @@ struct gps_device_t {
 	    time_t last_5c;
 	    time_t last_6d;
 	    time_t last_46;
+	    time_t req_compact;
 	    unsigned int stopbits; /* saved RS232 link parameter */
 	    char parity;
 	} tsip;
