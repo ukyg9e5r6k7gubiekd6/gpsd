@@ -393,7 +393,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 
     n = (int)getub(buf, 6); /* number of measurements */
     t = getled(buf, 7); /* measurement time */
-    for(i = 0; i < n; i++){
+    for(i = 0; i < n; i++) {
 	session->gpsdata.raw.mtime[i] = t;
 	session->gpsdata.PRN[i] = (int)getub(buf, 11*i + 15) & 0x1f;
 	session->gpsdata.ss[i] = (double)getub(buf, 11*i * 15 +1 )/4.0;
@@ -582,7 +582,7 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == SUPERSTAR2_PACKET){
+    if (session->packet.type == SUPERSTAR2_PACKET) {
 	st = superstar2_dispatch(session, session->packet.outbuffer,
 				 session->packet.length);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;

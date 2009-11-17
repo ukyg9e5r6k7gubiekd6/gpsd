@@ -77,7 +77,7 @@ static bool italk_initialize(void)
 	/*@ +onlytrans @*/
 }
 
-static void display_itk_navfix(unsigned char *buf, size_t len){
+static void display_itk_navfix(unsigned char *buf, size_t len) {
 
 	unsigned int tow, tod, nsec, d, svlist;
 	unsigned short gps_week, flags, cflags, pflags, nsv;
@@ -172,8 +172,8 @@ static void display_itk_navfix(unsigned char *buf, size_t len){
 		char prn[4], satlist[38];
 		unsigned int i;
 		satlist[0] = '\0';
-		for(i = 0; i<32; i++){
-			if (svlist & (1<<i)){
+		for(i = 0; i<32; i++) {
+			if (svlist & (1<<i)) {
 				(void)snprintf(prn, 4, "%u ", i+1);
 				(void)strlcat(satlist, prn, 38);
 			}
@@ -208,7 +208,7 @@ static void display_itk_prnstatus(unsigned char *buf, size_t len)
 			prn, az, el, ss, fl,
 			(fl & PRN_FLAG_USE_IN_NAV)? 'Y' : ' ');
 	}
-	for ( ; i < MAX_NR_VISIBLE_PRNS; i++){
+	for ( ; i < MAX_NR_VISIBLE_PRNS; i++) {
 	    (void)wmove(satwin, (int)i+2, 4);
 		(void)wprintw(satwin, "                      ");
 	}

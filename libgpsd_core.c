@@ -575,7 +575,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.online = 0;
 	return 0;
     } else if (newlen == 0) {		/* no new data */
-	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.dev.cycle+1){
+	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.dev.cycle+1) {
 	    gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
 		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);

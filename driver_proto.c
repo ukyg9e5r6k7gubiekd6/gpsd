@@ -380,7 +380,7 @@ static gps_mask_t _proto__parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == _PROTO__PACKET){
+    if (session->packet.type == _PROTO__PACKET) {
 	st = _proto__dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.driver_mode = MODE_BINARY;
 	return st;

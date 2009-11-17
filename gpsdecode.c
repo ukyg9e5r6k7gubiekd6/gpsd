@@ -367,7 +367,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
 	else if (lexer.type == AIVDM_PACKET) {
 	    /*@ -uniondef */
-	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm, &ais)){
+	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm, &ais)) {
 		if (!json)
 		    aivdm_csv_dump(&ais, buf, sizeof(buf));
 		else

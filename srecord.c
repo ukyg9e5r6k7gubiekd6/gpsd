@@ -38,7 +38,7 @@
  * bytes are read from bbuf and a ready-to-go srecord is placed in sbuf
  */
 int
-bin2srec(unsigned int type, unsigned int offset, unsigned int num, unsigned char *bbuf, unsigned char *sbuf){
+bin2srec(unsigned int type, unsigned int offset, unsigned int num, unsigned char *bbuf, unsigned char *sbuf) {
 	unsigned char abuf[MAX_BYTES_PER_RECORD*2 + 2], sum;
 	size_t len;
 
@@ -56,12 +56,12 @@ bin2srec(unsigned int type, unsigned int offset, unsigned int num, unsigned char
 }
 
 int
-srec_hdr(unsigned int num, unsigned char *bbuf, unsigned char *sbuf){
+srec_hdr(unsigned int num, unsigned char *bbuf, unsigned char *sbuf) {
 	return bin2srec(0, 0, num, bbuf, sbuf);
 }
 
 int
-srec_fin(unsigned int num, unsigned char *sbuf){
+srec_fin(unsigned int num, unsigned char *sbuf) {
 	unsigned char bbuf[4], sum;
 
 	memset(bbuf, 0, 4);
@@ -75,14 +75,14 @@ srec_fin(unsigned int num, unsigned char *sbuf){
 
 
 void
-hexdump(size_t len, unsigned char *bbuf, unsigned char *abuf){
+hexdump(size_t len, unsigned char *bbuf, unsigned char *abuf) {
 	size_t i;
 
 	memset(abuf, 0, MAX_BYTES_PER_RECORD*2 + 2);
 	if (len > MAX_BYTES_PER_RECORD*2)
 		len = MAX_BYTES_PER_RECORD*2;
 
-	for(i = 0; i < len; i++){
+	for(i = 0; i < len; i++) {
 		abuf[i*2] = hc((bbuf[i] &0xf0) >> 4);
 		abuf[i*2+1] = hc(bbuf[i] &0x0f);
 	}
@@ -90,8 +90,8 @@ hexdump(size_t len, unsigned char *bbuf, unsigned char *abuf){
 
 /*@ -type @*/
 unsigned char
-hc(unsigned char x){
-	switch(x){
+hc(unsigned char x) {
+	switch(x) {
 	case 15:
 	case 14:
 	case 13:
@@ -118,7 +118,7 @@ hc(unsigned char x){
 /*@ -type @*/
 
 unsigned char
-sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf){
+sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf) {
 	int i, j;
 	unsigned char k, sum = 0;
 
@@ -128,7 +128,7 @@ sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf){
 	sum += ((addr & 0x00ff0000) >> 16);
 	sum += ((addr & 0xff000000) >> 24);
 	j = count - 5;
-	for(i = 0; i < j; i++){
+	for(i = 0; i < j; i++) {
 		k = bbuf[i];
 		sum += k;
 	}

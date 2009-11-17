@@ -632,7 +632,7 @@ static bool open_device(char *device_name)
 
     /* normal case: set up GPS/RTCM/AIS service */
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (!allocated_device(devp) || (strcmp(devp->gpsdata.dev.path, device_name)==0 && !initialized_device(devp))){
+	if (!allocated_device(devp) || (strcmp(devp->gpsdata.dev.path, device_name)==0 && !initialized_device(devp))) {
 	    goto found;
 	}
     return false;
@@ -2114,7 +2114,7 @@ int main(int argc, char *argv[])
 
 	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds)) {
 	    /* be ready for DGPS reports */
-	    if (netgnss_poll(&context) == -1){
+	    if (netgnss_poll(&context) == -1) {
 		FD_CLR(context.dsock, &all_fds);
 		FD_CLR(context.dsock, &rfds);
 		context.dsock = -1;

@@ -622,7 +622,7 @@ static void sirf_update(void)
 
 #ifdef ALLOW_CONTROLSEND
     /* elicit navigation parameters */
-    if (dispmode && (time(NULL) % 10 == 0)){
+    if (dispmode && (time(NULL) % 10 == 0)) {
 	(void)monitor_control_send((unsigned char *)"\x98\x00", 2);
     }
 #endif /* ALLOW_CONTROLSEND */

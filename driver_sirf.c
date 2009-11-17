@@ -355,7 +355,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     gpsd_interpret_subframe(session, words);
 
 #ifdef ALLOW_RECONFIGURE
-    if (session->gpsdata.dev.baudrate < 38400){
+    if (session->gpsdata.dev.baudrate < 38400) {
 	gpsd_report(LOG_PROG, "Disabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
     }
@@ -1005,7 +1005,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == SIRF_PACKET){
+    if (session->packet.type == SIRF_PACKET) {
 	st = sirf_parse(session, session->packet.outbuffer,
 			session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;

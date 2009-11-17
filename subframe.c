@@ -55,7 +55,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
     gpsd_report(LOG_PROG, "50B: %06x %06x %06x %06x %06x %06x %06x %06x\n",
 	    words[2], words[3], words[4], words[5],
 	    words[6], words[7], words[8], words[9]);
-    switch(pageid){
+    switch(pageid) {
     case 55:
 	/*
 	 * "The requisite 176 bits shall occupy bits 9 through 24 of word

@@ -135,7 +135,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	navmode = (unsigned char)getub(buf, 10);
 	flags = (unsigned int)getub(buf, 11);
 
-	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
+	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0) {
 	    tow = (unsigned int)getleul(buf, 0);
 		gw = (unsigned short)getlesw(buf, 8);
 		t = gpstime_to_unix((int)gw, tow/1000.0);
@@ -174,7 +174,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	(void)wprintw(navsolwin, "%s", ctime(&tt));
 	/*@ +compdef @*/
 	(void)wmove(navsolwin, 8, 11);
-	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
+	if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0) {
 	    (void)wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow/1000.0));
 	    (void)wmove(navsolwin, 8, 36);
 	    (void)wprintw(navsolwin, "%d", (tow/86400000) );

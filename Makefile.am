@@ -478,6 +478,16 @@ splint: gpsd.h packet_names.h
 	@echo "Running splint on test_json test harness..."
 	-splint $(SPLINTOPTS) $(test_json_SOURCES)
 
+# Re-indenting to a uniform style would be nice, and we leave this hear
+# as a rough guide to the project style, but it turns out that indent is
+# an excessively blunt instrument.  As of 2.2.10 it doesn't honor -nfca
+# and produces loads of spurious changes to splint directives.
+indent:
+	chmod u+w maskdump.c
+	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
+	chmod u-w maskdump.c
+	@echo "Diff lines:" `svn diff | wc -l`
+
 # Bogon-checking the Python tools
 pychecker:
 	for f in gps.py gpsfake.py leapsecond.py; do pychecker $$f; done

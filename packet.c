@@ -274,7 +274,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
     case AT1_LEADER:
-	switch (c){
+	switch (c) {
 #ifdef ONCORE_ENABLE
 	    case '@':
 		lexer->state = ONCORE_AT2;
@@ -872,7 +872,7 @@ static void nextstate(struct gps_packet_t *lexer,
     case ITALK_PAYLOAD:
 	/* lookahead for "<!" because sometimes packets are short but valid */
 	if ((c == '>') && (lexer->inbufptr[0] == '<') &&
-	    (lexer->inbufptr[1] == '!')){
+	    (lexer->inbufptr[1] == '!')) {
 	    lexer->state = ITALK_RECOGNIZED;
 	    gpsd_report(LOG_IO, "ITALK: trying to process runt packet\n");
 	    break;
@@ -1463,7 +1463,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    /* expected checksum */
 	    xsum = getiw(7+2*len);
 
-	    for (n = 0; n < len; n++){
+	    for (n = 0; n < len; n++) {
 		tmpw = getiw(7 + 2*n);
 		tmpdw = (csum + 1) * (tmpw + n);
 		csum ^= (tmpdw & 0xffff) ^ ((tmpdw >>16) & 0xffff);

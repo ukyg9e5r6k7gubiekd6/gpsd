@@ -35,7 +35,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     double epx, epy, epz, evx, evy, evz, eph;
     double t;
 
-    if (len != 296){
+    if (len != 296) {
 	gpsd_report(LOG_PROG, "ITALK: bad NAV_FIX (len %zu, should be 296)\n",
 		    len);
 	return -1;
@@ -77,7 +77,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	(int)MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
     mask |= USED_SET ;
 
-    if (flags & FIX_CONV_DOP_VALID){
+    if (flags & FIX_CONV_DOP_VALID) {
 	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.hdop = (double)(getleuw(buf, 7 + 56)/100.0);
 	session->gpsdata.dop.gdop = (double)(getleuw(buf, 7 + 58)/100.0);
@@ -87,7 +87,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	mask |= DOP_SET;
     }
 
-    if ((pflags & FIX_FLAG_MASK_INVALID) == 0 && (flags & FIXINFO_FLAG_VALID) != 0){
+    if ((pflags & FIX_FLAG_MASK_INVALID) == 0 && (flags & FIXINFO_FLAG_VALID) != 0) {
 	if (pflags & FIX_FLAG_3DFIX)
 	    session->gpsdata.fix.mode = MODE_3D;
 	else
@@ -125,7 +125,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     double t;
     gps_mask_t mask;
 
-    if (len < 62){
+    if (len < 62) {
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%zu)\n", len);
 	mask = ERROR_SET;
     }
@@ -150,7 +150,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	    session->gpsdata.PRN[i]		= (int)getleuw(buf, off+4)&0xff;
 	    session->gpsdata.elevation[i]	= (int)getlesw(buf, off+6)&0xff;
 	    session->gpsdata.azimuth[i]	= (int)getlesw(buf, off+8)&0xff;
-	    if (session->gpsdata.PRN[i]){
+	    if (session->gpsdata.PRN[i]) {
 		st++;
 		if (flags & PRN_FLAG_USE_IN_NAV)
 		    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
@@ -177,7 +177,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     unsigned short gps_week, flags;
     double t;
 
-    if (len != 64){
+    if (len != 64) {
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad UTC_IONO_MODEL (len %zu, should be 64)\n", len);
 	return ERROR_SET;
@@ -207,7 +207,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
     unsigned short flags, prn, sf;
     unsigned int words[10];
 
-    if (len != 64){
+    if (len != 64) {
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad SUBFRAME (len %zu, should be 64)\n", len);
 	return ERROR_SET;
@@ -350,7 +350,7 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == ITALK_PACKET){
+    if (session->packet.type == ITALK_PACKET) {
 	st = italk_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;	/* binary */
 	return st;

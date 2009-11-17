@@ -145,26 +145,26 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	}
 	break;
     case 4:
-	if ((tp->reference.valid = len >= 2)){
+	if ((tp->reference.valid = len >= 2)) {
 	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
 	    tp->reference.system =
 		    (m->w3.dgnss==0) ? NAVSYSTEM_GPS :
 			    ((m->w3.dgnss==1) ? NAVSYSTEM_GLONASS : NAVSYSTEM_UNKNOWN);
 	    tp->reference.sense = (m->w3.dat != 0) ? SENSE_GLOBAL : SENSE_LOCAL;
-	    if (m->w3.datum_alpha_char1){
+	    if (m->w3.datum_alpha_char1) {
 		tp->reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
 	    }
-	    if (m->w3.datum_alpha_char2){
+	    if (m->w3.datum_alpha_char2) {
 		tp->reference.datum[n++] = (char)(m->w3.datum_alpha_char2);
 	    }
-	    if (m->w4.datum_sub_div_char1){
+	    if (m->w4.datum_sub_div_char1) {
 		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char1);
 	    }
-	    if (m->w4.datum_sub_div_char2){
+	    if (m->w4.datum_sub_div_char2) {
 		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char2);
 	    }
-	    if (m->w4.datum_sub_div_char3){
+	    if (m->w4.datum_sub_div_char3) {
 		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
 	    }
 	    tp->reference.datum[n++] = '\0';
@@ -210,7 +210,7 @@ void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 	break;
     case 16:
 	/*@ -boolops @*/
-	for (w = 0; w < (unsigned)len; w++){
+	for (w = 0; w < (unsigned)len; w++) {
 	    if (!msg->msg_type.type16.txt[w].byte1) {
 		break;
 	    }
@@ -404,7 +404,7 @@ bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 	break;
     case 16:	/* T */
 	/*@ -boolops @*/
-	for (w = 0; w < RTCM2_WORDS_MAX - 2; w++){
+	for (w = 0; w < RTCM2_WORDS_MAX - 2; w++) {
 	    if (!tp->message[n]) {
 		break;
 	    }

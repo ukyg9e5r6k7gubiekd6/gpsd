@@ -883,7 +883,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == TSIP_PACKET){
+    if (session->packet.type == TSIP_PACKET) {
 	st = tsip_analyze(session);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;

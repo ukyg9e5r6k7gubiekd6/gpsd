@@ -1153,7 +1153,7 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == NAVCOM_PACKET){
+    if (session->packet.type == NAVCOM_PACKET) {
 	st = navcom_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;  /* binary */
 	return st;

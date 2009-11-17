@@ -443,7 +443,7 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == ONCORE_PACKET){
+    if (session->packet.type == ONCORE_PACKET) {
 	st = oncore_dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;

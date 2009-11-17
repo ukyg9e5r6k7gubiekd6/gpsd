@@ -351,7 +351,7 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == EVERMORE_PACKET){
+    if (session->packet.type == EVERMORE_PACKET) {
 	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	return st;
 #ifdef NMEA_ENABLE

@@ -451,7 +451,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	session->gpsdata.satellites_visible = 0;
 	return ERROR_SET;
     }
-    if (count % 4 != 0){
+    if (count % 4 != 0) {
 	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites_visible = 0;
@@ -538,7 +538,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     gps_mask_t mask;
     if ((strcmp(field[2], "M")!=0) ||
 	(strcmp(field[4], "M")!=0) ||
-	(strcmp(field[6], "M")!=0)){
+	(strcmp(field[6], "M")!=0)) {
 	    session->gpsdata.fix.epx =
 	    session->gpsdata.fix.epy =
 	    session->gpsdata.fix.epv =
@@ -760,15 +760,15 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
     gps_mask_t mask;
     mask = 0;
 
-    if (0 == strcmp("RID", field[1])){ /* Receiver ID */
+    if (0 == strcmp("RID", field[1])) { /* Receiver ID */
 	(void)snprintf(session->subtype, sizeof(session->subtype)-1,
 		       "%s ver %s", field[2], field[3]);
 	gpsd_report(LOG_DATA, "PASHR,RID: subtype=%s mask={}\n",
 		    session->subtype);
 	return mask;
-    } else if (0 == strcmp("POS", field[1])){ /* 3D Position */
+    } else if (0 == strcmp("POS", field[1])) { /* 3D Position */
 	mask |= MODE_SET | STATUS_SET | CLEAR_SET;
-	if (0 == strlen(field[2])){
+	if (0 == strlen(field[2])) {
 	    /* empty first field means no 3D fix is available */
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
@@ -812,11 +812,11 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 			session->gpsdata.dop.tdop,
 			gpsd_maskdump(mask));
 	}
-    } else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
+    } else if (0 == strcmp("SAT", field[1])) { /* Satellite Status */
 	int i, n, p, u;
 	n = session->gpsdata.satellites_visible = atoi(field[2]);
 	u = 0;
-	for (i = 0; i < n; i++){
+	for (i = 0; i < n; i++) {
 	    session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);
 	    session->gpsdata.azimuth[i] = atoi(field[3+i*5+1]);
 	    session->gpsdata.elevation[i] = atoi(field[3+i*5+2]);
@@ -941,10 +941,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     t = p;  /* end of sentence */
     p = (char *)session->driver.nmea.fieldcopy + 1; /* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
-    while((p != NULL) && (p <= t)){
+    while((p != NULL) && (p <= t)) {
 	session->driver.nmea.field[count] = p; /* we have a field. record it */
 	/*@ -compdef @*/
-	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
+	if ((p = strchr(p, ',')) != NULL) { /* search for the next delimiter */
 	    *p = '\0'; /* replace it with a NUL */
 	    count++; /* bump the counters and continue */
 	    p++;

@@ -31,7 +31,7 @@ int main( void );
 int test_single( void );
 int test_double( void );
 
-int main(){
+int main() {
 	int i, j;
 
 	if ((i = test_single()))
@@ -48,7 +48,7 @@ int main(){
 	return i;
 }
 
-int test_single(){
+int test_single() {
 	static float f;
 	static int i;
 	static int e = 0;
@@ -57,7 +57,7 @@ int test_single(){
 	f = 1.0;
 	for(i = 0; i < 10; i++)
 		f += (1<<i);
-	if (f != 1024.0){
+	if (f != 1024.0) {
 		printf("s1 ");
 		e++;
 	}
@@ -66,7 +66,7 @@ int test_single(){
 	f = 1024.0;
 	for(i = 0; i < 10; i++)
 		f -= (1<<i);
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("s2 ");
 		e++;
 	}
@@ -75,7 +75,7 @@ int test_single(){
 	f = 1.0;
 	for(i = 1; i < 10; i++)
 		f *= i;
-	if (f != 362880.0){
+	if (f != 362880.0) {
 		printf("s3 ");
 		e++;
 	}
@@ -84,29 +84,29 @@ int test_single(){
 	f = 362880.0;
 	for(i = 1; i < 10; i++)
 		f /= i;
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("s4 ");
 		e++;
 	}
 
 	/* multiply-accumulate test */
 	f = 0.5;
-	for(i = 1; i < 1000000; i++){
+	for(i = 1; i < 1000000; i++) {
 		f += 2.0;
 		f *= 0.5;
 	}
-	if (f != 2.0){
+	if (f != 2.0) {
 		printf("s5 ");
 		e++;
 	}
 
 	/* divide-subtract test */
 	f = 2.0;
-	for(i = 1; i < 1000000; i++){
+	for(i = 1; i < 1000000; i++) {
 		f /= 0.5;
 		f -= 2.0;
 	}
-	if (f != 2.0){
+	if (f != 2.0) {
 		printf("s6 ");
 		e++;
 	}
@@ -115,7 +115,7 @@ int test_single(){
 	f = 1000000.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f + 1.5) * 0.5) - 1.25) / 0.5);
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("s7 ");
 		e++;
 	}
@@ -131,7 +131,7 @@ int test_single(){
 	f = 8.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f - 5.0) / 2.0) + 2.5) * 2.0);
-	if (f != 8.0){
+	if (f != 8.0) {
 		printf("s9 ");
 		e++;
 	}
@@ -140,11 +140,11 @@ int test_single(){
 	f = 42.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f / 6.0) - 5.0) * 19.75 ) + 2.5);
-	if (f != 42.0){
+	if (f != 42.0) {
 		printf("s10 ");
 		e++;
 	}
-	if (e){
+	if (e) {
 		printf("\n");
 		return 1;
 	}
@@ -152,7 +152,7 @@ int test_single(){
 }
 
 
-int test_double(){
+int test_double() {
 	static double f;
 	static int i;
 	static int e = 0;
@@ -161,7 +161,7 @@ int test_double(){
 	f = 1.0;
 	for(i = 0; i < 10; i++)
 		f += (1<<i);
-	if (f != 1024.0){
+	if (f != 1024.0) {
 		printf("d1 ");
 		e++;
 	}
@@ -170,7 +170,7 @@ int test_double(){
 	f = 1024.0;
 	for(i = 0; i < 10; i++)
 		f -= (1<<i);
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("d2 ");
 		e++;
 	}
@@ -179,7 +179,7 @@ int test_double(){
 	f = 1.0;
 	for(i = 1; i < 10; i++)
 		f *= i;
-	if (f != 362880.0){
+	if (f != 362880.0) {
 		printf("d3 ");
 		e++;
 	}
@@ -188,29 +188,29 @@ int test_double(){
 	f = 362880.0;
 	for(i = 1; i < 10; i++)
 		f /= i;
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("d4 ");
 		e++;
 	}
 
 	/* multiply-accumulate test */
 	f = 0.5;
-	for(i = 1; i < 1000000; i++){
+	for(i = 1; i < 1000000; i++) {
 		f += 2.0;
 		f *= 0.5;
 	}
-	if (f != 2.0){
+	if (f != 2.0) {
 		printf("d5 ");
 		e++;
 	}
 
 	/* divide-subtract test */
 	f = 2.0;
-	for(i = 1; i < 1000000; i++){
+	for(i = 1; i < 1000000; i++) {
 		f /= 0.5;
 		f -= 2.0;
 	}
-	if (f != 2.0){
+	if (f != 2.0) {
 		printf("d6 ");
 		e++;
 	}
@@ -219,7 +219,7 @@ int test_double(){
 	f = 1000000.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f + 1.5) * 0.5) - 1.25) / 0.5);
-	if (f != 1.0){
+	if (f != 1.0) {
 		printf("d7 ");
 		e++;
 	}
@@ -235,7 +235,7 @@ int test_double(){
 	f = 8.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f - 5.0) / 2.0) + 2.5) * 2.0);
-	if (f != 8.0){
+	if (f != 8.0) {
 		printf("d9 ");
 		e++;
 	}
@@ -244,11 +244,11 @@ int test_double(){
 	f = 42.0;
 	for(i = 1; i < 1000000; i++)
 		f = ((((f / 6.0) - 5.0) * 19.75 ) + 2.5);
-	if (f != 42.0){
+	if (f != 42.0) {
 		printf("d10 ");
 		e++;
 	}
-	if (e){
+	if (e) {
 		printf("\n");
 		return 1;
 	}

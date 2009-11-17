@@ -229,7 +229,7 @@ static void die(int sig UNUSED)
 static enum deg_str_type deg_type = deg_dd;
 
 /*@ -globstate @*/
-static void windowsetup(void){
+static void windowsetup(void) {
   /* Set the window sizes per the following criteria:
 
      1.  Set the window size to display the maximum number of

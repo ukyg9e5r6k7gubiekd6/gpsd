@@ -67,7 +67,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 
     flags = (unsigned int)getub(buf, 11);
     mask = 0;
-    if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
+    if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
 	session->driver.ubx.gps_week = gw;
@@ -97,7 +97,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.satellites_used = (int)getub(buf, 47);
 
     navmode = (unsigned char)getub(buf, 10);
-    switch (navmode){
+    switch (navmode) {
     case UBX_MODE_TMONLY:
     case UBX_MODE_3D:
 	session->gpsdata.fix.mode = MODE_3D;
@@ -207,7 +207,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 #endif
     /*@ +charint @*/
     nchan = (unsigned int)getub(buf, 4);
-    if (nchan > MAXCHANNELS){
+    if (nchan > MAXCHANNELS) {
 	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >%d reported visible",MAXCHANNELS);
 	return 0;
     }
@@ -499,7 +499,7 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == UBX_PACKET){
+    if (session->packet.type == UBX_PACKET) {
 	st = ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;

@@ -262,7 +262,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next preamble match and go on from there. 
 		     */
-		    if (session->isgps.bufindex >= (unsigned)maxlen){
+		    if (session->isgps.bufindex >= (unsigned)maxlen) {
 			session->isgps.bufindex = 0;
 			gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
 				    "ISGPS buffer overflowing -- resetting\n");

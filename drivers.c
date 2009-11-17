@@ -776,7 +776,7 @@ static int oceanserver_send(int fd, const char *fmt, ... )
 #ifdef ALLOW_RECONFIGURE
 static void oceanserver_configure(struct gps_device_t *session, event_t event)
 {
-    if (event == event_configure && session->packet.counter == 0){
+    if (event == event_configure && session->packet.counter == 0) {
 	/* report in NMEA format */
 	(void)oceanserver_send(session->gpsdata.gps_fd, "2\n");
 	/* ship all fields */
@@ -1029,7 +1029,7 @@ const struct gps_type_t mtk3301 = {
 #ifdef AIVDM_ENABLE
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-    if (session->packet.type == AIVDM_PACKET){
+    if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm, &session->gpsdata.ais)) {
 	    return ONLINE_SET | AIS_SET;
 	}else

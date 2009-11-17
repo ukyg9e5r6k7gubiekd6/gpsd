@@ -89,7 +89,7 @@ static void print_fix(struct gps_fix_t *fix, struct tm *time)
      * we don't necessarily have access to some of the stuff in gsdata.
      * Might mean some of this stuff should be promoted.
      */
-    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= MODE_3D)){
+    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= MODE_3D)) {
 	/* dgps or pps */
 	if (gpsdata->fix.mode == 4) { /* military pps */
 	    (void)printf("        <fix>pps</fix>\n");
@@ -291,7 +291,7 @@ static int socket_mainloop(void)
     gps_set_raw_hook(gpsdata, process);
     gps_stream(gpsdata, WATCH_ENABLE|WATCH_NEWSTYLE, NULL);
 
-    for(;;){
+    for(;;) {
 	int data;
 	struct timeval tv;
 
@@ -334,7 +334,7 @@ int main (int argc, char** argv)
     int ch;
 
     progname = argv[0];
-    while ((ch = getopt(argc, argv, "hi:V")) != -1){
+    while ((ch = getopt(argc, argv, "hi:V")) != -1) {
 	switch (ch) {
 	case 'i':		/* set polling interfal */
 	    timeout = (unsigned int)atoi(optarg);
