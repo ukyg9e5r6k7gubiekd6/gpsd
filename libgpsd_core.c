@@ -359,7 +359,7 @@ void ntpd_link_activate(struct gps_device_t *session)
 	session->shmindex = ntpshm_alloc(session->context);
 
     if ( 0 > session->shmindex ) {
-	gpsd_report(LOG_INFO, "NTPD ntpshm_alloc() failed\n");
+	gpsd_report(LOG_INF, "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     } else if ( session->context->shmTimePPS) {
 	/* We also have the 1pps capability, allocate a shared-memory segment
@@ -369,7 +369,7 @@ void ntpd_link_activate(struct gps_device_t *session)
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
 	    (void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	} else {
-	    gpsd_report(LOG_INFO, "NTPD ntpshm_alloc(1) failed\n");
+	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	}
 
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
