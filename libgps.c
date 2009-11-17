@@ -186,7 +186,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->dev.path[0] = '\0';
 			else {
 			    /*@ -mayaliasunique @*/
-			    strncpy(gpsdata->dev.path, sp+2, PATH_MAX);
+			    strncpy(gpsdata->dev.path, sp+2, sizeof(gpsdata->dev.path));
 			    /*@ +mayaliasunique @*/
 			    gpsdata->set |= DEVICE_SET;
 			}

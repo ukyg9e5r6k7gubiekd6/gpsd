@@ -491,7 +491,7 @@ int main (int argc, char **argv)
 	    (void)gps_send(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
 	serial = false;
     } else {
-	(void)strlcpy(session.gpsdata.dev.path, argv[optind], PATH_MAX);
+	(void)strlcpy(session.gpsdata.dev.path, argv[optind], sizeof(session.gpsdata.dev.path));
 	if (gpsd_activate(&session) == -1) {
 	    gpsd_report(LOG_ERROR,
 			  "activation of device %s failed, errno=%d\n",
