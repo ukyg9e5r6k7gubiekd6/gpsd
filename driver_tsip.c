@@ -71,9 +71,15 @@ static bool tsip_detect(struct gps_device_t *session)
     int myfd;
     fd_set fdset;
     struct timeval to;
+    speed_t old_baudrate;
+    char old_parity;
+    unsigned int old_stopbits;
 
     gpsd_report(LOG_PROG, "Probing TSIP\n");
 
+    old_baudrate = session->gpsdata.dev.baudrate;
+    old_parity = session->gpsdata.dev.parity;
+    old_stopbits = session->gpsdata.dev.stopbits;
     gpsd_set_speed(session, 9600, 'O', 1);
 
     /* request firmware revision and look for a valid response */
@@ -102,10 +108,7 @@ static bool tsip_detect(struct gps_device_t *session)
 
     if (ret == 0)
 	/* return serial port to original settings */
-	gpsd_set_speed(session,
-		       session->gpsdata.dev.baudrate,
-		       session->gpsdata.dev.parity,
-		       session->gpsdata.dev.stopbits);
+	gpsd_set_speed(session, old_baudrate, old_parity, old_stopbits);
 
     return ret;
 }
