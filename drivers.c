@@ -216,7 +216,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 
 #ifdef ALLOW_RECONFIGURE
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-extern void sirfbin_mode(struct gps_device_t *, int);
+extern const struct gps_type_t sirf_binary;
 #endif
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
@@ -224,7 +224,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 	if ( 0 != (SIRF_PACKET & session->observed)) {
 		/* it was SiRF binary once, do it again */
-		sirfbin_mode(session, mode);
+		sirf_binary.mode_switcher(session, mode);
 	}
 #endif
     }
@@ -1097,7 +1097,7 @@ static const struct gps_type_t aivdm = {
 #endif /* AIVDM_ENABLE */
 
 extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
-extern const struct gps_type_t sirf_binary, tsip_binary, oncore_binary;
+extern const struct gps_type_t tsip_binary, oncore_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
 extern const struct gps_type_t navcom_binary, superstar2_binary;
 
