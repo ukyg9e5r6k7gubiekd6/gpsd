@@ -78,7 +78,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.dop.gdop = NAN;
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
-    session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1; 
+    session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -137,7 +137,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
-        int ok = 0;
+	int ok = 0;
 	char *log = NULL;
 
 	(void)gettimeofday(&tv,NULL);
@@ -151,24 +151,24 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
 
 	state = (int)((state & pps_device) != 0);
-        /*@ +boolint @*/
+	/*@ +boolint @*/
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	cycle = timediff(tv, pulse[state]);
 	duration = timediff(tv, pulse[(int)(state == 0)]);
 #undef timediff
-        /*@ -boolint @*/
+	/*@ -boolint @*/
 
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
 	    if ( 999000 < cycle && 1001000 > cycle ) {
 		duration = 0;
-	        unchanged = 0;
-	        gpsd_report(LOG_RAW, 
+		unchanged = 0;
+		gpsd_report(LOG_RAW,
 			"PPS pps-detect (%s) on %s invisible pulse\n",
 			pps_device_str, session->gpsdata.dev.path);
 	    } else if (++unchanged == 10) {
-	        unchanged = 0;
-		gpsd_report(LOG_WARN, 
+		unchanged = 0;
+		gpsd_report(LOG_WARN,
 	"PPS TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
 		(void)sleep(10);
 	    }
@@ -208,10 +208,10 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	     * The pulse is so short that TIOCMIWAIT sees a state change
 	     * but by the time TIOCMGET is called the pulse is gone.
 	     *
-	     * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
+	     * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz
 	     * square wave where the leading edge is the start of a second
 	     *
-	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to 
+	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
 	     * 40ms which gives a 160ms pulse before going high.
 	     *
 	     */
@@ -223,7 +223,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
 		if (100000 > duration) {
-		    /* BUG: how does the code know to tell ntpd 
+		    /* BUG: how does the code know to tell ntpd
 		     * which 1/5 of a second to use?? */
 		    ok = 1;
 		    log = "5Hz PPS pulse\n";
@@ -236,7 +236,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 #if 0
 /* huh? */
 #if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
-		 && session->driver.nmea.ignore_trailing_edge 
+		 && session->driver.nmea.ignore_trailing_edge
 #endif /* GPSCLOCK_ENABLE */
 #endif
 
@@ -250,8 +250,8 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		} else if (501000 > duration) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
-		        ok = 1;
-		        log = "PPS square\n";
+			ok = 1;
+			log = "PPS square\n";
 		    }
 		} else {
 		    /* end of the long "half" of the cycle */
@@ -269,7 +269,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		log = "Too long for 2Hz\n";
 	    }
 	} else {
-	    /* not a good fix, but a test for an otherwise good PPS 
+	    /* not a good fix, but a test for an otherwise good PPS
 	     * would go here */
 	    log = "PPS no fix.\n";
 	}
@@ -308,7 +308,7 @@ int gpsd_activate(struct gps_device_t *session)
 		gpsd_assert_sync(session);
 		goto foundit;
 	    }
- 	}
+	}
 	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
     foundit:
@@ -319,8 +319,8 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* SIRF_ENABLE */
 	session->packet.char_counter = 0;
 	session->packet.retry_counter = 0;
-	gpsd_report(LOG_INF, 
-		    "gpsd_activate(): opened GPS (fd %d)\n", 
+	gpsd_report(LOG_INF,
+		    "gpsd_activate(): opened GPS (fd %d)\n",
 		    session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
@@ -334,12 +334,12 @@ int gpsd_activate(struct gps_device_t *session)
 	memset(&session->driver, '\0', sizeof(session->driver));
 	/*
 	 * We might know the device's type, but we shoudn't assume it has
-	 * retained its settings.  A revert hook might well have undone 
-	 * them on the previous close.  Fire a reactivate event so drivers 
+	 * retained its settings.  A revert hook might well have undone
+	 * them on the previous close.  Fire a reactivate event so drivers
 	 * can do something about this if they choose.
 	 */
-	if (session->device_type != NULL 
-	    	&& session->device_type->event_hook != NULL)
+	if (session->device_type != NULL
+		&& session->device_type->event_hook != NULL)
 	    session->device_type->event_hook(session, event_reactivate);
     }
 
@@ -362,10 +362,10 @@ void ntpd_link_activate(struct gps_device_t *session)
 	gpsd_report(LOG_ERROR, "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     } else if ( session->context->shmTimePPS) {
-        /* We also have the 1pps capability, allocate a shared-memory segment 
-	 * for the 1pps time data and launch a thread to capture the 1pps 
+	/* We also have the 1pps capability, allocate a shared-memory segment
+	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
-         */
+	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
 	    (void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	} else {
@@ -462,8 +462,8 @@ void gpsd_error_model(struct gps_device_t *session,
 	    session->gpsdata.epe = NAN;
 
 	/*
-	 * If we have a current fix and an old fix, and the packet handler 
-	 * didn't set the speed error and climb error members itself, 
+	 * If we have a current fix and an old fix, and the packet handler
+	 * didn't set the speed error and climb error members itself,
 	 * try to compute them now.
 	 */
 	if (isnan(fix->eps)!=0)
@@ -566,7 +566,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(LOG_RAW+2, "%s sent %zd new characters\n", 
+    gpsd_report(LOG_RAW+2, "%s sent %zd new characters\n",
 		session->gpsdata.dev.path, newlen);
    if (newlen == -1)	{		/* read error */
 	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
@@ -611,7 +611,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->device_type->event_hook != NULL)
 	    session->device_type->event_hook(session, event_configure);
 
-	/* 
+	/*
 	 * If this is the first time we've achieved sync on this device, that's
 	 * a significant event that the caller needs to know about.  Using
 	 * DEVICE_SET this way is a bit shaky but we're short of bits in
@@ -638,7 +638,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.set = ONLINE_SET | dopmask | received;
 
 	/*
-	 * Count good fixes. We used to check 
+	 * Count good fixes. We used to check
 	 *	session->gpsdata.status > STATUS_NO_FIX
 	 * here, but that wasn't quite right.  That tells us whether
 	 * we think we have a valid fix for the current cycle, but remains
