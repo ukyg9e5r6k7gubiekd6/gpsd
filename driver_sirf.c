@@ -416,10 +416,14 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    "NTPD valid time in message 0x04, seen=0x%02x\n",
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
+#if __UNUSED__
+	/* this time stamp, at 4800bps, is so close to 1 sec old as to 
+	 * be confusing to ntpshm_put(), so ignore */
 	if (session->context->enable_ntpshm) {
             // fudge valid at 4800bps
-	    (void)ntpshm_put(session,session->gpsdata.skyview_time, 0.700);
+	    (void)ntpshm_put(session,session->gpsdata.skyview_time, 1.040);
 	}
+#endif
     }
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask={SATELLITE}\n",
