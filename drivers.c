@@ -214,6 +214,20 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
+extern void sirfbin_mode(struct gps_device_t *, int);
+#endif
+static void nmea_mode_switch(struct gps_device_t *session, int mode)
+{
+    if (mode == MODE_BINARY) {
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
+	sirfbin_mode(session, mode);
+#endif
+    }
+}
+#endif ALLOW_RECONFIGURE
+
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -226,7 +240,7 @@ const struct gps_type_t nmea = {
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = NULL,		/* no mode switcher */
+    .mode_switcher  = nmea_mode_switch,	/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
@@ -234,6 +248,7 @@ const struct gps_type_t nmea = {
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
 };
+
 
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
 /**************************************************************************

@@ -210,13 +210,20 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
    return (sirf_write(ttyfd, msg));
 }
 
-static void sirfbin_mode(struct gps_device_t *session, int mode)
+void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.dev.baudrate);
-    } else {
-	session->back_to_nmea = false;
+    } else if (mode == MODE_BINARY) {
+	(void)nmea_send(session,
+			"$PSRF100,0,%d,%d,%d,0",
+			session->gpsdata.dev.baudrate,
+			9-session->gpsdata.dev.stopbits,
+			session->gpsdata.dev.stopbits);
+	(void)usleep(333);	/* guessed settling time */
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
+    session->back_to_nmea = false;
 }
 #endif /* ALLOW_RECONFIGURE */
 
