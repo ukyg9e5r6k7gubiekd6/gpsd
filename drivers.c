@@ -229,7 +229,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 #endif
     }
 }
-#endif ALLOW_RECONFIGURE
+#endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
