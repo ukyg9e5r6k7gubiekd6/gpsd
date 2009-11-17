@@ -178,8 +178,8 @@ to standard error if <application>gpsd</application> is in the foreground
 </variablelist>
 
 <para>Arguments are interpreted as the names of data sources.
-Normally, a data source is the name of a local serial device from
-which the daemon may expect GPS data.</para>
+Normally, a data source is the device pathname of a local serial
+device from which the daemon may expect GPS data.</para>
 
 <para>A data source name may also be a URI pointing to a specific
 network GNSS service (a DGPSIP server or Ntrip broadcaster).  If the
