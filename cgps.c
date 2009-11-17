@@ -22,6 +22,14 @@
   Kind of a curses version of xgps for use with gpsd.
 */
 
+/*
+ * The True North compass fails with current gpsd versions for reasons
+ * the dev team has been unable to diagnose due to not having test hardware.
+ * The sup[port for it is conditioned out in order to simplify moving 
+ * to the new JSON-based oprotocol and reduce startup time.
+ */
+#undef TRUENORTH
+
 /* ==================================================================
    These #defines should be modified if changing the number of fields
    to be displayed.
@@ -128,10 +136,12 @@ static bool got_gps_type=false;
 static bool raw_flag=false;
 static bool silent_flag=false;
 static bool magnetic_flag=false;
-static bool compass_flag=false;
 static char gps_type[26];
 static int window_length;
 static int display_sats;
+#ifdef TRUENORTH
+static bool compass_flag=false;
+#endif /* TRUENORTH */
 
 /* Convert true heading to magnetic.  Taken from the Aviation
    Formulary v1.43.  Valid to within two degrees within the
@@ -242,6 +252,7 @@ static void windowsetup(void){
 
   getmaxyx(stdscr,ysize,xsize);
 
+#ifdef TRUENORTH
   if(compass_flag) {
     if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
       raw_flag = false;
@@ -257,7 +268,9 @@ static void windowsetup(void){
       (void)sleep(5);
       die(0);
     }
-  } else {
+  } else
+#endif /* TRUENOTH */
+  {
     if(ysize == MAX_SATWIN_SIZE) {
       raw_flag = false;
       window_length = MAX_SATWIN_SIZE;
@@ -288,6 +301,7 @@ static void windowsetup(void){
     }
   }
 
+#ifdef TRUENORTH
   /* Set up the screen for either a compass or a gps receiver. */
   if(compass_flag) {
     /* We're a compass, set up accordingly. */
@@ -316,7 +330,9 @@ static void windowsetup(void){
     (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Rcvr Type:");
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
 
-  } else {
+  } else
+#endif /* TRUENORTH */ 
+  {
     /* We're a GPS, set up accordingly. */
 
     /*@ -onlytrans @*/
@@ -368,6 +384,7 @@ static void windowsetup(void){
 }
 /*@ +globstate @*/
 
+#ifdef TRUENORTH
 /* This gets called once for each new compass sentence. */
 static void update_compass_panel(struct gps_data_t *gpsdata,
 			char *message,
@@ -426,7 +443,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
     (void)wrefresh(messages);
   }
 }
-
+#endif /* TRUENORTH */
 
 /* This gets called once for each new GPS sentence. */
 static void update_gps_panel(struct gps_data_t *gpsdata,
@@ -648,41 +665,6 @@ static void usage( char *prog)
  * No protocol dependencies above this line
  */
 
-static time_t misc_timer;    /* Misc use timer. */
-
-/* This gets called once for each new sentence until we figure out
-   what's going on and switch to either update_gps_panel() or
-   update_compass_panel(). */
-static void update_probe(struct gps_data_t *gpsdata,
-		       char *message,
-		       size_t len UNUSED)
-{
-  int ret;
-
-  /* Send an 'i' once per second until we figure out what the GPS
-     device is. */
-  if(time(NULL)-misc_timer > 2) {
-    (void)fprintf(stderr,"Probing...\n");
-    ret = gps_send(gpsdata, "I\n");
-    if ( ret ) {
-        (void)fprintf(stderr,"Probing send failed\n");
-    }
-    misc_timer=time(NULL);
-  }
-
-  assert(message != NULL);
-  if(strncmp(message,"GPSD,I=",6)==0) {
-    message+=7;
-    (void)strlcpy(gps_type, message, sizeof(gps_type));
-    got_gps_type=true;
-    /* If we're hooked to a compass, we display an entirely different
-       screen and label the data much differently. */
-    if(strstr(message,"True North")) {
-      compass_flag=true;
-    }
-  }
-}
-
 int main(int argc, char *argv[])
 {
   int option;
@@ -769,65 +751,12 @@ int main(int argc, char *argv[])
     exit(2);
   }
 
-  /* Set both timers to now. */
-  status_timer = time(NULL);
-  misc_timer = status_timer;
-
   /* If the user requested a specific device, try to change to it. */
   if (source.device != NULL) {
       ret = gps_send(gpsdata, "F=%s\n", source.device);
       if ( ret ) {
           (void)fprintf(stderr,"Device change send failed\n");
       }
-  }
-
-  /* Here's where updates go until we figure out what we're dealing
-     with. */
-  gps_set_raw_hook(gpsdata, update_probe);
-
-  /* Tell me what you are... */
-  ret = gps_send(gpsdata, "i\n");
-  if ( ret ) {
-      (void)fprintf(stderr,"Probing send failed\n");
-  }
-
-  /* Loop for ten seconds looking for a device.  If none found, give
-     up and assume "unknown" device type. */
-  while(got_gps_type==0) {
-
-    /* Give up after ten seconds. */
-    if(time(NULL)-status_timer >= 10) {
-      (void)strlcpy(gps_type, "unknown", sizeof(gps_type));
-      got_gps_type=true;
-    }
-
-    /* watch to see when it has input */
-    FD_ZERO(&rfds);
-    FD_SET(gpsdata->gps_fd, &rfds);
-
-    /* Sleep for one second. */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
-
-    /* check if we have new information */
-    data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
-
-    if (data == -1) {
-      fprintf( stderr, "cgps: socket error 1\n");
-      exit(2);
-    } else if( data ) {
-      /* code that calls gps_poll(gpsdata) */
-      if (gps_poll(gpsdata) != 0) {
-        fprintf( stderr, "cgps: socket error 2\n");
-	die(1);
-      }
-    }
-
-    ret = gps_send(gpsdata, "I\n");
-    if ( ret ) {
-      (void)fprintf(stderr,"Probing send failed\n");
-    }
-
   }
 
   /* Fire up curses. */
@@ -839,9 +768,12 @@ int main(int argc, char *argv[])
   windowsetup();
 
   /* Here's where updates go now that things are established. */
+#ifdef TRUENORTH
   if(compass_flag) {
     gps_set_raw_hook(gpsdata, update_compass_panel);
-  } else {
+  } else
+#endif /* TRUENORTH */
+  {
     gps_set_raw_hook(gpsdata, update_gps_panel);
   }
 
