@@ -443,8 +443,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    break;
 	}
 #ifdef NTPSHM_ENABLE
-	if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
-	    (void) ntpshm_put(session, session->gpsdata.fix.time, 0);
+	if (session->context->enable_ntpshm 
+	  && session->gpsdata.fix.mode > MODE_NO_FIX) {
+	    // Garmin SerBin fudge 0.430 valid at 4800bps
+	    (void) ntpshm_put(session, session->gpsdata.fix.time, 0.430);
+	}
 #endif /* NTPSHM_ENABLE */
 
 	gpsd_report(LOG_PROG, "Appl, mode %d, status %d\n"
