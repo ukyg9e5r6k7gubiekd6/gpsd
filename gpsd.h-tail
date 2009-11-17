@@ -526,9 +526,9 @@ extern void ubx_catch_model(struct gps_device_t *,
 extern bool aivdm_decode(const char *, size_t, struct aivdm_context_t *, struct ais_t *);
 extern void  aivdm_json_dump(const struct ais_t *, bool, /*@out@*/char *, size_t);
 #endif /* AIVDM_ENABLE */
-#ifdef MKT3301_ENABLE
-    extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
-#endif /* MKT3301_ENABLE */
+#ifdef MTK3301_ENABLE
+extern gps_mask_t processMTK3301(int c UNUSED, char *field[], struct gps_device_t *session);
+#endif /* MTK3301_ENABLE */
 
 /* caller should supply this */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)

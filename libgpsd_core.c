@@ -275,7 +275,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	}
 	/*@ -boolint @*/
 	if ( NULL != log ) {
-	    gpsd_report(LOG_RAW, log);
+	    gpsd_report(LOG_RAW, "%s", log);
 	}
 	if ( 0 != ok ) {
 	    (void)ntpshm_pps(session, &tv);

@@ -988,7 +988,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session,"$PMTK313,1"); /* SBAS enable */
     }
 }
-static void mtk3301_rate_switcher(struct gps_device_t *session, double rate)
+static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 {
     char buf[78];
     /*@i1@*/unsigned int milliseconds = 1000 * rate;
@@ -999,6 +999,7 @@ static void mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 	
     (void)snprintf(buf, 78, "$PMTK300,%u,0,0,0,0", milliseconds);
     (void)nmea_send(session,buf); /* Fix interval */
+    return true;
 }
 #endif /* ALLOW_RECONFIGURE */
 
