@@ -773,6 +773,8 @@ int main(int argc, char *argv[])
     gps_set_raw_hook(gpsdata, update_gps_panel);
   }
 
+  status_timer = time(NULL);
+
   (void)gps_stream(gpsdata, WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE, NULL);
 
   /* heart of the client */
