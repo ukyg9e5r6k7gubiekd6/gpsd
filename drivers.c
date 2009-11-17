@@ -222,7 +222,10 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_BINARY) {
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-	sirfbin_mode(session, mode);
+	if ( 0 != (SIRF_PACKET & session->observed)) {
+		/* it was SiRF binary once, do it again */
+		sirfbin_mode(session, mode);
+	}
 #endif
     }
 }
