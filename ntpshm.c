@@ -118,7 +118,7 @@ bool ntpshm_free(struct gps_context_t *context, int segment)
 }
 
 
-int ntpshm_put(struct gps_device_t *session, double fixtime)
+int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 /* put a received fix time into shared memory for NTP */
 {
     struct shmTime *shmTime = NULL;
@@ -130,7 +130,12 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
 	return 0;
 
     (void)gettimeofday(&tv,NULL);
+    fixtime += fudge;
     microseconds = 1000000.0 * modf(fixtime,&seconds);
+    if ( shmTime->clockTimeStampSec == (time_t)seconds) {
+	gpsd_report(LOG_RAW, "NTPD ntpshm_put: skipping duplicate second\n");
+    	return 0;
+    }
 
     /* we use the shmTime mode 1 protocol
      *
@@ -160,9 +165,10 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     shmTime->count++;
     shmTime->valid = 1;
 
-    gpsd_report(LOG_RAW, "NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu\n"
+    gpsd_report(LOG_RAW, 
+        "NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu, fudge: %0.3f\n"
 	, (unsigned long)seconds , (unsigned long)microseconds
-	, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
+	, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec, fudge);
 
     return 1;
 }

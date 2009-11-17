@@ -98,7 +98,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	if (session->context->enable_ntpshm &&
 	    (st & TIME_SET) != 0 &&
 	    (session->gpsdata.fix.time!=session->last_fixtime)) {
-	    (void)ntpshm_put(session, session->gpsdata.fix.time);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);
 	    session->last_fixtime = session->gpsdata.fix.time;
 	}
 #endif /* NTPSHM_ENABLE */

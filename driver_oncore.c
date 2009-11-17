@@ -110,7 +110,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	 * Else we may be providing GPS time.
 	 */
 	if (session->context->enable_ntpshm)
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.16);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.16);
 #endif /* NTPSHM_ENABLE */
 
 	gpsd_report(LOG_IO, "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",

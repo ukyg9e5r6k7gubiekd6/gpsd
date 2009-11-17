@@ -417,7 +417,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
 	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_1))
-	    (void)ntpshm_put(session,session->gpsdata.skyview_time+0.8);
+	    (void)ntpshm_put(session,session->gpsdata.skyview_time, 0.8);
     }
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_DATA, "MTD 0x04: visible=%d mask={SATELLITE}\n",
@@ -478,7 +478,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
 	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_2))
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.8);
     }
 #endif /* NTPSHM_ENABLE */
     /* fix quality data */
@@ -634,7 +634,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 		session->driver.sirf.time_seen);
 	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_1;
 	    if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_UTC_1))
-		(void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+		(void)ntpshm_put(session, session->gpsdata.fix.time, 0.8);
 	}
 #endif /* NTPSHM_ENABLE */
 	/* skip 4 bytes of satellite map */
@@ -742,7 +742,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_UTC_2))
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.8);
 #endif /* NTPSHM_ENABLE */
 	session->context->valid |= LEAP_SECOND_VALID;
     }
@@ -805,7 +805,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 	if (session->context->enable_ntpshm 
 	  && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_UTC_2))
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.3);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.3);
 #endif /* NTPSHM_ENABLE */
 	mask |= TIME_SET;
     }

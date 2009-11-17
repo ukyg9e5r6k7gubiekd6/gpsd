@@ -190,7 +190,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
 	    d1 = gpstime_to_unix((int)s1, f1) - f2;
 	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,d1+0.075);
+		(void)ntpshm_put(session,d1,0.075);
 #endif
 	}
 	gpsd_report(LOG_INF, "GPS Time %f %d %f\n",f1,s1,f2);
@@ -738,7 +738,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)s1, (double)ul1) - (double)s2;
 #ifdef NTPSHM_ENABLE
 	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,session->gpsdata.fix.time+0.075);
+		(void)ntpshm_put(session,session->gpsdata.fix.time,0.075);
 #endif
 	    mask |= TIME_SET;
 	    gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",

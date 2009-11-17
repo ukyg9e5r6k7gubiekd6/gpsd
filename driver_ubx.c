@@ -78,7 +78,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 #ifdef NTPSHM_ENABLE
 	/* TODO overhead */
 	if (session->context->enable_ntpshm)
-	    (void)ntpshm_put(session, t);
+	    (void)ntpshm_put(session, t,0);
 #endif
     }
 
