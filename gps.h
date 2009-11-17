@@ -937,7 +937,7 @@ struct gps_data_t {
     /* redundant with the estimate elements in the fix structure */
     double epe;  /* spherical position error, 95% confidence (meters)  */
 
-    /* satellite status -- valid when satellites > 0 */
+    /* satellite status -- valid when satellites_visible > 0 */
     double skyview_time;	/* skyview timestamp */
     int satellites_visible;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
