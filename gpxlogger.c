@@ -289,7 +289,7 @@ static int socket_mainloop(void)
     }
 
     gps_set_raw_hook(gpsdata, process);
-    gps_stream(gpsdata, WATCH_ENABLE, NULL);
+    gps_stream(gpsdata, WATCH_ENABLE|WATCH_NEWSTYLE, NULL);
 
     for(;;){
 	int data;
