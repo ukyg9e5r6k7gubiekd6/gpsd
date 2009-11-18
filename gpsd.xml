@@ -43,15 +43,15 @@
 Linux system, and want to read reports from it on TCP/IP port 2947, it
 will normally suffice to do this:</para>
 
-<example>
+<programlisting>
 gpsd /dev/ttyUSB0
-</example>
+</programlisting>
 
 <para>For the lowest-numbered serial port:</para>
 
-<example>
+<programlisting>
 gpsd /dev/ttyS0
-</example>
+</programlisting>
 
 <para>Change the device number as appropriate if you need to use a
 different port. Command-line flags enable verbose logging, a control
