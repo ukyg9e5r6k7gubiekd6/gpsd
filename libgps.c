@@ -50,6 +50,7 @@ int gps_open_r(const char *host, const char *port,
 	return -1;
     }
 
+    gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
     gpsdata->newstyle = false;
@@ -86,52 +87,62 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 
 #ifdef LIBGPS_DEBUG
 static void libgps_dump_state(struct gps_data_t *collect, 
-			      time_t now, FILE *fput)
+			      time_t now, FILE *fpout)
 {
     extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
 
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    (void)fprintf(fput, "flags: %s\n", gpsd_maskdump(collect->set));
+    (void)fprintf(fpout, "flags: (0x%04x) %s\n", 
+		  collect->set, gpsd_maskdump(collect->set));
     if (collect->set & ONLINE_SET)
-	(void)fprintf(fput, "online: %lf\n", collect->online);
+	(void)fprintf(fpout, "online: %lf\n", collect->online);
     if (collect->set & LATLON_SET)
-	(void)fprintf(fput, "P: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
+	(void)fprintf(fpout, "LATLON: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
     if (collect->set & ALTITUDE_SET)
-	(void)fprintf(fput, "A: altitude: %lf  U: climb: %lf\n",
+	(void)fprintf(fpout, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
 	       collect->fix.altitude, collect->fix.climb);
-    if (!isnan(collect->fix.track))
-	(void)fprintf(fput, "T: track: %lf  V: speed: %lf\n",
-	       collect->fix.track, collect->fix.speed);
+    if (collect->set & TRACK_SET)
+	(void)fprintf(fpout, "TRACK: track: %lf\n",
+	       collect->fix.track);
+    if (collect->set & SPEED_SET)
+	(void)fprintf(fpout, "SPEED: speed: %lf\n",
+	       collect->fix.speed);
     if (collect->set & STATUS_SET)
-	(void)fprintf(fput, "S: status: %d (%s)\n",
+	(void)fprintf(fpout, "STATUS: status: %d (%s)\n",
 	       collect->status, status_values[collect->status]);
     if (collect->fix.mode & MODE_SET)
-	(void)fprintf(fput, "M: mode: %d (%s)\n",
+	(void)fprintf(fpout, "MODE: mode: %d (%s)\n",
 	   collect->fix.mode, mode_values[collect->fix.mode]);
     if (collect->fix.mode & DOP_SET)
-	(void)fprintf(fput, "Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+	(void)fprintf(fpout, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
 	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
 
     if (collect->set & SATELLITE_SET) {
 	int i;
 
-	(void)fprintf(fput, "Y: satellites in view: %d\n", collect->satellites_visible);
+	(void)fprintf(fpout, "SKY: satellites in view: %d\n", collect->satellites_visible);
 	for (i = 0; i < collect->satellites_visible; i++) {
-	    (void)fprintf(fput, "    %2.2d: %2.2d %3.3d %3.0f %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
+	    (void)fprintf(fpout, "    %2.2d: %2.2d %3.3d %3.0f %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
     }
     if (collect->set & DEVICE_SET)
-	(void)fprintf(fput, "Device is %s\n", collect->dev.path);
+	(void)fprintf(fpout, "DEVICE: Device is '%s', driver is '%s'\n", 
+		      collect->dev.path, collect->dev.driver);
+#ifdef OLDSTYLE_ENABLE
     if (collect->set & DEVICEID_SET)
-	(void)fprintf(fput, "GPSD ID is %s\n", collect->dev.subtype);
+	(void)fprintf(fpout, "GPSD ID is %s\n", collect->dev.subtype);
+#endif /* OLDSTYLE_ENABLE */
     if (collect->set & DEVICELIST_SET) {
 	int i;
-	(void)fprintf(fput, "%d devices:\n", collect->devices.ndevices);
+	(void)fprintf(fpout, "DEVICELIST:%d devices:\n", collect->devices.ndevices);
 	for (i = 0; i < collect->devices.ndevices; i++) {
-	    (void)fprintf(fput, "%d: %s\n", collect->devices.ndevices, collect->devices.list[i].path);
+	    (void)fprintf(fpout, "%d: path='%s' driver='%s'\n", 
+			  collect->devices.ndevices, 
+			  collect->devices.list[i].path,
+			  collect->devices.list[i].driver);
 	}
     }
 
