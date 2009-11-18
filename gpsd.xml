@@ -1238,7 +1238,8 @@ notifications.</para>
 <para>This command sets watcher mode. It also sets or elicits a
 report of per-subscriber buffering policy and the raw bit.  An
 argument WATCH object changes the subscriber's policy. The respunce
-describes the subscriber's policy.</para>
+describes the subscriber's policy. The response will also include a
+DEVICES object.</para>
 
 <para>A WATCH object has the following elements:</para>
 
@@ -1306,7 +1307,7 @@ describes the subscriber's policy.</para>
 </table>
 
 <para>There is an additional boolean "timing" attribute which is 
-undodumented because that portion iof the interface is considered
+undodumented because that portion of the interface is considered
 unstable and for developer use only.</para>
 
 <para>In watcher mode, GPS reports are dumpred as TPV and SKY

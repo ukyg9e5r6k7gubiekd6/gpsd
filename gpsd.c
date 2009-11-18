@@ -1621,10 +1621,11 @@ static void handle_newstyle_request(struct subscriber_t *sub,
 		    }
 		}
 	}
-	/* display the user's policy */
+	/* display a device list and the user's policy */
+	json_devicelist_dump(reply + strlen(reply), replylen - strlen(reply));
 	json_watch_dump(&sub->policy, 
-			     reply + strlen(reply),
-			     replylen - strlen(reply));
+			reply + strlen(reply),
+			replylen - strlen(reply));
     } else if (strncmp(buf, "DEVICE", 6) == 0 && (buf[6] == ';' || buf[6] == '=')) {
 	struct devconfig_t devconf;
 	buf += 6;
