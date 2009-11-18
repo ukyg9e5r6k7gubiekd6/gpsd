@@ -3,6 +3,10 @@
 
 if [ -r /etc/default/gpsd ]; then
   . /etc/default/gpsd
+
+  export GPSD_OPTIONS
+  export GPSD_SOCKET
+
   [ "$USBAUTO" = "true" ] || exit 0
 fi
 
