@@ -278,35 +278,37 @@ static int json_error_read(const char *buf,
     return 0;
 }
 
-int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
+int libgps_json_unpack(const char *buf, 
+		       struct gps_data_t *gpsdata, 
+		       const char **end)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
     int status;
     if (strstr(buf, "\"class\":\"TPV\"") != 0) {
-	return json_tpv_read(buf, gpsdata, NULL);
+	return json_tpv_read(buf, gpsdata, end);
     } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
-	return json_sky_read(buf, gpsdata, NULL);
+	return json_sky_read(buf, gpsdata, end);
     } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
-	return json_devicelist_read(buf, gpsdata, NULL);
+	return json_devicelist_read(buf, gpsdata, end);
     } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
-	status = json_device_read(buf, &gpsdata->devices.list[0], NULL);
+	status = json_device_read(buf, &gpsdata->devices.list[0], end);
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
     } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
-	status = json_watch_read(buf, &gpsdata->policy, NULL);
+	status = json_watch_read(buf, &gpsdata->policy, end);
 	if (status == 0) {
 	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= POLICY_SET;
 	}
 	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
-	return json_version_read(buf, gpsdata, NULL);
+	return json_version_read(buf, gpsdata, end);
 #ifdef RTCM104V2_ENABLE
     } else if (strstr(buf, "\"class\":\"RTCM2\"") != 0) {
 	status = json_rtcm2_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
-				 &gpsdata->rtcm2, NULL);
+				 &gpsdata->rtcm2, end);
 	if (status == 0) {
 	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= RTCM2_SET;
@@ -317,7 +319,7 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
     } else if (strstr(buf, "\"class\":\"AIS\"") != 0) {
 	status = json_ais_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
-				 &gpsdata->ais, NULL);
+				 &gpsdata->ais, end);
 	if (status == 0) {
 	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= AIS_SET;
@@ -325,7 +327,7 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return status;
 #endif /* AIVDM_ENABLE */
     } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {
-	return json_error_read(buf, gpsdata, NULL);
+	return json_error_read(buf, gpsdata, end);
     } else
 	return -1;
 }

@@ -396,7 +396,7 @@ static void encode(FILE *fpin, bool repack, FILE *fpout)
 	++lineno;
 	if (inbuf[0] == '#')
 	    continue;
-	status = libgps_json_unpack(inbuf, &gpsdata);
+	status = libgps_json_unpack(inbuf, &gpsdata, NULL);
 	if (status != 0) {
 	    (void) fprintf(stderr, "gpsdecode: bailing out with status %d (%s) on line %d\n", status, json_error_string(status), lineno);
 	    exit(1);
