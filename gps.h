@@ -909,6 +909,7 @@ struct gps_data_t {
 #define CLEAR_SET	0x40000000u	/* sentence starts a reporting cycle */
 #define REPORT_SET	0x80000000u	/* sentence ends a reporting cycle */
 #define DATA_SET	~(ONLINE_SET|PACKET_SET|CLEAR_SET|REPORT_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -954,9 +955,8 @@ struct gps_data_t {
     void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
 
-    /* Private data - may be changed or removed */
+    /* pack things never reported together to reduce structure size */ 
     union {
-	/* pack things never reported together to reduce structure size */ 
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
 	struct rtcm3_t	rtcm3;
@@ -974,6 +974,7 @@ struct gps_data_t {
 	char error[80];
     };
 
+    /* Private data - may be changed or removed */
     bool newstyle;		/* have we seen a JSON response */
 };
 

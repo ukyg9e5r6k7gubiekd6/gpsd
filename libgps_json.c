@@ -221,6 +221,7 @@ static int json_devicelist_read(const char *buf,
     }
 
     gpsdata->devices.time = timestamp();
+    gpsdata->set =~ UNION_SET;
     gpsdata->set |= DEVICELIST_SET;
     return 0;
 }
@@ -248,6 +249,7 @@ static int json_version_read(const char *buf,
     if (status != 0)
 	return status;
 
+    gpsdata->set =~ UNION_SET;
     gpsdata->set |= VERSION_SET;
     return 0;
 }
@@ -271,6 +273,7 @@ static int json_error_read(const char *buf,
     if (status != 0)
 	return status;
 
+    gpsdata->set =~ UNION_SET;
     gpsdata->set |= ERR_SET;
     return 0;
 }
@@ -292,8 +295,10 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	return status;
     } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
 	status = json_watch_read(buf, &gpsdata->policy, NULL);
-	if (status == 0)
+	if (status == 0) {
+	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= POLICY_SET;
+	}
 	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, NULL);
@@ -302,8 +307,10 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	status = json_rtcm2_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->rtcm2, NULL);
-	if (status == 0)
+	if (status == 0) {
+	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= RTCM2_SET;
+	}
 	return status;
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
@@ -311,8 +318,10 @@ int libgps_json_unpack(const char *buf, struct gps_data_t *gpsdata)
 	status = json_ais_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->ais, NULL);
-	if (status == 0)
+	if (status == 0) {
+	    gpsdata->set =~ UNION_SET;
 	    gpsdata->set |= AIS_SET;
+	}
 	return status;
 #endif /* AIVDM_ENABLE */
     } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {
