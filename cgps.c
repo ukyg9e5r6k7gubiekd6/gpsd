@@ -425,9 +425,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
     (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-  /* Fill in receiver type. */
-  if (gpsdata->set & DEVICE_SET) {
-      (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
+  /* When we need to fill in receiver type again, do it here. */
     (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
   }
 
@@ -580,11 +578,17 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in receiver type. */
-  if (gpsdata->set & DEVICE_SET) {
-    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
+  if (gpsdata->set & (DEVICE_SET | DEVICELIST_SET)) {
+      if (gpsdata->set & DEVICE_SET) {
+        (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
+      } else if (gpsdata->devices.ndevices == 1) {
+        (void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[0].driver);
+      } else {
+	  (void)snprintf(scr, sizeof(scr), "%d devices", 
+			 gpsdata->devices.ndevices);
+      }      
     (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
   }
-
     /* Note that the following four fields are exceptions to the
        sizing rule.  The minimum window size does not include these
        fields, if the window is too small, they get excluded.  This
