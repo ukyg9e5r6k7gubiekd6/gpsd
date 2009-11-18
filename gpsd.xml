@@ -37,7 +37,7 @@
 </cmdsynopsis>
 </refsynopsisdiv>
 
-<refsect1 id='description'><title>QUICK START</title>
+<refsect1 id='quickstart'><title>QUICK START</title>
 
 <para>If you have a GPS attached on the lowest-numbered USB port of a
 Linux system, and want to read reports from it on TCP/IP port 2947, it
