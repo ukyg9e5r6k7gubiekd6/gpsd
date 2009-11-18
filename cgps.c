@@ -431,7 +431,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 
     /* Be quiet if the user requests silence. */
     if(!silent_flag && raw_flag) {
-	(void)wprintw(messages, "%s\n", message);
+	(void)waddstr(messages, message);
     }
 
     (void)wrefresh(datawin);
@@ -631,7 +631,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     /* Be quiet if the user requests silence. */
     if(!silent_flag && raw_flag) {
-	(void)wprintw(messages, "%s\n", message);
+	(void)waddstr(messages, message);
     }
 
     /* Reset the status_timer if the state has changed. */
@@ -774,7 +774,7 @@ int main(int argc, char *argv[])
 
     status_timer = time(NULL);
 
-    (void)gps_stream(gpsdata, WATCH_ENABLE|WATCH_RAW|WATCH_NEWSTYLE, NULL);
+    (void)gps_stream(gpsdata, WATCH_ENABLE|WATCH_NEWSTYLE, NULL);
 
     /* heart of the client */
     for (;;) {
