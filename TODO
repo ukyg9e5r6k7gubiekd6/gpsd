@@ -228,7 +228,7 @@ include:
 **** Detect IPv6 support and getaddrinfo(3) in configure.ac
 
 This web page may be helpful, but is probably overkill - the world has
-gotten simper since then:
+gotten simpler since then:
 http://cvs.deepspace6.net/view/example-ipv6-package/configure.ac?rev=1.2&content-type=text/vnd.viewcvs-markup
 
 **** Change from one listening socket to N
