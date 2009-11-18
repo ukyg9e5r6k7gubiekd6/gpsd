@@ -237,17 +237,20 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->clockTimeStampUSec = (int)microseconds;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
-    /* this is more an offset jitter/dispersion than precision, 
-     * but still useful */
-    shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
+    /* precision is a placebo, ntpd does not really use it
+     * real world accuracty is around 16uS, thus -16 precision */
+    shmTimeP->precision = -16;
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
+    /* this is more an offset jitter/dispersion than precision, 
+     * but still useful for debug */
+    precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     gpsd_report(LOG_RAW
         , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, precision %d\n"
 	, (unsigned long)seconds, (unsigned long)microseconds/1000
 	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
-	, shmTimeP->precision);
+	, precision);
     return 1;
 }
 #endif /* PPS_ENABLE */
