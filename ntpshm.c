@@ -181,7 +181,8 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
     /* FIXME, microseconds needs to be set for 5Hz PPS */
-    time_t microseconds = 0;
+    int microseconds = 0;
+    int precision;
     double offset;
     long l_offset;
 
@@ -247,7 +248,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
      * but still useful for debug */
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     gpsd_report(LOG_RAW
-        , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, precision %d\n"
+        , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, preci %d\n"
 	, (unsigned long)seconds, (unsigned long)microseconds/1000
 	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
 	, precision);
