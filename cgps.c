@@ -133,11 +133,9 @@ static struct fixsource_t source;
 
 static WINDOW *datawin, *satellites, *messages;
 
-static bool got_gps_type=false;
 static bool raw_flag=false;
 static bool silent_flag=false;
 static bool magnetic_flag=false;
-static char gps_type[26];
 static int window_length;
 static int display_sats;
 #ifdef TRUENORTH
@@ -428,11 +426,10 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in receiver type. */
-  if(got_gps_type)
-    (void)snprintf(scr, sizeof(scr), "%s",gps_type);
-  else
-    (void)snprintf(scr, sizeof(scr), "unknown");
-  (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+  if (gpsdata->set & DEVICE_SET) {
+      (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
+    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+  }
 
   /* Be quiet if the user requests silence. */
   if(!silent_flag && raw_flag) {
@@ -582,13 +579,11 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   }
   (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-  /* Fill in the receiver type. */
-  if(got_gps_type) {
-    (void)snprintf(scr, sizeof(scr), "%s",gps_type);
-  } else {
-    (void)snprintf(scr, sizeof(scr), "unknown");
+  /* Fill in receiver type. */
+  if (gpsdata->set & DEVICE_SET) {
+    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
+    (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
   }
-  (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Note that the following four fields are exceptions to the
        sizing rule.  The minimum window size does not include these
