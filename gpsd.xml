@@ -37,6 +37,48 @@
 </cmdsynopsis>
 </refsynopsisdiv>
 
+<refsect1 id='description'><title>QUICK START</title>
+
+<para>If you have a GPS attached on the lowest-numbered USB port of a
+Linux system, and want to read reports from it on TCP/IP port 2947, it
+will normally suffice to do this:</para>
+
+<example>
+gpsd /dev/ttyUSB0
+</example>
+
+<para>For the lowest-numbered serial port:</para>
+
+<example>
+gpsd /dev/ttyS0
+</example>
+
+<para>Change the device number as appropriate if you need to use a
+different port. Command-line flags enable verbose logging, a control
+port, and other optional extras but should not be needed for basic
+operation; the one exception, on very badly designed hardware, might
+be <option>-b</option> (which see).</para>
+
+<para>On Linux systems supporting udev, <application>gpsd</application>
+is normally started automatically when a USB plugin event fires (if it
+is not already running) and is handed the name of the newly active 
+device. In that case no invocation is required at all.</para>
+
+<para>For your initial tests set your GPS hardware to speak NMEA, as
+<application>gpsd</application> is guaranteed to be able to process
+that. If your GPS has a native or binary mode with better perfornance
+that <application>gpsd</application> knows how to speak,
+<application>gpsd</application> will autoconfigure that mode.</para>
+
+<para>You can verify correct operation by first starting
+<application>gpsd</application> and then
+<application>xgps</application>, the X windows test client.</para>
+
+<para>If you have problems, the GPSD project maintains a <ulink
+url="http://gpsd.berlios.de/faq.html">FAQ</ulink> to assist
+troubleshooting.</para>
+
+</refsect1>
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><application>gpsd</application> is a monitor daemon that watches
@@ -106,7 +148,7 @@ clients.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-b</term>
-<listitem><para>Broken-device-safety, otherwise known as read-only
+<listitem><para>Broken-device-safety mode, otherwise known as read-only
 mode. Some popular bluetooth and USB receivers lock up or become
 totally inaccessible when probed or reconfigured. This switch prevents
 gpsd from writing to a receiver.  This means that
@@ -1930,8 +1972,8 @@ Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 
 <para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond,
 Chris Kuethe.  This manual page by Eric S. Raymond
-<email>esr@thyrsus.com</email>.  There is a project site at <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+<email>esr@thyrsus.com</email>.  There is a <ulink
+url="http://gpsd.berlios.de/">project site</ulink>.</para>
 </refsect1>
 
 </refentry>

@@ -495,13 +495,15 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
 		(void)strlcat(buf, "r+", sizeof(buf));
 	} else if ((flags & WATCH_NEWSTYLE) != 0) {
-	    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
+	    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
 	    if (flags & WATCH_NMEA)
-		(void)strlcat(buf, "\"nmea\":true", sizeof(buf));
-	    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
-		(void)strlcat(buf, "\"raw\":1", sizeof(buf));
+		(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
+	    if (flags & WATCH_RAW)
+		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
-		(void)strlcat(buf, "\"scaled\":true", sizeof(buf));
+		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+	    if (buf[strlen(buf)-1] == ',')
+		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
 	/*@i1@*/return gps_send(gpsdata, buf);
@@ -513,11 +515,13 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 	} else if ((flags & WATCH_NEWSTYLE) != 0) {
 	    (void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
 	    if (flags & WATCH_NMEA)
-		(void)strlcat(buf, "\"nmea\":false", sizeof(buf));
-	    if (gpsdata->raw_hook != NULL || (flags & WATCH_RAW)!=0)
-		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+		(void)strlcat(buf, "\"nmea\":false,", sizeof(buf));
+	    if (flags & WATCH_RAW)
+		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
-		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
+	    if (buf[strlen(buf)-1] == ',')
+		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
 	/*@i1@*/return gps_send(gpsdata, buf);

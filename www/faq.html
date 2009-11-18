@@ -64,6 +64,7 @@ GPSD Frequently Asked Questions
 
 <ul>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
+<li><a href='#nodata'>I get no data from my GPS</a></h1>
 <li><a href='#oldcommands'>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</a><br/>
 <li><a href="#singleshot">Why does my single-shot query fail to return fix data?</a><br/>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
@@ -342,6 +343,35 @@ ships a recognized sentence.  The old-style individual requests are
 obsolete, really; they were poorly thought out and are only retained
 for backward compatibility.  You should fix your application to use
 watcher mode &mdash; or better yet, the libgps client library.</p>
+
+<h1 id="nodata">I get no data from my GPS</h1>
+
+<p>This answer may apply if you have followed the Quick Start
+procedure on the manual page but <code>gpsd</code> reports no data.</p>
+
+<p>Check for the obvious thing &mdash; a disconnected or loose cable<
+&mdash; first. Make sure you specified the device your GPS is
+actually plugged into.</p>
+
+<p>A good test to try is to run <b>gpscat(1)</b> on the device with
+speed set to 4800, then 9600. Most devices will report NMEA text 
+at one of these speeds; a few will report binary spewage. Either
+is a good sign.  If yours reports no data at all, you probably
+have some low-level system problem with serial or USB that you'll
+need to fix before <code>gpsd</code> will operate.</p>
+
+<para>USB GPSes actually emulate RS232 serial using converter chips.
+Under Linux, the usbserial kernel module must be loaded for correct
+operation of this class of device. Normally this module load should
+happen automatically when the device activates, but if you don't
+receive data check for it with <b>lsmod(1)</b>.</p>
+
+<p>On Linux systems with module autoloading disabled or misconfigured,
+it is possible you may need to load the module manually with a command
+such as <code>sudo modprobe usbserial vendor=0×1a86
+product=0×7523</code>.  Do not copy those hex numbers slavishly, they
+are examples.  To get the right numbers, you will need to dig up the
+vendor and product ID of your USB-serial converter device.</p>
 
 <h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
 
