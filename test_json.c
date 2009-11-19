@@ -205,7 +205,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     (void)fprintf(stderr, "JSON unit test ");
 
-    status = libgps_json_unpack(json_str1, &gpsdata);
+    status = libgps_json_unpack(json_str1, &gpsdata, NULL);
     assert_case(1, status);
     assert_string("device", gpsdata.dev.path, "GPS#1");
     assert_string("tag", gpsdata.tag, "MID2");
@@ -214,7 +214,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_real("lon", gpsdata.fix.longitude, 46.498203637);
     assert_real("lat", gpsdata.fix.latitude, 7.568074350);
 
-    status = libgps_json_unpack(json_str2, &gpsdata);
+    status = libgps_json_unpack(json_str2, &gpsdata, NULL);
     assert_case(2, status);
     assert_string("tag", gpsdata.tag, "MID4");
     assert_integer("used", gpsdata.satellites_used, 6);
@@ -244,7 +244,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_boolean("flag1", flag1, true);
     assert_boolean("flag2", flag2, false);
 
-    status = libgps_json_unpack(json_str5, &gpsdata);
+    status = libgps_json_unpack(json_str5, &gpsdata, NULL);
     assert_case(5, status);
     assert_string("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
     assert_integer("flags",gpsdata.devices.list[0].flags, 5);
@@ -266,7 +266,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_integer("dumbstruck[2].count", dumbstruck[2].count, 4);
     assert_integer("dumbstruck[3].count", dumbstruck[3].count, 1);
 
-    status = libgps_json_unpack(json_str7, &gpsdata);
+    status = libgps_json_unpack(json_str7, &gpsdata, NULL);
     assert_case(7, status);
     assert_string("release", gpsdata.version.release, "2.40dev");
     assert_string("rev", gpsdata.version.rev, "dummy-revision");

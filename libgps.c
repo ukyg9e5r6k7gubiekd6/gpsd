@@ -718,7 +718,7 @@ static void unpack_unit_test(void)
     (void)signal(SIGBUS, onsig);
 
     (void)gps_unpack(buf, &gpsdata);
-    data_dump(&gpsdata, time(NULL));
+    libgps_dump_state(&gpsdata, time(NULL), stdout);
 }
 
 int main(int argc, char *argv[])
@@ -764,7 +764,7 @@ int main(int argc, char *argv[])
 	strlcat(buf,"\n", BUFSIZ);
 	gps_send(collect, buf);
 	gps_poll(collect);
-	data_dump(collect, time(NULL));
+	libgps_dump_state(collect, time(NULL), stdout);
     } else {
 	int	tty = isatty(0);
 
