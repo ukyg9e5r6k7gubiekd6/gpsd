@@ -1564,6 +1564,12 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     /* Otherwise, consume from the packet input buffer */
     packet_parse(lexer);
 
+    /* if input buffer is full, discard */
+    if (sizeof(lexer->inbuffer)==(lexer->inbuflen)) {
+	    packet_discard(lexer);
+	    lexer->state = GROUND_STATE;
+    }
+
     /*
      * If we gathered a packet, return its length; it will have been
      * consumed out of the input buffer and moved to the output
