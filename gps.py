@@ -430,15 +430,17 @@ class gps(gpsdata):
 
     def waiting(self):
         "Return True if data is ready for the client."
-        # WARNING! When we're testing here is whether there's data left in
-        # sockfile.readline()'s read buffer before we look to see if
-        # there's input waiting at the socket level. The Python sockfile API
-        # doesn't expose a way to do this, so we have to rely on knowing
-        # that the read buffer is the _rbuf member and that it's a StringIO
-        # object. Without this test, we go back to having flaky regression
-        # errors at the end of check files, but with it the tests hang on some
-        # BSD-derived systems.  This is OK for production use, because dropping
-        # some data on device close isn't actually a problem.
+        # WARNING! When we're testing here is whether there's data
+        # left in sockfile.readline()'s read buffer before we look to
+        # see if there's input waiting at the socket level. The Python
+        # sockfile API doesn't expose a way to do this, so we have to
+        # rely on knowing that the read buffer is the _rbuf member and
+        # that it's a StringIO object. Without this test, we go back
+        # to having flaky regression errors at the end of check files,
+        # but with it the tests hang on some BSD-derived systems.  The
+        # former outcome () but not the latteris OK for production
+        # use, because dropping some data on device close isn't
+        # actually a problem.
         broken = ('openbsd4')
         if sys.platform not in broken and len(self.sockfile._rbuf.getvalue()) > 0:
             return True
