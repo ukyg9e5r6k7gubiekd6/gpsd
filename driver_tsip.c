@@ -67,7 +67,8 @@ static int tsip_write(struct gps_device_t *session,
 static bool tsip_detect(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
-    unsigned int n, ret = 0;
+    unsigned int n;
+    bool ret = false;
     int myfd;
     fd_set fdset;
     struct timeval to;
@@ -83,10 +84,12 @@ static bool tsip_detect(struct gps_device_t *session)
     gpsd_set_speed(session, 9600, 'O', 1);
 
     /* request firmware revision and look for a valid response */
+    /*@+ignoresigns@*/
     putbyte(buf, 0, 0x10);
     putbyte(buf, 1, 0x1f);
     putbyte(buf, 2, 0x10);
     putbyte(buf, 3, 0x03);
+    /*@+ignoresigns@*/
     myfd = session->gpsdata.gps_fd;
     if (write(myfd, buf, 4) == 4) {
 	for (n = 0; n < 3; n++) {
@@ -99,14 +102,14 @@ static bool tsip_detect(struct gps_device_t *session)
 	    if (generic_get(session) >= 0) {
 		if(session->packet.type == TSIP_PACKET) {
 		    gpsd_report(LOG_RAW, "tsip_detect found\n");
-		    ret = 1;
+		    ret = true;
 		    break;
 		}
 	    }
 	}
     }
 
-    if (ret == 0)
+    if (!ret)
 	/* return serial port to original settings */
 	gpsd_set_speed(session, old_baudrate, old_parity, old_stopbits);
 
@@ -941,6 +944,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 
 	case 1:
+	    /*@ -shiftimplementation @*/
 	    /* Request Software Versions */
 	    (void)tsip_write(session, 0x1f, NULL, 0);
 	    /* Request Current Time */
@@ -960,6 +964,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    /* - PDOP switch */
 	    i_f.f = 6.0;
 	    putbelong(buf, 13, i_f.i);
+	    /*@ +shiftimplementation @*/
 	    (void)tsip_write(session, 0x2c, buf, 17);
 	    /* Set Position Fix Mode (auto 2D/3D) */
 	    putbyte(buf,0,0x00);

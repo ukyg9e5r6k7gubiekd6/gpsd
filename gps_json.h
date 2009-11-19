@@ -20,7 +20,8 @@ int json_rtcm2_read(const char *, char *, size_t, struct rtcm2_t *,
 		    /*@null@*/const char **);
 int json_ais_read(const char *, char *, size_t, struct ais_t *, 
 		  /*@null@*/const char **);
-int libgps_json_unpack(const char *, struct gps_data_t *, const char **);
+int libgps_json_unpack(const char *, struct gps_data_t *, 
+		       /*@null@*/const char **);
 
 /* these values don't matter in themselves, they just have to be out-of-band */
 #define DEVDEFAULT_BPS  	0

@@ -672,7 +672,6 @@ static void usage( char *prog)
 int main(int argc, char *argv[])
 {
     int option;
-    struct fixsource_t source;
     int c;
 
     struct timeval timeout;

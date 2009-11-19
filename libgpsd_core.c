@@ -601,7 +601,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
 	    /* fire the identified hook */
-	    if (session->device_type->event_hook != NULL)
+	    if (session->device_type != NULL && session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session, event_identified);
 	    session->packet.counter = 0;
 	} else

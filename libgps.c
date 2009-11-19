@@ -73,8 +73,8 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    libgps_debug_trace((stderr, "libgps: gps_close()\n"));
     int retval = close(gpsdata->gps_fd);
+    libgps_debug_trace((stderr, "libgps: gps_close()\n"));
     gpsdata->gps_fd = -1;
     return retval;
 }
@@ -150,7 +150,7 @@ static void libgps_dump_state(struct gps_data_t *collect,
 #endif /* LIBGPS_DEBUG */
 
 
-/*@ -branchstate -usereleased -mustfreefresh -nullstate@*/
+/*@ -branchstate -usereleased -mustfreefresh -nullstate -usedef @*/
 int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
 {
@@ -531,7 +531,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     return 0;
 }
 /*@ +compdef @*/
-/*@ -branchstate +usereleased +mustfreefresh +nullstate@*/
+/*@ -branchstate +usereleased +mustfreefresh +nullstate +usedef @*/
 
 /*
  * return: 0, success
