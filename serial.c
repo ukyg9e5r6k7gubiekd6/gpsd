@@ -201,7 +201,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	(void)usleep(200000);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
-    gpsd_report(LOG_INF, "speed %d, %d%c%d\n", 
+    gpsd_report(LOG_INF, "speed %u, %d%c%d\n", 
 		gpsd_get_speed(&session->ttyset), 9-stopbits, parity, stopbits);
 
     session->gpsdata.dev.baudrate = (unsigned int)speed;

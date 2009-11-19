@@ -689,7 +689,7 @@ static bool ubx_speed(struct gps_device_t *session,
 
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
-    usart_mode = (ulong)getleul(buf, 4);
+    usart_mode = (unsigned long)getleul(buf, 4);
     usart_mode &=~ 0xE00;	/* zero bits 11:9 */
     switch (parity) {
     case (int)'E':

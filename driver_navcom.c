@@ -1190,7 +1190,7 @@ static ssize_t navcom_control_send(struct gps_device_t *session,
 
 #ifdef ALLOW_RECONFIGURE
 static bool navcom_speed(struct gps_device_t *session, 
-			 unsigned int speed, char parity, int stopbits)
+			 speed_t speed, char parity, int stopbits)
 {
     /* parity and stopbit switching aren't implemented */
     if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {

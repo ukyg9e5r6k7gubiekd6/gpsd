@@ -991,7 +991,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session,
-			      unsigned int speed,
+			      speed_t speed,
 			      char parity, int stopbits)
 {
     unsigned char buf[100];

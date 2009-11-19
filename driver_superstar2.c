@@ -398,7 +398,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 	session->gpsdata.PRN[i] = (int)getub(buf, 11*i + 15) & 0x1f;
 	session->gpsdata.ss[i] = (double)getub(buf, 11*i * 15 +1 )/4.0;
 	session->gpsdata.raw.codephase[i] = (double)getleul(buf, 11*i * 15 + 2);
-	ul = (ulong)getleul(buf, 11*i * 15 + 6);
+	ul = (unsigned long)getleul(buf, 11*i * 15 + 6);
 
 	session->gpsdata.raw.satstat[i] = (unsigned int)(ul & 0x03L);
 	session->gpsdata.raw.carrierphase[i] = (double)((ul >> 2) & 0x03ffL);
