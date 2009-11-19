@@ -494,7 +494,6 @@ int json_read_object(const char *cp,
 {
     json_debug_trace(("json_read_object() sees '%s'\n", cp));
     return json_internal_read_object(cp, attrs, NULL, 0, end);
-    json_debug_trace(("json_read_object() finished with %s\n", cp));
 }
 
 const /*@observer@*/char *json_error_string(int err)
