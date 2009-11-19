@@ -937,7 +937,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	     */
 	    session->driver.tsip.parity = session->gpsdata.dev.parity;
 	    session->driver.tsip.stopbits = (uint)session->gpsdata.dev.stopbits;
-	    gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
+	    // gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	    break;
 
 	case 1:
@@ -1060,7 +1060,8 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 	/* The speed switcher also puts us back in TSIP, so call it */
 	/* with the default 9600 8O1. */
 	// FIXME: Should preserve the current speed.
-	(void)tsip_speed_switch(session, 9600, 'O', 1);
+	// (void)tsip_speed_switch(session, 9600, 'O', 1);
+	;
 
     } else {
 	gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);
