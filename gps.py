@@ -438,7 +438,7 @@ class gps(gpsdata):
         # that it's a StringIO object. Without this test, we go back
         # to having flaky regression errors at the end of check files,
         # but with it the tests hang on some BSD-derived systems.  The
-        # former outcome () but not the latteris OK for production
+        # former outcome (but not the latter) is OK for production
         # use, because dropping some data on device close isn't
         # actually a problem.
         broken = ('openbsd4')
