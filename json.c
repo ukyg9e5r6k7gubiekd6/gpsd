@@ -389,6 +389,9 @@ static int json_internal_read_object(const char *cp,
     }
 
 good_parse:
+    /* in case there's another object following, consune trailing WS */
+    while (isspace(*cp))
+	++cp;
     if (end != NULL)
 	*end = cp;
     json_debug_trace(("JSON parse ends.\n"));
