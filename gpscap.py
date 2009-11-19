@@ -117,7 +117,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.get(dev, "status") == "excellent":
                     testfield += "<img src='star.png'/><img src='star.png'/><img src='star.png'/><img src='star.png'/>"
                 elif self.get(dev, "status") == "good":
-                    testfield += "<img src='star.png'/><img src='star.png/'><img src='star.png'/>"
+                    testfield += "<img src='star.png'/><img src='star.png'/'><img src='star.png'/>"
                 elif self.get(dev, "status") == "fair":
                     testfield += "<img src='star.png'/><img src='star.png'/>"
                 elif self.get(dev, "status") == "poor":
