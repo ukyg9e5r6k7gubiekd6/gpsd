@@ -278,7 +278,7 @@ client application.</para>
 
 <para>The risky set of responses includes VERSION, DEVICELIST, RTCM2,
 RTCM3, and AIS; it may not be limited to that set.  The logic of the
-daemon's watcher mode is careful to avoid dangerouss sequences, but
+daemon's watcher mode is careful to avoid dangerous sequences, but
 you should read and understand the layout of <structname>struct
 gps_data_t</structname> before using <function>gps_send()</function>
 to request any of these responses.</para>
