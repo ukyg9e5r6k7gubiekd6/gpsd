@@ -200,12 +200,12 @@ transponders.
 
 == How the command set has changed == 
 
-If your code issues old-protocol commands A, D, E, M, P, T, U, or V,
-it is a wretched hive of scum and villainy that probably hasn't
-changed since before the introduction of "W".  You are using the
-oldest single-shot commands and will have to rewrite your interface
-significantly, as the new protocol does not support equivalents.  Use
-libgps.
+If your code issues old-protocol commands 'A', 'D', 'E', 'M', 'P',
+'T', 'U', or 'V', it is a wretched hive of scum and villainy that
+probably hasn't changed since before the introduction of 'W'.  You are
+using the oldest single-shot commands and will have to rewrite your
+interface significantly, as the new protocol does not support
+equivalents.  Use libgps.
 
 If your code issues B, C, or N commands, they need to change to
 ?DEVICE commands.  See the protocol reference for details.
@@ -242,9 +242,9 @@ The old 'Q' command has no equivalent.  DOPs are reported in the SKY response.
 The 'S' command has no equivalent, because it is not well defined what
 value should be presented for binary protocols.
 
-The old 'R' command has been replaced by an optional attribute in
-?WATCH.  Include the WATCH_RAW mask in the argument of
-gps_stream(), or set a raw hook before alling gps_stream().
+The old 'R' command has been replaced by two optional attributes in
+?WATCH.  Include the WATCH_RAW and/or WATCH_NMEA masks in the argument
+of gps_stream(), or set a raw hook before alling gps_stream().
 
 The old 'W' command has been replaced by ?WATCH. Call gps_stream()
 with whatever options you want to set.
