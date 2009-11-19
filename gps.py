@@ -435,9 +435,12 @@ class gps(gpsdata):
         # there's input waiting at the socket level. The Python sockfile API
         # doesn't expose a way to do this, so we have to rely on knowing
         # that the read buffer is the _rbuf member and that it's a StringIO
-        # object.  Ugh. This could break. But without it, we go back ro
-        # having flaky regression errors at the end of check files.
-        if len(self.sockfile._rbuf.getvalue()) > 0:
+        # object. Without this test, we go back to having flaky regression
+        # errors at the end of check files, but with it the tests hang on some
+        # BSD-derived systems.  This is OK for production use, because dropping
+        # some data on device close isn't actually a problem.
+        broken = ('openbsd4')
+        if sys.platform not in broken and len(self.sockfile._rbuf.getvalue()) > 0:
             return True
         (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
         return winput != []
