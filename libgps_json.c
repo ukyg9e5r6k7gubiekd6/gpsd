@@ -297,10 +297,8 @@ int libgps_json_unpack(const char *buf,
 	return status;
     } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
 	status = json_watch_read(buf, &gpsdata->policy, end);
-	if (status == 0) {
-	    gpsdata->set &=~ UNION_SET;
+	if (status == 0)
 	    gpsdata->set |= POLICY_SET;
-	}
 	return status;
     } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
 	return json_version_read(buf, gpsdata, end);

@@ -151,7 +151,8 @@ It may have % elements as for
 <citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 which will be filled in from any following arguments.  This function
 returns a -1 if there was a Unix-level write error, otherwise
-0.</para>
+0. Please read the LIMITATIONS section for additional information and
+cautions.</para>
 
 <para><function>gps_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
@@ -258,6 +259,29 @@ code that calls gps_poll(gpsdata).
 
     (void)gps_close(gpsdata);
 </programlisting>
+
+</refsect1>
+
+<refsect1 id='limitations'><title>LIMITATIONS</title>
+
+<para>Incautious use of <function>gps_send()</function> may lead to
+subtle bugs. In order to not bloat <structname>struct
+gps_data_t</structname> with space used by responses that are not
+expected to be shipped in close sequence with each other, the storage
+for fields associated with certain responses are combined in a union.</para>
+
+<para>Sends that might invoke this set of responses need to be
+sequenced carefully so the unpacking of multiple responses arriving in
+the same socket read cannot result in later updates to the union
+obliterating data from earlier ones before it becomes visible to the
+client application.</para>
+
+<para>The risky set of responses includes VERSION, DEVICELIST, RTCM2,
+RTCM3, and AIS; it may not be limited to that set.  The logic of the
+daemon's watcher mode is careful to avoid dangerouss sequences, but
+you should read and understand the layout of <structname>struct
+gps_data_t</structname> before using <function>gps_send()</function>
+to request any of these responses.</para>
 
 </refsect1>
 

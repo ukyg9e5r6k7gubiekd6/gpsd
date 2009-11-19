@@ -520,13 +520,14 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 /*@ -compdef @*/
     if (gpsdata->raw_hook) {
-	libgps_debug_trace((stderr, "libgps: raw hook called on '%s'\n", buf));
+	//libgps_debug_trace((stderr, "libgps: raw hook called on '%s'\n", buf));
 	gpsdata->raw_hook(gpsdata, buf, strlen(buf));
     }
     if (gpsdata->thread_hook) {
-	libgps_debug_trace((stderr, "libgps: thread hook called on '%s'\n", buf));
+	//libgps_debug_trace((stderr, "libgps: thread hook called on '%s'\n", buf));
 	gpsdata->thread_hook(gpsdata, buf, strlen(buf));
     }
+    libgps_debug_trace((stderr, "final flags: (0x%04x) %s\n", gpsdata->set, gpsd_maskdump(gpsdata->set)));
     return 0;
 }
 /*@ +compdef @*/

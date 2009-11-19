@@ -909,7 +909,6 @@ struct gps_data_t {
 #define CLEAR_SET	0x40000000u	/* sentence starts a reporting cycle */
 #define REPORT_SET	0x80000000u	/* sentence ends a reporting cycle */
 #define DATA_SET	~(ONLINE_SET|PACKET_SET|CLEAR_SET|REPORT_SET)
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -948,6 +947,8 @@ struct gps_data_t {
 
     struct devconfig_t dev;	/* device that shipped last update */
 
+    struct policy_t policy;	/* our listening policy */
+
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* hook functions */
@@ -956,6 +957,7 @@ struct gps_data_t {
     void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
 
     /* pack things never reported together to reduce structure size */ 
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
@@ -965,7 +967,6 @@ struct gps_data_t {
 	struct rawdata_t raw;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
-	struct policy_t policy;
 	struct {
 	    double time;
 	    int ndevices;
