@@ -161,7 +161,17 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
     /* detect and process a JSON response */
     if (buf[0] == '{') {
-	(void)libgps_json_unpack(buf, gpsdata, NULL);
+	const char *jp = buf, **next = &jp;
+	while (next != NULL && *next != NULL && next[0][0] != '\0') {
+	    libgps_debug_trace((stderr, 
+				"libgps: gps_unpack() segment parse '%s'\n", 
+				*next));
+	    (void)libgps_json_unpack(*next, gpsdata, next);
+#ifdef LIBGPS_DEBUG
+	    libgps_dump_state(gpsdata, time(NULL), stderr);
+#endif /* LIBGPS_DEBUG */
+
+	}
 #ifdef OLDSTYLE_ENABLE
 	gpsdata->newstyle = true;
 #endif /* OLDSTYLE_ENABLE */
@@ -491,6 +501,10 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    }
 
+#ifdef LIBGPS_DEBUG
+		    libgps_dump_state(gpsdata, time(NULL), stderr);
+#endif /* LIBGPS_DEBUG */
+
 		    /*
 		     * Skip to next GPSD when we see \r or \n;
 		     * we don't want to try interpreting stuff
@@ -503,10 +517,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	}
     }
 #endif /* OLDSTYLE_ENABLE */
-
-#ifdef LIBGPS_DEBUG
-    libgps_dump_state(gpsdata, time(NULL), stderr);
-#endif /* LIBGPS_DEBUG */
 
 /*@ -compdef @*/
     if (gpsdata->raw_hook) {

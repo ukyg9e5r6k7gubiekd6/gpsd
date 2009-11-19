@@ -221,7 +221,7 @@ static int json_devicelist_read(const char *buf,
     }
 
     gpsdata->devices.time = timestamp();
-    gpsdata->set =~ UNION_SET;
+    gpsdata->set &=~ UNION_SET;
     gpsdata->set |= DEVICELIST_SET;
     return 0;
 }
@@ -249,7 +249,7 @@ static int json_version_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set =~ UNION_SET;
+    gpsdata->set &=~ UNION_SET;
     gpsdata->set |= VERSION_SET;
     return 0;
 }
@@ -273,7 +273,7 @@ static int json_error_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set =~ UNION_SET;
+    gpsdata->set &=~ UNION_SET;
     gpsdata->set |= ERR_SET;
     return 0;
 }
@@ -298,7 +298,7 @@ int libgps_json_unpack(const char *buf,
     } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
 	status = json_watch_read(buf, &gpsdata->policy, end);
 	if (status == 0) {
-	    gpsdata->set =~ UNION_SET;
+	    gpsdata->set &=~ UNION_SET;
 	    gpsdata->set |= POLICY_SET;
 	}
 	return status;
@@ -310,7 +310,7 @@ int libgps_json_unpack(const char *buf,
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->rtcm2, end);
 	if (status == 0) {
-	    gpsdata->set =~ UNION_SET;
+	    gpsdata->set &=~ UNION_SET;
 	    gpsdata->set |= RTCM2_SET;
 	}
 	return status;
@@ -321,7 +321,7 @@ int libgps_json_unpack(const char *buf,
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->ais, end);
 	if (status == 0) {
-	    gpsdata->set =~ UNION_SET;
+	    gpsdata->set &=~ UNION_SET;
 	    gpsdata->set |= AIS_SET;
 	}
 	return status;
