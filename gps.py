@@ -445,6 +445,7 @@ class gps(gpsdata):
     def poll(self):
         "Wait for and read data being streamed from gpsd."
         self.response = self.sockfile.readline()
+        # This code can go away when we remove oldstyle protocol
         if self.response.startswith("H") and "=" not in self.response:
             while True:
                 frag = self.sockfile.readline()
