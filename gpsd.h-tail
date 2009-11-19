@@ -140,7 +140,7 @@ struct classmap_t {
     int		packetmask;
 };
 #define CLASSMAP_NITEMS	5
-struct classmap_t classmap[CLASSMAP_NITEMS];
+extern struct classmap_t classmap[CLASSMAP_NITEMS];
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 

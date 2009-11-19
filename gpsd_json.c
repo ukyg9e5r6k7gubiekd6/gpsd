@@ -19,6 +19,19 @@ representations to gpsd core strctures, and vice_versa.
 #include "gpsd.h"
 #include "gps_json.h"
 
+/*
+ * Manifest names for the gnss_type enum - must be kept synced with it.
+ * Also, masks so we can tell what packet types correspond to each class.
+ */
+struct classmap_t classmap[CLASSMAP_NITEMS] = {
+    /* name	typemask	packetmask */
+    {"ANY",	0,       	0},
+    {"GPS",	SEEN_GPS, 	GPS_TYPEMASK},
+    {"RTCM2",	SEEN_RTCM2,	PACKET_TYPEMASK(RTCM2_PACKET)},
+    {"RTCM3",	SEEN_RTCM3,	PACKET_TYPEMASK(RTCM3_PACKET)},
+    {"AIS",	SEEN_AIS,  	PACKET_TYPEMASK(AIVDM_PACKET)},
+};
+
 char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {

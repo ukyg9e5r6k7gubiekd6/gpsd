@@ -109,19 +109,6 @@
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
 
-/*
- * Manifest names for the gnss_type enum - must be kept synced with it.
- * Also, masks so we can tell what packet types correspond to each class.
- */
-struct classmap_t classmap[CLASSMAP_NITEMS] = {
-    /* name	typemask	packetmask */
-    {"ANY",	0,       	0},
-    {"GPS",	SEEN_GPS, 	GPS_TYPEMASK},
-    {"RTCM2",	SEEN_RTCM2,	PACKET_TYPEMASK(RTCM2_PACKET)},
-    {"RTCM3",	SEEN_RTCM3,	PACKET_TYPEMASK(RTCM3_PACKET)},
-    {"AIS",	SEEN_AIS,  	PACKET_TYPEMASK(AIVDM_PACKET)},
-};
-
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
