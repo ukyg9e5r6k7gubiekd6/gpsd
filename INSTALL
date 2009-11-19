@@ -5,6 +5,10 @@ are C and C++ compilers: C for the gpsd daemon itself and its client C
 library, C++ for the C++ client-library wrapper.  You will also
 need autotools; automake 1.10 or later and autoconf 2.61 or later
 
+The code depends on one non-C99 feature: anonymous unions.  We could
+eliminate these, but the cost would be source-level interface breakage
+if we have to move structure members in and out of unions.
+
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
