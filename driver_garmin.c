@@ -5,20 +5,21 @@
  *
  * One driver "garmin_usb_binary" handles the Garmin binary packet
  * format supported by the USB Garmins tested with the Garmin 18 and
- * other models.  (There is also "garmin_usb_binary_old".)
+ * other models.  (There is also "garmin_usb_binary_old".)  This is
+ * ONLY for USB devices reporting as: 091e:0003.
  *
  * The other driver "garmin_ser_binary" is for Garmin receivers via a
  * serial port, whether or not one uses a USB/serial adaptor or a real
  * serial port.  These receivers provide adequate NMEA support, so it
  * often makes sense to just put them into NMEA mode.
  *
- * On Linux, USB Garmins need the Linux garmin_gps driver and will not
- * function without it.  This code has been tested and at least at one
- * time is known to work on big- and little-endian CPUs and 32 and 64
- * bit cpu modes.
+ * On Linux, USB Garmins (091e:0003) need the Linux garmin_gps driver and 
+ * will not function without it.  This code has been tested and at least 
+ * at one time is known to work on big- and little-endian CPUs and 32 and 
+ * 64 bit cpu modes.
  *
- * On other operating systems, it is not clear if garmin_usb_binary
- * works.
+ * On other operating systems, it is clear garmin_usb_binary)old 
+ * does not work since it requires the Linux garmingps_usb module.
  *
  * Documentation for the Garmin protocols can be found via
  *   http://www.garmin.com/support/commProtocol.html
@@ -800,8 +801,10 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 
 
 /*
- * garmin_detect()
+ * garmin_usb_detect()
  *
+ * This is ONLY for USB devices reporting as: 091e:0003.
+  *
  * check that the garmin_gps driver is installed in the kernel
  * and that an active USB device is using it.
  *
@@ -815,7 +818,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
  * return 0 if not
  *
  */
-static bool garmin_detect(struct gps_device_t *session)
+static bool garmin_usb_detect(struct gps_device_t *session)
 {
 
     FILE *fp = NULL;
@@ -827,28 +830,31 @@ static bool garmin_detect(struct gps_device_t *session)
 	gpsd_report(LOG_WARN, "garmin_gps Linux USB module not active.\n");
 	return false;
     }
-    // check for a garmin_gps device in /proc
-    if ( !(fp = fopen( "/proc/bus/usb/devices", "r") ) ) {
-	gpsd_report(LOG_ERROR, "Can't open /proc/bus/usb/devices\n");
-	return false;
-    }
-
-    ok = false;
-    while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
-	if ( strstr( buf, "garmin_gps") ) {
+    /* check for a garmin_gps device in /proc
+     * if we can */
+    if ( 0 != (fp = fopen( "/proc/bus/usb/devices", "r")) ) {
+	ok = false;
+	while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
+	    if ( strstr( buf, "garmin_gps") ) {
 		ok = true;
 		break;
+	    }
 	}
-    }
-    (void)fclose(fp);
-    if ( !ok ) {
-	// no device using garmin now
-	gpsd_report(LOG_WARN, "garmin_gps not in /proc/bus/usb/devices.\n");
-	return false;
+	(void)fclose(fp);
+	if ( !ok ) {
+	    // no device using garmin_gps now
+	    gpsd_report(LOG_WARN, "garmin_gps not in /proc/bus/usb/devices.\n");
+	    gpsd_report(LOG_WARN, "garmin_gps driver present, but not in use\n");
+	    return false;
+	}
+    } else {
+	gpsd_report(LOG_WARN, 
+	    "Can't open /proc/bus/usb/devices, will try anyway\n");
     }
 
+
     if (!gpsd_set_raw(session)) {
-	gpsd_report(LOG_ERROR, "garmin_detect: error changing port attributes: %s\n",
+	gpsd_report(LOG_ERROR, "garmin_usb_detect: error changing port attributes: %s\n",
 	     strerror(errno));
 	return false;
     }
@@ -861,7 +867,7 @@ static bool garmin_detect(struct gps_device_t *session)
     session->driver.garmin.BufferLen = 0;
 
     if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
-	gpsd_report(LOG_ERROR, "garmin_detect: Compile error, garmin.Buffer too small.\n",
+	gpsd_report(LOG_ERROR, "garmin_usb_detect: Compile error, garmin.Buffer too small.\n",
 	     strerror(errno));
 	return false;
     }
@@ -1235,7 +1241,7 @@ const struct gps_type_t garmin_usb_binary_old =
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe_detect   = garmin_detect,	/* how to detect at startup time */
+    .probe_detect   = garmin_usb_detect,/* how to detect at startup time */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1258,7 +1264,9 @@ const struct gps_type_t garmin_usb_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe_detect   = garmin_detect,	/* how to detect at startup time */
+    /* BUG, this should be NULL, but the proper one in garmin_usb_binary_old
+     * is not being called *.
+    .probe_detect   = garmin_usb_detect,/* how to detect at startup time */
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
