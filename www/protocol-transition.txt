@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.0, August 2009
+v1.1, November 2009
 
 == Why a new protocol? ==
 
@@ -15,8 +15,8 @@ RTCM3.
 
 Yes, we could as a desperate expedient have pressed non-alphabetic
 printables into service - but the result would have looked like
-line noise and only delayed the day of reckoning.  Instead, we're
-writing a new protocol that is upward-compatible with the old one 
+line noise and only delayed the day of reckoning.  Instead, we've
+written a new protocol that is upward-compatible with the old one 
 in that you can mix old and new syntax.
 
 The old protocol will continue to be available for some time, but not
@@ -122,8 +122,8 @@ that has made us rethink some of the assumptions behind the old one.
 
 Since we knew we were going to have a forced compatibility break at the
 wire-protocol level anyway, we decided not to do things by halves.  One
-big break - in the application model, struct gpsdata_t, and the
-wire protocol behind it - is better than three or four spread out
+big break -- in the application model, struct gpsdata_t, and the
+wire protocol behind it -- is better than three or four spread out
 over a period of time.  
 
 As a result, the new protocol is not an exact superset of the old one.
@@ -263,7 +263,7 @@ wire protocol, it is extremely unwise to assume that the first
 transmission from the damon after a command is shipped to it will be
 the reponse to command.  If you must send explicit
 commands to the daemon, use gps_send() and handle the response in
-your main event-polling loop - but beware, as using gps_send()
+your main event-polling loop -- but beware, as using gps_send()
 ties your code to the GPSD wire protocol and is not recommended.
 
 The client library's reporting structure, struct gpsdata_t, has a new

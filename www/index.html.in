@@ -64,6 +64,16 @@
 
 <div id="Content">
 
+<h1 id='news'>Urgent news for maintainers of <code>gpsd</code> clients</h1>
+
+<p>We've been warning it was coming for years, and it's here: the
+request/response protocol used by <code>gpsd</code> is about to change
+in ways that will break your application if you're not careful.  The
+old protocol is still supported, but will remain so only for a very
+limited time.  Read <a href="protocol-transition.html">"Moving to
+GPSD-NG: a Guide for Client Developers"</a> to find out why this is
+happening and what you need to do about it.</p>
+
 <h1>About <code>gpsd</code></h1>
 
 <p><code>gpsd</code> is a service daemon that monitors one or more
@@ -126,8 +136,8 @@ the *BSD family.  Presently Linux and OpenBSD are directly supported.
 We'll support proprietary Unixes if it's not too much work (and it
 usually isn't). Apple's OS X is back in our good books, but it is
 criticial that you have all your USB drivers updated. Older drivers
-are buggy and prevent gpsd from being able to read from usb-serial
-devices.</p>
+are buggy and prevent <code>gpsd</code> from being able to read from
+USB-serial devices.</p>
 
 <p>No, we don't support Windows &mdash; get a better operating system.</p>
 

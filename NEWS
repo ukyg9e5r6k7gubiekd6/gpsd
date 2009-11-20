@@ -1,4 +1,4 @@
-* Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.40dev
+* Thu Nov 19 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90dev
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
   consequence, AIS is now fully supported in both daemon and client.
   Detection of end of a fix-reporting cycle is now reliable;
