@@ -389,6 +389,7 @@ endif
 # Note: packaging/gpsd.spec is generated, but it needs to be in the
 # tarball in order for 'make diat-rpm' to work.
 EXTRA_DIST = \
+	revision.h \
 	autogen.sh \
 	README \
 	INSTALL \
