@@ -5,8 +5,8 @@
  *
  * One driver "garmin_usb_binary" handles the Garmin binary packet
  * format supported by the USB Garmins tested with the Garmin 18 and
- * other models.  (There is also "garmin_usb_binary_old".)  This is
- * ONLY for USB devices reporting as: 091e:0003.
+ * other models.  (There is also "garmin_usb_binary_old".)  These are ONLY
+ * for USB devices reporting as: 091e:0003.
  *
  * The other driver "garmin_ser_binary" is for Garmin receivers via a
  * serial port, whether or not one uses a USB/serial adaptor or a real
@@ -14,12 +14,13 @@
  * often makes sense to just put them into NMEA mode.
  *
  * On Linux, USB Garmins (091e:0003) need the Linux garmin_gps driver and 
- * will not function without it.  This code has been tested and at least 
- * at one time is known to work on big- and little-endian CPUs and 32 and 
- * 64 bit cpu modes.
+ * will not function without it.  On other operating systems, it is clear 
+ * garmin_usb_binary_old does not work since it requires the Linux 
+ * garmin_gps module.
  *
- * On other operating systems, it is clear garmin_usb_binary)old 
- * does not work since it requires the Linux garmingps_usb module.
+ * This code has been tested and at least at one time is known to work on 
+ * big- and little-endian CPUs and 32 and 64 bit cpu modes.
+ *
  *
  * Documentation for the Garmin protocols can be found via
  *   http://www.garmin.com/support/commProtocol.html
@@ -33,11 +34,11 @@
  * Information about the GPS 18 
  *   http://www.garmin.com/manuals/425_TechnicalSpecification.pdf
  *
- * There is one Physical protocols for serial which uses DLE/ETX
+ * There is one physical link protocol for serial which uses DLE/ETX
  * framing.  There is another physical protocol for USB which relies
  * on the packetization intrinstic to USB bulk pipes.
  *
- * There are several Link protocols; all devices implement L000.
+ * There are several link protocols; all devices implement L000.
  * There are then product-specific protocols; most devices implement
  * L001.  Link protocols are the same and carried over either Physical
  * protocol.
@@ -69,7 +70,6 @@
  *
  * known bugs:
  *      hangs in the fread loop instead of keeping state and returning.
- *      may or may not work on a little-endian machine
  *
  * TODO:
  *
@@ -1264,8 +1264,6 @@ const struct gps_type_t garmin_usb_binary =
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    /* BUG, this should be NULL, but the proper one in garmin_usb_binary_old
-     * is not being called *.
     .probe_detect   = garmin_usb_detect,/* how to detect at startup time */
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
