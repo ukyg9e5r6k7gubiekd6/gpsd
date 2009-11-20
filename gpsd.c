@@ -2294,7 +2294,7 @@ int main(int argc, char *argv[])
 		/* some listeners may be in watcher mode */
 		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
-		    char buf2[BUFSIZ];
+		    char buf2[GPS_JSON_RESPONSE_MAX*4];
 		    if (changed & DATA_SET) {
 			bool report_fix = false;
 			gpsd_report(LOG_PROG,
