@@ -6,6 +6,9 @@
  * file "COPYING" for more information.
  *
  */
+#include <cstdlib>
+
+#include "gpsd_config.h"
 #include "libgpsmm.h"
 
 gpsmm::gpsmm() : gps_data(0) { gps_data = NULL; }
@@ -67,6 +70,12 @@ int gpsmm::del_callback(void) {
 
 void gpsmm::clear_fix(void) {
 	gps_clear_fix(&(gps_data->fix));
+}
+
+void gpsmm::enable_debug(int level, FILE *fp) {
+#ifdef CLIENTDEBUG_ENABLE
+	gps_enable_debug(level, fp);
+#endif /* CLIENTDEBUG_ENABLE */
 }
 
 gpsmm::~gpsmm() {

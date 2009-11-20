@@ -691,6 +691,21 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for client debugging support
+AC_ARG_ENABLE(clientdebug,
+  AC_HELP_STRING([--disable-clientdebug],
+		 [disable client debugging support]),
+  [ac_clientdebug=$enableval], [ac_clientdebug=yes])
+AC_MSG_CHECKING([for client debugging support])
+if test x"$ac_clientdebug" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([CLIENTDEBUG_ENABLE], 1, [client debugging support)])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL([CLIENTDEBUG_ENABLE], [test x"$ac_clientdebug" = x"yes"])
+
 dnl check for support for oldstyle protocol
 AC_ARG_ENABLE(oldstyle,
   AC_HELP_STRING([--disable-oldstyle],
@@ -1031,6 +1046,7 @@ echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
 echo "AIVDM support           : $ac_aivdm"
 echo "Timing support          : $ac_timing"
+echo "Client debugging support: $ac_clientdebug"
 echo "MTK-3301                : $ac_mtk3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"

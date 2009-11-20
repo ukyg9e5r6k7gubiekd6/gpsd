@@ -22,12 +22,39 @@
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
 
-#ifdef TESTMAIN
+#if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)
 #define LIBGPS_DEBUG
-#endif /* TESTMAIN */
+#endif /* defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE) */
 
 #ifdef LIBGPS_DEBUG
-# define libgps_debug_trace(args) (void) fprintf args
+static int debuglevel = 0; 
+static FILE *debugfp;
+
+void gps_enable_debug(int level, FILE *fp)
+/* control the level and destination of debug trace messages */
+{
+    debuglevel = level;
+    debugfp = fp;
+    json_enable_debug(level-2, fp);
+}
+
+static void gps_trace(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style */
+{
+    if (errlevel <= debuglevel) {
+	char buf[BUFSIZ];
+	va_list ap;
+
+	(void)strlcpy(buf, "libgps: ", BUFSIZ);
+	va_start(ap, fmt) ;
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
+
+	(void)fputs(buf, debugfp);
+    }
+}
+
+# define libgps_debug_trace(args) (void) gps_trace args
 #else
 # define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
@@ -43,7 +70,7 @@ int gps_open_r(const char *host, const char *port,
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 
-    libgps_debug_trace((stderr, "\nlibgps: gps_open_r(%s, %s)\n", host, port));
+    libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return -1;
@@ -73,7 +100,7 @@ int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     int retval = close(gpsdata->gps_fd);
-    libgps_debug_trace((stderr, "libgps: gps_close()\n"));
+    libgps_debug_trace((1, "gps_close()\n"));
     gpsdata->gps_fd = -1;
     return retval;
 }
@@ -85,60 +112,59 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 }
 
 #ifdef LIBGPS_DEBUG
-static void libgps_dump_state(struct gps_data_t *collect, 
-			      time_t now, FILE *fpout)
+static void libgps_dump_state(struct gps_data_t *collect, time_t now)
 {
     extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
 
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    (void)fprintf(fpout, "flags: (0x%04x) %s\n", 
+    (void)fprintf(debugfp, "flags: (0x%04x) %s\n", 
 		  collect->set, gpsd_maskdump(collect->set));
     if (collect->set & ONLINE_SET)
-	(void)fprintf(fpout, "online: %lf\n", collect->online);
+	(void)fprintf(debugfp, "online: %lf\n", collect->online);
     if (collect->set & LATLON_SET)
-	(void)fprintf(fpout, "LATLON: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
+	(void)fprintf(debugfp, "LATLON: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
     if (collect->set & ALTITUDE_SET)
-	(void)fprintf(fpout, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
+	(void)fprintf(debugfp, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
 	       collect->fix.altitude, collect->fix.climb);
     if (collect->set & TRACK_SET)
-	(void)fprintf(fpout, "TRACK: track: %lf\n",
+	(void)fprintf(debugfp, "TRACK: track: %lf\n",
 	       collect->fix.track);
     if (collect->set & SPEED_SET)
-	(void)fprintf(fpout, "SPEED: speed: %lf\n",
+	(void)fprintf(debugfp, "SPEED: speed: %lf\n",
 	       collect->fix.speed);
     if (collect->set & STATUS_SET)
-	(void)fprintf(fpout, "STATUS: status: %d (%s)\n",
+	(void)fprintf(debugfp, "STATUS: status: %d (%s)\n",
 	       collect->status, status_values[collect->status]);
     if (collect->fix.mode & MODE_SET)
-	(void)fprintf(fpout, "MODE: mode: %d (%s)\n",
+	(void)fprintf(debugfp, "MODE: mode: %d (%s)\n",
 	   collect->fix.mode, mode_values[collect->fix.mode]);
     if (collect->fix.mode & DOP_SET)
-	(void)fprintf(fpout, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+	(void)fprintf(debugfp, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
 	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
 
     if (collect->set & SATELLITE_SET) {
 	int i;
 
-	(void)fprintf(fpout, "SKY: satellites in view: %d\n", collect->satellites_visible);
+	(void)fprintf(debugfp, "SKY: satellites in view: %d\n", collect->satellites_visible);
 	for (i = 0; i < collect->satellites_visible; i++) {
-	    (void)fprintf(fpout, "    %2.2d: %2.2d %3.3d %3.0f %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
+	    (void)fprintf(debugfp, "    %2.2d: %2.2d %3.3d %3.0f %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
     }
     if (collect->set & DEVICE_SET)
-	(void)fprintf(fpout, "DEVICE: Device is '%s', driver is '%s'\n", 
+	(void)fprintf(debugfp, "DEVICE: Device is '%s', driver is '%s'\n", 
 		      collect->dev.path, collect->dev.driver);
 #ifdef OLDSTYLE_ENABLE
     if (collect->set & DEVICEID_SET)
-	(void)fprintf(fpout, "GPSD ID is %s\n", collect->dev.subtype);
+	(void)fprintf(debugfp, "GPSD ID is %s\n", collect->dev.subtype);
 #endif /* OLDSTYLE_ENABLE */
     if (collect->set & DEVICELIST_SET) {
 	int i;
-	(void)fprintf(fpout, "DEVICELIST:%d devices:\n", collect->devices.ndevices);
+	(void)fprintf(debugfp, "DEVICELIST:%d devices:\n", collect->devices.ndevices);
 	for (i = 0; i < collect->devices.ndevices; i++) {
-	    (void)fprintf(fpout, "%d: path='%s' driver='%s'\n", 
+	    (void)fprintf(debugfp, "%d: path='%s' driver='%s'\n", 
 			  collect->devices.ndevices, 
 			  collect->devices.list[i].path,
 			  collect->devices.list[i].driver);
@@ -156,18 +182,19 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     char *ns, *sp, *tp;
     int i;
 
-    libgps_debug_trace((stderr, "libgps: gps_unpack(%s)\n", buf));
+    libgps_debug_trace((1, "gps_unpack(%s)\n", buf));
 
     /* detect and process a JSON response */
     if (buf[0] == '{') {
 	const char *jp = buf, **next = &jp;
 	while (next != NULL && *next != NULL && next[0][0] != '\0') {
-	    libgps_debug_trace((stderr, 
-				"libgps: gps_unpack() segment parse '%s'\n", 
+	    libgps_debug_trace((1, 
+				"gps_unpack() segment parse '%s'\n", 
 				*next));
 	    (void)libgps_json_unpack(*next, gpsdata, next);
 #ifdef LIBGPS_DEBUG
-	    libgps_dump_state(gpsdata, time(NULL), stderr);
+	    if (debuglevel >= 1)
+		libgps_dump_state(gpsdata, time(NULL));
 #endif /* LIBGPS_DEBUG */
 
 	}
@@ -501,7 +528,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 
 #ifdef LIBGPS_DEBUG
-		    libgps_dump_state(gpsdata, time(NULL), stderr);
+		    if (debuglevel >= 1)
+			libgps_dump_state(gpsdata, time(NULL));
 #endif /* LIBGPS_DEBUG */
 
 		    /*
@@ -526,7 +554,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	//libgps_debug_trace((stderr, "libgps: thread hook called on '%s'\n", buf));
 	gpsdata->thread_hook(gpsdata, buf, strlen(buf));
     }
-    libgps_debug_trace((stderr, "final flags: (0x%04x) %s\n", gpsdata->set, gpsd_maskdump(gpsdata->set)));
+    libgps_debug_trace((1, "final flags: (0x%04x) %s\n", gpsdata->set, gpsd_maskdump(gpsdata->set)));
     return 0;
 }
 /*@ +compdef @*/
@@ -728,7 +756,7 @@ static void unpack_unit_test(void)
     (void)signal(SIGBUS, onsig);
 
     (void)gps_unpack(buf, &gpsdata);
-    libgps_dump_state(&gpsdata, time(NULL), stdout);
+    libgps_dump_state(&gpsdata, time(NULL));
 }
 
 int main(int argc, char *argv[])
@@ -738,6 +766,7 @@ int main(int argc, char *argv[])
     int option;
     bool unpack_test = false;
 
+    gps_enable_debug(0, stdout);
     while ((option = getopt(argc, argv, "uhs?")) != -1) {
 	switch (option) {
 	case 'u':
@@ -774,7 +803,7 @@ int main(int argc, char *argv[])
 	strlcat(buf,"\n", BUFSIZ);
 	gps_send(collect, buf);
 	gps_poll(collect);
-	libgps_dump_state(collect, time(NULL), stdout);
+	libgps_dump_state(collect, time(NULL));
     } else {
 	int	tty = isatty(0);
 
@@ -792,7 +821,7 @@ int main(int argc, char *argv[])
 	    collect->set = 0;
 	    gps_send(collect, buf);
 	    gps_poll(collect);
-	    libgps_dump_state(collect, time(NULL), stdout);
+	    libgps_dump_state(collect, time(NULL));
 	}
     }
 

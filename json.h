@@ -66,6 +66,8 @@ int json_read_array(const char *, const struct json_array_t *,
 		    /*@null@*/const char **);
 const /*@observer@*/char *json_error_string(int);
 
+void json_enable_debug(int, FILE *);
+
 #define JSON_ERR_OBSTART	1	/* non-WS when expecting object start */
 #define JSON_ERR_ATTRSTART	2	/* non-WS when expecting attrib start */
 #define JSON_ERR_BADATTR	3	/* unknown attribute name */

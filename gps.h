@@ -23,6 +23,7 @@ extern "C" {
 #include <limits.h>
 #include <time.h>
 #include <signal.h>
+#include <stdio.h>
 #ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
@@ -1006,6 +1007,7 @@ extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  /*@ in @*/struct gps_fix_t *);
 extern unsigned int gps_valid_fields(/*@ in @*/struct gps_fix_t *);
 extern char *gps_show_transfer(int);
+extern void gps_enable_debug(int, FILE *);
 
 extern time_t mkgmtime(register struct tm *);
 extern double timestamp(void);

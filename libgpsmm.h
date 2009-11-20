@@ -24,7 +24,7 @@ class gpsmm {
 		int set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, size_t len)); //set a callback funcition, called each time new data arrives
 		int del_callback(void); //delete the callback function
 		void clear_fix(void);
-
+		void enable_debug(int, FILE*);
 	private:
 		struct gps_data_t *gps_data;
 		struct gps_data_t *to_user;	//we return the user a copy of the internal structure. This way she can modify it without
