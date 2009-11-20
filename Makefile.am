@@ -20,6 +20,8 @@ MULTIOUT_RECOVER_DELETED = \
 
 #SUBDIRS = contrib
 
+ACLOCAL_AMFLAGS = -I m4
+
 XMLTO = xmlto
 
 #
