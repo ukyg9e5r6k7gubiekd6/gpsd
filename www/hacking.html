@@ -1417,18 +1417,23 @@ the release has been shipped and tagged.</dd>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>8. Ship to Berlios</dt>
-<dd>Upload the tarball to berlios.de, and do Berlios's release procedure.</dd>
+<dt>8. Check the revision.h file</dt>
+<dd>The contenrts of the revision.h file should mach the output of
+svnversion. If it doesn't, remove revision.h, svn up, and make revision.h</dd>
 
-<dt>9. Tag the release in SVN</dt>
+<dt>9. Ship to Berlios</dt>
+<dd>Make the tarball and upload to berlios.de, 
+and do Berlios's release procedure.</dd>
+
+<dt>10. Tag the release in SVN</dt>
 <dd>Doing 'make svn-tag' should accomplish this</dd>
 
-<dt>10. Bump the release number</dt>
+<dt>11. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>11. Announce the release</dt>
+<dt>12. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the mailing lists.</dd>
 </dl>
