@@ -11,7 +11,6 @@
 #include <stdarg.h>
 #include <time.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 #define MONTHSPERYEAR	12		/* months per calendar year */

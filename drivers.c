@@ -12,7 +12,6 @@
 #include <math.h>
 #include <stdarg.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "bits.h"	/* for getbeuw(), to extract big-endiamn words */
 

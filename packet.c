@@ -37,7 +37,6 @@ others apart and distinguish them from baud barf.
 #include <arpa/inet.h>	/* for htons() */
 #endif /* S_SPLINT_S */
 
-#include "gpsd_config.h"
 #include "bits.h"
 #include "gpsd.h"
 #include "crc24q.h"

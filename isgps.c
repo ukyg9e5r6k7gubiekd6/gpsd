@@ -64,7 +64,6 @@ You are not expected to understand any of this.
 #include <string.h>
 #include <stdbool.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 #define MAG_SHIFT 6u

@@ -15,7 +15,6 @@
 #include <math.h>
 #include <locale.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "gps_json.h"
 

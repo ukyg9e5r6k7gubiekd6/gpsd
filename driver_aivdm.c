@@ -19,9 +19,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
-
 #include "bits.h"
 
 /**

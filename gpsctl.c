@@ -16,7 +16,6 @@
 #include <assert.h>
 #include <signal.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 static int debuglevel;

@@ -1,6 +1,8 @@
 /* $Id$ */
 #include <sys/types.h>
+
 #include "gpsd_config.h"
+
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

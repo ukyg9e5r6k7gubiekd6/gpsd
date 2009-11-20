@@ -38,7 +38,6 @@ firmware.
 #include <arpa/inet.h>	/* for ntohl(3) and friends */
 #endif /* S_SPLINT_S */
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "bits.h"
 

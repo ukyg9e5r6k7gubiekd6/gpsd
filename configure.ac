@@ -250,7 +250,9 @@ size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif
 #ifndef HAVE_STRLCPY
 size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
-#endif])
+#endif
+
+#define GPSD_CONFIG_H])
 
 dnl Check for X libraries
 ac_x="no"

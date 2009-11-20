@@ -1,4 +1,5 @@
 /* Feature configuration switches end here */
+#endif /* GPSD_CONFIG_H */
 
 /* $Id$ */
 

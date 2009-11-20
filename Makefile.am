@@ -202,8 +202,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	rm -f $(srcdir)/gpsd.h
 	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h
 	cat $(srcdir)/gpsd.h-head >>gpsd.h
-	grep VERSION  gpsd_config.h >>gpsd.h
-	grep ENABLE gpsd_config.h >>gpsd.h
+	cat $(srcdir)/gpsd_config.h >>gpsd.h
 	cat $(srcdir)/gpsd.h-tail >>gpsd.h
 	chmod a-w $(srcdir)/gpsd.h
 
@@ -370,7 +369,8 @@ stamp-gps-manpages: gps.xml
 CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
-noinst_HEADERS = driver_italk.h driver_rtcm2.h driver_superstar2.h \
+noinst_HEADERS = gpsd_config.h \ 
+	driver_italk.h driver_rtcm2.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h
 
 nodist_include_HEADERS = gpsd.h

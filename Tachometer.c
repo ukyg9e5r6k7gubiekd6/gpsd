@@ -12,6 +12,7 @@
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
+
 #include "gpsd_config.h"
 #include "gps.h"
 

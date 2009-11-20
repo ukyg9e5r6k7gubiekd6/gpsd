@@ -10,7 +10,6 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <math.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 #include "bits.h"

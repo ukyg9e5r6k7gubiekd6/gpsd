@@ -15,7 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include "gpsd_config.h"
+
 #include "gpsd.h"
 
 /*@ -branchstate */

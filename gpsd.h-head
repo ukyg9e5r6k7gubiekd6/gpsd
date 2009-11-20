@@ -14,4 +14,5 @@
 #endif
 #include "gps.h"
 
+#ifndef GPSD_CONFIG_H
 /* Feature configuration switches begin here */

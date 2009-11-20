@@ -11,7 +11,6 @@
 #include <ctype.h>
 #include <time.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "timebase.h"
 

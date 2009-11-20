@@ -5,7 +5,6 @@
 #include <Python.h>
 
 #include <stdio.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 static PyObject *ErrorObject = NULL;

@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 /*

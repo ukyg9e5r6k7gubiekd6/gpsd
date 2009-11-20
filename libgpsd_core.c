@@ -17,7 +17,6 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)

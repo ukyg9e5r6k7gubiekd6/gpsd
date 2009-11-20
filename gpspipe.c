@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <assert.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "gpsdclient.h"
 

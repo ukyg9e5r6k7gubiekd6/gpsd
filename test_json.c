@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include "gpsd_config.h"
+
 #include "gpsd.h"
 #include "gps_json.h"
 

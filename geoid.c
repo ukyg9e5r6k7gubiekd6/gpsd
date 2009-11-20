@@ -8,7 +8,6 @@
 
 #include <sys/types.h>
 #include <math.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 static double fix_minuz(double d);

@@ -8,7 +8,7 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include "gpsd_config.h"
+
 #include "gpsd.h"
 
 static int verbose = 0;

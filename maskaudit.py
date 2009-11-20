@@ -66,7 +66,6 @@ if __name__ == '__main__':
 #include <stdio.h>
 #include <string.h>
 
-#include \"gpsd_config.h\"	/* for strlcat() */
 #include \"gpsd.h\"
 
 const char *gpsd_maskdump(gps_mask_t set)

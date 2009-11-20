@@ -15,9 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include "gpsd_config.h"
 
-#ifdef NTRIP_ENABLE
 #include "gpsd.h"
 #include "bsd-base64.h"
 
@@ -474,4 +472,3 @@ void ntrip_report(struct gps_device_t *session)
 	}
     }
 }
-#endif /* NTRIP_ENABLE */

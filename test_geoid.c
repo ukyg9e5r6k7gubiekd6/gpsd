@@ -6,10 +6,10 @@
 
 #include <sys/types.h>
 #include <math.h>
-#include "gpsd_config.h"
-#include "gpsd.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "gpsd.h"
 
 int main(int argc, char **argv)
 {

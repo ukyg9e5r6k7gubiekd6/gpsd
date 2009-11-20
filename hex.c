@@ -7,7 +7,6 @@
 #include <math.h>
 #include <string.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 int gpsd_hexdump_level = -1;

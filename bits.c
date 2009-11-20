@@ -12,7 +12,6 @@
 #include "bits.h"
 #ifdef DEBUG
 #include <stdio.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 #endif /* DEBUG */
 

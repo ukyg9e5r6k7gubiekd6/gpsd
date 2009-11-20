@@ -27,6 +27,7 @@
 #include <math.h>
 
 #include "gpsd_config.h"
+
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else

@@ -41,7 +41,6 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include "gpsd_config.h"
 #include "gpsd.h"
 
 #if defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE)

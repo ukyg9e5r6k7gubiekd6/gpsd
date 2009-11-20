@@ -60,7 +60,6 @@ Starlink's website.
 #include <stdio.h>
 #include <math.h> 		/* for round() */
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #include "driver_rtcm2.h"
 

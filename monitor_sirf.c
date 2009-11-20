@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "gpsd_config.h"
+
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #else

@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "gpsd_config.h"
 #include "gpsd.h"
 #if defined(UBX_ENABLE) && defined(BINARY_ENABLE)
 #include "driver_ubx.h"
