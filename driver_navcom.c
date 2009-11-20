@@ -894,7 +894,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO,
 		    "Navcom: epe = %f\n", session->gpsdata.epe);
-	return TIME_SET | PERR_SET;
+	return TIME_SET | HERR_SET | VERR_SET;
     } else {
 	/* Ignore this message block */
 	if (!session->driver.navcom.warned) {
