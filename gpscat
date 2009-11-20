@@ -11,14 +11,12 @@ NMEA_MAX = 86
 # Lowest debug level at which packet getter begins to emit messages, minus one
 BASELEVEL = gpspacket.LOG_IO
 
+highhalf_latch = True
+
 def hexdump(str):
     dmp = ""
     for (i, ch) in enumerate(str):
-        if curses.ascii.isprint(ord(ch)):
-            dmp += ch
-        elif ch == '\r' and i+1 < len(str) and str[i+1] == '\n':
-            dmp += ch
-        elif ch == '\n' and i-1 >= 0 and str[i-1] == '\r':
+        if curses.ascii.isprint(ord(ch)) or curses.ascii.isspace(ord(ch)):
             dmp += ch
         else:
             dmp += "\\x%02x" % ord(ch)
@@ -104,9 +102,7 @@ if __name__ == '__main__':
             if fd == tty and event == select.POLLIN:
                 if rawmode:
                     buf += os.read(tty, NMEA_MAX)
-                    if not buf.endswith("\n"):
-                        buf = hexdump(buf)
-                    sys.stdout.write(buf)
+                    sys.stdout.write(hexdump(buf))
                     buf = ""
                 else:
                     (length, ptype, packet) = getter.get(tty)
