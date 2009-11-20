@@ -119,21 +119,25 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
+    /* FIXME: We di=on't dump the entire state here yet */
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n", 
 		  collect->set, gpsd_maskdump(collect->set));
     if (collect->set & ONLINE_SET)
-	(void)fprintf(debugfp, "online: %lf\n", collect->online);
+	(void)fprintf(debugfp, "ONLINE: %lf\n", collect->online);
+    if (collect->set & TIME_SET)
+	(void)fprintf(debugfp, "TIME: %lf\n", collect->fix.time);
     if (collect->set & LATLON_SET)
-	(void)fprintf(debugfp, "LATLON: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
+	(void)fprintf(debugfp, "LATLON: lat/lon: %lf %lf\n", 
+		      collect->fix.latitude, collect->fix.longitude);
     if (collect->set & ALTITUDE_SET)
 	(void)fprintf(debugfp, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
 	       collect->fix.altitude, collect->fix.climb);
-    if (collect->set & TRACK_SET)
-	(void)fprintf(debugfp, "TRACK: track: %lf\n",
-	       collect->fix.track);
     if (collect->set & SPEED_SET)
-	(void)fprintf(debugfp, "SPEED: speed: %lf\n",
-	       collect->fix.speed);
+	(void)fprintf(debugfp, "SPEED: %lf\n", collect->fix.speed);
+    if (collect->set & TRACK_SET)
+	(void)fprintf(debugfp, "TRACK: track: %lf\n", collect->fix.track);
+    if (collect->set & CLIMB_SET)
+	(void)fprintf(debugfp, "CLIMB: climb: %lf\n", collect->fix.climb);
     if (collect->set & STATUS_SET)
 	(void)fprintf(debugfp, "STATUS: status: %d (%s)\n",
 	       collect->status, status_values[collect->status]);
@@ -144,7 +148,20 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
 	(void)fprintf(debugfp, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
 	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
-
+    if (collect->fix.mode & VERSION_SET)
+	(void)fprintf(debugfp, "VERSION: release=%s rev=%s proto=%d.%d\n",
+		      collect->version.release, 
+		      collect->version.rev,
+		      collect->version.proto_major, 
+		      collect->version.proto_minor);
+    if (collect->fix.mode & POLICY_SET)
+	(void)fprintf(debugfp, "POLICY: watcher=%s nmea=%s raw=%d scaled=%s timing=%s, devpath=%s\n",
+		      collect->policy.watcher ? "true" : "false", 
+		      collect->policy.nmea ? "true" : "false",
+		      collect->policy.raw, 
+		      collect->policy.scaled ? "true" : "false", 
+		      collect->policy.timing ? "true" : "false", 
+		      collect->policy.devpath);
     if (collect->set & SATELLITE_SET) {
 	int i;
 
