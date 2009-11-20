@@ -134,9 +134,11 @@ the following are well known:
 GP      Global Positioning System receiver
 LC      Loran-C receiver
 II      Integrated Instrumentation
-IN	Integrated Navigation
+IN      Integrated Navigation
 EC      Electronic Chart Display & Information System (ECDIS)
-CD	Digital Selective Calling (DSC)
+CD      Digital Selective Calling (DSC)
+GL      GLONASS, according to IEIC 61162-1
+GN      Mixed GPS and GLONASS data, according to IEIC 61162-1
 --------------------------------------------------------------
 
 LC - LORAN-C is a marine navigation system run by the U.S. government,
