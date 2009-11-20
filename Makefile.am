@@ -191,7 +191,7 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-BUILT_SOURCES = packet_names.h gpsd.h ais_json.i maskdump.c
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i maskdump.c
 
 packet_names.h: packet_states.h
 	rm -f $(srcdir)/packet_names.h
@@ -210,6 +210,11 @@ ais_json.i: jsongen.py
 	rm -f $(srcdir)/ais_json.i
 	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i
 	chmod a-w $(srcdir)/ais_json.i
+
+revision.h: Makefile
+	@rm -f $(srcdir)/revision.h
+	@echo '#define' REVISION '"svn'`svnversion -n`'"' >$(srcdir)/revision.h
+	@chmod a-w $(srcdir)/revision.h
 
 maskdump.c: gpsd.h-tail maskaudit.py
 	rm -f $(srcdir)/maskdump.c
@@ -369,7 +374,7 @@ stamp-gps-manpages: gps.xml
 CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
-noinst_HEADERS = gpsd_config.h \ 
+noinst_HEADERS = gpsd_config.h \
 	driver_italk.h driver_rtcm2.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h
 
@@ -678,6 +683,8 @@ svn-tag:
 		-m "Tagged for external release $(VERSION)"
 #
 # Ship a release, providing all regression tests pass.
+# The clean is necessary so that dist will remake revision.h
+# with the current revision level in it.
 #
-ship: testregress dist upload-ftp svn-tag
+ship: testregress clean dist upload-ftp svn-tag
 

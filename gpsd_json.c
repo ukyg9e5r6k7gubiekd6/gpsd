@@ -17,6 +17,7 @@ representations to gpsd core strctures, and vice_versa.
 
 #include "gpsd.h"
 #include "gps_json.h"
+#include "revision.h"
 
 /*
  * Manifest names for the gnss_type enum - must be kept synced with it.
@@ -83,7 +84,8 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 void json_version_dump(/*@out@*/char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"VERSION\",\"release\":\"" VERSION "\",\"rev\":\"$Id$\",\"proto_major\":%d,\"proto_minor\":%d}\r\n", 
+		   "{\"class\":\"VERSION\",\"release\":\"%s\",\"rev\":\"%s\",\"proto_major\":%d,\"proto_minor\":%d}\r\n", 
+		   VERSION, REVISION, 
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
