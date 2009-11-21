@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON@
 #
 # With -t, report on which status masks are used in the daemon vs. the
 # client-side library.
