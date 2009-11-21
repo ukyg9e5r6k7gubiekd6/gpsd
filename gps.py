@@ -468,7 +468,7 @@ class gps(gpsdata):
         # This code can go away when we remove oldstyle protocol
         if self.response.startswith("{"):
             self.__json_unpack(self.response)
-        else:
+        elif self.response.startswith("GPSD"):
             self.__oldstyle_unpack(self.response)
         return 0
 
