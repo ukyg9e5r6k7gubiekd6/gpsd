@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 			(void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
 			(void)printf("test %2d failed. "		\
 			       "Time returned from: %s should be %lu (but was: %lu)\n",
-				i, tbuf, tests[i].result, ts);
+				i, tbuf, (unsigned long) tests[i].result, (unsigned long) ts);
 		}
 	}
 	return (int)failed;
