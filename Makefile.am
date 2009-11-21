@@ -192,31 +192,31 @@ libgpsd_h_sources = \
 BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i maskdump.c
 
 packet_names.h: packet_states.h
-	rm -f $(srcdir)/packet_names.h
-	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
+	rm -f $(srcdir)/packet_names.h && \
+	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h && \
 	chmod a-w $(srcdir)/packet_names.h
 
 gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
-	rm -f $(srcdir)/gpsd.h
-	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h
-	cat $(srcdir)/gpsd.h-head >>gpsd.h
-	cat $(srcdir)/gpsd_config.h >>gpsd.h
-	cat $(srcdir)/gpsd.h-tail >>gpsd.h
+	rm -f $(srcdir)/gpsd.h && \
+	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h && \
+	cat $(srcdir)/gpsd.h-head >>gpsd.h && \
+	cat $(srcdir)/gpsd_config.h >>gpsd.h && \
+	cat $(srcdir)/gpsd.h-tail >>gpsd.h && \
 	chmod a-w $(srcdir)/gpsd.h
 
 ais_json.i: jsongen.py
-	rm -f $(srcdir)/ais_json.i
-	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i
+	rm -f $(srcdir)/ais_json.i && \
+	$(srcdir)/jsongen.py --ais --target=parser >ais_json.i && \
 	chmod a-w $(srcdir)/ais_json.i
 
 revision.h: Makefile
-	@rm -f $(srcdir)/revision.h
-	@echo '#define' REVISION '"svn'`svnversion -n`'"' >$(srcdir)/revision.h
-	@chmod a-w $(srcdir)/revision.h
+	@rm -f $(srcdir)/revision.h && \
+	echo '#define' REVISION '"svn'`svnversion -n`'"' >$(srcdir)/revision.h && \
+	chmod a-w $(srcdir)/revision.h
 
 maskdump.c: gpsd.h-tail maskaudit.py
-	rm -f $(srcdir)/maskdump.c
-	$(srcdir)/maskaudit.py -c >maskdump.c
+	rm -f $(srcdir)/maskdump.c && \
+	$(srcdir)/maskaudit.py -c >maskdump.c && \
 	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
@@ -257,8 +257,8 @@ stamp-python-modules: gpspacket.c gpslib.c libgps.la setup.py
 			--build-lib '$(srcdir)' \
 			--build-temp '$(srcdir)/build' \
 			--include-dirs '$(srcdir):.'\
-			--mangenerator '$(MANGENERATOR)'
-	@mv -f '$@.tmp' '$@'
+			--mangenerator '$(MANGENERATOR)' && \
+	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 endif
 # Clean up after Python
@@ -366,9 +366,9 @@ gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: stamp-gps-manpages
 	+@WITNESS=stamp-gps-manpages; $(MULTIOUT_RECOVER_DELETED)
 stamp-gps-manpages: gps.xml
 	@rm -f '$@' '$@.tmp'
-	@echo 'timestamp for $@' > '$@.tmp'
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) '$(srcdir)/gps.xml'
-	@mv -f '$@.tmp' '$@'
+	echo 'timestamp for $@' > '$@.tmp' && \
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) '$(srcdir)/gps.xml' && \
+	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
