@@ -395,8 +395,8 @@ EXTRA_DIST = \
 	TODO \
 	NEWS \
 	AUTHORS \
-	jsongen.py \
-	maskaudit.py \
+	jsongen.py.in \
+	maskaudit.py.in \
 	dgpsip-servers \
 	test_float.c \
 	gpsd.php \
