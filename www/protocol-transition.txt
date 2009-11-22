@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.1, November 2009
+v1.2, November 2009
 
 == Why a new protocol? ==
 
@@ -54,7 +54,7 @@ it right, you have been telling gpsd to stream data at you with the
 
 -------------------------------------------------------------------
 
-If you have been virtuous, you need only to make one small change to
+If you have been virtuous, you need only to make two small changes to
 your code.  Replace the gps_query() call with:
 
 -------------------------------------------------------------------
@@ -66,6 +66,9 @@ dynamically links to emit what it should under the hood, either old
 or new protocol. Unless a target system carries a version of the
 libgps shared library different from the gpsd version, everything
 should work and continue to work through future updates.
+
+Next, if you have references to the 'satellites' member of the structure,
+those need to change them to 'satellites_visible'.  
 
 There. You're probably done, unless you relied on some parts of 
 struct gpsdata_t that application developers usually don't or issued
@@ -100,6 +103,22 @@ pain.  The main strategy for doing so is to *use libgps* (or its
 functional equivalents in languages other than C).  Scrap your
 hand-rolled interface code!  When you use libgps, compatibility issues
 become *our* problem to solve rather than *yours*.
+
+== Binary stability ==
+
+In the past, the GPSD project has not been very good about preserving
+stability of the binary structure layout for struct gpsdata_t between
+releases. There was a reason for this -- we were very focused
+on reducing memory footprint for SBCs and embedded devices, so we
+conditioned out various pieces of the strucure depending on what
+features were or were not compiled in.
+
+We're not going to do this any more. It has been pointed out to us
+that the friction costs of breaking shared-library compatibility are
+higher than we were reckoning. The new layout has no sections
+conditionalized; instead, we have moved a number of fields into
+a union. From 2.90 on, the structure layout will change rarely, 
+only at major version bumps. 
 
 == When the bough breaks ==
 
