@@ -1,9 +1,12 @@
 Here are the steps for installing gpsd and verifying its performance:
 
-0. The only prerequisites you will absolutely need to build the suite
-are C and C++ compilers: C for the gpsd daemon itself and its client C
-library, C++ for the C++ client-library wrapper.  You will also
-need autotools; automake 1.10 or later and autoconf 2.61 or later
+0. gpsd has a core set of prerequisites that are required for any
+configuration of the package, and then additional features and tests
+have additional prerequisites.
+
+Necessary components for any build:
+
+C compiler		-> gpsd and client library are written in C
 
 The code depends on one non-C99 feature: anonymous unions.  We could
 eliminate these, but the cost would be source-level interface breakage
@@ -12,11 +15,19 @@ if we have to move structure members in and out of unions.
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
+C++ compiler	       -> libgpsmm C++ wrapper for the library
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
 X windows + lesstif    -> two test clients depend on this
 ncurses                -> two more test clients depend on this
-Python                 -> most of the test and profiling tools are in Python
+Python 2.6             -> most of the test and profiling tools are in Python
+       		       	  and the 'json' module is needed for tests
+
+For building from SVN, the following are necessary:
+autoconf 2.61 or later
+automake 1.10 or later
+libtool
+Python			-> code is generated from python scripts
 
 For building from SVN, or if you change the man page source, xslt and
 docbook xsl style files are used to generate nroff -man source from
