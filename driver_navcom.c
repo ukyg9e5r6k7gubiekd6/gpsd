@@ -863,6 +863,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 static gps_mask_t handle_0xb5(struct gps_device_t *session)
 {
     if(sizeof(double) == 8) {
+	gps_mask_t mask = TIME_SET;
 	union long_double l_d;
 	unsigned char *buf = session->packet.outbuffer + 3;
 	uint16_t week = getleuw(buf, 3);
@@ -882,9 +883,11 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	double hrms = sqrt(pow(lat_sd, 2) + pow(lon_sd, 2));
 #endif /*  __UNUSED__ */
 	session->gpsdata.epe = rms*1.96;
+	mask |= PERR_SET;
 #ifdef __UNUSED__
 	session->gpsdata.fix.eph = hrms*1.96;
 	session->gpsdata.fix.epv = alt_sd*1.96;
+	mask |= (HERR_SET | VERR_SET);
 #endif /*  __UNUSED__ */
 	/*@ ignore @*//*@ splint is confused @*/
 	session->gpsdata.fix.time = 
@@ -894,7 +897,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO,
 		    "Navcom: epe = %f\n", session->gpsdata.epe);
-	return TIME_SET | HERR_SET | VERR_SET;
+	return mask;
     } else {
 	/* Ignore this message block */
 	if (!session->driver.navcom.warned) {

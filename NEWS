@@ -9,7 +9,7 @@
   get. Increase major version of shared library due to significant API
   change. Added new driver for Motorola Oncore receivers, with help
   from Håkan Johansson. gpsfake can now accept multiple logfiles,
-  interleaving test sentences from each.  gpsd noe accepts error
+  interleaving test sentences from each.  gpsd now accepts error
   estimates from the NMEA $GPGBS sentence.
 
 * Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
