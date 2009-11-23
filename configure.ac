@@ -51,10 +51,10 @@ if test "x$try_python" = "xyes"; then
 		PYTHON_VERSION="${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
 		AC_MSG_RESULT([$PYTHON, $PYTHON_VERSION, $PYTHON_PREFIX])
 
-		AC_MSG_CHECKING(whether Python is at least 2.4)
-		if test $PYTHON_VERSION_MAJOR -lt 2 -o $PYTHON_VERSION_MAJOR -eq 2 -a $PYTHON_VERSION_MINOR -lt 3; then
+		AC_MSG_CHECKING(whether Python is at least 2.6)
+		if test $PYTHON_VERSION_MAJOR -lt 2 -o $PYTHON_VERSION_MAJOR -eq 2 -a $PYTHON_VERSION_MINOR -lt 6; then
 			AC_MSG_RESULT(no)
-			AC_MSG_WARN([*** GPSD requires at least Python 2.3, Python support disabled.])
+			AC_MSG_WARN([*** GPSD requires at least Python 2.6, Python support disabled.])
 			ac_python=no
 		fi
 		if test "x$ac_python" = "xyes"; then
