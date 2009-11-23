@@ -253,7 +253,7 @@ responses.  Currently there are two supported protocols, but there
 may be only one in the future. It is a bad idea for applications to
 speak either protocol directly: rather, they should use the
 <application>libgps</application> client library and take appropriate
-care to conditionalize their code on the major and minor API version
+care to conditionalize their code on the major and minor protocol version
 symbols.</para>
 
 </refsect1>
@@ -494,10 +494,10 @@ a name in this list does not guarantee that the device is available.</para>
 
 <varlistentry>
 <term>l</term>
-<listitem><para>Returns four fields: the major protocol/API revision number,
-the minor revision number, the gpsd version, and a list of accepted
+<listitem><para>Returns four fields: the major protocol revision number,
+the minor protocol revision number, the gpsd version, and a list of accepted
 request letters. Note: earlier versions of this command returned only
-three fields, omitting the minor revision number.</para></listitem>
+three fields, omitting the minor protocol revision number.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -1191,13 +1191,13 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
         <entry>Internal revision-control level.</entry>
 </row>
 <row>
-	<entry>api_major</entry>
+	<entry>proto_major</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
         <entry>API major revision level..</entry>
 </row>
 <row>
-	<entry>api_minor</entry>
+	<entry>proto_minor</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
         <entry>API minor revision level..</entry>
@@ -1215,7 +1215,7 @@ will assert the VERSION_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"VERSION","version":"2.40dev","rev":$Id$,"api_major":3,"api_minor":1}
+{"class":"VERSION","version":"2.40dev","rev":$Id$,"proto_major":3,"proto_minor":1}
 </programlisting>
 
 
