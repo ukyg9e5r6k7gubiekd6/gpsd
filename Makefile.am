@@ -603,7 +603,7 @@ unpack-regress: libgps
 
 # Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
-	@echo "Rebuilding the clent sentence-unpacker test..."
+	@echo "Rebuilding the client sentence-unpacker test..."
 	@$(srcdir)/libgps -u >$(srcdir)/test/unpack.chk
 
 # Unit-test the JSON parsing
