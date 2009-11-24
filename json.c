@@ -510,7 +510,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 breakout:
     if (end != NULL)
 	*end = cp;
+    /*@ -nullderef @*/
     json_debug_trace((1, "leaving json_read_array() with %d elements\n", *arr->count));
+    /*@ +nullderef @*/
     return 0;
     /*@+nullstate +onlytrans@*/
 }

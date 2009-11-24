@@ -310,8 +310,11 @@ static XtIntervalId timeout, gps_timeout;
 static XtInputId gps_input;
 static enum deg_str_type deg_type = deg_dd;
 static struct fixsource_t source;
+#ifdef CLIENTDEBUG_ENABLE
+static int debug;
+#endif /* CLIENTDEBUG_ENABLE */
 
-bool gps_lost;
+static bool gps_lost;
 
 /*@ -nullassign @*/
 static XrmOptionDescRec options[] = {
@@ -1215,11 +1218,17 @@ speedunits_ok:
 
 altunits_ok:
 
-	while ((option = getopt(argc, argv, "Vhl:")) != -1) {
+	while ((option = getopt(argc, argv, "Vd:hl:")) != -1) {
 		switch (option) {
 		case 'V':
 		    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 		    exit(0);
+		case 'd':
+		    debug = atoi(optarg);
+#ifdef CLIENTDEBUG_ENABLE
+		    gps_enable_debug(debug, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
+		    break;
 		case 'l':
 		    switch (optarg[0]) {
 		    case 'd':

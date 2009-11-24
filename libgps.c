@@ -114,8 +114,6 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 #ifdef LIBGPS_DEBUG
 static void libgps_dump_state(struct gps_data_t *collect, time_t now)
 {
-    extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
-
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 

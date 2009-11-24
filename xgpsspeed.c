@@ -37,6 +37,9 @@ static Widget tacho;
 static double speedfactor;
 static Widget toplevel;
 static struct fixsource_t source;
+#ifdef CLIENTDEBUG_ENABLE
+static int debug;
+#endif /* CLIENTDEBUG_ENABLE */
 
 static void update_display(struct gps_data_t *gpsdata, 
 			   char *buf UNUSED, size_t len UNUSED)
@@ -104,8 +107,14 @@ int main(int argc, char **argv)
     else if (strcmp(speedunits, "knots")==0)
 	speedfactor = MPS_TO_KNOTS;
 
-    while ((option = getopt(argc, argv, "hV")) != -1) {
+    while ((option = getopt(argc, argv, "d:hV")) != -1) {
 	switch (option) {
+	case 'd':
+	    debug = atoi(optarg);
+#ifdef CLIENTDEBUG_ENABLE
+	    gps_enable_debug(debug, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
+	    break;
 	case 'V':
 	    (void)printf("xgpsspeed %s\n", VERSION);
 	    exit(0);

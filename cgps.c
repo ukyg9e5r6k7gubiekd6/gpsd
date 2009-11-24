@@ -130,6 +130,9 @@ static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
 static struct fixsource_t source;
+#ifdef CLIENTDEBUG_ENABLE
+static int debug;
+#endif /* CLIENTDEBUG_ENABLE */
 
 static WINDOW *datawin, *satellites, *messages;
 
@@ -579,6 +582,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     /* Fill in receiver type. */
     if (gpsdata->set & (DEVICE_SET | DEVICELIST_SET)) {
+	if (debug > 0)
+	    (void)fprintf(stderr, "Device ID or list set.\n");
 	if (gpsdata->set & DEVICE_SET) {
 	    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
 	} else if (gpsdata->devices.ndevices == 1) {
@@ -679,8 +684,14 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hVl:sm")) != -1) {
+    while ((option = getopt(argc, argv, "hVl:smd:")) != -1) {
 	switch (option) {
+	case 'd':
+	    debug = atoi(optarg);
+#ifdef CLIENTDEBUG_ENABLE
+	    gps_enable_debug(debug, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
+	    break;
 	case 'm':
 	    magnetic_flag=true;
 	    break;
