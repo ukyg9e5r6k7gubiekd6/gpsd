@@ -179,6 +179,8 @@ static char gpsd_devname[BUFSIZ];
 static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 {
     DBusError	error;
+    /* this packet format was designed before we split eph */
+    double eph = EMIX(gpsfix->epx, gpsfix->epy);
 
     dbus_error_init (&error);
 
@@ -189,7 +191,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 			   DBUS_TYPE_DOUBLE, &gpsfix.ept,
 			   DBUS_TYPE_DOUBLE, &gpsfix.latitude,
 			   DBUS_TYPE_DOUBLE, &gpsfix.longitude,
-			   DBUS_TYPE_DOUBLE, &gpsfix.eph,
+			   DBUS_TYPE_DOUBLE, &eph,
 			   DBUS_TYPE_DOUBLE, &gpsfix.altitude,
 			   DBUS_TYPE_DOUBLE, &gpsfix.epv,
 			   DBUS_TYPE_DOUBLE, &gpsfix.track,
