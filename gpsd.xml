@@ -1313,7 +1313,7 @@ DEVICES object.</para>
 	<entry>nmea</entry>
 	<entry>No</entry>
 	<entry>boolean</entry>
-        <entry>Eanable (true) or disable (false) dumping of binary
+        <entry>Enable (true) or disable (false) dumping of binary
 	packets as pseudo-NMEA. Default
 	is false.</entry>
 </row>
