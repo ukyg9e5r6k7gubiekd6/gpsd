@@ -1223,7 +1223,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	    break;
 #endif /* UNUSED */
 	case 'M':
-	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))== NULL && (!channel->device || channel->fixbuffer.mode == MODE_NOT_SEEN))
+	    if ((channel=mandatory_assign_channel(sub, GPS, NULL))==NULL || (!channel->device || channel->fixbuffer.mode == MODE_NOT_SEEN))
 		(void)strlcpy(phrase, ",M=?", sizeof(phrase));
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", channel->fixbuffer.mode);
