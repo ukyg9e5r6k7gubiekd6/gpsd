@@ -29,6 +29,10 @@ automake 1.10 or later
 libtool
 Python			-> code is generated from python scripts
 
+For working with DBUS, you'll need the DBUS development
+headers and libraries installed.  Under Debian/Ubuntu these
+are the packages ibdbus-1-dev and libdbus-glib-1-dev.
+
 For building from SVN, or if you change the man page source, xslt and
 docbook xsl style files are used to generate nroff -man source from
 docbook xml.  The following packages are used in this process:
@@ -38,6 +42,11 @@ docbook-xsl            -> style file for xml to man translation
 
 The build degrades gracefully in the absence of any of these. You should
 be able to tell from configure messages which extensions you will get.
+
+Under Ubuntu and most other Debian-derived, an easy way to pick up
+the prerequisites is: "apt-get build-dep gpsd"
+
+Once you have built the software:
 
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
