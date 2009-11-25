@@ -40,7 +40,7 @@ void send_dbus_fix(struct gps_device_t* channel) {
 
     gpsdata = &(channel->gpsdata);
     gpsfix = &(gpsdata->fix);
-    gpsd_devname = gpsdata->gps_device;
+    gpsd_devname = gpsdata->dev.path;
 
     /* Send the named signel.  */
     message = dbus_message_new_signal("/org/gpsd", "org.gpsd", "fix");

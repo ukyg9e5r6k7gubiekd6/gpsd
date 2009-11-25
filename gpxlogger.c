@@ -172,6 +172,12 @@ static struct gps_fix_t gpsfix;
 
 #include <glib/gprintf.h>
 
+/*
+ * FIXME: use here is a minor bug, should report epx and epy separately.
+ * How to mix together epx and epy to get a horizontal circular error.
+ */
+#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
+
 DBusConnection* connection;
 
 static char gpsd_devname[BUFSIZ];
@@ -180,7 +186,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message)
 {
     DBusError	error;
     /* this packet format was designed before we split eph */
-    double eph = EMIX(gpsfix->epx, gpsfix->epy);
+    double eph = EMIX(gpsfix.epx, gpsfix.epy);
 
     dbus_error_init (&error);
 
