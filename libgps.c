@@ -804,7 +804,7 @@ int main(int argc, char *argv[])
     gps_enable_debug(debug, stdout);
     if (batchmode) {
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
-	    if (isalpha(buf[0])) {
+	    if (buf[0] == '{' || isalpha(buf[0])) {
 		gps_unpack(buf, &gpsdata);
 		libgps_dump_state(&gpsdata, time(NULL));
 	    }

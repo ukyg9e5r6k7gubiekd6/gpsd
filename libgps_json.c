@@ -290,7 +290,7 @@ int libgps_json_unpack(const char *buf,
     } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
 	return json_devicelist_read(buf, gpsdata, end);
     } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
-	status = json_device_read(buf, &gpsdata->devices.list[0], end);
+	status = json_device_read(buf, &gpsdata->dev, end);
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
