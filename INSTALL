@@ -46,7 +46,7 @@ be able to tell from configure messages which extensions you will get.
 Under Ubuntu and most other Debian-derived, an easy way to pick up
 the prerequisites is: "apt-get build-dep gpsd"
 
-Once you have built the software:
+Once you have fetched the software prrerequisites:
 
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
