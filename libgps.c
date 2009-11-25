@@ -117,7 +117,7 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    /* FIXME: We di=on't dump the entire state here yet */
+    /* FIXME: We don't dump the entire state here yet */
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n", 
 		  collect->set, gpsd_maskdump(collect->set));
     if (collect->set & ONLINE_SET)
@@ -780,10 +780,17 @@ int main(int argc, char *argv[])
     char buf[BUFSIZ];
     int option;
     bool unpack_test = false;
+    bool batchmode = false;
+    int debug = 0;
 
-    gps_enable_debug(0, stdout);
-    while ((option = getopt(argc, argv, "uhs?")) != -1) {
+    while ((option = getopt(argc, argv, "bd:uhs?")) != -1) {
 	switch (option) {
+	case 'b':
+	    batchmode = true;
+	    break;
+	case 'd':
+	    debug = atoi(optarg);
+	    break;
 	case 'u':
 	    unpack_test = true;
 	    break;
@@ -806,9 +813,17 @@ int main(int argc, char *argv[])
 	}
     }
 
+    gps_enable_debug(debug, stdout);
     if (unpack_test) {
 	unpack_unit_test();
 	return 0;
+    } else if (batchmode) {
+	while (fgets(buf, sizeof(buf), stdin) != NULL) {
+	    if (isalpha(buf[0])) {
+		gps_unpack(buf, &gpsdata);
+		libgps_dump_state(&gpsdata, time(NULL));
+	    }
+	}
     } else if ((collect = gps_open(NULL, 0)) == NULL) {
 	(void)fputs("Daemon is not running.\n", stdout);
 	exit(1);
@@ -819,6 +834,7 @@ int main(int argc, char *argv[])
 	gps_send(collect, buf);
 	gps_poll(collect);
 	libgps_dump_state(collect, time(NULL));
+	(void)gps_close(collect);
     } else {
 	int	tty = isatty(0);
 
@@ -838,9 +854,9 @@ int main(int argc, char *argv[])
 	    gps_poll(collect);
 	    libgps_dump_state(collect, time(NULL));
 	}
+	(void)gps_close(collect);
     }
 
-    (void)gps_close(collect);
     return 0;
 }
 
