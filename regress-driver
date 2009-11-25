@@ -8,10 +8,12 @@ PATH=.:$PATH
 export PATH
 
 mode=regress
+testing=daemon
 opts=""
-while getopts strbvo opt
+while getopts cstrbvo opt
 do
     case $opt in
+        c) testing=clientlib ;;	# Can be 'daemon'  
 	s) mode=regress ;;	# Run regression tests
 	t) opts="-b $opts" mode=regress ;;	# Run regression tests w/baton
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
@@ -40,14 +42,17 @@ GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATC
 
 case $mode in
     regress)
-        echo "Testing the daemon..." >&2
+        echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
             dir=`dirname $f`
 	    trap 'rm -f $dir/test.chk $dir/test-whole.chk $dir/test-trunc.chk $dir/log-copy.chk $dir/diff $dir/diff-trunc; exit $errors' 0 1 2 15
 	    if [ -r $f.chk ]
 	    then
-		gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk;
+		case $testing in
+		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk ;;
+		clientlib) libgps -b <${f} >$dir/test.chk ;;
+		esac
 		sed -n <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
 		sed -n <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
 		sed -n <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
@@ -83,16 +88,22 @@ case $mode in
         done; rm $dir/test[12].chk
         ;;
     build)
-	echo "Rebuilding regressions..." >&2
+	echo "Rebuilding $testing regressions..." >&2
         for f in $*; do
-            gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER} >${f}.chk;
+	    case $testing in 
+            daemon) gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
+	    clientlib) libgps -b <${f} >${f}.chk ;;
+            esac
         done
         exit 0
         ;;
     view)
         echo "Viewing..." >&2
         for f in $*; do
-            gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER}
+	    case $testing in 
+            daemon) gpsfake -s 38400 -1 -b -p $opts ${f} | ${GPSFILTER} ;;
+            clientlib) libgps -b <${f} ;;
+            esac
         done
         exit 0
         ;;

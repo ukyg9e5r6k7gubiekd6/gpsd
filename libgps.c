@@ -761,38 +761,26 @@ static void onsig(int sig)
 }
 
 /* must start zeroed, otherwise the unit test will try to chase garbage pointer fields. */
-struct gps_data_t gpsdata;
-static char buf[] = "GPSD,O=RMC 1207318966.000 0.005 49.026225 12.188348 375.20 19.20 10.40 70.8900 24.899 0.000 75.6699 38.40 ? 3\r\n$GPVTG,70.89,T,,M,48.40,N,89.6,K,A*34\r\n";
-
-static void unpack_unit_test(void)
-/* torture the unpacking function */
-{
-    (void)signal(SIGSEGV, onsig);
-    (void)signal(SIGBUS, onsig);
-
-    (void)gps_unpack(buf, &gpsdata);
-    libgps_dump_state(&gpsdata, time(NULL));
-}
+static struct gps_data_t gpsdata;
 
 int main(int argc, char *argv[])
 {
     struct gps_data_t *collect;
     char buf[BUFSIZ];
     int option;
-    bool unpack_test = false;
     bool batchmode = false;
     int debug = 0;
 
-    while ((option = getopt(argc, argv, "bd:uhs?")) != -1) {
+    (void)signal(SIGSEGV, onsig);
+    (void)signal(SIGBUS, onsig);
+
+    while ((option = getopt(argc, argv, "bd:hs?")) != -1) {
 	switch (option) {
 	case 'b':
 	    batchmode = true;
 	    break;
 	case 'd':
 	    debug = atoi(optarg);
-	    break;
-	case 'u':
-	    unpack_test = true;
 	    break;
 	case 's':
 	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
@@ -808,16 +796,13 @@ int main(int argc, char *argv[])
 	case '?':
 	case 'h':
 	default:
-	    (void)fputs("usage: libps [-u]\n", stderr);
+	    (void)fputs("usage: libps [-b] [-d lvl] [-s]\n", stderr);
 	    exit(1);
 	}
     }
 
     gps_enable_debug(debug, stdout);
-    if (unpack_test) {
-	unpack_unit_test();
-	return 0;
-    } else if (batchmode) {
+    if (batchmode) {
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
 	    if (isalpha(buf[0])) {
 		gps_unpack(buf, &gpsdata);
