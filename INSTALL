@@ -109,6 +109,11 @@ To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Mac OS X users may
 need to do "./autogen.sh --x-includes=/usr/X11R6/include"
 
+Note: As of November 2009, some versions of libtool are buggy in a
+way that breaks the gpsd build.  Symptoms range from spuruious
+creation of a shared library named libgps-0.0.0 to complete failure
+of autogen.sh.  If this happens to you, use ./autogen.h --disable-shared.
+
 Note: if you are going to use the RTCM-104 support, you should compile
 with gcc4; if you don't have it installed as your default 
 compiler, do this by specifying CC=gcc4 before the autogen.sh
