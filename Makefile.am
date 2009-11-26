@@ -216,7 +216,7 @@ revision.h: Makefile
 
 maskdump.c: gpsd.h-tail maskaudit.py
 	rm -f $(srcdir)/maskdump.c && \
-	$(srcdir)/maskaudit.py -c >maskdump.c && \
+	python $(srcdir)/maskaudit.py -c >maskdump.c && \
 	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
