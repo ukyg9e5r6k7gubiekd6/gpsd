@@ -246,9 +246,9 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     status = libgps_json_unpack(json_str5, &gpsdata, NULL);
     assert_case(5, status);
-    assert_string("path", gpsdata.devices.list[0].path, "/dev/ttyUSB0");
-    assert_integer("flags",gpsdata.devices.list[0].flags, 5);
-    assert_string("driver", gpsdata.devices.list[0].driver, "Foonly");
+    assert_string("path", gpsdata.dev.path, "/dev/ttyUSB0");
+    assert_integer("flags",gpsdata.dev.flags, 5);
+    assert_string("driver", gpsdata.dev.driver, "Foonly");
 
     status = json_read_object(json_str6, json_attrs_6, NULL);
     assert_case(6, status);
