@@ -206,7 +206,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 
 ais_json.i: jsongen.py
 	rm -f $(srcdir)/ais_json.i && \
-	python $(srcdir)/jsongen.py --ais --target=parser >ais_json.i && \
+	$(PYTHON) $(srcdir)/jsongen.py --ais --target=parser >ais_json.i && \
 	chmod a-w $(srcdir)/ais_json.i
 
 revision.h: Makefile
@@ -216,7 +216,7 @@ revision.h: Makefile
 
 maskdump.c: gpsd.h-tail maskaudit.py
 	rm -f $(srcdir)/maskdump.c && \
-	python $(srcdir)/maskaudit.py -c >maskdump.c && \
+	$(PYTHON) $(srcdir)/maskaudit.py -c >maskdump.c && \
 	chmod a-w $(srcdir)/maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
