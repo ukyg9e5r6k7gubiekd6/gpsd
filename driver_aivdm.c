@@ -446,7 +446,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type20.increment4	= UBITS(149, 11);
 	    break;
 	case 21:	/* Aid-to-Navigation Report */
-	    ais->type21.type = UBITS(38, 5);
+	    ais->type21.aid_type = UBITS(38, 5);
 	    from_sixbit((char *)ais_context->bits, 
 			43, 21, ais->type21.name);
 	    if (strlen(ais->type21.name) == 20 && ais_context->bitlen > 272)

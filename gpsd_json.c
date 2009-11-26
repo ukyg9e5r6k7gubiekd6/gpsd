@@ -1113,7 +1113,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
-			   NAVAIDTYPE_DISPLAY(ais->type21.type),
+			   NAVAIDTYPE_DISPLAY(ais->type21.aid_type),
 			   json_stringify(buf1, sizeof(buf1), ais->type21.name),
 			   ais->type21.lon / AIS_LATLON_SCALE,
 			   ais->type21.lat / AIS_LATLON_SCALE,
@@ -1136,7 +1136,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"epfd\":%u,\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
-			   ais->type21.type,
+			   ais->type21.aid_type,
 			   ais->type21.name,
 			   JSON_BOOL(ais->type21.accuracy),
 			   ais->type21.lon,

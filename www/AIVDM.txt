@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.15, Oct 2009
+v1.16, Nov 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -99,8 +99,13 @@ document:
 == Open-Source Implementations ==
 
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
-sentence decoder. This document was developed to be the specification
-for it, and it will decode all sentence type described herein.
+sentence decoder as part of the daemon. This document was developed to
+be the specification for it, and it will decode all sentence type
+described herein.
+
+The source-code repository of the GPSD project holds a conforming
+standalone Python decoder, ais.py, that is not included in shipped
+releases. It may be useful for developers working in that language.
 
 <<Schwehr>> includes links to a collection of Python scripts for
 decoding and analyzing AIVDM sentences.  Kurt Schwehr warns that this
@@ -453,7 +458,7 @@ Turn rate is encoded as follows:
 * 0...-126 = turning left at up to 708 degrees per minute or higher
 * 127 = turning right at more than 5deg/30s (No TI available)
 * -127 = turning left at more than 5deg/30s (No TI available)
-* –128 (80 hex) indicates no turn information available (default)
+* 128 (80 hex) indicates no turn information available (default)
 
 Values between 0 and 708 degrees/min coded by ROT~AIS~=4.733 *
 SQRT(ROT~sensor~) degrees/min where ROT~sensor~ is the Rate of Turn as
@@ -472,7 +477,7 @@ default, indicates an unaugmented GNSS fix with accuracy > 10m.
 
 Longitude is given in in 1/10000 min; divide by 600000.0 to obtain
 degrees. Values up to plus or minus 180 degrees, East = positive, West
-= negative.  A value of 181 degrees (0x6791AC0 hex) indicates that
+\= negative.  A value of 181 degrees (0x6791AC0 hex) indicates that
 longitude is not available and is the default.
 
 Latitude is given in in 1/10000 min; divide by 600000.0 to obtain
@@ -778,12 +783,12 @@ Field   Len Description        Member     Encoding
 116-127 12  Course Over Ground course     Relative to true north to 0.1 degree
 128-133  6  Time Stamp         second     Unsigned integer: UTC second.
 134-141  8  Regional reserved  regional
-142-142  1  DTE                reserved   0=Data terminal ready, 
+142-142  1  DTE                dte        0=Data terminal ready, 
                                           1=Data terminal not ready (default)
 143-145  3  Spare                         Not used
 146-146  1  Assigned           assigned   Assigned-mode flag
 147-147  1  RAIM flag          raim       As for common navigation block
-148-167 20  Radio status       radio      See <<IALA>> for details.
+148-167 19  Radio status       radio      See <<IALA>> for details.
 -------------------------------------------------------------------------------
 
 Altitude is in meters.  The special value 4095 indicates altitude is
@@ -1061,7 +1066,7 @@ Field    Len Description            Member        Units
 280-288   9  Dimension to Stern     to_stern      Unsigned integer: Meters
 289-294   6  Dimension to Port      to_port       Unsigned integer: Meters
 295-297   6  Dimension to Starboard to_starboard  Unsigned integer: Meters
-299-301   4  Position Fix Type      epsd          As in Type 4 EPSD codes
+299-301   4  Position Fix Type      epfd          As in Type 4 EPFD codes
 302-303   1  RAIM flag              raim          As for common navigation block
 304-305   1  DTE                    dte           0=Data terminal ready, 
 306-306   1  Assigned mode flag     assigned      See <<IALA>> for details
@@ -1118,7 +1123,7 @@ Field   Len Description             Member       Units
 0-5       6  Message Type           type         Unsigned integer: 21
 6-7       2  Repeat Indicator       repeat       As in Common Navigation Block
 8-37     30  MMSI                   mmsi         Unsigned integer: 9 digits
-38-42     5  Aid type               type         See Below
+38-42     5  Aid type               aid_type     See Below
 43-162  120  Name                   name         Name of the aid to navigation
 163-163   1  Position Accuracy      accuracy     As in common navigation block
 164-191  28  Longitude              lon          Minutes/10000 (as in CNB)
@@ -1237,7 +1242,9 @@ Field    Len Description      Member       Units
 145-167  23  Spare                         Reserved for future use
 --------------------------------------------------------------------------------
 
-See <<IALA>> for details on the meaning of these fields.
+See <<IALA>> for details on the meaning of these fields.  txrx encodes
+the same information as the 2-bit field txrx field in message type 23;
+only the two low bits are used.
 
 Note that the 'not available' values for longitudesc and latitudes
 match the short ones used in message 17, not the long ones used in the
@@ -1282,7 +1289,7 @@ match the short ones used in messages 17 and 22, not the long ones
 used in the common navigation block and elsewhere.
 
 The txrx field tells the affected stations which channel or
-channels they may transmit on.  The optiobs erefer to the same A and B
+channels they may transmit on.  The options refer to the same A and B
 VHF channels as in Message Type 22. The field is interpreted as follows:
 
 .Tranmit-Mode Table
@@ -1360,7 +1367,7 @@ Field   Len Description             Member          Units
 150-155   6  Dimension to Port      to_port         (Part B) Unsigned int: Meters
 156-161   6  Dimension to Starboard to_starboard    (Part B) Unsigned int: Meters
 132-161  30  Mothership MMSI        mothership_mmsi (Part B) See below
-162-167   8  Spare                                  (Part B) Not used
+162-167   6  Spare                                  (Part B) Not used
 --------------------------------------------------------------------------------
 
 If the Part Number field is 0, the rest of the message is interpreted
@@ -1536,7 +1543,8 @@ Version 1.14 documents message 23.
 
 Version 1.15 corrects an incorrect member name in message 5. It didn't
 match my C code, but had no effect on conformance with the standard. I
-correct it because it confused someone working on a Python decoder.
+corrected it because it confused someone working on a Python decoder.
 
-
- 
+Version 1.16 incorporated various minor fixes and corrections from
+Neal Arundale.  One 'standard' fieldname changed, in message type 21:
+type -> aid_type.

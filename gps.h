@@ -724,7 +724,7 @@ struct ais_t
 	} type20;
 	/* Type 21 - Aids to Navigation Report */
 	struct {
-	    uint type;			/* aid type */
+	    uint aid_type;		/* aid type */
 	    char name[35];		/* name of aid to navigation */
 	    bool accuracy;		/* position accuracy */
 	    int lon;			/* longitude */

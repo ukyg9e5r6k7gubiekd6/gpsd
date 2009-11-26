@@ -258,7 +258,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 21: /* Aid to Navigation */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 		       "%u,%s,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,0x%x,%u,%u",
-		       ais->type21.type,
+		       ais->type21.aid_type,
 		       ais->type21.name,
 		       (uint)ais->type21.accuracy,
 		       ais->type21.lon,

@@ -359,7 +359,7 @@ type9 = (
     spare(3),
     bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
     bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
-    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    bitfield("radio",       19, 'unsigned', None,      "Radio status"),
     )
 
 type10 = (
@@ -533,7 +533,7 @@ aide_type_legends = (
         )
 
 type21 = (
-    bitfield("type",            5, 'unsigned',  0,         "Aid type",
+    bitfield("aid_type",        5, 'unsigned',  0,         "Aid type",
              formatter=aide_type_legends),
     bitfield("name",          120, 'string',    None,      "Name"),
     bitfield("accuracy",        1, 'unsigned',  0,         "Position Accuracy"),
