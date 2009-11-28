@@ -149,7 +149,7 @@ libgpsd_c_sources = \
 	hex.c \
 	isgps.c \
 	json.c \
-	libgps.c \
+	libgps_core.c \
 	libgps_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
@@ -451,8 +451,8 @@ pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
 # These are not distributed
-libgps: libgps.c .libs/libgps.a
-	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
+libgps: libgps_core.c .libs/libgps.a
+	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
 
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/ +quiet

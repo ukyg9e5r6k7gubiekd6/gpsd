@@ -1073,15 +1073,6 @@ echo "Enable Python support   : $ac_python"
 echo "Enable C++ support      : $ac_libgpsmm"
 echo "------------------------------------------"
 echo ""
-echo ""
-echo "WARNING: As of November 2009, some recent versions of autotools"
-echo "are broken in a way that makes the gpsd build fail or sometimes"
-echo "generates a spurious library named libgps.0.0.0. If this happens,"
-echo "use 'autogen.sh --disable-shared' or downgrade to less broken versions;"
-echo "see the INSTALL file for discussion."
-echo ""
-echo ""
-echo ""
 
 if test "xdummy" = "xdummy" -a \
     x"$ac_earthmate" = "xno" -a \

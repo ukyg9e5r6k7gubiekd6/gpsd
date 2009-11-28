@@ -24,18 +24,10 @@ Python 2.6             -> most of the test and profiling tools are in Python
        		       	  and the 'json' module is needed for tests
 
 For building from SVN, the following are necessary:
-autoconf 2.61-2.63
-automake 1.10
+autoconf 2.61 or later
+automake 1.10 or later
 libtool 2.26 or later
 Python			-> code is generated from python scripts
-
-Note: As of November 2009, some recent versions of autotools are buggy
-in a way that breaks the gpsd build (breakage has been observed with
-autoconf-2.64 + automake 1.11 + libtool-2.26).  Symptoms range from
-spuruious creation of a shared library named libgps-0.0.0 to complete
-failure of autogen.sh.  If this happens to you, use ./autogen.h
---disable-shared or downgrade to less broken versions. The combination
-of autoconf-2.63 + automake 1.10.2 + libtool-2.26 is known to work.
 
 For working with DBUS, you'll need the DBUS development
 headers and libraries installed.  Under Debian/Ubuntu these
