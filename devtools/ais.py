@@ -774,7 +774,7 @@ def aivdm_unpack(data, offset, values, instructions):
             cooked.append([inst, value])
     return cooked
 
-def parse_ais_messages(source, scaled=False):
+def parse_ais_messages(source, scaled=False, skiperr=False):
     "Generator code - read forever from source stream, parsing AIS messages."
     payload = ''
     values = {}
@@ -798,27 +798,34 @@ def parse_ais_messages(source, scaled=False):
         bits = BitVector()
         bits.from_sixbit(payload)
         # Magic recursive unpacking operation
-        cooked = aivdm_unpack(bits, 0, values, aivdm_decode)
-        # We now have a list of tuples containing unpacked fields
-        # Collect some field groups into ISO8601 format
-        for (offset, template, label, legend, formatter) in field_groups:
-            segment = cooked[offset:offset+len(template)]
-            if map(lambda x: x[0], segment) == template:
-                group = formatter(*map(lambda x: x[1], segment))
-                group = (label, group, 'string', legend, None)
-                cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
-        # Now apply custom formatting hooks.
-        if scaled:
-            for (i, (inst, value)) in enumerate(cooked):
-                if value == inst.oob:
-                    cooked[i][1] = "n/a"
-                elif inst.formatter:
-                    if type(inst.formatter) == type(()):
-                        cooked[i][1] = inst.formatter[value]
-                    elif type(formatter) == type(lambda x: x):
-                        cooked[i][1] = inst.formatter(value)
-        values = {}
-        yield cooked
+        try:
+            cooked = aivdm_unpack(bits, 0, values, aivdm_decode)
+            # We now have a list of tuples containing unpacked fields
+            # Collect some field groups into ISO8601 format
+            for (offset, template, label, legend, formatter) in field_groups:
+                segment = cooked[offset:offset+len(template)]
+                if map(lambda x: x[0], segment) == template:
+                    group = formatter(*map(lambda x: x[1], segment))
+                    group = (label, group, 'string', legend, None)
+                    cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
+            # Now apply custom formatting hooks.
+            if scaled:
+                for (i, (inst, value)) in enumerate(cooked):
+                    if value == inst.oob:
+                        cooked[i][1] = "n/a"
+                    elif inst.formatter:
+                        if type(inst.formatter) == type(()):
+                            cooked[i][1] = inst.formatter[value]
+                        elif type(formatter) == type(lambda x: x):
+                            cooked[i][1] = inst.formatter(value)
+            values = {}
+            yield cooked
+        except AISUnpackingException, e:
+            if skiperr:
+                # FIXME: Add error notification here
+                continue
+            else:
+                raise e
 
 # The rest is just sequencing and report generation.
 
@@ -826,7 +833,7 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjs")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjsx")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
@@ -834,6 +841,7 @@ if __name__ == "__main__":
     scaled = False
     json = False
     csv = False
+    skiperr = False
     for (switch, val) in options:
         if (switch == '-c'):
             csv = True
@@ -841,8 +849,10 @@ if __name__ == "__main__":
             scaled = True
         elif (switch == '-j'):
             json = True
+        elif (switch == '-x'):
+            skiperr = True
 
-    for parsed in parse_ais_messages(sys.stdin, scaled):
+    for parsed in parse_ais_messages(sys.stdin, scaled, skiperr):
         if json:
             print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
         elif csv:
