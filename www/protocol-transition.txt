@@ -150,7 +150,7 @@ library-internal thread hook.  Here's why:
    are, and our library doesn't. 
 
 3. We don't like to ship code we can't test, we didn't have a
-   regression test for trhe thread stuff, and writing one would
+   regression test for the thread stuff, and writing one would
    have been a painful expenditure of time better spent elsewhere.
 
 == On not doing things by halves ==

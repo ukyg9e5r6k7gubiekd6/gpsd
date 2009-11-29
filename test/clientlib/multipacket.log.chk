@@ -1,0 +1,4 @@
+flags: (0x808000) {POLICY|DEVICELIST}
+POLICY: watcher=true nmea=false raw=0 scaled=false timing=false, devpath=
+DEVICELIST:1 devices:
+1: path='/dev/ttyS0' driver='SiRF binary'

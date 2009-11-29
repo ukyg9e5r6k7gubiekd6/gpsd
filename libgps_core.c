@@ -136,20 +136,20 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     if (collect->set & STATUS_SET)
 	(void)fprintf(debugfp, "STATUS: status: %d (%s)\n",
 	       collect->status, status_values[collect->status]);
-    if (collect->fix.mode & MODE_SET)
+    if (collect->set & MODE_SET)
 	(void)fprintf(debugfp, "MODE: mode: %d (%s)\n",
-	   collect->fix.mode, mode_values[collect->fix.mode]);
-    if (collect->fix.mode & DOP_SET)
+	   collect->set, mode_values[collect->fix.mode]);
+    if (collect->set & DOP_SET)
 	(void)fprintf(debugfp, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
 	   collect->dop.pdop, collect->dop.hdop, collect->dop.vdop);
-    if (collect->fix.mode & VERSION_SET)
+    if (collect->set & VERSION_SET)
 	(void)fprintf(debugfp, "VERSION: release=%s rev=%s proto=%d.%d\n",
 		      collect->version.release, 
 		      collect->version.rev,
 		      collect->version.proto_major, 
 		      collect->version.proto_minor);
-    if (collect->fix.mode & POLICY_SET)
+    if (collect->set & POLICY_SET)
 	(void)fprintf(debugfp, "POLICY: watcher=%s nmea=%s raw=%d scaled=%s timing=%s, devpath=%s\n",
 		      collect->policy.watcher ? "true" : "false", 
 		      collect->policy.nmea ? "true" : "false",

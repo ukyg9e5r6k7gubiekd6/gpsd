@@ -283,26 +283,31 @@ int libgps_json_unpack(const char *buf,
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
     int status;
-    if (strstr(buf, "\"class\":\"TPV\"") != 0) {
+    char *classtag = strstr(buf, "\"class\":");
+
+    if (classtag == NULL)
+	return -1;
+#define STARTSWITH(str, prefix)	strncmp(str, prefix, sizeof(prefix)-1)==0
+    if (STARTSWITH(classtag, "\"class\":\"TPV\"")) {
 	return json_tpv_read(buf, gpsdata, end);
-    } else if (strstr(buf, "\"class\":\"SKY\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"SKY\"")) {
 	return json_sky_read(buf, gpsdata, end);
-    } else if (strstr(buf, "\"class\":\"DEVICES\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"DEVICES\"")) {
 	return json_devicelist_read(buf, gpsdata, end);
-    } else if (strstr(buf, "\"class\":\"DEVICE\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"DEVICE\"")) {
 	status = json_device_read(buf, &gpsdata->dev, end);
 	if (status == 0)
 	    gpsdata->set |= DEVICE_SET;
 	return status;
-    } else if (strstr(buf, "\"class\":\"WATCH\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"WATCH\"")) {
 	status = json_watch_read(buf, &gpsdata->policy, end);
 	if (status == 0)
 	    gpsdata->set |= POLICY_SET;
 	return status;
-    } else if (strstr(buf, "\"class\":\"VERSION\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"VERSION\"")) {
 	return json_version_read(buf, gpsdata, end);
 #ifdef RTCM104V2_ENABLE
-    } else if (strstr(buf, "\"class\":\"RTCM2\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"RTCM2\"")) {
 	status = json_rtcm2_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->rtcm2, end);
@@ -313,7 +318,7 @@ int libgps_json_unpack(const char *buf,
 	return status;
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
-    } else if (strstr(buf, "\"class\":\"AIS\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"AIS\"")) {
 	status = json_ais_read(buf, 
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
 				 &gpsdata->ais, end);
@@ -323,10 +328,11 @@ int libgps_json_unpack(const char *buf,
 	}
 	return status;
 #endif /* AIVDM_ENABLE */
-    } else if (strstr(buf, "\"class\":\"ERROR\"") != 0) {
+    } else if (STARTSWITH(classtag, "\"class\":\"ERROR\"")) {
 	return json_error_read(buf, gpsdata, end);
     } else
 	return -1;
+#undef STARTSWITH
 }
 /*@+compdef@*/
 
