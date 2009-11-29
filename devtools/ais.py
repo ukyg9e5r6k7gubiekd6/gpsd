@@ -608,10 +608,10 @@ type23 = (
              formatter=short_latlon_format),
     bitfield("sw_lat",    17, 'unsigned',  0xd548,  "SW Latitude",
              formatter=short_latlon_format),
-    bitfield("stationtype",9,'unsigned',   0,       "Station Type",
+    bitfield("stationtype",4, 'unsigned',  0,       "Station Type",
              validator=lambda n: n >= 0 and n <= 31,
              formatter=station_type_legends),
-    bitfield("shiptype",  9, 'unsigned',   0,       "Ship Type",
+    bitfield("shiptype",   8, 'unsigned',  0,       "Ship Type",
              validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     spare(22),
@@ -655,7 +655,7 @@ type24 = (
 
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n > 0 and n <= 24 and n != 23),
+        validator=lambda n: n > 0 and n <= 24),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type
