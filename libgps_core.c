@@ -709,13 +709,10 @@ int main(int argc, char *argv[])
     (void)signal(SIGSEGV, onsig);
     (void)signal(SIGBUS, onsig);
 
-    while ((option = getopt(argc, argv, "bd:hs?")) != -1) {
+    while ((option = getopt(argc, argv, "b:hsD?")) != -1) {
 	switch (option) {
 	case 'b':
 	    batchmode = true;
-	    break;
-	case 'd':
-	    debug = atoi(optarg);
 	    break;
 	case 's':
 	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
@@ -728,6 +725,9 @@ int main(int argc, char *argv[])
 			 sizeof(struct policy_t),
 			 sizeof(struct version_t));
 	    exit(0);
+	case 'D':
+	    debug = atoi(optarg);
+	    break;
 	case '?':
 	case 'h':
 	default:
