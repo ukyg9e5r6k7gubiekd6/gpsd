@@ -774,7 +774,7 @@ def aivdm_unpack(data, offset, values, instructions):
             cooked.append([inst, value])
     return cooked
 
-def parse_ais_messages(source, scaled=False, skiperr=False):
+def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     "Generator code - read forever from source stream, parsing AIS messages."
     payload = ''
     values = {}
@@ -782,6 +782,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False):
         line = source.readline()
         if not line:
             return
+        if verbose > 0:
+            sys.stdout.write(line)
         # Ignore comments
         if line.startswith("#"):
             continue
@@ -833,7 +835,7 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjsx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjsvx")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
@@ -842,17 +844,20 @@ if __name__ == "__main__":
     json = False
     csv = False
     skiperr = False
+    verbose = 0
     for (switch, val) in options:
-        if (switch == '-c'):
+        if switch == '-c':
             csv = True
-        elif (switch == '-s'):
+        elif switch == '-s':
             scaled = True
-        elif (switch == '-j'):
+        elif switch == '-j':
             json = True
-        elif (switch == '-x'):
+        elif switch == '-x':
             skiperr = True
+        elif switch == '-v':
+            verbose += 1
 
-    for parsed in parse_ais_messages(sys.stdin, scaled, skiperr):
+    for parsed in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
         if json:
             print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
         elif csv:
@@ -861,5 +866,6 @@ if __name__ == "__main__":
             for (inst, value) in parsed:
                 print "%-25s: %s" % (inst.legend, value)
             print "%%"
+        sys.stdout.flush()
 
 # $Id$
