@@ -88,6 +88,9 @@ unusual configuration commands. Here are the exceptions:
 * You set a per-packet raw hook.  This feature was documented
   incorrectly.  It no longer takes a level argument.
 
+* You set a thread hook.  We have deleted the thread-hook portion of
+  the API; for discussion, see "Why threads are gone" below.
+
 You can probably ignore the rest of this document, unless
 either (a) you want to learn about gpsd's new capabilities so you
 can use them in creative ways, or (b) you want to caper with unholy glee 
@@ -132,6 +135,23 @@ difficult.  We're essentially relying on the distribution integrators
 to ship libgps and gpsd updates at the same time, with sane
 package dependencies. If that goes smoothly, applications may
 not even notice the changes.  We can hope...
+
+== Why threads are gone ==
+
+We have deleted the two functions in the API that managed a
+library-internal thread hook.  Here's why:
+
+1. Actual use of it has been at best very rare and possibly nonexistent.
+
+2. Applications that want location handing to run in a thread are in
+   a better position to manage thread locks and mutexes themselves
+   than our client library can possibly be -- after all, the
+   application knows what all the other threads and mutex locks 
+   are, and our library doesn't. 
+
+3. We don't like to ship code we can't test, we didn't have a
+   regression test for trhe thread stuff, and writing one would
+   have been a painful expenditure of time better spent elsewhere.
 
 == On not doing things by halves ==
 

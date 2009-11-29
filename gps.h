@@ -955,7 +955,6 @@ struct gps_data_t {
     /* hook functions */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
-    void (*thread_hook)(struct gps_data_t *, char *, size_t len);/* Thread-callback hook for GPS data. */
 
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
@@ -997,8 +996,6 @@ extern int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... );
 extern int gps_poll(struct gps_data_t *gpsdata);
 extern int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, /*@null@*/void *);
 extern void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len));
-extern int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len), pthread_t *handler);
-extern int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 extern char /*@observer@*/ *gps_errstr(const int);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);

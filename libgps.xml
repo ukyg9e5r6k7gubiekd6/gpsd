@@ -53,18 +53,6 @@ C:
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_set_callback</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>void (*<parameter>callback</parameter>)(struct
-    gps_data_t *sentence, char *buf, size_t len)</paramdef>
-    <paramdef>pthread_t *<parameter>handler</parameter></paramdef>
-</funcprototype>
-<funcprototype>
-<funcdef>void <function>gps_del_callback</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>pthread *<parameter>handler</parameter></paramdef>
-</funcprototype>
-<funcprototype>
 <funcdef>void <function>rtcm2_unpack</function></funcdef>
     <paramdef>struct rtcm_t *<parameter>rtcmp</parameter></paramdef>
     <paramdef>char *<parameter>buf</parameter></paramdef>
@@ -135,13 +123,7 @@ version That put the session storage where you wish to allocate it.
 It returns 0 on success and -1 on failure, with errno set
 appropriately.</para>
 
-<para><function>gps_close()</function> ends the session.
-NB: ending the session does not destroy any threads created to handle
-callbacks.  You must delete all callbacks prior to
-calling <function>gps_close()</function>.  Failure to do so results in
-undefined behavior.  Currently it will leak a thread, and in the
-future might result in aborting the program.
-</para>
+<para><function>gps_close()</function> ends the session.</para>
 
 <para><function>gps_send()</function> writes a command to the daemon.
 The second argument must be a format string containing elements from
@@ -180,28 +162,6 @@ specify and run it (synchronously) on the raw data pulled by a
 call.  The arguments passed to this hook will be a pointer to a
 structure containing parsed data, and a buffer containining the
 raw <application>gpsd</application> response.</para>
-
-<para><function>gps_set_callback()</function> takes a function you
-specify and runs it asynchronously each time new data arrives from
-<application>gpsd</application>, using POSIX threads.  For example,
-you can call gps_set_callback(gpsdata, my_function, handler) once in
-your program, and from there on your gpsdata structure will be parsed
-by your <function>my_function()</function> each time new data are
-available.  <function>my_function()</function> could change some
-global variables in your program based on received data; it is your
-responsibility to ensure that your program uses mutexes or other
-mechanisms to avoid race conditions.
-NB: <function>gps_set_callback()</function> will create a new thread,
-and contrary to what you might expect <function>gps_close()</function>
-will not destroy that thread.  You must therefore explicitly remove
-the callback with <function>gps_del_callback()</function> before
-calling <function>gps_close()</function>.
-</para>
-
-<para><function>gps_del_callback()</function> deregisters the callback
-function previously set with <function>gps_set_callback()</function>.
-After the invocation of this function no operation will be done when
-new data arrives.</para>
 
 <para><function>gps_errstr()</function> returns an ASCII string (in
 English) describing the error indicated by a nonzero return value from

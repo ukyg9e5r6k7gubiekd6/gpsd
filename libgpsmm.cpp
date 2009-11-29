@@ -56,18 +56,6 @@ struct gps_data_t* gpsmm::poll(void) {
 	}
 }
 
-int gpsmm::set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, size_t len)) {
-	handler = new pthread_t;
-	return gps_set_callback(gps_data,hook,handler);
-}
-
-int gpsmm::del_callback(void) {
-	int res;
-	res=gps_del_callback(gps_data,handler);
-	delete handler;
-	return res;
-}
-
 void gpsmm::clear_fix(void) {
 	gps_clear_fix(&(gps_data->fix));
 }
