@@ -506,6 +506,8 @@ void gpsd_error_model(struct gps_device_t *session,
 		double adj = earth_distance(
 		    oldfix->latitude, oldfix->longitude,
 		    fix->latitude, fix->longitude);
+		gpsd_report(LOG_RAW, "gpsd_error_model(): %2.9f = earth_distance(%2.9f, %2.9f, %2.9f, %2.9f)\n", adj, oldfix->latitude, oldfix->longitude, fix->latitude, fix->longitude);
+		gpsd_report(LOG_RAW, "gpsd_error_model(): fix->epx = %2.9f; fix->epy = %2.9f\n", fix->epx, fix->epy);
 		if (isnan(adj)==0 && adj > EMIX(fix->epx, fix->epy)) {
 		    double opp = EMIX(fix->epx, fix->epy);
 		    double hyp = sqrt(adj*adj + opp*opp);
