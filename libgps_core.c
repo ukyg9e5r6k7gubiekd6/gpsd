@@ -709,7 +709,7 @@ int main(int argc, char *argv[])
     (void)signal(SIGSEGV, onsig);
     (void)signal(SIGBUS, onsig);
 
-    while ((option = getopt(argc, argv, "b:hsD?")) != -1) {
+    while ((option = getopt(argc, argv, "bhsD:?")) != -1) {
 	switch (option) {
 	case 'b':
 	    batchmode = true;
