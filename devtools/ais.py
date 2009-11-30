@@ -377,7 +377,7 @@ type12 = (
     )
 
 type14 = (
-    spare(1),
+    spare(2),
     bitfield("text",           968, 'string',   None, "Text"),
     )
 
