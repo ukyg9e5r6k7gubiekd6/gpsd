@@ -365,6 +365,8 @@ static void decode(FILE *fpin, FILE *fpout)
 	    rtcm3_dump(&rtcm3, stdout);
 	}
 	else if (lexer.type == AIVDM_PACKET) {
+	    if (verbose >=1 )
+		(void)fputs((char *)lexer.outbuffer, stdout);
 	    /*@ -uniondef */
 	    if (aivdm_decode((char *)lexer.outbuffer, lexer.outbuflen, &aivdm, &ais)) {
 		if (!json)

@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.16, Nov 2009
+v1.17, Nov 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -299,9 +299,11 @@ brackets, pipe bar, tilde and DEL cannot be encoded.
 -----------------------------------------------------------------------------
 
 According to the standard, trailing unused characters in six-bit
-fields will be represented by "@" (six-bit zero). It is common to
-space-fill the fields instead, so a decoder should strip trailing
-spaces well as at-signs.
+fields will be represented by "@" (six-bit zero). The terminating "@"
+should not be considered part of the text, and any non-"@" characters
+adter it should be discarded.  It is common to space-fill the fields
+instead, so a decoder should strip trailing spaces well as at-signs
+and garbage after them.
 
 == AIVDM/AIVDO Payload Interpretation ==
 
@@ -1548,3 +1550,5 @@ corrected it because it confused someone working on a Python decoder.
 Version 1.16 incorporated various minor fixes and corrections from
 Neal Arundale.  One 'standard' fieldname changed, in message type 21:
 type -> aid_type.
+
+Version 1.17 clatfies the role of @ as a terminator in 6-bit text.

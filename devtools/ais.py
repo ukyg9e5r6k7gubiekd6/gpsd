@@ -758,8 +758,17 @@ def aivdm_unpack(data, offset, values, instructions):
                 value = data.sbits(offset, inst.width)
             elif inst.type == 'string':
                 value = ''
-                for i in range(inst.width/6):
-                    value += "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
+                # The try/catch error here is in case we run off the end
+                # of a variable-length string field, as in messages 12 and 14
+                try:
+                    for i in range(inst.width/6):
+                        newchar = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
+                        if newchar == '@':
+                            break
+                        else:
+                            value += newchar
+                except IndexError:
+                    pass
                 value = value.replace("@", " ").rstrip()
             elif inst.type == 'raw':
                 value = BitVector(data.bits[offset/8:], len(data)-offset)
