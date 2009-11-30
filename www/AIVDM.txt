@@ -895,7 +895,7 @@ content that looks like line noise ("]XFD5D/\7`>PA!Q DX0??K?8?>D").
 
 Such apparently garbled content does *not* mean there is an error in
 your decoder. It may indicate faulty encoders, operator error, or even
-the use of private encodings for non-ASCII characters sets.
+the use of private encodings for non-ASCII character sets.
 
 === Type 13: Safety-Related Acknowledge ===
 

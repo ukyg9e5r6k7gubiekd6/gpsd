@@ -514,21 +514,21 @@ version:
 
 # Regression-test the daemon
 gps-regress: gpsd 
-	$(srcdir)/regress-driver -t $(srcdir)/test/stable/*.log
+	$(srcdir)/regress-driver -t $(srcdir)/test/daemon/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	$(srcdir)/regress-driver -r  $(srcdir)/test/stable/*.log
+	$(srcdir)/regress-driver -r  $(srcdir)/test/daemon/*.log
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	$(srcdir)/regress-driver -b $(srcdir)/test/stable/*.log
+	$(srcdir)/regress-driver -b $(srcdir)/test/daemon/*.log
 
 # To build an individual test for a load named foo.log, put it in
-# test/stable and do this:
-#	regress-driver -b test/stable/foo.log
+# test/daemon and do this:
+#	regress-driver -b test/daemon/foo.log
 
 # Regression-test the RTCM decoder.
 rtcm-regress: gpsdecode
