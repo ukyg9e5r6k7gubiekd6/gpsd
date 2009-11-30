@@ -277,6 +277,8 @@ static double CalcRad(double lat)
     double y = pow(z, 1.5);
     double r = x / y;
 
+    gpsd_report(LOG_RAW, "CalcRad(): lat = %2.30f; sc = %2.30f; x = %2.30f; z = %2.30f; y = %2.30f; r = %2.30f;\n", lat, sc, x, z, y, r);
+
     return r * 1000.0;	// Convert to meters
 }
 
@@ -290,6 +292,11 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
     double z1 = CalcRad(lat1) * cos(Deg2Rad(90-lat1));
     double z2 = CalcRad(lat2) * cos(Deg2Rad(90-lat2));
     double a = (x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2);
+
+    gpsd_report(LOG_RAW, "earth_distance(): (x1*x2 + y1*y2 + z1*z2) = %2.30f\n", (x1*x2 + y1*y2 + z1*z2));
+    gpsd_report(LOG_RAW, "earth_distance(): (lat1+lat2)/2 = %2.30f\n", (lat1+lat2)/2);
+    gpsd_report(LOG_RAW, "earth_distance(): x1 = %2.30f; x2 = %2.30f; y1 = %2.30f; y2 = %2.30f; z1 = %2.30f; z2 = %2.30f; a = %2.30f\n", x1, x2, y1, y2, z1, z2, a);
+
     // a should be in [1, -1] but can sometimes fall outside it by
     // a very small amount due to rounding errors in the preceding
     // calculations.  This is prone to happen when the argument points
