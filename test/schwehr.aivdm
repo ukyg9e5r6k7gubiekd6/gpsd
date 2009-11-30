@@ -1,7 +1,7 @@
 # Sample AIVDM data sentences provided from real data by Kurt Schwehr
-# and Mike Greene.
+# Mike Greene, and Neal Arundale.
 #
-# The text dumps following are (mostly) producerd by the parsers in
+# The text dumps following are (mostly) produced by the parsers in
 # Kurt's noaadata.py toolkit, and are here so they can be eyeball-checked
 # against gpsdecode's output.
 #
@@ -255,6 +255,75 @@
 #      state_syncstate:     0
 #      state_slottimeout:   0
 #      state_slotoffset:    0
+#
+# Type 12:
+# From AIS Hub via Neal Arundale. Dumps by ais.py.
+!AIVDM,1,1,,A,<02:oP0kKcv0@<51C5PB5@?BDPD?P:?2?EB7PDB16693P381>>5<PikP,0*37
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 2275200
+#       Sequence Number          : 0
+#       Destination MMSI         : 215724000
+#       Retransmit flag          : 0
+#       Text                     : PLEASE REPORT TO JOBOURG TRAFFIC CHANNEL 13
+!AIVDM,1,1,,A,<5?SIj1;GbD07??4,0*38
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 351853000
+#       Sequence Number          : 0
+#       Destination MMSI         : 316123456
+#       Retransmit flag          : 0
+#       Text                     : GOOD
+!AIVDM,1,1,,A,<5?SIj5Cp;NPD81>H0,4*4C
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 351853000
+#       Sequence Number          : 1
+#       Destination MMSI         : 351809000
+#       Retransmit flag          : 0
+#       Text                     : THANX
+!AIVDM,1,1,,A,<42Lati0W:Ov=C7P6B?=Pjoihhjhqq0,2*2B
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 271002099
+#       Sequence Number          : 0
+#       Destination MMSI         : 271002111
+#       Retransmit flag          : 1
+#       Text                     : MSG FROM 271002099
+!AIVDM,1,1,,A,<CR3B@<0TO3j5@PmkiP31BCPphPDB13;CPihkP=?D?PmP3B5GPpn,0*3A
+#       Message Type             : 12
+#       Repeat Indicator         : 1
+#       MMSI                     : 237032000
+#       Sequence Number          : 3
+#       Destination MMSI         : 2391100
+#       Retransmit flag          : 1
+#       Text                     : EP 531 CARS 80 TRACKS 103 MOTO 5 CREW 86
+!AIVDM,1,1,,A,<9NS8O1ROcS0>9P81?f31<<PD5CD,0*46
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 636012668
+#       Sequence Number          : 0
+#       Destination MMSI         : 413118000
+#       Retransmit flag          : 0
+#       Text                     : NI HAO.CALL TEST
+#
+# Type 14:
+# From AIS Hub via Neal Arundale.  Dumps by ais.py.
+!AIVDM,1,1,,A,>5?Per18=HB1U:1@E=B0m<L,2*51
+#       Message Type             : 14
+#       Repeat Indicator         : 0
+#       MMSI                     : 351809000
+#       Text                     : RCVD YR TEST MSG
+!AIVDM,1,1,,A,>3R1p10E3;;R0USCR0HO>0@gN10kGJp,2*7F
+#       Message Type             : 14
+#       Repeat Indicator         : 0
+#       MMSI                     : 237008900
+#       Text                     : EP228 IX48 FG3 DK7 PL56.
+!AIVDM,1,1,,A,>4aDT81@E=@,2*2E
+#       Message Type             : 14
+#       Repeat Indicator         : 0
+#       MMSI                     : 311764000
+#       Text                     : TEST
 #
 # Type 15:
 # From Mike Greene

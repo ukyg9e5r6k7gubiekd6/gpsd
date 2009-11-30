@@ -99,8 +99,8 @@ document:
 * Field offsets, types, and descriptions for messages 25 and 26. which
   are not described in <<IALA>>.
 
-* Sample sentences of types 12-14, 16-17, 21-23, and 25-26 together
-  with decoded dumps of the field values.
+* Sample sentences of types 16-17, 21-23, and 25-26 together with
+  decoded dumps of the field values.
 
 == Open-Source Implementations ==
 
@@ -433,8 +433,8 @@ set to use.
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-11, 15, 18-21, and 24.  Described but unchecked are 12-14, 16-17,
-and 22-23.
+1-12, 14-15, 18-21, and 24.  Described but unchecked are 13, 16-17, and
+22-23.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -886,6 +886,17 @@ Field   Len Description        Member      Units
                                            Field may be shorter than 936 bits.
 -------------------------------------------------------------------------------
 
+Pragmatic note: On <<<AISHUB>>> he actual content of these messages is
+highly variable, ranging from fairly plain English ("PLEASE REPORT TO
+JOBOURG TRAFFIC CHANNEL 13") through snippets of tabular data ("PAX
+589 FG 36 IX 74 MOTO 10 CREW 108+1" through what look like opaque
+commercial codes ("EP285 IX46 FG3 DK8 PL56") to empty strings and
+content that looks like line noise ("]XFD5D/\7`>PA!Q DX0??K?8?>D"). 
+
+Such apparently garbled content does *not* mean there is an error in
+your decoder. It may indicate faulty encoders, operator error, or even
+the use of private encodings for non-ASCII characters sets.
+
 === Type 13: Safety-Related Acknowledge ===
 
 Message type 13 is a receipt acknowledgement to senders of
@@ -911,6 +922,9 @@ Field   Len Description        Member    Units
 
 Note: There may be an error in the standards.  161 * 6 = 966, not 968,
 but 968 is the figure given in <<<IALA>>>.
+
+Also see the pragmatic note on message content attached to type 12; it
+applies to type 14 messages as well.
 
 === Type 15: Interrogation ===
 
@@ -1596,7 +1610,7 @@ Version 1.16 incorporated various minor fixes and corrections from
 Neal Arundale.  One 'standard' fieldname changed, in message type 21:
 type -> aid_type.
 
-Version 1.17 clatfies the role of @ as a terminator in 6-bit text.
+Version 1.17 clarifies the role of @ as a terminator in 6-bit text.
 
 Version 1.18 notes a possible off-by-two error in the standards'
 description of type 14, and noted that type 25 and 26 have not
