@@ -1253,7 +1253,7 @@ concatenate it to this one to obtain the full name.
 implying that it is vessel dimensions as in message type 5.
 
 The Off-Position Indicator is for floating Aids-to-Navigation only: 0
-= on position; 1 = off position. Only valid if UTC second is equal to
+means on position; 1 means off position. Only valid if UTC second is equal to
 or below 59.
 
 The Virtual Aid flag is interpreted as follows: 0 = default = real Aid
