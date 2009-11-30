@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.17, Nov 2009
+v1.18, Nov 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -269,7 +269,38 @@ sort of thing that is (a) likely to confuse implementors reading
 the public sources, and (b) all too likely to become visible if there
 are firmware or software errors in the transmission chain.
 
-== AIVDM/AIVDO Six-Bit ASCII ==
+== AIVDM/AIVDO Data Types ==
+
+AIVDM data is encoded as bitfields in the sentence.  Bitfields may be 
+interpreted in one of the following ways:
+
+- Signed or unsigned numeric
+- Flag or boolean
+- Index into a controlled vocabulary
+- Reserved bits
+- Spare bits
+- Strings
+
+Numeric bitfields are interpreted as big-endian twos-complement
+integers; when signed, the sign bit is the highest.  Many fields have
+an associated divisor which should be applied to convert to the
+correct units.
+
+Flags are encoded as 1 for true/yes/on, 0 for false/no/off.
+
+Indices into controlled vocabularies are numeric bitfields which
+must be interpreted using per-field string lists specified in the
+standards.
+
+Spare fields generally seem to have been inserted in order to put
+certain field starts on 8-bit boundaries, and should be ignored.  Decoders
+should not, however, assume that spare fields will be all zeroes.
+
+Reserved fields should not be ignored, as they may be assigned for
+extension data in minor revisions of the AIS standard; it is noted in
+the message descriptions where this has already occurred.  It is good
+practice for a decoder to make reserved fields available to client
+applications as uninterpreted bitfields.
 
 Character-string fields within AIVDM/AIVDO messages are encoded in a
 special way, referred to as "six-bit" in the tables below. Each
@@ -299,18 +330,19 @@ brackets, pipe bar, tilde and DEL cannot be encoded.
 -----------------------------------------------------------------------------
 
 According to the standard, trailing unused characters in six-bit
-fields will be represented by "@" (six-bit zero). The terminating "@"
-should not be considered part of the text, and any non-"@" characters
-adter it should be discarded.  It is common to space-fill the fields
-instead, so a decoder should strip trailing spaces well as at-signs
-and garbage after them.
+fields will be represented by "@" (six-bit zero); however, real-world
+encoders are not careful about this and often have nonzero garbage
+after the "@". The terminating "@" should not be considered part of
+the text, and any non-"@" characters after it should be discarded.  It
+is also common to space-fill short fields such as ship and station
+name, so a decoder should strip trailing spaces after stripping
+at-signs and the garbage after them.
+
+Trailing string fields are often specified as "up to" a certain number of bits.
+Decoders should be prepared to handle any field length up to that
+number, including zero.
 
 == AIVDM/AIVDO Payload Interpretation ==
-
-AIVDM data is encoded as bitfields in the sentence.  The bitfields are
-generally interpreted as big-endian twos-complement integers; when
-signed, the sign bit is the highest.  Many fields have an associated
-divisor which should be applied to convert to the correct units.
 
 Note that many sources use 1-origin numbering for the bits.  We'll
 use 0-origin in this document.
@@ -370,7 +402,9 @@ such as the St. Lawrence Seaway and PAWSS.
 Classes 12 and 14 are used for safety-related text messaging.
 
 In practice, message types other than 1, 3, 4, 5, 18, and 24 are
-unusual or rare; many AIS transponders never emit them.
+unusual or rare; many AIS transponders never emit them.  As of
+November 2009, an overnight capture of a full feed from <<<AISHUB>>>
+shows no type 25 or type 26 messages.
 
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).  The first three digits convey information
@@ -866,8 +900,11 @@ Field   Len Description        Member    Units
 8-37     30 Source MMSI        mmsi      Unsigned integer: 9 digits
 38-39     2 Spare                        Not used
 40      968 Text               text      1-161 chars of six-bit encoded text.
-                                         Field may be shorter than 936 bits.
+                                         Field may be shorter than 968 bits.
 -------------------------------------------------------------------------------
+
+Note: There may be an error in the standards.  161 * 6 = 966, not 968,
+but 968 is the figure given in <<<IALA>>>.
 
 === Type 15: Interrogation ===
 
@@ -1476,10 +1513,10 @@ Identification System]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
--  [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
-   radiocommunication equipment and systems"  The six-bit encoding
-   is described on page 26 of Annex C, Table C-1.  Communicated by 
-   Kurt Schwehr; I have not looked at it.
+- [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
+  radiocommunication equipment and systems"  The six-bit encoding
+  is described on page 26 of Annex C, Table C-1. Communicated by 
+  Kurt Schwehr; I have not looked at it.
 
 - [[[IEC 62287]]] "Maritime Navigation and Radiocommunication
   Equipment and Systems – Class B Shipborne Equipment of the
@@ -1499,6 +1536,8 @@ Identification System]
   Format]
 
 - [[[JSON-AIS]]] http://wiki.ham.fi/JSON_AIS.en[JSON AIS transmission protocol]
+
+- [[[AISHUB]]] http://www.aishub.net/[AIS Hub, the AIS data sharing center]
 
 == Change history ==
 
@@ -1552,3 +1591,9 @@ Neal Arundale.  One 'standard' fieldname changed, in message type 21:
 type -> aid_type.
 
 Version 1.17 clatfies the role of @ as a terminator in 6-bit text.
+
+Version 1.18 notes a possible off-by-two error in the standards'
+description of type 14, and noted that type 25 and 26 have not
+been observed in the wild.  It also adds a more complete description
+of AIS data types and some pragmatics about spare and reserved fields.
+
