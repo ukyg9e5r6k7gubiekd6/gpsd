@@ -66,6 +66,7 @@ GPSD Frequently Asked Questions
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
 <li><a href='#nodata'>I get no data from my GPS</a></h1>
 <li><a href='#oldcommands'>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</a><br/>
+<li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
 <li><a href="#singleshot">Why does my single-shot query fail to return fix data?</a><br/>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
@@ -373,10 +374,27 @@ product=0×7523</code>.  Do not copy those hex numbers slavishly, they
 are examples.  To get the right numbers, you will need to dig up the
 vendor and product ID of your USB-serial converter device.</p>
 
+<h1 id="timelag">Why does GPS time lag wall time by 11-15 seconds?</h1>
+
+<p>Your GPS has dropped its leap-second offset.  Wait 20 minutes or
+so; the lag should go away.</p>
+
+<p>GPS satellites broadcast time using a clock without a leap-second
+correction. They broadcast a leap-second correction once each complete
+reporting cycle along with the satellite ephemerides; it's up to the
+GPS firmware to add that correction to the time it puts in reports.
+If your GPS has forgotten the current correction, you'll have to wait
+until the next ephemerides message for it.</p>
+
+<p>GPSes are supposed to retain the leap-second correction along with 
+the last fix in NVRAM when they power down, but we've observed that
+many seem prone to drop this information. All you can do is wait
+for the problem to resolve itself.</p>
+
 <h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
 
 <p>Note: The new protocol does not support single-shot queries at all &mdash;
-the race conditions aassociated wit them are intractable.  You should
+the race conditions associated wit them are intractable.  You should
 not rely on such commands.  Use the new protcol, preferably through
 a client libary, instead.</p>
 
