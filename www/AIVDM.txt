@@ -82,6 +82,12 @@ to me by email. He also communicated some critical information from
 <<IEC-PAS>>, and supplied information about new messages and fields in
 ITU-1371-3.
 
+Some of what this document explains about the quirks of real-world
+encoders comes from examples provided by Kurt Schwehr. Other such
+information, especially for the less common sentences, comes from
+inspection of sentences forwarded to me from <<<AISHUB>>> by various
+interested parties.
+
 == Improving This Document ==
 
 To avoid copyright difficulties, I rely only on freely redistributable
