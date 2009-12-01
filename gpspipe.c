@@ -132,7 +132,6 @@ static void usage(void)
 		  "-r Dump raw NMEA.\n"
 		  "-R Dump super-raw mode (GPS binary).\n"
 		  "-w Dump gpsd native data.\n"
-		  "-j Turn on server-side buffering.\n"
 		  "-l Sleep for ten seconds before connecting to gpsd.\n"
 		  "-t Time stamp the data.\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
@@ -165,7 +164,7 @@ int main( int argc, char **argv)
     char *filename = NULL;
 
     buf[0] = '\0';
-    while ((option = getopt(argc, argv, "?dlhrRwjtvVn:s:f:")) != -1) {
+    while ((option = getopt(argc, argv, "?dlhrRwtvVn:s:f:")) != -1) {
 	switch (option) {
 	case 'n':
 	    count = strtol(optarg, 0, 0);
@@ -191,9 +190,6 @@ int main( int argc, char **argv)
 	    break;
 	case 'w':
 	    (void)strlcat(buf, "w=1;", sizeof(buf));
-	    break;
-	case 'j':
-	    (void)strlcat(buf, "j=1;", sizeof(buf));
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
