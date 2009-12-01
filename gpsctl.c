@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
 	    gpsd_hexdump_level = debuglevel;
-	    gps_enable_debug(debuglevel, stdout);
+	    gps_enable_debug(debuglevel, stderr);
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "gpsctl at svn revision $Rev$\n");
@@ -365,12 +365,12 @@ int main(int argc, char **argv)
 				    device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
-		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%d\n", 
+		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%c\n", 
 			    gpsdata->dev.path,
 			    speed, parity, stopbits);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
+		gpsd_report(LOG_PROG, "%s change to %s%c%c succeeded\n", 
 			    gpsdata->dev.path,
 			    speed, parity, stopbits);
 	}
