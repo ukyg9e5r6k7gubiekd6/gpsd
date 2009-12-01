@@ -228,7 +228,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 		break;
 	
 	}
-	// gpsd only supports 8N1 or 7[OE]2
+	// gpsd only supports 8[NO]1 or 7[EO]2
 	// thus the strange us of stopbits
 	(void)nmea_send(session,
 			"$PSRF100,0,%d,%d,%d,%c",
