@@ -217,7 +217,9 @@ static void nmea_update(void)
 	}
 	last_tick = now;
 
-	if (strcmp(fields[0], "GPGSV") == 0) {
+	if (strcmp(fields[0], "GPGSV") == 0 
+	  || strcmp(fields[0], "GNGSV") == 0 
+	  || strcmp(fields[0], "GLGSV") == 0) {
 	    int i;
 	    int nsats = (session.gpsdata.satellites_visible < MAXSATS) ? session.gpsdata.satellites_visible : MAXSATS;
 
@@ -236,7 +238,9 @@ static void nmea_update(void)
 		(void)mvwaddch(satwin, MAXSATS+2, 18, ACS_DARROW);
 	}
 
-	if (strcmp(fields[0], "GPRMC") == 0) {
+	if (strcmp(fields[0], "GPRMC") == 0 
+	  || strcmp(fields[0], "GNRMC") == 0 
+	  || strcmp(fields[0], "GLRMC") == 0) {
 	    /* time, lat, lon, course, speed */
 	    (void)mvwaddstr(gprmcwin, 1, 12, fields[1]);
 	    (void)mvwprintw(gprmcwin, 2, 12, "%12s %s", fields[3], fields[4]);
@@ -251,7 +255,9 @@ static void nmea_update(void)
 	    cooked_pvt();	/* cooked version of PVT */
 	}
 
-	if (strcmp(fields[0], "GPGSA") == 0) {
+	if (strcmp(fields[0], "GPGSA") == 0 
+	  || strcmp(fields[0], "GNGSA") == 0 
+	  || strcmp(fields[0], "GLGSA") == 0) {
 	    char scr[128];
 	    int i;
 	    (void)mvwprintw(gpgsawin, 1,7, "%1s %s", fields[1], fields[2]);
@@ -275,7 +281,9 @@ static void nmea_update(void)
 	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]);
 	    monitor_fixframe(gpgsawin);
 	}
-	if (strcmp(fields[0], "GPGGA") == 0) {
+	if (strcmp(fields[0], "GPGGA") == 0 
+	  || strcmp(fields[0], "GNGGA") == 0 
+	  || strcmp(fields[0], "GLGGA") == 0) {
 	    (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
 	    (void)mvwprintw(gpggawin, 2, 12, "%-17s", fields[2]);
 	    (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
