@@ -376,8 +376,9 @@ vendor and product ID of your USB-serial converter device.</p>
 
 <h1 id="timelag">Why does GPS time lag wall time by 11-15 seconds?</h1>
 
-<p>Your GPS has dropped its leap-second offset.  Wait 20 minutes or
-so; the lag should go away.</p>
+<p>Your GPS may have dropped its leap-second offset.  You can tell you
+have this problem if your sentence timestamps look wrong at startup.
+Wait 20 minutes or so; the lag should go away.</p>
 
 <p>GPS satellites broadcast time using a clock without a leap-second
 correction. They broadcast a leap-second correction once each complete
@@ -386,10 +387,17 @@ GPS firmware to add that correction to the time it puts in reports.
 If your GPS has forgotten the current correction, you'll have to wait
 until the next ephemerides message for it.</p>
 
-<p>GPSes are supposed to retain the leap-second correction along with 
+<p>GPSes are supposed to retain the leap-second correction along with
 the last fix in NVRAM when they power down, but we've observed that
-many seem prone to drop this information. All you can do is wait
-for the problem to resolve itself.</p>
+many seem prone to occasionally drop this information. All you can do
+is wait for the problem to resolve itself.</p>
+
+<p>SiRF-based GPSes have a more specific timelag problem. 4800 is just
+a bit too slow for SiRF binary at full flood; the device can actually
+fail to ship all its reports before the next once-per-second fix,
+producing an accumulating stall.  The symptom of this is sentence times that
+look right at startup but gradually fall behind clock time.  To fix
+this, bump your speed to 9600 or higher.</p>
 
 <h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
 
