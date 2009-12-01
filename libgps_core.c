@@ -138,7 +138,7 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
 	       collect->status, status_values[collect->status]);
     if (collect->set & MODE_SET)
 	(void)fprintf(debugfp, "MODE: mode: %d (%s)\n",
-	   collect->set, mode_values[collect->fix.mode]);
+	   collect->fix.mode, mode_values[collect->fix.mode]);
     if (collect->set & DOP_SET)
 	(void)fprintf(debugfp, "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used,
