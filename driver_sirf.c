@@ -534,9 +534,13 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	        fudge = 0.704;
 		break;
 	    case 9600:
-	    case 19200:		/* unknown */
-	    case 38400:		/* unknown */
 	        fudge = 0.688;
+		break;
+	    case 19200:	
+	        fudge = 0.484;
+		break;
+	    case 38400:	
+	        fudge = 0.388;
 		break;
 	    }
 	    (void)ntpshm_put(session, session->gpsdata.fix.time, fudge);
