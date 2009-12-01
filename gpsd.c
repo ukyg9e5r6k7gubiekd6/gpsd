@@ -975,8 +975,10 @@ static void set_serial(struct gps_device_t *device,
 	}
     }
 
+    gpsd_report(LOG_PROG, "set_serial(,%d,%s) %c%d\n", speed, modestring,
+    	parity, stopbits);
     /* no support for other word sizes yet */
-    if (wordsize != (int)(9 - stopbits) && device->device_type->speed_switcher!=NULL)
+    if (wordsize == (int)(9 - stopbits) && device->device_type->speed_switcher!=NULL)
 	if (device->device_type->speed_switcher(device,
 						speed,
 						parity,
