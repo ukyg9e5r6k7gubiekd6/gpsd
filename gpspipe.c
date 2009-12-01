@@ -154,7 +154,10 @@ int main( int argc, char **argv)
     bool binary = false;
     bool sleepy = false;
     bool new_line = true;
+    bool raw = false;
+    bool watch = false;
     long count = -1;
+    bool nopipe = false;
     int option;
     unsigned int vflag = 0, l = 0;
     FILE * fp;
@@ -164,18 +167,26 @@ int main( int argc, char **argv)
     char *serialport = NULL;
     char *filename = NULL;
 
-    buf[0] = '\0';
-    while ((option = getopt(argc, argv, "?dlhrRwtvVn:s:f:")) != -1) {
+    (void)strlcpy(buf, "{\"class\"=\"WATCH\",", sizeof(buf));
+    while ((option = getopt(argc, argv, "?dlhrRwtvVn:Ns:f:")) != -1) {
 	switch (option) {
 	case 'n':
 	    count = strtol(optarg, 0, 0);
 	    break;
+	case 'N':	/* not documented - diagnotic option */
+	    nopipe = true;
+	    break;
 	case 'r':
-	    (void)strlcat(buf, "r=1;", sizeof(buf));
+	    /* 
+	     * Yes, -r invokes NMEA mode rather than proper raw mode.
+	     * This emulates the behavior under the old protocol.
+	     */
+	    raw = true;
+	    (void)strlcat(buf, "\"nmea\"=true,", sizeof(buf));
 	    break;
 	case 'R':
 	    binary=true;
-	    (void)strlcat(buf, "r=2;", sizeof(buf));
+	    (void)strlcat(buf, "\"raw\"=2,", sizeof(buf));
 	    break;
 	case 'd':
 	    daemon = true;
@@ -190,7 +201,8 @@ int main( int argc, char **argv)
 	    vflag++;
 	    break;
 	case 'w':
-	    (void)strlcat(buf, "w=1;", sizeof(buf));
+	    watch = true;
+	    (void)strlcat(buf, "\"enable\"=true,", sizeof(buf));
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n", 
@@ -210,7 +222,24 @@ int main( int argc, char **argv)
 	}
     }
 
-    if (serialport!=NULL && strstr(buf, "r=1")==NULL) {
+    /* Grok the server, port, and device. */
+    if (optind < argc) {
+	gpsd_source_spec(argv[optind], &source);
+    } else
+	gpsd_source_spec(NULL, &source);
+
+    if (source.device != NULL)
+	(void)snprintf(buf, sizeof(buf), "\"path\"=\"%s\",", source.device);
+
+    if (buf[strlen(buf)-1] == ',')
+	buf[strlen(buf)-1] = '\0';
+    (void)strlcat(buf, "}\r\n", sizeof(buf));
+
+    /* diagnostic option -- lets us see the generated initializartion command */
+    if (nopipe)
+	(void)fputs(buf, stdout);
+
+    if (serialport!=NULL && raw) {
 	(void)fprintf(stderr, "gpsipipe: use of '-s' requires '-r'.\n");
 	exit(1);
     }
@@ -220,20 +249,13 @@ int main( int argc, char **argv)
 	exit(1);
     }
 
-    if (strstr(buf, "r=")==NULL && strstr(buf, "w=1")==NULL) {
+    if (!raw && !watch) {
 	(void)fprintf(stderr, "gpspipe: one of '-R', '-r' or '-w' is required.\n");
 	exit(1);
     }
-    /* Grok the server, port, and device. */
-    if (optind < argc) {
-	gpsd_source_spec(argv[optind], &source);
-    } else
-	gpsd_source_spec(NULL, &source);
 
-    if (source.device != NULL) {
-	(void)strlcat(buf, "F=", sizeof(buf));
-	(void)strlcat(buf, source.device, sizeof(buf));
-    }
+    if (nopipe)
+	exit(0);
 
     /* Daemonize if the user requested it. */
     if (daemon)
