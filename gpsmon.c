@@ -46,6 +46,7 @@
 
 #include "gpsdclient.h"
 #include "gpsmon.h"
+#include "revision.h"
 
 #ifdef S_SPLINT_S
 extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
@@ -422,7 +423,7 @@ int main (int argc, char **argv)
 	    controlsock = optarg;
 	    break;
 	case 'V':
-	    (void)printf("gpsmon %s\n", VERSION);
+	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
 	    exit(0);
 	case 'l':		/* list known device types */
 	    (void) fputs("General commands available per type. '+' means there are private commands.\n", stdout);
