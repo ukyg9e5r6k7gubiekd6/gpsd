@@ -387,6 +387,13 @@ void gpsd_close(struct gps_device_t *session)
 	}
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;
+	/* keep the most recent baud rate */
+	/*@ ignore @*/
+	(void)cfsetispeed(&session->ttyset_old, 
+	    (speed_t)session->gpsdata.dev.baudrate);
+	(void)cfsetospeed(&session->ttyset_old, 
+	    (speed_t)session->gpsdata.dev.baudrate);
+	/*@ end @*/
 	(void)tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
 	(void)close(session->gpsdata.gps_fd);
 	session->gpsdata.gps_fd = -1;
