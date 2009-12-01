@@ -227,19 +227,19 @@ int main( int argc, char **argv)
      */
     (void)strlcpy(buf, "?WATCH={", sizeof(buf));
     if (watch)
-	(void)strlcat(buf, "\"enable\"=true,", sizeof(buf));
+	(void)strlcat(buf, "\"enable\":true,", sizeof(buf));
     else
-	(void)strlcat(buf, "\"enable\"=false,", sizeof(buf));
+	(void)strlcat(buf, "\"enable\":false,", sizeof(buf));
     if (raw)
 	/* 
 	 * Yes, -r invokes NMEA mode rather than proper raw mode.
 	 * This emulates the behavior under the old protocol.
 	 */
-	(void)strlcat(buf, "\"nmea\"=true,", sizeof(buf));
+	(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
     if (binary)
-	(void)strlcat(buf, "\"raw\"=2,", sizeof(buf));
+	(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
     if (source.device != NULL)
-	(void)snprintf(buf, sizeof(buf), "\"path\"=\"%s\",", source.device);
+	(void)snprintf(buf, sizeof(buf), "\"path\":\"%s\",", source.device);
     if (buf[strlen(buf)-1] == ',')
 	buf[strlen(buf)-1] = '\0';
     (void)strlcat(buf, "}\r\n", sizeof(buf));
