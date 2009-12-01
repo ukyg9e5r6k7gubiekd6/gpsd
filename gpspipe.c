@@ -167,7 +167,6 @@ int main( int argc, char **argv)
     char *serialport = NULL;
     char *filename = NULL;
 
-    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
     while ((option = getopt(argc, argv, "?dlhrRwtvVn:Ns:f:")) != -1) {
 	switch (option) {
 	case 'n':
@@ -177,16 +176,10 @@ int main( int argc, char **argv)
 	    nopipe = true;
 	    break;
 	case 'r':
-	    /* 
-	     * Yes, -r invokes NMEA mode rather than proper raw mode.
-	     * This emulates the behavior under the old protocol.
-	     */
 	    raw = true;
-	    (void)strlcat(buf, "\"nmea\"=true,", sizeof(buf));
 	    break;
 	case 'R':
 	    binary=true;
-	    (void)strlcat(buf, "\"raw\"=2,", sizeof(buf));
 	    break;
 	case 'd':
 	    daemon = true;
@@ -202,7 +195,6 @@ int main( int argc, char **argv)
 	    break;
 	case 'w':
 	    watch = true;
-	    (void)strlcat(buf, "\"enable\"=true,", sizeof(buf));
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n", 
@@ -228,9 +220,26 @@ int main( int argc, char **argv)
     } else
 	gpsd_source_spec(NULL, &source);
 
+    /*
+     * Assemble the initialization command. 
+     * FIXME: Should be done with a slightly enhanced gps_stream(),
+     * but we're in feature freeze.
+     */
+    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
+    if (watch)
+	(void)strlcat(buf, "\"enable\"=true,", sizeof(buf));
+    else
+	(void)strlcat(buf, "\"enable\"=false,", sizeof(buf));
+    if (raw)
+	/* 
+	 * Yes, -r invokes NMEA mode rather than proper raw mode.
+	 * This emulates the behavior under the old protocol.
+	 */
+	(void)strlcat(buf, "\"nmea\"=true,", sizeof(buf));
+    if (binary)
+	(void)strlcat(buf, "\"raw\"=2,", sizeof(buf));
     if (source.device != NULL)
 	(void)snprintf(buf, sizeof(buf), "\"path\"=\"%s\",", source.device);
-
     if (buf[strlen(buf)-1] == ',')
 	buf[strlen(buf)-1] = '\0';
     (void)strlcat(buf, "}\r\n", sizeof(buf));
