@@ -168,6 +168,8 @@ static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
 		     0x00,			/* byte 12: reserved pad */
 		     0x00, 0x00, 0xb0, 0xb3};
     /*@ -charint @*/
+    gpsd_report(LOG_PROG, "sirf_speed(%d,%c,%d)\n",
+	        speed, parity, stopbits);
 
     switch (parity) {
     case 'E':
