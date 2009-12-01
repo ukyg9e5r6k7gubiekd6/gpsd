@@ -167,7 +167,7 @@ int main( int argc, char **argv)
     char *serialport = NULL;
     char *filename = NULL;
 
-    (void)strlcpy(buf, "{\"class\"=\"WATCH\",", sizeof(buf));
+    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
     while ((option = getopt(argc, argv, "?dlhrRwtvVn:Ns:f:")) != -1) {
 	switch (option) {
 	case 'n':
