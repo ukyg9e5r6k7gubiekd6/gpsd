@@ -211,14 +211,31 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
+    char parity = 0;
     if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.dev.baudrate);
     } else if (mode == MODE_BINARY) {
+        switch ( session->gpsdata.dev.parity) {
+	default:
+	case 'N':
+		parity = '0';
+		break;
+	case 'O':
+		parity = '1';
+		break;
+	case 'E':
+		parity = '2';
+		break;
+	
+	}
+	// gpsd only supports 8N1 or 7[OE]2
+	// thus the strange us of stopbits
 	(void)nmea_send(session,
-			"$PSRF100,0,%d,%d,%d,0",
+			"$PSRF100,0,%d,%d,%d,%c",
 			session->gpsdata.dev.baudrate,
 			9-session->gpsdata.dev.stopbits,
-			session->gpsdata.dev.stopbits);
+			session->gpsdata.dev.stopbits,
+			parity);
 	(void)usleep(333);	/* guessed settling time */
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
