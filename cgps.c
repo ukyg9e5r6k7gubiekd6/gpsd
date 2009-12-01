@@ -115,6 +115,7 @@
 
 #include "gps.h"
 #include "gpsdclient.h"
+#include "revision.h"
 
 /*
  * FIXME: use here is a minor bug, should report epx and epy separately.
@@ -699,7 +700,8 @@ int main(int argc, char *argv[])
 	    silent_flag=true;
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+	    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
+			  VERSION, REVISION);
 	    exit(0);
 	case 'l':
 	    switch ( optarg[0] ) {

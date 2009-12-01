@@ -52,6 +52,7 @@
 #include "gpsd_config.h"
 #include "gps.h"
 #include "gpsdclient.h"
+#include "revision.h"
 
 /*
  * FIXME: use here is a minor bug, should report epx and epy separately.
@@ -1221,7 +1222,8 @@ altunits_ok:
 	while ((option = getopt(argc, argv, "Vd:hl:")) != -1) {
 		switch (option) {
 		case 'V':
-		    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+		    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
+				  VERSION, REVISION);
 		    exit(0);
 		case 'd':
 		    debug = atoi(optarg);

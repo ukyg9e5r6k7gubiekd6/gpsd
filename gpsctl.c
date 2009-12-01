@@ -17,6 +17,7 @@
 #include <signal.h>
 
 #include "gpsd.h"
+#include "revision.h"
 
 static int debuglevel;
 
@@ -202,7 +203,8 @@ int main(int argc, char **argv)
 	    gps_enable_debug(debuglevel, stderr);
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "gpsctl at svn revision $Rev$\n");
+	    (void)fprintf(stderr, "gpsctl: version %s (revision %s)\n",
+			  VERSION, REVISION);
 	    break;
 	case 'h':
 	default:

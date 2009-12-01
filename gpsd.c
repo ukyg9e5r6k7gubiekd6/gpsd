@@ -55,6 +55,7 @@
 #include "gpsd.h"
 #include "gps_json.h"
 #include "timebase.h"
+#include "revision.h"
 
 /*
  * The name of a tty device from which to pick up whatever the local
@@ -1847,7 +1848,7 @@ int main(int argc, char *argv[])
 	    pid_file = optarg;
 	    break;
 	case 'V':
-	    (void)printf("gpsd %s\n", VERSION);
+	    (void)printf("gpsd: %s (revision %s)\n", VERSION, REVISION);
 	    exit(0);
 	case 'h': case '?':
 	default:
@@ -2319,7 +2320,7 @@ int main(int argc, char *argv[])
 			    report_fix = true;
 #ifdef DBUS_ENABLE
 			if (report_fix)
-			    send_dbus_fix(channel);
+			    send_dbus_fix(channel->device);
 #endif /* DBUS_ENABLE */
 #ifdef OLDSTYLE_ENABLE
 			if (!newstyle(sub)) {
