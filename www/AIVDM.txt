@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.18, Nov 2009
+v1.19, Nov 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -82,11 +82,28 @@ to me by email. He also communicated some critical information from
 <<IEC-PAS>>, and supplied information about new messages and fields in
 ITU-1371-3.
 
+Should you set out to write a decoder using this document, you are
+likely to find that one of your challenges is finding enough AIS
+packet data to make an effective regression test -- especially if you
+live out of line of sight of any ship traffic and would get nothing
+from running an AIS receiver.  Fortunately, various AIS sites offer
+live feeds over the Internet that aggregate AIS streams from all over
+the world. Some charge subscriptions; others offer time-delayed access
+for free and charge for a real-time feed. Still others are pool sites;
+you join by contributing your feed and receive all feeds.
+
+AIS Hub (<<<AISHUB>>>) is a free, public AIS feed pool that is
+open-source friendly, offering a Linux port in source of its software
+for collecting and forwarding AIS data. Peter Stoyanov and the other
+AIS Hub principals have generously donated a live feed to the GPSD
+project despite the fact that I live 60 miles inland and cannot send
+them anything interesting.
+
 Some of what this document explains about the quirks of real-world
 encoders comes from examples provided by Kurt Schwehr. Other such
 information, especially for the less common sentences, comes from
-inspection of sentences forwarded to me from <<<AISHUB>>> by various
-interested parties.
+inspection of sentences forwarded to me from AIS Hub by various
+interested parties, and more recently from AIS Hub itself.
 
 == Improving This Document ==
 
@@ -1630,3 +1647,4 @@ description of type 14, and noted that type 25 and 26 have not
 been observed in the wild.  It also adds a more complete description
 of AIS data types and some pragmatics about spare and reserved fields.
 
+Version 1.19 adds a description of AIS Hub.
