@@ -598,17 +598,17 @@ Total of 168 bits, occupying one AIVDM sentence.
 The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 
 [frame="topbot",options="header"]
-|====================================================================================
+|==============================================================================
 |Field   |Len  |Description      |Member   |Units
 |0-5     |  6  |Message Type     |type     |Unsigned integer: 4
 |6-7     |  2  |Repeat Indicator |repeat   |Unknown
 |8-37    | 30  |MMSI             |mmsi     |Unsigned integer: 9 digits
-|38-51   | 14  |Year             |year     |UTC, 1-999, 0 = not available (default)
-|52-55   |  4  |Month            |month    |1-12; 0 = not available (default)
-|56-60   |  5  |Day              |day      |1-31; 0 = not available (default)
-|61-65   |  5  |Hour             |hour     |0-23; 24 = not available (default)
-|66-71   |  6  |Minute           |minute   |0-59; 60 = not available (default)
-|72-77   |  6  |Second           |second   |0-59; 60 = not available (default)
+|38-51   | 14  |Year             |year     |UTC, 1-999, 0 = N/A (default)
+|52-55   |  4  |Month            |month    |1-12; 0 = N/A (default)
+|56-60   |  5  |Day              |day      |1-31; 0 = N/A (default)
+|61-65   |  5  |Hour             |hour     |0-23; 24 = N/A (default)
+|66-71   |  6  |Minute           |minute   |0-59; 60 = N/A (default)
+|72-77   |  6  |Second           |second   |0-59; 60 = N/A (default)
 |78-78   |  1  |Fix quality      |accuracy |As in Common Navigation Block
 |79-106  | 28  |Longitude        |lon      |As in Common Navigation Block
 |107-133 | 27  |Latitude         |lat      |As in Common Navigation Block
@@ -616,7 +616,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |138-147 | 10  |Spare            |         |Not used
 |148-148 |  1  |RAIM flag        |raim     |As for common navigation block
 |149-167 | 19  |SOTDMA state     |radio    |As in same bits for Type 1
-|====================================================================================
+|==============================================================================
 
 .EPFD fix type codes
 [width="50%",frame="topbot",options="header"]
@@ -771,7 +771,7 @@ in length up to a maximum of 1008 bits (up to 5 AIVDM sentence
 payloads).
 
 [frame="topbot",options="header"]
-|====================================================================================
+|==============================================================================
 |Field   |Len |Description      |Member         |Units
 |0-5     |  6 |Message Type     |type           |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator |repeat         |As in Common Navigation Block
@@ -783,8 +783,8 @@ payloads).
 |71      |  1 |Spare            |               |Not used
 |72-87   | 16 |Application ID   |app_id         |Unsigned integer
 |88      |920 |Data             |data           |Binary data
-|        |    |                 |               |Field may be shorter than 920 bits.
-|====================================================================================
+|        |    |                 |               |May be shorter than 920 bits.
+|==============================================================================
 
 === Type 7: Binary Acknowledge ===
 
@@ -1134,14 +1134,14 @@ gathered automatically from sensors.
 |8-37     |30  |MMSI                   |mmsi         |Unsigned integer: 9 digits
 |38-45    | 8  |Regional Reserved      |reserved
 |
-|46-55    |10  |Speed Over Ground      |speed        |As in common navigation block
+|46-55    |10  |Speed Over Ground      |speed        |As in Common Navigation Block
 |56-56    | 1  |Position Accuracy      |accuracy     |See below
 |57-84    |28  |Longitude              |lon          |Minutes/10000 (as in CNB)
 |85-111   |27  |Latitude               |lat          |Minutes/10000 (as in CNB)
 |112-123  |12  |Course Over Ground     |course       |Relative to true north,
 |         |    |                       |             |units of 0.1 degrees
 |124-132  | 9  |True Heading           |heading      |0 to 359 degrees,
-|         |    |                       |             |511 = not available
+|         |    |                       |             |511 = N/A
 |133-138  | 6  |Time Stamp             |second       |Second of UTC timestamp.
 |139-142  | 4  |Regional reserved      |regional
 |
@@ -1152,11 +1152,11 @@ gathered automatically from sensors.
 |289-294  | 6  |Dimension to Port      |to_port      |Unsigned integer: Meters
 |295-297  | 6  |Dimension to Starboard |to_starboard |Unsigned integer: Meters
 |299-301  | 4  |Position Fix Type      |epfd         |As in Type 4 EPFD codes
-|302-303  | 1  |RAIM flag              |raim         |As for common navigation block
+|302-303  | 1  |RAIM flag              |raim         |As for Common Navigation Block
 |304-305  | 1  |DTE                    |dte          |0=Data terminal ready,
 |306-306  | 1  |Assigned mode flag     |assigned     |See <<IALA>> for details
 |307-311  | 5  |Spare                  |             |Unused, should be zero
-|===============================================================================
+|==============================================================================
 
 === Type 20 Data Link Management Message ===
 
@@ -1220,8 +1220,7 @@ and 360 bits.
 |249-252  | 4  |Type of EPFD           |epfd         |As in Message Type 4
 |253-258  | 6  |UTC Second             |second       |As in Message Type 5
 |259-259  | 1  |Off-Position Indicator |off_position |See Below
-|260-267  | 8  |Regional reserved      |regional
-|
+|260-267  | 8  |Regional reserved      |regional     |
 |268-268  | 1  |RAIM flag              |raim         |As in Common Navigation Block
 |269-269  | 1  |Virtual-aid flag       |virtual_aid  |See Below
 |270-270  | 1  |Assigned-mode flag     |assigned     |See <<IALA>> for details
