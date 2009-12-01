@@ -38,6 +38,7 @@
 #include <assert.h>
 #include "gpsd.h"
 #include "gpsdclient.h"
+#include "revision.h"
 
 static int fd_out = 1;		/* output initially goes to standard output */ 
 static void spinner(unsigned int, unsigned int);
@@ -49,47 +50,48 @@ static void spinner(unsigned int, unsigned int);
 static struct termios oldtio, newtio;
 static char serbuf[255];
 
+static void daemonize(void) 
 /* Daemonize me. */
-static void daemonize(void) {
-  int i;
-  pid_t pid;
+{
+    int i;
+    pid_t pid;
 
-  /* Run as my child. */
-  pid=fork();
-  if (pid == -1) exit(1); /* fork error */
-  if (pid>0) exit(0); /* parent exits */
+    /* Run as my child. */
+    pid=fork();
+    if (pid == -1) exit(1); /* fork error */
+    if (pid>0) exit(0); /* parent exits */
 
-  /* Obtain a new process group. */
-  (void)setsid();
+    /* Obtain a new process group. */
+    (void)setsid();
 
-  /* Close all open descriptors. */
-  for(i=getdtablesize();i>=0;--i)
-      (void)close(i);
+    /* Close all open descriptors. */
+    for(i=getdtablesize();i>=0;--i)
+	(void)close(i);
 
-  /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
-  i=open("/dev/null",O_RDWR);	/* STDIN */
-  /*@ -sefparams @*/
-  assert(dup(i) != -1); 	/* STDOUT */
-  assert(dup(i) != -1);		/* STDERR */
+    /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
+    i=open("/dev/null",O_RDWR);	/* STDIN */
+    /*@ -sefparams @*/
+    assert(dup(i) != -1); 	/* STDOUT */
+    assert(dup(i) != -1);		/* STDERR */
 
-  /* Know thy mask. */
-  (void)umask(0x033);
+    /* Know thy mask. */
+    (void)umask(0x033);
 
-  /* Run from a known spot. */
-  assert(chdir("/") != -1);
-  /*@ +sefparams @*/
+    /* Run from a known spot. */
+    assert(chdir("/") != -1);
+    /*@ +sefparams @*/
 
-  /* Catch child sig */
-  (void)signal(SIGCHLD,SIG_IGN);
+    /* Catch child sig */
+    (void)signal(SIGCHLD,SIG_IGN);
 
-  /* Ignore tty signals */
-  (void)signal(SIGTSTP,SIG_IGN);
-  (void)signal(SIGTTOU,SIG_IGN);
-  (void)signal(SIGTTIN,SIG_IGN);
+    /* Ignore tty signals */
+    (void)signal(SIGTSTP,SIG_IGN);
+    (void)signal(SIGTTOU,SIG_IGN);
+    (void)signal(SIGTTIN,SIG_IGN);
 }
 
-/* open the serial port and set it up */
 static void open_serial(char* device)
+/* open the serial port and set it up */
 {
     /* 
      * Open modem device for reading and writing and not as controlling
@@ -125,7 +127,6 @@ static void open_serial(char* device)
 static void usage(void)
 {
     (void)fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port[:device]]]\n\n"
-		  "SVN ID: $Id$ \n"
 		  "-d Run as a daemon.\n"
 		  "-f [file] Write output to file.\n"
 		  "-h Show this help.\n"
@@ -192,7 +193,8 @@ int main( int argc, char **argv)
 	    (void)strlcat(buf, "w=1;", sizeof(buf));
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
+	    (void)fprintf(stderr, "%s: %s (revision %s)\n", 
+			  argv[0], VERSION, REVISION);
 	    exit(0);
 	case 's':
 	    serialport = optarg;
