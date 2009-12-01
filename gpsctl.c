@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(gpsdata, 
-				    "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"serialmode\":\"8%c%c\"}\r\n", 
+				    "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c%\",\"stopbits\":\"%c\"}\r\n", 
 				    device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
