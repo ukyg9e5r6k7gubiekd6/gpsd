@@ -184,73 +184,74 @@ this encoding begin with "0" (64) and end with "w" (87); however, the
 intermediate range "X" (58) to "\_" (95) is not used.  
 
 .ASCII payload armoring
-`--------`-------`---------`-------
- Char    ASCII   Decimal   Bits
-"0"       48      0        000000
-"1"       49      1        000001
-"2"       50      2        000010
-"3"       51      3        000011
-"4"       52      4        000100
-"5"       53      5        000101
-"6"       54      6        000110
-"7"       55      7        000111
-"8"       56      8        001000
-"9"       57      9        001001
-":"       58     10        001010
-";"       59     11        001011
-"<"       60     12        001100
-"="       61     13        001101
-">"       62     14        001110
-"?"       63     15        001111
-"@"       64     16        010000
-"A"       65     17        010001
-"B"       66     18        010010
-"C"       67     19        010011
-"D"       68     20        010100
-"E"       69     21        010101
-"F"       70     22        010110
-"G"       71     23        010111
-"H"       72     24        011000
-"I"       73     25        011001
-"J"       74     26        011010
-"K"       75     27        011011
-"L"       76     28        011100
-"M"       77     29        011101
-"N"       78     30        011110
-"O"       79     31        011111
-"P"       80     32        100000
-"Q"       81     33        100001
-"R"       82     34        100010
-"S"       83     35        100011
-"T"       84     36        100100
-"U"       85     37        100101
-"V"       86     38        100110
-"W"       87     39        100111
-"`"       96     40        101000
-"a"       97     41        101001
-"b"       98     42        101010
-"c"       99     43        101011
-"d"      100     44        101100
-"e"      101     45        101101
-"f"      102     46        101110
-"g"      103     47        101111
-"h"      104     48        110000
-"i"      105     49        110001
-"j"      106     50        110010
-"k"      107     51        110011
-"l"      108     52        110100
-"m"      109     53        110101
-"n"      110     54        110110
-"o"      111     55        110111
-"p"      112     56        111000
-"q"      113     57        111001
-"r"      114     58        111010
-"s"      115     59        111011
-"t"      116     60        111100
-"u"      117     61        111101
-"v"      118     62        111110
-"w"      119     63        111111
----------------------------------------
+[width="25%",frame="topbot",options="header"]
+|======================================
+| Char    |ASCII   |Decimal   |Bits
+|"0"      | 48     | 0        |000000
+|"1"      | 49     | 1        |000001
+|"2"      | 50     | 2        |000010
+|"3"      | 51     | 3        |000011
+|"4"      | 52     | 4        |000100
+|"5"      | 53     | 5        |000101
+|"6"      | 54     | 6        |000110
+|"7"      | 55     | 7        |000111
+|"8"      | 56     | 8        |001000
+|"9"      | 57     | 9        |001001
+|":"      | 58     |10        |001010
+|";"      | 59     |11        |001011
+|"<"      | 60     |12        |001100
+|"="      | 61     |13        |001101
+|">"      | 62     |14        |001110
+|"?"      | 63     |15        |001111
+|"@"      | 64     |16        |010000
+|"A"      | 65     |17        |010001
+|"B"      | 66     |18        |010010
+|"C"      | 67     |19        |010011
+|"D"      | 68     |20        |010100
+|"E"      | 69     |21        |010101
+|"F"      | 70     |22        |010110
+|"G"      | 71     |23        |010111
+|"H"      | 72     |24        |011000
+|"I"      | 73     |25        |011001
+|"J"      | 74     |26        |011010
+|"K"      | 75     |27        |011011
+|"L"      | 76     |28        |011100
+|"M"      | 77     |29        |011101
+|"N"      | 78     |30        |011110
+|"O"      | 79     |31        |011111
+|"P"      | 80     |32        |100000
+|"Q"      | 81     |33        |100001
+|"R"      | 82     |34        |100010
+|"S"      | 83     |35        |100011
+|"T"      | 84     |36        |100100
+|"U"      | 85     |37        |100101
+|"V"      | 86     |38        |100110
+|"W"      | 87     |39        |100111
+|"`"      | 96     |40        |101000
+|"a"      | 97     |41        |101001
+|"b"      | 98     |42        |101010
+|"c"      | 99     |43        |101011
+|"d"      |100     |44        |101100
+|"e"      |101     |45        |101101
+|"f"      |102     |46        |101110
+|"g"      |103     |47        |101111
+|"h"      |104     |48        |110000
+|"i"      |105     |49        |110001
+|"j"      |106     |50        |110010
+|"k"      |107     |51        |110011
+|"l"      |108     |52        |110100
+|"m"      |109     |53        |110101
+|"n"      |110     |54        |110110
+|"o"      |111     |55        |110111
+|"p"      |112     |56        |111000
+|"q"      |113     |57        |111001
+|"r"      |114     |58        |111010
+|"s"      |115     |59        |111011
+|"t"      |116     |60        |111100
+|"u"      |117     |61        |111101
+|"v"      |118     |62        |111110
+|"w"      |119     |63        |111111
+|======================================
 
 Concatenate all six-bit quantities found in the payload, MSB first.
 This is the binary payload of the sentence.  
@@ -298,7 +299,7 @@ Indices into controlled vocabularies are numeric bitfields which
 must be interpreted using per-field string lists specified in the
 standards.
 
-Spare fields generally seem to have been inserted in order to put
+Spar fields generally seem to have been inserted in order to put
 certain field starts on 8-bit boundaries, and should be ignored.  Decoders
 should not, however, assume that spare fields will be all zeroes.
 
@@ -316,24 +317,26 @@ segments 32-63 map to characters " " (ASCII 32) though "?"  (ASCII
 63). Lowercase ASCII letters, the backtick, right and left curly
 brackets, pipe bar, tilde and DEL cannot be encoded.
 
-`------`---`------`------`---`--------------`------`---`-------`------`---`----
-000000  0  "@"    010000 16  "P"            100000 32  " "     110000 48  "0"
-000001  1  "A"    010001 17  "Q"            100001 33  "!"     110001 49  "1"
-000010  2  "B"    010010 18  "R"            100010 34  """     110010 50  "2"
-000011  3  "C"    010011 19  "S"            100011 35  "\#"    110011 51  "3"
-000100  4  "D"    010100 20  "T"            100100 36  "$"     110100 52  "4"
-000101  5  "E"    010101 21  "U"            100101 37  "%"     110101 53  "5"
-000110  6  "F"    010110 22  "V"            100110 38  "&"     110110 54  "6"
-000111  7  "G"    010111 23  "W"            100111 39  "\'"    110111 55  "7"
-001000  8  "H"    011000 24  "X"            101000 40  "("     111000 56  "8"
-001001  9  "I"    011001 25  "Y"            101001 41  ")"     111001 56  "9"
-001010 10  "J"    011010 26  "Z"            101010 42  "\*"    111010 58  ":"
-001011 11  "K"    011011 27  "["            101011 43  "\+"    111011 59  ";"
-001100 12  "L"    011100 28  "{backslash}"  101100 44  ","     111100 60  "<"
-001101 13  "M"    011101 29  "]"            101101 45  "-"     111101 61  "="
-001110 14  "N"    011110 30  "\^"           101110 46  "."     111110 62  ">"
-001111 15  "O"    011111 31  "\_"           101111 47  "/"     111111 63  "?"
------------------------------------------------------------------------------
+.Sixbit ASCII
+[width="25%",frame="topbot"]
+|==========================================================================================
+|000000 | 0  |"@"    |010000 |16  |"P"            |100000 |32  |" "     |110000 |48  |"0"
+|000001 | 1  |"A"    |010001 |17  |"Q"            |100001 |33  |"!"     |110001 |49  |"1"
+|000010 | 2  |"B"    |010010 |18  |"R"            |100010 |34  |"""     |110010 |50  |"2"
+|000011 | 3  |"C"    |010011 |19  |"S"            |100011 |35  |"\#"    |110011 |51  |"3"
+|000100 | 4  |"D"    |010100 |20  |"T"            |100100 |36  |"$"     |110100 |52  |"4"
+|000101 | 5  |"E"    |010101 |21  |"U"            |100101 |37  |"%"     |110101 |53  |"5"
+|000110 | 6  |"F"    |010110 |22  |"V"            |100110 |38  |"&"     |110110 |54  |"6"
+|000111 | 7  |"G"    |010111 |23  |"W"            |100111 |39  |"\'"    |110111 |55  |"7"
+|001000 | 8  |"H"    |011000 |24  |"X"            |101000 |40  |"("     |111000 |56  |"8"
+|001001 | 9  |"I"    |011001 |25  |"Y"            |101001 |41  |")"     |111001 |56  |"9"
+|001010 |10  |"J"    |011010 |26  |"Z"            |101010 |42  |"\*"    |111010 |58  |":"
+|001011 |11  |"K"    |011011 |27  |"["            |101011 |43  |"\+"    |111011 |59  |";"
+|001100 |12  |"L"    |011100 |28  |"{backslash}"  |101100 |44  |","     |111100 |60  |"<"
+|001101 |13  |"M"    |011101 |29  |"]"            |101101 |45  |"-"     |111101 |61  |"="
+|001110 |14  |"N"    |011110 |30  |"\^"           |101110 |46  |"."     |111110 |62  |">"
+|001111 |15  |"O"    |011111 |31  |"\_"           |101111 |47  |"/"     |111111 |63  |"?"
+|==========================================================================================
 
 According to the standard, trailing unused characters in six-bit
 fields will be represented by "@" (six-bit zero); however, real-world
@@ -361,34 +364,35 @@ The first 6 bits of the payload (0-5) are the message type.  Message
 types are as follows:
 
 .Message types
-`--`-------------------------------------------------
-01 Position Report Class A
-02 Position Report Class A (Assigned schedule)
-03 Position Report Class A (Response to interrogation)
-04 Base Station Report
-05 Ship and Voyage data
-06 Addressed Binary Message
-07 Binary Acknowledge
-08 Binary Broadcast Message
-09 Standard SAR Aircraft Position Report
-10 UTC and Date Inquiry
-11 UTC and Date Response
-12 Addressed Safety Related Message
-13 Safety Related Acknowledge
-14 Safety Related Broadcast Message
-15 Interrogation
-16 Assigned Mode Command
-17 GNSS Binary Broadcast Message
-18 Standard Class B CS Position Report
-19 Extended Class B Equipment Position Report
-20 Data Link Management
-21 Aid-to-Navigation Report
-22 Channel Management
-23 Group Assignment Command
-24 Class B CS Static Data Report 
-25 Binary Message, Single Slot
-26 Binary Message, Multiple Slot
------------------------------------------------------
+[width="50%",frame="topbot"]
+|======================================================
+|01 |Position Report Class A
+|02 |Position Report Class A (Assigned schedule)
+|03 |Position Report Class A (Response to interrogation)
+|04 |Base Station Report
+|05 |Ship and Voyage data
+|06 |Addressed Binary Message
+|07 |Binary Acknowledge
+|08 |Binary Broadcast Message
+|09 |Standard SAR Aircraft Position Report
+|10 |UTC and Date Inquiry
+|11 |UTC and Date Response
+|12 |Addressed Safety Related Message
+|13 |Safety Related Acknowledge
+|14 |Safety Related Broadcast Message
+|15 |Interrogation
+|16 |Assigned Mode Command
+|17 |GNSS Binary Broadcast Message
+|18 |Standard Class B CS Position Report
+|19 |Extended Class B Equipment Position Report
+|20 |Data Link Management
+|21 |Aid-to-Navigation Report
+|22 |Channel Management
+|23 |Group Assignment Command
+|24 |Class B CS Static Data Report
+|25 |Binary Message, Single Slot
+|26 |Binary Message, Multiple Slot
+|======================================================
 
 In normal operation, an AIS transceiver will send a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
@@ -444,55 +448,56 @@ navigational information; we'll call it the Common Navigation Block
 decoding software.
 
 .Common Navigation Block
-`-------`---`------------------------`--------`--------------------------------
-Field   Len Description              Member   Units
--------------------------------------------------------------------------------
-0-5      6  Message Type             type     Unsigned integer: 1-3
-6-7      2  Repeat Indicator         repeat   3 = "Do not repeat"; see below..
-8-37    30  MMSI                     mmsi     Unsigned integer: 9 digits
-38-41    4  Navigation Status        status   See table below
-42-49    8  Rate of Turn (ROT)       turn     Signed integer: see below
-50-59   10  Speed Over Ground (SOG)  speed    Unsigned integer: see below
-60-60    1  Position Accuracy        accuracy See below
-61-88   28  Longitude                lon      Minutes/10000 (see below)
-89-115  27  Latitude                 lat      Minutes/10000 (see below)
-116-127 12  Course Over Ground (COG) course   Relative to true north,
-                                              to 0.1 degree precision
-128-136  9  True Heading (HDG)       heading  0 to 359 degrees, 
-                                              511 = not available
-137-142  6  Time Stamp               second   Second of UTC timestamp
-143-144  2  Maneuver Indicator       maneuver See below
-145-147  3  Spare                    
-148-148  1  RAIM flag                raim     See below
-149-167 19  Radio status             radio    See below
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description              |Member   |Units
+|0-5     | 6  |Message Type             |type     |Unsigned integer: 1-3
+|6-7     | 2  |Repeat Indicator         |repeat   |See below...
+|8-37    |30  |MMSI                     |mmsi     |Unsigned integer: 9 digits
+|38-41   | 4  |Navigation Status        |status   |See table below
+|42-49   | 8  |Rate of Turn (ROT)       |turn     |Signed integer: see below
+|50-59   |10  |Speed Over Ground (SOG)  |speed    |Unsigned integer: see below
+|60-60   | 1  |Position Accuracy        |accuracy |See below
+|61-88   |28  |Longitude                |lon      |Minutes/10000 (see below)
+|89-115  |27  |Latitude                 |lat      |Minutes/10000 (see below)
+|116-127 |12  |Course Over Ground (COG) |course   |Relative to true north,
+|        |    |                         |         |to 0.1 degree precision
+|128-136 | 9  |True Heading (HDG)       |heading  |0 to 359 degrees,
+|        |    |                         |         |511 = not available
+|137-142 | 6  |Time Stamp               |second   |Second of UTC timestamp
+|143-144 | 2  |Maneuver Indicator       |maneuver |See below
+|145-147 | 3  |Spare                    |         |Not used
+|148-148 | 1  |RAIM flag                |raim     |See below
+|149-167 |19  |Radio status             |radio    |See below
+|==============================================================================
 
 The Repeat Indicator is a directive to an AIS transceiver that this
 message should be rebroadcast.  This was intended as a way of getting
 AIS messages around hills and other obstructions in coastal waters,
 but is little used as base station coverage is more effective.  It is
 intended that the bit be incremented on each retransmission, to a
-maximum of three hops.
+maximum of three hops. A vakue f 3 indicates "Do not repeat".
 
 .Navigation status codes
-`-`-------------------------------------------------------------
-0  Under way using engine  
-1  At anchor
-2  Not under command
-3  Restricted manoeuverability
-4  Constrained by her draught
-5  Moored
-6  Aground
-7  Engaged in Fishing
-8  Under way sailing
-9  Reserved for future amendment of Navigational Status for HSC
-10 Reserved for future amendment of Navigational Status for WIG
-11 Reserved for future use
-12 Reserved for future use
-13 Reserved for future use
-14 Reserved for future use
-15 Not defined (default)
----------------------------------------------------------------
+[width="50%",frame="topbot"]
+|=================================================================
+|0 | Under way using engine
+|1 | At anchor
+|2 | Not under command
+|3 | Restricted manoeuverability
+|4 | Constrained by her draught
+|5 | Moored
+|6 | Aground
+|7 | Engaged in Fishing
+|8 | Under way sailing
+|9 | Reserved for future amendment of Navigational Status for HSC
+|10| Reserved for future amendment of Navigational Status for WIG
+|11| Reserved for future use
+|12| Reserved for future use
+|13| Reserved for future use
+|14| Reserved for future use
+|15| Not defined (default)
+|=================================================================
 
 Turn rate is encoded as follows:
 
@@ -550,12 +555,12 @@ The interpretation of bits 143-147 has been a bit unstable. In
 <<IALA>>. and therefore in the original <<ITU1371>>, they were 
 described like this:
 
-`-------`---`------------------
-Field   Len Description        
--------------------------------
-143-145  3  Regional Reserved  
-146-147  2  Spare              
--------------------------------
+[width="50%",frame="topbot",options="header"]
+|=================================
+|Field   |Len |Description
+|143-145 | 3  |Regional Reserved
+|146-147 | 2  |Spare
+|=================================
 
 The interpretation of 143-144 as a special maneuver field is new in
 revision 3 of <<ITU1371>>.
@@ -575,41 +580,41 @@ Total of 168 bits, occupying one AIVDM sentence.
 
 The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 
-`-------`----`----------------`--------`----------------------------------------
-Field   Len  Description      Member   Units
---------------------------------------------------------------------------------
-0-5       6  Message Type     type     Unsigned integer: 4
-6-7       2  Repeat Indicator repeat   Unknown
-8-37     30  MMSI             mmsi     Unsigned integer: 9 digits
-38-51    14  Year             year     UTC, 1-999, 0 = not available (default)
-52-55     4  Month            month    1-12; 0 = not available (default)
-56-60     5  Day              day      1-31; 0 = not available (default)
-61-65     5  Hour             hour     0-23; 24 = not available (default)
-66-71     6  Minute           minute   0-59; 60 = not available (default)
-72-77     6  Second           second   0-59; 60 = not available (default)
-78-78     1  Fix quality      accuracy As in Common Navigation Block
-79-106   28  Longitude        lon      As in Common Navigation Block
-107-133  27  Latitude         lat      As in Common Navigation Block
-134-137   4  Type of EPFD     epfd     See below
-138-147  10  Spare                     Not used
-148-148   1  RAIM flag        raim     As for common navigation block
-149-167  19  SOTDMA state     radio    As in same bits for Type 1
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|====================================================================================
+|Field   |Len  |Description      |Member   |Units
+|0-5     |  6  |Message Type     |type     |Unsigned integer: 4
+|6-7     |  2  |Repeat Indicator |repeat   |Unknown
+|8-37    | 30  |MMSI             |mmsi     |Unsigned integer: 9 digits
+|38-51   | 14  |Year             |year     |UTC, 1-999, 0 = not available (default)
+|52-55   |  4  |Month            |month    |1-12; 0 = not available (default)
+|56-60   |  5  |Day              |day      |1-31; 0 = not available (default)
+|61-65   |  5  |Hour             |hour     |0-23; 24 = not available (default)
+|66-71   |  6  |Minute           |minute   |0-59; 60 = not available (default)
+|72-77   |  6  |Second           |second   |0-59; 60 = not available (default)
+|78-78   |  1  |Fix quality      |accuracy |As in Common Navigation Block
+|79-106  | 28  |Longitude        |lon      |As in Common Navigation Block
+|107-133 | 27  |Latitude         |lat      |As in Common Navigation Block
+|134-137 |  4  |Type of EPFD     |epfd     |See below
+|138-147 | 10  |Spare            |         |Not used
+|148-148 |  1  |RAIM flag        |raim     |As for common navigation block
+|149-167 | 19  |SOTDMA state     |radio    |As in same bits for Type 1
+|====================================================================================
 
 .EPFD fix type codes
-`----`----------------------------
-Code Position Fix Type
-----------------------------------
-0    Undefined (default)
-1    GPS
-2    GLONASS
-3    Combined GPS/GLONASS
-4    Loran-C
-5    Chayka
-6    Integrated navigation system
-7    Surveyed
-8    Galileo
-----------------------------------
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Position Fix Type
+|0    |Undefined (default)
+|1    |GPS
+|2    |GLONASS
+|3    |Combined GPS/GLONASS
+|4    |Loran-C
+|5    |Chayka
+|6    |Integrated navigation system
+|7    |Surveyed
+|8    |Galileo
+|===================================
 
 === Type 5: Ship static and voyage related data ===
 
@@ -619,33 +624,33 @@ In practice, the information in these fields (especially ETA and
 destination) is not reliable, as it has to be hand-updated by
 humans rather than gathered automatically from sensors.
 
-`-------`---`----------------------`------------`------------------------------
-Field   Len Description            Member       Encoding   
--------------------------------------------------------------------------------
-0-5       6 Message Type           type         Unsigned integer: 5
-6-7       2 Repeat Indicator       repeat       Message repeat count
-8-37     30 MMSI                   mmsi         Unsigned integer: 9 digits
-38-39     2 AIS Version            ais_version  0=<<ITU1371>>, 
-                                                1-3 = future editions
-40-69    30 IMO Number             imo          Unsigned IMO ship ID number
-70-111   42 Call Sign              callsign     7 six-bit characters
-112-231 120 Vessel Name            shipname     20 six-bit characters
-232-239   8 Ship Type              shiptype     See table below
-240-248   9 Dimension to Bow       to_bow       Unsigned integer: Meters
-249-257   9 Dimension to Stern     to_stern     Unsigned integer: Meters
-258-263   6 Dimension to Port      to_port      Unsigned integer: Meters
-264-269   6 Dimension to Starboard to_starboard Unsigned integer: Meters
-270-273   4 Position Fix Type      epfd         As in Type 4 EPSD codes
-274-277   4 ETA month              month        1-12, 0=not available (default)
-278-282   5 ETA day                day          1-31, 0=not available (default)
-283-287   5 ETA hour               hour         0-23, 24=not available (default)
-288-293   6 ETA minute             minute       0-59, 60=not available (default)
-294-301   8 Draught                draught      Unsigned integer: Meters/10
-302-421 120 Destination            destination  20 6-bit characters
-422-422   1 DTE                    dte          0=Data terminal ready, 
-                                                1=Not ready (default)
-423-423   1 Spare                               Not used
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description            |Member       |Encoding
+|0-5     |  6 |Message Type           |type         |Unsigned integer: 5
+|6-7     |  2 |Repeat Indicator       |repeat       |Message repeat count
+|8-37    | 30 |MMSI                   |mmsi         |Unsigned integer: 9 digits
+|38-39   |  2 |AIS Version            |ais_version  |0=<<ITU1371>>,
+|        |    |                       |             |1-3 = future editions
+|40-69   | 30 |IMO Number             |imo          |Unsigned IMO ship ID number
+|70-111  | 42 |Call Sign              |callsign     |7 six-bit characters
+|112-231 |120 |Vessel Name            |shipname     |20 six-bit characters
+|232-239 |  8 |Ship Type              |shiptype     |See table below
+|240-248 |  9 |Dimension to Bow       |to_bow       |Unsigned integer: Meters
+|249-257 |  9 |Dimension to Stern     |to_stern     |Unsigned integer: Meters
+|258-263 |  6 |Dimension to Port      |to_port      |Unsigned integer: Meters
+|264-269 |  6 |Dimension to Starboard |to_starboard |Unsigned integer: Meters
+|270-273 |  4 |Position Fix Type      |epfd         |As in Type 4 EPSD codes
+|274-277 |  4 |ETA month              |month        |1-12, 0=N/A (default)
+|278-282 |  5 |ETA day                |day          |1-31, 0=N/A (default)
+|283-287 |  5 |ETA hour               |hour         |0-23, 24=N/A (default)
+|288-293 |  6 |ETA minute             |minute       |0-59, 60=N/A (default)
+|294-301 |  8 |Draught                |draught      |Unsigned integer: Meters/10
+|302-421 |120 |Destination            |destination  |20 6-bit characters
+|422-422 |  1 |DTE                    |dte          |0=Data terminal ready,
+|        |    |                       |             |1=Not ready (default)
+|423-423 |  1 |Spare                  |             |Not used
+|==============================================================================
 
 Ship dimensions will be 0 if not available. For the dimensions to bow
 and stern, the special value 511 indicates 511 meters or greater; for
@@ -653,92 +658,92 @@ the dimensions to port and starboard, the special value 63 indicates
 63 meters or greater.
 
 .Codes for Ship Type
-`------`-----------------------------------------------------
-Code   Ship & Cargo Classification
--------------------------------------------------------------
-0      Not available (default)
-1-19   Reserved for future use
-20     Wing in ground (WIG), all ships of this type
-21     Wing in ground (WIG), Hazardous category A
-22     Wing in ground (WIG), Hazardous category B
-23     Wing in ground (WIG), Hazardous category C
-24     Wing in ground (WIG), Hazardous category D
-25     Wing in ground (WIG), Reserved for future use
-26     Wing in ground (WIG), Reserved for future use
-27     Wing in ground (WIG), Reserved for future use
-28     Wing in ground (WIG), Reserved for future use
-29     Wing in ground (WIG), Reserved for future use
-30     Fishing
-31     Towing
-32     Towing: length exceeds 200m or breadth exceeds 25m
-33     Dredging or underwater ops
-34     Diving ops
-35     Military ops
-36     Sailing
-37     Pleasure Craft
-38     Reserved
-39     Reserved
-40     High speed craft (HSC), all ships of this type
-41     High speed craft (HSC), Hazardous category A
-42     High speed craft (HSC), Hazardous category B
-43     High speed craft (HSC), Hazardous category C
-44     High speed craft (HSC), Hazardous category D
-45     High speed craft (HSC), Reserved for future use
-46     High speed craft (HSC), Reserved for future use
-47     High speed craft (HSC), Reserved for future use
-48     High speed craft (HSC), Reserved for future use
-49     High speed craft (HSC), No additional information
-50     Pilot Vessel
-51     Search and Rescue vessel
-52     Tug
-53     Port Tender
-54     Anti-pollution equipment
-55     Law Enforcement
-56     Spare - Local Vessel
-57     Spare - Local Vessel
-58     Medical Transport
-59     Ship according to RR Resolution No. 18
-60     Passenger, all ships of this type
-61     Passenger, Hazardous category A
-62     Passenger, Hazardous category B
-63     Passenger, Hazardous category C
-64     Passenger, Hazardous category D
-65     Passenger, Reserved for future use
-66     Passenger, Reserved for future use
-67     Passenger, Reserved for future use
-68     Passenger, Reserved for future use
-69     Passenger, No additional information
-70     Cargo, all ships of this type
-71     Cargo, Hazardous category A
-72     Cargo, Hazardous category B
-73     Cargo, Hazardous category C
-74     Cargo, Hazardous category D
-75     Cargo, Reserved for future use
-76     Cargo, Reserved for future use
-77     Cargo, Reserved for future use
-78     Cargo, Reserved for future use
-79     Cargo, No additional information
-80     Tanker, all ships of this type
-81     Tanker, Hazardous category A
-82     Tanker, Hazardous category B
-83     Tanker, Hazardous category C
-84     Tanker, Hazardous category D
-85     Tanker, Reserved for future use
-86     Tanker, Reserved for future use
-87     Tanker, Reserved for future use
-88     Tanker, Reserved for future use
-89     Tanker, No additional information
-90     Other Type, all ships of this type
-91     Other Type, Hazardous category A
-92     Other Type, Hazardous category B
-93     Other Type, Hazardous category C
-94     Other Type, Hazardous category D
-95     Other Type, Reserved for future use
-96     Other Type, Reserved for future use
-97     Other Type, Reserved for future use
-98     Other Type, Reserved for future use
-99     Other Type, no additional information
--------------------------------------------------------------
+[width="50%",frame="topbot",options="header"]
+|==============================================================
+|Code   |Ship & Cargo Classification
+|0      |Not available (default)
+|1-19   |Reserved for future use
+|20     |Wing in ground (WIG), all ships of this type
+|21     |Wing in ground (WIG), Hazardous category A
+|22     |Wing in ground (WIG), Hazardous category B
+|23     |Wing in ground (WIG), Hazardous category C
+|24     |Wing in ground (WIG), Hazardous category D
+|25     |Wing in ground (WIG), Reserved for future use
+|26     |Wing in ground (WIG), Reserved for future use
+|27     |Wing in ground (WIG), Reserved for future use
+|28     |Wing in ground (WIG), Reserved for future use
+|29     |Wing in ground (WIG), Reserved for future use
+|30     |Fishing
+|31     |Towing
+|32     |Towing: length exceeds 200m or breadth exceeds 25m
+|33     |Dredging or underwater ops
+|34     |Diving ops
+|35     |Military ops
+|36     |Sailing
+|37     |Pleasure Craft
+|38     |Reserved
+|39     |Reserved
+|40     |High speed craft (HSC), all ships of this type
+|41     |High speed craft (HSC), Hazardous category A
+|42     |High speed craft (HSC), Hazardous category B
+|43     |High speed craft (HSC), Hazardous category C
+|44     |High speed craft (HSC), Hazardous category D
+|45     |High speed craft (HSC), Reserved for future use
+|46     |High speed craft (HSC), Reserved for future use
+|47     |High speed craft (HSC), Reserved for future use
+|48     |High speed craft (HSC), Reserved for future use
+|49     |High speed craft (HSC), No additional information
+|50     |Pilot Vessel
+|51     |Search and Rescue vessel
+|52     |Tug
+|53     |Port Tender
+|54     |Anti-pollution equipment
+|55     |Law Enforcement
+|56     |Spare - Local Vessel
+|57     |Spare - Local Vessel
+|58     |Medical Transport
+|59     |Ship according to RR Resolution No. 18
+|60     |Passenger, all ships of this type
+|61     |Passenger, Hazardous category A
+|62     |Passenger, Hazardous category B
+|63     |Passenger, Hazardous category C
+|64     |Passenger, Hazardous category D
+|65     |Passenger, Reserved for future use
+|66     |Passenger, Reserved for future use
+|67     |Passenger, Reserved for future use
+|68     |Passenger, Reserved for future use
+|69     |Passenger, No additional information
+|70     |Cargo, all ships of this type
+|71     |Cargo, Hazardous category A
+|72     |Cargo, Hazardous category B
+|73     |Cargo, Hazardous category C
+|74     |Cargo, Hazardous category D
+|75     |Cargo, Reserved for future use
+|76     |Cargo, Reserved for future use
+|77     |Cargo, Reserved for future use
+|78     |Cargo, Reserved for future use
+|79     |Cargo, No additional information
+|80     |Tanker, all ships of this type
+|81     |Tanker, Hazardous category A
+|82     |Tanker, Hazardous category B
+|83     |Tanker, Hazardous category C
+|84     |Tanker, Hazardous category D
+|85     |Tanker, Reserved for future use
+|86     |Tanker, Reserved for future use
+|87     |Tanker, Reserved for future use
+|88     |Tanker, Reserved for future use
+|89     |Tanker, No additional information
+|90     |Other Type, all ships of this type
+|91     |Other Type, Hazardous category A
+|92     |Other Type, Hazardous category B
+|93     |Other Type, Hazardous category C
+|94     |Other Type, Hazardous category D
+|95     |Other Type, Reserved for future use
+|96     |Other Type, Reserved for future use
+|97     |Other Type, Reserved for future use
+|98     |Other Type, Reserved for future use
+|99     |Other Type, no additional information
+|==============================================================
 
 === Type 6: Addressed Binary Message ===
 
@@ -748,21 +753,21 @@ system use this payload for local extension messages. It is variable
 in length up to a maximum of 1008 bits (up to 5 AIVDM sentence
 payloads).
 
-`-------`---`----------------`--------------`-----------------------------------
-Field   Len Description      Member         Units
---------------------------------------------------------------------------------
-0-5       6 Message Type     type           Unsigned integer: 6
-6-7       2 Repeat Indicator repeat         As in Common Navigation Block
-8-37     30 Source MMSI      mmsi           Unsigned integer: 9 digits
-38-39     2 Sequence Number  seqno          Unsigned integer 0-3
-40-69    30 Destination MMSI dest_mmsi      Unsigned integer: 9 digits
-70        1 Retransmit flag  retransmit     0 = no retransmission (default)
-                                            1 = retransmitted
-71        1 Spare                           Not used
-72-87    16 Application ID   app_id         Unsigned integer
-88      920 Data             data           Binary data
-                                            Field may be shorter than 920 bits.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|====================================================================================
+|Field   |Len |Description      |Member         |Units
+|0-5     |  6 |Message Type     |type           |Unsigned integer: 6
+|6-7     |  2 |Repeat Indicator |repeat         |As in Common Navigation Block
+|8-37    | 30 |Source MMSI      |mmsi           |Unsigned integer: 9 digits
+|38-39   |  2 |Sequence Number  |seqno          |Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI |dest_mmsi      |Unsigned integer: 9 digits
+|70      |  1 |Retransmit flag  |retransmit     |0 = no retransmission (default)
+|        |    |                 |               |1 = retransmitted
+|71      |  1 |Spare            |               |Not used
+|72-87   | 16 |Application ID   |app_id         |Unsigned integer
+|88      |920 |Data             |data           |Binary data
+|        |    |                 |               |Field may be shorter than 920 bits.
+|====================================================================================
 
 === Type 7: Binary Acknowledge ===
 
@@ -770,22 +775,22 @@ Message type 7 is a receipt acknowledgement to the senders of a
 previous messages of type 6.  Total length varies between 72 and 168
 bits depending on the number of destination MMSIs included.
 
-`-------`---`----------------`--------`-----------------------------------------
-Field   Len Description      Member   Units
---------------------------------------------------------------------------------
-0-5       6 Message Type     type     Unsigned integer: 7
-6-7       2 Repeat Indicator repeat   As in Common Navigation Block
-8-37     30 Source MMSI      mmsi     Unsigned integer: 9 digits
-38-39     2 Spare                     Not used
-40-69    30 MMSI number 1    mmsi1    Unsigned integer: 9 digits
-70-71     2 Spare                     Not used
-62-101   30 MMSI number 2    mmsi2    Unsigned integer: 9 digits
-102-103   2 Spare                     Not used
-104-133  30 MMSI number 3    mmsi3    Unsigned integer: 9 digits
-134-135   2 Spare                     Not used
-136-165  30 MMSI number 4    mmsi4    Unsigned integer: 9 digits
-166-167   2 Spare                     Not used
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description      |Member   |Units
+|0-5     |  6 |Message Type     |type     |Unsigned integer: 7
+|6-7     |  2 |Repeat Indicator |repeat   |As in Common Navigation Block
+|8-37    | 30 |Source MMSI      |mmsi     |Unsigned integer: 9 digits
+|38-39   |  2 |Spare            |         |Not used
+|40-69   | 30 |MMSI number 1    |mmsi1    |Unsigned integer: 9 digits
+|70-71   |  2 |Spare            |         |Not used
+|62-101  | 30 |MMSI number 2    |mmsi2    |Unsigned integer: 9 digits
+|102-103 |  2 |Spare            |         |Not used
+|104-133 | 30 |MMSI number 3    |mmsi3    |Unsigned integer: 9 digits
+|134-135 |  2 |Spare            |         |Not used
+|136-165 | 30 |MMSI number 4    |mmsi4    |Unsigned integer: 9 digits
+|166-167 |  2 |Spare            |         |Not used
+|==============================================================================
 
 === Type 8: Binary Broadcast Message ===
 
@@ -794,44 +799,45 @@ The St. Lawrence Seaway AIS system and the USG PAWSS system use this
 payload for local extension messages. It is variable in length up to a
 maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
-`-------`---`-----------------`--------------`---------------------------------
-Field   Len Description       Member         Units
--------------------------------------------------------------------------------
-0-5       6 Message Type      type           Unsigned integer: 8
-6-7       2 Repeat Indicator  repeat         As in Common Navigation Block
-8-37     30 Source MMSI       mmsi           Unsigned integer: 9 digits
-38-39     2 Spare                            Not used
-40-55    16 Application ID    app_id         Unsigned integer
-56      952 Data              data           Binary data
-                                             Field may be shorter than 952 bits.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description       |Member         |Units
+|0-5     |  6 |Message Type      |type           |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator  |repeat         |As in Common Navigation Block
+|8-37    | 30 |Source MMSI       |mmsi           |Unsigned integer: 9 digits
+|38-39   |  2 |Spare             |               |Not used
+|40-55   | 16 |Application ID    |app_id         |Unsigned integer
+|56      |952 |Data              |data           |Binary data
+|        |    |                  |               |May be shorter than 952 bits.
+|==============================================================================
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
 Tracking information for search-and-rescue aircraft.  Total number of
 bits is 168.
 
-`-------`---`------------------`----------`------------------------------------
-Field   Len Description        Member     Encoding   
--------------------------------------------------------------------------------
-0-5      6  Message Type       type       Unsigned integer: 9
-6-7      2  Repeat Indicator   repeat     As in Common Navigation Block
-8-37    30  MMSI               mmsi       Unsigned integer: 9 digits
-38-49   12  Altitude           alt        Unsigned integer: See below
-50-59   10  SOG                speed      Unsigned integer: See below
-60-60    1  Position Accuracy  accuracy   See below
-61-88   28  Longitude          lon        Minutes/10000 (as in CNB)
-89-115  27  Latitude           lat        Minutes/10000 (as in CNB)
-116-127 12  Course Over Ground course     Relative to true north to 0.1 degree
-128-133  6  Time Stamp         second     Unsigned integer: UTC second.
-134-141  8  Regional reserved  regional
-142-142  1  DTE                dte        0=Data terminal ready, 
-                                          1=Data terminal not ready (default)
-143-145  3  Spare                         Not used
-146-146  1  Assigned           assigned   Assigned-mode flag
-147-147  1  RAIM flag          raim       As for common navigation block
-148-167 19  Radio status       radio      See <<IALA>> for details.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member     |Encoding
+|0-5     | 6  |Message Type       |type       |Unsigned integer: 9
+|6-7     | 2  |Repeat Indicator   |repeat     |As in Common Navigation Block
+|8-37    |30  |MMSI               |mmsi       |Unsigned integer: 9 digits
+|38-49   |12  |Altitude           |alt        |Unsigned integer: See below
+|50-59   |10  |SOG                |speed      |Unsigned integer: See below
+|60-60   | 1  |Position Accuracy  |accuracy   |See below
+|61-88   |28  |Longitude          |lon        |Minutes/10000 (as in CNB)
+|89-115  |27  |Latitude           |lat        |Minutes/10000 (as in CNB)
+|116-127 |12  |Course Over Ground |course     |Relative to true north to 0.1 degree
+|128-133 | 6  |Time Stamp         |second     |Unsigned integer: UTC second.
+|134-141 | 8  |Regional reserved  |regional
+|
+|142-142 | 1  |DTE                |dte        |0=Data terminal ready,
+|        |    |                   |           |1=Data terminal not ready (default)
+|143-145 | 3  |Spare              |           |Not used
+|146-146 | 1  |Assigned           |assigned   |Assigned-mode flag
+|147-147 | 1  |RAIM flag          |raim       |As for common navigation block
+|148-167 |19  |Radio status       |radio      |See <<IALA>> for details.
+|==============================================================================
 
 Altitude is in meters.  The special value 4095 indicates altitude is
 not available; 4094 indicates 4094 meters or higher.
@@ -850,16 +856,16 @@ values as in the common navigation block, but is at a different offset.
 Request for UTC/Date information from an AIS base station. Total
 number of bits is 72.
 
-`-------`---`------------------`----------`------------------------------------
-Field   Len Description        Member     Encoding   
--------------------------------------------------------------------------------
-0-5      6  Message Type       type       Unsigned integer: 9
-6-7      2  Repeat Indicator   repeat     As in Common Navigation Block
-8-37    30  Source MMSI        mmsi       Unsigned integer: 9 digits
-38-39    2  Spare                         Not used
-40-69   30  Destination MMSI   dest_mmsi  Unsigned integer: 9 digits
-70-71    2  Spare                         Not used
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member     |Encoding
+|0-5     | 6  |Message Type       |type       |Unsigned integer: 9
+|6-7     | 2  |Repeat Indicator   |repeat     |As in Common Navigation Block
+|8-37    |30  |Source MMSI        |mmsi       |Unsigned integer: 9 digits
+|38-39   | 2  |Spare              |           |Not used
+|40-69   |30  |Destination MMSI   |dest_mmsi  |Unsigned integer: 9 digits
+|70-71   | 2  |Spare              |           |Not used
+|==============================================================================
 
 === Type 11: UTC/Date Response ===
 
@@ -871,20 +877,20 @@ This is a point-to-point text message.  The payload is interpreted as
 six-bit text.  This message is variable in length up to a maximum of
 1008 bits (up to 5 AIVDM sentence payloads).
 
-`-------`---`------------------`-----------`-----------------------------------
-Field   Len Description        Member      Units
--------------------------------------------------------------------------------
-0-5       6 Message Type       type        Unsigned integer: 12
-6-7       2 Repeat Indicator   repeat      As in Common Navigation Block
-8-37     30 Source MMSI        mmsi        Unsigned integer: 9 digits
-38-39     2 Sequence Number    seqno       Unsigned integer 0-3
-40-69    30 Destination MMSI   dest_mmsi   Unsigned integer: 9 digits
-70        1 Retransmit flag    retransmit  0 = no retransmission (default)
-                                           1 = retransmitted
-71        1 Spare                          Not used
-72      936 Text               text        1-156 chars of six-bit encoded text.
-                                           Field may be shorter than 936 bits.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member      |Units
+|0-5     |  6 |Message Type       |type        |Unsigned integer: 12
+|6-7     |  2 |Repeat Indicator   |repeat      |As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi        |Unsigned integer: 9 digits
+|38-39   |  2 |Sequence Number    |seqno       |Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI   |dest_mmsi   |Unsigned integer: 9 digits
+|70      |  1 |Retransmit flag    |retransmit  |0 = no retransmission (default)
+|        |    |                   |            |1 = retransmitted
+|71      |  1 |Spare              |            |Not used
+|72      |936 |Text               |text        |1-156 chars of six-bit text.
+|        |    |                   |            |May be shorter than 936 bits.
+|==============================================================================
 
 Pragmatic note: On <<<AISHUB>>> he actual content of these messages is
 highly variable, ranging from fairly plain English ("PLEASE REPORT TO
@@ -909,16 +915,16 @@ This is a broadcast text message.  The payload is interpreted as
 six-bit text.  This message is variable in length up to a maximum of
 1008 bits (up to 5 AIVDM sentence payloads).
 
-`-------`---`------------------`---------`-------------------------------------
-Field   Len Description        Member    Units
--------------------------------------------------------------------------------
-0-5       6 Message Type       type      Unsigned integer: 14
-6-7       2 Repeat Indicator   repeat    As in Common Navigation Block
-8-37     30 Source MMSI        mmsi      Unsigned integer: 9 digits
-38-39     2 Spare                        Not used
-40      968 Text               text      1-161 chars of six-bit encoded text.
-                                         Field may be shorter than 968 bits.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member    |Units
+|0-5     |  6 |Message Type       |type      |Unsigned integer: 14
+|6-7     |  2 |Repeat Indicator   |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare              |          |Not used
+|40      |968 |Text               |text      |1-161 chars of six-bit text.
+|        |    |                   |          |May be shorter than 968 bits.
+|==============================================================================
 
 Note: There may be an error in the standards.  161 * 6 = 966, not 968,
 but 968 is the figure given in <<<IALA>>>.
@@ -937,25 +943,25 @@ analysis of information flow in an AIS station network.  The "slot offset"
 members are a request for the response to interrogation to occupy
 a particular time division in the TDMA packet layer.
 
-`-------`---`-------------------`---------`-------------------------------------
-Field   Len Description         Member    Units
---------------------------------------------------------------------------------
-0-5       6 Message Type        type      Unsigned integer: 15
-6-7       2 Repeat Indicator    repeat    As in Common Navigation Block
-8-37     30 Source MMSI         mmsi      Unsigned integer: 9 digits
-38-39     2 Spare                         Not used
-40-69    30 Interrogated MMSI   mmsi1     Unsigned integer: 9 digits
-70-75     6 First message type  type1_1   Unsigned integer
-76-87    12 First slot offset   offset1_1 Unsigned integer
-88-89     2 Spare                         Not used
-90-95     6 Second message type type1_2   Unsigned integer
-96-107   12 Second slot offset  offset1_2 Unsigned integer
-108-109   2 Spare                         Not used
-110-139  30 Interrogated MMSI   mmsi2     Unsigned integer: 9 digits
-140-145   6 First message type  type2_1   Unsigned integer
-146-157  12 First slot offset   offset2_1 Unsigned integer
-158-159   2 Spare                         Not used
-------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description         |Member    |Units
+|0-5     |  6 |Message Type        |type      |Unsigned integer: 15
+|6-7     |  2 |Repeat Indicator    |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare               |          |Not used
+|40-69   | 30 |Interrogated MMSI   |mmsi1     |Unsigned integer: 9 digits
+|70-75   |  6 |First message type  |type1_1   |Unsigned integer
+|76-87   | 12 |First slot offset   |offset1_1 |Unsigned integer
+|88-89   |  2 |Spare               |          |Not used
+|90-95   |  6 |Second message type |type1_2   |Unsigned integer
+|96-107  | 12 |Second slot offset  |offset1_2 |Unsigned integer
+|108-109 |  2 |Spare               |          |Not used
+|110-139 | 30 |Interrogated MMSI   |mmsi2     |Unsigned integer: 9 digits
+|140-145 |  6 |First message type  |type2_1   |Unsigned integer
+|146-157 | 12 |First slot offset   |offset2_1 |Unsigned integer
+|158-159 |  2 |Spare               |          |Not used
+|==============================================================================
 
 There are four use cases for this message.  A decoder must dispatch on
 the length of the data packet to determine which it is seeing:
@@ -990,20 +996,20 @@ be transmitted.  It is probably not of interest unless you are
 studying the internal operation of an AIS base station network.
 Length may be 96 or 144 bits.
 
-`-------`---`-------------------`----------`------------------------------------
-Field   Len Description         Member     Units
---------------------------------------------------------------------------------
-0-5       6 Message Type        type       Unsigned integer: 16
-6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
-8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
-38-39     2 Spare                          Not used
-40-69    30 Destination A MMSI  mmsi1      Unsigned integer: 9 digits
-70-81    12 Offset A            offset1    See <<IALA>>
-82-91    10 Increment A         increment1 See <<IALA>>
-92-121   30 Destination B MMSI  mmsi2      Unsigned integer: 9 digits
-122-133  12 Offset B            offset2    See <<IALA>>
-134-143  10 Increment B         increment2 See <<IALA>>
-------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|============================================================================
+|Field   |Len |Description         |Member     |Units
+|0-5     |  6 |Message Type        |type       |Unsigned integer: 16
+|6-7     |  2 |Repeat Indicator    |repeat     |As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi       |Unsigned integer: 9 digits
+|38-39   |  2 |Spare               |           |Not used
+|40-69   | 30 |Destination A MMSI  |mmsi1      |Unsigned integer: 9 digits
+|70-81   | 12 |Offset A            |offset1    |See <<IALA>>
+|82-91   | 10 |Increment A         |increment1 |See <<IALA>>
+|92-121  | 30 |Destination B MMSI  |mmsi2      |Unsigned integer: 9 digits
+|122-133 | 12 |Offset B            |offset2    |See <<IALA>>
+|134-143 | 10 |Increment B         |increment2 |See <<IALA>>
+|=============================================================================
 
 If the message is 96 bits long, it should be interpreted as an
 assignment for a single station (92 bits) followed by 4 bits of
@@ -1024,18 +1030,17 @@ The data in the payload is intended to be passed directly to GPS
 receivers capable of accepting such corrections. 80 to 816 bits
 depending on payload size.
 
-`-------`---`-------------------`----------`------------------------------------
-Field   Len Description         Member     Units
---------------------------------------------------------------------------------
-0-5       6 Message Type        type       Unsigned integer: 16
-6-7       2 Repeat Indicator    repeat     As in Common Navigation Block
-8-37     30 Source MMSI         mmsi       Unsigned integer: 9 digits
-38-39     2 Spare                          Not used
-40-57    18 Longitude           lon        Minutes/10
-58-74    17 Latitude            lat        Minutes/10
-75-79     5 Spare                          Not used - reserved
-80-815  736 Payload             data       DGNSS correction data
-------------------------------------------------------------------------------
+|==============================================================================
+|Field   |Len |Description         |Member     |Units
+|0-5     |  6 |Message Type        |type       |Unsigned integer: 16
+|6-7     |  2 |Repeat Indicator    |repeat     |As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi       |Unsigned integer: 9 digits
+|38-39   |  2 |Spare               |           |Not used
+|40-57   | 18 |Longitude           |lon        |Minutes/10
+|58-74   | 17 |Latitude            |lat        |Minutes/10
+|75-79   |  5 |Spare               |           |Not used - reserved
+|80-815  |736 |Payload             |data       |DGNSS correction data
+|==============================================================================
 
 Nore that latitude and longitude are in units of a tenth of a minute;
 sign interpretation and out-of-band values are as in the Common
@@ -1058,37 +1063,39 @@ communicated by Kurt Schwehr.  Kurt warns that "the spec does not do a
 good job of explaining these fields... I don't think that I totally
 understand these fields."
 
-`-------`---`------------------`---------`-------------------------------------
-Field   Len Description        Member    Units
--------------------------------------------------------------------------------
-0-5      6  Message Type       type      Unsigned integer: 18
-6-7      2  Repeat Indicator   repeat    As in Common Navigation Block
-8-37    30  MMSI               mmsi      Unsigned integer: 9 digits
-38-45    8  Regional Reserved  reserved
-46-55   10  Speed Over Ground  speed     As in common navigation block
-56-56    1  Position Accuracy  accuracy  See below
-57-84   28  Longitude          lon       Minutes/10000 (as in CNB)
-85-111  27  Latitude           lat       Minutes/10000 (as in CNB)
-112-123 12  Course Over Ground course    Relative to true north to 0.1 degree
-124-132  9  True Heading       heading   0 to 359 degrees, 511 = not available
-133-138  6  Time Stamp         second    Second of UTC timestamp.
-139-140  2  Regional reserved  regional
-141-141  1  CS Unit            cs        0=Class B SOTDMA unit
-                                         1=Class B CS (Carrier Sense) unit
-142-142  1  Display flag       display   0=No visual display, 1=Has display
-                                         (Probably not reliable.)
-143-143  1  DSC Flag           dsc       If 1, unit is attached to a VHF
-                                         voice radio with DSC capability.
-144-144  1  Band flag          band      Base stations can command units
-                                         to switch frequency.  If this flag
-                                         is 1, the unit can use any part
-				         of the marine channel
-145-145  1  Message 22 flag    msg22     If 1, unit can accept a channel
-                                         assignment via Message Type 22.
-146-146  1  Assigned           assigned  Assigned-mode flag
-147-147  1  RAIM flag          raim      As for common navigation block
-148-167 20  Radio status       radio     See <<IALA>> for details.
--------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member    |Units
+|0-5     | 6  |Message Type       |type      |Unsigned integer: 18
+|6-7     | 2  |Repeat Indicator   |repeat    |As in Common Navigation Block
+|8-37    |30  |MMSI               |mmsi      |Unsigned integer: 9 digits
+|38-45   | 8  |Regional Reserved  |reserved
+|
+|46-55   |10  |Speed Over Ground  |speed     |As in common navigation block
+|56-56   | 1  |Position Accuracy  |accuracy  |See below
+|57-84   |28  |Longitude          |lon       |Minutes/10000 (as in CNB)
+|85-111  |27  |Latitude           |lat       |Minutes/10000 (as in CNB)
+|112-123 |12  |Course Over Ground |course    |Relative to true north to 0.1 degree
+|124-132 | 9  |True Heading       |heading   |0 to 359 degrees, 511 = N/A
+|133-138 | 6  |Time Stamp         |second    |Second of UTC timestamp.
+|139-140 | 2  |Regional reserved  |regional
+|
+|141-141 | 1  |CS Unit            |cs        |0=Class B SOTDMA unit
+|        |    |                   |          |1=Class B CS (Carrier Sense) unit
+|142-142 | 1  |Display flag       |display   |0=No visual display, 1=Has display
+|        |    |                   |          |(Probably not reliable.)
+|143-143 | 1  |DSC Flag           |dsc       |If 1, unit is attached to a VHF
+|        |    |                   |          |voice radio with DSC capability.
+|144-144 | 1  |Band flag          |band      |Base stations can command units
+|        |    |                   |          |to switch frequency.  If this flag
+|        |    |                   |          |is 1, the unit can use any part
+|        |    |                   |          |of the marine channel.
+|145-145 | 1  |Message 22 flag    |msg22     |If 1, unit can accept a channel
+|        |    |                   |          |assignment via Message Type 22.
+|146-146 | 1  |Assigned           |assigned  |Assigned-mode flag
+|147-147 | 1  |RAIM flag          |raim      |As for common navigation block
+|148-167 |20  |Radio status       |radio     |See <<IALA>> for details.
+|==============================================================================
 
 === Type 19: Extended Class B CS Position Report ===
 
@@ -1102,35 +1109,37 @@ In practice, the information in the ship name and dimension fields is
 not reliable, as it has to be hand-entered by humans rather than
 gathered automatically from sensors.
 
-`--------`---`----------------------`-------------`-----------------------------
-Field    Len Description            Member        Units
---------------------------------------------------------------------------------
-0-5       6  Message Type           type          Unsigned integer: 19
-6-7       2  Repeat Indicator       repeat        As in Common Navigation Block
-8-37     30  MMSI                   mmsi          Unsigned integer: 9 digits
-38-45     8  Regional Reserved      reserved
-46-55    10  Speed Over Ground      speed         As in common navigation block
-56-56     1  Position Accuracy      accuracy      See below
-57-84    28  Longitude              lon           Minutes/10000 (as in CNB)
-85-111   27  Latitude               lat           Minutes/10000 (as in CNB)
-112-123  12  Course Over Ground     course        Relative to true north,
-                                                  units of 0.1 degrees0.1 degree
-124-132   9  True Heading           heading       0 to 359 degrees, 
-                                                  511 = not available
-133-138   6  Time Stamp             second        Second of UTC timestamp.
-139-142   4  Regional reserved      regional
-143-262 120  Name                   shipname      20 6-bit characters 
-263-270   8  Type of ship and cargo shiptype      As in Message 5
-271-279   9  Dimension to Bow       to_bow        Unsigned integer: Meters
-280-288   9  Dimension to Stern     to_stern      Unsigned integer: Meters
-289-294   6  Dimension to Port      to_port       Unsigned integer: Meters
-295-297   6  Dimension to Starboard to_starboard  Unsigned integer: Meters
-299-301   4  Position Fix Type      epfd          As in Type 4 EPFD codes
-302-303   1  RAIM flag              raim          As for common navigation block
-304-305   1  DTE                    dte           0=Data terminal ready, 
-306-306   1  Assigned mode flag     assigned      See <<IALA>> for details
-307-311   5  Spare                                Unused, should be zero
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field    |Len |Description            |Member       |Units
+|0-5      | 6  |Message Type           |type         |Unsigned integer: 19
+|6-7      | 2  |Repeat Indicator       |repeat       |As in Common Navigation Block
+|8-37     |30  |MMSI                   |mmsi         |Unsigned integer: 9 digits
+|38-45    | 8  |Regional Reserved      |reserved
+|
+|46-55    |10  |Speed Over Ground      |speed        |As in common navigation block
+|56-56    | 1  |Position Accuracy      |accuracy     |See below
+|57-84    |28  |Longitude              |lon          |Minutes/10000 (as in CNB)
+|85-111   |27  |Latitude               |lat          |Minutes/10000 (as in CNB)
+|112-123  |12  |Course Over Ground     |course       |Relative to true north,
+|         |    |                       |             |units of 0.1 degrees
+|124-132  | 9  |True Heading           |heading      |0 to 359 degrees,
+|         |    |                       |             |511 = not available
+|133-138  | 6  |Time Stamp             |second       |Second of UTC timestamp.
+|139-142  | 4  |Regional reserved      |regional
+|
+|143-262 1|20  |Name                   |shipname     |20 6-bit characters
+|263-270  | 8  |Type of ship and cargo |shiptype     |As in Message 5
+|271-279  | 9  |Dimension to Bow       |to_bow       |Unsigned integer: Meters
+|280-288  | 9  |Dimension to Stern     |to_stern     |Unsigned integer: Meters
+|289-294  | 6  |Dimension to Port      |to_port      |Unsigned integer: Meters
+|295-297  | 6  |Dimension to Starboard |to_starboard |Unsigned integer: Meters
+|299-301  | 4  |Position Fix Type      |epfd         |As in Type 4 EPFD codes
+|302-303  | 1  |RAIM flag              |raim         |As for common navigation block
+|304-305  | 1  |DTE                    |dte          |0=Data terminal ready,
+|306-306  | 1  |Assigned mode flag     |assigned     |See <<IALA>> for details
+|307-311  | 5  |Spare                  |             |Unused, should be zero
+|===============================================================================
 
 === Type 20 Data Link Management Message ===
 
@@ -1140,30 +1149,30 @@ unlikely to be of interest unless you are implementing or studying
 an AIS base station network. Length varies from 72-160 depending on
 the number of slot reservations (1 to 4) in the message.
 
-`--------`---`-----------------`-------------`-----------------------------
-Field    Len Description       Member        Units
----------------------------------------------------------------------------
-0-5       6  Message Type      type          Unsigned integer: 20
-6-7       2  Repeat Indicator  repeat        As in Common Navigation Block
-8-37     30  MMSI              mmsi          Unsigned integer: 9 digits
-38-39     2  Spare                           Not used
-40-51    12  Offset number 1   offset1       Reserved offset number
-52-55     4  Reserved slots    number1       Consecutive slots
-56-58     3  Time-out          timeout1      Allocation timeout in minutes
-59-69    11  Increment         increment1    Repeat increment
-70-81    12  Offset number 2   offset2       Reserved offset number
-82-85     4  Reserved slots    number2       Consecutive slots
-86-88     3  Time-out          timeout2      Allocation timeout in minutes
-89-99    11  Increment         increment2    Repeat increment
-100-111  12  Offset number 3   offset3       Reserved offset number
-112-115   4  Reserved slots    number3       Consecutive slots
-116-118   3  Time-out          timeout3      Allocation timeout in minutes
-119-129  11  Increment         increment3    Repeat increment
-130-141  12  Offset number 4   offset4       Reserved offset number
-142-145   4  Reserved slots    number4       Consecutive slots
-146-148   3  Time-out          timeout4      Allocation timeout in minutes
-149-159  11  Increment         increment4    Repeat increment
----------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|===============================================================================
+|Field    |Len |Description       |Member        |Units
+|0-5      | 6  |Message Type      |type          |Unsigned integer: 20
+|6-7      | 2  |Repeat Indicator  |repeat        |As in Common Navigation Block
+|8-37     |30  |MMSI              |mmsi          |Unsigned integer: 9 digits
+|38-39    | 2  |Spare             |              |Not used
+|40-51    |12  |Offset number 1   |offset1       |Reserved offset number
+|52-55    | 4  |Reserved slots    |number1       |Consecutive slots
+|56-58    | 3  |Time-out          |timeout1      |Allocation timeout in minutes
+|59-69    |11  |Increment         |increment1    |Repeat increment
+|70-81    |12  |Offset number 2   |offset2       |Reserved offset number
+|82-85    | 4  |Reserved slots    |number2       |Consecutive slots
+|86-88    | 3  |Time-out          |timeout2      |Allocation timeout in minutes
+|89-99    |11  |Increment         |increment2    |Repeat increment
+|100-111  |12  |Offset number 3   |offset3       |Reserved offset number
+|112-115  | 4  |Reserved slots    |number3       |Consecutive slots
+|116-118  | 3  |Time-out          |timeout3      |Allocation timeout in minutes
+|119-129  |11  |Increment         |increment3    |Repeat increment
+|130-141  |12  |Offset number 4   |offset4       |Reserved offset number
+|142-145  | 4  |Reserved slots    |number4       |Consecutive slots
+|146-148  | 3  |Time-out          |timeout4      |Allocation timeout in minutes
+|149-159  |11  |Increment         |increment4    |Repeat increment
+|===============================================================================
 
 See <<IALA>> for details on the meaning of these fields.
 
@@ -1176,73 +1185,74 @@ This message is unusual in that it varies in length depending on the
 presence and size of the Name Extension field. May vary between 272
 and 360 bits.
 
-`--------`---`----------------------`------------`------------------------------
-Field   Len Description             Member       Units
---------------------------------------------------------------------------------
-0-5       6  Message Type           type         Unsigned integer: 21
-6-7       2  Repeat Indicator       repeat       As in Common Navigation Block
-8-37     30  MMSI                   mmsi         Unsigned integer: 9 digits
-38-42     5  Aid type               aid_type     See Below
-43-162  120  Name                   name         Name of the aid to navigation
-163-163   1  Position Accuracy      accuracy     As in common navigation block
-164-191  28  Longitude              lon          Minutes/10000 (as in CNB)
-192-218  27  Latitude               lat          Minutes/10000 (as in CNB)
-219-227   9  Dimension to Bow       to_bow       Unsigned integer: Meters
-228-236   9  Dimension to Stern     to_stern     Unsigned integer: Meters
-237-242   6  Dimension to Port      to_port      Unsigned integer: Meters
-243-248   6  Dimension to Starboard to_starboard Unsigned integer: Meters
-249-252   4  Type of EPFD           epfd         As in Message Type 4
-253-258   6  UTC Second             second       As in Message Type 5
-259-259   1  Off-Position Indicator off_position See Below
-260-267   8  Regional reserved      regional
-268-268   1  RAIM flag              raim         As for common navigation block
-269-269   1  Virtual-aid flag       virtual_aid  See Below
-270-270   1  Assigned-mode flag     assigned     See <<IALA>> for details
-271-271   1  Spare                               Not used
-272-360  88  Name Extension                      See Below
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field    |Len |Description            |Member       |Units
+|0-5      | 6  |Message Type           |type         |Unsigned integer: 21
+|6-7      | 2  |Repeat Indicator       |repeat       |As in Common Navigation Block
+|8-37     |30  |MMSI                   |mmsi         |Unsigned integer: 9 digits
+|38-42    | 5  |Aid type               |aid_type     |See Below
+|43-162  1|20  |Name                   |name         |Name of the aid to navigation
+|163-163  | 1  |Position Accuracy      |accuracy     |As in Common Navigation Block
+|164-191  |28  |Longitude              |lon          |Minutes/10000 (as in CNB)
+|192-218  |27  |Latitude               |lat          |Minutes/10000 (as in CNB)
+|219-227  | 9  |Dimension to Bow       |to_bow       |Unsigned integer: Meters
+|228-236  | 9  |Dimension to Stern     |to_stern     |Unsigned integer: Meters
+|237-242  | 6  |Dimension to Port      |to_port      |Unsigned integer: Meters
+|243-248  | 6  |Dimension to Starboard |to_starboard |Unsigned integer: Meters
+|249-252  | 4  |Type of EPFD           |epfd         |As in Message Type 4
+|253-258  | 6  |UTC Second             |second       |As in Message Type 5
+|259-259  | 1  |Off-Position Indicator |off_position |See Below
+|260-267  | 8  |Regional reserved      |regional
+|
+|268-268  | 1  |RAIM flag              |raim         |As in Common Navigation Block
+|269-269  | 1  |Virtual-aid flag       |virtual_aid  |See Below
+|270-270  | 1  |Assigned-mode flag     |assigned     |See <<IALA>> for details
+|271-271  | 1  |Spare                  |             |Not used
+|272-360  |88  |Name Extension         |             |See Below
+|==============================================================================
 
 According to <<IALA>>, the aid type field has values 1-15 for fixed
 and 16-31 for floating aids to navigation.  The detailed list is as follows:
 
-`----`-------------------------------------------------------------
-Code Definition
--------------------------------------------------------------------
-0    Default, Type of Aid to Navigation not specified
-1    Reference point
-2    RACON
-3    Fixed structure off shore, such as oil platforms, wind farms,
-     rigs. (Note: This code should identify an obstruction that is
-     fitted with an Aid-to-Navigation AIS station.)
-4    Spare, Reserved for future use.
-5    Light, without sectors
-6    Light, with sectors
-7    Leading Light Front
-8    Leading Light Rear
-9    Beacon, Cardinal N
-10   Beacon, Cardinal E
-11   Beacon, Cardinal S
-12   Beacon, Cardinal W
-13   Beacon, Port hand
-14   Beacon, Starboard hand
-15   Beacon, Preferred Channel port hand
-16   Beacon, Preferred Channel starboard hand
-17   Beacon, Isolated danger
-18   Beacon, Safe water
-19   Beacon, Special mark
-20   Cardinal Mark N
-21   Cardinal Mark E
-22   Cardinal Mark S
-23   Cardinal Mark W
-24   Port hand Mark
-25   Starboard hand Mark
-26   Preferred Channel Port hand
-27   Preferred Channel Starboard hand
-28   Isolated danger
-29   Safe Water
-30   Special Mark
-31   Light Vessel / LANBY / Rigs
--------------------------------------------------------------------
+[frame="topbot",options="header"]
+|====================================================================
+|Code |Definition
+|0    |Default, Type of Aid to Navigation not specified
+|1    |Reference point
+|2    |RACON
+|3    |Fixed structure off shore, such as oil platforms, wind farms,
+|     |rigs. (Note: This code should identify an obstruction that is
+|     |fitted with an Aid-to-Navigation AIS station.)
+|4    |Spare, Reserved for future use.
+|5    |Light, without sectors
+|6    |Light, with sectors
+|7    |Leading Light Front
+|8    |Leading Light Rear
+|9    |Beacon, Cardinal N
+|10   |Beacon, Cardinal E
+|11   |Beacon, Cardinal S
+|12   |Beacon, Cardinal W
+|13   |Beacon, Port hand
+|14   |Beacon, Starboard hand
+|15   |Beacon, Preferred Channel port hand
+|16   |Beacon, Preferred Channel starboard hand
+|17   |Beacon, Isolated danger
+|18   |Beacon, Safe water
+|19   |Beacon, Special mark
+|20   |Cardinal Mark N
+|21   |Cardinal Mark E
+|22   |Cardinal Mark S
+|23   |Cardinal Mark W
+|24   |Port hand Mark
+|25   |Starboard hand Mark
+|26   |Preferred Channel Port hand
+|27   |Preferred Channel Starboard hand
+|28   |Isolated danger
+|29   |Safe Water
+|30   |Special Mark
+|31   |Light Vessel / LANBY / Rigs
+|====================================================================
 
 The name field is 6-bit ASCII.  If this field is full (has no trailing
 @ characters) the decoder should interpret the Name Extension field
@@ -1279,27 +1289,27 @@ This message contains no navigational information, and is unlikely to be of
 interest unless you are implementing or studying an AIS base station
 network. 
 
-`--------`---`----------------`------------`------------------------------------
-Field    Len Description      Member       Units
---------------------------------------------------------------------------------
-0-5       6  Message Type     type         Unsigned integer: 22
-6-7       2  Repeat Indicator repeat       As in Common Navigation Block
-8-37     30  MMSI             mmsi         Unsigned integer: 9 digits
-38-39     2  Spare                         Not used
-40-51    12  Channel A        channel_a    Channel number
-52-63    12  Channel B        channel_b    Channel number
-64-67     4  Tx/Rx mode       txrx         Transmit/receive mode
-68-68     1  Power            power        Low=0, high=1
-69-86    18  NE Longitude     ne_lon       NE corner longitude to 0.1 minutes
-87-103   17  NE Latitude      ne_lat       NE corner latitude to 0.1 minutes
-104-121  18  SW Longitude     sw_lon       SW corner longitude to 0.1 minutes
-122-138  17  SW Latitude      sw_lat       SW corner latitude to 0.1 minutes
-139-139   1  Addressed        addressed    0=Broadcast, 1=Addressed
-140-140   1  Channel A Band   band_a       0=Default, 1=12.5kHz
-141-141   1  Channel B Band   band_b       0=Default, 1=12.5kHz
-142-144   3  Zone size        zonesize     Size of transitional zone
-145-167  23  Spare                         Reserved for future use
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field    |Len |Description      |Member    |Units
+|0-5      | 6  |Message Type     |type      |Unsigned integer: 22
+|6-7      | 2  |Repeat Indicator |repeat    |As in Common Navigation Block
+|8-37     |30  |MMSI             |mmsi      |Unsigned integer: 9 digits
+|38-39    | 2  |Spare            |          |Not used
+|40-51    |12  |Channel A        |channel_a |Channel number
+|52-63    |12  |Channel B        |channel_b |Channel number
+|64-67    | 4  |Tx/Rx mode       |txrx      |Transmit/receive mode
+|68-68    | 1  |Power            |power     |Low=0, high=1
+|69-86    |18  |NE Longitude     |ne_lon    |NE corner longitude to 0.1 minutes
+|87-103   |17  |NE Latitude      |ne_lat    |NE corner latitude to 0.1 minutes
+|104-121  |18  |SW Longitude     |sw_lon    |SW corner longitude to 0.1 minutes
+|122-138  |17  |SW Latitude      |sw_lat    |SW corner latitude to 0.1 minutes
+|139-139  | 1  |Addressed        |addressed |0=Broadcast, 1=Addressed
+|140-140  | 1  |Channel A Band   |band_a    |0=Default, 1=12.5kHz
+|141-141  | 1  |Channel B Band   |band_b    |0=Default, 1=12.5kHz
+|142-144  | 3  |Zone size        |zonesize  |Size of transitional zone
+|145-167  |23  |Spare            |          |Reserved for future use
+|==============================================================================
 
 See <<IALA>> for details on the meaning of these fields.  txrx encodes
 the same information as the 2-bit field txrx field in message type 23;
@@ -1319,25 +1329,25 @@ This message contains no navigational information, and is unlikely to
 be of interest unless you are implementing or studying an AIS base
 station network.
 
-`--------`---`----------------`------------`------------------------------------
-Field    Len Description      Member       Units
---------------------------------------------------------------------------------
-0-5       6  Message Type     type         Unsigned Integer: 23
-6-7       2  Repeat Indicator repeat       As in Common Navigation Block
-8-37     30  MMSI             mmsi         Unsigned Integer: 9 digits
-38-39     2  Spare
-40-57    18  NE Longitude     ne_lon       Same as type 22
-58-74    17  NE Latitude      ne_lat       Same as type 22
-75-92    18  SW Longitude     sw_lon       Same as type 22
-93-109   17  SW Latitude      sw_lat       Same as type 22
-110-113   4  Station Type     station_type Unsigned Integer, see below
-114-121   8  Ship Type        ship_type    As for Message type 5
-122-143  22  Spare
-144-145   2  Tx/Rx Mode       txrx         Transmit/receive mode; see below,
-146-149   4  Report Interval  interval     Station report interval; see Below
-150-153   4  Quiet Time       quiet        0 = none, 1-15 quiet time in minutes
-154-159   6  Spare
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field    |Len |Description      |Member       |Units
+|0-5      | 6  |Message Type     |type         |Unsigned Integer: 23
+|6-7      | 2  |Repeat Indicator |repeat       |As in Common Navigation Block
+|8-37     |30  |MMSI             |mmsi         |Unsigned Integer: 9 digits
+|38-39    | 2  |Spare            |             |Not used
+|40-57    |18  |NE Longitude     |ne_lon       |Same as type 22
+|58-74    |17  |NE Latitude      |ne_lat       |Same as type 22
+|75-92    |18  |SW Longitude     |sw_lon       |Same as type 22
+|93-109   |17  |SW Latitude      |sw_lat       |Same as type 22
+|110-113  | 4  |Station Type     |station_type |Unsigned Integer, see below
+|114-121  | 8  |Ship Type        |ship_type    |As for Message type 5
+|122-143  |22  |Spare            |             |Not used
+|144-145  | 2  |Tx/Rx Mode       |txrx         |Transmit/receive mode; see below,
+|146-149  | 4  |Report Interval  |interval     |Station report interval; see below
+|150-153  | 4  |Quiet Time       |quiet        |0 = none, 1-15 quiet time in minutes
+|154-159  | 6  |Spare            |             |Not used
+|==============================================================================
 
 The target set of mobile stations is specified by the station-type and
 ship-type fields. An addressed (non-broadcast) message 22 overrides a
@@ -1351,25 +1361,27 @@ The txrx field tells the affected stations which channel or
 channels they may transmit on.  The options refer to the same A and B
 VHF channels as in Message Type 22. The field is interpreted as follows:
 
-.Tranmit-Mode Table
-`---`-----------------------------
-0 = TxA/TxB, RxA/RxB (default)
-1 = TxA, RxA/RxB
-2 = TxB, RxA/RxB
-3 = Reserved for Future Use
-----------------------------------
+.Transmit-Mode Table
+[width="25%",frame="topbot"]
+|===================================
+|0 = |TxA/TxB, RxA/RxB (default)
+|1 = |TxA, RxA/RxB
+|2 = |TxB, RxA/RxB
+|3 = |Reserved for Future Use
+|===================================
 
 .Station Type Table
-`-----`----------------------------------------------
-0     All types of mobiles (default)
-1     Reserved for future use
-2     All types of Class B mobile stations
-3     SAR airborne mobile station
-4     Aid to Navigation station
-5     Class B shipborne mobile station (IEC62287 only)
-6-9   Regional use and inland waterways
-10-15 Reserved for future use
-------------------------------------------------------
+[width="50%",frame="topbot"]
+|======================================================
+|0     |All types of mobiles (default)
+|1     |Reserved for future use
+|2     |All types of Class B mobile stations
+|3     |SAR airborne mobile station
+|4     |Aid to Navigation station
+|5     |Class B shipborne mobile station (IEC62287 only)
+|6-9   |Regional use and inland waterways
+|10-15 |Reserved for future use
+|======================================================
 
 Reporting Interval is a 4 bit unsigned integer, how often to report
 while within the area specified by this message. When the dual-channel
@@ -1377,20 +1389,21 @@ operation is suspended by Tx/Rx mode command 1 or 2, the reporting
 interval is twice the interval given in the table.
 
 .Interval Table
-`-----`----------------------------------------------
-0     As given by the autonomous mode
-1     10 Minutes
-2     6 Minutes
-3     3 Minutes
-4     1 Minute
-5     30 Seconds
-6     15 Seconds
-7     10 Seconds
-8     5 Seconds
-9     Next Shorter Reporting Interval
-10    Next Longer Reporting Interval
-11-15 Reserved for future use
-------------------------------------------------------
+[width="50%",frame="topbot"]
+|======================================================
+|0     |As given by the autonomous mode
+|1     |10 Minutes
+|2     |6 Minutes
+|3     |3 Minutes
+|4     |1 Minute
+|5     |30 Seconds
+|6     |15 Seconds
+|7     |10 Seconds
+|8     |5 Seconds
+|9     |Next Shorter Reporting Interval
+|10    |Next Longer Reporting Interval
+|11-15 |Reserved for future use
+|======================================================
 
 Quiet Time is a 4 bit unsigned integer specifying how many minutes
 affected stations are to remain silent. If a class B station receives
@@ -1409,25 +1422,25 @@ the range of the Type B MMSI field.
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.
 
-`-------`---`----------------------`---------------`----------------------------
-Field   Len Description             Member          Units
---------------------------------------------------------------------------------
-0-5       6  Message Type           type            Unsigned integer: 19
-6-7       2  Repeat Indicator       repeat          As in CNB
-8-37     30  MMSI                   mmsi            Unsigned integer: 9 digits
-38-39     2  Part Number            partno          Unsigned integer: 0-1
-40-159  120  Vessel Name            shipname        (Part A) 20 six-bit chars
-160-167   8  Spare                                  (Part A) Not used
-40-47     8  Ship Type              shiptype        (Part B) As in Message Type 5
-48-89    42  Vendor ID              vendorid        (Part B) 7 six-bit chars
-90-131   42  Call Sign              callsign        (Part B) As in Message Type 5
-132-140   9  Dimension to Bow       to_bow          (Part B) Unsigned int: Meters
-141-149   9  Dimension to Stern     to_stern        (Part B) Unsigned int: Meters
-150-155   6  Dimension to Port      to_port         (Part B) Unsigned int: Meters
-156-161   6  Dimension to Starboard to_starboard    (Part B) Unsigned int: Meters
-132-161  30  Mothership MMSI        mothership_mmsi (Part B) See below
-162-167   6  Spare                                  (Part B) Not used
---------------------------------------------------------------------------------
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description            | Member         | Units
+|0-5     |  6 | Message Type          | type           | Unsigned integer: 19
+|6-7     |  2 | Repeat Indicator      | repeat         | As in CNB
+|8-37    | 30 | MMSI                  | mmsi           | Unsigned integer: 9 digits
+|38-39   |  2 | Part Number           | partno         | Unsigned integer: 0-1
+|40-159  |120 | Vessel Name           | shipname       | (Part A) 20 six-bit chars
+|160-167 |  8 | Spare                 |                | (Part A) Not used
+|40-47   |  8 | Ship Type             | shiptype       | (Part B) As in Message Type 5
+|48-89   | 42 | Vendor ID             | vendorid       | (Part B) 7 six-bit chars
+|90-131  | 42 | Call Sign             | callsign       | (Part B) As in Message Type 5
+|132-140 |  9 | Dimension to Bow      | to_bow         | (Part B) Unsigned int: Meters
+|141-149 |  9 | Dimension to Stern    | to_stern       | (Part B) Unsigned int: Meters
+|150-155 |  6 | Dimension to Port     | to_port        | (Part B) Unsigned int: Meters
+|156-161 |  6 | Dimension to Starboard| to_starboard   | (Part B) Unsigned int: Meters
+|132-161 | 30 | Mothership MMSI       | mothership_mmsi| (Part B) See below
+|162-167 |  6 | Spare                 |                | (Part B) Not used
+|===============================================================================
 
 If the Part Number field is 0, the rest of the message is interpreted
 as a Part A; if it is 1, the rest of the message is interpreted
