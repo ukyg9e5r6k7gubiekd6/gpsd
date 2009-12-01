@@ -524,8 +524,22 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
 	if (session->context->enable_ntpshm) {
+	    float fudge;
 	    // fudge valid at 4800bps
-	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.704);
+	    switch( session->gpsdata.dev.baudrate ) {
+	    default: 
+	        fudge = 0.704; /* WAG */
+		break;
+	    case 4800:
+	        fudge = 0.704;
+		break;
+	    case 9600:
+	    case 19200:		/* unknown */
+	    case 38400:		/* unknown */
+	        fudge = 0.688;
+		break;
+	    }
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, fudge);
 	}
     }
 #endif /* NTPSHM_ENABLE */
