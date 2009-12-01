@@ -442,8 +442,10 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    gpsd_report(LOG_RAW, "NTPD just seen GPS_1\n");
 	}
 	gpsd_report(LOG_PROG, 
-	    "NTPD valid time in message 0x04, seen=0x%02x\n",
-	    session->driver.sirf.time_seen);
+	    "NTPD valid time MID 0x04, seen=0x%02x, time:%.2lf, leap:%d\n",
+	    session->driver.sirf.time_seen,
+            session->gpsdata.skyview_time,
+	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
 #if __UNUSED__
 	/* this time stamp, at 4800bps, is so close to 1 sec old as to 
@@ -509,8 +511,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	    gpsd_report(LOG_PROG, "NTPD SEEN_GPS_2\n");
 	}
 	gpsd_report(LOG_PROG, 
-	    "NTPD valid time in message 0x02, seen=0x%02x\n",
-	    session->driver.sirf.time_seen);
+	    "NTPD valid time MID 0x02, seen=0x%02x, time;%.2lf, leap:%d\n",
+	    session->driver.sirf.time_seen,
+	    session->gpsdata.fix.time,
+	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
 	if (session->context->enable_ntpshm) {
 	    // fudge valid at 4800bps
@@ -667,7 +671,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 		gpsd_report(LOG_RAW, "NTPD just SEEN_UTC 1\n");
 	    }
 	    gpsd_report(LOG_PROG, 
-		"NTPD valid time in message 0x29, seen=0x%02x\n",
+		"NTPD valid time MID 0x29, seen=0x%02x\n",
 		session->driver.sirf.time_seen);
 	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_1;
 	    if (session->context->enable_ntpshm) {
@@ -776,7 +780,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	    gpsd_report(LOG_RAW, "NTPD just SEEN_UTC_2\n");
 	}
 	gpsd_report(LOG_PROG, 
-	    "NTPD valid time in message 0x62, seen=0x%02x\n",
+	    "NTPD valid time MID 0x62, seen=0x%02x\n",
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 	if (session->context->enable_ntpshm) {
@@ -839,7 +843,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	    gpsd_report(LOG_RAW, "NTPD just SEEN_UTC_2\n");
 	}
 	gpsd_report(LOG_PROG, 
-	    "NTPD valid time in message 0x34, seen=0x%02x\n",
+	    "NTPD valid time MID 0x34, seen=0x%02x\n",
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 	if (session->context->enable_ntpshm) {
