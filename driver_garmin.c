@@ -1094,8 +1094,6 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
     } else {
 	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
 	(void)nmea_send(session, "$PGRMI,,,,,,,R");
-	// garmin serial binary is 9600 only!
-	gpsd_report(LOG_ERROR, "NOTE: Garmin binary is 9600 baud only!\n");
 	settle();	// wait 333mS, essential!
     }
 }
