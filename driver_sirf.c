@@ -170,6 +170,9 @@ static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
     /*@ -charint @*/
     gpsd_report(LOG_PROG, "sirf_speed(%d,%c,%d)\n",
 	        speed, parity, stopbits);
+    if ( 9600 > speed ) {
+	gpsd_report(LOG_WARN, "NTPD: SiRF may lag at less than 9600bps\n");
+    }
 
     switch (parity) {
     case 'E':
