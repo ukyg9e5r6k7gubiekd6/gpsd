@@ -617,11 +617,11 @@ bits-regress: test_bits
 testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
-# We would like "${MAKE} check" to run the regression tests.  automake
-# appears to have support for running programs, but not make targets.
-# Perhaps the tests should be moved into scripts, but then it's not
-# clear how to deal with $(srcdir).
-# TESTS=testregress
+# automake has support for running programs, but not make targets.
+# However, TESTS_ENVIRONMENT can be used to specify an interpreter,
+# which we use to re-invoke make.
+TESTS_ENVIRONMENT = $(MAKE)
+TESTS = gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 
 # Productions for setting up and performing udev tests.
 #
