@@ -33,13 +33,15 @@ void send_dbus_fix(struct gps_device_t* channel) {
     dbus_uint32_t	serial; /* collected, but not used */
     char*		gpsd_devname;
     /* this packet format was designed before we split eph */
-    double		eph = EMIX(gpsfix->epx, gpsfix->epy);
+    double		eph;
 
     /* if the connection is non existent, return without doing anything */
     if (connection == NULL) return;
 
     gpsdata = &(channel->gpsdata);
     gpsfix = &(gpsdata->fix);
+    /* this packet format was designed before we split eph */
+    eph = EMIX(gpsfix->epx, gpsfix->epy);
     gpsd_devname = gpsdata->dev.path;
 
     /* Send the named signel.  */
