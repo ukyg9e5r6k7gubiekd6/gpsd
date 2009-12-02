@@ -222,11 +222,12 @@ maskdump.c: gpsd.h-tail maskaudit.py
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h packet_states.h
 
+# Warning: This overrides autoconf's normal link-line generatyion process
 if LIBGPSMM_ENABLE
 libgps_la_SOURCES += libgpsmm.cpp
-libgps_la_LINK = /bin/sh ./libtool --tag=CXX --mode=link g++ -o $@
+libgps_la_LINK = /bin/sh ./libtool --tag=CXX --mode=link g++ $(libgps_la_LDFLAGS) -o $@
 else
-libgps_la_LINK = /bin/sh ./libtool --tag=CC --mode=link gcc -o $@
+libgps_la_LINK = /bin/sh ./libtool --tag=CC --mode=link gcc $(libgps_la_LDFLAGS) -o $@
 endif
 
 nodist_libgps_la_SOURCES = packet_names.h ais_json.i
