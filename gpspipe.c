@@ -258,7 +258,7 @@ int main( int argc, char **argv)
 	exit(1);
     }
 
-    if (!raw && !watch) {
+    if (!raw && !watch && !binary) {
 	(void)fprintf(stderr, "gpspipe: one of '-R', '-r' or '-w' is required.\n");
 	exit(1);
     }
