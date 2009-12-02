@@ -252,7 +252,13 @@ void unix_to_gpstime(double unixtime, /*@out@*/int *week, /*@out@*/double *tow)
     *tow = fmod(unixtime, SECS_PER_WEEK);
 }
 
-#define Deg2Rad(n)	((n) * DEG_2_RAD)
+// #define Deg2Rad(n)	((n) * DEG_2_RAD)
+static double Deg2Rad(double deg)
+{
+    double rad = deg * DEG_2_RAD;
+    gpsd_report(LOG_RAW, "Deg2Rad(): deg = %2.30f; rad = %2.30f\n", deg, rad);
+    return rad;
+}
 
 static double CalcRad(double lat)
 /* earth's radius of curvature in meters at specified latitude.*/
