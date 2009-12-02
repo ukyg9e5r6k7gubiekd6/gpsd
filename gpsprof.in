@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON@
 #
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.

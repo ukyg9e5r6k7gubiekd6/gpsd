@@ -1096,7 +1096,8 @@ if test "xdummy" = "xdummy" -a \
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
 AC_OUTPUT(Makefile packaging/gpsd.spec libgps.pc libgpsd.pc
-		   jsongen.py maskaudit.py,
-		   [chmod +x jsongen.py maskaudit.py])
+		   jsongen.py maskaudit.py
+		   gpscat gpsfake gpsprof valgrind-audit,
+		   [chmod +x jsongen.py maskaudit.py gpscat gpsfake gpsprof valgrind-audit])
 echo "Configure finished, type 'make' to build."
 
