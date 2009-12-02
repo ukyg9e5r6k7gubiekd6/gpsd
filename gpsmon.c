@@ -158,7 +158,7 @@ static ssize_t readpkt(void)
 
     FD_ZERO(&select_set);
     FD_SET(session.gpsdata.gps_fd,&select_set);
-    if (controlfd < -1)
+    if (controlfd > -1)
 	FD_SET(controlfd,&select_set);
     timeval.tv_sec = 0;
     timeval.tv_usec = 500000;
