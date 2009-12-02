@@ -32,6 +32,11 @@ AC_ARG_ENABLE(python,
   [try_python="$enableval"], [try_python="yes"])
 
 if test "x$try_python" = "xyes"; then
+	dnl AM_PATH_PYTHON provided with automake can be too old.  Look
+	dnl for newer python first, and include 2.6 on the list.
+	dnl gpsd needs 2.6 for tests; perhaps we should require 2.6 or newer.
+	m4_define([_AM_PYTHON_INTERPRETER_LIST],
+                    [python3.0 python2.6 python2.5 python2.4 python])
 	AM_PATH_PYTHON
 	ac_python=yes
 	if test "x$PYTHON" = "x"; then
