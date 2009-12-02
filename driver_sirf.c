@@ -1113,8 +1113,6 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 #ifdef ALLOW_RECONFIGURE
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
-    gpsd_report(LOG_PROG, "SiRF: sirfbin_event_hook(,%#x)\n", 
-    	        (unsigned int) event);
     if (event == event_identified || event == event_reactivate) {
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_PROG, "SiRF: Switching chip mode to binary.\n");
