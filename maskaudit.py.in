@@ -14,7 +14,7 @@ class SourceExtractor:
         self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c")
         self.masks = []
         self.primitive_masks = []
-        for line in file("gps.h"):
+        for line in file("@srcdir@/gps.h"):
             if line.startswith("#define") and "_SET" in line:
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
