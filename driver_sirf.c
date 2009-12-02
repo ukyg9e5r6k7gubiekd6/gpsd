@@ -101,7 +101,7 @@ static gps_mask_t sirf_msg_errors(unsigned char *, size_t );
 
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t);
-static gps_mask_t sirf_msg_nlm(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sirf_msg_nlmd(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t);
 #ifdef ALLOW_RECONFIGURE
@@ -327,11 +327,25 @@ static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
     }
     return 0;
 }
-static gps_mask_t sirf_msg_nlm(struct gps_device_t *session, 
+
+/* Navigation Library Measurement Data Message ID 28 */
+static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session, 
                                unsigned char *buf, size_t len)
 {
-    gpsd_report(LOG_PROG, 
-		"SiRF: MID 0x1c, NLM\n");
+
+    double gps_tow = 0.0;
+
+    if (len != 56)
+	return 0;
+    
+    /* oh barf, SiRF claims to be IEEE754 but supports two
+     * different double orders, neither IEEE754 */
+    /* Todo - decode the time, since this is the first MID with a
+     * good time stamp this will be good for ntpshm time */
+    gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f, %s\n", 
+    	(double)gps_tow,
+	gpsd_hexdump_wrapper( &gps_tow, 8, LOG_PROG));
+
     return 0;
 }
 
@@ -1004,9 +1018,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x1c:		/* Navigation Library Measurement Data */
 	gpsd_report(LOG_PROG, "SiRF: NLMD 0x1c: %s\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	return sirf_msg_nlmd(session, buf, len);
 	return 0;
 
-    case 0x1d:		/* Navigation Library DGPS Data */
+    case 0x1d:		/* Navigation Library DGPS Data ID 29 */
 	gpsd_report(LOG_PROG, "SiRF: NLDG 0x1d: %s\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
@@ -1098,6 +1113,8 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 #ifdef ALLOW_RECONFIGURE
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
+    gpsd_report(LOG_PROG, "SiRF: sirfbin_event_hook(,%#x)\n", 
+    	        (unsigned int) event);
     if (event == event_identified || event == event_reactivate) {
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_PROG, "SiRF: Switching chip mode to binary.\n");
@@ -1107,27 +1124,49 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	/* do this every time*/
 	{
 	    /*@ +charint @*/
+	    /* Poll Navigation Parameters Message ID 152 
+	     * query for MID 19 */
 	    static unsigned char navparams[] = {0xa0, 0xa2, 0x00, 0x02,
-						0x98, 0x00,
+						0x98, /* MID 152 */
+						0x00,
 						0x00, 0x00, 0xb0, 0xb3};
+	    /* DGPS Source Message ID 133 */
 	    static unsigned char dgpscontrol[] = {0xa0, 0xa2, 0x00, 0x07,
-						  0x85, 0x01, 0x00, 0x00,
+						  0x85, /* MID 133 */
+						  0x01, /* use SBAS */
+						  0x00, 0x00,
 						  0x00, 0x00, 0x00,
 						  0x00, 0x00, 0xb0, 0xb3};
+	    /* Set SBAS Parameters Message ID 170 */
 	    static unsigned char sbasparams[] = {0xa0, 0xa2, 0x00, 0x06,
-						 0xaa, 0x00, 0x01, 0x00,
+						 0xaa, /* MID 170 */
+						 0x00, /* SBAS PRN */
+						 0x01, /* SBAS Mode */
+						 0x00, /* Auto PRN */
 						 0x00, 0x00,
 						 0x00, 0x00, 0xb0, 0xb3};
+	    /* Poll Software Version Message ID 132 */
 	    static unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
-						   0x84, 0x00,
+						   0x84, /* MID 132 */
+						   0x00, /* unused */
 						   0x00, 0x00, 0xb0, 0xb3};
+	    /* Set Message Rate Message ID 166 */
 	    static unsigned char requestecef[] = {0xa0, 0xa2, 0x00, 0x08,
-						  0xa6, 0x00, 0x02, 0x01,
-						  0x00, 0x00, 0x00, 0x00,
+						  0xa6, /* MID 166 */
+						  0x00, /* enable 1 */
+						  0x02, /* MID 2 */
+						  0x01, /* once per Sec */
+						  0x00, 0x00, /* unused */
+						  0x00, 0x00, /* unused */
 						  0x00, 0x00, 0xb0, 0xb3};
+	    /* Set Message Rate Message ID 166 */
 	    static unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08,
-						     0xa6, 0x00, 0x04, 0x03,
-						     0x00, 0x00, 0x00, 0x00,
+						     0xa6, /* MID 166 */
+						     0x00, /* enable 1 */
+						     0x04, /* MID 4 */
+						     0x03, /* every 3 sec */
+						     0x00, 0x00, /* unused */
+						     0x00, 0x00, /* unused */
 						     0x00, 0x00, 0xb0, 0xb3};
 	    /*@ -charint @*/
 	    gpsd_report(LOG_PROG, "SiRF: Requesting periodic ecef reports...\n");
