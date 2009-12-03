@@ -76,7 +76,7 @@ int gps_open_r(const char *host, const char *port,
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
-    gpsdata->newstyle = false;
+    gpsdata->privdata = (void *)0;
     return 0;
     /*@ +branchstate @*/
 }
@@ -211,7 +211,12 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 	}
 #ifdef OLDSTYLE_ENABLE
-	gpsdata->newstyle = true;
+	/*
+	 * At the moment this member is only being used as a flag.
+	 * It has void pointer type because someday we might want
+	 * to point to a library state structure.
+	 */
+	/*@i1*/gpsdata->privdata = (void *)1;
 #endif /* OLDSTYLE_ENABLE */
     }
 #ifdef OLDSTYLE_ENABLE
@@ -617,7 +622,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
     char buf[GPS_JSON_COMMAND_MAX];
 
     if ((flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW))== 0) {
-	if (gpsdata->newstyle || (flags & WATCH_NEWSTYLE)!=0)
+	if (gpsdata->privdata != (void *)0 || (flags & WATCH_NEWSTYLE)!=0)
 	    flags |= WATCH_JSON;
         else
 	    flags |= WATCH_OLDSTYLE;

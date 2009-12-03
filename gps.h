@@ -921,7 +921,8 @@ struct gps_data_t {
 				 * prone to false zero values.
 				 */
 
-    struct gps_fix_t	fix;		/* accumulated PVT data */
+    int gps_fd;			/* socket or file descriptor to GPS */
+    struct gps_fix_t	fix;	/* accumulated PVT data */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
@@ -953,8 +954,6 @@ struct gps_data_t {
 
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
-    /* hook functions */
-    int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
 
     /* pack things never reported together to reduce structure size */ 
@@ -976,8 +975,8 @@ struct gps_data_t {
 	char error[80];
     };
 
-    /* Private data - may be changed or removed */
-    bool newstyle;		/* have we seen a JSON response */
+    /* Private data - client code must not set this */
+    void *privdata;
 };
 
 /* mode flags for gps_stream() */
