@@ -222,7 +222,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ -predboolothers */
 	if (getub(buf, off+2) & 0x01)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
-	if (session->gpsdata.PRN[j] == session->driver.ubx.sbas_in_use)
+	if (session->gpsdata.PRN[j] == (int)session->driver.ubx.sbas_in_use)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
 	/*@ +predboolothers */
 	j++;
