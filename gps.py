@@ -508,7 +508,7 @@ class gps(gpsdata):
             # should have been set when we saw the initial VERSION
             # response.  Note, however, that this requires at
             # least one poll() before stream() is called
-            if self.newstyle:
+            if self.newstyle or flags & WATCH_NEWSTYLE:
                 flags |= WATCH_JSON
             else:
                 flags |= WATCH_OLDSTYLE
