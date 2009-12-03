@@ -832,7 +832,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
     }
     /* check for a garmin_gps device in /proc
      * if we can */
-    if ( 0 != (fp = fopen( "/proc/bus/usb/devices", "r")) ) {
+    if ( NULL != (fp = fopen( "/proc/bus/usb/devices", "r")) ) {
 	ok = false;
 	while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
 	    if ( strstr( buf, "garmin_gps") ) {

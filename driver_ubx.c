@@ -34,9 +34,6 @@
  * see also the FV25 and UBX documents on reference.html
  */
 
-static bool have_port_configuration = false;
-static unsigned char original_port_settings[20];
-static unsigned char sbas_in_use;
 
 	bool 		ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
 	gps_mask_t 	ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
@@ -45,7 +42,7 @@ static	gps_mask_t 	ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *
 static	gps_mask_t 	ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static	gps_mask_t 	ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static	gps_mask_t 	ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
-static	void		ubx_msg_sbas(unsigned char *buf);
+static	void		ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
 static	void       	ubx_msg_inf(unsigned char *buf, size_t data_len);
 
 /**
@@ -225,7 +222,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ -predboolothers */
 	if (getub(buf, off+2) & 0x01)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
-	if (session->gpsdata.PRN[j] == (int)sbas_in_use)
+	if (session->gpsdata.PRN[j] == session->driver.ubx.sbas_in_use)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
 	/*@ +predboolothers */
 	j++;
@@ -244,7 +241,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
  * SBAS Info
  */
 static void
-ubx_msg_sbas(unsigned char *buf)
+ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 {
 #ifdef UBX_SBAS_DEBUG
     unsigned int i, nsv;
@@ -260,7 +257,7 @@ ubx_msg_sbas(unsigned char *buf)
 #endif
 /* really 'in_use' depends on the sats info, EGNOS is still in test */
 /* In WAAS areas one might also check for the type of corrections indicated */
-    sbas_in_use = (unsigned char)getub(buf, 4);
+    session->driver.ubx.sbas_in_use = (unsigned char)getub(buf, 4);
 }
 
 /*
@@ -383,7 +380,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    break;
 	case UBX_NAV_SBAS:
 	    gpsd_report(LOG_IO, "UBX_NAV_SBAS\n");
-	    ubx_msg_sbas(&buf[6]);
+	    ubx_msg_sbas(session, &buf[6]);
 	    break;
 	case UBX_NAV_EKFSTATUS:
 	    gpsd_report(LOG_IO, "UBX_NAV_EKFSTATUS\n");
@@ -467,10 +464,10 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	case UBX_CFG_PRT:
 	    gpsd_report(LOG_IO, "UBX_CFG_PRT\n");
 	    for(i=6;i<26;i++)
-		original_port_settings[i-6] = buf[i];				/* copy the original port settings */
+		session->driver.ubx.original_port_settings[i-6] = buf[i];				/* copy the original port settings */
 	    buf[14+6] &= ~0x02;							/* turn off NMEA output on this port */
 	    (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
-	    have_port_configuration = true;
+	    session->driver.ubx.have_port_configuration = true;
 	    break;
 
 	case UBX_ACK_NAK:
@@ -655,12 +652,12 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     int i;
     unsigned char buf[20];
 
-    if(!have_port_configuration)
+    if(!session->driver.ubx.have_port_configuration)
 	return;
 
     /*@ +charint -usedef @*/
     for(i=0;i<22;i++)
-	buf[i] = original_port_settings[i];	/* copy the original port settings */
+	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
 	putlelong(buf, 8, session->gpsdata.dev.baudrate);
 
@@ -683,11 +680,11 @@ static bool ubx_speed(struct gps_device_t *session,
     unsigned long usart_mode;
 
     /*@ +charint -usedef -compdef */
-    if((!have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
+    for(i=0;i<22;i++)
+	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
+    if((!session->driver.ubx.have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
 	return false;
 
-    for(i=0;i<22;i++)
-	buf[i] = original_port_settings[i];	/* copy the original port settings */
     usart_mode = (unsigned long)getleul(buf, 4);
     usart_mode &=~ 0xE00;	/* zero bits 11:9 */
     switch (parity) {

@@ -617,7 +617,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
     char buf[GPS_JSON_COMMAND_MAX];
 
     if ((flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW))== 0) {
-	if (gpsdata->newstyle || (flags & WATCH_NEWSTYLE))
+	if (gpsdata->newstyle || (flags & WATCH_NEWSTYLE)!=0)
 	    flags |= WATCH_JSON;
         else
 	    flags |= WATCH_OLDSTYLE;
@@ -641,7 +641,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	/*@i1@*/return gps_send(gpsdata, buf);
+	return gps_send(gpsdata, buf);
     } else /* if ((flags & WATCH_ENABLE) != 0) */{
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w+x", sizeof(buf));
@@ -661,9 +661,8 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	/*@i1@*/return gps_send(gpsdata, buf);
+	return gps_send(gpsdata, buf);
     }
-    return 0;
 }
 
 extern char /*@observer@*/ *gps_errstr(const int err)

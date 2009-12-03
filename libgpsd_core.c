@@ -366,7 +366,7 @@ void ntpd_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
-	    (void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+	    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	} else {
 	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	}

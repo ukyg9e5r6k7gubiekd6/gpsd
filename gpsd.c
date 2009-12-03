@@ -2304,20 +2304,20 @@ int main(int argc, char *argv[])
 			if (sub->policy.nmea
  			    && GPS_PACKET_TYPE(device->packet.type)
  			    && !TEXTUAL_PACKET_TYPE(device->packet.type)) {
- 			    char buf2[MAX_PACKET_LENGTH*3+2];
+ 			    char buf3[MAX_PACKET_LENGTH*3+2];
  
 			    gpsd_report(LOG_PROG, "data mask is %s\n",
 					gpsd_maskdump(device->gpsdata.set));
  			    if (report_fix) {
- 				nmea_tpv_dump(device,buf2,sizeof(buf2));
+ 				nmea_tpv_dump(device,buf3,sizeof(buf3));
  				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s",
-					    device->gpsdata.dev.path, buf2);
- 				(void)throttled_write(sub, buf2, strlen(buf2));
+					    device->gpsdata.dev.path, buf3);
+ 				(void)throttled_write(sub, buf3, strlen(buf3));
  			    } else if ((changed & SATELLITE_SET)!=0) {
- 				nmea_sky_dump(device,buf2,sizeof(buf2));
+ 				nmea_sky_dump(device,buf3,sizeof(buf3));
  				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s",
-					    device->gpsdata.dev.path, buf2);
- 				(void)throttled_write(sub, buf2, strlen(buf2));
+					    device->gpsdata.dev.path, buf3);
+ 				(void)throttled_write(sub, buf3, strlen(buf3));
  			    }
  			}
 
