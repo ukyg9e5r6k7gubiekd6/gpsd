@@ -63,10 +63,11 @@ WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
 WATCH_JSON	= 0x02
 WATCH_NMEA	= 0x04
-WATCH_RAW	= 0x08
-WATCH_SCALED	= 0x10
-WATCH_NEWSTYLE	= 0x20
-WATCH_OLDSTYLE	= 0x40
+WATCH_RARE	= 0x08
+WATCH_RAW	= 0x10
+WATCH_SCALED	= 0x20
+WATCH_NEWSTYLE	= 0x40
+WATCH_OLDSTYLE	= 0x80
 
 GPSD_PORT = 2947
 
@@ -532,8 +533,10 @@ class gps(gpsdata):
                     arg += ',"json":false'
                 if flags & WATCH_NMEA:
                     arg += ',"nmea":false'
-                if flags & WATCH_RAW:
+                if flags & WATCH_RARE:
                     arg += ',"raw":1'
+                if flags & WATCH_RAW:
+                    arg += ',"raw":2'
                 if flags & WATCH_SCALED:
                     arg += ',"scaled":false'
             else: # flags & WATCH_ENABLE:
@@ -543,6 +546,8 @@ class gps(gpsdata):
                 if flags & WATCH_NMEA:
                     arg += ',"nmea":true'
                 if flags & WATCH_RAW:
+                    arg += ',"raw":1'
+                if flags & WATCH_RARE:
                     arg += ',"raw":0'
                 if flags & WATCH_SCALED:
                     arg += ',"scaled":true'

@@ -985,10 +985,11 @@ struct gps_data_t {
 #define WATCH_ENABLE	0x01u	/* enable streaming */
 #define WATCH_JSON	0x02u	/* enable JSON output */
 #define WATCH_NMEA	0x04u	/* enable output in NMEA */
-#define WATCH_RAW	0x08u	/* enable output of raw packets in hex */
-#define WATCH_SCALED	0x10u	/* scale output to floats, when applicable */ 
-#define WATCH_NEWSTYLE	0x20u	/* force JSON streaming */
-#define WATCH_OLDSTYLE	0x40u	/* force old-style streaming */
+#define WATCH_RARE	0x08u	/* enable output of packets in hex */
+#define WATCH_RAW	0x10u	/* enable output of raw packets */
+#define WATCH_SCALED	0x20u	/* scale output to floats, when applicable */ 
+#define WATCH_NEWSTYLE	0x40u	/* force JSON streaming */
+#define WATCH_OLDSTYLE	0x80u	/* force old-style streaming */
 
 extern int gps_open_r(const char *host, const char *port, 
 		      /*@out@*/struct gps_data_t *gpsdata);

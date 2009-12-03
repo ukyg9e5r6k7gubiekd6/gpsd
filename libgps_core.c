@@ -634,6 +634,8 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 	    if (flags & WATCH_NMEA)
 		(void)strlcat(buf, "\"nmea\":false,", sizeof(buf));
 	    if (flags & WATCH_RAW)
+		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	    if (flags & WATCH_RARE)
 		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
@@ -653,8 +655,10 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 		(void)strlcat(buf, "\"json\":true,", sizeof(buf));
 	    if (flags & WATCH_NMEA)
 		(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
-	    if (flags & WATCH_RAW)
+	    if (flags & WATCH_RARE)
 		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	    if (flags & WATCH_RAW)
+		(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
 	    if (buf[strlen(buf)-1] == ',')
