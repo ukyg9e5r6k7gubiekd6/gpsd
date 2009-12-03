@@ -225,11 +225,11 @@ int main( int argc, char **argv)
      * FIXME: Should be done with a slightly enhanced gps_stream(),
      * but we're in feature freeze.
      */
-    (void)strlcpy(buf, "?WATCH={", sizeof(buf));
+    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
     if (watch)
-	(void)strlcat(buf, "\"enable\":true,", sizeof(buf));
+	(void)strlcat(buf, "\"json\":true,", sizeof(buf));
     else
-	(void)strlcat(buf, "\"enable\":false,", sizeof(buf));
+	(void)strlcat(buf, "\"json\":false,", sizeof(buf));
     if (raw)
 	/* 
 	 * Yes, -r invokes NMEA mode rather than proper raw mode.

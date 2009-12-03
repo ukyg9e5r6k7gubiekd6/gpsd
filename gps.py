@@ -56,10 +56,10 @@ SIGNAL_STRENGTH_UNKNOWN = NaN
 
 WATCH_DISABLE	= 0x00
 WATCH_ENABLE	= 0x01
-WATCH_RAW	= 0x02
+WATCH_JSON	= 0x02
+WATCH_RAW	= 0x04
 WATCH_SCALED	= 0x08
-WATCH_NEWSTYLE	= 0x10
-WATCH_OLDSTYLE	= 0x20
+WATCH_OLDSTYLE	= 0x10
 
 GPSD_PORT = 2947
 
@@ -503,36 +503,48 @@ class gps(gpsdata):
 
     def stream(self, flags=0):
         "Ask gpsd to stream reports at your client."
-        if (flags & (WATCH_NEWSTYLE|WATCH_OLDSTYLE)) == 0:
+        if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
             # If we're looking at a daemon that speakds JSON, this
             # should have been set when we saw the initial VERSION
             # response.  Note, however, that this requires at
             # least one poll() before stream() is called
             if self.newstyle:
-                flags |= WATCH_NEWSTYLE
+                flags |= WATCH_JSON
             else:
                 flags |= WATCH_OLDSTYLE
-        if flags & WATCH_NEWSTYLE:
-            if flags & WATCH_ENABLE:
-                arg = '?WATCH={"enable":true'
-                if self.raw_hook or (flags & WATCH_NMEA):
-                    arg += ',"nmea":true'
-            elif flags & WATCH_DISABLE:
-                arg = '?WATCH={"enable":false'
-                if self.raw_hook or (flags & WATCH_NMEA):
-                    arg += ',"nmea":false'
-            return self.send(arg + "}")
-        elif flags & WATCH_OLDSTYLE:
-            if flags & WATCH_ENABLE:
+        if flags & WATCH_OLDSTYLE:
+            if flags & WATCH_DISABLE:
+                arg = "w-"
+                if flags & WATCH_NMEA:
+                    arg += 'r-'
+                    return self.send(arg)
+            else: # flags & WATCH_ENABLE:
                 arg = 'w+'
                 if self.raw_hook or (flags & WATCH_NMEA):
                     arg += 'r+'
                     return self.send(arg)
-            elif flags & WATCH_DISABLE:
-                arg = "w-"
-                if self.raw_hook or (flags & WATCH_NMEA):
-                    arg += 'r-'
-                    return self.send(arg)
+        else: # flags & WATCH_NEWSTYLE:
+            if flags & WATCH_DISABLE:
+                arg = '?WATCH={"enable":false'
+                if flags & WATCH_JSON:
+                    arg += ',"json":false'
+                if flags & WATCH_NMEA:
+                    arg += ',"nmea":false'
+                if flags & WATCH_RAW:
+                    arg += ',"raw":1'
+                if flags & WATCH_SCALED:
+                    arg += ',"scaled":false'
+            else: # flags & WATCH_ENABLE:
+                arg = '?WATCH={"enable":true'
+                if flags & WATCH_JSON:
+                    arg += ',"json":true'
+                if flags & WATCH_NMEA:
+                    arg += ',"nmea":true'
+                if flags & WATCH_RAW:
+                    arg += ',"raw":0'
+                if flags & WATCH_SCALED:
+                    arg += ',"scaled":true'
+            return self.send(arg + "}")
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET  = 3.2808399

@@ -226,17 +226,22 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 }
 
 /*@-compdef -mustdefine@*/
-void gpsd_pseudonmea_dump(struct gps_device_t *session,
+void nmea_tpv_dump(struct gps_device_t *session,
 			      /*@out@*/char bufp[], size_t len)
-/* the only entry point - dump a device state in pseudo-NMEA */
 {
     bufp[0] = '\0';
     if ((session->gpsdata.set & LATLON_SET) != 0) {
 	gpsd_position_fix_dump(session, bufp, len);
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
     }
-    if ((session->gpsdata.set & (DOP_SET | USED_SET | ERR_SET)) != 0)
+    if ((session->gpsdata.set & (MODE_SET | DOP_SET | USED_SET | ERR_SET)) != 0)
 	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
+}
+
+void nmea_sky_dump(struct gps_device_t *session,
+			      /*@out@*/char bufp[], size_t len)
+{
+    bufp[0] = '\0';
     if ((session->gpsdata.set & SATELLITE_SET) != 0)
 	gpsd_binary_satellite_dump(session,bufp+strlen(bufp),len-strlen(bufp));
 }

@@ -616,43 +616,47 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
-    if ((flags & (WATCH_NEWSTYLE|WATCH_OLDSTYLE))== 0) {
+    if ((flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW))== 0) {
 	if (gpsdata->newstyle)
-	    flags |= WATCH_NEWSTYLE;
+	    flags |= WATCH_JSON;
         else
 	    flags |= WATCH_OLDSTYLE;
     }
-    if ((flags & WATCH_ENABLE) != 0) {
-	if ((flags & WATCH_OLDSTYLE) != 0) {
-	    (void)strlcpy(buf, "w+x", sizeof(buf));
-	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
-		(void)strlcat(buf, "r+", sizeof(buf));
-	} else if ((flags & WATCH_NEWSTYLE) != 0) {
-	    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
-	    if (flags & WATCH_NMEA)
-		(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
-	    if (flags & WATCH_RAW)
-		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
-	    if (flags & WATCH_SCALED)
-		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
-	    if (buf[strlen(buf)-1] == ',')
-		buf[strlen(buf)-1] = '\0';
-	    (void)strlcat(buf, "};", sizeof(buf));
-	}
-	/*@i1@*/return gps_send(gpsdata, buf);
-    } else if ((flags & WATCH_DISABLE) != 0) {
+    if ((flags & WATCH_DISABLE) != 0) {
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w-", sizeof(buf));
 	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
 		(void)strlcat(buf, "r-", sizeof(buf));
-	} else if ((flags & WATCH_NEWSTYLE) != 0) {
+	} else {
 	    (void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
+	    if (flags & WATCH_JSON)
+		(void)strlcat(buf, "\"json\":false,", sizeof(buf));
 	    if (flags & WATCH_NMEA)
 		(void)strlcat(buf, "\"nmea\":false,", sizeof(buf));
 	    if (flags & WATCH_RAW)
 		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
+	    if (buf[strlen(buf)-1] == ',')
+		buf[strlen(buf)-1] = '\0';
+	    (void)strlcat(buf, "};", sizeof(buf));
+	}
+	/*@i1@*/return gps_send(gpsdata, buf);
+    } else /* if ((flags & WATCH_ENABLE) != 0) */{
+	if ((flags & WATCH_OLDSTYLE) != 0) {
+	    (void)strlcpy(buf, "w+x", sizeof(buf));
+	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA)!=0)
+		(void)strlcat(buf, "r+", sizeof(buf));
+	} else {
+	    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
+	    if (flags & WATCH_JSON)
+		(void)strlcat(buf, "\"json\":true,", sizeof(buf));
+	    if (flags & WATCH_NMEA)
+		(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
+	    if (flags & WATCH_RAW)
+		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	    if (flags & WATCH_SCALED)
+		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
 	    if (buf[strlen(buf)-1] == ',')
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
@@ -665,7 +669,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 extern char /*@observer@*/ *gps_errstr(const int err)
 {
     /* 
-     * We might ad out own error codes in the future, e.g for
+     * We might add our own error codes in the future, e.g for
      * protocol compatibility checks
      */
     return netlib_errstr(err); 

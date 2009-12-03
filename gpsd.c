@@ -2189,31 +2189,6 @@ int main(int argc, char *argv[])
 			(void)throttled_write(channel->subscriber, 
 						  hd, strlen(hd));
 		    }
-
-		    /* some packet types should not fall through */
-		    if (LOSSLESS_PACKET_TYPE(device->packet.type)) {
-			/*
-			 * Some binary packet types never
-			 * get dumped at raw level 1 because
-			 * they don't need to be. For RTCM2
-			 * and RTCM3, our report sentences
-			 * correspond 1-1 with the raw data
-			 * and are lossless.
-			 */
-			continue;
-		    }
-
-		    /* binary GPS packet, pseudo-NMEA dumping enabled */
-		    if (channel->subscriber->policy.nmea) {
-			char buf2[MAX_PACKET_LENGTH*3+2];
-			gpsd_pseudonmea_dump(device, buf2, sizeof(buf2));
-			if (buf2[0]!= '\0') {
-			    gpsd_report(LOG_IO, "<= GPS (binary) %s: %s",
-				    device->gpsdata.dev.path, buf2);
-			    (void)throttled_write(channel->subscriber, 
-						  buf2, strlen(buf2));
-			}
-		    }
 #endif /* BINARY_ENABLE */
 		}
 
@@ -2302,8 +2277,8 @@ int main(int argc, char *argv[])
 		    if (changed & DATA_SET) {
 			bool report_fix = false;
 			gpsd_report(LOG_PROG,
-				    "Changed mask: %s\n", 
-				    gpsd_maskdump(changed));
+				    "Changed mask: %s with %sreliable cycle detection\n", 
+				    gpsd_maskdump(changed), device->cycle_end_reliable ? "" : "un");
 			if (device->cycle_end_reliable) {
 			    /*
 			     * Driver returns reliable end of cycle, 
@@ -2318,10 +2293,35 @@ int main(int argc, char *argv[])
 			     * or mode. Likely to cause display jitter.
 			     */
 			    report_fix = true;
+			if (report_fix)
+			    gpsd_report(LOG_PROG, "time to report a fix\n");
 #ifdef DBUS_ENABLE
 			if (report_fix)
 			    send_dbus_fix(channel->device);
 #endif /* DBUS_ENABLE */
+
+			/* binary GPS packet, pseudo-NMEA dumping enabled */
+			if (sub->policy.nmea
+ 			    && GPS_PACKET_TYPE(device->packet.type)
+ 			    && !TEXTUAL_PACKET_TYPE(device->packet.type)) {
+ 			    char buf2[MAX_PACKET_LENGTH*3+2];
+ 
+			    gpsd_report(LOG_PROG, "data mask is %s\n",
+					gpsd_maskdump(device->gpsdata.set));
+ 			    if (report_fix) {
+ 				nmea_tpv_dump(device,buf2,sizeof(buf2));
+ 				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s",
+					    device->gpsdata.dev.path, buf2);
+ 				(void)throttled_write(sub, buf2, strlen(buf2));
+ 			    } else if ((changed & SATELLITE_SET)!=0) {
+ 				nmea_sky_dump(device,buf2,sizeof(buf2));
+ 				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s",
+					    device->gpsdata.dev.path, buf2);
+ 				(void)throttled_write(sub, buf2, strlen(buf2));
+ 			    }
+ 			}
+
+
 #ifdef OLDSTYLE_ENABLE
 			if (!newstyle(sub)) {
 			    char cmds[4] = "";
@@ -2341,7 +2341,7 @@ int main(int argc, char *argv[])
 #endif /* RTCM104V2_ENABLE */
 			}
 #endif /* OLDSTYLE_ENABLE */
-			if (newstyle(sub)) {
+			if (newstyle(sub) && sub->policy.json) {
 			    buf2[0] = '\0';
 			    if (report_fix) {
 				json_tpv_dump(&device->gpsdata, &channel->fixbuffer, 
@@ -2387,6 +2387,7 @@ int main(int argc, char *argv[])
 #endif /* TIMING_ENABLE */
 			}
 		    }
+		    gpsd_report(LOG_PROG, "reporting finished\n");
 		}
 		/*@-nullderef@*/
 	    }

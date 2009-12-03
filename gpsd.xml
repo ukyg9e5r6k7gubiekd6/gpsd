@@ -1310,6 +1310,13 @@ DEVICES object.</para>
 	is true.</entry>
 </row>
 <row>
+	<entry>json</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>Enable (true) or disable (false) dumping of JSON reports.
+	Default is false.</entry>
+</row>
+<row>
 	<entry>nmea</entry>
 	<entry>No</entry>
 	<entry>boolean</entry>

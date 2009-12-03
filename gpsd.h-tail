@@ -487,8 +487,8 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 extern char /*@observer@*/ *netlib_errstr(const int);
 extern char /*@observer@*/ *sock2ip(int);
 
-extern void gpsd_pseudonmea_dump(struct gps_device_t *, 
-				 /*@out@*/char[], size_t);
+extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
 extern void ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_alloc(struct gps_context_t *);

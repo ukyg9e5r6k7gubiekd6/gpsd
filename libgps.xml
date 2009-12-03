@@ -77,7 +77,7 @@ session = gps.gps(host="127.0.0.1", port="2947")
 
 session.set_raw_hook(raw_hook)
 
-session.stream(WATCH_ENABLE)
+session.stream(flags=WATCH_JSON)
 
 for report in session:
     process(report)
@@ -147,7 +147,7 @@ read error. </para>
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
 to be made available whenn you poll.  It is preferable to the
-older-style (pre-2.39) way of doing this,
+older-style (pre-2.90) way of doing this,
 <function>gps_query()</function> with a "w+" argument, because it
 insulates your code from whether your client library and your
 <application>gpsd</application> are using old or new protocol.
