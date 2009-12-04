@@ -1458,20 +1458,24 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		if (*p == '1' || *p == '+') {
 		    sub->policy.watcher = true;
 		    sub->policy.json = false;
+		    sub->policy.scaled = true;	/* UGH! */
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		    p++;
 		} else if (*p == '0' || *p == '-') {
 		    sub->policy.watcher = false;
 		    sub->policy.json = false;
+		    sub->policy.scaled = false;	/* UGH! */
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		    p++;
 		} else if (sub->policy.watcher) {
 		    sub->policy.watcher = false;
 		    sub->policy.json = false;
+		    sub->policy.scaled = false;	/* UGH! */
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		} else {
 		    sub->policy.watcher = true;
 		    sub->policy.json = false;
+		    sub->policy.scaled = true;	/* UGH! */
 		    gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		}
@@ -2341,7 +2345,14 @@ int main(int argc, char *argv[])
 
 
 #ifdef OLDSTYLE_ENABLE
-			if (!newstyle(sub) && !sub->policy.json) {
+			/*
+			 * UGH! Good thing this code is going away soon.
+			 * We press the scaled flag, which isn't otherwise
+			 * used when oldstyle is on, into service as an
+			 * enable flag for oldstyle reports,  See where
+			 * it says "UGH!" in the oldstyle command interpreter.
+			 */
+			if (!newstyle(sub) && sub->policy.scaled) {
 			    char cmds[4] = "";
 			    if (report_fix)
 				(void)strlcat(cmds, "o", 4);
