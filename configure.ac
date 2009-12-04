@@ -49,54 +49,43 @@ if test "x$ac_python" = "xyes"; then
 	PYTHON_VERSION="${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
 	AC_MSG_RESULT([$PYTHON, $PYTHON_VERSION, $PYTHON_PREFIX])
 
-	AC_MSG_CHECKING(whether Python is at least 2.6)
-	if test $PYTHON_VERSION_MAJOR -lt 2 -o $PYTHON_VERSION_MAJOR -eq 2 -a $PYTHON_VERSION_MINOR -lt 6; then
-		AC_MSG_RESULT(no)
-		AC_MSG_WARN([*** GPSD requires at least Python 2.6, Python support disabled.])
-		ac_python=no
-	fi
+	PYTHON_CFLAGS="-DHAVE_PYTHON -I$PYTHON_PREFIX/include/python$PYTHON_VERSION"
+
+	OLD_CPPFLAGS="$CPPFLAGS"
+	OLD_CXXFLAGS="$CXXFLAGS"
+	CPPFLAGS="$CPPFLAGS $PYTHON_CFLAGS"
+	CXXFLAGS="$CXXFLAGS $PYTHON_CFLAGS"
+
+	AC_CHECK_HEADERS([Python.h],
+			[],
+			[AC_MSG_WARN([*** Python include files not found! You should install the Python development package. Python support disabled]); ac_python=no])
+	CPPFLAGS="$OLD_CPPFLAGS"
+	CXXFLAGS="$OLD_CXXFLAGS"
+
 	if test "x$ac_python" = "xyes"; then
-		AC_MSG_RESULT(yes)
+		AC_SUBST([PYTHON_CFLAGS])
 
-		PYTHON_CFLAGS="-DHAVE_PYTHON -I$PYTHON_PREFIX/include/python$PYTHON_VERSION"
+		ac_python=no
+		for pylibpath in '/usr/lib' $PYTHON_PREFIX/lib $PYTHON_PREFIX/lib/python$PYTHON_VERSION/config; do
+			eval `echo unset ac_cv_lib_python$PYTHON_VERSION'___'Py_Finalize | tr '.' '_'`
 
-		OLD_CPPFLAGS="$CPPFLAGS"
-		OLD_CXXFLAGS="$CXXFLAGS"
-		CPPFLAGS="$CPPFLAGS $PYTHON_CFLAGS"
-		CXXFLAGS="$CXXFLAGS $PYTHON_CFLAGS"
-
-		AC_CHECK_HEADERS([Python.h],
-				[],
-				[AC_MSG_WARN([*** Python include files not found! You should install the Python development package. Python support disabled]); ac_python=no])
-		CPPFLAGS="$OLD_CPPFLAGS"
-		CXXFLAGS="$OLD_CXXFLAGS"
-
-		if test "x$ac_python" = "xyes"; then
-			AC_SUBST([PYTHON_CFLAGS])
-
-			ac_python=no
-			for pylibpath in '/usr/lib' $PYTHON_PREFIX/lib $PYTHON_PREFIX/lib/python$PYTHON_VERSION/config; do
-				eval `echo unset ac_cv_lib_python$PYTHON_VERSION'___'Py_Finalize | tr '.' '_'`
-
-				save_LIBS=$LIBS
-				LIBS="$LIBS -L$pylibpath $PYTHON_LIBS"
-				AC_CHECK_LIB(python$PYTHON_VERSION, Py_Finalize, PYTHON_LIBS="-L$pylibpath -lpython$PYTHON_VERSION $PYTHON_DEPS"; ac_python=yes,,$PYTHON_DEPS)
-				LIBS=$save_LIBS
-				if test "x$ac_python" = "xyes"; then
-					break
-				fi
-			done
-
-			if test "x$ac_python" != "xyes"; then
-				AC_MSG_WARN(*** Python development libraries required, Python support disabled)
+			save_LIBS=$LIBS
+			LIBS="$LIBS -L$pylibpath $PYTHON_LIBS"
+			AC_CHECK_LIB(python$PYTHON_VERSION, Py_Finalize, PYTHON_LIBS="-L$pylibpath -lpython$PYTHON_VERSION $PYTHON_DEPS"; ac_python=yes,,$PYTHON_DEPS)
+			LIBS=$save_LIBS
+			if test "x$ac_python" = "xyes"; then
+				break
 			fi
-			AC_SUBST([PYTHON_LIBS])
+		done
 
-			AC_SUBST(pkgpythondir)
-			if test "x$python_install" = "xyes"; then
-				pkgpythondir=$PYTHON_PREFIX"/lib/python"$PYTHON_VERSION"/site-packages/gpsd"
-			fi
+		if test "x$ac_python" != "xyes"; then
+			AC_MSG_WARN(*** Python development libraries required, Python support disabled)
+		fi
+		AC_SUBST([PYTHON_LIBS])
 
+		AC_SUBST(pkgpythondir)
+		if test "x$python_install" = "xyes"; then
+			pkgpythondir=$PYTHON_PREFIX"/lib/python"$PYTHON_VERSION"/site-packages/gpsd"
 		fi
 	fi
 fi
