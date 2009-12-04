@@ -1382,34 +1382,48 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 #undef ZEROIZE
 	    break;
 	case 'R':
-	    if (*p == '=') ++p;
-	    if (*p == '2') {
-		sub->policy.raw = 2;
-		gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=2");
-		p++;
-	    } else if (*p == '1' || *p == '+') {
-		sub->policy.nmea = true;
-		sub->policy.raw = 0;
-		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=1");
-		p++;
-	    } else if (*p == '0' || *p == '-') {
-		sub->policy.raw = 0;
-		sub->policy.nmea = false;
-		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=0");
-		p++;
-	    } else if (sub->policy.nmea) {
-		sub->policy.nmea = false;
-		sub->policy.raw = 0;
-		gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=0");
-	    } else {
-		sub->policy.nmea = true;
-		sub->policy.raw = 0;
-		gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
-		(void)snprintf(phrase, sizeof(phrase), ",R=1");
+	    if ((channel = mandatory_assign_channel(sub, ANY, NULL))==NULL)
+		(void)strlcpy(phrase, ",R=?", sizeof(phrase));
+	    else {
+		if (*p == '=') ++p;
+		if (*p == '2') {
+		    sub->policy.watcher = true;
+		    sub->policy.json = false;
+		    sub->policy.raw = 2;
+		    gpsd_report(LOG_INF, "client(%d) turned on super-raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=2");
+		    p++;
+		} else if (*p == '1' || *p == '+') {
+		    sub->policy.watcher = true;
+		    sub->policy.json = false;
+		    sub->policy.nmea = true;
+		    sub->policy.raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    sub->policy.watcher = false;
+		    sub->policy.json = false;
+		    sub->policy.raw = 0;
+		    sub->policy.nmea = false;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
+		    p++;
+		} else if (sub->policy.nmea) {
+		    sub->policy.watcher = false;
+		    sub->policy.json = false;
+		    sub->policy.nmea = false;
+		    sub->policy.raw = 0;
+		    gpsd_report(LOG_INF, "client(%d) turned off raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=0");
+		} else {
+		    sub->policy.watcher = true;
+		    sub->policy.json = false;
+		    sub->policy.nmea = true;
+		    sub->policy.raw = 1;
+		    gpsd_report(LOG_INF, "client(%d) turned on raw mode\n", sub_index(sub));
+		    (void)snprintf(phrase, sizeof(phrase), ",R=1");
+		}
 	    }
 	    break;
 	case 'S':
@@ -1443,17 +1457,21 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
 		    sub->policy.watcher = true;
+		    sub->policy.json = false;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		    p++;
 		} else if (*p == '0' || *p == '-') {
 		    sub->policy.watcher = false;
+		    sub->policy.json = false;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		    p++;
 		} else if (sub->policy.watcher) {
 		    sub->policy.watcher = false;
+		    sub->policy.json = false;
 		    (void)snprintf(phrase, sizeof(phrase), ",W=0");
 		} else {
 		    sub->policy.watcher = true;
+		    sub->policy.json = false;
 		    gpsd_report(LOG_INF, "client(%d) turned on watching\n", sub_index(sub));
 		    (void)snprintf(phrase, sizeof(phrase), ",W=1");
 		}
@@ -2323,7 +2341,7 @@ int main(int argc, char *argv[])
 
 
 #ifdef OLDSTYLE_ENABLE
-			if (!newstyle(sub)) {
+			if (!newstyle(sub) && !sub->policy.json) {
 			    char cmds[4] = "";
 			    if (report_fix)
 				(void)strlcat(cmds, "o", 4);

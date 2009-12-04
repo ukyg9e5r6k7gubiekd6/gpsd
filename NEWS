@@ -25,7 +25,7 @@
   GPS chipset and adaptor can support it. Specfile and other packaging
   paraphenalia now live in a packaging subdirectory.  rtcmdecode becomes
   gpsdecode and can now de-armor and dump AIDVM packets. The client
-  library now work correctly in locales where the decimal separator is 
+  library now works correctly in locales where the decimal separator is 
   not a period.
 
 * Tue Feb 10 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
