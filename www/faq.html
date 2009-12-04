@@ -30,7 +30,7 @@ GPSD Frequently Asked Questions
     <a href="wishlist.html">Wish List</a><br/>
     <a href="hall-of-shame.html">Hall of Shame</a><br/>
     <a href="hacking.html">Hacker's Guide</a><br/>
-    <a href="compatibility">Application Compatibility</a>
+    <a href="protocol-transition.html">Application Compatibility</a>
     <a href="references.html">References</a><br/>
     <a href="history.html">History</a><br/>
     <a href="future.html">Future</a><br/>
@@ -65,21 +65,15 @@ GPSD Frequently Asked Questions
 <ul>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
 <li><a href='#nodata'>I get no data from my GPS</a></h1>
-<li><a href='#oldcommands'>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</a><br/>
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
 <li><a href="#singleshot">Why does my single-shot query fail to return fix data?</a><br/>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
-<li><a href='#flicker'>Why does the date field in <code>xgps</code> flicker to "n/a" part of the time even when there's a fix?</a><br/>
-<li><a href='#flicker'>Why does <code>xgps</code> flicker between displaying FIX and NOFIX about once a second?</a><br/>
-<li><a href='#flicker'>Why doesn't <code>gpsd</code> set its J=1 option by default and avoid the flicker problem?</a><br/>
 <li><a href='#kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</a><br/>
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a><br/>
 <li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a><br/>
-<li><a href='#why_migrate'>Why use this version of <code>gpsd</code>?</a><br/>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
-<li><a href='#changes'>How has the <code>gpsd</code> interface changed since 1.x?</a><br/>
 <li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
 </ul>
 
@@ -305,46 +299,6 @@ command to it.  Alternatively, running the daemon at -D 4 may reveal
 the version.</p>
 </blockquote>
 
-<h1 id="oldcommands">Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
-
-<p>Note: These commands are now deprecated. The old command protocol
-they are part of will be <a href="orotocol-transition.html">removed at
-some time in the future</a>.  If you rely on them, you will create
-problems for yourself. Use one of the client libraries included with
-<code>gpsd</code> to avoid problems.</p>
-
-<p>To understand what's going on, you need to know that
-<code>gpsd</code> does not immediately assign a client a GPS from its
-pool of known devices when the client connects.  Rather, it waits
-until the client issues a command that requires GPS information.</p>
-
-<p>The reason for this goes back to when multi-device support was
-added in 2.21.  In a multi-device world, what the client might want to
-do is list available GPSes (with K) and choose one (with F).  There is
-also at least one other command, L, that doesn't require a GPS.  And
-in general, waiting until a GPS is really needed to wake one up is a
-good idea &mdash; it saves power, which can be important because
-GPS-equipped computers are more than likely running off a battery.</p>
-
-<p>So <code>gpsd</code> now defers binding the device.  Your first
-request for fix data triggers the action of binding a GPS to your
-channel, but <em>at that time</em> no GPS is yet bound.  The GPS
-doesn't have a fix, so you get ?.  But by the time of your
-<em>next</em> request <code>gpsd</code> has polled the daemon and has
-a fix.</p>
-
-<p>Generally only human beings testing <code>gpsd</code> via telnet/ssh
-ever notice this behavior.  <code>gpsd</code>-using applications poll the
-daemon repeatedly; the delay before the second response comes in
-normally is not noticeable.</p>
-
-<p>We haven't fixed this because the test clients and libgps all use
-watcher mode.  In watcher mode, you get 'O' updates whenever the GPS
-ships a recognized sentence.  The old-style individual requests are
-obsolete, really; they were poorly thought out and are only retained
-for backward compatibility.  You should fix your application to use
-watcher mode &mdash; or better yet, the libgps client library.</p>
-
 <h1 id="nodata">I get no data from my GPS</h1>
 
 <p>This answer may apply if you have followed the Quick Start
@@ -399,58 +353,6 @@ producing an accumulating stall.  The symptom of this is sentence times that
 look right at startup but gradually fall behind clock time.  To fix
 this, bump your speed to 9600 or higher.</p>
 
-<h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
-
-<p>Note: The new protocol does not support single-shot queries at all &mdash;
-the race conditions associated wit them are intractable.  You should
-not rely on such commands.  Use the new protcol, preferably through
-a client libary, instead.</p>
-
-<p>This is closely related to the previous item.</p>
-
-<p>The old-style query commands such as P and A are are safe to use
-with J=1 if you're polling repeatedly, but they're a dicey way to go
-if you're opening a channel to <code>gpsd</code>, doing a single-shot
-query, and then hanging up.  Even repeating the query a few times
-won't necessarily work.</p>
-
-<p>The problem is that your queries are in a race with the daemon's logic for 
-assigning and initializing a GPS.  It won't try to assign a GPS to your
-channel until the first command that demands actual device information.</p>
-
-<p>Then the race begins. The daemon will be interleaving reads of whatever
-packet fragments the GPS is shipping with reads from your client
-socket.  It is entirely possible that the rest of your commands
-will get processed before the daemon reads and processes enough GPS 
-sentences to get a fix &mdash; especially if the serial device is 
-slow and the GPS has a long initialization sequence.</p>
-
-<p>(A similar race existed in <code>gpsd</code> versions before
-multi-device support was added in 2.21; if you issued a query too
-soon after device open it would fail in exactly this way.)</p>
-
-<p>The right way to code your client is to set watcher mode and
-read a couple of O responses before trying to parse one.  That way
-the daemon paces the action, actually telling the client when it
-receives packets.</p>
-
-<p>To be certain of having full fix data, you'd need to wait for as
-many O responses as there are sentences that set fix data in the
-device's normal cycle.  For SiRFs, one read will do because normally
-only one sentence in the cycle ships fix data.  For NMEA devices you
-don't have a full fix before five reads, enough for an entire
-GPRMC/GPGGA/GPVTG/GPGLL/GPGSV cycle in whatever permutation the device
-ships it.</p>
-
-<p>In practice, three O reads will always be enough to get you
-<em>some</em> fix information &mdash; worst case is your first O came
-from a GPGSA and all you get is a mode, and then you get GPVTG, but
-you'll always get lat/lon on the next O.</p>
-
-<p>Clients that poll P or A repeatedly won't have a problem; the race
-effects will show up but be limited to noise in the first few seconds
-of samples.</p>
-
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
@@ -466,53 +368,6 @@ similar solution.</p>
 
 <p>This is a gpsdrive bug, as you can verify by running
 <code>xgps</code> alongside it.</p>
-
-<h1 id='flicker'>Why does the date field in <code>xgps</code> flicker 
-to "n/a" part of the time even when there's a fix?</h1>
-
-<p>The sentence or packet your GPS uses to report satellite
-bearing/elevation has no timestamp. The <code>xgps</code>
-date display flickers to "n/a" when it has just seen this report.</p>
-
-<p>This is a known problem.  It's not a bug &mdash; or, at least, not
-a bug in the GPSD code.  Blame the idiot protocol designers who
-saw fit not to timestamp their satellite-data packet.  (NMEA and Garmin 
-GPSes don't.  SiRF GPSes do.  Score one for SiRF.)</p>
-
-<p><code>gpsd</code> is faithfully reporting the information it is
-getting from the GPS, including the fact that the Y sentence contains
-no date. That's its job.  The libgps library is doing its bit by
-passing everything from <code>gpsd</code> on to the client application
-as it arrives, including the lack of date.</p>
-
-<p>The -j option of <code>xgps</code> will work around this problem.
-It sends <code>gpsd</code> an initialization command that causes it
-not to clear fix data at the beginning of each reporting cycle.  This
-will eliminate the flicker, but means that you may occasionally see
-stale and invalid data.</p>
-
-<h1 id='flicker'>Why does <code>xgps</code> flicker between displaying FIX
-and NOFIX about once a second?</h1>
-
-<p>It's the same problem as the previous entry, and can be banished
-with the -j option.</p>
-
-<p>Other fields may flicker as well; latitude is especially prone to
-this.  Usually the problem only affects NMEA devices, so if you are
-using something wuith a SiRF or other chipset that reports in a
-non-NMEA format you will never see it.</p>
-
-<h1 id='flicker'>Why doesn't <code>gpsd</code> set its J=1 option by
-default and avoid the flicker problem?</h1>
-
-<p>Because that's policy, and policy is really the client's job.  We
-choose to make <code>gpsd</code> report what the GPS tells it as
-faithfully as it can without making assumptions about how the client
-wants to use the data.</p>
-
-<p>The design issues here  are much thornier than they at first appear.  
-See <a href="hacking.html#buffering">this extended discussion</a> in
-the <a href="hacking.html">Hacker's Guide</a>.</p>
 
 <h1 id='kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</h1>
 
@@ -570,52 +425,10 @@ brought on by lots of I/O activity.</p>
 <p>Another thing to try is running <code>gpsd</code> under Valgrind overnight 
 and seeing if it reports any leaks.</p>
 
-<h1 id='why_migrate'>Why use this version of <code>gpsd</code>?</h1>
-
-<p>If you have written a <code>gpsd</code>-aware application using one
-of the old 1.x versions, or a fork such as <code>ngpsd</code> or
-<code>tgpsd</code>, here are some good functional reasons to migrate
-to 2.0:</p>
-
-<ol>
-<li>The new version supports AIS as well as GPS receivers.</li>
-
-<li>Hotplug- and reconnect support.  Your application does not have to be
-aware of GPS device connects and disconnects, but can choose to be by
-watching for X commands.</li>
-
-<li>Your application can now query whether or not the GPS is online
-and get an authoritative answer.</li>
-
-<li>Timestamps are now no longer truncated to seconds, but reported to 
-whatever resolution the GPS ships.  Often (notably on SiRF-II GPSes)
-this is milliseconds.</li>
-
-<li>There is a "watcher" mode.  It is like raw mode in that the
-GPS streams updates at you, but unlike it in that the updates are in 
-the simpler GPSD format rather than the more complex NMEA one.</li>
-
-<li>The daemon now automatically tries to reconnect to the GPS once
-a second when it is offline but clients are connected.</li>
-
-<li>Writes to clients are nonblocking, so new <code>gpsd</code> cannot
-be stalled by a wedged client.</li>
-
-<li>The code in the new version has been carefully audited for quality,
-static-checked using <a href='http://www.splint.org'>splint</a>, and
-is regression-tested before every release.</li>
-
-<li>It took us two years of hard work, but as of late 2006
-<code>gpsd</code> dominates its application niche so completely that
-every competitor we knew of in 2004 has been abandoned by its own
-maintainers in our favor.  The 1.x versions or any fork you use won't
-be getting any future maintenance.</li>
-</ol>
-
 <h1 id='why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</h1>
 
-<p>Some applications that use <code>gpsd</code> start raw mode with
-the 'r' command and parse the NMEA directly.  This is not a good idea.</p>
+<p>Some applications that use <code>gpsd</code> start raw mode
+and parse the NMEA directly.  This is not a good idea.</p>
 
 <p>One problem with raw mode is that NMEA is a poorly specified
 standard.  There are, for example, two different and incompatible
@@ -639,7 +452,7 @@ same sorts of computation that more capable GPSes use.</p>
 <h1 id='interfacing'>How should  I interface my application with <code>gpsd</code>?</h1>
 
 <p>The <code>gpsd</code> package provides two ways for C code to get
-data from a GPS or AIS rceiver.  Both go through the libgps.a library,
+data from a GPS or AIS receiver.  Both go through the libgps.a library,
 which supports two sets of entry points. The <a
 href="libgpsd.html">low-level interface</a> talks directly to the GPS.
 The <a href="libgps.html">high-level interface</a> communicates with
@@ -663,42 +476,6 @@ build from source that conditions out all but one of the drivers.</p>
 
 <p>For Python programmers, there is a gps.py module the high-level
 interface.  It exports a class that encapsulates a GPS session.</p>
-
-<h1 id='changes'>How has the <code>gpsd</code> interface changed since 1.x?</h1>
-
-<p>Note: This section describes evolutionary changes in the old
-1.x-2.x protocol.  This protocol is now deprecated; while still
-supported for backward compatibility, it will be removed in the
-future. You should be using the new JSON-based protocol. preferably
-through one of our client libraries.</p>
-
-<p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>
-
-<p>First, <code>gpsd</code>-2's command-line options have been changed
-and simplified.  If your <code>gpsd</code>-using application is
-starting up <code>gpsd</code> directly you may find you have to modify
-the invocation.  However, we don't recommend this.  New
-<code>gpsd</code> is designed to be started by hotplug scripts when
-a USB device wakes up, or started at boot time and run
-continuously just like any normal daemon.  It will do nothing, and be
-swapped out, unless there are clients trying to query the GPS.</p>
-
-<p>Second, <code>gpsd</code> now returns "?" as the contents for a 
-field when it doesn't have valid data for that field (e.g. latitude 
-or longitude before the first fix).  This is only an issue if you are
-interpreting GPSD responses yourself rather than using libgps.a or the
-gps.py Python module.</p>
-
-<p>Third, the format of the timestamp returned by the D command has
-changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
-No more U.S.-centric date-format assumptions!  Also, as previously
-noted, the seconds part may have one or more digits of decimal fractional
-seconds.</p>
-
-<p>The protocol and API around <code>gpsd</code> will need to change
-again in the future.  See <a href="compatibility.html">this
-compatibility page</a> for explanation, and for advice on how to
-minimize your exposure to the change.</p>
 
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 

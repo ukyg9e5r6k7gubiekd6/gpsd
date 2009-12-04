@@ -26,7 +26,7 @@
     <a href="for-vendors.html">For GPS Vendors</a><br/>
     <a href="hall-of-shame.html">Hall of Shame</a><br/>
     Hacker's Guide<<br/>
-    <a href="compatibility">Application Compatibility</a>
+    <a href="protocol-transition.html">Application Compatibility</a>
     <a href="references.html">References</a><br/>
     <a href="history.html">History</a><br/>
     <a href="future.html">Future</a><br/>
@@ -1139,20 +1139,12 @@ logfile format.</p>
 portion during which the GPS has no fix, a portion during which it has
 a fix but is stationary, and a portion during which it is moving.</p>
 
-<h1 id="designahead">GPSD-NG, the Next-Generation GPSD Protocol</h1>
+<h1 id="designahead">Future Protocol Directions</h1>
 
-<p>There are almost no more letters left in the namespace of the GPSD
-version 3 protocol.  As early as 2006 we had only one more
-command left, 'h', and that was it.  We knew that that, extending the set would
-require a new command/response syntax.  Some posts in the dev-list
-archive refer to this as "Version 4", but GPSD-NG got implemented.
-well before that major version level was reached </p>
+<p>The new protocol based on <a href="http://www.json.org/">JSON</a> 
+(JavaScript Object Notation) shipped in 2.90.</a>
 
-<p>The new protocol has now been implemented and is in testing.  It is
-based on <a href="http://www.json.org/">JSON</a> (JavaScript Object
-Notation).</a>
-
-<p>The major virtue of JSON is its extensibility. There are
+<p>A major virtue of JSON is its extensibility. There are
 <em>lots</em> of other things a sensor wedded to a GPS might report
 that don't fit the position-velocity-time model of the oldstyle O report.
 Depth of water.  Temperature of water.  Compass heading.  Roll.
@@ -1160,11 +1152,8 @@ Pitch. Yaw.  We've already had requests to handle some of these for
 NMEA-emitting devices like magnetic compasses (which report heading
 via a proprietary TNTHTM sentence) and fish finders (which report
 water depth and temperature via NMEA DPT and MTW sentences). JSON
-gives a natural way to add ad-hoc fields.</p>
-
-<p>The '{' introducer on JSON responses serves to distinguish
-them from old-style responses that effectively have 'GPSD,' as an
-introducer.
+gives a natural way to add ad-hoc fields, and we expect to
+explot that in the future.</p>
 
 <h2>Proposed sentences:</h2>
 

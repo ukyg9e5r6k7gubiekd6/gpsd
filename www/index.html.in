@@ -33,7 +33,7 @@
     <a href="hall-of-shame.html">Hall of Shame</a><br/>
     <a href="hacking.html">Hacker's Guide</a><br/>
     <a href="references.html">References</a><br/>
-    <a href="compatibility">Application Compatibility</a>
+    <a href="protocol-transition.html">Application Compatibility</a>
     <a href="history.html">History</a><br/>
     <a href="future.html">Future</a><br/>
 
@@ -66,10 +66,10 @@
 
 <h1 id='news'>Urgent news for maintainers of <code>gpsd</code> clients</h1>
 
-<p>We've been warning it was coming for years, and it's here: the
-request/response protocol used by <code>gpsd</code> is about to change
-in ways that will break your application if you're not careful.  The
-old protocol is still supported, but will remain so only for a very
+<p>We've been warning it was coming for years, and it's here: in 2.90,
+the request/response protocol used by <code>gpsd</code> has changed in
+ways that will break your application if you're not careful.  The old
+protocol is still supported, but will remain so only for a very
 limited time.  Read <a href="protocol-transition.html">"Moving to
 GPSD-NG: a Guide for Client Developers"</a> to find out why this is
 happening and what you need to do about it.</p>

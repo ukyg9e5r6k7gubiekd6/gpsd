@@ -1,10 +1,10 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.2, November 2009
+v1.3, December 2009
 
 == Why a new protocol? ==
 
-GPSD is moving to a new request/response protocol.  This move has been
+GPSD has moved to a new request/response protocol.  This move has been
 forced upon us because the old one ran out of namespace.  It was
 designed with case-insensitive single-character command/response
 codes. 25 of 26 ASCII alphabetics were already in use by 2006, and
@@ -19,13 +19,25 @@ line noise and only delayed the day of reckoning.  Instead, we've
 written a new protocol that is upward-compatible with the old one 
 in that you can mix old and new syntax.
 
-The old protocol will continue to be available for some time, but not
-indefinitely.  Eventually we're going to want to shed the code
-complexity and overhead of maintaining both protocols at once. This
-will happen sooner than it otherwise might have because gpsd is in
-part targeted for SBCs and other constrained environments where 
-shaving a few K off the runtime image can actually matter.  When
-it comes to keeping the codebase lean and mean, we try harder.
+There were other problems as well. The old command set encouraged
+sloppy handling of data by supporting commands that return PVT and
+fix-quality information in atomized partial form, without
+timestamps.
+
+There was also no way to support returning more than single-line
+responses to a client. This is a problem for returning things like <a
+http://gps.wva.net/html.com[RINEX] format, which we'd like to be able
+to do when a device can report pseudoranges.
+
+The old protocol will continue to be available until the 2.91 release,
+but that's not far in the future; it coould be removed from the
+development sources a t any time, and may already have been when you
+read this.  Eventually we're going to want to shed the code complexity
+and overhead of maintaining both protocols at once. This will happen
+sooner than it otherwise might have because gpsd is in part targeted
+for SBCs and other constrained environments where shaving a few K off
+the runtime image can actually matter.  When it comes to keeping the
+codebase lean and mean, we try harder.
 
 We'll try to make the transition easy, but we cannot guarantee no
 problems. The sooner you start adapting your code, the less pain you

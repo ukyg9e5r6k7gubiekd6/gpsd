@@ -5,7 +5,7 @@
   consequence, AIS is now fully supported in both daemon and client.
   Detection of end of a fix-reporting cycle is now reliable;
   accordingly data is accumulated from cycle start and the "J"
-  (nojitter) opoption on both server and client side is gone. We have
+  (nojitter) option on both server and client side is gone. We have
   abandoned the gpsflash subproject since it has become apparent that
   we can't do it without more vendor cooperation than we're likely to
   get. Increase major version of shared library due to significant API
