@@ -26,21 +26,10 @@ to reverse his refusal to send us an eval unit.
 
 *** Driver issues
 
-**** uBlox-lea-4h.log.chk: 
-
-Time value in TPVs looks like garbage. Something is probably
-off-kilter in the field extraction.
-
 **** bu303-nofix.log.ck: 
 
 Test returns a bogus altitude (large and negative) on NetBSD 5.0
 i386, but not on Intel 64. This is probably a 32-vs.64-bit port problem.
-
-**** mkt-3301.chk and rgm3800.chk:
-
-These files contain bogus timestamps with year beyond 2080.  There is
-probably something wrong with the way we extract time from these
-packets.
 
 **** navcom.chk:
 

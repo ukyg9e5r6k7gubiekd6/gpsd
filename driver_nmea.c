@@ -75,8 +75,12 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 /* sentence supplied ddmmyy, but no century part */
 {
-    if (session->driver.nmea.date.tm_year == 0)
+    if (session->driver.nmea.date.tm_year == 0) {
 	session->driver.nmea.date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
+	gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
+		    session->driver.nmea.date.tm_year,
+		    ddmmyy);
+    }
     session->driver.nmea.date.tm_mon = DD(ddmmyy+2)-1;
     session->driver.nmea.date.tm_mday = DD(ddmmyy);
 }
@@ -145,12 +149,6 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
      */
     gps_mask_t mask = 0;
 
-    if (count > 9 && field[1][0]!='\0' && field[9][0]!='\0') {
-	merge_hhmmss(field[1], session);
-	merge_ddmmyy(field[9], session);
-	mask |= TIME_SET;
-	register_fractional_time(field[0], field[1], session);
-    }
     if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
 	if (session->gpsdata.status != STATUS_NO_FIX) {
@@ -164,6 +162,17 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	/* set something nz, so it won't look like an unknown sentence */
 	mask |= ONLINE_SET;
     } else if (strcmp(field[2], "A")==0) {
+	/*
+	 * The MKT3301, Royaltek RGM-3800, and possibly other
+	 * devices deliver bogus time values when the navigation
+	 * warning bit is set.
+	 */
+	if (count > 9 && field[1][0]!='\0' && field[9][0]!='\0') {
+	    merge_hhmmss(field[1], session);
+	    merge_ddmmyy(field[9], session);
+	    mask |= TIME_SET;
+	    register_fractional_time(field[0], field[1], session);
+	}
 	do_lat_lon(&field[3], &session->gpsdata);
 	mask |= LATLON_SET;
 	session->gpsdata.fix.speed = atof(field[7]) * KNOTS_TO_MPS;
@@ -990,9 +999,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_SET)!=0) {
 	session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	gpsd_report(LOG_DATA, "%s computed time is %2f\n", 
+	gpsd_report(LOG_DATA, "%s computed time is %2f = %s\n", 
 		    session->driver.nmea.field[0],
-		    session->gpsdata.fix.time);
+		    session->gpsdata.fix.time,
+		    asctime(&session->driver.nmea.date));
     }
 
     /*

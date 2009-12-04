@@ -657,6 +657,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->d_decode_time = timestamp();
 #endif /* TIMING_ENABLE */
 
+	/*
+	 * Sanity check.  This catches a surprising number of port and
+	 * driver errors, including 32-vs.-64-bit problems.
+	 */
+	if ((session->gpsdata.set & TIME_SET)!=0) {
+	    if (session->gpsdata.fix.time > time(NULL) + (60 * 60 * 24 * 365))
+		gpsd_report(LOG_ERROR,"date more than a year in the future!\n");
+	    else if (session->gpsdata.fix.time < 0)
+		gpsd_report(LOG_ERROR,"date is negative!\n");
+	}
+
 	return session->gpsdata.set;
     }
 }
