@@ -214,7 +214,7 @@ features of the repository tip (development version) rather than the
 latest stable version.</p>
 
 <dl>
-<dt><a href="gpsd.html">gpsd.1</a></dt>
+<dt><a href="gpsd.html">gpsd.8</a></dt>
 <dd>The <code>gpsd</code> daemon.</dd>
 
 <dt><a href="xgps.html">gps.1</a></dt>
@@ -323,6 +323,10 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 
 <dt><a href="writing-a-driver.html">Notes on Writing a GPSD Driver</a></dt>
 <dd>A guide for the perplexed by the author of the Jupiter-T driver.</dd>
+
+<dt><a href="excellence.html">GPSD and Code Excellence</a></dt>
+<dd>An essay written for the <a href="http://codeoffsets.com/">The
+Alliance for Code Excellence</a> omn how GPSD drives out bad code.</dd>
 
 </dl>
 

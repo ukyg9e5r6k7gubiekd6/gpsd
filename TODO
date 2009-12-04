@@ -24,18 +24,28 @@ fix the driver yourself and send us the patch, contact Bill Powell
 <bpowell@tntc.com> at True North Technologies and tell him he needs
 to reverse his refusal to send us an eval unit.
 
-*** SiRF 15-second lag
-
-The tendency of SiRF chips to lag real-time by 15 seconds or so
-under some (unexplained) circumstances is still...unexplained. Or,
-rather, we have several different possible explanations and have
-not been able to verify any of them.  Note, this is not properly
-a gpsd problem, but it may well be there is some sort
-of mode switch we should be uttering.
-
 *** Driver issues
-**** uBlox-lea-4h.log.chk: Time value in TPVs looks like garbage.
-**** uBlox-lea-4t.log.chk: ubx driver is dumping garbage values in GSA. 
+
+**** uBlox-lea-4h.log.chk: 
+
+Time value in TPVs looks like garbage. Something is probably
+off-kilter in the field extraction.
+
+**** bu303-nofix.log.ck: 
+
+Test returns a bogus altitude (large and negative) on NetBSD 5.0
+i386, but not on Intel 64. This is probably a 32-vs.64-bit port problem.
+
+**** mkt-3301.chk and rgm3800.chk:
+
+These files contain bogus timestamps with year beyond 2080.  There is
+probably something wrong with the way we extract time from these
+packets.
+
+**** navcom.chk:
+
+This testfile triggers a numeric instability in the sin() and cos() 
+functions inside earth_distance().  The result is that epd is unstable.
 
 ** To do:
 
