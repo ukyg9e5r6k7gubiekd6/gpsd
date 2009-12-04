@@ -48,7 +48,7 @@ endif
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 
-check_PROGRAMS = test_float test_bits test_packet test_mkgmtime test_geoid test_json
+check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_geoid test_json
 if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
@@ -267,10 +267,10 @@ clean-local:
 	rm -rf build
 
 if LIBGPSMM_ENABLE
-TESTBINS = test_float test_gpsmm test_bits test_packet test_geoid \
+TESTBINS = test_float test_trig test_gpsmm test_bits test_packet test_geoid \
 	test_mkgmtime test_json
 else
-TESTBINS = test_float test_bits test_packet test_geoid \
+TESTBINS = test_float test_trig test_bits test_packet test_geoid \
 	test_mkgmtime test_json
 endif
 
@@ -279,6 +279,12 @@ endif
 #
 test_float_SOURCES = test_float.c
 test_float_LDADD = $(LIBC) libgps.la -lm
+
+#
+# Build test_trig
+#
+test_trig_SOURCES = test_trig.c
+test_trig_LDADD = $(LIBC) libgps.la -lm
 
 if LIBGPSMM_ENABLE
 #
@@ -401,6 +407,7 @@ EXTRA_DIST = \
 	maskaudit.py.in \
 	dgpsip-servers \
 	test_float.c \
+	test_trig.c \
 	gpsd.php \
 	gpsd.xml \
 	gpsd.h-head \
