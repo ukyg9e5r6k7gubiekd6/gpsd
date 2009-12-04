@@ -38,6 +38,12 @@ functions inside earth_distance().  The result is that epd is unstable.
 
 ** To do:
 
+*** Ship a DEVICE notification on every driver change
+
+There's a race condition where if you start cgps at just the right
+time while an NMEA device is being probed, it may switch to a binary
+type but never update the type display.
+
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
 These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
