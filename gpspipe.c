@@ -222,8 +222,8 @@ int main( int argc, char **argv)
 
     /*
      * Assemble the initialization command. 
-     * FIXME: Should be done with a slightly enhanced gps_stream(),
-     * but we're in feature freeze.
+     * Can't be done with gps_stream(), as the source option may 
+     * require us to ship a pathname.
      */
     (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
     if (watch)
@@ -249,12 +249,12 @@ int main( int argc, char **argv)
 	(void)fputs(buf, stdout);
 
     if (serialport!=NULL && raw) {
-	(void)fprintf(stderr, "gpsipipe: use of '-s' requires '-r'.\n");
+	(void)fprintf(stderr, "gpspipe: use of '-s' requires '-r'.\n");
 	exit(1);
     }
 
     if (filename==NULL && daemon) {
-	(void)fprintf(stderr, "gpsipipe: use of '-d' requires '-f'.\n");
+	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-f'.\n");
 	exit(1);
     }
 
