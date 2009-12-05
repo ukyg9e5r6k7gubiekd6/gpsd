@@ -29,12 +29,22 @@ to reverse his refusal to send us an eval unit.
 **** bu303-nofix.log.ck: 
 
 Test returns a bogus altitude (large and negative) on NetBSD 5.0
-i386, but not on Intel 64. This is probably a 32-vs.64-bit port problem.
+i386, and on NetBSD/amd64, but not on Intel 64.
 
 **** navcom.chk:
 
-This testfile triggers a numeric instability in the sin() and cos() 
-functions inside earth_distance().  The result is that epd is unstable.
+This testfile triggers a numeric instability in the earth_distance()
+function.  The result is that epd is unstable.  What we should do is
+use the official US Government function for
+calculating earth distances: INVERSE.  See
+http://www.ngs.noaa.gov/TOOLS/Inv_Fwd/Inv_Fwd.html =>
+http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/source/
+
+**** superstar2.chk:
+
+Packet detection appears to fail completely on big-endian machines.
+Greg Troxel reports this from netbsd-5/sparc64.  output at
+<http://www.lexort.com/gpsd/>.
 
 ** To do:
 
