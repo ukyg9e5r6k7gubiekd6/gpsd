@@ -47,6 +47,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    /* reconfiguration might be required */
 	    if (identified && session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session, event_driver_switch);
+	    /* clients should be notified */
+	    session->notify_clients = true;
 	    return 1;
 	}
     gpsd_report(LOG_ERROR, "invalid GPS type \"%s\".\n", type_name);
@@ -613,13 +615,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->device_type->event_hook(session, event_configure);
 
 	/*
-	 * If this is the first time we've achieved sync on this device, that's
-	 * a significant event that the caller needs to know about.  Using
-	 * DEVICE_SET this way is a bit shaky but we're short of bits in
-	 * the flag mask (client library uses it differently).
+	 * If this is the first time we've achieved sync on this
+	 * device, or the the driver type has changed for any other
+	 * reason, that's a significant event that the caller needs to
+	 * know about.  Using DEVICE_SET this way is a bit shaky but
+	 * we're short of bits in the flag mask (client library uses
+	 * it differently).
 	 */
-	if (first_sync)
+	if (first_sync || session->notify_clients) {
+	    session->notify_clients = false;
 	    received |= DEVICE_SET;
+	}
 
 	/* Get data from current packet into the fix structure */
 	if (session->packet.type != COMMENT_PACKET)

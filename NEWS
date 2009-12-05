@@ -1,4 +1,6 @@
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91dev
+  We have support for NMEA GLONASS sentences, and a regression test.
+  Clients now get a DEVICE dotification on every driver switch.
 
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
