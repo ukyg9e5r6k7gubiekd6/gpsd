@@ -51,6 +51,8 @@ calculating earth distances: INVERSE.  See
 http://www.ngs.noaa.gov/TOOLS/Inv_Fwd/Inv_Fwd.html =>
 http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/source/
 
+Useful tool for the purpose: http://www.netlib.org/f2c/
+
 **** superstar2.chk:
 
 Packet detection appears to fail completely on big-endian machines.
