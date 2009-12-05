@@ -34,7 +34,7 @@ interrupted by ^C or other means.</para>
 
 <para>In raw mode (the default) <application>gpscat</application>
 simply dumps its input to standard output.  Nonprintable characters
-other than ASCII whitepace are rendered as hexadecimal string escapes.
+other than ASCII whitepace are rendered as hexadecimal string escapes.</para>
 
 <para>In packetizing mode, <application>gpscat</application> uses the
 same code as
