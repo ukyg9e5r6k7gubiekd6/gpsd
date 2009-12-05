@@ -446,7 +446,9 @@ EXTRA_DIST = \
 	packaging/gpsd.spec \
 	packaging/etc_default_gpsd \
 	packaging/etc_init.d_gpsd \
-	packaging/etc_init.d_gpsd_rpm
+	packaging/etc_init.d_gpsd_rpm \
+	regress-driver \
+	test
 
 #dist-hook:
 #	$(MKDIR_P) '$(distdir)/contrib' && \
