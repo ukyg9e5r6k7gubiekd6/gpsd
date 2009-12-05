@@ -37,6 +37,8 @@ SYSFS{idVendor}=="091e", SYSFS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/
 SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U)
 SYSFS{idVendor}=="1546", SYSFS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# FTDI FT232
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
