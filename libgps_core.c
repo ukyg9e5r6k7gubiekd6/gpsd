@@ -11,6 +11,9 @@
 #include <stdarg.h>
 #include <math.h>
 #include <locale.h>
+#if defined (HAVE_SYS_SELECT_H)
+#include <sys/select.h>
+#endif
 
 #include "gpsd.h"
 #include "gps_json.h"
@@ -577,6 +580,19 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
  * return: 0, success
  *        -1, read error
  */
+
+bool gps_waiting(struct gps_data_t *gpsdata)
+/* is there input waiting from the GPS? */
+{
+    fd_set rfds;
+    struct timeval tv;
+
+    FD_ZERO(&rfds);
+    FD_SET(gpsdata->gps_fd, &rfds);
+    tv.tv_sec = 0; tv.tv_usec = 1;
+    /* all error conditions return "not waiting" -- crude but effective */
+    return (select(gpsdata->gps_fd+1, &rfds, NULL, NULL, &tv) == 1);
+}
 
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */

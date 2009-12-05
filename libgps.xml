@@ -49,6 +49,10 @@ C:
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcdef>bool <function>gps_waiting</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>void <function>gps_close</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
@@ -143,6 +147,11 @@ query response (the return value is as for a query).
 received structure.  This function does a blocking read waiting for
 data from the daemon; it returns 0 for success, or -1 on a Unix-level
 read error. </para>
+
+<para><function>gps_waiting()</function> can be used to check
+whether there is data from the daemon. It returns true if there is,
+false on no data waiting or error condition. It does not block
+waiting for input.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
@@ -256,6 +265,9 @@ command is shipped to it will be the reponse to command.</para>
 <para>If you must send commands to the daemon explicity, use
 <function>gps_send()</function> but beware that this ties your code to
 the GPSD wire protocol. It is not recommended.</para>
+
+<para>Thia API has been stable since GPSD 2.90, except that
+<function>gps_waiting()</function> was added in 2.91.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
