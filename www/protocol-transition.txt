@@ -31,13 +31,13 @@ to do when a device can report pseudoranges.
 
 The old protocol will continue to be available until the 2.91 release,
 but that's not far in the future; it coould be removed from the
-development sources a t any time, and may already have been when you
-read this.  Eventually we're going to want to shed the code complexity
-and overhead of maintaining both protocols at once. This will happen
-sooner than it otherwise might have because gpsd is in part targeted
-for SBCs and other constrained environments where shaving a few K off
-the runtime image can actually matter.  When it comes to keeping the
-codebase lean and mean, we try harder.
+development sources at any time, and may already have been when you
+read this.  We want to shed the code complexity and overhead of
+maintaining both protocols at once. This will happen sooner than it
+otherwise might have because gpsd is in part targeted for SBCs and
+other constrained environments where shaving a few K off the runtime
+image can actually matter.  When it comes to keeping the codebase lean
+and mean, we try harder.
 
 We'll try to make the transition easy, but we cannot guarantee no
 problems. The sooner you start adapting your code, the less pain you
@@ -108,10 +108,10 @@ either (a) you want to learn about gpsd's new capabilities so you
 can use them in creative ways, or (b) you want to caper with unholy glee 
 as you contemplate the trials awaiting the non-virtuous.
 
-If you are non-virtuous - that is, you rolled your own client-side
-interface - you've had years of warning that this choice would 
+If you are non-virtuous -- that is, you rolled your own client-side
+interface -- you've had years of warning that this choice would 
 fail to insulate you from protocol details and cost you pain in the
-future -- and that future is now.  
+future. That future is now.  
 
 In the remainder of this document we will try to help you minimize the
 pain.  The main strategy for doing so is to *use libgps* (or its
@@ -366,7 +366,7 @@ has had a corresponding Python gps-class send() method all along.
 The pre-existing interface using the poll() method and self.valid is
 still available and should work compatibly with a daemon speaking
 JSON. One new feature has been added; after a VERSION response (which
-a JSON-speaking instance of gpsd should emitwhen a connection is
+a JSON-speaking instance of gpsd should emit when a connection is
 opened) the version member of the session will be an object containing
 version information. However, data from the new responses (WATCH,
 VERSION, AIS, and TIMING in particular) will be available only through
