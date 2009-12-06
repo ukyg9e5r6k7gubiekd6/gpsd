@@ -28,6 +28,7 @@ extern char *strtok_r(char *, const char *, char **);
 
 #ifdef LIBGPS_DEBUG
 static int debuglevel = 0; 
+static int waitcount = 0;
 static FILE *debugfp;
 
 void gps_enable_debug(int level, FILE *fp)
@@ -582,6 +583,7 @@ bool gps_waiting(struct gps_data_t *gpsdata)
     fd_set rfds;
     struct timeval tv;
 
+    libgps_debug_trace((1, "gps_waiting(): %d\n", waitcount));
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
     tv.tv_sec = 0; tv.tv_usec = 1;

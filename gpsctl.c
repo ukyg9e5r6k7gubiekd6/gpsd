@@ -200,7 +200,9 @@ int main(int argc, char **argv)
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
 	    gpsd_hexdump_level = debuglevel;
+#ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debuglevel, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "gpsctl: version %s (revision %s)\n",

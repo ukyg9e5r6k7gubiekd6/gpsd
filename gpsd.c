@@ -1827,7 +1827,9 @@ int main(int argc, char *argv[])
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
 	    gpsd_hexdump_level = debuglevel;
+#ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debuglevel, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
 	    break;
 	case 'F':
 	    control_socket = optarg;
