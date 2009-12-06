@@ -59,15 +59,16 @@ MODE_3D = 3
 MAXCHANNELS = 12
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
-WATCH_DISABLE	= 0x00
-WATCH_ENABLE	= 0x01
-WATCH_JSON	= 0x02
-WATCH_NMEA	= 0x04
-WATCH_RARE	= 0x08
-WATCH_RAW	= 0x10
-WATCH_SCALED	= 0x20
-WATCH_NEWSTYLE	= 0x40
-WATCH_OLDSTYLE	= 0x80
+WATCH_DISABLE	= 0x0000
+WATCH_ENABLE	= 0x0001
+WATCH_JSON	= 0x0002
+WATCH_NMEA	= 0x0004
+WATCH_RARE	= 0x0008
+WATCH_RAW	= 0x0010
+WATCH_SCALED	= 0x0020
+WATCH_NEWSTYLE	= 0x0040
+WATCH_OLDSTYLE	= 0x0080
+WATCH_DEVICE	= 0x0100
 
 GPSD_PORT = 2947
 
@@ -504,7 +505,7 @@ class gps(gpsdata):
             commands += "\n"
         self.sock.send(commands)
 
-    def stream(self, flags=0):
+    def stream(self, flags=0, outfile=None):
         "Ask gpsd to stream reports at your client."
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
             # If we're looking at a daemon that speakds JSON, this
@@ -551,6 +552,8 @@ class gps(gpsdata):
                     arg += ',"raw":0'
                 if flags & WATCH_SCALED:
                     arg += ',"scaled":true'
+                if lags & WATCH_DEVICE:
+                    arg += ',"device":"%s"' % outfile
             return self.send(arg + "}")
 
 # some multipliers for interpreting GPS output

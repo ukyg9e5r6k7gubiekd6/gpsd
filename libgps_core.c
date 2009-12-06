@@ -633,7 +633,9 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
 }
 
-int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
+int gps_stream(struct gps_data_t *gpsdata, 
+	       unsigned int flags, 
+	       /*@null@*/void *d)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
     char buf[GPS_JSON_COMMAND_MAX];
@@ -665,6 +667,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
+	libgps_debug_trace((1, "gps_stream() enable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     } else /* if ((flags & WATCH_ENABLE) != 0) */{
 	if ((flags & WATCH_OLDSTYLE) != 0) {
@@ -683,10 +686,16 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d UNUSED)
 		(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */
+	    if (flags & WATCH_DEVICE)
+		(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
+			       "\"device\":%s,", (char*)d);
+	    /*@+nullpass@*/
 	    if (buf[strlen(buf)-1] == ',')
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
+	libgps_debug_trace((1, "gps_stream() disable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     }
 }

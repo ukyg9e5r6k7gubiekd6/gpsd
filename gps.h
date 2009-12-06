@@ -980,15 +980,16 @@ struct gps_data_t {
 };
 
 /* mode flags for gps_stream() */
-#define WATCH_DISABLE	0x00u	/* disable watching */
-#define WATCH_ENABLE	0x01u	/* enable streaming */
-#define WATCH_JSON	0x02u	/* enable JSON output */
-#define WATCH_NMEA	0x04u	/* enable output in NMEA */
-#define WATCH_RARE	0x08u	/* enable output of packets in hex */
-#define WATCH_RAW	0x10u	/* enable output of raw packets */
-#define WATCH_SCALED	0x20u	/* scale output to floats, when applicable */ 
-#define WATCH_NEWSTYLE	0x40u	/* force JSON streaming */
-#define WATCH_OLDSTYLE	0x80u	/* force old-style streaming */
+#define WATCH_DISABLE	0x000u	/* disable watching */
+#define WATCH_ENABLE	0x0001u	/* enable streaming */
+#define WATCH_JSON	0x0002u	/* enable JSON output */
+#define WATCH_NMEA	0x0004u	/* enable output in NMEA */
+#define WATCH_RARE	0x0008u	/* enable output of packets in hex */
+#define WATCH_RAW	0x0010u	/* enable output of raw packets */
+#define WATCH_SCALED	0x0020u	/* scale output to floats, when applicable */ 
+#define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
+#define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
+#define WATCH_DEVICE	0x0100u	/* watch specific device */
 
 extern int gps_open_r(const char *host, const char *port, 
 		      /*@out@*/struct gps_data_t *gpsdata);
@@ -997,7 +998,9 @@ extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... );
 extern int gps_poll(struct gps_data_t *gpsdata);
 extern bool gps_waiting(struct gps_data_t *gpsdata);
-extern int gps_stream(struct gps_data_t *gpsdata, unsigned int flags, /*@null@*/void *);
+extern int gps_stream(struct gps_data_t *gpsdata, 
+		      unsigned int flags, 
+		      /*@null@*/void *);
 extern void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len));
 extern char /*@observer@*/ *gps_errstr(const int);
 
