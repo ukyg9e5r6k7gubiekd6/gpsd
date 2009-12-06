@@ -56,12 +56,6 @@ C:
 <funcdef>void <function>gps_close</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
-<funcprototype>
-<funcdef>void <function>rtcm2_unpack</function></funcdef>
-    <paramdef>struct rtcm_t *<parameter>rtcmp</parameter></paramdef>
-    <paramdef>char *<parameter>buf</parameter></paramdef>
-</funcprototype>
-<funcprototype>
 <funcdef>int <function>gps_stream</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>unsigned int<parameter>flags</parameter></paramdef>
@@ -182,19 +176,6 @@ in the session structure over time, and the 'valid' field is not
 automatically zeroed by each poll.  It is up to the client to
 zero that field when appropriate and to keep an eye on the fix 
 and sentence timestamps.</para>
-
-<para>The <function>rtcm_unpack()</function> will be useful when you
-are connected to an RTCM-104 source in raw mode.  Use it as part of a
-raw hook, calling it with the address of the <structname>struct
-rtcm_t</structname> element of your session structure buffer as first
-argument and the buffer as the second.  It will unpack a line of RTCM
-data into the structure.  This function returns 0 when it has read the
-last line of an RTCM-104 message, a positive int when it expects more
-dump lines, and a negative int on parse failure. You must zero out the
-<structname>struct rtcm_t</structname> each time before this function
-is called on a new header (H) line, as it relies on the message type
-field being initially zero and uses it to track what kind of 
-following line is expected.</para>
 
 <para>The Python implementation supports the same facilities as the C
 library. <function>gps_open()</function> is replaced by the
