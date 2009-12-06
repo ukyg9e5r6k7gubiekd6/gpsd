@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.3, December 2009
+v1.4, December 2009
 
 == Why a new protocol? ==
 
@@ -21,28 +21,63 @@ in that you can mix old and new syntax.
 
 There were other problems as well. The old command set encouraged
 sloppy handling of data by supporting commands that return PVT and
-fix-quality information in atomized partial form, without
-timestamps.
+fix-quality information in atomized partial form, without timestamps.
 
 There was also no way to support returning more than single-line
-responses to a client. This is a problem for returning things like <a
+responses to a client. This was a problem for returning things like
 http://gps.wva.net/html.com[RINEX] format, which we'd like to be able
 to do when a device can report pseudoranges.
 
-The old protocol will continue to be available until the 2.91 release,
-but that's not far in the future; it coould be removed from the
-development sources at any time, and may already have been when you
-read this.  We want to shed the code complexity and overhead of
-maintaining both protocols at once. This will happen sooner than it
-otherwise might have because gpsd is in part targeted for SBCs and
-other constrained environments where shaving a few K off the runtime
-image can actually matter.  When it comes to keeping the codebase lean
-and mean, we try harder.
+== The transition plan ==
+
+We need to shed the code complexity and overhead of maintaining both
+protocols at once. This will happen sooner than it otherwise might
+have because gpsd is in part targeted for SBCs and other constrained
+environments where shaving a few K off the runtime image can actually
+matter.  When it comes to keeping the codebase lean and mean, we try
+harder.
+
+Thus: the old protocol will continue to be available from the daemon
+for the next one or two point releases, but those are not far in the
+future and it could be removed from the development sources at any
+time after 2.91.  Old protocol will be supported in the client-side
+library for somewhat longer, giving your applications a bridge period
+when they can speak both old and new protocol -- but the client-side
+support for old protocol will be removed when 3.0 ships.
+
+This is our schedule for the changeover:
+
+[options="header"]
+|================================================================
+| Release | Timing                      | Description
+
+| 2.91    | Before end of January 2010	|
+Wire protocol freezes (no incompatible changes going forward from
+this point). Old protocol support will be removed from the daemon, but
+not from the library.
+
+| 2.92    | Jan-Feb 2010                |
+Cleanup release, if needed.
+
+| 3.0     | Before 30 June 2010         |
+Old protocol support will be removed from the library.
+
+|================================================================
+
+The most likely way for this schedule to flex is with another point
+release or two before 3.0, but the overall timeframe is firm.
+
+If you follow our transition advice now, you will be able to talk to
+all old-protocol and new-protocol versions of the daemon until the
+3.0 shared client library is deployed in mid-2010, at which point your
+runtime will silently get smaller but you won't be able to use 2.x 
+daemon versions any more. You should only have to change your
+application source code once.
 
 We'll try to make the transition easy, but we cannot guarantee no
 problems. The sooner you start adapting your code, the less pain you
 are likely to experience.  The rest of this document will explain both
-theory and practice, and give you specific questions on how to fix
+theory and practice, and give you specific pointers on how to fix
 client code.
 
 == Virtue is rewarded ==
@@ -239,7 +274,7 @@ you could ask gpsd to stream GPS reports at you whenever it got them.
 
 In the new protocol, streaming is all there is.  Every report coming
 up from the daemon is tagged with its device and type.  Instead of
-issuing commands and then ewaiting for specific responses, clients
+issuing commands and then waiting for specific responses, clients
 should expect any kind of report at any time and merge it into
 client-local storage (libgps does this for you).
 
@@ -261,10 +296,13 @@ equivalents.  Use libgps.
 If your code issues B, C, or N commands, they need to change to
 ?DEVICE commands.  See the protocol reference for details.
 
-The old 'F' and 'G' commands do not have equivalents.  It would be
-possible to implement these, but we probably won't do it unless there is
-actual demand.  Consider teaching your client to ignore fix updates
-when they don't have a specified "device" or "class" tag, respectively.
+The 'F' command has no equivalent in 2.90; consider teaching your
+client to ignore fix updates when they don't have a specified "device"
+or "class" tag, respectively.  There will be an equivalent in 2.91.
+
+The old 'G' command does not have an equivalent.  It would be possible
+to implement one, but we probably won't do it unless there is actual
+demand (and we don't expect any).
 
 The old 'I' command has no equivalent. You probably issued it as part
 of an initialization string, hoping that a subtype string would later
@@ -293,9 +331,10 @@ The old 'Q' command has no equivalent.  DOPs are reported in the SKY response.
 The 'S' command has no equivalent, because it is not well defined what
 value should be presented for binary protocols.
 
-The old 'R' command has been replaced by two optional attributes in
-?WATCH.  Include the WATCH_RAW and/or WATCH_NMEA masks in the argument
-of gps_stream(), or set a raw hook before alling gps_stream().
+The old 'R' command has been replaced by three optional attributes in
+?WATCH.  Include the WATCH_RARE, WATCH_RAW and/or WATCH_NMEA masks in
+the argument of gps_stream(), or set a raw hook before alling
+gps_stream().
 
 The old 'W' command has been replaced by ?WATCH. Call gps_stream()
 with whatever options you want to set.
@@ -350,11 +389,15 @@ a bug or two.
 There is a new substructure, dop, which holds the
 dilution-of-precision factors that were previously individual members
 of the gpsdata structure. Two new DOPs, xdop and ydop, are available;
-these express dilution of precisopn in longitude and latitude,
+these express dilution of precision in longitude and latitude,
 respectively.
 
 The signature of the raw_hook member has changed.  It no longer takes
 the final 'level' argument, which libgps had always set to 1.
+
+The 2.91 API will include a gps_waiting() method analogous to the 
+waiting() method in he Pythonn class -- a non-blocking way to check
+if input is waiting from the daemon.
 
 == Python client library changes ==
 
