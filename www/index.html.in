@@ -101,6 +101,7 @@ aim for simple, robust interfaces, unfussy operation, and an easy
 learning curve for application developers.  Applications that
 presently use <code>gpsd</code> include <a
 href="http://www.pygps.org">pyGPS</a>, <a
+href="http://www.gpsdrive.de/">gpsdrive</a>, <a
 href="http://www.kismetwireless.net/">Kismet</a>, <a
 href="http://www.gpsdrive.de/">GPSdrive</a>, <a
 href="http://qpegps.sourceforge.net/">gpeGPS</a>, <a
