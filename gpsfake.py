@@ -101,7 +101,9 @@ class TestLoad:
             elif ptype == gpspacket.BAD_PACKET:
                 break
             elif ptype == gpspacket.COMMENT_PACKET:
+                # Some comments are magic
                 if "Serial:" in packet:
+                    # Change serial parameters
                     packet = packet[1:].strip()
                     try:
                         (xx, baud, params) = packet.split()
@@ -123,6 +125,9 @@ class TestLoad:
                                             logfp.name)
                     
                     self.serial = (baud, databits, parity, stopbits)
+                elif "Delay:" in packet:
+                    # Delay specified number of seconds
+                    time.sleep(int(packet.split()[1]))
             else:
                 if type_latch is None:
                     type_latch = ptype
