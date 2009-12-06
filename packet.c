@@ -45,13 +45,15 @@ others apart and distinguish them from baud barf.
  * The packet-recognition state machine.  This takes an incoming byte stream
  * and tries to segment it into packets.  There are three types of packets:
  *
- * 1) NMEA lines.  These begin with $, and with \r\n, and have a checksum.
+ * 1) Comments. These begin with # and end with \r\n.
  *
- * 2) Binary packets.  These begin with some fixed leader character(s),
+ * 2) NMEA lines.  These begin with $, and with \r\n, and have a checksum.
+ *
+ * 3) Binary packets.  These begin with some fixed leader character(s),
  *    have a length embedded in them, and end with a checksum (and possibly)
  *    some fixed trailing bytes.  
  *
- * 3) ISGPS packets. The input may be a bitstream containing IS-GPS-200
+ * 4) ISGPS packets. The input may be a bitstream containing IS-GPS-200
  *    packets.  Each includes a fixed leader byte, a length, and check bits.  
  *    In this case, it is not guaranted that packet starts begin on byte 
  *    bounaries; the recognizer has to run a separate state machine against 
@@ -329,7 +331,9 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_RECOGNIZED:
-	if (c == '$')
+	if (c == '#')
+	    lexer->state = COMMENT_BODY;
+	else if (c == '$')
 	    lexer->state = NMEA_DOLLAR;
 	else if (c == '!')
 	    lexer->state = NMEA_BANG;
