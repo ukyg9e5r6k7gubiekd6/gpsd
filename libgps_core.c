@@ -576,11 +576,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /*@ +compdef @*/
 /*@ -branchstate +usereleased +mustfreefresh +nullstate +usedef @*/
 
-/*
- * return: 0, success
- *        -1, read error
- */
-
 bool gps_waiting(struct gps_data_t *gpsdata)
 /* is there input waiting from the GPS? */
 {
@@ -612,6 +607,10 @@ int gps_poll(struct gps_data_t *gpsdata)
 
     received = gpsdata->online = timestamp();
     status = gps_unpack(buf, gpsdata);
+    /*
+     * return: 0, success
+     *        -1, read error
+     */
     return status;
 }
 
