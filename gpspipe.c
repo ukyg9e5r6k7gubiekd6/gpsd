@@ -40,6 +40,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
+static struct gps_data_t *gpsdata;
 static int fd_out = 1;		/* output initially goes to standard output */ 
 static void spinner(unsigned int, unsigned int);
 
@@ -49,6 +50,7 @@ static void spinner(unsigned int, unsigned int);
 /* Serial port variables */
 static struct termios oldtio, newtio;
 static char serbuf[255];
+static int debug;
 
 static void daemonize(void) 
 /* Daemonize me. */
@@ -146,9 +148,7 @@ static void usage(void)
 
 int main( int argc, char **argv)
 {
-    int sock = 0;
     char buf[4096];
-    ssize_t wrote = 0;
     bool timestamp = false;
     bool daemon = false;
     bool binary = false;
@@ -157,28 +157,38 @@ int main( int argc, char **argv)
     bool raw = false;
     bool watch = false;
     long count = -1;
-    bool nopipe = false;
     int option;
     unsigned int vflag = 0, l = 0;
     FILE * fp;
+    unsigned int flags;
 
     struct fixsource_t source;
     char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
     char *serialport = NULL;
-    char *filename = NULL;
+    char *outfile = NULL;
 
-    while ((option = getopt(argc, argv, "?dlhrRwtvVn:Ns:f:")) != -1) {
+    flags = WATCH_ENABLE;
+    while ((option = getopt(argc, argv, "?dD:lhrRwtvVn:s:o:")) != -1) {
 	switch (option) {
+	case 'D':
+	    debug = atoi(optarg);
+#ifdef CLIENTDEBUG_ENABLE
+	    gps_enable_debug(debug, stderr);
+#endif /* CLIENTDEBUG_ENABLE */
+	    break;
 	case 'n':
 	    count = strtol(optarg, 0, 0);
 	    break;
-	case 'N':	/* not documented - diagnotic option */
-	    nopipe = true;
-	    break;
 	case 'r':
 	    raw = true;
+	    /* 
+	     * Yes, -r invokes NMEA mode rather than proper raw mode.
+	     * This emulates the behavior under the old protocol.
+	     */
+	    flags |= WATCH_NMEA;
 	    break;
 	case 'R':
+	    flags |= WATCH_RAW;
 	    binary=true;
 	    break;
 	case 'd':
@@ -194,6 +204,7 @@ int main( int argc, char **argv)
 	    vflag++;
 	    break;
 	case 'w':
+	    flags |= WATCH_JSON;
 	    watch = true;
 	    break;
 	case 'V':
@@ -203,8 +214,8 @@ int main( int argc, char **argv)
 	case 's':
 	    serialport = optarg;
 	    break;
-	case 'f':
-	    filename = optarg;
+	case 'o':
+	    outfile = optarg;
 	    break;
 	case '?':
 	case 'h':
@@ -220,40 +231,12 @@ int main( int argc, char **argv)
     } else
 	gpsd_source_spec(NULL, &source);
 
-    /*
-     * Assemble the initialization command. 
-     * Can't be done with gps_stream(), as the source option may 
-     * require us to ship a pathname.
-     */
-    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
-    if (watch)
-	(void)strlcat(buf, "\"json\":true,", sizeof(buf));
-    else
-	(void)strlcat(buf, "\"json\":false,", sizeof(buf));
-    if (raw)
-	/* 
-	 * Yes, -r invokes NMEA mode rather than proper raw mode.
-	 * This emulates the behavior under the old protocol.
-	 */
-	(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
-    if (binary)
-	(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
-    if (source.device != NULL)
-	(void)snprintf(buf, sizeof(buf), "\"path\":\"%s\",", source.device);
-    if (buf[strlen(buf)-1] == ',')
-	buf[strlen(buf)-1] = '\0';
-    (void)strlcat(buf, "}\r\n", sizeof(buf));
-
-    /* diagnostic option -- lets us see the generated initializartion command */
-    if (nopipe)
-	(void)fputs(buf, stdout);
-
     if (serialport!=NULL && raw) {
 	(void)fprintf(stderr, "gpspipe: use of '-s' requires '-r'.\n");
 	exit(1);
     }
 
-    if (filename==NULL && daemon) {
+    if (outfile==NULL && daemon) {
 	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-f'.\n");
 	exit(1);
     }
@@ -262,9 +245,6 @@ int main( int argc, char **argv)
 	(void)fprintf(stderr, "gpspipe: one of '-R', '-r' or '-w' is required.\n");
 	exit(1);
     }
-
-    if (nopipe)
-	exit(0);
 
     /* Daemonize if the user requested it. */
     if (daemon)
@@ -277,18 +257,18 @@ int main( int argc, char **argv)
     /* Open the output file if the user requested it.  If the user
        requested '-R', we use the 'b' flag in fopen() to "do the right
        thing" in non-linux/unix OSes. */
-    if (filename==NULL) {
+    if (outfile==NULL) {
       fp = stdout;
     } else {
       if (binary)
-	fp = fopen(filename,"wb");
+	fp = fopen(outfile,"wb");
       else
-	fp = fopen(filename,"w");
+	fp = fopen(outfile,"w");
 
       if (fp == NULL) {
 	(void)fprintf(stderr,
 		      "gpspipe: unable to open output file:  %s\n",
-		      filename);
+		      outfile);
 	exit(1);
       }
     }
@@ -297,23 +277,19 @@ int main( int argc, char **argv)
     if (serialport)
 	open_serial(serialport);
 
-    /*@ -nullpass @*/
-    sock = netlib_connectsock(source.server, source.port, "tcp");
-    if (sock == -1) {
+    /*@ -nullpass -onlytrans @*/
+    gpsdata = gps_open(server, port);
+    if (gpsdata == NULL) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      server, port, strerror(errno), errno);
 	exit(1);
     }
-    /*@ +nullpass @*/
+    /*@ +nullpass +onlytrans @*/
 
-    /* ship the assembled options */
-    wrote = write(sock, buf, strlen(buf));
-    if ((ssize_t)strlen(buf) != wrote) {
-	(void)fprintf(stderr, "gpspipe: write error, %s(%d)\n",
-		      strerror(errno), errno);
-	exit(1);
-    }
+    if (source.device != NULL)
+	flags |= WATCH_DEVICE;
+    (void)gps_stream(gpsdata, flags, source.device);
 
     if ((isatty(STDERR_FILENO) == 0) || daemon)
 	vflag = 0;
@@ -325,7 +301,10 @@ int main( int argc, char **argv)
 
 	if (vflag)
 	    spinner(vflag, l++);
-	readbytes = (int)read(sock, buf, sizeof(buf));
+	/* reading directly from the socket avoides decode overhead */
+	    flags |= WATCH_DEVICE;
+
+	readbytes = (int)read(gpsdata->gps_fd, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0 ; i < readbytes ; i++) {
 		char c = buf[i];

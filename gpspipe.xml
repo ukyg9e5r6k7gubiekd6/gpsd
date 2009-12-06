@@ -19,7 +19,7 @@
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-l</arg>
-      <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
+      <arg choice='opt'>-o <replaceable>filename</replaceable></arg>
       <arg choice='opt'>-n <replaceable>count</replaceable></arg>
       <arg choice='opt'>-r</arg>
       <arg choice='opt'>-R</arg>
@@ -27,6 +27,7 @@
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-w</arg>
       <arg choice='opt'>-v</arg>
+      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group><replaceable>:port</replaceable>
@@ -52,13 +53,13 @@ to the local <application>gpsd</application> without causing problems.</para>
 time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
 
-<para>Optionally a server, tcp port number and remote device can be given.
+<para>Optionally a server, TCP/IP port number and remote device can be given.
 If omitted, <application>gpspipe</application> connects to 127.0.0.1 on
-the default port (2947) and uses the first device opened by 
+the default port (2947) and watches all devices opened by
 <application>gpsd</application>.</para>
 
 <para><application>gpspipe</application> may be run as a daemon, but
-requires the -f flag for writing the output to a file.</para>
+requires the -o flag for writing the output to a file.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -84,7 +85,7 @@ specified serial device with settings 4800 8N1.  Thus
 to emulate a serial port hardwired to a GPS that
 <application>gpsd</application> is managing.</para>
 
-<para>-f option causes the collected data to be written to the
+<para>-o option causes the collected data to be written to the
 specified file.  Use of this option is mandatory
 if <application>gpspipe</application> is run as a daemon.</para>
 
