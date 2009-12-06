@@ -685,9 +685,9 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hVl:smd:")) != -1) {
+    while ((option = getopt(argc, argv, "hVl:smD:")) != -1) {
 	switch (option) {
-	case 'd':
+	case 'D':
 	    debug = atoi(optarg);
 #ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debug, stderr);

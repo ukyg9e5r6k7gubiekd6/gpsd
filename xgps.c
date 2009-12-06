@@ -1219,13 +1219,13 @@ speedunits_ok:
 
 altunits_ok:
 
-	while ((option = getopt(argc, argv, "Vd:hl:")) != -1) {
+	while ((option = getopt(argc, argv, "VD:hl:")) != -1) {
 		switch (option) {
 		case 'V':
 		    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
 				  VERSION, REVISION);
 		    exit(0);
-		case 'd':
+		case 'D':
 		    debug = atoi(optarg);
 #ifdef CLIENTDEBUG_ENABLE
 		    gps_enable_debug(debug, stderr);

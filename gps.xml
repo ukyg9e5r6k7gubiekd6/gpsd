@@ -22,7 +22,7 @@
 <cmdsynopsis>
   <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>debug-level</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
@@ -39,7 +39,7 @@
 <cmdsynopsis>
   <command>xgpsspeed</command> <arg choice='opt'>-rv</arg> 
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>debug-level</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg> 
       <arg choice='opt'>-V </arg> <arg
       choice='opt'>-nc <replaceable>X-color</replaceable></arg> <arg
@@ -56,7 +56,7 @@
 <cmdsynopsis>
   <command>cgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>debug-level</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
@@ -121,8 +121,8 @@ degrees and is the default.  The value 'm' produces degrees and
 decimal minutes.  The value 's' produces degrees, minutes, and decimal
 seconds.</para>
 
-<para> The <option>-d</option> option, when present, sets a debug
-level; it is primarily for usee by GPSD developers.  It enables
+<para> The <option>-D</option> option, when present, sets a debug
+level; it is primarily for use by GPSD developers.  It enables
 various progress messages to standard error.</para>
 
 <para>An optional argument to any client may specify a server to get

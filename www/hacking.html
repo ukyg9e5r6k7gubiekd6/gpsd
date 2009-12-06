@@ -433,11 +433,11 @@ admin space) is a crash landing.</p>
 
 <h2 id="statics">Don't create static variables in the libraries!</h2>
 
-<p>Don't create static variables in library files; it makes them
-non-reentrant <s>and hard to light</s>.  In practice, this means
-you shouldn't declare a static in any file that doesn't have a
-main() function of its own, and silly little test mains cordoned
-off by a preprocessor conditional don't count.</p>
+<p>Don't create static variables in library or driver files; it makes
+them non-reentrant <s>and hard to light</s>.  In practice, this means
+you shouldn't declare a static in any file that doesn't have a main()
+function of its own, and silly little test mains cordoned off by a
+preprocessor conditional don't count.</p>
 
 <p>Instead, use the 'driver' union in gps_device_t and the gps_context_t
 storage area that's passed in common in a lot of the calls.
@@ -464,19 +464,28 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 it somewhat easier to use gdb. (Don't forget to set CFLAGS=-g in the
 configure environment)</p>
 
-<p>There is a script called <code>logextract</code> in the
-source distribution that you can use to strip clean NMEA out of the log files
-produced by <code>gpsd</code>.  This can be useful if someone ships
-you a log that they allege caused <code>gpsd</code> to misbehave.</p>
+<p>There is a script called <code>logextract</code> in the devtools
+directory of the source distribution that you can use to strip clean
+NMEA out of the log files produced by <code>gpsd</code>.  This can be
+useful if someone ships you a log that they allege caused
+<code>gpsd</code> to misbehave.</p>
 
 <p><code>gpsfake</code> enables you to repeatedly feed a packet
 sequence to a <code>gpsd</code> instance running as non-root.
 Watching such a session with <code>gdb(1)</code> should smoke out any
 repeatable bug pretty quickly.</p>
 
+<p>Almost all the C programs have a -D option that enables logging
+of progress messages to standard error.  In gpsd itself this ups the
+syslogging level if it is running in background; see the LOG_* defines
+in gpsd.h to get an idea of what the log levels do.  Most of the test 
+clients accept this switch to enable progress message from the libgps
+code; you can use it, for example, to watch what the client-side
+parser for the wire protocol is actually doing.</p>
+
 <p>The parsing of GPGSV sentences in the NMEA driver has been a
 persistent and nasty trouble spot, causing more buffer overruns and
-weird secondary damage than all the rest of the code put together.
+weird secondary damage than all the rest of the gpsd put together.
 Any time you get a bug report that seems to afflict NMEA devices
 only, suspicion should focus here.</p>
 
