@@ -19,7 +19,7 @@
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-t</arg>
-      <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='plain'><replaceable>serial-port</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -85,7 +85,7 @@ parentheses) reported before a colon and space on each line.</para>
 </varlistentry>
 
 <varlistentry>
-<term>-v</term>
+<term>-D</term>
 <listitem>
 <para>In packetizer mode, enable progress messages from the packet
 getter.  Probably only of interest to developers testing packet

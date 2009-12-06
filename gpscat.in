@@ -32,7 +32,7 @@ if __name__ == '__main__':
     buf = ""
     try:
         try:
-            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:tv:V")
+            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:tD:V")
         except getopt.GetoptError, msg:
             print "gpscat: " + str(msg)
             raise SystemExit, 1
@@ -54,7 +54,7 @@ if __name__ == '__main__':
             elif switch == '-t':
                 typeflag = True
                 rawmode = False
-            elif switch == '-v':
+            elif switch == '-D':
                 debuglevel = BASELEVEL + int(val)
             elif switch == '-h':
                 sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
@@ -125,5 +125,8 @@ if __name__ == '__main__':
             sys.stdout.write("\n")
         raise SystemExit, 0
 
+# Local variables:
+# mode: python
+# end:
 
 
