@@ -74,6 +74,12 @@ runtime will silently get smaller but you won't be able to use 2.x
 daemon versions any more. You should only have to change your
 application source code once.
 
+We're counting on binary-package dependencies to make the transition
+easier.  When you ship a release using the new interface library,
+specify the GPSD package at version >= 2.90 to get the new shared
+library; then, when the 3.0 interface library is deployed next year,
+you shouldn't have to do anything.
+
 We'll try to make the transition easy, but we cannot guarantee no
 problems. The sooner you start adapting your code, the less pain you
 are likely to experience.  The rest of this document will explain both
@@ -398,6 +404,12 @@ the final 'level' argument, which libgps had always set to 1.
 The 2.91 API will include a gps_waiting() method analogous to the 
 waiting() method in he Pythonn class -- a non-blocking way to check
 if input is waiting from the daemon.
+
+== C++  client library changes ==
+
+The C++ client library continues to be a trivial class wrpapper around
+the C.  About all yo need to know is that the query() method is gone
+and there is a new stream() method that calls gps_stream().
 
 == Python client library changes ==
 
