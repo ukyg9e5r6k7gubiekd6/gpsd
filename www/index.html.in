@@ -105,11 +105,10 @@ href="http://www.kismetwireless.net/">Kismet</a>, <a
 href="http://www.gpsdrive.de/">GPSdrive</a>, <a
 href="http://qpegps.sourceforge.net/">gpeGPS</a>, <a
 href="http://www.gnustep.it/enrico/position/">position</a>, <a
-href="http://roadmap.digitalomaha.net/index.html">roadmap</a>, <a
+href="http://roadmap.sourceforge.net/">roadmap</a>, <a
 href="http://roadnav.sourceforge.net/">roadnav</a>, <a
-href="http://www.navit-project.org/">navit</a>, <a
-href="http://viking.sf.net">viking</a>,
-and <a href="http://gaia.serezhkin.com/">gaia</a>.</p>
+href="http://www.navit-project.org/">navit</a>, and <a
+href="http://viking.sf.net">viking</a>.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero
 configuration.  Binary packages for this program install hotplug
