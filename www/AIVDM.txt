@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.19, Nov 2009
+v1.20, Nov 2009
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -1539,6 +1539,21 @@ language time function. Both date and time to the nearest second can be
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
 
+== AIS feed sites ==
+
+Most sites that advertise "live" AIS feeds actually give you a map
+display through a browser.  Here are a few from which you can get raw
+sentence data over a TCP/IP port for testing.  Coverage on these is
+not yet very comprehensive; these sites tnd to have good coverage in
+Europe, the U.S. and a few poers in Asia but to be spotty elsewhere.
+See their siting maps for details.
+
+- http://aishub.net[AIS Hub]:
+Share alike. You contribute a feed, you get back all feeds.
+
+- http://www.aislive.com/[AIS Live]:
+Subscription access to real-time data, free access to time-delayed data. 
+
 == References ==
 
 [bibliography]
@@ -1649,3 +1664,5 @@ been observed in the wild.  It also adds a more complete description
 of AIS data types and some pragmatics about spare and reserved fields.
 
 Version 1.19 adds a description of AIS Hub.
+
+Version 1.20 adds a list of AIS feed sites - just two, so far.
