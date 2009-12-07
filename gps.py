@@ -375,7 +375,7 @@ class gps(gpsdata):
                     va = v
                 t[ka] = va
             return t
-        self.data = dictwrapper(**asciify(json.loads(buf, encoding="ascii")))
+        self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
             if k not in self.data.keys():
@@ -552,7 +552,7 @@ class gps(gpsdata):
                     arg += ',"raw":0'
                 if flags & WATCH_SCALED:
                     arg += ',"scaled":true'
-                if lags & WATCH_DEVICE:
+                if flags & WATCH_DEVICE:
                     arg += ',"device":"%s"' % outfile
             return self.send(arg + "}")
 
@@ -646,11 +646,14 @@ def isotime(s):
 
 if __name__ == '__main__':
     import readline, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "w")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "vw")
     streaming = False
+    verbose = False
     for (switch, val) in options:
-        if (switch == '-w'):
+        if switch == '-w':
             streaming = True    
+        elif switch == '-v':
+            verbose = True    
     if len(arguments) > 2:
         print 'Usage: gps.py [host [port]]'
         sys.exit(1)
