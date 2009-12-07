@@ -70,7 +70,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 		tp += strlen(tp);
 	    }
 	} else {
-	    if (*sp == '"')
+	    if (*sp == '"' || *sp == '\\')
 		*tp++ = '\\';
 	    *tp++ = *sp;
 	}
@@ -1205,7 +1205,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
 			   "\"stationtype\":%s,\"shiptype\":%s,"
-			   "\"interval\":%u,\"quiet\":%u\r\n",
+			   "\"interval\":%u,\"quiet\":%u}\r\n",
 			   ais->type23.ne_lon / AIS_CHANNEL_LATLON_SCALE,
 			   ais->type23.ne_lat / AIS_CHANNEL_LATLON_SCALE,
 			   ais->type23.sw_lon / AIS_CHANNEL_LATLON_SCALE,
@@ -1219,7 +1219,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,"
 			   "\"stationtype\":%u,\"shiptype\":%u,"
-			   "\"interval\":%u,\"quiet\":%u\r\n",
+			   "\"interval\":%u,\"quiet\":%u}\r\n",
 			   ais->type23.ne_lon,
 			   ais->type23.ne_lat,
 			   ais->type23.sw_lon,
