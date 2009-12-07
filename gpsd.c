@@ -610,16 +610,6 @@ static bool open_device(char *device_name)
 {
     struct gps_device_t *devp;
 
-    /* special case: source may be a URI to a remote GNSS or DGPS service */
-    if (netgnss_uri_check(device_name)) {
-	int dsock = netgnss_uri_open(&context, device_name);
-	if (dsock >= 0) {
-	    FD_SET(dsock, &all_fds);
-	    adjust_max_fd(dsock, true);
-	}
-    }
-
-    /* normal case: set up GPS/RTCM/AIS service */
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (!allocated_device(devp) || (strcmp(devp->gpsdata.dev.path, device_name)==0 && !initialized_device(devp))) {
 	    goto found;

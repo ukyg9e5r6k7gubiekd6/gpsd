@@ -296,7 +296,15 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
-    if (gpsd_open(session) < 0)
+    /* special case: source may be a URI to a remote GNSS or DGPS service */
+    if (netgnss_uri_check(session->gpsdata.dev.path))
+	session->gpsdata.gps_fd = netgnss_uri_open(session->context, 
+						   session->gpsdata.dev.path);
+    /* otherwise, ordinary serial device */
+    else 
+	session->gpsdata.gps_fd = gpsd_open(session);
+
+    if (session->gpsdata.gps_fd < 0)
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE
