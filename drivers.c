@@ -1044,6 +1044,12 @@ const struct gps_type_t mtk3301 = {
 
 
 #ifdef AIVDM_ENABLE
+/**************************************************************************
+ *
+ * AIVDM
+ *
+ **************************************************************************/
+
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
     if (session->packet.type == AIVDM_PACKET) {
