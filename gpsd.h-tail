@@ -237,6 +237,7 @@ struct gps_device_t {
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
+    bool is_serial;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
     struct termios ttyset, ttyset_old;
     unsigned int baudindex;

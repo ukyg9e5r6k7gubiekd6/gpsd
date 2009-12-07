@@ -297,17 +297,19 @@ void json_device_dump(const struct gps_device_t *device,
 	    (void)strlcat(reply, "\",", replylen);
 	}
 	/*@+mustfreefresh@*/
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-		       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
-		       device->gpsdata.dev.driver_mode,
-		       (int)gpsd_get_speed(&device->ttyset),
-		       device->gpsdata.dev.parity,
-		       device->gpsdata.dev.stopbits,
-		       device->gpsdata.dev.cycle);
-	if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
+	if (device->is_serial) {
 	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			   ",\"mincycle\":%2.2f",
-			   device->device_type->min_cycle);
+			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
+			   device->gpsdata.dev.driver_mode,
+			   (int)gpsd_get_speed(&device->ttyset),
+			   device->gpsdata.dev.parity,
+			   device->gpsdata.dev.stopbits,
+			   device->gpsdata.dev.cycle);
+	    if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
+		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			       ",\"mincycle\":%2.2f",
+			       device->device_type->min_cycle);
+	}
     }
     if (reply[strlen(reply)-1] == ',')
 	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
@@ -927,7 +929,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	break;
     case 15:	/* Interrogation */
 	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "mmsi1:%u,\"type1_1\":%u,\"offset1_1\":%u,"
+		       "\"mmsi1\":%u,\"type1_1\":%u,\"offset1_1\":%u,"
 		       "\"type1_2\":%u,\"offset1_2\":%u,\"mmsi2\":%u,"
 		       "\"type2_1\":%u,\"offset2_1\":%u}\r\n",
 		      ais->type15.mmsi1,

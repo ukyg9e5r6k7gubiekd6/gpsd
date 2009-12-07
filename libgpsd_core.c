@@ -67,6 +67,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->device_type = NULL;	/* start by hunting packets */
     session->observed = 0;
     session->rtcmtime = 0;
+    session->is_serial = false;		/* gpsd_open() setss this */
     /*@ -temptrans @*/
     session->context = context;
     /*@ +temptrans @*/

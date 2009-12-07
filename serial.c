@@ -290,6 +290,7 @@ int gpsd_open(struct gps_device_t *session)
 	gpsd_set_speed(session,
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
+    session->is_serial = true;
     return session->gpsdata.gps_fd;
 }
 
