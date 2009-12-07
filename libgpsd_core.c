@@ -85,7 +85,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 
     /* tty-level initialization */
     gpsd_tty_init(session);
-
     /* necessary in case we start reading in the middle of a GPGSV sequence */
     gpsd_zero_satellites(&session->gpsdata);
 
@@ -300,6 +299,26 @@ int gpsd_activate(struct gps_device_t *session)
     if (netgnss_uri_check(session->gpsdata.dev.path))
 	session->gpsdata.gps_fd = netgnss_uri_open(session->context, 
 						   session->gpsdata.dev.path);
+    /* otherwise, could be an AIS data feed */
+    else if (strncmp(session->gpsdata.dev.path, "ais://", 6) == 0) {
+	char server[GPS_PATH_MAX], *port;
+	int dsock;
+	(void)strlcpy(server, session->gpsdata.dev.path+6, sizeof(server));
+	session->gpsdata.gps_fd = -1;
+	port = strchr(server, ':');
+	if (port == NULL) {
+	    gpsd_report(LOG_ERROR, "Missing colon in AIS feed spec.\n");
+	    return -1;
+	}
+	*port++ = '\0';
+	gpsd_report(LOG_INF, "opening AIS feed at %s, port %s.\n", server,port);
+	if ((dsock = netlib_connectsock(server, port, "tcp")) < 0) {
+	    gpsd_report(LOG_ERROR, "AIS device open error %s.\n", 
+			netlib_errstr(dsock));
+	    return -1;
+	}
+	session->gpsdata.gps_fd = dsock;
+    }
     /* otherwise, ordinary serial device */
     else 
 	session->gpsdata.gps_fd = gpsd_open(session);
@@ -350,7 +369,7 @@ int gpsd_activate(struct gps_device_t *session)
 	 * can do something about this if they choose.
 	 */
 	if (session->device_type != NULL
-		&& session->device_type->event_hook != NULL)
+	    && session->device_type->event_hook != NULL)
 	    session->device_type->event_hook(session, event_reactivate);
     }
 

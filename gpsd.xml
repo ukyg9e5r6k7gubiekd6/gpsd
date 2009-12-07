@@ -220,33 +220,64 @@ to standard error if <application>gpsd</application> is in the foreground
 </variablelist>
 
 <para>Arguments are interpreted as the names of data sources.
-Normally, a data source is the device pathname of a local serial
-device from which the daemon may expect GPS data.</para>
+Normally, a data source is the device pathname of a local device from
+which the daemon may expect GPS data. But there are three other
+special source types recognized, for a total of four:</para>
 
-<para>A data source name may also be a URI pointing to a specific
-network GNSS service (a DGPSIP server or Ntrip broadcaster).  If the
-URI starts with "ntrip://" Ntrip will be used; if the URI starts with
-"dgpsip://", DGPSIP will be used. <application>gpsd</application>
-defaults to DGPSIP if no protocol is defined. For Ntrip services that
-require authentication, a prefix of the form "username:password@" can
-be added before the name of the Ntrip broadcaster.  If a suffix of the
-service name begins with ":" it is interpreted as a port number,
-overriding the default IANA-assigned port of 2101.  For Ntrip service
-you must specify which stream to use; the stream is given in the form
-"/streamname". !n example DGPSIP URI could be
-"dgpsip://dgpsip.example.com" and a Ntrip URI could be
-"ntrip://foo:bar@ntrip.example.com:80/example-stream".  <!-- If this
-option is not given, <application>gpsd</application> will hunt for a
-DGPSIP server. --></para>
+<variablelist>
+<varlistentry>
+<term>Local serial or USB device</term>
+<listitem>
+<para>A normal Unix device name of a serial or USB device to which a
+sensor is attached. Example:
+<filename>/dev/ttyUSB0</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>AIS feed</term>
+<listitem>
+<para>A URI with the prefix "ais://", followed by a hostname, a
+colon, and a port number. The daemon will open a socket to the
+indicated server and read AIVDM/AIVDO packets from it. Example:
+<filename>ais://data.aishub.net:4006</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Ntrip caster</term>
+<listitem>
+<para>A URI with the prefix "ntrip://" followed by the name of an Ntrp
+caster. For Ntrip services that require authentication, a prefix of
+the form "username:password@" can be added before the name of the
+Ntrip broadcaster.  For Ntrip service, you must specify which stream to use;
+the stream is given in the form "/streamname". An example DGPSIP URI
+could be "dgpsip://dgpsip.example.com" and a Ntrip URI could be
+"ntrip://foo:bar@ntrip.example.com:80/example-stream". Corrections
+from the caster will be send to each attached GPS with the capability
+to accept them.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>DGPSIP server</term>
+<listitem>
+<para>A URI with the prefix "dgpsip://" followed by a hostname, a
+colon, and an optional colon-separated port number (defaulting to
+2101). The daemon will handshake with the DGPSIP server and 
+read RTCM2 correction data from it. Corrections
+from the server will be set to each attached GPS with the capability
+to accept them.Example:
+<filename>dgpsip://dgps.wsrcc.com:2101</filename>.</para>
+</listitem>
+</varlistentry>
+</variablelist>
 
 <para>Internally, the daemon maintains a device list holding the
-pathnames of GPSes known to the daemon. Initially, this list is the
-list of device-name arguments specified on the command line.  That
-list may be empty, in which case the daemon will have no devices on
-its search list until they are added by a control-socket command (see
-<xref linkend='devices'/> for details on this).  Daemon startup will
-abort with an error if neither any devices nor a control socket are
-specified.</para>
+pathnames of devices and remote servers known to the
+daemon. Initially, this list is the list of device-name arguments
+specified on the command line.  That list may be empty, in which case
+the daemon will have no devices on its search list until they are
+added by a control-socket command (see <xref linkend='devices'/> for
+details on this).  Daemon startup will abort with an error if neither
+any devices nor a control socket are specified.</para>
 
 <para>Clients communicate with the dameon via textual request and
 responses.  Currently there are two supported protocols, but there
