@@ -2418,7 +2418,7 @@ int main(int argc, char *argv[])
 #endif /* TIMING_ENABLE */
 			}
 		    }
-		    gpsd_report(LOG_PROG, "reporting finished\n");
+		    //gpsd_report(LOG_PROG, "reporting finished\n");
 		}
 		/*@-nullderef@*/
 	    }

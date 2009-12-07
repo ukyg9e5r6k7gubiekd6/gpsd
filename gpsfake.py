@@ -125,9 +125,9 @@ class TestLoad:
                                             logfp.name)
                     
                     self.serial = (baud, databits, parity, stopbits)
-                elif "Delay:" in packet:
-                    # Delay specified number of seconds
-                    time.sleep(int(packet.split()[1]))
+                elif "%" in packet:
+                    # Pass through for later interpretation 
+                    self.sentences.append(packet)
             else:
                 if type_latch is None:
                     type_latch = ptype
@@ -226,6 +226,10 @@ class FakeGPS:
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
+        if "%Delay:" in line:
+            # Delay specified number of seconds
+            delay = line.split()[1]
+            time.sleep(int(delay))
         os.write(self.master_fd, line)
         if self.progress:
             self.progress("gpsfake: %s feeds %d=%s\n" % (self.name, len(line), `line`))
