@@ -583,12 +583,12 @@ bool gps_waiting(struct gps_data_t *gpsdata)
     fd_set rfds;
     struct timeval tv;
 
-    libgps_debug_trace((1, "gps_waiting(): %d\n", waitcount));
+    libgps_debug_trace((1, "gps_waiting(): %d\n", waitcount++));
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
     tv.tv_sec = 0; tv.tv_usec = 1;
     /* all error conditions return "not waiting" -- crude but effective */
-    return (select(gpsdata->gps_fd+1, &rfds, NULL, NULL, &tv) == 1);
+    return (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) == 1);
 }
 
 int gps_poll(struct gps_data_t *gpsdata)
