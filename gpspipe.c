@@ -301,9 +301,8 @@ int main( int argc, char **argv)
 
 	if (vflag)
 	    spinner(vflag, l++);
-	/* reading directly from the socket avoides decode overhead */
-	    flags |= WATCH_DEVICE;
 
+	/* reading directly from the socket avoides decode overhead */
 	readbytes = (int)read(gpsdata->gps_fd, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0 ; i < readbytes ; i++) {
