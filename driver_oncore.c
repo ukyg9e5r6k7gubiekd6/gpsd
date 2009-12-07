@@ -25,6 +25,7 @@ static char enableEn[]		= { 'E', 'n', 1, 0, 100, 100, 1, 0,0,0,0,0,0,0,0,0,0 };
 /*static char enableAt2[] 	= { 'A', 't', 2, };*/
 static char pollAs[]		= { 'A', 's', 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff };
 static char pollAt[]		= { 'A', 't', 0xff };
+static char pollAy[]		= { 'A', 'y', 0xff, 0xff, 0xff, 0xff };
 static char pollBo[]		= { 'B', 'o', 0x01 };
 /*@ -charint @*/
 
@@ -36,6 +37,7 @@ static	gps_mask_t oncore_parse_input(struct gps_device_t *);
 static	gps_mask_t oncore_dispatch(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_utc_offset(struct gps_device_t *, unsigned char *, size_t );
+static	gps_mask_t oncore_msg_pps_delay(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_time_raim(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *, size_t );
@@ -109,7 +111,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	 * Else we may be providing GPS time.
 	 */
 	if (session->context->enable_ntpshm)
-	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.16);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.175);
 #endif /* NTPSHM_ENABLE */
 
 	gpsd_report(LOG_IO, "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
@@ -196,6 +198,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
      */
     (void)oncore_control_send(session,pollAs,sizeof(pollAs));
     (void)oncore_control_send(session,pollAt,sizeof(pollAt));
+    (void)oncore_control_send(session,pollAy,sizeof(pollAy));
     (void)oncore_control_send(session,pollBo,sizeof(pollBo));
 
     gpsd_report(LOG_DATA, "NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f mode=%d status=%d visible=%d used=%d mask=%s\n",
@@ -232,6 +235,24 @@ oncore_msg_utc_offset(struct gps_device_t *session, unsigned char *buf, size_t d
     session->context->leap_seconds = utc_offset;
     session->context->valid |= LEAP_SECOND_VALID;
     return 0; /* no flag for leap seconds update */
+}
+
+/**
+ * PPS delay
+ */
+static gps_mask_t
+oncore_msg_pps_delay(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+{
+    double pps_delay;
+
+    if (data_len != 11)
+	return 0;
+
+    gpsd_report(LOG_IO, "oncore PPS delay\n");
+    pps_delay = getbesl(buf, 4) / 1000000.0;
+
+    session->driver.oncore.pps_delay = pps_delay;
+    return 0;
 }
 
 /**
@@ -339,6 +360,8 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
 	return 0; /* position hold mode */
     case ONCTYPE('A','t'):
 	return 0; /* position hold position */
+    case ONCTYPE('A','y'):
+	return oncore_msg_pps_delay(session, buf, len);
 
     default:
 	/* XXX This gets noisy in a hurry. Change once your driver works */

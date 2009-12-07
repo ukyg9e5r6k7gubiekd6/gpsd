@@ -29,7 +29,7 @@
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t oncore_binary;
 
-static WINDOW *Ea1win, *Eawin, *Bbwin, *Enwin, *Bowin, *Aswin, *Atwin;
+static WINDOW *Ea1win, *Eawin, *Bbwin, *Enwin, *Bowin, *Aywin, *Aswin, *Atwin;
 static unsigned char EaSVlines[8];
 
 static const char *antenna[] =
@@ -103,6 +103,7 @@ static bool oncore_initialize(void)
     Bbwin   = subwin(devicewin, MAXVISSATS+3,   22,  6, 28);
     Enwin   = subwin(devicewin, 10,		29,  6, 51);
     Bowin   = subwin(devicewin, 4,		11, 17, 0);
+    Aywin   = subwin(devicewin, 4,		15, 17, 12);
     Atwin   = subwin(devicewin, 5,		 9, 16, 51);
     Aswin   = subwin(devicewin, 5,		19, 16, 61);
     /*@ +onlytrans @*/
@@ -116,6 +117,7 @@ static bool oncore_initialize(void)
     (void)syncok(Bbwin, true);
     (void)syncok(Enwin, true);
     (void)syncok(Bowin, true);
+    (void)syncok(Aywin, true);
     (void)syncok(Aswin, true);
     (void)syncok(Atwin, true);
 
@@ -158,8 +160,14 @@ static bool oncore_initialize(void)
     (void)wborder(Bowin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(Bowin, A_BOLD);
     (void)mvwprintw(Bowin, 1, 1, "UTC:");
-    (void)mvwprintw(Bowin, 3, 1, " @@Bo ");
+    (void)mvwprintw(Bowin, 3, 2, " @@Bo ");
     (void)wattrset(Bowin, A_NORMAL);
+
+    (void)wborder(Aywin, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(Aywin, A_BOLD);
+    (void)mvwprintw(Aywin, 1, 1, "PPS delay:");
+    (void)mvwprintw(Aywin, 3, 4, " @@Ay ");
+    (void)wattrset(Aywin, A_NORMAL);
 
     (void)wborder(Atwin, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(Atwin, A_BOLD);
@@ -393,12 +401,24 @@ static void oncore_update(void)
 	    utc_offset = (unsigned char)getub(buf, 4);
 
 	    if (utc_offset != (unsigned char) 0)
-	        (void)mvwprintw(Bowin, 2, 2, "GPS%+3d",utc_offset);
+	        (void)mvwprintw(Bowin, 2, 2, "GPS%+4d",utc_offset);
 	    else
 	        (void)mvwprintw(Bowin, 2, 2, "unknown",utc_offset);
 	}
 
 	monitor_log("Bo =");
+	break;
+
+    case ONCTYPE('A','y'):
+	{
+	    double pps_delay;
+
+	    pps_delay = getbesl(buf, 4) / 1000000.0;
+
+	    (void)mvwprintw(Aywin, 2, 2, " %7.3f ms",pps_delay);
+	}
+
+	monitor_log("Ay =");
 	break;
 
     case ONCTYPE('A','t'):
@@ -449,6 +469,7 @@ static void oncore_wrap(void)
     (void)delwin(Bbwin);
     (void)delwin(Enwin);
     (void)delwin(Bowin);
+    (void)delwin(Aywin);
     (void)delwin(Atwin);
     (void)delwin(Aswin);
 }
