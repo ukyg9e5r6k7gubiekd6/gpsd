@@ -92,12 +92,14 @@ the world. Some charge subscriptions; others offer time-delayed access
 for free and charge for a real-time feed. Still others are pool sites;
 you join by contributing your feed and receive all feeds.
 
-AIS Hub (<<<AISHUB>>>) is a free, public AIS feed pool that is
-open-source friendly, offering a Linux port in source of its software
-for collecting and forwarding AIS data. Peter Stoyanov and the other
-AIS Hub principals have generously donated a live feed to the GPSD
-project despite the fact that I live 60 miles inland and cannot send
-them anything interesting.
+AIS Hub (<<<AISHUB>>>) is a free, public AIS feed pool. It provides
+exchange of AIS data in raw NMEA format; all AISHub members share
+their own AIS feed and receive the merged feed from all other
+participating parties.  It is open-source friendly, offering a Linux
+port in source of its software for collecting and forwarding AIS
+data. Peter Stoyanov and the other AIS Hub principals have generously
+donated a live feed to the GPSD project despite the fact that I live
+60 miles inland and cannot send them anything interesting.
 
 Some of what this document explains about the quirks of real-world
 encoders comes from examples provided by Kurt Schwehr. Other such
