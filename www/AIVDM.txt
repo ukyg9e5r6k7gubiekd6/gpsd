@@ -118,8 +118,9 @@ document:
 * Field offsets, types, and descriptions for messages 25 and 26. which
   are not described in <<IALA>>.
 
-* Sample sentences of types 16-17, 21-23, and 25-26 together with
-  decoded dumps of the field values.
+* Sample sentences of types 16-17, 22-23, and 25-26 together with
+  decoded dumps of the field values.  Please note that sample
+  sentences not acciompanied by field dumps are *not* useful.
 
 == Open-Source Implementations ==
 

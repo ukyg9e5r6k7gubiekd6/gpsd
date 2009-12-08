@@ -1164,7 +1164,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
 			   "\"addressed\":%s,\"band_a\":%s,"
-			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
+			   "\"band_b\":%s,\"zonesize\":%u}\r\n",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
 			   ais->type22.txrx,
@@ -1184,7 +1184,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,"
 			   "\"addressed\":%s,\"band_a\":%s,"
-			   "\"band_b\":%s,\"zonesize\":\":%u}\r\n",
+			   "\"band_b\":%s,\"zonesize\":%u}\r\n",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
 			   ais->type22.txrx,
@@ -1262,7 +1262,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	}
 	break;
     default:
-	    (void) strlcat(buf, "}\r\n", buflen);
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void) strlcat(buf, "}\r\n", buflen);
 	break;
     }
     /*@ +formatcode +mustfreefresh @*/
