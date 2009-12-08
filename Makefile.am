@@ -330,7 +330,6 @@ MANPAGES_BASE = \
 	xgpsspeed.1 \
 	cgps.1 \
 	lcdgps.1 \
-	cgpxlogger.1 \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
@@ -369,7 +368,7 @@ BUILT_MANPAGES = $(MANPAGES_DIST)
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
 # Another instance of the multiple-outputs hack.
-gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1 cgpxlogger.1: stamp-gps-manpages
+gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1: stamp-gps-manpages
 	+@WITNESS=stamp-gps-manpages; $(MULTIOUT_RECOVER_DELETED)
 stamp-gps-manpages: gps.xml
 	@rm -f '$@' '$@.tmp'

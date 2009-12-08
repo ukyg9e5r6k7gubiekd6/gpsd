@@ -31,6 +31,9 @@ static time_t int_time, old_int_time;
 static bool intrack = false;
 static bool first = true;
 static time_t timeout = 5; /* seconds */
+#ifdef CLIENTDEBUG_ENABLE
+static int debug;
+#endif /* CLIENTDEBUG_ENABLE */
 
 static void print_gpx_header(void) 
 {
@@ -342,8 +345,14 @@ int main (int argc, char** argv)
     int ch;
 
     progname = argv[0];
-    while ((ch = getopt(argc, argv, "hi:V")) != -1) {
+    while ((ch = getopt(argc, argv, "D:hi:V")) != -1) {
 	switch (ch) {
+	case 'D':
+	    debug = atoi(optarg);
+#ifdef CLIENTDEBUG_ENABLE
+	    gps_enable_debug(debug, stdout);
+#endif /* CLIENTDEBUG_ENABLE */
+	    break;
 	case 'i':		/* set polling interfal */
 	    timeout = (unsigned int)atoi(optarg);
 	    if (timeout < 1)

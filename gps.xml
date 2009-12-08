@@ -14,7 +14,6 @@
 <refname>xgpsspeed</refname>
 <refname>cgps</refname>
 <refname>lcdgps</refname>
-<refname>cgpxlogger</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
@@ -91,6 +90,7 @@
 </cmdsynopsis>
 <cmdsynopsis>
   <command>gpxlogger</command>  
+      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>

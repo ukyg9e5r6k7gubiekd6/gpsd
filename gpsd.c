@@ -1209,7 +1209,7 @@ static bool handle_oldstyle(struct subscriber_t *sub, char *buf,
 	* fighting with Dragorn.  We'll just disable it.  The client
 	* library could never parse the response anyway, so the only
 	* people who lose are the ones opening a socket direct to the
-	* daemon and doing depreacated single-shot queries.
+	* daemon and doing deprecated single-shot queries.
 	*/
 	case 'L':
 	    (void)snprintf(phrase, sizeof(phrase), ",L=%d %d %s abcdefgijklmnopqrstuvwxyz", GPSD_API_MAJOR_VERSION, GPSD_API_MINOR_VERSION, VERSION);	//h

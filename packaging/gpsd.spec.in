@@ -157,7 +157,6 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %attr(755, root, root) %{_bindir}/gpxlogger
 %{_mandir}/man1/gps.1*
 %{_mandir}/man1/cgps.1*
-%{_mandir}/man1/cgpxlogger.1*
 %{_mandir}/man1/xgps.1*
 %{_mandir}/man1/xgpsspeed.1*
 %{_mandir}/man1/gpspipe.1*
