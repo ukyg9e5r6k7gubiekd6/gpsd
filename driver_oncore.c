@@ -111,7 +111,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	 * Else we may be providing GPS time.
 	 */
 	if (session->context->enable_ntpshm) {
-	    /* 0.175 seems best at 600 for UT+, not sure what the fudge 
+	    /* 0.175 seems best at 9600 for UT+, not sure what the fudge 
 	     * should be at other baud rates or for other models.
 	     * If you change this be sure to allow for multiple baud
 	     * rates/models.
