@@ -7,6 +7,7 @@
 #endif /* S_SPLINT_S */
 #include <sys/types.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -632,7 +633,7 @@ int gps_poll(struct gps_data_t *gpsdata)
 		  0);
     if (status > -1)
 	priv->waiting += status;
-    else if (errno == EINTR)
+    else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
 	return 0;
     else if (priv->waiting == 0)
 	return status;
@@ -688,6 +689,8 @@ int gps_stream(struct gps_data_t *gpsdata,
         else
 	    flags |= WATCH_OLDSTYLE;
     }
+    if (flags & POLL_NONBLOCK)
+	(void)fcntl(gpsdata->gps_fd, F_SETFL, O_NONBLOCK); 
     if ((flags & WATCH_DISABLE) != 0) {
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w-", sizeof(buf));

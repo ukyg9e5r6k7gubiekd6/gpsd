@@ -156,9 +156,88 @@ older-style (pre-2.90) way of doing this,
 insulates your code from whether your client library and your
 <application>gpsd</application> are using old or new protocol.
 The second argument is a flag mask that sets various policy bits; 
-see gps.h for description.  Calling <function>gps_stream()</function>
-more than once with different flag masks is allowed.The third
-argument is not presently used but reserved for expansion.</para>
+see trhe list below.  Calling <function>gps_stream()</function>
+more than once with different flag masks is allowed.</para>
+
+<variablelist>
+<varlistentry>
+<term>WATCH_DISABLE</term>
+<listitem>
+<para>Disable the reporting modes specified by the other WATCH_ flags.
+Cannot be used to disable POLL_NONBLOCK.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_ENABLE</term>
+<listitem>
+<para>Disable the reporting modes specified by the other WATCH_ flags.
+This is the default.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_JSON</term>
+<listitem>
+<para>Enable JSON reporting of data. If WATCH_ENABLE is set, and nmo
+other WATCH flags are set, this ids the default.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_NMEA</term>
+<listitem>
+<para>Enable generated pseudo-NMEA reporting on binary devices.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_RARE</term>
+<listitem>
+<para>Enable reporting of binary packets in encoded hex.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_RAW</term>
+<listitem>
+<para>Enable literal passtrough of binary packets.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_SCALED</term>
+<listitem>
+<para>When reporting AIS data, scale integer quantities to floats if 
+they have a divisor or rendering formula assosiated with them.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_NEWSTYLE</term>
+<listitem>
+<para>Force issuing a JSON initialization and getting new-style 
+responses. This will become the default in a future release. </para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_OLDSTYLE</term>
+<listitem>
+<para>Force issuing a W or R command and getting old-style
+responses. This is now the default behavior, but will be removed
+in a future release.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>WATCH_DEVICE</term>
+<listitem>
+<para>Restrict watching to a speciied device, patch given as second 
+argument.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>POLL_NONBLOCK</term>
+<listitem>
+<para>Normally <function>gps_poll()</function> blocks until
+either there is a read error or some data is received from tha 
+daemon.  In this mode, <function>gps_poll()</function> returns
+immediately wityh a value of 0 if there is no input waiting.</para>
+</listitem>
+</varlistentry>
+</variablelist>
 
 <para><function>gps_set_raw_hook()</function> takes a function you
 specify and run it (synchronously) on the raw data pulled by a
@@ -183,7 +262,8 @@ library. <function>gps_open()</function> is replaced by the
 initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
 Resources within the session object will be properly released when it
-is garbage-collected.</para>
+is garbage-collected. Note one limitation: POLL_NOBLOCK is not yet 
+supported in Python; use the waiting() method instead.</para>
 </refsect1>
 
 <refsect1 id='example'><title>CODE EXAMPLE</title>

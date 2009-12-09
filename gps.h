@@ -990,6 +990,7 @@ struct gps_data_t {
 #define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
 #define WATCH_DEVICE	0x0100u	/* watch specific device */
+#define POLL_NONBLOCK	0x1000u	/* set non-blocking poll */
 
 extern int gps_open_r(const char *host, const char *port, 
 		      /*@out@*/struct gps_data_t *gpsdata);
