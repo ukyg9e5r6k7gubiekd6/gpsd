@@ -39,6 +39,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "timebase.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)		((n) >> 8)
@@ -894,8 +895,8 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeuw(buf, 8);
 	if ( LEAP_SECONDS > session->context->leap_seconds ) {
-		/* something wrong */
-	    gpsd_report(LOG_ERR, "SiRF: Invalid leap_seconds: %d\n",
+	    /* something wrong */
+	    gpsd_report(LOG_ERROR, "SiRF: Invalid leap_seconds: %d\n",
 		session->context->leap_seconds);
 	    session->context->leap_seconds = LEAP_SECONDS;
 	} else {
