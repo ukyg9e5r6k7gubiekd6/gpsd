@@ -16,8 +16,10 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
+#ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #endif
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
@@ -72,6 +74,7 @@ static void gps_trace(int errlevel, const char *fmt, ... )
 # define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
 
+/*@-nullderef@*/
 int gps_open_r(const char *host, const char *port, 
 	       /*@out@*/struct gps_data_t *gpsdata)
 {
@@ -95,9 +98,11 @@ int gps_open_r(const char *host, const char *port,
 
     /* set up for line-buffered I/O over the daemon socket */
     gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
+    if (gpsdata->privdata == NULL)
+	return -1;
     PRIVATE(gpsdata)->newstyle = false;
     PRIVATE(gpsdata)->waiting = 0;
-    PRIVATE(gpsdata)->buffer[0] = '\0';
+    /*@i2@*/PRIVATE(gpsdata)->buffer[0] = '\0';
 
     return 0;
     /*@ +branchstate @*/
@@ -115,6 +120,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 }
 /*@+compmempass +immediatetrans@*/
 
+/*@-compdef -usereleased@*/
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
@@ -124,6 +130,7 @@ int gps_close(struct gps_data_t *gpsdata)
     
     return 0;
 }
+/*@+compdef +usereleased@*/
 
 void gps_set_raw_hook(struct gps_data_t *gpsdata,
 		      void (*hook)(struct gps_data_t *, char *, size_t len))
@@ -618,36 +625,37 @@ int gps_poll(struct gps_data_t *gpsdata)
     int status = -1;
     struct privdata_t *priv = PRIVATE(gpsdata);
 
-    for (;;) {
-	eol = strchr(priv->buffer, '\n');
-	if (eol != NULL) {
-	    // FIME: Make the JSON parser stoop on } so this isn't needed
-	    *eol = '\0';
-	    response_length = eol - priv->buffer + 1;
-	    received = gpsdata->online = timestamp();
-	    status = gps_unpack(priv->buffer, gpsdata);
-	    memmove(priv->buffer, 
-		    priv->buffer + response_length, 
-		    priv->waiting - response_length);
-	    priv->waiting -= response_length;
-	    return 0;
-	} else {
-	    status = recv(gpsdata->gps_fd,
-			  priv->buffer + priv->waiting,
-			  sizeof(priv->buffer)-priv->waiting,
-			  0);
-	    if (status == -1)
-		return status;
-	    else
-		priv->waiting += status;
-	}
-    }
+    /* read data: return -1 if no data waiting or buffered, 0 otherwise */
+    status = (int)recv(gpsdata->gps_fd,
+		  priv->buffer + priv->waiting,
+		  sizeof(priv->buffer)-priv->waiting,
+		  0);
+    if (status > -1)
+	priv->waiting += status;
+    else if (errno == EINTR)
+	return 0;
+    else if (priv->waiting == 0)
+	return status;
 
-    /*
-     * return: 0, success
-     *        -1, read error
-     */
-    return status;
+    /* parse a response if we have a whole one */
+    eol = strchr(priv->buffer, '\n');
+    if (eol != NULL) {
+	// FIXME: Make the JSON parser stop on \n so this isn't needed
+	*eol = '\0';
+	response_length = eol - priv->buffer + 1;
+	received = gpsdata->online = timestamp();
+	status = gps_unpack(priv->buffer, gpsdata);
+	/*@+matchanyintegral@*/
+	memmove(priv->buffer, 
+		priv->buffer + response_length, 
+		priv->waiting - response_length);
+	/*@-matchanyintegral@*/
+	priv->waiting -= response_length;
+	gpsdata->set |= REPORT_SET;
+    } else
+	gpsdata->set &=~ REPORT_SET;
+
+    return 0;
 }
 
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
@@ -851,6 +859,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+/*@-nullderef@*/
 
 #endif /* TESTMAIN */
 
