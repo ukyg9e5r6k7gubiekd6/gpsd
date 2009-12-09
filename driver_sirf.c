@@ -893,7 +893,14 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	    (double)mkgmtime(&unpacked_date);
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeuw(buf, 8);
-	session->context->valid |= LEAP_SECOND_VALID;
+	if ( LEAP_SECONDS > session->context->leap_seconds ) {
+		/* something wrong */
+	    gpsd_report(LOG_ERR, "SiRF: Invalid leap_seconds: %d\n",
+		session->context->leap_seconds);
+	    session->context->leap_seconds = LEAP_SECONDS;
+	} else {
+	    session->context->valid |= LEAP_SECOND_VALID;
+	}
 #ifdef NTPSHM_ENABLE
 	if ( 0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
 	    gpsd_report(LOG_RAW, "SiRF: NTPD just SEEN_UTC_2\n");
