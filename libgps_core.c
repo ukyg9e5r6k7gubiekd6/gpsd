@@ -5,18 +5,23 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <math.h>
 #include <locale.h>
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
 
 #include "gpsd.h"
 #include "gps_json.h"
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if defined (HAVE_SYS_SELECT_H)
+#include <sys/select.h>
+#endif
 
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);
@@ -25,6 +30,13 @@ extern char *strtok_r(char *, const char *, char **);
 #if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)
 #define LIBGPS_DEBUG
 #endif /* defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE) */
+
+struct privdata_t {
+    bool newstyle;
+    ssize_t waiting;
+    char buffer[BUFSIZ];
+};
+#define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
 #ifdef LIBGPS_DEBUG
 static int debuglevel = 0; 
@@ -80,7 +92,13 @@ int gps_open_r(const char *host, const char *port,
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
-    gpsdata->privdata = (void *)0;
+
+    /* set up for line-buffered I/O over the daemon socket */
+    gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
+    PRIVATE(gpsdata)->newstyle = false;
+    PRIVATE(gpsdata)->waiting = 0;
+    PRIVATE(gpsdata)->buffer[0] = '\0';
+
     return 0;
     /*@ +branchstate @*/
 }
@@ -100,10 +118,11 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    int retval = close(gpsdata->gps_fd);
     libgps_debug_trace((1, "gps_close()\n"));
+    free(PRIVATE(gpsdata));
     gpsdata->gps_fd = -1;
-    return retval;
+    
+    return 0;
 }
 
 void gps_set_raw_hook(struct gps_data_t *gpsdata,
@@ -215,12 +234,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 	}
 #ifdef OLDSTYLE_ENABLE
-	/*
-	 * At the moment this member is only being used as a flag.
-	 * It has void pointer type because someday we might want
-	 * to point to a library state structure.
-	 */
-	/*@i1*/gpsdata->privdata = (void *)1;
+	if (PRIVATE(gpsdata) != NULL)
+	    PRIVATE(gpsdata)->newstyle = true;
 #endif /* OLDSTYLE_ENABLE */
     }
 #ifdef OLDSTYLE_ENABLE
@@ -584,6 +599,9 @@ bool gps_waiting(struct gps_data_t *gpsdata)
     struct timeval tv;
 
     libgps_debug_trace((1, "gps_waiting(): %d\n", waitcount++));
+    if (PRIVATE(gpsdata)->waiting > 0)
+	return true;
+
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
     tv.tv_sec = 0; tv.tv_usec = 1;
@@ -594,21 +612,37 @@ bool gps_waiting(struct gps_data_t *gpsdata)
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */
 {
-    char	buf[BUFSIZ];
-    ssize_t	n;
+    char *eol;
     double received = 0;
-    int status;
+    ssize_t response_length;
+    int status = -1;
+    struct privdata_t *priv = PRIVATE(gpsdata);
 
-    /* the daemon makes sure that every read is NUL-terminated */
-    n = read(gpsdata->gps_fd, buf, sizeof(buf)-1);
-    if (n <= 0) {
-	 /* error or nothing read */
-	return -1;
+    for (;;) {
+	eol = strchr(priv->buffer, '\n');
+	if (eol != NULL) {
+	    // FIME: Make the JSON parser stoop on } so this isn't needed
+	    *eol = '\0';
+	    response_length = eol - priv->buffer + 1;
+	    received = gpsdata->online = timestamp();
+	    status = gps_unpack(priv->buffer, gpsdata);
+	    memmove(priv->buffer, 
+		    priv->buffer + response_length, 
+		    priv->waiting - response_length);
+	    priv->waiting -= response_length;
+	    return 0;
+	} else {
+	    status = recv(gpsdata->gps_fd,
+			  priv->buffer + priv->waiting,
+			  sizeof(priv->buffer)-priv->waiting,
+			  0);
+	    if (status == -1)
+		return status;
+	    else
+		priv->waiting += status;
+	}
     }
-    buf[n] = '\0';
 
-    received = gpsdata->online = timestamp();
-    status = gps_unpack(buf, gpsdata);
     /*
      * return: 0, success
      *        -1, read error
@@ -617,7 +651,7 @@ int gps_poll(struct gps_data_t *gpsdata)
 }
 
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
-/* query a gpsd instance for new data */
+/* send a command to the gpsd instance */
 {
     char buf[BUFSIZ];
     va_list ap;
@@ -641,7 +675,7 @@ int gps_stream(struct gps_data_t *gpsdata,
     char buf[GPS_JSON_COMMAND_MAX];
 
     if ((flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW))== 0) {
-	if (gpsdata->privdata != (void *)0 || (flags & WATCH_NEWSTYLE)!=0)
+	if (PRIVATE(gpsdata)->newstyle || (flags & WATCH_NEWSTYLE)!=0)
 	    flags |= WATCH_JSON;
         else
 	    flags |= WATCH_OLDSTYLE;
