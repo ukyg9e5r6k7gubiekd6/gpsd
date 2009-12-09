@@ -907,7 +907,7 @@ struct gps_data_t {
 #define RTCM2_SET	0x04000000u
 #define RTCM3_SET	0x08000000u
 #define AIS_SET 	0x10000000u
-#define PACKET_SET	0x20000000u	/* only used in the daemon */
+#define PACKET_SET	0x20000000u
 #define CLEAR_SET	0x40000000u	/* sentence starts a reporting cycle */
 #define REPORT_SET	0x80000000u	/* sentence ends a reporting cycle */
 #define DATA_SET	~(ONLINE_SET|PACKET_SET|CLEAR_SET|REPORT_SET)

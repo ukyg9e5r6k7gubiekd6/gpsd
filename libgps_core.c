@@ -651,9 +651,9 @@ int gps_poll(struct gps_data_t *gpsdata)
 		priv->waiting - response_length);
 	/*@-matchanyintegral@*/
 	priv->waiting -= response_length;
-	gpsdata->set |= REPORT_SET;
+	gpsdata->set |= PACKET_SET;
     } else
-	gpsdata->set &=~ REPORT_SET;
+	gpsdata->set &=~ PACKET_SET;
 
     return 0;
 }

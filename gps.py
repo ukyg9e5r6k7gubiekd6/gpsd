@@ -474,6 +474,7 @@ class gps(gpsdata):
             self.__json_unpack(self.response)
         else:
             self.__oldstyle_unpack(self.response)
+        self.valid |= PACKET_SET
         return 0
 
     def next(self):

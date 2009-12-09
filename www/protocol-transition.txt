@@ -290,6 +290,19 @@ gpsd could include other kinds of data, such as the take from
 a digital compass, water-temperature sensors, or even aircraft
 transponders.
 
+=== Asynchronous-write handling ===
+
+The old client code had an assumption baked into it that gps_poll()
+can do one read call end expect the daemon to hand it an entire 
+\n-terminated packet. 99.9% of the time this is true, but socket
+layers can do some remarkably perverse things.
+
+In 2.91 and later, gps_poll() behaves in a subtly different way.
+Each call does exactly one read() call as before, but the incoming
+data is now buffered; the logic to interpret the buffer and empty
+it is called only when the read() contains a \n.  When that happens,
+the validity flags include the PACKET_SET mask.
+
 == How the command set has changed == 
 
 If your code issues old-protocol commands 'A', 'D', 'E', 'M', 'P',
