@@ -434,15 +434,6 @@ class gps(gpsdata):
 
     def readline(self):
         "Get a line of data from the socket connected to the daemon."
-        while True:
-            eol = self.linebuffer.find('\n')
-            if eol > -1:
-                eol += 1
-                line = self.linebuffer[:eol]
-                self.linebuffer = self.linebuffer[eol:]
-                return line
-            else:
-                self.linebuffer += self.sock.recv(4096)
 
     def waiting(self):
         "Return True if data is ready for the client."
@@ -453,7 +444,15 @@ class gps(gpsdata):
 
     def poll(self):
         "Wait for and read data being streamed from gpsd."
-        self.response = self.readline()
+        while True:
+            eol = self.linebuffer.find('\n')
+            if eol > -1:
+                eol += 1
+                self.response = self.linebuffer[:eol]
+                self.linebuffer = self.linebuffer[eol:]
+                break
+            else:
+                self.linebuffer += self.sock.recv(4096)
         # This code can go away when we remove oldstyle protocol
         if self.response.startswith("H") and "=" not in self.response:
             while True:
