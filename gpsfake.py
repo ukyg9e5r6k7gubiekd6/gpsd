@@ -476,7 +476,8 @@ class TestSession:
                         chosen.enqueued = ""
                     while chosen.waiting():
                         chosen.poll()
-                        self.reporter(chosen.response)
+                        if chosen.valid & gps.PACKET_SET:
+                            self.reporter(chosen.response)
                         had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
