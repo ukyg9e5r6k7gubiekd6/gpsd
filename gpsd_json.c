@@ -1109,7 +1109,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
     case 21: /* Aid to Navigation */
 	if (scaled) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"type\":%s,\"name\":\"%s\",\"lon\":%.4f,"
+			   "\"aid_type\":%s,\"name\":\"%s\",\"lon\":%.4f,"
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,"
 			   "\"to_starboard\":%u,\"epfd\":\"%s\","
@@ -1133,7 +1133,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   JSON_BOOL(ais->type21.virtual_aid));
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
+			   "\"aid_type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
 			   "\"epfd\":%u,\"second\":%u,\"regional\":%u,"
