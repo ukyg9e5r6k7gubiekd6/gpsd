@@ -234,7 +234,7 @@ argument.</para>
 <para>Normally <function>gps_poll()</function> blocks until
 either there is a read error or some data is received from tha 
 daemon.  In this mode, <function>gps_poll()</function> returns
-immediately wityh a value of 0 if there is no input waiting.</para>
+immediately with a value of 0 if there is no input waiting.</para>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -295,17 +295,12 @@ code that calls gps_poll(gpsdata).
 
 <refsect1 id='limitations'><title>LIMITATIONS</title>
 
-<para>Incautious use of <function>gps_send()</function> may lead to
-subtle bugs. In order to not bloat <structname>struct
+<para>In the C API, incautious use of <function>gps_send()</function>
+may lead to subtle bugs. In order to not bloat <structname>struct
 gps_data_t</structname> with space used by responses that are not
 expected to be shipped in close sequence with each other, the storage
-for fields associated with certain responses are combined in a union.</para>
-
-<para>Sends that might invoke this set of responses need to be
-sequenced carefully so the unpacking of multiple responses arriving in
-the same socket read cannot result in later updates to the union
-obliterating data from earlier ones before it becomes visible to the
-client application.</para>
+for fields associated with certain responses are combined in a
+union.</para>
 
 <para>The risky set of responses includes VERSION, DEVICELIST, RTCM2,
 RTCM3, and AIS; it may not be limited to that set.  The logic of the
