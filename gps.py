@@ -450,13 +450,6 @@ class gps(gpsdata):
                 break
             else:
                 self.linebuffer += self.sock.recv(4096)
-        # This code can go away when we remove oldstyle protocol
-        if self.response.startswith("H") and "=" not in self.response:
-            while True:
-                frag = self.readline()
-                self.response += frag
-                if frag.startswith("."):
-                    break
         # Can happen if daemon terminates while we're reading.
         if not self.response:
             return -1
