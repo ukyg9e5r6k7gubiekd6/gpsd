@@ -441,15 +441,21 @@ class gps(gpsdata):
 
     def poll(self):
         "Wait for and read data being streamed from gpsd."
-        while True:
+        eol = self.linebuffer.find('\n')
+        if eol == -1:
+            frag = self.sock.recv(4096)
+            self.linebuffer += frag
+            if not self.linebuffer:
+                return -1
             eol = self.linebuffer.find('\n')
-            if eol > -1:
-                eol += 1
-                self.response = self.linebuffer[:eol]
-                self.linebuffer = self.linebuffer[eol:]
-                break
-            else:
-                self.linebuffer += self.sock.recv(4096)
+            if eol == -1:
+                return 0
+
+        # We got a line
+        eol += 1
+        self.response = self.linebuffer[:eol]
+        self.linebuffer = self.linebuffer[eol:]
+
         # Can happen if daemon terminates while we're reading.
         if not self.response:
             return -1
