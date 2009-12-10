@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include <locale.h>
+#include <assert.h>
 
 #include "gpsd.h"
 #include "gps_json.h"
@@ -626,35 +627,38 @@ int gps_poll(struct gps_data_t *gpsdata)
     int status = -1;
     struct privdata_t *priv = PRIVATE(gpsdata);
 
-    /* read data: return -1 if no data waiting or buffered, 0 otherwise */
-    status = (int)recv(gpsdata->gps_fd,
-		  priv->buffer + priv->waiting,
-		  sizeof(priv->buffer)-priv->waiting,
-		  0);
-    if (status > -1)
-	priv->waiting += status;
-    else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
-	return 0;
-    else if (priv->waiting == 0)
-	return status;
-
-    /* parse a response if we have a whole one */
+    gpsdata->set &=~ PACKET_SET;
     eol = strchr(priv->buffer, '\n');
-    if (eol != NULL) {
-	// FIXME: Make the JSON parser stop on \n so this isn't needed
-	*eol = '\0';
-	response_length = eol - priv->buffer + 1;
-	received = gpsdata->online = timestamp();
-	status = gps_unpack(priv->buffer, gpsdata);
-	/*@+matchanyintegral@*/
-	memmove(priv->buffer, 
-		priv->buffer + response_length, 
-		priv->waiting - response_length);
-	/*@-matchanyintegral@*/
-	priv->waiting -= response_length;
-	gpsdata->set |= PACKET_SET;
-    } else
-	gpsdata->set &=~ PACKET_SET;
+    if (eol == NULL) {
+	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
+	status = (int)recv(gpsdata->gps_fd,
+			   priv->buffer + priv->waiting,
+			   sizeof(priv->buffer)-priv->waiting,
+			   0);
+	if (status > -1)
+	    priv->waiting += status;
+	else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+	    return 0;
+	else if (priv->waiting == 0)
+	    return status;
+	eol = strchr(priv->buffer, '\n');
+	if (eol == NULL)
+	    return 0;
+    }
+
+    assert(eol != NULL);
+    // FIXME: Make the JSON parser stop on \n so this isn't needed
+    *eol = '\0';
+    response_length = eol - priv->buffer + 1;
+    received = gpsdata->online = timestamp();
+    status = gps_unpack(priv->buffer, gpsdata);
+    /*@+matchanyintegral@*/
+    memmove(priv->buffer, 
+	    priv->buffer + response_length, 
+	    priv->waiting - response_length);
+    /*@-matchanyintegral@*/
+    priv->waiting -= response_length;
+    gpsdata->set |= PACKET_SET;
 
     return 0;
 }
