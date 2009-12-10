@@ -432,9 +432,6 @@ class gps(gpsdata):
             self.data["c_decode"] = time.time()
             self.timings = self.data
 
-    def readline(self):
-        "Get a line of data from the socket connected to the daemon."
-
     def waiting(self):
         "Return True if data is ready for the client."
         if self.linebuffer:
