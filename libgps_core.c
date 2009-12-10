@@ -798,7 +798,8 @@ int main(int argc, char *argv[])
 	    batchmode = true;
 	    break;
 	case 's':
-	    (void)printf("Sizes: rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
+	    (void)printf("Sizes: gpsdata=%zd rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
+			 sizeof(struct gps_data_t),
 			 sizeof(struct rtcm2_t),
 			 sizeof(struct rtcm3_t),
 			 sizeof(struct ais_t),
