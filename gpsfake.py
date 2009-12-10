@@ -409,15 +409,6 @@ class TestSession:
         if commands:
             self.initialize(newclient, commands) 
         return self.client_id
-    def client_query(self, id, commands):
-        "Ship a command to a client channel, get a response (threaded mode only)."
-        self.progress("gpsfake: client_query(%d, %s)\n" % (id, `commands`))
-        for obj in self.runqueue:
-            if isinstance(obj, gps.gps) and obj.id == id:
-                obj.send(commands)
-                obj.poll()
-                return obj.response
-        return None
     def client_remove(self, cid):
         "Terminate a client session."
         self.progress("gpsfake: client_remove(%d)\n" % cid)
