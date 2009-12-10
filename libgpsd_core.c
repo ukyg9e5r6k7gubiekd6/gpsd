@@ -266,10 +266,16 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 		log = "Too long for 1Hz, too short for 2Hz\n";
 	    } else if (2001000 > cycle) {
 		/* looks like 0.5 Hz square wave */
-		ok = 1;
-		log = "PPS square wave\n";
+                if (999000 > duration) {
+                    log = "PPS 0.5 Hz square too short duration\n";
+                } else if (1001000 > duration) {
+                    ok = 1;
+                    log = "PPS 0.5 Hz square wave\n";
+                } else {
+                    log = "PPS 0.5 Hz square too long duration\n";
+                }
 	    } else {
-		log = "Too long for 2Hz\n";
+		log = "Too long for 0.5Hz\n";
 	    }
 	} else {
 	    /* not a good fix, but a test for an otherwise good PPS
