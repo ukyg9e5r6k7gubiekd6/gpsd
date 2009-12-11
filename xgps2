@@ -23,7 +23,7 @@ class Base:
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
         self.window.connect("delete_event", self.delete_event)
-        #self.window.set_border_width(5)
+        self.window.set_size_request(800, 600)
 
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
@@ -31,7 +31,7 @@ class Base:
 
         self.window.connect("destroy", lambda w: gtk.main_quit())
 
-        self.tooltips = gtk.Tooltips()
+        #self.tooltips = gtk.Tooltips()
 
         # Set up toolbar style
         toolbar = gtk.Toolbar()
@@ -43,18 +43,23 @@ class Base:
 
         quit = gtk.ToolButton(gtk.STOCK_QUIT)
         toolbar.insert(quit, -1)
-        self.tooltips.set_tip(quit, "Leave this program.")
+        #self.tooltips.set_tip(quit, "Leave this program.")
         quit.connect("clicked", self.delete_event)
         quit.show()
 
         properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
         toolbar.insert(properties, -1)
-        self.tooltips.set_tip(properties, "Preferences.")
+        #self.tooltips.set_tip(properties, "Preferences.")
         #properties.connect("clicked", self.properties_handler)
         properties.show()
 
-        
+        hbox = gtk.HBox(False, 0)
+        vbox.add(hbox)
+        hbox.show()
 
+        self.skyview = gtk.DrawingArea()
+        self.skyview.set_size_request(400, 400)
+        hbox.add(self.skyview)
 
         self.window.show()
 
