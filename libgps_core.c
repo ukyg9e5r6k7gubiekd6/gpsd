@@ -716,7 +716,7 @@ int gps_stream(struct gps_data_t *gpsdata,
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	libgps_debug_trace((1, "gps_stream() enable command: %s\n", buf));
+	libgps_debug_trace((1, "gps_stream() disable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     } else /* if ((flags & WATCH_ENABLE) != 0) */{
 	if ((flags & WATCH_OLDSTYLE) != 0) {
@@ -744,7 +744,7 @@ int gps_stream(struct gps_data_t *gpsdata,
 		buf[strlen(buf)-1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	libgps_debug_trace((1, "gps_stream() disable command: %s\n", buf));
+	libgps_debug_trace((1, "gps_stream() enable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     }
 }
