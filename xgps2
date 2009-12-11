@@ -23,7 +23,7 @@ class Base:
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
         self.window.connect("delete_event", self.delete_event)
-        self.window.set_size_request(800, 600)
+        #self.window.set_size_request(800, 600)
 
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
@@ -60,6 +60,11 @@ class Base:
         skyframe = gtk.Frame(label="Satellite List")
         skyframe.show()
         hbox.add(skyframe)
+        self.skytext = gtk.TextView()
+        self.skytext.set_editable(False)
+        self.skytext.get_buffer().set_text("PRN:   Elev:  Azim:  SNR:  Used:")
+        self.skytext.show()
+        skyframe.add(self.skytext)
 
         viewframe = gtk.Frame(label="Skyview")
         viewframe.show()
@@ -70,6 +75,7 @@ class Base:
         viewframe.add(self.skyview)
 
         self.rawdisplay = gtk.Entry()
+        self.rawdisplay.set_editable(False)
         self.rawdisplay.show()
         vbox.add(self.rawdisplay)
 
