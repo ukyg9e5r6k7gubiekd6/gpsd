@@ -44,7 +44,7 @@ class Base:
         quit = gtk.ToolButton(gtk.STOCK_QUIT)
         toolbar.insert(quit, -1)
         #self.tooltips.set_tip(quit, "Leave this program.")
-        quit.connect("clicked", self.delete_event)
+        quit.connect("clicked", lambda w: gtk.main_quit())
         quit.show()
 
         properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
@@ -57,9 +57,25 @@ class Base:
         vbox.add(hbox)
         hbox.show()
 
+        skyframe = gtk.Frame(label="Satellite List")
+        skyframe.show()
+        hbox.add(skyframe)
+
+        viewframe = gtk.Frame(label="Skyview")
+        viewframe.show()
+        hbox.add(viewframe)
         self.skyview = gtk.DrawingArea()
         self.skyview.set_size_request(400, 400)
-        hbox.add(self.skyview)
+        self.skyview.show()
+        viewframe.add(self.skyview)
+
+        self.rawdisplay = gtk.Entry()
+        self.rawdisplay.show()
+        vbox.add(self.rawdisplay)
+
+        dataframe = gtk.Frame(label="GPS data")
+        dataframe.show()
+        vbox.add(dataframe)
 
         self.window.show()
 
