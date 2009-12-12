@@ -420,6 +420,7 @@ class gps(gpsdata):
             for attrp in "xyvhpg":
                 setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
             if "satellites" in self.data.keys():
+                self.satellites = [] 
                 for sat in self.data['satellites']:
                     self.satellites.append(gps.satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
             self.satellites_used = 0
