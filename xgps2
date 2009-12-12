@@ -14,9 +14,11 @@ By Eric S. Raymond for the GPSD project, December 2009
 
 import sys, os, re, math, time, exceptions, getopt
 
-import pygtk
+import gobject, pygtk
 pygtk.require('2.0')
 import gtk
+
+import gps
 
 class Base:
     def __init__(self):
@@ -89,6 +91,28 @@ class Base:
         gtk.main_quit()
         return False
 
+    def watch(self, daemon):
+        "Set up monitoring of a daemon instance."
+        self.daemon = daemon
+        gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
+        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_error)
+        gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
+
+    def handle_response(self, source, condition):
+        "Handle ordinary I/O ready condition from the daemon."
+        self.daemon.poll()
+        return True
+
+    def handle_error(self, source, condition):
+        "Handle error condition from the daemon."
+        # FIXME: Pop up a notification...
+        return True
+
+    def handle_hangup(self, source, condition):
+        "Handle hangup condition from the daemon."
+        # FIXME: Pop up a notification...
+        return True
+
     def main(self):
         gtk.main()
 
@@ -115,5 +139,8 @@ if __name__ == "__main__":
             sys.stderr.write("xgps 0.1\n")
 	    sys.exit(0)
 
+    # FIXME: Currently no args other than verbose are honored.
     base = Base()
-    gtk.main()
+    daemon = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_JSON,verbose=debug>0)
+    base.watch(daemon)
+    base.main()
