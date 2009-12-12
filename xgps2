@@ -105,6 +105,10 @@ class Base:
 				    satellite.PRN, satellite.elevation,
 				    satellite.azimuth, satellite.ss,
 				    yesno)
+        #start = self.skytext.get_buffer().get_start_iter()
+        #end = self.skytext.get_buffer().get_end_iter()
+        #fixedwidth = self.skytext.get_buffer().create_tag(family="Monospace")
+        #self.skytext.get_buffer().apply_tag(fixedwidth, start, end) 
         self.skytext.get_buffer().set_text(satlist)
 
     # I/O monitoring and gtk housekeeping
@@ -120,6 +124,7 @@ class Base:
         "Handle ordinary I/O ready condition from the daemon."
         self.daemon.poll()
         if self.daemon.valid & gps.PACKET_SET:
+            self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
                 self.update_skyview(self.daemon.satellites)
         return True
