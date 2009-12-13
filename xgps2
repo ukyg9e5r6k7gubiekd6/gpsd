@@ -67,16 +67,17 @@ class Base:
         self.satlist = gtk.ListStore(str,str,str,str,str)
         view = gtk.TreeView(model=self.satlist)
 
-        columns = []
         for (i, label) in enumerate(('PRN:','Elev:','Azim:','SNR:','Used:')):
             column = gtk.TreeViewColumn(label)
-            view.append_column(column)
             renderer = gtk.CellRendererText()
             column.pack_start(renderer)
             column.add_attribute(renderer, 'text', i)
+            view.append_column(column)
 
+        self.row_iters = []
         for i in range(gps.MAXCHANNELS):
-            self.satlist.append(["A", "B", "C", "D", "E"])
+            self.satlist.append(["", "", "", "", ""])
+            self.row_iters.append(self.satlist.get_iter(i))
 
         view.show()
         skyframe.add(view)
@@ -100,6 +101,10 @@ class Base:
 
         self.window.show()
 
+    def set_satlist_field(self, row, column, value):
+        "Set a specified field in the satellite list."
+        self.satlist.set_value(self.row_iters[row], column, value)
+
     def delete_event(self, widget, event, data=None):
         gtk.main_quit()
         return False
@@ -108,7 +113,18 @@ class Base:
 
     def update_skyview(self, satellites):
         "Update the satellite list and skyview."
-        pass
+        for (i, satellite) in enumerate(satellites): 
+            self.set_satlist_field(i, 0, satellite.PRN)
+            self.set_satlist_field(i, 1, satellite.elevation)
+            self.set_satlist_field(i, 2, satellite.azimuth)
+            self.set_satlist_field(i, 3, satellite.ss)
+            yesno = 'N'
+            if satellite.used:
+                yesno = 'Y'
+            self.set_satlist_field(i, 4, yesno)
+        for i in range(len(satellites), gps.MAXCHANNELS):
+            for j in range(0, 5):
+                self.set_satlist_field(i, j, "")
 
     # I/O monitoring and gtk housekeeping
 
