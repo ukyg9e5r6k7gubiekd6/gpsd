@@ -881,6 +881,7 @@ update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 	int newstate;
 	XmString string[MAXCHANNELS + 1];
 	char s[128], *latlon, *sp;
+	bool usedflags[MAXCHANNELS];
 
 	/* this is where we implement source-device filtering */
 	if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
@@ -894,6 +895,10 @@ update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 
 	/* This is for the satellite status display */
 	if (gpsdata->satellites_visible) {
+		for (i = 0; i < MAXCHANNELS; i++)
+		    usedflags[i] = false;
+		for (i = 0; i < (unsigned int)gpsdata->satellites_used; i++)
+		    usedflags[gpsdata->used[i]] = true;
 		string[0] = XmStringCreateSimple(
 		    "PRN:   Elev:  Azim:  SNR:  Used:");
 		for (i = 0; i < MAXCHANNELS; i++) {
@@ -902,7 +907,7 @@ update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 				    " %3d    %2d    %3d    %2.0f      %c",
 				    gpsdata->PRN[i], gpsdata->elevation[i],
 				    gpsdata->azimuth[i], gpsdata->ss[i],
-				    gpsdata->used[i] ? 'Y' : 'N');
+				    usedflags[i] ? 'Y' : 'N');
 			} else
 			    (void)strlcpy(s, "                  ", sizeof(s));
 			string[i + 1] = XmStringCreateSimple(s);
