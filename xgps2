@@ -33,7 +33,7 @@ class Base:
 
         self.window.connect("destroy", lambda w: gtk.main_quit())
 
-        self.tooltips = gtk.Tooltips()
+        #self.tooltips = gtk.Tooltips()
 
         # Set up toolbar style
         toolbar = gtk.Toolbar()
@@ -45,13 +45,13 @@ class Base:
 
         quit = gtk.ToolButton(gtk.STOCK_QUIT)
         toolbar.insert(quit, -1)
-        self.tooltips.set_tip(quit, "Leave this program.")
+        quit.set_tooltip_text("Leave this program.")
         quit.connect("clicked", lambda w: gtk.main_quit())
         quit.show()
 
         properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
         toolbar.insert(properties, -1)
-        self.tooltips.set_tip(properties, "Preferences.")
+        properties.set_tooltip_text("Preferences.")
         #properties.connect("clicked", self.properties_handler)
         properties.show()
 
