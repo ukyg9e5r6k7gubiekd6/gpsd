@@ -63,11 +63,45 @@ class Base:
         skyframe = gtk.Frame(label="Satellite List")
         skyframe.show()
         hbox.add(skyframe)
-        self.skytext = gtk.TextView()
-        self.skytext.set_editable(False)
-        self.skytext.get_buffer().set_text(Base.SATLIST_HEADER)
-        self.skytext.show()
-        skyframe.add(self.skytext)
+
+        self.satlist = gtk.ListStore(str,str,str,str,str)
+        view = gtk.TreeView(model=self.satlist)
+
+        col_PRN  = gtk.TreeViewColumn('PRN:')
+        col_el   = gtk.TreeViewColumn('Elev:')
+        col_azim = gtk.TreeViewColumn('Azim:')
+        col_snr  = gtk.TreeViewColumn('SNR:')
+        col_used = gtk.TreeViewColumn('Used:')
+
+        view.append_column(col_PRN)
+        view.append_column(col_el)
+        view.append_column(col_azim)
+        view.append_column(col_snr)
+        view.append_column(col_used)
+
+        cell_PRN  = gtk.CellRendererText()
+        cell_el   = gtk.CellRendererText()
+        cell_azim = gtk.CellRendererText()
+        cell_snr  = gtk.CellRendererText()
+        cell_used = gtk.CellRendererText()
+
+        col_PRN.pack_start(cell_PRN)
+        col_el.pack_start(cell_el)
+        col_azim.pack_start(cell_azim)
+        col_snr.pack_start(cell_snr)
+        col_used.pack_start(cell_used)
+
+        col_PRN.add_attribute(cell_PRN, 'text', 0)
+        col_el.add_attribute(cell_el, 'text', 1)
+        col_azim.add_attribute(cell_azim, 'text', 2)
+        col_snr.add_attribute(cell_snr, 'text', 3)
+        col_used.add_attribute(cell_used, 'text', 4)
+
+        for i in range(gps.MAXCHANNELS):
+            self.satlist.append(["A", "B", "C", "D", "E"])
+
+        view.show()
+        skyframe.add(view)
 
         viewframe = gtk.Frame(label="Skyview")
         viewframe.show()
@@ -96,20 +130,7 @@ class Base:
 
     def update_skyview(self, satellites):
         "Update the satellite list and skyview."
-        satlist = self.SATLIST_HEADER + "\r\n"
-        for satellite in satellites:
-            yesno = "N"
-            if satellite.used:
-                yesno = "Y"
-            satlist += " %3d    %2d    %3d    %2.0f      %c\r\n" % (
-				    satellite.PRN, satellite.elevation,
-				    satellite.azimuth, satellite.ss,
-				    yesno)
-        #start = self.skytext.get_buffer().get_start_iter()
-        #end = self.skytext.get_buffer().get_end_iter()
-        #fixedwidth = self.skytext.get_buffer().create_tag(family="Monospace")
-        #self.skytext.get_buffer().apply_tag(fixedwidth, start, end) 
-        self.skytext.get_buffer().set_text(satlist)
+        pass
 
     # I/O monitoring and gtk housekeeping
 
