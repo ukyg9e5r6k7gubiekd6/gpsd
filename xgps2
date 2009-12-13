@@ -21,7 +21,6 @@ import gtk
 import gps
 
 class Base:
-    SATLIST_HEADER = "PRN:   Elev:  Azim:  SNR:  Used:"
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
@@ -34,7 +33,7 @@ class Base:
 
         self.window.connect("destroy", lambda w: gtk.main_quit())
 
-        #self.tooltips = gtk.Tooltips()
+        self.tooltips = gtk.Tooltips()
 
         # Set up toolbar style
         toolbar = gtk.Toolbar()
@@ -46,13 +45,13 @@ class Base:
 
         quit = gtk.ToolButton(gtk.STOCK_QUIT)
         toolbar.insert(quit, -1)
-        #self.tooltips.set_tip(quit, "Leave this program.")
+        self.tooltips.set_tip(quit, "Leave this program.")
         quit.connect("clicked", lambda w: gtk.main_quit())
         quit.show()
 
         properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
         toolbar.insert(properties, -1)
-        #self.tooltips.set_tip(properties, "Preferences.")
+        self.tooltips.set_tip(properties, "Preferences.")
         #properties.connect("clicked", self.properties_handler)
         properties.show()
 
