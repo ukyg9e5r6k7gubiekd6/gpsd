@@ -67,35 +67,13 @@ class Base:
         self.satlist = gtk.ListStore(str,str,str,str,str)
         view = gtk.TreeView(model=self.satlist)
 
-        col_PRN  = gtk.TreeViewColumn('PRN:')
-        col_el   = gtk.TreeViewColumn('Elev:')
-        col_azim = gtk.TreeViewColumn('Azim:')
-        col_snr  = gtk.TreeViewColumn('SNR:')
-        col_used = gtk.TreeViewColumn('Used:')
-
-        view.append_column(col_PRN)
-        view.append_column(col_el)
-        view.append_column(col_azim)
-        view.append_column(col_snr)
-        view.append_column(col_used)
-
-        cell_PRN  = gtk.CellRendererText()
-        cell_el   = gtk.CellRendererText()
-        cell_azim = gtk.CellRendererText()
-        cell_snr  = gtk.CellRendererText()
-        cell_used = gtk.CellRendererText()
-
-        col_PRN.pack_start(cell_PRN)
-        col_el.pack_start(cell_el)
-        col_azim.pack_start(cell_azim)
-        col_snr.pack_start(cell_snr)
-        col_used.pack_start(cell_used)
-
-        col_PRN.add_attribute(cell_PRN, 'text', 0)
-        col_el.add_attribute(cell_el, 'text', 1)
-        col_azim.add_attribute(cell_azim, 'text', 2)
-        col_snr.add_attribute(cell_snr, 'text', 3)
-        col_used.add_attribute(cell_used, 'text', 4)
+        columns = []
+        for (i, label) in enumerate(('PRN:','Elev:','Azim:','SNR:','Used:')):
+            column = gtk.TreeViewColumn(label)
+            view.append_column(column)
+            renderer = gtk.CellRendererText()
+            column.pack_start(renderer)
+            column.add_attribute(renderer, 'text', i)
 
         for i in range(gps.MAXCHANNELS):
             self.satlist.append(["A", "B", "C", "D", "E"])
