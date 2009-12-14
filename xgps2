@@ -58,6 +58,7 @@ class SkyView(gtk.DrawingArea):
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('expose-event',  self.on_expose_event)
         self.connect('realize',       self.on_realize)
+        self.pangolayout = self.create_pango_layout("")
 
     def on_realize(self, widget):
         self.gc = widget.window.new_gc()
@@ -70,6 +71,7 @@ class SkyView(gtk.DrawingArea):
         self.diameter = min(self.width, self.height) - SkyView.HORIZON_PAD
 
     def set_color(self, spec):
+        "Set foreground color for draweing."
         self.gc.set_rgb_fg_color(gtk.gdk.color_parse(spec))
 
     def draw_circle(self, widget, x, y, diam):
@@ -79,17 +81,19 @@ class SkyView(gtk.DrawingArea):
                                diam, diam, 0, 360 * 64)
 
     def draw_letter(self, widget, x, y, letter):
-        pass
+        "Draw a letter on the skyview."
+        self.pangolayout.set_text(letter)
+        # FIXME: When the layout object can report its size, use it
+        self.window.draw_layout(self.gc, x-5, y-10, self.pangolayout)
 
-    def pol2cart(self, azimuth, elevation):
+    def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
-	azimuth *= (math.pi/180)	# Degrees to radians
+	az *= (math.pi/180)	# Degrees to radians
         # Exact spherical projection would be like this:
-	# elevation = sin((90.0 - elevation) * DEG_2_RAD);
-	elevation = ((90.0 - elevation) / 90.0);
-
-	xout = int((self.width / 2) + math.sin(azimuth) * elevation * (self.diameter / 2))
-	yout = int((self.height / 2) - math.cos(azimuth) * elevation * (self.diameter / 2))
+	# el = sin((90.0 - el) * DEG_2_RAD);
+	el = ((90.0 - el) / 90.0);
+	xout = int((self.width / 2) + math.sin(az) * el * (self.diameter / 2))
+	yout = int((self.height / 2) - math.cos(az) * el * (self.diameter / 2))
         return (xout, yout)
 
     def on_expose_event(self, widget, event):
@@ -111,13 +115,13 @@ class SkyView(gtk.DrawingArea):
                          self.diameter)
         # The compass-point letters
         (x, y) = self.pol2cart(0, 0)
-        self.draw_letter(widget, x, y, "N")
+        self.draw_letter(widget, x, y+10, "N")
         (x, y) = self.pol2cart(90, 0)
-        self.draw_letter(widget, x + 2, y, "E")
+        self.draw_letter(widget, x-10, y, "E")
         (x, y) = self.pol2cart(180, 0)
-        self.draw_letter(widget, x, y + 10, "S")
+        self.draw_letter(widget, x, y-10, "S")
         (x, y) = self.pol2cart(270, 0)
-        self.draw_letter(widget, x - 5, y, "W")
+        self.draw_letter(widget, x+10, y, "W")
 
 class Base:
     gpsfields = (
