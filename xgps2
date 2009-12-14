@@ -18,14 +18,16 @@ import gobject, pygtk
 pygtk.require('2.0')
 import gtk
 
-import gps
+# We can't ship this until we fugure out how to merge the gpslib C extensions
+# into the gps export module.
+import gps, gpslib
 
 class Base:
     gpsfields = (
         # First column
-        ("Time", lambda r: gps.isotime(r.time)),
-        ("Latitude", None),
-        ("Longitude", None),
+        ("Time", lambda s, r: gps.isotime(r.time)),
+        ("Latitude", lambda s, r: s.update_latitude(r)),
+        ("Longitude", lambda s, r: s.update_longitude(r)),
         ("Altitude", None),
         ("Speed", None),
         ("Climb", None),
@@ -39,7 +41,9 @@ class Base:
         ("EPC", None),
         ("EPD", None),
         )
-    def __init__(self):
+    def __init__(self, deg_type):
+        self.deg_type = deg_type
+        
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
         self.window.connect("delete_event", self.delete_event)
@@ -122,6 +126,7 @@ class Base:
             else:
                 colbase = 2
             label = gtk.Label(Base.gpsfields[i][0])
+            # FIXME: Right-justification isn't working
             label.set_justify(gtk.JUSTIFY_RIGHT)
             datatable.attach(label, colbase, colbase+1, i % 7, i % 7 + 1)
             entry = gtk.Entry()
@@ -146,11 +151,29 @@ class Base:
 
     # State updates
 
+    def update_latitude(self, data):
+        if data.mode >= gps.MODE_2D:
+            lat = gpslib.deg_to_str(self.deg_type, abs(data.lat))
+            if data.lat < 0:
+                ns = 'S'
+            else:
+                ns = 'N'
+            return "%s %s" % (lat, ns)
+
+    def update_longitude(self, data):
+        if data.mode >= gps.MODE_2D:
+            lon = gpslib.deg_to_str(self.deg_type, abs(data.lon))
+            if data.lon < 0:
+                ew = 'W'
+            else:
+                ew = 'E'
+            return "%s %s" % (lon, ew)
+
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
         for (hook, widget) in Base.gpsfields:
             if hook:	# Remove this guard when we have all hooks 
-                widget.set_text(hook(tpv))
+                widget.set_text(hook(self, tpv))
 
     def update_skyview(self, satellites):
         "Update the satellite list and skyview."
@@ -205,14 +228,14 @@ if __name__ == "__main__":
     (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:V?",
                                          ['speedunits=','altunits=','verbose'])
     debug = 0
-    latlon = 'd'
+    degreefmt = 'd'
     speedunits = 'mph'
     altunits = 'feet'
     for (opt, val) in options:
         if opt in '-D':
             debug = int(val)
         elif opt == '-l':
-            latlon = val
+            degreeformat = val
         elif opt == '--speedunits':
             speedunits = val
         elif opt == '--altunits':
@@ -224,8 +247,12 @@ if __name__ == "__main__":
             sys.stderr.write("xgps 0.1\n")
 	    sys.exit(0)
 
+    degreefmt = {'d':gpslib.deg_dd,
+                 'm':gpslib.deg_ddmm,
+                 's':gpslib.deg_ddmmss}[degreefmt]
+    
     # FIXME: Currently no args other than verbose are honored.
-    base = Base()
+    base = Base(deg_type=degreefmt)
     daemon = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_JSON,verbose=debug>0)
     base.watch(daemon)
     base.main()
