@@ -165,7 +165,7 @@ static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 	    /* some pulses may be so short that state never changes */
 	    if ( 999000 < cycle && 1001000 > cycle ) {
 		duration = 0;
-		unchanged = 0;
+		unchanged = 1;
 		gpsd_report(LOG_RAW,
 			"PPS pps-detect (%s) on %s invisible pulse\n",
 			pps_device_str, session->gpsdata.dev.path);
