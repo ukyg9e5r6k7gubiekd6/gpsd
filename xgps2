@@ -22,6 +22,26 @@ import gtk
 # into the gps export module.
 import gps, gpslib
 
+class unit_adjustments:
+    "Encapsulate adjustments for unit systems."
+    def __init__(self):
+        units = gpslib.gpsd_units()
+        if units in (gpslib.unspecified, gpslib.imperial):
+            self.altfactor = gps.METERS_TO_FEET
+            self.altunits = "ft"
+            self.speedfactor = gps.MPS_TO_MPH
+            self.speedunits = "mph"
+        elif units == gpslib.nautical:
+            self.altfactor = gps.METERS_TO_FEET
+            self.altunits = "ft"
+            self.speedfactor = gps.MPS_TO_KNOTS
+            self.speedunits = "knots"
+        elif units == gpslib.metric:
+            self.altfactor = 1
+            self.altunits = "m"
+            self.speedfactor = gps.MPS_TO_KPH
+            self.speedunits = "kph"
+
 class Base:
     gpsfields = (
         # First column
@@ -43,6 +63,7 @@ class Base:
         )
     def __init__(self, deg_type):
         self.deg_type = deg_type
+        self.conversions = unit_adjustments()
         
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
@@ -236,9 +257,9 @@ if __name__ == "__main__":
             debug = int(val)
         elif opt == '-l':
             degreeformat = val
-        elif opt == '--speedunits':
+        elif opt == '--speedunits':	# FIXME: Not yet honored
             speedunits = val
-        elif opt == '--altunits':
+        elif opt == '--altunits':	# FIXME: Not yet honored
             altunits = val
         elif opt in ('-?', '-h', '--help'):
             print __doc__
@@ -250,28 +271,6 @@ if __name__ == "__main__":
     degreefmt = {'d':gpslib.deg_dd,
                  'm':gpslib.deg_ddmm,
                  's':gpslib.deg_ddmmss}[degreefmt]
-
-    # FIXME: Encapsulate this in a adjustments class 
-    altfactor = gps.METERS_TO_FEET
-    speedfactor = gps.MPS_TO_MPH
-    altunits = "ft"
-    speedunits = "mph"
-    units = gpslib.gpsd_units() 
-    if units == gpslib.imperial:
-	altfactor = gps.METERS_TO_FEET
-	altunits = "ft"
-	speedfactor = gps.MPS_TO_MPH
-	speedunits = "mph"
-    elif units == gpslib.nautical:
-	altfactor = gps.METERS_TO_FEET
-	altunits = "ft"
-	speedfactor = gps.MPS_TO_KNOTS
-	speedunits = "knots"
-    elif units == gpslib.metric:
-	altfactor = 1
-	altunits = "m"
-	speedfactor = gps.MPS_TO_KPH
-	speedunits = "kph"
 
     base = Base(deg_type=degreefmt)
     daemon = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_JSON,verbose=debug>0)
