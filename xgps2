@@ -56,7 +56,7 @@ class Base:
         ("Climb", lambda s, r: s.update_climb(r)),
         ("Track", lambda s, r: s.update_track(r)),
         # Second column
-        ("Status", None),
+        ("Status", lambda s, r: s.update_status(r)),
         ("EPX", None),
         ("EPY", None),
         ("EPV", None),
@@ -67,7 +67,8 @@ class Base:
     def __init__(self, deg_type):
         self.deg_type = deg_type
         self.conversions = unit_adjustments()
-        
+        self.saved_mode = -1
+  
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
         self.window.connect("delete_event", self.delete_event)
@@ -226,6 +227,18 @@ class Base:
             return gpslib.deg_to_str(self.deg_type, abs(data.track))
         else:
             return "n/a"
+
+    def update_status(self, data):
+        if data.mode == gps.MODE_2D:
+            status = "2D FIX"
+        elif data.mode == gps.MODE_3D:
+            status = "3D FIX"
+        else:
+            status = "NO FIX"
+        if data.mode != self.saved_mode:
+            self.last_transition = time.time()
+            self.saved_mode = data.mode
+        return status + " (%d secs)" % (time.time() - self.last_transition)
 
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
