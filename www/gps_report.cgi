@@ -49,7 +49,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	$msg .= sprintf("[%s]\n", $query->param('model'));
 	$msg .= sprintf("type = device\n");
 	foreach $var ( sort qw(submitter vendor model packaging techdoc chipset
-                        firmware nmea interface tested rating noconfigure 
+                        firmware nmea interfaces tested rating noconfigure 
                         location date notes sample_notes)){
 		$val = $query->param($var);
 		$msg .= sprintf("\t%s = %s\n", $var, $val) if (defined($val) && $val);
