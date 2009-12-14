@@ -117,7 +117,7 @@ enum unit gpsd_units(void)
 	}
  	if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu != '\0') 
  	    || ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
-		if (strcasecmp(envu, "en_US")==0 
+	    if (strncasecmp(envu, "en_US", 5)==0 
 		    || strcasecmp(envu, "C")==0
 		    || strcasecmp(envu, "POSIX")==0) {
 			return imperial;
