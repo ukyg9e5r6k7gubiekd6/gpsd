@@ -57,12 +57,12 @@ class Base:
         ("Track", lambda s, r: s.update_track(r)),
         # Second column
         ("Status", lambda s, r: s.update_status(r)),
-        ("EPX", None),
-        ("EPY", None),
-        ("EPV", None),
-        ("EPS", None),
-        ("EPC", None),
-        ("EPD", None),
+        ("EPX", lambda s, r: s.update_err(r, "epx")),
+        ("EPY", lambda s, r: s.update_err(r, "epy")),
+        ("EPV", lambda s, r: s.update_err(r, "epv")),
+        ("EPS", lambda s, r: s.update_err(r, "eps")),
+        ("EPC", lambda s, r: s.update_err(r, "epc")),
+        ("EPD", lambda s, r: s.update_err(r, "epd")),
         )
     def __init__(self, deg_type):
         self.deg_type = deg_type
@@ -225,6 +225,14 @@ class Base:
     def update_track(self, data):
         if hasattr(data, "track"):
             return gpslib.deg_to_str(self.deg_type, abs(data.track))
+        else:
+            return "n/a"
+
+    def update_err(self, data, errtype):
+        if hasattr(data, errtype):
+            return "%.3f %s" % (
+                getattr(data, errtype) * self.conversions.altfactor,
+                self.conversions.altunits)
         else:
             return "n/a"
 
