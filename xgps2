@@ -250,8 +250,29 @@ if __name__ == "__main__":
     degreefmt = {'d':gpslib.deg_dd,
                  'm':gpslib.deg_ddmm,
                  's':gpslib.deg_ddmmss}[degreefmt]
-    
-    # FIXME: Currently no args other than verbose are honored.
+
+    # FIXME: Encapsulate this in a adjustments class 
+    altfactor = gps.METERS_TO_FEET
+    speedfactor = gps.MPS_TO_MPH
+    altunits = "ft"
+    speedunits = "mph"
+    units = gpslib.gpsd_units() 
+    if units == gpslib.imperial:
+	altfactor = gps.METERS_TO_FEET
+	altunits = "ft"
+	speedfactor = gps.MPS_TO_MPH
+	speedunits = "mph"
+    elif units == gpslib.nautical:
+	altfactor = gps.METERS_TO_FEET
+	altunits = "ft"
+	speedfactor = gps.MPS_TO_KNOTS
+	speedunits = "knots"
+    elif units == gpslib.metric:
+	altfactor = 1
+	altunits = "m"
+	speedfactor = gps.MPS_TO_KPH
+	speedunits = "kph"
+
     base = Base(deg_type=degreefmt)
     daemon = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_JSON,verbose=debug>0)
     base.watch(daemon)

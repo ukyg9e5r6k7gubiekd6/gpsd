@@ -554,12 +554,16 @@ class gps(gpsdata):
             return self.send(arg + "}")
 
 # some multipliers for interpreting GPS output
-METERS_TO_FEET  = 3.2808399
-METERS_TO_MILES = 0.00062137119
-KNOTS_TO_MPH    = 1.1507794
+METERS_TO_FEET	= 3.2808399	# Meters to U.S./British feet
+METERS_TO_MILES	= 0.00062137119	# Meters to miles
+KNOTS_TO_MPH	= 1.1507794	# Knots to miles per hour
+KNOTS_TO_KPH	= 1.852		# Knots to kilometers per hour
+KNOTS_TO_MPS	= 0.51444444	# Knots to meters per second
+MPS_TO_KPH	= 3.6		# Meters per second to klicks/hr
+MPS_TO_MPH	= 2.2369363	# Meters/second to miles per hour
+MPS_TO_KNOTS	= 1.9438445	# Meters per second to knots
 
 # EarthDistance code swiped from Kismet and corrected
-# (As yet, this stuff is not in the libgps C library.)
 
 def Deg2Rad(x):
     "Degrees to radians."
