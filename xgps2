@@ -46,7 +46,8 @@ class unit_adjustments:
             raise ValueError	# Should never happen
 
 class SkyView(gtk.DrawingArea):
-    "Satellite skyview, encapsulates pygtk's "
+    "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
+    # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
@@ -59,7 +60,7 @@ class SkyView(gtk.DrawingArea):
 
     def on_realize(self, widget):
         self.gc = widget.window.new_gc()
-        self.gc.set_line_attributes(1, gtk.gdk.LINE_ON_OFF_DASH,
+        self.gc.set_line_attributes(1, gtk.gdk.LINE_SOLID,
                                     gtk.gdk.CAP_ROUND, gtk.gdk.JOIN_ROUND)
 
     def on_size_allocate(self, widget, allocation):
@@ -67,7 +68,6 @@ class SkyView(gtk.DrawingArea):
         self.height = allocation.height
 
     def on_expose_event(self, widget, event):
-        # Example drawing code swiped from pygtk FAQ
         widget.window.draw_rectangle(self.gc, False,
                                      1, 1, self.width - 2, self.height - 2)
         widget.window.draw_line(self.gc,
