@@ -45,6 +45,36 @@ class unit_adjustments:
         else:
             raise ValueError	# Should never happen
 
+class SkyView(gtk.DrawingArea):
+    "Satellite skyview, encapsulates pygtk's "
+    def __init__(self):
+        gtk.DrawingArea.__init__(self)
+        self.set_size_request(400, 400)
+        self.gc = None  # initialized in realize-event handler
+        self.width  = 0 # updated in size-allocate handler
+        self.height = 0 # updated in size-allocate handler
+        self.connect('size-allocate', self.on_size_allocate)
+        self.connect('expose-event',  self.on_expose_event)
+        self.connect('realize',       self.on_realize)
+
+    def on_realize(self, widget):
+        self.gc = widget.window.new_gc()
+        self.gc.set_line_attributes(1, gtk.gdk.LINE_ON_OFF_DASH,
+                                    gtk.gdk.CAP_ROUND, gtk.gdk.JOIN_ROUND)
+
+    def on_size_allocate(self, widget, allocation):
+        self.width = allocation.width
+        self.height = allocation.height
+
+    def on_expose_event(self, widget, event):
+        # Example drawing code swiped from pygtk FAQ
+        widget.window.draw_rectangle(self.gc, False,
+                                     1, 1, self.width - 2, self.height - 2)
+        widget.window.draw_line(self.gc,
+                                0, 0, self.width - 1, self.height - 1)
+        widget.window.draw_line(self.gc,
+                                self.width - 1, 0, 0, self.height - 1)
+
 class Base:
     gpsfields = (
         # First column
@@ -131,8 +161,7 @@ class Base:
         viewframe = gtk.Frame(label="Skyview")
         viewframe.show()
         hbox.add(viewframe)
-        self.skyview = gtk.DrawingArea()
-        self.skyview.set_size_request(400, 400)
+        self.skyview = SkyView()
         self.skyview.show()
         viewframe.add(self.skyview)
 
