@@ -23,21 +23,21 @@ import gps
 class Base:
     gpsfields = (
         # First column
-        ("Time", "time"),
-        ("Latitude", "lat"),
-        ("Longitude", "lon"),
-        ("Altitude", "alt"),
-        ("Speed", "speed"),
-        ("Climb", "climb"),
-        ("Track", "track"),
+        ("Time", lambda r: gps.isotime(r.time)),
+        ("Latitude", None),
+        ("Longitude", None),
+        ("Altitude", None),
+        ("Speed", None),
+        ("Climb", None),
+        ("Track", None),
         # Second column
-        ("Status", "mode"),
-        ("EPX", "epx"),
-        ("EPY", "epy"),
-        ("EPV", "epv"),
-        ("EPS", "eps"),
-        ("EPC", "epc"),
-        ("EPD", "epd"),
+        ("Status", None),
+        ("EPX", None),
+        ("EPY", None),
+        ("EPV", None),
+        ("EPS", None),
+        ("EPC", None),
+        ("EPD", None),
         )
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -132,6 +132,10 @@ class Base:
 
         self.window.show()
 
+        # Discard field labels and associate data hooks with their widgets
+        Base.gpsfields = map(lambda ((label, hook), widget): (hook, widget),
+                             zip(Base.gpsfields, gpswidgets))
+
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
         self.satlist.set_value(self.row_iters[row], column, value)
@@ -141,6 +145,12 @@ class Base:
         return False
 
     # State updates
+
+    def update_gpsdata(self, tpv):
+        "Update the GPS data fields."
+        for (hook, widget) in Base.gpsfields:
+            if hook:	# Remove this guard when we have all hooks 
+                widget.set_text(hook(tpv))
 
     def update_skyview(self, satellites):
         "Update the satellite list and skyview."
@@ -173,8 +183,9 @@ class Base:
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
                 self.update_skyview(self.daemon.satellites)
-            #elif self.daemon.data["class"] == "TPV":
-            #    self.update_gpsdata(self.daemon.satellites)
+            elif self.daemon.data["class"] == "TPV":
+                self.update_gpsdata(self.daemon.data)
+                    
         return True
 
     def handle_error(self, source, condition):
