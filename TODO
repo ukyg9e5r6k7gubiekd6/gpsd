@@ -15,14 +15,6 @@ See also the GPSD bug tracker at
 
 ** Bugs in gpsd and its clients:
 
-*** The DGPSIP and NTRIP code is severaly bitrotted
-
-I descovered that dfor many, many revisions back the device opens for
-DGPSIP and NTRIP have been being done in a way that cannot possibly
-have worked.  Yet nobody has complained!  We need to find some way to
-test this code.  Web research suggests that DGPSIP may be dead; should
-it be removed?
-
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcheri reported that it broke somewhere between rev 3654 and
