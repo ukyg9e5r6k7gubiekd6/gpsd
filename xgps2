@@ -113,21 +113,20 @@ class Base:
         vbox.add(self.rawdisplay)
 
         dataframe = gtk.Frame(label="GPS data")
-        data_hbox = gtk.HBox()
-        dataframe.add(data_hbox)
-        datacolumns = (gtk.VBox(), gtk.VBox())
-        map(lambda w: data_hbox.add(w), datacolumns)
+        datatable = gtk.Table(7, 4, False)
+        dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
-            new_hbox = gtk.HBox()
-            if i < len(Base.gpsfields) / len(datacolumns):
-                datacolumns[0].add(new_hbox)
+            if i < len(Base.gpsfields) / 2:
+                colbase = 0
             else:
-                datacolumns[1].add(new_hbox)
-            new_hbox.add(gtk.Label(Base.gpsfields[i][0]))
-            new_widget = gtk.Entry()
-            new_hbox.add(new_widget)
-            gpswidgets.append(new_widget)
+                colbase = 2
+            label = gtk.Label(Base.gpsfields[i][0])
+            label.set_justify(gtk.JUSTIFY_RIGHT)
+            datatable.attach(label, colbase, colbase+1, i % 7, i % 7 + 1)
+            entry = gtk.Entry()
+            datatable.attach(entry, colbase+1, colbase+2, i % 7, i % 7 + 1)
+            gpswidgets.append(entry)
         dataframe.show_all()
         vbox.add(dataframe)
 
