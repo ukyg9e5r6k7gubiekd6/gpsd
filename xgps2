@@ -73,10 +73,24 @@ class SkyView(gtk.DrawingArea):
         self.gc.set_rgb_fg_color(gtk.gdk.color_parse(spec))
 
     def draw_circle(self, widget, x, y, diam):
-        "Draw a circle centered on the canvas midpoint."
+        "Draw a circle centered on the specified midpoint."
         widget.window.draw_arc(self.gc, False,
                                x - diam / 2, y - diam / 2,
                                diam, diam, 0, 360 * 64)
+
+    def draw_letter(self, widget, x, y, letter):
+        pass
+
+    def pol2cart(self, azimuth, elevation):
+        "Polar to Cartesian coordinates within the horizon circle."
+	azimuth *= (math.pi/180)	# Degrees to radians
+        # Exact spherical projection would be like this:
+	# elevation = sin((90.0 - elevation) * DEG_2_RAD);
+	elevation = ((90.0 - elevation) / 90.0);
+
+	xout = int((self.width / 2) + math.sin(azimuth) * elevation * (self.diameter / 2))
+	yout = int((self.height / 2) - math.cos(azimuth) * elevation * (self.diameter / 2))
+        return (xout, yout)
 
     def on_expose_event(self, widget, event):
         self.set_color("white")
@@ -95,6 +109,15 @@ class SkyView(gtk.DrawingArea):
         # The horizon circle
         self.draw_circle(widget, self.width / 2, self.height / 2,
                          self.diameter)
+        # The compass-point letters
+        (x, y) = self.pol2cart(0, 0)
+        self.draw_letter(widget, x, y, "N")
+        (x, y) = self.pol2cart(90, 0)
+        self.draw_letter(widget, x + 2, y, "E")
+        (x, y) = self.pol2cart(180, 0)
+        self.draw_letter(widget, x, y + 10, "S")
+        (x, y) = self.pol2cart(270, 0)
+        self.draw_letter(widget, x - 5, y, "W")
 
 class Base:
     gpsfields = (
