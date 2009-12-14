@@ -30,7 +30,6 @@ class unit_adjustments:
         self.speedfactor = gps.MPS_TO_MPH
         self.speedunits = "mph"
         units = gpslib.gpsd_units()
-        print "Units", units
         if units in (gpslib.unspecified, gpslib.imperial):
             pass
         elif units == gpslib.nautical:
@@ -55,7 +54,7 @@ class Base:
         ("Altitude", lambda s, r: s.update_altitude(r)),
         ("Speed", lambda s, r: s.update_speed(r)),
         ("Climb", lambda s, r: s.update_climb(r)),
-        ("Track", None),
+        ("Track", lambda s, r: s.update_track(r)),
         # Second column
         ("Status", None),
         ("EPX", None),
@@ -219,6 +218,12 @@ class Base:
             return "%.3f %s" % (
                 data.climb * self.conversions.speedfactor,
                 self.conversions.speedunits)
+        else:
+            return "n/a"
+
+    def update_track(self, data):
+        if hasattr(data, "track"):
+            return gpslib.deg_to_str(self.deg_type, abs(data.track))
         else:
             return "n/a"
 

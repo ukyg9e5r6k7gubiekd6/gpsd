@@ -28,7 +28,7 @@ gpslib_gpsd_units(PyObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ""))
 	return NULL;
-    return Py_BuildValue("d", (int)gpsd_units());
+    return Py_BuildValue("i", (int)gpsd_units());
 }
 
 /*
