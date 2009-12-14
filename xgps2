@@ -48,6 +48,7 @@ class unit_adjustments:
 class SkyView(gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
+    HORIZON_PAD = 20	# How much whitespace to leave around horizon
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
@@ -66,14 +67,34 @@ class SkyView(gtk.DrawingArea):
     def on_size_allocate(self, widget, allocation):
         self.width = allocation.width
         self.height = allocation.height
+        self.diameter = min(self.width, self.height) - SkyView.HORIZON_PAD
+
+    def set_color(self, spec):
+        self.gc.set_rgb_fg_color(gtk.gdk.color_parse(spec))
+
+    def draw_circle(self, widget, x, y, diam):
+        "Draw a circle centered on the canvas midpoint."
+        widget.window.draw_arc(self.gc, False,
+                               x - diam / 2, y - diam / 2,
+                               diam, diam, 0, 360 * 64)
 
     def on_expose_event(self, widget, event):
-        widget.window.draw_rectangle(self.gc, False,
-                                     1, 1, self.width - 2, self.height - 2)
-        widget.window.draw_line(self.gc,
-                                0, 0, self.width - 1, self.height - 1)
-        widget.window.draw_line(self.gc,
-                                self.width - 1, 0, 0, self.height - 1)
+        self.set_color("white")
+        widget.window.draw_rectangle(self.gc, True, 0,0, self.width,self.height)
+        # The zenith marker
+        self.set_color("gray")
+        self.draw_circle(widget, self.width / 2, self.height / 2, 6)
+        # The circle corresponding to 45 degrees elevation.
+        # There are two ways we could plot this.  Projecting the sphere
+        # on the display plane, the circle would have a diameter of
+        # sin(45) ~ 0.7.  But the naive linear mapping, just splitting
+        # the horizon diameter in half, seems to work better visually.
+        self.draw_circle(widget, self.width / 2, self.height / 2,
+                         int(self.diameter * 0.5))
+        self.set_color("black")
+        # The horizon circle
+        self.draw_circle(widget, self.width / 2, self.height / 2,
+                         self.diameter)
 
 class Base:
     gpsfields = (

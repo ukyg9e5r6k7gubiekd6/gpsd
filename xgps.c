@@ -62,7 +62,8 @@
 
 /* This code used to live in display.c */
 
-#define RM		20
+#undef SPHERICAL		/* use true spherical projection for coords? */ 
+#define HORIZON_PAD	20	/* how much space to leave around horizon */
 #define IDIAM		5	/* satellite icon diameter */
 
 #undef min
@@ -113,7 +114,7 @@ register_canvas(Widget w, GC gc)
 	    width, height, (unsigned int)DefaultDepthOfScreen(XtScreen(w)));
 	set_color("White");
 	(void)XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0,0, width, height);
-	diameter = min(width, height) - RM;
+	diameter = min(width, height) - HORIZON_PAD;
 }
 
 static void
@@ -136,7 +137,7 @@ pol2cart(double azimuth, double elevation,
 	 /*@out@*/int *xout, /*@out@*/int *yout)
 {
 	azimuth *= DEG_2_RAD;
-#ifdef PCORRECT
+#ifdef SPHERICAL
 	elevation = sin((90.0 - elevation) * DEG_2_RAD);
 #else
 	elevation = ((90.0 - elevation) / 90.0);
@@ -173,16 +174,16 @@ draw_graphics(struct gps_data_t *gpsdata)
 		draw_arc((int)(width / 2), (int)(height / 2), 6);
 
 		/* draw the 45 degree circle */
-#ifdef PCORRECT
+#ifdef SPHERICAL
 #define FF	0.7 /* sin(45) ~ 0.7 */
 #else
 #define FF	0.5
 #endif
-		draw_arc((int)(width / 2), (int)(height / 2), (unsigned)((i - RM) * FF));
+		draw_arc((int)(width / 2), (int)(height / 2), (unsigned)((i - HORIZON_PAD) * FF));
 #undef FF
-
+		/* draw the horizon circle */
 		set_color("Black");
-		draw_arc((int)(width / 2), (int)(height / 2), (unsigned)(i - RM));
+		draw_arc((int)(width / 2), (int)(height / 2), (unsigned)(i - HORIZON_PAD));
 
 		pol2cart(0, 0, &x, &y);
 		set_color("Black");
