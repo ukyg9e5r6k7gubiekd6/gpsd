@@ -25,12 +25,14 @@ import gps, gpslib
 class unit_adjustments:
     "Encapsulate adjustments for unit systems."
     def __init__(self):
+        self.altfactor = gps.METERS_TO_FEET
+        self.altunits = "ft"
+        self.speedfactor = gps.MPS_TO_MPH
+        self.speedunits = "mph"
         units = gpslib.gpsd_units()
+        print "Units", units
         if units in (gpslib.unspecified, gpslib.imperial):
-            self.altfactor = gps.METERS_TO_FEET
-            self.altunits = "ft"
-            self.speedfactor = gps.MPS_TO_MPH
-            self.speedunits = "mph"
+            pass
         elif units == gpslib.nautical:
             self.altfactor = gps.METERS_TO_FEET
             self.altunits = "ft"
@@ -41,6 +43,8 @@ class unit_adjustments:
             self.altunits = "m"
             self.speedfactor = gps.MPS_TO_KPH
             self.speedunits = "kph"
+        else:
+            raise ValueError	# Should never happen
 
 class Base:
     gpsfields = (
@@ -48,9 +52,9 @@ class Base:
         ("Time", lambda s, r: gps.isotime(r.time)),
         ("Latitude", lambda s, r: s.update_latitude(r)),
         ("Longitude", lambda s, r: s.update_longitude(r)),
-        ("Altitude", None),
-        ("Speed", None),
-        ("Climb", None),
+        ("Altitude", lambda s, r: s.update_altitude(r)),
+        ("Speed", lambda s, r: s.update_speed(r)),
+        ("Climb", lambda s, r: s.update_climb(r)),
         ("Track", None),
         # Second column
         ("Status", None),
@@ -180,6 +184,8 @@ class Base:
             else:
                 ns = 'N'
             return "%s %s" % (lat, ns)
+        else:
+            return "n/a"
 
     def update_longitude(self, data):
         if data.mode >= gps.MODE_2D:
@@ -189,6 +195,32 @@ class Base:
             else:
                 ew = 'E'
             return "%s %s" % (lon, ew)
+        else:
+            return "n/a"
+
+    def update_altitude(self, data):
+        if data.mode >= gps.MODE_3D:
+            return "%.3f %s" % (
+                data.alt * self.conversions.altfactor,
+                self.conversions.altunits)
+        else:
+            return "n/a"
+
+    def update_speed(self, data):
+        if hasattr(data, "speed"):
+            return "%.3f %s" % (
+                data.speed * self.conversions.speedfactor,
+                self.conversions.speedunits)
+        else:
+            return "n/a"
+
+    def update_climb(self, data):
+        if hasattr(data, "climb"):
+            return "%.3f %s" % (
+                data.climb * self.conversions.speedfactor,
+                self.conversions.speedunits)
+        else:
+            return "n/a"
 
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
