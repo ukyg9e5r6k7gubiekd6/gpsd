@@ -22,23 +22,23 @@
 SUBSYSTEM!="tty", GOTO="gpsd_rules_end"
 
 # Prolific Technology, Inc. PL2303 Serial Port
-SYSFS{idVendor}=="067b", SYSFS{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="067b", ATTR{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # ATEN International Co., Ltd UC-232A Serial Port [pl2303]
-SYSFS{idVendor}=="0557", SYSFS{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="0557", ATTR{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # FTDI 8U232AM
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # Cypress M8/CY7C64013 (DeLorme uses these)
-SYSFS{idVendor}=="1163", SYSFS{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="1163", ATTR{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # PS-360 OEM (Microsoft GPS sold with Street and Trips 2005)
-SYSFS{idVendor}=="067b", SYSFS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="067b", ATTR{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # Garmin International GPSmap, various models (tested with Garmin GPS 18 USB)
-SYSFS{idVendor}=="091e", SYSFS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="091e", ATTR{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241)
-SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="10c4", ATTR{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U)
-SYSFS{idVendor}=="1546", SYSFS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="1546", ATTR{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # FTDI FT232
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
