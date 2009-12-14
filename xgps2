@@ -21,6 +21,24 @@ import gtk
 import gps
 
 class Base:
+    gpsfields = (
+        # First column
+        ("Time", "time"),
+        ("Latitude", "lat"),
+        ("Longitude", "lon"),
+        ("Altitude", "alt"),
+        ("Speed", "speed"),
+        ("Climb", "climb"),
+        ("Track", "track"),
+        # Second column
+        ("Status", "mode"),
+        ("EPX", "epx"),
+        ("EPY", "epy"),
+        ("EPV", "epv"),
+        ("EPS", "eps"),
+        ("EPC", "epc"),
+        ("EPD", "epd"),
+        )
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
@@ -95,7 +113,22 @@ class Base:
         vbox.add(self.rawdisplay)
 
         dataframe = gtk.Frame(label="GPS data")
-        dataframe.show()
+        data_hbox = gtk.HBox()
+        dataframe.add(data_hbox)
+        datacolumns = (gtk.VBox(), gtk.VBox())
+        map(lambda w: data_hbox.add(w), datacolumns)
+        gpswidgets = []
+        for i in range(len(Base.gpsfields)):
+            new_hbox = gtk.HBox()
+            if i < len(Base.gpsfields) / len(datacolumns):
+                datacolumns[0].add(new_hbox)
+            else:
+                datacolumns[1].add(new_hbox)
+            new_hbox.add(gtk.Label(Base.gpsfields[i][0]))
+            new_widget = gtk.Entry()
+            new_hbox.add(new_widget)
+            gpswidgets.append(new_widget)
+        dataframe.show_all()
         vbox.add(dataframe)
 
         self.window.show()
@@ -141,6 +174,8 @@ class Base:
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
                 self.update_skyview(self.daemon.satellites)
+            #elif self.daemon.data["class"] == "TPV":
+            #    self.update_gpsdata(self.daemon.satellites)
         return True
 
     def handle_error(self, source, condition):
