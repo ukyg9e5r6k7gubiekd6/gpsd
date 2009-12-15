@@ -11,7 +11,7 @@ This is xgps2, a test client for the gpsd daemon.
 By Eric S. Raymond for the GPSD project, December 2009
 '''
 
-import sys, os, re, math, time, exceptions, getopt
+import sys, os, re, math, time, exceptions, getopt, socket
 
 import gobject, pygtk
 pygtk.require('2.0')
@@ -50,6 +50,7 @@ class SkyView(gtk.DrawingArea):
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 20	# How much whitespace to leave around horizon
     SAT_RADIUS = 5	# Diameter of satellite circle
+    GPS_PRNMAX = 32	# above this number are SBAS satellites
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
@@ -81,6 +82,12 @@ class SkyView(gtk.DrawingArea):
         widget.window.draw_arc(self.gc, filled,
                                x - diam / 2, y - diam / 2,
                                diam, diam, 0, 360 * 64)
+
+    def draw_square(self, widget, x, y, diam, filled=False):
+        "Draw a square centered on the specified midpoint."
+        widget.window.draw_rectangle(self.gc, filled,
+                                     x - diam / 2, y - diam / 2,
+                                     diam, diam)
 
     def draw_string(self, widget, x, y, letter):
         "Draw a letter on the skyview."
@@ -137,10 +144,14 @@ class SkyView(gtk.DrawingArea):
                 self.set_color("Green3");
             else:
                 self.set_color("Green1");
-            # FIXME: Draw diamonds for WAAS/EGNOS birds
-            self.draw_circle(widget,
-                             x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
-                             2 * SkyView.SAT_RADIUS + 1, sat.used);
+            if sat.PRN > SkyView.GPS_PRNMAX:
+                self.draw_square(widget,
+                                 x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
+                                 2 * SkyView.SAT_RADIUS + 1, sat.used);
+            else:
+                self.draw_circle(widget,
+                                 x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
+                                 2 * SkyView.SAT_RADIUS + 1, sat.used);
             self.set_color("Black")
             self.draw_string(widget, x, y+10, str(sat.PRN))
     def redraw(self, satellites):
@@ -187,7 +198,7 @@ class Base:
         # Set up toolbar style
         toolbar = gtk.Toolbar()
         toolbar.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-        toolbar.set_style(gtk.TOOLBAR_BOTH)
+        toolbar.set_style(gtk.TOOLBAR_TEXT)
         toolbar.set_border_width(1)
         vbox.pack_start(toolbar, expand = False)
         toolbar.show()
@@ -198,11 +209,11 @@ class Base:
         quit.connect("clicked", lambda w: gtk.main_quit())
         quit.show()
 
-        properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
-        toolbar.insert(properties, -1)
-        properties.set_tooltip_text("Preferences.")
+        #properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
+        #toolbar.insert(properties, -1)
+        #properties.set_tooltip_text("Preferences.")
         #properties.connect("clicked", self.properties_handler)
-        properties.show()
+        #properties.show()
 
         hbox = gtk.HBox(False, 0)
         vbox.add(hbox)
@@ -401,11 +412,13 @@ class Base:
     def handle_error(self, source, condition):
         "Handle error condition from the daemon."
         # FIXME: Pop up a notification...
+        sys.stderr.write("xgps ERROR\n")
         return True
 
     def handle_hangup(self, source, condition):
         "Handle hangup condition from the daemon."
         # FIXME: Pop up a notification...
+        sys.stderr.write("xgps HANGUP\n")
         return True
 
     def main(self):
@@ -442,8 +455,17 @@ if __name__ == "__main__":
 
     base = Base(deg_type=degreefmt)
     base.set_units(unit_system)
-    daemon = gps.gps(host=host,
-                     mode=gps.WATCH_ENABLE|gps.WATCH_JSON,
-                     verbose=debug>0)
-    base.watch(daemon)
-    base.main()
+    try:
+        daemon = gps.gps(host=host,
+                         mode=gps.WATCH_ENABLE|gps.WATCH_JSON,
+                         verbose=debug>0)
+        base.watch(daemon)
+        base.main()
+    except socket.error:
+        w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
+                              flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                              buttons=gtk.BUTTONS_CANCEL)
+        w.set_markup("gpsd is not running.")
+        w.run()
+        w.destroy()
+
