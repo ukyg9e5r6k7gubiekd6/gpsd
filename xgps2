@@ -2,8 +2,7 @@
 '''
 xgps2 -- test client for gpsd
 
-usage: xgps2 [-DhlV?] [server[:port[:device]]]
-
+usage: xgps2 [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
 
 gui_about = '''\
@@ -24,20 +23,21 @@ import gps, gpslib
 
 class unit_adjustments:
     "Encapsulate adjustments for unit systems."
-    def __init__(self):
+    def __init__(self, units=None):
         self.altfactor = gps.METERS_TO_FEET
         self.altunits = "ft"
         self.speedfactor = gps.MPS_TO_MPH
         self.speedunits = "mph"
-        units = gpslib.gpsd_units()
-        if units in (gpslib.unspecified, gpslib.imperial):
+        if units is None:
+            units = gpslib.gpsd_units()
+        if units in (gpslib.unspecified, gpslib.imperial, "imperial"):
             pass
-        elif units == gpslib.nautical:
+        elif units in (gpslib.nautical, "nautical"):
             self.altfactor = gps.METERS_TO_FEET
             self.altunits = "ft"
             self.speedfactor = gps.MPS_TO_KNOTS
             self.speedunits = "knots"
-        elif units == gpslib.metric:
+        elif units in (gpslib.metric, "metric"):
             self.altfactor = 1
             self.altunits = "m"
             self.speedfactor = gps.MPS_TO_KPH
@@ -371,6 +371,12 @@ class Base:
                 self.set_satlist_field(i, j, "")
         self.skyview.redraw(satellites)
 
+    # Preferences
+
+    def set_units(self, system):
+        "Change the display units."
+        self.conversions = unit_adjustments(system)
+
     # I/O monitoring and gtk housekeeping
 
     def watch(self, daemon):
@@ -406,21 +412,18 @@ class Base:
         gtk.main()
 
 if __name__ == "__main__":
-    (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:V?",
-                                         ['speedunits=','altunits=','verbose'])
+    (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:V?",
+                                         ['verbose'])
     debug = 0
     degreefmt = 'd'
-    speedunits = 'mph'
-    altunits = 'feet'
+    unit_system = None
     for (opt, val) in options:
         if opt in '-D':
             debug = int(val)
         elif opt == '-l':
             degreeformat = val
-        elif opt == '--speedunits':	# FIXME: Not yet honored
-            speedunits = val
-        elif opt == '--altunits':	# FIXME: Not yet honored
-            altunits = val
+        elif opt == '-u':
+            unit_system = val
         elif opt in ('-?', '-h', '--help'):
             print __doc__
             sys.exit(0)
@@ -432,7 +435,15 @@ if __name__ == "__main__":
                  'm':gpslib.deg_ddmm,
                  's':gpslib.deg_ddmmss}[degreefmt]
 
+    if len(arguments) == 0:
+        host = "127.0.0.1"
+    else:
+        host = arguments[0]
+
     base = Base(deg_type=degreefmt)
-    daemon = gps.gps(mode=gps.WATCH_ENABLE|gps.WATCH_JSON,verbose=debug>0)
+    base.set_units(unit_system)
+    daemon = gps.gps(host=host,
+                     mode=gps.WATCH_ENABLE|gps.WATCH_JSON,
+                     verbose=debug>0)
     base.watch(daemon)
     base.main()
