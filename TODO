@@ -318,6 +318,16 @@ http://www.twinsun.com/tz/tz-link.htm
 Free time-zone maps of the U.S.
 http://www.manifold.net/download/freemaps.html
 
+** Documentation
+
+*** GeoClue
+
+Figure out how gpsd should relate to GeoClue and explain this.  A
+particular question is the dbus interface to gpsd and the GeoClue
+provider interface.  There is quite possibly nothing to do; GeoClue
+using gpsd's published interfaces seems sensible.
+http://www.freedesktop.org/wiki/Software/GeoClue
+
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"
