@@ -160,8 +160,16 @@ static void
 draw_graphics(struct gps_data_t *gpsdata)
 {
 	Display *dpy = XtDisplay(draww);
-	int i, x, y;
+	int i, j, x, y;
 	char buf[20];
+	bool usedflags[MAXCHANNELS];
+
+	for (i = 0; i < MAXCHANNELS; i++) {
+	    usedflags [i] = false;
+	    for (j = 0; j < gpsdata->satellites_used; j++)
+		if (gpsdata->used[j] == gpsdata->PRN[i])
+		    usedflags[i] = true;
+	}
 
 	if (gpsdata->satellites_visible != 0) {
 		i = (int)min(width, height);
@@ -229,7 +237,7 @@ draw_graphics(struct gps_data_t *gpsdata)
 				vertices[4].y = y-IDIAM;
 				/*@ +type -compdef @*/
 
-				if (gpsdata->used[i])
+				if (usedflags[i])
 				    (void)XFillPolygon(dpy, pixmap, drawGC,
 					    vertices, 5, Convex,
 					    CoordModeOrigin);
@@ -238,7 +246,7 @@ draw_graphics(struct gps_data_t *gpsdata)
 					    vertices, 5, CoordModeOrigin);
 			} else {
 				/* ordinary GPS satellites */
-				if (gpsdata->used[i])
+				if (usedflags[i])
 				    (void)XFillArc(dpy, pixmap, drawGC,
 					    x - IDIAM,
 					    y - IDIAM, 2 * IDIAM + 1,
@@ -878,7 +886,7 @@ handle_input(XtPointer client_data UNUSED, int *source UNUSED, XtInputId *id UNU
 static void
 update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 {
-	unsigned int i;
+    unsigned int i, j;
 	int newstate;
 	XmString string[MAXCHANNELS + 1];
 	char s[128], *latlon, *sp;
@@ -896,10 +904,12 @@ update_panel(struct gps_data_t *gpsdata, char *message,	size_t len UNUSED)
 
 	/* This is for the satellite status display */
 	if (gpsdata->satellites_visible) {
-		for (i = 0; i < MAXCHANNELS; i++)
-		    usedflags[i] = false;
-		for (i = 0; i < (unsigned int)gpsdata->satellites_used; i++)
-		    usedflags[gpsdata->used[i]] = true;
+		for (i = 0; i < MAXCHANNELS; i++) {
+		    usedflags [i] = false;
+		    for (j = 0; j < (unsigned int)gpsdata->satellites_used; j++)
+			if (gpsdata->used[j] == gpsdata->PRN[i])
+			    usedflags[i] = true;
+		}
 		string[0] = XmStringCreateSimple(
 		    "PRN:   Elev:  Azim:  SNR:  Used:");
 		for (i = 0; i < MAXCHANNELS; i++) {

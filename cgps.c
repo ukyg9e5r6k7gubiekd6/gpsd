@@ -450,13 +450,22 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			char *message,
 			size_t len UNUSED)
 {
-    int i,n;
+    int i,j, n;
     int newstate;
     char scr[128];
+    bool usedflags[MAXCHANNELS];
 
     /* this is where we implement source-device filtering */
     if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
 	return;
+
+    /* must build bit vector of which statellites are used from list */
+    for (i = 0; i < MAXCHANNELS; i++) {
+	usedflags [i] = false;
+	for (j = 0; j < gpsdata->satellites_used; j++)
+	    if (gpsdata->used[j] == gpsdata->PRN[i])
+		usedflags[i] = true;
+    }
 
     /* This is for the satellite status display.  Originally lifted from
        xgps.c.  Note that the satellite list may be truncated based on
@@ -470,7 +479,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 				   " %3d    %02d    %03d    %02d      %c",
 				   gpsdata->PRN[i],
 				   gpsdata->elevation[i], gpsdata->azimuth[i],
-				   (int)gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+				   (int)gpsdata->ss[i], usedflags[i] ? 'Y' : 'N');
 		} else {
 		    (void)strlcpy(scr, "", sizeof(scr));
 		}
