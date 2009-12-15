@@ -49,6 +49,7 @@ class SkyView(gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 20	# How much whitespace to leave around horizon
+    SAT_RADIUS = 5	# Diameter of satellite circle
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
@@ -59,6 +60,7 @@ class SkyView(gtk.DrawingArea):
         self.connect('expose-event',  self.on_expose_event)
         self.connect('realize',       self.on_realize)
         self.pangolayout = self.create_pango_layout("")
+        self.satellites = []
 
     def on_realize(self, widget):
         self.gc = widget.window.new_gc()
@@ -74,9 +76,9 @@ class SkyView(gtk.DrawingArea):
         "Set foreground color for draweing."
         self.gc.set_rgb_fg_color(gtk.gdk.color_parse(spec))
 
-    def draw_circle(self, widget, x, y, diam):
+    def draw_circle(self, widget, x, y, diam, filled=False):
         "Draw a circle centered on the specified midpoint."
-        widget.window.draw_arc(self.gc, False,
+        widget.window.draw_arc(self.gc, filled,
                                x - diam / 2, y - diam / 2,
                                diam, diam, 0, 360 * 64)
 
@@ -122,6 +124,23 @@ class SkyView(gtk.DrawingArea):
         self.draw_letter(widget, x, y-10, "S")
         (x, y) = self.pol2cart(270, 0)
         self.draw_letter(widget, x+10, y, "W")
+        # The satellites
+        for sat in self.satellites:
+            (x, y) = self.pol2cart(sat.azimuth, sat.elevation)
+            if sat.ss < 10:
+                self.set_color("Black")
+            elif sat.ss < 30:
+                self.set_color("Red")
+            elif sat.ss < 35:
+                self.set_color("Yellow");
+            elif sat.ss < 40:
+                self.set_color("Green3");
+            else:
+                self.set_color("Green1");
+            # FIXME: Draw diamonds for WAAS/EGNOS birds
+            self.draw_circle(widget,
+                             x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
+                             2 * SkyView.SAT_RADIUS + 1, sat.used);
 
     def redraw(self, satellites):
         "Redraw the skyview."
