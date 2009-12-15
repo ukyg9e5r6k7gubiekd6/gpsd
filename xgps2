@@ -123,6 +123,11 @@ class SkyView(gtk.DrawingArea):
         (x, y) = self.pol2cart(270, 0)
         self.draw_letter(widget, x+10, y, "W")
 
+    def redraw(self, satellites):
+        "Redraw the skyview."
+        self.satellites = satellites
+        self.queue_draw()
+
 class Base:
     gpsfields = (
         # First column
@@ -150,7 +155,6 @@ class Base:
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps2")
         self.window.connect("delete_event", self.delete_event)
-        #self.window.set_size_request(800, 600)
 
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
@@ -345,6 +349,7 @@ class Base:
         for i in range(len(satellites), gps.MAXCHANNELS):
             for j in range(0, 5):
                 self.set_satlist_field(i, j, "")
+        self.skyview.redraw(satellites)
 
     # I/O monitoring and gtk housekeeping
 
