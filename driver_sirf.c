@@ -132,6 +132,9 @@ static bool sirf_write(int fd, unsigned char *msg) {
    gpsd_report(LOG_IO, "SiRF: Writing control type %02x:%s\n", msg[4],
        gpsd_hexdump_wrapper(msg, len+8, LOG_IO));
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
+   if ( !ok ) {
+	   gpsd_report(LOG_ERROR, "SiRF: Writing error.\n");
+   }
    (void)tcdrain(fd);
    return(ok);
 }
@@ -374,8 +377,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
     }
     if (strstr((char *)(buf+1), "ES"))
 	gpsd_report(LOG_INF, "SiRF: Firmware has XTrac capability\n");
-    gpsd_report(LOG_PROG, "SiRF: Driver state flags are: %0x\n", 
-                session->driver.sirf.driverstate);
+    gpsd_report(LOG_PROG, "SiRF: fv: %0.2f, Driver state flags are: %0x\n", 
+                fv, session->driver.sirf.driverstate);
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
@@ -383,7 +386,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
-    gpsd_report(LOG_DATA, "SiRF: FV 0x06: subtype='%s' mask={DEVEICEID}\n", 
+    gpsd_report(LOG_DATA, "SiRF: FV 0x06: subtype='%s' mask={DEVICEID}\n", 
 	session->subtype);
     return DEVICEID_SET;
 }
@@ -408,7 +411,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     words[7] = ((unsigned int)getbeul(buf, 31) & 0x3fffffff) >> 6;
     words[8] = ((unsigned int)getbeul(buf, 35) & 0x3fffffff) >> 6;
     words[9] = ((unsigned int)getbeul(buf, 39) & 0x3fffffff) >> 6;
-    gpsd_report(LOG_PROG, "SiRF: 50B 0x08\n");
+    gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08\n");
 
     words[0] &= 0xff0000;
     if (words[0] != 0x8b0000 && words[0] != 0x740000)
@@ -1199,6 +1202,14 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 						     0x00, 0x00, /* unused */
 						     0x00, 0x00, 0xb0, 0xb3};
 	    /*@ -charint @*/
+
+	    gpsd_report(LOG_PROG, "SiRF: baudrate: %d\n",
+	        session->gpsdata.dev.baudrate);
+	    (void)usleep(3330);	/* guessed settling time */
+	    gpsd_report(LOG_PROG, "SiRF: unset MID30...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid30);
+	    (void)usleep(3330);	/* guessed settling time */
+
 	    gpsd_report(LOG_PROG, "SiRF: Requesting periodic ecef reports...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, requestecef);
 	    gpsd_report(LOG_PROG, 
@@ -1218,10 +1229,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session->gpsdata.gps_fd, versionprobe);
 	    gpsd_report(LOG_PROG, "SiRF: Requesting navigation parameters...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, navparams);
-
-	    gpsd_report(LOG_PROG, 
-	                "SiRF: unset MID30...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid30);
 	}
     }
     if (event == event_deactivate) {
