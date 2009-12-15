@@ -364,6 +364,33 @@ int main(int argc, char *argv[])
     for(n=0;n<CLIMB;n++) climb[n]=0.0;
 #endif 
 
+    /*@ -observertrans @*/
+    switch (gpsd_units())
+    {
+    case imperial:
+	altfactor = METERS_TO_FEET;
+	altunits = "ft";
+	speedfactor = MPS_TO_MPH;
+	speedunits = "mph";
+	break;
+    case nautical:
+	altfactor = METERS_TO_FEET;
+	altunits = "ft";
+	speedfactor = MPS_TO_KNOTS;
+	speedunits = "knots";
+	break;
+    case metric:
+	altfactor = 1;
+	altunits = "m";
+	speedfactor = MPS_TO_KPH;
+	speedunits = "kph";
+	break;
+    default:
+	/* leave the default alone */
+	break;
+    }
+    /*@ +observertrans @*/
+
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "Vhl:su:")) != -1) {
 	switch (option) {

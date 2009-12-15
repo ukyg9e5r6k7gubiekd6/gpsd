@@ -693,8 +693,35 @@ int main(int argc, char *argv[])
     fd_set rfds;
     int data;
 
+    /*@ -observertrans @*/
+    switch (gpsd_units())
+    {
+    case imperial:
+	altfactor = METERS_TO_FEET;
+	altunits = "ft";
+	speedfactor = MPS_TO_MPH;
+	speedunits = "mph";
+	break;
+    case nautical:
+	altfactor = METERS_TO_FEET;
+	altunits = "ft";
+	speedfactor = MPS_TO_KNOTS;
+	speedunits = "knots";
+	break;
+    case metric:
+	altfactor = 1;
+	altunits = "m";
+	speedfactor = MPS_TO_KPH;
+	speedunits = "kph";
+	break;
+    default:
+	/* leave the default alone */
+	break;
+    }
+    /*@ +observertrans @*/
+
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hVl:smD:")) != -1) {
+    while ((option = getopt(argc, argv, "hVl:smuD:")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -708,6 +735,29 @@ int main(int argc, char *argv[])
 	case 's':
 	    silent_flag=true;
 	    break;
+	case 'u':
+	    switch ( optarg[0] ) {
+	    case 'i':
+		altfactor = METERS_TO_FEET;
+		altunits = "ft";
+		speedfactor = MPS_TO_MPH;
+		speedunits = "mph";
+		continue;
+	    case 'n':
+		altfactor = METERS_TO_FEET;
+		altunits = "ft";
+		speedfactor = MPS_TO_KNOTS;
+		speedunits = "knots";
+		continue;
+	    case 'm':
+		altfactor = 1;
+		altunits = "m";
+		speedfactor = MPS_TO_KPH;
+		speedunits = "kph";
+		continue;
+	    default:
+		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
+	    }
 	case 'V':
 	    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
 			  VERSION, REVISION);
@@ -738,33 +788,6 @@ int main(int argc, char *argv[])
 	gpsd_source_spec(argv[optind], &source);
     } else
 	gpsd_source_spec(NULL, &source);
-
-    /*@ -observertrans @*/
-    switch (gpsd_units())
-    {
-    case imperial:
-	altfactor = METERS_TO_FEET;
-	altunits = "ft";
-	speedfactor = MPS_TO_MPH;
-	speedunits = "mph";
-	break;
-    case nautical:
-	altfactor = METERS_TO_FEET;
-	altunits = "ft";
-	speedfactor = MPS_TO_KNOTS;
-	speedunits = "knots";
-	break;
-    case metric:
-	altfactor = 1;
-	altunits = "m";
-	speedfactor = MPS_TO_KPH;
-	speedunits = "kph";
-	break;
-    default:
-	/* leave the default alone */
-	break;
-    }
-    /*@ +observertrans @*/
 
     /* Open the stream to gpsd. */
     /*@i@*/gpsdata = gps_open(source.server, source.port);

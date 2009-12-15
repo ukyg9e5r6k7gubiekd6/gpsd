@@ -24,7 +24,7 @@
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
-      <arg choice='opt'>-u <group><arg>imperial</arg><arg>nautical</arg><arg>metric</arg></group></arg>
+      <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -52,15 +52,13 @@
 </cmdsynopsis>
 <cmdsynopsis>
   <command>cgps</command>  
-      <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
-      <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-m </arg>
       <arg choice='opt'>-s </arg>
+      <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -119,10 +117,11 @@ degrees and is the default.  The value 'm' produces degrees and
 decimal minutes.  The value 's' produces degrees, minutes, and decimal
 seconds.</para>
 
-<para><application>xgps</application> and
-<application>cgps</application> look at variables in the environment
-to figure out what units they should default to using for display.
-Here are the variables and values they check:</para>
+<para><application>xgps</application>,
+<application>cgps</application>, and <application>ldcgps</application>
+look at variables in the environment to figure out what units they
+should default to using for display &mdash; imperial, nautical, or
+metric.  Here are the variables and values they check:</para>
 
 <screen>
     GPSD_UNITS one of: 
@@ -140,6 +139,15 @@ Here are the variables and values they check:</para>
               POSIX      = miles/feet
               [other]    = km/meters
 </screen>
+<para>These preferences may be overridden by the <option>-u</option>
+option.</para>
+
+<para>Where present, the <option>-u</option> option can be used to set
+the system units for display; follow the keyword with 'i' for
+'imperial' for American units (feet in altitude and error estimates,
+miles per hour in speeds), 'n' for 'nautical' (feet in altitude and
+error estimates, knots in speed) or 'm' for 'metric' (meters in
+altitude and error estimates, kiliometers per hour in speeds). </para>
 
 <para> The <option>-D</option> option, when present, sets a debug
 level; it is primarily for use by GPSD developers.  It enables
@@ -169,13 +177,6 @@ of signal; consult the data display to the left for exact figures in
 dB. Square icons indicate WAAS/EGNOS satellites, circles indicate
 ordinary GPS satellites.  Filled icons were used in the last fix, 
 outline icons were not.</para>
-
-<para>The <option>-u</option> option can be used to set the
-system units for display; follow the keyword with 'imperial' for
-American units (feet in altitude and error estimates, miles per hour
-in speeds), 'nautical' (feet in altitude and error estimates, knots
-in speed) or 'metric' (meters in altitude and error estimates,
-kiliometers per hour in speeds). </para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
@@ -223,12 +224,6 @@ when you type Ctl-C at it.  It will also terminate on 'q'</para>
 very expensive and nearly feature-free GPS receiver.  Currently
 assumes a 4x40 LCD and writes data formatted to fit that size screen.
 Also displays 4- or 6-character Maidenhead grid square output.</para>
-
-<para>Options are as for <application>cgps</application>, except: The
-<option>-u</option> sets the display format the units used for
-altitude and speed. The options are: <quote>i</quote> for Imperial
-units (feet/miles-per-hour); <quote>n</quote> for nautical
-(feet/knots); 'm' for metric (meters/kilometers-per-hour).</para>
 
 </refsect2>
 <refsect2><title>gpxlogger</title>

@@ -28,14 +28,14 @@ class unit_adjustments:
         self.speedunits = "mph"
         if units is None:
             units = gps.client.gpsd_units()
-        if units in (gps.client.unspecified, gps.client.imperial, "imperial"):
+        if units in (gps.client.unspecified, gps.client.imperial, "imperial", "i"):
             pass
-        elif units in (gps.client.nautical, "nautical"):
+        elif units in (gps.client.nautical, "nautical", "n"):
             self.altfactor = gps.METERS_TO_FEET
             self.altunits = "ft"
             self.speedfactor = gps.MPS_TO_KNOTS
             self.speedunits = "knots"
-        elif units in (gps.client.metric, "metric"):
+        elif units in (gps.client.metric, "metric", "m"):
             self.altfactor = 1
             self.altunits = "m"
             self.speedfactor = gps.MPS_TO_KPH
