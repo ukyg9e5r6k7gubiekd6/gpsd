@@ -82,7 +82,7 @@ class SkyView(gtk.DrawingArea):
                                x - diam / 2, y - diam / 2,
                                diam, diam, 0, 360 * 64)
 
-    def draw_letter(self, widget, x, y, letter):
+    def draw_string(self, widget, x, y, letter):
         "Draw a letter on the skyview."
         self.pangolayout.set_text(letter)
         # FIXME: When the layout object can report its size, use it
@@ -117,13 +117,13 @@ class SkyView(gtk.DrawingArea):
                          self.diameter)
         # The compass-point letters
         (x, y) = self.pol2cart(0, 0)
-        self.draw_letter(widget, x, y+10, "N")
+        self.draw_string(widget, x, y+10, "N")
         (x, y) = self.pol2cart(90, 0)
-        self.draw_letter(widget, x-10, y, "E")
+        self.draw_string(widget, x-10, y, "E")
         (x, y) = self.pol2cart(180, 0)
-        self.draw_letter(widget, x, y-10, "S")
+        self.draw_string(widget, x, y-10, "S")
         (x, y) = self.pol2cart(270, 0)
-        self.draw_letter(widget, x+10, y, "W")
+        self.draw_string(widget, x+10, y, "W")
         # The satellites
         for sat in self.satellites:
             (x, y) = self.pol2cart(sat.azimuth, sat.elevation)
@@ -141,7 +141,8 @@ class SkyView(gtk.DrawingArea):
             self.draw_circle(widget,
                              x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
                              2 * SkyView.SAT_RADIUS + 1, sat.used);
-
+            self.set_color("Black")
+            self.draw_string(widget, x, y+10, str(sat.PRN))
     def redraw(self, satellites):
         "Redraw the skyview."
         self.satellites = satellites
