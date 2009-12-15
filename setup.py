@@ -57,8 +57,8 @@ gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
 setup( name="gpsd",
        version="1.0",
        ext_modules=[
-    	Extension("gpspacket", gpspacket_sources),
-    	Extension("gpslib", ["gpslib.c", "geoid.c", "gpsdclient.c", "strl.c"])
+    	Extension("gps.packet", gpspacket_sources),
+    	Extension("gps.client", ["gpslib.c", "geoid.c", "gpsdclient.c", "strl.c"])
         ],
        py_modules = ['gpsfake','gps'],
        data_files=[('bin', ['gpscat','gpsfake','gpsprof'])] + manpages

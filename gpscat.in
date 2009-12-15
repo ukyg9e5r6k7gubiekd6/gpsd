@@ -3,13 +3,13 @@
 # Display GPS output.  Hexify it if necessary.
 #
 import os, sys, termios, select, getopt, curses.ascii
-import gpspacket
+import gps.packet
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 NMEA_MAX = 86
 
 # Lowest debug level at which packet getter begins to emit messages, minus one
-BASELEVEL = gpspacket.LOG_IO
+BASELEVEL = gps.packet.LOG_IO
 
 highhalf_latch = True
 
@@ -94,8 +94,8 @@ if __name__ == '__main__':
 
         buf = ""
         if not rawmode:
-            getter = gpspacket.new()
-            gpspacket.register_report(reporter)
+            getter = gps.packet.new()
+            gps.packet.register_report(reporter)
         seqno = 0
         while True:
             (fd, event) = poller.poll()[0]
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                     seqno += 1
                     # Don't crap out if the first packet is bad, we might
                     # be seeing an incomplete read from a tty.
-                    if ptype == gpspacket.BAD_PACKET and seqno >= 2:
+                    if ptype == gps.packet.BAD_PACKET and seqno >= 2:
                         if debuglevel >= BASELEVEL:
                             sys.stdout.write("gpscat: terminating on bad packet\n")
                         break

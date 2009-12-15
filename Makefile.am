@@ -57,7 +57,6 @@ PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py gpscap.py
-nodist_python_PYTHON = gpspacket.so gpslib.so
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
 

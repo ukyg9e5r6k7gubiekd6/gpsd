@@ -121,7 +121,7 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
 %attr(755, root, root) /etc/rc.d/init.d/gpsd
-%attr(755, root, root) /usr/lib/python*/site-packages/gps.py*
+%attr(755, root, root) /usr/lib/python*/site-packages/gps/*
 %attr(755, root, root) /usr/lib/python*/site-packages/gpscap.py*
 #%{_datadir}/gpsd/dgpsip-servers
 
@@ -131,9 +131,6 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %attr(755, root, root) %{_bindir}/gpscat
 %attr(755, root, root) %{_bindir}/gpsfake
 %attr(755, root, root) %{_bindir}/gpsdecode
-/usr/lib/python*/site-packages/gpsfake.py*
-/usr/lib/python*/site-packages/gpspacket.so*
-/usr/lib/python*/site-packages/gpslib.so*
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h

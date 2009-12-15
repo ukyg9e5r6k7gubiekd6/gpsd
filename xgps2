@@ -17,9 +17,7 @@ import gobject, pygtk
 pygtk.require('2.0')
 import gtk
 
-# We can't ship this until we fugure out how to merge the gpslib C extensions
-# into the gps export module.
-import gps, gpslib
+import gps, gps.client
 
 class unit_adjustments:
     "Encapsulate adjustments for unit systems."
@@ -29,15 +27,15 @@ class unit_adjustments:
         self.speedfactor = gps.MPS_TO_MPH
         self.speedunits = "mph"
         if units is None:
-            units = gpslib.gpsd_units()
-        if units in (gpslib.unspecified, gpslib.imperial, "imperial"):
+            units = gps.client.gpsd_units()
+        if units in (gps.client.unspecified, gps.client.imperial, "imperial"):
             pass
-        elif units in (gpslib.nautical, "nautical"):
+        elif units in (gps.client.nautical, "nautical"):
             self.altfactor = gps.METERS_TO_FEET
             self.altunits = "ft"
             self.speedfactor = gps.MPS_TO_KNOTS
             self.speedunits = "knots"
-        elif units in (gpslib.metric, "metric"):
+        elif units in (gps.client.metric, "metric"):
             self.altfactor = 1
             self.altunits = "m"
             self.speedfactor = gps.MPS_TO_KPH
@@ -290,7 +288,7 @@ class Base:
 
     def update_latitude(self, data):
         if data.mode >= gps.MODE_2D:
-            lat = gpslib.deg_to_str(self.deg_type, abs(data.lat))
+            lat = gps.client.deg_to_str(self.deg_type, abs(data.lat))
             if data.lat < 0:
                 ns = 'S'
             else:
@@ -301,7 +299,7 @@ class Base:
 
     def update_longitude(self, data):
         if data.mode >= gps.MODE_2D:
-            lon = gpslib.deg_to_str(self.deg_type, abs(data.lon))
+            lon = gps.client.deg_to_str(self.deg_type, abs(data.lon))
             if data.lon < 0:
                 ew = 'W'
             else:
@@ -336,7 +334,7 @@ class Base:
 
     def update_track(self, data):
         if hasattr(data, "track"):
-            return gpslib.deg_to_str(self.deg_type, abs(data.track))
+            return gps.client.deg_to_str(self.deg_type, abs(data.track))
         else:
             return "n/a"
 
@@ -443,9 +441,9 @@ if __name__ == "__main__":
             sys.stderr.write("xgps 0.1\n")
 	    sys.exit(0)
 
-    degreefmt = {'d':gpslib.deg_dd,
-                 'm':gpslib.deg_ddmm,
-                 's':gpslib.deg_ddmmss}[degreefmt]
+    degreefmt = {'d':gps.client.deg_dd,
+                 'm':gps.client.deg_ddmm,
+                 's':gps.client.deg_ddmmss}[degreefmt]
 
     if len(arguments) == 0:
         host = "127.0.0.1"
