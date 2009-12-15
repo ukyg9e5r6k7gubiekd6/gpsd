@@ -1034,7 +1034,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
-    case 0x1e:		/* Navigation Library SV State Data */
+    case 0x1e:		/* Navigation Library SV State Data ID 30 */
 	gpsd_report(LOG_PROG, "SiRF: unused NLSV 0x1e: %s\n",
 	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
@@ -1178,10 +1178,22 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 						     0x00, 0x00, 0xb0, 0xb3};
 	    /* unset MID 29 0x1d */
 	    /* we do not decode it, so don't send it */
-	    static unsigned char unsetmid29[] = {0xa0, 0xa2, 0x00, 0x08,
+	    static unsigned char unsetmid29[] = {0xa0, 0xa2, 
+	    					     0x00, 0x08, /* len */
 						     0xa6, /* MID 166 */
 						     0x00, /* enable 1 */
 						     0x1d, /* MID 29 */
+						     0x00, /* never */
+						     0x00, 0x00, /* unused */
+						     0x00, 0x00, /* unused */
+						     0x00, 0x00, 0xb0, 0xb3};
+	    /* unset MID 30 0x1e */
+	    /* we do not decode it, so don't send it */
+	    static unsigned char unsetmid30[] = {0xa0, 0xa2, 
+	    				             0x00, 0x08, /* len */
+						     0xa6, /* MID 166 */
+						     0x00, /* enable 1 */
+						     0x1e, /* MID 30 */
 						     0x00, /* never */
 						     0x00, 0x00, /* unused */
 						     0x00, 0x00, /* unused */
@@ -1197,13 +1209,19 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    gpsd_report(LOG_PROG, 
 	                "SiRF: Setting SBAS to auto/integrity mode...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, sbasparams);
+
 	    gpsd_report(LOG_PROG, 
 	                "SiRF: unset MID29...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid29);
+
 	    gpsd_report(LOG_PROG, "SiRF: Probing for firmware version...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, versionprobe);
 	    gpsd_report(LOG_PROG, "SiRF: Requesting navigation parameters...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, navparams);
+
+	    gpsd_report(LOG_PROG, 
+	                "SiRF: unset MID30...\n");
+	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid30);
 	}
     }
     if (event == event_deactivate) {
