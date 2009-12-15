@@ -28,9 +28,6 @@ XMLTO = xmlto
 if HAVE_NCURSES
 CURSESPROGS = cgps gpsmon
 endif
-if HAVE_MOTIF
-MOTIF_PROGS = xgps
-endif
 if HAVE_XAW
 XAW_PROGS = xgpsspeed
 endif
@@ -55,16 +52,10 @@ endif
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
-dist_bin_SCRIPTS = gpsprof gpsfake gpscat
+dist_bin_SCRIPTS = gpsprof gpsfake gpscat xgps
 python_PYTHON = gps.py gpsfake.py gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
-
-#
-# Build xgps
-#
-xgps_SOURCES = xgps.c
-xgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Build xgpsspeed
@@ -221,7 +212,7 @@ maskdump.c: gpsd.h-tail maskaudit.py
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h packet_states.h
 
-# Warning: This overrides autoconf's normal link-line generatyion process
+# Warning: This overrides autoconf's normal link-line generation process
 if LIBGPSMM_ENABLE
 libgps_la_SOURCES += libgpsmm.cpp
 libgps_la_LINK = /bin/sh ./libtool --tag=CXX --mode=link g++ $(libgps_la_LDFLAGS) -o $@
@@ -424,7 +415,6 @@ EXTRA_DIST = \
 	rtcm-104.xml \
 	srec.xml \
 	$(MANPAGES_DIST) \
-	xgps.ad \
 	xgpsspeed.ad \
 	gpsd.rules \
 	gpsd.hotplug \
@@ -468,8 +458,6 @@ SPLINTOPTS = -I/usr/include/dbus-1.0/ +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon and libraries..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
-	@echo "Running splint on xgps..."
-	-splint $(SPLINTOPTS) -exportlocal $(xgps_SOURCES)
 	@echo "Running splint on cgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."

@@ -77,12 +77,6 @@ These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
 SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
 to be tested.
 
-*** Rewrite xgps
-
-The Motif/Lesstif dependency is a pain in the butt, the code is a 
-maintainability problem, and we'd like to extend it to display AIS
-messages. Probably the thing to do is write something pygtk-based.
-
 *** Support the D-Bus signals recognized by libgypsy
 
 Ian Holmes's Gypsy daemon is a pale shadow of GPSD, but his ideas 

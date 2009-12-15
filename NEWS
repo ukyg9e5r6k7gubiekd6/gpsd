@@ -4,7 +4,9 @@
   It is possible to specify a TCP/IP AIS feed such as AISHub 
   as a data source. Serious bitrot in the NTRIP support has been fixed -
   it was probably nonfunctional for several releases before this.
-  Fixed buggy display of satellite-used flags in xgps and cgps.
+  Fixed buggy display of satellite-used flags in cgps.  xgps is
+  replaced by a rewrite in Python that uses pygtk, eliminating a
+  dependency on Motif.
 
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a

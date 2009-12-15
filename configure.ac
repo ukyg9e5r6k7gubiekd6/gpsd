@@ -265,7 +265,6 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   if test x"$ac_cv_lib_Xt_XtToolkitInitialize" = "xno"; then
     AC_MSG_WARN([libXt problem - xgps won't be built.])
   fi
-  AC_CHECK_HEADER([X11/Xaw/Label.h],, motif_includes="no")
   dnl We can't use AC_SEARCH_LIBS because it always modifies LIBS.
   dnl Instead, check for two common places (xorg way and the
   dnl traditional way) by hand.
@@ -295,30 +294,8 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   if test x"$ac_cv_lib_Xpm_XpmCreatePixmapFromXpmImage" = "xno"; then
     AC_MSG_WARN([libXpm problem - xgps won't be built.])
   fi
-
-  dnl Check for Motif widget libraries
-  XM_LIBS=""
-  XP_LIBS=""
-  if test "$motif_includes" != "no" -a "$motif_libraries" != "no"
-  then
-  dnl Motif 2.1 wants '-lXp' (X11R6.3 print server)
-  AC_CHECK_LIB(Xp, XpSelectInput,
-	  XP_LIBS="-lXp"
-	  AC_DEFINE([HAVE_XP],1,[Xp available]),,
-	  ${X_PRE_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
-  dnl
-  AC_CHECK_LIB(Xm, XmInternAtom,
-	  XM_LIBS="-lXm"
-	  AC_DEFINE([HAVE_MOTIF],1,[Motif available]),,
-	  ${X_PRE_LIBS} ${XP_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
-  fi
-  AC_SUBST(XP_LIBS)
-  AC_SUBST(XM_LIBS)
-  AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != "" -a "$motif_includes" != "no"])
-  ac_x="yes"
 else
   dnl X11 disabled
-  AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
   AM_CONDITIONAL([HAVE_XAW],false)
   AC_MSG_WARN([Not including X11 support])
 fi

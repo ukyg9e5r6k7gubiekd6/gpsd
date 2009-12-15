@@ -45,10 +45,7 @@ You will need to have gpsd installed for it to work.
 %package clients
 Summary: Clients for gpsd with an X interface
 Group: Applications/System
-BuildRequires: lesstif-devel
-#############################################################################
-#  libXaw-devel was repackaged for FC6; on FC<6 this package is not required #
-#############################################################################
+BuildRequires: pygtk
 BuildRequires: libXaw-devel
 
 %description clients
@@ -57,7 +54,7 @@ current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.
 
 xgpsspeed is a speedometer that uses position information from the GPS.
-It accepts an -h option and optional argument as for gps, or a -v option
+It accepts an -h option and optional argument as for gps, or a -V option
 to dump the package version and exit. Additionally, it accepts -rv
 (reverse video) and -nc (needle color) options.
 
