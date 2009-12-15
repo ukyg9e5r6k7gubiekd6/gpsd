@@ -207,7 +207,8 @@ class gps(gpsdata):
             except ValueError:
                 raise socket.error, "nonnumeric port"
         if not port: port = GPSD_PORT
-        #if self.debuglevel > 0: print 'connect:', (host, port)
+        #if self.verbose > 0:
+        #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
@@ -442,15 +443,26 @@ class gps(gpsdata):
 
     def poll(self):
         "Wait for and read data being streamed from gpsd."
+        if self.verbose > 1:
+            sys.stderr.write("poll: reading from daemon...\n")
         eol = self.linebuffer.find('\n')
         if eol == -1:
             frag = self.sock.recv(4096)
             self.linebuffer += frag
+            if self.verbose > 1:
+                sys.stderr.write("poll: read complete.\n")
             if not self.linebuffer:
+                if self.verbose > 1:
+                    sys.stderr.write("poll: returning -1.\n")
                 return -1
             eol = self.linebuffer.find('\n')
             if eol == -1:
+                if self.verbose > 1:
+                    sys.stderr.write("poll: returning 0.\n")
                 return 0
+        else:
+            if self.verbose > 1:
+                sys.stderr.write("poll: fetching from buffer.\n")
 
         # We got a line
         eol += 1
@@ -461,7 +473,7 @@ class gps(gpsdata):
         if not self.response:
             return -1
         if self.verbose:
-            sys.stderr.write("GPS-DATA %s\n" % repr(self.response))
+            sys.stderr.write("poll: data is %s\n" % repr(self.response))
         self.received = time.time()
         if self.raw_hook:
             self.raw_hook(self.response);

@@ -394,12 +394,13 @@ class Base:
         "Set up monitoring of a daemon instance."
         self.daemon = daemon
         gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
-        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_error)
+        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
         gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
 
     def handle_response(self, source, condition):
         "Handle ordinary I/O ready condition from the daemon."
-        self.daemon.poll()
+        if self.daemon.poll() == -1:
+            self.handle_hangup(source, condition)
         if self.daemon.valid & gps.PACKET_SET:
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
@@ -409,17 +410,15 @@ class Base:
                     
         return True
 
-    def handle_error(self, source, condition):
-        "Handle error condition from the daemon."
-        # FIXME: Pop up a notification...
-        sys.stderr.write("xgps ERROR\n")
-        return True
-
     def handle_hangup(self, source, condition):
         "Handle hangup condition from the daemon."
-        # FIXME: Pop up a notification...
-        sys.stderr.write("xgps HANGUP\n")
-        return True
+        w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
+                              flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                              buttons=gtk.BUTTONS_CANCEL)
+        w.connect("destroy", lambda w: gtk.main_quit())
+        w.set_markup("gpsd has stopped sending data.")
+        w.run()
+        gtk.main_quit()
 
     def main(self):
         gtk.main()
@@ -458,7 +457,7 @@ if __name__ == "__main__":
     try:
         daemon = gps.gps(host=host,
                          mode=gps.WATCH_ENABLE|gps.WATCH_JSON,
-                         verbose=debug>0)
+                         verbose=debug)
         base.watch(daemon)
         base.main()
     except socket.error:
