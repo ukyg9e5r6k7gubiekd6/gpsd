@@ -53,7 +53,7 @@ endif
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat xgps
-python_PYTHON = gps.py gpsfake.py gpscap.py
+python_PYTHON = gpsfake.py gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
 
@@ -491,10 +491,6 @@ indent:
 	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
 	chmod u-w maskdump.c
 	@echo "Diff lines:" `svn diff | wc -l`
-
-# Bogon-checking the Python tools
-pychecker:
-	for f in gps.py gpsfake.py leapsecond.py; do pychecker $$f; done
 
 version:
 	@echo $(VERSION)
