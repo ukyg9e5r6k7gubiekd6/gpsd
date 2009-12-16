@@ -13,7 +13,7 @@
  */
 
 static PyObject *
-gpslib_deg_to_str(PyObject *self, PyObject *args)
+gpsclient_deg_to_str(PyObject *self, PyObject *args)
 {
     int fmt;
     double degrees;
@@ -24,7 +24,7 @@ gpslib_deg_to_str(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-gpslib_gpsd_units(PyObject *self, PyObject *args)
+gpsclient_gpsd_units(PyObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ""))
 	return NULL;
@@ -36,7 +36,7 @@ gpslib_gpsd_units(PyObject *self, PyObject *args)
  */
 
 static PyObject *
-gpslib_wgs84_separation(PyObject *self, PyObject *args)
+gpsclient_wgs84_separation(PyObject *self, PyObject *args)
 {
     const double lat, lon;
     double sep;
@@ -49,12 +49,12 @@ gpslib_wgs84_separation(PyObject *self, PyObject *args)
 
 /* List of functions defined in the module */
 
-static PyMethodDef gpslib_methods[] = {
-    {"wgs84_separation",	gpslib_wgs84_separation,	METH_VARARGS,
+static PyMethodDef gpsclient_methods[] = {
+    {"wgs84_separation",	gpsclient_wgs84_separation,	METH_VARARGS,
      PyDoc_STR("Return WGS84 geodetic separation in meters.")},
-    {"deg_to_str",      	gpslib_deg_to_str,      	METH_VARARGS,
+    {"deg_to_str",      	gpsclient_deg_to_str,      	METH_VARARGS,
      PyDoc_STR("String-format a latitude/longitude.")},
-    {"gpsd_units",      	gpslib_gpsd_units,      	METH_VARARGS,
+    {"gpsd_units",      	gpsclient_gpsd_units,      	METH_VARARGS,
      PyDoc_STR("Deduce a set of units from locale and environment.")},
     {NULL,		NULL}		/* sentinel */
 };
@@ -64,11 +64,11 @@ PyDoc_STRVAR(module_doc,
 ");
 
 PyMODINIT_FUNC
-initgpslib(void)
+initclient(void)
 {
     PyObject *m;
 
-    m = Py_InitModule3("gpslib", gpslib_methods, module_doc);
+    m = Py_InitModule3("gps.client", gpsclient_methods, module_doc);
 
     PyModule_AddIntConstant(m, "deg_dd", deg_dd);
     PyModule_AddIntConstant(m, "deg_ddmm", deg_ddmm);

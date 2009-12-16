@@ -1,4 +1,4 @@
-* Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91dev
+* Tue Dec 15 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91dev
   We have support for NMEA GLONASS sentences, and a regression test.
   Clients now get a DEVICE dotification on every driver switch.
   It is possible to specify a TCP/IP AIS feed such as AISHub 
@@ -6,7 +6,8 @@
   it was probably nonfunctional for several releases before this.
   Fixed buggy display of satellite-used flags in cgps.  xgps is
   replaced by a rewrite in Python that uses pygtk, eliminating a
-  dependency on Motif.
+  dependency on Motif. Uniform treatment of display-unit defaulting and
+  -u in xgps, cgps, and lcdgps.
 
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a

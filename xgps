@@ -207,19 +207,27 @@ class Base:
         quit.connect("clicked", lambda w: gtk.main_quit())
         quit.show()
 
+        #viewmenu = gtk.Menu()
+        #for (t, w) in (("Satellites", self.satbox),
+        #               ("Raw Data", self.rawdisplay),
+        #               ("GPS Display", self.dataframe)):
+        #    button = gtk.CheckButton(t)
+        #    viewmenu.add(button)
+        #viewmenu.show_all()
+
         #properties = gtk.ToolButton(gtk.STOCK_PROPERTIES)
         #toolbar.insert(properties, -1)
         #properties.set_tooltip_text("Preferences.")
         #properties.connect("clicked", self.properties_handler)
         #properties.show()
 
-        hbox = gtk.HBox(False, 0)
-        vbox.add(hbox)
-        hbox.show()
+        self.satbox = gtk.HBox(False, 0)
+        vbox.add(self.satbox)
+        self.satbox.show()
 
         skyframe = gtk.Frame(label="Satellite List")
         skyframe.show()
-        hbox.add(skyframe)
+        self.satbox.add(skyframe)
 
         self.satlist = gtk.ListStore(str,str,str,str,str)
         view = gtk.TreeView(model=self.satlist)
@@ -241,7 +249,7 @@ class Base:
 
         viewframe = gtk.Frame(label="Skyview")
         viewframe.show()
-        hbox.add(viewframe)
+        self.satbox.add(viewframe)
         self.skyview = SkyView()
         self.skyview.show()
         viewframe.add(self.skyview)
@@ -251,9 +259,9 @@ class Base:
         self.rawdisplay.show()
         vbox.add(self.rawdisplay)
 
-        dataframe = gtk.Frame(label="GPS data")
+        self.dataframe = gtk.Frame(label="GPS data")
         datatable = gtk.Table(7, 4, False)
-        dataframe.add(datatable)
+        self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
             if i < len(Base.gpsfields) / 2:
@@ -267,8 +275,8 @@ class Base:
             entry = gtk.Entry()
             datatable.attach(entry, colbase+1, colbase+2, i % 7, i % 7 + 1)
             gpswidgets.append(entry)
-        dataframe.show_all()
-        vbox.add(dataframe)
+        self.dataframe.show_all()
+        vbox.add(self.dataframe)
 
         self.window.show()
 

@@ -238,7 +238,7 @@ $(PYEXTENSIONS): stamp-python-modules
 	+@WITNESS=stamp-python-modules; $(MULTIOUT_RECOVER_DELETED)
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
-stamp-python-modules: gpspacket.c gpslib.c libgps.la setup.py
+stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
@@ -423,7 +423,7 @@ EXTRA_DIST = \
 	valgrind-audit \
 	valgrind-suppressions \
 	gpspacket.c \
-	gpslib.c \
+	gpsclient.c \
 	driver_proto.c \
 	monitor_proto.c \
 	setup.py \
