@@ -317,6 +317,7 @@ class Base:
                 self.view_name_to_widget[action.get_name()].show()
             else:
                 self.view_name_to_widget[action.get_name()].hide()
+        self.window.queue_resize()
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
