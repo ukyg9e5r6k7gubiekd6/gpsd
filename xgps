@@ -199,8 +199,15 @@ class Base:
             [('Quit', gtk.STOCK_QUIT, '_Quit', None,
               'Quit the Program', lambda w: gtk.main_quit()),
              ('File', None, '_File'),
+             ('View', None, '_View'),
              ('Units', None, '_Units')])
-        self.actiongroup.get_action('Quit').set_property('short-label', '_Quit')
+        self.actiongroup.add_toggle_actions(
+            [('Skyview', None, '_Skyview', '<Control>s',
+              'Enable Skyview', lambda a: self.view_toggle(a)),
+             ('Responses', None, '_Responses', '<Control>r',
+              'Enable Response Reports', lambda a: self.view_toggle(a)),
+             ('GPS', None, '_GPS Data', '<Control>a',
+              'Enable GPS Data', lambda a: self.view_toggle(a))])
         self.actiongroup.add_radio_actions(
             [('Imperial', None, '_Imperial', '<Control>i',
               'Imperial units', 0),
@@ -216,6 +223,11 @@ class Base:
       <menu action="File">
         <menuitem action="Quit"/>
       </menu>
+      <menu action="View">
+        <menuitem action="Skyview"/>
+        <menuitem action="Responses"/>
+        <menuitem action="GPS"/>
+      </menu>
       <menu action="Units">
         <menuitem action="Imperial"/>
         <menuitem action="Nautical"/>
@@ -224,6 +236,9 @@ class Base:
     </menubar>
 </ui>
 ''')
+        uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
+        uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
+        uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
         menubar = uimanager.get_widget('/MenuBar')
         vbox.pack_start(menubar, False)
 
@@ -286,9 +301,22 @@ class Base:
 
         self.window.show()
 
+        self.view_name_to_widget = \
+                                 {"Skyview": self.satbox,
+                                  "Responses": self.rawdisplay,
+                                  "GPS": self.dataframe}
+
         # Discard field labels and associate data hooks with their widgets
         Base.gpsfields = map(lambda ((label, hook), widget): (hook, widget),
                              zip(Base.gpsfields, gpswidgets))
+
+    def view_toggle(self, action):
+        #print "View toggle:", action.get_active(), action.get_name()
+        if hasattr(self, 'view_name_to_widget'):
+            if action.get_active():
+                self.view_name_to_widget[action.get_name()].show()
+            else:
+                self.view_name_to_widget[action.get_name()].hide()
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
