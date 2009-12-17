@@ -917,20 +917,10 @@ is so you can use it to set the system clock.</p>
 <h2 id="hotplug">Hotplug interface problems</h2>
 
 <p>The hotplug interface works pretty nicely for telling gpsd which
-device to look at, at least on Fedora and Ubuntu Linux machines.  The fly
-in the ointment is that we're using a deprecated version of the
-interface, the old-style /etc/hotplug version with usermap files.</p>
-
-<p>It is unlikely this interface will be dropped by distro makers any
-time soon, because it's supporting a bunch of popular USB cameras.
-Still, it would be nice not to be using a deprecated interface.</p>
-
-<p>There is experimental udev support in the distribution now.  Someday
-this will replace the hotplug stuff.</p>
-
-<p>A more general problem: the hotplug code we have is Linux-specific.
-OpenBSD (at least) features a hotplug daemon with similar
-capabilities.  We ought to do the right thing there as well.</p>
+device to look at, at least on Fedora and Ubuntu Linux machines.  But
+it's Linux-specific.  OpenBSD (at least) features a hotplug daemon
+with similar capabilities.  We ought to do the right thing there as
+well.</p>
 
 <h2 id="security">Security Issues</h2>
 
