@@ -312,9 +312,8 @@ class Base:
                 self.view_name_to_widget[action.get_name()].hide()
         # The effect we're after is to make the top-level window
         # resize itself to fit when we show or hide widgets.
-        # It would be nice if this didn't make the window hop
-        # around.  I don't think it was intended for this use...
-        self.window.reshow_with_initial_size()
+        # This is undocumented magic to do that.
+        self.window.resize(1, 1)
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
