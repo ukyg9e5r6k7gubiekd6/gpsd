@@ -184,6 +184,7 @@ class Base:
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps")
         self.window.connect("delete_event", self.delete_event)
+        self.window.set_resizable(False)
 
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
@@ -317,7 +318,11 @@ class Base:
                 self.view_name_to_widget[action.get_name()].show()
             else:
                 self.view_name_to_widget[action.get_name()].hide()
-        self.window.queue_resize()
+        # The effect we're after is to make the top-level window
+        # resize itself to fit when we show or hide widgets.
+        # It would be nice if this didn't make the window hop
+        # around.  I don't think it was intended for this use...
+        self.window.reshow_with_initial_size()
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
