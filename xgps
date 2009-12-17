@@ -2,11 +2,11 @@
 '''
 xgps2 -- test client for gpsd
 
-usage: xgps2 [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
+usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
 
 gui_about = '''\
-This is xgps2, a test client for the gpsd daemon.
+This is xgps, a test client for the gpsd daemon.
 
 By Eric S. Raymond for the GPSD project, December 2009
 '''
@@ -182,7 +182,7 @@ class Base:
         self.saved_mode = -1
   
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("xgps2")
+        self.window.set_title("xgps")
         self.window.connect("delete_event", self.delete_event)
 
         vbox = gtk.VBox(False, 0)
