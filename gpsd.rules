@@ -25,7 +25,7 @@ SUBSYSTEM!="tty", GOTO="gpsd_rules_end"
 ATTR{idVendor}=="067b", ATTR{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # ATEN International Co., Ltd UC-232A Serial Port [pl2303]
 ATTR{idVendor}=="0557", ATTR{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
-# FTDI 8U232AM
+# FTDI 8U232AM / FT232
 ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # Cypress M8/CY7C64013 (DeLorme uses these)
 ATTR{idVendor}=="1163", ATTR{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
@@ -37,8 +37,6 @@ ATTR{idVendor}=="091e", ATTR{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/ud
 ATTR{idVendor}=="10c4", ATTR{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U)
 ATTR{idVendor}=="1546", ATTR{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
-# FTDI FT232
-ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
