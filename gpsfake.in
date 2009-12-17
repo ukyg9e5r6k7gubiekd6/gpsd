@@ -3,11 +3,11 @@
 # gpsfake -- test harness for gpsd
 #
 # Simulates a GPS, playing back a logfile
-# Most of the logic for this now lives in gpsfake.py,
+# Most of the logic for this now lives in gps.fake,
 # factored out so we can write other test programs with it.
 
 import sys, os, signal, time, getopt, socket
-import gpsfake
+import gps.fake
 
 # So we can do regression tests without stepping on a production daemon
 # According to IANA port 12000 belongs to an IBM SNA service. Picking an
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     else:
         print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
-    test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
+    test = gps.fake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
 
     if pipe:
         test.reporter = sys.stdout.write
@@ -156,13 +156,13 @@ if __name__ == '__main__':
         for logfile in arguments:
             try:
                 test.gps_add(logfile, speed=speed, pred=fakehook)
-            except gpsfake.TestLoadError, e:
+            except gps.fake.TestLoadError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
-            except gpsfake.PacketError, e:
+            except gps.fake.PacketError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
-            except gpsfake.DaemonError, e:
+            except gps.fake.DaemonError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
             except IOError, e:

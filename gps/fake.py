@@ -66,7 +66,7 @@ the run method in a subthread, with locking of critical regions.
 """
 import sys, os, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket
-import gps, gps.packet
+import gps, packet
 
 # Define a per-character delay on writes so we won't spam the buffers
 # in the pty layer or gpsd itself.  The magic number here has to be
