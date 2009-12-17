@@ -66,7 +66,8 @@ the run method in a subthread, with locking of critical regions.
 """
 import sys, os, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket
-import gps, packet
+import gps
+import packet as sniffer
 
 # Define a per-character delay on writes so we won't spam the buffers
 # in the pty layer or gpsd itself.  The magic number here has to be
@@ -91,16 +92,16 @@ class TestLoad:
         self.type = None
         self.serial = None
         # Grab the packets
-        getter = gps.packet.new()
+        getter = sniffer.new()
         #gps.packet.register_report(reporter)
         type_latch = None
         while True:
             (len, ptype, packet) = getter.get(logfp.fileno())
             if len <= 0:
                 break
-            elif ptype == gps.packet.BAD_PACKET:
+            elif ptype == sniffer.BAD_PACKET:
                 break
-            elif ptype == gps.packet.COMMENT_PACKET:
+            elif ptype == sniffer.COMMENT_PACKET:
                 # Some comments are magic
                 if "Serial:" in packet:
                     # Change serial parameters
@@ -135,7 +136,7 @@ class TestLoad:
                     print `packet`
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
-        self.textual = (type_latch == gps.packet.NMEA_PACKET)
+        self.textual = (type_latch == sniffer.NMEA_PACKET)
         if self.textual:
             self.legend = "gpsfake: line %d: "
         else:
