@@ -188,7 +188,6 @@ class Base:
 
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
-        vbox.show()
 
         self.window.connect("destroy", lambda w: gtk.main_quit())
 
@@ -245,10 +244,8 @@ class Base:
 
         self.satbox = gtk.HBox(False, 0)
         vbox.add(self.satbox)
-        self.satbox.show()
 
         skyframe = gtk.Frame(label="Satellite List")
-        skyframe.show()
         self.satbox.add(skyframe)
 
         self.satlist = gtk.ListStore(str,str,str,str,str)
@@ -266,19 +263,15 @@ class Base:
             self.satlist.append(["", "", "", "", ""])
             self.row_iters.append(self.satlist.get_iter(i))
 
-        view.show()
         skyframe.add(view)
 
         viewframe = gtk.Frame(label="Skyview")
-        viewframe.show()
         self.satbox.add(viewframe)
         self.skyview = SkyView()
-        self.skyview.show()
         viewframe.add(self.skyview)
 
         self.rawdisplay = gtk.Entry()
         self.rawdisplay.set_editable(False)
-        self.rawdisplay.show()
         vbox.add(self.rawdisplay)
 
         self.dataframe = gtk.Frame(label="GPS data")
@@ -297,10 +290,9 @@ class Base:
             entry = gtk.Entry()
             datatable.attach(entry, colbase+1, colbase+2, i % 7, i % 7 + 1)
             gpswidgets.append(entry)
-        self.dataframe.show_all()
         vbox.add(self.dataframe)
 
-        self.window.show()
+        self.window.show_all()
 
         self.view_name_to_widget = \
                                  {"Skyview": self.satbox,
