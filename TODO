@@ -66,11 +66,6 @@ Greg Troxel reports this from netbsd-5/sparc64.  output at
 Now that the main test client is in Python and extensible, give it
 the ability to make displays from RTCM2 and AIS JSON.
 
-*** Miscellaneous xgps features
-
-**** Select unit sysyem from a pull-down menu
-**** Show/hide subpanels with a checkbox list).
-
 *** Finish gpssim
 
 It's blocked on skyview computation.
