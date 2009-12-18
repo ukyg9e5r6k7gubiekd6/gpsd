@@ -586,8 +586,10 @@ struct ais_t
 	struct {
 	    uint alt;			/* altitude in meters */
 #define AIS_ALT_NOT_AVAILABLE	4095
-#define AIS_ALT_FAST_MOVER	4094	/* 4094 meters or higher */
+#define AIS_ALT_HIGH    	4094	/* 4094 meters or higher */
 	    uint speed;			/* speed over ground in deciknots */
+#define AIS_SAR_SPEED_NOT_AVAILABLE	1023
+#define AIS_SAR_FAST_MOVER  	1022
 	    bool accuracy;		/* position accuracy */
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */

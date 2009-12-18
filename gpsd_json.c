@@ -873,13 +873,40 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	break;
     case 9:	/* Standard SAR Aircraft Position Report */
 	if (scaled) {
+	    char altlegend[10];
+	    char speedlegend[10];
+
+	    /*
+	     * Express altitude as nan if not available,
+	     * "high" for above the reporting ceiling.
+	     */
+	    if (ais->type9.alt == AIS_ALT_NOT_AVAILABLE)
+		(void) strlcpy(altlegend, "\"nan\"", sizeof(altlegend));
+	    else if (ais->type9.alt == AIS_ALT_HIGH)
+		(void) strlcpy(altlegend, "\"high\"", sizeof(altlegend));
+	    else
+		(void)snprintf(altlegend, sizeof(altlegend),
+			       "%.1f", ais->type9.alt / 10.0);
+
+	    /*
+	     * Express speed as nan if not available,
+	     * "high" for above the reporting ceiling.
+	     */
+	    if (ais->type9.speed == AIS_SAR_SPEED_NOT_AVAILABLE)
+		(void) strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
+	    else if (ais->type9.speed == AIS_SAR_FAST_MOVER)
+		(void) strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
+	    else
+		(void)snprintf(speedlegend, sizeof(speedlegend),
+			       "%.1f", ais->type1.speed / 10.0);
+
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"alt\":%u,\"speed\":%u,\"accuracy\":%s,"
+			   "\"alt\":%s,\"speed\":%s,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
 			   "\"raim\":%s,\"radio\":%u}\r\n",
-			   ais->type9.alt,
-			   ais->type9.speed,
+			   altlegend,
+			   speedlegend,
 			   JSON_BOOL(ais->type9.accuracy),
 			   ais->type9.lon / AIS_LATLON_SCALE,
 			   ais->type9.lat / AIS_LATLON_SCALE,
