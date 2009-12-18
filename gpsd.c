@@ -2227,7 +2227,7 @@ int main(int argc, char *argv[])
 				(void)assign_channel(sub, ANY, device);
 		    }
 		    /* handle laggy response to a firmware version query */
-		    if ((changed & DEVICEID_SET) != 0) {
+		    if ((changed & (DEVICEID_SET|DEVICE_SET)) != 0) {
 			assert(device->device_type != NULL);
 #ifdef OLDSTYLE_ENABLE
 			{
