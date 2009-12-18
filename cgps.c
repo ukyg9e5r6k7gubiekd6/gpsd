@@ -736,6 +736,7 @@ int main(int argc, char *argv[])
 	    silent_flag=true;
 	    break;
 	case 'u':
+	    /*@ -observertrans @*/
 	    switch ( optarg[0] ) {
 	    case 'i':
 		altfactor = METERS_TO_FEET;
@@ -758,6 +759,8 @@ int main(int argc, char *argv[])
 	    default:
 		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
 	    }
+	    break;
+	    /*@ +observertrans @*/
 	case 'V':
 	    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
 			  VERSION, REVISION);
@@ -777,6 +780,7 @@ int main(int argc, char *argv[])
 		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
 		/*@ -casebreak @*/
 	    }
+	    break;
 	case 'h': default:
 	    usage(argv[0]);
 	    break;
