@@ -690,11 +690,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "fastleft"/"fastright" for fast turns.
 	     */
 	    if (ais->type1.turn == -128)
-		(void) strlcpy(turnlegend, "nan", sizeof(turnlegend));
+		(void) strlcpy(turnlegend, "\"nan\"", sizeof(turnlegend));
 	    else if (ais->type1.turn == -127)
-		(void) strlcpy(turnlegend, "fastleft", sizeof(turnlegend));
+		(void) strlcpy(turnlegend, "\"fastleft\"", sizeof(turnlegend));
 	    else if (ais->type1.turn == 127)
-		(void) strlcpy(turnlegend, "fastright", sizeof(turnlegend));
+		(void) strlcpy(turnlegend, "\"fastright\"", sizeof(turnlegend));
 	    else
 		(void)snprintf(turnlegend, sizeof(turnlegend),
 			       "%.0f",
@@ -705,9 +705,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "fast" for fast movers.
 	     */
 	    if (ais->type1.speed == AIS_SPEED_NOT_AVAILABLE)
-		(void) strlcpy(speedlegend, "nan", sizeof(speedlegend));
+		(void) strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
 	    else if (ais->type1.speed == AIS_SPEED_FAST_MOVER)
-		(void) strlcpy(speedlegend, "fast", sizeof(speedlegend));
+		(void) strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
 			       "%.1f", ais->type1.speed / 10.0);
