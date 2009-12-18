@@ -496,7 +496,7 @@ message should be rebroadcast.  This was intended as a way of getting
 AIS messages around hills and other obstructions in coastal waters,
 but is little used as base station coverage is more effective.  It is
 intended that the bit be incremented on each retransmission, to a
-maximum of three hops. A vakue f 3 indicates "Do not repeat".
+maximum of three hops. A value of 3 indicates "Do not repeat".
 
 .Navigation status codes
 [width="50%",frame="topbot"]
