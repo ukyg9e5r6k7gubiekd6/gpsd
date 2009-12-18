@@ -234,7 +234,7 @@ void nmea_tpv_dump(struct gps_device_t *session,
 	gpsd_position_fix_dump(session, bufp, len);
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
     }
-    if ((session->gpsdata.set & (MODE_SET | DOP_SET | USED_SET | ERR_SET)) != 0)
+    if ((session->gpsdata.set & (MODE_SET | DOP_SET | USED_SET | HERR_SET | VERR_SET)) != 0)
 	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
 }
 

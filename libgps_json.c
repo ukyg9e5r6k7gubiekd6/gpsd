@@ -273,7 +273,7 @@ static int json_error_read(const char *buf,
 	return status;
 
     gpsdata->set &=~ UNION_SET;
-    gpsdata->set |= ERR_SET;
+    gpsdata->set |= ERROR_SET;
     return 0;
 }
 

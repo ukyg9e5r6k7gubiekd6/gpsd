@@ -895,7 +895,6 @@ struct gps_data_t {
 #define VERR_SET	0x00002000u
 #define PERR_SET	0x00004000u
 #define POLICY_SET	0x00008000u	/* only used in client library */
-#define ERR_SET		(HERR_SET|VERR_SET|PERR_SET)
 #define SATELLITE_SET	0x00010000u
 #define RAW_SET		0x00020000u
 #define USED_SET	0x00040000u
