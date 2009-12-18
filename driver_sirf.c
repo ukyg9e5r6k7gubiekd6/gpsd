@@ -133,7 +133,7 @@ static bool sirf_write(int fd, unsigned char *msg) {
        gpsd_hexdump_wrapper(msg, len+8, LOG_IO));
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
    if ( !ok ) {
-	   gpsd_report(LOG_ERROR, "SiRF: Writing error.\n");
+	   gpsd_report(LOG_WARN, "SiRF: Writing error.\n");
    }
    (void)tcdrain(fd);
    return(ok);
