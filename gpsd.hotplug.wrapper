@@ -11,7 +11,7 @@ if [ -r /etc/default/gpsd ]; then
 fi
 
 if [ "$ACTION" = "remove" ] ; then
-  if [ $(echo $DEVLINKS | grep -q /dev/gps) ] ; then
+  if echo $DEVLINKS | grep -q /dev/gps; then
     exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
   fi
   exit 0
