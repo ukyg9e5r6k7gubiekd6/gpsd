@@ -670,12 +670,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (uint)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
+#define JSON_BOOL(x)	((x)?"true":"false")
     (void)snprintf(buf, buflen, 
 		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"
-		   "\"mmsi\":%u,", 
-		   ais->type, ais->repeat, ais->mmsi);
-
-#define JSON_BOOL(x)	((x)?"true":"false")
+		   "\"mmsi\":%u,\"scaled\":%s,", 
+		   ais->type, ais->repeat, ais->mmsi, JSON_BOOL(scaled));
     /*@ -formatcode -mustfreefresh @*/
     switch (ais->type) {
     case 1:	/* Position Report */
