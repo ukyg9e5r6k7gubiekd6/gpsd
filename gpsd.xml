@@ -1648,21 +1648,7 @@ and a "scaled" field telling whether the remainder of the fields are
 dumped in scaled or unscaled form. Other fields are as named ands
 specified in the <cite>AIVDM/AIVDO Protocol Decoding</cite> document.</para>
 
-<para>Most fields in most messages are integer-valued and are dumped
-the same way whether scaled or unscaled.  A few are float-valued and
-associated with formulas to translate integer-valued packet bitfields
-into floats, typically by applying a divisor.  A few others are
-string-valued fields in which the integer-valued packet bitfield is
-treated as an index into a string list specified in the AIS standards.
-In the latter two cases, an unscsaled dump reports the integer packet
-bitfield value and is lossless; a scaled dump reports a float or
-string.</para>
-
-<para>A few fields may have either integer or string values in a
-scaled dump, with the string values describing various extreme or
-unknown-value conditions.</para>
-
-<para>RTCM2 correctionsare dumped in the JSON format described in
+<para>RTCM2 corrections are dumped in the JSON format described in
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
 
 </refsect1>
