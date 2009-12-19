@@ -1646,7 +1646,8 @@ will assert the ERR_SET bit in the top-level set member.</para>
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
 dumped in scaled or unscaled form. Other fields are as named ands
-specified in the <cite>AIVDM/AIVDO Protocol Decoding</cite> document.</para>
+specified in the <citetitle>AIVDM/AIVDO Protocol Decoding</citetitle>
+document.</para>
 
 <para>RTCM2 corrections are dumped in the JSON format described in
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>

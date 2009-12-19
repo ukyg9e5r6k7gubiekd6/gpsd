@@ -75,6 +75,9 @@ to me by email. He also communicated some critical information from
 <<IEC-PAS>>, and supplied information about new messages and fields in
 ITU-1371-3.
 
+Descriptions of messages 25 and 26 are based on AIS transceiver vendor
+documentation forwarded to me by a source wishing to remain anonymous.
+
 Should you set out to write a decoder using this document, you are
 likely to find that one of your challenges is finding enough AIS
 packet data to make an effective regression test -- especially if you
@@ -108,9 +111,6 @@ relevant proprietary standards.  If you are such a person, please help
 by reporting the following to be included in future versions of this
 document:
 
-* Field offsets, types, and descriptions for messages 25 and 26. which
-  are not described in <<IALA>>.
-
 * Sample sentences of types 13, 16-17, 22-23, and 25-26 together with
   decoded dumps of the field values.  Please note that sample
   sentences not accompanied by field dumps are *not* useful.
@@ -120,7 +120,7 @@ document:
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
 sentence decoder as part of the daemon. This document was developed to
 be the specification for it, and it will decode all sentence type
-described herein.
+described herein (except at present 25 and 26).
 
 The source-code repository of the GPSD project holds a conforming
 standalone Python decoder, ais.py, that is not included in shipped
@@ -943,7 +943,7 @@ six-bit text.  This message is variable in length up to a maximum of
 |==============================================================================
 
 Note: There may be an error in the standards.  161 * 6 = 966, not 968,
-but 968 is the figure given in <<<IALA>>>.
+but 968 is the figure given in <<IALA>>.
 
 Also see the pragmatic note on message content attached to type 12; it
 applies to type 14 messages as well.
@@ -1473,6 +1473,61 @@ According to <<MMSI>>, an MMSI is associated with an auxiliary craft
 when it is of the form 98MIDXXXX where the digits 3, 4 and 5 represent
 the MID and X is any figure from 0 to 9.
 
+=== Type 25: Binary Message, Single Slot  ===
+
+Maximum of 168 bits (a single slots). Fields after the Destination
+MMSI are at variable offsets depending on tht flag and the Destination
+Indicator; they always occur in the same order but some may be omitted.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len   |Description            | Member      | Units
+|0-5     |  6   | Message Type          | type        | Unsigned integer: 25
+|6-7     |  2   | Repeat Indicator      | repeat      | As in CNB
+|8-37    | 30   | MMSI                  | mmsi        | Unsigned integer: 9 digits
+|38      |  1   | Destination indicator | addressed   | 0=broadcast,1=addressed
+|39      |  1   | Binary data flag      | structured  | See below
+|40      |0/30  | Destination MMSI      | dest_mmsi   | Message destination
+|?       |0/16  | Application ID        | app_id      | Unsigned integer
+|?       |0-128 | Data                  | data        | Binary data
+|===============================================================================
+
+If the 'addressed' flag is on, 30 bits of data at offset 40 are
+interpreted as a destination MMSI.  Otherwise that field span becomes 
+part of the message payload, with the first 16 bits used as an
+Application ID if the 'structured' flag is on.
+
+If the 'structured' flag is on, a 16-bit application identifier is 
+interpreted. Otherwise that field span becomes part of the message payload.
+
+The data fields is not, in contrast to message type 26, followed by a
+radio status block.
+
+=== Type 26: Binary Message, Multiple Slot  ===
+
+Maximum of 1064 bits (up to 5 slots).
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len   |Description           | Member      | Units
+|0-5     |  6   | Message Type         | type        | Unsigned integer: 25
+|6-7     |  2   | Repeat Indicator     | repeat      | As in CNB
+|8-37    | 30   | MMSI                 | mmsi        | Unsigned integer: 9 digits
+|38      |  1   | Destination indicator| addressed   | 0=broadcast,1=addressed
+|39      |  1   | Binary data flag     | structured  | See below
+|40      |0/30  | Destination MMSI     | dest_mmsi   | Message destination
+|?       |0/16  | Application ID       | app_id      | Unsigned integer
+|?       |0-1004| Data                 | data        | Binary data
+|?       |20    | Radio status         | radio       | See <<IALA>> for details.
+|===============================================================================
+
+The data field may span up to 5 256-bit slots in addition to the tail
+end of the base slot.  Documentation says the data length of each slot
+is 224 and adds the note "Allows for 32 bits of bit-stuffing."
+
+The 20 radio status bits are always present after end-of-data in the
+last slot and are in the format specified by <<IALA>>.
+
 == Local extensions ==
 
 Some regional authorities extend the AIS message set.
@@ -1738,4 +1793,5 @@ Version 1.19 adds a description of AIS Hub.
 
 Version 1.20 adds a list of AIS feed sites - just two, so far.
 
-Version 1.21 describes JSON-AIS more completely.
+Version 1.21 describes JSON-AIS more completely.  It adds descriptions
+for AIS messages type 25 and 26, not yet observed in the wild.
