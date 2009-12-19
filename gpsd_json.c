@@ -681,8 +681,8 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
     case 2:
     case 3:
 	if (scaled) {
-	    char turnlegend[10];
-	    char speedlegend[10];
+	    char turnlegend[20];
+	    char speedlegend[20];
 
 	    /*
 	     * Express turn as nan if not available,
@@ -873,8 +873,8 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	break;
     case 9:	/* Standard SAR Aircraft Position Report */
 	if (scaled) {
-	    char altlegend[10];
-	    char speedlegend[10];
+	    char altlegend[20];
+	    char speedlegend[20];
 
 	    /*
 	     * Express altitude as nan if not available,
