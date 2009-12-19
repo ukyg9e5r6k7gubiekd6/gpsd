@@ -4,8 +4,9 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Message types 1-12, 14-15, 18-21, and 24 have been tested against live data
- * with known-good decodings. Message types 13, 16-17 and 22-23 have not.
+ * Code for message types 1-12, 14-15, 18-21, and 24 has been tested against
+ * live data with known-good decodings. Code for message types 13, 16-17,
+ * 22-23, and 25-26 has not.
  */
 #include <sys/types.h>
 #include <stdio.h>
@@ -532,6 +533,51 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		break;
 	    }
 	    gpsd_report(LOG_INF, "\n");
+	    break;
+	case 25:	/* Binary Message, Single Slot */
+	    ais->type25.addressed	= (bool)UBITS(38, 1);
+	    ais->type25.structured	= (bool)UBITS(39, 1);
+	    if (ais->type25.addressed)
+		ais->type25.dest_mmsi   = UBITS(40, 30);
+	    if (ais->type25.structured)
+		ais->type25.app_id      = UBITS(40+ais->type25.addressed*30,16);
+	    /*
+	     * Not possible to do this right without machinery we
+	     * don't yet have.  The problem is that if the addressed
+	     * bit is on the bitfield start won't be on a byte
+	     * boundary. Thus the formulas below (and in message type 26)
+	     * will work perfectly for brodacst messages, but for addressed
+	     * messages the retrieved data will be led by thr 30 bits of
+	     * the destination MMSI
+	     */
+	    ais->type25.bitcount       = ais_context->bitlen - 40 - 16*ais->type25.structured;
+	    (void)memcpy(ais->type25.bitdata,
+			 (char *)ais_context->bits+5 + 2 * ais->type25.structured,
+			 (ais->type25.bitcount + 7) / 8);
+	    gpsd_report(LOG_INF, "addressed=%d, structured=%d, dest=%u, id=%u, cnt=%zd\n",
+			ais->type25.addressed,
+			ais->type25.structured,
+			ais->type25.dest_mmsi,
+			ais->type25.app_id,
+			ais->type25.bitcount);		
+	    break;
+	case 26:	/* Binary Message, Multiple Slot */
+	    ais->type26.addressed	= (bool)UBITS(38, 1);
+	    ais->type26.structured	= (bool)UBITS(39, 1);
+	    if (ais->type26.addressed)
+		ais->type26.dest_mmsi      = UBITS(40, 30);
+	    if (ais->type26.structured)
+		ais->type26.app_id      = UBITS(40+ais->type26.addressed*30,16);
+	    ais->type26.bitcount        = ais_context->bitlen - 60 - 16*ais->type26.structured;
+	    (void)memcpy(ais->type26.bitdata,
+			 (char *)ais_context->bits+5 + 2 * ais->type26.structured,
+			 (ais->type26.bitcount + 7) / 8);
+	    gpsd_report(LOG_INF, "addressed=%d, structured=%d, dest=%u, id=%u, cnt=%zd\n",
+			ais->type26.addressed,
+			ais->type26.structured,
+			ais->type26.dest_mmsi,
+			ais->type26.app_id,
+			ais->type26.bitcount);
 	    break;
 	default:
 	    gpsd_report(LOG_INF, "\n");

@@ -120,7 +120,7 @@ document:
 The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
 sentence decoder as part of the daemon. This document was developed to
 be the specification for it, and it will decode all sentence type
-described herein (except at present 25 and 26).
+described herein.
 
 The source-code repository of the GPSD project holds a conforming
 standalone Python decoder, ais.py, that is not included in shipped
@@ -453,8 +453,8 @@ set to use.
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-12, 14-15, 18-21, and 24.  Described but unchecked are 13, 16-17, and
-22-23.
+1-12, 14-15, 18-21, and 24.  Described but unchecked are 13, 16-17,
+22-23, and 25-26.
 
 === Types 1, 2 and 3: Position Report Class A ===
 

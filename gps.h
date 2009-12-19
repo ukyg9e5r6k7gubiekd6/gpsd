@@ -792,6 +792,27 @@ struct ais_t
 		} dim;
 	    };
 	} type24;
+	/* Type 25 - Addressed Binary Message */
+	struct {
+	    bool addressed;		/* addressed-vs.broadcast flag */
+	    bool structured;		/* structured-binary flag */
+	    uint dest_mmsi;		/* destination MMSI */
+	    uint app_id;        	/* Application ID */
+#define AIS_TYPE25_BINARY_MAX	128	/* Up to 128 bits */
+	    size_t bitcount;		/* bit count of the data */
+	    char bitdata[(AIS_TYPE25_BINARY_MAX + 7) / 8];
+	} type25;
+	/* Type 26 - Addressed Binary Message */
+	struct {
+	    bool addressed;		/* addressed-vs.broadcast flag */
+	    bool structured;		/* structured-binary flag */
+	    uint dest_mmsi;		/* destination MMSI */
+	    uint app_id;        	/* Application ID */
+#define AIS_TYPE26_BINARY_MAX	1004	/* Up to 128 bits */
+	    size_t bitcount;		/* bit count of the data */
+	    char bitdata[(AIS_TYPE26_BINARY_MAX + 7) / 8];
+	    uint radio;			/* radio status bits */
+	} type26;
     };
 };
 
