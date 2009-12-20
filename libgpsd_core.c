@@ -659,7 +659,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (first_sync || session->notify_clients) {
 	    session->notify_clients = false;
 	    received |= DEVICE_SET;
-	    gpsd_report(LOG_SHOUT, "Client-notify flag is raised\n"); 
 	}
 
 	/* Get data from current packet into the fix structure */
