@@ -160,8 +160,10 @@ class SkyView(gtk.DrawingArea):
 class AISView:
     "Encapsulate store and view objects for watching AIS data." 
     AIS_ENTRIES = 10
+    DWELLTIME = 360
     def __init__(self):
         "Initialize the store and view."
+        self.name_to_mmsi = {}
         self.named = {}
         self.store = gtk.ListStore(str,str,str)
         self.widget = gtk.ScrolledWindow()
@@ -177,13 +179,28 @@ class AISView:
             column.add_attribute(renderer, 'text', i)
             self.view.append_column(column)
 
+    def enter(self, ais, name):
+        "Add a named object (ship or station) to the store."
+        ais.entry_time = time.time()
+        self.named[ais.mmsi] = ais
+        self.name_to_mmsi[name] = ais.mmsi
+        # Garbage-gollect old entries
+        for i in range(len(self.store)):
+            here = self.store.get_iter(i)
+            name = self.store.get_value(here, 0)
+            mmsi = self.name_to_mmsi[name]
+            if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
+                del self.named[mmsi]
+                del name_to_mmsi[name]
+
     def update(self, ais):
         "Update the AIS data fields."
         if ais.type == 5:
             if ais.mmsi not in self.named:
-                self.named[ais.mmsi] = ais
-                self.store.prepend((ais.shipname, ais.callsign, ais.destination))
-
+                self.enter(ais, ais.shipname)
+                self.store.prepend(
+                    (ais.shipname, ais.callsign, ais.destination))
+                    
 class Base:
     gpsfields = (
         # First column
