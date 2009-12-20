@@ -165,14 +165,14 @@ class AISView:
         "Initialize the store and view."
         self.name_to_mmsi = {}
         self.named = {}
-        self.store = gtk.ListStore(str,str,str)
+        self.store = gtk.ListStore(str, str,str,str)
         self.widget = gtk.ScrolledWindow()
         self.widget.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.view = gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
         self.widget.add_with_viewport(self.view)
 
-        for (i, label) in enumerate(('Name:','Sign:','Dest:')):
+        for (i, label) in enumerate(('#', 'Name:','Callsign:','Destination:')):
             column = gtk.TreeViewColumn(label)
             renderer = gtk.CellRendererText()
             column.pack_start(renderer)
@@ -184,10 +184,10 @@ class AISView:
         ais.entry_time = time.time()
         self.named[ais.mmsi] = ais
         self.name_to_mmsi[name] = ais.mmsi
-        # Garbage-gollect old entries
+        # Garbage-collect old entries
         for i in range(len(self.store)):
             here = self.store.get_iter(i)
-            name = self.store.get_value(here, 0)
+            name = self.store.get_value(here, 1)
             mmsi = self.name_to_mmsi[name]
             if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
                 del self.named[mmsi]
@@ -195,11 +195,19 @@ class AISView:
 
     def update(self, ais):
         "Update the AIS data fields."
-        if ais.type == 5:
-            if ais.mmsi not in self.named:
+        if ais.mmsi not in self.named:
+            if ais.type == 5:
                 self.enter(ais, ais.shipname)
                 self.store.prepend(
-                    (ais.shipname, ais.callsign, ais.destination))
+                    (ais.type, ais.shipname, ais.callsign, ais.destination))
+            elif ais.type in (19, 24):
+                self.enter(ais, ais.shipname)
+                self.store.prepend(
+                    (ais.type, ais.shipname, "(class B)", ""))
+            elif ais.type == 21:
+                self.enter(ais, ais.name)
+                self.store.prepend(
+                    (ais.type, ais.name, "(navaid)", ""))
                     
 class Base:
     gpsfields = (
