@@ -165,14 +165,14 @@ class AISView:
         "Initialize the store and view."
         self.name_to_mmsi = {}
         self.named = {}
-        self.store = gtk.ListStore(str, str,str,str)
+        self.store = gtk.ListStore(str, str,str,str,str)
         self.widget = gtk.ScrolledWindow()
         self.widget.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.view = gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
         self.widget.add_with_viewport(self.view)
 
-        for (i, label) in enumerate(('#', 'Name:','Callsign:','Destination:')):
+        for (i, label) in enumerate(('#', 'Name:','Callsign:','Destination:', "Lat/Lon:")):
             column = gtk.TreeViewColumn(label)
             renderer = gtk.CellRendererText()
             column.pack_start(renderer)
@@ -193,21 +193,44 @@ class AISView:
                 del self.named[mmsi]
                 del name_to_mmsi[name]
 
+    def latlon(self, lat, lon):
+        "Latitude/longitude display in nice format."
+        print "Foo!", lat, lon
+        if lat < 0:
+            latsuff = "S"
+        elif lat > 0:
+            latsuff = "N"
+        else:
+            latsuff = ""
+        lat = abs(lat)
+        lat = gps.client.deg_to_str(gps.client.deg_dd, lat)
+        if lon < 0:
+            lonsuff = "W"
+        elif lon > 0:
+            lonsuff = "E"
+        else:
+            lonsuff = ""
+        lon = abs(lon)
+        lon = gps.client.deg_to_str(gps.client.deg_ddmmss, lon)
+        return lat + latsuff + "/" + lon + lonsuff
+
     def update(self, ais):
         "Update the AIS data fields."
         if ais.mmsi not in self.named:
             if ais.type == 5:
                 self.enter(ais, ais.shipname)
                 self.store.prepend(
-                    (ais.type, ais.shipname, ais.callsign, ais.destination))
+                    (ais.type, ais.shipname, ais.callsign, ais.destination, ""))
             elif ais.type in (19, 24):
                 self.enter(ais, ais.shipname)
                 self.store.prepend(
-                    (ais.type, ais.shipname, "(class B)", ""))
+                    (ais.type, ais.shipname, "(class B)", "", ""))
             elif ais.type == 21:
+                print "I see:", ais
                 self.enter(ais, ais.name)
+                where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.name, "(navaid)", ""))
+                    (ais.type, ais.name, "(navaid)", "", where))
                     
 class Base:
     gpsfields = (
@@ -565,7 +588,7 @@ if __name__ == "__main__":
     base.set_units(unit_system)
     try:
         daemon = gps.gps(host=host,
-                         mode=gps.WATCH_ENABLE|gps.WATCH_JSON,
+                         mode=gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
                          verbose=debug)
         base.watch(daemon)
         base.main()
