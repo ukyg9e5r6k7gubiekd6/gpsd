@@ -628,7 +628,11 @@ int gps_poll(struct gps_data_t *gpsdata)
     struct privdata_t *priv = PRIVATE(gpsdata);
 
     gpsdata->set &=~ PACKET_SET;
-    eol = strchr(priv->buffer, '\n');
+    for (eol = priv->buffer; *eol != '\n' && eol < priv->buffer+priv->waiting; eol++)
+	continue;
+    if (*eol != '\n')
+        eol = NULL;
+
     if (eol == NULL) {
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
 	status = (int)recv(gpsdata->gps_fd,
@@ -641,7 +645,10 @@ int gps_poll(struct gps_data_t *gpsdata)
 	    return 0;
 	else if (priv->waiting == 0)
 	    return status;
-	eol = strchr(priv->buffer, '\n');
+	for (eol = priv->buffer; *eol != '\n' && eol < priv->buffer+priv->waiting; eol++)
+	    continue;
+	if (*eol != '\n')
+	    eol = NULL;
 	if (eol == NULL)
 	    return 0;
     }
