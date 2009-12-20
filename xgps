@@ -329,9 +329,11 @@ class Base:
 
         self.aisview = AISView()
         aisframe.add(self.aisview.widget)
-        #aisframe.set_no_show_all(True)
 
         self.window.show_all()
+        # Hide the AIS window util user selects it.
+        uimanager.get_widget('/MenuBar/View/AIS').set_active(False)
+        self.aisbox.hide()
 
         self.view_name_to_widget = \
                                  {"Skyview": self.satbox,
