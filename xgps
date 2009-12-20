@@ -165,7 +165,7 @@ class AISView:
         "Initialize the store and view."
         self.name_to_mmsi = {}
         self.named = {}
-        self.store = gtk.ListStore(str, str,str,str,str)
+        self.store = gtk.ListStore(str,str,str,str,str)
         self.widget = gtk.ScrolledWindow()
         self.widget.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.view = gtk.TreeView(model=self.store)
@@ -195,7 +195,6 @@ class AISView:
 
     def latlon(self, lat, lon):
         "Latitude/longitude display in nice format."
-        print "Foo!", lat, lon
         if lat < 0:
             latsuff = "S"
         elif lat > 0:
@@ -217,7 +216,18 @@ class AISView:
     def update(self, ais):
         "Update the AIS data fields."
         if ais.mmsi not in self.named:
-            if ais.type == 5:
+            if ais.type in (1, 2, 3):
+                #print "CNB", ais.mmsi
+                if ais.mmsi in self.named:
+                    for i in range(len(self.store)):
+                        here = self.store.get_iter(i)
+                        name = self.store.get_value(here, 1)
+                        mmsi = self.name_to_mmsi[name]
+                        if mmsi == ais.mmsi:
+                            latlon = self.latlon(ais.lat, ais.lon)
+                            self.store.set_value(here, 4, latlon)
+            elif ais.type == 5:
+                print "Ship", ais.mmsi
                 self.enter(ais, ais.shipname)
                 self.store.prepend(
                     (ais.type, ais.shipname, ais.callsign, ais.destination, ""))
@@ -226,7 +236,6 @@ class AISView:
                 self.store.prepend(
                     (ais.type, ais.shipname, "(class B)", "", ""))
             elif ais.type == 21:
-                print "I see:", ais
                 self.enter(ais, ais.name)
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
