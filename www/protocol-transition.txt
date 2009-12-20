@@ -415,13 +415,13 @@ The signature of the raw_hook member has changed.  It no longer takes
 the final 'level' argument, which libgps had always set to 1.
 
 The 2.91 API will include a gps_waiting() method analogous to the 
-waiting() method in he Pythonn class -- a non-blocking way to check
+waiting() method in the Pythonn class -- a non-blocking way to check
 if input is waiting from the daemon.
 
 == C++  client library changes ==
 
 The C++ client library continues to be a trivial class wrpapper around
-the C.  About all yo need to know is that the query() method is gone
+the C.  About all you need to know is that the query() method is gone
 and there is a new stream() method that calls gps_stream().
 
 == Python client library changes ==
