@@ -163,14 +163,14 @@ class AISView:
     def __init__(self):
         "Initialize the store and view."
         self.named = {}
-        self.aislist = gtk.ListStore(str,str,str)
+        self.store = gtk.ListStore(str,str,str)
         self.widget = gtk.ScrolledWindow()
         self.widget.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.view = gtk.TreeView(model=self.aislist)
+        self.view = gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
         self.widget.add_with_viewport(self.view)
 
-        for (i, label) in enumerate(('Name:','Sign:','Lat/Lon:')):
+        for (i, label) in enumerate(('Name:','Sign:','Dest:')):
             column = gtk.TreeViewColumn(label)
             renderer = gtk.CellRendererText()
             column.pack_start(renderer)
@@ -180,7 +180,9 @@ class AISView:
     def update(self, ais):
         "Update the AIS data fields."
         if ais.type == 5:
-            pass
+            if ais.mmsi not in self.named:
+                self.named[ais.mmsi] = ais
+                self.store.prepend((ais.shipname, ais.callsign, ais.destination))
 
 class Base:
     gpsfields = (
