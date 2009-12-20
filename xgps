@@ -157,6 +157,30 @@ class SkyView(gtk.DrawingArea):
         self.satellites = satellites
         self.queue_draw()
 
+class AISView:
+    "Encapsulate store and view objects for watching AIS data." 
+    AIS_ENTRIES = 10
+    def __init__(self):
+        "Initialize the store and view."
+        self.aislist = gtk.ListStore(str,str,str)
+        self.widget = gtk.TreeView(model=self.aislist)
+
+        for (i, label) in enumerate(('Name:','Sign:','Lat/Lon:')):
+            column = gtk.TreeViewColumn(label)
+            renderer = gtk.CellRendererText()
+            column.pack_start(renderer)
+            column.add_attribute(renderer, 'text', i)
+            self.widget.append_column(column)
+
+        self.ais_row_iters = []
+        for i in range(AISView.AIS_ENTRIES):
+            self.aislist.append(["", "", ""])
+            self.ais_row_iters.append(self.aislist.get_iter(i))
+
+    def update(self, tpv):
+        "Update the AIS data fields."
+        pass
+
 class Base:
     gpsfields = (
         # First column
@@ -206,8 +230,11 @@ class Base:
               'Enable Skyview', lambda a: self.view_toggle(a)),
              ('Responses', None, '_Responses', '<Control>r',
               'Enable Response Reports', lambda a: self.view_toggle(a)),
-             ('GPS', None, '_GPS Data', '<Control>a',
-              'Enable GPS Data', lambda a: self.view_toggle(a))])
+             ('GPS', None, '_GPS Data', '<Control>g',
+              'Enable GPS Data', lambda a: self.view_toggle(a)),
+             ('AIS', None, '_AIS Data', '<Control>a',
+              'Enable AIS Data', lambda a: self.view_toggle(a)),
+             ])
         self.actiongroup.add_radio_actions(
             [('Imperial', None, '_Imperial', '<Control>i',
               'Imperial units', 0),
@@ -227,6 +254,7 @@ class Base:
         <menuitem action="Skyview"/>
         <menuitem action="Responses"/>
         <menuitem action="GPS"/>
+        <menuitem action="AIS"/>
       </menu>
       <menu action="Units">
         <menuitem action="Imperial"/>
@@ -239,6 +267,7 @@ class Base:
         uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
         uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
         uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
+        uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
         menubar = uimanager.get_widget('/MenuBar')
         vbox.pack_start(menubar, False)
 
@@ -292,12 +321,23 @@ class Base:
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
+        self.aisbox = gtk.HBox(False, 0)
+        vbox.add(self.aisbox)
+
+        aisframe = gtk.Frame(label="AIS Data")
+        self.aisbox.add(aisframe)
+
+        self.aisview = AISView()
+        aisframe.add(self.aisview.widget)
+        #aisframe.set_no_show_all(True)
+
         self.window.show_all()
 
         self.view_name_to_widget = \
                                  {"Skyview": self.satbox,
                                   "Responses": self.rawdisplay,
-                                  "GPS": self.dataframe}
+                                  "GPS": self.dataframe,
+                                  "AIS": self.aisbox}
 
         # Discard field labels and associate data hooks with their widgets
         Base.gpsfields = map(lambda ((label, hook), widget): (hook, widget),
@@ -444,6 +484,8 @@ class Base:
                 self.update_skyview(self.daemon.satellites)
             elif self.daemon.data["class"] == "TPV":
                 self.update_gpsdata(self.daemon.data)
+            elif self.daemon.data["class"] == "AIS":
+                self.aisview.update(self.daemon.data)
                     
         return True
 
