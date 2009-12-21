@@ -225,7 +225,7 @@ class AISView:
 
     def update(self, ais):
         "Update the AIS data fields."
-        if ais.type in (1, 2, 3):
+        if ais.type in (1, 2, 3, 18):
             if ais.mmsi in self.named:
                 for i in range(len(self.store)):
                     here = self.store.get_iter(i)
@@ -249,7 +249,7 @@ class AISView:
             if sender in self.named:
                 sender = self.named[sender].shipname
             recipient = ais.dest_mmsi
-            if recipient in self.named:
+            if recipient in self.named and hasattr(self.named[recipient], "shipname"):
                 recipient = self.named[recipient].shipname
             self.store.prepend(
                 (ais.type, sender, "", recipient, "", ais.text))
