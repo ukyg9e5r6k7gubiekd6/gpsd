@@ -244,6 +244,21 @@ class AISView:
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
                     (ais.type, ais.shipname, ais.callsign, ais.destination, "", ais.shiptype))
+        elif ais.type == 12:
+            sender = ais.mmsi
+            if sender in self.named:
+                sender = self.named[sender].shipname
+            recipient = ais.dest_mmsi
+            if recipient in self.named:
+                recipient = self.named[recipient].shipname
+            self.store.prepend(
+                (ais.type, sender, "", recipient, "", ais.text))
+        elif ais.type == 14:
+            sender = ais.mmsi
+            if sender in self.named:
+                sender = self.named[sender].shipname
+            self.store.prepend(
+                (ais.type, sender, "", "(broadcast)", "", ais.text))
         elif ais.type in (19, 24):
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
