@@ -161,8 +161,9 @@ class AISView:
     "Encapsulate store and view objects for watching AIS data." 
     AIS_ENTRIES = 10
     DWELLTIME = 360
-    def __init__(self):
+    def __init__(self, deg_type):
         "Initialize the store and view."
+        self.deg_type = deg_type
         self.name_to_mmsi = {}
         self.named = {}
         self.store = gtk.ListStore(str,str,str,str,str,str)
@@ -211,7 +212,7 @@ class AISView:
         else:
             latsuff = ""
         lat = abs(lat)
-        lat = gps.client.deg_to_str(gps.client.deg_dd, lat)
+        lat = gps.client.deg_to_str(self.deg_type, lat)
         if lon < 0:
             lonsuff = "W"
         elif lon > 0:
@@ -394,7 +395,7 @@ class Base:
         aisframe = gtk.Frame(label="AIS Data")
         self.aisbox.add(aisframe)
 
-        self.aisview = AISView()
+        self.aisview = AISView(self.deg_type)
         aisframe.add(self.aisview.widget)
 
         self.window.show_all()
