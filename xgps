@@ -198,7 +198,7 @@ class AISView:
                         if name in self.name_to_mmsi:
                             del self.name_to_mmsi[name]
                         self.store.remove(here)
-            except ValueError:	# Invalid TreeIters throw these
+            except (ValueError, KeyError):	# Invalid TreeIters throw these
                 pass
             return True
 
@@ -270,6 +270,7 @@ class Base:
         self.deg_type = deg_type
         self.conversions = unit_adjustments()
         self.saved_mode = -1
+        self.ais_latch = False
   
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("xgps")
@@ -281,8 +282,8 @@ class Base:
 
         self.window.connect("destroy", lambda w: gtk.main_quit())
 
-        uimanager = gtk.UIManager()
-        self.accelgroup = uimanager.get_accel_group()
+        self.uimanager = gtk.UIManager()
+        self.accelgroup = self.uimanager.get_accel_group()
         self.window.add_accel_group(self.accelgroup)
         self.actiongroup = gtk.ActionGroup('xgps')
         self.actiongroup.add_actions(
@@ -309,8 +310,8 @@ class Base:
              ('Metric', None, '_Metric', '<Control>m',
               'Metric Units', 2),
              ], 0, lambda a, v: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
-        uimanager.insert_action_group(self.actiongroup, 0)
-        uimanager.add_ui_from_string('''
+        self.uimanager.insert_action_group(self.actiongroup, 0)
+        self.uimanager.add_ui_from_string('''
 <ui>
     <menubar name="MenuBar">
       <menu action="File">
@@ -330,11 +331,11 @@ class Base:
     </menubar>
 </ui>
 ''')
-        uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
-        uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
-        uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
-        uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
-        menubar = uimanager.get_widget('/MenuBar')
+        self.uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
+        self.uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
+        self.uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
+        self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
+        menubar = self.uimanager.get_widget('/MenuBar')
         vbox.pack_start(menubar, False)
 
         self.satbox = gtk.HBox(False, 0)
@@ -398,7 +399,7 @@ class Base:
 
         self.window.show_all()
         # Hide the AIS window util user selects it.
-        uimanager.get_widget('/MenuBar/View/AIS').set_active(False)
+        self.uimanager.get_widget('/MenuBar/View/AIS').set_active(False)
         self.aisbox.hide()
 
         self.view_name_to_widget = \
@@ -554,6 +555,10 @@ class Base:
                 self.update_gpsdata(self.daemon.data)
             elif self.daemon.data["class"] == "AIS":
                 self.aisview.update(self.daemon.data)
+                if self.ais_latch == False:
+                    self.ais_latch = True
+                    self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
+                    self.aisbox.show()
                     
         return True
 
