@@ -572,6 +572,7 @@ class Base:
         w.set_markup("gpsd has stopped sending data.")
         w.run()
         gtk.main_quit()
+        return True
 
     def main(self):
         gtk.main()
