@@ -181,18 +181,26 @@ class AISView:
 
     def enter(self, ais, name):
         "Add a named object (ship or station) to the store."
-        ais.entry_time = time.time()
-        self.named[ais.mmsi] = ais
-        self.name_to_mmsi[name] = ais.mmsi
-        # Garbage-collect old entries
-        for i in range(len(self.store)):
-            here = self.store.get_iter(i)
-            name = self.store.get_value(here, 1)
-            mmsi = self.name_to_mmsi[name]
-            if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
-                del self.named[mmsi]
-                del self.name_to_mmsi[name]
-                self.store.remove(here)
+        if ais.mmsi in self.named:
+            return False
+        else:
+            ais.entry_time = time.time()
+            self.named[ais.mmsi] = ais
+            self.name_to_mmsi[name] = ais.mmsi
+            # Garbage-collect old entries
+            try:
+                for i in range(len(self.store)):
+                    here = self.store.get_iter(i)
+                    name = self.store.get_value(here, 1)
+                    mmsi = self.name_to_mmsi[name]
+                    if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
+                        del self.named[mmsi]
+                        if name in self.name_to_mmsi:
+                            del self.name_to_mmsi[name]
+                        self.store.remove(here)
+            except ValueError:	# Invalid TreeIters throw these
+                pass
+            return True
 
     def latlon(self, lat, lon):
         "Latitude/longitude display in nice format."
@@ -216,29 +224,25 @@ class AISView:
 
     def update(self, ais):
         "Update the AIS data fields."
-        if ais.mmsi not in self.named:
-            if ais.type in (1, 2, 3):
-                #print "CNB", ais.mmsi
-                if ais.mmsi in self.named:
-                    #print "MMSI match"
-                    for i in range(len(self.store)):
-                        here = self.store.get_iter(i)
-                        name = self.store.get_value(here, 1)
-                        mmsi = self.name_to_mmsi[name]
-                        if mmsi == ais.mmsi:
-                            latlon = self.latlon(ais.lat, ais.lon)
-                            self.store.set_value(here, 4, latlon)
-            elif ais.type == 5:
-                #print "Ship", ais.mmsi
-                self.enter(ais, ais.shipname)
+        if ais.type in (1, 2, 3):
+            if ais.mmsi in self.named:
+                for i in range(len(self.store)):
+                    here = self.store.get_iter(i)
+                    name = self.store.get_value(here, 1)
+                    mmsi = self.name_to_mmsi[name]
+                    if mmsi == ais.mmsi:
+                        latlon = self.latlon(ais.lat, ais.lon)
+                        self.store.set_value(here, 4, latlon)
+        elif ais.type == 5:
+            if self.enter(ais, ais.shipname):
                 self.store.prepend(
                     (ais.type, ais.shipname, ais.callsign, ais.destination, ""))
-            elif ais.type in (19, 24):
-                self.enter(ais, ais.shipname)
+        elif ais.type in (19, 24):
+            if self.enter(ais, ais.shipname):
                 self.store.prepend(
                     (ais.type, ais.shipname, "(class B)", "", ""))
-            elif ais.type == 21:
-                self.enter(ais, ais.name)
+        elif ais.type == 21:
+            if self.enter(ais, ais.name):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
                     (ais.type, ais.name, "(navaid)", "", where))
