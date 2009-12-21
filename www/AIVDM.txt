@@ -592,7 +592,9 @@ occupying one AIVDM sentence.
 
 === Type 4: Base Station Report ===
 
-Total of 168 bits, occupying one AIVDM sentence.
+This message is to be used by fixed-location base stations to
+periodically report a position and time reference. Total of 168 bits, 
+occupying one AIVDM sentence.
 
 The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 
@@ -908,7 +910,7 @@ six-bit text.  This message is variable in length up to a maximum of
 |        |    |                   |            |May be shorter than 936 bits.
 |==============================================================================
 
-Pragmatic note: On <<<AISHUB>>> he actual content of these messages is
+Pragmatic note: On <<<AISHUB>>> the actual content of these messages is
 highly variable, ranging from fairly plain English ("PLEASE REPORT TO
 JOBOURG TRAFFIC CHANNEL 13") through snippets of tabular data ("PAX
 589 FG 36 IX 74 MOTO 10 CREW 108+1" through what look like opaque
@@ -1069,9 +1071,9 @@ omitted, as it appears to be tied to the now obsolete RTCM2 protocol.
 
 === Type 18: Standard Class B CS Position Report ===
 
-A less detailed report for vessels using Class B transponders.  Omits
-navigational status and rate of turn.  Fields are encoded as in the
-common navigation block.  168 bits total.
+A less detailed report than types 1-3 for vessels using Class B
+transponders.  Omits navigational status and rate of turn.  Fields are
+encoded as in the common navigation block.  168 bits total.
 
 In <<IALA>> (and ITU 1371-1) bits 141-145 were designated "Spare"; the
 bit-flag semantics given here are from ITU-1371-3 and were

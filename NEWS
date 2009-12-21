@@ -1,13 +1,14 @@
-* Tue Dec 15 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91dev
-  We have support for NMEA GLONASS sentences, and a regression test.
-  Clients now get a DEVICE dotification on every driver switch.
-  It is possible to specify a TCP/IP AIS feed such as AISHub 
-  as a data source. Serious bitrot in the NTRIP support has been fixed -
-  it was probably nonfunctional for several releases before this.
-  Fixed buggy display of satellite-used flags in cgps.  xgps is
-  replaced by a rewrite in Python that uses pygtk, eliminating a
-  dependency on Motif. Uniform treatment of display-unit defaulting and
-  -u in xgps, cgps, and lcdgps. Support for AIS message types 25 and 26.
+* Mon Dec 21 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91dev We
+  have support for NMEA GLONASS sentences, and a regression test.
+  Clients now get a DEVICE dotification on every driver switch.  It is
+  possible to specify a TCP/IP AIS feed such as AISHub as a data
+  source. Serious bitrot in the NTRIP support has been fixed - it was
+  probably nonfunctional for several releases before this.  Fixed
+  buggy display of satellite-used flags in cgps.  xgps is replaced by
+  a rewrite in Python that uses pygtk, eliminating a dependency on
+  Motif; also, it now displays AIS information. Uniform treatment of
+  display-unit defaulting and -u in xgps, cgps, and lcdgps. Support
+  for AIS message types 25 and 26.
 
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
