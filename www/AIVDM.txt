@@ -1117,11 +1117,11 @@ understand these fields."
 
 === Type 19: Extended Class B CS Position Report ===
 
-A more detailed report for vessels using Class B transponders.  Omits
-navigational status and rate of turn.  Fields are encoded as in the
-common navigation block and the Type 5 message.  Note that until just
-before the reserved field at bit 139 this is identical to message 18.
-312 bits total.
+A slightly more detailed report than type 18 for vessels using Class B
+transponders.  Omits navigational status and rate of turn.  Fields are
+encoded as in the common navigation block and the Type 5 message.
+Note that until just before the reserved field at bit 139 this is
+identical to message 18.  312 bits total.
 
 In practice, the information in the ship name and dimension fields is
 not reliable, as it has to be hand-entered by humans rather than
@@ -1599,7 +1599,7 @@ Most sites that advertise "live" AIS feeds actually give you a map
 display through a browser.  Here are a few from which you can get raw
 sentence data over a TCP/IP port for testing.  Coverage on these is
 not yet very comprehensive; these sites tnd to have good coverage in
-Europe, the U.S. and a few poers in Asia but to be spotty elsewhere.
+Europe, the U.S. and a few ports in Asia but to be spotty elsewhere.
 See their siting maps for details.
 
 - http://aishub.net[AIS Hub]:
