@@ -191,7 +191,8 @@ class AISView:
             mmsi = self.name_to_mmsi[name]
             if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
                 del self.named[mmsi]
-                del name_to_mmsi[name]
+                del self.name_to_mmsi[name]
+                self.store.remove(here)
 
     def latlon(self, lat, lon):
         "Latitude/longitude display in nice format."
@@ -219,6 +220,7 @@ class AISView:
             if ais.type in (1, 2, 3):
                 #print "CNB", ais.mmsi
                 if ais.mmsi in self.named:
+                    #print "MMSI match"
                     for i in range(len(self.store)):
                         here = self.store.get_iter(i)
                         name = self.store.get_value(here, 1)
@@ -227,7 +229,7 @@ class AISView:
                             latlon = self.latlon(ais.lat, ais.lon)
                             self.store.set_value(here, 4, latlon)
             elif ais.type == 5:
-                print "Ship", ais.mmsi
+                #print "Ship", ais.mmsi
                 self.enter(ais, ais.shipname)
                 self.store.prepend(
                     (ais.type, ais.shipname, ais.callsign, ais.destination, ""))
