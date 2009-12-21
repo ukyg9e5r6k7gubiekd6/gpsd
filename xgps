@@ -230,10 +230,16 @@ class AISView:
                 for i in range(len(self.store)):
                     here = self.store.get_iter(i)
                     name = self.store.get_value(here, 1)
-                    mmsi = self.name_to_mmsi[name]
-                    if mmsi == ais.mmsi:
-                        latlon = self.latlon(ais.lat, ais.lon)
-                        self.store.set_value(here, 4, latlon)
+                    if name in self.name_to_mmsi:
+                        mmsi = self.name_to_mmsi[name]
+                        if mmsi == ais.mmsi:
+                            latlon = self.latlon(ais.lat, ais.lon)
+                            self.store.set_value(here, 4, latlon)
+        elif ais.type == 4:
+            if self.enter(ais, ais.mmsi):
+                where = self.latlon(ais.lat, ais.lon)
+                self.store.prepend(
+                    (ais.type, ais.mmsi, "(shore)", ais.timestamp, where, ais.epfd))
         elif ais.type == 5:
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
