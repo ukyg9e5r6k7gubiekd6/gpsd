@@ -605,7 +605,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
  We've stopped interpreting GND (0x29) for the following reasons:
 
 1) Versions of SiRF firmware still in wide circulation (and likely to be
-   so fotr a while) don't report a valid time field, leading to annoying
+   so for a while) don't report a valid time field, leading to annoying
    twice-per-second jitter in client displays.
 
 2) What we wanted out of this that MND didn't give us was horizontal and 
