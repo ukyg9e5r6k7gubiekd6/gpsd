@@ -267,7 +267,7 @@ class AISView:
             if self.enter(ais, ais.name):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.name, "(navaid)", "", where, ais.epfd))
+                    (ais.type, ais.name, "(%s navaid)" % ais.epfd, "", where, ais.aid_type))
                     
 class Base:
     gpsfields = (
