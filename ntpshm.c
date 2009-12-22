@@ -79,7 +79,7 @@ void ntpshm_init(struct gps_context_t *context, bool enablepps)
     int i;
 
     for (i = 0; i < NTPSHMSEGS; i++) {
-	if ( 2 =< i ) {
+	if ( 2 <= i ) {
 	    context->shmTime[i] = NULL;
 	} else {
 	    // Only grab the first two.
