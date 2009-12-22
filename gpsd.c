@@ -1931,11 +1931,8 @@ int main(int argc, char *argv[])
 	// do not even bother as non-root
 	if (nice(NICEVAL) == -1 && errno != 0 ) 
 	    gpsd_report (2, "NTPD Priority setting failed.\n");
-	(void)ntpshm_init(&context, nowait);
-    } else {
-	gpsd_report (LOG_INF
-	    , "NTPD Unable to start ntpshm.  gpsd must run as root.\n");
     }
+    (void)ntpshm_init(&context, nowait);
 #endif /* NTPSHM_ENABLE */
 
 #ifdef DBUS_ENABLE
