@@ -226,8 +226,6 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 # Build Python binding
 #
-# install may require --root depending on what you're doing.
-# python setup.py install --root=$DESTIR --prefix=$PREFIX
 if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
 noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
@@ -255,6 +253,8 @@ endif
 # Clean up after Python
 clean-local:
 	rm -rf build
+install-exec-local:
+	python setup.py install --root=$(DESTDIR) --prefix=$(PREFIX)
 
 if LIBGPSMM_ENABLE
 TESTBINS = test_float test_trig test_gpsmm test_bits test_packet test_geoid \
