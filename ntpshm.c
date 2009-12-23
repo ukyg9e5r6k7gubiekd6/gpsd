@@ -52,6 +52,20 @@ struct shmTime {
     int    pad[10];
 };
 
+/* Note: you can start gpsd as non-root, and have it work with ntpd
+ * you MUST start gpsd before ntpd.  Confirmed working in SVN 6900.
+ *
+ * to debug, try this:
+ *  cat /proc/sysvipc/shm
+ *
+ * if you see the shared segments, and no gpsd or ntpd is running then
+ * try removeing them like this:
+ *
+ * ipcrm  -M 0x4e545030
+ * ipcrm  -M 0x4e545031
+ * ipcrm  -M 0x4e545031
+ * ipcrm  -M 0x4e545031
+ */
 static /*@null@*/ struct shmTime *getShmTime(int unit)
 {
     int shmid;
@@ -68,8 +82,6 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
     shmid=shmget ((key_t)(NTPD_BASE+unit),
 		      sizeof (struct shmTime), IPC_CREAT|perms);
     if (shmid == -1) {
-        // to debug, try this:
-	//  cat /proc/sysvipc/shm
 	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, %ld, %o) fail: %s\n",
 	   (long int)(NTPD_BASE+unit),sizeof (struct shmTime), (int)0777, strerror(errno));
 	gpsd_report(LOG_ERROR, 
