@@ -54,10 +54,26 @@ struct shmTime {
 
 static /*@null@*/ struct shmTime *getShmTime(int unit)
 {
-    int shmid=shmget ((key_t)(NTPD_BASE+unit),
-		      sizeof (struct shmTime), IPC_CREAT|0644);
+    int shmid;
+    unsigned int perms;
+    // set the SHM perms the way ntpd does
+    if ( 0 == getuid() ) {
+    	// we are root, be carfull
+	perms = 0700;
+    } else {
+        // we are not root, try to work anyway
+	perms = 0777;
+    }
+
+    shmid=shmget ((key_t)(NTPD_BASE+unit),
+		      sizeof (struct shmTime), IPC_CREAT|perms);
     if (shmid == -1) {
-	gpsd_report(LOG_ERROR, "NTPD shmget fail: %s\n", strerror(errno));
+        // to debug, try this:
+	//  cat /proc/sysvipc/shm
+	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, %ld, %o) fail: %s\n",
+	   (long int)(NTPD_BASE+unit),sizeof (struct shmTime), (int)0777, strerror(errno));
+	gpsd_report(LOG_ERROR, 
+	   "NTPD usually this fails because gpsd not run as root and ntd started first\n");
 	return NULL;
     } else {
 	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
