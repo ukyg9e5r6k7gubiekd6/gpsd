@@ -254,7 +254,7 @@ endif
 clean-local:
 	rm -rf build
 install-exec-local:
-	python setup.py install --root=$(DESTDIR) --prefix=$(PREFIX)
+	python setup.py install --prefix=${prefix}
 
 if LIBGPSMM_ENABLE
 TESTBINS = test_float test_trig test_gpsmm test_bits test_packet test_geoid \
