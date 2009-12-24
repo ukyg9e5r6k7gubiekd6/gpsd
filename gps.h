@@ -28,12 +28,7 @@ extern "C" {
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
 
-/*
- * Unless otherwise noted, all function signatures and types and
- * constants and structure layouts exposed here are correct for all
- * 3.x versions up to and including this one.
- */
-#define GPSD_API_MAJOR_VERSION	3	/* bump on incompatible changes */
+#define GPSD_API_MAJOR_VERSION	4	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
