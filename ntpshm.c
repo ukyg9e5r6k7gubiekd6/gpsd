@@ -80,7 +80,7 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
     }
 
     shmid=shmget ((key_t)(NTPD_BASE+unit),
-		      sizeof (struct shmTime), IPC_CREAT|perms);
+		  sizeof (struct shmTime), (int)(IPC_CREAT|perms));
     if (shmid == -1) {
 	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, %ld, %o) fail: %s\n",
 	   (long int)(NTPD_BASE+unit),sizeof (struct shmTime), (int)0777, strerror(errno));

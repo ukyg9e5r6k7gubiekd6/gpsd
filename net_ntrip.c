@@ -316,7 +316,7 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
 	if (!auth)
 	    return -1;
 	memset(authenc, 0, sizeof(authenc));
-	if (b64_ntop((u_char *) auth, strlen(auth), authenc, sizeof(authenc) - 1) < 0)
+	if (b64_ntop((unsigned char *) auth, strlen(auth), authenc, sizeof(authenc) - 1) < 0)
 	    return -1;
 	(void)snprintf(buf, size - 1, "Authorization: Basic %s\r\n", authenc);
     } else {
