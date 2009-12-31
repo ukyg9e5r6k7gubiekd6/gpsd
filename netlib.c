@@ -34,13 +34,14 @@
 #define INADDR_NONE   ((in_addr_t)-1)
 #endif
 
-int netlib_connectsock(const char *host, const char *service, const char *protocol)
+socket_t netlib_connectsock(const char *host, const char *service, const char *protocol)
 {
     struct hostent *phe;
     struct servent *pse;
     struct protoent *ppe;
     struct sockaddr_in sin;
-    int s, type, proto, one = 1;
+    int type, proto, one = 1;
+    socket_t s;
 
     memset((char *) &sin, 0, sizeof(sin));
     /*@ -type -mustfreefresh @*/

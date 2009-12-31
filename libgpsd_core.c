@@ -309,7 +309,7 @@ int gpsd_activate(struct gps_device_t *session)
     /* otherwise, could be an AIS data feed */
     else if (strncmp(session->gpsdata.dev.path, "ais://", 6) == 0) {
 	char server[GPS_PATH_MAX], *port;
-	int dsock;
+	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path+6, sizeof(server));
 	session->gpsdata.gps_fd = -1;
 	port = strchr(server, ':');

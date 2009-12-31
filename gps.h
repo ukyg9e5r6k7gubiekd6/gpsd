@@ -893,6 +893,14 @@ struct policy_t {
 
 /* this is the main structure that includes all previous substructures */
 
+/* 
+ * Someday we may support Windows, under which socket_t is a separate type.
+ * In the meantime, having a typedef for this semantic kind is no bad thing,
+ * as it makes clearer what some declarations are doing without breaking
+ * binary compatibility. 
+ */
+typedef int socket_t;
+
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
 #define ONLINE_SET	0x00000001u
@@ -938,7 +946,7 @@ struct gps_data_t {
 				 * prone to false zero values.
 				 */
 
-    int gps_fd;			/* socket or file descriptor to GPS */
+    socket_t gps_fd;		/* socket or file descriptor to GPS */
     struct gps_fix_t	fix;	/* accumulated PVT data */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */

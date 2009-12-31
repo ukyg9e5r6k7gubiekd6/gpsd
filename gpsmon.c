@@ -52,7 +52,7 @@
 extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
 #endif /* S_SPLINT_S */
 
-extern int netlib_connectsock(const char *, const char *, const char *);
+extern socket_t netlib_connectsock(const char *, const char *, const char *);
 
 #define BUFLEN		2048
 

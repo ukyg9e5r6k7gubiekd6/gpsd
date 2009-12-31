@@ -281,7 +281,7 @@ static int ntrip_stream_probe(const char *caster,
 			      struct ntrip_stream_t *keep)
 {
     int ret;
-    int dsock;
+    socket_t dsock;
     char buf[BUFSIZ];
 
     if ((dsock = netlib_connectsock(caster, port, "tcp")) == -1) {
