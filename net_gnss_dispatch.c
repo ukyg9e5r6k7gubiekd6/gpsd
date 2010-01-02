@@ -1,9 +1,13 @@
 /* $Id$ */
 /* net_gnss_dispatch.c -- common interface to a number of Network GNSS services */
 
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
+ #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+ #endif
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <string.h>

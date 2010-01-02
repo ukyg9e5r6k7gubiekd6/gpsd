@@ -105,7 +105,7 @@ at
 <warning><para>The API described below may change incompatibly at API
 version 4. Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
-force a compilation failure if the header is not exporting a version
+force a compilation failure if GPSD_API_MAJOR_VERSION is not a version
 you recognize.  See the GPSD project website for more information on
 the protocol and API changes.</para></warning>
 
@@ -323,7 +323,7 @@ command is shipped to it will be the reponse to command.</para>
 <function>gps_send()</function> but beware that this ties your code to
 the GPSD wire protocol. It is not recommended.</para>
 
-<para>Thia API has been stable since GPSD 2.90, except that
+<para>This API has been stable since GPSD 2.90, except that
 <function>gps_waiting()</function> was added in 2.91.</para>
 </refsect1>
 

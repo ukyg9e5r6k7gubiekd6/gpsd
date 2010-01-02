@@ -5,13 +5,14 @@
  *	sht.c - Testprogram for shared memory refclock
  */
 
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <math.h>
 #include <errno.h>
 
@@ -22,8 +23,12 @@
 #include <sys/time.h>
 #endif
 
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#ifdef HAVE_SYS_IPC_H
+ #include <sys/ipc.h>
+#endif /* HAVE_SYS_IPC_H */
+#ifdef HAVE_SYS_SHM_H
+ #include <sys/shm.h>
+#endif /* HAVE_SYS_SHM_H */
 
 #define PPS_MAX_OFFSET	100000		/* microseconds the PPS can 'pull' */
 #define PUT_MAX_OFFSET	1000000		/* microseconds for lost lock */

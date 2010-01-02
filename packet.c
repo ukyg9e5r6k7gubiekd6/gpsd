@@ -24,6 +24,8 @@ connected to the Garmin kernel driver.  But we need to be able to tell the
 others apart and distinguish them from baud barf.
 
 ***************************************************************************/
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -33,8 +35,12 @@ others apart and distinguish them from baud barf.
 #include <string.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
-#include <netinet/in.h>	/* for htons() */
-#include <arpa/inet.h>	/* for htons() */
+ #ifdef HAVE_NETINET_IN_H
+  #include <netinet/in.h>      /* for htons() */
+ #endif /* HAVE_NETNET_IN_H */
+ #ifdef HAVE_ARPA_INET_H
+  #include <arpa/inet.h>       /* for htons() */
+ #endif /* HAVE_ARPA_INET_H */
 #endif /* S_SPLINT_S */
 
 #include "bits.h"

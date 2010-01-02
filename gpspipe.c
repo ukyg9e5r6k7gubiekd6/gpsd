@@ -22,26 +22,30 @@
  * license they use.  A thank you would be nice if you use this code.
  */
 
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
+ #if HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+ #endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <fcntl.h>
-#include <termios.h>
+#if HAVE_TERMIOS
+ #include <termios.h>
+#endif /* HAVE_TERMIOS */
 #include <assert.h>
 #include "gpsd.h"
 #include "gpsdclient.h"
 #include "revision.h"
 
 static struct gps_data_t *gpsdata;
-static int fd_out = 1;		/* output initially goes to standard output */ 
 static void spinner(unsigned int, unsigned int);
 
 /* NMEA-0183 standard baud rate */
@@ -49,6 +53,7 @@ static void spinner(unsigned int, unsigned int);
 
 /* Serial port variables */
 static struct termios oldtio, newtio;
+static int fd_out = 1;		/* output initially goes to standard output */ 
 static char serbuf[255];
 static int debug;
 

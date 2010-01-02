@@ -4,6 +4,7 @@
 #ifndef _GPSD_H_
 #define _GPSD_H_
 
+#include "gpsd_config.h"
 #include <stdbool.h>
 #include <stdio.h>
 #ifdef HAVE_TERMIOS_H

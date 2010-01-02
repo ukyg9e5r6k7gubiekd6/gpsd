@@ -5,7 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/ioctl.h>
+#include "gpsd_config.h"
+#if HAVE_SYS_IOCTL_H
+ #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

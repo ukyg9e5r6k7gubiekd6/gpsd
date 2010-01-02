@@ -89,7 +89,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 
     /*
      * Yes, you can set speeds that aren't in the hunt loop.  If you
-     * do this, and you aren't on Linux where boad rate is preserved
+     * do this, and you aren't on Linux where baud rate is preserved
      * across port closings, you've screwed yourself. Don't do that!
      */
     if (speed < 300)

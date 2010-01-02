@@ -34,8 +34,11 @@ firmware.
 #include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
+#include "gpsd_config.h"
 #ifndef S_SPLINT_S
-#include <arpa/inet.h>	/* for ntohl(3) and friends */
+ #ifdef HAVE_ARPA_INET
+  #include <arpa/inet.h>	/* for ntohl(3) and friends */
+ #endif /* HAVE_ARPA_INET */
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"

@@ -1,6 +1,9 @@
 /* $Id$ */
 #include <sys/types.h>
-#include <sys/ioctl.h>
+#include "gpsd_config.h"
+#ifdef HAVE_SYS_IOCTL_H
+ #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 #include <sys/time.h>
 #include <stdlib.h>
 #ifndef S_SPLINT_S

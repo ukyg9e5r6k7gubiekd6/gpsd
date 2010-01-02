@@ -54,7 +54,7 @@ static int end_write(int fd, void *d, int len)
 }
 #else
 #define end_write write
-#endif
+#endif /* WORDS_BIGENDIAN */
 
 static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type, unsigned short *dat, int dlen)
 {

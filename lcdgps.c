@@ -35,8 +35,9 @@
 
 #define CLIMB 3
 
-#include <stdio.h>
 #include <stdlib.h>
+#include "gpsd_config.h"
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #ifndef S_SPLINT_S
@@ -44,20 +45,32 @@
 #endif /* S_SPLINT_S */
 #include <math.h>
 #include <errno.h>
-#include <sys/select.h>
+#ifdef HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
+ #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+ #endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
 
 #include <sys/time.h> /* select() */
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <termios.h>
+#ifdef HAVE_TERMIOS_H
+ #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 
 #ifndef S_SPLINT_S
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+ #ifdef HAVE_NETINET_IN_H
+  #include <netinet/in.h>
+ #endif /* HAVE_NETINET_IN_H */
+ #ifdef HAVE_ARPA_INET_H
+  #include <arpa/inet.h>
+ #endif /* HAVE_ARPA_INET_H */
+ #ifdef HAVE_NETDB_H
+  #include <netdb.h>
+ #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
 #include <errno.h>
 

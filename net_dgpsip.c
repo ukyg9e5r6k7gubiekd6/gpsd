@@ -1,16 +1,21 @@
 /* $Id$ */
 /* net_dgpsip.c -- gather and dispatch DGPS data from DGPSIP servers */
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
-#include <unistd.h>
+ #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+ #endif /* HAVE_SYS_SOCKET_H */
+ #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <sys/time.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #ifndef S_SPLINT_S
-#include <netdb.h>
+ #ifdef HAVE_NETDB_H
+  #include <netdb.h>
+ #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>

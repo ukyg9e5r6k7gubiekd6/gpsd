@@ -18,8 +18,12 @@
 #endif
 #endif /* S_SPLINT_S */
 #ifndef S_SPLINT_S
-#include <netdb.h>
-#include <arpa/inet.h>
+ #ifdef HAVE_NETDB_H
+  #include <netdb.h>
+ #endif /* HAVE_NETDB_H */
+ #ifdef HAVE_ARPA_INET_H
+  #include <arpa/inet.h>
+ #endif /* HAVE_ARPA_INET_H */
 #endif /* S_SPLINT_S */
 #include <errno.h>
 #include <stdlib.h>
@@ -88,7 +92,7 @@ socket_t netlib_connectsock(const char *host, const char *service, const char *p
 #endif
 #ifdef TCP_NODELAY
     if (type == SOCK_STREAM)
-	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof one);
+	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof one);
 #endif
     return s;
     /*@ +type +mustfreefresh @*/
