@@ -114,15 +114,15 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                         testfield += tested
                 if self.has_option(dev, "noconfigure"):
                     testfield += "<img title='Requires -b option' src='noconfigure.png'>"
-                if self.get(dev, "status") == "excellent":
+                if self.get(dev, "rating") == "excellent":
                     testfield += "<img src='star.png'/><img src='star.png'/><img src='star.png'/><img src='star.png'/>"
-                elif self.get(dev, "status") == "good":
+                elif self.get(dev, "rating") == "good":
                     testfield += "<img src='star.png'/><img src='star.png'/'><img src='star.png'/>"
-                elif self.get(dev, "status") == "fair":
+                elif self.get(dev, "rating") == "fair":
                     testfield += "<img src='star.png'/><img src='star.png'/>"
-                elif self.get(dev, "status") == "poor":
+                elif self.get(dev, "rating") == "poor":
                     testfield += "<img src='star.png'/>"
-                elif self.get(dev, "status") == "broken":
+                elif self.get(dev, "rating") == "broken":
                     testfield += "<img title='Device is broken' src='bomb.png'/>"
                 if self.has_option(dev, "usbchip") and self.get(dev, "usbchip") in hotpluggables:
                     testfield += "<img src='hotplug.png'/>"
