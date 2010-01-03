@@ -528,7 +528,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, size_t len)
 	}
     }
 
-    status = write(sub->fd, buf, len);
+    status = send(sub->fd, buf, len, 0);
     if (status == (ssize_t)len)
 	return status;
     else if (status > -1) {
@@ -2435,7 +2435,7 @@ int main(int argc, char *argv[])
 		int buflen;
 
 		gpsd_report(LOG_PROG, "checking client(%d)\n", sub_index(sub));
-		if ((buflen = (int)read(sub->fd, buf, sizeof(buf) - 1)) <= 0) {
+		if ((buflen = (int)recv(sub->fd, buf, sizeof(buf) - 1, 0)) <= 0) {
 		    detach_client(sub);
 		} else {
 		    if (buf[buflen-1] != '\n')
