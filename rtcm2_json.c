@@ -31,32 +31,32 @@ int json_rtcm2_read(const char *buf,
     static int stringcount;
 
 #define RTCM2_HEADER \
-	{"class",          check,    .dflt.check = "RTCM2"}, \
-	{"type",           uinteger, .addr.uinteger = &rtcm2->type}, \
-	{"device",         string,   .addr.string = path, \
-	                             .len = pathlen}, \
-	{"station_id",     uinteger, .addr.uinteger = &rtcm2->refstaid}, \
-	{"zcount",         real,     .addr.real = &rtcm2->zcount, \
-			             .dflt.real = NAN}, \
-	{"seqnum",         uinteger, .addr.uinteger = &rtcm2->seqnum}, \
-	{"length",         uinteger, .addr.uinteger = &rtcm2->length}, \
-	{"station_health", uinteger, .addr.uinteger = &rtcm2->stathlth},
+	{"class",          t_check,    .dflt.check = "RTCM2"}, \
+	{"type",           t_uinteger, .addr.uinteger = &rtcm2->type}, \
+	{"device",         t_string,   .addr.string = path, \
+	                                  .len = pathlen}, \
+	{"station_id",     t_uinteger, .addr.uinteger = &rtcm2->refstaid}, \
+	{"zcount",         t_real,     .addr.real = &rtcm2->zcount, \
+			                  .dflt.real = NAN}, \
+	{"seqnum",         t_uinteger, .addr.uinteger = &rtcm2->seqnum}, \
+	{"length",         t_uinteger, .addr.uinteger = &rtcm2->length}, \
+	{"station_health", t_uinteger, .addr.uinteger = &rtcm2->stathlth},
 
     int status = 0, satcount = 0;
 
     /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1_satellite[] = {
-	{"ident",     uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
-	{"udre",      uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
-	{"issuedata", uinteger, STRUCTOBJECT(struct rangesat_t, issuedata)},
-	{"rangerr",   real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
-	{"rangerate", real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
+	{"ident",     t_uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
+	{"udre",      t_uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
+	{"issuedata", t_uinteger, STRUCTOBJECT(struct rangesat_t, issuedata)},
+	{"rangerr",   t_real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
+	{"rangerate", t_real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
 	{NULL},
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
-        {"satellites", array,	STRUCTARRAY(rtcm2->ranges.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->ranges.sat, 
 					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
@@ -64,12 +64,12 @@ int json_rtcm2_read(const char *buf,
 
     const struct json_attr_t json_rtcm3[] = {
 	RTCM2_HEADER
-	{"x",              real,    .addr.real = &rtcm2->ecef.x,
-			            .dflt.real = NAN},
-	{"y",              real,    .addr.real = &rtcm2->ecef.y,
-			            .dflt.real = NAN},
-	{"z",              real,    .addr.real = &rtcm2->ecef.z,
-			            .dflt.real = NAN},
+	{"x",              t_real,    .addr.real = &rtcm2->ecef.x,
+			                 .dflt.real = NAN},
+	{"y",              t_real,    .addr.real = &rtcm2->ecef.y,
+			                 .dflt.real = NAN},
+	{"z",              t_real,    .addr.real = &rtcm2->ecef.z,
+			                 .dflt.real = NAN},
 	{NULL},
     };
 
@@ -84,36 +84,36 @@ int json_rtcm2_read(const char *buf,
     };
     const struct json_attr_t json_rtcm4[] = {
 	RTCM2_HEADER
-        {"valid",          boolean, .addr.boolean = &rtcm2->reference.valid},
-	{"system",         integer, .addr.integer = &rtcm2->reference.system,
-	                            .map=system_table},
-	{"sense",          integer, .addr.integer = &rtcm2->reference.sense},
-	{"datum",          string,  .addr.string = rtcm2->reference.datum,
-	                            .len = sizeof(rtcm2->reference.datum)},
-	{"dx",             real,    .addr.real = &rtcm2->reference.dx,
-			            .dflt.real = NAN},
-	{"dy",             real,    .addr.real = &rtcm2->reference.dy,
-			            .dflt.real = NAN},
-	{"dz",             real,    .addr.real = &rtcm2->reference.dz,
-			            .dflt.real = NAN},
+        {"valid",          t_boolean, .addr.boolean = &rtcm2->reference.valid},
+	{"system",         t_integer, .addr.integer = &rtcm2->reference.system,
+	                                 .map=system_table},
+	{"sense",          t_integer, .addr.integer = &rtcm2->reference.sense},
+	{"datum",          t_string,  .addr.string = rtcm2->reference.datum,
+	                                 .len = sizeof(rtcm2->reference.datum)},
+	{"dx",             t_real,    .addr.real = &rtcm2->reference.dx,
+			                 .dflt.real = NAN},
+	{"dy",             t_real,    .addr.real = &rtcm2->reference.dy,
+			                 .dflt.real = NAN},
+	{"dz",             t_real,    .addr.real = &rtcm2->reference.dz,
+			                 .dflt.real = NAN},
 	{NULL},
     };
 
     const struct json_attr_t rtcm5_satellite[] = {
-	{"ident",       uinteger, STRUCTOBJECT(struct consat_t, ident)},
-	{"iodl",        boolean,  STRUCTOBJECT(struct consat_t, iodl)},
-	{"health",      uinteger, STRUCTOBJECT(struct consat_t, health)},
-	{"snr",         integer,  STRUCTOBJECT(struct consat_t, snr)},
-	{"health_en",   boolean,  STRUCTOBJECT(struct consat_t, health_en)},
-	{"new_data",    boolean,  STRUCTOBJECT(struct consat_t, new_data)},
-	{"los_warning", boolean,  STRUCTOBJECT(struct consat_t, los_warning)},
-	{"tou",         uinteger, STRUCTOBJECT(struct consat_t, tou)},
+	{"ident",       t_uinteger, STRUCTOBJECT(struct consat_t, ident)},
+	{"iodl",        t_boolean,  STRUCTOBJECT(struct consat_t, iodl)},
+	{"health",      t_uinteger, STRUCTOBJECT(struct consat_t, health)},
+	{"snr",         t_integer,  STRUCTOBJECT(struct consat_t, snr)},
+	{"health_en",   t_boolean,  STRUCTOBJECT(struct consat_t, health_en)},
+	{"new_data",    t_boolean,  STRUCTOBJECT(struct consat_t, new_data)},
+	{"los_warning", t_boolean,  STRUCTOBJECT(struct consat_t, los_warning)},
+	{"tou",         t_uinteger, STRUCTOBJECT(struct consat_t, tou)},
 	{NULL},
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm5[] = {
 	RTCM2_HEADER
-        {"satellites", array,	STRUCTARRAY(rtcm2->conhealth.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->conhealth.sat, 
 					    rtcm5_satellite, &satcount)},
 	{NULL},
     };
@@ -126,19 +126,19 @@ int json_rtcm2_read(const char *buf,
     };
 
     const struct json_attr_t rtcm7_satellite[] = {
-	{"lat",         real,     STRUCTOBJECT(struct station_t, latitude)},
-	{"lon",         real,     STRUCTOBJECT(struct station_t, longitude)},
-	{"range",       uinteger, STRUCTOBJECT(struct station_t, range)},
-	{"frequency",   real,     STRUCTOBJECT(struct station_t, frequency)},
-	{"health",      uinteger, STRUCTOBJECT(struct station_t, health)},
-	{"station_id",  uinteger, STRUCTOBJECT(struct station_t, station_id)},
-	{"bitrate",     uinteger, STRUCTOBJECT(struct station_t, bitrate)},
+	{"lat",         t_real,     STRUCTOBJECT(struct station_t, latitude)},
+	{"lon",         t_real,     STRUCTOBJECT(struct station_t, longitude)},
+	{"range",       t_uinteger, STRUCTOBJECT(struct station_t, range)},
+	{"frequency",   t_real,     STRUCTOBJECT(struct station_t, frequency)},
+	{"health",      t_uinteger, STRUCTOBJECT(struct station_t, health)},
+	{"station_id",  t_uinteger, STRUCTOBJECT(struct station_t, station_id)},
+	{"bitrate",     t_uinteger, STRUCTOBJECT(struct station_t, bitrate)},
 	{NULL},
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm7[] = {
 	RTCM2_HEADER
-        {"satellites", array,	STRUCTARRAY(rtcm2->almanac.station, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->almanac.station, 
 					    rtcm7_satellite, &satcount)},
 	{NULL},
     };
@@ -146,20 +146,20 @@ int json_rtcm2_read(const char *buf,
 
     const struct json_attr_t json_rtcm16[] = {
 	RTCM2_HEADER
-	{"message",        string,  .addr.string = rtcm2->message,
-	                            .len = sizeof(rtcm2->message)},
+	{"message",        t_string,  .addr.string = rtcm2->message,
+	                                 .len = sizeof(rtcm2->message)},
 	{NULL},
     };
 
     /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm2_fallback[] = {
 	RTCM2_HEADER
-	{"data",         array, .addr.array.element_type = string,
-	                        .addr.array.arr.strings.ptrs = stringptrs,
-	                        .addr.array.arr.strings.store = stringstore,
-	                        .addr.array.arr.strings.storelen = sizeof(stringstore),
-	                        .addr.array.count = &stringcount,
-	                        .addr.array.maxlen = NITEMS(stringptrs)},
+	{"data",         t_array, .addr.array.element_type = t_string,
+	                             .addr.array.arr.strings.ptrs = stringptrs,
+	                             .addr.array.arr.strings.store = stringstore,
+	                             .addr.array.arr.strings.storelen = sizeof(stringstore),
+	                             .addr.array.count = &stringcount,
+	                             .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
     /*@+type@*/

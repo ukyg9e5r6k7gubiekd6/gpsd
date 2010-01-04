@@ -390,9 +390,9 @@ def generate(spec):
             target = structname + "." + attr
         if "." in attr:
             attr = attr[attr.rfind(".")+1:]
-        print '\t{"%s",%s%s,%s.addr.%s = %s%s,' % \
-               (attr, " "*(12-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
-        leader = " " * 35
+        print '\t{"%s",%st_%s,%s.addr.%s = %s%s,' % \
+               (attr, " "*(14-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
+        leader = " " * 39
         if itype == "string":
             print leader + ".len = sizeof(%s)}," % target
         else:

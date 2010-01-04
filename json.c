@@ -95,26 +95,26 @@ static /*@null@*/char *json_target_address(const struct json_attr_t *cursor,
 			       int offset)
 {
     char *targetaddr = NULL; 
-    if (parent == NULL || parent->element_type != structobject) { 
+    if (parent == NULL || parent->element_type != t_structobject) { 
 	/* ordinary case - use the address in the cursor structure */
 	switch(cursor->type)
 	{
-	case integer:
+	case t_integer:
 	    targetaddr = (char *)&cursor->addr.integer[offset];
 	    break;
-	case uinteger:
+	case t_uinteger:
 	    targetaddr = (char *)&cursor->addr.uinteger[offset];
 	    break;
-	case real:
+	case t_real:
 	    targetaddr = (char *)&cursor->addr.real[offset];
 	    break;
-	case string:
+	case t_string:
 	    targetaddr = cursor->addr.string;
 	    break;
-	case boolean:
+	case t_boolean:
 	    targetaddr = (char *)&cursor->addr.boolean[offset];
 	    break;
-	case character:
+	case t_character:
 	    targetaddr = (char *)&cursor->addr.character[offset];
 	    break;
 	default:
@@ -172,34 +172,34 @@ static int json_internal_read_object(const char *cp,
 	    if (lptr != NULL)
 		switch(cursor->type)
 		{
-		case integer:
+		case t_integer:
 		    *((int *)lptr) = cursor->dflt.integer;
 		    break;
-		case uinteger:
+		case t_uinteger:
 		    *((unsigned int *)lptr) = cursor->dflt.uinteger;
 		    break;
-		case real:
+		case t_real:
 		    *((double *)lptr) = cursor->dflt.real;
 		    break;
-		case string:
-		    if (parent != NULL && parent->element_type != structobject && offset > 0)
+		case t_string:
+		    if (parent != NULL && parent->element_type != t_structobject && offset > 0)
 			return JSON_ERR_NOPARSTR;
 		    lptr[0] = '\0';
 		    break;
-		case boolean:
+		case t_boolean:
 		    /* nullbool default says not to set the value at all */
 		    /*@+boolint@*/
 		    if (cursor->dflt.boolean != nullbool)
 			*((bool *)lptr) = cursor->dflt.boolean;
 		    /*@-boolint@*/
 		    break;
-		case character:
+		case t_character:
 		    lptr[0] = cursor->dflt.character;
 		    break;
-		case object:	/* silences a compiler warning */
-		case structobject:
-		case array:
-		case check:
+		case t_object:	/* silences a compiler warning */
+		case t_structobject:
+		case t_array:
+		case t_check:
 		    break;
 		}
 	}
@@ -246,9 +246,9 @@ static int json_internal_read_object(const char *cp,
 		    return JSON_ERR_BADATTR;
 		}
 		state = await_value;
-		if (cursor->type == string)
+		if (cursor->type == t_string)
 		    maxlen = (int)cursor->len - 1;
-		else if (cursor->type == check)
+		else if (cursor->type == t_check)
 		    maxlen = (int)strlen(cursor->dflt.check);
 		else if (cursor->map != NULL)
 		    maxlen = (int)sizeof(valbuf)-1;
@@ -263,7 +263,7 @@ static int json_internal_read_object(const char *cp,
 	    if (isspace(*cp) || *cp == ':')
 		continue;
 	    else if (*cp == '[') {
-		if (cursor->type != array) {
+		if (cursor->type != t_array) {
 		    json_debug_trace((1, "Saw [ when not expecting array.\n"));
 		    return JSON_ERR_NOARRAY;
 		}
@@ -271,7 +271,7 @@ static int json_internal_read_object(const char *cp,
 		if (substatus != 0)
 		    return substatus;
 		state = post_array;
-	    } else if (cursor->type == array) {
+	    } else if (cursor->type == t_array) {
 		json_debug_trace((1, "Array element was specified, but no [.\n"));
 		return JSON_ERR_NOBRAK;
 	    } else if (*cp == '"') {
@@ -342,11 +342,11 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    if (value_quoted && (cursor->type != string && cursor->type != character && cursor->type != check && cursor->map == 0)) { 
+	    if (value_quoted && (cursor->type != t_string && cursor->type != t_character && cursor->type != t_check && cursor->map == 0)) { 
 		json_debug_trace((1, "Saw quoted value when expecting non-string.\n"));
 		return JSON_ERR_QNONSTRING;
 	    }		    
-	    if (!value_quoted && (cursor->type == string || cursor->type == check || cursor->map != 0)) { 
+	    if (!value_quoted && (cursor->type == t_string || cursor->type == t_check || cursor->map != 0)) { 
 		json_debug_trace((1, "Didn't see quoted value when expecting string.\n"));
 		return JSON_ERR_NONQSTRING;
 	    }		    
@@ -364,34 +364,34 @@ static int json_internal_read_object(const char *cp,
 	    if (lptr != NULL)
 		switch(cursor->type)
 		{
-		case integer:
+		case t_integer:
 		    *((int *)lptr) = atoi(valbuf);
 		    break;
-		case uinteger:
+		case t_uinteger:
 		    *((unsigned int *)lptr) = (unsigned)atoi(valbuf);
 		    break;
-		case real:
+		case t_real:
 		    *((double *)lptr) = atof(valbuf);
 		    break;
-		case string:
-		    if (parent != NULL && parent->element_type != structobject && offset > 0)
+		case t_string:
+		    if (parent != NULL && parent->element_type != t_structobject && offset > 0)
 			return JSON_ERR_NOPARSTR;
 		    (void)strncpy(lptr, valbuf, cursor->len);
 		    break;
-		case boolean:
+		case t_boolean:
 		    *((bool *)lptr) = (strcmp(valbuf, "true") == 0);
 		    break;
-		case character:
+		case t_character:
 		    if (strlen(valbuf) > 1)
 			return JSON_ERR_STRLONG;
 		    else
 			lptr[0] = valbuf[0];
 		    break;
-		case object:	/* silences a compiler warning */
-		case structobject:
-		case array:
+		case t_object:	/* silences a compiler warning */
+		case t_structobject:
+		case t_array:
 		    break;
-		case check:
+		case t_check:
 		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
 			json_debug_trace((1, "Required attribute vakue %s not present.\n", cursor->dflt.check));
 			return JSON_ERR_CHECKFAIL;
@@ -452,7 +452,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type)
 	{
-	case string:
+	case t_string:
 	    if (isspace(*cp))
 		cp++;
 	    if (*cp != '"')
@@ -475,19 +475,19 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	    return JSON_ERR_BADSTRING;
 	stringend:
 	    break;
-	case object:
-	case structobject:
+	case t_object:
+	case t_structobject:
 	    substatus = json_internal_read_object(cp, arr->arr.objects.subtype, arr, offset, &cp);
 	    if (substatus != 0)
 		return substatus;
 	    break;
-	case integer:
-	case uinteger:
-	case real:
-	case boolean:
-	case character:
-	case array:
-	case check:
+	case t_integer:
+	case t_uinteger:
+	case t_real:
+	case t_boolean:
+	case t_character:
+	case t_array:
+	case t_check:
 	    json_debug_trace((1, "Invalid array subtype.\n"));
 	    return JSON_ERR_SUBTYPE;
 	}

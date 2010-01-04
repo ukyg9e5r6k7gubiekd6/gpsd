@@ -106,7 +106,7 @@ static int stringcount;
 
 /*@-type@*/
 static const struct json_array_t json_array_3 = {
-    .element_type = string,
+    .element_type = t_string,
     .arr.strings.ptrs = stringptrs,
     .arr.strings.store = stringstore,
     .arr.strings.storelen = sizeof(stringstore),
@@ -125,11 +125,11 @@ static int dftinteger;
 static unsigned int dftuinteger;
 
 static const struct json_attr_t json_attrs_4[] = {
-    {"dftint",  integer, .addr.integer = &dftinteger, .dflt.integer = -5},
-    {"dftuint", integer, .addr.uinteger = &dftuinteger, .dflt.uinteger = 10},
-    {"dftreal", real,    .addr.real = &dftreal,       .dflt.real = 23.17},
-    {"flag1",   boolean, .addr.boolean = &flag1,},
-    {"flag2",   boolean, .addr.boolean = &flag2,},
+    {"dftint",  t_integer, .addr.integer = &dftinteger, .dflt.integer = -5},
+    {"dftuint", t_integer, .addr.uinteger = &dftuinteger, .dflt.uinteger = 10},
+    {"dftreal", t_real,    .addr.real = &dftreal,       .dflt.real = 23.17},
+    {"flag1",   t_boolean, .addr.boolean = &flag1,},
+    {"flag2",   t_boolean, .addr.boolean = &flag2,},
     {NULL},
 };
 
@@ -159,20 +159,20 @@ static int dumbcount;
 
 /*@-type@*/
 static const struct json_attr_t json_attrs_6_subtype[] = {
-    {"name",  string,  .addr.offset = offsetof(struct dumbstruct_t, name),
-                       .len = 64},
-    {"flag",  boolean, .addr.offset = offsetof(struct dumbstruct_t, flag),},
-    {"count", integer, .addr.offset = offsetof(struct dumbstruct_t, count),},
+    {"name",  t_string,  .addr.offset = offsetof(struct dumbstruct_t, name),
+                         .len = 64},
+    {"flag",  t_boolean, .addr.offset = offsetof(struct dumbstruct_t, flag),},
+    {"count", t_integer, .addr.offset = offsetof(struct dumbstruct_t, count),},
     {NULL},
 };
 
 static const struct json_attr_t json_attrs_6[] = {
-    {"parts", array,  .addr.array.element_type = structobject,
-                      .addr.array.arr.objects.base = (char*)&dumbstruck,
-                      .addr.array.arr.objects.stride = sizeof(struct dumbstruct_t),
-                      .addr.array.arr.objects.subtype = json_attrs_6_subtype,
-                      .addr.array.count = &dumbcount,
-                      .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
+    {"parts", t_array, .addr.array.element_type = t_structobject,
+                       .addr.array.arr.objects.base = (char*)&dumbstruck,
+                       .addr.array.arr.objects.stride = sizeof(struct dumbstruct_t),
+                       .addr.array.arr.objects.subtype = json_attrs_6_subtype,
+                       .addr.array.count = &dumbcount,
+                       .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
     {NULL},
 };
 /*@+type@*/
@@ -192,9 +192,9 @@ static const struct json_enum_t enum_table[] = {
 
 static int fee, fie, foe;
 static const struct json_attr_t json_attrs_8[] = {
-    {"fee",  integer, .addr.integer = &fee, .map=enum_table},
-    {"fie",  integer, .addr.integer = &fie, .map=enum_table},
-    {"foe",  integer, .addr.integer = &foe, .map=enum_table},
+    {"fee",  t_integer, .addr.integer = &fee, .map=enum_table},
+    {"fie",  t_integer, .addr.integer = &fie, .map=enum_table},
+    {"foe",  t_integer, .addr.integer = &foe, .map=enum_table},
     {NULL},
 };
 /*@ +fullinitblock @*/

@@ -4,8 +4,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-typedef enum {integer, uinteger, real, string, boolean, character,
-	      object, structobject, array, check} json_type;
+typedef enum {t_integer, t_uinteger, t_real,
+	      t_string, t_boolean, t_character,
+	      t_object, t_structobject, t_array,
+	      t_check} json_type;
 
 #define nullbool	-1	/* not true, not false */
 
@@ -102,7 +104,7 @@ void json_enable_debug(int, FILE *);
  */
 #define STRUCTOBJECT(s, f)	.addr.offset = offsetof(s, f)
 #define STRUCTARRAY(a, e, n) \
-	.addr.array.element_type = structobject, \
+	.addr.array.element_type = t_structobject, \
 	.addr.array.arr.objects.subtype = e, \
 	.addr.array.arr.objects.base = (char*)a, \
 	.addr.array.arr.objects.stride = sizeof(a[0]), \

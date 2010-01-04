@@ -42,14 +42,14 @@ int json_ais_read(const char *buf,
     /*@-nullstate@*/
 
 #define AIS_HEADER \
-	{"class",          check,    .dflt.check = "AIS"}, \
-	{"type",           uinteger, .addr.uinteger = &ais->type}, \
-	{"device",         string,   .addr.string = path, \
-	                             .len = pathlen}, \
-	{"repeat",         uinteger, .addr.uinteger = &ais->repeat}, \
-	{"scaled",         boolean,  .addr.boolean = &scaled, \
-		                     .dflt.boolean = false}, \
-	{"mmsi",           uinteger, .addr.uinteger = &ais->mmsi}
+	{"class",          t_check,    .dflt.check = "AIS"}, \
+	{"type",           t_uinteger, .addr.uinteger = &ais->type}, \
+	{"device",         t_string,   .addr.string = path, \
+	                                  .len = pathlen}, \
+	{"repeat",         t_uinteger, .addr.uinteger = &ais->repeat}, \
+	{"scaled",         t_boolean,  .addr.boolean = &scaled, \
+		                          .dflt.boolean = false}, \
+	{"mmsi",           t_uinteger, .addr.uinteger = &ais->mmsi}
 
     int status;
 
