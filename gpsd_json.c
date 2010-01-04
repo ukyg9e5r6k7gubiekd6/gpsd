@@ -66,7 +66,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
 		break;
 	    default:
 		/* ugh, we'd prefer a C-style escape here, but this is JSON */
-		(void)snprintf(tp, 5, "%u04x", (uint)*sp);
+		(void)snprintf(tp, 5, "%u04x", (unsigned int)*sp);
 		tp += strlen(tp);
 	    }
 	} else {
@@ -610,7 +610,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	"Other Type - no additional information",
     };
 
-#define SHIPTYPE_DISPLAY(n) (((n) < (uint)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
+#define SHIPTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
 
     static char *station_type_legends[16] = {
 	"All types of mobiles",
@@ -631,7 +631,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	"Reserved for future use",
     };
 
-#define STATIONTYPE_DISPLAY(n) (((n) < (uint)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
+#define STATIONTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
 
     static char *navaid_type_legends[] = {
 	"Unspcified",
@@ -668,7 +668,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	"Light Vessel / LANBY / Rigs",
     };
 
-#define NAVAIDTYPE_DISPLAY(n) (((n) < (uint)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
+#define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
 #define JSON_BOOL(x)	((x)?"true":"false")
     (void)snprintf(buf, buflen, 
