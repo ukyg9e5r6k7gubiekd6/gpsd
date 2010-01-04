@@ -1,32 +1,47 @@
 /* $Id$ */
+#include <stdlib.h>
+#include "gpsd_config.h"
 #include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdlib.h>
-#include <syslog.h>
+#ifdef HAVE_SYSLOG_H
+ #include <syslog.h>
+#endif /* HAVE_SYSLOG_H */
 #include <signal.h>
 #include <errno.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+ #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+ #endif /* HAVE_SYS_SOCKET_H */
+ #ifdef HAVE_SYS_UN_H
+  #include <sys/un.h>
+ #endif /* HAVE_SYS_UN_H */
+ #ifdef HAVE_NETINET_IN_H
+  #include <netinet/in.h>
+ #endif /* HAVE_NETINET_IN_H */
+ #ifdef HAVE_ARPA_INET_H
+  #include <arpa/inet.h>
+ #endif /* HAVE_ARPA_INET_H */
+ #ifdef HAVE_NETDB_H
+  #include <netdb.h>
+ #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
 #include <stdarg.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <assert.h>
-#include <pwd.h>
-#include <grp.h>
+#ifdef HAVE_PWD_H
+ #include <pwd.h>
+#endif /* HAVE_PWD_H */
+#ifdef HAVE_GRP_H
+ #include <grp.h>
+#endif /* HAVE_GRP_H */
 #include <stdbool.h>
 #include <math.h>
-
-#include "gpsd_config.h"
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
