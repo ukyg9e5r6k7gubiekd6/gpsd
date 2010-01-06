@@ -75,12 +75,20 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 /* sentence supplied ddmmyy, but no century part */
 {
-    if (session->driver.nmea.date.tm_year == 0) {
-	session->driver.nmea.date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
-	gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
-		    session->driver.nmea.date.tm_year,
-		    ddmmyy);
+    int yy = DD(ddmmyy+4), year = session->driver.nmea.date.tm_year;
+
+    if (year == 0) {
+	year = (CENTURY_BASE + yy) - 1900;
+    } else if (year % 100 != yy) {
+	/* update year */
+	if (year % 100 == 99 && yy == 0)
+	   yy += 100;	/* century change */
+	year = year / 100 * 100 + yy;
     }
+    gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
+		year,
+		ddmmyy);
+    session->driver.nmea.date.tm_year = year;
     session->driver.nmea.date.tm_mon = DD(ddmmyy+2)-1;
     session->driver.nmea.date.tm_mday = DD(ddmmyy);
 }
