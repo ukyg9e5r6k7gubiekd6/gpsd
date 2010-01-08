@@ -98,9 +98,9 @@ class SkyView(gtk.DrawingArea):
 	az *= (math.pi/180)	# Degrees to radians
         # Exact spherical projection would be like this:
 	# el = sin((90.0 - el) * DEG_2_RAD);
-	el = ((90.0 - el) / 90.0);
-	xout = int((self.width / 2) + math.sin(az) * el * (self.diameter / 2))
-	yout = int((self.height / 2) - math.cos(az) * el * (self.diameter / 2))
+    el = ((90.0 - el) / 90.0);
+    xout = int((self.width / 2) + math.sin(az) * el * (self.diameter / 2))
+    yout = int((self.height / 2) - math.cos(az) * el * (self.diameter / 2))
         return (xout, yout)
 
     def on_expose_event(self, widget, event):
@@ -616,7 +616,7 @@ if __name__ == "__main__":
             sys.exit(0)
         elif opt == 'V':
             sys.stderr.write("xgps 0.1\n")
-	    sys.exit(0)
+            sys.exit(0)
 
     degreefmt = {'d':gps.client.deg_dd,
                  'm':gps.client.deg_ddmm,
