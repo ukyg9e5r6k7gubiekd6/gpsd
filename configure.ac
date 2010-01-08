@@ -974,6 +974,10 @@ AC_SUBST(MANGENERATOR)
 AC_SUBST(MANTARGET)
 AC_SUBST(MANFLAGS)
 
+dnl Gentoo systems can have a problem with the Python path
+if test -e /etc/gentoo-release; then
+    AC_MSG_WARN([This is a Gentoo system. You may need to adjust your $PYTHONPATH to see library directories under /usr/local])
+fi 
 
 dnl Output the configuration summary
 echo ""
