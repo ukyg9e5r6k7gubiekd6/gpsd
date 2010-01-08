@@ -249,12 +249,15 @@ stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py
 			--mangenerator '$(MANGENERATOR)') && \
 	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python-modules stamp-python-modules.tmp
-endif
+
 # Clean up after Python
 clean-local:
 	rm -rf build
+
+# Install Python modules
 install-exec-local:
-	python setup.py install --prefix=${prefix}
+	$(PYTHON) setup.py install --prefix=${prefix} # --root=$(DESTDIR)
+endif
 
 if LIBGPSMM_ENABLE
 TESTBINS = test_float test_trig test_gpsmm test_bits test_packet test_geoid \
