@@ -74,6 +74,7 @@ GPSD Frequently Asked Questions
 <li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a><br/>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
+<li><a href='#agps'>Can GPSD work use Assisted GPS data from cellphone networks?</code>?</a><br/>
 <li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
 </ul>
 
@@ -476,6 +477,22 @@ build from source that conditions out all but one of the drivers.</p>
 
 <p>For Python programmers, there is a gps.py module the high-level
 interface.  It exports a class that encapsulates a GPS session.</p>
+
+<h1 id='agps'>Can GPSD use Assisted GPS data from cellphone networks?</h1>
+
+<p>Sadly, no. There are both hardware and software barriers to this.</p>
+
+<p>Using AGPS would requires picking up and interpreting information
+broadcast by cellphone towers, so it would at minimum need another
+receiver (separate from the GPS mouse) operating in those frequency
+bands. Of course, a cellphone has one of those built in. Standalone
+GPS sensors don't.</p>
+
+<p>There's another level of the problem, too. Supposing we had the
+right sort of receiver, AGPS systems are carrier-dependent.  As far as
+we know there aren't any published standards for the format of the
+corrections.  So even if we had the signals, GPSD couldn't know what to
+do with them.</p>
 
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
