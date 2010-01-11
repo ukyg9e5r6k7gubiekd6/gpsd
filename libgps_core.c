@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
 	case '?':
 	case 'h':
 	default:
-	    (void)fputs("usage: libps [-b] [-d lvl] [-s]\n", stderr);
+	    (void)fputs("usage: libgps [-b] [-d lvl] [-s]\n", stderr);
 	    exit(1);
 	}
     }
