@@ -33,11 +33,13 @@
 #include <string.h>
 
 #include "gpsd.h"
+#include "sockaddr.h"
 
 #if !defined (INADDR_NONE)
 #define INADDR_NONE   ((in_addr_t)-1)
 #endif
 
+/*@-mustfreefresh -usedef@*/
 socket_t netlib_connectsock(int af, const char *host, const char *service, const char *protocol)
 {
     struct protoent *ppe;
@@ -46,6 +48,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
     int ret, type, proto, one = 1;
     socket_t s = -1;
 
+    /*@-type@*/
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
 	type = SOCK_DGRAM;
@@ -54,14 +57,17 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 	type = SOCK_STREAM;
 	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
+    /*@+type@*/
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = af;
     hints.ai_socktype = type;
     hints.ai_protocol = proto;
+#ifndef S_SPLINT_S 
     if((ret = getaddrinfo(host, service, &hints, &result))) {
 	return NL_NOHOST;
     }
+#endif /* S_SPLINT_S */
 
     /*
      * From getaddrinfo(3):
@@ -71,8 +77,9 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
      * From RFC 3484 (Section 10.3):
      *     The default policy table gives IPv6 addresses higher precedence than
      *     IPv4 addresses.
-     * Thus, with the default palameters, we get IPv6 addresses first.
+     * Thus, with the default parameters, we get IPv6 addresses first.
      */
+    /*@-type@*/
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 	ret = NL_NOCONNECT;
 	if((s = socket(rp->ai_family, rp->ai_socktype,
@@ -80,14 +87,18 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 	    ret = NL_NOSOCK;
 	else if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1)
 	    ret = NL_NOSOCKOPT;
-	else if (!connect(s, rp->ai_addr, rp->ai_addrlen)) {
+	else if (connect(s, rp->ai_addr, rp->ai_addrlen) == 0) {
 	    ret = 0;
 	    break;
 	}
 
-	if (s > 0) close(s);
+	if (s > 0) 
+	    (void)close(s);
     }
+    /*@+type@*/
+#ifndef S_SPLINT_S 
     freeaddrinfo(result);
+#endif /* S_SPLINT_S */
     if (ret)
 	return ret;
 
@@ -106,6 +117,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
     return s;
     /*@ +type +mustfreefresh @*/
 }
+/*@+mustfreefresh +usedef@*/
 
 char /*@observer@*/ *netlib_errstr(const int err)
 {
@@ -124,11 +136,11 @@ char *sock2ip(int fd)
 {
     sockaddr_t fsin;
     socklen_t alen = (socklen_t)sizeof(fsin);
-    static char ip[INET6_ADDRSTRLEN];
+    /*@i1@*/static char ip[INET6_ADDRSTRLEN];
     int r;
 
     r = getpeername(fd, &(fsin.sa), &alen);
-    /*@ -branchstate @*/
+    /*@ -branchstate -unrecog @*/
     if (r == 0) {
 	switch (fsin.sa.sa_family) {
 	case AF_INET:
@@ -144,14 +156,14 @@ char *sock2ip(int fd)
 	default:
 	    gpsd_report(LOG_ERROR, "Unhandled address family %d in %s\n",
 			    fsin.sa.sa_family, __FUNCTION__);
-	    strlcpy(ip,"<unknown AF>", sizeof(ip));
+	    (void)strlcpy(ip,"<unknown AF>", sizeof(ip));
 	    return ip;
 	}
     }
     if (r != 0){
 	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r, strerror(errno), errno);
-	strlcpy(ip,"<unknown>", sizeof(ip));
+	(void)strlcpy(ip,"<unknown>", sizeof(ip));
     }
-    /*@ +branchstate @*/
+    /*@ +branchstate +unrecog @*/
     return ip;
 }

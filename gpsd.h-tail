@@ -588,16 +588,6 @@ extern float roundf(float x);
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 
-/* Conditionnaly define the sockaddr_t union type if the necessary
- * header files defining the base type have already been included */
-#ifdef _NETINET_IN_H
-typedef union sockaddr_u {
-    struct sockaddr sa;
-    struct sockaddr_in sa_in;
-    struct sockaddr_in6 sa_in6;
-} sockaddr_t;
-#endif /* _NETINET_IN_H */
-
 #endif /* _GPSD_H_ */
 // Local variables:
 // mode: c

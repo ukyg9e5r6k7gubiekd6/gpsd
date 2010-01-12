@@ -174,6 +174,7 @@ libgpsd_c_sources = \
 	driver_zodiac.c
 
 libgpsd_h_sources = \
+	sockaddr.h \
 	bsd-base64.h \
 	timebase.h \
 	bits.h \

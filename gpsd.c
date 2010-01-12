@@ -70,6 +70,7 @@
 #endif
 
 #include "gpsd.h"
+#include "sockaddr.h"
 #include "gps_json.h"
 #include "timebase.h"
 #include "revision.h"
@@ -287,7 +288,8 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
     struct protoent *ppe ;	/* splint has a bug here */
     sockaddr_t sat;
     int sin_len = 0;
-    int s = -1, port, type, proto, one = 1;
+    int s = -1, type, proto, one = 1;
+    in_port_t port;
 
     if ((pse = getservbyname(service, protocol)))
 	port = ntohs((in_port_t)pse->s_port);
@@ -364,7 +366,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
     /*@ +mustfreefresh -matchanyintegral @*/
 }
 
-static int passivesocks(char *service, char *protocol, int qlen, int socks[AFCOUNT])
+static int passivesocks(char *service, char *protocol, int qlen, /*@out@*/int socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -2149,7 +2151,7 @@ int main(int argc, char *argv[])
 	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t)sizeof(fsin);
 		char *c_ip;
-		/*@i1@*/int ssock = accept(msocks[i], (struct sockaddr *) &fsin, &alen);
+		/*@i@*/int ssock = accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 
 		if (ssock == -1)
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
