@@ -519,8 +519,8 @@ function write_config(){
 	$buf = <<<EOB
 <?PHP
 \$title = 'My GPS Server';
-\$server = '127.0.0.1';
-#\$advertise = '127.0.0.1';
+\$server = 'localhost';
+#\$advertise = 'localhost';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
 \$googlemap = 0; # set to 1 if you want to have a google map

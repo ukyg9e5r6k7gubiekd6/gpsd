@@ -6,6 +6,8 @@
 #ifndef S_SPLINT_S
  #ifdef HAVE_SYS_SOCKET_H
   #include <sys/socket.h>
+ #else
+  #define AF_UNSPEC 0
  #endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -289,7 +291,7 @@ static int ntrip_stream_probe(const char *caster,
     socket_t dsock;
     char buf[BUFSIZ];
 
-    if ((dsock = netlib_connectsock(caster, port, "tcp")) == -1) {
+    if ((dsock = netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) == -1) {
 	    printf("ntrip stream connect error %d\n", dsock);
 	    return -1;
     }
@@ -346,7 +348,7 @@ static int ntrip_stream_open(const char *caster,
 		    caster, port, stream->mountpoint);	
 	return -1;
     }
-    if ((context->dsock = netlib_connectsock(caster, port, "tcp")) < 0)
+    if ((context->dsock = netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) < 0)
 	return -1;
 
     (void)snprintf(buf, sizeof(buf),

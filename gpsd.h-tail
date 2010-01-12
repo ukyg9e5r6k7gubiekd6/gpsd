@@ -489,7 +489,7 @@ extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct gps_fix_t *);
 extern void gpsd_clear_data(struct gps_device_t *);
-extern socket_t netlib_connectsock(const char *, const char *, const char *);
+extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
 extern char /*@observer@*/ *netlib_errstr(const int);
 extern char /*@observer@*/ *sock2ip(int);
 
@@ -587,6 +587,16 @@ extern float roundf(float x);
 #if defined(__CYGWIN__)
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
+
+/* Conditionnaly define the sockaddr_t union type if the necessary
+ * header files defining the base type have already been included */
+#ifdef _NETINET_IN_H
+typedef union sockaddr_u {
+    struct sockaddr sa;
+    struct sockaddr_in sa_in;
+    struct sockaddr_in6 sa_in6;
+} sockaddr_t;
+#endif /* _NETINET_IN_H */
 
 #endif /* _GPSD_H_ */
 // Local variables:

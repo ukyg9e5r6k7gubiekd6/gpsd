@@ -133,7 +133,7 @@ enum unit gpsd_units(void)
 void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /* standard parsing of a GPS data source spec */
 {
-    source->server = "127.0.0.1";
+    source->server = "localhost";
     source->port = DEFAULT_GPSD_PORT;
     source->device = NULL;
 

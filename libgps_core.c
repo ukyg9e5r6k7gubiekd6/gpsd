@@ -21,6 +21,8 @@
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#else
+#define AF_UNSPEC 0
 #endif
 #endif
 #if defined (HAVE_SYS_SELECT_H)
@@ -77,19 +79,19 @@ static void gps_trace(int errlevel, const char *fmt, ... )
 #endif /* LIBGPS_DEBUG */
 
 /*@-nullderef@*/
-int gps_open_r(const char *host, const char *port, 
+int gps_open_r(const char *host, const char *port,
 	       /*@out@*/struct gps_data_t *gpsdata)
 {
     /*@ -branchstate @*/
     if (!gpsdata)
 	return -1;
     if (!host)
-	host = "127.0.0.1";
+	host = "localhost";
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 
-    libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));
-    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
+    libgps_debug_trace((1, "gps_open_r(..., %s, %s)\n", host, port));
+    if ((gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return -1;
     }

@@ -9,6 +9,8 @@
 #ifndef S_SPLINT_S
  #ifdef HAVE_SYS_SOCKET_H
   #include <sys/socket.h>
+ #else
+  #define AF_UNSPEC 0
  #endif /* HAVE_SYS_SOCKET_H */
  #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -326,7 +328,7 @@ int gpsd_activate(struct gps_device_t *session)
 	}
 	*port++ = '\0';
 	gpsd_report(LOG_INF, "opening AIS feed at %s, port %s.\n", server,port);
-	if ((dsock = netlib_connectsock(server, port, "tcp")) < 0) {
+	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
 	    gpsd_report(LOG_ERROR, "AIS device open error %s.\n", 
 			netlib_errstr(dsock));
 	    return -1;

@@ -54,7 +54,7 @@ time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
 
 <para>Optionally a server, TCP/IP port number and remote device can be given.
-If omitted, <application>gpspipe</application> connects to 127.0.0.1 on
+If omitted, <application>gpspipe</application> connects to localhost on
 the default port (2947) and watches all devices opened by
 <application>gpsd</application>.</para>
 

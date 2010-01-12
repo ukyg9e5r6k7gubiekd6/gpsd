@@ -24,11 +24,13 @@ C:
 </funcsynopsisinfo>
 <funcprototype>
 <funcdef>struct gps_data_t *<function>gps_open</function></funcdef>
+    <paramdef>int<parameter>af</parameter></paramdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
     <paramdef>char * <parameter>port</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_open_r</function></funcdef>
+    <paramdef>int<parameter>af</parameter></paramdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
     <paramdef>char * <parameter>port</parameter></paramdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
@@ -72,7 +74,7 @@ Python:
 
 import gps
 
-session = gps.gps(host="127.0.0.1", port="2947")
+session = gps.gps(host="localhost", port="2947")
 
 session.set_raw_hook(raw_hook)
 

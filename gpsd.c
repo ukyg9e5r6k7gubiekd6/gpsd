@@ -16,6 +16,8 @@
 #ifndef S_SPLINT_S
  #ifdef HAVE_SYS_SOCKET_H
   #include <sys/socket.h>
+ #else
+  #define AF_UNSPEC 0
  #endif /* HAVE_SYS_SOCKET_H */
  #ifdef HAVE_SYS_UN_H
   #include <sys/un.h>
@@ -125,6 +127,15 @@
 
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
+
+/* IP version used by the program */
+/* AF_UNSPEC: all
+ * AF_INET: IPv4 only
+ * AF_INET6: IPv6 only
+ */
+static int af = AF_UNSPEC;
+
+#define AFCOUNT 2
 
 static fd_set all_fds;
 static int maxfd;
@@ -270,24 +281,17 @@ The following driver types are compiled into this gpsd instance:\n",
     }
 }
 
-static int passivesock(char *service, char *protocol, int qlen)
+static int passivesock_af(int af, char *service, char *protocol, int qlen)
 {
     struct servent *pse;
     struct protoent *ppe ;	/* splint has a bug here */
-    struct sockaddr_in sin;
-    int s, type, proto, one = 1;
-
-    /*@ -mustfreefresh +matchanyintegral @*/
-    memset((char *) &sin, 0, sizeof(sin));
-    sin.sin_family = (sa_family_t)AF_INET;
-    if (listen_global)
-	sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    else
-	sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sockaddr_t sat;
+    int sin_len = 0;
+    int s = -1, port, type, proto, one = 1;
 
     if ((pse = getservbyname(service, protocol)))
-	sin.sin_port = htons(ntohs((in_port_t)pse->s_port));
-    else if ((sin.sin_port = htons((in_port_t)atoi(service))) == 0) {
+	port = ntohs((in_port_t)pse->s_port);
+    else if ((port = (in_port_t)atoi(service)) == 0) {
 	gpsd_report(LOG_ERROR, "Can't get \"%s\" service entry.\n", service);
 	return -1;
     }
@@ -299,15 +303,52 @@ static int passivesock(char *service, char *protocol, int qlen)
 	type = SOCK_STREAM;
 	/*@i@*/proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
-    if ((s = socket(PF_INET, type, proto)) == -1) {
+
+    /*@ -mustfreefresh +matchanyintegral @*/
+    switch(af) {
+    case AF_INET:
+	sin_len = sizeof(sat.sa_in);
+
+	memset((char *) &sat.sa_in, 0, sin_len);
+	sat.sa_in.sin_family = (sa_family_t)AF_INET;
+	if (listen_global)
+	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
+	else
+	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	sat.sa_in.sin_port = htons(port);
+
+	s = socket(PF_INET, type, proto);
+	break;
+
+    case AF_INET6:
+	sin_len = sizeof(sat.sa_in6);
+
+	memset ((char *) &sat.sa_in6, 0, sin_len);
+	sat.sa_in6.sin6_family = (sa_family_t)AF_INET6;
+	if (listen_global)
+	    sat.sa_in6.sin6_addr = in6addr_any;
+	else
+	    sat.sa_in6.sin6_addr = in6addr_loopback;
+	sat.sa_in6.sin6_port = htons(port);
+
+	s = socket(PF_INET6, type, proto);
+	break;
+
+    default:
+	gpsd_report(LOG_ERROR, "Unhandled address family %d\n", af);
+	return -1;
+    }
+
+    if (s == -1) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
 	return -1;
     }
-    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,(int)sizeof(one)) == -1) {
+    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,
+		(int)sizeof(one)) == -1) {
 	gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
-    if (bind(s, (struct sockaddr *) &sin, (int)sizeof(sin)) == -1) {
+    if (bind(s, &sat.sa, sin_len) < 0) {
 	gpsd_report(LOG_ERROR, "Can't bind to port %s\n", service);
 	if (errno == EADDRINUSE) {
 		gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
@@ -318,8 +359,32 @@ static int passivesock(char *service, char *protocol, int qlen)
 	gpsd_report(LOG_ERROR, "Can't listen on port %s\n", service);
 	return -1;
     }
+
     return s;
     /*@ +mustfreefresh -matchanyintegral @*/
+}
+
+static int passivesocks(char *service, char *protocol, int qlen, int socks[AFCOUNT])
+{
+    int numsocks = AFCOUNT;
+    int i;
+
+    for (i=0;i<AFCOUNT;i++)
+	socks[i] = -1;
+
+    if (AF_UNSPEC == af || (AF_INET == af))
+	socks[0] = passivesock_af(AF_INET, service, protocol, qlen);
+
+    if (AF_UNSPEC == af || (AF_INET6 == af))
+	socks[1] = passivesock_af(AF_INET6, service, protocol, qlen);
+
+    for (i=0;i<AFCOUNT;i++)
+	if(socks[i]<0)
+	    numsocks--;
+
+    /* Return the number of succesfully openned sockets
+     * The failed ones are identified by negative values */
+    return numsocks;
 }
 
 static int filesock(char *filename)
@@ -1809,9 +1874,9 @@ int main(int argc, char *argv[])
     static char *gpsd_service = NULL;
     static char *control_socket = NULL;
     struct gps_device_t *device;
-    struct sockaddr_in fsin;
+    sockaddr_t fsin;
     fd_set rfds, control_fds;
-    int i, option, msock, cfd, dfd;
+    int i, option, msocks[2], cfd, dfd;
     bool go_background = true;
     struct timeval tv;
     struct subscriber_t *sub;
@@ -1933,8 +1998,8 @@ int main(int argc, char *argv[])
     if (!gpsd_service)
 	gpsd_service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     /*@ +observertrans @*/
-    if ((msock = passivesock(gpsd_service, "tcp", QLEN)) == -1) {
-	gpsd_report(LOG_ERR,"command socket create failed, netlib error %d\n",msock);
+    if (passivesocks(gpsd_service, "tcp", QLEN, msocks) < 1) {
+	gpsd_report(LOG_ERR,"command sockets create failed, netlib errors %d, %d\n", msocks[0], msocks[1]);
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
@@ -2021,8 +2086,11 @@ int main(int argc, char *argv[])
     (void)signal(SIGQUIT, onsig);
     (void)signal(SIGPIPE, SIG_IGN);
 
-    FD_SET(msock, &all_fds);
-    adjust_max_fd(msock, true);
+    for(i=0; i<AFCOUNT; i++)
+	if (msocks[i] >= 0) {
+	    FD_SET(msocks[i], &all_fds);
+	    adjust_max_fd(msocks[i], true);
+	}
     FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
@@ -2077,42 +2145,44 @@ int main(int argc, char *argv[])
 #endif /* UNUSED */
 
 	/* always be open to new client connections */
-	if (FD_ISSET(msock, &rfds)) {
-	    socklen_t alen = (socklen_t)sizeof(fsin);
-	    char *c_ip;
-	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
+	for(i=0; i<AFCOUNT; i++) {
+	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
+		socklen_t alen = (socklen_t)sizeof(fsin);
+		char *c_ip;
+		/*@i1@*/int ssock = accept(msocks[i], (struct sockaddr *) &fsin, &alen);
 
-	    if (ssock == -1)
-		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
-	    else {
-		struct subscriber_t *client = NULL;
-		int opts = fcntl(ssock, F_GETFL);
+		if (ssock == -1)
+		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
+		else {
+		    struct subscriber_t *client = NULL;
+		    int opts = fcntl(ssock, F_GETFL);
 
-		if (opts >= 0)
-		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
+		    if (opts >= 0)
+			(void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 
-		c_ip = sock2ip(ssock);
-		client = allocate_client();
-		if (client == NULL) {
-		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
-			"no subscriber slots available\n", c_ip, ssock);
-		    (void)close(ssock);
-		} else {
-		    char announce[GPS_JSON_RESPONSE_MAX];
-		    FD_SET(ssock, &all_fds);
-		    adjust_max_fd(ssock, true);
-		    client->fd = ssock;
-		    client->active = timestamp();
+		    c_ip = sock2ip(ssock);
+		    client = allocate_client();
+		    if (client == NULL) {
+			gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
+				"no subscriber slots available\n", c_ip, ssock);
+			(void)close(ssock);
+		    } else {
+			char announce[GPS_JSON_RESPONSE_MAX];
+			FD_SET(ssock, &all_fds);
+			adjust_max_fd(ssock, true);
+			client->fd = ssock;
+			client->active = timestamp();
 #ifdef OLDSTYLE_ENABLE
-		    client->tied = false;
+			client->tied = false;
 #endif /* OLDSTYLE_ENABLE */
-		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
-			c_ip, sub_index(client), ssock);	
-		    json_version_dump(announce, sizeof(announce));
-		    (void)throttled_write(client, announce, strlen(announce));
+			gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
+				c_ip, sub_index(client), ssock);	
+			json_version_dump(announce, sizeof(announce));
+			(void)throttled_write(client, announce, strlen(announce));
+		    }
 		}
+		FD_CLR(msocks[i], &rfds);
 	    }
-	    FD_CLR(msock, &rfds);
 	}
 
 	/* also be open to new control-socket connections */

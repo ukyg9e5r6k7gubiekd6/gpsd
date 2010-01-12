@@ -168,7 +168,7 @@ int main( int argc, char **argv)
     unsigned int flags;
 
     struct fixsource_t source;
-    char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
+    char *port = DEFAULT_GPSD_PORT, *server = NULL;
     char *serialport = NULL;
     char *outfile = NULL;
 

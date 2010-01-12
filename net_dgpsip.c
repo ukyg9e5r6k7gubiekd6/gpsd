@@ -6,6 +6,8 @@
 #ifndef S_SPLINT_S
  #ifdef HAVE_SYS_SOCKET_H
   #include <sys/socket.h>
+ #else
+  #define AF_UNSPEC 0
  #endif /* HAVE_SYS_SOCKET_H */
  #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -38,7 +40,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
     if (!getservbyname(dgpsport, "tcp"))
 	dgpsport = DEFAULT_RTCM_PORT;
 
-    context->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
+    context->dsock = netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
     if (context->dsock >= 0) {
 	gpsd_report(LOG_PROG,"connection to DGPS server %s established.\n",dgpsserver);
 	(void)gethostname(hn, sizeof(hn));

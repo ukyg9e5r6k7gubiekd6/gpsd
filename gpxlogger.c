@@ -7,7 +7,6 @@
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif /* HAVE_SYSLOG_H */
-#include <syslog.h>
 #include <math.h>
 #include <time.h>
 #include <signal.h>
@@ -337,7 +336,7 @@ static void usage(void)
 	    "Usage: %s [-V] [-h] [-i timeout] [-j casoc] [server[:port:[device]]]\n",
 	    progname);
     fprintf(stderr,
-	    "\tdefaults to '%s -i 5 -j 0 127.0.0.1:2947'\n",
+	    "\tdefaults to '%s -i 5 -j 0 localhost:2947'\n",
 	    progname);
     exit(1);
 }
@@ -395,7 +394,7 @@ int main (int argc, char** argv)
     print_gpx_header ();
 
 #ifdef DBUS_ENABLE
-    /* To force socket use in the default way just give a '127.0.0.1' arg */  
+    /* To force socket use in the default way just give a 'localhost' arg */
     if (optind < argc)
 	return socket_mainloop();
     else
