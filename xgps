@@ -87,11 +87,14 @@ class SkyView(gtk.DrawingArea):
                                      x - diam / 2, y - diam / 2,
                                      diam, diam)
 
-    def draw_string(self, widget, x, y, letter):
+    def draw_string(self, widget, x, y, letter, centered=True):
         "Draw a letter on the skyview."
         self.pangolayout.set_text(letter)
-        # FIXME: When the layout object can report its size, use it
-        self.window.draw_layout(self.gc, x-5, y-10, self.pangolayout)
+        if centered:
+            (w, h) = self.pangolayout.get_pixel_size()
+            x -= w/2
+            y -= h/2
+        self.window.draw_layout(self.gc, x, y, self.pangolayout)
 
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
@@ -151,7 +154,7 @@ class SkyView(gtk.DrawingArea):
                                  x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
                                  2 * SkyView.SAT_RADIUS + 1, sat.used);
             self.set_color("Black")
-            self.draw_string(widget, x, y+10, str(sat.PRN))
+            self.draw_string(widget, x, y, str(sat.PRN), centered=False)
     def redraw(self, satellites):
         "Redraw the skyview."
         self.satellites = satellites
