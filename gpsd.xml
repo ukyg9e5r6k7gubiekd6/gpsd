@@ -81,12 +81,11 @@ troubleshooting.</para>
 </refsect1>
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpsd</application> is a monitor daemon that watches
-a TCP/IP port (2947 by default), waiting for applications to request
+<para><application>gpsd</application> is a monitor daemon that collects
 information from GPSes, differential-GPS radios, or AIS receivers
 attached to the host machine.  Each GPS, DGPS radio, or AIS receiver
 is expected to be direct-connected to the host via a USB or RS232C
-serial port.  The port may be specified to
+serial device.  The serial device may be specified to
 <application>gpsd</application> at startup, or it may be set via a
 command shipped down a local control socket (e.g. by a USB hotplug
 script). Given a GPS device by either means,
@@ -102,7 +101,7 @@ Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. It can read
 heading and attitude information from the Oceanserver 5000 digital
 compass.</para>
 
-<para>The GPS protocols supported by your instance of
+<para>The GPS reporting formats supported by your instance of
 <application>gpsd</application> may differ depending on how it was
 compiled; general-purpose versions support many, but it can be built
 with protocol subsets down to a singleton for use in constrained
@@ -111,7 +110,9 @@ instance, see the output of <command>gpsd -l</command></para>
 
 <para><application>gpsd</application> effectively hides the
 differences among the GPS types it supports. It also knows about and
-uses commands that tune these GPSes for lower latency. </para>
+uses commands that tune these GPSes for lower latency. By using
+<application>gpsd</application> as an intermediary applications 
+avoid contention for serial devices.</para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
@@ -123,6 +124,10 @@ correction source for all connected GPSes that accept RTCM corrections
 (this is dependent on the type of the GPS; not all GPSes have the
 firmware capability to accept RTCM correction packets). See 
 <xref linkend='accuracy'/> and <xref linkend='files'/> for discussion.</para>
+
+<para>Client applications will communicate with <application>gpsd</application>
+via a TCP/IP port, 2947 by default).  Both IPv4 and IPv6 connections
+are supported and a client may connect via either.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -165,8 +170,7 @@ also be nice.</para></listitem>
 listen on all addresses (INADDR_ANY) rather than just the loopback
 (INADDR_LOOPBACK) address. For the sake of privacy and security, PVT
 information is now private to the local machine until the user makes
-an effort to expose this to the world. Listening on the loopback by
-default is a change from previous behaviour.</para></listitem>
+an effort to expose this to the world.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-l</term>
@@ -280,12 +284,11 @@ details on this).  Daemon startup will abort with an error if neither
 any devices nor a control socket are specified.</para>
 
 <para>Clients communicate with the dameon via textual request and
-responses.  Currently there are two supported protocols, but there
-may be only one in the future. It is a bad idea for applications to
-speak either protocol directly: rather, they should use the
+responses. It is a bad idea for applications to speak the protocol
+directly: rather, they should use the
 <application>libgps</application> client library and take appropriate
-care to conditionalize their code on the major and minor protocol version
-symbols.</para>
+care to conditionalize their code on the major and minor protocol
+version symbols.</para>
 
 </refsect1>
 <refsect1 id='old_protocol'><title>OLD PROTOCOL</title>
