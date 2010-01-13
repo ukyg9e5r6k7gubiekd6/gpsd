@@ -152,8 +152,9 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	if (colon1 != NULL) {
 	    char *colon2;
 	    *colon1 = '\0';
-	    if (colon1 != source->spec)
+	    if (colon1 != source->spec) {
 		source->server = source->spec;
+	    }
 	    source->port = colon1 + 1;
 	    colon2 = strchr(source->port, ':');
 	    if (colon2 != NULL) {
@@ -166,6 +167,15 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	    source->server = source->spec;
 	}
     }
+
+    /*@-modobserver@*/
+    if (*source->server == '[') {
+	char *rbrk = strchr(source->server, ']');
+	++source->server;
+	if (rbrk != NULL)
+	    *rbrk = '\0';
+    }
+    /*@+modobserver@*/
     /*@+usedef@*/
 }
 /*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
