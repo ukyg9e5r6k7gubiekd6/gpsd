@@ -137,11 +137,17 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     source->port = DEFAULT_GPSD_PORT;
     source->device = NULL;
 
+    /*@-usedef@ Sigh, splint is buggy*/
     if (arg != NULL) {
-	char *colon1;
+	char *colon1, *skipto, *rbrk;
 	source->spec = strdup(arg);
 	assert(source->spec != NULL);
-	colon1 = strchr(source->spec, ':');
+
+	skipto = source->spec;
+	if (*skipto == '[' && (rbrk = strchr(skipto, ']'))!=NULL) {
+	    skipto = rbrk;
+	}
+	colon1 = strchr(skipto, ':');
 
 	if (colon1 != NULL) {
 	    char *colon2;
@@ -160,6 +166,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	    source->server = source->spec;
 	}
     }
+    /*@+usedef@*/
 }
 /*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 

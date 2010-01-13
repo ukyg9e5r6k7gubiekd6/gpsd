@@ -153,11 +153,38 @@ altitude and error estimates, kiliometers per hour in speeds). </para>
 level; it is primarily for use by GPSD developers.  It enables
 various progress messages to standard error.</para>
 
-<para>An optional argument to any client may specify a server to get
-data from; a colon-separated suffix is taken as a port number. If
-there is a second colon-separated suffix, that is taken as a device
-name to be handed to the daemon in an F= command (or
-equivalent).</para>
+<para>By default, clients collect data from all compatible devices on
+localhost, using the defalt GPSD port 2947. An optional argument to any
+client may specify a server to get data from. A colon-separated suffix
+is taken as a port number. If there is a second colon-separated
+suffix, that is taken as a specific device name to be
+watched. However, if the server specification contains square
+brackets, the part inside them is taken as an IPv6 address and
+port/device suffixes are obnly parsed after the trailing bracket.
+Possible cases look like this:</para>
+
+<variablelist>
+<varlistentry>
+<term>localhost:/dev/ttyS1</term>
+<listitem><para>Look at the default port of localhost, trying both
+IPv4 and IPv6 and watching ouput from serial device 1.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>example.com:2317</term>
+<listitem><para>Look at port 2317 on example.com, trying both
+IPv4 and IPv6.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>71.162.241.5:2317:/dev/ttyS3</term>
+<listitem><para>Look at port 2317 at the specified IPv4 
+address, collecting data from attached serial device 3.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:2317:/dev/ttyS5</term>
+<listitem><para>Look at port 2317 at the specified IPv6 
+address, collecting data from attached serial device 5.</para></listitem>
+</varlistentry>
+</variablelist>
 
 <para>Not all clients shipped with GPSD are documented here. See also
 the separate manual pages for
