@@ -328,9 +328,16 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 
 	memset ((char *) &sat.sa_in6, 0, sin_len);
 	sat.sa_in6.sin6_family = (sa_family_t)AF_INET6;
-	if (listen_global)
-	    sat.sa_in6.sin6_addr = in6addr_any;
-	else
+	if (listen_global) {
+	    /* BAD:  sat.sa_in6.sin6_addr = in6addr_any; 
+	     * the simple assignment will not work (except as an initializer)
+	     * because sin6_addr is an array not a simple type 
+	     * we could do something like this:
+	     * memcpy(sat.sa_in6.sin6_addr, in6addr_any, sizeof(sin6_addr));
+	     * BUT, all zeros is IPv6 wildcard, and we just zeroed the array 
+	     * so really nothing to do here
+	     */
+	} else
 	    sat.sa_in6.sin6_addr = in6addr_loopback;
 	sat.sa_in6.sin6_port = htons(port);
 
