@@ -328,13 +328,12 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	memset ((char *) &sat.sa_in6, 0, sin_len);
 	sat.sa_in6.sin6_family = (sa_family_t)AF_INET6;
 	if (listen_global)
-	    // FIXME: -G doesn't make it listen on ::1
 	    sat.sa_in6.sin6_addr = in6addr_any;
 	else
 	    sat.sa_in6.sin6_addr = in6addr_loopback;
 	sat.sa_in6.sin6_port = htons(port);
 
-	s = socket(PF_INET6, type, proto);
+	s = socket(AF_INET6, type, proto);
 	break;
 
     default:
