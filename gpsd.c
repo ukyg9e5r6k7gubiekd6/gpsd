@@ -319,7 +319,8 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	sat.sa_in.sin_port = htons(port);
 
-	s = socket(PF_INET, type, proto);
+	/* see AF_INET6 case below */
+	s = socket(AF_INET, type, proto);
 	break;
 
     case AF_INET6:
@@ -333,6 +334,11 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	    sat.sa_in6.sin6_addr = in6addr_loopback;
 	sat.sa_in6.sin6_port = htons(port);
 
+	/*
+	 * POSIX would have us use PF_INET6 here, but when we do that
+	 * under Linux 2.6.31 the listen_global=true case fails. The
+	 * original BSD man page uses AF_* defines.
+	 */
 	s = socket(AF_INET6, type, proto);
 	break;
 
