@@ -30,7 +30,6 @@ C:
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_open_r</function></funcdef>
-    <paramdef>int<parameter>af</parameter></paramdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
     <paramdef>char * <parameter>port</parameter></paramdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>

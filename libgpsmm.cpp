@@ -14,7 +14,7 @@
 gpsmm::gpsmm() : gps_data(0) { gps_data = NULL; }
 
 struct gps_data_t* gpsmm::open(void) {
-	return open("127.0.0.1",DEFAULT_GPSD_PORT);
+	return open("localhost",DEFAULT_GPSD_PORT);
 }
 
 struct gps_data_t* gpsmm::open(const char *host, const char *port) {
