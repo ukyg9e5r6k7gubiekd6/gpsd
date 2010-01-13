@@ -104,8 +104,7 @@ is probably the one you want.  The low-level interface is documented
 at
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
 
-<warning><para>The API described below may change incompatibly at API
-version 4. Take care to conditionalize your code on the major and
+<warning><para>Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
 force a compilation failure if GPSD_API_MAJOR_VERSION is not a version
 you recognize.  See the GPSD project website for more information on
@@ -117,10 +116,12 @@ attached to
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. 
 <function>gps_open()</function> returns NULL on errors.  errno is
 set depending on the error returned from the the socket layer; see
-<filename>gps.h</filename> for values and explanations.</para>
+<filename>gps.h</filename> for values and explanations. The host
+address may be a DNS name, an IPv4 dotted quad, or an IPV6 address;
+the library will do the roight thing for any of these.</para>
 
 <para><function>gps_open_r()</function> is a reentrent-friendly
-version That put the session storage where you wish to allocate it.
+version that puts the session storage where you wish to allocate it.
 It returns 0 on success and -1 on failure, with errno set
 appropriately.</para>
 
