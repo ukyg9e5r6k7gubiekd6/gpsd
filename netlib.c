@@ -132,7 +132,7 @@ char /*@observer@*/ *netlib_errstr(const int err)
     }
 }
 
-char *sock2ip(int fd)
+char *netlib_sock2ip(int fd)
 {
     sockaddr_t fsin;
     socklen_t alen = (socklen_t)sizeof(fsin);

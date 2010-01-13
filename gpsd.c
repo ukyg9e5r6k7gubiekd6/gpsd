@@ -569,7 +569,7 @@ static void detach_client(struct subscriber_t *sub)
     struct channel_t *channel; 
     if (sub->fd == UNALLOCATED_FD)
 	return;
-    c_ip = sock2ip(sub->fd);
+    c_ip = netlib_sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (sub %d, fd %d) in detach_client\n",
@@ -2168,7 +2168,7 @@ int main(int argc, char *argv[])
 		    if (opts >= 0)
 			(void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 
-		    c_ip = sock2ip(ssock);
+		    c_ip = netlib_sock2ip(ssock);
 		    client = allocate_client();
 		    if (client == NULL) {
 			gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"

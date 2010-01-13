@@ -491,7 +491,7 @@ extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct g
 extern void gpsd_clear_data(struct gps_device_t *);
 extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
 extern char /*@observer@*/ *netlib_errstr(const int);
-extern char /*@observer@*/ *sock2ip(int);
+extern char /*@observer@*/ *netlib_sock2ip(int);
 
 extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);
