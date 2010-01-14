@@ -1536,7 +1536,7 @@ backup battery.</para>
 </tgroup>
 </table>
 
-<para>The serial parameters will be omitted in a responce describing a 
+<para>The serial parameters will be omitted in a response describing a 
 TCP/IP source such as an Ntrip, DGPSIP, or AIS feed.</para>
 
 <para>The contents of the flags field should be interpreted as follows:</para>
