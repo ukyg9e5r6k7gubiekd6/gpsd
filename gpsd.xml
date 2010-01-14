@@ -387,34 +387,6 @@ first full packet has been received from the GPS, because the GPS type is
 not yet known. To set up conditions for a real answer, issue it after
 some command that reads position/velocity/time information from the
 device.</para>
-
-<!--
-<para>The second field of the C return may be 0, indicating no hard
-lower limit on the cycle time. On an NMEA device of this kind it is
-possible to try to push more characters through per cycle than the
-time to transmit will allow. You must set the time high enough to let
-all sentences come through.  Here are the maxima to use for
-computation:</para>
-
-<table frame='all'>
-<tgroup cols='2'>
-<tbody>
-<row><entry>ZDA       </entry><entry>36</entry></row>
-<row><entry>GLL       </entry><entry>47</entry></row>
-<row><entry>GGA       </entry><entry>82</entry></row>
-<row><entry>VTG       </entry><entry>46</entry></row>
-<row><entry>RMC       </entry><entry>77</entry></row>
-<row><entry>GSA       </entry><entry>67</entry></row>
-<row><entry>GSV       </entry><entry>60 (per line, thus 180 for a set of 3)</entry> </row>
-</tbody>
-</tgroup>
-</table>
-
-<para>The transmit time for a cycle (which must be less than 1 second)
-is the total character count multiplied by 10 and divided by the baud
-rate. A typical budget is GGA, RMC, GSA, 3*GSV = 82+75+67+(3*60) =
-404.</para>
--->
 </listitem>
 
 </varlistentry>
@@ -1575,6 +1547,32 @@ TCP/IP source such as an Ntrip, DGPSIP, or AIS feed.</para>
 </tgroup>
 </table>
 
+<!--
+<para>The mincycle member may be 0, indicating no hard lower limit on the
+cycle time. On an NMEA device of this kind it is possible to try to
+push more characters through per cycle than the time to transmit will
+allow. You must set the time high enough to let all sentences come
+through.  Here are the maxima to use for computation:</para>
+
+<table frame='all'>
+<tgroup cols='2'>
+<tbody>
+<row><entry>ZDA       </entry><entry>36</entry></row>
+<row><entry>GLL       </entry><entry>47</entry></row>
+<row><entry>GGA       </entry><entry>82</entry></row>
+<row><entry>VTG       </entry><entry>46</entry></row>
+<row><entry>RMC       </entry><entry>77</entry></row>
+<row><entry>GSA       </entry><entry>67</entry></row>
+<row><entry>GSV       </entry><entry>60 (per line, thus 180 for a set of 3)</entry> </row>
+</tbody>
+</tgroup>
+</table>
+
+<para>The transmit time for a cycle (which must be less than 1 second)
+is the total character count multiplied by 10 and divided by the baud
+rate. A typical budget is GGA, RMC, GSA, 3*GSV = 82+75+67+(3*60) =
+404.</para>
+-->
 
 <para>When the C client library parses a response of this kind, it
 will assert the DEVICE_SET bit in the top-level set member.</para>
