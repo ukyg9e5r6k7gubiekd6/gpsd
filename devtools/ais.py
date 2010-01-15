@@ -15,10 +15,12 @@
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
 # * Does not join the type 21 name extension field to the name fields.
-# * Message type 26 is presenrly unsupported.
+# * Message type 26 is presently unsupported. It hasn't been observed
+#   in the wild yet as of Jan 2010; not a lot of point in trying util
+#   we have test data.
 #
-# Message types 1-11, 15, 18-21, and 24 have been tested against live data.
-# Message types 12-14, 16-17, 22-23, and 25-26 have not.
+# Decoding for 1-12, 14-15, 18-21, and 24 have been tested against live data.
+# Decoding for 13, 16-17, 22-23, and 25-26 have not.
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
