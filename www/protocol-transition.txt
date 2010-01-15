@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.4, December 2009
+v1.5, January 2010
 
 == Why a new protocol? ==
 
@@ -37,13 +37,11 @@ environments where shaving a few K off the runtime image can actually
 matter.  When it comes to keeping the codebase lean and mean, we try
 harder.
 
-Thus: the old protocol will continue to be available from the daemon
-for the next one or two point releases, but those are not far in the
-future and it could be removed from the development sources at any
-time after 2.91.  Old protocol will be supported in the client-side
-library for somewhat longer, giving your applications a bridge period
-when they can speak both old and new protocol -- but the client-side
-support for old protocol will be removed when 3.0 ships.
+The old-protocol support was removed from the daemon in 2.91.  Old
+protocol will be supported in the client-side library for somewhat
+longer, giving your applications a bridge period when they can speak
+both old and new protocol -- but the client-side support for old
+protocol will be removed when 3.0 ships.
 
 This is our schedule for the changeover:
 

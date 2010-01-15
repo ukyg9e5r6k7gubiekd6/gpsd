@@ -8,7 +8,8 @@
   a rewrite in Python that uses pygtk, eliminating a dependency on
   Motif; also, it now displays AIS information. Uniform treatment of
   display-unit defaulting and -u in xgps, cgps, and lcdgps. Support
-  for AIS message types 25 and 26.  Support for IPv6
+  for AIS message types 25 and 26.  Support for IPv6.  Old protocol
+  has been removed from the daemon; the library still speaks it.
 
 * Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
