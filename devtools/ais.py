@@ -15,6 +15,7 @@
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
 # * Does not join the type 21 name extension field to the name fields.
+# * Message type 26 is presenrly unsupported.
 #
 # Message types 1-11, 15, 18-21, and 24 have been tested against live data.
 # Message types 12-14, 16-17, 22-23, and 25-26 have not.
@@ -29,7 +30,7 @@ class bitfield:
     # handle the case where the field should be reported as an integer
     # or "n/a".
     def __init__(self, name, width, dtype, oob, legend,
-                 validator=None, formatter=None):
+                 validator=None, formatter=None, conditional=None):
         self.name = name		# Fieldname, for internal use and JSON
         self.width = width		# Bit width
         self.type = dtype		# Data type: signed/unsigned/string/raw
@@ -37,18 +38,21 @@ class bitfield:
         self.legend = legend		# Human-friendly description of field
         self.validator = validator	# Validation checker
         self.formatter = formatter	# Custom reporting hook.
+        self.conditional = conditional	# Evaluation guard for this field
 
 class spare:
     "Describes spare bits,, not to be interpreted."
-    def __init__(self, width):
+    def __init__(self, width, conditional=None):
         self.width = width
+        self.conditional = conditional	# Evaluation guard for this field
 
 class dispatch:
     "Describes how to dispatch to a message type variant on a subfield value."
-    def __init__(self, fieldname, subtypes, compute=lambda x: x):
+    def __init__(self, fieldname, subtypes, compute=lambda x: x, conditional=None):
         self.fieldname = fieldname	# Value of view to dispatch on
         self.subtypes = subtypes	# Possible subtypes to dispatch to
         self.compute = compute		# Pass value through this pre-dispatch
+        self.conditional = conditional	# Evaluation guard for this field
 
 # Message-type-specific information begins here. There are four
 # different kinds of things in it: (1) string tables for expanding
@@ -653,9 +657,22 @@ type24 = (
     dispatch('partno', [type24a, type24b]),
     )
 
+type25 = (
+    bitfield("addressed",     1, 'unsigned',    None, "Addressing flag"),
+    bitfield("structured",    1, 'unsigned',    None, "Dimension to Bow"),
+    bitfield("dest_mmsi",    30, 'unsigned',       0, "Destinstion MMSI",
+             conditional=lambda i, v: v["addressed"]),
+    bitfield("app_id",       16, 'unsigned',       0, "Application ID",
+             conditional=lambda i, v: v["structured"]),
+    bitfield("data",       None, 'raw',         None, "Data"),
+    )
+
+# No type 26 handling yet, we'd need new machinery to contrain how many
+# bits the data spec eats in order to recover the radio bits after it.
+
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n > 0 and n <= 24),
+        validator=lambda n: n > 0 and n <= 26),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type
@@ -663,7 +680,8 @@ aivdm_decode = (
                               type5,  type6,  type7,   type8,  type9,
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
-                              type20, type21, type22,  type23, type24]),
+                              type20, type21, type22,  type23, type24,
+                              type25]),
     )
 
 field_groups = (
@@ -745,6 +763,8 @@ def aivdm_unpack(data, offset, values, instructions):
     for inst in instructions:
         if offset >= len(data):
             break
+        elif inst.conditional is not None and not inst.conditional(inst,values):
+            continue
         elif isinstance(inst, spare):
             offset += inst.width
         elif isinstance(inst, dispatch):
@@ -771,6 +791,7 @@ def aivdm_unpack(data, offset, values, instructions):
                     pass
                 value = value.replace("@", " ").rstrip()
             elif inst.type == 'raw':
+                # Note: Doesn't rely on the length.
                 value = BitVector(data.bits[offset/8:], len(data)-offset)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
