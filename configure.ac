@@ -976,7 +976,8 @@ AC_SUBST(MANFLAGS)
 
 dnl Gentoo systems can have a problem with the Python path
 if test -e /etc/gentoo-release; then
-    AC_MSG_WARN([This is a Gentoo system. You may need to adjust your $PYTHONPATH to see library directories under /usr/local])
+    AC_MSG_WARN([This is a Gentoo system.])
+    AC_MSG_WARN([Adjust your PYTHONPATH to see library directories under /usr/local/lib])
 fi 
 
 dnl Output the configuration summary
