@@ -902,6 +902,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	    gpsd_report(LOG_ERROR, "SiRF: Invalid leap_seconds: %d\n",
 		session->context->leap_seconds);
 	    session->context->leap_seconds = LEAP_SECONDS;
+	    session->context->valid &= ~LEAP_SECOND_VALID;
 	} else {
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}

@@ -3,6 +3,7 @@
 #include <sys/types.h>
 
 #include "gpsd.h"
+#include "timebase.h"
 
 #if 0
 static char sf4map[] = {-1, 57, 25, 26, 27, 28, 57, 29, 30, 31, 32, 57, 62, 52, 53, 54, 57, 55, 56, 58, 59, 57, 60, 61, 62, 63};
@@ -134,9 +135,17 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	 */
 	if (leap > 128)
 	    leap ^= 0xff;
-	gpsd_report(LOG_INF, "leap-seconds is %d\n", leap);
+	if ( LEAP_SECONDS > leap ) {
+	    /* something wrong */
+	    gpsd_report(LOG_ERROR, "Invalid leap_seconds: %d\n",
+		leap);
+	    leap = LEAP_SECONDS;
+	    session->context->valid &= ~LEAP_SECOND_VALID;
+	} else {
+	    gpsd_report(LOG_INF, "leap-seconds is %d\n", leap);
+	    session->context->valid |= LEAP_SECOND_VALID;
+	}
 	session->context->leap_seconds = (int)leap;
-	session->context->valid |= LEAP_SECOND_VALID;
 	break;
     default:
 	    ; /* no op */
