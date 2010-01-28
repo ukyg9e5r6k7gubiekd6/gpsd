@@ -155,6 +155,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
+	    if (ais_context->bitlen != 168) {
+		gpsd_report(LOG_ERROR, "AIVDM message type %d size not 168 bits (%zd).\n",
+			    ais->type,
+			    ais_context->bitlen);
+		break;
+	    }
 	    ais->type1.status		= UBITS(38, 4);
 	    ais->type1.turn		= SBITS(42, 8);
 	    ais->type1.speed		= UBITS(50, 10);
@@ -182,6 +188,11 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    break;
 	case 4: 	/* Base Station Report */
 	case 11:	/* UTC/Date Response */
+	    if (ais_context->bitlen != 168) {
+		gpsd_report(LOG_ERROR, "AIVDM message type 4 size not 168 bits (%zd).\n",
+			    ais_context->bitlen);
+		break;
+	    }
 	    ais->type4.year		= UBITS(38, 14);
 	    ais->type4.month		= UBITS(52, 4);
 	    ais->type4.day		= UBITS(56, 5);
