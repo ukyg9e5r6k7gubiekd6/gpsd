@@ -809,13 +809,13 @@ def aivdm_unpack(data, offset, values, instructions):
 def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     "Generator code - read forever from source stream, parsing AIS messages."
     payload = ''
+    raw = ''
     values = {}
     while True:
         line = source.readline()
         if not line:
             return
-        if verbose > 0:
-            sys.stdout.write(line)
+        raw += line
         # Ignore comments
         if line.startswith("#"):
             continue
@@ -853,7 +853,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                         elif type(formatter) == type(lambda x: x):
                             cooked[i][1] = inst.formatter(value)
             values = {}
-            yield cooked
+            yield (raw, cooked)
+            raw = ''
         except AISUnpackingException, e:
             if skiperr:
                 # FIXME: Add error notification here
@@ -889,15 +890,19 @@ if __name__ == "__main__":
         elif switch == '-v':
             verbose += 1
 
-    for parsed in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
-        if json:
-            print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
-        elif csv:
-            print ",".join(map(lambda x: str(x[1]), parsed))
-        else:
-            for (inst, value) in parsed:
-                print "%-25s: %s" % (inst.legend, value)
-            print "%%"
-        sys.stdout.flush()
-
+    try:
+        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+            if verbose >= 1:
+                sys.stdout.write(raw)
+            if json:
+                print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
+            elif csv:
+                print ",".join(map(lambda x: str(x[1]), parsed))
+            else:
+                for (inst, value) in parsed:
+                    print "%-25s: %s" % (inst.legend, value)
+                print "%%"
+            sys.stdout.flush()
+    except KeyboardInterrupt:
+        pass
 # $Id$
