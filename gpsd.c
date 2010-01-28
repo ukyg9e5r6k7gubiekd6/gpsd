@@ -342,9 +342,12 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	sat.sa_in6.sin6_port = htons(port);
 
 	/*
-         * POSIX would have us use PF_INET6 here, but Linux specifies
-         * AF_INET6.  Turns out they are functionally equivalent
-         * so flip a coin as to which is 'correct'.
+         * Traditionally BSD uses "communication domains", named by
+         * constants starting with PF_ as the first argument for
+         * select.  In practice PF_INET has the same value as AF_INET
+         * (on BSD and Linux, and probably everywhere else).  POSIX
+         * leaves much of this unspecified, but requires that AF_INET
+         * be recognized.  We follow tradition here.
          */
 	s = socket(PF_INET6, type, proto);
 	break;
