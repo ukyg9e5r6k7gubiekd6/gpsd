@@ -109,7 +109,8 @@ href="http://www.gnustep.it/enrico/position/">position</a>, <a
 href="http://roadmap.sourceforge.net/">roadmap</a>, <a
 href="http://roadnav.sourceforge.net/">roadnav</a>, <a
 href="http://www.navit-project.org/">navit</a>, <a
-href="http://viking.sf.net">viking</a>, and
+href="http://viking.sf.net">viking</a>, <a
+href="http://opencpn.org">opencpn</a>, and <a
 href="http://icculus.org/obdgpslogger/">obdgpslogger</a>.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero
