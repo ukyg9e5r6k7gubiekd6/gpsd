@@ -111,7 +111,7 @@ relevant proprietary standards.  If you are such a person, please help
 by reporting the following to be included in future versions of this
 document:
 
-* Sample sentences of types 13, 16-17, 22-23, and 25-26 together with
+* Sample sentences of types 16-17, 22-23, and 25-26 together with
   decoded dumps of the field values.  Please note that sample
   sentences not accompanied by field dumps are *not* useful.
 
@@ -463,8 +463,8 @@ set to use.
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-12, 14-15, 18-21, and 24.  Described but unchecked are 13, 16-17,
-22-23, and 25-26.
+1-15, 18-21, and 24.  Described but unchecked are 16-17, 22-23, and 
+25-26.
 
 === Types 1, 2 and 3: Position Report Class A ===
 

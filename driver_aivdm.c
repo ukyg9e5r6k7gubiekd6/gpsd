@@ -4,8 +4,8 @@
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
  *
- * Code for message types 1-12, 14-15, 18-21, and 24 has been tested against
- * live data with known-good decodings. Code for message types 13, 16-17,
+ * Code for message types 1-15, 18-21, and 24 has been tested against
+ * live data with known-good decodings. Code for message types 16-17,
  * 22-23, and 25-26 has not.
  */
 #include <sys/types.h>

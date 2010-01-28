@@ -19,8 +19,8 @@
 #   in the wild yet as of Jan 2010; not a lot of point in trying util
 #   we have test data.
 #
-# Decoding for 1-12, 14-15, 18-21, and 24 have been tested against live data.
-# Decoding for 13, 16-17, 22-23, and 25-26 have not.
+# Decoding for 1-15, 18-21, and 24 have been tested against live data.
+# Decoding for 16-17, 22-23, and 25-26 have not.
 
 # Here are the pseudoinstructions in the pseudolanguage.
 

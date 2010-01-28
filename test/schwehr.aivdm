@@ -306,6 +306,23 @@
 #       Destination MMSI         : 413118000
 #       Retransmit flag          : 0
 #       Text                     : NI HAO.CALL TEST
+!AIVDM,2,1,1,A,<39KdV8jIGtP7E4P@=PjEP>P81@9P>5GPI9BP?<P4P25CP6B=P1<P6E:19B1,0*02
+!AIVDM,2,2,1,A,80,4*1B
+#       Message Type             : 12
+#       Repeat Indicator         : 0
+#       MMSI                     : 211217560
+#       Sequence Number          : 2
+#       Destination MMSI         : 211378120
+#       Retransmit flag          : 0
+#       Text                     : GUD PM 2U N HAPI NEW YIR OL D BES FRM AL FUJAIRAH
+# Type 13:
+# This message was shipped to acknowledge the last type 12 and is verified
+# by the fact that the MMSI fields are right. 
+!AIVDM,1,1,,A,=39UOj0jFs9R,0*65
+#       Message Type             : 13
+#       Repeat Indicator         : 0
+#       MMSI                     : 211378120
+#       MMSI number 1            : 211217560
 #
 # Type 14:
 # From AIS Hub via Neal Arundale.  Dumps by ais.py.
