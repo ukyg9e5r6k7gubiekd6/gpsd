@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.21, Dec 2009
+v1.22, Jan 2010
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -305,7 +305,7 @@ interpreted in one of the following ways:
 Numeric bitfields are interpreted as big-endian twos-complement
 integers; when signed, the sign bit is the highest.  
 
-Float fields usully have an associated divisor which should be applied
+Float fields usually have an associated divisor which should be applied
 to convert to the correct units. In one case, the ROT field in message
 types 1-3, the scaling operation involves a more laborate formula.
 
@@ -410,7 +410,7 @@ types are as follows:
 |26 |Binary Message, Multiple Slot
 |======================================================
 
-In normal operation, an AIS transceiver will send a position report
+In normal operation, an AIS transceiver will broadcast a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
 speed while underway, and every 3 minutes while the vessel is at
 anchor and stationary. It will send a type 5 identification every 6
@@ -431,6 +431,16 @@ In practice, message types other than 1, 3, 4, 5, 18, and 24 are
 unusual or rare; many AIS transponders never emit them.  As of
 November 2009, an overnight capture of a full feed from <<<AISHUB>>>
 shows no type 25 or type 26 messages at all.
+
+While the expected bit length or length range of each message is
+documented, it is common for receivers to ship slightly oversized
+messages with trailing garbage. For example, Type 1 messages not
+infrequently have length 204 rather than 168, and I have seen valid
+type 5 messages with a length of 426 rather than 424.  Decoders should
+do whatever length checking is needed to prevent buffer overruns
+(especially an issue for message types with trailing binary data or
+strings: 6, 8, 12, 14, 17, 24, 25, 26). Otherwise, strict length
+checks may throw out valid data.
 
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).  The first three digits convey information
@@ -461,7 +471,7 @@ decoded data rendered by known-good implementations for message types
 Type 1, 2 and 3 messages share a common reporting structure for
 navigational information; we'll call it the Common Navigation Block
 (CNB). This is the information most likely to be of interest for
-decoding software.
+decoding software. Total of 168 bits, occupying one AIVDM sentence.
 
 .Common Navigation Block
 [frame="topbot",options="header"]
@@ -587,8 +597,7 @@ Monitoring is being used to check the performance of the EPFD.
 a detailed description of this flag.
 
 Bits 149-167 are diagnostic information for the radio system.  Consult
-<<IALA>> for detailed description of the latter.  Total of 168 bits,
-occupying one AIVDM sentence.
+<<IALA>> for detailed description of the latter.
 
 === Type 4: Base Station Report ===
 
@@ -1797,3 +1806,6 @@ Version 1.20 adds a list of AIS feed sites - just two, so far.
 
 Version 1.21 describes JSON-AIS more completely.  It adds descriptions
 for AIS messages type 25 and 26, not yet observed in the wild.
+
+Version 1.22 describes the problem with message length checks.
+

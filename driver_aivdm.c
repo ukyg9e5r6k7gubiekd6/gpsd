@@ -155,12 +155,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 1:	/* Position Report */
 	case 2:
 	case 3:
-	    if (ais_context->bitlen != 168) {
-		gpsd_report(LOG_ERROR, "AIVDM message type %d size not 168 bits (%zd).\n",
-			    ais->type,
-			    ais_context->bitlen);
-		break;
-	    }
 	    ais->type1.status		= UBITS(38, 4);
 	    ais->type1.turn		= SBITS(42, 8);
 	    ais->type1.speed		= UBITS(50, 10);
