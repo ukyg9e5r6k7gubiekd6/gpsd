@@ -868,7 +868,7 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjsvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjst:vx")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
@@ -878,13 +878,16 @@ if __name__ == "__main__":
     csv = False
     skiperr = False
     verbose = 0
+    types = []
     for (switch, val) in options:
         if switch == '-c':
             csv = True
-        elif switch == '-s':
-            scaled = True
         elif switch == '-j':
             json = True
+        elif switch == '-s':
+            scaled = True
+        elif switch == '-t':
+            types = map(int, val.split(","))
         elif switch == '-x':
             skiperr = True
         elif switch == '-v':
@@ -892,6 +895,8 @@ if __name__ == "__main__":
 
     try:
         for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+            if types and parsed[0][1] not in types:
+                continue
             if verbose >= 1:
                 sys.stdout.write(raw)
             if json:
