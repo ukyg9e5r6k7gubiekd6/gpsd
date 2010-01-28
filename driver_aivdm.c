@@ -535,8 +535,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 25:	/* Binary Message, Single Slot */
+	    /* this check and the fikollowing one reject line noise */
+	    if (ais_context->bitlen < 40 || ais_context->bitlen > 168) {
+		gpsd_report(LOG_ERROR, "AIVDM message type 25 size not between 40 to 168 bits (%zd).\n",
+			    ais_context->bitlen);
+		break;
+	    }
 	    ais->type25.addressed	= (bool)UBITS(38, 1);
 	    ais->type25.structured	= (bool)UBITS(39, 1);
+	    if (ais_context->bitlen < ( 40 + (16*ais->type25.structured) + (30*ais->type25.addressed) ) ) {
+		gpsd_report(LOG_ERROR, "AIVDM message type 25 too short for mode.\n");
+		break;
+	    }
 	    if (ais->type25.addressed)
 		ais->type25.dest_mmsi   = UBITS(40, 30);
 	    if (ais->type25.structured)
