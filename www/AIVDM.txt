@@ -113,7 +113,8 @@ document:
 
 * Sample sentences of types 16-17, 22-23, and 25-26 together with
   decoded dumps of the field values.  Please note that sample
-  sentences not accompanied by field dumps are *not* useful.
+  sentences not accompanied by field dumps are *not* useful; I
+  can get plenty of those.
 
 == Open-Source Implementations ==
 
@@ -1619,7 +1620,7 @@ the type of AIS equipment.
 Most sites that advertise "live" AIS feeds actually give you a map
 display through a browser.  Here are a few from which you can get raw
 sentence data over a TCP/IP port for testing.  Coverage on these is
-not yet very comprehensive; these sites tnd to have good coverage in
+not yet very comprehensive; these sites tend to have good coverage in
 Europe, the U.S. and a few ports in Asia but to be spotty elsewhere.
 See their siting maps for details.
 
