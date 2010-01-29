@@ -36,9 +36,9 @@ exists because assembling them into a complete picture is both
 technically difficult and impeded by legal barriers.
 
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
-Shipborne Automatic Identification System Using Time Division
-Multiple Access" <<ITU1371>>, issued in 2001, describes the format of
-AIS binary messages. It is proprietary, expensive, and surrounded by
+Shipborne Automatic Identification System Using Time Division Multiple
+Access" <<ITU1371>>, issued in 2001, describes the bit-level format of
+AIS radio messages. It is proprietary, expensive, and surrounded by
 attack lawyers.  I have not looked at it.
 
 ITU-R M.1371 is expanded and clarified by "IALA Technical
@@ -50,13 +50,14 @@ originally issued.  These add interpretations to packet bitfields that
 were previously marked "spare" and "regional reserved".  I have not
 seen these either, but have been passed information on them.
 
-The ASCII format for AIS messages seems to have been set by IEC-PAS
-61162-100, "Maritime navigation and radiocommunication equipment and
-systems" <<IEC-PAS>>. It is proprietary and I have not looked at it.
-Various public sources indicate that it has been "harmonized" with some
-version of NMEA 0183 <<NMEA>>, which I also have not looked at because
-it too is proprietary and expensive, and surrounded by even more
-rapacious attack lawyers.
+The ASCII format for AIVDM/AIVDO representations of AIS radio messages
+seems to have been set by IEC-PAS 61162-100, "Maritime navigation and
+radiocommunication equipment and systems" <<IEC-PAS>>. It is
+proprietary and I have not looked at it.  Various public sources
+indicate that it has been "harmonized" with some version of NMEA 0183
+<<NMEA>>, which I also have not looked at because it too is
+proprietary and expensive, and surrounded by even more rapacious
+attack lawyers.
 
 == Information Sources ==
 
