@@ -859,6 +859,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             raw = ''
         except KeyboardInterrupt:
             raise KeyboardInterrupt
+        except GeneratorExit:
+            raise GeneratorExit
         except AISUnpackingException, e:
             if skiperr:
                 sys.stderr.write("%s: %s\n" % (`e`, raw.strip()))
