@@ -643,6 +643,11 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |8    |Galileo
 |===================================
 
+Note: though values 9-15 are marked "not used" in <<IALA>>, the EPFD
+type value 15 (all field bits 1) is not uncommon in the wild; it
+appears some receivers emit it as the Undefined value. Decoders should
+be prepared to accept this.
+
 === Type 5: Ship static and voyage related data ===
 
 Message has a total of 424 bits, occupying two AIVDM sentences.
@@ -771,6 +776,13 @@ the dimensions to port and starboard, the special value 63 indicates
 |98     |Other Type, Reserved for future use
 |99     |Other Type, no additional information
 |==============================================================
+
+Note that garbage values greater than 99 are supposed to be unused,
+but are not uncommon in the wild; AIS transponers seem prone to put
+garbage in this field when it's not explicitly set.  Decoders should
+treat these like value 0 rather than throwing an exception until and
+unless the controlled vocabulary is extended to include the unknown
+values.
 
 === Type 6: Addressed Binary Message ===
 
@@ -1808,4 +1820,4 @@ Version 1.21 describes JSON-AIS more completely.  It adds descriptions
 for AIS messages type 25 and 26, not yet observed in the wild.
 
 Version 1.22 describes the problem with message length checks.
-
+Notes on EPFD value 15 and shiptype values > 99 are added.

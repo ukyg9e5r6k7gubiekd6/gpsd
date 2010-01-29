@@ -169,7 +169,7 @@ type4 = (
     bitfield("lat",     27,  "signed",   0x3412140, "Latitude",
              formatter=cnb_latlon_format),
     bitfield("epfd",     4,  "unsigned", None,      "Type of EPFD",
-             validator=lambda n: n >= 0 and n <= 8,
+             validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
     spare(10),
     bitfield("raim",     1,  "unsigned", None,      "RAIM flag "),
@@ -285,14 +285,14 @@ type5 = (
     bitfield("callsign",     42, 'string',   None, "Call Sign"),              
     bitfield("shipname",    120, 'string',   None, "Vessel Name"),
     bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
-             validator=lambda n: n >= 0 and n <= 99,
+             #validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
     bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
     bitfield("to_port",       6, 'unsigned',    0, "Dimension to Port"),
     bitfield("to_starbord",   6, 'unsigned',    0, "Dimension to Starboard"),
     bitfield("epfd",          4, 'unsigned',    0, "Position Fix Type",
-             validator=lambda n: n >= 0 and n <= 8,
+             validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
     bitfield("month",         4, 'unsigned',    0, "ETA month"),
     bitfield("day",           5, 'unsigned',    0, "ETA day"),
@@ -469,14 +469,14 @@ type19 = (
     bitfield("regional",    4,  'unsigned', None,      "Regional reserved"),
     bitfield("shipname",  120,  'string',   None,      "Vessel Name"),
     bitfield("shiptype",    8,  'unsigned', None,      "Ship Type",
-             validator=lambda n: n >= 0 and n <= 99,
+             #validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("to_bow",      9,  'unsigned', 0,         "Dimension to Bow"),
     bitfield("to_stern",    9,  'unsigned', 0,         "Dimension to Stern"),
     bitfield("to_port",     6,  'unsigned', 0,         "Dimension to Port"),
     bitfield("to_starbord", 6,  'unsigned', 0,         "Dimension to Starboard"),
     bitfield("epfd",        4,  'unsigned', 0,         "Position Fix Type",
-             validator=lambda n: n >= 0 and n <= 8,
+             validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
     bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
     bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
@@ -552,7 +552,7 @@ type21 = (
     bitfield("to_port",         6, 'unsigned',  0,         "Dimension to Port"),
     bitfield("to_starboard",    6, 'unsigned',  0,         "Dimension to Starboard"),
     bitfield("epfd",            4, 'unsigned',  0,         "Position Fix Type",
-             validator=lambda n: n >= 0 and n <= 8,
+             validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
     bitfield("second",          6, 'unsigned',  0,         "UTC Second"),
     bitfield("off_position",    1, 'unsigned',  0,         "Off-Position Indicator"),
@@ -618,7 +618,7 @@ type23 = (
              validator=lambda n: n >= 0 and n <= 31,
              formatter=station_type_legends),
     bitfield("shiptype",   8, 'unsigned',  0,       "Ship Type",
-             validator=lambda n: n >= 0 and n <= 99,
+             #validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     spare(22),
     bitfield("txrx",       2, 'unsigned',  0,       "Tx/Rx mode"),
@@ -851,6 +851,9 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                         cooked[i][1] = "n/a"
                     elif inst.formatter:
                         if type(inst.formatter) == type(()):
+                            # Assumes 0 is the legend for the "undefined" value 
+                            if value >= len(inst.formatter):
+                                value = 0
                             cooked[i][1] = inst.formatter[value]
                         elif type(formatter) == type(lambda x: x):
                             cooked[i][1] = inst.formatter(value)
