@@ -948,7 +948,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     gpsd_report(LOG_RAW, "SiRF: Raw packet type 0x%02x length %zd: %s\n",
 	buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "MID%d",(int)buf[0]);
+		   "MID %d",(int)buf[0]);
 
     /* could change if the set of messages we enable does */
     session->cycle_end_reliable = true;
@@ -1222,7 +1222,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    gpsd_report(LOG_PROG, "SiRF: baudrate: %d\n",
 	        session->gpsdata.dev.baudrate);
 	    (void)usleep(3330);	/* guessed settling time */
-	    gpsd_report(LOG_PROG, "SiRF: unset MID30...\n");
+	    gpsd_report(LOG_PROG, "SiRF: unset MID 30...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid30);
 	    (void)usleep(3330);	/* guessed settling time */
 
@@ -1238,7 +1238,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session->gpsdata.gps_fd, sbasparams);
 
 	    gpsd_report(LOG_PROG, 
-	                "SiRF: unset MID29...\n");
+	                "SiRF: unset MID 29...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid29);
 
 	    gpsd_report(LOG_PROG, "SiRF: Probing for firmware version...\n");
