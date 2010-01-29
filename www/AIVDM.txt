@@ -1630,6 +1630,9 @@ Share alike. You contribute a feed, you get back all feeds.
 - http://www.aislive.com/[AIS Live]:
 Subscription access to real-time data, free access to time-delayed data. 
 
+- hd-sf.com:9009
+Free San Francisco Bay Area AIS feed. For non-commercial use only.
+
 == JSON-AIS encoding ==
 
 Here is an application of the JSON metaformat to present AIS data in a
@@ -1821,4 +1824,5 @@ Version 1.21 describes JSON-AIS more completely.  It adds descriptions
 for AIS messages type 25 and 26, not yet observed in the wild.
 
 Version 1.22 describes the problem with message length checks.
-Notes on EPFD value 15 and shiptype values > 99 are added.
+Notes on EPFD value 15 and shiptype values > 99 are added.  Added
+another AIS feed.
