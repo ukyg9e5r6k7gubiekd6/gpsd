@@ -752,7 +752,9 @@ class BitVector:
         "Used for dumping binary data."
         return str(self.bitlen) + ":" + "".join(map(lambda d: "%02x" % d, self.bits[:(self.bitlen + 7)/8]))
 
-class AISUnpackingException:
+import sys, exceptions
+
+class AISUnpackingException(exceptions.Exception):
     def __init__(self, fieldname, value):
         self.fieldname = fieldname
         self.value = value
@@ -855,12 +857,21 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             values = {}
             yield (raw, cooked)
             raw = ''
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
         except AISUnpackingException, e:
             if skiperr:
-                # FIXME: Add error notification here
+                sys.stderr.write("Validation exception on type %s: %s\n" % (cooked[0][1], raw.strip()))
                 continue
             else:
                 raise e
+        except:
+            (exc_type, exc_value, exc_traceback) = sys.exc_info()
+            sys.stderr.write("Exception %s on: %s\n" % (exc_type, line))
+            if skiperr:
+                continue
+            else:
+                raise exc_type, exc_value, exc_traceback
 
 # The rest is just sequencing and report generation.
 
