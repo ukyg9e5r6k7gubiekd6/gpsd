@@ -861,7 +861,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             raise KeyboardInterrupt
         except AISUnpackingException, e:
             if skiperr:
-                sys.stderr.write("Validation exception on type %s: %s\n" % (cooked[0][1], raw.strip()))
+                sys.stderr.write("%s: %s\n" % (`e`, raw.strip()))
                 continue
             else:
                 raise e
