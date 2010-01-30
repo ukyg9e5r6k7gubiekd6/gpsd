@@ -501,6 +501,8 @@
 # Type 22:
 # From AISHub.  Broadcast case: we won't count this as a full test by
 # itself because the bit layout of the addressed case is different.
+# (The addressed form seems to be rare or nonexistent in the wild; none
+# showed up in a three-hour sample from AISHub, while many broadcasts did.)
 # Verified only by the fact that the Python and C decoders get consistent
 # results, we haven't actually seen an independent dump of these fields. 
 # (The noaadata 0.42 dumper for this type doesn't seem to work.)
@@ -520,6 +522,23 @@
 #        Channel A Band           : 0
 #        Channel A Band           : 0
 #        Zone size                : 4
+#
+# Type 23:
+# From AISHub. Only a regression test to check that the C and Python decoders
+# do the same thing, not yet checked against other decoders.
+!AIVDM,1,1,,B,G02:Kn01R`sn@291nj600000900,2*12
+#        Message Type             : 23
+#        Repeat Indicator         : 0
+#        MMSI                     : 2268120
+#        NE Longitude             : 1578
+#        NE Latitude              : 30642
+#        SW Longitude             : 1096
+#        SW Latitude              : 30408
+#        Station Type             : 6
+#        Ship Type                : 0
+#        Tx/Rx mode               : 0
+#        Reporting interval       : 9
+#        Quiet time               : 0
 #
 # Type 24:
 # One pair of type A and Type B messages. Note, these have Coast Guard 
