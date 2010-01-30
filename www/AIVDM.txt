@@ -1344,8 +1344,8 @@ network.
 |87-103   |17  |NE Latitude      |ne_lat    |Signed: NE latitude to 0.1 minutes
 |104-121  |18  |SW Longitude     |sw_lon    |Signed: SW longitude to 0.1 minutes
 |122-138  |17  |SW Latitude      |sw_lat    |Signed: SW latitude to 0.1 minutes
-|69-98    |30  |MMSI1            |dest1_mmsi|Unsigned: MMSI of destination 1
-|104-133  |30  |MMSI2            |dest1_mmsi|Unsigned: MMSI of destination 2
+|69-98    |30  |MMSI1            |dest1     |Unsigned: MMSI of destination 1
+|104-133  |30  |MMSI2            |dest2     |Unsigned: MMSI of destination 2
 |139-139  | 1  |Addressed        |addressed |0=Broadcast, 1=Addressed
 |140-140  | 1  |Channel A Band   |band_a    |0=Default, 1=12.5kHz
 |141-141  | 1  |Channel B Band   |band_b    |0=Default, 1=12.5kHz
@@ -1377,7 +1377,7 @@ common navigation block and elsewhere.
 
 The band fields control channel bandwidth for channels A and B, and
 the zonesize field describes the size of the transition zone around the
-control juisdiction. The semantics of these fields is complicated,
+control jurisdiction. The semantics of these fields is complicated,
 controlling transponder behavior as it moves between jurisdictions;
 see <<IALA>> for full details.
 
