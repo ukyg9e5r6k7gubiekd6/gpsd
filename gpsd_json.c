@@ -1183,47 +1183,41 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	}
 	break;
     case 22:	/* Channel Management */
-	if (scaled) {
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "\"channel_a\":%u,\"channel_b\":%u,"
+		       "\"txrx\":%u,\"power\":%s,",
+		       ais->type22.channel_a,
+		       ais->type22.channel_b,
+		       ais->type22.txrx,
+		       JSON_BOOL(ais->type22.power));
+	if (ais->type22.addressed) {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"channel_a\":%u,\"channel_b\":%u,"
-			   "\"txrx\":%u,\"power\":%s,"
+			   "\"dest1\":%u,\"dest2\":%u",
+			   ais->type22.mmsi.dest1, ais->type22.mmsi.dest2);
+	} else if (scaled) {
+	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
-			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
-			   "\"addressed\":%s,\"band_a\":%s,"
-			   "\"band_b\":%s,\"zonesize\":%u}\r\n",
-			   ais->type22.channel_a,
-			   ais->type22.channel_b,
-			   ais->type22.txrx,
-			   JSON_BOOL(ais->type22.power),
-			   ais->type22.ne_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.ne_lat / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.sw_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.sw_lat / AIS_CHANNEL_LATLON_SCALE,
-			   JSON_BOOL(ais->type22.addressed),
-			   JSON_BOOL(ais->type22.band_a),
-			   JSON_BOOL(ais->type22.band_b),
-			   ais->type22.zonesize);
+			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",",
+			   ais->type22.area.ne_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.area.ne_lat / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.area.sw_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.area.sw_lat / AIS_CHANNEL_LATLON_SCALE);
 	} else {
 	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"channel_a\":%u,\"channel_b\":%u,"
-			   "\"txrx\":%u,\"power\":%s,"
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
-			   "\"sw_lon\":%d,\"sw_lat\":%d,"
-			   "\"addressed\":%s,\"band_a\":%s,"
-			   "\"band_b\":%s,\"zonesize\":%u}\r\n",
-			   ais->type22.channel_a,
-			   ais->type22.channel_b,
-			   ais->type22.txrx,
-			   JSON_BOOL(ais->type22.power),
-			   ais->type22.ne_lon,
-			   ais->type22.ne_lat,
-			   ais->type22.sw_lon,
-			   ais->type22.sw_lat,
-			   JSON_BOOL(ais->type22.addressed),
-			   JSON_BOOL(ais->type22.band_a),
-			   JSON_BOOL(ais->type22.band_b),
-			   ais->type22.zonesize);
+			   "\"sw_lon\":%d,\"sw_lat\":%d,",
+			   ais->type22.area.ne_lon,
+			   ais->type22.area.ne_lat,
+			   ais->type22.area.sw_lon,
+			   ais->type22.area.sw_lat);
 	}
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "\"addressed\":%s,\"band_a\":%s,"
+		       "\"band_b\":%s,\"zonesize\":%u}\r\n",
+		       JSON_BOOL(ais->type22.addressed),
+		       JSON_BOOL(ais->type22.band_a),
+		       JSON_BOOL(ais->type22.band_b),
+		       ais->type22.zonesize);
 	break;
     case 23:	/* Group Assignment Command */
 	if (scaled) {

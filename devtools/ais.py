@@ -15,6 +15,8 @@
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
 # * Does not join the type 21 name extension field to the name fields.
+# * Only handles the broadcast case of type 22.  The problem is that the
+#   addressed field is located *after* the variant parts. Grrrr... 
 # * Message type 26 is presently unsupported. It hasn't been observed
 #   in the wild yet as of Jan 2010; not a lot of point in trying util
 #   we have test data.
@@ -570,13 +572,13 @@ type22 = (
     bitfield("channel_b", 12, 'unsigned',  0,       "Channel B"),
     bitfield("txrx",       4, 'unsigned',  0,       "Tx/Rx mode"),
     bitfield("power",      1, 'unsigned',  0,       "Power"),
-    bitfield("ne_lon",    18, 'unsigned',  0x1a838, "NE Longitude",
+    bitfield("ne_lon",    18, 'signed',    0x1a838, "NE Longitude",
              formatter=short_latlon_format),
-    bitfield("ne_lat",    17, 'unsigned',  0xd548,  "NE Latitude",
+    bitfield("ne_lat",    17, 'signed',    0xd548,  "NE Latitude",
              formatter=short_latlon_format),
-    bitfield("sw_lon",    18, 'unsigned',  0x1a838, "SW Longitude",
+    bitfield("sw_lon",    18, 'signed',    0x1a838, "SW Longitude",
              formatter=short_latlon_format),
-    bitfield("sw_lat",    17, 'unsigned',  0xd548,  "SW Latitude",
+    bitfield("sw_lat",    17, 'signed',    0xd548,  "SW Latitude",
              formatter=short_latlon_format),
     bitfield("addressed",  1, 'unsigned',  0,       "Addressed"),
     bitfield("band_a",     1, 'unsigned',  0,       "Channel A Band"),
@@ -606,13 +608,13 @@ station_type_legends = (
 
 type23 = (
     spare(2),
-    bitfield("ne_lon",    18, 'unsigned',  0x1a838, "NE Longitude",
+    bitfield("ne_lon",    18, 'signed',    0x1a838, "NE Longitude",
              formatter=short_latlon_format),
-    bitfield("ne_lat",    17, 'unsigned',  0xd548,  "NE Latitude",
+    bitfield("ne_lat",    17, 'signed',    0xd548,  "NE Latitude",
              formatter=short_latlon_format),
-    bitfield("sw_lon",    18, 'unsigned',  0x1a838, "SW Longitude",
+    bitfield("sw_lon",    18, 'signed',    0x1a838, "SW Longitude",
              formatter=short_latlon_format),
-    bitfield("sw_lat",    17, 'unsigned',  0xd548,  "SW Latitude",
+    bitfield("sw_lat",    17, 'signed',    0xd548,  "SW Latitude",
              formatter=short_latlon_format),
     bitfield("stationtype",4, 'unsigned',  0,       "Station Type",
              validator=lambda n: n >= 0 and n <= 31,
@@ -884,7 +886,7 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjst:vx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cjst:v")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
@@ -892,7 +894,6 @@ if __name__ == "__main__":
     scaled = False
     json = False
     csv = False
-    skiperr = False
     verbose = 0
     types = []
     for (switch, val) in options:
@@ -910,7 +911,7 @@ if __name__ == "__main__":
             verbose += 1
 
     try:
-        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, True, verbose):
             if types and parsed[0][1] not in types:
                 continue
             if verbose >= 1:

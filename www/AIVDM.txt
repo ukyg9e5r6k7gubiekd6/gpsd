@@ -1077,8 +1077,8 @@ depending on payload size.
 |6-7     |  2 |Repeat Indicator    |repeat     |As in Common Navigation Block
 |8-37    | 30 |Source MMSI         |mmsi       |Unsigned integer: 9 digits
 |38-39   |  2 |Spare               |           |Not used
-|40-57   | 18 |Longitude           |lon        |Minutes/10
-|58-74   | 17 |Latitude            |lat        |Minutes/10
+|40-57   | 18 |Longitude           |lon        |Signed: minutes/10
+|58-74   | 17 |Latitude            |lat        |Signed: minutes/10
 |75-79   |  5 |Spare               |           |Not used - reserved
 |80-815  |736 |Payload             |data       |DGNSS correction data
 |==============================================================================
@@ -1340,10 +1340,12 @@ network.
 |52-63    |12  |Channel B        |channel_b |Channel number
 |64-67    | 4  |Tx/Rx mode       |txrx      |Transmit/receive mode
 |68-68    | 1  |Power            |power     |Low=0, high=1
-|69-86    |18  |NE Longitude     |ne_lon    |NE corner longitude to 0.1 minutes
-|87-103   |17  |NE Latitude      |ne_lat    |NE corner latitude to 0.1 minutes
-|104-121  |18  |SW Longitude     |sw_lon    |SW corner longitude to 0.1 minutes
-|122-138  |17  |SW Latitude      |sw_lat    |SW corner latitude to 0.1 minutes
+|69-86    |18  |NE Longitude     |ne_lon    |Signed: NE longitude to 0.1 minutes
+|87-103   |17  |NE Latitude      |ne_lat    |Signed: NE latitude to 0.1 minutes
+|104-121  |18  |SW Longitude     |sw_lon    |Signed: SW longitude to 0.1 minutes
+|122-138  |17  |SW Latitude      |sw_lat    |Signed: SW latitude to 0.1 minutes
+|69-98    |30  |MMSI1            |dest1_mmsi|Unsigned: MMSI of destination 1
+|104-133  |30  |MMSI2            |dest1_mmsi|Unsigned: MMSI of destination 2
 |139-139  | 1  |Addressed        |addressed |0=Broadcast, 1=Addressed
 |140-140  | 1  |Channel A Band   |band_a    |0=Default, 1=12.5kHz
 |141-141  | 1  |Channel B Band   |band_b    |0=Default, 1=12.5kHz
@@ -1351,13 +1353,33 @@ network.
 |145-167  |23  |Spare            |          |Reserved for future use
 |==============================================================================
 
-See <<IALA>> for details on the meaning of these fields.  txrx encodes
-the same information as the 2-bit field txrx field in message type 23;
-only the two low bits are used.
+The values of the channel_a and channel_b fields are ITU frequency
+designators for channelas A and B. Normally these will be 2087 and
+2088, the AIS 1 and AIS 2 frequencies of 87B (161.975 MHz) and 88B
+(162.025 MHz) respectively. Regional authorities may set different
+frequencies.
 
-Note that the 'not available' values for longitudesc and latitudes
+The txrx field encodes the same information as the 2-bit field txrx
+field in message type 23; only the two low bits are used.
+
+The power bit instructs designated recxeivers which power level to use.
+
+If the message is broadcast (addressed field is 0), the ne_lon,
+ne_lat, sw_lon, and sw_lat fields are the corners of a rectangular
+jurisdiction area over which control parameters are to be set.  If it
+is addressed (addressed field is 1), the same span of data is
+interpreted as two 30-bit MMSIs beginning at at bit offsets 69 and 104
+respectively.
+
+Note that the 'not available' values for longitude and latitudes
 match the short ones used in message 17, not the long ones used in the
 common navigation block and elsewhere. 
+
+The band fields control channel bandwidth for channels A and B, and
+the zonesize field describes the size of the transition zone around the
+control juisdiction. The semantics of these fields is complicated,
+controlling transponder behavior as it moves between jurisdictions;
+see <<IALA>> for full details.
 
 === Type 23: Group Assignment Command ===
 
@@ -1376,10 +1398,10 @@ station network.
 |6-7      | 2  |Repeat Indicator |repeat       |As in Common Navigation Block
 |8-37     |30  |MMSI             |mmsi         |Unsigned Integer: 9 digits
 |38-39    | 2  |Spare            |             |Not used
-|40-57    |18  |NE Longitude     |ne_lon       |Same as type 22
-|58-74    |17  |NE Latitude      |ne_lat       |Same as type 22
-|75-92    |18  |SW Longitude     |sw_lon       |Same as type 22
-|93-109   |17  |SW Latitude      |sw_lat       |Same as type 22
+|40-57    |18  |NE Longitude     |ne_lon       |Same as broadcast type 22
+|58-74    |17  |NE Latitude      |ne_lat       |Same as broadcast type 22
+|75-92    |18  |SW Longitude     |sw_lon       |Same as broadcast type 22
+|93-109   |17  |SW Latitude      |sw_lat       |Same as broadcast type 22
 |110-113  | 4  |Station Type     |station_type |Unsigned Integer, see below
 |114-121  | 8  |Ship Type        |ship_type    |As for Message type 5
 |122-143  |22  |Spare            |             |Not used
@@ -1393,7 +1415,7 @@ The target set of mobile stations is specified by the station-type and
 ship-type fields. An addressed (non-broadcast) message 22 overrides a
 message 23, but a message 23 ovewrrides a broadcast message 22.
 
-Note that the 'not available' values for longitudesc and latitudes
+Note that the 'not available' values for longitude and latitudes
 match the short ones used in messages 17 and 22, not the long ones
 used in the common navigation block and elsewhere.
 
@@ -1826,4 +1848,5 @@ for AIS messages type 25 and 26, not yet observed in the wild.
 
 Version 1.22 describes the problem with message length checks.
 Notes on EPFD value 15 and shiptype values > 99 are added.  Added
-another AIS feed.
+another AIS feed. Corrections and more details on message 22.
+

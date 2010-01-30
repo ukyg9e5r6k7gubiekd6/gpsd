@@ -498,6 +498,29 @@
 #        Virtual-Aid Flag: 0
 #        Assigned-Mode Flag: 0
 #
+# Type 22:
+# From AISHub.  Broadcast case: we won't count this as a full test by
+# itself because the bit layout of the addressed case is different.
+# Verified only by the fact that the Python and C decoders get consistent
+# results, we haven't actually seen an independent dump of these fields. 
+# (The noaadata 0.42 dumper for this type doesn't seem to work.)
+!AIVDM,1,1,,A,F030ot22N2P6aoQbhe4736L20000,0*1
+#        Message Type             : 22
+#        Repeat Indicator         : 0
+#        MMSI                     : 3160048
+#        Channel A                : 2087
+#        Channel B                : 2088
+#        Tx/Rx mode               : 0
+#        Power                    : 0
+#        NE Longitude             : -44100
+#        NE Latitude              : 27330
+#        SW Longitude             : -48100
+#        SW Latitude              : 25400
+#        Addressed                : 0
+#        Channel A Band           : 0
+#        Channel A Band           : 0
+#        Zone size                : 4
+#
 # Type 24:
 # One pair of type A and Type B messages. Note, these have Coast Guard 
 # extended fields after them.

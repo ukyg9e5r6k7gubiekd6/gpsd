@@ -493,11 +493,16 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type22.channel_b    = UBITS(52, 12);
 	    ais->type22.txrx         = UBITS(64, 4);
 	    ais->type22.power        = UBITS(68, 1);
-	    ais->type22.ne_lon       = SBITS(69, 18);
-	    ais->type22.ne_lat       = SBITS(87, 17);
-	    ais->type22.sw_lon       = SBITS(104, 18);
-	    ais->type22.sw_lat       = SBITS(122, 17);
 	    ais->type22.addressed    = UBITS(139, 1);
+	    if (!ais->type22.addressed) {
+		ais->type22.area.ne_lon       = SBITS(69, 18);
+		ais->type22.area.ne_lat       = SBITS(87, 17);
+		ais->type22.area.sw_lon       = SBITS(104, 18);
+		ais->type22.area.sw_lat       = SBITS(122, 17);
+	    } else {
+		ais->type22.mmsi.dest1             = SBITS(69, 30);
+		ais->type22.mmsi.dest2             = SBITS(104, 30);
+	    }
 	    ais->type22.band_a       = UBITS(140, 1);
 	    ais->type22.band_b       = UBITS(141, 1);
 	    ais->type22.zonesize     = UBITS(142, 3);

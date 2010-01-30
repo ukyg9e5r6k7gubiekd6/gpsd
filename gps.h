@@ -747,10 +747,18 @@ struct ais_t
 	    unsigned int txrx;		/* transmit/receive mode */
 	    bool power;			/* high-power flag */
 #define AIS_CHANNEL_LATLON_SCALE	600.0
-	    int ne_lon;			/* NE corner longitude */
-	    int ne_lat;			/* NE corner latitude */
-	    int sw_lon;			/* SW corner longitude */
-	    int sw_lat;			/* SW corner latitude */
+	    union {
+		struct {
+		    int ne_lon;		/* NE corner longitude */
+		    int ne_lat;		/* NE corner latitude */
+		    int sw_lon;		/* SW corner longitude */
+		    int sw_lat;		/* SW corner latitude */
+		} area;
+		struct {
+		    unsigned int dest1;	/* addressed station MMSI 1 */
+		    unsigned int dest2;	/* addressed station MMSI 2 */
+		} mmsi;
+	    };
 	    bool addressed;		/* addressed vs. broadast flag */
 	    bool band_a;		/* fix 1.5kHz band for channel A */
 	    bool band_b;		/* fix 1.5kHz band for channel B */
@@ -758,11 +766,11 @@ struct ais_t
 	} type22;
 	/* Type 23 - Group Assignment Command */
 	struct {
-	    //unsigned int spare;	spare bit(s) */
 	    int ne_lon;			/* NE corner longitude */
 	    int ne_lat;			/* NE corner latitude */
 	    int sw_lon;			/* SW corner longitude */
 	    int sw_lat;			/* SW corner latitude */
+	    //unsigned int spare;	spare bit(s) */
 	    unsigned int stationtype;	/* station type code */
 	    unsigned int shiptype;	/* ship type code */
 	    //unsigned int spare2;	spare bit(s) */
