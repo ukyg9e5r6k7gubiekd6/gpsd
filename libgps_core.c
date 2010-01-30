@@ -94,10 +94,6 @@ int gps_open_r(const char *host, const char *port,
 
     libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));    
 
-    if (strchr(host, ':') != NULL)
-	proto = AF_INET6;
-    else if (strchr(host, '.') != NULL)
-	proto = AF_INET;
     if ((gpsdata->gps_fd = netlib_connectsock(proto, host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return -1;
