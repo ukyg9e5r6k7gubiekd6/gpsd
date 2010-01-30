@@ -410,9 +410,12 @@ type16 = (
     bitfield("offset1  ", 12, 'unsigned', 0, "First slot offset"),
     bitfield("increment1",10, 'unsigned', 0, "First slot increment"),
     spare(2),
-    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2"),
-    bitfield("offset2",   12, 'unsigned', 0, "Second slot offset"),
-    bitfield("increment2",10, 'unsigned', 0, "Second slot increment"),
+    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2",
+             conditional=lambda i, v: v['length'] >= 144),
+    bitfield("offset2",   12, 'unsigned', 0, "Second slot offset",
+             conditional=lambda i, v: v['length'] >= 144),
+    bitfield("increment2",10, 'unsigned', 0, "Second slot increment",
+             conditional=lambda i, v: v['length'] >= 144),
     spare(2),
     )
 
@@ -835,6 +838,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         # Render assembled payload to packed bytes
         bits = BitVector()
         bits.from_sixbit(payload)
+        values['length'] = bits.bitlen
         # Magic recursive unpacking operation
         try:
             cooked = aivdm_unpack(bits, 0, values, aivdm_decode)

@@ -353,6 +353,17 @@
 #       First Message Type: 5
 #       First Slot Offset:  0
 #
+# Type 16:
+# From AISHub. Only a regression test to check that the C and Python decoders
+# do the same thing, not yet checked against other decoders.
+!AIVDM,1,1,,A,@01uEO@mMk7P<P00,0*18
+#       Message Type             : 16
+#       Repeat Indicator         : 0
+#       MMSI                     : 2053501
+#       Interrogated MMSI 1      : 224251000
+#       First slot offset        : 200
+#       First slot increment     : 0
+#
 # Type 18:
 # From Kurt Schwehr
 # I had to regenerate the CRC32 for this one myself, it was missing

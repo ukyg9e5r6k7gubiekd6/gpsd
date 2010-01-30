@@ -357,8 +357,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type16.mmsi1		= UBITS(40, 30);
 	    ais->type16.offset1		= UBITS(70, 12);
 	    ais->type16.increment1	= UBITS(82, 10);
-	    if (ais_context->bitlen <= 96)
-		ais->type16.mmsi2 = 0;
+	    if (ais_context->bitlen < 144)
+		ais->type16.mmsi2=ais->type16.offset2=ais->type16.increment2 = 0;
 	    else {
 		ais->type16.mmsi2	= UBITS(92, 30);
 		ais->type16.offset2	= UBITS(122, 12);
