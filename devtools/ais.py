@@ -887,13 +887,13 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 sys.stderr.write("%d: malformed line %s\n" % (lc, line.strip()))
                 well_formed = False
             else:
-                raise AISUnpackingException("checksum", crc)
+                raise AISUnpackingException(lc, "checksum", crc)
         if csum != crc:
             if skiperr:
                 sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" % (lc, csum, `crc`, line.strip()))
                 well_formed = False
             else:
-                raise AISUnpackingException("checksum", crc)
+                raise AISUnpackingException(lc, "checksum", crc)
         if fragment < expect or not well_formed:
             continue
         # Render assembled payload to packed bytes
@@ -924,7 +924,19 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                             cooked[i][1] = inst.formatter[value]
                         elif type(formatter) == type(lambda x: x):
                             cooked[i][1] = inst.formatter(value)
-            values = {}
+            expected = lengths.get(values['msgtype'], None)
+            if expected is not None:
+                if type(expected) == type(0):
+                    expected_range = (expected, expected)
+                else:
+                    expected_range = expected
+                actual = values['length']
+                if not (actual >= expected_range[0] and actual <= expected_range[1]):
+                    if skiperr:
+                        sys.stderr.write("%d: type %d expected %s bits but saw %s\n" % (lc, values['msgtype'], expected, actual))
+                    else:
+                        raise AISUnpackingException(lc, "length", actual)
+            values = {}                    
             yield (raw, cooked)
             raw = ''
         except KeyboardInterrupt:
@@ -939,7 +951,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 raise e
         except:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
-            sys.stderr.write("Exception %s on: %s\n" % (exc_type, line))
+            sys.stderr.write("Unknown exception on: %s\n" % (line))
             if skiperr:
                 continue
             else:
@@ -951,7 +963,7 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "chjst:v")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "chjqst:vx")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
@@ -959,10 +971,12 @@ if __name__ == "__main__":
     csv = False
     histogram = False
     json = False
+    quiet = False
     scaled = False
     types = []
     frequencies = {}
     verbose = 0
+    skiperr = True
     for (switch, val) in options:
         if switch == '-c':
             csv = True
@@ -970,17 +984,18 @@ if __name__ == "__main__":
             histogram = True
         elif switch == '-j':
             json = True
+        elif switch == '-q':
+            quiet = True
         elif switch == '-s':
             scaled = True
         elif switch == '-t':
             types = map(int, val.split(","))
-        elif switch == '-x':
-            skiperr = True
         elif switch == '-v':
             verbose += 1
-
+        elif switch == '-x':
+            skiperr = False
     try:
-        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, True, verbose):
+        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
             msgtype = parsed[0][1]
             if types and msgtype not in types:
                 continue
@@ -992,7 +1007,7 @@ if __name__ == "__main__":
                 print ",".join(map(lambda x: str(x[1]), parsed))
             elif histogram:
                 frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
-            else:
+            elif not quiet:
                 for (inst, value) in parsed:
                     print "%-25s: %s" % (inst.legend, value)
                 print "%%"
