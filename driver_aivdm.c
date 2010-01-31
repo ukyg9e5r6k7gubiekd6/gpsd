@@ -80,7 +80,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 #endif /* __UNUSED_DEBUG__ */
     int nfields = 0;
     unsigned char *data, *cp = ais_context->fieldcopy;
-    unsigned char ch;
+    unsigned char ch, pad;
     int i;
 
     if (buflen == 0)
@@ -102,6 +102,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     ais_context->await = atoi((char *)ais_context->field[1]);
     ais_context->part = atoi((char *)ais_context->field[2]);
     data = ais_context->field[5];
+    pad = ais_context->field[6][0];
     gpsd_report(LOG_PROG, "await=%d, part=%d, data=%s\n",
 		ais_context->await,
 		ais_context->part,
@@ -132,6 +133,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	}
 	/*@ +shiftnegative @*/
     }
+    if (isdigit(pad))
+	ais_context->bitlen += (pad - '0');	/* ASCII assumption */
     /*@ -charint @*/
 
     /* time to pass buffered-up data to where it's actually processed? */

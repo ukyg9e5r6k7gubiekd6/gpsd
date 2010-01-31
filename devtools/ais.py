@@ -754,9 +754,9 @@ class BitVector:
                 self.bitlen = len(data) * 8
             else:
                 self.bitlen = length
-    def from_sixbit(self, data):
+    def from_sixbit(self, data, pad=0):
         "Initialize bit vector from AIVDM-style six-bit armoring."
-        self.bits.extend([0] * len(data))
+        self.bits.extend([0] * (len(data) + pad))
         for ch in data:
             ch = ord(ch) - 48
             if ch > 40:
@@ -864,11 +864,12 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         if fragment == '1':
             payload = ''
         payload += fields[5]
+        pad = int(fields[6].split('*')[0])
         if fragment < expect:
             continue
         # Render assembled payload to packed bytes
         bits = BitVector()
-        bits.from_sixbit(payload)
+        bits.from_sixbit(payload, pad)
         values['length'] = bits.bitlen
         # Magic recursive unpacking operation
         try:
@@ -927,7 +928,7 @@ if __name__ == "__main__":
         raise SystemExit, 1
 
     csv = False
-    histogram = True
+    histogram = False
     json = False
     scaled = False
     types = []
