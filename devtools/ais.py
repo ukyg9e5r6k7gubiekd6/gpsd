@@ -890,19 +890,23 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cjst:v")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "chjst:v")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
 
-    scaled = False
-    json = False
     csv = False
-    verbose = 0
+    histogram = True
+    json = False
+    scaled = False
     types = []
+    frequencies = {}
+    verbose = 0
     for (switch, val) in options:
         if switch == '-c':
             csv = True
+        elif switch == '-h':
+            histogram = True
         elif switch == '-j':
             json = True
         elif switch == '-s':
@@ -916,7 +920,8 @@ if __name__ == "__main__":
 
     try:
         for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, True, verbose):
-            if types and parsed[0][1] not in types:
+            msgtype = parsed[0][1]
+            if types and msgtype not in types:
                 continue
             if verbose >= 1:
                 sys.stdout.write(raw)
@@ -924,11 +929,18 @@ if __name__ == "__main__":
                 print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
             elif csv:
                 print ",".join(map(lambda x: str(x[1]), parsed))
+            elif histogram:
+                frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
             else:
                 for (inst, value) in parsed:
                     print "%-25s: %s" % (inst.legend, value)
                 print "%%"
             sys.stdout.flush()
+        if histogram:
+            keys = frequencies.keys()
+            keys.sort()
+            for msgtype in keys:
+                print "%d\t%d" % (msgtype, frequencies[msgtype])
     except KeyboardInterrupt:
         pass
 # $Id$
