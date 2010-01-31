@@ -1059,7 +1059,7 @@ should be interpreted as a channel assignment for two stations; no
 padding follows.
 
 When increment is zero, the offset field is interpreted as the
-frequency with which the subordinate station should report prer
+frequency with which the subordinate station should report per
 10-minute interval. When increment is nonzero, reporting interval
 is specified at the level of TDMA slot numbers; see <<IALA>> for the 
 detailed specification.
@@ -1479,7 +1479,7 @@ Equivalent of a Type 5 message for ships using Class B equipment.  A
 "Type 24" may be in part A or part B format; either is 168 bits.
 Parts A and B are expected to be broadcast in adjacent pairs.  The
 interpretation of some fields in Type B format changes depending on
-the range of the Type B MMSI field.
+the range of the Type B MMSI field. 168 bits.
 
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.
@@ -1552,7 +1552,7 @@ radio status block.
 
 === Type 26: Binary Message, Multiple Slot  ===
 
-Maximum of 1064 bits (up to 5 slots).
+Takes up 60-1064 bits (up to 5 slots).
 
 [frame="topbot",options="header"]
 |==============================================================================

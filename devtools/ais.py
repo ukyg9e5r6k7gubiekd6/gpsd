@@ -691,6 +691,37 @@ aivdm_decode = (
                               type25]),
     )
 
+# Length ranges.  We use this for integrity checking.
+# When a renge is a tuple, it's (minimum, maximum).
+lengths = {
+    1:  168,
+    2:  168,
+    3:  168,
+    4:  168,
+    5:  424,
+    6:  (88, 1008),
+    7:  (72, 168),
+    8:  (56, 1008),
+    9:  168,
+    10: 72,
+    11: 168,
+    12: (72, 1008),
+    13: (72, 168),
+    14: (40, 1008),
+    15: (88, 168),
+    16: (96, 144),
+    17: (80, 816),
+    18: 168,
+    19: 312,
+    20: (72, 160),
+    21: (272, 360),
+    22: 168,
+    23: 160,
+    24: 168,
+    25: 168,
+    26: (60, 1004),
+    }
+
 field_groups = (
     # This one occurs in message type 4
     (3, ["year", "month", "day", "hour", "minute", "second"],
