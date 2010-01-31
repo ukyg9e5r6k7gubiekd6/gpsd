@@ -849,13 +849,20 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     payload = ''
     raw = ''
     values = {}
+    crc_ok = False
     while True:
         line = source.readline()
         if not line:
             return
         raw += line
+        # Compute CRC-16 checksum
+        packet = line.strip()[1:-3]	# Strip leading !, trailing * and CRC
+        csum = 0
+        for c in packet:
+            csum ^= ord(c)
+        csum = "%02X" % csum
         # Ignore comments
-        if line.startswith("#"):
+        if not line.startswith("!"):
             continue
         # Assemble fragments from single- and multi-line payloads
         fields = line.split(",")
@@ -863,9 +870,17 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         fragment = fields[2]
         if fragment == '1':
             payload = ''
+            crc_ok = True
         payload += fields[5]
         pad = int(fields[6].split('*')[0])
-        if fragment < expect:
+        crc = fields[6].split('*')[1].strip()
+        if csum != crc:
+            if skiperr:
+                sys.stderr.write("Bad checksum %s, expecting %s: %s\n" % (csum, `crc`, line.strip()))
+                crc_ok = False
+            else:
+                raise AISUnpackingException("checksum", crc)
+        if fragment < expect or not crc_ok:
             continue
         # Render assembled payload to packed bytes
         bits = BitVector()
