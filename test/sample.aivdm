@@ -354,10 +354,11 @@
 #       First Slot Offset:  0
 #
 # Type 16:
-# From AISHub. Only a regression test to check that the C and Python
+# From AISHub. These are only a regression test to check that the C and Python
 # decoders do the same thing, not yet checked against other
-# decoders. This is the 96-bit version addressing just one destination
-# MMSI.
+# decoders. 
+#
+# This is the 96-bit version addressing just one destination MMSI.
 !AIVDM,1,1,,A,@01uEO@mMk7P<P00,0*18
 #       Message Type             : 16
 #       Repeat Indicator         : 0
@@ -365,6 +366,17 @@
 #       Interrogated MMSI 1      : 224251000
 #       First slot offset        : 200
 #       First slot increment     : 0
+# The 144-bit version addressing two destination MMSIs
+!AIVDM,1,1,,B,@E7GGWiLEiM?;QdLQD::B2rQslVn,5*1D
+#       Message Type             : 16
+#       Repeat Indicator         : 1
+#       MMSI                     : 343267231
+#       Interrogated MMSI 1      : 387302867
+#       First slot offset        : 3256
+#       First slot increment     : 433
+#       Interrogated MMSI 2      : 139733156
+#       Second slot offset       : 2094
+#       Second slot increment    : 647
 #
 # Type 18:
 # From Kurt Schwehr

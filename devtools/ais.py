@@ -409,7 +409,6 @@ type16 = (
     bitfield("mmsi1",     30, 'unsigned', 0, "Interrogated MMSI 1"),
     bitfield("offset1  ", 12, 'unsigned', 0, "First slot offset"),
     bitfield("increment1",10, 'unsigned', 0, "First slot increment"),
-    spare(2),
     bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2",
              conditional=lambda i, v: v['length'] >= 144),
     bitfield("offset2",   12, 'unsigned', 0, "Second slot offset",
