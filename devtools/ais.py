@@ -791,13 +791,14 @@ class BitVector:
 import sys, exceptions
 
 class AISUnpackingException(exceptions.Exception):
-    def __init__(self, fieldname, value):
+    def __init__(self, lc, fieldname, value):
+        self.lc = lc
         self.fieldname = fieldname
         self.value = value
     def __repr__(self):
-        return "Validation on fieldname %s failed (value %s)" % (self.fieldname, self.value)
+        return "%d: validation on fieldname %s failed (value %s)" % (self.lc, self.fieldname, self.value)
 
-def aivdm_unpack(data, offset, values, instructions):
+def aivdm_unpack(lc, data, offset, values, instructions):
     "Unpack fields from data according to instructions."
     cooked = []
     for inst in instructions:
@@ -810,7 +811,7 @@ def aivdm_unpack(data, offset, values, instructions):
         elif isinstance(inst, dispatch):
             i = inst.compute(values[inst.fieldname])
             # This is the recursion that lets us handle variant types
-            cooked += aivdm_unpack(data, offset, values, inst.subtypes[i])
+            cooked += aivdm_unpack(lc, data, offset, values, inst.subtypes[i])
         elif isinstance(inst, bitfield):
             if inst.type == 'unsigned':
                 value = data.ubits(offset, inst.width)
@@ -835,7 +836,7 @@ def aivdm_unpack(data, offset, values, instructions):
                 value = BitVector(data.bits[offset/8:], len(data)-offset)
             values[inst.name] = value
             if inst.validator and not inst.validator(value):
-                raise AISUnpackingException(inst.name, value)
+                raise AISUnpackingException(lc, inst.name, value)
             offset += inst.width
             # An important thing about the unpacked representation this
             # generates is that it carries forward the meta-information from
@@ -849,8 +850,10 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     payload = ''
     raw = ''
     values = {}
-    crc_ok = False
+    well_formed = False
+    lc = 0
     while True:
+        lc += 1;
         line = source.readline()
         if not line:
             return
@@ -866,21 +869,33 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             continue
         # Assemble fragments from single- and multi-line payloads
         fields = line.split(",")
-        expect = fields[1]
-        fragment = fields[2]
-        if fragment == '1':
-            payload = ''
-            crc_ok = True
-        payload += fields[5]
-        pad = int(fields[6].split('*')[0])
-        crc = fields[6].split('*')[1].strip()
-        if csum != crc:
+        try:
+            expect = fields[1]
+            fragment = fields[2]
+            if fragment == '1':
+                payload = ''
+                well_formed = True
+            payload += fields[5]
+            try:
+                # This works because a mangled pad literal means
+                # a malformed packet that will be caught by the CRC check. 
+                pad = int(fields[6].split('*')[0])
+            except ValueError:
+                pad = 0
+            crc = fields[6].split('*')[1].strip()
+        except IndexError:
             if skiperr:
-                sys.stderr.write("Bad checksum %s, expecting %s: %s\n" % (csum, `crc`, line.strip()))
-                crc_ok = False
+                sys.stderr.write("%d: malformed line %s\n" % (lc, line.strip()))
+                well_formed = False
             else:
                 raise AISUnpackingException("checksum", crc)
-        if fragment < expect or not crc_ok:
+        if csum != crc:
+            if skiperr:
+                sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" % (lc, csum, `crc`, line.strip()))
+                well_formed = False
+            else:
+                raise AISUnpackingException("checksum", crc)
+        if fragment < expect or not well_formed:
             continue
         # Render assembled payload to packed bytes
         bits = BitVector()
@@ -888,7 +903,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         values['length'] = bits.bitlen
         # Magic recursive unpacking operation
         try:
-            cooked = aivdm_unpack(bits, 0, values, aivdm_decode)
+            cooked = aivdm_unpack(lc, bits, 0, values, aivdm_decode)
             # We now have a list of tuples containing unpacked fields
             # Collect some field groups into ISO8601 format
             for (offset, template, label, legend, formatter) in field_groups:
@@ -919,7 +934,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             raise GeneratorExit
         except AISUnpackingException, e:
             if skiperr:
-                sys.stderr.write("%s: %s\n" % (`e`, raw.strip()))
+                sys.stderr.write("%s on %s\n" % (`e`, raw.strip()))
                 continue
             else:
                 raise e
