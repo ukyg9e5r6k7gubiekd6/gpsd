@@ -134,7 +134,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	/*@ +shiftnegative @*/
     }
     if (isdigit(pad))
-	ais_context->bitlen += (pad - '0');	/* ASCII assumption */
+	ais_context->bitlen -= (pad - '0');	/* ASCII assumption */
     /*@ -charint @*/
 
     /* time to pass buffered-up data to where it's actually processed? */

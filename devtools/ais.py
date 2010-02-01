@@ -755,7 +755,7 @@ class BitVector:
                 self.bitlen = length
     def from_sixbit(self, data, pad=0):
         "Initialize bit vector from AIVDM-style six-bit armoring."
-        self.bits.extend([0] * (len(data) + pad))
+        self.bits.extend([0] * len(data))
         for ch in data:
             ch = ord(ch) - 48
             if ch > 40:
@@ -764,6 +764,7 @@ class BitVector:
                 if (ch >> i) & 0x01:
                     self.bits[self.bitlen/8] |= (1 << (7 - self.bitlen % 8))
                 self.bitlen += 1
+        self.bitlen -= pad
     def ubits(self, start, width):
         "Extract a (zero-origin) bitfield from the buffer as an unsigned int."
         fld = 0
