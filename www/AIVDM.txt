@@ -13,17 +13,25 @@ and is intended to assist developers of open-source software for
 interpreting these messages.
 
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
-Automatic Identification System. All cargo vessels of more than 300
-tons displacement and all passenger vessels are supposed to carry AIS
-transmitters that periodically squawk their position and course,
-using TDMA (Time Division Multiple Access) technology similar to the
-way cellphones do to avoid mutual interference.
+Automatic Identification System. AIS transmitters are fitted to
+vessels, navigation markers, and ccertain tyoes of shore station. They
+periodically squawk their position and course (if applicable), using
+TDMA (Time Division Multiple Access) technology similar to the way
+cellphones do to avoid mutual interference. AIS receivers make this data
+available for navigation, anti-collision systems, and other uses.
 
-AIS receivers capture these squawks and report them as ASCII data
-packets over serial lines, using the NMEA 0183 data format and
-physical network standards. AIS packets have the introducer "!AIVDM"
-or "!AIVDO"; AIVDM packets are reports from other ships and AIVDO
-packets are reports from your own ship.
+The International Maritime Organization's (IMO) International
+Convention for the Safety of Life at Sea (SOLAS) reqires all
+international cargo vessels of more than 300 tons displacement and all
+passenger vessels to carry operating AIS transmitters.  Individual
+maritime nations may have stricter and more detailed rules: for those
+obtaining in U.S. waters, see <<US-REQUIREMENTS>>.
+
+AIS receivers report ASCII data packets over serial or USB lines,
+using the NMEA 0183 data format and physical network standards. AIS
+packets have the introducer "!AIVDM" or "!AIVDO"; AIVDM packets are
+reports from other ships and AIVDO packets are reports from your own
+ship.
 
 A lengthy description of AIS, focusing on the goals and history of the
 system, but not describing the data protocols in any detail, can be
@@ -1735,6 +1743,10 @@ integer indices.  In scaled mode, the values are dumped as strings.
 [bibliography]
 - [[[AIS]]] http://en.wikipedia.org/wiki/Automatic_Identification_System[Automatic
 Identification System]
+
+- [[[US-REQUIREMENTS]]]
+  http://www.navcen.uscg.gov/enav/AIS/AIS_carriage_reqmts.htm[AIS
+  Carriage Requirements]
 
 - [[[ITU1371]]]
   http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371:
