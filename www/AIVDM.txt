@@ -443,16 +443,6 @@ unusual or rare; many AIS transponders never emit them.  As of
 November 2009, an overnight capture of a full feed from <<<AISHUB>>>
 shows no type 25 or type 26 messages at all.
 
-While the expected bit length or length range of each message is
-documented, it is common for receivers to ship slightly oversized
-messages with trailing garbage. For example, Type 1 messages not
-infrequently have length 204 rather than 168, and I have seen valid
-type 5 messages with a length of 426 rather than 424.  Decoders should
-do whatever length checking is needed to prevent buffer overruns
-(especially an issue for message types with trailing binary data or
-strings: 6, 8, 12, 14, 17, 24, 25, 26). Otherwise, strict length
-checks may throw out valid data.
-
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
 for the ship's radio(s).  The first three digits convey information
 about the country in which the ID was issued <<ITU-MID>>.
@@ -476,6 +466,12 @@ The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
 1-15, 18-21, and 24.  Described but unchecked are 16-17, 22-23, and 
 25-26.
+
+Bit lengths and length ranges are given because decoders should check
+them against the message type. Messages with correct checksums but the
+wrong payload length for their type occur with about 0.3% frequency on
+AISHub; if you don't reject these, your clients will see spurious
+zeros or garbage.
 
 === Types 1, 2 and 3: Position Report Class A ===
 
@@ -1488,7 +1484,8 @@ Equivalent of a Type 5 message for ships using Class B equipment.  A
 "Type 24" may be in part A or part B format; either is 168 bits.
 Parts A and B are expected to be broadcast in adjacent pairs.  The
 interpretation of some fields in Type B format changes depending on
-the range of the Type B MMSI field. 168 bits.
+the range of the Type B MMSI field. 160 bits for part A, 168 bits for
+part B.
 
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.

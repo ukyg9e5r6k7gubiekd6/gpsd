@@ -716,7 +716,7 @@ lengths = {
     21: (272, 360),
     22: 168,
     23: 160,
-    24: 168,
+    24: (160, 168),
     25: 168,
     26: (60, 1004),
     }
@@ -926,6 +926,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                         elif type(formatter) == type(lambda x: x):
                             cooked[i][1] = inst.formatter(value)
             expected = lengths.get(values['msgtype'], None)
+            bogon = False
             if expected is not None:
                 if type(expected) == type(0):
                     expected_range = (expected, expected)
@@ -933,12 +934,13 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                     expected_range = expected
                 actual = values['length']
                 if not (actual >= expected_range[0] and actual <= expected_range[1]):
+                    bogon = True
                     if skiperr:
                         sys.stderr.write("%d: type %d expected %s bits but saw %s\n" % (lc, values['msgtype'], expected, actual))
                     else:
                         raise AISUnpackingException(lc, "length", actual)
             values = {}                    
-            yield (raw, cooked)
+            yield (raw, cooked, bogon)
             raw = ''
         except KeyboardInterrupt:
             raise KeyboardInterrupt
@@ -964,14 +966,16 @@ if __name__ == "__main__":
     import sys, getopt
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "chjqst:vx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdhjmqst:vx")
     except getopt.GetoptError, msg:
         print "ais.py: " + str(msg)
         raise SystemExit, 1
 
     csv = False
+    dump = False
     histogram = False
     json = False
+    malformed = False
     quiet = False
     scaled = False
     types = []
@@ -981,10 +985,14 @@ if __name__ == "__main__":
     for (switch, val) in options:
         if switch == '-c':
             csv = True
+        elif switch == '-d':
+            dump = True
         elif switch == '-h':
             histogram = True
         elif switch == '-j':
             json = True
+        elif switch == '-m':
+            malformed = True
         elif switch == '-q':
             quiet = True
         elif switch == '-s':
@@ -995,8 +1003,11 @@ if __name__ == "__main__":
             verbose += 1
         elif switch == '-x':
             skiperr = False
+
+    if not csv and not histogram and not json and not malformed and not quiet:
+            dump = True
     try:
-        for (raw, parsed) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+        for (raw, parsed, bogon) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
             msgtype = parsed[0][1]
             if types and msgtype not in types:
                 continue
@@ -1008,10 +1019,12 @@ if __name__ == "__main__":
                 print ",".join(map(lambda x: str(x[1]), parsed))
             elif histogram:
                 frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
-            elif not quiet:
+            elif dump:
                 for (inst, value) in parsed:
                     print "%-25s: %s" % (inst.legend, value)
                 print "%%"
+            elif malformed and bogon:
+                sys.stdout.write(raw)
             sys.stdout.flush()
         if histogram:
             keys = frequencies.keys()
