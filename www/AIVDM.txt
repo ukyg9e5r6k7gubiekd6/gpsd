@@ -21,9 +21,10 @@ cellphones do to avoid mutual interference. AIS receivers make this data
 available for navigation, anti-collision systems, and other uses.
 
 The International Maritime Organization's (IMO) International
-Convention for the Safety of Life at Sea (SOLAS) reqires all
-international cargo vessels of more than 300 tons displacement and all
-passenger vessels to carry operating AIS transmitters.  Individual
+Convention for the Safety of Life at Sea (SOLAS) reqires operating AIS
+transmitters on all international cargo vessels of more than 300 tons
+displacement, all cargo vessels of more than 500 tonds displacement,
+and all passenger vessels; see <<SOLAS>> for details.  Individual
 maritime nations may have stricter and more detailed rules: for those
 obtaining in U.S. waters, see <<US-REQUIREMENTS>>.
 
@@ -1743,6 +1744,10 @@ integer indices.  In scaled mode, the values are dumped as strings.
 [bibliography]
 - [[[AIS]]] http://en.wikipedia.org/wiki/Automatic_Identification_System[Automatic
 Identification System]
+
+- [[[SOLAS]]]
+  http://www.navcen.uscg.gov/enav/ais/AIS_Regs_SOLAS_MTSA_FR.pdf[SOLAS
+  AIS Regulations]
 
 - [[[US-REQUIREMENTS]]]
   http://www.navcen.uscg.gov/enav/AIS/AIS_carriage_reqmts.htm[AIS
