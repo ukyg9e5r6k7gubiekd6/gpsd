@@ -1013,17 +1013,18 @@ if __name__ == "__main__":
                 continue
             if verbose >= 1:
                 sys.stdout.write(raw)
-            if json:
-                print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
-            elif csv:
-                print ",".join(map(lambda x: str(x[1]), parsed))
-            elif histogram:
-                frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
-            elif dump:
-                for (inst, value) in parsed:
-                    print "%-25s: %s" % (inst.legend, value)
-                print "%%"
-            elif malformed and bogon:
+            if not bogon:
+                if json:
+                    print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
+                elif csv:
+                    print ",".join(map(lambda x: str(x[1]), parsed))
+                elif histogram:
+                    frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
+                elif dump:
+                    for (inst, value) in parsed:
+                        print "%-25s: %s" % (inst.legend, value)
+                    print "%%"
+            elif malformed:
                 sys.stdout.write(raw)
             sys.stdout.flush()
         if histogram:
