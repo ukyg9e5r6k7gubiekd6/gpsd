@@ -194,26 +194,23 @@
 #       Binary Data:        256:631d1d6b32f735f03494870d9e13addaf3f373435347ab94628f1498868051c3
 #
 # Type 9:
-# From Kurt Schwehr
-# This sentence is slightly malformed -- extra data at the end.
-!AIVDM,1,1,,B,9wsh:3?h>TdcWHftni=J0d5fs?8WT852,5*74
-#       MessageID:           9
-#       RepeatIndicator:     3
-#       UserID:              1069287948
-#       Altitude:            4032
-#       SOG:                 932
-#       PositionAccuracy:    1
-#       Position_longitude:  177.3000916666666666666666667
-#       Position_latitude:   106.353155
-#       COG:                 256.2
-#       TimeStamp:           48
-#       Reserved:            0
-#       DTE:                 True
-#       Spare:               0
-#       RAIM:                True
-#       state_syncstate:     2
-#       state_slottimeout:   3
-#       state_slotoffset:    12839
+# From AISHub
+!AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69
+#       Message Type             : 9
+#       Repeat Indicator         : 0
+#       MMSI                     : 111265591
+#       Altitude                 : 15
+#       SOG                      : 0
+#       Position Accuracy        : 0
+#       Longitude                : 7128960
+#       Latitude                 : 34667073
+#       Course Over Ground       : 0
+#       Time Stamp               : 28
+#       Regional reserved        : 0
+#       DTE                      : 0
+#       Assigned                 : 0
+#       RAIM flag                : 0
+#       Radio status             : 24597
 #
 # Type 10:
 # From Kurt Schwehr
@@ -366,18 +363,20 @@
 #       Interrogated MMSI 1      : 224251000
 #       First slot offset        : 200
 #       First slot increment     : 0
-# The 144-bit version addressing two destination MMSIs
-!AIVDM,1,1,,B,@E7GGWiLEiM?;QdLQD::B2rQslVn,5*1D
-#       Message Type             : 16
-#       Repeat Indicator         : 1
-#       MMSI                     : 343267231
-#       Interrogated MMSI 1      : 387302867
-#       First slot offset        : 3256
-#       First slot increment     : 433
-#       Interrogated MMSI 2      : 139733156
-#       Second slot offset       : 2094
-#       Second slot increment    : 647
 #
+# Type 17:
+# From AISHub. This is only a regression test to check that the C and Python
+# decoders do the same thing, not yet checked against other
+# decoders. 
+!AIVDM,2,1,5,A,A02VqLPA4I6C07h5Ed1h<OrsuBTTwS?r:C?w`?la<gno1RTRwSP9:BcurA8a,0*3A
+!AIVDM,2,2,5,A,:Oko02TSwu8<:Jbb,0*11
+Message Type             : 17
+Repeat Indicator         : 0
+MMSI                     : 2734450
+Longitude                : 17478
+Latitude                 : 35992
+DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
+%%
 # Type 18:
 # From Kurt Schwehr
 # I had to regenerate the CRC32 for this one myself, it was missing
