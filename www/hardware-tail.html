@@ -13,6 +13,10 @@
   comparison with the NTP time service and reported by
   <code>gpsd</code>.</p>
 
+  <p>Note that a direct RS-232 connection is required for PPS.  GPS that
+  natively use USB or an RS-232 to USB converter will not provide time
+  more accurate than about 250mS.</p>
+
 <div>&nbsp;</div>
 
 <table border='1'>
@@ -107,16 +111,10 @@
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Garmin GPS18/USB</td>
-<td align="center">1usec</td>
-<td align="center">0.100sec</td>
-<td align="center">-</td>
-</tr>
-<tr>
 <td>Garmin GPS18/LVC</td>
 <td align="center">1usec</td>
 <td align="center">0.125sec</td>
-<td align="center">At 19200bps; drops to 0.525 at 4800bps</td>
+<td align="center">Must be outside with a clear sky view.<br>At 19200bps; drops to 0.525 at 4800bps</td>
 </tr>
 <tr>
 <td>Rockwell Jupiter</td>
@@ -131,10 +129,10 @@
 <td align="center">-</td>
 </tr>
 <tr>
-<td>SiRFstar3</td>
+<td>SiRFstar3<br>(GlobalSat MR-350P)</td>
 <td align="center">1usec</td>
 <td align="center">-</td>
-<td align="center">-</td>
+<td align="center">May work inside wood frame buildings.</td>
 </tr>
 </table>
 
