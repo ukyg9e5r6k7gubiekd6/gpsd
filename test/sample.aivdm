@@ -153,8 +153,29 @@
 #       ApplicationID:    42827
 #	Data:             48:eb2f118f7ff1
 #
+# From AISHub.  This type 6 has no data.  It's paired with the
+# following type 7; both are verified by the match in the MMSI fields 
+!AIVDM,1,1,,A,63u?;TP0`QJ<06P000,4*43
+#	Message Type             : 6
+#	Repeat Indicator         : 0
+#	MMSI                     : 265538450
+#	Sequence Number          : 0
+#	Destination MMSI         : 2655651
+#	Retransmit flag          : 0
+#	Application ID           : 104
+#	Data                     : 16:0000
+#
 # Type 7:
-# From Kurt Schwehr
+# From AISHub - reported immediately after the preceding type 6, 
+# which matches it.  Two destination MMSIs.
+#	!AIVDM,1,1,,A,702R5`hwCjq8,0*6B
+#	Message Type             : 7
+#	Repeat Indicator         : 0
+#	MMSI                     : 2655651
+#	MMSI number 1            : 265538450
+#
+# Type 7:
+# From Kurt Schwehr.  Three destination MMSIs.
 !AIVDM,1,1,,A,7IiQ4T`UjA9lC;b:M<MWE@,4*01
 #	SourceMMSI:       655901842
 #	MMSI1:            158483613
