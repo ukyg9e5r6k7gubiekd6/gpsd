@@ -82,8 +82,6 @@ static void gps_trace(int errlevel, const char *fmt, ... )
 int gps_open_r(const char *host, const char *port,
 	       /*@out@*/struct gps_data_t *gpsdata)
 {
-    int proto = AF_UNSPEC;
-
     /*@ -branchstate @*/
     if (!gpsdata)
 	return -1;
@@ -94,7 +92,7 @@ int gps_open_r(const char *host, const char *port,
 
     libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));    
 
-    if ((gpsdata->gps_fd = netlib_connectsock(proto, host, port, "tcp")) < 0) {
+    if ((gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return -1;
     }
