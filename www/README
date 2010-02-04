@@ -1,7 +1,7 @@
 This subdirectory contains the web pages for the berlios.de repository.
 
-To upload them after modifying , run "./upload'.  You must have xmlto 
-installed for this to work.
+To upload them after modifying , run "./upload'.  You must have xmlto,
+the docbook DTD (Ver 4.1.2) and asciidoc (Ver 8.5.1+) installed for this to work.
 
 Note: The PDFs on the site are not in the Subversion repository, they'd
 just bulk it up.  Be careful not to delete them.
