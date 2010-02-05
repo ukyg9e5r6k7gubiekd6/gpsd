@@ -394,7 +394,7 @@
 #       First slot offset        : 200
 #       First slot increment     : 0
 #
-# FIXME: Need and example of the 144-bit variant with two MMSIs.
+# FIXME: Need an example of the 144-bit variant with two MMSIs.
 #
 # Type 17:
 # From AISHub. This is only a regression test to check that the C and Python
@@ -410,7 +410,7 @@ Latitude                 : 35992
 DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
 #
 # Type 18:
-# From Kurt Schwehr. Checked with the nooadata tools.
+# From Kurt Schwehr. Checked with the noaadata tools.
 # I had to regenerate the CRC32 for this one myself, it was missing
 # in Kurt's original..
 !AIVDM,1,1,,A,B52K>;h00Fc>jpUlNV@ikwpUoP06,0*4C
@@ -431,7 +431,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       CommStateSelector:  1
 #       CommState:          393222
 # Type 18:
-# From Kurt Schwehr. Checked with the nooadata tools.
+# From Kurt Schwehr. Checked with the noaadata tools.
 !AIVDM,1,1,,A,B52KB8h006fu`Q6:g1McCwb5oP06,0*00
 #       MessageID:          18
 #       RepeatIndicator:    0
@@ -450,7 +450,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       CommStateSelector:  1
 #       CommState:          393222
 # Type 18:
-# From Kurt Schwehr.  Checked with the nooadata tools.
+# From Kurt Schwehr.  Checked with the noaadata tools.
 !AIVDM,1,1,,B,B5O6hr00<veEKmUaMFdEow`UWP06,0*4F
 #       Message Type:       18
 #       Repeat Indicator:   0
@@ -474,7 +474,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       Sub Message:        6
 #
 # Type 19:
-# From Mike Greene.  Checked with the nooadata tools.
+# From Mike Greene.  Checked with the noaadata tools.
 !AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
 #        MessageID:         19
 #        RepeatIndicator:   0
@@ -500,59 +500,59 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #        Spare3:            0
 #
 # Type 20 (1 offset)
-# From Mike Greene.  Checked with the nooadata tools.
+# From Mike Greene.  Checked with the noaadata tools.
 !AIVDM,1,1,,A,Dh3OvjB8IN>4,0*1D
-#        Message Type: 20
-#        Repeat Indicator: 3
-#        MMSI: 3669705
-#        Offset 1: 2182
-#        Reserved Slots 1: 5
-#        Timeout 1: 7
-#        Increment 1: 225
+#        Message Type:      20
+#        Repeat Indicator:  3
+#        MMSI:              3669705
+#        Offset 1:          2182
+#        Reserved Slots 1:  5
+#        Timeout 1:         7
+#        Increment 1:       225
 #
 # Type 20 (3 offsets):
 # From Mike Greene. 
 !AIVDM,1,1,,B,D030p8@2tN?b<`O6DmQO6D0,2*5D
-#        Message Type: 20
-#        Repeat Indicator: 0
-#        MMSI: 3160097
-#        Offset 1: 47
-#        Reserved Slots 1: 1
-#        Timeout 1: 7
-#        Increment 1: 250
-#        Offset 2: 2250
-#        Reserved Slots 2: 1
-#        Timeout 2: 7
-#        Increment 2: 1125
-#        Offset 3: 856
-#        Reserved Slots 3: 5
-#        Timeout 3: 7
-#        Increment 3: 1125
+#        Message Type:      20
+#        Repeat Indicator:  0
+#        MMSI:              3160097
+#        Offset 1:          47
+#        Reserved Slots 1:  1
+#        Timeout 1:         7
+#        Increment 1:       250
+#        Offset 2:          2250
+#        Reserved Slots 2:  1
+#        Timeout 2:         7
+#        Increment 2:       1125
+#        Offset 3:          856
+#        Reserved Slots 3:  5
+#        Timeout 3:         7
+#        Increment 3:       1125
 #
 # Type 21:
 # Has a Name Extension field
 # From Mike Greene
 !AIVDM,2,1,5,B,E1mg=5J1T4W0h97aRh6ba84<h2d;W:Te=eLvH50```q,0*46
 !AIVDM,2,2,5,B,:D44QDlp0C1DU00,2*36
-#        Message Type: 21
-#        Repeat Indicator: 0
-#        MMSI: 123456789
-#        Aid Type: 20
-#        Name: CHINA ROSE MURPHY EXPRESS ALERT
-#        Position Accuracy: 0
-#        Longitude: -122.698591667
-#        Latitude: 47.9206183333
-#        Dimension to Bow: 5
-#        Dimension to Stern: 5
-#        Dimension to Port: 5
-#        Dimension to Starboard: 5
-#        Type of EPFD: GPS
-#        UTC Second: 50
-#        Off-Position Indicator: 0
-#        Regional Reserved: 165
-#        RAIM Flag: 0
-#        Virtual-Aid Flag: 0
-#        Assigned-Mode Flag: 0
+#        Message Type:             21
+#        Repeat Indicator:         0
+#        MMSI:                     123456789
+#        Aid Type:                 20
+#        Name:                     CHINA ROSE MURPHY EXPRESS ALERT
+#        Position Accuracy:        0
+#        Longitude:                -122.698591667
+#        Latitude:                 47.9206183333
+#        Dimension to Bow:         5
+#        Dimension to Stern:       5
+#        Dimension to Port:        5
+#        Dimension to Starboard:   5
+#        Type of EPFD:             GPS
+#        UTC Second:               50
+#        Off-Position Indicator:   0
+#        Regional Reserved:        165
+#        RAIM Flag:                0
+#        Virtual-Aid Flag:         0
+#        Assigned-Mode Flag:       0
 #
 # Type 22:
 # From AISHub.  Broadcast case: we won't count this as a full test by
@@ -597,7 +597,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #        Quiet time               : 0
 #
 # Type 24:
-# From Kurt Schwehr. Checked with the nooadata tools.
+# From Kurt Schwehr. Checked with the noaadata tools.
 # One pair of type A and Type B messages. Note, these have Coast Guard 
 # extended fields after them.
 !AIVDM,1,1,,B,H5NHcTP<51@4TrM>10584@U<D00,2*77,x337805,b003669710,1241895000
