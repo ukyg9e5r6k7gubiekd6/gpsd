@@ -6,6 +6,7 @@
 # against gpsdecode's output.
 #
 # Type 1:
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A
 #       MessageID:          1
 #       RepeatIndicator:    0
@@ -26,6 +27,7 @@
 #       state_slotoffset:   4252
 #
 # Type 1:
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,16SteH0P00Jt63hHaa6SagvJ087r,0*42
 #       MessageID:          1
 #       RepeatIndicator:    0
@@ -47,6 +49,7 @@
 #       state_slotoffset:   506
 #
 # Type 2:
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 # Kurt says 2 is really uncommon.  I had to regenerate the CRC32 
 # for this one myself, it was missing in Kurt's original.
 !AIVDM,1,1,,B,25Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*60
@@ -70,6 +73,7 @@
 #       state_slotoffset:   6
 #
 # Type 3:
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,38Id705000rRVJhE7cl9n;160000,0*40
 #       MessageID:          3
 #       RepeatIndicator:    0
@@ -91,6 +95,7 @@
 #       state_slotoffset:   0
 #
 # Type 4:
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
 #       MessageID:          4
 #       RepeatIndicator:    0
@@ -112,7 +117,7 @@
 #       state_slotoffset:   1503
 #
 # Type 5:
-# From Kurt Schwehr
+# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C
 !AIVDM,2,2,1,A,88888888880,2*25
 #       MessageID:        5
@@ -167,7 +172,7 @@
 #
 # Type 7:
 # From AISHub - reported immediately after the preceding type 6, 
-# which matches it.  Two destination MMSIs.
+# which matches it.  One destination MMSI.
 #	!AIVDM,1,1,,A,702R5`hwCjq8,0*6B
 #	Message Type             : 7
 #	Repeat Indicator         : 0
@@ -205,7 +210,7 @@
 #       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
 #
 # Type 8:
-# From Mike Greene
+# From Mike Greene.
 !AIVDM,2,1,6,B,85MwpIiKf6<M7FdjukGh=9B73IpCcMckto=3DlNcU6:,0*04
 !AIVDM,2,2,5,A,?59R6P573,0*25
 #       Message Type:       8
@@ -215,7 +220,7 @@
 #       Binary Data:        256:631d1d6b32f735f03494870d9e13addaf3f373435347ab94628f1498868051c3
 #
 # Type 9:
-# From AISHub
+# From AISHub. Checked with the noaadata tools.
 !AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69
 #       Message Type             : 9
 #       Repeat Indicator         : 0
@@ -234,7 +239,7 @@
 #       Radio status             : 24597
 #
 # Type 10:
-# From Kurt Schwehr
+# From Kurt Schwehr. Two destination MMSIs. Checked with the noaadata tools.
 !AIVDM,1,1,,B,:5MlU41GMK6@,0*6C
 #       MessageID:        10
 #       RepeatIndicator:  0
@@ -244,7 +249,7 @@
 #       Spare2:           0
 #
 # Type 10:
-# From Mike Greene
+# From Mike Greene. One destination MMSI.
 !AIVDM,1,1,,B,:6TMCD1GOS60,0*5B,s36310,d-081,T59.01777335
 #       Message Type:     10
 #       Repeat Indicator: 0
@@ -252,7 +257,7 @@
 #       Destination MMSI: 366972000
 #
 # Type 11:
-# From Kurt Schwehr
+# From Kurt Schwehr. Checked with the noaadata tools.
 # Message has Coast Guard extended fields following
 !AIVDM,1,1,,B,;4R33:1uUK2F`q?mOt@@GoQ00000,0*5D,s28089,d-103,T39.44353985,x147521,r08TPHI1,1242958962
 #      MessageID:           11
@@ -276,6 +281,7 @@
 #
 # Type 12:
 # From AIS Hub via Neal Arundale. Dumps by ais.py.
+# Verified by the text being readable
 !AIVDM,1,1,,A,<02:oP0kKcv0@<51C5PB5@?BDPD?P:?2?EB7PDB16693P381>>5<PikP,0*37
 #       Message Type             : 12
 #       Repeat Indicator         : 0
@@ -345,6 +351,7 @@
 #
 # Type 14:
 # From AIS Hub via Neal Arundale.  Dumps by ais.py.
+# Verified by the text being readable
 !AIVDM,1,1,,A,>5?Per18=HB1U:1@E=B0m<L,2*51
 #       Message Type             : 14
 #       Repeat Indicator         : 0
@@ -362,7 +369,7 @@
 #       Text                     : TEST
 #
 # Type 15:
-# From Mike Greene
+# From Mike Greene.
 !AIVDM,1,1,,A,?5OP=l00052HD00,2*5B
 #       Message Type:       15
 #       Repeat Indicator:   0
@@ -385,6 +392,8 @@
 #       First slot offset        : 200
 #       First slot increment     : 0
 #
+# FIXME: Need and example of the 144-bit variant with two MMSIs.
+#
 # Type 17:
 # From AISHub. This is only a regression test to check that the C and Python
 # decoders do the same thing, not yet checked against other
@@ -397,11 +406,11 @@ MMSI                     : 2734450
 Longitude                : 17478
 Latitude                 : 35992
 DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
-%%
+#
 # Type 18:
-# From Kurt Schwehr
+# From Kurt Schwehr. Checked with the nooadata tools.
 # I had to regenerate the CRC32 for this one myself, it was missing
-# in Kurt's original.
+# in Kurt's original..
 !AIVDM,1,1,,A,B52K>;h00Fc>jpUlNV@ikwpUoP06,0*4C
 #       MessageID:          18
 #       RepeatIndicator:    0
@@ -420,7 +429,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       CommStateSelector:  1
 #       CommState:          393222
 # Type 18:
-# From Kurt Schwehr
+# From Kurt Schwehr. Checked with the nooadata tools.
 !AIVDM,1,1,,A,B52KB8h006fu`Q6:g1McCwb5oP06,0*00
 #       MessageID:          18
 #       RepeatIndicator:    0
@@ -439,7 +448,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       CommStateSelector:  1
 #       CommState:          393222
 # Type 18:
-# From Kurt Schwehr
+# From Kurt Schwehr.  Checked with the nooadata tools.
 !AIVDM,1,1,,B,B5O6hr00<veEKmUaMFdEow`UWP06,0*4F
 #       Message Type:       18
 #       Repeat Indicator:   0
@@ -463,7 +472,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #       Sub Message:        6
 #
 # Type 19:
-# From Mike Greene
+# From Mike Greene.  Checked with the nooadata tools.
 !AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
 #        MessageID:         19
 #        RepeatIndicator:   0
@@ -489,7 +498,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #        Spare3:            0
 #
 # Type 20 (1 offset)
-# From Mike Greene
+# From Mike Greene.  Checked with the nooadata tools.
 !AIVDM,1,1,,A,Dh3OvjB8IN>4,0*1D
 #        Message Type: 20
 #        Repeat Indicator: 3
@@ -500,7 +509,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #        Increment 1: 225
 #
 # Type 20 (3 offsets):
-# From Mike Greene
+# From Mike Greene. 
 !AIVDM,1,1,,B,D030p8@2tN?b<`O6DmQO6D0,2*5D
 #        Message Type: 20
 #        Repeat Indicator: 0
@@ -586,6 +595,7 @@ DGNSS data               : 379:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb70
 #        Quiet time               : 0
 #
 # Type 24:
+# From Kurt Schwehr. Checked with the nooadata tools.
 # One pair of type A and Type B messages. Note, these have Coast Guard 
 # extended fields after them.
 !AIVDM,1,1,,B,H5NHcTP<51@4TrM>10584@U<D00,2*77,x337805,b003669710,1241895000
