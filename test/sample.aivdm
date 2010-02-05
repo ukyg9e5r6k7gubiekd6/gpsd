@@ -1,10 +1,6 @@
 # Sample AIVDM data sentences provided from real data by Kurt Schwehr
 # Mike Greene, Neal Arundale, and AISHub.
 #
-# The text dumps following are (mostly) produced by the parsers in
-# Kurt's noaadata.py toolkit, and are here so they can be eyeball-checked
-# against gpsdecode's output.
-#
 # Type 1:
 # From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A
@@ -24,7 +20,8 @@
 #       Spare:              0
 #       RAIM:               False
 #       state_syncstate:    0
-#       state_slotoffset:   4252
+#	state_slottimeout:  2
+#	state_slotoffset:   1249
 #
 # Type 1:
 # From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
@@ -50,8 +47,8 @@
 #
 # Type 2:
 # From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
-# Kurt says 2 is really uncommon.  I had to regenerate the CRC32 
-# for this one myself, it was missing in Kurt's original.
+# I had to regenerate the CRC32 for this one myself, it was missing in 
+# Kurt's original.
 !AIVDM,1,1,,B,25Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*60
 #       MessageID:          2
 #       RepeatIndicator:    0
@@ -170,10 +167,13 @@
 #	Application ID           : 104
 #	Data                     : 16:0000
 #
+# FIXME: We need a type 6 test case that requires more than one AIVDM fragment.
+#
 # Type 7:
 # From AISHub - reported immediately after the preceding type 6, 
-# which matches it.  One destination MMSI.
-#	!AIVDM,1,1,,A,702R5`hwCjq8,0*6B
+# which matches it.  One destination MMSI.  noaadata-04.2 fails
+# on this message.
+!AIVDM,1,1,,A,702R5`hwCjq8,0*6B
 #	Message Type             : 7
 #	Repeat Indicator         : 0
 #	MMSI                     : 2655651
@@ -181,6 +181,7 @@
 #
 # Type 7:
 # From Kurt Schwehr.  Three destination MMSIs.
+# noaadata-04.2 fails on this message
 !AIVDM,1,1,,A,7IiQ4T`UjA9lC;b:M<MWE@,4*01
 #	SourceMMSI:       655901842
 #	MMSI1:            158483613
@@ -190,6 +191,7 @@
 #
 # Type 7:
 # This was from Mike Greene and had a dump attached.
+# noaadata-04.2 fails on this message
 !AIVDM,1,1,,B,7`0Pv1L:Ac8rbgPKHA8`P,2*56
 #        Message Type:    7
 #        RepeatIndicator: 2
@@ -210,7 +212,7 @@
 #       Data:               256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb
 #
 # Type 8:
-# From Mike Greene.
+# From Mike Greene. Spans more than one AIVDM fragment.
 !AIVDM,2,1,6,B,85MwpIiKf6<M7FdjukGh=9B73IpCcMckto=3DlNcU6:,0*04
 !AIVDM,2,2,5,A,?59R6P573,0*25
 #       Message Type:       8
