@@ -23,6 +23,8 @@ SUBSYSTEM!="tty", GOTO="gpsd_rules_end"
 
 # Prolific Technology, Inc. PL2303 Serial Port
 ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# Prolific Technology, Inc. Prolific Pharos
+ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # ATEN International Co., Ltd UC-232A Serial Port [pl2303]
 ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 # FTDI 8U232AM / FT232
