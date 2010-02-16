@@ -377,9 +377,9 @@ int main( int argc, char **argv)
 	    exit(1);
 	}
     }
+#endif /* __UNUSED__ */
 
     exit(0);
-#endif /* __UNUSED__ */
 }
 
 static void spinner (unsigned int v, unsigned int num) {

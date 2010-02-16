@@ -113,7 +113,7 @@ char moto_gen_checksum(char *buf, int len){
 static int moto_send(int fd, char *type, char *body ) {
 	size_t status;
 	char *buf;
-	unsigned short l, n, ck;
+	unsigned short l, ck;
 
 	l = strlen(body) / 2;
 	if ((buf = malloc(l+7)) == NULL)

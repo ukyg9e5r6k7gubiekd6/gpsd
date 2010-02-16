@@ -500,7 +500,6 @@ const struct gps_type_t italk_binary =
 static int literal_send(int fd, const char *fmt, ... )
 /* ship a raw command to the GPS */
 {
-    ssize_t status;
     va_list ap;
 
     va_start(ap, fmt) ;

@@ -229,7 +229,7 @@ ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
 int send_lcd(char *buf) {
 
   int res;
-  char rcvbuf[255];
+  char rcvbuf[256];
 
   /* Limit the size of outgoing strings. */
   if(strlen(buf)>255) {

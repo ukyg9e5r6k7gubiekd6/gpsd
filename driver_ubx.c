@@ -650,13 +650,13 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 {
     int i;
-    unsigned char buf[20];
+    unsigned char buf[sizeof(session->driver.ubx.original_port_settings)];
 
     if(!session->driver.ubx.have_port_configuration)
 	return;
 
     /*@ +charint -usedef @*/
-    for(i=0;i<22;i++)
+    for(i=0;i<sizeof(session->driver.ubx.original_port_settings);i++)
 	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
 	putlelong(buf, 8, session->gpsdata.dev.baudrate);

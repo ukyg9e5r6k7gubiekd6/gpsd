@@ -485,6 +485,10 @@ splint: gpsd.h packet_names.h
 	@echo "Running splint on test_json test harness..."
 	-splint $(SPLINTOPTS) $(test_json_SOURCES)
 
+# Report cppcheck warnings.  Requires 1.40 or later.
+cppcheck: gpsd.h packet_names.h
+	cppcheck --template gcc --all --force .
+
 # Re-indenting to a uniform style would be nice, and we leave this here
 # as a rough guide to the project style, but it turns out that indent is
 # an excessively blunt instrument.  As of 2.2.10 it doesn't honor -nfca
