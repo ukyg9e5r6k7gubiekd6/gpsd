@@ -89,7 +89,17 @@ struct shmTime {
  * GPS will deliver data on segments 0 and 1, and as non-root data
  * will be delivered on segments 2 and 3.
  *
- * to debug, try this:
+ * to debug, try looking at the live segments this way
+ *  ipcs -m
+ * results  should look like this:
+ * ------ Shared Memory Segments --------
+ *  key        shmid      owner      perms      bytes      nattch     status
+ *  0x4e545030 0          root       700        96         2
+ *  0x4e545031 32769      root       700        96         2
+ *  0x4e545032 163842     root       666        96         1
+ *  0x4e545033 196611     root       666        96         1
+ *
+ * For a bit more data try this:
  *  cat /proc/sysvipc/shm
  *
  * if you see the shared segments (keys 1314148400 -- 1314148403), and
