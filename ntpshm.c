@@ -102,6 +102,9 @@ struct shmTime {
  * For a bit more data try this:
  *  cat /proc/sysvipc/shm
  *
+ * If gpsd can not open the segments be sure you are not running SELinux
+ * or apparmor.
+ *
  * if you see the shared segments (keys 1314148400 -- 1314148403), and
  * no gpsd or ntpd is running then try removing them like this:
  *
