@@ -35,6 +35,9 @@ extern "C" {
 #define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 
+#define WGS84A 6378137		/* equatorial radius */
+#define WGS84F 298.257223563	/* flattening */
+#define WGS84B 6356752.3142	/* polar radius */
 /* 
  * The structure describing an uncertainty volume in kinematic space.
  * This is what GPSes are meant to produce; all the other info is 
