@@ -61,6 +61,9 @@ int main(int argc, char **argv) {
 		bzero(buf, BUFSIZ);
 		spinner( n++ );
 	}
+	/* NOTREACHED */
+	close(ifd);
+	close(ofd);
 	return 0;
 }
 
