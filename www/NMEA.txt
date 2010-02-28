@@ -146,9 +146,10 @@ which is planning to shut it down in favor of GPS.  Some non-LORAN
 devices emit GLL but use this talker ID for backward-compatibility
 reasons, so it may outlast the actual LORAN system.
 
-II - II is emitted by the NMEA interface of a widely-used line of
-marine-navigation electronics called the AutoHelm Seatalk system, made
-by Raytheon; see also [SEATALK]. 
+II - II is emitted by the NMEA interfaces of several widely-used lines
+of marine-navigation electronics. One is the AutoHelm system by
+Raymarine; see also [SEATALK] for the native protocol of these
+devices.
 
 IN -- Some Garmin GPS units use an IN talker ID.
 
