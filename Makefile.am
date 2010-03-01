@@ -386,8 +386,11 @@ include_HEADERS = gps.h
 endif
 
 # Note: packaging/gpsd.spec is generated, but it needs to be in the
-# tarball in order for 'make diat-rpm' to work.
+# tarball in order for 'make diat-rpm' to work.  The BUILT_SOURCES
+# files are here in order to minimize build dependencies for package
+# builders who never alter anything, especially the Python dependency.
 EXTRA_DIST = \
+	$(BUILT_SOURCES)
 	revision.h \
 	autogen.sh \
 	README \
