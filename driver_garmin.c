@@ -1269,7 +1269,9 @@ const struct gps_type_t garmin_usb_binary =
     .event_hook     = garmin_event_hook,/* lifetime ebent handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = garmin_switcher,	/* how to change modes */
+
+					/* Garmin USB Binary has no NMEA */
+    .mode_switcher  = NULL,	        /* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
