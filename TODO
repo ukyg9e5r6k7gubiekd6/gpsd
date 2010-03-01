@@ -44,17 +44,6 @@ anyone has hand-validated the expected output.
 architecture; the machine in question above is an Intel CPU under
 Xen.)
 
-**** navcom.chk:
-
-This testfile triggers a numeric instability in the earth_distance()
-function.  The result is that epd is unstable.  What we should do is
-use the official US Government function for
-calculating earth distances: INVERSE.  See
-http://www.ngs.noaa.gov/TOOLS/Inv_Fwd/Inv_Fwd.html =>
-http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/source/
-
-Useful tool for the purpose: http://www.netlib.org/f2c/
-
 **** superstar2.chk:
 
 Packet detection appears to fail completely on big-endian machines.
