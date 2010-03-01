@@ -390,7 +390,7 @@ endif
 # files are here in order to minimize build dependencies for package
 # builders who never alter anything, especially the Python dependency.
 EXTRA_DIST = \
-	$(BUILT_SOURCES)
+	$(BUILT_SOURCES) \
 	revision.h \
 	autogen.sh \
 	README \
