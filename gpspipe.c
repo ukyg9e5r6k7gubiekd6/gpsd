@@ -151,6 +151,7 @@ static void usage(void)
 	);
 }
 
+/*@ -compdestroy @*/
 int main( int argc, char **argv)
 {
     char buf[4096];
@@ -379,8 +380,9 @@ int main( int argc, char **argv)
     }
 #endif /* __UNUSED__ */
 
-    exit(0);
+    /*@i1@*/exit(0);
 }
+/*@ +compdestroy @*/
 
 static void spinner (unsigned int v, unsigned int num) {
     char *spin = "|/-\\";

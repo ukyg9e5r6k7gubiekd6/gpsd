@@ -230,14 +230,16 @@ int send_lcd(char *buf) {
 
   int res;
   char rcvbuf[256];
+  size_t outlen;
 
   /* Limit the size of outgoing strings. */
-  if(strlen(buf)>255) {
-    buf[255]=0;
+  outlen = strlen(buf);
+  if(outlen > 255) {
+    outlen = 256;
   }
 
   /* send the command */
-  res=sockwriteline(sd,buf,strlen(buf));
+  res=sockwriteline(sd,buf,outlen);
 
   /* TODO:  check return status */
 
