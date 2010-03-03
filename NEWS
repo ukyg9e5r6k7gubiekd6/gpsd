@@ -1,6 +1,11 @@
+* Tue Mar 2 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
+  Fix a packaging error.  The new Python library moduke was
+  inadvertently omitted from the 2.91 tarball.  Also, improve the json
+  import test slightly.
+
 * Mon Mar 1 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91
   We have support for NMEA GLONASS sentences, and a regression test.
-  Clients now get a DEVICE dotification on every driver switch.  It is
+  Clients now get a DEVICE notification on every driver switch.  It is
   possible to specify a TCP/IP AIS feed such as AISHub as a data
   source. Serious bitrot in the NTRIP support has been fixed - it was
   probably nonfunctional for several releases before this.  Fixed

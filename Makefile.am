@@ -394,8 +394,10 @@ endif
 # tarball in order for 'make diat-rpm' to work.  The BUILT_SOURCES
 # files are here in order to minimize build dependencies for package
 # builders who never alter anything, especially the Python dependency.
+# Alsoo note that the test and gps directories are here rather than
+# being the contents of a SUBDIRS variable so that autconf won't 
+# go looking for makefiles in them.
 EXTRA_DIST = \
-	$(BUILT_SOURCES) \
 	revision.h \
 	autogen.sh \
 	README \
@@ -426,6 +428,7 @@ EXTRA_DIST = \
 	gpsdecode.xml \
 	rtcm-104.xml \
 	srec.xml \
+	$(BUILT_SOURCES) \
 	$(MANPAGES_DIST) \
 	xgpsspeed.ad \
 	gpsd.rules \
@@ -448,7 +451,8 @@ EXTRA_DIST = \
 	packaging/etc_init.d_gpsd \
 	packaging/etc_init.d_gpsd_rpm \
 	regress-driver \
-	test
+	test \
+	gps
 
 #dist-hook:
 #	$(MKDIR_P) '$(distdir)/contrib' && \

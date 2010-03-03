@@ -5,9 +5,9 @@
 #
 import time, calendar, math, socket, sys, select
 
-try:
+if sys.hexversion >= 0x2060000:
     import json			# For Python 2.6
-except ImportError:
+else:
     import simplejson as json	# For Python 2.4 and 2.5
 
 api_major_version = 3   # bumped on incompatible changes
