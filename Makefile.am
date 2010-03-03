@@ -4,7 +4,7 @@
 # Exclude Subversion state from the tarball.  Needed because we 
 # grab the test directory wholesale. Hack appropriately when and if we 
 # change version control systems.
-am__tar += --exclude '*svn*'
+am__tar += --exclude '*svn*' --exclude '*.so' --exclude '*.pyc'
 
 CLEANFILES =
 
