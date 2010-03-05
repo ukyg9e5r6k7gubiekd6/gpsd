@@ -183,40 +183,6 @@ News flash: it develops that the "Navigation receiver warning" is
 supposed to indicate a valid fix that has a DOP too high or fails
 an elevation test.
 
-*** IPv6 Support
-
-gpsd should have support for IPv6.  Steps to get to full IPv6 support
-include:
-
-**** Detect IPv6 support and getaddrinfo(3) in configure.ac
-
-This web page may be helpful, but is probably overkill - the world has
-gotten simpler since then:
-http://cvs.deepspace6.net/view/example-ipv6-package/configure.ac?rev=1.2&content-type=text/vnd.viewcvs-markup
-
-**** Change from one listening socket to N
-
-Having multiple sockets will also support future changes to listen on
-specific addresses, rather than the -G option for INADDR_ANY instead
-of INADDR_LOCAL.
-
-**** If v6 support is present, open both AF_INET and AF_INET6.
-
-If either fails, just skip it.  gpsd should run on systems without
-"options INET" but with only "options INET6" (BSD) or the Linux
-equivalent.
-
-**** In libgps, if getaddrinfo is present, use it instead of gethostbyname.
-
-Loop through all the returned addresses until one works.  See telnet
-in NetBSD for an example (src/usr.bin/telnet/commands.c).
-
-**** (perhaps) Add a flag to connection libraries to force v4 or v6.
-
-Also add command line flags to force the library flags.  Perhaps this
-is not necessary; telnet and ntp have this feature but postfix and
-sendmail don't seem to.
-
 ** Future features (?)
 
 *** Support for more survey / professional / up-scale receivers.
