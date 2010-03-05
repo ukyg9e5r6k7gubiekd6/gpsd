@@ -312,7 +312,12 @@ the value of which is either the name of the invoking command
 or one of the strings "DEVICE" or "ERROR". Their length
 limit is 1024 characters, including trailing newline.</para>
 
-<para>Here are the most important responses:</para>
+<para>The remainder of this section documents the core GPSD protocol.
+Extensions are docomented in the following sections. The extensions 
+may not be supported in your <application>gpsd</application> instance 
+if it has been compiled with a restricted feature set.</para>
+
+<para>Here are the core-protocol responses:</para>
 
 <variablelist>
 <varlistentry>
@@ -1152,15 +1157,21 @@ the following elements:</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert the ERR_SET bit in the top-level set member.</para>
+
 </refsect1>
 <refsect1 id='ais-rtcm'><title>AIS AND RTCM DUMP FORMATS</title>
+
+<para>AIS support is an extension.  It may not be present if your
+instance of <application>gpsd</application> has been built with
+a restricted feature set.</para>
 
 <para>AIS packets are dumped as JSON objects with class "AIS".  Each
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
-dumped in scaled or unscaled form. Other fields are as named ands
-specified in the <citetitle>AIVDM/AIVDO Protocol Decoding</citetitle>
-document.</para>
+dumped in scaled or unscaled form. Other fields have names and types
+as specified in the <citetitle>AIVDM/AIVDO Protocol Decoding</citetitle>
+document; each message field table may be directly interpreted as a 
+specification for the members of the corresponding JSON object type.</para>
 
 <para>RTCM2 corrections are dumped in the JSON format described in
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
