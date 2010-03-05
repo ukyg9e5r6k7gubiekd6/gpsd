@@ -1281,6 +1281,31 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			  ais->type24.dim.to_starboard);
 	}
 	break;
+    case 25:	/* Binary Message, Single Slot */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
+		       "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",
+		       JSON_BOOL(ais->type25.addressed),
+		       JSON_BOOL(ais->type25.structured),
+		       ais->type25.dest_mmsi,
+		       ais->type25.app_id,
+		       ais->type25.bitcount,
+		       gpsd_hexdump(ais->type25.bitdata,
+				       (ais->type25.bitcount+7)/8));
+	break;
+    case 26:	/* Binary Message, Multiple Slot */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
+		       "\"app_id\":%u,\"data\":\"%zd:%s\"\"radio\":%u}\r\n",
+		       JSON_BOOL(ais->type26.addressed),
+		       JSON_BOOL(ais->type26.structured),
+		       ais->type26.dest_mmsi,
+		       ais->type26.app_id,
+		       ais->type26.bitcount,
+		       gpsd_hexdump(ais->type26.bitdata,
+				    (ais->type26.bitcount+7)/8),
+		       ais->type26.radio);
+	break;
     default:
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';

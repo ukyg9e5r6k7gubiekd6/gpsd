@@ -341,6 +341,29 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			   ais->type24.dim.to_starboard);
 	}
 	break;
+    case 25:	/* Binary Message, Single Slot */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%zd:%s\r\n",
+		       (uint)ais->type25.addressed,
+		       (uint)ais->type25.structured,
+		       ais->type25.dest_mmsi,
+		       ais->type25.app_id,
+		       ais->type25.bitcount,
+		       gpsd_hexdump(ais->type25.bitdata,
+				       (ais->type25.bitcount+7)/8));
+	break;
+    case 26:	/* Binary Message, Multiple Slot */
+	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+		       "%u,%u,%u,%u,%zd:%s:%u\r\n",
+		       (uint)ais->type26.addressed,
+		       (uint)ais->type26.structured,
+		       ais->type26.dest_mmsi,
+		       ais->type26.app_id,
+		       ais->type26.bitcount,
+		       gpsd_hexdump(ais->type26.bitdata,
+				    (ais->type26.bitcount+7)/8),
+		       ais->type26.radio);
+	break;
     default:
 	(void)snprintf(buf+strlen(buf),
 		      buflen-strlen(buf), "unknown AIVDM message content.");
