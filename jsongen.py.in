@@ -360,6 +360,35 @@ ais_specs = (
         ('dim.to_starboard',  'uinteger',      '0'),	# Part B
         ),
     },
+    {
+    "initname" : "json_ais25",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type25",
+    "fieldmap":(
+        # fieldname       type             default
+        ('addressed',     'boolean',       'false'),
+        ('structured',    'boolean',       'false'),
+        ('dest_mmsi',     'uinteger',      '0'),
+        ('app_id',        'uinteger',      '0'),
+        ('data',          'string',        None),
+        ),
+    "stringbuffered":("data",),
+    },
+    {
+    "initname" : "json_ais26",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type26",
+    "fieldmap":(
+        # fieldname       type             default
+        ('addressed',     'boolean',       'false'),
+        ('structured',    'boolean',       'false'),
+        ('dest_mmsi',     'uinteger',      '0'),
+        ('app_id',        'uinteger',      '0'),
+        ('data',          'string',        None),
+        ('radio',         'uinteger',      '0'),
+        ),
+    "stringbuffered":("data",),
+    },
 )
 
 

@@ -8,10 +8,10 @@ conveniences, examples or rudimetary starting points for other development
 efforts.
 
 binlog and binreplay are probably only useful for people developing
-new protocols, when gpsfake does not yet know what to do with a log
-file. These utilities are not particularly clever - they merely slurp
-a tty's output into a file, or spray the contents of a file out of a
-tty.
+drivers for new protocols, when gpsfake does not yet know what to do
+with a log file. These utilities are not particularly clever - they
+merely slurp a tty's output into a file, or spray the contents of a
+file out of a tty.
 
 skyview.php is used to generate pictures of your skyview, and may be
 used to help determine if a given antenna placement is appropriate for
