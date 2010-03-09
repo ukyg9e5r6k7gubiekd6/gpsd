@@ -129,7 +129,9 @@ extensive regression-test suite is used to check correct behavior
 before each release.  This care has paid off in an exceptionally low
 defect rate; our first <a href='http://coverity.com'>Coverity</a>
 scan, in March 2007, turned up only two errors in over 22,000
-LLOC.</p>
+LLOC. And in January 2010, the GPSD project <a
+href="http://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation.asp">won</a>
+the first Good Code Grant from the Alliance for Code Excellence.</p>
 
 <p>Statistics about the code volume, commit history, and contributors
 associated with thias project are <a
