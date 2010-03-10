@@ -900,6 +900,7 @@ static void handle_control(int sfd, char *buf)
 		adjust_max_fd(devp->gpsdata.gps_fd, false);
 	    }
 	    deactivate_device(devp);
+	    free_device(devp);
 	    ignore_return(write(sfd, "OK\n", 3));
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
