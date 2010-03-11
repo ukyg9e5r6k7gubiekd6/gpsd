@@ -1,5 +1,8 @@
 /* $Id$ */
 /*
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  * Driver for AIS/AIVDM messages.
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.

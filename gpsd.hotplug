@@ -1,5 +1,9 @@
 #!/usr/bin/python
 # $Id$
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Hotplug script for gpsd by Eric S. Raymond, March 2005
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
 # Can be called like "gpsd.hotplug [add|remove] /dev/ttyUSB0" for test

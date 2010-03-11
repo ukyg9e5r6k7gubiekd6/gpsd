@@ -5,6 +5,9 @@
 # Simulates a GPS, playing back a logfile
 # Most of the logic for this now lives in gps.fake,
 # factored out so we can write other test programs with it.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
 
 import sys, os, signal, time, getopt, socket
 import gps.fake

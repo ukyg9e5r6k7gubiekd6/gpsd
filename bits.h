@@ -1,4 +1,8 @@
-/* $Id$ */
+/* $Id$
+ *
+ * This file is Copyright (c)2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 #ifndef _GPSD_BITS_H_
 #define _GPSD_BITS_H_
 
@@ -18,6 +22,9 @@
  *
  * The use of fixed-length types in the casts enforces these.
  * Both 32- and 64-bit systems with gcc are OK with this set.
+ *
+ * This file is Copyright (c)2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
 #include <stdint.h>

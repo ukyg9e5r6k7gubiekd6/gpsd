@@ -1,4 +1,7 @@
 dnl $Id$
+dnl This file is Copyright (c)2010 by the GPSD project
+dnl BSD terms apply: see the file COPYING in the distribution root for details.
+
 AC_INIT
 AM_INIT_AUTOMAKE(gpsd, 2.93dev)
 dnl AC_PREFIX_PROGRAM(gcc)

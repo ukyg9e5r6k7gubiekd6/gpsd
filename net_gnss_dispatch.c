@@ -1,5 +1,10 @@
-/* $Id$ */
-/* net_gnss_dispatch.c -- common interface to a number of Network GNSS services */
+/* net_gnss_dispatch.c -- common interface to a number of Network GNSS services
+ *
+ * $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 
 #include <stdlib.h>
 #include "gpsd_config.h"

@@ -1,5 +1,8 @@
 #!@PYTHON@
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #

@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Alfredo Pironti
  *
  * This software is distributed under a BSD-style license. See the
- * file "COPYING" for more information.
+ * file "COPYING" in the top-level directory of the distribution for details.
  *
  */
 

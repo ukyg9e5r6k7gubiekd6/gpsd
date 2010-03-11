@@ -1,5 +1,8 @@
-/* $Id$ */
-/*
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  * This file contains two drivers for Garmin receivers and some code
  * shared by both drivers.
  *
@@ -53,7 +56,6 @@
  * sample code in the Linux garmin_gps driver.
  *
  * bad code by: Gary E. Miller <gem@rellim.com>
- * all rights abandoned, a thank would be nice if you use this code.
  *
  * -D 3 = packet trace
  * -D 4 = packet details

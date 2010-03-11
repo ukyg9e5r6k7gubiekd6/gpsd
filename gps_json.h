@@ -1,4 +1,9 @@
-/* gps_json.h - JSON handling for libgps and gpsd */
+/* gps_json.h - JSON handling for libgps and gpsd
+ *
+ * By Eric S. Raymond, 2009
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 
 #include "json.h"
 

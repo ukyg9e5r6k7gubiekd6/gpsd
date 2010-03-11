@@ -1,4 +1,8 @@
-/* Feature configuration switches end here */
+/* Feature configuration switches end here
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 #endif /* GPSD_CONFIG_H */
 
 /* $Id$ */

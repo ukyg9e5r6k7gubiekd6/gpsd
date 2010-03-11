@@ -1,4 +1,8 @@
-/* $Id$ */
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 #ifndef _CRC24Q_H_
 #define _CRC24Q_H_
 

@@ -1,5 +1,8 @@
 #!@PYTHON@
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Display GPS output.  Hexify it if necessary.
 #
 import os, sys, termios, select, getopt, curses.ascii

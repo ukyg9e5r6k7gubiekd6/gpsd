@@ -1,8 +1,10 @@
 			BSD LICENSE
 
-The GPSD code is Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002 by
-Remco Treffkorn. Portions of it are also Copyright (c) 2005 by Eric S. 
-Raymond. All rights reserved.
+Compilation copyright is held by the GPSD project.  All rights reserved.
+
+Portions of the GPSD code are Copyright (c) 1997, 1998, 1999, 2000,
+2001, 2002 by Remco Treffkorn. Portions of it are also Copyright (c)
+2005 by Eric S. Raymond. For other copyrights, see individual files.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

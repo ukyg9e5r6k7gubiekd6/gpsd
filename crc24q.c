@@ -1,5 +1,8 @@
-/* $Id$ */
-/*
+/* $Id$
+ *
+ * This file is Copyright (c) 2008,2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  * This is an implementation of the CRC-24Q cyclic redundancy checksum
  * used by Qualcomm, RTCM104V3, and PGP 6.5.1. According to the RTCM104V3
  * standard, it uses the error polynomial
@@ -23,9 +26,6 @@
  *
  * Note that this version has a seed of 0 wired in.  The RTCM104V3 standard
  * requires this.
- *
- * This implementation by Eric Steven Raymond is Copyright (c) 2008
- * for the GPSD project, and is released under BSD terms.
  *
  */
 #include <stdbool.h>

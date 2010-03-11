@@ -1,4 +1,8 @@
-/* $Id$ */
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
 /*****************************************************************************
 
 This is a decoder for the unnamed protocol described in IS-GPS-200,

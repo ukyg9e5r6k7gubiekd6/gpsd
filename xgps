@@ -10,6 +10,9 @@ This is xgps, a test client for the gpsd daemon.
 
 By Eric S. Raymond for the GPSD project, December 2009
 '''
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
 
 import sys, os, re, math, time, exceptions, getopt, socket
 

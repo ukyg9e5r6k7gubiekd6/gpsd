@@ -1,5 +1,8 @@
-/* $Id$ */
-/*
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  * Driver for Navcom receivers using propietary NCT messages, a binary protocol.
  *
  * Vendor website: http://www.navcomtech.com/
@@ -26,7 +29,6 @@
  * 0xef: Clock Drift and Offset
  *
  * By Diego Berge. Contact via web form at http://www.navlost.eu/contact
- *
  */
 
 #include <stdio.h>

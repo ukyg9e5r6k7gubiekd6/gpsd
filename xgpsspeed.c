@@ -1,6 +1,9 @@
 /* $Id$ */
 /* GPS speedometer as a wrapper around an Athena widget Tachometer
  * - Derrick J Brashear <shadow@dementia.org>
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
 #include <stdlib.h>

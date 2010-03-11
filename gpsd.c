@@ -1,4 +1,11 @@
-/* $Id$ */
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
+ * This is the main sequence of the gpsd daemon. The IO dos[atcher, main 
+ * select loop, and user command handling lives here. 
+ */
 #include <stdlib.h>
 #include "gpsd_config.h"
 #include <sys/types.h>

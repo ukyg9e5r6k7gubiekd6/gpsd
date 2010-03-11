@@ -1,6 +1,9 @@
 /* $Id$ */
 /*****************************************************************************
 
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+
 This is a decoder for RTCM-104 2.x, an obscure and complicated serial
 protocol used for broadcasting pseudorange corrections from
 differential-GPS reference stations.  The applicable

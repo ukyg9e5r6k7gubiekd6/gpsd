@@ -1,5 +1,8 @@
 #!@PYTHON@
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Never hand-hack what you can generate...
 #
 # This code generates template declarations for AIS-JSON parsing from a

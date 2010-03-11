@@ -1,5 +1,8 @@
-/* $Id$ */
-/*
+/* $Id$
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  * This is the gpsd driver for SiRF GPSes operating in binary mode.
  * It also handles uBlox, a SiRF derivative.
  *

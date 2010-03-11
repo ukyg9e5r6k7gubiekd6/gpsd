@@ -23,6 +23,10 @@ No need to handle Garmin USB binary, we know that type by the fact we're
 connected to the Garmin kernel driver.  But we need to be able to tell the
 others apart and distinguish them from baud barf.
 
+PERMISSIONS
+   This file is Copyright (c) 2010 by the GPSD project
+   BSD terms apply: see the file COPYING in the distribution root for details.
+
 ***************************************************************************/
 #include <stdlib.h>
 #include "gpsd_config.h"
