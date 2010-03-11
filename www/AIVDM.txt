@@ -1069,6 +1069,10 @@ frequency with which the subordinate station should report per
 is specified at the level of TDMA slot numbers; see <<IALA>> for the 
 detailed specification.
 
+Note: While the 96-bit form of Type 16 is not uncommon, the 144-bit
+form is extremely rare. As of March 2010 it has not been observed even
+in long-duration samples from AISHub.
+
 === Type 17: GNSS Broadcast Binary Message ===
 
 Message type 17 is used to broadcast differential corrections for GPS.
@@ -1556,6 +1560,9 @@ interpreted. Otherwise that field span becomes part of the message payload.
 The data fields is not, in contrast to message type 26, followed by a
 radio status block.
 
+Note: Type 25 is extremely rare. As of March 2010 it has not been
+observed even in long-duration samples from AISHub.
+
 === Type 26: Binary Message, Multiple Slot  ===
 
 Takes up 60-1064 bits (up to 5 slots).
@@ -1580,6 +1587,9 @@ is 224 and adds the note "Allows for 32 bits of bit-stuffing."
 
 The 20 radio status bits are always present after end-of-data in the
 last slot and are in the format specified by <<IALA>>.
+
+Note: Type 26 is extremely rare. As of March 2010 it has not been
+observed even in long-duration samples from AISHub.
 
 == Local extensions ==
 
