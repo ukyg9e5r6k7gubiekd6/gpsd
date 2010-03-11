@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.5, January 2010
+v1.6, March 2010
 
 == Why a new protocol? ==
 
@@ -43,22 +43,20 @@ longer, giving your applications a bridge period when they can speak
 both old and new protocol -- but the client-side support for old
 protocol will be removed when 3.0 ships.
 
+The 2.92 version, with the new protocol deployed, will be in Lucid
+Lynx, the Ubuntu LTS release scheduled for April 2010.
+
 This is our schedule for the changeover:
 
 [options="header"]
 |================================================================
 | Release | Timing                      | Description
-
-| 2.91    | Before end of January 2010	|
-Wire protocol freezes (no incompatible changes going forward from
-this point). Old protocol support will be removed from the daemon, but
-not from the library.
-
-| 2.92    | Jan-Feb 2010                |
-Cleanup release, if needed.
+| 2.93    | Late March 2010             |
+DBUS support deprecated.
 
 | 3.0     | Before 30 June 2010         |
 Old protocol support will be removed from the library.
+DBUS support will be removed from the daemon.
 
 |================================================================
 

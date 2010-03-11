@@ -73,13 +73,6 @@ These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
 SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
 to be tested.
 
-*** Support the D-Bus signals recognized by libgypsy
-
-Ian Holmes's Gypsy daemon is a pale shadow of GPSD, but his ideas 
-about signalling D-Bus client apps only on fix changes are good.  We
-should support the signal set described here:
-<http://gypsy.freedesktop.org/why-not-gpsd.html>.
-
 *** Command to ship RTCM corrections to a specified device
 
 At the moment, if a GPS accepts RTCM corrections and they are
