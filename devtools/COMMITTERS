@@ -1,5 +1,5 @@
 # Use this to map SVN author names to network-wide identities as
-# reqyuired by git and other distributes VCSes.  This file will go
+# required by git and other distributes VCSes.  This file will go
 # away once we fully convert to one of these.
 (no author) = cvs2svn
 bzed = Bernd Zeimetz <bernd@bzed.de>

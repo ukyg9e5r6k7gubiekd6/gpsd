@@ -1667,7 +1667,8 @@ See their siting maps for details.
 Share alike. You contribute a feed, you get back all feeds.
 
 - http://www.aislive.com/[AIS Live]:
-Subscription access to real-time data, free access to time-delayed data. 
+Subscription access to real-time data. No onger has free access even 
+to delayed data. 
 
 - hd-sf.com:9009
 Free San Francisco Bay Area AIS feed. For non-commercial use only.
