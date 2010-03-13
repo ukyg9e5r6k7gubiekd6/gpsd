@@ -8,7 +8,7 @@
 # Exclude Subversion state from the tarball.  Needed because we 
 # grab the test directory wholesale. Hack appropriately when and if we 
 # change version control systems.
-am__tar += --exclude '*svn*' --exclude '*.so' --exclude '*.pyc'
+am__tar += --exclude '*git*' --exclude '*.so' --exclude '*.pyc'
 
 CLEANFILES =
 
@@ -211,7 +211,7 @@ ais_json.i: jsongen.py
 
 revision.h: Makefile
 	@rm -f revision.h && \
-	echo '#define' REVISION '"svn'`svnversion -n`'"' >revision.h && \
+	echo '#define' REVISION '"git'`git describe`'"' >revision.h && \
 	chmod a-w revision.h
 
 maskdump.c: gpsd.h-tail maskaudit.py
@@ -514,7 +514,7 @@ indent:
 	chmod u+w maskdump.c
 	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
 	chmod u-w maskdump.c
-	@echo "Diff lines:" `svn diff | wc -l`
+	@echo "Diff lines:" `git diff | wc -l`
 
 version:
 	@echo $(VERSION)
@@ -688,17 +688,15 @@ upload-ftp: dist
 	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd.sum"
 
 #
-# This is how to tag a release for the SVN repository.
+# This is how to tag a release for the git repository.
 # It requires developer access verified via ssh.
 #
-REPO=https://svn.berlios.de/svnroot/repos/gpsd
-svn-tag:
-	svn copy $(REPO)/trunk $(REPO)/tags/release-$(VERSION) \
-		-m "Tagged for external release $(VERSION)"
+release-tag:
+	git tag -s -m "Tagged for external release $(VERSION)" HEAD
 #
 # Ship a release, providing all regression tests pass.
 # The clean is necessary so that dist will remake revision.h
 # with the current revision level in it.
 #
-ship: testregress clean dist upload-ftp svn-tag
+ship: testregress clean dist upload-ftp release-tag
 

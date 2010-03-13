@@ -296,7 +296,7 @@ from your receiver - not the gpsd logfile, just raw output.  We'll use this for
 mechanical regression testing, which is your best guarantee that support for
 your device won't get broken in a future release. Please be advised that these
 logs will be sent to a publicly archived mailing list, and will be available in
-the public SVN repository.</p>
+the public code repository.</p>
 
 <p>Almost all receivers will simply start throwing data to your port
 immediately when they're plugged in. You should normally be able to capture

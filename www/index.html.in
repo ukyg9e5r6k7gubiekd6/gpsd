@@ -176,9 +176,10 @@ version) rather than the latest released stable version.</p>
 href="http://developer.berlios.de/project/showfiles.php?group_id=2116">download</a>
 directory for tarballs of all released versions. Access to the
 bleeding-edge developer version is supported <a
-href="http://developer.berlios.de/svn/?group_id=2116">via
-Subversion</a>.  The main project page is <a
-href='http://developer.berlios.de/projects/gpsd/'>here on berlios.de</a>.</p>
+href="http://developer.berlios.de/git/?group_id=2116">via git</a>.
+The main project page is <a
+href='http://developer.berlios.de/projects/gpsd/'>here on
+berlios.de</a>.</p>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package

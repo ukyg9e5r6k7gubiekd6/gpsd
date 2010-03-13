@@ -367,7 +367,7 @@ int main (int argc, char** argv)
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+	    (void)fprintf(stderr, "gpxlogger revision $Id$ \n");
 	    exit(0);
 	default:
  	    usage();

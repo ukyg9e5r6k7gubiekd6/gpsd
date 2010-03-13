@@ -501,7 +501,7 @@ int main(int argc, char **argv)
 	    break;
 
 	case 'V':
-	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
+	    (void)fprintf(stderr, "gpsdecode revision $Id$ \n");
 	    exit(0);
 
 	case '?':

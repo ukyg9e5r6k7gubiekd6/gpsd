@@ -79,7 +79,7 @@
       <date>14 November 2006</date>
       <authorinitials>md</authorinitials>
       <revremark>
-	 Updated to conform to SVN 3884.
+	 Updated to conform to the fepo source at this date.
       </revremark>
    </revision>
 </revhistory>
@@ -101,7 +101,7 @@ supports around 40 different GPS devices, so it may be that your
 device is already supported by an existing driver.</para>
 
 <para>It may be worth noting that these notes were written against
-gpsd version 2.34 compiled from SVN revision 3884 of November 14th
+gpsd version 2.34 as it existed on of November 14th
 2006. The situation will likely have changed by the time you read
 this, but the broad principles should still apply. Check what version
 you are using.</para>

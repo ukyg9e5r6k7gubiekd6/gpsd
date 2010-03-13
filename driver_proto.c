@@ -33,9 +33,6 @@
  * libgpsd_core.c
  * packet.c
  * packet_states.h
- *
- * see http://svn.berlios.de/viewvc/gpsd/trunk/?sortby=date&pathrev=5078
- * for an example of how a new driver arrived.
  */
 
 #include <sys/types.h>

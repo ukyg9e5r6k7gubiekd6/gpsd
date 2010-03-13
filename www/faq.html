@@ -108,7 +108,7 @@ possible your bug has already been fixed.  Download the latest public
 version from the <a
 href='http://developer.berlios.de/projects/gpsd/'>project page</a> and
 test it.  To be really helpful, check out the <a
-href='http://developer.berlios.de/svn/?group_id=2116'>Subversion
+href='https://developer.berlios.de/git/?group_id=2116'>git
 head</a> and test that.  We don't mind getting bug reports that say 
 "I saw version foo had the following bug, but you've fixed it."</p>
 
@@ -254,39 +254,17 @@ describe that procedure here.</p>
 
 <ol>
 <li><p>Follow <a
-href='http://developer.berlios.de/svn/?group_id=2116'>these
+href='http://developer.berlios.de/git/?group_id=2116'>these
 instructions</a> to check out a copy of the software.</p></li>
 
-<li><p>Do "svn log *" in the top-level directory of the checked-out tree.
-Save the results.  This is your map of dates to revision levels.</p></li>
-
-<li><p>Determine the revision levels of the first known bad release
-and the last known good release.  You can do this by looking for the
-release dates from gpsd.spec in the log output. Note: pick the
-<em>first</em> revision matching the known-good date and the <em>last</em>
-revision matching the known-bad date.</p></li>
-
-<li><p>Use the <code>-r</code> option of <code>svn up</code> to check
-out the revision level in the middle of that range.  Thus, if the last
-known good release was 2502 and the known bad one is 2760, check out
-release (2760 + 2502) / 2 = 2631.  The command you want would be "svn
--r 2631 up" in this case.</p></li>
-
-<li><p>Build and test the revision.  Whether it works or not, you will
-eliminate half the range.  If it works, you know the bug was introduced
-somewhere in the upper half range.  If it doesn't, the bug was introduced
-in the lower half.</p></li>
-
-<li><p>Do the same test on the half-range where the error was introduced;
-e.g. check out the middle version, test that, and narrow the range by another
-factor of 2.</p></li>
-
-<li><p>Repeat this bisection search until you know the exact revision that
-introduced your bug.  This will happen very quickly, as the number of
-tests required will be the log to the base 2 of the number of
-revisions in your original span.  Even if there are (say) 500
-revisions in the span you should only require 9 tests to nail down the
-exact change in question.</p></li>
+<li><p>Use <a
+href="http://www.kernel.org/pub/software/scm/git/docs/git-bisect.html">git
+bisect</a> to locate the exact revision that introduced your bug.
+This will happen very quickly, as the number of tests required will be
+the log to the base 2 of the number of revisions in your original
+span.  Even if there are (say) 500 revisions in the span you should
+only require 9 tests to nail down the exact change in
+question.</p></li>
 </ol>
 
 <h3>12. Include the vendor, mode, and firmware version in your report.</h3>

@@ -59,8 +59,7 @@
 
 <h1>Contents</h1>
 
-<p>If you're looking for things to hack on, first see the
-<a href="http://svn.berlios.de/svnroot/repos/gpsd/trunk/TODO">TODO</a>
+<p>If you're looking for things to hack on, first see the TODO
 file in the source distribution.</p>
 
 <ol type="I">
@@ -881,14 +880,10 @@ a non-DGPS UERE estimate of 8 (95% confidence).  That's what we use.</p>
 
 <h2 id="ancient">Ancient history</h2>
 
-<p>The project is presently kept in a Subversion repository.  Up until
+<p>The project is presently kept in a git repository.  Up until
 mid-August 2004 (r256) it was kept in CVS, which was mechanically
-upconverted using cvs2svn.</p>
-
-<p>If you read very old portions of the revision log, there are many
-spans of identical comments.  Some of these are places where cvs2svn should
-have merged multiple CVS commits to a single SVN changeset, but did
-not. Others are scar tissue from pre-2006 versions of Emacs VC.</p>
+upconverted to Subversion. On 12 March 2010 the Subversion repository was
+converted to git.</p>
 
 <h1 id="trouble">Known trouble spots</h1>
 
@@ -1406,15 +1401,16 @@ the release has been shipped and tagged.</dd>
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>8. Check the revision.h file</dt>
-<dd>The contents of the revision.h file should match the output of
-svnversion. If it doesn't, remove revision.h, svn up, and make revision.h</dd>
+<dd>The contents of the revision.h file should match the output of git
+describe. If it doesn't, remove revision.h, git pull, and make
+revision.h</dd>
 
 <dt>9. Ship to Berlios</dt>
 <dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp), 
 and do Berlios's release procedure.</dd>
 
-<dt>10. Tag the release in SVN</dt>
-<dd>Doing 'make svn-tag' should accomplish this</dd>
+<dt>10. Tag the release in git</dt>
+<dd>Doing 'make release-tag' should accomplish this.</dd>
 
 <dt>11. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix

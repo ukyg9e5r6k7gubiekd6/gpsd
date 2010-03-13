@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
     int option, singletest = 0;
 
     verbose = 0;
-    while ((option = getopt(argc, argv, "Vt:v:")) != -1) {
+    while ((option = getopt(argc, argv, "t:v:")) != -1) {
 	switch (option) {
 	case 't':
 	    singletest = atoi(optarg);
@@ -290,9 +290,6 @@ int main(int argc, char *argv[])
 	case 'v':
 	    verbose = atoi(optarg); 
 	    break;
-	case 'V':
-	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
-	    exit(0);
 	}
     }
 
