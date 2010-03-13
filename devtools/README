@@ -16,11 +16,6 @@ Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
 
 Finds end-of-cycle sentences from GPS output logs.
 
-** editcomment
-
-Edit the change comment at the revision level specified as $1.
-Only works if you have developer ssh access to the repo.
-
 ** fakecompare
 
 Compare the results from running gpsfake on a logfile between this
@@ -57,11 +52,6 @@ May be useful for comparing logs when regression tests break.
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do
 this itself now, so this script has a lot of dust on it. 
 
-** COMMITTERS
-
-Email addreesses for all committers up to October 2009 - required for
-good-quality git conversion of the SVN archive. When we switch to a
-DVCS permanently this file will probably go away.
 
 
 

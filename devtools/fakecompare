@@ -7,7 +7,7 @@
 file=$1
 remote=$2
 
-directory=svn/gpsd/trunk
+directory=git/gpsd
 options="-D 4"
 
 ./gpsfake $options -s 38400 -1 -p $file >/tmp/fcmp-local-$$ 2>&1
