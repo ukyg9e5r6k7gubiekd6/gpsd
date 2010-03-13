@@ -33,6 +33,9 @@
  * libgpsd_core.c
  * packet.c
  * packet_states.h
+ *
+ * For an example of how a new driver is connected, see
+ * http://git.berlios.de/cgi-bin/cgit.cgi/gpsd/commit/?id=ea17b554b6276f0993921a1f387df574f844964a
  */
 
 #include <sys/types.h>
