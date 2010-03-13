@@ -1,4 +1,3 @@
-dnl $Id$
 dnl This file is Copyright (c)2010 by the GPSD project
 dnl BSD terms apply: see the file COPYING in the distribution root for details.
 

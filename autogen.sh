@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 
 # Automakeversion
 AM_1=1

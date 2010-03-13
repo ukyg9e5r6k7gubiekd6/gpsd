@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
@@ -501,7 +500,7 @@ int main(int argc, char **argv)
 	    break;
 
 	case 'V':
-	    (void)fprintf(stderr, "gpsdecode revision $Id$ \n");
+	    (void)fprintf(stderr, "gpsdecode revision " VERSION "\n");
 	    exit(0);
 
 	case '?':

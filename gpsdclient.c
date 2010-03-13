@@ -1,9 +1,8 @@
-/* $Id$
+/*
+ * gpsdclient.c -- support functions for GPSD clients
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
- *
- * gpsdclient.c -- support functions for GPSD clients
  */
 #include <sys/time.h>
 #include <stdio.h>

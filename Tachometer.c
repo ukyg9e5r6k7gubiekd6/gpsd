@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * Tachometer Widget Implementation
  *

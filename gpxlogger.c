@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
@@ -21,6 +20,7 @@
 #endif /* S_SPLINT_S */
 #include "gps.h"
 #include "gpsdclient.h"
+#include "revision.h"
 
 /**************************************************************************
  *
@@ -367,7 +367,7 @@ int main (int argc, char** argv)
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "gpxlogger revision $Id$ \n");
+	    (void)fprintf(stderr, "gpxlogger revision " REVISION "\n");
 	    exit(0);
 	default:
  	    usage();

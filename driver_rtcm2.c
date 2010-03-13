@@ -1,8 +1,4 @@
-/* $Id$ */
 /*****************************************************************************
-
-This file is Copyright (c) 2010 by the GPSD project
-BSD terms apply: see the file COPYING in the distribution root for details.
 
 This is a decoder for RTCM-104 2.x, an obscure and complicated serial
 protocol used for broadcasting pseudorange corrections from
@@ -50,6 +46,9 @@ are one or two annoying and vital omissions!). Information
 about the serial interface format was gleaned from studying
 the output of a beacon receiver test program made available on
 Starlink's website.
+
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 

@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * Copyright (c) 2005 Jeff Francis <jeff@gritch.org>
  * BSD terms apply: see the filr COPYING in the distribution root for details.

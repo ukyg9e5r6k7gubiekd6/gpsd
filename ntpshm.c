@@ -1,4 +1,3 @@
-/* $Id$ */
 /* 
  * ntpshm.c - put time information in SHM segment for xntpd
  * struct shmTime and getShmTime from file in the xntp distribution:

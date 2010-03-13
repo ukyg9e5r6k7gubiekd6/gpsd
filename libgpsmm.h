@@ -1,4 +1,3 @@
-/* $Id$ */
 #ifndef _GPSD_GPSMM_H_
 #define _GPSD_GPSMM_H_
 

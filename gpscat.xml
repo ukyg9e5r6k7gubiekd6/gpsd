@@ -103,13 +103,6 @@ getter changes.</para>
 <para>Display program usage and exit.</para>
 </listitem>
 </varlistentry>
-
-<varlistentry>
-<term>-V</term>
-<listitem>
-<para>Display program version and exit.</para>
-</listitem>
-</varlistentry>
 </variablelist>
 
 <para>Specifying -s 4800N1 is frequently helpful with unknown

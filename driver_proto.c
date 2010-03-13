@@ -1,8 +1,4 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- *
+/*
  * A prototype driver.  Doesn't run, doesn't even compile.
  *
  * For new driver authors: replace "_PROTO_" and "_proto_" with the name of
@@ -33,6 +29,10 @@
  * libgpsd_core.c
  * packet.c
  * packet_states.h
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  */
 
 #include <sys/types.h>

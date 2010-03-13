@@ -1,7 +1,5 @@
 /* test driver for the ECEF to WGS84 conversions in geoid.c
  *
- * $Id$
- *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details. 
  */

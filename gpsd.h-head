@@ -4,7 +4,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-/* $Id$ */
 #ifndef _GPSD_H_
 #define _GPSD_H_
 

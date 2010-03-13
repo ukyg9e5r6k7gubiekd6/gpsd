@@ -1,4 +1,3 @@
-/* $Id$ */
 /* edit packet_states.h to add new packet types. */
    GROUND_STATE,	/* we don't know what packet type to expect */
 

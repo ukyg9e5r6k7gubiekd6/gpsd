@@ -1,8 +1,4 @@
-/* $Id$ */
 /*
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- *
  * Driver for AIS/AIVDM messages.
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
@@ -10,6 +6,9 @@
  * Code for message types 1-15, 18-21, and 24 has been tested against
  * live data with known-good decodings. Code for message types 16-17,
  * 22-23, and 25-26 has not.
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
 #include <stdio.h>

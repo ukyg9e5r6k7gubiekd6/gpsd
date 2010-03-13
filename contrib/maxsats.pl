@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# $Id$
 
 # Copyright (c) 2008 Chris Kuethe <chris.kuethe@gmail.com>
 #

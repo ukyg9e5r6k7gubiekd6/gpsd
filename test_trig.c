@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Copyright (c) 2006 Chris Kuethe <chris.kuethe@gmail.com>
  * Copyright (c) 2009 BBN Technologies (Greg Troxel)

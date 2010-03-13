@@ -1,8 +1,3 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- */
 /****************************************************************************
 
 NAME
@@ -51,6 +46,10 @@ array's base address and the stride length (the size of the C struct).
 If you initialize the offset fields with the correct offsetof() calls,
 everything will work. Strings are suppported but all string storage
 has to be inline in the struct.
+
+PERMISSIONS
+   This file is Copyright (c) 2010 by the GPSD project
+   BSD terms apply: see the file COPYING in the distribution root for details.
 
 ***************************************************************************/
 #include <stdio.h>

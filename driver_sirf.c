@@ -1,8 +1,4 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- *
+/*
  * This is the gpsd driver for SiRF GPSes operating in binary mode.
  * It also handles uBlox, a SiRF derivative.
  *
@@ -26,6 +22,9 @@
  * "[When we need RINEX data, we can get it from] SiRF Message #5.
  *  If it's no longer implemented on your receiver, messages
  * 7, 28, 29 and 30 will give you the same information."
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
 #include <sys/types.h>

@@ -510,7 +510,6 @@ EOF
 }
 
 print "</form>\n<hr/>\n";
-print '<code>$Id$</code>';
 
 
 print $query->end_html;

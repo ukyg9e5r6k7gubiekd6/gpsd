@@ -740,7 +740,7 @@ will assert the VERSION_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"VERSION","version":"2.40dev","rev":$Id$,"proto_major":3,"proto_minor":1}
+{"class":"VERSION","version":"2.40dev","rev":"06f62e14eae9886cde907dae61c124c53eb1101f","proto_major":3,"proto_minor":1}
 </programlisting>
 
 

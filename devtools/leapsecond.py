@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# $Id$
 #
 # Get the current leap-second value.  This is the offset between UTC and
 # GPS time, which changes occasionally due to variations in the Earth's

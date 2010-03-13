@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * OnCore object for the GPS packet monitor.
  *

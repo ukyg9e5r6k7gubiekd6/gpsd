@@ -1,8 +1,4 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- *
+/*
  * Handle the Garmin simple text format supported by some Garmins.
  * Tested with the 'Garmin eTrex Legend' device working in 'Text Out' mode.
  *
@@ -26,6 +22,10 @@
  *      vdop
  *	magnetic variation
  *      satellite information
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  */
 
 /***************************************************

@@ -1,4 +1,3 @@
-/* $Id$ */
 /* GPS speedometer as a wrapper around an Athena widget Tachometer
  * - Derrick J Brashear <shadow@dementia.org>
  *

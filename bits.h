@@ -1,11 +1,3 @@
-/* $Id$
- *
- * This file is Copyright (c)2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- */
-#ifndef _GPSD_BITS_H_
-#define _GPSD_BITS_H_
-
 /*
  * bits.h - extract binary data from message buffer
  *
@@ -26,6 +18,8 @@
  * This file is Copyright (c)2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#ifndef _GPSD_BITS_H_
+#define _GPSD_BITS_H_
 
 #include <stdint.h>
 

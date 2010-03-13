@@ -1,8 +1,4 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- *
+/*
  * gpspipe
  *
  * a simple program to connect to a gpsd daemon and dump the received data
@@ -21,8 +17,10 @@
  *      gpspipe -wr
  *
  * Original code by: Gary E. Miller <gem@rellim.com>.  Cleanup by ESR.
- * All rights given to the gpsd project to release under whatever open source
- * license they use.  A thank you would be nice if you use this code.
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
  */
 
 #include <stdlib.h>

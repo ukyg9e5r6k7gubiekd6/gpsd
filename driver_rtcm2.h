@@ -1,11 +1,3 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- */
-#ifndef _GPSD_RTCM2_H_
-#define _GPSD_RTCM2_H_
-
 /*****************************************************************************
 
 This is a decoder for RTCM-104 2.x, an obscure and complicated serial
@@ -55,7 +47,13 @@ about the serial interface format was gleaned from studying
 the output of a beacon receiver test program made available on
 Starlink's website.
 
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+
 *****************************************************************************/
+
+#ifndef _GPSD_RTCM2_H_
+#define _GPSD_RTCM2_H_
 
 /*
  * Structures for interpreting words in an RTCM-104 2.x message (after

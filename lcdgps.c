@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * Copyright (c) 2005 Jeff Francis <jeff@gritch.org>
  *
@@ -78,6 +77,7 @@
 
 #include "gps.h"
 #include "gpsdclient.h"
+#include "revision.h"
 
 /* Macro for declaring function arguments unused. */
 #if defined(__GNUC__)
@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
     while ((option = getopt(argc, argv, "Vhl:su:")) != -1) {
 	switch (option) {
 	case 'V':
-	    (void)fprintf(stderr, "$Id$\n");
+	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
 	    exit(0);
 	case 'h':
 	default:

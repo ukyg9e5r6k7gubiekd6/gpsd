@@ -62,9 +62,6 @@ if __name__ == '__main__':
             elif switch == '-h':
                 sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
                 raise SystemExit, 0
-            elif switch == '-V':
-                sys.stderr.write("gpscat at revision $Rev$\n")
-                raise SystemExit, 0
 
         tty = os.open(arguments[0], os.O_RDWR)
         if speed != None:

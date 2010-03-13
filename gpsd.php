@@ -1,6 +1,5 @@
 <?php
 
-# $Id$
 #$CSK: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $
 
 # Copyright (c) 2006 Chris Kuethe <chris.kuethe@gmail.com>
@@ -395,7 +394,6 @@ function write_html($resp){
 		$gmap_body = 'onload="Load()" onunload="GUnload()"';
 		$gmap_code = gen_gmap_code();
 	}
-	$svn ='$Rev$';
 	$part1 = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -501,7 +499,6 @@ EOF;
 
 <hr/>
 <span class="administrivia">This script is distributed by the <a href="http://gpsd.berlios.de">GPSD project</a>.</span><br/>
-<span class="administrivia">{$svn}<br/>
 </body>
 </body>
 

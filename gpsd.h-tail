@@ -5,8 +5,6 @@
  */
 #endif /* GPSD_CONFIG_H */
 
-/* $Id$ */
-
 /* constants for the VERSION response */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
 #define GPSD_PROTO_MINOR_VERSION	1	/* bump on compatible changes */

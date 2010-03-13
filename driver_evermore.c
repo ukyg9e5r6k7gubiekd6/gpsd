@@ -1,7 +1,4 @@
-/* $Id$
- *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+/*
  *
  * This is the gpsd driver for EverMore GPSes operating in binary mode.
  * About the only thing this gives us that NMEA won't is TDOP.
@@ -112,6 +109,9 @@
  * *10 *02 *04 *38 8d c5 *10 *03
  * 8d indicates that message 0x8d was sent;
  * c5 is EverMore checksum, other bytes are fixed
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details. 
  */
 
 #include <sys/types.h>

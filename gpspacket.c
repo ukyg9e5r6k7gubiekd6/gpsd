@@ -1,9 +1,9 @@
-/* $Id$
+/*
+ * Python binding for the packet.c module.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
- * Python binding for the packet.c module.
  */
 #include <Python.h>
 

@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  *

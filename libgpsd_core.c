@@ -1,7 +1,5 @@
 /* libgpsd_core.c -- direct access to GPSes on serial or USB devices.
  *
- * $Id$
- *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
