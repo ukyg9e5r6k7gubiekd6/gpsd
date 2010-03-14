@@ -6,6 +6,10 @@
 # one captured without a fix (first three lines) and one with.
 # This GPS emuits a badly malformed GSA when it has no fix, as
 # you can see on the first two lines.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMC,151605.053,V,,,,,,,260705,,*29
 $GPRMC,151606.055,V,,,,,,,260705,,*2C
 $GPGSA,A,1,,,,*32

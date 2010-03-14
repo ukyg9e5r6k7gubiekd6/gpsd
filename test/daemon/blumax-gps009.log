@@ -4,6 +4,9 @@
 # Date: 18 July 2008
 # Location: Bielefeld, DE,  52=B0 01' N, 08=B0 31' O
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Following lines are
 # `cat /dev/ttyACM0` at startup
 $PSRFTXTVersion GSW3.2.2_3.1.00.12-SDK003P1.01a *78

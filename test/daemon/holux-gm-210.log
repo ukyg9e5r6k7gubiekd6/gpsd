@@ -2,6 +2,10 @@
 # Chipset: SiRF-II
 # Submitted-by: "Patrick L. McGillan" <pmcgillan@pateri.com>
 # Date: 4 Apr 2005
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGGA,012519.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*7D
 $GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
 $GPRMC,012519.563,V,4131.7353,N,09336.8150,W,0.00,,050405,,*14

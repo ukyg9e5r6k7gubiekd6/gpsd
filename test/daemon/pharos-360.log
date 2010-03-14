@@ -3,6 +3,10 @@
 # Submitted-by: "Jeff Fisher" <guppy@techmonkeys.org>
 # Date: 27 July 2006
 # Location: Regina, Saskatchewan, Canada, 50N104W
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGSA,A,3,28,11,26,29,,,,,,,,,12.9,12.5,3.1*39
 $GPRMC,021612.949,A,5029.3800,N,10441.0390,W,0.039560,189.06,280706,,*18
 $GPGGA,021613.949,5029.3800,N,10441.0389,W,1,04,12.5,572.4,M,-20.3,M,0.0,0000*7E

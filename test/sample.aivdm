@@ -1,6 +1,9 @@
 # Sample AIVDM data sentences provided from real data by Kurt Schwehr
 # Mike Greene, Neal Arundale, and AISHub.
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Type 1:
 # From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
 !AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A

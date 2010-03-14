@@ -6,6 +6,9 @@
 # Date: 18 Dec 2007
 # Location: Nozay, 48.66564N2.24812E
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # Lines up to but not including the first GPGLL are
 # `cat /dev/ttyACM0` at startup=20
 # Following lines are

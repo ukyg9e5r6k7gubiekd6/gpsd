@@ -1,6 +1,10 @@
 # Name: Magellan 315
 # Submitted-by: Ángel Marqués Mateu <amarques@cgf.upv.es>
 # Date: 12 Mar 2005
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGLL,3908.8199,N,00023.0832,W,120824.758,A*22
 $GPGGA,120824.76,3908.8199,N,00023.0832,W,1,06,2.1,00176,M,,,,*39
 $GPRMC,120824.76,A,3908.8199,N,00023.0832,W,00.0,000.0,130305,01.,W*62

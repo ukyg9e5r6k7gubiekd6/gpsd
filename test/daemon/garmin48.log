@@ -8,6 +8,10 @@
 #
 # Submitted-by: Hamish <hamish_nospam@yahoo.com>
 # Date: 11 Mar 2005
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMC,225308,A,4527.458,S,16709.165,E,000.0,094.5,060601,024.1,E*6D
 $GPRMB,A,,,,,,,,,,,,V*71
 $GPGGA,225308,4527.458,S,16709.165,E,1,05,2.1,14.7,M,1.1,M,,*53

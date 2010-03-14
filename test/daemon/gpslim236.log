@@ -2,6 +2,10 @@
 # Chipset: SiRF-III
 # Submitted-by:  "Kévin REDON" <kevredon@gmail.com>
 # Date: 22 Jul 2006 
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGGA,185244.000,4854.2575,N,00219.9816,E,1,05,1.7,124.4,M,47.3,M,,0000*56
 $GPGSA,A,3,14,01,30,06,09,,,,,,,,2.8,1.7,2.2*36
 $GPGSV,3,1,11,30,79,308,20,05,54,079,16,06,43,204,29,14,39,247,41*75

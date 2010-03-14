@@ -10,6 +10,9 @@
 # Log created with Kermit logging from /dev/ttyUSB0 at 4800 baud
 # Log shows entire power up to first fix sequence 
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 # power up
 #
 $PMTK010,001*2E

@@ -3,6 +3,10 @@
 # Submitted-by: Chris Kuethe <chris.kuethe@gmail.com>
 # Date: 23 Dec 2007
 # Location: Playa del Carmen, Mexico. 20.63N/87.07W
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGGA,193221.00,2037.72792,N,08704.08478,W,1,04,1.7,-30.40,M,-13.9,M,,*7D
 $GPGSA,A,3,10,28,09,13,,,,,,,,,03.4,01.7,03.0*00
 $GPGSV,3,1,12,28,14,150,41,09,15,254,41,10,43,192,47,13,06,081,36*7A

@@ -2,6 +2,10 @@
 # These are JSON dumps of the packets in the Schwehr testload,
 # with synthetic messages 12 and 14 added  
 # FIXME: Needs a more complete set of test sentences.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 {"class":"AIS","type":1,"repeat":0,"mmsi":371798000,"scaled":false,"status":0,"turn":-127,"speed":123,"accuracy":true,"lon":-74037230,"lat":29028980,"course":2240,"heading":215,"second":33,"maneuver":0,"raim":false,"radio":68034}
 {"class":"AIS","type":1,"repeat":0,"mmsi":440348000,"scaled":false,"status":0,"turn":-128,"speed":0,"accuracy":false,"lon":-42454920,"lat":25848090,"course":934,"heading":511,"second":13,"maneuver":0,"raim":false,"radio":66548}
 {"class":"AIS","type":2,"repeat":0,"mmsi":356302000,"scaled":false,"status":0,"turn":127,"speed":139,"accuracy":false,"lon":-42975686,"lat":24235415,"course":877,"heading":91,"second":41,"maneuver":0,"raim":false,"radio":98316}

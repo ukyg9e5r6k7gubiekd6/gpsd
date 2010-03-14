@@ -3,6 +3,10 @@
 # Date: 16 September 2006
 # Location: Connecticut River, New Hampshire, USA, 44N71W
 # Comments: Powerboat track with NMEA depth (DPT) and water temperature (MTW) sentences
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $INDPT,2.2,0.0*47
 $INRMC,194101,A,4426.1130,N,07140.5596,W,5.2,77.3,160906,15.8,W*60
 $INDPT,2.1,0.0*44

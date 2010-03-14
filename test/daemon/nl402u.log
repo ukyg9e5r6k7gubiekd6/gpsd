@@ -2,6 +2,10 @@
 # Chipset: u-blox5 GPS & GALILEO SuperSense®
 # Submitted-by: Klaus Plöger k.ploeger@gastradata.de
 # Date: 2008:07:24
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPTXT,01,01,02,u-blox ag - www.u-blox.com*50
 $GPTXT,01,01,02,HW  UBX-G5xxx  00040005 *1B
 $GPTXT,01,01,02,EXT CORE 5.00 (28483) Jun  6 2008 14:42:32*5F

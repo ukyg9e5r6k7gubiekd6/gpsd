@@ -6,6 +6,10 @@
 # Location = Moscow, Russia, 55.71N 37.41E
 # Notes: Emits GLONASS sentences. Mostly 2D fixes but it loses
 #	satellite lock near the end and the sentence mix changes.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GNGGA,135627.997,5543.0325,N,03724.7192,E,1,06,01.8,165.6,M,14.6,M,,*75
 $GNRMC,135627.997,A,5543.0325,N,03724.7192,E,00.00,129.5,051209,,,A*7F
 $PORZD,A,024.1*3B

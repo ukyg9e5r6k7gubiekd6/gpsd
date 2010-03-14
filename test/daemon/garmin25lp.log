@@ -2,6 +2,10 @@
 # Chipset: Garmin proprietary, emits NMEA 2.0
 # Submitted-by: Daniele Giangrazi <daniele.giangrazi@elital.net>
 # Date: 22 Mar 2005
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMC,120316,V,4221.4394,N,01321.9948,E,000.0,000.0,150305,001.4,E*63
 $GPGSV,2,1,08,01,10,158,45,03,72,164,41,11,24,279,,14,30,119,48*76
 $GPGSV,2,2,08,15,33,070,40,16,05,184,,18,20,046,,19,73,304,*7B

@@ -8,6 +8,9 @@
 # Device is described here:
 # http://www.yachtronics.com/yachtronics/manuals/DIGITAL%20YACHT%20AIT250%20OPERATION.pdf
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMC,194907.00,A,5241.99815,N,00517.56525,E,0.005,,010809,,,A*7B
 !AIVDO,1,1,,,B3aC3LP00063aj7RNpl03wSUwP06,0*43
 !AIVDM,1,1,,B,13njCt031t0DA=lN2:jKmad60l1p,0*12

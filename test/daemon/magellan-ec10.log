@@ -6,6 +6,9 @@
 # Roof-mounted stationary GPS.  This is about as dumb as NMEA gets.
 # This log records a transition from no fix to 2D fix and then no fix.
 #
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMB,V,,,,,,,,,,,,V*66
 $GPRMC,205150.00,V,,,,,,,,,,,V*4a
 $GPRMB,V,,,,,,,,,,,,V*66

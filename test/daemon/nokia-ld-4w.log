@@ -5,6 +5,10 @@
 # Submitted-by: jussi.kivilinna@mbnet.fi
 # Date: 5 Dec 2009
 # Location: Oulu, FI, 65N 25E
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGGA,080315.000,6503.0241,N,02528.3627,E,1,07,1.2,9.9,M,21.6,M,,0000*58
 $GPGSA,A,3,29,12,30,23,04,31,16,,,,,,2.2,1.2,1.9*32
 $GPGSV,3,1,11,29,65,214,25,30,52,154,23,31,45,272,32,02,41,068,*7A

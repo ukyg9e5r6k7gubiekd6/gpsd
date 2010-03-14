@@ -1,6 +1,10 @@
 # Name: Garmin 38
 # Submitted-by: "Pascal F. Martin" <pascal.martin@cox.net>
 # Date: 18 Mar 2005
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $PGRME,19.2,M,28.7,M,34.6,M*18
 $GPGLL,3348.452,N,11821.142,W,142214,A*3B
 $PGRMZ,125,f,3*1D

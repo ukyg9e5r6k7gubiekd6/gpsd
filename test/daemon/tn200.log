@@ -5,6 +5,10 @@
 # Location: Edmonton, Alberta, CA 53N113W
 # Comments - Nearby airports include YEG and YXD. This capture was done
 # at 4800 baud with the SiRF default NMEA message set.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGGA,000416.984,0000.0000,N,00000.0000,E,0,00,50.0,0.0,M,0.0,M,0.0,0000*70
 $GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
 $GPRMC,000416.984,V,36000.0000,N,72000.0000,E,0.000000,,260120,,*3B

@@ -4,6 +4,10 @@
 # Date: 14 Jun 2005
 # Location: Madrid, Madrid, Spain (ES), 40.39N 03.64E
 # Comments:  This is demo-mode data, with no actual fixes.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPRMC,214350,V,4023.8600,N,00339.1630,W,10.8,0.0,140605,2.5,W,S*21
 $GPRMB,V,,,,,,,,,,,,A,S*0E
 $GPGGA,214350,4023.8600,N,00339.1630,W,8,09,2.0,695.7,M,51.6,M,,*5A

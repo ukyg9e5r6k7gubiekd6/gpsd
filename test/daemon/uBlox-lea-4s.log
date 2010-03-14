@@ -3,6 +3,10 @@
 # Submitted-by: "Ali Utku Selen" <selenau@kentkart.com.tr>
 # Date: 11 Dec 2006
 # Location: İzmir, TR, 38N27E
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPZDA,175503.00,11,12,2006,00,00*64
 $GPRMC,175504.00,A,3825.60966,N,02708.53787,E,0.142,113.02,111206,,,A*6F
 $GPVTG,113.02,T,,M,0.142,N,0.263,K,A*3C

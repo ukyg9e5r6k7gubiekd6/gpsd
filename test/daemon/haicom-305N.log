@@ -4,6 +4,10 @@
 # Location: 153E 27S
 # Submitted by: "David Findlay" <david@davsoft.com.au>
 # Description: Starts stationary, then moving 5m due west, 10m due south, then reversing course
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
 $GPGSV,3,3,12,24,58,220,,26,17,053,,29,20,063,,30,60,311,44*7F
 $GPRMC,095255.810,V,2712.6404,S,15303.1201,E,0.00,0.00,080407,,,A*6E
 $GPVTG,0.00,T,,,0.00,N,0.00,K,A*70
