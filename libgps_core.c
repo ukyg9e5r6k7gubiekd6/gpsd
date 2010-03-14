@@ -701,11 +701,9 @@ int gps_stream(struct gps_data_t *gpsdata,
     char buf[GPS_JSON_COMMAND_MAX];
 
     if ((flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW))== 0) {
-	if (PRIVATE(gpsdata)->newstyle || (flags & WATCH_NEWSTYLE)!=0)
-	    flags |= WATCH_JSON;
-        else
-	    flags |= WATCH_OLDSTYLE;
+	flags |= WATCH_JSON;
     }
+
     if (flags & POLL_NONBLOCK)
 	(void)fcntl(gpsdata->gps_fd, F_SETFL, O_NONBLOCK); 
     if ((flags & WATCH_DISABLE) != 0) {
