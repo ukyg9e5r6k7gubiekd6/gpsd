@@ -52,6 +52,7 @@ This is our schedule for the changeover:
 |================================================================
 | Release | Timing                      | Description
 | 2.93    | Late March 2010             |
+The library will default to initializing for JSON rather than old protocol. 
 DBUS support deprecated.
 
 | 3.0     | Before 30 June 2010         |
@@ -67,8 +68,7 @@ If you follow our transition advice now, you will be able to talk to
 all old-protocol and new-protocol versions of the daemon until the
 3.0 shared client library is deployed in mid-2010, at which point your
 runtime will silently get smaller but you won't be able to use 2.x 
-daemon versions any more. You should only have to change your
-application source code once.
+daemon versions any more.
 
 We're counting on binary-package dependencies to make the transition
 easier.  When you ship a release using the new interface library,

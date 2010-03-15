@@ -1,9 +1,10 @@
-* Wed Mar 10 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93dev
+* Mon Mar 15 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93dev
   Support for JSON dumping and parsing of AIS message types 25 and 26,
   not yet observed in the wild on AISHub. Fix Debian bug #569703.
   by removing non-streaming mode from the Python exerciser. Fix
   Debian bug #572900 by unsetting the appropriate in-use flag in
-  the device array.
+  the device array.  Change the libgps default from old protocol to 
+  JSON.
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
   Fix a packaging error.  The new Python library module was
