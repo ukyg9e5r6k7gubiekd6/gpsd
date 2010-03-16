@@ -21,5 +21,5 @@ else
     #scp gps_report.cgi $cgidir
 fi
 
-# To refresh the vendor-docs and standards directories just do this:
-#scp -r standards library vendor-docs $webdir
+# End
+
