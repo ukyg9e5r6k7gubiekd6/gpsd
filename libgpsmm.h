@@ -20,7 +20,8 @@ class gpsmm {
 		struct gps_data_t* send(const char *request); //put a command to gpsd and return the updated struct
 		struct gps_data_t* stream(int); //set watcher and policy flags
 		struct gps_data_t* poll(void); //block until gpsd returns new data, then return the updated struct
-		bool waiting(void); //nonblocking check for data waitin
+		int close(void);	// close the GPS
+		bool waiting(void);	//nonblocking check for data waitin
 		void clear_fix(void);
 		void enable_debug(int, FILE*);
 	private:

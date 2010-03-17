@@ -55,6 +55,10 @@ struct gps_data_t* gpsmm::poll(void) {
 	}
 }
 
+int gpsmm::close(void) {
+	return gps_close(gps_data);
+}
+
 bool gpsmm::waiting(void) {
 	return gps_waiting(gps_data);
 }
