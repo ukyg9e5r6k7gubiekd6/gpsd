@@ -13,6 +13,13 @@ cgpxlogger
 gpspipe
 libgps
 gpspacket.so
+# These are built from .in files
+gpscat
+gpsfake
+gpsprof
+jsongen.py
+maskaudit.py
+valgrind-audit
 # Unit tests
 test_float
 test_bits
@@ -33,11 +40,13 @@ test_json
 *.lo
 *.so
 *.la
+maskdump.c
 gpsd.h
 gpsd_config.h.in
 gpsd_config.h
 packet_names.h
 gpsd.spec
+revision.h
 MANIFEST
 # Used by setup.py as scratch space
 build
@@ -63,3 +72,25 @@ stamp-*
 libtool
 NEWS
 ChangeLog
+# Documentation
+www/AIVDM.html
+www/NMEA.html
+www/gps.html
+www/gpscat.html
+www/gpsctl.html
+www/gpsdecode.html
+www/gpsfake.html
+www/gpsmon.html
+www/gpspipe.html
+www/gpsprof.html
+www/hardware.html
+www/index.html
+www/libgps.html
+www/libgpsd.html
+www/libgpsmm.html
+www/performance/performance.html
+www/protocol-evolution.html
+www/protocol-transition.html
+www/rtcm-104.html
+www/srec.html
+www/writing-a-driver.html
