@@ -4,7 +4,7 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 
-# Exclude Subversion state from the tarball.  Needed because we 
+# Exclude version-control state from the tarball.  Needed because we 
 # grab the test directory wholesale. Hack appropriately when and if we 
 # change version control systems.
 am__tar += --exclude '*git*' --exclude '*.so' --exclude '*.pyc'
@@ -687,7 +687,7 @@ upload-ftp: dist
 	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd.sum"
 
 #
-# This is how to tag a release for the git repository.
+# This is how to tag a release.
 # It requires developer access verified via ssh.
 #
 release-tag:
