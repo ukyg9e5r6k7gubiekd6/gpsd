@@ -899,6 +899,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
 #endif /* EVERMORE_ENABLE */
+#ifdef SIRF_ENABLE
+    /*
+     * mrd reported that once every couple of weeks his SiRF was flipping
+     * into Trimble binary mode and not recovering.  Damn Trimble for not
+     * checksumming their packets, it make palse positives hard to reject.
+     * This should enable the SiRF to recover.
+     */
+    } else if (session->packet.type == SIRF_PACKET) {
+	(void)gpsd_switch_driver(session, "SiRF binary");
+	st = sirf_parse(session, session->packet.outbuffer, session->packet.outbuflen);
+	session->gpsdata.dev.driver_mode = MODE_BINARY;
+	return st;
+#endif /* SIRF_ENABLE */
     } else
 	return 0;
 }
