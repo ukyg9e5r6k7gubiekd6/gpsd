@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.22, Jan 2010
+v1.23, Mar 2010
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -1147,6 +1147,9 @@ understand these fields."
 |148-167 |20  |Radio status       |radio     |See <<IALA>> for details.
 |==============================================================================
 
+The radio status is 20 bits rather than 19 because an extra first bit
+selects whether it should be interpretred as a SOTDMA or ITDMA state.
+
 === Type 19: Extended Class B CS Position Report ===
 
 A slightly more detailed report than type 18 for vessels using Class B
@@ -1162,33 +1165,33 @@ gathered automatically from sensors.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field    |Len |Description            |Member       |Units
-|0-5      | 6  |Message Type           |type         |Unsigned integer: 19
-|6-7      | 2  |Repeat Indicator       |repeat       |As in Common Navigation Block
-|8-37     |30  |MMSI                   |mmsi         |Unsigned integer: 9 digits
-|38-45    | 8  |Regional Reserved      |reserved
+|0-5      |  6 |Message Type           |type         |Unsigned integer: 19
+|6-7      |  2 |Repeat Indicator       |repeat       |As in Common Navigation Block
+|8-37     | 30 |MMSI                   |mmsi         |Unsigned integer: 9 digits
+|38-45    |  8 |Regional Reserved      |reserved
 |
-|46-55    |10  |Speed Over Ground      |speed        |As in Common Navigation Block
-|56-56    | 1  |Position Accuracy      |accuracy     |See below
-|57-84    |28  |Longitude              |lon          |Minutes/10000 (as in CNB)
-|85-111   |27  |Latitude               |lat          |Minutes/10000 (as in CNB)
-|112-123  |12  |Course Over Ground     |course       |Relative to true north,
+|46-55    | 10 |Speed Over Ground      |speed        |As in Common Navigation Block
+|56-56    |  1 |Position Accuracy      |accuracy     |See below
+|57-84    | 28 |Longitude              |lon          |Minutes/10000 (as in CNB)
+|85-111   | 27 |Latitude               |lat          |Minutes/10000 (as in CNB)
+|112-123  | 12 |Course Over Ground     |course       |Relative to true north,
 |         |    |                       |             |units of 0.1 degrees
-|124-132  | 9  |True Heading           |heading      |0 to 359 degrees,
+|124-132  |  9 |True Heading           |heading      |0 to 359 degrees,
 |         |    |                       |             |511 = N/A
-|133-138  | 6  |Time Stamp             |second       |Second of UTC timestamp.
-|139-142  | 4  |Regional reserved      |regional
+|133-138  |  6 |Time Stamp             |second       |Second of UTC timestamp.
+|139-142  |  4 |Regional reserved      |regional
 |
-|143-262 1|20  |Name                   |shipname     |20 6-bit characters
-|263-270  | 8  |Type of ship and cargo |shiptype     |As in Message 5
-|271-279  | 9  |Dimension to Bow       |to_bow       |Unsigned integer: Meters
-|280-288  | 9  |Dimension to Stern     |to_stern     |Unsigned integer: Meters
-|289-294  | 6  |Dimension to Port      |to_port      |Unsigned integer: Meters
-|295-297  | 6  |Dimension to Starboard |to_starboard |Unsigned integer: Meters
-|299-301  | 4  |Position Fix Type      |epfd         |As in Type 4 EPFD codes
-|302-303  | 1  |RAIM flag              |raim         |As for Common Navigation Block
-|304-305  | 1  |DTE                    |dte          |0=Data terminal ready,
-|306-306  | 1  |Assigned mode flag     |assigned     |See <<IALA>> for details
-|307-311  | 5  |Spare                  |             |Unused, should be zero
+|143-262  |120 |Name                   |shipname     |20 6-bit characters
+|263-270  |  8 |Type of ship and cargo |shiptype     |As in Message 5
+|271-279  |  9 |Dimension to Bow       |to_bow       |Unsigned integer: Meters
+|280-288  |  9 |Dimension to Stern     |to_stern     |Unsigned integer: Meters
+|289-294  |  6 |Dimension to Port      |to_port      |Unsigned integer: Meters
+|295-300  |  6 |Dimension to Starboard |to_starboard |Unsigned integer: Meters
+|301-304  |  4 |Position Fix Type      |epfd         |As in Type 4 EPFD codes
+|305-305  |  1 |RAIM flag              |raim         |As for Common Navigation Block
+|306-306  |  1 |DTE                    |dte          |0=Data terminal ready,
+|307-307  |  1 |Assigned mode flag     |assigned     |See <<IALA>> for details
+|308-311  |  4 |Spare                  |             |Unused, should be zero
 |==============================================================================
 
 === Type 20 Data Link Management Message ===
@@ -1586,7 +1589,9 @@ end of the base slot.  Documentation says the data length of each slot
 is 224 and adds the note "Allows for 32 bits of bit-stuffing."
 
 The 20 radio status bits are always present after end-of-data in the
-last slot and are in the format specified by <<IALA>>.
+last slot and are in the format specified by <<IALA>>.  The radio
+status is 20 bits rather than 19 because an extra first bit selects
+whether it should be interpretred as a SOTDMA or ITDMA state.
 
 Note: Type 26 is extremely rare. As of March 2010 it has not been
 observed even in long-duration samples from AISHub.
@@ -1875,3 +1880,6 @@ Version 1.22 describes the problem with message length checks.
 Notes on EPFD value 15 and shiptype values > 99 are added.  Added
 another AIS feed. Corrections and more details on message 22.
 
+Version 1.23 corrects some typos and numbering errors in the
+description of message 19 (field widths where correct, though).
+Also, AISlive no longer offers free delayed access.
