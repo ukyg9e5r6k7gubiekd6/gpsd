@@ -1,0 +1,36 @@
+The repo directory contains the git configuration files and hooks as
+used at berlios. Here follows a short description of the files and
+what they do:
+
+description: Description of the project as displayed by gitweb/cgit.
+
+config: Repository configuration, including config details for the
+        hooks.
+
+hooks/acl.sh: see hooks/update
+
+hooks/ciabot.sh: see hooks/update
+
+hooks/post-receive: This script is run after receive-pack has accepted a
+                    pack and the repository has been updated.
+                    Currently passes stdin to post-receive-email.sh
+                    which mails out commit messages to the commit
+                    mailing list. See the head of post-receive-email.sh
+                    for a documentation of the config options for the
+                    hook.
+
+hooks/post-receive-email.sh: see hooks/post-receive
+
+hooks/post-update: Runs after the update hook. Executes
+                   git update-server-info
+                   to update the auxiliary info file to help dumb
+                   servers (needed to clone via http)
+
+hooks/update: This script does some sanity checks on the pushed commits
+              before accepting them, see the description on top of the
+              file for details. It also runs hooks/acl.sh, which is a
+              berlios specific script to set/update acls on the
+              repository - usually such a script should not be
+              necessary at all. In case all checks were passed,
+              hooks/ciabot.sh is called to show all commits in #gpsd.
+

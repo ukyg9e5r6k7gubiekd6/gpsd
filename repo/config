@@ -1,0 +1,19 @@
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = true
+        logallrefupdates = true
+	sharedrepository = group
+[gitweb]
+	owner = esr dbrashear remco nelsonrn garyemiller ckuethe wkazubski marr jfrancis mick_durkin bzed gdt mledford
+[hooks]
+	mailinglist = gpsd-commit-watch@lists.berlios.de
+	announcelist = gpsd-dev@lists.berlios.de
+	envelopesender = gpsd-dev@lists.berlios.de
+	emailprefix = [GIT]
+	allowunannotated = true
+	allowdeletebranch = true
+	denycreatebranch = false
+	allowdeletetag = false
+	allowmodifytag = false
+	showrev = "git show -C %s; echo"
