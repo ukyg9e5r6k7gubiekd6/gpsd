@@ -4,7 +4,9 @@
   by removing non-streaming mode from the Python exerciser. Fix
   Debian bug #572900 by unsetting the appropriate in-use flag in
   the device array.  Change the libgps default from old protocol to 
-  JSON.
+  JSON. Add a close() method to the C++ binding. Try to recover
+  better froim sporadic cases of false matches to Trimble packet 
+  format from a SiRF binary datasteam.
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
   Fix a packaging error.  The new Python library module was

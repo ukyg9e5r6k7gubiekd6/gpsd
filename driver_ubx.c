@@ -664,10 +664,10 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
 	putlelong(buf, 8, session->gpsdata.dev.baudrate);
 
-    if (mode == 0) {
+    if (mode == MODE_NMEA) {
 	buf[14] &= ~0x01;			/* turn off UBX output on this port */
 	buf[14] |=  0x02;			/* turn on NMEA output on this port */
-    } else {
+    } else { /* MODE_BINARY */
 	buf[14] &= ~0x02;			/* turn off NMEA output on this port */
 	buf[14] |=  0x01;			/* turn on UBX output on this port */
     }
