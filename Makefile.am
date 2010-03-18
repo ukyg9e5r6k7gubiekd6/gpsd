@@ -692,6 +692,7 @@ upload-ftp: dist
 #
 release-tag:
 	git tag -s -m "Tagged for external release $(VERSION)" HEAD
+	git push --tags
 #
 # Ship a release, providing all regression tests pass.
 # The clean is necessary so that dist will remake revision.h
