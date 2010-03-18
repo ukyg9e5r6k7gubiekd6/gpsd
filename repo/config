@@ -17,4 +17,3 @@
 	allowdeletetag = false
 	allowmodifytag = false
 	showrev = "git show -C %s; echo"
-	diff.mnemonicprefix = true
