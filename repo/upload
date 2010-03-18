@@ -10,18 +10,17 @@ confdir=git.berlios.de:/gitroot/gpsd/
 copy()
 {
     scp $1 $LOGNAME@shell.berlios.de:STAGE
-    ssh $LOGNAME@shell.berlios.de "mv -f STAGE /gitroot/gpsd; cp /gitroot/gpsd/STAGE /gitroot/gpsd/$1"
+    ssh $LOGNAME@git.berlios.de "cp -f STAGE /gitroot/gpsd && mv /gitroot/gpsd/STAGE /gitroot/gpsd/$1"
 }
-
 
 if [ $1 ]
 then
-    for f in $*; do scp $f $confdir/$f; done
+    for f in $*; do copy $f ; done
 else
-    scp config $confdir
+    copy config
     for file in hooks/*
     do
-        copy $file $confdir/hooks
+        copy $file
     done
 fi
 
