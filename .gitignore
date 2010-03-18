@@ -50,8 +50,6 @@ revision.h
 MANIFEST
 # Used by setup.py as scratch space
 build
-# Used by ESR's shipper utility
-.shipper
 # Developer sandbox directory for patches that haven't been applied yet
 patches
 # autotools cruft
@@ -78,6 +76,7 @@ www/NMEA.html
 www/gps.html
 www/gpscat.html
 www/gpsctl.html
+www/gpsd.html
 www/gpsdecode.html
 www/gpsfake.html
 www/gpsmon.html
