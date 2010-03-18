@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Upload git configuration from here to the repo
+#
+confdir=git.berlios.de:/gitroot/gpsd/
+
+# Get around the ssh lockout on git.berlios.de by copying up to 
+# shell.berlios.de and doing a local move. Written so the last
+# move is atomic.
+copy()
+{
+    scp $1 $LOGNAME@shell.berlios.de:STAGE
+    ssh $LOGNAME@shell.berlios.de "mv -f STAGE /gitroot/gpsd; cp /gitroot/gpsd/STAGE /gitroot/gpsd/$1"
+}
+
+
+if [ $1 ]
+then
+    for f in $*; do scp $f $confdir/$f; done
+else
+    scp config $confdir
+    for file in hooks/*
+    do
+        copy $file $confdir/hooks
+    done
+fi
+
+# End
+
