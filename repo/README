@@ -34,3 +34,11 @@ hooks/update: This script does some sanity checks on the pushed commits
               necessary at all. In case all checks were passed,
               hooks/ciabot.sh is called to show all commits in #gpsd.
 
+The executable script "upload" can be used to update the repo copies with
+files from this directory.  Give it arguments to upload specified filenames,
+for example
+
+    upload config
+
+uploads the config file. With no arguments, uploads config and all hook scripts
+under hooks/ directory.
