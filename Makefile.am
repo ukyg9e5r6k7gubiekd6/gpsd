@@ -253,7 +253,6 @@ stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py
 	    MAKE='$(MAKE)' \
 		$(PYTHON) setup.py build_ext \
 			--build-lib '$(srcdir)' \
-			--build-temp '$(srcdir)/build' \
 			--include-dirs '$(srcdir):.'\
 			--mangenerator '$(MANGENERATOR)') && \
 	mv -f '$@.tmp' '$@'
