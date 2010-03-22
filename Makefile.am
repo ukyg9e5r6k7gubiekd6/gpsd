@@ -210,7 +210,7 @@ ais_json.i: jsongen.py
 
 revision.h: Makefile
 	@rm -f revision.h && \
-	echo '#define' REVISION '"git'`git describe`'"' >revision.h && \
+	echo '#define' REVISION '"'`date --utc +%Y-%m-%dT%H:%M:%S`'"' >revision.h && \
 	chmod a-w revision.h
 
 maskdump.c: gpsd.h-tail maskaudit.py
