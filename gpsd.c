@@ -440,8 +440,6 @@ static int filesock(char *filename)
  */
 
 struct channel_t {
-    struct gps_fix_t fixbuffer;		/* info to report to the client */
-    struct gps_fix_t oldfix;		/* previous fix for error modeling */
     /*@null@*/struct subscriber_t *subscriber;	/* subscriber monitoring this */
     /*@null@*/struct gps_device_t *device;	/* device subscriber listens to */
 };
@@ -530,8 +528,6 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
     assert(UNALLOCATED_FD != 0);
     for (si = 0; si < NITEMS(subscribers); si++) {
 	if (subscribers[si].fd == UNALLOCATED_FD) {
-	    gps_clear_fix(&channels[si].fixbuffer);
-	    gps_clear_fix(&channels[si].oldfix);
 	    subscribers[si].fd = 0;	/* mark subscriber as allocated */
 	    return &subscribers[si];
 	}
@@ -1458,10 +1454,6 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
 
-    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-	gps_clear_fix(&channel->fixbuffer);
-	gps_clear_fix(&channel->oldfix);
-    }
     for (i = 0; i < NITEMS(subscribers); i++)
 	subscribers[i].fd = UNALLOCATED_FD; 
 
@@ -1711,26 +1703,20 @@ int main(int argc, char *argv[])
 			    notify_watchers(device, id2);
 			}
 		    }
-		    /* copy/merge device data into subscriber fix buffers */
+		    /* copy/merge device data into staging buffers */
 		    /*@-nullderef -nullpass@*/
-		    for (channel = channels;
-			 channel < channels + NITEMS(channels);
-			 channel++) {
-			if (channel->device == device) {
-			    if ((changed & CLEAR_SET)!=0)
-				gps_clear_fix(&channel->fixbuffer);
-			    /* don't downgrade mode if holding previous fix */
-			    if (channel->fixbuffer.mode > channel->device->gpsdata.fix.mode)
-				changed &=~ MODE_SET;
-			    //gpsd_report(LOG_PROG,
-			    //		"transfer mask on %s: %02x\n", channel->channel->gpsdata.tag, changed);
-			    gps_merge_fix(&channel->fixbuffer,
-					  changed,
-					  &channel->device->gpsdata.fix);
-			    gpsd_error_model(channel->device,
-					     &channel->fixbuffer, &channel->oldfix);
-			}
-		    }
+		    if ((changed & CLEAR_SET)!=0)
+			gps_clear_fix(&device->fixbuffer);
+		    /* don't downgrade mode if holding previous fix */
+		    if (device->fixbuffer.mode > device->gpsdata.fix.mode)
+			changed &=~ MODE_SET;
+		    //gpsd_report(LOG_PROG,
+		    //		"transfer mask on %s: %02x\n", device->gpsdata.tag, changed);
+		    gps_merge_fix(&device->fixbuffer,
+				  changed,
+				  &device->gpsdata.fix);
+		    gpsd_error_model(device,
+				     &device->fixbuffer, &device->oldfix);
 		    /*@+nullderef -nullpass@*/
 		}
 		/* copy each RTCM-104 correction to all GPSes */
@@ -1801,7 +1787,7 @@ int main(int argc, char *argv[])
 			if (sub->policy.json) {
 			    buf2[0] = '\0';
 			    if (report_fix) {
-				json_tpv_dump(&device->gpsdata, &channel->fixbuffer, 
+				json_tpv_dump(&device->gpsdata, &device->fixbuffer, 
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }

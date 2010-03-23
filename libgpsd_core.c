@@ -86,6 +86,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
+    gps_clear_fix(&session->fixbuffer);
+    gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
     session->gpsdata.dop.hdop = NAN;
     session->gpsdata.dop.vdop = NAN;
