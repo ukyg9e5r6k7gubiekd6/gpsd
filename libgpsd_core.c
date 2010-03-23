@@ -707,6 +707,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		      &session->gpsdata.fix);
 	gpsd_error_model(session,
 			 &session->fixbuffer, &session->oldfix);
+	memcpy(&session->gpsdata.fix, 
+	       &session->fixbuffer, 
+	       sizeof(session->fixbuffer));
 	/*@+nullderef -nullpass@*/
 
 	/*
