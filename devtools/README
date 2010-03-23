@@ -16,6 +16,13 @@ Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
 
 Finds end-of-cycle sentences from GPS output logs.
 
+** editcomment
+
+Give this a commit-ID specification.  It will edit the associated comment.
+Usual caveats apply; the edited one and all commits after will change IDs,
+and pushing them to a repo with the old commits will wreak havoc.
+Note also that this cavalierly overwrites refs/original.
+
 ** fakecompare
 
 Compare the results from running gpsfake on a logfile between this
