@@ -442,6 +442,7 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
     }
     return(buf);
 }
+
 void gpsd_error_model(struct gps_device_t *session,
 		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
@@ -691,6 +692,22 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->gpsdata.epe = NAN;
 	}
 	session->gpsdata.set = ONLINE_SET | dopmask | received;
+
+	/* copy/merge device data into staging buffers */
+	/*@-nullderef -nullpass@*/
+	if ((session->gpsdata.set & CLEAR_SET)!=0)
+	    gps_clear_fix(&session->fixbuffer);
+	/* don't downgrade mode if holding previous fix */
+	if (session->fixbuffer.mode > session->gpsdata.fix.mode)
+	    session->gpsdata.set &=~ MODE_SET;
+	//gpsd_report(LOG_PROG,
+	//		"transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
+	gps_merge_fix(&session->fixbuffer,
+		      session->gpsdata.set,
+		      &session->gpsdata.fix);
+	gpsd_error_model(session,
+			 &session->fixbuffer, &session->oldfix);
+	/*@+nullderef -nullpass@*/
 
 	/*
 	 * Count good fixes. We used to check

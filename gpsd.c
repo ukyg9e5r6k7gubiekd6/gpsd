@@ -1703,21 +1703,6 @@ int main(int argc, char *argv[])
 			    notify_watchers(device, id2);
 			}
 		    }
-		    /* copy/merge device data into staging buffers */
-		    /*@-nullderef -nullpass@*/
-		    if ((changed & CLEAR_SET)!=0)
-			gps_clear_fix(&device->fixbuffer);
-		    /* don't downgrade mode if holding previous fix */
-		    if (device->fixbuffer.mode > device->gpsdata.fix.mode)
-			changed &=~ MODE_SET;
-		    //gpsd_report(LOG_PROG,
-		    //		"transfer mask on %s: %02x\n", device->gpsdata.tag, changed);
-		    gps_merge_fix(&device->fixbuffer,
-				  changed,
-				  &device->gpsdata.fix);
-		    gpsd_error_model(device,
-				     &device->fixbuffer, &device->oldfix);
-		    /*@+nullderef -nullpass@*/
 		}
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
