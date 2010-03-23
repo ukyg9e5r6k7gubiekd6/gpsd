@@ -28,6 +28,14 @@ PERMISSIONS
  * Manifest names for the gnss_type enum - must be kept synced with it.
  * Also, masks so we can tell what packet types correspond to each class.
  */
+/* the map of device class names */
+struct classmap_t {
+    char	*name;
+    int		typemask;
+    int		packetmask;
+};
+#define CLASSMAP_NITEMS	5
+
 struct classmap_t classmap[CLASSMAP_NITEMS] = {
     /* name	typemask	packetmask */
     {"ANY",	0,       	0},

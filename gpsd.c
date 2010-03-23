@@ -707,7 +707,7 @@ static bool add_device(char *device_name)
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
-static bool allocation_filter(struct gps_device_t *device, gnss_type type)
+static bool allocation_filter(struct gps_device_t *device)
 /* does specified device match the user's type criteria? */
 {
     /*
@@ -722,25 +722,11 @@ static bool allocation_filter(struct gps_device_t *device, gnss_type type)
 	}
     }
 
-    gpsd_report(LOG_PROG, 
-		"user requires %d=%s, device %d=%s emits packet type %d, observed mask is 0x%0x, checking against 0x%0x\n", 
-		type, classmap[type].name,
-		(int)(device - devices), device->gpsdata.dev.path,
-		device->packet.type,
-		device->observed,
-		classmap[type].typemask);
-    /* we might have type constraints */
-    if (type == ANY)
-	return true;
-    else if (device->device_type == NULL)
-	return false;
-    else
-	return (device->observed & classmap[type].packetmask) != 0;
+    return true;
 }
 
 /*@ -branchstate -usedef -globstate @*/
 static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user, 
-						  gnss_type type, 
 						  /*@null@*/struct gps_device_t *forcedev)
 {
     /*@-temptrans@*/
@@ -753,11 +739,10 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	if (((forcedev == NULL || chp->device == forcedev)
 	     && chp->subscriber == user 
 	     && chp->device != NULL 
-	     && allocation_filter(chp->device, type))) {
-	    gpsd_report(LOG_INF, "client(%d): reusing channel %d (type %s), forced device %s\n",
+	     && allocation_filter(chp->device))) {
+	    gpsd_report(LOG_INF, "client(%d): reusing channel %d, forced device %s\n",
 			sub_index(user), 
 			(int)(chp-channels),
-			classmap[type].name,
 			forcedev != NULL ? "true" : "false");
 	    channel = chp;
 	}
@@ -766,17 +751,15 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	    if (chp->subscriber == NULL) {
 		channel = chp;
-		gpsd_report(LOG_INF, "client(%d): attaching channel %d (type %s)\n",
-			    sub_index(user), 
-			    (int)(chp-channels),
-			    classmap[type].name);
+		gpsd_report(LOG_INF, "client(%d): attaching channel %d\n",
+			    sub_index(user),
+			    (int)(chp-channels));
 		break;
 	    }
     }
     if (channel == NULL) {
-	gpsd_report(LOG_ERROR, "client(%d): channel allocation for type %s failed.\n",
-		    sub_index(user),
-		    classmap[type].name);
+	gpsd_report(LOG_ERROR, "client(%d): channel allocation failed.\n",
+		    sub_index(user));
 	return NULL;
     }
 
@@ -795,20 +778,23 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	    /*@ -mustfreeonly @*/
 	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 		if (allocated_device(devp)) {
-		    if (allocation_filter(devp, type)) {
+		    if (allocation_filter(devp)) {
 			/*
 			 * Grab device if it's:
 			 * (1) The first we've seen,
 			 * (2) Has a better quality fix than we've seen yet,
 			 * (3) Fix of same quality we've seen but more recent.
+			 * Latter cases will only fire when device is GPS.
+			 * FIXME: This means failure to wake up an AIS
+			 * receiver if there are any GPSes on the host.
 			 */
 			if (channel->device == NULL) {
 			    channel->device = devp;
 			    most_recent = devp->gpsdata.fix.time;
-			} else if (type == GPS && devp->gpsdata.status > fix_quality) {
+			} else if (devp->gpsdata.status > fix_quality) {
 			    channel->device = devp;
 			    fix_quality = devp->gpsdata.status;
-			} else if (type == GPS && devp->gpsdata.status == fix_quality && 
+			} else if (devp->gpsdata.status == fix_quality && 
 				   devp->gpsdata.fix.time >= most_recent) {
 			    channel->device = devp;
 			    most_recent = devp->gpsdata.fix.time;
@@ -1088,7 +1074,7 @@ static void handle_request(struct subscriber_t *sub,
 		    /* assign all devices */
 		    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 			if (allocated_device(devp))
-			    (void)assign_channel(sub, ANY, devp);
+			    (void)assign_channel(sub, devp);
 		} else {
 		    devp = find_device(sub->policy.devpath);
 		    if (devp == NULL) {
@@ -1096,7 +1082,7 @@ static void handle_request(struct subscriber_t *sub,
 				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n", sub->policy.devpath); 
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
-		    } else if (assign_channel(sub, ANY, devp) == NULL)
+		    } else if (assign_channel(sub, devp) == NULL)
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n", sub->policy.devpath); 
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
@@ -1137,7 +1123,7 @@ static void handle_request(struct subscriber_t *sub,
 	    } else {
 		if (devconf.path[0]!='\0') {
 		    /* user specified a path, try to assign it */
-		    if ((channel = assign_channel(sub, ANY, find_device(devconf.path))) == NULL) {
+		    if ((channel = assign_channel(sub, find_device(devconf.path))) == NULL) {
 			(void)snprintf(reply, replylen, 
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
@@ -1692,7 +1678,7 @@ int main(int argc, char *argv[])
 		    if ((changed & DEVICE_SET) != 0) {
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
 			    if (sub->policy.watcher && sub->policy.devpath[0] == '\0')
-				(void)assign_channel(sub, ANY, device);
+				(void)assign_channel(sub, device);
 		    }
 		    /* handle laggy response to a firmware version query */
 		    if ((changed & (DEVICEID_SET|DEVICE_SET)) != 0) {

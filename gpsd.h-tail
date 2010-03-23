@@ -141,15 +141,6 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
-/* the map of device class names */
-struct classmap_t {
-    char	*name;
-    int		typemask;
-    int		packetmask;
-};
-#define CLASSMAP_NITEMS	5
-extern struct classmap_t classmap[CLASSMAP_NITEMS];
-
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
 struct gps_context_t {
