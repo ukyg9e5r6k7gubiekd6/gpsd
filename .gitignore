@@ -40,6 +40,7 @@ test_json
 *.lo
 *.so
 *.la
+*~
 maskdump.c
 gpsd.h
 gpsd_config.h.in
