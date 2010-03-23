@@ -237,7 +237,7 @@ relevant to GPS systems.
 |II	| Integrated Instrumentation
 |IN	| Integrated Navigation
 |LA	| Loran A (obsolete)
-|LC	| Loran C
+|LC	| Loran C (obsolete)
 |MP	| Microwave Positioning System (obsolete)
 |OM	| OMEGA Navigation System (obsolete)
 |OS	| Distress Alarm System (obsolete)
