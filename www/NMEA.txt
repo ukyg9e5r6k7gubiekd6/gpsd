@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.1, Sep 2009
+v2.2, Mar 2010
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -117,6 +117,43 @@ with zeros when the GPS has no valid data.
 Date and time in GPS is computed as number of weeks from 6 January
 1980 plus number of seconds into the week.
 
+== Error status indications
+
+The NMEA sentences in the normal GPS inventory return four kinds of
+validity flags: Mode, Status, the Active/Void bit, and in later
+versions the FAA indicator mode.  The FAA mode field is legally
+required and orthogonal to the others. Here's how the first three used
+in various sentences:
+
+[frame="topbot",options="header"]
+|========================================================
+|               | GPRMC  |   GPGLL  |   GPGGA  |   GPGSA
+|Returns A/V    |  Yes   |    Yes   |    No    |     No
+|Returns mode   |  No    |    No    |    No    |     Yes
+|Returns status |  No    |    Yes   |    Yes   |     No
+|========================================================
+
+The "Navigation receiver warning" is 'A' for Active and 'V' for Void.
+(or warning).  You will see it when either there is no satellite lock,
+or to indicate a valid fix that has a DOP too high, or which fails an
+elevation test. In the latter case the visible sats are below some
+fixed elevation of the horizon (usually 15%, but some GPSes make this
+adjustable) making position unreliable due to poor geometrty and more
+variable signal lag induced by lengthened atmisphere transit.
+
+Mode is associated with the GSA sentence associated with the last fix.
+It reports whether the fix was no good, sufficirnt for 2D, or 
+sufficient for 3D (values 1, 2, and 3).
+
+Status will be 0 ehen the sample from from which the reporting
+sentence was generated does not have a valid fix, 1 when it has
+a valid (normal-precision) fix, and 2 when the fig is DGPS corrected
+(reducing the base error).
+
+In addition, some sentences may use empty fields to signify invalid
+data. It is not clear whether NMEA 0183 allows this, but real-world
+software must cope.
+
 == Talker IDs == 
 
 NMEA sentences do not identify the individuasl device that issued
@@ -130,16 +167,16 @@ most common talker ID is "GP", identifying a generic GPS, but all of
 the following are well known:
 
 .Common talker IDs
-`-------`----------------------------------------------------
-GP      Global Positioning System receiver
-LC      Loran-C receiver
-II      Integrated Instrumentation
-IN      Integrated Navigation
-EC      Electronic Chart Display & Information System (ECDIS)
-CD      Digital Selective Calling (DSC)
-GL      GLONASS, according to IEIC 61162-1
-GN      Mixed GPS and GLONASS data, according to IEIC 61162-1
---------------------------------------------------------------
+|================================================================
+|GP    |  Global Positioning System receiver
+|LC    |  Loran-C receiver
+|II    |  Integrated Instrumentation
+|IN    |  Integrated Navigation
+|EC    |  Electronic Chart Display & Information System (ECDIS)
+|CD    |  Digital Selective Calling (DSC)
+|GL    |  GLONASS, according to IEIC 61162-1
+|GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
+|================================================================
 
 LC - LORAN-C is a marine navigation system run by the U.S. government,
 which is planning to shut it down in favor of GPS.  Some non-LORAN
@@ -178,107 +215,107 @@ Here is a more complete list of talker ID prefixes.  Most are not
 relevant to GPS systems.
 
 .Big list of talker IDs
-`-------`-----------------------------------------------------------
-AG	Autopilot - General
-AP	Autopilot - Magnetic
-CC	Computer - Programmed Calculator (obsolete)
-CD	Communications - Digital Selective Calling (DSC)
-CM	Computer - Memory Data (obsolete)
-CS	Communications - Satellite
-CT	Communications - Radio-Telephone (MF/HF)
-CV	Communications - Radio-Telephone (VHF)
-CX	Communications - Scanning Receiver
-DE	DECCA Navigation (obsolete)
-DF	Direction Finder
-EC	Electronic Chart Display & Information System (ECDIS)
-EP	Emergency Position Indicating Beacon (EPIRB)
-ER	Engine Room Monitoring Systems
-GP	Global Positioning System (GPS)
-HC	Heading - Magnetic Compass
-HE	Heading - North Seeking Gyro
-HN   	Heading - Non North Seeking Gyro
-II	Integrated Instrumentation
-IN	Integrated Navigation
-LA	Loran A (obsolete)
-LC	Loran C
-MP	Microwave Positioning System (obsolete)
-OM	OMEGA Navigation System (obsolete)
-OS	Distress Alarm System (obsolete)
-RA	RADAR and/or ARPA
-SD	Sounder, Depth
-SN	Electronic Positioning System, other/general
-SS	Sounder, Scanning
-TI	Turn Rate Indicator
-TR      TRANSIT Navigation System
-VD	Velocity Sensor, Doppler, other/general
-DM	Velocity Sensor, Speed Log, Water, Magnetic
-VW	Velocity Sensor, Speed Log, Water, Mechanical
-WI	Weather Instruments 
-YC	Transducer - Temperature (obsolete)
-YD	Transducer - Displacement, Angular or Linear (obsolete)
-YF	Transducer - Frequency (obsolete)
-YL	Transducer - Level (obsolete)
-YP	Transducer - Pressure (obsolete)
-YR	Transducer - Flow Rate (obsolete)
-YT	Transducer - Tachometer (obsolete)
-YV	Transducer - Volume (obsolete)
-YX      Transducer
-ZA	Timekeeper - Atomic Clock
-ZC	Timekeeper - Chronometer
-ZQ	Timekeeper - Quartz
-ZV	Timekeeper - Radio Update, WWV or WWVH
---------------------------------------------------------------------
+|================================================================
+|AG	| Autopilot - General
+|AP	| Autopilot - Magnetic
+|CC	| Computer - Programmed Calculator (obsolete)
+|CD	| Communications - Digital Selective Calling (DSC)
+|CM	| Computer - Memory Data (obsolete)
+|CS	| Communications - Satellite
+|CT	| Communications - Radio-Telephone (MF/HF)
+|CV	| Communications - Radio-Telephone (VHF)
+|CX	| Communications - Scanning Receiver
+|DE	| DECCA Navigation (obsolete)
+|DF	| Direction Finder
+|EC	| Electronic Chart Display & Information System (ECDIS)
+|EP	| Emergency Position Indicating Beacon (EPIRB)
+|ER	| Engine Room Monitoring Systems
+|GP	| Global Positioning System (GPS)
+|HC	| Heading - Magnetic Compass
+|HE	| Heading - North Seeking Gyro
+|HN	| Heading - Non North Seeking Gyro
+|II	| Integrated Instrumentation
+|IN	| Integrated Navigation
+|LA	| Loran A (obsolete)
+|LC	| Loran C
+|MP	| Microwave Positioning System (obsolete)
+|OM	| OMEGA Navigation System (obsolete)
+|OS	| Distress Alarm System (obsolete)
+|RA	| RADAR and/or ARPA
+|SD	| Sounder, Depth
+|SN	| Electronic Positioning System, other/general
+|SS	| Sounder, Scanning
+|TI	| Turn Rate Indicator
+|TR	| TRANSIT Navigation System
+|VD	| Velocity Sensor, Doppler, other/general
+|DM	| Velocity Sensor, Speed Log, Water, Magnetic
+|VW	| Velocity Sensor, Speed Log, Water, Mechanical
+|WI	| Weather Instruments 
+|YC	| Transducer - Temperature (obsolete)
+|YD	| Transducer - Displacement, Angular or Linear (obsolete)
+|YF	| Transducer - Frequency (obsolete)
+|YL	| Transducer - Level (obsolete)
+|YP	| Transducer - Pressure (obsolete)
+|YR	| Transducer - Flow Rate (obsolete)
+|YT	| Transducer - Tachometer (obsolete)
+|YV	| Transducer - Volume (obsolete)
+|YX	| Transducer
+|ZA	| Timekeeper - Atomic Clock
+|ZC	| Timekeeper - Chronometer
+|ZQ	| Timekeeper - Quartz
+|ZV	| Timekeeper - Radio Update, WWV or WWVH
+|================================================================
 
 == Obsolete sentences ==
 
 The following NMEA sentences have been designated "obsolete" in a
 publicly available NMEA document dated 2009.
 
-`---`-------------------------------------------------------------------------
-APA – Autopilot Sentence "A"
-BER – Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
-BPI – Bearing & Distance to Point of Interest
-DBK – Depth Below Keel
-DBS – Depth Below Surface
-
-DRU – Dual Doppler Auxiliary Data
-GDA – Dead Reckoning Positions
-GLA – Loran-C Positions
-GOA – OMEGA Positions
-GXA – TRANSIT Positions
-GTD – Geographical Position, Loran-C TDs
-GXA – TRANSIT Position
-HCC – Compass Heading
-HCD – Heading and Deviation
-HDM – Heading, Magnetic
-HDT – Heading, True
-HVD – Magnetic Variation, Automatic
-HVM – Magnetic Variation, Manually Set
-IMA – Vessel Identification
-MDA – Meteorological Composite
-MHU – Humidity
-MMB – Barometer
-MTA – Air Temperature
-MWH – Wave Height
-MWS – Wind & Sea State
-
-Rnn – Routes
-SBK – Loran-C Blink Status
-SCY – Loran-C Cycle Lock Status
-SCD – Loran-C ECDs
-SDB – Loran-C Signal Strength
-SGD – Position Accuracy Estimate
-SGR – Loran-C Chain Identifier
-SIU – Loran-C Stations in Use
-SLC – Loran-C Status
-SNC – Navigation Calculation Basis
-SNU – Loran-C SNR Status
-SPS – Loran-C Predicted Signal Strength
-SSF – Position Correction Offset
-STC – Time Constant
-STR – Tracking Reference
-SYS – Hybrid System Configuration
-------------------------------------------------------------------------------
+|================================================================
+|APA – Autopilot Sentence "A"
+|BER – Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
+|BPI – Bearing & Distance to Point of Interest
+|DBK – Depth Below Keel
+|DBS – Depth Below Surface
+|
+|DRU – Dual Doppler Auxiliary Data
+|GDA – Dead Reckoning Positions
+|GLA – Loran-C Positions
+|GOA – OMEGA Positions
+|GXA – TRANSIT Positions
+|GTD – Geographical Position, Loran-C TDs
+|GXA – TRANSIT Position
+|HCC – Compass Heading
+|HCD – Heading and Deviation
+|HDM – Heading, Magnetic
+|HDT – Heading, True
+|HVD – Magnetic Variation, Automatic
+|HVM – Magnetic Variation, Manually Set
+|IMA – Vessel Identification
+|MDA – Meteorological Composite
+|MHU – Humidity
+|MMB – Barometer
+|MTA – Air Temperature
+|MWH – Wave Height
+|MWS – Wind & Sea State
+|
+|Rnn – Routes
+|SBK – Loran-C Blink Status
+|SCY – Loran-C Cycle Lock Status
+|SCD – Loran-C ECDs
+|SDB – Loran-C Signal Strength
+|SGD – Position Accuracy Estimate
+|SGR – Loran-C Chain Identifier
+|SIU – Loran-C Stations in Use
+|SLC – Loran-C Status
+|SNC – Navigation Calculation Basis
+|SNU – Loran-C SNR Status
+|SPS – Loran-C Predicted Signal Strength
+|SSF – Position Correction Offset
+|STC – Time Constant
+|STR – Tracking Reference
+|SYS – Hybrid System Configuration
+|================================================================
 
 == NMEA-Standard Sentences ==
 
@@ -1900,18 +1937,18 @@ Field Number:
 There isis evidence for the existence ofv the following NMEA semtences
 on the Web:
 
-`---`------------------------------------------
-ASD - Autopilot System Data
-DSC - Digital Selective Calling Information
-DSE - Extended DSC
-DSI - DSC Transponder Initiate
-DSR - DSC Transponder Response
-MWD - Wind Direction & Speed
-TLL - Target Latitude and Longitude
-WDR - Distance to Waypoint - Rhumb Line
-WDC - Distance to Waypoint - Great Circle
-ZDL - Time and Distance to Variable Point
------------------------------------------------
+|======================================================
+|ASD - Autopilot System Data
+|DSC - Digital Selective Calling Information
+|DSE - Extended DSC
+|DSI - DSC Transponder Initiate
+|DSR - DSC Transponder Response
+|MWD - Wind Direction & Speed
+|TLL - Target Latitude and Longitude
+|WDR - Distance to Waypoint - Rhumb Line
+|WDC - Distance to Waypoint - Great Circle
+|ZDL - Time and Distance to Variable Point
+|======================================================
 
 == Vendor extensions == 
 

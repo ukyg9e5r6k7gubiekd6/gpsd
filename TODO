@@ -138,42 +138,6 @@ representative set of RTCM3 sentences and some sort of ASCII dump of
 them so we can test whether our analyzer gets all the bitfield
 boundaries right.
 
-*** Do the research to figure out just what is going on with status bits
-
-NMEA actually has *four* kinds of validity bits: Mode, Status, the
-Active/Void bit (some sources interpret 'V' as 'Navigation receiver
-warning'), and in later versions the FAA indicator mode.  Sentences
-that have an Active/Void send V when there is no fix, so the position
-data is no good.
-
-Let's look at which sentences send what:
-
-                GPRMC     GPGLL     GPGGA     GPGSA
-Returns fix      Yes       Yes       Yes        No
-Returns status   No        Yes       Yes        No
-Returns mode     No        No        No         Yes
-Returns A/V      Yes       Yes       No         No
-
-In addition, some sentences use empty fields to signify invalid data.
-
-My first conclusion from looking at this table is that the designers
-of NMEA 0183 should be hung for galloping incompetence.  But never mind that.
-What are we to make of this mess?
-
-The fact that the FV18 sends GPRMC/GPGLL/GPGGA but not GPGSA
-argues that GPGSA is optional.  I don't see how it can be, since it
-seems to be the only status bit that applies to altitude.  Just how are
-we supposed to know when altitude is valid if it doesn't ship GSA?  
-Can a receiver ever ship a non-empty but invalid altitude?
-
-Which of these override which other bits?  I don't think status is ever
-nonzero when mode is zero. So status overrides mode.  What other such
-relationships are there?
-
-News flash: it develops that the "Navigation receiver warning" is
-supposed to indicate a valid fix that has a DOP too high or fails
-an elevation test.
-
 ** Future features (?)
 
 *** Support for more survey / professional / up-scale receivers.
