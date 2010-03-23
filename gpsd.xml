@@ -802,11 +802,11 @@ notifications.</para>
 <term>?WATCH</term> 
 <listitem>
 
-<para>This command sets watcher mode. It also sets or elicits a
-report of per-subscriber buffering policy and the raw bit.  An
-argument WATCH object changes the subscriber's policy. The respunce
-describes the subscriber's policy. The response will also include a
-DEVICES object.</para>
+<para>This command sets watcher mode. It also sets or elicits a report
+of per-subscriber policy and the raw bit.  An argument WATCH object
+changes the subscriber's policy. The respunce describes the
+subscriber's policy. The response will also include a DEVICES
+object.</para>
 
 <para>A WATCH object has the following elements:</para>
 
