@@ -1049,7 +1049,6 @@ extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  gps_mask_t,
 			  /*@ in @*/struct gps_fix_t *);
 extern unsigned int gps_valid_fields(/*@ in @*/struct gps_fix_t *);
-extern char *gps_show_transfer(int);
 extern void gps_enable_debug(int, FILE *);
 
 extern time_t mkgmtime(register struct tm *);

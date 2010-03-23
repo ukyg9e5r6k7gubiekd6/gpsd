@@ -70,41 +70,6 @@ unsigned int gps_valid_fields(/*@in@*/struct gps_fix_t *fixp)
 	valid |= CLIMBERR_SET;
     return valid;
 }
-
-char *gps_show_transfer(int transfer)
-{
-/*@ -statictrans @*/
-    static char showbuf[100];
-    showbuf[0] = '\0';
-    if ((transfer & TIME_SET)!=0)
-	(void)strlcat(showbuf, "time,", sizeof(showbuf));
-    if ((transfer & LATLON_SET)!=0)
-	(void)strlcat(showbuf, "latlon,", sizeof(showbuf));
-    if ((transfer & MODE_SET)!=0)
-	(void)strlcat(showbuf, "mode,", sizeof(showbuf));
-    if ((transfer & ALTITUDE_SET)!=0)
-	(void)strlcat(showbuf, "altitude,", sizeof(showbuf));
-    if ((transfer & TRACK_SET)!=0)
-	(void)strlcat(showbuf, "track,", sizeof(showbuf));
-    if ((transfer & SPEED_SET)!=0)
-	(void)strlcat(showbuf, "speed,", sizeof(showbuf));
-    if ((transfer & CLIMB_SET)!=0)
-	(void)strlcat(showbuf, "climb,", sizeof(showbuf));
-    if ((transfer & TIMERR_SET)!=0)
-	(void)strlcat(showbuf, "timerr,", sizeof(showbuf));
-    if ((transfer & HERR_SET)!=0)
-	(void)strlcat(showbuf, "herr,", sizeof(showbuf));
-    if ((transfer & VERR_SET)!=0)
-	(void)strlcat(showbuf, "verr,", sizeof(showbuf));
-    if ((transfer & SPEEDERR_SET)!=0)
-	(void)strlcat(showbuf, "speederr,", sizeof(showbuf));
-    if ((transfer & CLIMBERR_SET)!=0)
-	(void)strlcat(showbuf, "climberr,", sizeof(showbuf));
-    if (strlen(showbuf)>0)
-	showbuf[strlen(showbuf)-1] = '\0';
-    return showbuf;
-/*@ +statictrans @*/
-}
 #endif /* __UNUSED__ */
 
 void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
