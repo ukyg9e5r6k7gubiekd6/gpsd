@@ -11,8 +11,7 @@
 #define GPS_JSON_RESPONSE_MAX	1024
 
 char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
-void json_tpv_dump(const struct gps_data_t *, struct gps_fix_t *, 
-		   /*@out@*/char *, size_t);
+void json_tpv_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_device_dump(const struct gps_device_t *, /*@out@*/char *, size_t);
 void json_watch_dump(const struct policy_t *, /*@out@*/char *, size_t);

@@ -94,7 +94,7 @@ void json_version_dump(/*@out@*/char *reply, size_t replylen)
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
-void json_tpv_dump(const struct gps_data_t *gpsdata, struct gps_fix_t *fixp, 
+void json_tpv_dump(const struct gps_data_t *gpsdata,
 		   /*@out@*/char *reply, size_t replylen)
 {
     assert(replylen > 2);
@@ -107,77 +107,77 @@ void json_tpv_dump(const struct gps_data_t *gpsdata, struct gps_fix_t *fixp,
 		   replylen-strlen(reply),
 		   "\"device\":\"%s\",",
 		   gpsdata->dev.path);
-    if (isnan(fixp->time)==0)
+    if (isnan(gpsdata->fix.time)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"time\":%.3f,",
-		       fixp->time);
-    if (isnan(fixp->ept)==0)
+		       gpsdata->fix.time);
+    if (isnan(gpsdata->fix.ept)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"ept\":%.3f,",
-		       fixp->ept);
-    if (isnan(fixp->latitude)==0)
+		       gpsdata->fix.ept);
+    if (isnan(gpsdata->fix.latitude)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"lat\":%.9f,",
-		       fixp->latitude);
-    if (isnan(fixp->longitude)==0)
+		       gpsdata->fix.latitude);
+    if (isnan(gpsdata->fix.longitude)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"lon\":%.9f,",
-		       fixp->longitude);
-    if (isnan(fixp->altitude)==0)
+		       gpsdata->fix.longitude);
+    if (isnan(gpsdata->fix.altitude)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"alt\":%.3f,",
-		       fixp->altitude);
-    if (isnan(fixp->epx)==0)
+		       gpsdata->fix.altitude);
+    if (isnan(gpsdata->fix.epx)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"epx\":%.3f,",
-		       fixp->epx);
-    if (isnan(fixp->epy)==0)
+		       gpsdata->fix.epx);
+    if (isnan(gpsdata->fix.epy)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"epy\":%.3f,",
-		       fixp->epy);
-    if (isnan(fixp->epv)==0)
+		       gpsdata->fix.epy);
+    if (isnan(gpsdata->fix.epv)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"epv\":%.3f,",
-		       fixp->epv);
-    if (isnan(fixp->track)==0)
+		       gpsdata->fix.epv);
+    if (isnan(gpsdata->fix.track)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"track\":%.4f,",
-		       fixp->track);
-    if (isnan(fixp->speed)==0)
+		       gpsdata->fix.track);
+    if (isnan(gpsdata->fix.speed)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"speed\":%.3f,",
-		       fixp->speed);
-    if (isnan(fixp->climb)==0)
+		       gpsdata->fix.speed);
+    if (isnan(gpsdata->fix.climb)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"climb\":%.3f,",
-		       fixp->climb);
-    if (isnan(fixp->epd)==0)
+		       gpsdata->fix.climb);
+    if (isnan(gpsdata->fix.epd)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"epd\":%.4f,",
-		       fixp->epd);
-    if (isnan(fixp->eps)==0)
+		       gpsdata->fix.epd);
+    if (isnan(gpsdata->fix.eps)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"eps\":%.2f,", fixp->eps);
-    if (isnan(fixp->epc)==0)
+		       "\"eps\":%.2f,", gpsdata->fix.eps);
+    if (isnan(gpsdata->fix.epc)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"epc\":%.2f,", fixp->epc);
+		       "\"epc\":%.2f,", gpsdata->fix.epc);
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
-		   "\"mode\":%d,", fixp->mode);
+		   "\"mode\":%d,", gpsdata->fix.mode);
     if (reply[strlen(reply)-1] == ',')
 	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));

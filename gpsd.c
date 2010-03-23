@@ -1772,7 +1772,7 @@ int main(int argc, char *argv[])
 			if (sub->policy.json) {
 			    buf2[0] = '\0';
 			    if (report_fix) {
-				json_tpv_dump(&device->gpsdata, &device->gpsdata.fix, 
+				json_tpv_dump(&device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
