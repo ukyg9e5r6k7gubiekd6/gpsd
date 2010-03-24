@@ -1018,7 +1018,6 @@ echo "MTK-3301                : $ac_mtk3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
-echo "GPSD-NG                 : $ac_gpsdng"
 echo "Old protocol            : $ac_oldstyle"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
