@@ -708,7 +708,7 @@ static bool add_device(char *device_name)
 /*@ +globstate @*/
 
 static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
-/* awaken a device and notivy all watchers*/
+/* awaken a device and notify all watchers*/
 {
     /* and open that device */
     if (device->gpsdata.gps_fd != -1) {
@@ -720,7 +720,6 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
 	return true;
     } else {
 	if (gpsd_activate(device) < 0) {
-
 	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
 			sub_index(user));
 	    return false;
