@@ -764,13 +764,12 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
     struct channel_t *chp, *channel;
     bool was_unassigned;
 
-    /* search for an already-assigned device with matching type or device */
+    /* search for an already-assigned channel with matching type or device */
     channel = NULL;
     for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if (((forcedev == NULL || chp->device == forcedev)
-	     && chp->subscriber == user 
-	     && chp->device != NULL 
-	     && allocation_filter(chp->device))) {
+		  && chp->subscriber == user 
+		  && chp->device != NULL)) {
 	    gpsd_report(LOG_INF, "client(%d): reusing channel %d, forced device %s\n",
 			sub_index(user), 
 			(int)(chp-channels),
