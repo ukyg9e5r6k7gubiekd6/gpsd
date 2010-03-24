@@ -738,28 +738,10 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
     }
 }
 
-static bool allocation_filter(struct gps_device_t *device)
-/* does specified device match the user's type criteria? */
-{
-    /*
-     * Might be we don't know the device type attached to this yet.
-     * If we don't, open it and sniff packets until we do. 
-     */
-    if (allocated_device(device) && !initialized_device(device)) {
-	if (!open_device(device->gpsdata.dev.path)) {
-	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
-	    free_device(device);
-	    return false;
-	}
-    }
-
-    return true;
-}
-
 /*@ -branchstate -usedef -globstate @*/
 static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user, 
 						  /*@null@*/struct gps_device_t *forcedev)
-/* allocate a new channel for the user, awakening a device if necessaery */
+/* allocate a new channel for the user, awakening a device if necessary */
 {
     /*@-temptrans@*/
     struct channel_t *chp, *channel;
@@ -809,27 +791,33 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	    /*@ -mustfreeonly @*/
 	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 		if (allocated_device(devp)) {
-		    if (allocation_filter(devp)) {
-			/*
-			 * Grab device if it's:
-			 * (1) The first we've seen,
-			 * (2) Has a better quality fix than we've seen yet,
-			 * (3) Fix of same quality we've seen but more recent.
-			 * Latter cases will only fire when device is GPS.
-			 * FIXME: This means failure to wake up an AIS
-			 * receiver if there are any GPSes on the host.
-			 */
-			if (channel->device == NULL) {
-			    channel->device = devp;
-			    most_recent = devp->gpsdata.fix.time;
-			} else if (devp->gpsdata.status > fix_quality) {
-			    channel->device = devp;
-			    fix_quality = devp->gpsdata.status;
-			} else if (devp->gpsdata.status == fix_quality && 
-				   devp->gpsdata.fix.time >= most_recent) {
-			    channel->device = devp;
-			    most_recent = devp->gpsdata.fix.time;
+		    if (allocated_device(devp) && !initialized_device(devp)) {
+			if (!open_device(devp->gpsdata.dev.path)) {
+			    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
+			    free_device(devp);
+			    continue;
 			}
+		    }
+
+		    /*
+		     * Grab device if it's:
+		     * (1) The first we've seen,
+		     * (2) Has a better quality fix than we've seen yet,
+		     * (3) Fix of same quality we've seen but more recent.
+		     * Latter cases will only fire when device is GPS.
+		     * FIXME: This means failure to wake up an AIS
+		     * receiver if there are any GPSes on the host.
+		     */
+		    if (channel->device == NULL) {
+			channel->device = devp;
+			most_recent = devp->gpsdata.fix.time;
+		    } else if (devp->gpsdata.status > fix_quality) {
+			channel->device = devp;
+			fix_quality = devp->gpsdata.status;
+		    } else if (devp->gpsdata.status == fix_quality && 
+			       devp->gpsdata.fix.time >= most_recent) {
+			channel->device = devp;
+			most_recent = devp->gpsdata.fix.time;
 		    }
 		}
 	    /*@ +mustfreeonly @*/
