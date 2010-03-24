@@ -710,7 +710,15 @@ static bool add_device(char *device_name)
 static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
 /* awaken a device and notify all watchers*/
 {
-    /* and open that device */
+    /* open that device */
+    if (!initialized_device(device)) {
+	if (!open_device(device->gpsdata.dev.path)) {
+	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
+	    free_device(device);
+	    return false;
+	}
+    }
+
     if (device->gpsdata.gps_fd != -1) {
 	gpsd_report(LOG_PROG,"client(%d): device %d (fd=%d, path %s) already active.\n",
 		    sub_index(user), 
@@ -813,14 +821,6 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 		    }
 		}
 	    /*@ +mustfreeonly @*/
-	}
-    }
-
-    if (!initialized_device(channel->device)) {
-	if (!open_device(channel->device->gpsdata.dev.path)) {
-	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
-	    free_device(channel->device);
-	    return false;
 	}
     }
 
