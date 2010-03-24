@@ -791,14 +791,6 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	    /*@ -mustfreeonly @*/
 	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 		if (allocated_device(devp)) {
-		    if (!initialized_device(devp)) {
-			if (!open_device(devp->gpsdata.dev.path)) {
-			    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
-			    free_device(devp);
-			    continue;
-			}
-		    }
-
 		    /*
 		     * Grab device if it's:
 		     * (1) The first we've seen,
@@ -821,6 +813,14 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 		    }
 		}
 	    /*@ +mustfreeonly @*/
+	}
+    }
+
+    if (!initialized_device(channel->device)) {
+	if (!open_device(channel->device->gpsdata.dev.path)) {
+	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
+	    free_device(channel->device);
+	    return false;
 	}
     }
 
