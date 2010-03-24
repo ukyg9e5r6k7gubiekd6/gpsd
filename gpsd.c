@@ -707,6 +707,38 @@ static bool add_device(char *device_name)
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
+static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
+/* awaken a device and notivy all watchers*/
+{
+    /* and open that device */
+    if (device->gpsdata.gps_fd != -1) {
+	gpsd_report(LOG_PROG,"client(%d): device %d (fd=%d, path %s) already active.\n",
+		    sub_index(user), 
+		    (int)(device - devices),
+		    device->gpsdata.gps_fd,
+		    device->gpsdata.dev.path);
+	return true;
+    } else {
+	if (gpsd_activate(device) < 0) {
+
+	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
+			sub_index(user));
+	    return false;
+	} else {
+	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel()\n",
+			device->gpsdata.gps_fd);
+	    FD_SET(device->gpsdata.gps_fd, &all_fds);
+	    adjust_max_fd(device->gpsdata.gps_fd, true);
+	    if (user->policy.watcher) {
+		char buf[GPS_JSON_RESPONSE_MAX];
+		json_device_dump(device, buf, sizeof(buf));
+		(void)throttled_write(user, buf, strlen(buf));
+	    }
+	    return true;
+	}
+    }
+}
+
 static bool allocation_filter(struct gps_device_t *device)
 /* does specified device match the user's type criteria? */
 {
@@ -809,30 +841,8 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 	return NULL;
     }
 
-    /* and open that device */
-    if (channel->device->gpsdata.gps_fd != -1)
-	gpsd_report(LOG_PROG,"client(%d): device %d (fd=%d, path %s) already active.\n",
-		    sub_index(user), 
-		    (int)(channel->device - devices),
-		    channel->device->gpsdata.gps_fd,
-		    channel->device->gpsdata.dev.path);
-    else {
-	if (gpsd_activate(channel->device) < 0) {
-
-	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
-			sub_index(user));
-	    return NULL;
-	} else {
-	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel()\n",
-			channel->device->gpsdata.gps_fd);
-	    FD_SET(channel->device->gpsdata.gps_fd, &all_fds);
-	    adjust_max_fd(channel->device->gpsdata.gps_fd, true);
-	    if (user->policy.watcher) {
-		char buf[GPS_JSON_RESPONSE_MAX];
-		json_device_dump(channel->device, buf, sizeof(buf));
-		(void)throttled_write(user, buf, strlen(buf));
-	    }
-	}
+    if (!awaken(user, channel->device)) {
+	return NULL;
     }
 
     channel->subscriber = user;
