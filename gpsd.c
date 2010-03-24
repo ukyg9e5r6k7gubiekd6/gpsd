@@ -759,12 +759,13 @@ static bool allocation_filter(struct gps_device_t *device)
 /*@ -branchstate -usedef -globstate @*/
 static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user, 
 						  /*@null@*/struct gps_device_t *forcedev)
+/* allocate a new channel for the user, awakening a device if necessaery */
 {
     /*@-temptrans@*/
     struct channel_t *chp, *channel;
     bool was_unassigned;
 
-    /* search for an already-assigned channel with matching type or device */
+    /* search for an already-assigned channel with matching device */
     channel = NULL;
     for (chp = channels; chp < channels + NITEMS(channels); chp++)
 	if (((forcedev == NULL || chp->device == forcedev)
