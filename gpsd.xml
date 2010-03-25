@@ -799,7 +799,7 @@ notifications.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?WATCH</term> 
+<term>?WATCH;</term> 
 <listitem>
 
 <para>This command sets watcher mode. It also sets or elicits a report
@@ -895,6 +895,69 @@ will assert the POLICY_SET bit in the top-level set member.</para>
 <programlisting>
 {"class":"WATCH", "raw":1,"scaled":true}
 </programlisting>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>?POLL;</term> 
+<listitem>
+
+<warning>
+<para>This feature is a work in progress, introduced at protocol version
+3.2.  The name, attributes, and semantics may change before it is
+finalized. The minor version number of the protocol will be bumped
+each time this occurs.</para>
+</warning>
+
+<para>The POLL command requests data from the last-seen fixes on all
+active GPS devices.  Devices must previously have been activated by
+?WATCH to be pollable, or have been specified on the GPSD command line
+together with an <option>-n</option> option.</para>
+
+<para>Polling can lead to possibly surprising results when it is used
+on a device such as an NMEA GPS for which a complete fix has to be
+accumulated from several sentences. If you poll while those sentences
+are being omitted, the response will only contain partial fix
+data.</para>
+
+<para>The POLL response is a timestamped list of TPV objects
+describing cached data. If a device ha not seen fixes, it will
+be reported with a mode field of zero.</para>
+
+<table frame="all" pgwide="0"><title>POLL object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "POLL"</entry>
+</row>
+<row>
+	<entry>time</entry>
+	<entry>No</entry>
+	<entry>Yes</entry>
+        <entry>Seconds since the Unix epoch, UTC. May have a
+	fractional part of up to .001sec precision.</entry>
+</row>
+<row>
+	<entry>fixes</entry>
+	<entry>Yes</entry>
+	<entry>JSON array</entry>
+        <entry>Comma-separated list of TPV objects.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 </listitem>
 </varlistentry>

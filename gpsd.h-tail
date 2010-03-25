@@ -7,7 +7,7 @@
 
 /* constants for the VERSION response */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	1	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	2	/* bump on compatible changes */
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE
