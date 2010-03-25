@@ -460,6 +460,7 @@ struct subscriber_t {
 #define allocated_device(devp)	 ((devp)->gpsdata.dev.path[0] != '\0')
 #define free_device(devp)	 (devp)->gpsdata.dev.path[0] = '\0'
 #define initialized_device(devp) ((devp)->context != NULL)
+#define subscribed(sub, devp)    (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0)
 
 struct gps_device_t devices[MAXDEVICES];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
@@ -582,9 +583,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     va_end(ap);
 
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (sub->fd == UNALLOCATED_FD)
-	    continue;
-	else if (sub->policy.devpath[0] == '\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path) == 0)
+	if (sub->active!=0 && subscribed(sub, device))
 	    (void)throttled_write(sub, buf, strlen(buf));
 }
 
@@ -722,8 +721,15 @@ static bool privileged_user(struct gps_device_t *device)
 /* is this channel privileged to change a device's behavior? */
 {
     /* grant user privilege if he's the only one listening to the device */
-    /* FIXME: this is a shim to be replaced */
-    return true;
+    struct subscriber_t *sub;
+    int subcount = 0;
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	if (sub->active == 0)
+	    continue;
+	else if (subscribed(sub, device))
+	    subcount++;
+    }
+    return subcount == 1;
 }
 #endif /* ALLOW_CONFIGURE */
 
@@ -1726,7 +1732,7 @@ int main(int argc, char *argv[])
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 			    if (sub->active == 0)
 				continue;
-			    else if (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path)==0) {
+			    else if (subscribed(sub, device)) {
 				device_needed = true;
 				break;
 			    }
