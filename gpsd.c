@@ -1075,7 +1075,7 @@ static void handle_request(struct subscriber_t *sub,
 	    --errend;
 	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
-		       (int)(errend-buf+1), buf);
+		       (int)(errend-buf), buf);
 	gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 	buf += strlen(buf);
     }
