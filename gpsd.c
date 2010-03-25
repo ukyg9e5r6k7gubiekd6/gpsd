@@ -99,13 +99,12 @@
 /*
  * Timeout policy.  We can't rely on clients closing connections
  * correctly, so we need timeouts to tell us when it's OK to
- * reclaim client fds.  ASSIGNMENT_TIMEOUT fends off programs
+ * reclaim client fds.  COMMAND_TIMEOUT fends off programs
  * that open connections and just sit there, not issuing a WATCH or
  * doing anything else that triggers a device assignment.  Clients
  * in watcher or raw mode that don't read their data will get dropped
  * when throttled_write() fills up the outbound buffers and the
- * NOREAD_TIMEOUT expires.  Clients in the original polling mode have
- * to be timed out as well; that's what POLLER_TIMOUT is for.  
+ * NOREAD_TIMEOUT expires.
  *
  * Finally, RELEASE_TIMEOUT sets the amount of time we hold a device
  * open after the last subscriber closes it; this is nonzero so a
@@ -119,9 +118,8 @@
  * when it's powered up, a re-open can fail with EIO and needs to be
  * tried repeatedly.  Better to avoid this...
  */
-#define ASSIGNMENT_TIMEOUT	60
+#define COMMAND_TIMEOUT		60*15
 #define NOREAD_TIMEOUT		60*3
-#define POLLER_TIMEOUT  	60*15
 #define RELEASE_TIMEOUT		60
 
 #define QLEN			5
@@ -432,18 +430,6 @@ static int filesock(char *filename)
     return sock;
 }
 
-/*
- * Multi-session support requires us to have two arrays, one of GPS
- * devices currently available and one of client sessions.  The number
- * of slots in each array is limited by the maximum number of client
- * sessions we can have open.
- */
-
-struct channel_t {
-    /*@null@*/struct subscriber_t *subscriber;	/* subscriber monitoring this */
-    /*@null@*/struct gps_device_t *device;	/* device subscriber listens to */
-};
-
 struct subscriber_t {
     int fd;			/* client file descriptor. -1 if unused */
     double active;		/* when subscriber last polled for data */
@@ -471,13 +457,11 @@ struct subscriber_t {
 #define MAXSUBSCRIBERS	FD_SETSIZE
 #endif
 #define sub_index(s) (int)((s) - subscribers)
-#define channel_index(s) (int)((s) - channels)
 #define allocated_device(devp)	 ((devp)->gpsdata.dev.path[0] != '\0')
 #define free_device(devp)	 (devp)->gpsdata.dev.path[0] = '\0'
 #define initialized_device(devp) ((devp)->context != NULL)
 
 struct gps_device_t devices[MAXDEVICES];
-struct channel_t channels[MAXSUBSCRIBERS*MAXDEVICES_PER_USER];
 struct subscriber_t subscribers[MAXSUBSCRIBERS];		/* indexed by client file descriptor */
 
 static void adjust_max_fd(int fd, bool on)
@@ -508,17 +492,6 @@ static void adjust_max_fd(int fd, bool on)
 #endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
 }
 
-static int channel_count(struct subscriber_t *sub)
-{
-    int chancount = 0;
-    struct channel_t *chp;
-
-    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	if (chp->subscriber == sub)
-	    ++chancount;
-    return chancount;
-}
-
 #define UNALLOCATED_FD	-1
 
 static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
@@ -538,7 +511,6 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 static void detach_client(struct subscriber_t *sub)
 {
     char *c_ip;
-    struct channel_t *channel; 
     if (sub->fd == UNALLOCATED_FD)
 	return;
     c_ip = netlib_sock2ip(sub->fd);
@@ -555,13 +527,6 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.scaled = false;
     sub->policy.timing = false;
     sub->policy.devpath[0] = '\0';
-    for (channel = channels; channel < channels + NITEMS(channels); channel++)
-	if (channel->subscriber == sub)
-	{
-	    /*@i1@*/channel->device = NULL;
-	    /*@i1@*/channel->subscriber = NULL;
-	    
-	}
     sub->fd = UNALLOCATED_FD;
     /*@+mustfreeonly@*/
 }
@@ -608,34 +573,24 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, size_t len)
 static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
-    struct channel_t *channel;
     va_list ap;
     char buf[BUFSIZ];
+    struct subscriber_t *sub;
 
     va_start(ap, sentence) ;
     (void)vsnprintf(buf, sizeof(buf), sentence, ap);
     va_end(ap);
 
-    for (channel = channels; channel < channels + NITEMS(channels); channel++)
-    {
-	struct subscriber_t *sub = channel->subscriber;
-	/*@-boolcompare@*/
-	if (channel->device==device && sub != NULL)
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
+	if (sub->fd == UNALLOCATED_FD)
+	    continue;
+	else if (sub->policy.devpath[0] == '\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path) == 0)
 	    (void)throttled_write(sub, buf, strlen(buf));
-	/*@+boolcompare@*/
-    }
 }
 
 static void deactivate_device(struct gps_device_t *device)
 /* deactivate device, but leave it in the pool (do not free it) */
 {
-    int cfd;
-
-    for (cfd = 0; cfd < NITEMS(channels); cfd++)
-	if (channels[cfd].device == device) {
-	    channels[cfd].device = NULL;
-	    channels[cfd].subscriber = NULL;
-	}
     notify_watchers(device,
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
@@ -746,98 +701,6 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
     }
 }
 
-/*@ -branchstate -usedef -globstate @*/
-static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user, 
-						  /*@null@*/struct gps_device_t *forcedev)
-/* allocate a new channel for the user, awakening a device if necessary */
-{
-    /*@-temptrans@*/
-    struct channel_t *chp, *channel;
-    bool was_unassigned;
-
-    /* search for an already-assigned channel with matching device */
-    channel = NULL;
-    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	if (((forcedev == NULL || chp->device == forcedev)
-		  && chp->subscriber == user 
-		  && chp->device != NULL)) {
-	    gpsd_report(LOG_INF, "client(%d): reusing channel %d, forced device %s\n",
-			sub_index(user), 
-			(int)(chp-channels),
-			forcedev != NULL ? "true" : "false");
-	    channel = chp;
-	}
-    /* if we didn't find one, allocate a new channel */
-    if (channel == NULL) {
-	for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	    if (chp->subscriber == NULL) {
-		channel = chp;
-		gpsd_report(LOG_INF, "client(%d): attaching channel %d\n",
-			    sub_index(user),
-			    (int)(chp-channels));
-		break;
-	    }
-    }
-    if (channel == NULL) {
-	gpsd_report(LOG_ERROR, "client(%d): channel allocation failed.\n",
-		    sub_index(user));
-	return NULL;
-    }
-
-    was_unassigned = (channel->device == NULL);
-
-    /* if subscriber has no device... */
-    if (was_unassigned) {
-	if (forcedev != NULL) {
-	    channel->device = forcedev;
-	} else {
-	    double most_recent = 0;
-	    int fix_quality = 0;
-	    struct gps_device_t *devp;
-
-	    gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", sub_index(user));
-	    /*@ -mustfreeonly @*/
-	    for(devp = devices; devp < devices + MAXDEVICES; devp++)
-		if (allocated_device(devp)) {
-		    /*
-		     * Grab device if it's:
-		     * (1) The first we've seen,
-		     * (2) Has a better quality fix than we've seen yet,
-		     * (3) Fix of same quality we've seen but more recent.
-		     * Latter cases will only fire when device is GPS.
-		     * FIXME: This means failure to wake up an AIS
-		     * receiver if there are any GPSes on the host.
-		     */
-		    if (channel->device == NULL) {
-			channel->device = devp;
-			most_recent = devp->gpsdata.fix.time;
-		    } else if (devp->gpsdata.status > fix_quality) {
-			channel->device = devp;
-			fix_quality = devp->gpsdata.status;
-		    } else if (devp->gpsdata.status == fix_quality && 
-			       devp->gpsdata.fix.time >= most_recent) {
-			channel->device = devp;
-			most_recent = devp->gpsdata.fix.time;
-		    }
-		}
-	    /*@ +mustfreeonly @*/
-	}
-    }
-
-    if (channel->device == NULL) {
-	return NULL;
-    }
-
-    if (!awaken(user, channel->device)) {
-	return NULL;
-    }
-
-    channel->subscriber = user;
-    return channel;
-    /*@+temptrans@*/
-}
-/*@ +branchstate +usedef +globstate @*/
-
 /*@ observer @*/static char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
 {
@@ -855,17 +718,12 @@ static /*@null@*/struct channel_t *assign_channel(struct subscriber_t *user,
 }
 
 #ifdef ALLOW_RECONFIGURE
-static bool privileged_channel(struct channel_t *channel)
+static bool privileged_user(struct gps_device_t *device)
 /* is this channel privileged to change a device's behavior? */
 {
-    struct channel_t *chp;
-    int channelcount = 0;
-
     /* grant user privilege if he's the only one listening to the device */
-    for (chp = channels; chp < channels + NITEMS(channels); chp++)
-	if (chp->device == channel->device)
-	    channelcount++;
-    return (channelcount == 1);
+    /* FIXME: this is a shim to be replaced */
+    return true;
 }
 #endif /* ALLOW_CONFIGURE */
 
@@ -1030,7 +888,6 @@ static void handle_request(struct subscriber_t *sub,
 				    char *reply, size_t replylen)
 {
     struct gps_device_t *devp;
-    struct channel_t *channel;
     const char *end = NULL;
 
     /*
@@ -1068,10 +925,10 @@ static void handle_request(struct subscriber_t *sub,
 		gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 	    } else if (sub->policy.watcher) {
 		if (sub->policy.devpath[0] == '\0') {
-		    /* assign all devices */
+		    /* awaken all devices */
 		    for(devp = devices; devp < devices + MAXDEVICES; devp++)
 			if (allocated_device(devp))
-			    (void)assign_channel(sub, devp);
+			    (void)awaken(sub, devp);
 		} else {
 		    devp = find_device(sub->policy.devpath);
 		    if (devp == NULL) {
@@ -1079,7 +936,7 @@ static void handle_request(struct subscriber_t *sub,
 				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n", sub->policy.devpath); 
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
-		    } else if (assign_channel(sub, devp) == NULL)
+		    } else if (!awaken(sub, devp))
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n", sub->policy.devpath); 
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
@@ -1094,13 +951,13 @@ static void handle_request(struct subscriber_t *sub,
 			replylen - strlen(reply));
     } else if (strncmp(buf, "DEVICE", 6) == 0 && (buf[6] == ';' || buf[6] == '=')) {
 	struct devconfig_t devconf;
+	struct gps_device_t *device;
 	buf += 6;
 	devconf.path[0] = '\0';	/* initially, no device selection */
 	if (*buf == ';') {
 	    ++buf;
 	} else {
 	    /* first, select a device to operate on */
-	    struct channel_t *chp;
 	    int status = json_device_read(buf+1, &devconf, &end);
 	    if (end == NULL)
 		buf += strlen(buf);
@@ -1109,7 +966,7 @@ static void handle_request(struct subscriber_t *sub,
 		    ++end;
 		buf = end;
 	    }
-	    channel = NULL;
+	    device = NULL;
 	    /*@-branchstate@*/
 	    if (status != 0) {
 		(void)snprintf(reply, replylen, 
@@ -1120,7 +977,7 @@ static void handle_request(struct subscriber_t *sub,
 	    } else {
 		if (devconf.path[0]!='\0') {
 		    /* user specified a path, try to assign it */
-		    if ((channel = assign_channel(sub, find_device(devconf.path))) == NULL) {
+		    if (!awaken(sub, find_device(devconf.path))) {
 			(void)snprintf(reply, replylen, 
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
@@ -1129,80 +986,78 @@ static void handle_request(struct subscriber_t *sub,
 		    }
 		} else {
 		    /* no path specified */
-		    int chcount = channel_count(sub);
-		    if (chcount == 0) {
+		    int devcount = 0;
+		    for (devp = devices; devp < devices + MAXDEVICES; devp++)
+			if (allocated_device(devp)) {
+			    device = devp;
+			    devcount++;
+			}
+		    if (devcount == 0) {
 			(void)strlcat(reply, 
-			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no channels attached.\"}\r\n",
+			  "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no devices attached.\"}\r\n",
 			  replylen);
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
-		    } else if (chcount > 1) {
+		    } else if (devcount > 1) {
 			(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple channels are subscribed.\"}\r\n");
+				   "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple devices are attached.\"}\r\n");
 	                gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
-		    } else {
-			/* we should have exactly one device now */
-			for (chp = channels; chp < channels + NITEMS(channels); chp++)
-			    if (chp->subscriber == sub) {
-				channel = chp;
-				break;
-			}
 		    }
+		    /* we should have exactly one device now */
 		}
-		assert(channel != NULL);
-		if (!privileged_channel(channel))
-		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits.\"}\r\n");
-		else if (channel->device == NULL)
+		if (device == NULL)
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 				   "{\"class\":\"ERROR\",\"message\":\"Channel has no device (possible internal error).\"}\r\n");
-		else if (channel->device->device_type == NULL)
+		else if (!privileged_user(device))
 		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n", channel->device->gpsdata.dev.path);
+				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits on %s.\"}\r\n", device->gpsdata.dev.path);
+		else if (device->device_type == NULL)
+		    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n", device->gpsdata.dev.path);
 		else {
 		    char serialmode[3];
-		    const struct gps_type_t *dt = channel->device->device_type;
+		    const struct gps_type_t *dt = device->device_type;
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
-			devconf.baudrate = (uint)gpsd_get_speed(&channel->device->ttyset);
+			devconf.baudrate = (uint)gpsd_get_speed(&device->ttyset);
 		    if (devconf.parity == DEVDEFAULT_PARITY)
-			devconf.stopbits=channel->device->gpsdata.dev.stopbits;
+			devconf.stopbits=device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)
-			devconf.stopbits=channel->device->gpsdata.dev.stopbits;
+			devconf.stopbits=device->gpsdata.dev.stopbits;
 		    if (isnan(devconf.cycle))
-			devconf.cycle=channel->device->gpsdata.dev.cycle;
+			devconf.cycle=device->gpsdata.dev.cycle;
 
 		    /* now that channel is selected, apply changes */
-		    if (devconf.driver_mode != channel->device->gpsdata.dev.driver_mode
+		    if (devconf.driver_mode != device->gpsdata.dev.driver_mode
 				&& devconf.driver_mode != DEVDEFAULT_NATIVE
 				&& dt->mode_switcher != NULL)
-			dt->mode_switcher(channel->device, devconf.driver_mode);
+			dt->mode_switcher(device, devconf.driver_mode);
 		    
 			serialmode[0] = devconf.parity;
 		    serialmode[1] = '0' + devconf.stopbits;
 		    serialmode[2] = '\0';
-		    set_serial(channel->device, 
+		    set_serial(device, 
 			       (speed_t)devconf.baudrate, serialmode);
 			if (dt->rate_switcher != NULL 
 			&& isnan(devconf.cycle)==0
 			&& devconf.cycle >= dt->min_cycle)
-				if (dt->rate_switcher(channel->device, devconf.cycle))
-					channel->device->gpsdata.dev.cycle = devconf.cycle;
+				if (dt->rate_switcher(device, devconf.cycle))
+					device->gpsdata.dev.cycle = devconf.cycle;
 		}
 	    }
 	    /*@+branchstate@*/
 	}
 	/* dump a response for each selected channel */
-	for (channel = channels; channel < channels + NITEMS(channels); channel++)
-	    if (channel->subscriber != sub)
+	for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	    if (!allocated_device(devp))
 		continue;
-	    else if (devconf.path[0] != '\0' && channel->device!=NULL && strcmp(channel->device->gpsdata.dev.path, devconf.path)!=0)
+	    else if (devconf.path[0] != '\0' && devp!=NULL && strcmp(devp->gpsdata.dev.path, devconf.path)!=0)
 		continue;
 	    else {
-		json_device_dump(channel->device, 
-				    reply + strlen(reply),
-				    replylen - strlen(reply));
+		json_device_dump(devp, 
+				 reply + strlen(reply),
+				 replylen - strlen(reply));
 	    }
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
@@ -1256,7 +1111,6 @@ int main(int argc, char *argv[])
     bool go_background = true;
     struct timeval tv;
     struct subscriber_t *sub;
-    struct channel_t *channel;
     const struct gps_type_t **dp;
 
 #ifdef PPS_ENABLE
@@ -1613,9 +1467,10 @@ int main(int argc, char *argv[])
                 if ((changed & PACKET_SET) == 0)
                     continue;
 
+
 		/* raw hook and relaying functions */
-		for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		    if (channel->subscriber == NULL || channel->device == NULL || channel->device != device) 
+		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+		    if (sub->active == 0)
 			continue;
 
 		    /* 
@@ -1624,8 +1479,8 @@ int main(int argc, char *argv[])
 		     * mode.
 		     */
 		    if (TEXTUAL_PACKET_TYPE(device->packet.type)
-			&& (channel->subscriber->policy.raw > 0 || channel->subscriber->policy.nmea)) {
-			    (void)throttled_write(channel->subscriber, (char *)device->packet.outbuffer, device->packet.outbuflen);
+			&& (sub->policy.raw > 0 || sub->policy.nmea)) {
+			    (void)throttled_write(sub, (char *)device->packet.outbuffer, device->packet.outbuflen);
 			    continue;
 		    }
 
@@ -1633,8 +1488,8 @@ int main(int argc, char *argv[])
 		     * Also, simply copy if user has specified
 		     * super-raw mode.
 		     */
-		    if (channel->subscriber->policy.raw > 1) {
-			    (void)throttled_write(channel->subscriber, 
+		    if (sub->policy.raw > 1) {
+			    (void)throttled_write(sub, 
 						  (char *)device->packet.outbuffer, 
 						  device->packet.outbuflen);
 			    continue;
@@ -1643,7 +1498,7 @@ int main(int argc, char *argv[])
 		    /*
 		     * Maybe the user wants a binary packet hexdumped.
 		     */
-		    if (channel->subscriber->policy.raw==1) {
+		    if (sub->policy.raw==1) {
 			char *hd = gpsd_hexdump((char*)device->packet.outbuffer, 
 					       device->packet.outbuflen);
 			/*
@@ -1651,7 +1506,7 @@ int main(int argc, char *argv[])
 			 * buffer.
 			 */
 			(void) strlcat(hd, "\r\n", MAX_PACKET_LENGTH*2+1);
-			(void)throttled_write(channel->subscriber, 
+			(void)throttled_write(sub, 
 						  hd, strlen(hd));
 		    }
 #endif /* BINARY_ENABLE */
@@ -1675,7 +1530,7 @@ int main(int argc, char *argv[])
 		    if ((changed & DEVICE_SET) != 0) {
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
 			    if (sub->policy.watcher && sub->policy.devpath[0] == '\0')
-				(void)assign_channel(sub, device);
+				(void)awaken(sub, device);
 		    }
 		    /* handle laggy response to a firmware version query */
 		    if ((changed & (DEVICEID_SET|DEVICE_SET)) != 0) {
@@ -1697,10 +1552,9 @@ int main(int argc, char *argv[])
 	    }
 
 	    /* watch all channels associated with this device */
-	    for (channel = channels; channel < channels + NITEMS(channels); channel++) {
-		if (device != channel->device)
+	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+		if (sub->active == 0)
 		    continue;
-		sub = channel->subscriber;
 		/* some listeners may be in watcher mode */
 		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
@@ -1728,7 +1582,7 @@ int main(int argc, char *argv[])
 			    gpsd_report(LOG_PROG, "time to report a fix\n");
 #ifdef DBUS_ENABLE
 			if (report_fix)
-			    send_dbus_fix(channel->device);
+			    send_dbus_fix(device);
 #endif /* DBUS_ENABLE */
 
 			/* binary GPS packet, pseudo-NMEA dumping enabled */
@@ -1793,8 +1647,7 @@ int main(int argc, char *argv[])
 					       device->d_recv_time,
 					       device->d_decode_time,
 					       timestamp());
-				(void)throttled_write(channel->subscriber,
-						      buf2, strlen(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* TIMING_ENABLE */
 			}
@@ -1840,27 +1693,15 @@ int main(int argc, char *argv[])
 		    /*
 		     * When a command comes in, update subscriber.active to
 		     * timestamp() so we don't close the connection
-		     * after POLLER_TIMEOUT seconds. This makes
-		     * POLLER_TIMEOUT useful.
+		     * after COMMAND_TIMEOUT seconds. This makes
+		     * COMMAND_TIMEOUT useful.
 		     */
 		    sub->active = timestamp();
 		    if (handle_gpsd_request(sub, buf) < 0)
 			detach_client(sub);
 		}
 	    } else {
-		int devcount = 0, rawcount = 0;
-		/* count devices attached by this subscriber */
-		for (channel = channels; channel < channels + NITEMS(channels); channel++)
-		    if (channel->device!=NULL && channel->subscriber == sub) {
-			devcount++;
-			if (channel->subscriber->policy.raw > 0)
-			    rawcount++;
-		    }
-
-		if (devcount == 0 && timestamp() - sub->active > ASSIGNMENT_TIMEOUT) {
-		    gpsd_report(LOG_WARN, "client(%d) timed out before assignment request.\n", sub_index(sub));
-		    detach_client(sub);
-		} else if (devcount > 0 && !sub->policy.watcher && rawcount == 0 && timestamp() - sub->active > POLLER_TIMEOUT) {
+		if (!sub->policy.watcher && timestamp() - sub->active > COMMAND_TIMEOUT) {
 		    gpsd_report(LOG_WARN, "client(%d) timed out on command wait.\n", cfd);
 		    detach_client(sub);
 		}
@@ -1882,9 +1723,14 @@ int main(int argc, char *argv[])
 		    if (device->packet.type != BAD_PACKET) {
 			bool device_needed = false;
 
-			for (cfd = 0; cfd < NITEMS(channels); cfd++)
-			    if (channels[cfd].device == device)
+			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+			    if (sub->active == 0)
+				continue;
+			    else if (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path)==0) {
 				device_needed = true;
+				break;
+			    }
+			}
 
 			if (!device_needed && device->gpsdata.gps_fd > -1) {
 			    if (device->releasetime == 0) {
@@ -1902,6 +1748,7 @@ int main(int argc, char *argv[])
 		}
 	    }
     }
+
     /* if we make it here, we got a signal... deal with it */
     /* restart on SIGHUP, clean up and exit otherwise */
     if (SIGHUP == (int)signalled)
