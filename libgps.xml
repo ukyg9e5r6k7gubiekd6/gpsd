@@ -11,7 +11,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refmeta>
 <refentrytitle>3</refentrytitle>
 <manvolnum>3</manvolnum>
-<refmiscinfo class='source'>Linux</refmiscinfo>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>libgps</refname>

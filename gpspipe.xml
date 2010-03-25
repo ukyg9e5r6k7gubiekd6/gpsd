@@ -7,10 +7,12 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpspipe.1'>
+<refentryinfo><date>03 Aug 2005</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpspipe</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='date'>03 Aug 2005</refmiscinfo>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>gpspipe</refname>

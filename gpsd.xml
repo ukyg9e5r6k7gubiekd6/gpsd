@@ -9,15 +9,18 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd.8'>
+<refentryinfo><date>9 Aug 2004</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsd</refentrytitle>
 <manvolnum>8</manvolnum>
-<refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsd</refname>
 <refpurpose>interface daemon for GPS receivers</refpurpose>
 </refnamediv>
+
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
