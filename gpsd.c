@@ -1065,6 +1065,24 @@ static void handle_request(struct subscriber_t *sub,
 				 reply + strlen(reply),
 				 replylen - strlen(reply));
 	    }
+    } else if (strncmp(buf, "POLL;", 5) == 0) {
+	buf += 5;
+	(void)snprintf(reply, replylen,
+		       "{class=\"POLL\",\"timestamp\"=%.3f,fixes=[",
+		       timestamp());
+	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
+	    if (allocated_device(devp) && subscribed(sub, devp)) {
+		if ((devp->observed & GPS_TYPEMASK)!=0) {
+		    json_tpv_dump(&devp->gpsdata, 
+				  reply + strlen(reply),
+				  replylen - strlen(reply));
+		    (void)strlcat(reply, ",", replylen);
+		}
+	    }
+	}
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "]}\r\n", replylen);
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
 	json_version_dump(reply, replylen);
@@ -1108,7 +1126,7 @@ int main(int argc, char *argv[])
     char *pid_file = NULL;
     int st, csock = -1;
     gps_mask_t changed;
-    char *gpsd_service = NULL;
+    static char *gpsd_service = NULL;	/* static pacifies splint */
     char *control_socket = NULL;
     struct gps_device_t *device;
     sockaddr_t fsin;
