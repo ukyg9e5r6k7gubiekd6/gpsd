@@ -1105,11 +1105,11 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
-    static char *pid_file = NULL;
-    static int st, csock = -1;
-    static gps_mask_t changed;
-    static char *gpsd_service = NULL;
-    static char *control_socket = NULL;
+    char *pid_file = NULL;
+    int st, csock = -1;
+    gps_mask_t changed;
+    char *gpsd_service = NULL;
+    char *control_socket = NULL;
     struct gps_device_t *device;
     sockaddr_t fsin;
     fd_set rfds, control_fds;
