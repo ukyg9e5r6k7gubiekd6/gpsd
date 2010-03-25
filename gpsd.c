@@ -1073,9 +1073,14 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
+		    char *replyend;
 		    json_tpv_dump(&devp->gpsdata, 
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
+		    replyend = reply + strlen(reply) - 1;
+		    if (isspace(*replyend))
+			--replyend;
+		    replyend[1] = '\0';
 		    (void)strlcat(reply, ",", replylen);
 		}
 	    }
