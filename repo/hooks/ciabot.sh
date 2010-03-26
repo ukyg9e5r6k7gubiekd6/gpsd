@@ -36,7 +36,7 @@ project="GPSD"
 
 # Name of the repository.
 # You can hardwire this to make the script faster.
-repo="`basename $GIT_DIR`"
+repo="`basename ${PWD}`"
 
 # Fully qualified domain name of the repo host.
 # You can hardwire this to make the script faster.
