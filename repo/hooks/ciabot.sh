@@ -24,18 +24,20 @@
 #       done
 #
 
-# The project as known to CIA
+# The project as known to CIA:
 project="GPSD"
 repo="${REPO:-gpsd}"
-
-# Addresses for the e-mail
-from="esr@thyrsus.com"
-to="cia@cia.vc"
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
 # through gitweb or something similar.
 urlprefix="http://git.berlios.de/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
+
+# You probably will not need to change the following:
+
+# Addresses for the e-mail
+from="$LOGNAME@`hostname --fqdn`"
+to="cia@cia.vc"
 
 # SMTP client to use - may need to edit the absolute pathname for your system
 sendmail="/usr/sbin/sendmail -t -f ${from}"
