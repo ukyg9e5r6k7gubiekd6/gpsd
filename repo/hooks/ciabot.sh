@@ -44,7 +44,8 @@ host=`hostname --fqdn`
 # to this, it should point at a CGI that will display the commit
 # through gitweb or something similar. The default will probably
 # work if you have a typical gitweb setup.
-urlprefix="http://${host}/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
+#urlprefix="http://${host}/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
+urlprefix="http://git.berlios.de/cgi-bin/cgit.cgi/gpsd/commit/?id="
 
 #
 # You probably will not need to change the following:
