@@ -24,26 +24,43 @@
 #       done
 #
 
-# The project as known to CIA:
+#
+# The project as known to CIA. You will want to change this.
+#
+
 project="GPSD"
-repo="${REPO:-gpsd}"
+
+#
+# You may not need to change these:
+#
+
+# Name of the repository.
+# You can hardwire this to make the script faster.
+repo="`basename $GIT_DIR`"
+
+# Fully qualified domain name of the repo host.
+# You can hardwire this to make the script faster.
+host=`hostname --fqdn`
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
-# through gitweb or something similar.
-urlprefix="http://git.berlios.de/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
+# through gitweb or something similar. The default will probably
+# work if you have a typical gitweb setup.
+urlprefix="http://${host}/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
 
+#
 # You probably will not need to change the following:
+#
 
 # Addresses for the e-mail
-from="$LOGNAME@`hostname --fqdn`"
+from="${LOGNAME}@${host}"
 to="cia@cia.vc"
 
 # SMTP client to use - may need to edit the absolute pathname for your system
 sendmail="/usr/sbin/sendmail -t -f ${from}"
 
 #
-# No user-serviceable parts below this line
+# No user-serviceable parts below this line:
 #
 
 PATH="$PATH:`git --exec-path`"
