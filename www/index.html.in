@@ -66,15 +66,37 @@
 
 <div id="Content">
 
+<table class="centered" width="80%" border="1" cellpadding="20" bgcolor="white">
+<tr>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_basic_stats.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_factoids.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_languages.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
+</td>
+</tr>
+</table>
+
 <h1 id='news'>Urgent news for maintainers of <code>gpsd</code> clients</h1>
 
 <p>We've been warning it was coming for years, and it's here: in 2.90,
 the request/response protocol used by <code>gpsd</code> has changed in
 ways that will break your application if you're not careful.  The old
-protocol is still supported, but will remain so only for a very
-limited time.  Read <a href="protocol-transition.html">"Moving to
-GPSD-NG: a Guide for Client Developers"</a> to find out why this is
-happening and what you need to do about it.</p>
+protocol is gone from the damon.  It is still supported in the client
+library, but will remain so only for a very limited time.  Read <a
+href="protocol-transition.html">"Moving to GPSD-NG: a Guide for Client
+Developers"</a> to find out why this is happening and what you need to
+do about it.</p>
 
 <h1>About <code>gpsd</code></h1>
 
@@ -164,29 +186,6 @@ bugs.</p>
 <p>All advertising revenue from this site (on the optimistic
 assumption that we ever see any!) will go to the project's fund for
 buying <a href="wishlist.html"> test hardware and standards</a>.</p>
-
-<p>And here's what you get for what you aren't paying (gadgets by Ohloh):</p>
-
-<table class="centered" width="80%">
-<tr>
-<td>
-<script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_basic_stats.js"></script>
-</td>
-<td>
-<script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
-</td>
-<td>
-<script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_factoids.js"></script>
-</td>
-<td>
-<script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_languages.js"></script>
-</td>
-</tr>
-</table>
 
 <p class="centered">
 
