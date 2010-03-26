@@ -75,7 +75,7 @@ logmessage=$(echo "$rawcommit" | sed -e '1,/^$/d' | head -n 1)
 logmessage=$(echo "$logmessage" | sed 's/\&/&amp\;/g; s/</&lt\;/g; s/>/&gt\;/g')
 ts=$(echo "$rawcommit" | sed -n -e '/^author .*> \([0-9]\+\).*$/s--\1-p')
 
-# <revision>${rev}</revision>
+# 
 #
 #      <files>
 #        $(git diff-tree -r --name-only ${merged} |
@@ -97,6 +97,7 @@ out="
   <body>
     <commit>
       <author>${author}</author>
+      <revision>${rev}</revision>
       <log>${logmessage} ${url}</log>
       <url>${url}</url>
     </commit>
