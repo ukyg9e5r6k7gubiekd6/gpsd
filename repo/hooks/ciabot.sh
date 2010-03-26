@@ -42,10 +42,10 @@ host=`hostname --fqdn`
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
-# through gitweb or something similar. The default will probably
-# work if you have a typical gitweb setup.
-#urlprefix="http://${host}/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
-urlprefix="http://git.berlios.de/cgi-bin/cgit.cgi/gpsd/commit/?id="
+# through gitweb or something similar. The defaults will probably
+# work if you have a typical gitweb/cgit setup.
+#urlprefix="http://${host}/cgi-bin/gitweb.cgi?p=${repo};a=commit;h="
+urlprefix="http://${host}/cgi-bin/cgit.cgi/${repo}/commit/?id="
 
 #
 # You probably will not need to change the following:
