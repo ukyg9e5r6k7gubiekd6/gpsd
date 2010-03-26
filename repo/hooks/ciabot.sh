@@ -57,13 +57,15 @@ from="${LOGNAME}@${host}"
 to="cia@cia.vc"
 
 # SMTP client to use - may need to edit the absolute pathname for your system
-sendmail="/usr/sbin/sendmail -t -f ${from}"
+sendmail="sendmail -t -f ${from}"
 
 #
 # No user-serviceable parts below this line:
 #
 
-PATH="$PATH:`git --exec-path`"
+# Should include both places sendmail is likely to lurk 
+# and the git private command directory.
+PATH="$PATH:/usr/sbin/:`git --exec-path`"
 
 if [ $# -eq 0 ] ; then
 	refname=$(git symbolic-ref HEAD 2>/dev/null)
