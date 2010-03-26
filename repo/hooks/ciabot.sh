@@ -5,7 +5,7 @@
 # Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
 #
 # Git CIA bot in bash. (no, not the POSIX shell, bash).
-# It is *heavily* based on Git ciabot.pl by Petr Baudis.
+# Originally based on Git ciabot.pl by Petr Baudis.
 # This script contains porcelain and porcelain byproducts.
 #
 # It is meant to be run either on a post-commit hook or in an update
@@ -56,9 +56,14 @@ else
 	merged=$2
 fi
 
-url=$(wget -O - -q http://tinyurl.com/api-create.php?url=${urlprefix}${merged} 2>/dev/null)
+# This tries to turn your gitwebbish URL into a tinyurl so it will take up
+# less space on the IRC notification line. Some repo sites (I'm looking at
+# you, berlios.de!) forbid wget calls for security reasons.  On these,
+# the code will fall back to the full un-tinyfied URL.
+longurl=${urlprefix}${merged}
+url=$(wget -O - -q http://tinyurl.com/api-create.php?url=${longurl} 2>/dev/null)
 if [ -z "$url" ]; then
-	url="${urlprefix}${merged}"
+	url="${longurl}"
 fi
 
 refname=${refname##refs/heads/}
@@ -74,13 +79,6 @@ author=$(echo "$rawcommit" | sed -n -e '/^author .*<\([^@]*\).*$/s--\1-p')
 logmessage=$(echo "$rawcommit" | sed -e '1,/^$/d' | head -n 1)
 logmessage=$(echo "$logmessage" | sed 's/\&/&amp\;/g; s/</&lt\;/g; s/>/&gt\;/g')
 ts=$(echo "$rawcommit" | sed -n -e '/^author .*> \([0-9]\+\).*$/s--\1-p')
-
-# 
-#
-#      <files>
-#        $(git diff-tree -r --name-only ${merged} |
-#          sed -e '1d' -e 's-.*-<file>&</file>-')
-#      </files>
 
 out="
 <message>
@@ -98,6 +96,10 @@ out="
     <commit>
       <author>${author}</author>
       <revision>${rev}</revision>
+      <files>
+        $(git diff-tree -r --name-only ${merged} |
+          sed -e '1d' -e 's-.*-<file>&</file>-')
+      </files>
       <log>${logmessage} ${url}</log>
       <url>${url}</url>
     </commit>
