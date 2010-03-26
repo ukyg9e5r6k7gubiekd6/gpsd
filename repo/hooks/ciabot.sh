@@ -4,7 +4,6 @@
 # Copyright (c) 2008 Natanael Copa <natanael.copa@gmail.com>
 # Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
 #
-# Git CIA bot in bash. (no, not the POSIX shell, bash).
 # Originally based on Git ciabot.pl by Petr Baudis.
 # This script contains porcelain and porcelain byproducts.
 #
@@ -25,9 +24,8 @@
 #
 
 #
-# The project as known to CIA. You will want to change this.
+# The project as known to CIA. You will want to change this:
 #
-
 project="GPSD"
 
 #
@@ -91,9 +89,11 @@ gitver=$(git --version)
 gitver=${gitver##* }
 
 rev=$(git describe ${merged} 2>/dev/null)
-# ${merged:0:12} is the only bashism left in this script,
-# according to checkbashisms.
-[ -z ${rev} ] && rev=${merged:0:12}
+# ${merged:0:12} here was the only bashism left in the 2008 version of
+# this script, according to checkbashisms.  Replace it with ${merged}
+# because it was just a fallback anyway, and it's worth taking accepting
+# a longer fallback for faster execution and removing the bash deoendency.
+[ -z ${rev} ] && rev=${merged}
 
 rawcommit=$(git cat-file commit ${merged})
 author=$(echo "$rawcommit" | sed -n -e '/^author .*<\([^@]*\).*$/s--\1-p')
