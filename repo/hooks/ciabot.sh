@@ -32,15 +32,18 @@ repo="${REPO:-gpsd}"
 from="esr@thyrsus.com"
 to="cia@cia.vc"
 
-# SMTP client to use - may need to edit the absolute pathname for your system
-sendmail="/usr/sbin/sendmail -t -f ${from}"
-
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
 # through gitweb or something similar.
 urlprefix="http://git.alpinelinux.org/cgit/$repo/commit/?id="
 
-# You shouldn't be touching anything else.
+# SMTP client to use - may need to edit the absolute pathname for your system
+sendmail="/usr/sbin/sendmail -t -f ${from}"
+
+#
+# No user-serviceable parts below this line
+#
+
 if [ $# -eq 0 ] ; then
 	refname=$(git symbolic-ref HEAD 2>/dev/null)
 	merged=$(git rev-parse HEAD)
