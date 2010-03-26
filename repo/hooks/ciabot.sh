@@ -72,6 +72,8 @@ gitver=$(git --version)
 gitver=${gitver##* }
 
 rev=$(git describe ${merged} 2>/dev/null)
+# ${merged:0:12} is the only bashism left in this script,
+# according to checkbashisms.
 [ -z ${rev} ] && rev=${merged:0:12}
 
 rawcommit=$(git cat-file commit ${merged})
