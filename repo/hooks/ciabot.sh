@@ -2,9 +2,11 @@
 # Distributed under the terms of the GNU General Public License v2
 # Copyright (c) 2006 Fernando J. Pereda <ferdy@gentoo.org>
 # Copyright (c) 2008 Natanael Copa <natanael.copa@gmail.com>
+# Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
 #
 # Git CIA bot in bash. (no, not the POSIX shell, bash).
 # It is *heavily* based on Git ciabot.pl by Petr Baudis.
+# This script contains porcelain and porcelain byproducts.
 #
 # It is meant to be run either on a post-commit hook or in an update
 # hook:
