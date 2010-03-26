@@ -3,15 +3,32 @@
 # Usual caveats apply; the edited one and all commits after will change IDs,
 # and pushing them to a repo with the old commits will wreak havoc.
 # Note also that this cavalierly overwrites refs/original.
+#
+# This script by Eric S. Raymond, March 2010, all rites perverted.
+# It's based on an idea by thiago from #git, but debugged and with a safety.
+# It contains porcelain and porcelain byproducts.
 
 topdir=`git rev-parse --show-cdup`
 test -n "$topdir" && cd "$topdir"
+
+my_commit=`git rev-parse $1` || exit $?
+
+# Run a safety check before edits that could hose remotes.
+if test -n "`git branch -r --contains $mycommit`"
+then
+    echo -n "Commit has been pushed.  Really edit? "
+    read yn
+    if test "$yn" != 'y'
+    then
+	exit 0
+    fi
+fi
 
 my_file=COMMIT_EDITMSG
 test -d .git && myfile=.git/COMMIT_EDITMSG
 
 # This effort to invoke the user's normal editor fails.
-# the problem is that anytjing the editor writes to stdout on the
+# the problem is that anything the editor writes to stdout on the
 # controlling terminal becomes part of the commit message.  So
 # the editor needs to actually run inside another window.
 #test -z "$GIT_EDITOR" && GIT_EDITOR=$EDITOR
@@ -20,8 +37,6 @@ test -d .git && myfile=.git/COMMIT_EDITMSG
 
 # xterm -e vi should also work.
 my_editor=emacsclient
-
-my_commit=`git rev-parse $1` || exit $?
 
 export my_file my_commit my_editor
 
