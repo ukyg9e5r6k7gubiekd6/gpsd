@@ -31,7 +31,7 @@ from="esr@thyrsus.com"
 to="cia@cia.vc"
 
 # SMTP client to use
-sendmail="sendmail -t -f ${from}"
+/usr/sbin/sendmail="sendmail -t -f ${from}"
 
 # Changeset URL
 urlprefix="http://git.alpinelinux.org/cgit/$repo/commit/?id="
