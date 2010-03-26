@@ -43,6 +43,8 @@
     src='http://www.catb.org/hacker-emblem/glider.png'
     alt='hacker emblem' /></a><br />
 
+    <script type="text/javascript" src="http://www.ohloh.net/p/3944/widgets/project_thin_badge.js"></script>
+
     <hr/>
     <script type="text/javascript"><!--
     google_ad_client = "pub-1458586455084261";
@@ -136,7 +138,7 @@ href="http://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation.asp">
 the first Good Code Grant from the Alliance for Code Excellence.</p>
 
 <p>Statistics about the code volume, commit history, and contributors
-associated with thias project are <a
+associated with this project are <a
 href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 
 <p>Our development platforms are open-source Unixes &mdash; Linux, and
@@ -162,6 +164,31 @@ bugs.</p>
 <p>All advertising revenue from this site (on the optimistic
 assumption that we ever see any!) will go to the project's fund for
 buying <a href="wishlist.html"> test hardware and standards</a>.</p>
+
+<p>And here's what you get for what you aren't paying (gadgets by Ohloh):</p>
+
+<table class="centered" width="80%">
+<tr>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_basic_stats.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_factoids.js"></script>
+</td>
+<td>
+<script type="text/javascript"
+src="http://www.ohloh.net/p/3944/widgets/project_languages.js"></script>
+</td>
+</tr>
+</table>
+
+<p class="centered">
 
 <h1 id='news'>News</h1>
 
@@ -336,6 +363,12 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 <dt><a href="excellence.html">GPSD and Code Excellence</a></dt>
 <dd>An essay written for the <a href="http://codeoffsets.com/">The
 Alliance for Code Excellence</a> on how GPSD drives out bad code.</dd>
+
+<dt><a href="http://esr.ibiblio.org/?p=1859">Scenes from the Life of a System Architect</a></dt>
+<dd>The GPSD lead describes some work in progress on the core code of
+GPSD. A slice of what doing software architecture is like in the
+real world, where historyt can weigh neatrly as much as today's
+requirements list.</dd>
 
 </dl>
 
