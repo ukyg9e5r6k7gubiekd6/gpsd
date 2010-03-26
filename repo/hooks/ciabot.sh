@@ -35,7 +35,7 @@ to="cia@cia.vc"
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
 # through gitweb or something similar.
-urlprefix="http://git.alpinelinux.org/cgit/$repo/commit/?id="
+urlprefix="http://git.berlios.de/cgi-bin/gitweb.cgi?p=$repo;a=commit;h="
 
 # SMTP client to use - may need to edit the absolute pathname for your system
 sendmail="/usr/sbin/sendmail -t -f ${from}"
@@ -43,6 +43,8 @@ sendmail="/usr/sbin/sendmail -t -f ${from}"
 #
 # No user-serviceable parts below this line
 #
+
+PATH="$PATH:`git --exec-path`"
 
 if [ $# -eq 0 ] ; then
 	refname=$(git symbolic-ref HEAD 2>/dev/null)
