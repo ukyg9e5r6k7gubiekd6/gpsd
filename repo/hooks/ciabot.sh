@@ -90,8 +90,8 @@ gitver=$(git --version)
 gitver=${gitver##* }
 
 rev=$(git describe ${merged} 2>/dev/null)
-# ${merged:0:12} here was the only bashism left in the 2008 version of
-# this script, according to checkbashisms.  Replace it with ${merged}
+# ${merged:0:12} was the only bashism left in the 2008 version of this
+# script, according to checkbashisms.  Replace it with ${merged} here
 # because it was just a fallback anyway, and it's worth taking accepting
 # a longer fallback for faster execution and removing the bash deoendency.
 [ -z ${rev} ] && rev=${merged}
@@ -129,7 +129,7 @@ out="
 </message>"
 
 ${sendmail} << EOM
-Message-ID: <${merged:0:12}.${author}@${project}>
+Message-ID: <${merged}.${author}@${project}>
 From: ${from}
 To: ${to}
 Content-type: text/xml
