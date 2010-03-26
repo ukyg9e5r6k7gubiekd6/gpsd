@@ -294,6 +294,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
     int sin_len = 0;
     int s = -1, type, proto, one = 1;
     in_port_t port;
+    char *af_str = "";
 
     if ((pse = getservbyname(service, protocol)))
 	port = ntohs((in_port_t)pse->s_port);
@@ -323,6 +324,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	sat.sa_in.sin_port = htons(port);
 
+	af_str = "IPv4";
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	break;
@@ -353,6 +355,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
          * leaves much of this unspecified, but requires that AF_INET
          * be recognized.  We follow tradition here.
          */
+	af_str = "IPv6";
 	s = socket(PF_INET6, type, proto);
 	break;
 
@@ -360,9 +363,10 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	gpsd_report(LOG_ERROR, "Unhandled address family %d\n", af);
 	return -1;
     }
+    gpsd_report(LOG_IO, "opening %s socket\n", af_str);
 
     if (s == -1) {
-	gpsd_report(LOG_ERROR, "Can't create socket\n");
+	gpsd_report(LOG_ERROR, "Can't create %s socket\n", af_str);
 	return -1;
     }
     if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,
@@ -371,8 +375,8 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	return -1;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
-	gpsd_report(LOG_ERROR, "Can't bind to port %s, %s\n", service, 
-		strerror(errno));
+	gpsd_report(LOG_ERROR, "Can't bind to %s port %s, %s\n", af_str, 
+		service, strerror(errno));
 	if (errno == EADDRINUSE) {
 		gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
 	}
