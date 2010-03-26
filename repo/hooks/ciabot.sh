@@ -1,6 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Distributed under the terms of the GNU General Public License v2
 # Copyright (c) 2006 Fernando J. Pereda <ferdy@gentoo.org>
+# Copyright (c) 2008 Natanael Copa <natanael.copa@gmail.com>
 #
 # Git CIA bot in bash. (no, not the POSIX shell, bash).
 # It is *heavily* based on Git ciabot.pl by Petr Baudis.
@@ -23,24 +24,20 @@
 
 # The project as known to CIA
 project="GPSD"
-
-# Set to true if you want the full log to be sent
-noisy=false
+repo="${REPO:-gpsd}"
 
 # Addresses for the e-mail
 from="esr@thyrsus.com"
 to="cia@cia.vc"
 
 # SMTP client to use
-sendmail="/usr/sbin/sendmail -f ${from} ${to}"
+sendmail="sendmail -t -f ${from}"
 
 # Changeset URL
-#url="http://www.example.com/gitweb/?p=${project}.git;a=commit;h=@@sha1@@"
-url="http://git.berlios.de/cgi-bin/cgit.cgi/gpsd/commit/?id=@@sha1@@"
-
+urlprefix="http://git.alpinelinux.org/cgit/$repo/commit/?id="
 
 # You shouldn't be touching anything else.
-if [[ $# = 0 ]] ; then
+if [ $# -eq 0 ] ; then
 	refname=$(git symbolic-ref HEAD 2>/dev/null)
 	merged=$(git rev-parse HEAD)
 else
@@ -48,8 +45,10 @@ else
 	merged=$2
 fi
 
-export PATH
-PATH="$PATH:`git --exec-path`"
+url=$(wget -O - -q http://tinyurl.com/api-create.php?url=${urlprefix}${merged} 2>/dev/null)
+if [ -z "$url" ]; then
+	url="${urlprefix}${merged}"
+fi
 
 refname=${refname##refs/heads/}
 
@@ -57,46 +56,38 @@ gitver=$(git --version)
 gitver=${gitver##* }
 
 rev=$(git describe ${merged} 2>/dev/null)
-[[ -z ${rev} ]] && rev=${merged:0:12}
+[ -z ${rev} ] && rev=${merged:0:12}
 
 rawcommit=$(git cat-file commit ${merged})
+author=$(echo "$rawcommit" | sed -n -e '/^author .*<\([^@]*\).*$/s--\1-p')
+logmessage=$(echo "$rawcommit" | sed -e '1,/^$/d' | head -n 1)
+logmessage=$(echo "$logmessage" | sed 's/\&/&amp\;/g; s/</&lt\;/g; s/>/&gt\;/g')
+ts=$(echo "$rawcommit" | sed -n -e '/^author .*> \([0-9]\+\).*$/s--\1-p')
 
-author=$(sed -n -e '/^author .*<\([^@]*\).*$/s--\1-p' \
-	<<< "${rawcommit}")
-
-logmessage=$(sed -e '1,/^$/d' <<< "${rawcommit}")
-${noisy} || logmessage=$(head -n 1 <<< "${logmessage}")
-logmessage=${logmessage//&/&amp;}
-logmessage=${logmessage//</&lt;}
-logmessage=${logmessage//>/&gt;}
-
-ts=$(sed -n -e '/^author .*> \([0-9]\+\).*$/s--\1-p' \
-	<<< "${rawcommit}")
+# <revision>${rev}</revision>
+#
+#      <files>
+#        $(git diff-tree -r --name-only ${merged} |
+#          sed -e '1d' -e 's-.*-<file>&</file>-')
+#      </files>
 
 out="
 <message>
   <generator>
-    <name>CIA Bash client for Git</name>
+    <name>CIA Shell client for Git</name>
     <version>${gitver}</version>
-    <url>http://dev.gentoo.org/~ferdy/stuff/ciabot.bash</url>
+    <url>http://dev.alpinelinux.org/~ncopa/alpine/ciabot.sh</url>
   </generator>
   <source>
     <project>${project}</project>
-    <branch>${refname}</branch>
+    <branch>$repo:${refname}</branch>
   </source>
   <timestamp>${ts}</timestamp>
   <body>
     <commit>
       <author>${author}</author>
-      <revision>${rev}</revision>
-      <files>
-        $(git diff-tree -r --name-only ${merged} |
-          sed -e '1d' -e 's-.*-<file>&</file>-')
-      </files>
-      <log>
-${logmessage}
-      </log>
-      <url>${url//@@sha1@@/${merged}}</url>
+      <log>${logmessage} ${url}</log>
+      <url>${url}</url>
     </commit>
   </body>
 </message>"
