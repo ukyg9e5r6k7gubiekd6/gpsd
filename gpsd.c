@@ -371,7 +371,8 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	return -1;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
-	gpsd_report(LOG_ERROR, "Can't bind to port %s\n", service);
+	gpsd_report(LOG_ERROR, "Can't bind to port %s, %s\n", service, 
+		strerror(errno));
 	if (errno == EADDRINUSE) {
 		gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
 	}
