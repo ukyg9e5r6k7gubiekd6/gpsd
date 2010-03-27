@@ -392,6 +392,7 @@ static void decode(FILE *fpin, FILE *fpout)
     while (packet_get(fileno(fpin), &lexer) > 0) {
 	if (lexer.type == COMMENT_PACKET)
 	    continue;
+#ifdef RTCM104V2_ENABLE
 	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
 	    if (json)
@@ -400,10 +401,13 @@ static void decode(FILE *fpin, FILE *fpout)
 		rtcm2_sager_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
+#endif
+#ifdef RTCM104V3_ENABLE
 	else if (lexer.type == RTCM3_PACKET) {
 	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
 	    rtcm3_dump(&rtcm3, stdout);
 	}
+#endif
 	else if (lexer.type == AIVDM_PACKET) {
 	    if (verbose >=1 )
 		(void)fputs((char *)lexer.outbuffer, stdout);
