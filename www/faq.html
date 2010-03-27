@@ -68,7 +68,6 @@ GPSD Frequently Asked Questions
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
 <li><a href='#nodata'>I get no data from my GPS</a></h1>
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
-<li><a href="#singleshot">Why does my single-shot query fail to return fix data?</a><br/>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
 <li><a href='#kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</a><br/>
@@ -77,6 +76,7 @@ GPSD Frequently Asked Questions
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
 <li><a href='#agps'>Can GPSD work use Assisted GPS data from cellphone networks?</code>?</a><br/>
+<li><a href='#accuracy'>How can I improve fix and PPS time accuracy from my GPS</a><br/>
 <li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
 </ul>
 
@@ -466,6 +466,28 @@ right sort of receiver, AGPS systems are carrier-dependent.  As far as
 we know there aren't any published standards for the format of the
 corrections.  So even if we had the signals, GPSD couldn't know what to
 do with them.</p>
+
+<h1 id='accuracy'>How can I improve fix and PPS time accuracy from my GPS</h1>
+
+<p>Use an antenna, and place the sensor (and/or antenna) properly.</p>
+
+<p>A real antenna can help, especially if you're using PPS as a time
+reference. It should be particularly helpful for reducing timing
+jitter.</p>
+
+<p>One common error is to place the GPS or antenna as high as possible.
+This is wrong, and causes signal bounce from the ground or water,
+which can causes the GPS to mistake its position and the time signal.
+The correct location for a boat GPS antenna is on the gunwale rail or
+pushpit rail, close to the water and as far from the mast as possible
+(to reduce signal bounce from the mast).  If you're in a car, don't
+put the GPS antenna on the roof, put it on the towbar or similar.  If
+you're outside or in a fixed location, put the GPS antenna as far from
+buildings as possible, and on the ground./<p>
+
+<p>If you're driving in a heavily built up area, you're going to get
+signal bounce and reduced accuracy. That's just how the physics
+works.</p>
 
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
