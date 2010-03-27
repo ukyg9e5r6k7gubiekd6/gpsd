@@ -24,23 +24,10 @@ to reverse his refusal to send us an eval unit.
 
 *** Driver issues
 
-**** Geodetic fix computation is numerically unstable: 
+**** gpsctl -b should work on UBX, but does not.
 
-In the bu303-nofix.log test, the expected-correct output has an
-altitude of -6378137m, about earth radius, with lat/lon of 180,0.  On
-NetBSD 5.0/i386, the altitude is -6378253m, on NetBSD 5.0/amd64 it is
--6378253m, and on NetBSD 5.0/sparc64 it is -6378171m.  On Linux/i386,
-it is -6378143m.
-
-Altitude is computed by geoid.c:ecef_to_wgs84fix(), which is a pile of
-trig calculations.  As usual, sin() and cos() aren't guaranteed to be
-cross-architecture stable throughout their range. Note that bu303 logs
-with valid fixes have not been problematic.  It is not clear that
-anyone has hand-validated the expected output.
-
-(amd64 is what NetBSD labels all implementations of AMD's 64-bit
-architecture; the machine in question above is an Intel CPU under
-Xen.)
+Presently this means there's no way to kick a UBX into returning
+binary data.
 
 **** superstar2.chk:
 

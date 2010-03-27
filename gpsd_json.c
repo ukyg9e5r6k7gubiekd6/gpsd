@@ -125,64 +125,76 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 		       replylen-strlen(reply),
 		       "\"ept\":%.3f,",
 		       gpsdata->fix.ept);
-    if (isnan(gpsdata->fix.latitude)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"lat\":%.9f,",
-		       gpsdata->fix.latitude);
-    if (isnan(gpsdata->fix.longitude)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"lon\":%.9f,",
-		       gpsdata->fix.longitude);
-    if (isnan(gpsdata->fix.altitude)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"alt\":%.3f,",
-		       gpsdata->fix.altitude);
-    if (isnan(gpsdata->fix.epx)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"epx\":%.3f,",
-		       gpsdata->fix.epx);
-    if (isnan(gpsdata->fix.epy)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"epy\":%.3f,",
-		       gpsdata->fix.epy);
-    if (isnan(gpsdata->fix.epv)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"epv\":%.3f,",
-		       gpsdata->fix.epv);
-    if (isnan(gpsdata->fix.track)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"track\":%.4f,",
-		       gpsdata->fix.track);
-    if (isnan(gpsdata->fix.speed)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"speed\":%.3f,",
-		       gpsdata->fix.speed);
-    if (isnan(gpsdata->fix.climb)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"climb\":%.3f,",
-		       gpsdata->fix.climb);
-    if (isnan(gpsdata->fix.epd)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"epd\":%.4f,",
-		       gpsdata->fix.epd);
-    if (isnan(gpsdata->fix.eps)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"eps\":%.2f,", gpsdata->fix.eps);
-    if (isnan(gpsdata->fix.epc)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"epc\":%.2f,", gpsdata->fix.epc);
+    /*
+     * Suppressing TPV fields that would be invalid because the fix
+     * quality doesn't support them is nice for cutting down on the
+     * volume of meaningless output, but the real reason to do it is
+     * that we've observed that geodetic fix computation is unstable
+     * in a way that tends to change low-order digits in invalid
+     * fixes. Dumping these tends to cause cross-architecture failures
+     * in the regression tests.  Rgus effect has been seen on SiRF-II
+     * chips, which are quite common.
+     */
+    if (gpsdata->fix.mode >= MODE_2D) {
+	if (isnan(gpsdata->fix.latitude)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"lat\":%.9f,",
+			   gpsdata->fix.latitude);
+	if (isnan(gpsdata->fix.longitude)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"lon\":%.9f,",
+			   gpsdata->fix.longitude);
+	if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"alt\":%.3f,",
+			   gpsdata->fix.altitude);
+	if (isnan(gpsdata->fix.epx)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"epx\":%.3f,",
+			   gpsdata->fix.epx);
+	if (isnan(gpsdata->fix.epy)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"epy\":%.3f,",
+			   gpsdata->fix.epy);
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epv)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"epv\":%.3f,",
+			   gpsdata->fix.epv);
+	if (isnan(gpsdata->fix.track)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"track\":%.4f,",
+			   gpsdata->fix.track);
+	if (isnan(gpsdata->fix.speed)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"speed\":%.3f,",
+			   gpsdata->fix.speed);
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.climb)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"climb\":%.3f,",
+			   gpsdata->fix.climb);
+	if (isnan(gpsdata->fix.epd)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"epd\":%.4f,",
+			   gpsdata->fix.epd);
+	if (isnan(gpsdata->fix.eps)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"eps\":%.2f,", gpsdata->fix.eps);
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epc)==0)
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"epc\":%.2f,", gpsdata->fix.epc);
+    }
     (void)snprintf(reply+strlen(reply),
 		   replylen-strlen(reply),
 		   "\"mode\":%d,", gpsdata->fix.mode);
