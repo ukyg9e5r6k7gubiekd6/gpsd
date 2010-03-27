@@ -241,7 +241,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    libgps_debug_trace((1, 
 				"gps_unpack() segment parse '%s'\n", 
 				*next));
-	    (void)libgps_json_unpack(*next, gpsdata, next);
+	    if (libgps_json_unpack(*next, gpsdata, next) == -1)
+		break;
 #ifdef LIBGPS_DEBUG
 	    if (debuglevel >= 1)
 		libgps_dump_state(gpsdata, time(NULL));
