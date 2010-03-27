@@ -23,7 +23,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>gpsmon</command>  
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-L </arg>
       <arg choice='opt'>-V </arg>
+      <arg>-l <replaceable>logfile</replaceable></arg>
       <arg>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>
 	<group>
@@ -37,7 +39,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
           <arg choice='plain'><replaceable>device</replaceable></arg>
         </group>
       </arg>
-      <arg choice='opt'>-l </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -97,11 +98,16 @@ your local filesystem.</para>
 probably only useful to developers of the GPSD code.  Consult the
 packet-getter source code for relevant values.</para>
 
-<para>The -l option lists a table showing which GPS device types
+<para>The -L option lists a table showing which GPS device types
 <application>gpsmon</application> has built-in support for, and which
 generic commands can be applied to which GPS types, and then
 exits. Note that this does not list type-specific commands associated
 with individual GPS types.</para>
+
+<para>The -l option sets up logging to a specified file to start
+immediately on device open.  This may be useful is, for example,
+you want to capture the startup message from a device that displays
+firmware version information there.</para>
 
 <para>After startup, the top part of the screen reports the contents
 of several especially interesting packet types.  The bottom half of

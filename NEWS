@@ -8,7 +8,9 @@
   better from sporadic cases of false matches to Trimble packet 
   format from a SiRF binary datastream. gps_poll() now returns -1 with
   errno not set when the gpsd socket closes. TPV now refrains
-  from reporting fields the fix quality won't support.
+  from reporting fields the fix quality won't support. gpsmon 
+  option for listing device types is now -L to -l can be used 
+  to enable logging (to stay consistent with the l command).
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
   Fix a packaging error.  The new Python library module was

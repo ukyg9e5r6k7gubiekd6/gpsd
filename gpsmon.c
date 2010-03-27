@@ -414,7 +414,7 @@ int main (int argc, char **argv)
     (void)putenv("TZ=GMT"); // for ctime()
     /*@ +observertrans @*/
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:F:Vhl")) != -1) {
+    while ((option = getopt(argc, argv, "D:F:LVhl:")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = atoi(optarg);
@@ -425,7 +425,7 @@ int main (int argc, char **argv)
 	case 'V':
 	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
 	    exit(0);
-	case 'l':		/* list known device types */
+	case 'L':		/* list known device types */
 	    (void) fputs("General commands available per type. '+' means there are private commands.\n", stdout);
 	    for (active = monitor_objects; *active; active++) {
 		(void)fputs("i l q ^S ^Q", stdout);
@@ -463,6 +463,13 @@ int main (int argc, char **argv)
 		(void)fputc('\n', stdout);
 	    }
 	    exit(0);
+	case 'l':		/* enable logging at startup */
+	    logfile = fopen(optarg, "w");
+	    if (logfile == NULL) {
+		(void)fprintf(stderr, "Couldn't open logfile for writing.\n");
+		exit(1);
+	    }
+	    break;
 	case 'h': case '?': default:
 	    (void)fputs("usage:  gpsmon [-?hVl] [-D debuglevel] [-F controlsock] [server[:port:[device]]]\n", stderr);
 	    exit(1);
