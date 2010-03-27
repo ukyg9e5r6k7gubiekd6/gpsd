@@ -1,0 +1,44 @@
+# 
+# Author: Fulup Ar Foll
+# Date:   26-jun-09
+# Object: make sure GPS dev (ex: /dev/gps-usb) dont change name on sleep/wakeup
+# -----------------------------------------------------------------------------
+#
+# 1) place this file in /etc/udev/rules.d
+# 2) use default config or update with your own vendor:product ID (use "lsusb" to find them)
+# 3) reload udev with "/etc/init.d/udev reload"
+#
+# Device alias can be:
+#  (default) - by path  ==> SYMLINK="serial-$env(ID_PATH)"   /dev/gps-pci-0000:00:1d.1-usb-0:1:1.0
+#            - static   ==> SYMLINK="gps-usb"                /dev/gps-usb
+#            - custom   ==> RUN+="/usr/local/bin/myscript"   /dev/any-thingk-you-want
+#
+# DEFAULT CONFIG: you can use this file "as it is", you should then see a /dev/gps-pci* 
+# that will be created for any of the serial/usb you hot-plug. The name is fixed but
+# depend on the USB port you use. As a result the name is fixed until you keep the same socket.
+#
+# -----------------------------------------------------------------------
+# check "man 7 udev" for forther syntax. (search for %n)
+# -----------------------------------------------------------------------
+
+# Examples
+# -----------------------------------------------------------------------
+# Your own script:     SUBSYSTEM=="tty", SYSFS{idVendor}=="xxxx", SYSFS{idProduct}=="yyyy", RUN+="/usr/local/bin/myscript"
+# Static device name:  SUBSYSTEM=="tty", SYSFS{idVendor}=="xxxx", SYSFS{idProduct}=="yyyy", SYMLINK="gps-usb"
+# Path dependent name: SUBSYSTEM=="tty", SYSFS{idVendor}=="xxxx", SYSFS{idProduct}=="yyyy", SYMLINK="gps-$env{ID_PATH}"
+# In first case you do what ever you want, script received the information about context in environement variables
+# In second case you name is fixe (ex: /dev/gps-usb) this is working if your usb/serial ID(vendor:product) is unique
+# In third case your device name depend on the port it is plugged in.
+
+
+# ========================================================================================
+#                          update YOUR CONFIG here after
+# ========================================================================================
+
+# Default rules is applied for any unspecified vendor:product devices
+# -----------------------------------------------------------------------------------------
+SUBSYSTEM=="tty", SYSFS{idVendor}=="?*", SYSFS{idProduct}=="?*", SYMLINK="gps-$env{ID_PATH}"
+
+# Well known device may get a static device name 
+# -----------------------------------------------------------------------
+SUBSYSTEM=="tty", SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK="gps-usb"

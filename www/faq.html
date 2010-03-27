@@ -77,6 +77,7 @@ GPSD Frequently Asked Questions
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
 <li><a href='#agps'>Can GPSD work use Assisted GPS data from cellphone networks?</code>?</a><br/>
 <li><a href='#accuracy'>How can I improve fix and PPS time accuracy from my GPS</a><br/>
+<li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
 <li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
 </ul>
 
@@ -488,6 +489,29 @@ buildings as possible, and on the ground./<p>
 <p>If you're driving in a heavily built up area, you're going to get
 signal bounce and reduced accuracy. That's just how the physics
 works.</p>
+
+<h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
+
+<p>This is not a GPSD problem, but a result of the way Linux handles
+USB serial devices.  In a default Linux configuration, USB serial
+device name do not depend on which physical port you plug the
+USB/serial adaptor, but on what order you plug devices in: 1st device
+gets /dev/ttyUSB0, 2nd gets /dev/ttyUSB1, etc....
+
+<p>This collides with what happens during a suspend/resume. If you
+suspensd while <tt>gpsd</tt> has a device active, it will hold the
+device open while your laptop is asleep - but, meanwhile, the suspend
+logic is shutting down hotpluggable devices to be recreated at
+resume time. On resume, Linux will see that the old device is open
+<em>and recreate one with a different name</em>, leaving <tt>gpsd</tt>
+kooking at a bad file descriptor.</p>
+
+<p>There is a solution to this problem: create a stable gps-usb device
+that is actually a symlink which gets modified by hotplug events, and
+give <tt>gpsd</tt> that device when you invoke it.  You'll need <a
+href="70-persistent-usb-gps.rules">these replacement udev rules</a>,
+and the experience required to patch them so the vendor ID in the last
+one matches your GPS hardware (look in your lsusb output).
 
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
