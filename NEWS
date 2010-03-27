@@ -6,8 +6,9 @@
   the device array.  Change the libgps default from old protocol to 
   JSON. Add a close() method to the C++ binding. Try to recover
   better from sporadic cases of false matches to Trimble packet 
-  format from a SiRF binary datastream. gps_poll() now retyurns -1 with
-  errno not set when the gpsd socket closes.
+  format from a SiRF binary datastream. gps_poll() now returns -1 with
+  errno not set when the gpsd socket closes. TPV now refrains
+  from reporting fields the fix quality won't support.
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
   Fix a packaging error.  The new Python library module was
