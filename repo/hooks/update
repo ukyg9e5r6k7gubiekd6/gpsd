@@ -133,7 +133,7 @@ case "$refname","$newrev_type" in
 esac
 
 for merged in $(git rev-list ${oldrev}..${newrev} | tac) ; do
-      /gitroot/gpsd/hooks/ciabot.sh ${refname} ${merged}
+      /gitroot/gpsd/hooks/ciabot.py ${refname} ${merged}
 done
 
 
