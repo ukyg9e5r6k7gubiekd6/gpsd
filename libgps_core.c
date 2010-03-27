@@ -645,12 +645,25 @@ int gps_poll(struct gps_data_t *gpsdata)
 			   priv->buffer + priv->waiting,
 			   sizeof(priv->buffer)-priv->waiting,
 			   0);
+	/* if we just received data from the socket, it's in the buffer */ 
 	if (status > -1)
 	    priv->waiting += status;
-	else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
-	    return 0;
-	else if (priv->waiting == 0)
-	    return status;
+	/* buffer is empty - implies no data was read */
+	if (priv->waiting == 0) {
+	    /* 
+	     * If we received 0 bytes, other side of socket is closing.
+	     * Return -1 as end-of-data indication.
+	     */
+	    if (status == 0)
+		return -1;
+	    /* count transient errors as success, we'll retry later */
+	    else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+		return 0;
+	    /* hard error return of -1, pass it along */
+	    else
+		return -1;
+	}
+	/* there's buffered data waiting to be returned */ 
 	for (eol = priv->buffer; *eol != '\n' && eol < priv->buffer+priv->waiting; eol++)
 	    continue;
 	if (*eol != '\n')

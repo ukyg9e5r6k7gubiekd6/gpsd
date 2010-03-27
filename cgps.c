@@ -134,6 +134,11 @@ static int display_sats;
 static bool compass_flag=false;
 #endif /* TRUENORTH */
 
+/* pseudo-signals indicating reason for termination */
+#define CGPS_QUIT	0	/* voluntary yterminastion */
+#define GPS_GONE	-1	/* GPS device went away */
+#define GPS_ERROR	-2	/* low-level failure in GPS read */
+
 /* Convert true heading to magnetic.  Taken from the Aviation
    Formulary v1.43.  Valid to within two degrees within the
    continiental USA except for the following airports: MO49 MO86 MO50
@@ -193,7 +198,7 @@ static float true2magnetic(double lat, double lon, double heading)
 }
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
-static void die(int sig UNUSED)
+static void die(int sig)
 {
     /* Ignore signals. */
     (void)signal(SIGINT,SIG_IGN);
@@ -210,6 +215,18 @@ static void die(int sig UNUSED)
 
     /* We're done talking to gpsd. */
     (void)gps_close(gpsdata);
+
+    switch (sig) {
+    case CGPS_QUIT:
+	break;
+    case GPS_GONE:
+	(void)fprintf(stderr, "cgps: GPS hung up.\n");
+	break;
+    case GPS_ERROR:
+	(void)fprintf(stderr, "cgps: GPS read returned error\n");
+    default:
+	(void)fprintf(stderr, "cgps: caught signal %d\n", sig);
+    }
 
     /* Bye! */
     exit(0);
@@ -830,10 +847,10 @@ int main(int argc, char *argv[])
 	    fprintf( stderr, "cgps: socket error 3\n");
 	    exit(2);
 	} else if( data ) {
-	    /* code that calls gps_poll(gpsdata) */
+	    errno = 0;
 	    if (gps_poll(gpsdata) != 0) {
 		fprintf( stderr, "cgps: socket error 4\n");
-		die(1);
+		die(errno == 0 ? GPS_GONE : GPS_ERROR);
 	    }
 	}
 
@@ -843,7 +860,7 @@ int main(int argc, char *argv[])
 	switch ( c ) {
 	    /* Quit */
 	case 'q':
-	    die(0);
+	    die(CGPS_QUIT);
 	    break;
 
 	    /* Toggle spewage of raw gpsd data. */
