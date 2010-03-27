@@ -51,6 +51,9 @@ urlprefix="http://${host}/cgi-bin/cgit.cgi/${repo}/commit/?id="
 # You probably will not need to change the following:
 #
 
+# Identify the script. Should change only wghen the script itself  
+generator="http://www.catb.org/~esr/ciabot.py"
+
 # Addresses for the e-mail
 from="${LOGNAME}@${host}"
 to="cia@cia.vc"
@@ -107,7 +110,7 @@ out="
   <generator>
     <name>CIA Shell client for Git</name>
     <version>${gitver}</version>
-    <url>http://dev.alpinelinux.org/~ncopa/alpine/ciabot.sh</url>
+    <url>${generator}</url>
   </generator>
   <source>
     <project>${project}</project>
