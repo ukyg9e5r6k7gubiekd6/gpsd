@@ -493,9 +493,12 @@ works.</p>
 <p>If you're using <tt>gpsd</tt> with software that plots your
 position on a map, and you seem to be getting latitude/longitude that
 is at a fixed offset from reality, it is possible the base datum of
-the map is something other than the WGS84 GPS uses. An important case
-of this is North American Geodetic Survey maps based on NAD27; you may
-see a displacement of as much as 100-150m with respect to WGS84.</p>
+the map is something other than the WGS84 GPS uses. A
+frequently-occuring case of this is older maps in the United States
+based on NAD27 (e.g., USGS topo maps); you may see a displacement of
+as much as 100-150m with respect to WGS84.  While modern datums (e.g.,
+NAD83) are almost all very close to WGS84, typically each area of
+world has an older datum that only agrees at the 100m level.</p>
 
 <h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
 
