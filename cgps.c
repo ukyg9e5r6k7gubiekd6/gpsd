@@ -224,6 +224,7 @@ static void die(int sig)
 	break;
     case GPS_ERROR:
 	(void)fprintf(stderr, "cgps: GPS read returned error\n");
+	break;
     default:
 	(void)fprintf(stderr, "cgps: caught signal %d\n", sig);
     }
