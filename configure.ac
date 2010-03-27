@@ -928,6 +928,20 @@ fi
 
 AM_CONDITIONAL([LIBGPSMM_ENABLE], [test x"$ac_libgpsmm" = x"yes"])
 
+AC_ARG_ENABLE(ipv6,
+  AC_HELP_STRING([--disable-ipv6],
+		 [don't build IPv6 support]),
+  [ac_ipv6=$enableval], [ac_ipv6=$ISCXX])
+AC_MSG_CHECKING([for IPv6 support])
+if test x"$ac_ipv6" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([IPV6_ENABLE], 1, [IPv6 support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL([IPV6_ENABLE], [test x"$ac_ipv6" = x"yes"])
+
 dnl Test for XSLT processor (xsltproc or xmlto)
 AC_CHECK_PROG(WITH_XSLTPROC,[xsltproc],[yes],[no])
 MANGENERATOR=
@@ -1026,6 +1040,7 @@ echo "Fixed port speed        : $ac_baud"
 echo "Priv-drop user          : $ac_user"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
+echo "Enable IPv6 support     : $ac_ipv6"
 echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"

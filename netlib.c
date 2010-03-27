@@ -150,12 +150,12 @@ char *netlib_sock2ip(int fd)
 	    r = !inet_ntop(fsin.sa_in.sin_family, &(fsin.sa_in.sin_addr),
 		    ip, sizeof(ip));
 	    break;
-
+#ifdef IPV6_ENABLE
 	case AF_INET6:
 	    r = !inet_ntop(fsin.sa_in6.sin6_family, &(fsin.sa_in6.sin6_addr),
 		    ip, sizeof(ip));
 	    break;
-
+#endif
 	default:
 	    gpsd_report(LOG_ERROR, "Unhandled address family %d in %s\n",
 			    fsin.sa.sa_family, __FUNCTION__);
