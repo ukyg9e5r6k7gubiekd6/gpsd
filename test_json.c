@@ -273,8 +273,8 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     assert_case(7, status);
     assert_string("release", gpsdata.version.release, "2.40dev");
     assert_string("rev", gpsdata.version.rev, "dummy-revision");
-    assert_integer("proto_major", gpsdata.version.proto_major, GPSD_PROTO_MAJOR_VERSION);
-    assert_integer("proto_minor", gpsdata.version.proto_minor, GPSD_PROTO_MINOR_VERSION);
+    assert_integer("proto_major", gpsdata.version.proto_major, 3);
+    assert_integer("proto_minor", gpsdata.version.proto_minor, 1);
 
     status = json_read_object(json_str8, json_attrs_8, NULL);
     assert_case(8, status);
