@@ -1,6 +1,7 @@
-#!/bin/bash 
+#!/bin/sh 
 #
-# Upload gpsd docs
+# Upload gpsd website contents.
+# Plesase do not introduce bashims into this script.
 #
 # No CGI copy yet, hosting site won't let us send mail
 #
@@ -15,7 +16,7 @@ then
 else
     (cd performance; xmlto xhtml-nochunks performance.xml)
     scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt \
-	performance/{*.html,*.txt,*.png} \
+	performance/*.html performance/*.txt performance/*.png \
 	../TODO ../NEWS \
 	$webdir
     #scp gps_report.cgi $cgidir
