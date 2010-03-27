@@ -71,7 +71,7 @@ GPSD Frequently Asked Questions
 <li><a href="#singleshot">Why does my single-shot query fail to return fix data?</a><br/>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
-<li><a href='#kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</a><br/>
+<li><a href='#kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</a><br/>
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a><br/>
 <li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a><br/>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
@@ -350,16 +350,9 @@ similar solution.</p>
 <p>This is a gpsdrive bug, as you can verify by running
 <code>xgps</code> alongside it.</p>
 
-<h1 id='kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</h1>
+<h1 id='kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</h1>
 
-<p>Kismet's interface was designed for a much older version of
-<code>gpsd</code>, and tends to fight with the autobauding code in the
-newer versions.  The Kismet maintainer has promised to fix this.
-Until he does, the workaround is to start <code>gpsd</code> and make
-sure it has synced up to a GPS before running Kismet. You can <a
-href='start-kismet'>download a shellscript</a> that does this.</p>
-
-<p>Note that your Kismet configuration has to include the setting
+<p>Your Kismet configuration has to include the setting
 "gps=true"  This is s a surprisingly easy detail to forget.</p>
 
 <h1 id='bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</h1>

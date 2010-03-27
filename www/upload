@@ -15,7 +15,7 @@ then
     for f in $*; do scp $f $webdir/$f; done
 else
     (cd performance; xmlto xhtml-nochunks performance.xml)
-    scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt \
+    scp *.html *.png *.pdf *.gif *.css *.js *.txt \
 	performance/*.html performance/*.txt performance/*.png \
 	../TODO ../NEWS \
 	$webdir
