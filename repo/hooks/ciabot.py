@@ -63,7 +63,7 @@ tinyifier = "http://tinyurl.com/api-create.php?url="
 xml = '''\
 <message>
   <generator>
-    <name>CIA Shell client for Git</name>
+    <name>CIA Python client for Git</name>
     <version>%(gitver)s</version>
     <url>%(generator)s</url>
   </generator>
