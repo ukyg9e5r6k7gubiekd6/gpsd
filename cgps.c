@@ -598,8 +598,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     /* Fill in receiver type. */
     if (gpsdata->set & (DEVICE_SET | DEVICELIST_SET)) {
+#ifdef CLIENTDEBUG_ENABLE
 	if (debug > 0)
 	    (void)fprintf(stderr, "Device ID or list set.\n");
+#endif
 	if (gpsdata->set & DEVICE_SET) {
 	    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
 	} else if (gpsdata->devices.ndevices == 1) {
@@ -729,12 +731,12 @@ int main(int argc, char *argv[])
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "hVl:smuD:")) != -1) {
 	switch (option) {
+#ifdef CLIENTDEBUG_ENABLE
 	case 'D':
 	    debug = atoi(optarg);
-#ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debug, stderr);
-#endif /* CLIENTDEBUG_ENABLE */
 	    break;
+#endif /* CLIENTDEBUG_ENABLE */
 	case 'm':
 	    magnetic_flag=true;
 	    break;

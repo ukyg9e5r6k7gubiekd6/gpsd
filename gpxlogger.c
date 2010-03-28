@@ -352,12 +352,12 @@ int main (int argc, char** argv)
     progname = argv[0];
     while ((ch = getopt(argc, argv, "D:hi:V")) != -1) {
 	switch (ch) {
+#ifdef CLIENTDEBUG_ENABLE
 	case 'D':
 	    debug = atoi(optarg);
-#ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debug, stdout);
-#endif /* CLIENTDEBUG_ENABLE */
 	    break;
+#endif /* CLIENTDEBUG_ENABLE */
 	case 'i':		/* set polling interfal */
 	    timeout = (unsigned int)atoi(optarg);
 	    if (timeout < 1)
