@@ -926,7 +926,6 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 }
 #endif /* ALLOW_CONTROLSEND */
 
-#ifdef ALLOW_RECONFIGURE
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
     /* FIXME: Resending this might not be needed on reactivation */
@@ -1005,6 +1004,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool tsip_speed_switch(struct gps_device_t *session,
 			      speed_t speed,
 			      char parity, int stopbits)

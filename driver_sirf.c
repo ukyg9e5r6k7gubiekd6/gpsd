@@ -1141,7 +1141,6 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_RECONFIGURE
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_identified || event == event_reactivate) {
@@ -1279,6 +1278,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool sirfbin_speed(struct gps_device_t *session, 
 			  speed_t speed, char parity, int stopbits)
 {

@@ -386,7 +386,6 @@ static ssize_t italk_control_send(struct gps_device_t *session,
 /*@ -charint +usedef +compdef @*/
 #endif /* ALLOW_CONTROLSEND */
 
-#ifdef ALLOW_RECONFIGURE
 static bool italk_set_mode(struct gps_device_t *session UNUSED, 
 			   speed_t speed UNUSED, 
 			   char parity UNUSED, int stopbits UNUSED, 
@@ -405,6 +404,7 @@ static bool italk_set_mode(struct gps_device_t *session UNUSED,
     return false;	/* until this actually works */
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool italk_speed(struct gps_device_t *session, 
 			speed_t speed, char parity, int stopbits)
 {
@@ -421,6 +421,7 @@ static void italk_mode(struct gps_device_t *session,  int mode)
 			     false);
     }
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void italk_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -435,7 +436,6 @@ static void italk_event_hook(struct gps_device_t *session, event_t event)
 			     (int)session->gpsdata.dev.stopbits,
 			     true);
 }
-#endif /* ALLOW_RECONFIGURE */
 
 #ifdef __not_yet__
 static void italk_ping(struct gps_device_t *session)

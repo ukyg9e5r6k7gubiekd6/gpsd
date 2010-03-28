@@ -972,6 +972,7 @@ static void handle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
+#ifdef ALLOW_RECONFIGURE
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf+1, &devconf, &end);
 	    if (end == NULL)
@@ -1062,6 +1063,10 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	    /*@+branchstate@*/
+#else /* ALLOW_RECONFIGURE */
+	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			   "{\"class\":\"ERROR\",\"message\":\"Device configuration support not compiled.\"}\r\n");
+#endif /* ALLOW_RECONFIGURE */
 	}
 	/* dump a response for each selected channel */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)

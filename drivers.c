@@ -219,10 +219,11 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t sirf_binary;
 #endif
+
+#ifdef ALLOW_RECONFIGURE
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_BINARY) {
@@ -276,7 +277,7 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
-
+#endif /* ALLOW_RECONFIGURE */
 
 static void garmin_nmea_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -327,7 +328,6 @@ static void garmin_nmea_event_hook(struct gps_device_t *session, event_t event)
 	}
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t garmin = {
     .type_name      = "Garmin NMEA",	/* full name of type */
@@ -358,7 +358,6 @@ const struct gps_type_t garmin = {
  *
  **************************************************************************/
 
-#ifdef ALLOW_RECONFIGURE
 static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup)
@@ -383,7 +382,6 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session, "$PASHS,NME,ZDA,A,ON");
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
@@ -414,7 +412,6 @@ const struct gps_type_t ashtech = {
  *
  **************************************************************************/
 
-#ifdef ALLOW_RECONFIGURE
 static void fv18_event_hook(struct gps_device_t *session, event_t event)
 {
     /*
@@ -427,7 +424,6 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session,
 		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
 }
-#endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
@@ -511,7 +507,6 @@ const struct gps_type_t gpsclock = {
  * and was replaced by the Zodiac EarthMate.
  */
 
-#ifdef ALLOW_RECONFIGURE
 static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
@@ -521,7 +516,6 @@ static void tripmate_event_hook(struct gps_device_t *session, event_t event)
     if (event == event_identified || event == event_reactivate)
 	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
@@ -978,7 +972,6 @@ gps_mask_t processMTK3301(int c UNUSED, char *field[], struct gps_device_t *sess
     return mask;
 }
 
-#ifdef ALLOW_RECONFIGURE
 static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 {
 /*
@@ -1009,6 +1002,8 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session,"$PMTK313,1"); /* SBAS enable */
     }
 }
+
+#ifdef ALLOW_RECONFIGURE
 static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 {
     char buf[78];

@@ -329,10 +329,12 @@ void json_device_dump(const struct gps_device_t *device,
 			   device->gpsdata.dev.parity,
 			   device->gpsdata.dev.stopbits,
 			   device->gpsdata.dev.cycle);
+#ifdef ALLOW_RECONFIGURE
 	    if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
 		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
 			       ",\"mincycle\":%2.2f",
 			       device->device_type->min_cycle);
+#endif /* ALLOW_RECONFIGURE */
 	}
     }
     if (reply[strlen(reply)-1] == ',')

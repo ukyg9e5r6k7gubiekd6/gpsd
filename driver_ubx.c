@@ -591,7 +591,6 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t 
 }
 #endif /* ALLOW_CONTROLSEND */
 
-#ifdef ALLOW_RECONFIGURE
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_identified || event == event_reactivate) {
@@ -650,6 +649,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 {
     int i;
