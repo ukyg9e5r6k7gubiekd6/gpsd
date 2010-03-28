@@ -63,7 +63,7 @@ urlprefix="http://${host}/cgi-bin/cgit.cgi/${repo}/commit/?id="
 generator="http://www.catb.org/~esr/ciabot.sh"
 
 # Addresses for the e-mail
-from="${LOGNAME}@${host}"
+from="CIABOT-NOREPLY@${host}"
 to="cia@cia.vc"
 
 # SMTP client to use - may need to edit the absolute pathname for your system
@@ -103,8 +103,9 @@ gitver=${gitver##* }
 rev=$(git describe ${merged} 2>/dev/null)
 # ${merged:0:12} was the only bashism left in the 2008 version of this
 # script, according to checkbashisms.  Replace it with ${merged} here
-# because it was just a fallback anyway, and it's worth taking accepting
-# a longer fallback for faster execution and removing the bash deoendency.
+# because it was just a fallback anyway, and it's worth accepting a
+# longer fallback for faster execution and removing the bash
+# dependency.
 [ -z ${rev} ] && rev=${merged}
 
 rawcommit=$(git cat-file commit ${merged})
