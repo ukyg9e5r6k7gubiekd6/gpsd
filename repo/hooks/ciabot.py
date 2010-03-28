@@ -91,9 +91,6 @@ xml = '''\
 # No user-serviceable parts below this line:
 #
 
-def do(command):
-    return commands.getstatusoutput(command)[1]
-
 # Addresses for the e-mail. The from address is a dummy, since CIA
 # will never reply to this mail.
 fromaddr = "CIABOT-NOREPLY@" + host
@@ -103,16 +100,11 @@ toaddr = "cia@cia.vc"
 # Should only change when the script itself has a new home
 generator="http://www.catb.org/~esr/ciabot.sh"
 
-# Git version number.
-gitver = do("git --version").split()[0]
-
-# Add the git private command directory to the command path.
-os.environ["PATH"] += ":" + do("git --exec-path")
-
-urlprefix = urlprefix % globals()
+def do(command):
+    return commands.getstatusoutput(command)[1]
 
 def report(refname, merged):
-    "Report a commit notification to CIA"
+    "Generare a commit notification to be reported to CIA"
 
     # Try to tinyfy a reference to a web view for this commit.
     try:
@@ -159,12 +151,17 @@ Subject: DeliverXML
 
 %(out)s''' % locals()
 
-    if mailit:
-        server.sendmail(fromaddr, [toaddr], message)
-    else:
-        print message
+    return message
 
 if __name__ == "__main__":
+    # We''ll need the git version number.
+    gitver = do("git --version").split()[0]
+
+    # Add the git private command directory to the command path.
+    os.environ["PATH"] += ":" + do("git --exec-path")
+
+    urlprefix = urlprefix % globals()
+
     # Call this script with -n to dump the notification mail to stdout
     mailit = True
     if sys.argv[1] == '-n':
@@ -185,7 +182,11 @@ if __name__ == "__main__":
         server = smtplib.SMTP('localhost')
 
     for merged in merges:
-        report(refname, merged)
+        message = report(refname, merged)
+        if mailit:
+            server.sendmail(fromaddr, [toaddr], message)
+        else:
+            print message
 
     if mailit:
         server.quit()
