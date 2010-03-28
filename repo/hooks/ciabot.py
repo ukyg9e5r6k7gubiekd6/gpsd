@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Distributed under the terms of the GNU General Public License v2
 # Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
+# Distributed under BSD terms.
 #
 # This script contains porcelain and porcelain byproducts.
 # It's Python because the Python standard libraries avoid portability/security
@@ -8,23 +8,20 @@
 # be compatible back to Python 2.1.5
 #
 # It is meant to be run either in a post-commit hook or in an update
-# hook:
+# hook.
 #
-# post-commit: Run it without arguments. It will query for current HEAD and
+# In post-commit, run it without arguments. It will query for current HEAD and
 # the latest commit ID to get the information it needs.
 #
-# update: Call it with a refname followed by a list of commits.
+# In update, call it with a refname followed by a list of commits.
 #
-#       refname=$1
-#       oldhead=$2
-#       newhead=$3
 #       ciabot.py ${refname} $(git rev-list ${oldhead}..${newhead} | tac)
 #
 # Note: this script uses mail, not XML-RPC, in order to avoid stalling
-# until timeout when the XML-RPC server is down. 
+# until timeout when the CIA XML-RPC server is down. 
 #
 # Call with -n to see the notification mail dumped to stdout rather
-# than shipped to CIA.
+# than shipped to CIA. This may be useful for debugging purposes.
 #
 import os, sys, commands, socket, urllib
 #
