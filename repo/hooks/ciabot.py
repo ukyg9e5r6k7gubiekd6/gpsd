@@ -137,7 +137,9 @@ def report(refname, merged):
             break
     (author, ts) = headers["author"].split(">")
     author = author.replace("<", "").split("@")[0].split()[-1]
-    ts = ts.strip()
+
+    # This ignores the timezone.  Not clear what to do with it...
+    ts = ts.strip().split()[0]
 
     context = locals()
     context.update(globals())
