@@ -2,6 +2,8 @@
 # Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
 # Distributed under BSD terms.
 #
+# Thiu is version 1.1 of ciabot.py
+#
 # This script contains porcelain and porcelain byproducts.
 # It's Python because the Python standard libraries avoid portability/security
 # issues raised by callouts in the ancestral Perl and sh scripts.  It should

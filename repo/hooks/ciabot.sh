@@ -4,6 +4,13 @@
 # Copyright (c) 2008 Natanael Copa <natanael.copa@gmail.com>
 # Copyright (c) 2010 Eric S. Raymond <esr@thyrsus.com>
 #
+# This is version 3.1 of ciabot.sh.  Versions 1 and 2 were shipped
+# in 2006 and 2008 and are not version-stamped.
+#
+# Note: This script should be considered obsolete.  
+# There is a faster, better-documented rewrite in Python: find it as ciabot.py
+# Use this only if your hosting site forbids Python hooks.
+#
 # Originally based on Git ciabot.pl by Petr Baudis.
 # This script contains porcelain and porcelain byproducts.
 #
@@ -52,7 +59,7 @@ urlprefix="http://${host}/cgi-bin/cgit.cgi/${repo}/commit/?id="
 #
 
 # Identify the script. Should change only wghen the script itself  
-generator="http://www.catb.org/~esr/ciabot.py"
+generator="http://www.catb.org/~esr/ciabot.sh"
 
 # Addresses for the e-mail
 from="${LOGNAME}@${host}"
