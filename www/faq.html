@@ -525,14 +525,17 @@ observing something like a 1 ms high sawtooth in the time-reports.</p>
 
 <p>For accurate time reference, use a PPS line over RS232 triggering an
 interrupt. Serial bus interrupt latencies on modern hardware on the
-order of 10 microseconds, roughly a hundred-fold impovement over
+order of 10 microseconds, roughly a hundred-fold improvement over
 USB.</p>
 
-<p>Don't confuse PPS with conventianal, non-PPS data transport over RS232;
-the latency on that is much higher. At one character per ten bits
-(counting framing at stopbits) a 9600-bps serial link introduces
-about a millisecond of latency <em>per character</em>; both USB and
-RS232 will incur that overhead.</p>
+<p>Don't confuse PPS with conventional, non-PPS data transport over
+RS232; the latency on that is much higher. At one character per ten
+bits (counting framing at stopbits) a 9600-bps serial link introduces
+about a millisecond of latency <em>per character</em>; furthermore,
+the Linux kernel will normally delay delivery of characters to your
+application until the next timer tick, about every 4 milliseconds in
+modern kernels. Both USB and RS232 will incur that approximately
+5ms-per-char latency overhead.</p>
 
 <h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
 
