@@ -796,8 +796,7 @@ static int oceanserver_send(int fd, const char *fmt, ... )
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
-static void oceanserver_configure(struct gps_device_t *session, event_t event)
+static void oceanserver_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_configure && session->packet.counter == 0) {
 	/* report in NMEA format */
@@ -806,7 +805,6 @@ static void oceanserver_configure(struct gps_device_t *session, event_t event)
 	(void)oceanserver_send(session->gpsdata.gps_fd, "X2047");
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
