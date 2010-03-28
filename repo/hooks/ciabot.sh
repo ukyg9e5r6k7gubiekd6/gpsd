@@ -58,7 +58,8 @@ urlprefix="http://${host}/cgi-bin/cgit.cgi/${repo}/commit/?id="
 # You probably will not need to change the following:
 #
 
-# Identify the script. Should change only wghen the script itself  
+# Identify the script. Should change only when the script itself 
+# gets a new home and maintainer. 
 generator="http://www.catb.org/~esr/ciabot.sh"
 
 # Addresses for the e-mail

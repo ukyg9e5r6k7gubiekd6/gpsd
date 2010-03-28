@@ -99,8 +99,8 @@ fromaddr = "CIABOT-NOREPLY@" + host
 toaddr = "cia@cia.vc"
 
 # Identify the generator script.
-# Should only change when the script itself has a new home
-generator="http://www.catb.org/~esr/ciabot.sh"
+# Should only change when the script itself gets a new home and maintainer.
+generator="http://www.catb.org/~esr/ciabot.py"
 
 def do(command):
     return commands.getstatusoutput(command)[1]
