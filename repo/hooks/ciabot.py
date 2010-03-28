@@ -23,7 +23,7 @@
 # Call with -n to see the notification mail dumped to stdout rather
 # than shipped to CIA. This may be useful for debugging purposes.
 #
-import os, sys, commands, socket, urllib
+
 #
 # The project as known to CIA. You will want to change this:
 #
@@ -32,6 +32,7 @@ project="GPSD"
 #
 # You may not need to change these:
 #
+import os, sys, commands, socket, urllib
 
 # Name of the repository.
 # You can hardwire this to make the script faster.
@@ -54,7 +55,7 @@ urlprefix="http://%(host)s/cgi-bin/cgit.cgi/%(repo)s/commit/?id="
 tinyifier = "http://tinyurl.com/api-create.php?url="
 
 # The template used to generate the XML messages to CIA.  You can make
-# visible changes to the IRC-bot notfication lines by hacking this.
+# visible changes to the IRC-bot notification lines by hacking this.
 # The default will produce a notfication line that looks like this:
 #
 # ${project}: ${author} ${repo}:${branch} * ${rev} ${files}: ${logmsg} ${url}
