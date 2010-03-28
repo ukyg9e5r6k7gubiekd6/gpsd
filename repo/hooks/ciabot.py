@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     # Call this script with -n to dump the notification mail to stdout
     mailit = True
-    if sys.argv[1] == '-n':
+    if len(sys.argv) > 1 and sys.argv[1] == '-n':
         mailit = False
         sys.argv.pop(1)
 
