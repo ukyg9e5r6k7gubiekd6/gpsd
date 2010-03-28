@@ -93,7 +93,7 @@ def report(refname, merged):
     except:
         url = urlprefix + merged
 
-    refname = os.path.basename(refname)
+    shortref = os.path.basename(refname)
 
     # Compute a shortnane for the revision
     rev = do("git describe ${merged} 2>/dev/null") or merged[:12]
@@ -130,7 +130,7 @@ def report(refname, merged):
   </generator>
   <source>
     <project>%(project)s</project>
-    <branch>%(repo)s:%(refname)s</branch>
+    <branch>%(repo)s:%(shortref)s</branch>
   </source>
   <timestamp>%(ts)s</timestamp>
   <body>
@@ -162,8 +162,6 @@ Subject: DeliverXML
         print message
 
 if __name__ == "__main__":
-    sys.stderr.write("ciabot.py version 2.\n")
-
     # Call this script with -n to dump the notification mail to stdout
     if sys.argv[1] == '-n':
         mailit = False
