@@ -106,12 +106,8 @@ generator="http://www.catb.org/~esr/ciabot.sh"
 # Git version number.
 gitver = do("git --version").split()[0]
 
-# Should add to the command path both places sendmail is likely to lurk, 
-# and the git private command directory.
-os.environ["PATH"] += ":/usr/sbin/:" + do("git --exec-path")
-
-# Option flags
-mailit = True 
+# Add the git private command directory to the command path.
+os.environ["PATH"] += ":" + do("git --exec-path")
 
 urlprefix = urlprefix % globals()
 
@@ -170,6 +166,7 @@ Subject: DeliverXML
 
 if __name__ == "__main__":
     # Call this script with -n to dump the notification mail to stdout
+    mailit = True
     if sys.argv[1] == '-n':
         mailit = False
         sys.argv.pop(1)
