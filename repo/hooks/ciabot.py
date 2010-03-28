@@ -5,22 +5,20 @@
 # This script contains porcelain and porcelain byproducts.
 # It's Python because the Python standard libraries avoid portability/security
 # issues raised by callouts in the ancestral Perl and sh scripts.  It should
-# be compatible back to Python 2.1.5.
+# be compatible back to Python 2.1.5
 #
-# It is meant to be run either on a post-commit hook or in an update
+# It is meant to be run either in a post-commit hook or in an update
 # hook:
 #
-# post-commit: It queries for current HEAD and latest commit ID to get the
-# information it needs.
+# post-commit: Run it without arguments. It will query for current HEAD and
+# the latest commit ID to get the information it needs.
 #
-# update: You have to call it once per merged commit:
+# update: Call it with a refname followed by a list of commits.
 #
 #       refname=$1
 #       oldhead=$2
 #       newhead=$3
-#       for merged in $(git rev-list ${oldhead}..${newhead} | tac) ; do
-#               /path/to/ciabot.py ${refname} ${merged}
-#       done
+#       ciabot.py ${refname} $(git rev-list ${oldhead}..${newhead} | tac)
 #
 # Note: this script uses mail, not XML-RPC, in order to avoid stalling
 # until timeout when the XML-RPC server is down. 
@@ -167,20 +165,21 @@ if __name__ == "__main__":
         mailit = False
         sys.argv.pop(1)
 
-    # In post-commit mode, the script wants a reference to head
-    # followed by the commit ID to report about.
+    # The script wants a reference to head followed by the list of
+    # commit ID to report about.
     if len(sys.argv) == 1:
         refname = do("git symbolic-ref HEAD 2>/dev/null")
-        merged = do("git rev-parse HEAD")
+        merges = [do("git rev-parse HEAD")]
     else:
         refname = sys.argv[1]
-        merged = sys.argv[2]
+        merges = sys.argv[2:]
 
     if mailit:
         import smtplib
         server = smtplib.SMTP('localhost')
 
-    report(refname, merged)
+    for merged in merges:
+        report(refname, merged)
 
     if mailit:
         server.quit()
