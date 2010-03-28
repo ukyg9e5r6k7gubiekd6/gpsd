@@ -43,15 +43,48 @@ host = socket.getfqdn()
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
-# through gitweb or something similar. The default will probably
+# through gitweb or something similar. The defaults will probably
 # work if you have a typical gitweb/cgit setup.
 #
-#urlprefix="http://%(host)s/cgi-bin/gitweb.cgi?p=%(repo)s;a=commit;h="%locals()
-urlprefix="http://%(host)s/cgi-bin/cgit.cgi/%(repo)s/commit/?id="%locals()
+#urlprefix="http://%(host)s/cgi-bin/gitweb.cgi?p=%(repo)s;a=commit;h="
+urlprefix="http://%(host)s/cgi-bin/cgit.cgi/%(repo)s/commit/?id="
 
 # The service used to turn your gitwebbish URL into a tinyurl so it
 # will take up less space on the IRC notification line.
 tinyifier = "http://tinyurl.com/api-create.php?url="
+
+# The template used to generate the XML messages to CIA.  You can make
+# visible changes to the IRC-bot notfication lines by hacking this.
+# The default will produce a notfication line that looks like this:
+#
+# ${project}: ${author} ${repo}:${branch} * ${rev} ${files}: ${logmsg} ${url}
+#
+# By omitting $files you can collapse the files part to a single slash.
+xml = '''\
+<message>
+  <generator>
+    <name>CIA Shell client for Git</name>
+    <version>%(gitver)s</version>
+    <url>%(generator)s</url>
+  </generator>
+  <source>
+    <project>%(project)s</project>
+    <branch>%(repo)s:%(branch)s</branch>
+  </source>
+  <timestamp>%(ts)s</timestamp>
+  <body>
+    <commit>
+      <author>%(author)s</author>
+      <revision>%(rev)s</revision>
+      <files>
+        %(files)s
+      </files>
+      <log>%(logmsg)s %(url)s</log>
+      <url>%(url)s</url>
+    </commit>
+  </body>
+</message>
+'''
 
 #
 # No user-serviceable parts below this line:
@@ -79,6 +112,8 @@ os.environ["PATH"] += ":/usr/sbin/:" + do("git --exec-path")
 # Option flags
 mailit = True 
 
+urlprefix = urlprefix % globals()
+
 def report(refname, merged):
     "Report a commit notification to CIA"
 
@@ -88,7 +123,7 @@ def report(refname, merged):
     except:
         url = urlprefix + merged
 
-    shortref = os.path.basename(refname)
+    branch = os.path.basename(refname)
 
     # Compute a shortnane for the revision
     rev = do("git describe ${merged} 2>/dev/null") or merged[:12]
@@ -98,7 +133,7 @@ def report(refname, merged):
     files=do("git diff-tree -r --name-only '"+ merged +"' | sed -e '1d' -e 's-.*-<file>&</file>-'")
     inheader = True
     headers = {}
-    logmessage = ""
+    logmsg = ""
     for line in rawcommit.split("\n"):
         if inheader:
             if line:
@@ -107,7 +142,7 @@ def report(refname, merged):
             else:
                 inheader = False
         else:
-            logmessage = line
+            logmsg = line
             break
     (author, ts) = headers["author"].split(">")
     author = author.replace("<", "").split("@")[0].split()[-1]
@@ -116,31 +151,7 @@ def report(refname, merged):
     context = locals()
     context.update(globals())
 
-    out = '''\
-<message>
-  <generator>
-    <name>CIA Shell client for Git</name>
-    <version>%(gitver)s</version>
-    <url>%(generator)s</url>
-  </generator>
-  <source>
-    <project>%(project)s</project>
-    <branch>%(repo)s:%(shortref)s</branch>
-  </source>
-  <timestamp>%(ts)s</timestamp>
-  <body>
-    <commit>
-      <author>%(author)s</author>
-      <revision>%(rev)s</revision>
-      <files>
-        %(files)s
-      </files>
-      <log>%(logmessage)s %(url)s</log>
-      <url>%(url)s</url>
-    </commit>
-  </body>
-</message>
-''' % context
+    out = xml % context
 
     message = '''\
 Message-ID: <%(merged)s.%(author)s@%(project)s>
