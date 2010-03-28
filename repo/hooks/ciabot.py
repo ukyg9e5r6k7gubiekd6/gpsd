@@ -54,6 +54,10 @@ host = socket.getfqdn()
 #urlprefix="http://%(host)s/cgi-bin/gitweb.cgi?p=%(repo)s;a=commit;h="%locals()
 urlprefix="http://%(host)s/cgi-bin/cgit.cgi/%(repo)s/commit/?id="%locals()
 
+# The service used to turn your gitwebbish URL into a tinyurl so it
+# will take up less space on the IRC notification line.
+tinyifier = "http://tinyurl.com/api-create.php?url="
+
 #
 # No user-serviceable parts below this line:
 #
@@ -70,58 +74,54 @@ toaddr = "cia@cia.vc"
 # Should only change when the script itself has a new home
 generator="http://www.catb.org/~esr/ciabot.sh"
 
+# Git version number.
+gitver = do("git --version").split()[0]
+
 # Should add to the command path both places sendmail is likely to lurk, 
 # and the git private command directory.
 os.environ["PATH"] += ":/usr/sbin/:" + do("git --exec-path")
 
-# Call this script with -n tp dump the notification mail to stdout
+# Option flags
 mailit = True 
-if sys.argv[1] == '-n':
-    mailit = False
-    sys.argv.pop(1)
 
-# Script wants a reference to head followed by the commit ID to notify about. 
-if len(sys.argv) == 1:
-    refname = do("git symbolic-ref HEAD 2>/dev/null")
-    merged = do("git rev-parse HEAD")
-else:
-    refname = sys.argv[1]
-    merged = sys.argv[2]
+def report(refname, merged):
+    "Report a commit notification to CIA"
 
-# This tries to turn your gitwebbish URL into a tinyurl so it will take up
-# less space on the IRC notification line. You can tweak the tinyfier
-# service if you need to.
-tinyifier = "http://tinyurl.com/api-create.php?url="
-try:
-    url = open(urllib.urlretrieve(tinyifier + urlprefix + merged)[0]).read()
-except:
-    url = urlprefix + merged
+    # Try to tinyfy a reference to a web view for this commit.
+    try:
+        url = open(urllib.urlretrieve(tinyifier + urlprefix + merged)[0]).read()
+    except:
+        url = urlprefix + merged
 
-refname = os.path.basename(refname)
-gitver = do("git --version").split()[0]	# Git version number
+    refname = os.path.basename(refname)
 
-rev = do("git describe ${merged} 2>/dev/null") or merged[:12]
-rawcommit = do("git cat-file commit " + merged)
-files=do("git diff-tree -r --name-only '"+ merged +"' | sed -e '1d' -e 's-.*-<file>&</file>-'")
+    # Compute a shortnane for the revision
+    rev = do("git describe ${merged} 2>/dev/null") or merged[:12]
 
-inheader = True
-headers = {}
-logmessage = ""
-for line in rawcommit.split("\n"):
-    if inheader:
-        if line:
-            fields = line.split()
-            headers[fields[0]] = " ".join(fields[1:])
+    # Extract the neta-information for the commit
+    rawcommit = do("git cat-file commit " + merged)
+    files=do("git diff-tree -r --name-only '"+ merged +"' | sed -e '1d' -e 's-.*-<file>&</file>-'")
+    inheader = True
+    headers = {}
+    logmessage = ""
+    for line in rawcommit.split("\n"):
+        if inheader:
+            if line:
+                fields = line.split()
+                headers[fields[0]] = " ".join(fields[1:])
+            else:
+                inheader = False
         else:
-            inheader = False
-    else:
-        logmessage = line
-        break
-(author, ts) = headers["author"].split(">")
-author = author.replace("<", "").split("@")[0].split()[-1]
-ts = ts.strip()
+            logmessage = line
+            break
+    (author, ts) = headers["author"].split(">")
+    author = author.replace("<", "").split("@")[0].split()[-1]
+    ts = ts.strip()
 
-out = '''\
+    context = locals()
+    context.update(globals())
+
+    out = '''\
 <message>
   <generator>
     <name>CIA Shell client for Git</name>
@@ -145,9 +145,9 @@ out = '''\
     </commit>
   </body>
 </message>
-''' % locals()
+''' % context
 
-message = '''\
+    message = '''\
 Message-ID: <%(merged)s.%(author)s@%(project)s>
 From: %(fromaddr)s
 To: %(toaddr)s
@@ -156,12 +156,35 @@ Subject: DeliverXML
 
 %(out)s''' % locals()
 
-if mailit:
-    import smtplib
-    server = smtplib.SMTP('localhost')
-    server.sendmail(fromaddr, [toaddr], message)
-    server.quit()
-else:
-    print message
+    if mailit:
+        server.sendmail(fromaddr, [toaddr], message)
+    else:
+        print message
+
+if __name__ == "__main__":
+    sys.stderr.write("ciabot.py version 2.\n")
+
+    # Call this script with -n to dump the notification mail to stdout
+    if sys.argv[1] == '-n':
+        mailit = False
+        sys.argv.pop(1)
+
+    # In post-commit mode, the script wants a reference to head
+    # followed by the commit ID to report about.
+    if len(sys.argv) == 1:
+        refname = do("git symbolic-ref HEAD 2>/dev/null")
+        merged = do("git rev-parse HEAD")
+    else:
+        refname = sys.argv[1]
+        merged = sys.argv[2]
+
+    if mailit:
+        import smtplib
+        server = smtplib.SMTP('localhost')
+
+    report(refname, merged)
+
+    if mailit:
+        server.quit()
 
 #End
