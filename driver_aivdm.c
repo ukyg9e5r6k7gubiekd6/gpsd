@@ -148,6 +148,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 					 clen, LOG_INF));
 
 
+#define BITS_PER_BYTE	8
 #define UBITS(s, l)	ubits((char *)ais_context->bits, s, l)
 #define SBITS(s, l)	sbits((char *)ais_context->bits, s, l)
 #define UCHARS(s, to)	from_sixbit((char *)ais_context->bits, s, sizeof(to), to)
@@ -269,7 +270,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type6.app_id         = UBITS(72, 16);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
 	    (void)memcpy(ais->type6.bitdata,
-			 (char *)ais_context->bits+11,
+			 (char *)ais_context->bits + (88 / BITS_PER_BYTE),
 			 (ais->type6.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%zd\n",
 			ais->type6.seqno,
@@ -311,7 +312,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type8.app_id =       UBITS(40, 16);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
 	    (void)memcpy(ais->type8.bitdata,
-			 (char *)ais_context->bits+7,
+			 (char *)ais_context->bits + (56 / BITS_PER_BYTE),
 			 (ais->type8.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "id=%u, cnt=%zd\n",
 			ais->type8.app_id,
@@ -438,10 +439,11 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    //ais->type17.spare         = UBITS(38, 2);
 	    ais->type17.lon		= UBITS(40, 18);
 	    ais->type17.lat		= UBITS(58, 17);
-	    ais->type8.bitcount       = ais_context->bitlen - 56;
+	    //ais->type17.spare	        = UBITS(75, 4);
+	    ais->type17.bitcount        = ais_context->bitlen - 80;
 	    (void)memcpy(ais->type17.bitdata,
-			 (char *)ais_context->bits + 10,
-			 (ais->type8.bitcount + 7) / 8);
+			 (char *)ais_context->bits + (80 / BITS_PER_BYTE),
+			 (ais->type17.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 18:	/* Standard Class B CS Position Report */
@@ -720,6 +722,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 #undef UCHARS
 #undef SBITS
 #undef UBITS
+#undef BITS_PER_BYTE
 
 	/* data is fully decoded */
 	return true;
