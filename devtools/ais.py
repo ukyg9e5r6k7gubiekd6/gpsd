@@ -427,7 +427,7 @@ type17 = (
              formatter=short_latlon_format),
     bitfield("lat",         17, 'signed',   0xd548,  "Latitude",
              formatter=short_latlon_format),
-    spare(2),
+    spare(5),
     bitfield("data",      736,  'raw',      None,    "DGNSS data"),
     )
 
