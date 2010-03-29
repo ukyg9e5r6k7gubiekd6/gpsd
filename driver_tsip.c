@@ -1107,7 +1107,7 @@ const struct gps_type_t tsip_binary =
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
 #endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_RECONFIGURE
+#ifdef ALLOW_CONTROLSEND
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* ALLOW_CONTROLSEND */
 };

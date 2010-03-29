@@ -386,7 +386,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
  *
  **********************************************************/
 
-#ifdef ALLOW_CONTROLSEND
 /**
  * Write data to the device, doing any required padding or checksumming
  */
@@ -412,7 +411,6 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
-#endif /* ALLOW_CONTROLSEND */
 
 static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {

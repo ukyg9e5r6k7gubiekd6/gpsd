@@ -364,7 +364,6 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
 /*@ +charint -usedef -compdef @*/
 static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
 {
@@ -407,7 +406,6 @@ static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, si
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
-#endif /* ALLOW_CONTROLSEND */
 
 static bool evermore_protocol(struct gps_device_t *session, int protocol)
 {

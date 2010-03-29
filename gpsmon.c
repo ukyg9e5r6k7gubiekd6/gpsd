@@ -205,8 +205,7 @@ static void packet_dump(char *buf, size_t buflen)
     }
 }
 
-
-#ifdef ALLOW_CONTROLSEND
+#if defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE)
 static void monitor_dump_send(void)
 {
     if (packetwin != NULL) {
@@ -216,7 +215,9 @@ static void monitor_dump_send(void)
 	(void)wattrset(packetwin, A_NORMAL);
     }
 }
+#endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
 
+#ifdef ALLOW_CONTROLSEND
 bool monitor_control_send(/*@in@*/unsigned char *buf, size_t len)
 {
     if (controlfd == -1)
@@ -398,9 +399,9 @@ static void onsig(int sig UNUSED)
 
 int main (int argc, char **argv)
 {
-#ifdef ALLOW_CONTROLSEND
+#if defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE)
     unsigned int v;
-#endif /* ALLOW_CONTROLSEND */
+#endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
     struct fixsource_t source;
