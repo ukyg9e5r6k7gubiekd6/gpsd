@@ -410,7 +410,7 @@ Repeat Indicator         : 0
 MMSI                     : 2734450
 Longitude                : 17478
 Latitude                 : 35992
-DGNSS data               : 376:007c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
+DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
 #
 # Type 18:
 # From Kurt Schwehr. Checked with the noaadata tools.
