@@ -1106,8 +1106,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    lexer->length = 4 + (size_t) lexer->inbuffer[3] + 2;
 	    for(n = 0; n < lexer->length - 2; n++)
 		a += (uint16_t)lexer->inbuffer[n];
-	    a = htons(a);
-	    b = (uint16_t)getbeuw(lexer->inbuffer, lexer->length - 2);
+	    b = (uint16_t)getleuw(lexer->inbuffer, lexer->length - 2);
 	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
 			lexer->inbuffer[1], (unsigned int)lexer->length,
 			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length, LOG_RAW));
