@@ -28,6 +28,7 @@ test_packet
 test_mkgmtime
 test_geoid
 test_json
+test_trig
 # Other generated files
 ./*.html
 *.[1358]
