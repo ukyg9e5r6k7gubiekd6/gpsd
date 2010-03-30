@@ -167,6 +167,7 @@ libgpsd_c_sources = \
 	serial.c \
 	rtcm2_json.c \
 	srecord.c \
+	shared_json.c \
 	strl.c \
 	subframe.c \
 	drivers.c \
