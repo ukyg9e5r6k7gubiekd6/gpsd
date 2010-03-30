@@ -626,11 +626,11 @@ unpack-makeregress: libgps
 
 # Unit-test the JSON parsing
 json-regress: test_json
-	test_json
+	./test_json
 
 # Unit-test the bitfield extractor - not in normal tests
 bits-regress: test_bits
-	test_bits
+	./test_bits
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
