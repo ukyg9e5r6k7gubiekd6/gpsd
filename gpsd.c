@@ -1096,6 +1096,14 @@ static void handle_request(struct subscriber_t *sub,
 			--replyend;
 		    replyend[1] = '\0';
 		    (void)strlcat(reply, ",", replylen);
+		    json_sky_dump(&devp->gpsdata, 
+				  reply + strlen(reply),
+				  replylen - strlen(reply));
+		    replyend = reply + strlen(reply) - 1;
+		    if (isspace(*replyend))
+			--replyend;
+		    replyend[1] = '\0';
+		    (void)strlcat(reply, ",", replylen);
 		}
 	    }
 	}
