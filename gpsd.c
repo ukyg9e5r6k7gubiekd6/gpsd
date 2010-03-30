@@ -1082,7 +1082,7 @@ static void handle_request(struct subscriber_t *sub,
 		if ((devp->observed & GPS_TYPEMASK)!=0)
 		    active++;
 	(void)snprintf(reply, replylen,
-		       "{class:\"POLL\",\"timestamp\":%.3f,\"active\":%d,fixes:[",
+		       "{\"class\":\"POLL\",\"timestamp\":%.3f,\"active\":%d,\"fixes\":[",
 		       timestamp(), active);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
