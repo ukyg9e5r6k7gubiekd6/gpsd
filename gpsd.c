@@ -699,11 +699,6 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
 			device->gpsdata.gps_fd);
 	    FD_SET(device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(device->gpsdata.gps_fd, true);
-	    if (user->policy.watcher) {
-		char buf[GPS_JSON_RESPONSE_MAX];
-		json_device_dump(device, buf, sizeof(buf));
-		(void)throttled_write(user, buf, strlen(buf));
-	    }
 	    return true;
 	}
     }
