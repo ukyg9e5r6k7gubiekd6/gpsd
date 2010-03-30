@@ -1,0 +1,340 @@
+= GPSD Client HOWTO =
+Eric S. Raymond <esr@thyrsus.com>
+v1.0, April 2010
+
+This document is mastered in asciidoc format.  If you are reading it
+in HTML, you can find the original at
+http://gpsd.berlios.de/client-howto.txt[]
+
+== Introduction ==
+
+This document is a guide to interfacing client applications with GPSD.
+It surveys the available binding and their use cases  It also explains
+some sharp edges in the client API which, unfortunely, are fundamental
+results of the way GPS sensor devices operate, and suggests tactics
+for avoiding being cut.
+
+== Sensor behavior matters ==
+
+GPSD handles two main kinds of sensors: GPS receivers and AIS
+receivers. It has rudimentary support for some other kinds of
+specialized geolocation-related sensors as well, notably compass and
+yaw/pitch/roll, but those sensors are usually combined with GPS
+receivers and behave like them.
+
+In an ideal world, GPS sensors would be oracles that you could
+poll at any time to get a clean fix.  Real GPSes fail to be like 
+that in at least the following ways: 
+
+* You can't actually poll them. They report to you over a serial
+  (RS232 or USB-serial) interface at a fixed interval, usually once
+  per second.
+
+* They don't always have a fix to report, because they can only
+  get one when they have satellite lock.
+
+* They may fail to have satellite lock when your skyview is poor.
+  If you are moving through uneven terrain or anywhere with trees 
+  or buildings, your skyview can degrade in an instant.
+
+* They may also fail to have lock because they're initially powering
+  on (cold start), or waking from a power-conserving sleep mode (warm
+  start).  While most modern GPSes with a good skyview can get
+  satellite lock in 30 seconds from a warm start, a GPS that has
+  been off for a while can take 15 minutes or more to acquire lock
+
+Time to fix after a power-on matters because in many use cases for
+GPSes they're running off a battery, and you can't afford to keep them
+powered when you don't actually need location data.  This is why GPS
+sensors are usually designed to go to a low-power mode when you close
+the serial port they're attached to.
+
+AIS receivers have a simpler set of constraints. They report
+navigational and ID information from any AIS transmitter in line of
+sight; there are no skyview issues, and they're ready instantly when
+powered up. Furthermore, they're not normally battery constrained.
+However, you don't poll them either; they receive information
+packets over the air and ship them to you at unpredictable intervals
+over a serial port.
+
+== What GPSD does, and what it cannot do ==
+
+GPSD solves some of the problems with GPS/AIS sensors. First:
+multiplexing; it allows multiple applications to get sensor data
+without having to contend for a single serial device.  Second:
+coping with the hideous gallimaufry of badly-designed protocols these
+devices use -- regardless of device type, you will get data in a single
+well-documented format.  Third: on operating systems with a hotplug
+facility (like Linux udev), GPSD will handle all the device 
+management as USB devices are plugged in and unplugged.
+
+What GPSD can't do is pull fix data out of thin air when your 
+device han't reported any.  Nor is it a magic power supply,
+so its device management has to be designed around keeping the
+attached sensors open only when a client application actually
+needs a fix. 
+
+As you'll see, these constraints explain most of the design of the GPSD
+wire protocol, and of the library APIs your client application 
+will be using.
+
+== How the GPSD wire protocol works ==
+
+While GPSD project ships several library bindings that will hide the
+details of the wire protocol from you, you'll understand the library APIs
+better by knowing what a wire-protocol session looks like. After
+reading this section, you can forget the details about commands and
+responses and attributes as long as you hold on to the basic 
+logical flow of a session.
+
+Your client library's open function is going to connect a socket to
+port 2947 on the host your sensors are attached to, usually
+localhost. On connection, the gpsd daemon will ship a banner that
+looks something like this:
+
+-----------------------------------------------------------------------------
+{"class":"VERSION","release":"2.93","rev":"2010-03-30T12:18:17",
+                   "proto_major":3,"proto_minor":2}
+-----------------------------------------------------------------------------
+
+There's nothing mysterious here. Your server daemon is identifying
+itself with information that may allow a client library to work
+around bugs or potential incompatibilities produced by upgrades.
+
+To get data from the attached sensors, you need to explicitly tell the
+daemon you want it.  (Remember that it's trying to minimize the amount
+of time the devices are held open and in a fully powered state.)  You
+do this by issuing a WATCH command:
+
+-----------------------------------------------------------------------------
+?WATCH={"enable":true,"json":true}
+-----------------------------------------------------------------------------
+
+This tells the daemon to watch all devices and to issue reports in
+JSON.  It can ship some other protocols as well (notably, NMEA 0183)
+but JSON is the most capable and usually what you want.
+
+A side effect of the WATCH command is that the daemon will ship you
+back some information on available devices.
+
+-----------------------------------------------------------------------------
+{"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyUSB0","activated":1269959537.20,"native":0,"bps":4800,"parity":"N","stopbits":1,"cycle":1.00}]}
+{"class":"WATCH","enable":true,"json":true,"nmea":false,"raw":0,"scaled":false,"timing":false}
+-----------------------------------------------------------------------------
+
+The DEVICES response tells you what devices are available to the
+daemon; this list is maintained in a way you as the application
+designer don't have to care about.  The WATCH response will
+immediately follow and tells you what all your watch request settings
+are.
+
+Up to this point, nothing has been dependent on the state of the
+sensors. At this time, it may well be that none of those devices is
+fully powered up yet. In fact, thet won't be, unless another
+GPSD-enabled application is already watching when you open your
+connection.  If that's the case, you will start seeing data
+immediately.
+
+For now, though, let's go back to the case where gpsd has to fire up
+the sensors. After issuing the WATCH response, the daemon opens all of
+them and watches for incoming packets that it can recognize.  *After
+a variable delay*, it will ship a notification that looks something
+like this:
+
+-----------------------------------------------------------------------------
+{"class":"DEVICE","path":"/dev/ttyUSB0","activated":1269960793.97,
+                 "driver":"SiRF binary","native":1,"bps":4800,
+                 "parity":"N","stopbits":1,"cycle":1.00}
+-----------------------------------------------------------------------------
+
+This is the daemon telling you that it has recognized a SiRF binary
+GPS on /dev/ttyUSB0 shipping report packets at 4800 bits per second.
+This notification is not delayed by the time it takes to achieve
+satellite lock; the GPS will cheerfully ship packets before that.  But
+it will be delayed by the time required for the daemon to sync up with
+the GPS.
+
+The GPSD daemon is designed so it doesn't have to know anything about the
+sensor in advance - not which of a dozen reporting protocols it uses,
+and not even the baud rate of the serial device.  The reason for this
+agnosticism is so the daemon can adapt properly to anything a hotplug 
+event night throw at it.  If you unplug your GPS while your
+application is running, and then plug one one of a different type, the
+daemon will cope.  Your application won't know the difference unless
+you have told it to notice device types.
+
+You can even start your application, have it issue a WATCH, realize
+you forgot to plug in a GPS, and do that.  The hotplug event will
+tell gpsd, which will add the new device to the watched-devices list
+of every client that has issued a ?WATCH.
+
+In order to make this work, gpsd has a packet sniffer inside it that
+does autobauding and packet-protocol detection. Normally the packet
+sniffer will achive sync in well under a second, but it can take
+longer if your serial traffic is degraded by dodgy cables or
+electrical noise, or if the GPS is configured to run at an unusual
+speed/parity/stopbit configuration.
+
+The real point here is that the delay is *variable*.  The client 
+library, and your application, can't assume a neat lockstep of
+request and instant response.
+
+Once you do get your device(s) synced, things become more predictable.
+The sensor will start shipping fix reports at a constant interval,
+usually every second, and the daemon will massage them into JSON and
+pass them up the client to your application.  
+
+However, until the sensor achives satellite lock, those fixes will be
+"mode 1" - no valid data.  Here's what that looks like:
+
+-----------------------------------------------------------------------------
+{"class":"TPV","tag":"MID2","device":"/dev/ttyUSB0",
+               "time":1269964063.670,"ept":0.005,"mode":1}
+-----------------------------------------------------------------------------
+
+Occasionally you'll get another kind of sentence, SKY, that reports a
+satellite skyview.  But TPV is the important one.  Here's what it
+looks like when the sensor has a fix to report:
+
+-----------------------------------------------------------------------------
+{"class":"TPV","tag":"MID2","time":1119197547.890,"ept":0.005,
+               "lat":46.498204497,"lon":7.568061439,"alt":1327.689,
+                "epx":15.319,"epy":17.054,"epv":124.484,"track":10.3797,
+                "speed":0.091,"climb":-0.085,"eps":34.11,"mode":3}
+-----------------------------------------------------------------------------
+
+Note the "mode":3 at the end.  This is how you tell that the GPS ia
+reporting a full 3D fix with altitude.
+
+When your application shuts down, it can cancel its watch:
+
+-----------------------------------------------------------------------------
+?WATCH={"enable":false}
+-----------------------------------------------------------------------------
+
+This will enable the daemon to close devices and conserve
+power. Supposing you don't do this, the daemon will time out devices
+with no listeners, so canceling your watch is not strictly necessary.
+But it is good manners.
+
+If you're a clever sort, you're already wondering what the daemon does
+if the application at the other end of the client socket doesn't read data
+out of it as fast as gpsd is shipping it upwards.  And the answer is
+this: eventually the socket buffer fills up, a write from the daemon 
+throws an error, and the daemon shuts down that client socket.  
+
+From the point of view of the application, it reads all the buffered
+data and then gets a read return indicating the socket shutdown. We'll
+return to this in the discussion of client libraries, but the thing
+for you to know right now is that this edge case is actually quite
+difficult to fall afoul of.  Total data volume on these sockets is not
+high. As long as your application checks for and reads socket data no
+less often than once a second, you won't -- and a second is a *lot* of
+time in which to come back around your main loop.
+
+== Interfacing from the client side ==
+
+The GPSD project provides client-side libraries in C, C++, and Python.
+A Perl module is separately available from CPAN.  While the details of
+these libraries vary, they all have the same two purposes and the same
+limitations. 
+
+One purpose of the libraries is to handle the details of unpacking
+JSON-based wire-protocol objects into whatever native structure/record
+feature your application language has. This is particularly important
+in the C and C++ libraries, because those languages don't have
+good native support for JSON.
+
+Another purpose is to hide the details of the wire protocol from the
+application.  This gives the GPSD developers room to improve extend
+the protocol without breaking every client application.  Depend
+on wire-protocol details only at your own risk!
+
+The limitations the libraries have to cope with are the nature of
+the data flow from the sensors, and the simple fact that they're
+not necessarily delivering fixes at any given time.  
+
+For details of the libraries' APIs, see their reference
+sdocumentation; the objective of the rest of this section is to teach
+you the general model of client-side interfacing that they all have to
+follow because of the way the daemon works.
+
+Each library has the following main entry points:
+
+* Open a session socket to the daemon.  Named something like "open()".
+
+* Set watch policy. Named something like "stream()"
+
+* Nonblocking check to see if data from the daemon is waiting. Named
+  something like "waiting()".
+
+* Blocking poll for data from the daemon.  Named something like "poll()".
+
+* Close the session socket. Named something like "close()".
+
+The tricky part is interpreting what you get from the blocking
+poll. The reason it's tricky is that you're not guaranteed that
+every poll will pick up exactly one complete JSON object from the 
+daemon. It may grab one response object, or more than one, or
+part of one, or one or more followed by a fragment.
+
+What the library does on each poll is this: get what it can from the
+socket, append that to a private buffer, and then consume as many JSON
+objects from the front of the buffer as it can.  Any incomplete JSON
+is left in the private buffer to be completed and unpacked on a later
+go-round.
+
+In C, the library "consumes" a JSON object by unpacking its content
+into a blackboard structure passed to the poll entry point by
+address. The structure contains a state-flag mask that you can (and
+should!) check so you'll know which parts of the structure contain
+valid data.  It is safe to do nothing unless the PACKET_SET mask bit
+is on, which is the library's way of telling you that at least one
+complete JSON response has arrived since the last poll.
+
+Data may accumulate on the blackboard over multiple reads,
+with new TPV reports overwriting old ones;it is guaranteed that
+overwrites are not partial.  Expect this pattern to be replicated
+in any compiled language with only fixed-extent structures.
+
+In Python and Perl the poll entry point returns an object containing
+accumulated data.  The state-flag mask is still useful for telling you
+which parts contain data, and there is still a PACKET_SET bit.  Expect
+this pattern to be replicated in other dynamic OO languages when we
+support them.
+
+The C++ binding is a very thin wrapper around the C.  You get back an
+object, but it's just a reference to the C blackboard structure.
+
+All bindings will throw a recognizable error from the poll entry
+point when the socket is closed from the daemon side.
+
+== C Examples ==
+
+The source distribution includes three example clients in C; 
+gpxlogger.c, cgps.c, and xgpsspeed.c.  
+
+gpxlogger.c illustrates the simplest possible program flow; open,
+followed by stream, followed by blocking polls forever.  The use of
+select is not strictly necessary, but illustrates how to wait for data
+from the daemon; it would work even if the poll were
+non-blocking. This would only be appropriate for a batch-mode report
+generator.
+
+cgps.c shows what an interactive application using the library and
+also processing user commands works. Observe the use of select(2)
+to wait on either data from the daemon or a keystroke.
+
+xgpsspeed.c is a simple C client using X for display.  It doesn't need
+to use a select(2) or the gps_waiting() library entry point because
+it's tied into the X main event loop, which is watching the daemon
+socket.
+
+== Python examples ==
+
+There's a very simple Python example analogous to gpxlogger attached
+to the source code for the gps.py library.
+
+For a more interesting example integrated with X and GNOME, see xgps.
+
+

@@ -329,6 +329,11 @@ do, even if you don't yet have a local GPS.</p>
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
+<dt><a href="client-howto.html">GPSD Client HOWTO</a></dt>
+<dd>A programmer's guide to interfacing with <code>gpsd</code> from
+client applications. Explains the theory, points at working example
+source code, warns you what the edge cases and gotchas are.</dd>
+
 <dt><a href="gps-hacking.html">ESR's Guide to Hacking With GPS</a></dt>
 <dd>If you are new to GPS technology and don't quite understand what
 <code>gpsd</code> is about, you might find this interesting.</dd>

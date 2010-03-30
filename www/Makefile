@@ -37,6 +37,9 @@ protocol-evolution.html: protocol-evolution.txt
 protocol-transition.html: protocol-transition.txt
 	asciidoc -a toc protocol-transition.txt
 
+client-howto.html: client-howto.txt
+	asciidoc -a toc client-howto.txt
+
 writing-a-driver.html: writing-a-driver.xml
 	xmlto xhtml-nochunks writing-a-driver.xml
 
@@ -47,4 +50,4 @@ hardware.html: hardware-head.html ../gpscap.ini hardware-tail.html
 	(cat hardware-head.html; (cd ..; python gpscap.py); cat hardware-tail.html) >hardware.html
 
 clean:
-	rm -f $(XML:.xml=.html) hardware.html protocol-evolution.html protocol-transition.html writing-a-driver.html *~
+	rm -f $(XML:.xml=.html) hardware.html protocol-evolution.html protocol-transition.html client-howto.html writing-a-driver.html *~
