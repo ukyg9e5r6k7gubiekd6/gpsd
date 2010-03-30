@@ -184,8 +184,8 @@ This is the default.</para>
 <varlistentry>
 <term>WATCH_JSON</term>
 <listitem>
-<para>Enable JSON reporting of data. If WATCH_ENABLE is set, and nmo
-other WATCH flags are set, this ids the default.</para>
+<para>Enable JSON reporting of data. If WATCH_ENABLE is set, and no
+other WATCH flags are set, this is the default.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
