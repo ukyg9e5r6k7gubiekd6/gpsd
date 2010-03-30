@@ -29,13 +29,6 @@ to reverse his refusal to send us an eval unit.
 Presently this means there's no way to kick a UBX into returning
 binary data.
 
-**** superstar2.chk:
-
-Packet detection appears to fail completely on big-endian machines.
-Greg Troxel reports this from netbsd-5/sparc64. Output at
-<http://www.lexort.com/gpsd/>. The problem is very likely in the
-packet-checksum computation, which looks a bit dodgy.
-
 ** To do:
 
 *** Finish gpssim
