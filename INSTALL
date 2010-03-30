@@ -181,5 +181,5 @@ to set a valid Google API key in your config file.
 14. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
-testregress".  It is not necessary to install first.  Python is
+check".  It is not necessary to install first.  Python is
 required for regression tests.

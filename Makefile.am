@@ -632,13 +632,16 @@ json-regress: test_json
 bits-regress: test_bits
 	$(srcdir)/test_bits
 
-# Do all normal regression tests
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+# Do all normal regression tests. Nowadays we delegate this to
+# "make check" since that's what people with autotools exprience
+# expect to be able to do.
+testregress: check
 	@echo "Regressions complete."
 
 # automake has support for running programs, but not make targets.
 # However, TESTS_ENVIRONMENT can be used to specify an interpreter,
-# which we use to re-invoke make.
+# which we use to re-invoke make. The order of the targets in TESTS 
+# defines the sequence order of testing.
 TESTS_ENVIRONMENT = $(MAKE)
 TESTS = gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 
