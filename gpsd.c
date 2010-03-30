@@ -1081,9 +1081,14 @@ static void handle_request(struct subscriber_t *sub,
 	    }
     } else if (strncmp(buf, "POLL;", 5) == 0) {
 	buf += 5;
+	int active = 0;
+	for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	    if (allocated_device(devp) && subscribed(sub, devp))
+		if ((devp->observed & GPS_TYPEMASK)!=0)
+		    active++;
 	(void)snprintf(reply, replylen,
-		       "{class=\"POLL\",\"timestamp\"=%.3f,fixes=[",
-		       timestamp());
+		       "{class=\"POLL\",\"timestamp\"=%.3f,\"active\"=%d,fixes=[",
+		       timestamp(), active);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
@@ -1093,15 +1098,25 @@ static void handle_request(struct subscriber_t *sub,
 				  replylen - strlen(reply));
 		    replyend = reply + strlen(reply) - 1;
 		    if (isspace(*replyend))
-			--replyend;
+		    	--replyend;
 		    replyend[1] = '\0';
 		    (void)strlcat(reply, ",", replylen);
+		}
+	    }
+	}
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "],\"skyviews\"=[,", replylen);
+	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
+	    if (allocated_device(devp) && subscribed(sub, devp)) {
+		if ((devp->observed & GPS_TYPEMASK)!=0) {
+		    char *replyend;
 		    json_sky_dump(&devp->gpsdata, 
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
 		    replyend = reply + strlen(reply) - 1;
 		    if (isspace(*replyend))
-			--replyend;
+		    	--replyend;
 		    replyend[1] = '\0';
 		    (void)strlcat(reply, ",", replylen);
 		}
