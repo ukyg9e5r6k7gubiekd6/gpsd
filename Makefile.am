@@ -580,7 +580,7 @@ aivdm-regress: gpsdecode
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
+	@$(srcdir)/gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
 	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test/test.chk
 	@rm $(srcdir)/test/test.chk
 
@@ -626,11 +626,11 @@ unpack-makeregress: libgps
 
 # Unit-test the JSON parsing
 json-regress: test_json
-	./test_json
+	$(srcdir)/test_json
 
 # Unit-test the bitfield extractor - not in normal tests
 bits-regress: test_bits
-	./test_bits
+	$(srcdir)/test_bits
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
