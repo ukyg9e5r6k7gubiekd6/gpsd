@@ -1126,7 +1126,7 @@ static void handle_request(struct subscriber_t *sub,
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
-	if (isspace(*errend))
+	while (isspace(*errend))
 	    --errend;
 	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
