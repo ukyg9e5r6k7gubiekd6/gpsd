@@ -612,7 +612,7 @@ geoid-makeregress: test_geoid
 
 # Regression-test the calendar functions
 time-regress: test_mkgmtime
-	./test_mkgmtime
+	$(srcdir)/test_mkgmtime
 
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
