@@ -830,7 +830,7 @@ int main(int argc, char *argv[])
 
     status_timer = time(NULL);
 
-    (void)gps_stream(gpsdata, WATCH_ENABLE|WATCH_NEWSTYLE, NULL);
+    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
 
     /* heart of the client */
     for (;;) {
