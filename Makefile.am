@@ -48,6 +48,11 @@ RTCM104PAGES_DIST = gpsdecode.1
 if HAVE_RTCM104V2
 RTCM104PROGS = gpsdecode
 RTCM104PAGES = $(RTCM104PAGES_DIST)
+else
+if HAVE_RTCM104V3
+RTCM104PROGS = gpsdecode
+RTCM104PAGES = $(RTCM104PAGES_DIST)
+endif
 endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
@@ -76,7 +81,7 @@ xgpsspeed_c_sources = \
 xgpsspeed_SOURCES = \
 	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build cgps
@@ -162,6 +167,7 @@ libgpsd_c_sources = \
 	serial.c \
 	rtcm2_json.c \
 	srecord.c \
+	shared_json.c \
 	strl.c \
 	subframe.c \
 	drivers.c \
@@ -575,7 +581,7 @@ aivdm-regress: gpsdecode
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
+	@$(srcdir)/gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
 	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test/test.chk
 	@rm $(srcdir)/test/test.chk
 
@@ -607,7 +613,7 @@ geoid-makeregress: test_geoid
 
 # Regression-test the calendar functions
 time-regress: test_mkgmtime
-	./test_mkgmtime
+	$(srcdir)/test_mkgmtime
 
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
@@ -621,19 +627,22 @@ unpack-makeregress: libgps
 
 # Unit-test the JSON parsing
 json-regress: test_json
-	test_json
+	$(srcdir)/test_json
 
 # Unit-test the bitfield extractor - not in normal tests
 bits-regress: test_bits
-	test_bits
+	$(srcdir)/test_bits
 
-# Do all normal regression tests
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+# Do all normal regression tests. Nowadays we delegate this to
+# "make check" since that's what people with autotools exprience
+# expect to be able to do.
+testregress: check
 	@echo "Regressions complete."
 
 # automake has support for running programs, but not make targets.
 # However, TESTS_ENVIRONMENT can be used to specify an interpreter,
-# which we use to re-invoke make.
+# which we use to re-invoke make. The order of the targets in TESTS 
+# defines the sequence order of testing.
 TESTS_ENVIRONMENT = $(MAKE)
 TESTS = gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 

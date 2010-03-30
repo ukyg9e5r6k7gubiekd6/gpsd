@@ -28,6 +28,7 @@ RETVAL=0
 
 start() {
 # Check if it is already running
+  [ "$EUID" != "0" ] && exit 4
   if [ ! -f /var/lock/subsys/$PROGNAME ]; then
     echo -n "Starting $DAEMON daemon: "
     daemon /usr/sbin/$PROGNAME $OPTIONS $TTY
@@ -39,6 +40,7 @@ start() {
 }
 
 stop() {
+  [ "$EUID" != "0" ] && exit 4
   echo -n "Stopping $DAEMON daemon: "
   killproc /usr/sbin/$PROGNAME
   RETVAL=$?

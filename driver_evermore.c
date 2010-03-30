@@ -364,7 +364,6 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
 /*@ +charint -usedef -compdef @*/
 static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, size_t len)
 {
@@ -407,37 +406,6 @@ static ssize_t evermore_control_send(struct gps_device_t *session, char *buf, si
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
-#endif /* ALLOW_CONTROLSEND */
-
-#ifdef ALLOW_RECONFIGURE
-static bool evermore_speed(struct gps_device_t *session, 
-			   speed_t speed, char parity, int stopbits)
-{
-    /*@ -type @*/
-    gpsd_report(LOG_PROG, "evermore_speed(%u%c%d)\n", speed, parity, stopbits);
-    /* parity and stopbit switching aren't available on this chip */
-    if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
-	return false;
-    } else {
-	unsigned char tmp8;
-	char msg[] = {
-	    0x89,          /*  0: msg ID, Serial Port Configuration */
-	    0x01,          /*  1: bit 0 cfg for main serial, bit 1 cfg for DGPS port */
-	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
-	    0x00,          /*  3: baud rate for DGPS serial port; 4800(0), 9600(1), etc */
-	};
-	switch (speed) {
-	case 4800:  tmp8 = 0; break;
-	case 9600:  tmp8 = 1; break;
-	case 19200: tmp8 = 2; break;
-	case 38400: tmp8 = 3; break;
-	default: return false;
-	}
-	msg[2] = tmp8;
-	return (evermore_control_send(session, msg, sizeof(msg)) != -1);
-    }
-    /*@ +type @*/
-}
 
 static bool evermore_protocol(struct gps_device_t *session, int protocol)
 {
@@ -518,6 +486,35 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
+static bool evermore_speed(struct gps_device_t *session, 
+			   speed_t speed, char parity, int stopbits)
+{
+    /*@ -type @*/
+    gpsd_report(LOG_PROG, "evermore_speed(%u%c%d)\n", speed, parity, stopbits);
+    /* parity and stopbit switching aren't available on this chip */
+    if (parity!=session->gpsdata.dev.parity || stopbits!=(int)session->gpsdata.dev.parity) {
+	return false;
+    } else {
+	unsigned char tmp8;
+	char msg[] = {
+	    0x89,          /*  0: msg ID, Serial Port Configuration */
+	    0x01,          /*  1: bit 0 cfg for main serial, bit 1 cfg for DGPS port */
+	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
+	    0x00,          /*  3: baud rate for DGPS serial port; 4800(0), 9600(1), etc */
+	};
+	switch (speed) {
+	case 4800:  tmp8 = 0; break;
+	case 9600:  tmp8 = 1; break;
+	case 19200: tmp8 = 2; break;
+	case 38400: tmp8 = 3; break;
+	default: return false;
+	}
+	msg[2] = tmp8;
+	return (evermore_control_send(session, msg, sizeof(msg)) != -1);
+    }
+    /*@ +type @*/
+}
 
 static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */

@@ -138,7 +138,11 @@
  * AF_INET: IPv4 only
  * AF_INET6: IPv6 only
  */
-static int af = AF_UNSPEC;
+#ifdef IPV6_ENABLE
+static const int af = AF_UNSPEC;
+#else
+static const int af = AF_INET;
+#endif
 
 #define AFCOUNT 2
 
@@ -328,7 +332,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	break;
-
+#ifdef IPV6_ENABLE
     case AF_INET6:
 	sin_len = sizeof(sat.sa_in6);
 
@@ -358,7 +362,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	af_str = "IPv6";
 	s = socket(PF_INET6, type, proto);
 	break;
-
+#endif
     default:
 	gpsd_report(LOG_ERROR, "Unhandled address family %d\n", af);
 	return -1;
@@ -968,6 +972,7 @@ static void handle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
+#ifdef ALLOW_RECONFIGURE
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf+1, &devconf, &end);
 	    if (end == NULL)
@@ -1058,6 +1063,10 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	    /*@+branchstate@*/
+#else /* ALLOW_RECONFIGURE */
+	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+			   "{\"class\":\"ERROR\",\"message\":\"Device configuration support not compiled.\"}\r\n");
+#endif /* ALLOW_RECONFIGURE */
 	}
 	/* dump a response for each selected channel */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
@@ -1072,9 +1081,14 @@ static void handle_request(struct subscriber_t *sub,
 	    }
     } else if (strncmp(buf, "POLL;", 5) == 0) {
 	buf += 5;
+	int active = 0;
+	for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	    if (allocated_device(devp) && subscribed(sub, devp))
+		if ((devp->observed & GPS_TYPEMASK)!=0)
+		    active++;
 	(void)snprintf(reply, replylen,
-		       "{class=\"POLL\",\"timestamp\"=%.3f,fixes=[",
-		       timestamp());
+		       "{class=\"POLL\",\"timestamp\"=%.3f,\"active\"=%d,fixes=[",
+		       timestamp(), active);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
@@ -1084,7 +1098,25 @@ static void handle_request(struct subscriber_t *sub,
 				  replylen - strlen(reply));
 		    replyend = reply + strlen(reply) - 1;
 		    if (isspace(*replyend))
-			--replyend;
+		    	--replyend;
+		    replyend[1] = '\0';
+		    (void)strlcat(reply, ",", replylen);
+		}
+	    }
+	}
+	if (reply[strlen(reply)-1] == ',')
+	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "],\"skyviews\"=[,", replylen);
+	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
+	    if (allocated_device(devp) && subscribed(sub, devp)) {
+		if ((devp->observed & GPS_TYPEMASK)!=0) {
+		    char *replyend;
+		    json_sky_dump(&devp->gpsdata, 
+				  reply + strlen(reply),
+				  replylen - strlen(reply));
+		    replyend = reply + strlen(reply) - 1;
+		    if (isspace(*replyend))
+		    	--replyend;
 		    replyend[1] = '\0';
 		    (void)strlcat(reply, ",", replylen);
 		}

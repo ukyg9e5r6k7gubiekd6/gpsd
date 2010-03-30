@@ -947,16 +947,28 @@ be reported with a mode field of zero.</para>
 </row>
 <row>
 	<entry>time</entry>
-	<entry>No</entry>
 	<entry>Yes</entry>
+	<entry>Numeric</entry>
         <entry>Seconds since the Unix epoch, UTC. May have a
 	fractional part of up to .001sec precision.</entry>
+</row>
+<row>
+	<entry>active</entry>
+	<entry>Yes</entry>
+	<entry>Numeric</entry>
+        <entry>Count of active devices.</entry>
 </row>
 <row>
 	<entry>fixes</entry>
 	<entry>Yes</entry>
 	<entry>JSON array</entry>
         <entry>Comma-separated list of TPV objects.</entry>
+</row>
+<row>
+	<entry>skyviews</entry>
+	<entry>Yes</entry>
+	<entry>JSON array</entry>
+        <entry>Comma-separated list of SKY objects.</entry>
 </row>
 </tbody>
 </tgroup>

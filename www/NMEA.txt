@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.2, Mar 2010
+v2.3, Mar 2010
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -39,6 +39,8 @@ distribution, but adds more information on the following topics:
 * Common talker IDs
 * Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
 * Sentence PASHR from [PASHR].
+* Satellite IDs: PRN vs NMEA-ID. 
+* Error status indications.
 
 == Physical protocol layer ==
 
@@ -265,6 +267,37 @@ relevant to GPS systems.
 |ZQ	| Timekeeper - Quartz
 |ZV	| Timekeeper - Radio Update, WWV or WWVH
 |================================================================
+
+== Satellite IDs ==
+
+Satellites may be identified by one of two different numbers in
+sentences such as GSV: a PRN number associate with their radio code,
+or an NMEA-ID.  
+
+For satellites 1-32, the GPS constellation, these numbers are the
+same. For satellites associated with WAAS (Wide Area Augnmentation
+System), EGNOS (European Geostationary Navigation Overlay Service),
+and MSAS (Multi-functional Satellite Augmentation System), they are
+different.
+
+Here is a table of NMEA-ID allocations above 32 as of March 2010:
+
+[frame="topbot",options="header"]
+|====================================================
+|System     |Satellite       |PRN            |NMEA-ID
+|EGNOS      |AOR-E           |120            |33
+|EGNOS      |Artemis         |124            |37
+|EGNOS      |IOR-W           |126            |39
+|MSAS       |MTSAT-1         |129            |42
+|EGNOS      |IOR-E           |131            |44
+|WAAS       |AMR             |133            |46
+|WAAS       |PanAm           |135            |48
+|MSAS       |MTSAT-2         |137            |50 
+|WAAS       |Anik            |138            |51
+|====================================================
+
+In general, NMEA-ID = PRN - 87. Theoretically, all NMEA-emitting
+devices should emit NMEA-IDs. In practice, some pass through PRNs.
 
 == Obsolete sentences ==
 
@@ -2148,3 +2181,7 @@ Only emitted by uBlox Antaris chipset.
 - [[[PASHR]]]
     "News - NMEA PASHR Output Format Added"
     http://www.oxts.com/default.asp?pageRef=76&newsID=69
+
+- [[[WAAS]]]
+    "WAAS Information"
+    http://gpsinformation.net/exe/waas.html
