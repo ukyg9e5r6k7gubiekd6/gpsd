@@ -561,7 +561,7 @@ rtcm-regress: gpsdecode
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for RTCM2"
-	@gpsdecode -e -j <test/synthetic-rtcm2.json >$(srcdir)/test/test.chk
+	@$(srcdir)/gpsdecode -e -j <test/synthetic-rtcm2.json >$(srcdir)/test/test.chk
 	@grep -v '^#' test/synthetic-rtcm2.json | diff -ub - $(srcdir)/test/test.chk
 	@rm $(srcdir)/test/test.chk
 
@@ -581,8 +581,8 @@ aivdm-regress: gpsdecode
 		diff -ub $${f}.chk $(srcdir)/test/test.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@$(srcdir)/gpsdecode -e -j <test/synthetic-ais.json >$(srcdir)/test/test.chk
-	@grep -v '^#' test/synthetic-ais.json | diff -ub - $(srcdir)/test/test.chk
+	@$(srcdir)/gpsdecode -e -j <$(srcdir)/test/synthetic-ais.json >$(srcdir)/test/test.chk
+	@grep -v '^#' $(srcdir)/test/synthetic-ais.json | diff -ub - $(srcdir)/test/test.chk
 	@rm $(srcdir)/test/test.chk
 
 # Rebuild the AIVDM regression tests.
