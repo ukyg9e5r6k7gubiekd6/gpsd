@@ -5,7 +5,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 -->
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<!-- lifted from troff+man by doclifter -->
 <refentry>
 <refentryinfo><date>13 May 2005</date></refentryinfo>
 <refmeta>
