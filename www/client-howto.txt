@@ -206,6 +206,21 @@ looks like when the sensor has a fix to report:
 Note the "mode":3 at the end.  This is how you tell that the GPS ia
 reporting a full 3D fix with altitude.
 
+If you have an AIS receiver attached, it too will have been opened
+and autobauded and protocol-sniffed after your WATCH.  The stream of
+JSON objects will then include things like this:
+
+-----------------------------------------------------------------------------
+{"class":"AIS","type":5,"repeat":0,"mmsi":351759000,"scaled":true,
+               "imo":9134270,"ais_version":0,"callsign":"3FOF8",
+               "shipname":"EVER DIADEM",
+               "shiptype":"Cargo - all ships of this type",
+               "to_bow":225,
+	       "to_stern":70,"to_port":1,"to_starboard":31,"draught":12.2,
+               "epfd":"GPS","eta":"05-15T14:00Z",
+	       "destination":"NEW YORK","dte":0}
+-----------------------------------------------------------------------------
+
 When your application shuts down, it can cancel its watch:
 
 -----------------------------------------------------------------------------
@@ -335,6 +350,6 @@ socket.
 There's a very simple Python example analogous to gpxlogger attached
 to the source code for the gps.py library.
 
-For a more interesting example integrated with X and GNOME, see xgps.
+For a more interesting example integrated with X and GTK, see xgps.
 
 
