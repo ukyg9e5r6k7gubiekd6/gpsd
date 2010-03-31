@@ -8,7 +8,7 @@
 /* gps.h -- interface of the libgps library */
 
 #ifdef _WIN32
-  #define strtok_r(s,d,p) strtok(s,d)
+#define strtok_r(s,d,p) strtok_s(s,d,p)
 #endif
 
 #ifdef __cplusplus
