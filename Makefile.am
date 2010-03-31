@@ -7,7 +7,8 @@
 # Exclude version-control state from the tarball.  Needed because we 
 # grab the test directory wholesale. Hack appropriately when and if we 
 # change version control systems.
-am__tar += --exclude '*git*' --exclude '*.so' --exclude '*.pyc'
+# \bug This is non-portable and depends on GNU tar beyond-POSIX extensions.
+am__tar += --exclude '*git*'
 
 CLEANFILES =
 
@@ -458,8 +459,11 @@ EXTRA_DIST = \
 	packaging/etc_init.d_gpsd_rpm \
 	do-tests \
 	regress-driver \
-	test \
-	gps
+	gps/__init__.py \
+	gps/client.so \
+	gps/fake.py \
+	gps/gps.py \
+	test
 
 #dist-hook:
 #	$(MKDIR_P) '$(distdir)/contrib' && \
