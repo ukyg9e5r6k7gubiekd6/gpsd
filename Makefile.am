@@ -531,6 +531,17 @@ version:
 # apparently increases the accuracy of computation in a way that affects
 # the low-order digits of the track field in the O response.
 
+# Our regression tests are make targets, while automake expects
+# programs.  Thus, our approach is to construct the test
+# infrastructure our way, with make targets, and to have one TEST from
+# automake's viewpoint: a trivial shell script to invoke make with our
+# top-level regression target.
+
+# One might think that using TESTS_ENVIRONMENT=$(MAKE) would work
+# around this, but because the generated rule (check-TESTS) both
+# depends on each TEST as well as invokes it (with TESTS_ENVIRONMENT)
+# the entire list of tests is run twice.
+
 # Regression-test the daemon
 gps-regress: gpsd 
 	$(srcdir)/regress-driver -t $(srcdir)/test/daemon/*.log
@@ -635,12 +646,10 @@ bits-regress: test_bits
 testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
-# automake has support for running programs, but not make targets.
-# However, TESTS_ENVIRONMENT can be used to specify an interpreter,
-# which we use to re-invoke make. The order of the targets in TESTS 
-# defines the sequence order of testing.
-TESTS_ENVIRONMENT = $(MAKE)
-TESTS = gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+# do-tests is a shell script that invokes make with target testregress.
+# This works around automake's lack of support for make targets as tests.
+TESTS_ENVIRONMENT = MAKE=$(MAKE)
+TESTS = do-tests
 
 # Productions for setting up and performing udev tests.
 #
