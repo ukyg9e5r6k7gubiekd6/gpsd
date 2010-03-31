@@ -20,6 +20,7 @@ pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
 X windows + lesstif    -> two test clients depend on this
 ncurses                -> two more test clients depend on this
+Qt + qmake             -> libQgpsmm depends on this
 
 Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
 2.4-compatible except that you need either the json library module
@@ -177,7 +178,33 @@ file called 'gpsd_config.inc' containing configuration information;
 edit to taste.  Note that for the Google Maps feature work you need
 to set a valid Google API key in your config file.
 
-14. There are regression tests to verify proper operation of gpsd, and
+14. libQgpsmm is a Qt version of the libgps/libgpsmm pair. Thanks to
+the multi-platform approach of Qt, it allows the gpsd client library
+to be available on all the Qt supported platforms.  Please see
+http://qt.nokia.com/doc/4.6/supported-platforms.html for a status of
+Qt supported platforms as of version 4.6.
+
+You can build libQgpsmm if you have qmake and Qt (specifically the
+(specifically QtCore and QtNetwork modules) version 4.5.3 or higher.
+You will also need a C++ compiler supported by Qt (tested on GCC
+4.4.0/mingw on Windows and GCC 4.1.2 on linux).
+
+Building is done through a standard Qt .pro project file:
+- Go to the libQgpsmm subdirectory of gpsd and execute "qmake" 
+  to create the Makefiles
+- execute "make" to build the library
+- execute "make install" or equivalent to copy libgpsmm.h and the library 
+  to the appropriate location for your platform.
+
+Specifically for linux: You can specify the installation prefix by
+running "qmake PREFIX=<installation_root>". Default value is
+"/usr/local".
+
+Please refer to Qt's documentation at
+http://qt.nokia.com/doc/4.6/platform-specific.html for platform specific
+building documentation
+
+15. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
 check".  It is not necessary to install first.  Python is
