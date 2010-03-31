@@ -10,6 +10,9 @@
 #define GPS_JSON_COMMAND_MAX	80
 #define GPS_JSON_RESPONSE_MAX	1024
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
 void json_tpv_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
@@ -26,6 +29,9 @@ int json_ais_read(const char *, char *, size_t, struct ais_t *,
 		  /*@null@*/const char **);
 int libgps_json_unpack(const char *, struct gps_data_t *, 
 		       /*@null@*/const char **);
+#ifdef __cplusplus
+}
+#endif
 
 /* these values don't matter in themselves, they just have to be out-of-band */
 #define DEVDEFAULT_BPS  	0

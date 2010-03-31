@@ -16,6 +16,11 @@
 
 #include "gpsd.h"
 
+#ifdef USE_QT
+#include <QDateTime>
+#include <QStringList>
+#endif
+
 #define MONTHSPERYEAR	12		/* months per calendar year */
 
 void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
@@ -147,6 +152,7 @@ time_t mkgmtime(register struct tm *t)
 double iso8601_to_unix(/*@in@*/char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
+#ifndef USE_QT
     char *dp = NULL;
     double usec;
     struct tm tm;
@@ -157,6 +163,16 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     else
 	usec = 0;
     return (double)mkgmtime(&tm) + usec;
+#else
+    double usec = 0;
+
+    QString t(isotime);
+    QDateTime d = QDateTime::fromString(isotime, Qt::ISODate);
+    QStringList sl = t.split(".");
+    if (sl.size() > 1)
+        usec = sl[1].toInt() / pow(10., (double)sl[1].size());
+    return d.toTime_t() + usec;
+#endif
 }
 
 /*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], size_t len)
@@ -539,9 +555,11 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 	}
 #endif /* __UNUSED__ */
     } else {
+#ifndef USE_QT
 	gpsd_report(LOG_DATA,
 	    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
 	    gpsdata->dev.path);
+#endif
 	return 0;
     }
 
@@ -553,6 +571,7 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     tdop = sqrt(inv[3][3]);
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 
+#ifndef USE_QT
     gpsd_report(LOG_DATA, "DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
 		xdop, dop->xdop,
 		ydop, dop->ydop,
@@ -561,6 +580,7 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
 		pdop, dop->pdop,
 		tdop, dop->tdop,
 		gdop, dop->gdop);
+#endif
 
     /*@ -usedef @*/
     if (isnan(dop->xdop)!=0) {

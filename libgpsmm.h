@@ -11,7 +11,12 @@
 #include <sys/types.h>
 #include "gps.h" //the C library we are going to wrap
 
+#ifndef USE_QT
 class gpsmm {
+#else
+#include "libQgpsmm_global.h"
+class LIBQGPSMMSHARED_EXPORT gpsmm {
+#endif
 	public:
 		gpsmm();
 		virtual ~gpsmm();

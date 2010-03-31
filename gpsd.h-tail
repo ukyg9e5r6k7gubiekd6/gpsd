@@ -5,6 +5,10 @@
  */
 #endif /* GPSD_CONFIG_H */
 
+#ifdef _WIN32
+typedef unsigned int speed_t;
+#endif
+
 /* constants for the VERSION response */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
 #define GPSD_PROTO_MINOR_VERSION	2	/* bump on compatible changes */
@@ -232,7 +236,9 @@ struct gps_device_t {
     struct gps_context_t	*context;
     bool is_serial;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
+#ifndef _WIN32
     struct termios ttyset, ttyset_old;
+#endif
     unsigned int baudindex;
     int saved_baud;
     struct gps_packet_t packet;

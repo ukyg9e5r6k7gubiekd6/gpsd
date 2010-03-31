@@ -21,6 +21,7 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
+#ifndef USE_QT
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -31,6 +32,9 @@
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
+#else 
+#include <QTcpSocket>
+#endif /* USE_QT */
 
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);
@@ -57,7 +61,9 @@ void gps_enable_debug(int level, FILE *fp)
 {
     debuglevel = level;
     debugfp = fp;
+#ifdef CLIENTDEBUG_ENABLE
     json_enable_debug(level-2, fp);
+#endif
 }
 
 static void gps_trace(int errlevel, const char *fmt, ... )
@@ -95,10 +101,20 @@ int gps_open_r(const char *host, const char *port,
 
     libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));    
 
+#ifndef USE_QT
     if ((gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return -1;
     }
+#else
+	QTcpSocket* sock = new QTcpSocket();
+    gpsdata->gps_fd = sock;
+    sock->connectToHost(host, QString(port).toInt());
+    if (!sock->waitForConnected())
+        qDebug() << "libgps::connect error: " << sock->errorString();
+    else
+        qDebug() << "libgps::connected!";
+#endif
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
@@ -133,8 +149,15 @@ int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     libgps_debug_trace((1, "gps_close()\n"));
+#ifndef USE_QT
     free(PRIVATE(gpsdata));
     gpsdata->gps_fd = -1;
+#else
+	QTcpSocket* sock = (QTcpSocket*)gpsdata->gps_fd;
+    sock->disconnectFromHost();
+    delete sock;
+	gpsdata->gps_fd = NULL;
+#endif
     
     return 0;
 }
@@ -153,8 +176,10 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
     /* FIXME: We don't dump the entire state here yet */
+#ifndef USE_QT
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n", 
 		  collect->set, gpsd_maskdump(collect->set));
+#endif
     if (collect->set & ONLINE_SET)
 	(void)fprintf(debugfp, "ONLINE: %lf\n", collect->online);
     if (collect->set & TIME_SET)
@@ -602,7 +627,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	//libgps_debug_trace((stderr, "libgps: raw hook called on '%s'\n", buf));
 	gpsdata->raw_hook(gpsdata, buf, strlen(buf));
     }
+#ifndef USE_QT
     libgps_debug_trace((1, "final flags: (0x%04x) %s\n", gpsdata->set, gpsd_maskdump(gpsdata->set)));
+#endif
     return 0;
 }
 /*@ +compdef @*/
@@ -611,6 +638,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 bool gps_waiting(struct gps_data_t *gpsdata)
 /* is there input waiting from the GPS? */
 {
+#ifndef USE_QT
     fd_set rfds;
     struct timeval tv;
 
@@ -623,6 +651,9 @@ bool gps_waiting(struct gps_data_t *gpsdata)
     tv.tv_sec = 0; tv.tv_usec = 1;
     /* all error conditions return "not waiting" -- crude but effective */
     return (select(gpsdata->gps_fd+1, &rfds, NULL, NULL, &tv) == 1);
+#else
+    return ((QTcpSocket*)(gpsdata->gps_fd))->waitForReadyRead(250);
+#endif
 }
 
 int gps_poll(struct gps_data_t *gpsdata)
@@ -641,11 +672,16 @@ int gps_poll(struct gps_data_t *gpsdata)
         eol = NULL;
 
     if (eol == NULL) {
+#ifndef USE_QT
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
 	status = (int)recv(gpsdata->gps_fd,
 			   priv->buffer + priv->waiting,
 			   sizeof(priv->buffer)-priv->waiting,
 			   0);
+#else
+	status = ((QTcpSocket*)(gpsdata->gps_fd))->read(priv->buffer + priv->waiting, sizeof(priv->buffer)-priv->waiting);
+#endif
+
 	/* if we just received data from the socket, it's in the buffer */ 
 	if (status > -1)
 	    priv->waiting += status;
@@ -657,9 +693,11 @@ int gps_poll(struct gps_data_t *gpsdata)
 	     */
 	    if (status == 0)
 		return -1;
+#ifndef USE_QT
 	    /* count transient errors as success, we'll retry later */
 	    else if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
 		return 0;
+#endif
 	    /* hard error return of -1, pass it along */
 	    else
 		return -1;
@@ -701,10 +739,21 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... )
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
 	(void)strlcat(buf, "\n", BUFSIZ);
+#ifndef USE_QT
     if (write(gpsdata->gps_fd, buf, strlen(buf)) == (ssize_t)strlen(buf))
 	return 0;
     else
 	return -1;
+#else
+	QTcpSocket* sock = (QTcpSocket*)gpsdata->gps_fd;
+    sock->write(buf, strlen(buf));
+    if (sock->waitForBytesWritten())
+        return 0;
+    else {
+        qDebug() << "libgps::send error: " << sock->errorString();
+        return -1;
+    }
+#endif
 }
 
 int gps_stream(struct gps_data_t *gpsdata, 
@@ -718,8 +767,10 @@ int gps_stream(struct gps_data_t *gpsdata,
 	flags |= WATCH_JSON;
     }
 
+#ifndef USE_QT
     if (flags & POLL_NONBLOCK)
 	(void)fcntl(gpsdata->gps_fd, F_SETFL, O_NONBLOCK); 
+#endif
     if ((flags & WATCH_DISABLE) != 0) {
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w-", sizeof(buf));
@@ -780,7 +831,11 @@ extern char /*@observer@*/ *gps_errstr(const int err)
      * We might add our own error codes in the future, e.g for
      * protocol compatibility checks
      */
+#ifndef USE_QT
     return netlib_errstr(err); 
+#else
+    return "";
+#endif
 }
 
 #ifdef TESTMAIN

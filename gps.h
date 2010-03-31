@@ -7,6 +7,10 @@
 
 /* gps.h -- interface of the libgps library */
 
+#ifdef _WIN32
+  #define strtok_r(s,d,p) strtok(s,d)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -960,7 +964,11 @@ struct gps_data_t {
 				 * prone to false zero values.
 				 */
 
+#ifndef USE_QT
     socket_t gps_fd;		/* socket or file descriptor to GPS */
+#else
+    void* gps_fd;
+#endif
     struct gps_fix_t	fix;	/* accumulated PVT data */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
