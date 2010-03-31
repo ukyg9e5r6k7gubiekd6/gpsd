@@ -273,12 +273,10 @@ install-exec-local:
 	$(PYTHON) setup.py install --prefix=${prefix} # --root=$(DESTDIR)
 endif
 
-if LIBGPSMM_ENABLE
-TESTBINS = test_float test_trig test_gpsmm test_bits test_packet test_geoid \
-	test_mkgmtime test_json
-else
 TESTBINS = test_float test_trig test_bits test_packet test_geoid \
 	test_mkgmtime test_json
+if LIBGPSMM_ENABLE
+TESTBINS += test_gpsmm
 endif
 
 #
