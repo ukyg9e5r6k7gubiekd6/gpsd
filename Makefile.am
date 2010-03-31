@@ -456,6 +456,7 @@ EXTRA_DIST = \
 	packaging/etc_default_gpsd \
 	packaging/etc_init.d_gpsd \
 	packaging/etc_init.d_gpsd_rpm \
+	do-tests \
 	regress-driver \
 	test \
 	gps
