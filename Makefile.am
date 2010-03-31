@@ -631,10 +631,8 @@ json-regress: test_json
 bits-regress: test_bits
 	$(srcdir)/test_bits
 
-# Do all normal regression tests. Nowadays we delegate this to
-# "make check" since that's what people with autotools exprience
-# expect to be able to do.
-testregress: check
+# Do all normal regression tests.
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
 # automake has support for running programs, but not make targets.
