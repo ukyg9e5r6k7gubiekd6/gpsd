@@ -43,7 +43,7 @@ extern char *strtok_r(char *, const char *, char **);
 struct privdata_t {
     bool newstyle;
     ssize_t waiting;
-    char buffer[BUFSIZ];
+    char buffer[GPS_JSON_RESPONSE_MAX * 2];
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
