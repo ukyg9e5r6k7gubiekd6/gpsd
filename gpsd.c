@@ -893,6 +893,16 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 	(void)strlcat(reply, "]}\r\n", replylen);
 }
 
+static void rstrip(char *str)
+/* strip trailing \r\n\t\SP from a string */
+{
+    char *strend;
+    strend = str + strlen(str) - 1;
+    while (isspace(*strend))
+	--strend;
+    strend[1] = '\0';
+}
+
 static void handle_request(struct subscriber_t *sub, 
 				    const char *buf, const char **after,
 				    char *reply, size_t replylen)
@@ -1087,14 +1097,10 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
-		    char *replyend;
 		    json_tpv_dump(&devp->gpsdata, 
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
-		    replyend = reply + strlen(reply) - 1;
-		    while (isspace(*replyend))
-		    	--replyend;
-		    replyend[1] = '\0';
+		    rstrip(reply);
 		    (void)strlcat(reply, ",", replylen);
 		}
 	    }
@@ -1105,14 +1111,10 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
-		    char *replyend;
 		    json_sky_dump(&devp->gpsdata, 
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
-		    replyend = reply + strlen(reply) - 1;
-		    while (isspace(*replyend))
-		    	--replyend;
-		    replyend[1] = '\0';
+		    rstrip(reply);
 		    (void)strlcat(reply, ",", replylen);
 		}
 	    }
@@ -1126,7 +1128,7 @@ static void handle_request(struct subscriber_t *sub,
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
-	while (isspace(*errend))
+	while (isspace(*errend) && errend > buf)
 	    --errend;
 	(void)snprintf(reply, replylen, 
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
