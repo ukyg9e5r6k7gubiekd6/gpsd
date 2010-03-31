@@ -21,9 +21,11 @@ DBUS                   -> gpsd will issue DBUS notifications
 X windows + lesstif    -> two test clients depend on this
 ncurses                -> two more test clients depend on this
 
-Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is 2.4-compatible
-except that you need either the json library module from 2.6 or the
-functionally equivalent simplejson backport.
+Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
+2.4-compatible except that you need either the json library module
+from 2.6 or the functionally equivalent simplejson backport.  Note
+that while Python is required to *build* GPSD (the build uses some code
+generators in Python), it is not required to *run* GPSD.
 
 For building from the source tree, the following are necessary:
 autoconf 2.61 or later
@@ -162,9 +164,6 @@ hardware already supported.
 11. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
-It's also possible to build without Python via --disable-python, in which 
-case you'd build won't make Python libraries and "make install" won't
-try to install Python tools.
 
 12. Note for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
