@@ -400,7 +400,7 @@ endif
 # tarball in order for 'make diat-rpm' to work.  The BUILT_SOURCES
 # files are here in order to minimize build dependencies for package
 # builders who never alter anything, especially the Python dependency.
-# Alsoo note that the test and gps directories are here rather than
+# Also note that the test and gps directories are here rather than
 # being the contents of a SUBDIRS variable so that autconf won't 
 # go looking for makefiles in them.
 EXTRA_DIST = \
@@ -643,7 +643,7 @@ bits-regress: test_bits
 	$(srcdir)/test_bits
 
 # Do all normal regression tests.
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+testregress: check
 	@echo "Regressions complete."
 
 # do-tests is a shell script that invokes make with target testregress.
