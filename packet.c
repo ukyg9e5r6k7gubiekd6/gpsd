@@ -1021,6 +1021,12 @@ static void character_discard(struct gps_packet_t *lexer)
 
 /* entry points begin here */
 
+void packet_init(struct gps_packet_t *lexer)
+{
+    lexer->char_counter = 0;
+    lexer->retry_counter = 0;
+}
+
 void packet_parse(struct gps_packet_t *lexer)
 /* grab a packet from the input buffer */
 {

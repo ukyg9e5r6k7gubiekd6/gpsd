@@ -368,8 +368,7 @@ int gpsd_activate(struct gps_device_t *session)
 #ifdef SIRF_ENABLE
 	session->driver.sirf.satcounter = 0;
 #endif /* SIRF_ENABLE */
-	session->packet.char_counter = 0;
-	session->packet.retry_counter = 0;
+	packet_init(&session->packet);
 	gpsd_report(LOG_INF,
 		    "gpsd_activate(): opened GPS (fd %d)\n",
 		    session->gpsdata.gps_fd);

@@ -239,6 +239,7 @@ static int packet_test(struct map *mp)
     struct gps_packet_t packet;
     int failure = 0;
 
+    packet_init(&packet);
     packet.type = BAD_PACKET;
     packet.state = 0;
     /*@i@*/memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
