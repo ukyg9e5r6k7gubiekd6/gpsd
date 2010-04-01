@@ -20,7 +20,6 @@
 #
 #   * mail the output back to you if the test failed.
 #
-# FIXME: We're not generating TEST.LOG
 
 # Project-specific configuration
 project=GPSD
@@ -62,7 +61,7 @@ else
     fi
 
     # Perform the test
-    if (./autogen.sh && make && make aivdm-regress)
+    if (./autogen.sh && make && make aivdm-regress) >TEST.LOG
     then
 	logmessage="Regression test succeeded."
 	mailback=no
