@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# flockdriver - conduct regression tests as an argent for a remote flocktest
+#
+#  This will perform the following steps:
+#
+#  * If required, create the origin repo in a directory named after 
+#     you beneath the test account home,
+#
+#   * git pull and build in that repo.
+#
+#   * make check, capturing the output
+#
+#   * mail the output back to you.
+#
+# FIXME: this is presently just a test stub.
+#
+invoker=$1
+
+echo "On behalf of: ${invoker}"
+
+# FIXME: actual test sequence to go here
+ls 
+
+# End.

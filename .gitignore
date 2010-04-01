@@ -96,3 +96,5 @@ www/client-howto.html
 www/rtcm-104.html
 www/srec.html
 www/writing-a-driver.html
+# Control for the flock tester
+devtools/.flocktest
