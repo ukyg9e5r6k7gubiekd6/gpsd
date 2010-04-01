@@ -52,11 +52,15 @@ class TestSite:
     def update_remote(self, filename):
         "Copy a specified file to the remote home."
         os.system("scp %s %s:~" % (filename, self.me))
-    def do_remote(self, command, verbose=0):
+    def do_remote(self, command, background=True, verbose=0):
         "Execute a command on a specified remote host."
         if verbose > 1:
             command = "sh -x " + command
-        command = "ssh %s '%s'" %  (self.me, command)
+        command = "( ssh %s '%s' )" %  (self.me, command)
+        if background:
+            command += " &"
+        if verbose:
+            print command
         return os.system(command)
 
 class TestFlock:
@@ -66,12 +70,12 @@ class TestFlock:
         "Copy a specified file to the remote home on all machines."
         for site in self.sitelist:
             site.update_remote(filename)
-    def do_remote(self, command, verbose=0):
+    def do_remote(self, command, background=True, verbose=0):
         "Execute a command on all machines in the flock." 
         for site in self.sitelist:
             if verbose > 0:
                 print site.fqdn + ":"
-            site.do_remote(command, verbose)
+            site.do_remote(command, background, verbose)
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -91,14 +95,14 @@ if __name__ == '__main__':
     subdir = None
     mailto = None
     verbose = 0
-    foreground = False
+    background = True
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
         elif  switch == 'd':
             subdir = val
         elif switch == '-n':
-            foreground = True
+            background = False
         elif  switch == 'm':
             mailto = val
         elif switch == '-v':
@@ -150,8 +154,6 @@ if __name__ == '__main__':
             flock.exclude(controls.get('exclude'))
         print "Testing at", flock.listdump()
         command = "./flockdriver -d %s -m %s" % (subdir, mailto)
-        if not foreground:
-            command += " &"
-        flock.do_remote(command, verbose=verbose)
+        flock.do_remote(command, background=background, verbose=verbose)
 
 # End
