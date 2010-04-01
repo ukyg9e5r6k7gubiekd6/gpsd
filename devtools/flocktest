@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d subdir] [- mailto] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d subdir] [- mailto] [-n] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -15,6 +15,8 @@ Otherwise, the remote flockdriver script is executed on each machine.
 The -d option passes it a name for the remote test subdirectory
 
 The -m option passes it an email address to which failure logs can be mailed.
+
+The -n option makes the command run in foreground
 
 -v 1 prints the remote hostname before each invocation.
 
@@ -79,7 +81,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdmxv:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdmnxv:?")
     except getopt.GetoptError, msg:
         print "flockest: " + str(msg)
         raise SystemExit, 1
@@ -89,11 +91,14 @@ if __name__ == '__main__':
     subdir = None
     mailto = None
     verbose = 0
+    foreground = False
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
         elif  switch == 'd':
             subdir = val
+        elif switch == '-n':
+            foreground = True
         elif  switch == 'm':
             mailto = val
         elif switch == '-v':
@@ -144,6 +149,9 @@ if __name__ == '__main__':
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
         print "Testing at", flock.listdump()
-        flock.do_remote("./flockdriver -d %s -m %s &" % (subdir, mailto))
+        command = "./flockdriver -d %s -m %s" % (subdir, mailto)
+        if not foreground:
+            command += " &"
+        flock.do_remote(command, verbose=verbose)
 
 # End
