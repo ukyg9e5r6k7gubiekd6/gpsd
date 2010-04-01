@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-g gitname] [-m mailto] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d gitname] [-m mailto] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -12,7 +12,7 @@ all flock machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
 
-The -g option passes it a usermame for git clone and pull operations.
+The -d option passes it a name for the remote test subdirectory
 
 The -m option passes it an email address to which test results can be mailed.
 
@@ -29,9 +29,9 @@ If you have a .flocktest file, it is interpreted as a set of
 attribute/value pairs, one per line separated by '='.  The following
 attributes are recognized:
 
-gitname = a default identity to use for git pulls and clones (-g)
+subdir = a default test directory name (-d)
 mailto = a default email address to use (-m)
-exclude = a default exclude set (-m)
+exclude = a default exclude set (-x)
 """
 
 import os, sys, ConfigParser, getopt
@@ -71,21 +71,21 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cgmxv:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdmxv:?")
     except getopt.GetoptError, msg:
         print "flockest: " + str(msg)
         raise SystemExit, 1
 
     copymode = False
     exclusions = []
-    gitname = None
+    subdir = None
     mailto = None
     verbose = 0
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
-        elif  switch == 'g':
-            gitname = val
+        elif  switch == 'd':
+            subdir = val
         elif  switch == 'm':
             mailto = val
         elif switch == '-v':
@@ -120,17 +120,17 @@ if __name__ == '__main__':
         else:
             print "flocktest: who are you?"
             sys.exit(1)
-        if gitname:
+        if subdir:
             pass
-        elif 'gitname' in controls:
-            gitname = controls.get('gitname')
+        elif 'subdir' in controls:
+            subdir = controls.get('subdir')
         else:
-            print "flocktest: what is your id?"
+            print "flocktest: what is your test subdirectory?"
             sys.exit(1)
         if exclusions:
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver -g %s -m %s" % (gitname, mailto), verbose=verbose)
+        flock.do_remote("./flockdriver -d %s -m %s" % (subdir, mailto), verbose=verbose)
 
 # End

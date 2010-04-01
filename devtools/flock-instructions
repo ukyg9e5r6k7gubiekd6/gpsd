@@ -31,6 +31,8 @@ To gain access to the test network:
 1. Email a valid public ssh key to the gatekeeper. He will install the
    key on the test sites.
 
+2. Once your public key is installed on the test sites, 
+
 To use the test network:
 
 1. Call the script 'flocktest', giving it your email address as argument.
