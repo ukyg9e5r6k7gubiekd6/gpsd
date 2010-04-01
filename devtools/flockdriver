@@ -2,6 +2,11 @@
 #
 # flockdriver - conduct regression tests as an argent for a remote flocktest
 #
+# usage: flockdriver -g gitname -m mailto
+#
+# The -g argument must be a git name valid for forming a clone URL
+# The -m option must be a valid address for notification mail.
+#
 #  This will perform the following steps:
 #
 #  * If required, create the origin repo in a directory named after 
@@ -13,13 +18,19 @@
 #
 #   * mail the output back to you.
 #
-# FIXME: this is presently just a test stub.
-#
-invoker=$1
+while getopts gm opt
+do
+    case $opt in
+        g) gitname=$2; shift; shift ;;
+	m) mailto=$2; shift; shift ;;
+    esac
+done
 
-echo "On behalf of: ${invoker}"
+# Should yield a git URL valid for commit access
+origin="ssh://${gitname}@git.berlios.de/gitroot/gpsd"
 
-# FIXME: actual test sequence to go here
-ls 
+echo "site: `hostname --fqdn`" 
+echo "mailto: $mailto"
+echo "clone-url: $origin"
 
 # End.

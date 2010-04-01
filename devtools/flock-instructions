@@ -38,6 +38,6 @@ To use the test network:
    "flocktest -?" to see instructions about how to set this up.)
 
    The local flocktest script will execute the remote flockdriver
-   script on each machine, calling it with your email name as
-   argument. See the local copy of the flockdriver script for
-   details on the test sequence
+   script on each machine, calling it with options that will identify
+   you to it. See the local copy of the flockdriver script for details
+   on the test sequence

@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-g gitname] [-m mailto] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -11,6 +11,10 @@ The -c option invokes copy mode, which copies the 'flockdriver' script to
 all flock machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
+
+The -g option passes it a usermame for git clone and pull operations.
+
+The -m option passes it an email address to which test results can be mailed.
 
 -v 1 prints the remote hostmame before each invocation.
 
@@ -21,15 +25,13 @@ either remote hostnames or architecture tags.  Matching sites are
 excluded.  You may wish to use this to avoid doing remote tests that
 are redundant with your local ones.
 
-The whoami argument should be your email address. Copy mode does
-not require it
+If you have a .flocktest file, it is interpreted as a set of
+attribute/value pairs, one per line separated by '='.  The following
+attributes are recognized:
 
-If you have a .flocktest file, it is interpreted as a set of attribute
--value pairs, one per line separated by '='.  The following attributes
-are recognized:
-
-whoami = a default email address to use
-exclude = a default exclude option 
+gitname = a default identity to use for git pulls and clones (-g)
+mailto = a default email address to use (-m)
+exclude = a default exclude set (-m)
 """
 
 import os, sys, ConfigParser, getopt
@@ -60,7 +62,8 @@ class TestFlock:
     def do_remote(self, command, verbose=0):
         "Execute a command on all machines in the flock." 
         for site in self.sitelist:
-            print site.fqdn + ":"
+            if verbose > 0:
+                print site.fqdn + ":"
             site.do_remote(command, verbose)
     def exclude(self, exclusions):
         "Delete matching sites."
@@ -68,17 +71,23 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cxv?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cgmxv:?")
     except getopt.GetoptError, msg:
         print "flockest: " + str(msg)
         raise SystemExit, 1
 
     copymode = False
     exclusions = []
+    gitname = None
+    mailto = None
     verbose = 0
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
+        elif  switch == 'g':
+            gitname = val
+        elif  switch == 'm':
+            mailto = val
         elif switch == '-v':
             verbose = int(val)
         elif switch == '-x':
@@ -104,17 +113,24 @@ if __name__ == '__main__':
     if copymode:
         flock.update_remote("flockdriver")
     else:
-        if arguments:
-            whoami = arguments[0]
-        elif 'whoami' in controls:
-            whoami = controls.get('whoami')
+        if mailto:
+            pass
+        elif 'mailto' in controls:
+            mailto = controls.get('mailto')
         else:
             print "flocktest: who are you?"
+            sys.exit(1)
+        if gitname:
+            pass
+        elif 'gitname' in controls:
+            gitname = controls.get('gitname')
+        else:
+            print "flocktest: what is your id?"
             sys.exit(1)
         if exclusions:
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver " + whoami, verbose=verbose)
+        flock.do_remote("./flockdriver -g %s -m %s" % (gitname, mailto), verbose=verbose)
 
 # End
