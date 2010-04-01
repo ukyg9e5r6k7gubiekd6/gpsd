@@ -10,7 +10,7 @@ To add a machine to the flock, do these steps:
    where the test account can run them.  On a Debian/Ubuntu system you may be
    able to do this all at once with this command:
 
-   aptitude install git-core; aptitude build-dep gpsd
+   aptitude install git-core autoconf automake libtool; aptitude build-dep gpsd;
 
 3. Make sure the account is reachable from the general Internet via ssh.
 
