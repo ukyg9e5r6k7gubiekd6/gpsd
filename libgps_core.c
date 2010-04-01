@@ -151,12 +151,13 @@ int gps_close(struct gps_data_t *gpsdata)
     libgps_debug_trace((1, "gps_close()\n"));
 #ifndef USE_QT
     free(PRIVATE(gpsdata));
+    close(gpsdata->gps_fd);
     gpsdata->gps_fd = -1;
 #else
-	QTcpSocket* sock = (QTcpSocket*)gpsdata->gps_fd;
+    QTcpSocket* sock = (QTcpSocket*)gpsdata->gps_fd;
     sock->disconnectFromHost();
     delete sock;
-	gpsdata->gps_fd = NULL;
+    gpsdata->gps_fd = NULL;
 #endif
     
     return 0;
