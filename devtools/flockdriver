@@ -16,12 +16,15 @@
 #
 #   * make check, capturing the output
 #
-#   * mail the output back to you.
+#   * Notify the #gpsd chabnnel of success or failyre via CIA
 #
-while getopts d opt
+#   * mail the output back to you if the test failed.
+#
+while getopts dm opt
 do
     case $opt in
         d) subdir=$2; shift; shift ;;
+	m) mailto=$2; shift; shift ;;
     esac
 done
 
@@ -36,6 +39,7 @@ echo "Test begins: "`date`
 site=`hostname --fqdn`
 echo "Site: $site" 
 echo "Directory: ${PWD}${subdir}"
+echo "Mailto: $mailto"
 
 # Set up or update the repo
 if [ ! -d $subdir ]
@@ -49,9 +53,11 @@ fi
 # Perform the test
 if (./autogen.sh && make aivdm-regress)
 then
-    logmessage="Regression test succeeded"
+    logmessage="Regression test succeeded."
+    success=yes
 else
-    logmessage="Regression test failed"
+    logmessage="Regression test failed."
+    success=no
 fi
 
 # Here's where we abuse CIA to do our notfications for us.
@@ -77,6 +83,7 @@ refname=${refname##refs/heads/}
 gitver=$(git --version)
 gitver=${gitver##* }
 
+# Compose and ship the CIA notification
 out="
 <message>
   <generator>
@@ -97,10 +104,8 @@ out="
     </commit>
   </body>
 </message>"
-
-set -x
 ${sendmail} << EOM
-Message-ID: <${merged}.${subdir}@GPSD>
+Message-ID: <${merged}.${subdir}.blip@GPSD>
 From: ${from}
 To: ${to}
 Content-type: text/xml
@@ -108,6 +113,23 @@ Subject: DeliverXML
 ${out}
 EOM
 
+# Now ship the error log if need be.
+cat >/tmp/flockdriver$$ <<EOM
+Message-ID: <${merged}.${subdir}.log@GPSD>
+From: ${from}
+To: ${mailto}
+Content-type: text/plain; charset=us-ascii
+Subject: flockdriver test log
+
+$logmessage
+EOM
 echo "Test ends: "`date`
+
+if [ "$success" = no ]
+then
+    # Ugh - depends on flockdriver having done a redirect to TEST.LOG
+    cat /tmp/flockdriver$$ TEST.LOG | ${sendmail}
+fi
+rm /tmp/flockdriver$$
 
 # End.

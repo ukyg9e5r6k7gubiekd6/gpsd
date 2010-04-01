@@ -33,8 +33,9 @@ To gain access to the test network:
 
 To use the test network:
 
-1. Call the script 'flocktest'.
-   (You can also set these in a .flockdriver dot file; do
+1. Call the script 'flocktest', optionally with an -m option to
+   set a return email address for error logs.
+   (You can also set this in a .flockdriver dot file; do
    "flocktest -?" to see instructions about how to set this up.)
 
    The local flocktest script will execute the remote flockdriver
@@ -43,4 +44,6 @@ To use the test network:
    on the test sequence
 
    The success/failure notifications will appear as CIA messages on
-   the #gpsd IRC channel at freenode.
+   the #gpsd IRC channel at freenode.  If the test failed, the
+   log will be mailed to you.
+

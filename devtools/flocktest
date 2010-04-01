@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d gitname] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d subdir] [- mailto] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -13,6 +13,8 @@ all flock machines
 Otherwise, the remote flockdriver script is executed on each machine.
 
 The -d option passes it a name for the remote test subdirectory
+
+The -m option passes it an email address to which failure logs can be mailed.
 
 -v 1 prints the remote hostname before each invocation.
 
@@ -28,13 +30,16 @@ attribute/value pairs, one per line separated by '='.  The following
 attributes are recognized:
 
 subdir = a default test directory name (-d)
+mailto = a default email address to use (-m)
 exclude = a default exclude set (-x)
 
 If you do not specify a subdirectory name either with -d or in the
-.flocktest file, the value of $LOGNAME will be used.
+.flocktest file, the value of $LOGNAME will be used.  If you do not
+specify a mailto address with -m or a mailto entry, one will be
+guessed from ${LOGNAME} and your machine's FQDN.
 """
 
-import os, sys, ConfigParser, getopt
+import os, sys, ConfigParser, getopt, socket
 
 class TestSite:
     "Methods for performing tests on a single remote site."
@@ -113,6 +118,15 @@ if __name__ == '__main__':
     if copymode:
         flock.update_remote("flockdriver")
     else:
+        if mailto:
+            pass
+        elif 'mailto' in controls:
+            mailto = controls.get('mailto')
+        else:
+            mailto = sys.getenv("LOGNAME") + "@" + socket.fqdn()
+        if not mailto:
+            print "flocktest: who are you?"
+            sys.exit(1)
         if subdir:
             pass
         elif 'subdir' in controls:
@@ -126,6 +140,6 @@ if __name__ == '__main__':
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver -d %s >%s/TEST.LOG 2>&1" % (subdir, subdir))
+        flock.do_remote("./flockdriver -d %s -m %s >%s/TEST.LOG 2>&1" % (subdir, mailto, subdir))
 
 # End
