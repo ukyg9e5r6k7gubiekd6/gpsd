@@ -140,6 +140,6 @@ if __name__ == '__main__':
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver -d %s -m %s >%s/TEST.LOG 2>&1" % (subdir, mailto, subdir))
+        flock.do_remote("./flockdriver -d %s -m %s >%s/TEST.LOG 2>&1 &" % (subdir, mailto, subdir))
 
 # End

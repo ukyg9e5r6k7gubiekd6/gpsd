@@ -51,7 +51,7 @@ else
 fi
 
 # Perform the test
-if (./autogen.sh && make aivdm-regress)
+if (./autogen.sh && make check)
 then
     logmessage="Regression test succeeded."
     success=yes
