@@ -43,7 +43,7 @@ echo "Test begins: "`date`
 
 site=`hostname --fqdn`
 echo "Site: $site" 
-echo "Directory: ${PWD}${subdir}"
+echo "Directory: ${PWD}/${subdir}"
 echo "Mailto: $mailto"
 
 if [ -f "flockdriver.lock" ]
@@ -56,14 +56,14 @@ else
     # Set up or update the repo
     if [ ! -d $subdir ]
     then
-	mkdir $subdir
 	git clone $origin $subdir
+	cd $subdir
     else
 	cd $subdir; git pull
     fi
 
     # Perform the test
-    if (./autogen.sh && make check)
+    if (./autogen.sh && make && make aivdm-regress)
     then
 	logmessage="Regression test succeeded."
 	mailback=no
@@ -117,6 +117,7 @@ out="
     </commit>
   </body>
 </message>"
+sendmail=cat
 ${sendmail} << EOM
 Message-ID: <${merged}.${subdir}.blip@GPSD>
 From: ${from}
