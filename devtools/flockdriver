@@ -27,11 +27,21 @@ do
 done
 
 # Should yield a git URL valid for read-only access
-origin="git://git.berlios.de/gitroot/gpsd"
+origin="git://git.berlios.de/gpsd"
 
-echo "site: `hostname --fqdn`" 
-echo "subdir: $subdir"
-echo "mailto: $mailto"
-echo "clone-url: $origin"
+echo "Site: `hostname --fqdn`" 
+echo "  subdir: $subdir"
+echo "  mailto: $mailto"
+echo "  clone-url: $origin"
+echo "  here: $PWD"
+
+# Set up or update the repo
+if [ ! -d $subdir ]
+then
+    mkdir $subdir
+    git clone $origin $subdir
+else
+    cd $subdir; git pull
+fi
 
 # End.
