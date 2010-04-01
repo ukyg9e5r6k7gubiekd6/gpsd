@@ -20,11 +20,6 @@
 #
 #   * mail the output back to you if the test failed.
 #
-# FIXME: The ugly way we handle collecting the test log has consequences:
-# a test attempt that trips over the flockdriver lock and stops will 
-# clobber whatever part of the testfile the previous test has written.
-# Not an issue unless the test fails.
-#
 while getopts dm opt
 do
     case $opt in
@@ -71,6 +66,8 @@ else
 	logmessage="Regression test failed."
 	mailback=yes
     fi
+
+    rm ../flockdriver.lock
 fi
 
 # Here's where we abuse CIA to do our notfications for us.
@@ -142,8 +139,8 @@ echo "Test ends: "`date`
 if [ "$mailback" = yes ]
 then
     # Ugh - depends on flockdriver having done a redirect to TEST.LOG
-    cat /tmp/flockdriver$$ TEST.LOG | ${sendmail}
+    cat "/tmp/flockdriver$$" TEST.LOG | ${sendmail}
 fi
-rm -f /tmp/flockdriver$$ flockdriver.lock
+rm -f "/tmp/flockdriver$$"
 
 # End.
