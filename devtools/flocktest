@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d gitname] [-m mailto] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d gitname] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -14,9 +14,7 @@ Otherwise, the remote flockdriver script is executed on each machine.
 
 The -d option passes it a name for the remote test subdirectory
 
-The -m option passes it an email address to which test results can be mailed.
-
--v 1 prints the remote hostmame before each invocation.
+-v 1 prints the remote hostname before each invocation.
 
 -v 2 executes flockdriver with -x set.
 
@@ -30,8 +28,10 @@ attribute/value pairs, one per line separated by '='.  The following
 attributes are recognized:
 
 subdir = a default test directory name (-d)
-mailto = a default email address to use (-m)
 exclude = a default exclude set (-x)
+
+If you do not specify a subdirectory name either with -d or in the
+.flocktest file, the value of $LOGNAME will be used.
 """
 
 import os, sys, ConfigParser, getopt
@@ -113,24 +113,19 @@ if __name__ == '__main__':
     if copymode:
         flock.update_remote("flockdriver")
     else:
-        if mailto:
-            pass
-        elif 'mailto' in controls:
-            mailto = controls.get('mailto')
-        else:
-            print "flocktest: who are you?"
-            sys.exit(1)
         if subdir:
             pass
         elif 'subdir' in controls:
             subdir = controls.get('subdir')
         else:
-            print "flocktest: what is your test subdirectory?"
+            subdir sys.getenv("LOGNAME")
+        if not subdir:
+            print "flocktest: you don't exist, go away!"
             sys.exit(1)
         if exclusions:
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver -d %s -m %s" % (subdir, mailto), verbose=verbose)
+        flock.do_remote("./flockdriver -d %s" % (subdir,), verbose=verbose)
 
 # End

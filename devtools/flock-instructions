@@ -28,18 +28,19 @@ ssh-dss AAAAB3NzaC1kc3MAAACBAPcpYG3nTzwrnZ1Nuz4FlODvnDaoHVaDoVg3jiSax/OJLuLmP+B1
 
 To gain access to the test network:
 
-1. Email a valid public ssh key to the gatekeeper. He will install the
+1. Email a valid public ssh key to the flock gatekeeper. He will install the
    key on the test sites.
-
-2. Once your public key is installed on the test sites, 
 
 To use the test network:
 
-1. Call the script 'flocktest', giving it your email address as argument.
-   (You can also set your email name in a .flockdriver dot file; do
+1. Call the script 'flocktest'.
+   (You can also set these in a .flockdriver dot file; do
    "flocktest -?" to see instructions about how to set this up.)
 
    The local flocktest script will execute the remote flockdriver
    script on each machine, calling it with options that will identify
    you to it. See the local copy of the flockdriver script for details
    on the test sequence
+
+   The success/failure notifications will appear as CIA messages on
+   the #gpsd IRC channel at freenode.
