@@ -20,6 +20,15 @@
 #
 #   * mail the output back to you if the test failed.
 #
+# FIXME: We're not generating TEST.LOG
+
+# Project-specific configuration
+project=GPSD
+origin="git://git.berlios.de/gpsd"
+generator="http://gpsd.berlios/de"
+
+# No project-specific stuff below this line
+
 while getopts dm opt
 do
     case $opt in
@@ -28,11 +37,6 @@ do
     esac
 done
 
-# Should yield a git URL valid for read-only access
-origin="git://git.berlios.de/gpsd"
-
-# Seems to be necessary to appease CIA
-generator="http://gpsd.berlios/de"
 
 echo "Test begins: "`date`
 
@@ -97,12 +101,12 @@ gitver=${gitver##* }
 out="
 <message>
   <generator>
-    <name>GPSD Remote Test Flock Driver</name>
+    <name>${project} Remote Test Flock Driver</name>
     <version>${gitver}</version>
     <url>${generator}</url>
   </generator>
   <source>
-    <project>GPSD</project>
+    <project>${project}</project>
     <branch>${refname}@${site}</branch>
   </source>
   <timestamp>`date`</timestamp>
@@ -116,7 +120,7 @@ out="
 </message>"
 sendmail=cat
 ${sendmail} << EOM
-Message-ID: <${merged}.${subdir}.blip@GPSD>
+Message-ID: <${merged}.${subdir}.blip@${project}>
 From: ${from}
 To: ${to}
 Content-type: text/xml
@@ -126,7 +130,7 @@ EOM
 
 # Now ship the error log if need be.
 cat >/tmp/flockdriver$$ <<EOM
-Message-ID: <${merged}.${subdir}.log@GPSD>
+Message-ID: <${merged}.${subdir}.log@${project}>
 From: ${from}
 To: ${mailto}
 Content-type: text/plain; charset=us-ascii
@@ -138,7 +142,6 @@ echo "Test ends: "`date`
 
 if [ "$mailback" = yes ]
 then
-    # Ugh - depends on flockdriver having done a redirect to TEST.LOG
     cat "/tmp/flockdriver$$" TEST.LOG | ${sendmail}
 fi
 rm -f "/tmp/flockdriver$$"
