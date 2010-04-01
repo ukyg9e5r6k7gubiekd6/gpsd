@@ -36,8 +36,6 @@ do
     esac
 done
 
-
-
 site=`hostname --fqdn`
 
 if [ -f "flockdriver.lock" ]
@@ -46,25 +44,25 @@ then
     cd $subdir
     mailback=no
 else
-    touch "flockdriver.lock"
-    echo "Test begins: "`date`
+    (
+	echo "Test begins: "`date`
 
-    echo "Site: $site" 
-    echo "Directory: ${PWD}/${subdir}"
-    echo "Mailto: $mailto"
+	echo "Site: $site" 
+	echo "Directory: ${PWD}/${subdir}"
+	echo "Mailto: $mailto"
+    ) >"flockdriver-${subdir}.log"
 
     # Set up or update the repo
     if [ ! -d $subdir ]
     then
-	git clone $origin $subdir 
+	git clone $origin $subdir >>"flockdriver-${subdir}.log" 2>&1
 	cd $subdir
-	cp /dev/null TEST.LOG
     else
-	cd $subdir; git pull >TEST.LOG 2>&1
+	cd $subdir; git pull >>"../flockdriver-${subdir}.log" 2>&1
     fi
 
     # Perform the test
-    if ( ./autogen.sh && make && make aivdm-regress ) >>TEST.LOG 2>&1
+    if ( ./autogen.sh && make && make aivdm-regress ) >>"../flockdriver-${subdir}.log" 2>&1
     then
 	logmessage="Regression test succeeded."
 	mailback=no
@@ -73,8 +71,8 @@ else
 	mailback=yes
     fi
 
-    echo "Test ends: "`date`
-    rm ../flockdriver.lock
+    echo "Test ends: "`date` >>"../flockdriver-${subdir}.log" 2>&1
+    mv "../flockdriver-${subdir}.log" TEST.LOG
 fi
 
 # Here's where we abuse CIA to do our notfications for us.
