@@ -274,12 +274,6 @@ install-exec-local:
 	$(PYTHON) setup.py install --prefix=${prefix} # --root=$(DESTDIR)
 endif
 
-TESTBINS = test_float test_trig test_bits test_packet test_geoid \
-	test_mkgmtime test_json
-if LIBGPSMM_ENABLE
-TESTBINS += test_gpsmm
-endif
-
 #
 # Build test_float
 #
@@ -471,7 +465,7 @@ EXTRA_DIST = \
 #distclean-local:
 #	rm -rf '$(distdir)/contrib'
 
-CLEANFILES += $(BUILT_SOURCES) $(TESTBINS) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
+CLEANFILES += $(BUILT_SOURCES) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
