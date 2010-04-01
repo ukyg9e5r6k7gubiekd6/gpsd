@@ -2,7 +2,7 @@
 #
 # flockdriver - conduct regression tests as an argent for a remote flocktest
 #
-# usage: flockdriver -d subdir
+# usage: flockdriver -d subdir [-m mailto]
 #
 # The -d argument must be a subdirectory name
 # The -m option must be a valid address for notification mail.
@@ -16,7 +16,7 @@
 #
 #   * make check, capturing the output
 #
-#   * Notify the #gpsd chabnnel of success or failyre via CIA
+#   * Notify the project channel of success or failure via CIA
 #
 #   * mail the output back to you if the test failed.
 #
@@ -24,7 +24,7 @@
 # Project-specific configuration
 project=GPSD
 origin="git://git.berlios.de/gpsd"
-generator="http://gpsd.berlios/de"
+generator="http://gpsd.berlios.de/flockdriver"
 
 # No project-specific stuff below this line
 
