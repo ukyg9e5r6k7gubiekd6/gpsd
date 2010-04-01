@@ -28,11 +28,11 @@ done
 # Should yield a git URL valid for read-only access
 origin="git://git.berlios.de/gpsd"
 
+echo "Test begins: "`date`
+
 site=`hostname --fqdn`
 echo "Site: $site" 
-echo "  subdir: $subdir"
-echo "  clone-url: $origin"
-echo "  here: $PWD"
+echo "Directory: ${PWD}${subdir}"
 
 # Set up or update the repo
 if [ ! -d $subdir ]
@@ -44,7 +44,7 @@ else
 fi
 
 # Perform the test
-if (./autogen.sh 2>&1 && make check 2>&1) >TEST.LOG
+if (./autogen.sh && make aivdm-regress)
 then
     logmessage="Regression test succeeded"
 else
@@ -98,5 +98,7 @@ Content-type: text/xml
 Subject: DeliverXML
 ${out}
 EOM
+
+echo "Test ends: "`date`
 
 # End.

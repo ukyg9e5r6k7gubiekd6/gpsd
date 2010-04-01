@@ -118,7 +118,7 @@ if __name__ == '__main__':
         elif 'subdir' in controls:
             subdir = controls.get('subdir')
         else:
-            subdir sys.getenv("LOGNAME")
+            subdir = sys.getenv("LOGNAME")
         if not subdir:
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
@@ -126,6 +126,6 @@ if __name__ == '__main__':
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
-        flock.do_remote("./flockdriver -d %s" % (subdir,), verbose=verbose)
+        flock.do_remote("./flockdriver -d %s >%s/TEST.LOG 2>&1" % (subdir, subdir))
 
 # End
