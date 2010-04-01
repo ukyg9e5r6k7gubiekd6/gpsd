@@ -28,6 +28,9 @@ done
 # Should yield a git URL valid for read-only access
 origin="git://git.berlios.de/gpsd"
 
+# Seems to be necessary to appease CIA
+generator="http://gpsd.berlios/de"
+
 echo "Test begins: "`date`
 
 site=`hostname --fqdn`
@@ -54,7 +57,7 @@ fi
 # Here's where we abuse CIA to do our notfications for us.
 
 # Addresses for the e-mail
-from="CIABOT-NOREPLY@${host}"
+from="FLOCKDRIVER-NOREPLY@${site}"
 to="cia@cia.navi.cx"
 
 # SMTP client to use
@@ -70,10 +73,16 @@ rev=$(git describe ${merged} 2>/dev/null)
 refname=$(git symbolic-ref HEAD 2>/dev/null)
 refname=${refname##refs/heads/}
 
+# And the git version
+gitver=$(git --version)
+gitver=${gitver##* }
+
 out="
 <message>
   <generator>
     <name>GPSD Remote Test Flock Driver</name>
+    <version>${gitver}</version>
+    <url>${generator}</url>
   </generator>
   <source>
     <project>GPSD</project>
@@ -89,7 +98,7 @@ out="
   </body>
 </message>"
 
-sendmail=cat
+set -x
 ${sendmail} << EOM
 Message-ID: <${merged}.${subdir}@GPSD>
 From: ${from}
