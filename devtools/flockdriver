@@ -20,6 +20,11 @@
 #
 #   * mail the output back to you if the test failed.
 #
+# FIXME: The ugly way we handle collecting the test log has consequences:
+# a test attempt that trips over the flockdriver lock and stops will 
+# clobber whatever part of the testfile the previous test has written.
+# Not an issue unless the test fails.
+#
 while getopts dm opt
 do
     case $opt in
@@ -41,23 +46,31 @@ echo "Site: $site"
 echo "Directory: ${PWD}${subdir}"
 echo "Mailto: $mailto"
 
-# Set up or update the repo
-if [ ! -d $subdir ]
+if [ -f "flockdriver.lock" ]
 then
-    mkdir $subdir
-    git clone $origin $subdir
+    logmessage="A test was already running when you initiated this one."
+    mailback=no
 else
-    cd $subdir; git pull
-fi
+    touch "flockdriver.lock"
 
-# Perform the test
-if (./autogen.sh && make check)
-then
-    logmessage="Regression test succeeded."
-    success=yes
-else
-    logmessage="Regression test failed."
-    success=no
+    # Set up or update the repo
+    if [ ! -d $subdir ]
+    then
+	mkdir $subdir
+	git clone $origin $subdir
+    else
+	cd $subdir; git pull
+    fi
+
+    # Perform the test
+    if (./autogen.sh && make check)
+    then
+	logmessage="Regression test succeeded."
+	mailback=no
+    else
+	logmessage="Regression test failed."
+	mailback=yes
+    fi
 fi
 
 # Here's where we abuse CIA to do our notfications for us.
@@ -125,11 +138,11 @@ $logmessage
 EOM
 echo "Test ends: "`date`
 
-if [ "$success" = no ]
+if [ "$mailback" = yes ]
 then
     # Ugh - depends on flockdriver having done a redirect to TEST.LOG
     cat /tmp/flockdriver$$ TEST.LOG | ${sendmail}
 fi
-rm /tmp/flockdriver$$
+rm -f /tmp/flockdriver$$ flockdriver.lock
 
 # End.

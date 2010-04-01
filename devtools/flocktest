@@ -73,6 +73,9 @@ class TestFlock:
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
+    def listdump(self):
+        "Return a dump of the site list."
+        return ", ".join(map(lambda x: x.fqdn, self.sitelist))
 
 if __name__ == '__main__':
     try:
@@ -140,6 +143,7 @@ if __name__ == '__main__':
             flock.exclude(exclusions)
         elif 'exclude' in controls:
             flock.exclude(controls.get('exclude'))
+        print "Testing at", flock.listdump()
         flock.do_remote("./flockdriver -d %s -m %s >%s/TEST.LOG 2>&1 &" % (subdir, mailto, subdir))
 
 # End
