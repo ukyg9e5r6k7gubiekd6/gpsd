@@ -1025,6 +1025,7 @@ void packet_init(struct gps_packet_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
+    packet_reset(lexer);
 }
 
 void packet_parse(struct gps_packet_t *lexer)

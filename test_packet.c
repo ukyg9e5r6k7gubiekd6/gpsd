@@ -240,8 +240,6 @@ static int packet_test(struct map *mp)
     int failure = 0;
 
     packet_init(&packet);
-    packet.type = BAD_PACKET;
-    packet.state = 0;
     /*@i@*/memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
     packet.inbuflen = mp->testlen;
     /*@ -compdef -uniondef -usedef -formatcode @*/
