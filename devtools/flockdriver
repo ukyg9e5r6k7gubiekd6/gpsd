@@ -47,21 +47,24 @@ echo "Mailto: $mailto"
 if [ -f "flockdriver.lock" ]
 then
     logmessage="A test was already running when you initiated this one."
+    cd $subdir
     mailback=no
 else
     touch "flockdriver.lock"
 
+
     # Set up or update the repo
     if [ ! -d $subdir ]
     then
-	git clone $origin $subdir
+	git clone $origin $subdir 
 	cd $subdir
+	cp /dev/null TEST.LOG
     else
-	cd $subdir; git pull
+	cd $subdir; git pull >TEST.LOG 2>&1
     fi
 
     # Perform the test
-    if (./autogen.sh && make && make aivdm-regress) >TEST.LOG
+    if ( ./autogen.sh && make && make aivdm-regress ) >>TEST.LOG 2>&1
     then
 	logmessage="Regression test succeeded."
 	mailback=no
