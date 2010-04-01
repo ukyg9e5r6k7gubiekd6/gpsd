@@ -87,7 +87,7 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "cdmnxv:?")
     except getopt.GetoptError, msg:
-        print "flockest: " + str(msg)
+        print "flocktest: " + str(msg)
         raise SystemExit, 1
 
     copymode = False

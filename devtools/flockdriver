@@ -37,12 +37,8 @@ do
 done
 
 
-echo "Test begins: "`date`
 
 site=`hostname --fqdn`
-echo "Site: $site" 
-echo "Directory: ${PWD}/${subdir}"
-echo "Mailto: $mailto"
 
 if [ -f "flockdriver.lock" ]
 then
@@ -51,7 +47,11 @@ then
     mailback=no
 else
     touch "flockdriver.lock"
+    echo "Test begins: "`date`
 
+    echo "Site: $site" 
+    echo "Directory: ${PWD}/${subdir}"
+    echo "Mailto: $mailto"
 
     # Set up or update the repo
     if [ ! -d $subdir ]
@@ -73,6 +73,7 @@ else
 	mailback=yes
     fi
 
+    echo "Test ends: "`date`
     rm ../flockdriver.lock
 fi
 
@@ -140,7 +141,6 @@ Subject: flockdriver test log
 
 $logmessage
 EOM
-echo "Test ends: "`date`
 
 if [ "$mailback" = yes ]
 then
