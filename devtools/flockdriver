@@ -62,7 +62,7 @@ else
     fi
 
     # Perform the test
-    if ( ./autogen.sh && make && make aivdm-regress ) >>"../flockdriver-${subdir}.log" 2>&1
+    if ( ./autogen.sh && make && make check ) >>"../flockdriver-${subdir}.log" 2>&1
     then
 	logmessage="Regression test succeeded."
 	mailback=no
@@ -119,7 +119,7 @@ out="
     </commit>
   </body>
 </message>"
-sendmail=cat
+
 ${sendmail} << EOM
 Message-ID: <${merged}.${subdir}.blip@${project}>
 From: ${from}

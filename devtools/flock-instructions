@@ -33,10 +33,10 @@ To gain access to the test network:
 
 To use the test network:
 
-1. Call the script 'flocktest', optionally with an -m option to
-   set a return email address for error logs.
-   (You can also set this in a .flockdriver dot file; do
-   "flocktest -?" to see instructions about how to set this up.)
+1. Call the script 'flocktest', optionally with a -d optopn to set a
+   test subdirectory and an -m option to set a return email address
+   for error logs.  (You can also set these in a .flockdriver dot file;
+   do "flocktest -?" to see instructions about how to set this up.)
 
    The local flocktest script will execute the remote flockdriver
    script on each machine, calling it with options that will identify
