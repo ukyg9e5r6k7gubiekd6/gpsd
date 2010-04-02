@@ -291,8 +291,14 @@ The following driver types are compiled into this gpsd instance:\n",
 }
 
 static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
-/* af = address family, service = IANA protocol name, tcp_or_udp = TCP or UDP */
+/* bind a passive command socket for the daemon */
 {
+    /* 
+     * af = address family, 
+     * service = IANA protocol name or number.
+     * tcp_or_udp = TCP or UDP
+     * qlen = maximum wait-queue length for connections
+     */
     struct servent *pse;
     struct protoent *ppe ;	/* splint has a bug here */
     sockaddr_t sat;
