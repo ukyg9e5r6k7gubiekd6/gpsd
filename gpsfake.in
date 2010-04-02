@@ -9,14 +9,8 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import sys, os, signal, time, getopt, socket
+import sys, os, signal, time, getopt, socket, random
 import gps.fake
-
-# So we can do regression tests without stepping on a production daemon
-# According to IANA port 12000 belongs to an IBM SNA service. Picking an
-# obsolete service seems safer than picking an unused number that IANA might
-# allocate in the future.
-fakeport = 12000
 
 class Baton:
     "Ship progress indications to stderr."
@@ -51,6 +45,16 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+def fakeport():
+    "Find a port that isn't in use to bind to."
+    # Grab a random port from IANA's unassigned/private range. Not perfect,
+    # but at least less than in 16000 chance of a pair collision. It would
+    # be very hard to get this deterministically correct, since there would
+    # always be a window between port allocation and when the daemon picked
+    # it up.  We'd need to do some kind of semaphore, etc., and even that
+    # wouldn't prevent collisions with other apps using the range.
+    return random.randint(49152, 65535)
+
 try:
     (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pr:s:vx")
 except getopt.GetoptError, msg:
@@ -74,7 +78,7 @@ verbose = 0
 for (switch, val) in options:
     if (switch == '-1'):
         singleshot = True
-        port = fakeport
+        port = fakeport()
     elif (switch == '-b'):
         progress = True
     elif (switch == '-c'):
