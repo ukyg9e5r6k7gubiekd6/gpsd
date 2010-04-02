@@ -116,7 +116,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:nNxv:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:nNv:x:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
