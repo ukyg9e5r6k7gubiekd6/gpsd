@@ -3,12 +3,14 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d subdir] [- mailto] [-n] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d subdir] [-k key] [-m mailto] [-n] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
 The -c option invokes copy mode, which copies the 'flockdriver' script to
 all flock machines
+
+The -k mode installs a specified ssh public key an all machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
 
@@ -49,9 +51,18 @@ class TestSite:
         self.fqdn = fqdn
         self.config = config
         self.me = self.config["login"] + "@" + self.fqdn
-    def update_remote(self, filename):
+    def error(self, msg):
+        "Report an error while executing a remote command."
+        sys.stderr("%s: %s\n" % (site.fqdn, msg))
+    def update_remote(self, filename, verbose=0):
         "Copy a specified file to the remote home."
-        os.system("scp %s %s:~" % (filename, self.me))
+        command = "scp %s %s:~" % (filename, self.me)
+        if verbose:
+            print command
+        status = os.system(command)
+        if status:
+            self.error("copy with '%s' failed" % command)
+        return status
     def do_remote(self, command, background=True, verbose=0):
         "Execute a command on a specified remote host."
         if verbose > 1:
@@ -61,9 +72,18 @@ class TestSite:
             command += " &"
         if verbose:
             print command
-        return os.system(command)
+        status = os.system(command)
+        if status:
+            self.error("%s failed" % command)
+        return status
+    def do_append(self, filename, string):
+        "Append a line to a specified remote file."
+        self.do_remote("echo '%s' >>%s" % (string.strip(), filename), background=False)
 
 class TestFlock:
+    "Methods for performing parallel tests on a flock of remote sites."
+    ssh_options = "no-port-forwarding,no-X11-forwarding," \
+                 "no-agent-forwarding,no-pty "
     def __init__(self, sitelist):
         self.sitelist = sitelist
     def update_remote(self, filename):
@@ -79,13 +99,18 @@ class TestFlock:
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
+    def add_key(self, key):
+        "Add the specified public key to all sites."
+        for site in self.sitelist:
+            site.do_append(".ssh/authorized_keys",
+                           TestFlock.ssh_options + " " + key)
     def listdump(self):
         "Return a dump of the site list."
         return ", ".join(map(lambda x: x.fqdn, self.sitelist))
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdmnxv:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:nxv:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
@@ -93,6 +118,7 @@ if __name__ == '__main__':
     copymode = False
     exclusions = []
     subdir = None
+    key = None
     mailto = None
     verbose = 0
     background = True
@@ -101,6 +127,8 @@ if __name__ == '__main__':
             copymode = True
         elif  switch == 'd':
             subdir = val
+        elif  switch == '-k':
+            key = val
         elif switch == '-n':
             background = False
         elif  switch == 'm':
@@ -129,6 +157,8 @@ if __name__ == '__main__':
 
     if copymode:
         flock.update_remote("flockdriver")
+    elif key:
+        flock.add_key(val)
     else:
         if mailto:
             pass
