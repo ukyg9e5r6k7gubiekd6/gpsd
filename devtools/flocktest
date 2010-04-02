@@ -86,7 +86,7 @@ class TestSite:
                 self.error("%s failed" % command)
         return status
     def do_append(self, filename, string):
-        "Append a line to a specified remote file."
+        "Append a line to a specified remote file, in foreground."
         self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename),
                        background=False)
 
@@ -202,4 +202,7 @@ if __name__ == '__main__':
             command = "sh -x " + command
         flock.do_remote(command, background=background)
 
-# End
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:

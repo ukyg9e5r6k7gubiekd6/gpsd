@@ -194,4 +194,7 @@ if __name__ == '__main__':
     if progress:
         baton.end()
 
-# gpsfake ends here
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:

@@ -524,3 +524,7 @@ if __name__ == '__main__':
 
 /* Generated code ends. */
 """
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:

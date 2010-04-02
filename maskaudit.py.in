@@ -99,9 +99,12 @@ const char *gpsd_maskdump(gps_mask_t set)
     return buf;
 }
 '''
-
     except KeyboardInterrupt:
         pass
 
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:
 
 

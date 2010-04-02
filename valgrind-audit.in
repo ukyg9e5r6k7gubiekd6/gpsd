@@ -94,3 +94,8 @@ try:
     print "*** Test #4 complete.\n"
 finally:
     test.cleanup();
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:
