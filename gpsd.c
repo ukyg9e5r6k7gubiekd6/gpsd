@@ -290,7 +290,8 @@ The following driver types are compiled into this gpsd instance:\n",
     }
 }
 
-static int passivesock_af(int af, char *service, char *protocol, int qlen)
+static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
+/* af = address family, service = IANA protocol name, tcp_or_udp = TCP or UDP */
 {
     struct servent *pse;
     struct protoent *ppe ;	/* splint has a bug here */
@@ -300,14 +301,14 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
     in_port_t port;
     char *af_str = "";
 
-    if ((pse = getservbyname(service, protocol)))
+    if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t)pse->s_port);
     else if ((port = (in_port_t)atoi(service)) == 0) {
-	gpsd_report(LOG_ERROR, "Can't get \"%s\" service entry.\n", service);
+	gpsd_report(LOG_ERROR, "can't get \"%s\" service entry.\n", service);
 	return -1;
     }
-    ppe = getprotobyname(protocol);
-    if (strcmp(protocol, "udp") == 0) {
+    ppe = getprotobyname(tcp_or_udp);
+    if (strcmp(tcp_or_udp, "udp") == 0) {
 	type = SOCK_DGRAM;
 	/*@i@*/proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
     } else {
@@ -364,13 +365,13 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	break;
 #endif
     default:
-	gpsd_report(LOG_ERROR, "Unhandled address family %d\n", af);
+	gpsd_report(LOG_ERROR, "unhandled address family %d\n", af);
 	return -1;
     }
     gpsd_report(LOG_IO, "opening %s socket\n", af_str);
 
     if (s == -1) {
-	gpsd_report(LOG_ERROR, "Can't create %s socket\n", af_str);
+	gpsd_report(LOG_ERROR, "can't create %s socket\n", af_str);
 	return -1;
     }
     if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,
@@ -379,15 +380,15 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
 	return -1;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
-	gpsd_report(LOG_ERROR, "Can't bind to %s port %s, %s\n", af_str, 
+	gpsd_report(LOG_ERROR, "can't bind to %s port %s, %s\n", af_str, 
 		service, strerror(errno));
 	if (errno == EADDRINUSE) {
-		gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
+		gpsd_report(LOG_ERROR, "maybe gpsd is already running!\n");
 	}
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) == -1) {
-	gpsd_report(LOG_ERROR, "Can't listen on port %s\n", service);
+	gpsd_report(LOG_ERROR, "can't listen on port %s\n", service);
 	return -1;
     }
 
@@ -395,7 +396,7 @@ static int passivesock_af(int af, char *service, char *protocol, int qlen)
     /*@ +mustfreefresh -matchanyintegral @*/
 }
 
-static int passivesocks(char *service, char *protocol, int qlen, /*@out@*/int socks[])
+static int passivesocks(char *service, char *tcp_or_udp, int qlen, /*@out@*/int socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -404,10 +405,10 @@ static int passivesocks(char *service, char *protocol, int qlen, /*@out@*/int so
 	socks[i] = -1;
 
     if (AF_UNSPEC == af || (AF_INET == af))
-	socks[0] = passivesock_af(AF_INET, service, protocol, qlen);
+	socks[0] = passivesock_af(AF_INET, service, tcp_or_udp, qlen);
 
     if (AF_UNSPEC == af || (AF_INET6 == af))
-	socks[1] = passivesock_af(AF_INET6, service, protocol, qlen);
+	socks[1] = passivesock_af(AF_INET6, service, tcp_or_udp, qlen);
 
     for (i=0;i<AFCOUNT;i++)
 	if(socks[i]<0)
@@ -1292,7 +1293,7 @@ int main(int argc, char *argv[])
 	gpsd_service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     /*@ +observertrans @*/
     if (passivesocks(gpsd_service, "tcp", QLEN, msocks) < 1) {
-	gpsd_report(LOG_ERR,"command sockets create failed, netlib errors %d, %d\n", msocks[0], msocks[1]);
+	gpsd_report(LOG_ERR,"command sockets creation failed, netlib errors %d, %d\n", msocks[0], msocks[1]);
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
