@@ -40,29 +40,30 @@ GPSFILTER="sed -e /^GPSD,X/d -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATC
 # logic. Note that as the last attribute mode needs to be handled differently.
 #ALTFILTER="-e s/\"alt\":[^,]*,// -e s/\"ep[vhs]\":[-+0-9.]*// -e s/,\"mode\":[^}]*//"
 
+TMP=/tmp
+
 case $mode in
     regress)
         echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
-            dir=`dirname $f`
-	    trap 'rm -f $dir/test.chk $dir/test-whole.chk $dir/test-trunc.chk $dir/log-copy.chk $dir/diff $dir/diff-trunc; exit $errors' 0 1 2 15
+	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc; exit $errors' 0 1 2 15
 	    if [ -r $f.chk ]
 	    then
 		case $testing in
-		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >$dir/test.chk ;;
-		clientlib) libgps -b <${f} >$dir/test.chk ;;
+		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
+		clientlib) libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
-		sed -n <${f}.chk >$dir/log-copy.chk ${ALTFILTER} -e 'p';
-		sed -n <$dir/test.chk >$dir/test-whole.chk ${ALTFILTER} -e 'p';
-		sed -n <$dir/test.chk >$dir/test-trunc.chk -e '$d' ${ALTFILTER} -e 'p';
-		diff -ub $dir/log-copy.chk $dir/test-whole.chk >$dir/diff;
-		diff -ub $dir/log-copy.chk $dir/test-trunc.chk >$dir/diff-trunc;
-		if test \( -s $dir/diff \) -a \( -s $dir/diff-trunc \) ; then
+		sed -n <${f}.chk >${TMP}/log-copy-$$.chk ${ALTFILTER} -e 'p';
+		sed -n <${TMP}/test-$$.chk >${TMP}/test-whole-$$.chk ${ALTFILTER} -e 'p';
+		sed -n <${TMP}/test-$$.chk >${TMP}/test-trunc-$$.chk -e '$d' ${ALTFILTER} -e 'p';
+		diff -ub ${TMP}/log-copy-$$.chk ${TMP}/test-whole-$$.chk >${TMP}/diff-$$;
+		diff -ub ${TMP}/log-copy-$$.chk ${TMP}/test-trunc-$$.chk >${TMP}/diff-$$-trunc;
+		if test \( -s ${TMP}/diff-$$ \) -a \( -s ${TMP}/diff-$$-trunc \) ; then
 		    errors=`expr $errors + 1`;
-		    cat $dir/diff
+		    cat ${TMP}/diff-$$
 		fi;
-		rm -f $dir/test.chk $dir/test-whole.chk $dir/test-trunc.chk $dir/log-copy.chk $dir/diff $dir/diff-trunc
+		rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc
 	    else
 		echo "*** No check log $f.chk exists"
 		notfound=`expr $notfound + 1`;
@@ -80,12 +81,11 @@ case $mode in
     superraw)
         echo "Testing super-raw mode..." >&2
         for f in $*; do
-            dir=`dirname $f`
             gpsfake -s 38400 -1 -b -p -r '{"class":"WATCH","enable":False,"raw":2}' $opts ${f} \
-            | ./devtools/striplog -1 >$dir/test1.chk;
-            ./devtools/striplog <${f} >$dir/test2.chk;
-            cmp $dir/test[12].chk;
-        done; rm $dir/test[12].chk
+            | ./devtools/striplog -1 >${TMP}/test1-$$.chk;
+            ./devtools/striplog <${f} >${TMP}/test2-$$.chk;
+            cmp ${TMP}/test[12]-$$.chk;
+        done; rm ${TMP}/test[12]-$$.chk
         ;;
     build)
 	echo "Rebuilding $testing regressions..." >&2
