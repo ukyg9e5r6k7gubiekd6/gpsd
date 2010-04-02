@@ -542,12 +542,6 @@ version:
 # depends on each TEST as well as invokes it (with TESTS_ENVIRONMENT)
 # the entire list of tests is run twice.
 
-# Make the srcdir test directory writable, because non-srcdir builds
-# write in the wrong place.
-kludge-permissions-regress:
-	chmod +w $(srcdir)/test
-	echo "WARNING: writing to \$\(srcdir])/test!!!"
-
 # Regression-test the daemon
 gps-regress: gpsd 
 	$(srcdir)/regress-driver -t $(srcdir)/test/daemon/*.log
@@ -649,7 +643,7 @@ bits-regress: test_bits
 	$(srcdir)/test_bits
 
 # Do all normal regression tests.
-testregress: kludge-permissions-regress gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
 # do-tests is a shell script that invokes make with target testregress.
