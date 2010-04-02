@@ -58,7 +58,7 @@ class TestSite:
         self.me = self.config["login"] + "@" + self.fqdn
     def error(self, msg):
         "Report an error while executing a remote command."
-        sys.stderr("%s: %s\n" % (site.fqdn, msg))
+        sys.stderr.write("%s: %s\n" % (self.fqdn, msg))
     def update_remote(self, filename):
         "Copy a specified file to the remote home."
         command = "scp %s %s:~" % (filename, self.me)
@@ -72,9 +72,11 @@ class TestSite:
         return status
     def do_remote(self, command, background=True):
         "Execute a command on a specified remote host."
-        command = "( ssh %s '%s' )" %  (self.me, command)
         if background:
-            command += " &"
+            suffix = " &"
+        else:
+            suffix = ""
+        command = "ssh %s '%s%s'" %  (self.me, command, suffix)
         if self.verbose:
             print command
         status = 0
@@ -85,7 +87,7 @@ class TestSite:
         return status
     def do_append(self, filename, string):
         "Append a line to a specified remote file."
-        self.do_remote("echo '%s' >>%s" % (string.strip(), filename),
+        self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename),
                        background=False)
 
 class TestFlock:
@@ -166,6 +168,11 @@ if __name__ == '__main__':
     except IOError:
         pass
 
+    if exclusions:
+        flock.exclude(exclusions)
+    elif 'exclude' in controls:
+        flock.exclude(controls.get('exclude'))
+
     if copymode:
         flock.update_remote("flockdriver")
     elif key:
@@ -189,10 +196,6 @@ if __name__ == '__main__':
         if not subdir:
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
-        if exclusions:
-            flock.exclude(exclusions)
-        elif 'exclude' in controls:
-            flock.exclude(controls.get('exclude'))
         print "Testing at", flock.listdump()
         command = "./flockdriver -d %s -m %s" % (subdir, mailto)
         if verbose > 1:
