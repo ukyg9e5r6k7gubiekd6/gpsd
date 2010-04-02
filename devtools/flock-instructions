@@ -8,9 +8,10 @@ To add a machine to the flock, do these steps:
 
 2. Install git and gpsd's build prerequisites (gcc, Python, autotools, etc.)
    where the test account can run them.  On a Debian/Ubuntu system you may be
-   able to do this all at once with this command:
+   able to do this all at once with these commands:
 
-   aptitude install git-core autoconf automake libtool; aptitude build-dep gpsd;
+       aptitude install git-core autoconf automake libtool
+       aptitude build-dep gpsd
 
 3. Make sure the account is reachable from the general Internet via ssh.
 
@@ -33,7 +34,7 @@ To gain access to the test network:
 
 To use the test network:
 
-1. Call the script 'flocktest', optionally with a -d optopn to set a
+1. Call the script 'flocktest', optionally with a -d option to set a
    test subdirectory and an -m option to set a return email address
    for error logs.  (You can also set these in a .flockdriver dot file;
    do "flocktest -?" to see instructions about how to set this up.)
