@@ -84,6 +84,10 @@ class SkyView(gtk.DrawingArea):
                                x - diam / 2, y - diam / 2,
                                diam, diam, 0, 360 * 64)
 
+    def draw_line(self, widget, x1, y1, x2, y2):
+        "Draw a line between specified points."
+        widget.window.draw_lines(self.gc, [(x1, y1), (x2, y2)])
+
     def draw_square(self, widget, x, y, diam, filled=False):
         "Draw a square centered on the specified midpoint."
         widget.window.draw_rectangle(self.gc, filled,
@@ -126,7 +130,15 @@ class SkyView(gtk.DrawingArea):
         # The horizon circle
         self.draw_circle(widget, self.width / 2, self.height / 2,
                          self.diameter)
+        self.set_color("gray")
+        (x1, y1) = self.pol2cart(0, 0)
+        (x2, y2) = self.pol2cart(180, 0)
+        self.draw_line(widget, x1, y1, x2, y2)
+        (x1, y1) = self.pol2cart(90, 0)
+        (x2, y2) = self.pol2cart(270, 0)
+        self.draw_line(widget, x1, y1, x2, y2)
         # The compass-point letters
+        self.set_color("black")
         (x, y) = self.pol2cart(0, 0)
         self.draw_string(widget, x, y+10, "N")
         (x, y) = self.pol2cart(90, 0)
