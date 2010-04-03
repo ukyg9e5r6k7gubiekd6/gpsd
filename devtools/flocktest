@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d subdir] [-k key] [-m mailto] [-n] [-N] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d subdir] [-k key] [-m mailto] [-N] [-v n] [-x exclude] [-?] [whoami]
 
 -? prints this help.
 
@@ -18,9 +18,7 @@ The -d option passes it a name for the remote test subdirectory
 
 The -m option passes it an email address to which failure logs can be mailed.
 
-The -n option makes the command run in foreground
-
-The -N option prints all tghe commands that would be executed without actually
+The -N option prints all the commands that would be executed without actually
 running them
 
 -v 1 prints the remote hostname before each invocation.
@@ -46,7 +44,7 @@ specify a mailto address with -m or a mailto entry, one will be
 guessed from ${LOGNAME} and your machine's FQDN.
 """
 
-import os, sys, ConfigParser, getopt, socket
+import os, sys, ConfigParser, getopt, socket, thread
 
 class TestSite:
     "Methods for performing tests on a single remote site."
@@ -70,16 +68,12 @@ class TestSite:
             if status:
                 self.error("copy with '%s' failed" % command)
         return status
-    def do_remote(self, remote, background=True):
+    def do_remote(self, remote):
         "Execute a command on a specified remote host."
-        if background:
-            suffix = " &"
-        else:
-            suffix = ""
         command = "ssh "
         if "port" in self.config:
             command += "-p %s " % self.config["port"]
-        command += "%s '%s%s'" %  (self.me, remote, suffix)
+        command += "%s '%s'" %  (self.me, remote)
         if self.verbose:
             print command
         status = 0
@@ -90,8 +84,7 @@ class TestSite:
         return status
     def do_append(self, filename, string):
         "Append a line to a specified remote file, in foreground."
-        self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename),
-                       background=False)
+        self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename))
 
 class TestFlock:
     "Methods for performing parallel tests on a flock of remote sites."
@@ -103,10 +96,10 @@ class TestFlock:
         "Copy a specified file to the remote home on all machines."
         for site in self.sitelist:
             site.update_remote(filename)
-    def do_remote(self, command, background=True):
+    def do_remote(self, command):
         "Execute a command on all machines in the flock." 
         for site in self.sitelist:
-            site.do_remote(command, background)
+            site.do_remote(command)
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -121,7 +114,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:nNv:x:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:Nv:x:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
@@ -133,7 +126,6 @@ if __name__ == '__main__':
     mailto = None
     execute = True
     verbose = 0
-    background = True
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
@@ -141,8 +133,6 @@ if __name__ == '__main__':
             subdir = val
         elif  switch == '-k':
             key = val
-        elif switch == '-n':
-            background = False
         elif  switch == '-N':
             execute = False
         elif  switch == 'm':
@@ -205,7 +195,7 @@ if __name__ == '__main__':
         command = "./flockdriver -d %s -m %s" % (subdir, mailto)
         if verbose > 1:
             command = "sh -x " + command
-        flock.do_remote(command, background=background)
+        flock.do_remote(command)
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
