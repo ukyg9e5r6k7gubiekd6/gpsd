@@ -76,7 +76,6 @@ if [ -f "flockdriver.lock" ]
 then
     logmessage="A test was already running when you initiated this one."
     cd $subdir
-    mailback=no
 else
     (
 	echo "Test begins: "`date`
@@ -91,7 +90,8 @@ else
 	git clone $origin $subdir >>"flockdriver-${subdir}.log" 2>&1
 	cd $subdir
     else
-	cd $subdir; git pull >>"../flockdriver-${subdir}.log" 2>&1
+	cd $subdir;
+	git pull >>"../flockdriver-${subdir}.log" 2>&1
     fi
 
     # Perform the test

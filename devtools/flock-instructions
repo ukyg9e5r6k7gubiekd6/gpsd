@@ -39,7 +39,7 @@ To use the test network:
    do "flocktest -?" to see instructions about how to set this up.)
 
    The local flocktest script will upload an agent script to each
-   machine that will do "autogen.sh && mak % make check".  flocktest
+   machine that will do "autogen.sh && make % make check".  flocktest
    will only return after all tests are complete, but they will be run
    in parallel rather than sequentially.
 
