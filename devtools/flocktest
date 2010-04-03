@@ -70,13 +70,16 @@ class TestSite:
             if status:
                 self.error("copy with '%s' failed" % command)
         return status
-    def do_remote(self, command, background=True):
+    def do_remote(self, remote, background=True):
         "Execute a command on a specified remote host."
         if background:
             suffix = " &"
         else:
             suffix = ""
-        command = "ssh %s '%s%s'" %  (self.me, command, suffix)
+        command = "ssh "
+        if "port" in self.config:
+            command += "-p %s " % self.config["port"]
+        command += "%s '%s%s'" %  (self.me, remote, suffix)
         if self.verbose:
             print command
         status = 0
@@ -156,9 +159,11 @@ if __name__ == '__main__':
     config.read(["flock-sites.ini"])
     sites = []
     for site in config.sections():
-        sites.append(TestSite(site, dict(config.items(site))))
-        sites[-1].execute = execute
-        sites[-1].verbose = verbose
+        newsite = TestSite(site, dict(config.items(site)))
+        newsite.execute = execute
+        newsite.verbose = verbose
+        if newsite.config["status"].lower() == "up":
+            sites.append(newsite)
     flock = TestFlock(sites)
 
     controls = {}
