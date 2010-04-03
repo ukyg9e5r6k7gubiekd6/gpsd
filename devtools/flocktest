@@ -200,15 +200,18 @@ class TestFlock:
     def do_remotes(self):
         "Execute a command on all machines in the flock."
         slaves = []
+        print "== testing at: %s ==" % flock.listdump()
         for site in self.sitelist:
             slaves.append(site.do_flockdriver())
         for slave in slaves:
             slave.join()
         for slave in slaves:
-            print "From %s:" % slave.site.fqdn
-            print "Status:", slave.status
             if slave.status:
+                print "== %s test FAILED, status %d ==" % (site.fqdn, slave.status)
                 print slave.output
+            else:
+                print "== %s test succeeded ==" % site.fqdn
+            print "== tests completed =="
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -267,7 +270,6 @@ if __name__ == '__main__':
         if not subdir:
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
-        print "Selected sites:", flock.listdump()
         flock.do_remotes()
 
 # The following sets edit modes for GNU EMACS
