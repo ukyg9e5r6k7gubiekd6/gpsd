@@ -1,5 +1,5 @@
 /*
- * This is the main sequence of the gpsd daemon. The IO dos[atcher, main 
+ * This is the main sequence of the gpsd daemon. The IO dispatcher, main 
  * select loop, and user command handling lives here. 
  *
  * This file is Copyright (c) 2010 by the GPSD project
@@ -1128,7 +1128,7 @@ static void handle_request(struct subscriber_t *sub,
 	}
 	if (reply[strlen(reply)-1] == ',')
 	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "]}\r\n", replylen);
+	(void)strlcat(reply, "]}]}\r\n", replylen);
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
 	json_version_dump(reply, replylen);
