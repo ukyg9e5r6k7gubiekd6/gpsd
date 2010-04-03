@@ -2,10 +2,9 @@
 #
 # flockdriver - conduct regression tests as an argent for a remote flocktest
 #
-# usage: flockdriver -d subdir [-m mailto]
+# usage: flockdriver -d subdir
 #
 # The -d argument must be a subdirectory name
-# The -m option must be a valid address for notification mail.
 #
 #  This will perform the following steps:
 #
@@ -28,11 +27,10 @@ generator="http://gpsd.berlios.de/flockdriver"
 
 # No project-specific stuff below this line
 
-while getopts dm opt
+while getopts d opt
 do
     case $opt in
         d) subdir=$2; shift; shift ;;
-	m) mailto=$2; shift; shift ;;
     esac
 done
 
@@ -49,7 +47,6 @@ else
 
 	echo "Site: $site" 
 	echo "Directory: ${PWD}/${subdir}"
-	echo "Mailto: $mailto"
     ) >"flockdriver-${subdir}.log"
 
     # Set up or update the repo
@@ -65,10 +62,10 @@ else
     if ( ./autogen.sh && make && make check ) >>"../flockdriver-${subdir}.log" 2>&1
     then
 	logmessage="Regression test succeeded."
-	mailback=no
+	status=0
     else
 	logmessage="Regression test failed."
-	mailback=yes
+	status=1
     fi
 
     echo "Test ends: "`date` >>"../flockdriver-${subdir}.log" 2>&1
@@ -98,8 +95,13 @@ refname=${refname##refs/heads/}
 gitver=$(git --version)
 gitver=${gitver##* }
 
-# Compose and ship the CIA notification
-out="
+${sendmail} << EOM
+Message-ID: <${merged}.${subdir}.blip@${project}>
+From: ${from}
+To: ${to}
+Content-type: text/xml
+Subject: DeliverXML
+
 <message>
   <generator>
     <name>${project} Remote Test Flock Driver</name>
@@ -118,32 +120,8 @@ out="
       <log>${logmessage}</log>
     </commit>
   </body>
-</message>"
-
-${sendmail} << EOM
-Message-ID: <${merged}.${subdir}.blip@${project}>
-From: ${from}
-To: ${to}
-Content-type: text/xml
-Subject: DeliverXML
-${out}
+</message>
 EOM
 
-# Now ship the error log if need be.
-cat >/tmp/flockdriver$$ <<EOM
-Message-ID: <${merged}.${subdir}.log@${project}>
-From: ${from}
-To: ${mailto}
-Content-type: text/plain; charset=us-ascii
-Subject: flockdriver test log
-
-$logmessage
-EOM
-
-if [ "$mailback" = yes ]
-then
-    cat "/tmp/flockdriver$$" TEST.LOG | ${sendmail}
-fi
-rm -f "/tmp/flockdriver$$"
-
+exit $status
 # End.

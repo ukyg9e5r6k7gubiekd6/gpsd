@@ -3,9 +3,9 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d subdir] [-k key] [-m mailto] [-N] [-v n] [-x exclude] [-?] [whoami]
+usage: flocktest [-c] [-d subdir] [-k key] -v [-x exclude] [-?]
 
--? prints this help.
+The -? makes flocktest prints this help and exits.
 
 The -c option invokes copy mode, which copies the 'flockdriver' script to
 all flock machines
@@ -16,14 +16,7 @@ Otherwise, the remote flockdriver script is executed on each machine.
 
 The -d option passes it a name for the remote test subdirectory
 
-The -m option passes it an email address to which failure logs can be mailed.
-
-The -N option prints all the commands that would be executed without actually
-running them
-
--v 1 prints the remote hostname before each invocation.
-
--v 2 executes flockdriver with -x set.
+The -v option shows all ssh commands issued and runs flockdriver with -x set.
 
 The -x option specifies a comma-separated list of items that are
 either remote hostnames or architecture tags.  Matching sites are
@@ -35,16 +28,21 @@ attribute/value pairs, one per line separated by '='.  The following
 attributes are recognized:
 
 subdir = a default test directory name (-d)
-mailto = a default email address to use (-m)
 exclude = a default exclude set (-x)
 
 If you do not specify a subdirectory name either with -d or in the
-.flocktest file, the value of $LOGNAME will be used.  If you do not
-specify a mailto address with -m or a mailto entry, one will be
-guessed from ${LOGNAME} and your machine's FQDN.
+.flocktest file, the value of $LOGNAME will be used.
 """
 
-import os, sys, ConfigParser, getopt, socket, thread
+import os, sys, ConfigParser, getopt, socket, threading, commands
+
+class FlockThread(threading.Thread):
+    def __init__(self, site, command):
+        threading.Thread.__init__(self)
+        self.site = site
+        self.command = command
+    def run(self):
+        (self.status, self.output) = commands.getstatusoutput(self.command)
 
 class TestSite:
     "Methods for performing tests on a single remote site."
@@ -52,22 +50,10 @@ class TestSite:
         self.fqdn = fqdn
         self.config = config
         self.execute = execute
-        self.verbose = 0
         self.me = self.config["login"] + "@" + self.fqdn
     def error(self, msg):
         "Report an error while executing a remote command."
         sys.stderr.write("%s: %s\n" % (self.fqdn, msg))
-    def update_remote(self, filename):
-        "Copy a specified file to the remote home."
-        command = "scp %s %s:~" % (filename, self.me)
-        if self.verbose:
-            print command
-        status = 0
-        if self.execute:
-            status = os.system(command)
-            if status:
-                self.error("copy with '%s' failed" % command)
-        return status
     def do_remote(self, remote):
         "Execute a command on a specified remote host."
         command = "ssh "
@@ -76,11 +62,17 @@ class TestSite:
         command += "%s '%s'" %  (self.me, remote)
         if self.verbose:
             print command
-        status = 0
-        if self.execute:
-            status = os.system(command)
-            if status:
-                self.error("%s failed" % command)
+        current =  FlockThread(self, command)
+        current.start()
+        return current
+    def update_remote(self, filename):
+        "Copy a specified file to the remote home."
+        command = "scp %s %s:~" % (filename, self.me)
+        if self.verbose:
+            print command
+        status = os.system(command)
+        if status:
+            self.error("copy with '%s' failed" % command)
         return status
     def do_append(self, filename, string):
         "Append a line to a specified remote file, in foreground."
@@ -97,9 +89,17 @@ class TestFlock:
         for site in self.sitelist:
             site.update_remote(filename)
     def do_remote(self, command):
-        "Execute a command on all machines in the flock." 
+        "Execute a command on all machines in the flock."
+        slaves = []
         for site in self.sitelist:
-            site.do_remote(command)
+            slaves.append(site.do_remote(command))
+        for slave in slaves:
+            slave.join()
+        for slave in slaves:
+            print "From %s:" % slave.site.fqdn
+            print "Status:", slave.status
+            if slave.status:
+                print slave.output
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -114,7 +114,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:m:Nv:x:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:vx:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
@@ -123,9 +123,7 @@ if __name__ == '__main__':
     exclusions = []
     subdir = None
     key = None
-    mailto = None
-    execute = True
-    verbose = 0
+    verbose = False
     for (switch, val) in options:
         if switch == '-c':
             copymode = True
@@ -135,10 +133,8 @@ if __name__ == '__main__':
             key = val
         elif  switch == '-N':
             execute = False
-        elif  switch == 'm':
-            mailto = val
         elif switch == '-v':
-            verbose = int(val)
+            verbose = True
         elif switch == '-x':
             exclusions = map(lambda x: x.strip(), val.split(","))
         else: # switch == '-?':
@@ -150,7 +146,6 @@ if __name__ == '__main__':
     sites = []
     for site in config.sections():
         newsite = TestSite(site, dict(config.items(site)))
-        newsite.execute = execute
         newsite.verbose = verbose
         if newsite.config["status"].lower() == "up":
             sites.append(newsite)
@@ -173,15 +168,6 @@ if __name__ == '__main__':
     elif key:
         flock.add_key(val)
     else:
-        if mailto:
-            pass
-        elif 'mailto' in controls:
-            mailto = controls.get('mailto')
-        else:
-            mailto = sys.getenv("LOGNAME") + "@" + socket.fqdn()
-        if not mailto:
-            print "flocktest: who are you?"
-            sys.exit(1)
         if subdir:
             pass
         elif 'subdir' in controls:
@@ -192,7 +178,7 @@ if __name__ == '__main__':
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
         print "Testing at", flock.listdump()
-        command = "./flockdriver -d %s -m %s" % (subdir, mailto)
+        command = "./flockdriver -d %s" % (subdir,)
         if verbose > 1:
             command = "sh -x " + command
         flock.do_remote(command)
