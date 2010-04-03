@@ -20,15 +20,7 @@ either remote hostnames or architecture tags.  Matching sites are
 excluded.  You may wish to use this to avoid doing remote tests that
 are redundant with your local ones.
 
-If you have a .flocktest file, it is interpreted as a set of
-attribute/value pairs, one per line separated by '='.  The following
-attributes are recognized:
-
-subdir = a default test directory name (-d)
-exclude = a default exclusion set (-x)
-
-If you do not specify a subdirectory name either with -d or in the
-.flocktest file, the value of $LOGNAME will be used.
+If you do not specify a subdirectory name, the value of $LOGNAME will be used.
 """
 
 import os, sys, ConfigParser, getopt, socket, threading, commands
@@ -38,30 +30,9 @@ flockdriver = '''
 #
 # flockdriver - conduct regression tests as an agent for a remote flocktest
 #
-# usage: flockdriver -d subdir
-#
-# The -d argument must be a subdirectory name
-#
-#  This will perform the following steps:
-#
-#  * If required, create the origin repo in a directory named after 
-#     you beneath the test account home,
-#
-#   * git pull and build in that repo.
-#
-#   * make check, capturing the output
-#
-#   * Notify the project channel of success or failure via CIA
-#
-#   * mail the output back to you if the test failed.
-#
+# This file is generated.  Do not hand-hack.
 
-# Project-specific configuration
-project=%(project)s
-origin=%(origin)s
 generator="http://gpsd.berlios.de/flockdriver"
-
-# No project-specific stuff below this line
 
 while getopts d opt
 do
@@ -87,7 +58,7 @@ else
     # Set up or update the repo
     if [ ! -d $subdir ]
     then
-	git clone $origin $subdir >>"flockdriver-${subdir}.log" 2>&1
+	git clone %(origin)s $subdir >>"flockdriver-${subdir}.log" 2>&1
 	cd $subdir
     else
 	cd $subdir;
@@ -132,7 +103,7 @@ gitver=$(git --version)
 gitver=${gitver##* }
 
 ${sendmail} << EOM
-Message-ID: <${merged}.${subdir}.blip@${project}>
+Message-ID: <${merged}.${subdir}.blip@%(project)s>
 From: ${from}
 To: ${to}
 Content-type: text/xml
@@ -140,12 +111,12 @@ Subject: DeliverXML
 
 <message>
   <generator>
-    <name>${project} Remote Test Flock Driver</name>
+    <name>%(project)s Remote Test Flock Driver</name>
     <version>${gitver}</version>
     <url>${generator}</url>
   </generator>
   <source>
-    <project>${project}</project>
+    <project>%(project)s</project>
     <branch>${refname}@${site}</branch>
   </source>
   <timestamp>`date`</timestamp>
@@ -288,32 +259,18 @@ if __name__ == '__main__':
         if newsite.config["status"].lower() == "up":
             sites.append(newsite)
     flock = TestFlock(sites)
-
-    controls = {}
-    try:
-        myconfig = open(".flocktest")
-        controls = dict(map(lambda x: map(lambda y: y.strip(), x.split("=")), myconfig.readlines()))
-    except IOError:
-        pass
-
     if exclusions:
         flock.exclude(exclusions)
-    elif 'exclude' in controls:
-        flock.exclude(controls.get('exclude'))
 
     if key:
         flock.add_key(val)
     else:
-        if subdir:
-            pass
-        elif 'subdir' in controls:
-            subdir = controls.get('subdir')
-        else:
-            subdir = sys.getenv("LOGNAME")
+        if not subdir:
+            subdir = os.getenv("LOGNAME")
         if not subdir:
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
-        print "Testing at", flock.listdump()
+        print "Selected sites:", flock.listdump()
         flock.do_remotes()
 
 # The following sets edit modes for GNU EMACS
