@@ -48,25 +48,23 @@ then
     logmessage="A test was already running when you initiated this one."
     cd $subdir
 else
-    (
-	echo "Test begins: "`date`
+    echo "Test begins: "`date`
 
-	echo "Site: $site" 
-	echo "Directory: ${PWD}/${subdir}"
-    ) >"flockdriver-${subdir}.log"
+    echo "Site: $site" 
+    echo "Directory: ${PWD}/${subdir}"
 
     # Set up or update the repo
     if [ ! -d $subdir ]
     then
-	git clone %(origin)s $subdir >>"flockdriver-${subdir}.log" 2>&1
+	git clone %(origin)s $subdir
 	cd $subdir
     else
 	cd $subdir;
-	git pull >>"../flockdriver-${subdir}.log" 2>&1
+	git pull
     fi
 
     # Perform the test
-    if ( %(regression)s ) >>"../flockdriver-${subdir}.log" 2>&1
+    if ( %(regression)s )
     then
 	logmessage="Regression test succeeded."
 	status=0
@@ -75,8 +73,7 @@ else
 	status=1
     fi
 
-    echo "Test ends: "`date` >>"../flockdriver-${subdir}.log" 2>&1
-    mv "../flockdriver-${subdir}.log" TEST.LOG
+    echo "Test ends: "`date`
 fi
 
 # Here is where we abuse CIA to do our notfications for us.
