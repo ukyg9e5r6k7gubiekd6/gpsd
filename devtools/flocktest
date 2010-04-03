@@ -25,7 +25,7 @@ attribute/value pairs, one per line separated by '='.  The following
 attributes are recognized:
 
 subdir = a default test directory name (-d)
-exclude = a default exclude set (-x)
+exclude = a default exclusion set (-x)
 
 If you do not specify a subdirectory name either with -d or in the
 .flocktest file, the value of $LOGNAME will be used.
@@ -57,8 +57,8 @@ flockdriver = '''
 #
 
 # Project-specific configuration
-project=GPSD
-origin="git://git.berlios.de/gpsd"
+project=%(project)s
+origin=%(origin)s
 generator="http://gpsd.berlios.de/flockdriver"
 
 # No project-specific stuff below this line
@@ -95,7 +95,7 @@ else
     fi
 
     # Perform the test
-    if ( ./autogen.sh && make && make check ) >>"../flockdriver-${subdir}.log" 2>&1
+    if ( %(regression)s ) >>"../flockdriver-${subdir}.log" 2>&1
     then
 	logmessage="Regression test succeeded."
 	status=0
@@ -209,7 +209,7 @@ class TestSite:
         ofp = os.popen("ssh -p %s %s 'cat >flockdriver.%s'" \
                        % (self.config.get("port", "22"), self.me, subdir),
                        "w")
-        ofp.write(flockdriver)
+        ofp.write(flockdriver % self.config)
         if ofp.close():
             # FIXME: Error handling is unsatisfactory if this failes
             print >>sys.stderr, "flocktest: flockdriver copy failed"
