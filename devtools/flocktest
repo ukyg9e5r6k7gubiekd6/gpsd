@@ -9,22 +9,25 @@ The -? makes flocktest prints this help and exits.
 
 The -c option dumps flocktest's configuration and exits
 
-The -k mode installs a specified file of ssh public key an all machines
+The -k mode installs a specified file of ssh public key on all machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
 
 The -d option passes it a name for the remote test subdirectory
+If you do not specify a subdirectory name, the value of $LOGNAME will be used.
 
 The -q option supprssed CIA notifications
 
-The -v option shows all ssh commands issued and runs flockdriver with -x set.
+The -v option shows all ssh commands issued, runs flockdriver with -x set
+and causes logs to be echoed even on success.
 
 The -x option specifies a comma-separated list of items that are
 either remote hostnames or architecture tags.  Matching sites are
 excluded.  You may wish to use this to avoid doing remote tests that
 are redundant with your local ones.
 
-If you do not specify a subdirectory name, the value of $LOGNAME will be used.
+Known bug: The -k has no atomicity check.  Running it from two
+flocktest instances concurrently could result in a scrambled keyfile.
 """
 
 import os, sys, ConfigParser, getopt, socket, threading, commands, time
@@ -202,8 +205,9 @@ class TestFlock:
     "Methods for performing parallel tests on a flock of remote sites."
     ssh_options = "no-port-forwarding,no-X11-forwarding," \
                  "no-agent-forwarding,no-pty "
-    def __init__(self, sitelist):
+    def __init__(self, sitelist, verbose=False):
         self.sitelist = sitelist
+        self.verbose = verbose
     def update_remote(self, filename):
         "Copy a specified file to the remote home on all machines."
         for site in self.sitelist:
@@ -225,6 +229,8 @@ class TestFlock:
                 print site.thread.output
             else:
                 print "== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed)
+                if self.verbose:
+                    print site.thread.output
         elapsed = time.time() - starttime
         print "== %d tests completed in %.2f seconds: %d failed ==" % (len(sites), elapsed, failed)
     def exclude(self, exclusions):
@@ -276,7 +282,7 @@ if __name__ == '__main__':
         newsite.verbose = verbose
         if newsite.config["status"].lower() == "up":
             sites.append(newsite)
-    flock = TestFlock(sites)
+    flock = TestFlock(sites, verbose)
     if exclusions:
         flock.exclude(exclusions)
 
