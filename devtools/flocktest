@@ -3,7 +3,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-d subdir] [-k key] -v [-x exclude] [-?]
+usage: flocktest [-c] [-q] [-d subdir] [-k key] -v [-x exclude] [-?]
 
 The -? makes flocktest prints this help and exits.
 
@@ -14,6 +14,8 @@ The -k mode installs a specified ssh public key an all machines
 Otherwise, the remote flockdriver script is executed on each machine.
 
 The -d option passes it a name for the remote test subdirectory
+
+The -q option supprssed CIA notifications
 
 The -v option shows all ssh commands issued and runs flockdriver with -x set.
 
@@ -36,10 +38,12 @@ flockdriver = '''
 
 generator="http://gpsd.berlios.de/flockdriver"
 
-while getopts d opt
+quiet=no
+while getopts dq opt
 do
     case $opt in
         d) subdir=$2; shift; shift ;;
+        q) quiet=yes; shift ;;
     esac
 done
 
@@ -101,7 +105,9 @@ refname=${refname##refs/heads/}
 gitver=$(git --version)
 gitver=${gitver##* }
 
-${sendmail} << EOM
+if [ $quiet = no ]
+then
+    ${sendmail} << EOM
 Message-ID: <${merged}.${subdir}.blip@%(project)s>
 From: ${from}
 To: ${to}
@@ -128,6 +134,7 @@ Subject: DeliverXML
   </body>
 </message>
 EOM
+fi
 
 exit $status
 # End.
@@ -178,6 +185,7 @@ class TestSite:
         "Copy flockdriver to the remote site and run it."
         self.starttime = time.time() 
         status = 1
+        # FIXME: subdir and cianotify are globals
         ofp = os.popen("ssh -p %s %s 'cat >flockdriver.%s'" \
                        % (self.config.get("port", "22"), self.me, subdir),
                        "w")
@@ -186,6 +194,8 @@ class TestSite:
             print >>sys.stderr, "flocktest: flockdriver copy failed"
         else:
             command = "sh flockdriver.%s -d %s" % (subdir, subdir,)
+            if not cianotify:
+                command += " -q"
             if self.verbose > 1:
                 command = "sh -x " + command
             status = self.do_remote(command)
@@ -220,7 +230,7 @@ class TestFlock:
             else:
                 print "== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed)
         elapsed = time.time() - starttime
-        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(slaves), site.elapsed, failed)
+        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(slaves), elapsed, failed)
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -235,7 +245,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:vx:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:qvx:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
@@ -245,6 +255,7 @@ if __name__ == '__main__':
     key = None
     verbose = False
     dumpconf = False
+    cianotify = True
     for (switch, val) in options:
         if  switch == '-c':
             dumpconf = True
@@ -252,8 +263,8 @@ if __name__ == '__main__':
             subdir = val
         elif  switch == '-k':
             key = val
-        elif  switch == '-N':
-            execute = False
+        elif switch == '-q':
+            cianotify = False
         elif switch == '-v':
             verbose = True
         elif switch == '-x':
