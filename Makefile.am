@@ -544,7 +544,7 @@ version:
 
 # Regression-test the daemon
 gps-regress: gpsd 
-	$(srcdir)/regress-driver -t $(srcdir)/test/daemon/*.log
+	$(srcdir)/regress-driver $(srcdir)/test/daemon/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
@@ -627,7 +627,7 @@ time-regress: test_mkgmtime
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
 	@echo "Testing the client-library sentence decoder..."
-	$(srcdir)/regress-driver -c -t $(srcdir)/test/clientlib/*.log
+	$(srcdir)/regress-driver -c $(srcdir)/test/clientlib/*.log
 
 # Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
@@ -677,7 +677,7 @@ udev-test:
 #
 
 unstable-regress: gpsd 
-	./regress-driver -t $(srcdir)/test/unstable/*.log
+	./regress-driver $(srcdir)/test/unstable/*.log
 
 unstable-makeregress: gpsd
 	./regress-driver -b $(srcdir)/test/unstable/*.log
