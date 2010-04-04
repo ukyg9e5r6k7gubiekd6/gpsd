@@ -69,6 +69,9 @@ else
 	git pull
     fi
 
+    # Scripts in the test directory need to be able to run binaries in same
+    PATH="$PATH:."
+
     # Perform the test
     if ( %(regression)s )
     then
