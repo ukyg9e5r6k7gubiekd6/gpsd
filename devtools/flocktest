@@ -166,9 +166,8 @@ class TestSite:
         command += "%s '%s'" %  (self.me, remote)
         if self.verbose:
             print command
-        current =  FlockThread(self, command)
-        current.start()
-        return current
+        self.thread =  FlockThread(self, command)
+        self.thread.start()
     def update_remote(self, filename):
         "Copy a specified file to the remote home."
         command = "scp %s %s:~" % (filename, self.me)
@@ -184,7 +183,6 @@ class TestSite:
     def do_flockdriver(self):
         "Copy flockdriver to the remote site and run it."
         self.starttime = time.time() 
-        status = 1
         # FIXME: subdir and cianotify are globals
         ofp = os.popen("ssh -p %s %s 'cat >flockdriver.%s'" \
                        % (self.config.get("port", "22"), self.me, subdir),
@@ -198,9 +196,8 @@ class TestSite:
                 command += " -q"
             if self.verbose > 1:
                 command = "sh -x " + command
-            status = self.do_remote(command)
+            self.do_remote(command)
         self.elapsed = time.time() - self.starttime
-        return status
 
 class TestFlock:
     "Methods for performing parallel tests on a flock of remote sites."
@@ -218,19 +215,19 @@ class TestFlock:
         print "== testing at: %s ==" % flock.listdump()
         starttime = time.time()
         for site in self.sitelist:
-            slaves.append(site.do_flockdriver())
-        for slave in slaves:
-            slave.join()
+            site.do_flockdriver()
+        for site in sites:
+            site.thread.join()
         failed = 0
-        for slave in slaves:
-            if slave.status:
-                print "== %s test FAILED in %.2f seconds, status %d ==" % (site.fqdn, site.elapsed, slave.status)
+        for site in sites:
+            if site.thread.status:
+                print "== %s test FAILED in %.2f seconds, status %d ==" % (site.fqdn, site.elapsed, site.thread.status)
                 failed += 1
-                print slave.output
+                print site.thread.output
             else:
                 print "== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed)
         elapsed = time.time() - starttime
-        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(slaves), elapsed, failed)
+        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(sites), elapsed, failed)
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
