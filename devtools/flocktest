@@ -3,9 +3,11 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-d subdir] [-k key] -v [-x exclude] [-?]
+usage: flocktest [-c] [-d subdir] [-k key] -v [-x exclude] [-?]
 
 The -? makes flocktest prints this help and exits.
+
+The -c option dumps flocktest's configuration and exits
 
 The -k mode installs a specified ssh public key an all machines
 
@@ -23,7 +25,7 @@ are redundant with your local ones.
 If you do not specify a subdirectory name, the value of $LOGNAME will be used.
 """
 
-import os, sys, ConfigParser, getopt, socket, threading, commands
+import os, sys, ConfigParser, getopt, socket, threading, commands, time
 
 flockdriver = '''
 #!/bin/sh
@@ -174,18 +176,21 @@ class TestSite:
         self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename))
     def do_flockdriver(self):
         "Copy flockdriver to the remote site and run it."
+        self.starttime = time.time() 
+        status = 1
         ofp = os.popen("ssh -p %s %s 'cat >flockdriver.%s'" \
                        % (self.config.get("port", "22"), self.me, subdir),
                        "w")
         ofp.write(flockdriver % self.config)
         if ofp.close():
-            # FIXME: Error handling is unsatisfactory if this failes
             print >>sys.stderr, "flocktest: flockdriver copy failed"
         else:
             command = "sh flockdriver.%s -d %s" % (subdir, subdir,)
             if self.verbose > 1:
                 command = "sh -x " + command
-            return self.do_remote(command)
+            status = self.do_remote(command)
+        self.elapsed = time.time() - self.starttime
+        return status
 
 class TestFlock:
     "Methods for performing parallel tests on a flock of remote sites."
@@ -201,17 +206,21 @@ class TestFlock:
         "Execute a command on all machines in the flock."
         slaves = []
         print "== testing at: %s ==" % flock.listdump()
+        starttime = time.time()
         for site in self.sitelist:
             slaves.append(site.do_flockdriver())
         for slave in slaves:
             slave.join()
+        failed = 0
         for slave in slaves:
             if slave.status:
-                print "== %s test FAILED, status %d ==" % (site.fqdn, slave.status)
+                print "== %s test FAILED in %.2f seconds, status %d ==" % (site.fqdn, site.elapsed, slave.status)
+                failed += 1
                 print slave.output
             else:
-                print "== %s test succeeded ==" % site.fqdn
-            print "== tests completed =="
+                print "== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed)
+        elapsed = time.time() - starttime
+        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(slaves), site.elapsed, failed)
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
@@ -226,7 +235,7 @@ class TestFlock:
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "dk:vx:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:vx:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
@@ -235,8 +244,11 @@ if __name__ == '__main__':
     subdir = None
     key = None
     verbose = False
+    dumpconf = False
     for (switch, val) in options:
-        if  switch == 'd':
+        if  switch == '-c':
+            dumpconf = True
+        elif  switch == '-d':
             subdir = val
         elif  switch == '-k':
             key = val
@@ -251,7 +263,7 @@ if __name__ == '__main__':
             sys.exit(0)
 
     config = ConfigParser.RawConfigParser()
-    config.read(["flock-sites.ini"])
+    config.read(["flocktest.ini", ".flocktest.ini"])
     sites = []
     for site in config.sections():
         newsite = TestSite(site, dict(config.items(site)))
@@ -262,7 +274,9 @@ if __name__ == '__main__':
     if exclusions:
         flock.exclude(exclusions)
 
-    if key:
+    if dumpconf:
+        config.write(sys.stdout)
+    elif key:
         flock.add_key(val)
     else:
         if not subdir:

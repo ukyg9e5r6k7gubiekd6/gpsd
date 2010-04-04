@@ -22,7 +22,7 @@ To add a machine to the flock, do these steps:
 
 ssh-dss AAAAB3NzaC1kc3MAAACBAPcpYG3nTzwrnZ1Nuz4FlODvnDaoHVaDoVg3jiSax/OJLuLmP+B1RMIMzQyQvbpeVHfMvBk1G+lqpysdUGOjM1ohYIXD479oOUg+Iga4SxrAwMwIiOFF5XhLc3hV2Ibd0N6V9ho8Sz8Kgq4CKj7323bLL+YpfldMhIlLXYDwTVo7AAAAFQCpZm4A5EiQar4+WavFBS1Xy3mJ6wAAAIEA2H33z6KpgRPIV/m5tRX4RmPmtunpC8UpBxj/uEadkaKnbDHLSuyUcflXe2A5xTuYIdFglEkt7ebZ1Gil4f7NuiKbukfQ13jMDWyuS9kDw0gr245kInu22dpfU1ZlCoDmNZSSeRJFkmhfvAim6yXoNpcS/PCaICNPJ1Ww9COYkqoAAACAY4g8mk80LXEpumbEonuDbsFobkz3HiooKgZd+xAGlYEDKpdVlh+bAXHW2R8tHnfYzP5Lq9nGan9i8GSAnw4ETwQ/IfIo7uT1OikyuImYqX2WKoUz5/3i9KOEUy4LWbqSHjIxBw3Y9ZlFYzq3gG/EhnmIuKGlN6Ig1P7B7v0GuXg= esr@snark
 
-5. Append an entry to the flock-sites file and push to origin with the commit
+5. Append an entry to the flocktest.ini file and push to origin with the commit
    message "Added new flock site" or something similar.  If you do not
    have git commit access, mail the entry to the development mailing
    list.
