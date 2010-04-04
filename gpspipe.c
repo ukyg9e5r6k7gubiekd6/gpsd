@@ -238,7 +238,7 @@ int main( int argc, char **argv)
     } else
 	gpsd_source_spec(NULL, &source);
 
-    if (serialport!=NULL && raw) {
+    if (serialport!=NULL && !raw) {
 	(void)fprintf(stderr, "gpspipe: use of '-s' requires '-r'.\n");
 	exit(1);
     }
