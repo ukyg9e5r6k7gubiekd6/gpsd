@@ -9,7 +9,7 @@ The -? makes flocktest prints this help and exits.
 
 The -c option dumps flocktest's configuration and exits
 
-The -k mode installs a specified ssh public key an all machines
+The -k mode installs a specified file of ssh public key an all machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
 
@@ -171,9 +171,9 @@ class TestSite:
             print command
         self.thread =  FlockThread(self, command)
         self.thread.start()
-    def update_remote(self, filename):
-        "Copy a specified file to the remote home."
-        command = "scp %s %s:~" % (filename, self.me)
+    def update_keys(self, filename):
+        "Upload a specified file to replace the remote authorized keys."
+        command = "scp '%s' %s:~/.ssh/.authorized_keys" % (filename, self.me)
         if self.verbose:
             print command
         status = os.system(command)
@@ -193,7 +193,7 @@ class TestSite:
         ofp = os.popen(uploader, "w")
         ofp.write(flockdriver % self.config)
         if ofp.close():
-            print >>sys.stderr, "flocktest: agen upload failed"
+            print >>sys.stderr, "flocktest: agent upload failed"
         else:
             self.do_remote(invocation)
         self.elapsed = time.time() - self.starttime
@@ -230,25 +230,24 @@ class TestFlock:
     def exclude(self, exclusions):
         "Delete matching sites."
         self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
-    def add_key(self, key):
-        "Add the specified public key to all sites."
+    def update_keys(self, keyfile):
+        "Copy the specified public key file to all sites."
         for site in self.sitelist:
-            site.do_append(".ssh/authorized_keys",
-                           TestFlock.ssh_options + " " + key)
+            site.update_keys(keyfile)
     def listdump(self):
         "Return a dump of the site list."
         return ", ".join(map(lambda x: x.fqdn, self.sitelist))
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdk:qvx:?")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdkqvx:?")
     except getopt.GetoptError, msg:
         print "flocktest: " + str(msg)
         raise SystemExit, 1
 
     exclusions = []
     subdir = None
-    key = None
+    copykeys = None
     verbose = False
     dumpconf = False
     cianotify = True
@@ -258,7 +257,7 @@ if __name__ == '__main__':
         elif  switch == '-d':
             subdir = val
         elif  switch == '-k':
-            key = val
+            copykeys = True
         elif switch == '-q':
             cianotify = False
         elif switch == '-v':
@@ -283,8 +282,9 @@ if __name__ == '__main__':
 
     if dumpconf:
         config.write(sys.stdout)
-    elif key:
-        flock.add_key(val)
+    elif copykeys:
+        keyfile = config.get("DEFAULT", "sshkeys")
+        flock.update_keys(keyfile)
     else:
         if not subdir:
             subdir = os.getenv("LOGNAME")
