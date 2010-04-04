@@ -1780,12 +1780,8 @@ int main(int argc, char *argv[])
 
 	/*
 	 * Mark devices with an identified packet type but no
-	 * remaining subscribers to be closed.  The reason the test
-	 * has this particular form is so that, immediately after
-	 * device open, we'll keep reading packets until a type is
-	 * identified even though there are no subscribers yet.  We
-	 * need this to happen so that subscribers can later choose a
-	 * device by packet type.
+	 * remaining subscribers to be closed in RELEASE_TIME seconds.
+	 * See the explanation of RELEASE_TIME for the reasoning.
 	 */
 	if (!nowait)
 	    for (device=devices; device < devices+MAXDEVICES; device++) {
