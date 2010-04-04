@@ -170,7 +170,6 @@ int main( int argc, char **argv)
     unsigned int flags;
 
     struct fixsource_t source;
-    char *port = DEFAULT_GPSD_PORT, *server = NULL;
     char *serialport = NULL;
     char *outfile = NULL;
 
@@ -285,11 +284,11 @@ int main( int argc, char **argv)
 	open_serial(serialport);
 
     /*@ -nullpass -onlytrans @*/
-    gpsdata = gps_open(server, port);
+    gpsdata = gps_open(source.server, source.port);
     if (gpsdata == NULL) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
-		      server, port, strerror(errno), errno);
+		      source.server, source.port, strerror(errno), errno);
 	exit(1);
     }
     /*@ +nullpass +onlytrans @*/
