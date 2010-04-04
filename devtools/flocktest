@@ -180,23 +180,19 @@ class TestSite:
     def do_append(self, filename, string):
         "Append a line to a specified remote file, in foreground."
         self.do_remote("echo \"%s\" >>%s" % (string.strip(), filename))
-    def do_flockdriver(self):
+    def do_flockdriver(self, agent, invocation):
         "Copy flockdriver to the remote site and run it."
-        self.starttime = time.time() 
-        # FIXME: subdir and cianotify are globals
-        ofp = os.popen("ssh -p %s %s 'cat >flockdriver.%s'" \
-                       % (self.config.get("port", "22"), self.me, subdir),
-                       "w")
+        self.starttime = time.time()
+        uploader = "ssh -p %s %s 'cat >%s'" \
+                       % (self.config.get("port", "22"), self.me, agent)
+        if self.verbose:
+            print uploader
+        ofp = os.popen(uploader, "w")
         ofp.write(flockdriver % self.config)
         if ofp.close():
-            print >>sys.stderr, "flocktest: flockdriver copy failed"
+            print >>sys.stderr, "flocktest: agen upload failed"
         else:
-            command = "sh flockdriver.%s -d %s" % (subdir, subdir,)
-            if not cianotify:
-                command += " -q"
-            if self.verbose > 1:
-                command = "sh -x " + command
-            self.do_remote(command)
+            self.do_remote(invocation)
         self.elapsed = time.time() - self.starttime
 
 class TestFlock:
@@ -209,13 +205,13 @@ class TestFlock:
         "Copy a specified file to the remote home on all machines."
         for site in self.sitelist:
             site.update_remote(filename)
-    def do_remotes(self):
+    def do_remotes(self, agent, invocation):
         "Execute a command on all machines in the flock."
         slaves = []
         print "== testing at: %s ==" % flock.listdump()
         starttime = time.time()
         for site in self.sitelist:
-            site.do_flockdriver()
+            site.do_flockdriver(agent, invocation)
         for site in sites:
             site.thread.join()
         failed = 0
@@ -292,7 +288,13 @@ if __name__ == '__main__':
         if not subdir:
             print "flocktest: you don't exist, go away!"
             sys.exit(1)
-        flock.do_remotes()
+        agent = "flockdriver.%s" % subdir
+        invocation = "sh flockdriver.%s -d %s" % (subdir, subdir,)
+        if not cianotify:
+            invocation += " -q"
+        if verbose > 1:
+            invocation = "sh -x " + invocation
+        flock.do_remotes(agent, invocation)
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
