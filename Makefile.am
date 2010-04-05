@@ -655,12 +655,11 @@ testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress 
 TESTS_ENVIRONMENT = MAKE=$(MAKE)
 TESTS = do-tests
 
+# The website directory
 #
-# The website material
-#
-# None of these productions are fired by 'make all'
+# None of these productions are fired by 'make all'.
 
-# FIXME: Need to be replaced by a $(MANGENERATOR) rule
+# FIXME: Needs to be replaced by a $(MANGENERATOR) rule
 %.html: %.xml
 	xmlto xhtml-nochunks $<
 
@@ -698,6 +697,16 @@ www/hardware.html: www/hardware-head.html gpscap.ini www/hardware-tail.html
 
 www/performance/performance.html: www/performance/performance.xml
 	(cd www/performance; xmlto xhtml-nochunks performance.xml)
+
+# Experimenting with pydoc.  Not yet fired by any other productions.
+
+pydoc: www/pydoc/index.html
+
+www/pydoc/index.html: gps gpsfake gpscat gpsprof
+	mkdir -p www/pydoc
+	epydoc -v -q --html --graph all -n GPSD gps gpsfake gpscat gpsprof -o www/pydoc
+
+.PHONY: pydoc
 
 # Productions for setting up and performing udev tests.
 #
