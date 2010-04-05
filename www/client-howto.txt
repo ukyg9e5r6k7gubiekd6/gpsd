@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.0, April 2010
+v1.1, April 2010
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -9,7 +9,7 @@ http://gpsd.berlios.de/client-howto.txt[]
 == Introduction ==
 
 This document is a guide to interfacing client applications with GPSD.
-It surveys the available binding and their use cases  It also explains
+It surveys the available binding and their use cases.  It also explains
 some sharp edges in the client API which, unfortunely, are fundamental
 results of the way GPS sensor devices operate, and suggests tactics
 for avoiding being cut.
@@ -270,15 +270,20 @@ the data flow from the sensors, and the simple fact that they're
 not necessarily delivering fixes at any given time.  
 
 For details of the libraries' APIs, see their reference
-sdocumentation; the objective of the rest of this section is to teach
+documentation; the objective of the rest of this section is to teach
 you the general model of client-side interfacing that they all have to
 follow because of the way the daemon works.
 
-Each library has the following main entry points:
+Each library has the following entry points:
 
 * Open a session socket to the daemon.  Named something like "open()".
 
 * Set watch policy. Named something like "stream()"
+
+* Send wire-protocol commands to the daemon. Deprecated; makes your
+  code dependent on the wire protocol. There is no longer a real
+  use case for this entry point; if you think you need no use it, 
+  you have probably failed to understand the rest of the interface.
 
 * Nonblocking check to see if data from the daemon is waiting. Named
   something like "waiting()".
@@ -286,6 +291,37 @@ Each library has the following main entry points:
 * Blocking poll for data from the daemon.  Named something like "poll()".
 
 * Close the session socket. Named something like "close()".
+
+* Enable debugging trace messages
+
+Here is a complete table of the binding entry points:
+
+.Entry points in client bindings
+[frame="topbot",options="header"]
+|========================================================================
+|C			|C++			|Python			|
+Function
+|gps_open()		|gpsmm.gpsmm()		|gps.\_\_init__()	|
+In OO languages the client class initializer opens the daemon socket.
+|gps_open_r()		|			|			|
+The C library, only, has an open variant that is re-entrant.
+|gps_set_raw_hook()	|			|gps.set_raw_hook()	|
+Set a hook function to be executed on each raw packet as it arrives.
+|gps_send()		|gpsmm.send()		|gps.send()		|
+Send wire-protocol commands to the daemon. Deprecated and unstable.
+|gps_stream()		|gpsmm.stream()		|gps.stream()		|
+Set watch policy. What you should use instead of send().
+|gps_waiting()		|gpsmm.waiting()	|gps.waiting()		|
+Nonblocking check to see in input is waiting.
+|gps_poll()		|gpsmm.poll()		|gps.poll()		|
+Blocking poll for data from the daemon.
+|gps_close()		|gpsmm.close()		|gps.close()		|
+Close the daemon socket and end the session.
+|gps_enable_debug()	|gpsmm_enable_debug()	|			|
+Enable debug tracing.  Only useful for GPSD developers.
+			|gpsmm.clear_fix()	|			|
+Clear the contents of the fix structure.
+|========================================================================
 
 The tricky part is interpreting what you get from the blocking
 poll. The reason it's tricky is that you're not guaranteed that
