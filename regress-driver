@@ -25,14 +25,13 @@ done
 shift $(($OPTIND - 1))
 
 # Enables us to turn debugging up high without screwing up the diff checks
-# First expression ignore difference between positive and negative zero
-# Second and third filter out gpsd log messages.
-# Fourth filters out gps.py verbose loggging
-# Fifth filters out new-style WATCH responses
-# Sixth filters out new-style DEVICE responses
-# Seventh filters out new-style VERSION responses
-# Eighth filters out device fields in new-style responses.
-GPSFILTER="sed -e /-0.000/s//0.000/ -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/,\"device\":[^,}]*//"
+# First and Second filter out gpsd log messages.
+# Third filters out gps.py verbose loggging
+# Fourth filters out WATCH responses
+# Fifth filters out DEVICE responses
+# Sixth filters out VERSION responses
+# Seventh filters out device fields
+GPSFILTER="sed -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/,\"device\":[^,}]*//"
 
 # Use ALTFILTER to set up custom filtering when a regression test fails
 # This example filters out altitude and some fields computed by gpsd's error 
