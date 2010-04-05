@@ -1021,7 +1021,7 @@ static void character_discard(struct gps_packet_t *lexer)
 
 /* entry points begin here */
 
-void packet_init(struct gps_packet_t *lexer)
+void packet_init(/*@out@*/struct gps_packet_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
@@ -1618,7 +1618,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	return recvd;
 }
 
-void packet_reset(struct gps_packet_t *lexer)
+void packet_reset(/*@out@*/struct gps_packet_t *lexer)
 /* return the packet machine to the ground state */
 {
     lexer->type = BAD_PACKET;

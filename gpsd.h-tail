@@ -107,8 +107,8 @@ struct gps_packet_t {
     } isgps;
 };
 
-extern void packet_init(struct gps_packet_t *);
-extern void packet_reset(struct gps_packet_t *);
+extern void packet_init(/*@out@*/struct gps_packet_t *);
+extern void packet_reset(/*@out@*/struct gps_packet_t *);
 extern void packet_pushback(struct gps_packet_t *);
 extern void packet_parse(struct gps_packet_t *);
 extern ssize_t packet_get(int, struct gps_packet_t *);
