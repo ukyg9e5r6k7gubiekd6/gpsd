@@ -72,7 +72,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	session->driver.ubx.gps_week = gw;
 
 	t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
-	session->gpsdata.fix.time = t;
+	session->newdata.time = t;
 	mask |= TIME_SET;
 #ifdef NTPSHM_ENABLE
 	/* TODO overhead */
@@ -87,11 +87,11 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     evx = (double)(getlesl(buf, 28)/100.0);
     evy = (double)(getlesl(buf, 32)/100.0);
     evz = (double)(getlesl(buf, 36)/100.0);
-    ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
+    ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     epx, epy, epz, evx, evy, evz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
-    session->gpsdata.fix.epx = session->gpsdata.fix.epy = (double)(getlesl(buf, 24)/100.0)/sqrt(2);
-    session->gpsdata.fix.eps = (double)(getlesl(buf, 40)/100.0);
+    session->newdata.epx = session->newdata.epy = (double)(getlesl(buf, 24)/100.0)/sqrt(2);
+    session->newdata.eps = (double)(getlesl(buf, 40)/100.0);
     /* Better to have a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
@@ -100,33 +100,33 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     switch (navmode) {
     case UBX_MODE_TMONLY:
     case UBX_MODE_3D:
-	session->gpsdata.fix.mode = MODE_3D;
+	session->newdata.mode = MODE_3D;
 	break;
     case UBX_MODE_2D:
     case UBX_MODE_DR:	    /* consider this too as 2D */
     case UBX_MODE_GPSDR:    /* XXX DR-aided GPS may be valid 3D */
-	session->gpsdata.fix.mode = MODE_2D;
+	session->newdata.mode = MODE_2D;
 	break;
     default:
-	session->gpsdata.fix.mode = MODE_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
     }
 
     if ((flags & UBX_SOL_FLAG_DGPS) != 0)
 	session->gpsdata.status = STATUS_DGPS_FIX;
-    else if (session->gpsdata.fix.mode != MODE_NO_FIX)
+    else if (session->newdata.mode != MODE_NO_FIX)
 	session->gpsdata.status = STATUS_FIX;
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_report(LOG_DATA, 
 		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.track,
+		session->newdata.speed,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		session->gpsdata.satellites_used,
 		gpsd_maskdump(mask));
@@ -180,10 +180,10 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 	session->context->leap_seconds = (int)getub(buf, 10);
 
     t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.fix.time = t;
+    session->newdata.time = t;
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
-		session->gpsdata.fix.time);
+		session->newdata.time);
     return TIME_SET;
 }
 

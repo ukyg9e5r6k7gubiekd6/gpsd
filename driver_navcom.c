@@ -413,7 +413,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Timestamp */
     week = (uint16_t)getleuw(buf, 3);
     tow = (uint32_t)getleul(buf, 5);
-    session->gpsdata.fix.time = gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
+    session->newdata.time = gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 
     /* Satellites used */
     sats_used = (uint32_t)getleul(buf, 9);
@@ -429,16 +429,16 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     lat_fraction = (uint8_t)(getub(buf, 21) >> 4);
     lon_fraction = (uint8_t)(getub(buf, 21) & 0x0f);
 
-    session->gpsdata.fix.latitude = (double)(lat * LL_RES + lat_fraction * LL_FRAC_RES ) / 3600;
-    session->gpsdata.fix.longitude = (double)(lon * LL_RES + lon_fraction * LL_FRAC_RES ) / 3600;
+    session->newdata.latitude = (double)(lat * LL_RES + lat_fraction * LL_FRAC_RES ) / 3600;
+    session->newdata.longitude = (double)(lon * LL_RES + lon_fraction * LL_FRAC_RES ) / 3600;
 
     /* Nav mode */
     nav_mode = (uint8_t)getub(buf, 22);
     if (-nav_mode & 0x80) {
 	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.mode = MODE_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
     } else {
-	session->gpsdata.fix.mode = (nav_mode & 0x40 ? MODE_3D : MODE_2D);
+	session->newdata.mode = (nav_mode & 0x40 ? MODE_3D : MODE_2D);
 	session->gpsdata.status = (nav_mode & 0x03 ? STATUS_DGPS_FIX : STATUS_FIX);
     }
 
@@ -449,7 +449,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     ant_height_adj = getlesw(buf, 51);
     set_delta_up = getlesl(buf, 79);
 
-    session->gpsdata.fix.altitude = (double)(altitude * EL_RES)
+    session->newdata.altitude = (double)(altitude * EL_RES)
 	    + (ant_height_adj * D_RES) + (set_delta_up * D_RES);
     session->gpsdata.separation = (double)(ellips_height - altitude)*EL_RES
 	    + (ant_height_adj * D_RES) + (set_delta_up * D_RES);
@@ -463,11 +463,11 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     track = atan2(vel_east, vel_north);
     if (track < 0)
 	track += 2 * GPS_PI;
-    session->gpsdata.fix.track = track * RAD_2_DEG;
+    session->newdata.track = track * RAD_2_DEG;
     /*@ -evalorder @*/
-    session->gpsdata.fix.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
+    session->newdata.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
     /*@ +evalorder @*/
-    session->gpsdata.fix.climb = vel_up * VEL_RES;
+    session->newdata.climb = vel_up * VEL_RES;
 
     /* Quality indicators */
     /*@ -type @*/
@@ -482,9 +482,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Get two-sigma horizontal circular error estimate */
     eph = fom/100.0 * 1.96;
     /* approximate epx and epy errors from it */
-    session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph/sqrt(2);
+    session->newdata.epx = session->newdata.epy = eph/sqrt(2);
     /* FIXME - Which units is tfom in (spec doesn't say) */
-    session->gpsdata.fix.ept = tfom * 1.96	/*Two sigma*/;
+    session->newdata.ept = tfom * 1.96	/*Two sigma*/;
 
     clear_dop(&session->gpsdata.dop);
     if (gdop != DOP_UNDEFINED)
@@ -504,12 +504,12 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		(-nav_mode&0x80?"invalid":"valid"), nav_mode,
 		(nav_mode&0x40?"3D":"2D"), (nav_mode&0x03?"DGPS":"GPS"));
     gpsd_report(LOG_IO, "Navcom: latitude = %f, longitude = %f, altitude = %f, geoid = %f\n",
-		session->gpsdata.fix.latitude, session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude, session->gpsdata.separation);
+		session->newdata.latitude, session->newdata.longitude,
+		session->newdata.altitude, session->gpsdata.separation);
     gpsd_report(LOG_IO,
 		"Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
 		vel_north*VEL_RES, vel_east*VEL_RES, vel_up*VEL_RES,
-		session->gpsdata.fix.track, session->gpsdata.fix.speed);
+		session->newdata.track, session->newdata.speed);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -526,18 +526,18 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f "
 		"mask={LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
 		"USED|HERR|VERR|TIMERR|DOP}\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
-		session->gpsdata.fix.epx, 
-		session->gpsdata.fix.epy, 
-		session->gpsdata.fix.epv,
+		session->newdata.epx, 
+		session->newdata.epy, 
+		session->newdata.epv,
 		session->gpsdata.dop.gdop,
 		session->gpsdata.dop.pdop,
 		session->gpsdata.dop.hdop,
@@ -886,12 +886,12 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->gpsdata.epe = rms*1.96;
 	mask |= PERR_SET;
 #ifdef __UNUSED__
-	session->gpsdata.fix.eph = hrms*1.96;
-	session->gpsdata.fix.epv = alt_sd*1.96;
+	session->newdata.eph = hrms*1.96;
+	session->newdata.epv = alt_sd*1.96;
 	mask |= (HERR_SET | VERR_SET);
 #endif /*  __UNUSED__ */
 	/*@ ignore @*//*@ splint is confused @*/
-	session->gpsdata.fix.time = 
+	session->newdata.time = 
 	    gpstime_to_unix((int)week, tow/1000.0f) - session->context->leap_seconds;
 	/*@ end @*/
 	gpsd_report(LOG_PROG,
@@ -1090,7 +1090,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 		osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 		osc_filter_drift_est, time_slew);
     gpsd_report(LOG_DATA,
-		"CDO 0xef: time=%.2f mask={TIME}\n", session->gpsdata.fix.time);
+		"CDO 0xef: time=%.2f mask={TIME}\n", session->newdata.time);
     return 0;
 }
 

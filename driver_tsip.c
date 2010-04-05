@@ -281,23 +281,23 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x4a:		/* Single-Precision Position LLA */
 	if (len != 20)
 	    break;
-	session->gpsdata.fix.latitude  = getbef(buf,0) * RAD_2_DEG;
-	session->gpsdata.fix.longitude = getbef(buf,4) * RAD_2_DEG;
-	session->gpsdata.fix.altitude  = getbef(buf,8);
+	session->newdata.latitude  = getbef(buf,0) * RAD_2_DEG;
+	session->newdata.longitude = getbef(buf,4) * RAD_2_DEG;
+	session->newdata.altitude  = getbef(buf,8);
 	f1 = getbef(buf,12);			/* clock bias */
 	f2 = getbef(buf,16);			/* time-of-fix */
 	if (session->driver.tsip.gps_week) {
-	    session->gpsdata.fix.time =
+	    session->newdata.time =
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f2) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET | REPORT_SET;
 	gpsd_report(LOG_DATA, "SPPLLA 0x4a "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.altitude,
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.altitude,
 		    gpsd_maskdump(mask));
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
@@ -356,20 +356,20 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f3 = getbef(buf,8);			/* Up velocity */
 	f4 = getbef(buf,12);			/* clock bias rate */
 	f5 = getbef(buf,16);			/* time-of-fix */
-	session->gpsdata.fix.climb = f3;
+	session->newdata.climb = f3;
 	/*@ -evalorder @*/
-	session->gpsdata.fix.speed = sqrt(pow(f2,2) + pow(f1,2));
+	session->newdata.speed = sqrt(pow(f2,2) + pow(f1,2));
 	/*@ +evalorder @*/
-	if ((session->gpsdata.fix.track = atan2(f1,f2) * RAD_2_DEG) < 0)
-	    session->gpsdata.fix.track += 360.0;
+	if ((session->newdata.track = atan2(f1,f2) * RAD_2_DEG) < 0)
+	    session->newdata.track += 360.0;
 	gpsd_report(LOG_INF, "GPS Velocity ENU %f %f %f %f %f\n",f1,f2,f3,f4,f5);
 	mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
 	gpsd_report(LOG_DATA, "VFENU 0x56 "
 		    "time=%.2f speed=%.2f track=%.2f climb=%.2f mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.speed,
-		    session->gpsdata.fix.track,
-		    session->gpsdata.fix.climb,
+		    session->newdata.time,
+		    session->newdata.speed,
+		    session->newdata.track,
+		    session->newdata.climb,
 		    gpsd_maskdump(mask));
 	break;
     case 0x57:		/* Information About Last Computed Fix */
@@ -454,15 +454,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	{
 	case 3:
 	    //session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	    break;
 	case 4:
 	    //session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	default:
 	    //session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	}
 	mask |= MODE_SET;
@@ -537,28 +537,28 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x84:		/* Double-Precision LLA Position Fix and Bias Information */
 	if (len != 36)
 	    break;
-	session->gpsdata.fix.latitude  = getbed(buf,0) * RAD_2_DEG;
-	session->gpsdata.fix.longitude = getbed(buf,8) * RAD_2_DEG;
-	session->gpsdata.fix.altitude  = getbed(buf,16);
+	session->newdata.latitude  = getbed(buf,0) * RAD_2_DEG;
+	session->newdata.longitude = getbed(buf,8) * RAD_2_DEG;
+	session->newdata.altitude  = getbed(buf,16);
 	d1 = getbed(buf,24);			/* clock bias */
 	f1 = getbef(buf,32);			/* time-of-fix */
 	if (session->driver.tsip.gps_week) {
-	    session->gpsdata.fix.time =
+	    session->newdata.time =
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f1) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
 	gpsd_report(LOG_INF, "GPS DP LLA %f %f %f %f\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.altitude);
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_SET | REPORT_SET;
 	gpsd_report(LOG_DATA, "DPPLLA 0x84 "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.altitude,
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.altitude,
 		    gpsd_maskdump(mask));
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
@@ -607,28 +607,28 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		d5 = 0.005;
 	    d1 = s1 * d5;			/* east velocity m/s */
 	    d2 = s2 * d5;			/* north velocity m/s */
-	    session->gpsdata.fix.climb = s3 * d5; /* up velocity m/s */
+	    session->newdata.climb = s3 * d5; /* up velocity m/s */
 	    /*@ -evalorder @*/
-	    session->gpsdata.fix.speed = sqrt(pow(d2,2) + pow(d1,2));
+	    session->newdata.speed = sqrt(pow(d2,2) + pow(d1,2));
 	    /*@ +evalorder @*/
-	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
-		session->gpsdata.fix.track += 360.0;
-	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
-	    /*@i1@*/session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
-	    if (session->gpsdata.fix.longitude > 180.0)
-		session->gpsdata.fix.longitude -= 360.0;
-	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-	    session->gpsdata.fix.altitude  = sl2 * 1e-3 - session->gpsdata.separation;;
+	    if ((session->newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
+		session->newdata.track += 360.0;
+	    session->newdata.latitude  = sl1 * SEMI_2_DEG;
+	    /*@i1@*/session->newdata.longitude = ul2 * SEMI_2_DEG;
+	    if (session->newdata.longitude > 180.0)
+		session->newdata.longitude -= 360.0;
+	    session->gpsdata.separation = wgs84_separation(session->newdata.latitude, session->newdata.longitude);
+	    session->newdata.altitude  = sl2 * 1e-3 - session->gpsdata.separation;;
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t)0) {	/* Fix Available */
 		session->gpsdata.status = STATUS_FIX;
 		if ((u2 & 0x02) != (uint8_t)0)	/* DGPS Corrected */
 		    session->gpsdata.status = STATUS_DGPS_FIX;
 		if ((u2 & 0x04) != (uint8_t)0)	/* Fix Dimension */
-		    session->gpsdata.fix.mode = MODE_2D;
+		    session->newdata.mode = MODE_2D;
 		else
-		    session->gpsdata.fix.mode = MODE_3D;
+		    session->newdata.mode = MODE_3D;
 	    }
 	    session->gpsdata.satellites_used = (int)u3;
 	    if ((int)u4 > 10) {
@@ -637,7 +637,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    }
 	    session->driver.tsip.gps_week = s4;
 	    /*@ ignore @*//*@ splint is confused @*/
-	    session->gpsdata.fix.time =
+	    session->newdata.time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
 	    /*@ end @*/
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET | REPORT_SET;
@@ -645,14 +645,14 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
 	    break;
@@ -678,51 +678,51 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    /*@ ignore @*//*@ splint is confused @*/
-	    session->gpsdata.fix.time =
+	    session->newdata.time =
 		gpstime_to_unix((int)s1, ul1 * 1e-3) - session->context->leap_seconds;
 	    /*@ end @*/
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t)0) {	/* Fix Available */
 		session->gpsdata.status = STATUS_FIX;
 		if ((u2 & 0x02) != (uint8_t)0)	/* DGPS Corrected */
 		    session->gpsdata.status = STATUS_DGPS_FIX;
 		if ((u2 & 0x04) != (uint8_t)0)	/* Fix Dimension */
-		    session->gpsdata.fix.mode = MODE_2D;
+		    session->newdata.mode = MODE_2D;
 		else
-		    session->gpsdata.fix.mode = MODE_3D;
+		    session->newdata.mode = MODE_3D;
 	    }
-	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
-	    /*@i1@*/session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG;
-	    if (session->gpsdata.fix.longitude > 180.0)
-		session->gpsdata.fix.longitude -= 360.0;
-	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-	    session->gpsdata.fix.altitude  = sl3 * 1e-3 - session->gpsdata.separation;;
+	    session->newdata.latitude  = sl1 * SEMI_2_DEG;
+	    /*@i1@*/session->newdata.longitude = ul2 * SEMI_2_DEG;
+	    if (session->newdata.longitude > 180.0)
+		session->newdata.longitude -= 360.0;
+	    session->gpsdata.separation = wgs84_separation(session->newdata.latitude, session->newdata.longitude);
+	    session->newdata.altitude  = sl3 * 1e-3 - session->gpsdata.separation;;
 	    if ((u2 & 0x20) != (uint8_t)0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
 	    d1 = s2 * d5;			/* east velocity m/s */
 	    d2 = s3 * d5;			/* north velocity m/s */
-	    session->gpsdata.fix.climb = s4 * d5; /* up velocity m/s */
+	    session->newdata.climb = s4 * d5; /* up velocity m/s */
 	    /*@ -evalorder @*/
-	    session->gpsdata.fix.speed = sqrt(pow(d2,2) + pow(d1,2)) * MPS_TO_KNOTS;
+	    session->newdata.speed = sqrt(pow(d2,2) + pow(d1,2)) * MPS_TO_KNOTS;
 	    /*@ +evalorder @*/
-	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
-		session->gpsdata.fix.track += 360.0;
+	    if ((session->newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
+		session->newdata.track += 360.0;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_SET | REPORT_SET;
 	    gpsd_report(LOG_DATA,
 		"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		"speed=%.2f track=%.2f climb=%.2f "
 		"mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
 	    break;
@@ -742,15 +742,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)s2;
 	    session->context->valid |= LEAP_SECOND_VALID;
 
-	    session->gpsdata.fix.time =
+	    session->newdata.time =
 		gpstime_to_unix((int)s1, (double)ul1) - (double)s2;
 #ifdef NTPSHM_ENABLE
 	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,session->gpsdata.fix.time,0.075);
+		(void)ntpshm_put(session,session->newdata.time,0.075);
 #endif
 	    mask |= TIME_SET;
 	    gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",
-			session->gpsdata.fix.time);
+			session->newdata.time);
 	  }
 
 	  gpsd_report(4, "GPS Time %u %d %d\n", ul1, s1, s2);
@@ -763,9 +763,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	    break;
 	  }
-	  session->gpsdata.fix.latitude  = getbed(buf,36) * RAD_2_DEG;
-	  session->gpsdata.fix.longitude = getbed(buf,44) * RAD_2_DEG;
-	  session->gpsdata.fix.altitude  = getbed(buf,52);
+	  session->newdata.latitude  = getbed(buf,36) * RAD_2_DEG;
+	  session->newdata.longitude = getbed(buf,44) * RAD_2_DEG;
+	  session->newdata.altitude  = getbed(buf,52);
 	  f1 = getbef(buf,16);			/* clock bias */
 
 	  u1 = getub(buf, 12);			/* GPS Decoding Status */
@@ -786,26 +786,26 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	  case 6:		/* Clock Hold 2D */
 	  case 3:		/* 2D Position Fix */
 	    //session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	    break;
 	  case 7:		/* Thunderbolt overdetermined clock */
 	  case 4:		/* 3D position Fix */
 	    //session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	  default:
 	    //session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	  }
 
 	  mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | CLEAR_SET | REPORT_SET;
 	  gpsd_report(LOG_DATA, "SP-TPS 0xac "
 		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.altitude,
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.altitude,
 		    gpsd_maskdump(mask));
 	  break;
 

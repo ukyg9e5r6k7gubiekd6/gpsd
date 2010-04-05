@@ -104,17 +104,17 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
     tm.tm_year = (int)getleuw(buf, 16) - 1900;
-    session->gpsdata.fix.time =
+    session->newdata.time =
 	timegm(&tm) + (d - tm.tm_sec);
     mask |= TIME_SET;
 
     /* extract the local tangential plane (ENU) solution */
-    session->gpsdata.fix.latitude = getled(buf,18) * RAD_2_DEG;
-    session->gpsdata.fix.longitude = getled(buf,26) * RAD_2_DEG;
-    session->gpsdata.fix.altitude = getlef(buf,34);
-    session->gpsdata.fix.speed = getlef(buf,38);
-    session->gpsdata.fix.track = getlef(buf,42) * RAD_2_DEG;
-    session->gpsdata.fix.climb = getlef(buf,54);
+    session->newdata.latitude = getled(buf,18) * RAD_2_DEG;
+    session->newdata.longitude = getled(buf,26) * RAD_2_DEG;
+    session->newdata.altitude = getlef(buf,34);
+    session->newdata.speed = getlef(buf,38);
+    session->newdata.track = getlef(buf,42) * RAD_2_DEG;
+    session->newdata.climb = getlef(buf,54);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
     session->gpsdata.satellites_used = (int)getub(buf,71) & 0x0f;
@@ -127,38 +127,38 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     flags = (unsigned char)getub(buf,70);
     switch (flags & 0x1f) {
 	    case 2:
-		session->gpsdata.fix.mode = MODE_3D;
+		session->newdata.mode = MODE_3D;
 		session->gpsdata.status = STATUS_FIX;
 		break;
 	    case 4:
-		session->gpsdata.fix.mode = MODE_3D;
+		session->newdata.mode = MODE_3D;
 		session->gpsdata.status = STATUS_DGPS_FIX;
 		break;
 	    case 5:
-		session->gpsdata.fix.mode = MODE_2D;
+		session->newdata.mode = MODE_2D;
 		session->gpsdata.status = STATUS_DGPS_FIX;
 		break;
 	    case 3:
 	    case 6:
-		session->gpsdata.fix.mode = MODE_2D;
+		session->newdata.mode = MODE_2D;
 		session->gpsdata.status = STATUS_FIX;
 		break;
 	    default:
 		session->gpsdata.status = STATUS_NO_FIX;
-		session->gpsdata.fix.mode = MODE_NO_FIX;
+		session->newdata.mode = MODE_NO_FIX;
     }
 
     mask |= MODE_SET | STATUS_SET ;
     gpsd_report(LOG_DATA, 
 		"NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f hdop=%.2f used=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.track,
+		session->newdata.speed,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
@@ -201,12 +201,12 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
     session->driver.superstar2.gps_week = getleuw(buf, 12);
     tm = gpstime_to_unix((int)session->driver.superstar2.gps_week, tow) -
 	session->context->leap_seconds;
-    session->gpsdata.fix.time = tm;
+    session->newdata.time = tm;
     mask |= TIME_SET;
 
     /* extract the earth-centered, earth-fixed (ECEF) solution */
     /*@ -evalorder @*/
-    ecef_to_wgs84fix(&session->gpsdata.fix, &session->separation,
+    ecef_to_wgs84fix(&session->newdata, &session->separation,
 	 getled(buf, 14), getled(buf, 22), getled(buf, 30),
 	 getlef(buf, 38), getlef(buf, 42), getlef(buf, 46));
     /*@ +evalorder @*/
@@ -222,38 +222,38 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
     flags = getub(buf,70);
     switch (flags & 0x1f) {
 	    case 2:
-		session->gpsdata.fix.mode = MODE_3D;
+		session->newdata.mode = MODE_3D;
 		session->gpsdata.status = STATUS_FIX;
 		break;
 	    case 4:
-		session->gpsdata.fix.mode = MODE_3D;
+		session->newdata.mode = MODE_3D;
 		session->gpsdata.status = STATUS_DGPS_FIX;
 		break;
 	    case 5:
-		session->gpsdata.fix.mode = MODE_2D;
+		session->newdata.mode = MODE_2D;
 		session->gpsdata.status = STATUS_DGPS_FIX;
 		break;
 	    case 3:
 	    case 6:
-		session->gpsdata.fix.mode = MODE_2D;
+		session->newdata.mode = MODE_2D;
 		session->gpsdata.status = STATUS_FIX;
 		break;
 	    default:
 		session->gpsdata.status = STATUS_NO_FIX;
-		session->gpsdata.fix.mode = MODE_NO_FIX;
+		session->newdata.mode = MODE_NO_FIX;
     }
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_report(LOG_DATA, 
 		"NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f vdop=%.2f used=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.track,
+		session->newdata.speed,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
@@ -369,12 +369,12 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf, size_t d
 	tm.tm_min = (int)getsb(buf, 42);
 	d = getled(buf, 43);
 	tm.tm_sec = (int)d;
-	session->gpsdata.fix.time = timegm(&tm);
+	session->newdata.time = timegm(&tm);
 	session->context->leap_seconds = (int)getsb(buf,20);
 	mask = TIME_SET;
     }
     gpsd_report(LOG_DATA, "TIMING: time=%.2f mask={TIME}\n", 
-		session->gpsdata.fix.time);
+		session->newdata.time);
     return mask;
 }
 

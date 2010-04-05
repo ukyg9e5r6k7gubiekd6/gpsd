@@ -316,12 +316,12 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         if (0 != gar_int_decode(buf+10, 2, 0, 60, &result)) break; 
         session->driver.nmea.date.tm_sec = (int)result;
         session->driver.nmea.subseconds = 0;
-        session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+        session->newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
         mask |= TIME_SET;
     } while (0);
 
     /* assume that possition is unknown; if the position is known we will fix status information later */
-    session->gpsdata.fix.mode = MODE_NO_FIX;
+    session->newdata.mode = MODE_NO_FIX;
     session->gpsdata.status = STATUS_NO_FIX;
     mask |= MODE_SET | STATUS_SET | CLEAR_SET | REPORT_SET;
 
@@ -338,7 +338,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         /* decode minutes of Latitude */
         if (0 != gar_int_decode((char *) session->packet.outbuffer+16, 5, 0, 99999, &degfrag)) break;
         lat += degfrag * 100.0 / 60.0 / 100000.0;
-        session->gpsdata.fix.latitude = lat;
+        session->newdata.latitude = lat;
 
         /* Longitude, [EW]dddmmmmm */
         /* decode degrees of Longitude */
@@ -346,7 +346,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         /* decode minutes of Longitude */
         if (0 != gar_int_decode((char *) session->packet.outbuffer+25, 5, 0, 99999, &degfrag)) break;
         lon += degfrag * 100.0 / 60.0 / 100000.0;
-        session->gpsdata.fix.longitude = lon;
+        session->newdata.longitude = lon;
 
 	/* fix mode, GPS status, [gGdDS_] */
         status = (char)session->packet.outbuffer[30];
@@ -354,23 +354,23 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         switch (status) {
         case 'G':
         case 'S':  /* 'S' is DEMO mode, assume 3D position */
-            session->gpsdata.fix.mode = MODE_3D;
+            session->newdata.mode = MODE_3D;
             session->gpsdata.status = STATUS_FIX;
             break;
         case 'D':
-            session->gpsdata.fix.mode = MODE_3D;
+            session->newdata.mode = MODE_3D;
             session->gpsdata.status = STATUS_DGPS_FIX;
             break;
         case 'g':
-            session->gpsdata.fix.mode = MODE_2D;
+            session->newdata.mode = MODE_2D;
             session->gpsdata.status = STATUS_FIX;
             break;
         case 'd':
-            session->gpsdata.fix.mode = MODE_2D;
+            session->newdata.mode = MODE_2D;
             session->gpsdata.status = STATUS_DGPS_FIX;
             break;
         default:
-            session->gpsdata.fix.mode = MODE_NO_FIX;
+            session->newdata.mode = MODE_NO_FIX;
             session->gpsdata.status = STATUS_NO_FIX;
         }
         mask |= MODE_SET | STATUS_SET | LATLON_SET;
@@ -381,7 +381,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double eph;
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
-        session->gpsdata.fix.epx = session->gpsdata.fix.epy = eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+        session->newdata.epx = session->newdata.epy = eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
         mask |= HERR_SET;
     } while (0);
 
@@ -389,7 +389,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     do {
         double alt;
         if (0 != gar_decode((char *) session->packet.outbuffer+34, 6, "+-", 1.0, &alt)) break;
-        session->gpsdata.fix.altitude = alt;
+        session->newdata.altitude = alt;
         mask |= ALTITUDE_SET;
     } while (0);
 
@@ -399,10 +399,10 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         if (0 != gar_decode((char *) session->packet.outbuffer+40, 5, "EW", 10.0, &ewvel)) break;
         if (0 != gar_decode((char *) session->packet.outbuffer+45, 5, "NS", 10.0, &nsvel)) break;
         speed = sqrt(ewvel * ewvel + nsvel * nsvel); /* is this correct formula? Result is in mps */
-        session->gpsdata.fix.speed = speed;
+        session->newdata.speed = speed;
         track = atan2(ewvel, nsvel) * RAD_2_DEG;  /* is this correct formula? Result is in degrees */
         if (track < 0.0) track += 360.0;
-        session->gpsdata.fix.track = track;
+        session->newdata.track = track;
         mask |= SPEED_SET | TRACK_SET;
     } while (0);
 
@@ -411,21 +411,21 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     do {
         double climb;
         if (0 != gar_decode((char *) session->packet.outbuffer+50, 5, "UD", 100.0, &climb)) break;
-        session->gpsdata.fix.climb = climb; /* climb in mps */
+        session->newdata.climb = climb; /* climb in mps */
         mask |= CLIMB_SET;
     } while (0);
 
     gpsd_report(LOG_DATA, "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.epx,
-		session->gpsdata.fix.epy,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.climb,
+		session->newdata.epx,
+		session->newdata.epy,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
     return mask;	

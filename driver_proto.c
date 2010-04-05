@@ -94,13 +94,13 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     /* extract ECEF navigation solution here */
     /* or extract the local tangential plane (ENU) solution */
     [Px, Py, Pz, Vx, Vy, Vz] = GET_ECEF_FIX();
-    ecef_to_wgs84fix(&session->gpsdata.fix,  &session->separation,
+    ecef_to_wgs84fix(&session->newdata,  &session->separation,
 		     Px, Py, Pz, Vx, Vy, Vz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
-    session->gpsdata.fix.epx = GET_LONGITUDE_ERROR();
-    session->gpsdata.fix.epy = GET_LATITUDE_ERROR();
-    session->gpsdata.fix.eps = GET_SPEED_ERROR();
+    session->newdata.epx = GET_LONGITUDE_ERROR();
+    session->newdata.epy = GET_LATITUDE_ERROR();
+    session->newdata.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
     dop_clear(&session->gpsdata.dop);
     session->gpsdata.dop.hdop = GET_HDOP();
@@ -108,11 +108,11 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     /* other DOP if available */
     mask |= DOP_SET;
 
-    session->gpsdata.fix.mode = GET_FIX_MODE();
+    session->newdata.mode = GET_FIX_MODE();
     session->gpsdata.status = GET_FIX_STATUS();
 
     /*
-     * Mix in CLEAE_SET to clue the daemon in about when to clear fix
+     * Mix in CLEAR_SET to clue the daemon in about when to clear fix
      * information.  Mix in REPORT_SET when the sentence is reliably
      * the last in a reporting cycle.
      */
@@ -124,11 +124,11 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * makes it relatively easy to track down data-management problems.
      */
     gpsd_report(LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
 
@@ -157,7 +157,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
 
     t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.fix.time = t;
+    session->newdata.time = t;
 
     return TIME_SET | ONLINE_SET;
 }

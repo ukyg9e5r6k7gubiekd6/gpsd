@@ -78,13 +78,13 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     /*@ -predboolothers @*/
     if (flags & 0x20) {
 	session->gpsdata.status = STATUS_FIX;
-	session->gpsdata.fix.mode = MODE_3D;
+	session->newdata.mode = MODE_3D;
     } else if (flags & 0x10) {
 	session->gpsdata.status = STATUS_FIX;
-	session->gpsdata.fix.mode = MODE_2D;
+	session->newdata.mode = MODE_2D;
     } else {
 	gpsd_report(LOG_WARN, "oncore NAVSOL no fix - flags 0x%02x\n", flags);
-	session->gpsdata.fix.mode = MODE_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
 	session->gpsdata.status = STATUS_NO_FIX;
     }
     mask |= MODE_SET;
@@ -103,7 +103,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	nsec			= (uint)getbeul(buf, 11);
 
 	/*@ -unrecog */
-	session->gpsdata.fix.time =
+	session->newdata.time =
 	    (double)timegm(&unpacked_date)+nsec * 1e-9;
 	/*@ +unrecog */
 	mask |= TIME_SET;
@@ -118,7 +118,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	     * If you change this be sure to allow for multiple baud
 	     * rates/models.
 	     */
-	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0.175);
+	    (void)ntpshm_put(session, session->newdata.time, 0.175);
 	}
 #endif /* NTPSHM_ENABLE */
 
@@ -143,12 +143,12 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 
     gpsd_report(LOG_IO, "oncore NAVSOL - %lf %lf %.2lfm-%.2lfm | %.2fm/s %.1fdeg dop=%.1f\n", lat, lon, alt,wgs84_separation(lat,lon), speed, track, (float )dop);
     
-    session->gpsdata.fix.latitude	= lat;
-    session->gpsdata.fix.longitude	= lon;
-    session->gpsdata.separation		= wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-    session->gpsdata.fix.altitude	= alt - session->gpsdata.separation;
-    session->gpsdata.fix.speed		= speed;
-    session->gpsdata.fix.track		= track;
+    session->newdata.latitude	= lat;
+    session->newdata.longitude	= lon;
+    session->gpsdata.separation		= wgs84_separation(session->newdata.latitude, session->newdata.longitude);
+    session->newdata.altitude	= alt - session->gpsdata.separation;
+    session->newdata.speed		= speed;
+    session->newdata.track		= track;
 
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET ;
 
@@ -195,7 +195,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    st++;
 	}
         /*@ +boolops @*/
-    session->gpsdata.skyview_time = session->gpsdata.fix.time;
+    session->gpsdata.skyview_time = session->newdata.time;
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 
@@ -210,13 +210,13 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     (void)oncore_control_send(session,pollBo,sizeof(pollBo));
 
     gpsd_report(LOG_DATA, "NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f mode=%d status=%d visible=%d used=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.mode,
 		session->gpsdata.status,
 		session->gpsdata.satellites_used,
 		session->gpsdata.satellites_visible,

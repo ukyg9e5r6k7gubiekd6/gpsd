@@ -260,6 +260,7 @@ struct gps_device_t {
     bool cycle_end_reliable;		/* does driverr signal REPORT_SET */
     bool notify_clients;		/* ship DEVICE notification on poll? */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
+    struct gps_fix_t newdata;		/* where clients put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     /*
      * The rest of this structure is driver-specific private storage.

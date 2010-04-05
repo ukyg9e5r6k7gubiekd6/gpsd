@@ -86,6 +86,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
+    gps_clear_fix(&session->newdata);
     gps_clear_fix(&session->fixbuffer);
     gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
@@ -580,14 +581,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     ssize_t newlen;
     bool first_sync = false;
 
-    /*
-     * This looks strange, but it works because the
-     * gpsdata.fix buffer has been pressed into service
-     * as a place for the drivers to drop new data. 
-     * The last accumulated fix actually lives in
-     * fixbuffer now.  This should probably be fixed.
-     */
-    gps_clear_fix(&session->gpsdata.fix);
+    gps_clear_fix(&session->newdata);
 
 #ifdef TIMING_ENABLE
     if (session->packet.outbuflen == 0)
@@ -686,6 +680,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->packet.type != COMMENT_PACKET)
 	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 		received |= session->device_type->parse_packet(session);
+
+	/* FIXME: this copy should not be necessary */
+	memcpy(&session->gpsdata.fix, 
+	       &session->newdata, 
+	       sizeof(struct gps_fix_t));
 
 	/*
 	 * Compute fix-quality data from the satellite positions.

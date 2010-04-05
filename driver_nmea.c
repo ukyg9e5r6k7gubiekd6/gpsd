@@ -161,8 +161,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
 	}
-	if (session->gpsdata.fix.mode >= MODE_2D) {
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	if (session->newdata.mode >= MODE_2D) {
+	    session->newdata.mode = MODE_NO_FIX;
 	    mask |= MODE_SET;
 	}
 	/* set something nz, so it won't look like an unknown sentence */
@@ -179,10 +179,10 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    mask |= TIME_SET;
 	    register_fractional_time(field[0], field[1], session);
 	}
-	do_lat_lon(&field[3], &session->gpsdata.fix);
+	do_lat_lon(&field[3], &session->newdata);
 	mask |= LATLON_SET;
-	session->gpsdata.fix.speed = atof(field[7]) * KNOTS_TO_MPS;
-	session->gpsdata.fix.track = atof(field[8]);
+	session->newdata.speed = atof(field[7]) * KNOTS_TO_MPS;
+	session->newdata.track = atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -194,8 +194,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
 	    mask |= STATUS_SET;
 	}
-	if (session->gpsdata.fix.mode < MODE_2D) {
-	    session->gpsdata.fix.mode = MODE_2D;
+	if (session->newdata.mode < MODE_2D) {
+	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
     }
@@ -204,11 +204,11 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 		"RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
 		"speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
 		field[9], field[1],
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.mode,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.speed,
+		session->newdata.track,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
     return mask;
@@ -265,7 +265,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	int newstatus = session->gpsdata.status;
 
 	mask &=~ ERROR_SET;
-	do_lat_lon(&field[1], &session->gpsdata.fix);
+	do_lat_lon(&field[1], &session->newdata);
 	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
@@ -278,8 +278,8 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	 * elsewhere in the code we want to be able to test for the
 	 * presence of a valid fix with mode > MODE_NO_FIX.
 	 */
-	if (session->gpsdata.fix.mode < MODE_2D) {
-	    session->gpsdata.fix.mode = MODE_2D;
+	if (session->newdata.mode < MODE_2D) {
+	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
 	session->gpsdata.status = newstatus;
@@ -289,9 +289,9 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
     gpsd_report(LOG_DATA, 
 		"GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d mask=%s\n",
 		field[5],
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.mode,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
     return mask;
@@ -331,7 +331,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	else {
 	    mask |= TIME_SET;
 	}
-	do_lat_lon(&field[2], &session->gpsdata.fix);
+	do_lat_lon(&field[2], &session->newdata);
 	mask |= LATLON_SET;
 	session->gpsdata.satellites_used = atoi(field[7]);
 	altitude = field[9];
@@ -341,12 +341,12 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	 * If we see this, force mode to 2D at most.
 	 */
 	if (altitude[0] == '\0') {
-	    if (session->gpsdata.fix.mode == MODE_3D) {
-		session->gpsdata.fix.mode = session->gpsdata.status ? MODE_2D : MODE_NO_FIX;
+	    if (session->newdata.mode == MODE_3D) {
+		session->newdata.mode = session->gpsdata.status ? MODE_2D : MODE_NO_FIX;
 		mask |= MODE_SET;
 	    }
 	} else {
-	    session->gpsdata.fix.altitude = atof(altitude);
+	    session->newdata.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
 	    /*
 	     * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -355,24 +355,24 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	     * elsewhere in the code we want to be able to test for the
 	     * presence of a valid fix with mode > MODE_NO_FIX.
 	     */
-	    if (session->gpsdata.fix.mode < MODE_3D) {
-		session->gpsdata.fix.mode = MODE_3D;
+	    if (session->newdata.mode < MODE_3D) {
+		session->newdata.mode = MODE_3D;
 		mask |= MODE_SET;
 	    }
 	}
 	if (strlen(field[11]) > 0) {
 	   session->gpsdata.separation = atof(field[11]);
 	} else {
-	   session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude,session->gpsdata.fix.longitude);
+	   session->gpsdata.separation = wgs84_separation(session->newdata.latitude,session->newdata.longitude);
 	}
     }
     gpsd_report(LOG_DATA, 
 		"GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
 		field[1],
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.mode,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
     return mask;
@@ -407,17 +407,17 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	mask = ONLINE_SET;
     } else {
 	int i;
-	session->gpsdata.fix.mode = atoi(field[2]);
+	session->newdata.mode = atoi(field[2]);
 	/*
 	 * The first arm of this conditional ignores dead-reckoning
 	 * fixes from an Antaris chipset. which returns E in field 2
 	 * for a dead-reckoning estimate.  Fix by Andreas Stricker.
 	 */
-	if (session->gpsdata.fix.mode == 0 && field[2][0] == 'E')
+	if (session->newdata.mode == 0 && field[2][0] == 'E')
 	    mask = 0;
 	else
 	    mask = MODE_SET;
-	gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
+	gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->newdata.mode);
 	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.pdop = atof(field[15]);
 	session->gpsdata.dop.hdop = atof(field[16]);
@@ -434,7 +434,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	/* FIXME: perhaps dump the satellite vector here? */
 	gpsd_report(LOG_DATA, 
 		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f mask=%s\n",
-		    session->gpsdata.fix.mode,
+		    session->newdata.mode,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,
@@ -553,24 +553,24 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     if ((strcmp(field[2], "M")!=0) ||
 	(strcmp(field[4], "M")!=0) ||
 	(strcmp(field[6], "M")!=0)) {
-	    session->gpsdata.fix.epx =
-	    session->gpsdata.fix.epy =
-	    session->gpsdata.fix.epv =
+	    session->newdata.epx =
+	    session->newdata.epy =
+	    session->newdata.epv =
 	    session->gpsdata.epe = 100;
 	    mask = ERROR_SET;
     }
     else 
     {
-	session->gpsdata.fix.epx = session->gpsdata.fix.epy = atof(field[1]) * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
-	session->gpsdata.fix.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->newdata.epx = session->newdata.epy = atof(field[1]) * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->newdata.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	session->gpsdata.epe = atof(field[5]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	mask = HERR_SET | VERR_SET | PERR_SET;
     }
 
     gpsd_report(LOG_DATA, "PGRME: epx=%.2f epy=%.2f epv=%.2f mask=%s\n",
-		session->gpsdata.fix.epx,
-		session->gpsdata.fix.epy,
-		session->gpsdata.fix.epv,
+		session->newdata.epx,
+		session->newdata.epy,
+		session->newdata.epv,
 		gpsd_maskdump(mask));
     return mask;
 }
@@ -598,13 +598,13 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[], struct gps_device_t 
     if (session->driver.nmea.date.tm_hour == DD(field[1])
 		&& session->driver.nmea.date.tm_min == DD(field[1]+2)
 		&& session->driver.nmea.date.tm_sec == DD(field[1]+4)) {
-	session->gpsdata.fix.epy = atof(field[2]);
-	session->gpsdata.fix.epx = atof(field[3]);
-	session->gpsdata.fix.epv = atof(field[4]);
+	session->newdata.epy = atof(field[2]);
+	session->newdata.epx = atof(field[3]);
+	session->newdata.epv = atof(field[4]);
 	gpsd_report(LOG_DATA, "GBS: epx=%.2f epy=%.2f epv=%.2f mask=%s\n",
-		    session->gpsdata.fix.epx,
-		    session->gpsdata.fix.epy,
-		    session->gpsdata.fix.epv,
+		    session->newdata.epx,
+		    session->newdata.epy,
+		    session->newdata.epv,
 		    gpsd_maskdump(HERR_SET | VERR_SET));
 	return HERR_SET | VERR_SET;
     } else {
@@ -691,20 +691,20 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
      * Roll maps to speed.
      * Dip maps to altitude.
      */
-    session->gpsdata.fix.time = timestamp();
-    session->gpsdata.fix.track = atof(field[1]);
+    session->newdata.time = timestamp();
+    session->newdata.track = atof(field[1]);
     session->gpsdata.headingStatus = *field[2];
-    session->gpsdata.fix.climb = atof(field[3]);
+    session->newdata.climb = atof(field[3]);
     session->gpsdata.pitchStatus = *field[4];
-    session->gpsdata.fix.speed = atof(field[5]);
+    session->newdata.speed = atof(field[5]);
     session->gpsdata.rollStatus = *field[6];
-    session->gpsdata.fix.altitude = atof(field[7]);
+    session->newdata.altitude = atof(field[7]);
     session->gpsdata.horzField = atof(field[8]);
-    session->gpsdata.fix.mode = MODE_3D;
+    session->newdata.mode = MODE_3D;
     mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
     session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
-    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.headingStatus);
+    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->newdata.track, session->gpsdata.headingStatus);
     return mask;
 }
 #endif /* TNT_ENABLE */
@@ -743,12 +743,12 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
      * Roll maps to speed.
      * Depth maps to altitude.
      */
-    session->gpsdata.fix.time = timestamp();
-    session->gpsdata.fix.track = atof(field[1]);
-    session->gpsdata.fix.climb = atof(field[2]);
-    session->gpsdata.fix.speed = atof(field[3]);
+    session->newdata.time = timestamp();
+    session->newdata.track = atof(field[1]);
+    session->newdata.climb = atof(field[2]);
+    session->newdata.speed = atof(field[3]);
     session->gpsdata.compass.temperature = atof(field[4]);
-    session->gpsdata.fix.altitude = atof(field[5]);
+    session->newdata.altitude = atof(field[5]);
     session->gpsdata.compass.magnetic_length = atof(field[6]);
     session->gpsdata.compass.magnetic_field_x = atof(field[7]);
     session->gpsdata.compass.magnetic_field_y = atof(field[8]);
@@ -759,11 +759,11 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     session->gpsdata.compass.acceleration_field_z = atof(field[13]);
     session->gpsdata.compass.gyro_output_x = atof(field[15]);
     session->gpsdata.compass.gyro_output_y = atof(field[16]);
-    session->gpsdata.fix.mode = MODE_3D;
+    session->newdata.mode = MODE_3D;
     mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
     session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
-    gpsd_report(LOG_RAW, "Heading %lf.\n", session->gpsdata.fix.track);
+    gpsd_report(LOG_RAW, "Heading %lf.\n", session->newdata.track);
     return mask;
 }
 #endif /* OCEANSERVER_ENABLE */
@@ -785,10 +785,10 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	if (0 == strlen(field[2])) {
 	    /* empty first field means no 3D fix is available */
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	} else {
 	    /* if we make it this far, we at least have a 3D fix */
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    if (1 == atoi(field[2]))
 		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else
@@ -797,11 +797,11 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	    session->gpsdata.satellites_used = atoi(field[3]);
 	    merge_hhmmss(field[4], session);
 	    register_fractional_time(field[0], field[4], session);
-	    do_lat_lon(&field[5], &session->gpsdata.fix);
-	    session->gpsdata.fix.altitude = atof(field[9]);
-	    session->gpsdata.fix.track = atof(field[11]);
-	    session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
-	    session->gpsdata.fix.climb = atof(field[13]);
+	    do_lat_lon(&field[5], &session->newdata);
+	    session->newdata.altitude = atof(field[9]);
+	    session->newdata.track = atof(field[11]);
+	    session->newdata.speed = atof(field[12]) / MPS_TO_KPH;
+	    session->newdata.climb = atof(field[13]);
 	    clear_dop(&session->gpsdata.dop);
 	    session->gpsdata.dop.pdop = atof(field[14]);
 	    session->gpsdata.dop.hdop = atof(field[15]);
@@ -812,13 +812,13 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	    mask |= DOP_SET;
 	    gpsd_report(LOG_DATA, "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
 			field[4],
-			session->gpsdata.fix.latitude,
-			session->gpsdata.fix.longitude,
-			session->gpsdata.fix.altitude,
-			session->gpsdata.fix.speed,
-			session->gpsdata.fix.track,
-			session->gpsdata.fix.climb,
-			session->gpsdata.fix.mode,
+			session->newdata.latitude,
+			session->newdata.longitude,
+			session->newdata.altitude,
+			session->newdata.speed,
+			session->newdata.track,
+			session->newdata.climb,
+			session->newdata.mode,
 			session->gpsdata.status,
 			session->gpsdata.dop.pdop,
 			session->gpsdata.dop.hdop,
@@ -1004,10 +1004,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_SET)!=0) {
-	session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+	session->newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	gpsd_report(LOG_DATA, "%s computed time is %2f = %s\n", 
 		    session->driver.nmea.field[0],
-		    session->gpsdata.fix.time,
+		    session->newdata.time,
 		    asctime(&session->driver.nmea.date));
     }
 

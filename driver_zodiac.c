@@ -139,9 +139,9 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /*@ -boolops -predboolothers @*/
     session->gpsdata.status       = (getzword(10) & 0x1c) ? 0 : 1;
     if (session->gpsdata.status != 0)
-	session->gpsdata.fix.mode = (getzword(10) & 1) ? MODE_2D : MODE_3D;
+	session->newdata.mode = (getzword(10) & 1) ? MODE_2D : MODE_3D;
     else
-	session->gpsdata.fix.mode = MODE_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
     /*@ +boolops -predboolothers @*/
 
     /* solution_type                 = getzword(11); */
@@ -158,7 +158,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_sec = (int)getzword(24);
     subseconds = (int)getzlong(25) / 1e9;
     /*@ -compdef */
-    session->gpsdata.fix.time =
+    session->newdata.time =
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
@@ -166,41 +166,41 @@ static gps_mask_t handle1000(struct gps_device_t *session)
      * the handling of the 1pps signal from the gps device. The regression
      * tests and simple gps applications do not detect this. A live test
      * with the 1pps signal active is required. */
-    if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
-	(void)ntpshm_put(session, session->gpsdata.fix.time, 1.1);
+    if (session->context->enable_ntpshm && session->newdata.mode > MODE_NO_FIX)
+	(void)ntpshm_put(session, session->newdata.time, 1.1);
 #endif
     /*@ -type @*/
-    session->gpsdata.fix.latitude  = ((long)getzlong(27)) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
+    session->newdata.latitude  = ((long)getzlong(27)) * RAD_2_DEG * 1e-8;
+    session->newdata.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
     /*
      * The Rockwell Jupiter TU30-D140 reports altitude as uncorrected height
      * above WGS84 geoid.  The Zodiac binary protocol manual does not 
      * specify whether word 31 is geodetic or WGS 84. 
      */
-    session->gpsdata.fix.altitude  = ((long)getzlong(31)) * 1e-2;
+    session->newdata.altitude  = ((long)getzlong(31)) * 1e-2;
     /*@ +type @*/
     session->gpsdata.separation    = ((short)getzword(33)) * 1e-2;
-    session->gpsdata.fix.altitude -= session->gpsdata.separation;
-    session->gpsdata.fix.speed     = (int)getzlong(34) * 1e-2;
-    session->gpsdata.fix.track     = (int)getzword(36) * RAD_2_DEG * 1e-3;
+    session->newdata.altitude -= session->gpsdata.separation;
+    session->newdata.speed     = (int)getzlong(34) * 1e-2;
+    session->newdata.track     = (int)getzword(36) * RAD_2_DEG * 1e-3;
     session->mag_var		   = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
-    session->gpsdata.fix.climb     = ((short)getzword(38)) * 1e-2;
+    session->newdata.climb     = ((short)getzword(38)) * 1e-2;
     /* map_datum                   = getzword(39); */
     /* 
      * The manual says these are 1-sigma.  Device reports only eph, circular
      * error; no harm in assigning it to both x and y components.
      */
-    session->gpsdata.fix.epx = session->gpsdata.fix.epy = (int)getzlong(40) * 1e-2 * (1/sqrt(2)) * GPSD_CONFIDENCE;
-    session->gpsdata.fix.epv       = (int)getzlong(42) * 1e-2 * GPSD_CONFIDENCE;
-    session->gpsdata.fix.ept       = (int)getzlong(44) * 1e-2 * GPSD_CONFIDENCE;
-    session->gpsdata.fix.eps       = (int)getzword(46) * 1e-2 * GPSD_CONFIDENCE;
+    session->newdata.epx = session->newdata.epy = (int)getzlong(40) * 1e-2 * (1/sqrt(2)) * GPSD_CONFIDENCE;
+    session->newdata.epv       = (int)getzlong(42) * 1e-2 * GPSD_CONFIDENCE;
+    session->newdata.ept       = (int)getzlong(44) * 1e-2 * GPSD_CONFIDENCE;
+    session->newdata.eps       = (int)getzword(46) * 1e-2 * GPSD_CONFIDENCE;
     /* clock_bias                  = (int)getzlong(47) * 1e-2; */
     /* clock_bias_sd               = (int)getzlong(49) * 1e-2; */
     /* clock_drift                 = (int)getzlong(51) * 1e-2; */
     /* clock_drift_sd              = (int)getzlong(53) * 1e-2; */
 
 #if 0
-    gpsd_report(LOG_INF, "date: %lf\n", session->gpsdata.fix.time);
+    gpsd_report(LOG_INF, "date: %lf\n", session->newdata.time);
     gpsd_report(LOG_INF, "  solution invalid:\n");
     gpsd_report(LOG_INF, "    altitude: %d\n", (getzword(10) & 1) ? 1 : 0);
     gpsd_report(LOG_INF, "    no diff gps: %d\n", (getzword(10) & 2) ? 1 : 0);
@@ -225,14 +225,14 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     mask = TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
     gpsd_report(LOG_DATA, 
 		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
-		session->gpsdata.fix.time,
-		session->gpsdata.fix.latitude,
-		session->gpsdata.fix.longitude,
-		session->gpsdata.fix.altitude,
-		session->gpsdata.fix.track,
-		session->gpsdata.fix.speed,
-		session->gpsdata.fix.climb,
-		session->gpsdata.fix.mode,
+		session->newdata.time,
+		session->newdata.latitude,
+		session->newdata.longitude,
+		session->newdata.altitude,
+		session->newdata.track,
+		session->newdata.speed,
+		session->newdata.climb,
+		session->newdata.mode,
 		session->gpsdata.status,
 		gpsd_maskdump(mask));
     return mask;
@@ -361,7 +361,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 	gpsd_report(LOG_INF, "iode mismatch:%d\n", (getzword(13+i) & 4096) ? 1 : 0);
     }
 #endif
-    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+    if (session->newdata.mode == MODE_NO_FIX)
 	session->gpsdata.status = STATUS_NO_FIX;
     else if (numcorrections == 0)
 	session->gpsdata.status = STATUS_FIX;

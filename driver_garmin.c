@@ -364,31 +364,31 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
-	session->gpsdata.fix.time
+	session->newdata.time
 	  = (double)time_l;
 	gpsd_report(LOG_PROG, "time_l: %ld\n", (long int)time_l);
 
-	session->gpsdata.fix.latitude = radtodeg(pvt->lat);
+	session->newdata.latitude = radtodeg(pvt->lat);
 	/* sanity check the lat */
-	if ( 90.0 < session->gpsdata.fix.latitude ) {
-		session->gpsdata.fix.latitude = 90.0;
+	if ( 90.0 < session->newdata.latitude ) {
+		session->newdata.latitude = 90.0;
 		gpsd_report(LOG_INF, "ERROR: Latitude overrange\n");
-	} else if ( -90.0 > session->gpsdata.fix.latitude ) {
-		session->gpsdata.fix.latitude = -90.0;
+	} else if ( -90.0 > session->newdata.latitude ) {
+		session->newdata.latitude = -90.0;
 		gpsd_report(LOG_INF, "ERROR: Latitude negative overrange\n");
 	}
-	session->gpsdata.fix.longitude = radtodeg(pvt->lon);
+	session->newdata.longitude = radtodeg(pvt->lon);
 	/* sanity check the lon */
-	if ( 180.0 < session->gpsdata.fix.longitude ) {
-		session->gpsdata.fix.longitude = 180.0;
+	if ( 180.0 < session->newdata.longitude ) {
+		session->newdata.longitude = 180.0;
 		gpsd_report(LOG_INF, "ERROR: Longitude overrange\n");
-	} else if ( -180.0 > session->gpsdata.fix.longitude ) {
-		session->gpsdata.fix.longitude = -180.0;
+	} else if ( -180.0 > session->newdata.longitude ) {
+		session->newdata.longitude = -180.0;
 		gpsd_report(LOG_INF, "ERROR: Longitude negative overrange\n");
 	}
 
 	// altitude over WGS84 converted to MSL
-	session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
+	session->newdata.altitude = pvt->alt + pvt->msl_hght;
 
 	// geoid separation from WGS 84
 	// gpsd sign is opposite of garmin sign
@@ -400,20 +400,20 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// nmea_parse.c where we analyze PGRME.
 	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE/CEP50_SIGMA);
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
-	session->gpsdata.fix.epx = session->gpsdata.fix.epy = pvt->eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
-	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->newdata.epx = session->newdata.epy = pvt->eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->newdata.epv = pvt->epv * (GPSD_CONFIDENCE/CEP50_SIGMA);
 
 	// convert lat/lon to directionless speed
-	session->gpsdata.fix.speed = hypot(pvt->lon_vel, pvt->lat_vel);
+	session->newdata.speed = hypot(pvt->lon_vel, pvt->lat_vel);
 
 	// keep climb in meters/sec
-	session->gpsdata.fix.climb = pvt->alt_vel;
+	session->newdata.climb = pvt->alt_vel;
 
 	track = atan2(pvt->lon_vel, pvt->lat_vel);
 	if (track < 0) {
 	    track += 2 * GPS_PI;
 	}
-	session->gpsdata.fix.track = radtodeg(track);
+	session->newdata.track = radtodeg(track);
 
 	switch ( pvt->fix) {
 	case 0:
@@ -421,47 +421,47 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	default:
 	    // no fix
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	case 2:
 	    // 2D fix
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	    break;
 	case 3:
 	    // 3D fix
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	case 4:
 	    // 2D Differential fix
 	    session->gpsdata.status = STATUS_DGPS_FIX;
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	    break;
 	case 5:
 	    // 3D differential fix
 	    session->gpsdata.status = STATUS_DGPS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	}
 #ifdef NTPSHM_ENABLE
 	if (session->context->enable_ntpshm 
-	  && session->gpsdata.fix.mode > MODE_NO_FIX) {
+	  && session->newdata.mode > MODE_NO_FIX) {
 	    // Garmin SerBin fudge 0.430 valid at 4800bps
-	    (void) ntpshm_put(session, session->gpsdata.fix.time, 0.430);
+	    (void) ntpshm_put(session, session->newdata.time, 0.430);
 	}
 #endif /* NTPSHM_ENABLE */
 
 	gpsd_report(LOG_PROG, "Appl, mode %d, status %d\n"
-	    , session->gpsdata.fix.mode
+	    , session->newdata.mode
 	    , session->gpsdata.status);
 
-	gpsd_report(LOG_INF, "UTC Time: %lf\n", session->gpsdata.fix.time);
+	gpsd_report(LOG_INF, "UTC Time: %lf\n", session->newdata.time);
 	gpsd_report(LOG_INF
 	    , "Geoid Separation (MSL-WGS84): from garmin %lf, calculated %lf\n"
 	    , -pvt->msl_hght
-	    , wgs84_separation(session->gpsdata.fix.latitude
-	    , session->gpsdata.fix.longitude));
+	    , wgs84_separation(session->newdata.latitude
+	    , session->newdata.longitude));
 
 	gpsd_report(LOG_INF, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %d\n"
 	    , pvt->alt
@@ -470,8 +470,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->epv
 	    , pvt->fix
 	    , pvt->gps_tow
-	    , session->gpsdata.fix.latitude
-	    , session->gpsdata.fix.longitude
+	    , session->newdata.latitude
+	    , session->newdata.longitude
 	    , pvt->lon_vel
 	    , pvt->lat_vel
 	    , pvt->alt_vel
@@ -485,16 +485,16 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 		    "speed=%.2f track=%.2f climb=%.2f "
 		    "epx=%.2f epy=%.2f epv=%.2f "
 		    "mode=%d status=%d mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.speed,
-		    session->gpsdata.fix.track,
-		    session->gpsdata.fix.climb,
-		    session->gpsdata.fix.epx,
-		    session->gpsdata.fix.epy,
-		    session->gpsdata.fix.epv,
-		    session->gpsdata.fix.mode,
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.speed,
+		    session->newdata.track,
+		    session->newdata.climb,
+		    session->newdata.epx,
+		    session->newdata.epy,
+		    session->newdata.epv,
+		    session->newdata.mode,
 		    session->gpsdata.status,
 		    gpsd_maskdump(mask));
 	break;

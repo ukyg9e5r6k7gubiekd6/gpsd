@@ -182,10 +182,10 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     {
     case 0x02:	/* Navigation Data Output */
 	/*@ ignore @*//*@ splint is confused @*/
-	session->gpsdata.fix.time =
+	session->newdata.time =
 	    gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
 	/*@ end @*/
-	ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
+	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 			 getlesl(buf2, 8)*1.0, getlesl(buf2, 12)*1.0, getlesl(buf2, 16)*1.0,
 			 getlesw(buf2, 20)/10.0, getlesw(buf2, 22)/10.0, getlesw(buf2, 24)/10.0);
 	used = (unsigned char)getub(buf2, 26) & 0x0f;
@@ -193,11 +193,11 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	version = (uint)getleuw(buf2, 27)/100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	else if (used == 3)
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	else {
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
@@ -207,21 +207,21 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    mask |= DEVICEID_SET;
 	}
 	gpsd_report(LOG_DATA, "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s' mask=%s\n",
-		    session->gpsdata.fix.time,
-		    session->gpsdata.fix.latitude,
-		    session->gpsdata.fix.longitude,
-		    session->gpsdata.fix.altitude,
-		    session->gpsdata.fix.speed,
-		    session->gpsdata.fix.track,
-		    session->gpsdata.fix.climb,
-		    session->gpsdata.fix.mode,
+		    session->newdata.time,
+		    session->newdata.latitude,
+		    session->newdata.longitude,
+		    session->newdata.altitude,
+		    session->newdata.speed,
+		    session->newdata.track,
+		    session->newdata.climb,
+		    session->newdata.mode,
 		    session->gpsdata.dev.subtype,
 		    gpsd_maskdump(mask));
 	return mask | CLEAR_SET | REPORT_SET;
 
     case 0x04:	/* DOP Data Output */
 	/*@ ignore @*//*@ splint is confused @*/
-	session->gpsdata.fix.time =
+	session->newdata.time =
 	    gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
 	/*@ end @*/
 	clear_dop(&session->gpsdata.dop);
@@ -234,19 +234,19 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	case 0:	/* no position fix */
 	case 1:	/* manual calls this "1D navigation" */
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	case 2:	/* 2D navigation */
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_2D;
+	    session->newdata.mode = MODE_2D;
 	    break;
 	case 3:	/* 3D navigation */
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	case 4:	/* 3D navigation with DGPS */
 	    session->gpsdata.status = STATUS_DGPS_FIX;
-	    session->gpsdata.fix.mode = MODE_3D;
+	    session->newdata.mode = MODE_3D;
 	    break;
 	}
 	/* that's all the information in this packet */
@@ -257,7 +257,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    session->gpsdata.dop.hdop,
 		    session->gpsdata.dop.vdop,
 		    session->gpsdata.dop.tdop,
-		    session->gpsdata.fix.mode,
+		    session->newdata.mode,
 		    session->gpsdata.status);
 	return mask;
 
@@ -305,7 +305,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* that's all the information in this packet */
 	mask = SATELLITE_SET | USED_SET;
 	gpsd_report(LOG_DATA, "CSO 0x06: time=%.2f used=%d visible=%d mask={TIME|SATELLITE|USED}\n",
-		    session->gpsdata.fix.time,
+		    session->newdata.time,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.satellites_visible);
 	return mask;
@@ -314,7 +314,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* clock offset is a manufacturer diagnostic */
 	/* (int)getleuw(buf2, 8);  clock offset, 29000..29850 ?? */
 	/*@ ignore @*//*@ splint is confused @*/
-	session->gpsdata.fix.time = 
+	session->newdata.time = 
 	    gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
 	/*@ end @*/
 	visible = (unsigned char)getub(buf2, 10);
@@ -322,7 +322,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME}\n",
-		    session->gpsdata.fix.time);
+		    session->newdata.time);
 	return TIME_SET;
 
     case 0x20:	/* LogConfig Info, could be used as a probe for EverMore GPS */
