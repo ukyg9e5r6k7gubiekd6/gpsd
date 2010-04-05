@@ -12,7 +12,7 @@ if sys.hexversion >= 0x2060000:
 else:
     import simplejson as json	# For Python 2.4 and 2.5
 
-api_major_version = 3   # bumped on incompatible changes
+api_major_version = 4   # bumped on incompatible changes
 api_minor_version = 1   # bumped on compatible changes
 
 NaN = float('nan')
