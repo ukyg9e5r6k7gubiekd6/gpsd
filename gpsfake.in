@@ -55,65 +55,6 @@ def fakeport():
     # wouldn't prevent collisions with other apps using the range.
     return random.randint(49152, 65535)
 
-try:
-    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pr:s:vx")
-except getopt.GetoptError, msg:
-    print "gpsfake: " + str(msg)
-    raise SystemExit, 1
-
-port = None
-progress = False
-cycle = 0
-monitor = ""
-speed = 4800
-linedump = False
-predump = False
-pipe = False
-singleshot = False
-flicker = False
-promptme = False
-client_init = '?WATCH={"json":true,"nmea":true}'
-doptions = ""
-verbose = 0
-for (switch, val) in options:
-    if (switch == '-1'):
-        singleshot = True
-        port = fakeport()
-    elif (switch == '-b'):
-        progress = True
-    elif (switch == '-c'):
-        cycle = float(val)
-    elif (switch == '-D'):
-        doptions += " -D " + val
-    elif (switch == '-g'):
-        monitor = "xterm -e gdb -tui --args "
-    elif (switch == '-i'):
-        linedump = promptme = True
-    elif (switch == '-l'):
-        linedump = True
-    elif (switch == '-m'):
-        monitor = val + " "
-    elif (switch == '-n'):
-        doptions += " -n"
-    elif (switch == '-x'):
-        predump = True
-    elif (switch == '-o'):
-        doptions = val
-    elif (switch == '-p'):
-        pipe = True
-    elif (switch == '-r'):
-        if flicker:
-            client_init += val
-        else:
-            client_init = val
-    elif (switch == '-s'):
-        speed = int(val)
-    elif (switch == '-v'):
-        verbose += 1
-    elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
-        raise SystemExit,0
-
 def hexdump(s):
     rep = ""
     for c in s:
@@ -146,6 +87,69 @@ def fakehook(linenumber, fakegps):
     return True
 
 if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pr:s:vx")
+    except getopt.GetoptError, msg:
+        print "gpsfake: " + str(msg)
+        raise SystemExit, 1
+
+    if not arguments:
+        print >>sys.stderr, "gpsfake: requires at least one logfile argument."
+        raise SystemExit, 1
+
+    port = None
+    progress = False
+    cycle = 0
+    monitor = ""
+    speed = 4800
+    linedump = False
+    predump = False
+    pipe = False
+    singleshot = False
+    flicker = False
+    promptme = False
+    client_init = '?WATCH={"json":true,"nmea":true}'
+    doptions = ""
+    verbose = 0
+    for (switch, val) in options:
+        if (switch == '-1'):
+            singleshot = True
+            port = fakeport()
+        elif (switch == '-b'):
+            progress = True
+        elif (switch == '-c'):
+            cycle = float(val)
+        elif (switch == '-D'):
+            doptions += " -D " + val
+        elif (switch == '-g'):
+            monitor = "xterm -e gdb -tui --args "
+        elif (switch == '-i'):
+            linedump = promptme = True
+        elif (switch == '-l'):
+            linedump = True
+        elif (switch == '-m'):
+            monitor = val + " "
+        elif (switch == '-n'):
+            doptions += " -n"
+        elif (switch == '-x'):
+            predump = True
+        elif (switch == '-o'):
+            doptions = val
+        elif (switch == '-p'):
+            pipe = True
+        elif (switch == '-r'):
+            if flicker:
+                client_init += val
+            else:
+                client_init = val
+        elif (switch == '-s'):
+            speed = int(val)
+        elif (switch == '-v'):
+            verbose += 1
+        elif (switch == '-h'):
+            sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
+            raise SystemExit,0
+
     if progress:
         baton = Baton("Processing %s" % ",".join(arguments), "done")
     else:
