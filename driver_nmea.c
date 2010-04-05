@@ -24,12 +24,11 @@
  *
  **************************************************************************/
 
-static void do_lat_lon(char *field[], struct gps_data_t *out)
+static void do_lat_lon(char *field[], struct gps_fix_t *out)
 /* process a pair of latitude/longitude fields starting at field index BEGIN */
 {
     double lat, lon, d, m;
     char str[20], *p;
-    int updated = 0;
 
     if (*(p = field[0]) != '\0') {
 	strncpy(str, p, 20);
@@ -39,9 +38,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[1];
 	if (*p == 'S')
 	    lat = -lat;
-	if (out->fix.latitude != lat)
-	    out->fix.latitude = lat;
-	updated++;
+	out->latitude = lat;
     }
     if (*(p = field[2]) != '\0') {
 	strncpy(str, p, 20);
@@ -52,9 +49,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[3];
 	if (*p == 'W')
 	    lon = -lon;
-	if (out->fix.longitude != lon)
-	    out->fix.longitude = lon;
-	updated++;
+	out->longitude = lon;
     }
 }
 
@@ -184,7 +179,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    mask |= TIME_SET;
 	    register_fractional_time(field[0], field[1], session);
 	}
-	do_lat_lon(&field[3], &session->gpsdata);
+	do_lat_lon(&field[3], &session->gpsdata.fix);
 	mask |= LATLON_SET;
 	session->gpsdata.fix.speed = atof(field[7]) * KNOTS_TO_MPS;
 	session->gpsdata.fix.track = atof(field[8]);
@@ -270,7 +265,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	int newstatus = session->gpsdata.status;
 
 	mask &=~ ERROR_SET;
-	do_lat_lon(&field[1], &session->gpsdata);
+	do_lat_lon(&field[1], &session->gpsdata.fix);
 	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
@@ -336,7 +331,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	else {
 	    mask |= TIME_SET;
 	}
-	do_lat_lon(&field[2], &session->gpsdata);
+	do_lat_lon(&field[2], &session->gpsdata.fix);
 	mask |= LATLON_SET;
 	session->gpsdata.satellites_used = atoi(field[7]);
 	altitude = field[9];
@@ -802,7 +797,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	    session->gpsdata.satellites_used = atoi(field[3]);
 	    merge_hhmmss(field[4], session);
 	    register_fractional_time(field[0], field[4], session);
-	    do_lat_lon(&field[5], &session->gpsdata);
+	    do_lat_lon(&field[5], &session->gpsdata.fix);
 	    session->gpsdata.fix.altitude = atof(field[9]);
 	    session->gpsdata.fix.track = atof(field[11]);
 	    session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
