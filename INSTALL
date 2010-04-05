@@ -132,7 +132,7 @@ a serial or USB port with a GPS attached to it.
 greeting line that's a JSON object describing GPSD's version.
 Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
-6. Type '?WATCH={"raw:1"};' to start raw and watcher modes.  You
+6. Type '?WATCH={"raw":1};' to start raw and watcher modes.  You
 should see NMEA data (text lines beginning with $) spewing out.  You
 will also see lines beginning with '{' that are JSON objects
 representing reports from your GPS; these are packet translations in
