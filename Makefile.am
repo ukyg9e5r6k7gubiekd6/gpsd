@@ -392,6 +392,22 @@ else
 include_HEADERS = gps.h
 endif
 
+XML = \
+	gpsd.xml \
+	gps.xml \
+	libgps.xml \
+	libgpsmm.xml \
+	libgpsd.xml \
+	gpsmon.xml \
+	gpsdecode.xml \
+	gpsprof.xml \
+	gpsfake.xml \
+	gpsctl.xml \
+	gpscat.xml \
+	gpspipe.xml \
+	rtcm-104.xml \
+	srec.xml
+
 # Note: packaging/gpsd.spec is generated, but it needs to be in the
 # tarball in order for 'make diat-rpm' to work.  The BUILT_SOURCES
 # files are here in order to minimize build dependencies for package
@@ -417,19 +433,7 @@ EXTRA_DIST = \
 	gpsd.xml \
 	gpsd.h-head \
 	gpsd.h-tail \
-	gps.xml \
-	libgpsd.xml \
-	libgps.xml \
-	libgpsmm.xml \
-	gpsprof.xml \
-	gpsfake.xml \
-	gpscat.xml \
-	gpsctl.xml \
-	gpsmon.xml \
-	gpspipe.xml \
-	gpsdecode.xml \
-	rtcm-104.xml \
-	srec.xml \
+	$(XML) \
 	$(BUILT_SOURCES) \
 	$(MANPAGES_DIST) \
 	xgpsspeed.ad \
@@ -650,6 +654,50 @@ testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress 
 # This works around automake's lack of support for make targets as tests.
 TESTS_ENVIRONMENT = MAKE=$(MAKE)
 TESTS = do-tests
+
+#
+# The website material
+#
+# None of these productions are fired by 'make all'
+
+# FIXME: Need to be replaced by a $(MANGENERATOR) rule
+%.html: %.xml
+	xmlto xhtml-nochunks $<
+
+website: $(XML:.xml=.html) \
+		www/AIVDM.html www/NMEA.html \
+		www/protocol-evolution.html www/protocol-transition.html \
+		www/client-howto.html www/writing-a-driver.html \
+		www/index.html www/hardware.html \
+		www/performance/performance.html
+	@cp $(XML:.xml=.html) www
+
+www/AIVDM.html: www/AIVDM.txt
+	asciidoc -a toc -o www/AIVDM.html www/AIVDM.txt
+
+www/NMEA.html: www/NMEA.txt
+	asciidoc -a toc -o www/NMEA.html NMEA.txt
+
+www/protocol-evolution.html: www/protocol-evolution.txt
+	asciidoc -a toc -o www/protocol-evolution.html www/protocol-evolution.txt
+
+www/protocol-transition.html: www/protocol-transition.txt
+	asciidoc -a toc -o www/protocol-transition.html www/protocol-transition.txt
+
+www/client-howto.html: www/client-howto.txt
+	asciidoc -a toc -o www/client-howto.html www/client-howto.txt
+
+www/writing-a-driver.html: www/writing-a-driver.xml
+	xmlto xhtml-nochunks www/writing-a-driver.xml; mv writing-a-driver.html www
+
+www/index.html: www/index.html.in
+	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <www/index.html.in >www/index.html
+
+www/hardware.html: www/hardware-head.html gpscap.ini www/hardware-tail.html
+	(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html
+
+www/performance/performance.html: www/performance/performance.xml
+	(cd www/performance; xmlto xhtml-nochunks performance.xml)
 
 # Productions for setting up and performing udev tests.
 #

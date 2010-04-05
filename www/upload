@@ -8,13 +8,13 @@
 webdir=shell.berlios.de:/home/groups/gpsd/htdocs
 #cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
-make all	# Ensure all derived HTML and checksums are up to date.
+# Ensure all derived HTML and checksums are up to date.
+(cd ..; make website)
 
 if [ $1 ]
 then
     for f in $*; do scp $f $webdir/$f; done
 else
-    (cd performance; xmlto xhtml-nochunks performance.xml)
     scp *.html *.png *.gif *.css *.js *.txt \
 	performance/*.html performance/*.txt performance/*.png \
 	../TODO ../NEWS \
