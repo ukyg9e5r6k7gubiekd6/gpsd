@@ -66,7 +66,8 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     evx = (double)(getlesl(buf, 7 + 186)/1000.0);
     evy = (double)(getlesl(buf, 7 + 190)/1000.0);
     evz = (double)(getlesl(buf, 7 + 194)/1000.0);
-    ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
+    ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
+		     epx, epy, epz, evx, evy, evz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
     eph = (double)(getlesl(buf, 7 + 252)/100.0);
     /* eph is a circular error, sqrt(epx**2 + epy**2) */

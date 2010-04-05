@@ -531,7 +531,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
     for (i = 0; i < SIRF_CHANNELS; i++)
 	session->gpsdata.used[i] = (int)getub(buf, 29+i);
     /* position/velocity is bytes 1-18 */
-    ecef_to_wgs84fix(&session->gpsdata,
+    ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
 		     getbesl(buf, 1)*1.0, getbesl(buf, 5)*1.0, getbesl(buf, 9)*1.0,
 		     getbesw(buf, 13)/8.0, getbesw(buf, 15)/8.0, getbesw(buf, 17)/8.0);
     /* fix status is byte 19 */

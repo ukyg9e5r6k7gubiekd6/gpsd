@@ -94,7 +94,8 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     /* extract ECEF navigation solution here */
     /* or extract the local tangential plane (ENU) solution */
     [Px, Py, Pz, Vx, Vy, Vz] = GET_ECEF_FIX();
-    ecef_to_wgs84fix(&session->gpsdata, Px, Py, Pz, Vx, Vy, Vz);
+    ecef_to_wgs84fix(&session->gpsdata.fix,  &session->separation,
+		     Px, Py, Pz, Vx, Vy, Vz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
     session->gpsdata.fix.epx = GET_LONGITUDE_ERROR();

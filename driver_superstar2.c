@@ -206,7 +206,7 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 
     /* extract the earth-centered, earth-fixed (ECEF) solution */
     /*@ -evalorder @*/
-    ecef_to_wgs84fix(&session->gpsdata,
+    ecef_to_wgs84fix(&session->gpsdata.fix, &session->separation,
 	 getled(buf, 14), getled(buf, 22), getled(buf, 30),
 	 getlef(buf, 38), getlef(buf, 42), getlef(buf, 46));
     /*@ +evalorder @*/

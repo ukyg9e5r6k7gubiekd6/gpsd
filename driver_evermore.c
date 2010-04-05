@@ -185,7 +185,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	session->gpsdata.fix.time =
 	    gpstime_to_unix((int)getleuw(buf2, 2), getleul(buf2, 4)*0.01) - session->context->leap_seconds;
 	/*@ end @*/
-	ecef_to_wgs84fix(&session->gpsdata, 
+	ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
 			 getlesl(buf2, 8)*1.0, getlesl(buf2, 12)*1.0, getlesl(buf2, 16)*1.0,
 			 getlesw(buf2, 20)/10.0, getlesw(buf2, 22)/10.0, getlesw(buf2, 24)/10.0);
 	used = (unsigned char)getub(buf2, 26) & 0x0f;

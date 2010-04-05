@@ -87,7 +87,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     evx = (double)(getlesl(buf, 28)/100.0);
     evy = (double)(getlesl(buf, 32)/100.0);
     evz = (double)(getlesl(buf, 36)/100.0);
-    ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
+    ecef_to_wgs84fix(&session->gpsdata.fix, &session->gpsdata.separation,
+		     epx, epy, epz, evx, evy, evz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     session->gpsdata.fix.epx = session->gpsdata.fix.epy = (double)(getlesl(buf, 24)/100.0)/sqrt(2);
     session->gpsdata.fix.eps = (double)(getlesl(buf, 40)/100.0);

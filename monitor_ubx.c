@@ -132,6 +132,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	double t;
 	time_t tt;
 	struct gps_data_t g;
+	double separation;
 
 	if (data_len != 52)
 		return;
@@ -152,7 +153,8 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	evx = (double)(getlesl(buf, 28)/100.0);
 	evy = (double)(getlesl(buf, 32)/100.0);
 	evz = (double)(getlesl(buf, 36)/100.0);
-	ecef_to_wgs84fix(&g, epx, epy, epz, evx, evy, evz);
+	ecef_to_wgs84fix(&g.fix, &separation,
+			 epx, epy, epz, evx, evy, evz);
 	g.fix.epx = g.fix.epy = (double)(getlesl(buf, 24)/100.0);
 	g.fix.eps = (double)(getlesl(buf, 40)/100.0);
 	g.dop.pdop = (double)(getleuw(buf, 44)/100.0);
