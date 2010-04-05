@@ -44,7 +44,7 @@ TMP=/tmp
 # Only twirl the baton on a tty, avoids junk in transcripts. 
 if [ -t 1 ]
 then
-    PROGRESS=-b
+    opts="$opts -b"
 fi
 
 case $mode in
