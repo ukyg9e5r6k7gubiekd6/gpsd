@@ -1104,13 +1104,6 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK)!=0) {
-		    /*
-		     * Architectural problem: This is going to see just the
-		     * data dropped in during the last gps_poll() call.
-		     * What we really need to do is have the drivers put
-		     * new data someplace other than devp->gpsdata.fix, so
-		     * that it can be returned to use for accumulated fix data. 
-		     */
 		    json_tpv_dump(&devp->gpsdata, 
 				  reply + strlen(reply),
 				  replylen - strlen(reply));

@@ -87,7 +87,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
     gps_clear_fix(&session->newdata);
-    gps_clear_fix(&session->fixbuffer);
     gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
     session->gpsdata.dop.hdop = NAN;
@@ -681,16 +680,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 		received |= session->device_type->parse_packet(session);
 
-	/* FIXME: this copy should not be necessary */
-	memcpy(&session->gpsdata.fix, 
-	       &session->newdata, 
-	       sizeof(struct gps_fix_t));
-
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite DOPs reported from the packet we just got.
 	 */
-	if (session->gpsdata.fix.mode > MODE_NO_FIX
+	if (session->newdata.mode > MODE_NO_FIX
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
 		    && session->gpsdata.satellites_visible > 0) {
 	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
@@ -701,20 +695,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* copy/merge device data into staging buffers */
 	/*@-nullderef -nullpass@*/
 	if ((session->gpsdata.set & CLEAR_SET)!=0)
-	    gps_clear_fix(&session->fixbuffer);
+	    gps_clear_fix(&session->gpsdata.fix);
 	/* don't downgrade mode if holding previous fix */
-	if (session->fixbuffer.mode > session->gpsdata.fix.mode)
+	if (session->gpsdata.fix.mode > session->newdata.mode)
 	    session->gpsdata.set &=~ MODE_SET;
 	//gpsd_report(LOG_PROG,
 	//		"transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
-	gps_merge_fix(&session->fixbuffer,
+	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set,
-		      &session->gpsdata.fix);
+		      &session->newdata);
 	gpsd_error_model(session,
-			 &session->fixbuffer, &session->oldfix);
-	memcpy(&session->gpsdata.fix, 
-	       &session->fixbuffer, 
-	       sizeof(session->fixbuffer));
+			 &session->gpsdata.fix, &session->oldfix);
 	/*@+nullderef -nullpass@*/
 
 	/*
@@ -742,9 +733,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	/*@+relaxtypes +longunsignedintegral@*/
 	if ((session->gpsdata.set & TIME_SET)!=0) {
-	    if (session->gpsdata.fix.time > time(NULL) + (60 * 60 * 24 * 365))
+	    if (session->newdata.time > time(NULL) + (60 * 60 * 24 * 365))
 		gpsd_report(LOG_ERROR,"date more than a year in the future!\n");
-	    else if (session->gpsdata.fix.time < 0)
+	    else if (session->newdata.time < 0)
 		gpsd_report(LOG_ERROR,"date is negative!\n");
 	}
 	/*@-relaxtypes -longunsignedintegral@*/
