@@ -580,6 +580,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     ssize_t newlen;
     bool first_sync = false;
 
+    /*
+     * This looks strange, but it works because the
+     * gpsdata.fix buffer has been pressed into service
+     * as a place for the drivers to drop new data. 
+     * The last accumulated fix actually lives in
+     * fixbuffer now.  This should probably be fixed.
+     */
     gps_clear_fix(&session->gpsdata.fix);
 
 #ifdef TIMING_ENABLE
