@@ -388,4 +388,17 @@ to the source code for the gps.py library.
 
 For a more interesting example integrated with X and GTK, see xgps.
 
+== Future Changes ==
 
+The C/C++ binding makes available two preprocessor symbols,
+GPSD_API_MAJOR_VERSION and GPSD_API_MINOR_VERSION, in gps.h.
+The Python module has corresponding symbols.
+
+At some point in the foreseeable (but not near) future, the value of
+the GPSD_API_MAJOR_VERSION symbol will be bumped and the API
+redesigned to discard historical baggage from the old protocol.
+You will be able to use the version symbols to make your code
+work with either version.
+
+See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
+for details.
