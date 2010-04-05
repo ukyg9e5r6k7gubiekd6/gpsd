@@ -420,7 +420,7 @@ static int passivesocks(char *service, char *tcp_or_udp, int qlen, /*@out@*/int 
 	if(socks[i]<0)
 	    numsocks--;
 
-    /* Return the number of succesfully openned sockets
+    /* Return the number of succesfully opened sockets
      * The failed ones are identified by negative values */
     return numsocks;
 }
@@ -1092,8 +1092,8 @@ static void handle_request(struct subscriber_t *sub,
 				 replylen - strlen(reply));
 	    }
     } else if (strncmp(buf, "POLL;", 5) == 0) {
-	buf += 5;
 	int active = 0;
+	buf += 5;
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (allocated_device(devp) && subscribed(sub, devp))
 		if ((devp->observed & GPS_TYPEMASK)!=0)
@@ -1452,6 +1452,7 @@ int main(int argc, char *argv[])
 		else {
 		    struct subscriber_t *client = NULL;
 		    int opts = fcntl(ssock, F_GETFL);
+		    static struct linger linger = {1, RELEASE_TIMEOUT};
 
 		    if (opts >= 0)
 			(void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
@@ -1461,6 +1462,10 @@ int main(int argc, char *argv[])
 		    if (client == NULL) {
 			gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
 				"no subscriber slots available\n", c_ip, ssock);
+			(void)close(ssock);
+		    } else if (setsockopt(ssock, SOL_SOCKET,SO_LINGER,(char *)&linger,
+					  (int)sizeof(struct linger)) == -1) {
+			gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_LINGER\n");
 			(void)close(ssock);
 		    } else {
 			char announce[GPS_JSON_RESPONSE_MAX];
@@ -1821,6 +1826,18 @@ int main(int argc, char *argv[])
 	longjmp(restartbuf, 1);
 
     gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",signalled);
+
+    /*
+     * A linger option was set on each client socket when it was
+     * creaed.  Now, shut them down gracefully, letting I/O drain.
+     * This is an attempt to avoid the sporadic race errors at the ends
+     * of our regression tests.
+     */
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	if (sub->active != 0)
+	    detach_client(sub);
+    }
+
     /* try to undo all device configurations */
     for (dfd = 0; dfd < MAXDEVICES; dfd++) {
 	if (allocated_device(&devices[dfd]))
