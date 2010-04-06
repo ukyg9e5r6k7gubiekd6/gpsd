@@ -34,7 +34,7 @@ extern const struct gps_type_t sirf_binary;
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
-static bool dispmode = false, subframe_enabled = false;;
+static bool dispmode = false, subframe_enabled = false;
 static int nfix,fix[20];
 
 /*@ -nullassign @*/
