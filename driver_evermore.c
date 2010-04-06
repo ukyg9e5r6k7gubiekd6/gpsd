@@ -412,10 +412,10 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
     /*@ +charint */
     char tmp8;
     char evrm_protocol_config[] = {
-	    0x84,    /* 0: msg ID, Protocol Configuration */
-	    0x00,    /* 1: mode; EverMore binary(0), NMEA(1) */
-	    0x00,    /* 2: reserved */
-	    0x00,    /* 3: reserved */
+	(char)0x84,    /* 0: msg ID, Protocol Configuration */
+	(char)0x00,    /* 1: mode; EverMore binary(0), NMEA(1) */
+	(char)0x00,    /* 2: reserved */
+	(char)0x00,    /* 3: reserved */
     };
     /*@ -charint */
     gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);

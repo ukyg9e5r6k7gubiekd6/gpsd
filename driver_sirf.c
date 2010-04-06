@@ -158,13 +158,13 @@ static bool sirf_write(int fd, unsigned char *msg) {
 #ifdef ALLOW_CONTROLSEND
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t len) {
     /*@ +charint +matchanyintegral -initallelements -mayaliasunique @*/
-    session->msgbuf[0] = 0xa0;
-    session->msgbuf[1] = 0xa2;
+    session->msgbuf[0] = (char)0xa0;
+    session->msgbuf[1] = (char)0xa2;
     session->msgbuf[2] = (len >> 8) & 0xff;
     session->msgbuf[3] = len & 0xff;
     memcpy(session->msgbuf+4, msg, len);
-    session->msgbuf[len + 6] = 0xb0;
-    session->msgbuf[len + 7] = 0xb3;
+    session->msgbuf[len + 6] = (char)0xb0;
+    session->msgbuf[len + 7] = (char)0xb3;
     session->msgbuflen = len + 8;
 
     return sirf_write(session->gpsdata.gps_fd,
