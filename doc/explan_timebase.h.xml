@@ -13,18 +13,20 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: timebase.h 4040 2006-12-01 03:41:42Z esr $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on Tue Apr 6 10:17:55 2010 -0400</entry>
 </row>
 </tfoot>
 
 <tbody>
 <row>
   <entry><function>LEAP_SECONDS</function></entry>
-  <entry><para>Currently 14</para></entry>
+  <entry><para>Offset between GPS and UTC, in seconds.</para></entry>
 </row>
 <row>
   <entry><function>START_SUBFRAME</function></entry>
-  <entry><para>Currently 1183262400 or 1 Jun 2007 00:00:00</para></entry>
+  <entry><para>When to start doing subframe queries to get the
+  leap-second offset.  Should be set to the next possible time for a
+  leap-second change according to IERS.</para></entry>
 </row>
 <row>
   <entry><function>CENTURY_BASE</function></entry>

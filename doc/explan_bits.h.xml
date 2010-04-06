@@ -7,13 +7,19 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: bits.h 4030 2006-11-30 07:29:25Z esr $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
 </row>
 </tfoot>
 
 <tbody>
 <row>
-  <entry><para>This file only contains macros that convert data variables from the native format of the device output (MSB-first or LSB-first) into a standard form for <function>gpsd</function> use. This makes data parsing consistent regardless of the underlying format. If the device driver file makes no deliberate selection, the default is to assume the device emits data in big-endian (network byte) order.</para></entry>
+  <entry><para>This file only contains macros that convert data
+  variables from the native format of the device output (MSB-first or
+  LSB-first) into a standard form for <function>gpsd</function>
+  use. This makes data parsing consistent regardless of the underlying
+  format. If the device driver file makes no deliberate selection, the
+  default is to assume the device emits data in big-endian (network
+  byte) order.</para></entry>
 </row>
 </tbody>
 

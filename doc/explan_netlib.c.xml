@@ -5,6 +5,8 @@
 <colspec colname='c2'></colspec>
 <spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
 
+<!-- Not documented: netlib_errstr() -->
+
 <thead>
 <row>
   <entry>Functions:-</entry><entry>This provides socket connectivity.</entry>
@@ -13,18 +15,24 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4376 2007-06-02 06:29:26Z esr $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on thge code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
 </row>
 </tfoot>
 
 <tbody>
 <row>
   <entry><function>int netlib_connectsock(const char *host, const char *service, const char *protocol)</function></entry>
-  <entry><para>This attempts to connect the to nominated service on the nominated host using the nominated protocol. On success, the return value is the socket number. On error, an appropriate system defined error code is returned.</para></entry>
+  <entry><para>This attempts to connect the to nominated service on
+  the nominated host using the nominated protocol. On success, the
+  return value is the socket number. On error, an appropriate system
+  defined error code is returned.</para></entry>
 </row>
 <row>
   <entry><function>char *sock2ip(int fd)</function></entry>
-  <entry><para>This makes a call to <function>getpeername</function> using the spplied fd. On success, the returned string is the ip address in dotted notation. On error, "&lt;unknown&gt;" is returned.</para></entry>
+  <entry><para>This makes a call to <function>getpeername</function>
+  using the spplied fd. On success, the returned string is the ip
+  address in dotted notation. On error, "&lt;unknown&gt;" is
+  returned.</para></entry>
 </row>
 </tbody>
 

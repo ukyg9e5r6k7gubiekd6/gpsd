@@ -13,34 +13,56 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: ntpshm.c 4412 2007-08-21 15:48:02Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on code as of Tue Apr 6 10:17:55 2010 -0400.</entry>
 </row>
 </tfoot>
 
 <tbody>
 <row>
   <entry><function>static struct shmTime *getShmTime(int unit)</function></entry>
-  <entry><para>This requests a block of shared memory to communicate to the ntp daemon. It returns a pointer to the memory on success or NULL on failure.</para></entry>
+  <entry><para>This requests a block of shared memory to communicate
+  to the ntp daemon. It returns a pointer to the memory on success or
+  NULL on failure.</para></entry>
 </row>
 <row>
   <entry><function>void ntpshm_init(struct gps_context_t *context, bool enablepps)</function></entry>
-  <entry><para>Attaches all ntp shared memeory segments, flagging the avaliablilty of the NMEA and 1pps capabilities as appropriate.</para></entry>
+  <entry><para>Attaches all ntp shared memeory segments, flagging the
+  avaliablilty of the NMEA and 1pps capabilities as
+  appropriate.</para></entry>
 </row>
 <row>
   <entry><function>int ntpshm_alloc(struct gps_context_t *context)</function></entry>
-  <entry><para>This tries to allocate a free ntp shared memory segment.</para><para>If one is available, initialise it for use and flag it as in use.</para><para>Returns the segment number on success or -1 on failure.</para></entry>
+  <entry><para>This tries to allocate a free ntp shared memory
+  segment.</para><para>If one is available, initialise it for use and
+  flag it as in use.</para><para>Returns the segment number on success
+  or -1 on failure.</para></entry>
 </row>
 <row>
   <entry><function>bool ntpshm_free(struct gps_context_t *context, int segment)</function></entry>
-  <entry><para>This tries to release a previously allocated ntp shared memory segment. Indicates the outcome by returning true (success) or false.</para></entry>
+  <entry><para>This tries to release a previously allocated ntp shared
+  memory segment. Indicates the outcome by returning true (success) or
+  false.</para></entry>
 </row>
 <row>
   <entry><function>int ntpshm_put(struct gps_device_t *session, double fixtime)</function></entry>
-  <entry><para>If the shared memory index allocated to the session is valid and the <function>shmTime</function> structure of the session is valid, store the time of the fix.</para><para>Success is indicated by a return value of 1 and errors are indicated by a return value of 0.</para></entry>
+  <entry><para>If the shared memory index allocated to the session is
+  valid and the <function>shmTime</function> structure of the session
+  is valid, store the time of the fix.</para><para>Success is
+  indicated by a return value of 1 and errors are indicated by a
+  return value of 0.</para></entry>
 </row>
 <row>
   <entry><function>int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)</function></entry>
-  <entry><para>This code is only available if the 1PPS function is compiled in.</para><para>The shared memory structures are checked for validity and if not valid, a 0 is returned.</para><para>The time received is then checked to be within 100 milliseconds of the PC's internal time and if not, a -1 is returned.</para><para></para><para>The time received is then checked to be within 500 milliseconds of the second boundary and if not, the shared memory structure is advised that lock is lost and a -1 is returned.</para><para>If good, the time is stored in the shared memory and 1 is returned.</para></entry>
+  <entry><para>This code is only available if the 1PPS function is
+  compiled in.</para><para>The shared memory structures are checked
+  for validity and if not valid, a 0 is returned.</para><para>The time
+  received is then checked to be within 100 milliseconds of the PC's
+  internal time and if not, a -1 is
+  returned.</para><para></para><para>The time received is then checked
+  to be within 500 milliseconds of the second boundary and if not, the
+  shared memory structure is advised that lock is lost and a -1 is
+  returned.</para><para>If good, the time is stored in the shared
+  memory and 1 is returned.</para></entry>
 </row>
 </tbody>
 

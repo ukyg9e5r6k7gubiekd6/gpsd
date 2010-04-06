@@ -7,13 +7,15 @@
 
 <thead>
 <row>
-  <entry>Functions:-</entry><entry>Code shared between low-level and high-level interfaces. Most of them do exactly what they say on the tin.</entry>
+  <entry>Functions:-</entry><entry>Code shared between low-level and
+  high-level interfaces. Most of them do exactly what they say on the
+  tin.</entry>
 </row>
 </thead>
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsutils.c 4108 2006-12-08 11:48:31Z esr $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
 </row>
 </tfoot>
 
@@ -25,14 +27,6 @@
 <row>
   <entry><function>unsigned int gps_valid_fields(struct gps_fix_t *fixp)</function></entry>
   <entry><para>Clears certain status flags, depending if the associated fields are invalid.</para></entry>
-</row>
-<row>
-  <entry><function>char *gps_show_transfer(int transfer)</function></entry>
-  <entry><para>Takes a mask word and uses it to check certain status flags. If the associated flag is active, the name of the status is written to the return buffer.</para></entry>
-</row>
-<row>
-  <entry><function>void gps_merge_fix(struct gps_fix_t *to, gps_mask_t transfer, struct gps_fix_t *from)</function></entry>
-  <entry><para>Merges (overwrites the contents of) an old fix with the contents of a new fix for those fields where the associated bit in the mask word is set and the new fix data is valid.</para></entry>
 </row>
 <row>
   <entry><function>double timestamp(void)</function></entry>

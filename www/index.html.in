@@ -319,13 +319,6 @@ that describes particularly egregious vendor blunders.</p>
 <p>Some of the developers hang out regularly on IRC at <a
 href="irc://irc.freenode.net#gpsd">channel #gpsd at irc.freenode.net</a>.</p>
 
-<p>Some GPSD data streams that you can look at are 
-<a href="http://gpsd.rellim.com">http://gpsd.rellim.com</a><!--/*The following two not available as of 2007-12-23*/, 
-<a href="http://gpsd.gritch.org">http://gpsd.gritch.org</a>,-->
-and <a href="http://gpsd.mainframe.cx">http://gpsd.mainframe.cx</a>.  You can
-also point our test clients at these hostnames to see what the clients
-do, even if you don't yet have a local GPS.</p>
-
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
@@ -363,6 +356,11 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 
 <dt><a href="writing-a-driver.html">Notes on Writing a GPSD Driver</a></dt>
 <dd>A guide for the perplexed by the author of the Jupiter-T driver.</dd>
+
+<dt><a href="internals.html">A Tour of the GPSD Internals</a></dt>
+<dd>A walk through the code of GPSD. Written in 2007 and out of date
+in spots, but still quite useful for anyone interested in modifying
+the code.</dd>
 
 <dt><a href="excellence.html">GPSD and Code Excellence</a></dt>
 <dd>An essay written for the <a href="http://codeoffsets.com/">The

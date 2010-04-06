@@ -5,6 +5,8 @@
 <colspec colname='c2'></colspec>
 <spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
 
+<!-- Not documented: struct ais_t, struct rtcm3_t -->
+
 <thead>
 <row>
   <entry>Structures:-</entry><entry>The interface of the libgps library, provides data structures the library needs and that the daemon fills.</entry>
@@ -13,7 +15,7 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gps.h 4369 2007-06-01 19:23:17Z esr $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on code as of Mon Apr 5 21:38:06 2010 -0400</entry>
 </row>
 </tfoot>
 
@@ -23,7 +25,7 @@
   <entry><para>This is the fix related data gathered from the gps device. Each client session has 2, the current fix and the previous fix.</para></entry>
 </row>
 <row>
-  <entry><function>struct rtcm_t {}</function></entry>
+  <entry><function>struct rtcm2_t {}</function></entry>
   <entry><para>This holds the data being processed by the rtcm functions.</para></entry>
 </row>
 <row>

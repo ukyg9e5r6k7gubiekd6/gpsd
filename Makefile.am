@@ -668,7 +668,8 @@ website: $(XML:.xml=.html) \
 		www/protocol-evolution.html www/protocol-transition.html \
 		www/client-howto.html www/writing-a-driver.html \
 		www/index.html www/hardware.html \
-		www/performance/performance.html
+		www/performance/performance.html \
+		www/internals.html
 	@cp $(XML:.xml=.html) www
 
 www/AIVDM.html: www/AIVDM.txt
@@ -697,6 +698,9 @@ www/hardware.html: www/hardware-head.html gpscap.ini www/hardware-tail.html
 
 www/performance/performance.html: www/performance/performance.xml
 	(cd www/performance; xmlto xhtml-nochunks performance.xml)
+
+www/internals.html: $(shell ls doc/*.xml)
+	cd doc; xmlto xhtml-nochunks explanation.xml; cp explanation.html ../www/internals.html
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 
