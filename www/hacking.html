@@ -108,20 +108,7 @@ file in the source distribution.</p>
 <li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
 <li><a href="#logfiles">Log files for regression testing</a></li>
 </ol>
-<li><a href="#buffering">The buffering problem</a></li>
-<ol>
-<li><a href="#mapping">Mapping the design space</a></li>
-<ol type="i">
-<li><a href="#rtcpp">Report then clear per packet</a></li>
-<li><a href="#bartcot">Buffer all, report then clear on trigger</a></li>
-<li><a href="#baroepcasoc">Buffer all, report on every packet, clear at start-of-cycle</a></li>
-<li><a href="#baroencd">Buffer all, report on every packet, never clear data</a></li>
-<li><a href="#baroeptood">Buffer all, report on every packet, time out old data</a></li>
-</ol>
-<li><a href="#noperfect">There is no perfect option</a></li>
-<li><a href="#interpolation">Combining buffering with interpolation: a speculative design</a></li>
-</ol>
-<li><a href="#designahead">Designing Ahead</a></li>
+<li><a href="#designahead">Future Protocol Directions</a></li>
 <ol>
 <li><a href="#nonpvt">Non-TPV Data</a></li>
 <li><a href="#protov4">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</a></li>
@@ -1065,15 +1052,16 @@ See the Garmin binary driver for an example.</p>
 
 <h3 id="reports">Where to put the data you get from the GPS</h3>
 
-<p>Your driver should put new data from each incoming packet or sentence
-in the 'gpsdata' member of the GPS, and return a validity flag mask
-telling what members were updated (all float members are initially set -->
-to not-a-number. as well).  There is driver-independent code
-that will be responsible for merging that new data into the existing
-fix.  To assist this, the CYCLE_START_SET flag is special.  Set this
-when the driver returns the first timestamped message containing fix
-data in an update cycle.  (This excludes satellite-picture messages
-and messages about GPS status that don't contain fix data.)</p>
+<p>Your driver should put new data from each incoming packet or
+sentence in the 'gpsdata' member of the GPS (fixes go in the 'newdata'
+member), and return a validity flag mask telling what members were
+updated (all float members are initially set to not-a-number. as
+well).  There is driver-independent code that will be responsible for
+merging that new data into the existing fix.  To assist this, the
+CYCLE_START_SET flag is special.  Set this when the driver returns the
+first timestamped message containing fix data in an update cycle.
+(This excludes satellite-picture messages and messages about GPS
+status that don't contain fix data.)</p>
 
 <p>Your packet parser must return field-validity mask bits (using the
 _SET macros in gps.h), suitable to be put in session->gpsdata.valid.
@@ -1378,10 +1366,11 @@ the following order:</p>
 href="http://developer.berlios.de/bugs/?group_id=2116">Berlios bug
 tracker</a> for release blockers.</dt>  <dd></dd>
 
-<dt>2. Run the stable regression tests and other checks</dt> <dd>If it
-doesn't pass regressions, it isn't ready to ship. This is the time to
-run valgrind-audit, 'make splint', and 'make cppcheck' as well and
-check that those reports are clean.</dd>
+<dt>2. Run the stable regression tests and other checks</dt> 
+<dd>If it doesn't pass regressions, it isn't ready to ship. This is
+the time to run valgrind-audit, 'make splint', and 'make cppcheck' as
+well and check that those reports are clean. Use flocktest to
+verify operation on the remote test machines.</dd>
 
 <dt>3. Issue the pre-release heads-up</dt>
 <dd>About 48 hours before release, announce that it's coming so people
