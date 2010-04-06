@@ -516,7 +516,9 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 {
     int si;
 
-    assert(UNALLOCATED_FD != 0);
+#if UNALLOCATED_FD == 0
+#error client allocation code will fail horribly
+#endif 
     for (si = 0; si < NITEMS(subscribers); si++) {
 	if (subscribers[si].fd == UNALLOCATED_FD) {
 	    subscribers[si].fd = 0;	/* mark subscriber as allocated */
