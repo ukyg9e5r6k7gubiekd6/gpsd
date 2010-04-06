@@ -512,6 +512,7 @@ static void adjust_max_fd(int fd, bool on)
 #define UNALLOCATED_FD	-1
 
 static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
+/* return the address of a subscriber structure allocated for a new session */
 {
     int si;
 
@@ -526,6 +527,7 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 }
 
 static void detach_client(struct subscriber_t *sub)
+/* detach a client and terminate the session */
 {
     char *c_ip;
     if (sub->fd == UNALLOCATED_FD)
@@ -630,7 +632,7 @@ static void deactivate_device(struct gps_device_t *device)
 /*@ -nullret @*/
 /*@ -statictrans @*/
 static bool open_device(char *device_name)
-/* open and initialize a new channel block */
+/* open and initialize a new device block */
 {
     struct gps_device_t *devp;
 
@@ -683,7 +685,7 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
     /* open that device */
     if (!initialized_device(device)) {
 	if (!open_device(device->gpsdata.dev.path)) {
-	    gpsd_report(LOG_PROG, "allocation_filter: open failed\n");
+	    gpsd_report(LOG_PROG, "client(%d): open failed\n", sub_index(user));
 	    free_device(device);
 	    return false;
 	}
