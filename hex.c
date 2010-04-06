@@ -125,22 +125,22 @@ ssize_t hex_escapes(/*@out@*/char *cooked, const char *raw)
 	    case 'v': *cookend++ = '\v'; break;
 	    case 'x':
 		switch(*++raw) {
-		case '0': c = 0x00; break;
-		case '1': c = 0x10; break;
-		case '2': c = 0x20; break;
-		case '3': c = 0x30; break;
-		case '4': c = 0x40; break;
-		case '5': c = 0x50; break;
-		case '6': c = 0x60; break;
-		case '7': c = 0x70; break;
-		case '8': c = 0x80; break;
-		case '9': c = 0x90; break;
-		case 'A': case 'a': c = 0xa0; break;
-		case 'B': case 'b': c = 0xb0; break;
-		case 'C': case 'c': c = 0xc0; break;
-		case 'D': case 'd': c = 0xd0; break;
-		case 'E': case 'e': c = 0xe0; break;
-		case 'F': case 'f': c = 0xf0; break;
+		case '0': c = (char)0x00; break;
+		case '1': c = (char)0x10; break;
+		case '2': c = (char)0x20; break;
+		case '3': c = (char)0x30; break;
+		case '4': c = (char)0x40; break;
+		case '5': c = (char)0x50; break;
+		case '6': c = (char)0x60; break;
+		case '7': c = (char)0x70; break;
+		case '8': c = (char)0x80; break;
+		case '9': c = (char)0x90; break;
+		case 'A': case 'a': c = (char)0xa0; break;
+		case 'B': case 'b': c = (char)0xb0; break;
+		case 'C': case 'c': c = (char)0xc0; break;
+		case 'D': case 'd': c = (char)0xd0; break;
+		case 'E': case 'e': c = (char)0xe0; break;
+		case 'F': case 'f': c = (char)0xf0; break;
 		default:
 		    return -1;
 		}
