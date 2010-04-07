@@ -4,6 +4,13 @@
 # makefile before we regrouped the regression tests by stable and unstable 
 # drivers.
 #
+
+# Arrange to call a gpsfake in the source directory without fuss.
+#
+# I'm aware of the security issues with dot in path.  I don't much care, not 
+# in this context.  If you're running regress-driver at all, you're building
+# from source and expected to know better than to run strange scripts in
+# a world-writeable directory.
 PATH=.:$PATH
 export PATH
 
