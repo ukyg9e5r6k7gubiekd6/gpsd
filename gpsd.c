@@ -616,6 +616,8 @@ static void deactivate_device(struct gps_device_t *device)
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
     if (device->gpsdata.gps_fd != -1) {
+	FD_CLR(device->gpsdata.gps_fd, &all_fds);
+	adjust_max_fd(device->gpsdata.gps_fd, false);
 	gpsd_deactivate(device);
 	device->gpsdata.gps_fd = -1;	/* device is already disconnected */
     }
@@ -761,10 +763,6 @@ static void handle_control(int sfd, char *buf)
 	p = snarfline(buf+1, &stash);
 	gpsd_report(LOG_INF, "<= control(%d): removing %s\n", sfd, stash);
 	if ((devp = find_device(stash))) {
-	    if (devp->gpsdata.gps_fd > 0) {
-		FD_CLR(devp->gpsdata.gps_fd, &all_fds);
-		adjust_max_fd(devp->gpsdata.gps_fd, false);
-	    }
 	    deactivate_device(devp);
 	    free_device(devp);
 	    ignore_return(write(sfd, "OK\n", 3));
@@ -1602,12 +1600,8 @@ int main(int argc, char *argv[])
 
 		if (changed == ERROR_SET) {
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
-		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(device->gpsdata.gps_fd, false);
 		    deactivate_device(device);
 		} else if ((changed & ONLINE_SET) == 0) {
-		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(device->gpsdata.gps_fd, false);
 		    deactivate_device(device);
 		}
 		else {
@@ -1820,8 +1814,6 @@ int main(int argc, char *argv[])
 			    } else if (timestamp() - device->releasetime > RELEASE_TIMEOUT) {
 				gpsd_report(LOG_PROG, "device %d closed\n", (int)(device-devices));
 				gpsd_report(LOG_RAW, "unflagging descriptor %d\n", device->gpsdata.gps_fd);
-				FD_CLR(device->gpsdata.gps_fd, &all_fds);
-				adjust_max_fd(device->gpsdata.gps_fd, false);
 				deactivate_device(device);
 			    }
 			}
