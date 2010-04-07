@@ -414,7 +414,7 @@ EOF;
 
 	if ($magic && !$sock)
 		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
-	else
+	else {
 		$nsv = count($GPS['skyviews'][0]['satellites']);
 		$ts = gmdate("r", $GPS['fixes'][0]['time']);
 		$part4 = <<<EOF
@@ -435,6 +435,7 @@ EOF;
 {$resp}
 -->
 EOF;
+	}
 
 	$part5 = <<<EOF
 </table>
