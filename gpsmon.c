@@ -169,7 +169,7 @@ static ssize_t readpkt(void)
 	return EOF;
 
     changed = gpsd_poll(&session);
-    if (changed & ERROR_SET)
+    if (changed == 0 || (changed & ERROR_SET) != 0)
 	return EOF;
 
     if (logfile != NULL) {

@@ -13,19 +13,6 @@ See also the GPSD bug tracker at
 
 ** Bugs in gpsd and its clients:
 
-*** spinning in select(2)
-
-From three sources:
-
-Håkan Johansson adds:
-
-There is a similar (infinite select()) issue in gpsmon, triggered via:
-
-start gpsd
-start gpsmon
-stop/kill/ctrl-c gpsd
-gpsmon now runs at 100% cpu.
-
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcheri reported that it broke somewhere between rev 3654 and
