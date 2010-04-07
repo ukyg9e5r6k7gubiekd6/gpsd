@@ -13,6 +13,50 @@ See also the GPSD bug tracker at
 
 ** Bugs in gpsd and its clients:
 
+*** spinning in select(2)
+
+From three sources:
+
+Jirí Techet <techet@gmail.com> writes:
+
+I have a Holux M-1000c GPS logger (MTK-3301 based, connected using
+bluetooth) and I'm experiencing 100pct CPU usage after I stop using
+the device and switch it off. This is how it can be reproduced:
+
+1. Turn on the GPS device and start xgps
+2. Wait until you start receiving some data from the GPS device
+3. Keep xgps running and turn off the GPS device
+4. Wait for about 20 seconds - after this time gpsd starts consuming 100cpu
+
+I can reproduce this both with gpsd 2.92 that comes with Ubuntu Lucid
+beta and also the current git tip, but there wasn't this issue with
+2.39.
+
+I had a brief look at the gpsd sources and put some traces into gpsd.c
+- what happens here is that the select() at line 1416 stops blocking
+and doesn't wait for 1 second as before. From my experience this
+happens e.g. when the file descriptor inside the readfds set becomes
+invalid - select() then signals this file descriptor as ready to be
+read. So I assume that you close the file descriptor but forget to
+remove it from the readfds set of select - but I can be totally wrong
+here, just a wild guess. The code is a little messy so I didn't
+explore any further.
+
+Håkan Johansson adds:
+
+There is a similar (infinite select()) issue in gpsmon, triggered via:
+
+start gpsd
+start gpsmon
+stop/kill/ctrl-c gpsd
+gpsmon now runs at 100% cpu.
+
+Then there's this:
+
+[15:31]	<ckuethe>	esr: the gpsd spin thing. it's easy to reproduce.
+[15:32]	<ckuethe>	plug in usb gps, run "gpsd -n /dev/gps", unplug usb gps
+[15:32]	<ckuethe>	spin, spin sugar!
+
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcheri reported that it broke somewhere between rev 3654 and

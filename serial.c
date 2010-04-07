@@ -294,6 +294,8 @@ int gpsd_open(struct gps_device_t *session)
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
     session->is_serial = true;
+    gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_open()\n", 
+		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     return session->gpsdata.gps_fd;
 }
 
@@ -399,6 +401,8 @@ void gpsd_close(struct gps_device_t *session)
 	    (speed_t)session->gpsdata.dev.baudrate);
 	/*@ end @*/
 	(void)tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
+	gpsd_report(LOG_SPIN, "close(%d) in gpsd_close(%s)\n", 
+		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
 	session->gpsdata.gps_fd = -1;
     }

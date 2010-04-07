@@ -95,8 +95,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 	    break;
 	}
 
-	if (s > 0) 
+	if (s > 0) {
+	    gpsd_report(LOG_SPIN, "close(%d) in netlib_connectsock()\n", s);
 	    (void)close(s);
+	}
     }
     /*@+type@*/
 #ifndef S_SPLINT_S 
@@ -117,6 +119,8 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
     if (type == SOCK_STREAM)
 	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof one);
 #endif
+
+    gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n", s);
     return s;
     /*@ +type +mustfreefresh @*/
 }

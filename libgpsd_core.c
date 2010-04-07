@@ -317,11 +317,13 @@ int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
     /* special case: source may be a URI to a remote GNSS or DGPS service */
-    if (netgnss_uri_check(session->gpsdata.dev.path))
+    if (netgnss_uri_check(session->gpsdata.dev.path)) {
 	session->gpsdata.gps_fd = netgnss_uri_open(session->context, 
 						   session->gpsdata.dev.path);
+	gpsd_report(LOG_SPIN, "netgnss_uri_open(%s) returns socket on fd %d\n", 
+		    session->gpsdata.dev.path, session->gpsdata.gps_fd);
     /* otherwise, could be an AIS data feed */
-    else if (strncmp(session->gpsdata.dev.path, "ais://", 6) == 0) {
+    } else if (strncmp(session->gpsdata.dev.path, "ais://", 6) == 0) {
 	char server[GPS_PATH_MAX], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path+6, sizeof(server));

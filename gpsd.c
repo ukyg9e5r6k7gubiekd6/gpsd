@@ -398,6 +398,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	return -1;
     }
 
+    gpsd_report(LOG_SPIN, "passivesock_af() -> %d\n", s);
     return s;
     /*@ +mustfreefresh -matchanyintegral @*/
 }
@@ -536,6 +537,7 @@ static void detach_client(struct subscriber_t *sub)
 	return;
     c_ip = netlib_sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
+    gpsd_report(LOG_SPIN, "close(%d) in detach_client()\n", sub->fd);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (sub %d, fd %d) in detach_client\n",
 	c_ip, sub_index(sub), sub->fd);
@@ -1276,7 +1278,9 @@ int main(int argc, char *argv[])
 	if ((csock = filesock(control_socket)) == -1) {
 	    gpsd_report(LOG_ERROR,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
-	}
+	} else
+	    gpsd_report(LOG_SPIN, "control socket %s is fd %d\n", 
+			control_socket, csock);
 	FD_SET(csock, &all_fds);
 	adjust_max_fd(csock, true);
 	gpsd_report(LOG_PROG, "control socket opened at %s\n", control_socket);
@@ -1425,24 +1429,25 @@ int main(int argc, char *argv[])
 	}
 	/*@ +usedef @*/
 
-#ifdef __UNUSED__
-	{
+	if (debuglevel >= LOG_SPIN) {
 	    char dbuf[BUFSIZ];
+	    int i;
 	    dbuf[0] = '\0';
-	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-		if (FD_ISSET(sub->fd, &all_fds))
+	    for (i = 0; i < FD_SETSIZE; i++)
+		if (FD_ISSET(i, &all_fds))
 		    (void)snprintf(dbuf + strlen(dbuf),
 				   sizeof(dbuf)-strlen(dbuf),
-				   " %d", sub->fd);
+				   "%d ", i);
+	    if (strlen(dbuf) > 0)
+		dbuf[strlen(dbuf)-1] = '\0';
 	    strlcat(dbuf, "} -> {", BUFSIZ);
-	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-		if (FD_ISSET(sub->fd, &rfds))
+	    for (i = 0; i < FD_SETSIZE; i++)
+		if (FD_ISSET(i, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf),
 				   sizeof(dbuf)-strlen(dbuf),
-				   " %d", sub->fd);
-	    gpsd_report(LOG_RAW, "Polling descriptor set: {%s}\n", dbuf);
+				   " %d ", i);
+	    gpsd_report(LOG_SPIN, "select() {%s} at %f\n", dbuf, timestamp());
 	}
-#endif /* UNUSED */
 
 	/* always be open to new client connections */
 	for(i=0; i<AFCOUNT; i++) {
@@ -1477,7 +1482,7 @@ int main(int argc, char *argv[])
 			adjust_max_fd(ssock, true);
 			client->fd = ssock;
 			client->active = timestamp();
-			gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
+			gpsd_report(LOG_SPIN, "client %s (%d) connect on fd %d\n",
 				c_ip, sub_index(client), ssock);	
 			json_version_dump(announce, sizeof(announce));
 			(void)throttled_write(client, announce, strlen(announce));
@@ -1520,6 +1525,7 @@ int main(int argc, char *argv[])
 		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
 		    handle_control(cfd, buf);
 		}
+		gpsd_report(LOG_SPIN, "close(%d) of control socket\n", cfd);
 		(void)close(cfd);
 		FD_CLR(cfd, &all_fds);
 		FD_CLR(cfd, &control_fds);
@@ -1833,7 +1839,7 @@ int main(int argc, char *argv[])
 
     /*
      * A linger option was set on each client socket when it was
-     * creaed.  Now, shut them down gracefully, letting I/O drain.
+     * created.  Now, shut them down gracefully, letting I/O drain.
      * This is an attempt to avoid the sporadic race errors at the ends
      * of our regression tests.
      */
