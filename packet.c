@@ -1546,6 +1546,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     ssize_t recvd;
 
     /*@ -modobserver @*/
+    errno = 0;
     recvd = read(fd, lexer->inbuffer+lexer->inbuflen,
 			sizeof(lexer->inbuffer)-(lexer->inbuflen));
     /*@ +modobserver @*/
@@ -1571,6 +1572,8 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 #endif /* STATE_DEBUG */
 	lexer->inbuflen += recvd;
     }
+    gpsd_report(LOG_SPIN, "packet_get() fd %d -> %zd (%d)\n",
+		fd, recvd, errno);
 
     /*
      * Bail out, indicating no more input, only if we just received
