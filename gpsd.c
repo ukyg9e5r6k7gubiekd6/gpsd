@@ -1546,10 +1546,21 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
 
+		if (changed == ERROR_SET) {
+		    gpsd_report(LOG_WARN,"packet sniffer failed sync with %s\n",
+				device->gpsdata.dev.path);
+		    deactivate_device(device);
+		    continue;
+		} else if ((changed & ONLINE_SET) == 0) {
+		    gpsd_report(LOG_WARN, "%s returned error or went offline\n",
+			device->gpsdata.dev.path);
+		    deactivate_device(device);
+		    continue;
+		}
+
                 /* must have a full packet to continue */
                 if ((changed & PACKET_SET) == 0)
                     continue;
-
 
 		/* raw hook and relaying functions */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
@@ -1598,12 +1609,6 @@ int main(int argc, char *argv[])
 		if (device->gpsdata.fix.mode == MODE_3D)
 		    netgnss_report(device);
 
-		if (changed == ERROR_SET) {
-		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");
-		    deactivate_device(device);
-		} else if ((changed & ONLINE_SET) == 0) {
-		    deactivate_device(device);
-		}
 		else {
 		    /* we may need to add device to new-style watcher lists */
 		    if ((changed & DEVICE_SET) != 0) {

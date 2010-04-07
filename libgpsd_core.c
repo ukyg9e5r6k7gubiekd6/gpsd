@@ -621,21 +621,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     /* update the scoreboard structure from the GPS */
     gpsd_report(LOG_RAW+2, "%s sent %zd new characters\n",
 		session->gpsdata.dev.path, newlen);
-   if (newlen == -1)	{		/* read error */
-	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-		    session->gpsdata.dev.path,
-		    timestamp() - session->gpsdata.online);
+    if (newlen <= 0)	{		/* read error or EOF*/   
+       gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+		   session->gpsdata.dev.path,
+		   timestamp() - session->gpsdata.online);
 	session->gpsdata.online = 0;
 	return 0;
-    } else if (newlen == 0) {		/* no new data */
-	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->gpsdata.dev.cycle+1) {
-	    gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-		    session->gpsdata.dev.path,
-		    timestamp() - session->gpsdata.online);
-	    session->gpsdata.online = 0;
-	    return 0;
-	} else
-	    return ONLINE_SET;
     } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
 	gpsd_report(LOG_RAW+3, "New data on %s, not yet a packet\n",
 			    session->gpsdata.dev.path);
