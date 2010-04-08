@@ -447,10 +447,6 @@ href='http://www.wigle.net'>JiGLE</a> can still get GPS data from
 netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
 
-<p>There is an interesting alpha-stage proposal called <a
-href='http://www.gpster.net/locod.html'>locod</a> that aims to
-integrate location information from GPSes and other sources.</p>
-
 <p><a
 href='http://users.hol.gr/~dzach/gpsfeed/index.html'>gpsfeed+</a> is a
 program that simulates the output of a GPS in motion, and can be used
