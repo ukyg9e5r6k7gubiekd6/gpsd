@@ -41,10 +41,10 @@ extern "C" {
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
+#define GPS_PATH_MAX	64	/* dev files usually have short names */
 
-#define WGS84A 6378137		/* equatorial radius */
-#define WGS84F 298.257223563	/* flattening */
-#define WGS84B 6356752.3142	/* polar radius */
+#define MAXDEVICES_PER_USER	4	/* old protocol only */
+
 /* 
  * The structure describing an uncertainty volume in kinematic space.
  * This is what GPSes are meant to produce; all the other info is 
@@ -871,12 +871,6 @@ struct rawdata_t {
 #define SAT_FIX_USED	0x40		/* used for position fix */
 };
 
-/* following structures are for representing new-protocol responses */
-
-#define MAXDEVICES_PER_USER	4
-#define GPS_PATH_MAX		64	/* dev files usually have short names */
-#define TYPES_PER_DEVICE	4
-
 struct version_t {
     char release[64];			/* external version */
     char rev[64];			/* internal revision ID */
@@ -909,8 +903,6 @@ struct policy_t {
     char devpath[GPS_PATH_MAX];		/* specific device to watch */   
 };
 
-/* this is the main structure that includes all previous substructures */
-
 /* 
  * Someday we may support Windows, under which socket_t is a separate type.
  * In the meantime, having a typedef for this semantic kind is no bad thing,
@@ -918,6 +910,23 @@ struct policy_t {
  * binary compatibility. 
  */
 typedef int socket_t;
+
+/* mode flags for setting streaming policy */
+#define WATCH_DISABLE	0x0000u	/* disable watching */
+#define WATCH_ENABLE	0x0001u	/* enable streaming */
+#define WATCH_JSON	0x0002u	/* enable JSON output */
+#define WATCH_NMEA	0x0004u	/* enable output in NMEA */
+#define WATCH_RARE	0x0008u	/* enable output of packets in hex */
+#define WATCH_RAW	0x0010u	/* enable output of raw packets */
+#define WATCH_SCALED	0x0020u	/* scale output to floats, when applicable */ 
+#define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
+#define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
+#define WATCH_DEVICE	0x0100u	/* watch specific device */
+#define POLL_NONBLOCK	0x1000u	/* set non-blocking poll (experimental!) */
+
+/* 
+ * Main structure that includes all previous substructures
+ */
 
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
@@ -1026,31 +1035,22 @@ struct gps_data_t {
     void *privdata;
 };
 
-/* mode flags for gps_stream() */
-#define WATCH_DISABLE	0x000u	/* disable watching */
-#define WATCH_ENABLE	0x0001u	/* enable streaming */
-#define WATCH_JSON	0x0002u	/* enable JSON output */
-#define WATCH_NMEA	0x0004u	/* enable output in NMEA */
-#define WATCH_RARE	0x0008u	/* enable output of packets in hex */
-#define WATCH_RAW	0x0010u	/* enable output of raw packets */
-#define WATCH_SCALED	0x0020u	/* scale output to floats, when applicable */ 
-#define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
-#define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
-#define WATCH_DEVICE	0x0100u	/* watch specific device */
-#define POLL_NONBLOCK	0x1000u	/* set non-blocking poll */
-
-extern int gps_open_r(const char *host, const char *port, 
-		      /*@out@*/struct gps_data_t *gpsdata);
-extern /*@null@*/struct gps_data_t *gps_open(const char *host,const char *port);
+extern int gps_open_r(const char *host, const char *, 
+		      /*@out@*/struct gps_data_t *);
+extern /*@null@*/struct gps_data_t *gps_open(const char *, const char *);
 extern int gps_close(struct gps_data_t *);
-extern int gps_send(struct gps_data_t *gpsdata, const char *fmt, ... );
-extern int gps_poll(struct gps_data_t *gpsdata);
-extern bool gps_waiting(struct gps_data_t *gpsdata);
-extern int gps_stream(struct gps_data_t *gpsdata, 
-		      unsigned int flags, 
-		      /*@null@*/void *);
-extern void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len));
+extern int gps_send(struct gps_data_t *, const char *, ... );
+extern int gps_poll(struct gps_data_t *);
+extern bool gps_waiting(struct gps_data_t *);
+extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern void gps_set_raw_hook(struct gps_data_t *, 
+			     void (*)(struct gps_data_t *, char *, size_t));
 extern char /*@observer@*/ *gps_errstr(const int);
+
+/* this only needs to be visible for the unit tests */
+extern int gps_unpack(char *, struct gps_data_t *);
+
+/* dependencies on struct gpsdata_t end hrere */
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
@@ -1068,9 +1068,6 @@ extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double wgs84_separation(double, double);
 
-/* this only needs to be visible for the unit tests */
-extern int gps_unpack(char *, struct gps_data_t *);
-
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */
 #define METERS_TO_MILES	0.00062137119	/* Meters to miles */
@@ -1086,6 +1083,11 @@ extern int gps_unpack(char *, struct gps_data_t *);
 #define GPS_PI      	3.1415926535897932384626433832795029
 #define RAD_2_DEG	57.2957795130823208767981548141051703
 #define DEG_2_RAD	0.0174532925199432957692369076848861271
+
+/* geodetic constants */
+#define WGS84A 6378137		/* equatorial radius */
+#define WGS84F 298.257223563	/* flattening */
+#define WGS84B 6356752.3142	/* polar radius */
 
 /* gps_open() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
