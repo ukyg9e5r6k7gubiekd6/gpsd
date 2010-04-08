@@ -912,7 +912,6 @@ struct policy_t {
 typedef int socket_t;
 
 /* mode flags for setting streaming policy */
-#define WATCH_DISABLE	0x0000u	/* disable watching */
 #define WATCH_ENABLE	0x0001u	/* enable streaming */
 #define WATCH_JSON	0x0002u	/* enable JSON output */
 #define WATCH_NMEA	0x0004u	/* enable output in NMEA */
@@ -922,6 +921,7 @@ typedef int socket_t;
 #define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
 #define WATCH_DEVICE	0x0100u	/* watch specific device */
+#define WATCH_DISABLE	0x0200u	/* disable watching */
 #define POLL_NONBLOCK	0x1000u	/* set non-blocking poll (experimental!) */
 
 /* 
