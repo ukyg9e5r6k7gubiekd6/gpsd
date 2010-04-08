@@ -42,8 +42,7 @@ extern "C" {
 #define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define GPS_PATH_MAX	64	/* dev files usually have short names */
-
-#define MAXDEVICES_PER_USER	4	/* old protocol only */
+#define MAXUSERDEVS	4	/* max devices per user */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
@@ -1026,7 +1025,7 @@ struct gps_data_t {
 	struct {
 	    double time;
 	    int ndevices;
-	    struct devconfig_t list[MAXDEVICES_PER_USER];
+	    struct devconfig_t list[MAXUSERDEVS];
 	} devices;
 	char error[80];
     };
