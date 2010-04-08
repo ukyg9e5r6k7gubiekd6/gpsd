@@ -139,13 +139,13 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	 * unless there is actual following data.
 	 */
 	switch (session->packet.counter) {
-#ifdef SIRF_ENABLE
+#ifdef NMEA_ENABLE
 	case 0:
 	    /* probe for Garmin serial GPS -- expect $PGRMC followed by data*/
 	    (void)nmea_send(session, "$PGRMCE");
 	    break;
-#endif /* SIRF_ENABLE */
-#ifdef NMEA_ENABLE
+#endif /* NMEA_ENABLE */
+#ifdef SIRF_ENABLE
 	case 1:
 	    /*
 	     * We used to try to probe for SiRF by issuing "$PSRF105,1"
@@ -166,6 +166,8 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 			    session->gpsdata.dev.stopbits);
 	    session->back_to_nmea = true;
 	    break;
+#endif /* SIRF_ENABLE */
+#ifdef NMEA_ENABLE
 	case 2:
 	    /* probe for the FV-18 -- expect $PFEC,GPint followed by data */
 	    (void)nmea_send(session, "$PFEC,GPint");
