@@ -693,18 +693,18 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
      */
     session->newdata.time = timestamp();
     session->newdata.track = atof(field[1]);
-    session->gpsdata.headingStatus = *field[2];
+    session->gpsdata.compass.headingStatus = *field[2];
     session->newdata.climb = atof(field[3]);
-    session->gpsdata.pitchStatus = *field[4];
+    session->gpsdata.compass.pitchStatus = *field[4];
     session->newdata.speed = atof(field[5]);
-    session->gpsdata.rollStatus = *field[6];
+    session->gpsdata.compass.rollStatus = *field[6];
     session->newdata.altitude = atof(field[7]);
-    session->gpsdata.horzField = atof(field[8]);
+    session->gpsdata.compass.horzField = atof(field[8]);
     session->newdata.mode = MODE_3D;
     mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
     session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
-    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->newdata.track, session->gpsdata.headingStatus);
+    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->newdata.track, session->gpsdata.compass.headingStatus);
     return mask;
 }
 #endif /* TNT_ENABLE */
