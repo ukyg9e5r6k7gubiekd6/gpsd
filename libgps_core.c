@@ -409,7 +409,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				    sizeof(gpsdata->devices.list[0].path));
 			    i = 0;
 			    while ((sp2 = strtok_r(NULL, " \r\n",  &ns2))!=NULL)
-				if (i < MAXDEVICES_PER_USER-1)
+				if (i < MAXUSERDEVS-1)
 				    (void)strlcpy(gpsdata->devices.list[++i].path, 
 						 sp2,
 						 sizeof(gpsdata->devices.list[0].path));
