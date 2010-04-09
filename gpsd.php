@@ -393,7 +393,7 @@ width="600" height="600"/>
 <p class="caption">A filled circle means the satellite was used in
 the last fix. Green-yellow-red colors indicate signal strength in dB, 
  green=most and red=least.  Diamonds indicate SBAS satellites.</p>
-</td>
+{$gmap_code}</td>
 </tr>
 EOF;
 
