@@ -909,9 +909,10 @@ static void rstrip(char *str)
 {
     char *strend;
     strend = str + strlen(str) - 1;
-    while (isspace(*strend))
-	--strend;
-    strend[1] = '\0';
+    while (isspace(*strend)){
+	    *strend = '\0';
+	    --strend;
+    }
 }
 
 static void handle_request(struct subscriber_t *sub, 
