@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $server, $advertise, $port, $magic, $swap_ew, $magic;
+global $server, $advertise, $port, $open, $swap_ew, $magic;
 $magic = 1; # leave this set to 1
 
 # If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
@@ -311,9 +311,9 @@ function dfix($x, $y, $z){
 }
 
 function write_html($resp){
-	global $sock, $errstr, $errno, $server, $port, $head, $body;
+	global $sock, $errstr, $errno, $server, $port, $head, $body, $open;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
-	global $magic;
+	global $magic, $advertise;
 
 	$GPS = json_decode($resp, true);
 	if ($GPS === false){
@@ -401,7 +401,10 @@ the last fix. Green-yellow-red colors indicate signal strength in dB,
 </tr>
 EOF;
 
-	$part3 = <<<EOF
+	if (!$open)
+		$part3 = '';
+	else
+		$part3 = <<<EOF
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
@@ -474,6 +477,7 @@ function write_config(){
 \$googlemap = 0; # set to 1 if you want to have a google map
 \$gmap_key = 'GetYourOwnGoogleKey'; # your google API key goes here
 \$swap_ew = 0; # set to 1 if you don't understand projections
+\$open = 0; # set to 1 to show the form to change the GPSd server
 
 ## You can read the header, footer and blurb from a file...
 # \$head = file_get_contents('/path/to/header.inc');
