@@ -351,7 +351,7 @@ function write_html($resp){
 {$gmap_head}
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta http-equiv="Content-Language" content="en,en-us"/>
-<title>{$title} - GPSD Test Station {$GPS['loc']}</title>
+<title>{$title} - GPSD Test Station {$lat}, {$lon}</title>
 {$autorefresh}
 <style>
 .warning {
