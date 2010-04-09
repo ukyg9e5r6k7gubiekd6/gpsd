@@ -407,7 +407,8 @@ EOF;
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
-<span class="fixed">telnet://{$advertise}:{$port}/</span> and type "R".<br/>
+<span class="fixed">telnet://{$advertise}:{$port}/</span> and type "?POLL;"
+or "?WATCH={"enable":true,"raw":true}".<br/>
 Use a different server:<br/>
 <form method=GET action="${_SERVER['SCRIPT_NAME']}">
 <input name="host" value="{$advertise}">:
