@@ -327,7 +327,6 @@ function write_html($resp){
 	$lon = (float)$GPS['fixes'][0]['lon'];
 	$x = $server; $y = $port;
 	$imgdata = base64_encode($resp);
-	include("gpsd_config.inc"); # breaks things - XXX wtf?
 	$server = $x; $port = $y;
 
 	if ($autorefresh > 0)
