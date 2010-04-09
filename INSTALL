@@ -18,7 +18,7 @@ various additional capabilities and extensions:
 C++ compiler	       -> libgpsmm C++ wrapper for the library
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
-X windows + lesstif    -> two test clients depend on this
+X windows              -> two test clients depend on this
 ncurses                -> two more test clients depend on this
 Qt + qmake             -> libQgpsmm depends on this
 
@@ -107,7 +107,7 @@ resembling "Xm/Xm.h: No such file or directory".  If you're on a Linux
 system, you may already have LessTif.  Source code is available
 from <http://www.lesstif.org/>.
 
-Under Ubuntu, you will require libmotif-dev, libxp-dev and libxaw7-dev
+Under Ubuntu, you will require libxp-dev and libxaw7-dev
 in addition to the standard build-support packages.  You can get
 all the build prerequisites intalled with "apt-get build-dep gpsd".
 
