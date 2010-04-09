@@ -20,6 +20,12 @@ global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
 global $server, $advertise, $port, $open, $swap_ew, $testmode;
 $testmode = 1; # leave this set to 1
 
+# Public script parameters:
+#   host: host name or address where GPSd runs. Default: from config file
+#   port: port of GPSd. Default: from config file
+#   op=view: show just the skyview image instead of the whole HTML page
+#   sz=small: used with op=view, display a small (240x240px) skyview
+
 # If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
 # it may be necessary to increase the value of the
 # suhosin.get.max_value_length parameter to 2048. The imgdata parameter used
