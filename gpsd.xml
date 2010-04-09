@@ -147,12 +147,6 @@ this will be created as a Unix-domain socket to which you can write
 commands that edit the daemon's internal device list.</para>
 </listitem>
 </varlistentry>
-<!-- varlistentry>
-<term>-R</term>
-<listitem><para>Set TCP/IP port on which to listen for DGPSIP clients
-(default is 2101). The option -R 0 will disable serving DGPSIP
-clients.</para></listitem>
-</varlistentry -->
 <varlistentry>
 <term>-S</term>
 <listitem><para>Set TCP/IP port on which to listen for GPSD clients
@@ -189,18 +183,17 @@ control commands supported by that driver.</para>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
-<listitem><para>Don't wait for a client to connect before polling
-whatever GPS is associated with it. It is thought that some GPSes
-go to a standby mode (drawing less power) before the host machine
-asserts DTR, so waiting for the first actual request might save
-battery power on portable equipment.</para>
+<listitem>
+<para>Don't wait for a client to connect before polling
+whatever GPS is associated with it. Many GPSes go to a standby mode
+(drawing less power) before the host machine asserts DTR, so waiting
+for the first actual request saves battery power.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>-N</term>
 <listitem><para>Don't daemonize; run in foreground.  Also suppresses
-privilege-dropping.  This switch is mainly useful for debugging.
-Its meaning may change in future versions.</para>
+privilege-dropping.  This switch is mainly useful for debugging.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -281,7 +274,7 @@ to accept them.Example:
 </varlistentry>
 </variablelist>
 
-<para>Internally, the daemon maintains a device list holding the
+<para>Internally, the daemon maintains a device pool holding the
 pathnames of devices and remote servers known to the
 daemon. Initially, this list is the list of device-name arguments
 specified on the command line.  That list may be empty, in which case
@@ -1286,12 +1279,17 @@ specification for the members of the corresponding JSON object type.</para>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
 
 <para><application>gpsd</application> maintains an internal list of
-GPS devices.  If you specify devices on the command line, the list is
-initialized with those pathnames; otherwise the list starts empty.
-Commands to add and remove GPS device paths from the daemon's device
-list must be written to a local Unix-domain socket which will be
-accessible only to programs running as root.  This control socket will
-be located wherever the -F option specifies it.</para>
+GPS devices (the "device pool").  If you specify devices on the
+command line, the list is initialized with those pathnames; otherwise
+the list starts empty.  Commands to add and remove GPS device paths
+from the daemon's device list must be written to a local Unix-domain
+socket which will be accessible only to programs running as root.
+This control socket will be located wherever the -F option specifies
+it.</para>
+
+<para>A device may will also be dropped from the pool if GPSD gets a zero
+length read from it. This  end-of-file condition indicates that the'
+device has been disconnected.</para>
 
 <para>When <application>gpsd</application> is properly installed along
 with hotplug notifier scripts feeding it device-add commands over the
@@ -1326,7 +1324,7 @@ followed by the control string in paired hex digits.</para>
 with either "OK" or "ERROR".  An ERROR reponse to an add command means
 the device did not emit data recognizable as GPS packets; an ERROR
 response to a remove command means the specified device was not in
-<application>gpsd</application>'s device list. An ERROR response to a
+<application>gpsd</application>'s device pool. An ERROR response to a
 ! command means the daemon did not recognize the devicename
 specified.</para>
 
@@ -1343,7 +1341,7 @@ spoofing attacks.</para>
 or less at 66% confidence, 15 meters or less at 95% confidence. Actual
 horizontal error will be UERE times a dilution factor dependent on current
 satellite position.  Altitude determination is more sensitive to
-variability to atmospheric signal lag than latitude/longitude, and is
+variability in ionospheric signal lag than latitude/longitude is, and is
 also subject to errors in the estimation of local mean sea level; base
 error is 12 meters at 66% confidence, 23 meters at 95% confidence.
 Again, this will be multiplied by a vertical dilution of precision
@@ -1532,7 +1530,7 @@ longer timeout (15 minutes).</para>
 
 <para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
 to the same serial device (possible with an RS422 adapter hooked up to
-some marine-navigation systems), an 'O' response may mix an altitude
+some marine-navigation systems), a 'TPV' response may mix an altitude
 from one device's GGA with latitude/longitude from another's RMC/GLL
 after the second sentence has arrived.</para>
 
@@ -1630,6 +1628,13 @@ Recommended Standards for Differential NAVSTAR GPS Service</citetitle>
 RTCM Paper 194-93/SC 104-STD.  The applicable standard for RTCM-104 V3
 is <citetitle>RTCM Standard 10403.1 for Differential GNSS Services -
 Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
+
+<para>AIS is defined by ITU Recommendation M.1371,
+<citetitle>Technical Characteristics for a Universal Shipborne
+Automatic Identification System Using Time Division Multiple
+Access</citetitle>. The AIVDM/AIVDO format understood by this progeam
+is defined by IEC-PAS 61162-100, <citetitle>Maritime navigation and
+radiocommunication equipment and systems</citetitle></para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
