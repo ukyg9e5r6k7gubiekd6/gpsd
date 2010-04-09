@@ -403,7 +403,6 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x5c:		/* Satellite Tracking Status */
 	if (len != 24)
 	    break;
-	session->driver.tsip.last_5c = now;		/* keep timestamp for request */
 	u1 = getub(buf,0);			/* PRN */
 	u2 = getub(buf,1);			/* chan */
 	u3 = getub(buf,2);			/* Acquisition flag */
