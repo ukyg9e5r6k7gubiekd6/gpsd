@@ -644,7 +644,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
-	    gpsd_report(LOG_SHOUT, "%s identified as type %s\n",
+	    gpsd_report(LOG_INF, "%s identified as type %s\n",
 			session->gpsdata.dev.path, 
 			session->device_type->type_name);
 	    /* fire the identified hook */
