@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $GPS, $server, $advertise, $port, $magic, $swap_ew, $magic;
+global $server, $advertise, $port, $magic, $swap_ew, $magic;
 $magic = 1; # leave this set to 1
 
 # If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
@@ -88,10 +88,6 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 			}
 		}
 		@fclose($sock);
-	}
-	$GPS = json_decode($resp, true);
-	if ($GPS === false){
-		die("json_decode error: $resp");
 	}
 }
 
@@ -281,8 +277,6 @@ function skyview($im, $sz, $C){
 }
 
 function gen_image($resp){
-	global $magic;
-
 	$sz = 600;
 	if (isset($_GET['sz']) && ($_GET['sz'] == 'small'))
 		$sz = 240;
@@ -317,9 +311,14 @@ function dfix($x, $y, $z){
 }
 
 function write_html($resp){
-	global $GPS, $sock, $errstr, $errno, $server, $port, $head, $body;
+	global $sock, $errstr, $errno, $server, $port, $head, $body;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
 	global $magic;
+
+	$GPS = json_decode($resp, true);
+	if ($GPS === false){
+		die("json_decode error: $resp");
+	}
 
 	header("Content-type: text/html; charset=UTF-8");
 
