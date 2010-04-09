@@ -273,6 +273,8 @@ void json_sky_dump(const struct gps_data_t *datap,
 			       used ? "true" : "false");
 	    }
 	}
+    }
+    if (reported) {
 	if (reply[strlen(reply)-1] == ',')
 	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "]", replylen-strlen(reply));
