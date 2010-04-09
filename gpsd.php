@@ -17,8 +17,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $server, $advertise, $port, $open, $swap_ew, $magic;
-$magic = 1; # leave this set to 1
+global $server, $advertise, $port, $open, $swap_ew, $testmode;
+$testmode = 1; # leave this set to 1
 
 # If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
 # it may be necessary to increase the value of the
@@ -77,7 +77,7 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 		if (!preg_match('/\D/', $_GET['port']) && ($port>0) && ($port<65536))
 			$port = $_GET['port'];
 
-	if ($magic){
+	if ($testmode){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
 		@fwrite($sock, "?POLL;\n");
 		for($tries = 0; $tries < 10; $tries++){
@@ -313,7 +313,7 @@ function dfix($x, $y, $z){
 function write_html($resp){
 	global $sock, $errstr, $errno, $server, $port, $head, $body, $open;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
-	global $magic, $advertise;
+	global $testmode, $advertise;
 
 	$GPS = json_decode($resp, true);
 	if ($GPS === false){
@@ -384,7 +384,7 @@ EOF;
 	if (!strlen($advertise))
 		$advertise = $server;
 
-	if ($magic && !$sock)
+	if ($testmode && !$sock)
 		$part2 = "";
 	else
 		$part2 = <<<EOF
@@ -420,7 +420,7 @@ Use a different server:<br/>
 </tr>
 EOF;
 
-	if ($magic && !$sock)
+	if ($testmode && !$sock)
 		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else {
 		$nsv = count($GPS['skyviews'][0]['satellites']);
