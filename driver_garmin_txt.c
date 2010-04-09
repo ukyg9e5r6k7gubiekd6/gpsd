@@ -282,7 +282,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
     if (session->packet.outbuflen < 54) {
         /* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
         gpsd_report(LOG_WARN, "Message is too short, rejected.\n");
-        return ONLINE_SET;	
+        return ONLINE_IS;	
     }
     
     session->packet.type=GARMINTXT_PACKET;
@@ -317,13 +317,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         session->driver.nmea.date.tm_sec = (int)result;
         session->driver.nmea.subseconds = 0;
         session->newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-        mask |= TIME_SET;
+        mask |= TIME_IS;
     } while (0);
 
     /* assume that possition is unknown; if the position is known we will fix status information later */
     session->newdata.mode = MODE_NO_FIX;
     session->gpsdata.status = STATUS_NO_FIX;
-    mask |= MODE_SET | STATUS_SET | CLEAR_SET | REPORT_SET;
+    mask |= MODE_IS | STATUS_IS | CLEAR_IS | REPORT_IS;
 
     /* process position */
 
@@ -373,7 +373,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
             session->newdata.mode = MODE_NO_FIX;
             session->gpsdata.status = STATUS_NO_FIX;
         }
-        mask |= MODE_SET | STATUS_SET | LATLON_SET;
+        mask |= MODE_IS | STATUS_IS | LATLON_IS;
     } while (0);
 
     /* EPH */
@@ -382,7 +382,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         if (0 != gar_decode((char *) session->packet.outbuffer+31, 3, "", 1.0, &eph)) break;
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
         session->newdata.epx = session->newdata.epy = eph * (1/sqrt(2)) * (GPSD_CONFIDENCE/CEP50_SIGMA);
-        mask |= HERR_SET;
+        mask |= HERR_IS;
     } while (0);
 
     /* Altitude */
@@ -390,7 +390,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double alt;
         if (0 != gar_decode((char *) session->packet.outbuffer+34, 6, "+-", 1.0, &alt)) break;
         session->newdata.altitude = alt;
-        mask |= ALTITUDE_SET;
+        mask |= ALTITUDE_IS;
     } while (0);
 
     /* Velocity */
@@ -403,7 +403,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         track = atan2(ewvel, nsvel) * RAD_2_DEG;  /* is this correct formula? Result is in degrees */
         if (track < 0.0) track += 360.0;
         session->newdata.track = track;
-        mask |= SPEED_SET | TRACK_SET;
+        mask |= SPEED_IS | TRACK_IS;
     } while (0);
 
 
@@ -412,7 +412,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
         double climb;
         if (0 != gar_decode((char *) session->packet.outbuffer+50, 5, "UD", 100.0, &climb)) break;
         session->newdata.climb = climb; /* climb in mps */
-        mask |= CLIMB_SET;
+        mask |= CLIMB_IS;
     } while (0);
 
     gpsd_report(LOG_DATA, "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",

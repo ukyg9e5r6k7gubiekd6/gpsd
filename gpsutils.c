@@ -42,41 +42,6 @@ void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
     fixp->epc = NAN;
 }
 
-#ifdef __UNUSED__
-unsigned int gps_valid_fields(/*@in@*/struct gps_fix_t *fixp)
-{
-    unsigned int valid = 0;
-
-    if (isnan(fixp->time) == 0)
-	valid |= TIME_SET;
-    if (fixp->mode != MODE_NOT_SEEN)
-	valid |= MODE_SET;
-    if (isnan(fixp->latitude) == 0 && isnan(fixp->longitude) == 0)
-	valid |= LATLON_SET;
-    if (isnan(fixp->altitude) == 0)
-	valid |= ALTITUDE_SET;
-    if (isnan(fixp->track) == 0)
-	valid |= TRACK_SET;
-    if (isnan(fixp->speed) == 0)
-	valid |= SPEED_SET;
-    if (isnan(fixp->climb) == 0)
-	valid |= CLIMB_SET;
-    if (isnan(fixp->ept) == 0)
-	valid |= TIMERR_SET;
-    if (isnan(fixp->epx) == 0 && isnan(fixp->epy) == 0)
-	valid |= HERR_SET;
-    if (isnan(fixp->epv) == 0)
-	valid |= VERR_SET;
-    if (isnan(fixp->epd) == 0)
-	valid |= TRACKERR_SET;
-    if (isnan(fixp->eps) == 0)
-	valid |= SPEEDERR_SET;
-    if (isnan(fixp->epc) == 0)
-	valid |= CLIMBERR_SET;
-    return valid;
-}
-#endif /* __UNUSED__ */
-
 void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 		   gps_mask_t transfer,
 		   /*@ in @*/struct gps_fix_t *from)
@@ -84,33 +49,33 @@ void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 {
     if ((NULL == to) || (NULL == from))
 	return;
-    if ((transfer & TIME_SET)!=0)
+    if ((transfer & TIME_IS)!=0)
 	to->time = from->time;
-    if ((transfer & LATLON_SET)!=0) {
+    if ((transfer & LATLON_IS)!=0) {
 	to->latitude = from->latitude;
 	to->longitude = from->longitude;
     }
-    if ((transfer & MODE_SET)!=0)
+    if ((transfer & MODE_IS)!=0)
 	to->mode = from->mode;
-    if ((transfer & ALTITUDE_SET)!=0)
+    if ((transfer & ALTITUDE_IS)!=0)
 	to->altitude = from->altitude;
-    if ((transfer & TRACK_SET)!=0)
+    if ((transfer & TRACK_IS)!=0)
 	to->track = from->track;
-    if ((transfer & SPEED_SET)!=0)
+    if ((transfer & SPEED_IS)!=0)
 	to->speed = from->speed;
-    if ((transfer & CLIMB_SET)!=0)
+    if ((transfer & CLIMB_IS)!=0)
 	to->climb = from->climb;
-    if ((transfer & TIMERR_SET)!=0)
+    if ((transfer & TIMERR_IS)!=0)
 	to->ept = from->ept;
-    if ((transfer & HERR_SET)!=0) {
+    if ((transfer & HERR_IS)!=0) {
 	to->epx = from->epx;
 	to->epy = from->epy;
     }
-    if ((transfer & VERR_SET)!=0)
+    if ((transfer & VERR_IS)!=0)
 	to->epv = from->epv;
-    if ((transfer & SPEEDERR_SET)!=0)
+    if ((transfer & SPEEDERR_IS)!=0)
 	to->eps = from->eps;
-    if ((transfer & CLIMBERR_SET)!=0)
+    if ((transfer & CLIMBERR_IS)!=0)
 	to->epc = from->epc;
 }
 
@@ -606,5 +571,5 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     }
     /*@ +usedef @*/
 
-    return DOP_SET;
+    return DOP_IS;
 }

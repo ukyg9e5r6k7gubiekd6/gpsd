@@ -48,7 +48,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->newdata.mode = MODE_NO_FIX;
-    mask =  ONLINE_SET | MODE_SET | STATUS_SET | CLEAR_SET;
+    mask =  ONLINE_IS | MODE_IS | STATUS_IS | CLEAR_IS;
 
     /* just bail out if this fix is not marked valid */
     if (0 != (pflags & FIX_FLAG_MASK_INVALID) || 0 == (flags & FIXINFO_FLAG_VALID))
@@ -58,7 +58,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     tow = (uint)getleul(buf, 7 + 84);
     t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->newdata.time = t;
-    mask |= TIME_SET;
+    mask |= TIME_IS;
 
     epx = (double)(getlesl(buf, 7 + 96)/100.0);
     epy = (double)(getlesl(buf, 7 + 100)/100.0);
@@ -68,7 +68,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     evz = (double)(getlesl(buf, 7 + 194)/1000.0);
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     epx, epy, epz, evx, evy, evz);
-    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
+    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS  ;
     eph = (double)(getlesl(buf, 7 + 252)/100.0);
     /* eph is a circular error, sqrt(epx**2 + epy**2) */
     session->newdata.epx = session->newdata.epy = eph/sqrt(2);
@@ -77,7 +77,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     session->gpsdata.satellites_used =
 	(int)MAX(getleuw(buf, 7 + 12), getleuw(buf, 7 + 14));
-    mask |= USED_SET ;
+    mask |= USED_IS ;
 
     if (flags & FIX_CONV_DOP_VALID) {
 	clear_dop(&session->gpsdata.dop);
@@ -86,7 +86,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	session->gpsdata.dop.pdop = (double)(getleuw(buf, 7 + 60)/100.0);
 	session->gpsdata.dop.vdop = (double)(getleuw(buf, 7 + 62)/100.0);
 	session->gpsdata.dop.tdop = (double)(getleuw(buf, 7 + 64)/100.0);
-	mask |= DOP_SET;
+	mask |= DOP_IS;
     }
 
     if ((pflags & FIX_FLAG_MASK_INVALID) == 0 && (flags & FIXINFO_FLAG_VALID) != 0) {
@@ -129,7 +129,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 
     if (len < 62) {
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%zu)\n", len);
-	mask = ERROR_SET;
+	mask = ERROR_IS;
     }
     else
     {
@@ -160,7 +160,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	}
 	session->gpsdata.satellites_visible = (int)st;
 	session->gpsdata.satellites_used = (int)nsv;
-	mask = USED_SET | SATELLITE_SET;;
+	mask = USED_IS | SATELLITE_IS;;
 
 	gpsd_report(LOG_DATA,
 		    "PRN_STATUS: time=%.2f visible=%d used=%d mask={USED|SATELLITE}\n",
@@ -182,7 +182,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     if (len != 64) {
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad UTC_IONO_MODEL (len %zu, should be 64)\n", len);
-	return ERROR_SET;
+	return ERROR_IS;
     }
 
     flags = (ushort)getleuw(buf, 7);
@@ -201,7 +201,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
     gpsd_report(LOG_DATA,
 		"UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
 		session->newdata.time);
-    return TIME_SET;
+    return TIME_IS;
 }
 
 static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -212,7 +212,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
     if (len != 64) {
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad SUBFRAME (len %zu, should be 64)\n", len);
-	return ERROR_SET;
+	return ERROR_IS;
     }
 
     flags = (ushort)getleuw(buf, 7 + 4);
@@ -223,7 +223,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
 		flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
     if (flags & SUBFRAME_WORD_FLAG_MASK)
-	return ONLINE_SET | ERROR_SET; // don't try decode an erroneous packet
+	return ONLINE_IS | ERROR_IS; // don't try decode an erroneous packet
 
     /*
      * Timo says "SUBRAME message contains decoded navigation message subframe
@@ -243,7 +243,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session, unsigned cha
     /*@+type@*/
 
     gpsd_interpret_subframe(session, words);
-    return ONLINE_SET;
+    return ONLINE_IS;
 }
 
 /*@ +charint @*/
@@ -266,7 +266,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
     {
     case ITALK_NAV_FIX:
 	gpsd_report(LOG_IO, "iTalk NAV_FIX len %zu\n", len);
-	mask = decode_itk_navfix(session, buf, len) | (CLEAR_SET|REPORT_SET);
+	mask = decode_itk_navfix(session, buf, len) | (CLEAR_IS|REPORT_IS);
 	break;
     case ITALK_PRN_STATUS:
 	gpsd_report(LOG_IO, "iTalk PRN_STATUS len %zu\n", len);
@@ -338,13 +338,13 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 	gpsd_report(LOG_IO, "iTalk unknown packet: id 0x%02x length %zu\n",
 		    type, len);
     }
-    if (mask == ERROR_SET)
+    if (mask == ERROR_IS)
 	mask = 0;
     else
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	   "ITK-%02x",type);
 
-    return mask | ONLINE_SET;
+    return mask | ONLINE_IS;
 }
 /*@ -charint @*/
 

@@ -92,7 +92,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    return DEVICEID_SET;
+		    return DEVICEID_IS;
 		}
 	    }
 #endif /* NON_NMEA_ENABLE */
@@ -101,7 +101,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
 	/* this magic number is derived from observation */
 	if (session->context->enable_ntpshm &&
-	    (st & TIME_SET) != 0 &&
+	    (st & TIME_IS) != 0 &&
 	    (session->gpsdata.fix.time!=session->last_fixtime)) {
 	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);
 	    session->last_fixtime = session->gpsdata.fix.time;
@@ -838,7 +838,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 	session->gpsdata.rtcm2.type, session->gpsdata.rtcm2.length+2,
 	gpsd_hexdump_wrapper(session->packet.isgps.buf,
 	    (session->gpsdata.rtcm2.length+2)*sizeof(isgps30bits_t), LOG_RAW));
-    return RTCM2_SET;
+    return RTCM2_IS;
 }
 
 static const struct gps_type_t rtcm104v2 = {
@@ -877,7 +877,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     gpsd_report(LOG_RAW, "RTCM 3.x packet type %d length %d words: %s\n",
 	type, length, gpsd_hexdump_wrapper(session->packet.inbuffer,
 	    (size_t)(session->gpsdata.rtcm3.length), LOG_RAW));
-    return RTCM3_SET;
+    return RTCM3_IS;
 }
 
 static const struct gps_type_t rtcm104v3 = {
@@ -950,7 +950,7 @@ gps_mask_t processMTK3301(int c UNUSED, char *field[], struct gps_device_t *sess
 {
     int msg, reason;
     gps_mask_t mask;
-    mask = 1; //ONLINE_SET;
+    mask = 1; //ONLINE_IS;
 
     switch(msg = atoi(&(field[0])[4]))
     {
@@ -1055,9 +1055,9 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
     if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode((char *)session->packet.outbuffer, session->packet.outbuflen, &session->aivdm, &session->gpsdata.ais)) {
-	    return ONLINE_SET | AIS_SET;
+	    return ONLINE_IS | AIS_IS;
 	}else
-	    return ONLINE_SET;
+	    return ONLINE_IS;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	return nmea_parse((char *)session->packet.outbuffer, session);

@@ -158,7 +158,8 @@ libgpsd_c_sources = \
 	libgps_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
-	maskdump.c \
+	gps_maskdump.c \
+	gpsd_maskdump.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
 	net_ntrip.c \
@@ -196,7 +197,7 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i maskdump.c
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
@@ -221,10 +222,15 @@ revision.h: Makefile
 	echo '#define' REVISION '"'`date -u +%Y-%m-%dT%H:%M:%S`'"' >revision.h && \
 	chmod a-w revision.h
 
-maskdump.c: gpsd.h-tail maskaudit.py
-	rm -f maskdump.c && \
-	$(PYTHON) maskaudit.py -c >maskdump.c && \
-	chmod a-w maskdump.c
+gps_maskdump.c: gps.h maskaudit.py
+	rm -f gps_maskdump.c && \
+	$(PYTHON) maskaudit.py -c >gps_maskdump.c && \
+	chmod a-w gps_maskdump.c
+
+gpsd_maskdump.c: gpsd.h-tail maskaudit.py
+	rm -f gpsd_maskdump.c && \
+	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
+	chmod a-w gpsd_maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h packet_states.h

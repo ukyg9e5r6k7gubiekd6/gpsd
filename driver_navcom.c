@@ -517,9 +517,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
-	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
-	| TIMERR_SET | DOP_SET;
+    mask = LATLON_IS | ALTITUDE_IS | CLIMB_IS | SPEED_IS | TRACK_IS
+	| TIME_IS | STATUS_IS | MODE_IS | USED_IS | HERR_IS | VERR_IS
+	| TIMERR_IS | DOP_IS;
     gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
 		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
 		"epx=%.2f epy=%.2f epv=%.2f "
@@ -754,7 +754,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR,
 			"Navcom: packet type 0x86: too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
-	    return ERROR_SET;
+	    return ERROR_IS;
 	}
 	prn = getub(buf, n);
 	tracking_status = getub(buf, n+1);
@@ -795,7 +795,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     gpsd_report(LOG_DATA, 
 	       "CS 0x86: visible=%d, used=%d, mask={SATELLITE|STATUS}\n",
 	       session->gpsdata.satellites_visible, session->gpsdata.satellites_used);
-    return SATELLITE_SET | STATUS_SET;
+    return SATELLITE_IS | STATUS_IS;
 }
 
 /* Raw Meas. Data Block */
@@ -864,7 +864,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 static gps_mask_t handle_0xb5(struct gps_device_t *session)
 {
     if(sizeof(double) == 8) {
-	gps_mask_t mask = TIME_SET;
+	gps_mask_t mask = TIME_IS;
 	union long_double l_d;
 	unsigned char *buf = session->packet.outbuffer + 3;
 	uint16_t week = getleuw(buf, 3);
@@ -884,11 +884,11 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	double hrms = sqrt(pow(lat_sd, 2) + pow(lon_sd, 2));
 #endif /*  __UNUSED__ */
 	session->gpsdata.epe = rms*1.96;
-	mask |= PERR_SET;
+	mask |= PERR_IS;
 #ifdef __UNUSED__
 	session->newdata.eph = hrms*1.96;
 	session->newdata.epv = alt_sd*1.96;
-	mask |= (HERR_SET | VERR_SET);
+	mask |= (HERR_IS | VERR_IS);
 #endif /*  __UNUSED__ */
 	/*@ ignore @*//*@ splint is confused @*/
 	session->newdata.time = 
@@ -1050,7 +1050,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 	     engconfstr, asicstr, swvermaj, swvermin, slsbn, dcser, dcclass,
 	     rfcser, rfcclass);
     /*@ +formattype @*/
-    return DEVICEID_SET;
+    return DEVICEID_IS;
     /*@+modobserver@*/
 }
 
@@ -1136,7 +1136,7 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
     case 0xb0:
 	return handle_0xb0(session);
     case 0xb1:
-	return handle_0xb1(session) | (CLEAR_SET | REPORT_SET);
+	return handle_0xb1(session) | (CLEAR_IS | REPORT_IS);
     case 0xb5:
 	return handle_0xb5(session);
     case 0xd3:

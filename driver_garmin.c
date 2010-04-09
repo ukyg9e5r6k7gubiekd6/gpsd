@@ -348,7 +348,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 		, prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin Product Desc: %s\n"
 		, &buf[4]);
-	mask |= DEVICEID_SET;
+	mask |= DEVICEID_IS;
 	gpsd_report(LOG_DATA, "PRODUCT_DATA: subtype=%s mask=%s\n",
 		    session->subtype, gpsd_maskdump(mask));
 	break;
@@ -479,7 +479,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->leap_sec
 	    , pvt->grmn_days);
 
-	mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET | CLEAR_SET | REPORT_SET;
+	mask |= TIME_IS | LATLON_IS | ALTITUDE_IS | STATUS_IS | MODE_IS | SPEED_IS | TRACK_IS | CLIMB_IS | HERR_IS | VERR_IS | PERR_IS | CLEAR_IS | REPORT_IS;
 	gpsd_report(LOG_DATA,
 		    "PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		    "speed=%.2f track=%.2f climb=%.2f "
@@ -559,7 +559,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 
 	}
 	session->gpsdata.skyview_time = NAN;
-	mask |= SATELLITE_SET | USED_SET;
+	mask |= SATELLITE_IS | USED_IS;
 	gpsd_report(LOG_DATA,
 		    "SAT_DATA: visible=%d used=%d mask=%s\n",
 		    session->gpsdata.satellites_visible,

@@ -615,7 +615,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    break;
 		}
 	} else if (!gpsd_next_hunt_setting(session))
-	    return ERROR_SET;
+	    return ERROR_IS;
     }
 
     /* update the scoreboard structure from the GPS */
@@ -630,9 +630,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
 	gpsd_report(LOG_RAW+3, "New data on %s, not yet a packet\n",
 			    session->gpsdata.dev.path);
-	return ONLINE_SET;
+	return ONLINE_IS;
     } else {				/* we have recognized a packet */
-	gps_mask_t received = PACKET_SET, dopmask = 0;
+	gps_mask_t received = PACKET_IS, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
@@ -662,13 +662,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * If this is the first time we've achieved sync on this
 	 * device, or the the driver type has changed for any other
 	 * reason, that's a significant event that the caller needs to
-	 * know about.  Using DEVICE_SET this way is a bit shaky but
+	 * know about.  Using DEVICE_IS this way is a bit shaky but
 	 * we're short of bits in the flag mask (client library uses
 	 * it differently).
 	 */
 	if (first_sync || session->notify_clients) {
 	    session->notify_clients = false;
-	    received |= DEVICE_SET;
+	    received |= DEVICE_IS;
 	}
 
 	/* Get data from current packet into the fix structure */
@@ -681,20 +681,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * These will not overwrite DOPs reported from the packet we just got.
 	 */
 	if (session->newdata.mode > MODE_NO_FIX
-		    && (session->gpsdata.set & SATELLITE_SET) != 0
+		    && (session->gpsdata.set & SATELLITE_IS) != 0
 		    && session->gpsdata.satellites_visible > 0) {
 	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
-	session->gpsdata.set = ONLINE_SET | dopmask | received;
+	session->gpsdata.set = ONLINE_IS | dopmask | received;
 
 	/* copy/merge device data into staging buffers */
 	/*@-nullderef -nullpass@*/
-	if ((session->gpsdata.set & CLEAR_SET)!=0)
+	if ((session->gpsdata.set & CLEAR_IS)!=0)
 	    gps_clear_fix(&session->gpsdata.fix);
 	/* don't downgrade mode if holding previous fix */
 	if (session->gpsdata.fix.mode > session->newdata.mode)
-	    session->gpsdata.set &=~ MODE_SET;
+	    session->gpsdata.set &=~ MODE_IS;
 	//gpsd_report(LOG_PROG,
 	//		"transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
 	gps_merge_fix(&session->gpsdata.fix,
@@ -716,7 +716,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * devices output fix packets on a regular basis, even when unable
 	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
-	if ((session->gpsdata.set & LATLON_SET )!=0 && session->gpsdata.status > STATUS_NO_FIX)
+	if ((session->gpsdata.set & LATLON_IS )!=0 && session->gpsdata.status > STATUS_NO_FIX)
 	    session->context->fixcnt++;
 
 #ifdef TIMING_ENABLE
@@ -728,7 +728,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * driver errors, including 32-vs.-64-bit problems.
 	 */
 	/*@+relaxtypes +longunsignedintegral@*/
-	if ((session->gpsdata.set & TIME_SET)!=0) {
+	if ((session->gpsdata.set & TIME_IS)!=0) {
 	    if (session->newdata.time > time(NULL) + (60 * 60 * 24 * 365))
 		gpsd_report(LOG_ERROR,"date more than a year in the future!\n");
 	    else if (session->newdata.time < 0)

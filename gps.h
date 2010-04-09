@@ -940,11 +940,11 @@ struct gps_data_t {
 #define STATUS_SET	0x00000100u
 #define MODE_SET	0x00000200u
 #define DOP_SET  	0x00000400u
-#define VERSION_SET	0x00000800u	/* only used in client library */
+#define VERSION_SET	0x00000800u
 #define HERR_SET	0x00001000u
 #define VERR_SET	0x00002000u
 #define PERR_SET	0x00004000u
-#define POLICY_SET	0x00008000u	/* only used in client library */
+#define POLICY_SET	0x00008000u
 #define SATELLITE_SET	0x00010000u
 #define RAW_SET		0x00020000u
 #define USED_SET	0x00040000u
@@ -959,9 +959,6 @@ struct gps_data_t {
 #define RTCM3_SET	0x08000000u
 #define AIS_SET 	0x10000000u
 #define PACKET_SET	0x20000000u
-#define CLEAR_SET	0x40000000u	/* sentence starts a reporting cycle */
-#define REPORT_SET	0x80000000u	/* sentence ends a reporting cycle */
-#define DATA_SET	~(ONLINE_SET|PACKET_SET|CLEAR_SET|REPORT_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1055,8 +1052,8 @@ extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  gps_mask_t,
 			  /*@ in @*/struct gps_fix_t *);
-extern unsigned int gps_valid_fields(/*@ in @*/struct gps_fix_t *);
 extern void gps_enable_debug(int, FILE *);
+extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
 
 extern time_t mkgmtime(register struct tm *);
 extern double timestamp(void);

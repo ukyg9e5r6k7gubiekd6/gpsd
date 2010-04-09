@@ -70,7 +70,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     if (data_len != 76)
 	return 0;
 
-    mask = ONLINE_SET;
+    mask = ONLINE_IS;
     gpsd_report(LOG_IO, "oncore NAVSOL - navigation data\n");
 
     flags = (unsigned char)getub(buf, 72);
@@ -87,7 +87,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	session->newdata.mode = MODE_NO_FIX;
 	session->gpsdata.status = STATUS_NO_FIX;
     }
-    mask |= MODE_SET;
+    mask |= MODE_IS;
     /*@ +predboolothers @*/
 
     /* Unless we have seen non-zero utc offset data, the time is GPS time
@@ -106,7 +106,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	session->newdata.time =
 	    (double)timegm(&unpacked_date)+nsec * 1e-9;
 	/*@ +unrecog */
-	mask |= TIME_SET;
+	mask |= TIME_IS;
 	
 #ifdef NTPSHM_ENABLE
 	/* Only update the NTP time if we've seen the leap-seconds data. 
@@ -150,7 +150,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     session->newdata.speed		= speed;
     session->newdata.track		= track;
 
-    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET ;
+    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS ;
 
     gpsd_zero_satellites(&session->gpsdata);
     /* Merge the satellite information from the Bb message. */
@@ -199,7 +199,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 
-    mask |= SATELLITE_SET | USED_SET;
+    mask |= SATELLITE_IS | USED_IS;
     
     /* Some messages can only be polled.  As they are not so
      * important, would be enough to poll e.g. one message per cycle.
@@ -307,7 +307,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_
     }
 
     gpsd_report(LOG_DATA, "SVINFO: mask={SATELLITE}\n");
-    return SATELLITE_SET;
+    return SATELLITE_IS;
 }
 
 /**
@@ -357,7 +357,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t *session, unsigned char *buf, siz
     case ONCTYPE('B','b'):
 	return oncore_msg_svinfo(session, buf, len);
     case ONCTYPE('E','a'):
-	return oncore_msg_navsol(session, buf, len) | (CLEAR_SET | REPORT_SET);
+	return oncore_msg_navsol(session, buf, len) | (CLEAR_IS | REPORT_IS);
     case ONCTYPE('E','n'):
 	return oncore_msg_time_raim(session, buf, len);
     case ONCTYPE('C','j'):

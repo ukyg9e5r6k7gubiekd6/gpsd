@@ -179,7 +179,7 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     /* FIXME: We don't dump the entire state here yet */
 #ifndef USE_QT
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n", 
-		  collect->set, gpsd_maskdump(collect->set));
+		  collect->set, gps_maskdump(collect->set));
 #endif
     if (collect->set & ONLINE_SET)
 	(void)fprintf(debugfp, "ONLINE: %lf\n", collect->online);

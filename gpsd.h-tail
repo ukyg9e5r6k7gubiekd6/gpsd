@@ -207,6 +207,38 @@ typedef enum {
     event_reactivate,
 } event_t;
 
+#define ONLINE_IS	0x00000001u
+#define TIME_IS 	0x00000002u
+#define TIMERR_IS	0x00000004u
+#define LATLON_IS	0x00000008u
+#define ALTITUDE_IS	0x00000010u
+#define SPEED_IS	0x00000020u
+#define TRACK_IS	0x00000040u
+#define CLIMB_IS	0x00000080u
+#define STATUS_IS	0x00000100u
+#define MODE_IS 	0x00000200u
+#define DOP_IS  	0x00000400u
+#define HERR_IS 	0x00001000u
+#define VERR_IS 	0x00002000u
+#define PERR_IS 	0x00004000u
+#define SATELLITE_IS	0x00010000u
+#define RAW_IS  	0x00020000u
+#define USED_IS 	0x00040000u
+#define SPEEDERR_IS	0x00080000u
+#define TRACKERR_IS	0x00100000u
+#define CLIMBERR_IS	0x00200000u
+#define DEVICE_IS	0x00400000u
+#define DEVICELIST_IS	0x00800000u
+#define DEVICEID_IS	0x01000000u
+#define ERROR_IS	0x02000000u
+#define RTCM2_IS	0x04000000u
+#define RTCM3_IS	0x08000000u
+#define AIS_IS  	0x10000000u
+#define PACKET_IS	0x20000000u
+#define CLEAR_IS	0x40000000u	/* sentence starts a reporting cycle */
+#define REPORT_IS	0x80000000u	/* sentence ends a reporting cycle */
+#define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
+
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *type_name;
@@ -257,7 +289,7 @@ struct gps_device_t {
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
     size_t msgbuflen;
     int observed;			/* which packet type`s have we seen? */
-    bool cycle_end_reliable;		/* does driverr signal REPORT_SET */
+    bool cycle_end_reliable;		/* does driver signal REPORT_MASK */
     bool notify_clients;		/* ship DEVICE notification on poll? */
     struct gps_fix_t newdata;		/* where clients put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */

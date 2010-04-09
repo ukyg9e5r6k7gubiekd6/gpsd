@@ -222,7 +222,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     gpsd_report(LOG_INF, "Separation: %f\n", getzword(33) * 1e-2);
 #endif
 
-    mask = TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
+    mask = TIME_IS|LATLON_IS|ALTITUDE_IS|CLIMB_IS|SPEED_IS|TRACK_IS|STATUS_IS|MODE_IS;
     gpsd_report(LOG_DATA, 
 		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
 		session->newdata.time,
@@ -281,7 +281,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 		"1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible, 
 		session->gpsdata.satellites_used);
-    return SATELLITE_SET | USED_SET;
+    return SATELLITE_IS | USED_IS;
 }
 
 static gps_mask_t handle1003(struct gps_device_t *session)
@@ -332,7 +332,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.pdop,
 		session->gpsdata.dop.tdop);
-    return SATELLITE_SET | DOP_SET;
+    return SATELLITE_IS | DOP_IS;
 }
 
 static void handle1005(struct gps_device_t *session UNUSED)
@@ -381,7 +381,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
 	      session->packet.outbuffer,
 	      19, 28);	/* software version field */
     gpsd_report(LOG_DATA, "1011: subtype=%s mask={DEVICEID}\n", session->subtype);
-    return DEVICEID_SET;
+    return DEVICEID_IS;
 }
 
 
@@ -447,7 +447,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     switch (id) {
     case 1000:
-	return handle1000(session) | (CLEAR_SET | REPORT_SET);
+	return handle1000(session) | (CLEAR_IS | REPORT_IS);
     case 1002:
 	return handle1002(session);
     case 1003:

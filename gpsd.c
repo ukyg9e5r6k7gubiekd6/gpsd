@@ -1547,12 +1547,12 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_RAW+1, "polling %d\n", device->gpsdata.gps_fd);
 		changed = gpsd_poll(device);
 
-		if (changed == ERROR_SET) {
+		if (changed == ERROR_IS) {
 		    gpsd_report(LOG_WARN,"packet sniffer failed sync with %s\n",
 				device->gpsdata.dev.path);
 		    deactivate_device(device);
 		    continue;
-		} else if ((changed & ONLINE_SET) == 0) {
+		} else if ((changed & ONLINE_IS) == 0) {
 		    gpsd_report(LOG_WARN, "%s returned error or went offline\n",
 			device->gpsdata.dev.path);
 		    deactivate_device(device);
@@ -1560,7 +1560,7 @@ int main(int argc, char *argv[])
 		}
 
                 /* must have a full packet to continue */
-                if ((changed & PACKET_SET) == 0)
+                if ((changed & PACKET_IS) == 0)
                     continue;
 
 		/* raw hook and relaying functions */
@@ -1612,13 +1612,13 @@ int main(int argc, char *argv[])
 
 		else {
 		    /* we may need to add device to new-style watcher lists */
-		    if ((changed & DEVICE_SET) != 0) {
+		    if ((changed & DEVICE_IS) != 0) {
 			for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
 			    if (sub->policy.watcher && sub->policy.devpath[0] == '\0')
 				(void)awaken(sub, device);
 		    }
 		    /* handle laggy response to a firmware version query */
-		    if ((changed & (DEVICEID_SET|DEVICE_SET)) != 0) {
+		    if ((changed & (DEVICEID_IS|DEVICE_IS)) != 0) {
 			assert(device->device_type != NULL);
 			{
 			    char id2[GPS_JSON_RESPONSE_MAX];
@@ -1628,7 +1628,7 @@ int main(int argc, char *argv[])
 		    }
 		}
 		/* copy each RTCM-104 correction to all GPSes */
-		if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
+		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
 		    struct gps_device_t *gps;
 		    for (gps = devices; gps < devices + MAXDEVICES; gps++)
 			if (gps->device_type != NULL && gps->device_type->rtcm_writer != NULL)
@@ -1644,7 +1644,7 @@ int main(int argc, char *argv[])
 		/*@-nullderef@*/
 		if (sub != NULL && sub->policy.watcher) {
 		    char buf2[GPS_JSON_RESPONSE_MAX*4];
-		    if (changed & DATA_SET) {
+		    if (changed & DATA_IS) {
 			bool report_fix = false;
 			gpsd_report(LOG_PROG,
 				    "Changed mask: %s with %sreliable cycle detection\n", 
@@ -1654,9 +1654,9 @@ int main(int argc, char *argv[])
 			     * Driver returns reliable end of cycle, 
 			     * report only when that is signaled.
 			     */
-			    if ((changed & REPORT_SET)!=0)
+			    if ((changed & REPORT_IS)!=0)
 				report_fix = true;
-			} else if (changed & (LATLON_SET | MODE_SET))
+			} else if (changed & (LATLON_IS | MODE_IS))
 			    /*
 			     * No reliable end of cycle.  Must report
 			     * every time a sentence changes position
@@ -1683,7 +1683,7 @@ int main(int argc, char *argv[])
  				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s",
 					    device->gpsdata.dev.path, buf3);
  				(void)throttled_write(sub, buf3, strlen(buf3));
- 			    } else if ((changed & SATELLITE_SET)!=0) {
+ 			    } else if ((changed & SATELLITE_IS)!=0) {
  				nmea_sky_dump(device,buf3,sizeof(buf3));
  				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s",
 					    device->gpsdata.dev.path, buf3);
@@ -1698,19 +1698,19 @@ int main(int argc, char *argv[])
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
-			    if ((changed & SATELLITE_SET)!=0) {
+			    if ((changed & SATELLITE_IS)!=0) {
 				json_sky_dump(&device->gpsdata,
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #ifdef RTCM104V2_ENABLE
-			    if ((changed & RTCM2_SET) != 0) {
+			    if ((changed & RTCM2_IS) != 0) {
 				rtcm2_json_dump(&device->gpsdata.rtcm2, buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
-			    if ((changed & AIS_SET)!=0) {
+			    if ((changed & AIS_IS)!=0) {
 				aivdm_json_dump(&device->gpsdata.ais, 
 						sub->policy.scaled, 
 						buf2, sizeof(buf2));

@@ -181,12 +181,12 @@ static ssize_t readpkt(void)
     if (changed == 0)
 	longjmp(terminate, TERM_EMPTY_READ);
 
-    if ((changed & ERROR_SET) != 0)
+    if ((changed & ERROR_IS) != 0)
 	longjmp(terminate, TERM_READ_ERROR);
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation -sefparams +charint @*/
-	assert(fwrite(session.packet.outbuffer,		      sizeof(char), session.packet.outbuflen,
+	assert(fwrite(session.packet.outbuffer,	sizeof(char), session.packet.outbuflen,
 		      logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
