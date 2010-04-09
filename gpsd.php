@@ -20,6 +20,12 @@ global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
 global $GPS, $server, $advertise, $port, $magic, $swap_ew, $magic;
 $magic = 1; # leave this set to 1
 
+# If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
+# it may be necessary to increase the value of the
+# suhosin.get.max_value_length parameter to 2048. The imgdata parameter used
+# for displaying the skyview is longer than the default 512 allowed by Suhosin.
+# Debian has the config file at /etc/php5/conf.d/suhosin.ini.
+
 # this script shouldn't take more than a few seconds to run
 set_time_limit(3);
 ini_set('max_execution_time', 3);
