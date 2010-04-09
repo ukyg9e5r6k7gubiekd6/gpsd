@@ -85,7 +85,7 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 	}
 	$GPS = json_decode($resp, true);
 	if ($GPS === false){
-		die("json_decode error...");
+		die("json_decode error: $resp");
 	}
 }
 
@@ -283,7 +283,7 @@ function gen_image($resp){
 
 	$GPS = json_decode($resp, true);
 	if ($GPS['class'] != "POLL"){
-		die("json_decode error...");
+		die("json_decode error: $resp");
 	}
 
 	$im = imageCreate($sz, $sz);
