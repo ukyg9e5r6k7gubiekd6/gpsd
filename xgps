@@ -466,7 +466,10 @@ class Base:
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
-        self.satlist.set_value(self.row_iters[row], column, value)
+        try:
+            self.satlist.set_value(self.row_iters[row], column, value)
+        except IndexError:
+            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, gps.MAXCHANNELS))
 
     def delete_event(self, widget, event, data=None):
         gtk.main_quit()
