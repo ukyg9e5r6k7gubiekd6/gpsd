@@ -221,10 +221,6 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t sirf_binary;
-#endif
-
 #ifdef ALLOW_RECONFIGURE
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
@@ -1109,6 +1105,7 @@ extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern const struct gps_type_t tsip_binary, oncore_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
 extern const struct gps_type_t navcom_binary, superstar2_binary;
+extern const struct gps_type_t sirf_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
