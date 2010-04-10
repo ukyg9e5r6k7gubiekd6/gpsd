@@ -22,6 +22,11 @@ Usual caveats apply; the edited one and all commits after will change IDs,
 and pushing them to a repo with the old commits will wreak havoc.
 Note also that this cavalierly overwrites refs/original.
 
+== fakeserver ==
+
+Analogue of gpsfake. Impersonates a gpsd, spewing specified data to
+clients comnnecting to localhost:2947
+
 == fakecompare ==
 
 Compare the results from running gpsfake on a logfile between this
