@@ -23,6 +23,7 @@
 
 extern const struct gps_type_t zodiac_binary;
 extern const struct gps_type_t ubx_binary;
+extern const struct gps_type_t sirf_binary;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -220,10 +221,6 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	}
     }
 }
-
-#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t sirf_binary;
-#endif
 
 #ifdef ALLOW_RECONFIGURE
 static void nmea_mode_switch(struct gps_device_t *session, int mode)

@@ -1343,6 +1343,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
     /*@ +formatcode +mustfreefresh @*/
 #undef SHOW_BOOL
 }
+#endif /* defined(AIVDM_ENABLE) */
 
 #ifdef COMPASS_ENABLE
 void json_att_dump(const struct gps_data_t *gpsdata, 
@@ -1446,6 +1447,5 @@ gpsdata->attitude.roll_st);
 }
 #endif /* COMPASS_ENABLE */
 
-#endif /* defined(AIVDM_ENABLE) */
 
 /* gpsd_json.c ends here */

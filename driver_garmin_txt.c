@@ -298,25 +298,25 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
 
         /* year */
         if (0 != gar_int_decode(buf+0, 2, 0, 99, &result)) break;
-        session->driver.nmea.date.tm_year = (CENTURY_BASE + (int)result) - 1900;
+        session->driver.garmintxt.date.tm_year = (CENTURY_BASE + (int)result) - 1900;
         /* month */
         if (0 != gar_int_decode(buf+2, 2, 1, 12, &result)) break;
-        session->driver.nmea.date.tm_mon = (int)result-1;
+        session->driver.garmintxt.date.tm_mon = (int)result-1;
         /* day */
         if (0 != gar_int_decode(buf+4, 2, 1, 31, &result)) break;
-        session->driver.nmea.date.tm_mday = (int)result;
+        session->driver.garmintxt.date.tm_mday = (int)result;
         /* hour */
         if (0 != gar_int_decode(buf+6, 2, 0, 23, &result)) break;
-        session->driver.nmea.date.tm_hour = (int)result;  /* mday update?? */
+        session->driver.garmintxt.date.tm_hour = (int)result;  /* mday update?? */
         /* minute */
         if (0 != gar_int_decode(buf+8, 2, 0, 59, &result)) break;
-        session->driver.nmea.date.tm_min = (int)result;
+        session->driver.garmintxt.date.tm_min = (int)result;
         /* second */
         /* second value can be even 60, occasional leap second */
         if (0 != gar_int_decode(buf+10, 2, 0, 60, &result)) break; 
-        session->driver.nmea.date.tm_sec = (int)result;
-        session->driver.nmea.subseconds = 0;
-        session->newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+        session->driver.garmintxt.date.tm_sec = (int)result;
+        session->driver.garmintxt.subseconds = 0;
+        session->newdata.time = (double)mkgmtime(&session->driver.garmintxt.date)+session->driver.garmintxt.subseconds;
         mask |= TIME_IS;
     } while (0);
 

@@ -627,10 +627,12 @@ static void nextstate(struct gps_packet_t *lexer,
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE) || defined(NAVCOM_ENABLE)
 	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
+#if defined(TSIP_ENABLE)
 	if (c >= 0x13) {
 	    lexer->state = TSIP_PAYLOAD;
 	    break;
 	}
+#endif /* TSIP_ENABLE */
 	if (c == DLE) {
 	    lexer->state = GROUND_STATE;
 	    break;

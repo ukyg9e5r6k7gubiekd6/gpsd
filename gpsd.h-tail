@@ -326,6 +326,12 @@ struct gps_device_t {
 #endif /* GPSCLOCK_ENABLE */
 	} nmea;
 #endif /* NMEA_ENABLE */
+#ifdef GARMINTXT_ENABLE
+	struct {
+	    struct tm date;		/* date part of last sentence time */
+	    double subseconds;		/* subsec part of last sentence time */
+	} garmintxt;
+#endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef SIRF_ENABLE
 	struct {

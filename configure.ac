@@ -651,6 +651,7 @@ if test x"$ac_aivdm" = "xyes"; then
 else
   AC_MSG_RESULT([no])
 fi
+AM_CONDITIONAL([HAVE_AIVDM], [test "$ac_aivdm" = "yes"])
 
 dnl check for latency timing support
 AC_ARG_ENABLE(timing,
