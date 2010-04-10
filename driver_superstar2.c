@@ -414,7 +414,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf, siz
 
 /* request for ionospheric and utc time data #75 */
 /*@ +charint @*/
-static char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
+static unsigned char iono_utc_msg[] =	{0x01, 0x4b, 0xb4, 0x00, 0x00, 0x01};
 /*@ -charint @*/
 
 
@@ -451,7 +451,7 @@ superstar2_msg_ephemeris(struct gps_device_t *session, unsigned char *buf, size_
 
     /* ephemeris data updates fairly slowly, but when it does, poll UTC */
     if ((time(NULL) - session->driver.superstar2.last_iono) > 60)
-	(void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+	(void)superstar2_write(session, (char *)iono_utc_msg, sizeof(iono_utc_msg));
 
     return ONLINE_IS;
 }
@@ -532,45 +532,45 @@ superstar2_dispatch(struct gps_device_t *session, unsigned char *buf,
 /*@ +charint @*/
 /* canned config messages */
 /* Initiate Link ID# 63 */
-static char link_msg[] = {0x01, 0x3f, 0xc0, 0x08,
+static unsigned char link_msg[] = {0x01, 0x3f, 0xc0, 0x08,
 	    0x55, 0x47, 0x50, 0x53, 0x2d, 0x30, 0x30, 0x30,
 	    0x00, 0x00};
 
 /* Request Hardware/Software Identification ID# 45 */
-static char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
+static unsigned char version_msg[] = {0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01};
 /*@ -charint @*/
 
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup)
     {
-	(void)superstar2_write(session, link_msg, sizeof(link_msg));
+	(void)superstar2_write(session, (char *)link_msg, sizeof(link_msg));
 	(void)usleep(320000);
-	(void)superstar2_write(session, version_msg, sizeof(version_msg));
+	(void)superstar2_write(session, (char *)version_msg, sizeof(version_msg));
 	return;
     }
 
     /* query firmware version */
     if (event == event_identified)
-	(void)superstar2_write(session, version_msg, sizeof(version_msg));
+	(void)superstar2_write(session, (char *)version_msg, sizeof(version_msg));
 
-    /* FIXME: check to see if this really needs to be resent on reactivation */ 
+    /* FIXME: check to see if this really needs to be resent on reactivation */
     if (event == event_identified || event == event_reactivate) {
 	/*@ +charint @*/
-	char svinfo_msg[] =	{0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
-	char timing_msg[] =	{0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
-	char navsol_lla_msg[] =	{0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
-	char ephemeris_msg[] =	{0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
-	char measurement_msg[] =	{0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
+	unsigned char svinfo_msg[] = {0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01};
+	unsigned char timing_msg[] = {0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01};
+	unsigned char navsol_lla_msg[] = {0x01, 0x94, 0x6b, 0x00, 0x00, 0x01};
+	unsigned char ephemeris_msg[] = {0x01, 0x96, 0x69, 0x00, 0x00, 0x01};
+	unsigned char measurement_msg[] = {0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01};
 	/*@ -charint @*/
 
-	(void)superstar2_write(session, timing_msg, sizeof(timing_msg));
-	(void)superstar2_write(session, measurement_msg, sizeof(measurement_msg));
-	(void)superstar2_write(session, svinfo_msg, sizeof(svinfo_msg));
-	(void)superstar2_write(session, navsol_lla_msg, sizeof(navsol_lla_msg));
-	(void)superstar2_write(session, version_msg, sizeof(version_msg));
-	(void)superstar2_write(session, ephemeris_msg, sizeof(ephemeris_msg));
-	(void)superstar2_write(session, iono_utc_msg, sizeof(iono_utc_msg));
+	(void)superstar2_write(session, (char *)timing_msg, sizeof(timing_msg));
+	(void)superstar2_write(session, (char *)measurement_msg, sizeof(measurement_msg));
+	(void)superstar2_write(session, (char *)svinfo_msg, sizeof(svinfo_msg));
+	(void)superstar2_write(session, (char *)navsol_lla_msg, sizeof(navsol_lla_msg));
+	(void)superstar2_write(session, (char *)version_msg, sizeof(version_msg));
+	(void)superstar2_write(session, (char *)ephemeris_msg, sizeof(ephemeris_msg));
+	(void)superstar2_write(session, (char *)iono_utc_msg, sizeof(iono_utc_msg));
 	session->driver.superstar2.last_iono = time(NULL);
     }
 }
@@ -625,12 +625,12 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 	return false;
     } else {
 	/*@ +charint @*/
-	char speed_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
+	unsigned char speed_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
 	speed_msg[4] = (char)(speed / 300);
 	/*@ -charint @*/
-	return (superstar2_write(session, speed_msg, 7) == 7);
+	return (superstar2_write(session, (char *)speed_msg, 7) == 7);
     }
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -639,11 +639,11 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
 	/*@ +charint @*/
-	char mode_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
+	unsigned char mode_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
 	mode_msg[4] = (char)(session->gpsdata.dev.baudrate / 300);
-	(void)superstar2_write(session, mode_msg, 7);
+	(void)superstar2_write(session, (char *)mode_msg, 7);
 	/*@ -charint @*/
     } else {
 	session->back_to_nmea = false;

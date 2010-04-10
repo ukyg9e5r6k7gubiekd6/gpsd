@@ -25,9 +25,9 @@ static char enableBb[]		= { 'B', 'b', 1 };
 static char getfirmware[] 	= { 'C', 'j' };
 static char enableEn[]		= { 'E', 'n', 1, 0, 100, 100, 1, 0,0,0,0,0,0,0,0,0,0 };
 /*static char enableAt2[] 	= { 'A', 't', 2, };*/
-static char pollAs[]		= { 'A', 's', 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff };
-static char pollAt[]		= { 'A', 't', 0xff };
-static char pollAy[]		= { 'A', 'y', 0xff, 0xff, 0xff, 0xff };
+static unsigned char pollAs[]	= { 'A', 's', 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff };
+static unsigned char pollAt[]	= { 'A', 't', 0xff };
+static unsigned char pollAy[]	= { 'A', 'y', 0xff, 0xff, 0xff, 0xff };
 static char pollBo[]		= { 'B', 'o', 0x01 };
 /*@ -charint @*/
 
@@ -204,9 +204,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
     /* Some messages can only be polled.  As they are not so
      * important, would be enough to poll e.g. one message per cycle.
      */
-    (void)oncore_control_send(session,pollAs,sizeof(pollAs));
-    (void)oncore_control_send(session,pollAt,sizeof(pollAt));
-    (void)oncore_control_send(session,pollAy,sizeof(pollAy));
+    (void)oncore_control_send(session,(char *)pollAs,sizeof(pollAs));
+    (void)oncore_control_send(session,(char *)pollAt,sizeof(pollAt));
+    (void)oncore_control_send(session,(char *)pollAy,sizeof(pollAy));
     (void)oncore_control_send(session,pollBo,sizeof(pollBo));
 
     gpsd_report(LOG_DATA, "NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f mode=%d status=%d visible=%d used=%d mask=%s\n",

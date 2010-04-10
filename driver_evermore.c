@@ -431,7 +431,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 {
     char tmp8;
     /*@ +charint */
-    char evrm_nmeaout_config[] = {
+    unsigned char evrm_nmeaout_config[] = {
 	    0x8e,	/*  0: msg ID, NMEA Message Control */
 	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
 	    0x01,       /*  2: nmea checksum no(0), yes(1) */
@@ -450,7 +450,8 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
     evrm_nmeaout_config[6] = tmp8;           /* GPGSV, 1s or 5s */
     /*@i1@*/tmp8 = (mode == 2) ? 1 : 0;   /* NMEA PEMT101 */
     evrm_nmeaout_config[9] = tmp8;           /* PEMT101, 1s or 0s */
-    return (evermore_control_send(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config)) != -1);
+    return (evermore_control_send(session, (char *)evrm_nmeaout_config,
+				  sizeof(evrm_nmeaout_config)) != -1);
 }
 
 static void evermore_mode(struct gps_device_t *session, int mode)
@@ -497,7 +498,7 @@ static bool evermore_speed(struct gps_device_t *session,
 	return false;
     } else {
 	unsigned char tmp8;
-	char msg[] = {
+	unsigned char msg[] = {
 	    0x89,          /*  0: msg ID, Serial Port Configuration */
 	    0x01,          /*  1: bit 0 cfg for main serial, bit 1 cfg for DGPS port */
 	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
@@ -511,7 +512,7 @@ static bool evermore_speed(struct gps_device_t *session,
 	default: return false;
 	}
 	msg[2] = tmp8;
-	return (evermore_control_send(session, msg, sizeof(msg)) != -1);
+	return (evermore_control_send(session, (char *)msg, sizeof(msg)) != -1);
     }
     /*@ +type @*/
 }
@@ -520,7 +521,7 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
     /*@ +charint @*/
-    char evrm_rate_config[] = {
+    unsigned char evrm_rate_config[] = {
 	    0x84,    /* 1: msg ID, Operating Mode Configuration */
 	    0x02,    /* 2: normal mode with 1PPS */
 	    0x00,    /* 3: navigation update rate */
@@ -531,8 +532,9 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 	gpsd_report(LOG_ERROR, "valid rate range is 1-10.\n");
 	return false;
     } else {
-	evrm_rate_config[2] = (char)trunc(rate);
-	return (evermore_control_send(session, evrm_rate_config, sizeof(evrm_rate_config)) != -1);
+	evrm_rate_config[2] = (unsigned char)trunc(rate);
+	return (evermore_control_send(session, (char *)evrm_rate_config,
+				      sizeof(evrm_rate_config)) != -1);
     }
     /*@ -charint @*/
 }
