@@ -1430,7 +1430,6 @@ int main(int argc, char *argv[])
 
 	if (debuglevel >= LOG_SPIN) {
 	    char dbuf[BUFSIZ];
-	    int i;
 	    dbuf[0] = '\0';
 	    for (i = 0; i < FD_SETSIZE; i++)
 		if (FD_ISSET(i, &all_fds))
@@ -1439,7 +1438,7 @@ int main(int argc, char *argv[])
 				   "%d ", i);
 	    if (strlen(dbuf) > 0)
 		dbuf[strlen(dbuf)-1] = '\0';
-	    strlcat(dbuf, "} -> {", BUFSIZ);
+	    (void)strlcat(dbuf, "} -> {", BUFSIZ);
 	    for (i = 0; i < FD_SETSIZE; i++)
 		if (FD_ISSET(i, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf),
