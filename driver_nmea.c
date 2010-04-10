@@ -685,26 +685,30 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 
     //gpsd_zero_satellites(&session->gpsdata);
 
-    /*
-     * Heading maps to track.
-     * Pitch maps to climb.
-     * Roll maps to speed.
-     * Dip maps to altitude.
-     */
     session->newdata.time = timestamp();
-    session->newdata.track = atof(field[1]);
-    session->gpsdata.compass.headingStatus = *field[2];
-    session->newdata.climb = atof(field[3]);
-    session->gpsdata.compass.pitchStatus = *field[4];
-    session->newdata.speed = atof(field[5]);
-    session->gpsdata.compass.rollStatus = *field[6];
-    session->newdata.altitude = atof(field[7]);
-    session->gpsdata.compass.horzField = atof(field[8]);
-    session->newdata.mode = MODE_3D;
-    mask |= (STATUS_IS | MODE_IS | TRACK_IS | SPEED_IS | CLIMB_IS | ALTITUDE_IS);
-    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
+    session->newdata.attitude.heading = atof(field[1]);
+    session->gpsdata.attitude.headingStatus = *field[2];
+    session->newdata.attitude.pitch = atof(field[3]);
+    session->gpsdata.attitude.pitchStatus = *field[4];
+    session->newdata.attitude.roll = atof(field[5]);
+    session->gpsdata.attitude.rollStatus = *field[6];
+    session->newdata.attitude.yaw = NaN;
+    session->gpsdata.attitude.yawStatus = '\0';
+    session->gpsdata.attitude.dip = atof(field[7]);
+    session->gpsdata.attitude.horzField = NaN;
+    session->gpsdata.attitude.magnetic_length = NaN;
+    session->gpsdata.attitude.magnetic_field_x = NaN;
+    session->gpsdata.attitude.magnetic_field_y = NaN;
+    session->gpsdata.attitude.magnetic_field_z = NaN;
+    session->gpsdata.attitude.acceleration_length = NaN;
+    session->gpsdata.attitude.acceleration_field_x = NaN;
+    session->gpsdata.attitude.acceleration_field_y = NaN;
+    session->gpsdata.attitude.acceleration_field_z = NaN;
+    session->gpsdata.attitude.gyro_output_x = NaN;
+    session->gpsdata.attitude.gyro_output_y = NaN;
+    mask |= ATT_IS;
 
-    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->newdata.track, session->gpsdata.compass.headingStatus);
+    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->newdata.attitude.heading, session->gpsdata.attitude.headingStatus);
     return mask;
 }
 #endif /* TNT_ENABLE */
@@ -738,32 +742,33 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     //gpsd_zero_satellites(&session->gpsdata);
 
     /*
-     * Heading maps to track.
-     * Pitch maps to climb.
-     * Roll maps to speed.
      * Depth maps to altitude.
      */
     session->newdata.time = timestamp();
-    session->newdata.track = atof(field[1]);
-    session->newdata.climb = atof(field[2]);
-    session->newdata.speed = atof(field[3]);
-    session->gpsdata.compass.temperature = atof(field[4]);
+    session->newdata.attitude.heading = atof(field[1]);
+    session->attitude.headingStatus = '\0';
+    session->newdata.attitude.pitch = atof(field[2]);
+    session->attitude.pitchStatus = '\0';
+    session->newdata.attitude.roll = atof(field[3]);
+    session->attitude.rollStatus = '\0';
+    session->newdata.attitude.yaw = '\0';
+    session->attitude.yawStatus = '\0';
+    session->newdata.attitude.dip = NaN;
+    session->gpsdata.attitude.temperature = atof(field[4]);
     session->newdata.altitude = atof(field[5]);
-    session->gpsdata.compass.magnetic_length = atof(field[6]);
-    session->gpsdata.compass.magnetic_field_x = atof(field[7]);
-    session->gpsdata.compass.magnetic_field_y = atof(field[8]);
-    session->gpsdata.compass.magnetic_field_z = atof(field[9]);
-    session->gpsdata.compass.acceleration_length = atof(field[10]);
-    session->gpsdata.compass.acceleration_field_x = atof(field[11]);
-    session->gpsdata.compass.acceleration_field_y = atof(field[12]);
-    session->gpsdata.compass.acceleration_field_z = atof(field[13]);
-    session->gpsdata.compass.gyro_output_x = atof(field[15]);
-    session->gpsdata.compass.gyro_output_y = atof(field[16]);
-    session->newdata.mode = MODE_3D;
-    mask |= (STATUS_IS | MODE_IS | TRACK_IS | SPEED_IS | CLIMB_IS | ALTITUDE_IS);
-    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
+    session->gpsdata.attitude.magnetic_length = atof(field[6]);
+    session->gpsdata.attitude.magnetic_field_x = atof(field[7]);
+    session->gpsdata.attitude.magnetic_field_y = atof(field[8]);
+    session->gpsdata.attitude.magnetic_field_z = atof(field[9]);
+    session->gpsdata.attitude.acceleration_length = atof(field[10]);
+    session->gpsdata.attitude.acceleration_field_x = atof(field[11]);
+    session->gpsdata.attitude.acceleration_field_y = atof(field[12]);
+    session->gpsdata.attitude.acceleration_field_z = atof(field[13]);
+    session->gpsdata.attitude.gyro_output_x = atof(field[15]);
+    session->gpsdata.attitude.gyro_output_y = atof(field[16]);
+    mask |= (ATT_IS | ALTITUDE_IS);
 
-    gpsd_report(LOG_RAW, "Heading %lf.\n", session->newdata.track);
+    gpsd_report(LOG_RAW, "Heading %lf.\n", session->newdata.attitude.heading);
     return mask;
 }
 #endif /* OCEANSERVER_ENABLE */

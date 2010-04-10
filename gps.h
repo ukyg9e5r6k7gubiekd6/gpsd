@@ -828,7 +828,12 @@ struct ais_t
     };
 };
 
-struct compass_t {
+struct attitude_t {
+    double heading;
+    double pitch;
+    double roll;
+    double yaw;
+    double dip;
     double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
     double magnetic_field_x;
     double magnetic_field_y;
@@ -844,6 +849,7 @@ struct compass_t {
     char headingStatus;
     char pitchStatus;
     char rollStatus;
+    char yawStatus;
     double horzField;   /* Magnitude of horizontal magnetic field */
 };
 
@@ -959,6 +965,8 @@ struct gps_data_t {
 #define RTCM3_SET	0x08000000u
 #define AIS_SET 	0x10000000u
 #define PACKET_SET	0x20000000u
+#define ATTITUDE_SET	0x40000000u
+#define AUXDATA_SET	0x80000000u	/* reserved */
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1015,7 +1023,7 @@ struct gps_data_t {
 	struct rtcm2_t	rtcm2;
 	struct rtcm3_t	rtcm3;
 	struct ais_t ais;
-	struct compass_t compass;
+	struct attitude_t attitude;
 	struct rawdata_t raw;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;

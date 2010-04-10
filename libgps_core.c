@@ -888,7 +888,7 @@ int main(int argc, char *argv[])
 			 sizeof(struct rtcm2_t),
 			 sizeof(struct rtcm3_t),
 			 sizeof(struct ais_t),
-			 sizeof(struct compass_t),
+			 sizeof(struct attitude_t),
 			 sizeof(struct rawdata_t),
 			 sizeof(collect->devices),
 			 sizeof(struct policy_t),
