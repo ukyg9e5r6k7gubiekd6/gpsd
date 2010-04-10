@@ -231,9 +231,10 @@ typedef enum {
 #define RTCM2_IS	0x00400000u
 #define RTCM3_IS	0x00800000u
 #define AIS_IS  	0x01000000u
-#define PACKET_IS	0x02000000u
-#define CLEAR_IS	0x04000000u	/* sentence starts a reporting cycle */
-#define REPORT_IS	0x08000000u	/* sentence ends a reporting cycle */
+#define ATT_IS		0x02000000u
+#define PACKET_IS	0x04000000u
+#define CLEAR_IS	0x08000000u	/* sentence starts a reporting cycle */
+#define REPORT_IS	0x10000000u	/* sentence ends a reporting cycle */
 #define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
 
 struct gps_type_t {
