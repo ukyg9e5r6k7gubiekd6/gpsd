@@ -601,6 +601,8 @@ static const struct gps_type_t earthmate = {
  *
  **************************************************************************/
 
+/* for now, only supporting run mode */
+#ifdef SAMPLE_MODE_SUPPORTED
 enum {
 #include "packet_states.h"
 };
@@ -647,7 +649,7 @@ static int tnt_send(int fd, const char *fmt, ... )
 
 #define TNT_SNIFF_RETRIES       100
 /*
- * The True North compass won't start talking
+ * In sample mode, the True North compass won't start talking
  * unless you ask it to. So to identify it we
  * need to query for its ID string.
  */
@@ -734,17 +736,18 @@ static bool tnt_probe(struct gps_device_t *session)
       }
   return false;
 }
+#endif /* SAMPLE_MODE_SUPPORTED */
 
 static const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .trigger	    = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
-    .probe_detect   = tnt_probe,	/* probe by sending ID query */
+    .probe_detect   = NULL,		/* probe by sending ID query */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
-    .event_hook     = tnt_event_hook,	/* lifetime event handler */
+    .event_hook     = NULL,		/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */

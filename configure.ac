@@ -507,8 +507,8 @@ fi
 dnl check for True North support
 AC_ARG_ENABLE(tnt,
   AC_HELP_STRING([--enable-tnt],
-		 [enable True North Technologies support]),
-  [ac_tnt=$enableval], [ac_tnt=no])
+		 [disable True North Technologies support]),
+  [ac_tnt=$enableval], [ac_tnt=yes])
 AC_MSG_CHECKING([for True North support])
 if test x"$ac_tnt" = "xyes"; then
     ac_nmea=yes
@@ -521,9 +521,9 @@ fi
 
 dnl check for OceanServer support
 AC_ARG_ENABLE(oceanserver,
-  AC_HELP_STRING([--enable-oceanserver],
-		 [enable OceanServer support]),
-  [ac_oceanserver=$enableval], [ac_oceanserver=no])
+  AC_HELP_STRING([--disble-oceanserver],
+		 [disable OceanServer support]),
+  [ac_oceanserver=$enableval], [ac_oceanserver=yes])
 AC_MSG_CHECKING([for OceanServer support])
 if test x"$ac_oceanserver" = "xyes"; then
     ac_nmea=yes
