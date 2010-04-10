@@ -628,7 +628,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 	unsigned char speed_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
-	speed_msg[4] = (char)(speed / 300);
+	speed_msg[4] = (unsigned char)(speed / 300);
 	/*@ -charint @*/
 	return (superstar2_write(session, (char *)speed_msg, 7) == 7);
     }
@@ -642,7 +642,7 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 	unsigned char mode_msg[] = {0x01, 0x48, 0xB7, 0x01, 0x00, 0x00, 0x00};
 
 	/* high bit 0 in the mode word means set NMEA mode */
-	mode_msg[4] = (char)(session->gpsdata.dev.baudrate / 300);
+	mode_msg[4] = (unsigned char)(session->gpsdata.dev.baudrate / 300);
 	(void)superstar2_write(session, (char *)mode_msg, 7);
 	/*@ -charint @*/
     } else {

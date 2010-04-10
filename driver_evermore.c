@@ -429,7 +429,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 /* mode = 1 : gpsd best */
 /* mode = 2 : EverMore search, activate PEMT101 message */
 {
-    char tmp8;
+    unsigned char tmp8;
     /*@ +charint */
     unsigned char evrm_nmeaout_config[] = {
 	    0x8e,	/*  0: msg ID, NMEA Message Control */
