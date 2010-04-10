@@ -75,8 +75,6 @@ void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 	to->epv = from->epv;
     if ((transfer & SPEEDERR_IS)!=0)
 	to->eps = from->eps;
-    if ((transfer & CLIMBERR_IS)!=0)
-	to->epc = from->epc;
 }
 
 double timestamp(void)

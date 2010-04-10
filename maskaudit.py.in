@@ -16,7 +16,7 @@ class SourceExtractor:
         self.sourcefile = sourcefile
         self.suffix = suffix
         self.clientside = clientside
-        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c")
+        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c") + ["gpsmon.c"] + glob.glob("monitor_*.c")
         self.masks = []
         self.primitive_masks = []
         for line in file(self.sourcefile):
@@ -27,7 +27,7 @@ class SourceExtractor:
                     self.primitive_masks.append((fields[1], fields[2]))
     
     def in_library(self, flag):
-        (status, output) = commands.getstatusoutput("grep %s libgps_core.c libgps_json.c" % flag)
+        (status, output) = commands.getstatusoutput("grep %s libgps_core.c libgps_json.c gpsctl.c" % flag)
         return status == 0
 
     def in_daemon(self, flag):
@@ -42,8 +42,8 @@ class SourceExtractor:
     
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "cdp")
-        pythonize = False
+        (options, arguments) = getopt.getopt(sys.argv[1:], "cdpt")
+        pythonize = tabulate = False
         clientgen = daemongen = False
         for (switch, val) in options:
             if (switch == '-p'):
@@ -52,24 +52,28 @@ if __name__ == '__main__':
                 clientgen = True
             if (switch == '-d'):
                 daemongen = True
+            if (switch == '-t'):
+                tabulate = True
 
         if clientgen:
             source = SourceExtractor("./gps.h", "_SET", clientside=True)
             prefix = "gps"
+            banner = "Library"
         elif daemongen:
             source = SourceExtractor("./gpsd.h", "_IS", clientside=False)
             prefix = "gpsd"
+            banner = "Daemon"
 
-        #if tabulate:
-        #    print "%-14s	%8s %8s" % (" ", "Library", "Daemon")
-        #    for (flag, value) in source.masks:
-        #        print "%-14s	%8s %8s" % (flag, source.in_library(flag), source.in_daemon(flag))
+        if tabulate:
+            print "%-14s	%8s %8s" % (" ", "Library", banner)
+            for (flag, value) in source.masks:
+                print "%-14s	%8s" % (flag, source.relevant(flag))
         if pythonize:
             for (d, v) in source.masks:
                 if v[-1] == 'u':
                     v = v[:-1]
                 print "%-15s\t= %s" % (d, v)
-        if not pythonize:
+        if not pythonize and not tabulate:
             maxout = 0
             for (d, v) in source.primitive_masks:
                 if source.relevant(d):
