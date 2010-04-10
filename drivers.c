@@ -23,6 +23,7 @@
 
 extern const struct gps_type_t zodiac_binary;
 extern const struct gps_type_t ubx_binary;
+extern const struct gps_type_t sirf_binary;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -1105,7 +1106,6 @@ extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern const struct gps_type_t tsip_binary, oncore_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
 extern const struct gps_type_t navcom_binary, superstar2_binary;
-extern const struct gps_type_t sirf_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
