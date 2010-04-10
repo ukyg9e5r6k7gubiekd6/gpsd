@@ -846,11 +846,10 @@ struct attitude_t {
     double gyro_output_y;
     double temperature;
     /* compass status -- TrueNorth (and any similar) devices only */
-    char headingStatus;
-    char pitchStatus;
-    char rollStatus;
-    char yawStatus;
-    double horzField;   /* Magnitude of horizontal magnetic field */
+    char heading_st;
+    char pitch_st;
+    char roll_st;
+    char yaw_st;
 };
 
 struct dop_t {

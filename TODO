@@ -13,15 +13,6 @@ See also the GPSD bug tracker at
 
 ** Bugs in gpsd and its clients:
 
-*** Support for the True North magnetic compass is currently broken
-
-Massimo Burcheri reported that it broke somewhere between rev 3654 and
-3722.  We think this is a shallow bug, but we can't fix it without
-test hardware.  If TNT support is a problem for you, and you can't
-fix the driver yourself and send us the patch, contact Bill Powell 
-<bpowell@tntc.com> at True North Technologies and tell him he needs
-to reverse his refusal to send us an eval unit.
-
 *** time reference instability on loss of fix
 
 [23:14]	<agcme>	I've discovered when the gpsd feed to ntpd goes crazy

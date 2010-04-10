@@ -661,9 +661,11 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
      * This may also apply to some Honeywell units since they may have been
      * designed by True North.
 
+        $PTNTHTM,14223,N,169,N,-43,N,13641,2454*15
+
 	HTM,x.x,a,x.x,a,x.x,a,x.x,x.x*hh<cr><lf>
 	Fields in order:
-	1. True heading in degrees
+	1. True heading (compass measurement + deviation + variation)
 	2. magnetometer status character:
 		C = magnetometer calibration alarm
 		L = low alarm
@@ -683,21 +685,17 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     gps_mask_t mask;
     mask = ONLINE_IS;
 
-    //gpsd_zero_satellites(&session->gpsdata);
-
-    session->newdata.time = timestamp();
     session->gpsdata.attitude.heading = atof(field[1]);
-    session->gpsdata.attitude.headingStatus = *field[2];
+    session->gpsdata.attitude.heading_st = *field[2];
     session->gpsdata.attitude.pitch = atof(field[3]);
-    session->gpsdata.attitude.pitchStatus = *field[4];
+    session->gpsdata.attitude.pitch_st = *field[4];
     session->gpsdata.attitude.roll = atof(field[5]);
-    session->gpsdata.attitude.rollStatus = *field[6];
+    session->gpsdata.attitude.roll_st = *field[6];
     session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yawStatus = '\0';
+    session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = atof(field[7]);
-    session->gpsdata.attitude.horzField = NAN;
     session->gpsdata.attitude.magnetic_length = NAN;
-    session->gpsdata.attitude.magnetic_field_x = NAN;
+    session->gpsdata.attitude.magnetic_field_x = atof(field[8]);
     session->gpsdata.attitude.magnetic_field_y = NAN;
     session->gpsdata.attitude.magnetic_field_z = NAN;
     session->gpsdata.attitude.acceleration_length = NAN;
@@ -706,9 +704,12 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     session->gpsdata.attitude.acceleration_field_z = NAN;
     session->gpsdata.attitude.gyro_output_x = NAN;
     session->gpsdata.attitude.gyro_output_y = NAN;
-    mask |= ATT_IS;
+    mask |= (ATT_IS);
 
-    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->gpsdata.attitude.heading, session->gpsdata.attitude.headingStatus);
+    gpsd_report(LOG_RAW, "time %.3f, heading %lf (%c).\n", 
+		session->newdata.time,
+		session->gpsdata.attitude.heading, 
+		session->gpsdata.attitude.heading_st);
     return mask;
 }
 #endif /* TNT_ENABLE */
@@ -744,15 +745,14 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     /*
      * Depth maps to altitude.
      */
-    session->newdata.time = timestamp();
     session->gpsdata.attitude.heading = atof(field[1]);
-    session->gpsdata.attitude.headingStatus = '\0';
+    session->gpsdata.attitude.heading_st = '\0';
     session->gpsdata.attitude.pitch = atof(field[2]);
-    session->gpsdata.attitude.pitchStatus = '\0';
+    session->gpsdata.attitude.pitch_st = '\0';
     session->gpsdata.attitude.roll = atof(field[3]);
-    session->gpsdata.attitude.rollStatus = '\0';
+    session->gpsdata.attitude.roll_st = '\0';
     session->gpsdata.attitude.yaw = '\0';
-    session->gpsdata.attitude.yawStatus = '\0';
+    session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = NAN;
     session->gpsdata.attitude.temperature = atof(field[4]);
     session->newdata.altitude = atof(field[5]);
@@ -1009,6 +1009,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_IS)!=0) {
+	/*
+	 * WARNING: This assumes time is always field 0, and that field 0
+	 * is a timestamp whenever TIME_IS is set.
+	 */
 	session->newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	gpsd_report(LOG_DATA, "%s computed time is %2f = %s\n", 
 		    session->driver.nmea.field[0],

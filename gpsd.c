@@ -1702,6 +1702,13 @@ int main(int argc, char *argv[])
 					      buf2, sizeof(buf2));
 				(void)throttled_write(sub, buf2, strlen(buf2));
 			    }
+#ifdef COMPASS_ENABLE
+			    if ((changed & ATT_IS) != 0) {
+				json_att_dump(&device->gpsdata, 
+						buf2, sizeof(buf2));
+				(void)throttled_write(sub, buf2, strlen(buf2));
+			    }
+#endif /* COMPASS_ENABLE */
 #ifdef RTCM104V2_ENABLE
 			    if ((changed & RTCM2_IS) != 0) {
 				rtcm2_json_dump(&device->gpsdata.rtcm2, buf2, sizeof(buf2));

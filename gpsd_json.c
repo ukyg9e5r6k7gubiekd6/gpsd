@@ -1344,6 +1344,108 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 #undef SHOW_BOOL
 }
 
+#ifdef COMPASS_ENABLE
+void json_att_dump(const struct gps_data_t *gpsdata, 
+		   /*@out@*/char *reply, size_t replylen)
+/* dump the contents of an attitude_t structure as JSON */
+{
+    assert(replylen > 2);
+    (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
+    (void)snprintf(reply+strlen(reply),
+		   replylen-strlen(reply),
+		   "\"tag\":\"%s\",",
+		   gpsdata->tag[0]!='\0' ? gpsdata->tag : "-");
+    (void)snprintf(reply+strlen(reply),
+		   replylen-strlen(reply),
+		   "\"device\":\"%s\",",
+		   gpsdata->dev.path);
+    if (isnan(gpsdata->fix.time)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"time\":%.3f,",
+		       gpsdata->fix.time);
+    if (isnan(gpsdata->attitude.heading)==0) {
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"heading\":%.2f,", gpsdata->attitude.heading);
+	if (gpsdata->attitude.heading_st != '\0')
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"heading_st\":\"%c\",", 
+			   gpsdata->attitude.heading_st);
+
+    }
+    if (isnan(gpsdata->attitude.pitch)==0) {
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"pitch\":%.2f,", gpsdata->attitude.pitch);
+	if (gpsdata->attitude.pitch_st != '\0')
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"pitch_st\":\"%c\",", 
+			   gpsdata->attitude.pitch_st);
+
+    }
+    if (isnan(gpsdata->attitude.pitch)==0) {
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"pitch\":%.2f,", gpsdata->attitude.pitch);
+	if (gpsdata->attitude.pitch_st != '\0')
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"pitch_st\":\"%c\",", 
+			   gpsdata->attitude.pitch_st);
+
+    }
+    if (isnan(gpsdata->attitude.roll)==0) {
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"roll\":%.2f,", gpsdata->attitude.roll);
+	if (gpsdata->attitude.roll_st != '\0')
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"roll_st\":\"%c\",", 
+gpsdata->attitude.roll_st);
+
+    }
+    if (isnan(gpsdata->attitude.yaw)==0) {
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
+	if (gpsdata->attitude.yaw_st != '\0')
+	    (void)snprintf(reply+strlen(reply),
+			   replylen-strlen(reply),
+			   "\"yaw_st\":\"%c\",", 
+			   gpsdata->attitude.yaw_st);
+
+    }
+    if (isnan(gpsdata->attitude.dip)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"dip\":%.3f,",
+		       gpsdata->attitude.dip);
+    if (isnan(gpsdata->attitude.magnetic_field_x)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"mag_x\":%.3f,",
+		       gpsdata->attitude.magnetic_field_x);
+    if (isnan(gpsdata->attitude.magnetic_field_y)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"mag_y\":%.3f,",
+		       gpsdata->attitude.magnetic_field_y);
+    if (isnan(gpsdata->attitude.magnetic_field_z)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"mag_z\":%.3f,",
+		       gpsdata->attitude.magnetic_field_z);
+
+    if (reply[strlen(reply)-1] == ',')
+	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+    (void)strlcat(reply, "}\r\n", replylen);
+}
+#endif /* COMPASS_ENABLE */
+
 #endif /* defined(AIVDM_ENABLE) */
 
 /* gpsd_json.c ends here */

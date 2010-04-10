@@ -23,6 +23,9 @@ typedef unsigned int speed_t;
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
 #define NON_NMEA_ENABLE	
 #endif
+#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
+#define COMPASS_ENABLE	
+#endif
 
 /* First, declarations for the packet layer... */
 
