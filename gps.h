@@ -834,17 +834,17 @@ struct attitude_t {
     double roll;
     double yaw;
     double dip;
-    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double magnetic_field_x;
-    double magnetic_field_y;
-    double magnetic_field_z;
-    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double acceleration_x;
-    double acceleration_y;
-    double acceleration_z;
+    double mag_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double mag_x;
+    double mag_y;
+    double mag_z;
+    double acc_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double acc_x;
+    double acc_y;
+    double acc_z;
     double gyro_x;
     double gyro_y;
-    double temperature;
+    double temp;
     double depth;
     /* compass status -- TrueNorth (and any similar) devices only */
     char mag_st;

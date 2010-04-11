@@ -694,14 +694,14 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     session->gpsdata.attitude.yaw = NAN;
     session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = atof(field[7]);
-    session->gpsdata.attitude.magnetic_length = NAN;
-    session->gpsdata.attitude.magnetic_field_x = atof(field[8]);
-    session->gpsdata.attitude.magnetic_field_y = NAN;
-    session->gpsdata.attitude.magnetic_field_z = NAN;
-    session->gpsdata.attitude.acceleration_length = NAN;
-    session->gpsdata.attitude.acceleration_x = NAN;
-    session->gpsdata.attitude.acceleration_y = NAN;
-    session->gpsdata.attitude.acceleration_z = NAN;
+    session->gpsdata.attitude.mag_len = NAN;
+    session->gpsdata.attitude.mag_x = atof(field[8]);
+    session->gpsdata.attitude.mag_y = NAN;
+    session->gpsdata.attitude.mag_z = NAN;
+    session->gpsdata.attitude.acc_len = NAN;
+    session->gpsdata.attitude.acc_x = NAN;
+    session->gpsdata.attitude.acc_y = NAN;
+    session->gpsdata.attitude.acc_z = NAN;
     session->gpsdata.attitude.gyro_x = NAN;
     session->gpsdata.attitude.gyro_y = NAN;
     mask |= (ATT_IS);
@@ -725,7 +725,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
 	1. Azimuth
 	2. Pitch Angle
 	3. Roll Angle
-	4. Sensor temperature, degrees centigrade 
+	4. Sensor temp, degrees centigrade 
 	5. Depth (feet)
 	6. Magnetic Vector Length
 	7-9. 3 axis Magnetic Field readings x,y,z
@@ -749,16 +749,16 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     session->gpsdata.attitude.yaw = '\0';
     session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = NAN;
-    session->gpsdata.attitude.temperature = atof(field[4]);
+    session->gpsdata.attitude.temp = atof(field[4]);
     session->gpsdata.attitude.depth = atof(field[5]) / METERS_TO_FEET;
-    session->gpsdata.attitude.magnetic_length = atof(field[6]);
-    session->gpsdata.attitude.magnetic_field_x = atof(field[7]);
-    session->gpsdata.attitude.magnetic_field_y = atof(field[8]);
-    session->gpsdata.attitude.magnetic_field_z = atof(field[9]);
-    session->gpsdata.attitude.acceleration_length = atof(field[10]);
-    session->gpsdata.attitude.acceleration_x = atof(field[11]);
-    session->gpsdata.attitude.acceleration_y = atof(field[12]);
-    session->gpsdata.attitude.acceleration_z = atof(field[13]);
+    session->gpsdata.attitude.mag_len = atof(field[6]);
+    session->gpsdata.attitude.mag_x = atof(field[7]);
+    session->gpsdata.attitude.mag_y = atof(field[8]);
+    session->gpsdata.attitude.mag_z = atof(field[9]);
+    session->gpsdata.attitude.acc_len = atof(field[10]);
+    session->gpsdata.attitude.acc_x = atof(field[11]);
+    session->gpsdata.attitude.acc_y = atof(field[12]);
+    session->gpsdata.attitude.acc_z = atof(field[13]);
     session->gpsdata.attitude.gyro_x = atof(field[15]);
     session->gpsdata.attitude.gyro_y = atof(field[16]);
     mask |= (ALTITUDE_IS);

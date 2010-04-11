@@ -1421,47 +1421,47 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 		       "\"dip\":%.3f,",
 		       gpsdata->attitude.dip);
 
-    if (isnan(gpsdata->attitude.magnetic_length)==0)
+    if (isnan(gpsdata->attitude.mag_len)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"mag_len\":%.3f,",
-		       gpsdata->attitude.magnetic_length);
-    if (isnan(gpsdata->attitude.magnetic_field_x)==0)
+		       gpsdata->attitude.mag_len);
+    if (isnan(gpsdata->attitude.mag_x)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"mag_x\":%.3f,",
-		       gpsdata->attitude.magnetic_field_x);
-    if (isnan(gpsdata->attitude.magnetic_field_y)==0)
+		       gpsdata->attitude.mag_x);
+    if (isnan(gpsdata->attitude.mag_y)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"mag_y\":%.3f,",
-		       gpsdata->attitude.magnetic_field_y);
-    if (isnan(gpsdata->attitude.magnetic_field_z)==0)
+		       gpsdata->attitude.mag_y);
+    if (isnan(gpsdata->attitude.mag_z)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"mag_z\":%.3f,",
-		       gpsdata->attitude.magnetic_field_z);
+		       gpsdata->attitude.mag_z);
 
-    if (isnan(gpsdata->attitude.acceleration_length)==0)
+    if (isnan(gpsdata->attitude.acc_len)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"acc_len\":%.3f,",
-		       gpsdata->attitude.acceleration_length);
-    if (isnan(gpsdata->attitude.acceleration_x)==0)
+		       gpsdata->attitude.acc_len);
+    if (isnan(gpsdata->attitude.acc_x)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"acc_x\":%.3f,",
-		       gpsdata->attitude.acceleration_x);
-    if (isnan(gpsdata->attitude.acceleration_y)==0)
+		       gpsdata->attitude.acc_x);
+    if (isnan(gpsdata->attitude.acc_y)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"acc_y\":%.3f,",
-		       gpsdata->attitude.acceleration_y);
-    if (isnan(gpsdata->attitude.acceleration_z)==0)
+		       gpsdata->attitude.acc_y);
+    if (isnan(gpsdata->attitude.acc_z)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"acc_z\":%.3f,",
-		       gpsdata->attitude.acceleration_z);
+		       gpsdata->attitude.acc_z);
 
     if (isnan(gpsdata->attitude.gyro_x)==0)
 	(void)snprintf(reply+strlen(reply),
@@ -1474,11 +1474,11 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 		       "\"gyro_y\":%.3f,",
 		       gpsdata->attitude.gyro_y);
 
-    if (isnan(gpsdata->attitude.temperature)==0)
+    if (isnan(gpsdata->attitude.temp)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"temperature\":%.3f,",
-		       gpsdata->attitude.temperature);
+		       "\"temp\":%.3f,",
+		       gpsdata->attitude.temp);
     if (isnan(gpsdata->attitude.depth)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
