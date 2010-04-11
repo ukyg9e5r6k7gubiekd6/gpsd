@@ -52,8 +52,9 @@ static bool PROTO_initialize(void)
      * devicewin, just below the status and command line at top of
      * screen, and (2) packetwin, taking up the rest of the screen below
      * it; packetwin will be enabled for scrolling. Note, however,
-     * that you cannot update packetwin safely, as it may be NULL
-     * if the screen has no lines left over after allocating devicewin.
+     * that you cannot necessarily update packetwin safely, as it may be NULL
+     * if the screen has no lines left over after allocating devicewin;
+     * you'll need to check this in your code.
      *
      * Use this method to paint windowframes and legends on the
      * freshly initialized device window.  You can also use this
@@ -93,7 +94,7 @@ static int PROTO_command(char line[])
      * NULL, gpsmon will behave sanely, accepting no device-specific commands. 
      *
      * It is a useful convention to use uppercase letters for
-     * driver-specfic commands and leave lowercase ones for the
+     * driver-specific commands and leave lowercase ones for the
      * generic gpsmon ones.
      */
 
