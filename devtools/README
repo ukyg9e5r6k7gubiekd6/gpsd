@@ -25,7 +25,7 @@ Note also that this cavalierly overwrites refs/original.
 == fakeserver ==
 
 Analogue of gpsfake. Impersonates a gpsd, spewing specified data to
-clients comnnecting to localhost:2947
+clients connecting to localhost:2947
 
 == fakecompare ==
 
@@ -55,7 +55,7 @@ looking for ones that break the build.
 
 == regressdiff ==
 
-Walk through a pair of textfiles looking for where they begin to differ.
+Walk through a pair of text files looking for where they begin to differ.
 May be useful for comparing logs when regression tests break.
 
 == striplog ==
