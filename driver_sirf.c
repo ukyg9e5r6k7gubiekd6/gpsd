@@ -431,7 +431,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
 
     words[0] &= 0xff0000;
     if (words[0] != 0x8b0000 && words[0] != 0x740000)
-       return ERROR_IS;
+       return 0;
     if (words[0] == 0x740000)
 	for (i = 1; i < 10; i++)
 	    words[i] ^= 0xffffff;
