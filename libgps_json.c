@@ -178,6 +178,62 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
+static int json_att_read(const char *buf, 
+			 struct gps_data_t *gpsdata, 
+			 /*@null@*/const char **endptr)
+{
+    /*@ -fullinitblock @*/
+    const struct json_attr_t json_attrs_1[] = {
+	{"class",    t_check,     .dflt.check = "ATT"},
+	{"device",   t_string,    .addr.string = gpsdata->dev.path,
+			             .len = sizeof(gpsdata->dev.path)},
+	{"tag",      t_string,    .addr.string = gpsdata->tag,
+			             .len = sizeof(gpsdata->tag)},
+	{"heading",  t_real,      .addr.real = &gpsdata->attitude.heading,
+			             .dflt.real = NAN},
+	{"mag_st",   t_character, .addr.character = &gpsdata->attitude.mag_st},
+	{"pitch",    t_real,      .addr.real = &gpsdata->attitude.pitch,
+			             .dflt.real = NAN},
+	{"pitch_st", t_character, .addr.character = &gpsdata->attitude.pitch_st},
+	{"roll",     t_real,      .addr.real = &gpsdata->attitude.roll,
+			             .dflt.real = NAN},
+	{"roll_st",  t_character, .addr.character = &gpsdata->attitude.roll_st},
+	{"yaw",      t_real,      .addr.real = &gpsdata->attitude.yaw,
+			             .dflt.real = NAN},
+	{"yaw_st",   t_character, .addr.character = &gpsdata->attitude.yaw_st},
+
+	{"mag_len",  t_real,      .addr.real = &gpsdata->attitude.magnetic_length,
+			             .dflt.real = NAN},
+	{"mag_x",    t_real,      .addr.real = &gpsdata->attitude.magnetic_field_x,
+			              .dflt.real = NAN},
+	{"mag_y",    t_real,      .addr.real = &gpsdata->attitude.magnetic_field_y,
+			              .dflt.real = NAN},
+	{"mag_z",    t_real,      .addr.real = &gpsdata->attitude.magnetic_field_z,
+			              .dflt.real = NAN},
+	{"acc_len",  t_real,      .addr.real = &gpsdata->attitude.acceleration_length,
+			             .dflt.real = NAN},
+	{"acc_x",    t_real,      .addr.real = &gpsdata->attitude.acceleration_x,
+			              .dflt.real = NAN},
+	{"acc_y",    t_real,      .addr.real = &gpsdata->attitude.acceleration_y,
+			              .dflt.real = NAN},
+	{"acc_z",    t_real,      .addr.real = &gpsdata->attitude.acceleration_z,
+			              .dflt.real = NAN},
+	{"gyro_x",    t_real,      .addr.real = &gpsdata->attitude.gyro_x,
+			              .dflt.real = NAN},
+	{"gyro_y",    t_real,      .addr.real = &gpsdata->attitude.gyro_y,
+			              .dflt.real = NAN},
+
+	{"temperature", t_real, .addr.real = &gpsdata->attitude.temperature,
+			         .dflt.real = NAN},
+	{"depth",    t_real,    .addr.real = &gpsdata->attitude.depth,
+			         .dflt.real = NAN},
+	{NULL},
+    };
+    /*@ +fullinitblock @*/
+
+    return json_read_object(buf, json_attrs_1, endptr);
+}
+
 static int json_devicelist_read(const char *buf, 
 				struct gps_data_t *gpsdata, 
 				/*@null@*/const char **endptr)
@@ -298,6 +354,8 @@ int libgps_json_unpack(const char *buf,
 	return json_tpv_read(buf, gpsdata, end);
     } else if (STARTSWITH(classtag, "\"class\":\"SKY\"")) {
 	return json_sky_read(buf, gpsdata, end);
+    } else if (STARTSWITH(classtag, "\"class\":\"ATT\"")) {
+	return json_att_read(buf, gpsdata, end);
     } else if (STARTSWITH(classtag, "\"class\":\"DEVICES\"")) {
 	return json_devicelist_read(buf, gpsdata, end);
     } else if (STARTSWITH(classtag, "\"class\":\"DEVICE\"")) {
