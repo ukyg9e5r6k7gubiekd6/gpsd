@@ -1360,20 +1360,15 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 		   replylen-strlen(reply),
 		   "\"device\":\"%s\",",
 		   gpsdata->dev.path);
-    if (isnan(gpsdata->fix.time)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"time\":%.3f,",
-		       gpsdata->fix.time);
     if (isnan(gpsdata->attitude.heading)==0) {
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
 		       "\"heading\":%.2f,", gpsdata->attitude.heading);
-	if (gpsdata->attitude.heading_st != '\0')
+	if (gpsdata->attitude.mag_st != '\0')
 	    (void)snprintf(reply+strlen(reply),
 			   replylen-strlen(reply),
-			   "\"heading_st\":\"%c\",", 
-			   gpsdata->attitude.heading_st);
+			   "\"mag_st\":\"%c\",", 
+			   gpsdata->attitude.mag_st);
 
     }
     if (isnan(gpsdata->attitude.pitch)==0) {
@@ -1387,15 +1382,15 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 			   gpsdata->attitude.pitch_st);
 
     }
-    if (isnan(gpsdata->attitude.pitch)==0) {
+    if (isnan(gpsdata->attitude.yaw)==0) {
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
-		       "\"pitch\":%.2f,", gpsdata->attitude.pitch);
-	if (gpsdata->attitude.pitch_st != '\0')
+		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
+	if (gpsdata->attitude.yaw_st != '\0')
 	    (void)snprintf(reply+strlen(reply),
 			   replylen-strlen(reply),
-			   "\"pitch_st\":\"%c\",", 
-			   gpsdata->attitude.pitch_st);
+			   "\"yaw_st\":\"%c\",", 
+			   gpsdata->attitude.yaw_st);
 
     }
     if (isnan(gpsdata->attitude.roll)==0) {
@@ -1406,7 +1401,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 	    (void)snprintf(reply+strlen(reply),
 			   replylen-strlen(reply),
 			   "\"roll_st\":\"%c\",", 
-gpsdata->attitude.roll_st);
+			   gpsdata->attitude.roll_st);
 
     }
     if (isnan(gpsdata->attitude.yaw)==0) {
@@ -1425,6 +1420,12 @@ gpsdata->attitude.roll_st);
 		       replylen-strlen(reply),
 		       "\"dip\":%.3f,",
 		       gpsdata->attitude.dip);
+
+    if (isnan(gpsdata->attitude.magnetic_length)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"mag_len\":%.3f,",
+		       gpsdata->attitude.magnetic_length);
     if (isnan(gpsdata->attitude.magnetic_field_x)==0)
 	(void)snprintf(reply+strlen(reply),
 		       replylen-strlen(reply),
@@ -1440,6 +1441,49 @@ gpsdata->attitude.roll_st);
 		       replylen-strlen(reply),
 		       "\"mag_z\":%.3f,",
 		       gpsdata->attitude.magnetic_field_z);
+
+    if (isnan(gpsdata->attitude.acceleration_length)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"acc_len\":%.3f,",
+		       gpsdata->attitude.acceleration_length);
+    if (isnan(gpsdata->attitude.acceleration_x)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"acc_x\":%.3f,",
+		       gpsdata->attitude.acceleration_x);
+    if (isnan(gpsdata->attitude.acceleration_y)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"acc_y\":%.3f,",
+		       gpsdata->attitude.acceleration_y);
+    if (isnan(gpsdata->attitude.acceleration_z)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"acc_z\":%.3f,",
+		       gpsdata->attitude.acceleration_z);
+
+    if (isnan(gpsdata->attitude.gyro_x)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"gyro_x\":%.3f,",
+		       gpsdata->attitude.gyro_x);
+    if (isnan(gpsdata->attitude.gyro_y)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"gyro_y\":%.3f,",
+		       gpsdata->attitude.gyro_y);
+
+    if (isnan(gpsdata->attitude.temperature)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"temperature\":%.3f,",
+		       gpsdata->attitude.temperature);
+    if (isnan(gpsdata->attitude.depth)==0)
+	(void)snprintf(reply+strlen(reply),
+		       replylen-strlen(reply),
+		       "\"depth\":%.3f,",
+		       gpsdata->attitude.depth);
 
     if (reply[strlen(reply)-1] == ',')
 	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */

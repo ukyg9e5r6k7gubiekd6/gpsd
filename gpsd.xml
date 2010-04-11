@@ -105,8 +105,8 @@ that speaks either the standard textual NMEA 0183 protocol, or the
 OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
 interpret the binary protocols used by EverMore, Garmin, Navcom,
 Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. It can read
-heading and attitude information from the Oceanserver 5000 digital
-compass.</para>
+heading and attitude information from the Oceanserver 5000 orv TNT
+Revolution digital compasses.</para>
 
 <para>The GPS reporting formats supported by your instance of
 <application>gpsd</application> may differ depending on how it was
@@ -456,7 +456,7 @@ depending on the fix quality.</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert validity bits in the top-level set member for each
-field actrually received; see gps.h for bitmask names and values.</para>
+field actually received; see gps.h for bitmask names and values.</para>
 
 <para>Here's an example:</para>
 
@@ -669,6 +669,247 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
         {"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 </programlisting>
 
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>ATT</term> 
+<listitem>
+<para>An ATT object is a vehicle-attitude report. It is returned by
+digital-compass and gyroscope sensors; depending on device, it may 
+include: heading, pitch, roll, yaw, gyroscope, and magnetic-field
+readings. Because such sensors are often bundled as part of 
+marine-navigation systems, the ATT response may also include
+dwater dpth and temperature.</para>
+
+<para>The "class", "mode", and "tag" fields will reliably be present.  Others
+may be reported or not depending on the specific device type.</para>
+
+<table frame="all" pgwide="0"><title>ATT object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "ATT"</entry>
+</row>
+<row>
+	<entry>tag</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Type tag associated with this GPS sentence; from an NMEA
+	device this is just the NMEA sentence type..</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Name of originating device</entry>
+</row>
+<row>
+	<entry>time</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>Seconds since the Unix epoch, UTC. May have a
+	fractional part of up to .01sec precision.</entry>
+</row>
+<row>
+	<entry>heading</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Heading, degrees from true north.</entry>
+</row>
+<row>
+	<entry>mag_st</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Magnetometer status.</entry>
+</row>
+<row>
+	<entry>pitch</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Pitch in degrees.</entry>
+</row>
+<row>
+	<entry>pitch_st</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Pitch sensor status.</entry>
+</row>
+<row>
+	<entry>yaw</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Yaw in degrees</entry>
+</row>
+<row>
+	<entry>yaw_st</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Yaw sensor status.</entry>
+</row>
+<row>
+	<entry>roll</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Roll in degrees.</entry>
+</row>
+<row>
+	<entry>roll_st</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Roll sensor status.</entry>
+</row>
+<row>
+	<entry>dip</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Roll in degrees.</entry>
+</row>
+<row>
+	<entry>mag_len</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Scalar magnetic field strength.</entry>
+</row>
+<row>
+	<entry>mag_x</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>X component of magnetic field strength.</entry>
+</row>
+<row>
+	<entry>mag_y</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Y component of magnetic field strength..</entry>
+</row>
+<row>
+	<entry>mag_z</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Z component of magnetic field strength..</entry>
+</row>
+<row>
+	<entry>mag_len</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Scalar acceleration.</entry>
+</row>
+<row>
+	<entry>acc_x</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>X component of acceleration.</entry>
+</row>
+<row>
+	<entry>acc_y</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Y component of acceleration.</entry>
+</row>
+<row>
+	<entry>acc_z</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Z component of acceleration..</entry>
+</row>
+<row>
+	<entry>gyro_x</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>X component of acceleration.</entry>
+</row>
+<row>
+	<entry>gyro_y</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Y component of acceleration.</entry>
+</row>
+<row>
+	<entry>depth</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Water depth in meters.</entry>
+</row>
+<row>
+	<entry>temperature</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Temperature at sensir, degrees centigrade.</entry>
+</row>
+
+
+</tbody>
+</tgroup>
+</table>
+
+<para>The heading, pitch, and roll status codes (if present) vary by device.
+For the TNT Revolution digital compasses, they are coded as follows: </para>
+
+<table frame="all" pgwide="0"><title>Device flags</title>
+<tgroup cols="2" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Code</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>C</entry>
+	<entry>magnetometer calibration alarm</entry>
+</row>
+<row>
+	<entry>L</entry>
+	<entry>low alarm</entry>
+</row>
+<row>
+	<entry>M</entry>
+	<entry>low warning</entry>
+</row>
+<row>
+	<entry>N</entry>
+	<entry>normal</entry>
+</row>
+<row>
+	<entry>O</entry>
+	<entry>high warning</entry>
+</row>
+<row>
+	<entry>P</entry>
+	<entry>high alarm</entry>
+</row>
+<row>
+	<entry>V</entry>
+	<entry>magnetometer voltage level alarm</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+
+<para>When the C client library parses a response of this kind, it
+will assert ATT_IS.</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"ATT","tag":"PTNTHTM","time":1270938096.843,
+    "heading":14223.00,"mag_st":"N",
+    "pitch":169.00,"pitch_st":"N", "roll":-43.00,"roll_st":"N",
+    "dip":13641.000,"mag_x":2454.000,"temperature":0.000,"depth":0.000}
+</programlisting>
 </listitem>
 </varlistentry>
 

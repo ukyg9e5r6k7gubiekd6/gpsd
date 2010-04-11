@@ -686,7 +686,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     mask = ONLINE_IS;
 
     session->gpsdata.attitude.heading = atof(field[1]);
-    session->gpsdata.attitude.heading_st = *field[2];
+    session->gpsdata.attitude.mag_st = *field[2];
     session->gpsdata.attitude.pitch = atof(field[3]);
     session->gpsdata.attitude.pitch_st = *field[4];
     session->gpsdata.attitude.roll = atof(field[5]);
@@ -699,17 +699,17 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     session->gpsdata.attitude.magnetic_field_y = NAN;
     session->gpsdata.attitude.magnetic_field_z = NAN;
     session->gpsdata.attitude.acceleration_length = NAN;
-    session->gpsdata.attitude.acceleration_field_x = NAN;
-    session->gpsdata.attitude.acceleration_field_y = NAN;
-    session->gpsdata.attitude.acceleration_field_z = NAN;
-    session->gpsdata.attitude.gyro_output_x = NAN;
-    session->gpsdata.attitude.gyro_output_y = NAN;
+    session->gpsdata.attitude.acceleration_x = NAN;
+    session->gpsdata.attitude.acceleration_y = NAN;
+    session->gpsdata.attitude.acceleration_z = NAN;
+    session->gpsdata.attitude.gyro_x = NAN;
+    session->gpsdata.attitude.gyro_y = NAN;
     mask |= (ATT_IS);
 
     gpsd_report(LOG_RAW, "time %.3f, heading %lf (%c).\n", 
 		session->newdata.time,
 		session->gpsdata.attitude.heading, 
-		session->gpsdata.attitude.heading_st);
+		session->gpsdata.attitude.mag_st);
     return mask;
 }
 #endif /* TNT_ENABLE */
@@ -725,7 +725,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
 	1. Azimuth
 	2. Pitch Angle
 	3. Roll Angle
-	4. Temperature
+	4. Sensor temperature, degrees centigrade 
 	5. Depth (feet)
 	6. Magnetic Vector Length
 	7-9. 3 axis Magnetic Field readings x,y,z
@@ -740,13 +740,8 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     gps_mask_t mask;
     mask = ONLINE_IS;
 
-    //gpsd_zero_satellites(&session->gpsdata);
-
-    /*
-     * Depth maps to altitude.
-     */
     session->gpsdata.attitude.heading = atof(field[1]);
-    session->gpsdata.attitude.heading_st = '\0';
+    session->gpsdata.attitude.mag_st = '\0';
     session->gpsdata.attitude.pitch = atof(field[2]);
     session->gpsdata.attitude.pitch_st = '\0';
     session->gpsdata.attitude.roll = atof(field[3]);
@@ -755,18 +750,18 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = NAN;
     session->gpsdata.attitude.temperature = atof(field[4]);
-    session->newdata.altitude = atof(field[5]);
+    session->gpsdata.attitude.depth = atof(field[5]) / METERS_TO_FEET;
     session->gpsdata.attitude.magnetic_length = atof(field[6]);
     session->gpsdata.attitude.magnetic_field_x = atof(field[7]);
     session->gpsdata.attitude.magnetic_field_y = atof(field[8]);
     session->gpsdata.attitude.magnetic_field_z = atof(field[9]);
     session->gpsdata.attitude.acceleration_length = atof(field[10]);
-    session->gpsdata.attitude.acceleration_field_x = atof(field[11]);
-    session->gpsdata.attitude.acceleration_field_y = atof(field[12]);
-    session->gpsdata.attitude.acceleration_field_z = atof(field[13]);
-    session->gpsdata.attitude.gyro_output_x = atof(field[15]);
-    session->gpsdata.attitude.gyro_output_y = atof(field[16]);
-    mask |= (ATT_IS | ALTITUDE_IS);
+    session->gpsdata.attitude.acceleration_x = atof(field[11]);
+    session->gpsdata.attitude.acceleration_y = atof(field[12]);
+    session->gpsdata.attitude.acceleration_z = atof(field[13]);
+    session->gpsdata.attitude.gyro_x = atof(field[15]);
+    session->gpsdata.attitude.gyro_y = atof(field[16]);
+    mask |= (ALTITUDE_IS);
 
     gpsd_report(LOG_RAW, "Heading %lf.\n", session->gpsdata.attitude.heading);
     return mask;
