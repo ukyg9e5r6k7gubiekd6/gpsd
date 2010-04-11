@@ -680,7 +680,7 @@ digital-compass and gyroscope sensors; depending on device, it may
 include: heading, pitch, roll, yaw, gyroscope, and magnetic-field
 readings. Because such sensors are often bundled as part of 
 marine-navigation systems, the ATT response may also include
-dwater dpth and temperature.</para>
+water depth.</para>
 
 <para>The "class", "mode", and "tag" fields will reliably be present.  Others
 may be reported or not depending on the specific device type.</para>
