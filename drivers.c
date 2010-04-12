@@ -47,11 +47,11 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 
 gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
+    const struct gps_type_t **dp;
+
     if (session->packet.type == COMMENT_PACKET) {
 	return 0;
     } else if (session->packet.type != NMEA_PACKET ) {
-	const struct gps_type_t **dp;
-
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    if (session->packet.type == (*dp)->packet_type) {
 		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
@@ -89,10 +89,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	gpsd_report(LOG_IO, "<= GPS: %s\n", session->packet.outbuffer);
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
-#ifdef NON_NMEA_ENABLE
-	    const struct gps_type_t **dp;
-
-	    /* maybe this is a trigger string for a driver we know about? */
 #ifdef UBX_ENABLE
 	    if(strncmp((char *)session->packet.outbuffer, "$GPTXT,01,01,02,MOD", 19)==0) {
 		ubx_catch_model(session, session->packet.outbuffer, session->packet.outbuflen);
@@ -100,17 +96,18 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		return 0;
 	    }
 #endif /* UBX_ENABLE */
-	    for (dp = gpsd_drivers; *dp; dp++) {
-		char	*trigger = (*dp)->trigger;
+	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
+	}
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    char	*trigger = (*dp)->trigger;
 
-		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0) {
-		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
+	    if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0) {
+		gpsd_report(LOG_PROG, "found %s.\n", trigger);
+		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    return DEVICEID_IS;
+		    st |= DEVICEID_IS;
 		}
 	    }
-#endif /* NON_NMEA_ENABLE */
-	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 #ifdef NTPSHM_ENABLE
 	if (session->context->enable_ntpshm &&
@@ -757,7 +754,7 @@ static bool tnt_probe(struct gps_device_t *session)
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = NULL,		/* their proprietary sentence */
+    .trigger	    = "$PTNTHTM",	/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
     .get_packet     = generic_get,	/* how to get a packet */
