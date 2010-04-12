@@ -14,9 +14,9 @@
   reference accuracy. New sections have been added to NMEA.txt on
   error status indications and satellite IDs.  New POLL command brings
   back polling-mode operation.  A Client-HOWTO has been added to the
-  documentation. gpsd no longer eats CPU when a device is unexpectedky
+  documentation. gpsd no longer eats CPU when a device is unexpectedly
   unplugged. Support for the TNT revolution is back (run mode only).
-  There is now a gpsdfake diagnostic tool that fakes being gpsdm shipping
+  There is now a gpsdfake diagnostic tool that fakes being gpsd shipping
   arbitrary specified data to clients.
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
