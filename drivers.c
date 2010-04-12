@@ -83,7 +83,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0) {
-		gpsd_report(LOG_PROG, "found %s.\n", trigger);
+		gpsd_report(LOG_PROG, "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    st |= DEVICEID_IS;
