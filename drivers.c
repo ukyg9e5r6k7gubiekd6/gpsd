@@ -598,12 +598,6 @@ static const struct gps_type_t earthmate = {
  *
  **************************************************************************/
 
-/* for now, only supporting run mode */
-#ifdef SAMPLE_MODE_SUPPORTED
-enum {
-#include "packet_states.h"
-};
-
 static void tnt_add_checksum(char *sentence)
 {
     unsigned char sum = '\0';
@@ -622,28 +616,41 @@ static void tnt_add_checksum(char *sentence)
     /*@i@*/snprintf(p, 4, "%02X\r\n", sum);
 }
 
-static int tnt_send(int fd, const char *fmt, ... )
+
+static ssize_t tnt_control_send(struct gps_device_t *session, 
+				char *msg, size_t len)
+/* send a control string in TNT native formal */
 {
-    int status;
+    ssize_t status;
+
+    (void)strlcat(msg, "*", BUFSIZ);
+    tnt_add_checksum(msg);
+    status = write(session->gpsdata.gps_fd, msg, len);
+    (void)tcdrain(session->gpsdata.gps_fd);
+    if (status == (ssize_t)len)
+	gpsd_report(LOG_IO, "=> GPS: %s\n", msg);
+    else
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", msg);
+    return status;
+}
+
+/* for now, only supporting run mode */
+#ifdef SAMPLE_MODE_SUPPORTED
+
+static ssize_t tnt_send(struct gps_device_t *session, const char *fmt, ... )
+{
     char buf[BUFSIZ];
     va_list ap;
 
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    strlcat(buf, "*", BUFSIZ);
-    tnt_add_checksum(buf);
-    status = (int)write(fd, buf, strlen(buf));
-    tcdrain(fd);
-    if (status == (int)strlen(buf)) {
-	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
-	return status;
-    } else {
-	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
-	return -1;
-    }
+    return tnt_control_send(session, buf, strlen(buf));
 }
 
+enum {
+#include "packet_states.h"
+};
 #define TNT_SNIFF_RETRIES       100
 /*
  * In sample mode, the True North compass won't start talking
@@ -738,9 +745,9 @@ static bool tnt_probe(struct gps_device_t *session)
 static const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = " TNT1500",
+    .trigger	    = "PTNTHTM",	/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
-    .probe_detect   = NULL,		/* probe by sending ID query */
+    .probe_detect   = NULL,		/* no probe in run mode */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
@@ -752,7 +759,7 @@ static const struct gps_type_t trueNorth = {
     .min_cycle      = 0.5,		/* fixed at 20 samples per second */
 #endif /* ALLOW_RECONFIGURE */
 #ifdef ALLOW_CONTROLSEND
-    .control_send   = nmea_write,	/* how to send control strings */
+    .control_send   = tnt_control_send,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
 };
 #endif
@@ -780,9 +787,9 @@ static int oceanserver_send(int fd, const char *fmt, ... )
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    strlcat(buf, "", BUFSIZ);
+    (void)strlcat(buf, "", BUFSIZ);
     status = (int)write(fd, buf, strlen(buf));
-    tcdrain(fd);
+    (void)tcdrain(fd);
     if (status == (int)strlen(buf)) {
 	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;

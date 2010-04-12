@@ -746,7 +746,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *
     session->gpsdata.attitude.pitch_st = '\0';
     session->gpsdata.attitude.roll = atof(field[3]);
     session->gpsdata.attitude.roll_st = '\0';
-    session->gpsdata.attitude.yaw = '\0';
+    session->gpsdata.attitude.yaw = NAN;
     session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = NAN;
     session->gpsdata.attitude.temp = atof(field[4]);

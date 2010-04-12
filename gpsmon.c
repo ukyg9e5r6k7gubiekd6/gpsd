@@ -61,7 +61,7 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt, ashtech_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
-extern struct monitor_object_t oncore_mmt;
+extern struct monitor_object_t oncore_mmt, tnt_mmt;
 
 /* These are public */
 struct gps_device_t	session;
@@ -112,6 +112,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
     &oncore_mmt,
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
+#ifdef TNT_ENABLE
+    &tnt_mmt,
+#endif /* TNT_ENABLE */
     NULL,
 };
 static const struct monitor_object_t **active;
