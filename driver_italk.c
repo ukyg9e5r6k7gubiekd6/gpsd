@@ -468,6 +468,9 @@ const struct gps_type_t italk_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = italk_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
 
@@ -589,6 +592,9 @@ const static struct gps_type_t itrax = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */

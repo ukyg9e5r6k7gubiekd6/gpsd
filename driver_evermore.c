@@ -562,5 +562,8 @@ const struct gps_type_t evermore_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = evermore_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

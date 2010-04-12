@@ -1281,6 +1281,9 @@ const struct gps_type_t navcom_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = navcom_control_send,	/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 
 #endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */

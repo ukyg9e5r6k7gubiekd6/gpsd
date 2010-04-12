@@ -678,6 +678,27 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 		received |= session->device_type->parse_packet(session);
 
+#ifdef NTPSHM_ENABLE
+	/*
+	 * Only update the NTP time if we've seen the leap-seconds data. 
+	 * Else we may be providing GPS time.
+	 */
+	if (session->context->enable_ntpshm
+	    && (session->gpsdata.set & TIME_IS)!=0
+	    && (session->newdata.time != session->last_fixtime)
+	    && session->newdata.mode > MODE_NO_FIX) {
+		double offset;
+		/* FIXME: notify NTP when there's no offset method? */
+		if (session->device_type == NULL || session->device_type->ntp_offset == NULL)
+		    offset = NAN;
+		else
+		    offset = session->device_type->ntp_offset(session);
+		if (isnan(offset)!=0)
+		    (void) ntpshm_put(session, session->newdata.time, offset);
+		session->last_fixtime = session->newdata.time;
+	}
+#endif /* NTPSHM_ENABLE */
+
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite DOPs reported from the packet we just got.

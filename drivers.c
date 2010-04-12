@@ -90,14 +90,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		}
 	    }
 	}
-#ifdef NTPSHM_ENABLE
-	if (session->context->enable_ntpshm &&
-	    (st & TIME_IS) != 0 &&
-	    (session->gpsdata.fix.time!=session->last_fixtime)) {
-	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);
-	    session->last_fixtime = session->gpsdata.fix.time;
-	}
-#endif /* NTPSHM_ENABLE */
 	return st;
     }
 }
@@ -245,6 +237,9 @@ const struct gps_type_t nmea = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 
 
@@ -337,6 +332,9 @@ const struct gps_type_t garmin = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
@@ -391,6 +389,9 @@ const struct gps_type_t ashtech = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* ASHTECH_ENABLE */
 
@@ -433,6 +434,9 @@ const struct gps_type_t fv18 = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* FV18_ENABLE */
 
@@ -478,6 +482,9 @@ const struct gps_type_t gpsclock = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* GPSCLOCK_ENABLE */
 
@@ -525,6 +532,9 @@ static const struct gps_type_t tripmate = {
 #ifdef ALLOW_CONTROLSEND
     .control_send  = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* TRIPMATE_ENABLE */
 
@@ -568,6 +578,9 @@ static const struct gps_type_t earthmate = {
 #ifdef ALLOW_CONTROLSEND
     .control_send  = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
@@ -751,6 +764,9 @@ const struct gps_type_t trueNorth = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = tnt_control_send,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif
 
@@ -818,6 +834,9 @@ static const struct gps_type_t oceanServer = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif
 
@@ -857,6 +876,9 @@ static const struct gps_type_t rtcm104v2 = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
@@ -896,6 +918,9 @@ static const struct gps_type_t rtcm104v3 = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* RTCM104V3_ENABLE */
 
@@ -932,6 +957,9 @@ static const struct gps_type_t garmintxt = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* GARMINTXT_ENABLE */
 
@@ -1037,6 +1065,9 @@ const struct gps_type_t mtk3301 = {
 #ifdef ALLOW_CONTROLSEND
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* MTK3301_ENABLE */
 
@@ -1096,6 +1127,9 @@ static const struct gps_type_t aivdm = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send     = NULL,
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* AIVDM_ENABLE */
 

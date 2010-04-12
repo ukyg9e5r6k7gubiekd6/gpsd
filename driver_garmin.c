@@ -444,13 +444,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    session->newdata.mode = MODE_3D;
 	    break;
 	}
-#ifdef NTPSHM_ENABLE
-	if (session->context->enable_ntpshm 
-	  && session->newdata.mode > MODE_NO_FIX) {
-	    // Garmin SerBin fudge 0.430 valid at 4800bps
-	    (void) ntpshm_put(session, session->newdata.time, 0.430);
-	}
-#endif /* NTPSHM_ENABLE */
 
 	gpsd_report(LOG_PROG, "Appl, mode %d, status %d\n"
 	    , session->newdata.mode
@@ -1113,6 +1106,14 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 }
 #endif /* ALLOW_CONTROLSEND */
 
+#ifdef NTPSHM_ENABLE
+static double garmin_ntp_offset(struct gps_device_t *session)
+{
+    /* only one sentence ships time */
+    return 0.430;			/* valid at 4800bps */
+}
+#endif /* NTPSHM_ENABLE */
+
 /* this is everything we export */
 #ifdef __UNUSED__
 static int GetPacket (struct gps_device_t *session );
@@ -1254,6 +1255,9 @@ const struct gps_type_t garmin_usb_binary_old =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* __UNUSED__ */
 
@@ -1279,6 +1283,9 @@ const struct gps_type_t garmin_usb_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 
 const struct gps_type_t garmin_ser_binary =
@@ -1301,6 +1308,9 @@ const struct gps_type_t garmin_ser_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = garmin_ntp_offset,
+#endif /* NTPSHM_ ENABLE */
 };
 
 #endif /* GARMIN_ENABLE */

@@ -508,20 +508,58 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
             session->gpsdata.skyview_time,
 	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
-#if __UNUSED__
-	/* this time stamp, at 4800bps, is so close to 1 sec old as to 
-	 * be confusing to ntpshm_put(), so ignore */
-	if (session->context->enable_ntpshm) {
-            // fudge valid at 4800bps
-	    (void)ntpshm_put(session,session->gpsdata.skyview_time, 1.040);
-	}
-#endif
+	/*
+	 * Don't be tempted to set TIME_IS here.  This time stamp, at
+	 * 4800bps, is so close to 1 sec old as to be confusing to
+	 * ntpd, so ignore it.
+	 */
     }
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_DATA, "SiRF: MTD 0x04: visible=%d mask={SATELLITE}\n",
 	session->gpsdata.satellites_visible);
     return SATELLITE_IS;
 }
+
+#ifdef NTPSHM_ENABLE
+static double sirf_ntp_offset(struct gps_device_t *session)
+/* return NTP time-offset fudge factor for this device */
+{
+    /* we need to have seen UTC time with a valid leap-year offset */
+    if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) != 0)
+	return NAN;
+
+    /* the PPS time message */ 
+    if (strcmp(session->gpsdata.tag, "MID52") == 0)
+	return 0.3;
+
+    /* uBlox EMND message */
+    if (strcmp(session->gpsdata.tag, "MID98") == 0)
+	return 0.570;
+
+#ifdef __UNUSED__
+    /* geodetic-data message */
+    if (strcmp(session->gpsdata.tag, "MID41") == 0)
+	return 0.570;
+#endif /* __UNUSED__ */
+
+    /* the Navigation Solution message */
+    if (strcmp(session->gpsdata.tag, "MID2") == 0)
+	switch (session->gpsdata.dev.baudrate) {
+	default: 
+	    return 0.704; /* WAG */
+	case 4800:
+	    return 0.704;	/* fudge valid at 4800bps */
+	case 9600:
+	    return 0.688;
+	case 19200:	
+	    return 0.484; 
+	case 38400:	
+	    return 0.845; /*  0.388; ?? */
+	}
+
+    return NAN;
+}
+#endif /* NTPSHM_ENABLE */
 
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -578,28 +616,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	    session->newdata.time,
 	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
-	if (session->context->enable_ntpshm) {
-	    float fudge;
-	    // fudge valid at 4800bps
-	    switch( session->gpsdata.dev.baudrate ) {
-	    default: 
-	        fudge = 0.704; /* WAG */
-		break;
-	    case 4800:
-	        fudge = 0.704;
-		break;
-	    case 9600:
-	        fudge = 0.688;
-		break;
-	    case 19200:	
-	        fudge = 0.484; 
-		break;
-	    case 38400:	
-	        fudge = 0.845; /*  0.388; ?? */
-		break;
-	    }
-	    (void)ntpshm_put(session, session->newdata.time, fudge);
-	}
     }
 #endif /* NTPSHM_ENABLE */
     /* fix quality data */
@@ -756,8 +772,6 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 		"SiRF: NTPD valid time MID 0x29, seen=0x%02x\n",
 		session->driver.sirf.time_seen);
 	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_1;
-	    if (session->context->enable_ntpshm) {
-		(void)ntpshm_put(session, session->newdata.time, 0.570);
             }
 	}
 #endif /* NTPSHM_ENABLE */
@@ -865,9 +879,6 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	    "SiRF: NTPD valid time MID 0x62, seen=0x%02x\n",
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-	if (session->context->enable_ntpshm) {
-	    (void)ntpshm_put(session, session->newdata.time, 0.570);
-  	}
 #endif /* NTPSHM_ENABLE */
 	session->context->valid |= LEAP_SECOND_VALID;
     }
@@ -936,9 +947,6 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	    "SiRF: NTPD valid time MID 0x34, seen=0x%02x\n",
 	    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-	if (session->context->enable_ntpshm) {
-	    (void)ntpshm_put(session, session->newdata.time, 0.3);
-	}
 #endif /* NTPSHM_ENABLE */
 	mask |= TIME_IS;
     }
@@ -1313,5 +1321,8 @@ const struct gps_type_t sirf_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = sirf_control_send,/* how to send a control string */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = sirf_ntp_offset,
+#endif /* NTP_SHM_ENABLE */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

@@ -74,11 +74,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
 	session->newdata.time = t;
 	mask |= TIME_IS;
-#ifdef NTPSHM_ENABLE
-	/* TODO overhead */
-	if (session->context->enable_ntpshm)
-	    (void)ntpshm_put(session, t,0);
-#endif
     }
 
     epx = (double)(getlesl(buf, 12)/100.0);
@@ -763,5 +758,8 @@ const struct gps_type_t ubx_binary = {
 #ifdef ALLOW_CONTROLSEND
     .control_send     = ubx_control_send,	/* no control sender yet */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
 };
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

@@ -161,14 +161,6 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->newdata.time =
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
-#ifdef NTPSHM_ENABLE
-    /* Removing/changing the magic number below is likely to disturb
-     * the handling of the 1pps signal from the gps device. The regression
-     * tests and simple gps applications do not detect this. A live test
-     * with the 1pps signal active is required. */
-    if (session->context->enable_ntpshm && session->newdata.mode > MODE_NO_FIX)
-	(void)ntpshm_put(session, session->newdata.time, 1.1);
-#endif
     /*@ -type @*/
     session->newdata.latitude  = ((long)getzlong(27)) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
@@ -516,6 +508,17 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
 }
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef NTPSHM_ENABLE
+static double zodiac_ntp_offset(struct gps_device_t *session)
+{
+    /* Removing/changing the magic number below is likely to disturb
+     * the handling of the 1pps signal from the gps device. The regression
+     * tests and simple gps applications do not detect this. A live test
+     * with the 1pps signal active is required. */
+     return 1.1;
+}
+#endif /* NTPSHM_ENABLE */
+
 /* this is everything we export */
 const struct gps_type_t zodiac_binary =
 {
@@ -537,6 +540,9 @@ const struct gps_type_t zodiac_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = zodiac_control_send,	/* for gpsctl and friends */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = zodiac_ntp_offset,	/* compute NTO fudge factor */
+#endif /* NTPSHM_ENABLE */
 };
 
 #endif /* ZODIAC_ENABLE */

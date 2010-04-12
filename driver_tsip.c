@@ -194,12 +194,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 
-
-#ifdef NTPSHM_ENABLE
-	    d1 = gpstime_to_unix((int)s1, f1) - f2;
-	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,d1,0.075);
-#endif
+	    session->newdata.time = gpstime_to_unix((int)s1, f1) - f2;
+	    mask |= TIME_IS;
 	}
 	gpsd_report(LOG_INF, "GPS Time %f %d %f\n",f1,s1,f2);
 	break;
@@ -743,10 +739,6 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	    session->newdata.time =
 		gpstime_to_unix((int)s1, (double)ul1) - (double)s2;
-#ifdef NTPSHM_ENABLE
-	    if (session->context->enable_ntpshm)
-		(void)ntpshm_put(session,session->newdata.time,0.075);
-#endif
 	    mask |= TIME_IS;
 	    gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",
 			session->newdata.time);
@@ -1088,6 +1080,14 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef NTPSHM_ENABLE
+static double tsip_ntp_offset(struct gps_device_t *session)
+{
+    /* FIXME: is a constant offset right here? */
+    return 0.075;
+}
+#endif /* NTPSHM_ENABLE */
+
 /* this is everything we export */
 const struct gps_type_t tsip_binary =
 {
@@ -1109,6 +1109,9 @@ const struct gps_type_t tsip_binary =
 #ifdef ALLOW_CONTROLSEND
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = tsip_ntp_offset,
+#endif /* NTPSHM_ENABLE */
 };
 
 #endif /* TSIP_ENABLE */

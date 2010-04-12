@@ -424,6 +424,22 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef NTPSHM_ENABLE
+static double _proto_ntp_offset(struct gps_device_t *session)
+{
+    /*
+     * If NTP notification is enabled, the GPS will occasionally NTP
+     * its notion of the time. This will lag behind actual time by
+     * some amount which has to be determined by observation vs. (say
+     * WWVB radio broadcasts) and, furthermore, may differ by baud
+     * rate. This method is for computing the NTP fudge factor.
+     * If it's absent, or when it returns NAN, nothing will be
+     * sent to NTP.
+     */
+    return MAGIC_CONSTANT;
+}
+#endif /* NTPSHM_ENABLE */
+
 static void _proto__wrapup(struct gps_device_t *session)
 {
 }
@@ -476,6 +492,9 @@ const struct gps_type_t _proto__binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = _proto__control_send,
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = _proto_ntp_offset,
+#endif /* NTPSHM_ENABLE */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */
 

@@ -107,21 +107,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data_
 	    (double)timegm(&unpacked_date)+nsec * 1e-9;
 	/*@ +unrecog */
 	mask |= TIME_IS;
-	
-#ifdef NTPSHM_ENABLE
-	/* Only update the NTP time if we've seen the leap-seconds data. 
-	 * Else we may be providing GPS time.
-	 */
-	if (session->context->enable_ntpshm) {
-	    /* 0.175 seems best at 9600 for UT+, not sure what the fudge 
-	     * should be at other baud rates or for other models.
-	     * If you change this be sure to allow for multiple baud
-	     * rates/models.
-	     */
-	    (void)ntpshm_put(session, session->newdata.time, 0.175);
-	}
-#endif /* NTPSHM_ENABLE */
-
 	gpsd_report(LOG_IO, "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
 		    unpacked_date.tm_year+1900,
 		    unpacked_date.tm_mon+1,
@@ -431,6 +416,18 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+#ifdef NTPSHM_ENABLE
+static double oncore_ntp_offset(struct gps_device_t *session) 
+{
+    /* 
+     * Only one sentence (NAVSOL) ships time.  0.175 seems best at
+     * 9600 for UT+, not sure what the fudge should be at other baud
+     * rates or for other models.
+     */
+    return 0.175;
+}
+#endif /* NTPSHM_ENABLE */
+
 #ifdef ALLOW_RECONFIGURE
 static bool oncore_set_speed(struct gps_device_t *session UNUSED,
 			     speed_t speed UNUSED,
@@ -520,6 +517,9 @@ const struct gps_type_t oncore_binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = oncore_control_send,
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset = oncore_ntp_offset,
+#endif /* NTPSHM_ENABLE */
 };
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 
