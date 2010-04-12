@@ -64,23 +64,12 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else /* session->packet.type == NMEA_PACKET) */ {
 	gps_mask_t st = 0;
 
-	/*
-	 * The general trigger string mechanism doesn't work if the
-	 * trigger is a sentence explicitly recognized in the NMEA
-	 * driver.  This should probably be fixed.
-	 */
 #ifdef OCEANSERVER_ENABLE
 	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
 	    (void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
 	    return  1;
 	}
 #endif /* OCEANSERVER_ENABLE */
-#ifdef TNT_ENABLE_NOGOOD
-	if (strncmp((char *)session->packet.outbuffer, "$PTNTHTM", 8)==0) {
-	    (void)gpsd_switch_driver(session, "True North");
-	    return  1;
-	}
-#endif /* TNT_ENABLE */
 
 	/* 
 	 * Some packets do not end in \n, append one
