@@ -742,10 +742,10 @@ static bool tnt_probe(struct gps_device_t *session)
 }
 #endif /* SAMPLE_MODE_SUPPORTED */
 
-static const struct gps_type_t trueNorth = {
+const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = "PTNTHTM",	/* their proprietary sentence */
+    .trigger	    = "$PTNTHTM",	/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
     .get_packet     = generic_get,	/* how to get a packet */
