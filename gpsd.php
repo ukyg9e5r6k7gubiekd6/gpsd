@@ -24,7 +24,10 @@ $testmode = 1; # leave this set to 1
 #   host: host name or address where GPSd runs. Default: from config file
 #   port: port of GPSd. Default: from config file
 #   op=view: show just the skyview image instead of the whole HTML page
-#   sz=small: used with op=view, display a small (240x240px) skyview
+#     sz=small: used with op=view, display a small (240x240px) skyview
+#   op=json: respond with the GPSd POLL JSON structure
+#     jsonp=prefix: used with op=json, wrap the POLL JSON in parentheses
+#                   and prepend prefix
 
 # If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
 # it may be necessary to increase the value of the
@@ -68,7 +71,8 @@ EOF;
 
 
 # if we're passing in a query, let's unpack and use it
-if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
+$op = isset($_GET['op']) ? $_GET['op'] : '';
+if (isset($_GET['imgdata']) && $op == 'view'){
 	$resp = base64_decode($_GET['imgdata']);
 	if ($resp){
 		gen_image($resp);
@@ -97,11 +101,12 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 	}
 }
 
-if (isset($_GET['op']) && ($_GET['op'] == 'view')){
+if ($op == 'view')
 	gen_image($resp);
-} else {
+else if ($op == 'json')
+	write_json($resp);
+else
 	write_html($resp);
-}
 
 exit(0);
 
@@ -466,6 +471,14 @@ EOF;
 
 print $part1 . $part2 . $part3 . $part4 . $part5;
 
+}
+
+function write_json($resp){
+	header('Content-Type: text/javascript');
+	if (isset($_GET['jsonp']))
+		print "{$_GET['jsonp']}({$resp})";
+	else
+		print $resp;
 }
 
 function write_config(){
