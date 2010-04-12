@@ -64,12 +64,23 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else /* session->packet.type == NMEA_PACKET) */ {
 	gps_mask_t st = 0;
 
+	/*
+	 * The general trigger string mechanism doesn't work if the
+	 * trigger is a sentence explicitly recognized in the NMEA
+	 * driver.  This should probably be fixed.
+	 */
 #ifdef OCEANSERVER_ENABLE
 	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
 	    (void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
 	    return  1;
 	}
 #endif /* OCEANSERVER_ENABLE */
+#ifdef TNT_ENABLE_NOGOOD
+	if (strncmp((char *)session->packet.outbuffer, "$PTNTHTM", 8)==0) {
+	    (void)gpsd_switch_driver(session, "True North");
+	    return  1;
+	}
+#endif /* TNT_ENABLE */
 
 	/* some packets do not end in \n, so make sure at least one
 	 * for good loggin */
@@ -90,7 +101,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
-		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
+		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0) {
 		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    return DEVICEID_IS;
@@ -745,7 +756,7 @@ static bool tnt_probe(struct gps_device_t *session)
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = "$PTNTHTM",	/* their proprietary sentence */
+    .trigger	    = NULL,		/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
     .get_packet     = generic_get,	/* how to get a packet */
