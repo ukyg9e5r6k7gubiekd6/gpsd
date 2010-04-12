@@ -206,8 +206,10 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
     double seconds,microseconds;
 
     if (session->shmindex < 0 ||
-	(shmTime = session->context->shmTime[session->shmindex]) == NULL)
+	(shmTime = session->context->shmTime[session->shmindex]) == NULL) {
+	gpsd_report(LOG_RAW, "NTPD missing shm\n");
 	return 0;
+    }
 
     (void)gettimeofday(&tv,NULL);
     fixtime += fudge;

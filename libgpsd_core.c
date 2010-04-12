@@ -683,18 +683,23 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Only update the NTP time if we've seen the leap-seconds data. 
 	 * Else we may be providing GPS time.
 	 */
-	if (session->context->enable_ntpshm
-	    && (session->gpsdata.set & TIME_IS)!=0
-	    && (session->newdata.time != session->last_fixtime)
-	    && session->newdata.mode > MODE_NO_FIX) {
+	if (session->context->enable_ntpshm==0) {
+		//gpsd_report(LOG_PROG, "NTP: off\n");
+	} else if ((session->gpsdata.set & TIME_IS)==0) {
+		//gpsd_report(LOG_PROG, "NTP: No time this packet\n");
+	} else if ( session->newdata.time == session->last_fixtime) {
+		//gpsd_report(LOG_PROG, "NTP: Not a new time\n");
+	} else if ( session->newdata.mode <= MODE_NO_FIX) {
+		//gpsd_report(LOG_PROG, "NTP: No fix\n");
+	} else {
 		double offset;
-		/* FIXME: notify NTP when there's no offset method? */
+		//gpsd_report(LOG_PROG, "NTP: doing ntpshm_put()\n");
+		/* assume zero when there's no offset method */
 		if (session->device_type == NULL || session->device_type->ntp_offset == NULL)
-		    offset = NAN;
+		    offset = 0.0;
 		else
 		    offset = session->device_type->ntp_offset(session);
-		if (isnan(offset)!=0)
-		    (void) ntpshm_put(session, session->newdata.time, offset);
+		(void) ntpshm_put(session, session->newdata.time, offset);
 		session->last_fixtime = session->newdata.time;
 	}
 #endif /* NTPSHM_ENABLE */

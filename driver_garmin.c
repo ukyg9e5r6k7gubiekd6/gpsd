@@ -1259,7 +1259,7 @@ const struct gps_type_t garmin_usb_binary_old =
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+    .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
 };
 #endif /* __UNUSED__ */
@@ -1287,7 +1287,7 @@ const struct gps_type_t garmin_usb_binary =
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+    .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
 };
 
