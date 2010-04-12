@@ -98,6 +98,8 @@ if (isset($_GET['imgdata']) && $op == 'view'){
 			}
 		}
 		@fclose($sock);
+		if (!$resp)
+			$resp = '{"class":"ERROR","message":"no response from GPS daemon"}';
 	}
 }
 
@@ -327,7 +329,7 @@ function write_html($resp){
 	global $testmode, $advertise;
 
 	$GPS = json_decode($resp, true);
-	if ($GPS === false){
+	if ($GPS['class'] != 'POLL'){
 		die("json_decode error: $resp");
 	}
 
