@@ -82,8 +82,10 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #endif /* TNT_ENABLE */
 
-	/* some packets do not end in \n, so make sure at least one
-	 * for good loggin */
+	/* 
+	 * Some packets do not end in \n, append one
+	 * for good logging
+	 */
 	gpsd_report(LOG_IO, "<= GPS: %s\n", session->packet.outbuffer);
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
@@ -111,7 +113,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 #ifdef NTPSHM_ENABLE
-	/* this magic number is derived from observation */
 	if (session->context->enable_ntpshm &&
 	    (st & TIME_IS) != 0 &&
 	    (session->gpsdata.fix.time!=session->last_fixtime)) {
