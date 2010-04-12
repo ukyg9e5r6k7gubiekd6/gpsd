@@ -472,7 +472,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    , pvt->leap_sec
 	    , pvt->grmn_days);
 
-	mask |= TIME_IS | LATLON_IS | ALTITUDE_IS | STATUS_IS | MODE_IS | SPEED_IS | TRACK_IS | CLIMB_IS | HERR_IS | VERR_IS | PERR_IS | CLEAR_IS | REPORT_IS;
+        if ( session->newdata.mode > MODE_NO_FIX) {
+	        /* data only valid with a fix */
+		mask |= TIME_IS | LATLON_IS | ALTITUDE_IS | STATUS_IS | MODE_IS | SPEED_IS | TRACK_IS | CLIMB_IS | HERR_IS | VERR_IS | PERR_IS | CLEAR_IS | REPORT_IS;
+	}
 	gpsd_report(LOG_DATA,
 		    "PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		    "speed=%.2f track=%.2f climb=%.2f "
