@@ -434,7 +434,7 @@ static double _proto_ntp_offset(struct gps_device_t *session)
      * WWVB radio broadcasts) and, furthermore, may differ by baud
      * rate. This method is for computing the NTP fudge factor.  If
      * it's absent, an offset of 0.0 will be assumed, effectively
-     * falling back on what's in ntpd.conf. When it returns NAN,
+     * falling back on what's in ntp.conf. When it returns NAN,
      * nothing will be sent to NTP.
      */
     return MAGIC_CONSTANT;
