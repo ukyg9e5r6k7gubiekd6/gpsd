@@ -429,9 +429,12 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     words[9] = ((unsigned int)getbeul(buf, 39) & 0x3fffffff) >> 6;
     gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08\n");
 
+    /* TODO, check parity */
     words[0] &= 0xff0000;
-    if (words[0] != 0x8b0000 && words[0] != 0x740000)
+    if (words[0] != 0x8b0000 && words[0] != 0x740000) {
+       gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
        return 0;
+    }
     if (words[0] == 0x740000)
 	for (i = 1; i < 10; i++)
 	    words[i] ^= 0xffffff;
