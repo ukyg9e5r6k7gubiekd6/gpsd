@@ -63,14 +63,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
     } else /* session->packet.type == NMEA_PACKET) */ {
 	gps_mask_t st = 0;
-
-#ifdef OCEANSERVER_ENABLE
-	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
-	    (void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
-	    return  1;
-	}
-#endif /* OCEANSERVER_ENABLE */
-
 	/* 
 	 * Some packets do not end in \n, append one
 	 * for good logging
@@ -810,7 +802,7 @@ static void oceanserver_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = "$C,",
+    .trigger	    = "$OHPR,",		/* detect their main sentence */ 
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
     .get_packet     = generic_get,	/* how to get a packet */
