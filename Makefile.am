@@ -41,8 +41,10 @@ if HAVE_XAW
 XAW_PROGS = xgpsspeed
 endif
 
+# Conditional includes.
+INCLUDES = $(INCUSB)
 if HAVE_DBUS
-INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
+INCLUDES += $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
 
 RTCM104PAGES_DIST = gpsdecode.1
@@ -100,7 +102,6 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 # Build gpsd
 #
 gpsd_c_sources = gpsd_dbus.c gpsd.c
-gpsd_CFLAGS = $(INCUSB) 
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
