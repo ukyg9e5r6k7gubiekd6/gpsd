@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 	case 't':		/* force the device type */
 	    devtype = optarg;
 	    break;
-	case 'T':		/* force the device type */
+	case 'T':		/* set the timeout on packet recognition */
 	    timeout = (unsigned)atoi(optarg);
 	    break;
 	case 'D':		/* set debugging level */

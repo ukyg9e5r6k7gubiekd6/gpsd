@@ -681,7 +681,11 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 	7. dip angle
 	8. relative magnitude horizontal component of earth's magnetic field
 	*hh	  mandatory nmea_checksum
-     */
+
+	By default, angles are reported as 26-bit integers: weirdly, the
+	technical manual says either 0 to 65535 or -32768 to 32767 can
+	occur as a range.
+    */
     gps_mask_t mask;
     mask = ONLINE_IS;
 
