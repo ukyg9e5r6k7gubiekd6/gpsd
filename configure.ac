@@ -228,6 +228,29 @@ AC_CHECK_LIB(pthread, pthread_setcancelstate,
 	AC_DEFINE([HAVE_LIBPTHREAD], [], [pthread libraries are present])])
 AC_SUBST(LIBPTHREAD)
 
+#
+# We want libusb-1.x or later.  Checking for this is messy in 2010
+# since many Linux systems ship with .0,1.x versions and that's 
+# what you get if you check naively for -lusb.  
+#
+# We use the fact that the obsolete versions put their include file in
+# /usr/include/usb.h, while the newer ones have it in 
+# /usr/include/libusb-*/libusb.h
+#
+AC_MSG_CHECKING([for libusb version >= 1.0.0])
+if test -f /usr/include/libusb-*/libusb.h ;
+then
+    libusb=$(basename /usr/lib/libusb-*.so | sed -e s/\.so// -e s/^lib//)
+    AC_DEFINE([HAVE_LIBUSB], [], [have libusb, linking with $libusb])
+    LIBUSB=-l${libusb}
+    INCUSB=-I/usr/include/libusb-*
+    AC_MSG_RESULT([found.])
+else
+    AC_MSG_RESULT([not found.])
+fi
+AC_SUBST(LIBUSB)
+AC_SUBST(INCUSB)
+
 AH_VERBATIM([_GNU_SOURCE],
 	  [/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
