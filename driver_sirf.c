@@ -447,12 +447,27 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
        gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
        return 0;
     }
+    // BEFORE the inversion corrected, check for mandatory zeros at
+    // end of word 1, per Carl at Sirf
+    i = (unsigned int)getbeul(buf, 7) & 0x3;
+    if ( 0 != i ) {
+       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 1 parity 0x%u\n", i);
+       return 0;
+    }
+    // and at end of word 9, per Carl at Sirf
+    i = (unsigned int)getbeul(buf, 39) & 0x3;
+    if ( 0 != i ) {
+       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 9 parity 0x%u\n", i);
+       return 0;
+    }
     if (words[0] == 0x740000) {
+        //gpsd_report(LOG_PROG, "SiRF: 50BPS uncomplement\n");
         /* the SiRF spontaneously inverted the data, invert it back */
 	for (i = 1; i < 10; i++) {
 	    words[i] ^= 0xffffff;
 	}
     }
+
     gpsd_interpret_subframe(session, words);
 
 #ifdef ALLOW_RECONFIGURE
