@@ -525,7 +525,7 @@ cppcheck: gpsd.h packet_names.h
 # it seem to honor -npcs.
 indent:
 	chmod u+w maskdump.c
-	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
+	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources) $(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) $(test_bits_SOURCES) $(test_packet_SOURCES) $(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES) 
 	chmod u-w maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
