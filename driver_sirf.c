@@ -487,6 +487,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
+    gps_mask_t mask = 0;
 
     if (len != 188)
 	return 0;
@@ -529,6 +530,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    gpsd_report(LOG_PROG, 
 	        "SiRF: NTPD not enough satellites seen: %d\n", st);
     } else { 
+        /* SiRF says if 3 sats in view the time is good */
 	if ( 0 == (session->driver.sirf.time_seen & TIME_SEEN_GPS_1)) {
 	    gpsd_report(LOG_RAW, "SiRF: NTPD just seen GPS_1\n");
 	}
@@ -538,16 +540,17 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
             session->gpsdata.skyview_time,
 	    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
+	mask |= TIME_IS;
 	/*
-	 * Don't be tempted to set TIME_IS here.  This time stamp, at
-	 * 4800bps, is so close to 1 sec old as to be confusing to
-	 * ntpd, so ignore it.
+	 * This time stamp, at 4800bps, is so close to 1 sec old as to 
+	 * be confusing to ntpd, but ntpshm_put() will ignore it if a better
+	 * time already seen
 	 */
     }
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_DATA, "SiRF: MTD 0x04: visible=%d mask={SATELLITE}\n",
 	session->gpsdata.satellites_visible);
-    return SATELLITE_IS;
+    return SATELLITE_IS | mask;
 }
 
 #ifdef NTPSHM_ENABLE
