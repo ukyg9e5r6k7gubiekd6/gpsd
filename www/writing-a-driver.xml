@@ -17,10 +17,11 @@
 <revhistory>
    <revision>
       <revnumber>1.9</revnumber>
-      <date>12 Apr 2010</date>
+      <date>13 Apr 2010</date>
       <authorinitials>er</authorinitials>
       <revremark>
-	 Updated by esr; added event_triggermatch.
+	 Updated by esr; added event_triggermatch and the new
+	 ntp_offset member.
       </revremark>
    </revision>
    <revision>
@@ -718,6 +719,13 @@ possible, assemble your packet in
 <structfield>session->msgbuf</structfield> and put the length in
 <structfield>session->msgbuflen</structfield>; this will allow 
 gpsmon to display the control messages it sends for you.</para>
+
+<!-- added by ESR, 2009 -->
+<para><structfield>.ntp_offset</structfield> points to code to compute
+an offset to be added, additionally to that in
+<filename>ntp.conf</filename> (if any) whe shipping time notifications
+to NTP. If multiple sentences set TIME_IS, this will differ by
+sentence type; it should differ by baud rare, as well. </para>
 
 </sect1>
 
