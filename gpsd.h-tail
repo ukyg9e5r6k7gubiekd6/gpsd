@@ -266,12 +266,21 @@ struct gps_type_t {
 #endif /* NTPSHM_ENABLE */
 };
 
+typedef enum {source_unknown,
+	      source_blockdev,
+	      source_rs232,
+	      source_usb,
+	      source_pty,
+	      source_socket}
+    sourcetype_t;
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
     bool is_serial;
+    sourcetype_t sourcetype;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;

@@ -28,6 +28,36 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
+static sourcetype_t gpsd_classify(const char *path)
+/* figure out what kind of device we're looking at */
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == -1)
+	return source_unknown;
+    else if (S_ISREG(sb.st_mode))
+	return source_blockdev;
+    else if (S_ISSOCK(sb.st_mode))
+	return source_socket;
+    else if (S_ISCHR(sb.st_mode)) {
+	sourcetype_t devtype = source_unknown;
+#ifdef __linux__
+	/* Linux major device numbers live here
+	 * ftp://ftp.kernel.org/pub/linux/docs/device-list/devices-2.6+.txt
+	 */
+	int devmajor = major(sb.st_rdev);
+	if (devmajor == 4)
+	    devtype = source_rs232;
+	else if (devmajor == 188)
+	    devtype = source_usb;
+	else if (devmajor == 3 || (devmajor >= 136 && devmajor <= 143))
+	    devtype = source_pty;
+#endif /* __linux__ */
+	return devtype;
+    } else
+	return source_unknown;
+}
+
 void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
 {
@@ -234,15 +264,22 @@ void gpsd_set_speed(struct gps_device_t *session,
 
 int gpsd_open(struct gps_device_t *session)
 {
-    struct stat sb;
     mode_t mode = (mode_t)O_RDWR;
 
+    session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
+
     /*@ -boolops -type @*/
-    if (session->context->readonly || ((stat(session->gpsdata.dev.path, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))) {
+    if (session->context->readonly || (session->sourcetype <= source_blockdev)) {
 	mode = (mode_t)O_RDONLY;
-	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.dev.path);
+	gpsd_report(LOG_INF, 
+		    "opening read-only GPS data source type %d and at '%s'\n",
+		    (int)session->sourcetype,
+		    session->gpsdata.dev.path);
     } else {
-	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.dev.path);
+	gpsd_report(LOG_INF, 
+		    "opening GPS data source type %d at '%s'\n",
+		    (int)session->sourcetype,
+		    session->gpsdata.dev.path);
     }
     /*@ +boolops +type @*/
 

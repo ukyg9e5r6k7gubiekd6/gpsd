@@ -79,7 +79,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->device_type = NULL;	/* start by hunting packets */
     session->observed = 0;
     session->rtcmtime = 0;
-    session->is_serial = false;		/* gpsd_open() setss this */
+    session->is_serial = false;			/* gpsd_open() sets this */
+    session->sourcetype = source_unknown;	/* gpsd_open() sets this */
     /*@ -temptrans @*/
     session->context = context;
     /*@ +temptrans @*/
@@ -320,6 +321,7 @@ int gpsd_activate(struct gps_device_t *session)
     if (netgnss_uri_check(session->gpsdata.dev.path)) {
 	session->gpsdata.gps_fd = netgnss_uri_open(session->context, 
 						   session->gpsdata.dev.path);
+	session->sourcetype = source_socket; 
 	gpsd_report(LOG_SPIN, "netgnss_uri_open(%s) returns socket on fd %d\n", 
 		    session->gpsdata.dev.path, session->gpsdata.gps_fd);
     /* otherwise, could be an AIS data feed */
