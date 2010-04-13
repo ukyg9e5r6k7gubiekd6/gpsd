@@ -436,15 +436,14 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
      * hamming code */
 
     // Look for the preamble in the first byte
-    // or its complement
-    // AND check the complement bit (0x02)
+    // OR its complement
     // ckuethe says to check message 10, code 2 to see if this data is valid
-    words[0] &= 0xff0002;
-    if (words[0] != 0x8b0000 && words[0] != 0x740002) {
+    words[0] &= 0xff0000;
+    if (words[0] != 0x8b0000 && words[0] != 0x740000) {
        gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
        return 0;
     }
-    if (words[0] == 0x740002) {
+    if (words[0] == 0x740000) {
         /* the SiRF spontaneously inverted the data, invert it back */
 	for (i = 1; i < 10; i++) {
 	    words[i] ^= 0xffffff;
