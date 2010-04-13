@@ -16,6 +16,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.9</revnumber>
+      <date>12 Apr 2010</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; added event_triggermatch.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.8</revnumber>
       <date>16 Sep 2009</date>
       <authorinitials>er</authorinitials>
@@ -610,6 +618,10 @@ called in the following circumstances:</para>
 
 <listitem><para>When the main auto-baud hunt loop in the daemon offers
 a new speed to probe at, with event argument 'event_wakeup'.</para></listitem>
+
+<listitem><para>When the driver has a trigger string and the NMEA driver 
+sees it, 'event_triggermatch' fires.  An 'event_switch_driver' should
+follow immediately.</para></listitem>
 
 <listitem><para> 
 Whenever <application>gpsd</application> first achieves packet lock

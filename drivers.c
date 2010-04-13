@@ -70,13 +70,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	gpsd_report(LOG_IO, "<= GPS: %s\n", session->packet.outbuffer);
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
-#ifdef UBX_ENABLE
-	    if(strncmp((char *)session->packet.outbuffer, "$GPTXT,01,01,02,MOD", 19)==0) {
-		ubx_catch_model(session, session->packet.outbuffer, session->packet.outbuflen);
-		(void)gpsd_switch_driver(session, "uBlox UBX binary");
-		return 0;
-	    }
-#endif /* UBX_ENABLE */
 	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 	for (dp = gpsd_drivers; *dp; dp++) {
@@ -86,6 +79,8 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		gpsd_report(LOG_PROG, "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
+		    if (session->device_type != NULL && session->device_type->event_hook != 0)
+			session->device_type->event_hook(session, event_triggermatch);
 		    st |= DEVICEID_IS;
 		}
 	    }

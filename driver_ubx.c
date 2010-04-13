@@ -37,10 +37,7 @@
  * see also the FV25 and UBX documents on reference.html
  */
 
-
-	bool 		ubx_write(struct gps_device_t *session, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
-	gps_mask_t 	ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
-	void 		ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
+static gps_mask_t 	ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
 static	gps_mask_t 	ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static	gps_mask_t 	ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static	gps_mask_t 	ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
@@ -508,24 +505,6 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len)
-{
-    /*@ +charint */
-    unsigned char *ip = &buf[19];
-    unsigned char *op = (unsigned char *)session->subtype;
-    size_t end = ((len - 19) < 63)?(len - 19):63;
-    size_t i;
-
-    for(i=0;i<end;i++) {
-	if((*ip == 0x00) || (*ip == '*')) {
-	    *op = 0x00;
-	    break;
-	}
-	*(op++) = *(ip++);
-    }
-    /*@ -charint */
-}
-
 bool ubx_write(struct gps_device_t *session, 
 	       unsigned int msg_class, unsigned int msg_id, 
 	       unsigned char *msg, unsigned short data_len) 
@@ -587,9 +566,30 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg, size_t 
 }
 #endif /* ALLOW_CONTROLSEND */
 
+static void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len)
+{
+    /*@ +charint */
+    unsigned char *ip = &buf[19];
+    unsigned char *op = (unsigned char *)session->subtype;
+    size_t end = ((len - 19) < 63)?(len - 19):63;
+    size_t i;
+
+    for(i=0;i<end;i++) {
+	if((*ip == 0x00) || (*ip == '*')) {
+	    *op = 0x00;
+	    break;
+	}
+	*(op++) = *(ip++);
+    }
+    /*@ -charint */
+}
+
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_identified || event == event_reactivate) {
+    if (event == event_triggermatch)
+	ubx_catch_model(session, 
+			session->packet.outbuffer, session->packet.outbuflen);
+    else if (event == event_identified || event == event_reactivate) {
 	unsigned char msg[32];
 
 	gpsd_report(LOG_IO, "UBX configure: %d\n", session->packet.counter);
@@ -628,9 +628,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	msg[2] = 0x0a; /* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 	/*@ +type @*/
-    }
-    if (event == event_deactivate)
-    {
+    } else if (event == event_deactivate) {
 	/*@ -type @*/
 	unsigned char msg[4] = {
 	    0x00, 0x00,	/* hotstart */
@@ -742,7 +740,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 const struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX binary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
-    .trigger          = NULL,           /* Response string that identifies device (not active) */
+    .trigger          = "$GPTXT,01,01,02,MOD",
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */

@@ -203,6 +203,7 @@ struct gps_device_t;
 typedef enum {ANY, GPS, RTCM2, RTCM3, AIS} gnss_type;
 typedef enum {
     event_wakeup,
+    event_triggermatch,
     event_identified,
     event_configure, 
     event_driver_switch,
@@ -581,11 +582,8 @@ extern void gpsd_wrap(struct gps_device_t *);
 
 /* exceptional driver methods */
 #ifdef UBX_ENABLE
-extern gps_mask_t ubx_parse(struct gps_device_t *, unsigned char *, size_t);
 extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int, 
 		      /*@null@*/unsigned char *, unsigned short);
-extern void ubx_catch_model(struct gps_device_t *,
-			    unsigned char *, size_t);
 #endif /* UBX_ENABLE */
 #ifdef AIVDM_ENABLE
 extern bool aivdm_decode(const char *, size_t, struct aivdm_context_t *, struct ais_t *);
