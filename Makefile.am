@@ -520,12 +520,10 @@ cppcheck: gpsd.h packet_names.h
 
 # Re-indenting to a uniform style would be nice, and we leave this here
 # as a rough guide to the project style, but it turns out that indent is
-# an excessively blunt instrument.  As of 2.2.10 it doesn't honor -nfca
-# and produces loads of spurious changes to splint directives.  Nor does
-# it seem to honor -npcs.
+# an excessively blunt instrument.
 indent:
 	chmod u+w *maskdump.c
-	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources) $(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) $(test_bits_SOURCES) $(test_packet_SOURCES) $(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES) 
+	indent -i4 -npsl -ce -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources) $(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) $(test_bits_SOURCES) $(test_packet_SOURCES) $(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES) 
 	chmod u-w *maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
