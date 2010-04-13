@@ -411,6 +411,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned int i, words[10], chan, svid;
+    unsigned int parity1, parity9;
 
     if (len != 43)
 	return 0;
@@ -447,25 +448,27 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
        gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
        return 0;
     }
-    // BEFORE the inversion corrected, check for mandatory zeros at
-    // end of word 1, per Carl at Sirf
-    i = (unsigned int)getbeul(buf, 7) & 0x3;
-    if ( 0 != i ) {
-       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 1 parity 0x%u\n", i);
-       return 0;
-    }
-    // and at end of word 9, per Carl at Sirf
-    i = (unsigned int)getbeul(buf, 39) & 0x3;
-    if ( 0 != i ) {
-       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 9 parity 0x%u\n", i);
-       return 0;
-    }
+    parity1 = (unsigned int)getbeul(buf, 7) & 0x3;
+    parity9 = (unsigned int)getbeul(buf, 39) & 0x3;
     if (words[0] == 0x740000) {
         //gpsd_report(LOG_PROG, "SiRF: 50BPS uncomplement\n");
         /* the SiRF spontaneously inverted the data, invert it back */
 	for (i = 1; i < 10; i++) {
 	    words[i] ^= 0xffffff;
 	}
+	parity1 ^= 0x3;
+	parity9 ^= 0x3;
+    }
+    // after inversion corrected, check for mandatory zeros at
+    // end of word 1, per Carl at Sirf
+    if ( 0 != parity1 ) {
+       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 1 parity 0x%u\n", parity1);
+       return 0;
+    }
+    // and at end of word 9, per Carl at Sirf
+    if ( 0 != parity9 ) {
+       gpsd_report(LOG_WARN, "SiRF: 50BPS bad word 9 parity 0x%u\n", parity9);
+       return 0;
     }
 
     gpsd_interpret_subframe(session, words);
