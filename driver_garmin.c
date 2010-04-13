@@ -798,93 +798,111 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 
 
 /*
- * garmin_usb_detect()
+ * garmin_usb_detect() - detect a Garmin USB device connected to ession fd. 
  *
- * This is ONLY for USB devices reporting as: 091e:0003.
-  *
- * check that the garmin_gps driver is installed in the kernel
- * and that an active USB device is using it.
+ * This is only necessary because under Linux Garmin devices need a kernel
+ * module rather than being normal USB-serial devices.
  *
- * It does not yet check that the currect device is the one
- * attached to the garmin.  So if you have a garmin and another
- * gps this could be a problem.
+ * The actual wire protocol from the Garmin device is very strange. There
+ * are no delimiters.  End of packet is signaled by a zero-length read
+ * on the USB device, and start of packet is the next read.  You can't just
+ * ignore the zero reads and pass the data through - you'd never be able 
+ * to tell where the packet boundaries are.
  *
- * this is very linux specific.
- *
- * return 1 if garmin_gps device found
- * return 0 if not
- *
+ * The garmin_usb module's job is to grab the packet and frame it in
+ * DLEs (with DLE stuffing).  This makes the USB packets look as
+ * though they came from a regular Garmin *serial* device, which is how
+ * most of the processing for both types can be unified here.
  */
 static bool garmin_usb_detect(struct gps_device_t *session)
 {
 #if defined(__linux__) || defined(S_SPLINT_S)
-    FILE *fp = NULL;
-    char buf[256];
-    bool ok = false;
-
-    /* only perform this check if we're looking at a USB-serial device */
+    /*
+     * Only perform this check if we're looking at a USB-serial
+     * device.  This prevents drivers for attached serial GPSes
+     * fronm being rudely elbowed aside by this one if they happen
+     * to be trying to coexist with the Garmin.
+     */
     if (session->sourcetype != source_usb)
 	return false;
+    else
+    {
+	/*
+	 * This is ONLY for USB devices reporting as: 091e:0003.
+	 *
+	 * Check that the garmin_gps driver is installed in the kernel
+	 * and that an active USB device is using it.
+	 *
+	 * BUG: It does not yet check that the currect device is the one
+	 * attached to the Garmin.  So if you have a Garmin and another
+	 * USB gps this could be a problem.
+	 *
+	 * Return true if garmin_gps device found, false otherwise.
+	 */
+	FILE *fp = NULL;
+	char buf[256];
+	bool ok = false;
 
-    /* check for garmin USB serial driver -- very Linux-specific */
-    if (access("/sys/module/garmin_gps", R_OK) != 0) {
-	gpsd_report(LOG_WARN, "Garmin: garmin_gps Linux USB module not active.\n");
-	return false;
-    }
-    /* check for a garmin_gps device in /proc
-     * if we can */
-    if ( NULL != (fp = fopen( "/proc/bus/usb/devices", "r")) ) {
-	ok = false;
-	while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
-	    if ( strstr( buf, "garmin_gps") ) {
-		ok = true;
-		break;
-	    }
-	}
-	(void)fclose(fp);
-	if ( !ok ) {
-	    // no device using garmin_gps now
-	    gpsd_report(LOG_WARN, "Garmin: garmin_gps not in /proc/bus/usb/devices.\n");
-	    gpsd_report(LOG_WARN, "Garmin: garmin_gps driver present, but not in use\n");
+	/* check for garmin USB serial driver -- very Linux-specific */
+	if (access("/sys/module/garmin_gps", R_OK) != 0) {
+	    gpsd_report(LOG_WARN, "Garmin: garmin_gps Linux USB module not active.\n");
 	    return false;
 	}
-    } else {
-	gpsd_report(LOG_WARN, 
-	    "Garmin: Can't open /proc/bus/usb/devices, will try anyway\n");
-    }
+	/* check for a garmin_gps device in /proc
+	 * if we can */
+	if ( NULL != (fp = fopen( "/proc/bus/usb/devices", "r")) ) {
 
+	    ok = false;
+	    while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
+		if ( strstr( buf, "garmin_gps") ) {
+		    ok = true;
+		    break;
+		}
+	    }
+	    (void)fclose(fp);
+	    if ( !ok ) {
+		// no device using garmin_gps now
+		gpsd_report(LOG_WARN, "Garmin: garmin_gps not in /proc/bus/usb/devices.\n");
+		gpsd_report(LOG_WARN, "Garmin: garmin_gps driver present, but not in use\n");
+		return false;
+	    }
+	} else {
+	    gpsd_report(LOG_WARN, 
+			"Garmin: Can't open /proc/bus/usb/devices, will try anyway\n");
+	}
 
-    if (!gpsd_set_raw(session)) {
-	gpsd_report(LOG_ERROR, "Garmin: garmin_usb_detect: error changing port attributes: %s\n",
-	     strerror(errno));
-	return false;
-    }
+	if (!gpsd_set_raw(session)) {
+	    gpsd_report(LOG_ERROR, "Garmin: garmin_usb_detect: error changing port attributes: %s\n",
+			strerror(errno));
+	    return false;
+	}
 
 #ifdef __UNUSED
-    Packet_t *thePacket = NULL;
-    uint8_t *buffer = NULL;
-    /* reset the buffer and buffer length */
-    memset( session->driver.garmin.Buffer, 0, sizeof(session->driver.garmin.Buffer) );
-    session->driver.garmin.BufferLen = 0;
+	Packet_t *thePacket = NULL;
+	uint8_t *buffer = NULL;
+	/* reset the buffer and buffer length */
+	memset( session->driver.garmin.Buffer, 0, sizeof(session->driver.garmin.Buffer) );
+	session->driver.garmin.BufferLen = 0;
 
-    if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
-	gpsd_report(LOG_ERROR, "Garmin: garmin_usb_detect: Compile error, garmin.Buffer too small.\n",
-	     strerror(errno));
-	return false;
-    }
+	if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
+	    gpsd_report(LOG_ERROR, "Garmin: garmin_usb_detect: Compile error, garmin.Buffer too small.\n",
+			strerror(errno));
+	    return false;
+	}
 
-    buffer = (uint8_t *)session->driver.garmin.Buffer;
-    thePacket = (Packet_t*)buffer;
+	buffer = (uint8_t *)session->driver.garmin.Buffer;
+	thePacket = (Packet_t*)buffer;
 #endif /* __UNUSED__ */
 
-    // set Mode 1, mode 0 is broken somewhere past 2.6.14
-    // but how?
-    gpsd_report(LOG_PROG, "Garmin: Set garmin_gps driver mode = 0\n");
-    Build_Send_USB_Packet( session, GARMIN_LAYERID_PRIVATE
-	, PRIV_PKTID_SET_MODE, 4, MODE_GARMIN_SERIAL);
-    // expect no return packet !?
+	// set Mode 1, mode 0 is broken somewhere past 2.6.14
+	// but how?
+	gpsd_report(LOG_PROG, "Garmin: Set garmin_gps driver mode = 0\n");
+	Build_Send_USB_Packet( session, GARMIN_LAYERID_PRIVATE
+			       , PRIV_PKTID_SET_MODE, 4, MODE_GARMIN_SERIAL);
+	// expect no return packet !?
 
-    return true;
+	return true;
+    }
 #else
     return false;
 #endif /* __linux__ */
