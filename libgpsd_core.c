@@ -685,7 +685,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if (session->context->enable_ntpshm==0) {
 		//gpsd_report(LOG_PROG, "NTP: off\n");
-	} else if ((session->gpsdata.set & TIME_IS)==0) {
+	} else if ((received & TIME_IS)==0) {
 		//gpsd_report(LOG_PROG, "NTP: No time this packet\n");
 	} else if ( isnan(session->newdata.time) ) {
 		//gpsd_report(LOG_PROG, "NTP: bad new time\n");
