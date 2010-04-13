@@ -671,6 +671,15 @@ static bool tnt_speed(struct gps_device_t *session,
 }
 #endif /* ALLOW_RECONFIGURE */
 
+static void tnt_event_hook(struct gps_device_t *session, event_t event)
+/* TNT lifetime event hook */
+{
+    if (event == event_wakeup) {
+	(void)tnt_send(session, "@F0.3=1");	/* set run mode */
+	(void)tnt_send(session, "@F2.2=1");	/* report in degrees */
+    }
+}
+
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -680,7 +689,7 @@ const struct gps_type_t trueNorth = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
-    .event_hook     = NULL,		/* lifetime event handler */
+    .event_hook     = tnt_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = tnt_speed,	/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
