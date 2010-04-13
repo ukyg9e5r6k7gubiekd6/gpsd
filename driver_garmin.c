@@ -800,8 +800,13 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 /*
  * garmin_usb_detect() - detect a Garmin USB device connected to ession fd. 
  *
- * This is only necessary because under Linux Garmin devices need a kernel
- * module rather than being normal USB-serial devices.
+ * This is ONLY for USB devices reporting as: 091e:0003.
+ *
+ * This driver ONLY works in Linux and ONLY when the the garmin_gps kernel
+ * module is installed.
+ *
+ * This is only necessary because under Linux Garmin USB devices need a 
+ * kernel module rather than being normal USB-serial devices.
  *
  * The actual wire protocol from the Garmin device is very strange. There
  * are no delimiters.  End of packet is signaled by a zero-length read
@@ -813,6 +818,9 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
  * DLEs (with DLE stuffing).  This makes the USB packets look as
  * though they came from a regular Garmin *serial* device, which is how
  * most of the processing for both types can be unified here.
+ *
+ * return 1 is device found
+ * return 0 if not
  */
 static bool garmin_usb_detect(struct gps_device_t *session)
 {
