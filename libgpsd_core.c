@@ -498,6 +498,8 @@ void gpsd_error_model(struct gps_device_t *session,
     if (isnan(fix->time)==0 && isnan(fix->ept)!=0)
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
+    gpsd_report(LOG_DATA, "modeling errors: mode=%d, masks=%s\n",
+		fix->mode, gpsd_maskdump(session->gpsdata.set));
     if (fix->mode >= MODE_2D) {
 	if (isnan(fix->epx)!=0 && finite(session->gpsdata.dop.hdop)!=0)
 		fix->epx = session->gpsdata.dop.xdop * h_uere;
@@ -708,10 +710,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/*
 	 * Compute fix-quality data from the satellite positions.
-	 * These will not overwrite DOPs reported from the packet we just got.
+	 * These will not overwrite any DOPs reported from the packet
+	 * we just got.
 	 */
-	if (session->newdata.mode > MODE_NO_FIX
-		    && (session->gpsdata.set & SATELLITE_IS) != 0
+	if ((received & SATELLITE_IS) != 0
 		    && session->gpsdata.satellites_visible > 0) {
 	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
