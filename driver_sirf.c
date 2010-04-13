@@ -417,6 +417,16 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
 
     chan = (unsigned int)getub(buf, 1);
     svid = (unsigned int)getub(buf, 2);
+
+    /* Data is in ICD 200d format, as munged by Sirf */
+    /* ICD == Interface Control Document */
+    /* download from http://www.navcen.uscg.gov/GPS/ICD200c.htm */
+    /* FIXME, the data is flakey, need to check  'parity' which is really a
+     * hamming code */
+
+    /* ICD words are really 30 bits, the right most 6 bits are 'parity'
+     * so mask the unused top 2 bits and shift off the 6 'parity'
+     * that leaves us with 3 real bytes per word */
     words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
     words[1] = ((unsigned int)getbeul(buf, 7) & 0x3fffffff) >> 6;
     words[2] = ((unsigned int)getbeul(buf, 11) & 0x3fffffff) >> 6;
@@ -428,12 +438,6 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     words[8] = ((unsigned int)getbeul(buf, 35) & 0x3fffffff) >> 6;
     words[9] = ((unsigned int)getbeul(buf, 39) & 0x3fffffff) >> 6;
     gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08\n");
-
-    /* Data is in ICD 200d format */
-    /* ICD == Interface Control Document */
-    /* download from http://www.navcen.uscg.gov/GPS/ICD200c.htm */
-    /* FIXME, the data is flakey, need to check  'parity' which is really a
-     * hamming code */
 
     // Look for the preamble in the first byte
     // OR its complement
