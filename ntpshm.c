@@ -205,7 +205,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
     struct timeval tv;
     double seconds,microseconds;
 
-    gpsd_report(LOG_PROG, "NTP: doing ntpshm_put(,%g, %g)\n", fixtime, fudge);
+    // gpsd_report(LOG_PROG, "NTP: doing ntpshm_put(,%g, %g)\n", fixtime, fudge);
     if (session->shmindex < 0 ||
 	(shmTime = session->context->shmTime[session->shmindex]) == NULL) {
 	gpsd_report(LOG_RAW, "NTPD missing shm\n");
