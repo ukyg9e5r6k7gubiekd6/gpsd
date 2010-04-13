@@ -602,6 +602,7 @@ static const struct gps_type_t earthmate = {
  **************************************************************************/
 
 static void tnt_add_checksum(char *sentence)
+/* add NMEA-style CRC checksum to a command */
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
@@ -611,12 +612,11 @@ static void tnt_add_checksum(char *sentence)
     } else {
 	gpsd_report(LOG_ERROR, "Bad TNT sentence: '%s'\n", sentence);
     }
-    while ( ((c = *p) != '*') && (c != '\0')) {
+    while (((c = *p) != '\0')) {
 	sum ^= c;
 	p++;
     }
-    *p++ = '*';
-    /*@i@*/snprintf(p, 4, "%02X\r\n", sum);
+    (void)snprintf(p, 6, "*%02X\r\n", (unsigned int)sum);
 }
 
 
@@ -626,124 +626,50 @@ static ssize_t tnt_control_send(struct gps_device_t *session,
 {
     ssize_t status;
 
-    (void)strlcat(msg, "*", BUFSIZ);
     tnt_add_checksum(msg);
-    status = write(session->gpsdata.gps_fd, msg, len);
+    status = write(session->gpsdata.gps_fd, msg, strlen(msg));
     (void)tcdrain(session->gpsdata.gps_fd);
-    if (status == (ssize_t)len)
-	gpsd_report(LOG_IO, "=> GPS: %s\n", msg);
-    else
-	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", msg);
     return status;
 }
 
-/* for now, only supporting run mode */
-#ifdef SAMPLE_MODE_SUPPORTED
-
-static ssize_t tnt_send(struct gps_device_t *session, const char *fmt, ... )
+static bool tnt_send(struct gps_device_t *session, const char *fmt, ... )
+/* printf(3)-like TNT command generator */
 {
     char buf[BUFSIZ];
     va_list ap;
+    ssize_t sent;
 
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    return tnt_control_send(session, buf, strlen(buf));
-}
-
-enum {
-#include "packet_states.h"
-};
-#define TNT_SNIFF_RETRIES       100
-/*
- * In sample mode, the True North compass won't start talking
- * unless you ask it to. So to identify it we
- * need to query for its ID string.
- */
-static int tnt_packet_sniff(struct gps_device_t *session)
-{
-    unsigned int n, count = 0;
-
-    gpsd_report(LOG_RAW, "tnt_packet_sniff begins\n");
-    for (n = 0; n < TNT_SNIFF_RETRIES; n++)
-    {
-      count = 0;
-      (void)tnt_send(session->gpsdata.gps_fd, "@X?");
-      if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) == -1)
-	  return BAD_PACKET;
-      if (count == 0) {
-	  //int delay = 10000000000.0 / session->gpsdata.baudrate;
-	  //gpsd_report(LOG_RAW, "usleep(%d)\n", delay);
-	  //usleep(delay);
-	  gpsd_report(LOG_RAW, "sleep(1)\n");
-	  (void)sleep(1);
-      } else if (generic_get(session) >= 0) {
-	if((session->packet.type == NMEA_PACKET)&&(session->packet.state == NMEA_RECOGNIZED))
-	{
-	  gpsd_report(LOG_RAW, "tnt_packet_sniff returns %d\n",session->packet.type);
-	  return session->packet.type;
-	}
-      }
-    }
-
-    gpsd_report(LOG_RAW, "tnt_packet_sniff found no packet\n");
-    return BAD_PACKET;
-}
-
-static void tnt_event_hook(struct gps_device_t *session, event_t event)
-{
-    if (event == event_identified) {
-	// Send codes to start the flow of data
-	//tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
-	//tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
-	/*
-	 * Sending this twice seems to make it more reliable!!
-	 * I think it gets the input on the unit synced up.
-	 */
-	(void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
-	(void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
+    sent = tnt_control_send(session, buf, strlen(buf));
+    if (sent == (ssize_t)strlen(buf)) {
+	gpsd_report(LOG_IO, "=> GPS: %s", buf);
+	return true;
+    } else {
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED", buf);
+	return false;
     }
 }
 
-static bool tnt_probe(struct gps_device_t *session)
+#ifdef ALLOW_RECONFIGURE
+static bool tnt_speed(struct gps_device_t *session, 
+			  speed_t speed, char parity, int stopbits)
 {
-  unsigned int *ip;
-#ifdef FIXED_PORT_SPEED
-    /* just the one fixed port speed... */
-    static unsigned int rates[] = {FIXED_PORT_SPEED};
-#else /* FIXED_PORT_SPEED not defined */
-  /* The supported baud rates */
-  static unsigned int rates[] = {38400, 19200, 2400, 4800, 9600 };
-#endif /* FIXED_PORT_SPEED defined */
+    /*
+     * Baud rate change followed by device reset.
+     * See page 40 of Technical Guide 1555-B.  We need:
+     * 2400 -> 1, 4800 -> 2, 9600 -> 3, 19200 -> 4, 38400 -> 5
+     */
+    unsigned int val = speed/2400u;	/* 2400->1, 4800->2, 9600->4, 19200->8...  */
+    unsigned int i = 0;
 
-  gpsd_report(LOG_PROG, "Probing TrueNorth Compass\n");
-
-  /*
-   * Only block until we get at least one character, whatever the
-   * third arg of read(2) says.
-   */
-  /*@ ignore @*/
-  memset(session->ttyset.c_cc,0,sizeof(session->ttyset.c_cc));
-  session->ttyset.c_cc[VMIN] = 1;
-  /*@ end @*/
-
-  session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS);
-  session->ttyset.c_cflag |= CREAD | CLOCAL;
-  session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
-
-  session->baudindex = 0;
-  for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-      if (ip == rates || *ip != rates[0])
-      {
-	  gpsd_report(LOG_PROG, "hunting at speed %d\n", *ip);
-	  gpsd_set_speed(session, *ip, 'N',1);
-	  if (tnt_packet_sniff(session) != BAD_PACKET) {
-	      return true;
-	  }
-      }
-  return false;
+    /* fast way to compute log2(val) */
+    while((val >> i) > 1) 
+	++i;
+    return tnt_send(session, "@B6=%d", i+1) && tnt_send(session, "@F28.6=1");
 }
-#endif /* SAMPLE_MODE_SUPPORTED */
+#endif /* ALLOW_RECONFIGURE */
 
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
@@ -756,7 +682,7 @@ const struct gps_type_t trueNorth = {
     .rtcm_writer    = NULL,		/* Don't send */
     .event_hook     = NULL,		/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .speed_switcher = NULL,		/* no speed switcher */
+    .speed_switcher = tnt_speed,	/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .min_cycle      = 0.5,		/* fixed at 20 samples per second */
