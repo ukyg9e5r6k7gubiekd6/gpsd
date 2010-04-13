@@ -240,10 +240,10 @@ AC_SUBST(LIBPTHREAD)
 AC_MSG_CHECKING([for libusb version >= 1.0.0])
 if test -f /usr/include/libusb-*/libusb.h ;
 then
-    libusb=$(basename /usr/lib/libusb-*.so | sed -e s/\.so// -e s/^lib//)
-    AC_DEFINE([HAVE_LIBUSB], [], [have libusb, linking with $libusb])
-    LIBUSB=-l${libusb}
-    INCUSB=-I/usr/include/libusb-*
+    usb=$(basename /usr/lib/libusb-*.so | sed -e s/\.so// -e s/^lib//)
+    AC_DEFINE([HAVE_LIBUSB], [], [will link with -l$usb; ])
+    LIBUSB=-l${usb}
+    INCUSB=-I/usr/include/lib${usb}
     AC_MSG_RESULT([found.])
 else
     AC_MSG_RESULT([not found.])

@@ -100,8 +100,9 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 # Build gpsd
 #
 gpsd_c_sources = gpsd_dbus.c gpsd.c
+gpsd_CFLAGS = $(INCUSB) 
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
 #
 # Build gpsctl
