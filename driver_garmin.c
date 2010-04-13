@@ -817,10 +817,14 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
  */
 static bool garmin_usb_detect(struct gps_device_t *session)
 {
-
+#if defined(__linux__) || defined(S_SPLINT_S)
     FILE *fp = NULL;
     char buf[256];
     bool ok = false;
+
+    /* only perform this check if we're looking at a USB-serial device */
+    if (session->sourcetype != source_usb)
+	return false;
 
     /* check for garmin USB serial driver -- very Linux-specific */
     if (access("/sys/module/garmin_gps", R_OK) != 0) {
@@ -881,6 +885,9 @@ static bool garmin_usb_detect(struct gps_device_t *session)
     // expect no return packet !?
 
     return true;
+#else
+    return false;
+#endif /* __linux__ */
 }
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)
