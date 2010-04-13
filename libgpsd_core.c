@@ -687,13 +687,15 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		//gpsd_report(LOG_PROG, "NTP: off\n");
 	} else if ((session->gpsdata.set & TIME_IS)==0) {
 		//gpsd_report(LOG_PROG, "NTP: No time this packet\n");
+	} else if ( isnan(session->newdata.time) ) {
+		//gpsd_report(LOG_PROG, "NTP: bad new time\n");
 	} else if ( session->newdata.time == session->last_fixtime) {
 		//gpsd_report(LOG_PROG, "NTP: Not a new time\n");
-	} else if ( session->newdata.mode <= MODE_NO_FIX) {
+	} else if ( session->newdata.mode == MODE_NO_FIX) {
 		//gpsd_report(LOG_PROG, "NTP: No fix\n");
 	} else {
 		double offset;
-		//gpsd_report(LOG_PROG, "NTP: doing ntpshm_put()\n");
+		//gpsd_report(LOG_PROG, "NTP: Got one\n");
 		/* assume zero when there's no offset method */
 		if (session->device_type == NULL || session->device_type->ntp_offset == NULL)
 		    offset = 0.0;

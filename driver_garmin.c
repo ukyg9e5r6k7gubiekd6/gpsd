@@ -576,8 +576,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    gpsd_hexdump_wrapper(buf, (size_t)pkt_len, LOG_WARN));
 	break;
     }
-    gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, ) = %#02x\n",
-	pkt_id, pkt_len, mask);
+    gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, ) = %s\n",
+	pkt_id, pkt_len, gpsd_maskdump(mask));
     return mask;
 }
 
@@ -1051,6 +1051,8 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     (void)usleep(300);
     Send_ACK();
     /*@ +usedef +compdef @*/
+    gpsd_report(LOG_IO, "Garmin: garmin_ser_parse( ) = %s\n",
+	gpsd_maskdump(mask));
     return mask;
 }
 /*@ -charint @*/
