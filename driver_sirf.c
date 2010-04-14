@@ -791,7 +791,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	gpsd_report(LOG_PROG, "SiRF: GND 0x29 UTC: %lf\n", 
 	            session->newdata.time);
 #ifdef NTPSHM_ENABLE
-	if (session->newdata.mode <= MODE_NO_FIX 
+	if (session->newdata.mode <= MODE_NO_FIX) 
 	    gpsd_report(LOG_PROG, "SiRF: NTPD no fix, mode: $d\n", 
 	        session->newdata.mode);
 	} else if ( 0 ==  unpacked_date.tm_year ) {
