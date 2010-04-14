@@ -429,30 +429,31 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
      * int transporting them. The right most 6 bits are 'parity' and the top
      * 2 bits are the bottom two parity bits from the previous word. Mask and
      * shift these away to leave us with 3 data bytes per word */
-	words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
-	preamble = words[0] >> 16;
-	if (preamble  == 0x8b){
-		preamble ^= 0xff;
-	}
 
-	parity1 = parity9 = 0;
-	for (i = 0; i < 10; i++) {
-		int invert;
-		words[i] = (unsigned int)getbeul(buf, 4*i + 3);
-		invert = (words[i] & 0x40000000) ? 1 : 0;
-		/* inverted the data, invert it back */
-		if (invert)
-			words[i] ^= 0xffffffff;
-		switch( i ) {
-		case 1:
-			parity1 = words[1] & 0x3;
-			break;
-		case 9:
-			parity9 = words[9] & 0x3;
-			break;
-		}
-		words[i] = (words[i] & 0x3fffffff) >> 6;
+    preamble = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 22;
+    if (preamble  == 0x8b){
+	preamble ^= 0xff;
+    }
+
+    parity1 = parity9 = 0;
+    for (i = 0; i < 10; i++) {
+	int invert;
+	words[i] = (unsigned int)getbeul(buf, 4*i + 3);
+	switch( i ) {
+	case 1:
+		parity1 = words[1] & 0x3;
+		break;
+	case 9:
+		parity9 = words[9] & 0x3;
+		break;
 	}
+	invert = (words[i] & 0x40000000) ? 1 : 0;
+	/* inverted data, invert it back */
+	if (invert) {
+		words[i] ^= 0xffffffff;
+	}
+	words[i] = (words[i] & 0x3fffffff) >> 6;
+    }
     gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08: %2d %2d "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		chan, svid,
