@@ -47,9 +47,9 @@ struct classmap_t classmap[CLASSMAP_NITEMS] = {
 };
 /* *INDENT-ON* */
 
-char *json_stringify(/*@out@*/char *to, 
-		      size_t len, 
-		      /*@in@*/const char *from)
+char *json_stringify( /*@out@*/ char *to,
+		     size_t len,
+		     /*@in@*/ const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {
     /*@-temptrans@*/

@@ -1507,7 +1507,8 @@ int main(int argc, char *argv[])
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
 		/*@+matchanyintegral@*/
-		int ssock =  accept(msocks[i], (struct sockaddr *)&fsin, &alen);
+		int ssock =
+		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
 		if (ssock == -1)
@@ -1555,9 +1556,9 @@ int main(int argc, char *argv[])
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
-	    /*@+matchanyintegral@*/ 
-	    int ssock =	accept(csock, (struct sockaddr *)&fsin, &alen);
-	    /*@-matchanyintegral@*/ 
+	    /*@+matchanyintegral@*/
+	    int ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
+	    /*@-matchanyintegral@*/
 
 	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));

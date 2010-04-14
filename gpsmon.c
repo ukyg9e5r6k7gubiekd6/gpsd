@@ -699,8 +699,8 @@ int main(int argc, char **argv)
 			if ((*active)->driver->rate_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->driver->
-				rate_switcher(&session, rate)) {
+			    if ((*active)->
+				driver->rate_switcher(&session, rate)) {
 				monitor_dump_send();
 			    } else
 				monitor_complain("Rate not supported.");
