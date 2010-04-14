@@ -7,20 +7,20 @@
 #include "gpsd_config.h"
 #include <sys/types.h>
 #ifndef S_SPLINT_S
- #ifdef HAVE_SYS_SOCKET_H
-  #include <sys/socket.h>
- #else
-  #define AF_UNSPEC 0
- #endif /* HAVE_SYS_SOCKET_H */
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#else
+#define AF_UNSPEC 0
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <sys/time.h>
 #include <stdio.h>
 #include <math.h>
 #ifndef S_SPLINT_S
- #ifdef HAVE_NETDB_H
-  #include <netdb.h>
- #endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
@@ -29,15 +29,20 @@
 #include "gpsd.h"
 #include "bsd-base64.h"
 
-struct ntrip_stream_t {
+struct ntrip_stream_t
+{
     char mountpoint[101];
-    enum { fmt_rtcm2, fmt_rtcm2_0, fmt_rtcm2_1, fmt_rtcm2_2, fmt_rtcm2_3, fmt_rtcm3, fmt_unknown } format;
+    enum
+    { fmt_rtcm2, fmt_rtcm2_0, fmt_rtcm2_1, fmt_rtcm2_2, fmt_rtcm2_3,
+	    fmt_rtcm3, fmt_unknown } format;
     int carrier;
     double latitude;
     double longitude;
     int nmea;
-    enum { cmp_enc_none, cmp_enc_unknown } compr_encryp;
-    enum { auth_none, auth_basic, auth_digest, auth_unknown } authentication;
+    enum
+    { cmp_enc_none, cmp_enc_unknown } compr_encryp;
+    enum
+    { auth_none, auth_basic, auth_digest, auth_unknown } authentication;
     int fee;
     int bitrate;
 };
@@ -55,12 +60,14 @@ struct ntrip_stream_t {
 static struct ntrip_stream_t ntrip_stream;
 
 /*@ -temptrans -mustfreefresh @*/
-static /*@null@*/char *ntrip_field_iterate(/*@null@*/char *start, /*@null@*/char *prev, const char *eol)
+static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
+					     /*@null@*/ char *prev,
+					     const char *eol)
 {
     char *s, *t, *u;
 
     if (start)
-	    s = start;
+	s = start;
     else {
 	if (!prev)
 	    return NULL;
@@ -77,15 +84,16 @@ static /*@null@*/char *ntrip_field_iterate(/*@null@*/char *start, /*@null@*/char
     if ((t = strstr(t, ";")))
 	*t = '\0';
 
-    gpsd_report(LOG_RAW, "Next Ntrip source table field %s\n", s);	
+    gpsd_report(LOG_RAW, "Next Ntrip source table field %s\n", s);
 
     return s;
 }
+
 /*@ +temptrans +mustfreefresh @*/
 
 /*@ -mustfreefresh @*/
 static void ntrip_str_parse(char *str, size_t len,
-			    /*@out@*/struct ntrip_stream_t *hold)
+			    /*@out@*/ struct ntrip_stream_t *hold)
 {
     char *s, *eol = str + len;
 
@@ -98,17 +106,17 @@ static void ntrip_str_parse(char *str, size_t len,
     s = ntrip_field_iterate(NULL, s, eol);
     /* <format> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	if (strcasecmp("RTCM 2", s)==0)
+	if (strcasecmp("RTCM 2", s) == 0)
 	    hold->format = fmt_rtcm2;
-	else if (strcasecmp("RTCM 2.0", s)==0)
+	else if (strcasecmp("RTCM 2.0", s) == 0)
 	    hold->format = fmt_rtcm2_0;
-	else if (strcasecmp("RTCM 2.1", s)==0)
+	else if (strcasecmp("RTCM 2.1", s) == 0)
 	    hold->format = fmt_rtcm2_1;
-	else if (strcasecmp("RTCM 2.2", s)==0)
+	else if (strcasecmp("RTCM 2.2", s) == 0)
 	    hold->format = fmt_rtcm2_2;
-	else if (strcasecmp("RTCM 2.3", s)==0)
+	else if (strcasecmp("RTCM 2.3", s) == 0)
 	    hold->format = fmt_rtcm2_3;
-	else if (strcasecmp("RTCM 3.0", s)==0)
+	else if (strcasecmp("RTCM 3.0", s) == 0)
 	    hold->format = fmt_rtcm3;
 	else
 	    hold->format = fmt_unknown;
@@ -142,18 +150,18 @@ static void ntrip_str_parse(char *str, size_t len,
     s = ntrip_field_iterate(NULL, s, eol);
     /* <compr-encryp> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	if (strcasecmp("none", s)==0)
+	if (strcasecmp("none", s) == 0)
 	    hold->compr_encryp = cmp_enc_none;
 	else
 	    hold->compr_encryp = cmp_enc_unknown;
     }
     /* <authentication> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	if (strcasecmp("N", s)==0)
+	if (strcasecmp("N", s) == 0)
 	    hold->authentication = auth_none;
-	else if (strcasecmp("B", s)==0)
+	else if (strcasecmp("B", s) == 0)
 	    hold->authentication = auth_basic;
-	else if (strcasecmp("D", s)==0)
+	else if (strcasecmp("D", s) == 0)
 	    hold->authentication = auth_digest;
 	else
 	    hold->authentication = auth_unknown;
@@ -169,6 +177,7 @@ static void ntrip_str_parse(char *str, size_t len,
     /* ...<misc> */
     while ((s = ntrip_field_iterate(NULL, s, eol)));
 }
+
 /*@ +mustfreefresh @*/
 
 static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
@@ -185,9 +194,9 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	char *eol;
 	ssize_t rlen;
 
-	memset(&buf[len], 0, (size_t)(blen - len));
+	memset(&buf[len], 0, (size_t) (blen - len));
 
-	if ((rlen = recv(fd, &buf[len], (size_t)(blen - 1 - len), 0)) == -1) {
+	if ((rlen = recv(fd, &buf[len], (size_t) (blen - 1 - len), 0)) == -1) {
 	    if (errno == EINTR)
 		continue;
 	    return -1;
@@ -202,22 +211,26 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 
 	if (!srctbl) {
 	    /* parse SOURCETABLE */
-	    if (strncmp(line,NTRIP_SOURCETABLE,strlen(NTRIP_SOURCETABLE))==0) {
+	    if (strncmp(line, NTRIP_SOURCETABLE, strlen(NTRIP_SOURCETABLE)) ==
+		0) {
 		srctbl = true;
-		llen = (ssize_t)strlen(NTRIP_SOURCETABLE);
+		llen = (ssize_t) strlen(NTRIP_SOURCETABLE);
 		line += llen;
 		len -= llen;
 	    } else {
-		gpsd_report(LOG_WARN, "Received unexpexted Ntrip reply %s.\n", buf);
+		gpsd_report(LOG_WARN, "Received unexpexted Ntrip reply %s.\n",
+			    buf);
 		return -1;
 	    }
 	}
 	if (!srctbl)
-		return -1;
+	    return -1;
 
 	while (len > 0) {
 	    /* parse ENDSOURCETABLE */
-	    if (strncmp(line, NTRIP_ENDSOURCETABLE, strlen(NTRIP_ENDSOURCETABLE))==0)
+	    if (strncmp
+		(line, NTRIP_ENDSOURCETABLE,
+		 strlen(NTRIP_ENDSOURCETABLE)) == 0)
 		goto done;
 
 	    if (!(eol = strstr(line, NTRIP_BR)))
@@ -226,14 +239,15 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	    gpsd_report(LOG_IO, "next Ntrip source table line %s\n", line);
 
 	    *eol = '\0';
-	    llen = (ssize_t)(eol - line);
+	    llen = (ssize_t) (eol - line);
 
 	    /* todo: parse headers */
 
 	    /* parse STR */
-	    if (strncmp(line, NTRIP_STR, strlen(NTRIP_STR))==0) {
-		ntrip_str_parse(line + strlen(NTRIP_STR), (size_t)(llen - strlen(NTRIP_STR)), &hold);
-		if (stream!=NULL && strcmp(stream, hold.mountpoint)==0) {
+	    if (strncmp(line, NTRIP_STR, strlen(NTRIP_STR)) == 0) {
+		ntrip_str_parse(line + strlen(NTRIP_STR),
+				(size_t) (llen - strlen(NTRIP_STR)), &hold);
+		if (stream != NULL && strcmp(stream, hold.mountpoint) == 0) {
 		    /* todo: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
 		    if (hold.format == fmt_unknown) {
 			gpsd_report(LOG_ERROR,
@@ -260,7 +274,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 		    match = true;
 		}
 		/* todo: compare stream location to own location to
-		   find nearest stream if user hasn't provided one */
+		 * find nearest stream if user hasn't provided one */
 	    }
 	    /* todo: parse CAS */
 	    /* else if (strncmp(line, NTRIP_CAS, strlen(NTRIP_CAS))==0); */
@@ -271,51 +285,52 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	    llen += strlen(NTRIP_BR);
 	    line += llen;
 	    len -= llen;
-	    gpsd_report(LOG_RAW, "Remaining Ntrip source table buffer %zd %s\n", len, line);
+	    gpsd_report(LOG_RAW,
+			"Remaining Ntrip source table buffer %zd %s\n", len,
+			line);
 	}
 	/* message too big to fit into buffer */
 	if (len == blen - 1)
 	    return -1;
 
 	if (len > 0)
-	    memcpy(buf, &buf[rlen-len], (size_t)len);
+	    memcpy(buf, &buf[rlen - len], (size_t) len);
     }
 
-done:
+  done:
     return match ? 0 : -1;
 }
 
 static int ntrip_stream_probe(const char *caster,
 			      const char *port,
-			      const char *stream,
-			      struct ntrip_stream_t *keep)
+			      const char *stream, struct ntrip_stream_t *keep)
 {
     int ret;
     socket_t dsock;
     char buf[BUFSIZ];
 
     if ((dsock = netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) == -1) {
-	    printf("ntrip stream connect error %d\n", dsock);
-	    return -1;
+	printf("ntrip stream connect error %d\n", dsock);
+	return -1;
     }
     (void)snprintf(buf, sizeof(buf),
 		   "GET / HTTP/1.1\r\n"
 		   "User-Agent: NTRIP gpsd/%s\r\n"
-		   "Connection: close\r\n"
-		   "\r\n",
-		   VERSION);
-    if (write(dsock, buf, strlen(buf)) != (ssize_t)strlen(buf)) {
-	    printf("ntrip stream write error %d\n", dsock);
-	    return -1;
+		   "Connection: close\r\n" "\r\n", VERSION);
+    if (write(dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
+	printf("ntrip stream write error %d\n", dsock);
+	return -1;
     }
-    ret = ntrip_sourcetable_parse(dsock, buf, (ssize_t)sizeof(buf), stream, keep);
+    ret =
+	ntrip_sourcetable_parse(dsock, buf, (ssize_t) sizeof(buf), stream,
+				keep);
     (void)close(dsock);
     return ret;
 }
 
 static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
-			     const char *auth, 
-			     /*@out@*/char buf[], 
+			     const char *auth,
+			     /*@out@*/ char buf[],
 			     size_t size)
 {
     memset(buf, 0, size);
@@ -326,7 +341,9 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
 	if (!auth)
 	    return -1;
 	memset(authenc, 0, sizeof(authenc));
-	if (b64_ntop((unsigned char *) auth, strlen(auth), authenc, sizeof(authenc) - 1) < 0)
+	if (b64_ntop
+	    ((unsigned char *)auth, strlen(auth), authenc,
+	     sizeof(authenc) - 1) < 0)
 	    return -1;
 	(void)snprintf(buf, size - 1, "Authorization: Basic %s\r\n", authenc);
     } else {
@@ -335,11 +352,10 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
     return 0;
 }
 
-/*@ -nullpass @*/ /* work around a splint bug */
-static int ntrip_stream_open(const char *caster,
-			     const char *port,
-			     /*@null@*/const char *auth,
-			     struct gps_context_t *context, 
+		  /*@ -nullpass @*//* work around a splint bug */
+static int ntrip_stream_open(const char *caster, const char *port,
+			     /*@null@*/ const char *auth,
+			     struct gps_context_t *context,
 			     struct ntrip_stream_t *stream)
 {
     char buf[BUFSIZ];
@@ -348,10 +364,11 @@ static int ntrip_stream_open(const char *caster,
 
     if (ntrip_auth_encode(stream, auth, authstr, sizeof(authstr)) < 0) {
 	gpsd_report(LOG_ERROR, "User-ID and password needed for %s:%s/%s\n",
-		    caster, port, stream->mountpoint);	
+		    caster, port, stream->mountpoint);
 	return -1;
     }
-    if ((context->dsock = netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) < 0)
+    if ((context->dsock =
+	 netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) < 0)
 	return -1;
 
     (void)snprintf(buf, sizeof(buf),
@@ -360,11 +377,10 @@ static int ntrip_stream_open(const char *caster,
 		   "Accept: rtk/rtcm, dgps/rtcm\r\n"
 		   "%s"
 		   "Connection: close\r\n"
-		   "\r\n",
-		   stream->mountpoint, VERSION, authstr);
-    if (write(context->dsock, buf, strlen(buf)) != (ssize_t)strlen(buf)) {
-	    printf("ntrip stream write error on %d\n", context->dsock);
-	    return -1;
+		   "\r\n", stream->mountpoint, VERSION, authstr);
+    if (write(context->dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
+	printf("ntrip stream write error on %d\n", context->dsock);
+	return -1;
     }
 
     memset(buf, 0, sizeof(buf));
@@ -373,20 +389,23 @@ static int ntrip_stream_open(const char *caster,
 
     /* parse 401 Unauthorized */
     if (strstr(buf, NTRIP_UNAUTH)) {
-	gpsd_report(LOG_ERROR, "%s not authorized for Ntrip stream %s:%s/%s\n",
-		    auth, caster, port, stream->mountpoint);	
+	gpsd_report(LOG_ERROR,
+		    "%s not authorized for Ntrip stream %s:%s/%s\n", auth,
+		    caster, port, stream->mountpoint);
 	goto close;
     }
     /* parse SOURCETABLE */
     if (strstr(buf, NTRIP_SOURCETABLE)) {
-	gpsd_report(LOG_ERROR, "Broadcaster doesn't recognize Ntrip stream %s:%s/%s\n",
-		    caster, port, stream->mountpoint);	
+	gpsd_report(LOG_ERROR,
+		    "Broadcaster doesn't recognize Ntrip stream %s:%s/%s\n",
+		    caster, port, stream->mountpoint);
 	goto close;
     }
     /* parse ICY 200 OK */
     if (!strstr(buf, NTRIP_ICY)) {
-	gpsd_report(LOG_ERROR, "Unknown reply %s from Ntrip service %s:%s/%s\n",
-		    buf, caster, port, stream->mountpoint);	
+	gpsd_report(LOG_ERROR,
+		    "Unknown reply %s from Ntrip service %s:%s/%s\n", buf,
+		    caster, port, stream->mountpoint);
 	goto close;
     }
     opts = fcntl(context->dsock, F_GETFL);
@@ -399,10 +418,11 @@ static int ntrip_stream_open(const char *caster,
     context->netgnss_privdata = stream;
 #endif
     return context->dsock;
-close:
+  close:
     (void)close(context->dsock);
     return -1;
 }
+
 /*@ +nullpass @*/
 
 /*@ -branchstate @*/
@@ -417,12 +437,13 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 
     /*@ -boolops @*/
     if ((amp = strchr(caster, '@')) != NULL) {
-	if (((colon = strchr(caster, ':')) != NULL) &&  colon < amp) { 
+	if (((colon = strchr(caster, ':')) != NULL) && colon < amp) {
 	    auth = caster;
 	    *amp = '\0';
 	    caster = amp + 1;
 	} else {
-	    gpsd_report(LOG_ERROR, "can't extract user-ID and password from %s\n",
+	    gpsd_report(LOG_ERROR,
+			"can't extract user-ID and password from %s\n",
 			caster);
 	    return -1;
 	}
@@ -433,7 +454,8 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	stream = slash + 1;
     } else {
 	/* todo: add autoconnect like in dgpsip.c */
-	gpsd_report(LOG_ERROR, "can't extract Ntrip stream from %s\n", caster);
+	gpsd_report(LOG_ERROR, "can't extract Ntrip stream from %s\n",
+		    caster);
 	return -1;
     }
     if ((colon = strchr(caster, ':')) != NULL) {
@@ -446,19 +468,22 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	    port = DEFAULT_RTCM_PORT;
     }
     if (ntrip_stream_probe(caster, port, stream, &ntrip_stream)) {
-	gpsd_report(LOG_ERROR, "unable to probe for data about stream %s:%s/%s\n",
+	gpsd_report(LOG_ERROR,
+		    "unable to probe for data about stream %s:%s/%s\n",
 		    caster, port, stream);
 	return -1;
     }
     ret = ntrip_stream_open(caster, port, auth, context, &ntrip_stream);
     if (ret >= 0)
-	gpsd_report(LOG_PROG,"connection to Ntrip broadcaster %s established.\n",
+	gpsd_report(LOG_PROG,
+		    "connection to Ntrip broadcaster %s established.\n",
 		    caster);
     else
 	gpsd_report(LOG_ERROR, "can't connect to Ntrip stream %s:%s/%s.\n",
 		    caster, port, stream);
     return ret;
 }
+
 /*@ +branchstate @*/
 
 void ntrip_report(struct gps_device_t *session)
@@ -469,13 +494,14 @@ void ntrip_report(struct gps_device_t *session)
      * 10 is an arbitrary number, the point is to have gotten several good
      * fixes before reporting usage to our Ntrip caster.
      */
-    if (stream!=NULL && stream->nmea!=0
+    if (stream != NULL && stream->nmea != 0
 	&& session->context->fixcnt > 10 && !session->context->sentdgps) {
 	session->context->sentdgps = true;
 	if (session->context->dsock > -1) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(session, buf, sizeof(buf));
-	    if (write(session->context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
+	    if (write(session->context->dsock, buf, strlen(buf)) ==
+		(ssize_t) strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s", buf);
 	    else
 		gpsd_report(LOG_IO, "ntrip report write failed");

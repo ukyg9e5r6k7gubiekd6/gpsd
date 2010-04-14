@@ -21,12 +21,12 @@
 #endif
 #endif /* S_SPLINT_S */
 #ifndef S_SPLINT_S
- #ifdef HAVE_NETDB_H
-  #include <netdb.h>
- #endif /* HAVE_NETDB_H */
- #ifdef HAVE_ARPA_INET_H
-  #include <arpa/inet.h>
- #endif /* HAVE_ARPA_INET_H */
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif /* HAVE_NETDB_H */
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif /* HAVE_ARPA_INET_H */
 #endif /* S_SPLINT_S */
 #include <errno.h>
 #include <stdlib.h>
@@ -43,7 +43,8 @@
 #endif
 
 /*@-mustfreefresh -usedef@*/
-socket_t netlib_connectsock(int af, const char *host, const char *service, const char *protocol)
+socket_t netlib_connectsock(int af, const char *host, const char *service,
+			    const char *protocol)
 {
     struct protoent *ppe;
     struct addrinfo hints;
@@ -66,8 +67,8 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
     hints.ai_family = af;
     hints.ai_socktype = type;
     hints.ai_protocol = proto;
-#ifndef S_SPLINT_S 
-    if((ret = getaddrinfo(host, service, &hints, &result))) {
+#ifndef S_SPLINT_S
+    if ((ret = getaddrinfo(host, service, &hints, &result))) {
 	return NL_NOHOST;
     }
 #endif /* S_SPLINT_S */
@@ -85,10 +86,11 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
     /*@-type@*/
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 	ret = NL_NOCONNECT;
-	if((s = socket(rp->ai_family, rp->ai_socktype,
-			rp->ai_protocol)) < 0)
+	if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
 	    ret = NL_NOSOCK;
-	else if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1)
+	else if (setsockopt
+		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
+		  sizeof(one)) == -1)
 	    ret = NL_NOSOCKOPT;
 	else if (connect(s, rp->ai_addr, rp->ai_addrlen) == 0) {
 	    ret = 0;
@@ -101,7 +103,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 	}
     }
     /*@+type@*/
-#ifndef S_SPLINT_S 
+#ifndef S_SPLINT_S
     freeaddrinfo(result);
 #endif /* S_SPLINT_S */
     if (ret)
@@ -109,10 +111,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 
 #ifdef IPTOS_LOWDELAY
     {
-    int opt = IPTOS_LOWDELAY;
-    /*@ -unrecog @*/
-    (void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
-    /*@ +unrecog @*/
+	int opt = IPTOS_LOWDELAY;
+	/*@ -unrecog @*/
+	(void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
+	/*@ +unrecog @*/
     }
 #endif
 #ifdef TCP_NODELAY
@@ -120,30 +122,39 @@ socket_t netlib_connectsock(int af, const char *host, const char *service, const
 	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof one);
 #endif
 
-    gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n", s);
+    gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
+		s);
     return s;
     /*@ +type +mustfreefresh @*/
 }
+
 /*@+mustfreefresh +usedef@*/
 
 char /*@observer@*/ *netlib_errstr(const int err)
 {
     switch (err) {
-    case NL_NOSERVICE:  return "can't get service entry";
-    case NL_NOHOST:     return "can't get host entry";
-    case NL_NOPROTO:    return "can't get protocol entry";
-    case NL_NOSOCK:     return "can't create socket";
-    case NL_NOSOCKOPT:  return "error SETSOCKOPT SO_REUSEADDR";
-    case NL_NOCONNECT:  return "can't connect to host/port pair";
-    default:		return "unknown error";
+    case NL_NOSERVICE:
+	return "can't get service entry";
+    case NL_NOHOST:
+	return "can't get host entry";
+    case NL_NOPROTO:
+	return "can't get protocol entry";
+    case NL_NOSOCK:
+	return "can't create socket";
+    case NL_NOSOCKOPT:
+	return "error SETSOCKOPT SO_REUSEADDR";
+    case NL_NOCONNECT:
+	return "can't connect to host/port pair";
+    default:
+	return "unknown error";
     }
 }
 
 char *netlib_sock2ip(int fd)
 {
     sockaddr_t fsin;
-    socklen_t alen = (socklen_t)sizeof(fsin);
-    /*@i1@*/static char ip[INET6_ADDRSTRLEN];
+    socklen_t alen = (socklen_t) sizeof(fsin);
+    /*@i1@*/ static char ip[INET6_ADDRSTRLEN];
     int r;
 
     r = getpeername(fd, &(fsin.sa), &alen);
@@ -152,24 +163,25 @@ char *netlib_sock2ip(int fd)
 	switch (fsin.sa.sa_family) {
 	case AF_INET:
 	    r = !inet_ntop(fsin.sa_in.sin_family, &(fsin.sa_in.sin_addr),
-		    ip, sizeof(ip));
+			   ip, sizeof(ip));
 	    break;
 #ifdef IPV6_ENABLE
 	case AF_INET6:
 	    r = !inet_ntop(fsin.sa_in6.sin6_family, &(fsin.sa_in6.sin6_addr),
-		    ip, sizeof(ip));
+			   ip, sizeof(ip));
 	    break;
 #endif
 	default:
 	    gpsd_report(LOG_ERROR, "Unhandled address family %d in %s\n",
-			    fsin.sa.sa_family, __FUNCTION__);
-	    (void)strlcpy(ip,"<unknown AF>", sizeof(ip));
+			fsin.sa.sa_family, __FUNCTION__);
+	    (void)strlcpy(ip, "<unknown AF>", sizeof(ip));
 	    return ip;
 	}
     }
-    if (r != 0){
-	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r, strerror(errno), errno);
-	(void)strlcpy(ip,"<unknown>", sizeof(ip));
+    if (r != 0) {
+	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r,
+		    strerror(errno), errno);
+	(void)strlcpy(ip, "<unknown>", sizeof(ip));
     }
     /*@ +branchstate +unrecog @*/
     return ip;
