@@ -32,41 +32,42 @@
  *      deg_ddmmss : return DD MM' SS.sss"
  *
  */
-/*@observer@*/char *deg_to_str( enum deg_str_type type,  double f) 
+/*@observer@*/ char *deg_to_str(enum deg_str_type type, double f)
 {
     static char str[40];
     int dsec, sec, deg, min;
     long frac_deg;
     double fdsec, fsec, fdeg, fmin;
 
-    if ( f < 0 || f > 360 ) {
-	(void)strlcpy( str, "nan", 40);
+    if (f < 0 || f > 360) {
+	(void)strlcpy(str, "nan", 40);
 	return str;
     }
 
-    fmin = modf( f, &fdeg);
+    fmin = modf(f, &fdeg);
     deg = (int)fdeg;
     frac_deg = (long)(fmin * 1000000);
 
-    if ( deg_dd == type ) {
+    if (deg_dd == type) {
 	/* DD.dddddd */
-	(void)snprintf(str, sizeof(str), "%3d.%06ld", deg,frac_deg);
+	(void)snprintf(str, sizeof(str), "%3d.%06ld", deg, frac_deg);
 	return str;
     }
-    fsec = modf( fmin * 60, &fmin);
+    fsec = modf(fmin * 60, &fmin);
     min = (int)fmin;
     sec = (int)(fsec * 10000.0);
 
-    if ( deg_ddmm == type ) {
+    if (deg_ddmm == type) {
 	/* DD MM.mmmm */
-	(void)snprintf(str,sizeof(str), "%3d %02d.%04d'", deg,min,sec);
+	(void)snprintf(str, sizeof(str), "%3d %02d.%04d'", deg, min, sec);
 	return str;
     }
     /* else DD MM SS.sss */
-    fdsec = modf( fsec * 60, &fsec);
+    fdsec = modf(fsec * 60, &fsec);
     sec = (int)fsec;
     dsec = (int)(fdsec * 1000.0);
-    (void)snprintf(str,sizeof(str), "%3d %02d' %02d.%03d\"", deg,min,sec,dsec);
+    (void)snprintf(str, sizeof(str), "%3d %02d' %02d.%03d\"", deg, min, sec,
+		   dsec);
 
     return str;
 }
@@ -102,35 +103,34 @@
  */
 enum unit gpsd_units(void)
 {
-	char *envu = NULL;
+    char *envu = NULL;
 
 #ifdef HAVE_SETLOCALE
-	(void)setlocale(LC_NUMERIC, "C");
+    (void)setlocale(LC_NUMERIC, "C");
 #endif
-  	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
-		if (0 == strcasecmp(envu, "imperial")) {
-			return imperial;
-		}
-		if (0 == strcasecmp(envu, "nautical")) {
-			return nautical;
-		}
-		if (0 == strcasecmp(envu, "metric")) {
-			return metric;
-		}
-		/* unrecognized, ignore it */
+    if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
+	if (0 == strcasecmp(envu, "imperial")) {
+	    return imperial;
 	}
- 	if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu != '\0') 
- 	    || ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
-	    if (strncasecmp(envu, "en_US", 5)==0 
-		    || strcasecmp(envu, "C")==0
-		    || strcasecmp(envu, "POSIX")==0) {
-			return imperial;
-		}
-		/* Other, must be metric */
-		return metric;
+	if (0 == strcasecmp(envu, "nautical")) {
+	    return nautical;
 	}
-	/* TODO: allow a compile time default here */
-	return unspecified;
+	if (0 == strcasecmp(envu, "metric")) {
+	    return metric;
+	}
+	/* unrecognized, ignore it */
+    }
+    if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu != '\0')
+	|| ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
+	if (strncasecmp(envu, "en_US", 5) == 0
+	    || strcasecmp(envu, "C") == 0 || strcasecmp(envu, "POSIX") == 0) {
+	    return imperial;
+	}
+	/* Other, must be metric */
+	return metric;
+    }
+    /* TODO: allow a compile time default here */
+    return unspecified;
 }
 
 /*@ -observertrans -statictrans -mustfreeonly -branchstate -kepttrans @*/
@@ -141,14 +141,14 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     source->port = DEFAULT_GPSD_PORT;
     source->device = NULL;
 
-    /*@-usedef@ Sigh, splint is buggy*/
+    /*@-usedef@ Sigh, splint is buggy */
     if (arg != NULL) {
 	char *colon1, *skipto, *rbrk;
 	source->spec = strdup(arg);
 	assert(source->spec != NULL);
 
 	skipto = source->spec;
-	if (*skipto == '[' && (rbrk = strchr(skipto, ']'))!=NULL) {
+	if (*skipto == '[' && (rbrk = strchr(skipto, ']')) != NULL) {
 	    skipto = rbrk;
 	}
 	colon1 = strchr(skipto, ':');
@@ -182,8 +182,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     /*@+modobserver@*/
     /*@+usedef@*/
 }
+
 /*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 
 /* gpsclient.c ends here */
-
-
