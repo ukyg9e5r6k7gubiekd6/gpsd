@@ -411,7 +411,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned int i, words[10], chan, svid;
-    unsigned int parity1, parity9;
+    unsigned int preamble, parity1, parity9;
 
     if (len != 43)
 	return 0;
@@ -425,39 +425,46 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
     /* FIXME, the data is flakey, need to check  'parity' which is really a
      * hamming code */
 
-    /* ICD words are really 30 bits, the right most 6 bits are 'parity'
-     * so mask the unused top 2 bits and shift off the 6 'parity'
-     * that leaves us with 3 real bytes per word */
-    words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
-    words[1] = ((unsigned int)getbeul(buf, 7) & 0x3fffffff) >> 6;
-    words[2] = ((unsigned int)getbeul(buf, 11) & 0x3fffffff) >> 6;
-    words[3] = ((unsigned int)getbeul(buf, 15) & 0x3fffffff) >> 6;
-    words[4] = ((unsigned int)getbeul(buf, 19) & 0x3fffffff) >> 6;
-    words[5] = ((unsigned int)getbeul(buf, 23) & 0x3fffffff) >> 6;
-    words[6] = ((unsigned int)getbeul(buf, 27) & 0x3fffffff) >> 6;
-    words[7] = ((unsigned int)getbeul(buf, 31) & 0x3fffffff) >> 6;
-    words[8] = ((unsigned int)getbeul(buf, 35) & 0x3fffffff) >> 6;
-    words[9] = ((unsigned int)getbeul(buf, 39) & 0x3fffffff) >> 6;
-    gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08\n");
+    /* ICD words are really 30 bits, and their LSB is the LSB of the 32 bit
+     * int transporting them. The right most 6 bits are 'parity' and the top
+     * 2 bits are the bottom two parity bits from the previous word. Mask and
+     * shift these away to leave us with 3 data bytes per word */
+	words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
+	preamble = words[0] >> 16;
+	if (preamble  == 0x8b){
+		preamble ^= 0xff;
+		words[0] ^= 0xffffff;
+	}
 
-    // Look for the preamble in the first byte
-    // OR its complement
-    // ckuethe says to check message 10, code 2 to see if this data is valid
-    words[0] &= 0xff0000;
-    if (words[0] != 0x8b0000 && words[0] != 0x740000) {
+	parity1 = parity9 = 0;
+	for (i = 1; i < 10; i++) {
+		int invert;
+		words[i] = (unsigned int)getbeul(buf, 4*i + 3);
+		invert = (words[i] & 0x40000000) ? 1 : 0;
+		if (i == 1) {
+			parity1 = words[1] & 0x3;
+			if (!invert)
+				parity1 ^= 0x3;
+		}
+		if (i == 9) {
+			parity9 = words[9] & 0x3;
+			if (!invert)
+				parity9 ^= 0x3;
+		}
+		/* inverted the data, invert it back */
+		if (invert)
+			words[i] ^= 0xffffffff;
+		words[i] = (words[i] & 0x3fffffff) >> 6;
+	}
+    gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08: %2d %2d "
+		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
+		chan, svid,
+		words[0], words[1], words[2], words[3], words[4],
+		words[5], words[6], words[7], words[8], words[9]);
+    // Look for the preamble in the first byte OR its complement
+    if (preamble != 0x74) {
        gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
        return 0;
-    }
-    parity1 = (unsigned int)getbeul(buf, 7) & 0x3;
-    parity9 = (unsigned int)getbeul(buf, 39) & 0x3;
-    if (words[0] == 0x740000) {
-        //gpsd_report(LOG_PROG, "SiRF: 50BPS uncomplement\n");
-        /* the SiRF spontaneously inverted the data, invert it back */
-	for (i = 1; i < 10; i++) {
-	    words[i] ^= 0xffffff;
-	}
-	parity1 ^= 0x3;
-	parity9 ^= 0x3;
     }
     // after inversion corrected, check for mandatory zeros at
     // end of word 1, per Carl at Sirf
