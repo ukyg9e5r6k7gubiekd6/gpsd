@@ -612,7 +612,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type22.channel_a    = UBITS(40, 12);
 	    ais->type22.channel_b    = UBITS(52, 12);
 	    ais->type22.txrx         = UBITS(64, 4);
@@ -630,7 +629,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type22.band_a       = UBITS(140, 1);
 	    ais->type22.band_b       = UBITS(141, 1);
 	    ais->type22.zonesize     = UBITS(142, 3);
-	    /* *INDENT-ON* */
 	    break;
 	case 23:	/* Group Assignment Command */
 	    if (ais_context->bitlen != 160) {
@@ -638,7 +636,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type23.ne_lon       = SBITS(40, 18);
 	    ais->type23.ne_lat       = SBITS(58, 17);
 	    ais->type23.sw_lon       = SBITS(75, 18);
@@ -648,7 +645,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type23.txrx         = UBITS(144, 4);
 	    ais->type23.interval     = UBITS(146, 4);
 	    ais->type23.quiet        = UBITS(150, 4);
-	    /* *INDENT-ON* */
 	    break;
 	case 24:	/* Class B CS Static Data Report */
 	    switch (UBITS(38, 2)) {
@@ -695,7 +691,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type25.addressed	= (bool)UBITS(38, 1);
 	    ais->type25.structured	= (bool)UBITS(39, 1);
 	    if (ais_context->bitlen < (40 + (16*ais->type25.structured) + (30*ais->type25.addressed))) {
@@ -706,7 +701,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		ais->type25.dest_mmsi   = UBITS(40, 30);
 	    if (ais->type25.structured)
 		ais->type25.app_id      = UBITS(40+ais->type25.addressed*30,16);
-	    /* *INDENT-ON* */
 	    /*
 	     * Not possible to do this right without machinery we
 	     * don't yet have.  The problem is that if the addressed
@@ -733,7 +727,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type26.addressed	= (bool)UBITS(38, 1);
 	    ais->type26.structured	= (bool)UBITS(39, 1);
 	    if (ais->type26.addressed)
@@ -741,7 +734,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    if (ais->type26.structured)
 		ais->type26.app_id      = UBITS(40+ais->type26.addressed*30,16);
 	    ais->type26.bitcount        = ais_context->bitlen - 60 - 16*ais->type26.structured;
-	    /* *INDENT-ON* */
 	    (void)memcpy(ais->type26.bitdata,
 			 (char *)ais_context->bits+5 + 2 * ais->type26.structured,
 			 (ais->type26.bitcount + 7) / 8);
