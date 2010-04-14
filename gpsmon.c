@@ -837,12 +837,14 @@ int main(int argc, char **argv)
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
 			 */
+			/* *INDENT-OFF* */
 			if ((*active)->driver->speed_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->driver->
-				speed_switcher(&session, speed, parity, (int)
-					       stopbits)) {
+			    if ((*active)->
+				driver->speed_switcher(&session, speed,
+						       parity, (int)
+						       stopbits)) {
 				monitor_dump_send();
 				/*
 				 * See the comment attached to the 'B'
@@ -858,11 +860,12 @@ int main(int argc, char **argv)
 						     parity, stopbits);
 			    } else
 				monitor_complain
-				    ("Speed/mode cobination not supported.");
+				    ("Speed/mode combination not supported.");
 			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
 				("Device type has no speed switcher");
+			/* *INDENT-ON* */
 		    } else {
 			line[0] = 'b';
 			/*@ -sefparams @*/
