@@ -69,7 +69,7 @@ int netgnss_poll(struct gps_context_t *context)
 	    context->rtcmbytes = 0;
 	    return -1;
 	} else {
-	    context->rtcmbytes = (size_t)rtcmbytes;
+	    context->rtcmbytes = (size_t) rtcmbytes;
 	    context->rtcmtime = timestamp();
 	}
     }
@@ -104,8 +104,7 @@ void rtcm_relay(struct gps_device_t *session)
 	&& session->device_type->rtcm_writer != NULL) {
 	if (session->device_type->rtcm_writer(session,
 					      session->context->rtcmbuf,
-					      (size_t) session->context->
-					      rtcmbytes) == 0)
+					      session->context->rtcmbytes) == 0)
 	    gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
 	else {
 	    session->rtcmtime = timestamp();
