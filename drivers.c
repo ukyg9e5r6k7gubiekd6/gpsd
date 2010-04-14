@@ -857,11 +857,12 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     uint16_t length = getbeuw(session->packet.inbuffer, 1);
     uint16_t type = getbeuw(session->packet.inbuffer, 3) >> 4;
 
+    /* *INDENT-OFF* */
     gpsd_report(LOG_RAW, "RTCM 3.x packet type %d length %d words: %s\n",
 		type, length, gpsd_hexdump_wrapper(session->packet.inbuffer,
-						   (size_t) (session->gpsdata.
-							     rtcm3.length),
-						   LOG_RAW));
+				   (size_t) (session->gpsdata.rtcm3.length),
+				   LOG_RAW));
+    /* *INDENT-ON* */
     return RTCM3_IS;
 }
 

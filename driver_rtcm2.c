@@ -189,7 +189,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    csp->iodl = m->issue_of_data_link != 0;
 	    csp->health = m->data_health;
 	    /*@+ignoresigns@*/ 
-	    csp->snr =	(int) (m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
+	    csp->snr = (int) (m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
 	    /*@-ignoresigns@*/ 
 	    csp->health_en = m->health_enable != 0;
 	    csp->new_data = m->new_nav_data != 0;

@@ -248,10 +248,12 @@ void nmea_tpv_dump(struct gps_device_t *session,
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp),
 			      len - strlen(bufp));
     }
-    if ((session->gpsdata.
-	 set & (MODE_IS | DOP_IS | USED_IS | HERR_IS | VERR_IS)) != 0)
+    /* *INDENT-OFF* */
+    if ((session->gpsdata.set 
+		& (MODE_IS | DOP_IS | USED_IS | HERR_IS | VERR_IS)) != 0)
 	gpsd_binary_quality_dump(session, bufp + strlen(bufp),
 				 len - strlen(bufp));
+    /* *INDENT-ON* */
 }
 
 void nmea_sky_dump(struct gps_device_t *session,

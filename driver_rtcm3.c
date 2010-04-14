@@ -60,7 +60,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* Other magic values */
 #define INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
-			     /*@ -type @*//* re-enable when we're ready to take this live */
+/* Large case statements make GNU indent very confused */
+/* *INDENT-OFF* */
+/*@ -type @*//* re-enable when we're ready to take this live */
 
 void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
@@ -920,6 +922,7 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 #undef INT
 }
 
+/* *INDENT-ON* */
 /*@ +type @*/
 
 #endif /* RTCM104V3_ENABLE */

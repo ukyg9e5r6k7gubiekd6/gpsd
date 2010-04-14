@@ -47,8 +47,9 @@ struct classmap_t classmap[CLASSMAP_NITEMS] = {
 };
 /* *INDENT-ON* */
 
-char *json_stringify( /*@out@*/ char *to, size_t len, /*@in@ */
-		     const char *from)
+char *json_stringify(/*@out@*/char *to, 
+		      size_t len, 
+		      /*@in@*/const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {
     /*@-temptrans@*/
@@ -794,6 +795,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/
 	break;
     case 5:			/* Ship static and voyage related data */
 	if (scaled) {
+            /* *INDENT-OFF* */
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
@@ -813,13 +815,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/
 			   ais->type5.to_port, ais->type5.to_starboard,
 			   epfd_legends[ais->type5.epfd], ais->type5.month,
 			   ais->type5.day, ais->type5.hour, ais->type5.minute,
-			   ais->type5.draught / 10.0, json_stringify(buf3,
-								     sizeof
-								     (buf3),
-								     ais->
-								     type5.
-								     destination),
+			   ais->type5.draught / 10.0, 
+			   json_stringify(buf3, sizeof(buf3), 
+					  ais->type5.destination),
 			   ais->type5.dte);
+            /* *INDENT-ON* */
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","

@@ -138,7 +138,8 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
 #endif
 }
 
-/*@observer@*/ char *unix_to_iso8601(double fixtime, /*@ out @*/
+/* *INDENT-OFF* */
+/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/
 				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.0Z */
@@ -159,6 +160,7 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
     (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr + 1);
     return isotime;
 }
+/* *INDENT-ON* */
 
 /*
  * The 'week' part of GPS dates are specified in weeks since 0000 on 06
