@@ -420,18 +420,18 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				   sizeof(gpsdata->devices));
 			    gpsdata->devices.ndevices =
 				(int)strtol(sp2 + 2, &sp2, 10);
+			    /* *INDENT-OFF* */
 			    (void)strlcpy(gpsdata->devices.list[0].path,
 					  strtok_r(sp2 + 1, " \r\n", &ns2),
-					  sizeof(gpsdata->devices.list[0].
-						 path));
+					  sizeof(gpsdata->devices.list[0].path));
 			    i = 0;
 			    while ((sp2 =
 				    strtok_r(NULL, " \r\n", &ns2)) != NULL)
 				if (i < MAXUSERDEVS - 1)
 				    (void)strlcpy(gpsdata->devices.list[++i].
 						  path, sp2,
-						  sizeof(gpsdata->devices.
-							 list[0].path));
+						  sizeof(gpsdata->devices.list[0].path));
+			    /* *INDENT-ON* */
 			    free(rc);
 			    gpsdata->set |= DEVICELIST_SET;
 			    gpsdata->devices.time = timestamp();
