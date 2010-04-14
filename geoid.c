@@ -35,12 +35,12 @@ static double bilinear(double x1, double y1, double x2, double y2, double x,
 
 
 /* return geoid separtion (MSL - WGS84) in meters, given a lat/lot in degrees */
-/* *INDENT-OFF* */
-/*@ +charint @*/
 double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
 #define GEOID_COL	37
+    /* *INDENT-OFF* */
+    /*@ +charint @*/
     const char geoid_delta[GEOID_COL*GEOID_ROW]={
 	/* 90S */ -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30, -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,
 	/* 80S */ -53,-54,-55,-52,-48,-42,-38,-38,-29,-26,-26,-24,-23,-21,-19,-16,-12, -8, -4, -1,  1,  4,  4,  6,  5,  4,   2, -6,-15,-24,-33,-40,-48,-50,-53,-52,-53,
@@ -60,36 +60,37 @@ double wgs84_separation(double lat, double lon)
 	/* 60N */   2,  9, 17, 10, 13,  1,-14,-30,-39,-46,-42,-21,  6, 29, 49, 65, 60, 57, 47, 41, 21, 18, 14,  7, -3,-22, -29,-32,-32,-26,-15, -2, 13, 17, 19,  6,  2,
 	/* 70N */   2,  2,  1, -1, -3, -7,-14,-24,-27,-25,-19,  3, 24, 37, 47, 60, 61, 58, 51, 43, 29, 20, 12,  5, -2,-10, -14,-12,-10,-14,-12, -6, -2,  3,  6,  4,  2,
 	/* 80N */   3,  1, -2, -3, -3, -3, -1,  3,  1,  5,  9, 11, 19, 27, 31, 34, 33, 34, 33, 34, 28, 23, 17, 13,  9,  4,   4,  1, -2, -2,  0,  2,  3,  2,  1,  1,  3,
-	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13}; 
-/*@ -charint @*/
-/* *INDENT-ON* */
-int ilat, ilon;
-int ilat1, ilat2, ilon1, ilon2;
+	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13
+    }; 
+    /*@ -charint @*/
+    /* *INDENT-ON* */
+    int ilat, ilon;
+    int ilat1, ilat2, ilon1, ilon2;
 
-ilat = (int)floor((90. + lat) / 10);
-ilon = (int)floor((180. + lon) / 10);
+    ilat = (int)floor((90. + lat) / 10);
+    ilon = (int)floor((180. + lon) / 10);
 
     /* sanity checks to prevent segfault on bad data */
-if ((ilat > 90) || (ilat < -90)) {
-    return 0.0;
-}
-if ((ilon > 180) || (ilon < -180)) {
-    return 0.0;
-}
+    if ((ilat > 90) || (ilat < -90)) {
+	return 0.0;
+    }
+    if ((ilon > 180) || (ilon < -180)) {
+	return 0.0;
+    }
 
-ilat1 = ilat;
-ilon1 = ilon;
-ilat2 = (ilat < GEOID_ROW - 1) ? ilat + 1 : ilat;
-ilon2 = (ilon < GEOID_COL - 1) ? ilon + 1 : ilon;
+    ilat1 = ilat;
+    ilon1 = ilon;
+    ilat2 = (ilat < GEOID_ROW - 1) ? ilat + 1 : ilat;
+    ilon2 = (ilon < GEOID_COL - 1) ? ilon + 1 : ilon;
 
-return bilinear(ilon1 * 10. - 180., ilat1 * 10. - 90.,
-		ilon2 * 10. - 180., ilat2 * 10. - 90.,
-		lon, lat,
-		(double)geoid_delta[ilon1 + ilat1 * GEOID_COL],
-		(double)geoid_delta[ilon2 + ilat1 * GEOID_COL],
-		(double)geoid_delta[ilon1 + ilat2 * GEOID_COL],
-		(double)geoid_delta[ilon2 + ilat2 * GEOID_COL]
-    );
+    return bilinear(ilon1 * 10. - 180., ilat1 * 10. - 90.,
+		    ilon2 * 10. - 180., ilat2 * 10. - 90.,
+		    lon, lat,
+		    (double)geoid_delta[ilon1 + ilat1 * GEOID_COL],
+		    (double)geoid_delta[ilon2 + ilat1 * GEOID_COL],
+		    (double)geoid_delta[ilon1 + ilat2 * GEOID_COL],
+		    (double)geoid_delta[ilon2 + ilat2 * GEOID_COL]
+	);
 }
 
 
