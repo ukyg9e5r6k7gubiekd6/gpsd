@@ -58,7 +58,7 @@
  *   MID 30 Nav Lib SV State Data
  *   MID 31 Nav Lib Initialization data
  * at 1Hz rate */
-static unsigned char enablesubframe[] = { 
+static unsigned char enablesubframe[] = {
     0xa0, 0xa2, 0x00, 0x19,
     0x80,			/* MID 128 initialize Data Source */
     0x00, 0x00, 0x00, 0x00,	/* EXEF X */
@@ -89,7 +89,7 @@ static unsigned char disablesubframe[] = {
     0x00, 0x00, 0xb0, 0xb3
 };
 
-static unsigned char modecontrol[] = { 
+static unsigned char modecontrol[] = {
     0xa0, 0xa2, 0x00, 0x0e,
     0x88,			/* MID 136 Mode Control */
     0x00, 0x00,			/* pad bytes */
@@ -187,8 +187,8 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
     session->msgbuflen = len + 8;
 
     return sirf_write(session->gpsdata.gps_fd,
-		      (unsigned char *)session->msgbuf) ? (int)session->
-	msgbuflen : -1;
+		      (unsigned char *)session->
+		      msgbuf) ? (int)session->msgbuflen : -1;
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 #endif /* ALLOW_CONTROLSEND */
@@ -1310,7 +1310,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    };
 	    /* unset MID 30 0x1e */
 	    /* we do not decode it, so don't send it */
-	    static unsigned char unsetmid30[] = { 
+	    static unsigned char unsetmid30[] = {
 		0xa0, 0xa2, 0x00, 0x08,
 		0xa6,		/* MID 166 */
 		0x00,		/* enable 1 */
