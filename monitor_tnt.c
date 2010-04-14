@@ -36,20 +36,20 @@ static WINDOW *thtmwin;
 static bool tnt_initialize(void)
 {
     /*@ -onlytrans @*/
-    thtmwin  = derwin(devicewin, 6, 80, 0, 0);
+    thtmwin = derwin(devicewin, 6, 80, 0, 0);
     (void)wborder(thtmwin, 0, 0, 0, 0, 0, 0, 0, 0),
-    (void)syncok(thtmwin, true);
+	(void)syncok(thtmwin, true);
     (void)wattrset(thtmwin, A_BOLD);
-    (void)mvwaddstr(thtmwin, 0,  35, " PTNTHTM ");
-    (void)mvwaddstr(thtmwin, 1,  1,  "Heading:          ");
-    (void)mvwaddstr(thtmwin, 2,  1,  "Pitch:            ");
-    (void)mvwaddstr(thtmwin, 3,  1,  "Roll:             ");
-    (void)mvwaddstr(thtmwin, 4,  1,  "Dip:              ");
+    (void)mvwaddstr(thtmwin, 0, 35, " PTNTHTM ");
+    (void)mvwaddstr(thtmwin, 1, 1, "Heading:          ");
+    (void)mvwaddstr(thtmwin, 2, 1, "Pitch:            ");
+    (void)mvwaddstr(thtmwin, 3, 1, "Roll:             ");
+    (void)mvwaddstr(thtmwin, 4, 1, "Dip:              ");
 
-    (void)mvwaddstr(thtmwin, 1,  40, "Magnetometer Status: ");
-    (void)mvwaddstr(thtmwin, 2,  40, "Pitch Status:        ");
-    (void)mvwaddstr(thtmwin, 3,  40, "Roll Status          ");
-    (void)mvwaddstr(thtmwin, 4,  40, "Horizontal Field:    ");
+    (void)mvwaddstr(thtmwin, 1, 40, "Magnetometer Status: ");
+    (void)mvwaddstr(thtmwin, 2, 40, "Pitch Status:        ");
+    (void)mvwaddstr(thtmwin, 3, 40, "Roll Status          ");
+    (void)mvwaddstr(thtmwin, 4, 40, "Horizontal Field:    ");
     (void)wattrset(thtmwin, A_NORMAL);
     /*@ +onlytrans @*/
     return true;
@@ -63,15 +63,15 @@ static void tnt_update(void)
      */
     (void)nmea_parse((char *)session.packet.outbuffer, &session);
 
-    (void)mvwaddstr(thtmwin, 1,  19,  session.driver.nmea.field[1]);
-    (void)mvwaddstr(thtmwin, 2,  19,  session.driver.nmea.field[3]);
-    (void)mvwaddstr(thtmwin, 3,  19,  session.driver.nmea.field[5]);
-    (void)mvwaddstr(thtmwin, 4,  19,  session.driver.nmea.field[7]);
+    (void)mvwaddstr(thtmwin, 1, 19, session.driver.nmea.field[1]);
+    (void)mvwaddstr(thtmwin, 2, 19, session.driver.nmea.field[3]);
+    (void)mvwaddstr(thtmwin, 3, 19, session.driver.nmea.field[5]);
+    (void)mvwaddstr(thtmwin, 4, 19, session.driver.nmea.field[7]);
 
-    (void)mvwaddstr(thtmwin, 1,  61, session.driver.nmea.field[2]);
-    (void)mvwaddstr(thtmwin, 2,  61, session.driver.nmea.field[4]);
-    (void)mvwaddstr(thtmwin, 3,  61, session.driver.nmea.field[6]);
-    (void)mvwaddstr(thtmwin, 4,  61, session.driver.nmea.field[8]);
+    (void)mvwaddstr(thtmwin, 1, 61, session.driver.nmea.field[2]);
+    (void)mvwaddstr(thtmwin, 2, 61, session.driver.nmea.field[4]);
+    (void)mvwaddstr(thtmwin, 3, 61, session.driver.nmea.field[6]);
+    (void)mvwaddstr(thtmwin, 4, 61, session.driver.nmea.field[8]);
 }
 
 static int tnt_command(char line[])
@@ -116,7 +116,7 @@ const struct monitor_object_t tnt_mmt = {
     .update = tnt_update,
     .command = tnt_command,
     .wrap = tnt_wrap,
-    .min_y = 6, .min_x = 80,	/* size of the device window */
+    .min_y = 6,.min_x = 80,	/* size of the device window */
     .driver = &trueNorth,
 };
 #endif /* TNT_ENABLE */
