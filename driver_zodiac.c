@@ -520,6 +520,7 @@ static double zodiac_ntp_offset(struct gps_device_t *session)
 #endif /* NTPSHM_ENABLE */
 
 /* this is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t zodiac_binary =
 {
     .type_name      = "Zodiac binary",	/* full name of type */
@@ -544,5 +545,6 @@ const struct gps_type_t zodiac_binary =
     .ntp_offset     = zodiac_ntp_offset,	/* compute NTO fudge factor */
 #endif /* NTPSHM_ENABLE */
 };
+/* *INDENT-ON* */
 
 #endif /* ZODIAC_ENABLE */

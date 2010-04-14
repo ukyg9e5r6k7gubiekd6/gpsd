@@ -1334,6 +1334,7 @@ static bool sirfbin_speed(struct gps_device_t *session,
 #endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t sirf_binary =
 {
     .type_name      = "SiRF binary",	/* full name of type */
@@ -1358,4 +1359,5 @@ const struct gps_type_t sirf_binary =
     .ntp_offset     = sirf_ntp_offset,
 #endif /* NTP_SHM_ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

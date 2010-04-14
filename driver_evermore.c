@@ -542,6 +542,7 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 
 
 /* this is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t evermore_binary =
 {
     .type_name      = "EverMore binary",	/* full name of type */
@@ -565,5 +566,6 @@ const struct gps_type_t evermore_binary =
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
+/* *INDENT-OM* */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

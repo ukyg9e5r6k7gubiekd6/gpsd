@@ -650,6 +650,7 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
     }
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t superstar2_binary = {
     /* Full name of type */
     .type_name		= "SuperStarII binary",
@@ -686,5 +687,6 @@ const struct gps_type_t superstar2_binary = {
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
+/* *INDENT-ON* */
 };
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

@@ -1261,6 +1261,7 @@ static bool navcom_speed(struct gps_device_t *session,
 #endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t navcom_binary =
 {
     .type_name      = "Navcom binary",  	/* full name of type */
@@ -1285,5 +1286,6 @@ const struct gps_type_t navcom_binary =
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 
 #endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */

@@ -573,6 +573,7 @@ static void itrax_wrap(struct gps_device_t *session)
 }
 
 /*@ -redef @*/
+/* *INDENT-OFF* */
 const static struct gps_type_t itrax = {
     .type_name      = "iTrax",		/* full name of type */
     .packet_type    = NMEA_PACKET;	/* associated lexer packet type */
@@ -596,6 +597,7 @@ const static struct gps_type_t itrax = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */
 

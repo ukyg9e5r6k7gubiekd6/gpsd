@@ -1089,6 +1089,7 @@ static double tsip_ntp_offset(struct gps_device_t *session)
 #endif /* NTPSHM_ENABLE */
 
 /* this is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t tsip_binary =
 {
     .type_name      = "Trimble TSIP",	/* full name of type */
@@ -1113,5 +1114,6 @@ const struct gps_type_t tsip_binary =
     .ntp_offset     = tsip_ntp_offset,
 #endif /* NTPSHM_ENABLE */
 };
+/* *INDENT-ON* */
 
 #endif /* TSIP_ENABLE */

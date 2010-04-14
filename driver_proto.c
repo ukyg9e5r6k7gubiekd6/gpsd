@@ -460,6 +460,7 @@ static void _proto__wrapup(struct gps_device_t *session)
 /* any driver must use to compile.                   */
 
 /* This is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t _proto__binary = {
     /* Full name of type */
     .type_name        = "_proto_ binary",
@@ -496,6 +497,7 @@ const struct gps_type_t _proto__binary = {
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = _proto_ntp_offset,
 #endif /* NTPSHM_ENABLE */
+/* *INDENT-ON* */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */
 

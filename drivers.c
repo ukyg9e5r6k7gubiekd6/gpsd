@@ -213,6 +213,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+/* *INDENT-OFF* */
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -236,7 +237,7 @@ const struct gps_type_t nmea = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
-
+/* *INDENT-ON* */
 
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
 /**************************************************************************
@@ -308,6 +309,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t garmin = {
     .type_name      = "Garmin NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -331,6 +333,7 @@ const struct gps_type_t garmin = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
 #ifdef ASHTECH_ENABLE
@@ -365,6 +368,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -388,6 +392,7 @@ const struct gps_type_t ashtech = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* ASHTECH_ENABLE */
 
 #ifdef FV18_ENABLE
@@ -410,6 +415,7 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
 		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -433,6 +439,7 @@ const struct gps_type_t fv18 = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* FV18_ENABLE */
 
 #ifdef GPSCLOCK_ENABLE
@@ -458,6 +465,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -481,6 +489,7 @@ const struct gps_type_t gpsclock = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* GPSCLOCK_ENABLE */
 
 #ifdef TRIPMATE_ENABLE
@@ -508,6 +517,7 @@ static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
 }
 
+/* *INDENT-OFF* */
 static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
@@ -531,6 +541,7 @@ static const struct gps_type_t tripmate = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* TRIPMATE_ENABLE */
 
 #ifdef EARTHMATE_ENABLE
@@ -554,6 +565,7 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /*@ -redef @*/
+/* *INDENT-OFF* */
 static const struct gps_type_t earthmate = {
     .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
@@ -578,6 +590,7 @@ static const struct gps_type_t earthmate = {
 #endif /* NTPSHM_ ENABLE */
 };
 /*@ -redef @*/
+/* *INDENT-ON* */
 #endif /* EARTHMATE_ENABLE */
 
 #endif /* NMEA_ENABLE */
@@ -675,6 +688,7 @@ static void tnt_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -698,6 +712,7 @@ const struct gps_type_t trueNorth = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif
 
 #ifdef OCEANSERVER_ENABLE
@@ -745,6 +760,7 @@ static void oceanserver_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+/* *INDENT-OFF* */
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -768,6 +784,7 @@ static const struct gps_type_t oceanServer = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif
 
 #ifdef RTCM104V2_ENABLE
@@ -787,6 +804,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
     return RTCM2_IS;
 }
 
+/* *INDENT-ON* */
 static const struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
@@ -810,6 +828,7 @@ static const struct gps_type_t rtcm104v2 = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
 /**************************************************************************
@@ -829,6 +848,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     return RTCM3_IS;
 }
 
+/* *INDENT-OFF* */
 static const struct gps_type_t rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
@@ -852,6 +872,7 @@ static const struct gps_type_t rtcm104v3 = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* RTCM104V3_ENABLE */
 
 #ifdef GARMINTXT_ENABLE
@@ -867,7 +888,7 @@ static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
     return garmintxt_parse(session);
 }
 
-
+/* *INDENT-OFF* */
 static const struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
     .packet_type   = GARMINTXT_PACKET,	/* associated lexer packet type */
@@ -891,6 +912,7 @@ static const struct gps_type_t garmintxt = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* GARMINTXT_ENABLE */
 
 #ifdef MTK3301_ENABLE
@@ -976,6 +998,7 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+/* *INDENT-OFF* */
 const struct gps_type_t mtk3301 = {
     .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
@@ -999,6 +1022,7 @@ const struct gps_type_t mtk3301 = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* MTK3301_ENABLE */
 
 

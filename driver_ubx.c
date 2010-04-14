@@ -737,6 +737,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 #endif /* ALLOW_RECONFIGURE */
 
 /* This is everything we export */
+/* *INDENT-OFF* */
 const struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX binary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
@@ -760,4 +761,5 @@ const struct gps_type_t ubx_binary = {
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

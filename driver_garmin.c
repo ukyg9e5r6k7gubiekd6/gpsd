@@ -1273,6 +1273,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
     return (ssize_t)( 0 == GetPacket( session ) ? 1 : 0);
 }
 
+/* *INDENT-OFF* */
 const struct gps_type_t garmin_usb_binary_old =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
@@ -1297,8 +1298,10 @@ const struct gps_type_t garmin_usb_binary_old =
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* __UNUSED__ */
 
+/* *INDENT-OFF* */
 const struct gps_type_t garmin_usb_binary =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
@@ -1325,7 +1328,9 @@ const struct gps_type_t garmin_usb_binary =
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 
+/* *INDENT-OFF* */
 const struct gps_type_t garmin_ser_binary =
 {
     .type_name      = "Garmin Serial binary",	/* full name of type */
@@ -1350,6 +1355,7 @@ const struct gps_type_t garmin_ser_binary =
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 
 #endif /* GARMIN_ENABLE */
 
