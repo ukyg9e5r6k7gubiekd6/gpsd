@@ -19,7 +19,7 @@
 #include <stdarg.h>
 
 #include "gpsd.h"
-#include "bits.h"	/* for getbeuw(), to extract big-endiamn words */
+#include "bits.h"	/* for getbeuw(), to extract big-endian words */
 
 extern const struct gps_type_t zodiac_binary;
 extern const struct gps_type_t ubx_binary;
@@ -804,7 +804,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
     return RTCM2_IS;
 }
 
-/* *INDENT-ON* */
+/* *INDENT-OFF* */
 static const struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
@@ -1048,6 +1048,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 	return 0;
 }
 
+/* *INDENT-OFF* */
 static const struct gps_type_t aivdm = {
     /* Full name of type */
     .type_name        = "AIVDM",
@@ -1085,6 +1086,7 @@ static const struct gps_type_t aivdm = {
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
 };
+/* *INDENT-ON* */
 #endif /* AIVDM_ENABLE */
 
 extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
