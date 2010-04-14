@@ -97,8 +97,7 @@ static void json_trace(int errlevel, const char *fmt, ...)
 static /*@null@*/ char *json_target_address(const struct json_attr_t *cursor,
 					     /*@null@*/
 					     const struct json_array_t
-					     *parent,
-					     int offset)
+					     *parent, int offset)
 {
     char *targetaddr = NULL;
     if (parent == NULL || parent->element_type != t_structobject) {

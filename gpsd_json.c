@@ -47,7 +47,8 @@ struct classmap_t classmap[CLASSMAP_NITEMS] = {
 };
 /* *INDENT-ON* */
 
-char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
+char *json_stringify( /*@out@*/ char *to, size_t len, /*@in@ */
+		     const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {
     /*@-temptrans@*/
@@ -60,7 +61,7 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
      * each character to generate an up to 6-character Java-style
      * escape
      */
-    for (sp = from; *sp!='\0' && ((tp - to) < ((int)len-5)); sp++) {
+    for (sp = from; *sp != '\0' && ((tp - to) < ((int)len - 5)); sp++) {
 	if (iscntrl(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
@@ -96,37 +97,34 @@ char *json_stringify(/*@out@*/char *to, size_t len, /*@in@*/const char *from)
     /*@+temptrans@*/
 }
 
-void json_version_dump(/*@out@*/char *reply, size_t replylen)
+void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"VERSION\",\"release\":\"%s\",\"rev\":\"%s\",\"proto_major\":%d,\"proto_minor\":%d}\r\n", 
-		   VERSION, REVISION, 
+		   "{\"class\":\"VERSION\",\"release\":\"%s\",\"rev\":\"%s\",\"proto_major\":%d,\"proto_minor\":%d}\r\n",
+		   VERSION, REVISION,
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
 void json_tpv_dump(const struct gps_data_t *gpsdata,
-		   /*@out@*/char *reply, size_t replylen)
+		   /*@out@*/ char *reply, size_t replylen)
 {
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
-		   gpsdata->tag[0]!='\0' ? gpsdata->tag : "-");
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
-		   "\"device\":\"%s\",",
-		   gpsdata->dev.path);
-    if (isnan(gpsdata->fix.time)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"time\":%.3f,",
-		       gpsdata->fix.time);
-    if (isnan(gpsdata->fix.ept)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"ept\":%.3f,",
-		       gpsdata->fix.ept);
+		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
+		   "\"device\":\"%s\",", gpsdata->dev.path);
+    if (isnan(gpsdata->fix.time) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"time\":%.3f,", gpsdata->fix.time);
+    if (isnan(gpsdata->fix.ept) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"ept\":%.3f,", gpsdata->fix.ept);
     /*
      * Suppressing TPV fields that would be invalid because the fix
      * quality doesn't support them is nice for cutting down on the
@@ -138,119 +136,107 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
      * chips, which are quite common.
      */
     if (gpsdata->fix.mode >= MODE_2D) {
-	if (isnan(gpsdata->fix.latitude)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"lat\":%.9f,",
-			   gpsdata->fix.latitude);
-	if (isnan(gpsdata->fix.longitude)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"lon\":%.9f,",
-			   gpsdata->fix.longitude);
-	if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"alt\":%.3f,",
-			   gpsdata->fix.altitude);
-	if (isnan(gpsdata->fix.epx)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"epx\":%.3f,",
-			   gpsdata->fix.epx);
-	if (isnan(gpsdata->fix.epy)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"epy\":%.3f,",
-			   gpsdata->fix.epy);
-	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epv)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"epv\":%.3f,",
-			   gpsdata->fix.epv);
-	if (isnan(gpsdata->fix.track)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"track\":%.4f,",
-			   gpsdata->fix.track);
-	if (isnan(gpsdata->fix.speed)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"speed\":%.3f,",
-			   gpsdata->fix.speed);
-	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.climb)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"climb\":%.3f,",
-			   gpsdata->fix.climb);
-	if (isnan(gpsdata->fix.epd)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"epd\":%.4f,",
-			   gpsdata->fix.epd);
-	if (isnan(gpsdata->fix.eps)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
+	if (isnan(gpsdata->fix.latitude) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"lat\":%.9f,", gpsdata->fix.latitude);
+	if (isnan(gpsdata->fix.longitude) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"lon\":%.9f,", gpsdata->fix.longitude);
+	if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"alt\":%.3f,", gpsdata->fix.altitude);
+	if (isnan(gpsdata->fix.epx) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"epx\":%.3f,", gpsdata->fix.epx);
+	if (isnan(gpsdata->fix.epy) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"epy\":%.3f,", gpsdata->fix.epy);
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epv) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"epv\":%.3f,", gpsdata->fix.epv);
+	if (isnan(gpsdata->fix.track) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"track\":%.4f,", gpsdata->fix.track);
+	if (isnan(gpsdata->fix.speed) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"speed\":%.3f,", gpsdata->fix.speed);
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.climb) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"climb\":%.3f,", gpsdata->fix.climb);
+	if (isnan(gpsdata->fix.epd) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"epd\":%.4f,", gpsdata->fix.epd);
+	if (isnan(gpsdata->fix.eps) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
 			   "\"eps\":%.2f,", gpsdata->fix.eps);
-	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epc)==0)
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
+	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epc) == 0)
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
 			   "\"epc\":%.2f,", gpsdata->fix.epc);
     }
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
 		   "\"mode\":%d,", gpsdata->fix.mode);
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", sizeof(reply)-strlen(reply));
+    if (reply[strlen(reply) - 1] == ',')
+	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    (void)strlcat(reply, "}\r\n", sizeof(reply) - strlen(reply));
 }
 
-void json_sky_dump(const struct gps_data_t *datap, 
-		   /*@out@*/char *reply, size_t replylen)
+void json_sky_dump(const struct gps_data_t *datap,
+		   /*@out@*/ char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
-    (void)snprintf(reply+strlen(reply),
-		   replylen- strlen(reply),
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
-		   datap->tag[0]!='\0' ? datap->tag : "-");
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
-		   "\"device\":\"%s\",",
-		   datap->dev.path);
-    if (isnan(datap->skyview_time)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"time\":%.3f,",
-		       datap->skyview_time);
-    if (isnan(datap->dop.xdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+		   datap->tag[0] != '\0' ? datap->tag : "-");
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
+		   "\"device\":\"%s\",", datap->dev.path);
+    if (isnan(datap->skyview_time) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"time\":%.3f,", datap->skyview_time);
+    if (isnan(datap->dop.xdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"xdop\":%.2f,", datap->dop.xdop);
-    if (isnan(datap->dop.ydop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.ydop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"ydop\":%.2f,", datap->dop.ydop);
-    if (isnan(datap->dop.vdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.vdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"vdop\":%.2f,", datap->dop.vdop);
-    if (isnan(datap->dop.tdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.tdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"tdop\":%.2f,", datap->dop.tdop);
-    if (isnan(datap->dop.hdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.hdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"hdop\":%.2f,", datap->dop.hdop);
-    if (isnan(datap->dop.gdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.gdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"gdop\":%.2f,", datap->dop.gdop);
-    if (isnan(datap->dop.pdop)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(datap->dop.pdop) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"pdop\":%.2f,", datap->dop.pdop);
     /* insurance against flaky drivers */
     for (i = 0; i < datap->satellites_visible; i++)
@@ -266,67 +252,65 @@ void json_sky_dump(const struct gps_data_t *datap,
 		    break;
 		}
 	    if (datap->PRN[i]) {
-		(void)snprintf(reply+strlen(reply),
-			       replylen-strlen(reply),
+		(void)snprintf(reply + strlen(reply),
+			       replylen - strlen(reply),
 			       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s},",
 			       datap->PRN[i],
-			       datap->elevation[i],datap->azimuth[i],
-			       datap->ss[i],
-			       used ? "true" : "false");
+			       datap->elevation[i], datap->azimuth[i],
+			       datap->ss[i], used ? "true" : "false");
 	    }
 	}
     }
     if (reported) {
-	if (reply[strlen(reply)-1] == ',')
-	    reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "]", replylen-strlen(reply));
+	if (reply[strlen(reply) - 1] == ',')
+	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "]", replylen - strlen(reply));
     }
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", replylen-strlen(reply));
+    if (reply[strlen(reply) - 1] == ',')
+	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
     if (datap->satellites_visible != reported)
-	gpsd_report(LOG_WARN,"Satellite count %d != PRN count %d\n",
+	gpsd_report(LOG_WARN, "Satellite count %d != PRN count %d\n",
 		    datap->satellites_visible, reported);
 }
 
 void json_device_dump(const struct gps_device_t *device,
-		     /*@out@*/char *reply, size_t replylen)
+		      /*@out@*/ char *reply, size_t replylen)
 {
-    char buf1[JSON_VAL_MAX*2+1];
+    char buf1[JSON_VAL_MAX * 2 + 1];
     struct classmap_t *cmp;
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
     if (device->gpsdata.online > 0) {
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"activated\":%2.2f,", device->gpsdata.online);
 	if (device->observed != 0) {
 	    int mask = 0;
-	    for (cmp = classmap; cmp < classmap+NITEMS(classmap); cmp++)
-		if ((device->observed & cmp->packetmask) != 0) 
+	    for (cmp = classmap; cmp < classmap + NITEMS(classmap); cmp++)
+		if ((device->observed & cmp->packetmask) != 0)
 		    mask |= cmp->typemask;
 	    if (mask != 0)
-		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
-			       "\"flags\":%d,", mask);
+		(void)snprintf(reply + strlen(reply),
+			       replylen - strlen(reply), "\"flags\":%d,",
+			       mask);
 	}
 	if (device->device_type != NULL) {
 	    (void)strlcat(reply, "\"driver\":\"", replylen);
-	    (void)strlcat(reply, 
-			  device->device_type->type_name,
-			  replylen);
+	    (void)strlcat(reply, device->device_type->type_name, replylen);
 	    (void)strlcat(reply, "\",", replylen);
 	}
 	/*@-mustfreefresh@*/
 	if (device->subtype[0] != '\0') {
 	    (void)strlcat(reply, "\"subtype\":\"", replylen);
-	    (void)strlcat(reply, 
+	    (void)strlcat(reply,
 			  json_stringify(buf1, sizeof(buf1), device->subtype),
 			  replylen);
 	    (void)strlcat(reply, "\",", replylen);
 	}
 	/*@+mustfreefresh@*/
 	if (device->is_serial) {
-	    (void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 			   device->gpsdata.dev.driver_mode,
 			   (int)gpsd_get_speed(&device->ttyset),
@@ -334,20 +318,22 @@ void json_device_dump(const struct gps_device_t *device,
 			   device->gpsdata.dev.stopbits,
 			   device->gpsdata.dev.cycle);
 #ifdef ALLOW_RECONFIGURE
-	    if (device->device_type != NULL && device->device_type->rate_switcher != NULL)
-		(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+	    if (device->device_type != NULL
+		&& device->device_type->rate_switcher != NULL)
+		(void)snprintf(reply + strlen(reply),
+			       replylen - strlen(reply),
 			       ",\"mincycle\":%2.2f",
 			       device->device_type->min_cycle);
 #endif /* ALLOW_RECONFIGURE */
 	}
     }
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+    if (reply[strlen(reply) - 1] == ',')
+	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
-void json_watch_dump(const struct policy_t *ccp, 
-		     /*@out@*/char *reply, size_t replylen)
+void json_watch_dump(const struct policy_t *ccp,
+		     /*@out@*/ char *reply, size_t replylen)
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
@@ -355,40 +341,38 @@ void json_watch_dump(const struct policy_t *ccp,
 		   ccp->watcher ? "true" : "false",
 		   ccp->json ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
-		   ccp->raw, 
+		   ccp->raw,
 		   ccp->scaled ? "true" : "false",
 		   ccp->timing ? "true" : "false");
     if (ccp->devpath[0] != '\0')
-	(void)snprintf(reply+strlen(reply), replylen-strlen(reply),
+	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"device\":%s,", ccp->devpath);
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';
-    (void)strlcat(reply, "}\r\n", replylen-strlen(reply));
+    if (reply[strlen(reply) - 1] == ',')
+	reply[strlen(reply) - 1] = '\0';
+    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
     /*@+compdef@*/
 }
 
 #if defined(RTCM104V2_ENABLE)
-void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
+		     size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
     /*@-mustfreefresh@*/
-    char buf1[JSON_VAL_MAX*2+1];
+    char buf1[JSON_VAL_MAX * 2 + 1];
     /*
      * Beware! Needs to stay synchronized with a JSON enumeration map in
      * the parser. This interpretation of NAVSYSTEM_GALILEO is assumed
      * from RTCM3, it's not actually documented in RTCM 2.1.
      */
-    static char *navsysnames[] = {"GPS", "GLONASS", "GALILEO"};
+    static char *navsysnames[] = { "GPS", "GLONASS", "GALILEO" };
 
     unsigned int n;
 
-    (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",\"type\":%u,\"station_id\":%u,\"zcount\":%0.1f,\"seqnum\":%u,\"length\":%u,\"station_health\":%u,",
-		   rtcm->type,
-		   rtcm->refstaid,
-		   rtcm->zcount,
-		   rtcm->seqnum,
-		   rtcm->length,
-		   rtcm->stathlth);
+    (void)snprintf(buf, buflen,
+		   "{\"class\":\"RTCM2\",\"type\":%u,\"station_id\":%u,\"zcount\":%0.1f,\"seqnum\":%u,\"length\":%u,\"station_health\":%u,",
+		   rtcm->type, rtcm->refstaid, rtcm->zcount, rtcm->seqnum,
+		   rtcm->length, rtcm->stathlth);
 
     switch (rtcm->type) {
     case 1:
@@ -400,12 +384,10 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
 			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
 			   rsp->ident,
 			   rsp->udre,
-			   rsp->issuedata,
-			   rsp->rangerr,
-			   rsp->rangerate);
+			   rsp->issuedata, rsp->rangerr, rsp->rangerate);
 	}
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -413,49 +395,45 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
 	if (rtcm->ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,",
-			   rtcm->ecef.x, 
-			   rtcm->ecef.y,
-			   rtcm->ecef.z);
+			   rtcm->ecef.x, rtcm->ecef.y, rtcm->ecef.z);
 	break;
 
     case 4:
 	if (rtcm->reference.valid) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":\"%s\",\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f,",
-			   rtcm->reference.system >= NITEMS(navsysnames) 
+			   rtcm->reference.system >= NITEMS(navsysnames)
 			   ? "UNKNOWN"
 			   : navsysnames[rtcm->reference.system],
 			   rtcm->reference.sense,
 			   rtcm->reference.datum,
 			   rtcm->reference.dx,
-			   rtcm->reference.dy,
-			   rtcm->reference.dz);
+			   rtcm->reference.dy, rtcm->reference.dz);
 	}
 	break;
 
     case 5:
 #define JSON_BOOL(x)	((x)?"true":"false")
 	(void)strlcat(buf, "\"satellites\":[", buflen);
-    for (n = 0; n < rtcm->conhealth.nentries; n++) {
-	const struct consat_t *csp = &rtcm->conhealth.sat[n];
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "{\"ident\":%u,\"iodl\":%s,\"health\":%1u,\"snr\":%d,\"health_en\":%s,\"new_data\":%s,\"los_warning\":%s,\"tou\":%u},",
-		       csp->ident,
-		       JSON_BOOL(csp->iodl),
-		       (unsigned)csp->health,
-		       csp->snr,
-		       JSON_BOOL(csp->health_en),
-		       JSON_BOOL(csp->new_data),
-		       JSON_BOOL(csp->los_warning),
-		       csp->tou);
-    }
+	for (n = 0; n < rtcm->conhealth.nentries; n++) {
+	    const struct consat_t *csp = &rtcm->conhealth.sat[n];
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "{\"ident\":%u,\"iodl\":%s,\"health\":%1u,\"snr\":%d,\"health_en\":%s,\"new_data\":%s,\"los_warning\":%s,\"tou\":%u},",
+			   csp->ident,
+			   JSON_BOOL(csp->iodl),
+			   (unsigned)csp->health,
+			   csp->snr,
+			   JSON_BOOL(csp->health_en),
+			   JSON_BOOL(csp->new_data),
+			   JSON_BOOL(csp->los_warning), csp->tou);
+	}
 #undef JSON_BOOL
-    if (buf[strlen(buf)-1] == ',')
-	buf[strlen(buf)-1] = '\0';
-    (void)strlcat(buf, "]", buflen);
-    break;
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
 
-    case 6: 			/* NOP msg */
+    case 6:			/* NOP msg */
 	break;
 
     case 7:
@@ -468,17 +446,17 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
 			   ssp->longitude,
 			   ssp->range,
 			   ssp->frequency,
-			   ssp->health,
-			   ssp->station_id,
-			   ssp->bitrate);
+			   ssp->health, ssp->station_id, ssp->bitrate);
 	}
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
 	(void)strlcat(buf, "]", buflen);
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"message\":\"%s\"", json_stringify(buf1, sizeof(buf1), rtcm->message));
+		       "\"message\":\"%s\"", json_stringify(buf1,
+							    sizeof(buf1),
+							    rtcm->message));
 	break;
 
     default:
@@ -486,14 +464,14 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
 	for (n = 0; n < rtcm->length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"0x%08x\",", rtcm->words[n]);
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
 	(void)strlcat(buf, "]", buflen);
 	break;
     }
 
-    if (buf[strlen(buf)-1] == ',')
-	buf[strlen(buf)-1] = '\0';
+    if (buf[strlen(buf) - 1] == ',')
+	buf[strlen(buf) - 1] = '\0';
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+mustfreefresh@*/
 }
@@ -501,11 +479,12 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buf
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, size_t buflen)
+void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/
+		     char *buf, size_t buflen)
 {
-    char buf1[JSON_VAL_MAX*2+1];
-    char buf2[JSON_VAL_MAX*2+1];
-    char buf3[JSON_VAL_MAX*2+1];
+    char buf1[JSON_VAL_MAX * 2 + 1];
+    char buf2[JSON_VAL_MAX * 2 + 1];
+    char buf3[JSON_VAL_MAX * 2 + 1];
 
     static char *nav_legends[] = {
 	"Under way using engine",
@@ -701,13 +680,13 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
 #define JSON_BOOL(x)	((x)?"true":"false")
-    (void)snprintf(buf, buflen, 
+    (void)snprintf(buf, buflen,
 		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"
-		   "\"mmsi\":%u,\"scaled\":%s,", 
+		   "\"mmsi\":%u,\"scaled\":%s,",
 		   ais->type, ais->repeat, ais->mmsi, JSON_BOOL(scaled));
     /*@ -formatcode -mustfreefresh @*/
     switch (ais->type) {
-    case 1:	/* Position Report */
+    case 1:			/* Position Report */
     case 2:
     case 3:
 	if (scaled) {
@@ -719,11 +698,12 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "fastleft"/"fastright" for fast turns.
 	     */
 	    if (ais->type1.turn == -128)
-		(void) strlcpy(turnlegend, "\"nan\"", sizeof(turnlegend));
+		(void)strlcpy(turnlegend, "\"nan\"", sizeof(turnlegend));
 	    else if (ais->type1.turn == -127)
-		(void) strlcpy(turnlegend, "\"fastleft\"", sizeof(turnlegend));
+		(void)strlcpy(turnlegend, "\"fastleft\"", sizeof(turnlegend));
 	    else if (ais->type1.turn == 127)
-		(void) strlcpy(turnlegend, "\"fastright\"", sizeof(turnlegend));
+		(void)strlcpy(turnlegend, "\"fastright\"",
+			      sizeof(turnlegend));
 	    else
 		(void)snprintf(turnlegend, sizeof(turnlegend),
 			       "%.0f",
@@ -734,14 +714,14 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "fast" for fast movers.
 	     */
 	    if (ais->type1.speed == AIS_SPEED_NOT_AVAILABLE)
-		(void) strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
+		(void)strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
 	    else if (ais->type1.speed == AIS_SPEED_FAST_MOVER)
-		(void) strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
+		(void)strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
 			       "%.1f", ais->type1.speed / 10.0);
 
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
@@ -756,10 +736,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type1.heading,
 			   ais->type1.second,
 			   ais->type1.maneuver,
-			   JSON_BOOL(ais->type1.raim),
-			   ais->type1.radio);
+			   JSON_BOOL(ais->type1.raim), ais->type1.radio);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"status\":%u,\"turn\":%d,\"speed\":%u,"
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
@@ -774,14 +753,13 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type1.heading,
 			   ais->type1.second,
 			   ais->type1.maneuver,
-			   JSON_BOOL(ais->type1.raim),
-			   ais->type1.radio);
+			   JSON_BOOL(ais->type1.raim), ais->type1.radio);
 	}
 	break;
-    case 4:	/* Base Station Report */
-    case 11:	/* UTC/Date Response */
+    case 4:			/* Base Station Report */
+    case 11:			/* UTC/Date Response */
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%u}\r\n",
@@ -795,10 +773,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type4.lon / AIS_LATLON_SCALE,
 			   ais->type4.lat / AIS_LATLON_SCALE,
 			   epfd_legends[ais->type4.epfd],
-			   JSON_BOOL(ais->type4.raim),
-			   ais->type4.radio);
+			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"epfd\":%u,\"raim\":%s,\"radio\":%u}\r\n",
@@ -812,13 +789,12 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type4.lon,
 			   ais->type4.lat,
 			   ais->type4.epfd,
-			   JSON_BOOL(ais->type4.raim),
-			   ais->type4.radio);
+			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	}
 	break;
-    case 5:	/* Ship static and voyage related data */
+    case 5:			/* Ship static and voyage related data */
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
 			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
@@ -828,23 +804,24 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"dte\":%u}\r\n",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(buf1, sizeof(buf1), ais->type5.callsign),
-			   json_stringify(buf2, sizeof(buf2), ais->type5.shipname),
+			   json_stringify(buf1, sizeof(buf1),
+					  ais->type5.callsign),
+			   json_stringify(buf2, sizeof(buf2),
+					  ais->type5.shipname),
 			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
-			   ais->type5.to_bow,
-			   ais->type5.to_stern,
-			   ais->type5.to_port,
-			   ais->type5.to_starboard,
-			   epfd_legends[ais->type5.epfd],
-			   ais->type5.month,
-			   ais->type5.day,
-			   ais->type5.hour,
-			   ais->type5.minute,
-			   ais->type5.draught / 10.0,
-			   json_stringify(buf3, sizeof(buf3), ais->type5.destination),
+			   ais->type5.to_bow, ais->type5.to_stern,
+			   ais->type5.to_port, ais->type5.to_starboard,
+			   epfd_legends[ais->type5.epfd], ais->type5.month,
+			   ais->type5.day, ais->type5.hour, ais->type5.minute,
+			   ais->type5.draught / 10.0, json_stringify(buf3,
+								     sizeof
+								     (buf3),
+								     ais->
+								     type5.
+								     destination),
 			   ais->type5.dte);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
 			   "\"shipname\":\"%s\",\"shiptype\":%u,"
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
@@ -854,25 +831,22 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"dte\":%u}\r\n",
 			   ais->type5.imo,
 			   ais->type5.ais_version,
-			   json_stringify(buf1, sizeof(buf1), ais->type5.callsign),
-			   json_stringify(buf2, sizeof(buf2), ais->type5.shipname),
-			   ais->type5.shiptype,
-			   ais->type5.to_bow,
-			   ais->type5.to_stern,
-			   ais->type5.to_port,
-			   ais->type5.to_starboard,
-			   ais->type5.epfd,
-			   ais->type5.month,
-			   ais->type5.day,
-			   ais->type5.hour,
-			   ais->type5.minute,
-			   ais->type5.draught,
-			   json_stringify(buf3, sizeof(buf3), ais->type5.destination),
+			   json_stringify(buf1, sizeof(buf1),
+					  ais->type5.callsign),
+			   json_stringify(buf2, sizeof(buf2),
+					  ais->type5.shipname),
+			   ais->type5.shiptype, ais->type5.to_bow,
+			   ais->type5.to_stern, ais->type5.to_port,
+			   ais->type5.to_starboard, ais->type5.epfd,
+			   ais->type5.month, ais->type5.day, ais->type5.hour,
+			   ais->type5.minute, ais->type5.draught,
+			   json_stringify(buf3, sizeof(buf3),
+					  ais->type5.destination),
 			   ais->type5.dte);
 	}
 	break;
-    case 6:	/* Binary Message */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 6:			/* Binary Message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
 		       "\"retransmit\":%s,\"app_id\":%u,"
 		       "\"data\":\"%zd:%s\"}\r\n",
@@ -882,26 +856,24 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 		       ais->type6.app_id,
 		       ais->type6.bitcount,
 		       gpsd_hexdump(ais->type6.bitdata,
-				       (ais->type6.bitcount+7)/8));
+				    (ais->type6.bitcount + 7) / 8));
 	break;
-    case 7:	/* Binary Acknowledge */
-    case 13:	/* Safety Related Acknowledge */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		       "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n",  
+    case 7:			/* Binary Acknowledge */
+    case 13:			/* Safety Related Acknowledge */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"mmsi1\":%u,\"mmsi2\":%u,\"mmsi3\":%u,\"mmsi4\":%u}\r\n",
 		       ais->type7.mmsi1,
-		       ais->type7.mmsi2,
-		       ais->type7.mmsi3,
-		       ais->type7.mmsi4);
+		       ais->type7.mmsi2, ais->type7.mmsi3, ais->type7.mmsi4);
 	break;
-    case 8:	/* Binary Broadcast Message */
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",  
-			  ais->type8.app_id,
-			  ais->type8.bitcount,
-			  gpsd_hexdump(ais->type8.bitdata,
-				       (ais->type8.bitcount+7)/8));
+    case 8:			/* Binary Broadcast Message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",
+		       ais->type8.app_id,
+		       ais->type8.bitcount,
+		       gpsd_hexdump(ais->type8.bitdata,
+				    (ais->type8.bitcount + 7) / 8));
 	break;
-    case 9:	/* Standard SAR Aircraft Position Report */
+    case 9:			/* Standard SAR Aircraft Position Report */
 	if (scaled) {
 	    char altlegend[20];
 	    char speedlegend[20];
@@ -911,9 +883,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "high" for above the reporting ceiling.
 	     */
 	    if (ais->type9.alt == AIS_ALT_NOT_AVAILABLE)
-		(void) strlcpy(altlegend, "\"nan\"", sizeof(altlegend));
+		(void)strlcpy(altlegend, "\"nan\"", sizeof(altlegend));
 	    else if (ais->type9.alt == AIS_ALT_HIGH)
-		(void) strlcpy(altlegend, "\"high\"", sizeof(altlegend));
+		(void)strlcpy(altlegend, "\"high\"", sizeof(altlegend));
 	    else
 		(void)snprintf(altlegend, sizeof(altlegend),
 			       "%.1f", ais->type9.alt / 10.0);
@@ -923,14 +895,14 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 	     * "high" for above the reporting ceiling.
 	     */
 	    if (ais->type9.speed == AIS_SAR_SPEED_NOT_AVAILABLE)
-		(void) strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
+		(void)strlcpy(speedlegend, "\"nan\"", sizeof(speedlegend));
 	    else if (ais->type9.speed == AIS_SAR_FAST_MOVER)
-		(void) strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
+		(void)strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
 			       "%.1f", ais->type1.speed / 10.0);
 
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"alt\":%s,\"speed\":%s,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
@@ -944,10 +916,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type9.second,
 			   ais->type9.regional,
 			   ais->type9.dte,
-			   JSON_BOOL(ais->type9.raim),
-			   ais->type9.radio);
+			   JSON_BOOL(ais->type9.raim), ais->type9.radio);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"alt\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"second\":%u,\"regional\":%u,\"dte\":%u,"
@@ -961,75 +932,71 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type9.second,
 			   ais->type9.regional,
 			   ais->type9.dte,
-			   JSON_BOOL(ais->type9.raim),
-			   ais->type9.radio);
+			   JSON_BOOL(ais->type9.raim), ais->type9.radio);
 	}
 	break;
-    case 10:	/* UTC/Date Inquiry */
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"dest_mmsi\":%u}\r\n",  
-			  ais->type10.dest_mmsi);
+    case 10:			/* UTC/Date Inquiry */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"dest_mmsi\":%u}\r\n", ais->type10.dest_mmsi);
 	break;
-    case 12:	/* Safety Related Message */
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			   "\"seqno\":%u,\"dest_mmsi\":%u,\"retransmit\":%s,\"text\":\"%s\"}\r\n",  
-			   ais->type12.seqno,
-			   ais->type12.dest_mmsi,
-			   JSON_BOOL(ais->type12.retransmit),
-			   json_stringify(buf1, sizeof(buf1), ais->type12.text));
+    case 12:			/* Safety Related Message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"seqno\":%u,\"dest_mmsi\":%u,\"retransmit\":%s,\"text\":\"%s\"}\r\n",
+		       ais->type12.seqno,
+		       ais->type12.dest_mmsi,
+		       JSON_BOOL(ais->type12.retransmit),
+		       json_stringify(buf1, sizeof(buf1), ais->type12.text));
 	break;
-    case 14:	/* Safety Related Broadcast Message */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 14:			/* Safety Related Broadcast Message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"text\":\"%s\"}\r\n",
 		       json_stringify(buf1, sizeof(buf1), ais->type14.text));
 	break;
-    case 15:	/* Interrogation */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 15:			/* Interrogation */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"mmsi1\":%u,\"type1_1\":%u,\"offset1_1\":%u,"
 		       "\"type1_2\":%u,\"offset1_2\":%u,\"mmsi2\":%u,"
 		       "\"type2_1\":%u,\"offset2_1\":%u}\r\n",
-		      ais->type15.mmsi1,
-		      ais->type15.type1_1,
-		      ais->type15.offset1_1,
-		      ais->type15.type1_2,
-		      ais->type15.offset1_2,
-		      ais->type15.mmsi2,
-		      ais->type15.type2_1,
-		      ais->type15.offset2_1);
+		       ais->type15.mmsi1,
+		       ais->type15.type1_1,
+		       ais->type15.offset1_1,
+		       ais->type15.type1_2,
+		       ais->type15.offset1_2,
+		       ais->type15.mmsi2,
+		       ais->type15.type2_1, ais->type15.offset2_1);
 	break;
     case 16:
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"mmsi1\":%u,\"offset1\":%u,\"increment1\":%u,"
 		       "\"mmsi2\":%u,\"offset2\":%u,\"increment2\":%u}\r\n",
 		       ais->type16.mmsi1,
 		       ais->type16.offset1,
 		       ais->type16.increment1,
 		       ais->type16.mmsi2,
-		       ais->type16.offset2,
-		       ais->type16.increment2);
+		       ais->type16.offset2, ais->type16.increment2);
 	break;
     case 17:
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%zd:%s\"}\r\n",
-			  ais->type17.lon / AIS_GNSS_LATLON_SCALE,
-			  ais->type17.lat / AIS_GNSS_LATLON_SCALE,
-			  ais->type17.bitcount,
-			  gpsd_hexdump(ais->type17.bitdata,
-				       (ais->type17.bitcount+7)/8));
+			   ais->type17.lon / AIS_GNSS_LATLON_SCALE,
+			   ais->type17.lat / AIS_GNSS_LATLON_SCALE,
+			   ais->type17.bitcount,
+			   gpsd_hexdump(ais->type17.bitdata,
+					(ais->type17.bitcount + 7) / 8));
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"lon\":%d,\"lat\":%d,\"data\":\"%zd:%s\"}\r\n",
-			  ais->type17.lon,
-			  ais->type17.lat,
-			  ais->type17.bitcount,
-			  gpsd_hexdump(ais->type17.bitdata,
-				       (ais->type17.bitcount+7)/8));
+			   ais->type17.lon,
+			   ais->type17.lat,
+			   ais->type17.bitcount,
+			   gpsd_hexdump(ais->type17.bitdata,
+					(ais->type17.bitcount + 7) / 8));
 	}
 	break;
     case 18:
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
@@ -1049,10 +1016,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   JSON_BOOL(ais->type18.dsc),
 			   JSON_BOOL(ais->type18.band),
 			   JSON_BOOL(ais->type18.msg22),
-			   JSON_BOOL(ais->type18.raim),
-			   ais->type18.radio);
+			   JSON_BOOL(ais->type18.raim), ais->type18.radio);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
@@ -1072,13 +1038,12 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   JSON_BOOL(ais->type18.dsc),
 			   JSON_BOOL(ais->type18.band),
 			   JSON_BOOL(ais->type18.msg22),
-			   JSON_BOOL(ais->type18.raim),
-			   ais->type18.radio);
+			   JSON_BOOL(ais->type18.raim), ais->type18.radio);
 	}
 	break;
     case 19:
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
@@ -1103,10 +1068,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type19.to_starboard,
 			   epfd_legends[ais->type19.epfd],
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.dte,
-			   JSON_BOOL(ais->type19.assigned));
+			   ais->type19.dte, JSON_BOOL(ais->type19.assigned));
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
@@ -1131,12 +1095,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type19.to_starboard,
 			   ais->type19.epfd,
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.dte,
-			   JSON_BOOL(ais->type19.assigned));
+			   ais->type19.dte, JSON_BOOL(ais->type19.assigned));
 	}
 	break;
-    case 20:	/* Data Link Management Message */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 20:			/* Data Link Management Message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"offset1\":%u,\"number1\":%u,"
 		       "\"timeout1\":%u,\"increment1\":%u,"
 		       "\"offset2\":%u,\"number2\":%u,"
@@ -1159,12 +1122,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 		       ais->type20.increment3,
 		       ais->type20.offset4,
 		       ais->type20.number4,
-		       ais->type20.timeout4,
-		       ais->type20.increment4);
+		       ais->type20.timeout4, ais->type20.increment4);
 	break;
-    case 21: /* Aid to Navigation */
+    case 21:			/* Aid to Navigation */
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"aid_type\":\"%s\",\"name\":\"%s\",\"lon\":%.4f,"
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,"
@@ -1173,22 +1135,20 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
 			   NAVAIDTYPE_DISPLAY(ais->type21.aid_type),
-			   json_stringify(buf1, sizeof(buf1), ais->type21.name),
+			   json_stringify(buf1, sizeof(buf1),
+					  ais->type21.name),
 			   ais->type21.lon / AIS_LATLON_SCALE,
 			   ais->type21.lat / AIS_LATLON_SCALE,
 			   JSON_BOOL(ais->type21.accuracy),
-			   ais->type21.to_bow,
-			   ais->type21.to_stern,
-			   ais->type21.to_port,
-			   ais->type21.to_starboard,
-			   epfd_legends[ais->type21.epfd],
-			   ais->type21.second,
+			   ais->type21.to_bow, ais->type21.to_stern,
+			   ais->type21.to_port, ais->type21.to_starboard,
+			   epfd_legends[ais->type21.epfd], ais->type21.second,
 			   ais->type21.regional,
 			   JSON_BOOL(ais->type21.off_position),
 			   JSON_BOOL(ais->type21.raim),
 			   JSON_BOOL(ais->type21.virtual_aid));
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"aid_type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
@@ -1212,46 +1172,44 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   JSON_BOOL(ais->type21.virtual_aid));
 	}
 	break;
-    case 22:	/* Channel Management */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 22:			/* Channel Management */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"channel_a\":%u,\"channel_b\":%u,"
 		       "\"txrx\":%u,\"power\":%s,",
 		       ais->type22.channel_a,
 		       ais->type22.channel_b,
-		       ais->type22.txrx,
-		       JSON_BOOL(ais->type22.power));
+		       ais->type22.txrx, JSON_BOOL(ais->type22.power));
 	if (ais->type22.addressed) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"dest1\":%u,\"dest2\":%u",
 			   ais->type22.mmsi.dest1, ais->type22.mmsi.dest2);
 	} else if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",",
 			   ais->type22.area.ne_lon / AIS_CHANNEL_LATLON_SCALE,
 			   ais->type22.area.ne_lat / AIS_CHANNEL_LATLON_SCALE,
 			   ais->type22.area.sw_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.area.sw_lat / AIS_CHANNEL_LATLON_SCALE);
+			   ais->type22.area.sw_lat /
+			   AIS_CHANNEL_LATLON_SCALE);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,",
 			   ais->type22.area.ne_lon,
 			   ais->type22.area.ne_lat,
-			   ais->type22.area.sw_lon,
-			   ais->type22.area.sw_lat);
+			   ais->type22.area.sw_lon, ais->type22.area.sw_lat);
 	}
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"addressed\":%s,\"band_a\":%s,"
 		       "\"band_b\":%s,\"zonesize\":%u}\r\n",
 		       JSON_BOOL(ais->type22.addressed),
 		       JSON_BOOL(ais->type22.band_a),
-		       JSON_BOOL(ais->type22.band_b),
-		       ais->type22.zonesize);
+		       JSON_BOOL(ais->type22.band_b), ais->type22.zonesize);
 	break;
-    case 23:	/* Group Assignment Command */
+    case 23:			/* Group Assignment Command */
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
 			   "\"stationtype\":\"%s\",\"shiptype\":\"%s\","
@@ -1262,10 +1220,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type23.sw_lat / AIS_CHANNEL_LATLON_SCALE,
 			   STATIONTYPE_DISPLAY(ais->type23.stationtype),
 			   SHIPTYPE_DISPLAY(ais->type23.shiptype),
-			   ais->type23.interval,
-			   ais->type23.quiet);
+			   ais->type23.interval, ais->type23.quiet);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,"
 			   "\"stationtype\":%u,\"shiptype\":%u,"
@@ -1276,43 +1233,41 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 			   ais->type23.sw_lat,
 			   ais->type23.stationtype,
 			   ais->type23.shiptype,
-			   ais->type23.interval,
-			   ais->type23.quiet);
+			   ais->type23.interval, ais->type23.quiet);
 	}
 	break;
-    case 24:	/* Class B CS Static Data Report */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
+    case 24:			/* Class B CS Static Data Report */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"shipname\":\"%s\",",
-		       json_stringify(buf1,sizeof(buf1), ais->type24.shipname));
+		       json_stringify(buf1, sizeof(buf1),
+				      ais->type24.shipname));
 	if (scaled) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf), 
-			  "\"shiptype\":\"%s\",",
-			  SHIPTYPE_DISPLAY(ais->type24.shiptype));
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"shiptype\":\"%s\",",
+			   SHIPTYPE_DISPLAY(ais->type24.shiptype));
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"shiptype\":%u,",
-			  ais->type24.shiptype);
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"shiptype\":%u,", ais->type24.shiptype);
 	}
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-		      "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
-		      ais->type24.vendorid,
-		      ais->type24.callsign);
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
+		       ais->type24.vendorid, ais->type24.callsign);
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "mothership_\"mmsi\":%u}\r\n",
-			  ais->type24.mothership_mmsi);
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "mothership_\"mmsi\":%u}\r\n",
+			   ais->type24.mothership_mmsi);
 	} else {
-	    (void)snprintf(buf+strlen(buf), buflen-strlen(buf),
-			  "\"to_bow\":%u,\"to_stern\":%u,"
-			  "\"to_port\":%u,\"to_starboard\":%u}\r\n",
-			  ais->type24.dim.to_bow,
-			  ais->type24.dim.to_stern,
-			  ais->type24.dim.to_port,
-			  ais->type24.dim.to_starboard);
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"to_bow\":%u,\"to_stern\":%u,"
+			   "\"to_port\":%u,\"to_starboard\":%u}\r\n",
+			   ais->type24.dim.to_bow,
+			   ais->type24.dim.to_stern,
+			   ais->type24.dim.to_port,
+			   ais->type24.dim.to_starboard);
 	}
 	break;
-    case 25:	/* Binary Message, Single Slot */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 25:			/* Binary Message, Single Slot */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
 		       "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",
 		       JSON_BOOL(ais->type25.addressed),
@@ -1321,10 +1276,10 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 		       ais->type25.app_id,
 		       ais->type25.bitcount,
 		       gpsd_hexdump(ais->type25.bitdata,
-				       (ais->type25.bitcount+7)/8));
+				    (ais->type25.bitcount + 7) / 8));
 	break;
-    case 26:	/* Binary Message, Multiple Slot */
-	(void)snprintf(buf+strlen(buf), buflen-strlen(buf),
+    case 26:			/* Binary Message, Multiple Slot */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
 		       "\"app_id\":%u,\"data\":\"%zd:%s\"\"radio\":%u}\r\n",
 		       JSON_BOOL(ais->type26.addressed),
@@ -1333,13 +1288,13 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 		       ais->type26.app_id,
 		       ais->type26.bitcount,
 		       gpsd_hexdump(ais->type26.bitdata,
-				    (ais->type26.bitcount+7)/8),
+				    (ais->type26.bitcount + 7) / 8),
 		       ais->type26.radio);
 	break;
     default:
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
-	(void) strlcat(buf, "}\r\n", buflen);
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
+	(void)strlcat(buf, "}\r\n", buflen);
 	break;
     }
     /*@ +formatcode +mustfreefresh @*/
@@ -1348,147 +1303,129 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/char *buf, s
 #endif /* defined(AIVDM_ENABLE) */
 
 #ifdef COMPASS_ENABLE
-void json_att_dump(const struct gps_data_t *gpsdata, 
-		   /*@out@*/char *reply, size_t replylen)
+void json_att_dump(const struct gps_data_t *gpsdata,
+		   /*@out@*/ char *reply, size_t replylen)
 /* dump the contents of an attitude_t structure as JSON */
 {
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
-		   gpsdata->tag[0]!='\0' ? gpsdata->tag : "-");
-    (void)snprintf(reply+strlen(reply),
-		   replylen-strlen(reply),
-		   "\"device\":\"%s\",",
-		   gpsdata->dev.path);
-    if (isnan(gpsdata->attitude.heading)==0) {
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
+		   "\"device\":\"%s\",", gpsdata->dev.path);
+    if (isnan(gpsdata->attitude.heading) == 0) {
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"heading\":%.2f,", gpsdata->attitude.heading);
 	if (gpsdata->attitude.mag_st != '\0')
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"mag_st\":\"%c\",", 
-			   gpsdata->attitude.mag_st);
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"mag_st\":\"%c\",", gpsdata->attitude.mag_st);
 
     }
-    if (isnan(gpsdata->attitude.pitch)==0) {
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(gpsdata->attitude.pitch) == 0) {
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"pitch\":%.2f,", gpsdata->attitude.pitch);
 	if (gpsdata->attitude.pitch_st != '\0')
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"pitch_st\":\"%c\",", 
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"pitch_st\":\"%c\",",
 			   gpsdata->attitude.pitch_st);
 
     }
-    if (isnan(gpsdata->attitude.yaw)==0) {
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(gpsdata->attitude.yaw) == 0) {
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
 	if (gpsdata->attitude.yaw_st != '\0')
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"yaw_st\":\"%c\",", 
-			   gpsdata->attitude.yaw_st);
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"yaw_st\":\"%c\",", gpsdata->attitude.yaw_st);
 
     }
-    if (isnan(gpsdata->attitude.roll)==0) {
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(gpsdata->attitude.roll) == 0) {
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"roll\":%.2f,", gpsdata->attitude.roll);
 	if (gpsdata->attitude.roll_st != '\0')
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"roll_st\":\"%c\",", 
-			   gpsdata->attitude.roll_st);
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"roll_st\":\"%c\",", gpsdata->attitude.roll_st);
 
     }
-    if (isnan(gpsdata->attitude.yaw)==0) {
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
+    if (isnan(gpsdata->attitude.yaw) == 0) {
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
 		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
 	if (gpsdata->attitude.yaw_st != '\0')
-	    (void)snprintf(reply+strlen(reply),
-			   replylen-strlen(reply),
-			   "\"yaw_st\":\"%c\",", 
-			   gpsdata->attitude.yaw_st);
+	    (void)snprintf(reply + strlen(reply),
+			   replylen - strlen(reply),
+			   "\"yaw_st\":\"%c\",", gpsdata->attitude.yaw_st);
 
     }
-    if (isnan(gpsdata->attitude.dip)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"dip\":%.3f,",
-		       gpsdata->attitude.dip);
+    if (isnan(gpsdata->attitude.dip) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"dip\":%.3f,", gpsdata->attitude.dip);
 
-    if (isnan(gpsdata->attitude.mag_len)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"mag_len\":%.3f,",
-		       gpsdata->attitude.mag_len);
-    if (isnan(gpsdata->attitude.mag_x)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"mag_x\":%.3f,",
-		       gpsdata->attitude.mag_x);
-    if (isnan(gpsdata->attitude.mag_y)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"mag_y\":%.3f,",
-		       gpsdata->attitude.mag_y);
-    if (isnan(gpsdata->attitude.mag_z)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"mag_z\":%.3f,",
-		       gpsdata->attitude.mag_z);
+    if (isnan(gpsdata->attitude.mag_len) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"mag_len\":%.3f,", gpsdata->attitude.mag_len);
+    if (isnan(gpsdata->attitude.mag_x) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"mag_x\":%.3f,", gpsdata->attitude.mag_x);
+    if (isnan(gpsdata->attitude.mag_y) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"mag_y\":%.3f,", gpsdata->attitude.mag_y);
+    if (isnan(gpsdata->attitude.mag_z) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"mag_z\":%.3f,", gpsdata->attitude.mag_z);
 
-    if (isnan(gpsdata->attitude.acc_len)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"acc_len\":%.3f,",
-		       gpsdata->attitude.acc_len);
-    if (isnan(gpsdata->attitude.acc_x)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"acc_x\":%.3f,",
-		       gpsdata->attitude.acc_x);
-    if (isnan(gpsdata->attitude.acc_y)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"acc_y\":%.3f,",
-		       gpsdata->attitude.acc_y);
-    if (isnan(gpsdata->attitude.acc_z)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"acc_z\":%.3f,",
-		       gpsdata->attitude.acc_z);
+    if (isnan(gpsdata->attitude.acc_len) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"acc_len\":%.3f,", gpsdata->attitude.acc_len);
+    if (isnan(gpsdata->attitude.acc_x) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"acc_x\":%.3f,", gpsdata->attitude.acc_x);
+    if (isnan(gpsdata->attitude.acc_y) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"acc_y\":%.3f,", gpsdata->attitude.acc_y);
+    if (isnan(gpsdata->attitude.acc_z) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"acc_z\":%.3f,", gpsdata->attitude.acc_z);
 
-    if (isnan(gpsdata->attitude.gyro_x)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"gyro_x\":%.3f,",
-		       gpsdata->attitude.gyro_x);
-    if (isnan(gpsdata->attitude.gyro_y)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"gyro_y\":%.3f,",
-		       gpsdata->attitude.gyro_y);
+    if (isnan(gpsdata->attitude.gyro_x) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"gyro_x\":%.3f,", gpsdata->attitude.gyro_x);
+    if (isnan(gpsdata->attitude.gyro_y) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"gyro_y\":%.3f,", gpsdata->attitude.gyro_y);
 
-    if (isnan(gpsdata->attitude.temp)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"temp\":%.3f,",
-		       gpsdata->attitude.temp);
-    if (isnan(gpsdata->attitude.depth)==0)
-	(void)snprintf(reply+strlen(reply),
-		       replylen-strlen(reply),
-		       "\"depth\":%.3f,",
-		       gpsdata->attitude.depth);
+    if (isnan(gpsdata->attitude.temp) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"temp\":%.3f,", gpsdata->attitude.temp);
+    if (isnan(gpsdata->attitude.depth) == 0)
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"depth\":%.3f,", gpsdata->attitude.depth);
 
-    if (reply[strlen(reply)-1] == ',')
-	reply[strlen(reply)-1] = '\0';	/* trim trailing comma */
+    if (reply[strlen(reply) - 1] == ',')
+	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", replylen);
 }
 #endif /* COMPASS_ENABLE */

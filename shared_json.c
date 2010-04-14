@@ -24,9 +24,9 @@ PERMISSIONS
 #include "gpsd.h"
 #include "gps_json.h"
 
-int json_device_read(const char *buf, 
-		     /*@out@*/struct devconfig_t *dev, 
-		     /*@null@*/const char **endptr)
+int json_device_read(const char *buf,
+		     /*@out@*/ struct devconfig_t *dev,
+		     /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     /* *INDENT-OFF* */
@@ -66,9 +66,9 @@ int json_device_read(const char *buf,
     return 0;
 }
 
-int json_watch_read(const char *buf, 
-		    /*@out@*/struct policy_t *ccp,
-		    /*@null@*/const char **endptr)
+int json_watch_read(const char *buf,
+		    /*@out@*/ struct policy_t *ccp,
+		    /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     /* *INDENT-OFF* */
