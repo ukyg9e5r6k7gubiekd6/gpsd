@@ -480,8 +480,8 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/
-		     char *buf, size_t buflen)
+void aivdm_json_dump(const struct ais_t *ais, bool scaled,
+		     /*@out@*/ char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX * 2 + 1];
     char buf2[JSON_VAL_MAX * 2 + 1];
