@@ -538,7 +538,6 @@ INDENT_OPTIONS = --indent-level4 \
 indent:
 	chmod u+w *maskdump.c
 	indent $(INDENT_OPTIONS) $(INDENT_FILES)
-	#replace '@ \*/' '@\*/' $(INDENT_FILES)
 	chmod u-w *maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
