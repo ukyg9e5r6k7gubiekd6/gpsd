@@ -26,37 +26,38 @@
 #endif
 
 #ifdef HAVE_SYS_IPC_H
- #include <sys/ipc.h>
+#include <sys/ipc.h>
 #endif /* HAVE_SYS_IPC_H */
 #ifdef HAVE_SYS_SHM_H
- #include <sys/shm.h>
+#include <sys/shm.h>
 #endif /* HAVE_SYS_SHM_H */
 
-#define PPS_MAX_OFFSET	100000		/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	1000000		/* microseconds for lost lock */
+#define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
+#define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
-#define SHM_UNIT	0		/* SHM driver unit number (0..3) */
+#define SHM_UNIT	0	/* SHM driver unit number (0..3) */
 
-struct shmTime {
-    int    mode; /* 0 - if valid set
-		  *       use values, 
-		  *       clear valid
-		  * 1 - if valid set 
-		  *       if count before and after read of values is equal,
-		  *         use values 
-		  *       clear valid
-		  */
-    int    count;
+struct shmTime
+{
+    int mode;			/* 0 - if valid set
+				 *       use values, 
+				 *       clear valid
+				 * 1 - if valid set 
+				 *       if count before and after read of values is equal,
+				 *         use values 
+				 *       clear valid
+				 */
+    int count;
     time_t clockTimeStampSec;
-    int    clockTimeStampUSec;
+    int clockTimeStampUSec;
     time_t receiveTimeStampSec;
-    int    receiveTimeStampUSec;
-    int    leap;
-    int    precision;
-    int    nsamples;
-    int    valid;
-    int    pad[10];
+    int receiveTimeStampUSec;
+    int leap;
+    int precision;
+    int nsamples;
+    int valid;
+    int pad[10];
 };
 
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
@@ -120,29 +121,31 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
     int shmid;
     unsigned int perms;
     // set the SHM perms the way ntpd does
-    if ( unit < 2 ) {
-    	// we are root, be careful
+    if (unit < 2) {
+	// we are root, be careful
 	perms = 0600;
     } else {
-        // we are not root, try to work anyway
+	// we are not root, try to work anyway
 	perms = 0666;
     }
 
-    shmid=shmget ((key_t)(NTPD_BASE+unit),
-		  sizeof (struct shmTime), (int)(IPC_CREAT|perms));
+    shmid = shmget((key_t) (NTPD_BASE + unit),
+		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
     if (shmid == -1) {
 	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, %zd, %o) fail: %s\n",
-	   (long int)(NTPD_BASE+unit), sizeof (struct shmTime), (int)perms, strerror(errno));
+		    (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
+		    (int)perms, strerror(errno));
 	return NULL;
     } else {
-	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
+	struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
 	/*@ -mustfreefresh */
 	if ((int)(long)p == -1) {
-	    gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n", strerror(errno));
+	    gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n",
+			strerror(errno));
 	    return NULL;
 	}
-	gpsd_report(LOG_PROG, "NTPD shmat(%d,0,0) succeeded, segment %d\n", 
-	   shmid, unit);
+	gpsd_report(LOG_PROG, "NTPD shmat(%d,0,0) succeeded, segment %d\n",
+		    shmid, unit);
 	return p;
 	/*@ +mustfreefresh */
     }
@@ -156,14 +159,14 @@ void ntpshm_init(struct gps_context_t *context, bool enablepps)
 
     for (i = 0; i < NTPSHMSEGS; i++) {
 	// Only grab the first two when running as root.
-	if ( 2 <= i || 0 == getuid()) {
+	if (2 <= i || 0 == getuid()) {
 	    context->shmTime[i] = getShmTime(i);
 	}
     }
-    memset(context->shmTimeInuse,0,sizeof(context->shmTimeInuse));
+    memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 # ifdef PPS_ENABLE
     context->shmTimePPS = enablepps;
-# endif /* PPS_ENABLE */
+# endif	/* PPS_ENABLE */
     context->enable_ntpshm = true;
 }
 
@@ -176,9 +179,9 @@ int ntpshm_alloc(struct gps_context_t *context)
 	if (context->shmTime[i] != NULL && !context->shmTimeInuse[i]) {
 	    context->shmTimeInuse[i] = true;
 
-	    memset((void *)context->shmTime[i],0,sizeof(struct shmTime));
+	    memset((void *)context->shmTime[i], 0, sizeof(struct shmTime));
 	    context->shmTime[i]->mode = 1;
-	    context->shmTime[i]->precision = -1; /* initially 0.5 sec */
+	    context->shmTime[i]->precision = -1;	/* initially 0.5 sec */
 	    context->shmTime[i]->nsamples = 3;	/* stages of median filter */
 
 	    return i;
@@ -187,7 +190,7 @@ int ntpshm_alloc(struct gps_context_t *context)
     return -1;
 }
 
-bool ntpshm_free(struct gps_context_t *context, int segment)
+bool ntpshm_free(struct gps_context_t * context, int segment)
 /* free NTP SHM segment */
 {
     if (segment < 0 || segment >= NTPSHMSEGS)
@@ -203,7 +206,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 {
     struct shmTime *shmTime = NULL;
     struct timeval tv;
-    double seconds,microseconds;
+    double seconds, microseconds;
 
     // gpsd_report(LOG_PROG, "NTP: doing ntpshm_put(,%g, %g)\n", fixtime, fudge);
     if (session->shmindex < 0 ||
@@ -212,12 +215,12 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 	return 0;
     }
 
-    (void)gettimeofday(&tv,NULL);
+    (void)gettimeofday(&tv, NULL);
     fixtime += fudge;
-    microseconds = 1000000.0 * modf(fixtime,&seconds);
-    if ( shmTime->clockTimeStampSec == (time_t)seconds) {
+    microseconds = 1000000.0 * modf(fixtime, &seconds);
+    if (shmTime->clockTimeStampSec == (time_t) seconds) {
 	gpsd_report(LOG_RAW, "NTPD ntpshm_put: skipping duplicate second\n");
-    	return 0;
+	return 0;
     }
 
     /* we use the shmTime mode 1 protocol
@@ -236,22 +239,22 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      */
     shmTime->valid = 0;
     shmTime->count++;
-    shmTime->clockTimeStampSec = (time_t)seconds;
+    shmTime->clockTimeStampSec = (time_t) seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
-    shmTime->receiveTimeStampSec = (time_t)tv.tv_sec;
+    shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
     shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
     /* setting the precision here does not seem to help anything, too
-       hard to calculate properly anyway.  Let ntpd figure it out.
-       Any NMEA will be about -1 or -2. 
-       Garmin GPS-18/USB is around -6 or -7.
-    */
+     * hard to calculate properly anyway.  Let ntpd figure it out.
+     * Any NMEA will be about -1 or -2. 
+     * Garmin GPS-18/USB is around -6 or -7.
+     */
     shmTime->count++;
     shmTime->valid = 1;
 
-    gpsd_report(LOG_RAW, 
-        "NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu, fudge: %0.3f\n"
-	, (unsigned long)seconds , (unsigned long)microseconds
-	, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec, fudge);
+    gpsd_report(LOG_RAW,
+		"NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu, fudge: %0.3f\n",
+		(unsigned long)seconds, (unsigned long)microseconds,
+		(unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec, fudge);
 
     return 1;
 }
@@ -269,7 +272,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     double offset;
     long l_offset;
 
-    if ( 0 > session->shmindex ||  0 > session->shmTimeP ||
+    if (0 > session->shmindex || 0 > session->shmTimeP ||
 	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
 	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
@@ -280,7 +283,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     /* FIXME, does not handle 5Hz yet */
 
-#ifdef S_SPLINT_S      /* avoids an internal error in splint 3.1.1 */
+#ifdef S_SPLINT_S		/* avoids an internal error in splint 3.1.1 */
     l_offset = 0;
 #else
     l_offset = tv->tv_sec - shmTime->receiveTimeStampSec;
@@ -288,16 +291,16 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     /*@ -ignorequals @*/
     l_offset *= 1000000;
     l_offset += tv->tv_usec - shmTime->receiveTimeStampUSec;
-    if ( 0 > l_offset || 1000000 < l_offset ) {
-	gpsd_report(LOG_RAW, "PPS ntpshm_pps: no current GPS seconds: %ld\n"
-	    , (long)l_offset);
+    if (0 > l_offset || 1000000 < l_offset) {
+	gpsd_report(LOG_RAW, "PPS ntpshm_pps: no current GPS seconds: %ld\n",
+		    (long)l_offset);
 	return -1;
     }
 
     /*@+relaxtypes@*/
     seconds = shmTime->clockTimeStampSec + 1;
     offset = fabs((tv->tv_sec - seconds)
-    	+((double)(tv->tv_usec - 0)/1000000.0));
+		  + ((double)(tv->tv_usec - 0) / 1000000.0));
     /*@-relaxtypes@*/
 
 
@@ -319,7 +322,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = (int)microseconds;
-    shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
+    shmTimeP->receiveTimeStampSec = (time_t) tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracty is around 16uS, thus -16 precision */
@@ -330,11 +333,10 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     /* this is more an offset jitter/dispersion than precision, 
      * but still useful for debug */
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
-    gpsd_report(LOG_RAW
-        , "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, preci %d\n"
-	, (unsigned long)seconds, (unsigned long)microseconds/1000
-	, (unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec
-	, precision);
+    gpsd_report(LOG_RAW, "PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, preci %d\n",
+		(unsigned long)seconds, (unsigned long)microseconds / 1000,
+		(unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec,
+		precision);
     return 1;
 }
 #endif /* PPS_ENABLE */
