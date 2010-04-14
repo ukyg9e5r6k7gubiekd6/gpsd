@@ -840,10 +840,9 @@ int main(int argc, char **argv)
 			if ((*active)->driver->speed_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->
-				driver->speed_switcher(&session, speed,
-						       parity, (int)
-						       stopbits)) {
+			    if ((*active)->driver->
+				speed_switcher(&session, speed, parity, (int)
+					       stopbits)) {
 				monitor_dump_send();
 				/*
 				 * See the comment attached to the 'B'
