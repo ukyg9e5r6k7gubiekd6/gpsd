@@ -38,6 +38,7 @@ static int json_tpv_read(const char *buf,
     int status;
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
+	/* *INDENT-OFF* */
 	{"class",  t_check,   .dflt.check = "TPV"},
 	{"device", t_string,  .addr.string = gpsdata->dev.path,
 			         .len = sizeof(gpsdata->dev.path)},
@@ -74,6 +75,7 @@ static int json_tpv_read(const char *buf,
 	{"mode",   t_integer, .addr.integer = &gpsdata->fix.mode,
 			         .dflt.integer = MODE_NOT_SEEN},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@ +fullinitblock @*/
 
@@ -121,14 +123,17 @@ static int json_sky_read(const char *buf,
     bool usedflags[MAXCHANNELS];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_2_1[] = {
+	/* *INDENT-OFF* */
 	{"PRN",	   t_integer, .addr.integer = gpsdata->PRN},
 	{"el",	   t_integer, .addr.integer = gpsdata->elevation},
 	{"az",	   t_integer, .addr.integer = gpsdata->azimuth},
 	{"ss",	   t_real,    .addr.real = gpsdata->ss},
 	{"used",   t_boolean, .addr.boolean = usedflags},
+	/* *INDENT-ON* */
 	{NULL},
     };
     const struct json_attr_t json_attrs_2[] = {
+	/* *INDENT-OFF* */
 	{"class",      t_check,   .dflt.check = "SKY"},
 	{"device",     t_string,  .addr.string  = gpsdata->dev.path,
 	                             .len = sizeof(gpsdata->dev.path)},
@@ -155,6 +160,7 @@ static int json_sky_read(const char *buf,
 	                             .addr.array.maxlen = MAXCHANNELS,
 	                             .addr.array.count = &gpsdata->satellites_visible},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@ +fullinitblock @*/
     int status, i, j;
@@ -184,6 +190,7 @@ static int json_att_read(const char *buf,
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
+	/* *INDENT-OFF* */
 	{"class",    t_check,     .dflt.check = "ATT"},
 	{"device",   t_string,    .addr.string = gpsdata->dev.path,
 			             .len = sizeof(gpsdata->dev.path)},
@@ -228,6 +235,7 @@ static int json_att_read(const char *buf,
 	{"depth",    t_real,    .addr.real = &gpsdata->attitude.depth,
 			         .dflt.real = NAN},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@ +fullinitblock @*/
 
@@ -240,6 +248,7 @@ static int json_devicelist_read(const char *buf,
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_subdevices[] = {
+	/* *INDENT-OFF* */
 	{"class",      t_check,      .dflt.check = "DEVICE"},
 	{"path",       t_string,     STRUCTOBJECT(struct devconfig_t, path),
 	                                .len = sizeof(gpsdata->devices.list[0].path)},
@@ -262,6 +271,7 @@ static int json_devicelist_read(const char *buf,
 	{"mincycle",   t_real,       STRUCTOBJECT(struct devconfig_t, mincycle),
 				        .dflt.real = NAN},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_attrs_devices[] = {
@@ -293,6 +303,7 @@ static int json_version_read(const char *buf,
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_version[] = {
+	/* *INDENT-OFF* */
         {"class",     t_check,   .dflt.check = "VERSION"},
 	{"release",   t_string,  .addr.string  = gpsdata->version.release,
 	                            .len = sizeof(gpsdata->version.release)},
@@ -301,6 +312,7 @@ static int json_version_read(const char *buf,
 	{"proto_major", t_integer, .addr.integer = &gpsdata->version.proto_major},
 	{"proto_minor", t_integer, .addr.integer = &gpsdata->version.proto_minor},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@ +fullinitblock @*/
     int status;
@@ -321,10 +333,12 @@ static int json_error_read(const char *buf,
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_error[] = {
+	/* *INDENT-OFF* */
         {"class",     t_check,   .dflt.check = "ERROR"},
 	{"message",   t_string,  .addr.string  = gpsdata->error,
 	                            .len = sizeof(gpsdata->error)},
 	{NULL},
+	/* *INDENT-ON* */
     };
     /*@ +fullinitblock @*/
     int status;
