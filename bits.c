@@ -27,14 +27,15 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     unsigned int i;
     unsigned end;
 
-    /*@i1@*/assert(width <= sizeof(long long) * BITS_PER_BYTE);
-    for (i = start / BITS_PER_BYTE; i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
+    /*@i1@*/ assert(width <= sizeof(long long) * BITS_PER_BYTE);
+    for (i = start / BITS_PER_BYTE;
+	 i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
 	fld <<= BITS_PER_BYTE;
 	fld |= (unsigned char)buf[i];
     }
 #ifdef DEBUG
     (void)printf("%d:%d from %s:\n", start, width, gpsd_hexdump(buf, 32));
-#endif 
+#endif
 
 #ifdef DEBUG
     (void)printf("    segment=0x%llx,", fld);
@@ -43,7 +44,7 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     if (end != 0) {
 	fld >>= (BITS_PER_BYTE - end);
 #ifdef DEBUG
-	(void)printf(" after downshifting by %d bits: 0x%llx", 
+	(void)printf(" after downshifting by %d bits: 0x%llx",
 		     BITS_PER_BYTE - end, fld);
 #endif /* UDEBUG */
     }
@@ -55,8 +56,9 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     fld &= ~(-1LL << width);
     /*@ +shiftimplementation @*/
 #ifdef DEBUG
-    (void)printf("    after selecting out the bottom %u bits: 0x%llx = %lld\n", 
-		 width, fld, fld);
+    (void)
+	printf("    after selecting out the bottom %u bits: 0x%llx = %lld\n",
+	       width, fld, fld);
 #endif /* DEBUG */
 
     return fld;
@@ -71,18 +73,18 @@ signed long long sbits(char buf[], unsigned int start, unsigned int width)
     (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
 #endif /* SDEBUG */
     /*@ +relaxtypes */
-    if (fld & (1 << (width-1))) {
+    if (fld & (1 << (width - 1))) {
 #ifdef SDEBUG
 	(void)fprintf(stderr, "%llx is signed\n", fld);
 #endif /* SDEBUG */
 	/*@ -shiftimplementation @*/
-	fld |= (-1LL << (width-1));
+	fld |= (-1LL << (width - 1));
 	/*@ +shiftimplementation @*/
     }
 #ifdef SDEBUG
-    (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width, (signed long long)fld);
+    (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width,
+		  (signed long long)fld);
 #endif /* SDEBUG */
     return (signed long long)fld;
     /*@ -relaxtypes */
 }
-

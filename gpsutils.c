@@ -21,9 +21,9 @@
 #include <QStringList>
 #endif
 
-#define MONTHSPERYEAR	12		/* months per calendar year */
+#define MONTHSPERYEAR	12	/* months per calendar year */
 
-void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
+void gps_clear_fix( /*@out@*/ struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
     fixp->time = NAN;
@@ -42,38 +42,38 @@ void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
     fixp->epc = NAN;
 }
 
-void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
+void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 		   gps_mask_t transfer,
-		   /*@ in @*/struct gps_fix_t *from)
+		   /*@ in @*/ struct gps_fix_t *from)
 /* merge new data into an old fix */
 {
     if ((NULL == to) || (NULL == from))
 	return;
-    if ((transfer & TIME_IS)!=0)
+    if ((transfer & TIME_IS) != 0)
 	to->time = from->time;
-    if ((transfer & LATLON_IS)!=0) {
+    if ((transfer & LATLON_IS) != 0) {
 	to->latitude = from->latitude;
 	to->longitude = from->longitude;
     }
-    if ((transfer & MODE_IS)!=0)
+    if ((transfer & MODE_IS) != 0)
 	to->mode = from->mode;
-    if ((transfer & ALTITUDE_IS)!=0)
+    if ((transfer & ALTITUDE_IS) != 0)
 	to->altitude = from->altitude;
-    if ((transfer & TRACK_IS)!=0)
+    if ((transfer & TRACK_IS) != 0)
 	to->track = from->track;
-    if ((transfer & SPEED_IS)!=0)
+    if ((transfer & SPEED_IS) != 0)
 	to->speed = from->speed;
-    if ((transfer & CLIMB_IS)!=0)
+    if ((transfer & CLIMB_IS) != 0)
 	to->climb = from->climb;
-    if ((transfer & TIMERR_IS)!=0)
+    if ((transfer & TIMERR_IS) != 0)
 	to->ept = from->ept;
-    if ((transfer & HERR_IS)!=0) {
+    if ((transfer & HERR_IS) != 0) {
 	to->epx = from->epx;
 	to->epy = from->epy;
     }
-    if ((transfer & VERR_IS)!=0)
+    if ((transfer & VERR_IS) != 0)
 	to->epv = from->epv;
-    if ((transfer & SPEEDERR_IS)!=0)
+    if ((transfer & SPEEDERR_IS) != 0)
 	to->eps = from->eps;
 }
 
@@ -81,16 +81,16 @@ double timestamp(void)
 {
     struct timeval tv;
     (void)gettimeofday(&tv, NULL);
-    /*@i1@*/return(tv.tv_sec + tv.tv_usec*1e-6);
+    /*@i1@*/ return (tv.tv_sec + tv.tv_usec * 1e-6);
 }
 
-time_t mkgmtime(register struct tm *t)
+time_t mkgmtime(register struct tm * t)
 /* struct tm to seconds since Unix epoch */
 {
     register int year;
     register time_t result;
     static const int cumdays[MONTHSPERYEAR] =
-    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+	{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     /*@ +matchanyintegral @*/
     year = 1900 + t->tm_year + t->tm_mon / MONTHSPERYEAR;
@@ -100,7 +100,7 @@ time_t mkgmtime(register struct tm *t)
     result += (year - 1600) / 400;
     if ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0) &&
 	(t->tm_mon % MONTHSPERYEAR) < 2)
-	     result--;
+	result--;
     result += t->tm_mday - 1;
     result *= 24;
     result += t->tm_hour;
@@ -112,7 +112,7 @@ time_t mkgmtime(register struct tm *t)
     return (result);
 }
 
-double iso8601_to_unix(/*@in@*/char *isotime)
+double iso8601_to_unix( /*@in@*/ char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
 #ifndef USE_QT
@@ -120,7 +120,7 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     double usec;
     struct tm tm;
 
-    /*@i1@*/dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    /*@i1@*/ dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
     if (dp != NULL && *dp == '.')
 	usec = strtod(dp, NULL);
     else
@@ -133,12 +133,13 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     QDateTime d = QDateTime::fromString(isotime, Qt::ISODate);
     QStringList sl = t.split(".");
     if (sl.size() > 1)
-        usec = sl[1].toInt() / pow(10., (double)sl[1].size());
+	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
     return d.toTime_t() + usec;
 #endif
 }
 
-/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], size_t len)
+/*@observer@*/ char *unix_to_iso8601(double fixtime, /*@ out @*/
+				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.0Z */
 {
@@ -149,13 +150,13 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     char fractstr[10];
 
     fractional = modf(fixtime, &integral);
-    intfixtime = (time_t)integral;
+    intfixtime = (time_t) integral;
     (void)gmtime_r(&intfixtime, &when);
 
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     (void)snprintf(fractstr, sizeof(fractstr), "%.1f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr+1);
+    (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr + 1);
     return isotime;
 }
 
@@ -173,8 +174,8 @@ double iso8601_to_unix(/*@in@*/char *isotime)
  *
  * Note: This time will need to be corrected for leap seconds.
  */
-#define GPS_EPOCH	315964800		/* GPS epoch in Unix time */
-#define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
+#define GPS_EPOCH	315964800	/* GPS epoch in Unix time */
+#define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
 double gpstime_to_unix(int week, double tow)
@@ -186,13 +187,15 @@ double gpstime_to_unix(int week, double tow)
     else {
 	time_t now, last_rollover;
 	(void)time(&now);
-	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
-	/*@i@*/fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+	last_rollover =
+	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
+	/*@i@*/ fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
     }
     return fixtime;
 }
 
-void unix_to_gpstime(double unixtime, /*@out@*/int *week, /*@out@*/double *tow)
+void unix_to_gpstime(double unixtime, /*@out@*/ int *week, /*@out@ */
+		     double *tow)
 {
     unixtime -= GPS_EPOCH;
     *week = (int)(unixtime / SECS_PER_WEEK);
@@ -204,66 +207,66 @@ void unix_to_gpstime(double unixtime, /*@out@*/int *week, /*@out@*/double *tow)
 double earth_distance(double lat1, double lon1, double lat2, double lon2)
 /* distance in meters between two points specified in degrees. */
 {
-	/*
-	 * this is a translation of the javascript implementation of the
-	 * Vincenty distance formula by Chris Veness. See
-	 * http://www.movable-type.co.uk/scripts/latlong-vincenty.html
-	 */
-	double a, b, f; // WGS-84 ellipsoid params
-	double L, L_P, U1, U2, s_U1, c_U1, s_U2, c_U2;
-	double uSq, A, B, d_S, lambda;
-	double s_L, c_L, s_S, C;
-	double c_S, S, s_A, c_SqA, c_2SM;
-	int i = 100;
+    /*
+     * this is a translation of the javascript implementation of the
+     * Vincenty distance formula by Chris Veness. See
+     * http://www.movable-type.co.uk/scripts/latlong-vincenty.html
+     */
+    double a, b, f;		// WGS-84 ellipsoid params
+    double L, L_P, U1, U2, s_U1, c_U1, s_U2, c_U2;
+    double uSq, A, B, d_S, lambda;
+    double s_L, c_L, s_S, C;
+    double c_S, S, s_A, c_SqA, c_2SM;
+    int i = 100;
 
-	a = WGS84A;
-	b = WGS84B;
-	f = 1/WGS84F;
-	L = Deg2Rad(lon2 - lon1);
-	U1 = atan((1 - f) * tan(Deg2Rad(lat1)));
-	U2 = atan((1 - f) * tan(Deg2Rad(lat2)));
-	s_U1 = sin(U1);
-	c_U1 = cos(U1);
-	s_U2 = sin(U2);
-	c_U2 = cos(U2);
-	lambda = L;
+    a = WGS84A;
+    b = WGS84B;
+    f = 1 / WGS84F;
+    L = Deg2Rad(lon2 - lon1);
+    U1 = atan((1 - f) * tan(Deg2Rad(lat1)));
+    U2 = atan((1 - f) * tan(Deg2Rad(lat2)));
+    s_U1 = sin(U1);
+    c_U1 = cos(U1);
+    s_U2 = sin(U2);
+    c_U2 = cos(U2);
+    lambda = L;
 
-	do {
-		s_L = sin(lambda);
-		c_L = cos(lambda);
-		s_S = sqrt((c_U2 * s_L) * (c_U2 * s_L) +
-			   (c_U1 * s_U2 - s_U1 * c_U2 * c_L) *
-			   (c_U1 * s_U2 - s_U1 * c_U2 * c_L));
+    do {
+	s_L = sin(lambda);
+	c_L = cos(lambda);
+	s_S = sqrt((c_U2 * s_L) * (c_U2 * s_L) +
+		   (c_U1 * s_U2 - s_U1 * c_U2 * c_L) *
+		   (c_U1 * s_U2 - s_U1 * c_U2 * c_L));
 
-		if (s_S==0)
-			return 0;
+	if (s_S == 0)
+	    return 0;
 
-		c_S = s_U1 * s_U2 + c_U1 * c_U2 * c_L;
-		S = atan2(s_S, c_S);
-		s_A = c_U1 * c_U2 * s_L / s_S;
-		c_SqA = 1 - s_A * s_A;
-		c_2SM = c_S - 2 * s_U1 * s_U2 / c_SqA;
+	c_S = s_U1 * s_U2 + c_U1 * c_U2 * c_L;
+	S = atan2(s_S, c_S);
+	s_A = c_U1 * c_U2 * s_L / s_S;
+	c_SqA = 1 - s_A * s_A;
+	c_2SM = c_S - 2 * s_U1 * s_U2 / c_SqA;
 
-		if (isnan(c_2SM))
-			c_2SM = 0;
+	if (isnan(c_2SM))
+	    c_2SM = 0;
 
-		C = f / 16 * c_SqA * (4 + f * (4 - 3 * c_SqA));
-		L_P = lambda;
-		lambda = L + (1 - C) * f * s_A *
-		    (S + C * s_S * (c_2SM + C * c_S * (2 * c_2SM * c_2SM - 1)));
-	} while ((fabs(lambda - L_P) > 1.0e-12) && (--i > 0));
+	C = f / 16 * c_SqA * (4 + f * (4 - 3 * c_SqA));
+	L_P = lambda;
+	lambda = L + (1 - C) * f * s_A *
+	    (S + C * s_S * (c_2SM + C * c_S * (2 * c_2SM * c_2SM - 1)));
+    } while ((fabs(lambda - L_P) > 1.0e-12) && (--i > 0));
 
-	if (i == 0)
-		return NAN; // formula failed to converge
+    if (i == 0)
+	return NAN;		// formula failed to converge
 
-	uSq = c_SqA * ((a*a) - (b*b)) / (b*b);
-	A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-	B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-	d_S = B * s_S * (c_2SM + B/4 *
-			(c_S * (-1 + 2 * c_2SM * c_2SM) - B/6 * c_2SM *
-			(-3 + 4 * s_S * s_S) * (-3 + 4 * c_2SM * c_2SM)));
+    uSq = c_SqA * ((a * a) - (b * b)) / (b * b);
+    A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+    B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+    d_S = B * s_S * (c_2SM + B / 4 *
+		     (c_S * (-1 + 2 * c_2SM * c_2SM) - B / 6 * c_2SM *
+		      (-3 + 4 * s_S * s_S) * (-3 + 4 * c_2SM * c_2SM)));
 
-	return(WGS84B * A * (S - d_S));
+    return (WGS84B * A * (S - d_S));
 }
 
 /*****************************************************************************
@@ -354,104 +357,105 @@ driver.
 
 ******************************************************************************/
 
-void clear_dop(/*@out@*/struct dop_t *dop)
+void clear_dop( /*@out@*/ struct dop_t *dop)
 {
-    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop = dop->gdop = NAN;
+    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
+	dop->gdop = NAN;
 }
 
 /*@ -fixedformalarray -mustdefine @*/
-static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
+static bool invert(double mat[4][4], /*@out@*/ double inverse[4][4])
 {
-  // Find all NECESSARY 2x2 subdeterminants
-  double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
-  double Det2_12_02 = mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0];
-  //double Det2_12_03 = mat[1][0]*mat[2][3] - mat[1][3]*mat[2][0];
-  double Det2_12_12 = mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1];
-  //double Det2_12_13 = mat[1][1]*mat[2][3] - mat[1][3]*mat[2][1];
-  //double Det2_12_23 = mat[1][2]*mat[2][3] - mat[1][3]*mat[2][2];
-  double Det2_13_01 = mat[1][0]*mat[3][1] - mat[1][1]*mat[3][0];
-  //double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
-  double Det2_13_03 = mat[1][0]*mat[3][3] - mat[1][3]*mat[3][0];
-  //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1]; 
-  double Det2_13_13 = mat[1][1]*mat[3][3] - mat[1][3]*mat[3][1];
-  //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2]; 
-  double Det2_23_01 = mat[2][0]*mat[3][1] - mat[2][1]*mat[3][0];
-  double Det2_23_02 = mat[2][0]*mat[3][2] - mat[2][2]*mat[3][0];
-  double Det2_23_03 = mat[2][0]*mat[3][3] - mat[2][3]*mat[3][0];
-  double Det2_23_12 = mat[2][1]*mat[3][2] - mat[2][2]*mat[3][1];
-  double Det2_23_13 = mat[2][1]*mat[3][3] - mat[2][3]*mat[3][1];
-  double Det2_23_23 = mat[2][2]*mat[3][3] - mat[2][3]*mat[3][2];
+    // Find all NECESSARY 2x2 subdeterminants
+    double Det2_12_01 = mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0];
+    double Det2_12_02 = mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0];
+    //double Det2_12_03 = mat[1][0]*mat[2][3] - mat[1][3]*mat[2][0];
+    double Det2_12_12 = mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1];
+    //double Det2_12_13 = mat[1][1]*mat[2][3] - mat[1][3]*mat[2][1];
+    //double Det2_12_23 = mat[1][2]*mat[2][3] - mat[1][3]*mat[2][2];
+    double Det2_13_01 = mat[1][0] * mat[3][1] - mat[1][1] * mat[3][0];
+    //double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
+    double Det2_13_03 = mat[1][0] * mat[3][3] - mat[1][3] * mat[3][0];
+    //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1]; 
+    double Det2_13_13 = mat[1][1] * mat[3][3] - mat[1][3] * mat[3][1];
+    //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2]; 
+    double Det2_23_01 = mat[2][0] * mat[3][1] - mat[2][1] * mat[3][0];
+    double Det2_23_02 = mat[2][0] * mat[3][2] - mat[2][2] * mat[3][0];
+    double Det2_23_03 = mat[2][0] * mat[3][3] - mat[2][3] * mat[3][0];
+    double Det2_23_12 = mat[2][1] * mat[3][2] - mat[2][2] * mat[3][1];
+    double Det2_23_13 = mat[2][1] * mat[3][3] - mat[2][3] * mat[3][1];
+    double Det2_23_23 = mat[2][2] * mat[3][3] - mat[2][3] * mat[3][2];
 
-  // Find all NECESSARY 3x3 subdeterminants
-  double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02
-				+ mat[0][2]*Det2_12_01;
-  //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03
-  //				+ mat[0][3]*Det2_12_01;
-  //double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03
-  //				+ mat[0][3]*Det2_12_02;
-  //double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13
-  //				+ mat[0][3]*Det2_12_12;
-  //double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02
-  //				+ mat[0][2]*Det2_13_01;
-  double Det3_013_013 = mat[0][0]*Det2_13_13 - mat[0][1]*Det2_13_03
-				+ mat[0][3]*Det2_13_01;
-  //double Det3_013_023 = mat[0][0]*Det2_13_23 - mat[0][2]*Det2_13_03
-  //				+ mat[0][3]*Det2_13_02;
-  //double Det3_013_123 = mat[0][1]*Det2_13_23 - mat[0][2]*Det2_13_13
-  //				+ mat[0][3]*Det2_13_12;
-  //double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02
-  //				+ mat[0][2]*Det2_23_01;
-  //double Det3_023_013 = mat[0][0]*Det2_23_13 - mat[0][1]*Det2_23_03
-  //				+ mat[0][3]*Det2_23_01;
-  double Det3_023_023 = mat[0][0]*Det2_23_23 - mat[0][2]*Det2_23_03
-				+ mat[0][3]*Det2_23_02;
-  //double Det3_023_123 = mat[0][1]*Det2_23_23 - mat[0][2]*Det2_23_13
-  //				+ mat[0][3]*Det2_23_12;
-  double Det3_123_012 = mat[1][0]*Det2_23_12 - mat[1][1]*Det2_23_02
-				+ mat[1][2]*Det2_23_01;
-  double Det3_123_013 = mat[1][0]*Det2_23_13 - mat[1][1]*Det2_23_03
-				+ mat[1][3]*Det2_23_01;
-  double Det3_123_023 = mat[1][0]*Det2_23_23 - mat[1][2]*Det2_23_03
-				+ mat[1][3]*Det2_23_02;
-  double Det3_123_123 = mat[1][1]*Det2_23_23 - mat[1][2]*Det2_23_13
-				+ mat[1][3]*Det2_23_12;
+    // Find all NECESSARY 3x3 subdeterminants
+    double Det3_012_012 = mat[0][0] * Det2_12_12 - mat[0][1] * Det2_12_02
+	+ mat[0][2] * Det2_12_01;
+    //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03
+    //                            + mat[0][3]*Det2_12_01;
+    //double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03
+    //                            + mat[0][3]*Det2_12_02;
+    //double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13
+    //                            + mat[0][3]*Det2_12_12;
+    //double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02
+    //                            + mat[0][2]*Det2_13_01;
+    double Det3_013_013 = mat[0][0] * Det2_13_13 - mat[0][1] * Det2_13_03
+	+ mat[0][3] * Det2_13_01;
+    //double Det3_013_023 = mat[0][0]*Det2_13_23 - mat[0][2]*Det2_13_03
+    //                            + mat[0][3]*Det2_13_02;
+    //double Det3_013_123 = mat[0][1]*Det2_13_23 - mat[0][2]*Det2_13_13
+    //                            + mat[0][3]*Det2_13_12;
+    //double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02
+    //                            + mat[0][2]*Det2_23_01;
+    //double Det3_023_013 = mat[0][0]*Det2_23_13 - mat[0][1]*Det2_23_03
+    //                            + mat[0][3]*Det2_23_01;
+    double Det3_023_023 = mat[0][0] * Det2_23_23 - mat[0][2] * Det2_23_03
+	+ mat[0][3] * Det2_23_02;
+    //double Det3_023_123 = mat[0][1]*Det2_23_23 - mat[0][2]*Det2_23_13
+    //                            + mat[0][3]*Det2_23_12;
+    double Det3_123_012 = mat[1][0] * Det2_23_12 - mat[1][1] * Det2_23_02
+	+ mat[1][2] * Det2_23_01;
+    double Det3_123_013 = mat[1][0] * Det2_23_13 - mat[1][1] * Det2_23_03
+	+ mat[1][3] * Det2_23_01;
+    double Det3_123_023 = mat[1][0] * Det2_23_23 - mat[1][2] * Det2_23_03
+	+ mat[1][3] * Det2_23_02;
+    double Det3_123_123 = mat[1][1] * Det2_23_23 - mat[1][2] * Det2_23_13
+	+ mat[1][3] * Det2_23_12;
 
-  // Find the 4x4 determinant
-  static double det;
-	  det =   mat[0][0]*Det3_123_123
-		- mat[0][1]*Det3_123_023
-		+ mat[0][2]*Det3_123_013
-		- mat[0][3]*Det3_123_012;
+    // Find the 4x4 determinant
+    static double det;
+    det = mat[0][0] * Det3_123_123
+	- mat[0][1] * Det3_123_023
+	+ mat[0][2] * Det3_123_013 - mat[0][3] * Det3_123_012;
 
-  // Very small determinants probably reflect floating-point fuzz near zero
-  if (fabs(det) < 0.0001)
-      return false;
+    // Very small determinants probably reflect floating-point fuzz near zero
+    if (fabs(det) < 0.0001)
+	return false;
 
-  inverse[0][0] =  Det3_123_123 / det;
-  //inverse[0][1] = -Det3_023_123 / det;
-  //inverse[0][2] =  Det3_013_123 / det;
-  //inverse[0][3] = -Det3_012_123 / det;
+    inverse[0][0] = Det3_123_123 / det;
+    //inverse[0][1] = -Det3_023_123 / det;
+    //inverse[0][2] =  Det3_013_123 / det;
+    //inverse[0][3] = -Det3_012_123 / det;
 
-  //inverse[1][0] = -Det3_123_023 / det;
-  inverse[1][1] =  Det3_023_023 / det;
-  //inverse[1][2] = -Det3_013_023 / det;
-  //inverse[1][3] =  Det3_012_023 / det;
+    //inverse[1][0] = -Det3_123_023 / det;
+    inverse[1][1] = Det3_023_023 / det;
+    //inverse[1][2] = -Det3_013_023 / det;
+    //inverse[1][3] =  Det3_012_023 / det;
 
-  //inverse[2][0] =  Det3_123_013 / det;
-  //inverse[2][1] = -Det3_023_013 / det;
-  inverse[2][2] =  Det3_013_013 / det;
-  //inverse[2][3] = -Det3_012_013 / det;
+    //inverse[2][0] =  Det3_123_013 / det;
+    //inverse[2][1] = -Det3_023_013 / det;
+    inverse[2][2] = Det3_013_013 / det;
+    //inverse[2][3] = -Det3_012_013 / det;
 
-  //inverse[3][0] = -Det3_123_012 / det;
-  //inverse[3][1] =  Det3_023_012 / det;
-  //inverse[3][2] = -Det3_013_012 / det;
-  inverse[3][3] =  Det3_012_012 / det;
+    //inverse[3][0] = -Det3_123_012 / det;
+    //inverse[3][1] =  Det3_023_012 / det;
+    //inverse[3][2] = -Det3_013_012 / det;
+    inverse[3][3] = Det3_012_012 / det;
 
-  return true;
+    return true;
 }
+
 /*@ +fixedformalarray +mustdefine @*/
 
-gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
+gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
 {
     double prod[4][4];
     double inv[4][4];
@@ -463,7 +467,8 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     for (k = 0; k < MAXCHANNELS; k++) {
 	if (gpsdata->used[k])
 	    gpsd_report(LOG_INF, "az: %d el: %d  SV: %d\n",
-			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);
+			gpsdata->azimuth[k], gpsdata->elevation[k],
+			gpsdata->used[k]);
     }
 #ifdef __UNUSED__
 #endif /* __UNUSED__ */
@@ -471,11 +476,11 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
 	if (gpsdata->used[k] == 0)
 	    continue;
-	satpos[n][0] = sin(gpsdata->azimuth[k]*DEG_2_RAD)
-	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
-	satpos[n][1] = cos(gpsdata->azimuth[k]*DEG_2_RAD)
-	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
-	satpos[n][2] = sin(gpsdata->elevation[k]*DEG_2_RAD);
+	satpos[n][0] = sin(gpsdata->azimuth[k] * DEG_2_RAD)
+	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][1] = cos(gpsdata->azimuth[k] * DEG_2_RAD)
+	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][2] = sin(gpsdata->elevation[k] * DEG_2_RAD);
 	satpos[n][3] = 1;
 	n++;
     }
@@ -488,8 +493,8 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     }
 #endif /* __UNUSED__ */
 
-    for (i = 0; i < 4; ++i) { //< rows
-	for (j = 0; j < 4; ++j) { //< cols
+    for (i = 0; i < 4; ++i) {	//< rows
+	for (j = 0; j < 4; ++j) {	//< cols
 	    prod[i][j] = 0.0;
 	    for (k = 0; k < n; ++k) {
 		prod[i][j] += satpos[k][i] * satpos[k][j];
@@ -520,8 +525,8 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     } else {
 #ifndef USE_QT
 	gpsd_report(LOG_DATA,
-	    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
-	    gpsdata->dev.path);
+		    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
+		    gpsdata->dev.path);
 #endif
 	return 0;
     }
@@ -535,36 +540,32 @@ gps_mask_t fill_dop(const struct gps_data_t *gpsdata, struct dop_t *dop)
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 
 #ifndef USE_QT
-    gpsd_report(LOG_DATA, "DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
-		xdop, dop->xdop,
-		ydop, dop->ydop,
-		hdop, dop->hdop,
-		vdop, dop->vdop,
-		pdop, dop->pdop,
-		tdop, dop->tdop,
-		gdop, dop->gdop);
+    gpsd_report(LOG_DATA,
+		"DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
+		xdop, dop->xdop, ydop, dop->ydop, hdop, dop->hdop, vdop,
+		dop->vdop, pdop, dop->pdop, tdop, dop->tdop, gdop, dop->gdop);
 #endif
 
     /*@ -usedef @*/
-    if (isnan(dop->xdop)!=0) {
+    if (isnan(dop->xdop) != 0) {
 	dop->xdop = xdop;
     }
-    if (isnan(dop->ydop)!=0) {
+    if (isnan(dop->ydop) != 0) {
 	dop->ydop = ydop;
     }
-    if (isnan(dop->hdop)!=0) {
+    if (isnan(dop->hdop) != 0) {
 	dop->hdop = hdop;
     }
-    if (isnan(dop->vdop)!=0) {
+    if (isnan(dop->vdop) != 0) {
 	dop->vdop = vdop;
     }
-    if (isnan(dop->pdop)!=0) {
+    if (isnan(dop->pdop) != 0) {
 	dop->pdop = pdop;
     }
-    if (isnan(dop->tdop)!=0) {
+    if (isnan(dop->tdop) != 0) {
 	dop->tdop = tdop;
     }
-    if (isnan(dop->gdop)!=0) {
+    if (isnan(dop->gdop) != 0) {
 	dop->gdop = gdop;
     }
     /*@ +usedef @*/
