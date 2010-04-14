@@ -1147,8 +1147,22 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
 static double garmin_ntp_offset(struct gps_device_t *session)
 {
-    /* only one sentence ships time */
-    return 0.430;			/* valid at 4800bps */
+    if (session->sourcetype == source_usb) {
+	return 0.042;  /* Garmin USB */
+    }
+    /* only two sentences ships time */
+    /* but the PVT data is always first */
+    switch (session->gpsdata.dev.baudrate) {
+    case 4800:
+	return 0.430;	/* TBD */
+    case 9600:
+	return 0.430;   /* tested 12Arp10 */
+    case 19200:	
+        return 0.430;   /* TBD */
+    case 38400:	
+        return 0.430;   /* TBD */
+    }
+    return 0.430;   /* WTF?  WAG */
 }
 #endif /* NTPSHM_ENABLE */
 
