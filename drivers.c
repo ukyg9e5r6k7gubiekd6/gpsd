@@ -79,7 +79,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		gpsd_report(LOG_PROG, "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    if (session->device_type != NULL && session->device_type->event_hook != 0)
+		    if (session->device_type != NULL && session->device_type->event_hook != NULL)
 			session->device_type->event_hook(session, event_triggermatch);
 		    st |= DEVICEID_IS;
 		}
