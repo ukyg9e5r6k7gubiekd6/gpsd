@@ -157,6 +157,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	ais->mmsi = UBITS(8, 30);
 	gpsd_report(LOG_INF, "AIVDM message type %d, MMSI %09d:\n",
 		    ais->type, ais->mmsi);
+	/*
+	 * Something about the shape of this switch statement confuses
+	 * GNU indent so badly that there is no point in trying to be
+	 * finer-grained than leaving it all alone.
+	 */
+	/* *INDENT-OFF* */
 	switch (ais->type) {
 	case 1:	/* Position Report */
 	case 2:
@@ -167,7 +173,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type1.status		= UBITS(38, 4);
 	    ais->type1.turn		= SBITS(42, 8);
 	    ais->type1.speed		= UBITS(50, 10);
@@ -181,7 +186,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    //ais->type1.spare	= UBITS(145, 3);
 	    ais->type1.raim		= UBITS(148, 1)!=0;
 	    ais->type1.radio		= UBITS(149, 20);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"Nav=%d TURN=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d TH=%d Sec=%d\n",
 			ais->type1.status,
@@ -202,7 +206,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type4.year		= UBITS(38, 14);
 	    ais->type4.month		= UBITS(52, 4);
 	    ais->type4.day		= UBITS(56, 5);
@@ -216,7 +219,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    //ais->type4.spare		= UBITS(138, 10);
 	    ais->type4.raim		= UBITS(148, 1)!=0;
 	    ais->type4.radio		= UBITS(149, 19);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"Date: %4d:%02d:%02dT%02d:%02d:%02d Q=%d Lat=%d  Lon=%d epfd=%d\n",
 			ais->type4.year,
@@ -236,7 +238,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type5.ais_version  = UBITS(38, 2);
 	    ais->type5.imo          = UBITS(40, 30);
 	    UCHARS(70, ais->type5.callsign);
@@ -255,7 +256,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    UCHARS(302, ais->type5.destination);
 	    ais->type5.dte          = UBITS(422, 1);
 	    //ais->type5.spare        = UBITS(423, 1);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"AIS=%d callsign=%s, name=%s destination=%s\n",
 			ais->type5.ais_version,
@@ -269,14 +269,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type6.seqno          = UBITS(38, 2);
 	    ais->type6.dest_mmsi      = UBITS(40, 30);
 	    ais->type6.retransmit     = (bool)UBITS(70, 1);
 	    //ais->type6.spare        = UBITS(71, 1);
 	    ais->type6.app_id         = UBITS(72, 16);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
-	    /* *INDENT-ON* */
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)ais_context->bits + (88 / BITS_PER_BYTE),
 			 (ais->type6.bitcount + 7) / 8);
@@ -332,7 +330,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type9.alt		= UBITS(38, 12);
 	    ais->type9.speed		= UBITS(50, 10);
 	    ais->type9.accuracy		= (bool)UBITS(60, 1);
@@ -346,7 +343,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type9.assigned		= UBITS(146, 1)!=0;
 	    ais->type9.raim		= UBITS(147, 1)!=0;
 	    ais->type9.radio		= UBITS(148, 19);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"Alt=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d Sec=%d\n",
 			ais->type9.alt,
@@ -363,11 +359,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    //ais->type10.spare        = UBITS(38, 2);
 	    ais->type10.dest_mmsi      = UBITS(40, 30);
 	    //ais->type10.spare2       = UBITS(70, 2);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF, "dest=%u\n", ais->type10.dest_mmsi);
 	    break;
 	case 12: /* Safety Related Message */
@@ -376,12 +370,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type12.seqno          = UBITS(38, 2);
 	    ais->type12.dest_mmsi      = UBITS(40, 30);
 	    ais->type12.retransmit     = (bool)UBITS(70, 1);
 	    //ais->type12.spare        = UBITS(71, 1);
-	    /* *INDENT-ON* */
 	    from_sixbit((char *)ais_context->bits,
 			72, ais_context->bitlen-72,
 			ais->type12.text);
@@ -408,14 +400,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		break;
 	    }
 	    (void)memset(&ais->type15, '\0', sizeof(ais->type15));
-	    /* *INDENT-OFF* */
 	    //ais->type14.spare         = UBITS(38, 2);
 	    ais->type15.mmsi1		= UBITS(40, 30);
 	    ais->type15.type1_1		= UBITS(70, 6);
 	    ais->type15.type1_1		= UBITS(70, 6);
 	    ais->type15.offset1_1	= UBITS(76, 12);
 	    //ais->type14.spare2        = UBITS(88, 2);
-	    /* *INDENT-ON* */
 	    if (ais_context->bitlen > 90) {
 		ais->type15.type1_2	= UBITS(90, 6);
 		ais->type15.offset1_2	= UBITS(96, 12);
@@ -434,7 +424,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type16.mmsi1		= UBITS(40, 30);
 	    ais->type16.offset1		= UBITS(70, 12);
 	    ais->type16.increment1	= UBITS(82, 10);
@@ -445,7 +434,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		ais->type16.offset2	= UBITS(122, 12);
 		ais->type16.increment2	= UBITS(134, 10);
 	    }
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 17:	/* GNSS Broadcast Binary Message */
@@ -454,13 +442,11 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    //ais->type17.spare         = UBITS(38, 2);
 	    ais->type17.lon		= UBITS(40, 18);
 	    ais->type17.lat		= UBITS(58, 17);
 	    //ais->type17.spare	        = UBITS(75, 4);
 	    ais->type17.bitcount        = ais_context->bitlen - 80;
-	    /* *INDENT-ON* */
 	    (void)memcpy(ais->type17.bitdata,
 			 (char *)ais_context->bits + (80 / BITS_PER_BYTE),
 			 (ais->type17.bitcount + 7) / 8);
@@ -472,7 +458,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type18.reserved	= UBITS(38, 8);
 	    ais->type18.speed		= UBITS(46, 10);
 	    ais->type18.accuracy	= UBITS(56, 1)!=0;
@@ -490,7 +475,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type18.assigned	= UBITS(146, 1)!=0;
 	    ais->type18.raim		= UBITS(147, 1)!=0;
 	    ais->type18.radio		= UBITS(148, 20);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d\n",
 			ais->type18.reserved,
@@ -508,7 +492,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    ais->type19.reserved     = UBITS(38, 8);
 	    ais->type19.speed        = UBITS(46, 10);
 	    ais->type19.accuracy     = UBITS(56, 1)!=0;
@@ -529,7 +512,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type19.dte          = UBITS(305, 1)!=0;
 	    ais->type19.assigned     = UBITS(306, 1)!=0;
 	    //ais->type19.spare      = UBITS(307, 5);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"reserved=%d speed=%d accuracy=%d lon=%d lat=%d course=%d heading=%d sec=%d name=%s\n",
 			ais->type19.reserved,
@@ -548,7 +530,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    ais_context->bitlen);
 		break;
 	    }
-	    /* *INDENT-OFF* */
 	    //ais->type20.spare		= UBITS(38, 2);
 	    ais->type20.offset1		= UBITS(40, 12);
 	    ais->type20.number1		= UBITS(52, 4);
@@ -566,7 +547,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type20.number4		= UBITS(142, 4);
 	    ais->type20.timeout4	= UBITS(146, 3);
 	    ais->type20.increment4	= UBITS(149, 11);
-	    /* *INDENT-ON* */
 	    break;
 	case 21:	/* Aid-to-Navigation Report */
 	    if (ais_context->bitlen < 272 || ais_context->bitlen > 360) {
@@ -581,7 +561,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		from_sixbit((char *)ais_context->bits, 
 			    272, (ais_context->bitlen - 272)/6, 
 			    ais->type21.name+20);
-	    /* *INDENT-OFF* */
 	    ais->type21.accuracy     = UBITS(163, 1);
 	    ais->type21.lon          = SBITS(164, 28);
 	    ais->type21.lat          = SBITS(192, 27);
@@ -597,7 +576,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type21.virtual_aid  = UBITS(269, 1)!=0;
 	    ais->type21.assigned     = UBITS(270, 1)!=0;
 	    //ais->type21.spare      = UBITS(271, 1);
-	    /* *INDENT-ON* */
 	    gpsd_report(LOG_INF,
 			"name=%s accuracy=%d lon=%d lat=%d sec=%d\n",
 			ais->type21.name,
@@ -672,12 +650,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		if (AIS_AUXILIARY_MMSI(ais->mmsi))
 		    ais->type24.mothership_mmsi   = UBITS(132, 30);
 		else {
-		    /* *INDENT-OFF* */
 		    ais->type24.dim.to_bow        = UBITS(132, 9);
 		    ais->type24.dim.to_stern      = UBITS(141, 9);
 		    ais->type24.dim.to_port       = UBITS(150, 6);
 		    ais->type24.dim.to_starboard  = UBITS(156, 6);
-		    /* *INDENT-ON* */
 		}
 		//ais->type24.b.spare	    = UBITS(162, 8);
 		break;
@@ -749,6 +725,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    gpsd_report(LOG_ERROR, "Unparsed AIVDM message type %d.\n",ais->type);
 	    break;
 	}
+	/* *INDENT-ON* */
 #undef UCHARS
 #undef SBITS
 #undef UBITS
