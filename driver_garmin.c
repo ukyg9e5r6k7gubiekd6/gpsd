@@ -1147,6 +1147,9 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
 static double garmin_ntp_offset(struct gps_device_t *session)
 {
+    if (session->sourcetype == source_usb) {
+	return 0.042;  /* Garmin USB */
+    }
     /* only one sentence ships time */
     return 0.430;			/* valid at 4800bps */
 }
