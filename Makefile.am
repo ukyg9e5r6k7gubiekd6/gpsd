@@ -538,6 +538,11 @@ INDENT_OPTIONS = --indent-level4 \
 indent:
 	chmod u+w *maskdump.c
 	indent $(INDENT_OPTIONS) $(INDENT_FILES)
+	for f in $(INDENT_FILES); \
+		do \
+			sed <$${f} >/tmp/reindent$$$$ -e 's/@ \*/@*/' ; \
+			mv /tmp/reindent$$$$ $${f} ; \
+		done
 	chmod u-w *maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
