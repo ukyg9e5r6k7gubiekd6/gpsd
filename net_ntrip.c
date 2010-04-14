@@ -33,8 +33,15 @@ struct ntrip_stream_t
 {
     char mountpoint[101];
     enum
-    { fmt_rtcm2, fmt_rtcm2_0, fmt_rtcm2_1, fmt_rtcm2_2, fmt_rtcm2_3,
-	    fmt_rtcm3, fmt_unknown } format;
+    {
+	fmt_rtcm2,
+	fmt_rtcm2_0,
+	fmt_rtcm2_1,
+	fmt_rtcm2_2,
+	fmt_rtcm2_3,
+	fmt_rtcm3,
+	fmt_unknown
+    } format;
     int carrier;
     double latitude;
     double longitude;
@@ -352,7 +359,7 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
     return 0;
 }
 
-		  /*@ -nullpass @*//* work around a splint bug */
+/*@ -nullpass @*//* work around a splint bug */
 static int ntrip_stream_open(const char *caster, const char *port,
 			     /*@null@*/ const char *auth,
 			     struct gps_context_t *context,

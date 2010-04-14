@@ -416,8 +416,8 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     char buf[BUFSIZ];
     int i;
     unsigned int id =
-	(unsigned int)((session->packet.outbuffer[3] << 8) | session->packet.
-		       outbuffer[2]);
+	(unsigned int)((session->packet.outbuffer[3] << 8) |
+		       session->packet.outbuffer[2]);
 
     if (session->packet.type != ZODIAC_PACKET) {
 	const struct gps_type_t **dp;
