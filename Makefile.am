@@ -525,20 +525,20 @@ INDENT_SOURCES = $(gpsd_c_sources) $(libgpsd_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \
 	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
-INDENT_OPTIONS = --indent-level=4 \
-		--honor-newlines \
+INDENT_OPTIONS = --indent-level4 \
+		--honour-newlines \
 		--dont-break-procedure-type \
 		--cuddle-else \
 		--braces-on-if-line \
-		--case-brace-indentation=0 \
-		--brace-indent=0 \
+		--case-brace-indentation0 \
+		--brace-indent0 \
 		--no-space-after-casts \
 		--no-space-after-function-call-names \
 		--dont-format-comments
 indent:
 	chmod u+w *maskdump.c
 	indent $(INDENT_OPTIONS) $(INDENT_SOURCES)
-	replace '@ \*/' '@\*/' $(INDENT_SOURCES)
+	#replace '@ \*/' '@\*/' $(INDENT_SOURCES)
 	chmod u-w *maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
