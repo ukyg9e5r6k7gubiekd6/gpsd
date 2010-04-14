@@ -534,6 +534,7 @@ INDENT_OPTIONS = --indent-level4 \
 		--brace-indent0 \
 		--no-space-after-casts \
 		--no-space-after-function-call-names \
+		--start-left-side-of-comments \
 		--dont-format-comments
 indent:
 	chmod u+w *maskdump.c
