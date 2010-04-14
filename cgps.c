@@ -770,7 +770,7 @@ int main(int argc, char *argv[])
 	    break;
 	    /*@ +observertrans @*/
 	case 'V':
-	    (void)fprintf(stderr, "xgps: %s (revision %s)\n", 
+	    (void)fprintf(stderr, "cgps: %s (revision %s)\n", 
 			  VERSION, REVISION);
 	    exit(0);
 	case 'l':
