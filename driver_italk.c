@@ -373,16 +373,16 @@ static ssize_t italk_control_send(struct gps_device_t *session,
 {
     ssize_t      status;
 
-    /*@ -mayaliasunique **/
+    /*@ -mayaliasunique @*/
     session->msgbuflen = msglen;
     (void)memcpy(session->msgbuf, msg, msglen);
-    /*@ +mayaliasunique **/
+    /*@ +mayaliasunique @*/
     /* we may need to dump the message */
     gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
 		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
     status = write(session->gpsdata.gps_fd, msg, msglen);
     (void)tcdrain(session->gpsdata.gps_fd);
-    return(status);
+    return status;
 }
 /*@ -charint +usedef +compdef @*/
 #endif /* ALLOW_CONTROLSEND */

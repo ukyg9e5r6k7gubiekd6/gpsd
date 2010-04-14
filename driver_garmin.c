@@ -1136,11 +1136,11 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 			    char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
 {
-    /*@ -mayaliasunique **/
+    /*@ -mayaliasunique @*/
     session->msgbuflen = buflen;
     (void)memcpy(session->msgbuf, buf, buflen);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-    /*@ +mayaliasunique **/
+    /*@ +mayaliasunique @*/
 }
 #endif /* ALLOW_CONTROLSEND */
 

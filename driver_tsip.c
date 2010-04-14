@@ -894,7 +894,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     /*
      * mrd reported that once every couple of weeks his SiRF was flipping
      * into Trimble binary mode and not recovering.  Damn Trimble for not
-     * checksumming their packets, it make palse positives hard to reject.
+     * checksumming their packets, it makes false positives hard to reject.
      * This should enable the SiRF to recover.
      */
     } else if (session->packet.type == SIRF_PACKET) {
