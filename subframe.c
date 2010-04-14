@@ -9,12 +9,17 @@
 #include "timebase.h"
 
 #if 0
-static char sf4map[] = {-1, 57, 25, 26, 27, 28, 57, 29, 30, 31, 32, 57, 62, 52, 53, 54, 57, 55, 56, 58, 59, 57, 60, 61, 62, 63};
-static char sf5map[] = {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 51};
+static char sf4map[] =
+    { -1, 57, 25, 26, 27, 28, 57, 29, 30, 31, 32, 57, 62, 52, 53, 54, 57, 55,
+56, 58, 59, 57, 60, 61, 62, 63 };
+static char sf5map[] =
+    { -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+20, 21, 22, 23, 24, 51 };
 #endif
 
 /*@ -usedef @*/
-void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
+void gpsd_interpret_subframe(struct gps_device_t *session,
+			     unsigned int words[])
 /* extract leap-second from RTCM-104 subframe data */
 {
     /*
@@ -51,15 +56,16 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
      */
     pageid = (words[2] & 0x3F0000) >> 16;
     data_id = (words[2] >> 22) & 0x3;
-    gpsd_report(LOG_PROG, "Subframe %d SVID %d data_id %d\n", subframe, pageid, data_id);
-    /* we're not interested in anything but subframe 4 - for now*/
+    gpsd_report(LOG_PROG, "Subframe %d SVID %d data_id %d\n", subframe,
+		pageid, data_id);
+    /* we're not interested in anything but subframe 4 - for now */
     if (subframe != 4)
 	return;
     /* once we've filtered, we can ignore the TEL and HOW words */
     gpsd_report(LOG_PROG, "50B: %06x %06x %06x %06x %06x %06x %06x %06x\n",
-	    words[2], words[3], words[4], words[5],
-	    words[6], words[7], words[8], words[9]);
-    switch(pageid) {
+		words[2], words[3], words[4], words[5],
+		words[6], words[7], words[8], words[9]);
+    switch (pageid) {
     case 55:
 	/*
 	 * "The requisite 176 bits shall occupy bits 9 through 24 of word
@@ -68,7 +74,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	 *
 	 * Since we've already stripped the low six parity bits, and shifted
 	 * the data to a byte boundary, we can just copy it out. */
-	{
+    {
 	char str[24];
 	int j = 0;
 	/*@ -type @*/
@@ -104,7 +110,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	str[j++] = '\0';
 	/*@ +type @*/
 	gpsd_report(LOG_INF, "gps system message is %s\n", str);
-	}
+    }
 	break;
     case 56:
 	leap = (words[8] & 0xff0000) >> 16;
@@ -138,10 +144,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	 */
 	if (leap > 128)
 	    leap ^= 0xff;
-	if ( LEAP_SECONDS > leap ) {
+	if (LEAP_SECONDS > leap) {
 	    /* something wrong */
-	    gpsd_report(LOG_ERROR, "Invalid leap_seconds: %d\n",
-		leap);
+	    gpsd_report(LOG_ERROR, "Invalid leap_seconds: %d\n", leap);
 	    leap = LEAP_SECONDS;
 	    session->context->valid &= ~LEAP_SECOND_VALID;
 	} else {
@@ -151,7 +156,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	session->context->leap_seconds = (int)leap;
 	break;
     default:
-	    ; /* no op */
+	;			/* no op */
     }
 }
+
 /*@ +usedef @*/
