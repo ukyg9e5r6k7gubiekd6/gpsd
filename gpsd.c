@@ -437,12 +437,11 @@ static int filesock(char *filename)
     struct sockaddr_un addr;
     int sock;
 
-    /*@ -mayaliasunique @*/
+    /*@ -mayaliasunique -usedef @*/
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
-    /*@i1@*/
     (void)strlcpy(addr.sun_path, filename, 104);	/* from sys/un.h */
     addr.sun_family = AF_UNIX;
     (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
@@ -450,7 +449,7 @@ static int filesock(char *filename)
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;
     }
-    /*@ +mayaliasunique @*/
+    /*@ +mayaliasunique +usedef @*/
     return sock;
 }
 
@@ -1501,8 +1500,9 @@ int main(int argc, char *argv[])
 	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
-		/*@i@*/ int ssock =
-		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
+		/*@+matchanyintegral@*/
+		int ssock =  accept(msocks[i], (struct sockaddr *)&fsin, &alen);
+		/*@+matchanyintegral@*/
 
 		if (ssock == -1)
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
@@ -1549,8 +1549,9 @@ int main(int argc, char *argv[])
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
-	    /*@i1@*/ int ssock =
-		accept(csock, (struct sockaddr *)&fsin, &alen);
+	    /*@+matchanyintegral@*/ 
+	    int ssock =	accept(csock, (struct sockaddr *)&fsin, &alen);
+	    /*@-matchanyintegral@*/ 
 
 	    if (ssock == -1)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));

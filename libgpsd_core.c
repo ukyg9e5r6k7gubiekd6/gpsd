@@ -429,8 +429,9 @@ void ntpd_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
-	    /*@i1@*/ (void)
-		pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
+	    /*@-unrecog@*/
+	    (void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
+	    /*@+unrecog@*/
 	} else {
 	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	}
@@ -612,9 +613,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->d_xmit_time = timestamp();
 #endif /* TIMING_ENABLE */
 
-    if (session->packet.type >= COMMENT_PACKET)
-	/*@i2@*/
+    if (session->packet.type >= COMMENT_PACKET) {
+	/*@-shiftnegative@*/
 	session->observed |= PACKET_TYPEMASK(session->packet.type);
+	/*@+shiftnegative@*/
+    }
 
     /* can we get a full packet from the device? */
     if (session->device_type) {

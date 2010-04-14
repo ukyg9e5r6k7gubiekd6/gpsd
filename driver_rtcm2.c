@@ -188,8 +188,9 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    csp->ident = m->sat_id;
 	    csp->iodl = m->issue_of_data_link != 0;
 	    csp->health = m->data_health;
-	    /*@i@*/ csp->snr =
-		(uint) (m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
+	    /*@+ignoresigns@*/ 
+	    csp->snr =	(int) (m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
+	    /*@-ignoresigns@*/ 
 	    csp->health_en = m->health_enable != 0;
 	    csp->new_data = m->new_nav_data != 0;
 	    csp->los_warning = m->loss_warn != 0;
@@ -203,8 +204,9 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
 	    np->latitude = mp->w3.lat * LA_SCALE;
-	    /*@i@*/ np->longitude =
-		((mp->w3.lon_h << 8) | mp->w4.lon_l) * LO_SCALE;
+	    /*@-shiftimplementation@*/
+	    np->longitude = ((mp->w3.lon_h << 8) | mp->w4.lon_l) * LO_SCALE;
+	    /*@+shiftimplementation@*/
 	    np->range = mp->w4.range;
 	    np->frequency =
 		(((mp->w4.freq_h << 6) | mp->w5.freq_l) * FREQ_SCALE) +
