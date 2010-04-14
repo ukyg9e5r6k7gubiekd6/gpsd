@@ -22,6 +22,10 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
+#ifdef S_SPLINT_S
+extern struct tm *gmtime_r(const time_t *, /*@out@*/ struct tm *tp);
+#endif /* S_SPLINT_S */
+
 /**************************************************************************
  *
  * Transport-layer-independent functions
@@ -127,7 +131,7 @@ static void print_fix(struct gps_fix_t *fix, struct tm *time)
 
 static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 {
-    int_time = floor(gpsfix->time);
+    int_time = (time_t)floor(gpsfix->time);
     if ((int_time != old_int_time) && gpsfix->mode >= MODE_2D) {
 	struct tm 	time;
 	/* 
@@ -137,10 +141,12 @@ static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 	 * backward when gpsd is submitting junk on the
 	 * dbus.
 	 */
+	/*@-type@*/
 	if (fabs(int_time - old_int_time) > timeout && !first) {
 	    print_gpx_trk_end();
 	    intrack = false;
 	}
+	/*@+type@*/
 
 	if (!intrack) {
 	    print_gpx_trk_start();
@@ -150,7 +156,7 @@ static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 	}
 		
 	old_int_time = int_time;
-	gmtime_r(&(int_time), &time);
+	(void)gmtime_r(&(int_time), &time);
 	print_fix(gpsfix, &time);
     }
 }
@@ -279,18 +285,19 @@ static int dbus_mainloop(void)
  *
  **************************************************************************/
 
-struct fixsource_t source;
+static struct fixsource_t source;
 
 static void process(struct gps_data_t *gpsdata,
 	     char *buf UNUSED, size_t len UNUSED)
 {
     /* this is where we implement source-device filtering */
-    if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+    if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
 	return;
 
     conditionally_log_fix(&gpsdata->fix);
 }
 
+/*@-mustfreefresh@*/
 static int socket_mainloop(void)
 {
     fd_set fds;
@@ -305,7 +312,7 @@ static int socket_mainloop(void)
     }
 
     gps_set_raw_hook(gpsdata, process);
-    gps_stream(gpsdata, WATCH_ENABLE, NULL);
+    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
 
     for(;;) {
 	int data;
@@ -323,10 +330,11 @@ static int socket_mainloop(void)
 	    break;
 	}
 	else if (data)
-	    gps_poll(gpsdata);
+	    (void)gps_poll(gpsdata);
     }
     return 0;
 }
+/*@+mustfreefresh@*/
 
 /**************************************************************************
  *
@@ -359,7 +367,7 @@ int main (int argc, char** argv)
 	    break;
 #endif /* CLIENTDEBUG_ENABLE */
 	case 'i':		/* set polling interfal */
-	    timeout = (unsigned int)atoi(optarg);
+	    timeout = (time_t)atoi(optarg);
 	    if (timeout < 1)
 		timeout = 1;
 	    if (timeout >= 3600)
@@ -388,9 +396,9 @@ int main (int argc, char** argv)
     gps_clear_fix(&gpsfix);
 
     /* catch all interesting signals */
-    signal (SIGTERM, quit_handler);
-    signal (SIGQUIT, quit_handler);
-    signal (SIGINT, quit_handler);
+    (void)signal(SIGTERM, quit_handler);
+    (void)signal(SIGQUIT, quit_handler);
+    (void)signal(SIGINT, quit_handler);
 
     //openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
     //syslog (LOG_INFO, "---------- STARTED ----------");

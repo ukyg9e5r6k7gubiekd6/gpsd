@@ -502,7 +502,9 @@ splint: gpsd.h packet_names.h
 	@echo "Running splint on gpspipe..."
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on gpsdecode..."
-	-splint $(SPLINTOPTS) -exportlocal gpsdecode.c
+	-splint $(SPLINTOPTS) $(gpsdecode_SOURCES)
+	@echo "Running splint on gpxlogger..."
+	-splint $(SPLINTOPTS) $(gpxlogger_SOURCES)
 	@echo "Running splint on test_bits test harness..."
 	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
 	@echo "Running splint on test_packet test harness..."
@@ -518,11 +520,10 @@ splint: gpsd.h packet_names.h
 cppcheck: gpsd.h packet_names.h
 	cppcheck --template gcc --all --force .
 
-# Re-indenting to a uniform style would be nice, and we leave this here
-# as a rough guide to the project style, but it turns out that indent is
-# an excessively blunt instrument.
+# Re-indent the codebase in aa uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
+	$(gpxlogger_SOURCES) $(xgpsspeed_SOURCES) $(gpsdecode_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \
 	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
 INDENT_OPTIONS = --indent-level4 \
