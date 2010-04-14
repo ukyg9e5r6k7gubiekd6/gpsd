@@ -40,8 +40,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * capability to read subframe data may want it.
      */
     unsigned int pageid, subframe, data_id, leap;
-    gpsd_report(LOG_IO,
-		"50B (raw): %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    gpsd_report(LOG_PROG,
+		"50B: (raw) %06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
     /*
@@ -59,7 +59,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     pageid = (words[2] & 0x3F0000) >> 16;
     data_id = (words[2] >> 22) & 0x3;
-    gpsd_report(LOG_PROG, "Subframe %d SVID %d data_id %d\n", subframe,
+    gpsd_report(LOG_PROG, "50B: Subframe %d SVID %d data_id %d\n", subframe,
 		pageid, data_id);
     /* we're not interested in anything but subframe 4 - for now */
     if (subframe != 4)
@@ -112,7 +112,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	str[j++] = (words[9] >> 8) & 0xff;
 	str[j++] = '\0';
 	/*@ +type @*/
-	gpsd_report(LOG_INF, "gps system message is %s\n", str);
+	gpsd_report(LOG_INF, "50B: gps system message is %s\n", str);
     }
 	break;
     case 56:
