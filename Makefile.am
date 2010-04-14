@@ -521,9 +521,10 @@ cppcheck: gpsd.h packet_names.h
 	cppcheck --template gcc --all --force .
 
 # Re-indent the codebase in aa uniform style for readability.
+# FIXME: Except for xgpsspeed - Tachmmeter.c make GNI indent lose it.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
-	$(gpxlogger_SOURCES) $(xgpsspeed_SOURCES) $(gpsdecode_SOURCES) \
+	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \
 	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
 INDENT_OPTIONS = --indent-level4 \
