@@ -592,12 +592,14 @@ int main(int argc, char **argv)
 
     FD_ZERO(&select_set);
 
+
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
 	for (;;) {
+	    /* *INDENT-OFF* */
 	    type_name =
-		session.device_type ? session.device_type->
-		type_name : "Unknown device";
+		session.device_type ? session.device_type->type_name : "Unknown device";
+	    /* *INDENT-ON* */
 	    (void)wattrset(statwin, A_BOLD);
 	    if (serial)
 		display(statwin, 0, 0, "%s %4d %c %d",
@@ -728,9 +730,10 @@ int main(int argc, char **argv)
 			    context.readonly = !context.readonly;
 			else
 			    context.readonly = (atoi(line + 1) == 0);
+			/* *INDENT-OFF* */
 			(void)gpsd_switch_driver(&session,
-						 (*active)->driver->
-						 type_name);
+				 (*active)->driver->type_name);
+			/* *INDENT-ON* */
 		    }
 		    break;
 
@@ -751,10 +754,12 @@ int main(int argc, char **argv)
 #ifdef ALLOW_RECONFIGURE
 		case 'n':	/* change mode */
 		    /* if argument not specified, toggle */
-		    if (strcspn(line, "01") == strlen(line))
-			v = (unsigned int)TEXTUAL_PACKET_TYPE(session.packet.
-							      type);
-		    else
+		    if (strcspn(line, "01") == strlen(line)) {
+			/* *INDENT-OFF* */
+			v = (unsigned int)TEXTUAL_PACKET_TYPE(
+			    session.packet.type);
+			/* *INDENT-ON* */
+		    } else
 			v = (unsigned)atoi(line + 1);
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
@@ -888,10 +893,11 @@ int main(int argc, char **argv)
 					     arg);
 			} else if (matchcount == 1) {
 			    assert(forcetype != NULL);
+			    /* *INDENT-OFF* */
 			    if (switch_type(forcetype))
 				(void)gpsd_switch_driver(&session,
-							 forcetype->
-							 type_name);
+							 forcetype->type_name);
+			    /* *INDENT-ON* */
 			} else {
 			    monitor_complain
 				("Multiple driver type names match '%s'.",
