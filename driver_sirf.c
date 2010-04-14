@@ -430,13 +430,16 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
      * 2 bits are the bottom two parity bits from the previous word. Mask and
      * shift these away to leave us with 3 data bytes per word */
 
-    preamble = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 22;
+    words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
+    preamble = words[0] >> 16;
     if (preamble  == 0x8b){
-	preamble ^= 0xff;
+	 preamble ^= 0xff;
+	 words[0] ^= 0xffffff;
     }
 
+
     parity1 = parity9 = 0;
-    for (i = 0; i < 10; i++) {
+    for (i = 1; i < 10; i++) {
 	int invert;
 	words[i] = (unsigned int)getbeul(buf, 4*i + 3);
 	switch( i ) {
