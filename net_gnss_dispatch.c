@@ -95,6 +95,7 @@ void netgnss_autoconnect(struct gps_context_t *context, double lat,
     }
 }
 
+/* *INDENT-OFF* */
 void rtcm_relay(struct gps_device_t *session)
 /* pass a DGNSS connection report to a session */
 {
@@ -104,7 +105,8 @@ void rtcm_relay(struct gps_device_t *session)
 	&& session->device_type->rtcm_writer != NULL) {
 	if (session->device_type->rtcm_writer(session,
 					      session->context->rtcmbuf,
-					      session->context->rtcmbytes) == 0)
+					      session->context->rtcmbytes) ==
+	    0)
 	    gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
 	else {
 	    session->rtcmtime = timestamp();
@@ -113,3 +115,6 @@ void rtcm_relay(struct gps_device_t *session)
 	}
     }
 }
+/* *INDENT-ON* */
+
+/* end */
