@@ -156,8 +156,7 @@ invalid data.
  *  123 -> +12.3
 
 **************************************************************************/
-static int gar_decode(const char *data, const size_t length,
-		      const char *prefix, const double dividor, /*@out@*/
+static int gar_decode(const char *data, const size_t length, const char *prefix, const double dividor,	/*@out@*/
 		      double *result)
 {
     char buf[10];
