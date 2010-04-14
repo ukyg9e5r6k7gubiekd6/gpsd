@@ -195,7 +195,7 @@ static float true2magnetic(double lat, double lon, double heading)
 	     (0.000222521 * pow(lon, 3)) + heading);
     } else {
 	/* We don't know how to compute magnetic heading for this
-	   location. */
+	 * location. */
 	magnetic_flag = false;
     }
 
@@ -250,23 +250,23 @@ static enum deg_str_type deg_type = deg_dd;
 static void windowsetup(void)
 {
     /* Set the window sizes per the following criteria:
-
-       1.  Set the window size to display the maximum number of
-       satellites possible, but not more than the size required to
-       display the maximum number of satellites gpsd is capable of
-       tracking (MAXCHANNELS - 2).
-
-       2.  If the screen size will not allow for the full complement of
-       satellites to be displayed, set the windows sizes smaller, but
-       not smaller than the number of lines necessary to display all of
-       the fields in the 'datawin'.  The list of displayed satellites
-       will be truncated to fit the available window size.  (TODO: If
-       the satellite list is truncated, omit the satellites not used to
-       obtain the current fix.)
-
-       3.  If the screen is large enough to display all possible
-       satellites (MAXCHANNELS - 2) with space still left at the bottom,
-       add a window at the bottom in which to scroll raw gpsd data.
+     * 
+     * 1.  Set the window size to display the maximum number of
+     * satellites possible, but not more than the size required to
+     * display the maximum number of satellites gpsd is capable of
+     * tracking (MAXCHANNELS - 2).
+     * 
+     * 2.  If the screen size will not allow for the full complement of
+     * satellites to be displayed, set the windows sizes smaller, but
+     * not smaller than the number of lines necessary to display all of
+     * the fields in the 'datawin'.  The list of displayed satellites
+     * will be truncated to fit the available window size.  (TODO: If
+     * the satellite list is truncated, omit the satellites not used to
+     * obtain the current fix.)
+     * 
+     * 3.  If the screen is large enough to display all possible
+     * satellites (MAXCHANNELS - 2) with space still left at the bottom,
+     * add a window at the bottom in which to scroll raw gpsd data.
      */
     int xsize, ysize;
 
@@ -389,12 +389,12 @@ static void windowsetup(void)
 	(void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
 
 	/* Note that the following four fields are exceptions to the
-	   sizing rule.  The minimum window size does not include these
-	   fields, if the window is too small, they get excluded.  This
-	   may or may not change if/when the output for these fields is
-	   fixed and/or people request their permanance.  They're only
-	   there in the first place because I arbitrarily thought they
-	   sounded interesting. ;^) */
+	 * sizing rule.  The minimum window size does not include these
+	 * fields, if the window is too small, they get excluded.  This
+	 * may or may not change if/when the output for these fields is
+	 * fixed and/or people request their permanance.  They're only
+	 * there in the first place because I arbitrarily thought they
+	 * sounded interesting. ;^) */
 
 	if (window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 	    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET,
@@ -492,9 +492,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     }
 
     /* This is for the satellite status display.  Originally lifted from
-       xgps.c.  Note that the satellite list may be truncated based on
-       available screen size, or may only show satellites used for the
-       fix.  */
+     * xgps.c.  Note that the satellite list may be truncated based on
+     * available screen size, or may only show satellites used for the
+     * fix.  */
     if (gpsdata->satellites_visible != 0) {
 	if (display_sats >= MAX_POSSIBLE_SATS) {
 	    for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
@@ -517,8 +517,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 		if (n < display_sats) {
 		    if ((i < gpsdata->satellites_visible)
 			&& ((gpsdata->used[i] != 0)
-			    || (gpsdata->satellites_visible <=
-				display_sats))) {
+			    || (gpsdata->satellites_visible <= display_sats))) {
 			(void)snprintf(scr, sizeof(scr),
 				       " %3d    %02d    %03d    %02d      %c",
 				       gpsdata->PRN[i], gpsdata->elevation[i],
@@ -607,7 +606,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     (void)mvwprintw(datawin, 7, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the GPS status and the time since the last state
-       change. */
+     * change. */
     if (gpsdata->online == 0) {
 	newstate = 0;
 	(void)snprintf(scr, sizeof(scr), "OFFLINE");
@@ -652,12 +651,12 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 	(void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
     }
     /* Note that the following four fields are exceptions to the
-       sizing rule.  The minimum window size does not include these
-       fields, if the window is too small, they get excluded.  This
-       may or may not change if/when the output for these fields is
-       fixed and/or people request their permanance.  They're only
-       there in the first place because I arbitrarily thought they
-       sounded interesting. ;^) */
+     * sizing rule.  The minimum window size does not include these
+     * fields, if the window is too small, they get excluded.  This
+     * may or may not change if/when the output for these fields is
+     * fixed and/or people request their permanance.  They're only
+     * there in the first place because I arbitrarily thought they
+     * sounded interesting. ;^) */
 
     if (window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 

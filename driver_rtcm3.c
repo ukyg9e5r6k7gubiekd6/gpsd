@@ -60,7 +60,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* Other magic values */
 #define INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
-		/*@ -type @*//* re-enable when we're ready to take this live */
+			     /*@ -type @*//* re-enable when we're ready to take this live */
 
 void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
@@ -584,13 +584,13 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u prange=%8.1f delta=%6.4f lockt=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L1.indicator),
+			  rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].L1.
-			      locktime));
+			  INT(rtcm->rtcmtypes.rtcm3_1001.rtk_data[i].
+			      L1.locktime));
 	}
 	break;
 
@@ -607,15 +607,15 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n",
 			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L1.indicator),
+			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].
+			      L1.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].
+			      L1.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR);
 	}
 	break;
@@ -633,20 +633,20 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u prange=%8.1f delta=%6.4f lockt=%u\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L1.indicator),
+			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			      locktime),
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.
-			  pseudorange,
+			  INT(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			      L1.locktime),
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L2.indicator),
+			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			  L2.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L2.
-			      locktime));
+			  INT(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			      L2.locktime));
 	}
 	break;
 
@@ -663,25 +663,25 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n",
 			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			       L1.indicator),
+			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			      L1.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].
+			      L1.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR,
-			  CODE(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			       L2.indicator),
+			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			  L2.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			      L2.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].
+			      L2.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.CNR);
 	}
 	break;
@@ -741,15 +741,15 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			       indicator),
-			  INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.
-			      channel),
-			  rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L1.indicator),
+			  INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].
+			      L1.channel),
+			  rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].L1.
-			      locktime));
+			  INT(rtcm->rtcmtypes.rtcm3_1009.rtk_data[i].
+			      L1.locktime));
 	}
 	break;
 
@@ -766,17 +766,17 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n",
 			  rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].L1.
-			       indicator),
-			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.
-			      channel),
-			  rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1003.rtk_data[i].
+			       L1.indicator),
+			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].
+			      L1.channel),
+			  rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].
+			      L1.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].
+			      L1.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.CNR);
 	}
 	break;
@@ -794,22 +794,22 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.
-			       indicator),
-			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.
-			      channel),
-			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			       L1.indicator),
+			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			      L1.channel),
+			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.
-			      locktime),
-			  CODE(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.
-			  pseudorange,
+			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			      L1.locktime),
+			  CODE(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			       L2.indicator),
+			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			  L2.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.
-			      locktime));
+			  INT(rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].
+			      L2.locktime));
 	}
 	break;
 
@@ -826,27 +826,27 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    ident=%u\n      L1: ind=%u channel=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n      L2: ind=%u prange=%8.1f delta=%6.4f lockt=%u amb=%u CNR=%.2f\n",
 			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].ident,
-			  CODE(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.
-			       indicator),
-			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.
-			      channel),
-			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			       L1.indicator),
+			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			      L1.channel),
+			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			  L1.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			      L1.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			      L1.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L1.CNR,
-			  CODE(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.
-			       indicator),
-			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.
-			  pseudorange,
+			  CODE(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			       L2.indicator),
+			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			  L2.pseudorange,
 			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.rangediff,
-			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.
-			      locktime),
-			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.
-			      ambiguity),
+			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			      L2.locktime),
+			  INT(rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].
+			      L2.ambiguity),
 			  rtcm->rtcmtypes.rtcm3_1012.rtk_data[i].L2.CNR);
 	}
 	break;
@@ -863,10 +863,10 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE * fp)
 	    (void)fprintf(fp,
 			  "    id=%u sync=%c interval=%u\n",
 			  rtcm->rtcmtypes.rtcm3_1013.announcements[i].id,
-			  BOOL(rtcm->rtcmtypes.rtcm3_1013.announcements[i].
-			       sync),
-			  rtcm->rtcmtypes.rtcm3_1013.announcements[i].
-			  interval);
+			  BOOL(rtcm->rtcmtypes.rtcm3_1013.
+			       announcements[i].sync),
+			  rtcm->rtcmtypes.rtcm3_1013.
+			  announcements[i].interval);
 	break;
 
     case 1014:
