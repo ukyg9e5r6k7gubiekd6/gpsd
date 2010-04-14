@@ -408,8 +408,9 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
     /*@ +mustfreefresh -matchanyintegral @*/
 }
 
-static int passivesocks(char *service, char *tcp_or_udp, int qlen, /*@out@*/
-			int socks[])
+/* *INDENT-OFF* */
+static int passivesocks(char *service, char *tcp_or_udp, 
+			int qlen, /*@out@*/int socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -431,6 +432,7 @@ static int passivesocks(char *service, char *tcp_or_udp, int qlen, /*@out@*/
      * The failed ones are identified by negative values */
     return numsocks;
 }
+/* *INDENT-ON* */
 
 static int filesock(char *filename)
 {
@@ -634,9 +636,10 @@ static void deactivate_device(struct gps_device_t *device)
     }
 }
 
+/* *INDENT-OFF* */
 /*@ -globstate @*/
-	   /*@null@*//*@observer@*/ static struct gps_device_t *find_device(char
-								  *device_name)
+/*@null@*//*@observer@*/ static struct gps_device_t *find_device(char
+								 *device_name)
 /* find the device block for an existing device name */
 {
     struct gps_device_t *devp;
@@ -647,6 +650,7 @@ static void deactivate_device(struct gps_device_t *device)
 	    return devp;
     return NULL;
 }
+/* *INDENT-ON* */
 
 /*@ -nullret @*/
 /*@ -statictrans @*/
@@ -879,10 +883,10 @@ static void set_serial(struct gps_device_t *device,
     gpsd_report(LOG_PROG, "set_serial(,%d,%s) %c%d\n", speed, modestring,
 		parity, stopbits);
     /* no support for other word sizes yet */
+    /* *INDENT-ON* */
     if (wordsize == (int)(9 - stopbits)
-	&& device->device_type->speed_switcher != NULL)
-	if (device->device_type->
-	    speed_switcher(device, speed, parity, (int)stopbits)) {
+	&& device->device_type->speed_switcher != NULL) {
+	if (device->device_type->speed_switcher(device, speed, parity, (int)stopbits)) {
 	    /*
 	     * Deep black magic is required here. We have to
 	     * allow the control string time to register at the
@@ -903,6 +907,8 @@ static void set_serial(struct gps_device_t *device,
 	    (void)usleep(50000);
 	    gpsd_set_speed(device, speed, parity, stopbits);
 	}
+    }
+    /* *INDENT-ON* */
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -1630,6 +1636,7 @@ int main(int argc, char *argv[])
 		    if (sub->active == 0)
 			continue;
 
+		    /* *INDENT-OFF* */
 		    /* 
 		     * NMEA and other textual sentences are simply
 		     * copied to all clients that are in raw or nmea
@@ -1671,6 +1678,7 @@ int main(int argc, char *argv[])
 			(void)throttled_write(sub, hd, strlen(hd));
 		    }
 #endif /* BINARY_ENABLE */
+		    /* *INDENT-ON* */
 		}
 
 		if (device->gpsdata.fix.mode == MODE_3D)
@@ -1695,6 +1703,7 @@ int main(int argc, char *argv[])
 			}
 		    }
 		}
+		/* *INDENT-OFF* */
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
 		    struct gps_device_t *gps;
@@ -1708,6 +1717,7 @@ int main(int argc, char *argv[])
 								gps->packet.
 								outbuflen);
 		}
+		/* *INDENT-ON* */
 	    }
 
 	    /* watch all channels associated with this device */
