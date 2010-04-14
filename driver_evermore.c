@@ -439,8 +439,8 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
     };
     /*@ -charint */
     gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);
-						/*@i1@*/ tmp8 = (protocol != 0) ? 1 : 0;
-						/* NMEA : binary */
+    /*@i1@*/ tmp8 = (protocol != 0) ? 1 : 0;
+    /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
     return (evermore_control_send
 	    (session, evrm_protocol_config,
@@ -469,11 +469,11 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
     };
     /*@ -charint */
     gpsd_report(LOG_PROG, "evermore_nmea_config(%d)\n", mode);
-						/*@i1@*/ tmp8 = (mode == 1) ? 5 : 1;
-						/* NMEA GPGSV, gpsd  */
+    /*@i1@*/ tmp8 = (mode == 1) ? 5 : 1;
+    /* NMEA GPGSV, gpsd  */
     evrm_nmeaout_config[6] = tmp8;	/* GPGSV, 1s or 5s */
-						/*@i1@*/ tmp8 = (mode == 2) ? 1 : 0;
-						/* NMEA PEMT101 */
+    /*@i1@*/ tmp8 = (mode == 2) ? 1 : 0;
+    /* NMEA PEMT101 */
     evrm_nmeaout_config[9] = tmp8;	/* PEMT101, 1s or 0s */
     return (evermore_control_send(session, (char *)evrm_nmeaout_config,
 				  sizeof(evrm_nmeaout_config)) != -1);
