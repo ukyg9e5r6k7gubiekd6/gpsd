@@ -791,7 +791,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	gpsd_report(LOG_PROG, "SiRF: GND 0x29 UTC: %lf\n", 
 	            session->newdata.time);
 #ifdef NTPSHM_ENABLE
-	if (session->newdata.mode <= MODE_NO_FIX) 
+	if (session->newdata.mode <= MODE_NO_FIX) {
 	    gpsd_report(LOG_PROG, "SiRF: NTPD no fix, mode: $d\n", 
 	        session->newdata.mode);
 	} else if ( 0 ==  unpacked_date.tm_year ) {
@@ -802,11 +802,11 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 		gpsd_report(LOG_RAW, "SiRF: NTPD just SEEN_UTC 1\n");
 	    }
 	    gpsd_report(LOG_PROG, 
-		"SiRF: NTPD valid time MID 0x29, seen=0x%02x\n",
-		session->driver.sirf.time_seen);
+			"SiRF: NTPD valid time MID 0x29, seen=0x%02x\n",
+			session->driver.sirf.time_seen);
 	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_1;
-            }
 	}
+
 #endif /* NTPSHM_ENABLE */
 	/* skip 4 bytes of satellite map */
 	session->newdata.altitude = getbesl(buf, 35)*1e-2;
