@@ -687,6 +687,6 @@ const struct gps_type_t superstar2_binary = {
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
-/* *INDENT-ON* */
 };
+/* *INDENT-ON* */
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

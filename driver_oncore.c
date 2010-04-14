@@ -521,7 +521,7 @@ const struct gps_type_t oncore_binary = {
 #ifdef NTPSHM_ENABLE
     .ntp_offset = oncore_ntp_offset,
 #endif /* NTPSHM_ENABLE */
-/* *INDENT-ON* */
 };
+/* *INDENT-ON* */
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 
