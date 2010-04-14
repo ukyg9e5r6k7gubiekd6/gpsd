@@ -161,7 +161,7 @@ struct gps_context_t {
     int fixcnt;				/* count of good fixes seen */
     socket_t dsock;			/* socket to DGPSIP server/Ntrip caster */
     void *netgnss_privdata;		/* DGNSS service specific data */
-    ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
+    size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
     /* timekeeping */

@@ -61,15 +61,17 @@ int netgnss_poll(struct gps_context_t *context)
 /* poll the DGNSS service for a correction report */
 {
     if (context->dsock > -1) {
-	context->rtcmbytes =
+	ssize_t rtcmbytes =
 	    read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
-	if ((context->rtcmbytes == -1 && errno != EAGAIN)
-	    || (context->rtcmbytes == 0)) {
+	if ((rtcmbytes == -1 && errno != EAGAIN) || (rtcmbytes == 0)) {
 	    (void)shutdown(context->dsock, SHUT_RDWR);
 	    (void)close(context->dsock);
+	    context->rtcmbytes = 0;
 	    return -1;
-	} else
+	} else {
+	    context->rtcmbytes = (size_t)rtcmbytes;
 	    context->rtcmtime = timestamp();
+	}
     }
     return 0;
 }
@@ -97,7 +99,7 @@ void rtcm_relay(struct gps_device_t *session)
 /* pass a DGNSS connection report to a session */
 {
     if (session->gpsdata.gps_fd != -1
-	&& session->context->rtcmbytes > -1
+	&& session->context->rtcmbytes > 0
 	&& session->rtcmtime < session->context->rtcmtime
 	&& session->device_type->rtcm_writer != NULL) {
 	if (session->device_type->rtcm_writer(session,
