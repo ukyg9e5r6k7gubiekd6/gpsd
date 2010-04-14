@@ -34,6 +34,7 @@ int json_rtcm2_read(const char *buf,
     static char stringstore[sizeof(rtcm2->words)*2];
     static int stringcount;
 
+/* *INDENT-OFF* */
 #define RTCM2_HEADER \
 	{"class",          t_check,    .dflt.check = "RTCM2"}, \
 	{"type",           t_uinteger, .addr.uinteger = &rtcm2->type}, \
@@ -170,6 +171,7 @@ int json_rtcm2_read(const char *buf,
     /*@ +fullinitblock @*/
 
 #undef RTCM2_HEADER
+/* *INDENT-ON* */
 
     memset(rtcm2, '\0', sizeof(struct rtcm2_t));
 

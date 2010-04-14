@@ -31,9 +31,8 @@ PERMISSIONS
  */
 /*@-compdef@*/
 
-static int json_tpv_read(const char *buf, 
-			 struct gps_data_t *gpsdata, 
-			 /*@null@*/const char **endptr)
+static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
+			 /*@null@*/ const char **endptr)
 {
     int status;
     /*@ -fullinitblock @*/
@@ -92,23 +91,23 @@ static int json_tpv_read(const char *buf,
 	    gpsdata->set |= LATLON_SET;
 	if (isnan(gpsdata->fix.altitude) == 0)
 	    gpsdata->set |= ALTITUDE_SET;
-	if (isnan(gpsdata->fix.epx)==0 && isnan(gpsdata->fix.epy)==0)
+	if (isnan(gpsdata->fix.epx) == 0 && isnan(gpsdata->fix.epy) == 0)
 	    gpsdata->set |= HERR_SET;
-	if (isnan(gpsdata->fix.epv)==0)
+	if (isnan(gpsdata->fix.epv) == 0)
 	    gpsdata->set |= VERR_SET;
-	if (isnan(gpsdata->fix.track)==0)
+	if (isnan(gpsdata->fix.track) == 0)
 	    gpsdata->set |= TRACK_SET;
-	if (isnan(gpsdata->fix.speed)==0)
+	if (isnan(gpsdata->fix.speed) == 0)
 	    gpsdata->set |= SPEED_SET;
-	if (isnan(gpsdata->fix.climb)==0)
+	if (isnan(gpsdata->fix.climb) == 0)
 	    gpsdata->set |= CLIMB_SET;
-	if (isnan(gpsdata->fix.epd)==0)
+	if (isnan(gpsdata->fix.epd) == 0)
 	    gpsdata->set |= TRACKERR_SET;
-	if (isnan(gpsdata->fix.eps)==0)
+	if (isnan(gpsdata->fix.eps) == 0)
 	    gpsdata->set |= SPEEDERR_SET;
-	if (isnan(gpsdata->fix.epc)==0)
+	if (isnan(gpsdata->fix.epc) == 0)
 	    gpsdata->set |= CLIMBERR_SET;
-	if (isnan(gpsdata->fix.epc)==0)
+	if (isnan(gpsdata->fix.epc) == 0)
 	    gpsdata->set |= CLIMBERR_SET;
 	if (gpsdata->fix.mode != MODE_NOT_SEEN)
 	    gpsdata->set |= MODE_SET;
@@ -116,9 +115,8 @@ static int json_tpv_read(const char *buf,
     return status;
 }
 
-static int json_sky_read(const char *buf, 
-			 struct gps_data_t *gpsdata, 
-			 /*@null@*/const char **endptr)
+static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
+			 /*@null@*/ const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
     /*@ -fullinitblock @*/
@@ -184,9 +182,8 @@ static int json_sky_read(const char *buf,
     return 0;
 }
 
-static int json_att_read(const char *buf, 
-			 struct gps_data_t *gpsdata, 
-			 /*@null@*/const char **endptr)
+static int json_att_read(const char *buf, struct gps_data_t *gpsdata,
+			 /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
@@ -242,9 +239,8 @@ static int json_att_read(const char *buf,
     return json_read_object(buf, json_attrs_1, endptr);
 }
 
-static int json_devicelist_read(const char *buf, 
-				struct gps_data_t *gpsdata, 
-				/*@null@*/const char **endptr)
+static int json_devicelist_read(const char *buf, struct gps_data_t *gpsdata,
+				/*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_subdevices[] = {
@@ -275,10 +271,10 @@ static int json_devicelist_read(const char *buf,
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_attrs_devices[] = {
-        {"class",   t_check,  .dflt.check = "DEVICES"},
-        {"devices", t_array,  STRUCTARRAY(gpsdata->devices.list,
-					json_attrs_subdevices,
-					&gpsdata->devices.ndevices)},
+	{"class", t_check,.dflt.check = "DEVICES"},
+	{"devices", t_array, STRUCTARRAY(gpsdata->devices.list,
+					 json_attrs_subdevices,
+					 &gpsdata->devices.ndevices)},
 	{NULL},
     };
     /*@+type@*/
@@ -292,14 +288,13 @@ static int json_devicelist_read(const char *buf,
     }
 
     gpsdata->devices.time = timestamp();
-    gpsdata->set &=~ UNION_SET;
+    gpsdata->set &= ~UNION_SET;
     gpsdata->set |= DEVICELIST_SET;
     return 0;
 }
 
-static int json_version_read(const char *buf, 
-			     struct gps_data_t *gpsdata, 
-			     /*@null@*/const char **endptr)
+static int json_version_read(const char *buf, struct gps_data_t *gpsdata,
+			     /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_version[] = {
@@ -322,14 +317,13 @@ static int json_version_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set &=~ UNION_SET;
+    gpsdata->set &= ~UNION_SET;
     gpsdata->set |= VERSION_SET;
     return 0;
 }
 
-static int json_error_read(const char *buf, 
-			   struct gps_data_t *gpsdata, 
-			   /*@null@*/const char **endptr)
+static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
+			   /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_error[] = {
@@ -348,14 +342,13 @@ static int json_error_read(const char *buf,
     if (status != 0)
 	return status;
 
-    gpsdata->set &=~ UNION_SET;
+    gpsdata->set &= ~UNION_SET;
     gpsdata->set |= ERROR_SET;
     return 0;
 }
 
-int libgps_json_unpack(const char *buf, 
-		       struct gps_data_t *gpsdata, 
-		       const char **end)
+int libgps_json_unpack(const char *buf,
+		       struct gps_data_t *gpsdata, const char **end)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
 {
     int status;
@@ -386,22 +379,22 @@ int libgps_json_unpack(const char *buf,
 	return json_version_read(buf, gpsdata, end);
 #ifdef RTCM104V2_ENABLE
     } else if (STARTSWITH(classtag, "\"class\":\"RTCM2\"")) {
-	status = json_rtcm2_read(buf, 
-				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
+	status = json_rtcm2_read(buf,
+				 gpsdata->dev.path, sizeof(gpsdata->dev.path),
 				 &gpsdata->rtcm2, end);
 	if (status == 0) {
-	    gpsdata->set &=~ UNION_SET;
+	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= RTCM2_SET;
 	}
 	return status;
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
     } else if (STARTSWITH(classtag, "\"class\":\"AIS\"")) {
-	status = json_ais_read(buf, 
-				 gpsdata->dev.path, sizeof(gpsdata->dev.path), 
-				 &gpsdata->ais, end);
+	status = json_ais_read(buf,
+			       gpsdata->dev.path, sizeof(gpsdata->dev.path),
+			       &gpsdata->ais, end);
 	if (status == 0) {
-	    gpsdata->set &=~ UNION_SET;
+	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= AIS_SET;
 	}
 	return status;
@@ -412,6 +405,7 @@ int libgps_json_unpack(const char *buf,
 	return -1;
 #undef STARTSWITH
 }
+
 /*@+compdef@*/
 
 /* libgps_json.c ends here */
