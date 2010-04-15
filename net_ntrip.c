@@ -359,6 +359,7 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
     return 0;
 }
 
+/* *INDENT-OFF* */
 /*@ -nullpass @*//* work around a splint bug */
 static int ntrip_stream_open(const char *caster, const char *port,
 			     /*@null@*/ const char *auth,
@@ -429,6 +430,7 @@ static int ntrip_stream_open(const char *caster, const char *port,
     (void)close(context->dsock);
     return -1;
 }
+/* *INDENT-ON* */
 
 /*@ +nullpass @*/
 

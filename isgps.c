@@ -282,13 +282,14 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		    session->isgps.buf[session->isgps.bufindex] =
 			session->isgps.curr_word;
 
+		    /* *INDENT-OFF* */
 		    if ((session->isgps.bufindex == 0) &&
-			!preamble_match((isgps30bits_t *) session->isgps.
-					buf)) {
+			!preamble_match((isgps30bits_t *) session->isgps.buf)) {
 			gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 				    "ISGPS word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
+		    /* *INDENT-ON* */
 		    session->isgps.bufindex++;
 
 		    if (length_check(session)) {

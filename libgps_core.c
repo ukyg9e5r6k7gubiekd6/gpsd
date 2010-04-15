@@ -411,6 +411,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			/*@ +mustfreeonly */
 			break;
 		    case 'K':
+			/* *INDENT-OFF* */
 			/*@ -nullpass -mustfreeonly -dependenttrans@*/
 			if (sp[2] != '?') {
 			    char *rc = strdup(sp);
@@ -422,21 +423,20 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				(int)strtol(sp2 + 2, &sp2, 10);
 			    (void)strlcpy(gpsdata->devices.list[0].path,
 					  strtok_r(sp2 + 1, " \r\n", &ns2),
-					  sizeof(gpsdata->devices.list[0].
-						 path));
+					  sizeof(gpsdata->devices.list[0].path));
 			    i = 0;
 			    while ((sp2 =
 				    strtok_r(NULL, " \r\n", &ns2)) != NULL)
 				if (i < MAXUSERDEVS - 1)
 				    (void)strlcpy(gpsdata->devices.list[++i].
 						  path, sp2,
-						  sizeof(gpsdata->devices.
-							 list[0].path));
+						  sizeof(gpsdata->devices.list[0].path));
 			    free(rc);
 			    gpsdata->set |= DEVICELIST_SET;
 			    gpsdata->devices.time = timestamp();
 			}
 			/*@ +nullpass +mustfreeonly +dependenttrans@*/
+			/* *INDENT-ON* */
 			break;
 		    case 'M':
 			if (sp[2] == '?') {

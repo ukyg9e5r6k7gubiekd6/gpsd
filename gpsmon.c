@@ -592,12 +592,14 @@ int main(int argc, char **argv)
 
     FD_ZERO(&select_set);
 
+
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
 	for (;;) {
+	    /* *INDENT-OFF* */
 	    type_name =
-		session.device_type ? session.device_type->
-		type_name : "Unknown device";
+		session.device_type ? session.device_type->type_name : "Unknown device";
+	    /* *INDENT-ON* */
 	    (void)wattrset(statwin, A_BOLD);
 	    if (serial)
 		display(statwin, 0, 0, "%s %4d %c %d",
@@ -697,11 +699,12 @@ int main(int argc, char **argv)
 			if ((*active)->driver->rate_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->driver->
-				rate_switcher(&session, rate)) {
+			    /* *INDENT-OFF* */
+			    if ((*active)->driver->rate_switcher(&session, rate)) {
 				monitor_dump_send();
 			    } else
 				monitor_complain("Rate not supported.");
+			    /* *INDENT-ON* */
 			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
@@ -728,33 +731,36 @@ int main(int argc, char **argv)
 			    context.readonly = !context.readonly;
 			else
 			    context.readonly = (atoi(line + 1) == 0);
+			/* *INDENT-OFF* */
 			(void)gpsd_switch_driver(&session,
-						 (*active)->driver->
-						 type_name);
+				 (*active)->driver->type_name);
+			/* *INDENT-ON* */
 		    }
 		    break;
 
 		case 'l':	/* open logfile */
 		    if (logfile != NULL) {
 			if (packetwin != NULL)
-			    (void)wprintw(packetwin, ">>> Logging to %s off",
-					  logfile);
+			    (void)wprintw(packetwin,
+					  ">>> Logging to %s off", logfile);
 			(void)fclose(logfile);
 		    }
 
 		    if ((logfile = fopen(line + 1, "a")) != NULL)
 			if (packetwin != NULL)
-			    (void)wprintw(packetwin, ">>> Logging to %s on",
-					  logfile);
+			    (void)wprintw(packetwin,
+					  ">>> Logging to %s on", logfile);
 		    break;
 
 #ifdef ALLOW_RECONFIGURE
 		case 'n':	/* change mode */
 		    /* if argument not specified, toggle */
-		    if (strcspn(line, "01") == strlen(line))
-			v = (unsigned int)TEXTUAL_PACKET_TYPE(session.packet.
-							      type);
-		    else
+		    if (strcspn(line, "01") == strlen(line)) {
+			/* *INDENT-OFF* */
+			v = (unsigned int)TEXTUAL_PACKET_TYPE(
+			    session.packet.type);
+			/* *INDENT-ON* */
+		    } else
 			v = (unsigned)atoi(line + 1);
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
@@ -831,14 +837,14 @@ int main(int argc, char **argv)
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
 			 */
+			/* *INDENT-OFF* */
 			if ((*active)->driver->speed_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->driver->speed_switcher(&session,
-								  speed,
-								  parity,
-								  (int)
-								  stopbits)) {
+			    if ((*active)->
+				driver->speed_switcher(&session, speed,
+						       parity, (int)
+						       stopbits)) {
 				monitor_dump_send();
 				/*
 				 * See the comment attached to the 'B'
@@ -854,11 +860,12 @@ int main(int argc, char **argv)
 						     parity, stopbits);
 			    } else
 				monitor_complain
-				    ("Speed/mode cobination not supported.");
+				    ("Speed/mode combination not supported.");
 			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
 				("Device type has no speed switcher");
+			/* *INDENT-ON* */
 		    } else {
 			line[0] = 'b';
 			/*@ -sefparams @*/
@@ -884,14 +891,15 @@ int main(int argc, char **argv)
 			    }
 			}
 			if (matchcount == 0) {
-			    monitor_complain("No driver type matches '%s'.",
-					     arg);
+			    monitor_complain
+				("No driver type matches '%s'.", arg);
 			} else if (matchcount == 1) {
 			    assert(forcetype != NULL);
+			    /* *INDENT-OFF* */
 			    if (switch_type(forcetype))
 				(void)gpsd_switch_driver(&session,
-							 forcetype->
-							 type_name);
+							 forcetype->type_name);
+			    /* *INDENT-ON* */
 			} else {
 			    monitor_complain
 				("Multiple driver type names match '%s'.",
@@ -908,8 +916,8 @@ int main(int argc, char **argv)
 			/*@ -compdef @*/
 			int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
 			if (st < 0)
-			    monitor_complain("Invalid hex string (error %d)",
-					     st);
+			    monitor_complain
+				("Invalid hex string (error %d)", st);
 			else if ((*active)->driver->control_send == NULL)
 			    monitor_complain
 				("Device type has no control-send method.");

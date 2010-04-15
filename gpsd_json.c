@@ -47,9 +47,9 @@ struct classmap_t classmap[CLASSMAP_NITEMS] = {
 };
 /* *INDENT-ON* */
 
-char *json_stringify(/*@out@*/char *to, 
-		      size_t len, 
-		      /*@in@*/const char *from)
+char *json_stringify( /*@out@*/ char *to,
+		     size_t len,
+		     /*@in@*/ const char *from)
 /* escape double quotes and control characters inside a JSON string */
 {
     /*@-temptrans@*/
@@ -480,8 +480,8 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(const struct ais_t *ais, bool scaled, /*@out@*/
-		     char *buf, size_t buflen)
+void aivdm_json_dump(const struct ais_t *ais, bool scaled,
+		     /*@out@*/ char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX * 2 + 1];
     char buf2[JSON_VAL_MAX * 2 + 1];

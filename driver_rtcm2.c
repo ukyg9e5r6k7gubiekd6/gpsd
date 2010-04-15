@@ -188,9 +188,9 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    csp->ident = m->sat_id;
 	    csp->iodl = m->issue_of_data_link != 0;
 	    csp->health = m->data_health;
-	    /*@+ignoresigns@*/ 
+	    /*@+ignoresigns@*/
 	    csp->snr = (int)(m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
-	    /*@-ignoresigns@*/ 
+	    /*@-ignoresigns@*/
 	    csp->health_en = m->health_enable != 0;
 	    csp->new_data = m->new_nav_data != 0;
 	    csp->los_warning = m->loss_warn != 0;
