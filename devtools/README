@@ -22,6 +22,11 @@ Usual caveats apply; the edited one and all commits after will change IDs,
 and pushing them to a repo with the old commits will wreak havoc.
 Note also that this cavalierly overwrites refs/original.
 
+== fakeserver ==
+
+Analogue of gpsfake. Impersonates a gpsd, spewing specified data to
+clients connecting to localhost:2947
+
 == fakecompare ==
 
 Compare the results from running gpsfake on a logfile between this
@@ -50,7 +55,7 @@ looking for ones that break the build.
 
 == regressdiff ==
 
-Walk through a pair of textfiles looking for where they begin to differ.
+Walk through a pair of text files looking for where they begin to differ.
 May be useful for comparing logs when regression tests break.
 
 == striplog ==

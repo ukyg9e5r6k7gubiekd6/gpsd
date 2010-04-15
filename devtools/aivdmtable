@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #
 # Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
 
 sixbits = (
 	"000000", "000001", "000010", "000011", "000100",

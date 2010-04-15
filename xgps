@@ -466,7 +466,10 @@ class Base:
 
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
-        self.satlist.set_value(self.row_iters[row], column, value)
+        try:
+            self.satlist.set_value(self.row_iters[row], column, value)
+        except IndexError:
+            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, gps.MAXCHANNELS))
 
     def delete_event(self, widget, event, data=None):
         gtk.main_quit()
@@ -582,9 +585,10 @@ class Base:
 
     # I/O monitoring and gtk housekeeping
 
-    def watch(self, daemon):
+    def watch(self, daemon, device):
         "Set up monitoring of a daemon instance."
         self.daemon = daemon
+        self.device = device
         gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
         gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
         gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
@@ -594,6 +598,8 @@ class Base:
         if self.daemon.poll() == -1:
             self.handle_hangup(source, condition)
         if self.daemon.valid & gps.PACKET_SET:
+            if self.device and self.device != self.daemon.data["device"]:
+                return True
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
                 self.update_skyview(self.daemon.satellites)
@@ -646,18 +652,24 @@ if __name__ == "__main__":
                  'm':gps.client.deg_ddmm,
                  's':gps.client.deg_ddmmss}[degreefmt]
 
-    if len(arguments) == 0:
-        host = "localhost"
-    else:
-        host = arguments[0]
+    (host, port, device) = ("localhost", "2947", None)
+    if len(arguments):
+        args = arguments[0].split(":")
+        if len(args) >= 1:
+            host = args[0]
+        if len(args) >= 2:
+            port = args[1]
+        if len(args) >= 3:
+            device = args[2]
 
     base = Base(deg_type=degreefmt)
     base.set_units(unit_system)
     try:
         daemon = gps.gps(host=host,
+                         port=port,
                          mode=gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
                          verbose=debug)
-        base.watch(daemon)
+        base.watch(daemon, device)
         base.main()
     except socket.error:
         w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,

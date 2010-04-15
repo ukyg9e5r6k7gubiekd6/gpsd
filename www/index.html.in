@@ -197,20 +197,27 @@ list</a> here.  Note: because of the way this website is maintained,
 these files may reflect the state of the repository tip (development
 version) rather than the latest released stable version.</p>
 
-<h1 id='downloads'>Downloads and packages</h1>
+<h1 id='downloads'>Repository, Downloads and Packages</h1>
 
-<p>Look in the <a
-href="http://developer.berlios.de/project/showfiles.php?group_id=2116">download</a>
-directory for tarballs of all released versions. Access to the
-bleeding-edge developer version is supported <a
-href="http://developer.berlios.de/git/?group_id=2116">via git</a>.
-The main project page is <a
-href='http://developer.berlios.de/projects/gpsd/'>here on
-berlios.de</a>.</p>
+<dl>
+<dt><a href='http://developer.berlios.de/projects/gpsd/'>Project page</a>
+<dd>The main project page on Berlios</dd>
+
+<dt><a
+href="http://developer.berlios.de/project/showfiles.php?group_id=2116">Releases</a>
+<dd>Where to get release tarballs</dd>
+
+<dt><a href="http://developer.berlios.de/git/?group_id=2116">Browse Code</a></dt>
+<dd>Developer access to master git repository</dd>
+
+<dt><a
+href="http://git.debian.org/?p=users/bzed/mirror/gpsd.git">Debian mirror</a></dt>
+<dd>Debian mirror, updated every 7 minutes.</dd>
+</dl>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package
-manager or by tying <code>"sudo apt-get gpsd"</code> at the command
+manager or by typing <code>"sudo apt-get gpsd"</code> at the command
 line.</p>
 
 <h1 id='mailing-lists'>Mailing Lists</h1>
@@ -446,10 +453,6 @@ win32.  This way programs such as <a
 href='http://www.wigle.net'>JiGLE</a> can still get GPS data from
 netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
-
-<p>There is an interesting alpha-stage proposal called <a
-href='http://www.gpster.net/locod.html'>locod</a> that aims to
-integrate location information from GPSes and other sources.</p>
 
 <p><a
 href='http://users.hol.gr/~dzach/gpsfeed/index.html'>gpsfeed+</a> is a

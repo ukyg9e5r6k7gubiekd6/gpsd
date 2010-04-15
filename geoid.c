@@ -14,26 +14,33 @@
 
 static double fix_minuz(double d);
 
-static double bilinear(double x1, double y1, double x2, double y2, double x, double y, double z11, double z12, double z21, double z22)
+static double bilinear(double x1, double y1, double x2, double y2, double x,
+		       double y, double z11, double z12, double z21,
+		       double z22)
 {
- double delta;
+    double delta;
 
- if (y1 == y2 && x1 == x2 ) return (z11);
- if (y1 == y2 && x1 != x2 ) return (z22*(x-x1)+z11*(x2-x))/(x2-x1);
- if (x1 == x2 && y1 != y2 ) return (z22*(y-y1)+z11*(y2-y))/(y2-y1);
+    if (y1 == y2 && x1 == x2)
+	return (z11);
+    if (y1 == y2 && x1 != x2)
+	return (z22 * (x - x1) + z11 * (x2 - x)) / (x2 - x1);
+    if (x1 == x2 && y1 != y2)
+	return (z22 * (y - y1) + z11 * (y2 - y)) / (y2 - y1);
 
- delta=(y2-y1)*(x2-x1);
+    delta = (y2 - y1) * (x2 - x1);
 
- return (z22*(y-y1)*(x-x1)+z12*(y2-y)*(x-x1)+z21*(y-y1)*(x2-x)+z11*(y2-y)*(x2-x))/delta;
+    return (z22 * (y - y1) * (x - x1) + z12 * (y2 - y) * (x - x1) +
+	    z21 * (y - y1) * (x2 - x) + z11 * (y2 - y) * (x2 - x)) / delta;
 }
 
 
 /* return geoid separtion (MSL - WGS84) in meters, given a lat/lot in degrees */
-/*@ +charint @*/
 double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
 #define GEOID_COL	37
+    /* *INDENT-OFF* */
+    /*@ +charint @*/
     const char geoid_delta[GEOID_COL*GEOID_ROW]={
 	/* 90S */ -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30, -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,
 	/* 80S */ -53,-54,-55,-52,-48,-42,-38,-38,-29,-26,-26,-24,-23,-21,-19,-16,-12, -8, -4, -1,  1,  4,  4,  6,  5,  4,   2, -6,-15,-24,-33,-40,-48,-50,-53,-52,-53,
@@ -53,67 +60,74 @@ double wgs84_separation(double lat, double lon)
 	/* 60N */   2,  9, 17, 10, 13,  1,-14,-30,-39,-46,-42,-21,  6, 29, 49, 65, 60, 57, 47, 41, 21, 18, 14,  7, -3,-22, -29,-32,-32,-26,-15, -2, 13, 17, 19,  6,  2,
 	/* 70N */   2,  2,  1, -1, -3, -7,-14,-24,-27,-25,-19,  3, 24, 37, 47, 60, 61, 58, 51, 43, 29, 20, 12,  5, -2,-10, -14,-12,-10,-14,-12, -6, -2,  3,  6,  4,  2,
 	/* 80N */   3,  1, -2, -3, -3, -3, -1,  3,  1,  5,  9, 11, 19, 27, 31, 34, 33, 34, 33, 34, 28, 23, 17, 13,  9,  4,   4,  1, -2, -2,  0,  2,  3,  2,  1,  1,  3,
-	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13}; 
-/*@ -charint @*/
-    int	ilat, ilon;
-    int	ilat1, ilat2, ilon1, ilon2;
+	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13
+    }; 
+    /*@ -charint @*/
+    /* *INDENT-ON* */
+    int ilat, ilon;
+    int ilat1, ilat2, ilon1, ilon2;
 
-    ilat=(int)floor(( 90.+lat)/10);
-    ilon=(int)floor((180.+lon)/10);
-	
+    ilat = (int)floor((90. + lat) / 10);
+    ilon = (int)floor((180. + lon) / 10);
+
     /* sanity checks to prevent segfault on bad data */
-    if ( ( ilat > 90 ) || ( ilat < -90 ) ) {
+    if ((ilat > 90) || (ilat < -90)) {
 	return 0.0;
     }
-    if ( ( ilon > 180 ) || ( ilon < -180 ) ) {
+    if ((ilon > 180) || (ilon < -180)) {
 	return 0.0;
     }
 
-    ilat1=ilat;
-    ilon1=ilon;
-    ilat2=(ilat < GEOID_ROW-1)? ilat+1:ilat;
-    ilon2=(ilon < GEOID_COL-1)? ilon+1:ilon;
-	
-    return bilinear(
-	ilon1*10.-180.,ilat1*10.-90.,
-	ilon2*10.-180.,ilat2*10.-90.,
-	lon,           lat,
-	(double)geoid_delta[ilon1+ilat1*GEOID_COL], 
-	(double)geoid_delta[ilon2+ilat1*GEOID_COL],
-	(double)geoid_delta[ilon1+ilat2*GEOID_COL], 
-	(double)geoid_delta[ilon2+ilat2*GEOID_COL]
+    ilat1 = ilat;
+    ilon1 = ilon;
+    ilat2 = (ilat < GEOID_ROW - 1) ? ilat + 1 : ilat;
+    ilon2 = (ilon < GEOID_COL - 1) ? ilon + 1 : ilon;
+
+    return bilinear(ilon1 * 10. - 180., ilat1 * 10. - 90.,
+		    ilon2 * 10. - 180., ilat2 * 10. - 90.,
+		    lon, lat,
+		    (double)geoid_delta[ilon1 + ilat1 * GEOID_COL],
+		    (double)geoid_delta[ilon2 + ilat1 * GEOID_COL],
+		    (double)geoid_delta[ilon1 + ilat2 * GEOID_COL],
+		    (double)geoid_delta[ilon2 + ilat2 * GEOID_COL]
 	);
 }
 
 
 void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
-			double x, double y, double z, 
-			double vx, double vy, double vz)
+		      double x, double y, double z,
+		      double vx, double vy, double vz)
 /* fill in WGS84 position/velocity fields from ECEF coordinates */
 {
-    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
-    const double a = WGS84A;			/* equatorial radius */
-    const double b = WGS84B;		/* polar radius */
-    const double e2 = (a*a - b*b) / (a*a);
-    const double e_2 = (a*a - b*b) / (b*b);
+    double lambda, phi, p, theta, n, h, vnorth, veast, heading;
+    const double a = WGS84A;	/* equatorial radius */
+    const double b = WGS84B;	/* polar radius */
+    const double e2 = (a * a - b * b) / (a * a);
+    const double e_2 = (a * a - b * b) / (b * b);
 
     /* geodetic location */
-    lambda = atan2(y,x);
-    /*@ -evalorder @*/ 
-    p = sqrt(pow(x,2) + pow(y,2)); 
-    theta = atan2(z*a,p*b);
-    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
-    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
+    lambda = atan2(y, x);
+    /*@ -evalorder @*/
+    p = sqrt(pow(x, 2) + pow(y, 2));
+    theta = atan2(z * a, p * b);
+    phi =
+	atan2(z + e_2 * b * pow(sin(theta), 3),
+	      p - e2 * a * pow(cos(theta), 3));
+    n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
     h = p / cos(phi) - n;
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
     *separation = wgs84_separation(fix->latitude, fix->longitude);
     fix->altitude = h - *separation;
     /* velocity computation */
-    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
-    veast = -vx*sin(lambda)+vy*cos(lambda);
-    fix->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-    fix->speed = sqrt(pow(vnorth,2) + pow(veast,2));
+    vnorth =
+	-vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
+	vz * cos(phi);
+    veast = -vx * sin(lambda) + vy * cos(lambda);
+    fix->climb =
+	vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
+	vz * sin(phi);
+    fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
     /*@ +evalorder @*/
     if (heading < 0)

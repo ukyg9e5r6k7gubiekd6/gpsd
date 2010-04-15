@@ -23,6 +23,9 @@ typedef unsigned int speed_t;
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
 #define NON_NMEA_ENABLE	
 #endif
+#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
+#define COMPASS_ENABLE	
+#endif
 
 /* First, declarations for the packet layer... */
 
@@ -158,7 +161,7 @@ struct gps_context_t {
     int fixcnt;				/* count of good fixes seen */
     socket_t dsock;			/* socket to DGPSIP server/Ntrip caster */
     void *netgnss_privdata;		/* DGNSS service specific data */
-    ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
+    size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
     /* timekeeping */
@@ -200,12 +203,43 @@ struct gps_device_t;
 typedef enum {ANY, GPS, RTCM2, RTCM3, AIS} gnss_type;
 typedef enum {
     event_wakeup,
+    event_triggermatch,
     event_identified,
     event_configure, 
     event_driver_switch,
     event_deactivate,
     event_reactivate,
 } event_t;
+
+#define ONLINE_IS	0x00000001u
+#define TIME_IS 	0x00000002u
+#define TIMERR_IS	0x00000004u
+#define LATLON_IS	0x00000008u
+#define ALTITUDE_IS	0x00000010u
+#define SPEED_IS	0x00000020u
+#define TRACK_IS	0x00000040u
+#define CLIMB_IS	0x00000080u
+#define STATUS_IS	0x00000100u
+#define MODE_IS 	0x00000200u
+#define DOP_IS  	0x00000400u
+#define HERR_IS 	0x00000800u
+#define VERR_IS 	0x00001000u
+#define PERR_IS 	0x00002000u
+#define SATELLITE_IS	0x00004000u
+#define RAW_IS  	0x00008000u
+#define USED_IS 	0x00010000u
+#define SPEEDERR_IS	0x00020000u
+#define DEVICE_IS	0x00040000u
+#define DEVICEID_IS	0x00100000u
+#define ERROR_IS	0x00200000u
+#define RTCM2_IS	0x00400000u
+#define RTCM3_IS	0x00800000u
+#define AIS_IS  	0x01000000u
+#define ATT_IS		0x02000000u
+#define PACKET_IS	0x04000000u
+#define CLEAR_IS	0x08000000u	/* sentence starts a reporting cycle */
+#define REPORT_IS	0x10000000u	/* sentence ends a reporting cycle */
+#define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
@@ -228,7 +262,18 @@ struct gps_type_t {
 #ifdef ALLOW_CONTROLSEND
     /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
 #endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    /*@null@*/double (*ntp_offset)(struct gps_device_t *session);
+#endif /* NTPSHM_ENABLE */
 };
+
+typedef enum {source_unknown,
+	      source_blockdev,
+	      source_rs232,
+	      source_usb,
+	      source_pty,
+	      source_socket}
+    sourcetype_t;
 
 struct gps_device_t {
 /* session object, encapsulates all global state */
@@ -236,6 +281,7 @@ struct gps_device_t {
     /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
     bool is_serial;
+    sourcetype_t sourcetype;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
@@ -244,6 +290,7 @@ struct gps_device_t {
     int saved_baud;
     struct gps_packet_t packet;
     char subtype[64];			/* firmware version or subtype ID */
+    double opentime;
     double releasetime;
 #ifdef NTPSHM_ENABLE
     int shmindex;
@@ -257,7 +304,7 @@ struct gps_device_t {
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
     size_t msgbuflen;
     int observed;			/* which packet type`s have we seen? */
-    bool cycle_end_reliable;		/* does driverr signal REPORT_SET */
+    bool cycle_end_reliable;		/* does driver signal REPORT_MASK */
     bool notify_clients;		/* ship DEVICE notification on poll? */
     struct gps_fix_t newdata;		/* where clients put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
@@ -292,6 +339,12 @@ struct gps_device_t {
 	    bool ignore_trailing_edge;
 #endif /* GPSCLOCK_ENABLE */
 	} nmea;
+#endif /* NMEA_ENABLE */
+#ifdef GARMINTXT_ENABLE
+	struct {
+	    struct tm date;		/* date part of last sentence time */
+	    double subseconds;		/* subsec part of last sentence time */
+	} garmintxt;
 #endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef SIRF_ENABLE
@@ -425,7 +478,8 @@ struct gps_device_t {
 #define LOG_DATA	3	/* log data management messages */
 #define LOG_PROG	4	/* progress messages */
 #define LOG_IO  	5	/* IO to and from devices */
-#define LOG_RAW 	6	/* raw low-level I/O */
+#define LOG_SPIN	6	/* logging for catching spin bugs */
+#define LOG_RAW 	7	/* raw low-level I/O */
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
@@ -529,11 +583,8 @@ extern void gpsd_wrap(struct gps_device_t *);
 
 /* exceptional driver methods */
 #ifdef UBX_ENABLE
-extern gps_mask_t ubx_parse(struct gps_device_t *, unsigned char *, size_t);
 extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int, 
 		      /*@null@*/unsigned char *, unsigned short);
-extern void ubx_catch_model(struct gps_device_t *,
-			    unsigned char *, size_t);
 #endif /* UBX_ENABLE */
 #ifdef AIVDM_ENABLE
 extern bool aivdm_decode(const char *, size_t, struct aivdm_context_t *, struct ais_t *);

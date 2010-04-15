@@ -8,7 +8,7 @@
 #include "json.h"
 
 #define GPS_JSON_COMMAND_MAX	80
-#define GPS_JSON_RESPONSE_MAX	1024
+#define GPS_JSON_RESPONSE_MAX	1536
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,6 +16,7 @@ extern "C" {
 char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
 void json_tpv_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
+void json_att_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_device_dump(const struct gps_device_t *, /*@out@*/char *, size_t);
 void json_watch_dump(const struct policy_t *, /*@out@*/char *, size_t);
 int json_watch_read(const char *, /*@out@*/struct policy_t *, 

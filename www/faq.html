@@ -67,6 +67,7 @@ GPSD Frequently Asked Questions
 <ul>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
 <li><a href='#nodata'>I get no data from my GPS</a></h1>
+<li><a href='#startup'>Why does getting a fix take so long after powerup?</li>
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a><br/>
@@ -287,7 +288,7 @@ the version.</p>
 <p>This answer may apply if you have followed the Quick Start
 procedure on the manual page but <code>gpsd</code> reports no data.</p>
 
-<p>Check for the obvious thing &mdash; a disconnected or loose cable<
+<p>Check for the obvious thing &mdash; a disconnected or loose cable
 &mdash; first. Make sure you specified the device your GPS is
 actually plugged into.</p>
 
@@ -310,6 +311,38 @@ such as <code>sudo modprobe usbserial vendor=0×1a86
 product=0×7523</code>.  Do not copy those hex numbers slavishly, they
 are examples.  To get the right numbers, you will need to dig up the
 vendor and product ID of your USB-serial converter device.</p>
+
+<h1 id="startup">Why does getting a fix take so long after powerup?</h1>
+
+<p>On a Linux machine, the <code>gpsd</code> daemon normally takes
+between 0.1 and 0.6 seconds to handshake with your hardware.  After
+that you will receive GPS reports within a second of when the sensor
+issues them.  GPSD itself adds <a
+href="http://gpsd.berlios.de/performance.html">no measurable
+latency</a>, but RS-323 transmission time to <code>gpsd</code> can be
+significant; you can cut this time by increasing the baud rate.</p>
+
+<p>Longer handshake delays have been reported from other platforms.
+Under OpenBSD, time to handshake with some binary GPSes (including
+SiRFs) can be up to two minutes.  This seems to reflect some bad
+interaction between the autobauding code in <code>gpsd</code> and the
+operating system's tty layer; when <code>gpsd</code> is compiled to
+use a fixed port speed, handshake times drop to a fraction of a
+second.</p>
+
+<p>If you are starting a GPS for the first time, or after it has been
+powered off for more than two weeks, this is a 'cold start'; it needs
+to get a new satellite ephemeris to do its job. The satellites
+broadcast this information very slowly (at 50bps) on a fixed schedule,
+and it can take up to 20 minutes.</p>
+
+<p>Warm start on a modern GPS with a good skyview (4 or more sats
+visible) normally takes about 30 seconds. (Vendor spec sheets fib by
+quoting this time only, leaving out the cold-start lag to fetch
+ephemeris.) If it's taking longer, the first thing to suspect is that
+your skyview is poor. Especially if you're indoors.</p>
+
+<p>The best advice is: go outside and be patient for a few minutes.</p>
 
 <h1 id="timelag">Why does GPS time lag wall time by 11-15 seconds?</h1>
 

@@ -41,18 +41,19 @@ if HAVE_XAW
 XAW_PROGS = xgpsspeed
 endif
 
+# Conditional includes.
+INCLUDES = $(INCUSB)
 if HAVE_DBUS
-INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
+INCLUDES += $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
 
 RTCM104PAGES_DIST = gpsdecode.1
 if HAVE_RTCM104V2
-RTCM104PROGS = gpsdecode
-RTCM104PAGES = $(RTCM104PAGES_DIST)
-else
 if HAVE_RTCM104V3
+if HAVE_AIVDM
 RTCM104PROGS = gpsdecode
 RTCM104PAGES = $(RTCM104PAGES_DIST)
+endif
 endif
 endif
 
@@ -102,7 +103,7 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 #
 gpsd_c_sources = gpsd_dbus.c gpsd.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
 #
 # Build gpsctl
@@ -127,7 +128,7 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 #
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
-	monitor_oncore.c
+	monitor_oncore.c monitor_tnt.c
 gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
@@ -158,7 +159,8 @@ libgpsd_c_sources = \
 	libgps_json.c \
 	gpsdclient.c \
 	libgpsd_core.c \
-	maskdump.c \
+	gps_maskdump.c \
+	gpsd_maskdump.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
 	net_ntrip.c \
@@ -196,7 +198,7 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i maskdump.c
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
@@ -221,10 +223,15 @@ revision.h: Makefile
 	echo '#define' REVISION '"'`date -u +%Y-%m-%dT%H:%M:%S`'"' >revision.h && \
 	chmod a-w revision.h
 
-maskdump.c: gpsd.h-tail maskaudit.py
-	rm -f maskdump.c && \
-	$(PYTHON) maskaudit.py -c >maskdump.c && \
-	chmod a-w maskdump.c
+gps_maskdump.c: gps.h maskaudit.py
+	rm -f gps_maskdump.c && \
+	$(PYTHON) maskaudit.py -c >gps_maskdump.c && \
+	chmod a-w gps_maskdump.c
+
+gpsd_maskdump.c: gpsd.h-tail maskaudit.py
+	rm -f gpsd_maskdump.c && \
+	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
+	chmod a-w gpsd_maskdump.c
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h packet_states.h
@@ -495,7 +502,9 @@ splint: gpsd.h packet_names.h
 	@echo "Running splint on gpspipe..."
 	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on gpsdecode..."
-	-splint $(SPLINTOPTS) -exportlocal gpsdecode.c
+	-splint $(SPLINTOPTS) $(gpsdecode_SOURCES)
+	@echo "Running splint on gpxlogger..."
+	-splint $(SPLINTOPTS) $(gpxlogger_SOURCES)
 	@echo "Running splint on test_bits test harness..."
 	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
 	@echo "Running splint on test_packet test harness..."
@@ -511,15 +520,33 @@ splint: gpsd.h packet_names.h
 cppcheck: gpsd.h packet_names.h
 	cppcheck --template gcc --all --force .
 
-# Re-indenting to a uniform style would be nice, and we leave this here
-# as a rough guide to the project style, but it turns out that indent is
-# an excessively blunt instrument.  As of 2.2.10 it doesn't honor -nfca
-# and produces loads of spurious changes to splint directives.  Nor does
-# it seem to honor -npcs.
+# Re-indent the codebase in aa uniform style for readability.
+# FIXME: Except for xgpsspeed - Tachometer.c makes GNI indent lose it.
+INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) \
+	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
+	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
+	$(test_bits_SOURCES) $(test_packet_SOURCES) \
+	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
+INDENT_OPTIONS = --indent-level4 \
+		--honour-newlines \
+		--dont-break-procedure-type \
+		--cuddle-else \
+		--braces-on-if-line \
+		--case-brace-indentation0 \
+		--brace-indent0 \
+		--no-space-after-casts \
+		--no-space-after-function-call-names \
+		--start-left-side-of-comments \
+		--dont-format-comments
 indent:
-	chmod u+w maskdump.c
-	indent -i4 -br -cbi0 -bli0 -ncs -npcs -nfca $(gpsd_c_sources) $(libgpsd_c_sources)
-	chmod u-w maskdump.c
+	chmod u+w *maskdump.c
+	indent $(INDENT_OPTIONS) $(INDENT_FILES)
+	for f in $(INDENT_FILES); \
+		do \
+			sed <$${f} >/tmp/reindent$$$$ -e 's/@ \*/@*/' ; \
+			mv /tmp/reindent$$$$ $${f} ; \
+		done
+	chmod u-w *maskdump.c
 	@echo "Diff lines:" `git diff | wc -l`
 
 version:

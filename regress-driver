@@ -4,6 +4,7 @@
 # makefile before we regrouped the regression tests by stable and unstable 
 # drivers.
 
+# Arrange to call a gpsfake in the source directory without fuss.
 # Add the current directory to $PATH
 PATH=`pwd`:$PATH
 

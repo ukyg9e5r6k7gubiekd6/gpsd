@@ -16,6 +16,15 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.9</revnumber>
+      <date>13 Apr 2010</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; added event_triggermatch and the new
+	 ntp_offset member.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.8</revnumber>
       <date>16 Sep 2009</date>
       <authorinitials>er</authorinitials>
@@ -611,6 +620,10 @@ called in the following circumstances:</para>
 <listitem><para>When the main auto-baud hunt loop in the daemon offers
 a new speed to probe at, with event argument 'event_wakeup'.</para></listitem>
 
+<listitem><para>When the driver has a trigger string and the NMEA driver 
+sees it, 'event_triggermatch' fires.  An 'event_switch_driver' should
+follow immediately.</para></listitem>
+
 <listitem><para> 
 Whenever <application>gpsd</application> first achieves packet lock
 with a device, with event type 'identified'.  
@@ -706,6 +719,13 @@ possible, assemble your packet in
 <structfield>session->msgbuf</structfield> and put the length in
 <structfield>session->msgbuflen</structfield>; this will allow 
 gpsmon to display the control messages it sends for you.</para>
+
+<!-- added by ESR, 2009 -->
+<para><structfield>.ntp_offset</structfield> points to code to compute
+an offset to be added, additionally to that in
+<filename>ntp.conf</filename> (if any) whe shipping time notifications
+to NTP. If multiple sentences set TIME_IS, this will differ by
+sentence type; it should differ by baud rare, as well. </para>
 
 </sect1>
 

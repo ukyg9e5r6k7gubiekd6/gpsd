@@ -20,21 +20,21 @@ representations to libgps structures.
 #include "gps_json.h"
 
 /*@ -mustdefine @*/
-static void lenhex_unpack(const char *from, 
-			  size_t *plen, /*@out@*/char *to, size_t maxlen)
+static void lenhex_unpack(const char *from,
+			  size_t * plen, /*@out@*/ char *to, size_t maxlen)
 {
     char *colon = strchr(from, ':');
 
-    *plen = (size_t)atoi(from);
+    *plen = (size_t) atoi(from);
     if (colon != NULL)
-	(void)gpsd_hexpack(colon+1, to, maxlen);
+	(void)gpsd_hexpack(colon + 1, to, maxlen);
 }
+
 /*@ +mustdefine @*/
 
-int json_ais_read(const char *buf, 
-		  char *path, size_t pathlen,
-		  struct ais_t *ais, 
-		  /*@null@*/const char **endptr)
+int json_ais_read(const char *buf,
+		  char *path, size_t pathlen, struct ais_t *ais,
+		  /*@null@*/ const char **endptr)
 {
     /* collected but not actually used yet */
     bool scaled;
@@ -53,21 +53,24 @@ int json_ais_read(const char *buf,
 
     int status;
 
-#include "ais_json.i"	/* JSON parser template structures */
+#include "ais_json.i"		/* JSON parser template structures */
 
 #undef AIS_HEADER
 
     memset(ais, '\0', sizeof(struct ais_t));
 
-    if (strstr(buf, "\"type\":1,")!=NULL || strstr(buf, "\"type\":2,")!=NULL || strstr(buf, "\"type\":3,")!=NULL) {
+    if (strstr(buf, "\"type\":1,") != NULL
+	|| strstr(buf, "\"type\":2,") != NULL
+	|| strstr(buf, "\"type\":3,") != NULL) {
 	status = json_read_object(buf, json_ais1, endptr);
-    } else if (strstr(buf, "\"type\":4,") != NULL || strstr(buf, "\"type\":11,")!=NULL) {
+    } else if (strstr(buf, "\"type\":4,") != NULL
+	       || strstr(buf, "\"type\":11,") != NULL) {
 	status = json_read_object(buf, json_ais4, endptr);
 	if (status == 0) {
-	    ais->type4.year   = AIS_YEAR_NOT_AVAILABLE;
-	    ais->type4.month  = AIS_MONTH_NOT_AVAILABLE;
-	    ais->type4.day    = AIS_DAY_NOT_AVAILABLE;
-	    ais->type4.hour   = AIS_HOUR_NOT_AVAILABLE;
+	    ais->type4.year = AIS_YEAR_NOT_AVAILABLE;
+	    ais->type4.month = AIS_MONTH_NOT_AVAILABLE;
+	    ais->type4.day = AIS_DAY_NOT_AVAILABLE;
+	    ais->type4.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type4.minute = AIS_MINUTE_NOT_AVAILABLE;
 	    ais->type4.second = AIS_SECOND_NOT_AVAILABLE;
 	    (void)sscanf(timestamp, "%4u-%02u-%02uT%02u:%02u:%02uZ",
@@ -75,34 +78,33 @@ int json_ais_read(const char *buf,
 			 &ais->type4.month,
 			 &ais->type4.day,
 			 &ais->type4.hour,
-			 &ais->type4.minute,
-			 &ais->type4.second);
+			 &ais->type4.minute, &ais->type4.second);
 	}
     } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_ais5, endptr);
 	if (status == 0) {
-	    ais->type5.month  = AIS_MONTH_NOT_AVAILABLE;
-	    ais->type5.day    = AIS_DAY_NOT_AVAILABLE;
-	    ais->type5.hour   = AIS_HOUR_NOT_AVAILABLE;
+	    ais->type5.month = AIS_MONTH_NOT_AVAILABLE;
+	    ais->type5.day = AIS_DAY_NOT_AVAILABLE;
+	    ais->type5.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type5.minute = AIS_MINUTE_NOT_AVAILABLE;
 	    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 			 &ais->type5.month,
 			 &ais->type5.day,
-			 &ais->type5.hour,
-			 &ais->type5.minute);
+			 &ais->type5.hour, &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
 	status = json_read_object(buf, json_ais6, endptr);
 	if (status == 0)
-	    lenhex_unpack(data, &ais->type6.bitcount, 
-			 ais->type6.bitdata, sizeof(ais->type6.bitdata));
-    } else if (strstr(buf, "\"type\":7,") != NULL || strstr(buf, "\"type\":13,") != NULL) {
+	    lenhex_unpack(data, &ais->type6.bitcount,
+			  ais->type6.bitdata, sizeof(ais->type6.bitdata));
+    } else if (strstr(buf, "\"type\":7,") != NULL
+	       || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
     } else if (strstr(buf, "\"type\":8,") != NULL) {
 	status = json_read_object(buf, json_ais8, endptr);
 	if (status == 0)
-	    lenhex_unpack(data, &ais->type8.bitcount, 
-			 ais->type8.bitdata, sizeof(ais->type8.bitdata));
+	    lenhex_unpack(data, &ais->type8.bitcount,
+			  ais->type8.bitdata, sizeof(ais->type8.bitdata));
     } else if (strstr(buf, "\"type\":9,") != NULL) {
 	status = json_read_object(buf, json_ais9, endptr);
     } else if (strstr(buf, "\"type\":10,") != NULL) {
@@ -118,8 +120,8 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":17,") != NULL) {
 	status = json_read_object(buf, json_ais17, endptr);
 	if (status == 0)
-	    lenhex_unpack(data, &ais->type17.bitcount, 
-			 ais->type17.bitdata, sizeof(ais->type17.bitdata));
+	    lenhex_unpack(data, &ais->type17.bitcount,
+			  ais->type17.bitdata, sizeof(ais->type17.bitdata));
     } else if (strstr(buf, "\"type\":18,") != NULL) {
 	status = json_read_object(buf, json_ais18, endptr);
     } else if (strstr(buf, "\"type\":18,") != NULL) {

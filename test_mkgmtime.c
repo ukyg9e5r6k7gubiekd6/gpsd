@@ -10,10 +10,12 @@
 #include "gps.h"
 
 /*@-type@*/
-static struct {
-	struct tm t;
-	time_t result;
+static struct
+{
+    struct tm t;
+    time_t result;
 } tests[] = {
+	/* *INDENT-OFF* */
 	/* sec, min,  h, md, mon, year, wd,  yd, isdst, gmtoff, zone    timestamp        what	*/
 	{{   0,   0,  0,  1,   0,   70,  0,   0,     0,      0,    0, }, 0 },
 	{{   0,   0,  0,  1,   0,   70,  0,   0,     0,      0,    0, }, 0	      }, /* lower limit */
@@ -76,34 +78,37 @@ static struct {
 	{{   0,   0,  0,  1,  11,  115,  0,   0,     0,      0,    0, }, 1448928000 }, /* month wrap */
 	{{  59,  59, 23, 31,  11,  115,  0,   0,     0,      0,    0, }, 1451606399 }, /* month wrap */
 	{{   0,   0,  0,  1,   0,  116,  0,   0,     0,      0,    0, }, 1451606400 }, /* month wrap */
+	/* *INDENT-ON* */
 };
+
 /*@-type@*/
 
 /*@+longunsignedintegral*/
 int main(int argc, char *argv[])
 {
-	int i;
-	char tbuf[128];
-	time_t ts;
-	bool failed = false;
+    int i;
+    char tbuf[128];
+    time_t ts;
+    bool failed = false;
 
-	(void)setenv("TZ", "GMT", 1);
+    (void)setenv("TZ", "GMT", 1);
 
-	for (i = 0; i < (int)(sizeof(tests)/sizeof(tests[0])); i++) {
-#if 0	/* use this to calculate with glibc */
-		ts = mktime(&tests[i].t);
+    for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
+#if 0				/* use this to calculate with glibc */
+	ts = mktime(&tests[i].t);
 #else
-		ts = mkgmtime(&tests[i].t);
+	ts = mkgmtime(&tests[i].t);
 #endif
-		if (ts != tests[i].result) {
-			failed = true;
-			(void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
-			(void)printf("test %2d failed. "		\
-			       "Time returned from: %s should be %lu (but was: %lu)\n",
-				i, tbuf, (unsigned long) tests[i].result, (unsigned long) ts);
-		}
+	if (ts != tests[i].result) {
+	    failed = true;
+	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
+	    (void)printf("test %2d failed. "
+			 "Time returned from: %s should be %lu (but was: %lu)\n",
+			 i, tbuf, (unsigned long)tests[i].result,
+			 (unsigned long)ts);
 	}
-	return (int)failed;
+    }
+    return (int)failed;
 }
-/*@-longunsignedintegral*/
 
+/*@-longunsignedintegral*/

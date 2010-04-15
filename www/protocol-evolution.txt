@@ -1,6 +1,6 @@
 = GPSD-NG: A Case Study in Application Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
-v1.3, August 2009
+v1.4, April 2010
 
 == Introduction ==
 
@@ -310,8 +310,8 @@ of a 'W+R+' command.
 
 Even had I not anticipated parsing JSON arguments in gpsd, I try to
 limit malloc use in the client libraries as well.  Before the
-new-protocol implementation only used two calloc(3) calls, in very
-careful ways. Now they use none at all.
+new-protocol implementation the client library only used two calloc(3)
+calls, in very careful ways. Now they use none at all.
 
 So my next challenge was to write and verify a tiny JSON parser that
 is driven by sets of fixed-extent structures - they tell it what shape
@@ -324,7 +324,7 @@ comments (but not including 165 LOC of unit-test code).
 == Un-channeling: the power ==
 
 Both gpsd and its C client library could now count on parsing JSON;
-that gave me my infrastructure.  And an extremely strong one one, too;
+that gave me my infrastructure.  And an extremely strong one, too;
 the type ontology of JSON is rich enough that I'm not likely to ever
 have to replace it.  Of course this just opened up the next question -
 now that I can readily pass complex objects between gpsd and its
@@ -348,8 +348,9 @@ devices so gpsd sees them as serial devices.  Because X also uses pty
 devices for virtual terminals, the device names that a gpsd instance
 running under gpsfake sees may depend on random factors like the
 number of terminal emulators I have open.  This is a problem when
-regression-testing!  At some point, this issue is going to require me
-to write a configuration command that suppresses device display.
+regression-testing!  I thought this issue was going to require me
+to write a configuration command that suppresses device display; I
+ended up writing a sed filter in my regression-test driver instead.
 
 Now we come back to our previous example:
 
@@ -452,14 +453,12 @@ in combination with the increasing use of metaprotocols.
 Second, I noted *a shift from lockstep conversational interfaces to
 event streams*.  
 
-The big change in the second protocol version was watcher
-mode.  One of the possibilities this opens up (and, in fact, it's
-a possibility that the C client library packages for you) is that
-you can put the report interpreter into an asychronous thread that
-magically updates a C struct for you every so often, without 
-the rest of your program having to know or care how that is being
-done (except possibly by waiting a mutex to ensure it doesn't read
-a partially-updated state).
+The big change in the second protocol version was watcher mode.  One
+of the possibilities this opens up is that you can put the report
+interpreter into an asychronous thread that magically updates a C
+struct for you every so often, without the rest of your program having
+to know or care how that is being done (except possibly by waiting a
+mutex to ensure it doesn't read a partially-updated state).
 
 Analogous developments have been visible in other Internet protocols
 over roughly the same period.  Compare, for example, POP3 to IMAP. The
@@ -590,5 +589,3 @@ I have found JSON pleasant to work with, liberating, and
 thought-provoking; hence this paper. I will certainly reach for this 
 Swiss-army knife first thing, next time I have to design an
 application protocol.
-
-

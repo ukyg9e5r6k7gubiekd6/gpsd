@@ -75,7 +75,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #define W_DATA_MASK	0x3fffffc0u
 
 /*@ +charint @*/
-static unsigned char   parity_array[] = {
+static unsigned char parity_array[] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -100,6 +100,7 @@ static unsigned int reverse_bits[] = {
     1, 33, 17, 49, 9, 41, 25, 57, 5, 37, 21, 53, 13, 45, 29, 61,
     3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 55, 15, 47, 31, 63
 };
+
 /*@ -charint @*/
 
 unsigned int isgps_parity(isgps30bits_t th)
@@ -112,13 +113,13 @@ unsigned int isgps_parity(isgps30bits_t th)
 #define	PARITY_28	0x5763e680u
 #define	PARITY_29	0x6bb1f340u
 #define	PARITY_30	0x8b7a89c0u
-    isgps30bits_t   t;
-    unsigned int    p;
+    isgps30bits_t t;
+    unsigned int p;
 
     /*
-    if (th & P_30_MASK)
-	th ^= W_DATA_MASK;
-    */
+     * if (th & P_30_MASK)
+     * th ^= W_DATA_MASK;
+     */
 
     /*@ +charint @*/
     t = th & PARITY_25;
@@ -126,22 +127,27 @@ unsigned int isgps_parity(isgps30bits_t th)
 	parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff];
     t = th & PARITY_26;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
+								  0xff]);
     t = th & PARITY_27;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
+								  0xff]);
     t = th & PARITY_28;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
+								  0xff]);
     t = th & PARITY_29;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
+								  0xff]);
     t = th & PARITY_30;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
+								  0xff]);
     /*@ -charint @*/
 
-    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS parity %u\n", p);
+    gpsd_report(ISGPS_ERRLEVEL_BASE + 2, "ISGPS parity %u\n", p);
     return (p);
 }
 
@@ -174,7 +180,7 @@ static bool isgps_parityok(isgps30bits_t w)
 }
 #endif
 
-void isgps_init(/*@out@*/struct gps_packet_t *session)
+void isgps_init( /*@out@*/ struct gps_packet_t *session)
 {
     session->isgps.curr_word = 0;
     session->isgps.curr_offset = 24;	/* first word */
@@ -183,17 +189,16 @@ void isgps_init(/*@out@*/struct gps_packet_t *session)
 }
 
 /*@ -usereleased -compdef @*/
-enum isgpsstat_t isgps_decode(struct gps_packet_t *session, 
-				     bool (*preamble_match)(isgps30bits_t *),
-				     bool (*length_check)(struct gps_packet_t*),
-			      	     size_t maxlen,
-				     unsigned int c)
+enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
+			      bool(*preamble_match) (isgps30bits_t *),
+			      bool(*length_check) (struct gps_packet_t *),
+			      size_t maxlen, unsigned int c)
 {
     enum isgpsstat_t res;
 
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+	gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 		    "ISGPS word tag not correct, skipping byte\n");
 	return ISGPS_SKIP;
     }
@@ -210,19 +215,22 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 	    if (session->isgps.curr_offset > 0) {
 		session->isgps.curr_word |= c << session->isgps.curr_offset;
 	    } else {
-		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+		session->isgps.curr_word |=
+		    c >> -(session->isgps.curr_offset);
 	    }
-	    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS syncing at byte %lu: 0x%08x\n", session->char_counter, session->isgps.curr_word);
+	    gpsd_report(ISGPS_ERRLEVEL_BASE + 2,
+			"ISGPS syncing at byte %lu: 0x%08x\n",
+			session->char_counter, session->isgps.curr_word);
 
 	    if (preamble_match(&session->isgps.curr_word)) {
 		if (isgps_parityok(session->isgps.curr_word)) {
-		    gpsd_report(ISGPS_ERRLEVEL_BASE+1,
+		    gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 				"ISGPS preamble ok, parity ok -- locked\n");
 		    session->isgps.locked = true;
 		    /* session->isgps.curr_offset;  XXX - testing */
 		    break;
 		}
-		gpsd_report(ISGPS_ERRLEVEL_BASE+1,
+		gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 			    "ISGPS preamble ok, parity fail\n");
 	    }
 	    session->isgps.curr_offset++;
@@ -249,15 +257,16 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		 * another preamble pattern in the data stream. -wsr
 		 */
 		if (preamble_match(&session->isgps.curr_word)) {
-		    gpsd_report(ISGPS_ERRLEVEL_BASE+2, 
+		    gpsd_report(ISGPS_ERRLEVEL_BASE + 2,
 				"ISGPS preamble spotted (index: %u)\n",
 				session->isgps.bufindex);
 		    session->isgps.bufindex = 0;
 		}
 #endif
-		gpsd_report(ISGPS_ERRLEVEL_BASE+2,
+		gpsd_report(ISGPS_ERRLEVEL_BASE + 2,
 			    "ISGPS processing word %u (offset %d)\n",
-			    session->isgps.bufindex, session->isgps.curr_offset);
+			    session->isgps.bufindex,
+			    session->isgps.curr_offset);
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
@@ -265,23 +274,26 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		     */
 		    if (session->isgps.bufindex >= (unsigned)maxlen) {
 			session->isgps.bufindex = 0;
-			gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+			gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 				    "ISGPS buffer overflowing -- resetting\n");
 			return ISGPS_NO_SYNC;
 		    }
 
-		    session->isgps.buf[session->isgps.bufindex] = session->isgps.curr_word;
+		    session->isgps.buf[session->isgps.bufindex] =
+			session->isgps.curr_word;
 
+		    /* *INDENT-OFF* */
 		    if ((session->isgps.bufindex == 0) &&
-			!preamble_match((isgps30bits_t *)session->isgps.buf)) {
-			gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+			!preamble_match((isgps30bits_t *) session->isgps.buf)) {
+			gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 				    "ISGPS word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
+		    /* *INDENT-ON* */
 		    session->isgps.bufindex++;
 
 		    if (length_check(session)) {
-			/* jackpot, we have a complete packet*/
+			/* jackpot, we have a complete packet */
 			session->isgps.bufindex = 0;
 			res = ISGPS_MESSAGE;
 		    }
@@ -289,31 +301,34 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		session->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
 		session->isgps.curr_offset += 30;
 		if (session->isgps.curr_offset > 0) {
-		    session->isgps.curr_word |= c << session->isgps.curr_offset;
+		    session->isgps.curr_word |=
+			c << session->isgps.curr_offset;
 		} else {
-		    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+		    session->isgps.curr_word |=
+			c >> -(session->isgps.curr_offset);
 		}
 	    } else {
-		gpsd_report(ISGPS_ERRLEVEL_BASE+0, 
+		gpsd_report(ISGPS_ERRLEVEL_BASE + 0,
 			    "ISGPS parity failure, lost lock\n");
 		session->isgps.locked = false;
 	    }
 	}
 	session->isgps.curr_offset -= 6;
-	gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS residual %d\n", session->isgps.curr_offset);
+	gpsd_report(ISGPS_ERRLEVEL_BASE + 2, "ISGPS residual %d\n",
+		    session->isgps.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
 
     /* never achieved lock */
-    gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
-		"ISGPS lock never achieved\n");
+    gpsd_report(ISGPS_ERRLEVEL_BASE + 1, "ISGPS lock never achieved\n");
     return ISGPS_NO_SYNC;
 }
+
 /*@ +usereleased +compdef @*/
 
 #ifdef __UNUSED__
-void isgps_output_magnavox(isgps30bits_t *ip, unsigned int len, FILE *fp)
+void isgps_output_magnavox(isgps30bits_t * ip, unsigned int len, FILE * fp)
 /* ship an IS-GPS-200 message to standard output in Magnavox format */
 {
     isgps30bits_t w = 0;

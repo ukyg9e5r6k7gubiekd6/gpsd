@@ -34,6 +34,5 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		struct gps_data_t *to_user;	//we return the user a copy of the internal structure. This way she can modify it without
 						//integrity loss for the entire class
 		struct gps_data_t* backup(void) { *to_user=*gps_data; return to_user;}; //return the backup copy
-		pthread_t *handler; //needed to handle the callback registration/deletion
 };
 #endif // _GPSD_GPSMM_H_

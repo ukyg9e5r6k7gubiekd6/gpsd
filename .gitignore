@@ -55,7 +55,8 @@ srec.html
 *.so
 *.la
 *~
-maskdump.c
+gps_maskdump.c
+gpsd_maskdump.c
 gpsd.h
 gpsd_config.h.in
 gpsd_config.h

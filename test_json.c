@@ -17,36 +17,39 @@
 
 static void assert_case(int num, int status)
 {
-    if (status != 0)
-    { 
-	(void)fprintf(stderr, "case %d FAILED, status %d (%s).\n", num, status, json_error_string(status));
+    if (status != 0) {
+	(void)fprintf(stderr, "case %d FAILED, status %d (%s).\n", num,
+		      status, json_error_string(status));
 	exit(1);
     }
 }
 
 static void assert_string(char *attr, char *fld, char *val)
 {
-    if (strcmp(fld, val))
-    {
-	(void)fprintf(stderr, "'%s' string attribute eval failed, value = %s.\n", attr, fld);
+    if (strcmp(fld, val)) {
+	(void)fprintf(stderr,
+		      "'%s' string attribute eval failed, value = %s.\n",
+		      attr, fld);
 	exit(1);
     }
 }
 
 static void assert_integer(char *attr, int fld, int val)
 {
-    if (fld != val)
-    {
-	(void)fprintf(stderr, "'%s' integer attribute eval failed, value = %d.\n", attr, fld);
+    if (fld != val) {
+	(void)fprintf(stderr,
+		      "'%s' integer attribute eval failed, value = %d.\n",
+		      attr, fld);
 	exit(1);
     }
 }
 
 static void assert_uinteger(char *attr, uint fld, uint val)
 {
-    if (fld != val)
-    {
-	(void)fprintf(stderr, "'%s' integer attribute eval failed, value = %u.\n", attr, fld);
+    if (fld != val) {
+	(void)fprintf(stderr,
+		      "'%s' integer attribute eval failed, value = %u.\n",
+		      attr, fld);
 	exit(1);
     }
 }
@@ -54,9 +57,10 @@ static void assert_uinteger(char *attr, uint fld, uint val)
 static void assert_boolean(char *attr, bool fld, bool val)
 {
     /*@-boolcompare@*/
-    if (fld != val)
-    {
-	(void)fprintf(stderr, "'%s' boolean attribute eval failed, value = %s.\n", attr, fld ? "true" : "false");
+    if (fld != val) {
+	(void)fprintf(stderr,
+		      "'%s' boolean attribute eval failed, value = %s.\n",
+		      attr, fld ? "true" : "false");
 	exit(1);
     }
     /*@+boolcompare@*/
@@ -68,9 +72,10 @@ static void assert_boolean(char *attr, bool fld, bool val)
  */
 static void assert_real(char *attr, double fld, double val)
 {
-    if (fld != val)
-    {
-	(void)fprintf(stderr, "'%s' real attribute eval failed, value = %f.\n", attr, fld);
+    if (fld != val) {
+	(void)fprintf(stderr,
+		      "'%s' real attribute eval failed, value = %f.\n", attr,
+		      fld);
 	exit(1);
     }
 }
@@ -81,6 +86,7 @@ static struct gps_data_t gpsdata;
 
 /* Case 1: TPV report */
 
+/* *INDENT-OFF* */
 static const char json_str1[] = "{\"class\":\"TPV\",\
     \"device\":\"GPS#1\",\"tag\":\"MID2\",				\
     \"time\":1119197561.890,\"lon\":46.498203637,\"lat\":7.568074350,\
@@ -201,8 +207,9 @@ static const struct json_attr_t json_attrs_8[] = {
     {NULL},
 };
 /*@ +fullinitblock @*/
+/* *INDENT-ON* */
 
-int main(int argc UNUSED, char *argv[] UNUSED)
+int main(int argc UNUSED, char *argv[]UNUSED)
 {
     int status = 0;
 
@@ -250,7 +257,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     status = libgps_json_unpack(json_str5, &gpsdata, NULL);
     assert_case(5, status);
     assert_string("path", gpsdata.dev.path, "/dev/ttyUSB0");
-    assert_integer("flags",gpsdata.dev.flags, 5);
+    assert_integer("flags", gpsdata.dev.flags, 5);
     assert_string("driver", gpsdata.dev.driver, "Foonly");
 
     status = json_read_object(json_str6, json_attrs_6, NULL);

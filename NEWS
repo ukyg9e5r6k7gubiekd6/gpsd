@@ -12,9 +12,12 @@
   now -L to -l can be used to enable logging (to stay consistent with
   the l command). There is new FAQ material on improving fix and time
   reference accuracy. New sections have been added to NMEA.txt on
-  error status indications and satellite IDs.  New POLL command
-  brings back polling-mode operation.  A Client-HOWTO has been added
-  to the documentation.
+  error status indications and satellite IDs.  New POLL command brings
+  back polling-mode operation.  A Client-HOWTO has been added to the
+  documentation. gpsd no longer eats CPU when a device is unexpectedly
+  unplugged. Support for the TNT revolution is back (run mode only).
+  There is now a gpsdfake diagnostic tool that fakes being gpsd shipping
+  arbitrary specified data to clients.
 
 * Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
   Fix a packaging error.  The new Python library module was

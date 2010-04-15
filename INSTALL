@@ -18,7 +18,7 @@ various additional capabilities and extensions:
 C++ compiler	       -> libgpsmm C++ wrapper for the library
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
-X windows + lesstif    -> two test clients depend on this
+X windows              -> two test clients depend on this
 ncurses                -> two more test clients depend on this
 Qt + qmake             -> libQgpsmm depends on this
 
@@ -107,7 +107,7 @@ resembling "Xm/Xm.h: No such file or directory".  If you're on a Linux
 system, you may already have LessTif.  Source code is available
 from <http://www.lesstif.org/>.
 
-Under Ubuntu, you will require libmotif-dev, libxp-dev and libxaw7-dev
+Under Ubuntu, you will require libxp-dev and libxaw7-dev
 in addition to the standard build-support packages.  You can get
 all the build prerequisites intalled with "apt-get build-dep gpsd".
 
@@ -132,11 +132,12 @@ a serial or USB port with a GPS attached to it.
 greeting line that's a JSON object describing GPSD's version.
 Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
-6. Type '?WATCH={"raw":1};' to start raw and watcher modes.  You
-should see NMEA data (text lines beginning with $) spewing out.  You
-will also see lines beginning with '{' that are JSON objects
-representing reports from your GPS; these are packet translations in
-GPSD protocol.
+6. Type '?WATCH={"enable":true,"json":true,"raw":1};' to start raw and
+watcher modes.  You should see NMEA data (text lines beginning with $)
+spewing out (if you have a non-NMEA device you may see long strings of
+hex instead).  You will also see lines beginning with '{' that are
+JSON objects representing reports from your GPS; these are packet
+translations in GPSD protocol.
 
 7. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
@@ -207,5 +208,6 @@ building documentation
 15. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
-check".  It is not necessary to install first.  Python is
+check".  It is not necessary to install first, but you do need
+to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.

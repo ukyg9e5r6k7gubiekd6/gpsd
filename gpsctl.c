@@ -58,7 +58,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	    continue;
 	}
 	fieldmask = gpsd_poll(session);
-	if ((fieldmask &~ ONLINE_SET)!=0)
+	if ((fieldmask &~ ONLINE_IS)!=0)
 	    return fieldmask;
     }
 }
@@ -82,7 +82,7 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
     ret = gps_poll(gpsdata);
-    if (ERROR_SET & gpsdata->set) {
+    if (ERROR_IS & gpsdata->set) {
 	gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
     }
     return ret;
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 	case 't':		/* force the device type */
 	    devtype = optarg;
 	    break;
-	case 'T':		/* force the device type */
+	case 'T':		/* set the timeout on packet recognition */
 	    timeout = (unsigned)atoi(optarg);
 	    break;
 	case 'D':		/* set debugging level */

@@ -24,11 +24,12 @@ PERMISSIONS
 #include "gpsd.h"
 #include "gps_json.h"
 
-int json_device_read(const char *buf, 
-		     /*@out@*/struct devconfig_t *dev, 
-		     /*@null@*/const char **endptr)
+int json_device_read(const char *buf,
+		     /*@out@*/ struct devconfig_t *dev,
+		     /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
+    /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
 	
@@ -54,6 +55,7 @@ int json_device_read(const char *buf,
 				        .dflt.real = NAN},
 	{NULL},
     };
+    /* *INDENT-ON* */
     /*@ +fullinitblock @*/
     int status;
 
@@ -64,11 +66,12 @@ int json_device_read(const char *buf,
     return 0;
 }
 
-int json_watch_read(const char *buf, 
-		    /*@out@*/struct policy_t *ccp,
-		    /*@null@*/const char **endptr)
+int json_watch_read(const char *buf,
+		    /*@out@*/ struct policy_t *ccp,
+		    /*@null@*/ const char **endptr)
 {
     /*@ -fullinitblock @*/
+    /* *INDENT-OFF* */
     struct json_attr_t chanconfig_attrs[] = {
 	{"class",          t_check,    .dflt.check = "WATCH"},
 	
@@ -86,6 +89,7 @@ int json_watch_read(const char *buf,
 	                                  .len = sizeof(ccp->devpath)},
 	{NULL},
     };
+    /* *INDENT-ON* */
     /*@ +fullinitblock @*/
     int status;
 

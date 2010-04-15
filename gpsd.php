@@ -17,8 +17,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $GPS, $server, $advertise, $port, $magic, $swap_ew, $magic;
-$magic = 1; # leave this set to 1
+global $server, $advertise, $port, $open, $swap_ew, $testmode;
+$testmode = 1; # leave this set to 1
+
+# Public script parameters:
+#   host: host name or address where GPSd runs. Default: from config file
+#   port: port of GPSd. Default: from config file
+#   op=view: show just the skyview image instead of the whole HTML page
+#     sz=small: used with op=view, display a small (240x240px) skyview
+#   op=json: respond with the GPSd POLL JSON structure
+#     jsonp=prefix: used with op=json, wrap the POLL JSON in parentheses
+#                   and prepend prefix
+
+# If you're running PHP with the Suhosin patch (like the Debian PHP5 package),
+# it may be necessary to increase the value of the
+# suhosin.get.max_value_length parameter to 2048. The imgdata parameter used
+# for displaying the skyview is longer than the default 512 allowed by Suhosin.
+# Debian has the config file at /etc/php5/conf.d/suhosin.ini.
 
 # this script shouldn't take more than a few seconds to run
 set_time_limit(3);
@@ -56,7 +71,8 @@ EOF;
 
 
 # if we're passing in a query, let's unpack and use it
-if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
+$op = isset($_GET['op']) ? $_GET['op'] : '';
+if (isset($_GET['imgdata']) && $op == 'view'){
 	$resp = base64_decode($_GET['imgdata']);
 	if ($resp){
 		gen_image($resp);
@@ -71,7 +87,7 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 		if (!preg_match('/\D/', $_GET['port']) && ($port>0) && ($port<65536))
 			$port = $_GET['port'];
 
-	if ($magic){
+	if ($testmode){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
 		@fwrite($sock, "?POLL;\n");
 		for($tries = 0; $tries < 10; $tries++){
@@ -82,18 +98,17 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 			}
 		}
 		@fclose($sock);
-	}
-	$GPS = json_decode($resp, true);
-	if ($GPS === false){
-		die("json_decode error...");
+		if (!$resp)
+			$resp = '{"class":"ERROR","message":"no response from GPS daemon"}';
 	}
 }
 
-if (isset($_GET['op']) && ($_GET['op'] == 'view')){
+if ($op == 'view')
 	gen_image($resp);
-} else {
+else if ($op == 'json')
+	write_json($resp);
+else
 	write_html($resp);
-}
 
 exit(0);
 
@@ -275,15 +290,13 @@ function skyview($im, $sz, $C){
 }
 
 function gen_image($resp){
-	global $magic;
-
 	$sz = 600;
 	if (isset($_GET['sz']) && ($_GET['sz'] == 'small'))
 		$sz = 240;
 
 	$GPS = json_decode($resp, true);
 	if ($GPS['class'] != "POLL"){
-		die("json_decode error...");
+		die("json_decode error: $resp");
 	}
 
 	$im = imageCreate($sz, $sz);
@@ -311,9 +324,14 @@ function dfix($x, $y, $z){
 }
 
 function write_html($resp){
-	global $GPS, $sock, $errstr, $errno, $server, $port, $head, $body;
+	global $sock, $errstr, $errno, $server, $port, $head, $body, $open;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
-	global $magic;
+	global $testmode, $advertise;
+
+	$GPS = json_decode($resp, true);
+	if ($GPS['class'] != 'POLL'){
+		die("json_decode error: $resp");
+	}
 
 	header("Content-type: text/html; charset=UTF-8");
 
@@ -322,7 +340,6 @@ function write_html($resp){
 	$lon = (float)$GPS['fixes'][0]['lon'];
 	$x = $server; $y = $port;
 	$imgdata = base64_encode($resp);
-	include("gpsd_config.inc"); # breaks things - XXX wtf?
 	$server = $x; $port = $y;
 
 	if ($autorefresh > 0)
@@ -337,7 +354,7 @@ function write_html($resp){
 		$gmap_code = gen_gmap_code();
 	}
 	$part1 = <<<EOF
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -346,7 +363,7 @@ function write_html($resp){
 {$gmap_head}
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta http-equiv="Content-Language" content="en,en-us"/>
-<title>{$title} - GPSD Test Station {$GPS['loc']}</title>
+<title>{$title} - GPSD Test Station {$lat}, {$lon}</title>
 {$autorefresh}
 <style>
 .warning {
@@ -380,7 +397,7 @@ EOF;
 	if (!strlen($advertise))
 		$advertise = $server;
 
-	if ($magic && !$sock)
+	if ($testmode && !$sock)
 		$part2 = "";
 	else
 		$part2 = <<<EOF
@@ -393,15 +410,19 @@ width="600" height="600"/>
 <p class="caption">A filled circle means the satellite was used in
 the last fix. Green-yellow-red colors indicate signal strength in dB, 
  green=most and red=least.  Diamonds indicate SBAS satellites.</p>
-</td>
+{$gmap_code}</td>
 </tr>
 EOF;
 
-	$part3 = <<<EOF
+	if (!$open)
+		$part3 = '';
+	else
+		$part3 = <<<EOF
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
-<span class="fixed">telnet://{$advertise}:{$port}/</span> and type "R".<br/>
+<span class="fixed">telnet://{$advertise}:{$port}/</span> and type "?POLL;"
+or "?WATCH={"enable":true,"raw":true}".<br/>
 Use a different server:<br/>
 <form method=GET action="${_SERVER['SCRIPT_NAME']}">
 <input name="host" value="{$advertise}">:
@@ -412,7 +433,7 @@ Use a different server:<br/>
 </tr>
 EOF;
 
-	if ($magic && !$sock)
+	if ($testmode && !$sock)
 		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else {
 		$nsv = count($GPS['skyviews'][0]['satellites']);
@@ -454,6 +475,14 @@ print $part1 . $part2 . $part3 . $part4 . $part5;
 
 }
 
+function write_json($resp){
+	header('Content-Type: text/javascript');
+	if (isset($_GET['jsonp']))
+		print "{$_GET['jsonp']}({$resp})";
+	else
+		print $resp;
+}
+
 function write_config(){
 	$f = fopen("gpsd_config.inc", "a");
 	if (!$f)
@@ -469,6 +498,7 @@ function write_config(){
 \$googlemap = 0; # set to 1 if you want to have a google map
 \$gmap_key = 'GetYourOwnGoogleKey'; # your google API key goes here
 \$swap_ew = 0; # set to 1 if you don't understand projections
+\$open = 0; # set to 1 to show the form to change the GPSd server
 
 ## You can read the header, footer and blurb from a file...
 # \$head = file_get_contents('/path/to/header.inc');

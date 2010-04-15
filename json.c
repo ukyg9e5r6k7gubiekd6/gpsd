@@ -61,17 +61,17 @@ PERMISSIONS
 #include "json.h"
 
 #ifdef CLIENTDEBUG_ENABLE
-static int debuglevel = 0; 
+static int debuglevel = 0;
 static FILE *debugfp;
 
-void json_enable_debug(int level, FILE *fp)
+void json_enable_debug(int level, FILE * fp)
 /* control the level and destination of debug trace messages */
 {
     debuglevel = level;
     debugfp = fp;
 }
 
-static void json_trace(int errlevel, const char *fmt, ... )
+static void json_trace(int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style */
 {
     if (errlevel <= debuglevel) {
@@ -79,8 +79,9 @@ static void json_trace(int errlevel, const char *fmt, ... )
 	va_list ap;
 
 	(void)strlcpy(buf, "json: ", BUFSIZ);
-	va_start(ap, fmt) ;
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_start(ap, fmt);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+			ap);
 	va_end(ap);
 
 	(void)fputs(buf, debugfp);
@@ -93,15 +94,15 @@ static void json_trace(int errlevel, const char *fmt, ... )
 #endif /* CLIENTDEBUG_ENABLE */
 
 /*@-immediatetrans -dependenttrans -usereleased -compdef@*/
-static /*@null@*/char *json_target_address(const struct json_attr_t *cursor, 
-				 /*@null@*/const struct json_array_t *parent, 
-			       int offset)
+static /*@null@*/ char *json_target_address(const struct json_attr_t *cursor,
+					     /*@null@*/
+					     const struct json_array_t
+					     *parent, int offset)
 {
-    char *targetaddr = NULL; 
-    if (parent == NULL || parent->element_type != t_structobject) { 
+    char *targetaddr = NULL;
+    if (parent == NULL || parent->element_type != t_structobject) {
 	/* ordinary case - use the address in the cursor structure */
-	switch(cursor->type)
-	{
+	switch (cursor->type) {
 	case t_integer:
 	    targetaddr = (char *)&cursor->addr.integer[offset];
 	    break;
@@ -124,35 +125,40 @@ static /*@null@*/char *json_target_address(const struct json_attr_t *cursor,
 	    targetaddr = NULL;
 	    break;
 	}
-    }
-    else
+    } else
 	/* tricky case - hacking a member in an array of structures */
-	targetaddr = parent->arr.objects.base + (offset * parent->arr.objects.stride) + cursor->addr.offset;
-    json_debug_trace((1, "Target address for %s (offset %d) is %p\n", 
+	targetaddr =
+	    parent->arr.objects.base + (offset * parent->arr.objects.stride) +
+	    cursor->addr.offset;
+    json_debug_trace((1, "Target address for %s (offset %d) is %p\n",
 		      cursor->attribute, offset, targetaddr));
     return targetaddr;
 }
+
 /*@-immediatetrans -dependenttrans +usereleased +compdef@*/
 
-static int json_internal_read_object(const char *cp, 
-				     const struct json_attr_t *attrs, 
-				     /*@null@*/const struct json_array_t *parent, 
-				     int offset, 
-				     /*@null@*/const char **end)
+static int json_internal_read_object(const char *cp,
+				     const struct json_attr_t *attrs,
+				     /*@null@*/
+				     const struct json_array_t *parent,
+				     int offset,
+				     /*@null@*/ const char **end)
 {
     /*@ -nullstate -nullderef -mustfreefresh -nullpass -usedef @*/
-    enum {init, await_attr, in_attr, await_value, in_val_string, 
-	  in_escape, in_val_token, post_val, post_array} state = 0;
+    enum
+    { init, await_attr, in_attr, await_value, in_val_string,
+	in_escape, in_val_token, post_val, post_array
+    } state = 0;
 #ifdef CLIENTDEBUG_ENABLE
     char *statenames[] = {
-	"init", "await_attr", "in_attr", "await_value", "in_val_string", 
+	"init", "await_attr", "in_attr", "await_value", "in_val_string",
 	"in_escape", "in_val_token", "post_val", "post_array",
-	};
+    };
 #endif /* CLIENTDEBUG_ENABLE */
-    char attrbuf[JSON_ATTR_MAX+1], *pattr = NULL;
-    char valbuf[JSON_VAL_MAX+1], *pval = NULL;
+    char attrbuf[JSON_ATTR_MAX + 1], *pattr = NULL;
+    char valbuf[JSON_VAL_MAX + 1], *pval = NULL;
     bool value_quoted = false;
-    char uescape[5];	/* enough space for 4 hex digits and a NUL */
+    char uescape[5];		/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
     int substatus, n, maxlen = 0;
     unsigned int u;
@@ -166,15 +172,14 @@ static int json_internal_read_object(const char *cp,
 #endif /* S_SPLINT_S */
 
     if (end != NULL)
-	*end = NULL;	/* give it a well-defined value on parse failure */
+	*end = NULL;		/* give it a well-defined value on parse failure */
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
-    for (cursor = attrs; cursor->attribute != NULL; cursor++) 
+    for (cursor = attrs; cursor->attribute != NULL; cursor++)
 	if (!cursor->nodefault) {
 	    lptr = json_target_address(cursor, parent, offset);
 	    if (lptr != NULL)
-		switch(cursor->type)
-		{
+		switch (cursor->type) {
 		case t_integer:
 		    *((int *)lptr) = cursor->dflt.integer;
 		    break;
@@ -185,7 +190,9 @@ static int json_internal_read_object(const char *cp,
 		    *((double *)lptr) = cursor->dflt.real;
 		    break;
 		case t_string:
-		    if (parent != NULL && parent->element_type != t_structobject && offset > 0)
+		    if (parent != NULL
+			&& parent->element_type != t_structobject
+			&& offset > 0)
 			return JSON_ERR_NOPARSTR;
 		    lptr[0] = '\0';
 		    break;
@@ -193,7 +200,7 @@ static int json_internal_read_object(const char *cp,
 		    /* nullbool default says not to set the value at all */
 		    /*@+boolint@*/
 		    if (cursor->dflt.boolean != nullbool)
-			*((bool *)lptr) = cursor->dflt.boolean;
+			*((bool *) lptr) = cursor->dflt.boolean;
 		    /*@-boolint@*/
 		    break;
 		case t_character:
@@ -210,17 +217,18 @@ static int json_internal_read_object(const char *cp,
     json_debug_trace((1, "JSON parse of '%s' begins.\n", cp));
 
     /* parse input JSON */
-    for (; *cp!='\0'; cp++) {
-	json_debug_trace((2, "State %-14s, looking at '%c' (%p)\n", statenames[state], *cp, cp));
-	switch (state)
-	{
+    for (; *cp != '\0'; cp++) {
+	json_debug_trace((2, "State %-14s, looking at '%c' (%p)\n",
+			  statenames[state], *cp, cp));
+	switch (state) {
 	case init:
 	    if (isspace(*cp))
 		continue;
 	    else if (*cp == '{')
 		state = await_attr;
 	    else {
-		json_debug_trace((1, "Non-WS when expecting object start.\n"));
+		json_debug_trace((1,
+				  "Non-WS when expecting object start.\n"));
 		return JSON_ERR_OBSTART;
 	    }
 	    break;
@@ -240,12 +248,15 @@ static int json_internal_read_object(const char *cp,
 	case in_attr:
 	    if (*cp == '"') {
 		*pattr++ = '\0';
-		json_debug_trace((1, "Collected attribute name %s\n", attrbuf));
+		json_debug_trace((1, "Collected attribute name %s\n",
+				  attrbuf));
 		for (cursor = attrs; cursor->attribute != NULL; cursor++)
-		    if (strcmp(cursor->attribute, attrbuf)==0)
+		    if (strcmp(cursor->attribute, attrbuf) == 0)
 			break;
 		if (cursor->attribute == NULL) {
-		    json_debug_trace((1, "Unknown attribute name '%s' (attributes begin with '%s').\n", attrbuf, attrs->attribute));
+		    json_debug_trace((1,
+				      "Unknown attribute name '%s' (attributes begin with '%s').\n",
+				      attrbuf, attrs->attribute));
 		    return JSON_ERR_BADATTR;
 		}
 		state = await_value;
@@ -254,7 +265,7 @@ static int json_internal_read_object(const char *cp,
 		else if (cursor->type == t_check)
 		    maxlen = (int)strlen(cursor->dflt.check);
 		else if (cursor->map != NULL)
-		    maxlen = (int)sizeof(valbuf)-1;
+		    maxlen = (int)sizeof(valbuf) - 1;
 		pval = valbuf;
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1) {
 		json_debug_trace((1, "Attribute name too long.\n"));
@@ -267,7 +278,8 @@ static int json_internal_read_object(const char *cp,
 		continue;
 	    else if (*cp == '[') {
 		if (cursor->type != t_array) {
-		    json_debug_trace((1, "Saw [ when not expecting array.\n"));
+		    json_debug_trace((1,
+				      "Saw [ when not expecting array.\n"));
 		    return JSON_ERR_NOARRAY;
 		}
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
@@ -275,7 +287,8 @@ static int json_internal_read_object(const char *cp,
 		    return substatus;
 		state = post_array;
 	    } else if (cursor->type == t_array) {
-		json_debug_trace((1, "Array element was specified, but no [.\n"));
+		json_debug_trace((1,
+				  "Array element was specified, but no [.\n"));
 		return JSON_ERR_NOBRAK;
 	    } else if (*cp == '"') {
 		value_quoted = true;
@@ -295,14 +308,15 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = '\0';
 		json_debug_trace((1, "Collected string value %s\n", valbuf));
 		state = post_val;
-	    } else if (pval > valbuf + JSON_VAL_MAX - 1 || pval > valbuf + maxlen) {
+	    } else if (pval > valbuf + JSON_VAL_MAX - 1
+		       || pval > valbuf + maxlen) {
 		json_debug_trace((1, "String value too long.\n"));
 		return JSON_ERR_STRLONG;	/*  */
 	    } else
 		*pval++ = *cp;
 	    break;
 	case in_escape:
-	    switch(*cp) {
+	    switch (*cp) {
 	    case 'b':
 		*pval++ = '\b';
 		break;
@@ -325,7 +339,7 @@ static int json_internal_read_object(const char *cp,
 		(void)sscanf(uescape, "%04x", &u);
 		*pval++ = (char)u;	/* will truncate values above 0xff */
 		break;
-	    default:	/* handles double quote and solidus */
+	    default:		/* handles double quote and solidus */
 		*pval++ = *cp;
 		break;
 	    }
@@ -345,28 +359,34 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = *cp;
 	    break;
 	case post_val:
-	    if (value_quoted && (cursor->type != t_string && cursor->type != t_character && cursor->type != t_check && cursor->map == 0)) { 
-		json_debug_trace((1, "Saw quoted value when expecting non-string.\n"));
+	    if (value_quoted
+		&& (cursor->type != t_string && cursor->type != t_character
+		    && cursor->type != t_check && cursor->map == 0)) {
+		json_debug_trace((1,
+				  "Saw quoted value when expecting non-string.\n"));
 		return JSON_ERR_QNONSTRING;
-	    }		    
-	    if (!value_quoted && (cursor->type == t_string || cursor->type == t_check || cursor->map != 0)) { 
-		json_debug_trace((1, "Didn't see quoted value when expecting string.\n"));
+	    }
+	    if (!value_quoted
+		&& (cursor->type == t_string || cursor->type == t_check
+		    || cursor->map != 0)) {
+		json_debug_trace((1,
+				  "Didn't see quoted value when expecting string.\n"));
 		return JSON_ERR_NONQSTRING;
-	    }		    
+	    }
 	    if (cursor->map != 0) {
 		for (mp = cursor->map; mp->name != NULL; mp++)
 		    if (strcmp(mp->name, valbuf) == 0) {
 			goto foundit;
 		    }
-		json_debug_trace((1, "Invalid enumerated value string %s.\n", valbuf));
+		json_debug_trace((1, "Invalid enumerated value string %s.\n",
+				  valbuf));
 		return JSON_ERR_BADENUM;
-	    foundit:
+	      foundit:
 		(void)snprintf(valbuf, sizeof(valbuf), "%d", mp->value);
 	    }
 	    lptr = json_target_address(cursor, parent, offset);
 	    if (lptr != NULL)
-		switch(cursor->type)
-		{
+		switch (cursor->type) {
 		case t_integer:
 		    *((int *)lptr) = atoi(valbuf);
 		    break;
@@ -377,12 +397,14 @@ static int json_internal_read_object(const char *cp,
 		    *((double *)lptr) = atof(valbuf);
 		    break;
 		case t_string:
-		    if (parent != NULL && parent->element_type != t_structobject && offset > 0)
+		    if (parent != NULL
+			&& parent->element_type != t_structobject
+			&& offset > 0)
 			return JSON_ERR_NOPARSTR;
 		    (void)strncpy(lptr, valbuf, cursor->len);
 		    break;
 		case t_boolean:
-		    *((bool *)lptr) = (strcmp(valbuf, "true") == 0);
+		    *((bool *) lptr) = (strcmp(valbuf, "true") == 0);
 		    break;
 		case t_character:
 		    if (strlen(valbuf) > 1)
@@ -395,30 +417,32 @@ static int json_internal_read_object(const char *cp,
 		case t_array:
 		    break;
 		case t_check:
-		    if (strcmp(cursor->dflt.check, valbuf)!=0) {
-			json_debug_trace((1, "Required attribute vakue %s not present.\n", cursor->dflt.check));
+		    if (strcmp(cursor->dflt.check, valbuf) != 0) {
+			json_debug_trace((1,
+					  "Required attribute vakue %s not present.\n",
+					  cursor->dflt.check));
 			return JSON_ERR_CHECKFAIL;
 		    }
 		    break;
 		}
-		/*@fallthrough@*/
-	    case post_array:
-		if (isspace(*cp))
-		    continue;
-		else if (*cp == ',')
-		    state = await_attr;
-		else if (*cp == '}') {
-		    ++cp;
-		    goto good_parse;
-		} else {
-		    json_debug_trace((1, "Garbage while expecting comma or }\n"));
-		    return JSON_ERR_BADTRAIL;
-		}
-		break;
+	    /*@fallthrough@*/
+	case post_array:
+	    if (isspace(*cp))
+		continue;
+	    else if (*cp == ',')
+		state = await_attr;
+	    else if (*cp == '}') {
+		++cp;
+		goto good_parse;
+	    } else {
+		json_debug_trace((1, "Garbage while expecting comma or }\n"));
+		return JSON_ERR_BADTRAIL;
 	    }
+	    break;
+	}
     }
 
-good_parse:
+  good_parse:
     /* in case there's another object following, consune trailing WS */
     while (isspace(*cp))
 	++cp;
@@ -429,14 +453,15 @@ good_parse:
     /*@ +nullstate +nullderef +mustfreefresh +nullpass +usedef @*/
 }
 
-int json_read_array(const char *cp, const struct json_array_t *arr, const char **end)
+int json_read_array(const char *cp, const struct json_array_t *arr,
+		    const char **end)
 {
     /*@-nullstate -onlytrans@*/
     int substatus, offset;
     char *tp;
 
     if (end != NULL)
-	*end = NULL;	/* give it a well-defined value on parse failure */
+	*end = NULL;		/* give it a well-defined value on parse failure */
 
     json_debug_trace((1, "Entered json_read_array()\n"));
 
@@ -445,7 +470,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
     if (*cp != '[') {
 	json_debug_trace((1, "Didn't find expected array start\n"));
 	return JSON_ERR_ARRAYSTART;
-    }else
+    } else
 	cp++;
 
     tp = arr->arr.strings.store;
@@ -453,8 +478,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	*(arr->count) = 0;
     for (offset = 0; offset < arr->maxlen; offset++) {
 	json_debug_trace((1, "Looking at %s\n", cp));
-	switch (arr->element_type)
-	{
+	switch (arr->element_type) {
 	case t_string:
 	    if (isspace(*cp))
 		cp++;
@@ -463,24 +487,28 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
 	    else
 		++cp;
 	    arr->arr.strings.ptrs[offset] = tp;
-	    for (; tp - arr->arr.strings.store < arr->arr.strings.storelen; tp++)
+	    for (; tp - arr->arr.strings.store < arr->arr.strings.storelen;
+		 tp++)
 		if (*cp == '"') {
 		    ++cp;
 		    *tp++ = '\0';
 		    goto stringend;
 		} else if (*cp == '\0') {
-		    json_debug_trace((1, "Bad string syntax in string list.\n"));
+		    json_debug_trace((1,
+				      "Bad string syntax in string list.\n"));
 		    return JSON_ERR_BADSTRING;
-	        } else {
+		} else {
 		    *tp = *cp++;
 		}
 	    json_debug_trace((1, "Bad string syntax in string list.\n"));
 	    return JSON_ERR_BADSTRING;
-	stringend:
+	  stringend:
 	    break;
 	case t_object:
 	case t_structobject:
-	    substatus = json_internal_read_object(cp, arr->arr.objects.subtype, arr, offset, &cp);
+	    substatus =
+		json_internal_read_object(cp, arr->arr.objects.subtype, arr,
+					  offset, &cp);
 	    if (substatus != 0)
 		return substatus;
 	    break;
@@ -510,25 +538,25 @@ int json_read_array(const char *cp, const struct json_array_t *arr, const char *
     }
     json_debug_trace((1, "Too many elements in array.\n"));
     return JSON_ERR_SUBTOOLONG;
-breakout:
+  breakout:
     if (end != NULL)
 	*end = cp;
     /*@ -nullderef @*/
-    json_debug_trace((1, "leaving json_read_array() with %d elements\n", *arr->count));
+    json_debug_trace((1, "leaving json_read_array() with %d elements\n",
+		      *arr->count));
     /*@ +nullderef @*/
     return 0;
     /*@+nullstate +onlytrans@*/
 }
 
-int json_read_object(const char *cp, 
-		     const struct json_attr_t *attrs, 
-		     /*@null@*/const char **end)
+int json_read_object(const char *cp, const struct json_attr_t *attrs,
+		     /*@null@*/ const char **end)
 {
     json_debug_trace((1, "json_read_object() sees '%s'\n", cp));
     return json_internal_read_object(cp, attrs, NULL, 0, end);
 }
 
-const /*@observer@*/char *json_error_string(int err)
+const /*@observer@*/ char *json_error_string(int err)
 {
     const char *errors[] = {
 	"unknown error while parsing JSON",
@@ -555,7 +583,7 @@ const /*@observer@*/char *json_error_string(int err)
 	"other data conversion error",
     };
 
-    if (err <= 0 || err >= (int)(sizeof(errors)/sizeof(errors[0])))
+    if (err <= 0 || err >= (int)(sizeof(errors) / sizeof(errors[0])))
 	return errors[0];
     else
 	return errors[err];
