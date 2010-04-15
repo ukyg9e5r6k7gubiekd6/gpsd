@@ -8,20 +8,13 @@ For contribution guidelines and internals documentation, please see
 The list of bugs exposed by gpsd in other software has moved to
 <http://gpsd.berlios.de/upstream-bugs.html>.
 
-See also the GPSD bug tracker at 
-<https://developer.berlios.de/bugs/?group_id=2116>
-
 ** Bugs in gpsd and its clients:
 
-*** time reference instability on loss of fix
+*** Tracker bugs
 
-[23:14]	<agcme>	I've discovered when the gpsd feed to ntpd goes crazy
-[23:14]	<agcme>	it happens when the GPS receiver loses the fix
-[23:15]	<agcme>	these errors start popping up: gpsd: PPS ntpshm_pps: no current GPS seconds: 1247359355
-[23:17]	<agcme>	It did it several times but most of the time when the fix came back everything went back to normal. However, at some point regaining a fix does not restore the ntpd shm data and it stays completely lost.
-[23:18]	<agcme>	Right now ntpd says the PPS offset is currently -12885008 seconds
-[23:19]	<agcme>	The NMEA offset is only -129.3 seconds
-[23:20]	<agcme>	The receiver has a fix on six satellites right now
+See the GPSD bug tracker at https://developer.berlios.de/bugs/?group_id=2116
+but don't be surprised if it's empty or very sparse.  Our rate of new defects
+per month is quite low.
 
 *** Driver issues
 
@@ -30,7 +23,34 @@ See also the GPSD bug tracker at
 Presently this means there's no way to kick a UBX into returning
 binary data.
 
+*** gpsmon failures
+
+There have been persistent reports of gpsmon failing with 0-length
+reads or select(2) failures, in both daemon-mediated and
+direct-to-device modes.  Cause is unknown, but is related to
+zero-length reads somehow.
+
 ** To do:
+
+*** Write advanced features for TNT Revolution device
+
+The baud-rate switcher in the TNT driver needs to be tested.
+
+gpsmon could support a number of TNT configuration commands, including
+unit changes. See http://gpsd.googlecode.com/truenorth-reference.pdf
+for possibilities.  
+
+Jon Schlueter has one of these on a flock machine, so testing 
+shouldn't be difficult.
+
+*** Python interface rework
+
+The Python client interface is buggy and overcomplicated and needs a
+rethink. (Much of the complication is a hangover from old protocol.)
+
+** Autodetect old-protocol daemons from library and leave in support?
+
+Might be possible to do this using a read-with-timeout.
 
 *** Finish gpssim
 
@@ -201,16 +221,6 @@ http://www.twinsun.com/tz/tz-link.htm
 
 Free time-zone maps of the U.S.
 http://www.manifold.net/download/freemaps.html
-
-** Documentation
-
-*** GeoClue
-
-Figure out how gpsd should relate to GeoClue and explain this.  A
-particular question is the dbus interface to gpsd and the GeoClue
-provider interface.  There is quite possibly nothing to do; GeoClue
-using gpsd's published interfaces seems sensible.
-http://www.freedesktop.org/wiki/Software/GeoClue
 
 Local variables:
 mode: outline
