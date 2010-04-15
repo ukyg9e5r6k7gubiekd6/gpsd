@@ -311,6 +311,26 @@ product=0×7523</code>.  Do not copy those hex numbers slavishly, they
 are examples.  To get the right numbers, you will need to dig up the
 vendor and product ID of your USB-serial converter device.</p>
 
+<h1 id="startup">Why does getting a fix take so long after powerup?</h1>
+
+<p>The GPSD daemon takes between 0.1 and 0.6 seconds to handshake with
+your hardware.  After that, if the GPS is reporting fixes, you will
+get them instantly.</p>
+
+<p>If you are starting a GPS for the first time, or after it has been
+powered off for more than two weeks, this is a 'cold start'; it needs
+to get a new satellite ephemeris to do its job. The satellites
+broadcast this information very slowly (at 50bps) on a fixed schedule,
+and it can take up to 20 minutes.</p>
+
+<p>Warm start on a modern GPS with a good skyview (4 or more sats
+visible) normally takes about 30 seconds. (Vendor spec sheets fib by
+quoting this time only, leaving out the cold-start lag to fetch
+ephemeris.) If it's taking longer, the first thing to suspect is that
+your skyview is poor. Especially if you're indoors.</p>
+
+<p>The best advice is: go outside and be patient for a few minutes.</p>
+
 <h1 id="timelag">Why does GPS time lag wall time by 11-15 seconds?</h1>
 
 <p>Your GPS may have dropped its leap-second offset.  You can tell you
