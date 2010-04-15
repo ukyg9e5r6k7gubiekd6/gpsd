@@ -33,24 +33,25 @@ DOP_SET        	= 0x00000400
 VERSION_SET    	= 0x00000800
 HERR_SET       	= 0x00001000
 VERR_SET       	= 0x00002000
-PERR_SET       	= 0x00004000
-POLICY_SET     	= 0x00020000
-ERR_SET        	= (HERR_SET|VERR_SET|PERR_SET)
-SATELLITE_SET  	= 0x00040000
-RAW_SET        	= 0x00080000
-USED_SET       	= 0x00100000
-SPEEDERR_SET   	= 0x00200000
-TRACKERR_SET   	= 0x00400000
-CLIMBERR_SET   	= 0x00800000
-DEVICE_SET     	= 0x01000000
-DEVICELIST_SET 	= 0x02000000
-DEVICEID_SET   	= 0x04000000
-ERROR_SET      	= 0x08000000
-RTCM2_SET      	= 0x10000000
-RTCM3_SET      	= 0x20000000
-AIS_SET        	= 0x40000000
-PACKET_SET     	= 0x80000000
-DATA_SET       	= ~(ONLINE_SET|PACKET_SET)
+UNUSED1_SET    	= 0x00004000
+POLICY_SET     	= 0x00008000
+SATELLITE_SET  	= 0x00010000
+RAW_SET        	= 0x00020000
+USED_SET       	= 0x00040000
+SPEEDERR_SET   	= 0x00080000
+TRACKERR_SET   	= 0x00100000
+CLIMBERR_SET   	= 0x00200000
+DEVICE_SET     	= 0x00400000
+DEVICELIST_SET 	= 0x00800000
+DEVICEID_SET   	= 0x01000000
+ERROR_SET      	= 0x02000000
+RTCM2_SET      	= 0x04000000
+RTCM3_SET      	= 0x08000000
+AIS_SET        	= 0x10000000
+PACKET_SET     	= 0x20000000
+ATTITUDE_SET   	= 0x40000000
+AUXDATA_SET    	= 0x80000000
+UNION_SET      	= (RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
 
 STATUS_NO_FIX = 0
 STATUS_FIX = 1
@@ -250,39 +251,10 @@ class gps(gpsdata):
                 data = field[2:]
                 if data[0] == "?":
                     continue
-                if cmd == 'A':
-                    self.fix.altitude = float(data)
-                    self.valid |= ALTITUDE_SET
-                elif cmd == 'B':
-                    parts = data.split()
-                    self.baudrate = int(parts[0])
-                    self.stopbits = int(parts[3])
-                elif cmd == 'C':
-                    parts = data.split()
-                    if len(parts) == 2:
-                        (self.cycle, self.mincycle) = map(float, parts)
-                    else:
-                        self.mincycle = self.cycle = float(data)
-                elif cmd == 'D':
-                    self.utc = data
-                    self.fix.time = isotime(self.utc)
-                    self.valid |= TIME_SET
-                elif cmd == 'E':
-                    parts = data.split()
-                    (self.epe, eph, self.fix.epv) = map(float, parts)
-                    self.epx = self.epy = eph
-                    self.valid |= HERR_SET | VERR_SET | PERR_SET
-                elif cmd == 'F':
+                if cmd == 'F':
                     self.device = data
                 elif cmd == 'I':
                     self.gps_id = data
-                elif cmd == 'K':
-                    self.devices = data[1:].split()
-                elif cmd == 'M':
-                    self.fix.mode = int(data)
-                    self.valid |= MODE_SET
-                elif cmd == 'N':
-                    self.driver_mode = int(data)
                 elif cmd == 'O':
                     fields = data.split()
                     if fields[0] == '?':
@@ -328,26 +300,6 @@ class gps(gpsdata):
                             else:
                                 self.fix.mode = MODE_3D
                             self.valid |= MODE_SET
-                elif cmd == 'P':
-                    (self.fix.latitude, self.fix.longitude) = map(float, data.split())
-                    self.valid |= LATLON_SET
-                elif cmd == 'Q':
-                    parts = data.split()
-                    self.satellites_used = int(parts[0])
-                    (self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
-                    self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
-                elif cmd == 'S':
-                    self.status = int(data)
-                    self.valid |= STATUS_SET
-                elif cmd == 'T':
-                    self.fix.track = float(data)
-                    self.valid |= TRACK_SET
-                elif cmd == 'U':
-                    self.fix.climb = float(data)
-                    self.valid |= CLIMB_SET
-                elif cmd == 'V':
-                    self.fix.speed = float(data)
-                    self.valid |= SPEED_SET
                 elif cmd == 'X':
                     self.online = float(data)
                     self.valid |= ONLINE_SET
