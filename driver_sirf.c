@@ -436,7 +436,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 				   unsigned char *buf, size_t len)
 {
     unsigned int i, words[10], chan, svid;
-    unsigned int preamble, parity1, parity9;
+    unsigned int preamble, parity, parity1, parity9;
 
     if (len != 43)
 	return 0;
@@ -459,9 +459,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     preamble = words[0] >> 16;
     if (preamble == 0x8b) {
 	preamble ^= 0xff;
-	words[0] ^= 0xffffff;
+	words[0] ^= 0xffffC0;
     }
-
 
     parity1 = parity9 = 0;
     for (i = 1; i < 10; i++) {
@@ -475,10 +474,18 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	    parity9 = words[9] & 0x3;
 	    break;
 	}
+	/* D30* says invert */
 	invert = (words[i] & 0x40000000) ? 1 : 0;
 	/* inverted data, invert it back */
 	if (invert) {
-	    words[i] ^= 0xffffffff;
+	    words[i] ^= 0xffffffC0;
+	}
+	parity = isgps_parity( getbeul(buf, 4 * i + 3));
+	if ( parity != (getbeul(buf, 4  * i + 3) & 0x3f) ) {
+	    gpsd_report(LOG_WARN, 
+	    	"SiRF: 50BPS parity fail words[%d] 0x%x != 0x%x\n", i,
+		    parity, ( getbeul(buf, 4 * i + 3) & 0x3f));
+	    //return 0;
 	}
 	words[i] = (words[i] & 0x3fffffff) >> 6;
     }
@@ -489,7 +496,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 		words[5], words[6], words[7], words[8], words[9]);
     // Look for the preamble in the first byte OR its complement
     if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "SiRF: 50BPS bad header 0x%u\n", words[0]);
+	gpsd_report(LOG_WARN, "SiRF: 50BPS bad premable: 0x%x header 0x%x\n"
+		, preamble, words[0]);
 	return 0;
     }
     // after inversion corrected, check for mandatory zeros at
