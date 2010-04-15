@@ -9,7 +9,7 @@ http://gpsd.berlios.de/client-howto.txt[]
 == Introduction ==
 
 This document is a guide to interfacing client applications with GPSD.
-It surveys the available binding and their use cases.  It also explains
+It surveys the available bindings and their use cases.  It also explains
 some sharp edges in the client API which, unfortunely, are fundamental
 results of the way GPS sensor devices operate, and suggests tactics
 for avoiding being cut.
@@ -170,10 +170,11 @@ of every client that has issued a ?WATCH.
 
 In order to make this work, gpsd has a packet sniffer inside it that
 does autobauding and packet-protocol detection. Normally the packet
-sniffer will achive sync in well under a second, but it can take
-longer if your serial traffic is degraded by dodgy cables or
-electrical noise, or if the GPS is configured to run at an unusual
-speed/parity/stopbit configuration.
+sniffer will achive sync in well under a second (my measured times
+range from 0.10 to 0.53 sec at 4800bps), but it can take longer if
+your serial traffic is degraded by dodgy cables or electrical noise,
+or if the GPS is configured to run at an unusual speed/parity/stopbit
+configuration.
 
 The real point here is that the delay is *variable*.  The client 
 library, and your application, can't assume a neat lockstep of
