@@ -64,10 +64,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     /* we're not interested in anything but subframe 4 - for now */
     if (subframe != 4)
 	return;
-    /* once we've filtered, we can ignore the TEL and HOW words */
-    gpsd_report(LOG_PROG, "50B: %06x %06x %06x %06x %06x %06x %06x %06x\n",
-		words[2], words[3], words[4], words[5],
-		words[6], words[7], words[8], words[9]);
     switch (pageid) {
     case 55:
 	/*
@@ -149,11 +145,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    leap ^= 0xff;
 	if (LEAP_SECONDS > leap) {
 	    /* something wrong */
-	    gpsd_report(LOG_ERROR, "Invalid leap_seconds: %d\n", leap);
+	    gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n", leap);
 	    leap = LEAP_SECONDS;
 	    session->context->valid &= ~LEAP_SECOND_VALID;
 	} else {
-	    gpsd_report(LOG_INF, "leap-seconds is %d\n", leap);
+	    gpsd_report(LOG_INF, "50B: leap-seconds is %d\n", leap);
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
 	session->context->leap_seconds = (int)leap;
