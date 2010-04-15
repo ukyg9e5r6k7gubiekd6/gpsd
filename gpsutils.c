@@ -466,6 +466,7 @@ gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
     double xdop, ydop, hdop, vdop, pdop, tdop, gdop;
     int i, j, k, n;
 
+#ifdef __UNUSED__
     gpsd_report(LOG_INF, "Satellite picture:\n");
     for (k = 0; k < MAXCHANNELS; k++) {
 	if (gpsdata->used[k])
@@ -473,7 +474,6 @@ gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
 			gpsdata->azimuth[k], gpsdata->elevation[k],
 			gpsdata->used[k]);
     }
-#ifdef __UNUSED__
 #endif /* __UNUSED__ */
 
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
