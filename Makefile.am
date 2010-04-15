@@ -271,7 +271,7 @@ clean-local:
 
 # Install Python modules
 install-exec-local:
-	$(PYTHON) setup.py install --prefix=${prefix} # --root=$(DESTDIR)
+	$(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR)
 endif
 
 #
