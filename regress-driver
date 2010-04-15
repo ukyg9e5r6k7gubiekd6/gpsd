@@ -5,25 +5,19 @@
 # drivers.
 
 # Arrange to call a gpsfake in the source directory without fuss.
-# Add the current directory to $PATH
-PATH=`pwd`:$PATH
-
-# Use built Python files if available - instead of using
-# those which were installed somewhere in the system.
-if [ -d build ]; then
-    if [ -z ${PYTHON} ]; then
-        PYTHON="python"
-    fi
-    libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print "lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3])'`
-    scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print "scripts-%s" %(sys.version[0:3], )'`
-    if [ -d ${libdir} ] && [ -d ${scriptdir} ]; then
-        PYTHONPATH=${libdir}
-        export PYTHONPATH
-
-        PATH=${scriptdir}:${PATH}
-    fi
+if [ -z ${PYTHON} ]; then
+    PYTHON="python"
 fi
+py_libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print "lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3])'`
+py_scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print "scripts-%s" %(sys.version[0:3], )'`
+if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
+    PYTHONPATH=${py_libdir}
+    export PYTHONPATH
 
+    PATH=${py_scriptdir}:${PATH}
+else
+    PATH=`dirname $0`:${PATH}
+fi
 export PATH
 
 mode=regress
