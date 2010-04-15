@@ -274,13 +274,16 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
  */
 static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
-    unsigned int words[10], chan, svid;
+    unsigned int preamble, words[10], chan, svid;
 
     chan = (unsigned int)getub(buf, 0);
     svid = (unsigned int)getub(buf, 1);
     gpsd_report(LOG_PROG, "UBX_RXM_SFRB: %u %u\n", chan, svid);
-    /* UBX does all the parity checking */
+    /* UBX does all the parity checking, but still bad data gets through */
     words[0] = (unsigned int)getleul(buf, 2) & 0xffffff;
+    preamble = (words[0] >> 16)  & 0xff;
+    if ((preamble != 0x74) && (preamble != 0x8b))
+	return;
     words[1] = (unsigned int)getleul(buf, 6) & 0xffffff;
     words[2] = (unsigned int)getleul(buf, 10) & 0xffffff;
     words[3] = (unsigned int)getleul(buf, 14) & 0xffffff;
