@@ -69,6 +69,7 @@ PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
+export PYTHON
 endif
 
 #
