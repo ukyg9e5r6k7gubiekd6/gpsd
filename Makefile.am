@@ -67,7 +67,6 @@ endif
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
-dist_bin_SCRIPTS = gpsprof gpsfake gpscat xgps
 python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif

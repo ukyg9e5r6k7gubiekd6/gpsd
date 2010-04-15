@@ -63,5 +63,6 @@ setup( name="gpsd",
     	Extension("gps.client", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"])
         ],
        packages = ['gps'],
-       data_files=[('bin', ['gpscat','gpsfake','gpsprof'])] + manpages
+       scripts = ['gpscat','gpsfake','gpsprof', 'xgps'],
+       data_files= manpages
      )
