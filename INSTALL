@@ -208,5 +208,6 @@ building documentation
 15. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
-check".  It is not necessary to install first.  Python is
+check".  It is not necessary to install first, but you do need
+to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.

@@ -314,9 +314,21 @@ vendor and product ID of your USB-serial converter device.</p>
 
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
 
-<p>The GPSD daemon takes between 0.1 and 0.6 seconds to handshake with
-your hardware.  After that, if the GPS is reporting fixes, you will
-get them instantly.</p>
+<p>On a Linux machine, the <code>gpsd</code> daemon normally takes
+between 0.1 and 0.6 seconds to handshake with your hardware.  After
+that you will receive GPS reports within a second of when the sensor
+issues them.  GPSD itself adds <a
+href="http://gpsd.berlios.de/performance.html">no measurable
+latency</a>, but RS-323 transmission time to <code>gpsd</code> can be
+significant; you can cut this time by increasing the baud rate.</p>
+
+<p>Longer handshake delays have been reported from other platforms.
+Under OpenBSD, time to handshake with some binary GPSes (including
+SiRFs) can be up to two minutes.  This seems to reflect some bad
+interaction between the autobauding code in <code>gpsd</code> and the
+operating system's tty layer; when <code>gpsd</code> is compiled to
+use a fixed port speed, handshake times drop to a fraction of a
+second.</p>
 
 <p>If you are starting a GPS for the first time, or after it has been
 powered off for more than two weeks, this is a 'cold start'; it needs
