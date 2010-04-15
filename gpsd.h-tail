@@ -290,6 +290,7 @@ struct gps_device_t {
     int saved_baud;
     struct gps_packet_t packet;
     char subtype[64];			/* firmware version or subtype ID */
+    double opentime;
     double releasetime;
 #ifdef NTPSHM_ENABLE
     int shmindex;
