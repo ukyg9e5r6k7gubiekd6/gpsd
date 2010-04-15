@@ -1164,7 +1164,7 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 static double garmin_ntp_offset(struct gps_device_t *session)
 {
     if (session->sourcetype == source_usb) {
-	return 0.042;		/* Garmin USB */
+	return 0.035;		/* Garmin USB, expect +/- 40mS jitter */
     }
     /* only two sentences ships time */
     /* but the PVT data is always first */
