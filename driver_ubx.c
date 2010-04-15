@@ -276,9 +276,10 @@ static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
     unsigned int words[10], chan, svid;
 
-    gpsd_report(LOG_PROG, "UBX_RXM_SFRB\n");
     chan = (unsigned int)getub(buf, 0);
     svid = (unsigned int)getub(buf, 1);
+    gpsd_report(LOG_PROG, "UBX_RXM_SFRB: %u %u\n", chan, svid);
+    /* UBX does all the parity checking */
     words[0] = (unsigned int)getleul(buf, 2) & 0xffffff;
     words[1] = (unsigned int)getleul(buf, 6) & 0xffffff;
     words[2] = (unsigned int)getleul(buf, 10) & 0xffffff;
