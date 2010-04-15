@@ -73,18 +73,25 @@ poses some significant deployment challenges as well.</p>
 
 <p>Over the next few releases we're going to be preoccupied with 
 <a href="protocol-transition.html">managing the transition to the
-new protocol.</a>. See that document is our tentative release schedule:</p>
+new protocol.</a>. See that document for our tentative release schedule:</p>
 
 <p>For more on specific tasks planned for upcoming releases, see our
 <a href="TODO">file</a>.</p>
 
 <h2 id="hosting">Changing hosting sites</h2>
 
-<p>We're presently (March 2010) hosted at <a
+<p>We're presently (April 2010) hosted at <a
 href="http://developer.berlios.de">berlios.de</a>, but find that it
 has become extremely flaky of late (logins failing due to broken SSL
 certs is the most recent symptom).  We plan to change sites some time
 in 2010.</p>
+
+<h2 id="buildsys">Changing build systems</h2>
+
+<p>Our build is presently autotools-based. We may move to scons in
+2010. Autotools is a festering pile of hacks, and will become a
+serious liability if David Ludlow's Windows port actually
+finishes.</p>
 
 <h2 id="api_cleanup">Client API cleanup</h2>
 
