@@ -169,7 +169,7 @@ also be nice.</para></listitem>
 <term>-G</term>
 <listitem><para>This flag causes <application>gpsd</application> to
 listen on all addresses (INADDR_ANY) rather than just the loopback
-(INADDR_LOOPBACK) address. For the sake of privacy and security, PVT
+(INADDR_LOOPBACK) address. For the sake of privacy and security, TPV
 information is now private to the local machine until the user makes
 an effort to expose this to the world.</para></listitem>
 </varlistentry>
