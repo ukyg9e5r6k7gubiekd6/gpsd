@@ -138,6 +138,8 @@ esac
 
 /gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
 
+echo "Files modified:"
+git diff --name-only ${oldrev} ${newrev}
 
 # --- Finished
 exit 0
