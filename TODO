@@ -30,6 +30,16 @@ reads or select(2) failures, in both daemon-mediated and
 direct-to-device modes.  Cause is unknown, but is related to
 zero-length reads somehow.
 
+** Ports
+
+*** Qt port 
+
+Nearly done. Chase Chris Browet <cbro@semperpax.com> about this
+
+*** Windows port
+
+Partially complete. David Ludlow <dave@adsllc.com> is working on it.
+
 ** To do:
 
 *** Write advanced features for TNT Revolution device
