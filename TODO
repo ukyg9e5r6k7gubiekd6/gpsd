@@ -58,6 +58,11 @@ shouldn't be difficult.
 The Python client interface is buggy and overcomplicated and needs a
 rethink. (Much of the complication is a hangover from old protocol.)
 
+** Detect old-protocol daeemons from the library.
+
+Might be possible using read-with-timeout.  If so, maybe we don't
+deep-six old protocol support in 3.0 after all. 
+
 ** Autodetect old-protocol daemons from library and leave in support?
 
 Might be possible to do this using a read-with-timeout.
