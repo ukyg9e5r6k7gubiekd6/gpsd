@@ -20,6 +20,7 @@ pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
 X windows              -> two test clients depend on this
 ncurses                -> two more test clients depend on this
+libusb-1.0.x or later  -> better USB device discovery
 Qt + qmake             -> libQgpsmm depends on this
 
 Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
@@ -27,6 +28,11 @@ Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
 from 2.6 or the functionally equivalent simplejson backport.  Note
 that while Python is required to *build* GPSD (the build uses some code
 generators in Python), it is not required to *run* GPSD.
+
+If you have libusb-1.0.0 or later, the GPSD build will autodetect
+this and use it to discover Garmin USB GPSes, rather than groveling
+through /proc/bus/usb/devices (which has been deprecated by the
+Linux kernel team).
 
 For building from the source tree, the following are necessary:
 autoconf 2.61 or later

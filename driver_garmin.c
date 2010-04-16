@@ -101,6 +101,10 @@
 #include <strings.h>
 #endif
 
+#if defined(HAVE_LIBUSB)
+#include <libusb.h>
+#endif
+
 #include "gpsd.h"
 #include "gps.h"
 
@@ -799,6 +803,65 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
 }
 
+#if defined(__linux__) || defined(S_SPLINT_S)
+/*
+ * is_usb_device() - is a specified device USB matching given vendor/product?
+ *
+ * BUG: Doesn't actually match against path yet. Must finish this function 
+ * by querying /sys/dev/char, either directly or using libudev. Greg KH
+ * assures this is possible, though he is vague about how.
+ *
+ * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/ 
+ */
+static bool is_usb_device(const char *path UNUSED, int vendor, int product)
+{
+	// discover devices
+	libusb_device **list;
+	ssize_t cnt;
+	ssize_t i = 0;
+	bool found = false;
+
+	gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
+	libusb_init(NULL);
+
+	if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
+	    gpsd_report(LOG_ERROR, "USB device list call failed.\n");
+	    libusb_exit(NULL);
+	    return false;
+	}
+
+	for (i = 0; i < cnt; i++) {
+	    struct libusb_device_descriptor desc;
+	    libusb_device *dev = list[i];
+
+	    int r = libusb_get_device_descriptor(dev, &desc);
+	    if (r < 0) {
+		gpsd_report(LOG_ERROR, 
+			    "USB descriptor fetch failed on device %zd.\n",
+			    i);
+		continue;
+	    }
+
+	    /* we can extract device descriptor data */
+	    gpsd_report(LOG_SHOUT, "%04x:%04x (bus %d, device %d)\n",
+			desc.idVendor, desc.idProduct,
+			libusb_get_bus_number(dev), 
+			libusb_get_device_address(dev));
+
+	    /* we match if vendor and product ID are right */
+	    if (desc.idVendor == 0x91e && desc.idProduct == 3) {
+		found = true;
+		break;
+	    }
+	}
+
+	gpsd_report(LOG_SHOUT, "vendor/product match with %04x:%04x %sfound\n",
+		    vendor, product, found ? "" : "not ");
+	libusb_free_device_list(list, 1);
+	libusb_exit(NULL);
+	return found;
+}
+#endif /* __linux__ || S_SPLINT_S */
 
 /*
  * garmin_usb_detect() - detect a Garmin USB device connected to ession fd. 
@@ -837,6 +900,10 @@ static bool garmin_usb_detect(struct gps_device_t *session)
     if (session->sourcetype != source_usb)
 	return false;
     else {
+#ifdef HAVE_LIBUSB
+	if (!is_usb_device(session->gpsdata.dev.path, 0x091e, 0x0003))
+	    return false;
+#else
 	/*
 	 * This is ONLY for USB devices reporting as: 091e:0003.
 	 *
@@ -883,6 +950,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
 	    gpsd_report(LOG_WARN,
 			"Garmin: Can't open /proc/bus/usb/devices, will try anyway\n");
 	}
+#endif /* HAVE_LIBUSB */
 
 	if (!gpsd_set_raw(session)) {
 	    gpsd_report(LOG_ERROR,
@@ -920,7 +988,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
     }
 #else
     return false;
-#endif /* __linux__ */
+#endif /* __linux__ || S_SPLINT_S */
 }
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)

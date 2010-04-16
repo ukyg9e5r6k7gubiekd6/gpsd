@@ -84,19 +84,19 @@ xgpsspeed_c_sources = \
 xgpsspeed_SOURCES = \
 	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build cgps
 #
 cgps_SOURCES = cgps.c
-cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
+cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build gpxlogger
 #
 gpxlogger_SOURCES = gpxlogger.c
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm $(LIBUSB)
 
 #
 # Build gpsd
@@ -109,19 +109,19 @@ gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
 #
 # Build gpspipe
 #
 gpspipe_SOURCES = gpspipe.c
-gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
+gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm  $(LIBUSB)
 
 #
 # Build lcdgps
 #
 lcdgps_SOURCES = lcdgps.c
-lcdgps_LDADD = $(LIBM) libgps.la -lm
+lcdgps_LDADD = $(LIBM) libgps.la -lm  $(LIBUSB)
 
 #
 # Build gpsmon
@@ -129,13 +129,13 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
+gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build gpsdecode
 #
 gpsdecode_SOURCES = gpsdecode.c
-gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build shared libraries

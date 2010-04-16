@@ -1176,22 +1176,6 @@ daemon running &mdash; but a bad idea.  It would make denial-of-service
 attacks on applications using the GPS far too easy.  For example,
 suppose the control string were a baud-rate change?</p>
 
-<h2 id="libusb">Using libusb to do USB device discovery</h2>
-
-<p>There has been some consideration of going to the cross-platform libusb
-library to do USB device discovery. This would create an external
-dependency that gpsd doesn't now have, and bring more complexity on
-board than is probably desirable.</p>
-
-<p>We've chosen instead to rely on the local hotplug system.  That way
-gpsd can concentrate solely on knowing about GPSes.</p>
-
-<p>There has been talk of revisiting libusb as a more reliable way to
-communicate with Garmin receivers. By implementing the driver in user
-space with libusb, we gain portability and freedom from buggy kernel
-modules. It may also offer us a way to better support OS X. It's not a
-dead issue any more.<p>
-
 <h2 id="fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</h2>
 
 <p>When using gpsd as a time reference, one of the things we'd like to do
