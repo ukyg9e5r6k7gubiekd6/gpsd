@@ -803,7 +803,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
 }
 
-#if defined(__linux__) || defined(S_SPLINT_S)
+#if defined(HAVE_LIBUSB) || defined(S_SPLINT_S)
 /*
  * is_usb_device() - is a specified device USB matching given vendor/product?
  *
@@ -861,7 +861,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 	libusb_exit(NULL);
 	return found;
 }
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* HAVE_LIBUSB || S_SPLINT_S */
 
 /*
  * garmin_usb_detect() - detect a Garmin USB device connected to ession fd. 
