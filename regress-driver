@@ -65,7 +65,7 @@ case $mode in
         echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
-	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc; exit $errors' 0 1 2 15
+	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc; exit $errors' EXIT HUP INT TERM
 	    if [ -r $f.chk ]
 	    then
 		case $testing in
