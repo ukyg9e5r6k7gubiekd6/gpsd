@@ -136,7 +136,7 @@ esac
 # Local customizations begin here.
 #
 
-if [ "$oldrev" -a "$newrev"]
+if [ "$oldrev" -a "$newrev" ]
 then
     /gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
 
