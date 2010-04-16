@@ -1391,25 +1391,20 @@ the time to run valgrind-audit, 'make splint', and 'make cppcheck' as
 well and check that those reports are clean. Use flocktest to
 verify operation on the remote test machines.</dd>
 
-<dt>8. Check the revision.h file</dt>
-<dd>The contents of the revision.h file should match the output of git
-describe. If it doesn't, remove revision.h, git pull, and make
-revision.h</dd>
-
-<dt>9. Ship to Berlios</dt>
+<dt>8. Ship to Berlios</dt>
 <dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp), 
 and do Berlios's release procedure.</dd>
 
-<dt>10. Tag the release in git</dt>
+<dt>9. Tag the release in git</dt>
 <dd>Doing 'make release-tag' should accomplish this. The tag push
 will trigger mail to the announce list.</dd>
 
-<dt>11. Bump the release number</dt>
+<dt>10. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>12. Announce the release</dt>
+<dt>11. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>
