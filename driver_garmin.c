@@ -199,7 +199,7 @@ typedef struct
 				 * 4 - 2D Diff
 				 * 5 - 3D Diff
 				 */
-    double gps_tow;		/* gps time  os week (seconds) */
+    double gps_tow;		/* gps time of week (seconds) */
     double lat;			/* ->latitude (radians) */
     double lon;			/* ->longitude (radians) */
     float lon_vel;		/* velocity east (meters/second) */
