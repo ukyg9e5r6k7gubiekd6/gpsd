@@ -472,11 +472,11 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	if (invert) {
 	    words[i] ^= 0x3fffffC0;
 	}
-	parity = isgps_parity( words[i] ) ;
-	if ( parity != (words[i] & 0x3F) ) {
+	parity = isgps_parity(words[i]);
+	if (parity != (words[i] & 0x3F)) {
 	    gpsd_report(LOG_PROG,
-		"SiRF: 50BPS parity fail words[%d] 0x%x != 0x%x\n", i,
-		    parity, ( words[i] & 0x1));
+			"SiRF: 50BPS parity fail words[%d] 0x%x != 0x%x\n", i,
+			parity, (words[i] & 0x1));
 	    return 0;
 	}
 	words[i] = (words[i] & 0x3fffffff) >> 6;
@@ -488,8 +488,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 		words[5], words[6], words[7], words[8], words[9]);
     // Look for the preamble in the first byte OR its complement
     if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "SiRF: 50BPS bad premable: 0x%x header 0x%x\n"
-		, preamble, words[0]);
+	gpsd_report(LOG_WARN, "SiRF: 50BPS bad premable: 0x%x header 0x%x\n",
+		    preamble, words[0]);
 	return 0;
     }
 

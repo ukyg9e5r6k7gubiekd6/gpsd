@@ -672,10 +672,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
 	    /*@-nullderef@*/
-	    gpsd_report(LOG_INF, "%s identified as type %s (%f sec @ %dbps)\n",
+	    gpsd_report(LOG_INF,
+			"%s identified as type %s (%f sec @ %dbps)\n",
 			session->gpsdata.dev.path,
 			session->device_type->type_name,
-			timestamp()- session->opentime,
+			timestamp() - session->opentime,
 			gpsd_get_speed(&session->ttyset));
 	    /*@+nullderef@*/
 	    /* fire the identified hook */
