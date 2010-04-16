@@ -1,4 +1,4 @@
-* Mon Mar 15 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93dev
+* Fri Apr 16 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93
   Support for JSON dumping and parsing of AIS message types 25 and 26,
   not yet observed in the wild on AISHub. Fix Debian bug #569703.  by
   removing non-streaming mode from the Python exerciser. Fix Debian
