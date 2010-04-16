@@ -784,7 +784,7 @@ upload-ftp: dist
 # It requires developer access verified via ssh.
 #
 release-tag:
-	git tag -s -m "Tagged for external release $(VERSION)" HEAD
+	git tag -s -m "Tagged for external release $(VERSION)" release-$(VERSION)
 	git push --tags
 
 #
