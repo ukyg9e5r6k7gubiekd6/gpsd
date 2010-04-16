@@ -252,6 +252,9 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
+# Having gpspacket.so gpslib.so in noinst_SCRIPTS forces copies to be dropped 
+# under gps.  This is important, otherwise gpsfake will fail before
+# make install. 
 noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
 
 # Multiple-outputs hack.  See
