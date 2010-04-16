@@ -15,7 +15,8 @@
  *
  * You can use the Python expression
  *	time.mktime(time.strptime(... , "%d %b %Y %H:%M:%S"))
- * to generate an integer value for START_SUBFRAME. 
+ * to generate an integer value for START_SUBFRAME, or use the
+ * -n option of devtools/leapsecond.py in the source distribution
  */
 
 /*
@@ -34,9 +35,9 @@
  */
 #define LEAP_SECONDS	15
 
-/* IERS says no leap second will be inserted in December 2009.
+/* Date of next possible leap second adjustment, according to IERS
  */
-#define START_SUBFRAME	1277956799	/* 31 June 2010 23:59:59 */
+#define START_SUBFRAME	1293857999	/* 31 Dec 2010 23:59:59 */
 
 /*
  * This is used only when an NMEA device issues a two-digit year in a GPRMC

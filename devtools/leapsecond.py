@@ -94,4 +94,35 @@ def get():
         return current_offset
 
 if __name__ == '__main__':
-    print "Current leap second:", retrieve()
+    import sys, getopt
+    next = False
+    (options, arguments) = getopt.getopt(sys.argv[1:], "n:")
+    for (switch, val) in options:
+        if (switch == '-n'):  # Compute possible next leapsecond
+            next = True
+
+    if not next:
+        print "Current leap second:", retrieve()
+    elif val[:3].lower() not in ("jun", "dec"):
+        print >>sys.stderr, "leapsecond.py: -n argument must begin with "\
+              "'Jun' or 'Dec'"
+        raise SystemExit, 1
+    else:
+        month = val[:3].lower()
+        if len(val) != 7:
+            print >>sys.stderr, "leapsecond.py: -n argument must end "\
+                  "with a a 4-digit year."                
+            raise SystemExit, 1
+        try:
+            year = int(val[3:])
+        except ValueError:
+            print >>sys.stderr, "leapsecond.py: -n argument must end "\
+                  "with a 4-digit year."
+            raise SystemExit, 1
+        # Date looks valid
+        if month == "jun":
+            fmt = "30 Jun %d 23:59:59" % year
+        else:
+            fmt = "31 Dec %d 23:59:59" % year
+        next = time.mktime(time.strptime(fmt , "%d %b %Y %H:%M:%S"))
+        print "#define START_SUBFRAME	%d	/* %s */" % (next, fmt)
