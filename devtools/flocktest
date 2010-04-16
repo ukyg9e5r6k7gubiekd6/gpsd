@@ -53,7 +53,8 @@ do
     esac
 done
 
-site=`hostname --fqdn`
+# Note: `hostname --fqdn` and `hostname -f` are not portable
+site=`hostname`
 
 if [ -f "flockdriver.lock" ]
 then
