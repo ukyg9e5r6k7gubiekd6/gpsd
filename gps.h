@@ -949,7 +949,7 @@ struct gps_data_t {
 #define VERSION_SET	0x00000800u
 #define HERR_SET	0x00001000u
 #define VERR_SET	0x00002000u
-#define UNUSED1_SET	0x00004000u	/* unused and reserved */
+#define ATTITUDE_SET	0x00004000u
 #define POLICY_SET	0x00008000u
 #define SATELLITE_SET	0x00010000u
 #define RAW_SET		0x00020000u
@@ -965,7 +965,6 @@ struct gps_data_t {
 #define RTCM3_SET	0x08000000u
 #define AIS_SET 	0x10000000u
 #define PACKET_SET	0x20000000u
-#define ATTITUDE_SET	0x40000000u
 #define AUXDATA_SET	0x80000000u	/* reserved */
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
