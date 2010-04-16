@@ -119,7 +119,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	/*
 	 * On SiRFs, the 50BPS data is passed on even when the
 	 * parity fails.  This happens frequently.  So the driver 
-	 * must be extra careful that * bad data does not reach here.
+	 * must be extra careful that bad data does not reach here.
 	 */
 	if (LEAP_SECONDS > leap) {
 	    /* something wrong */
@@ -128,9 +128,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    session->context->valid &= ~LEAP_SECOND_VALID;
 	} else {
 	    gpsd_report(LOG_INF, 
-	    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
-	    leap, lsf, wnlsf, dn);
+	        "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
+	        leap, lsf, wnlsf, dn);
 	    session->context->valid |= LEAP_SECOND_VALID;
+	    if ( leap != lsf ) {
+		    gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
+	    }
 	}
 	session->context->leap_seconds = (int)leap;
 	break;
