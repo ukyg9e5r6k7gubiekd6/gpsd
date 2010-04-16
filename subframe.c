@@ -39,7 +39,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * the core because other chipsets reporting only GPS time but with the
      * capability to read subframe data may want it.
      */
-    unsigned int pageid, subframe, data_id, leap;
+    unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn;
     gpsd_report(LOG_PROG,
 		"50B: (raw) %06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
@@ -112,44 +112,24 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     }
 	break;
     case 56:
-	leap = (words[8] & 0xff0000) >> 16;
+	leap = (words[8] & 0xff0000) >> 16;  /* current leap seconds */
+	wnlsf = (words[8] & 0x00ff00) >>  8; /* WNlsf (Week Number of LSF) */
+	dn = (words[8] & 0x0000FF);          /* DN (Day Number of LSF) */
+	lsf = (words[9] & 0xff0000) >> 16;   /* leap second future */
 	/*
-	 * On SiRFs, there appears to be some bizarre bug that
-	 * randomly causes this field to come out two's-complemented.
-	 * This could very well be a general problem; work around it.
-	 * At the current expected rate of issuing leap-seconds this
-	 * kluge won't bite until about 2070, by which time the
-	 * vendors had better have fixed their damn firmware...
-	 *
-	 * Carl: ...I am unsure, and suggest you
-	 * experiment.  The D30 bit is in bit 30 of the 32-bit
-	 * word (next to MSB), and should signal an inverted
-	 * value when it is one coming over the air.  But if
-	 * the bit is set and the word decodes right without
-	 * inversion, then we properly caught it.  Cases where
-	 * you see subframe 6 rather than 1 means we should
-	 * have done the inversion but we did not.  Some other
-	 * things you can watch for: in any subframe, the
-	 * second word (HOW word) should have last 2 parity
-	 * bits 00 -- there are bits within the rest of the
-	 * word that are set as required to ensure that.  The
-	 * same goes for word 10.  That means that both words
-	 * 1 and 3 (the words that immediately follow words 10
-	 * and 2, respectively) should always be uninverted.
-	 * In these cases, the D29 and D30 from the previous
-	 * words, found in the two MSBs of the word, should
-	 * show 00 -- if they don't then you may find an
-	 * unintended inversion due to noise on the data link.
+	 * On SiRFs, the 50BPS data is passed on even when the
+	 * parity fails.  This happens frequently.  So the driver 
+	 * must be extra careful that * bad data does not reach here.
 	 */
-	if (leap > 128)
-	    leap ^= 0xff;
 	if (LEAP_SECONDS > leap) {
 	    /* something wrong */
 	    gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n", leap);
 	    leap = LEAP_SECONDS;
 	    session->context->valid &= ~LEAP_SECOND_VALID;
 	} else {
-	    gpsd_report(LOG_INF, "50B: leap-seconds is %d\n", leap);
+	    gpsd_report(LOG_INF, 
+	    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
+	    leap, lsf, wnlsf, dn);
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
 	session->context->leap_seconds = (int)leap;
