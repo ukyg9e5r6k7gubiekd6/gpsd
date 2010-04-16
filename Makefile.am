@@ -275,7 +275,7 @@ CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 
 # Clean up after Python
 clean-local:
-	rm -rf build
+	rm -rf build gps/*.so
 
 # Install Python modules
 install-exec-local:
