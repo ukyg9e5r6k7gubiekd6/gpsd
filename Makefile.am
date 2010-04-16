@@ -763,17 +763,6 @@ udev-uninstall:
 udev-test:
 	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 4
 
-#
-# Productions for testing unstable drivers.
-#
-
-unstable-regress: gpsd 
-	./regress-driver $(srcdir)/test/unstable/*.log
-
-unstable-makeregress: gpsd
-	./regress-driver -b $(srcdir)/test/unstable/*.log
-
-
 # Release machinery begins here
 #
 
@@ -797,6 +786,7 @@ upload-ftp: dist
 release-tag:
 	git tag -s -m "Tagged for external release $(VERSION)" HEAD
 	git push --tags
+
 #
 # Ship a release, providing all regression tests pass.
 # The clean is necessary so that dist will remake revision.h
