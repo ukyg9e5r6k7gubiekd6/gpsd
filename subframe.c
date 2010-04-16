@@ -61,84 +61,92 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     data_id = (words[2] >> 22) & 0x3;
     gpsd_report(LOG_PROG, "50B: Subframe %d SVID %d data_id %d\n", subframe,
 		pageid, data_id);
-    /* we're not interested in anything but subframe 4 - for now */
-    if (subframe != 4)
-	return;
-    switch (pageid) {
-    case 55:
-	/*
-	 * "The requisite 176 bits shall occupy bits 9 through 24 of word
-	 * TWO, the 24 MSBs of words THREE through EIGHT, plus the 16 MSBs
-	 * of word NINE." (word numbers changed to account for zero-indexing)
-	 *
-	 * Since we've already stripped the low six parity bits, and shifted
-	 * the data to a byte boundary, we can just copy it out. */
-    {
-	char str[24];
-	int j = 0;
-	/*@ -type @*/
-	str[j++] = (words[2] >> 8) & 0xff;
-	str[j++] = (words[2]) & 0xff;
-
-	str[j++] = (words[3] >> 16) & 0xff;
-	str[j++] = (words[3] >> 8) & 0xff;
-	str[j++] = (words[3]) & 0xff;
-
-	str[j++] = (words[4] >> 16) & 0xff;
-	str[j++] = (words[4] >> 8) & 0xff;
-	str[j++] = (words[4]) & 0xff;
-
-	str[j++] = (words[5] >> 16) & 0xff;
-	str[j++] = (words[5] >> 8) & 0xff;
-	str[j++] = (words[5]) & 0xff;
-
-	str[j++] = (words[6] >> 16) & 0xff;
-	str[j++] = (words[6] >> 8) & 0xff;
-	str[j++] = (words[6]) & 0xff;
-
-	str[j++] = (words[7] >> 16) & 0xff;
-	str[j++] = (words[7] >> 8) & 0xff;
-	str[j++] = (words[7]) & 0xff;
-
-	str[j++] = (words[8] >> 16) & 0xff;
-	str[j++] = (words[8] >> 8) & 0xff;
-	str[j++] = (words[8]) & 0xff;
-
-	str[j++] = (words[9] >> 16) & 0xff;
-	str[j++] = (words[9] >> 8) & 0xff;
-	str[j++] = '\0';
-	/*@ +type @*/
-	gpsd_report(LOG_INF, "50B: gps system message is %s\n", str);
-    }
+    switch (subframe) {
+    case 1:
+    	/* get Week Number WN) from subframe 1 */
+	session->context->gps_week = (words[2] & 0xffc000) >> 14; 
+	gpsd_report(LOG_PROG, 
+	    "50B: WN: %u\n", session->context->gps_week);
 	break;
-    case 56:
-	leap = (words[8] & 0xff0000) >> 16;  /* current leap seconds */
-	wnlsf = (words[8] & 0x00ff00) >>  8; /* WNlsf (Week Number of LSF) */
-	dn = (words[8] & 0x0000FF);          /* DN (Day Number of LSF) */
-	lsf = (words[9] & 0xff0000) >> 16;   /* leap second future */
-	/*
-	 * On SiRFs, the 50BPS data is passed on even when the
-	 * parity fails.  This happens frequently.  So the driver 
-	 * must be extra careful that bad data does not reach here.
-	 */
-	if (LEAP_SECONDS > leap) {
-	    /* something wrong */
-	    gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n", leap);
-	    leap = LEAP_SECONDS;
-	    session->context->valid &= ~LEAP_SECOND_VALID;
-	} else {
-	    gpsd_report(LOG_INF, 
-	        "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
-	        leap, lsf, wnlsf, dn);
-	    session->context->valid |= LEAP_SECOND_VALID;
-	    if ( leap != lsf ) {
-		    gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
-	    }
+    case 4:
+	switch (pageid) {
+	case 55:
+	    /*
+	     * "The requisite 176 bits shall occupy bits 9 through 24 of word
+	     * TWO, the 24 MSBs of words THREE through EIGHT, plus the 16 MSBs
+	     * of word NINE." (word numbers changed to account for zero-indexing)
+	     *
+	     * Since we've already stripped the low six parity bits, and shifted
+	     * the data to a byte boundary, we can just copy it out. */
+	{
+	    char str[24];
+	    int j = 0;
+	    /*@ -type @*/
+	    str[j++] = (words[2] >> 8) & 0xff;
+	    str[j++] = (words[2]) & 0xff;
+
+	    str[j++] = (words[3] >> 16) & 0xff;
+	    str[j++] = (words[3] >> 8) & 0xff;
+	    str[j++] = (words[3]) & 0xff;
+
+	    str[j++] = (words[4] >> 16) & 0xff;
+	    str[j++] = (words[4] >> 8) & 0xff;
+	    str[j++] = (words[4]) & 0xff;
+
+	    str[j++] = (words[5] >> 16) & 0xff;
+	    str[j++] = (words[5] >> 8) & 0xff;
+	    str[j++] = (words[5]) & 0xff;
+
+	    str[j++] = (words[6] >> 16) & 0xff;
+	    str[j++] = (words[6] >> 8) & 0xff;
+	    str[j++] = (words[6]) & 0xff;
+
+	    str[j++] = (words[7] >> 16) & 0xff;
+	    str[j++] = (words[7] >> 8) & 0xff;
+	    str[j++] = (words[7]) & 0xff;
+
+	    str[j++] = (words[8] >> 16) & 0xff;
+	    str[j++] = (words[8] >> 8) & 0xff;
+	    str[j++] = (words[8]) & 0xff;
+
+	    str[j++] = (words[9] >> 16) & 0xff;
+	    str[j++] = (words[9] >> 8) & 0xff;
+	    str[j++] = '\0';
+	    /*@ +type @*/
+	    gpsd_report(LOG_INF, "50B: gps system message is %s\n", str);
 	}
-	session->context->leap_seconds = (int)leap;
+	    break;
+	case 56:
+	    leap = (words[8] & 0xff0000) >> 16;  /* current leap seconds */
+	    /* careful WN is 10 bits, but WNlsf is 8 bits! */
+	    wnlsf = (words[8] & 0x00ff00) >>  8; /* WNlsf (Week Number of LSF) */
+	    dn = (words[8] & 0x0000FF);          /* DN (Day Number of LSF) */
+	    lsf = (words[9] & 0xff0000) >> 16;   /* leap second future */
+	    /*
+	     * On SiRFs, the 50BPS data is passed on even when the
+	     * parity fails.  This happens frequently.  So the driver 
+	     * must be extra careful that bad data does not reach here.
+	     */
+	    if (LEAP_SECONDS > leap) {
+		/* something wrong */
+		gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n", leap);
+		leap = LEAP_SECONDS;
+		session->context->valid &= ~LEAP_SECOND_VALID;
+	    } else {
+		gpsd_report(LOG_INF, 
+		    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
+		    leap, lsf, wnlsf, dn);
+		session->context->valid |= LEAP_SECOND_VALID;
+		if ( leap != lsf ) {
+			gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
+		}
+	    }
+	    session->context->leap_seconds = (int)leap;
+	    break;
+	default:
+	    ;			/* no op */
+	}
 	break;
-    default:
-	;			/* no op */
     }
 }
 
