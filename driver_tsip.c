@@ -194,7 +194,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	s1 = getbesw(buf, 4);	/* week */
 	f2 = getbef(buf, 6);	/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
-	    session->driver.tsip.gps_week = s1;
+	    session->context->gps_week = s1;
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 
@@ -290,9 +290,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->newdata.altitude = getbef(buf, 8);
 	f1 = getbef(buf, 12);	/* clock bias */
 	f2 = getbef(buf, 16);	/* time-of-fix */
-	if (session->driver.tsip.gps_week) {
+	if (session->context->gps_week) {
 	    session->newdata.time =
-		gpstime_to_unix((int)session->driver.tsip.gps_week,
+		gpstime_to_unix((int)session->context->gps_week,
 				f2) - session->context->leap_seconds;
 	    mask |= TIME_IS;
 	}
@@ -386,7 +386,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	s1 = getbesw(buf, 6);	/* tsip.gps_week */
 	/*@ +charint @*/
 	if (getub(buf, 0) == 0x01)	/* good current fix? */
-	    session->driver.tsip.gps_week = s1;
+	    session->context->gps_week = s1;
 	/*@ -charint @*/
 	gpsd_report(LOG_INF, "Fix info %02x %02x %d %f\n", u1, u2, s1, f1);
 	break;
@@ -551,9 +551,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->newdata.altitude = getbed(buf, 16);
 	d1 = getbed(buf, 24);	/* clock bias */
 	f1 = getbef(buf, 32);	/* time-of-fix */
-	if (session->driver.tsip.gps_week) {
+	if (session->context->gps_week) {
 	    session->newdata.time =
-		gpstime_to_unix((int)session->driver.tsip.gps_week,
+		gpstime_to_unix((int)session->context->gps_week,
 				f1) - session->context->leap_seconds;
 	    mask |= TIME_IS;
 	}
@@ -648,7 +648,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->driver.tsip.gps_week = s4;
+	    session->context->gps_week = s4;
 	    /*@ ignore @*//*@ splint is confused @ */
 	    session->newdata.time =
 		gpstime_to_unix((int)s4,
@@ -684,7 +684,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    s4 = getbesw(buf, 25);	/* up velocity */
 	    gpsd_report(LOG_INF, "CSP %u %d %u %u %d %u %d %d %d %d\n", ul1,
 			s1, u1, u2, sl1, ul2, sl3, s2, s3, s4);
-	    session->driver.tsip.gps_week = s1;
+	    session->context->gps_week = s1;
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
@@ -751,7 +751,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    s1 = (short)getbeuw(buf, 5);	/* week */
 	    s2 = getbesw(buf, 7);	/* leap seconds */
 
-	    session->driver.tsip.gps_week = s1;
+	    session->context->gps_week = s1;
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;

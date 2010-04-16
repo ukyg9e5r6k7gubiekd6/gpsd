@@ -61,6 +61,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 	return mask;
 
     gps_week = (ushort) getlesw(buf, 7 + 82);
+    session->context->gps_week = gps_week;
     tow = (uint) getleul(buf, 7 + 84);
     t = gpstime_to_unix((int)gps_week,
 			tow / 1000.0) - session->context->leap_seconds;
@@ -135,6 +136,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	mask = ERROR_IS;
     } else {
 	gps_week = (ushort) getleuw(buf, 7 + 4);
+	session->context->gps_week = gps_week;
 	tow = (uint) getleul(buf, 7 + 6);
 	t = gpstime_to_unix((int)gps_week,
 			    tow / 1000.0) - session->context->leap_seconds;
@@ -198,6 +200,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 	session->context->leap_seconds = leap;
 
     gps_week = (ushort) getleuw(buf, 7 + 36);
+    session->context->gps_week = gps_week;
     tow = (uint) getleul(buf, 7 + 38);
     t = gpstime_to_unix((int)gps_week,
 			tow / 1000.0) - session->context->leap_seconds;

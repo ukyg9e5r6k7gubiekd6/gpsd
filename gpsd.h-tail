@@ -166,6 +166,7 @@ struct gps_context_t {
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
     /* timekeeping */
     int leap_seconds;			/* Unix seconds to UTC */
+    unsigned short gps_week;            /* GPS week, actually 10 bits */
     int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
     bool enable_ntpshm;
@@ -373,13 +374,11 @@ struct gps_device_t {
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
 	struct {
-	    unsigned short gps_week;
 	    time_t last_iono;
 	} superstar2;
 #endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
 	struct {
-	    int16_t gps_week;		/* Current GPS week number */
 	    bool superpkt;		/* Super Packet mode requested */
 	    time_t last_41;		/* Timestamps for packet requests */
 	    time_t last_48;
@@ -412,7 +411,6 @@ struct gps_device_t {
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
 	struct {
-            unsigned int gps_week;
 	    bool have_port_configuration;
 	    unsigned char original_port_settings[20];
 	    unsigned char sbas_in_use;

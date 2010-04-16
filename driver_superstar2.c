@@ -196,8 +196,8 @@ superstar2_msg_navsol_ecef(struct gps_device_t *session,
 
     /* extract time data */
     tow = getled(buf, 4);
-    session->driver.superstar2.gps_week = getleuw(buf, 12);
-    tm = gpstime_to_unix((int)session->driver.superstar2.gps_week, tow) -
+    session->context->gps_week = getleuw(buf, 12);
+    tm = gpstime_to_unix((int)session->context->gps_week, tow) -
 	session->context->leap_seconds;
     session->newdata.time = tm;
     mask |= TIME_IS;

@@ -72,9 +72,9 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
-	session->driver.ubx.gps_week = gw;
+	session->context->gps_week = gw;
 
-	t = gpstime_to_unix((int)session->driver.ubx.gps_week,
+	t = gpstime_to_unix((int)session->context->gps_week,
 			    tow / 1000.0) - session->context->leap_seconds;
 	session->newdata.time = t;
 	mask |= TIME_IS;
@@ -172,14 +172,14 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 
     tow = (unsigned int)getleul(buf, 0);
     gw = (unsigned int)getlesw(buf, 8);
-    if (gw > session->driver.ubx.gps_week)
-	session->driver.ubx.gps_week = gw;
+    if (gw > session->context->gps_week)
+	session->context->gps_week = gw;
 
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
 
-    t = gpstime_to_unix((int)session->driver.ubx.gps_week,
+    t = gpstime_to_unix((int)session->context->gps_week,
 			tow / 1000.0) - session->context->leap_seconds;
     session->newdata.time = t;
 
