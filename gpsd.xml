@@ -249,12 +249,15 @@ indicated server and read AIVDM/AIVDO packets from it. Example:
 <varlistentry>
 <term>Ntrip caster</term>
 <listitem>
-<para>A URI with the prefix "ntrip://" followed by the name of an Ntrp
-caster. For Ntrip services that require authentication, a prefix of
-the form "username:password@" can be added before the name of the
-Ntrip broadcaster.  For Ntrip service, you must specify which stream to use;
-the stream is given in the form "/streamname". An example DGPSIP URI
-could be "dgpsip://dgpsip.example.com" and a Ntrip URI could be
+
+<para>A URI with the prefix "ntrip://" followed by the name of an
+Ntrip caster (Ntrip is a protocol for broadcasting differential-GPS
+fixes over the net). For Ntrip services that require authentication, a
+prefix of the form "username:password@" can be added before the name
+of the Ntrip broadcaster.  For Ntrip service, you must specify which
+stream to use; the stream is given in the form "/streamname". An
+example DGPSIP URI could be "dgpsip://dgpsip.example.com" and a Ntrip
+URI could be
 "ntrip://foo:bar@ntrip.example.com:80/example-stream". Corrections
 from the caster will be send to each attached GPS with the capability
 to accept them.</para>
@@ -283,7 +286,7 @@ added by a control-socket command (see <xref linkend='devices'/> for
 details on this).  Daemon startup will abort with an error if neither
 any devices nor a control socket are specified.</para>
 
-<para>Clients communicate with the dameon via textual request and
+<para>Clients communicate with the daemon via textual request and
 responses. It is a bad idea for applications to speak the protocol
 directly: rather, they should use the
 <application>libgps</application> client library and take appropriate
@@ -429,7 +432,7 @@ depending on the fix quality.</para>
 	<entry>epd</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Direction error estinmate in degrees, 95% confifdence.</entry>
+        <entry>Direction error estimate in degrees, 95% confifdence.</entry>
 </row>
 <row>
 	<entry>eps</entry>
@@ -1041,7 +1044,7 @@ notifications.</para>
 
 <para>This command sets watcher mode. It also sets or elicits a report
 of per-subscriber policy and the raw bit.  An argument WATCH object
-changes the subscriber's policy. The respunce describes the
+changes the subscriber's policy. The responce describes the
 subscriber's policy. The response will also include a DEVICES
 object.</para>
 
@@ -1068,7 +1071,7 @@ object.</para>
 	<entry>enable</entry>
 	<entry>No</entry>
 	<entry>boolean</entry>
-        <entry>Eanable (true) or disable (false) watcher mode. Default
+        <entry>Enable (true) or disable (false) watcher mode. Default
 	is true.</entry>
 </row>
 <row>
@@ -1118,10 +1121,10 @@ object.</para>
 </table>
 
 <para>There is an additional boolean "timing" attribute which is 
-undodumented because that portion of the interface is considered
+undocumented because that portion of the interface is considered
 unstable and for developer use only.</para>
 
-<para>In watcher mode, GPS reports are dumpred as TPV and SKY
+<para>In watcher mode, GPS reports are dumped as TPV and SKY
 responses. AIS and RTCM reporting is described in the next section.</para>
 
 <para>When the C client library parses a response of this kind, it
@@ -1255,7 +1258,7 @@ continue to communicate at the old speed.</para>
 Bluetooth GPSes it is also possible for serial mode setting to fail
 either because the serial adaptor chip does not support non-8N1 modes
 or because the device firmware does not properly synchronize the
-serrial adaptor chip with the UART on the GPS chipset whjen the speed
+serial adaptor chip with the UART on the GPS chipset whjen the speed
 changes. These failures can hang your device, possibly requiring a GPS
 power cycle or (in extreme cases) physically disconnecting the NVRAM
 backup battery.</para>
@@ -1509,9 +1512,11 @@ a restricted feature set.</para>
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
 dumped in scaled or unscaled form. Other fields have names and types
-as specified in the <citetitle>AIVDM/AIVDO Protocol Decoding</citetitle>
-document; each message field table may be directly interpreted as a 
-specification for the members of the corresponding JSON object type.</para>
+as specified in the <ulink
+url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO Protocol
+Decoding</ulink> document; each message field table may be directly
+interpreted as a specification for the members of the corresponding
+JSON object type.</para>
 
 <para>RTCM2 corrections are dumped in the JSON format described in
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
@@ -1856,10 +1861,12 @@ sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA.  It recognizes these
 with either the normal GP talker-ID prefix, or with the GN prefix used
 by GLONASS, or with the II prefix emitted by Seahawk Autohelm marine
 navigation systems, or with the IN prefix emitted by some Garmin
-units.  It recognizes one vendor extension, the PGRME emitted by some
-Garmin GPS models.</para>
+units.  It recognizes some vendor extensions: the PGRME emitted by some
+Garmin GPS models, the OHPR emitted by Oceanserver digital compasses,
+the PTNTHTM emitted by True North digital compasses, and the PASHR 
+sentences emitted by some Ashtech GPSes.</para>
 
-<para>Note that <application>gpsd</application> returns pure decimal
+<para>Note that <application>gpsd</application> JSON returns pure decimal
 degrees, not the hybrid degree/minute format described in the NMEA
 standard.</para>
 
