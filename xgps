@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-xgps2 -- test client for gpsd
+xgps -- test client for gpsd
 
 usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
