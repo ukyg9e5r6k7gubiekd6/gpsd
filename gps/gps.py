@@ -442,6 +442,15 @@ class gps(gpsdata):
 
     def next(self):
         "Get next object (new-style interface)."
+        def __set_device__(self, data):
+            if "driver" in data:
+                self.driver = data["driver"]
+                if "subtype" in data:
+                    self.subtype = data["subtype"]
+                if self.driver:
+                    self.gps_id = self.driver
+                    if self.subtype:
+                        self.gps_id += self.subtype
         if self.poll() == -1:
             raise StopIteration
         # There are a few things we need to stash away for later use
@@ -449,15 +458,11 @@ class gps(gpsdata):
         if self.data["class"] == "VERSION":
             self.version = payload
         elif self.data["class"] == "DEVICE":
-            if "driver" in self.data:
-                if "driver" in self.data:
-                    self.driver = self.data["driver"]
-                if "subtype" in self.data:
-                    self.subtype = self.data["subtype"]
-                if self.driver:
-                    self.gps_id = self.driver
-                    if self.subtype:
-                        self.gps_id += self.subtype
+            __set_device__(self, data)
+        elif self.data["class"] == "DEVICES":
+            for device in self.data["devices"]:
+                self.__set_device__(self.data)
+                break
         elif self.data["class"] == "TIMING":
             payload.c_recv = self.received
             payload.c_decode = time.time()
