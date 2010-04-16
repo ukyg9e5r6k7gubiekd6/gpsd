@@ -93,6 +93,30 @@ in 2010.</p>
 serious liability if David Ludlow's Windows port actually
 finishes.</p>
 
+<h2 id="dbus">Delegating DBUS support to geoclue</h2>
+
+<p>We're probably going to stop shipping DBUS notifications directly
+sometime fairly soon, 3.0 at the latest.</p>
+
+<p>The reason for this is <a
+href="http://www.freedesktop.org/wiki/Software/GeoClue">GeoClue</a>.
+GeoClue is an aggregator that takes geolocation-related information
+from provider programs, including <code>gpsd</code>, and publishes
+it on DBUS.</p>
+
+<p>For us, DBUS support is a dusty backwater in our code.  We don't
+track what the DBUS community is doing or expecting.  Our devteam
+worries about version skew between GPSD's DBUS transmissions and
+client apps, and wouldn't have the knowledge base to fix that quickly
+if it happened.</p>
+
+<p>The GeoClue team, on the other hand, loves DBUS and specializes
+in it. We think it's probably best for both projects if they take
+data from us and handle the DBUS publishing job for us.</p>
+
+<p>We could be talked out of this by a solid technical argument,
+but nobody has tried to make one yet.</p>
+
 <h2 id="api_cleanup">Client API cleanup</h2>
 
 <p>This is not a near-term project.</p>
