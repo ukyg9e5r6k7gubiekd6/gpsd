@@ -186,7 +186,8 @@ usually every second, and the daemon will massage them into JSON and
 pass them up the client to your application.  
 
 However, until the sensor achives satellite lock, those fixes will be
-"mode 1" - no valid data.  Here's what that looks like:
+"mode 1" - no valid data (mode 2 is a 2D fix, mode 3 is a 3D fix).
+Here's what that looks like:
 
 -----------------------------------------------------------------------------
 {"class":"TPV","tag":"MID2","device":"/dev/ttyUSB0",
