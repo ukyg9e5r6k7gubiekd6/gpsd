@@ -3,7 +3,7 @@
 # An example hook script to blocks unannotated tags from entering.
 # Called by git-receive-pack with arguments: refname sha1-old sha1-new
 #
-# Has some local cusomizations at the end.
+# Has some local customizations at the end.
 #
 # Config
 # ------
@@ -136,13 +136,7 @@ esac
 # Local customizations begin here.
 #
 
-if [ "$oldrev" -a "$newrev" ]
-then
-    /gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
-
-    echo "Files modified:"
-    git diff --name-only ${oldrev} ${newrev}
-fi
+/gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
 
 # --- Finished
 exit 0
