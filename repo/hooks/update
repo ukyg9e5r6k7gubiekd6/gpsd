@@ -3,7 +3,7 @@
 # An example hook script to blocks unannotated tags from entering.
 # Called by git-receive-pack with arguments: refname sha1-old sha1-new
 #
-# To enable this hook, rename this file to "update".
+# Has some local cusomizations at the end.
 #
 # Config
 # ------
@@ -131,6 +131,10 @@ case "$refname","$newrev_type" in
 		exit 1
 		;;
 esac
+
+#
+# Local customizations begin here.
+#
 
 /gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
 
