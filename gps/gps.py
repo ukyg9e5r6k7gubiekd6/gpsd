@@ -175,6 +175,8 @@ class dictwrapper:
     def __setitem__(self, key, val):
         "Emulate dictionary, for new-style interface."
         self.__dict__[key] = val
+    def __contains__(self, key):
+        return key in self.__dict__
     def __str__(self):
         return "<dictwrapper: " + str(self.__dict__) + ">"
     __repr__ = __str__
@@ -449,9 +451,9 @@ class gps(gpsdata):
             self.version = payload
         elif self.data["class"] == "DEVICE":
             if "driver" in self.data:
-                if "driver" in data:
+                if "driver" in self.data:
                     self.driver = self.data["driver"]
-                if "subtype" in data:
+                if "subtype" in self.data:
                     self.subtype = self.data["subtype"]
                 if self.driver:
                     self.gps_id = self.driver
