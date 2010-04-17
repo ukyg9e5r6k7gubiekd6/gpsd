@@ -53,8 +53,16 @@ do
     esac
 done
 
-# Note: `hostname --fqdn` and `hostname -f` are not portable
-site=`hostname`
+# Fully qualified domain name of the repo host.  You can hardwire this
+# to make the script faster. The -f option works under Linux and FreeBSD,
+# but not OpenBSD and NetBSD. But under OpenBSD and NetBSD,
+# hostname without options gives the FQDN.
+if hostname -f >/dev/null 2>&1
+then
+    hostname=`hostname -f`
+else
+    hostname=`hostname`
+fi
 
 if [ -f "flockdriver.lock" ]
 then
