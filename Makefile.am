@@ -302,37 +302,37 @@ if LIBGPSMM_ENABLE
 # Build test_gpsmm
 #
 test_gpsmm_SOURCES = test_gpsmm.cpp
-test_gpsmm_LDADD = $(LIBC) libgps.la -lm
+test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 endif
 
 #
 # Build test_bits tester
 #
 test_bits_SOURCES = test_bits.c
-test_bits_LDADD = $(LIBC) libgps.la
+test_bits_LDADD = $(LIBC) libgps.la  $(LIBUSB)
 
 #
 # Build packets tester
 #
 test_packet_SOURCES = test_packet.c
-test_packet_LDADD = $(LIBC) libgps.la -lm
+test_packet_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 
 #
 # Build geoid model tester
 #
 test_geoid_SOURCES = test_geoid.c
-test_geoid_LDADD = $(LIBC) libgps.la -lm
+test_geoid_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 
 #
 # Build time functions tester
 #
 test_mkgmtime_SOURCES = test_mkgmtime.c
-test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
+test_mkgmtime_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 
 #
 # Build JSON parse tester
 test_json_SOURCES = test_json.c
-test_json_LDADD = $(LIBC) libgps.la -lm
+test_json_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 
 MANPAGES_BASE = \
 	gpsd.8 \
