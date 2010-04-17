@@ -244,8 +244,10 @@ then
     AC_DEFINE([HAVE_LIBUSB], [], [will link with -l$usb; ])
     LIBUSB=-l${usb}
     INCUSB=-I/usr/include/lib${usb}
+    ac_libusb=yes
     AC_MSG_RESULT([found.])
 else
+    ac_libusb=yes
     AC_MSG_RESULT([not found.])
 fi
 AC_SUBST(LIBUSB)
@@ -544,7 +546,7 @@ fi
 
 dnl check for OceanServer support
 AC_ARG_ENABLE(oceanserver,
-  AC_HELP_STRING([--disble-oceanserver],
+  AC_HELP_STRING([--disable-oceanserver],
 		 [disable OceanServer support]),
   [ac_oceanserver=$enableval], [ac_oceanserver=yes])
 AC_MSG_CHECKING([for OceanServer support])
@@ -1082,6 +1084,7 @@ echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"
 echo "Raw Measurements        : $ac_raw"
+echo "libusb device discovery : $ac_libusb"
 echo "	Client Features"
 echo "	---------------"
 echo "Old protocol in libgps  : $ac_oldstyle"
