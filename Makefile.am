@@ -468,7 +468,7 @@ EXTRA_DIST = \
 	do-tests \
 	regress-driver \
 	gps/__init__.py \
-	gps/client.so \
+	gps/clienthelpers.so \
 	gps/fake.py \
 	gps/gps.py \
 	test

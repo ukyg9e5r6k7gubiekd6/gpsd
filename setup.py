@@ -60,7 +60,7 @@ setup( name="gpsd",
        version="1.0",
        ext_modules=[
     	Extension("gps.packet", gpspacket_sources),
-    	Extension("gps.client", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"])
+    	Extension("gps.clienthelpers", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"])
         ],
        packages = ['gps'],
        scripts = ['gpscat','gpsfake','gpsprof', 'xgps'],
