@@ -444,56 +444,11 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     chan = (unsigned int)getub(buf, 1);
     svid = (unsigned int)getub(buf, 2);
 
-    /* Data is in ICD 200d format, as munged by Sirf */
-    /* ICD == Interface Control Document */
-    /* download from http://www.navcen.uscg.gov/GPS/ICD200c.htm */
-    /* FIXME, the data is flakey, need to check  'parity' which is really a
-     * hamming code */
-
-    /* ICD words are really 30 bits, and their LSB is the LSB of the 32 bit
-     * int transporting them. The right most 6 bits are 'parity' and the top
-     * 2 bits are the bottom two parity bits from the previous word. Mask and
-     * shift these away to leave us with 3 data bytes per word */
-
-    /* gotta do the first word by hand, D29* and D30* seem missing */
-    words[0] = ((unsigned int)getbeul(buf, 3) & 0x3fffffff) >> 6;
-    preamble = words[0] >> 16;
-    if (preamble == 0x8b) {
-	preamble ^= 0xff;
-	words[0] ^= 0x3fffC0;
-    }
-
-    for (i = 1; i < 10; i++) {
-	int invert;
+    for (i = 0; i < 10; i++) {
 	words[i] = (unsigned int)getbeul(buf, 4 * i + 3);
-	/* D30* says invert */
-	invert = (words[i] & 0x40000000) ? 1 : 0;
-	/* inverted data, invert it back */
-	if (invert) {
-	    words[i] ^= 0x3fffffC0;
-	}
-	parity = isgps_parity(words[i]);
-	if (parity != (words[i] & 0x3F)) {
-	    gpsd_report(LOG_PROG,
-			"SiRF: 50BPS parity fail words[%d] 0x%x != 0x%x\n", i,
-			parity, (words[i] & 0x1));
-	    return 0;
-	}
-	words[i] = (words[i] & 0x3fffffff) >> 6;
-    }
-    gpsd_report(LOG_PROG, "SiRF: 50BPS 0x08: %2d %2d "
-		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
-		chan, svid,
-		words[0], words[1], words[2], words[3], words[4],
-		words[5], words[6], words[7], words[8], words[9]);
-    // Look for the preamble in the first byte OR its complement
-    if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "SiRF: 50BPS bad premable: 0x%x header 0x%x\n",
-		    preamble, words[0]);
-	return 0;
     }
 
-    gpsd_interpret_subframe(session, words);
+    gpsd_interpret_subframe_raw(session, words);
 
 #ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.dev.baudrate < 38400) {

@@ -216,7 +216,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 				      unsigned char *buf, size_t len)
 {
     unsigned short flags, prn, sf;
-    unsigned int words[10];
+    unsigned int i, words[10];
 
     if (len != 64) {
 	gpsd_report(LOG_PROG,
@@ -239,6 +239,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
      * words with parity checking done but parity bits still present."
      */
     /*@-type@*/
+#ifdef __UNUSED__
     words[0] = (getbeul(buf, 7 + 14) & 0x3fffffff) >> 6;
     words[1] = (getleul(buf, 7 + 18) & 0x3fffffff) >> 6;
     words[2] = (getleul(buf, 7 + 22) & 0x3fffffff) >> 6;
@@ -249,9 +250,13 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     words[7] = (getleul(buf, 7 + 42) & 0x3fffffff) >> 6;
     words[8] = (getleul(buf, 7 + 46) & 0x3fffffff) >> 6;
     words[9] = (getleul(buf, 7 + 50) & 0x3fffffff) >> 6;
+#endif
     /*@+type@*/
+    for (i = 0; i < 10; i++) {
+	words[i] = (unsigned int)getbeul(buf, 4 * i + 17);
+    }
 
-    gpsd_interpret_subframe(session, words);
+    gpsd_interpret_subframe_raw(session, words);
     return ONLINE_IS;
 }
 
