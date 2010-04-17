@@ -201,6 +201,8 @@ class TestSite:
     def do_flockdriver(self, agent, invocation):
         "Copy flockdriver to the remote site and run it."
         self.starttime = time.time()
+        if self.config.get("quiet", "no") == "yes":
+            invocation += " -q"
         uploader = "ssh -p %s %s 'cat >%s'" \
                        % (self.config.get("port", "22"), self.me, agent)
         if self.verbose:
