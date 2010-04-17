@@ -70,7 +70,6 @@ PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
-export PYTHON
 endif
 
 #
@@ -576,19 +575,21 @@ version:
 # depends on each TEST as well as invokes it (with TESTS_ENVIRONMENT)
 # the entire list of tests is run twice.
 
+run_regress_driver = PYTHON=$(PYTHON) $(srcdir)/regress-driver
+
 # Regression-test the daemon
 gps-regress: gpsd 
-	$(srcdir)/regress-driver $(srcdir)/test/daemon/*.log
+	$(run_regress_driver) $(srcdir)/test/daemon/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	$(srcdir)/regress-driver -r  $(srcdir)/test/daemon/*.log
+	$(run_regress_driver) -r  $(srcdir)/test/daemon/*.log
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	$(srcdir)/regress-driver -b $(srcdir)/test/daemon/*.log
+	$(run_regress_driver) -b $(srcdir)/test/daemon/*.log
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
@@ -661,12 +662,12 @@ time-regress: test_mkgmtime
 # Regression test the unpacking code in libgps
 unpack-regress: libgps
 	@echo "Testing the client-library sentence decoder..."
-	$(srcdir)/regress-driver -c $(srcdir)/test/clientlib/*.log
+	$(run_regress_driver) -c $(srcdir)/test/clientlib/*.log
 
 # Build the regression test for the sentence unpacker
 unpack-makeregress: libgps
 	@echo "Rebuilding the client sentence-unpacker tests..."
-	$(srcdir)/regress-driver -c -b $(srcdir)/test/clientlib/*.log
+	$(run_regress_driver) -c -b $(srcdir)/test/clientlib/*.log
 
 # Unit-test the JSON parsing
 json-regress: test_json
@@ -682,7 +683,7 @@ testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress 
 
 # do-tests is a shell script that invokes make with target testregress.
 # This works around automake's lack of support for make targets as tests.
-TESTS_ENVIRONMENT = MAKE=$(MAKE)
+TESTS_ENVIRONMENT = MAKE=$(MAKE) PYTHON=$(PYTHON)
 TESTS = do-tests
 
 # The website directory
