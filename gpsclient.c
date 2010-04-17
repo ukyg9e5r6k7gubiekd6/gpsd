@@ -66,11 +66,11 @@ PyDoc_STRVAR(module_doc,
 ");
 
 PyMODINIT_FUNC
-initclient(void)
+initclienthelpers(void)
 {
     PyObject *m;
 
-    m = Py_InitModule3("gps.client", gpsclient_methods, module_doc);
+    m = Py_InitModule3("gps.clienthelpers", gpsclient_methods, module_doc);
 
     PyModule_AddIntConstant(m, "deg_dd", deg_dd);
     PyModule_AddIntConstant(m, "deg_ddmm", deg_ddmm);
