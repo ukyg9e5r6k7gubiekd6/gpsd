@@ -27,25 +27,39 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     unsigned int i;
     unsigned int preamble, parity;
 
-    /* Data is in ICD 200d format */
-    /* ICD == Interface Control Document */
-    /* download from http://www.navcen.uscg.gov/GPS/ICD200c.htm */
-    /* FIXME, the data is flakey, need to check  'parity' which is really a
-     * hamming code */
+    /*
+     * This function assumes an array of 10 ints, each of which carries
+     * a raw 30-bit GPS word use your favorite search engine to find the
+     * latest version of the specification: IS-GPS-200.
+     *
+     * Each raw 30-bit word is made of 24 data bits and 6 parity bits. The
+     * raw word and transport word are emitted from the GPS MSB-first and
+     * right justified. In other words, masking the raw word against 0x3f
+     * will return just the parity bits. Masking with 0x3fffffff and shifting
+     * 6 bits to the right returns just the 24 data bits. The top two bits
+     * (b31 and b30) are undefined; chipset designers may store copies of
+     * the bits D29* and D30* here to aid parity checking.
+     *
+     * Since bits D29* and D30* are not available in word 0, it is tested for
+     * a known preamble to help check its validity and determine whether the
+     * word is inverted.
+     *
+     * This function terminates if 
+     */
 
-    /* ICD words are really 30 bits, and their LSB is the LSB of the 32 bit
-     * int transporting them. The right most 6 bits are 'parity' and the top
-     * 2 bits are the bottom two parity bits from the previous word. Mask and
-     * shift these away to leave us with 3 data bytes per word */
-
-    /* gotta do the first word by hand, D29* and D30* often missing */
     preamble = (words[0] >> 22) & 0x0ff;
-    if (preamble == 0x8b) {
+    if (preamble == 0x8b) { /* preamble is inverted */
 	preamble ^= 0xff;
-	words[0] ^= 0x3fffC0;
+	words[0] ^= 0x3fffc0; /* invert */
+	words[0] &= ~0x40000000; /* clear D30* */
     }
 
-    for (i = 1; i < 10; i++) {
+    if (preamble != 0x74) {
+	gpsd_report(LOG_WARN, "50B bad preamble: 0x%x\n", preamble);
+	return 0;
+    }
+
+    for (i = 0; i < 10; i++) {
 	int invert;
 	/* D30* says invert */
 	invert = (words[i] & 0x40000000) ? 1 : 0;
@@ -56,29 +70,23 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	parity = isgps_parity(words[i]);
 	if (parity != (words[i] & 0x3F)) {
 	    gpsd_report(LOG_PROG,
-			"50BPS parity fail words[%d] 0x%x != 0x%x\n", i,
+			"50B: parity fail words[%d] 0x%x != 0x%x\n", i,
 			parity, (words[i] & 0x1));
 	    return 0;
 	}
 	words[i] = (words[i] & 0x3fffffff) >> 6;
     }
-    gpsd_report(LOG_PROG, "50BPS 0x08: "
+    gpsd_report(LOG_PROG, "50B: gpsd_interpret_subframe_raw: "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
-    // Look for the preamble in the first byte OR its complement
-    if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "50BPS bad premable: 0x%x header 0x%x\n",
-		    preamble, words[0]);
-	return 0;
-    }
 
     gpsd_interpret_subframe(session, words);
+    return 0;
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
 			     unsigned int words[])
-/* extract leap-second from RTCM-104 subframe data */
 {
     /*
      * Heavy black magic begins here!
@@ -86,26 +94,30 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * A description of how to decode these bits is at
      * <http://home-2.worldonline.nl/~samsvl/nav2eu.htm>
      *
-     * We're after subframe 4 page 18 word 9, the leap second correction.
-     * We assume that the chip is presenting clean data that has been
-     * parity-checked.
+     * We're mostly looking for subframe 4 page 18 word 9, the leap second
+     * correction. This functions assumes an array of words without parity
+     * or inversion (inverted word 0 is OK). It may be called directly by a
+     * driver if the chipset emits acceptable data.
      *
-     * To date this code has been tested on iTrax, SiRF and ublox. It's in
-     * the core because other chipsets reporting only GPS time but with the
-     * capability to read subframe data may want it.
+     * To date this code has been tested on iTrax, SiRF and ublox.
      */
-    unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn;
+    unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
     gpsd_report(LOG_PROG,
-		"50B: (raw) %06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
+		"50B: gpsd_interpret_subframe: "
+		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
-    /*
-     * It is the responsibility of each driver to mask off the high 2 bits
-     * and shift out the 6 parity bits or do whatever else is necessary to
-     * present an array of acceptable words to this decoder. Hopefully parity
-     * checks are done in hardware, but if not, the driver should do them.
-     */
 
+    preamble = (words[0] >> 16) & 0x0ff;
+    if (preamble == 0x8b) {
+	    preamble ^= 0xff;
+	    words[0] ^= 0xffffff;
+    }
+    if (preamble != 0x74) {
+	gpsd_report(LOG_WARN, "50B bad preamble: 0x%x header 0x%x\n",
+		    preamble, words[0]);
+	return;
+    }
     /* The subframe ID is in the Hand Over Word (page 80) */
     subframe = ((words[1] >> 2) & 0x07);
     /*
@@ -118,9 +130,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		pageid, data_id);
     switch (subframe) {
     case 1:
-    	/* get Week Number WN) from subframe 1 */
-	session->context->gps_week = (words[2] & 0xffc000) >> 14; 
-	gpsd_report(LOG_PROG, 
+	/* get Week Number WN) from subframe 1 */
+	session->context->gps_week = (words[2] & 0xffc000) >> 14;
+	gpsd_report(LOG_PROG,
 	    "50B: WN: %u\n", session->context->gps_week);
 	break;
     case 4:
@@ -172,11 +184,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	    break;
 	case 56:
-	    leap = (words[8] & 0xff0000) >> 16;  /* current leap seconds */
+	    leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
 	    /* careful WN is 10 bits, but WNlsf is 8 bits! */
-	    wnlsf = (words[8] & 0x00ff00) >>  8; /* WNlsf (Week Number of LSF) */
-	    dn = (words[8] & 0x0000FF);          /* DN (Day Number of LSF) */
-	    lsf = (words[9] & 0xff0000) >> 16;   /* leap second future */
+	    wnlsf = (words[8] & 0x00ff00) >> 8;	/* WNlsf (Week Number of LSF) */
+	    dn = (words[8] & 0x0000FF);		/* DN (Day Number of LSF) */
+	    lsf = (words[9] & 0xff0000) >> 16;	/* leap second future */
 	    /*
 	     * On SiRFs, the 50BPS data is passed on even when the
 	     * parity fails.  This happens frequently.  So the driver 
@@ -188,8 +200,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		leap = LEAP_SECONDS;
 		session->context->valid &= ~LEAP_SECOND_VALID;
 	    } else {
-		gpsd_report(LOG_INF, 
-		    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n", 
+		gpsd_report(LOG_INF,
+		    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n",
 		    leap, lsf, wnlsf, dn);
 		session->context->valid |= LEAP_SECOND_VALID;
 		if ( leap != lsf ) {
@@ -203,6 +215,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	break;
     }
+    return;
 }
 
 /*@ +usedef @*/
