@@ -52,17 +52,16 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 
     preamble = (words[0] >> 22) & 0xff;
     if (preamble == 0x8b) { /* preamble is inverted */
-	preamble ^= 0xff;
 	words[0] ^= 0x3fffffc0; /* invert */
-	words[0] &= ~0x40000000; /* clear D30* */
     } else if (preamble != 0x74) {
 	gpsd_report(LOG_WARN,
 		    "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n",
 		    preamble);
 	return 0;
     }
+    words[0] = (words[0] >> 6) & 0xffffff;
 
-    for (i = 0; i < 10; i++) {
+    for (i = 1; i < 10; i++) {
 	int invert;
 	/* D30* says invert */
 	invert = (words[i] & 0x40000000) ? 1 : 0;
