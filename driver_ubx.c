@@ -201,12 +201,6 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	gpsd_report(LOG_PROG, "runt svinfo (datalen=%zd)\n", data_len);
 	return 0;
     }
-#if 0
-    // Alas, this sentence doesn't supply GPS week
-    tow = getleul(buf, 0);
-    session->gpsdata.skyview_time = gpstime_to_unix(gps_week, tow)
-	- session->context->leap_seconds;
-#endif
     /*@ +charint @*/
     nchan = (unsigned int)getub(buf, 4);
     if (nchan > MAXCHANNELS) {
