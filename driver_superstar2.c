@@ -31,10 +31,6 @@ static gps_mask_t superstar2_msg_ack(struct gps_device_t *,
 				     unsigned char *, size_t);
 static gps_mask_t superstar2_msg_navsol_lla(struct gps_device_t *,
 					    unsigned char *, size_t);
-#ifdef __UNUSED__
-static gps_mask_t superstar2_msg_navsol_ecef(struct gps_device_t *,
-					     unsigned char *, size_t);
-#endif /* __UNUSED__ */
 static gps_mask_t superstar2_msg_timing(struct gps_device_t *,
 					unsigned char *, size_t);
 static gps_mask_t superstar2_msg_svinfo(struct gps_device_t *,
@@ -70,8 +66,12 @@ superstar2_msg_ack(struct gps_device_t *session UNUSED,
 }
 
 /*
- * Decode the navigation solution message
+ * Decode the navigation solution message. The ECEF version is intentionally
+ * unhandled. By suppressing evaluation of it, we gain the desirable feature
+ * that the fix update is atomic and exactly once per cycle.
  */
+
+
 static gps_mask_t
 superstar2_msg_navsol_lla(struct gps_device_t *session,
 			  unsigned char *buf, size_t data_len)
@@ -164,101 +164,6 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 		session->gpsdata.satellites_used, gpsd_maskdump(mask));
     return mask;
 }
-
-#ifdef __UNUSED__
-/*
- * This is duplicative with navsol_lla. By suppressing evaluation of it,
- * we gain the desirable feature that the fix update is atomic and 
- * exactly once per cycle.
- */
-
-static gps_mask_t
-superstar2_msg_navsol_ecef(struct gps_device_t *session,
-			   unsigned char *buf, size_t data_len)
-{
-    gps_mask_t mask;
-    unsigned char flags;
-    union int_float i_f;
-    union long_double l_d;
-    double tm, tow;
-
-    if (data_len != 85)
-	return 0;
-
-    gpsd_report(LOG_PROG, "superstar2 #21 - ecef navigation data\n");
-    mask = 0;
-
-    /*@ +charint @*/
-    flags = getub(buf, 79) & 0x1f;
-    if ((flags < 2) || (flags > 5))
-	return mask;
-    /*@ -charint @*/
-
-    /* extract time data */
-    tow = getled(buf, 4);
-    session->context->gps_week = getleuw(buf, 12);
-    tm = gpstime_to_unix((int)session->context->gps_week, tow) -
-	session->context->leap_seconds;
-    session->newdata.time = tm;
-    mask |= TIME_IS;
-
-    /* extract the earth-centered, earth-fixed (ECEF) solution */
-    /*@ -evalorder @*/
-    ecef_to_wgs84fix(&session->newdata, &session->separation,
-		     getled(buf, 14), getled(buf, 22), getled(buf, 30),
-		     getlef(buf, 38), getlef(buf, 42), getlef(buf, 46));
-    /*@ +evalorder @*/
-    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
-
-    session->gpsdata.satellites_used = (int)getub(buf, 79) & 0x0f;
-    clear_dop(&session->gpsdata.dop);
-    session->gpsdata.dop.hdop = getleuw(buf, 74) * 0.1;
-    session->gpsdata.dop.vdop = getleuw(buf, 76) * 0.1;
-    /* other DOP if available */
-    mask |= DOP_IS | USED_IS;
-
-    flags = getub(buf, 70);
-    switch (flags & 0x1f) {
-    case 2:
-	session->newdata.mode = MODE_3D;
-	session->gpsdata.status = STATUS_FIX;
-	break;
-    case 4:
-	session->newdata.mode = MODE_3D;
-	session->gpsdata.status = STATUS_DGPS_FIX;
-	break;
-    case 5:
-	session->newdata.mode = MODE_2D;
-	session->gpsdata.status = STATUS_DGPS_FIX;
-	break;
-    case 3:
-    case 6:
-	session->newdata.mode = MODE_2D;
-	session->gpsdata.status = STATUS_FIX;
-	break;
-    default:
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-    }
-
-    mask |= MODE_IS | STATUS_IS;
-    gpsd_report(LOG_DATA,
-		"NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f vdop=%.2f used=%d mask=%s\n",
-		session->newdata.time,
-		session->newdata.latitude,
-		session->newdata.longitude,
-		session->newdata.altitude,
-		session->newdata.track,
-		session->newdata.speed,
-		session->newdata.climb,
-		session->newdata.mode,
-		session->gpsdata.status,
-		session->gpsdata.dop.hdop,
-		session->gpsdata.dop.vdop,
-		session->gpsdata.satellites_used, gpsd_maskdump(mask));
-    return mask;
-}
-#endif /* __UNUSED__ */
 
 /**
  * GPS Satellite Info
@@ -502,10 +407,6 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
     case SUPERSTAR2_NAVSOL_LLA:	/* Navigation Data */
 	return superstar2_msg_navsol_lla(session, buf,
 					 len) | (CLEAR_IS | REPORT_IS);
-#ifdef __UNUSED__
-    case SUPERSTAR2_NAVSOL_ECEF:	/* Navigation Data */
-	return superstar2_msg_navsol_ecef(session, buf, len);
-#endif /* __UNUSED__ */
     case SUPERSTAR2_VERSION:	/* Hardware/Software Version */
 	return superstar2_msg_version(session, buf, len);
     case SUPERSTAR2_TIMING:	/* Timing Parameters */
