@@ -45,7 +45,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
      * word is inverted.
      *
      */
-    gpsd_report(LOG_PROG, "50B: gpsd_interpret_subframe_raw: "
+    gpsd_report(LOG_IO, "50B: gpsd_interpret_subframe_raw: "
 		"%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
@@ -101,7 +101,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
     unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
-    gpsd_report(LOG_PROG,
+    gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
