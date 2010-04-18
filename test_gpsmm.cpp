@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#if 0
+#ifdef SAMPLE_USAGE
 static void callback(struct gps_data_t* p, char* buf, size_t len);
 #endif
 
@@ -29,7 +29,7 @@ int main(void) {
 		return (1);
 	}
 
-#if 0
+#ifdef SAMPLE_USAGE
 	cout << "Going to set the callback...\n";
 	if (gps_rec.set_callback(callback)!=0 ) {
 		cout << "Error setting callback.\n";
@@ -40,8 +40,8 @@ int main(void) {
 	sleep(10);
 	cout << "Exited from sleep...\n";
 #endif
-	
-#if 0
+
+#ifdef SAMPLE_USAGE
 	if (gps_rec.del_callback()!=0) {
 		cout << "Error deleting callback\n";
 		return (1);
@@ -54,9 +54,8 @@ int main(void) {
 	return 0;
 }
 
-#if 0
+#ifdef SAMPLE_USAGE
 static void callback(struct gps_data_t* p, char* buf, size_t len) {
-	
 	if (p==NULL) {
 		cout << "Error polling gpsd\n";
 		return;

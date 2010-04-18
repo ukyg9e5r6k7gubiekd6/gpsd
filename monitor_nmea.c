@@ -151,24 +151,6 @@ static void cooked_pvt(void)
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(cookedwin, 1, 60, "%-17s", scr);
-
-#if 0
-    if (isnan(session.gpsdata.fix.track) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f meters/sec",
-		       session.gpsdata.fix.speed);
-    else
-	(void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(cookedwin, 1, 33, "%-17s", scr);
-
-    /* fill in the course */
-    if (session.gpsdata.fix.mode >= MODE_2D
-	&& isnan(session.gpsdata.fix.track) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f deg",
-		       session.gpsdata.fix.track);
-    else
-	(void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(cookedwin, 5, 11, "%-17s", scr);
-#endif
 }
 
 
