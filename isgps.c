@@ -151,15 +151,11 @@ unsigned int isgps_parity(isgps30bits_t th)
     return (p);
 }
 
-
-#define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
-
-#if 0
 /* 
  * ESR found a doozy of a bug...
  *
- * Defining the above as a function triggers an optimizer bug in gcc 3.4.2.
- * The symptom is that parity computation is screwed up and the decoder
+ * Defining isgps_parityok as a function triggers an optimizer bug in gcc
+ * 3.4.2. The symptom is that parity computation is screwed up and the decoder
  * never achieves sync lock.  Something steps on the argument to 
  * isgpsparity(); the lossage appears to be related to the compiler's 
  * attempt to fold the isgps_parity() call into isgps_parityok() in some
@@ -174,11 +170,7 @@ unsigned int isgps_parity(isgps30bits_t th)
  *
  *  gcc 4.0 does not manifest these bugs.
  */
-static bool isgps_parityok(isgps30bits_t w)
-{
-    return (isgpsparity(w) == (w & 0x3f));
-}
-#endif
+#define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
 
 void isgps_init( /*@out@*/ struct gps_packet_t *session)
 {
