@@ -55,9 +55,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	preamble ^= 0xff;
 	words[0] ^= 0x3fffffc0; /* invert */
 	words[0] &= ~0x40000000; /* clear D30* */
-    }
-
-    if (preamble != 0x74) {
+    } else if (preamble != 0x74) {
 	gpsd_report(LOG_WARN, "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n", preamble);
 	return 0;
     }
