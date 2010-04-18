@@ -288,13 +288,13 @@ endif
 # Build test_float
 #
 test_float_SOURCES = test_float.c
-test_float_LDADD = $(LIBC) libgps.la -lm
+test_float_LDADD = $(LIBC) -lm
 
 #
 # Build test_trig
 #
 test_trig_SOURCES = test_trig.c
-test_trig_LDADD = $(LIBC) libgps.la -lm
+test_trig_LDADD = $(LIBC) -lm
 
 if LIBGPSMM_ENABLE
 #
