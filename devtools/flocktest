@@ -59,9 +59,9 @@ done
 # hostname without options gives the FQDN.
 if hostname -f >/dev/null 2>&1
 then
-    hostname=`hostname -f`
+    site=`hostname -f`
 else
-    hostname=`hostname`
+    site=`hostname`
 fi
 
 if [ -f "flockdriver.lock" ]
