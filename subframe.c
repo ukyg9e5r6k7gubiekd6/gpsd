@@ -39,10 +39,15 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
      * shift these away to leave us with 3 data bytes per word */
 
     /* gotta do the first word by hand, D29* and D30* often missing */
+    /* Look for the preamble in the first byte OR its complement */
     preamble = (words[0] >> 22) & 0x0ff;
     if (preamble == 0x8b) {
 	preamble ^= 0xff;
 	words[0] ^= 0x3fffC0;
+    } else if (preamble != 0x74) {
+	gpsd_report(LOG_WARN, "50BPS bad preamble: 0x%x header 0x%x\n",
+		    preamble, words[0]);
+	return 0;
     }
 
     for (i = 1; i < 10; i++) {
@@ -66,12 +71,6 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
-    // Look for the preamble in the first byte OR its complement
-    if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "50BPS bad premable: 0x%x header 0x%x\n",
-		    preamble, words[0]);
-	return 0;
-    }
 
     gpsd_interpret_subframe(session, words);
 }
