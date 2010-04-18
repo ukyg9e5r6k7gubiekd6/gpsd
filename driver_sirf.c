@@ -444,7 +444,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     svid = (unsigned int)getub(buf, 2);
 
     for (i = 0; i < 10; i++) {
-	words[i] = (unsigned int)getbeul(buf, 4 * i + 3) &0x3fffffff;
+	words[i] = (unsigned int)getbeul(buf, 4 * i + 3);
     }
 
     gpsd_interpret_subframe_raw(session, words);
