@@ -436,7 +436,6 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 				   unsigned char *buf, size_t len)
 {
     unsigned int i, words[10], chan, svid;
-    unsigned int preamble, parity;
 
     if (len != 43)
 	return 0;
@@ -445,7 +444,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     svid = (unsigned int)getub(buf, 2);
 
     for (i = 0; i < 10; i++) {
-	words[i] = (unsigned int)getbeul(buf, 4 * i + 3);
+	words[i] = (unsigned int)getbeul(buf, 4 * i + 3) &0x3fffffff;
     }
 
     gpsd_interpret_subframe_raw(session, words);
