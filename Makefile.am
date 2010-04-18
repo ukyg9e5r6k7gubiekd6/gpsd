@@ -707,7 +707,7 @@ www/AIVDM.html: www/AIVDM.txt
 	asciidoc -a toc -o www/AIVDM.html www/AIVDM.txt
 
 www/NMEA.html: www/NMEA.txt
-	asciidoc -a toc -o www/NMEA.html NMEA.txt
+	asciidoc -a toc -o www/NMEA.html www/NMEA.txt
 
 www/protocol-evolution.html: www/protocol-evolution.txt
 	asciidoc -a toc -o www/protocol-evolution.html www/protocol-evolution.txt
