@@ -394,7 +394,7 @@ static bool italk_set_mode(struct gps_device_t *session UNUSED,
 			   char parity UNUSED, int stopbits UNUSED,
 			   bool mode UNUSED)
 {
-#if 0
+#ifdef __NOT_YET__
     /*@ +charint @*/
     char msg[] = { 0, };
 
