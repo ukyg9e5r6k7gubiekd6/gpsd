@@ -404,14 +404,15 @@ stringspec = ""
 
 def generate(spec):
     global outboard
+    report = ""
     for (attr, itype, default) in spec["fieldmap"]:
         if attr in spec.get("stringbuffered", []):
             if attr not in outboard:
-                print "    char %s[JSON_VAL_MAX+1];" % attr
+                report += "    char %s[JSON_VAL_MAX+1];\n" % attr
                 outboard.append(attr)
-    print "    const struct json_attr_t %s[] = {" % spec["initname"]
+    report += "    const struct json_attr_t %s[] = {\n" % spec["initname"]
     if "header" in spec:
-        print spec["header"]
+        report += spec["header"] + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
         structname = spec["structname"]
         if itype == "string":
@@ -424,18 +425,19 @@ def generate(spec):
             target = structname + "." + attr
         if "." in attr:
             attr = attr[attr.rfind(".")+1:]
-        print '\t{"%s",%st_%s,%s.addr.%s = %s%s,' % \
+        report += '\t{"%s",%st_%s,%s.addr.%s = %s%s,\n' % \
                (attr, " "*(14-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
         leader = " " * 39
         if itype == "string":
-            print leader + ".len = sizeof(%s)}," % target
+            report += leader + ".len = sizeof(%s)},\n" % target
         else:
-            print leader + ".dflt.%s = %s}," % (itype, default)
+            report += leader + ".dflt.%s = %s},\n" % (itype, default)
 
-    print """\
-	{NULL},
+    report += """\
+	{NULL}
     };
 """
+    print report
 
 # No code for generating dump functions yet.
 # When we do this, remembeer that we have to suppress dump function
