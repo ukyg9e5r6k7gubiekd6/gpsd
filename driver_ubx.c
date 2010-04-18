@@ -274,34 +274,18 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
  */
 static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
-    unsigned int i, preamble, words[10], chan, svid;
+    unsigned int i, words[10], chan, svid;
 
     chan = (unsigned int)getub(buf, 0);
     svid = (unsigned int)getub(buf, 1);
     gpsd_report(LOG_PROG, "UBX_RXM_SFRB: %u %u\n", chan, svid);
+
     /* UBX does all the parity checking, but still bad data gets through */
-#if 1
-    words[0] = (unsigned int)getleul(buf, 2) & 0xffffff;
-    preamble = (words[0] >> 16) & 0xff;
-    if ((preamble != 0x74) && (preamble != 0x8b))
-	return;
-    words[1] = (unsigned int)getleul(buf, 6) & 0xffffff;
-    words[2] = (unsigned int)getleul(buf, 10) & 0xffffff;
-    words[3] = (unsigned int)getleul(buf, 14) & 0xffffff;
-    words[4] = (unsigned int)getleul(buf, 18) & 0xffffff;
-    words[5] = (unsigned int)getleul(buf, 22) & 0xffffff;
-    words[6] = (unsigned int)getleul(buf, 26) & 0xffffff;
-    words[7] = (unsigned int)getleul(buf, 30) & 0xffffff;
-    words[8] = (unsigned int)getleul(buf, 34) & 0xffffff;
-    words[9] = (unsigned int)getleul(buf, 38) & 0xffffff;
-    gpsd_interpret_subframe(session, words);
-#else
     for (i = 0; i < 10; i++) {
-	words[i] = (unsigned int)getbeul(buf, 4 * i + 2);
+	words[i] = (unsigned int)getleul(buf, 4 * i + 2) & 0xffffff;
     }
 
-    gpsd_interpret_subframe_raw(session, words);
-#endif
+    gpsd_interpret_subframe(session, words);
 }
 
 static void ubx_msg_inf(unsigned char *buf, size_t data_len)
