@@ -17,6 +17,108 @@ if sys.hexversion >= 0x2060000:
 else:
     import simplejson as json	# For Python 2.4 and 2.5
 
+GPSD_PORT="2947"
+
+class gpscommon:
+    "Isolate socket handling and buffering from the protcol interpretation."
+    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
+        self.sock = None        # in case we blow up in connect
+        self.linebuffer = ""
+        self.verbose = verbose
+        self.connect(host, port)
+
+    def connect(self, host, port):
+        """Connect to a host on a given port.
+
+        If the hostname ends with a colon (`:') followed by a number, and
+        there is no port specified, that suffix will be stripped off and the
+        number interpreted as the port number to use.
+        """
+        if not port and (host.find(':') == host.rfind(':')):
+            i = host.rfind(':')
+            if i >= 0:
+                host, port = host[:i], host[i+1:]
+            try: port = int(port)
+            except ValueError:
+                raise socket.error, "nonnumeric port"
+        #if self.verbose > 0:
+        #    print 'connect:', (host, port)
+        msg = "getaddrinfo returns an empty list"
+        self.sock = None
+        for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            try:
+                self.sock = socket.socket(af, socktype, proto)
+                #if self.debuglevel > 0: print 'connect:', (host, port)
+                self.sock.connect(sa)
+            except socket.error, msg:
+                #if self.debuglevel > 0: print 'connect fail:', (host, port)
+                self.close()
+                continue
+            break
+        if not self.sock:
+            raise socket.error, msg
+
+    def close(self):
+        if self.sock:
+            self.sock.close()
+        self.sock = None
+
+    def __del__(self):
+        self.close()
+
+    def waiting(self):
+        "Return True if data is ready for the client."
+        if self.linebuffer:
+            return True
+        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
+        return winput != []
+
+    def read(self):
+        "Wait for and read data being streamed from the daemon."
+        if self.verbose > 1:
+            sys.stderr.write("poll: reading from daemon...\n")
+        eol = self.linebuffer.find('\n')
+        if eol == -1:
+            frag = self.sock.recv(4096)
+            self.linebuffer += frag
+            if self.verbose > 1:
+                sys.stderr.write("poll: read complete.\n")
+            if not self.linebuffer:
+                if self.verbose > 1:
+                    sys.stderr.write("poll: returning -1.\n")
+                # Read failed
+                return -1
+            eol = self.linebuffer.find('\n')
+            if eol == -1:
+                if self.verbose > 1:
+                    sys.stderr.write("poll: returning 0.\n")
+                # Read succeeded, but only got a fragment
+                return 0
+        else:
+            if self.verbose > 1:
+                sys.stderr.write("poll: fetching from buffer.\n")
+
+        # We got a line
+        eol += 1
+        self.response = self.linebuffer[:eol]
+        self.linebuffer = self.linebuffer[eol:]
+
+        # Can happen if daemon terminates while we're reading.
+        if not self.response:
+            return -1
+        if self.verbose:
+            sys.stderr.write("poll: data is %s\n" % repr(self.response))
+        self.received = time.time()
+        # We got a \n-terminated line
+        return len(self.linebuffer)
+
+    def send(self, commands):
+        "Ship commands to the daemon."
+        if not commands.endswith("\n"):
+            commands += "\n"
+        self.sock.send(commands)
+
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
 
@@ -73,8 +175,6 @@ WATCH_SCALED	= 0x0020
 WATCH_NEWSTYLE	= 0x0040
 WATCH_OLDSTYLE	= 0x0080
 WATCH_DEVICE	= 0x0100
-
-GPSD_PORT = 2947
 
 class gpsfix:
     def __init__(self):
@@ -182,14 +282,11 @@ class dictwrapper:
         return "<dictwrapper: " + str(self.__dict__) + ">"
     __repr__ = __str__
 
-class gps(gpsdata):
+class gps(gpsdata, gpscommon):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="127.0.0.1", port="2947", verbose=0, mode=0):
+    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
+        gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
-        self.sock = None        # in case we blow up in connect
-        self.linebuffer = ""
-        self.connect(host, port)
-        self.verbose = verbose
         self.raw_hook = None
         self.newstyle = False
         if mode:
@@ -198,49 +295,8 @@ class gps(gpsdata):
     def __iter__(self):
         return self
 
-    def connect(self, host, port):
-        """Connect to a host on a given port.
-
-        If the hostname ends with a colon (`:') followed by a number, and
-        there is no port specified, that suffix will be stripped off and the
-        number interpreted as the port number to use.
-        """
-        if not port and (host.find(':') == host.rfind(':')):
-            i = host.rfind(':')
-            if i >= 0:
-                host, port = host[:i], host[i+1:]
-            try: port = int(port)
-            except ValueError:
-                raise socket.error, "nonnumeric port"
-        if not port: port = GPSD_PORT
-        #if self.verbose > 0:
-        #    print 'connect:', (host, port)
-        msg = "getaddrinfo returns an empty list"
-        self.sock = None
-        for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
-            af, socktype, proto, canonname, sa = res
-            try:
-                self.sock = socket.socket(af, socktype, proto)
-                #if self.debuglevel > 0: print 'connect:', (host, port)
-                self.sock.connect(sa)
-            except socket.error, msg:
-                #if self.debuglevel > 0: print 'connect fail:', (host, port)
-                self.close()
-                continue
-            break
-        if not self.sock:
-            raise socket.error, msg
-
     def set_raw_hook(self, hook):
         self.raw_hook = hook
-
-    def close(self):
-        if self.sock:
-            self.sock.close()
-        self.sock = None
-
-    def __del__(self):
-        self.close()
 
     def __oldstyle_unpack(self, buf):
         # unpack a daemon response into the gps instance members
@@ -391,50 +447,13 @@ class gps(gpsdata):
             self.data["c_decode"] = time.time()
             self.timings = self.data
 
-    def waiting(self):
-        "Return True if data is ready for the client."
-        if self.linebuffer:
-            return True
-        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
-        return winput != []
-
     def poll(self):
-        "Wait for and read data being streamed from gpsd."
-        if self.verbose > 1:
-            sys.stderr.write("poll: reading from daemon...\n")
-        eol = self.linebuffer.find('\n')
-        if eol == -1:
-            frag = self.sock.recv(4096)
-            self.linebuffer += frag
-            if self.verbose > 1:
-                sys.stderr.write("poll: read complete.\n")
-            if not self.linebuffer:
-                if self.verbose > 1:
-                    sys.stderr.write("poll: returning -1.\n")
-                return -1
-            eol = self.linebuffer.find('\n')
-            if eol == -1:
-                if self.verbose > 1:
-                    sys.stderr.write("poll: returning 0.\n")
-                return 0
-        else:
-            if self.verbose > 1:
-                sys.stderr.write("poll: fetching from buffer.\n")
-
-        # We got a line
-        eol += 1
-        self.response = self.linebuffer[:eol]
-        self.linebuffer = self.linebuffer[eol:]
-
-        # Can happen if daemon terminates while we're reading.
-        if not self.response:
-            return -1
-        if self.verbose:
-            sys.stderr.write("poll: data is %s\n" % repr(self.response))
-        self.received = time.time()
+        "Read and interpret data from the daemon."
+        status = gpscommon.read(self)
+        if status <= 0:
+            return status
         if self.raw_hook:
             self.raw_hook(self.response);
-        # This code can go away when we remove oldstyle protocol
         if self.response.startswith("{"):
             self.__json_unpack(self.response)
         else:
@@ -469,12 +488,6 @@ class gps(gpsdata):
             payload.c_recv = self.received
             payload.c_decode = time.time()
         return payload
-
-    def send(self, commands):
-        "Ship commands to the daemon."
-        if not commands.endswith("\n"):
-            commands += "\n"
-        self.sock.send(commands)
 
     def stream(self, flags=0, outfile=None):
         "Ask gpsd to stream reports at your client."
