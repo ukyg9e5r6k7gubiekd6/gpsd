@@ -44,18 +44,21 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
      * a known preamble to help check its validity and determine whether the
      * word is inverted.
      *
-     * This function terminates if 
      */
+    gpsd_report(LOG_PROG, "50B: gpsd_interpret_subframe_raw: "
+		"%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
+		words[0], words[1], words[2], words[3], words[4],
+		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (words[0] >> 22) & 0x0ff;
+    preamble = (words[0] >> 22) & 0xff;
     if (preamble == 0x8b) { /* preamble is inverted */
 	preamble ^= 0xff;
-	words[0] ^= 0x3fffc0; /* invert */
+	words[0] ^= 0x3fffffc0; /* invert */
 	words[0] &= ~0x40000000; /* clear D30* */
     }
 
     if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "50B bad preamble: 0x%x\n", preamble);
+	gpsd_report(LOG_WARN, "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n", preamble);
 	return 0;
     }
 
@@ -65,21 +68,17 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	invert = (words[i] & 0x40000000) ? 1 : 0;
 	/* inverted data, invert it back */
 	if (invert) {
-	    words[i] ^= 0x3fffffC0;
+	    words[i] ^= 0x3fffffc0;
 	}
 	parity = isgps_parity(words[i]);
-	if (parity != (words[i] & 0x3F)) {
+	if (parity != (words[i] & 0x3f)) {
 	    gpsd_report(LOG_PROG,
-			"50B: parity fail words[%d] 0x%x != 0x%x\n", i,
+			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n", i,
 			parity, (words[i] & 0x1));
 	    return 0;
 	}
-	words[i] = (words[i] & 0x3fffffff) >> 6;
+	words[i] = (words[i] >> 6) & 0xffffff;
     }
-    gpsd_report(LOG_PROG, "50B: gpsd_interpret_subframe_raw: "
-		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
-		words[0], words[1], words[2], words[3], words[4],
-		words[5], words[6], words[7], words[8], words[9]);
 
     gpsd_interpret_subframe(session, words);
     return 0;
@@ -108,13 +107,14 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (words[0] >> 16) & 0x0ff;
+    preamble = (words[0] >> 16) & 0xffL;
     if (preamble == 0x8b) {
 	    preamble ^= 0xff;
 	    words[0] ^= 0xffffff;
     }
     if (preamble != 0x74) {
-	gpsd_report(LOG_WARN, "50B bad preamble: 0x%x header 0x%x\n",
+	gpsd_report(LOG_WARN,
+		    "50B: gpsd_interpret_subframe bad preamble: 0x%x header 0x%x\n",
 		    preamble, words[0]);
 	return;
     }
@@ -126,8 +126,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     pageid = (words[2] & 0x3F0000) >> 16;
     data_id = (words[2] >> 22) & 0x3;
-    gpsd_report(LOG_PROG, "50B: Subframe %d SVID %d data_id %d\n", subframe,
-		pageid, data_id);
+    gpsd_report(LOG_PROG,
+		"50B: gpsd_interpret_subframe: Subframe %d SVID %d data_id %d\n",
+		subframe, pageid, data_id);
     switch (subframe) {
     case 1:
 	/* get Week Number WN) from subframe 1 */
