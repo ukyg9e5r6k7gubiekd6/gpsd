@@ -272,17 +272,17 @@ if __name__ == '__main__':
     dumpconf = False
     cianotify = True
     for (switch, val) in options:
-        if  switch == '-c':
+        if  switch == '-c':	# Dump flocktest configuration
             dumpconf = True
-        elif  switch == '-d':
+        elif  switch == '-d':	# Set the test subdirectory name
             subdir = val
-        elif  switch == '-k':
+        elif  switch == '-k':	# Install the access keys
             copykeys = True
-        elif switch == '-q':
+        elif switch == '-q':	# Suppress CIA notifications
             cianotify = False
-        elif switch == '-v':
+        elif switch == '-v':	# Display build log even when no error
             verbose = True
-        elif switch == '-x':
+        elif switch == '-x':	# Exclude specified sites or architectures
             exclusions = map(lambda x: x.strip(), val.split(","))
         else: # switch == '-?':
             print __doc__
