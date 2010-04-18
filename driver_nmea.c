@@ -865,22 +865,6 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 }
 #endif /* ASHTECH_ENABLE */
 
-#ifdef __UNUSED__
-static short nmea_checksum(char *sentence, unsigned char *correct_sum)
-/* is the checksum on the specified sentence good? */
-{
-    unsigned char sum = '\0';
-    char c, *p = sentence, csum[3];
-
-    while ((c = *p++) != '*' && c != '\0')
-	sum ^= c;
-    if (correct_sum)
-	*correct_sum = sum;
-    (void)snprintf(csum, sizeof(csum), "%02X", sum);
-    return (csum[0] == toupper(p[0])) && (csum[1] == toupper(p[1]));
-}
-#endif /* __ UNUSED__ */
-
 /**************************************************************************
  *
  * Entry points begin here
