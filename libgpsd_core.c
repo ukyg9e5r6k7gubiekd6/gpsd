@@ -254,13 +254,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log = "Too long for 5Hz, too short for 1Hz\n";
 	    } else if (1001000 > cycle) {
 		/* looks like PPS pulse or square wave */
-
-#if 0
-/* huh? */
-#if defined(NMEA_ENABLE) && defined(GPSCLOCK_ENABLE)
-		&&session->driver.nmea.ignore_trailing_edge
-#endif /* GPSCLOCK_ENABLE */
-#endif
 		    if (0 == duration) {
 		    ok = 1;
 		    log = "PPS invisible pulse\n";
