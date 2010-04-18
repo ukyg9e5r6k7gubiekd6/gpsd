@@ -34,10 +34,12 @@ driver_names = (
     "tripmate",
     "tsip",
     "ubx",
-}
+)
+
+
 cyclesize = 2 ** len(driver_names)
 
-def Sequential(,
+def Sequential():
     "Generate sequential test vectors for exhautive search."
     for i in xrange(cyclesize):
         yield i
@@ -66,13 +68,12 @@ env	X_LIBS="" \\
 	LDFLAGS=" -L/usr/local/lib -g" \\
 	CFLAGS="-g -O2 -W -Wall" \\
 ./configure --prefix=/home/gpsd --disable-shared \\
-	--without-x --enable-python \\
+	--without-x \\
 	--disable-itrax \\
-	--disable-italk \\
 '''
     def n2v(self, n):
         "Number to test-vector"
-        v = [0] * len(driver_weights.keys())
+        v = [0] * len(driver_names)
         i = 0
         while n > 0:
             v[i] = n % 2
