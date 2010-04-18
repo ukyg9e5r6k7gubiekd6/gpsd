@@ -8,7 +8,7 @@
 #include "gpsd.h"
 #include "timebase.h"
 
-#if 0
+#ifdef __NOT_YET__
 static char sf4map[] =
     { -1, 57, 25, 26, 27, 28, 57, 29, 30, 31, 32, 57, 62, 52, 53, 54, 57, 55,
     56, 58, 59, 57, 60, 61, 62, 63
