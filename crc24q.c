@@ -30,7 +30,7 @@
 
 #include "crc24q.h"
 
-#if 0
+#ifdef REBUILD_CRC_TABLE
 /*
  * The crc24q code table below can be regenerated with the following code:
  */
