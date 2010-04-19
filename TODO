@@ -30,6 +30,23 @@ reads or select(2) failures, in both daemon-mediated and
 direct-to-device modes.  Cause is unknown, but is related to
 zero-length reads somehow.
 
+*** The sporadic regression-test failures
+
+[19:40]	<sanooj>	in the strace I have here, I see it reading it, but not sending it onwards
+[19:40]	<sanooj>	dunno why yet.
+[19:40]	<ckuethe>	well that makes 3 of us.
+[20:03]	<sanooj>	interesting. it seems to go out of sync at some point.
+[20:04]	<sanooj>	it starts out doing (read a line; sendto the same line onwards) but at some point it ends up doing (read a line; sendto the previous line onwards)
+[20:05]	<sanooj>	which is why everything is peachy until the very last line.
+[20:09]	<sanooj>	mh. at the point where it goes out of sync it's sent an extra "$GPGGA,143809.78, <...>" which it didn't read from anywhere.
+[20:24]	<sanooj>	oh!
+[20:25]	<sanooj>	it did read the GPGGA before, but in the failing case the difference is that it got two lines from a single read() call
+[20:26]	<sanooj>	so even though the other send did two write() calls with two separate lines, gpsd got both lines in a single read() call
+[20:26]	<sanooj>	s/other send/other end/
+[20:27]	<esr>	I think I see where this is going...
+[20:29]	<sanooj>	I'm guessing the bug is something like "gpsd should process as many incoming messages as possible before doing another read"
+[20:31]	<sanooj>	the fix, rather than the bug. alternately, but likely less ideally, it should finish processing any buffered messages after getting an eof.
+
 ** Ports
 
 *** Qt port 
