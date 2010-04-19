@@ -8,8 +8,8 @@
 if [ -z ${PYTHON} ]; then
     PYTHON="python"
 fi
-py_libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print "lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3])'`
-py_scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print "scripts-%s" %(sys.version[0:3], )'`
+py_libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print("lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3]))'`
+py_scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print("scripts-%s" %(sys.version[0:3], ))'`
 if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
     PYTHONPATH=${py_libdir}
     export PYTHONPATH
