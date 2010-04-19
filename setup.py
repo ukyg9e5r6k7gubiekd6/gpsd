@@ -26,12 +26,12 @@ try:
     # Doesn't matter what it is, just that we have one
     if sys.argv[where+1]:
         manpages=[('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
-        print "Installing manual pages, generator is", sys.argv[where+1]
+        print("Installing manual pages, generator is %s" %( sys.argv[where+1]))
     sys.argv = sys.argv[:where] + sys.argv[where+2:]
 except ValueError:
     pass
 if not manpages:
-    print "No XML processor, omitting manual-page installation."
+    print("No XML processor, omitting manual-page installation.")
 
 if not 'clean' in sys.argv:
     abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
@@ -46,9 +46,9 @@ if not 'clean' in sys.argv:
         # dependency of f_name has been updated?
         if not os.path.exists(os.path.join(abs_builddir, f_name)):
             cmd = cdcmd + MAKE + " '" + f_name + "'"
-            print cmd
+            print(cmd)
             make_out = os.popen(cmd)
-            print make_out.read()
+            print(make_out.read())
             if make_out.close():
                 sys.exit(1)
             created_files.append(f_name)
