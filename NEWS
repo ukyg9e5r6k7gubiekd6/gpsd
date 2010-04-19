@@ -1,7 +1,9 @@
 * Sun Apr 18 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94~dev
   Error-checking in the 50bps aubframe code has been greatly improved.
   The Garmin GPS driver can now use libusb, if it is present, to do
-  device discovery.
+  device discovery. The libgps library has been split apart; the
+  service functions used by the daemon now live in libgpsd. This
+  will shave some code volume from GPSD client applications.
 
 * Fri Apr 16 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93
   Support for JSON dumping and parsing of AIS message types 25 and 26,

@@ -95,17 +95,8 @@ del session
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><emphasis remap='B'>libgps</emphasis> is a service library which
-supports querying GPS devices; link it with the linker option
--lgps. There are two interfaces supported in it; one high-level
-interface that goes through
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-and is intended for concurrent use by several applications, and one
-low-level interface that speaks directly with the serial or USB device
-to which the GPS is attached. This page describes the high-level
-interface that is safe for multiple applications to use simultaneously; it
-is probably the one you want.  The low-level interface is documented
-at
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
+supports communicating with an instance of the
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>; link it with the linker option -lgps.</para>
 
 <warning><para>Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
@@ -338,7 +329,7 @@ the GPSD wire protocol. It is not recommended.</para>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
 <citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
 </para>
 </refsect1>
