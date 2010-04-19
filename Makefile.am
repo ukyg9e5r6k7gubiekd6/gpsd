@@ -83,19 +83,19 @@ xgpsspeed_c_sources = \
 xgpsspeed_SOURCES = \
 	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build cgps
 #
 cgps_SOURCES = cgps.c
-cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpxlogger
 #
 gpxlogger_SOURCES = gpxlogger.c
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm $(LIBUSB)
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm
 
 #
 # Build gpsd
@@ -114,13 +114,13 @@ gpsctl_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 # Build gpspipe
 #
 gpspipe_SOURCES = gpspipe.c
-gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm  $(LIBUSB)
+gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
 
 #
 # Build lcdgps
 #
 lcdgps_SOURCES = lcdgps.c
-lcdgps_LDADD = $(LIBM) libgps.la -lm  $(LIBUSB)
+lcdgps_LDADD = $(LIBM) libgps.la -lm
 
 #
 # Build gpsmon
@@ -313,7 +313,7 @@ endif
 # Build test_bits tester
 #
 test_bits_SOURCES = test_bits.c
-test_bits_LDADD = $(LIBC) libgps.la  $(LIBUSB)
+test_bits_LDADD = $(LIBC) libgps.la
 
 #
 # Build packets tester
@@ -325,18 +325,18 @@ test_packet_LDADD = $(LIBC) libgpsd.la libgps.la -lm  $(LIBUSB)
 # Build geoid model tester
 #
 test_geoid_SOURCES = test_geoid.c
-test_geoid_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+test_geoid_LDADD = $(LIBC) libgps.la -lm
 
 #
 # Build time functions tester
 #
 test_mkgmtime_SOURCES = test_mkgmtime.c
-test_mkgmtime_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
 
 #
 # Build JSON parse tester
 test_json_SOURCES = test_json.c
-test_json_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+test_json_LDADD = $(LIBC) libgps.la -lm
 
 MANPAGES_BASE = \
 	gpsd.8 \
