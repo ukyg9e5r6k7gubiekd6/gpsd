@@ -743,7 +743,7 @@ www/internals.html: $(shell ls doc/*.xml)
 
 pydoc: www/pydoc/index.html
 
-www/pydoc/index.html: gps gpsfake gpscat gpsprof
+www/pydoc/index.html: gps gpsfake gpscat gpsprof stamp-python-modules
 	mkdir -p www/pydoc
 	epydoc -v -q --html --graph all -n GPSD gps gpsfake gpscat gpsprof -o www/pydoc
 
