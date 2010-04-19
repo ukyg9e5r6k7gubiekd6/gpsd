@@ -45,9 +45,9 @@ fi
 
 if test "x$ac_python" = "xyes"; then
 	AC_MSG_CHECKING(Python version and location)
-	PYTHON_PREFIX=`$PYTHON -c "import sys; print sys.prefix"`
-	PYTHON_VERSION_MAJOR=[`$PYTHON -c "import sys; print '%d' % (sys.version_info[0]);"`]
-	PYTHON_VERSION_MINOR=[`$PYTHON -c "import sys; print '%d' % (sys.version_info[1]);"`]
+	PYTHON_PREFIX=`$PYTHON -c "import sys; print(sys.prefix)"`
+	PYTHON_VERSION_MAJOR=[`$PYTHON -c "import sys; print('%d' % (sys.version_info[0]));"`]
+	PYTHON_VERSION_MINOR=[`$PYTHON -c "import sys; print('%d' % (sys.version_info[1]));"`]
 	PYTHON_VERSION="${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
 	AC_MSG_RESULT([$PYTHON, $PYTHON_VERSION, $PYTHON_PREFIX])
 
