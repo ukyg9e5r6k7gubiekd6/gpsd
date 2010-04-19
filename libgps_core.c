@@ -510,7 +510,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 #ifndef USE_QT
     libgps_debug_trace((1, "final flags: (0x%04x) %s\n", gpsdata->set,
-			gpsd_maskdump(gpsdata->set)));
+			gps_maskdump(gpsdata->set)));
 #endif
     return 0;
 }
