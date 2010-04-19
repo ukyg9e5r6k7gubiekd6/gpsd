@@ -258,11 +258,7 @@ libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 # Build Python binding
 #
 if HAVE_PYTHON
-PYEXTENSIONS = gpspacket.so gpslib.so
-# Having gpspacket.so gpslib.so in noinst_SCRIPTS forces copies to be dropped 
-# under gps.  This is important, otherwise gpsfake will fail before
-# make install. 
-noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
+noinst_SCRIPTS = setup.py
 
 # Multiple-outputs hack.  See
 # http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
