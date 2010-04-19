@@ -141,7 +141,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
-	t = gpstime_to_unix(gw, tow / 1000.0);
+	t = gpstime_to_unix((int)gw, tow / 1000.0);
 	tt = (time_t) trunc(t);
     }
 
