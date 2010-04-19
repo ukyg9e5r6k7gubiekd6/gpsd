@@ -156,8 +156,10 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     gps_week = GET_WEEKNUMBER();
     session->context->gps_week = gps_week;
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
+    session->context->gps_tow = tow / 1000.0;
 
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    t = gpstime_to_unix(gps_week, session->context->gps_tow) 
+    	- session->context->leap_seconds;
     session->newdata.time = t;
 
     return TIME_IS | ONLINE_IS;

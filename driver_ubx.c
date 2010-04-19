@@ -73,9 +73,11 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	tow = (unsigned int)getleul(buf, 0);
 	gw = (unsigned short)getlesw(buf, 8);
 	session->context->gps_week = gw;
+	session->context->gps_tow = tow / 1000.0;
 
-	t = gpstime_to_unix((int)session->context->gps_week,
-			    tow / 1000.0) - session->context->leap_seconds;
+	t = gpstime_to_unix((int)session->context->gps_week, 
+				session->context->gps_tow)
+			    - session->context->leap_seconds;
 	session->newdata.time = t;
 	mask |= TIME_IS;
     }
@@ -179,8 +181,10 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
 
+    session->context->gps_tow = tow / 1000.0;
     t = gpstime_to_unix((int)session->context->gps_week,
-			tow / 1000.0) - session->context->leap_seconds;
+    			session->context->gps_tow)
+			- session->context->leap_seconds;
     session->newdata.time = t;
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",

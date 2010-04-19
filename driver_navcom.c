@@ -416,9 +416,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     week = (uint16_t) getleuw(buf, 3);
     session->context->gps_week = week;
     tow = (uint32_t) getleul(buf, 5);
+    session->context->gps_tow = tow / 1000.0;
     session->newdata.time =
-	gpstime_to_unix((int)week,
-			tow / 1000.0) - session->context->leap_seconds;
+	gpstime_to_unix((int)week, session->context->gps_tow)
+			- session->context->leap_seconds;
 
     /* Satellites used */
     sats_used = (uint32_t) getleul(buf, 9);
@@ -656,7 +657,9 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     /*@ +predboolothers @*/
     char time_str[24];
     session->context->gps_week = wn;
-    (void)unix_to_iso8601(gpstime_to_unix((int)wn, (double)(toc * SF_TOC)),
+    session->context->gps_tow = (double)(toc * SF_TOC);
+    /* leap second? */
+    (void)unix_to_iso8601(gpstime_to_unix((int)wn, session->context->gps_tow),
 			  time_str, sizeof(time_str));
 
     gpsd_report(LOG_PROG,
@@ -737,10 +740,11 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     /* Timestamp and PDOP */
     session->context->gps_week = week;
+    session->context->gps_tow = tow / 1000.0f;
     /*@ ignore @*//*@ splint is confused @ */
     session->gpsdata.skyview_time =
-	gpstime_to_unix((int)week,
-			tow / 1000.0f) - session->context->leap_seconds;
+	gpstime_to_unix((int)week, session->context->gps_tow)
+			- session->context->leap_seconds;
     /*@ end @*/
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
@@ -839,7 +843,8 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 
     char time_str[24];
     session->context->gps_week = week;
-    (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow / 1000.0),
+    session->context->gps_tow = (double)tow / 1000.0;
+    (void)unix_to_iso8601(gpstime_to_unix((int)week, session->context->gps_tow),
 			  time_str, sizeof(time_str));
 
     gpsd_report(LOG_PROG,
@@ -932,10 +937,11 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	mask |= (HERR_IS | VERR_IS);
 #endif /*  __UNUSED__ */
 	session->context->gps_week = week;
+	session->context->gps_tow = tow / 1000.0f;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
-	    gpstime_to_unix((int)week,
-			    tow / 1000.0f) - session->context->leap_seconds;
+	    gpstime_to_unix((int)week, session->context->gps_tow)
+			    - session->context->leap_seconds;
 	/*@ end @*/
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
