@@ -104,62 +104,55 @@ the permission-setting part; the hotplug scripts will force the
 permissions for you.  You still have to make sure all the tty devices
 are in the same group.
 
-3. Build gpsd from source (skip this step if you have installed a gpsd
-binary package).
-
-You will need to have either Motif or LessTif installed in order for
-xgps and xgpsspeed to build; if you don't, you'll get some error
-resembling "Xm/Xm.h: No such file or directory".  If you're on a Linux
-system, you may already have LessTif.  Source code is available
-from <http://www.lesstif.org/>.
+3. Install prerequisites
 
 Under Ubuntu, you will require libxp-dev and libxaw7-dev
 in addition to the standard build-support packages.  You can get
-all the build prerequisites intalled with "apt-get build-dep gpsd".
-
-To build from source, run ./autogen.sh (or sh autogen.sh if the
-script does not have execute permission).  Mac OS X users may
-need to do "./autogen.sh --x-includes=/usr/X11R6/include"
+all the build prerequisites installed with "apt-get build-dep gpsd".
 
 Note: if you are going to use the RTCM-104 support, you should compile
 with gcc4; if you don't have it installed as your default 
-compiler, do this by specifying CC=gcc4 before the autogen.sh
+compiler, do this by specifying CC=gcc4 before the configure
 command.  The rtcm2.c file confuses the gcc-3.4.[23] optimizer
 at -O2 level, making it generate incorrect code.
 
-Then run make: libgps.so, gpsd, xgps, and xgpsspeed will be
-built. Copy the app-defaults files xgps.ad and xgpsspeed.ad to your
+4. Build gpsd from source (skip this step if you have installed GPSD 
+from a binary package).  As usual, the sequence is:
+
+     ./configure && make
+
+Mac OS X users may need to do "./configure --x-includes=/usr/X11R6/include"
+
+Optionally, copy the app-defaults files xgpsspeed.ad to your
 home directory or to the system-wide X app-defaults directory.
 
-4. Start gpsd.  You'll need to give it as an argument a path to 
+5. Start gpsd.  You'll need to give it as an argument a path to 
 a serial or USB port with a GPS attached to it.
 
-5. Once gpsd is running, telnet to port 2947. You should see a
+6. Once gpsd is running, telnet to port 2947. You should see a
 greeting line that's a JSON object describing GPSD's version.
 Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
-6. Type '?WATCH={"enable":true,"json":true,"raw":1};' to start raw and
-watcher modes.  You should see NMEA data (text lines beginning with $)
-spewing out (if you have a non-NMEA device you may see long strings of
-hex instead).  You will also see lines beginning with '{' that are
+7. Type '?WATCH={"enable":true,"json"};' to start raw and
+watcher modes.  You should see lines beginning with '{' that are
 JSON objects representing reports from your GPS; these are packet
 translations in GPSD protocol.
 
-7. Start the xgps client.  Calling it with no arguments should do the right 
+8. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-8. Now that you've verified that the code is working, "make install" 
+9. Now that you've verified that the code is working, "make install" 
 will install it it in the system directories.  "make uninstall" will
 undo this.
 
 (You won't need to "make install" if you installed from a binary package.)
 
-9. To enable hotplugging of USB GPSes under Linux, do a 'make udev-install' or
-equivalent to put the appropriate udev rules and wrapper files in plases.
+10. To enable hotplugging of USB GPSes under Linux, do a 'make udev-install' or
+equivalent to put the appropriate udev rules and wrapper files in place.
 
-10. Check out the list of supported hardware at 
+11. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
@@ -169,15 +162,15 @@ line to the table.  Directions are included on that page.
 We can also use updates of the latest version number known to work with
 hardware already supported.
 
-11. Note for small embedded systems and those without threading.  It is
+12. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
 
-12. Note for systems using DBUS: gpsd includes support for shipping fixes
+13. Note for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
 with the option "--enable-dbus" to get it working.
 
-13. The distribution includes a PHP script that you can use to
+14. The distribution includes a PHP script that you can use to
 generate a PHP status page for your GPS.  You will need php and php-gd
 installed.  To install it, copy the file 'gpsd.php' to your HTTP
 document directory.  The first time it's invoked, it will generate a
@@ -185,7 +178,7 @@ file called 'gpsd_config.inc' containing configuration information;
 edit to taste.  Note that for the Google Maps feature work you need
 to set a valid Google API key in your config file.
 
-14. libQgpsmm is a Qt version of the libgps/libgpsmm pair. Thanks to
+15. libQgpsmm is a Qt version of the libgps/libgpsmm pair. Thanks to
 the multi-platform approach of Qt, it allows the gpsd client library
 to be available on all the Qt supported platforms.  Please see
 http://qt.nokia.com/doc/4.6/supported-platforms.html for a status of
@@ -211,7 +204,7 @@ Please refer to Qt's documentation at
 http://qt.nokia.com/doc/4.6/platform-specific.html for platform specific
 building documentation
 
-15. There are regression tests to verify proper operation of gpsd, and
+16. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "make
 check".  It is not necessary to install first, but you do need

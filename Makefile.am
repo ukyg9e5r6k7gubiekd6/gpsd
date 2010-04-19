@@ -57,7 +57,7 @@ endif
 endif
 endif
 
-bin_PROGRAMS = $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
+bin_PROGRAMS = $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 
 # \todo Add programs to TESTS if not already. used.
@@ -473,7 +473,7 @@ EXTRA_DIST = \
 	do-tests \
 	regress-driver \
 	gps/__init__.py \
-	gps/clienthelpers.so \
+	gps/misc.py \
 	gps/fake.py \
 	gps/gps.py \
 	test
