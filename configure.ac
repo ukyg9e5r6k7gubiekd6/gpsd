@@ -31,7 +31,7 @@ ACREQUIRE_BUGFIX
 dnl AM_PATH_PYTHON provided with automake can be too old.  Look
 dnl for newer python first, and include 2.6 on the list.
 m4_define([_AM_PYTHON_INTERPRETER_LIST],
-	    [python3.0 python2.6 python2.5 python2.4 python])
+	    [python2.6 python2.5 python2.4 python])
 AM_PATH_PYTHON([2.4])
 ac_python=yes
 if test "x$PYTHON" = "x"; then
