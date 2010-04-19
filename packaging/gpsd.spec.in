@@ -111,6 +111,9 @@ cp packaging/etc_init.d_gpsd_rpm "$RPM_BUILD_ROOT"/etc/rc.d/init.d/gpsd
 %{_libdir}/libgps.la
 %{_libdir}/libgps.so*
 %{_libdir}/libgps.a
+%{_libdir}/libgpsd.la
+%{_libdir}/libgpsd.so*
+%{_libdir}/libgpsd.a
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/gpsmon.1*

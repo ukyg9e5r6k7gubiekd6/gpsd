@@ -102,13 +102,13 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm $(LIBUSB)
 #
 gpsd_c_sources = gpsd_dbus.c gpsd.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
+gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
 #
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
+gpsctl_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
 
 #
 # Build gpspipe
@@ -128,50 +128,52 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm  $(LIBUSB)
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build gpsdecode
 #
 gpsdecode_SOURCES = gpsdecode.c
-gpsdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 
 #
 # Build shared libraries
 #
 libgps_la_LDFLAGS = -version-number 19:0:0
-lib_LTLIBRARIES = libgps.la
+lib_LTLIBRARIES = libgps.la libgpsd.la
 
-libgpsd_c_sources = \
+libgps_c_sources = \
 	ais_json.c \
-	bits.c \
-	bsd-base64.c \
-	crc24q.c \
 	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
-	gpsd_json.c \
+	gpsdclient.c \
+	gps_maskdump.c \
 	hex.c \
-	isgps.c \
 	json.c \
 	libgps_core.c \
 	libgps_json.c \
-	gpsdclient.c \
-	libgpsd_core.c \
-	gps_maskdump.c \
+	netlib.c \
+	rtcm2_json.c \
+	shared_json.c \
+	strl.c
+
+libgpsd_c_sources = \
+	bits.c \
+	bsd-base64.c \
+	crc24q.c \
+	gpsd_json.c \
+	isgps.c \
 	gpsd_maskdump.c \
+	libgpsd_core.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
 	net_ntrip.c \
-	netlib.c \
 	ntpshm.c \
 	packet.c \
 	pseudonmea.c \
 	serial.c \
-	rtcm2_json.c \
 	srecord.c \
-	shared_json.c \
-	strl.c \
 	subframe.c \
 	drivers.c \
 	driver_aivdm.c \
@@ -232,7 +234,9 @@ gpsd_maskdump.c: gpsd.h-tail maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
+libgps_la_SOURCES = $(libgps_c_sources)
+
+libgpsd_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				driver_rtcm2.h packet_states.h
 
 # Warning: This overrides autoconf's normal link-line generation process
@@ -243,8 +247,9 @@ else
 libgps_la_LINK = /bin/sh ./libtool --tag=CC --mode=link gcc $(libgps_la_LDFLAGS) -o $@
 endif
 
-nodist_libgps_la_SOURCES = packet_names.h ais_json.i
+nodist_libgpsd_la_SOURCES = packet_names.h ais_json.i
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
+libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
 # Build Python binding
@@ -314,7 +319,7 @@ test_bits_LDADD = $(LIBC) libgps.la  $(LIBUSB)
 # Build packets tester
 #
 test_packet_SOURCES = test_packet.c
-test_packet_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+test_packet_LDADD = $(LIBC) libgpsd.la libgps.la -lm  $(LIBUSB)
 
 #
 # Build geoid model tester
@@ -489,10 +494,10 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
 
 # Report splint warnings
-SPLINTOPTS = -I/usr/include/dbus-1.0/ +quiet
+SPLINTOPTS = -I/usr/include/dbus-1.0/ $(INCUSB) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon and libraries..."
-	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
+	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources)
 	@echo "Running splint on cgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
@@ -524,7 +529,7 @@ cppcheck: gpsd.h packet_names.h
 
 # Re-indent the codebase in aa uniform style for readability.
 # FIXME: Except for xgpsspeed - Tachometer.c makes GNI indent lose it.
-INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) \
+INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
 	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \

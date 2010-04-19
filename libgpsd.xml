@@ -64,16 +64,10 @@ C:
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
-<para><emphasis remap='B'>libgps</emphasis>
+<para><emphasis remap='B'>libgpsd</emphasis>
 is a service library which supports querying GPS devices; link it with
-the linker option -lgps. There are
-two interfaces supported in it; one high-level interface that
-goes through
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-and is intended for concurrent use by several applications, and one
-low-level interface that speaks directly with the serial or USB device
-to which the GPS is attached.  This page describes the low-level
-interface, which
+the linker option -lgpsd.  It is a set of low-level
+device-handling calls, which
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 itself uses.  See 
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
@@ -161,7 +155,7 @@ a mutex.</para>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
