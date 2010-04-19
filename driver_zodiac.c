@@ -240,6 +240,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
+    session->context->gps_week = gps_week;
     session->gpsdata.skyview_time =
 	gpstime_to_unix(gps_week, (double)gps_seconds);
     gpsd_report(LOG_DATA, "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
