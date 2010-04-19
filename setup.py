@@ -55,12 +55,25 @@ if not 'clean' in sys.argv:
 
 gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
             "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
+include_dirs = [ os.path.realpath(os.path.dirname(__file__)) ]
+version_out = os.popen(MAKE + " version")
+version = version_out.read()
+print(version)
+if version_out.close():
+    sys.exit(1)
+version = version.split('\n')[-1]
+version = version.strip()
 
-setup( name="gpsd",
-       version="1.0",
+setup( name="gps",
+       version=version,
+       description='Python libraries for the gpsd service daemon',
+       url="http://gpsd.berlios.de/",
+       author='the GPSD project',
+       author_email="gpsd-dev@lists.berlios.de",
+       license="BSD",
        ext_modules=[
-    	Extension("gps.packet", gpspacket_sources),
-    	Extension("gps.clienthelpers", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"])
+    	Extension("gps.packet", gpspacket_sources, include_dirs=include_dirs),
+    	Extension("gps.clienthelpers", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"], include_dirs=include_dirs)
         ],
        packages = ['gps'],
        scripts = ['gpscat','gpsfake','gpsprof', 'xgps'],
