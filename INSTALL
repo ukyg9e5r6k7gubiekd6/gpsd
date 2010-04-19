@@ -7,6 +7,7 @@ have additional prerequisites.
 Necessary components for any build:
 
 C compiler		-> gpsd and client library are written in C
+Python			-> some code is generated from python scripts
 
 The code depends on one non-C99 feature: anonymous unions.  We could
 eliminate these, but the cost would be source-level interface breakage
@@ -34,12 +35,6 @@ this and use it to discover Garmin USB GPSes, rather than groveling
 through /proc/bus/usb/devices (which has been deprecated by the
 Linux kernel team).
 
-For building from the source tree, the following are necessary:
-autoconf 2.61 or later
-automake 1.10 or later
-libtool 2.26 or later
-Python			-> code is generated from python scripts
-
 For working with DBUS, you'll need the DBUS development
 headers and libraries installed.  Under Debian/Ubuntu these
 are the packages ibdbus-1-dev and libdbus-glib-1-dev.
@@ -57,6 +52,12 @@ be able to tell from configure messages which extensions you will get.
 
 Under Ubuntu and most other Debian-derived, an easy way to pick up
 the prerequisites is: "apt-get build-dep gpsd"
+
+If you are going to modify the build, you will need these:
+
+autoconf 2.61 or later
+automake 1.10 or later
+libtool 2.26 or later
 
 Once you have fetched the software prerequisites:
 
