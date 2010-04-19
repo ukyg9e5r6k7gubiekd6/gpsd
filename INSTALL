@@ -8,10 +8,19 @@ Necessary components for any build:
 
 C compiler		-> gpsd and client library are written in C
 Python			-> some code is generated from python scripts
+Python GTK-2 binding	-> the main test client, xgps, needs this
 
-The code depends on one non-C99 feature: anonymous unions.  We could
+The C code depends on one non-C99 feature: anonymous unions.  We could
 eliminate these, but the cost would be source-level interface breakage
 if we have to move structure members in and out of unions.
+
+You will need Python 2.6 or 2.4+ & simplejson.  The Python code in
+GPSD is 2.4-compatible except that you need either the json library
+module from 2.6 or the functionally equivalent simplejson backport.
+Note that while Python is required to *build* GPSD (the build uses
+some code generators in Python), it is not required to run the service
+daemon.  In particular, you can cross-compile onto an embeddeed system
+without having to take Python with you.
 
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
@@ -19,16 +28,10 @@ various additional capabilities and extensions:
 C++ compiler	       -> libgpsmm C++ wrapper for the library
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
-X windows              -> two test clients depend on this
-ncurses                -> two more test clients depend on this
+X windows              -> one test client depends on this
+ncurses                -> a test client and the GPS monitor depend on this
 libusb-1.0.x or later  -> better USB device discovery
 Qt + qmake             -> libQgpsmm depends on this
-
-Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
-2.4-compatible except that you need either the json library module
-from 2.6 or the functionally equivalent simplejson backport.  Note
-that while Python is required to *build* GPSD (the build uses some code
-generators in Python), it is not required to *run* GPSD.
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
 this and use it to discover Garmin USB GPSes, rather than groveling
