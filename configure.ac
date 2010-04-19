@@ -53,6 +53,9 @@ if test "x$ac_python" = "xyes"; then
 
 	PYTHON_CFLAGS="-DHAVE_PYTHON -I$PYTHON_PREFIX/include/python$PYTHON_VERSION"
 
+	PYTHON_DISTUTILS_LIBDIR=[`$PYTHON -c 'import distutils.util; import sys; print ("build/lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3]))'`]
+	PYTHON_DISTUTILS_SCRIPTDIR=[`$PYTHON  -c 'import sys; print ("build/scripts-%s" %(sys.version[0:3], ))'`]
+
 	OLD_CPPFLAGS="$CPPFLAGS"
 	OLD_CXXFLAGS="$CXXFLAGS"
 	CPPFLAGS="$CPPFLAGS $PYTHON_CFLAGS"
@@ -66,6 +69,8 @@ if test "x$ac_python" = "xyes"; then
 
 	if test "x$ac_python" = "xyes"; then
 		AC_SUBST([PYTHON_CFLAGS])
+		AC_SUBST([PYTHON_DISTUTILS_LIBDIR])
+		AC_SUBST([PYTHON_DISTUTILS_SCRIPTDIR])
 
 		ac_python=no
 		for pylibpath in '/usr/lib' $PYTHON_PREFIX/lib $PYTHON_PREFIX/lib/python$PYTHON_VERSION/config; do
