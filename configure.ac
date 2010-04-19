@@ -284,7 +284,7 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   AC_CHECK_HEADERS(X11/xpm.h xpm.h)
   if test x"$ac_cv_header_X11_xpm_h" = "xno" &&
      test x"$ac_cv_header_xpm_h" = "xno"; then
-    AC_MSG_WARN([xpm.h problem - xgps won't be built.])
+    AC_MSG_WARN([xpm.h problem - xgpsspeed won't be built.])
   fi
   AC_PATH_XTRA
   if test x"$ac_cv_have_x" = "xno"; then
@@ -324,14 +324,14 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
 	  ${X_PRE_LIBS} ${X11_LIBS})
   AC_SUBST(XEXT_LIBS)
   if test x"$ac_cv_lib_Xext_XShapeQueryVersion" = "xno"; then
-    AC_MSG_WARN([libXext problem - xgps won't be built.])
+    AC_MSG_WARN([libXext problem - xgpsspeed won't be built.])
   fi
   AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
 	  XPM_LIBS="-lXpm"
 	  AC_DEFINE([HAVE_XPM],1,[Xpm available]),,${X_PRE_LIBS} ${X11_LIBS})
   AC_SUBST(XPM_LIBS)
   if test x"$ac_cv_lib_Xpm_XpmCreatePixmapFromXpmImage" = "xno"; then
-    AC_MSG_WARN([libXpm problem - xgps won't be built.])
+    AC_MSG_WARN([libXpm problem - xgpsspeed won't be built.])
   fi
 else
   dnl X11 disabled
