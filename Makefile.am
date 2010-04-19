@@ -258,7 +258,8 @@ libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 # Build Python binding
 #
 if HAVE_PYTHON
-noinst_SCRIPTS = setup.py
+PYEXTENSIONS = gpspacket.so gpslib.so
+noinst_SCRIPTS = stamp-python-modules setup.py
 
 # Multiple-outputs hack.  See
 # http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
@@ -276,8 +277,10 @@ stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py
 			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
 			--build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
 			--mangenerator '$(MANGENERATOR)') && \
-	mv -f '$@.tmp' '$@' && \
-	ln -s $(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so $(srcdir)/gps
+	(cd '$(srcdir)/gps' && \
+	    rm -f *.so && \
+	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
+	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 
 # Clean up after Python
