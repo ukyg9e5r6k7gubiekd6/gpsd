@@ -276,11 +276,12 @@ stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py
 	(cd '$(srcdir)' && \
 	env abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
-		$(PYTHON) setup.py build_ext \
-			--build-lib '$(srcdir)' \
-			--include-dirs '$(srcdir):.'\
+		$(PYTHON) setup.py build \
+			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
+			--build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
 			--mangenerator '$(MANGENERATOR)') && \
-	mv -f '$@.tmp' '$@'
+	mv -f '$@.tmp' '$@' && \
+	ln -s $(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so $(srcdir)/gps
 CLEANFILES += stamp-python-modules stamp-python-modules.tmp
 
 # Clean up after Python
