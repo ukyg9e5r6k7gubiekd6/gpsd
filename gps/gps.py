@@ -119,6 +119,31 @@ class gpscommon:
             commands += "\n"
         self.sock.send(commands)
 
+class dictwrapper:
+    "Wrapper that yields both class and dictionary behavior,"
+    def __init__(self, **ddict):
+        self.__dict__ = ddict
+    def get(self, k, d=None):
+        return self.__dict__.get(k, d)
+    def keys(self):
+        return self.__dict__.keys()
+    def __getitem__(self, key):
+        "Emulate dictionary, for new-style interface."
+        return self.__dict__[key]
+    def __setitem__(self, key, val):
+        "Emulate dictionary, for new-style interface."
+        self.__dict__[key] = val
+    def __contains__(self, key):
+        return key in self.__dict__
+    def __str__(self):
+        return "<dictwrapper: " + str(self.__dict__) + ">"
+    __repr__ = __str__
+
+
+#
+# Stuff below this line is specific to the old interface 
+#
+
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
 
@@ -261,26 +286,6 @@ class gpsdata:
         for sat in self.satellites:
           st += "    %r\n" % sat
         return st
-
-class dictwrapper:
-    "Wrapper that yields both class and dictionary behavior,"
-    def __init__(self, **ddict):
-        self.__dict__ = ddict
-    def get(self, k, d=None):
-        return self.__dict__.get(k, d)
-    def keys(self):
-        return self.__dict__.keys()
-    def __getitem__(self, key):
-        "Emulate dictionary, for new-style interface."
-        return self.__dict__[key]
-    def __setitem__(self, key, val):
-        "Emulate dictionary, for new-style interface."
-        self.__dict__[key] = val
-    def __contains__(self, key):
-        return key in self.__dict__
-    def __str__(self):
-        return "<dictwrapper: " + str(self.__dict__) + ">"
-    __repr__ = __str__
 
 class gps(gpsdata, gpscommon):
     "Client interface to a running gpsd instance."
