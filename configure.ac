@@ -1118,7 +1118,7 @@ if test "xdummy" = "xdummy" -a \
 fi
 AC_OUTPUT(Makefile packaging/gpsd.spec libgps.pc libgpsd.pc
 		   jsongen.py maskaudit.py
-		   xgps gpscat gpsfake gpsprof valgrind-audit,
-		   [chmod +x jsongen.py maskaudit.py gpscat gpsfake gpsprof valgrind-audit])
+		   valgrind-audit,
+		   [chmod +x jsongen.py maskaudit.py gpscat gpsfake gpsprof xgps valgrind-audit])
 echo "Configure finished, type 'make' to build."
 

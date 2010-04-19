@@ -66,6 +66,9 @@ if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
 
+PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps
+PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py
+
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
 python_PYTHON = gpscap.py
@@ -472,10 +475,8 @@ EXTRA_DIST = \
 	packaging/etc_init.d_gpsd_rpm \
 	do-tests \
 	regress-driver \
-	gps/__init__.py \
-	gps/misc.py \
-	gps/fake.py \
-	gps/gps.py \
+	$(PYTHONSCRIPTS_DIST) \
+	$(PYTHONMODULES_DIST) \
 	test
 
 #dist-hook:
