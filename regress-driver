@@ -4,6 +4,14 @@
 # makefile before we regrouped the regression tests by stable and unstable 
 # drivers.
 
+# We need to have the build directory in $PATH to find the new gpsd
+# in case there is one in $PATH somewhere else in the system.
+if [ "`dirname $0`" = "." ]; then
+    PATH=`pwd`:${PATH}
+else
+    PATH=`dirname $0`:${PATH}
+fi
+
 # Arrange to call a gpsfake in the source directory without fuss.
 if [ -z ${PYTHON} ]; then
     PYTHON="python"
@@ -15,8 +23,6 @@ if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
     export PYTHONPATH
 
     PATH=${py_scriptdir}:${PATH}
-else
-    PATH=`dirname $0`:${PATH}
 fi
 export PATH
 
