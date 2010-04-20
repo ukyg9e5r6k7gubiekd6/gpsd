@@ -61,7 +61,7 @@ version = version_out.read()
 print(version)
 if version_out.close():
     sys.exit(1)
-version = version.split('\n')[-1]
+version = version.split('\n')[-2]
 version = version.strip()
 
 setup( name="gps",
