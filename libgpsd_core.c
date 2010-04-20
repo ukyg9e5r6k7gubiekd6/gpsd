@@ -486,10 +486,9 @@ static void gpsd_error_model(struct gps_device_t *session,
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
-
     /*
      * OK, this is not an error computation, but
-     * we're at the right place in the architrcture for it.
+     * we're at the right place in the architecture for it.
      * Compute climb/sink in the simplest possible way.
      * FIXME: Someday we should compute speed here too.
      */
