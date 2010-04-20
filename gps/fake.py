@@ -329,6 +329,12 @@ class DaemonInstance:
             self.sock.sendall("-%s\r\n" % path)
             self.sock.recv(12)
             self.sock.close()
+    def quit_on_quiesce(self, num):
+        "Tell the daemon to quit when it next goes quiescent."
+        if self.__get_control_socket():
+            self.sock.sendall("$%d\r\n" % num)
+            self.sock.recv(12)
+            self.sock.close()
     def kill(self):
         "Kill the daemon instance."
         if self.pid:
@@ -346,13 +352,14 @@ class TestSessionError(exceptions.Exception):
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
     CLOSE_DELAY = 1
-    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, expected=0):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
         self.port = port
         self.options = options
         self.verbose = verbose
         self.predump = predump
+        self.expected = expected
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.client_id = 0
@@ -454,7 +461,7 @@ class TestSession:
                     # before removing it.  This should give its subscribers time
                     # to get gpsd's response before we call cleanup()
                     if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
-                        self.remove(chosen)
+                        self.gps_remove(chosen.slave)
                         self.progress("gpsfake: GPS %s removed\n" % chosen.slave)
                     elif not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
@@ -470,6 +477,9 @@ class TestSession:
                         chosen.poll()
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
+                            if self.expected:
+                                self.daemon.quit_on_quiesce(self.expected)
+                                self.expected = 0
                         had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
