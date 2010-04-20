@@ -168,6 +168,8 @@ struct gps_context_t context = {
     .rtcmbuf	    = {'\0'},
     .rtcmtime	    = 0,
     .leap_seconds   = LEAP_SECONDS,
+    .gps_week	    = 0,
+    .gps_tow        = 0,
     .century	    = CENTURY_BASE,
 #ifdef NTPSHM_ENABLE
     .enable_ntpshm  = false,

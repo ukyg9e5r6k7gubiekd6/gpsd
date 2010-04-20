@@ -106,7 +106,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (words[0] >> 16) & 0xffL;
+    preamble = (unsigned int)((words[0] >> 16) & 0xffL);
     if (preamble == 0x8b) {
 	    preamble ^= 0xff;
 	    words[0] ^= 0xffffff;
@@ -131,7 +131,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     switch (subframe) {
     case 1:
 	/* get Week Number WN) from subframe 1 */
-	session->context->gps_week = (words[2] & 0xffc000) >> 14;
+	session->context->gps_week = (unsigned short)((words[2] & 0xffc000) >> 14);
 	gpsd_report(LOG_PROG,
 	    "50B: WN: %u\n", session->context->gps_week);
 	break;

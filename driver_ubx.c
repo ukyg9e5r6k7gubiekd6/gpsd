@@ -175,7 +175,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     tow = (unsigned int)getleul(buf, 0);
     gw = (unsigned int)getlesw(buf, 8);
     if (gw > session->context->gps_week)
-	session->context->gps_week = gw;
+	session->context->gps_week = (unsigned short)gw;
 
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)

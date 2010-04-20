@@ -656,7 +656,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 		    4) | (getub(buf, 82) & 80 ? 0xc000 : 0x0000));
     /*@ +predboolothers @*/
     char time_str[24];
-    session->context->gps_week = wn;
+    session->context->gps_week = (unsigned short)wn;
     session->context->gps_tow = (double)(toc * SF_TOC);
     /* leap second? */
     (void)unix_to_iso8601(gpstime_to_unix((int)wn, session->context->gps_tow),
@@ -739,8 +739,8 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
-    session->context->gps_week = week;
-    session->context->gps_tow = tow / 1000.0f;
+    session->context->gps_week = (unsigned short)week;
+    session->context->gps_tow = (double)tow / 1000.0f;
     /*@ ignore @*//*@ splint is confused @ */
     session->gpsdata.skyview_time =
 	gpstime_to_unix((int)week, session->context->gps_tow)
@@ -842,7 +842,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     uint8_t status = getub(buf, 10);
 
     char time_str[24];
-    session->context->gps_week = week;
+    session->context->gps_week = (unsigned short)week;
     session->context->gps_tow = (double)tow / 1000.0;
     (void)unix_to_iso8601(gpstime_to_unix((int)week, session->context->gps_tow),
 			  time_str, sizeof(time_str));
@@ -936,8 +936,8 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.epv = alt_sd * 1.96;
 	mask |= (HERR_IS | VERR_IS);
 #endif /*  __UNUSED__ */
-	session->context->gps_week = week;
-	session->context->gps_tow = tow / 1000.0f;
+	session->context->gps_week = (unsigned short)week;
+	session->context->gps_tow = (double)tow / 1000.0f;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
 	    gpstime_to_unix((int)week, session->context->gps_tow)

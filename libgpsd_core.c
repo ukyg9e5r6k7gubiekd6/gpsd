@@ -450,7 +450,7 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
-void gpsd_error_model(struct gps_device_t *session,
+static void gpsd_error_model(struct gps_device_t *session,
 		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
 {

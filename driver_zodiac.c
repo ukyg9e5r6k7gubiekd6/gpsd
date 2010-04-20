@@ -152,7 +152,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* solution_type                 = getzword(11); */
     session->gpsdata.satellites_used = (int)getzword(12);
     /* polar_navigation              = getzword(13); */
-    session->context->gps_week       = getzword(14);
+    session->context->gps_week       = (unsigned short)getzword(14);
     /* gps_seconds                   = getzlong(15); */
     /* gps_nanoseconds               = getzlong(17); */
     unpacked_date.tm_mday = (int)getzword(19);
@@ -222,7 +222,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     int gps_seconds = getzlong(11);
     /* gps_nanoseconds            = getzlong(13); */
     /*@-charint@*/
-    session->context->gps_week = gps_week;
+    session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
@@ -240,7 +240,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    session->context->gps_week = gps_week;
+    session->context->gps_week = (unsigned short)gps_week;
     session->context->gps_tow = (double) gps_seconds;
     session->gpsdata.skyview_time =
 	gpstime_to_unix(gps_week, session->context->gps_tow);
