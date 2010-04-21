@@ -17,8 +17,9 @@
 # version and exits.
 #
 # In post-commit, run it without arguments (other than possibly a -p
-# option). It will query for current HEAD and the latest commit ID to
-# get the information it needs. 
+# option; better, use the ciabot.project variable). It will query for
+# current HEAD and the latest commit ID to get the information it
+# needs.
 #
 # In update, call it with a refname followed by a list of commits:
 # You want to reverse the order git rev-list emits becxause it lists
