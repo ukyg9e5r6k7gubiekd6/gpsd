@@ -312,11 +312,7 @@ class DaemonInstance:
         return self.sock
     def is_alive(self):
         "Is the daemon still alive?"
-        try:
-            os.kill(self.pid, 0)
-            return True
-        except OSError:
-            return False
+        return os.path.exists(self.pidfile)
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
@@ -447,7 +443,7 @@ class TestSession:
         "Run the tests."
         try:
             self.progress("gpsfake: test loop begins\n")
-            while self.daemon:
+            while self.daemon.is_alive():
                 # We have to read anything that gpsd might have tried
                 # to send to the GPS here -- under OpenBSD the
                 # TIOCDRAIN will hang, otherwise.
@@ -457,16 +453,9 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    # Delay a few seconds after a GPS source is exhausted
-                    # before removing it.  This should give its subscribers time
-                    # to get gpsd's response before we call cleanup()
-                    if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
+                    if not chosen.go_predicate(chosen.index, chosen):
                         self.gps_remove(chosen.slave)
                         self.progress("gpsfake: GPS %s removed\n" % chosen.slave)
-                    elif not chosen.go_predicate(chosen.index, chosen):
-                        if chosen.exhausted == 0:
-                            chosen.exhausted = time.time()
-                            self.progress("gpsfake: GPS %s ran out of input\n" % chosen.slave)
                     else:
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
@@ -474,18 +463,16 @@ class TestSession:
                         chosen.send(chosen.enqueued)
                         chosen.enqueued = ""
                     while chosen.waiting():
-                        chosen.poll()
+                        if chosen.poll() == -1:
+                            break
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
+                            chosen.valid = 0
                             if self.expected:
                                 self.daemon.quit_on_quiesce(self.expected)
                                 self.expected = 0
-                        had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
-                if not self.writers and not had_output:
-                    self.progress("gpsfake: no writers and no output\n")
-                    break
             self.progress("gpsfake: test loop ends\n")
         finally:
             self.cleanup()
