@@ -69,15 +69,6 @@ import exceptions, threading, socket
 import gps
 import packet as sniffer
 
-# Define a per-character delay on writes so we won't spam the buffers
-# in the pty layer or gpsd itself.  The magic number here has to be
-# derived from observation.  If it's too high you'll slow the tests
-# down a lot.  If it's too low you'll get random spurious regression
-# failures that usually look like lines missing from the end of the
-# test output relative to the check file.  This number might have to
-# be adusted upward on faster machines.
-WRITE_PAD = 0.033
-
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -234,7 +225,6 @@ class FakeGPS:
         os.write(self.master_fd, line)
         if self.progress:
             self.progress("gpsfake: %s feeds %d=%s\n" % (self.name, len(line), `line`))
-        time.sleep(WRITE_PAD)
         self.index += 1
 
     def drain(self):
