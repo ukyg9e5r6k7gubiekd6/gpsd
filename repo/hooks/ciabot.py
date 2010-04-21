@@ -11,13 +11,12 @@
 #
 # This script is meant to be run either in a post-commit hook or in an
 # update hook.  If there's nothing unusual about your hosting setup,
-# you can specify the project name with a -p option and avoid having
-# to modify this script.  Try it with -n to see the notification mail
-# dumped to stdout and verify that it looks sane. With -V it dumps its
-# version and exits.
+# you can specify the project name and repo with config variables and
+# avoid having to modify this script.  Try it with -n to see the
+# notification mail dumped to stdout and verify that it looks
+# sane. With -V it dumps its version and exits.
 #
-# In post-commit, run it without arguments (other than possibly a -p
-# option; better, use the ciabot.project variable). It will query for
+# In post-commit, run it without arguments. It will query for
 # current HEAD and the latest commit ID to get the information it
 # needs.
 #
@@ -28,9 +27,12 @@
 # /path/to/ciabot.py ${refname} $(git rev-list ${oldhead}..${newhead} | tac)
 #
 # Configuration variables affecting this script:
-# ciabot.project = name of the project (makes -p option unnecessary)
+# ciabot.project = name of the project (required)
+# ciabot.repo = name of the project repo for gitweb/cgit purposes
 # ciabot.xmlrpc  = if true, ship notifications via XML-RPC 
 # ciabot.revformat = format in which the revision is shown
+#
+# The ciabot.repo defaults to ciabot.project lowercased. 
 #
 # The revformat variable may have the following values
 # raw -> full hex ID of commit
@@ -46,14 +48,6 @@
 #
 
 import os, sys, commands, socket, urllib
-
-# Name of the repository.
-# You can hardwire this to make the script faster.
-repo = os.path.basename(os.getcwd())
-
-# Fully-qualified domain name of this host.
-# You can hardwire this to make the script faster.
-host = socket.getfqdn()
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
@@ -104,9 +98,7 @@ xml = '''\
 # No user-serviceable parts below this line:
 #
 
-# Addresses for the e-mail. The from address is a dummy, since CIA
-# will never reply to this mail.
-fromaddr = "CIABOT-NOREPLY@" + host
+# Where to ship e-mail notifications.
 toaddr = "cia@cia.navi.cx"
 
 # Identify the generator script.
@@ -116,8 +108,6 @@ version = "3.3"
 
 def do(command):
     return commands.getstatusoutput(command)[1]
-
-revformat = do("git config --get ciabot.revformat")
 
 def report(refname, merged):
     "Generate a commit notification to be reported to CIA"
@@ -173,6 +163,16 @@ Subject: DeliverXML
 if __name__ == "__main__":
     import getopt
 
+    # Get all config variables
+    revformat = do("git config --get ciabot.revformat")
+    project = do("git config --get ciabot.project")
+    repo = do("git config --get ciabot.repo")
+    xmlrpc = do("git config --get xmlrpc")
+    xmlrpc = xmlrpc and xmlrpc != "false"
+
+    host = socket.getfqdn()
+    fromaddr = "CIABOT-NOREPLY@" + host
+
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "np:V")
     except getopt.GetoptError, msg:
@@ -180,7 +180,6 @@ if __name__ == "__main__":
         raise SystemExit, 1
 
     notify = True
-    project = None
     for (switch, val) in options:
         if switch == '-p':
             project = val
@@ -190,13 +189,13 @@ if __name__ == "__main__":
             print "ciabot.py: version", version
             sys.exit(0)
 
-    if not project:
-        project = do("git config --get ciabot.project")
-
     # Cough and die if user has not specified a project
     if not project:
         sys.stderr.write("ciabot.py: no project specified, bailing out.\n")
         sys.exit(1)
+
+    if not repo:
+        repo = project.lower()
 
     urlprefix = urlprefix % globals()
 
@@ -210,8 +209,6 @@ if __name__ == "__main__":
         merges = arguments[1:]
 
     if notify:
-        xmlrpc = do("git config --get xmlrpc")
-        xmlrpc = xmlrpc and xmlrpc != "false"
         if xmlrpc:
             import xmlrpclib
             server = xmlrpclib.Server('http://cia.navi.cx/RPC2');
