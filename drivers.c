@@ -471,7 +471,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
      * ignore the trailing PPS edge when extracting time from this chip.
      */
     if (event == event_identified || event == event_reactivate) {
-	gpsd_report(LOG_INF, "PPS trailing edge will be ignored");
+	gpsd_report(LOG_INF, "PPS trailing edge will be ignored\n");
 	session->driver.nmea.ignore_trailing_edge = true;
     }
 }
@@ -663,10 +663,10 @@ static bool tnt_send(struct gps_device_t *session, const char *fmt, ...)
     va_end(ap);
     sent = tnt_control_send(session, buf, strlen(buf));
     if (sent == (ssize_t) strlen(buf)) {
-	gpsd_report(LOG_IO, "=> GPS: %s", buf);
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return true;
     } else {
-	gpsd_report(LOG_WARN, "=> GPS: %s FAILED", buf);
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return false;
     }
 }
