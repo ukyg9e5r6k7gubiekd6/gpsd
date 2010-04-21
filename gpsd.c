@@ -1992,8 +1992,10 @@ int main(int argc, char *argv[])
 			if (allocated_device(device))
 			    if (device->packet.inbuflen > 0)
 				waiting++;
-		    if (waiting == 0)
+		    if (waiting == 0) {
 			gpsd_report(LOG_INF, "all buffers are empty\n");
+			goto clean_shutdown;
+		    }
 		}
 	    }
 	} /* quit_when_quiescent */
@@ -2004,9 +2006,16 @@ int main(int argc, char *argv[])
     if (SIGHUP == (int)signalled)
 	longjmp(restartbuf, 1);
 
-    gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",
-		signalled);
+    gpsd_report(LOG_WARN, "received terminating signal %d.\n",signalled);
 
+    /* try to undo all device configurations */
+    for (dfd = 0; dfd < MAXDEVICES; dfd++) {
+	if (allocated_device(&devices[dfd]))
+	    (void)gpsd_wrap(&devices[dfd]);
+    }
+
+clean_shutdown:
+    gpsd_report(LOG_WARN, "exiting.\n");
     /*
      * A linger option was set on each client socket when it was
      * created.  Now, shut them down gracefully, letting I/O drain.
@@ -2016,12 +2025,6 @@ int main(int argc, char *argv[])
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 	if (sub->active != 0)
 	    detach_client(sub);
-    }
-
-    /* try to undo all device configurations */
-    for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	if (allocated_device(&devices[dfd]))
-	    (void)gpsd_wrap(&devices[dfd]);
     }
 
     if (control_socket)
