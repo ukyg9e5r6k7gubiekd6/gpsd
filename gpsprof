@@ -458,7 +458,7 @@ if __name__ == '__main__':
         title = time.ctime()
         threshold = 0
         await = 100
-        verbose = False
+        verbose = 0
         for (switch, val) in options:
             if (switch == '-f'):
                 formatter = val
@@ -471,10 +471,10 @@ if __name__ == '__main__':
             elif (switch == '-t'):
                 title = val
             elif (switch == '-v'):
-                verbose = True
+                verbose += 1
             elif (switch == '-h'):
                 sys.stderr.write(\
-                    "usage: gpsprof [-h] [-m threshold] [-n samplecount] \n"
+                    "usage: gpsprof [ [-v[v] -h] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
                 sys.exit(0)
         sys.stdout.write(plotframe(await,formatter,speed,threshold,title))
