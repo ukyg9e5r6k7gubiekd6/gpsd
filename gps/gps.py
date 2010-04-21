@@ -547,7 +547,7 @@ class gps(gpsdata, gpscommon):
 
 if __name__ == '__main__':
     import readline, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "w")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "v")
     streaming = False
     verbose = False
     for (switch, val) in options:
