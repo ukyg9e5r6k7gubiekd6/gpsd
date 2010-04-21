@@ -209,7 +209,8 @@ typedef struct
     // next 3 items
     float msl_hght;		/* height of WGS 84 above MSL (meters) */
     int16_t leap_sec;		/* diff between GPS and UTC (seconds) */
-    int32_t grmn_days;
+    int32_t grmn_days;          /* days from UTC December 31st, 1989 to the
+			         * beginning of the current week */
 } cpo_pvt_data;
 
 typedef struct
@@ -373,11 +374,13 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	// 631065600, unix seconds for 31 Dec 1989 Zulu
 	time_l = (time_t) (631065600 + (pvt->grmn_days * 86400));
+	// TODO, convert grmn_days to context->gps_week
 	time_l -= pvt->leap_sec;
 	session->context->leap_seconds = pvt->leap_sec;
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
+	session->context->gps_tow = pvt->gps_tow;
 	session->newdata.time = (double)time_l;
 	gpsd_report(LOG_PROG, "Garmin: time_l: %ld\n", (long int)time_l);
 
