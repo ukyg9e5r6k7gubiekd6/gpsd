@@ -289,7 +289,11 @@ clean-local:
 
 # Install Python modules
 install-exec-local:
-	$(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR)
+	if test -z "$(DESTDIR)"; then \
+		$(PYTHON) setup.py install --prefix=${prefix} ;\
+	else \
+		$(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
+	fi
 endif
 
 #
