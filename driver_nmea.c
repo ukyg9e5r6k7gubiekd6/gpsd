@@ -425,7 +425,6 @@ static gps_mask_t processGPGSA(int count, char *field[],
 	else
 	    mask = MODE_IS;
 	gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->newdata.mode);
-	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.pdop = atof(field[15]);
 	session->gpsdata.dop.hdop = atof(field[16]);
 	session->gpsdata.dop.vdop = atof(field[17]);
@@ -825,7 +824,6 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    session->newdata.track = atof(field[11]);
 	    session->newdata.speed = atof(field[12]) / MPS_TO_KPH;
 	    session->newdata.climb = atof(field[13]);
-	    clear_dop(&session->gpsdata.dop);
 	    session->gpsdata.dop.pdop = atof(field[14]);
 	    session->gpsdata.dop.hdop = atof(field[15]);
 	    session->gpsdata.dop.vdop = atof(field[16]);

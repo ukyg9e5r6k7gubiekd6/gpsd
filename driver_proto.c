@@ -51,10 +51,6 @@
 
 #include "bits.h"
 
-/*
- * These routines are specific to this driver
- */
-
 static	gps_mask_t _proto__parse_input(struct gps_device_t *);
 static	gps_mask_t _proto__dispatch(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t _proto__msg_navsol(struct gps_device_t *, unsigned char *, size_t );
@@ -102,7 +98,15 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->newdata.epy = GET_LATITUDE_ERROR();
     session->newdata.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
-    dop_clear(&session->gpsdata.dop);
+    /*
+     * Do *not* clear DOPs in a navigation solution message;  
+     * instead, opportunistically pick up whatever it gives 
+     * us and replace whatever values we computed from the 
+     * visibility matrix for he last skyview. The reason to trust
+     * the chip returns over what we compute is that some 
+     * chips have internal deweighting albums to throw out sats
+     * that increase DOP.
+     */
     session->gpsdata.dop.hdop = GET_HDOP();
     session->gpsdata.dop.vdop = GET_VDOP();
     /* other DOP if available */

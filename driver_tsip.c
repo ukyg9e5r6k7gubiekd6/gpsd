@@ -259,6 +259,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_PROG, "Receiver health %02x %02x\n", u1, u2);
 	break;
     case 0x47:			/* Signal Levels for all Satellites */
+	gpsd_zero_satellites(&session->gpsdata);
 	count = (int)getub(buf, 0);	/* satellite count */
 	if (len != (5 * count + 1))
 	    break;
@@ -455,7 +456,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 #ifdef __UNUSED__
 	/*
 	 * This looks right, but it sets a spurious mode value when
-	 * the satelliite constellation looks good to the chip but no
+	 * the satellite constellation looks good to the chip but no
 	 * actual fix has yet been acquired.  We should set the mode
 	 * field (which controls gpsd's fix reporting) only from sentences
 	 * that convey actual fix information, like 0x20, othewise we

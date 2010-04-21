@@ -497,7 +497,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* FIXME - Which units is tfom in (spec doesn't say) */
     session->newdata.ept = tfom * 1.96 /*Two sigma */ ;
 
-    clear_dop(&session->gpsdata.dop);
     if (gdop != DOP_UNDEFINED)
 	session->gpsdata.dop.gdop = gdop / 10.0;
     if (pdop != DOP_UNDEFINED)

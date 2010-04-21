@@ -144,7 +144,12 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 18)
 	return 0;
 
-    clear_dop(&session->gpsdata.dop);
+    /*
+     * We make a deliberate choice not to clear DOPs from the
+     * last skyview here, but rather to treat this as a supplement
+     * to our calculations from the visiniolity matrix, trusting
+     * the firmware algorithms over ours.
+     */
     session->gpsdata.dop.gdop = (double)(getleuw(buf, 4) / 100.0);
     session->gpsdata.dop.pdop = (double)(getleuw(buf, 6) / 100.0);
     session->gpsdata.dop.tdop = (double)(getleuw(buf, 8) / 100.0);

@@ -89,7 +89,6 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     mask |= USED_IS;
 
     if (flags & FIX_CONV_DOP_VALID) {
-	clear_dop(&session->gpsdata.dop);
 	session->gpsdata.dop.hdop = (double)(getleuw(buf, 7 + 56) / 100.0);
 	session->gpsdata.dop.gdop = (double)(getleuw(buf, 7 + 58) / 100.0);
 	session->gpsdata.dop.pdop = (double)(getleuw(buf, 7 + 60) / 100.0);

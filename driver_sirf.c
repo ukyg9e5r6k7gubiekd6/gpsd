@@ -636,7 +636,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     }
 #endif /* NTPSHM_ENABLE */
     /* fix quality data */
-    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     mask |=
 	TIME_IS | LATLON_IS | ALTITUDE_IS | TRACK_IS | SPEED_IS | STATUS_IS |
@@ -902,7 +901,6 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	session->context->valid |= LEAP_SECOND_VALID;
     }
 
-    clear_dop(&session->gpsdata.dop);
     session->gpsdata.dop.gdop = (int)getub(buf, 34) / 5.0;
     session->gpsdata.dop.pdop = (int)getub(buf, 35) / 5.0;
     session->gpsdata.dop.hdop = (int)getub(buf, 36) / 5.0;

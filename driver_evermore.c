@@ -231,7 +231,12 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 			    session->context->gps_tow) -
 	    session->context->leap_seconds;
 	/*@ end @*/
-	clear_dop(&session->gpsdata.dop);
+	/*
+	 * We make a deliberate choice not to clear DOPs from the
+	 * last skyview here, but rather to treat this as a supplement
+	 * to our calculations from the visiniolity matrix, trusting
+	 * the firmware algorithms over ours.
+	 */
 	session->gpsdata.dop.gdop = (double)getub(buf2, 8) * 0.1;
 	session->gpsdata.dop.pdop = (double)getub(buf2, 9) * 0.1;
 	session->gpsdata.dop.hdop = (double)getub(buf2, 10) * 0.1;
@@ -276,7 +281,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->context->leap_seconds;
 	/*@ end @*/
 	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
-	session->gpsdata.satellites_used = 0;
+        gpsd_zero_satellites(&session->gpsdata);
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	if (session->gpsdata.satellites_visible > 12) {
 	    gpsd_report(LOG_WARN,

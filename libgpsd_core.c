@@ -810,4 +810,5 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
     (void)memset(out->azimuth, 0, sizeof(out->azimuth));
     (void)memset(out->ss, 0, sizeof(out->ss));
     out->satellites_visible = 0;
+    clear_dop(&out->dop);
 }
