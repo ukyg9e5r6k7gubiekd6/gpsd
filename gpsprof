@@ -451,7 +451,8 @@ def plotframe(await, fname, speed, threshold, title):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:v")
+	(options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:D:")
+
         formatter = "space"
         raw = False
         speed = 0
@@ -470,11 +471,11 @@ if __name__ == '__main__':
                 speed = int(val)
             elif (switch == '-t'):
                 title = val
-            elif (switch == '-v'):
-                verbose += 1
+            elif (switch == '-D'):
+                verbose = int(val)
             elif (switch == '-h'):
                 sys.stderr.write(\
-                    "usage: gpsprof [ [-v[v] -h] [-m threshold] [-n samplecount] \n"
+                    "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
                 sys.exit(0)
         sys.stdout.write(plotframe(await,formatter,speed,threshold,title))

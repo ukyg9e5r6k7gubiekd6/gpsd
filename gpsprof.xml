@@ -27,6 +27,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-h</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -151,6 +152,8 @@ title.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>
+
+<para>The -D sets debug level.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
