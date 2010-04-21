@@ -552,12 +552,18 @@ if __name__ == '__main__':
     verbose = False
     for (switch, val) in options:
         if switch == '-v':
-            verbose = True    
+            verbose = True
     if len(arguments) > 2:
         print 'Usage: gps.py [-v] [host [port]]'
         sys.exit(1)
 
-    session = gps(*arguments)
+    opts = { "verbose" : verbose }
+    if len(arguments) > 0:
+        opts["host"] = arguments[0]
+    if len(arguments) > 1:
+        opts["port"] = arguments[1]
+
+    session = gps(**opts)
     session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
     session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
     for report in session:
