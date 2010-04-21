@@ -487,7 +487,7 @@ class gps(gpsdata, gpscommon):
             __set_device__(self, data)
         elif self.data["class"] == "DEVICES":
             for device in self.data["devices"]:
-                self.__set_device__(self.data)
+                __set_device__(self.data)
                 break
         elif self.data["class"] == "TIMING":
             payload.c_recv = self.received
