@@ -112,7 +112,7 @@ class gpscommon:
             sys.stderr.write("poll: data is %s\n" % repr(self.response))
         self.received = time.time()
         # We got a \n-terminated line
-        return len(self.linebuffer)
+        return len(self.response)
 
     def send(self, commands):
         "Ship commands to the daemon."
