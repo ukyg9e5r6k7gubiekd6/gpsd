@@ -259,15 +259,15 @@ libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) libgps.
 #
 if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
-noinst_SCRIPTS = stamp-python-modules setup.py
+noinst_SCRIPTS = stamp-python setup.py
 
 # Multiple-outputs hack.  See
 # http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
-$(PYEXTENSIONS): stamp-python-modules
-	+@WITNESS=stamp-python-modules; $(MULTIOUT_RECOVER_DELETED)
+$(PYEXTENSIONS): stamp-python
+	+@WITNESS=stamp-python; $(MULTIOUT_RECOVER_DELETED)
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
-stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST)
+stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST)
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
@@ -281,7 +281,7 @@ stamp-python-modules: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES
 	    rm -f *.so && \
 	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
 	mv -f '$@.tmp' '$@'
-CLEANFILES += stamp-python-modules stamp-python-modules.tmp
+CLEANFILES += stamp-python stamp-python.tmp
 
 # Clean up after Python
 clean-local:
@@ -588,17 +588,17 @@ version:
 run_regress_driver = PYTHON=$(PYTHON) $(srcdir)/regress-driver
 
 # Regression-test the daemon
-gps-regress: gpsd stamp-python-modules
+gps-regress: gpsd stamp-python
 	$(run_regress_driver) $(srcdir)/test/daemon/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
-raw-regress: stamp-python-modules
+raw-regress: stamp-python
 	$(run_regress_driver) -r  $(srcdir)/test/daemon/*.log
 
 # Build the regression tests for the daemon.
-gps-makeregress: gpsd stamp-python-modules
+gps-makeregress: gpsd stamp-python
 	$(run_regress_driver) -b $(srcdir)/test/daemon/*.log
 
 # To build an individual test for a load named foo.log, put it in
@@ -747,7 +747,7 @@ www/internals.html: $(shell ls doc/*.xml)
 
 pydoc: www/pydoc/index.html
 
-www/pydoc/index.html: gps gpsfake gpscat gpsprof stamp-python-modules
+www/pydoc/index.html: gps gpsfake gpscat gpsprof stamp-python
 	mkdir -p www/pydoc
 	epydoc -v -q --html --graph all -n GPSD gps gpsfake gpscat gpsprof -o www/pydoc
 
