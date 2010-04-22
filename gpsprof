@@ -78,19 +78,25 @@ class spaceplot:
         cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
         alt_sum = 0
         alt_num = 0
+        alt_fixes = []
         lon_max = -9999
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
             if not gps.isnan(alt):
                     alt_sum += alt
+                    alt_fixes.append( alt)
                     alt_num += 1
             if lon > lon_max :
                     lon_max = lon
         if alt_num == 0:
             alt_avg = gps.NaN
+            alt_ep = gps.NaN
         else:
             alt_avg = alt_sum / alt_num
+            # Sort fixes by distance from average altitude
+            alt_fixes.sort(lambda x, y: cmp(abs(alt_avg - x), abs(alt_avg - y)))
+            alt_ep = abs( alt_fixes[ len(alt_fixes)/2 ] - alt_avg)
         if self.centroid[0] < 0:
             latstring = "%fS" % -self.centroid[0]
         elif self.centroid[0] == 0:
@@ -124,10 +130,10 @@ class spaceplot:
         fmt += 'chlen = cep/20\n'
         fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
         fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
-        fmt += 'plot using 1:2 with points ls 3 title "%d GPS fixes" ' % (len(self.fixes))
-        fmt += ' "-" cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
+        fmt += 'plot  cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
+        fmt += ' "-" using 1:2 with points ls 3 title "%d GPS fixes" ' % (len(self.fixes))
         if not gps.isnan(alt_avg):
-            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % (lon_max +1, alt_avg, alt_num, alt_avg)
+            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f, EP (50%%) = %f" \n' % (lon_max +1, alt_avg, alt_num, alt_avg, alt_ep)
         else:
             fmt += "\n"
         fmt += self.header(session)
