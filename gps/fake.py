@@ -69,6 +69,15 @@ import exceptions, threading, socket
 import gps
 import packet as sniffer
 
+# Define a per-character delay on writes so we won't spam the buffers
+# in the pty layer or gpsd itself.  The magic number here has to be
+# derived from observation.  If it's too high you'll slow the tests
+# down a lot.  If it's too low you'll get random spurious regression
+# failures that usually look like lines missing from the end of the
+# test output relative to the check file.  This number might have to
+# be adusted upward on faster machines.
+WRITE_PAD = 0.033
+
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -225,6 +234,7 @@ class FakeGPS:
         os.write(self.master_fd, line)
         if self.progress:
             self.progress("gpsfake: %s feeds %d=%s\n" % (self.name, len(line), `line`))
+        time.sleep(WRITE_PAD)
         self.index += 1
 
     def drain(self):
@@ -302,7 +312,11 @@ class DaemonInstance:
         return self.sock
     def is_alive(self):
         "Is the daemon still alive?"
-        return os.path.exists(self.pidfile)
+        try:
+            os.kill(self.pid, 0)
+            return True
+        except OSError:
+            return False
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
@@ -433,7 +447,7 @@ class TestSession:
         "Run the tests."
         try:
             self.progress("gpsfake: test loop begins\n")
-            while self.daemon.is_alive():
+            while self.daemon:
                 # We have to read anything that gpsd might have tried
                 # to send to the GPS here -- under OpenBSD the
                 # TIOCDRAIN will hang, otherwise.
@@ -443,9 +457,16 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    if not chosen.go_predicate(chosen.index, chosen):
+                    # Delay a few seconds after a GPS source is exhausted
+                    # before removing it.  This should give its subscribers time
+                    # to get gpsd's response before we call cleanup()
+                    if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
                         self.gps_remove(chosen.slave)
                         self.progress("gpsfake: GPS %s removed\n" % chosen.slave)
+                    elif not chosen.go_predicate(chosen.index, chosen):
+                        if chosen.exhausted == 0:
+                            chosen.exhausted = time.time()
+                            self.progress("gpsfake: GPS %s ran out of input\n" % chosen.slave)
                     else:
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
@@ -453,16 +474,18 @@ class TestSession:
                         chosen.send(chosen.enqueued)
                         chosen.enqueued = ""
                     while chosen.waiting():
-                        if chosen.poll() == -1:
-                            break
+                        chosen.poll()
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
-                            chosen.valid = 0
                             if self.expected:
                                 self.daemon.quit_on_quiesce(self.expected)
                                 self.expected = 0
+                        had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
+                if not self.writers and not had_output:
+                    self.progress("gpsfake: no writers and no output\n")
+                    break
             self.progress("gpsfake: test loop ends\n")
         finally:
             self.cleanup()
