@@ -468,32 +468,12 @@ class gps(gpsdata, gpscommon):
         return 0
 
     def next(self):
-        "Get next object (new-style interface)."
-        def __set_device__(self, data):
-            if "driver" in data:
-                self.driver = data["driver"]
-                if "subtype" in data:
-                    self.subtype = data["subtype"]
-                if self.driver:
-                    self.gps_id = self.driver
-                    if self.subtype:
-                        self.gps_id += self.subtype
         if self.poll() == -1:
             raise StopIteration
-        # There are a few things we need to stash away for later use
-        payload = dictwrapper(**self.data)
-        if self.data["class"] == "VERSION":
-            self.version = payload
-        elif self.data["class"] == "DEVICE":
-            __set_device__(self, data)
-        elif self.data["class"] == "DEVICES":
-            for device in self.data["devices"]:
-                __set_device__(self.data)
-                break
-        elif self.data["class"] == "TIMING":
-            payload.c_recv = self.received
-            payload.c_decode = time.time()
-        return payload
+        if hasattr(self, "data"):
+            return self.data
+        else:
+            return self.response
 
     def stream(self, flags=0, outfile=None):
         "Ask gpsd to stream reports at your client."
