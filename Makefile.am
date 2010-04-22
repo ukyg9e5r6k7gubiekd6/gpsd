@@ -588,17 +588,17 @@ version:
 run_regress_driver = PYTHON=$(PYTHON) $(srcdir)/regress-driver
 
 # Regression-test the daemon
-gps-regress: gpsd 
+gps-regress: gpsd stamp-python-modules
 	$(run_regress_driver) $(srcdir)/test/daemon/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
-raw-regress:
+raw-regress: stamp-python-modules
 	$(run_regress_driver) -r  $(srcdir)/test/daemon/*.log
 
 # Build the regression tests for the daemon.
-gps-makeregress: gpsd
+gps-makeregress: gpsd stamp-python-modules
 	$(run_regress_driver) -b $(srcdir)/test/daemon/*.log
 
 # To build an individual test for a load named foo.log, put it in
