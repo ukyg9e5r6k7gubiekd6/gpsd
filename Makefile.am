@@ -66,6 +66,10 @@ if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
 
+# List of Python scripts and modules, which are handled by setup.py.
+# Required to ensure that the extensions/modules/scripts are rebuilt via
+# setup.py in case they changed.
+# Also used to specify which files to include during make dist.
 PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps
 PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py
 
@@ -268,6 +272,13 @@ $(PYEXTENSIONS): stamp-python
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
 stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST)
+# Build Python modules and scripts using distutils via setup.py.
+# We define build-lib and build-scripts as distutils might have been
+# configured to use different directories, but we want to use the
+# produced files within the regress-driver script - therefore we
+# need to build them in directories we know about.
+# See configure.ac for the definition of PYTHON_DISTUTILS_LIBDIR
+# and PYTHON_DISTUTILS_SCRIPTDIR.
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
@@ -289,6 +300,9 @@ clean-local:
 
 # Install Python modules
 install-exec-local:
+# Make sure we do not use --root as option to setup.py install
+# when DESTDIR is not defined as distutils would use the current
+# working directory as root directory and not install to ${prefix}.
 	if test -z "$(DESTDIR)"; then \
 		$(PYTHON) setup.py install --prefix=${prefix} ;\
 	else \

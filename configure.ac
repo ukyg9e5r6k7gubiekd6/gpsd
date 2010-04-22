@@ -53,6 +53,13 @@ if test "x$ac_python" = "xyes"; then
 
 	PYTHON_CFLAGS="-DHAVE_PYTHON -I$PYTHON_PREFIX/include/python$PYTHON_VERSION"
 
+	# Define the directories we ask setup.py to install the
+	# modules/extensions and scripts to. The way chosen here reproduces
+	# the internal behaviour of distutils. Unfortunately distutils does
+	# not export the pre-defined/configured directories, so we have to
+	# define them on our own. For default installations of distutils the
+	# chosen values here will match what distutils uses.
+	# See Makefile.am to see how they're used with setup.py.
 	PYTHON_DISTUTILS_LIBDIR=[`$PYTHON -c 'import distutils.util; import sys; print ("build/lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3]))'`]
 	PYTHON_DISTUTILS_SCRIPTDIR=[`$PYTHON  -c 'import sys; print ("build/scripts-%s" %(sys.version[0:3], ))'`]
 

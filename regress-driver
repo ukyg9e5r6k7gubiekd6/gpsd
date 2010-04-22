@@ -20,6 +20,8 @@ fi
 if [ -z ${PYTHON} ]; then
     PYTHON="python"
 fi
+# For an explanation of what we define here, see the comment on
+# PYTHON_DISTUTILS_LIBDIR/PYTHON_DISTUTILS_SCRIPTDIR in configure.ac
 py_libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print("lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3]))'`
 py_scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print("scripts-%s" %(sys.version[0:3], ))'`
 if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
