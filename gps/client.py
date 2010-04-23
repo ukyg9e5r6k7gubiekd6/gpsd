@@ -142,7 +142,8 @@ class gpsjson(gpscommon):
             return t
         self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
 
-    def streamcooker(flags):
+    def stream(self, flags=0, outfile=None):
+        "Control streaming reports from the daemon,"
         if flags & WATCH_DISABLE:
             arg = '?WATCH={"enable":false'
             if flags & WATCH_JSON:
@@ -169,7 +170,7 @@ class gpsjson(gpscommon):
                 arg += ',"scaled":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % outfile
-        return arg
+        return self.send(arg + "}")
 
 class dictwrapper:
     "Wrapper that yields both class and dictionary behavior,"

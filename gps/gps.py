@@ -11,12 +11,11 @@
 # away, but it's likely to be deprecated in favor of something more
 # Pythonic.
 #
-import time, sys
+# The JSON parts of this (which will be reused by any new interface)
+# now live in a different module.
+#
+import time
 from client import *
-
-#
-# Stuff below this line is specific to the old interface 
-#
 
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
@@ -343,11 +342,10 @@ class gps(gpsdata, gpsjson):
                     arg += 'r+'
                     return self.send(arg)
         else: # flags & WATCH_NEWSTYLE:
-            arg = self.streamcooker(flags)
-            return self.send(arg + "}")
+            gpsjson.stream(flags)
 
 if __name__ == '__main__':
-    import readline, getopt
+    import readline, getopt, sys
     (options, arguments) = getopt.getopt(sys.argv[1:], "v")
     streaming = False
     verbose = False
