@@ -67,7 +67,7 @@ altitude reports when the fix quality is too low.</para>
 
 <para><application>gpsmon</application> is a designed to run in a
 terminal emulator with a minimum 25x80 size; the non-GUI interface is
-a design choice made to accomodate users operating in constrained
+a design choice made to accommodate users operating in constrained
 environments and over telnet or ssh connections.  If run in a larger
 window, the size of the packet-log window will be increased to
 fit.</para>
