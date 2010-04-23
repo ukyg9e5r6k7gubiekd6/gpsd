@@ -71,7 +71,7 @@ endif
 # setup.py in case they changed.
 # Also used to specify which files to include during make dist.
 PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps
-PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py
+PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py gps/client.py
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
 if HAVE_PYTHON
