@@ -56,7 +56,7 @@ if not 'clean' in sys.argv:
 gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
             "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
 include_dirs = [ os.path.realpath(os.path.dirname(__file__)) ]
-version_out = os.popen(MAKE + " version")
+version_out = os.popen(MAKE + " -s version")
 version = version_out.read()
 print(version)
 if version_out.close():
