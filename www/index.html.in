@@ -92,7 +92,7 @@ src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
 <p>We've been warning it was coming for years, and it's here: in 2.90,
 the request/response protocol used by <code>gpsd</code> has changed in
 ways that will break your application if you're not careful.  The old
-protocol is gone from the damon.  It is still supported in the client
+protocol is gone from the daemon.  It is still supported in the client
 library, but will remain so only for a very limited time.  Read <a
 href="protocol-transition.html">"Moving to GPSD-NG: a Guide for Client
 Developers"</a> to find out why this is happening and what you need to
