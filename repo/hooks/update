@@ -138,5 +138,13 @@ esac
 
 /gitroot/gpsd/hooks/ciabot.py ${refname} $(git rev-list ${oldrev}..${newrev} | tac)
 
+cdto=$(git rev-parse --show-cdup)
+echo "Path to base directory: $cdto"
+echo "Files modified:"
+for filename in `git diff --name-only ${oldrev} ${newrev}`
+do
+    echo "Source path: $filename"
+done
+
 # --- Finished
 exit 0
