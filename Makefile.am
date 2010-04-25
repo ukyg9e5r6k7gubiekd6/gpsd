@@ -757,15 +757,27 @@ www/performance/performance.html: www/performance/performance.xml
 www/internals.html: $(shell ls doc/*.xml)
 	cd doc; xmlto xhtml-nochunks explanation.xml; cp explanation.html ../www/internals.html
 
+if HAVE_PYTHON
 # Experimenting with pydoc.  Not yet fired by any other productions.
 
 pydoc: www/pydoc/index.html
 
+# We need to run epydoc with the Python version we built the modules for.
+# So we define our on epydoc instead of using /usr/bin/epydoc
+EPYDOC = $(PYTHON) -c 'from epydoc.cli import cli; cli()'
+
+# We have pre-compiled python scripts in the script directory, so we exclude
+# all files ending on c here. Needs a better solution as soon as we have a
+# script ending with c.
+EPYDOCSCRIPTS = $(shell find $(PYTHON_DISTUTILS_SCRIPTDIR) -name '*c' -o -type f -print)
+EPYDOCMODULES = $(PYTHON_DISTUTILS_LIBDIR)/gps
+
 www/pydoc/index.html: gps gpsfake gpscat gpsprof stamp-python
 	mkdir -p www/pydoc
-	epydoc -v -q --html --graph all -n GPSD gps gpsfake gpscat gpsprof -o www/pydoc
+	$(EPYDOC) -v --html --graph all -n GPSD $(EPYDOCSCRIPTS) $(EPYDOCMODULES) -o www/pydoc
 
 .PHONY: pydoc
+endif
 
 # Productions for setting up and performing udev tests.
 #
