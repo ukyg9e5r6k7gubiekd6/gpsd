@@ -710,14 +710,14 @@ static bool add_device(char *device_name)
 /*@ +statictrans @*/
 /*@ +globstate @*/
 
-static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
+static bool awaken(struct gps_device_t *device)
 /* awaken a device and notify all watchers*/
 {
     /* open that device */
     if (!initialized_device(device)) {
 	if (!open_device(device->gpsdata.dev.path)) {
-	    gpsd_report(LOG_PROG, "client(%d): open failed\n",
-			sub_index(user));
+	    gpsd_report(LOG_PROG, "%s: open failed\n", 
+			device->gpsdata.dev.path);
 	    free_device(device);
 	    return false;
 	}
@@ -725,14 +725,15 @@ static bool awaken(struct subscriber_t *user, struct gps_device_t *device)
 
     if (device->gpsdata.gps_fd != -1) {
 	gpsd_report(LOG_PROG,
-		    "client(%d): device %d (fd=%d, path %s) already active.\n",
-		    sub_index(user), (int)(device - devices),
-		    device->gpsdata.gps_fd, device->gpsdata.dev.path);
+		    "device %d (fd=%d, path %s) already active.\n",
+		    (int)(device - devices),
+		    device->gpsdata.gps_fd, 
+		    device->gpsdata.dev.path);
 	return true;
     } else {
 	if (gpsd_activate(device) < 0) {
-	    gpsd_report(LOG_ERROR, "client(%d): device activation failed.\n",
-			sub_index(user));
+	    gpsd_report(LOG_ERROR, "%s: device activation failed.\n",
+		    device->gpsdata.dev.path);
 	    return false;
 	} else {
 	    gpsd_report(LOG_RAW,
@@ -1005,7 +1006,7 @@ static void handle_request(struct subscriber_t *sub,
 		    /* awaken all devices */
 		    for (devp = devices; devp < devices + MAXDEVICES; devp++)
 			if (allocated_device(devp))
-			    (void)awaken(sub, devp);
+			    (void)awaken(devp);
 		} else {
 		    devp = find_device(sub->policy.devpath);
 		    if (devp == NULL) {
@@ -1014,7 +1015,7 @@ static void handle_request(struct subscriber_t *sub,
 				       sub->policy.devpath);
 			gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
 			goto bailout;
-		    } else if (!awaken(sub, devp))
+		    } else if (!awaken(devp))
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n",
 				       sub->policy.devpath);
@@ -1057,7 +1058,7 @@ static void handle_request(struct subscriber_t *sub,
 	    } else {
 		if (devconf.path[0] != '\0') {
 		    /* user specified a path, try to assign it */
-		    if (!awaken(sub, find_device(devconf.path))) {
+		    if (!awaken(find_device(devconf.path))) {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
@@ -1645,6 +1646,29 @@ int main(int argc, char *argv[])
 		if ((changed & PACKET_IS) == 0)
 		    continue;
 
+		/* add any just-idebtifuied device to watcher lists */
+		if ((changed & DRIVER_IS) != 0) {
+		    bool listeners = false;
+		    for (sub = subscribers;
+			 sub < subscribers + MAXSUBSCRIBERS; sub++)
+			if (sub->active != 0
+			    && sub->policy.watcher
+			    && (sub->policy.devpath[0] == '\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path)==0))
+			    listeners = true;
+		    if (listeners)
+			(void)awaken(device);
+		}
+
+		/* handle laggy response to a firmware version query */
+		if ((changed & (DEVICEID_IS | DRIVER_IS)) != 0) {
+		    assert(device->device_type != NULL);
+		    {
+			char id2[GPS_JSON_RESPONSE_MAX];
+			json_device_dump(device, id2, sizeof(id2));
+			notify_watchers(device, id2);
+		    }
+		}
+
 		/* raw hook and relaying functions */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
 		     sub++) {
@@ -1698,26 +1722,6 @@ int main(int argc, char *argv[])
 
 		if (device->gpsdata.fix.mode == MODE_3D)
 		    netgnss_report(device);
-
-		else {
-		    /* we may need to add device to new-style watcher lists */
-		    if ((changed & DEVICE_IS) != 0) {
-			for (sub = subscribers;
-			     sub < subscribers + MAXSUBSCRIBERS; sub++)
-			    if (sub->policy.watcher
-				&& sub->policy.devpath[0] == '\0')
-				(void)awaken(sub, device);
-		    }
-		    /* handle laggy response to a firmware version query */
-		    if ((changed & (DEVICEID_IS | DEVICE_IS)) != 0) {
-			assert(device->device_type != NULL);
-			{
-			    char id2[GPS_JSON_RESPONSE_MAX];
-			    json_device_dump(device, id2, sizeof(id2));
-			    notify_watchers(device, id2);
-			}
-		    }
-		}
 		/* *INDENT-OFF* */
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {

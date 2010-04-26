@@ -229,7 +229,7 @@ typedef enum {
 #define RAW_IS  	0x00008000u
 #define USED_IS 	0x00010000u
 #define SPEEDERR_IS	0x00020000u
-#define DEVICE_IS	0x00040000u
+#define DRIVER_IS	0x00040000u
 #define DEVICEID_IS	0x00100000u
 #define ERROR_IS	0x00200000u
 #define RTCM2_IS	0x00400000u

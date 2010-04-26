@@ -688,13 +688,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * If this is the first time we've achieved sync on this
 	 * device, or the the driver type has changed for any other
 	 * reason, that's a significant event that the caller needs to
-	 * know about.  Using DEVICE_IS this way is a bit shaky but
-	 * we're short of bits in the flag mask (client library uses
-	 * it differently).
+	 * know about.
 	 */
 	if (first_sync || session->notify_clients) {
 	    session->notify_clients = false;
-	    received |= DEVICE_IS;
+	    received |= DRIVER_IS;
 	}
 
 	/* Get data from current packet into the fix structure */
