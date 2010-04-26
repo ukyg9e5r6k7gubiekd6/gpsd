@@ -149,7 +149,7 @@ class SkyView(gtk.DrawingArea):
         self.draw_string(widget, x+10, y, "W")
         # The satellites
         for sat in self.satellites:
-            (x, y) = self.pol2cart(sat.azimuth, sat.elevation)
+            (x, y) = self.pol2cart(sat.az, sat.el)
             if sat.ss < 10:
                 self.set_color("Black")
             elif sat.ss < 30:
@@ -561,12 +561,13 @@ class Base:
             if hook:	# Remove this guard when we have all hooks 
                 widget.set_text(hook(self, tpv))
 
-    def update_skyview(self, satellites):
+    def update_skyview(self, data):
         "Update the satellite list and skyview."
+        satellites = data.satellites
         for (i, satellite) in enumerate(satellites): 
             self.set_satlist_field(i, 0, satellite.PRN)
-            self.set_satlist_field(i, 1, satellite.elevation)
-            self.set_satlist_field(i, 2, satellite.azimuth)
+            self.set_satlist_field(i, 1, satellite.el)
+            self.set_satlist_field(i, 2, satellite.az)
             self.set_satlist_field(i, 3, satellite.ss)
             yesno = 'N'
             if satellite.used:
@@ -602,7 +603,7 @@ class Base:
                 return True
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
-                self.update_skyview(self.daemon.satellites)
+                self.update_skyview(self.daemon.data)
             elif self.daemon.data["class"] == "TPV":
                 self.update_gpsdata(self.daemon.data)
             elif self.daemon.data["class"] == "AIS":
