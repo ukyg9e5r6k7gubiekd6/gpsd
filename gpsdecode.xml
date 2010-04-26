@@ -157,9 +157,7 @@ GPSD project website.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
-<para>AIDVM decoding presently only parses fields for the sentence
-types 1-21 and 24. Decoding of types 6-8, 12-17, and 20-21
-is unverified. AIVDM encoding is not yet supported.</para>
+<para>AIDVM decoding of types 16-17, 22-23, and 25-26 is unverified.</para>
 
 <para>RTCM3 decoding is buggy and incomplete.</para>
 
