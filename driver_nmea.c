@@ -438,7 +438,6 @@ static gps_mask_t processGPGSA(int count, char *field[],
 		    prn;
 	}
 	mask |= DOP_IS | USED_IS;
-	/* FIXME: perhaps dump the satellite vector here? */
 	gpsd_report(LOG_DATA,
 		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f mask=%s\n",
 		    session->newdata.mode,
