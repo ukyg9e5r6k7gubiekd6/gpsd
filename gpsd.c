@@ -1595,6 +1595,7 @@ int main(int argc, char *argv[])
 		context.dsock = -1;
 	    }
 	}
+
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
@@ -1646,7 +1647,7 @@ int main(int argc, char *argv[])
 		if ((changed & PACKET_IS) == 0)
 		    continue;
 
-		/* add any just-idebtifuied device to watcher lists */
+		/* add any just-identified device to watcher lists */
 		if ((changed & DRIVER_IS) != 0) {
 		    bool listeners = false;
 		    for (sub = subscribers;
@@ -1668,6 +1669,25 @@ int main(int argc, char *argv[])
 			notify_watchers(device, id2);
 		    }
 		}
+
+		if (device->gpsdata.fix.mode == MODE_3D)
+		    netgnss_report(device);
+
+		/* *INDENT-OFF* */
+		/* copy each RTCM-104 correction to all GPSes */
+		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
+		    struct gps_device_t *gps;
+		    for (gps = devices; gps < devices + MAXDEVICES; gps++)
+			if (gps->device_type != NULL
+			    && gps->device_type->rtcm_writer != NULL)
+			    (void)gps->device_type->rtcm_writer(gps,
+								(char *)gps->
+								packet.
+								outbuffer,
+								gps->packet.
+								outbuflen);
+		}
+		/* *INDENT-ON* */
 
 		/* raw hook and relaying functions */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
@@ -1718,26 +1738,8 @@ int main(int argc, char *argv[])
 		    }
 #endif /* BINARY_ENABLE */
 		    /* *INDENT-ON* */
-		}
-
-		if (device->gpsdata.fix.mode == MODE_3D)
-		    netgnss_report(device);
-		/* *INDENT-OFF* */
-		/* copy each RTCM-104 correction to all GPSes */
-		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
-		    struct gps_device_t *gps;
-		    for (gps = devices; gps < devices + MAXDEVICES; gps++)
-			if (gps->device_type != NULL
-			    && gps->device_type->rtcm_writer != NULL)
-			    (void)gps->device_type->rtcm_writer(gps,
-								(char *)gps->
-								packet.
-								outbuffer,
-								gps->packet.
-								outbuflen);
-		}
-		/* *INDENT-ON* */
-	    }
+		} /* subscribers */
+	    } /* devices */
 
 	    /* watch all channels associated with this device */
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
