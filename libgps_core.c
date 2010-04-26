@@ -602,7 +602,6 @@ int gps_poll(struct gps_data_t *gpsdata)
     }
 
     assert(eol != NULL);
-    // FIXME: Make the JSON parser stop on \n so this isn't needed
     *eol = '\0';
     response_length = eol - priv->buffer + 1;
     received = gpsdata->online = timestamp();
