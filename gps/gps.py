@@ -342,7 +342,7 @@ class gps(gpsdata, gpsjson):
                     arg += 'r+'
                     return self.send(arg)
         else: # flags & WATCH_NEWSTYLE:
-            gpsjson.stream(flags)
+            gpsjson.stream(self, flags)
 
 if __name__ == '__main__':
     import readline, getopt, sys
