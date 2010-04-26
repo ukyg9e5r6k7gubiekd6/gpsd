@@ -214,3 +214,7 @@ regression tests, first build gpsd from sources, and then run "make
 check".  It is not necessary to install first, but you do need
 to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.
+
+17. If you installed from a .deb under Debian or a Debian-derived 
+system, you may need to dpkg-reconfigure gpsd to enable the hotplug
+magic ("Start gpsd automatically").
