@@ -434,11 +434,12 @@ void gpsd_assert_sync(struct gps_device_t *session)
      * 1pps derived time data to ntpd.
      */
 
-    gpsd_report(LOG_INF, "NTPD ntpd_link_activate: %d\n",
-		(int)session->shmindex >= 0);
     /* do not start more than one ntp thread */
     if (!(session->shmindex >= 0))
 	ntpd_link_activate(session);
+
+    gpsd_report(LOG_INF, "NTPD ntpd_link_activate: %d\n",
+		(int)session->shmindex >= 0);
 
 #endif /* NTPSHM_ENABLE */
 }
