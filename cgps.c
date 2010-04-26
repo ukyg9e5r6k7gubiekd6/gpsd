@@ -105,12 +105,6 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
-/*
- * FIXME: use here is a minor bug, should report epx and epy separately.
- * How to mix together epx and epy to get a horizontal circular error.
- */
-#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
-
 static struct gps_data_t *gpsdata;
 static time_t status_timer;	/* Time of last state change. */
 static int state = 0;		/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
@@ -396,13 +390,17 @@ static void windowsetup(void)
 	 * there in the first place because I arbitrarily thought they
 	 * sounded interesting. ;^) */
 
-	if (window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
+	if (window_length >= (MIN_GPS_DATAWIN_SIZE + 5)) {
 	    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET,
-			    "Horizontal Err:");
+			    "Longitude Err:");
 	    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET,
-			    "Vertical Err:");
-	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
-	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
+			    "Latitude Err:");
+	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET,
+			    "Altitude Err:");
+	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, 
+			    "Course Err:");
+	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, 
+			    "Speed Err:");
 	}
 
 	(void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -660,15 +658,21 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     if (window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 
-	// FIXME: Report both epx and epy!
 	/* Fill in the estimated horizontal position error. */
-	if (isnan(gpsdata->fix.epx) == 0 && isnan(gpsdata->fix.epx) == 0)
+	if (isnan(gpsdata->fix.epx) == 0)
 	    (void)snprintf(scr, sizeof(scr), "+/- %d %s",
-			   (int)(EMIX(gpsdata->fix.epx, gpsdata->fix.epy) *
-				 altfactor), altunits);
+			   (int)(gpsdata->fix.epx * altfactor), altunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
 	(void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+			scr);
+
+	if (isnan(gpsdata->fix.epy) == 0)
+	    (void)snprintf(scr, sizeof(scr), "+/- %d %s",
+			   (int)(gpsdata->fix.epy * altfactor), altunits);
+	else
+	    (void)snprintf(scr, sizeof(scr), "n/a");
+	(void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated vertical position error. */
@@ -677,7 +681,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			   (int)(gpsdata->fix.epv * altfactor), altunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated track error. */
@@ -686,7 +690,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			   (int)(gpsdata->fix.epd));
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated speed error. */
@@ -695,7 +699,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			   (int)(gpsdata->fix.eps * speedfactor), speedunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
     }
 
