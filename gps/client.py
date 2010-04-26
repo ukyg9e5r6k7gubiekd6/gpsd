@@ -141,6 +141,9 @@ class gpsjson(gpscommon):
                 t[ka] = va
             return t
         self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
+        # Should be done for any other array-valued subobjects, too.
+        if self.data["class"] == "SKY":
+            self.data.satellites = map(lambda x: dictwrapper(**x), self.data.satellites)
 
     def stream(self, flags=0, outfile=None):
         "Control streaming reports from the daemon,"
