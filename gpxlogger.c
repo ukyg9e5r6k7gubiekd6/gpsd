@@ -189,10 +189,6 @@ static struct gps_fix_t gpsfix;
 
 #include <glib/gprintf.h>
 
-/*
- * FIXME: use here is a minor bug, should report epx and epy separately.
- * How to mix together epx and epy to get a horizontal circular error.
- */
 #define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
 
 DBusConnection *connection;
