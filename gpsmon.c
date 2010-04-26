@@ -765,7 +765,6 @@ int main(int argc, char **argv)
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
 		    else if (serial) {
-			// FIXME: some sort of debug window display here?
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
 			 */
