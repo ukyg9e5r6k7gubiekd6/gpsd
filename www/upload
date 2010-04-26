@@ -11,14 +11,24 @@ webdir=shell.berlios.de:/home/groups/gpsd/htdocs
 # Ensure all derived HTML and checksums are up to date.
 (cd ..; make website)
 
+
 if [ $1 ]
 then
     for f in $*; do scp $f $webdir/$f; done
 else
-    scp *.html *.png *.gif *.css *.js *.txt \
+    eligible=`ls *.html *.png *.gif *.css *.js *.txt \
 	performance/*.html performance/*.txt performance/*.png \
-	../TODO ../NEWS \
-	$webdir
+	../TODO ../NEWS`
+    if [ -e .upload-stamp ]
+    then
+	eligible=`find $eligible -newer .upload-stamp`
+    fi
+    if [ -z "$eligible" ]
+    then
+        echo "Website is up to date."
+    else
+        echo scp $eligible $webdir
+    fi
     #scp gps_report.cgi $cgidir
 fi
 
