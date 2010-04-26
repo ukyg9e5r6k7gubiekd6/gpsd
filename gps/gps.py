@@ -239,6 +239,7 @@ class gps(gpsdata, gpsjson):
                     self.satellites = newsats
                     self.valid |= SATELLITE_SET
 
+    def __oldstyle_shim(self):
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
             if k not in self.data.keys():
@@ -305,6 +306,7 @@ class gps(gpsdata, gpsjson):
             self.raw_hook(self.response);
         if self.response.startswith("{"):
             self.json_unpack(self.response)
+            self.__oldstyle_shim()
             self.newstyle = True
         else:
             self.__oldstyle_unpack(self.response)
