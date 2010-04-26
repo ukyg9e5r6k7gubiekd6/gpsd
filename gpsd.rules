@@ -13,12 +13,11 @@
 # The following setup works on Debian - something similar will apply on 
 # other distributions:
 # 
-#   /etc/udev/gpsd.rules
-#   /etc/udev/rules.d/025_gpsd.rules -> ../gpsd.rules
+#   /lib/udev/rules.d/025_gpsd.rules
 #   /lib/udev/gpsd.hotplug.wrapper
 #   /lib/udev/gpsd.hotplug
 # 
-# Setting the link in /etc/udev/rules.d activates the rule and determines
+# Setting the link in /lib/udev/rules.d activates the rule and determines
 # when to run it on boot (similar to init.d processing).
 
 SUBSYSTEM!="tty", GOTO="gpsd_rules_end"

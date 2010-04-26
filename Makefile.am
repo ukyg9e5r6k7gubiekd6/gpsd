@@ -785,19 +785,14 @@ endif
 # another window, then run 'make udev-test', then plug and unplug the
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
-#
-# Note: We copy gpsd.rules to two places rather than symlinking in order
-# to avoid confusing inotify, which Ubuntu uses to track changes.
 
 udev-install:
-	cp $(srcdir)/gpsd.rules /lib/udev/
 	cp $(srcdir)/gpsd.rules /lib/udev/rules.d/025_gpsd.rules
-	cp $(srcdir)/gpsd.hotplug /lib/udev/
-	cp $(srcdir)/gpsd.hotplug.wrapper /lib/udev/
+	cp $(srcdir)/gpsd.hotplug $(srcdir)/gpsd.hotplug.wrapper /lib/udev/
 	chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper
 
 udev-uninstall:
-	rm -f /lib/udev/{gpsd.rules,gpsd.hotplug,gpsd.hotplug.wrapper}
+	rm -f /lib/udev/{gpsd.hotplug,gpsd.hotplug.wrapper}
 	rm -f /lib/udev/rules.d/025_gpsd.rules
 
 udev-test:
