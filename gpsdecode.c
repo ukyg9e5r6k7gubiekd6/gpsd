@@ -410,7 +410,7 @@ static void decode(FILE * fpin, FILE * fpout)
 /*@ +compdestroy +compdef +usedef @*/
 
 /*@ -compdestroy @*/
-static void encode(FILE * fpin, bool repack, FILE * fpout)
+static void encode(FILE * fpin, FILE * fpout)
 /* dump format on fpin to RTCM-104 on fpout */
 {
     char inbuf[BUFSIZ];
@@ -432,24 +432,10 @@ static void encode(FILE * fpin, bool repack, FILE * fpout)
 	    exit(1);
 	}
 	if ((gpsdata.set & RTCM2_SET) != 0) {
-	    if (repack) {
-		// FIXME: This code is presently broken
-		struct gps_packet_t lexer;
-		(void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-		(void)rtcm2_repack(&gpsdata.rtcm2, lexer.isgps.buf);
-		if (fwrite(lexer.isgps.buf,
-			   sizeof(isgps30bits_t),
-			   (size_t) gpsdata.rtcm2.length,
-			   fpout) != (size_t) gpsdata.rtcm2.length)
-		    (void)fprintf(stderr,
-				  "gpsdecode: report write failed.\n");
-		memset(&lexer, 0, sizeof(lexer));
-	    } else {
-		/* this works */
-		char outbuf[BUFSIZ];
-		rtcm2_json_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
-		(void)fputs(outbuf, fpout);
-	    }
+	    /* this works */
+	    char outbuf[BUFSIZ];
+	    rtcm2_json_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
+	    (void)fputs(outbuf, fpout);
 	}
 	if ((gpsdata.set & AIS_SET) != 0) {
 	    char outbuf[BUFSIZ];
@@ -508,7 +494,7 @@ int main(int argc, char **argv)
     argv += optind;
 
     if (mode == doencode)
-	encode(stdin, !json, stdout);
+	encode(stdin, stdout);
     else
 	decode(stdin, stdout);
     exit(0);
