@@ -1,12 +1,13 @@
-# Name: "Rabbit", an AUV using an ET-322 engine board
+# Name: ET-322 engine board from GlobalSat
 # Chipset: SiRF-III
 # Submitted-by: Val Schmidt <vschmidt@ccom.unh.edu>
 # Date: 25 Apr 2010
 # Location: Newark, DE
 #
-# The AUV was placed in the parking log of a university
-# laboratory for the capture of this data. It was completely stationary. Also,
-# this sample contains strings that indicate the date.
+# The bard lives inside a Gavia AUV <http://www.gavia.is/>, which was
+# placed in the parking log of a university laboratory for the capture
+# of this data. It was completely stationary. Also, this sample
+# contains strings that indicate the date.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
