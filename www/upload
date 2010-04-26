@@ -27,7 +27,7 @@ else
     then
         echo "Website is up to date."
     else
-        echo scp $eligible $webdir
+        scp $eligible $webdir && touch .upload-stamp
     fi
     #scp gps_report.cgi $cgidir
 fi

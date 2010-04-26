@@ -111,6 +111,7 @@ www/rtcm-104.html
 www/srec.html
 www/writing-a-driver.html
 www/internals.html
+www/.upload-stamp
 doc/explanation.html
 # Controls for the flock tester
 devtools/.flocktest.ini

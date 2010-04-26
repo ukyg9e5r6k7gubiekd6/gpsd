@@ -717,6 +717,7 @@ TESTS = do-tests
 # FIXME: Needs to be replaced by a $(MANGENERATOR) rule
 %.html: %.xml
 	xmlto xhtml-nochunks $<
+	if [ $< -nt www/$< ]; then cp $< www/$<; fi; done 
 
 website: $(XML:.xml=.html) \
 		www/AIVDM.html www/NMEA.html \
@@ -725,7 +726,6 @@ website: $(XML:.xml=.html) \
 		www/index.html www/hardware.html \
 		www/performance/performance.html \
 		www/internals.html
-	@cp $(XML:.xml=.html) www
 
 www/AIVDM.html: www/AIVDM.txt
 	asciidoc -a toc -o www/AIVDM.html www/AIVDM.txt
