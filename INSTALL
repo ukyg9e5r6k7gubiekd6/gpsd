@@ -218,3 +218,9 @@ required for regression tests.
 17. If you installed from a .deb under Debian or a Debian-derived 
 system, you may need to dpkg-reconfigure gpsd to enable the hotplug
 magic ("Start gpsd automatically").
+
+18. Note for people using gpsd as time source for ntpd: In case you're
+using dhcp3-client to configure your system, make sure you disable
+/etc/dhcp3/dhclient-exit-hooks.d/ntp as dhclient would restart
+ntpd with an automatically created ntp.conf otherwise - and gpsd
+would not be ablt to talk with ntpd anymore.
