@@ -58,7 +58,7 @@ shouldn't be difficult.
 The Python client interface is buggy and overcomplicated and needs a
 rethink. (Much of the complication is a hangover from old protocol.)
 
-** Detect old-protocol daeemons from the library.
+** Detect old-protocol daemons from the library.
 
 Might be possible using read-with-timeout.  If so, maybe we don't
 deep-six old protocol support in 3.0 after all. 
@@ -73,7 +73,7 @@ It's blocked on skyview computation.
 
 *** Complete and test the speed/parity/stopbit methods in the drivers
 
-These are used for the '?DEVICE' (old 'B') command.  All work for 8N1.
+These are used for the '?DEVICE' command.  All work for 8N1.
 
 **** superstar2: not implemented (driver is unfinished)
 **** italk: not implemented (but could be)
@@ -98,7 +98,7 @@ there should be a (privileged) command to redirect RTCM connections.
 
 This is a solved problem for generic NMEA, EverMore, TripMate,
 EarthMate, TNTC, Zodiac, and RTCM104 drivers (if only because they
-don't configure any device setting).
+don't configure any device settings).
 
 The SiRF driver now restores NMEA when necessary.  It also restores
 some (but not all) of the things it tweaks in binary mode -- at the
