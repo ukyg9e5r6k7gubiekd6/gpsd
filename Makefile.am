@@ -285,7 +285,7 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 		$(PYTHON) setup.py build \
 			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
 			--build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
-			--mangenerator '$(MANGENERATOR)') && \
+			--mangenerator '$(XMLPROC)') && \
 	(cd '$(srcdir)/gps' && \
 	    rm -f *.so && \
 	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
@@ -390,16 +390,16 @@ man_MANS = \
 BUILT_MANPAGES = $(MANPAGES_DIST)
 
 .xml.1:
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) $<
 
 .xml.3:
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) $<
 
 .xml.5:
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) $<
 
 .xml.8:
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) $<
 
 # Another instance of the multiple-outputs hack.
 gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1: stamp-gps-manpages
@@ -407,7 +407,7 @@ gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1: stamp-gps-manpages
 stamp-gps-manpages: gps.xml
 	@rm -f '$@' '$@.tmp'
 	echo 'timestamp for $@' > '$@.tmp' && \
-	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) '$(srcdir)/gps.xml' && \
+	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) '$(srcdir)/gps.xml' && \
 	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
@@ -710,12 +710,14 @@ TESTS = do-tests
 #
 # None of these productions are fired by 'make all'.
 
-# FIX-ME: Needs to be replaced by a $(MANGENERATOR) rule
-%.html: %.xml
-	xmlto xhtml-nochunks $<
-	if [ $< -nt www/$< ]; then cp $< www/$<; fi; done 
+www/%.html: %.xml
+	$(XMLPROC) $(XMLPROCFLAGS) $(HTMLTARGET) $<; cp $(<:.xml=.html) $@
 
-website: $(XML:.xml=.html) \
+website: www/gpscat.html www/gpsctl.html www/gpsdecode.html \
+		www/gpsd.html www/gpsfake.html www/gpsmon.html \
+		www/gpspipe.html www/gpsprof.html www/gps.html \
+		www/libgpsd.html www/libgpsmm.html www/libgps.html \
+		www/rtcm-104.html www/srec.html \
 		www/AIVDM.html www/NMEA.html \
 		www/protocol-evolution.html www/protocol-transition.html \
 		www/client-howto.html www/writing-a-driver.html \

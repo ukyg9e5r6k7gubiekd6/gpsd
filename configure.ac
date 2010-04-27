@@ -994,12 +994,13 @@ AM_CONDITIONAL([IPV6_ENABLE], [test x"$ac_ipv6" = x"yes"])
 
 dnl Test for XSLT processor (xsltproc or xmlto)
 AC_CHECK_PROG(WITH_XSLTPROC,[xsltproc],[yes],[no])
-MANGENERATOR=
+XMLPROC=
 MANTARGET=
-MANFLAGS=
+XMLPROCFLAGS=
 if test "x$WITH_XSLTPROC" = "xyes"; then
     AC_MSG_CHECKING([whether xsltproc knows about docbook xsl])
-    DOCBOOK_URI='http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
+    DOCBOOK_MAN_URI='http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
+    DOCBOOK_HTML_URI='http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl'
     cat >conftest.xml <<_EOF
        <refentry id="foo.1">
 	  <refmeta>
@@ -1014,31 +1015,34 @@ if test "x$WITH_XSLTPROC" = "xyes"; then
 	</refentry>
 _EOF
     if xsltproc --nonet --noout "$DOCBOOK_URI" conftest.xml >/dev/null 2>&1; then
-	MANGENERATOR=xsltproc
-	MANTARGET="$DOCBOOK_URI"
-	MANFLAGS="--nonet"
+	XMLPROC=xsltproc
+	MANTARGET="$DOCBOOK_MAN_URI"
+	HTMLTARGET="$DOCBOOK_HTML_URI"
+	XMLPROCFLAGS="--nonet"
 	AC_MSG_RESULT([yes])
     else
 	AC_MSG_RESULT([no])
     fi
     rm -f conftest.xml foo.1
 fi
-if test x"$MANGENERATOR" = x; then
+if test x"$XMLPROC" = x; then
     AC_CHECK_PROG(WITH_XMLTO,[xmlto],[yes],[no])
     if test "x$WITH_XMLTO" = "xyes"; then
-	MANGENERATOR=xmlto
+	XMLPROC=xmlto
 	MANTARGET=man
-	MANFLAGS=
+	HTMLTARGET=xhtml-nochunks
+	XMLPROCFLAGS=
     else
 	AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages.])
 	AC_MSG_WARN([To build man pages, install xsltproc/xsltlib or xmlto and run autogen.sh again.])
     fi
 fi
 AM_CONDITIONAL([HAVE_XSLT_PROCESSOR],
-	       [test x"$MANGENERATOR" != x])
-AC_SUBST(MANGENERATOR)
+	       [test x"$XMLPROC" != x])
+AC_SUBST(XMLPROC)
 AC_SUBST(MANTARGET)
-AC_SUBST(MANFLAGS)
+AC_SUBST(HTMLTARGET)
+AC_SUBST(XMLPROCFLAGS)
 
 dnl Gentoo systems can have a problem with the Python path
 if test -e /etc/gentoo-release; then

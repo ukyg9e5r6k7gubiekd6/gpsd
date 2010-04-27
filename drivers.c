@@ -358,7 +358,6 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup)
 	(void)nmea_send(session, "$PASHQ,RID");
-    /* FIX-ME: Do we need to do this on reactivate as well? */
     if (event == event_identified) {
 	/* turn WAAS on. can't hurt... */
 	(void)nmea_send(session, "$PASHS,WAS,ON");
