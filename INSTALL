@@ -216,8 +216,8 @@ to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.
 
 17. If you installed from a .deb under Debian or a Debian-derived 
-system, you may need to dpkg-reconfigure gpsd to enable the hotplug
-magic ("Start gpsd automatically").
+system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
+hotplug magic ("Start gpsd automatically").
 
 18. Note for people using gpsd as time source for ntpd: In case you're
 using dhcp3-client to configure your system, make sure you disable
