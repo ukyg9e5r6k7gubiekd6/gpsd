@@ -180,6 +180,9 @@ class FakePTY(FakeGPS):
                  speed=4800, databits=8, parity='N', stopbits=1,
                  progress=None):
         FakeGPS.__init__(self, testload, progress)
+        # Allow Serial: header to be overridden by explicit spped.
+        if self.testload.serial:
+            (speed, databits, parity, stopbits) = self.testload.serial
         self.speed = speed
         baudrates = {
             0: termios.B0,
@@ -203,9 +206,6 @@ class FakePTY(FakeGPS):
             230400: termios.B230400,
         }
         speed = baudrates[speed]	# Throw an error if the speed isn't legal
-        # FIXME: explicit arguments should probably override this
-        #if self.testload.serial:
-        #    (speed, databits, parity, stopbits) = self.testload.serial
         (self.fd, self.slave_fd) = pty.openpty()
         self.byname = os.ttyname(self.slave_fd)
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(self.slave_fd)
