@@ -203,7 +203,7 @@ static void navcom_event_hook(struct gps_device_t *session, event_t event)
     }
     /* Request the following messages: */
     /*
-     * FIXME: It might not be necessary to call this on reactivate.
+     * FIX-ME: It might not be necessary to call this on reactivate.
      * Experiment to see if the holds its settings through a close.
      */
     if (event == event_identified || event == event_reactivate) {
@@ -494,7 +494,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     eph = fom / 100.0 * 1.96;
     /* approximate epx and epy errors from it */
     session->newdata.epx = session->newdata.epy = eph / sqrt(2);
-    /* FIXME - Which units is tfom in (spec doesn't say) */
+    /* FIX-ME - Which units is tfom in (spec doesn't say) */
     session->newdata.ept = tfom * 1.96 /*Two sigma */ ;
 
     if (gdop != DOP_UNDEFINED)

@@ -341,7 +341,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->context->leap_seconds;
 	/*@ end @*/
 	visible = (unsigned char)getub(buf2, 10);
-	/* FIXME: read full statellite status for each channel */
+	/* FIX-ME: read full statellite status for each channel */
 	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME}\n",
@@ -508,7 +508,7 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 static void evermore_event_hook(struct gps_device_t *session, event_t event)
 {
     /*
-     * FIXME: It might not be necessary to call this on reactivate.
+     * FIX-ME: It might not be necessary to call this on reactivate.
      * Experiment to see if the holds its settings through a close.
      */
     if (event == event_identified || event == event_reactivate) {

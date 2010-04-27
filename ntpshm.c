@@ -266,7 +266,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
-    /* FIXME, microseconds needs to be set for 5Hz PPS */
+    /* FIX-ME, microseconds needs to be set for 5Hz PPS */
     int microseconds = 0;
     int precision;
     double offset;
@@ -281,7 +281,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
      * check to see if we have a fresh timestamp from the
      * GPS serial input then use that */
 
-    /* FIXME, does not handle 5Hz yet */
+    /* FIX-ME, does not handle 5Hz yet */
 
 #ifdef S_SPLINT_S		/* avoids an internal error in splint 3.1.1 */
     l_offset = 0;

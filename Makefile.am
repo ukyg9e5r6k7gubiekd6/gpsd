@@ -710,7 +710,7 @@ TESTS = do-tests
 #
 # None of these productions are fired by 'make all'.
 
-# FIXME: Needs to be replaced by a $(MANGENERATOR) rule
+# FIX-ME: Needs to be replaced by a $(MANGENERATOR) rule
 %.html: %.xml
 	xmlto xhtml-nochunks $<
 	if [ $< -nt www/$< ]; then cp $< www/$<; fi; done 

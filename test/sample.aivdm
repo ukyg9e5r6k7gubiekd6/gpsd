@@ -170,7 +170,7 @@
 #	Application ID           : 104
 #	Data                     : 16:0000
 #
-# FIXME: We need a type 6 test case that requires more than one AIVDM fragment.
+# FIX-ME: We need a type 6 test case that requires more than one AIVDM fragment.
 #
 # Type 7:
 # From AISHub - reported immediately after the preceding type 6, 
@@ -397,7 +397,7 @@
 #       First slot offset        : 200
 #       First slot increment     : 0
 #
-# FIXME: Need an example of the 144-bit variant with two MMSIs.
+# FIX-ME: Need an example of the 144-bit variant with two MMSIs.
 #
 # Type 17:
 # From AISHub. This is only a regression test to check that the C and Python

@@ -552,7 +552,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    if (session->gpsdata.ss[j] < 0.0) {
 		session->gpsdata.ss[j] = 0.0;
 	    }
-	    // FIXME: Garmin documents this, but Daniel Dorau
+	    // FIX-ME: Garmin documents this, but Daniel Dorau
 	    // <daniel.dorau@gmx.de> says the behavior on his GPSMap60CSX
 	    // doesn't match it.
 	    if ((uint8_t) 0 != (sats->status & 4)) {
@@ -744,7 +744,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */
-// FIXME: This should go through the common message buffer someday
+// FIX-ME: This should go through the common message buffer someday
 static void Build_Send_SER_Packet(struct gps_device_t *session,
 				  uint32_t layer_id UNUSED, uint32_t pkt_id,
 				  uint32_t length, uint32_t data)
@@ -1001,7 +1001,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
 static void garmin_event_hook(struct gps_device_t *session, event_t event)
 {
     /*
-     * FIXME: It might not be necessary to call this on reactivate.
+     * FIX-ME: It might not be necessary to call this on reactivate.
      * Experiment to see if the holds its settings through a close.
      */
     if (event == event_identified || event == event_reactivate) {
@@ -1026,7 +1026,7 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 #endif
     }
     if (event == event_deactivate)
-	/* FIXME: is any action needed, or is closing the port sufficient? */
+	/* FIX-ME: is any action needed, or is closing the port sufficient? */
 	gpsd_report(LOG_PROG, "Garmin: garmin_close()\n");
 }
 

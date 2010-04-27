@@ -358,7 +358,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup)
 	(void)nmea_send(session, "$PASHQ,RID");
-    /* FIXME: Do we need to do this on reactivate as well? */
+    /* FIX-ME: Do we need to do this on reactivate as well? */
     if (event == event_identified) {
 	/* turn WAAS on. can't hurt... */
 	(void)nmea_send(session, "$PASHS,WAS,ON");
@@ -992,7 +992,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 "$PMTK314,1,1,1,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0"
 
 */
-    /* FIXME: Do we need to resend this on reactivation? */
+    /* FIX-ME: Do we need to resend this on reactivation? */
     if (event == event_identified) {
 	(void)nmea_send(session, "$PMTK320,0");	/* power save off */
 	(void)nmea_send(session, "$PMTK300,1000,0,0,0.0,0.0");	/* Fix interval */

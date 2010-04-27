@@ -181,7 +181,7 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
     char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
     char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
 
-    /* FIXME: We don't dump the entire state here yet */
+    /* FIX-ME: We don't dump the entire state here yet */
 #ifndef USE_QT
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n",
 		  collect->set, gps_maskdump(collect->set));

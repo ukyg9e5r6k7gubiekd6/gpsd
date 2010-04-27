@@ -144,7 +144,7 @@ class gpssim:
         else:
             raise gpssimException("unknown command '%s'" % fields[1],
                                   self.filename, self.lineno)
-        # FIXME: add syntax for ephemeris elements
+        # FIX-ME: add syntax for ephemeris elements
         self.lineno += 1
     def filter(self, input, output):
         "Make this a filter for file-like objects."

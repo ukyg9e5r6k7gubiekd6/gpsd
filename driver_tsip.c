@@ -957,7 +957,7 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
-    /* FIXME: Resending this might not be needed on reactivation */
+    /* FIX-ME: Resending this might not be needed on reactivation */
     if (event == event_identified && event == event_reactivate) {
 	unsigned char buf[100];
 
@@ -1108,7 +1108,7 @@ static void tsip_mode(struct gps_device_t *session, int mode)
     } else if (mode == MODE_BINARY) {
 	/* The speed switcher also puts us back in TSIP, so call it */
 	/* with the default 9600 8O1. */
-	// FIXME: Should preserve the current speed.
+	// FIX-ME: Should preserve the current speed.
 	// (void)tsip_speed_switch(session, 9600, 'O', 1);
 	;
 
@@ -1121,7 +1121,7 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 #ifdef NTPSHM_ENABLE
 static double tsip_ntp_offset(struct gps_device_t *session)
 {
-    /* FIXME: is a constant offset right here? */
+    /* FIX-ME: is a constant offset right here? */
     return 0.075;
 }
 #endif /* NTPSHM_ENABLE */

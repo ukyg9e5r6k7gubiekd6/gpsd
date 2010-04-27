@@ -431,7 +431,7 @@ static void italk_mode(struct gps_device_t *session, int mode)
 static void italk_event_hook(struct gps_device_t *session, event_t event)
 {
     /*
-     * FIXME: It might not be necessary to call this on reactivate.
+     * FIX-ME: It might not be necessary to call this on reactivate.
      * Experiment to see if the holds its settings through a close.
      */
     if ((event == event_identified || event == event_reactivate)

@@ -459,7 +459,7 @@ static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 	(void)superstar2_write(session, (char *)version_msg,
 			       sizeof(version_msg));
 
-    /* FIXME: check to see if this really needs to be resent on reactivation */
+    /* FIX-ME: check to see if this really needs to be resent on reactivation */
     if (event == event_identified || event == event_reactivate) {
 	/*@ +charint @*/
 	unsigned char svinfo_msg[] = { 0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01 };
