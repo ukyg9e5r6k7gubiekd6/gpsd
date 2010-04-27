@@ -540,7 +540,6 @@ static gps_mask_t processGPGSV(int count, char *field[],
     session->gpsdata.skyview_time = NAN;
     gpsd_report(LOG_DATA, "GSV: Satellite data OK (%d of %d).\n",
 		session->driver.nmea.part, session->driver.nmea.await);
-    // FIX-ME: Dump satellite state at LOG_DATA level on final sentence
     return SATELLITE_IS;
 }
 
