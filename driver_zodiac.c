@@ -152,7 +152,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* solution_type                 = getzword(11); */
     session->gpsdata.satellites_used = (int)getzword(12);
     /* polar_navigation              = getzword(13); */
-    session->context->gps_week       = (unsigned short)getzword(14);
+    session->context->gps_week = (unsigned short)getzword(14);
     /* gps_seconds                   = getzlong(15); */
     /* gps_nanoseconds               = getzlong(17); */
     unpacked_date.tm_mday = (int)getzword(19);
@@ -241,7 +241,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	}
     }
     session->context->gps_week = (unsigned short)gps_week;
-    session->context->gps_tow = (double) gps_seconds;
+    session->context->gps_tow = (double)gps_seconds;
     session->gpsdata.skyview_time =
 	gpstime_to_unix(gps_week, session->context->gps_tow);
     gpsd_report(LOG_DATA, "1002: visible=%d used=%d mask={SATELLITE|USED}\n",

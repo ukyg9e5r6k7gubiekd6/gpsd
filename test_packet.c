@@ -276,7 +276,8 @@ static int packet_test(struct map *mp)
 	       mp->legend);
 	++failure;
     } else
-	printf("%2zi: %s test succeeded.\n", mp - singletests + 1, mp->legend);
+	printf("%2zi: %s test succeeded.\n", mp - singletests + 1,
+	       mp->legend);
 #ifdef DUMPIT
     for (cp = packet.outbuffer;
 	 cp < packet.outbuffer + packet.outbuflen; cp++) {
@@ -311,9 +312,8 @@ static void runon_test(struct map *mp)
     (void)fputs(mp->test, stdout);
     do {
 	st = packet_get(nullfd, &packet);
-	printf("packet_parse() returned %zd\n", st);	
-    } while
-	    (st > 0);
+	printf("packet_parse() returned %zd\n", st);
+    } while (st > 0);
     /*@ +compdef +uniondef +usedef +formatcode @*/
 }
 
@@ -337,10 +337,11 @@ int main(int argc, char *argv[])
 
     if (singletest)
 	failcount += packet_test(singletests + singletest - 1);
-    else
-    {
+    else {
 	(void)fputs("=== Packet identification tests\n ===", stdout);
-	for (mp = singletests; mp < singletests + sizeof(singletests) / sizeof(singletests[0]); mp++)
+	for (mp = singletests;
+	     mp < singletests + sizeof(singletests) / sizeof(singletests[0]);
+	     mp++)
 	    failcount += packet_test(mp);
 	(void)fputs("=== EOF with buffer nonempty test ===\n", stdout);
 	runon_test(&runontests[0]);

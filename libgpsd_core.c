@@ -254,7 +254,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log = "Too long for 5Hz, too short for 1Hz\n";
 	    } else if (1001000 > cycle) {
 		/* looks like PPS pulse or square wave */
-		    if (0 == duration) {
+		if (0 == duration) {
 		    ok = 1;
 		    log = "PPS invisible pulse\n";
 		} else if (499000 > duration) {
@@ -451,7 +451,7 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 }
 
 static void gpsd_error_model(struct gps_device_t *session,
-		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
+			     struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
 {
     /*

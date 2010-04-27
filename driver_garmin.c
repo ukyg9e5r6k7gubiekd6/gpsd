@@ -209,8 +209,8 @@ typedef struct
     // next 3 items
     float msl_hght;		/* height of WGS 84 above MSL (meters) */
     int16_t leap_sec;		/* diff between GPS and UTC (seconds) */
-    int32_t grmn_days;          /* days from UTC December 31st, 1989 to the
-			         * beginning of the current week */
+    int32_t grmn_days;		/* days from UTC December 31st, 1989 to the
+				 * beginning of the current week */
 } cpo_pvt_data;
 
 typedef struct
@@ -819,54 +819,54 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 /*@-compdef -usedef@*/
 static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 {
-	// discover devices
-	libusb_device **list;
-	ssize_t cnt;
-	ssize_t i = 0;
-	bool found = false;
+    // discover devices
+    libusb_device **list;
+    ssize_t cnt;
+    ssize_t i = 0;
+    bool found = false;
 
-	gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
-	/*@i2@*/libusb_init(NULL);
+    gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
+    /*@i2@*/ libusb_init(NULL);
 
-	/*@-nullpass@*/
-	if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
-	    gpsd_report(LOG_ERROR, "USB device list call failed.\n");
-	    /*@i1@*/libusb_exit(NULL);
-	    return false;
-	}
-	/*@+nullpass@*/
+    /*@-nullpass@*/
+    if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
+	gpsd_report(LOG_ERROR, "USB device list call failed.\n");
+	/*@i1@*/ libusb_exit(NULL);
+	return false;
+    }
+    /*@+nullpass@*/
 
-	for (i = 0; i < cnt; i++) {
-	    struct libusb_device_descriptor desc;
-	    libusb_device *dev = list[i];
+    for (i = 0; i < cnt; i++) {
+	struct libusb_device_descriptor desc;
+	libusb_device *dev = list[i];
 
-	    int r = libusb_get_device_descriptor(dev, &desc);
-	    if (r < 0) {
-		gpsd_report(LOG_ERROR, 
-			    "USB descriptor fetch failed on device %zd.\n",
-			    i);
-		continue;
-	    }
-
-	    /* we can extract device descriptor data */
-	    gpsd_report(LOG_SHOUT, "%04x:%04x (bus %d, device %d)\n",
-			desc.idVendor, desc.idProduct,
-			libusb_get_bus_number(dev), 
-			libusb_get_device_address(dev));
-
-	    /* we match if vendor and product ID are right */
-	    if (desc.idVendor == 0x91e && desc.idProduct == 3) {
-		found = true;
-		break;
-	    }
+	int r = libusb_get_device_descriptor(dev, &desc);
+	if (r < 0) {
+	    gpsd_report(LOG_ERROR,
+			"USB descriptor fetch failed on device %zd.\n", i);
+	    continue;
 	}
 
-	gpsd_report(LOG_SHOUT, "vendor/product match with %04x:%04x %sfound\n",
-		    vendor, product, found ? "" : "not ");
-	libusb_free_device_list(list, 1);
-	/*@i1@*/libusb_exit(NULL);
-	return found;
+	/* we can extract device descriptor data */
+	gpsd_report(LOG_SHOUT, "%04x:%04x (bus %d, device %d)\n",
+		    desc.idVendor, desc.idProduct,
+		    libusb_get_bus_number(dev),
+		    libusb_get_device_address(dev));
+
+	/* we match if vendor and product ID are right */
+	if (desc.idVendor == 0x91e && desc.idProduct == 3) {
+	    found = true;
+	    break;
+	}
+    }
+
+    gpsd_report(LOG_SHOUT, "vendor/product match with %04x:%04x %sfound\n",
+		vendor, product, found ? "" : "not ");
+    libusb_free_device_list(list, 1);
+    /*@i1@*/ libusb_exit(NULL);
+    return found;
 }
+
 /*@-compdef -usedef@*/
 #endif /* HAVE_LIBUSB || S_SPLINT_S */
 

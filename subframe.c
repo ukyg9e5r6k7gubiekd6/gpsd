@@ -22,7 +22,7 @@ static char sf5map[] =
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
-			     unsigned int words[])
+				unsigned int words[])
 {
     unsigned int i;
     unsigned int preamble, parity;
@@ -51,8 +51,8 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 		words[5], words[6], words[7], words[8], words[9]);
 
     preamble = (words[0] >> 22) & 0xff;
-    if (preamble == 0x8b) { /* preamble is inverted */
-	words[0] ^= 0x3fffffc0; /* invert */
+    if (preamble == 0x8b) {	/* preamble is inverted */
+	words[0] ^= 0x3fffffc0;	/* invert */
     } else if (preamble != 0x74) {
 	gpsd_report(LOG_WARN,
 		    "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n",
@@ -72,8 +72,8 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	parity = isgps_parity(words[i]);
 	if (parity != (words[i] & 0x3f)) {
 	    gpsd_report(LOG_PROG,
-			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n", i,
-			parity, (words[i] & 0x1));
+			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n",
+			i, parity, (words[i] & 0x1));
 	    return 0;
 	}
 	words[i] = (words[i] >> 6) & 0xffffff;
@@ -108,8 +108,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 
     preamble = (unsigned int)((words[0] >> 16) & 0xffL);
     if (preamble == 0x8b) {
-	    preamble ^= 0xff;
-	    words[0] ^= 0xffffff;
+	preamble ^= 0xff;
+	words[0] ^= 0xffffff;
     }
     if (preamble != 0x74) {
 	gpsd_report(LOG_WARN,
@@ -131,9 +131,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     switch (subframe) {
     case 1:
 	/* get Week Number WN) from subframe 1 */
-	session->context->gps_week = (unsigned short)((words[2] & 0xffc000) >> 14);
-	gpsd_report(LOG_PROG,
-	    "50B: WN: %u\n", session->context->gps_week);
+	session->context->gps_week =
+	    (unsigned short)((words[2] & 0xffc000) >> 14);
+	gpsd_report(LOG_PROG, "50B: WN: %u\n", session->context->gps_week);
 	break;
     case 4:
 	switch (pageid) {
@@ -187,7 +187,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
 	    /* careful WN is 10 bits, but WNlsf is 8 bits! */
 	    wnlsf = (words[8] & 0x00ff00) >> 8;	/* WNlsf (Week Number of LSF) */
-	    dn = (words[8] & 0x0000FF);		/* DN (Day Number of LSF) */
+	    dn = (words[8] & 0x0000FF);	/* DN (Day Number of LSF) */
 	    lsf = (words[9] & 0xff0000) >> 16;	/* leap second future */
 	    /*
 	     * On SiRFs, the 50BPS data is passed on even when the
@@ -196,16 +196,17 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	     */
 	    if (LEAP_SECONDS > leap) {
 		/* something wrong */
-		gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n", leap);
+		gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n",
+			    leap);
 		leap = LEAP_SECONDS;
 		session->context->valid &= ~LEAP_SECOND_VALID;
 	    } else {
 		gpsd_report(LOG_INF,
-		    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n",
-		    leap, lsf, wnlsf, dn);
+			    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n",
+			    leap, lsf, wnlsf, dn);
 		session->context->valid |= LEAP_SECOND_VALID;
-		if ( leap != lsf ) {
-			gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
+		if (leap != lsf) {
+		    gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
 		}
 	    }
 	    session->context->leap_seconds = (int)leap;

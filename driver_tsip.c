@@ -199,8 +199,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->valid |= LEAP_SECOND_VALID;
 	    session->context->gps_tow = f1;
 
-	    session->newdata.time = gpstime_to_unix(session->context->gps_week
-	        , session->context->gps_tow) - session->context->leap_seconds;
+	    session->newdata.time =
+		gpstime_to_unix(session->context->gps_week,
+				session->context->gps_tow) -
+		session->context->leap_seconds;
 	    mask |= TIME_IS;
 	}
 	gpsd_report(LOG_INF, "GPS Time %f %d %f\n", f1, s1, f2);
@@ -297,8 +299,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (session->context->gps_week) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
-				session->context->gps_tow) 
-				- session->context->leap_seconds;
+				session->context->gps_tow)
+		- session->context->leap_seconds;
 	    mask |= TIME_IS;
 	}
 	mask |= LATLON_IS | ALTITUDE_IS | CLEAR_IS | REPORT_IS;
@@ -560,8 +562,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (session->context->gps_week) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
-				session->context->gps_tow) 
-				- session->context->leap_seconds;
+				session->context->gps_tow)
+		- session->context->leap_seconds;
 	    mask |= TIME_IS;
 	}
 	gpsd_report(LOG_INF, "GPS DP LLA %f %f %f %f\n",
@@ -656,11 +658,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    session->context->gps_week = (unsigned short)s4;
-	    session->context->gps_tow = (double)ul1 * 1e-3;
+	    session->context->gps_tow = (double)ul1 *1e-3;
 	    /*@ ignore @*//*@ splint is confused @ */
 	    session->newdata.time =
 		gpstime_to_unix((int)s4, session->context->gps_tow)
-				- session->context->leap_seconds;
+		- session->context->leap_seconds;
 	    /*@ end @*/
 	    mask |=
 		TIME_IS | LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS |
@@ -698,12 +700,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    session->context->gps_week = (unsigned short)s1;
-	    session->context->gps_tow = (double)ul1 * 1e3;
+	    session->context->gps_tow = (double)ul1 *1e3;
 	    /*@ ignore @*//*@ splint is confused @ */
 	    session->newdata.time =
-		gpstime_to_unix(session->context->gps_week, 
+		gpstime_to_unix(session->context->gps_week,
 				session->context->gps_tow)
-				- session->context->leap_seconds;
+		- session->context->leap_seconds;
 	    /*@ end @*/
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
@@ -770,7 +772,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->gps_week = s1;
 		session->context->gps_tow = (double)ul1;
 		session->newdata.time =
-		    gpstime_to_unix((int)s1, session->context->gps_tow) 
+		    gpstime_to_unix((int)s1, session->context->gps_tow)
 		    - (double)s2;
 		mask |= TIME_IS;
 		gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",

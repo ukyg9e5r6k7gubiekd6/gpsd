@@ -26,12 +26,13 @@
 
 /*@ -nullassign @*/
 static XrmOptionDescRec options[] = {
-{"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
-{"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
-{"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
-{"-speedunits", "*speedunits",          XrmoptionSepArg,        NULL},
+    {"-rv", "*reverseVideo", XrmoptionNoArg, "TRUE"},
+    {"-nc", "*needleColor", XrmoptionSepArg, NULL},
+    {"-needlecolor", "*needleColor", XrmoptionSepArg, NULL},
+    {"-speedunits", "*speedunits", XrmoptionSepArg, NULL},
 };
-String fallback_resources[] = {NULL};
+String fallback_resources[] = { NULL };
+
 /*@ +nullassign @*/
 
 static struct gps_data_t *gpsdata;
@@ -43,17 +44,20 @@ static struct fixsource_t source;
 static int debug;
 #endif /* CLIENTDEBUG_ENABLE */
 
-static void update_display(struct gps_data_t *gpsdata, 
+static void update_display(struct gps_data_t *gpsdata,
 			   char *buf UNUSED, size_t len UNUSED)
 {
     /* this is where we implement source-device filtering */
-    if (gpsdata->dev.path[0]!='\0' && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
+    if (gpsdata->dev.path[0] != '\0' && source.device != NULL
+	&& strcmp(source.device, gpsdata->dev.path) != 0)
 	return;
     else {
 	int temp_int = (int)rint(gpsdata->fix.speed * speedfactor);
 
-	if (temp_int < 0) temp_int = 0;
-	else if (temp_int > 100) temp_int = 100;
+	if (temp_int < 0)
+	    temp_int = 0;
+	else if (temp_int > 100)
+	    temp_int = 100;
 
 	(void)TachometerSetValue(tacho, temp_int);
     }
@@ -70,43 +74,44 @@ static void handle_input(XtPointer client_data UNUSED,
 
 static char *get_resource(Widget w, char *name, char *default_value)
 {
-  XtResource xtr;
-  char *value = NULL;
+    XtResource xtr;
+    char *value = NULL;
 
-  /*@ -observertrans -statictrans -immediatetrans -compdestroy -nullpass @*/
-  xtr.resource_name = name;
-  xtr.resource_class = "AnyClass";
-  xtr.resource_type = XtRString;
-  xtr.resource_size = (Cardinal)sizeof(String);
-  xtr.resource_offset = 0;
-  xtr.default_type = XtRImmediate;
-  xtr.default_addr = default_value;
-  XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
-  if (value) return value;
-  /*@ +observertrans +statictrans +immediatetrans +compdestroy +nullpass @*/
-  /*@i@*/return default_value;
+    /*@ -observertrans -statictrans -immediatetrans -compdestroy -nullpass @*/
+    xtr.resource_name = name;
+    xtr.resource_class = "AnyClass";
+    xtr.resource_type = XtRString;
+    xtr.resource_size = (Cardinal) sizeof(String);
+    xtr.resource_offset = 0;
+    xtr.default_type = XtRImmediate;
+    xtr.default_addr = default_value;
+    XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
+    if (value)
+	return value;
+    /*@ +observertrans +statictrans +immediatetrans +compdestroy +nullpass @*/
+    /*@i@*/ return default_value;
 }
 
 /*@ -mustfreefresh @*/
 int main(int argc, char **argv)
 {
-    Arg             args[10];
+    Arg args[10];
     XtAppContext app;
     int option;
     char *speedunits;
     Widget base;
 
     /*@ -compdef -nullpass -onlytrans @*/
-    toplevel = XtVaAppInitialize(&app, "xgpsspeed", 
+    toplevel = XtVaAppInitialize(&app, "xgpsspeed",
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
     /*@ +compdef +nullpass +onlytrans @*/
-    speedfactor = MPS_TO_MPH;		/* Software maintained in US */
+    speedfactor = MPS_TO_MPH;	/* Software maintained in US */
     speedunits = get_resource(toplevel, "speedunits", "mph");
-    if (strcmp(speedunits, "kph")==0) 
+    if (strcmp(speedunits, "kph") == 0)
 	speedfactor = MPS_TO_KPH;
-    else if (strcmp(speedunits, "knots")==0)
+    else if (strcmp(speedunits, "knots") == 0)
 	speedfactor = MPS_TO_KNOTS;
 
     while ((option = getopt(argc, argv, "D:hV")) != -1) {
@@ -120,8 +125,12 @@ int main(int argc, char **argv)
 	case 'V':
 	    (void)printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
-	case 'h': default:
-	    (void)fputs("usage: gps [-h] [-V] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
+	case 'h':
+	default:
+	    (void)
+		fputs
+		("usage: gps [-h] [-V] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n",
+		 stderr);
 	    exit(1);
 	}
     }
@@ -135,11 +144,12 @@ int main(int argc, char **argv)
     /*@ -immediatetrans -usedef -observertrans -statictrans -nullpass @*/
     /**** Shell Widget ****/
     (void)XtSetArg(args[0], XtNiconPixmap,
-	     XCreateBitmapFromData(XtDisplay(toplevel),
-				   XtScreen(toplevel)->root, (char*)xgps_bits,
-				   xgps_width, xgps_height));
+		   XCreateBitmapFromData(XtDisplay(toplevel),
+					 XtScreen(toplevel)->root,
+					 (char *)xgps_bits, xgps_width,
+					 xgps_height));
     (void)XtSetValues(toplevel, args, 1);
-    
+
     /**** Form widget ****/
     base = XtCreateManagedWidget("pane", panedWidgetClass, toplevel, NULL, 0);
 
@@ -149,18 +159,19 @@ int main(int argc, char **argv)
 
     /**** Label widget ****/
     if (speedfactor == MPS_TO_MPH)
-        (void)XtSetArg(args[0], XtNlabel, "Miles per Hour");
+	(void)XtSetArg(args[0], XtNlabel, "Miles per Hour");
     else if (speedfactor == MPS_TO_KPH)
-        (void)XtSetArg(args[0], XtNlabel, "Km per Hour");
-    else 
-        (void)XtSetArg(args[0], XtNlabel, "Knots");
+	(void)XtSetArg(args[0], XtNlabel, "Km per Hour");
+    else
+	(void)XtSetArg(args[0], XtNlabel, "Knots");
 
     /*@ +immediatetrans +usedef +observertrans +statictrans -compmempass @*/
     (void)XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
-    
+
     /**** Tachometer widget ****/
     /*@ -onlytrans -mustfreeonly @*/
-    tacho = XtCreateManagedWidget("meter", tachometerWidgetClass,base,NULL,0);
+    tacho =
+	XtCreateManagedWidget("meter", tachometerWidgetClass, base, NULL, 0);
     (void)XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(source.server, source.port))) {
@@ -171,7 +182,7 @@ int main(int argc, char **argv)
 
     /*@ -usedef @*/
     (void)XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
-		  handle_input, NULL);
+			handle_input, NULL);
     /*@ +nullpass +usedef @*/
 
     gps_set_raw_hook(gpsdata, update_display);
@@ -184,4 +195,5 @@ int main(int argc, char **argv)
     return 0;
     /*@ +compdestroy @*/
 }
+
 /*@ +mustfreefresh @*/

@@ -64,8 +64,8 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     session->context->gps_week = gps_week;
     tow = (uint) getleul(buf, 7 + 84);
     session->context->gps_tow = tow / 1000.0;
-    t = gpstime_to_unix((int)gps_week,session->context->gps_tow)
-			- session->context->leap_seconds;
+    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
+	- session->context->leap_seconds;
     session->newdata.time = t;
     mask |= TIME_IS;
 
@@ -139,8 +139,8 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	session->context->gps_week = gps_week;
 	tow = (uint) getleul(buf, 7 + 6);
 	session->context->gps_tow = tow / 1000.0;
-	t = gpstime_to_unix((int)gps_week,session->context->gps_tow)
-			    - session->context->leap_seconds;
+	t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
+	    - session->context->leap_seconds;
 	session->gpsdata.skyview_time = t;
 
 	gpsd_zero_satellites(&session->gpsdata);
@@ -204,8 +204,8 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     session->context->gps_week = gps_week;
     tow = (uint) getleul(buf, 7 + 38);
     session->context->gps_tow = tow / 1000.0;
-    t = gpstime_to_unix((int)gps_week,session->context->gps_tow)
-			- session->context->leap_seconds;
+    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
+	- session->context->leap_seconds;
     session->newdata.time = t;
 
     gpsd_report(LOG_DATA,
@@ -241,7 +241,8 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
      * words with parity checking done but parity bits still present."
      */
     for (i = 0; i < 10; i++)
-	words[i] = (unsigned int)(getleul(buf, 7 + 14 + 4*i) >> 6) & 0xffffff;
+	words[i] =
+	    (unsigned int)(getleul(buf, 7 + 14 + 4 * i) >> 6) & 0xffffff;
 
     gpsd_interpret_subframe(session, words);
     return ONLINE_IS;

@@ -475,8 +475,8 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     /*@ ignore @*//*@ splint is confused @ */
     session->gpsdata.skyview_time
 	=
-	gpstime_to_unix( session->context->gps_week, session->context->gps_tow)
-				- session->context->leap_seconds;
+	gpstime_to_unix(session->context->gps_week, session->context->gps_tow)
+	- session->context->leap_seconds;
     /*@ end @*/
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
@@ -617,7 +617,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     session->context->gps_tow = (double)getbeul(buf, 24) * 1e-2;
     /*@ ignore @*//*@ splint is confused @ */
     session->newdata.time =
-	gpstime_to_unix(session->context->gps_week, session->context->gps_tow) -
+	gpstime_to_unix(session->context->gps_week,
+			session->context->gps_tow) -
 	session->context->leap_seconds;
     /*@ end @*/
 #ifdef NTPSHM_ENABLE

@@ -153,11 +153,13 @@ static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = false;
 static jmp_buf restartbuf;
-static enum {disabled, 
-	     enabled,
-	     fulfilled,
-	     holding} 
-    quit_when_quiescent = disabled;
+static enum
+{ disabled,
+    enabled,
+    fulfilled,
+    holding
+}
+quit_when_quiescent = disabled;
 static unsigned int devices_expected;
 
 /* *INDENT-OFF* */
@@ -716,7 +718,7 @@ static bool awaken(struct gps_device_t *device)
     /* open that device */
     if (!initialized_device(device)) {
 	if (!open_device(device->gpsdata.dev.path)) {
-	    gpsd_report(LOG_PROG, "%s: open failed\n", 
+	    gpsd_report(LOG_PROG, "%s: open failed\n",
 			device->gpsdata.dev.path);
 	    free_device(device);
 	    return false;
@@ -727,13 +729,12 @@ static bool awaken(struct gps_device_t *device)
 	gpsd_report(LOG_PROG,
 		    "device %d (fd=%d, path %s) already active.\n",
 		    (int)(device - devices),
-		    device->gpsdata.gps_fd, 
-		    device->gpsdata.dev.path);
+		    device->gpsdata.gps_fd, device->gpsdata.dev.path);
 	return true;
     } else {
 	if (gpsd_activate(device) < 0) {
 	    gpsd_report(LOG_ERROR, "%s: device activation failed.\n",
-		    device->gpsdata.dev.path);
+			device->gpsdata.dev.path);
 	    return false;
 	} else {
 	    gpsd_report(LOG_RAW,
@@ -863,10 +864,12 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	    }
 	}
-    } else if (buf[0] == '$') {		/* undocumented */
-	p = snarfline(buf+1, &stash);
+    } else if (buf[0] == '$') {	/* undocumented */
+	p = snarfline(buf + 1, &stash);
 	devices_expected = (unsigned)atoi(stash);
-	gpsd_report(LOG_INF, "<= control(%d): quit-when-quiescent set, %d devices expected\n", sfd, devices_expected);
+	gpsd_report(LOG_INF,
+		    "<= control(%d): quit-when-quiescent set, %d devices expected\n",
+		    sfd, devices_expected);
 	quit_when_quiescent = enabled;
 	ignore_return(write(sfd, "OK\n", 3));
     }
@@ -1654,7 +1657,9 @@ int main(int argc, char *argv[])
 			 sub < subscribers + MAXSUBSCRIBERS; sub++)
 			if (sub->active != 0
 			    && sub->policy.watcher
-			    && (sub->policy.devpath[0] == '\0' || strcmp(sub->policy.devpath, device->gpsdata.dev.path)==0))
+			    && (sub->policy.devpath[0] == '\0'
+				|| strcmp(sub->policy.devpath,
+					  device->gpsdata.dev.path) == 0))
 			    listeners = true;
 		    if (listeners)
 			(void)awaken(device);
@@ -1738,9 +1743,10 @@ int main(int argc, char *argv[])
 		    }
 #endif /* BINARY_ENABLE */
 		    /* *INDENT-ON* */
-		} /* subscribers */
-	    } /* devices */
+		}		/* subscribers */
+	    }
 
+	    /* devices */
 	    /* watch all channels associated with this device */
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		if (sub->active == 0)
@@ -1961,8 +1967,9 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	} /* nowait */
+	}
 
+	/* nowait */
 	/*
 	 * This code enables a test harness to use the undocumented
 	 * $<n> control-socket command to tell the daemon to notice
@@ -1978,7 +1985,7 @@ int main(int argc, char *argv[])
 	    if (quit_when_quiescent == enabled) {
 		if (activecount == devices_expected) {
 		    quit_when_quiescent = fulfilled;
-		    gpsd_report(LOG_INF, 
+		    gpsd_report(LOG_INF,
 				"expected number of devices are connected\n");
 		}
 	    }
@@ -1986,7 +1993,7 @@ int main(int argc, char *argv[])
 	    if (quit_when_quiescent == fulfilled) {
 		if (activecount == 0) {
 		    quit_when_quiescent = holding;
-		    gpsd_report(LOG_INF, 
+		    gpsd_report(LOG_INF,
 				"all expected devices are quiescent\n");
 		}
 	    }
@@ -1994,7 +2001,8 @@ int main(int argc, char *argv[])
 	    if (quit_when_quiescent == holding) {
 		int waiting = 0;
 		if (activecount == 0) {
-		    for (device = devices; device < devices + MAXDEVICES; device++)
+		    for (device = devices; device < devices + MAXDEVICES;
+			 device++)
 			if (allocated_device(device))
 			    if (device->packet.inbuflen > 0)
 				waiting++;
@@ -2004,7 +2012,7 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	} /* quit_when_quiescent */
+	}			/* quit_when_quiescent */
     }
 
     /* if we make it here, we got a signal... deal with it */
@@ -2012,7 +2020,7 @@ int main(int argc, char *argv[])
     if (SIGHUP == (int)signalled)
 	longjmp(restartbuf, 1);
 
-    gpsd_report(LOG_WARN, "received terminating signal %d.\n",signalled);
+    gpsd_report(LOG_WARN, "received terminating signal %d.\n", signalled);
 
     /* try to undo all device configurations */
     for (dfd = 0; dfd < MAXDEVICES; dfd++) {
@@ -2020,7 +2028,7 @@ int main(int argc, char *argv[])
 	    (void)gpsd_wrap(&devices[dfd]);
     }
 
-clean_shutdown:
+  clean_shutdown:
     gpsd_report(LOG_WARN, "exiting.\n");
     /*
      * A linger option was set on each client socket when it was

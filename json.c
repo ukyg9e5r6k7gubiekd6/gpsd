@@ -251,8 +251,8 @@ static int json_internal_read_object(const char *cp,
 		json_debug_trace((1, "Collected attribute name %s\n",
 				  attrbuf));
 		for (cursor = attrs; cursor->attribute != NULL; cursor++) {
-		json_debug_trace((2, "Checking against %s\n",
-				  cursor->attribute));		    
+		    json_debug_trace((2, "Checking against %s\n",
+				      cursor->attribute));
 		    if (strcmp(cursor->attribute, attrbuf) == 0)
 			break;
 		}

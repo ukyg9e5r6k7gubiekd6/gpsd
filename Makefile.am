@@ -84,9 +84,7 @@ endif
 #
 xgpsspeed_c_sources = \
 	xgpsspeed.c \
-	Tachometer.c \
-	TachometerP.h \
-	Tachometer.h
+	Tachometer.c
 xgpsspeed_SOURCES = \
 	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
@@ -417,8 +415,7 @@ endif
 noinst_HEADERS = gpsd_config.h \
 	driver_italk.h driver_rtcm2.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h \
-	revision.h
-
+	revision.h TachometerP.h Tachometer.h
 nodist_include_HEADERS = gpsd.h
 
 if LIBGPSMM_ENABLE
@@ -546,11 +543,10 @@ splint: gpsd.h packet_names.h
 cppcheck: gpsd.h packet_names.h
 	cppcheck --template gcc --all --force .
 
-# Re-indent the codebase in aa uniform style for readability.
-# FIXME: Except for xgpsspeed - Tachometer.c makes GNU indent lose it.
+# Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
-	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
+	$(xgpsspeed_SOURCES) $(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \
 	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
 INDENT_OPTIONS = --indent-level4 \

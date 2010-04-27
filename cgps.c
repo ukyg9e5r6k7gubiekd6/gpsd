@@ -397,10 +397,8 @@ static void windowsetup(void)
 			    "Latitude Err:");
 	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET,
 			    "Altitude Err:");
-	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, 
-			    "Course Err:");
-	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, 
-			    "Speed Err:");
+	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Course Err:");
+	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Speed Err:");
 	}
 
 	(void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);

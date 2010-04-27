@@ -281,7 +281,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->context->leap_seconds;
 	/*@ end @*/
 	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
-        gpsd_zero_satellites(&session->gpsdata);
+	gpsd_zero_satellites(&session->gpsdata);
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	if (session->gpsdata.satellites_visible > 12) {
 	    gpsd_report(LOG_WARN,
