@@ -494,7 +494,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     eph = fom / 100.0 * 1.96;
     /* approximate epx and epy errors from it */
     session->newdata.epx = session->newdata.epy = eph / sqrt(2);
-    /* FIX-ME - Which units is tfom in (spec doesn't say) */
     session->newdata.ept = tfom * 1.96 /*Two sigma */ ;
 
     if (gdop != DOP_UNDEFINED)
