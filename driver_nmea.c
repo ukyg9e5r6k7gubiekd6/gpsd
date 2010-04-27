@@ -1024,9 +1024,15 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	session->newdata.time =
 	    (double)mkgmtime(&session->driver.nmea.date) +
 	    session->driver.nmea.subseconds;
-	gpsd_report(LOG_DATA, "%s computed time is %2f = %s\n",
+	gpsd_report(LOG_DATA, 
+		    "%s time (nearest sec) is %2f = %d-%d-%dT%d:%d%d\n",
 		    session->driver.nmea.field[0], session->newdata.time,
-		    asctime(&session->driver.nmea.date));
+		    1900+session->driver.nmea.date.tm_year,
+		    session->driver.nmea.date.tm_mon+1,
+		    session->driver.nmea.date.tm_mday,
+		    session->driver.nmea.date.tm_hour,
+		    session->driver.nmea.date.tm_min,
+		    session->driver.nmea.date.tm_sec);
     }
 
     /*
