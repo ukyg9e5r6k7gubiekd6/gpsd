@@ -419,9 +419,9 @@ class Base:
                 colbase = 0
             else:
                 colbase = 2
-            label = gtk.Label(Base.gpsfields[i][0])
-            # FIX-ME: Right-justification isn't working
-            label.set_justify(gtk.JUSTIFY_RIGHT)
+            label = gtk.Label(Base.gpsfields[i][0] + ": ")
+            # Wacky way to force right alignment 
+            label.set_alignment(xalign=1, yalign=0.5)
             datatable.attach(label, colbase, colbase+1, i % 7, i % 7 + 1)
             entry = gtk.Entry()
             datatable.attach(entry, colbase+1, colbase+2, i % 7, i % 7 + 1)
