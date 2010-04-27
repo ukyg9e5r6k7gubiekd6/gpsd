@@ -421,7 +421,6 @@ class TestSession:
         if logfile not in self.fakegpslist:
             testload = TestLoad(logfile, predump=self.predump)
             if testload.sourcetype == "UDP":
-                # FIXME: As yet, no entries for these on the fakegps list 
                 newgps = FakeUDP(testload, ipaddr="127.0.1.255", port="5000",
                                    progress=self.progress)
             else:
