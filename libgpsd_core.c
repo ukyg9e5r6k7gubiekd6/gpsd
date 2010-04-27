@@ -487,11 +487,20 @@ static void gpsd_error_model(struct gps_device_t *session,
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
     /*
-     * OK, this is not an error computation, but
-     * we're at the right place in the architecture for it.
-     * Compute climb/sink in the simplest possible way.
-     * FIXME: Someday we should compute speed here too.
+     * OK, this is not an error computation, but we're at the right
+     * place in the architecture for it.  Compute speed over ground
+     * and climb/sink in the simplest possible way.
      */
+    if (fix->mode >= MODE_2D && oldfix->mode >= MODE_2D
+	&& isnan(fix->speed) != 0) {
+	if (fix->time == oldfix->time)
+	    fix->speed = 0;
+	else
+	    fix->speed =
+		earth_distance(fix->latitude, fix->longitude,
+			       oldfix->latitude, oldfix->longitude)
+		/ (fix->time - oldfix->time);
+    }
     if (fix->mode >= MODE_3D && oldfix->mode >= MODE_3D
 	&& isnan(fix->climb) != 0) {
 	if (fix->time == oldfix->time)
