@@ -141,7 +141,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 {
     unsigned char buf2[MAX_PACKET_LENGTH], *cp, *tp;
     size_t i, datalen;
-    unsigned int type, used, visible, satcnt;
+    unsigned int type, used, visible, satcnt, j, k;
     double version;
     gps_mask_t mask = 0;
 
@@ -341,12 +341,39 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->context->leap_seconds;
 	/*@ end @*/
 	visible = (unsigned char)getub(buf2, 10);
-	/* FIX-ME: read full statellite status for each channel */
-	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
-	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
-	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME}\n",
+	/* 
+	 * Note: This code is untested. It was written from the manual.
+	 * The results need to be sanity-checked against a GPS with
+	 * known-good raw decoding and the same skyview.
+	 *
+	 * We can get pseudo range (m), delta-range (m/s), doppler (Hz) 
+	 * and status for each channel from the chip.  We cannot get
+	 * codephase or carrierphase.
+	 */
+#define SBITS(sat, s, l)	sbits((char *)buf, 10 + (sat*14) + s, l) 
+#define UBITS(sat, s, l)	ubits((char *)buf, 10 + (sat*14) + s, l) 
+	for (k = 0; k < visible; k++) {
+	    int prn = (int)UBITS(k, 4, 5);
+	    /* this is so we can tell which never got set */
+	    for (j = 0; j < MAXCHANNELS; j++)
+		session->gpsdata.raw.mtime[j] = 0;
+	    for (j = 0; j < MAXCHANNELS; j++) {
+		if (session->gpsdata.PRN[j] == prn) {
+		    session->gpsdata.raw.codephase[j] = NAN;
+		    session->gpsdata.raw.carrierphase[j] = NAN;
+		    session->gpsdata.raw.mtime[j] = session->newdata.time;
+		    session->gpsdata.raw.satstat[j] = (unsigned)UBITS(k, 24, 8);
+		    session->gpsdata.raw.pseudorange[j] = (double)SBITS(k,40,32);
+		    session->gpsdata.raw.deltarange[j] = (double)SBITS(k,72,32);
+		    session->gpsdata.raw.doppler[j] = (double)SBITS(k, 104, 16);
+		}
+	    }
+	}
+#undef SBITS
+#undef UBITS
+	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME|RAW}\n",
 		    session->newdata.time);
-	return TIME_IS;
+	return TIME_IS|RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
 	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd: %s\n",
