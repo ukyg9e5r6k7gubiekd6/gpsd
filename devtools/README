@@ -6,6 +6,12 @@ the outline headers.  Ctl-C Ctl-a will unfold them again.
 == ais.py ==
 
 AIS packet decoder in Python.  Useful as a check on the C code.
+Also, a command like
+ 
+      nc data.aishub.net 4006 |devtools/ais.py -c -v -t RANGE >AIS.LOG 2>&1"
+
+is a handy way to capture filtered AIS samples; RANGE can be a comma-separated
+list of AIS types.
 
 == aidvmtable ==
 
