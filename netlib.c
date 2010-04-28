@@ -70,10 +70,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = af;
     hints.ai_socktype = type;
-    if (bind_me)
-	hints.ai_flags = AI_PASSIVE;
     hints.ai_protocol = proto;
 #ifndef S_SPLINT_S
+    if (bind_me)
+	hints.ai_flags = AI_PASSIVE;
     if ((ret = getaddrinfo(host, service, &hints, &result))) {
 	return NL_NOHOST;
     }
@@ -96,9 +96,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	    ret = NL_NOSOCK;
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
-		  sizeof(one)) == -1)
+		  sizeof(one)) == -1) {
+	    (void)close(s);
 	    ret = NL_NOSOCKOPT;
-	else {
+	} else {
 	    if (bind_me) {
 		if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0) {
 		    ret = 0;
