@@ -272,7 +272,8 @@ typedef enum {source_unknown,
 	      source_rs232,
 	      source_usb,
 	      source_pty,
-	      source_socket}
+	      source_tcp,
+	      source_udp}
     sourcetype_t;
 
 struct gps_device_t {

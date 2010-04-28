@@ -37,8 +37,9 @@ static sourcetype_t gpsd_classify(const char *path)
 	return source_unknown;
     else if (S_ISREG(sb.st_mode))
 	return source_blockdev;
+    /* this assumes we won't get UDP from a filesystem socket */
     else if (S_ISSOCK(sb.st_mode))
-	return source_socket;
+	return source_tcp;
     else if (S_ISCHR(sb.st_mode)) {
 	sourcetype_t devtype = source_unknown;
 #ifdef __linux__

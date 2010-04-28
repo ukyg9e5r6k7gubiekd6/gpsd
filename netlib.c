@@ -51,6 +51,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     struct addrinfo *result, *rp;
     int ret, type, proto, one = 1;
     socket_t s = -1;
+    bool bind_me;
 
     /*@-type@*/
     ppe = getprotobyname(protocol);
@@ -63,9 +64,14 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     }
     /*@+type@*/
 
+    /* we probably ought to pass this in as an explicit flag argument */
+    bind_me = (type == SOCK_DGRAM);
+
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = af;
     hints.ai_socktype = type;
+    if (bind_me)
+	hints.ai_flags = AI_PASSIVE;
     hints.ai_protocol = proto;
 #ifndef S_SPLINT_S
     if ((ret = getaddrinfo(host, service, &hints, &result))) {
@@ -92,9 +98,18 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		  sizeof(one)) == -1)
 	    ret = NL_NOSOCKOPT;
-	else if (connect(s, rp->ai_addr, rp->ai_addrlen) == 0) {
-	    ret = 0;
-	    break;
+	else {
+	    if (bind_me) {
+		if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0) {
+		    ret = 0;
+		    break;
+		}
+	    } else {
+		if (connect(s, rp->ai_addr, rp->ai_addrlen) == 0) {
+		    ret = 0;
+		    break;
+		}
+	    }
 	}
 
 	if (s > 0) {

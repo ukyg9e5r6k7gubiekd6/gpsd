@@ -317,7 +317,7 @@ int gpsd_activate(struct gps_device_t *session)
     if (netgnss_uri_check(session->gpsdata.dev.path)) {
 	session->gpsdata.gps_fd = netgnss_uri_open(session->context,
 						   session->gpsdata.dev.path);
-	session->sourcetype = source_socket;
+	session->sourcetype = source_tcp;
 	gpsd_report(LOG_SPIN,
 		    "netgnss_uri_open(%s) returns socket on fd %d\n",
 		    session->gpsdata.dev.path, session->gpsdata.gps_fd);
@@ -341,6 +341,27 @@ int gpsd_activate(struct gps_device_t *session)
 	    return -1;
 	}
 	session->gpsdata.gps_fd = dsock;
+	session->sourcetype = source_tcp;
+    } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
+	char server[GPS_PATH_MAX], *port;
+	socket_t dsock;
+	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
+	session->gpsdata.gps_fd = -1;
+	port = strchr(server, ':');
+	if (port == NULL) {
+	    gpsd_report(LOG_ERROR, "Missing colon in UDP feed spec.\n");
+	    return -1;
+	}
+	*port++ = '\0';
+	gpsd_report(LOG_INF, "opening UDP feed at %s, port %s.\n", server,
+		    port);
+	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
+	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
+			netlib_errstr(dsock));
+	    return -1;
+	}
+	session->gpsdata.gps_fd = dsock;
+	session->sourcetype = source_udp;
     }
     /* otherwise, ordinary serial device */
     else
