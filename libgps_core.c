@@ -267,8 +267,6 @@ static void libgps_dump_state(struct gps_data_t *collect, time_t now)
 int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable */
 {
-    char *ns, *sp, *tp;
-
     libgps_debug_trace((1, "gps_unpack(%s)\n", buf));
 
     /* detect and process a JSON response */
@@ -297,6 +295,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	 * This looks thread-unsafe, but it's not.  The key is that
 	 * character assignment is atomic.
 	 */
+	char *ns, *sp, *tp;
+
 	static char decimal_point = '\0';
 	if (decimal_point == '\0') {
 	    struct lconv *locale_data = localeconv();
