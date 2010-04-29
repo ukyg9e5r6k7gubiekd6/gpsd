@@ -3,11 +3,16 @@
 # Submitted-by: Val Schmidt <vschmidt@ccom.unh.edu>
 # Date: 25 Apr 2010
 # Location: Newark, DE
+# Transport: UDP
 #
 # The bard lives inside a Gavia AUV <http://www.gavia.is/>, which was
 # placed in the parking log of a university laboratory for the capture
 # of this data. It was completely stationary. Also, this sample
-# contains strings that indicate the date.
+# contains strings that indicate the date. 
+#
+# The contents of the Transport header tell the gpsd test framework to
+# ship the file to the subordinate gpsd via IP datagrams.  The source
+# is passed in as a udp:// URL.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.

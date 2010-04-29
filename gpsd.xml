@@ -248,6 +248,16 @@ be interpreted as though they had been issued by a serial device. Example:
 </listitem>
 </varlistentry>
 <varlistentry>
+<term>UDP feed</term>
+<listitem>
+<para>A URI with the prefix "udp://", followed by a hostname, a
+colon, and a port number. The daemon will open a socket listening for
+UDP datagrams arriving on the indicated address and port, which will 
+be interpreted as though they had been issued by a serial device. Example:
+<filename>udp://127.0.0.1:5000</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>Ntrip caster</term>
 <listitem>
 <para>A URI with the prefix "ntrip://" followed by the name of an
