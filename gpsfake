@@ -191,7 +191,7 @@ if __name__ == '__main__':
                 # Without a delay here there's a window for test
                 # sentences to arrive before the watch takes effect.
                 # This needs to increase if leading sentences in
-                # test loads aren't being process.
+                # test loads aren't being processed.
                 time.sleep(1)
             test.run()
         except socket.error, msg:
