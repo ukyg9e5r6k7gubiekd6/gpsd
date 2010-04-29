@@ -270,7 +270,7 @@ class FakeUDP(FakeGPS):
 
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
-        self.sock.shutdown(socket.SHUT_RDWR)
+        pass	# shutdown() fails on UDP
 
 class DaemonError(exceptions.Exception):
     def __init__(self, msg):
