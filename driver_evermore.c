@@ -6,7 +6,7 @@
  *
  * The vendor site is <http://www.emt.com.tw>.
  *
- * This driver was written by Petr Slansky based on a framework by Eric S. 
+ * This driver was written by Petr Slansky based on a framework by Eric S.
  * Raymond.  The following remarks are by Petr Slansky.
  *
  * Snooping on the serial the communication between a Windows program and
@@ -25,7 +25,7 @@
  * 10 02 06 8D 00 D8 00 65 10 03        switch to datum ID 217 (WGS-72)
  *
  * These don't entail a reset of GPS as the 0x80 message does.
- * 
+ *
  * 10 02 04 38 85 bd 10 03     answer from GPS to 0x85 message; ACK message
  * 10 02 04 38 8d c5 10 03     answer from GPS to 0x8d message; ACK message
  * 10 02 04 38 8e c6 10 03     answer from GPS to 0x8e message; ACK message
@@ -54,7 +54,7 @@
  *          2 clock hold only (2 sat)
  *          3 direction hold then clock hold (1 sat)
  *          4 clock hold then direction hold (1 sat)
- * 
+ *
  * Message $PEMT,100 could be forced with message 0x85 (restart):
  * 10 02 12 85 00 00 00 00 00 01 01 00 00 00 00 00 00 00 00 87 10 03
  * 0x85 ID, Restart
@@ -70,18 +70,18 @@
  * 0x0000 Longtitude WGS-84 (+/-1800, 1/10 degree, + for E, int16)
  * 0x0000 Altitude WGS-84 (-1000..+18000, meters, int16)
  * 0x87 CRC
- * 
+ *
  * With message 0x8e it is possible to define how often each NMEA
  * message is sent (0-255 seconds). It is possible with message 0x8e
  * to activate PEMT,101 messages that have information about time,
  * position, velocity and HDOP.
- * 
+ *
  * $PEMT,101,1,02,00.0,300906190446,5002.5062,N,01427.6166,E,00259,000,0000*27
  * $PEMT,101,2,06,02.1,300906185730,5002.7546,N,01426.9524,E,00323,020,0011*26
  * 101 - message type, Compact Navigation Solution
  * 2 - position status (1,2,3,4,5,6)
  *      (1 invalid, 2 2D fix, 3 3D fix, 4 2D with DIFF, 5 3D with DIFF,
- *       6 2/1 sat degrade mode) 
+ *       6 2/1 sat degrade mode)
  * 06 - number of used satelites
  * 02.1 - DOP (00.0 no fix, HDOP 2D fix, PDOP 3D fix)
  * 300906185730 - date and time, UTC ddmmyyHHMMSS (30/09/2006 18:57:30)
@@ -90,11 +90,11 @@
  * 00323 - Altitude (323 metres)
  * 020 - heading (20 degrees from true north)
  * 0011 - speed over ground (11 metres per second); documentation says km per h
- * 
- * This is an exampe of an 0x8e message that activates all NMEA sentences 
+ *
+ * This is an exampe of an 0x8e message that activates all NMEA sentences
  * with 1s period:
  * 10 02 12 8E 7F 01 01 01 01 01 01 01 01 00 00 00 00 00 00 15 10 03
- * 
+ *
  * There is a way to probe for this chipset. When binary message 0x81 is sent:
  * 10 02 04 81 13 94 10 03
  *
@@ -103,7 +103,7 @@
  * bytes marked with * are fixed
  * Message in reply is information about logging configuration of GPS
  *
- * Another way to detect the EverMore chipset is to send one of the messages 
+ * Another way to detect the EverMore chipset is to send one of the messages
  * 0x85, 0x8d, 0x8e or 0x8f and check for a reply.
  * The reply message from an EverMore GPS will look like this:
  * *10 *02 *04 *38 8d c5 *10 *03
@@ -111,7 +111,7 @@
  * c5 is EverMore checksum, other bytes are fixed
  *
  * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details. 
+ * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
 #include <sys/types.h>
@@ -341,17 +341,17 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->context->leap_seconds;
 	/*@ end @*/
 	visible = (unsigned char)getub(buf2, 10);
-	/* 
+	/*
 	 * Note: This code is untested. It was written from the manual.
 	 * The results need to be sanity-checked against a GPS with
 	 * known-good raw decoding and the same skyview.
 	 *
-	 * We can get pseudo range (m), delta-range (m/s), doppler (Hz) 
+	 * We can get pseudo range (m), delta-range (m/s), doppler (Hz)
 	 * and status for each channel from the chip.  We cannot get
 	 * codephase or carrierphase.
 	 */
-#define SBITS(sat, s, l)	sbits((char *)buf, 10 + (sat*14) + s, l) 
-#define UBITS(sat, s, l)	ubits((char *)buf, 10 + (sat*14) + s, l) 
+#define SBITS(sat, s, l)	sbits((char *)buf, 10 + (sat*14) + s, l)
+#define UBITS(sat, s, l)	ubits((char *)buf, 10 + (sat*14) + s, l)
 	for (k = 0; k < visible; k++) {
 	    int prn = (int)UBITS(k, 4, 5);
 	    /* this is so we can tell which never got set */
@@ -373,7 +373,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 #undef UBITS
 	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME|RAW}\n",
 		    session->newdata.time);
-	return TIME_IS|RAW_IS;
+	return TIME_IS | RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
 	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd: %s\n",

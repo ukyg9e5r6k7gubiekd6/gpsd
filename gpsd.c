@@ -1,6 +1,6 @@
 /*
- * This is the main sequence of the gpsd daemon. The IO dispatcher, main 
- * select loop, and user command handling lives here. 
+ * This is the main sequence of the gpsd daemon. The IO dispatcher, main
+ * select loop, and user command handling lives here.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -124,7 +124,7 @@
 
 #define QLEN			5
 
-/* 
+/*
  * If ntpshm is enabled, we renice the process to this priority level.
  * For precise timekeeping increase priority.
  */
@@ -308,8 +308,8 @@ The following driver types are compiled into this gpsd instance:\n",
 static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
-    /* 
-     * af = address family, 
+    /*
+     * af = address family,
      * service = IANA protocol name or number.
      * tcp_or_udp = TCP or UDP
      * qlen = maximum wait-queue length for connections
@@ -361,12 +361,12 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	memset((char *)&sat.sa_in6, 0, sin_len);
 	sat.sa_in6.sin6_family = (sa_family_t) AF_INET6;
 	if (listen_global) {
-	    /* BAD:  sat.sa_in6.sin6_addr = in6addr_any; 
+	    /* BAD:  sat.sa_in6.sin6_addr = in6addr_any;
 	     * the simple assignment will not work (except as an initializer)
-	     * because sin6_addr is an array not a simple type 
+	     * because sin6_addr is an array not a simple type
 	     * we could do something like this:
 	     * memcpy(sat.sa_in6.sin6_addr, in6addr_any, sizeof(sin6_addr));
-	     * BUT, all zeros is IPv6 wildcard, and we just zeroed the array 
+	     * BUT, all zeros is IPv6 wildcard, and we just zeroed the array
 	     * so really nothing to do here
 	     */
 	} else
@@ -419,7 +419,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 }
 
 /* *INDENT-OFF* */
-static int passivesocks(char *service, char *tcp_or_udp, 
+static int passivesocks(char *service, char *tcp_or_udp,
 			int qlen, /*@out@*/int socks[])
 {
     int numsocks = AFCOUNT;
@@ -1701,7 +1701,7 @@ int main(int argc, char *argv[])
 			continue;
 
 		    /* *INDENT-OFF* */
-		    /* 
+		    /*
 		     * NMEA and other textual sentences are simply
 		     * copied to all clients that are in raw or nmea
 		     * mode.
@@ -1763,7 +1763,7 @@ int main(int argc, char *argv[])
 				    device->cycle_end_reliable ? "" : "un");
 			if (device->cycle_end_reliable) {
 			    /*
-			     * Driver returns reliable end of cycle, 
+			     * Driver returns reliable end of cycle,
 			     * report only when that is signaled.
 			     */
 			    if ((changed & REPORT_IS) != 0)

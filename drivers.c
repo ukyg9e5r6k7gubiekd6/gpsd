@@ -64,7 +64,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t * session)
     } else {			/* session->packet.type == NMEA_PACKET) */
 
 	gps_mask_t st = 0;
-	/* 
+	/*
 	 * Some packets do not end in \n, append one
 	 * for good logging
 	 */
@@ -140,7 +140,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	     * Thus the only reliable probe is to try to flip the SiRF into
 	     * binary mode, cluing in the library to revert it on close.
 	     *
-	     * SiRFs dominate the GPS-mouse market, so we used to put this test 
+	     * SiRFs dominate the GPS-mouse market, so we used to put this test
 	     * first. Unfortunately this causes problems for gpsctl, as it cannot
 	     * select the NMEA driver without switching the device back to
 	     * binary mode!  Fix this if we ever find a nondisruptive probe string.
@@ -283,8 +283,8 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 	 */
 	switch (session->packet.counter) {
 	case 0:
-	    /* reset some config, AutoFix, WGS84, PPS 
-	     * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz 
+	    /* reset some config, AutoFix, WGS84, PPS
+	     * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz
 	     * with a 160ms low state.
 	     * NOTE: new PPS only takes effect after next power cycle
 	     */
@@ -776,7 +776,7 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .trigger	    = "$OHPR,",		/* detect their main sentence */ 
+    .trigger	    = "$OHPR,",		/* detect their main sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
     .get_packet     = generic_get,	/* how to get a packet */

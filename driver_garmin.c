@@ -12,12 +12,12 @@
  * serial port.  These receivers provide adequate NMEA support, so it
  * often makes sense to just put them into NMEA mode.
  *
- * On Linux, USB Garmins (091e:0003) need the Linux garmin_gps driver and 
- * will not function without it.  On other operating systems, it is clear 
- * garmin_usb_binary_old does not work since it requires the Linux 
+ * On Linux, USB Garmins (091e:0003) need the Linux garmin_gps driver and
+ * will not function without it.  On other operating systems, it is clear
+ * garmin_usb_binary_old does not work since it requires the Linux
  * garmin_gps module.
  *
- * This code has been tested and at least at one time is known to work on 
+ * This code has been tested and at least at one time is known to work on
  * big- and little-endian CPUs and 32 and 64 bit cpu modes.
  *
  *
@@ -30,7 +30,7 @@
  * An older version of iop_spec.pdf that describes only Serial Binary
  * is available at:
  *   http://vancouver-webpages.com/pub/peter/iop_spec.pdf
- * Information about the GPS 18 
+ * Information about the GPS 18
  *   http://www.garmin.com/manuals/425_TechnicalSpecification.pdf
  *
  * There is one physical link protocol for serial which uses DLE/ETX
@@ -810,11 +810,11 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 /*
  * is_usb_device() - is a specified device USB matching given vendor/product?
  *
- * BUG: Doesn't actually match against path yet. Must finish this function 
+ * BUG: Doesn't actually match against path yet. Must finish this function
  * by querying /sys/dev/char, either directly or using libudev. Greg KH
  * assures this is possible, though he is vague about how.
  *
- * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/ 
+ * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/
  */
 /*@-compdef -usedef@*/
 static bool is_usb_device(const char *path UNUSED, int vendor, int product)
@@ -871,20 +871,20 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 #endif /* HAVE_LIBUSB || S_SPLINT_S */
 
 /*
- * garmin_usb_detect() - detect a Garmin USB device connected to ession fd. 
+ * garmin_usb_detect() - detect a Garmin USB device connected to ession fd.
  *
  * This is ONLY for USB devices reporting as: 091e:0003.
  *
  * This driver ONLY works in Linux and ONLY when the the garmin_gps kernel
  * module is installed.
  *
- * This is only necessary because under Linux Garmin USB devices need a 
+ * This is only necessary because under Linux Garmin USB devices need a
  * kernel module rather than being normal USB-serial devices.
  *
  * The actual wire protocol from the Garmin device is very strange. There
  * are no delimiters.  End of packet is signaled by a zero-length read
  * on the USB device, and start of packet is the next read.  You can't just
- * ignore the zero reads and pass the data through - you'd never be able 
+ * ignore the zero reads and pass the data through - you'd never be able
  * to tell where the packet boundaries are.
  *
  * The garmin_usb module's job is to grab the packet and frame it in

@@ -57,7 +57,7 @@ char *json_stringify( /*@out@*/ char *to,
     char *tp;
 
     tp = to;
-    /* 
+    /*
      * The limit is len-6 here because we need to be leave room for
      * each character to generate an up to 6-character Java-style
      * escape
@@ -815,8 +815,8 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 			   ais->type5.to_port, ais->type5.to_starboard,
 			   epfd_legends[ais->type5.epfd], ais->type5.month,
 			   ais->type5.day, ais->type5.hour, ais->type5.minute,
-			   ais->type5.draught / 10.0, 
-			   json_stringify(buf3, sizeof(buf3), 
+			   ais->type5.draught / 10.0,
+			   json_stringify(buf3, sizeof(buf3),
 					  ais->type5.destination),
 			   ais->type5.dte);
             /* *INDENT-ON* */

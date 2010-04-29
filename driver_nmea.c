@@ -140,7 +140,7 @@ static gps_mask_t processGPRMC(int count, char *field[],
     /*
      * RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
      * 1     225446.33    Time of fix 22:54:46 UTC
-     * 2     A          Status of Fix: A = Autonomous, valid; 
+     * 2     A          Status of Fix: A = Autonomous, valid;
      * D = Differential, valid; V = invalid
      * 3,4   4916.45,N    Latitude 49 deg. 16.45 min North
      * 5,6   12311.12,W   Longitude 123 deg. 11.12 min West
@@ -152,7 +152,7 @@ static gps_mask_t processGPRMC(int count, char *field[],
      * A=autonomous, D=differential, E=Estimated,
      * N=not valid, S=Simulator, M=Manual input mode
      * *68        mandatory nmea_checksum
-     * 
+     *
      * * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
     gps_mask_t mask = 0;
@@ -220,16 +220,16 @@ static gps_mask_t processGPGLL(int count, char *field[],
 /* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.
-     * 
+     *
      * $GPGLL,4916.45,N,12311.12,W,225444,A,A*5C
-     * 
+     *
      * 1,2: 4916.46,N    Latitude 49 deg. 16.45 min. North
      * 3,4: 12311.12,W   Longitude 123 deg. 11.12 min. West
      * 5:   225444       Fix taken at 22:54:44 UTC
      * 6:   A            Data valid
      * 7:   A            Autonomous mode
      * 8:   *5C          Mandatory NMEA checksum
-     * 
+     *
      * 1,2 Latitude, N (North) or S (South)
      * 3,4 Longitude, E (East) or W (West)
      * 5 UTC of position
@@ -241,12 +241,12 @@ static gps_mask_t processGPGLL(int count, char *field[],
      * M = Manual Input Mode
      * S = Simulated Mode
      * N = Data Not Valid
-     * 
+     *
      * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
      * indicating that the Garmin 65 does not return time and status.
      * SiRF chipsets don't return the Mode Indicator.
      * This code copes gracefully with both quirks.
-     * 
+     *
      * Unless you care about the FAA indicator, this sentence supplies nothing
      * that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
      * actually ships updates in GPLL that aren't redundant.
@@ -638,10 +638,10 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
      * 5) Local zone description, 00 to +- 13 hours
      * 6) Local zone minutes description, apply same sign as local hours
      * 7) Checksum
-     * 
+     *
      * Note: some devices, like the uBlox ANTARIS 4h, are known to ship ZDAs
      * with some fields blank under poorly-understood circumstances (probably
-     * when they don't have satellite lock yet). 
+     * when they don't have satellite lock yet).
      */
     gps_mask_t mask;
 
@@ -744,7 +744,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
      1. Azimuth
      2. Pitch Angle
      3. Roll Angle
-     4. Sensor temp, degrees centigrade 
+     4. Sensor temp, degrees centigrade
      5. Depth (feet)
      6. Magnetic Vector Length
      7-9. 3 axis Magnetic Field readings x,y,z
@@ -893,10 +893,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     *
 	     * 1. A Garmin GPS in NMEA mode is detected.
 	     *
-	     * 2. PGRMC is sent to reconfigure to Garmin binary mode.  
+	     * 2. PGRMC is sent to reconfigure to Garmin binary mode.
 	     *    If successful, the GPS echoes the phrase.
 	     *
-	     * 3. nmea_parse() sees the echo as RMC because the talker ID is 
+	     * 3. nmea_parse() sees the echo as RMC because the talker ID is
 	     *    ignored, and fails to recognize the echo as PGRMC and ignore it.
 	     *
 	     * 4. The mode is changed back to NMEA, resulting in an infinite loop.
@@ -1024,11 +1024,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	session->newdata.time =
 	    (double)mkgmtime(&session->driver.nmea.date) +
 	    session->driver.nmea.subseconds;
-	gpsd_report(LOG_DATA, 
+	gpsd_report(LOG_DATA,
 		    "%s time (nearest sec) is %2f = %d-%d-%dT%d:%d%d\n",
 		    session->driver.nmea.field[0], session->newdata.time,
-		    1900+session->driver.nmea.date.tm_year,
-		    session->driver.nmea.date.tm_mon+1,
+		    1900 + session->driver.nmea.date.tm_year,
+		    session->driver.nmea.date.tm_mon + 1,
 		    session->driver.nmea.date.tm_mday,
 		    session->driver.nmea.date.tm_hour,
 		    session->driver.nmea.date.tm_min,
