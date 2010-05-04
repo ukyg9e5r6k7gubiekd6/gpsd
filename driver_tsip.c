@@ -808,6 +808,31 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	    /* Decode Fix modes */
 	    switch (u2 & 7) {
+            case 0:     /* Auto */
+                switch (u1) {
+                       /*
+			* According to the Thunderbolt Manual, the
+                        * first byte of the supplemental timing packet
+                        * simply indicates the configuration of the
+                        * device, not the actual lock, so we need to
+                        * look at the decode status.
+			*/
+                       case 0:   /* "Doing Fixes" */
+                         session->newdata.mode = MODE_3D;
+                         break;
+                       case 0x0B: /* "Only 3 usable sats" */
+                         session->newdata.mode = MODE_2D;
+                         break;
+                       case 0x1:   /* "Don't have GPS time" */
+                       case 0x3:   /* "PDOP is too high" */
+                       case 0x8:   /* "No usable sats" */
+                       case 0x9:   /* "Only 1 usable sat" */
+                       case 0x0A:  /* "Only 2 usable sats */
+                       case 0x0C:  /* "The chosen sat is unusable" */
+                       case 0x10:  /* TRAIM rejected the fix */
+                       default:
+                          session->newdata.mode = MODE_NO_FIX;
+                }
 	    case 6:		/* Clock Hold 2D */
 	    case 3:		/* 2D Position Fix */
 		//session->gpsdata.status = STATUS_FIX;
