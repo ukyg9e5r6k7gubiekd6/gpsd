@@ -595,7 +595,9 @@ version:
 # depends on each TEST as well as invokes it (with TESTS_ENVIRONMENT)
 # the entire list of tests is run twice.
 
-run_regress_driver = PYTHON=$(PYTHON) $(srcdir)/regress-driver
+# Use make REGRESSOPTS=-u to force running with UDP rather than pty devices
+
+run_regress_driver = PYTHON=$(PYTHON) $(srcdir)/regress-driver $(REGRESSOPTS)
 
 # Regression-test the daemon
 gps-regress: gpsd stamp-python

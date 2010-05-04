@@ -35,7 +35,7 @@ export PATH
 mode=regress
 testing=daemon
 opts=""
-while getopts cstrbvo opt
+while getopts cstrbuvo opt
 do
     case $opt in
         c) testing=clientlib ;;	# Can be 'daemon'  
@@ -43,6 +43,7 @@ do
 	t) opts="-b $opts" mode=regress ;;	# Run regression tests w/baton
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
 	b) mode=build ;;	# Rebuild regression check files
+	u) opts="$opts -u" ;;	# Force UDP
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
     esac

@@ -383,7 +383,7 @@ class TestSessionError(exceptions.Exception):
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
     CLOSE_DELAY = 1
-    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, expected=0):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, expected=0, udp=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
         self.port = port
@@ -391,6 +391,7 @@ class TestSession:
         self.verbose = verbose
         self.predump = predump
         self.expected = expected
+        self.udp = udp
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.client_id = 0
@@ -420,7 +421,7 @@ class TestSession:
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
             testload = TestLoad(logfile, predump=self.predump)
-            if testload.sourcetype == "UDP":
+            if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.1.255", port="5000",
                                    progress=self.progress)
             else:
