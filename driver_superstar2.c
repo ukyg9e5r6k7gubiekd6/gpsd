@@ -176,7 +176,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     if (data_len != 67)
 	return 0;
 
-    gpsd_report(LOG_PROG, "superstar2 #33 - satellite data");
+    gpsd_report(LOG_PROG, "superstar2 #33 - satellite data\n");
 
     nchan = 12;
     gpsd_zero_satellites(&session->gpsdata);

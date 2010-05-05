@@ -511,9 +511,9 @@ void ntrip_report(struct gps_device_t *session)
 	    gpsd_position_fix_dump(session, buf, sizeof(buf));
 	    if (write(session->context->dsock, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
-		gpsd_report(LOG_IO, "=> dgps %s", buf);
+		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
 	    else
-		gpsd_report(LOG_IO, "ntrip report write failed");
+		gpsd_report(LOG_IO, "ntrip report write failed\n");
 	}
     }
 }

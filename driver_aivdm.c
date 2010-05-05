@@ -90,7 +90,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	return false;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s", buflen, buf);
+    gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s\n", buflen, buf);
 
     /* extract packet fields */
     (void)strlcpy((char *)ais_context->fieldcopy, buf, buflen);

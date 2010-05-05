@@ -87,9 +87,9 @@ void dgpsip_report(struct gps_device_t *session)
 			   session->gpsdata.fix.altitude);
 	    if (write(session->context->dsock, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
-		gpsd_report(LOG_IO, "=> dgps %s", buf);
+		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
 	    else
-		gpsd_report(LOG_IO, "write to dgps FAILED");
+		gpsd_report(LOG_IO, "write to dgps FAILED\n");
 	}
     }
 }

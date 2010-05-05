@@ -257,8 +257,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
 	buf2[0] = '\0';
 	for (sp = buf; *sp != '\0'; sp++)
-	    if (isprint(*sp)
-		|| (isspace(*sp) && (sp[1] == '\0' || sp[2] == '\0')))
+	    if (isprint(*sp))
 		(void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	    else
 		(void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
@@ -581,7 +580,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 
     if (debuglevel >= 3) {
 	if (isprint(buf[0]))
-	    gpsd_report(LOG_IO, "=> client(%d): %s", sub_index(sub), buf);
+	    gpsd_report(LOG_IO, "=> client(%d): %s\n", sub_index(sub), buf);
 	else {
 	    char *cp, buf2[MAX_PACKET_LENGTH * 3];
 	    buf2[0] = '\0';
@@ -589,7 +588,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 		(void)snprintf(buf2 + strlen(buf2),
 			       sizeof(buf2) - strlen(buf2),
 			       "%02x", (unsigned int)(*cp & 0xff));
-	    gpsd_report(LOG_IO, "=> client(%d): =%s\r\n", sub_index(sub),
+	    gpsd_report(LOG_IO, "=> client(%d): =%s\n", sub_index(sub),
 			buf2);
 	}
     }
@@ -804,7 +803,7 @@ static void handle_control(int sfd, char *buf)
 			stash);
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
-	    gpsd_report(LOG_INF, "<= control(%d): adding %s \n", sfd, stash);
+	    gpsd_report(LOG_INF, "<= control(%d): adding %s\n", sfd, stash);
 	    if (add_device(stash))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
@@ -834,7 +833,7 @@ static void handle_control(int sfd, char *buf)
 	p = snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
-	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command \n",
+	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command\n",
 			sfd);
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
@@ -1003,7 +1002,7 @@ static void handle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
 			       json_error_string(status));
-		gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+		gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 	    } else if (sub->policy.watcher) {
 		if (sub->policy.devpath[0] == '\0') {
 		    /* awaken all devices */
@@ -1016,13 +1015,13 @@ static void handle_request(struct subscriber_t *sub,
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n",
 				       sub->policy.devpath);
-			gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 			goto bailout;
 		    } else if (!awaken(devp))
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n",
 				       sub->policy.devpath);
-		    gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+		    gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 		    goto bailout;
 		}
 	    }
@@ -1056,7 +1055,7 @@ static void handle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
 			       json_error_string(status));
-		gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+		gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 		goto bailout;
 	    } else {
 		if (devconf.path[0] != '\0') {
@@ -1065,7 +1064,7 @@ static void handle_request(struct subscriber_t *sub,
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
-			gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 			goto bailout;
 		    }
 		} else {
@@ -1080,13 +1079,13 @@ static void handle_request(struct subscriber_t *sub,
 			(void)strlcat(reply,
 				      "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no devices attached.\"}\r\n",
 				      replylen);
-			gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 			goto bailout;
 		    } else if (devcount > 1) {
 			(void)snprintf(reply + strlen(reply),
 				       replylen - strlen(reply),
 				       "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple devices are attached.\"}\r\n");
-			gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 			goto bailout;
 		    }
 		    /* we should have exactly one device now */
@@ -1204,7 +1203,7 @@ static void handle_request(struct subscriber_t *sub,
 	(void)snprintf(reply, replylen,
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
 		       (int)(errend - buf), buf);
-	gpsd_report(LOG_ERROR, "ERROR response: %s", reply);
+	gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 	buf += strlen(buf);
     }
   bailout:
@@ -1792,13 +1791,13 @@ int main(int argc, char *argv[])
 					gpsd_maskdump(device->gpsdata.set));
 			    if (report_fix) {
 				nmea_tpv_dump(device, buf3, sizeof(buf3));
-				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s",
+				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
 					    device->gpsdata.dev.path, buf3);
 				(void)throttled_write(sub, buf3,
 						      strlen(buf3));
 			    } else if ((changed & SATELLITE_IS) != 0) {
 				nmea_sky_dump(device, buf3, sizeof(buf3));
-				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s",
+				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
 					    device->gpsdata.dev.path, buf3);
 				(void)throttled_write(sub, buf3,
 						      strlen(buf3));
@@ -1903,7 +1902,7 @@ int main(int argc, char *argv[])
 			buf[buflen++] = '\n';
 		    buf[buflen] = '\0';
 		    gpsd_report(LOG_IO,
-				"<= client(%d): %s", sub_index(sub), buf);
+				"<= client(%d): %s\n", sub_index(sub), buf);
 
 		    /*
 		     * When a command comes in, update subscriber.active to
