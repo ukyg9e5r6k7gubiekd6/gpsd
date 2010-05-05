@@ -257,7 +257,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
 	buf2[0] = '\0';
 	for (sp = buf; *sp != '\0'; sp++)
-	    if (isprint(*sp))
+	    if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0'))
 		(void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	    else
 		(void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
