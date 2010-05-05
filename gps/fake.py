@@ -351,19 +351,19 @@ class DaemonInstance:
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
-            self.sock.sendall("+%s\r\n" % path)
+            self.sock.sendall("+%s\r\n\x00" % path)
             self.sock.recv(12)
             self.sock.close()
     def remove_device(self, path):
         "Remove a device from the daemon's internal search list."
         if self.__get_control_socket():
-            self.sock.sendall("-%s\r\n" % path)
+            self.sock.sendall("-%s\r\n\x00" % path)
             self.sock.recv(12)
             self.sock.close()
     def quit_on_quiesce(self, num):
         "Tell the daemon to quit when it next goes quiescent."
         if self.__get_control_socket():
-            self.sock.sendall("$%d\r\n" % num)
+            self.sock.sendall("$%d\r\n\x00" % num)
             self.sock.recv(12)
             self.sock.close()
     def kill(self):
