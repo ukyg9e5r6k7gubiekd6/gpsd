@@ -106,7 +106,6 @@ if __name__ == '__main__':
     predump = False
     pipe = False
     singleshot = False
-    flicker = False
     promptme = False
     client_init = '?WATCH={"json":true,"nmea":true}'
     doptions = ""
@@ -139,10 +138,7 @@ if __name__ == '__main__':
         elif (switch == '-p'):
             pipe = True
         elif (switch == '-r'):
-            if flicker:
-                client_init += val
-            else:
-                client_init = val
+            client_init = val
         elif (switch == '-s'):
             speed = int(val)
         elif (switch == '-u'):
