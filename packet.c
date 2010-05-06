@@ -111,6 +111,15 @@ enum
 #define STX	(unsigned char)0x02
 #define ETX	(unsigned char)0x03
 
+static void character_pushback(struct gps_packet_t *lexer)
+/* push back the last character grabbed */
+{
+    --lexer->inbufptr;
+    --lexer->char_counter;
+    gpsd_report(LOG_RAW + 2, "%08ld: character pushed back\n", 
+		lexer->char_counter);
+}
+
 static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 {
 #ifdef RTCM104V2_ENABLE
@@ -258,10 +267,57 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_VENDOR_LEAD:
-	if (isalpha(c))
+	if (c == 'A')
+	    lexer->state = NMEA_PASHR_A;
+	else if (isalpha(c))
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;
+	break;
+    /*
+     * Without the following six states, DLE in a $PASHR can fool the
+     * sniffer into thinking it sees a TSIP packet.  Hilarity ensues.
+     */
+    case NMEA_PASHR_A:
+	if (c == 'S')
+	    lexer->state = NMEA_PASHR_S;
+	else if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NMEA_PASHR_S:
+	if (c == 'H')
+	    lexer->state = NMEA_PASHR_H;
+	else if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NMEA_PASHR_H:
+	if (c == 'R')
+	    lexer->state = NMEA_BINARY_BODY;
+	else if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NMEA_BINARY_BODY:
+	if (c == '\r')
+	    lexer->state = NMEA_BINARY_CR;
+	break;
+    case NMEA_BINARY_CR:
+	if (c == '\n')
+	    lexer->state = NMEA_BINARY_NL;
+	else
+	    lexer->state = NMEA_BINARY_BODY;
+	break;
+    case NMEA_BINARY_NL:
+	if (c == '$') {
+	    character_pushback(lexer);
+	    lexer->state = NMEA_RECOGNIZED;	/* CRC will reject it */
+	} else
+	    lexer->state = NMEA_BINARY_BODY;
 	break;
     case NMEA_BANG:
 	if (c == 'A')

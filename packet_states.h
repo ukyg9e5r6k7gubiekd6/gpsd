@@ -10,6 +10,12 @@
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
    NMEA_VENDOR_LEAD,	/* seen second character of NMEA P leader */
    NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
+   NMEA_PASHR_A,	/* grind through recognizing $PASHR */
+   NMEA_PASHR_S,	/* grind through recognizing $PASHR */
+   NMEA_PASHR_H,	/* grind through recognizing $PASHR */
+   NMEA_BINARY_BODY,	/* Ashtech-style binary packet body, skip until \r\n */ 
+   NMEA_BINARY_CR,	/* \r on end of Ashtech-style binary packet */ 
+   NMEA_BINARY_NL,	/* \n on end of Ashtech-style binary packet */ 
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
