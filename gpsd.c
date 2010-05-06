@@ -153,12 +153,14 @@ static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = false;
 static jmp_buf restartbuf;
-static enum
-{ disabled,
+/* *INDENT-OFF* */
+static enum { 
+    disabled,
     enabled,
     fulfilled,
     holding
 }
+/* *INDENT-ON* */
 quit_when_quiescent = disabled;
 static unsigned int devices_expected;
 
@@ -236,12 +238,25 @@ static int daemonize(void)
 static pthread_mutex_t report_mutex;
 #endif /* PPS_ENABLE */
 
+static void visibilize(char *buf2, size_t len, char *buf)
+{
+    char *sp;
+
+    buf2[0] = '\0';
+    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') || (sp[0] == '\r' && sp[2] == '\0'))
+	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	else
+	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
+			   (unsigned)*sp);
+}
+
 void gpsd_report(int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
 #ifndef SQUELCH_ENABLE
     if (errlevel <= debuglevel) {
-	char buf[BUFSIZ], buf2[BUFSIZ], *sp;
+	char buf[BUFSIZ], buf2[BUFSIZ];
 	va_list ap;
 
 #if defined(PPS_ENABLE)
@@ -255,13 +270,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 			ap);
 	va_end(ap);
 
-	buf2[0] = '\0';
-	for (sp = buf; *sp != '\0'; sp++)
-	    if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0'))
-		(void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
-	    else
-		(void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			       (unsigned)*sp);
+	visibilize(buf2, sizeof(buf2), buf);
 
 	if (in_background)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
@@ -1493,6 +1502,7 @@ int main(int argc, char *argv[])
 	/*@ -usedef @*/
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
+	errno = 0;
 	if (select(maxfd + 1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR)
 		continue;
@@ -1515,7 +1525,8 @@ int main(int argc, char *argv[])
 		if (FD_ISSET(i, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf),
 				   sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	    gpsd_report(LOG_SPIN, "select() {%s} at %f\n", dbuf, timestamp());
+	    gpsd_report(LOG_SPIN, "select() {%s} at %f (errno %d)\n", 
+			dbuf, timestamp(), errno);
 	}
 
 	/* always be open to new client connections */
