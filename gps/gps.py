@@ -304,13 +304,14 @@ class gps(gpsdata, gpsjson):
             return status
         if self.raw_hook:
             self.raw_hook(self.response);
-        if self.response.startswith("{"):
+        if self.response.startswith("{") and self.response.endswith("}\r\n"):
             self.json_unpack(self.response)
             self.__oldstyle_shim()
             self.newstyle = True
-        else:
+            self.valid |= PACKET_SET
+        elif self.response.startswith("GPSD"):
             self.__oldstyle_unpack(self.response)
-        self.valid |= PACKET_SET
+            self.valid |= PACKET_SET
         return 0
 
     def next(self):
