@@ -139,6 +139,9 @@ class TestLoad:
                     type_latch = ptype
                 if self.predump:
                     print `packet`
+                if not packet:
+                    raise TestLoadError("zero-length packet from %s"%\
+                                        logfp.name)                    
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
         self.textual = (type_latch == sniffer.NMEA_PACKET)
