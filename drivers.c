@@ -950,9 +950,9 @@ gps_mask_t processMTK3301(int c UNUSED, char *field[],
 
     switch (msg = atoi(&(field[0])[4])) {
     case 705:			/*  */
-	(void)strlcat(session->subtype, field[1], 64);
-	(void)strlcat(session->subtype, "-", 64);
-	(void)strlcat(session->subtype, field[2], 64);
+	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
+	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
+	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
 	return 0;		/* return a unknown sentence, which will cause the driver switch */
     case 001:			/* ACK / NACK */
 	reason = atoi(field[2]);
