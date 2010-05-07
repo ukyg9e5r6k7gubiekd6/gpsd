@@ -404,6 +404,7 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.separation = NAN;
 	session->mag_var = NAN;
 	session->releasetime = 0;
+	session->getcount = 0;
 
 	/* clear the private data union */
 	memset(&session->driver, '\0', sizeof(session->driver));
@@ -665,7 +666,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    break;
 		}
-	} else if (!gpsd_next_hunt_setting(session))
+	} else if (session->getcount++ > 1 && !gpsd_next_hunt_setting(session))
 	    return ERROR_IS;
     }
 
