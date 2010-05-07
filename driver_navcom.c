@@ -777,7 +777,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR,
 			"Navcom: packet type 0x86: too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
-	    return ERROR_IS;
+	    return 0;
 	}
 	prn = getub(buf, n);
 	tracking_status = getub(buf, n + 1);

@@ -656,7 +656,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gpsd_report(LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.dev.path, session->packet.type);
-	if (session->packet.type > COMMENT_PACKET) {
+	if (session->packet.type == COMMENT_PACKET) {
+	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
+	} else if (session->packet.type > COMMENT_PACKET) {
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if (session->packet.type == (*dp)->packet_type) {

@@ -133,7 +133,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 
     if (len < 62) {
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%zu)\n", len);
-	mask = ERROR_IS;
+	mask = 0;
     } else {
 	gps_week = (ushort) getleuw(buf, 7 + 4);
 	session->context->gps_week = gps_week;
@@ -189,7 +189,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad UTC_IONO_MODEL (len %zu, should be 64)\n",
 		    len);
-	return ERROR_IS;
+	return 0;
     }
 
     flags = (ushort) getleuw(buf, 7);
@@ -223,7 +223,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     if (len != 64) {
 	gpsd_report(LOG_PROG,
 		    "ITALK: bad SUBFRAME (len %zu, should be 64)\n", len);
-	return ERROR_IS;
+	return 0;
     }
 
     flags = (ushort) getleuw(buf, 7 + 4);
@@ -234,7 +234,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
 		flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
     if (flags & SUBFRAME_WORD_FLAG_MASK)
-	return ONLINE_IS | ERROR_IS;	// don't try decode an erroneous packet
+	return 0;	// don't try decode an erroneous packet
 
     /*
      * Timo says "SUBRAME message contains decoded navigation message subframe
@@ -340,10 +340,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 	gpsd_report(LOG_IO, "iTalk unknown packet: id 0x%02x length %zu\n",
 		    type, len);
     }
-    if (mask == ERROR_IS)
-	mask = 0;
-    else
-	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		       "ITK-%02x", type);
 
     return mask | ONLINE_IS;

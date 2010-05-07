@@ -1644,8 +1644,9 @@ int main(int argc, char *argv[])
 
 		if (changed == ERROR_IS) {
 		    gpsd_report(LOG_WARN,
-				"packet sniffer failed sync with %s\n",
-				device->gpsdata.dev.path);
+				"packet sniffer failed sync with %s (flags %s)\n",
+				device->gpsdata.dev.path, 
+				gpsd_maskdump(changed));
 		    deactivate_device(device);
 		    continue;
 		} else if ((changed & ONLINE_IS) == 0) {
