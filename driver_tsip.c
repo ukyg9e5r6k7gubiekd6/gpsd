@@ -774,7 +774,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->newdata.time =
 		    gpstime_to_unix((int)s1, session->context->gps_tow)
 		    - (double)s2;
-		mask |= TIME_IS;
+		mask |= TIME_IS | CLEAR_IS;
 		gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",
 			    session->newdata.time);
 	    }
@@ -850,7 +850,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		break;
 	    }
 
-	    mask |= LATLON_IS | ALTITUDE_IS | MODE_IS | CLEAR_IS | REPORT_IS;
+	    mask |= LATLON_IS | ALTITUDE_IS | MODE_IS | REPORT_IS;
 	    gpsd_report(LOG_DATA, "SP-TPS 0xac "
 			"time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
 			session->newdata.time,
