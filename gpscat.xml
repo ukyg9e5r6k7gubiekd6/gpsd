@@ -35,8 +35,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <para><application>gpscat</application> is a simple program for
 logging and packetizing GPS data streams.  It takes input from a
 specified file or serial device (presumed to have a GPS attached) and
-reports to standard output. The program runs until end of input or ot is
-interrupted by ^C or other means.</para>
+reports to standard output. The program runs until end of input or it is
+interrupted by ^C or other means. It does not terminate on a bad
+backet; this is intentional.</para>
 
 <para>In raw mode (the default) <application>gpscat</application>
 simply dumps its input to standard output.  Nonprintable characters
