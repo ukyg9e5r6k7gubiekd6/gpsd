@@ -238,7 +238,7 @@ static int daemonize(void)
 static pthread_mutex_t report_mutex;
 #endif /* PPS_ENABLE */
 
-static void visibilize(char *buf2, size_t len, char *buf)
+static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
     char *sp;
 

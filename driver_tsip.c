@@ -833,6 +833,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
                        default:
                           session->newdata.mode = MODE_NO_FIX;
                 }
+		break;
 	    case 6:		/* Clock Hold 2D */
 	    case 3:		/* 2D Position Fix */
 		//session->gpsdata.status = STATUS_FIX;
