@@ -469,14 +469,14 @@ static gps_mask_t processGPGSV(int count, char *field[],
     if (count <= 3) {
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites_visible = 0;
-	return ERROR_IS;
+	return 0;
     }
     if (count % 4 != 0) {
 	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 0\n",
 		    count);
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites_visible = 0;
-	return ERROR_IS;
+	return 0;
     }
 
     session->driver.nmea.await = atoi(field[1]);
@@ -519,7 +519,7 @@ static gps_mask_t processGPGSV(int count, char *field[],
     if (session->driver.nmea.part < session->driver.nmea.await) {
 	gpsd_report(LOG_PROG, "Partial satellite data (%d of %d).\n",
 		    session->driver.nmea.part, session->driver.nmea.await);
-	return ERROR_IS;
+	return 0;
     }
     /*
      * This sanity check catches an odd behavior of SiRFstarII receivers.
@@ -535,7 +535,7 @@ static gps_mask_t processGPGSV(int count, char *field[],
     gpsd_report(LOG_WARN, "Satellite data no good (%d of %d).\n",
 		session->driver.nmea.part, session->driver.nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
-    return ERROR_IS;
+    return 0;
   sane:
     session->gpsdata.skyview_time = NAN;
     gpsd_report(LOG_DATA, "GSV: Satellite data OK (%d of %d).\n",

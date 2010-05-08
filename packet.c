@@ -1152,6 +1152,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		gpsd_report(LOG_WARN,
 			    "bad checksum in NMEA packet; expected %s.\n",
 			    csum);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
@@ -1169,8 +1170,10 @@ void packet_parse(struct gps_packet_t *lexer)
 	    crc &= 0x7fff;
 	    if (checksum == crc)
 		packet_accept(lexer, SIRF_PACKET);
-	    else
+	    else {
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
+	    }
 	    packet_discard(lexer);
 	    break;
 	}
@@ -1191,6 +1194,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		gpsd_report(LOG_IO, "REJECT SuperStarII packet type 0x%02x"
 			    "%zd bad checksum 0x%04x, expecting 0x%04x\n",
 			    lexer->inbuffer[1], lexer->length, a, b);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    } else {
 		packet_accept(lexer, SUPERSTAR2_PACKET);
@@ -1216,6 +1220,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    } else {
 		gpsd_report(LOG_IO, "REJECT OnCore packet @@%c%c len %d\n",
 			    lexer->inbuffer[2], lexer->inbuffer[3], len);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
@@ -1415,6 +1420,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		 * More attempts to recognize ambiguous TSIP-like
 		 * packet types could go here.
 		 */
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 		packet_discard(lexer);
 		break;
@@ -1435,6 +1441,7 @@ void packet_parse(struct gps_packet_t *lexer)
 					lexer->inbufptr - lexer->inbuffer -
 					3), lexer->inbufptr[-3],
 			    lexer->inbufptr[-2], lexer->inbufptr[-1]);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 		packet_discard(lexer);
 	    }
@@ -1454,6 +1461,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		gpsd_report(LOG_IO,
 			    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n",
 			    sum, len, getword(5 + len));
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
@@ -1485,6 +1493,7 @@ void packet_parse(struct gps_packet_t *lexer)
 			    lexer->inbuffer[len - 2],
 			    lexer->inbuffer[len - 1],
 			    lexer->inbuffer[2], lexer->inbuffer[3]);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
@@ -1535,6 +1544,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    packet_discard(lexer);
 	    break;
 	  not_evermore:
+	    packet_accept(lexer, BAD_PACKET);
 	    lexer->state = GROUND_STATE;
 	    packet_discard(lexer);
 	    break;
@@ -1571,6 +1581,7 @@ void packet_parse(struct gps_packet_t *lexer)
 			    "ITALK: checksum failed - "
 			    "type 0x%02x expected 0x%04x got 0x%04x\n",
 			    lexer->inbuffer[4], xsum, csum);
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
@@ -1608,6 +1619,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		lexer->state = GROUND_STATE;
 		break;
 	    } else {
+		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
 	}

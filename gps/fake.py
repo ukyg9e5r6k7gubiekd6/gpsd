@@ -103,8 +103,6 @@ class TestLoad:
             (len, ptype, packet) = getter.get(logfp.fileno())
             if len <= 0:
                 break
-            elif ptype == sniffer.BAD_PACKET:
-                break
             elif ptype == sniffer.COMMENT_PACKET:
                 # Some comments are magic
                 if "Serial:" in packet:
