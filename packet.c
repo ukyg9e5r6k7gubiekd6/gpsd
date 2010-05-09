@@ -1138,7 +1138,8 @@ void packet_parse(struct gps_packet_t *lexer)
 	     */
 	    for (end = (char *)lexer->inbufptr - 1; isspace(*end); end--)
 		continue;
-	    end -= 2;
+	    while (strchr("0123456789ABCDEF", *end))
+		--end;
 	    if (*end == '*') {
 		unsigned int n, crc = 0;
 		for (n = 1; (char *)lexer->inbuffer + n < end; n++)
