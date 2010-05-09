@@ -349,9 +349,13 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 #endif /* ONCORE_ENABLE */
 #ifdef TNT_ENABLE
 	case '*':
-	    /* TNT has similar structure like NMEA packet, '*' before optional checksum ends the packet */
-	    /* '*' cannot be received from GARMIN working in TEXT mode, use this diference for selection */
-	    /* this is not GARMIN TEXT packet, could be TNT */
+	    /*
+	     * TNT has similar structure to NMEA packet, '*' before
+	     * optional checksum ends the packet. Since '*' cannot be
+	     * received from GARMIN working in TEXT mode, use this
+	     * difference to tell that this is not GARMIN TEXT packet,
+	     * could be TNT.
+	     */
 	    lexer->state = NMEA_LEADER_END;
 	    break;
 #endif /* TNT_ENABLE */
