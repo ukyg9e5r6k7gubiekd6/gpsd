@@ -82,7 +82,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
     };
 #endif /* __UNUSED_DEBUG__ */
     int nfields = 0;
-    unsigned char *data, *cp = ais_context->fieldcopy;
+    unsigned char *field[NMEA_MAX];
+    unsigned char fieldcopy[NMEA_MAX+1];
+    unsigned char *data, *cp = fieldcopy;
     unsigned char ch, pad;
     int i;
 
@@ -93,18 +95,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
     gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s\n", buflen, buf);
 
     /* extract packet fields */
-    (void)strlcpy((char *)ais_context->fieldcopy, buf, buflen);
-    ais_context->field[nfields++] = (unsigned char *)buf;
-    for (cp = ais_context->fieldcopy;
-	 cp < ais_context->fieldcopy + buflen; cp++)
+    (void)strlcpy((char *)fieldcopy, buf, buflen);
+    field[nfields++] = (unsigned char *)buf;
+    for (cp = fieldcopy;
+	 cp < fieldcopy + buflen; cp++)
 	if (*cp == ',') {
 	    *cp = '\0';
-	    ais_context->field[nfields++] = cp + 1;
+	    field[nfields++] = cp + 1;
 	}
-    ais_context->await = atoi((char *)ais_context->field[1]);
-    ais_context->part = atoi((char *)ais_context->field[2]);
-    data = ais_context->field[5];
-    pad = ais_context->field[6][0];
+    ais_context->await = atoi((char *)field[1]);
+    ais_context->part = atoi((char *)field[2]);
+    data = field[5];
+    pad = field[6][0];
     gpsd_report(LOG_PROG, "await=%d, part=%d, data=%s\n",
 		ais_context->await, ais_context->part, data);
 
