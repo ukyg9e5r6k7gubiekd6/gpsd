@@ -1058,7 +1058,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
     if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode
 	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
-	     &session->aivdm, &session->gpsdata.ais)) {
+	     session->aivdm, &session->gpsdata.ais)) {
 	    return ONLINE_IS | AIS_IS;
 	} else
 	    return ONLINE_IS;

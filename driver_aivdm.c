@@ -62,7 +62,8 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 
 /*@ +charint @*/
 bool aivdm_decode(const char *buf, size_t buflen,
-		  struct aivdm_context_t *ais_context, struct ais_t *ais)
+		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS], 
+		  struct ais_t *ais)
 {
 #ifdef __UNUSED_DEBUG__
     char *sixbits[64] = {
@@ -86,6 +87,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     unsigned char fieldcopy[NMEA_MAX+1];
     unsigned char *data, *cp = fieldcopy;
     unsigned char ch, pad;
+    struct aivdm_context_t *ais_context;
     int i;
 
     if (buflen == 0)
@@ -103,6 +105,15 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    *cp = '\0';
 	    field[nfields++] = cp + 1;
 	}
+
+    switch (field[4][0]) {
+    case 'A': ais_context = &ais_contexts[0]; break;
+    case 'B': ais_context = &ais_contexts[1]; break;
+    default:
+	gpsd_report(LOG_ERROR, "invalid AIS channel %c\n", field[5][0]);
+	return false;
+    }
+
     ais_context->await = atoi((char *)field[1]);
     ais_context->part = atoi((char *)field[2]);
     data = field[5];

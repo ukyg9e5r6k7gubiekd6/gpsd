@@ -365,7 +365,7 @@ static void decode(FILE * fpin, FILE * fpout)
     struct rtcm2_t rtcm2;
     struct rtcm3_t rtcm3;
     struct ais_t ais;
-    struct aivdm_context_t aivdm;
+    struct aivdm_context_t aivdm[AIVDM_CHANNELS];
     char buf[BUFSIZ];
 
     memset(&aivdm, '\0', sizeof(aivdm));

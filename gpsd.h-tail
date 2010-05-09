@@ -149,6 +149,8 @@ extern size_t oncore_payload_cksum_length(unsigned char id1,unsigned char id2);
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
+#define AIVDM_CHANNELS	2		/* A, B */
+
 struct gps_context_t {
     int valid;				/* member validity flags */
     bool readonly;			/* if true, never write to device */
@@ -454,7 +456,7 @@ struct gps_device_t {
      * systems may come over the same wire with GPS NMEA sentences.
      */
 #ifdef AIVDM_ENABLE
-    struct aivdm_context_t aivdm;
+    struct aivdm_context_t aivdm[AIVDM_CHANNELS];
 #endif /* AIVDM_ENABLE */
 
 #ifdef TIMING_ENABLE
@@ -584,7 +586,9 @@ extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 		      /*@null@*/unsigned char *, unsigned short);
 #endif /* UBX_ENABLE */
 #ifdef AIVDM_ENABLE
-extern bool aivdm_decode(const char *, size_t, struct aivdm_context_t *, struct ais_t *);
+extern bool aivdm_decode(const char *, size_t, 
+			 struct aivdm_context_t [], 
+			 struct ais_t *);
 extern void  aivdm_json_dump(const struct ais_t *, bool, /*@out@*/char *, size_t);
 #endif /* AIVDM_ENABLE */
 #ifdef MTK3301_ENABLE
