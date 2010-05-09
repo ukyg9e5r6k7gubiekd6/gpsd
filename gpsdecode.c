@@ -368,6 +368,7 @@ static void decode(FILE * fpin, FILE * fpout)
     struct aivdm_context_t aivdm;
     char buf[BUFSIZ];
 
+    memset(&aivdm, '\0', sizeof(aivdm));
     packet_reset(&lexer);
 
     while (packet_get(fileno(fpin), &lexer) > 0) {
