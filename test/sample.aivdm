@@ -566,7 +566,7 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 # Verified only by the fact that the Python and C decoders get consistent
 # results, we haven't actually seen an independent dump of these fields. 
 # (The noaadata 0.42 dumper for this type doesn't seem to work.)
-!AIVDM,1,1,,A,F030ot22N2P6aoQbhe4736L20000,0*1
+!AIVDM,1,1,,A,F030ot22N2P6aoQbhe4736L20000,0*1A
 #        Message Type             : 22
 #        Repeat Indicator         : 0
 #        MMSI                     : 3160048

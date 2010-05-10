@@ -395,7 +395,7 @@ static void decode(FILE * fpin, FILE * fpout)
 		(void)fputs((char *)lexer.outbuffer, stdout);
 	    /*@ -uniondef */
 	    if (aivdm_decode
-		((char *)lexer.outbuffer, lexer.outbuflen, &aivdm, &ais)) {
+		((char *)lexer.outbuffer, lexer.outbuflen, aivdm, &ais)) {
 		if (!json)
 		    aivdm_csv_dump(&ais, buf, sizeof(buf));
 		else
