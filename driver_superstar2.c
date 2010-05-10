@@ -297,6 +297,10 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     gpsd_report(LOG_PROG, "superstar2 #23 - measurement block\n");
 
     n = (int)getub(buf, 6);	/* number of measurements */
+    if ((n < 1) || (n > MAXCHANNELS)) {
+	gpsd_report(LOG_INF, "too many measurements\n");
+	return 0;
+    }
     t = getled(buf, 7);		/* measurement time */
     for (i = 0; i < n; i++) {
 	session->gpsdata.raw.mtime[i] = t;
