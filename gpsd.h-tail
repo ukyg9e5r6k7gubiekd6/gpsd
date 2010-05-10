@@ -181,7 +181,7 @@ struct gps_context_t {
 
 struct aivdm_context_t {
     /* hold context for decoding AIDVM packet sequences */
-    int part, await;		/* for tracking AIDVM parts in a multipart sequence */
+    int await;		/* for tracking AIDVM parts in a multipart sequence */
     unsigned char bits[2048];
     char shipname[AIS_SHIPNAME_MAXLEN+1];
     size_t bitlen;
