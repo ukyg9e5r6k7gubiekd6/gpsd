@@ -17,6 +17,7 @@
 #    message.  Presently a known issue for types 15 and 16 only.  (Will
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
+# * Doesn't join parts A and B of Type 24 together yet.
 # * Does not join the type 21 name extension field to the name fields.
 # * Only handles the broadcast case of type 22.  The problem is that the
 #   addressed field is located *after* the variant parts. Grrrr... 
