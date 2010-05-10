@@ -851,7 +851,7 @@ def aivdm_unpack(lc, data, offset, values, instructions):
 
 def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     "Generator code - read forever from source stream, parsing AIS messages."
-    payload = ''
+    payloads = {'A':'', 'B':''}
     raw = ''
     values = {}
     well_formed = False
@@ -879,10 +879,11 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         try:
             expect = fields[1]
             fragment = fields[2]
+            channel = fields[4]
             if fragment == '1':
-                payload = ''
+                payloads[channel] = ''
                 well_formed = True
-            payload += fields[5]
+            payloads[channel] += fields[5]
             try:
                 # This works because a mangled pad literal means
                 # a malformed packet that will be caught by the CRC check. 
@@ -906,7 +907,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             continue
         # Render assembled payload to packed bytes
         bits = BitVector()
-        bits.from_sixbit(payload, pad)
+        bits.from_sixbit(payloads[channel], pad)
         values['length'] = bits.bitlen
         # Magic recursive unpacking operation
         try:
