@@ -1,15 +1,18 @@
 * Sat May 8 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95~dev
-  Rationalize clearing and generation of DOPs, this makes epx/epy
-  much more generally available. Fixed the test productions for
-  the udev magic and added a troubleshooting note in INSTALL. cgps
-  now displays epx/epy rather than eph. Speed is now always reported
-  if our last two fixes were good, even if the GPS didn't compute it.
-  Reading packets from UDP datagrams by specifying a listening address
-  and port is now supported, and the regression-test driver cam now 
-  be told to force this with -u; this enables regression testing in 
+  Rationalize clearing and generation of DOPs, this makes epx/epy much
+  more generally available. Fixed the test productions for the udev
+  magic and added a troubleshooting note in INSTALL. cgps now displays
+  epx/epy rather than eph. Speed is now always reported if our last
+  two fixes were good, even if the GPS didn't compute it.  Reading
+  packets from UDP datagrams by specifying a listening address and
+  port is now supported, and the regression-test driver cam now be
+  told to force this with -u; this enables regression testing in
   chroot jails where access to ptys is locked out. AIS code now
   interprets message type 6 and 8 application IDs correctly as a
-  Designated Area Code and Functional ID pair.
+  Designated Area Code and Functional ID pair. gpspipe has a new -T
+  option for setting the timestamp frmat.  xgpsspeed is completely
+  rewritten in Python, eliminating some dependencies on ancient X
+  libraries.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.
