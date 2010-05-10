@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned table[25];
+unsigned table[256];
 
 #define CRCSEED	0		/* could be NZ to detect leading zeros */
 #define CRCPOLY	0x1864CFB	/* encodes all info about the polynomial */
