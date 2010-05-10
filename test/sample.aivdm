@@ -624,3 +624,15 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #       dimD:              1
 #       mothership:        16789633
 #       spare:             0
+#
+# Invalid packet test
+AIVDM,2,2,1,B,00000000000,2*26
+# That fragment misses part 1, yields nothing
+#
+#
+# Channel multiplexing test:
+# simultaneous use of buffers of channels A & B
+!AIVDM,2,1,6,B,542M92h00001@<7;?G0PD4i@R0<tqA8tj37>220o0h:2240Ht50000000000,0*3B
+!AIVDM,2,1,2,A,542M92h00001@<7;?G0PD4i@R0<tqA8tj37>220o0h:2240Ht500000000000000,0*3C
+!AIVDM,2,2,2,A,0000002,2*24
+!AIVDM,2,2,6,B,00000000000,2*21
