@@ -24,6 +24,7 @@
  */
 
 #include <stdlib.h>
+#include <time.h>
 #include "gpsd_config.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -144,6 +145,7 @@ static void usage(void)
 		  "-w Dump gpsd native data.\n"
 		  "-l Sleep for ten seconds before connecting to gpsd.\n"
 		  "-t Time stamp the data.\n"
+		  "-T [format] set the timestamp format (strftime(3)-like; implies '-t')\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
@@ -157,6 +159,8 @@ int main(int argc, char **argv)
 {
     char buf[4096];
     bool timestamp = false;
+    char *format = "%c";
+    char tmstr[200];
     bool daemon = false;
     bool binary = false;
     bool sleepy = false;
@@ -174,7 +178,7 @@ int main(int argc, char **argv)
     char *outfile = NULL;
 
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwtvVn:s:o:")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -205,6 +209,10 @@ int main(int argc, char **argv)
 	    break;
 	case 't':
 	    timestamp = true;
+	    break;
+	case 'T':
+	    timestamp = true;
+	    format = optarg;
 	    break;
 	case 'v':
 	    vflag++;
@@ -309,7 +317,7 @@ int main(int argc, char **argv)
 	if (vflag)
 	    spinner(vflag, l++);
 
-	/* reading directly from the socket avoides decode overhead */
+	/* reading directly from the socket avoids decode overhead */
 	readbytes = (int)read(gpsdata->gps_fd, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0; i < readbytes; i++) {
@@ -320,8 +328,10 @@ int main(int argc, char **argv)
 		if (new_line && timestamp) {
 		    time_t now = time(NULL);
 
+		    struct tm *tmp_now = localtime(&now);
+		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
-		    if (fprintf(fp, "%.24s :", ctime(&now)) <= 0) {
+		    if (fprintf(fp, "%.24s :", tmstr) <= 0) {
 			(void)fprintf(stderr,
 				      "gpspipe: write error, %s(%d)\n",
 				      strerror(errno), errno);
