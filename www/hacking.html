@@ -1370,9 +1370,9 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>7. Run the regression tests and other checks</dt> 
 <dd>If it doesn't pass regressions, it isn't ready to ship. This is
-the time to run valgrind-audit, 'make splint', and 'make cppcheck' as
-well and check that those reports are clean. Use flocktest to
-verify operation on the remote test machines.</dd>
+the time to run valgrind-audit, 'make splint', 'make xmllint', and
+'make cppcheck' as well and check that those reports are clean. Use
+flocktest to verify operation on the remote test machines.</dd>
 
 <dt>8. Ship to Berlios</dt>
 <dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp), 

@@ -543,6 +543,10 @@ splint: gpsd.h packet_names.h
 cppcheck: gpsd.h packet_names.h
 	cppcheck --template gcc --all --force .
 
+# Check the documentation for bogons, too
+xmllint: $(XML)
+	for xml in $(XML); do xmllint --nonet --noout --valid $$xml; done
+
 # Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
