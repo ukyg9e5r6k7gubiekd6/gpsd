@@ -110,7 +110,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     case 'A': ais_context = &ais_contexts[0]; break;
     case 'B': ais_context = &ais_contexts[1]; break;
     default:
-	gpsd_report(LOG_ERROR, "invalid AIS channel %c\n", field[5][0]);
+	gpsd_report(LOG_ERROR, "invalid AIS channel %c\n", field[4][0]);
 	return false;
     }
 
