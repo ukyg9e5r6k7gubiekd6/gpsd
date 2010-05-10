@@ -25,7 +25,8 @@ try:
     where = sys.argv.index('--mangenerator')
     # Doesn't matter what it is, just that we have one
     if sys.argv[where+1]:
-        manpages=[('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1'])]
+        manpages=[('share/man/man1', ['gpscat.1', 'gpsfake.1','gpsprof.1',
+                                      'xgps.1', 'xgpsspeed.1'])]
         print("Installing manual pages, generator is %s" %( sys.argv[where+1]))
     sys.argv = sys.argv[:where] + sys.argv[where+2:]
 except ValueError:
@@ -76,6 +77,6 @@ setup( name="gps",
     	Extension("gps.clienthelpers", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"], include_dirs=include_dirs)
         ],
        packages = ['gps'],
-       scripts = ['gpscat','gpsfake','gpsprof', 'xgps'],
+       scripts = ['gpscat','gpsfake','gpsprof', 'xgps', 'xgpsspeed'],
        data_files= manpages
      )
