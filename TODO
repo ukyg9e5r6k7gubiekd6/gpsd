@@ -23,13 +23,6 @@ per month is quite low.
 Presently this means there's no way to kick a UBX into returning
 binary data.
 
-*** gpsmon failures
-
-There have been persistent reports of gpsmon failing with 0-length
-reads or select(2) failures, in both daemon-mediated and
-direct-to-device modes.  Cause is unknown, but is related to
-zero-length reads somehow.
-
 ** Ports
 
 *** Qt port 
