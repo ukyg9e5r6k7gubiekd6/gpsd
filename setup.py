@@ -76,6 +76,6 @@ setup( name="gps",
     	Extension("gps.clienthelpers", ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"], include_dirs=include_dirs)
         ],
        packages = ['gps'],
-       scripts = ['gpscat','gpsfake','gpsprof', 'xgps'],
+       scripts = ['gpscat','gpsfake','gpsprof', 'xgps', 'xgpsspeed'],
        data_files= manpages
      )
