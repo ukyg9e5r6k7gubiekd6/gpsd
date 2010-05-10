@@ -7,7 +7,9 @@
   Reading packets from UDP datagrams by specifying a listening address
   and port is now supported, and the regression-test driver cam now 
   be told to force this with -u; this enables regression testing in 
-  chroot jails where access to ptys is locked out.
+  chroot jails where access to ptys is locked out. AIS code now
+  interprets message type 6 and 8 application IDs correctly as a
+  Designated Area Code and Functional ID pair.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.

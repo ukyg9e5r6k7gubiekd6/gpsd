@@ -104,11 +104,12 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 6:			/* Binary Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%zd:%s",
+		       "%u,%u,%u,%u,%u,%zd:%s",
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       (uint) ais->type6.retransmit,
-		       ais->type6.app_id,
+		       ais->type6.dac,
+		       ais->type6.fid,
 		       ais->type6.bitcount,
 		       gpsd_hexdump(ais->type6.bitdata,
 				    (ais->type6.bitcount + 7) / 8));
@@ -122,8 +123,9 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 8:			/* Binary Broadcast Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%zd:%s",
-		       ais->type8.app_id,
+		       "%u,%u,%zd:%s",
+		       ais->type8.dac,
+		       ais->type8.fid,
 		       ais->type8.bitcount,
 		       gpsd_hexdump(ais->type8.bitdata,
 				    (ais->type8.bitcount + 7) / 8));

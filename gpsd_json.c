@@ -848,12 +848,13 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
     case 6:			/* Binary Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
-		       "\"retransmit\":%s,\"app_id\":%u,"
+		       "\"retransmit\":%s,\"dac\":%u,\"fid\":%u,"
 		       "\"data\":\"%zd:%s\"}\r\n",
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       JSON_BOOL(ais->type6.retransmit),
-		       ais->type6.app_id,
+		       ais->type6.dac,
+		       ais->type6.fid,
 		       ais->type6.bitcount,
 		       gpsd_hexdump(ais->type6.bitdata,
 				    (ais->type6.bitcount + 7) / 8));
@@ -867,8 +868,9 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 	break;
     case 8:			/* Binary Broadcast Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",
-		       ais->type8.app_id,
+		       "\"dac\":%u,\"fid\":%u,\"data\":\"%zd:%s\"}\r\n",
+		       ais->type8.dac,
+		       ais->type8.fid,
 		       ais->type8.bitcount,
 		       gpsd_hexdump(ais->type8.bitdata,
 				    (ais->type8.bitcount + 7) / 8));

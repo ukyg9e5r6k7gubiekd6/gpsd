@@ -35,8 +35,12 @@ extern "C" {
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
 
+/*
+ * 4.1 - Base version for initial JSON protocol (Dec 2009)
+ * 4.2 - AIS application IDs split into DAC and FID (May 2010)
+ */
 #define GPSD_API_MAJOR_VERSION	4	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
+#define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
@@ -565,7 +569,8 @@ struct ais_t
 	    unsigned int dest_mmsi;	/* destination MMSI */
 	    bool retransmit;		/* retransmit flag */
 	    //unsigned int spare;	spare bit(s) */
-	    unsigned int app_id;        /* Application ID */
+	    unsigned int dac;           /* Application ID */
+	    unsigned int fid;           /* Functional ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    size_t bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
@@ -581,7 +586,8 @@ struct ais_t
 	/* Type 8 - Broadcast Binary Message */
 	struct {
 	    //unsigned int spare;	spare bit(s) */
-	    unsigned int app_id;       	/* Application ID */
+	    unsigned int dac;       	/* Designated Area Code */
+	    unsigned int fid;       	/* Functional ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    size_t bitcount;		/* bit count of the data */
 	    char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];

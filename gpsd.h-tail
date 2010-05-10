@@ -9,9 +9,14 @@
 typedef unsigned int speed_t;
 #endif
 
-/* constants for the VERSION response */
+/*
+ * Constants for the VERSION response
+ * 3.1: Base JSON version
+ * 3.2: Added POLL command and response
+ * 3.3: AIS app_id split into DAC and FID
+ */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	2	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	3	/* bump on compatible changes */
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE
