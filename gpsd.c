@@ -1441,7 +1441,7 @@ int main(int argc, char *argv[])
 #endif
 	pw = getpwnam(GPSD_USER);
 	if (pw)
-	    (void)seteuid(pw->pw_uid);
+	    (void)setuid(pw->pw_uid);
 	/*@+type@*/
     }
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
