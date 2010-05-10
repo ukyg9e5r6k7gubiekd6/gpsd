@@ -791,7 +791,7 @@ class BitVector:
         "Used for dumping binary data."
         return str(self.bitlen) + ":" + "".join(map(lambda d: "%02x" % d, self.bits[:(self.bitlen + 7)/8]))
 
-import sys, exceptions
+import sys, exceptions, re
 
 class AISUnpackingException(exceptions.Exception):
     def __init__(self, lc, fieldname, value):
@@ -861,8 +861,11 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         if not line:
             return
         raw += line
+        line = line.strip()
+        # Strip off USCG metadata 
+        line = re.sub(r"(?<=\*[0-9A-F][0-9A-F]),.*", "", line)
         # Compute CRC-16 checksum
-        packet = line.strip()[1:-3]	# Strip leading !, trailing * and CRC
+        packet = line[1:-3]	# Strip leading !, trailing * and CRC
         csum = 0
         for c in packet:
             csum ^= ord(c)
