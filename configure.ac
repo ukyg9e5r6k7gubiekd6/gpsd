@@ -288,21 +288,25 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 #define GPSD_CONFIG_H])
 
-# I have found on the web a large number of ways to check for the
-# existence of Qt that are complicated and broken.  This one is
-# brutally simple, and relies on the assumption that if *any*
-# version of Qt exists we can hand off to the Qt project file the
-# actual worry about how to actually build with it.
-AC_MSG_CHECKING([for Qt])
-if test -d /usr/lib/qt*
-then
-    AC_MSG_RESULT([yes])
-    ac_qt="yes"
+dnl Check for QtNetwork library and qmake. Both are necessary
+dnl to build libQgpsmm. We use pkgconfig to check for the library
+dnl and AC_CHECK_PROGS to search for qmake. As it is possible to
+dnl install qmake from qt and qt4 in parallel, check for qmake-qt4
+dnl first as this ensures we're using qmake for qt4.
+PKG_CHECK_MODULES(QtNetwork, [QtNetwork >= 4.4],  ac_qt="yes", ac_qt="no")
+if test x"$ac_qt" != "xyes"; then
+  AC_MSG_WARN([QtNetwork library not found. Not including QT support])
+  AM_CONDITIONAL([HAVE_QT], false)
 else
-    AC_MSG_RESULT([no])
-    ac_qt="no"
+  AC_CHECK_PROGS(QMAKE, [qmake-qt4 qmake], [no])
+  if test x"$QMAKE" != "xno"; then
+    AM_CONDITIONAL([HAVE_QT], true)
+  else
+    AC_MSG_WARN([qmake not found. Not including QT support])
+    AM_CONDITIONAL([HAVE_QT], false)
+  fi
 fi
-AM_CONDITIONAL([HAVE_QT], [test x"$ac_qt" = xyes])
+
 
 dnl Check for curses headers and libraries.  The presence of the
 dnl library is used to decide whether or not to build some programs.
@@ -1057,7 +1061,6 @@ echo "	Client Features"
 echo "	---------------"
 echo "Old protocol in libgps  : $ac_oldstyle"
 echo "Build ncurses programs  : $ac_ncurses"
-echo "Enable X11 support      : $ac_x"
 echo "Enable Python support   : $ac_python"
 echo "Enable C++ support      : $ac_libgpsmm"
 echo "Enable Qt support       : $ac_qt"

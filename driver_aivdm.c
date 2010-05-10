@@ -189,14 +189,14 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type1.status		= UBITS(38, 4);
 	    ais->type1.turn		= SBITS(42, 8);
 	    ais->type1.speed		= UBITS(50, 10);
-	    ais->type1.accuracy	= (bool)UBITS(60, 1);
+	    ais->type1.accuracy	        = (bool)UBITS(60, 1);
 	    ais->type1.lon		= SBITS(61, 28);
 	    ais->type1.lat		= SBITS(89, 27);
 	    ais->type1.course		= UBITS(116, 12);
-	    ais->type1.heading	= UBITS(128, 9);
+	    ais->type1.heading	        = UBITS(128, 9);
 	    ais->type1.second		= UBITS(137, 6);
-	    ais->type1.maneuver	= UBITS(143, 2);
-	    //ais->type1.spare	= UBITS(145, 3);
+	    ais->type1.maneuver	        = UBITS(143, 2);
+	    //ais->type1.spare	        = UBITS(145, 3);
 	    ais->type1.raim		= UBITS(148, 1)!=0;
 	    ais->type1.radio		= UBITS(149, 20);
 	    gpsd_report(LOG_INF,
@@ -289,15 +289,17 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type6.dest_mmsi      = UBITS(40, 30);
 	    ais->type6.retransmit     = (bool)UBITS(70, 1);
 	    //ais->type6.spare        = UBITS(71, 1);
-	    ais->type6.app_id         = UBITS(72, 16);
+	    ais->type6.dac            = UBITS(72, 10);
+	    ais->type6.fid            = UBITS(82, 6);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)ais_context->bits + (88 / BITS_PER_BYTE),
 			 (ais->type6.bitcount + 7) / 8);
-	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, id=%u, cnt=%zd\n",
+	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, dac=%u, fid=%u, cnt=%zd\n",
 			ais->type6.seqno,
 			ais->type6.dest_mmsi,
-			ais->type6.app_id,
+			ais->type6.dac,
+			ais->type6.fid,
 			ais->type6.bitcount);
 	    break;
 	case 7: /* Binary acknowledge */
@@ -333,13 +335,15 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		return false;
 	    }
 	    //ais->type8.spare        = UBITS(38, 2);
-	    ais->type8.app_id =       UBITS(40, 16);
+	    ais->type8.dac            = UBITS(40, 10);
+	    ais->type8.fid            = UBITS(40, 6);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)ais_context->bits + (56 / BITS_PER_BYTE),
 			 (ais->type8.bitcount + 7) / 8);
-	    gpsd_report(LOG_INF, "id=%u, cnt=%zd\n",
-			ais->type8.app_id,
+	    gpsd_report(LOG_INF, "dac=%u, fid=%u, cnt=%zd\n",
+			ais->type8.dac,
+			ais->type8.fid,
 			ais->type8.bitcount);
 	    break;
 	case 9: /* Standard SAR Aircraft Position Report */

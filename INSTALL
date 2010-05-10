@@ -125,9 +125,6 @@ from a binary package).  As usual, the sequence is:
 
 Mac OS X users may need to do "./configure --x-includes=/usr/X11R6/include"
 
-Optionally, copy the app-defaults files xgpsspeed.ad to your
-home directory or to the system-wide X app-defaults directory.
-
 5. Start gpsd.  You'll need to give it as an argument a path to 
 a serial or USB port with a GPS attached to it.
 

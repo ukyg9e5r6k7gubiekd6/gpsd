@@ -316,7 +316,8 @@ type6 = (
     bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"),
     bitfield("retransmit",       1, 'unsigned', None, "Retransmit flag"),
     spare(1),
-    bitfield("application_id",  16, 'unsigned', 0,    "Application ID"),
+    bitfield("dac",             10, 'unsigned', 0,    "DAC"),
+    bitfield("fid",              6, 'unsigned', 0,    "Functional ID"),
     bitfield("data",           920, 'raw',      None, "Data"),
     )
 
@@ -334,8 +335,9 @@ type7 = (
 
 type8 = (
     spare(2),
-    bitfield("application_id",  16, 'unsigned', 0,    "Application ID"),
-    bitfield("data",           952, 'raw',      None, "Data"),
+    bitfield("dac",            10,  'unsigned', 0,     "DAC"),
+    bitfield("fid",            6,   'unsigned', 0,     "Functional ID"),
+    bitfield("data",           952, 'raw',      None,  "Data"),
     )
 
 def type9_alt_format(n):
