@@ -288,6 +288,22 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 #define GPSD_CONFIG_H])
 
+# I have found on the web a large number of ways to check for the
+# existence of Qt that are complicated and broken.  This one is
+# brutally simple, and relies on the assumption that if *any*
+# version of Qt exists we can hand off to the Qt project file the
+# actual worry about how to actually build with it.
+AC_MSG_CHECKING([for Qt])
+if test -d /usr/lib/qt*
+then
+    AC_MSG_RESULT([yes])
+    ac_qt="yes"
+else
+    AC_MSG_RESULT([no])
+    ac_qt="no"
+fi
+AM_CONDITIONAL([HAVE_QT], [test x"$ac_qt" = xyes])
+
 dnl Check for X libraries
 ac_x="no"
 if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
@@ -1108,6 +1124,7 @@ echo "Build ncurses programs  : $ac_ncurses"
 echo "Enable X11 support      : $ac_x"
 echo "Enable Python support   : $ac_python"
 echo "Enable C++ support      : $ac_libgpsmm"
+echo "Enable Qt support       : $ac_qt"
 echo "------------------------------------------"
 echo ""
 
