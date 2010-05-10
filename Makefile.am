@@ -37,9 +37,6 @@ XMLTO = xmlto
 if HAVE_NCURSES
 CURSESPROGS = cgps gpsmon
 endif
-if HAVE_XAW
-XAW_PROGS = xgpsspeed
-endif
 
 # Conditional includes.
 INCLUDES = $(INCUSB)
@@ -70,7 +67,7 @@ endif
 # Required to ensure that the extensions/modules/scripts are rebuilt via
 # setup.py in case they changed.
 # Also used to specify which files to include during make dist.
-PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps
+PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps xgpsspeed
 PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py gps/client.py
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
@@ -78,17 +75,6 @@ if HAVE_PYTHON
 python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
-
-#
-# Build xgpsspeed
-#
-xgpsspeed_c_sources = \
-	xgpsspeed.c \
-	Tachometer.c
-xgpsspeed_SOURCES = \
-	$(xgpsspeed_c_sources) \
-	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build cgps
@@ -468,7 +454,6 @@ EXTRA_DIST = \
 	$(XML) \
 	$(BUILT_SOURCES) \
 	$(MANPAGES_DIST) \
-	xgpsspeed.ad \
 	gpsd.rules \
 	gpsd.hotplug \
 	gpsd.hotplug.wrapper \
@@ -516,8 +501,6 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources)
 	@echo "Running splint on cgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
-	@echo "Running splint on xgpsspeed..."
-	-splint $(SPLINTOPTS) -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on gpsctl..."
 	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
 	@echo "Running splint on gpsmon..."
@@ -550,7 +533,7 @@ xmllint: $(XML)
 # Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
 	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
-	$(xgpsspeed_SOURCES) $(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
+	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
 	$(test_bits_SOURCES) $(test_packet_SOURCES) \
 	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
 INDENT_OPTIONS = --indent-level4 \

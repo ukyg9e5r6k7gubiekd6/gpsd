@@ -28,7 +28,6 @@ various additional capabilities and extensions:
 C++ compiler	       -> libgpsmm C++ wrapper for the library
 pthreads library       -> support for PPS timekeeping on serial GPSes
 DBUS                   -> gpsd will issue DBUS notifications 
-X windows              -> one test client depends on this
 ncurses                -> a test client and the GPS monitor depend on this
 libusb-1.0.x or later  -> better USB device discovery
 Qt + qmake             -> libQgpsmm depends on this
@@ -110,9 +109,8 @@ are in the same group.
 
 3. Install prerequisites
 
-Under Ubuntu, you will require libxp-dev and libxaw7-dev
-in addition to the standard build-support packages.  You can get
-all the build prerequisites installed with "apt-get build-dep gpsd".
+Under Debian and Ubuntu ou can get all the build prerequisites
+installed with "apt-get build-dep gpsd".
 
 Note: if you are going to use the RTCM-104 support, you should compile
 with gcc4; if you don't have it installed as your default 
