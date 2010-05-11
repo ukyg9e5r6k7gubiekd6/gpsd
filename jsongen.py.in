@@ -88,7 +88,8 @@ ais_specs = (
         ('seqno',         'uinteger',      '0'),
         ('dest_mmsi',     'uinteger',      '0'),
         ('retransmit',    'boolean',       'false'),
-        ('app_id',        'uinteger',      '0'),
+        ('dac',           'uinteger',      '0'),
+        ('fid',           'uinteger',      '0'),
         ('data',          'string',        None),
         ),
     "stringbuffered":("data",),
@@ -111,7 +112,8 @@ ais_specs = (
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname       type             default
-        ('app_id',        'uinteger',      '0'),
+        ('dac',           'uinteger',      '0'),
+        ('fid',           'uinteger',      '0'),
         ('data',          'string',        None),
         ),
     "stringbuffered":("data",),
