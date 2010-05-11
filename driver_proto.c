@@ -162,8 +162,8 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
     session->context->gps_tow = tow / 1000.0;
 
-    t = gpstime_to_unix(gps_week, session->context->gps_tow) 
-    	- session->context->leap_seconds;
+    t = gpstime_to_unix(gps_week, session->context->gps_tow)
+	- session->context->leap_seconds;
     session->newdata.time = t;
 
     return TIME_IS | ONLINE_IS;
@@ -195,6 +195,10 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
      * be set to the number of satellites which might be visible.
      */
     nchan = GET_NUMBER_OF_CHANNELS();
+    if ((nchan < 1) || (nchan > MAXCHANNELS)) {
+	gpsd_report(LOG_INF, "too many channels reported\n");
+	return 0;
+    }
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0; /* number of actually used satellites */
     for (i = st = 0; i < nchan; i++) {
@@ -216,9 +220,9 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.skyview_time = NaN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
-    gpsd_report(LOG_DATA, 
+    gpsd_report(LOG_DATA,
 		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
-		session->gpsdata.satellites_visible, 
+		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
     return SATELLITE_IS | USED_IS;
 }
