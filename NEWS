@@ -10,7 +10,7 @@
   chroot jails where access to ptys is locked out. AIS code now
   interprets message type 6 and 8 application IDs correctly as a
   Designated Area Code and Functional ID pair. gpspipe has a new -T
-  option for setting the timestamp frmat.  xgpsspeed is completely
+  option for setting the timestamp format.  xgpsspeed is completely
   rewritten in Python, eliminating some dependencies on ancient X
   libraries.
 

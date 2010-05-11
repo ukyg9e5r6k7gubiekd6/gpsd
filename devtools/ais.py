@@ -514,7 +514,7 @@ type20 = (
     )
 
 aide_type_legends = (
-	"Unspcified",
+	"Unspecified",
 	"Reference point",
 	"RACON",
 	"Fixed offshore structure",
