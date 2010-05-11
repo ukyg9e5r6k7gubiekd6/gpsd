@@ -851,11 +851,10 @@ def aivdm_unpack(lc, data, offset, values, instructions):
             cooked.append([inst, value])
     return cooked
 
-def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
-    "Generator code - read forever from source stream, parsing AIS messages."
+def packet_scanner(source):
+    "Get a span of AIVDM packets with contiguous fragment numbers."
     payloads = {'A':'', 'B':''}
     raw = ''
-    values = {}
     well_formed = False
     lc = 0
     while True:
@@ -910,6 +909,12 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
         # Render assembled payload to packed bytes
         bits = BitVector()
         bits.from_sixbit(payloads[channel], pad)
+        yield (lc, raw, bits)
+
+def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
+    "Generator code - read forever from source stream, parsing AIS messages."
+    values = {}
+    for (lc, raw, bits) in packet_scanner(source):
         values['length'] = bits.bitlen
         # Magic recursive unpacking operation
         try:
@@ -964,7 +969,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 raise e
         except:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
-            sys.stderr.write("Unknown exception on: %s\n" % (line))
+            sys.stderr.write("Unknown exception on line %d\n" % lc)
             if skiperr:
                 continue
             else:
