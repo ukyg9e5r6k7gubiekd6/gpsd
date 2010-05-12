@@ -391,6 +391,8 @@
 #       First Message Type: 5
 #       First Slot Offset:  0
 #
+# FIX-ME: Need an example of the 158-bit variant of type 15 with two MMSIs.
+#
 # Type 15:
 # From Kurt Schwehr. This is the 108/110-bit variant with one MMSI and two
 # message types. Includes USCG metadata. Decode is known good.
@@ -421,7 +423,7 @@
 #       First slot offset        : 200
 #       First slot increment     : 0
 #
-# FIX-ME: Need an example of the 144-bit variant with two MMSIs.
+# FIX-ME: Need an example of the 144-bit variant of type 16 with two MMSIs.
 #
 # Type 17:
 # From AISHub. This is only a regression test to check that the C and Python
