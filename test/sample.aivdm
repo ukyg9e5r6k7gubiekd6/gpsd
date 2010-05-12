@@ -381,7 +381,8 @@
 #       Text                     : TEST
 #
 # Type 15:
-# From Mike Greene.
+# From Mike Greene. This is the 88/90-bit variant with one MMSI, 
+# message type and offset. Decode is known good.
 !AIVDM,1,1,,A,?5OP=l00052HD00,2*5B
 #       Message Type:       15
 #       Repeat Indicator:   0
@@ -389,6 +390,22 @@
 #       Destination MMSI:   5158
 #       First Message Type: 5
 #       First Slot Offset:  0
+#
+# Type 15:
+# From Kurt Schwehr. This is the 108/110-bit variant with one MMSI and two
+# message types. Includes USCG metadata. Decode is known good.
+!AIVDM,1,1,,B,?h3Ovn1GP<K0<P@59a0,2*04,d-077,S1832,t004248.00,T48.85520485,r07RPAL1,1272415370
+#	Message Type             : 15
+#	Repeat Indicator         : 3
+#	MMSI                     : 3669720
+#	First interrogated MMSI  : 367014320
+#	First message type       : 3
+#	First slot offset        : 516
+#	Second message type      : 5
+#	Second slot offset       : 617
+#	Second interrogated MMSI : 0
+#	Message type             : 0
+#	Slot offset              : 0
 #
 # Type 16:
 # From AISHub. These are only a regression test to check that the C and Python

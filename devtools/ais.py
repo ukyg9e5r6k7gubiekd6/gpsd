@@ -395,7 +395,7 @@ type15 = (
     bitfield("offset1_1", 12, 'unsigned', 0, "First slot offset"),
     spare(2),
     bitfield("type1_2",   6,  'unsigned', 0, "Second message type"),
-    bitfield("offset1_2", 12, 'unsifned', 0, "Second slot offset"),
+    bitfield("offset1_2", 12, 'unsigned', 0, "Second slot offset"),
     spare(2),
     bitfield("mmsi2",     30, 'unsigned', 0, "Second interrogated MMSI"),
     bitfield("type2_1",   6,  'unsigned', 0, "Message type"),

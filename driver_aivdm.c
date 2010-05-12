@@ -438,9 +438,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		ais->type15.offset1_2	= UBITS(96, 12);
 		//ais->type14.spare3    = UBITS(108, 2);
 		if (ais_context->bitlen > 110) {
-		    ais->type15.type2_1	= UBITS(90, 6);
-		    ais->type15.offset2_1	= UBITS(96, 12);
-		    //ais->type14.spare4	= UBITS(108, 2);
+		    ais->type15.mmsi2	= UBITS(110, 30);
+		    ais->type15.type2_1	= UBITS(140, 6);
+		    ais->type15.offset2_1	= UBITS(146, 12);
+		    //ais->type14.spare4	= UBITS(158, 2);
 		}
 	    }
 	    gpsd_report(LOG_INF, "\n");
