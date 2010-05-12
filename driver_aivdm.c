@@ -83,8 +83,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
     };
 #endif /* __UNUSED_DEBUG__ */
     int part, nfields = 0;
-    unsigned char *field[NMEA_MAX];
-    unsigned char fieldcopy[NMEA_MAX+1];
+    unsigned char *field[NMEA_MAX*2];
+    unsigned char fieldcopy[NMEA_MAX*2+1];
     unsigned char *data, *cp = fieldcopy;
     unsigned char ch, pad;
     struct aivdm_context_t *ais_context;
@@ -96,8 +96,14 @@ bool aivdm_decode(const char *buf, size_t buflen,
     /* we may need to dump the raw packet */
     gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s\n", buflen, buf);
 
+    /* discard overlong sentences */
+    if (strlen(buf) > sizeof(fieldcopy)-1) {
+	gpsd_report(LOG_ERROR, "overlong AIVDM packet.\n");
+	return false;
+    }
+
     /* extract packet fields */
-    (void)strlcpy((char *)fieldcopy, buf, buflen);
+    (void)strlcpy((char *)fieldcopy, buf, sizeof(fieldcopy));
     field[nfields++] = (unsigned char *)buf;
     for (cp = fieldcopy;
 	 cp < fieldcopy + buflen; cp++)
@@ -106,11 +112,17 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    field[nfields++] = cp + 1;
 	}
 
+    /* discard overlong sentences */
+    if (nfields < 7) {
+	gpsd_report(LOG_ERROR, "malformed AIVDM packet.\n");
+	return false;
+    }
+
     switch (field[4][0]) {
     case 'A': ais_context = &ais_contexts[0]; break;
     case 'B': ais_context = &ais_contexts[1]; break;
     default:
-	gpsd_report(LOG_ERROR, "invalid AIS channel %c\n", field[4][0]);
+	gpsd_report(LOG_ERROR, "invalid AIS channel.\n");
 	return false;
     }
 
