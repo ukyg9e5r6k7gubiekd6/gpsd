@@ -177,6 +177,7 @@ int main(int argc, char **argv)
     char *serialport = NULL;
     char *outfile = NULL;
 
+    /*@-branchstate@*/
     flags = WATCH_ENABLE;
     while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:")) != -1) {
 	switch (option) {
@@ -238,6 +239,7 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
+    /*@+branchstate@*/
 
     /* Grok the server, port, and device. */
     if (optind < argc) {
