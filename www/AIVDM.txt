@@ -365,7 +365,7 @@ number, including zero.
 == AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
 
 AIS is a bit-sync protocol.  While some fields within AIS payloads are
-8-bit-byte-aligned with preceding padding, many are not. Furthermore,
+8-bit-byte-aligned with preceding padding, most are not. Furthermore,
 while most message variants have bit lengths that are a multiple of 8,
 some do not.
 
@@ -1996,6 +1996,6 @@ Also, AISlive no longer offers free delayed access.
 Version 1.24 breaks the Type 6 and 8 application_id field into 
 DAC and FID and adds tables for know DAC/FID pairs and their sources.
 Unspecified fields are noow omitted in JSON dumps.  A new section
-"AIS byte alignment, bit stuffing, and padding", reverals some 
+"AIS byte alignment, bit stuffing, and padding", reveals some 
 particularly black magic.
 
