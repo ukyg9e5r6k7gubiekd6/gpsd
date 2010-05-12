@@ -8,12 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>		/* for htons(3) */
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>		/* for htons(3) */
-#endif /* HAVE_ARPA_INET_H */
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
@@ -385,8 +379,8 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
     for (i = 0; i < (ssize_t) (msglen - 2); i++)
 	c += (unsigned short)msg[i];
     c += 0x100;
-    c = htons(c);
-    (void)memcpy(msg + (int)msg[3] + 4, &c, 2);
+    msg[(int)msg[3] + 4] = (char)((c >> 8) & 0xff);
+    msg[(int)msg[3] + 5] = (char)(c & 0xff);
     gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu:%s\n",
 		(int)msg[1] & 0x7f, msglen,
 		gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
