@@ -112,7 +112,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    field[nfields++] = cp + 1;
 	}
 
-    /* discard overlong sentences */
+    /* discard sentences with exiguous commas; catches run-ons */
     if (nfields < 7) {
 	gpsd_report(LOG_ERROR, "malformed AIVDM packet.\n");
 	return false;
