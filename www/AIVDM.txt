@@ -184,7 +184,10 @@ Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
 payload. We'll describe how to decode this in later sections.
 
 Field 7 (0) is the number of fill bits requires to pad the data 
-payload to a 6 bit boundary, ranging from 0 to 5.
+payload to a 6 bit boundary, ranging from 0 to 5.  Note that this
+pad byte has a tricky interaction with the ITU-1371 requirement
+for byte alignment in over-the-air AIS messages; see the detailed
+discussion of message lengths and alignment in a later section.
 
 The \*-separated suffix (\*5C) is the NMEA 0183 data-integrity checksum
 for the sentence, preceded by "*".  It is computed on the entire
@@ -280,29 +283,10 @@ intermediate range "X" (58) to "\_" (95) is not used.
 Concatenate all six-bit quantities found in the payload, MSB first.
 This is the binary payload of the sentence.  
 
-Note: There are references to "bit-stuffing" in the <<IALA>>
-clarifications describing certain payload fields.  <<C2>> reveals the
-following in 3.2.2.1: "The bitstream is subject to bit stuffing. This
-means that if more than 5 consecutive 1s are found in the output bit
-stream, a zero is inserted. This applies to all bits except the
-databits of HDLC flags."  <<IALA>> clarifies as follows: "On the
-transmitting side, this means that if five (5) consecutive ones (1s)
-are found in the output bit stream, a zero should be inserted after
-the five (5) consecutive ones (1s). This applies to all bits between
-the HDLC flags [...] On the receiving side, the first zero after five
-(5) consecutive ones (1s) should be removed."
+== AIS Payload Data Types ==
 
-It appears that this bit stuffing is meant to be performed by the AIS
-radio link layer at transmission time and undone at reception time,
-and should not be visible in AIVDM payloads reported by the
-receiver.  Nevertheless we document it here because it is just the
-sort of thing that is (a) likely to confuse implementors reading
-the public sources, and (b) all too likely to become visible if there
-are firmware or software errors in the transmission chain.
-
-== AIVDM/AIVDO Data Types ==
-
-AIVDM data is encoded as bitfields in the sentence.  Bitfields may be 
+Data in AIS message payloads (what you get after undoing the AIVDM/AIVDO
+armoring) is encoded as bitfields in the sentence.  Bitfields may be
 interpreted in one of the following ways:
 
 - Signed or unsigned integer
@@ -336,7 +320,7 @@ the message descriptions where this has already occurred.  It is good
 practice for a decoder to make reserved fields available to client
 applications as uninterpreted bitfields.
 
-Character-string fields within AIVDM/AIVDO messages are encoded in a
+Character-string fields within AIS messages are encoded in a
 special way, referred to as "six-bit" in the tables below. Each
 six-bit segment maps to an ASCII character.  Segments 0-31 map to the
 characters "@" ( ASCII 64) through "\_" (ASCII 95) respectively;
@@ -378,7 +362,60 @@ Trailing string fields are often specified as "up to" a certain number of bits.
 Decoders should be prepared to handle any field length up to that
 number, including zero.
 
-== AIVDM/AIVDO Payload Interpretation ==
+== AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
+
+AIS is a bit-sync protocol.  While some fields within AIS payloads are
+8-bit-byte-aligned with preceding padding, many are not. Furthermore,
+while most message variants have bit lengths that are a multiple of 8,
+some do not.
+
+<<ITU1371>> includes a single sentence, easy to miss, requiring
+over-the-air messages to have trailing padding to a 8-bit boundary.
+In most cases message lengths are a multiple of 8 with trailing spare
+fields added to ensure this; thus, the requirement will not change the
+transmitted bitlength of the message from what's described in the
+standard. There are, however, two exceptions to this rule.
+
+One is an apparent error in the format design.  The type 15 message
+has a variant with 108 data bits and a trailing 2-bit spare field, for
+110. This spare should have been 4 bits to guarantee a byte boundary
+at 112 bits. Decoders need to be prepared to encounter this length
+in case the transmitter has implemented the padding reqirement 
+properly.
+
+The other is messages containing variable-length text packed into
+6-bit nibbles: types 6, 12, and 14.  They may have trailing padding
+after the last nibble to get to an 8-bit boundary.  Decoders should
+be prepared to encounter and ignore this.
+
+The variable-length binary message types 8, 17, 25, and 26 are
+constrained to have data payloads of a size such that the payload ends
+on a byte boundary, but should not require special handling on this
+account. The binary data in message types 8 and 17 is also guaranteed
+to *begin* on a byte boundary, but this is not true of the addressed
+variants of type 25 and 26.
+
+There are references to "bit-stuffing" in the <<IALA>> clarifications
+describing certain payload fields.  <<C2>> reveals the following in
+3.2.2.1: "The bitstream is subject to bit stuffing. This means that if
+more than 5 consecutive 1s are found in the output bit stream, a zero
+is inserted. This applies to all bits except the databits of HDLC
+flags."  <<IALA>> clarifies as follows: "On the transmitting side,
+this means that if five (5) consecutive ones (1s) are found in the
+output bit stream, a zero should be inserted after the five (5)
+consecutive ones (1s). This applies to all bits between the HDLC flags
+[...] On the receiving side, the first zero after five (5) consecutive
+ones (1s) should be removed."
+
+It appears that this bit stuffing is meant to be performed by the AIS
+radio link layer at transmission time and undone at reception time,
+and should not be visible in AIVDM payloads reported by the
+receiver.  Nevertheless we document it here because it is just the
+sort of thing that is (a) likely to confuse implementors reading
+the public sources, and (b) all too likely to become visible if there
+are firmware or software errors in the transmission chain.
+
+== AIS Payload Interpretation ==
 
 Note that many sources use 1-origin numbering for the bits.  We'll
 use 0-origin in this document.
@@ -841,7 +878,8 @@ DAC/FID pairs are assigned separately per message type.
 
 Message type 7 is a receipt acknowledgement to the senders of a
 previous messages of type 6.  Total length varies between 72 and 168
-bits depending on the number of destination MMSIs included.
+bits by 32-bit increments, depending on the number of destination
+MMSIs included.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -1036,8 +1074,9 @@ six-bit text.  This message is variable in length up to a maximum of
 |        |    |                   |          |May be shorter than 968 bits.
 |==============================================================================
 
-Note: There may be an error in the standards.  161 * 6 = 966, not 968,
-but 968 is the figure given in <<IALA>>.
+Note: 161 * 6 = 966. <<IALA>> specifies 968 because over-the-air
+messages are required to be padded to an 8-bit byte boundary by
+<<<ITU1371>>>.
 
 Also see the pragmatic note on message content attached to type 12; it
 applies to type 14 messages as well.
@@ -1076,25 +1115,21 @@ a particular time division in the TDMA packet layer.
 There are four use cases for this message.  A decoder must dispatch on
 the length of the data packet to determine which it is seeing:
 
-1. One station is interrogated for one message type.  Length is 88-90 bits.
+1. One station is interrogated for one message type.  Length is 88 bits.
 
-2. One station is interrogated for two message types, Length is 108-110 bits.
+2. One station is interrogated for two message types, Length is 110
+bits. There is a design error in the standard here; according to the
+<<<ITU1371>>> requirement for padding to 8 bits, this should have been
+112 with a 4-bit trailing spare field, and decoders should be prepared
+to handle that length as well. See the discussion of byte alignment
+earlier in this document for context.
 
 3. Two stations are interrogated for one message type each. Length is
-158-160 bits.  The second message type and second slot offset associated
+160 bits.  The second message type and second slot offset associated
 with the first queried MMSI should be zeroed.
 
 4. One station is interrogated for two message types, and a second for
-one message type.  Length is 158-160 bits.
-
-The reason the lengths given here vary by up to two bits is that
-<<IALA>> is not consistent about whether it expects trailing spare
-bits to be included in the data packet. The shortest message length is
-given as 88, implying that in case 1 the trailing spare bits 88-89 are
-not expected to be sent.  The longest message length is given as 160,
-implying that in cases 3 and 4 the trailing spare bits 159-160 are
-expected to be sent.  A robust decoder should check for both possible
-lengths in each case.
+one message type.  Length is 160 bits.
 
 === Type 16: Assigned Mode Command ===
 
@@ -1960,4 +1995,7 @@ Also, AISlive no longer offers free delayed access.
 
 Version 1.24 breaks the Type 6 and 8 application_id field into 
 DAC and FID and adds tables for know DAC/FID pairs and their sources.
-Unspecified fields are noow omitted in JSON dumps.
+Unspecified fields are noow omitted in JSON dumps.  A new section
+"AIS byte alignment, bit stuffing, and padding", reverals some 
+particularly black magic.
+
