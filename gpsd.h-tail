@@ -634,7 +634,7 @@ extern float roundf(float x);
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 
 /* OpenBSD and FreeBSD and Cygwin don't seem to have NAN, NetBSD does, others? */
-/* XXX test for this in configure? */
+/* FIX-ME: test for this in configure? */
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__CYGWIN__)
 #ifndef NAN
 #define NAN (0.0/0.0)

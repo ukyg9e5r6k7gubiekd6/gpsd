@@ -24,7 +24,7 @@
 #define NODE_HOST	0x40	/* Software on your computer */
 #define NODE_GPSWB	0x60	/* GPSWorkbench seems to be HOST|ITRAX */
 
-/* XXX These defines will likely be replaced by an enum
+/* FIX-ME: These defines will likely be replaced by an enum
  * once I map every message to the task that sent it.
  */
 /* System controller on the receiver */

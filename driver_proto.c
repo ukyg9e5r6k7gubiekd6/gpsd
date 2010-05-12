@@ -257,8 +257,8 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 
    /*
-    * XXX The tag field is only 8 bytes; be careful you do not overflow.
-    * XXX Using an abbreviation (eg. "italk" -> "itk") may be useful.
+    * The tag field is only 8 bytes; be careful you do not overflow.
+    * Using an abbreviation (eg. "italk" -> "itk") may be useful.
     */
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 	"_PROTO_%02x", type);
@@ -268,7 +268,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	/* Deliver message to specific decoder based on message type */
 
     default:
-	/* XXX This gets noisy in a hurry. Change once your driver works */
+	/* This gets noisy in a hurry. Change once your driver works */
 	gpsd_report(LOG_WARN, "unknown packet id %d length %d: %s\n",
 	    type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;

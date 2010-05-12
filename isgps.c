@@ -219,7 +219,6 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		    gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
 				"ISGPS preamble ok, parity ok -- locked\n");
 		    session->isgps.locked = true;
-		    /* session->isgps.curr_offset;  XXX - testing */
 		    break;
 		}
 		gpsd_report(ISGPS_ERRLEVEL_BASE + 1,

@@ -106,7 +106,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	break;
     case UBX_MODE_2D:
     case UBX_MODE_DR:		/* consider this too as 2D */
-    case UBX_MODE_GPSDR:	/* XXX DR-aided GPS may be valid 3D */
+    case UBX_MODE_GPSDR:	/* FIX-ME: DR-aided GPS may be valid 3D */
 	session->newdata.mode = MODE_2D;
 	break;
     default:

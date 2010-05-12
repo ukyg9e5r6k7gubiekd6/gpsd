@@ -247,7 +247,7 @@ int send_lcd(char *buf) {
   res=sockreadline(sd,rcvbuf,255);
 
   /* null-terminate the string before printing */
-  /* rcvbuf[res-1]=0; XXX not using this at the moment... */
+  /* rcvbuf[res-1]=0; FIX-ME: not using this at the moment... */
 
   /* return the result */
   return(res);

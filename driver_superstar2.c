@@ -376,7 +376,7 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
     for (i = 0; i < (ssize_t) (msglen - 2); i++)
 	c += (unsigned short)msg[i];
     c += 0x100;
-    // c = htons(c); // XXX is this needed on big-endian machines?
+    // c = htons(c); // FIX-ME: is this needed on big-endian machines?
     (void)memcpy(msg + (int)msg[3] + 4, &c, 2);
     gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu:%s\n",
 		(int)msg[1] & 0x7f, msglen,
@@ -422,7 +422,6 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
 	return superstar2_msg_ephemeris(session, buf, len);
 
     default:
-	/* XXX This gets noisy in a hurry. */
 	gpsd_report(LOG_WARN,
 		    "unknown superstar2 packet id 0x%02x length %zd: %s\n",
 		    type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));

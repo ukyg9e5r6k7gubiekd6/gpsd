@@ -372,7 +372,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 	return oncore_msg_pps_delay(session, buf, len);
 
     default:
-	/* XXX This gets noisy in a hurry. Change once your driver works */
+	/* FIX-ME: This gets noisy in a hurry. Change once your driver works */
 	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %zd: %s\n",
 		    type >> 8, type & 0xff, len, gpsd_hexdump_wrapper(buf,
 								      len,

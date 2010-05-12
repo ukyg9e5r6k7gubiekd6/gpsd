@@ -600,7 +600,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 
 	case 0x20:		/* Last Fix with Extra Information (binary fixed point) */
-	    /* XXX CSK sez "why does my Lassen iQ output oversize packets?" */
+	    /* CSK sez "why does my Lassen iQ output oversize packets?" */
 	    if ((len != 56) && (len != 64))
 		break;
 	    s1 = getbesw(buf, 2);	/* east velocity */
@@ -679,7 +679,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 	case 0x23:		/* Compact Super Packet */
 	    session->driver.tsip.req_compact = 0;
-	    /* XXX CSK sez "i don't trust this to not be oversized either." */
+	    /* CSK sez "i don't trust this to not be oversized either." */
 	    if (len < 29)
 		break;
 	    ul1 = getbeul(buf, 1);	/* time */
