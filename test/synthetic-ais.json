@@ -11,13 +11,13 @@
 {"class":"AIS","type":3,"repeat":0,"mmsi":563808000,"scaled":false,"status":5,"turn":0,"speed":0,"accuracy":true,"lon":-45796520,"lat":22146000,"course":2520,"heading":352,"second":35,"maneuver":0,"raim":false,"radio":0}
 {"class":"AIS","type":4,"repeat":0,"mmsi":3669702,"scaled":false,"timestamp":"2007-05-14T19:57:39Z","accuracy":true,"lon":-45811417,"lat":22130260,"epfd":7,"raim":false,"radio":67039}
 {"class":"AIS","type":5,"repeat":0,"mmsi":351759000,"scaled":false,"imo":9134270,"ais_version":0,"callsign":"3FOF8","shipname":"EVER DIADEM","shiptype":70,"to_bow":225,"to_stern":70,"to_port":1,"to_starboard":31,"epfd":1,"eta":"05-15T14:00Z","draught":122,"destination":"NEW YORK","dte":0}
-{"class":"AIS","type":6,"repeat":1,"mmsi":150834090,"scaled":false,"seqno":3,"dest_mmsi":313240222,"retransmit":false,"app_id":42827,"data":"48:eb2f118f7ff1"}
-{"class":"AIS","type":6,"repeat":0,"mmsi":265538450,"scaled":false,"seqno":0,"dest_mmsi":2655651,"retransmit":false,"app_id":104,"data":"16:0000"}
+{"class":"AIS","type":6,"repeat":1,"mmsi":150834090,"scaled":false,"seqno":3,"dest_mmsi":313240222,"retransmit":false,"dac":669,"fid":11,"data":"48:eb2f118f7ff1"}
+{"class":"AIS","type":6,"repeat":0,"mmsi":265538450,"scaled":false,"seqno":0,"dest_mmsi":2655651,"retransmit":false,"dac":1,"fid":40,"data":"16:0000"}
 {"class":"AIS","type":7,"repeat":0,"mmsi":2655651,"scaled":false,"mmsi1":265538450,"mmsi2":0,"mmsi3":0,"mmsi4":0}
 {"class":"AIS","type":7,"repeat":1,"mmsi":655901842,"scaled":false,"mmsi1":158483613,"mmsi2":321823389,"mmsi3":836359488,"mmsi4":0}
 {"class":"AIS","type":7,"repeat":2,"mmsi":537411077,"scaled":false,"mmsi1":43101326,"mmsi2":717096664,"mmsi3":76161024,"mmsi4":0}
-{"class":"AIS","type":8,"repeat":0,"mmsi":366999712,"scaled":false,"app_id":23480,"data":"256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb"}
-{"class":"AIS","type":8,"repeat":0,"mmsi":366999655,"scaled":false,"app_id":23480,"data":"256:631d1d6b32f735f03494870d9e13addaf3f373435347ab94628f1498868051c3"}
+{"class":"AIS","type":8,"repeat":0,"mmsi":366999712,"scaled":false,"dac":366,"fid":22,"data":"256:3a53dbb7be4a773137f87d7b0445f040dea05d93f593783194ae9b9d9dbe05fb"}
+{"class":"AIS","type":8,"repeat":0,"mmsi":366999655,"scaled":false,"dac":366,"fid":22,"data":"256:631d1d6b32f735f03494870d9e13addaf3f373435347ab94628f1498868051c3"}
 {"class":"AIS","type":9,"repeat":0,"mmsi":111265591,"scaled":false,"alt":15,"speed":0,"accuracy":false,"lon":7128960,"lat":34667073,"course":0,"second":28,"regional":0,"dte":0,"raim":false,"radio":24597}
 {"class":"AIS","type":10,"repeat":0,"mmsi":366814480,"scaled":false,"dest_mmsi":366832740}
 {"class":"AIS","type":10,"repeat":0,"mmsi":440882000,"scaled":false,"dest_mmsi":366972000}
