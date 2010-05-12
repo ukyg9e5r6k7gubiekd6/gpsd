@@ -18,7 +18,6 @@
 #    never affect variable-length messages in which the last field type
 #    is 'string' or 'raw').
 # * Doesn't join parts A and B of Type 24 together yet.
-# * Does not join the type 21 name extension field to the name fields.
 # * Only handles the broadcast case of type 22.  The problem is that the
 #   addressed field is located *after* the variant parts. Grrrr... 
 # * Message type 26 is presently unsupported. It hasn't been observed
@@ -911,6 +910,14 @@ def packet_scanner(source):
         bits.from_sixbit(payloads[channel], pad)
         yield (lc, raw, bits)
 
+def postprocess(cooked):
+    "Postprocess cooked fields from a message."
+    # Handle type 21 name extension
+    if cooked[0][1] == 21:
+        cooked[4][1] += cooked[19][1]
+        cooked.pop(-1)
+    return cooked
+
 def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     "Generator code - read forever from source stream, parsing AIS messages."
     values = {}
@@ -927,6 +934,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                     group = formatter(*map(lambda x: x[1], segment))
                     group = (label, group, 'string', legend, None)
                     cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
+            # Apply the postprocessor stage
+            cooked = postprocess(cooked)
             # Now apply custom formatting hooks.
             if scaled:
                 for (i, (inst, value)) in enumerate(cooked):
