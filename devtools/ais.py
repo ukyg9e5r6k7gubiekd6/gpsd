@@ -11,12 +11,6 @@
 # and a small amount of code for interpreting it.
 #
 # Known bugs:
-# *  A subtle problem near certain variable-length messages: CSV
-#    reports will sometimes have fewer fields than expected, because the
-#    unpacker never generates cooked tuples for the omitted part of the
-#    message.  Presently a known issue for types 15 and 16 only.  (Will
-#    never affect variable-length messages in which the last field type
-#    is 'string' or 'raw').
 # * Doesn't join parts A and B of Type 24 together yet.
 # * Only handles the broadcast case of type 22.  The problem is that the
 #   addressed field is located *after* the variant parts. Grrrr... 
@@ -414,12 +408,9 @@ type16 = (
     bitfield("mmsi1",     30, 'unsigned', 0, "Interrogated MMSI 1"),
     bitfield("offset1",   12, 'unsigned', 0, "First slot offset"),
     bitfield("increment1",10, 'unsigned', 0, "First slot increment"),
-    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2",
-             conditional=lambda i, v: v['length'] >= 144),
-    bitfield("offset2",   12, 'unsigned', 0, "Second slot offset",
-             conditional=lambda i, v: v['length'] >= 144),
-    bitfield("increment2",10, 'unsigned', 0, "Second slot increment",
-             conditional=lambda i, v: v['length'] >= 144),
+    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2"),
+    bitfield("offset2",   12, 'unsigned', 0, "Second slot offset"),
+    bitfield("increment2",10, 'unsigned', 0, "Second slot increment"),
     spare(2),
     )
 
@@ -758,6 +749,11 @@ class BitVector:
                 self.bitlen = len(data) * 8
             else:
                 self.bitlen = length
+    def extend_to(self, length):
+        "Extend vector to given bitlength."
+        if length > self.bitlen:
+            self.bits.extend([0]*((length - self.bitlen +7 )/8))
+            self.bitlen = length
     def from_sixbit(self, data, pad=0):
         "Initialize bit vector from AIVDM-style six-bit armoring."
         self.bits.extend([0] * len(data))
@@ -923,6 +919,14 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     values = {}
     for (lc, raw, bits) in packet_scanner(source):
         values['length'] = bits.bitlen
+        # Without the following magic, we'd have a subtle problem near
+        # certain variable-length messages: CSV reports would
+        # sometimes have fewer fields than expected, because the
+        # unpacker would never generate cooked tuples for the omitted
+        # part of the message.  Presently a known issue for types 15
+        # and 16 only.  (Will never affect variable-length messages in
+        # which the last field type is 'string' or 'raw').
+        bits.extend_to(168)
         # Magic recursive unpacking operation
         try:
             cooked = aivdm_unpack(lc, bits, 0, values, aivdm_decode)
@@ -950,6 +954,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                         elif type(formatter) == type(lambda x: x):
                             cooked[i][1] = inst.formatter(value)
             expected = lengths.get(values['msgtype'], None)
+            # Check length; has to be done after so we have the type field 
             bogon = False
             if expected is not None:
                 if type(expected) == type(0):
@@ -963,6 +968,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                         sys.stderr.write("%d: type %d expected %s bits but saw %s\n" % (lc, values['msgtype'], expected, actual))
                     else:
                         raise AISUnpackingException(lc, "length", actual)
+            # We're done, hand back a decoding
             values = {}                    
             yield (raw, cooked, bogon)
             raw = ''
