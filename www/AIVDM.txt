@@ -183,11 +183,14 @@ side of the duplex from two VHF radio channels: AIS Channel A is
 Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
 payload. We'll describe how to decode this in later sections.
 
-Field 7 (0) is the number of fill bits requires to pad the data 
-payload to a 6 bit boundary, ranging from 0 to 5.  Note that this
-pad byte has a tricky interaction with the ITU-1371 requirement
-for byte alignment in over-the-air AIS messages; see the detailed
-discussion of message lengths and alignment in a later section.
+Field 7 (0) is the number of fill bits requires to pad the data
+payload to a 6 bit boundary, ranging from 0 to 5.  Equivalently,
+subtracting 5 from this tells how many least significant bits of the
+last 6-bit nibble in the data payload should be ignored. Note that
+this pad byte has a tricky interaction with the <<<ITU-1371>>>
+requirement for byte alignment in over-the-air AIS messages; see the
+detailed discussion of message lengths and alignment in a later
+section.
 
 The \*-separated suffix (\*5C) is the NMEA 0183 data-integrity checksum
 for the sentence, preceded by "*".  It is computed on the entire
@@ -322,9 +325,9 @@ applications as uninterpreted bitfields.
 
 Character-string fields within AIS messages are encoded in a
 special way, referred to as "six-bit" in the tables below. Each
-six-bit segment maps to an ASCII character.  Segments 0-31 map to the
+six-bit nibble maps to an ASCII character.  Nibbles 0-31 map to the
 characters "@" ( ASCII 64) through "\_" (ASCII 95) respectively;
-segments 32-63 map to characters " " (ASCII 32) though "?"  (ASCII
+nibbles 32-63 map to characters " " (ASCII 32) though "?"  (ASCII
 63). Lowercase ASCII letters, the backtick, right and left curly
 brackets, pipe bar, tilde and DEL cannot be encoded.
 
@@ -361,59 +364,6 @@ at-signs and the garbage after them.
 Trailing string fields are often specified as "up to" a certain number of bits.
 Decoders should be prepared to handle any field length up to that
 number, including zero.
-
-== AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
-
-AIS is a bit-sync protocol.  While some fields within AIS payloads are
-8-bit-byte-aligned with preceding padding, most are not. Furthermore,
-while most message variants have bit lengths that are a multiple of 8,
-some do not.
-
-<<ITU1371>> includes a single sentence, easy to miss, requiring
-over-the-air messages to have trailing padding to a 8-bit boundary.
-In most cases message lengths are a multiple of 8 with trailing spare
-fields added to ensure this; thus, the requirement will not change the
-transmitted bitlength of the message from what's described in the
-standard. There are, however, two exceptions to this rule.
-
-One is an apparent error in the format design.  The type 15 message
-has a variant with 108 data bits and a trailing 2-bit spare field, for
-110. This spare should have been 4 bits to guarantee a byte boundary
-at 112 bits. Decoders need to be prepared to encounter this length
-in case the transmitter has implemented the padding reqirement 
-properly.
-
-The other is messages containing variable-length text packed into
-6-bit nibbles: types 6, 12, and 14.  They may have trailing padding
-after the last nibble to get to an 8-bit boundary.  Decoders should
-be prepared to encounter and ignore this.
-
-The variable-length binary message types 8, 17, 25, and 26 are
-constrained to have data payloads of a size such that the payload ends
-on a byte boundary, but should not require special handling on this
-account. The binary data in message types 8 and 17 is also guaranteed
-to *begin* on a byte boundary, but this is not true of the addressed
-variants of type 25 and 26.
-
-There are references to "bit-stuffing" in the <<IALA>> clarifications
-describing certain payload fields.  <<C2>> reveals the following in
-3.2.2.1: "The bitstream is subject to bit stuffing. This means that if
-more than 5 consecutive 1s are found in the output bit stream, a zero
-is inserted. This applies to all bits except the databits of HDLC
-flags."  <<IALA>> clarifies as follows: "On the transmitting side,
-this means that if five (5) consecutive ones (1s) are found in the
-output bit stream, a zero should be inserted after the five (5)
-consecutive ones (1s). This applies to all bits between the HDLC flags
-[...] On the receiving side, the first zero after five (5) consecutive
-ones (1s) should be removed."
-
-It appears that this bit stuffing is meant to be performed by the AIS
-radio link layer at transmission time and undone at reception time,
-and should not be visible in AIVDM payloads reported by the
-receiver.  Nevertheless we document it here because it is just the
-sort of thing that is (a) likely to confuse implementors reading
-the public sources, and (b) all too likely to become visible if there
-are firmware or software errors in the transmission chain.
 
 == AIS Payload Interpretation ==
 
@@ -1122,7 +1072,7 @@ bits. There is a design error in the standard here; according to the
 <<<ITU1371>>> requirement for padding to 8 bits, this should have been
 112 with a 4-bit trailing spare field, and decoders should be prepared
 to handle that length as well. See the discussion of byte alignment
-earlier in this document for context.
+elsewhere in this document for context.
 
 3. Two stations are interrogated for one message type each. Length is
 160 bits.  The second message type and second slot offset associated
@@ -1762,6 +1712,105 @@ The last field is a time tag based on the standard C programming
 language time function. Both date and time to the nearest second can be  
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
+
+== AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
+
+Warning: Here there be dragons. Read with care. Once you get through
+it, you will at least not encounter anything more confusing in the
+rest of this document.
+
+=== Byte Alignment ===
+
+AIS is a bit-sync protocol.  While some fields within AIS payloads are
+8-bit-byte-aligned with preceding padding, most are not. Furthermore,
+while most message variants have bit lengths that are a multiple of 8,
+some do not.
+
+<<ITU1371>> includes a single sentence, easy to miss, requiring
+over-the-air messages to have trailing padding to a 8-bit boundary.
+In most cases message lengths are a multiple of 8 with trailing spare
+fields added to ensure this; thus, the requirement will not change the
+transmitted bitlength of the message from what's described in the
+standard. There are, however, two exceptions to this rule.
+
+One is an apparent error in the format design.  The type 15 message
+has a variant with 108 data bits and a trailing 2-bit spare field, for
+110. This spare should have been 4 bits to guarantee a byte boundary
+at 112 bits. Decoders need to be prepared to encounter this length
+in case the transmitter has implemented the padding reqirement 
+properly.
+
+The other is messages containing variable-length text packed into
+6-bit nibbles: types 6, 12, and 14.  They may have trailing padding
+after the last nibble to get to an 8-bit boundary.  Decoders should
+be prepared to encounter and ignore this.
+
+The variable-length binary message types 8, 17, 25, and 26 are
+constrained to have data payloads of a size such that the payload ends
+on a byte boundary, but should not require special handling on this
+account. The binary data in message types 8 and 17 is also guaranteed
+to *begin* on a byte boundary, but this is not true of the addressed
+variants of type 25 and 26.
+
+=== Interaction with AIVDM padding ===
+
+AIVDM armoring introduces a second layer of padding, with confusing
+consequences.  The real payload, already padded to a bit length that
+is a multiple of 8 by the AIS radio layer, gets armored as a sequence
+of ASCII characters encoding 6-bit nibbles.  To capture all of it, the
+payload must in effect be padded to the next multiple of 6.
+
+Consider a type 12 message with 5 sixbit characters in it. These will
+become bits 72-102 in the over-the-air message. The AIS radio layer will
+pad that to 104 bits at transmission to get to an 8-bit boundary.  The
+receiver, reporting the data in AIVDM armoring, will pad that to 108
+bits to get to a 6-bit boundary, encode the result, and issue a pad
+character of '4' to indicate that the low 4 bits of the last 6-bit
+nibble should be ignored.
+
+Because these requirements are tricky and poorly documented in the
+official standards, receivers not uncommonly get them wrong.  The most
+common way to get them wrong seems to be by computing the pad
+character incorrectly.  
+
+The most common error observed in the wild on AISHub is reporting a
+pad 2 bits too small, making the message look like it is 2 bits longer
+than it actually is.  This seems for some reason to be most common 
+on Type 5 messages, which then decode as 426 bits rather than 424.
+
+Accordingly, we recommend that when validating fixed-size messages by
+type and bit-length, decoders should accept messages that are up to 5
+bits over their theoretically correct length.
+
+For messages with a variable-length trailing payload (6, 8, 12, 14,
+17, 25, 26) there is no way to detect that the pad character might
+be wrong.  If it is, this will manifest as truncation of rhe last
+nibble or extra trailing zero data.
+
+=== Bit Stuffing ===
+
+The following probably will not effect decoders. Nevertheless we
+document it here because it is just the sort of thing that is (a)
+likely to confuse implementors reading the public portions of the
+standards, and (b) all too likely to become visible if there are
+firmware or software errors in the transmission chain.
+
+There are references to "bit-stuffing" in the <<IALA>> clarifications
+describing certain payload fields.  <<C2>> reveals the following in
+3.2.2.1: "The bitstream is subject to bit stuffing. This means that if
+more than 5 consecutive 1s are found in the output bit stream, a zero
+is inserted. This applies to all bits except the databits of HDLC
+flags."  <<IALA>> clarifies as follows: "On the transmitting side,
+this means that if five (5) consecutive ones (1s) are found in the
+output bit stream, a zero should be inserted after the five (5)
+consecutive ones (1s). This applies to all bits between the HDLC flags
+[...] On the receiving side, the first zero after five (5) consecutive
+ones (1s) should be removed."
+
+It appears that this bit stuffing is meant to be performed by the AIS
+radio link layer at transmission time and undone at reception time,
+and should not be visible in AIVDM payloads reported by the
+receiver.  
 
 == AIS feed sites ==
 
