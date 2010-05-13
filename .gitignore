@@ -63,8 +63,13 @@ packet_names.h
 gpsd.spec
 revision.h
 MANIFEST
-# Used by setup.py as scratch space
+# Python files
 build
+gpscatc
+gpsfakec
+gpsprofc
+xgpsc
+xgpsspeedc
 # Developer sandbox directory for patches that haven't been applied yet
 patches
 # autotools cruft
@@ -112,5 +117,10 @@ www/writing-a-driver.html
 www/internals.html
 www/.upload-stamp
 doc/explanation.html
+www/pydoc
 # Controls for the flock tester
 devtools/.flocktest.ini
+# QT stuff
+libQgpsmm/libgps_core.cpp
+libQgpsmm/gpsutils.cpp
+libQgpsmm/libQgpsmm.so.*
