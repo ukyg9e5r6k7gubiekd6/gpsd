@@ -13,7 +13,7 @@ from socket import error as SocketError
 
 __author__ = 'Robin Wittler <real@the-real.org>'
 __license__ = 'BSD'
-__version__ = '0.0.5'
+__version__ = '0.0.7'
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
 #TODO
@@ -25,7 +25,7 @@ __version__ = '0.0.5'
 # cleanup and sanitize code
 
 class Speedometer(gtk.DrawingArea):
-    def __init__(self, speed_label=None):
+    def __init__(self, speed_unit=None):
         gtk.DrawingArea.__init__(self)
         self.connect('expose_event', self.expose_event)
         self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
@@ -39,22 +39,22 @@ class Speedometer(gtk.DrawingArea):
         self.MPS_TO_KPH = 3.6000000000000001
         self.MPS_TO_MPH = 2.2369363
         self.MPS_TO_KNOTS = 1.9438445
-        self.MPH_LABEL = 'Mp/h'
-        self.KPH_LABEL = 'Kp/h'
-        self.KNOTS_LABEL = 'Knt'
+        self.MPH_UNIT_LABEL = 'mph'
+        self.KPH_UNIT_LABEL = 'kmh'
+        self.KNOTS_UNIT_LABEL = 'knots'
         self.conversions = {
-                self.MPH_LABEL: self.MPS_TO_MPH,
-                self.KPH_LABEL: self.MPS_TO_KPH,
-                self.KNOTS_LABEL: self.MPS_TO_KNOTS
+                self.MPH_UNIT_LABEL: self.MPS_TO_MPH,
+                self.KPH_UNIT_LABEL: self.MPS_TO_KPH,
+                self.KNOTS_UNIT_LABEL: self.MPS_TO_KNOTS
         }
-        self.speed_label = speed_label or self.MPH_LABEL
-        if not self.speed_label in self.conversions:
+        self.speed_unit = speed_unit or self.MPH_UNIT_LABEL
+        if not self.speed_unit in self.conversions:
             raise TypeError(
-                    '%s is not a valid speed label'
-                    %(repr(speed_label))
+                    '%s is not a valid speed unit'
+                    %(repr(speed_unit))
             )
         self.nums = {
-                -8: 0,
+                -8:  0,
                 -7: 10,
                 -6: 20,
                 -5: 30,
@@ -62,8 +62,8 @@ class Speedometer(gtk.DrawingArea):
                 -3: 50,
                 -2: 60,
                 -1: 70,
-                0: 80,
-                1: 90,
+                0:  80,
+                1:  90,
                 2: 100
         }
 
@@ -134,17 +134,22 @@ class Speedometer(gtk.DrawingArea):
 
             if i in (-8, -7, -6, -5, -4):
                 self.cr.move_to(
-                        (x + (radius - long_inset - (t_width / 2)) * cos(i * pi / 6.0)),
-                        (y + (radius - long_inset - (t_height * 2)) * sin(i * pi / 6.0))
+                        (x + (radius - long_inset - (t_width / 2)) * cos(i * pi
+                            / 6.0)),
+                        (y + (radius - long_inset - (t_height * 2)) * sin(i * pi
+                            / 6.0))
                 )
             elif i in (-2, -1, 0, 2, 1):
                 self.cr.move_to(
-                        (x + (radius - long_inset - (t_width * 1.5 )) * cos(i * pi / 6.0)),
-                        (y + (radius - long_inset - (t_height * 2 )) * sin(i * pi / 6.0))
+                        (x + (radius - long_inset - (t_width * 1.5 )) * cos(i * pi
+                            / 6.0)),
+                        (y + (radius - long_inset - (t_height * 2 )) * sin(i * pi
+                            / 6.0))
                 )
             elif i in (-3,):
                 self.cr.move_to(
-                        (x - t_width / 2), (y - radius +  self.long_inset(radius) *2 + t_height)
+                        (x - t_width / 2), (y - radius +
+                            self.long_inset(radius) * 2 + t_height)
                 )
             self.cr.show_text(_num)
             self.cr.restore()
@@ -155,8 +160,10 @@ class Speedometer(gtk.DrawingArea):
                         y + (radius - middle_inset) * sin((i + 0.5) * pi / 6.0)
                 )
                 self.cr.line_to(
-                        x + (radius + (self.cr.get_line_width() / 2)) * cos((i + 0.5) * pi / 6.0),
-                        y + (radius + (self.cr.get_line_width() / 2)) * sin((i + 0.5) * pi / 6.0)
+                        x + (radius + (self.cr.get_line_width() / 2)) * cos((i
+                            + 0.5) * pi / 6.0),
+                        y + (radius + (self.cr.get_line_width() / 2)) * sin((i
+                            + 0.5) * pi / 6.0)
                 )
 
             for z in self.short_ticks:
@@ -166,8 +173,10 @@ class Speedometer(gtk.DrawingArea):
                             y + (radius - short_inset) * sin((i + z) * pi / 6.0)
                     )
                     self.cr.line_to(
-                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i + z) * pi / 6.0),
-                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i + z) * pi / 6.0)
+                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i
+                                + z) * pi / 6.0),
+                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i
+                                + z) * pi / 6.0)
                     )
                 else:
                     self.cr.move_to(
@@ -175,15 +184,17 @@ class Speedometer(gtk.DrawingArea):
                             y + (radius - short_inset) * sin((i - z) * pi / 6.0)
                     )
                     self.cr.line_to(
-                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i - z) * pi / 6.0),
-                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i - z) * pi / 6.0)
+                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i
+                                - z) * pi / 6.0),
+                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i
+                                - z) * pi / 6.0)
                     )
             self.cr.stroke()
 
     def draw_needle(self, speed, radius, x, y):
         self.cr.save()
         inset = self.long_inset(radius)
-        speed = speed * self.conversions.get(self.speed_label)
+        speed = speed * self.conversions.get(self.speed_unit)
         speed = speed / (self.res_div * self.res_div_mul)
         actual = self.long_ticks[-1] + speed
         if actual > self.long_ticks[0]:
@@ -202,8 +213,8 @@ class Speedometer(gtk.DrawingArea):
     def draw_speed_text(self, speed, radius, x, y):
         self.cr.save()
         speed = '%.2f %s'  %(
-                speed * self.conversions.get(self.speed_label),
-                self.speed_label
+                speed * self.conversions.get(self.speed_unit),
+                self.speed_unit
         )
         self.cr.select_font_face(
                 'Georgia',
@@ -234,14 +245,15 @@ class Speedometer(gtk.DrawingArea):
 
 
 class Main(object):
-    def __init__(self, host='localhost', port='2947', debug=0, speed_label=None):
+    def __init__(self, host='localhost', port='2947', device=None, debug=0, speed_unit=None):
         self.host = host
         self.port = port
+        self.device = device
         self.debug = debug
-        self.speed_label = speed_label
+        self.speed_unit = speed_unit
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title('xgpsspeed')
-        self.widget = Speedometer(speed_label=self.speed_label)
+        self.widget = Speedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
@@ -267,8 +279,8 @@ class Main(object):
                  ('Nautical', None, '_Nautical', '<Control>n',
                      'Nautical Units', 2)
                  ],
-                0, lambda a, v: setattr(self.widget, 'speed_label', ['Mp/h',
-                'Kp/h', 'Knt'][a.get_current_value()])
+                0, lambda a, v: setattr(self.widget, 'speed_unit', ['mph',
+                'kmh', 'knots'][a.get_current_value()])
         )
 
         self.uimanager.insert_action_group(self.actiongroup, 0)
@@ -286,8 +298,15 @@ class Main(object):
     </menubar>
 </ui>
 ''')
+        self.active_unit_map = {
+                'mph': '/MenuBar/Units/Imperial',
+                'kmh': '/MenuBar/Units/Metric',
+                'knots': '/MenuBar/Units/Nautical'
+        }
         menubar = self.uimanager.get_widget('/MenuBar')
-        self.uimanager.get_widget('/MenuBar/Units/Imperial').set_active(True)
+        self.uimanager.get_widget(
+                self.active_unit_map.get(self.speed_unit)
+        ).set_active(True)
         vbox.pack_start(menubar, False, False, 0)
         vbox.add(self.widget)
         self.window.show_all()
@@ -341,7 +360,7 @@ class Main(object):
                     mode = gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
                     verbose = self.debug
             )
-            self.watch(daemon, None)
+            self.watch(daemon, self.device)
             gtk.main()
         except SocketError:
             w = gtk.MessageDialog(
@@ -360,4 +379,77 @@ class Main(object):
 
 
 if __name__ == '__main__':
-    Main(speed_label='Mp/h').run()
+    from sys import argv, exit
+    from os.path import basename
+    from optparse import OptionParser
+    prog = basename(argv[0])
+    usage = ('%s [-V|--version] [-h|--help] [--debug] [--host] ' +
+            '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
+            '[host [:port [:device]]]') %(prog)
+    epilog = 'BSD terms apply: see the file COPYING in the distribution root for details.'
+    version = '%s %s' %(prog, __version__)
+
+    parser = OptionParser(usage=usage, epilog=epilog)
+    parser.add_option(
+            '--host',
+            dest='host',
+            default='localhost',
+            help='The host to connect. [Default localhost]'
+    )
+    parser.add_option(
+            '--port',
+            dest='port',
+            default='2947',
+            help='The port to connect. [Default 2947]'
+    )
+    parser.add_option(
+            '--device',
+            dest='device',
+            default=None,
+            help='The device to connet. [Default None]'
+    )
+    parser.add_option(
+            '--speedunits',
+            dest='speedunits',
+            default='mph',
+            help='The unit of speed. Possible units are: mph, kmh, knots. [Default mph]'
+    )
+    parser.add_option(
+            '--debug',
+            dest='debug',
+            default=0,
+            action='store',
+            type='int',
+            help='Set level of debug. Must be integer. [Default 0]'
+    )
+    parser.add_option(
+            '-V',
+            '--version',
+            action='store_true',
+            default=False,
+            dest='version',
+            help='show program\'s version number and exit'
+    )
+    (options, args) = parser.parse_args()
+    if options.version:
+        print version
+        exit(0)
+    if args:
+        arg = args[0].split(':')
+        len_arg = len(arg)
+        if len_arg == 1:
+            (options.host,) = arg
+        elif len_arg == 2:
+            (options.host, options.port) = arg
+        elif len_arg == 3:
+            (options.host, options.port, options.device) = arg
+        else:
+            parser.print_help()
+            exit(0)
+    Main(
+            host=options.host,
+            port=options.port,
+            device=options.device,
+            speed_unit=options.speedunits,
+            debug=options.debug
+    ).run()
