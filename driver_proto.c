@@ -56,6 +56,7 @@ static	gps_mask_t _proto__dispatch(struct gps_device_t *, unsigned char *, size_
 static	gps_mask_t _proto__msg_navsol(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t _proto__msg_utctime(struct gps_device_t *, unsigned char *, size_t );
 static	gps_mask_t _proto__msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
+static	gps_mask_t _proto__msg_raw(struct gps_device_t *, unsigned char *, size_t );
 
 /*
  * These methods may be called elsewhere in gpsd
@@ -225,6 +226,51 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
     return SATELLITE_IS | USED_IS;
+}
+
+/**
+ * Raw measurements
+ */
+static gps_mask_t
+_proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+{
+    unsigned char i, st, nchan, nsv;
+    unsigned int tow;
+
+    if (data_len != RAW_MSG_LEN )
+	return 0;
+
+    gpsd_report(LOG_IO, "_proto_ RAW - raw measurements\n");
+    /* if this protocol has a way to test message validity, use it */
+    flags = GET_FLAGS();
+    if ((flags & _PROTO__SVINFO_VALID) == 0)
+	return 0;
+
+    /*
+     * not all chipsets emit the same information. some of these observables
+     * can be easily converted into others. these are suggestions for the
+     * quantities you may wish to try extract. chipset documentation may say
+     * something like "this message contains information required to generate
+     * a RINEX file." assign NAN for unavailable data.
+     */
+    nchan = GET_NUMBER_OF_CHANNELS();
+    if ((nchan < 1) || (nchan > MAXCHANNELS)) {
+	gpsd_report(LOG_INF, "too many channels reported\n");
+	return 0;
+    }
+
+    for (i = 0; i < n; i++){
+	session->gpsdata.PRN[i] = GET_PRN();
+	session->gpsdata.ss[i] = GET_SIGNAL()
+	session->gpsdata.raw.satstat[i] = GET_FLAGS();
+	session->gpsdata.raw.pseudorange[i] = GET_PSEUDORANGE();
+	session->gpsdata.raw.doppler[i] = GET_DOPPLER();
+	session->gpsdata.raw.carrierphase[i] = GET_CARRIER_PHASE();
+	session->gpsdata.raw.mtime[i] = GET_MEASUREMENT_TIME();
+	session->gpsdata.raw.codephase[i] = GET_CODE_PHASE();
+	session->gpsdata.raw.deltarange[i] = GET_DELTA_RANGE();
+    }
+    return RAW_IS;
 }
 
 /**
@@ -404,7 +450,7 @@ static gps_mask_t _proto__parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static bool _proto__set_speed(struct gps_device_t *session, 
+static bool _proto__set_speed(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
     /* 
