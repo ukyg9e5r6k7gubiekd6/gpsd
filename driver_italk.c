@@ -248,6 +248,52 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     return ONLINE_IS;
 }
 
+static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
+				      unsigned char *buf, size_t len)
+{
+    unsigned short gps_week, flags, n, i;
+    unsigned int tow;
+    union long_double l_d;
+    double t;
+
+    n = (ushort) getleuw(buf, 7 + 4);
+    if ((n < 1) || (n > MAXCHANNELS)){
+	gpsd_report(LOG_INF, "ITALK: bad PSEUDO channel count\n");
+	return 0;
+    }
+
+    if (len != (size_t)((n+1)*36)) {
+	gpsd_report(LOG_PROG,
+		    "ITALK: bad PSEUDO len %zu\n", len);
+    }
+
+    gpsd_report(LOG_PROG, "iTalk PSEUDO [%u]\n", n);
+    flags = getleuw(buf, 7 + 6);
+    if ((flags & 0x3) != 0x3)
+	return 0; // bail if measurement time not valid.
+
+    gps_week = (ushort) getleuw(buf, 7 + 8);
+    tow = (uint) getleul(buf, 7 + 38);
+    session->context->gps_week = gps_week;
+    session->context->gps_tow = tow / 1000.0;
+    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
+	- session->context->leap_seconds;
+
+    for (i = 0; i < n; i++){
+	session->gpsdata.PRN[i] = getleuw(buf, 7 + 26 + (i*36)) & 0xff;
+	session->gpsdata.ss[i] = getleuw(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
+	session->gpsdata.raw.satstat[i] = getleul(buf, 7 + 26 + (i*36 + 4));
+	session->gpsdata.raw.pseudorange[i] = getled(buf, 7 + 26 + (i*36 + 8));
+	session->gpsdata.raw.doppler[i] = getled(buf, 7 + 26 + (i*36 + 16));
+	session->gpsdata.raw.carrierphase[i] = getleuw(buf, 7 + 26 + (i*36 + 28));
+
+	session->gpsdata.raw.mtime[i] = t;
+	session->gpsdata.raw.codephase[i] = NAN;
+	session->gpsdata.raw.deltarange[i] = NAN;
+    }
+    return RAW_IS;
+}
+
 /*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session,
 			      unsigned char *buf, size_t len)
@@ -287,6 +333,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 	break;
     case ITALK_PSEUDO:
 	gpsd_report(LOG_IO, "iTalk PSEUDO len %zu\n", len);
+	mask = decode_itk_pseudo(session, buf, len);
 	break;
     case ITALK_RAW_ALMANAC:
 	gpsd_report(LOG_IO, "iTalk RAW_ALMANAC len %zu\n", len);
