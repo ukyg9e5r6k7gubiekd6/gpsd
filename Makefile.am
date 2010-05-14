@@ -136,8 +136,8 @@ gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
 libgps_VERSION_CURRENT = 19
 libgps_VERSION__REVISION = 0
 libgps_VERSION_AGE = 0
-libgps_la_LDFLAGS = -version-number \
-		    $(libgps_VERSION_AGE):$(libgps_VERSION__REVISION):$(libgps_VERSION_AGE)
+libgps_VERSION_NUMBER = $(libgps_VERSION_AGE):$(libgps_VERSION__REVISION):$(libgps_VERSION_AGE)
+libgps_la_LDFLAGS = -version-number $(libgps_VERSION_CURRENT):$(libgps_VERSION__REVISION):$(libgps_VERSION_AGE)
 lib_LTLIBRARIES = libgps.la libgpsd.la
 
 libgps_SONAME = $(shell expr $(libgps_VERSION_CURRENT) - $(libgps_VERSION_AGE))
