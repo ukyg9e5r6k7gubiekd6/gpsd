@@ -70,7 +70,7 @@ endif
 PYTHONSCRIPTS_DIST = gpscat gpsfake gpsprof xgps xgpsspeed
 PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py gps/client.py
 
-PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1
+PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1 xgpsspeed.1 xgps.1
 if HAVE_PYTHON
 python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
@@ -365,8 +365,6 @@ test_json_LDADD = $(LIBC) libgps.la -lm
 MANPAGES_BASE = \
 	gpsd.8 \
 	gps.1 \
-	xgps.1 \
-	xgpsspeed.1 \
 	cgps.1 \
 	lcdgps.1 \
 	libgps.3 \
