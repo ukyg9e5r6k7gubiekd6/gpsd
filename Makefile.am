@@ -62,6 +62,9 @@ check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_g
 if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
+if HAVE_QT
+check_PROGRAMS += test_qgpsmm
+endif
 
 # List of Python scripts and modules, which are handled by setup.py.
 # Required to ensure that the extensions/modules/scripts are rebuilt via
@@ -393,6 +396,16 @@ if LIBGPSMM_ENABLE
 #
 test_gpsmm_SOURCES = test_gpsmm.cpp
 test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+endif
+
+if HAVE_QT
+#
+# Build test_qgpsmm
+#
+test_qgpsmm_SOURCES = test_gpsmm.cpp
+test_qgpsmm_LDFLAGS = -Wl,-rpath,$(srcdir)/libQgpsmm
+test_qgpsmm_LDADD = $(LIBC) $(LIBUSB) $(QtNetwork_LIBS) -LlibQgpsmm -lQgpsmm
+test_qgpsmm_DEPENDENCIES = libQgpsmm/libQgpsmm.so
 endif
 
 #
