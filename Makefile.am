@@ -343,12 +343,12 @@ QMAKE_OPTS = "PREFIX=${prefix}" \
 	     "VERSION=$(libgps_VERSION)"
 
 libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro
-	cd libQgpsmm && $(QMAKE) $(QMAKE_OPTS)
+	cd $(srcdir)/libQgpsmm && $(QMAKE) $(QMAKE_OPTS)
 # Yet another multiple-outputs hack:
 $(QTLIBS): stamp-qt
 	        +@WITNESS=stamp-qt; $(MULTIOUT_RECOVER_DELETED)
 stamp-qt: $(QTLIB_sources) libQgpsmm/Makefile
-	$(MAKE) -C libQgpsmm
+	$(MAKE) -C $(srcdir)/libQgpsmm
 	touch $@
 CLEANFILES += stamp-qt
 endif
@@ -359,7 +359,9 @@ if HAVE_PYTHON
 	rm -rf build gps/*.so
 endif
 if HAVE_QT
-	if test -r libQgpsmm/Makefile; then $(MAKE) -C libQgpsmm distclean; fi
+	if test -r $(srcdir)/libQgpsmm/Makefile; then \
+		$(MAKE) -C $(srcdir)/libQgpsmm distclean;  \
+	fi
 endif
 
 # Install Python modules and QT library
