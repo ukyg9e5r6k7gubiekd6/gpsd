@@ -76,6 +76,7 @@ python_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
 
+
 #
 # Build cgps
 #
@@ -261,12 +262,13 @@ nodist_libgpsd_la_SOURCES = packet_names.h ais_json.i
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) libgps.la
 
-#
+noinst_SCRIPTS =
+
 # Build Python binding
 #
 if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
-noinst_SCRIPTS = stamp-python setup.py
+noinst_SCRIPTS += stamp-python setup.py
 
 # Multiple-outputs hack.  See
 # http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
@@ -296,13 +298,70 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
 	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python stamp-python.tmp
+endif
 
-# Clean up after Python
+QTLIB_DIST = libQgpsmm/libQgpsmm.pro \
+             libQgpsmm/gpsutils.cpp \
+             libQgpsmm/libgps_core.cpp \
+             libQgpsmm/libQgpsmm_global.h
+
+if HAVE_QT
+noinst_SCRIPTS += stamp-qt
+QTLIBS = libQgpsmm/libQgpsmm.so \
+	 libQgpsmm/libQgpsmm.so.$(libgps_SONAME) \
+	 libQgpsmm/libQgpsmm.so.$(libgps_SONAME).$(libgps_VERSION_AGE) \
+	 libQgpsmm/libQgpsmm.so.$(libgps_VERSION)
+
+QTLIB_sources = gpsutils.c \
+		libgps_core.c \
+		libgpsmm.cpp \
+		libgps_json.c \
+		hex.c \
+		gpsd_report.c \
+		strl.c \
+		shared_json.c \
+		rtcm2_json.c \
+		ais_json.c \
+		json.c \
+		gps.h \
+		libgpsmm.h \
+		gps_json.h \
+		json.h \
+		ais_json.i \
+		gpsd.h \
+		$(QTLIB_DIST)
+
+QMAKE_OPTS = "PREFIX=${prefix}" \
+	     "MAKE=$(MAKE)" \
+	     "QMAKE_CXX=$(CXX)" \
+	     "QMAKE_CC=$(CC)" \
+	     "QMAKE_CFLAGS+=$(CFLAGS)" \
+	     "QMAKE_LFLAGS+=$(LDFLAGS)" \
+	     "VERSION=$(libgps_VERSION)"
+
+libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro
+	cd libQgpsmm && $(QMAKE) $(QMAKE_OPTS)
+# Yet another multiple-outputs hack:
+$(QTLIBS): stamp-qt
+	        +@WITNESS=stamp-qt; $(MULTIOUT_RECOVER_DELETED)
+stamp-qt: $(QTLIB_sources) libQgpsmm/Makefile
+	$(MAKE) -C libQgpsmm
+	touch $@
+CLEANFILES += stamp-qt
+endif
+
+# Clean up after Python and QT
 clean-local:
+if HAVE_PYTHON
 	rm -rf build gps/*.so
+endif
+if HAVE_QT
+	if test -r libQgpsmm/Makefile; then $(MAKE) -C libQgpsmm distclean; fi
+endif
 
-# Install Python modules
+# Install Python modules and QT library
 install-exec-local:
+if HAVE_PYTHON
 # Make sure we do not use --root as option to setup.py install
 # when DESTDIR is not defined as distutils would use the current
 # working directory as root directory and not install to ${prefix}.
@@ -311,6 +370,9 @@ install-exec-local:
 	else \
 		$(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
 	fi
+endif
+if HAVE_QT
+	$(MAKE) -C libQgpsmm install INSTALL_ROOT=$(DESTDIR)
 endif
 
 #
@@ -494,6 +556,7 @@ EXTRA_DIST = \
 	regress-driver \
 	$(PYTHONSCRIPTS_DIST) \
 	$(PYTHONMODULES_DIST) \
+	$(QTLIB_DIST) \
 	test
 
 #dist-hook:
