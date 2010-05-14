@@ -121,6 +121,4 @@ www/pydoc
 # Controls for the flock tester
 devtools/.flocktest.ini
 # QT stuff
-libQgpsmm/libgps_core.cpp
-libQgpsmm/gpsutils.cpp
 libQgpsmm/libQgpsmm.so.*
