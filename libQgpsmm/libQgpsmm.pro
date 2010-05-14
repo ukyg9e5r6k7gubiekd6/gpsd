@@ -37,10 +37,6 @@ HEADERS += libQgpsmm_global.h \
 
 !win32 {
 
-    _IGNORE = $$system(test -r gpsutils.cpp || ln -s ../gpsutils.c gpsutils.cpp)
-    _IGNORE = $$system(test -r libgps_core.cpp || ln -s ../libgps_core.c libgps_core.cpp)
-    QMAKE_CLEAN += gpsutils.cpp libgps_core.cpp
-
     isEmpty( VERSION ) {
         VERSION = $$system($${MAKE} -s -C .. print_libgps_VERSION)
     }
@@ -70,14 +66,6 @@ win32 {
 
     HEADERS += \
         gpsd.h
-
-    gpsutilscpp.target = gpsutils.cpp
-    gpsutilscpp.commands = copy ..\gpsutils.c gpsutils.cpp
-    gpsutilscpp.depends = FORCE
-
-    libgps_corecpp.target = libgps_core.cpp
-    libgps_corecpp.commands = copy ..\libgps_core.c libgps_core.cpp
-    libgps_corecpp.depends = FORCE
 
     gpsdhcreate.target = gpsd.h
     gpsdhcreate.commands = "copy /Y /B ..\gpsd.h-head + mingw\gpsd_config.h + ..\gpsd.h-tail  gpsd.h" && "copy /Y mingw\gpsd_config.h .." && "copy /Y mingw\ais_json.i .."
