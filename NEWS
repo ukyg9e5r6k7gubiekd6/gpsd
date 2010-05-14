@@ -12,7 +12,7 @@
   Designated Area Code and Functional ID pair. gpspipe has a new -T
   option for setting the timestamp format.  xgpsspeed is completely
   rewritten in Python, eliminating some dependencies on ancient X
-  libraries.
+  libraries.  We now ship a Qt binding for the client library.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.
