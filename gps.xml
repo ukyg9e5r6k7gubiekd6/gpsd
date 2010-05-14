@@ -40,14 +40,15 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>xgpsspeed</command> <arg choice='opt'>-rv</arg> 
-      <arg choice='opt'><replaceable>X-options</replaceable></arg>
+  <command>xgpsspeed</command>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg> 
-      <arg choice='opt'>-V </arg> <arg
-      choice='opt'>-nc <replaceable>X-color</replaceable></arg> <arg
-      choice='opt'>-speedunits <group
-      choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
+      <arg choice='opt'>-V </arg>
+      <arg choice='opt'>--speedunits
+	      <group choice='req'>
+		      <arg>mph</arg><arg>kph</arg><arg>knots</arg>
+              </group>
+      </arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -217,14 +218,12 @@ outline icons were not.</para>
 <para><application>xgpsspeed</application> is a speedometer that uses
 position information from the GPS. It accepts an -h option and
 optional argument as for <application>gps</application>, or a -V
-option to dump the package version and exit.  Additionally, it accepts
--rv (reverse video) and -nc (needle color) options.</para>
+option to dump the package version and exit.</para>
 
 <para>The -speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
-is miles per hour.   This option can also be set as the X resource 
-'speedunits'.</para>
+is miles per hour. </para>
 
 </refsect2>
 <refsect2><title>cgps</title>
