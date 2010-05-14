@@ -7,8 +7,6 @@ TARGET = Qgpsmm
 TEMPLATE = lib
 DEFINES += LIBQGPSMM_LIBRARY
 DEFINES += USE_QT
-#QMAKE_EXT_CPP += .c
-!win32: QMAKE_CFLAGS += -D_GNU_SOURCE
 INCLUDEPATH += $$PWD \
     ..
 
@@ -54,6 +52,7 @@ HEADERS += libQgpsmm_global.h \
     header.files = ../libgpsmm.h ../gps.h
     INSTALLS += header
 
+    QMAKE_CFLAGS += -D_GNU_SOURCE
 
 }
 
