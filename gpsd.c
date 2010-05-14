@@ -240,7 +240,7 @@ static pthread_mutex_t report_mutex;
 
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
-    char *sp;
+    const char *sp;
 
     buf2[0] = '\0';
     for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)

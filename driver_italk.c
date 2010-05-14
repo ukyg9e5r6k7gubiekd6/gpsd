@@ -268,7 +268,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     }
 
     gpsd_report(LOG_PROG, "iTalk PSEUDO [%u]\n", n);
-    flags = getleuw(buf, 7 + 6);
+    flags = (unsigned short)getleuw(buf, 7 + 6);
     if ((flags & 0x3) != 0x3)
 	return 0; // bail if measurement time not valid.
 
@@ -279,6 +279,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;
 
+    /*@-type@*/
     for (i = 0; i < n; i++){
 	session->gpsdata.PRN[i] = getleuw(buf, 7 + 26 + (i*36)) & 0xff;
 	session->gpsdata.ss[i] = getleuw(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
@@ -291,6 +292,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 	session->gpsdata.raw.codephase[i] = NAN;
 	session->gpsdata.raw.deltarange[i] = NAN;
     }
+    /*@+type@*/
     return RAW_IS;
 }
 
