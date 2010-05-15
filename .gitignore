@@ -23,6 +23,7 @@ valgrind-audit
 test_float
 test_bits
 test_gpsmm
+test_qgpsmm
 test_packet
 test_mkgmtime
 test_geoid
