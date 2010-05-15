@@ -60,6 +60,7 @@ If you are going to modify the build, you will need these:
 autoconf 2.61 or later
 automake 1.10 or later
 libtool 2.26 or later
+pkg-config
 
 Once you have fetched the software prerequisites:
 
