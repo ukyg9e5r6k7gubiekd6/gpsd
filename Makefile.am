@@ -8,7 +8,7 @@
 # grab the test directory wholesale. Hack appropriately when and if we 
 # change version control systems.
 # \bug This is non-portable and depends on GNU tar beyond-POSIX extensions.
-am__tar += --exclude '*git*'
+am__tar += --exclude '.git' --exclude '.gitignore'
 
 CLEANFILES =
 
