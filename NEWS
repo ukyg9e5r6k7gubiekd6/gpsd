@@ -1,4 +1,5 @@
 * Sat May 8 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95~dev
+  The autonomous robot submarine total world domination release!
   Rationalize clearing and generation of DOPs, this makes epx/epy much
   more generally available. Fixed the test productions for the udev
   magic and added a troubleshooting note in INSTALL. cgps now displays
@@ -12,7 +13,8 @@
   Designated Area Code and Functional ID pair. gpspipe has a new -T
   option for setting the timestamp format.  xgpsspeed is completely
   rewritten in Python, eliminating some dependencies on ancient X
-  libraries.  We now ship a Qt binding for the client library.
+  libraries.  We now ship a Qt binding for the client library. Note
+  a GCC 4.2.1 optimizer bug.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.

@@ -74,6 +74,7 @@ maintainer, we've tried to kick these upstream.</p>
 <ul>
 <li><a href="#libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</a></li>
 <li><a href="#pyinstall">Defective Python installation in SuSE 10.3rc</a></li>
+<li><a href="#gcc421">Compiler optimizer bugs can produce error-modeling errors<a></li>
 </ul>
 
 <h1>Links to Fixed Bugs</h1>
@@ -201,6 +202,19 @@ in.</p>
 <p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
 Makefile.  This prevents the <code>gpsd</code> Python components from
 building correctly.</p>
+
+<h2 id="gcc421">Compiler optimizer bugs can produce error-modeling errors<</h2>
+
+<p>The floating-point code in the daemon's error modeler (the logic
+that produces uncertainty estimates in the sensor doesn't supply them)
+is sensitive to optimizer bugs.  If the optimizer is flaky, different
+levels of operation can cause the speed calculation to either converge
+or blow up in FP operations; the effect is that when it is actually
+reported seems to vary randomly with level of optimization.</p>
+
+<p>Under GCC 4.2.1, -O2 diverges from what GCC 4.4.1 reports, causing
+regression-test failures. Dropping back to -O1 or going up to -O3
+restores behavior like GCC 4.4.1's.</p>
 
 <h1>Fixed Problems</h1>
 
