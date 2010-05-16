@@ -30,8 +30,7 @@ HEADERS += libQgpsmm_global.h \
     ../gps.h \
     ../libgpsmm.h \
     ../gps_json.h \
-    ../json.h \
-    ../ais_json.i
+    ../json.h
 
 !win32 {
 
@@ -39,7 +38,8 @@ HEADERS += libQgpsmm_global.h \
         VERSION = $$system($${MAKE} -s -C .. print_libgps_VERSION)
     }
     HEADERS += \
-        ../gpsd.h
+        ../gpsd.h \
+	../ais_json.i
 
     # Prefix: base instalation directory
     isEmpty( PREFIX ) {
@@ -59,17 +59,20 @@ HEADERS += libQgpsmm_global.h \
 win32 {
 
     # TODO:
-    # - library version handling
-    # - add missing files (if there are any)
     # - test build
 
+    include( mingw/version.pri )
     HEADERS += \
-        gpsd.h
+        gpsd.h \
+	mingw/ais_json.i
+
+    INCLUDEPATH = $$PWD/mingw $${INCLUDEPATH}
 
     gpsdhcreate.target = gpsd.h
-    gpsdhcreate.commands = "copy /Y /B ..\gpsd.h-head + mingw\gpsd_config.h + ..\gpsd.h-tail  gpsd.h" && "copy /Y mingw\gpsd_config.h .." && "copy /Y mingw\ais_json.i .."
+    gpsdhcreate.commands = "copy /Y /B ..\gpsd.h-head + mingw\gpsd_config.h + ..\gpsd.h-tail  gpsd.h"
     gpsdhcreate.depends = FORCE
 
     PRE_TARGETDEPS += gpsd.h
     QMAKE_EXTRA_TARGETS += gpsdhcreate
+
 }
