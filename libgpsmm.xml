@@ -15,7 +15,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>libgpsmm</refname>
-<refpurpose>C++ class wrapper for the GPS daemon</refpurpose>
+<refname>libQgpsmm</refname>
+<refpurpose>C++ and QT class wrapper for the GPS daemon</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 <funcsynopsis>
@@ -60,8 +61,9 @@ C++:
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><emphasis remap='B'>libgpsmm</emphasis> is a mere wrapper over
-<emphasis remap='B'>libgps</emphasis>. Method names are the same as
+<para><emphasis remap='B'>libgpsmm and libQgpsmm</emphasis> are mere wrappers over
+	<emphasis remap='B'>libgps</emphasis>. The important difference between the libraries is that libgpsmm is targeted at C++ applications and contained in <emphasis remap='B'>libgps</emphasis>, while libQgpsmm is platform independant by using QTcpSocket to connect to <emphasis remap='B'>gpsd</emphasis> and shipped as an additional library due to the necessary linking to QT.
+Method names are the same as
 the analogue C functions. For a detailed description of the functions
 please read
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
