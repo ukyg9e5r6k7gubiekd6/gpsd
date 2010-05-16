@@ -308,6 +308,9 @@ QTLIB_DIST = libQgpsmm/libQgpsmm.pro \
              libQgpsmm/libgps_core.cpp \
              libQgpsmm/libQgpsmm_global.h
 
+QTLIB_DIST_MINGW = libQgpsmm/mingw/gpsd_config.h \
+		   libQgpsmm/mingw/test_qgpsmm.pro
+
 if LIB_Q_GPSMM_ENABLE
 noinst_SCRIPTS += stamp-qt
 QTLIBS = libQgpsmm/libQgpsmm.so \
@@ -572,13 +575,20 @@ EXTRA_DIST = \
 	$(PYTHONSCRIPTS_DIST) \
 	$(PYTHONMODULES_DIST) \
 	$(QTLIB_DIST) \
+	$(QTLIB_DIST_MINGW) \
 	test
 
-#dist-hook:
-#	$(MKDIR_P) '$(distdir)/contrib' && \
-#	cp -p '$(srcdir)/contrib/'* '$(distdir)/contrib'
-#distclean-local:
-#	rm -rf '$(distdir)/contrib'
+
+# Prepare necessary files to build the mingw-port of libQgpsmm
+# while creating the dist tarball.
+dist-hook: ais_json.i gpsd_config.h
+	$(MKDIR_P) '$(distdir)/libQgpsmm/mingw'
+	cp -p ais_json.i $(distdir)/libQgpsmm/mingw
+	grep "#define VERSION" gpsd_config.h > $(distdir)/libQgpsmm/mingw/version.h
+	echo "VERSION=$(libgps_VERSION)" > $(distdir)/libQgpsmm/mingw/version.pri
+distclean-local:
+	rm -f $(distdir)/libQgpsmm/mingw/version.* $(distdir)/libQgpsmm/mingw/ais_json.i
+
 
 CLEANFILES += $(BUILT_SOURCES) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
