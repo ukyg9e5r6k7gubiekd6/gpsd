@@ -7,6 +7,7 @@ TARGET = Qgpsmm
 TEMPLATE = lib
 DEFINES += LIBQGPSMM_LIBRARY
 DEFINES += USE_QT
+DESTDIR = binaries
 INCLUDEPATH += $$PWD \
     ..
 
@@ -57,9 +58,6 @@ HEADERS += libQgpsmm_global.h \
 }
 
 win32 {
-
-    # TODO:
-    # - test build
 
     include( mingw/version.pri )
     HEADERS += \

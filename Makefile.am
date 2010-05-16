@@ -313,10 +313,10 @@ QTLIB_DIST_MINGW = libQgpsmm/mingw/gpsd_config.h \
 
 if LIB_Q_GPSMM_ENABLE
 noinst_SCRIPTS += stamp-qt
-QTLIBS = libQgpsmm/libQgpsmm.so \
-	 libQgpsmm/libQgpsmm.so.$(libgps_SONAME) \
-	 libQgpsmm/libQgpsmm.so.$(libgps_SONAME).$(libgps_VERSION_AGE) \
-	 libQgpsmm/libQgpsmm.so.$(libgps_VERSION)
+QTLIBS = libQgpsmm/binaries/libQgpsmm.so \
+	 libQgpsmm/binaries/libQgpsmm.so.$(libgps_SONAME) \
+	 libQgpsmm/binaries/libQgpsmm.so.$(libgps_SONAME).$(libgps_VERSION_AGE) \
+	 libQgpsmm/binaries/libQgpsmm.so.$(libgps_VERSION)
 
 QTLIB_sources = gpsutils.c \
 		libgps_core.c \
@@ -363,8 +363,10 @@ if HAVE_PYTHON
 endif
 if LIB_Q_GPSMM_ENABLE
 	if test -r $(srcdir)/libQgpsmm/Makefile; then \
-		$(MAKE) -C $(srcdir)/libQgpsmm distclean;  \
+		$(MAKE) -C $(srcdir)/libQgpsmm distclean || true;  \
 	fi
+	rm -rf $(srcdir)/libQgpsmm/binaries
+	rm -f $(srcdir)/libQgpsmm/*.o $(srcdir)/libQgpsmm/Makefile
 endif
 
 # Install Python modules and QT library
@@ -408,9 +410,9 @@ if LIB_Q_GPSMM_ENABLE
 # Build test_qgpsmm
 #
 test_qgpsmm_SOURCES = test_gpsmm.cpp
-test_qgpsmm_LDFLAGS = -Wl,-rpath,$(srcdir)/libQgpsmm
-test_qgpsmm_LDADD = $(LIBC) $(LIBUSB) $(QtNetwork_LIBS) -LlibQgpsmm -lQgpsmm
-test_qgpsmm_DEPENDENCIES = libQgpsmm/libQgpsmm.so
+test_qgpsmm_LDFLAGS = -Wl,-rpath,$(srcdir)/libQgpsmm/binaries
+test_qgpsmm_LDADD = $(LIBC) $(LIBUSB) $(QtNetwork_LIBS) -LlibQgpsmm/binaries -lQgpsmm
+test_qgpsmm_DEPENDENCIES = libQgpsmm/binaries/libQgpsmm.so
 endif
 
 #
