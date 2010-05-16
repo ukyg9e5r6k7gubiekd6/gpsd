@@ -288,24 +288,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 #define GPSD_CONFIG_H])
 
-dnl Check for QtNetwork library and qmake. Both are necessary
-dnl to build libQgpsmm. We use pkgconfig to check for the library
-dnl and AC_CHECK_PROGS to search for qmake. As it is possible to
-dnl install qmake from qt and qt4 in parallel, check for qmake-qt4
-dnl first as this ensures we're using qmake for qt4.
-PKG_CHECK_MODULES(QtNetwork, [QtNetwork >= 4.4],  ac_qt="yes", ac_qt="no")
-if test x"$ac_qt" != "xyes"; then
-  AC_MSG_WARN([QtNetwork library not found. Not including QT support])
-  AM_CONDITIONAL([HAVE_QT], false)
-else
-  AC_CHECK_PROGS(QMAKE, [qmake-qt4 qmake], [no])
-  if test x"$QMAKE" != "xno"; then
-    AM_CONDITIONAL([HAVE_QT], true)
-  else
-    AC_MSG_WARN([qmake not found. Not including QT support])
-    AM_CONDITIONAL([HAVE_QT], false)
-  fi
-fi
 
 
 dnl Check for curses headers and libraries.  The presence of the
@@ -934,6 +916,44 @@ fi
 
 AM_CONDITIONAL([LIBGPSMM_ENABLE], [test x"$ac_libgpsmm" = x"yes"])
 
+
+
+dnl Check for QtNetwork library and qmake. Both are necessary
+dnl to build libQgpsmm. We use pkgconfig to check for the library
+dnl and AC_CHECK_PROGS to search for qmake. As it is possible to
+dnl install qmake from qt and qt4 in parallel, check for qmake-qt4
+dnl first as this ensures we're using qmake for qt4.
+AC_ARG_ENABLE(libQgpsmm,
+		AC_HELP_STRING([--disable-libQgpsmm],
+		[don't build QT bindings]),
+		[ac_libQgpsmm=$enableval], [ac_libQgpsmm=$ISCXX])
+AC_MSG_CHECKING([for QT support])
+if test x"$ac_libQgpsmm" = "xyes"; then
+  PKG_CHECK_MODULES(QtNetwork, [QtNetwork >= 4.4],  ac_qt="yes", ac_qt="no")
+  if test x"$ac_qt" != "xyes"; then
+    AC_MSG_WARN([QtNetwork library not found. Not including QT support])
+    ac_libQgpsmm="no"
+    AM_CONDITIONAL([LIB_Q_GPSMM_ENABLE], false)
+    AC_MSG_RESULT([no])
+  else
+    AC_CHECK_PROGS(QMAKE, [qmake-qt4 qmake], [no])
+    if test x"$QMAKE" != "xno"; then
+      AM_CONDITIONAL([LIB_Q_GPSMM_ENABLE], true)
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_WARN([qmake not found. Not including QT support])
+      ac_libQgpsmm="no"
+      AM_CONDITIONAL([LIB_Q_GPSMM_ENABLE], false)
+      AC_MSG_RESULT([no])
+    fi
+  fi
+else
+  AC_MSG_RESULT([no])
+  AM_CONDITIONAL([LIB_Q_GPSMM_ENABLE], false)
+fi
+
+
+
 AC_ARG_ENABLE(ipv6,
   AC_HELP_STRING([--disable-ipv6],
 		 [don't build IPv6 support]),
@@ -1063,7 +1083,7 @@ echo "Old protocol in libgps  : $ac_oldstyle"
 echo "Build ncurses programs  : $ac_ncurses"
 echo "Enable Python support   : $ac_python"
 echo "Enable C++ support      : $ac_libgpsmm"
-echo "Enable Qt support       : $ac_qt"
+echo "Enable Qt support       : $ac_libQgpsmm"
 echo "------------------------------------------"
 echo ""
 

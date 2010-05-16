@@ -62,7 +62,7 @@ check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_g
 if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
-if HAVE_QT
+if LIB_Q_GPSMM_ENABLE
 check_PROGRAMS += test_qgpsmm
 endif
 
@@ -308,7 +308,7 @@ QTLIB_DIST = libQgpsmm/libQgpsmm.pro \
              libQgpsmm/libgps_core.cpp \
              libQgpsmm/libQgpsmm_global.h
 
-if HAVE_QT
+if LIB_Q_GPSMM_ENABLE
 noinst_SCRIPTS += stamp-qt
 QTLIBS = libQgpsmm/libQgpsmm.so \
 	 libQgpsmm/libQgpsmm.so.$(libgps_SONAME) \
@@ -358,7 +358,7 @@ clean-local:
 if HAVE_PYTHON
 	rm -rf build gps/*.so
 endif
-if HAVE_QT
+if LIB_Q_GPSMM_ENABLE
 	if test -r $(srcdir)/libQgpsmm/Makefile; then \
 		$(MAKE) -C $(srcdir)/libQgpsmm distclean;  \
 	fi
@@ -376,7 +376,7 @@ if HAVE_PYTHON
 		$(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
 	fi
 endif
-if HAVE_QT
+if LIB_Q_GPSMM_ENABLE
 	$(MAKE) -C libQgpsmm install INSTALL_ROOT=$(DESTDIR)
 endif
 
@@ -400,7 +400,7 @@ test_gpsmm_SOURCES = test_gpsmm.cpp
 test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
 endif
 
-if HAVE_QT
+if LIB_Q_GPSMM_ENABLE
 #
 # Build test_qgpsmm
 #
