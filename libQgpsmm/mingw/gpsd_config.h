@@ -1,5 +1,7 @@
 /* Stripped down verison of gpsd_config.h to build the QT bindings with mingw  */
 
+#include "version.h"
+
 /* AIVDM protocol support) */
 #define AIVDM_ENABLE 1
 
