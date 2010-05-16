@@ -243,7 +243,7 @@ gps_maskdump.c: gps.h maskaudit.py
 	$(PYTHON) maskaudit.py -c >gps_maskdump.c && \
 	chmod a-w gps_maskdump.c
 
-gpsd_maskdump.c: gpsd.h-tail maskaudit.py
+gpsd_maskdump.c: gpsd.h maskaudit.py
 	rm -f gpsd_maskdump.c && \
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
