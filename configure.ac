@@ -990,7 +990,7 @@ if test "x$WITH_XSLTPROC" = "xyes"; then
 	  </refnamediv>
 	</refentry>
 _EOF
-    if xsltproc --nonet --noout "$DOCBOOK_URI" conftest.xml >/dev/null 2>&1; then
+    if xsltproc --nonet --noout "$DOCBOOK_MAN_URI" conftest.xml >/dev/null 2>&1; then
 	XMLPROC=xsltproc
 	MANTARGET="$DOCBOOK_MAN_URI"
 	HTMLTARGET="$DOCBOOK_HTML_URI"
