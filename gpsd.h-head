@@ -7,16 +7,8 @@
 #ifndef _GPSD_H_
 #define _GPSD_H_
 
-#include "gpsd_config.h"
 #include <stdbool.h>
 #include <stdio.h>
-#ifdef HAVE_TERMIOS_H
-#include <termios.h>
-#endif
-#ifdef HAVE_SYS_TERMIOS_H
-#include <sys/termios.h>
-#endif
-#include "gps.h"
 
 #ifndef GPSD_CONFIG_H
 /* Feature configuration switches begin here */
