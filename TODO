@@ -25,10 +25,6 @@ binary data.
 
 ** Ports
 
-*** Qt port 
-
-Nearly done. Chase Chris Browet <cbro@semperpax.com> about this
-
 *** Windows port
 
 Partially complete. David Ludlow <dave@adsllc.com> is working on it.
@@ -45,20 +41,6 @@ for possibilities.
 
 Jon Schlueter has one of these on a flock machine, so testing 
 shouldn't be difficult.
-
-*** Python interface rework
-
-The Python client interface is buggy and overcomplicated and needs a
-rethink. (Much of the complication is a hangover from old protocol.)
-
-** Detect old-protocol daemons from the library.
-
-Might be possible using read-with-timeout.  If so, maybe we don't
-deep-six old protocol support in 3.0 after all. 
-
-** Autodetect old-protocol daemons from library and leave in support?
-
-Might be possible to do this using a read-with-timeout.
 
 *** Finish gpssim
 
