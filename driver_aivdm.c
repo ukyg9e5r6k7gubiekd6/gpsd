@@ -37,7 +37,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
     const char sixchr[] = "abcd";
 #else
     const char sixchr[64] =
-	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?";
+	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&'()*+,-./0123456789:;<=>?";
 #endif /* S_SPLINT_S */
     int i;
     char newchar;
