@@ -824,7 +824,7 @@ def aivdm_unpack(lc, data, offset, values, instructions):
                 # of a variable-length string field, as in messages 12 and 14
                 try:
                     for i in range(inst.width/6):
-                        newchar = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&`()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
+                        newchar = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&'()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
                         if newchar == '@':
                             break
                         else:

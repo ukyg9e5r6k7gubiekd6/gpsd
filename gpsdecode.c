@@ -53,7 +53,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 2:
     case 3:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%d|%u|%u|%d|%d|%u|%u|%u,0x%x|%u,0x%x",
+		       "%u|%d|%u|%u|%d|%d|%u|%u|%u|0x%x|%u|0x%x",
 		       ais->type1.status,
 		       ais->type1.turn,
 		       ais->type1.speed,
@@ -69,7 +69,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 4:			/* Base Station Report */
     case 11:			/* UTC/Date Response */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%04u:%02u:%02uT%02u:%02u:%02uZ|%u|%d|%d|%u|%u,0x%x",
+		       "%04u:%02u:%02uT%02u:%02u:%02uZ|%u|%d|%d|%u|%u|0x%x",
 		       ais->type4.year,
 		       ais->type4.month,
 		       ais->type4.day,
@@ -132,7 +132,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 9:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%d|%d|%u|%u,0x%x|%u|%u,0x%x",
+		       "%u|%u|%u|%d|%d|%u|%u|0x%x|%u|%u|0x%x",
 		       ais->type9.alt,
 		       ais->type9.speed,
 		       (uint) ais->type9.accuracy,
@@ -190,7 +190,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 18:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%d|%d|%u|%u|%u,0x%x|%u|%u|%u|%u|%u|%u,0x%x",
+		       "%u|%u|%u|%d|%d|%u|%u|%u|0x%x|%u|%u|%u|%u|%u|%u|0x%x",
 		       ais->type18.reserved,
 		       ais->type18.speed,
 		       (uint) ais->type18.accuracy,
@@ -209,7 +209,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 19:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%d|%d|%u|%u|%u,0x%x|%s|%u|%u|%u|%u|%u|%u|%u|%u|%u",
+		       "%u|%u|%u|%d|%d|%u|%u|%u|0x%x|%s|%u|%u|%u|%u|%u|%u|%u|%u|%u",
 		       ais->type19.reserved,
 		       ais->type19.speed,
 		       (uint) ais->type19.accuracy,
@@ -250,7 +250,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 21:			/* Aid to Navigation */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%s|%u|%d|%d|%u|%u|%u|%u|%u|%u|%u,0x%x|%u|%u",
+		       "%u|%s|%u|%d|%d|%u|%u|%u|%u|%u|%u|%u|0x%x|%u|%u",
 		       ais->type21.aid_type,
 		       ais->type21.name,
 		       (uint) ais->type21.accuracy,
@@ -309,11 +309,11 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 24:			/* Class B CS Static Data Report */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%s,", ais->type24.shipname);
+		       "%s|", ais->type24.shipname);
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,", ais->type24.shiptype);
+		       "%u|", ais->type24.shiptype);
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%s|%s,", ais->type24.vendorid, ais->type24.callsign);
+		       "%s|%s|", ais->type24.vendorid, ais->type24.callsign);
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "%u", ais->type24.mothership_mmsi);
