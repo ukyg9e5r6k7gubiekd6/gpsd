@@ -81,9 +81,10 @@ lossless.</para>
 each each field preceded by a quoted label and colon and the
 entire dump line wrapped in curly braces.</para>
 
-<para>The <option>-c</option> sets the AIS dump format to CSV.  Fields
-are dumped in the order they occur in the AIS packet. Numerics are
-not scaled. Strings are unpacked from six-bit to full ASCII</para>
+<para>The <option>-c</option> sets the AIS dump format to separate
+fields with an ASCII pipe symbol.  Fields are dumped in the order they
+occur in the AIS packet. Numerics are not scaled. Strings are unpacked
+from six-bit to full ASCII</para>
 
 <para>The <option>-V</option> option directs the program to emit its
 version number, then exit.</para>
@@ -95,7 +96,7 @@ mainly of interest to developers.</para>
 <refsect1 id='json_ais'><title>AIS DUMP FORMATS</title> 
 
 <para>Without the <option>-j</option> option, dump lines are values of AIS
-payload fields, comma-separated, in the order that they occur in the
+payload fields, pipe-separated, in the order that they occur in the
 payload. Spans of fields expressing a date are emitted as an ISO8601
 timestamp (look for colons and the trailing Z indicating Zulu/UTC
 time), and the 19-bit group of TDMA status fields found at the end of
@@ -109,7 +110,7 @@ dump.</para>
 performed for the output.  Latitudes and longitudes are scaled to
 decimal degrees rather than the native AIS unit of 1/10000th of a
 minute of arc.  Ship (but not air) speeds are scaled to knots rather
-than tenth-of-knot unit.  Navigation status and positioning-system
+than tenth-of-knot units.  Navigation status and positioning-system
 type are dumped as text strings rather than IAS numeric codes. Rate of
 turn may appear as "nan" if is unavailable, or as one of the strings
 "fastright" or "fastleft" if it is out of the IAS encoding range;
@@ -173,6 +174,10 @@ scaling.</para>
 <para>The RTCM2 decoder logic is sufficiently convoluted to confuse some
 compiler optimizers, notably in GCC 3.x at -O2, into generating bad
 code.</para>
+
+<para>Older version of this utility used comma as a field separator with
+the <option>-c</option> option.  This was a mistake, as ship name and
+other string fields can contain commas.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

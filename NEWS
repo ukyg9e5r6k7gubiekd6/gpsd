@@ -14,7 +14,8 @@
   option for setting the timestamp format.  xgpsspeed is completely
   rewritten in Python, eliminating some dependencies on ancient X
   libraries.  We now ship a Qt binding for the client library. Note
-  a GCC 4.2.1 optimizer bug.
+  a GCC 4.2.1 optimizer bug.  gpsdcode now uses | as a field separator
+  in -c mode, as string fields can contain commas.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.

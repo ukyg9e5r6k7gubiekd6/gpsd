@@ -920,11 +920,11 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     for (lc, raw, bits) in packet_scanner(source):
         values['length'] = bits.bitlen
         # Without the following magic, we'd have a subtle problem near
-        # certain variable-length messages: CSV reports would
+        # certain variable-length messages: DSV reports would
         # sometimes have fewer fields than expected, because the
         # unpacker would never generate cooked tuples for the omitted
         # part of the message.  Presently a known issue for types 15
-        # and 16 only.  (Will never affect variable-length messages in
+        # and 16 only.  (Would never affect variable-length messages in
         # which the last field type is 'string' or 'raw').
         bits.extend_to(168)
         # Magic recursive unpacking operation
@@ -1001,7 +1001,7 @@ if __name__ == "__main__":
         print "ais.py: " + str(msg)
         raise SystemExit, 1
 
-    csv = False
+    dsv = False
     dump = False
     histogram = False
     json = False
@@ -1014,7 +1014,7 @@ if __name__ == "__main__":
     skiperr = True
     for (switch, val) in options:
         if switch == '-c':
-            csv = True
+            dsv = True
         elif switch == '-d':
             dump = True
         elif switch == '-h':
@@ -1034,7 +1034,7 @@ if __name__ == "__main__":
         elif switch == '-x':
             skiperr = False
 
-    if not csv and not histogram and not json and not malformed and not quiet:
+    if not dsv and not histogram and not json and not malformed and not quiet:
             dump = True
     try:
         for (raw, parsed, bogon) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
@@ -1046,8 +1046,8 @@ if __name__ == "__main__":
             if not bogon:
                 if json:
                     print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
-                elif csv:
-                    print ",".join(map(lambda x: str(x[1]), parsed))
+                elif dsv:
+                    print "|".join(map(lambda x: str(x[1]), parsed))
                 elif histogram:
                     frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
                 elif dump:

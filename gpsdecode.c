@@ -45,7 +45,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
-    (void)snprintf(buf, buflen, "%u,%u,%09u,", ais->type, ais->repeat,
+    (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
 		   ais->mmsi);
     /*@ -formatcode @*/
     switch (ais->type) {
@@ -53,7 +53,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 2:
     case 3:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%d,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,0x%x",
+		       "%u|%d|%u|%u|%d|%d|%u|%u|%u,0x%x|%u,0x%x",
 		       ais->type1.status,
 		       ais->type1.turn,
 		       ais->type1.speed,
@@ -69,7 +69,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 4:			/* Base Station Report */
     case 11:			/* UTC/Date Response */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%04u:%02u:%02uT%02u:%02u:%02uZ,%u,%d,%d,%u,%u,0x%x",
+		       "%04u:%02u:%02uT%02u:%02u:%02uZ|%u|%d|%d|%u|%u,0x%x",
 		       ais->type4.year,
 		       ais->type4.month,
 		       ais->type4.day,
@@ -84,7 +84,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 5:			/* Ship static and voyage related data */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%s,%s,%u,%u,%u,%u,%u,%u,%02u-%02uT%02u:%02uZ,%u,%s,%u",
+		       "%u|%u|%s|%s|%u|%u|%u|%u|%u|%u|%02u-%02uT%02u:%02uZ|%u|%s|%u",
 		       ais->type5.imo,
 		       ais->type5.ais_version,
 		       ais->type5.callsign,
@@ -104,7 +104,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 6:			/* Binary Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%u,%zd:%s",
+		       "%u|%u|%u|%u|%u|%zd:%s",
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       (uint) ais->type6.retransmit,
@@ -117,13 +117,13 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u",
+		       "%u|%u|%u|%u",
 		       ais->type7.mmsi1,
 		       ais->type7.mmsi2, ais->type7.mmsi3, ais->type7.mmsi4);
 	break;
     case 8:			/* Binary Broadcast Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%zd:%s",
+		       "%u|%u|%zd:%s",
 		       ais->type8.dac,
 		       ais->type8.fid,
 		       ais->type8.bitcount,
@@ -132,7 +132,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 9:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%d,%d,%u,%u,0x%x,%u,%u,0x%x",
+		       "%u|%u|%u|%d|%d|%u|%u,0x%x|%u|%u,0x%x",
 		       ais->type9.alt,
 		       ais->type9.speed,
 		       (uint) ais->type9.accuracy,
@@ -150,7 +150,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 12:			/* Safety Related Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%s",
+		       "%u|%u|%u|%s",
 		       ais->type12.seqno,
 		       ais->type12.dest_mmsi,
 		       (uint) ais->type12.retransmit, ais->type12.text);
@@ -161,7 +161,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 15:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%u,%u,%u,%u",
+		       "%u|%u|%u|%u|%u|%u|%u|%u",
 		       ais->type15.mmsi1,
 		       ais->type15.type1_1,
 		       ais->type15.offset1_1,
@@ -172,7 +172,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%u,%u",
+		       "%u|%u|%u|%u|%u|%u",
 		       ais->type16.mmsi1,
 		       ais->type16.offset1,
 		       ais->type16.increment1,
@@ -181,7 +181,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 17:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%d,%d,%zd:%s",
+		       "%d|%d|%zd:%s",
 		       ais->type17.lon,
 		       ais->type17.lat,
 		       ais->type17.bitcount,
@@ -190,7 +190,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 18:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%u,%u,%u,%u,%u,%u,0x%x",
+		       "%u|%u|%u|%d|%d|%u|%u|%u,0x%x|%u|%u|%u|%u|%u|%u,0x%x",
 		       ais->type18.reserved,
 		       ais->type18.speed,
 		       (uint) ais->type18.accuracy,
@@ -209,7 +209,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 19:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%d,%d,%u,%u,%u,0x%x,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+		       "%u|%u|%u|%d|%d|%u|%u|%u,0x%x|%s|%u|%u|%u|%u|%u|%u|%u|%u|%u",
 		       ais->type19.reserved,
 		       ais->type19.speed,
 		       (uint) ais->type19.accuracy,
@@ -231,7 +231,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 20:			/* Data Link Management Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+		       "%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u",
 		       ais->type20.offset1,
 		       ais->type20.number1,
 		       ais->type20.timeout1,
@@ -250,7 +250,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 21:			/* Aid to Navigation */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%s,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,0x%x,%u,%u",
+		       "%u|%s|%u|%d|%d|%u|%u|%u|%u|%u|%u|%u,0x%x|%u|%u",
 		       ais->type21.aid_type,
 		       ais->type21.name,
 		       (uint) ais->type21.accuracy,
@@ -270,7 +270,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 22:			/* Channel Management */
 	if (!ais->type22.addressed)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "%u,%u,%u,%u,%d,%d,%d,%d,%u,%u,%u,%u",
+			   "%u|%u|%u|%u|%d|%d|%d|%d|%u|%u|%u|%u",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
 			   ais->type22.txrx,
@@ -284,7 +284,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			   (uint) ais->type22.band_b, ais->type22.zonesize);
 	else
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+			   "%u|%u|%u|%u|%u|%u|%u|%u|%u|%u",
 			   ais->type22.channel_a,
 			   ais->type22.channel_b,
 			   ais->type22.txrx,
@@ -297,7 +297,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 23:			/* Group Management Command */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%d,%d,%d,%d,%u,%u,%u,%u,%u",
+		       "%d|%d|%d|%d|%u|%u|%u|%u|%u",
 		       ais->type23.ne_lon,
 		       ais->type23.ne_lat,
 		       ais->type23.sw_lon,
@@ -313,13 +313,13 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "%u,", ais->type24.shiptype);
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%s,%s,", ais->type24.vendorid, ais->type24.callsign);
+		       "%s|%s,", ais->type24.vendorid, ais->type24.callsign);
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "%u", ais->type24.mothership_mmsi);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "%u,%u,%u,%u",
+			   "%u|%u|%u|%u",
 			   ais->type24.dim.to_bow,
 			   ais->type24.dim.to_stern,
 			   ais->type24.dim.to_port,
@@ -328,7 +328,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 25:			/* Binary Message, Single Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%zd:%s\r\n",
+		       "%u|%u|%u|%u|%zd:%s\r\n",
 		       (uint) ais->type25.addressed,
 		       (uint) ais->type25.structured,
 		       ais->type25.dest_mmsi,
@@ -339,7 +339,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 26:			/* Binary Message, Multiple Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u,%u,%u,%u,%zd:%s:%u\r\n",
+		       "%u|%u|%u|%u|%zd:%s:%u\r\n",
 		       (uint) ais->type26.addressed,
 		       (uint) ais->type26.structured,
 		       ais->type26.dest_mmsi,
