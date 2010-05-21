@@ -176,8 +176,8 @@
 #
 # Type 7:
 # From AISHub - reported immediately after the preceding type 6, 
-# which matches it.  One destination MMSI.  noaadata-04.2 fails
-# on this message.
+# which matches it.  One destination MMSI.  noaadata-0.43 fails
+# on this message (Kurt says his decoder only handles the longest case).
 !AIVDM,1,1,,A,702R5`hwCjq8,0*6B
 #	Message Type             : 7
 #	Repeat Indicator         : 0
@@ -195,8 +195,8 @@
 #	MMSI4:            0
 #
 # Type 7:
-# This was from Mike Greene and had a dump attached.
-# noaadata-04.2 fails on this message
+# This was from Mike Greene and had a dump attached. Decode is known good.
+# noaadata-0.43 fails on this message
 !AIVDM,1,1,,B,7`0Pv1L:Ac8rbgPKHA8`P,2*56
 #        Message Type:    7
 #        RepeatIndicator: 2
@@ -261,7 +261,7 @@
 #       Spare2:           0
 #
 # Type 10:
-# From Mike Greene. One destination MMSI.
+# From Mike Greene. One destination MMSI. Decode is known good.
 !AIVDM,1,1,,B,:6TMCD1GOS60,0*5B,s36310,d-081,T59.01777335
 #       Message Type:     10
 #       Repeat Indicator: 0
@@ -293,7 +293,7 @@
 #
 # Type 12:
 # From AIS Hub via Neal Arundale. Dumps by ais.py.
-# Verified by the text being readable
+# Verified by the text being readable.
 !AIVDM,1,1,,A,<02:oP0kKcv0@<51C5PB5@?BDPD?P:?2?EB7PDB16693P381>>5<PikP,0*37
 #       Message Type             : 12
 #       Repeat Indicator         : 0
@@ -363,7 +363,7 @@
 #
 # Type 14:
 # From AIS Hub via Neal Arundale.  Dumps by ais.py.
-# Verified by the text being readable
+# Verified by the text being readable.
 !AIVDM,1,1,,A,>5?Per18=HB1U:1@E=B0m<L,2*51
 #       Message Type             : 14
 #       Repeat Indicator         : 0
@@ -423,7 +423,7 @@
 #       First slot offset        : 200
 #       First slot increment     : 0
 #
-# FIX-ME: Need an example of the 144-bit variant of type 16 with two MMSIs.
+# FIX-ME: Need an example of the 144-bit variant of type 16 with two MMSIs, g.
 #
 # Type 17:
 # From AISHub. This is only a regression test to check that the C and Python
@@ -503,7 +503,7 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #       Sub Message:        6
 #
 # Type 19:
-# From Mike Greene.  Checked with the noaadata tools.
+# From Mike Greene.  Checked with the noaadata tools. Decode is known good.
 !AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
 #        MessageID:         19
 #        RepeatIndicator:   0
@@ -560,7 +560,7 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #
 # Type 21:
 # Has a Name Extension field
-# From Mike Greene
+# From Mike Greene. Decode is verified by the text being readable.
 !AIVDM,2,1,5,B,E1mg=5J1T4W0h97aRh6ba84<h2d;W:Te=eLvH50```q,0*46
 !AIVDM,2,2,5,B,:D44QDlp0C1DU00,2*36
 #        Message Type:             21
