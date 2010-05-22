@@ -689,8 +689,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				ais_context->bitlen);
 		    return false;
 		}
-		UCHARS(40, ais_context->shipname);
+		if (ais_context->mmsi24) {
+		    gpsd_report(LOG_WARN,
+		                "AIVDM message type 24 collision on channel %c : Discarding previous sentence 24A from %09u.\n",
+		                field[4][0],
+		                ais_context->mmsi24);
+		    /* no return false */
+		}
+		ais_context->mmsi24 = ais->mmsi;
+		UCHARS(40, ais_context->shipname24);
 		//ais->type24.a.spare	= UBITS(160, 8);
+		gpsd_report(LOG_INF, "subtype=A name=%s\n",
+			ais_context->shipname24);
 		return false;	/* data only partially decoded */
 	    case 1:
 		if (ais_context->bitlen != 168) {
@@ -698,27 +708,54 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				ais_context->bitlen);
 		    return false;
 		}
+		if (ais_context->mmsi24 != ais->mmsi) {
+		    if (ais_context->mmsi24)
+			gpsd_report(LOG_WARN,
+			            "AIVDM message type 24 collision on channel %c: MMSI mismatch: %09u vs %09u.\n",
+			            field[4][0],
+			            ais_context->mmsi24, ais->mmsi);
+		    else
+			gpsd_report(LOG_WARN,
+			            "AIVDM message type 24 collision on channel %c: 24B sentence from %09u without 24A.\n",
+			            field[4][0],
+			            ais->mmsi);
+		    return false;
+		}
 		(void)strlcpy(ais->type24.shipname, 
-			      ais_context->shipname,
-			      sizeof(ais_context->shipname));
+			      ais_context->shipname24,
+			      sizeof(ais_context->shipname24));
 		ais->type24.shiptype = UBITS(40, 8);
 		UCHARS(48, ais->type24.vendorid);
 		UCHARS(90, ais->type24.callsign);
-		if (AIS_AUXILIARY_MMSI(ais->mmsi))
+		if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 		    ais->type24.mothership_mmsi   = UBITS(132, 30);
-		else {
+		    gpsd_report(LOG_INF,
+		                "subtype=B subsubtype=aux "
+		                "shiptype=%u vendor=%s callsign=%s "
+		                "mothership=%09u\n",
+		                ais->type24.shiptype, ais->type24.vendorid, ais->type24.callsign,
+		                ais->type24.mothership_mmsi);
+		} else {
 		    ais->type24.dim.to_bow        = UBITS(132, 9);
 		    ais->type24.dim.to_stern      = UBITS(141, 9);
 		    ais->type24.dim.to_port       = UBITS(150, 6);
 		    ais->type24.dim.to_starboard  = UBITS(156, 6);
+		    gpsd_report(LOG_INF,
+		                "subtype=B subsubtype=dim "
+		                "shiptype=%u vendor=%s callsign=%s "
+		                "bow=%u stern=%u port=%u starboard=%u\n",
+		                ais->type24.shiptype, ais->type24.vendorid, ais->type24.callsign,
+		                ais->type24.dim.to_bow, ais->type24.dim.to_stern,
+		                ais->type24.dim.to_port, ais->type24.dim.to_starboard);
 		}
 		//ais->type24.b.spare	    = UBITS(162, 8);
+		ais_context->mmsi24 = 0; /* reset last know 24A for collision detection */
 		break;
 	    default:
 		gpsd_report(LOG_WARN, "AIVDM message type 24 of subtype unknown.\n");
+		gpsd_report(LOG_INF, "\n");
 		return false;
 	    }
-	    gpsd_report(LOG_INF, "\n");
 	    break;
 	case 25:	/* Binary Message, Single Slot */
 	    /* this check and the following one reject line noise */

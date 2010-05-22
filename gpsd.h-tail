@@ -196,8 +196,9 @@ struct aivdm_context_t {
     /* hold context for decoding AIDVM packet sequences */
     int decoded_frags;		/* for tracking AIDVM parts in a multipart sequence */
     unsigned char bits[2048];
-    size_t bitlen;
-    char shipname[AIS_SHIPNAME_MAXLEN+1]; /* type 24 specific */
+    size_t bitlen; /* how many valid bits */
+    unsigned int mmsi24; /* type 24 specific */
+    char shipname24[AIS_SHIPNAME_MAXLEN+1]; /* type 24 specific */
 };
 
 struct gps_device_t;

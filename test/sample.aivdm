@@ -626,36 +626,66 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #        Quiet time               : 0
 #
 # Type 24:
-# From Kurt Schwehr. Checked with the noaadata tools.
-# One pair of type A and Type B messages. Note, these have Coast Guard 
-# extended fields after them.
-!AIVDM,1,1,,B,H5NHcTP<51@4TrM>10584@U<D00,2*77,x337805,b003669710,1241895000
+# From Nirgal
+# One pair of type A and Type B messages.
+!AIVDM,1,1,,A,H42O55i18tMET00000000000000,2*6D
 #       MessageID:         24
 #       RepeatIndicator:   0
-#       UserID:            367405970
+#       UserID:            271041815
 #       partnum:           0
-#       name:              CAPTAIN`S PARADISE
-!AIVDM,1,1,,B,HU2K5NTn13BijklG44oppk103210,0*06,s23294,d-114,T44.21624911,x731910,r13RSMT1,1241894986
+#       name:              PROGUY
+!AIVDM,1,1,,A,H42O55lti4hhhilD3nink000?050,0*40
 #       MessageID:         24
-#       RepeatIndicator:   2
-#       UserID:            338085242
-#       partnum:           1
-#       shipandcargo:      54
-#       vendorid:          ACR1234
-#       callsign:          WDD7883
-#       dimA:              8
-#       dimB:              3
-#       dimC:              2
-#       dimD:              1
-#       mothership:        16789633
-#       spare:             0
+#       RepeatIndicator:   0
+#       UserID:            271041815
+#       partnum:           0
+#       shipandcargo:      60|
+#       vendorid:          1D00014
+#       callsign:          TC6163
+#       dimA:              0
+#       dimB:              15
+#       dimC:              0
+#       dimD:              5
 #
-# Invalid packet test
+#
+##############################################################################
+# Invalid packet tests:
+##############################################################################
+#
+# That fragment misses part 1, yields nothing:
 AIVDM,2,2,1,B,00000000000,2*26
-# That fragment misses part 1, yields nothing
 #
 #
+##############################################################################
+# Type 24 collisions:
+##############################################################################
+#
+# 24B from 271041815:
+# This sentence is missing 24A and is discarded
+!AIVDM,1,1,,A,H42O55lti4hhhilD3nink000?050,0*40
+# gpsdecode: AIVDM message type 24 collision on channel A: 24B sentence from 271041815 without 24A.
+#
+# 24A from mmsi 271041511:
+# context is updated
+!AIVDM,1,1,,A,H42O3qiA8U10Tp0000000000000,2*37
+#
+# 24A from mmsi 271040660:
+# Previous 24A from 271041511 is discarded, context is updated
+!AIVDM,1,1,,A,H42O0U0Lu`@Dno4000000000000,2*18
+# gpsdecode: AIVDM message type 24 collision on channel A : Discarding previous sentence 24A from 271041511.
+#
+# 24B from mmsi 271020195:
+# Mmsi mismatch: That packet is discarded and context still hold data from 271040660
+!AIVDM,1,1,,A,H42Mh`lUi2hhljiI=mikk000B050,0*17
+# gpsdecode: AIVDM message type 24 collision on channel A: MMSI mismatch: 271040660 vs 271020195.
+#
+# 24B from mmsi 271040660:
+# Success
+!AIVDM,1,1,,A,H42O0U4Ui3hhhlmI=mmhl000H060,0*2E
+# 
+##############################################################################
 # Channel multiplexing test:
+##############################################################################
 # simultaneous use of buffers of channels A & B
 !AIVDM,2,1,6,B,542M92h00001@<7;?G0PD4i@R0<tqA8tj37>220o0h:2240Ht50000000000,0*3B
 !AIVDM,2,1,2,A,542M92h00001@<7;?G0PD4i@R0<tqA8tj37>220o0h:2240Ht500000000000000,0*3C
