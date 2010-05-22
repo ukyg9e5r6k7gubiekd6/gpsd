@@ -1754,10 +1754,9 @@ int main(int argc, char *argv[])
 		    }
 #endif /* BINARY_ENABLE */
 		    /* *INDENT-ON* */
-		}		/* subscribers */
-	    }
+		} /* subscribers */
+	    } /* devices */
 
-	    /* devices */
 	    /* watch all channels associated with this device */
 	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		if (sub->active == 0)
