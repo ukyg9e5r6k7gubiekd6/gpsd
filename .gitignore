@@ -64,6 +64,8 @@ packet_names.h
 gpsd.spec
 revision.h
 MANIFEST
+.kdbgrc.*
+tags
 # Python files
 build
 gpscatc
