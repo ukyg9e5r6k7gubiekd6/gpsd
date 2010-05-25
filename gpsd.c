@@ -1752,17 +1752,14 @@ int main(int argc, char *argv[])
 		}
 		/* *INDENT-ON* */
 
-		/* raw hook and relaying functions */
-		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
-		     sub++) {
-		    if (sub->active != 0)
-			raw_report(sub, device);
-		}
-
-		/* watch all channels associated with this device */
+		/* update all subscribers associated with this device */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		    if (sub->active == 0)
 			continue;
+
+		    /* report raw packets to users subscribed to those */
+		    raw_report(sub, device);
+
 		    /* some listeners may be in watcher mode */
 		    /*@-nullderef@*/
 		    if (sub != NULL && sub->policy.watcher) {
