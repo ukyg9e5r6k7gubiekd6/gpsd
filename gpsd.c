@@ -1268,6 +1268,31 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
 #endif /* BINARY_ENABLE */
 }
 
+static void pseudonmea_report(struct subscriber_t *sub,
+			  gps_mask_t changed,
+			  struct gps_device_t *device)
+/* report pseodo-NMEA in appropriate circumstances */
+{
+    if (GPS_PACKET_TYPE(device->packet.type)
+	&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
+	char buf[MAX_PACKET_LENGTH * 3 + 2];
+
+	gpsd_report(LOG_PROG, "data mask is %s\n",
+		    gpsd_maskdump(device->gpsdata.set));
+	if ((changed & REPORT_IS) != 0) {
+	    nmea_tpv_dump(device, buf, sizeof(buf));
+	    gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
+			device->gpsdata.dev.path, buf);
+	    (void)throttled_write(sub, buf, strlen(buf));
+	} else if ((changed & SATELLITE_IS) != 0) {
+	    nmea_sky_dump(device, buf, sizeof(buf));
+	    gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
+			device->gpsdata.dev.path, buf);
+	    (void)throttled_write(sub, buf, strlen(buf));
+	}
+    }
+}
+
 static void json_report(struct subscriber_t *sub,
 			  gps_mask_t changed,
 			  struct gps_device_t *device)
@@ -1845,27 +1870,8 @@ int main(int argc, char *argv[])
 #endif /* DBUS_ENABLE */
 
 			    /* binary GPS packet, pseudo-NMEA dumping enabled */
-			    if (sub->policy.nmea
-				&& GPS_PACKET_TYPE(device->packet.type)
-				&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
-				char buf3[MAX_PACKET_LENGTH * 3 + 2];
-
-				gpsd_report(LOG_PROG, "data mask is %s\n",
-					    gpsd_maskdump(device->gpsdata.set));
-				if ((changed & REPORT_IS) != 0) {
-				    nmea_tpv_dump(device, buf3, sizeof(buf3));
-				    gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
-						device->gpsdata.dev.path, buf3);
-				    (void)throttled_write(sub, buf3,
-							  strlen(buf3));
-				} else if ((changed & SATELLITE_IS) != 0) {
-				    nmea_sky_dump(device, buf3, sizeof(buf3));
-				    gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
-						device->gpsdata.dev.path, buf3);
-				    (void)throttled_write(sub, buf3,
-							  strlen(buf3));
-				}
-			    }
+			    if (sub->policy.nmea)
+				pseudonmea_report(sub, changed, device);
 
 			    if (sub->policy.json) {
 				json_report(sub, changed, device);
