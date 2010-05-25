@@ -1820,23 +1820,23 @@ int main(int argc, char *argv[])
 		    }
 		}
 
-		/* *INDENT-OFF* */
-		/* copy each RTCM-104 correction to all GPSes */
+		/* 
+		 * If the device provided an RTCM packet, stash it 
+		 * in the context structure for use as a future correction.
+		 */
 		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
-		    struct gps_device_t *gps;
-		    for (gps = devices; gps < devices + MAXDEVICES; gps++)
-			if (gps->device_type != NULL
-			    && gps->device_type->rtcm_writer != NULL)
-			    (void)gps->device_type->rtcm_writer(gps,
-								(char *)gps->
-								packet.
-								outbuffer,
-								gps->packet.
-								outbuflen);
+		    if (device->packet.outbuflen > RTCM_MAX) {
+			gpsd_report(LOG_ERROR, 
+				    "overlong RTCM packet (%zd bytes)\n",
+				    device->packet.outbuflen);
+		    } else {
+			context.rtcmbytes = device->packet.outbuflen;
+			memcpy(context.rtcmbuf, 
+			       device->packet.outbuffer, 
+			       context.rtcmbytes);
+		    }
 		}
-		/* *INDENT-ON* */
 
-		
 		/*
 		 * If no reliable end of cycle, must report every time
 		 * a sentence changes position or mode. Likely to
