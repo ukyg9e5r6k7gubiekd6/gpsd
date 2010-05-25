@@ -1268,12 +1268,19 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
 #endif /* BINARY_ENABLE */
 }
 
-static void cooked_report(struct subscriber_t *sub,
+static void json_report(struct subscriber_t *sub,
 			  gps_mask_t changed,
 			  struct gps_device_t *device)
-/* report cooked data to a subscriber */
+/* report in JSON format to a subscriber */
 {
     char buf[GPS_JSON_RESPONSE_MAX * 4];
+
+    buf[0] = '\0';
+    if ((changed & REPORT_IS) != 0) {
+	json_tpv_dump(&device->gpsdata,
+		      buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
 
     if ((changed & SATELLITE_IS) != 0) {
 	json_sky_dump(&device->gpsdata,
@@ -1323,6 +1330,7 @@ static void cooked_report(struct subscriber_t *sub,
 }
 
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
+/* execute GPSD requests from a buffer */
 {
     char reply[GPS_JSON_RESPONSE_MAX + 1];
 
@@ -1817,7 +1825,6 @@ int main(int argc, char *argv[])
 		    /* some listeners may be in watcher mode */
 		    /*@-nullderef@*/
 		    if (sub != NULL && sub->policy.watcher) {
-			char buf2[GPS_JSON_RESPONSE_MAX * 4];
 			if (changed & DATA_IS) {
 			    gpsd_report(LOG_PROG,
 					"Changed mask: %s with %sreliable cycle detection\n",
@@ -1861,16 +1868,7 @@ int main(int argc, char *argv[])
 			    }
 
 			    if (sub->policy.json) {
-				buf2[0] = '\0';
-				if ((changed & REPORT_IS) != 0) {
-				    json_tpv_dump(&device->gpsdata,
-						  buf2, sizeof(buf2));
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-
-				/* report non-GPS information */
-				cooked_report(sub, changed, device);
+				json_report(sub, changed, device);
 			    }
 			}
 			//gpsd_report(LOG_PROG, "reporting finished\n");
