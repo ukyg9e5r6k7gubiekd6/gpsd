@@ -1839,6 +1839,20 @@ int main(int argc, char *argv[])
 		}
 		/* *INDENT-ON* */
 
+		
+		/*
+		 * If no reliable end of cycle, must report every time
+		 * a sentence changes position or mode. Likely to
+		 * cause display jitter.
+		 */
+		if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS)))
+		    changed |= REPORT_IS;
+
+#ifdef DBUS_ENABLE
+		if ((changed & REPORT_IS) != 0)
+		    send_dbus_fix(device);
+#endif /* DBUS_ENABLE */
+
 		/* update all subscribers associated with this device */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 		    if (sub->active == 0)
@@ -1855,29 +1869,15 @@ int main(int argc, char *argv[])
 					"Changed mask: %s with %sreliable cycle detection\n",
 					gpsd_maskdump(changed),
 					device->cycle_end_reliable ? "" : "un");
-			    if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS)))
-				/*
-				 * If no reliable end of cycle, must report
-				 * every time a sentence changes position
-				 * or mode. Likely to cause display jitter.
-				 */
-				changed |= REPORT_IS;
 			    if ((changed & REPORT_IS) != 0)
 				gpsd_report(LOG_PROG, "time to report a fix\n");
-#ifdef DBUS_ENABLE
-			    if ((changed & REPORT_IS) != 0)
-				send_dbus_fix(device);
-#endif /* DBUS_ENABLE */
 
-			    /* binary GPS packet, pseudo-NMEA dumping enabled */
 			    if (sub->policy.nmea)
 				pseudonmea_report(sub, changed, device);
 
-			    if (sub->policy.json) {
+			    if (sub->policy.json)
 				json_report(sub, changed, device);
-			    }
 			}
-			//gpsd_report(LOG_PROG, "reporting finished\n");
 		    }
 		    /*@-nullderef@*/
 		} /* subscribers */
