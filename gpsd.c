@@ -1755,131 +1755,132 @@ int main(int argc, char *argv[])
 #endif /* BINARY_ENABLE */
 		    /* *INDENT-ON* */
 		} /* subscribers */
-	    } /* devices */
 
-	    /* watch all channels associated with this device */
-	    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-		if (sub->active == 0)
-		    continue;
-		/* some listeners may be in watcher mode */
-		/*@-nullderef@*/
-		if (sub != NULL && sub->policy.watcher) {
-		    char buf2[GPS_JSON_RESPONSE_MAX * 4];
-		    if (changed & DATA_IS) {
-			bool report_fix = false;
-			gpsd_report(LOG_PROG,
-				    "Changed mask: %s with %sreliable cycle detection\n",
-				    gpsd_maskdump(changed),
-				    device->cycle_end_reliable ? "" : "un");
-			if (device->cycle_end_reliable) {
-			    /*
-			     * Driver returns reliable end of cycle,
-			     * report only when that is signaled.
-			     */
-			    if ((changed & REPORT_IS) != 0)
+
+		/* watch all channels associated with this device */
+		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+		    if (sub->active == 0)
+			continue;
+		    /* some listeners may be in watcher mode */
+		    /*@-nullderef@*/
+		    if (sub != NULL && sub->policy.watcher) {
+			char buf2[GPS_JSON_RESPONSE_MAX * 4];
+			if (changed & DATA_IS) {
+			    bool report_fix = false;
+			    gpsd_report(LOG_PROG,
+					"Changed mask: %s with %sreliable cycle detection\n",
+					gpsd_maskdump(changed),
+					device->cycle_end_reliable ? "" : "un");
+			    if (device->cycle_end_reliable) {
+				/*
+				 * Driver returns reliable end of cycle,
+				 * report only when that is signaled.
+				 */
+				if ((changed & REPORT_IS) != 0)
+				    report_fix = true;
+			    } else if (changed & (LATLON_IS | MODE_IS))
+				/*
+				 * No reliable end of cycle.  Must report
+				 * every time a sentence changes position
+				 * or mode. Likely to cause display jitter.
+				 */
 				report_fix = true;
-			} else if (changed & (LATLON_IS | MODE_IS))
-			    /*
-			     * No reliable end of cycle.  Must report
-			     * every time a sentence changes position
-			     * or mode. Likely to cause display jitter.
-			     */
-			    report_fix = true;
-			if (report_fix)
-			    gpsd_report(LOG_PROG, "time to report a fix\n");
-#ifdef DBUS_ENABLE
-			if (report_fix)
-			    send_dbus_fix(device);
-#endif /* DBUS_ENABLE */
+			    if (report_fix)
+				gpsd_report(LOG_PROG, "time to report a fix\n");
+    #ifdef DBUS_ENABLE
+			    if (report_fix)
+				send_dbus_fix(device);
+    #endif /* DBUS_ENABLE */
 
-			/* binary GPS packet, pseudo-NMEA dumping enabled */
-			if (sub->policy.nmea
-			    && GPS_PACKET_TYPE(device->packet.type)
-			    && !TEXTUAL_PACKET_TYPE(device->packet.type)) {
-			    char buf3[MAX_PACKET_LENGTH * 3 + 2];
+			    /* binary GPS packet, pseudo-NMEA dumping enabled */
+			    if (sub->policy.nmea
+				&& GPS_PACKET_TYPE(device->packet.type)
+				&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
+				char buf3[MAX_PACKET_LENGTH * 3 + 2];
 
-			    gpsd_report(LOG_PROG, "data mask is %s\n",
-					gpsd_maskdump(device->gpsdata.set));
-			    if (report_fix) {
-				nmea_tpv_dump(device, buf3, sizeof(buf3));
-				gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
-					    device->gpsdata.dev.path, buf3);
-				(void)throttled_write(sub, buf3,
-						      strlen(buf3));
-			    } else if ((changed & SATELLITE_IS) != 0) {
-				nmea_sky_dump(device, buf3, sizeof(buf3));
-				gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
-					    device->gpsdata.dev.path, buf3);
-				(void)throttled_write(sub, buf3,
-						      strlen(buf3));
+				gpsd_report(LOG_PROG, "data mask is %s\n",
+					    gpsd_maskdump(device->gpsdata.set));
+				if (report_fix) {
+				    nmea_tpv_dump(device, buf3, sizeof(buf3));
+				    gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
+						device->gpsdata.dev.path, buf3);
+				    (void)throttled_write(sub, buf3,
+							  strlen(buf3));
+				} else if ((changed & SATELLITE_IS) != 0) {
+				    nmea_sky_dump(device, buf3, sizeof(buf3));
+				    gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
+						device->gpsdata.dev.path, buf3);
+				    (void)throttled_write(sub, buf3,
+							  strlen(buf3));
+				}
 			    }
-			}
 
-			if (sub->policy.json) {
-			    buf2[0] = '\0';
-			    if (report_fix) {
-				json_tpv_dump(&device->gpsdata,
-					      buf2, sizeof(buf2));
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
-			    if ((changed & SATELLITE_IS) != 0) {
-				json_sky_dump(&device->gpsdata,
-					      buf2, sizeof(buf2));
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
+			    if (sub->policy.json) {
+				buf2[0] = '\0';
+				if (report_fix) {
+				    json_tpv_dump(&device->gpsdata,
+						  buf2, sizeof(buf2));
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
+				if ((changed & SATELLITE_IS) != 0) {
+				    json_sky_dump(&device->gpsdata,
+						  buf2, sizeof(buf2));
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
 #ifdef COMPASS_ENABLE
-			    if ((changed & ATT_IS) != 0) {
-				json_att_dump(&device->gpsdata,
-					      buf2, sizeof(buf2));
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
+				if ((changed & ATT_IS) != 0) {
+				    json_att_dump(&device->gpsdata,
+						  buf2, sizeof(buf2));
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
 #endif /* COMPASS_ENABLE */
 #ifdef RTCM104V2_ENABLE
-			    if ((changed & RTCM2_IS) != 0) {
-				rtcm2_json_dump(&device->gpsdata.rtcm2, buf2,
-						sizeof(buf2));
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
+				if ((changed & RTCM2_IS) != 0) {
+				    rtcm2_json_dump(&device->gpsdata.rtcm2, buf2,
+						    sizeof(buf2));
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
-			    if ((changed & AIS_IS) != 0) {
-				aivdm_json_dump(&device->gpsdata.ais,
-						sub->policy.scaled,
-						buf2, sizeof(buf2));
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
+				if ((changed & AIS_IS) != 0) {
+				    aivdm_json_dump(&device->gpsdata.ais,
+						    sub->policy.scaled,
+						    buf2, sizeof(buf2));
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
 #endif /* AIVDM_ENABLE */
 
 #ifdef TIMING_ENABLE
-			    if (buf2[0] != '\0' && sub->policy.timing) {
-				(void)snprintf(buf2, sizeof(buf2),
-					       "{\"class\":\"TIMING\","
-					       "\"tag\":\"%s\",\"len\":%d,"
-					       "\"xmit\":%lf,\"recv\":%lf,"
-					       "\"decode\":%lf,"
-					       "\"emit\":%lf}\r\n",
-					       device->gpsdata.tag,
-					       (int)device->packet.outbuflen,
-					       device->d_xmit_time,
-					       device->d_recv_time,
-					       device->d_decode_time,
-					       timestamp());
-				(void)throttled_write(sub, buf2,
-						      strlen(buf2));
-			    }
+				if (buf2[0] != '\0' && sub->policy.timing) {
+				    (void)snprintf(buf2, sizeof(buf2),
+						   "{\"class\":\"TIMING\","
+						   "\"tag\":\"%s\",\"len\":%d,"
+						   "\"xmit\":%lf,\"recv\":%lf,"
+						   "\"decode\":%lf,"
+						   "\"emit\":%lf}\r\n",
+						   device->gpsdata.tag,
+						   (int)device->packet.outbuflen,
+						   device->d_xmit_time,
+						   device->d_recv_time,
+						   device->d_decode_time,
+						   timestamp());
+				    (void)throttled_write(sub, buf2,
+							  strlen(buf2));
+				}
 #endif /* TIMING_ENABLE */
+			    }
 			}
+			//gpsd_report(LOG_PROG, "reporting finished\n");
 		    }
-		    //gpsd_report(LOG_PROG, "reporting finished\n");
-		}
-		/*@-nullderef@*/
+		    /*@-nullderef@*/
+		} /* subscribers */
 	    }
-	}
+	} /* devices */
 
 #ifdef NOT_FIXED
 	if (context.fixcnt > 0 && context.dsock == -1) {
