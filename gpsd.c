@@ -1221,6 +1221,53 @@ static void handle_request(struct subscriber_t *sub,
     /*@+compdef@*/
 }
 
+static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
+/* report a raw packet to a subscriber */
+{
+    /* *INDENT-OFF* */
+    /*
+     * NMEA and other textual sentences are simply
+     * copied to all clients that are in raw or nmea
+     * mode.
+     */
+    if (TEXTUAL_PACKET_TYPE(device->packet.type)
+	&& (sub->policy.raw > 0 || sub->policy.nmea)) {
+	(void)throttled_write(sub,
+			      (char *)device->packet.
+			      outbuffer,
+			      device->packet.outbuflen);
+	return;
+    }
+
+    /*
+     * Also, simply copy if user has specified
+     * super-raw mode.
+     */
+    if (sub->policy.raw > 1) {
+	(void)throttled_write(sub,
+			      (char *)device->packet.
+			      outbuffer,
+			      device->packet.outbuflen);
+	return;
+    }
+#ifdef BINARY_ENABLE
+    /*
+     * Maybe the user wants a binary packet hexdumped.
+     */
+    if (sub->policy.raw == 1) {
+	char *hd =
+	    gpsd_hexdump((char *)device->packet.outbuffer,
+			 device->packet.outbuflen);
+	/*
+	 * Ugh...depends on knowing the length of gpsd_hexdump's
+	 * buffer.
+	 */
+	(void)strlcat(hd, "\r\n", MAX_PACKET_LENGTH * 2 + 1);
+	(void)throttled_write(sub, hd, strlen(hd));
+    }
+#endif /* BINARY_ENABLE */
+}
+
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 {
     char reply[GPS_JSON_RESPONSE_MAX + 1];
@@ -1708,54 +1755,9 @@ int main(int argc, char *argv[])
 		/* raw hook and relaying functions */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
 		     sub++) {
-		    if (sub->active == 0)
-			continue;
-
-		    /* *INDENT-OFF* */
-		    /*
-		     * NMEA and other textual sentences are simply
-		     * copied to all clients that are in raw or nmea
-		     * mode.
-		     */
-		    if (TEXTUAL_PACKET_TYPE(device->packet.type)
-			&& (sub->policy.raw > 0 || sub->policy.nmea)) {
-			(void)throttled_write(sub,
-					      (char *)device->packet.
-					      outbuffer,
-					      device->packet.outbuflen);
-			continue;
-		    }
-
-		    /*
-		     * Also, simply copy if user has specified
-		     * super-raw mode.
-		     */
-		    if (sub->policy.raw > 1) {
-			(void)throttled_write(sub,
-					      (char *)device->packet.
-					      outbuffer,
-					      device->packet.outbuflen);
-			continue;
-		    }
-#ifdef BINARY_ENABLE
-		    /*
-		     * Maybe the user wants a binary packet hexdumped.
-		     */
-		    if (sub->policy.raw == 1) {
-			char *hd =
-			    gpsd_hexdump((char *)device->packet.outbuffer,
-					 device->packet.outbuflen);
-			/*
-			 * Ugh...depends on knowing the length of gpsd_hexdump's
-			 * buffer.
-			 */
-			(void)strlcat(hd, "\r\n", MAX_PACKET_LENGTH * 2 + 1);
-			(void)throttled_write(sub, hd, strlen(hd));
-		    }
-#endif /* BINARY_ENABLE */
-		    /* *INDENT-ON* */
-		} /* subscribers */
-
+		    if (sub->active != 0)
+			raw_report(sub, device);
+		}
 
 		/* watch all channels associated with this device */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
