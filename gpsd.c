@@ -1819,29 +1819,21 @@ int main(int argc, char *argv[])
 		    if (sub != NULL && sub->policy.watcher) {
 			char buf2[GPS_JSON_RESPONSE_MAX * 4];
 			if (changed & DATA_IS) {
-			    bool report_fix = false;
 			    gpsd_report(LOG_PROG,
 					"Changed mask: %s with %sreliable cycle detection\n",
 					gpsd_maskdump(changed),
 					device->cycle_end_reliable ? "" : "un");
-			    if (device->cycle_end_reliable) {
+			    if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS)))
 				/*
-				 * Driver returns reliable end of cycle,
-				 * report only when that is signaled.
-				 */
-				if ((changed & REPORT_IS) != 0)
-				    report_fix = true;
-			    } else if (changed & (LATLON_IS | MODE_IS))
-				/*
-				 * No reliable end of cycle.  Must report
+				 * If no reliable end of cycle, must report
 				 * every time a sentence changes position
 				 * or mode. Likely to cause display jitter.
 				 */
-				report_fix = true;
-			    if (report_fix)
+				changed |= REPORT_IS;
+			    if ((changed & REPORT_IS) != 0)
 				gpsd_report(LOG_PROG, "time to report a fix\n");
 #ifdef DBUS_ENABLE
-			    if (report_fix)
+			    if ((changed & REPORT_IS) != 0)
 				send_dbus_fix(device);
 #endif /* DBUS_ENABLE */
 
@@ -1853,7 +1845,7 @@ int main(int argc, char *argv[])
 
 				gpsd_report(LOG_PROG, "data mask is %s\n",
 					    gpsd_maskdump(device->gpsdata.set));
-				if (report_fix) {
+				if ((changed & REPORT_IS) != 0) {
 				    nmea_tpv_dump(device, buf3, sizeof(buf3));
 				    gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
 						device->gpsdata.dev.path, buf3);
@@ -1870,7 +1862,7 @@ int main(int argc, char *argv[])
 
 			    if (sub->policy.json) {
 				buf2[0] = '\0';
-				if (report_fix) {
+				if ((changed & REPORT_IS) != 0) {
 				    json_tpv_dump(&device->gpsdata,
 						  buf2, sizeof(buf2));
 				    (void)throttled_write(sub, buf2,
