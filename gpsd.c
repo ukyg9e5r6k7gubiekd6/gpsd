@@ -1845,7 +1845,7 @@ int main(int argc, char *argv[])
 		 * a sentence changes position or mode. Likely to
 		 * cause display jitter.
 		 */
-		if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS)))
+		if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS))!=0)
 		    changed |= REPORT_IS;
 
 #ifdef DBUS_ENABLE
