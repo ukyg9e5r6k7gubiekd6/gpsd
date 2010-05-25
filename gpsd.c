@@ -1820,9 +1820,6 @@ int main(int argc, char *argv[])
 		    }
 		}
 
-		if (device->gpsdata.fix.mode == MODE_3D)
-		    netgnss_report(device);
-
 		/* *INDENT-OFF* */
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
@@ -1848,10 +1845,14 @@ int main(int argc, char *argv[])
 		if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS))!=0)
 		    changed |= REPORT_IS;
 
+		/* a few things are not per-subscriber reports */
+		if ((changed & REPORT_IS) != 0) {
+		    if (device->gpsdata.fix.mode == MODE_3D)
+			netgnss_report(device);
 #ifdef DBUS_ENABLE
-		if ((changed & REPORT_IS) != 0)
 		    send_dbus_fix(device);
 #endif /* DBUS_ENABLE */
+		}
 
 		/* update all subscribers associated with this device */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
