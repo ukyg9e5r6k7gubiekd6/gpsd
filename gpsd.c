@@ -1268,6 +1268,60 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
 #endif /* BINARY_ENABLE */
 }
 
+static void cooked_report(struct subscriber_t *sub,
+			  gps_mask_t changed,
+			  struct gps_device_t *device)
+/* report cooked data to a subscriber */
+{
+    char buf[GPS_JSON_RESPONSE_MAX * 4];
+
+    if ((changed & SATELLITE_IS) != 0) {
+	json_sky_dump(&device->gpsdata,
+		      buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+#ifdef COMPASS_ENABLE
+    if ((changed & ATT_IS) != 0) {
+	json_att_dump(&device->gpsdata,
+		      buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+#endif /* COMPASS_ENABLE */
+#ifdef RTCM104V2_ENABLE
+    if ((changed & RTCM2_IS) != 0) {
+	rtcm2_json_dump(&device->gpsdata.rtcm2, buf,
+			sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+#endif /* RTCM104V2_ENABLE */
+#ifdef AIVDM_ENABLE
+    if ((changed & AIS_IS) != 0) {
+	aivdm_json_dump(&device->gpsdata.ais,
+			sub->policy.scaled,
+			buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+#endif /* AIVDM_ENABLE */
+
+#ifdef TIMING_ENABLE
+    if (buf[0] != '\0' && sub->policy.timing) {
+	(void)snprintf(buf, sizeof(buf),
+		       "{\"class\":\"TIMING\","
+		       "\"tag\":\"%s\",\"len\":%d,"
+		       "\"xmit\":%lf,\"recv\":%lf,"
+		       "\"decode\":%lf,"
+		       "\"emit\":%lf}\r\n",
+		       device->gpsdata.tag,
+		       (int)device->packet.outbuflen,
+		       device->d_xmit_time,
+		       device->d_recv_time,
+		       device->d_decode_time,
+		       timestamp());
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+#endif /* TIMING_ENABLE */
+}
+
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 {
     char reply[GPS_JSON_RESPONSE_MAX + 1];
@@ -1786,10 +1840,10 @@ int main(int argc, char *argv[])
 				report_fix = true;
 			    if (report_fix)
 				gpsd_report(LOG_PROG, "time to report a fix\n");
-    #ifdef DBUS_ENABLE
+#ifdef DBUS_ENABLE
 			    if (report_fix)
 				send_dbus_fix(device);
-    #endif /* DBUS_ENABLE */
+#endif /* DBUS_ENABLE */
 
 			    /* binary GPS packet, pseudo-NMEA dumping enabled */
 			    if (sub->policy.nmea
@@ -1822,56 +1876,9 @@ int main(int argc, char *argv[])
 				    (void)throttled_write(sub, buf2,
 							  strlen(buf2));
 				}
-				if ((changed & SATELLITE_IS) != 0) {
-				    json_sky_dump(&device->gpsdata,
-						  buf2, sizeof(buf2));
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-#ifdef COMPASS_ENABLE
-				if ((changed & ATT_IS) != 0) {
-				    json_att_dump(&device->gpsdata,
-						  buf2, sizeof(buf2));
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-#endif /* COMPASS_ENABLE */
-#ifdef RTCM104V2_ENABLE
-				if ((changed & RTCM2_IS) != 0) {
-				    rtcm2_json_dump(&device->gpsdata.rtcm2, buf2,
-						    sizeof(buf2));
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-#endif /* RTCM104V2_ENABLE */
-#ifdef AIVDM_ENABLE
-				if ((changed & AIS_IS) != 0) {
-				    aivdm_json_dump(&device->gpsdata.ais,
-						    sub->policy.scaled,
-						    buf2, sizeof(buf2));
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-#endif /* AIVDM_ENABLE */
 
-#ifdef TIMING_ENABLE
-				if (buf2[0] != '\0' && sub->policy.timing) {
-				    (void)snprintf(buf2, sizeof(buf2),
-						   "{\"class\":\"TIMING\","
-						   "\"tag\":\"%s\",\"len\":%d,"
-						   "\"xmit\":%lf,\"recv\":%lf,"
-						   "\"decode\":%lf,"
-						   "\"emit\":%lf}\r\n",
-						   device->gpsdata.tag,
-						   (int)device->packet.outbuflen,
-						   device->d_xmit_time,
-						   device->d_recv_time,
-						   device->d_decode_time,
-						   timestamp());
-				    (void)throttled_write(sub, buf2,
-							  strlen(buf2));
-				}
-#endif /* TIMING_ENABLE */
+				/* report non-GPS information */
+				cooked_report(sub, changed, device);
 			    }
 			}
 			//gpsd_report(LOG_PROG, "reporting finished\n");
