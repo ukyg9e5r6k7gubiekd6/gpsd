@@ -538,43 +538,55 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 static double sirf_ntp_offset(struct gps_device_t *session)
 /* return NTP time-offset fudge factor for this device */
 {
+    double retval = NAN;
+
     /* we need to have seen UTC time with a valid leap-year offset */
-    if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) != 0)
-	return NAN;
+    if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) != 0) {
+	retval = NAN;
+    }
 
     /* the PPS time message */
-    if (strcmp(session->gpsdata.tag, "MID52") == 0)
-	return 0.3;
+    else if (strcmp(session->gpsdata.tag, "MID52") == 0) {
+	retval = 0.3;
+    }
 
     /* uBlox EMND message */
-    if (strcmp(session->gpsdata.tag, "MID98") == 0)
-	return 0.570;
-
+    else if (strcmp(session->gpsdata.tag, "MID98") == 0) {
+	retval = 0.570;
+    }
 #ifdef __UNUSED__
     /* geodetic-data message */
-    if (strcmp(session->gpsdata.tag, "MID41") == 0)
-	return 0.570;
+    else if (strcmp(session->gpsdata.tag, "MID41") == 0) {
+	retval = 0.570;
+    }
 #endif /* __UNUSED__ */
 
     /* the Navigation Solution message */
-    if (strcmp(session->gpsdata.tag, "MID2") == 0)
-        if (session->sourcetype == source_usb) {
-	    return 0.640;		/* USB, expect +/- 50mS jitter */
-        }
-	switch (session->gpsdata.dev.baudrate) {
-	default:
-	    return 0.704;	/* WAG */
-	case 4800:
-	    return 0.704;	/* fudge valid at 4800bps */
-	case 9600:
-	    return 0.688;
-	case 19200:
-	    return 0.484;
-	case 38400:
-	    return 0.845;	/*  0.388; ?? */
+    else if (strcmp(session->gpsdata.tag, "MID2") == 0) {
+	if (session->sourcetype == source_usb) {
+	    retval = 0.640;	/* USB, expect +/- 50mS jitter */
+	} else {
+	    switch (session->gpsdata.dev.baudrate) {
+	    default:
+		retval = 0.704;	/* WAG */
+		break;
+	    case 4800:
+		retval = 0.704;	/* fudge valid at 4800bps */
+		break;
+	    case 9600:
+		retval = 0.688;
+		break;
+	    case 19200:
+		retval = 0.484;
+		break;
+	    case 38400:
+		retval = 0.845;	/*  0.388; ?? */
+		break;
+	    }
 	}
+    }
 
-    return NAN;
+    return retval;
 }
 #endif /* NTPSHM_ENABLE */
 
