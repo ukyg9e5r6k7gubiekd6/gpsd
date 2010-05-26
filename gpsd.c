@@ -1527,7 +1527,7 @@ int main(int argc, char *argv[])
 	// nice() can ONLY succeed when run as root!
 	// do not even bother as non-root
 	if (nice(NICEVAL) == -1 && errno != 0)
-	    gpsd_report(2, "NTPD Priority setting failed.\n");
+	    gpsd_report(LOG_INF, "NTPD Priority setting failed.\n");
     }
     (void)ntpshm_init(&context, nowait);
 #endif /* NTPSHM_ENABLE */

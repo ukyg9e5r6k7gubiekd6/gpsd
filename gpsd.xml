@@ -1415,7 +1415,7 @@ TCP/IP source such as an Ntrip, DGPSIP, or AIS feed.</para>
 <row>
 	<entry>SEEN_AIS</entry>
 	<entry>0x08</entry>
-	<entry>GPS data has been seen on this device</entry>
+	<entry>AIS data has been seen on this device</entry>
 </row>
 </tbody>
 </tgroup>
