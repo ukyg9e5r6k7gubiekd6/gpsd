@@ -556,11 +556,11 @@ static double sirf_ntp_offset(struct gps_device_t *session)
 	return 0.570;
 #endif /* __UNUSED__ */
 
-    if (session->sourcetype == source_usb) {
-	return 0.600;		/* USB, expect +/- 40mS jitter */
-    }
     /* the Navigation Solution message */
     if (strcmp(session->gpsdata.tag, "MID2") == 0)
+        if (session->sourcetype == source_usb) {
+	    return 0.640;		/* USB, expect +/- 50mS jitter */
+        }
 	switch (session->gpsdata.dev.baudrate) {
 	default:
 	    return 0.704;	/* WAG */
