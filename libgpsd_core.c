@@ -719,7 +719,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/*
 	 * If this is the first time we've achieved sync on this
-	 * device, or the the driver type has changed for any other
+	 * device, or the driver type has changed for any other
 	 * reason, that's a significant event that the caller needs to
 	 * know about.
 	 */
