@@ -1856,15 +1856,15 @@ int main(int argc, char *argv[])
 
 		/* update all subscribers associated with this device */
 		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-		    if (sub->active == 0)
+		    /*@-nullderef@*/
+		    if (sub == NULL || sub->active == 0)
 			continue;
 
 		    /* report raw packets to users subscribed to those */
 		    raw_report(sub, device);
 
 		    /* some listeners may be in watcher mode */
-		    /*@-nullderef@*/
-		    if (sub != NULL && sub->policy.watcher) {
+		    if (sub->policy.watcher) {
 			if (changed & DATA_IS) {
 			    gpsd_report(LOG_PROG,
 					"Changed mask: %s with %sreliable cycle detection\n",
@@ -1880,7 +1880,7 @@ int main(int argc, char *argv[])
 				json_report(sub, changed, device);
 			}
 		    }
-		    /*@-nullderef@*/
+		    /*@+nullderef@*/
 		} /* subscribers */
 	    }
 	} /* devices */
