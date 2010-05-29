@@ -8,12 +8,11 @@
 # Should return an empty blank string if tose are not present.
 starttime=`date +"%s" 2>/dev/null`
 
-# We need to have the build directory in $PATH to find the new gpsd
-# in case there is one in $PATH somewhere else in the system.
+# We need to have the build directory in $GPSD_HOME to find the new gpsd
 if [ "`dirname $0`" = "." ]; then
-    PATH=`pwd`:${PATH}
+    GPSD_HOME=`pwd`
 else
-    PATH=`dirname $0`:${PATH}
+    GPSD_HOME=`dirname $0`
 fi
 
 # Arrange to call a gpsfake in the source directory without fuss.
