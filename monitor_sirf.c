@@ -59,6 +59,8 @@ static char *dgpsvec[] = {
     "Software",
 };
 
+#define CHECK_RANGE(vec, i) (((i) >= 0) && ((i) < sizeof(vec)/sizeof(vec[0])))
+
 /*****************************************************************************
  *
  * SiRF packet-decoding routines
@@ -300,6 +302,7 @@ static void sirf_update(void)
     int i, j, ch, off, cn;
     unsigned char *buf;
     size_t len;
+    uint8_t dgps;
 
     assert(mid27win != NULL);
     buf = session.packet.outbuffer + 4;
@@ -526,8 +529,9 @@ static void sirf_update(void)
 
 	total               3 x 12 = 36 bytes
 	******************************************************************/
+	dgps = getub(buf, 1);
 	display(mid27win, 1, 14, "%d (%s)",
-		getub(buf, 1), dgpsvec[(int)getub(buf, 1)]);
+		dgps, (CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
 	/*@ -type @*/
 	//(void) wmove(mid27win, 2, 0);
 	for (i = j = 0; i < 12; i++) {
