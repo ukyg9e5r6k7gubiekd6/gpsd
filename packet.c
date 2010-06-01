@@ -1643,31 +1643,8 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 
     /*@ -modobserver @*/
     errno = 0;
-    ssize_t read_size = sizeof(lexer->inbuffer) - (lexer->inbuflen);
-
-    /*
-     * Limit reads to 16.  This works around a logic bug in how
-     * packet_get works.  Briefly, the read call would otherwise read
-     * all available bytes.  Then, packet_parse looks for a packet
-     * (e.g., NMEA sentence).  If there is one, the caller of
-     * packet_get will process it.  The problem arises when there is
-     * more than one packet in the buffer; only the first is
-     * processed.  Then, because select(2) does not return true,
-     * packet_get is not reinvoked and the subsequent packets sit in
-     * the buffer.  By limiting reads to 16, we hope that each read is
-     * smaller than a packet and thus the buffer will not have
-     * persistent completed packets.  For NMEA, the magic read size is
-     * about 59, so 16 is surely short enough.  This limit results in
-     * more read system calls, but on a serial port GPS it is likely
-     * that only 1 or 2 bytes would be read per call, and therefore
-     * the USB case is still far more efficient.  This change should
-     * be removed when there is a way to process more than one packet
-     * per read call.
-     */
-    if(read_size > 16)
-	    read_size = 16;
     recvd = read(fd, lexer->inbuffer + lexer->inbuflen,
-		 read_size);
+		 sizeof(lexer->inbuffer) - (lexer->inbuflen));
     /*@ +modobserver @*/
     if (recvd == -1) {
 	if ((errno == EAGAIN) || (errno == EINTR)) {
