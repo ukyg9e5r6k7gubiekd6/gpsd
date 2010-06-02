@@ -98,7 +98,7 @@ the world. Some charge subscriptions; others offer time-delayed access
 for free and charge for a real-time feed. Still others are pool sites;
 you join by contributing your feed and receive all feeds.
 
-AIS Hub (<<<AISHUB>>>) is a free, public AIS feed pool. It provides
+AIS Hub (<<AISHUB>>) is a free, public AIS feed pool. It provides
 exchange of AIS data in raw NMEA format; all AISHub members share
 their own received AIS data and receive the merged feed from all other
 participating parties.  It is open-source friendly, offering a Linux
@@ -1825,8 +1825,8 @@ See their siting maps for details.
 Share alike. You contribute a feed, you get back all feeds.
 
 - http://www.aislive.com/[AIS Live]:
-Subscription access to real-time data. No onger has free access even 
-to delayed data. 
+Subscription access to real-time data. No longer has free access even 
+to delayed data.
 
 - hd-sf.com:9009
 Free San Francisco Bay Area AIS feed. For non-commercial use only.
