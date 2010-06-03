@@ -806,8 +806,13 @@ TESTS = do-tests
 #
 # None of these productions are fired by 'make all'.
 
+if XMLTOSTDOUT
+www/%.html: %.xml
+	$(XMLPROC) $(XMLPROCFLAGS) $(HTMLTARGET) $< >$(<:.xml=.html) ; cp $(<:.xml=.html) $@
+else
 www/%.html: %.xml
 	$(XMLPROC) $(XMLPROCFLAGS) $(HTMLTARGET) $<; cp $(<:.xml=.html) $@
+endif
 
 website: www/gpscat.html www/gpsctl.html www/gpsdecode.html \
 		www/gpsd.html www/gpsfake.html www/gpsmon.html \
