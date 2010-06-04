@@ -1772,9 +1772,10 @@ int main(int argc, char *argv[])
 	    changed = 0;
 	    if (device->gpsdata.gps_fd >= 0
 		&& FD_ISSET(device->gpsdata.gps_fd, &rfds)) {
+		int fragments;
+
 		gpsd_report(LOG_RAW + 1, "polling %d\n",
 			    device->gpsdata.gps_fd);
-		int fragments;
 
 		for (fragments = 0; ; fragments++) {
 		    changed = gpsd_poll(device);
