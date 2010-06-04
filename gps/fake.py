@@ -309,7 +309,7 @@ class DaemonInstance:
             try:
                 fp = open(self.pidfile)
             except IOError:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 continue
             try:
                 fp.seek(0)
@@ -356,10 +356,13 @@ class DaemonInstance:
         if self.pid:
             try:
                 os.kill(self.pid, signal.SIGTERM)
+                # Raises an OSError for ESRCH when we've killed it.
+                while True:
+                    os.kill(self.pid, signal.SIGTERM)
+                    time.sleep(0.01)
             except OSError:
                 pass
             self.pid = None
-            time.sleep(1)	# Give signal time to land
 
 class TestSessionError(exceptions.Exception):
     def __init__(self, msg):
