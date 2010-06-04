@@ -153,16 +153,6 @@ static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = false;
 static jmp_buf restartbuf;
-/* *INDENT-OFF* */
-static enum { 
-    disabled,
-    enabled,
-    fulfilled,
-    holding
-}
-/* *INDENT-ON* */
-quit_when_quiescent = disabled;
-static unsigned int devices_expected;
 
 /* *INDENT-OFF* */
 /*@ -initallelements -nullassign -nullderef @*/
@@ -872,14 +862,6 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	    }
 	}
-    } else if (buf[0] == '$') {	/* undocumented */
-	p = snarfline(buf + 1, &stash);
-	devices_expected = (unsigned)atoi(stash);
-	gpsd_report(LOG_INF,
-		    "<= control(%d): quit-when-quiescent set, %d devices expected\n",
-		    sfd, devices_expected);
-	quit_when_quiescent = enabled;
-	ignore_return(write(sfd, "OK\n", 3));
     }
     /*@ +sefparams @*/
 }
@@ -2009,49 +1991,6 @@ int main(int argc, char *argv[])
 	}
 
 	/* nowait */
-	/*
-	 * This code enables a test harness to use the undocumented
-	 * $<n> control-socket command to tell the daemon to notice
-	 * when the expected number of devices has both connected
-	 * and gone away again.
-	 */
-	if (quit_when_quiescent > disabled) {
-	    unsigned int activecount = 0;
-	    for (device = devices; device < devices + MAXDEVICES; device++)
-		if (allocated_device(device))
-		    activecount++;
-
-	    if (quit_when_quiescent == enabled) {
-		if (activecount == devices_expected) {
-		    quit_when_quiescent = fulfilled;
-		    gpsd_report(LOG_INF,
-				"expected number of devices are connected\n");
-		}
-	    }
-
-	    if (quit_when_quiescent == fulfilled) {
-		if (activecount == 0) {
-		    quit_when_quiescent = holding;
-		    gpsd_report(LOG_INF,
-				"all expected devices are quiescent\n");
-		}
-	    }
-
-	    if (quit_when_quiescent == holding) {
-		int waiting = 0;
-		if (activecount == 0) {
-		    for (device = devices; device < devices + MAXDEVICES;
-			 device++)
-			if (allocated_device(device))
-			    if (device->packet.inbuflen > 0)
-				waiting++;
-		    if (waiting == 0) {
-			gpsd_report(LOG_INF, "all buffers are empty\n");
-			goto clean_shutdown;
-		    }
-		}
-	    }
-	}			/* quit_when_quiescent */
     }
 
     /* if we make it here, we got a signal... deal with it */
@@ -2067,7 +2006,6 @@ int main(int argc, char *argv[])
 	    (void)gpsd_wrap(&devices[dfd]);
     }
 
-  clean_shutdown:
     gpsd_report(LOG_WARN, "exiting.\n");
     /*
      * A linger option was set on each client socket when it was

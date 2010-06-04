@@ -158,7 +158,6 @@ if __name__ == '__main__':
 
     if pipe:
         test.reporter = sys.stdout.write
-        test.expected = 1
         if verbose:
             progress = False
             test.progress = sys.stdout.write

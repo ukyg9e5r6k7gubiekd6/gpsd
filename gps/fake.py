@@ -351,12 +351,6 @@ class DaemonInstance:
             self.sock.sendall("-%s\r\n\x00" % path)
             self.sock.recv(12)
             self.sock.close()
-    def quit_on_quiesce(self, num):
-        "Tell the daemon to quit when it next goes quiescent."
-        if self.__get_control_socket():
-            self.sock.sendall("$%d\r\n\x00" % num)
-            self.sock.recv(12)
-            self.sock.close()
     def kill(self):
         "Kill the daemon instance."
         if self.pid:
@@ -374,14 +368,13 @@ class TestSessionError(exceptions.Exception):
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
     CLOSE_DELAY = 1
-    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, expected=0, udp=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
         self.port = port
         self.options = options
         self.verbose = verbose
         self.predump = predump
-        self.expected = expected
         self.udp = udp
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
@@ -505,9 +498,6 @@ class TestSession:
                         chosen.poll()
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
-                            if self.expected:
-                                self.daemon.quit_on_quiesce(self.expected)
-                                self.expected = 0
                         had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
