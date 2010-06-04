@@ -37,7 +37,6 @@
 #endif
 #endif
 
-
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
     const struct gps_type_t **dp;
@@ -678,7 +677,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path, newlen,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = 0;
-	return 0;
+	return NODATA_IS;
     } else if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
 	gpsd_report(LOG_RAW + 3, "New data on %s, not yet a packet\n",
 		    session->gpsdata.dev.path);

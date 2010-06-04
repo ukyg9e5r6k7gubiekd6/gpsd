@@ -1774,11 +1774,9 @@ int main(int argc, char *argv[])
 		&& FD_ISSET(device->gpsdata.gps_fd, &rfds)) {
 		gpsd_report(LOG_RAW + 1, "polling %d\n",
 			    device->gpsdata.gps_fd);
-		/* 
-		 * Extra block is a no-op. The intention is to minimize diffs
-		 * going forward as we introduce a control structure here.
-		 */
-		{
+		int fragments;
+
+		for (fragments = 0; ; fragments++) {
 		    changed = gpsd_poll(device);
 
 		    if (changed == ERROR_IS) {
@@ -1787,18 +1785,30 @@ int main(int argc, char *argv[])
 				    device->gpsdata.dev.path, 
 				    gpsd_maskdump(changed));
 			deactivate_device(device);
-			continue;
-		    } else if ((changed & ONLINE_IS) == 0) {
-			gpsd_report(LOG_WARN,
-				    "%s returned error or went offline\n",
-				    device->gpsdata.dev.path);
-			deactivate_device(device);
-			continue;
+			break;
+		    } else if (changed == NODATA_IS) {
+			/*
+			 * No data on the first fragment read means the device
+			 * fd was in an end-of-file condition on select. 
+			 */
+			if (fragments == 0) {
+			    gpsd_report(LOG_WARN,
+					"%s returned error or went offline\n",
+					device->gpsdata.dev.path);
+			    deactivate_device(device);
+			}
+			/*
+			 * No data on later fragment reads just means the
+			 * input buffer is empty.  In this case break out
+			 * of the packet-processing loop but don't drop
+			 * the device.
+			 */
+			break;
 		    }
 
 		    /* must have a full packet to continue */
 		    if ((changed & PACKET_IS) == 0)
-			continue;
+			break;
 
 		    /* add any just-identified device to watcher lists */
 		    if ((changed & DRIVER_IS) != 0) {
@@ -1887,6 +1897,14 @@ int main(int argc, char *argv[])
 			}
 			/*@+nullderef@*/
 		    } /* subscribers */
+
+		    /* 
+		     * Trying to read a nonexistent datagram hangs,
+		     * so only go through the poll loop once after 
+		     * select in this case.
+		     */
+		    if (device->sourcetype == source_udp)
+			break;
 		}
 	    }
 	} /* devices */
