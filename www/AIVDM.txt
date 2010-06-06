@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.24, May 2010
+v1.25, June 2010
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -874,39 +874,44 @@ pairs in use for type 8:
 
 [frame="topbot",options="header"]
 |==============================================================================
-| DAC |FID | Sub | Source     | Status       | Description     
-|   1 | 11 |     | <<IMO236>> | Deprecated   | Meteorological/Hydrological Data
-|   1 | 12 |     | <<IMO236>> | Deprecated   | Dangerous cargo indication
-|   1 | 13 |     | <<IMO236>> | Deprecated   | Fairway closed
-|   1 | 14 |     | <<IMO236>> | Deprecated   | Tidal window
-|   1 | 15 |     | <<IMO236>> | Deprecated   | Extended ship and voyage
-|   1 | 16 |     | <<IMO236>> | In use       | Num persons on board
-|   1 | 17 |     | <<IMO236>> | In use?      | VTS-Generated/Synthetic targets
-|   1 | 18 |     | <<NAV55>>  | Proposed     | Clearance time to enter port
-|   1 | 19 |     | <<NAV55>>  | Proposed     | Marine traffic signals
-|   1 | 20 |     | <<NAV55>>  | Proposed     | Berthing data
-|   1 | 21 |     | <<NAV55>>  | Proposed     | Weather obs from ship
-|   1 | 22 |     | <<NAV55>>  | Proposed     | area notice broadcast
-|   1 | 24 |     | <<NAV55>>  | Proposed     | Extended ship and voyage
-|   1 | 25 |     | <<NAV55>>  | Proposed     | Dangerous cargo
-|   1 | 26 |     | <<NAV55>>  | Proposed     | Environmental
-|   1 | 27 |     | <<NAV55>>  | Proposed     | Route info broadcast
-|   1 | 29 |     | <<NAV55>>  | Proposed     | Text description broadcast
-|   1 | 31 |     | <<NAV55>>  | Proposed     | Meteorological and Hydrological
-|   1 | 32 |     | <<NAV55>>  | Proposed     | Tidal Window
-| 316 |  1 |   2 | <<SEAWAY>> | In use       | Wind
-| 316 |  1 |   1 | <<SEAWAY>> | In use       | Weather station
-| 316 |  1 |   3 | <<SEAWAY>> | In use       | Water level
-| 316 |  1 |   6 | <<SEAWAY>> | In use       | Water flow
-| 316 |  2 |   1 | <<SEAWAY>> | In use       | Lockage Order
-| 316 |  2 |   2 | <<SEAWAY>> | In use       | Est. Lock Times
-| 316 | 32 |   1 | <<SEAWAY>> | In use       | Seaway Version Message
-|   ? |  1 |   4 | <<SEAWAY>> | ?            | PAWS Hydro / Current
+| DAC     |FID | Sub | Source     | Status     | Description     
+|   1     | 11 |     | <<IMO236>> | Deprecated | Meteorological/Hydrological Data
+|   1     | 12 |     | <<IMO236>> | Deprecated | Dangerous cargo indication
+|   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
+|   1     | 14 |     | <<IMO236>> | Deprecated | Tidal window
+|   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
+|   1     | 16 |     | <<IMO236>> | In use     | Num persons on board
+|   1     | 17 |     | <<IMO236>> | In use     | VTS-Generated/Synthetic targets
+|   1     | 18 |     | <<NAV55>>  | Proposed   | Clearance time to enter port
+|   1     | 19 |     | <<NAV55>>  | Proposed   | Marine traffic signals
+|   1     | 20 |     | <<NAV55>>  | Proposed   | Berthing data
+|   1     | 21 |     | <<NAV55>>  | Proposed   | Weather obs from ship
+|   1     | 22 |     | <<NAV55>>  | Proposed   | Area notice broadcast
+|   1     | 24 |     | <<NAV55>>  | Proposed   | Extended ship and voyage
+|   1     | 25 |     | <<NAV55>>  | Proposed   | Dangerous cargo
+|   1     | 26 |     | <<NAV55>>  | Proposed   | Environmental
+|   1     | 27 |     | <<NAV55>>  | Proposed   | Route info broadcast
+|   1     | 29 |     | <<NAV55>>  | Proposed   | Text description broadcast
+|   1     | 31 |     | <<NAV55>>  | Proposed   | Meteorological and Hydrological
+|   1     | 32 |     | <<NAV55>>  | Proposed   | Tidal Window
+| 316/366 |  1 |   2 | <<SEAWAY>> | In use     | Wind
+| 316/366 |  1 |   1 | <<SEAWAY>> | In use     | Weather station
+| 316/366 |  1 |   3 | <<SEAWAY>> | In use     | Water level
+| 316/366 |  1 |   6 | <<SEAWAY>> | In use     | Water flow
+| 316/366 |  2 |   1 | <<SEAWAY>> | In use     | Lockage Order
+| 316/366 |  2 |   2 | <<SEAWAY>> | In use     | Estimated Lock Times
+| 316/366 | 32 |   1 | <<SEAWAY>> | In use     | Seaway Version Message
+| 366     |  1 |   4 | <<SEAWAY>> | In use     | PAWS Hydro / Current
+| 366     |  1 |   6 | <<SEAWAY>> | In use     | PAWS Hydro / Salinity Temp
+| 366     |  1 |   3 | <<SEAWAY>> | In use     | PAWS Vessel Procession Order
 |==============================================================================
 
-DAC/FID pairs are assigned separately per message type.  
+DAC/FID pairs are assigned separately per message type.  For St. Lawrence
+Seaway messages, the DAC may be 316 (Canada) or 366 (U.S.) depending
+on the transmitter location.
+
 FID types 11-15 are being phased out and are not to be used after 1
-Jan 2013. FID types 16 and 17 are in use; there are a proposed updates 
+Jan 2013. FID types 16 and 17 are in use; there are proposed updates 
 for these in <<NAV55>>.
 
 === Type 9: Standard SAR Aircraft Position Report ===
@@ -1661,9 +1666,8 @@ under the descriptions of types 6 and 8.
 
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
 System) which uses extended AIS binary formats. <<SEAWAY>> says it's
-intercompatible with the St. Lawrence Seaway system; I have not been
-able to find any message documentation on PAWSS with which to verify
-this, however.
+intercompatible with the St. Lawrence Seaway system and describes three 
+PAWSS-specific messages in its Appendix A.
 
 === U.S. Coast Guard Extended AIVDM ===
 
@@ -2044,7 +2048,9 @@ Also, AISlive no longer offers free delayed access.
 
 Version 1.24 breaks the Type 6 and 8 application_id field into 
 DAC and FID and adds tables for know DAC/FID pairs and their sources.
-Unspecified fields are noow omitted in JSON dumps.  A new section
+Unspecified fields are now omitted in JSON dumps.  A new section
 "AIS byte alignment, bit stuffing, and padding", reveals some 
 particularly black magic.
 
+Version 1.25 adds clarifications and more message subtypes for
+U.S. Coast Guard PAWSS messages.
