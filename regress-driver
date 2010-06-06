@@ -29,7 +29,7 @@ if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
 
     PATH=${py_scriptdir}:${PATH}
 fi
-export PATH
+export GPSD_HOME PATH
 
 mode=regress
 testing=daemon
@@ -82,7 +82,7 @@ case $mode in
 	    then
 		case $testing in
 		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
-		clientlib) libgps -b <${f} >${TMP}/test-$$.chk ;;
+		clientlib) $GPSD_HOME/libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		sed -n <${f}.chk >${TMP}/log-copy-$$.chk ${ALTFILTER} -e 'p';
 		sed -n <${TMP}/test-$$.chk >${TMP}/test-whole-$$.chk ${ALTFILTER} -e 'p';
@@ -122,7 +122,7 @@ case $mode in
         for f in $*; do
 	    case $testing in 
             daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
-	    clientlib) libgps -b <${f} >${f}.chk ;;
+	    clientlib) $GPSD_HOME/libgps -b <${f} >${f}.chk ;;
             esac
         done
         status=0
@@ -132,7 +132,7 @@ case $mode in
         for f in $*; do
 	    case $testing in 
             daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
-            clientlib) libgps -b <${f} ;;
+            clientlib) $GPSD_HOME/libgps -b <${f} ;;
             esac
         done
         status=0
