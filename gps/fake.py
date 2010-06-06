@@ -282,16 +282,27 @@ class DaemonInstance:
     def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
         self.spawncmd = None
-        if not '/usr/sbin' in os.environ['PATH']:
-            os.environ['PATH']=os.environ['PATH'] + ":/usr/sbin"
-        for path in os.environ['PATH'].split(':'):
-            _spawncmd = "%s/gpsd" % path
-            if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
-                self.spawncmd = _spawncmd
-                break
+
+	# Look for gpsd in GPSD_HOME env variable
+	if os.environ['GPSD_HOME'] :
+            for path in os.environ['GPSD_HOME'].split(':'):
+                _spawncmd = "%s/gpsd" % path
+                if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
+                    self.spawncmd = _spawncmd
+                    break
+
+	# if we could not find it yet try PATH env variable for it
+	if not self.spawncmd:
+            if not '/usr/sbin' in os.environ['PATH']:
+                os.environ['PATH']=os.environ['PATH'] + ":/usr/sbin"
+            for path in os.environ['PATH'].split(':'):
+                _spawncmd = "%s/gpsd" % path
+                if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
+                    self.spawncmd = _spawncmd
+                    break
 
         if not self.spawncmd:
-            raise DaemonError("Cannot execute gpsd: executable not found.")
+            raise DaemonError("Cannot execute gpsd: executable not found. Set GPSD_HOME env variable")
         # The -b option to suppress hanging on probe returns is needed to cope
         # with OpenBSD (and possibly other non-Linux systems) that don't support
         # anything we can use to implement the FakeGPS.read() method
@@ -409,7 +420,7 @@ class TestSession:
         if logfile not in self.fakegpslist:
             testload = TestLoad(logfile, predump=self.predump)
             if testload.sourcetype == "UDP" or self.udp:
-                newgps = FakeUDP(testload, ipaddr="127.0.1.255", port="5000",
+                newgps = FakeUDP(testload, ipaddr="127.0.0.1", port="5000",
                                    progress=self.progress)
             else:
                 newgps = FakePTY(testload, speed=speed, 

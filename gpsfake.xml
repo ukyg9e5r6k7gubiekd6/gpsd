@@ -160,6 +160,12 @@ be retrieved using <application>gpspipe</application>,
 <application>gpscat</application>, or
 <application>gpsmon</application> from the gpsd distribution, or any
 other application which is able to create a compatible output.</para>
+
+<para>If <application>gpsfake</application> exits with "Cannot execute
+gpsd: executable not found." the environment variable GPSD_HOME can be
+set to the path where gpsd can be found. (instead of adding that folder
+to the PATH envirnment variable</para>
+
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
