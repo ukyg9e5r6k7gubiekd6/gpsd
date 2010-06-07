@@ -69,6 +69,25 @@ import exceptions, threading, socket
 import gps
 import packet as sniffer
 
+# The two magic numbers below have to be derived from observation.  If
+# they're too high you'll slow the tests down a lot.  If they's too low
+# you'll get random spurious regression failures that usually look
+# like lines missing from the end of the test output relative to the
+# check file.  These numbers might have to be adusted upward on faster
+# machines.  They need for them may be symnptomatic of race conditions
+# in the pty layer or elsewhere.
+
+# Define a per-line delay on writes so we won't spam the buffers in
+# the pty layer or gpsd itself.  Removing this entirely was tried but
+# caused failures under NetBSD.  Valus smaller than the stem timer
+# tick don't make any difference
+WRITE_PAD = 0.001
+
+# We delay a few seconds after a GPS source is exhausted
+# before removing it.  This should give its subscribers time
+# to get gpsd's response before we call the cleanup code.
+CLOSE_DELAY = 0.05
+
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -163,6 +182,7 @@ class FakeGPS:
         self.write(line)
         if self.progress:
             self.progress("gpsfake: %s feeds %d=%s\n" % (self.testload.name, len(line), `line`))
+        time.sleep(WRITE_PAD)
         self.index += 1
 
 class FakePTY(FakeGPS):
@@ -381,7 +401,6 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
-    CLOSE_DELAY = 1
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
@@ -492,10 +511,7 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    # Delay a few seconds after a GPS source is exhausted
-                    # before removing it.  This should give its subscribers time
-                    # to get gpsd's response before we call cleanup()
-                    if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
+                    if chosen.exhausted and (time.time() - chosen.exhausted > CLOSE_DELAY):
                         self.gps_remove(chosen.byname)
                         self.progress("gpsfake: GPS %s removed\n" % chosen.byname)
                     elif not chosen.go_predicate(chosen.index, chosen):
