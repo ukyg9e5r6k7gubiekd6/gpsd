@@ -107,7 +107,7 @@ int main(int argc, char **argv)
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
     bool lowlevel=false, echo=false;
-    struct gps_data_t *gpsdata = NULL;
+    struct gps_data_t gpsdata;
     const struct gps_type_t *forcetype = NULL;
     const struct gps_type_t **dp;
     unsigned int timeout = 4;
@@ -252,59 +252,61 @@ int main(int argc, char **argv)
     (void) signal(SIGTERM, onsig);
     (void) signal(SIGQUIT, onsig);
 
+    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen_r() params */
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
-	/*@i@*/gpsdata = gps_open(NULL, NULL);
-	if (gpsdata == NULL) {
+	if (gps_open_r(NULL, NULL, &gpsdata) != 0) {
 	    gpsd_report(LOG_ERROR, "no gpsd running or network error: %s.\n", 
 			netlib_errstr(errno));
 	    lowlevel = true;
 	}
     }
+    /*@-nullpass@*/
 
+    /*@-compdef -uniondef -usedef@*/ 
+    /* ^ someday, add out annotation to the gpspoll() param  and remove */
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
 	struct devconfig_t *devlistp;
-	assert(gpsdata != NULL);
-	(void)gps_poll(gpsdata);
-	if ((gpsdata->set & DEVICELIST_SET) != 0) {
+	(void)gps_poll(&gpsdata);
+	if ((gpsdata.set & DEVICELIST_SET) != 0) {
 	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
-	    (void)gps_close(gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-	(void)gps_query(gpsdata, "?DEVICES;\n");
-	if ((gpsdata->set & DEVICELIST_SET) == 0) {
+	(void)gps_query(&gpsdata, "?DEVICES;\n");
+	if ((gpsdata.set & DEVICELIST_SET) == 0) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
-	    (void)gps_close(gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
 
-	if (gpsdata->devices.ndevices == 0) {
+	if (gpsdata.devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
-	    (void)gps_close(gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(1);
-	} else if (gpsdata->devices.ndevices > 1 && device == NULL) {
+	} else if (gpsdata.devices.ndevices > 1 && device == NULL) {
 	    gpsd_report(LOG_ERROR, 
 			"multiple devices and no device specified.\n");
-	    (void)gps_close(gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata->devices.ndevices);
+	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata.devices.ndevices);
 
-	if (gpsdata->devices.ndevices == 1) {
-	    devlistp = &gpsdata->devices.list[0];
+	if (gpsdata.devices.ndevices == 1) {
+	    devlistp = &gpsdata.devices.list[0];
 	    device = devlistp->path;
 	} else {
 	    int i;
 	    assert(device != NULL);
-	    for (i = 0; i < gpsdata->devices.ndevices; i++)
-		if (strcmp(device, gpsdata->devices.list[i].path) == 0)
+	    for (i = 0; i < gpsdata.devices.ndevices; i++)
+		if (strcmp(device, gpsdata.devices.list[i].path) == 0)
 		    goto foundit;
 	    gpsd_report(LOG_ERROR, "specified device not found.\n");
-	    (void)gps_close(gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(1);
 	foundit:
-	    devlistp = &gpsdata->devices.list[i];
+	    devlistp = &gpsdata.devices.list[i];
 	}
 
 	/* if no control operation was specified, just ID the device */
@@ -324,27 +326,27 @@ int main(int argc, char **argv)
 
 	/*@-boolops@*/
 	if (to_nmea) {
-	    (void)gps_query(gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device); 
-	    if ((gpsdata->set & ERROR_SET) || (gpsdata->dev.driver_mode != MODE_NMEA)) {
-		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata->dev.path);
+	    (void)gps_query(&gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device); 
+	    if ((gpsdata.set & ERROR_SET) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
+		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	else if (to_binary) {
-	    (void)gps_query(gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device);
-	    if ((gpsdata->set & ERROR_SET) || (gpsdata->dev.driver_mode != MODE_BINARY)) {
-		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata->dev.path);
+	    (void)gps_query(&gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device);
+	    if ((gpsdata.set & ERROR_SET) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
+		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata->dev.path);
+		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	/*@+boolops@*/
 	if (speed != NULL) {
 	    char parity = 'N';
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
-		(void)gps_query(gpsdata,
+		(void)gps_query(&gpsdata,
 				"?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
 				device, speed);
 	    else {
@@ -369,27 +371,27 @@ int main(int argc, char **argv)
 		    }
 		}
 		if (status == 0)
-		    (void)gps_query(gpsdata, 
+		    (void)gps_query(&gpsdata, 
 				    "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c\",\"stopbits\":%c}\r\n", 
 				    device, speed, parity, stopbits);
 	    }
-	    if (atoi(speed) != (int)gpsdata->dev.baudrate) {
+	    if (atoi(speed) != (int)gpsdata.dev.baudrate) {
 		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%c\n", 
-			    gpsdata->dev.path,
+			    gpsdata.dev.path,
 			    speed, parity, stopbits);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s change to %s%c%c succeeded\n", 
-			    gpsdata->dev.path,
+			    gpsdata.dev.path,
 			    speed, parity, stopbits);
 	}
 	if (rate != NULL) {
-	    (void)gps_query(gpsdata, 
+	    (void)gps_query(&gpsdata, 
 			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n", 
 			    device, rate);
 	}
 #endif /* ALLOW_RECONFIGURE */
-	(void)gps_close(gpsdata);
+	(void)gps_close(&gpsdata);
 	exit(status);
 #ifdef ALLOW_RECONFIGURE
     } else if (reset) {
@@ -632,6 +634,7 @@ int main(int argc, char **argv)
 	    context.readonly = write_enable;
 	}
 #endif /* ALLOW_RECONFIGURE */
+	/*@+compdef +uniondef +usedef@*/
 #ifdef ALLOW_CONTROLSEND
 	/*@ -compdef @*/
 	if (control) {
