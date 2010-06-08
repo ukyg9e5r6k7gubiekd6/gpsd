@@ -330,7 +330,7 @@ static int socket_mainloop(void)
 	    (void)fprintf(stderr, "%s\n", strerror(errno));
 	    break;
 	} else if (data)
-	    (void)gps_poll(&gpsdata);
+	    (void)gps_read(&gpsdata);
     }
     (void)gps_close(&gpsdata);
     return 0;

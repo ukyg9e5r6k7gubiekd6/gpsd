@@ -541,7 +541,7 @@ bool gps_waiting(struct gps_data_t * gpsdata)
 }
 
 /*@-compdef -usedef -uniondef@*/
-int gps_poll(/*@out@*/struct gps_data_t *gpsdata)
+int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */
 {
     char *eol;
@@ -614,9 +614,20 @@ int gps_poll(/*@out@*/struct gps_data_t *gpsdata)
     priv->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
-    return 0;
+    return status;
 }
 /*@+compdef -usedef +uniondef@*/
+
+int gps_poll(/*@out@*/struct gps_data_t *gpsdata)
+/* for backwards compatibility */
+{
+    int status = gps_read(gpsdata);
+
+    if (status > 0)
+	status = 0;
+
+    return status;
+}
 
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
 /* send a command to the gpsd instance */
@@ -804,10 +815,10 @@ int main(int argc, char *argv[])
 	exit(1);
     } else if (optind < argc) {
 	gps_set_raw_hook(collect, dumpline);
-	strlcpy(buf, argv[optind], BUFSIZ);
-	strlcat(buf, "\n", BUFSIZ);
-	gps_send(collect, buf);
-	gps_poll(collect);
+	(void)strlcpy(buf, argv[optind], BUFSIZ);
+	(void)strlcat(buf, "\n", BUFSIZ);
+	(void)gps_send(collect, buf);
+	(void)gps_read(collect);
 	libgps_dump_state(collect, time(NULL));
 	(void)gps_close(collect);
     } else {
@@ -825,8 +836,8 @@ int main(int argc, char *argv[])
 		break;
 	    }
 	    collect->set = 0;
-	    gps_send(collect, buf);
-	    gps_poll(collect);
+	    (void)gps_send(collect, buf);
+	    (void)gps_read(collect);
 	    libgps_dump_state(collect, time(NULL));
 	}
 	(void)gps_close(collect);

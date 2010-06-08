@@ -899,7 +899,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	} else if (data) {
 	    errno = 0;
-	    if (gps_poll(&gpsdata) != 0) {
+	    if (gps_read(&gpsdata) == -1) {
 		fprintf(stderr, "cgps: socket error 4\n");
 		die(errno == 0 ? GPS_GONE : GPS_ERROR);
 	    }

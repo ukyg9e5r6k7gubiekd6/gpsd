@@ -540,8 +540,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
 	else if (data) {
-	    /* code that calls gps_poll(gpsdata) */
-	    (void)gps_poll(&gpsdata);
+	    (void)gps_read(&gpsdata);
 	}
 
     }

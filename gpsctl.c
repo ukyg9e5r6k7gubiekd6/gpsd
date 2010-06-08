@@ -81,7 +81,7 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
-    ret = gps_poll(gpsdata);
+    ret = gps_read(gpsdata);
     if (ERROR_IS & gpsdata->set) {
 	gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
     }
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
 	struct devconfig_t *devlistp;
-	(void)gps_poll(&gpsdata);
+	(void)gps_read(&gpsdata);
 	if ((gpsdata.set & DEVICELIST_SET) != 0) {
 	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
 	    (void)gps_close(&gpsdata);

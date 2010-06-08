@@ -1049,6 +1049,7 @@ extern int gps_open_r(/*@null@*/const char *, /*@null@*/const char *,
 extern /*@null@*/struct gps_data_t *gps_open(const char *, const char *);
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
+extern int gps_read(/*@out@*/struct gps_data_t *);
 extern int gps_poll(/*@out@*/struct gps_data_t *);
 extern bool gps_waiting(struct gps_data_t *);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
