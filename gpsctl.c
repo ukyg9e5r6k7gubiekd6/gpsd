@@ -263,7 +263,6 @@ int main(int argc, char **argv)
     }
     /*@-nullpass@*/
 
-    /*@-compdef -uniondef -usedef@*/ 
     /* ^ someday, add out annotation to the gpspoll() param  and remove */
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
@@ -634,7 +633,6 @@ int main(int argc, char **argv)
 	    context.readonly = write_enable;
 	}
 #endif /* ALLOW_RECONFIGURE */
-	/*@+compdef +uniondef +usedef@*/
 #ifdef ALLOW_CONTROLSEND
 	/*@ -compdef @*/
 	if (control) {

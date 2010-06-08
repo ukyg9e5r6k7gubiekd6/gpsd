@@ -90,7 +90,7 @@ static void gps_trace(int errlevel, const char *fmt, ...)
 #endif /* LIBGPS_DEBUG */
 
 /*@-nullderef@*/
-int gps_open_r(const char *host, const char *port,
+int gps_open_r(/*@null@*/const char *host, /*@null@*/const char *port,
 	       /*@out@*/ struct gps_data_t *gpsdata)
 {
     /*@ -branchstate @*/
@@ -540,7 +540,8 @@ bool gps_waiting(struct gps_data_t * gpsdata)
 #endif
 }
 
-int gps_poll(struct gps_data_t *gpsdata)
+/*@-compdef -usedef -uniondef@*/
+int gps_poll(/*@out@*/struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */
 {
     char *eol;
@@ -615,6 +616,7 @@ int gps_poll(struct gps_data_t *gpsdata)
 
     return 0;
 }
+/*@+compdef -usedef +uniondef@*/
 
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
 /* send a command to the gpsd instance */
