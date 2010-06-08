@@ -112,7 +112,7 @@ attached to
 set depending on the error returned from the the socket layer; see
 <filename>gps.h</filename> for values and explanations. The host
 address may be a DNS name, an IPv4 dotted quad, or an IPV6 address;
-the library will do the roight thing for any of these.</para>
+the library will do the right thing for any of these.</para>
 
 <para><function>gps_open_r()</function> is a reentrent-friendly
 version that puts the session storage where you wish to allocate it.
