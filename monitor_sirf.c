@@ -59,7 +59,8 @@ static char *dgpsvec[] = {
     "Software",
 };
 
-#define CHECK_RANGE(vec, i) (((i) >= 0) && ((i) < sizeof(vec)/sizeof(vec[0])))
+/* check range of an unsigned quantity */
+#define CHECK_RANGE(vec, i) ((i) < sizeof(vec)/sizeof(vec[0]))
 
 /*****************************************************************************
  *
