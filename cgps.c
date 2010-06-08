@@ -105,7 +105,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
-static struct gps_data_t *gpsdata;
+static struct gps_data_t gpsdata;
 static time_t status_timer;	/* Time of last state change. */
 static int state = 0;		/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 static float altfactor = METERS_TO_FEET;
@@ -218,7 +218,7 @@ static void die(int sig)
     (void)endwin();
 
     /* We're done talking to gpsd. */
-    (void)gps_close(gpsdata);
+    (void)gps_close(&gpsdata);
 
     switch (sig) {
     case CGPS_QUIT:
@@ -851,8 +851,7 @@ int main(int argc, char *argv[])
 	gpsd_source_spec(NULL, &source);
 
     /* Open the stream to gpsd. */
-    /*@i@*/ gpsdata = gps_open(source.server, source.port);
-    if (!gpsdata) {
+    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "cgps: no gpsd running or network error: %d, %s\n",
 		      errno, gps_errstr(errno));
@@ -870,37 +869,37 @@ int main(int argc, char *argv[])
     /* Here's where updates go now that things are established. */
 #ifdef TRUENORTH
     if (compass_flag) {
-	gps_set_raw_hook(gpsdata, update_compass_panel);
+	gps_set_raw_hook(&gpsdata, update_compass_panel);
     } else
 #endif /* TRUENORTH */
     {
-	gps_set_raw_hook(gpsdata, update_gps_panel);
+	gps_set_raw_hook(&gpsdata, update_gps_panel);
     }
 
     status_timer = time(NULL);
 
-    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
+    (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
 
     /* heart of the client */
     for (;;) {
 
 	/* watch to see when it has input */
 	FD_ZERO(&rfds);
-	FD_SET(gpsdata->gps_fd, &rfds);
+	FD_SET(gpsdata.gps_fd, &rfds);
 
 	/* wait up to five seconds. */
 	timeout.tv_sec = 5;
 	timeout.tv_usec = 0;
 
 	/* check if we have new information */
-	data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
+	data = select(gpsdata.gps_fd + 1, &rfds, NULL, NULL, &timeout);
 
 	if (data == -1) {
 	    fprintf(stderr, "cgps: socket error 3\n");
 	    exit(2);
 	} else if (data) {
 	    errno = 0;
-	    if (gps_poll(gpsdata) != 0) {
+	    if (gps_poll(&gpsdata) != 0) {
 		fprintf(stderr, "cgps: socket error 4\n");
 		die(errno == 0 ? GPS_GONE : GPS_ERROR);
 	    }

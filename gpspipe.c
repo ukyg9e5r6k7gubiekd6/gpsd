@@ -47,7 +47,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
-static struct gps_data_t *gpsdata;
+static struct gps_data_t gpsdata;
 static void spinner(unsigned int, unsigned int);
 
 /* NMEA-0183 standard baud rate */
@@ -295,8 +295,7 @@ int main(int argc, char **argv)
 	open_serial(serialport);
 
     /*@ -nullpass -onlytrans @*/
-    gpsdata = gps_open(source.server, source.port);
-    if (gpsdata == NULL) {
+    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      source.server, source.port, strerror(errno), errno);
@@ -306,7 +305,7 @@ int main(int argc, char **argv)
 
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
-    (void)gps_stream(gpsdata, flags, source.device);
+    (void)gps_stream(&gpsdata, flags, source.device);
 
     if ((isatty(STDERR_FILENO) == 0) || daemon)
 	vflag = 0;
@@ -320,7 +319,7 @@ int main(int argc, char **argv)
 	    spinner(vflag, l++);
 
 	/* reading directly from the socket avoids decode overhead */
-	readbytes = (int)read(gpsdata->gps_fd, buf, sizeof(buf));
+	readbytes = (int)read(gpsdata.gps_fd, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0; i < readbytes; i++) {
 		char c = buf[i];

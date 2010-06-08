@@ -299,44 +299,43 @@ static void process(struct gps_data_t *gpsdata,
     conditionally_log_fix(&gpsdata->fix);
 }
 
-/*@-mustfreefresh@*/
+/*@-mustfreefresh -compdestroy@*/
 static int socket_mainloop(void)
 {
     fd_set fds;
-    struct gps_data_t *gpsdata;
+    struct gps_data_t gpsdata;
 
-    gpsdata = gps_open(source.server, source.port);
-    if (!gpsdata) {
-	fprintf(stderr,
-		"%s: no gpsd running or network error: %d, %s\n",
-		progname, errno, gps_errstr(errno));
+    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
+	(void)fprintf(stderr,
+		      "%s: no gpsd running or network error: %d, %s\n",
+		      progname, errno, gps_errstr(errno));
 	exit(1);
     }
 
-    gps_set_raw_hook(gpsdata, process);
-    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
+    gps_set_raw_hook(&gpsdata, process);
+    (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
 
     for (;;) {
 	int data;
 	struct timeval tv;
 
 	FD_ZERO(&fds);
-	FD_SET(gpsdata->gps_fd, &fds);
+	FD_SET(gpsdata.gps_fd, &fds);
 
 	tv.tv_usec = 250000;
 	tv.tv_sec = 0;
-	data = select(gpsdata->gps_fd + 1, &fds, NULL, NULL, &tv);
+	data = select(gpsdata.gps_fd + 1, &fds, NULL, NULL, &tv);
 
 	if (data == -1) {
 	    (void)fprintf(stderr, "%s\n", strerror(errno));
 	    break;
 	} else if (data)
-	    (void)gps_poll(gpsdata);
+	    (void)gps_poll(&gpsdata);
     }
+    (void)gps_close(&gpsdata);
     return 0;
 }
-
-/*@+mustfreefresh@*/
+/*@+mustfreefresh +compdestroy@*/
 
 /**************************************************************************
  *

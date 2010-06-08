@@ -1098,7 +1098,7 @@ extern double wgs84_separation(double, double);
 #define WGS84F 298.257223563	/* flattening */
 #define WGS84B 6356752.3142	/* polar radius */
 
-/* gps_open() errno return values */
+/* netlib_connectsock() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
 #define NL_NOHOST	-2	/* can't get host entry */
 #define NL_NOPROTO	-3	/* can't get protocol entry */
