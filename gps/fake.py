@@ -83,9 +83,9 @@ import packet as sniffer
 # tick don't make any difference
 WRITE_PAD = 0.001
 
-# We delay briefly seconds after a GPS source is exhausted
-# before removing it.  This should give its subscribers time
-# to get gpsd's response before we call the cleanup code.
+# We delay briefly after a GPS source is exhausted before removing it.
+# This should give its subscribers time to get gpsd's response before
+# we call the cleanup code.
 # Note that because time() is used, using fractional seconds in
 # CLOSE_DELAY has on effect.
 CLOSE_DELAY = 1
