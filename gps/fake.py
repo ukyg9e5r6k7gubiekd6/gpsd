@@ -83,10 +83,12 @@ import packet as sniffer
 # tick don't make any difference
 WRITE_PAD = 0.001
 
-# We delay a few seconds after a GPS source is exhausted
+# We delay briefly seconds after a GPS source is exhausted
 # before removing it.  This should give its subscribers time
 # to get gpsd's response before we call the cleanup code.
-CLOSE_DELAY = 0.05
+# Note that because time() is used, using fractional seconds in
+# CLOSE_DELAY has on effect.
+CLOSE_DELAY = 1
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
