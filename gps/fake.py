@@ -70,24 +70,27 @@ import gps
 import packet as sniffer
 
 # The two magic numbers below have to be derived from observation.  If
-# they're too high you'll slow the tests down a lot.  If they's too low
+# they're too high you'll slow the tests down a lot.  If they're too low
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
-# check file.  These numbers might have to be adusted upward on faster
-# machines.  They need for them may be symnptomatic of race conditions
+# check file.  These numbers might have to be adjusted upward on faster
+# machines.  The need for them may be symnptomatic of race conditions
 # in the pty layer or elsewhere.
 
 # Define a per-line delay on writes so we won't spam the buffers in
 # the pty layer or gpsd itself.  Removing this entirely was tried but
-# caused failures under NetBSD.  Valus smaller than the stem timer
-# tick don't make any difference
+# caused failures under NetBSD.  Values smaller than the system timer
+# tick don't make any difference here.
 WRITE_PAD = 0.001
 
 # We delay briefly after a GPS source is exhausted before removing it.
 # This should give its subscribers time to get gpsd's response before
-# we call the cleanup code.
-# Note that because time() is used, using fractional seconds in
-# CLOSE_DELAY has on effect.
+# we call the cleanup code. Note that using fractional seconds in
+# CLOSE_DELAY may have no effect; Python time.time() returns a float
+# value, but it is not guaranteed that the C implementation underneath
+# will return with precision finer than 1 second.  In particular,
+# trying to drop this to 0.5 under NetBSD produces failures.
+# (Linux returns full precision.)
 CLOSE_DELAY = 1
 
 class TestLoadError(exceptions.Exception):
