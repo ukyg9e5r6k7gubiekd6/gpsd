@@ -87,10 +87,9 @@ WRITE_PAD = 0.001
 # This should give its subscribers time to get gpsd's response before
 # we call the cleanup code. Note that using fractional seconds in
 # CLOSE_DELAY may have no effect; Python time.time() returns a float
-# value, but it is not guaranteed that the C implementation underneath
-# will return with precision finer than 1 second.  In particular,
-# trying to drop this to 0.5 under NetBSD produces failures.
-# (Linux returns full precision.)
+# value, but it is not guaranteed by Python that the C implementation
+# underneath will return with precision finer than 1 second. (Linux
+# and *BSD return full precision.)
 CLOSE_DELAY = 1
 
 class TestLoadError(exceptions.Exception):
