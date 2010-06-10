@@ -1336,6 +1336,148 @@ static void json_report(struct subscriber_t *sub,
 #endif /* TIMING_ENABLE */
 }
 
+static void consume_packets(struct gps_device_t *device)
+/* consume and report packets from a specified device */
+{
+    gps_mask_t changed;
+    int fragments;
+    struct subscriber_t *sub;
+
+    gpsd_report(LOG_RAW + 1, "polling %d\n",
+		device->gpsdata.gps_fd);
+
+    for (fragments = 0; ; fragments++) {
+	changed = gpsd_poll(device);
+
+	if (changed == ERROR_IS) {
+	    gpsd_report(LOG_WARN,
+			"packet sniffer failed sync with %s (flags %s)\n",
+			device->gpsdata.dev.path, 
+			gpsd_maskdump(changed));
+	    deactivate_device(device);
+	    break;
+	} else if (changed == NODATA_IS) {
+	    /*
+	     * No data on the first fragment read means the device
+	     * fd was in an end-of-file condition on select. 
+	     */
+	    if (fragments == 0) {
+		gpsd_report(LOG_WARN,
+			    "%s returned error or went offline\n",
+			    device->gpsdata.dev.path);
+		deactivate_device(device);
+	    }
+	    /*
+	     * No data on later fragment reads just means the
+	     * input buffer is empty.  In this case break out
+	     * of the packet-processing loop but don't drop
+	     * the device.
+	     */
+	    break;
+	}
+
+	/* must have a full packet to continue */
+	if ((changed & PACKET_IS) == 0)
+	    break;
+
+	/* add any just-identified device to watcher lists */
+	if ((changed & DRIVER_IS) != 0) {
+	    bool listeners = false;
+	    for (sub = subscribers;
+		 sub < subscribers + MAXSUBSCRIBERS; sub++)
+		if (sub->active != 0
+		    && sub->policy.watcher
+		    && (sub->policy.devpath[0] == '\0'
+			|| strcmp(sub->policy.devpath,
+				  device->gpsdata.dev.path) == 0))
+		    listeners = true;
+	    if (listeners)
+		(void)awaken(device);
+	}
+
+	/* handle laggy response to a firmware version query */
+	if ((changed & (DEVICEID_IS | DRIVER_IS)) != 0) {
+	    assert(device->device_type != NULL);
+	    {
+		char id2[GPS_JSON_RESPONSE_MAX];
+		json_device_dump(device, id2, sizeof(id2));
+		notify_watchers(device, id2);
+	    }
+	}
+
+	/* 
+	 * If the device provided an RTCM packet, stash it 
+	 * in the context structure for use as a future correction.
+	 */
+	if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
+	    if (device->packet.outbuflen > RTCM_MAX) {
+		gpsd_report(LOG_ERROR, 
+			    "overlong RTCM packet (%zd bytes)\n",
+			    device->packet.outbuflen);
+	    } else {
+		context.rtcmbytes = device->packet.outbuflen;
+		memcpy(context.rtcmbuf, 
+		       device->packet.outbuffer, 
+		       context.rtcmbytes);
+	    }
+	}
+
+	/*
+	 * If no reliable end of cycle, must report every time
+	 * a sentence changes position or mode. Likely to
+	 * cause display jitter.
+	 */
+	if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS))!=0)
+	    changed |= REPORT_IS;
+
+	/* a few things are not per-subscriber reports */
+	if ((changed & REPORT_IS) != 0) {
+	    if (device->gpsdata.fix.mode == MODE_3D)
+		netgnss_report(device);
+#ifdef DBUS_ENABLE
+	    send_dbus_fix(device);
+#endif /* DBUS_ENABLE */
+	}
+
+	/* update all subscribers associated with this device */
+	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	    /*@-nullderef@*/
+	    if (sub == NULL || sub->active == 0)
+		continue;
+
+	    /* report raw packets to users subscribed to those */
+	    raw_report(sub, device);
+
+	    /* some listeners may be in watcher mode */
+	    if (sub->policy.watcher) {
+		if (changed & DATA_IS) {
+		    gpsd_report(LOG_PROG,
+				"Changed mask: %s with %sreliable cycle detection\n",
+				gpsd_maskdump(changed),
+				device->cycle_end_reliable ? "" : "un");
+		    if ((changed & REPORT_IS) != 0)
+			gpsd_report(LOG_PROG, "time to report a fix\n");
+
+		    if (sub->policy.nmea)
+			pseudonmea_report(sub, changed, device);
+
+		    if (sub->policy.json)
+			json_report(sub, changed, device);
+		}
+	    }
+	    /*@+nullderef@*/
+	} /* subscribers */
+
+	/* 
+	 * Trying to read a nonexistent datagram hangs,
+	 * so only go through the poll loop once after 
+	 * select in this case.
+	 */
+	if (device->sourcetype == source_udp)
+	    break;
+    }
+}
+
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 /* execute GPSD requests from a buffer */
 {
@@ -1360,7 +1502,6 @@ int main(int argc, char *argv[])
 {
     char *pid_file = NULL;
     int st, csock = -1;
-    gps_mask_t changed;
     static char *gpsd_service = NULL;	/* static pacifies splint */
     char *control_socket = NULL;
     struct gps_device_t *device;
@@ -1751,145 +1892,9 @@ int main(int argc, char *argv[])
 		rtcm_relay(device);
 
 	    /* get data from the device */
-	    changed = 0;
 	    if (device->gpsdata.gps_fd >= 0
-		&& FD_ISSET(device->gpsdata.gps_fd, &rfds)) {
-		int fragments;
-
-		gpsd_report(LOG_RAW + 1, "polling %d\n",
-			    device->gpsdata.gps_fd);
-
-		for (fragments = 0; ; fragments++) {
-		    changed = gpsd_poll(device);
-
-		    if (changed == ERROR_IS) {
-			gpsd_report(LOG_WARN,
-				    "packet sniffer failed sync with %s (flags %s)\n",
-				    device->gpsdata.dev.path, 
-				    gpsd_maskdump(changed));
-			deactivate_device(device);
-			break;
-		    } else if (changed == NODATA_IS) {
-			/*
-			 * No data on the first fragment read means the device
-			 * fd was in an end-of-file condition on select. 
-			 */
-			if (fragments == 0) {
-			    gpsd_report(LOG_WARN,
-					"%s returned error or went offline\n",
-					device->gpsdata.dev.path);
-			    deactivate_device(device);
-			}
-			/*
-			 * No data on later fragment reads just means the
-			 * input buffer is empty.  In this case break out
-			 * of the packet-processing loop but don't drop
-			 * the device.
-			 */
-			break;
-		    }
-
-		    /* must have a full packet to continue */
-		    if ((changed & PACKET_IS) == 0)
-			break;
-
-		    /* add any just-identified device to watcher lists */
-		    if ((changed & DRIVER_IS) != 0) {
-			bool listeners = false;
-			for (sub = subscribers;
-			     sub < subscribers + MAXSUBSCRIBERS; sub++)
-			    if (sub->active != 0
-				&& sub->policy.watcher
-				&& (sub->policy.devpath[0] == '\0'
-				    || strcmp(sub->policy.devpath,
-					      device->gpsdata.dev.path) == 0))
-				listeners = true;
-			if (listeners)
-			    (void)awaken(device);
-		    }
-
-		    /* handle laggy response to a firmware version query */
-		    if ((changed & (DEVICEID_IS | DRIVER_IS)) != 0) {
-			assert(device->device_type != NULL);
-			{
-			    char id2[GPS_JSON_RESPONSE_MAX];
-			    json_device_dump(device, id2, sizeof(id2));
-			    notify_watchers(device, id2);
-			}
-		    }
-
-		    /* 
-		     * If the device provided an RTCM packet, stash it 
-		     * in the context structure for use as a future correction.
-		     */
-		    if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
-			if (device->packet.outbuflen > RTCM_MAX) {
-			    gpsd_report(LOG_ERROR, 
-					"overlong RTCM packet (%zd bytes)\n",
-					device->packet.outbuflen);
-			} else {
-			    context.rtcmbytes = device->packet.outbuflen;
-			    memcpy(context.rtcmbuf, 
-				   device->packet.outbuffer, 
-				   context.rtcmbytes);
-			}
-		    }
-
-		    /*
-		     * If no reliable end of cycle, must report every time
-		     * a sentence changes position or mode. Likely to
-		     * cause display jitter.
-		     */
-		    if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS))!=0)
-			changed |= REPORT_IS;
-
-		    /* a few things are not per-subscriber reports */
-		    if ((changed & REPORT_IS) != 0) {
-			if (device->gpsdata.fix.mode == MODE_3D)
-			    netgnss_report(device);
-#ifdef DBUS_ENABLE
-			send_dbus_fix(device);
-#endif /* DBUS_ENABLE */
-		    }
-
-		    /* update all subscribers associated with this device */
-		    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-			/*@-nullderef@*/
-			if (sub == NULL || sub->active == 0)
-			    continue;
-
-			/* report raw packets to users subscribed to those */
-			raw_report(sub, device);
-
-			/* some listeners may be in watcher mode */
-			if (sub->policy.watcher) {
-			    if (changed & DATA_IS) {
-				gpsd_report(LOG_PROG,
-					    "Changed mask: %s with %sreliable cycle detection\n",
-					    gpsd_maskdump(changed),
-					    device->cycle_end_reliable ? "" : "un");
-				if ((changed & REPORT_IS) != 0)
-				    gpsd_report(LOG_PROG, "time to report a fix\n");
-
-				if (sub->policy.nmea)
-				    pseudonmea_report(sub, changed, device);
-
-				if (sub->policy.json)
-				    json_report(sub, changed, device);
-			    }
-			}
-			/*@+nullderef@*/
-		    } /* subscribers */
-
-		    /* 
-		     * Trying to read a nonexistent datagram hangs,
-		     * so only go through the poll loop once after 
-		     * select in this case.
-		     */
-		    if (device->sourcetype == source_udp)
-			break;
-		}
-	    }
+		&& FD_ISSET(device->gpsdata.gps_fd, &rfds))
+		consume_packets(device);
 	} /* devices */
 
 #ifdef NOT_FIXED
