@@ -37,7 +37,7 @@ does) or do something more exotic. A client session is identified by a
 small integer that counts the number of client session starts.
 
 There are a couple of convenience methods.  TestSession.wait() does nothing,
-allowing a specified number of seconds to elapse.  TestSession.client_query()
+allowing a specified number of seconds to elapse.  TestSession.send()
 ships commands to an open client session.
 
 TestSession does not currently capture the daemon's log output.  It is
