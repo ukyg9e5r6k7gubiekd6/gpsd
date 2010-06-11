@@ -1380,6 +1380,11 @@ static void consume_packets(struct gps_device_t *device)
 	if ((changed & PACKET_IS) == 0)
 	    break;
 
+	gpsd_report(LOG_DATA,
+		    "packet from %s with %s\n", 
+		    device->gpsdata.dev.path,
+		    gpsd_maskdump(device->gpsdata.set));
+
 	/* add any just-identified device to watcher lists */
 	if ((changed & DRIVER_IS) != 0) {
 	    bool listeners = false;
