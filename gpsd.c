@@ -1351,7 +1351,7 @@ static void consume_packets(struct gps_device_t *device)
 
 	if (changed == ERROR_IS) {
 	    gpsd_report(LOG_WARN,
-			"packet sniffer failed sync with %s (flags %s)\n",
+			"device read of %s returned error or packet sniffer failed sync (flags %s)\n",
 			device->gpsdata.dev.path, 
 			gpsd_maskdump(changed));
 	    deactivate_device(device);
@@ -1363,7 +1363,7 @@ static void consume_packets(struct gps_device_t *device)
 	     */
 	    if (fragments == 0) {
 		gpsd_report(LOG_WARN,
-			    "%s returned error or went offline\n",
+			    "%s returned zero bytes\n",
 			    device->gpsdata.dev.path);
 		deactivate_device(device);
 	    }

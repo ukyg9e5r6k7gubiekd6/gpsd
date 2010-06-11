@@ -672,9 +672,15 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     /* update the scoreboard structure from the GPS */
     gpsd_report(LOG_RAW + 2, "%s sent %zd new characters\n",
 		session->gpsdata.dev.path, newlen);
-    if (newlen <= 0) {		/* read error or EOF */
-	gpsd_report(LOG_INF, "GPS on %s is offline (status %zd, %lf sec since data)\n",
+    if (newlen < 0) {		/* read error */
+	gpsd_report(LOG_INF, "GPS on %s returned error %zd (%lf sec since data)\n",
 		    session->gpsdata.dev.path, newlen,
+		    timestamp() - session->gpsdata.online);
+	session->gpsdata.online = 0;
+	return ERROR_IS;
+    } else if (newlen == 0) {		/* zero length read, possible EOF */
+	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+		    session->gpsdata.dev.path,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = 0;
 	return NODATA_IS;
