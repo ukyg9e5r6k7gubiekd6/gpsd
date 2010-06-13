@@ -721,11 +721,11 @@ field_groups = (
     # This one occurs in message type 4
     (3, ["year", "month", "day", "hour", "minute", "second"],
      "time", "Timestamp",
-     lambda y, m, d, h, n, s: "%02d:%02d:%02dT%02d:%02d:%02dZ" % (y, m, d, h, n, s)),
+     lambda y, m, d, h, n, s: "%02d-%02d-%02dT%02d:%02d:%02dZ" % (y, m, d, h, n, s)),
     # This one is in message 5
     (13, ["month", "day", "hour", "minute", "second"],
      "eta", "Estimated Time of Arrival",
-     lambda m, d, h, n, s: "%02d:%02dT%02d:%02d:%02dZ" % (m, d, h, n, s)),
+     lambda m, d, h, n, s: "%02d-%02dT%02d:%02d:%02dZ" % (m, d, h, n, s)),
 )
 
 # Message-type-specific information ends here.

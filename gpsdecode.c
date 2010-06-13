@@ -69,7 +69,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     case 4:			/* Base Station Report */
     case 11:			/* UTC/Date Response */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%04u:%02u:%02uT%02u:%02u:%02uZ|%u|%d|%d|%u|%u|0x%x",
+		       "%04u-%02u-%02uT%02u:%02u:%02uZ|%u|%d|%d|%u|%u|0x%x",
 		       ais->type4.year,
 		       ais->type4.month,
 		       ais->type4.day,
