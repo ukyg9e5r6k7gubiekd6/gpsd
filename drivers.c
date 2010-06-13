@@ -901,8 +901,24 @@ static const struct gps_type_t rtcm104v3 = {
 
 static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
 {
-    //gpsd_report(LOG_PROG, "Garmin Simple Text packet\n");
-    return garmintxt_parse(session);
+    if (session->packet.type == COMMENT_PACKET) {
+	return 0;
+    } else if (session->packet.type == GARMINTXT_PACKET) {	
+	//gpsd_report(LOG_PROG, "Garmin Simple Text packet\n");
+	return garmintxt_parse(session);
+    } else {
+	const struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if (session->packet.type == (*dp)->packet_type) {
+		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
+			    (*dp)->type_name);
+		(void)gpsd_switch_driver(session, (*dp)->type_name);
+		return (*dp)->parse_packet(session);
+	    }
+	}
+	return 0;
+    }
 }
 
 /* *INDENT-OFF* */
