@@ -252,7 +252,7 @@ static gps_mask_t processGPGLL(int count, char *field[],
      * actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
-    gps_mask_t mask = ERROR_IS;
+    gps_mask_t mask = 0;
 
     if (field[5][0] != '\0') {
 	merge_hhmmss(field[5], session);
@@ -267,7 +267,6 @@ static gps_mask_t processGPGLL(int count, char *field[],
     if (strcmp(field[6], "A") == 0 && (count < 8 || *status != 'N')) {
 	int newstatus = session->gpsdata.status;
 
-	mask &= ~ERROR_IS;
 	do_lat_lon(&field[1], &session->newdata);
 	mask |= LATLON_IS;
 	if (count >= 8 && *status == 'D')
@@ -482,7 +481,7 @@ static gps_mask_t processGPGSV(int count, char *field[],
     session->driver.nmea.await = atoi(field[1]);
     if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
 	gpsd_zero_satellites(&session->gpsdata);
-	return ERROR_IS;
+	return 0;
     } else if (session->driver.nmea.part == 1)
 	gpsd_zero_satellites(&session->gpsdata);
 
@@ -568,7 +567,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
 	session->newdata.epx =
 	    session->newdata.epy =
 	    session->newdata.epv = session->gpsdata.epe = 100;
-	mask = ERROR_IS;
+	mask = 0;
     } else {
 	session->newdata.epx = session->newdata.epy =
 	    atof(field[1]) * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
@@ -648,7 +647,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
 	gpsd_report(LOG_WARN, "malformed ZDA\n");
-	mask = ERROR_IS;
+	mask = 0;
     } else {
 	merge_hhmmss(field[1], session);
 	/*
