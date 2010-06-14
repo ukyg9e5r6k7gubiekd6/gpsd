@@ -106,7 +106,7 @@
  * when throttled_write() fills up the outbound buffers and the
  * NOREAD_TIMEOUT expires.
  *
- * Finally, RELEASE_TIMEOUT sets the amount of time we hold a device
+ * RELEASE_TIMEOUT sets the amount of time we hold a device
  * open after the last subscriber closes it; this is nonzero so a
  * client that does open/query/close will have time to come back and
  * do another single-shot query, if it wants to, before the device is
@@ -117,10 +117,14 @@
  * device is in progress.  The result is that if you close the device
  * when it's powered up, a re-open can fail with EIO and needs to be
  * tried repeatedly.  Better to avoid this...
+ *
+ * DEVICE_REAWAKE says how long to wait before repolling after a zero-length
+ * read. It's there so we avoid spinning forever on an EOF condition.
  */
 #define COMMAND_TIMEOUT		60*15
 #define NOREAD_TIMEOUT		60*3
 #define RELEASE_TIMEOUT		60
+#define DEVICE_REAWAKE		0.01
 
 #define QLEN			5
 
@@ -1358,13 +1362,27 @@ static void consume_packets(struct gps_device_t *device)
 	} else if (changed == NODATA_IS) {
 	    /*
 	     * No data on the first fragment read means the device
-	     * fd was in an end-of-file condition on select. 
+	     * fd may have been in an end-of-file condition on select. 
 	     */
 	    if (fragments == 0) {
-		gpsd_report(LOG_WARN,
+		gpsd_report(LOG_DATA,
 			    "%s returned zero bytes\n",
 			    device->gpsdata.dev.path);
-		deactivate_device(device);
+		if (device->zerokill)
+		    /* failed timeout-and-reawake, kill it */
+		    deactivate_device(device);
+		else {
+		    /*
+		     * Disable listening to this fd for long enough
+		     * that the buffer can fill up again.
+		     */
+		    gpsd_report(LOG_DATA,
+				"%s will be repolled in %f seconds\n",
+				device->gpsdata.dev.path, DEVICE_REAWAKE);
+		    device->reawake = timestamp() + DEVICE_REAWAKE;
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, false);
+		}
 	    }
 	    /*
 	     * No data on later fragment reads just means the
@@ -1374,6 +1392,10 @@ static void consume_packets(struct gps_device_t *device)
 	     */
 	    break;
 	}
+
+	/* we got actual data, head off the reawake special case */
+	device->zerokill = false;
+	device->reawake = 0;
 
 	/* must have a full packet to continue */
 	if ((changed & PACKET_IS) == 0)
@@ -1895,10 +1917,21 @@ int main(int argc, char *argv[])
 	    if (device->device_type != NULL)
 		rtcm_relay(device);
 
-	    /* get data from the device */
-	    if (device->gpsdata.gps_fd >= 0
-		&& FD_ISSET(device->gpsdata.gps_fd, &rfds))
-		consume_packets(device);
+	    if (device->gpsdata.gps_fd >= 0) {
+		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
+		    /* get data from the device */
+		    consume_packets(device);
+	        else if (device->reawake>0 && timestamp()>device->reawake) {
+		    /* device may have had a zero-length read */
+		    gpsd_report(LOG_DATA,
+				"%s reawakened after zero-length read\n",
+				device->gpsdata.dev.path);
+		    device->reawake = 0;
+		    device->zerokill = true;
+		    FD_SET(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, true);
+		}
+		    }
 	} /* devices */
 
 #ifdef NOT_FIXED

@@ -72,6 +72,8 @@ void gpsd_tty_init(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif	/* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+    session->zerokill = false;
+    session->reawake = 0;
 }
 
 #if defined(__CYGWIN__)
