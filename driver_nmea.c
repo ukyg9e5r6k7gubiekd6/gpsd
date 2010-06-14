@@ -642,12 +642,11 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
      * with some fields blank under poorly-understood circumstances (probably
      * when they don't have satellite lock yet).
      */
-    gps_mask_t mask;
+    gps_mask_t mask = 0;
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
 	gpsd_report(LOG_WARN, "malformed ZDA\n");
-	mask = 0;
     } else {
 	merge_hhmmss(field[1], session);
 	/*
