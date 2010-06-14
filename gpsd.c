@@ -640,7 +640,7 @@ static void deactivate_device(struct gps_device_t *device)
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 	gpsd_deactivate(device);
-	device->gpsdata.gps_fd = -1;	/* device is already disconnected */
+	device->gpsdata.gps_fd = -1;
     }
 }
 
