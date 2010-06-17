@@ -77,7 +77,7 @@ case $mode in
         echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
-	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc; exit $errors' EXIT HUP INT TERM
+	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$; exit $errors' EXIT HUP INT TERM
 	    if [ -r $f.chk ]
 	    then
 		case $testing in
@@ -86,14 +86,12 @@ case $mode in
 		esac
 		sed -n <${f}.chk >${TMP}/log-copy-$$.chk ${ALTFILTER} -e 'p';
 		sed -n <${TMP}/test-$$.chk >${TMP}/test-whole-$$.chk ${ALTFILTER} -e 'p';
-		sed -n <${TMP}/test-$$.chk >${TMP}/test-trunc-$$.chk -e '$d' ${ALTFILTER} -e 'p';
 		diff -ub ${TMP}/log-copy-$$.chk ${TMP}/test-whole-$$.chk >${TMP}/diff-$$;
-		diff -ub ${TMP}/log-copy-$$.chk ${TMP}/test-trunc-$$.chk >${TMP}/diff-$$-trunc;
-		if test \( -s ${TMP}/diff-$$ \) -a \( -s ${TMP}/diff-$$-trunc \) ; then
+		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
 		    cat ${TMP}/diff-$$
 		fi;
-		rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/test-trunc-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$ ${TMP}/diff-$$-trunc
+		rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$
 	    else
 		echo "*** No check log $f.chk exists"
 		notfound=`expr $notfound + 1`;
