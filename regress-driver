@@ -77,21 +77,26 @@ case $mode in
         echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;
         for f in $*; do
-	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$; exit $errors' EXIT HUP INT TERM
+	    trap 'rm -f ${TMP}/test-$$.chk ${TMP}/testout-$$.chk ${TMP}/testin-$$.chk ${TMP}/diff-$$; exit $errors' EXIT HUP INT TERM
 	    if [ -r $f.chk ]
 	    then
 		case $testing in
 		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
 		clientlib) $GPSD_HOME/libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
-		sed -n <${f}.chk >${TMP}/log-copy-$$.chk ${ALTFILTER} -e 'p';
-		sed -n <${TMP}/test-$$.chk >${TMP}/test-whole-$$.chk ${ALTFILTER} -e 'p';
-		diff -ub ${TMP}/log-copy-$$.chk ${TMP}/test-whole-$$.chk >${TMP}/diff-$$;
+		if [ "${ALTFILTER}" ]
+		then
+		    sed -n <${f}.chk >${TMP}/testin-$$.chk ${ALTFILTER} -e 'p';
+		    sed -n <${TMP}/test-$$.chk >${TMP}/testout-$$.chk ${ALTFILTER} -e 'p';
+		    diff -ub ${TMP}/testin-$$.chk ${TMP}/testout-$$.chk >${TMP}/diff-$$;
+		else
+		    diff -ub ${f}.chk ${TMP}/test-$$.chk >${TMP}/diff-$$;
+		fi
 		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
 		    cat ${TMP}/diff-$$
 		fi;
-		rm -f ${TMP}/test-$$.chk ${TMP}/test-whole-$$.chk ${TMP}/log-copy-$$.chk ${TMP}/diff-$$
+		rm -f ${TMP}/test-$$.chk ${TMP}/testout-$$.chk ${TMP}/testin-$$.chk ${TMP}/diff-$$
 	    else
 		echo "*** No check log $f.chk exists"
 		notfound=`expr $notfound + 1`;
