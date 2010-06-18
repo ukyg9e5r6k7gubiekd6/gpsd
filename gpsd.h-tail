@@ -286,6 +286,7 @@ typedef enum {source_unknown,
 	      source_blockdev,
 	      source_rs232,
 	      source_usb,
+	      source_bluetooth,
 	      source_pty,
 	      source_tcp,
 	      source_udp}

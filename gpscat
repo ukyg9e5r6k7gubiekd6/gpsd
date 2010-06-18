@@ -5,7 +5,7 @@
 #
 # Display GPS output.  Hexify it if necessary.
 #
-import os, sys, termios, select, getopt, curses.ascii
+import os, sys, termios, socket, select, getopt, curses.ascii
 import gps.packet as sniffer
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
@@ -63,7 +63,13 @@ if __name__ == '__main__':
                 sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
                 raise SystemExit, 0
 
-        tty = os.open(arguments[0], os.O_RDWR)
+        if "rfcomm" in arguments[0]:     # Bluetooth special case
+            s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+            s.connect((arguments[0], 1))
+            tty = s.fileno()
+        else:                            # Ordinary device
+            tty = os.open(arguments[0], os.O_RDWR)
+
         if speed != None:
             (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(tty)
             try:

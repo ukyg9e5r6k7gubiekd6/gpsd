@@ -11,7 +11,19 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
+
 #include "gpsd_config.h"
+
+#ifdef HAVE_BLUEZ
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/rfcomm.h>
+#endif
 
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
@@ -51,6 +63,8 @@ static sourcetype_t gpsd_classify(const char *path)
 	    devtype = source_rs232;
 	else if (devmajor == 188)
 	    devtype = source_usb;
+	else if (devmajor == 216 || devtype == 217)
+	    devtype = source_bluetooth;
 	else if (devmajor == 3 || (devmajor >= 136 && devmajor <= 143))
 	    devtype = source_pty;
 #endif /* __linux__ */
@@ -299,21 +313,45 @@ int gpsd_open(struct gps_device_t *session)
 		    (int)session->sourcetype, session->gpsdata.dev.path);
     }
     /*@ +boolops +type @*/
-
-    if ((session->gpsdata.gps_fd =
-	 open(session->gpsdata.dev.path,
-	      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
-	gpsd_report(LOG_ERROR,
-		    "device open failed: %s - retrying read-only\n",
-		    strerror(errno));
-	if ((session->gpsdata.gps_fd =
-	     open(session->gpsdata.dev.path,
-		  O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
-	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n",
+#ifdef BLUEZ
+    if (gpsd_classify(session->gpsdata.dev.path[0]) == source_bluetooth) {
+        session->gpsdata.gps_fd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+        struct sockaddr_rc addr = { 0 };
+        addr.rc_family = AF_BLUETOOTH;
+        addr.rc_channel = (uint8_t) 1;
+        str2ba(session->gpsdata.dev.path, &addr.rc_bdaddr);
+        if (connect(session->gpsdata.gps_fd, (struct sockaddr *) &addr, sizeof (addr)) == -1) {
+	    if (errno != EINPROGRESS && errno != EAGAIN) {
+		gpsd_report(LOG_ERROR, "bluetooth socket connect failed: %s\n",
+			    strerror(errno));
+		return -1;
+	    }
+	    gpsd_report(LOG_ERROR, "bluetooth socket connect in progress or again : %s\n",
 			strerror(errno));
-	    return -1;
+        }
+	gpsd_report(LOG_PROG, "bluez device open success: %s %s\n",
+		    session->gpsdata.dev.path, strerror(errno));
+    } else 
+#endif /* BLUEZ */
+    {
+        if ((session->gpsdata.gps_fd =
+	     open(session->gpsdata.dev.path,
+		      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
+            gpsd_report(LOG_ERROR,
+			    "device open failed: %s - retrying read-only\n",
+			    strerror(errno));
+	    if ((session->gpsdata.gps_fd =
+		 open(session->gpsdata.dev.path,
+			  O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
+		gpsd_report(LOG_ERROR, "read-only device open failed: %s\n",
+				strerror(errno));
+		return -1;
+	    }
+	    gpsd_report(LOG_PROG, "file device open success: %s\n",
+			strerror(errno));
 	}
     }
+
 #ifdef FIXED_PORT_SPEED
     session->saved_baud = FIXED_PORT_SPEED;
 #endif
