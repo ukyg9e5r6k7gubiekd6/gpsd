@@ -759,6 +759,25 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl Check for BlueZ support
+AC_ARG_ENABLE(bluetooth, AC_HELP_STRING([--enable-bluetooth], [Enable support for Bluetooth GPS devices via BlueZ (experimental)]),
+  [ac_bluetooth=$enableval], [ac_bluetooth=no])
+AC_MSG_CHECKING([for BlueZ support])
+if test x"$ac_bluetooth" = x"yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_BLUEZ,1,[Define if we have Bluez])
+    # Older versions of autotools barf and die on this.
+    #PKG_CHECK_MODULES(BLUEZ, bluez )
+    BLUEZ_CFLAGS=`pkg-config --cflags bluez`
+    BLUEZ_LIBS=`pkg-config --libs bluez`
+    AC_SUBST(BLUEZ_CFLAGS)
+    AC_SUBST(BLUEZ_LIBS)
+else
+    AC_MSG_RESULT([no])
+fi
+
+
+
 dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
@@ -879,6 +898,7 @@ dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
 dnl    AC_SUBST(DBUS_GLIB_LIBS)
 dnl fi
 AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
+AM_CONDITIONAL([HAVE_BLUEZ], [test x"$ac_bluetooth" = x"yes"])
 
 dnl mute logging functions?
 AC_ARG_ENABLE(squelch,
@@ -1070,6 +1090,7 @@ echo "Fixed port speed        : $ac_baud"
 echo "Priv-drop user          : $ac_user"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
+echo "Enable BlueZ support    : $ac_bluetooth"
 echo "Enable IPv6 support     : $ac_ipv6"
 echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"

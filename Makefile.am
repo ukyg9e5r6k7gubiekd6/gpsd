@@ -43,6 +43,9 @@ INCLUDES = $(INCUSB)
 if HAVE_DBUS
 INCLUDES += $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
+if HAVE_BLUEZ
+INCLUDES += $(BLUEZ_CFLAGS)
+endif
 
 RTCM104PAGES_DIST = gpsdecode.1
 if HAVE_RTCM104V2
@@ -263,7 +266,7 @@ endif
 
 nodist_libgpsd_la_SOURCES = packet_names.h ais_json.i
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
-libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) libgps.la
+libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) $(BLUEZ_LIBS) libgps.la
 
 noinst_SCRIPTS =
 
