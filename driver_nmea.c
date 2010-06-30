@@ -74,8 +74,10 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 /* sentence supplied ddmmyy, but no century part */
 {
     int yy = DD(ddmmyy + 4), year = session->driver.nmea.date.tm_year;
+    int mon = DD(ddmmyy + 2);
+    int mday = DD(ddmmyy);
 
-    if (year == 0) {
+    if (year <= 0) {
 	year = (CENTURY_BASE + yy) - 1900;
     } else if (year % 100 != yy) {
 	/* update year */
@@ -83,11 +85,19 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	    yy += 100;		/* century change */
 	year = year / 100 * 100 + yy;
     }
-    gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
-		year, ddmmyy);
-    session->driver.nmea.date.tm_year = year;
-    session->driver.nmea.date.tm_mon = DD(ddmmyy + 2) - 1;
-    session->driver.nmea.date.tm_mday = DD(ddmmyy);
+    if ( (1 > year ) || (2200 < year ) ) {
+	gpsd_report(LOG_WARN, "merge_ddmmyy(), bad year: %d\n",  year);
+    } else if ( (1 > mon ) || (12 < mon ) ) {
+	gpsd_report(LOG_WARN, "merge_ddmmyy(), malformed month: %2s\n",  ddmmyy + 2);
+    } else if ( (1 > mday ) || (31 < mday ) ) {
+	gpsd_report(LOG_WARN, "merge_ddmmyy(), malformed day: %2s\n",  ddmmyy);
+    } else {
+	gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
+		    year, ddmmyy);
+	session->driver.nmea.date.tm_year = year;
+	session->driver.nmea.date.tm_mon = mon - 1;
+	session->driver.nmea.date.tm_mday = mday;
+    }
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
@@ -648,6 +658,8 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	|| field[4][0] == '\0') {
 	gpsd_report(LOG_WARN, "malformed ZDA\n");
     } else {
+    	int year, mon, mday;
+
 	merge_hhmmss(field[1], session);
 	/*
 	 * We don't register fractional time here because want to leave
@@ -655,10 +667,22 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	 * when they have a fix, so watching for it can make them look
 	 * like they have a variable fix reporting cycle.
 	 */
-	session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
-	session->driver.nmea.date.tm_mon = atoi(field[3]) - 1;
-	session->driver.nmea.date.tm_mday = atoi(field[2]);
-	mask = TIME_IS;
+	year = atoi(field[4]);
+	mon = atoi(field[3]);
+	mday = atoi(field[2]);
+	if ( (1900 > year ) || (2200 < year ) ) {
+	    gpsd_report(LOG_WARN, "malformed ZDA year: %s\n",  field[4]);
+	} else if ( (1 > mon ) || (12 < mon ) ) {
+	    gpsd_report(LOG_WARN, "malformed ZDA month: %s\n",  field[3]);
+	} else if ( (1 > mday ) || (31 < mday ) ) {
+	    gpsd_report(LOG_WARN, "malformed ZDA day: %s\n",  field[2]);
+	} else {
+	    year -= 1900;	
+	    session->driver.nmea.date.tm_year = year;
+	    session->driver.nmea.date.tm_mon = mon - 1;
+	    session->driver.nmea.date.tm_mday = mday;
+	    mask = TIME_IS;
+	}
     };
     gpsd_report(LOG_DATA, "ZDA: mask=%s\n", gpsd_maskdump(mask));
     return mask;
