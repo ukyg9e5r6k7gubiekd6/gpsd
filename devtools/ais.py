@@ -91,7 +91,7 @@ def cnb_rot_format(n):
     elif n == 127:
         return "fastright"
     else:
-        return str(n * n / 4.733);
+        return str((n / 4.733) ** 2);
 
 def cnb_latlon_format(n):
     return str(n / 600000.0)

@@ -705,10 +705,11 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 	    else if (ais->type1.turn == 127)
 		(void)strlcpy(turnlegend, "\"fastright\"",
 			      sizeof(turnlegend));
-	    else
+	    else {
+		double rot1 = ais->type1.turn / 4.733;
 		(void)snprintf(turnlegend, sizeof(turnlegend),
-			       "%.0f",
-			       ais->type1.turn * ais->type1.turn / 4.733);
+			       "%.0f", rot1 * rot1);
+	    }
 
 	    /*
 	     * Express speed as nan if not available,

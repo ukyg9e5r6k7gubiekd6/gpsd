@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.25, June 2010
+v1.26, July 2010
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -531,8 +531,8 @@ Turn rate is encoded as follows:
 Values between 0 and 708 degrees/min coded by ROT~AIS~=4.733 *
 SQRT(ROT~sensor~) degrees/min where ROT~sensor~ is the Rate of Turn as
 input by an external Rate of Turn Indicator. ROT~AIS~ is rounded to
-the nearest integer value.  Thus, to decode the field value, square it
-and divide by 4.733. Sign of the field value should be preserved when
+the nearest integer value.  Thus, to decode the field value, divide by 4.733
+and then square it. Sign of the field value should be preserved when
 squaring it, otherwise the left/right indication will be lost.
 
 Speed over ground is in 0.1-knot resolution from 0 to 102 knots.
@@ -2054,3 +2054,6 @@ particularly black magic.
 
 Version 1.25 adds clarifications and more message subtypes for
 U.S. Coast Guard PAWSS messages.
+
+Version 1.26 corrects an error in describing rate-of-turn decoding in
+AIS Type 1, 2, and 3 messages,
