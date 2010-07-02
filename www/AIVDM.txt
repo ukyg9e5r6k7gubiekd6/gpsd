@@ -323,13 +323,15 @@ the message descriptions where this has already occurred.  It is good
 practice for a decoder to make reserved fields available to client
 applications as uninterpreted bitfields.
 
-Character-string fields within AIS messages are encoded in a
-special way, referred to as "six-bit" in the tables below. Each
-six-bit nibble maps to an ASCII character.  Nibbles 0-31 map to the
-characters "@" ( ASCII 64) through "\_" (ASCII 95) respectively;
-nibbles 32-63 map to characters " " (ASCII 32) though "?"  (ASCII
-63). Lowercase ASCII letters, the backtick, right and left curly
-brackets, pipe bar, tilde and DEL cannot be encoded.
+Character-string fields within AIS messages are encoded in a special
+way, referred to as "six-bit" in the tables below. First, chop the
+string field into consecutive six-bit nibbles without padding (each
+span of three 8-bit bytes includes 4 of these). Each six-bit nibble
+maps to an ASCII character.  Nibbles 0-31 map to the characters "@" (
+ASCII 64) through "\_" (ASCII 95) respectively; nibbles 32-63 map to
+characters " " (ASCII 32) though "?"  (ASCII 63). Lowercase ASCII
+letters, the backtick, right and left curly brackets, pipe bar, tilde
+and DEL cannot be encoded.
 
 .Sixbit ASCII
 [width="25%",frame="topbot"]
