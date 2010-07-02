@@ -313,8 +313,8 @@ int gpsd_open(struct gps_device_t *session)
 		    (int)session->sourcetype, session->gpsdata.dev.path);
     }
     /*@ +boolops +type @*/
-#ifdef BLUEZ
-    if (gpsd_classify(session->gpsdata.dev.path[0]) == source_bluetooth) {
+#ifdef HAVE_BLUEZ
+    if (bachk(session->gpsdata.dev.path) == 0) {
         session->gpsdata.gps_fd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
         struct sockaddr_rc addr = { 0 };
         addr.rc_family = AF_BLUETOOTH;
@@ -329,6 +329,7 @@ int gpsd_open(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR, "bluetooth socket connect in progress or again : %s\n",
 			strerror(errno));
         }
+	(void)fcntl(session->gpsdata.gps_fd, F_SETFL, (int)mode | O_NONBLOCK);
 	gpsd_report(LOG_PROG, "bluez device open success: %s %s\n",
 		    session->gpsdata.dev.path, strerror(errno));
     } else 

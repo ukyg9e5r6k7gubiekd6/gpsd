@@ -31,6 +31,10 @@
 
 #include "gpsd_config.h"
 
+#ifdef HAVE_BLUEZ
+#include <bluetooth/bluetooth.h>
+#endif
+
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -173,8 +177,8 @@ static ssize_t readpkt(void)
     FD_SET(session.gpsdata.gps_fd, &select_set);
     if (controlfd > -1)
 	FD_SET(controlfd, &select_set);
-    timeval.tv_sec = 0;
-    timeval.tv_usec = 500000;
+    timeval.tv_sec = 3;
+    timeval.tv_usec = 0;
     if (select(session.gpsdata.gps_fd + 1, &select_set, NULL, NULL, &timeval)
 	== -1)
 	longjmp(terminate, TERM_SELECT_FAILED);
@@ -516,8 +520,13 @@ int main(int argc, char **argv)
     gpsd_init(&session, &context, NULL);
 
     /*@ -boolops */
-    if (optind >= argc || source.device == NULL
-	|| strchr(argv[optind], ':') != NULL) {
+    if ((optind >= argc || source.device == NULL
+	|| strchr(argv[optind], ':') != NULL)
+#ifdef HAVE_BLUEZ
+        && bachk(argv[optind])) {
+#else
+	) {
+#endif
 	(void)gps_open_r(source.server, source.port, &session.gpsdata);
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
