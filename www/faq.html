@@ -649,7 +649,7 @@ srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
 &lt;/Report&gt;
 </pre></code>
 
-<h1 id='baud'>Why is there no option to fix baud rate?<h1/>
+<h1 id='baud'>Why is there no option to fix baud rate?</h1>
 
 <p>There is no option to fix baud rate because <tt>gpsd</tt> is
 designed to (a) be autoconfiguring, and (b) handle multiple devices.
@@ -674,7 +674,7 @@ your GPS is on serial port 0 and operates at a fixed bps of 54600.  You
 can set that up like this:</p>
 
 <code><pre>
-        stty speed 54600 </dev/ttyS0
+        stty speed 54600 &lt;/dev/ttyS0
         gpsd -nN /dev/ttyS0
 </pre></code>
 </div>
