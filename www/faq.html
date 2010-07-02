@@ -76,11 +76,11 @@ GPSD Frequently Asked Questions
 <li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a><br/>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a><br/>
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a><br/>
-<li><a href='#agps'>Can GPSD work use Assisted GPS data from cellphone networks?</code>?</a><br/>
+<li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</code>?</a><br/>
 <li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a><br/>
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a><br/>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
-<li><a href='#web'>How do I get gpsd data into a web page?</a><br/>
+<li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
 </ul>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
@@ -517,10 +517,10 @@ effects</a> due to signal bounce from the ground or water, which can
 cause the GPS to mistake its position and the time signal.  The
 correct location for a boat GPS antenna is on the gunwale rail or
 pushpit rail, close to the water and as far from the mast as possible
-(to reduce signal bounce from the mast). If
-you're outside or in a fixed location, put the GPS antenna as far from
-buildings as possible, and on the ground. If you're in a car, don't
-put the GPS antenna on the roof, put it on the towbar or similar.</p>
+(to reduce signal bounce from the mast). If you're outside or in a
+fixed location, put the GPS antenna as far from buildings as possible,
+and on the ground. If you're in a car, don't put the GPS antenna on
+the roof, put it on the towbar or some similar location.</p>
 
 <p>If you're driving in a heavily built up area, you're going to get
 signal bounce off buildings and and reduced accuracy. That's just how
@@ -554,7 +554,7 @@ will have to wait for the computer to poll it. This polling happens
 half-millisecond.  Furthermore, the USB chip might run at anything
 close to 1000 Hz. If it runs at 1000.1 Hz, every 10th second the next
 time-report will come 1 whole millisecond earlier. This will have NTP
-observing something like a 1 ms high sawtooth in the time-reports.</p>
+observing something like a 1ms-high sawtooth in the time-reports.</p>
 
 <p>For accurate time reference, use a PPS line over RS232 triggering an
 interrupt. Serial bus interrupt latencies on modern hardware on the
@@ -579,7 +579,7 @@ USB/serial adaptor, but on what order you plug devices in: 1st device
 gets /dev/ttyUSB0, 2nd gets /dev/ttyUSB1, etc....
 
 <p>This collides with what happens during a suspend/resume. If you
-suspensd while <tt>gpsd</tt> has a device active, it will hold the
+suspends while <tt>gpsd</tt> has a device active, it will hold the
 device open while your laptop is asleep - but, meanwhile, the suspend
 logic is shutting down hotpluggable devices to be recreated at
 resume time. On resume, Linux will see that the old device is open
@@ -649,6 +649,34 @@ srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
 &lt;/Report&gt;
 </pre></code>
 
+<h1 id='baud'>Why is there no option to fix baud rate?<h1/>
+
+<p>There is no option to fix baud rate because <tt>gpsd</tt> is
+designed to (a) be autoconfiguring, and (b) handle multiple devices.
+There are some more philosophical reasons as well; read the 
+<a href="hacking.html">Hacker's Guide</a> for discussion.</p>
+
+<p>Unfortunately, this causes problems with some devices (notably
+Bluetooth GPSes) that are designed to operate at fixed baud rates.
+Some of these go catatonic if you try to set the baud rate, which is
+why we have a -b option that prevents <tt>gpsd</tt> from trying to
+configure the GPSes it talks to.</p>
+
+<p>On Linux systems, there's trick you can play to simulate fixing the
+baud rate.  It utilizes the fact that under Linux, setting baud rate 0
+is interpreted as "use the hardware port's existing baud rate without
+change".  The autoconfiguring hunt loop in <tt>gpsd</tt> always starts
+with this behavior.</p>
+
+<p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set 
+the bit rate just before starting gpsd.  For example, suppose you know that 
+your GPS is on serial port 0 and operates at a fixed bps of 54600.  You 
+can set that up like this:</p>
+
+<code><pre>
+        stty speed 54600 </dev/ttyS0
+        gpsd -nN /dev/ttyS0
+</pre></code>
 </div>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
