@@ -14,7 +14,7 @@ interpreting these messages.
 
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
 Automatic Identification System. AIS transmitters are fitted to
-vessels, navigation markers, and ccertain types of shore station. They
+vessels, navigation markers, and certain types of shore station. They
 periodically squawk their position and course (if applicable), using
 TDMA (Time Division Multiple Access) technology similar to the way
 cellphones do to avoid mutual interference. AIS receivers make this data
@@ -146,7 +146,7 @@ SourceForge.  It seems intended primarily to work directly
 with AIS radios.
 
 There's a http://rl.se/aivdm[web form] that does sentence decoding.
-It only understands message types 1-4.
+It only understands message types 1-4 and 24.
 
 == AIVDM/AIVDO Sentence Layer ==
 
@@ -1793,7 +1793,7 @@ nibble or extra trailing zero data.
 
 === Bit Stuffing ===
 
-The following probably will not effect decoders. Nevertheless we
+The following probably will not affect decoders. Nevertheless we
 document it here because it is just the sort of thing that is (a)
 likely to confuse implementors reading the public portions of the
 standards, and (b) all too likely to become visible if there are
