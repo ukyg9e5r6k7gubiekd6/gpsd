@@ -47,6 +47,18 @@ class unit_adjustments:
         else:
             raise ValueError	# Should never happen
 
+def fit_to_grid(x, y, line_width):
+    "Adjust coordinates to produce sharp lines."
+    if line_width % 1.0 != 0:
+        # Can't have sharp lines for non-integral line widths.
+        return x, y
+    if line_width % 2 == 0:
+        # Round to a pixel corner.
+        return int(x+0.5), int(y+0.5)
+    else:
+        # Round to a pixel centre.
+        return int(x)+0.5, int(y)+0.5
+
 class SkyView(gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
@@ -78,7 +90,14 @@ class SkyView(gtk.DrawingArea):
 
     def draw_circle(self, x, y, radius, filled=False):
         "Draw a circle centered on the specified midpoint."
-        self.cr.arc(x, y, radius, 0, math.pi * 2.0)
+        lw = self.cr.get_line_width()
+        r = int(2*radius+0.5) / 2
+        x1, y1 = fit_to_grid(x - r, y - r, lw)
+        x2, y2 = fit_to_grid(x + r, y + r, lw)
+        x, y = (x1+x2)/2, (y1+y2)/2
+
+        self.cr.arc(x, y, r, 0, math.pi * 2.0)
+        self.cr.close_path()
 
         if filled:
             self.cr.fill()
@@ -87,13 +106,21 @@ class SkyView(gtk.DrawingArea):
 
     def draw_line(self, x1, y1, x2, y2):
         "Draw a line between specified points."
-        self.cr.move_to(int(x1), int(y1))
-        self.cr.line_to(int(x2), int(y2))
+        lw = self.cr.get_line_width()
+        x1, y1 = fit_to_grid(x1, y1, lw)
+        x2, y2 = fit_to_grid(x2, y2, lw)
+
+        self.cr.move_to(x1, y1)
+        self.cr.line_to(x2, y2)
         self.cr.stroke()
 
     def draw_square(self, x, y, radius, filled=False):
         "Draw a square centered on the specified midpoint."
-        self.cr.rectangle(x - radius, y - radius, radius * 2, radius * 2)
+        lw = self.cr.get_line_width()
+        x1, y1 = fit_to_grid(x - radius, y - radius, lw)
+        x2, y2 = fit_to_grid(x + radius, y + radius, lw)
+
+        self.cr.rectangle(x1, y1, x2 - x1, y2 - y1)
 
         if filled:
             self.cr.fill()
