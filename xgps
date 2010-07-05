@@ -70,7 +70,11 @@ class SkyView(gtk.DrawingArea):
 
     def set_color(self, spec):
         "Set foreground color for draweing."
-        self.cr.set_source_color(gtk.gdk.color_parse(spec))
+        gdkcolor = gtk.gdk.color_parse(spec)
+        r = gdkcolor.red / 65535.0
+        g = gdkcolor.green / 65535.0
+        b = gdkcolor.blue / 65535.0
+        self.cr.set_source_rgb(r, g, b)
 
     def draw_circle(self, x, y, radius, filled=False):
         "Draw a circle centered on the specified midpoint."
