@@ -56,7 +56,7 @@ def fit_to_grid(x, y, line_width):
         # Round to a pixel corner.
         return int(x+0.5), int(y+0.5)
     else:
-        # Round to a pixel centre.
+        # Round to a pixel center.
         return int(x)+0.5, int(y)+0.5
 
 def fit_circle_to_grid(x, y, radius, line_width):
@@ -73,13 +73,13 @@ class SkyView(gtk.DrawingArea):
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 40	# How much whitespace to leave around horizon
     SAT_RADIUS = 5	# Diameter of satellite circle
-    GPS_PRNMAX = 32	# above this number are SBAS satellites
+    GPS_PRNMAX = 32	# Above this number are SBAS satellites
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
         self.cr = None  # New cairo context for each expose event
-        self.width  = 0 # updated in size-allocate handler
-        self.height = 0 # updated in size-allocate handler
+        self.width  = 0 # Updated in size-allocate handler
+        self.height = 0 # Updated in size-allocate handler
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('expose-event',  self.on_expose_event)
         self.satellites = []
@@ -96,7 +96,7 @@ class SkyView(gtk.DrawingArea):
         self.radius = r
 
     def set_color(self, spec):
-        "Set foreground color for draweing."
+        "Set foreground color for drawing."
         gdkcolor = gtk.gdk.color_parse(spec)
         r = gdkcolor.red / 65535.0
         g = gdkcolor.green / 65535.0
@@ -126,6 +126,7 @@ class SkyView(gtk.DrawingArea):
 
         self.cr.move_to(x1, y1)
         self.cr.line_to(x2, y2)
+
         self.cr.stroke()
 
     def draw_square(self, x, y, radius, filled=False):
@@ -141,20 +142,20 @@ class SkyView(gtk.DrawingArea):
         else:
             self.cr.stroke()
 
-    def draw_string(self, x, y, letter, centered=True):
-        "Draw a letter on the skyview."
+    def draw_string(self, x, y, text, centered=True):
+        "Draw a text on the skyview."
         self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         self.cr.set_font_size(10)
 
         if centered:
-            extents = self.cr.text_extents(letter)
+            extents = self.cr.text_extents(text)
             # width / 2 + x_bearing
             x -= extents[2] / 2 + extents[0]
             # height / 2 + y_bearing
             y -= extents[3] / 2 + extents[1]
 
         self.cr.move_to(x, y)
-        self.cr.show_text(letter)
+        self.cr.show_text(text)
         self.cr.new_path()
 
     def pol2cart(self, az, el):
