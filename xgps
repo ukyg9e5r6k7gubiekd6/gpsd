@@ -59,6 +59,15 @@ def fit_to_grid(x, y, line_width):
         # Round to a pixel centre.
         return int(x)+0.5, int(y)+0.5
 
+def fit_circle_to_grid(x, y, radius, line_width):
+    "Adjust circle coordinates and radius to produce sharp horizontal and vertical tangents."
+    r = radius
+    x1, y1 = fit_to_grid(x - r, y - r, line_width)
+    x2, y2 = fit_to_grid(x + r, y + r, line_width)
+    x, y = (x1+x2)/2, (y1+y2)/2
+    r = (x2 - x1 + y2 - y1) / 4
+    return x, y, r
+
 class SkyView(gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
@@ -78,9 +87,13 @@ class SkyView(gtk.DrawingArea):
     def on_size_allocate(self, widget, allocation):
         width = allocation.width
         height = allocation.height
-        self.center_x = width / 2
-        self.center_y = height / 2
-        self.radius = (min(width, height) - SkyView.HORIZON_PAD) / 2
+        x = width / 2
+        y = height / 2
+        r = (min(width, height) - SkyView.HORIZON_PAD) / 2
+        x, y, r = fit_circle_to_grid(x, y, r, 1)
+        self.center_x = x
+        self.center_y = y
+        self.radius = r
 
     def set_color(self, spec):
         "Set foreground color for draweing."
@@ -94,9 +107,8 @@ class SkyView(gtk.DrawingArea):
         "Draw a circle centered on the specified midpoint."
         lw = self.cr.get_line_width()
         r = int(2*radius+0.5) / 2
-        x1, y1 = fit_to_grid(x - r, y - r, lw)
-        x2, y2 = fit_to_grid(x + r, y + r, lw)
-        x, y = (x1+x2)/2, (y1+y2)/2
+
+        x, y, r = fit_circle_to_grid(x, y, radius, lw)
 
         self.cr.arc(x, y, r, 0, math.pi * 2.0)
         self.cr.close_path()
