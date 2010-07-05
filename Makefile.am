@@ -524,8 +524,8 @@ XML = \
 	rtcm-104.xml \
 	srec.xml
 
-# Note: packaging/gpsd.spec is generated, but it needs to be in the
-# tarball in order for 'make diat-rpm' to work.  The BUILT_SOURCES
+# Note: packaging/rpm/gpsd.spec is generated, but it needs to be in the
+# tarball in order for 'make dist-rpm' to work.  The BUILT_SOURCES
 # files are here in order to minimize build dependencies for package
 # builders who never alter anything, especially the Python dependency.
 # Also note that the test and gps directories are here rather than
@@ -567,10 +567,14 @@ EXTRA_DIST = \
 	libgps.pc.in \
 	libgpsd.pc.in \
 	gpscap.ini \
-	packaging/gpsd.spec \
-	packaging/etc_default_gpsd \
-	packaging/etc_init.d_gpsd \
-	packaging/etc_init.d_gpsd_rpm \
+	packaging/deb/etc_default_gpsd \
+	packaging/deb/etc_init.d_gpsd \
+	packaging/rpm/gpsd.spec \
+	packaging/rpm/gpsd.init \
+	packaging/rpm/gpsd.sysconfig \
+	packaging/X11/xgps.desktop \
+	packaging/X11/xgpsspeed.desktop \
+	packaging/X11/gpsd-logo.png \
 	do-tests \
 	regress-driver \
 	$(PYTHONSCRIPTS_DIST) \

@@ -1112,7 +1112,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_ubx" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
-AC_OUTPUT(Makefile packaging/gpsd.spec libgps.pc libgpsd.pc
+AC_OUTPUT(Makefile packaging/rpm/gpsd.spec libgps.pc libgpsd.pc
 		   jsongen.py maskaudit.py
 		   valgrind-audit,
 		   [chmod +x jsongen.py maskaudit.py gpscat gpsfake gpsprof xgps valgrind-audit])
