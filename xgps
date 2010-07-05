@@ -151,7 +151,7 @@ class SkyView(gtk.DrawingArea):
         self.cr.set_source_rgb(0, 0, 0)
         self.cr.fill()
 
-        self.cr.set_source_rgb(255, 255, 255)
+        self.cr.set_source_rgb(1, 1, 1)
         # The zenith marker
         self.draw_circle(int(self.width / 2), int(self.height / 2), 6, False)
 
@@ -202,7 +202,7 @@ class SkyView(gtk.DrawingArea):
             else:
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used);
 
-            self.cr.set_source_rgb(255, 255, 255)
+            self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS, y + (SkyView.SAT_RADIUS * 2), str(sat.PRN), centered=False)
 
         self.cr = None
