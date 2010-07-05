@@ -78,8 +78,6 @@ class SkyView(gtk.DrawingArea):
 
     def draw_circle(self, x, y, radius, filled=False):
         "Draw a circle centered on the specified midpoint."
-        self.cr.save()
-
         self.cr.arc(x, y, radius, 0, math.pi * 2.0)
 
         if filled:
@@ -87,22 +85,14 @@ class SkyView(gtk.DrawingArea):
         else:
             self.cr.stroke()
 
-        self.cr.restore()
-
     def draw_line(self, x1, y1, x2, y2):
         "Draw a line between specified points."
-        self.cr.save()
-
         self.cr.move_to(int(x1), int(y1))
         self.cr.line_to(int(x2), int(y2))
         self.cr.stroke()
 
-        self.cr.restore()
-
     def draw_square(self, x, y, radius, filled=False):
         "Draw a square centered on the specified midpoint."
-        self.cr.save()
-
         self.cr.rectangle(x - radius, y - radius, radius * 2, radius * 2)
 
         if filled:
@@ -110,12 +100,8 @@ class SkyView(gtk.DrawingArea):
         else:
             self.cr.stroke()
 
-        self.cr.restore()
-
     def draw_string(self, x, y, letter, centered=True):
         "Draw a letter on the skyview."
-        self.cr.save()
-
         self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         self.cr.set_font_size(10)
 
@@ -129,8 +115,6 @@ class SkyView(gtk.DrawingArea):
         self.cr.move_to(x, y)
         self.cr.show_text(letter)
         self.cr.new_path()
-
-        self.cr.restore()
 
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
