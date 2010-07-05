@@ -46,10 +46,32 @@ HEADERS += libQgpsmm_global.h \
     isEmpty( PREFIX ) {
         PREFIX = /usr/local
     }
-    target.path = $${PREFIX}/lib
+    isEmpty( EXEC_PREFIX ) {
+        EXEC_PREFIX = $${PREFIX}
+    }
+    isEmpty( LIBDIR ) {
+        LIBDIR = /lib
+    }
+    isEmpty( INCLUDEDIR ) {
+        INCLUDEDIR = /include
+    }
+
+    # TARGET_LIBDIR and TARGET_INCLUDEDIR allow to override
+    # the library and header install paths.
+    # This is mainly a workaround as QT was not able to use the proper
+    # path on some platforms. Both TARGET_ variables will be
+    # set from the autotools generated Makefile.
+    # There should be a better way to handle this, though.
+    isEmpty( TARGET_LIBDIR ) {
+        TARGET_LIBDIR = $${EXEC_PREFIX}$${LIBDIR}
+    }
+    isEmpty( TARGET_INCLUDEDIR ) {
+        TARGET_INCLUDEDIR = $${PREFIX}$${INCLUDEDIR}
+    }
+    target.path = $${TARGET_LIBDIR}
     INSTALLS += target
 
-    header.path = $${PREFIX}/include
+    header.path = $${TARGET_INCLUDEDIR}
     header.files = ../libgpsmm.h ../gps.h
     INSTALLS += header
 

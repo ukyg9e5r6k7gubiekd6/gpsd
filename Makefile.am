@@ -346,9 +346,11 @@ QMAKE_OPTS = "PREFIX=${prefix}" \
 	     "QMAKE_CC=$(CC)" \
 	     "QMAKE_CFLAGS+=$(CFLAGS)" \
 	     "QMAKE_LFLAGS+=$(LDFLAGS)" \
-	     "VERSION=$(libgps_VERSION)"
+	     "VERSION=$(libgps_VERSION)" \
+	     "TARGET_LIBDIR=${libdir}" \
+	     "TARGET_INCLUDEDIR=${includedir}"
 
-libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro
+libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro gpsd.h ais_json.i
 	cd $(srcdir)/libQgpsmm && $(QMAKE) $(QMAKE_OPTS)
 # Yet another multiple-outputs hack:
 $(QTLIBS): stamp-qt
