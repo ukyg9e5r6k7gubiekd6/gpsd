@@ -39,7 +39,7 @@ CURSESPROGS = cgps gpsmon
 endif
 
 # Conditional includes.
-INCLUDES = $(INCUSB)
+INCLUDES = $(LIBUSB_CFLAGS)
 if HAVE_DBUS
 INCLUDES += $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
@@ -100,13 +100,13 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm
 #
 gpsd_c_sources = gpsd_dbus.c gpsd.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
+gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB_LIBS)
 
 #
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB)
+gpsctl_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB_LIBS)
 
 #
 # Build gpspipe
@@ -126,13 +126,13 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS)
 
 #
 # Build gpsdecode
 #
 gpsdecode_SOURCES = gpsdecode.c
-gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB)
+gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS)
 
 #
 # Build shared libraries
@@ -407,7 +407,7 @@ if LIBGPSMM_ENABLE
 # Build test_gpsmm
 #
 test_gpsmm_SOURCES = test_gpsmm.cpp
-test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB)
+test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB_LIBS)
 endif
 
 if LIB_Q_GPSMM_ENABLE
@@ -424,13 +424,13 @@ endif
 # Build test_bits tester
 #
 test_bits_SOURCES = test_bits.c
-test_bits_LDADD = $(LIBC) libgpsd.la libgps.la  $(LIBUSB)
+test_bits_LDADD = $(LIBC) libgpsd.la libgps.la  $(LIBUSB_LIBS)
 
 #
 # Build packets tester
 #
 test_packet_SOURCES = test_packet.c
-test_packet_LDADD = $(LIBC) libgpsd.la libgps.la -lm  $(LIBUSB)
+test_packet_LDADD = $(LIBC) libgpsd.la libgps.la -lm  $(LIBUSB_LIBS)
 
 #
 # Build geoid model tester
@@ -607,7 +607,7 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
 
 # Report splint warnings
-SPLINTOPTS = -I/usr/include/dbus-1.0/ $(INCUSB) +quiet
+SPLINTOPTS = -I/usr/include/dbus-1.0/ $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon and libraries..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources)
