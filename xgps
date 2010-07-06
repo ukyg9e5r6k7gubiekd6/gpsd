@@ -19,6 +19,7 @@ import sys, os, re, math, time, exceptions, getopt, socket
 import gobject, pygtk
 pygtk.require('2.0')
 import gtk
+import cairo
 
 import gps, gps.clienthelpers
 
@@ -49,59 +50,83 @@ class unit_adjustments:
 class SkyView(gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
-    HORIZON_PAD = 20	# How much whitespace to leave around horizon
+    HORIZON_PAD = 40	# How much whitespace to leave around horizon
     SAT_RADIUS = 5	# Diameter of satellite circle
     GPS_PRNMAX = 32	# above this number are SBAS satellites
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_size_request(400, 400)
-        self.gc = None  # initialized in realize-event handler
+        self.cr = None  # New cairo context for each expose event
         self.width  = 0 # updated in size-allocate handler
         self.height = 0 # updated in size-allocate handler
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('expose-event',  self.on_expose_event)
-        self.connect('realize',       self.on_realize)
-        self.pangolayout = self.create_pango_layout("")
         self.satellites = []
-
-    def on_realize(self, widget):
-        self.gc = widget.window.new_gc()
-        self.gc.set_line_attributes(1, gtk.gdk.LINE_SOLID,
-                                    gtk.gdk.CAP_ROUND, gtk.gdk.JOIN_ROUND)
 
     def on_size_allocate(self, widget, allocation):
         self.width = allocation.width
         self.height = allocation.height
-        self.diameter = min(self.width, self.height) - SkyView.HORIZON_PAD
+        self.radius = int((min(self.width, self.height) - SkyView.HORIZON_PAD) / 2)
 
     def set_color(self, spec):
         "Set foreground color for draweing."
-        self.gc.set_rgb_fg_color(gtk.gdk.color_parse(spec))
+        self.cr.set_source_color(gtk.gdk.color_parse(spec))
 
-    def draw_circle(self, widget, x, y, diam, filled=False):
+    def draw_circle(self, x, y, radius, filled=False):
         "Draw a circle centered on the specified midpoint."
-        widget.window.draw_arc(self.gc, filled,
-                               x - diam / 2, y - diam / 2,
-                               diam, diam, 0, 360 * 64)
+        self.cr.save()
 
-    def draw_line(self, widget, x1, y1, x2, y2):
+        self.cr.arc(x, y, radius, 0, math.pi * 2.0)
+
+        if filled:
+            self.cr.fill()
+        else:
+            self.cr.stroke()
+
+        self.cr.restore()
+
+    def draw_line(self, x1, y1, x2, y2):
         "Draw a line between specified points."
-        widget.window.draw_lines(self.gc, [(x1, y1), (x2, y2)])
+        self.cr.save()
 
-    def draw_square(self, widget, x, y, diam, filled=False):
+        self.cr.move_to(int(x1), int(y1))
+        self.cr.line_to(int(x2), int(y2))
+        self.cr.stroke()
+
+        self.cr.restore()
+
+    def draw_square(self, x, y, radius, filled=False):
         "Draw a square centered on the specified midpoint."
-        widget.window.draw_rectangle(self.gc, filled,
-                                     x - diam / 2, y - diam / 2,
-                                     diam, diam)
+        self.cr.save()
 
-    def draw_string(self, widget, x, y, letter, centered=True):
+        self.cr.rectangle(x - radius, y - radius, radius * 2, radius * 2)
+
+        if filled:
+            self.cr.fill()
+        else:
+            self.cr.stroke()
+
+        self.cr.restore()
+
+    def draw_string(self, x, y, letter, centered=True):
         "Draw a letter on the skyview."
-        self.pangolayout.set_text(letter)
+        self.cr.save()
+
+        self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        self.cr.set_font_size(10)
+
         if centered:
-            (w, h) = self.pangolayout.get_pixel_size()
-            x -= w/2
-            y -= h/2
-        self.window.draw_layout(self.gc, x, y, self.pangolayout)
+            extents = self.cr.text_extents(letter)
+            # width / 2 + x_bearing
+            x -= extents[2] / 2 + extents[0]
+            # height / 2 + y_bearing
+            y -= extents[3] / 2 + extents[1]
+
+        self.cr.move_to(x, y)
+        self.cr.show_text(letter)
+        self.cr.new_path()
+
+        self.cr.restore()
 
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
@@ -109,49 +134,57 @@ class SkyView(gtk.DrawingArea):
         # Exact spherical projection would be like this:
         # el = sin((90.0 - el) * DEG_2_RAD);
         el = ((90.0 - el) / 90.0);
-        xout = int((self.width / 2) + math.sin(az) * el * (self.diameter / 2))
-        yout = int((self.height / 2) - math.cos(az) * el * (self.diameter / 2))
+        xout = int((self.width / 2) + math.sin(az) * el * (self.radius))
+        yout = int((self.height / 2) - math.cos(az) * el * (self.radius))
         return (xout, yout)
 
     def on_expose_event(self, widget, event):
-        self.set_color("white")
-        widget.window.draw_rectangle(self.gc, True, 0,0, self.width,self.height)
+        self.cr = widget.window.cairo_create()
+
+        self.cr.set_line_width(1)
+
+        self.cr.rectangle(0, 0, self.width, self.height)
+        self.cr.set_source_rgb(0, 0, 0)
+        self.cr.fill()
+
+        self.cr.set_source_rgb(255, 255, 255)
         # The zenith marker
-        self.set_color("gray")
-        self.draw_circle(widget, self.width / 2, self.height / 2, 6)
+        self.draw_circle(int(self.width / 2), int(self.height / 2), 6, False)
+
         # The circle corresponding to 45 degrees elevation.
         # There are two ways we could plot this.  Projecting the sphere
         # on the display plane, the circle would have a diameter of
         # sin(45) ~ 0.7.  But the naive linear mapping, just splitting
         # the horizon diameter in half, seems to work better visually.
-        self.draw_circle(widget, self.width / 2, self.height / 2,
-                         int(self.diameter * 0.5))
-        self.set_color("black")
+        self.draw_circle(int(self.width / 2), int(self.height / 2), int(self.radius / 2), False)
+
         # The horizon circle
-        self.draw_circle(widget, self.width / 2, self.height / 2,
-                         self.diameter)
-        self.set_color("gray")
+        self.draw_circle(int(self.width / 2), int(self.height / 2), self.radius, False)
+
         (x1, y1) = self.pol2cart(0, 0)
         (x2, y2) = self.pol2cart(180, 0)
-        self.draw_line(widget, x1, y1, x2, y2)
+        self.draw_line(x1, y1, x2, y2)
+
         (x1, y1) = self.pol2cart(90, 0)
         (x2, y2) = self.pol2cart(270, 0)
-        self.draw_line(widget, x1, y1, x2, y2)
+        self.draw_line(x1, y1, x2, y2)
+
         # The compass-point letters
-        self.set_color("black")
         (x, y) = self.pol2cart(0, 0)
-        self.draw_string(widget, x, y+10, "N")
+        self.draw_string(x, y-10, "N")
         (x, y) = self.pol2cart(90, 0)
-        self.draw_string(widget, x-10, y, "E")
+        self.draw_string(x+10, y, "E")
         (x, y) = self.pol2cart(180, 0)
-        self.draw_string(widget, x, y-10, "S")
+        self.draw_string(x, y+10, "S")
         (x, y) = self.pol2cart(270, 0)
-        self.draw_string(widget, x+10, y, "W")
+        self.draw_string(x-10, y, "W")
+
         # The satellites
+        self.cr.set_line_width(2)
         for sat in self.satellites:
             (x, y) = self.pol2cart(sat.az, sat.el)
             if sat.ss < 10:
-                self.set_color("Black")
+                self.set_color("Gray")
             elif sat.ss < 30:
                 self.set_color("Red")
             elif sat.ss < 35:
@@ -161,15 +194,15 @@ class SkyView(gtk.DrawingArea):
             else:
                 self.set_color("Green1");
             if sat.PRN > SkyView.GPS_PRNMAX:
-                self.draw_square(widget,
-                                 x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
-                                 2 * SkyView.SAT_RADIUS + 1, sat.used);
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used);
             else:
-                self.draw_circle(widget,
-                                 x-SkyView.SAT_RADIUS, y-SkyView.SAT_RADIUS,
-                                 2 * SkyView.SAT_RADIUS + 1, sat.used);
-            self.set_color("Black")
-            self.draw_string(widget, x, y, str(sat.PRN), centered=False)
+                self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used);
+
+            self.cr.set_source_rgb(255, 255, 255)
+            self.draw_string(x + SkyView.SAT_RADIUS, y + (SkyView.SAT_RADIUS * 2), str(sat.PRN), centered=False)
+
+        self.cr = None
+
     def redraw(self, satellites):
         "Redraw the skyview."
         self.satellites = satellites
