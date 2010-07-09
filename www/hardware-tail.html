@@ -7,17 +7,18 @@
   GPSD is capable of passing along to <code>ntpd</code> for use as an
   extremely accurate clock source.  The "Claimed Accuracy" are taken
   from manufacturers' data sheets, and have not been independently
-  verified.</p> 
+  verified.</p>
 
   <p>Where specified, NTP time offsets have been measured by
   comparison with the NTP time service and reported by
   <code>gpsd</code>.</p>
 
-  <p>Note that a direct RS-232 connection is required for optimal PPS timing.  Typical
-  gpsd/PPS users report ntp clock stability on the order of 1uS.  GPS that
-  use a RS-232 to USB converter that passes the PPS signal are reported to be stable on the order
-  of 1mS.  GPS that are native USB are not PPS capable but gpsd can still extract time 
-  information from the serial data accurate to about 250mS.</p>
+  <p>Note that a direct RS-232 connection is required for optimal PPS
+timing. Typical gpsd/PPS users report ntp clock stability on the order
+of 1uS. GPS that use a RS-232 to USB converter that passes the PPS signal
+are reported to be stable on the order of 1mS.GPS that are native USB are
+not PPS capable but gpsd can still extract time information from the
+serial data accurate to about 250mS.</p>
 
 <div>&nbsp;</div>
 
@@ -135,6 +136,12 @@
 <td align="center">1usec</td>
 <td align="center">-</td>
 <td align="center">May work inside wood frame buildings.</td>
+</tr>
+<tr>
+<td>Jackson Labs Firefly</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">GPS-disciplined oscillator, so the 1PPS output stays accurate even if GPS receiption is lost.</td>
 </tr>
 </table>
 
