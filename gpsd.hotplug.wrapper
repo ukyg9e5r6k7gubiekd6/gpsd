@@ -5,10 +5,18 @@
 
 if [ -r /etc/default/gpsd ]; then
   . /etc/default/gpsd
+elif [ -r /etc/sysconfig/gpsd ]; then
+  . /etc/sysconfig/gpsd
+fi
 
+if [ -n $GPSD_OPTIONS ]; then
   export GPSD_OPTIONS
+fi
+if [ -n $GPSD_SOCKET ]; then
   export GPSD_SOCKET
+fi
 
+if [ -n $USBAUTO ]; then
   [ "$USBAUTO" = "true" ] || exit 0
 fi
 
