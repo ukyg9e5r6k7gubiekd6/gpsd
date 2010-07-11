@@ -4,12 +4,6 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 
-# Exclude version-control state from the tarball.  Needed because we 
-# grab the test directory wholesale. Hack appropriately when and if we 
-# change version control systems.
-# \bug This is non-portable and depends on GNU tar beyond-POSIX extensions.
-am__tar += --exclude '.git' --exclude '.gitignore'
-
 CLEANFILES =
 
 # For a detailed explanation of what this ugly code is doing, see
