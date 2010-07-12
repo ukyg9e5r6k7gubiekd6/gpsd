@@ -36,12 +36,10 @@ else
 fi
 
 if [ "$AM_ERROR" = "1" ]; then
-	echo -e  '\E[31;m'
 	echo -n "Your automake version `automake --version | sed -n -e 's#[^0-9]* \([0-9]*\.[0-9]*\.[0-9]*\).*#\1#p'`"
 	echo " is older than the suggested one, $AM_1.$AM_2.$AM_3"
 	echo "Go on at your own risk. :-)"
 	echo
-	tput sgr0
 fi
 
 # Check autoconf version
@@ -60,12 +58,10 @@ else
 fi
 
 if [ "$AC_ERROR" = "1" ]; then
-	echo -e  '\E[31;m'
 	echo -n "Your autoconf version `autoconf --version | sed -n -e 's#[^0-9]* \([0-9]*\.[0-9]*\).*#\1#p'`"
 	echo " is older than the suggested one, $AC_1.$AC_2"
 	echo "Go on at your own risk. :-)"
 	echo
-	tput sgr0
 fi
 
 #Check for pkg-config
@@ -85,19 +81,15 @@ _EOF_
 	cd ${oldpwd}
 	rm -rf ${tmpdir}
 	if [ ${PKG_MACRO_AVAILABLE} -eq 0 ]; then
-		echo -e  '\E[31;m'
 		echo -n "pkg-config installed, but autoconf is not able to find pkg.m4. "
 		echo "Unfortunately the generated configure would not work, so we stop here."
 		echo
-		tput sgr0
 		exit 1
 	fi
 else
-	echo -e  '\E[31;m'
 	echo -n "pkg-config not found. "
 	echo "pkg-config is required to create a working configure, so we stop here."
 	echo
-	tput sgr0
 	exit 1
 fi
 
@@ -121,12 +113,10 @@ else
 fi
 
 if [ "$LT_ERROR" = "1" ]; then
-	echo -e  '\E[31;m'
 	echo -n "Your libtool version `libtool --version | sed -n -e 's#[^0-9]* \([0-9]*\.[0-9]*\).*#\1#p'`"
 	echo " is older than the suggested one, $LT_1.$LT_2"
 	echo "Go on at your own risk. :-)"
 	echo
-	tput sgr0
 fi
 
 if [ -z "$LIBTOOLIZE" ] ; then
