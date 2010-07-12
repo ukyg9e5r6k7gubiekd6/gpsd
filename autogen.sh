@@ -68,8 +68,15 @@ fi
 if which pkg-config 1>/dev/null 2>&1; then
 	#pkg-config seems to be installed. Check for m4 macros:
 	tmpdir=`mktemp -d "./autogenXXXXXX"`
+	if [ -z ${tmpdir} ]; then
+		echo -n "Creating a temporary directory failed. "
+		echo 'Is mktemp in $PATH?'
+		echo
+		exit 1
+	fi
+
 	oldpwd=`pwd`
-	cd ${tmpdir}
+	cd "${tmpdir}"
 	cat > configure.ac << _EOF_
 AC_INIT
 PKG_CHECK_MODULES(QtNetwork, [QtNetwork >= 4.4],  ac_qt="yes", ac_qt="no")
@@ -78,8 +85,8 @@ _EOF_
 	autoconf --force
 	grep -q PKG_CHECK_MODULES configure
 	PKG_MACRO_AVAILABLE=$?
-	cd ${oldpwd}
-	rm -rf ${tmpdir}
+	cd "${oldpwd}"
+	rm -rf "${tmpdir}"
 	if [ ${PKG_MACRO_AVAILABLE} -eq 0 ]; then
 		echo -n "pkg-config installed, but autoconf is not able to find pkg.m4. "
 		echo "Unfortunately the generated configure would not work, so we stop here."
