@@ -47,7 +47,6 @@ srec.html
 *.[1358]
 *.pyc
 *.pc
-*.log
 *.sum
 *.i
 *.o
