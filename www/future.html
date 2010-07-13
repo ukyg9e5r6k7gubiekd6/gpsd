@@ -117,13 +117,17 @@ data from us and handle the DBUS publishing job for us.</p>
 
 <h2 id="api_cleanup">Client API cleanup</h2>
 
-<p>This is not a near-term project.</p>
+<p>This will happen after 2.95 but before 3.0.</p>
 
 <p>The client API has some historical baggage, unfortunate naming, and
 scar tissue in it.  At some point we're going to bump the API major
 version number to 5 and make the following changes:<p>
 
 <ul>
+<li>MAXCHANNELS will increase so we can handle a GPS + GLONASS 
+constellation.  This has become a production issue because of the
+Geostar Geos 1M.</p> 
+
 <li><p>gps_open_r() will be renamed to gps_open(). The existing
 gps_open() will go away.</p></li>
 
