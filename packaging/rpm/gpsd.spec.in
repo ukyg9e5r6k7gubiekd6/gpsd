@@ -106,7 +106,7 @@ make DESTDIR=%{buildroot} pythondir=%{python_sitearch} install
 	%{buildroot}/lib/udev
 
 # remove .la files
-#rm -f %{buildroot}%{_libdir}/libgps*.la
+rm -f %{buildroot}%{_libdir}/libgps*.la
 
 # fix non-executable python script
 %{__chmod} +x %{buildroot}%{python_sitearch}/gps/gps.py
