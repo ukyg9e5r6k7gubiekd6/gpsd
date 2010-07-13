@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.6, March 2010
+v1.7, March 2010
 
 == Why a new protocol? ==
 
@@ -51,22 +51,18 @@ This is our schedule for the changeover:
 [options="header"]
 |================================================================
 | Release | Timing                      | Description
-| 2.93    | Late March 2010             |
-The library will default to initializing for JSON rather than old protocol. 
-DBUS support deprecated.
+| 2.96    | July-Aug 2010               |
+Object-file format bump.
 
-| 3.0     | Before 30 June 2010         |
+| 3.0     | Before 30 Sep 2010          |
 Old protocol support will be removed from the library.
 DBUS support will be removed from the daemon.
 
 |================================================================
 
-The most likely way for this schedule to flex is with another point
-release or two before 3.0, but the overall timeframe is firm.
-
 If you follow our transition advice now, you will be able to talk to
 all old-protocol and new-protocol versions of the daemon until the
-3.0 shared client library is deployed in mid-2010, at which point your
+3.0 shared client library is deployed in late 2010, at which point your
 runtime will silently get smaller but you won't be able to use 2.x 
 daemon versions any more.
 
