@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     /*@-nullpass@*/ /* someday, add null annotation to the gpsopen_r() params */
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
-	if (gps_open_r(NULL, NULL, &gpsdata) != 0) {
+	if (gps_open(NULL, NULL, &gpsdata) != 0) {
 	    gpsd_report(LOG_ERROR, "no gpsd running or network error: %s.\n", 
 			netlib_errstr(errno));
 	    lowlevel = true;

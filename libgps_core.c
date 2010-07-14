@@ -90,7 +90,7 @@ static void gps_trace(int errlevel, const char *fmt, ...)
 #endif /* LIBGPS_DEBUG */
 
 /*@-nullderef@*/
-int gps_open_r(/*@null@*/const char *host, /*@null@*/const char *port,
+int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 	       /*@out@*/ struct gps_data_t *gpsdata)
 {
     /*@ -branchstate @*/
@@ -101,7 +101,7 @@ int gps_open_r(/*@null@*/const char *host, /*@null@*/const char *port,
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 
-    libgps_debug_trace((1, "gps_open_r(%s, %s)\n", host, port));
+    libgps_debug_trace((1, "gps_open(%s, %s)\n", host, port));
 
 #ifndef USE_QT
     if ((gpsdata->gps_fd =
@@ -134,19 +134,6 @@ int gps_open_r(/*@null@*/const char *host, /*@null@*/const char *port,
     return 0;
     /*@ +branchstate @*/
 }
-
-/*@-compmempass -immediatetrans@*/
-struct gps_data_t *gps_open(const char *host, const char *port)
-/* open a connection to a gpsd daemon */
-{
-    static struct gps_data_t gpsdata;
-    if (gps_open_r(host, port, &gpsdata) == -1)
-	return NULL;
-    else
-	return &gpsdata;
-}
-
-/*@+compmempass +immediatetrans@*/
 
 /*@-compdef -usereleased@*/
 int gps_close(struct gps_data_t *gpsdata)
@@ -618,17 +605,6 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 }
 /*@+compdef -usedef +uniondef@*/
 
-int gps_poll(/*@out@*/struct gps_data_t *gpsdata)
-/* for backwards compatibility */
-{
-    int status = gps_read(gpsdata);
-
-    if (status > 0)
-	status = 0;
-
-    return status;
-}
-
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
 /* send a command to the gpsd instance */
 {
@@ -767,7 +743,7 @@ static struct gps_data_t gpsdata;
 
 int main(int argc, char *argv[])
 {
-    struct gps_data_t *collect;
+    struct gps_data_t collect;
     char buf[BUFSIZ];
     int option;
     bool batchmode = false;
@@ -788,7 +764,7 @@ int main(int argc, char *argv[])
 		 sizeof(struct gps_data_t), sizeof(struct rtcm2_t),
 		 sizeof(struct rtcm3_t), sizeof(struct ais_t),
 		 sizeof(struct attitude_t), sizeof(struct rawdata_t),
-		 sizeof(collect->devices), sizeof(struct policy_t),
+		 sizeof(collect.devices), sizeof(struct policy_t),
 		 sizeof(struct version_t));
 	    exit(0);
 	case 'D':
@@ -810,21 +786,21 @@ int main(int argc, char *argv[])
 		libgps_dump_state(&gpsdata, time(NULL));
 	    }
 	}
-    } else if ((collect = gps_open(NULL, 0)) == NULL) {
+    } else if (gps_open(NULL, 0, &collect) <= 0) {
 	(void)fputs("Daemon is not running.\n", stdout);
 	exit(1);
     } else if (optind < argc) {
-	gps_set_raw_hook(collect, dumpline);
+	gps_set_raw_hook(&collect, dumpline);
 	(void)strlcpy(buf, argv[optind], BUFSIZ);
 	(void)strlcat(buf, "\n", BUFSIZ);
-	(void)gps_send(collect, buf);
-	(void)gps_read(collect);
-	libgps_dump_state(collect, time(NULL));
-	(void)gps_close(collect);
+	(void)gps_send(&collect, buf);
+	(void)gps_read(&collect);
+	libgps_dump_state(&collect, time(NULL));
+	(void)gps_close(&collect);
     } else {
 	int tty = isatty(0);
 
-	gps_set_raw_hook(collect, dumpline);
+	gps_set_raw_hook(&collect, dumpline);
 	if (tty)
 	    (void)fputs("This is the gpsd exerciser.\n", stdout);
 	for (;;) {
@@ -835,12 +811,12 @@ int main(int argc, char *argv[])
 		    putchar('\n');
 		break;
 	    }
-	    collect->set = 0;
-	    (void)gps_send(collect, buf);
-	    (void)gps_read(collect);
-	    libgps_dump_state(collect, time(NULL));
+	    collect.set = 0;
+	    (void)gps_send(&collect, buf);
+	    (void)gps_read(&collect);
+	    libgps_dump_state(&collect, time(NULL));
 	}
-	(void)gps_close(collect);
+	(void)gps_close(&collect);
     }
 
     return 0;

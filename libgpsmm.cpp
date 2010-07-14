@@ -17,7 +17,7 @@ struct gps_data_t* gpsmm::open(void) {
 }
 
 struct gps_data_t* gpsmm::open(const char *host, const char *port) {
-	gps_data=gps_open(host,port);
+  gps_open(host,port, gps_data);
 	if (gps_data==NULL) { //connection not opened
 		return NULL;
 	}
@@ -46,7 +46,7 @@ struct gps_data_t* gpsmm::send(const char *request) {
 }
 
 struct gps_data_t* gpsmm::poll(void) {
-	if (gps_poll(gps_data)<0) {
+	if (gps_read(gps_data)<=0) {
 		// we return null if there was a read() error or connection is cloed by gpsd
 		return NULL;
 	}

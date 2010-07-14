@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 	open_serial(serialport);
 
     /*@ -nullpass -onlytrans @*/
-    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
+    if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      source.server, source.port, strerror(errno), errno);

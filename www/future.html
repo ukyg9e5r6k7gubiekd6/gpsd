@@ -126,10 +126,10 @@ version number to 5 and make the following changes:<p>
 <ul>
 <li>MAXCHANNELS will increase so we can handle a GPS + GLONASS 
 constellation.  This has become a production issue because of the
-Geostar Geos 1M.</p> 
+Geostar Geos 1M. (Done in 2.96~dev.)</p> 
 
 <li><p>gps_open_r() will be renamed to gps_open(). The existing
-gps_open() will go away.</p></li>
+gps_open() will go away. (Done in 2.96~dev.)</p></li>
 
 <li><p>The 'waiting' and 'buffer' members of privdata will move into
 the public part of gps.h</p></li>
@@ -138,7 +138,7 @@ the public part of gps.h</p></li>
 be able to look at the packet buffer directly. (Of course, this is
 only recommended when the PACKET_SET flag is up.)</p></li>
 
-<li><p>gps_poll() will be renamed to gps_read().</p></li>
+<li><p>gps_poll() will be renamed to gps_read(). (Done in 2.96~dev.)</p></li>
 
 <li><p>There will be a new gps_poll() entry point that will perform
 a nonblocking poll of the daemon, using the (now experimental) ?POLL

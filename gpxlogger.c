@@ -305,7 +305,7 @@ static int socket_mainloop(void)
     fd_set fds;
     struct gps_data_t gpsdata;
 
-    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
+    if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "%s: no gpsd running or network error: %d, %s\n",
 		      progname, errno, gps_errstr(errno));

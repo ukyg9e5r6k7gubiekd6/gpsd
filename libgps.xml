@@ -27,13 +27,7 @@ C:
 
 </funcsynopsisinfo>
 <funcprototype>
-<funcdef>struct gps_data_t *<function>gps_open</function></funcdef>
-    <paramdef>int<parameter>af</parameter></paramdef>
-    <paramdef>char *<parameter>server</parameter></paramdef>
-    <paramdef>char * <parameter>port</parameter></paramdef>
-</funcprototype>
-<funcprototype>
-<funcdef>int <function>gps_open_r</function></funcdef>
+<funcdef>int <function>gps_open</function></funcdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
     <paramdef>char * <parameter>port</parameter></paramdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
@@ -321,8 +315,8 @@ command is shipped to it will be the reponse to command.</para>
 <function>gps_send()</function> but beware that this ties your code to
 the GPSD wire protocol. It is not recommended.</para>
 
-<para>This API has been stable since GPSD 2.90, except that
-<function>gps_waiting()</function> was added in 2.91.</para>
+<para>See gthe comment above the symbol GPSD_API_MAJOR_VERSION
+in <filename>gps.h</filename> for recent changes.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

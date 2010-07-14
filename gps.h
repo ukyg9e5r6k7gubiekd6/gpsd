@@ -39,6 +39,8 @@ extern "C" {
  * 4.1 - Base version for initial JSON protocol (Dec 2009)
  * 4.2 - AIS application IDs split into DAC and FID (May 2010)
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (July 2010)
+ *       gps_open() becomes reentrant, what gps_open_r() used to be. 
+ *       gps_poll() removed in favor of gps_read().
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1045,13 +1047,11 @@ struct gps_data_t {
     void *privdata;
 };
 
-extern int gps_open_r(/*@null@*/const char *, /*@null@*/const char *, 
+extern int gps_open(/*@null@*/const char *, /*@null@*/const char *, 
 		      /*@out@*/struct gps_data_t *);
-extern /*@null@*/struct gps_data_t *gps_open(const char *, const char *);
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
-extern int gps_poll(/*@out@*/struct gps_data_t *);
 extern bool gps_waiting(struct gps_data_t *);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern void gps_set_raw_hook(struct gps_data_t *, 

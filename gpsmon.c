@@ -527,7 +527,7 @@ int main(int argc, char **argv)
 #else
 	) {
 #endif
-	(void)gps_open_r(source.server, source.port, &session.gpsdata);
+	(void)gps_open(source.server, source.port, &session.gpsdata);
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
 			  "%s: connection failure on %s:%s, error %d = %s.\n",

@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
     daemonize();
 
     /* Open the stream to gpsd. */
-    if (gps_open_r(source.server, source.port, &gpsdata) != 0) {
+    if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf( stderr,
 		       "cgps: no gpsd running or network error: %d, %s\n",
 		       errno, gps_errstr(errno));
