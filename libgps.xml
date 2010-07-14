@@ -44,7 +44,7 @@ C:
     char *buf, size_t len)</paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>int <function>gps_poll</function></funcdef>
+<funcdef>int <function>gps_read</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
@@ -126,14 +126,13 @@ returns a -1 if there was a Unix-level write error, otherwise
 0. Please read the LIMITATIONS section for additional information and
 cautions.</para>
 
-<para><function>gps_poll()</function> accepts a response, or sequence
+<para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
-query response (the return value is as for a query).
-<function>gps_poll()</function> returns the validity mask of the
-received structure.  This function does a blocking read waiting for
-data from the daemon; it returns 0 for success, -1 with errno set on a 
-Unix-level read error, -1 with errno not set if the socket to
-the daemon has closed. </para>
+query response (the return value is as for a query).  This function
+does a blocking read waiting for data from the daemon; it returns a
+count of bytes read for success, -1 with errno set on a Unix-level
+read error, -1 with errno not set if the socket to the daemon has
+closed. </para>
 
 <para><function>gps_waiting()</function> can be used to check
 whether there is data from the daemon. It returns true if there is,
@@ -223,9 +222,9 @@ argument.</para>
 <varlistentry>
 <term>POLL_NONBLOCK</term>
 <listitem>
-<para>Normally <function>gps_poll()</function> blocks until
+<para>Normally <function>gps_read()</function> blocks until
 either there is a read error or some data is received from tha 
-daemon.  In this mode, <function>gps_poll()</function> returns
+daemon.  In this mode, <function>gps_read()</function> returns
 immediately with a value of 0 if there is no input waiting.</para>
 </listitem>
 </varlistentry>
@@ -233,7 +232,7 @@ immediately with a value of 0 if there is no input waiting.</para>
 
 <para><function>gps_set_raw_hook()</function> takes a function you
 specify and run it (synchronously) on the raw data pulled by a
-<function>gps_query()</function> or <function>gps_poll()</function>
+<function>gps_query()</function> or <function>gps_read()</function>
 call.  The arguments passed to this hook will be a pointer to a
 structure containing parsed data, and a buffer containining the
 raw <application>gpsd</application> response.</para>
@@ -242,12 +241,12 @@ raw <application>gpsd</application> response.</para>
 English) describing the error indicated by a nonzero return value from
 <function>gps_open()</function>.</para>
 
-<para>Consult <filename>gps.h</filename> to learn more about the data members 
-and associated timestamps.  Note that information will accumulate
-in the session structure over time, and the 'valid' field is not
-automatically zeroed by each poll.  It is up to the client to
-zero that field when appropriate and to keep an eye on the fix 
-and sentence timestamps.</para>
+<para>Consult <filename>gps.h</filename> to learn more about the data
+members and associated timestamps.  Note that information will
+accumulate in the session structure over time, and the 'valid' field
+is not automatically zeroed by each <function>gps_read()</function>.
+It is up to the client to zero that field when appropriate and to keep
+an eye on the fix and sentence timestamps.</para>
 
 <para>The Python implementation supports the same facilities as the C
 library. <function>gps_open()</function> is replaced by the

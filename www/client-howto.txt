@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.1, April 2010
+v1.2, April 2010
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -290,7 +290,8 @@ Each library has the following entry points:
 * Nonblocking check to see if data from the daemon is waiting. Named
   something like "waiting()".
 
-* Blocking poll for data from the daemon.  Named something like "poll()".
+* Blocking read for data from the daemon.  Named something like "read()"
+  (this was "poll()" in older versions).
 
 * Close the session socket. Named something like "close()".
 
@@ -305,8 +306,6 @@ Here is a complete table of the binding entry points:
 Function
 |gps_open()		|gpsmm.gpsmm()		|gps.\_\_init__()	|
 In OO languages the client class initializer opens the daemon socket.
-|gps_open_r()		|			|			|
-The C library, only, has an open variant that is re-entrant.
 |gps_set_raw_hook()	|			|gps.set_raw_hook()	|
 Set a hook function to be executed on each raw packet as it arrives.
 |gps_send()		|gpsmm.send()		|gps.send()		|
@@ -315,8 +314,8 @@ Send wire-protocol commands to the daemon. Deprecated and unstable.
 Set watch policy. What you should use instead of send().
 |gps_waiting()		|gpsmm.waiting()	|gps.waiting()		|
 Nonblocking check to see in input is waiting.
-|gps_poll()		|gpsmm.poll()		|gps.poll()		|
-Blocking poll for data from the daemon.
+|gps_read()		|gpsmm.read()		|gps.read()		|
+Blocking read for data from the daemon.
 |gps_close()		|gpsmm.close()		|gps.close()		|
 Close the daemon socket and end the session.
 |gps_enable_debug()	|gpsmm_enable_debug()	|			|
@@ -326,31 +325,31 @@ Clear the contents of the fix structure.
 |========================================================================
 
 The tricky part is interpreting what you get from the blocking
-poll. The reason it's tricky is that you're not guaranteed that
-every poll will pick up exactly one complete JSON object from the 
+read. The reason it's tricky is that you're not guaranteed that
+every read will pick up exactly one complete JSON object from the 
 daemon. It may grab one response object, or more than one, or
 part of one, or one or more followed by a fragment.
 
-What the library does on each poll is this: get what it can from the
+What the library does on each read is this: get what it can from the
 socket, append that to a private buffer, and then consume as many JSON
 objects from the front of the buffer as it can.  Any incomplete JSON
 is left in the private buffer to be completed and unpacked on a later
 go-round.
 
 In C, the library "consumes" a JSON object by unpacking its content
-into a blackboard structure passed to the poll entry point by
+into a blackboard structure passed to the read entry point by
 address. The structure contains a state-flag mask that you can (and
 should!) check so you'll know which parts of the structure contain
 valid data.  It is safe to do nothing unless the PACKET_SET mask bit
 is on, which is the library's way of telling you that at least one
-complete JSON response has arrived since the last poll.
+complete JSON response has arrived since the last read.
 
 Data may accumulate on the blackboard over multiple reads,
 with new TPV reports overwriting old ones;it is guaranteed that
 overwrites are not partial.  Expect this pattern to be replicated
 in any compiled language with only fixed-extent structures.
 
-In Python and Perl the poll entry point returns an object containing
+In Python and Perl the read entry point returns an object containing
 accumulated data.  The state-flag mask is still useful for telling you
 which parts contain data, and there is still a PACKET_SET bit.  Expect
 this pattern to be replicated in other dynamic OO languages when we
@@ -359,18 +358,18 @@ support them.
 The C++ binding is a very thin wrapper around the C.  You get back an
 object, but it's just a reference to the C blackboard structure.
 
-All bindings will throw a recognizable error from the poll entry
+All bindings will throw a recognizable error from the read entry
 point when the socket is closed from the daemon side.
 
 == C Examples ==
 
-The source distribution includes three example clients in C; 
-gpxlogger.c, cgps.c, and xgpsspeed.c.  
+The source distribution includes two example clients in C; 
+gpxlogger.c and cgps.c.  
 
 gpxlogger.c illustrates the simplest possible program flow; open,
-followed by stream, followed by blocking polls forever.  The use of
+followed by stream, followed by blocking reads forever.  The use of
 select is not strictly necessary, but illustrates how to wait for data
-from the daemon; it would work even if the poll were
+from the daemon; it would work even if the read were
 non-blocking. This would only be appropriate for a batch-mode report
 generator.
 
@@ -378,29 +377,27 @@ cgps.c shows what an interactive application using the library and
 also processing user commands works. Observe the use of select(2)
 to wait on either data from the daemon or a keystroke.
 
-xgpsspeed.c is a simple C client using X for display.  It doesn't need
-to use a select(2) or the gps_waiting() library entry point because
-it's tied into the X main event loop, which is watching the daemon
-socket.
-
 == Python examples ==
 
 There's a very simple Python example analogous to gpxlogger attached
 to the source code for the gps.py library.
 
-For a more interesting example integrated with X and GTK, see xgps.
+For more interesting example integrated with X and GTK, see xgps and
+xgpsspeed.
 
-== Future Changes ==
+== Backward Incompatibility and Future Changes ==
 
 The C/C++ binding makes available two preprocessor symbols,
 GPSD_API_MAJOR_VERSION and GPSD_API_MINOR_VERSION, in gps.h.
 The Python module has corresponding symbols.
 
-At some point in the foreseeable (but not near) future, the value of
-the GPSD_API_MAJOR_VERSION symbol will be bumped and the API
-redesigned to discard historical baggage from the old protocol.
-You will be able to use the version symbols to make your code
-work with either version.
+In major versions before 5:
+
+* gps_open() didn't take a third argument; instead, it returned malloc storage.
+
+* The 'read()' method in various bindings was named 'poll()' and had
+  a different return convention. The name 'poll()' will at some point
+  be reintroduced as an interface to the wire-protocol POLL command.
 
 See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
 for details.

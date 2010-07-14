@@ -529,7 +529,7 @@ class TestSession:
                         chosen.send(chosen.enqueued)
                         chosen.enqueued = ""
                     while chosen.waiting():
-                        chosen.poll()
+                        chosen.read()
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
                         had_output = True

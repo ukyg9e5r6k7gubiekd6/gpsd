@@ -263,7 +263,7 @@ int main(int argc, char **argv)
     }
     /*@-nullpass@*/
 
-    /* ^ someday, add out annotation to the gpspoll() param  and remove */
+    /* ^ someday, add out annotation to the gps_poll() param  and remove */
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
 	struct devconfig_t *devlistp;

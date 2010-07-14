@@ -320,7 +320,7 @@ class Main(object):
         return True
 
     def handle_response(self, source, condition):
-        if self.daemon.poll() == -1:
+        if self.daemon.read() == -1:
             self.handle_hangup(source, condition)
         if self.daemon.data['class'] == 'TPV':
             self.update_speed(self.daemon.data)

@@ -395,12 +395,12 @@ def plotframe(await, fname, speed, threshold, title):
         sys.stderr.write("gpsprof: gpsd unreachable.\n")
         sys.exit(1)
     # Initialize
-    session.poll()
+    session.read()
     if session.version == None:
         print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
         sys.exit(1)
     session.send("?DEVICES;")
-    while session.poll() != -1:
+    while session.read() != -1:
         if session.data["class"] == "DEVICES":
             break
     if len(session.data.devices) != 1:
@@ -416,7 +416,7 @@ def plotframe(await, fname, speed, threshold, title):
     # Set parameters
     if speed:
         session.send('?DEVICE={"path":"%s","bps:":%d}' % (path, speed))
-        session.poll()
+        session.read()
         if session.baudrate != speed:
             sys.stderr.write("gpsprof: baud rate change failed.\n")
     options = ""
@@ -429,7 +429,7 @@ def plotframe(await, fname, speed, threshold, title):
         countdown = await
         basetime = time.time()
         while countdown > 0:
-            if session.poll() == -1:
+            if session.read() == -1:
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()

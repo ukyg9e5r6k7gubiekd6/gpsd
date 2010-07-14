@@ -297,7 +297,7 @@ class gps(gpsdata, gpsjson):
             self.data["c_decode"] = time.time()
             self.timings = self.data
 
-    def poll(self):
+    def read(self):
         "Read and interpret data from the daemon."
         status = gpscommon.read(self)
         if status <= 0:

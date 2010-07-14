@@ -596,7 +596,7 @@ class Base:
 
     def handle_response(self, source, condition):
         "Handle ordinary I/O ready condition from the daemon."
-        if self.daemon.poll() == -1:
+        if self.daemon.read() == -1:
             self.handle_hangup(source, condition)
         if self.daemon.valid & gps.PACKET_SET:
             if self.device and self.device != self.daemon.data["device"]:

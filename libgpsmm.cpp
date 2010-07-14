@@ -45,7 +45,7 @@ struct gps_data_t* gpsmm::send(const char *request) {
 	}
 }
 
-struct gps_data_t* gpsmm::poll(void) {
+struct gps_data_t* gpsmm::read(void) {
 	if (gps_read(gps_data)<=0) {
 		// we return null if there was a read() error or connection is cloed by gpsd
 		return NULL;
