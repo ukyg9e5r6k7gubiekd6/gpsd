@@ -49,6 +49,7 @@ extern "C" {
 #define MAXCHANNELS	32	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define GPS_PATH_MAX	64	/* dev files usually have short names */
+#define GPS_BUFFER_MAX  3072	/* enough for two maximun-size JSON objects */
 #define MAXUSERDEVS	4	/* max devices per user */
 
 /* 
@@ -1021,6 +1022,10 @@ struct gps_data_t {
     struct policy_t policy;	/* our listening policy */
 
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
+
+    /* data buffered from the last read */
+    ssize_t waiting;
+    char buffer[GPS_BUFFER_MAX * 2];
 
     void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
 

@@ -47,8 +47,6 @@ extern char *strtok_r(char *, const char *, char **);
 struct privdata_t
 {
     bool newstyle;
-    ssize_t waiting;
-    char buffer[GPS_JSON_RESPONSE_MAX * 2];
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
@@ -128,8 +126,8 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
     if (gpsdata->privdata == NULL)
 	return -1;
     PRIVATE(gpsdata)->newstyle = false;
-    PRIVATE(gpsdata)->waiting = 0;
-    /*@i2@*/ PRIVATE(gpsdata)->buffer[0] = '\0';
+    gpsdata->waiting = 0;
+    /*@i2@*/ gpsdata->buffer[0] = '\0';
 
     return 0;
     /*@ +branchstate @*/
@@ -513,7 +511,7 @@ bool gps_waiting(struct gps_data_t * gpsdata)
     struct timeval tv;
 
     libgps_debug_trace((1, "gps_waiting(): %d\n", waitcount++));
-    if (PRIVATE(gpsdata)->waiting > 0)
+    if (gpsdata->waiting > 0)
 	return true;
 
     FD_ZERO(&rfds);
@@ -535,11 +533,10 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     double received = 0;
     ssize_t response_length;
     int status = -1;
-    struct privdata_t *priv = PRIVATE(gpsdata);
 
     gpsdata->set &= ~PACKET_SET;
-    for (eol = priv->buffer;
-	 *eol != '\n' && eol < priv->buffer + priv->waiting; eol++)
+    for (eol = gpsdata->buffer;
+	 *eol != '\n' && eol < gpsdata->buffer + gpsdata->waiting; eol++)
 	continue;
     if (*eol != '\n')
 	eol = NULL;
@@ -548,21 +545,21 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 #ifndef USE_QT
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
 	status = (int)recv(gpsdata->gps_fd,
-			   priv->buffer + priv->waiting,
-			   sizeof(priv->buffer) - priv->waiting, 0);
+			   gpsdata->buffer + gpsdata->waiting,
+			   sizeof(gpsdata->buffer) - gpsdata->waiting, 0);
 #else
 	status =
-	    ((QTcpSocket *) (gpsdata->gps_fd))->read(priv->buffer +
-						     priv->waiting,
-						     sizeof(priv->buffer) -
-						     priv->waiting);
+	    ((QTcpSocket *) (gpsdata->gps_fd))->read(gpsdata->buffer +
+						     gpsdata->waiting,
+						     sizeof(gpsdata->buffer) -
+						     gpsdata->waiting);
 #endif
 
 	/* if we just received data from the socket, it's in the buffer */
 	if (status > -1)
-	    priv->waiting += status;
+	    gpsdata->waiting += status;
 	/* buffer is empty - implies no data was read */
-	if (priv->waiting == 0) {
+	if (gpsdata->waiting == 0) {
 	    /* 
 	     * If we received 0 bytes, other side of socket is closing.
 	     * Return -1 as end-of-data indication.
@@ -580,8 +577,8 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 		return -1;
 	}
 	/* there's buffered data waiting to be returned */
-	for (eol = priv->buffer;
-	     *eol != '\n' && eol < priv->buffer + priv->waiting; eol++)
+	for (eol = gpsdata->buffer;
+	     *eol != '\n' && eol < gpsdata->buffer + gpsdata->waiting; eol++)
 	    continue;
 	if (*eol != '\n')
 	    eol = NULL;
@@ -591,14 +588,14 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 
     assert(eol != NULL);
     *eol = '\0';
-    response_length = eol - priv->buffer + 1;
+    response_length = eol - gpsdata->buffer + 1;
     received = gpsdata->online = timestamp();
-    status = gps_unpack(priv->buffer, gpsdata);
+    status = gps_unpack(gpsdata->buffer, gpsdata);
     /*@+matchanyintegral@*/
-    memmove(priv->buffer,
-	    priv->buffer + response_length, priv->waiting - response_length);
+    memmove(gpsdata->buffer,
+	    gpsdata->buffer + response_length, gpsdata->waiting - response_length);
     /*@-matchanyintegral@*/
-    priv->waiting -= response_length;
+    gpsdata->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
     return status;
