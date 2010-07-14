@@ -31,12 +31,6 @@ Partially complete. David Ludlow <dave@adsllc.com> is working on it.
 
 ** To do:
 
-*** Bump MAXCHANNELS to support GPS/GLONASS devices
-
-This will require a major soname bump. Probably goes with the API 
-changes on the Future page. Here's a test log for a GPS/GLONASS device,
-the Geostar Geos 1M: <http://old.nabble.com/new-gps-report-to29115582.html>.
-
 *** Write advanced features for TNT Revolution device
 
 The baud-rate switcher in the TNT driver needs to be tested.
