@@ -210,6 +210,8 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
+libgpsd_la_LDFLAGS = $(LIBUSB_LIBS)
+
 BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
 
 packet_names.h: packet_states.h
