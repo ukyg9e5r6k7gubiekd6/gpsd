@@ -1,3 +1,6 @@
+* Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96dev
+  Bunped maximum cjhannel count to 22 tyo accommodate GPS +GLONASS devices.
+
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!
   Rationalize clearing and generation of DOPs, this makes epx/epy much
