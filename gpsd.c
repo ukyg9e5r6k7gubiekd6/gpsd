@@ -1185,7 +1185,7 @@ static void handle_request(struct subscriber_t *sub,
 	}
 	if (reply[strlen(reply) - 1] == ',')
 	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "]}]}\r\n", replylen);
+	(void)strlcat(reply, "]}\r\n", replylen);
     } else if (strncmp(buf, "VERSION;", 8) == 0) {
 	buf += 8;
 	json_version_dump(reply, replylen);
