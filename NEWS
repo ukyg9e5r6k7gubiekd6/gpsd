@@ -1,5 +1,7 @@
-* Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96dev
-  Bunped maximum cjhannel count to 22 tyo accommodate GPS +GLONASS devices.
+* Wed Jul 14 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96~dev
+  Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
+  API version bumped to 5, redesign in progress (changes are documented
+  in the Client HOWTO).
 
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!
