@@ -127,7 +127,7 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 	return -1;
     PRIVATE(gpsdata)->newstyle = false;
     gpsdata->waiting = 0;
-    /*@i2@*/ gpsdata->buffer[0] = '\0';
+    /*@i1@*/ gpsdata->buffer[0] = '\0';
 
     return 0;
     /*@ +branchstate @*/
