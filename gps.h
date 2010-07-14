@@ -1031,6 +1031,7 @@ struct gps_data_t {
 
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
+    gps_mask_t auxmask;	/* for future expansion */
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
