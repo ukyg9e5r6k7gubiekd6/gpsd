@@ -77,6 +77,12 @@ HEADERS += libQgpsmm_global.h \
 
     QMAKE_CFLAGS += -D_GNU_SOURCE
 
+    # create pkg_config and prl files
+    CONFIG += create_pc create_prl
+    QMAKE_PKGCONFIG_REQUIRES = QtNetwork
+    QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+    pkgconfig.path = $${TARGET_LIBDIR}
+    INSTALLS += pkgconfig
 }
 
 win32 {
