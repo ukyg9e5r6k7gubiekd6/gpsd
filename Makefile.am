@@ -133,7 +133,7 @@ gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS)
 #
 # As we need to retrieve the version from qmake to build the Qt library,
 # we provide targets to print the necessary informations.
-libgps_VERSION_CURRENT = 19
+libgps_VERSION_CURRENT = 20
 libgps_VERSION__REVISION = 0
 libgps_VERSION_AGE = 0
 libgps_VERSION_NUMBER = $(libgps_VERSION_AGE):$(libgps_VERSION__REVISION):$(libgps_VERSION_AGE)

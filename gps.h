@@ -38,12 +38,13 @@ extern "C" {
 /*
  * 4.1 - Base version for initial JSON protocol (Dec 2009)
  * 4.2 - AIS application IDs split into DAC and FID (May 2010)
+ * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (July 2010)
  */
-#define GPSD_API_MAJOR_VERSION	4	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
+#define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
+#define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
-#define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
+#define MAXCHANNELS	32	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define GPS_PATH_MAX	64	/* dev files usually have short names */
 #define MAXUSERDEVS	4	/* max devices per user */
