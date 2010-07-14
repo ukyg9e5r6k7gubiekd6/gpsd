@@ -49,9 +49,6 @@ HEADERS += libQgpsmm_global.h \
     isEmpty( EXEC_PREFIX ) {
         EXEC_PREFIX = $${PREFIX}
     }
-    isEmpty( LIBDIR ) {
-        LIBDIR = /lib
-    }
     isEmpty( INCLUDEDIR ) {
         INCLUDEDIR = /include
     }
@@ -63,7 +60,11 @@ HEADERS += libQgpsmm_global.h \
     # set from the autotools generated Makefile.
     # There should be a better way to handle this, though.
     isEmpty( TARGET_LIBDIR ) {
-        TARGET_LIBDIR = $${EXEC_PREFIX}$${LIBDIR}
+        isEmpty( LIBDIR ) {
+            TARGET_LIBDIR = $$[QT_INSTALL_LIBS]
+	} else {
+            TARGET_LIBDIR = $${EXEC_PREFIX}$${LIBDIR}
+	}
     }
     isEmpty( TARGET_INCLUDEDIR ) {
         TARGET_INCLUDEDIR = $${PREFIX}$${INCLUDEDIR}
