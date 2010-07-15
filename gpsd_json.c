@@ -261,15 +261,13 @@ void json_sky_dump(const struct gps_data_t *datap,
 			       datap->ss[i], used ? "true" : "false");
 	    }
 	}
-    }
-    if (reported) {
 	if (reply[strlen(reply) - 1] == ',')
 	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "]", replylen - strlen(reply));
+	(void)strlcat(reply, "]", replylen);
     }
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen);
     if (datap->satellites_visible != reported)
 	gpsd_report(LOG_WARN, "Satellite count %d != PRN count %d\n",
 		    datap->satellites_visible, reported);
