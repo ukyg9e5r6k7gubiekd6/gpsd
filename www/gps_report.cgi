@@ -480,7 +480,7 @@ if (hasNeededElements($query)){
     print <<EOF;
 <p>Click the <code>Send Report</code> button to
 send your report to the GPSD developers.  Eventually, your report is
-likely to appear on our <a href="/hardware.html">Hardware</a> page.</p>
+likely to appear on our <a href="http://gpsd.berlios.de/hardware.html">Hardware</a> page.</p>
 
 <table width="100%" border="0">
 <tr>
