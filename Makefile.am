@@ -799,7 +799,7 @@ bits-regress: test_bits
 	$(srcdir)/test_bits
 
 # Do all normal regression tests.
-testregress: gps-regress rtcm-regress aivdm-regress packet-regress time-regress unpack-regress json-regress
+testregress: gps-regress rtcm-regress aivdm-regress packet-regress geoid-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
 # do-tests is a shell script that invokes make with target testregress.
