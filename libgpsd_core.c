@@ -170,12 +170,31 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 #if defined(HAVE_LINUX_TIMEPPS_H)
     register struct ppsunit *up;
+    struct pps_params_t pp;
+
     up = malloc(sizeof(struct ppsunit));
     memset(up, 0, sizeof(struct ppsunit));
+    memset(pp, 0, sizeof(struct pp));
 
     if ( 0 > time_pps_create(session->gpsdata.gps_fd, &up->handle ) {
 	gpsd_report(LOG_INF, "PPS time_pps_create() failed\n");
+    } else {
+    	/* have kernel PPS handle */
+        int mode, old_mode;
+        if ( 0 > time_pps_getcap(ph, &old_mode) {
+	    gpsd_report(LOG_ERROR, "PPS time_pps_getcap() failed\n");
+        } else {
+	    gpsd_report(LOG_INF, "PPS old_mode %0x\n", old_mode);
+        }
+
+        pp.mode = PPS_CAPTUREBOTH | PPS_ECHOASSERT | PPS_ECHOCLEAR;
+
+        if ( 0 > time_pps_setparams(up->handle, &pp) {
+	    gpsd_report(LOG_ERROR, "PPS time_pps_setparams() failed\n");
+        }
     }
+
+
 #endif
 
     /* wait for status change on the device's carrier-detect line */
