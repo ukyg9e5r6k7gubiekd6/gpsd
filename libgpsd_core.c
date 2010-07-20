@@ -35,7 +35,7 @@
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
-#if defined(HAVE_LINUX_TIMEPPS_H)
+#if defined(HAVE_TIMEPPS_H)
     /* use RFC 2783 PPS API */
     /* this needs linux >= 2.6.34 and
      * CONFIG_PPS=y
@@ -156,7 +156,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    struct timeval tv;
+    struct timeval  tv;
+    struct timespec kernelpps_tv;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 
 #if defined(PPS_ON_CTS)
@@ -168,32 +169,37 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-#if defined(HAVE_LINUX_TIMEPPS_H)
-    register struct ppsunit *up;
-    struct pps_params_t pp;
+#if defined(HAVE_TIMEPPS_H)
+    int kernelpps_handle = -1;
+    pps_params_t pp;
+    pps_info_t pi;
+    int use_kernelpps = 1;
 
-    up = malloc(sizeof(struct ppsunit));
-    memset(up, 0, sizeof(struct ppsunit));
-    memset(pp, 0, sizeof(struct pp));
+    memset( (void *)&pp, 0, sizeof(pps_params_t));
+    memset( (void *)&pi, 0, sizeof(pps_info_t));
 
-    if ( 0 > time_pps_create(session->gpsdata.gps_fd, &up->handle ) {
-	gpsd_report(LOG_INF, "PPS time_pps_create() failed\n");
+    if ( 0 > time_pps_create(session->gpsdata.gps_fd, &kernelpps_handle )) {
+        use_kernelpps = 0;
+	gpsd_report(LOG_INF, "KPPS time_pps_create() failed\n");
     } else {
     	/* have kernel PPS handle */
-        int mode, old_mode;
-        if ( 0 > time_pps_getcap(ph, &old_mode) {
-	    gpsd_report(LOG_ERROR, "PPS time_pps_getcap() failed\n");
+        int old_mode;
+        if ( 0 > time_pps_getcap(kernelpps_handle, &old_mode)) {
+	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
         } else {
-	    gpsd_report(LOG_INF, "PPS old_mode %0x\n", old_mode);
+	    gpsd_report(LOG_ERROR, "KPPS old_mode %0x\n", old_mode);
         }
 
         pp.mode = PPS_CAPTUREBOTH | PPS_ECHOASSERT | PPS_ECHOCLEAR;
 
-        if ( 0 > time_pps_setparams(up->handle, &pp) {
-	    gpsd_report(LOG_ERROR, "PPS time_pps_setparams() failed\n");
+        if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
+            use_kernelpps = 0;
+	    gpsd_report(LOG_ERROR, "KPPS time_pps_setparams() failed\n");
         }
     }
-
+    if ( use_kernelpps ) {
+	gpsd_report(LOG_ERROR, "KPPS kernel PPS will be used\n");
+    }
 
 #endif
 
@@ -203,6 +209,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
 	(void)gettimeofday(&tv, NULL);
+#if defined(HAVE_TIMEPPS_H)
+	if ( use_kernelpps ) {
+	    kernelpps_tv.tv_nsec = 0;
+	    kernelpps_tv.tv_sec = 0;
+	    if ( 0 > time_pps_fetch(kernelpps_handle, PPS_TSFMT_TSPEC
+	        , &pi, &kernelpps_tv)) {
+		gpsd_report(LOG_ERROR, "KPPS kernel PPS failed\n");
+	    } else {
+		gpsd_report(LOG_ERROR, "KPPS kernel PPS worked?\n");
+	    }
+	}
+#endif
 
 	ok = 0;
 	log = NULL;
