@@ -156,6 +156,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
+#if defined(HAVE_LINUX_PPS_H)
+    /* this is where the kernel PPS code will go */
+#endif
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
