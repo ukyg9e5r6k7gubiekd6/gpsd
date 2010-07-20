@@ -35,9 +35,17 @@
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
-#if defined(HAVE_LINUX_PPS_H)
+#if defined(HAVE_LINUX_TIMEPPS_H)
     /* use RFC 2783 PPS API */
-    #include <linux/pps.h>
+    /* this needs linux >= 2.6.34 and
+     * CONFIG_PPS=y
+     * CONFIG_PPS_DEBUG=y
+     * CONFIG_PPS_CLIENT_LDISC=y
+     */
+    /* get timepps.h from here:
+     * http://www.mail-archive.com/debian-glibc@lists.debian.org/msg43125.html
+     */
+    #include <timepps.h>
 #endif
 #endif
 
@@ -160,13 +168,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-#if defined(HAVE_LINUX_PPS_H) && defined(__UNUSED__)
+#if defined(HAVE_LINUX_TIMEPPS_H)
     register struct ppsunit *up;
     up = malloc(sizeof(struct ppsunit));
     memset(up, 0, sizeof(struct ppsunit));
 
     if ( 0 > time_pps_create(session->gpsdata.gps_fd, &up->handle ) {
-	gpsd_report(LOG_INF, "NTPD time_pps_create() failed\n");
+	gpsd_report(LOG_INF, "PPS time_pps_create() failed\n");
     }
 #endif
 
