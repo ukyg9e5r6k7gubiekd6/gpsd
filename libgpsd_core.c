@@ -35,7 +35,7 @@
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
-#if defined(HAVE_LINUX_PPS_KERNEL_H)
+#if defined(HAVE_LINUX_PPS_H)
     #include <linux/pps_kernel.h>
     static struct pps_source_info pps_ktimer_info = {
             .name         = "ktimer",
@@ -169,7 +169,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-#if defined(HAVE_LINUX_PPS_KERNEL_H)
+#if defined(HAVE_LINUX_PPS_H)
     /* this is where the kernel PPS code will go */
 #endif
 
@@ -460,7 +460,7 @@ void ntpd_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
-#if defined(HAVE_LINUX_PPS_KERNEL_H)
+#if defined(HAVE_LINUX_PPS_H)
 	    int source;
             source = pps_register_source(&pps_ktimer_info,
                         PPS_CAPTUREASSERT | PPS_OFFSETASSERT);
