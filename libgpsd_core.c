@@ -218,13 +218,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	(void)gettimeofday(&tv, NULL);
 #if defined(HAVE_TIMEPPS_H)
 	if ( use_kernelpps ) {
-	    kernelpps_tv.tv_nsec = 0;
-	    kernelpps_tv.tv_sec = 0;
+            memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
 	    if ( 0 > time_pps_fetch(kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		gpsd_report(LOG_ERROR, "KPPS kernel PPS failed\n");
 	    } else {
-		gpsd_report(LOG_ERROR, "KPPS kernel PPS worked?\n");
+		gpsd_report(LOG_ERROR, "KPPS data: "
+		       "assert %ld.%09ld, sequence: %ld - "
+		       "clear  %ld.%09ld, sequence: %ld\n",
+		       pi.assert_timestamp.tv_sec,
+		       pi.assert_timestamp.tv_nsec,
+		       pi.assert_sequence,
+		       pi.clear_timestamp.tv_sec,
+		       pi.clear_timestamp.tv_nsec, 
+		       pi.clear_sequence);
 	    }
 	}
 #endif
