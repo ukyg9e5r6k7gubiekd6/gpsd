@@ -218,6 +218,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	(void)gettimeofday(&tv, NULL);
 #if defined(HAVE_TIMEPPS_H)
 	if ( use_kernelpps ) {
+	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
+	     * latency */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
 	    if ( 0 > time_pps_fetch(kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
@@ -366,10 +368,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	/*@ -boolint @*/
 	if (NULL != log) {
-	    gpsd_report(LOG_RAW, "%s\n", log);
+	    gpsd_report(LOG_RAW, log);
 	}
 	if (0 != ok) {
-	    (void)ntpshm_pps(session, &tv);
+	    if ( use_kernelpps ) {
+		/* ntpshm_pps() expects usec, not nsec */
+	        pi.clear_timestamp.tv_nsec /= 1000;
+	        (void)ntpshm_pps(session, &pi.clear_timestamp);
+	    } else {
+	        (void)ntpshm_pps(session, &tv);
+	    }
 	} else {
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
 	}
