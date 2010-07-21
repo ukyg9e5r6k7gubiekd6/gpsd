@@ -260,8 +260,11 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 }
 
 #ifdef PPS_ENABLE
-/* put NTP shared memory info based on received PPS pulse */
-
+/* put NTP shared memory info based on received PPS pulse
+ *
+ * good news is that kernel PPS gives us nSec resolution
+ * bad news is that ntpshm only has uSec resolution
+ */
 int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
