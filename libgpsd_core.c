@@ -371,13 +371,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(LOG_RAW, log);
 	}
 	if (0 != ok) {
+#if defined(HAVE_TIMEPPS_H)
 	    if ( use_kernelpps ) {
 		/* ntpshm_pps() expects usec, not nsec */
 	        pi.clear_timestamp.tv_nsec /= 1000;
 	        (void)ntpshm_pps(session, &pi.clear_timestamp);
-	    } else {
+	    } else 
+#endif
 	        (void)ntpshm_pps(session, &tv);
-	    }
 	} else {
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
 	}
