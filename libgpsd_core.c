@@ -180,6 +180,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 
     /* uh, oh, magic file names! */
+    /* FIXME,  need to look in /sys/class/pps/*/path
+     * to find the /dev/pps? that matches our serial port */
     int ret = open("/dev/pps0", O_RDWR);
     if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
         use_kernelpps = 0;
