@@ -179,8 +179,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     memset( (void *)&pp, 0, sizeof(pps_params_t));
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 
+    /* need to run as root: ldattach PPS /dev/ttyS0 to create the
+     * magic /dev/pps0 device */
     /* uh, oh, magic file names! */
-    /* FIXME,  need to look in /sys/class/pps/*/path
+    /* FIXME,  need to look in /sys/class/pps/pps?/path
      * to find the /dev/pps? that matches our serial port */
     int ret = open("/dev/pps0", O_RDWR);
     if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
