@@ -174,27 +174,34 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     pps_params_t pp;
     pps_info_t pi;
     int use_kernelpps = 1;
+    struct pps_kparams dummy;
 
     memset( (void *)&pp, 0, sizeof(pps_params_t));
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 
-    if ( 0 > time_pps_create(session->gpsdata.gps_fd, &kernelpps_handle )) {
+    /* uh, oh, magic file names! */
+    int ret = open("/dev/pps0", O_RDWR);
+    if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
         use_kernelpps = 0;
-	gpsd_report(LOG_INF, "KPPS time_pps_create() failed\n");
+	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
+	    , ret, errno);
     } else {
     	/* have kernel PPS handle */
-        int old_mode;
-        if ( 0 > time_pps_getcap(kernelpps_handle, &old_mode)) {
+        int caps;
+	/* get features  supported */
+        if ( 0 > time_pps_getcap(kernelpps_handle, &caps)) {
 	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
         } else {
-	    gpsd_report(LOG_ERROR, "KPPS old_mode %0x\n", old_mode);
+	    gpsd_report(LOG_ERROR, "KPPS caps %0x\n", caps);
         }
 
-        pp.mode = PPS_CAPTUREBOTH | PPS_ECHOASSERT | PPS_ECHOCLEAR;
+        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
+        pp.mode = PPS_CAPTUREBOTH;
 
         if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
             use_kernelpps = 0;
-	    gpsd_report(LOG_ERROR, "KPPS time_pps_setparams() failed\n");
+	    gpsd_report(LOG_ERROR, 
+	    	"KPPS time_pps_setparams() failed, errno:%d\n", errno);
         }
     }
     if ( use_kernelpps ) {
