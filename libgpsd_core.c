@@ -39,13 +39,14 @@
     /* use RFC 2783 PPS API */
     /* this needs linux >= 2.6.34 and
      * CONFIG_PPS=y
-     * CONFIG_PPS_DEBUG=y
+     * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
      * CONFIG_PPS_CLIENT_LDISC=y
      */
-    /* get timepps.h from here:
+    /* get timepps.h from the pps-tools package, or from here:
      * http://www.mail-archive.com/debian-glibc@lists.debian.org/msg43125.html
      */
     #include <timepps.h>
+    #include <glob.h>
 #endif
 #endif
 
@@ -158,25 +159,47 @@ static int init_kernel_pps(struct gps_device_t *session) {
     int kernelpps_handle = -1;
     int ldisc = 18;   /* the PPS line discipline */
     pps_params_t pp;
+    glob_t globbuf;
+    int i;
+
 
     if ( !isatty(session->gpsdata.gps_fd) ) {
 	gpsd_report(LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
     }
-    /* Attach the line PPS discpline. */
-    /* This ativates the magic /dev/pps0 device */
+    /* Attach the line PPS discpline, so no need to ldattach */
+    /* This activates the magic /dev/pps0 device */
     if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
 	gpsd_report(LOG_INF, "KPPS cannot set PPS line discipline: %d\n"
 	    , errno);
     	return -1;
     }
 
-    memset( (void *)&pp, 0, sizeof(pps_params_t));
 
-    /* uh, oh, magic file names! */
-    /* FIXME,  need to look in /sys/class/pps/pps?/path
+    /* uh, oh, magic file names!, this is not how RFC2783 was designed */
+    /* need to look in /sys/class/pps/pps?/path
      * to find the /dev/pps? that matches our serial port */
-    int ret = open("/dev/pps0", O_RDWR);
+    /* yes, this could be done with libsysfs, but trying to keep the
+     * number of required libs small */
+    memset( (void *)&globbuf, 0, sizeof(globbuf));
+    glob("/sys/class/pps/pps?/path", GLOB_DOOFFS, NULL, &globbuf);
+
+    for ( i = 0; i < globbuf.gl_pathc; i++ ) {
+	gpsd_report(LOG_INF, "KPPS checking %s\n"
+	    , globbuf.gl_pathv[i]);
+    }
+    char *path = "/dev/pps0";
+
+    /* have the path, clear the blob */
+    globfree(&globbuf);
+
+    int ret = open(path, O_RDWR);
+    if ( 0 > ret ) {
+	gpsd_report(LOG_INF, "KPPS cannot open %s: %d\n"
+	    , path, errno);
+    	return -1;
+    }
+
     if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
 	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
 	    , ret, errno);
@@ -192,6 +215,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
         }
 
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
+        memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
 
         if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
@@ -389,14 +413,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	/*@ -boolint @*/
 	if (NULL != log) {
-	    gpsd_report(LOG_RAW, log);
+	    gpsd_report(LOG_RAW, "%.100s", log);
 	}
 	if (0 != ok) {
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
 		/* ntpshm_pps() expects usec, not nsec */
 	        pi.clear_timestamp.tv_nsec /= 1000;
-	        (void)ntpshm_pps(session, &pi.clear_timestamp);
+	        (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
 	    } else 
 #endif
 	        (void)ntpshm_pps(session, &tv);
