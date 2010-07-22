@@ -161,6 +161,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     pps_params_t pp;
     glob_t globbuf;
     int i;
+    char path[20] = "";
 
 
     if ( !isatty(session->gpsdata.gps_fd) ) {
@@ -185,10 +186,17 @@ static int init_kernel_pps(struct gps_device_t *session) {
     glob("/sys/class/pps/pps?/path", GLOB_DOOFFS, NULL, &globbuf);
 
     for ( i = 0; i < globbuf.gl_pathc; i++ ) {
-	gpsd_report(LOG_INF, "KPPS checking %s\n"
-	    , globbuf.gl_pathv[i]);
+        int fd = open(globbuf.gl_pathv[i], O_RDONLY);
+	if ( 0 <= fd ) {
+	        memset( (void *)&path, 0, sizeof(path));
+		ssize_t r = read( fd, path, sizeof(path) -1);
+		close(fd);
+	}
+	gpsd_report(LOG_INF, "KPPS checking %s, %s\n"
+	    , globbuf.gl_pathv[i], path);
     }
-    char *path = "/dev/pps0";
+    memset( (void *)&path, 0, sizeof(path));
+    strncpy( path, "/dev/pps0", sizeof(path) -1);
 
     /* have the path, clear the blob */
     globfree(&globbuf);
