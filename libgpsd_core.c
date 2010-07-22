@@ -164,6 +164,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     	return -1;
     }
     /* Attach the line PPS discpline. */
+    /* This ativates the magic /dev/pps0 device */
     if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
 	gpsd_report(LOG_INF, "KPPS cannot set PPS line discipline: %d\n"
 	    , errno);
@@ -172,8 +173,6 @@ static int init_kernel_pps(struct gps_device_t *session) {
 
     memset( (void *)&pp, 0, sizeof(pps_params_t));
 
-    /* need to run as root: ldattach PPS /dev/ttyS0 to create the
-     * magic /dev/pps0 device */
     /* uh, oh, magic file names! */
     /* FIXME,  need to look in /sys/class/pps/pps?/path
      * to find the /dev/pps? that matches our serial port */
