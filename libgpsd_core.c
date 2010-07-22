@@ -183,13 +183,16 @@ static int init_kernel_pps(struct gps_device_t *session) {
     /* yes, this could be done with libsysfs, but trying to keep the
      * number of required libs small */
     memset( (void *)&globbuf, 0, sizeof(globbuf));
-    glob("/sys/class/pps/pps?/path", GLOB_DOOFFS, NULL, &globbuf);
+    glob("/sys/class/pps/pps?/path", 0, NULL, &globbuf);
 
     for ( i = 0; i < globbuf.gl_pathc; i++ ) {
         int fd = open(globbuf.gl_pathv[i], O_RDONLY);
 	if ( 0 <= fd ) {
 	        memset( (void *)&path, 0, sizeof(path));
 		ssize_t r = read( fd, path, sizeof(path) -1);
+		if ( 0 < r ) {
+		    path[r - 1] = '\0'; /* remove trailing \x0a */
+		}
 		close(fd);
 	}
 	gpsd_report(LOG_INF, "KPPS checking %s, %s\n"
