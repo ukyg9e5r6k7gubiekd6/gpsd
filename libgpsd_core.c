@@ -152,6 +152,58 @@ void gpsd_deactivate(struct gps_device_t *session)
 }
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+#if defined(HAVE_TIMEPPS_H)
+/* return handle for kernel pps, or -1 */
+static int init_kernel_pps(struct gps_device_t *session) {
+    int kernelpps_handle = -1;
+    int ldisc = 18;   /* the PPS line discipline */
+    pps_params_t pp;
+
+    if ( !isatty(session->gpsdata.gps_fd) ) {
+	gpsd_report(LOG_INF, "KPPS gps_fd not a tty\n");
+    	return -1;
+    }
+    /* Attach the line PPS discpline. */
+    if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
+	gpsd_report(LOG_INF, "KPPS cannot set PPS line discipline: %d\n"
+	    , errno);
+    	return -1;
+    }
+
+    memset( (void *)&pp, 0, sizeof(pps_params_t));
+
+    /* need to run as root: ldattach PPS /dev/ttyS0 to create the
+     * magic /dev/pps0 device */
+    /* uh, oh, magic file names! */
+    /* FIXME,  need to look in /sys/class/pps/pps?/path
+     * to find the /dev/pps? that matches our serial port */
+    int ret = open("/dev/pps0", O_RDWR);
+    if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
+	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
+	    , ret, errno);
+    	return -1;
+    } else {
+    	/* have kernel PPS handle */
+        int caps;
+	/* get features  supported */
+        if ( 0 > time_pps_getcap(kernelpps_handle, &caps)) {
+	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
+        } else {
+	    gpsd_report(LOG_ERROR, "KPPS caps %0x\n", caps);
+        }
+
+        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
+        pp.mode = PPS_CAPTUREBOTH;
+
+        if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
+	    gpsd_report(LOG_ERROR, 
+	    	"KPPS time_pps_setparams() failed, errno:%d\n", errno);
+	    return -1;
+        }
+    }
+    return kernelpps_handle;
+}
+#endif
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
@@ -170,47 +222,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 #if defined(HAVE_TIMEPPS_H)
-    int kernelpps_handle = -1;
-    pps_params_t pp;
+
     pps_info_t pi;
-    int use_kernelpps = 1;
-    struct pps_kparams dummy;
-
-    memset( (void *)&pp, 0, sizeof(pps_params_t));
-    memset( (void *)&pi, 0, sizeof(pps_info_t));
-
-    /* need to run as root: ldattach PPS /dev/ttyS0 to create the
-     * magic /dev/pps0 device */
-    /* uh, oh, magic file names! */
-    /* FIXME,  need to look in /sys/class/pps/pps?/path
-     * to find the /dev/pps? that matches our serial port */
-    int ret = open("/dev/pps0", O_RDWR);
-    if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
-        use_kernelpps = 0;
-	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
-	    , ret, errno);
-    } else {
-    	/* have kernel PPS handle */
-        int caps;
-	/* get features  supported */
-        if ( 0 > time_pps_getcap(kernelpps_handle, &caps)) {
-	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
-        } else {
-	    gpsd_report(LOG_ERROR, "KPPS caps %0x\n", caps);
-        }
-
-        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
-        pp.mode = PPS_CAPTUREBOTH;
-
-        if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
-            use_kernelpps = 0;
-	    gpsd_report(LOG_ERROR, 
-	    	"KPPS time_pps_setparams() failed, errno:%d\n", errno);
-        }
-    }
-    if ( use_kernelpps ) {
+    int kernelpps_handle = init_kernel_pps( session );
+    if ( 0 <= kernelpps_handle ) {
 	gpsd_report(LOG_ERROR, "KPPS kernel PPS will be used\n");
     }
+    memset( (void *)&pi, 0, sizeof(pps_info_t));
 
 #endif
 
@@ -221,9 +239,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	(void)gettimeofday(&tv, NULL);
 #if defined(HAVE_TIMEPPS_H)
-	if ( use_kernelpps ) {
+        if ( 0 <= kernelpps_handle ) {
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
-	     * latency */
+	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
 	    if ( 0 > time_pps_fetch(kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
@@ -376,7 +394,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	if (0 != ok) {
 #if defined(HAVE_TIMEPPS_H)
-	    if ( use_kernelpps ) {
+            if ( 0 <= kernelpps_handle ) {
 		/* ntpshm_pps() expects usec, not nsec */
 	        pi.clear_timestamp.tv_nsec /= 1000;
 	        (void)ntpshm_pps(session, &pi.clear_timestamp);
