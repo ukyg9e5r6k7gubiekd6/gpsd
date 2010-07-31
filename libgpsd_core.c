@@ -257,6 +257,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 #if defined(HAVE_TIMEPPS_H)
 
+    int kpps_edge = 0;       /* 0 = assert edge, 1 = clear edge */
     pps_info_t pi;
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
@@ -429,9 +430,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if (0 != ok) {
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
-		/* ntpshm_pps() expects usec, not nsec */
-	        pi.clear_timestamp.tv_nsec /= 1000;
-	        (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
+		/* pick the right edge */
+		if ( kpps_edge ) {
+		    /* ntpshm_pps() expects usec, not nsec */
+	            pi.clear_timestamp.tv_nsec /= 1000;
+	            (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
+		} else {
+	            pi.assert_timestamp.tv_nsec /= 1000;
+	            (void)ntpshm_pps(session, (struct timeval*)&pi.assert_timestamp);
+		}
 	    } else 
 #endif
 	        (void)ntpshm_pps(session, &tv);

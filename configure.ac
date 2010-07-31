@@ -686,6 +686,8 @@ AC_MSG_CHECKING([for PPS time syncing support])
 if test x"$ac_pps" = "xyes"; then
     AC_MSG_RESULT([yes])
 	AC_DEFINE([PPS_ENABLE], 1, [PPS time syncing support])
+    AC_CHECK_HEADERS(pps.h)
+    dnl timepps.h needs pps.h
     AC_CHECK_HEADERS(timepps.h)
 else
   AC_MSG_RESULT([no])
