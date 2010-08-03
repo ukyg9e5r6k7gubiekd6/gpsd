@@ -257,7 +257,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 #if defined(HAVE_TIMEPPS_H)
 
-    int kpps_edge = 0;       /* 0 = assert edge, 1 = clear edge */
+    int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
     pps_info_t pi;
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
@@ -284,17 +284,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else {
 		// find the last edge
 	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
-		    kpps_edge = 0;
-	    	} else if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
 		    kpps_edge = 1;
+	    	} else if ( pi.assert_timestamp.tv_sec < pi.clear_timestamp.tv_sec ) {
+		    kpps_edge = 0;
 		} else if ( pi.assert_timestamp.tv_nsec > pi.clear_timestamp.tv_nsec ) {
-		    kpps_edge = 0;
-		} else {
 		    kpps_edge = 1;
+		} else {
+		    kpps_edge = 0;
 		}
-		gpsd_report(LOG_ERROR, "KPPS data: "
+		gpsd_report(LOG_ERROR, "KPPS data: using %s,"
 		       "assert %ld.%09ld, sequence: %ld - "
 		       "clear  %ld.%09ld, sequence: %ld\n",
+		       kpps_edge ? "assert" : "clear",
 		       pi.assert_timestamp.tv_sec,
 		       pi.assert_timestamp.tv_nsec,
 		       pi.assert_sequence,
@@ -443,11 +444,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/* pick the right edge */
 		if ( kpps_edge ) {
 		    /* ntpshm_pps() expects usec, not nsec */
-	            pi.clear_timestamp.tv_nsec /= 1000;
-	            (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
-		} else {
 	            pi.assert_timestamp.tv_nsec /= 1000;
 	            (void)ntpshm_pps(session, (struct timeval*)&pi.assert_timestamp);
+		} else {
+	            pi.clear_timestamp.tv_nsec /= 1000;
+	            (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
 		}
 	    } else 
 #endif
