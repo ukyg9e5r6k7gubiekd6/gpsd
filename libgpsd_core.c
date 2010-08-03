@@ -282,6 +282,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	        , &pi, &kernelpps_tv)) {
 		gpsd_report(LOG_ERROR, "KPPS kernel PPS failed\n");
 	    } else {
+		// find the last edge
+	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
+		    kpps_edge = 0;
+	    	} else if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
+		    kpps_edge = 1;
+		} else if ( pi.assert_timestamp.tv_nsec > pi.clear_timestamp.tv_nsec ) {
+		    kpps_edge = 0;
+		} else {
+		    kpps_edge = 1;
+		}
 		gpsd_report(LOG_ERROR, "KPPS data: "
 		       "assert %ld.%09ld, sequence: %ld - "
 		       "clear  %ld.%09ld, sequence: %ld\n",
