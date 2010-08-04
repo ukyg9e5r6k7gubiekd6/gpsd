@@ -161,7 +161,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     pps_params_t pp;
     glob_t globbuf;
     int i;
-    char path[20] = "";
+    char path[GPS_PATH_MAX] = "";
 
 
     if ( !isatty(session->gpsdata.gps_fd) ) {
@@ -185,20 +185,30 @@ static int init_kernel_pps(struct gps_device_t *session) {
     memset( (void *)&globbuf, 0, sizeof(globbuf));
     glob("/sys/class/pps/pps?/path", 0, NULL, &globbuf);
 
+    memset( (void *)&path, 0, sizeof(path));
     for ( i = 0; i < globbuf.gl_pathc; i++ ) {
         int fd = open(globbuf.gl_pathv[i], O_RDONLY);
 	if ( 0 <= fd ) {
-	        memset( (void *)&path, 0, sizeof(path));
-		ssize_t r = read( fd, path, sizeof(path) -1);
-		if ( 0 < r ) {
-		    path[r - 1] = '\0'; /* remove trailing \x0a */
-		}
-		close(fd);
+	    ssize_t r = read( fd, path, sizeof(path) -1);
+	    if ( 0 < r ) {
+		path[r - 1] = '\0'; /* remove trailing \x0a */
+	    }
+	    close(fd);
 	}
 	gpsd_report(LOG_INF, "KPPS checking %s, %s\n"
 	    , globbuf.gl_pathv[i], path);
+	if ( 0 == strncmp( path, session->gpsdata.dev.path, sizeof(path))) {
+	    /* this is the pps we are looking for */
+	    /* FIXME, now build the proper pps device path */
+	    break;
+	}
+	memset( (void *)&path, 0, sizeof(path));
     }
-    memset( (void *)&path, 0, sizeof(path));
+    if ( '\0' == path[0] ) {
+	gpsd_report(LOG_INF, "KPPS device not found.\n");
+    	return -1;
+    }
+    /* above not working yet, cheat */
     strncpy( path, "/dev/pps0", sizeof(path) -1);
 
     /* have the path, clear the blob */
