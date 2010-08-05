@@ -161,6 +161,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     pps_params_t pp;
     glob_t globbuf;
     int i;
+    char pps_num = 0;     /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
 
 
@@ -178,12 +179,15 @@ static int init_kernel_pps(struct gps_device_t *session) {
 
 
     /* uh, oh, magic file names!, this is not how RFC2783 was designed */
-    /* need to look in /sys/class/pps/pps?/path
-     * to find the /dev/pps? that matches our serial port */
-    /* yes, this could be done with libsysfs, but trying to keep the
+    /* need to look in /sys/devices/virtual/pps/pps?/path
+     * (/sys/class/pps/pps?/path is just a link to that)
+     * to find the /dev/pps? that matches our serial port.
+     * this code fails if there are more then 10 pps devices.
+     *     
+     * yes, this could be done with libsysfs, but trying to keep the
      * number of required libs small */
     memset( (void *)&globbuf, 0, sizeof(globbuf));
-    glob("/sys/class/pps/pps?/path", 0, NULL, &globbuf);
+    glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
 
     memset( (void *)&path, 0, sizeof(path));
     for ( i = 0; i < globbuf.gl_pathc; i++ ) {
@@ -200,19 +204,20 @@ static int init_kernel_pps(struct gps_device_t *session) {
 	if ( 0 == strncmp( path, session->gpsdata.dev.path, sizeof(path))) {
 	    /* this is the pps we are looking for */
 	    /* FIXME, now build the proper pps device path */
+	    pps_num = globbuf.gl_pathv[i][28];
 	    break;
 	}
 	memset( (void *)&path, 0, sizeof(path));
     }
-    if ( '\0' == path[0] ) {
+    /* done with blob, clear it */
+    globfree(&globbuf);
+
+    if ( 0 == pps_num ) {
 	gpsd_report(LOG_INF, "KPPS device not found.\n");
     	return -1;
     }
-    /* above not working yet, cheat */
-    strncpy( path, "/dev/pps0", sizeof(path) -1);
-
-    /* have the path, clear the blob */
-    globfree(&globbuf);
+    /* contruct the magic device path */
+    (void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
 
     int ret = open(path, O_RDWR);
     if ( 0 > ret ) {
