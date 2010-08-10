@@ -328,7 +328,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
 	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[kpps_edge]);
 	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(kpps_edge == 0)]);
-		if ( 3 < duration_kpps ) {
+		if ( 3000000 < duration_kpps ) {
 		    // invisible pulse
 		    duration_kpps = 0;
 		}
