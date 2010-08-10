@@ -273,10 +273,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_TIMEPPS_H)
 
     int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
+    int cycle_kpps, duration_kpps;
+    struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
+    struct timespec tv_kpps;
     pps_info_t pi;
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
-	gpsd_report(LOG_ERROR, "KPPS kernel PPS will be used\n");
+	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
     }
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 
@@ -288,6 +291,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
 	(void)gettimeofday(&tv, NULL);
+
 #if defined(HAVE_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
@@ -300,14 +304,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		// find the last edge
 	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
 		    kpps_edge = 1;
+		    tv_kpps = pi.assert_timestamp;
 	    	} else if ( pi.assert_timestamp.tv_sec < pi.clear_timestamp.tv_sec ) {
 		    kpps_edge = 0;
+		    tv_kpps = pi.clear_timestamp;
 		} else if ( pi.assert_timestamp.tv_nsec > pi.clear_timestamp.tv_nsec ) {
 		    kpps_edge = 1;
+		    tv_kpps = pi.assert_timestamp;
 		} else {
 		    kpps_edge = 0;
+		    tv_kpps = pi.clear_timestamp;
 		}
-		gpsd_report(LOG_ERROR, "KPPS data: using %s,"
+		gpsd_report(LOG_PROG, "KPPS data: using %s,"
 		       "assert %ld.%09ld, sequence: %ld - "
 		       "clear  %ld.%09ld, sequence: %ld\n",
 		       kpps_edge ? "assert" : "clear",
@@ -317,6 +325,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		       pi.clear_timestamp.tv_sec,
 		       pi.clear_timestamp.tv_nsec, 
 		       pi.clear_sequence);
+#define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
+	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[kpps_edge]);
+	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(kpps_edge == 0)]);
+		if ( 3 < duration_kpps ) {
+		    // invisible pulse
+		    duration_kpps = 0;
+		}
+#undef timediff_kpps
+	        gpsd_report(LOG_INF, "KPPS cycle: %d, duration: %d @ %lu.%09lu\n",
+		    cycle_kpps, duration_kpps,
+		    (unsigned long)tv_kpps.tv_sec, (unsigned long)tv_kpps.tv_nsec);
+		pulse_kpps[kpps_edge] = tv_kpps;
 	    }
 	}
 #endif
