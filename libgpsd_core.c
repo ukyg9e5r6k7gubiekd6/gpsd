@@ -509,22 +509,29 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if (0 != ok) {
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
-	        memcpy( (void*)&sample.tv, (void*)&tv, sizeof(tv));
 		/* chrony expects tv-sec since Jan 1970 */
+	    	sample.tv.tv_sec = 1 + (int)session->last_fixtime;
 	    	sample.tv.tv_usec = 0;
-	    	sample.offset = 10; /* ?? */
 	    	sample.pulse = 0;
 	    	sample.leap = 0;
 	    	sample.magic = SOCK_MAGIC;
-	    	send(chronyfd, &sample, sizeof (sample), 0);
 		/* pick the right edge */
 		if ( kpps_edge ) {
+	    	    sample.offset = sample.tv.tv_sec - pi.assert_timestamp.tv_sec;
+	    	    sample.offset *= 1000000000;
+	    	    sample.offset += pi.assert_timestamp.tv_nsec;
 		    /* ntpshm_pps() expects usec, not nsec */
 	            pi.assert_timestamp.tv_nsec /= 1000;
 	            (void)ntpshm_pps(session, (struct timeval*)&pi.assert_timestamp);
 		} else {
+	    	    sample.offset = sample.tv.tv_sec - pi.clear_timestamp.tv_sec;
+	    	    sample.offset *= 1000000000;
+	    	    sample.offset += pi.assert_timestamp.tv_nsec;
 	            pi.clear_timestamp.tv_nsec /= 1000;
 	            (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
+		}
+		if ( 0 <= chronyfd ) {
+	    	    send(chronyfd, &sample, sizeof (sample), 0);
 		}
 	    } else 
 #endif
