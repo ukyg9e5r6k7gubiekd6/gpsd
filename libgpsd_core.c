@@ -290,6 +290,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int _pad;	/* unused */
 	int magic;      /* must be SOCK_MAGIC */
     } sample;
+    /* chrony must be started first as chrony insists on creating the socket */
     /* open the chrony socket */
     struct sockaddr_un s;
     int chronyfd;
@@ -509,6 +510,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
 	        memcpy( (void*)&sample.tv, (void*)&tv, sizeof(tv));
+		/* chrony expects tv-sec since Jan 1970 */
 	    	sample.tv.tv_usec = 0;
 	    	sample.offset = 10; /* ?? */
 	    	sample.pulse = 0;
