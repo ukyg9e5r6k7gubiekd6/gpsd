@@ -164,7 +164,6 @@ static int init_kernel_pps(struct gps_device_t *session) {
     char pps_num = 0;     /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
 
-
     if ( !isatty(session->gpsdata.gps_fd) ) {
 	gpsd_report(LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
@@ -277,6 +276,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec tv_kpps;
     pps_info_t pi;
+    /* for chrony SOCK interface, which allows nSec timekeeping */
+    #define SOCK_MAGIC 0x534f434b
+
+    struct sock_sample {
+	struct timeval tv;
+	double offset;
+	int pulse;
+	int leap;
+	int _pad;	/* unused */
+	int magic;      /* must be SOCK_MAGIC */
+    };
+    /* end chrony */
+
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
