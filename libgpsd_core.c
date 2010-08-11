@@ -289,22 +289,22 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int leap;
 	int _pad;	/* unused */
 	int magic;      /* must be SOCK_MAGIC */
-    };
+    } sample;
     /* open the chrony socket */
     struct sockaddr_un s;
-    int sockfd;
+    int chronyfd;
     char chrony_path[] = "/tmp/chrony.sock";
 
     s.sun_family = AF_UNIX;
     snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
 
-    sockfd = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
+    chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (chronyfd < 0) {
 	gpsd_report(LOG_PROG, "KPPS can not open chrony socket: %s", chrony_path);
-    } else if (bind(sockfd, (struct sockaddr *)&s, sizeof (s)) < 0) {
-	close(sockfd);
-	sockfd = -1;
-	gpsd_report(LOG_PROG, "KPPS can not bind chrony socket: %s", chrony_path);
+    } else if (connect(chronyfd, (struct sockaddr *)&s, sizeof (s))) {
+	close(chronyfd);
+	chronyfd = -1;
+	gpsd_report(LOG_PROG, "KPPS can not connect chrony socket: %s", chrony_path);
     }
 
     /* end chrony */
@@ -508,6 +508,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if (0 != ok) {
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
+	        memcpy( (void*)&sample.tv, (void*)&tv, sizeof(tv));
+	    	sample.tv.tv_usec = 0;
+	    	sample.offset = 10; /* ?? */
+	    	sample.pulse = 0;
+	    	sample.leap = 0;
+	    	sample.magic = SOCK_MAGIC;
+	    	send(chronyfd, &sample, sizeof (sample), 0);
 		/* pick the right edge */
 		if ( kpps_edge ) {
 		    /* ntpshm_pps() expects usec, not nsec */
