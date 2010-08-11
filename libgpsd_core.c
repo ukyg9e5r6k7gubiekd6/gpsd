@@ -47,6 +47,9 @@
      */
     #include <timepps.h>
     #include <glob.h>
+    /* and for chrony */
+    #include <sys/socket.h>
+    #include <sys/un.h>
 #endif
 #endif
 
@@ -287,6 +290,23 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int _pad;	/* unused */
 	int magic;      /* must be SOCK_MAGIC */
     };
+    /* open the chrony socket */
+    struct sockaddr_un s;
+    int sockfd;
+    char chrony_path[] = "/tmp/chrony.sock";
+
+    s.sun_family = AF_UNIX;
+    snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
+
+    sockfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+	gpsd_report(LOG_PROG, "KPPS can not open chrony socket: %s", chrony_path);
+    } else if (bind(sockfd, (struct sockaddr *)&s, sizeof (s)) < 0) {
+	close(sockfd);
+	sockfd = -1;
+	gpsd_report(LOG_PROG, "KPPS can not bind chrony socket: %s", chrony_path);
+    }
+
     /* end chrony */
 
     int kernelpps_handle = init_kernel_pps( session );
