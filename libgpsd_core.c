@@ -520,7 +520,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/* pick the right edge */
 		if ( kpps_edge ) {
 	    	    sample.tv.tv_sec = pi.assert_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.assert_timestamp.tv_nsec;
+	    	    sample.tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
 	    	    sample.offset -= pi.assert_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.assert_timestamp.tv_nsec) / 1000000000;
 		    /* ntpshm_pps() expects usec, not nsec */
@@ -528,7 +528,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	            (void)ntpshm_pps(session, (struct timeval*)&pi.assert_timestamp);
 		} else {
 	    	    sample.tv.tv_sec = pi.clear_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.clear_timestamp.tv_nsec;
+	    	    sample.tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
 	    	    sample.offset -= pi.clear_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.clear_timestamp.tv_nsec) / 1000000000;
 	            pi.clear_timestamp.tv_nsec /= 1000;
