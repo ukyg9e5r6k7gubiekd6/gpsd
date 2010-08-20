@@ -119,6 +119,7 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
+    gpsdata->raw_hook = NULL;
     gps_clear_fix(&gpsdata->fix);
 
     /* set up for line-buffered I/O over the daemon socket */
