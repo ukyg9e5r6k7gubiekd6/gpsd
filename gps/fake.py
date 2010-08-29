@@ -308,7 +308,7 @@ class DaemonInstance:
         self.spawncmd = None
 
 	# Look for gpsd in GPSD_HOME env variable
-	if os.environ.get('GPSD_HOME'):
+        if os.environ.get('GPSD_HOME'):
             for path in os.environ['GPSD_HOME'].split(':'):
                 _spawncmd = "%s/gpsd" % path
                 if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
@@ -316,7 +316,7 @@ class DaemonInstance:
                     break
 
 	# if we could not find it yet try PATH env variable for it
-	if not self.spawncmd:
+        if not self.spawncmd:
             if not '/usr/sbin' in os.environ['PATH']:
                 os.environ['PATH']=os.environ['PATH'] + ":/usr/sbin"
             for path in os.environ['PATH'].split(':'):

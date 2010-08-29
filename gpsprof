@@ -457,7 +457,7 @@ def plotframe(await, fname, speed, threshold, title):
 
 if __name__ == '__main__':
     try:
-	(options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:D:")
 
         formatter = "space"
         raw = False

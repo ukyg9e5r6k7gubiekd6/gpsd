@@ -105,9 +105,9 @@ class SkyView(gtk.DrawingArea):
 
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
-	az *= (math.pi/180)	# Degrees to radians
+        az *= (math.pi/180)	# Degrees to radians
         # Exact spherical projection would be like this:
-	# el = sin((90.0 - el) * DEG_2_RAD);
+        # el = sin((90.0 - el) * DEG_2_RAD);
         el = ((90.0 - el) / 90.0);
         xout = int((self.width / 2) + math.sin(az) * el * (self.diameter / 2))
         yout = int((self.height / 2) - math.cos(az) * el * (self.diameter / 2))
