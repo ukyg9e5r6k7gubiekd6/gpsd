@@ -46,6 +46,11 @@ The files prefixed with flock are the scripts, data files, and
 documentation for the flock-test suite. Read flock-instructions for 
 explanation.
 
+== gpsd-debian-regressions.sh ==
+
+Retrieves the latest build logs from Debian's buildds and extracts a
+list of failed regression tests, sorted by architecture.
+
 == leapsecond.py ==
 
 Gets the current leap-second correction forom IERS and/or the USNO.
