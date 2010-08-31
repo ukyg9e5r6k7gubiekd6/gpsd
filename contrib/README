@@ -39,3 +39,6 @@ lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If
 invoked as "ecef2lla" it will transform coordinates in the opposite manner.
 
+gpsd-debian-regressions.sh retrieves the latest build logs from
+Debian's buildds and extracts a list of failed regression tests, sorted
+by architecture.
