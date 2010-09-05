@@ -895,6 +895,9 @@ int main(int argc, char *argv[])
 	data = select(gpsdata.gps_fd + 1, &rfds, NULL, NULL, &timeout);
 
 	if (data == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
 	    fprintf(stderr, "cgps: socket error 3\n");
 	    exit(2);
 	} else if (data) {
