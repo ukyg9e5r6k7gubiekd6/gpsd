@@ -32,7 +32,7 @@ def reporter(errlevel, msg):
         sys.stdout.write(msg)
 
 def printusage():
-    sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
+    sys.stderr.write("usage: gpscat [-s speed] [-p] [-t] [-D debuglevel] serial-port\n")
 
 if __name__ == '__main__':
     buf = ""
