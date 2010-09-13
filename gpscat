@@ -31,6 +31,9 @@ def reporter(errlevel, msg):
     if errlevel <= debuglevel:
         sys.stdout.write(msg)
 
+def printusage():
+    sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
+
 if __name__ == '__main__':
     buf = ""
     try:
@@ -60,8 +63,12 @@ if __name__ == '__main__':
             elif switch == '-D':
                 debuglevel = BASELEVEL + int(val)
             elif switch == '-h':
-                sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
+                printusage()
                 raise SystemExit, 0
+
+        if (len(arguments) != 1):
+                printusage()
+                raise SystemExit, 1
 
         if "rfcomm" in arguments[0]:     # Bluetooth special case
             s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
