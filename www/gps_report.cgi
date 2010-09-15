@@ -1,8 +1,8 @@
 #!/usr/bin/perl -wT
 #
-# This is the CGI that processes the form return from newuser.html
-# It's in Perl rather than Python because Berlios doesn't support
-# Python CGIs.
+# This is the CGI that processes the form return from GPS information form.
+# It's in Perl rather than Python because Berlios and many other sites 
+# don't support Python CGIs.
 #
 use CGI qw(:standard);
 use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
@@ -10,6 +10,12 @@ use MIME::Base64;
 use MIME::Lite;
 use Net::SMTP;
 use strict;
+
+# All informationm on the ptroject siting, mailing
+# lists, and originating host lives here.
+$website='http://gpsd.berlios.de'
+$mailsite='berlios.de'
+$servaddr='www@mainframe.cx'
 
 my $query = new CGI;
 print $query->header;
@@ -30,8 +36,8 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
 
 	### mail parameters
-	my $from_address = 'HTTP Server <www@mainframe.cx>';
-	my $to_address = 'gpsd-dev@berlios.de';
+	my $from_address = 'HTTP Server <${servaddr}>';
+	my $to_address = "gpsd-dev@${mailsite}";
 	my $mailhost = '127.0.0.1';
 	my $subject = 'new gps report';
 
@@ -52,7 +58,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
                         firmware nmea interfaces tested rating noconfigure 
                         location date notes sample_notes)){
 		$val = $query->param($var);
-		$msg .= sprintf("\t%s = %s\n", $var, $val) if (defined($val) && $val);
+		$msg .= sprintf("%s = %s\n", $var, $val) if (defined($val) && $val);
 	}
 
 	### Add the text message part
@@ -480,7 +486,7 @@ if (hasNeededElements($query)){
     print <<EOF;
 <p>Click the <code>Send Report</code> button to
 send your report to the GPSD developers.  Eventually, your report is
-likely to appear on our <a href="http://gpsd.berlios.de/hardware.html">Hardware</a> page.</p>
+likely to appear on our <a href="${website}/hardware.html">Hardware</a> page.</p>
 
 <table width="100%" border="0">
 <tr>
