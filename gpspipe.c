@@ -151,7 +151,7 @@ static void usage(void)
 		  "-v Print a little spinner.\n"
 		  "-V Print version and exit.\n\n"
 		  "You must specify one, or both, of -r/-w.\n"
-		  "You must use -f if you use -d.\n");
+		  "You must use -o if you use -d.\n");
 }
 
 /*@ -compdestroy @*/
