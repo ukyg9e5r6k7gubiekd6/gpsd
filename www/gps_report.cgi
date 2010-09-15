@@ -11,11 +11,11 @@ use MIME::Lite;
 use Net::SMTP;
 use strict;
 
-# All informationm on the ptroject siting, mailing
+# All information on the project siting, mailing
 # lists, and originating host lives here.
-$website='http://gpsd.berlios.de'
-$mailsite='berlios.de'
-$servaddr='www@mainframe.cx'
+my $website = 'http://gpsd.berlios.de';
+my $mailsite = 'berlios.de';
+my $servaddr = 'www@mainframe.cx';
 
 my $query = new CGI;
 print $query->header;
