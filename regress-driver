@@ -5,7 +5,7 @@
 # drivers.
 
 # Requires GNU date extensions
-# Should return an empty blank string if tose are not present.
+# Should return an empty blank string if those are not present.
 starttime=`date +"%s" 2>/dev/null`
 
 # We need to have the build directory in $GPSD_HOME to find the new gpsd
@@ -34,10 +34,12 @@ export GPSD_HOME PATH
 mode=regress
 testing=daemon
 opts=""
-while getopts cstrbuvo opt
+logfile=""
+while getopts cl:strbuvo: opt
 do
     case $opt in
-        c) testing=clientlib ;;	# Can be 'daemon'  
+	c) testing=clientlib ;;	# Can be 'daemon'
+	l) logfile=$OPTARG ;;	# Logfile to save diffs to
 	s) mode=regress ;;	# Run regression tests
 	t) opts="-b $opts" mode=regress ;;	# Run regression tests w/baton
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
@@ -95,7 +97,12 @@ case $mode in
 		fi
 		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
-		    cat ${TMP}/diff-$$
+		    if [ -z "$logfile" ]
+		    then
+			cat ${TMP}/diff-$$
+		    else
+			cat ${TMP}/diff-$$ >>$logfile
+		    fi
 		fi;
 		rm -f ${TMP}/test-$$.chk ${TMP}/testout-$$.chk ${TMP}/testin-$$.chk ${TMP}/diff-$$
 	    else
