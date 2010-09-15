@@ -34,6 +34,7 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <string.h>
+#include <fcntl.h>
 
 #include "gpsd.h"
 #include "sockaddr.h"
@@ -137,6 +138,9 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     if (type == SOCK_STREAM)
 	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof one);
 #endif
+
+    /* set socket to noblocking */
+    fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
     gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
 		s);

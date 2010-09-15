@@ -1493,14 +1493,6 @@ static void consume_packets(struct gps_device_t *device)
 	    }
 	    /*@+nullderef@*/
 	} /* subscribers */
-
-	/* 
-	 * Trying to read a nonexistent datagram hangs,
-	 * so only go through the poll loop once after 
-	 * select in this case.
-	 */
-	if (device->sourcetype == source_udp)
-	    break;
     }
 }
 
