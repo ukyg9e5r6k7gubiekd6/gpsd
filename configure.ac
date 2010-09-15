@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE(gpsd, 2.96~dev)
 dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
+AC_CONFIG_MACRO_DIR([m4])
 
 # ACREQUIRE_BUGFIX
 # ----------------
