@@ -140,7 +140,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 #endif
 
     /* set socket to noblocking */
-    fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
+    (void)fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
     gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
 		s);

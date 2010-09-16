@@ -84,7 +84,7 @@ static struct
 /*@-type@*/
 
 /*@+longunsignedintegral*/
-int main(int argc, char *argv[])
+int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int i;
     char tbuf[128];
