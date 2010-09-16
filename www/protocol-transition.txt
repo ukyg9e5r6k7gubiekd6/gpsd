@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.8, Septhember 2010
+v1.8, September 2010
 
 == Why a new protocol? ==
 
