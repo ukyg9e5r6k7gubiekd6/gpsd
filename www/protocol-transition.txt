@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.7, March 2010
+v1.8, Septhember 2010
 
 == Why a new protocol? ==
 
@@ -43,8 +43,8 @@ longer, giving your applications a bridge period when they can speak
 both old and new protocol -- but the client-side support for old
 protocol will be removed when 3.0 ships.
 
-The 2.92 version, with the new protocol deployed, will be in Lucid
-Lynx, the Ubuntu LTS release scheduled for April 2010.
+The 2.92 version, with the new protocol deployed, is be in Lucid
+Lynx, the Ubuntu LTS release of April 2010.
 
 This is our schedule for the changeover:
 
@@ -54,9 +54,8 @@ This is our schedule for the changeover:
 | 2.96    | July-Aug 2010               |
 Object-file format bump.
 
-| 3.0     | Before 30 Sep 2010          |
+| 3.0     | Before 30 Oct 2010          |
 Old protocol support will be removed from the library.
-DBUS support will be removed from the daemon.
 
 |================================================================
 
@@ -299,17 +298,18 @@ the validity flags include the PACKET_SET mask.
 
 If your code issues old-protocol commands 'A', 'D', 'E', 'M', 'P',
 'T', 'U', or 'V', it is a wretched hive of scum and villainy that
-probably hasn't changed since before the introduction of 'W'.  You are
-using the oldest single-shot commands and will have to rewrite your
-interface significantly, as the new protocol does not support
-equivalents.  Use libgps.
+probably hasn't changed since before the introduction of 'W' in
+2004-2005.  You are using the oldest single-shot commands and will
+have to rewrite your interface significantly, as the new protocol does
+not support equivalents.  Use libgps.
 
 If your code issues B, C, or N commands, they need to change to
 ?DEVICE commands.  See the protocol reference for details.
 
 The 'F' command has no equivalent in 2.90; consider teaching your
 client to ignore fix updates when they don't have a specified "device"
-or "class" tag, respectively.  There will be an equivalent in 2.91.
+or "class" tag, respectively. In 2.91 and later versions, use the "device"
+option of the ?WATCH command for similar effect.
 
 The old 'G' command does not have an equivalent.  It would be possible
 to implement one, but we probably won't do it unless there is actual
