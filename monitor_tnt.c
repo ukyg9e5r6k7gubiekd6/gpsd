@@ -74,7 +74,7 @@ static void tnt_update(void)
     (void)mvwaddstr(thtmwin, 4, 61, session.driver.nmea.field[8]);
 }
 
-static int tnt_command(char line[])
+static int tnt_command(char line[] UNUSED)
 {
     /*
      * Interpret a command line.  Whatever characters the user types will

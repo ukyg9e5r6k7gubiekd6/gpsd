@@ -466,7 +466,7 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef NTPSHM_ENABLE
-static double zodiac_ntp_offset(struct gps_device_t *session)
+static double zodiac_ntp_offset(struct gps_device_t *session UNUSED)
 {
     /* Removing/changing the magic number below is likely to disturb
      * the handling of the 1pps signal from the gps device. The regression

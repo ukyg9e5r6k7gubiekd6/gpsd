@@ -1518,14 +1518,15 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
-    char *pid_file = NULL;
-    int st, csock = -1;
-    static char *gpsd_service = NULL;	/* static pacifies splint */
-    char *control_socket = NULL;
+    /* some of these statics suppress -W warnings due to longjmp() */
+    static char *pid_file = NULL;
+    static char *control_socket = NULL;
+    static int csock = -1;
+    static char *gpsd_service = NULL;	/* this static pacifies splint */
     struct gps_device_t *device;
     sockaddr_t fsin;
     fd_set rfds, control_fds;
-    int i, option, msocks[2], cfd, dfd;
+    int st, i, option, msocks[2], cfd, dfd;
     bool go_background = true;
     struct timeval tv;
     struct subscriber_t *sub;

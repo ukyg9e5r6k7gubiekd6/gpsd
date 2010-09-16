@@ -438,7 +438,7 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef NTPSHM_ENABLE
-static double oncore_ntp_offset(struct gps_device_t *session)
+static double oncore_ntp_offset(struct gps_device_t *session UNUSED)
 {
     /* 
      * Only one sentence (NAVSOL) ships time.  0.175 seems best at

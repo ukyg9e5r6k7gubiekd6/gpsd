@@ -1145,7 +1145,7 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef NTPSHM_ENABLE
-static double tsip_ntp_offset(struct gps_device_t *session)
+static double tsip_ntp_offset(struct gps_device_t *session UNUSED)
 {
     /* FIX-ME: is a constant offset right here? */
     return 0.075;

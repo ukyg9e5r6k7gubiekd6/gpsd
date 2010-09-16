@@ -260,7 +260,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval  tv;
-    struct timespec kernelpps_tv;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 
 #if defined(PPS_ON_CTS)
@@ -328,6 +327,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(HAVE_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
+	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
 	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));

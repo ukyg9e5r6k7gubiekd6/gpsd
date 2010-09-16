@@ -162,7 +162,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
 }
 
 #ifdef LIBGPS_DEBUG
-static void libgps_dump_state(struct gps_data_t *collect, time_t now)
+static void libgps_dump_state(struct gps_data_t *collect)
 {
     char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
     char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
@@ -265,7 +265,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		break;
 #ifdef LIBGPS_DEBUG
 	    if (debuglevel >= 1)
-		libgps_dump_state(gpsdata, time(NULL));
+		libgps_dump_state(gpsdata);
 #endif /* LIBGPS_DEBUG */
 
 	}
@@ -473,7 +473,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 #ifdef LIBGPS_DEBUG
 		    if (debuglevel >= 1)
-			libgps_dump_state(gpsdata, time(NULL));
+			libgps_dump_state(gpsdata);
 #endif /* LIBGPS_DEBUG */
 
 		    /*
@@ -781,7 +781,7 @@ int main(int argc, char *argv[])
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
 	    if (buf[0] == '{' || isalpha(buf[0])) {
 		gps_unpack(buf, &gpsdata);
-		libgps_dump_state(&gpsdata, time(NULL));
+		libgps_dump_state(&gpsdata);
 	    }
 	}
     } else if (gps_open(NULL, 0, &collect) <= 0) {
@@ -793,7 +793,7 @@ int main(int argc, char *argv[])
 	(void)strlcat(buf, "\n", BUFSIZ);
 	(void)gps_send(&collect, buf);
 	(void)gps_read(&collect);
-	libgps_dump_state(&collect, time(NULL));
+	libgps_dump_state(&collect);
 	(void)gps_close(&collect);
     } else {
 	int tty = isatty(0);
@@ -812,7 +812,7 @@ int main(int argc, char *argv[])
 	    collect.set = 0;
 	    (void)gps_send(&collect, buf);
 	    (void)gps_read(&collect);
-	    libgps_dump_state(&collect, time(NULL));
+	    libgps_dump_state(&collect);
 	}
 	(void)gps_close(&collect);
     }

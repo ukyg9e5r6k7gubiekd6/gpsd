@@ -639,7 +639,7 @@ static void tnt_add_checksum(char *sentence)
 
 
 static ssize_t tnt_control_send(struct gps_device_t *session,
-				char *msg, size_t len)
+				char *msg, size_t len UNUSED)
 /* send a control string in TNT native formal */
 {
     ssize_t status;
@@ -672,7 +672,7 @@ static bool tnt_send(struct gps_device_t *session, const char *fmt, ...)
 
 #ifdef ALLOW_RECONFIGURE
 static bool tnt_speed(struct gps_device_t *session,
-		      speed_t speed, char parity, int stopbits)
+		      speed_t speed, char parity UNUSED, int stopbits UNUSED)
 {
     /*
      * Baud rate change followed by device reset.

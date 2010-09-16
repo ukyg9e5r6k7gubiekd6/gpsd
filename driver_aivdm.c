@@ -341,18 +341,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 7: /* Binary acknowledge */
 	case 13: /* Safety Related Acknowledge */
 	{
-	    unsigned int mmsi[4];
+	    unsigned int u, mmsi[4];
 	    if (ais_context->bitlen < 72 || ais_context->bitlen > 168) {
 		gpsd_report(LOG_WARN, "AIVDM message type %d size is out of range (%zd).\n",
 			    ais->type,
 			    ais_context->bitlen);
 		return false;
 	    }
-	    for (i = 0; i < sizeof(mmsi)/sizeof(mmsi[0]); i++)
-		if (ais_context->bitlen > 40 + 32*i)
-		    mmsi[i] = UBITS(40 + 32*i, 30);
+	    for (u = 0; u < sizeof(mmsi)/sizeof(mmsi[0]); u++)
+		if (ais_context->bitlen > 40 + 32*u)
+		    mmsi[u] = UBITS(40 + 32*u, 30);
 		else
-		    mmsi[i] = 0;
+		    mmsi[u] = 0;
 	    /*@ -usedef @*/
 	    ais->type7.mmsi1 = mmsi[0];
 	    ais->type7.mmsi2 = mmsi[1];
@@ -766,7 +766,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais->type25.addressed	= (bool)UBITS(38, 1);
 	    ais->type25.structured	= (bool)UBITS(39, 1);
-	    if (ais_context->bitlen < (40 + (16*ais->type25.structured) + (30*ais->type25.addressed))) {
+	    if (ais_context->bitlen < (unsigned)(40 + (16*ais->type25.structured) + (30*ais->type25.addressed))) {
 		gpsd_report(LOG_WARN, "AIVDM message type 25 too short for mode.\n");
 		return false;
 	    }

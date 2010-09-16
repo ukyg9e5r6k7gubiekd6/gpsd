@@ -372,8 +372,8 @@ static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
 }
 
 /* Navigation Library Measurement Data MID 28 */
-static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session,
-				unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session UNUSED,
+				unsigned char *buf UNUSED, size_t len)
 {
 
     double gps_tow = 0.0;
@@ -383,7 +383,7 @@ static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session,
 
     /* oh barf, SiRF claims to be IEEE754 but supports two
      * different double orders, neither IEEE754 */
-    /* Todo - decode the time, since this is the first MID with a
+    /* FIXME - decode the time, since this is the first MID with a
      * good time stamp this will be good for ntpshm time */
     gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f, %s\n",
 		(double)gps_tow, gpsd_hexdump_wrapper(&gps_tow, 8, LOG_PROG));
