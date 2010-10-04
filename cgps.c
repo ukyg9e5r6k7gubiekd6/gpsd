@@ -777,7 +777,7 @@ int main(int argc, char *argv[])
     /*@ +observertrans @*/
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hVl:smuD:")) != -1) {
+    while ((option = getopt(argc, argv, "hVl:smu:D:")) != -1) {
 	switch (option) {
 #ifdef CLIENTDEBUG_ENABLE
 	case 'D':
