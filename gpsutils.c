@@ -466,6 +466,8 @@ gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
     double xdop, ydop, hdop, vdop, pdop, tdop, gdop;
     int i, j, k, n;
 
+    memset(satpos, 0, sizeof(satpos));
+
 #ifdef __UNUSED__
     gpsd_report(LOG_INF, "Satellite picture:\n");
     for (k = 0; k < MAXCHANNELS; k++) {
@@ -487,6 +489,16 @@ gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
 	satpos[n][3] = 1;
 	n++;
     }
+
+    /* If we don't have 4 satellites then we don't have enough information to calculate DOPS */
+    if (n < 4) {
+	gpsd_report(LOG_DATA + 2, "Not enough Satellites available %d < 4:\n",
+		    n);
+	return 0;		/* Is this correct return code here? or should it be ERROR_IS */
+    }
+
+    memset(prod, 0, sizeof(prod));
+    memset(inv, 0, sizeof(inv));
 
 #ifdef __UNUSED__
     gpsd_report(LOG_INF, "Line-of-sight matrix:\n");
