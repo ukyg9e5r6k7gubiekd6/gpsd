@@ -1152,6 +1152,8 @@ void packet_parse(struct gps_packet_t *lexer)
 #ifdef AIVDM_ENABLE
 		if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
 		    packet_accept(lexer, AIVDM_PACKET);
+		else if (strncmp((char *)lexer->inbuffer, "!AIVDO", 6) == 0)
+		    packet_accept(lexer, AIVDM_PACKET);
 		else
 #endif /* AIVDM_ENABLE */
 		    packet_accept(lexer, NMEA_PACKET);
