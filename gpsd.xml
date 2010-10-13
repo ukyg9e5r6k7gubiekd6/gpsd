@@ -184,10 +184,12 @@ control commands supported by that driver.</para>
 <varlistentry>
 <term>-n</term>
 <listitem>
-<para>Don't wait for a client to connect before polling
-whatever GPS is associated with it. Many GPSes go to a standby mode
-(drawing less power) before the host machine asserts DTR, so waiting
-for the first actual request saves battery power.</para>
+<para>Don't wait for a client to connect before polling whatever GPS
+is associated with it. Some RS232 GPSes wait in a standby mode
+(drawing less power) when the host machine is not asserting DTR, and
+some cellphone and handheld embedded GPSes have similar behaviors.
+Accordingly, waiting for a watch request to open the device may
+save battery power.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
