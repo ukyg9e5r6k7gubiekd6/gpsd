@@ -258,9 +258,9 @@ libgpsd_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 # Warning: This overrides autoconf's normal link-line generation process
 if LIBGPSMM_ENABLE
 libgps_la_SOURCES += libgpsmm.cpp
-libgps_la_LINK = /bin/sh ./libtool --tag=CXX --mode=link g++ $(libgps_la_LDFLAGS) -o $@
+libgps_la_LINK = $(LIBTOOL) --tag=CXX --mode=link g++ $(libgps_la_LDFLAGS) -o $@
 else
-libgps_la_LINK = /bin/sh ./libtool --tag=CC --mode=link gcc $(libgps_la_LDFLAGS) -o $@
+libgps_la_LINK = $(LIBTOOL) --tag=CC --mode=link gcc $(libgps_la_LDFLAGS) -o $@
 endif
 
 nodist_libgpsd_la_SOURCES = packet_names.h ais_json.i
