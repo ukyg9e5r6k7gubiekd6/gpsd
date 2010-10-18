@@ -188,8 +188,9 @@ control commands supported by that driver.</para>
 is associated with it. Some RS232 GPSes wait in a standby mode
 (drawing less power) when the host machine is not asserting DTR, and
 some cellphone and handheld embedded GPSes have similar behaviors.
-Accordingly, waiting for a watch request to open the device may
-save battery power.</para>
+Accordingly, waiting for a watch request to open the device may save
+battery power. (This capability is rare in consumer-grade devices and
+nonexistent in USB GPSes which lack a DTR line.)</para>
 </listitem>
 </varlistentry>
 <varlistentry>
