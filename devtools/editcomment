@@ -4,8 +4,8 @@
 # and pushing them to a repo with the old commits will wreak havoc.
 # Note also that this cavalierly overwrites refs/original.
 #
-# This script by Eric S. Raymond, March 2010, all rites perverted.
-# It's based on an idea by thiago from #git, but debugged and with a safety.
+# This script by Eric S. Raymond, March 2010, all rites perverted. It's based 
+# on an idea by thiago from #git, but debugged and with a safety check.
 # It contains porcelain and porcelain byproducts.
 
 topdir=`git rev-parse --show-cdup`
@@ -40,7 +40,7 @@ my_editor=emacsclient
 
 export my_file my_commit my_editor
 
-exec git filter-branch -f --msg-filter '
+exec git filter-branch -f --tag-name-filter cat --msg-filter '
 if test "$GIT_COMMIT" = "$my_commit"; then
     cat > $my_file;
     $my_editor $my_file >/dev/null;
