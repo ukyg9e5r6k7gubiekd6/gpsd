@@ -207,8 +207,9 @@ void unix_to_gpstime(double unixtime,
 
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 
-double earth_distance(double lat1, double lon1, double lat2, double lon2)
-/* distance in meters between two points specified in degrees. */
+/* Distance in meters between two points specified in degrees, optionally
+with initial and final bearings. */
+double earth_distance_and_bearings(double lat1, double lon1, double lat2, double lon2, double *ib, double *fb)
 {
     /*
      * this is a translation of the javascript implementation of the
@@ -269,7 +270,18 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 		     (c_S * (-1 + 2 * c_2SM * c_2SM) - B / 6 * c_2SM *
 		      (-3 + 4 * s_S * s_S) * (-3 + 4 * c_2SM * c_2SM)));
 
+    if (ib != NULL)
+	*ib = atan2(c_U2 * sin(lambda), c_U1 * s_U2 - s_U1 * c_U2 * cos(lambda));
+    if (fb != NULL)
+	*fb = atan2(c_U1 * sin(lambda), c_U1 * s_U2 * cos(lambda) - s_U1 * c_U2);
+
     return (WGS84B * A * (S - d_S));
+}
+
+/* Distance in meters between two points specified in degrees. */
+double earth_distance(double lat1, double lon1, double lat2, double lon2)
+{
+	return earth_distance_and_bearings(lat1, lon1, lat2, lon2, NULL, NULL);
 }
 
 /*****************************************************************************
