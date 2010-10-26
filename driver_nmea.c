@@ -931,7 +931,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	"GSV", 0, processGPGSV}, {
 	"VTG", 0, NULL},	/* ignore Velocity Track made Good */
 	{
-	"ZDA", 7, processGPZDA}, {
+	"ZDA", 4, processGPZDA}, {
 	"GBS", 7, processGPGBS},
 #ifdef TNT_ENABLE
 	{
