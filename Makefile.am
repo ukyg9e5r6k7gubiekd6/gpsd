@@ -363,7 +363,9 @@ endif
 # Clean up after Python and QT
 clean-local:
 if HAVE_PYTHON
-	rm -rf build gps/*.so
+	rm -rf build
+	rm -f gps/*.so gps/*.pyc stamp-python*.tmp
+	for i in $(PYTHONSCRIPTS_DIST); do rm -f $${i}c; done
 endif
 if LIB_Q_GPSMM_ENABLE
 	if test -r $(srcdir)/libQgpsmm/Makefile; then \
