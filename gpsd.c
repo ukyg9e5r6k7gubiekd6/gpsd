@@ -1812,7 +1812,7 @@ int main(int argc, char *argv[])
 		if (FD_ISSET(i, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf),
 				   sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	    gpsd_report(LOG_SPIN, "select() {%s} at %f (errno %d)\n", 
+	    gpsd_report(LOG_SPIN, "select() {%s} at %f (errno %d)\n",
 			dbuf, timestamp(), errno);
 	}
 

@@ -983,7 +983,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 #ifdef NTPSHM_ENABLE
 	/*
-	 * Only update the NTP time if we've seen the leap-seconds data. 
+	 * Only update the NTP time if we've seen the leap-seconds data.
 	 * Else we may be providing GPS time.
 	 */
 	if (session->context->enable_ntpshm == 0) {
