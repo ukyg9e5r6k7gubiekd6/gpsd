@@ -35,7 +35,8 @@ mode=regress
 testing=daemon
 opts=""
 logfile=""
-while getopts cl:strbuvo: opt
+help=""
+while getopts cl:strbuvo:h opt
 do
     case $opt in
 	c) testing=clientlib ;;	# Can be 'daemon'
@@ -47,9 +48,30 @@ do
 	u) opts="$opts -u" ;;	# Force UDP
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
+	h) help="1"
     esac
 done
 shift $(($OPTIND - 1))
+
+if [ $help -eq "1" ]
+then
+	echo
+	echo
+	echo "Regression test driver script"
+	echo "-h  - this help"
+	echo "-c  - can be 'daemon'"
+	echo "-l <filename>  - where to log diffs to"
+	echo "-s  - run regreession tests"
+	echo "-t <ots>  - Run regression tests w/baton"
+	echo "-r  - run superraw regressions (r=2 mode)"
+	echo "-b  - Rebuild regression check files"
+	echo "-u <opt> - Force UDP"
+	echo "-v  - view result of generating a check file"
+	echo "-o <opt> - Pass options to gpsfake"
+	echo
+
+	exit 0
+fi
 
 # Enables us to turn debugging up high without screwing up the diff checks
 # First and Second filter out gpsd log messages.
