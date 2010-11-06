@@ -35,7 +35,7 @@ mode=regress
 testing=daemon
 opts=""
 logfile=""
-help=""
+help="0"
 while getopts cl:strbuvo:h opt
 do
     case $opt in
