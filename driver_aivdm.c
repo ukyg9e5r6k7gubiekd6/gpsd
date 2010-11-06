@@ -125,8 +125,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
     /* FIXME: if fields[4] == "12", it doesn't detect the error */
     case '\0':
     case '1':
-	gpsd_report(LOG_ERROR, "invalid AIS channel '%c'. Assuming 'A'\n",
-	                       field[4][0]);
+	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0x '%c'. Assuming 'A'\n",
+	                       field[4][0], (field[4][0] != '\0' ? field[4][0]:' '));
 	/*@fallthrough@*/
     case 'A':
 	ais_context = &ais_contexts[0];
@@ -138,7 +138,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	ais_context = &ais_contexts[1];
 	break;
     default:
-	gpsd_report(LOG_ERROR, "invalid AIS channel.\n");
+	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0X .\n", field[4][0]);
 	return false;
     }
 
