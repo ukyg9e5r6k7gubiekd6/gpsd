@@ -233,7 +233,7 @@ any empty comment lines.</p>
 <p>If you're using a SiRF, Evermore, iTalk or u-blox GPS in binary mode
 (which you can tell from the -D 4 output), switch back to NMEA mode
 using the N command (or a vendor-provided tool) and see if the bug is
-still reproduceable.</p>
+still reproducible.</p>
 
 <h3>10. If your bug core-dumps gpsd, send us a stack trace.</h3>
 
@@ -251,7 +251,7 @@ most useful thing you can do is pin down the release in which the
 bug was introduced.</p>
 
 <p>How efficiently you can do this depends on whether or not you have
-a client for the the git version control system.  If you don't, all
+a client for the git version control system.  If you don't, all
 you can do is download and test named releases.  If you do, you can
 pin down the exact change that introduced the bug.  The latter is
 far more helpful to us and will get your bug fixed faster, so we'll
@@ -533,7 +533,7 @@ less important in fast-moving vehicles.</p>
 position on a map, and you seem to be getting latitude/longitude that
 is at a fixed offset from reality, it is possible the base datum of
 the map is something other than the WGS84 GPS uses. A
-frequently-occuring case of this is older maps in the United States
+frequently-occurring case of this is older maps in the United States
 based on NAD27 (e.g., USGS topo maps); you may see a displacement of
 as much as 100-150m with respect to WGS84.  While modern datums (e.g.,
 NAD83) are almost all very close to WGS84, typically each area of
@@ -584,7 +584,7 @@ device open while your laptop is asleep - but, meanwhile, the suspend
 logic is shutting down hotpluggable devices to be recreated at
 resume time. On resume, Linux will see that the old device is open
 <em>and recreate one with a different name</em>, leaving <tt>gpsd</tt>
-kooking at a bad file descriptor.</p>
+looking at a bad file descriptor.</p>
 
 <p>There is a solution to this problem: create a stable gps-usb device
 that is actually a symlink which gets modified by hotplug events, and
