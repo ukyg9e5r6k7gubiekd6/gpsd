@@ -10,15 +10,28 @@
 #include "gpsd_config.h"
 #include "libgpsmm.h"
 
-gpsmm::gpsmm() : gps_data(0) { gps_data = NULL; }
+
+gpsmm::gpsmm() :
+		#if GPSD_API_MAJOR_VERSION < 5
+			_gps_data(0),
+		#endif
+			to_user(0)
+	{
+	}
+
 
 struct gps_data_t* gpsmm::open(void) {
 	return open("localhost",DEFAULT_GPSD_PORT);
 }
 
 struct gps_data_t* gpsmm::open(const char *host, const char *port) {
-  gps_open(host,port, gps_data);
-	if (gps_data==NULL) { //connection not opened
+	#if GPSD_API_MAJOR_VERSION < 5
+		gps_data = gps_open( host, port );
+		const bool err = (gps_data==NULL); //connection not opened
+	#else
+		const bool err = (gps_open(host, port, gps_data()) != 0);
+	#endif
+	if ( err ) {
 		return NULL;
 	}
 	else { //connection succesfully opened
@@ -28,7 +41,7 @@ struct gps_data_t* gpsmm::open(const char *host, const char *port) {
 }
 
 struct gps_data_t* gpsmm::stream(int flags) {
-  if (gps_stream(gps_data,flags, NULL)==-1) {
+  if (gps_stream(gps_data(),flags, NULL)==-1) {
 		return NULL;
 	}
 	else {
@@ -37,7 +50,7 @@ struct gps_data_t* gpsmm::stream(int flags) {
 }
 
 struct gps_data_t* gpsmm::send(const char *request) {
-	if (gps_send(gps_data,request)==-1) {
+	if (gps_send(gps_data(),request)==-1) {
 		return NULL;
 	}
 	else {
@@ -46,8 +59,9 @@ struct gps_data_t* gpsmm::send(const char *request) {
 }
 
 struct gps_data_t* gpsmm::read(void) {
-	if (gps_read(gps_data)<=0) {
-		// we return null if there was a read() error or connection is cloed by gpsd
+	if (gps_read(gps_data())<=0) {
+		// we return null if there was a read() error, if no data was ready in
+		// POLL_NOBLOCK mode, or if the connection is closed by gpsd
 		return NULL;
 	}
 	else {
@@ -56,15 +70,15 @@ struct gps_data_t* gpsmm::read(void) {
 }
 
 int gpsmm::close(void) {
-	return gps_close(gps_data);
+	return gps_close(gps_data());
 }
 
 bool gpsmm::waiting(void) {
-	return gps_waiting(gps_data);
+	return gps_waiting(gps_data());
 }
 
 void gpsmm::clear_fix(void) {
-	gps_clear_fix(&(gps_data->fix));
+	gps_clear_fix(&(gps_data()->fix));
 }
 
 void gpsmm::enable_debug(int level, FILE *fp) {
@@ -74,8 +88,8 @@ void gpsmm::enable_debug(int level, FILE *fp) {
 }
 
 gpsmm::~gpsmm() {
-	if (gps_data!=NULL) {
-		gps_close(gps_data);
+	if ( to_user != NULL ) {
+		gps_close(gps_data());
 		delete to_user;
 	}
 }

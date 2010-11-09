@@ -30,9 +30,15 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		void clear_fix(void);
 		void enable_debug(int, FILE*);
 	private:
-		struct gps_data_t *gps_data;
 		struct gps_data_t *to_user;	//we return the user a copy of the internal structure. This way she can modify it without
 						//integrity loss for the entire class
-		struct gps_data_t* backup(void) { *to_user=*gps_data; return to_user;}; //return the backup copy
+		#if GPSD_API_MAJOR_VERSION < 5
+		    struct gps_data_t *_gps_data;
+		    struct gps_data_t * gps_data() { return _gps_data; }
+		#else
+		    struct gps_data_t _gps_data;
+		    struct gps_data_t * gps_data() { return &_gps_data; }
+		#endif
+		struct gps_data_t* backup(void) { *to_user=*gps_data(); return to_user;}; //return the backup copy
 };
 #endif // _GPSD_GPSMM_H_
