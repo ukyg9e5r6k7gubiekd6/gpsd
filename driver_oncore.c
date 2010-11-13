@@ -39,8 +39,8 @@ static gps_mask_t oncore_msg_navsol(struct gps_device_t *, unsigned char *,
 				    size_t);
 static gps_mask_t oncore_msg_utc_offset(struct gps_device_t *,
 					unsigned char *, size_t);
-static gps_mask_t oncore_msg_pps_delay(struct gps_device_t *, unsigned char *,
-				       size_t);
+static gps_mask_t oncore_msg_pps_offset(struct gps_device_t *, unsigned char *,
+					size_t);
 static gps_mask_t oncore_msg_svinfo(struct gps_device_t *, unsigned char *,
 				    size_t);
 static gps_mask_t oncore_msg_time_raim(struct gps_device_t *, unsigned char *,
@@ -238,21 +238,21 @@ oncore_msg_utc_offset(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
- * PPS delay
+ * PPS offset
  */
 static gps_mask_t
-oncore_msg_pps_delay(struct gps_device_t *session, unsigned char *buf,
-		     size_t data_len)
+oncore_msg_pps_offset(struct gps_device_t *session, unsigned char *buf,
+		      size_t data_len)
 {
-    double pps_delay;
+    int pps_offset_ns;
 
     if (data_len != 11)
 	return 0;
 
-    gpsd_report(LOG_IO, "oncore PPS delay\n");
-    pps_delay = getbesl(buf, 4) / 1000000.0;
+    gpsd_report(LOG_IO, "oncore PPS offset\n");
+    pps_offset_ns = getbesl(buf, 4);
 
-    session->driver.oncore.pps_delay = pps_delay;
+    session->driver.oncore.pps_offset_ns = pps_offset_ns;
     return 0;
 }
 
@@ -365,7 +365,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
     case ONCTYPE('A', 't'):
 	return 0;		/* position hold position */
     case ONCTYPE('A', 'y'):
-	return oncore_msg_pps_delay(session, buf, len);
+	return oncore_msg_pps_offset(session, buf, len);
 
     default:
 	/* FIX-ME: This gets noisy in a hurry. Change once your driver works */
