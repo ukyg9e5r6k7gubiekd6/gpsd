@@ -143,6 +143,8 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS;
 
+    session->driver.oncore.good_time = 0;
+
     gpsd_zero_satellites(&session->gpsdata);
     /* Merge the satellite information from the Bb message. */
     Bbused = 0;
@@ -174,6 +176,8 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	    st++;
 	    if (status & 0x80)
 		session->gpsdata.used[nsv++] = sv;
+	    if (status & 0x02)
+		session->driver.oncore.good_time = 1;
 	}
     }
     for (j = 0; (int)j < session->driver.oncore.visible; j++)

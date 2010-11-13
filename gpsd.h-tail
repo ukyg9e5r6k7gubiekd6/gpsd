@@ -448,6 +448,7 @@ struct gps_device_t {
 	    int PRN[ONCORE_VISIBLE_CH];		/* PRNs of satellite */
 	    int elevation[ONCORE_VISIBLE_CH];	/* elevation of satellite */
 	    int azimuth[ONCORE_VISIBLE_CH];	/* azimuth */
+	    int good_time;
 	    double pps_delay;
 	} oncore;
 #endif /* ONCORE_ENABLE */

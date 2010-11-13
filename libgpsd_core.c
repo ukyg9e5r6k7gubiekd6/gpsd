@@ -52,6 +52,10 @@
 #include <sys/un.h>
 #endif
 
+#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+extern const struct gps_type_t oncore_binary;
+#endif
+
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
     const struct gps_type_t **dp;
@@ -423,7 +427,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
 	/*@ +boolint @*/
-	if (3 < session->context->fixcnt) {
+	if (3 < session->context->fixcnt
+#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+	    || (session->device_type == &oncore_binary &&
+		session->driver.oncore.good_time)
+#endif
+	    ) {
 	    /* Garmin doc says PPS is valid after four good fixes. */
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
@@ -1006,7 +1015,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    //gpsd_report(LOG_PROG, "NTP: bad new time\n");
 	} else if (session->newdata.time == session->last_fixtime) {
 	    //gpsd_report(LOG_PROG, "NTP: Not a new time\n");
-	} else if (session->newdata.mode == MODE_NO_FIX) {
+	} else if (session->newdata.mode == MODE_NO_FIX
+#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+		   && !(session->device_type == &oncore_binary &&
+			session->driver.oncore.good_time)
+#endif
+		   ) {
 	    //gpsd_report(LOG_PROG, "NTP: No fix\n");
 	} else {
 	    double offset;
