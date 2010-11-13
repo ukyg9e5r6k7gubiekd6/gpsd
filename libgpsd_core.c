@@ -46,10 +46,10 @@
      */
     #include <timepps.h>
     #include <glob.h>
-    /* and for chrony */
-    #include <sys/socket.h>
-    #include <sys/un.h>
 #endif
+/* and for chrony */
+#include <sys/socket.h>
+#include <sys/un.h>
 #endif
 
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
@@ -277,6 +277,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec tv_kpps;
     pps_info_t pi;
+#endif
+
     /* for chrony SOCK interface, which allows nSec timekeeping */
     #define SOCK_MAGIC 0x534f434b
 
@@ -299,15 +301,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
-	gpsd_report(LOG_PROG, "KPPS can not open chrony socket: %s", chrony_path);
+	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n", chrony_path);
     } else if (connect(chronyfd, (struct sockaddr *)&s, sizeof (s))) {
 	close(chronyfd);
 	chronyfd = -1;
-	gpsd_report(LOG_PROG, "KPPS can not connect chrony socket: %s", chrony_path);
+	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", chrony_path);
     }
 
     /* end chrony */
 
+#if defined(HAVE_TIMEPPS_H)
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
@@ -507,15 +510,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(LOG_RAW, "%.100s", log);
 	}
 	if (0 != ok) {
+	    /* chrony expects tv-sec since Jan 1970 */
+	    /* FIXME!! sample.tv is time of sample */
+	    /* FIXME!! offset is double of the error from local time */
+	    sample.offset = 1 + session->last_fixtime;
+	    sample.pulse = 0;
+	    sample.leap = 0;
+	    sample.magic = SOCK_MAGIC;
 #if defined(HAVE_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
-		/* chrony expects tv-sec since Jan 1970 */
-		/* FIXME!! sample.tv is time of sample */
-		/* FIXME!! offset is double of the error from local time */
-	    	sample.offset = 1 + session->last_fixtime;
-	    	sample.pulse = 0;
-	    	sample.leap = 0;
-	    	sample.magic = SOCK_MAGIC;
 		/* pick the right edge */
 		if ( kpps_edge ) {
 	    	    sample.tv.tv_sec = pi.assert_timestamp.tv_sec;
@@ -523,22 +526,32 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    	    sample.offset -= pi.assert_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.assert_timestamp.tv_nsec) / 1000000000;
 		    /* ntpshm_pps() expects usec, not nsec */
-	            pi.assert_timestamp.tv_nsec /= 1000;
-	            (void)ntpshm_pps(session, (struct timeval*)&pi.assert_timestamp);
+		    tv.tv_sec  = pi.assert_timestamp.tv_sec;
+	            tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
 		} else {
 	    	    sample.tv.tv_sec = pi.clear_timestamp.tv_sec;
 	    	    sample.tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
 	    	    sample.offset -= pi.clear_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.clear_timestamp.tv_nsec) / 1000000000;
-	            pi.clear_timestamp.tv_nsec /= 1000;
-	            (void)ntpshm_pps(session, (struct timeval*)&pi.clear_timestamp);
+		    tv.tv_sec  = pi.clear_timestamp.tv_sec;
+	            tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
 		}
-		if ( 0 <= chronyfd ) {
-	    	    send(chronyfd, &sample, sizeof (sample), 0);
-		}
-	    } else 
+	    } else
 #endif
-	        (void)ntpshm_pps(session, &tv);
+	    {
+		sample.tv.tv_sec = tv.tv_sec;
+		sample.tv.tv_usec = tv.tv_usec;
+		sample.offset -= tv.tv_sec;
+		sample.offset -= ((double)tv.tv_usec) / 1000000;
+	    }
+	    if ( 0 <= chronyfd ) {
+		send(chronyfd, &sample, sizeof (sample), 0);
+		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%03lu offset %.9f\n",
+			    (unsigned long)sample.tv.tv_sec,
+			    (unsigned long)sample.tv.tv_usec / 1000,
+			    sample.offset);
+	    }
+	    (void)ntpshm_pps(session, &tv);
 	} else {
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
 	}
