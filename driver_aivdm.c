@@ -802,6 +802,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais->type26.addressed	= (bool)UBITS(38, 1);
 	    ais->type26.structured	= (bool)UBITS(39, 1);
+	    if (ais_context->bitlen < 40 + 16*ais->type26.structured + 30*ais->type26.addressed + 20) {
+		gpsd_report(LOG_WARN, "AIVDM message type 26 too short for mode.\n");
+		return false;
+	    }
 	    if (ais->type26.addressed)
 		ais->type26.dest_mmsi   = UBITS(40, 30);
 	    if (ais->type26.structured)
