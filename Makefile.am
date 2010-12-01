@@ -5,6 +5,9 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 
+# The deheader production uses this to pass in stop-on-error flags
+CFLAGS += $(MORECFLAGS)
+
 ACLOCAL_AMDFLAGS = -I m4
 
 CLEANFILES =
@@ -646,6 +649,10 @@ cppcheck: gpsd.h packet_names.h
 # Check the documentation for bogons, too
 xmllint: $(XML)
 	for xml in $(XML); do xmllint --nonet --noout --valid $$xml; done
+
+# Use deheader to remove headers not required
+deheader:
+	deheader -r -i gpsd_config.h -m "MORECFLAGS='-Werror -Wfatal-errors' make -e"
 
 # Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
