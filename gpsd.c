@@ -821,10 +821,21 @@ static void handle_control(int sfd, char *buf)
 	} else {
 	    *eq++ = '\0';
 	    if ((devp = find_device(stash))) {
-		gpsd_report(LOG_INF, "<= control(%d): writing to %s \n", sfd,
-			    stash);
-		ignore_return(write(devp->gpsdata.gps_fd, eq, strlen(eq)));
-		ignore_return(write(sfd, "OK\n", 3));
+		if (devp->context->readonly || (devp->sourcetype <= source_blockdev)) {
+		    gpsd_report(LOG_WARN, "<= control(%d): attempted to write to a read-only device\n",
+				sfd);
+		    ignore_return(write(sfd, "ERROR\n", 6));
+		} else {
+		    gpsd_report(LOG_INF, "<= control(%d): writing to %s \n", sfd,
+				stash);
+		    if (write(devp->gpsdata.gps_fd, eq, strlen(eq)) <= 0) {
+			gpsd_report(LOG_WARN, "<= control(%d): write to device failed\n",
+				    sfd);
+			ignore_return(write(sfd, "ERROR\n", 6));
+		    } else {
+			ignore_return(write(sfd, "OK\n", 3));
+		    }
+		}
 	    } else {
 		gpsd_report(LOG_INF, "<= control(%d): %s not active \n", sfd,
 			    stash);
@@ -1801,7 +1812,7 @@ int main(int argc, char *argv[])
 		if (FD_ISSET(i, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf),
 				   sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	    gpsd_report(LOG_SPIN, "select() {%s} at %f (errno %d)\n", 
+	    gpsd_report(LOG_SPIN, "select() {%s} at %f (errno %d)\n",
 			dbuf, timestamp(), errno);
 	}
 

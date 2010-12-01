@@ -231,14 +231,14 @@ static void oncore_update(void)
 	(void)mvwprintw(Ea1win, 1, 47, "%10.6lf %c",
 			fabs(lat), lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');
 	(void)mvwprintw(Ea1win, 1, 66, "%10.6lf %c",
-			fabs(lon), lat < 0 ? 'W' : lon > 0 ? 'E' : ' ');
+			fabs(lon), lon < 0 ? 'W' : lon > 0 ? 'E' : ' ');
 
 	(void)mvwprintw(Ea1win, 2, 50, "%6.2f m/s", speed);
 	(void)mvwprintw(Ea1win, 2, 70, "%5.1f", track);
 	(void)mvwprintw(Ea1win, 3, 68, "%8.2f m", alt);
 
 	/*@ -predboolothers @*/
-	(void)snprintf(statusbuf, sizeof(statusbuf), "%s%s%s%s%s%s%s%s",
+	(void)snprintf(statusbuf, sizeof(statusbuf), "%s%s%s%s%s%s%s%s%s",
 		       status & 0x80 ? "PProp " : "",
 		       status & 0x40 ? "PoorGeom " : "",
 		       status & 0x20 ? "3D " : "",
@@ -246,7 +246,8 @@ static void oncore_update(void)
 		       status & 0x08 ? "Acq/PHold " : "",
 		       status & 0x04 ? "Diff " : "",
 		       status & 0x02 ? "Ins (<3 SV) " : "",
-		       status & 0x01 ? "BadAlm " : "");
+		       status & 0x01 ? "BadAlm " : "",
+		       dopt   & 0x20 ? "survey " : "");
 	/*@ +predboolothers @*/
 
 	(void)mvwprintw(Ea1win, 3, 24, "%-37s", statusbuf);
@@ -365,11 +366,11 @@ static void oncore_update(void)
 	traim = (unsigned char)getub(buf, 5);
 	alarm = (float)(getbeuw(buf, 6) / 10.);
 	ctrl = (unsigned char)getub(buf, 8);
-	pulse = (unsigned char)getub(buf, 9);
-	sync = (unsigned char)getub(buf, 10);
-	sol_stat = (unsigned char)getub(buf, 11);
-	status = (unsigned char)getub(buf, 12);
-	sigma = (float)(getbeuw(buf, 13));
+	pulse = (unsigned char)getub(buf, 19);
+	sync = (unsigned char)getub(buf, 20);
+	sol_stat = (unsigned char)getub(buf, 21);
+	status = (unsigned char)getub(buf, 22);
+	sigma = (float)(getbeuw(buf, 23));
 
 	/*@ -predboolothers @*/
 	(void)mvwprintw(Enwin, 1, 24, "%3s", traim ? "on" : "off");
@@ -379,7 +380,7 @@ static void oncore_update(void)
 	(void)mvwprintw(Enwin, 5, 24, "%3s", pps_sync[sync]);
 	(void)mvwprintw(Enwin, 6, 20, "%7s", traim_sol[sol_stat]);
 	(void)mvwprintw(Enwin, 7, 11, "%16s", traim_status[status]);
-	(void)mvwprintw(Enwin, 8, 18, "%6.3f us", sigma);
+	(void)mvwprintw(Enwin, 8, 18, "%6.3f us", sigma * 0.001);
 	/*@ +predboolothers @*/
     }
 
@@ -436,7 +437,7 @@ static void oncore_update(void)
 	(void)mvwprintw(Aswin, 1, 5, "%10.6lf %c",
 			fabs(lat), lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');
 	(void)mvwprintw(Aswin, 2, 5, "%10.6lf %c",
-			fabs(lon), lat < 0 ? 'W' : lon > 0 ? 'E' : ' ');
+			fabs(lon), lon < 0 ? 'W' : lon > 0 ? 'E' : ' ');
 	(void)mvwprintw(Aswin, 3, 7, "%8.2f m", alt);
     }
 

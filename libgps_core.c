@@ -251,7 +251,10 @@ static void libgps_dump_state(struct gps_data_t *collect)
 
 /*@ -branchstate -usereleased -mustfreefresh -nullstate -usedef @*/
 int gps_unpack(char *buf, struct gps_data_t *gpsdata)
-/* unpack a gpsd response into a status structure, buf must be writeable */
+/* unpack a gpsd response into a status structure, buf must be writeable.
+ * gps_unpack() currently returns 0 in all cases, but should it ever need to
+ * return an error status, it must be < 0.
+ */
 {
     libgps_debug_trace((1, "gps_unpack(%s)\n", buf));
 
@@ -599,7 +602,7 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     gpsdata->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
-    return status;
+    return (status == 0) ? response_length : status;
 }
 /*@+compdef -usedef +uniondef@*/
 

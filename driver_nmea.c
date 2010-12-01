@@ -476,6 +476,8 @@ static gps_mask_t processGPGSV(int count, char *field[],
      */
     int n, fldnum;
     if (count <= 3) {
+	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d <= 3\n",
+		    count);
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites_visible = 0;
 	return 0;
@@ -490,6 +492,7 @@ static gps_mask_t processGPGSV(int count, char *field[],
 
     session->driver.nmea.await = atoi(field[1]);
     if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
+	gpsd_report(LOG_WARN, "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return 0;
     } else if (session->driver.nmea.part == 1)
@@ -931,7 +934,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	"GSV", 0, processGPGSV}, {
 	"VTG", 0, NULL},	/* ignore Velocity Track made Good */
 	{
-	"ZDA", 7, processGPZDA}, {
+	"ZDA", 4, processGPZDA}, {
 	"GBS", 7, processGPGBS},
 #ifdef TNT_ENABLE
 	{

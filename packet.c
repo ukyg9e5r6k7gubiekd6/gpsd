@@ -60,12 +60,12 @@ PERMISSIONS
  *
  * 3) Binary packets.  These begin with some fixed leader character(s),
  *    have a length embedded in them, and end with a checksum (and possibly)
- *    some fixed trailing bytes.  
+ *    some fixed trailing bytes.
  *
  * 4) ISGPS packets. The input may be a bitstream containing IS-GPS-200
- *    packets.  Each includes a fixed leader byte, a length, and check bits.  
- *    In this case, it is not guaranted that packet starts begin on byte 
- *    bounaries; the recognizer has to run a separate state machine against 
+ *    packets.  Each includes a fixed leader byte, a length, and check bits.
+ *    In this case, it is not guaranted that packet starts begin on byte
+ *    bounaries; the recognizer has to run a separate state machine against
  *    each byte just to achieve synchronization lock with the bitstream.
  *
  * Adding support for a new GPS protocol typically reqires adding state
@@ -118,7 +118,7 @@ static void character_pushback(struct gps_packet_t *lexer)
     --lexer->inbufptr;
     /*@+modobserver@*/
     --lexer->char_counter;
-    gpsd_report(LOG_RAW + 2, "%08ld: character pushed back\n", 
+    gpsd_report(LOG_RAW + 2, "%08ld: character pushed back\n",
 		lexer->char_counter);
 }
 
@@ -1676,8 +1676,8 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 
     /*
      * Bail out, indicating no more input, only if we just received
-     * nothing from the device and there is nothing waiting in the 
-     * packet input buffer.  
+     * nothing from the device and there is nothing waiting in the
+     * packet input buffer.
      */
     if (recvd <= 0 && packet_buffered_input(lexer) <= 0)
 	return recvd;
@@ -1701,12 +1701,12 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
      * Note: this choice greatly simplifies life for callers of
      * packet_get(), but means that they cannot tell when a nonzero
      * return means there was a successful physical read.  They will
-     * thus credit a data source that drops out with being alive 
+     * thus credit a data source that drops out with being alive
      * slightly longer than it actually was.  This is unlikely to
      * matter as long as any policy timeouts are large compared to
-     * the time required to consume the greatest possible amount 
+     * the time required to consume the greatest possible amount
      * of buffered input, but if you hack this code you need to
-     * be aware of the issue. It might also slightly affect 
+     * be aware of the issue. It might also slightly affect
      * performance profiling.
      */
     if (lexer->outbuflen > 0)
@@ -1714,7 +1714,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     else
 	/*
 	 * Otherwise recvd is the size of whatever packet fragment we got.
-	 * It can still be 0 or -1 at this point even if buffer data 
+	 * It can still be 0 or -1 at this point even if buffer data
 	 * was consumed.
 	 */
 	return recvd;

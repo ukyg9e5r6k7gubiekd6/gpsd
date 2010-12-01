@@ -129,10 +129,11 @@ cautions.</para>
 <para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).  This function
-does a blocking read waiting for data from the daemon; it returns a
-count of bytes read for success, -1 with errno set on a Unix-level
-read error, -1 with errno not set if the socket to the daemon has
-closed. </para>
+does a blocking read waiting for data from the daemon (but see
+POLL_NONBLOCK below); it returns a count of bytes read for success,
+-1 with errno set on a Unix-level read error, -1 with errno not set
+if the socket to the daemon has closed, and 0 if POLL_NONBLOCK was
+passed to gps_stream() and no data is yet available.</para>
 
 <para><function>gps_waiting()</function> can be used to check
 whether there is data from the daemon. It returns true if there is,

@@ -62,7 +62,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 
 /*@ +charint -fixedformalarray -usedef -branchstate @*/
 bool aivdm_decode(const char *buf, size_t buflen,
-		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS], 
+		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS],
 		  struct ais_t *ais)
 {
 #ifdef __UNUSED_DEBUG__
@@ -125,8 +125,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
     /* FIXME: if fields[4] == "12", it doesn't detect the error */
     case '\0':
     case '1':
-	gpsd_report(LOG_ERROR, "invalid AIS channel '%c'. Assuming 'A'\n",
-	                       field[4][0]);
+	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0x '%c'. Assuming 'A'\n",
+	                       field[4][0], (field[4][0] != '\0' ? field[4][0]:' '));
 	/*@fallthrough@*/
     case 'A':
 	ais_context = &ais_contexts[0];
@@ -138,7 +138,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	ais_context = &ais_contexts[1];
 	break;
     default:
-	gpsd_report(LOG_ERROR, "invalid AIS channel.\n");
+	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0X .\n", field[4][0]);
 	return false;
     }
 
@@ -542,7 +542,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			ais->type18.course,
 			ais->type18.heading,
 			ais->type18.second);
-	    break;	
+	    break;
 	case 19:	/* Extended Class B CS Position Report */
 	    if (ais_context->bitlen != 312) {
 		gpsd_report(LOG_WARN, "AIVDM message type 19 size not 312 bits (%zd).\n",
@@ -612,11 +612,11 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		return false;
 	    }
 	    ais->type21.aid_type = UBITS(38, 5);
-	    from_sixbit((char *)ais_context->bits, 
+	    from_sixbit((char *)ais_context->bits,
 			43, 21, ais->type21.name);
 	    if (strlen(ais->type21.name) == 20 && ais_context->bitlen > 272)
-		from_sixbit((char *)ais_context->bits, 
-			    272, (ais_context->bitlen - 272)/6, 
+		from_sixbit((char *)ais_context->bits,
+			    272, (ais_context->bitlen - 272)/6,
 			    ais->type21.name+20);
 	    ais->type21.accuracy     = UBITS(163, 1);
 	    ais->type21.lon          = SBITS(164, 28);
@@ -721,7 +721,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			            ais->mmsi);
 		    return false;
 		}
-		(void)strlcpy(ais->type24.shipname, 
+		(void)strlcpy(ais->type24.shipname,
 			      ais_context->shipname24,
 			      sizeof(ais_context->shipname24));
 		ais->type24.shiptype = UBITS(40, 8);
@@ -792,7 +792,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			ais->type25.structured,
 			ais->type25.dest_mmsi,
 			ais->type25.app_id,
-			ais->type25.bitcount);		
+			ais->type25.bitcount);
 	    break;
 	case 26:	/* Binary Message, Multiple Slot */
 	    if (ais_context->bitlen < 60 || ais_context->bitlen > 1004) {
@@ -802,6 +802,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais->type26.addressed	= (bool)UBITS(38, 1);
 	    ais->type26.structured	= (bool)UBITS(39, 1);
+	    if (ais_context->bitlen < 40 + 16*ais->type26.structured + 30*ais->type26.addressed + 20) {
+		gpsd_report(LOG_WARN, "AIVDM message type 26 too short for mode.\n");
+		return false;
+	    }
 	    if (ais->type26.addressed)
 		ais->type26.dest_mmsi   = UBITS(40, 30);
 	    if (ais->type26.structured)

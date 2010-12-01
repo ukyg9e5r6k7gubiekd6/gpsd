@@ -59,7 +59,7 @@ static sourcetype_t gpsd_classify(const char *path)
 	 * ftp://ftp.kernel.org/pub/linux/docs/device-list/devices-2.6+.txt
 	 */
 	int devmajor = major(sb.st_rdev);
-	if (devmajor == 4)
+	if (devmajor == 4 || devmajor == 204)
 	    devtype = source_rs232;
 	else if (devmajor == 188)
 	    devtype = source_usb;
