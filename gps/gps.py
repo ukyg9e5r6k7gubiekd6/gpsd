@@ -16,6 +16,7 @@
 #
 import time
 from client import *
+import misc
 
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
