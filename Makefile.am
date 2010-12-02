@@ -652,7 +652,9 @@ xmllint: $(XML)
 
 # Use deheader to remove headers not required
 deheader:
+	make clean
 	deheader -r -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors' make -e"
+	make clean
 
 # Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
