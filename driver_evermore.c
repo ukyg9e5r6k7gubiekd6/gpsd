@@ -114,17 +114,11 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <time.h>
-#include <stdio.h>
 
 #include "gpsd.h"
 #if defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE)

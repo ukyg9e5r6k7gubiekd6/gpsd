@@ -5,16 +5,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdarg.h>
-#include <stdbool.h>
 #include <assert.h>
 
 #include "gpsd_config.h"

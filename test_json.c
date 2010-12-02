@@ -5,15 +5,13 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
+#include <stddef.h>
 
 #include "gpsd.h"
 #include "gps_json.h"
 
-#include "strl.c"
 
 static void assert_case(int num, int status)
 {
