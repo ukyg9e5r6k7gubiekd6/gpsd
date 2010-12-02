@@ -124,6 +124,16 @@ bool aivdm_decode(const char *buf, size_t buflen,
     switch (field[4][0]) {
     /* FIXME: if fields[4] == "12", it doesn't detect the error */
     case '\0':
+	/*
+	 * Apparently an empty channel is normal for AIVDO sentences,
+	 * which makes sense as they don't come in over radio.  This
+	 * is going to break if there's ever an AIVDO type 24, though.
+	 */
+	if (strncmp(field[0], "!AIVDO", 6) != 0)
+	    gpsd_report(LOG_ERROR, "invalid empty AIS channel. Assuming 'A'\n",
+	                       field[4][0], (field[4][0] != '\0' ? field[4][0]:' '));
+	ais_context = &ais_contexts[0];
+	break;
     case '1':
 	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0x '%c'. Assuming 'A'\n",
 	                       field[4][0], (field[4][0] != '\0' ? field[4][0]:' '));
