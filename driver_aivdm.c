@@ -129,9 +129,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	 * which makes sense as they don't come in over radio.  This
 	 * is going to break if there's ever an AIVDO type 24, though.
 	 */
-	if (strncmp(field[0], "!AIVDO", 6) != 0)
-	    gpsd_report(LOG_ERROR, "invalid empty AIS channel. Assuming 'A'\n",
-	                       field[4][0], (field[4][0] != '\0' ? field[4][0]:' '));
+	if (strncmp((const char *)field[0], "!AIVDO", 6) != 0)
+	    gpsd_report(LOG_ERROR, "invalid empty AIS channel. Assuming 'A'\n");
 	ais_context = &ais_contexts[0];
 	break;
     case '1':
@@ -812,7 +811,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais->type26.addressed	= (bool)UBITS(38, 1);
 	    ais->type26.structured	= (bool)UBITS(39, 1);
-	    if (ais_context->bitlen < 40 + 16*ais->type26.structured + 30*ais->type26.addressed + 20) {
+	    if ((signed)ais_context->bitlen < 40 + 16*ais->type26.structured + 30*ais->type26.addressed + 20) {
 		gpsd_report(LOG_WARN, "AIVDM message type 26 too short for mode.\n");
 		return false;
 	    }
