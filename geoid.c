@@ -8,7 +8,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-#include <sys/types.h>
 #include <math.h>
 #include "gpsd.h"
 

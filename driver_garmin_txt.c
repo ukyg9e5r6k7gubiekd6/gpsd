@@ -106,9 +106,7 @@ invalid data.
 
 ***************************************************/
 
-#include <sys/types.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -116,8 +114,6 @@ invalid data.
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <errno.h>
-#include <inttypes.h>
 
 #include "gpsd_config.h"
 #if defined (HAVE_SYS_SELECT_H)
@@ -129,7 +125,6 @@ invalid data.
 #endif
 
 #include "gpsd.h"
-#include "gps.h"
 #include "timebase.h"
 
 #ifdef GARMINTXT_ENABLE

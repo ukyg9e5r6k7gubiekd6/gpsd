@@ -36,9 +36,7 @@
 
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -53,8 +51,6 @@
  #endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
 
-#include <sys/time.h> /* select() */
-#include <sys/stat.h>
 #include <fcntl.h>
 #ifdef HAVE_TERMIOS_H
  #include <termios.h>
@@ -73,7 +69,6 @@
 #endif /* S_SPLINT_S */
 #include <errno.h>
 
-#include <signal.h>
 
 #include "gps.h"
 #include "gpsdclient.h"

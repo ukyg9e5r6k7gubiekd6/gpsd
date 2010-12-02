@@ -9,12 +9,8 @@ representations to libgps structures.
 
 ***************************************************************************/
 
-#include <math.h>
-#include <assert.h>
 #include <string.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "gpsd.h"
 #include "gps_json.h"

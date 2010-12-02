@@ -7,15 +7,11 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
-#include <sys/time.h>
 #include <stdlib.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <string.h>
-#include <errno.h>
-#include <stdio.h>
-#include <math.h>
 #include <stdarg.h>
 
 #include "gpsd.h"

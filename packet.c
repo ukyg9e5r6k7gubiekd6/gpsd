@@ -29,9 +29,7 @@ PERMISSIONS
 ***************************************************************************/
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <sys/types.h>
 #include <ctype.h>
-#include <stdio.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

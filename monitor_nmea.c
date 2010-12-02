@@ -6,16 +6,11 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdarg.h>
-#include <stdbool.h>
 #include <assert.h>
 
 #include "gpsd_config.h"
@@ -27,7 +22,6 @@
 #endif /* HAVE_NCURSES_H */
 #include "gpsd.h"
 
-#include "bits.h"
 #include "gpsmon.h"
 #include "gpsdclient.h"
 

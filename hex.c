@@ -5,9 +5,6 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include <string.h>
 
 #include "gpsd.h"

@@ -4,29 +4,20 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <sys/types.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <assert.h>
-#include <signal.h>
 #include <setjmp.h>
 /* Cygwin has only _timezone and not timezone unless the following is set */
 #if defined(__CYGWIN__)
 #define timezonevar
 #endif /* defined(__CYGWIN__) */
-#include <time.h>
-#include <termios.h>
 #include <fcntl.h>		/* for O_RDWR */
-#include <stdarg.h>
-#include <stdbool.h>
 #include <errno.h>
-#include <sys/ioctl.h>		/* for O_RDWR */
 #include <setjmp.h>
 
 #include "gpsd_config.h"
@@ -42,7 +33,6 @@
 #endif /* HAVE_NCURSES_H */
 #include "gpsd.h"
 
-#include "bits.h"
 
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>

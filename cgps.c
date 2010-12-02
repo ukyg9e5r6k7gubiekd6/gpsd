@@ -78,21 +78,14 @@
 /* This is the maximum size we need for the 'satellites' window. */
 #define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
 
-#include <sys/types.h>
-#include <sys/select.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <math.h>
 #include <errno.h>
-#include <assert.h>
-#include <signal.h>
-#include <stdbool.h>
 
 #include "gpsd_config.h"
 #ifdef HAVE_NCURSES_H

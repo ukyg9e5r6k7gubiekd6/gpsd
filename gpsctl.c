@@ -4,9 +4,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include "gpsd_config.h"
 #if HAVE_SYS_IOCTL_H
  #include <sys/ioctl.h>
@@ -14,12 +12,10 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <assert.h>
-#include <signal.h>
 
 #include "gpsd.h"
 #include "revision.h"

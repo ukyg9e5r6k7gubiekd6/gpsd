@@ -4,16 +4,11 @@
  */
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <sys/types.h>
 #include <string.h>
-#include <stdio.h>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif /* HAVE_SYSLOG_H */
 #include <math.h>
-#include <time.h>
-#include <signal.h>
-#include <getopt.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>

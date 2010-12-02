@@ -5,7 +5,6 @@
  */
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <sys/types.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -14,8 +13,6 @@
 #endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <sys/time.h>
-#include <stdio.h>
 #include <math.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_NETDB_H

@@ -2,10 +2,7 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <time.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "gps.h"
 

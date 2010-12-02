@@ -3,16 +3,11 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdio.h>
 #include <string.h>
-#include <errno.h>
 #include <stdarg.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #include "gpsd.h"

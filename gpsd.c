@@ -7,18 +7,14 @@
  */
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <sys/types.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif /* HAVE_SYSLOG_H */
-#include <signal.h>
 #include <errno.h>
-#include <ctype.h>
 #include <fcntl.h>
-#include <string.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -40,7 +36,6 @@
 #endif /* S_SPLINT_S */
 #include <stdarg.h>
 #include <setjmp.h>
-#include <stdio.h>
 #include <assert.h>
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -48,7 +43,6 @@
 #ifdef HAVE_GRP_H
 #include <grp.h>
 #endif /* HAVE_GRP_H */
-#include <stdbool.h>
 #include <math.h>
 
 #if defined (HAVE_PATH_H)

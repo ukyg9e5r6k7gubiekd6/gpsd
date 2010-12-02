@@ -8,8 +8,6 @@
 
 /* This simple program shows the basic functionality of the C++ wrapper class */
 #include <iostream>
-#include <string>
-#include <unistd.h>
 
 #include "libgpsmm.h"
 

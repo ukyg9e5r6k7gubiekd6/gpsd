@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include "gpsd_config.h"
-#include <sys/types.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

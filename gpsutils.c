@@ -3,16 +3,12 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <sys/types.h>
-#include <stdio.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <stdarg.h>
-#include <time.h>
 
 #include "gpsd.h"
 

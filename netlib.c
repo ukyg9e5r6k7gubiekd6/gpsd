@@ -29,7 +29,6 @@
 #endif /* HAVE_ARPA_INET_H */
 #endif /* S_SPLINT_S */
 #include <errno.h>
-#include <stdlib.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
