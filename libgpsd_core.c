@@ -5,6 +5,7 @@
  */
 #include <stdlib.h>
 #include "gpsd_config.h"
+#include <sys/time.h>
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
@@ -16,6 +17,7 @@
 #endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#include <stdio.h>
 #include <math.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_NETDB_H
@@ -23,6 +25,8 @@
 #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #include "gpsd.h"
 
