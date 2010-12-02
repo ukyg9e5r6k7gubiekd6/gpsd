@@ -782,18 +782,18 @@ static void gpsd_error_model(struct gps_device_t *session,
     gpsd_report(LOG_DATA, "modeling errors: mode=%d, masks=%s\n",
 		fix->mode, gpsd_maskdump(session->gpsdata.set));
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->epx) != 0 && finite(session->gpsdata.dop.hdop) != 0)
+	if (isnan(fix->epx) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;
 
-	if (isnan(fix->epy) != 0 && finite(session->gpsdata.dop.hdop) != 0)
+	if (isnan(fix->epy) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epy = session->gpsdata.dop.ydop * h_uere;
 
 	if ((fix->mode >= MODE_3D)
-	    && isnan(fix->epv) != 0 && finite(session->gpsdata.dop.vdop) != 0)
+	    && isnan(fix->epv) != 0 && isfinite(session->gpsdata.dop.vdop) != 0)
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
 
 	if (isnan(session->gpsdata.epe) != 0
-	    && finite(session->gpsdata.dop.pdop) != 0)
+	    && isfinite(session->gpsdata.dop.pdop) != 0)
 	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
 	else
 	    session->gpsdata.epe = NAN;
