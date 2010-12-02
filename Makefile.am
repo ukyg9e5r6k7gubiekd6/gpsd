@@ -810,13 +810,13 @@ json-regress: test_json
 bits-regress: test_bits
 	$(srcdir)/test_bits
 
-python-identation-regress:
+python-indentation-regress:
 	set -e; for pyfile in $(PYTHONSCRIPTS_DIST) $(PYTHONMODULES_DIST); do \
 		$(PYTHON) -tt -B -m py_compile $$pyfile ;\
 	done
 
 # Do all normal regression tests.
-testregress: python-identation-regress gps-regress rtcm-regress aivdm-regress packet-regress geoid-regress time-regress unpack-regress json-regress
+testregress: python-indentation-regress gps-regress rtcm-regress aivdm-regress packet-regress geoid-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
 # do-tests is a shell script that invokes make with target testregress.
