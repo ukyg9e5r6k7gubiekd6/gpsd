@@ -886,8 +886,8 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 	    else if (ais->type9.alt == AIS_ALT_HIGH)
 		(void)strlcpy(altlegend, "\"high\"", sizeof(altlegend));
 	    else
-		(void)snprintf(altlegend, sizeof(altlegend),
-			       "%.1f", ais->type9.alt / 10.0);
+		(void)snprintf(altlegend, sizeof(altlegend), 
+			       "%u", ais->type9.alt);
 
 	    /*
 	     * Express speed as nan if not available,
@@ -899,7 +899,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 		(void)strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
-			       "%.1f", ais->type1.speed / 10.0);
+			       "%u", ais->type1.speed);
 
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"alt\":%s,\"speed\":%s,\"accuracy\":%s,"
