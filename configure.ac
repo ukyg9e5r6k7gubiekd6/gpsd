@@ -507,6 +507,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Geostar support
+AC_ARG_ENABLE(geostar,
+  AC_HELP_STRING([--disable-geostar],
+		 [disable Geostar Protocol support]),
+  [ac_geostar=$enableval], [ac_geostar=yes])
+AC_MSG_CHECKING([for Geostar support])
+if test x"$ac_geostar" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([GEOSTAR_ENABLE], 1, [Geostar Protocol support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for EverMore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
@@ -1049,6 +1062,7 @@ echo "EverMore                : $ac_evermore"
 echo "FV-18                   : $ac_fv18"
 echo "Garmin                  : $ac_garmin"
 echo "Garmin Simple Text      : $ac_garmintxt"
+echo "Geostar                 : $ac_geostar"
 echo "iTrax                   : $ac_itrax"
 echo "NMEA                    : $ac_nmea"
 echo "NTRIP                   : $ac_ntrip"
@@ -1103,6 +1117,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_fv18" = "xno" -a \
     x"$ac_garmin" = "xno" -a \
     x"$ac_garmintxt" = "xno" -a \
+    x"$ac_geostar" = "xno" -a \
     x"$ac_itrax" = "xno" -a \
     x"$ac_navcom" = "xno" -a \
     x"$ac_nmea" = "xno" -a \
