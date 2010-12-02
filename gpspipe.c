@@ -23,6 +23,8 @@
  *
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S

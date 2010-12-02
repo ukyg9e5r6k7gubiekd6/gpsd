@@ -34,6 +34,8 @@
 
 #define CLIMB 3
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include "gpsd_config.h"
 #include <string.h>
