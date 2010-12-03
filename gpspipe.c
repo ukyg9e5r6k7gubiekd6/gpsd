@@ -316,6 +316,7 @@ int main(int argc, char **argv)
 	    spinner(vflag, l++);
 
 	/* reading directly from the socket avoids decode overhead */
+	errno = 0;
 	readbytes = (int)read(gpsdata.gps_fd, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0; i < readbytes; i++) {
@@ -371,7 +372,10 @@ int main(int argc, char **argv)
 	    }
 	} else {
 	    if (readbytes == -1) {
-		(void)fprintf(stderr, "gpspipe: read error %s(%d)\n",
+		if (errno == EAGAIN)
+		    continue;
+		else
+		    (void)fprintf(stderr, "gpspipe: read error %s(%d)\n",
 			      strerror(errno), errno);
 		exit(1);
 	    } else {
