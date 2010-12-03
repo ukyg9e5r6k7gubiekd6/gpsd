@@ -126,7 +126,8 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS)
+gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS) $(BLUEZ_LIBS)
+
 
 #
 # Build gpsdecode
@@ -216,7 +217,7 @@ libgpsd_h_sources = \
 	bits.h \
 	crc24q.h
 
-libgpsd_la_LDFLAGS = $(LIBUSB_LIBS)
+libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
 BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
 
