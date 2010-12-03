@@ -650,12 +650,13 @@ cppcheck: gpsd.h packet_names.h
 xmllint: $(XML)
 	for xml in $(XML); do xmllint --nonet --noout --valid $$xml; done
 
-# Use deheader to remove headers not required
+# Use deheader to remove headers not required.  If the statistics kine
+# ends with other than '0 removed' there's work to be done.
 ENABLES = -DBINARY_ENABLE -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
 deheader:
-	make clean
+	make --quiet clean
 	deheader -r -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
-	make clean
+	make --quiet clean
 
 # Re-indent the codebase in a uniform style for readability.
 INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
