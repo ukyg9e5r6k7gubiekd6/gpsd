@@ -852,20 +852,30 @@ static void handle_control(int sfd, char *buf)
 	    *eq++ = '\0';
 	    len = strlen(eq) + 5;
 	    if ((devp = find_device(stash)) != NULL) {
-		/* NOTE: this destroys the original buffer contents */
-		st = gpsd_hexpack(eq, eq, len);
-		if (st <= 0) {
-		    gpsd_report(LOG_INF,
-				"<= control(%d): invalid hex string (error %d).\n",
-				sfd, st);
+		if (devp->context->readonly || (devp->sourcetype <= source_blockdev)) {
+		    gpsd_report(LOG_WARN, "<= control(%d): attempted to write to a read-only device\n",
+				sfd);
 		    ignore_return(write(sfd, "ERROR\n", 6));
-		} else {
-		    gpsd_report(LOG_INF,
-				"<= control(%d): writing %d bytes fromhex(%s) to %s\n",
-				sfd, st, eq, stash);
-		    ignore_return(write
-				  (devp->gpsdata.gps_fd, eq, (size_t) st));
-		    ignore_return(write(sfd, "OK\n", 3));
+                } else {
+                    /* NOTE: this destroys the original buffer contents */
+                    st = gpsd_hexpack(eq, eq, len);
+                    if (st <= 0) {
+                        gpsd_report(LOG_INF,
+                                    "<= control(%d): invalid hex string (error %d).\n",
+                                    sfd, st);
+                        ignore_return(write(sfd, "ERROR\n", 6));
+                    } else {
+                        gpsd_report(LOG_INF,
+                                    "<= control(%d): writing %d bytes fromhex(%s) to %s\n",
+                                    sfd, st, eq, stash);
+                        if (write(devp->gpsdata.gps_fd, eq, (size_t) st) <= 0) {
+                            gpsd_report(LOG_WARN, "<= control(%d): write to device failed\n",
+                                        sfd);
+                            ignore_return(write(sfd, "ERROR\n", 6));
+                        } else {
+                            ignore_return(write(sfd, "OK\n", 3));
+                        }
+                    }
 		}
 	    } else {
 		gpsd_report(LOG_INF, "<= control(%d): %s not active\n", sfd,
