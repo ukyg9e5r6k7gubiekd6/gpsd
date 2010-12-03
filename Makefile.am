@@ -651,9 +651,10 @@ xmllint: $(XML)
 	for xml in $(XML); do xmllint --nonet --noout --valid $$xml; done
 
 # Use deheader to remove headers not required
+ENABLES = -DBINARY_ENABLE -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
 deheader:
 	make clean
-	deheader -r -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors' make -e"
+	deheader -r -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make clean
 
 # Re-indent the codebase in a uniform style for readability.
