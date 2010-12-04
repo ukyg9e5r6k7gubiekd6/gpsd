@@ -16,7 +16,7 @@ struct monitor_object_t {
     /* a device-specific capability table for the monitor */
     bool (*initialize)(void);		/* paint legends on windows */
     void (*update)(void);		/* now paint the data */
-    int (*command)(char[]);		/* interpret device-specfic commands */
+    int (*command)(char[]);		/* interpret device-specific commands */
     void (*wrap)(void);			/* deallocate storage */
     int min_y, min_x;			/* space required for device info */
     const struct gps_type_t *driver;	/* device driver table */
