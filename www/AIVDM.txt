@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.26, July 2010
+v1.27, July 2010
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -432,9 +432,13 @@ unusual or rare; many AIS transmitters never emit them.  As of
 November 2009, an overnight capture of a full feed from <<<AISHUB>>>
 shows no type 25 or type 26 messages at all.
 
-An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID 
-for the ship's radio(s).  The first three digits convey information
-about the country in which the ID was issued <<ITU-MID>>.
+An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID for
+the ship's radio(s).  The first three digits convey information about
+the country in which the ID was issued <<ITU-MID>>.  US vessels
+travelling solely in U.S. waters sometimes incorrectly omit the
+leading "3", the geography code for North and Centra America and
+Caribbean, emitting 8-digit MMSIs beginning with the U.S. country code
+of 669.
 
 Detailed descriptions of message types 1-24 follow. Message types 1-22
 are derived from <<IALA>>. Message type 23 was decribed to me by Mike
@@ -2059,3 +2063,7 @@ U.S. Coast Guard PAWSS messages.
 
 Version 1.26 corrects an error in describing rate-of-turn decoding in
 AIS Type 1, 2, and 3 messages,
+
+Version 1.27 describes the sometime U.S. practice of omitting the leading
+'3' region code from MMSIs.
+  
