@@ -364,8 +364,10 @@ stamp-qt: $(QTLIB_sources) libQgpsmm/Makefile
 CLEANFILES += stamp-qt
 endif
 
-# Clean up after Python and QT
 clean-local:
+# remove libgps test binary
+	rm -f libgps
+# Clean up after Python and QT
 if HAVE_PYTHON
 	rm -rf build
 	rm -f gps/*.so gps/*.pyc stamp-python*.tmp
