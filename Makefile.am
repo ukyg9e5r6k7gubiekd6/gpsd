@@ -650,7 +650,7 @@ cppcheck: gpsd.h packet_names.h
 xmllint: $(XML)
 	for xml in $(XML); do xmllint --nonet --noout --valid $$xml; done
 
-# Use deheader to remove headers not required.  If the statistics kine
+# Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
 ENABLES = -DBINARY_ENABLE -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
 deheader:
