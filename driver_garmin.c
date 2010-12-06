@@ -80,7 +80,6 @@
 #define __USE_POSIX199309 1
 
 #include <math.h>
-#include <endian.h>  /* handle endianess */
 
 #include <string.h>
 #ifndef S_SPLINT_S
@@ -89,6 +88,20 @@
 #include <errno.h>
 
 #include "gpsd_config.h"
+
+/*
+ * gpsd uses non-POSIX le16toh.  Attempt to deal with this portably,
+ * failing obviously on systems that don't have support.
+ * Systems known to work: Linux, NetBSD
+ */
+#if defined(HAVE_ENDIAN_H)
+#include <endian.h>
+#elif defined(HAVE_SYS_ENDIAN_H)
+#include <sys/endian.h>
+#else /* HAVE_SYS_ENDIAN_H */
+#error gpsd uses non-POSIX le16toh; platform does not have {,sys/}endian.h
+#endif /* HAVE_ENDIAN_H */
+
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif

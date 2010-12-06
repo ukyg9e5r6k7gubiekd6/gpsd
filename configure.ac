@@ -186,6 +186,7 @@ AC_CHECK_HEADERS([netinet/ip.h], [], [],
 #endif
 ]])
 AC_CHECK_HEADERS(termios.h strings.h getopt.h netdb.h syslog.h pwd.h grp.h)
+AC_CHECK_HEADERS(endian.h sys/endian.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)

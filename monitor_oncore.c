@@ -158,7 +158,7 @@ static bool oncore_initialize(void)
 
     (void)wborder(Aywin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(Aywin, A_BOLD);
-    (void)mvwprintw(Aywin, 1, 1, "PPS delay:");
+    (void)mvwprintw(Aywin, 1, 1, "PPS offset:");
     (void)mvwprintw(Aywin, 3, 4, " @@Ay ");
     (void)wattrset(Aywin, A_NORMAL);
 
@@ -399,11 +399,11 @@ static void oncore_update(void)
 
     case ONCTYPE('A', 'y'):
     {
-	double pps_delay;
+	double pps_offset;
 
-	pps_delay = getbesl(buf, 4) / 1000000.0;
+	pps_offset = getbesl(buf, 4) / 1000000.0;
 
-	(void)mvwprintw(Aywin, 2, 2, " %7.3f ms", pps_delay);
+	(void)mvwprintw(Aywin, 2, 2, " %7.3f ms", pps_offset);
     }
 
 	monitor_log("Ay =");
