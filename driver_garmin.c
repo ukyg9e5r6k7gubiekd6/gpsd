@@ -96,11 +96,10 @@
  */
 #if defined(HAVE_ENDIAN_H)
 #include <endian.h>
-#else
-#if defined(HAVE_SYS_ENDIAN_H)
+#elif defined(HAVE_SYS_ENDIAN_H)
+#include <sys/endian.h>
 #else /* HAVE_SYS_ENDIAN_H */
 #error gpsd uses non-POSIX le16toh; platform does not have {,sys/}endian.h
-#endif /* HAVE_SYS_ENDIAN_H */
 #endif /* HAVE_ENDIAN_H */
 
 #if defined (HAVE_SYS_SELECT_H)
