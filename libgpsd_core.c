@@ -284,8 +284,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     pps_info_t pi;
 #endif
 
-    /* for chrony SOCK interface, which allows nSec timekeeping */
-    #define SOCK_MAGIC 0x534f434b
+/* for chrony SOCK interface, which allows nSec timekeeping */
+#define SOCK_MAGIC 0x534f434b
 
     struct sock_sample {
 	struct timeval tv;

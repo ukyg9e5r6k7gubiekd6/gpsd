@@ -394,7 +394,7 @@ int main(int argc, char **argv)
     }
 #endif /* __UNUSED__ */
 
-    /*@i1@*/ exit(0);
+    exit(0);
 }
 
 /*@ +compdestroy @*/
