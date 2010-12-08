@@ -14,7 +14,7 @@ use strict;
 # All information on the project siting, mailing
 # lists, and originating host lives here.
 my $website = 'http://gpsd.berlios.de';
-my $mailsite = 'berlios.de';
+my $to_address = 'gpsd-dev@berlios.de';
 my $servaddr = 'www@mainframe.cx';
 
 my $query = new CGI;
@@ -37,7 +37,6 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 
 	### mail parameters
 	my $from_address = 'HTTP Server <${servaddr}>';
-	my $to_address = "gpsd-dev@${mailsite}";
 	my $mailhost = '127.0.0.1';
 	my $subject = 'new gps report';
 
