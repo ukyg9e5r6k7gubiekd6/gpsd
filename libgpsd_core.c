@@ -260,6 +260,14 @@ static int init_kernel_pps(struct gps_device_t *session) {
 #endif
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
+    struct sock_sample {
+	struct timeval tv;
+	double offset;
+	int pulse;
+	int leap;
+	int _pad;	/* unused */
+	int magic;      /* must be SOCK_MAGIC */
+    } sample;
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     int pulse_delay_ns;
@@ -286,15 +294,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 /* for chrony SOCK interface, which allows nSec timekeeping */
 #define SOCK_MAGIC 0x534f434b
-
-    struct sock_sample {
-	struct timeval tv;
-	double offset;
-	int pulse;
-	int leap;
-	int _pad;	/* unused */
-	int magic;      /* must be SOCK_MAGIC */
-    } sample;
     /* chrony must be started first as chrony insists on creating the socket */
     /* open the chrony socket */
     struct sockaddr_un s;
