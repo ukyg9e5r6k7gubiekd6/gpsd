@@ -78,8 +78,8 @@
 /* This is the maximum size we need for the 'satellites' window. */
 #define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
 
-#if defined (HAVE_SYS_SELECT_H)
 #include <sys/types.h>
+#if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
 #ifndef S_SPLINT_S
