@@ -48,7 +48,6 @@
     #include <glob.h>
 #endif
 /* and for chrony */
-#include <sys/socket.h>
 #include <sys/un.h>
 #endif
 
@@ -304,7 +303,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
 	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n", chrony_path);
-    } else if (connect(chronyfd, (struct sockaddr *)&s, sizeof (s))) {
+    } else if (connect(chronyfd, (struct sockaddr *)&s, (int)sizeof(s))) {
 	(void)close(chronyfd);
 	chronyfd = -1;
 	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", chrony_path);

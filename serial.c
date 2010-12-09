@@ -16,7 +16,11 @@
 #include "gpsd_config.h"
 
 #ifdef HAVE_BLUEZ
+#ifndef S_SPLINT_S
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
+#endif /* S_SPLINT_S */
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>

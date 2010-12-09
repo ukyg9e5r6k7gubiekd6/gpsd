@@ -617,6 +617,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 libgps: libgps_core.c gps.h .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
 
+
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/ $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
