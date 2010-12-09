@@ -205,6 +205,7 @@ void unix_to_gpstime(double unixtime,
 
 /* Distance in meters between two points specified in degrees, optionally
 with initial and final bearings. */
+/*@-mustdefine@*/
 double earth_distance_and_bearings(double lat1, double lon1, double lat2, double lon2, double *ib, double *fb)
 {
     /*
@@ -273,6 +274,7 @@ double earth_distance_and_bearings(double lat1, double lon1, double lat2, double
 
     return (WGS84B * A * (S - d_S));
 }
+/*@+mustdefine@*/
 
 /* Distance in meters between two points specified in degrees. */
 double earth_distance(double lat1, double lon1, double lat2, double lon2)

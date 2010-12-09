@@ -321,7 +321,7 @@ oncore_msg_time_raim(struct gps_device_t *session UNUSED,
     if (data_len != 69)
 	return 0;
 
-    sawtooth_ns = (signed char) getub(buf, 25);
+    sawtooth_ns = (int)getub(buf, 25);
     gpsd_report(LOG_IO, "oncore PPS sawtooth: %d\n",sawtooth_ns);
 
     /* session->driver.oncore.traim_sawtooth_ns = sawtooth_ns; */

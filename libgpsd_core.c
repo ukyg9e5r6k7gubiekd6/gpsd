@@ -258,8 +258,30 @@ static int init_kernel_pps(struct gps_device_t *session) {
     return kernelpps_handle;
 }
 #endif
+
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
+    struct gps_device_t *session = (struct gps_device_t *)arg;
+    int cycle, duration, state = 0, laststate = -1, unchanged = 0;
+    int pulse_delay_ns;
+    struct timeval  tv;
+    struct timeval pulse[2] = { {0, 0}, {0, 0} };
+#if defined(PPS_ON_CTS)
+    int pps_device = TIOCM_CTS;
+#define pps_device_str "CTS"
+#else
+    int pps_device = TIOCM_CAR;
+#define pps_device_str "DCD"
+#endif
+#if defined(HAVE_TIMEPPS_H)
+    int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
+    int cycle_kpps, duration_kpps;
+    struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
+    struct timespec tv_kpps;
+    pps_info_t pi;
+#endif
+/* for chrony SOCK interface, which allows nSec timekeeping */
+#define SOCK_MAGIC 0x534f434b
     struct sock_sample {
 	struct timeval tv;
 	double offset;
@@ -268,46 +290,22 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int _pad;	/* unused */
 	int magic;      /* must be SOCK_MAGIC */
     } sample;
-    struct gps_device_t *session = (struct gps_device_t *)arg;
-    int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    int pulse_delay_ns;
-    struct timeval  tv;
-    struct timeval pulse[2] = { {0, 0}, {0, 0} };
-
-#if defined(PPS_ON_CTS)
-    int pps_device = TIOCM_CTS;
-#define pps_device_str "CTS"
-#else
-    int pps_device = TIOCM_CAR;
-#define pps_device_str "DCD"
-#endif
-
-    gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-#if defined(HAVE_TIMEPPS_H)
-
-    int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
-    int cycle_kpps, duration_kpps;
-    struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
-    struct timespec tv_kpps;
-    pps_info_t pi;
-#endif
-
-/* for chrony SOCK interface, which allows nSec timekeeping */
-#define SOCK_MAGIC 0x534f434b
     /* chrony must be started first as chrony insists on creating the socket */
     /* open the chrony socket */
     struct sockaddr_un s;
     int chronyfd;
     char chrony_path[] = "/tmp/chrony.sock";
 
-    s.sun_family = AF_UNIX;
-    snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
+    gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
+
+    /*@i1@*/s.sun_family = AF_UNIX;
+    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
 
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
 	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n", chrony_path);
     } else if (connect(chronyfd, (struct sockaddr *)&s, sizeof (s))) {
-	close(chronyfd);
+	(void)close(chronyfd);
 	chronyfd = -1;
 	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", chrony_path);
     }
@@ -565,7 +563,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		tv.tv_usec += 1000000;
 	    }
 	    if ( 0 <= chronyfd ) {
-		send(chronyfd, &sample, sizeof (sample), 0);
+		(void)send(chronyfd, &sample, sizeof (sample), 0);
 		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%03lu offset %.9f\n",
 			    (unsigned long)sample.tv.tv_sec,
 			    (unsigned long)sample.tv.tv_usec / 1000,
@@ -1029,7 +1027,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	} else if (session->newdata.mode == MODE_NO_FIX
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 		   && !(session->device_type == &oncore_binary &&
-			session->driver.oncore.good_time)
+			session->driver.oncore.good_time!=0)
 #endif
 		   ) {
 	    //gpsd_report(LOG_PROG, "NTP: No fix\n");

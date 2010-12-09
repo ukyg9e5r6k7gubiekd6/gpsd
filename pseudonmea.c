@@ -210,10 +210,10 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	nmea_add_checksum(bufp2);
 	bufp += strlen(bufp);
     }
-    if (isfinite(session->gpsdata.fix.epx)
-	&& isfinite(session->gpsdata.fix.epy)
-	&& isfinite(session->gpsdata.fix.epv)
-	&& isfinite(session->gpsdata.epe)) {
+    if (isfinite(session->gpsdata.fix.epx)!=0
+	&& isfinite(session->gpsdata.fix.epy)!=0
+	&& isfinite(session->gpsdata.fix.epv)!=0
+	&& isfinite(session->gpsdata.epe)!=0) {
 	struct tm tm;
 	time_t intfixtime;
 

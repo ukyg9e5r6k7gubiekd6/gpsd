@@ -599,7 +599,7 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     gpsdata->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
-    return (status == 0) ? response_length : status;
+    return (status == 0) ? (int)response_length : status;
 }
 /*@+compdef -usedef +uniondef@*/
 

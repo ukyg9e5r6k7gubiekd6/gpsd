@@ -1083,7 +1083,9 @@ extern /*@observer@*/char *unix_to_iso8601(double t, /*@ out @*/char[], size_t l
 extern double gpstime_to_unix(int, double);
 extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
-extern double earth_distance_and_bearings(double, double, double, double, double *, double *);
+extern double earth_distance_and_bearings(double, double, double, double, 
+					  /*@null@*//*@out@*/double *, 
+					  /*@null@*//*@out@*/double *);
 extern double wgs84_separation(double, double);
 
 /* some multipliers for interpreting GPS output */
