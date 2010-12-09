@@ -102,6 +102,16 @@
 #error gpsd uses non-POSIX le16toh; platform does not have {,sys/}endian.h
 #endif /* HAVE_ENDIAN_H */
 
+#if defined(le16toh)
+#define GPSD_LE16TOH le16toh
+#define GPSD_LE32TOH le32toh
+#elif defined(letoh16)
+#define GPSD_LE16TOH letoh16
+#define GPSD_LE32TOH letoh32
+#else
+#error don't know how to convert little endian 16bit to host order
+#endif
+
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
@@ -381,10 +391,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	pvt = (cpo_pvt_data *) buf;
 
 	// 631065600, unix seconds for 31 Dec 1989 Zulu
-	time_l = (time_t) (631065600 + (be32toh(pvt->grmn_days) * 86400));
+	time_l = (time_t) (631065600 + (GPSD_LE32TOH(pvt->grmn_days) * 86400));
 	// TODO, convert grmn_days to context->gps_week
-	time_l -= le16toh(pvt->leap_sec);
-	session->context->leap_seconds = le16toh(pvt->leap_sec);
+	time_l -= GPSD_LE16TOH(pvt->leap_sec);
+	session->context->leap_seconds = GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
@@ -441,7 +451,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	}
 	session->newdata.track = radtodeg(track);
 
-	switch (le16toh(pvt->fix)) {
+	switch (GPSD_LE16TOH(pvt->fix)) {
 	case 0:
 	case 1:
 	default:
@@ -484,11 +494,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	gpsd_report(LOG_INF,
 		    "Garmin: Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %d\n",
-		    pvt->alt, pvt->epe, pvt->eph, pvt->epv, le16toh(pvt->fix),
+		    pvt->alt, pvt->epe, pvt->eph, pvt->epv, GPSD_LE16TOH(pvt->fix),
 		    pvt->gps_tow, session->newdata.latitude,
 		    session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
-		    pvt->alt_vel, pvt->msl_hght, le16toh(pvt->leap_sec),
-		    be32toh(pvt->grmn_days));
+		    pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec),
+		    GPSD_LE32TOH(pvt->grmn_days));
 
 	if (session->newdata.mode > MODE_NO_FIX) {
 	    /* data only valid with a fix */
@@ -524,9 +534,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    gpsd_report(LOG_INF,
 			"Garmin: PVT RMD Sat: %3u, cycles: %9u, pr: %16.6f, "
 			"phase: %7.3f, slp_dtct: %3s, snr: %3u, Valid: %3s\n",
-			rmd->sv[i].svid + 1, be32toh(rmd->sv[i].cycles), 
+			rmd->sv[i].svid + 1, GPSD_LE32TOH(rmd->sv[i].cycles), 
 			rmd->sv[i].pr,
-			(be16toh(rmd->sv[i].phase) * 360.0) / 2048.0,
+			(GPSD_LE16TOH(rmd->sv[i].phase) * 360.0) / 2048.0,
 			rmd->sv[i].slp_dtct != '\0' ? "Yes" : "No",
 			rmd->sv[i].snr_dbhz,
 			rmd->sv[i].valid != '\0' ? "Yes" : "No");
@@ -543,8 +553,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
 	    gpsd_report(LOG_INF,
 			"Garmin:   Sat %3d, snr: %5d, elev: %2d, Azmth: %3d, Stat: %x\n",
-			sats->svid, le16toh(sats->snr), sats->elev, 
-			le16toh(sats->azmth),
+			sats->svid, GPSD_LE16TOH(sats->snr), sats->elev, 
+			GPSD_LE16TOH(sats->azmth),
 			sats->status);
 
 	    if (255 == (int)sats->svid) {
@@ -554,11 +564,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    }
 
 	    session->gpsdata.PRN[j] = (int)sats->svid;
-	    session->gpsdata.azimuth[j] = (int)le16toh(sats->azmth);
+	    session->gpsdata.azimuth[j] = (int)GPSD_LE16TOH(sats->azmth);
 	    session->gpsdata.elevation[j] = (int)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
-	    session->gpsdata.ss[j] = (float)(le16toh(sats->snr) / 100.0);
+	    session->gpsdata.ss[j] = (float)(GPSD_LE16TOH(sats->snr) / 100.0);
 	    if (session->gpsdata.ss[j] < 0.0) {
 		session->gpsdata.ss[j] = 0.0;
 	    }
