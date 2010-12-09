@@ -373,8 +373,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// 631065600, unix seconds for 31 Dec 1989 Zulu
 	time_l = (time_t) (631065600 + (ntohl(pvt->grmn_days) * 86400));
 	// TODO, convert grmn_days to context->gps_week
-	time_l -= ntohs(pvt->leap_sec);
-	session->context->leap_seconds = ntohs(pvt->leap_sec);
+	time_l -= le16toh(pvt->leap_sec);
+	session->context->leap_seconds = le16toh(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
@@ -431,7 +431,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	}
 	session->newdata.track = radtodeg(track);
 
-	switch (ntohs(pvt->fix)) {
+	switch (le16toh(pvt->fix)) {
 	case 0:
 	case 1:
 	default:
@@ -474,10 +474,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	gpsd_report(LOG_INF,
 		    "Garmin: Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %d\n",
-		    pvt->alt, pvt->epe, pvt->eph, pvt->epv, ntohs(pvt->fix),
+		    pvt->alt, pvt->epe, pvt->eph, pvt->epv, le16toh(pvt->fix),
 		    pvt->gps_tow, session->newdata.latitude,
 		    session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
-		    pvt->alt_vel, pvt->msl_hght, ntohs(pvt->leap_sec),
+		    pvt->alt_vel, pvt->msl_hght, le16toh(pvt->leap_sec),
 		    ntohl(pvt->grmn_days));
 
 	if (session->newdata.mode > MODE_NO_FIX) {
@@ -533,8 +533,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
 	    gpsd_report(LOG_INF,
 			"Garmin:   Sat %3d, snr: %5d, elev: %2d, Azmth: %3d, Stat: %x\n",
-			sats->svid, ntohs(sats->snr), sats->elev, 
-			ntohs(sats->azmth),
+			sats->svid, le16toh(sats->snr), sats->elev, 
+			le16toh(sats->azmth),
 			sats->status);
 
 	    if (255 == (int)sats->svid) {
@@ -544,11 +544,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    }
 
 	    session->gpsdata.PRN[j] = (int)sats->svid;
-	    session->gpsdata.azimuth[j] = (int)ntohs(sats->azmth);
+	    session->gpsdata.azimuth[j] = (int)le16toh(sats->azmth);
 	    session->gpsdata.elevation[j] = (int)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
-	    session->gpsdata.ss[j] = (float)(ntohs(sats->snr) / 100.0);
+	    session->gpsdata.ss[j] = (float)(le16toh(sats->snr) / 100.0);
 	    if (session->gpsdata.ss[j] < 0.0) {
 		session->gpsdata.ss[j] = 0.0;
 	    }
