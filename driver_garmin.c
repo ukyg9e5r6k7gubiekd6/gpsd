@@ -90,7 +90,7 @@
 #include "gpsd_config.h"
 
 /* there appears to be no POSIX solution for endianness, kludge it portably */
-#include <arpa/inet.h> 	/* for ntohl() and  ntohs() */
+#include <sys/types.h> 	/* for ntohl() and  ntohs() */
 
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
