@@ -109,7 +109,7 @@
 #define GPSD_LE16TOH letoh16
 #define GPSD_LE32TOH letoh32
 #else
-#error don't know how to convert little endian 16bit to host order
+#error "don't know how to convert little endian to host order"
 #endif
 
 #if defined (HAVE_SYS_SELECT_H)
