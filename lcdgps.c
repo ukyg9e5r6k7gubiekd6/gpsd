@@ -34,10 +34,10 @@
 
 #define CLIMB 3
 
-#include "gpsd_config.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "gpsd_config.h"
 #ifdef HAVE_SYS_SELECT_H
  #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
