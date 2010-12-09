@@ -34,16 +34,11 @@
 
 #define CLIMB 3
 
-#include <stdlib.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "gpsd_config.h"
-#include <string.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
-#include <math.h>
-#include <errno.h>
 #ifdef HAVE_SYS_SELECT_H
- #include <sys/types.h>
  #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
 #ifndef S_SPLINT_S
@@ -51,12 +46,6 @@
   #include <sys/socket.h>
  #endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
-
-#include <fcntl.h>
-#ifdef HAVE_TERMIOS_H
- #include <termios.h>
-#endif /* HAVE_TERMIOS_H */
-
 #ifndef S_SPLINT_S
  #ifdef HAVE_NETINET_IN_H
   #include <netinet/in.h>
@@ -68,8 +57,21 @@
   #include <netdb.h>
  #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
+
+#include <stdlib.h>
+#include <string.h>
+#ifndef S_SPLINT_S
+ #include <unistd.h>
+#endif /* S_SPLINT_S */
+#include <math.h>
 #include <errno.h>
 
+#include <fcntl.h>
+#ifdef HAVE_TERMIOS_H
+ #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+
+#include <errno.h>
 
 #include "gps.h"
 #include "gpsdclient.h"
