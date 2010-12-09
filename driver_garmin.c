@@ -89,18 +89,8 @@
 
 #include "gpsd_config.h"
 
-/*
- * gpsd uses non-POSIX le16toh.  Attempt to deal with this portably,
- * failing obviously on systems that don't have support.
- * Systems known to work: Linux, NetBSD
- */
-#if defined(HAVE_ENDIAN_H)
-#include <endian.h>
-#elif defined(HAVE_SYS_ENDIAN_H)
-#include <sys/endian.h>
-#else /* HAVE_SYS_ENDIAN_H */
-#error gpsd uses non-POSIX le16toh; platform does not have {,sys/}endian.h
-#endif /* HAVE_ENDIAN_H */
+/* there appears to be no POSIX solution for endianness, kludge it portably */
+#include <arpa/inet.h> 	/* for ntohl() and  ntohs() */
 
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
@@ -381,7 +371,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	pvt = (cpo_pvt_data *) buf;
 
 	// 631065600, unix seconds for 31 Dec 1989 Zulu
-	time_l = (time_t) (631065600 + (be32toh(pvt->grmn_days) * 86400));
+	time_l = (time_t) (631065600 + (ntohl(pvt->grmn_days) * 86400));
 	// TODO, convert grmn_days to context->gps_week
 	time_l -= le16toh(pvt->leap_sec);
 	session->context->leap_seconds = le16toh(pvt->leap_sec);
@@ -488,7 +478,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    pvt->gps_tow, session->newdata.latitude,
 		    session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
 		    pvt->alt_vel, pvt->msl_hght, le16toh(pvt->leap_sec),
-		    be32toh(pvt->grmn_days));
+		    ntohl(pvt->grmn_days));
 
 	if (session->newdata.mode > MODE_NO_FIX) {
 	    /* data only valid with a fix */
@@ -524,9 +514,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    gpsd_report(LOG_INF,
 			"Garmin: PVT RMD Sat: %3u, cycles: %9u, pr: %16.6f, "
 			"phase: %7.3f, slp_dtct: %3s, snr: %3u, Valid: %3s\n",
-			rmd->sv[i].svid + 1, be32toh(rmd->sv[i].cycles), 
+			rmd->sv[i].svid + 1, ntohl(rmd->sv[i].cycles), 
 			rmd->sv[i].pr,
-			(be16toh(rmd->sv[i].phase) * 360.0) / 2048.0,
+			(ntohs(rmd->sv[i].phase) * 360.0) / 2048.0,
 			rmd->sv[i].slp_dtct != '\0' ? "Yes" : "No",
 			rmd->sv[i].snr_dbhz,
 			rmd->sv[i].valid != '\0' ? "Yes" : "No");
