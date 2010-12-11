@@ -55,7 +55,7 @@
 /* normalize a timespec */
 #define TS_NORM(ts)  \
     do { \
-	if ( 1000000000 >= (ts)->tv_nsec ) { \
+	if ( 1000000000 <= (ts)->tv_nsec ) { \
 	    (ts)->tv_nsec -= 1000000000; \
 	    (ts)->tv_sec++; \
 	} else if ( 0 > (ts)->tv_nsec ) { \
@@ -67,7 +67,7 @@
 /* normalize a timeval */
 #define TV_NORM(tv)  \
     do { \
-	if ( 1000000 >= (tv)->tv_usec ) { \
+	if ( 1000000 <= (tv)->tv_usec ) { \
 	    (tv)->tv_usec -= 1000000; \
 	    (tv)->tv_sec++; \
 	} else if ( 0 > (tv)->tv_usec ) { \
