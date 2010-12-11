@@ -706,6 +706,10 @@ if test x"$ac_pps" = "xyes"; then
     AC_CHECK_HEADERS(pps.h)
     dnl sys/timepps.h needs pps.h
     AC_CHECK_HEADERS(sys/timepps.h)
+    AC_CHECK_LIB(rt, clock_gettime, 
+	[LIBRT="-lrt"
+	AC_DEFINE([HAVE_LIBRT], [], [rt libraries are present])])
+    AC_SUBST(LIBRT)
 else
   AC_MSG_RESULT([no])
 fi

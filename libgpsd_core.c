@@ -31,6 +31,7 @@
 #include "gpsd.h"
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+#include <time.h>		/* for clock_gettime() */
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
@@ -50,6 +51,49 @@
 #endif
 /* and for chrony */
 #include <sys/un.h>
+
+/* normalize a timespec */
+#define TS_NORM(ts)  \
+    do { \
+	if ( 1000000000 >= (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec -= 1000000000; \
+	    (ts)->tv_sec++; \
+	} else if ( 0 > (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec += 1000000000; \
+	    (ts)->tv_sec--; \
+	} \
+    } while (0)
+
+/* normalize a timeval */
+#define TV_NORM(tv)  \
+    do { \
+	if ( 1000000 >= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= 1000000; \
+	    (tv)->tv_sec++; \
+	} else if ( 0 > (tv)->tv_usec ) { \
+	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_sec--; \
+	} \
+    } while (0)
+
+/* convert timeval to timespec, with rounding */
+#define TSTOTV(tv, ts) \
+    do { \
+	(tv)->tv_sec = (ts)->tv_sec; \
+	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
+        TV_NORM( tv ); \
+    } while (0)
+
+/* convert timespec to timeval */
+#define TVTOTS(ts, tv) \
+    do { \
+	(ts)->tv_sec = (tv)->tv_sec; \
+	(ts)->tv_nsec = (tv)->tv_usec*1000; \
+        TS_NORM( ts ); \
+    } while (0)
+
+/* convert timespec to double */
+#define TSTOD(ts) ((double)((ts)->tv_sec+((double)((ts)->tv_nsec)/1000000000)))
 #endif
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -263,8 +307,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    int pulse_delay_ns;
+    int pulse_delay_ns = 0;
     struct timeval  tv;
+    struct timespec ts;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 #if defined(PPS_ON_CTS)
     int pps_device = TIOCM_CTS;
@@ -294,12 +339,24 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* open the chrony socket */
     struct sockaddr_un s;
     int chronyfd;
-    char chrony_path[] = "/tmp/chrony.sock";
+    char chrony_path[PATH_MAX] = "";
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
+    if( 0 == getuid() ) {
+        /* only root can use /var/run */
+    	strcpy( chrony_path, "/var/run/chrony");
+    } else {
+    	strcpy( chrony_path, "/tmp/chrony");
+    }
 
     /*@i1@*/s.sun_family = AF_UNIX;
-    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
+    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s.%s.sock", chrony_path,
+        basename(session->gpsdata.dev.path));
+    /* the socket will be either, for root:
+     *   /var/run/chrony.ttyXX.sock
+     * or for non-root:
+     *   /tmp/chrony.ttyXX.sock
+     */
 
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
@@ -307,7 +364,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     } else if (connect(chronyfd, (struct sockaddr *)&s, (int)sizeof(s))) {
 	(void)close(chronyfd);
 	chronyfd = -1;
-	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", chrony_path);
+	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", 
+	    s.sun_path);
     }
 
     /* end chrony */
@@ -326,8 +384,21 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int ok = 0;
 	char *log = NULL;
 
-	/* FIXME!! use clock_gettime() here, that is nSec, not uSec */
-	(void)gettimeofday(&tv, NULL);
+#ifdef HAVE_LIBRT
+	/* using  clock_gettime() here, that is nSec, 
+	 * not uSec like gettimeofday */
+	if ( 0 > clock_gettime(CLOCK_REALTIME, &ts) ) {
+	    /* uh, oh, can not get time! */
+	    continue;
+	}
+	TSTOTV( &tv, &ts);
+#else
+	if ( 0 > gettimeofday(&tv, NULL) ) {
+	    /* uh, oh, can not get time! */
+	    continue;
+	}
+	TVTOTS( &ts, &tv);
+#endif
 
 #if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
@@ -528,47 +599,34 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
             if ( 0 <= kernelpps_handle ) {
 		/* pick the right edge */
 		if ( kpps_edge ) {
-	    	    sample.tv.tv_sec = pi.assert_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
-	    	    sample.offset -= pi.assert_timestamp.tv_sec;
-	    	    sample.offset -= ((double)pi.assert_timestamp.tv_nsec) / 1000000000;
-		    /* ntpshm_pps() expects usec, not nsec */
-		    tv.tv_sec  = pi.assert_timestamp.tv_sec;
-	            tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
+		    ts = pi.assert_timestamp; /* structure copy */
 		} else {
-	    	    sample.tv.tv_sec = pi.clear_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
-	    	    sample.offset -= pi.clear_timestamp.tv_sec;
-	    	    sample.offset -= ((double)pi.clear_timestamp.tv_nsec) / 1000000000;
-		    tv.tv_sec  = pi.clear_timestamp.tv_sec;
-	            tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
+		    ts = pi.clear_timestamp;  /* structure copy */
 		}
+		TSTOTV( &sample.tv, &ts);
 	    } else
 #endif
 	    {
-		sample.tv.tv_sec = tv.tv_sec;
-		sample.tv.tv_usec = tv.tv_usec;
-		sample.offset -= tv.tv_sec;
-		sample.offset -= ((double)tv.tv_usec) / 1000000;
-	    }
-	    pulse_delay_ns = 0;
+		sample.tv = tv; 	/* structure copy */
+	    } 
+	    sample.offset -= TSTOD( &ts );
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-	    if (session->device_type == &oncore_binary)
+	    if (session->device_type == &oncore_binary) {
 		pulse_delay_ns = session->driver.oncore.pps_offset_ns;
-#endif
-	    sample.offset += pulse_delay_ns / 1000000000;
-	    tv.tv_usec -= pulse_delay_ns / 1000;
-	    if (tv.tv_usec < 0) {
-		tv.tv_sec--;
-		tv.tv_usec += 1000000;
+	        sample.offset += (double)pulse_delay_ns / 1000000000;
+	        ts.tv_nsec    -= pulse_delay_ns;
+	        TS_NORM( &ts );
 	    }
+#endif
+
 	    if ( 0 <= chronyfd ) {
 		(void)send(chronyfd, &sample, sizeof (sample), 0);
-		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%03lu offset %.9f\n",
+		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%06lu offset %.9f\n",
 			    (unsigned long)sample.tv.tv_sec,
-			    (unsigned long)sample.tv.tv_usec / 1000,
+			    (unsigned long)sample.tv.tv_usec,
 			    sample.offset);
 	    }
+	    TSTOTV( &tv, &ts );
 	    (void)ntpshm_pps(session, &tv);
 	} else {
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
