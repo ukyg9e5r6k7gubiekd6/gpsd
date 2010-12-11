@@ -129,14 +129,67 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		subframe, pageid, data_id);
     switch (subframe) {
     case 1:
+        /* subframe 1: clock parameters */
 	/* get Week Number WN) from subframe 1 */
 	session->context->gps_week =
 	    (unsigned short)((words[2] & 0xffc000) >> 14);
 	gpsd_report(LOG_PROG, "50B: WN: %u\n", session->context->gps_week);
 	break;
+    case 2:
+        /* subframe 2: ephemeris for transmitting SV */
+    	break;
+    case 3:
+        /* subframe 3: ephemeris for transmitting SV */
+    	break;
     case 4:
 	switch (pageid) {
+	case 1:
+	case 6:
+	case 11:
+	case 12:
+	case 14:
+	case 15:
+	case 16:
+	case 19:
+	case 20:
+	case 21:
+	case 22:
+	case 23:
+	case 24:
+	    /* reserved pages */
+	    break;
+
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 7:
+	case 8:
+	case 9:
+	case 10:
+	    /* almanac data for SV 25 through 32 respectively; */
+	    break;
+
+	case 13:
+	    /* NMCT */
+	    break;
+	
+	case 17:
+	    /* special messages */
+	    break;
+	
+	case 18:
+	    /* ionospheric and UTC data */
+	    break;
+	
+	case 25:
+	    /* A-S flags/SV configurations for 32 SVs, 
+	     * plus SV health for SV 25 through 32
+	     */
+	    break;
+	
 	case 55:
+	    /* FIXME!! there is no page 55!! */
 	    /*
 	     * "The requisite 176 bits shall occupy bits 9 through 24 of word
 	     * TWO, the 24 MSBs of words THREE through EIGHT, plus the 16 MSBs
@@ -213,6 +266,15 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	default:
 	    ;			/* no op */
 	}
+	break;
+    case 5:
+	/* Pages 1 through 24: almanac data for SV 1 through 24
+	 * Page 25: SV health data for SV 1 through 24, the almanac 
+	 * reference time, the almanac reference week number.
+	 */
+    	break;
+    default:
+    	/* unknown/illegal subframe */
 	break;
     }
     return;
