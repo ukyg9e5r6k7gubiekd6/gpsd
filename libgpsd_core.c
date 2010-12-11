@@ -386,7 +386,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int ok = 0;
 	char *log = NULL;
 
-#ifdef HAVE_CLOCK_GETTIME
+#ifdef HAVE_LIBRT
 	/* using  clock_gettime() here, that is nSec, 
 	 * not uSec like gettimeofday */
 	if ( 0 > clock_gettime(CLOCK_REALTIME, &ts) ) {
