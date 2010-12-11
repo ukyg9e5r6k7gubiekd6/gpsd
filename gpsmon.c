@@ -18,7 +18,6 @@
 #endif /* defined(__CYGWIN__) */
 #include <fcntl.h>		/* for O_RDWR */
 #include <errno.h>
-#include <setjmp.h>
 
 #include "gpsd_config.h"
 

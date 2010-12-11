@@ -71,8 +71,6 @@
  #include <termios.h>
 #endif /* HAVE_TERMIOS_H */
 
-#include <errno.h>
-
 #include "gps.h"
 #include "gpsdclient.h"
 #include "revision.h"

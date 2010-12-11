@@ -20,7 +20,6 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <time.h>
-#include <stdio.h>
 
 #include "gpsd.h"
 #include "bits.h"

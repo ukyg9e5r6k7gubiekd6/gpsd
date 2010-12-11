@@ -79,6 +79,7 @@
 #define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
