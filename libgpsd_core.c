@@ -62,6 +62,11 @@
 	    (tv)->tv_usec = 0; \
 	} \
     } while (0)
+
+/* convert timespec to double */
+#define TSTOD(ts) ((double)((ts)->tv_sec+((double)((ts)->tv_nsec)/1000000000)))
+/* convert timeval to double */
+#define TVTOD(tv) ((double)((tv)->tv_sec+((double)((tv)->tv_usec)/1000000)))
 #endif
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -555,23 +560,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/* pick the right edge */
 		if ( kpps_edge ) {
 	    	    TSTOTV( &sample.tv, &pi.assert_timestamp);
-	    	    sample.offset -= pi.assert_timestamp.tv_sec;
-	    	    sample.offset -= ((double)pi.assert_timestamp.tv_nsec) / 1000000000;
-		    /* ntpshm_pps() expects usec, not nsec */
 		    TSTOTV( &tv, &pi.assert_timestamp);
+	    	    sample.offset -= TSTOD( &pi.assert_timestamp);
+		    /* ntpshm_pps() expects usec, not nsec */
 		} else {
 	    	    TSTOTV( &sample.tv, &pi.clear_timestamp);
-	    	    sample.offset -= pi.clear_timestamp.tv_sec;
-	    	    sample.offset -= ((double)pi.clear_timestamp.tv_nsec) / 1000000000;
 		    TSTOTV( &tv, &pi.clear_timestamp);
+	    	    sample.offset -= TSTOD( &pi.clear_timestamp);
 		}
 	    } else
 #endif
 	    {
 		sample.tv.tv_sec = tv.tv_sec;
 		sample.tv.tv_usec = tv.tv_usec;
-		sample.offset -= tv.tv_sec;
-		sample.offset -= ((double)tv.tv_usec) / 1000000;
+		sample.offset -= TVTOD( &tv );
 	    }
 	    pulse_delay_ns = 0;
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
