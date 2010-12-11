@@ -295,26 +295,34 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* open the chrony socket */
     struct sockaddr_un s;
     int chronyfd;
-    char chrony_path[PATH_MAX];
+    char chrony_path[PATH_MAX] = "";
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
     if( 0 == getuid() ) {
         /* only root can use /var/run */
-    	strcpy( chrony_path, "/var/run/chrony.sock");
+    	strcpy( chrony_path, "/var/run/chrony");
     } else {
-    	strcpy( chrony_path, "/tmp/chrony.sock");
+    	strcpy( chrony_path, "/tmp/chrony");
     }
 
     /*@i1@*/s.sun_family = AF_UNIX;
-    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
+    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s.%s.sock", chrony_path,
+        basename(session->gpsdata.dev.path));
+    /* the socket will be either, for root:
+     *   /var/run/chrony.ttyXX.sock
+     * or for non-root:
+     *   /tmp/chrony.ttyXX.sock
+     */
 
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
-	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n", chrony_path);
+	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n", 
+	    s.sun_path);
     } else if (connect(chronyfd, (struct sockaddr *)&s, sizeof (s))) {
 	(void)close(chronyfd);
 	chronyfd = -1;
-	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", chrony_path);
+	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", 
+	    s.sun_path);
     }
 
     /* end chrony */
