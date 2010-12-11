@@ -34,7 +34,7 @@
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
     /* use RFC 2783 PPS API */
     /* this needs linux >= 2.6.34 and
      * CONFIG_PPS=y
@@ -43,8 +43,9 @@
      */
     /* get timepps.h from the pps-tools package, or from here:
      * http://www.mail-archive.com/debian-glibc@lists.debian.org/msg43125.html
+     * RFC2783 says timepps.h is in sys
      */
-    #include <timepps.h>
+    #include <sys/timepps.h>
     #include <glob.h>
 #endif
 /* and for chrony */
@@ -159,7 +160,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 }
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
 /* return handle for kernel pps, or -1 */
 static int init_kernel_pps(struct gps_device_t *session) {
     int kernelpps_handle = -1;
@@ -273,7 +274,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     int pps_device = TIOCM_CAR;
 #define pps_device_str "DCD"
 #endif
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
     int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
     int cycle_kpps, duration_kpps;
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
@@ -312,7 +313,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /* end chrony */
 
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
@@ -329,7 +330,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/* FIXME!! use clock_gettime() here, that is nSec, not uSec */
 	(void)gettimeofday(&tv, NULL);
 
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
@@ -524,7 +525,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    sample.pulse = 0;
 	    sample.leap = 0;
 	    sample.magic = SOCK_MAGIC;
-#if defined(HAVE_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= kernelpps_handle ) {
 		/* pick the right edge */
 		if ( kpps_edge ) {
