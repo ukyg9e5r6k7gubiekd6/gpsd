@@ -52,15 +52,36 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+/* normalize a timespec */
+#define TS_NORM(ts)  \
+    do { \
+	if ( 1000000000 >= (ts)->tv_usec ) { \
+	    (ts)->tv_nsec -= 1000000000; \
+	    (ts)->tv_sec++; \
+	} else if ( 0 > (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec += 1000000000; \
+	    (ts)->tv_sec--; \
+	} \
+    } while (0)
+
+/* normalize a timeval */
+#define TV_NORM(tv)  \
+    do { \
+	if ( 1000000 >= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= 1000000; \
+	    (tv)->tv_sec++; \
+	} else if ( 0 > (tv)->tv_usec ) { \
+	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_sec--; \
+	} \
+    } while (0)
+
 /* convert timeval to timespec, with rounding */
 #define TSTOTV(tv, ts) \
     do { \
 	(tv)->tv_sec = (ts)->tv_sec; \
 	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
-	if (1000000 == (tv)->tv_usec) { \
-	    (tv)->tv_sec++; \
-	    (tv)->tv_usec = 0; \
-	} \
+        TV_NORM( tv ); \
     } while (0)
 
 /* convert timespec to double */
@@ -280,7 +301,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    int pulse_delay_ns;
+    int pulse_delay_ns = 0;
     struct timeval  tv;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 #if defined(PPS_ON_CTS)
@@ -571,21 +592,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else
 #endif
 	    {
-		sample.tv.tv_sec = tv.tv_sec;
-		sample.tv.tv_usec = tv.tv_usec;
+		sample.tv = tv; 	/* structure copy */
 		sample.offset -= TVTOD( &tv );
 	    }
-	    pulse_delay_ns = 0;
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-	    if (session->device_type == &oncore_binary)
+	    if (session->device_type == &oncore_binary) {
 		pulse_delay_ns = session->driver.oncore.pps_offset_ns;
-#endif
-	    sample.offset += pulse_delay_ns / 1000000000;
-	    tv.tv_usec -= pulse_delay_ns / 1000;
-	    if (tv.tv_usec < 0) {
-		tv.tv_sec--;
-		tv.tv_usec += 1000000;
+	        sample.offset += pulse_delay_ns / 1000000000;
+	        tv.tv_usec -= pulse_delay_ns / 1000;
+	        TV_NORM( &tv );
 	    }
+#endif
+
 	    if ( 0 <= chronyfd ) {
 		(void)send(chronyfd, &sample, sizeof (sample), 0);
 		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%03lu offset %.9f\n",
