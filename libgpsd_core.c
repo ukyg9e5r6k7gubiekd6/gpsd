@@ -31,6 +31,7 @@
 #include "gpsd.h"
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+#include <time.h>		/* for clock_gettime() */
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
@@ -385,8 +386,21 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int ok = 0;
 	char *log = NULL;
 
-	/* FIXME!! use clock_gettime() here, that is nSec, not uSec */
-	(void)gettimeofday(&tv, NULL);
+#ifdef HAVE_CLOCK_GETTIME
+	/* using  clock_gettime() here, that is nSec, 
+	 * not uSec like gettimeofday */
+	if ( 0 > clock_gettime(CLOCK_REALTIME, &ts) ) {
+	    /* uh, oh, can not get time! */
+	    continue;
+	}
+	TSTOTV( &tv, &ts);
+#else
+	if ( 0 > gettimeofday(&tv, NULL) ) {
+	    /* uh, oh, can not get time! */
+	    continue;
+	}
+	TVTOTS( &ts, &tv);
+#endif
 
 #if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
@@ -595,7 +609,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else
 #endif
 	    {
-	        TVTOTS( &ts, &tv );
 		sample.tv = tv; 	/* structure copy */
 	    } 
 	    sample.offset -= TSTOD( &ts );
