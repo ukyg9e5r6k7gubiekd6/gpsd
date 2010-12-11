@@ -295,9 +295,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* open the chrony socket */
     struct sockaddr_un s;
     int chronyfd;
-    char chrony_path[] = "/tmp/chrony.sock";
+    char chrony_path[PATH_MAX];
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
+    if( 0 == getuid() ) {
+        /* only root can use /var/run */
+    	strcpy( chrony_path, "/var/run/chrony.sock");
+    } else {
+    	strcpy( chrony_path, "/tmp/chrony.sock");
+    }
 
     /*@i1@*/s.sun_family = AF_UNIX;
     (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s", chrony_path);
