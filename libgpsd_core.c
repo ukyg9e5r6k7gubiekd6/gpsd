@@ -51,6 +51,17 @@
 /* and for chrony */
 #include <sys/socket.h>
 #include <sys/un.h>
+
+/* convert timeval to timespec, with rounding */
+#define TSTOTV(tv, ts) \
+    do { \
+	(tv)->tv_sec = (ts)->tv_sec; \
+	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
+	if (1000000 == (tv)->tv_usec) { \
+	    (tv)->tv_sec++; \
+	    (tv)->tv_usec = 0; \
+	} \
+    } while (0)
 #endif
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -543,20 +554,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
             if ( 0 <= kernelpps_handle ) {
 		/* pick the right edge */
 		if ( kpps_edge ) {
-	    	    sample.tv.tv_sec = pi.assert_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
+	    	    TSTOTV( &sample.tv, &pi.assert_timestamp);
 	    	    sample.offset -= pi.assert_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.assert_timestamp.tv_nsec) / 1000000000;
 		    /* ntpshm_pps() expects usec, not nsec */
-		    tv.tv_sec  = pi.assert_timestamp.tv_sec;
-	            tv.tv_usec = pi.assert_timestamp.tv_nsec / 1000;
+		    TSTOTV( &tv, &pi.assert_timestamp);
 		} else {
-	    	    sample.tv.tv_sec = pi.clear_timestamp.tv_sec;
-	    	    sample.tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
+	    	    TSTOTV( &sample.tv, &pi.clear_timestamp);
 	    	    sample.offset -= pi.clear_timestamp.tv_sec;
 	    	    sample.offset -= ((double)pi.clear_timestamp.tv_nsec) / 1000000000;
-		    tv.tv_sec  = pi.clear_timestamp.tv_sec;
-	            tv.tv_usec = pi.clear_timestamp.tv_nsec / 1000;
+		    TSTOTV( &tv, &pi.clear_timestamp);
 		}
 	    } else
 #endif
