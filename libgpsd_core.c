@@ -55,7 +55,7 @@
 /* normalize a timespec */
 #define TS_NORM(ts)  \
     do { \
-	if ( 1000000000 >= (ts)->tv_usec ) { \
+	if ( 1000000000 >= (ts)->tv_nsec ) { \
 	    (ts)->tv_nsec -= 1000000000; \
 	    (ts)->tv_sec++; \
 	} else if ( 0 > (ts)->tv_nsec ) { \
@@ -84,10 +84,16 @@
         TV_NORM( tv ); \
     } while (0)
 
+/* convert timespec to timeval */
+#define TVTOTS(ts, tv) \
+    do { \
+	(ts)->tv_sec = (tv)->tv_sec; \
+	(ts)->tv_nsec = (tv)->tv_usec*1000; \
+        TS_NORM( ts ); \
+    } while (0)
+
 /* convert timespec to double */
 #define TSTOD(ts) ((double)((ts)->tv_sec+((double)((ts)->tv_nsec)/1000000000)))
-/* convert timeval to double */
-#define TVTOD(tv) ((double)((tv)->tv_sec+((double)((tv)->tv_usec)/1000000)))
 #endif
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -303,6 +309,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     int pulse_delay_ns = 0;
     struct timeval  tv;
+    struct timespec ts;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 #if defined(PPS_ON_CTS)
     int pps_device = TIOCM_CTS;
@@ -580,37 +587,35 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
             if ( 0 <= kernelpps_handle ) {
 		/* pick the right edge */
 		if ( kpps_edge ) {
-	    	    TSTOTV( &sample.tv, &pi.assert_timestamp);
-		    TSTOTV( &tv, &pi.assert_timestamp);
-	    	    sample.offset -= TSTOD( &pi.assert_timestamp);
-		    /* ntpshm_pps() expects usec, not nsec */
+		    ts = pi.assert_timestamp; /* structure copy */
 		} else {
-	    	    TSTOTV( &sample.tv, &pi.clear_timestamp);
-		    TSTOTV( &tv, &pi.clear_timestamp);
-	    	    sample.offset -= TSTOD( &pi.clear_timestamp);
+		    ts = pi.clear_timestamp;  /* structure copy */
 		}
+		TSTOTV( &sample.tv, &ts);
 	    } else
 #endif
 	    {
+	        TVTOTS( &ts, &tv );
 		sample.tv = tv; 	/* structure copy */
-		sample.offset -= TVTOD( &tv );
-	    }
+	    } 
+	    sample.offset -= TSTOD( &ts );
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 	    if (session->device_type == &oncore_binary) {
 		pulse_delay_ns = session->driver.oncore.pps_offset_ns;
-	        sample.offset += pulse_delay_ns / 1000000000;
-	        tv.tv_usec -= pulse_delay_ns / 1000;
-	        TV_NORM( &tv );
+	        sample.offset += (double)pulse_delay_ns / 1000000000;
+	        ts.tv_nsec    -= pulse_delay_ns;
+	        TS_NORM( &ts );
 	    }
 #endif
 
 	    if ( 0 <= chronyfd ) {
 		(void)send(chronyfd, &sample, sizeof (sample), 0);
-		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%03lu offset %.9f\n",
+		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%06lu offset %.9f\n",
 			    (unsigned long)sample.tv.tv_sec,
-			    (unsigned long)sample.tv.tv_usec / 1000,
+			    (unsigned long)sample.tv.tv_usec,
 			    sample.offset);
 	    }
+	    TSTOTV( &tv, &ts );
 	    (void)ntpshm_pps(session, &tv);
 	} else {
 	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
