@@ -443,7 +443,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	words[i] = (unsigned int)getbeul(buf, 4 * i + 3);
     }
 
-    (void)gpsd_interpret_subframe_raw(session, words);
+    (void)gpsd_interpret_subframe_raw(session, svid, words);
 
 #ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.dev.baudrate < 38400) {

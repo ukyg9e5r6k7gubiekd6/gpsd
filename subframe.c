@@ -21,7 +21,7 @@ static char sf5map[] =
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
-				unsigned int words[])
+				unsigned int svid, unsigned int words[])
 {
     unsigned int i;
     unsigned int preamble, parity;
@@ -78,12 +78,12 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	words[i] = (words[i] >> 6) & 0xffffff;
     }
 
-    gpsd_interpret_subframe(session, words);
+    gpsd_interpret_subframe(session, svid, words);
     return 0;
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
-			     unsigned int words[])
+			     unsigned int svid, unsigned int words[])
 {
     /*
      * Heavy black magic begins here!
@@ -100,9 +100,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
     gpsd_report(LOG_IO,
-		"50B: gpsd_interpret_subframe: "
+		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
-		words[0], words[1], words[2], words[3], words[4],
+		svid, words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
     preamble = (unsigned int)((words[0] >> 16) & 0xffL);

@@ -282,7 +282,7 @@ static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 	words[i] = (unsigned int)getleul(buf, 4 * i + 2) & 0xffffff;
     }
 
-    gpsd_interpret_subframe(session, words);
+    gpsd_interpret_subframe(session, svid, words);
 }
 
 static void ubx_msg_inf(unsigned char *buf, size_t data_len)
