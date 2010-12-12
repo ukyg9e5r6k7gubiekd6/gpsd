@@ -291,38 +291,38 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_WARN, "Negative acknowledge %x %d\n", ul1, ul2);
 	break;
     case 0x40:
-	gpsd_report(LOG_INF, "Responce to Set initial parameters\n");
+	gpsd_report(LOG_INF, "Response to Set initial parameters\n");
 	break;
     case 0x41:
-	gpsd_report(LOG_INF, "Responce to Set serial ports parameters\n");
+	gpsd_report(LOG_INF, "Response to Set serial ports parameters\n");
 	break;
     case 0x42:
 	ul1 = getleul(buf, OFFSET(1));
 	ul2 = getleul(buf, OFFSET(2));
 	ul3 = getleul(buf, OFFSET(3));
-	gpsd_report(LOG_INF, "Responce to Set receiver operation mode %d %d %d\n",
+	gpsd_report(LOG_INF, "Response to Set receiver operation mode %d %d %d\n",
 		    ul1, ul2, ul3);
 	break;
     case 0x43:
-	gpsd_report(LOG_INF, "Responce to Set navigation task solution parameters\n");
+	gpsd_report(LOG_INF, "Response to Set navigation task solution parameters\n");
 	break;
     case 0x44:
-	gpsd_report(LOG_INF, "Responce to Set output data rate\n");
+	gpsd_report(LOG_INF, "Response to Set output data rate\n");
 	break;
     case 0x46:
-	gpsd_report(LOG_INF, "Responce to Assign data protocol to communication port\n");
+	gpsd_report(LOG_INF, "Response to Assign data protocol to communication port\n");
 	break;
     case 0x48:
-	gpsd_report(LOG_INF, "Responce to Set GPS almanac\n");
+	gpsd_report(LOG_INF, "Response to Set GPS almanac\n");
 	break;
     case 0x49:
-	gpsd_report(LOG_INF, "Responce to Set GLONASS almanac\n");
+	gpsd_report(LOG_INF, "Response to Set GLONASS almanac\n");
 	break;
     case 0x4a:
-	gpsd_report(LOG_INF, "Responce to Set GPS ephemeris\n");
+	gpsd_report(LOG_INF, "Response to Set GPS ephemeris\n");
 	break;
 	case 0x4b:
-	gpsd_report(LOG_INF, "Responce to Set GLONASS ephemeris\n");
+	gpsd_report(LOG_INF, "Response to Set GLONASS ephemeris\n");
 	break;
     case 0x4c:
 	ul1 = getleul(buf, OFFSET(1));
@@ -330,7 +330,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul3 = getleul(buf, OFFSET(3));
 	ul4 = getleul(buf, OFFSET(4));
 	ul5 = getleul(buf, OFFSET(5));
-	gpsd_report(LOG_INF, "Responce to Set PPS paramters %d %d %d %d %d\n",
+	gpsd_report(LOG_INF, "Response to Set PPS paramters %d %d %d %d %d\n",
 		    ul1, ul2, ul3, ul4, ul5);
 	break;
     case 0x4d:
@@ -572,7 +572,7 @@ const struct gps_type_t geostar_binary =
 {
     .type_name      = "GeoStar binary",	/* full name of type */
     .packet_type    = GEOSTAR_PACKET,	/* associated lexer packet type */
-    .trigger        = NULL,		/* no trigger */
+    .trigger	    = NULL,		/* no trigger */
     .channels       = GEOSTAR_CHANNELS,	/* consumer-grade GPS/GLONASS */
     .probe_detect   = geostar_detect,	/* probe for device */
     .get_packet     = generic_get,	/* use the generic packet getter */
