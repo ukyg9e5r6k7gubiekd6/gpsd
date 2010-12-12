@@ -98,6 +98,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      *
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
+    /* FIXME!! I really doubt this is Big Endian copmatible */
     unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
@@ -119,7 +120,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     /* The subframe ID is in the Hand Over Word (page 80) */
     subframe = ((words[1] >> 2) & 0x07);
     gpsd_report(LOG_PROG,
-		"50B: gpsd_interpret_subframe: Subframe %d\n", subframe);
+		"50B: gpsd_interpret_subframe: Subframe:%d, SVID:%u\n", 
+			subframe, svid);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
@@ -131,15 +133,39 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 1:
 	/* subframe 1: clock parameters */
 	/* get Week Number WN) from subframe 1 */
-	session->context->gps_week =
-	    (unsigned short)((words[2] & 0xffc000) >> 14);
-	gpsd_report(LOG_PROG, "50B: WN: %u\n", session->context->gps_week);
+	{
+	    session->context->gps_week =
+		(unsigned short)((words[2] & 0xffc000) >> 14);
+	    unsigned int tgd = (words[6] & 0x0000FF);
+	    unsigned int toc = (words[7] & 0x00FFFF);
+	    unsigned int af1 = (words[8] & 0x00FFFF);
+	    gpsd_report(LOG_PROG, "50B: Subframe 1 WN: %u Tgd:%u toc:%u "
+	        " af1:%u, sqrtA:%u, omega0:%u\n", 
+	    	session->context->gps_week, tgd, toc, af1);
+	}
 	break;
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
+	{
+	    unsigned int iode = (words[2] & 0xFF0000) >> 16; 
+	    unsigned int crs = (words[2] & 0x00FFFF);
+	    unsigned int deltan = (words[3] & 0xFFFF00) >> 8;
+	    gpsd_report(LOG_PROG,
+		"50B: Subframe 2, SVID:%u, IODE:%u, Crs:%u, deltan:%u\n", 
+			svid, iode, crs, deltan);
+	}
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
+	/* subframe 2: ephemeris for transmitting SV */
+	{
+	    unsigned int cic = (words[2] & 0xFFFF00) >> 8;
+	    unsigned int cis = (words[4] & 0xFFFF00) >> 8;
+	    unsigned int iode = (words[9] & 0xFF0000) >> 16; 
+	    gpsd_report(LOG_PROG,
+		"50B: Subframe 3, SVID:%u, Cic:%u, Cis:%u, iode:%u\n", 
+			svid, cic, cis, iode);
+	}
 	break;
     case 4:
 	gpsd_report(LOG_PROG,
@@ -271,13 +297,30 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	break;
     case 5:
-	gpsd_report(LOG_PROG,
-		"50B: gpsd_interpret_subframe: Page 5-%d data_id %d\n",
-		pageid, data_id);
 	/* Pages 1 through 24: almanac data for SV 1 through 24
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
 	 */
+	if ( pageid < 25 ) {
+	    unsigned int e = (words[2] & 0x00FFFF);
+	    unsigned int toa = (words[3] & 0xFF0000) >> 16;
+	    unsigned int deltai = (words[3] & 0x00FFFF);
+	    unsigned int Omega = (words[4] & 0xFFFF00) >> 8;
+	    unsigned int svh = (words[4] & 0x0000FF);
+	    unsigned int sqrtA = (words[5] & 0xFFFFFF);
+	    unsigned int Omega0 = (words[6] & 0xFFFFFF);
+	    unsigned int omega = (words[7] & 0xFFFFFF);
+	    unsigned int M0 = (words[8] & 0xFFFFFF);
+	    gpsd_report(LOG_PROG,
+		"50B: Page 5 SV:%d data_id %d e:%u, ohm:%u, svh:%u"
+		" toa:%u deltai:%u sqrtA:%u Omega0:%u, M0:%u\n",
+		pageid, data_id, e, toa, deltai, Omega, svh, sqrtA, Omega0,
+		omega,M0);
+	} else {
+	    gpsd_report(LOG_PROG,
+		"50B: Page 5-%d data_id %d\n",
+		pageid, data_id);
+	}
 	break;
     default:
 	/* unknown/illegal subframe */
