@@ -118,15 +118,15 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     }
     /* The subframe ID is in the Hand Over Word (page 80) */
     subframe = ((words[1] >> 2) & 0x07);
+    gpsd_report(LOG_PROG,
+		"50B: gpsd_interpret_subframe: Subframe %d\n", subframe);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
      */
-    pageid = (words[2] & 0x3F0000) >> 16;
-    data_id = (words[2] >> 22) & 0x3;
-    gpsd_report(LOG_PROG,
-		"50B: gpsd_interpret_subframe: Subframe %d SVID %d data_id %d\n",
-		subframe, pageid, data_id);
+    pageid = (words[2] & 0x3F0000) >> 16; /* only in frames 4 & 5 */
+    data_id = (words[2] >> 22) & 0x3;     /* only in frames 4 & 5 */
+
     switch (subframe) {
     case 1:
         /* subframe 1: clock parameters */
@@ -142,6 +142,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
         /* subframe 3: ephemeris for transmitting SV */
     	break;
     case 4:
+	gpsd_report(LOG_PROG,
+		"50B: gpsd_interpret_subframe: Page 4-%d data_id %d\n",
+		pageid, data_id);
 	switch (pageid) {
 	case 1:
 	case 6:
@@ -268,6 +271,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	break;
     case 5:
+	gpsd_report(LOG_PROG,
+		"50B: gpsd_interpret_subframe: Page 5-%d data_id %d\n",
+		pageid, data_id);
 	/* Pages 1 through 24: almanac data for SV 1 through 24
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
