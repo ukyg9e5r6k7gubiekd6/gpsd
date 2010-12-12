@@ -140,7 +140,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int toc = (words[7] & 0x00FFFF);
 	    unsigned int af1 = (words[8] & 0x00FFFF);
 	    gpsd_report(LOG_PROG, "50B: Subframe 1 WN: %u Tgd:%u toc:%u "
-	        " af1:%u\n", 
+	        " af1:%u, sqrtA:%u, omega0:%u\n", 
 	    	session->context->gps_week, tgd, toc, af1);
 	}
 	break;
@@ -305,12 +305,17 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int e = (words[2] & 0x00FFFF);
 	    unsigned int toa = (words[3] & 0xFF0000) >> 16;
 	    unsigned int deltai = (words[3] & 0x00FFFF);
-	    unsigned int ohm = (words[4] & 0xFFFF00) >> 8;
+	    unsigned int Omega = (words[4] & 0xFFFF00) >> 8;
 	    unsigned int svh = (words[4] & 0x0000FF);
+	    unsigned int sqrtA = (words[5] & 0xFFFFFF);
+	    unsigned int Omega0 = (words[6] & 0xFFFFFF);
+	    unsigned int omega = (words[7] & 0xFFFFFF);
+	    unsigned int M0 = (words[8] & 0xFFFFFF);
 	    gpsd_report(LOG_PROG,
-		"50B: Page 5 SV:%d data_id %d e:%u, ohm:%u, svh:%h"
-		" toa:%u deltai:%u\n",
-		pageid, data_id, e, toa, deltai, ohm, svh);
+		"50B: Page 5 SV:%d data_id %d e:%u, ohm:%u, svh:%u"
+		" toa:%u deltai:%u sqrtA:%u Omega0:%u, M0:%u\n",
+		pageid, data_id, e, toa, deltai, Omega, svh, sqrtA, Omega0,
+		omega,M0);
 	} else {
 	    gpsd_report(LOG_PROG,
 		"50B: Page 5-%d data_id %d\n",
