@@ -129,18 +129,18 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 
     switch (subframe) {
     case 1:
-        /* subframe 1: clock parameters */
+	/* subframe 1: clock parameters */
 	/* get Week Number WN) from subframe 1 */
 	session->context->gps_week =
 	    (unsigned short)((words[2] & 0xffc000) >> 14);
 	gpsd_report(LOG_PROG, "50B: WN: %u\n", session->context->gps_week);
 	break;
     case 2:
-        /* subframe 2: ephemeris for transmitting SV */
-    	break;
+	/* subframe 2: ephemeris for transmitting SV */
+	break;
     case 3:
-        /* subframe 3: ephemeris for transmitting SV */
-    	break;
+	/* subframe 3: ephemeris for transmitting SV */
+	break;
     case 4:
 	gpsd_report(LOG_PROG,
 		"50B: gpsd_interpret_subframe: Page 4-%d data_id %d\n",
@@ -176,21 +176,21 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	case 13:
 	    /* NMCT */
 	    break;
-	
+
 	case 17:
 	    /* special messages */
 	    break;
-	
+
 	case 18:
 	    /* ionospheric and UTC data */
 	    break;
-	
+
 	case 25:
 	    /* A-S flags/SV configurations for 32 SVs, 
 	     * plus SV health for SV 25 through 32
 	     */
 	    break;
-	
+
 	case 55:
 	    /* FIXME!! there is no page 55!! */
 	    /*
@@ -278,9 +278,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
 	 */
-    	break;
+	break;
     default:
-    	/* unknown/illegal subframe */
+	/* unknown/illegal subframe */
 	break;
     }
     return;
