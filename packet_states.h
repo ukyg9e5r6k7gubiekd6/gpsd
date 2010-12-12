@@ -139,6 +139,21 @@
    ONCORE_RECOGNIZED,	/* closing LF */
 #endif
 
+#ifdef GEOSTAR_ENABLE
+   GEOSTAR_LEADER_1,        /* first constant leader byte found */
+   GEOSTAR_LEADER_2,        /* second constant leader byte found */
+   GEOSTAR_LEADER_3,        /* third constant leader byte found */
+   GEOSTAR_LEADER_4,        /* forth constant leader byte found */
+   GEOSTAR_MESSAGE_ID_1,    /* first message id read */
+   GEOSTAR_MESSAGE_ID_2,    /* second message id read */
+   GEOSTAR_LENGTH_1,        /* first length byte read */
+   GEOSTAR_LENGTH_2,        /* second length byte read */
+   GEOSTAR_PAYLOAD,         /* payload eating */
+   GEOSTAR_CHECKSUM_A,      /* checksum A byte (xor checksum) */
+   GEOSTAR_CHECKSUM_B,      /* checksum B byte (xor checksum) */
+   GEOSTAR_CHECKSUM_C,      /* checksum C byte (xor checksum) */
+   GEOSTAR_RECOGNIZED,      /* this is also GEOSTAR_CHECKSUM_D */
+#endif
 
 /*
  * Packet formats without checksums start here.  We list them last so

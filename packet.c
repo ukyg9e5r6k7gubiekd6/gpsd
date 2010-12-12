@@ -220,6 +220,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    break;
 	}
 #endif /* NAVCOM_ENABLE */
+#ifdef GEOSTAR_ENABLE
+	if (c == 'P') {
+	    lexer->state = GEOSTAR_LEADER_1;
+	    break;
+	}
+#endif /* GEOSTAR_ENABLE */
 #ifdef RTCM104V2_ENABLE
 	if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
 	    lexer->state = RTCM2_SYNC_STATE;
@@ -979,6 +985,66 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* ITRAX_ENABLE */
+#ifdef GEOSTAR_ENABLE
+    case GEOSTAR_LEADER_1:
+	if (c == 'S')
+	    lexer->state = GEOSTAR_LEADER_2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case GEOSTAR_LEADER_2:
+	if (c == 'G')
+	    lexer->state = GEOSTAR_LEADER_3;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case GEOSTAR_LEADER_3:
+	if (c == 'G')
+	    lexer->state = GEOSTAR_LEADER_4;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case GEOSTAR_LEADER_4:
+	lexer->state = GEOSTAR_MESSAGE_ID_1;
+	break;
+    case GEOSTAR_MESSAGE_ID_1:
+	lexer->state = GEOSTAR_MESSAGE_ID_2;
+	break;
+    case GEOSTAR_MESSAGE_ID_2:
+	lexer->length = (size_t)(c * 4);
+	lexer->state = GEOSTAR_LENGTH_1;
+	break;
+    case GEOSTAR_LENGTH_1:
+	lexer->length += (c << 8) * 4;
+	if (lexer->length <= MAX_PACKET_LENGTH)
+	    lexer->state = GEOSTAR_LENGTH_2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case GEOSTAR_LENGTH_2:
+	lexer->state = GEOSTAR_PAYLOAD;
+	break;
+    case GEOSTAR_PAYLOAD:
+	if (--lexer->length == 0)
+	    lexer->state = GEOSTAR_CHECKSUM_A;
+	/* else stay in payload state */
+	break;
+    case GEOSTAR_CHECKSUM_A:
+	lexer->state = GEOSTAR_CHECKSUM_B;
+	break;
+    case GEOSTAR_CHECKSUM_B:
+	lexer->state = GEOSTAR_CHECKSUM_C;
+	break;
+    case GEOSTAR_CHECKSUM_C:
+	lexer->state = GEOSTAR_RECOGNIZED;
+	break;
+    case GEOSTAR_RECOGNIZED:
+	if (c == 'P')
+	    lexer->state = GEOSTAR_LEADER_1;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+#endif /* GEOSTAR_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
 	/* unused case */
@@ -1609,6 +1675,31 @@ void packet_parse(struct gps_packet_t *lexer)
 	    break;
 	}
 #endif /* NAVCOM_ENABLE */
+#ifdef GEOSTAR_ENABLE
+	else if (lexer->state == GEOSTAR_RECOGNIZED) {
+	    /* GeoStar uses a XOR 32bit checksum */
+	    int n, len;
+	    unsigned int cs = 0L;
+	    len = lexer->inbufptr - lexer->inbuffer;
+
+	    /* Calculate checksum */
+	    for (n = 0; n < len; n += sizeof(long)) {
+		cs ^= getleul(lexer->inbuffer, n);
+	    }
+
+	    if (cs == 0)
+		packet_accept(lexer, GEOSTAR_PACKET);
+	    else {
+		gpsd_report(LOG_IO,
+			    "GeoStar checksum failed 0x%x over length %d\n",
+			    cs, len);
+		packet_accept(lexer, BAD_PACKET);
+		lexer->state = GROUND_STATE;
+	    }
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* GEOSTAR_ENABLE */
 #ifdef RTCM104V2_ENABLE
 	else if (lexer->state == RTCM2_RECOGNIZED) {
 	    /*

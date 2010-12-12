@@ -10,6 +10,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <sys/types.h>
+#include <math.h>
+
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -22,6 +25,10 @@
 #include <sys/time.h>
 #endif
 
+#include <string.h>
+
+#include "bits.h"
+#include "gpsd.h"
 
 #ifdef GEOSTAR_ENABLE
 #define GEOSTAR_CHANNELS	24

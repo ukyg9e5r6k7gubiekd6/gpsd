@@ -198,6 +198,7 @@ libgpsd_c_sources = \
 	driver_evermore.c \
 	driver_garmin.c \
 	driver_garmin_txt.c \
+	driver_geostar.c \
 	driver_italk.c \
 	driver_navcom.c \
 	driver_nmea.c \

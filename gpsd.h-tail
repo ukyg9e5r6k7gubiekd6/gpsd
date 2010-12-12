@@ -30,7 +30,7 @@ typedef unsigned int speed_t;
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
-#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITRAX_ENABLE) || defined(UBX_ENABLE) || defined(SUPERSTAR2_ENABLE) || defined(ONCORE_ENABLE)
+#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITRAX_ENABLE) || defined(UBX_ENABLE) || defined(SUPERSTAR2_ENABLE) || defined(ONCORE_ENABLE) || defined(GEOSTAR_ENABLE)
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
@@ -89,9 +89,10 @@ struct gps_packet_t {
 #define UBX_PACKET      	11
 #define SUPERSTAR2_PACKET	12
 #define ONCORE_PACKET   	13
-#define MAX_PACKET_TYPE		13	/* increment this as necessary */
-#define RTCM2_PACKET    	14
-#define RTCM3_PACKET    	15
+#define GEOSTAR_PACKET   	14
+#define MAX_PACKET_TYPE		14	/* increment this as necessary */
+#define RTCM2_PACKET    	15
+#define RTCM3_PACKET    	16
 #define TEXTUAL_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_TEXTUAL_TYPE))
 #define GPS_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_PACKET_TYPE))
 #define LOSSLESS_PACKET_TYPE(n)	(((n)>=RTCM2_PACKET) && ((n)<=RTCM3_PACKET))
@@ -367,6 +368,11 @@ struct gps_device_t {
 	} garmintxt;
 #endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE
+#ifdef GEOSTAR_ENABLE
+	struct {
+	    unsigned int physical_port;
+	} geostar;
+#endif /* GEOSTAR_ENABLE */
 #ifdef SIRF_ENABLE
 	struct {
 	    unsigned int driverstate;	/* for private use */
