@@ -122,6 +122,7 @@ static void character_pushback(struct gps_packet_t *lexer)
 
 static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 {
+    static int n = 0;
 #ifdef RTCM104V2_ENABLE
     enum isgpsstat_t isgpsstat;
 #endif /* RTCM104V2_ENABLE */
@@ -129,8 +130,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     static unsigned char ctmp;
 #endif /* SUPERSTAR2_ENABLE */
 /*@ +charint -casebreak @*/
+    n++;
     switch (lexer->state) {
     case GROUND_STATE:
+	n = 0;
 	if (c == '#') {
 	    lexer->state = COMMENT_BODY;
 	    break;
@@ -380,10 +383,11 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    lexer->state = NMEA_RECOGNIZED;
-	else if (c == '$')
+	else if (c == '$'){
 	    /* faster recovery from missing sentence trailers */
 	    lexer->state = NMEA_DOLLAR;
-	else if (!isprint(c))
+	    lexer->inbufptr += (n-1);
+	} else if (!isprint(c))
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_CR:
