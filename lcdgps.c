@@ -37,6 +37,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>		/* for select() */
 #include "gpsd_config.h"
 #ifdef HAVE_SYS_SELECT_H
  #include <sys/select.h>

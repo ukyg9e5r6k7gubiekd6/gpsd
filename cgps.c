@@ -80,6 +80,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>		/* for select() */
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
