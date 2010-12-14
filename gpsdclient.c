@@ -4,21 +4,18 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <locale.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #include "gps.h"
 #include "gpsdclient.h"
-
-#ifdef HAVE_SETLOCALE
-#include <locale.h>
-#endif
 
 /* convert double degrees to a static string and return a pointer to it
  *
@@ -101,9 +98,7 @@ enum unit gpsd_units(void)
 {
     char *envu = NULL;
 
-#ifdef HAVE_SETLOCALE
     (void)setlocale(LC_NUMERIC, "C");
-#endif
     if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
 	if (0 == strcasecmp(envu, "imperial")) {
 	    return imperial;

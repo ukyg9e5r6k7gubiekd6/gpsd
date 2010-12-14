@@ -22,6 +22,7 @@
 #include <syslog.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <locale.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -35,12 +36,9 @@
 #define _PATH_DEVNULL    "/dev/null"
 #endif
 #endif
-#ifdef HAVE_SETLOCALE
-#include <locale.h>
-#endif
 
 #ifdef DBUS_ENABLE
-#include <gpsd_dbus.h>
+#include "gpsd_dbus.h"
 #endif
 
 #include "gpsd.h"
@@ -1525,9 +1523,7 @@ int main(int argc, char *argv[])
     pthread_mutex_init(&report_mutex, NULL);
 #endif /* PPS_ENABLE */
 
-#ifdef HAVE_SETLOCALE
     (void)setlocale(LC_NUMERIC, "C");
-#endif
     debuglevel = 0;
     gpsd_hexdump_level = 0;
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
