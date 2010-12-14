@@ -112,10 +112,6 @@
 #error "don't know how to convert little endian to host order"
 #endif
 
-#if defined(HAVE_STRINGS_H)
-#include <strings.h>
-#endif
-
 #if defined(HAVE_LIBUSB)
 #include <libusb.h>
 #endif

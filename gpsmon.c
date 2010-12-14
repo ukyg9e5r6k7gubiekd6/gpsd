@@ -24,11 +24,6 @@
 #ifdef HAVE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #endif
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif /* HAVE_NCURSES_H */
 #include "gpsd.h"
 #include "gpsdclient.h"
 #include "gpsmon.h"

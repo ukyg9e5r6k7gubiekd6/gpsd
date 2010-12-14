@@ -28,20 +28,12 @@ PERMISSIONS
 
 ***************************************************************************/
 #include <stdlib.h>
-#include "gpsd_config.h"
 #include <ctype.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <string.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>		/* for htons() */
-#endif /* HAVE_NETNET_IN_H */
-#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>		/* for htons() */
-#endif /* HAVE_ARPA_INET_H */
+#include <unistd.h>
 #endif /* S_SPLINT_S */
 
 #include "bits.h"

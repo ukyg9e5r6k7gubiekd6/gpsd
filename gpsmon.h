@@ -8,6 +8,13 @@
 #ifndef _GPSD_GPSMON_H_
 #define _GPSD_GPSMON_H_
 
+#include "gpsd_config.h"
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif /* HAVE_NCURSES_H */
+
 #define COMMAND_TERMINATE	-1
 #define COMMAND_MATCH		1
 #define COMMAND_UNKNOWN		0
