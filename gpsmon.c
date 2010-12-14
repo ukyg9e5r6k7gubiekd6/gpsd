@@ -18,28 +18,18 @@
 #endif /* defined(__CYGWIN__) */
 #include <fcntl.h>		/* for O_RDWR */
 #include <errno.h>
+#include <sys/time.h>		/* expected to declare select(2) a la SuS */
 
 #include "gpsd_config.h"
-
 #ifdef HAVE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #endif
-
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
 #endif /* HAVE_NCURSES_H */
 #include "gpsd.h"
-
-
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-
 #include "gpsdclient.h"
 #include "gpsmon.h"
 #include "revision.h"

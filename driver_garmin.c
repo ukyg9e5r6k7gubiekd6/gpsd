@@ -112,10 +112,6 @@
 #error "don't know how to convert little endian to host order"
 #endif
 
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-
 #if defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif

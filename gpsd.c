@@ -6,18 +6,25 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <sys/time.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gpsd_config.h"
+#include <stdarg.h>
+#include <setjmp.h>
+#include <assert.h>
+#include <pwd.h>
+#include <grp.h>
+#include <math.h>
+#include <syslog.h>
+#include <errno.h>
+#include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#ifdef HAVE_SYSLOG_H
-#include <syslog.h>
-#endif /* HAVE_SYSLOG_H */
-#include <errno.h>
-#include <fcntl.h>
+
+#include "gpsd_config.h"
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -37,16 +44,6 @@
 #include <netdb.h>
 #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
-#include <stdarg.h>
-#include <setjmp.h>
-#include <assert.h>
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-#endif /* HAVE_PWD_H */
-#ifdef HAVE_GRP_H
-#include <grp.h>
-#endif /* HAVE_GRP_H */
-#include <math.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -54,15 +51,6 @@
 #if !defined (_PATH_DEVNULL)
 #define _PATH_DEVNULL    "/dev/null"
 #endif
-#endif
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-#if defined (HAVE_SYS_STAT_H)
-#include <sys/stat.h>
-#endif
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
 #endif
 #ifdef HAVE_SETLOCALE
 #include <locale.h>

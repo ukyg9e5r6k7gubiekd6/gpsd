@@ -5,19 +5,12 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <sys/time.h>
 #include <string.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <math.h>
-#include "gpsd_config.h"
-
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
 
 #include "gpsd.h"
 #include "bits.h"

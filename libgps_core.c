@@ -14,6 +14,7 @@
 #include <math.h>
 #include <locale.h>
 #include <assert.h>
+#include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
 
 #include "gpsd.h"
 #include "gps_json.h"
@@ -25,9 +26,6 @@
 #else
 #define AF_UNSPEC 0
 #endif
-#endif
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
 #endif
 #else
 #include <QTcpSocket>

@@ -11,24 +11,15 @@
  */
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <math.h>
-
+#include <string.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include "gpsd_config.h"
 
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
-
-#include <string.h>
-
-#include "bits.h"
 #include "gpsd.h"
+#include "bits.h"
 
 #ifdef GEOSTAR_ENABLE
 #define GEOSTAR_CHANNELS	24
@@ -560,7 +551,7 @@ static void geostar_mode(struct gps_device_t *session, int mode)
 #endif /* ALLOW_RECONFIGURE */
 
 #ifdef NTPSHM_ENABLE
-static double geostar_ntp_offset(struct gps_device_t *session)
+static double geostar_ntp_offset(struct gps_device_t *session UNUSED)
 {
     return 0.31;
 }

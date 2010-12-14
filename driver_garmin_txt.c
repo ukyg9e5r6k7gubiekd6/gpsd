@@ -109,20 +109,10 @@ invalid data.
 
 #include <stdlib.h>
 #include <math.h>
-
 #include <string.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-
-#include "gpsd_config.h"
-#if defined (HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#endif
-
-#if defined(HAVE_STRINGS_H)
-#include <strings.h>
-#endif
 
 #include "gpsd.h"
 #include "timebase.h"
