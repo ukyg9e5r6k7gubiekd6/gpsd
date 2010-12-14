@@ -3,16 +3,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
-#include "gpsd_config.h"
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <string.h>
-#include <stdarg.h>
 
 #include "gpsd.h"
 #include "bits.h"		/* for getbeuw(), to extract big-endian words */

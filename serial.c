@@ -22,9 +22,6 @@
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
 #endif /* HAVE_BLUEZ */
-#if defined(HAVE_SYS_MODEM_H)
-#include <sys/modem.h>
-#endif /* HAVE_SYS_MODEM_H */
 
 #include "gpsd.h"
 
