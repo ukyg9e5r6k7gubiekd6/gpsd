@@ -5,29 +5,25 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
-
 #ifdef HAVE_BLUEZ
 #ifndef S_SPLINT_S
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
-
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
-#endif
-
+#endif /* HAVE_BLUEZ */
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */

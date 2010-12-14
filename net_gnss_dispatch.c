@@ -7,13 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#include <unistd.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"

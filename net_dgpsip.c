@@ -4,6 +4,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
+
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
 #ifdef HAVE_SYS_SOCKET_H
@@ -11,15 +17,12 @@
 #else
 #define AF_UNSPEC 0
 #endif /* HAVE_SYS_SOCKET_H */
-#include <unistd.h>
 #endif /* S_SPLINT_S */
 #ifndef S_SPLINT_S
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
-#include <string.h>
-#include <fcntl.h>
 
 #include "gpsd.h"
 
