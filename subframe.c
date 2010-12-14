@@ -312,7 +312,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int omega = (words[7] & 0xFFFFFF);
 	    unsigned int M0 = (words[8] & 0xFFFFFF);
 	    gpsd_report(LOG_PROG,
-		"50B: Page 5 SV:%d data_id %d e:%u, ohm:%u, svh:%u"
+		"50B: Page 5 SV:%d data_id %d e:%u svh:%u"
 		" toa:%u deltai:%u sqrtA:%u Omega0:%u omega:%u M0:%u\n",
 		pageid, data_id, e, svh,  toa, deltai, sqrtA, Omega0,
 		omega,M0);
