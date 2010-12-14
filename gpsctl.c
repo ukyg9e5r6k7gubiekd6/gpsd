@@ -5,18 +5,18 @@
  *
  */
 #include <stdlib.h>
-#include "gpsd_config.h"
-#if HAVE_SYS_IOCTL_H
- #include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <assert.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
+#include "gpsd_config.h"
+#if HAVE_SYS_IOCTL_H
+ #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 #include "gpsd.h"
 #include "revision.h"
 
