@@ -6,15 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <netdb.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
-
-#include "gpsd_config.h"
-#ifndef S_SPLINT_S
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"

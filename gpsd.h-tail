@@ -5,12 +5,7 @@
  */
 #endif /* GPSD_CONFIG_H */
 
-#ifdef HAVE_TERMIOS_H
 #include <termios.h>
-#endif
-#ifdef HAVE_SYS_TERMIOS_H
-#include <sys/termios.h>
-#endif
 #include "gps.h"
 
 #ifdef _WIN32
