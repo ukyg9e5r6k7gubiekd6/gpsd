@@ -83,17 +83,12 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <curses.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif /* HAVE_NCURSES_H */
-
 #include "gps.h"
 #include "gpsdclient.h"
 #include "revision.h"

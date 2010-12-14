@@ -269,11 +269,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 dnl Check for curses headers and libraries.  The presence of the
 dnl library is used to decide whether or not to build some programs.
-dnl Those programs use ncurses.h if found, and otherwise use curses.h.
-dnl TODO: give an example of what system uses curses.h with
-dnl libncurses.  We define our own variables to reduce the risk of
-dnl breaking if autoconf changes (private) variable names.
-AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, initscr, NCURSES_LIBS="-lncurses")
 AC_SUBST(NCURSES_LIBS)
 if test x"$NCURSES_LIBS" = x"" ; then
