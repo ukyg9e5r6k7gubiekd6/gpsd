@@ -3,23 +3,11 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdlib.h>
-#include "gpsd_config.h"
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
-#ifndef S_SPLINT_S
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif /* HAVE_SYS_SOCKET_H */
-#include <unistd.h>
-#endif /* S_SPLINT_S */
+#include <string.h>
 #include <math.h>
 #ifndef S_SPLINT_S
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif /* HAVE_NETDB_H */
+#include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <string.h>
 
 #include "gpsd.h"
 
