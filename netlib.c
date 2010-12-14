@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
+#include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
