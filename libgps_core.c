@@ -16,20 +16,16 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
-#include "gpsd.h"
-#include "gps_json.h"
-
 #ifndef USE_QT
 #ifndef S_SPLINT_S
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#else
-#define AF_UNSPEC 0
-#endif
-#endif
+#endif /* S_SPLINT_S */
 #else
 #include <QTcpSocket>
 #endif /* USE_QT */
+
+#include "gpsd.h"
+#include "gps_json.h"
 
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);

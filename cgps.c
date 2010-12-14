@@ -81,13 +81,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>		/* for select() */
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #ifdef HAVE_NCURSES_H

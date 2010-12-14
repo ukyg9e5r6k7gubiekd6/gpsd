@@ -12,13 +12,6 @@
 
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#else
-#define AF_UNSPEC 0
-#endif /* HAVE_SYS_SOCKET_H */
-#endif /* S_SPLINT_S */
-#ifndef S_SPLINT_S
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif /* HAVE_NETDB_H */

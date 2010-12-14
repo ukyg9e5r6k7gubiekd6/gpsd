@@ -34,51 +34,23 @@
 
 #define CLIMB 3
 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>		/* for select() */
-#include "gpsd_config.h"
-#ifndef S_SPLINT_S
- #ifdef HAVE_SYS_SOCKET_H
-  #include <sys/socket.h>
- #endif /* HAVE_SYS_SOCKET_H */
-#endif /* S_SPLINT_S */
-#ifndef S_SPLINT_S
- #ifdef HAVE_NETINET_IN_H
-  #include <netinet/in.h>
- #endif /* HAVE_NETINET_IN_H */
- #ifdef HAVE_ARPA_INET_H
-  #include <arpa/inet.h>
- #endif /* HAVE_ARPA_INET_H */
- #ifdef HAVE_NETDB_H
-  #include <netdb.h>
- #endif /* HAVE_NETDB_H */
-#endif /* S_SPLINT_S */
-
 #include <stdlib.h>
 #include <string.h>
-#ifndef S_SPLINT_S
- #include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <math.h>
 #include <errno.h>
-
 #include <fcntl.h>
-#ifdef HAVE_TERMIOS_H
- #include <termios.h>
-#endif /* HAVE_TERMIOS_H */
+#include <termios.h>
+#include <netdb.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gps.h"
 #include "gpsdclient.h"
 #include "revision.h"
-
-/* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
-#else /* not __GNUC__ */
-#  define UNUSED
-#endif
 
 /* Prototypes. */
 void latlon2maidenhead(char *st,float n,float e);

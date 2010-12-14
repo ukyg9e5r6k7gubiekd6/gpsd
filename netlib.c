@@ -3,44 +3,15 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
-
-#include "gpsd_config.h"
-
-#ifndef S_SPLINT_S
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/ip.h>
-#endif
-#endif /* S_SPLINT_S */
-#ifndef S_SPLINT_S
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif /* HAVE_NETDB_H */
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif /* HAVE_ARPA_INET_H */
-#endif /* S_SPLINT_S */
 #include <errno.h>
+#include <string.h>
+#include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <string.h>
-#include <fcntl.h>
 
 #include "gpsd.h"
 #include "sockaddr.h"
-
-#if !defined (INADDR_NONE)
-#define INADDR_NONE   ((in_addr_t)-1)
-#endif
 
 /*@-mustfreefresh -usedef@*/
 socket_t netlib_connectsock(int af, const char *host, const char *service,
