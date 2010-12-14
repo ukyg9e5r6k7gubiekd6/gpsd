@@ -37,14 +37,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/time.h>		/* for select() */
+#include <time.h>		/* for select() */
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <termios.h>
 #include <netdb.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
