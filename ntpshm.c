@@ -8,27 +8,18 @@
  */
 
 #include <stdlib.h>
-#include "gpsd_config.h"
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #ifdef NTPSHM_ENABLE
-
-#if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
-#endif
-
-#ifdef HAVE_SYS_IPC_H
 #include <sys/ipc.h>
-#endif /* HAVE_SYS_IPC_H */
-#ifdef HAVE_SYS_SHM_H
 #include <sys/shm.h>
-#endif /* HAVE_SYS_SHM_H */
 
 #define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
 #define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */

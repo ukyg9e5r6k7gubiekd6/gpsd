@@ -178,13 +178,11 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -W
 fi
 
-AC_CHECK_HEADERS(sys/modem.h sys/ipc.h sys/shm.h sys/ioctl.h)
-AC_CHECK_HEADERS(endian.h sys/endian.h)
+AC_CHECK_HEADERS(sys/modem.h sys/ioctl.h endian.h sys/endian.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(strlcat)
-AC_CHECK_FUNCS(strtonum)
 AC_CHECK_FUNCS(setlocale)
 AC_CHECK_FUNCS(vsnprintf)
 
