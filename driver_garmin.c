@@ -94,13 +94,6 @@
  * failing obviously on systems that don't have support.
  * Systems known to work: Linux, NetBSD
  */
-#if defined(HAVE_ENDIAN_H)
-#include <endian.h>
-#elif defined(HAVE_SYS_ENDIAN_H)
-#include <sys/endian.h>
-#else /* HAVE_SYS_ENDIAN_H */
-#error gpsd uses non-POSIX le16toh; platform does not have {,sys/}endian.h
-#endif /* HAVE_ENDIAN_H */
 
 #if defined(le16toh)
 #define GPSD_LE16TOH le16toh
