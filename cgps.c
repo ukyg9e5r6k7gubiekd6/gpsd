@@ -82,7 +82,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>		/* for select() */
 #ifndef S_SPLINT_S
-#include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <stdlib.h>

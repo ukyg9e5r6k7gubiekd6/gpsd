@@ -26,20 +26,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include "gpsd_config.h"
-#ifndef S_SPLINT_S
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif /* HAVE_SYS_SOCKET_H */
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-#if HAVE_TERMIOS
 #include <termios.h>
-#endif /* HAVE_TERMIOS */
 #include <assert.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
+
 #include "gpsd.h"
 #include "gpsdclient.h"
 #include "revision.h"

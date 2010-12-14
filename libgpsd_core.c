@@ -3,9 +3,18 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <stdlib.h>
-#include "gpsd_config.h"
 #include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
+
+#include "gpsd_config.h"
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
@@ -15,18 +24,12 @@
 #else
 #define AF_UNSPEC 0
 #endif /* HAVE_SYS_SOCKET_H */
-#include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <stdio.h>
-#include <math.h>
 #ifndef S_SPLINT_S
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif /* HAVE_NETDB_H */
 #endif /* S_SPLINT_S */
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
 
 #include "gpsd.h"
 

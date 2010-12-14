@@ -3,9 +3,6 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
@@ -15,6 +12,9 @@
 #include <locale.h>
 #include <assert.h>
 #include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "gps_json.h"
