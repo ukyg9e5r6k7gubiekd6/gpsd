@@ -29,6 +29,8 @@ AC_DEFUN_ONCE([ACREQUIRE_BUGFIX],
 ACREQUIRE_BUGFIX
 # ACREQUIRE_BUGFIX done
 
+AC_CHECK_HEADERS(sys/ioctl.h)
+
 dnl AM_PATH_PYTHON provided with automake can be too old.  Look
 dnl for newer python first, and include 2.6 on the list.
 m4_define([_AM_PYTHON_INTERPRETER_LIST],
