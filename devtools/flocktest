@@ -19,7 +19,7 @@ Otherwise, the remote flockdriver script is executed on each machine.
 The -d option passes it a name for the remote test subdirectory
 If you do not specify a subdirectory name, the value of $LOGNAME will be used.
 
-The -q option supprssed CIA notifications
+The -q option suppresses CIA notifications
 
 The -v option shows all ssh commands issued, runs flockdriver with -x set
 and causes logs to be echoed even on success.
@@ -100,7 +100,7 @@ else
     echo "Test ends: "`date`
 fi
 
-# Here is where we abuse CIA to do our notfications for us.
+# Here is where we abuse CIA to do our notifications for us.
 
 # Addresses for the e-mail
 from="FLOCKDRIVER-NOREPLY@${site}"
