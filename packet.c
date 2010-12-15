@@ -732,7 +732,6 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	break;
     case NAVCOM_PAYLOAD:
     {
-	unsigned int n;
 	unsigned char csum = lexer->inbuffer[3];
 	for (n = 4;
 	     (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1;

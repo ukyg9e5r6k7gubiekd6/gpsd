@@ -424,7 +424,7 @@ static int filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, 104);	/* from sys/un.h */
     addr.sun_family = AF_UNIX;
-    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
+    (void)bind(sock, (struct sockaddr *)&addr, (socklen_t)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;
