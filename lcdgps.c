@@ -36,15 +36,17 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef __linux__      /* <netdb.h> briongs these in under Linux */
 #include <sys/socket.h>
-#include <time.h>		/* for select() */
 #include <netinet/in.h>
+#endif /* __linux__ */
+#include <netdb.h>
+#include <time.h>		/* for select() */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <netdb.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
