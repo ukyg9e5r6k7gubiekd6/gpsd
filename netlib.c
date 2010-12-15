@@ -149,7 +149,7 @@ char *netlib_sock2ip(int fd)
     int r;
 
     r = getpeername(fd, &(fsin.sa), &alen);
-    /*@ -branchstate -unrecog @*/
+    /*@ -branchstate -unrecog +boolint @*/
     if (r == 0) {
 	switch (fsin.sa.sa_family) {
 	case AF_INET:
@@ -158,7 +158,7 @@ char *netlib_sock2ip(int fd)
 	    break;
 #ifdef IPV6_ENABLE
 	case AF_INET6:
-	    r = !inet_ntop(fsin.sa_in6.sin6_family, &(fsin.sa_in6.sin6_addr),
+	    r = !inet_ntop((int)fsin.sa_in6.sin6_family, &(fsin.sa_in6.sin6_addr),
 			   ip, sizeof(ip));
 	    break;
 #endif
@@ -174,6 +174,6 @@ char *netlib_sock2ip(int fd)
 		    strerror(errno), errno);
 	(void)strlcpy(ip, "<unknown>", sizeof(ip));
     }
-    /*@ +branchstate +unrecog @*/
+    /*@ +branchstate +unrecog -boolint @*/
     return ip;
 }

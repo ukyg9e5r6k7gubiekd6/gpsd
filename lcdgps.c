@@ -37,9 +37,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <netdb.h>
+#ifndef S_SPLINT_S
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
+#endif /* S_SPLINT_S */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */

@@ -8,7 +8,6 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -24,6 +23,7 @@
 #include <fcntl.h>
 #include <locale.h>
 #ifndef S_SPLINT_S
+#include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -423,7 +423,7 @@ static int filesock(char *filename)
 	return -1;
     }
     (void)strlcpy(addr.sun_path, filename, 104);	/* from sys/un.h */
-    addr.sun_family = AF_UNIX;
+    addr.sun_family = (sa_family_t)AF_UNIX;
     (void)bind(sock, (struct sockaddr *)&addr, (socklen_t)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);

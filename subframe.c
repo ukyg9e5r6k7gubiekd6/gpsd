@@ -134,11 +134,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	/* subframe 1: clock parameters */
 	/* get Week Number WN) from subframe 1 */
 	{
-	    session->context->gps_week =
-		(unsigned short)((words[2] & 0xffc000) >> 14);
 	    unsigned int tgd = (words[6] & 0x0000FF);
 	    unsigned int toc = (words[7] & 0x00FFFF);
 	    unsigned int af1 = (words[8] & 0x00FFFF);
+	    session->context->gps_week =
+		(unsigned short)((words[2] & 0xffc000) >> 14);
 	    gpsd_report(LOG_PROG, "50B: Subframe 1 WN: %u Tgd:%u toc:%u "
 	        " af1:%u\n",
 	    	session->context->gps_week, tgd, toc, af1);
@@ -305,7 +305,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int e = (words[2] & 0x00FFFF);
 	    unsigned int toa = (words[3] & 0xFF0000) >> 16;
 	    unsigned int deltai = (words[3] & 0x00FFFF);
-	    unsigned int Omega = (words[4] & 0xFFFF00) >> 8;
+	    //unsigned int Omega = (words[4] & 0xFFFF00) >> 8;
 	    unsigned int svh = (words[4] & 0x0000FF);
 	    unsigned int sqrtA = (words[5] & 0xFFFFFF);
 	    unsigned int Omega0 = (words[6] & 0xFFFFFF);
