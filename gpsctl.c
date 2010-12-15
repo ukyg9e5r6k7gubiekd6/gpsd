@@ -9,14 +9,11 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <assert.h>
+#include <time.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
-#include "gpsd_config.h"
-#if HAVE_SYS_IOCTL_H
- #include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
 #include "gpsd.h"
 #include "revision.h"
 
@@ -44,15 +41,26 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 static gps_mask_t get_packet(struct gps_device_t *session)
 /* try to get a well-formed packet from the GPS */
 {
+    static fd_set rfds;
     gps_mask_t fieldmask;
+    struct timeval tv;
 
+    FD_ZERO(&rfds);
     for (;;) {
-	int waiting = 0;
-	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
-	if (waiting == 0) {
-	    (void)usleep(300);
-	    continue;
+	FD_CLR(session->gpsdata.gps_fd, &rfds);
+
+	/*@ -usedef @*/
+	tv.tv_sec = 0;
+	tv.tv_usec = 300;
+	errno = 0;
+	if (select(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
+	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))
+		continue;
+	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
+	    exit(2);
 	}
+	/*@ +usedef @*/
+
 	fieldmask = gpsd_poll(session);
 	if ((fieldmask &~ ONLINE_IS)!=0)
 	    return fieldmask;
