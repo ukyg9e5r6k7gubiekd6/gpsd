@@ -36,11 +36,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef __linux__      /* <netdb.h> briongs these in under Linux */
-#include <sys/socket.h>
-#include <netinet/in.h>
-#endif /* __linux__ */
 #include <netdb.h>
+#ifndef AF_UNSPEC
+#include <sys/socket.h>
+#endif /* AF_UNSPEC */
+#ifndef INADDR_ANY
+#include <netinet/in.h>
+#endif /* INADDR_ANY */
 #include <time.h>		/* for select() */
 #include <stdlib.h>
 #include <string.h>
