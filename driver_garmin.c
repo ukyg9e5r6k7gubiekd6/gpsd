@@ -80,36 +80,23 @@
 #define __USE_POSIX199309 1
 
 #include <math.h>
-
 #include <string.h>
+#include <errno.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <errno.h>
 
 #include "gpsd_config.h"
-
-/*
- * gpsd uses non-POSIX le16toh.  Attempt to deal with this portably,
- * failing obviously on systems that don't have support.
- * Systems known to work: Linux, NetBSD
- */
-
-#if defined(le16toh)
-#define GPSD_LE16TOH le16toh
-#define GPSD_LE32TOH le32toh
-#elif defined(letoh16)
-#define GPSD_LE16TOH letoh16
-#define GPSD_LE32TOH letoh32
-#else
-#error "don't know how to convert little endian to host order"
-#endif
 
 #if defined(HAVE_LIBUSB)
 #include <libusb.h>
 #endif
 
 #include "gpsd.h"
+#include "bits.h"
+
+#define GPSD_LE16TOH(x) getlesw((char *)(&(x)), 0)
+#define GPSD_LE32TOH(x) getlesl((char *)(&(x)), 0)
 
 #ifdef GARMIN_ENABLE
 
