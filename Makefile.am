@@ -821,7 +821,7 @@ bits-regress: test_bits
 
 python-indentation-regress:
 	set -e; for pyfile in $(PYTHONSCRIPTS_DIST) $(PYTHONMODULES_DIST); do \
-		$(PYTHON) -tt -B -m py_compile $$pyfile ;\
+		$(PYTHON) -tt -m py_compile $$pyfile ;\
 	done
 
 # Do all normal regression tests.
