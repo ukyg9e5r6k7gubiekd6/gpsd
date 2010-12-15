@@ -1,12 +1,5 @@
 /* klugey def'n of a socket address struct helps hide IPV4 vs. IPV6 ugliness */
 
-#include <netdb.h>
-#include <sys/un.h>
-#include <arpa/inet.h>     /* for htons() and friends */
-#ifndef S_SPLINT_S
-#include <sys/socket.h>
-#endif /* S_SPLINT_S */
-
 typedef union sockaddr_u {
     struct sockaddr sa;
     struct sockaddr_in sa_in;

@@ -9,7 +9,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -22,8 +21,18 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <locale.h>
+#include <netdb.h>
 #ifndef S_SPLINT_S
+#ifndef AF_UNSPEC
 #include <sys/socket.h>
+#endif /* AF_UNSPEC */
+#endif /* S_SPLINT_S */
+#ifndef INADDR_ANY
+#include <netinet/in.h>
+#endif /* INADDR_ANY */
+#include <sys/un.h>
+#include <arpa/inet.h>     /* for htons() and friends */
+#ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
