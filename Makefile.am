@@ -763,7 +763,7 @@ rtcm-makeregress: gpsdecode
 
 # Regression-test the AIVDM decoder.
 aivdm-regress: gpsdecode
-	echo "Testing AIVDM decoding..."
+	@echo "Testing AIVDM decoding..."
 	@mkdir -p $(srcdir)/test
 	@for f in $(srcdir)/test/*.aivdm; do \
 		echo "Testing $${f}..."; \
