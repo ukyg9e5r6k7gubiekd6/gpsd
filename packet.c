@@ -28,12 +28,12 @@ PERMISSIONS
 
 ***************************************************************************/
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
+#include <netinet/in.h>
 #include <arpa/inet.h>		/* for htons() */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
