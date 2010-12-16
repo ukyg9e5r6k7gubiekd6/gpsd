@@ -572,8 +572,6 @@ extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
 			     double, double, double, 
 			     double, double, double);
 extern void clear_dop(/*@out@*/struct dop_t *);
-extern gps_mask_t fill_dop(/*@in@*/const struct gps_data_t *gpsdata, 
-			   struct dop_t *dop);
 
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);

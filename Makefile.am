@@ -162,7 +162,6 @@ print_libgps_VERSION:
 
 libgps_c_sources = \
 	ais_json.c \
-	gpsd_report.c \
 	gpsutils.c \
 	geoid.c \
 	gpsdclient.c \

@@ -147,6 +147,7 @@ char /*@observer@*/ *netlib_errstr(const int err)
 }
 
 char *netlib_sock2ip(int fd)
+/* retrieve the IP address corresponding to a socket */ 
 {
     sockaddr_t fsin;
     socklen_t alen = (socklen_t) sizeof(fsin);
@@ -168,15 +169,11 @@ char *netlib_sock2ip(int fd)
 	    break;
 #endif
 	default:
-	    gpsd_report(LOG_ERROR, "Unhandled address family %d in %s\n",
-			fsin.sa.sa_family, __FUNCTION__);
 	    (void)strlcpy(ip, "<unknown AF>", sizeof(ip));
 	    return ip;
 	}
     }
     if (r != 0) {
-	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r,
-		    strerror(errno), errno);
 	(void)strlcpy(ip, "<unknown>", sizeof(ip));
     }
     /*@ +branchstate +unrecog -boolint @*/

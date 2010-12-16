@@ -791,6 +791,322 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
+/*****************************************************************************
+
+Carl Carter of SiRF supplied this algorithm for computing DOPs from
+a list of visible satellites (some typos corrected)...
+
+For satellite n, let az(n) = azimuth angle from North and el(n) be elevation.
+Let:
+
+    a(k, 1) = sin az(k) * cos el(k)
+    a(k, 2) = cos az(k) * cos el(k)
+    a(k, 3) = sin el(k)
+
+Then form the line-of-sight matrix A for satellites used in the solution:
+
+    | a(1,1) a(1,2) a(1,3) 1 |
+    | a(2,1) a(2,2) a(2,3) 1 |
+    |   :       :      :   : |
+    | a(n,1) a(n,2) a(n,3) 1 |
+
+And its transpose A~:
+
+    |a(1, 1) a(2, 1) .  .  .  a(n, 1) |
+    |a(1, 2) a(2, 2) .  .  .  a(n, 2) |
+    |a(1, 3) a(2, 3) .  .  .  a(n, 3) |
+    |    1       1   .  .  .     1    |
+
+Compute the covariance matrix (A~*A)^-1, which is guaranteed symmetric:
+
+    | s(x)^2    s(x)*s(y)  s(x)*s(z)  s(x)*s(t) |
+    | s(y)*s(x) s(y)^2     s(y)*s(z)  s(y)*s(t) |
+    | s(z)*s(x) s(z)*s(y)  s(z)^2     s(z)*s(t) |
+    | s(t)*s(x) s(t)*s(y)  s(t)*s(z)  s(t)^2    |
+
+Then:
+
+GDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2 + s(t)^2)
+TDOP = sqrt(s(t)^2)
+PDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2)
+HDOP = sqrt(s(x)^2 + s(y)^2)
+VDOP = sqrt(s(z)^2)
+
+Here's how we implement it...
+
+First, each compute element P(i,j) of the 4x4 product A~*A.
+If S(k=1,k=n): f(...) is the sum of f(...) as k varies from 1 to n, then
+applying the definition of matrix product tells us:
+
+P(i,j) = S(k=1,k=n): B(i, k) * A(k, j)
+
+But because B is the transpose of A, this reduces to
+
+P(i,j) = S(k=1,k=n): A(k, i) * A(k, j)
+
+This is not, however, the entire algorithm that SiRF uses.  Carl writes:
+
+> As you note, with rounding accounted for, most values agree exactly, and
+> those that don't agree our number is higher.  That is because we
+> deweight some satellites and account for that in the DOP calculation.
+> If a satellite is not used in a solution at the same weight as others,
+> it should not contribute to DOP calculation at the same weight.  So our
+> internal algorithm does a compensation for that which you would have no
+> way to duplicate on the outside since we don't output the weighting
+> factors.  In fact those are not even available to API users.
+
+Queried about the deweighting, Carl says:
+
+> In the SiRF tracking engine, each satellite track is assigned a quality
+> value based on the tracker's estimate of that signal.  It includes C/No
+> estimate, ability to hold onto the phase, stability of the I vs. Q phase
+> angle, etc.  The navigation algorithm then ranks all the tracks into
+> quality order and selects which ones to use in the solution and what
+> weight to give those used in the solution.  The process is actually a
+> bit of a "trial and error" method -- we initially use all available
+> tracks in the solution, then we sequentially remove the lowest quality
+> ones until the solution stabilizes.  The weighting is inherent in the
+> Kalman filter algorithm.  Once the solution is stable, the DOP is
+> computed from those SVs used, and there is an algorithm that looks at
+> the quality ratings and determines if we need to deweight any.
+> Likewise, if we use altitude hold mode for a 3-SV solution, we deweight
+> the phantom satellite at the center of the Earth.
+
+So we cannot exactly duplicate what SiRF does internally.  We'll leave
+HDOP alone and use our computed values for VDOP and PDOP.  Note, this
+may have to change in the future if this code is used by a non-SiRF
+driver.
+
+******************************************************************************/
+
+void clear_dop( /*@out@*/ struct dop_t *dop)
+{
+    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
+	dop->gdop = NAN;
+}
+
+/*@ -fixedformalarray -mustdefine @*/
+static bool invert(double mat[4][4], /*@out@*/ double inverse[4][4])
+{
+    // Find all NECESSARY 2x2 subdeterminants
+    double Det2_12_01 = mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0];
+    double Det2_12_02 = mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0];
+    //double Det2_12_03 = mat[1][0]*mat[2][3] - mat[1][3]*mat[2][0];
+    double Det2_12_12 = mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1];
+    //double Det2_12_13 = mat[1][1]*mat[2][3] - mat[1][3]*mat[2][1];
+    //double Det2_12_23 = mat[1][2]*mat[2][3] - mat[1][3]*mat[2][2];
+    double Det2_13_01 = mat[1][0] * mat[3][1] - mat[1][1] * mat[3][0];
+    //double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
+    double Det2_13_03 = mat[1][0] * mat[3][3] - mat[1][3] * mat[3][0];
+    //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1]; 
+    double Det2_13_13 = mat[1][1] * mat[3][3] - mat[1][3] * mat[3][1];
+    //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2]; 
+    double Det2_23_01 = mat[2][0] * mat[3][1] - mat[2][1] * mat[3][0];
+    double Det2_23_02 = mat[2][0] * mat[3][2] - mat[2][2] * mat[3][0];
+    double Det2_23_03 = mat[2][0] * mat[3][3] - mat[2][3] * mat[3][0];
+    double Det2_23_12 = mat[2][1] * mat[3][2] - mat[2][2] * mat[3][1];
+    double Det2_23_13 = mat[2][1] * mat[3][3] - mat[2][3] * mat[3][1];
+    double Det2_23_23 = mat[2][2] * mat[3][3] - mat[2][3] * mat[3][2];
+
+    // Find all NECESSARY 3x3 subdeterminants
+    double Det3_012_012 = mat[0][0] * Det2_12_12 - mat[0][1] * Det2_12_02
+	+ mat[0][2] * Det2_12_01;
+    //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03
+    //                            + mat[0][3]*Det2_12_01;
+    //double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03
+    //                            + mat[0][3]*Det2_12_02;
+    //double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13
+    //                            + mat[0][3]*Det2_12_12;
+    //double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02
+    //                            + mat[0][2]*Det2_13_01;
+    double Det3_013_013 = mat[0][0] * Det2_13_13 - mat[0][1] * Det2_13_03
+	+ mat[0][3] * Det2_13_01;
+    //double Det3_013_023 = mat[0][0]*Det2_13_23 - mat[0][2]*Det2_13_03
+    //                            + mat[0][3]*Det2_13_02;
+    //double Det3_013_123 = mat[0][1]*Det2_13_23 - mat[0][2]*Det2_13_13
+    //                            + mat[0][3]*Det2_13_12;
+    //double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02
+    //                            + mat[0][2]*Det2_23_01;
+    //double Det3_023_013 = mat[0][0]*Det2_23_13 - mat[0][1]*Det2_23_03
+    //                            + mat[0][3]*Det2_23_01;
+    double Det3_023_023 = mat[0][0] * Det2_23_23 - mat[0][2] * Det2_23_03
+	+ mat[0][3] * Det2_23_02;
+    //double Det3_023_123 = mat[0][1]*Det2_23_23 - mat[0][2]*Det2_23_13
+    //                            + mat[0][3]*Det2_23_12;
+    double Det3_123_012 = mat[1][0] * Det2_23_12 - mat[1][1] * Det2_23_02
+	+ mat[1][2] * Det2_23_01;
+    double Det3_123_013 = mat[1][0] * Det2_23_13 - mat[1][1] * Det2_23_03
+	+ mat[1][3] * Det2_23_01;
+    double Det3_123_023 = mat[1][0] * Det2_23_23 - mat[1][2] * Det2_23_03
+	+ mat[1][3] * Det2_23_02;
+    double Det3_123_123 = mat[1][1] * Det2_23_23 - mat[1][2] * Det2_23_13
+	+ mat[1][3] * Det2_23_12;
+
+    // Find the 4x4 determinant
+    static double det;
+    det = mat[0][0] * Det3_123_123
+	- mat[0][1] * Det3_123_023
+	+ mat[0][2] * Det3_123_013 - mat[0][3] * Det3_123_012;
+
+    // Very small determinants probably reflect floating-point fuzz near zero
+    if (fabs(det) < 0.0001)
+	return false;
+
+    inverse[0][0] = Det3_123_123 / det;
+    //inverse[0][1] = -Det3_023_123 / det;
+    //inverse[0][2] =  Det3_013_123 / det;
+    //inverse[0][3] = -Det3_012_123 / det;
+
+    //inverse[1][0] = -Det3_123_023 / det;
+    inverse[1][1] = Det3_023_023 / det;
+    //inverse[1][2] = -Det3_013_023 / det;
+    //inverse[1][3] =  Det3_012_023 / det;
+
+    //inverse[2][0] =  Det3_123_013 / det;
+    //inverse[2][1] = -Det3_023_013 / det;
+    inverse[2][2] = Det3_013_013 / det;
+    //inverse[2][3] = -Det3_012_013 / det;
+
+    //inverse[3][0] = -Det3_123_012 / det;
+    //inverse[3][1] =  Det3_023_012 / det;
+    //inverse[3][2] = -Det3_013_012 / det;
+    inverse[3][3] = Det3_012_012 / det;
+
+    return true;
+}
+
+/*@ +fixedformalarray +mustdefine @*/
+
+static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop)
+{
+    double prod[4][4];
+    double inv[4][4];
+    double satpos[MAXCHANNELS][4];
+    double xdop, ydop, hdop, vdop, pdop, tdop, gdop;
+    int i, j, k, n;
+
+    memset(satpos, 0, sizeof(satpos));
+
+#ifdef __UNUSED__
+    gpsd_report(LOG_INF, "Satellite picture:\n");
+    for (k = 0; k < MAXCHANNELS; k++) {
+	if (gpsdata->used[k])
+	    gpsd_report(LOG_INF, "az: %d el: %d  SV: %d\n",
+			gpsdata->azimuth[k], gpsdata->elevation[k],
+			gpsdata->used[k]);
+    }
+#endif /* __UNUSED__ */
+
+    for (n = k = 0; k < gpsdata->satellites_used; k++) {
+	if (gpsdata->used[k] == 0)
+	    continue;
+	satpos[n][0] = sin(gpsdata->azimuth[k] * DEG_2_RAD)
+	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][1] = cos(gpsdata->azimuth[k] * DEG_2_RAD)
+	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][2] = sin(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][3] = 1;
+	n++;
+    }
+
+    /* If we don't have 4 satellites then we don't have enough information to calculate DOPS */
+    if (n < 4) {
+	gpsd_report(LOG_DATA + 2, "Not enough Satellites available %d < 4:\n",
+		    n);
+	return 0;		/* Is this correct return code here? or should it be ERROR_IS */
+    }
+
+    memset(prod, 0, sizeof(prod));
+    memset(inv, 0, sizeof(inv));
+
+#ifdef __UNUSED__
+    gpsd_report(LOG_INF, "Line-of-sight matrix:\n");
+    for (k = 0; k < n; k++) {
+	gpsd_report(LOG_INF, "%f %f %f %f\n",
+		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
+    }
+#endif /* __UNUSED__ */
+
+    for (i = 0; i < 4; ++i) {	//< rows
+	for (j = 0; j < 4; ++j) {	//< cols
+	    prod[i][j] = 0.0;
+	    for (k = 0; k < n; ++k) {
+		prod[i][j] += satpos[k][i] * satpos[k][j];
+	    }
+	}
+    }
+
+#ifdef __UNUSED__
+    gpsd_report(LOG_INF, "product:\n");
+    for (k = 0; k < 4; k++) {
+	gpsd_report(LOG_INF, "%f %f %f %f\n",
+		    prod[k][0], prod[k][1], prod[k][2], prod[k][3]);
+    }
+#endif /* __UNUSED__ */
+
+    if (invert(prod, inv)) {
+#ifdef __UNUSED__
+	/*
+	 * Note: this will print garbage unless all the subdeterminants
+	 * are computed in the invert() function.
+	 */
+	gpsd_report(LOG_RAW, "inverse:\n");
+	for (k = 0; k < 4; k++) {
+	    gpsd_report(LOG_RAW, "%f %f %f %f\n",
+			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
+	}
+#endif /* __UNUSED__ */
+    } else {
+#ifndef USE_QT
+	gpsd_report(LOG_DATA,
+		    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
+		    gpsdata->dev.path);
+#endif
+	return 0;
+    }
+
+    xdop = sqrt(inv[0][0]);
+    ydop = sqrt(inv[1][1]);
+    hdop = sqrt(inv[0][0] + inv[1][1]);
+    vdop = sqrt(inv[2][2]);
+    pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
+    tdop = sqrt(inv[3][3]);
+    gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
+
+#ifndef USE_QT
+    gpsd_report(LOG_DATA,
+		"DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
+		xdop, dop->xdop, ydop, dop->ydop, hdop, dop->hdop, vdop,
+		dop->vdop, pdop, dop->pdop, tdop, dop->tdop, gdop, dop->gdop);
+#endif
+
+    /*@ -usedef @*/
+    if (isnan(dop->xdop) != 0) {
+	dop->xdop = xdop;
+    }
+    if (isnan(dop->ydop) != 0) {
+	dop->ydop = ydop;
+    }
+    if (isnan(dop->hdop) != 0) {
+	dop->hdop = hdop;
+    }
+    if (isnan(dop->vdop) != 0) {
+	dop->vdop = vdop;
+    }
+    if (isnan(dop->pdop) != 0) {
+	dop->pdop = pdop;
+    }
+    if (isnan(dop->tdop) != 0) {
+	dop->tdop = tdop;
+    }
+    if (isnan(dop->gdop) != 0) {
+	dop->gdop = gdop;
+    }
+    /*@ +usedef @*/
+
+    return DOP_IS;
+}
+
 static void gpsd_error_model(struct gps_device_t *session,
 			     struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
