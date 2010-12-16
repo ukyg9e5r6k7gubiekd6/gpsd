@@ -13,8 +13,8 @@
 /*
  * The True North compass fails with current gpsd versions for reasons
  * the dev team has been unable to diagnose due to not having test hardware.
- * The sup[port for it is conditioned out in order to simplify moving 
- * to the new JSON-based oprotocol and reduce startup time.
+ * The support for it is conditioned out in order to simplify moving 
+ * to the new JSON-based protocol and reduce startup time.
  */
 #undef TRUENORTH
 
@@ -192,18 +192,17 @@ static float true2magnetic(double lat, double lon, double heading)
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig)
 {
-    /* Ignore signals. */
-    (void)signal(SIGINT, SIG_IGN);
-    (void)signal(SIGHUP, SIG_IGN);
+    if (!isendwin())
+    {
+	/* Move the cursor to the bottom left corner. */
+	(void)mvcur(0, COLS - 1, LINES - 1, 0);
 
-    /* Move the cursor to the bottom left corner. */
-    (void)mvcur(0, COLS - 1, LINES - 1, 0);
+	/* Put input attributes back the way they were. */
+	(void)echo();
 
-    /* Put input attributes back the way they were. */
-    (void)echo();
-
-    /* Done with curses. */
-    (void)endwin();
+	/* Done with curses. */
+	(void)endwin();
+    }
 
     /* We're done talking to gpsd. */
     (void)gps_close(&gpsdata);
@@ -219,17 +218,18 @@ static void die(int sig)
 	break;
     default:
 	(void)fprintf(stderr, "cgps: caught signal %d\n", sig);
+	break;
     }
 
     /* Bye! */
     exit(0);
 }
 
-
 static enum deg_str_type deg_type = deg_dd;
 
 /*@ -globstate @*/
 static void windowsetup(void)
+/* inotialize curses and set up screen windows */
 {
     /* Set the window sizes per the following criteria:
      * 
@@ -252,6 +252,9 @@ static void windowsetup(void)
      */
     int xsize, ysize;
 
+    /* Fire up curses. */
+    (void)initscr();
+    (void)noecho();
     getmaxyx(stdscr, ysize, xsize);
 
 #ifdef TRUENORTH
@@ -396,6 +399,16 @@ static void windowsetup(void)
 }
 
 /*@ +globstate @*/
+
+static void resize(int sig UNUSED)
+/* cope with terminal resize */
+{
+    if (!isendwin()) 
+    {
+	(void)endwin();
+	windowsetup();
+    }
+}
 
 #ifdef TRUENORTH
 /* This gets called once for each new compass sentence. */
@@ -846,11 +859,10 @@ int main(int argc, char *argv[])
 	exit(2);
     }
 
-    /* Fire up curses. */
-    (void)initscr();
-    (void)noecho();
+    /* note: we're assuming BSD-style reliable signals here */
     (void)signal(SIGINT, die);
     (void)signal(SIGHUP, die);
+    (void)signal(SIGWINCH, resize);
 
     windowsetup();
 
