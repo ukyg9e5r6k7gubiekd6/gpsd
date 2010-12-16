@@ -453,7 +453,7 @@ if ($query->param("noconfigure")) {
 print "</td><td align='center'>";
 
 if ($query->param("notes")) {
-    print "Technical notes have been entered.";
+    print "Technical notes have been entered.<br/>\n";
 } else {
     print "No technical notes.<br/>\n";
 }
@@ -469,7 +469,7 @@ if ($query->param("date")) {
 }
 
 if ($query->param("sample_notes")) {
-    print "Notes on the sample have been entered.";
+    print "Notes on the sample have been entered.<br/>\n";
 } else {
     print "No notes on the sample.<br/>\n";
 }
