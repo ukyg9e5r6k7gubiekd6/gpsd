@@ -546,7 +546,7 @@ class Base:
             return "n/a"
 
     def update_latitude(self, data):
-        if data.mode >= gps.MODE_2D:
+        if data.mode >= gps.MODE_2D and hasattr(data, "lat"):
             lat = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lat))
             if data.lat < 0:
                 ns = 'S'
@@ -557,7 +557,7 @@ class Base:
             return "n/a"
 
     def update_longitude(self, data):
-        if data.mode >= gps.MODE_2D:
+        if data.mode >= gps.MODE_2D and hasattr(data, "lon"):
             lon = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lon))
             if data.lon < 0:
                 ew = 'W'
@@ -568,7 +568,7 @@ class Base:
             return "n/a"
 
     def update_altitude(self, data):
-        if data.mode >= gps.MODE_3D:
+        if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
             return "%.3f %s" % (
                 data.alt * self.conversions.altfactor,
                 self.conversions.altunits)
