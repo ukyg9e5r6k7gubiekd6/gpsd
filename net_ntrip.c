@@ -305,15 +305,16 @@ static int ntrip_stream_probe(const char *caster,
     char buf[BUFSIZ];
 
     if ((dsock = netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) == -1) {
-	printf("ntrip stream connect error %d\n", dsock);
+	gpsd_report(LOG_ERROR, "ntrip stream connect error %d\n", dsock);
 	return -1;
-    }
+    } else
+	gpsd_report(LOG_SPIN, "ntrip stream connectrd on fd %d\n", dsock);
     (void)snprintf(buf, sizeof(buf),
 		   "GET / HTTP/1.1\r\n"
 		   "User-Agent: NTRIP gpsd/%s\r\n"
 		   "Connection: close\r\n" "\r\n", VERSION);
     if (write(dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
-	printf("ntrip stream write error %d\n", dsock);
+	gpsd_report(LOG_ERROR, "ntrip stream write error %d\n", dsock);
 	return -1;
     }
     ret =
@@ -364,8 +365,12 @@ static int ntrip_stream_open(const char *caster, const char *port,
 	return -1;
     }
     if ((context->dsock =
-	 netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) < 0)
+	 netlib_connectsock(AF_UNSPEC, caster, port, "tcp")) < 0) {
+	gpsd_report(LOG_ERROR,"netlib_connectsock() returns error %d\n", errno);
 	return -1;
+    } else
+	gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
+		    context->dsock);
 
     (void)snprintf(buf, sizeof(buf),
 		   "GET /%s HTTP/1.1\r\n"

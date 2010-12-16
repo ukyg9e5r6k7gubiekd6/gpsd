@@ -96,8 +96,12 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
     if ((gpsdata->gps_fd =
 	 netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
+	gpsd_report(LOG_SPIN, "netlib_connectsock() returns error %d\n", errno);
 	return -1;
     }
+    else
+	gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
+		gpsdata->gps_fd);
 #else
     QTcpSocket *sock = new QTcpSocket();
     gpsdata->gps_fd = sock;

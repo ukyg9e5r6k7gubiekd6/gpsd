@@ -656,7 +656,8 @@ int gpsd_activate(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR, "TCP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
-	}
+	} else
+	    gpsd_report(LOG_SPIN, "TCP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_tcp;
     } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
@@ -676,7 +677,8 @@ int gpsd_activate(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
-	}
+	} else
+	    gpsd_report(LOG_SPIN, "UDP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_udp;
     }

@@ -94,7 +94,6 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	}
 
 	if (s > 0) {
-	    gpsd_report(LOG_SPIN, "close(%d) in netlib_connectsock()\n", s);
 	    (void)close(s);
 	}
     }
@@ -121,8 +120,6 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     /* set socket to noblocking */
     (void)fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
-    gpsd_report(LOG_SPIN, "netlib_connectsock() returns socket on fd %d\n",
-		s);
     return s;
     /*@ +type +mustfreefresh @*/
 }
