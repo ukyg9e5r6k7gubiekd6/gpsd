@@ -625,20 +625,21 @@ class Base:
 
     def update_skyview(self, data):
         "Update the satellite list and skyview."
-        satellites = data.satellites
-        for (i, satellite) in enumerate(satellites): 
-            self.set_satlist_field(i, 0, satellite.PRN)
-            self.set_satlist_field(i, 1, satellite.el)
-            self.set_satlist_field(i, 2, satellite.az)
-            self.set_satlist_field(i, 3, satellite.ss)
-            yesno = 'N'
-            if satellite.used:
-                yesno = 'Y'
-            self.set_satlist_field(i, 4, yesno)
-        for i in range(len(satellites), gps.MAXCHANNELS):
-            for j in range(0, 5):
-                self.set_satlist_field(i, j, "")
-        self.skyview.redraw(satellites)
+        if hasattr(data, 'satellites'):
+            satellites = data.satellites
+            for (i, satellite) in enumerate(satellites): 
+                self.set_satlist_field(i, 0, satellite.PRN)
+                self.set_satlist_field(i, 1, satellite.el)
+                self.set_satlist_field(i, 2, satellite.az)
+                self.set_satlist_field(i, 3, satellite.ss)
+                yesno = 'N'
+                if satellite.used:
+                    yesno = 'Y'
+                self.set_satlist_field(i, 4, yesno)
+            for i in range(len(satellites), gps.MAXCHANNELS):
+                for j in range(0, 5):
+                    self.set_satlist_field(i, j, "")
+            self.skyview.redraw(satellites)
 
     # Preferences
 
