@@ -162,7 +162,7 @@ be used as an peripheral to a computer.</li>
 on a car windshield or boat dash.</li>
 <li>A "survey" unit is packaged for field-survey use.</li> 
 <li>An "OEM module" is an un-cased circuit board with edge connectors.</li>
-<li>"chipset" is a bare chip or chips packaged for surface mount.</li>
+<li>A "chipset" is a bare chip or chips packaged for surface mount.</li>
 </ul>
 
 <p><em>Packaging:</em><br>
