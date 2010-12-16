@@ -408,11 +408,6 @@ def plotframe(await, fname, speed, threshold, title):
         sys.exit(1)
     device = session.data.devices[0]
     path = device["path"]
-    session.baudrate = device["bps"] 
-    session.parity = device["bps"] 
-    session.stopbits = device["stopbits"] 
-    session.cycle = device["cycle"]
-    session.gps_id = device["driver"]
     # Set parameters
     if speed:
         session.send('?DEVICE={"path":"%s","bps:":%d}' % (path, speed))
