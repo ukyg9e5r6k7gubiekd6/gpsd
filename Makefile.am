@@ -944,8 +944,8 @@ dist-rpm: distdir
 # It requires developer access verified via ssh.
 #
 upload-ftp: dist
-	shasum gpsd-$(VERSION).tar.gz >gpsd.sum
-	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd.sum"
+	shasum gpsd-$(VERSION).tar.gz >gpsd-$(VERSION).sum
+	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd-$(VERSION).sum"
 
 #
 # This is how to tag a release.
