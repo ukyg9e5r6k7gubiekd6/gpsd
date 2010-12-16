@@ -780,7 +780,7 @@ works.</p>
 <p>The outcome is that we know exactly what we're looking at, without any
 driver-type or baud rate options.</p>
 
-<p>(The above sequence of steps may be out pof date.  If so, it will 
+<p>(The above sequence of steps may be out of date.  If so, it will 
 be because we have added more recognized packet types and drivers.)</p>
 
 <h2 id="error">Error modeling</h2>
@@ -882,13 +882,29 @@ designed by fools who weren't looking past the ends of their noses)
 this code unavoidably includes some assumptions that will turn around
 and bite on various future dates. </p>
 
-<p>The two specific problems are:</p>
+<p>The three specific problems are:</p>
 
 <ol>
-<li>NMEA delivers only two-digit years.</li>
+<li><p>GPS has a Y2K-style bug, the week counter rollover, which happens 
+every 1024 weeks (roughly 20 years). At time of writing the last 0 week
+was in 1999 and the next wil be in 2019.</p>
 
-<li>SiRF chips at firmware level 231 deliver only GPS time in binary mode,
-not leap-second-corrected UTC.</li>
+<li><p>NMEA delivers only two-digit years.</p></li>
+
+<li><p>SiRF chips at firmware level 231 deliver only GPS time in binary mode,
+not leap-second-corrected UTC.</p></li>
+</ol>
+
+<p>Because of the first problem, the receiver's notion of the year may
+reset to the year of the last zero week if it is cold-booted on a date 
+after a rollover.  This can have side effects:</p>
+
+<ol>
+<li><p>The year part of the reported date will be invalid.</p></li>
+<li><p>UTC time will be correct, but a local time calculated on this 
+    will sometimes be off +- 1 hour, due to incorrect DST calculation.</p></li>
+<li><p>Some receivers may fail to get a fix, especially if they don't
+    have a recent ephemeris.</p></li>
 </ol>
 
 <p>See the timebase.h file for various constants that will need to
@@ -896,6 +912,10 @@ be tweaked occasionally to cope with these problems.</p>
 
 <p>Note that gpsd does not rely on the system clock in any way.  This
 is so you can use it to set the system clock.</p>
+
+<p>When debugging time and date issues, you may find an
+<a href="http://adn.agi.com/GNSSWeb/">interactive GPS calendar</a>
+useful.</p>
 
 <h2 id="hotplug">Hotplug interface problems</h2>
 
