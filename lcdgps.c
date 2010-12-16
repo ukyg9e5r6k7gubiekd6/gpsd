@@ -36,8 +36,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <netdb.h>
 #ifndef S_SPLINT_S
+#include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */

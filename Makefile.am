@@ -98,7 +98,7 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm
 #
 # Build gpsd
 #
-gpsd_c_sources = gpsd_dbus.c gpsd.c
+gpsd_c_sources = gpsd.c gpsd_dbus.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB_LIBS)
 
@@ -623,7 +623,9 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 SPLINTOPTS = -I/usr/include/dbus-1.0/ $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon..."
-	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
+	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources)
+	@echo "Running splint on libgpsd..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(libgpsd_c_sources)
 	@echo "Running splint on user-side libraries..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(libgps_c_sources)
 	@echo "Running splint on cgps..."

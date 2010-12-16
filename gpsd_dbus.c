@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "gpsd_config.h"
 #ifdef DBUS_ENABLE
-#include <gpsd_dbus.h>
+#include "gpsd_dbus.h"
 
 static DBusConnection *connection = NULL;
 

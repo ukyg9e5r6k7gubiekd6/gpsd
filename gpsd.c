@@ -21,17 +21,17 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <locale.h>
-#include <netdb.h>
 #ifndef S_SPLINT_S
+#include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
-#endif /* S_SPLINT_S */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
 #include <sys/un.h>
 #include <arpa/inet.h>     /* for htons() and friends */
+#endif /* S_SPLINT_S */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -433,7 +433,7 @@ static int filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, 104);	/* from sys/un.h */
     addr.sun_family = (sa_family_t)AF_UNIX;
-    (void)bind(sock, (struct sockaddr *)&addr, (socklen_t)sizeof(addr));
+    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;

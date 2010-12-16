@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include <netdb.h>
 #ifndef S_SPLINT_S
+#include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
