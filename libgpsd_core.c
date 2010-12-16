@@ -997,10 +997,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.online = 0;
 	return ERROR_IS;
     } else if (newlen == 0) {		/* zero length read, possible EOF */
-	gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
-		    session->gpsdata.dev.path,
-		    timestamp() - session->gpsdata.online);
-	session->gpsdata.online = 0;
+	
+	if (session->gpsdata.online > 0 && timestamp() - session->gpsdata.online >= session->gpsdata.dev.cycle * 2) {
+	    gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+			session->gpsdata.dev.path,
+			timestamp() - session->gpsdata.online);
+	    session->gpsdata.online = 0;
+	}
 	return NODATA_IS;
     } else if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
 	gpsd_report(LOG_RAW + 3, "New data on %s, not yet a packet\n",
