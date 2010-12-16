@@ -885,9 +885,13 @@ and bite on various future dates. </p>
 <p>The three specific problems are:</p>
 
 <ol>
-<li><p>GPS has a Y2K-style bug, the week counter rollover, which happens 
-every 1024 weeks (roughly 20 years). At time of writing the last 0 week
-was in 1999 and the next wil be in 2019.</p>
+
+<li><p>The GPS radio format has a Y2K-style bug, the week counter
+rollover, which happens either every 1024 weeks (roughly 20 years) or
+every 8192 weeks (roughly 157 years), depending on whether your
+receiver can decode a 10-bit or 13-bit GPS week field. At time of
+writing the last 0 week was in 1999, the next 10-bit wraparound will
+be in 2019, and the next 13-bit wraparound will be in 2157.</p>
 
 <li><p>NMEA delivers only two-digit years.</p></li>
 
@@ -906,6 +910,15 @@ after a rollover.  This can have side effects:</p>
 <li><p>Some receivers may fail to get a fix, especially if they don't
     have a recent ephemeris.</p></li>
 </ol>
+
+<p>The public documentation is unclear, but it appears from a
+reference in the Transmission Week Number section of IS-GPS-200
+PIRN-002 that whether you can get 10 or 13 bits is a function of the
+satellite firmware revision, with 13 bits in the Block IIF and later
+birds (the first of these was launched in May 2010). Of course your
+receiver firmware also has to know that the extra three bits are
+present; at time of writing in late 2010 this capability is at best
+rare and possibly nonexistent.</p>
 
 <p>See the timebase.h file for various constants that will need to
 be tweaked occasionally to cope with these problems.</p>
