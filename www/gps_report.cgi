@@ -180,7 +180,7 @@ print <<EOF;
 may be able to get this from the display of <code>xgps</code>; look for
 a Device Type field or at the window title bar. Alternatively, you may find
 it in the technical manual.
-<br/>Example: <code>SiRF-II</code> amd <code>2.31ES</code>.</p>
+<br/>Example: <code>SiRF-II</code> and <code>2.31ES</code>.</p>
 EOF
 
 print "<p><em>Chipset:</em>",
