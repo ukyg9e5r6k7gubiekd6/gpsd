@@ -622,8 +622,10 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/ $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
-	@echo "Running splint on daemon and libraries..."
-	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources)
+	@echo "Running splint on daemon..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
+	@echo "Running splint on user-side libraries..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(libgps_c_sources)
 	@echo "Running splint on cgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on gpsctl..."
