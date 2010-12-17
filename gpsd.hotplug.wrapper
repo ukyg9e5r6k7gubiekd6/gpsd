@@ -32,7 +32,7 @@ if [ "$ACTION" = "remove" ] ; then
   exit 0
 fi
 
-if [ -S ${GPSD_SOCKET} -a -x /usr/bin/python ]; then
+if [ -x /usr/bin/python ]; then
   exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
 fi
 
