@@ -32,10 +32,9 @@ static char *license = "BSD";
 static char *progname;
 
 static FILE *logfile;
-static time_t int_time, old_int_time;
 static bool intrack = false;
-static bool first = true;
 static time_t timeout = 5;	/* seconds */
+static double minmove = 0;	/* meters */
 #ifdef CLIENTDEBUG_ENABLE
 static int debug;
 #endif /* CLIENTDEBUG_ENABLE */
@@ -126,34 +125,46 @@ static void print_fix(struct gps_fix_t *fix, struct tm *time)
 
 static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 {
+    static time_t int_time, old_int_time;
+    static double old_lat, old_lon;
+    static bool first = true;
+
     int_time = (time_t) floor(gpsfix->time);
-    if ((int_time != old_int_time) && gpsfix->mode >= MODE_2D) {
-	struct tm time;
-	/* 
-	 * Make new track if the jump in time is above
-	 * timeout.  Handle jumps both forward and
-	 * backwards in time.  The clock sometimes jumps
-	 * backward when gpsd is submitting junk on the
-	 * dbus.
-	 */
-	/*@-type@*/
-	if (fabs(int_time - old_int_time) > timeout && !first) {
-	    print_gpx_trk_end();
-	    intrack = false;
-	}
-	/*@+type@*/
+    if ((int_time == old_int_time) || gpsfix->mode < MODE_2D)
+	return;
 
-	if (!intrack) {
-	    print_gpx_trk_start();
-	    intrack = true;
-	    if (first)
-		first = false;
-	}
+    /* may not be worth logging if we've moved only a very short distance */ 
+    if (minmove && !first && earth_distance(gpsfix->latitude, gpsfix->longitude,
+					    old_lat, old_lon) < minmove)
+	return;
 
-	old_int_time = int_time;
-	(void)gmtime_r(&(int_time), &time);
-	print_fix(gpsfix, &time);
+    /* 
+     * Make new track if the jump in time is above
+     * timeout.  Handle jumps both forward and
+     * backwards in time.  The clock sometimes jumps
+     * backward when gpsd is submitting junk on the
+     * dbus.
+     */
+    /*@-type@*/
+    if (fabs(int_time - old_int_time) > timeout && !first) {
+	print_gpx_trk_end();
+	intrack = false;
     }
+    /*@+type@*/
+
+    if (!intrack) {
+	print_gpx_trk_start();
+	intrack = true;
+	if (first)
+	    first = false;
+    }
+
+    old_int_time = int_time;
+    if (minmove) {
+	old_lat = gpsfix->latitude;
+	old_lon = gpsfix->longitude;
+    }
+    print_fix(gpsfix, gmtime(&int_time));
 }
 
 static void quit_handler(int signum)
@@ -338,7 +349,7 @@ static int socket_mainloop(void)
 static void usage(void)
 {
     fprintf(stderr,
-	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [server[:port:[device]]]\n",
+	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [-m minmove] [server[:port:[device]]]\n",
 	    progname);
     fprintf(stderr,
 	    "\tdefaults to '%s -i 5 -j 0 localhost:2947'\n", progname);
@@ -353,7 +364,7 @@ int main(int argc, char **argv)
     progname = argv[0];
 
     logfile = stdout;
-    while ((ch = getopt(argc, argv, "dD:f:hi:V")) != -1) {
+    while ((ch = getopt(argc, argv, "dD:f:hi:m:V")) != -1) {
 	switch (ch) {
 	case 'd':
 	    openlog(basename(progname), LOG_PID | LOG_PERROR, LOG_DAEMON);
@@ -392,6 +403,9 @@ int main(int argc, char **argv)
 	    if (timeout >= 3600)
 		fprintf(stderr,
 			"WARNING: track timeout is an hour or more!\n");
+	    break;
+        case 'm':
+	    minmove = (double )atoi(optarg);
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "gpxlogger revision " REVISION "\n");

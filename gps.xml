@@ -96,6 +96,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-d </arg>
       <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
+      <arg choice='opt'>-m <replaceable>minmove</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>
@@ -270,10 +271,14 @@ logging.</para>
 created if there's no fix for an interval specified by the
 <option>-i</option> and defaulting to 5 seconds.</para>
 
-<para>The <para>-d</para> option tells
+<para>The <option>-d</option> option tells
 <application>gpxlogger</application> to run as a daemon in background.
-It requires the <para>-f</para> option, which directs output to a
+It requires the <option>-f</option> option, which directs output to a
 specified logfile.</para>
+
+<para>The <option>-m</option> option sets a minimum move distance in
+meters (it may include a fractional decimal part).  Motions shorter
+than this will not be logged.</para>
 
 <para>If D-Bus support is available on the host and GPSD is
 configured  to use it, this program listens to DBUS broadcasts 
