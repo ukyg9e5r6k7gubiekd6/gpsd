@@ -4,7 +4,8 @@
   in the Client HOWTO). cgps now handles resize signals. Code can now
   link with uClibc for embedded use.  Various bugs in the C++ binding
   have been fixed. gpxlogger can now daemonize and write to a specified
-  log file.
+  log file. A gpsd client can now set any locale it likes, and JSON
+  will still be parsed using the C locale matching the daemon's.
 
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!

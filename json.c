@@ -56,6 +56,7 @@ PERMISSIONS
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <locale.h>
 
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"
@@ -555,8 +556,14 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 int json_read_object(const char *cp, const struct json_attr_t *attrs,
 		     /*@null@*/ const char **end)
 {
+    char *savedlocale = setlocale(LC_ALL, NULL);
+    int st;
+
+    setlocale(LC_ALL, "C");
     json_debug_trace((1, "json_read_object() sees '%s'\n", cp));
-    return json_internal_read_object(cp, attrs, NULL, 0, end);
+    st = json_internal_read_object(cp, attrs, NULL, 0, end);
+    setlocale(LC_ALL, savedlocale);
+    return st;
 }
 
 const /*@observer@*/ char *json_error_string(int err)

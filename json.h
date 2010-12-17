@@ -100,6 +100,7 @@ void json_enable_debug(int, FILE *);
 #define JSON_ERR_QNONSTRING	19	/* saw quoted value when expecting nonstring */
 #define JSON_ERR_NONQSTRING	19	/* didn't see quoted value when expecting string */
 #define JSON_ERR_MISC		20	/* other data conversion error */
+#define JSON_ERR_BADNUM		21	/* error while parsing a numerical argument */
 
 /*
  * Use the following macros to declare template initializers for structobject 
