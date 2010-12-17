@@ -818,12 +818,12 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
     bool found = false;
 
     gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
-    /*@i2@*/ libusb_init(NULL);
+    libusb_init(NULL);
 
     /*@-nullpass@*/
     if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
 	gpsd_report(LOG_ERROR, "USB device list call failed.\n");
-	/*@i1@*/ libusb_exit(NULL);
+	libusb_exit(NULL);
 	return false;
     }
     /*@+nullpass@*/
@@ -855,7 +855,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
     gpsd_report(LOG_SHOUT, "vendor/product match with %04x:%04x %sfound\n",
 		vendor, product, found ? "" : "not ");
     libusb_free_device_list(list, 1);
-    /*@i1@*/ libusb_exit(NULL);
+    libusb_exit(NULL);
     return found;
 }
 

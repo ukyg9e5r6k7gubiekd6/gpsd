@@ -348,7 +348,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     	strcpy( chrony_path, "/tmp/chrony");
     }
 
-    /*@i1@*/s.sun_family = AF_UNIX;
+    s.sun_family = AF_UNIX;
     (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s.%s.sock", chrony_path,
         basename(session->gpsdata.dev.path));
     /* the socket will be either, for root:
