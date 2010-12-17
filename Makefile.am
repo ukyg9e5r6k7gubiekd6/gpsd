@@ -333,7 +333,6 @@ QTLIB_sources = gpsutils.c \
 		libgpsmm.cpp \
 		libgps_json.c \
 		hex.c \
-		gpsd_report.c \
 		strl.c \
 		shared_json.c \
 		rtcm2_json.c \
