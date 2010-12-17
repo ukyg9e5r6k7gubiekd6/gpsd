@@ -3,10 +3,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <syslog.h>
 #include <math.h>
 #include <errno.h>
+#include <libgen.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -29,6 +31,7 @@ static char *author = "Amaury Jacquot, Chris Kuethe";
 static char *license = "BSD";
 static char *progname;
 
+static FILE *logfile;
 static time_t int_time, old_int_time;
 static bool intrack = false;
 static bool first = true;
@@ -39,58 +42,54 @@ static int debug;
 
 static void print_gpx_header(void)
 {
-    (void)printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-    (void)printf("<gpx version=\"1.1\" creator=\"navsys logger\"\n");
-    (void)
-	printf
-	("        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-    (void)printf("        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
-    (void)
-	printf
-	("        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
-    (void)printf("        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
-    (void)printf(" <metadata>\n");
-    (void)printf("  <name>NavSys GPS logger dump</name>\n");
-    (void)printf("  <author>%s</author>\n", author);
-    (void)printf("  <copyright>%s</copyright>\n", license);
-    (void)printf(" </metadata>\n");
-    (void)fflush(stdout);
+    (void)fprintf(logfile,"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+    (void)fprintf(logfile,"<gpx version=\"1.1\" creator=\"navsys logger\"\n");
+    (void)fprintf(logfile,"        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+    (void)fprintf(logfile,"        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
+    (void)fprintf(logfile,"        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
+    (void)fprintf(logfile,"        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
+    (void)fprintf(logfile," <metadata>\n");
+    (void)fprintf(logfile,"  <name>NavSys GPS logger dump</name>\n");
+    (void)fprintf(logfile,"  <author>%s</author>\n", author);
+    (void)fprintf(logfile,"  <copyright>%s</copyright>\n", license);
+    (void)fprintf(logfile," </metadata>\n");
+    (void)fflush(logfile);
 }
 
 static void print_gpx_trk_end(void)
 {
-    (void)printf("  </trkseg>\n");
-    (void)printf(" </trk>\n");
-    (void)fflush(stdout);
+    (void)fprintf(logfile,"  </trkseg>\n");
+    (void)fprintf(logfile," </trk>\n");
+    (void)fflush(logfile);
 }
 
 static void print_gpx_footer(void)
 {
     if (intrack)
 	print_gpx_trk_end();
-    (void)printf("</gpx>\n");
-    (void)fclose(stdout);
+    (void)fprintf(logfile,"</gpx>\n");
+    (void)fclose(logfile);
 }
 
 static void print_gpx_trk_start(void)
 {
-    (void)printf(" <trk>\n");
-    (void)printf("  <trkseg>\n");
-    (void)fflush(stdout);
+    (void)fprintf(logfile," <trk>\n");
+    (void)fprintf(logfile,"  <trkseg>\n");
+    (void)fflush(logfile);
 }
 
 static void print_fix(struct gps_fix_t *fix, struct tm *time)
 {
-    (void)printf("   <trkpt lat=\"%f\" lon=\"%f\">\n",
+    (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 fix->latitude, fix->longitude);
-    (void)printf("    <ele>%f</ele>\n", fix->altitude);
-    (void)printf("    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
+    (void)fprintf(logfile,"    <ele>%f</ele>\n", fix->altitude);
+    (void)fprintf(logfile,"    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
 		 time->tm_year + 1900, time->tm_mon + 1, time->tm_mday,
 		 time->tm_hour, time->tm_min, time->tm_sec);
     if (fix->mode == MODE_NO_FIX)
-	(void)fprintf(stdout, "    <fix>none</fix>\n");
+	(void)fprintf(logfile, "    <fix>none</fix>\n");
     else
-	(void)fprintf(stdout, "    <fix>%dd</fix>\n", fix->mode);
+	(void)fprintf(logfile, "    <fix>%dd</fix>\n", fix->mode);
 #if 0
     /*
      * Can't print this more detailed report because in D-Bus mode
@@ -100,29 +99,29 @@ static void print_fix(struct gps_fix_t *fix, struct tm *time)
     if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= MODE_3D)) {
 	/* dgps or pps */
 	if (gpsdata->fix.mode == 4) {	/* military pps */
-	    (void)printf("        <fix>pps</fix>\n");
+	    (void)fprintf(logfile,"        <fix>pps</fix>\n");
 	} else {		/* civilian dgps or sbas */
-	    (void)printf("        <fix>dgps</fix>\n");
+	    (void)fprintf(logfile,"        <fix>dgps</fix>\n");
 	}
     } else {			/* no dgps or pps */
 	if (gpsdata->fix.mode == MODE_3D) {
-	    (void)printf("        <fix>3d</fix>\n");
+	    (void)fprintf(logfile,"        <fix>3d</fix>\n");
 	} else if (gpsdata->fix.mode == MODE_2D) {
-	    (void)printf("        <fix>2d</fix>\n");
+	    (void)fprintf(logfile,"        <fix>2d</fix>\n");
 	} else if (gpsdata->fix.mode == MODE_NOFIX) {
-	    (void)printf("        <fix>none</fix>\n");
+	    (void)fprintf(logfile,"        <fix>none</fix>\n");
 	}			/* don't print anything if no fix indicator */
     }
 
     /* print # satellites used in fix, if reasonable to do so */
     if (gpsdata->fix.mode >= MODE_2D) {
-	(void)printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
-	(void)printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
+	(void)fprintf(logfile,"        <hdop>%.1f</hdop>\n", gpsdata->hdop);
+	(void)fprintf(logfile,"        <sat>%d</sat>\n", gpsdata->satellites_used);
     }
 #endif
 
-    (void)printf("   </trkpt>\n");
-    (void)fflush(stdout);
+    (void)fprintf(logfile,"   </trkpt>\n");
+    (void)fflush(logfile);
 }
 
 static void conditionally_log_fix(struct gps_fix_t *gpsfix)
@@ -339,7 +338,7 @@ static int socket_mainloop(void)
 static void usage(void)
 {
     fprintf(stderr,
-	    "Usage: %s [-V] [-h] [-i timeout] [-j casoc] [server[:port:[device]]]\n",
+	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [server[:port:[device]]]\n",
 	    progname);
     fprintf(stderr,
 	    "\tdefaults to '%s -i 5 -j 0 localhost:2947'\n", progname);
@@ -349,16 +348,43 @@ static void usage(void)
 int main(int argc, char **argv)
 {
     int ch;
+    bool daemonize = false;
 
     progname = argv[0];
-    while ((ch = getopt(argc, argv, "D:hi:V")) != -1) {
+
+    logfile = stdout;
+    while ((ch = getopt(argc, argv, "dD:f:hi:V")) != -1) {
 	switch (ch) {
+	case 'd':
+	    openlog(basename(progname), LOG_PID | LOG_PERROR, LOG_DAEMON);
+	    daemonize = true;
+	    break;
 #ifdef CLIENTDEBUG_ENABLE
 	case 'D':
 	    debug = atoi(optarg);
-	    gps_enable_debug(debug, stdout);
+	    gps_enable_debug(debug, logfile);
 	    break;
 #endif /* CLIENTDEBUG_ENABLE */
+       case 'f':       /* Output file name. */
+            {
+                char    fname[PATH_MAX];
+                time_t  t;
+                size_t  s;
+
+                t = time(NULL);
+                s = strftime(fname, sizeof(fname), optarg, localtime(&t));
+                if (s == 0) {
+                        syslog(LOG_ERR,
+                            "Bad template \"%s\", logging to stdout.", optarg);
+                        break;
+                }
+                logfile = fopen(fname, "w");
+                if (logfile == NULL)
+                        syslog(LOG_ERR,
+                            "Failed to open %s: %s, logging to stdout.",
+                            fname, strerror(errno));
+                break;
+            }
 	case 'i':		/* set polling interfal */
 	    timeout = (time_t) atoi(optarg);
 	    if (timeout < 1)
@@ -376,12 +402,17 @@ int main(int argc, char **argv)
 	}
     }
 
+    if (daemonize && logfile == stdout) {
+	syslog(LOG_ERR, "Daemon mode with no valid logfile name - exiting.");
+	exit(1);
+    }
+
     if (optind < argc) {
 	gpsd_source_spec(argv[optind], &source);
     } else
 	gpsd_source_spec(NULL, &source);
 #if 0
-    (void)printf("<!-- server: %s port: %s  device: %s -->\n",
+    (void)fprintf(logfile,"<!-- server: %s port: %s  device: %s -->\n",
 		 source.server, source.port, source.device);
 #endif
 
@@ -393,7 +424,13 @@ int main(int argc, char **argv)
     (void)signal(SIGQUIT, quit_handler);
     (void)signal(SIGINT, quit_handler);
 
-    //openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
+    /* might be time to daemonize */
+    if (daemonize) {
+	/* not SuS/POSIX portable, but we have our own fallback version */
+	if (daemon(0, 0) != 0)
+	    (void) fprintf(stderr,"demonization failed: %s\n", strerror(errno));
+    }
+
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
     print_gpx_header();

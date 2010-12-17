@@ -94,6 +94,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>gpxlogger</command>  
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
+      <arg choice='opt'>-d </arg>
+      <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>
@@ -268,6 +270,11 @@ logging.</para>
 created if there's no fix for an interval specified by the
 <option>-i</option> and defaulting to 5 seconds.</para>
 
+<para>The <para>-d</para> option tells
+<application>gpxlogger</application> to run as a daemon in background.
+It requires the <para>-f</para> option, which directs output to a
+specified logfile.</para>
+
 <para>If D-Bus support is available on the host and GPSD is
 configured  to use it, this program listens to DBUS broadcasts 
 from <application>gpsd</application>. (org.gpsd.fix).  Otherwise,
@@ -299,7 +306,7 @@ of interest to anyone except GPSD developers.</para>
 Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond,
 Jeff Francis (cgps). Amaury Jacquot <email>sxpert@sxpert.org</email>
 &amp; Petter Reinholdtsen <email>pere@hungry.com</email> (gpxlogger).
-Chris Kuethe <email>chris.kuethe@gmail.com</email> (cgpxlogger).
+Chris Kuethe <email>chris.kuethe@gmail.com</email> (gpxlogger).
 </para>
 
 <para>This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
