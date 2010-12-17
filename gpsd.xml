@@ -1643,6 +1643,12 @@ accuracy limit,the satellites only emit navigation messages at
 <application>gpsd</application> reports in time/position/velocity
 messages are normally accurate only to 1/100th of a second.</para>
 
+<para>GPS date reporting has a Y2K-like problem for which
+<application>gpsd</application> cannot compensate; GPS dates
+are shipped as (week, second) pairs in which the week part is a 10 
+or 13-bit counter. When the counter rolls over, a GPS receiver
+may see and report a date 1024 or 8192 weeks in the past.</para>
+
 </refsect1>
 <refsect1 id='ntp'><title>USE WITH NTP</title>
 

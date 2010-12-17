@@ -5,7 +5,7 @@
 # Location: Rotterdam, NL, 51.9N 4.6E
 # Notess: Unit was stationary.  Part without fix (antenna
 #	  shielded) and stationary fix.  Sentences with
-#	  fix begin at timramp 085515
+#	  fix begin at timestamp 085515
 #
 $GPTXT,01,01,02,u-blox ag - www.u-blox.com*50
 $GPTXT,01,01,02,HW  UBX-G50xx  00040005 *53
