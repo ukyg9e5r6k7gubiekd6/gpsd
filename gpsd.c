@@ -38,14 +38,6 @@
 
 #include "gpsd_config.h"
 
-#if defined (HAVE_PATH_H)
-#include <paths.h>
-#else
-#if !defined (_PATH_DEVNULL)
-#define _PATH_DEVNULL    "/dev/null"
-#endif
-#endif
-
 #ifdef DBUS_ENABLE
 #include "gpsd_dbus.h"
 #endif
@@ -168,39 +160,6 @@ static void onsig(int sig)
 {
     /* just set a variable, and deal with it in the main loop */
     signalled = (sig_atomic_t) sig;
-}
-
-static int daemonize(void)
-{
-    int fd;
-    pid_t pid;
-
-    /*@ -type @*//* weirdly, splint 3.1.2 is confused by fork() */
-    switch (pid = fork()) {
-    case -1:
-	return -1;
-    case 0:			/* child side */
-	break;
-    default:			/* parent side */
-	exit(0);
-    }
-    /*@ +type @*/
-
-    if (setsid() == -1)
-	return -1;
-    if (chdir("/") == -1)
-	return -1;
-    /*@ -nullpass @*/
-    if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
-	(void)dup2(fd, STDIN_FILENO);
-	(void)dup2(fd, STDOUT_FILENO);
-	(void)dup2(fd, STDERR_FILENO);
-	if (fd > 2)
-	    (void)close(fd);
-    }
-    /*@ +nullpass @*/
-    in_background = true;
-    return 0;
 }
 
 #if defined(PPS_ENABLE)
@@ -1628,8 +1587,14 @@ int main(int argc, char *argv[])
 		    control_socket);
     }
 
-    if (go_background)
-	(void)daemonize();
+    /* might be time to daemonize */
+    if (go_background) {
+	/* not SuS/POSIX portable, but we have our own fallback version */
+	if (daemon(0, 0) == 0)
+	    in_background = true;
+        else
+	    gpsd_report(LOG_ERROR,"demonization failed: %s\n",strerror(errno));
+    }
 
     if (pid_file) {
 	FILE *fp;

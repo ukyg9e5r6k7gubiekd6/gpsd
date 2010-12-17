@@ -175,6 +175,10 @@ libgps_c_sources = \
 	shared_json.c \
 	strl.c
 
+if NO_DAEMON3
+libgps_c_sources += daemon.c
+endif
+
 libgpsd_c_sources = \
 	bits.c \
 	bsd-base64.c \
