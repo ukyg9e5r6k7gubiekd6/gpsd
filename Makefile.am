@@ -427,7 +427,7 @@ if LIB_Q_GPSMM_ENABLE
 #
 test_qgpsmm_SOURCES = test_gpsmm.cpp
 test_qgpsmm_LDFLAGS = -Wl,-rpath,$(srcdir)/libQgpsmm/binaries
-test_qgpsmm_LDADD = $(LIBC) $(LIBUSB) $(QtNetwork_LIBS) -LlibQgpsmm/binaries -lQgpsmm
+test_qgpsmm_LDADD = $(LIBC) $(LIBUSB) $(QtNetwork_LIBS) libgps.la -LlibQgpsmm/binaries -lQgpsmm
 test_qgpsmm_DEPENDENCIES = libQgpsmm/binaries/libQgpsmm.so
 endif
 
