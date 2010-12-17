@@ -1211,7 +1211,7 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
 static void pseudonmea_report(struct subscriber_t *sub,
 			  gps_mask_t changed,
 			  struct gps_device_t *device)
-/* report pseodo-NMEA in appropriate circumstances */
+/* report pseudo-NMEA in appropriate circumstances */
 {
     if (GPS_PACKET_TYPE(device->packet.type)
 	&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
