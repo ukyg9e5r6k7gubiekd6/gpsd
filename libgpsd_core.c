@@ -3,13 +3,14 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <sys/time.h>
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <libgen.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
 #include <sys/socket.h>
@@ -18,8 +19,17 @@
 
 #include "gpsd.h"
 
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-#include <time.h>		/* for clock_gettime() */
+#if defined(PPS_ENABLE)
+/*
+ * Warning: This is a potential portability problem. 
+ * It's needed so that TIOCMIWAIT will be defined and the serial-PPS 
+ * code will work, but it's not a SuS/POSIX standard header.  We're
+ * going to include it unconditionally here because we expect both
+ * Linux and BSD to have it and we want compilation to break with
+ * an audible snapping 
+ */
+#include <sys/ioctl.h>
+
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
@@ -291,6 +301,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
 }
 #endif
 
+/*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
@@ -624,6 +635,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     return NULL;
 }
+/*@+mustfreefresh +type +unrecog@*/
 #endif /* PPS_ENABLE */
 
 /*@ -branchstate @*/
