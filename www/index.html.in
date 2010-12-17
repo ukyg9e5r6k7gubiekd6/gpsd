@@ -407,8 +407,8 @@ useful tutorial even if your actual device isn't a Garmin 18; many
 of the setup steps and caveats will be the same.</p>
 
 <p>Diego Berge has written a prototype <a
-href="http://www.navlost.eu/survey/gpsd/">Qt-based client</a>,
-basically <code>xgps</code> with a more modern look and feel.
+href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
+<code>xgps</code> with a Qt look and feel.
 
 <p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
 
