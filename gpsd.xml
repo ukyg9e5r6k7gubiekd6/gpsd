@@ -1115,7 +1115,10 @@ object.</para>
 	for a channel, <application>gpsd</application> reports the
 	unprocessed NMEA or AIVDM data stream from whatever device is attached.
 	Binary GPS packets are hex-dumped.  RTCM2 and RTCM3
-        packets are not dumped in raw mode.</entry>
+        packets are not dumped in raw mode. When this attribute is set to
+	2 for a channel that processes binary data,
+	<application>gpsd</application> reports the received data verbatim 
+	without hex-dumping.</entry>
 </row>
 <row>
 	<entry>scaled</entry>
