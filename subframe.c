@@ -126,7 +126,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     alert = ((words[1] >> 6) & 0x01);
     antispoof = ((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
-		"50B: Subframe:%d SV:%2u TOW17:%6u Alert:%u AS:%u"
+		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u"
 		"\n", 
 			subframe, svid, tow17, alert, antispoof);
     /*
