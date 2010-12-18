@@ -418,7 +418,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-    if (session->gpsdata.dev.baudrate >= 38400) {
+    if ( (session->gpsdata.dev.baudrate >= 38400)
+      || (session->sourcetype == source_usb) ) {
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
