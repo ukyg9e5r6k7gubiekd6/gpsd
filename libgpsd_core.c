@@ -425,16 +425,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    kpps_edge = 0;
 		    tv_kpps = pi.clear_timestamp;
 		}
-		gpsd_report(LOG_PROG, "KPPS data: using %s,"
-		       "assert %ld.%09ld, sequence: %ld - "
+		gpsd_report(LOG_PROG, "assert %ld.%09ld, sequence: %ld - "
 		       "clear  %ld.%09ld, sequence: %ld\n",
-		       kpps_edge ? "assert" : "clear",
 		       pi.assert_timestamp.tv_sec,
 		       pi.assert_timestamp.tv_nsec,
 		       pi.assert_sequence,
 		       pi.clear_timestamp.tv_sec,
 		       pi.clear_timestamp.tv_nsec, 
 		       pi.clear_sequence);
+		gpsd_report(LOG_PROG, "KPPS data: using %s",
+		       kpps_edge ? "assert" : "clear");
+
 #define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
 	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[kpps_edge]);
 	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(kpps_edge == 0)]);
@@ -492,7 +493,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    // strange, try again
 	    continue;
 	}
-	gpsd_report(LOG_INF, "PPS cycle: %d, duration: %d @ %lu.%06lu\n",
+	gpsd_report(LOG_INF, "PPS  cycle: %7d, duration: %7d @ %lu.%06lu\n",
 		    cycle, duration,
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
