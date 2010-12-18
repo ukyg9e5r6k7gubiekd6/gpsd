@@ -155,7 +155,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    iodc += ((words[7] >> 16) & 0x00FF);
 	    session->context->gps_week =
 		(unsigned short)((words[2] >> 14) & 0x03ff);
-	    gpsd_report(LOG_PROG, "50B: Subframe 1 SV:%2u WN:%4u IODC:%4u"
+	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 		" L2:%u ura:%u hlth:%u L2P:%u"
 		" Tgd:%u toc:%u af2:%3u"
 	        " af1:%5u af0:%7u\n", svid,
@@ -185,7 +185,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int fit    = ((words[9] >>  7) & 0x000001);
 	    unsigned int aodo   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 2 SV:%2u IODE:%u Crs:%u deltan:%u m0:%u "
+		"50B: SF:2 SV:%2u IODE:%u Crs:%u deltan:%u m0:%u "
 		"Cuc:%u e:%u Cus:%u sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
 		    svid, iode, crs, deltan, m0,
 		    cuc, e, cus, sqrta, toe, fit, aodo);
@@ -193,19 +193,31 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
-	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    unsigned int cic = (words[2] & 0xFFFF00) >> 8;
-	    unsigned int cis = (words[4] & 0xFFFF00) >> 8;
+	    unsigned int cic = ((words[2] >>  8) & 0x00FFFF);
+	    unsigned int om0 = ( words[2] & 0x0000FF);
+	    om0 <<= 24;
+	    om0             += ( words[3] & 0x00FFFFFF);
+	    unsigned int cis = ((words[4] >>  8) & 0x00FFFF);
+	    unsigned int i0  = ( words[4] & 0x0000FF);
+	    i0  <<= 24;
+	    i0              += ( words[5] & 0x00FFFFFF);
+	    unsigned int crc = ((words[6] >>  8) & 0x00FFFF);
+	    unsigned int om  = ( words[6] & 0x0000FF);
+	    om  <<= 24;
+	    om              += ( words[7] & 0x00FFFFFF);
+	    unsigned int omd = ( words[8] & 0x00FFFFFF);
 	    unsigned int iode = (words[9] & 0xFF0000) >> 16; 
+	    unsigned int iote = (words[9] & 0x003FFF) >>  2; 
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 3 SV:%2u Cic:%u Cis:%u iode:%u\n", 
-			svid, cic, cis, iode);
+		"50B: SF:3 SV:%2u IODE:%3u IOTE:%u Cic:%u om0:%u Cis:%u i0:%u "
+		" crc:%u om:%u omd:%u\n", 
+			svid, iode, iote, cic, om0, cis, i0, crc, om, omd );
 	}
 	break;
     case 4:
 	gpsd_report(LOG_PROG,
-		"50B: Subframe 4-%d data_id %d\n",
+		"50B: SF:4-%d data_id %d\n",
 		pageid, data_id);
 	switch (pageid) {
 	case 1:
@@ -348,13 +360,13 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int omega = (words[7] & 0xFFFFFF);
 	    unsigned int M0 = (words[8] & 0xFFFFFF);
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 5 SV:%2u data_id %d e:%u svh:%u"
+		"50B: SF:5 SV:%2u data_id %d e:%u svh:%u"
 		" toa:%u deltai:%u sqrtA:%u Omega0:%u omega:%u M0:%u\n",
 		pageid, data_id, e, svh,  toa, deltai, sqrtA, Omega0,
 		omega,M0);
 	} else {
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 5-%d data_id %d\n",
+		"50B: SF:5-%d data_id %d\n",
 		pageid, data_id);
 	}
 	break;
