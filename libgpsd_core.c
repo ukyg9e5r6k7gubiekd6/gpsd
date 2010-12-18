@@ -365,6 +365,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	chronyfd = -1;
 	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", 
 	    s.sun_path);
+    } else {
+	gpsd_report(LOG_RAW, "PPS using chrony socket: %s\n", chrony_path);
     }
 
     /* end chrony */
@@ -628,7 +630,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    TSTOTV( &tv, &ts );
 	    (void)ntpshm_pps(session, &tv);
 	} else {
-	    gpsd_report(LOG_INF, "PPS pulse rejected\n");
+	    gpsd_report(LOG_INF, "PPS edge rejected\n");
 	}
 
     }
