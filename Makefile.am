@@ -12,21 +12,6 @@ ACLOCAL_AMDFLAGS = -I m4
 
 CLEANFILES =
 
-# For a detailed explanation of what this ugly code is doing, see
-# http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
-MULTIOUT_RECOVER_DELETED = \
-	if test -f '$@'; then :; else \
-	  trap "rm -rf '$$WITNESS.lock' '$$WITNESS'" HUP INT PIPE TERM; \
-	  if mkdir "$$WITNESS.lock" 2>/dev/null; then \
-	    rm -f "$$WITNESS"; \
-	    $(MAKE) $(AM_MAKEFLAGS) "$$WITNESS"; \
-	    result=$$?; rm -rf "$$WITNESS.lock"; exit $$result; \
-	  else \
-	    while test -d "$$WITNESS.lock"; do sleep 1; done; \
-	    test -f "$$WITNESS"; \
-	  fi; \
-	fi
-
 #SUBDIRS = contrib
 
 XMLTO = xmlto
@@ -283,10 +268,6 @@ if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so gpslib.so
 noinst_SCRIPTS += stamp-python setup.py
 
-# Multiple-outputs hack.  See
-# http://www.gnu.org/software/automake/manual/automake.html#Multiple-Outputs
-$(PYEXTENSIONS): stamp-python
-	+@WITNESS=stamp-python; $(MULTIOUT_RECOVER_DELETED)
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
 stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST)
@@ -358,9 +339,6 @@ QMAKE_OPTS = "PREFIX=${prefix}" \
 
 libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro gpsd.h ais_json.i
 	cd $(srcdir)/libQgpsmm && $(QMAKE) $(QMAKE_OPTS)
-# Yet another multiple-outputs hack:
-$(QTLIBS): stamp-qt
-	        +@WITNESS=stamp-qt; $(MULTIOUT_RECOVER_DELETED)
 stamp-qt: $(QTLIB_sources) libQgpsmm/Makefile
 	$(MAKE) -C $(srcdir)/libQgpsmm
 	touch $@
@@ -372,6 +350,13 @@ clean-local:
 	rm -f libgps
 # Clean up after Python and QT
 if HAVE_PYTHON
+	(cd '$(srcdir)' && \
+	env abs_builddir='$(abs_builddir)' \
+	    MAKE='$(MAKE)' \
+	        $(PYTHON) setup.py clean \
+	                --build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
+	                --build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
+	                --mangenerator '$(XMLPROC)')
 	rm -rf build
 	rm -f gps/*.so gps/*.pyc stamp-python*.tmp
 	for i in $(PYTHONSCRIPTS_DIST); do rm -f $${i}c; done
