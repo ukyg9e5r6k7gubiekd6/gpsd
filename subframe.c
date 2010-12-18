@@ -53,7 +53,8 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     if (preamble == 0x8b) {	/* preamble is inverted */
 	words[0] ^= 0x3fffffc0;	/* invert */
     } else if (preamble != 0x74) {
-	gpsd_report(LOG_WARN,
+	/* strangely this is very common, so don't log it */
+	gpsd_report(LOG_IO,
 		    "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n",
 		    preamble);
 	return 0;
@@ -70,7 +71,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	}
 	parity = isgps_parity(words[i]);
 	if (parity != (words[i] & 0x3f)) {
-	    gpsd_report(LOG_PROG,
+	    gpsd_report(LOG_IO,
 			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n",
 			i, parity, (words[i] & 0x1));
 	    return 0;
