@@ -448,7 +448,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 
 #ifdef ALLOW_RECONFIGURE
     if ( (session->gpsdata.dev.baudrate < 38400) 
-      || (session->sourcetype == source_usb) ) {
+      && (session->sourcetype != source_usb) ) {
 	gpsd_report(LOG_PROG, "SiRF: Disabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
     }
