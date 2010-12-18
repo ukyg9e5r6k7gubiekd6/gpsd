@@ -126,7 +126,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     alert = ((words[1] >> 6) & 0x01);
     antispoof = ((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
-		"50B: Subframe:%d, SV:%2u TOW17:%6u Alert:%u AS:%u"
+		"50B: Subframe:%d SV:%2u TOW17:%6u Alert:%u AS:%u"
 		"\n", 
 			subframe, svid, tow17, alert, antispoof);
     /*
@@ -138,8 +138,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 
     switch (subframe) {
     case 1:
-	/* subframe 1: clock parameters */
-	/* get Week Number WN) from subframe 1 */
+	/* subframe 1: clock parameters for transmitting SV */
+	/* get Week Number (WN) from subframe 1 */
 	{
 	    unsigned int l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
 	    unsigned int ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
@@ -167,12 +167,28 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    unsigned int iode = (words[2] & 0xFF0000) >> 16; 
-	    unsigned int crs = (words[2] & 0x00FFFF);
-	    unsigned int deltan = (words[3] & 0xFFFF00) >> 8;
+	    unsigned int iode   = ((words[2] >> 16) & 0x00FF);
+	    unsigned int crs    = ( words[2] & 0x00FFFF);
+	    unsigned int deltan = ((words[3] >>  8) & 0x00FFFF);
+	    unsigned int m0     = ( words[3] & 0x0000FF);
+	    m0 <<= 24;
+	    m0                 += ( words[4] & 0x00FFFFFF);
+	    unsigned int cuc    = ((words[5] >>  8) & 0x00FFFF);
+	    unsigned int e      = ( words[5] & 0x0000FF);
+	    e <<= 24;
+	    e                  += ( words[6] & 0x00FFFFFF);
+	    unsigned int cus    = ((words[7] >>  8) & 0x00FFFF);
+	    unsigned int sqrta  = ( words[7] & 0x0000FF);
+	    sqrta <<= 24;
+	    sqrta              += ( words[8] & 0x00FFFFFF);
+	    unsigned int toe    = ((words[9] >>  8) & 0x00FFFF);
+	    unsigned int fit    = ((words[9] >>  7) & 0x000001);
+	    unsigned int aodo   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 2 SV:%2u, IODE:%u, Crs:%u, deltan:%u\n", 
-			svid, iode, crs, deltan);
+		"50B: Subframe 2 SV:%2u IODE:%u Crs:%u deltan:%u m0:%u "
+		"Cuc:%u e:%u Cus:%u sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
+		    svid, iode, crs, deltan, m0,
+		    cuc, e, cus, sqrta, toe, fit, aodo);
 	}
 	break;
     case 3:
@@ -338,7 +354,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		omega,M0);
 	} else {
 	    gpsd_report(LOG_PROG,
-		"50B: Page 5-%d data_id %d\n",
+		"50B: Subframe 5-%d data_id %d\n",
 		pageid, data_id);
 	}
 	break;
