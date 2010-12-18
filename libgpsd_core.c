@@ -444,9 +444,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    duration_kpps = 0;
 		}
 #undef timediff_kpps
-	        gpsd_report(LOG_INF, "KPPS cycle: %d, duration: %d @ %lu.%09lu\n",
+	        gpsd_report(LOG_INF, 
+		    "KPPS cycle: %7d, duration: %7d @ %lu.%09lu\n",
 		    cycle_kpps, duration_kpps,
-		    (unsigned long)tv_kpps.tv_sec, (unsigned long)tv_kpps.tv_nsec);
+		    (unsigned long)tv_kpps.tv_sec, 
+		    (unsigned long)tv_kpps.tv_nsec);
 		pulse_kpps[kpps_edge] = tv_kpps;
 	    }
 	}
