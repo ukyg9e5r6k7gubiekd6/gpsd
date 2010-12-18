@@ -433,7 +433,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		       pi.clear_timestamp.tv_sec,
 		       pi.clear_timestamp.tv_nsec, 
 		       pi.clear_sequence);
-		gpsd_report(LOG_PROG, "KPPS data: using %s",
+		gpsd_report(LOG_PROG, "KPPS data: using %s\n",
 		       kpps_edge ? "assert" : "clear");
 
 #define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
