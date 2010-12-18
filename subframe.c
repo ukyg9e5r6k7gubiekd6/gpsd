@@ -101,13 +101,15 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     /* FIXME!! I really doubt this is Big Endian copmatible */
     unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
+    unsigned int tow;
+    unsigned char alert, antispoof;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		svid, words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (unsigned int)((words[0] >> 16) & 0xffL);
+    preamble = (unsigned int)((words[0] >> 16) & 0x0ffL);
     if (preamble == 0x8b) {
 	preamble ^= 0xff;
 	words[0] ^= 0xffffff;
@@ -119,10 +121,14 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	return;
     }
     /* The subframe ID is in the Hand Over Word (page 80) */
+    tow = ((words[1] >> 7) & 0x01FFFF);
     subframe = ((words[1] >> 2) & 0x07);
+    alert = ((words[1] >> 6) & 0x01);
+    antispoof = ((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
-		"50B: gpsd_interpret_subframe: Subframe:%d, SVID:%u\n", 
-			subframe, svid);
+		"50B: Subframe:%d, SV:%u TOW:%6u Alert:%u AS:%u"
+		"\n", 
+			subframe, svid, tow, alert, antispoof);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
@@ -140,8 +146,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int af1 = (words[8] & 0x00FFFF);
 	    session->context->gps_week =
 		(unsigned short)((words[2] & 0xffc000) >> 14);
-	    gpsd_report(LOG_PROG, "50B: Subframe 1 WN: %u Tgd:%u toc:%u "
-	        " af1:%u\n",
+	    gpsd_report(LOG_PROG, "50B: Subframe 1, SV:%u WN:%u Tgd:%u toc:%u "
+	        " af1:%u\n", svid,
 	    	session->context->gps_week, tgd, toc, af1);
 	}
 	break;
@@ -152,7 +158,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int crs = (words[2] & 0x00FFFF);
 	    unsigned int deltan = (words[3] & 0xFFFF00) >> 8;
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 2, SVID:%u, IODE:%u, Crs:%u, deltan:%u\n", 
+		"50B: Subframe 2, SV:%u, IODE:%u, Crs:%u, deltan:%u\n", 
 			svid, iode, crs, deltan);
 	}
 	break;
@@ -164,7 +170,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int cis = (words[4] & 0xFFFF00) >> 8;
 	    unsigned int iode = (words[9] & 0xFF0000) >> 16; 
 	    gpsd_report(LOG_PROG,
-		"50B: Subframe 3, SVID:%u, Cic:%u, Cis:%u, iode:%u\n", 
+		"50B: Subframe 3, SV:%u, Cic:%u, Cis:%u, iode:%u\n", 
 			svid, cic, cis, iode);
 	}
 	break;
