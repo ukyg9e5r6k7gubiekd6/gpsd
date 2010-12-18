@@ -2,7 +2,8 @@
 
 # Very simple wrapper around the DSA version of dchroot
 # on the Debian porter boxes. dchroot only accepts one command
-# as argument, nothing else.
+# as argument, nothing else. This wrapper creates a temporary script
+# which will be executed then.
 
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
