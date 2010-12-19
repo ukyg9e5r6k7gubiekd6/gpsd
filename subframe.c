@@ -324,7 +324,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		break;
 
 	    case 13:
+	    case 52:
 		/* NMCT */
+		sv = -1;
+		gpsd_report(LOG_PROG,
+			"50B: SF:4-13 data_id %d NMCT TODO\n",
+			data_id);
 		break;
 
 	    case 25:
@@ -334,6 +339,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* A-S flags/SV configurations for 32 SVs, 
 		 * plus SV health for SV 25 through 32
 		 */
+		sv = -1;
+		gpsd_report(LOG_PROG,
+			"50B: SF:4-25 data_id %d SV Health TODO\n",
+			data_id);
 		break;
 
 	    case 33:
