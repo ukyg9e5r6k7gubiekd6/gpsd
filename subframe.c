@@ -126,7 +126,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
     /* FIXME!! I really doubt this is Big Endian copmatible */
-    unsigned int pageid, subframe, data_id, leap, lsf, wnlsf, dn, preamble;
+    unsigned int pageid, subframe, data_id, preamble;
     unsigned int tow17;
     unsigned char alert, antispoof;
     gpsd_report(LOG_IO,
@@ -419,36 +419,66 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* for some inscrutable reason page 18 is sent
 		 * as page 56, IS-GPS-200E Table 20-V */
 		/* ionospheric and UTC data */
-		sv = -1;
-		leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
-		/* careful WN is 10 bits, but WNlsf is 8 bits! */
-		/* WNlsf (Week Number of LSF) */
-		wnlsf = (words[8] & 0x00ff00) >> 8;	
-		dn = (words[8] & 0x0000FF);	   /* DN (Day Number of LSF) */
-		lsf = (words[9] & 0xff0000) >> 16;  /* leap second future */
-		/*
-		 * On SiRFs, the 50BPS data is passed on even when the
-		 * parity fails.  This happens frequently.  So the driver 
-		 * must be extra careful that bad data does not reach here.
-		 */
-		if (LEAP_SECONDS > leap) {
-		    /* something wrong */
-		    gpsd_report(LOG_ERROR, 
-			"50B: SF:4-56 Invalid leap_seconds: %d\n",
-				leap);
-		    leap = LEAP_SECONDS;
-		    session->context->valid &= ~LEAP_SECOND_VALID;
-		} else {
-		    gpsd_report(LOG_INF,
-			"50B: SF:4-56 leap-seconds: %d lsf:%d WNlsf:%d DN:%d\n",
-				leap, lsf, wnlsf, dn);
-		    session->context->valid |= LEAP_SECOND_VALID;
-		    if (leap != lsf) {
-			gpsd_report(LOG_PROG, 
-			    "50B: SF:4-56 leap-second change coming\n");
+		{
+		    sv = -1;
+		    /* current leap seconds */
+		    unsigned int a0 = ((words[2] >> 16) & 0x0000FF);
+		    unsigned int a1 = ((words[2] >>  8) & 0x0000FF);
+		    unsigned int a2 = ((words[3] >> 16) & 0x0000FF);
+		    unsigned int a3 = ((words[3] >>  8) & 0x0000FF);
+		    unsigned int b0 = ((words[3] >>  0) & 0x0000FF);
+		    unsigned int b1 = ((words[4] >> 16) & 0x0000FF);
+		    unsigned int b2 = ((words[4] >>  8) & 0x0000FF);
+		    unsigned int b3 = ((words[4] >>  0) & 0x0000FF);
+		    unsigned int A1 = ((words[5] >>  0) & 0xFFFFFF);
+		    unsigned int A0 = ((words[6] >>  0) & 0xFFFFFF);
+		    A0 <<= 8;
+		    A0             += ((words[7] >> 16) & 0x00FFFF);
+		    /* careful WN is 10 bits, but WNt is 8 bits! */
+		    /* WNt (Week Number of LSF) */
+		    unsigned int tot   = ((words[7] >> 8) & 0x0000FF);
+		    unsigned int wnt   = ((words[7] >> 0) & 0x0000FF);
+		    unsigned int leap  = ((words[8] >> 16) & 0x0000FF);
+		    unsigned int wnlsf = ((words[8] >>  8) & 0x0000FF);
+
+		    /* DN (Day Number of LSF) */
+		    unsigned int dn = (words[8] & 0x0000FF);	   
+		    /* leap second future */
+		    unsigned int lsf = ((words[9] >> 16) & 0x0000FF);
+		    /*
+		     * On SiRFs, the 50BPS data is passed on even when the
+		     * parity fails.  This happens frequently.  So the driver 
+		     * must be extra careful that bad data does not reach here.
+		     */
+		    if (LEAP_SECONDS > leap) {
+			/* something wrong */
+			gpsd_report(LOG_ERROR, 
+			    "50B: SF:4-18 Invalid leap_seconds: %d\n",
+				    leap);
+			leap = LEAP_SECONDS;
+			session->context->valid &= ~LEAP_SECOND_VALID;
+		    } else {
+			gpsd_report(LOG_INF,
+			    "50B: SF:4-18 leap-seconds:%u lsf:%u WNlsf:%u "
+			    "DN:%d\n",
+				    leap, lsf, wnlsf, dn);
+			gpsd_report(LOG_PROG,
+			    "50B: SF:4-18 a0:%u a1:%u a2:%u a3:%u "
+			    "b0:%u b1:%u b2:%u b3:%u "
+			    "A1:%u A0:%u tot:%u WNt:%u"
+			    "ls: %u wnlsf:%u DN:%u, lsf:%u\n",
+				a0, a1, a2, a3,
+				b0, b1, b2, b3,
+				A1, A0, tot, wnt,
+				leap, wnlsf, dn, lsf);
+			session->context->valid |= LEAP_SECOND_VALID;
+			if (leap != lsf) {
+			    gpsd_report(LOG_PROG, 
+				"50B: SF:4-18 leap-second change coming\n");
+			}
 		    }
+		    session->context->leap_seconds = (int)leap;
 		}
-		session->context->leap_seconds = (int)leap;
 		break;
 	    default:
 		;			/* no op */
