@@ -251,6 +251,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 6:
 	    case 11:
 	    case 12:
+	    case 14:
+	    case 15:
 	    case 16:
 	    case 19:
 	    case 20:
@@ -329,10 +331,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* unknown */
 		break;
 	
-	    case 14:
-		/* reserved, but known ASCII */
-	    case 15:
-		/* reserved, but known ASCII */
 	    case 17:
 		/* special messages */
 	    case 55:
@@ -482,8 +480,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			sv[17], sv[18], sv[19], sv[20],
 			sv[21], sv[22], sv[23], sv[24]);
 	} else {
+	    /* unknown page */
+	    /* seen page 51 */
 	    gpsd_report(LOG_PROG,
-		"50B: SF:5-%d data_id %d\n",
+		"50B: SF:5-%d data_id %d uknown page\n",
 		pageid, data_id);
 	}
 	break;
