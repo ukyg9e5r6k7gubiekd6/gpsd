@@ -436,7 +436,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 */
 	if ( 25 > pageid ) {
             subframe_almanac(svid, words, subframe, pageid, data_id);
-	} else if ( 25 == pageid ) {
+	} else if ( 51 == pageid ) {
+	    /* for some inscrutable reason page 25 is sent as page 51 
+	     * IS-GPS-200E Table 20-V */
 	    unsigned int toa   = ((words[2] >> 8) & 0x0000FF);
 	    unsigned int wna   = ( words[2] & 0x0000FF);
 	    unsigned int sv[25];
@@ -481,7 +483,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			sv[21], sv[22], sv[23], sv[24]);
 	} else {
 	    /* unknown page */
-	    /* seen page 51 */
 	    gpsd_report(LOG_PROG,
 		"50B: SF:5-%d data_id %d uknown page\n",
 		pageid, data_id);
