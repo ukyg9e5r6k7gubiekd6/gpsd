@@ -419,8 +419,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    str[j++] = (words[9] >> 8) & 0xff;
 		    str[j++] = '\0';
 		    /*@ +type @*/
-		    gpsd_report(LOG_INF, "50B: SF:4-%d system message: %s\n"
-			    , pageid, str);
+		    gpsd_report(LOG_INF, "50B: SF:4-17 system message: %s\n",
+			    str);
 		}
 		break;
 	    case 18:
