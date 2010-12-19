@@ -657,7 +657,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	|| field[4][0] == '\0') {
 	gpsd_report(LOG_WARN, "malformed ZDA\n");
     } else {
-    	int year, mon, mday;
+    	int year, mon, mday, century;
 
 	merge_hhmmss(field[1], session);
 	/*
@@ -669,12 +669,34 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	year = atoi(field[4]);
 	mon = atoi(field[3]);
 	mday = atoi(field[2]);
+	century = year - year % 100;
 	if ( (1900 > year ) || (2200 < year ) ) {
 	    gpsd_report(LOG_WARN, "malformed ZDA year: %s\n",  field[4]);
 	} else if ( (1 > mon ) || (12 < mon ) ) {
 	    gpsd_report(LOG_WARN, "malformed ZDA month: %s\n",  field[3]);
 	} else if ( (1 > mday ) || (31 < mday ) ) {
 	    gpsd_report(LOG_WARN, "malformed ZDA day: %s\n",  field[2]);
+	} else if (century > session->context->century) {
+	    /*
+	     * This mismatch is almost certainly not due to a GPS week
+	     * rollover, because that would throw the ZDA report backward
+	     * into the last rollover period instead of forward.  Almost
+	     * certainly it means that a century mark has passed while
+	     * gpsd was running, and we should trust the new ZDA year.
+	     */
+	    gpsd_report(LOG_WARN, "century rollover detected.\n");
+	    session->context->century = century;
+#if 0
+	} else if (century < session->context->century) {
+	    /*
+	     * This looks like a GPS week-counter rollover.  Hidden
+	     * assumption in the above test is that a bogus (small positive 
+	     * or negative) system clock value will always fail the
+	     * above guard and thus never trigger this error message.
+	     */
+	    gpsd_report(LOG_ERROR, "ZDA year %s less than clock year, "  
+			"probable GPS week rollover lossage\n", field[2]);
+#endif
 	} else {
 	    year -= 1900;	
 	    session->driver.nmea.date.tm_year = year;

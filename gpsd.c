@@ -1724,13 +1724,20 @@ int main(int argc, char *argv[])
     /*
      * We might be able to use the system clock to get the century.
      * Do this, just in case one of our embedded deployments is
-     * still in place in the year 2.1K.  Still going to fail if we
+     * still in place in the year 2.1K.  Still likely to fail if we
      * bring up the daemon just before a century mark, but that
      * case is probably doomed anyhow because of 2-digit years.
      */
     starttime = time(NULL);
-    if (starttime > GPS_EPOCH) {
+    if (starttime < GPS_EPOCH)
+	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in dates "
+		    "may not be reliable.\n");
+    else {
 	struct tm *now = localtime(&starttime);
+	/*
+	 * This is going to break our regression-test suite once a century.
+	 * I think we can live with that consequence.
+	 */
 	now->tm_year += 1900;
 	context.century = now->tm_year - (now->tm_year % 100);
     }
