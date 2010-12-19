@@ -37,7 +37,7 @@
 
 /* Date of next possible leap second adjustment, according to IERS
  */
-#define START_SUBFRAME	1293857999	/* 31 Dec 2010 23:59:59 */
+#define START_SUBFRAME	1309492799	/* 30 Jun 2011 23:59:59 */
 
 /*
  * This is used only when an NMEA device issues a two-digit year in a GPRMC
