@@ -88,6 +88,8 @@ static void subframe_almanac( unsigned int svid, unsigned int words[],
 			     unsigned int data_id)
 {
     unsigned int e      = ( words[2] & 0x00FFFF);
+    /* carefull, each SV can have more than 2 toa's active at the same time 
+     * you can not just store one or two almanacs for each sat */
     unsigned int toa    = ((words[3] >> 16) & 0x0000FF);
     unsigned int deltai = ( words[3] & 0x00FFFF);
     unsigned int omegad = ((words[4] >>  8) & 0x00FFFF);
@@ -244,23 +246,55 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    int sv = -2;
 	    switch (pageid) {
 	    case 0:
-		/* almanac for dummy sat 0 */
+		/* almanac for dummy sat 0, which is same as transmitting sat */
 		sv = 0;
 		break;
 	    case 1:
 	    case 6:
 	    case 11:
-	    case 12:
-	    case 14:
-	    case 15:
 	    case 16:
-	    case 19:
-	    case 20:
 	    case 21:
-	    case 22:
-	    case 23:
+	    case 57:
+		/* for some inscutable reason these pages are all sent
+		 * as page 57, IS-GPS-200E Table 20-V */
+		break;
+	    case 12:
 	    case 24:
-		/* reserved pages */
+	    case 62:
+		/* for some inscrutable reason these pages are all sent
+		 * as page 62, IS-GPS-200E Table 20-V */
+		break;
+	    case 14:
+	    case 53:
+		/* for some inscrutable reason page 14 is sent
+		 * as page 53, IS-GPS-200E Table 20-V */
+		break;
+	    case 15:
+	    case 54:
+		/* for some inscrutable reason page 15 is sent
+		 * as page 54, IS-GPS-200E Table 20-V */
+		break;
+	    case 19:
+		/* for some inscrutable reason page 20 is sent
+		 * as page 58, IS-GPS-200E Table 20-V */
+		/* reserved page */
+		break;
+	    case 20:
+		/* for some inscrutable reason page 20 is sent
+		 * as page 59, IS-GPS-200E Table 20-V */
+		/* reserved page */
+		break;
+	    case 22:
+	    case 60:
+		/* for some inscrutable reason page 22 is sent
+		 * as page 60, IS-GPS-200E Table 20-V */
+		/* reserved page */
+		break;
+	    case 23:
+	    case 61:
+		/* for some inscrutable reason page 23 is sent
+		 * as page 61, IS-GPS-200E Table 20-V */
+		/* reserved page */
 		break;
 
 	    /* almanac data for SV 25 through 32 respectively; */
@@ -293,11 +327,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* NMCT */
 		break;
 
-	    case 18:
-		/* ionospheric and UTC data */
-		break;
-
 	    case 25:
+	    case 63:
+		/* for some inscrutable reason page 25 is sent
+		 * as page 63, IS-GPS-200E Table 20-V */
 		/* A-S flags/SV configurations for 32 SVs, 
 		 * plus SV health for SV 25 through 32
 		 */
@@ -325,15 +358,13 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		break;
 
 	    case 51:
-	    case 52:
-	    case 53:
-	    case 54:
 		/* unknown */
 		break;
 	
 	    case 17:
-		/* special messages */
 	    case 55:
+		/* for some inscrutable reason page 17 is sent
+		 * as page 55, IS-GPS-200E Table 20-V */
 		sv = -1;
 		/*
 		 * "The requisite 176 bits shall occupy bits 9 through 24 
@@ -383,7 +414,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			    , pageid, str);
 		}
 		break;
+	    case 18:
 	    case 56:
+		/* for some inscrutable reason page 18 is sent
+		 * as page 56, IS-GPS-200E Table 20-V */
+		/* ionospheric and UTC data */
 		sv = -1;
 		leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
 		/* careful WN is 10 bits, but WNlsf is 8 bits! */
@@ -467,7 +502,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    sv[23] = ((words[7] >>  6) & 0x00003F);
 	    sv[24] = ((words[7] >>  0) & 0x00003F);
 	    gpsd_report(LOG_PROG,
-		"50B: SF:5-25 SV:%2u DI:%a toa:%u WNa:%u "
+		"50B: SF:5-25 SV:%2u DI:%u toa:%u WNa:%u "
 		"SV1:%u SV2:%u SV3:%uSV4:%u "
 		"SV5:%u SV6:%u SV7:%uSV8:%u "
 		"SV9:%u SV10:%u SV11:%uSV12:%u "
@@ -483,8 +518,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			sv[21], sv[22], sv[23], sv[24]);
 	} else {
 	    /* unknown page */
-	    gpsd_report(LOG_PROG,
-		"50B: SF:5-%d data_id %d uknown page\n",
+	    gpsd_report(LOG_PROG, "50B: SF:5-%d data_id %d uknown page\n",
 		pageid, data_id);
 	}
 	break;
