@@ -83,7 +83,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     return 0;
 }
 
-static void subframe_almanac(unsigned int words[], 
+static void subframe_almanac( unsigned int svid, unsigned int words[], 
 			     unsigned int subframe, unsigned int sv,
 			     unsigned int data_id)
 {
@@ -101,10 +101,10 @@ static void subframe_almanac(unsigned int words[],
     af0 <<= 3;
     af0                += ((words[9] >>  2) & 0x000003);
     gpsd_report(LOG_PROG,
-	"50B: SF:%d SV:%2u data_id %d e:%u toa:%u deltai:%u omegad:%u svh:%u"
-	" sqrtA:%u Omega0:%u omega:%u M0:%u af0:%u af1:%u\n",
-        subframe, sv, data_id, e, toa, deltai, omegad, svh, sqrtA, Omega0,
-	omega, M0, af0, af1);
+	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%u toa:%u deltai:%u omegad:%u"
+	" svh:%u sqrtA:%u Omega0:%u omega:%u M0:%u af0:%u af1:%u\n",
+        subframe, sv, svid, data_id, e, toa, deltai, omegad, svh, sqrtA, 
+	Omega0, omega, M0, af0, af1);
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
@@ -157,8 +157,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
      */
-    pageid = (words[2] & 0x3F0000) >> 16; /* only in frames 4 & 5 */
-    data_id = (words[2] >> 22) & 0x3;     /* only in frames 4 & 5 */
+    pageid  = (words[2] >> 16) & 0x00003F; /* only in frames 4 & 5 */
+    data_id = (words[2] >> 22) & 0x3;      /* only in frames 4 & 5 */
 
     switch (subframe) {
     case 1:
@@ -251,8 +251,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 6:
 	    case 11:
 	    case 12:
-	    case 14:
-	    case 15:
 	    case 16:
 	    case 19:
 	    case 20:
@@ -293,10 +291,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* NMCT */
 		break;
 
-	    case 17:
-		/* special messages */
-		break;
-
 	    case 18:
 		/* ionospheric and UTC data */
 		break;
@@ -335,6 +329,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* unknown */
 		break;
 	
+	    case 14:
+		/* reserved, but known ASCII */
+	    case 15:
+		/* reserved, but known ASCII */
+	    case 17:
+		/* special messages */
 	    case 55:
 		sv = -1;
 		/*
@@ -381,8 +381,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    str[j++] = (words[9] >> 8) & 0xff;
 		    str[j++] = '\0';
 		    /*@ +type @*/
-		    gpsd_report(LOG_INF, "50B: SF:4 gps system message: %s\n"
-			    , str);
+		    gpsd_report(LOG_INF, "50B: SF:4-%d system message: %s\n"
+			    , pageid, str);
 		}
 		break;
 	    case 56:
@@ -401,18 +401,18 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		if (LEAP_SECONDS > leap) {
 		    /* something wrong */
 		    gpsd_report(LOG_ERROR, 
-			"50B: SF:4 Invalid leap_seconds: %d\n",
+			"50B: SF:4-56 Invalid leap_seconds: %d\n",
 				leap);
 		    leap = LEAP_SECONDS;
 		    session->context->valid &= ~LEAP_SECOND_VALID;
 		} else {
 		    gpsd_report(LOG_INF,
-			"50B: SF:4 leap-seconds: %d lsf:%d WNlsf:%d DN:%d\n",
+			"50B: SF:4-56 leap-seconds: %d lsf:%d WNlsf:%d DN:%d\n",
 				leap, lsf, wnlsf, dn);
 		    session->context->valid |= LEAP_SECOND_VALID;
 		    if (leap != lsf) {
 			gpsd_report(LOG_PROG, 
-			    "50B: SF:4 leap-second change coming\n");
+			    "50B: SF:4-56 leap-second change coming\n");
 		    }
 		}
 		session->context->leap_seconds = (int)leap;
@@ -421,7 +421,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		;			/* no op */
 	    }
 	    if ( -1 < sv ) {
-		subframe_almanac(words, subframe, sv, data_id);
+		subframe_almanac(svid, words, subframe, sv, data_id);
 	    } else if ( -2 == sv ) {
 		gpsd_report(LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
@@ -436,8 +436,51 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
 	 */
-	if ( pageid < 25 ) {
-            subframe_almanac(words, subframe, pageid, data_id);
+	if ( 25 > pageid ) {
+            subframe_almanac(svid, words, subframe, pageid, data_id);
+	} else if ( 25 == pageid ) {
+	    unsigned int toa   = ((words[2] >> 8) & 0x0000FF);
+	    unsigned int wna   = ( words[2] & 0x0000FF);
+	    unsigned int sv[25];
+	    sv[1] = ((words[2] >> 18) & 0x00003F);
+	    sv[2] = ((words[2] >> 12) & 0x00003F);
+	    sv[3] = ((words[2] >>  6) & 0x00003F);
+	    sv[4] = ((words[2] >>  0) & 0x00003F);
+	    sv[5] = ((words[3] >> 18) & 0x00003F);
+	    sv[6] = ((words[3] >> 12) & 0x00003F);
+	    sv[7] = ((words[3] >>  6) & 0x00003F);
+	    sv[8] = ((words[3] >>  0) & 0x00003F);
+	    sv[9] = ((words[4] >> 18) & 0x00003F);
+	    sv[10] = ((words[4] >> 12) & 0x00003F);
+	    sv[11] = ((words[4] >>  6) & 0x00003F);
+	    sv[12] = ((words[4] >>  0) & 0x00003F);
+	    sv[13] = ((words[5] >> 18) & 0x00003F);
+	    sv[14] = ((words[5] >> 12) & 0x00003F);
+	    sv[15] = ((words[5] >>  6) & 0x00003F);
+	    sv[16] = ((words[5] >>  0) & 0x00003F);
+	    sv[17] = ((words[6] >> 18) & 0x00003F);
+	    sv[18] = ((words[6] >> 12) & 0x00003F);
+	    sv[19] = ((words[6] >>  6) & 0x00003F);
+	    sv[20] = ((words[6] >>  0) & 0x00003F);
+	    sv[21] = ((words[7] >> 18) & 0x00003F);
+	    sv[22] = ((words[7] >> 12) & 0x00003F);
+	    sv[23] = ((words[7] >>  6) & 0x00003F);
+	    sv[24] = ((words[7] >>  0) & 0x00003F);
+	    gpsd_report(LOG_PROG,
+		"50B: SF:5-25 SV:%2u DI:%a toa:%u WNa:%u "
+		"SV1:%u SV2:%u SV3:%uSV4:%u "
+		"SV5:%u SV6:%u SV7:%uSV8:%u "
+		"SV9:%u SV10:%u SV11:%uSV12:%u "
+		"SV13:%u SV14:%u SV15:%uSV16:%u "
+		"SV17:%u SV18:%u SV19:%uSV20:%u "
+		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
+			svid, data_id, toa, wna,
+			sv[1], sv[2], sv[3], sv[4],
+			sv[5], sv[5], sv[6], sv[4],
+			sv[9], sv[10], sv[11], sv[12],
+			sv[13], sv[14], sv[15], sv[16],
+			sv[17], sv[18], sv[19], sv[20],
+			sv[21], sv[22], sv[23], sv[24]);
 	} else {
 	    gpsd_report(LOG_PROG,
 		"50B: SF:5-%d data_id %d\n",
