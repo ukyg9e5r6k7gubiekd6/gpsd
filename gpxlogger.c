@@ -134,7 +134,7 @@ static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 	return;
 
     /* may not be worth logging if we've moved only a very short distance */ 
-    if (minmove && !first && earth_distance(gpsfix->latitude, gpsfix->longitude,
+    if (minmove>0 && !first && earth_distance(gpsfix->latitude, gpsfix->longitude,
 					    old_lat, old_lon) < minmove)
 	return;
 
@@ -160,7 +160,7 @@ static void conditionally_log_fix(struct gps_fix_t *gpsfix)
     }
 
     old_int_time = int_time;
-    if (minmove) {
+    if (minmove > 0) {
 	old_lat = gpsfix->latitude;
 	old_lon = gpsfix->longitude;
     }
@@ -356,6 +356,7 @@ static void usage(void)
     exit(1);
 }
 
+/*@-mustfreefresh -globstate@*/
 int main(int argc, char **argv)
 {
     int ch;
@@ -438,12 +439,14 @@ int main(int argc, char **argv)
     (void)signal(SIGQUIT, quit_handler);
     (void)signal(SIGINT, quit_handler);
 
+    /*@-unrecog@*/
     /* might be time to daemonize */
     if (daemonize) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (daemon(0, 0) != 0)
 	    (void) fprintf(stderr,"demonization failed: %s\n", strerror(errno));
     }
+    /*@+unrecog@*/
 
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
@@ -459,3 +462,4 @@ int main(int argc, char **argv)
     return socket_mainloop();
 #endif
 }
+/*@+mustfreefresh +globstate@*/

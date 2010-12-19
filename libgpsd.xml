@@ -53,13 +53,6 @@ C:
 <funcdef>void <function>gpsd_wrap</function></funcdef>
     <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
-
-<funcprototype>
-<funcdef>void <function>gpsd_report</function></funcdef>
-    <paramdef>int <parameter>d</parameter></paramdef>
-    <paramdef>const char * <parameter>fmt</parameter></paramdef>
-    <paramdef><parameter>...</parameter></paramdef>
-</funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
 

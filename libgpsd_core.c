@@ -615,12 +615,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } 
 	    sample.offset -= TSTOD( &ts );
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+	    /*@-noeffect@*/
 	    if (session->device_type == &oncore_binary) {
 		pulse_delay_ns = session->driver.oncore.pps_offset_ns;
 	        sample.offset += (double)pulse_delay_ns / 1000000000;
 	        ts.tv_nsec    -= pulse_delay_ns;
 	        TS_NORM( &ts );
 	    }
+	    /*@+noeffect@*/
 #endif
 
 	    if ( 0 <= chronyfd ) {
