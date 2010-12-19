@@ -292,7 +292,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	if (0 != gar_int_decode(buf + 0, 2, 0, 99, &result))
 	    break;
 	session->driver.garmintxt.date.tm_year =
-	    (CENTURY_BASE + (int)result) - 1900;
+	    (session->context->century + (int)result) - 1900;
 	/* month */
 	if (0 != gar_int_decode(buf + 2, 2, 1, 12, &result))
 	    break;

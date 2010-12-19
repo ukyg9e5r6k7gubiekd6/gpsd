@@ -74,7 +74,7 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int mday = DD(ddmmyy);
 
     if (year <= 0) {
-	year = (CENTURY_BASE + yy) - 1900;
+	year = (session->context->century + yy) - 1900;
     } else if (year % 100 != yy) {
 	/* update year */
 	if (year % 100 == 99 && yy == 0)
