@@ -93,25 +93,37 @@ def get():
                 pass
         return current_offset
 
+def rfc822(tv):
+    return time.mktime(time.strptime(tv , "%d %b %Y %H:%M:%S"))
+
 if __name__ == '__main__':
     import sys, getopt
     next = False
-    (options, arguments) = getopt.getopt(sys.argv[1:], "n:")
+    rfc822date = False
+    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:")
     for (switch, val) in options:
-        if (switch == '-n'):  # Compute possible next leapsecond
+        if (switch == '-i'):  # Compute Unix time from RFC822 date
+            rfc822date = True
+        elif (switch == '-n'):  # Compute possible next leapsecond
             next = True
 
-    if not next:
+    if not next and not rfc822date:
         print "Current leap second:", retrieve()
-    elif val[:3].lower() not in ("jun", "dec"):
+        raise SystemExit, 0
+
+    if rfc822date:
+        print "#define FOO	%d	/* %s */" % (rfc822(val), val)
+        raise SystemExit, 0
+
+    if val[:3].lower() not in ("jun", "dec"):
         print >>sys.stderr, "leapsecond.py: -n argument must begin with "\
               "'Jun' or 'Dec'"
         raise SystemExit, 1
     else:
         month = val[:3].lower()
         if len(val) != 7:
-            print >>sys.stderr, "leapsecond.py: -n argument must end "\
-                  "with a a 4-digit year."                
+            print >>sys.stderr, "leapsecond.py: -n argument must be of "\
+                  "the form {jun|dec}nnnn."                
             raise SystemExit, 1
         try:
             year = int(val[3:])
@@ -121,8 +133,7 @@ if __name__ == '__main__':
             raise SystemExit, 1
         # Date looks valid
         if month == "jun":
-            fmt = "30 Jun %d 23:59:59" % year
+            tv = "30 Jun %d 23:59:59" % year
         else:
-            fmt = "31 Dec %d 23:59:59" % year
-        next = time.mktime(time.strptime(fmt , "%d %b %Y %H:%M:%S"))
-        print "#define START_SUBFRAME	%d	/* %s */" % (next, fmt)
+            tv = "31 Dec %d 23:59:59" % year
+        print "#define START_SUBFRAME	%d	/* %s */" % (rfc822(tv), tv)
