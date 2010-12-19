@@ -40,10 +40,8 @@
 #define START_SUBFRAME	1309492799	/* 30 Jun 2011 23:59:59 */
 
 /*
- * This is used only when an NMEA device issues a two-digit year in a GPRMC
- * and there has been no previous ZDA to set the year.  We used to
- * query the system clock for this,  but there's no good way to cope 
- * with the mess if the system clock has been zeroed.
+ * Default century.  Gets used if the system clock value at startup
+ * time looks invalid.
  */
 #define CENTURY_BASE	2000
 

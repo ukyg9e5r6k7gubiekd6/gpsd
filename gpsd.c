@@ -96,6 +96,16 @@
 #define QLEN			5
 
 /*
+ * Second 0 of week 0 of the first rollover period of GPS time.
+ * The threshold value under which sytem clock times are considered
+ * unreliable. Often, embedded systems come up thinking it's early 1970 
+ * and the system clock will report small positive values until the clock 
+ * is set.  By choosing this as the cutoff, we'll never reject
+ * historical GPS logs that are actually valid.
+ */
+#define GPS_EPOCH	347605200	/* 6 Jan 1981 00:00:00 */
+
+/*
  * If ntpshm is enabled, we renice the process to this priority level.
  * For precise timekeeping increase priority.
  */
@@ -1486,6 +1496,7 @@ int main(int argc, char *argv[])
     struct timeval tv;
     struct subscriber_t *sub;
     const struct gps_type_t **dp;
+    time_t starttime;
 
 #ifdef PPS_ENABLE
     pthread_mutex_init(&report_mutex, NULL);
@@ -1709,6 +1720,20 @@ int main(int argc, char *argv[])
 	    adjust_max_fd(msocks[i], true);
 	}
     FD_ZERO(&control_fds);
+
+    /*
+     * We might be able to use the system clock to get the century.
+     * Do this, just in case one of our embedded deployments is
+     * still in place in the year 2.1K.  Still going to fail if we
+     * bring up the daemon just before a century mark, but that
+     * case is probably doomed anyhow because of 2-digit years.
+     */
+    starttime = time(NULL);
+    if (starttime > GPS_EPOCH) {
+	struct tm *now = localtime(&starttime);
+	now->tm_year += 1900;
+	context.century = now->tm_year - (now->tm_year % 100);
+    }
 
     /* optimization hack to defer having to read subframe data */
     if (time(NULL) < START_SUBFRAME)

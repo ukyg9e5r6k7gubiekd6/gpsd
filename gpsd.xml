@@ -1628,12 +1628,12 @@ are receiving corrections.</para>
 <application>gpsd</application> will be one second or less 95% of the
 time.  Most of this lag is due to the fact that GPSes normally emit
 fixes once per second, thus expected latency is 0.5sec.  On the
-personal-computer hardware available in 2005, computation lag induced
-by <application>gpsd</application> will be negligible, on the order of
-a millisecond.  Nevertheless, latency can introduce significant errors
-for vehicles in motion; at 50km/h (31mi/h) of speed over ground, 1
-second of lag corresponds to 13.8 meters change in position between
-updates.</para>
+personal-computer hardware available in 2005 and later, computation
+lag induced by <application>gpsd</application> will be negligible, on
+the order of a millisecond.  Nevertheless, latency can introduce
+significant errors for vehicles in motion; at 50km/h (31mi/h) of speed
+over ground, 1 second of lag corresponds to 13.8 meters change in
+position between updates.</para>
 
 <para>The time reporting of the GPS system itself has an intrinsic
 accuracy limit of 0.000,000,340 =
@@ -1652,7 +1652,18 @@ are shipped as (week, second) pairs in which the week part is a 10
 or 13-bit counter. When the counter rolls over, a GPS receiver
 may see and report a date 1024 or 8192 weeks in the past.</para>
 
+<para>To interpret the 2-digit years shipped in NMEA sentences,
+<application>gpsd</application> needs to know the base century and may
+not have it in advance of a GPZDA sentence. If the system clock at
+daemon startup time was at or later than the GPS epoch of 6 Jan 1981
+00:00:00 (excluding negative, 0, and small positive values), it is
+used to compute the base century.  (This is the
+<emphasis>only</emphasis> way in which <application>gpsd</application>
+relies on the system clock.)  Note that this computation may lead to
+errors if the daemon is started up before a transition but continues
+running after it wuthout a ZDA.</para>
 </refsect1>
+
 <refsect1 id='ntp'><title>USE WITH NTP</title>
 
 <para>gpsd can provide reference clock information to
