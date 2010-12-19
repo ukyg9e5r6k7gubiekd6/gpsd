@@ -83,6 +83,30 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     return 0;
 }
 
+static void subframe_almanac(unsigned int words[], 
+			     unsigned int subframe, unsigned int sv,
+			     unsigned int data_id)
+{
+    unsigned int e      = ( words[2] & 0x00FFFF);
+    unsigned int toa    = ((words[3] >> 16) & 0x0000FF);
+    unsigned int deltai = ( words[3] & 0x00FFFF);
+    unsigned int omegad = ((words[4] >>  8) & 0x00FFFF);
+    unsigned int svh    = ( words[4] & 0x0000FF);
+    unsigned int sqrtA  = ( words[5] & 0xFFFFFF);
+    unsigned int Omega0 = ( words[6] & 0xFFFFFF);
+    unsigned int omega  = ( words[7] & 0xFFFFFF);
+    unsigned int M0     = ( words[8] & 0xFFFFFF);
+    unsigned int af1    = ((words[9] >>  5) & 0x0003FF);
+    unsigned int af0    = ((words[9] >> 16) & 0x0000FF);
+    af0 <<= 3;
+    af0                += ((words[9] >>  2) & 0x000003);
+    gpsd_report(LOG_PROG,
+	"50B: SF:%d SV:%2u data_id %d e:%u toa:%u deltai:%u omegad:%u svh:%u"
+	" sqrtA:%u Omega0:%u omega:%u M0:%u af0:%u af1:%u\n",
+        subframe, sv, data_id, e, toa, deltai, omegad, svh, sqrtA, Omega0,
+	omega, M0, af0, af1);
+}
+
 void gpsd_interpret_subframe(struct gps_device_t *session,
 			     unsigned int svid, unsigned int words[])
 {
@@ -216,154 +240,204 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	break;
     case 4:
-	gpsd_report(LOG_PROG,
-		"50B: SF:4-%d data_id %d\n",
-		pageid, data_id);
-	switch (pageid) {
-	case 1:
-	case 6:
-	case 11:
-	case 12:
-	case 14:
-	case 15:
-	case 16:
-	case 19:
-	case 20:
-	case 21:
-	case 22:
-	case 23:
-	case 24:
-	    /* reserved pages */
-	    break;
-
-	case 2:
-	case 3:
-	case 4:
-	case 5:
-	case 7:
-	case 8:
-	case 9:
-	case 10:
-	    /* almanac data for SV 25 through 32 respectively; */
-	    break;
-
-	case 13:
-	    /* NMCT */
-	    break;
-
-	case 17:
-	    /* special messages */
-	    break;
-
-	case 18:
-	    /* ionospheric and UTC data */
-	    break;
-
-	case 25:
-	    /* A-S flags/SV configurations for 32 SVs, 
-	     * plus SV health for SV 25 through 32
-	     */
-	    break;
-
-	case 55:
-	    /* FIXME!! there is no page 55!! */
-	    /*
-	     * "The requisite 176 bits shall occupy bits 9 through 24 of word
-	     * TWO, the 24 MSBs of words THREE through EIGHT, plus the 16 MSBs
-	     * of word NINE." (word numbers changed to account for zero-indexing)
-	     *
-	     * Since we've already stripped the low six parity bits, and shifted
-	     * the data to a byte boundary, we can just copy it out. */
 	{
-	    char str[24];
-	    int j = 0;
-	    /*@ -type @*/
-	    str[j++] = (words[2] >> 8) & 0xff;
-	    str[j++] = (words[2]) & 0xff;
+	    int sv = -2;
+	    switch (pageid) {
+	    case 0:
+		/* almanac for dummy sat 0 */
+		sv = 0;
+		break;
+	    case 1:
+	    case 6:
+	    case 11:
+	    case 12:
+	    case 14:
+	    case 15:
+	    case 16:
+	    case 19:
+	    case 20:
+	    case 21:
+	    case 22:
+	    case 23:
+	    case 24:
+		/* reserved pages */
+		break;
 
-	    str[j++] = (words[3] >> 16) & 0xff;
-	    str[j++] = (words[3] >> 8) & 0xff;
-	    str[j++] = (words[3]) & 0xff;
+	    /* almanac data for SV 25 through 32 respectively; */
+	    case 2:
+		sv = 25;
+		break;
+	    case 3:
+		sv = 26;
+		break;
+	    case 4:
+		sv = 27;
+		break;
+	    case 5:
+		sv = 28;
+		break;
+	    case 7:
+		sv = 29;
+		break;
+	    case 8:
+		sv = 30;
+		break;
+	    case 9:
+		sv = 31;
+		break;
+	    case 10:
+		sv = 32;
+		break;
 
-	    str[j++] = (words[4] >> 16) & 0xff;
-	    str[j++] = (words[4] >> 8) & 0xff;
-	    str[j++] = (words[4]) & 0xff;
+	    case 13:
+		/* NMCT */
+		break;
 
-	    str[j++] = (words[5] >> 16) & 0xff;
-	    str[j++] = (words[5] >> 8) & 0xff;
-	    str[j++] = (words[5]) & 0xff;
+	    case 17:
+		/* special messages */
+		break;
 
-	    str[j++] = (words[6] >> 16) & 0xff;
-	    str[j++] = (words[6] >> 8) & 0xff;
-	    str[j++] = (words[6]) & 0xff;
+	    case 18:
+		/* ionospheric and UTC data */
+		break;
 
-	    str[j++] = (words[7] >> 16) & 0xff;
-	    str[j++] = (words[7] >> 8) & 0xff;
-	    str[j++] = (words[7]) & 0xff;
+	    case 25:
+		/* A-S flags/SV configurations for 32 SVs, 
+		 * plus SV health for SV 25 through 32
+		 */
+		break;
 
-	    str[j++] = (words[8] >> 16) & 0xff;
-	    str[j++] = (words[8] >> 8) & 0xff;
-	    str[j++] = (words[8]) & 0xff;
+	    case 33:
+	    case 34:
+	    case 35:
+	    case 36:
+	    case 37:
+	    case 38:
+	    case 39:
+	    case 40:
+	    case 41:
+	    case 42:
+	    case 43:
+	    case 44:
+	    case 45:
+	    case 46:
+	    case 47:
+	    case 48:
+	    case 49:
+	    case 50:
+		/* unassigned */
+		break;
 
-	    str[j++] = (words[9] >> 16) & 0xff;
-	    str[j++] = (words[9] >> 8) & 0xff;
-	    str[j++] = '\0';
-	    /*@ +type @*/
-	    gpsd_report(LOG_INF, "50B: gps system message is %s\n", str);
-	}
-	    break;
-	case 56:
-	    leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
-	    /* careful WN is 10 bits, but WNlsf is 8 bits! */
-	    wnlsf = (words[8] & 0x00ff00) >> 8;	/* WNlsf (Week Number of LSF) */
-	    dn = (words[8] & 0x0000FF);	/* DN (Day Number of LSF) */
-	    lsf = (words[9] & 0xff0000) >> 16;	/* leap second future */
-	    /*
-	     * On SiRFs, the 50BPS data is passed on even when the
-	     * parity fails.  This happens frequently.  So the driver 
-	     * must be extra careful that bad data does not reach here.
-	     */
-	    if (LEAP_SECONDS > leap) {
-		/* something wrong */
-		gpsd_report(LOG_ERROR, "50B: Invalid leap_seconds: %d\n",
-			    leap);
-		leap = LEAP_SECONDS;
-		session->context->valid &= ~LEAP_SECOND_VALID;
-	    } else {
-		gpsd_report(LOG_INF,
-			    "50B: leap-seconds: %d, lsf: %d, WNlsf: %d, DN: %d \n",
-			    leap, lsf, wnlsf, dn);
-		session->context->valid |= LEAP_SECOND_VALID;
-		if (leap != lsf) {
-		    gpsd_report(LOG_PROG, "50B: leap-second change coming\n");
+	    case 51:
+	    case 52:
+	    case 53:
+	    case 54:
+		/* unknown */
+		break;
+	
+	    case 55:
+		sv = -1;
+		/*
+		 * "The requisite 176 bits shall occupy bits 9 through 24 
+		 * of word TWO, the 24 MSBs of words THREE through EIGHT, 
+		 * plus the 16 MSBs of word NINE." (word numbers changed 
+ 		 * to account for zero-indexing)
+		 * Since we've already stripped the low six parity bits, 
+		 * and shifted the data to a byte boundary, we can just 
+		 * copy it out. */
+
+		{
+		    char str[24];
+		    int j = 0;
+		    /*@ -type @*/
+		    str[j++] = (words[2] >> 8) & 0xff;
+		    str[j++] = (words[2]) & 0xff;
+
+		    str[j++] = (words[3] >> 16) & 0xff;
+		    str[j++] = (words[3] >> 8) & 0xff;
+		    str[j++] = (words[3]) & 0xff;
+
+		    str[j++] = (words[4] >> 16) & 0xff;
+		    str[j++] = (words[4] >> 8) & 0xff;
+		    str[j++] = (words[4]) & 0xff;
+
+		    str[j++] = (words[5] >> 16) & 0xff;
+		    str[j++] = (words[5] >> 8) & 0xff;
+		    str[j++] = (words[5]) & 0xff;
+
+		    str[j++] = (words[6] >> 16) & 0xff;
+		    str[j++] = (words[6] >> 8) & 0xff;
+		    str[j++] = (words[6]) & 0xff;
+
+		    str[j++] = (words[7] >> 16) & 0xff;
+		    str[j++] = (words[7] >> 8) & 0xff;
+		    str[j++] = (words[7]) & 0xff;
+
+		    str[j++] = (words[8] >> 16) & 0xff;
+		    str[j++] = (words[8] >> 8) & 0xff;
+		    str[j++] = (words[8]) & 0xff;
+
+		    str[j++] = (words[9] >> 16) & 0xff;
+		    str[j++] = (words[9] >> 8) & 0xff;
+		    str[j++] = '\0';
+		    /*@ +type @*/
+		    gpsd_report(LOG_INF, "50B: SF:4 gps system message: %s\n"
+			    , str);
 		}
+		break;
+	    case 56:
+		sv = -1;
+		leap = (words[8] & 0xff0000) >> 16;	/* current leap seconds */
+		/* careful WN is 10 bits, but WNlsf is 8 bits! */
+		/* WNlsf (Week Number of LSF) */
+		wnlsf = (words[8] & 0x00ff00) >> 8;	
+		dn = (words[8] & 0x0000FF);	   /* DN (Day Number of LSF) */
+		lsf = (words[9] & 0xff0000) >> 16;  /* leap second future */
+		/*
+		 * On SiRFs, the 50BPS data is passed on even when the
+		 * parity fails.  This happens frequently.  So the driver 
+		 * must be extra careful that bad data does not reach here.
+		 */
+		if (LEAP_SECONDS > leap) {
+		    /* something wrong */
+		    gpsd_report(LOG_ERROR, 
+			"50B: SF:4 Invalid leap_seconds: %d\n",
+				leap);
+		    leap = LEAP_SECONDS;
+		    session->context->valid &= ~LEAP_SECOND_VALID;
+		} else {
+		    gpsd_report(LOG_INF,
+			"50B: SF:4 leap-seconds: %d lsf:%d WNlsf:%d DN:%d\n",
+				leap, lsf, wnlsf, dn);
+		    session->context->valid |= LEAP_SECOND_VALID;
+		    if (leap != lsf) {
+			gpsd_report(LOG_PROG, 
+			    "50B: SF:4 leap-second change coming\n");
+		    }
+		}
+		session->context->leap_seconds = (int)leap;
+		break;
+	    default:
+		;			/* no op */
 	    }
-	    session->context->leap_seconds = (int)leap;
-	    break;
-	default:
-	    ;			/* no op */
+	    if ( -1 < sv ) {
+		subframe_almanac(words, subframe, sv, data_id);
+	    } else if ( -2 == sv ) {
+		gpsd_report(LOG_PROG,
+			"50B: SF:4-%d data_id %d\n",
+			pageid, data_id);
+	    }
+	    /* else, already handled */
 	}
 	break;
     case 5:
-	/* Pages 1 through 24: almanac data for SV 1 through 24
+	/* Pages 0, dummy almanc for dummy SV 0
+	 * Pages 1 through 24: almanac data for SV 1 through 24
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
 	 */
 	if ( pageid < 25 ) {
-	    unsigned int e = (words[2] & 0x00FFFF);
-	    unsigned int toa = (words[3] & 0xFF0000) >> 16;
-	    unsigned int deltai = (words[3] & 0x00FFFF);
-	    //unsigned int Omega = (words[4] & 0xFFFF00) >> 8;
-	    unsigned int svh = (words[4] & 0x0000FF);
-	    unsigned int sqrtA = (words[5] & 0xFFFFFF);
-	    unsigned int Omega0 = (words[6] & 0xFFFFFF);
-	    unsigned int omega = (words[7] & 0xFFFFFF);
-	    unsigned int M0 = (words[8] & 0xFFFFFF);
-	    gpsd_report(LOG_PROG,
-		"50B: SF:5 SV:%2u data_id %d e:%u svh:%u"
-		" toa:%u deltai:%u sqrtA:%u Omega0:%u omega:%u M0:%u\n",
-		pageid, data_id, e, svh,  toa, deltai, sqrtA, Omega0,
-		omega,M0);
+            subframe_almanac(words, subframe, pageid, data_id);
 	} else {
 	    gpsd_report(LOG_PROG,
 		"50B: SF:5-%d data_id %d\n",
