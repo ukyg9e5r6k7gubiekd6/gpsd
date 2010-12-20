@@ -687,12 +687,9 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 		 */
 		gpsd_report(LOG_WARN, "century rollover detected.\n");
 		session->context->century = century;
-	    } else if (century < session->context->century) {
+	    } else if (session->context->start_time >= GPS_EPOCH && century < session->context->century) {
 		/*
-		 * This looks like a GPS week-counter rollover.  Hidden
-		 * assumption in the above test is that a bogus (small positive 
-		 * or negative) system clock value will always fail the
-		 * above guard and thus never trigger this error message.
+		 * This looks like a GPS week-counter rollover.
 		 */
 		gpsd_report(LOG_WARN, "ZDA year %d less than clock year, "  
 			    "probable GPS week rollover lossage\n", year);
