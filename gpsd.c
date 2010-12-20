@@ -1486,7 +1486,6 @@ int main(int argc, char *argv[])
     struct timeval tv;
     struct subscriber_t *sub;
     const struct gps_type_t **dp;
-    time_t starttime;
 
 #ifdef PPS_ENABLE
     pthread_mutex_init(&report_mutex, NULL);
@@ -1718,12 +1717,12 @@ int main(int argc, char *argv[])
      * bring up the daemon just before a century mark, but that
      * case is probably doomed anyhow because of 2-digit years.
      */
-    starttime = time(NULL);
-    if (starttime < GPS_EPOCH)
+    context.start_time = time(NULL);
+    if (context.start_time < GPS_EPOCH)
 	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in dates "
 		    "may not be reliable.\n");
     else {
-	struct tm *now = localtime(&starttime);
+	struct tm *now = localtime(&context.start_time);
 	/*
 	 * This is going to break our regression-test suite once a century.
 	 * I think we can live with that consequence.
