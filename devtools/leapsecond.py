@@ -1,8 +1,19 @@
 #!/usr/bin/env python
 #
-# Get the current leap-second value.  This is the offset between UTC and
-# GPS time, which changes occasionally due to variations in the Earth's
-# rotation.
+# Usage: leapsecond.py [-i rfcdate] [-o unixdate] [-n MMMYYYY]
+
+# With no option, get the current leap-second value.  This is the
+# offset between UTC and GPS time, which changes occasionally due to
+# variations in the Earth's rotation.
+#
+# With the -i option, take a date in RFC822 format and convert to Unix
+# local time
+#
+# With the -o option, take a date in Unix local time and convert to RFC822.
+#
+# With the -n option, compute Unix local time for an IERS leap-second event
+# given as a three-letter English Gregorian month abbreviation followed by
+# a 4-digit year.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
@@ -93,26 +104,38 @@ def get():
                 pass
         return current_offset
 
-def rfc822(tv):
-    return time.mktime(time.strptime(tv , "%d %b %Y %H:%M:%S"))
+def rfc822_to_unix(tv):
+    "Local Unix time to RFC822 date."
+    return time.mktime(time.strptime(tv, "%d %b %Y %H:%M:%S"))
+
+def unix_to_rfc822(tv):
+    "RFC822 date to local Unix time."
+    return time.strftime("%d %b %Y %H:%M:%S", time.localtime(tv))
 
 if __name__ == '__main__':
     import sys, getopt
     next = False
-    rfc822date = False
-    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:")
+    from_rfc822 = False
+    to_rfc822 = False
+    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:o:")
     for (switch, val) in options:
         if (switch == '-i'):  # Compute Unix time from RFC822 date
-            rfc822date = True
+            from_rfc822 = True
         elif (switch == '-n'):  # Compute possible next leapsecond
             next = True
+        elif (switch == '-o'):  # Compute RFC822 date from Unix time
+            to_rfc822 = True
 
-    if not next and not rfc822date:
+    if not next and not from_rfc822 and not to_rfc822:
         print "Current leap second:", retrieve()
         raise SystemExit, 0
 
-    if rfc822date:
-        print "#define FOO	%d	/* %s */" % (rfc822(val), val)
+    if from_rfc822:
+        print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)
+        raise SystemExit, 0
+
+    if to_rfc822:
+        print unix_to_rfc822(float(val))
         raise SystemExit, 0
 
     if val[:3].lower() not in ("jun", "dec"):
@@ -136,4 +159,4 @@ if __name__ == '__main__':
             tv = "30 Jun %d 23:59:59" % year
         else:
             tv = "31 Dec %d 23:59:59" % year
-        print "#define START_SUBFRAME	%d	/* %s */" % (rfc822(tv), tv)
+        print "#define START_SUBFRAME	%d	/* %s */" % (rfc822_to_unix(tv), tv)
