@@ -61,6 +61,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;
     session->newdata.time = t;
+    gpsd_rollover_check(session, session->newdata.time);
     mask |= TIME_IS;
 
     epx = (double)(getlesl(buf, 7 + 96) / 100.0);
@@ -136,6 +137,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
 	    - session->context->leap_seconds;
 	session->gpsdata.skyview_time = t;
+	gpsd_rollover_check(session, session->gpsdata.skyview_time);
 
 	gpsd_zero_satellites(&session->gpsdata);
 	nsv = 0;
@@ -201,6 +203,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;
     session->newdata.time = t;
+    gpsd_rollover_check(session, session->newdata.time);
 
     gpsd_report(LOG_DATA,
 		"UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
@@ -272,6 +275,8 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     session->context->gps_tow = tow / 1000.0;
     t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;
+    session->newdata.time = t;
+    gpsd_rollover_check(session, session->newdata.time);
 
     /*@-type@*/
     for (i = 0; i < n; i++){

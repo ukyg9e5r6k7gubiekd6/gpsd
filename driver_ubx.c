@@ -73,6 +73,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 			    session->context->gps_tow)
 	    - session->context->leap_seconds;
 	session->newdata.time = t;
+	gpsd_rollover_check(session, session->newdata.time);
 	mask |= TIME_IS;
     }
 
@@ -185,6 +186,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 			session->context->gps_tow)
 	- session->context->leap_seconds;
     session->newdata.time = t;
+    gpsd_rollover_check(session, session->newdata.time);
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->newdata.time);

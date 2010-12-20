@@ -562,8 +562,9 @@ extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
 extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *cooked, const char *raw);
-extern void ntpd_link_activate(struct gps_device_t *session);
+extern void ntpd_link_activate(struct gps_device_t *);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
+extern void gpsd_rollover_check(/*@in@ */ struct gps_device_t *, const double);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void gpsd_clear_data(struct gps_device_t *);
 extern socket_t netlib_connectsock(int, const char *, const char *, const char *);

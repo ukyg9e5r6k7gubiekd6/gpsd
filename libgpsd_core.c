@@ -810,6 +810,12 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
+void gpsd_rollover_check(/*@in@ */ struct gps_device_t *session, const double unixtime)
+{
+    if (session->context->start_time >= GPS_EPOCH && unixtime < session->context->start_time)
+	gpsd_report(LOG_WARN, "GPS week rollover makes time invalid");
+}
+
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from

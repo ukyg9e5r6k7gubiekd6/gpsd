@@ -184,6 +184,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    gpstime_to_unix(session->context->gps_week,
 			    session->context->gps_tow) -
 	    session->context->leap_seconds;
+	gpsd_rollover_check(session, session->newdata.time);
 	/*@ end @*/
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 			 getlesl(buf2, 8) * 1.0, getlesl(buf2, 12) * 1.0,
@@ -224,6 +225,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    gpstime_to_unix(session->context->gps_week,
 			    session->context->gps_tow) -
 	    session->context->leap_seconds;
+	gpsd_rollover_check(session, session->newdata.time);
 	/*@ end @*/
 	/*
 	 * We make a deliberate choice not to clear DOPs from the
@@ -273,6 +275,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    gpstime_to_unix(session->context->gps_week,
 			    session->context->gps_tow) -
 	    session->context->leap_seconds;
+	gpsd_rollover_check(session, session->gpsdata.skyview_time);
 	/*@ end @*/
 	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
 	gpsd_zero_satellites(&session->gpsdata);
@@ -333,6 +336,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    gpstime_to_unix(session->context->gps_week,
 			    session->context->gps_tow) -
 	    session->context->leap_seconds;
+	gpsd_rollover_check(session, session->newdata.time);
 	/*@ end @*/
 	visible = (unsigned char)getub(buf2, 10);
 	/*

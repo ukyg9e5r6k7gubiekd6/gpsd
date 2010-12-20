@@ -157,6 +157,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     t = gpstime_to_unix(gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;
     session->newdata.time = t;
+    gpsd_rollover_check(session, session->newdata.time);
 
     return TIME_IS | ONLINE_IS;
 }

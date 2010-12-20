@@ -413,6 +413,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->newdata.time =
 	gpstime_to_unix((int)week, session->context->gps_tow)
 	- session->context->leap_seconds;
+    gpsd_rollover_check(session, session->newdata.time);
 
     /* Satellites used */
     sats_used = (uint32_t) getleul(buf, 9);
@@ -736,6 +737,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     session->gpsdata.skyview_time =
 	gpstime_to_unix((int)week, session->context->gps_tow)
 	- session->context->leap_seconds;
+    gpsd_rollover_check(session, session->gpsdata.skyview_time);
     /*@ end @*/
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
@@ -934,6 +936,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.time =
 	    gpstime_to_unix((int)week, session->context->gps_tow)
 	    - session->context->leap_seconds;
+	gpsd_rollover_check(session, session->newdata.time);
 	/*@ end @*/
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
