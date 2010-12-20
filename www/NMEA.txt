@@ -305,49 +305,49 @@ The following NMEA sentences have been designated "obsolete" in a
 publicly available NMEA document dated 2009.
 
 |================================================================
-|APA – Autopilot Sentence "A"
-|BER – Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
-|BPI – Bearing & Distance to Point of Interest
-|DBK – Depth Below Keel
-|DBS – Depth Below Surface
+|APA - Autopilot Sentence "A"
+|BER - Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
+|BPI - Bearing & Distance to Point of Interest
+|DBK - Depth Below Keel
+|DBS - Depth Below Surface
 |
-|DRU – Dual Doppler Auxiliary Data
-|GDA – Dead Reckoning Positions
-|GLA – Loran-C Positions
-|GOA – OMEGA Positions
-|GXA – TRANSIT Positions
-|GTD – Geographical Position, Loran-C TDs
-|GXA – TRANSIT Position
-|HCC – Compass Heading
-|HCD – Heading and Deviation
-|HDM – Heading, Magnetic
-|HDT – Heading, True
-|HVD – Magnetic Variation, Automatic
-|HVM – Magnetic Variation, Manually Set
-|IMA – Vessel Identification
-|MDA – Meteorological Composite
-|MHU – Humidity
-|MMB – Barometer
-|MTA – Air Temperature
-|MWH – Wave Height
-|MWS – Wind & Sea State
+|DRU - Dual Doppler Auxiliary Data
+|GDA - Dead Reckoning Positions
+|GLA - Loran-C Positions
+|GOA - OMEGA Positions
+|GXA - TRANSIT Positions
+|GTD - Geographical Position, Loran-C TDs
+|GXA - TRANSIT Position
+|HCC - Compass Heading
+|HCD - Heading and Deviation
+|HDM - Heading, Magnetic
+|HDT - Heading, True
+|HVD - Magnetic Variation, Automatic
+|HVM - Magnetic Variation, Manually Set
+|IMA - Vessel Identification
+|MDA - Meteorological Composite
+|MHU - Humidity
+|MMB - Barometer
+|MTA - Air Temperature
+|MWH - Wave Height
+|MWS - Wind & Sea State
 |
-|Rnn – Routes
-|SBK – Loran-C Blink Status
-|SCY – Loran-C Cycle Lock Status
-|SCD – Loran-C ECDs
-|SDB – Loran-C Signal Strength
-|SGD – Position Accuracy Estimate
-|SGR – Loran-C Chain Identifier
-|SIU – Loran-C Stations in Use
-|SLC – Loran-C Status
-|SNC – Navigation Calculation Basis
-|SNU – Loran-C SNR Status
-|SPS – Loran-C Predicted Signal Strength
-|SSF – Position Correction Offset
-|STC – Time Constant
-|STR – Tracking Reference
-|SYS – Hybrid System Configuration
+|Rnn - Routes
+|SBK - Loran-C Blink Status
+|SCY - Loran-C Cycle Lock Status
+|SCD - Loran-C ECDs
+|SDB - Loran-C Signal Strength
+|SGD - Position Accuracy Estimate
+|SGR - Loran-C Chain Identifier
+|SIU - Loran-C Stations in Use
+|SLC - Loran-C Status
+|SNC - Navigation Calculation Basis
+|SNU - Loran-C SNR Status
+|SPS - Loran-C Predicted Signal Strength
+|SSF - Position Correction Offset
+|STC - Time Constant
+|STR - Tracking Reference
+|SYS - Hybrid System Configuration
 |================================================================
 
 == NMEA-Standard Sentences ==
@@ -1997,18 +1997,18 @@ $PASHR,hhmmss.sss,hhh.hh,T,rrr.rr,ppp.pp,xxx.xx,a.aaa,b.bbb,c.ccc,d,e*hh<CR><LF>
  
 Field number:
  
-1.  hhmmss.sss – UTC time
-2.  hhh.hh – Heading in degrees
-3.  T – flag to indicate that the Heading is True Heading (i.e. to True North)
-4.  rrr.rr – Roll Angle in degrees
-5.  ppp.pp – Pitch Angle in degrees
-6.  xxx.xx – Heave
-7.  a.aaa – Roll Angle Accuracy Estimate (Stdev) in degrees
-8.  b.bbb – Pitch Angle Accuracy Estimate (Stdev) in degrees
-9.  c.ccc – Heading Angle Accuracy Estimate (Stdev) in degrees
-10. d – Aiding Status
-11. e – IMU Status
-12. hh – Checksum
+1.  hhmmss.sss - UTC time
+2.  hhh.hh - Heading in degrees
+3.  T - flag to indicate that the Heading is True Heading (i.e. to True North)
+4.  rrr.rr - Roll Angle in degrees
+5.  ppp.pp - Pitch Angle in degrees
+6.  xxx.xx - Heave
+7.  a.aaa - Roll Angle Accuracy Estimate (Stdev) in degrees
+8.  b.bbb - Pitch Angle Accuracy Estimate (Stdev) in degrees
+9.  c.ccc - Heading Angle Accuracy Estimate (Stdev) in degrees
+10. d - Aiding Status
+11. e - IMU Status
+12. hh - Checksum
 
 [PASHR] describes this sentence as NMEA, though other sources say it is Ashtech 
 proprietary and describe a different format.
