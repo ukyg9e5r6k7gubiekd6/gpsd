@@ -138,6 +138,7 @@ struct gps_context_t context = {
     .rtcmbytes	    = 0,
     .rtcmbuf	    = {'\0'},
     .rtcmtime	    = 0,
+    .start_time     = 0,
     .leap_seconds   = LEAP_SECONDS,
     .gps_week	    = 0,
     .gps_tow        = 0,
