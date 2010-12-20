@@ -34,10 +34,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
-
 #if defined(_PROTO__ENABLE) && defined(BINARY_ENABLE)
 
 #include "bits.h"
