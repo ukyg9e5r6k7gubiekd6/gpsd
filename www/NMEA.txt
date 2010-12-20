@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.3, Mar 2010
+v2.4, Dec 2010
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -50,9 +50,10 @@ because NMEA expects many navigational devices to feed a common serial
 bus.  The darta encoding is ASCII with the high data bit not used and zeroed.
 
 Consumer-grade GPS sensors normally report over an RS232 port or a USB
-port emulating an RS232 serial device. Baud rate is variable, with
-9600 probably the most common.  Most deviveces use 8N1; there are 
-rare exceptions that use 7N2 (San Jose Navigation) or even 8O1 (Trimble).
+port emulating an RS232 serial device; some use Bluetooth. Baud rate
+is variable, with 9600 probably the most common.  Most devices use
+8N1; there are rare exceptions that use 7N2 (San Jose Navigation) or
+even 8O1 (Trimble).
 
 == Sentence Mixes and NMEA Variations ==
 
@@ -116,8 +117,8 @@ no valid data for it.  However, many receivers violate this.  It's
 common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
-Date and time in GPS is computed as number of weeks from 6 January
-1980 plus number of seconds into the week.
+Date and time in GPS is computed as number of weeks from the zero
+second of 6 January 1980, plus number of seconds into the week.
 
 == Error status indications
 
