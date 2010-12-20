@@ -172,7 +172,6 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
  *
  * Note: This time will need to be corrected for leap seconds.
  */
-#define GPS_EPOCH	315964800	/* GPS epoch in Unix time */
 #define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 

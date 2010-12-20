@@ -96,16 +96,6 @@
 #define QLEN			5
 
 /*
- * Second 0 of week 0 of the first rollover period of GPS time.
- * The threshold value under which sytem clock times are considered
- * unreliable. Often, embedded systems come up thinking it's early 1970 
- * and the system clock will report small positive values until the clock 
- * is set.  By choosing this as the cutoff, we'll never reject
- * historical GPS logs that are actually valid.
- */
-#define GPS_EPOCH	347605200	/* 6 Jan 1981 00:00:00 */
-
-/*
  * If ntpshm is enabled, we renice the process to this priority level.
  * For precise timekeeping increase priority.
  */
