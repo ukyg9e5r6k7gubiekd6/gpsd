@@ -339,10 +339,74 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* A-S flags/SV configurations for 32 SVs, 
 		 * plus SV health for SV 25 through 32
 		 */
-		sv = -1;
-		gpsd_report(LOG_PROG,
-			"50B: SF:4-25 data_id %d SV Health TODO\n",
-			data_id);
+		{
+		    sv = -1;
+		    unsigned char sv[33];
+		    sv[1]  = ((words[2] >> 12) & 0x00000F);
+		    sv[2]  = ((words[2] >>  8) & 0x00000F);
+		    sv[3]  = ((words[2] >>  4) & 0x00000F);
+		    sv[4]  = ((words[2] >>  0) & 0x00000F);
+		    sv[5]  = ((words[3] >> 20) & 0x00000F);
+		    sv[6]  = ((words[3] >> 16) & 0x00000F);
+		    sv[7]  = ((words[3] >> 12) & 0x00000F);
+		    sv[8]  = ((words[3] >>  8) & 0x00000F);
+		    sv[9]  = ((words[3] >>  4) & 0x00000F);
+		    sv[10] = ((words[3] >>  0) & 0x00000F);
+		    sv[11] = ((words[4] >> 20) & 0x00000F);
+		    sv[12] = ((words[4] >> 16) & 0x00000F);
+		    sv[13] = ((words[4] >> 12) & 0x00000F);
+		    sv[14] = ((words[4] >>  8) & 0x00000F);
+		    sv[15] = ((words[4] >>  4) & 0x00000F);
+		    sv[16] = ((words[4] >>  0) & 0x00000F);
+		    sv[17] = ((words[5] >> 20) & 0x00000F);
+		    sv[18] = ((words[5] >> 16) & 0x00000F);
+		    sv[19] = ((words[5] >> 12) & 0x00000F);
+		    sv[20] = ((words[5] >>  8) & 0x00000F);
+		    sv[21] = ((words[5] >>  4) & 0x00000F);
+		    sv[22] = ((words[5] >>  0) & 0x00000F);
+		    sv[23] = ((words[6] >> 20) & 0x00000F);
+		    sv[24] = ((words[6] >> 16) & 0x00000F);
+		    sv[25] = ((words[6] >> 12) & 0x00000F);
+		    sv[26] = ((words[6] >>  8) & 0x00000F);
+		    sv[27] = ((words[6] >>  4) & 0x00000F);
+		    sv[28] = ((words[6] >>  0) & 0x00000F);
+		    sv[29] = ((words[7] >> 20) & 0x00000F);
+		    sv[30] = ((words[7] >> 16) & 0x00000F);
+		    sv[31] = ((words[7] >> 12) & 0x00000F);
+		    sv[32] = ((words[7] >>  8) & 0x00000F);
+
+		    unsigned char svh25 = ((words[7] >>  0) & 0x00003F);
+		    unsigned char svh26 = ((words[8] >> 18) & 0x00003F);
+		    unsigned char svh27 = ((words[8] >> 12) & 0x00003F);
+		    unsigned char svh28 = ((words[8] >>  6) & 0x00003F);
+		    unsigned char svh29 = ((words[8] >>  0) & 0x00003F);
+		    unsigned char svh30 = ((words[9] >> 18) & 0x00003F);
+		    unsigned char svh31 = ((words[9] >> 12) & 0x00003F);
+		    unsigned char svh32 = ((words[9] >>  6) & 0x00003F);
+
+		    gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
+			"SV1:%u SV2:%u SV3:%u SV4:%u "
+			"SV5:%u SV6:%u SV7:%u SV8:%u "
+			"SV9:%u SV10:%u SV11:%u SV12:%u "
+			"SV13:%u SV14:%u SV15:%u SV16:%u "
+			"SV17:%u SV18:%u SV19:%u SV20:%u "
+			"SV21:%u SV22:%u SV23:%u SV24:%u "
+			"SV25:%u SV26:%u SV27:%u SV28:%u "
+			"SV29:%u SV30:%u SV31:%u SV32:%u "
+			"SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
+			"SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
+				svid, data_id, 
+				sv[1], sv[2], sv[3], sv[4],
+				sv[5], sv[5], sv[6], sv[4],
+				sv[9], sv[10], sv[11], sv[12],
+				sv[13], sv[14], sv[15], sv[16],
+				sv[17], sv[18], sv[19], sv[20],
+				sv[21], sv[22], sv[23], sv[24],
+				sv[25], sv[26], sv[27], sv[28],
+				sv[29], sv[30], sv[31], sv[32],
+				svh25, svh26, svh27, svh28,
+				svh29, svh30, svh31, svh32);
+		}
 		break;
 
 	    case 33:
