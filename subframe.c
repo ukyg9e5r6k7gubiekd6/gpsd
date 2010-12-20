@@ -326,10 +326,81 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 13:
 	    case 52:
 		/* NMCT */
-		sv = -1;
-		gpsd_report(LOG_PROG,
-			"50B: SF:4-13 data_id %d NMCT TODO\n",
-			data_id);
+		{
+		    sv = -1;
+		    unsigned char erd[33];
+		    unsigned char ai  = ((words[2] >> 22) & 0x000003);
+		    erd[1]  = ((words[2] >>  8) & 0x00003F);
+		    erd[2]  = ((words[2] >>  2) & 0x00003F);
+		    erd[3]  = ((words[2] >>  0) & 0x000003);
+		    erd[3] <<= 2;
+		    erd[3] += ((words[3] >> 20) & 0x00000F);
+
+		    erd[4]  = ((words[3] >> 14) & 0x00003F);
+		    erd[5]  = ((words[3] >>  8) & 0x00003F);
+		    erd[6]  = ((words[3] >>  2) & 0x00003F);
+		    erd[7]  = ((words[3] >>  0) & 0x000003);
+
+		    erd[7] <<= 2;
+		    erd[7] += ((words[4] >> 20) & 0x00000F);
+		    erd[8]  = ((words[4] >> 14) & 0x00003F);
+		    erd[9]  = ((words[4] >>  8) & 0x00003F);
+		    erd[10] = ((words[4] >>  2) & 0x00003F);
+		    erd[11] = ((words[4] >>  0) & 0x00000F);
+
+		    erd[11] <<= 2;
+		    erd[11] += ((words[5] >> 20) & 0x00000F);
+		    erd[12]  = ((words[5] >> 14) & 0x00003F);
+		    erd[13]  = ((words[5] >>  8) & 0x00003F);
+		    erd[14]  = ((words[5] >>  2) & 0x00003F);
+		    erd[15]  = ((words[5] >>  0) & 0x000003);
+
+		    erd[15] <<= 2;
+		    erd[15] += ((words[6] >> 20) & 0x00000F);
+		    erd[16]  = ((words[6] >> 14) & 0x00003F);
+		    erd[17]  = ((words[6] >>  8) & 0x00003F);
+		    erd[18]  = ((words[6] >>  2) & 0x00003F);
+		    erd[19]  = ((words[6] >>  0) & 0x000003);
+
+		    erd[19] <<= 2;
+		    erd[19] += ((words[7] >> 20) & 0x00000F);
+		    erd[20]  = ((words[7] >> 14) & 0x00003F);
+		    erd[21]  = ((words[7] >>  8) & 0x00003F);
+		    erd[22]  = ((words[7] >>  2) & 0x00003F);
+		    erd[23]  = ((words[7] >>  0) & 0x000003);
+
+		    erd[23] <<= 2;
+		    erd[23] += ((words[8] >> 20) & 0x00000F);
+		    erd[24]  = ((words[8] >> 14) & 0x00003F);
+		    erd[25]  = ((words[8] >>  8) & 0x00003F);
+		    erd[26]  = ((words[8] >>  2) & 0x00003F);
+		    erd[27]  = ((words[8] >>  0) & 0x000003);
+
+		    erd[27] <<= 2;
+		    erd[27] += ((words[9] >> 20) & 0x00000F);
+		    erd[28]  = ((words[9] >> 14) & 0x00003F);
+		    erd[29]  = ((words[9] >>  8) & 0x00003F);
+		    erd[30]  = ((words[9] >>  2) & 0x00003F);
+
+		    gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
+			"ERD1:%u ERD2:%u ERD3:%u ERD4:%u "
+			"ERD5:%u ERD6:%u ERD7:%u ERD8:%u "
+			"ERD9:%u ERD10:%u ERD11:%u ERD12:%u "
+			"ERD13:%u ERD14:%u ERD15:%u ERD16:%u "
+			"ERD17:%u ERD18:%u ERD19:%u ERD20:%u "
+			"ERD21:%u ERD22:%u ERD23:%u ERD24:%u "
+			"ERD25:%u ERD26:%u ERD27:%u ERD28:%u "
+			"ERD29:%u ERD30:%u\n",
+				data_id, ai,
+				erd[1], erd[2], erd[3], erd[4],
+				erd[5], erd[5], erd[6], erd[4],
+				erd[9], erd[10], erd[11], erd[12],
+				erd[13], erd[14], erd[15], erd[16],
+				erd[17], erd[18], erd[19], erd[20],
+				erd[21], erd[22], erd[23], erd[24],
+				erd[25], erd[26], erd[27], erd[28],
+				erd[29], erd[30]);
+		}
 		break;
 
 	    case 25:
@@ -341,39 +412,39 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 */
 		{
 		    sv = -1;
-		    unsigned char sv[33];
-		    sv[1]  = ((words[2] >> 12) & 0x00000F);
-		    sv[2]  = ((words[2] >>  8) & 0x00000F);
-		    sv[3]  = ((words[2] >>  4) & 0x00000F);
-		    sv[4]  = ((words[2] >>  0) & 0x00000F);
-		    sv[5]  = ((words[3] >> 20) & 0x00000F);
-		    sv[6]  = ((words[3] >> 16) & 0x00000F);
-		    sv[7]  = ((words[3] >> 12) & 0x00000F);
-		    sv[8]  = ((words[3] >>  8) & 0x00000F);
-		    sv[9]  = ((words[3] >>  4) & 0x00000F);
-		    sv[10] = ((words[3] >>  0) & 0x00000F);
-		    sv[11] = ((words[4] >> 20) & 0x00000F);
-		    sv[12] = ((words[4] >> 16) & 0x00000F);
-		    sv[13] = ((words[4] >> 12) & 0x00000F);
-		    sv[14] = ((words[4] >>  8) & 0x00000F);
-		    sv[15] = ((words[4] >>  4) & 0x00000F);
-		    sv[16] = ((words[4] >>  0) & 0x00000F);
-		    sv[17] = ((words[5] >> 20) & 0x00000F);
-		    sv[18] = ((words[5] >> 16) & 0x00000F);
-		    sv[19] = ((words[5] >> 12) & 0x00000F);
-		    sv[20] = ((words[5] >>  8) & 0x00000F);
-		    sv[21] = ((words[5] >>  4) & 0x00000F);
-		    sv[22] = ((words[5] >>  0) & 0x00000F);
-		    sv[23] = ((words[6] >> 20) & 0x00000F);
-		    sv[24] = ((words[6] >> 16) & 0x00000F);
-		    sv[25] = ((words[6] >> 12) & 0x00000F);
-		    sv[26] = ((words[6] >>  8) & 0x00000F);
-		    sv[27] = ((words[6] >>  4) & 0x00000F);
-		    sv[28] = ((words[6] >>  0) & 0x00000F);
-		    sv[29] = ((words[7] >> 20) & 0x00000F);
-		    sv[30] = ((words[7] >> 16) & 0x00000F);
-		    sv[31] = ((words[7] >> 12) & 0x00000F);
-		    sv[32] = ((words[7] >>  8) & 0x00000F);
+		    unsigned char svf[33];
+		    svf[1]  = ((words[2] >> 12) & 0x00000F);
+		    svf[2]  = ((words[2] >>  8) & 0x00000F);
+		    svf[3]  = ((words[2] >>  4) & 0x00000F);
+		    svf[4]  = ((words[2] >>  0) & 0x00000F);
+		    svf[5]  = ((words[3] >> 20) & 0x00000F);
+		    svf[6]  = ((words[3] >> 16) & 0x00000F);
+		    svf[7]  = ((words[3] >> 12) & 0x00000F);
+		    svf[8]  = ((words[3] >>  8) & 0x00000F);
+		    svf[9]  = ((words[3] >>  4) & 0x00000F);
+		    svf[10] = ((words[3] >>  0) & 0x00000F);
+		    svf[11] = ((words[4] >> 20) & 0x00000F);
+		    svf[12] = ((words[4] >> 16) & 0x00000F);
+		    svf[13] = ((words[4] >> 12) & 0x00000F);
+		    svf[14] = ((words[4] >>  8) & 0x00000F);
+		    svf[15] = ((words[4] >>  4) & 0x00000F);
+		    svf[16] = ((words[4] >>  0) & 0x00000F);
+		    svf[17] = ((words[5] >> 20) & 0x00000F);
+		    svf[18] = ((words[5] >> 16) & 0x00000F);
+		    svf[19] = ((words[5] >> 12) & 0x00000F);
+		    svf[20] = ((words[5] >>  8) & 0x00000F);
+		    svf[21] = ((words[5] >>  4) & 0x00000F);
+		    svf[22] = ((words[5] >>  0) & 0x00000F);
+		    svf[23] = ((words[6] >> 20) & 0x00000F);
+		    svf[24] = ((words[6] >> 16) & 0x00000F);
+		    svf[25] = ((words[6] >> 12) & 0x00000F);
+		    svf[26] = ((words[6] >>  8) & 0x00000F);
+		    svf[27] = ((words[6] >>  4) & 0x00000F);
+		    svf[28] = ((words[6] >>  0) & 0x00000F);
+		    svf[29] = ((words[7] >> 20) & 0x00000F);
+		    svf[30] = ((words[7] >> 16) & 0x00000F);
+		    svf[31] = ((words[7] >> 12) & 0x00000F);
+		    svf[32] = ((words[7] >>  8) & 0x00000F);
 
 		    unsigned char svh25 = ((words[7] >>  0) & 0x00003F);
 		    unsigned char svh26 = ((words[8] >> 18) & 0x00003F);
@@ -395,15 +466,15 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			"SV29:%u SV30:%u SV31:%u SV32:%u "
 			"SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
 			"SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
-				svid, data_id, 
-				sv[1], sv[2], sv[3], sv[4],
-				sv[5], sv[5], sv[6], sv[4],
-				sv[9], sv[10], sv[11], sv[12],
-				sv[13], sv[14], sv[15], sv[16],
-				sv[17], sv[18], sv[19], sv[20],
-				sv[21], sv[22], sv[23], sv[24],
-				sv[25], sv[26], sv[27], sv[28],
-				sv[29], sv[30], sv[31], sv[32],
+				data_id, 
+				svf[1], svf[2], svf[3], svf[4],
+				svf[5], svf[5], svf[6], svf[4],
+				svf[9], svf[10], svf[11], svf[12],
+				svf[13], svf[14], svf[15], svf[16],
+				svf[17], svf[18], svf[19], svf[20],
+				svf[21], svf[22], svf[23], svf[24],
+				svf[25], svf[26], svf[27], svf[28],
+				svf[29], svf[30], svf[31], svf[32],
 				svh25, svh26, svh27, svh28,
 				svh29, svh30, svh31, svh32);
 		}
@@ -538,7 +609,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			gpsd_report(LOG_PROG,
 			    "50B: SF:4-18 a0:%u a1:%u a2:%u a3:%u "
 			    "b0:%u b1:%u b2:%u b3:%u "
-			    "A1:%u A0:%u tot:%u WNt:%u"
+			    "A1:%u A0:%u tot:%u WNt:%u "
 			    "ls: %u wnlsf:%u DN:%u, lsf:%u\n",
 				a0, a1, a2, a3,
 				b0, b1, b2, b3,
