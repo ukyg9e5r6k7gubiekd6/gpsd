@@ -204,60 +204,67 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    uint32_t iode, e, sqrta, toe, fit, aodo;
-	    int32_t crs, cus, cuc, deltan, m0;
+	    uint32_t IODE, e, sqrta, toe, fit, aodo;
+	    int32_t crs, cus, cuc, deltan, M0;
 
-	    iode   = ((words[2] >> 16) & 0x00FF);
+	    IODE   = ((words[2] >> 16) & 0x00FF);
 	    crs    = ( words[2] & 0x00FFFF);
 	    crs    = uint2int(crs, BIT16);
 	    deltan = ((words[3] >>  8) & 0x00FFFF);
 	    deltan = uint2int(deltan, BIT16);
-	    m0     = ( words[3] & 0x0000FF);
-	    m0 <<= 24;
-	    m0    |= ( words[4] & 0x00FFFFFF);
-	    m0     = uint2int(m0, BIT24);
+	    M0     = ( words[3] & 0x0000FF);
+	    M0   <<= 24;
+	    M0    |= ( words[4] & 0x00FFFFFF);
+	    M0     = uint2int(M0, BIT24);
 	    cuc    = ((words[5] >>  8) & 0x00FFFF);
 	    cuc    = uint2int(cuc, BIT16);
 	    e      = ( words[5] & 0x0000FF);
-	    e <<= 24;
-	    e                  += ( words[6] & 0x00FFFFFF);
+	    e    <<= 24;
+	    e     |= ( words[6] & 0x00FFFFFF);
 	    cus    = ((words[7] >>  8) & 0x00FFFF);
-	    cus  = uint2int(cus, BIT16);
+	    cus    = uint2int(cus, BIT16);
 	    sqrta  = ( words[7] & 0x0000FF);
 	    sqrta <<= 24;
-	    sqrta              += ( words[8] & 0x00FFFFFF);
+	    sqrta |= ( words[8] & 0x00FFFFFF);
 	    toe    = ((words[9] >>  8) & 0x00FFFF);
 	    fit    = ((words[9] >>  7) & 0x000001);
 	    aodo   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
 		"Cuc:%d e:%u Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
-		    svid, iode, crs, deltan, m0,
+		    svid, IODE, crs, deltan, M0,
 		    cuc, e, cus, sqrta, toe, fit, aodo);
 	}
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
 	{
-	    unsigned int cic = ((words[2] >>  8) & 0x00FFFF);
-	    unsigned int om0 = ( words[2] & 0x0000FF);
-	    om0 <<= 24;
-	    om0             += ( words[3] & 0x00FFFFFF);
-	    unsigned int cis = ((words[4] >>  8) & 0x00FFFF);
-	    unsigned int i0  = ( words[4] & 0x0000FF);
-	    i0  <<= 24;
-	    i0              += ( words[5] & 0x00FFFFFF);
-	    unsigned int crc = ((words[6] >>  8) & 0x00FFFF);
-	    unsigned int om  = ( words[6] & 0x0000FF);
-	    om  <<= 24;
-	    om              += ( words[7] & 0x00FFFFFF);
-	    unsigned int omd = ( words[8] & 0x00FFFFFF);
-	    unsigned int iode = (words[9] & 0xFF0000) >> 16; 
-	    unsigned int iote = (words[9] & 0x003FFF) >>  2; 
+	    uint32_t IODE, IDOT;
+	    int32_t Cic, Cis, Crc, om0, i0, om, omd;
+
+	    Cic    = ((words[2] >>  8) & 0x00FFFF);
+	    Cic    = uint2int(Cic, BIT16);
+	    om0    = ( words[2] & 0x0000FF);
+	    om0  <<= 24;
+	    om0   |= ( words[3] & 0x00FFFFFF);
+	    Cis    = ((words[4] >>  8) & 0x00FFFF);
+	    Cis    = uint2int(Cis, BIT16);
+	    i0     = ( words[4] & 0x0000FF);
+	    i0   <<= 24;
+	    i0    |= ( words[5] & 0x00FFFFFF);
+	    Crc    = ((words[6] >>  8) & 0x00FFFF);
+	    Crc    = uint2int(Crc, BIT16);
+	    om     = ( words[6] & 0x0000FF);
+	    om   <<= 24;
+	    om    |= ( words[7] & 0x00FFFFFF);
+	    omd    = ( words[8] & 0x00FFFFFF);
+	    omd    = uint2int(omd, BIT24);
+	    IODE   = ((words[9] >> 16) & 0x0000FF);
+	    IDOT   = ((words[9] >>  2) & 0x003FFF);
 	    gpsd_report(LOG_PROG,
-		"50B: SF:3 SV:%2u IODE:%3u IOTE:%u Cic:%u om0:%u Cis:%u i0:%u "
-		" crc:%u om:%u omd:%u\n", 
-			svid, iode, iote, cic, om0, cis, i0, crc, om, omd );
+		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%u Cic:%d om0:%d Cis:%d "
+		"i0:%d crc:%d om:%d omd:%d\n", 
+			svid, IODE, IDOT, Cic, om0, Cis, i0, Crc, om, omd );
 	}
 	break;
     case 4:
