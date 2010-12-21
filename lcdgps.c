@@ -45,7 +45,7 @@
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#include <time.h>		/* for select() */
+#include <sys/time.h>		/* for select() */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

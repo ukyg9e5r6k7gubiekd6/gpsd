@@ -9,6 +9,7 @@
 #include <math.h>
 #include <errno.h>
 #include <libgen.h>
+#include <sys/time.h>		/* for select() */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

@@ -11,7 +11,7 @@
 #include <math.h>
 #include <locale.h>
 #include <assert.h>
-#include <time.h>	 /* expected to have a select(2) prototype a la SuS */
+#include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

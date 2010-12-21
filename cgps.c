@@ -78,7 +78,7 @@
 /* This is the maximum size we need for the 'satellites' window. */
 #define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
 
-#include <time.h>		/* for select() */
+#include <sys/time.h>		/* for select() */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

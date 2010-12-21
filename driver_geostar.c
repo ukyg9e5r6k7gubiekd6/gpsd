@@ -11,7 +11,7 @@
  */
 
 #include <sys/types.h>
-#include <time.h>
+#include <sys/time.h>		/* for select() */
 #include <math.h>
 #include <string.h>
 #ifndef S_SPLINT_S
