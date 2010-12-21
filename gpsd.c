@@ -6,9 +6,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
