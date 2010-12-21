@@ -205,36 +205,36 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    uint32_t IODE, e, sqrta, toe, fit, aodo;
-	    int32_t crs, cus, cuc, deltan, M0;
+	    uint32_t IODE, e, sqrta, toe, fit, AODO;
+	    int32_t Crs, Cus, Cuc, deltan, M0;
 
 	    IODE   = ((words[2] >> 16) & 0x00FF);
-	    crs    = ( words[2] & 0x00FFFF);
-	    crs    = uint2int(crs, BIT16);
+	    Crs    = ( words[2] & 0x00FFFF);
+	    Crs    = uint2int(Crs, BIT16);
 	    deltan = ((words[3] >>  8) & 0x00FFFF);
 	    deltan = uint2int(deltan, BIT16);
 	    M0     = ( words[3] & 0x0000FF);
 	    M0   <<= 24;
 	    M0    |= ( words[4] & 0x00FFFFFF);
 	    M0     = uint2int(M0, BIT24);
-	    cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    cuc    = uint2int(cuc, BIT16);
+	    Cuc    = ((words[5] >>  8) & 0x00FFFF);
+	    Cuc    = uint2int(Cuc, BIT16);
 	    e      = ( words[5] & 0x0000FF);
 	    e    <<= 24;
 	    e     |= ( words[6] & 0x00FFFFFF);
-	    cus    = ((words[7] >>  8) & 0x00FFFF);
-	    cus    = uint2int(cus, BIT16);
+	    Cus    = ((words[7] >>  8) & 0x00FFFF);
+	    Cus    = uint2int(Cus, BIT16);
 	    sqrta  = ( words[7] & 0x0000FF);
 	    sqrta <<= 24;
 	    sqrta |= ( words[8] & 0x00FFFFFF);
 	    toe    = ((words[9] >>  8) & 0x00FFFF);
 	    fit    = ((words[9] >>  7) & 0x000001);
-	    aodo   = ((words[9] >>  2) & 0x00001F);
+	    AODO   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
 		"Cuc:%d e:%u Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
-		    svid, IODE, crs, deltan, M0,
-		    cuc, e, cus, sqrta, toe, fit, aodo);
+		    svid, IODE, Crs, deltan, M0,
+		    Cuc, e, Cus, sqrta, toe, fit, AODO);
 	}
 	break;
     case 3:
@@ -600,31 +600,38 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 * as page 56, IS-GPS-200E Table 20-V */
 		/* ionospheric and UTC data */
 		{
+		    int32_t A0, A1;
+		    int8_t alpha0, alpha1, alpha2, alpha3;
+		    int8_t beta0, beta1, beta2, beta3;
+		    int8_t leap, lsf;
+		    uint8_t tot, WNt, WNlsf, DN;
+
 		    sv = -1;
 		    /* current leap seconds */
-		    unsigned int a0 = ((words[2] >> 16) & 0x0000FF);
-		    unsigned int a1 = ((words[2] >>  8) & 0x0000FF);
-		    unsigned int a2 = ((words[3] >> 16) & 0x0000FF);
-		    unsigned int a3 = ((words[3] >>  8) & 0x0000FF);
-		    unsigned int b0 = ((words[3] >>  0) & 0x0000FF);
-		    unsigned int b1 = ((words[4] >> 16) & 0x0000FF);
-		    unsigned int b2 = ((words[4] >>  8) & 0x0000FF);
-		    unsigned int b3 = ((words[4] >>  0) & 0x0000FF);
-		    unsigned int A1 = ((words[5] >>  0) & 0xFFFFFF);
-		    unsigned int A0 = ((words[6] >>  0) & 0xFFFFFF);
-		    A0 <<= 8;
-		    A0             += ((words[7] >> 16) & 0x00FFFF);
+		    alpha0 = ((words[2] >> 16) & 0x0000FF);
+		    alpha1 = ((words[2] >>  8) & 0x0000FF);
+		    alpha2 = ((words[3] >> 16) & 0x0000FF);
+		    alpha3 = ((words[3] >>  8) & 0x0000FF);
+		    beta0  = ((words[3] >>  0) & 0x0000FF);
+		    beta1  = ((words[4] >> 16) & 0x0000FF);
+		    beta2  = ((words[4] >>  8) & 0x0000FF);
+		    beta3  = ((words[4] >>  0) & 0x0000FF);
+		    A1     = ((words[5] >>  0) & 0xFFFFFF);
+		    A1     = uint2int(A1, BIT24);
+		    A0     = ((words[6] >>  0) & 0xFFFFFF);
+		    A0   <<= 8;
+		    A0    |= ((words[7] >> 16) & 0x00FFFF);
 		    /* careful WN is 10 bits, but WNt is 8 bits! */
 		    /* WNt (Week Number of LSF) */
-		    unsigned int tot   = ((words[7] >> 8) & 0x0000FF);
-		    unsigned int wnt   = ((words[7] >> 0) & 0x0000FF);
-		    unsigned int leap  = ((words[8] >> 16) & 0x0000FF);
-		    unsigned int wnlsf = ((words[8] >>  8) & 0x0000FF);
+		    tot    = ((words[7] >> 8) & 0x0000FF);
+		    WNt    = ((words[7] >> 0) & 0x0000FF);
+		    leap  = ((words[8] >> 16) & 0x0000FF);
+		    WNlsf  = ((words[8] >>  8) & 0x0000FF);
 
 		    /* DN (Day Number of LSF) */
-		    unsigned int dn = (words[8] & 0x0000FF);	   
+		    DN = (words[8] & 0x0000FF);	   
 		    /* leap second future */
-		    unsigned int lsf = ((words[9] >> 16) & 0x0000FF);
+		    lsf = ((words[9] >> 16) & 0x0000FF);
 		    /*
 		     * On SiRFs, the 50BPS data is passed on even when the
 		     * parity fails.  This happens frequently.  So the driver 
@@ -639,18 +646,18 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			session->context->valid &= ~LEAP_SECOND_VALID;
 		    } else {
 			gpsd_report(LOG_INF,
-			    "50B: SF:4-18 leap-seconds:%u lsf:%u WNlsf:%u "
+			    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
 			    "DN:%d\n",
-				    leap, lsf, wnlsf, dn);
+				    leap, lsf, WNlsf, DN);
 			gpsd_report(LOG_PROG,
-			    "50B: SF:4-18 a0:%u a1:%u a2:%u a3:%u "
-			    "b0:%u b1:%u b2:%u b3:%u "
-			    "A1:%u A0:%u tot:%u WNt:%u "
-			    "ls: %u wnlsf:%u DN:%u, lsf:%u\n",
-				a0, a1, a2, a3,
-				b0, b1, b2, b3,
-				A1, A0, tot, wnt,
-				leap, wnlsf, dn, lsf);
+			    "50B: SF:4-18 a0:%d a1:%d a2:%d a3:%d "
+			    "b0:%d b1:%d b2:%d b3:%d "
+			    "A1:%d A0:%d tot:%u WNt:%u "
+			    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
+				alpha0, alpha1, alpha2, alpha3,
+				beta0, beta1, beta2, beta3,
+				A1, A0, tot, WNt,
+				leap, WNlsf, DN, lsf);
 			session->context->valid |= LEAP_SECOND_VALID;
 			if (leap != lsf) {
 			    gpsd_report(LOG_PROG, 
