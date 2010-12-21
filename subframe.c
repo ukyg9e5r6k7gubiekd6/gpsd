@@ -176,6 +176,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    unsigned int l2, ura, hlth, iodc, toc, l2p;
 	    int32_t tgd, af0, af1, af2;
 
+	    session->context->gps_week =
+		(unsigned short)((words[2] >> 14) & 0x03ff);
 	    l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
 	    ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
 	    hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
@@ -191,9 +193,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    af0  = ((words[9] >>  1) & 0x03FFFFF);
 	    af0  = uint2int(af0, BIT22);
 	    iodc <<= 8;
-	    iodc += ((words[7] >> 16) & 0x00FF);
-	    session->context->gps_week =
-		(unsigned short)((words[2] >> 14) & 0x03ff);
+	    iodc |= ((words[7] >> 16) & 0x00FF);
 	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 		" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%3d"
 	        " af1:%5d af0:%7d\n", svid,
@@ -204,26 +204,34 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    unsigned int iode   = ((words[2] >> 16) & 0x00FF);
-	    unsigned int crs    = ( words[2] & 0x00FFFF);
-	    unsigned int deltan = ((words[3] >>  8) & 0x00FFFF);
-	    unsigned int m0     = ( words[3] & 0x0000FF);
+	    uint32_t iode, e, sqrta, toe, fit, aodo;
+	    int32_t crs, cus, cuc, deltan, m0;
+
+	    iode   = ((words[2] >> 16) & 0x00FF);
+	    crs    = ( words[2] & 0x00FFFF);
+	    crs    = uint2int(crs, BIT16);
+	    deltan = ((words[3] >>  8) & 0x00FFFF);
+	    deltan = uint2int(deltan, BIT16);
+	    m0     = ( words[3] & 0x0000FF);
 	    m0 <<= 24;
-	    m0                 += ( words[4] & 0x00FFFFFF);
-	    unsigned int cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    unsigned int e      = ( words[5] & 0x0000FF);
+	    m0    |= ( words[4] & 0x00FFFFFF);
+	    m0     = uint2int(m0, BIT24);
+	    cuc    = ((words[5] >>  8) & 0x00FFFF);
+	    cuc    = uint2int(cuc, BIT16);
+	    e      = ( words[5] & 0x0000FF);
 	    e <<= 24;
 	    e                  += ( words[6] & 0x00FFFFFF);
-	    unsigned int cus    = ((words[7] >>  8) & 0x00FFFF);
-	    unsigned int sqrta  = ( words[7] & 0x0000FF);
+	    cus    = ((words[7] >>  8) & 0x00FFFF);
+	    cus  = uint2int(cus, BIT16);
+	    sqrta  = ( words[7] & 0x0000FF);
 	    sqrta <<= 24;
 	    sqrta              += ( words[8] & 0x00FFFFFF);
-	    unsigned int toe    = ((words[9] >>  8) & 0x00FFFF);
-	    unsigned int fit    = ((words[9] >>  7) & 0x000001);
-	    unsigned int aodo   = ((words[9] >>  2) & 0x00001F);
+	    toe    = ((words[9] >>  8) & 0x00FFFF);
+	    fit    = ((words[9] >>  7) & 0x000001);
+	    aodo   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
-		"50B: SF:2 SV:%2u IODE:%u Crs:%u deltan:%u m0:%u "
-		"Cuc:%u e:%u Cus:%u sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
+		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
+		"Cuc:%d e:%u Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
 		    svid, iode, crs, deltan, m0,
 		    cuc, e, cus, sqrta, toe, fit, aodo);
 	}
