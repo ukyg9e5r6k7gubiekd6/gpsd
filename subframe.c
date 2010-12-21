@@ -7,13 +7,14 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#define BIT6  0x00020
 #define BIT8  0x00080
 #define BIT11 0x00400
 #define BIT16 0x08000
 #define BIT22 0x0200000
 #define BIT24 0x0800000
 /* convert unsigned to signed */
-#define uint2int( u, m) ( u & m ? u : u - m)
+#define uint2int( u, m) ( u & m ? u - m : u)
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
@@ -204,36 +205,36 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    uint32_t IODE, e, sqrta, toe, fit, aodo;
-	    int32_t crs, cus, cuc, deltan, M0;
+	    uint32_t IODE, e, sqrta, toe, fit, AODO;
+	    int32_t Crs, Cus, Cuc, deltan, M0;
 
 	    IODE   = ((words[2] >> 16) & 0x00FF);
-	    crs    = ( words[2] & 0x00FFFF);
-	    crs    = uint2int(crs, BIT16);
+	    Crs    = ( words[2] & 0x00FFFF);
+	    Crs    = uint2int(Crs, BIT16);
 	    deltan = ((words[3] >>  8) & 0x00FFFF);
 	    deltan = uint2int(deltan, BIT16);
 	    M0     = ( words[3] & 0x0000FF);
 	    M0   <<= 24;
 	    M0    |= ( words[4] & 0x00FFFFFF);
 	    M0     = uint2int(M0, BIT24);
-	    cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    cuc    = uint2int(cuc, BIT16);
+	    Cuc    = ((words[5] >>  8) & 0x00FFFF);
+	    Cuc    = uint2int(Cuc, BIT16);
 	    e      = ( words[5] & 0x0000FF);
 	    e    <<= 24;
 	    e     |= ( words[6] & 0x00FFFFFF);
-	    cus    = ((words[7] >>  8) & 0x00FFFF);
-	    cus    = uint2int(cus, BIT16);
+	    Cus    = ((words[7] >>  8) & 0x00FFFF);
+	    Cus    = uint2int(Cus, BIT16);
 	    sqrta  = ( words[7] & 0x0000FF);
 	    sqrta <<= 24;
 	    sqrta |= ( words[8] & 0x00FFFFFF);
 	    toe    = ((words[9] >>  8) & 0x00FFFF);
 	    fit    = ((words[9] >>  7) & 0x000001);
-	    aodo   = ((words[9] >>  2) & 0x00001F);
+	    AODO   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
 		"Cuc:%d e:%u Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
-		    svid, IODE, crs, deltan, M0,
-		    cuc, e, cus, sqrta, toe, fit, aodo);
+		    svid, IODE, Crs, deltan, M0,
+		    Cuc, e, Cus, sqrta, toe, fit, AODO);
 	}
 	break;
     case 3:
@@ -353,79 +354,88 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 52:
 		/* NMCT */
 		{
+		    /* mapping ord ERD# to SV # is non trivial
+		     * leave it alone */
+		    char ERD[33];
+		    unsigned char ai;
+		    int i;
+
 		    sv = -1;
-		    unsigned char erd[33];
-		    unsigned char ai  = ((words[2] >> 22) & 0x000003);
-		    erd[1]  = ((words[2] >>  8) & 0x00003F);
-		    erd[2]  = ((words[2] >>  2) & 0x00003F);
-		    erd[3]  = ((words[2] >>  0) & 0x000003);
-		    erd[3] <<= 2;
-		    erd[3] += ((words[3] >> 20) & 0x00000F);
+		    ai      = ((words[2] >> 22) & 0x000003);
+		    ERD[1]  = ((words[2] >>  8) & 0x00003F);
+		    ERD[2]  = ((words[2] >>  2) & 0x00003F);
+		    ERD[3]  = ((words[2] >>  0) & 0x000003);
+		    ERD[3] <<= 2;
+		    ERD[3] |= ((words[3] >> 20) & 0x00000F);
 
-		    erd[4]  = ((words[3] >> 14) & 0x00003F);
-		    erd[5]  = ((words[3] >>  8) & 0x00003F);
-		    erd[6]  = ((words[3] >>  2) & 0x00003F);
-		    erd[7]  = ((words[3] >>  0) & 0x000003);
+		    ERD[4]  = ((words[3] >> 14) & 0x00003F);
+		    ERD[5]  = ((words[3] >>  8) & 0x00003F);
+		    ERD[6]  = ((words[3] >>  2) & 0x00003F);
+		    ERD[7]  = ((words[3] >>  0) & 0x000003);
 
-		    erd[7] <<= 2;
-		    erd[7] += ((words[4] >> 20) & 0x00000F);
-		    erd[8]  = ((words[4] >> 14) & 0x00003F);
-		    erd[9]  = ((words[4] >>  8) & 0x00003F);
-		    erd[10] = ((words[4] >>  2) & 0x00003F);
-		    erd[11] = ((words[4] >>  0) & 0x00000F);
+		    ERD[7] <<= 2;
+		    ERD[7] |= ((words[4] >> 20) & 0x00000F);
+		    ERD[8]  = ((words[4] >> 14) & 0x00003F);
+		    ERD[9]  = ((words[4] >>  8) & 0x00003F);
+		    ERD[10] = ((words[4] >>  2) & 0x00003F);
+		    ERD[11] = ((words[4] >>  0) & 0x00000F);
 
-		    erd[11] <<= 2;
-		    erd[11] += ((words[5] >> 20) & 0x00000F);
-		    erd[12]  = ((words[5] >> 14) & 0x00003F);
-		    erd[13]  = ((words[5] >>  8) & 0x00003F);
-		    erd[14]  = ((words[5] >>  2) & 0x00003F);
-		    erd[15]  = ((words[5] >>  0) & 0x000003);
+		    ERD[11] <<= 2;
+		    ERD[11] |= ((words[5] >> 20) & 0x00000F);
+		    ERD[12]  = ((words[5] >> 14) & 0x00003F);
+		    ERD[13]  = ((words[5] >>  8) & 0x00003F);
+		    ERD[14]  = ((words[5] >>  2) & 0x00003F);
+		    ERD[15]  = ((words[5] >>  0) & 0x000003);
 
-		    erd[15] <<= 2;
-		    erd[15] += ((words[6] >> 20) & 0x00000F);
-		    erd[16]  = ((words[6] >> 14) & 0x00003F);
-		    erd[17]  = ((words[6] >>  8) & 0x00003F);
-		    erd[18]  = ((words[6] >>  2) & 0x00003F);
-		    erd[19]  = ((words[6] >>  0) & 0x000003);
+		    ERD[15] <<= 2;
+		    ERD[15] |= ((words[6] >> 20) & 0x00000F);
+		    ERD[16]  = ((words[6] >> 14) & 0x00003F);
+		    ERD[17]  = ((words[6] >>  8) & 0x00003F);
+		    ERD[18]  = ((words[6] >>  2) & 0x00003F);
+		    ERD[19]  = ((words[6] >>  0) & 0x000003);
 
-		    erd[19] <<= 2;
-		    erd[19] += ((words[7] >> 20) & 0x00000F);
-		    erd[20]  = ((words[7] >> 14) & 0x00003F);
-		    erd[21]  = ((words[7] >>  8) & 0x00003F);
-		    erd[22]  = ((words[7] >>  2) & 0x00003F);
-		    erd[23]  = ((words[7] >>  0) & 0x000003);
+		    ERD[19] <<= 2;
+		    ERD[19] |= ((words[7] >> 20) & 0x00000F);
+		    ERD[20]  = ((words[7] >> 14) & 0x00003F);
+		    ERD[21]  = ((words[7] >>  8) & 0x00003F);
+		    ERD[22]  = ((words[7] >>  2) & 0x00003F);
+		    ERD[23]  = ((words[7] >>  0) & 0x000003);
 
-		    erd[23] <<= 2;
-		    erd[23] += ((words[8] >> 20) & 0x00000F);
-		    erd[24]  = ((words[8] >> 14) & 0x00003F);
-		    erd[25]  = ((words[8] >>  8) & 0x00003F);
-		    erd[26]  = ((words[8] >>  2) & 0x00003F);
-		    erd[27]  = ((words[8] >>  0) & 0x000003);
+		    ERD[23] <<= 2;
+		    ERD[23] |= ((words[8] >> 20) & 0x00000F);
+		    ERD[24]  = ((words[8] >> 14) & 0x00003F);
+		    ERD[25]  = ((words[8] >>  8) & 0x00003F);
+		    ERD[26]  = ((words[8] >>  2) & 0x00003F);
+		    ERD[27]  = ((words[8] >>  0) & 0x000003);
 
-		    erd[27] <<= 2;
-		    erd[27] += ((words[9] >> 20) & 0x00000F);
-		    erd[28]  = ((words[9] >> 14) & 0x00003F);
-		    erd[29]  = ((words[9] >>  8) & 0x00003F);
-		    erd[30]  = ((words[9] >>  2) & 0x00003F);
+		    ERD[27] <<= 2;
+		    ERD[27] |= ((words[9] >> 20) & 0x00000F);
+		    ERD[28]  = ((words[9] >> 14) & 0x00003F);
+		    ERD[29]  = ((words[9] >>  8) & 0x00003F);
+		    ERD[30]  = ((words[9] >>  2) & 0x00003F);
+
+		    for ( i = 1; i < 31; i++ ) {
+			ERD[i]  = uint2int(ERD[i], BIT6);
+		    }
 
 		    gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
-			"ERD1:%u ERD2:%u ERD3:%u ERD4:%u "
-			"ERD5:%u ERD6:%u ERD7:%u ERD8:%u "
-			"ERD9:%u ERD10:%u ERD11:%u ERD12:%u "
-			"ERD13:%u ERD14:%u ERD15:%u ERD16:%u "
-			"ERD17:%u ERD18:%u ERD19:%u ERD20:%u "
-			"ERD21:%u ERD22:%u ERD23:%u ERD24:%u "
-			"ERD25:%u ERD26:%u ERD27:%u ERD28:%u "
-			"ERD29:%u ERD30:%u\n",
+			"ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
+			"ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
+			"ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
+			"ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
+			"ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
+			"ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
+			"ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
+			"ERD29:%d ERD30:%d\n",
 				data_id, ai,
-				erd[1], erd[2], erd[3], erd[4],
-				erd[5], erd[5], erd[6], erd[4],
-				erd[9], erd[10], erd[11], erd[12],
-				erd[13], erd[14], erd[15], erd[16],
-				erd[17], erd[18], erd[19], erd[20],
-				erd[21], erd[22], erd[23], erd[24],
-				erd[25], erd[26], erd[27], erd[28],
-				erd[29], erd[30]);
+				ERD[1], ERD[2], ERD[3], ERD[4],
+				ERD[5], ERD[5], ERD[6], ERD[4],
+				ERD[9], ERD[10], ERD[11], ERD[12],
+				ERD[13], ERD[14], ERD[15], ERD[16],
+				ERD[17], ERD[18], ERD[19], ERD[20],
+				ERD[21], ERD[22], ERD[23], ERD[24],
+				ERD[25], ERD[26], ERD[27], ERD[28],
+				ERD[29], ERD[30]);
 		}
 		break;
 
@@ -590,31 +600,38 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 * as page 56, IS-GPS-200E Table 20-V */
 		/* ionospheric and UTC data */
 		{
+		    int32_t A0, A1;
+		    int8_t alpha0, alpha1, alpha2, alpha3;
+		    int8_t beta0, beta1, beta2, beta3;
+		    int8_t leap, lsf;
+		    uint8_t tot, WNt, WNlsf, DN;
+
 		    sv = -1;
 		    /* current leap seconds */
-		    unsigned int a0 = ((words[2] >> 16) & 0x0000FF);
-		    unsigned int a1 = ((words[2] >>  8) & 0x0000FF);
-		    unsigned int a2 = ((words[3] >> 16) & 0x0000FF);
-		    unsigned int a3 = ((words[3] >>  8) & 0x0000FF);
-		    unsigned int b0 = ((words[3] >>  0) & 0x0000FF);
-		    unsigned int b1 = ((words[4] >> 16) & 0x0000FF);
-		    unsigned int b2 = ((words[4] >>  8) & 0x0000FF);
-		    unsigned int b3 = ((words[4] >>  0) & 0x0000FF);
-		    unsigned int A1 = ((words[5] >>  0) & 0xFFFFFF);
-		    unsigned int A0 = ((words[6] >>  0) & 0xFFFFFF);
-		    A0 <<= 8;
-		    A0             += ((words[7] >> 16) & 0x00FFFF);
+		    alpha0 = ((words[2] >> 16) & 0x0000FF);
+		    alpha1 = ((words[2] >>  8) & 0x0000FF);
+		    alpha2 = ((words[3] >> 16) & 0x0000FF);
+		    alpha3 = ((words[3] >>  8) & 0x0000FF);
+		    beta0  = ((words[3] >>  0) & 0x0000FF);
+		    beta1  = ((words[4] >> 16) & 0x0000FF);
+		    beta2  = ((words[4] >>  8) & 0x0000FF);
+		    beta3  = ((words[4] >>  0) & 0x0000FF);
+		    A1     = ((words[5] >>  0) & 0xFFFFFF);
+		    A1     = uint2int(A1, BIT24);
+		    A0     = ((words[6] >>  0) & 0xFFFFFF);
+		    A0   <<= 8;
+		    A0    |= ((words[7] >> 16) & 0x00FFFF);
 		    /* careful WN is 10 bits, but WNt is 8 bits! */
 		    /* WNt (Week Number of LSF) */
-		    unsigned int tot   = ((words[7] >> 8) & 0x0000FF);
-		    unsigned int wnt   = ((words[7] >> 0) & 0x0000FF);
-		    unsigned int leap  = ((words[8] >> 16) & 0x0000FF);
-		    unsigned int wnlsf = ((words[8] >>  8) & 0x0000FF);
+		    tot    = ((words[7] >> 8) & 0x0000FF);
+		    WNt    = ((words[7] >> 0) & 0x0000FF);
+		    leap  = ((words[8] >> 16) & 0x0000FF);
+		    WNlsf  = ((words[8] >>  8) & 0x0000FF);
 
 		    /* DN (Day Number of LSF) */
-		    unsigned int dn = (words[8] & 0x0000FF);	   
+		    DN = (words[8] & 0x0000FF);	   
 		    /* leap second future */
-		    unsigned int lsf = ((words[9] >> 16) & 0x0000FF);
+		    lsf = ((words[9] >> 16) & 0x0000FF);
 		    /*
 		     * On SiRFs, the 50BPS data is passed on even when the
 		     * parity fails.  This happens frequently.  So the driver 
@@ -629,18 +646,18 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			session->context->valid &= ~LEAP_SECOND_VALID;
 		    } else {
 			gpsd_report(LOG_INF,
-			    "50B: SF:4-18 leap-seconds:%u lsf:%u WNlsf:%u "
+			    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
 			    "DN:%d\n",
-				    leap, lsf, wnlsf, dn);
+				    leap, lsf, WNlsf, DN);
 			gpsd_report(LOG_PROG,
-			    "50B: SF:4-18 a0:%u a1:%u a2:%u a3:%u "
-			    "b0:%u b1:%u b2:%u b3:%u "
-			    "A1:%u A0:%u tot:%u WNt:%u "
-			    "ls: %u wnlsf:%u DN:%u, lsf:%u\n",
-				a0, a1, a2, a3,
-				b0, b1, b2, b3,
-				A1, A0, tot, wnt,
-				leap, wnlsf, dn, lsf);
+			    "50B: SF:4-18 a0:%d a1:%d a2:%d a3:%d "
+			    "b0:%d b1:%d b2:%d b3:%d "
+			    "A1:%d A0:%d tot:%u WNt:%u "
+			    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
+				alpha0, alpha1, alpha2, alpha3,
+				beta0, beta1, beta2, beta3,
+				A1, A0, tot, WNt,
+				leap, WNlsf, DN, lsf);
 			session->context->valid |= LEAP_SECOND_VALID;
 			if (leap != lsf) {
 			    gpsd_report(LOG_PROG, 
@@ -674,9 +691,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	} else if ( 51 == pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
-	    unsigned int toa   = ((words[2] >> 8) & 0x0000FF);
-	    unsigned int wna   = ( words[2] & 0x0000FF);
-	    unsigned int sv[25];
+	    uint8_t toa, WNa;
+	    uint8_t sv[25];
+	    toa   = ((words[2] >> 8) & 0x0000FF);
+	    WNa   = ( words[2] & 0x0000FF);
 	    sv[1] = ((words[2] >> 18) & 0x00003F);
 	    sv[2] = ((words[2] >> 12) & 0x00003F);
 	    sv[3] = ((words[2] >>  6) & 0x00003F);
@@ -709,7 +727,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		"SV13:%u SV14:%u SV15:%uSV16:%u "
 		"SV17:%u SV18:%u SV19:%uSV20:%u "
 		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
-			svid, data_id, toa, wna,
+			svid, data_id, toa, WNa,
 			sv[1], sv[2], sv[3], sv[4],
 			sv[5], sv[5], sv[6], sv[4],
 			sv[9], sv[10], sv[11], sv[12],
