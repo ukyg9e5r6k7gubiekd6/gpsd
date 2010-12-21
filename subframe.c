@@ -14,7 +14,7 @@
 #define BIT22 0x0200000
 #define BIT24 0x0800000
 /* convert unsigned to signed */
-#define uint2int( u, m) ( u & m ? u : u - m)
+#define uint2int( u, m) ( u & m ? u - m : u)
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
