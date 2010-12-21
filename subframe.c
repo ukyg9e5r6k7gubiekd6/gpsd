@@ -691,9 +691,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	} else if ( 51 == pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
-	    unsigned int toa   = ((words[2] >> 8) & 0x0000FF);
-	    unsigned int wna   = ( words[2] & 0x0000FF);
-	    unsigned int sv[25];
+	    uint8_t toa, WNa;
+	    uint8_t sv[25];
+	    toa   = ((words[2] >> 8) & 0x0000FF);
+	    WNa   = ( words[2] & 0x0000FF);
 	    sv[1] = ((words[2] >> 18) & 0x00003F);
 	    sv[2] = ((words[2] >> 12) & 0x00003F);
 	    sv[3] = ((words[2] >>  6) & 0x00003F);
@@ -726,7 +727,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		"SV13:%u SV14:%u SV15:%uSV16:%u "
 		"SV17:%u SV18:%u SV19:%uSV20:%u "
 		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
-			svid, data_id, toa, wna,
+			svid, data_id, toa, WNa,
 			sv[1], sv[2], sv[3], sv[4],
 			sv[5], sv[5], sv[6], sv[4],
 			sv[9], sv[10], sv[11], sv[12],
