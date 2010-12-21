@@ -7,6 +7,7 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#define BIT6  0x00020
 #define BIT8  0x00080
 #define BIT11 0x00400
 #define BIT16 0x08000
@@ -353,79 +354,88 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 52:
 		/* NMCT */
 		{
+		    /* mapping ord ERD# to SV # is non trivial
+		     * leave it alone */
+		    char ERD[33];
+		    unsigned char ai;
+		    int i;
+
 		    sv = -1;
-		    unsigned char erd[33];
-		    unsigned char ai  = ((words[2] >> 22) & 0x000003);
-		    erd[1]  = ((words[2] >>  8) & 0x00003F);
-		    erd[2]  = ((words[2] >>  2) & 0x00003F);
-		    erd[3]  = ((words[2] >>  0) & 0x000003);
-		    erd[3] <<= 2;
-		    erd[3] += ((words[3] >> 20) & 0x00000F);
+		    ai      = ((words[2] >> 22) & 0x000003);
+		    ERD[1]  = ((words[2] >>  8) & 0x00003F);
+		    ERD[2]  = ((words[2] >>  2) & 0x00003F);
+		    ERD[3]  = ((words[2] >>  0) & 0x000003);
+		    ERD[3] <<= 2;
+		    ERD[3] |= ((words[3] >> 20) & 0x00000F);
 
-		    erd[4]  = ((words[3] >> 14) & 0x00003F);
-		    erd[5]  = ((words[3] >>  8) & 0x00003F);
-		    erd[6]  = ((words[3] >>  2) & 0x00003F);
-		    erd[7]  = ((words[3] >>  0) & 0x000003);
+		    ERD[4]  = ((words[3] >> 14) & 0x00003F);
+		    ERD[5]  = ((words[3] >>  8) & 0x00003F);
+		    ERD[6]  = ((words[3] >>  2) & 0x00003F);
+		    ERD[7]  = ((words[3] >>  0) & 0x000003);
 
-		    erd[7] <<= 2;
-		    erd[7] += ((words[4] >> 20) & 0x00000F);
-		    erd[8]  = ((words[4] >> 14) & 0x00003F);
-		    erd[9]  = ((words[4] >>  8) & 0x00003F);
-		    erd[10] = ((words[4] >>  2) & 0x00003F);
-		    erd[11] = ((words[4] >>  0) & 0x00000F);
+		    ERD[7] <<= 2;
+		    ERD[7] |= ((words[4] >> 20) & 0x00000F);
+		    ERD[8]  = ((words[4] >> 14) & 0x00003F);
+		    ERD[9]  = ((words[4] >>  8) & 0x00003F);
+		    ERD[10] = ((words[4] >>  2) & 0x00003F);
+		    ERD[11] = ((words[4] >>  0) & 0x00000F);
 
-		    erd[11] <<= 2;
-		    erd[11] += ((words[5] >> 20) & 0x00000F);
-		    erd[12]  = ((words[5] >> 14) & 0x00003F);
-		    erd[13]  = ((words[5] >>  8) & 0x00003F);
-		    erd[14]  = ((words[5] >>  2) & 0x00003F);
-		    erd[15]  = ((words[5] >>  0) & 0x000003);
+		    ERD[11] <<= 2;
+		    ERD[11] |= ((words[5] >> 20) & 0x00000F);
+		    ERD[12]  = ((words[5] >> 14) & 0x00003F);
+		    ERD[13]  = ((words[5] >>  8) & 0x00003F);
+		    ERD[14]  = ((words[5] >>  2) & 0x00003F);
+		    ERD[15]  = ((words[5] >>  0) & 0x000003);
 
-		    erd[15] <<= 2;
-		    erd[15] += ((words[6] >> 20) & 0x00000F);
-		    erd[16]  = ((words[6] >> 14) & 0x00003F);
-		    erd[17]  = ((words[6] >>  8) & 0x00003F);
-		    erd[18]  = ((words[6] >>  2) & 0x00003F);
-		    erd[19]  = ((words[6] >>  0) & 0x000003);
+		    ERD[15] <<= 2;
+		    ERD[15] |= ((words[6] >> 20) & 0x00000F);
+		    ERD[16]  = ((words[6] >> 14) & 0x00003F);
+		    ERD[17]  = ((words[6] >>  8) & 0x00003F);
+		    ERD[18]  = ((words[6] >>  2) & 0x00003F);
+		    ERD[19]  = ((words[6] >>  0) & 0x000003);
 
-		    erd[19] <<= 2;
-		    erd[19] += ((words[7] >> 20) & 0x00000F);
-		    erd[20]  = ((words[7] >> 14) & 0x00003F);
-		    erd[21]  = ((words[7] >>  8) & 0x00003F);
-		    erd[22]  = ((words[7] >>  2) & 0x00003F);
-		    erd[23]  = ((words[7] >>  0) & 0x000003);
+		    ERD[19] <<= 2;
+		    ERD[19] |= ((words[7] >> 20) & 0x00000F);
+		    ERD[20]  = ((words[7] >> 14) & 0x00003F);
+		    ERD[21]  = ((words[7] >>  8) & 0x00003F);
+		    ERD[22]  = ((words[7] >>  2) & 0x00003F);
+		    ERD[23]  = ((words[7] >>  0) & 0x000003);
 
-		    erd[23] <<= 2;
-		    erd[23] += ((words[8] >> 20) & 0x00000F);
-		    erd[24]  = ((words[8] >> 14) & 0x00003F);
-		    erd[25]  = ((words[8] >>  8) & 0x00003F);
-		    erd[26]  = ((words[8] >>  2) & 0x00003F);
-		    erd[27]  = ((words[8] >>  0) & 0x000003);
+		    ERD[23] <<= 2;
+		    ERD[23] |= ((words[8] >> 20) & 0x00000F);
+		    ERD[24]  = ((words[8] >> 14) & 0x00003F);
+		    ERD[25]  = ((words[8] >>  8) & 0x00003F);
+		    ERD[26]  = ((words[8] >>  2) & 0x00003F);
+		    ERD[27]  = ((words[8] >>  0) & 0x000003);
 
-		    erd[27] <<= 2;
-		    erd[27] += ((words[9] >> 20) & 0x00000F);
-		    erd[28]  = ((words[9] >> 14) & 0x00003F);
-		    erd[29]  = ((words[9] >>  8) & 0x00003F);
-		    erd[30]  = ((words[9] >>  2) & 0x00003F);
+		    ERD[27] <<= 2;
+		    ERD[27] |= ((words[9] >> 20) & 0x00000F);
+		    ERD[28]  = ((words[9] >> 14) & 0x00003F);
+		    ERD[29]  = ((words[9] >>  8) & 0x00003F);
+		    ERD[30]  = ((words[9] >>  2) & 0x00003F);
+
+		    for ( i = 1; i < 31; i++ ) {
+			ERD[i]  = uint2int(ERD[i], BIT6);
+		    }
 
 		    gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
-			"ERD1:%u ERD2:%u ERD3:%u ERD4:%u "
-			"ERD5:%u ERD6:%u ERD7:%u ERD8:%u "
-			"ERD9:%u ERD10:%u ERD11:%u ERD12:%u "
-			"ERD13:%u ERD14:%u ERD15:%u ERD16:%u "
-			"ERD17:%u ERD18:%u ERD19:%u ERD20:%u "
-			"ERD21:%u ERD22:%u ERD23:%u ERD24:%u "
-			"ERD25:%u ERD26:%u ERD27:%u ERD28:%u "
-			"ERD29:%u ERD30:%u\n",
+			"ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
+			"ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
+			"ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
+			"ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
+			"ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
+			"ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
+			"ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
+			"ERD29:%d ERD30:%d\n",
 				data_id, ai,
-				erd[1], erd[2], erd[3], erd[4],
-				erd[5], erd[5], erd[6], erd[4],
-				erd[9], erd[10], erd[11], erd[12],
-				erd[13], erd[14], erd[15], erd[16],
-				erd[17], erd[18], erd[19], erd[20],
-				erd[21], erd[22], erd[23], erd[24],
-				erd[25], erd[26], erd[27], erd[28],
-				erd[29], erd[30]);
+				ERD[1], ERD[2], ERD[3], ERD[4],
+				ERD[5], ERD[5], ERD[6], ERD[4],
+				ERD[9], ERD[10], ERD[11], ERD[12],
+				ERD[13], ERD[14], ERD[15], ERD[16],
+				ERD[17], ERD[18], ERD[19], ERD[20],
+				ERD[21], ERD[22], ERD[23], ERD[24],
+				ERD[25], ERD[26], ERD[27], ERD[28],
+				ERD[29], ERD[30]);
 		}
 		break;
 
