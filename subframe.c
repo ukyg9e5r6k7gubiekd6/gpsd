@@ -7,17 +7,11 @@
 #include "gpsd.h"
 #include "timebase.h"
 
-#ifdef __NOT_YET__
-static char sf4map[] =
-    { -1, 57, 25, 26, 27, 28, 57, 29, 30, 31, 32, 57, 62, 52, 53, 54, 57, 55,
-    56, 58, 59, 57, 60, 61, 62, 63
-};
-
-static char sf5map[] =
-    { -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-    20, 21, 22, 23, 24, 51
-};
-#endif
+#define BIT11 0x00400
+#define BIT16 0x08000
+#define BIT24 0x0800000
+/* convert unsigned to signed */
+#define uint2int( u, m) ( u & m ? u : u - m)
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
@@ -87,24 +81,35 @@ static void subframe_almanac( unsigned int svid, unsigned int words[],
 			     unsigned int subframe, unsigned int sv,
 			     unsigned int data_id)
 {
-    unsigned int e      = ( words[2] & 0x00FFFF);
+    uint32_t e, toa, svh, sqrtA;
+    int32_t deltai, omegad, Omega0, omega, M0, af0, af1;
+    
+
+    e      = ( words[2] & 0x00FFFF);
     /* carefull, each SV can have more than 2 toa's active at the same time 
      * you can not just store one or two almanacs for each sat */
-    unsigned int toa    = ((words[3] >> 16) & 0x0000FF);
-    unsigned int deltai = ( words[3] & 0x00FFFF);
-    unsigned int omegad = ((words[4] >>  8) & 0x00FFFF);
-    unsigned int svh    = ( words[4] & 0x0000FF);
-    unsigned int sqrtA  = ( words[5] & 0xFFFFFF);
-    unsigned int Omega0 = ( words[6] & 0xFFFFFF);
-    unsigned int omega  = ( words[7] & 0xFFFFFF);
-    unsigned int M0     = ( words[8] & 0xFFFFFF);
-    unsigned int af1    = ((words[9] >>  5) & 0x0003FF);
-    unsigned int af0    = ((words[9] >> 16) & 0x0000FF);
+    toa    = ((words[3] >> 16) & 0x0000FF);
+    deltai = ( words[3] & 0x00FFFF);
+    deltai = uint2int(deltai, BIT16);
+    omegad = ((words[4] >>  8) & 0x00FFFF);
+    omegad = uint2int(omegad, BIT16);
+    svh    = ( words[4] & 0x0000FF);
+    sqrtA  = ( words[5] & 0xFFFFFF);
+    Omega0 = ( words[6] & 0xFFFFFF);
+    Omega0 = uint2int(Omega0, BIT24);
+    omega  = ( words[7] & 0xFFFFFF);
+    omega  = uint2int(omega, BIT24);
+    M0     = ( words[8] & 0xFFFFFF);
+    M0     = uint2int(M0, BIT24);
+    af1    = ((words[9] >>  5) & 0x0007FF);
+    af1    = uint2int(af1, BIT11);
+    af0    = ((words[9] >> 16) & 0x0000FF);
     af0 <<= 3;
-    af0                += ((words[9] >>  2) & 0x000003);
+    af0   |= ((words[9] >>  2) & 0x000007);
+    af0    = uint2int(af0, BIT11);
     gpsd_report(LOG_PROG,
-	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%u toa:%u deltai:%u omegad:%u"
-	" svh:%u sqrtA:%u Omega0:%u omega:%u M0:%u af0:%u af1:%u\n",
+	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%u toa:%u deltai:%d omegad:%d"
+	" svh:%u sqrtA:%u Omega0:%d omega:%d M0:%d af0:%d af1:%d\n",
         subframe, sv, svid, data_id, e, toa, deltai, omegad, svh, sqrtA, 
 	Omega0, omega, M0, af0, af1);
 }
