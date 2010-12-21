@@ -7,8 +7,10 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#define BIT8  0x00080
 #define BIT11 0x00400
 #define BIT16 0x08000
+#define BIT22 0x0200000
 #define BIT24 0x0800000
 /* convert unsigned to signed */
 #define uint2int( u, m) ( u & m ? u : u - m)
@@ -132,7 +134,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     /* FIXME!! I really doubt this is Big Endian copmatible */
     unsigned int pageid, subframe, data_id, preamble;
-    unsigned int tow17;
+    uint32_t tow17;
     unsigned char alert, antispoof;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
@@ -157,8 +159,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     alert = ((words[1] >> 6) & 0x01);
     antispoof = ((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
-		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u"
-		"\n", 
+		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u\n", 
 			subframe, svid, tow17, alert, antispoof);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
@@ -172,27 +173,32 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	/* subframe 1: clock parameters for transmitting SV */
 	/* get Week Number (WN) from subframe 1 */
 	{
-	    unsigned int l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
-	    unsigned int ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
-	    unsigned int hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
-	    unsigned int iodc = ( words[2] & 0x000003); /* IODC 2 MSB */
-	    unsigned int l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
-	    unsigned int tgd  = ( words[6] & 0x0000FF);
-	    unsigned int toc  = ( words[7] & 0x00FFFF);
-	    unsigned int af2  = ((words[8] >> 16) & 0x0FF);
-	    unsigned int af1  = ( words[8] & 0x00FFFF);
-	    unsigned int af0  = ((words[9] >>  1) & 0x03FFFFF);
+	    unsigned int l2, ura, hlth, iodc, toc, l2p;
+	    int32_t tgd, af0, af1, af2;
+
+	    l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
+	    ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
+	    hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
+	    iodc = ( words[2] & 0x000003); /* IODC 2 MSB */
+	    l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
+	    tgd  = ( words[6] & 0x0000FF);
+	    tgd  = uint2int(tgd, BIT8);
+	    toc  = ( words[7] & 0x00FFFF);
+	    af2  = ((words[8] >> 16) & 0x0FF);
+	    af2  = uint2int(af2, BIT8);
+	    af1  = ( words[8] & 0x00FFFF);
+	    af1  = uint2int(af1, BIT16);
+	    af0  = ((words[9] >>  1) & 0x03FFFFF);
+	    af0  = uint2int(af0, BIT22);
 	    iodc <<= 8;
 	    iodc += ((words[7] >> 16) & 0x00FF);
 	    session->context->gps_week =
 		(unsigned short)((words[2] >> 14) & 0x03ff);
 	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
-		" L2:%u ura:%u hlth:%u L2P:%u"
-		" Tgd:%u toc:%u af2:%3u"
-	        " af1:%5u af0:%7u\n", svid,
+		" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%3d"
+	        " af1:%5d af0:%7d\n", svid,
 	    	session->context->gps_week, iodc,
-		l2, ura, hlth, l2p,
-		tgd, toc, af2, af1, af0);
+		l2, ura, hlth, l2p, tgd, toc, af2, af1, af0);
 	}
 	break;
     case 2:
