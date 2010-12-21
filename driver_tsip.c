@@ -5,7 +5,7 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <sys/time.h>
+#include <time.h>
 #include <string.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>

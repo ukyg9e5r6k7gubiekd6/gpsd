@@ -11,7 +11,7 @@
  */
 
 #include <sys/types.h>
-#include <sys/time.h>
+#include <time.h>
 #include <math.h>
 #include <string.h>
 #ifndef S_SPLINT_S

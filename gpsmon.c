@@ -7,18 +7,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
+#include <setjmp.h>
+#include <fcntl.h>		/* for O_RDWR */
+#include <errno.h>
+#include <time.h>		/* expected to declare select(2) a la SuS */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <assert.h>
-#include <setjmp.h>
+
 /* Cygwin has only _timezone and not timezone unless the following is set */
 #if defined(__CYGWIN__)
 #define timezonevar
 #endif /* defined(__CYGWIN__) */
-#include <fcntl.h>		/* for O_RDWR */
-#include <errno.h>
-#include <sys/time.h>		/* expected to declare select(2) a la SuS */
 
 #include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
@@ -28,6 +29,7 @@
 #include "gpsdclient.h"
 #include "gpsmon.h"
 #include "revision.h"
+
 
 #ifdef S_SPLINT_S
 extern struct tm *localtime_r(const time_t *, /*@out@*/ struct tm *tp);
