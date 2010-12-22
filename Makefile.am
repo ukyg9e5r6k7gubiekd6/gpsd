@@ -648,10 +648,10 @@ xmllint: $(XML)
 
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
-ENABLES = -DBINARY_ENABLE -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
+ENABLES = -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
 deheader:
 	make --quiet clean
-	deheader -r -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
+	deheader -r -x 'cpp' -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make --quiet clean
 
 # Re-indent the codebase in a uniform style for readability.
