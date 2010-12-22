@@ -27,16 +27,12 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
-#ifdef HAVE_ARPA_INET
 #include <arpa/inet.h>		/* for ntohl(3) and friends */
-#endif /* HAVE_ARPA_INET */
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"

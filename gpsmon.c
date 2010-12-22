@@ -11,6 +11,9 @@
 #include <setjmp.h>
 #include <fcntl.h>		/* for O_RDWR */
 #include <errno.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <time.h>
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
 #ifndef S_SPLINT_S
 #include <unistd.h>

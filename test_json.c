@@ -4,6 +4,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

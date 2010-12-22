@@ -4,13 +4,14 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <stdio.h>
 #include <string.h>
+#include <math.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <math.h>
-#include "gpsd.h"
 
+#include "gpsd.h"
 #include "bits.h"
 
 #ifdef ZODIAC_ENABLE

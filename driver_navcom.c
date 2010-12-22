@@ -30,11 +30,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 #include "gpsd.h"
 
 #if defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE)

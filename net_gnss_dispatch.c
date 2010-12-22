@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
 #include <unistd.h>

@@ -114,6 +114,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #ifndef S_SPLINT_S

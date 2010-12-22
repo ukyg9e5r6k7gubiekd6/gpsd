@@ -79,9 +79,11 @@
 
 #define __USE_POSIX199309 1
 
+#include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

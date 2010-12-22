@@ -14,9 +14,6 @@
 #include <sys/time.h>		/* for select() */
 #include <math.h>
 #include <string.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "bits.h"

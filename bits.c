@@ -3,8 +3,8 @@
  * This file is Copyright (c)2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
- * Bitfield extraction functions.  In each, start is a bit index (not
- * a byte index) and width is a bit width.  The width bounded above by
+ * Bitfield extraction functions.  In each, start is a bit index  - not
+ * a byte index - and width is a bit width.  The width bounded above by
  * the bit width of a long long, which is 64 bits in all standard data
  * models for 32- and 64-bit processors.
  *
