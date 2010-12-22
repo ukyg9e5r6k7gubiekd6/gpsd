@@ -3,6 +3,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "gps.h"
 

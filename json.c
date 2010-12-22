@@ -43,8 +43,8 @@ to use as an offset multiplier.
 of modifications to a corresponding array of C structs.  The trick is
 that the array object initialization has to specify both the C struct
 array's base address and the stride length (the size of the C struct).
-If you initialize the offset fields with the correct offsetof() calls,
-everything will work. Strings are suppported but all string storage
+If you initialize the offset fields with the correct offsetof calls,
+everything will work. Strings are supported but all string storage
 has to be inline in the struct.
 
 PERMISSIONS
@@ -57,6 +57,7 @@ PERMISSIONS
 #include <stdlib.h>
 #include <stdarg.h>
 #include <locale.h>
+#include <ctype.h>
 
 #include "gpsd_config.h"	/* for strlcpy() prototype */
 #include "json.h"

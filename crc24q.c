@@ -27,6 +27,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "crc24q.h"
 

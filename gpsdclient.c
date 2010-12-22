@@ -4,8 +4,10 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>   /* for strcasecmp() */
 #include <math.h>
 #include <assert.h>
 #include <locale.h>
