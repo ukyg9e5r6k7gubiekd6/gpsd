@@ -42,7 +42,6 @@
  */
 
 #include <stdlib.h>
-#include <ctype.h>
 #include "gpsd_config.h"
 #if !defined(HAVE_B64_NTOP) && !defined(HAVE___B64_NTOP)
 
