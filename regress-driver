@@ -99,7 +99,7 @@ fi
 case $mode in
     regress)
         echo "Testing the $testing..." >&2
-        errors=0; total=0; notfound=0;
+        errors=0; total=0; notfound=0;error_list="";
         for f in $*; do
 	    if [ -r $f.chk ]
 	    then
@@ -119,6 +119,7 @@ case $mode in
 		fi
 		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
+                    error_list="${error_list}\n${f}"
 		    if [ -z "$logfile" ]
 		    then
 			cat ${TMP}/diff-$$
