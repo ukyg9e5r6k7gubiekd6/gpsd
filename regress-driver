@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # The regression-test driver script.  This used to be explicit in the
-# makefile before we regrouped the regression tests by stable and unstable 
+# makefile before we regrouped the regression tests by stable and unstable
 # drivers.
 
 # Requires GNU date extensions
@@ -83,14 +83,14 @@ fi
 GPSFILTER="sed -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE/d -e /VERSION/d -e s/,\"device\":[^,}]*//"
 
 # Use ALTFILTER to set up custom filtering when a regression test fails
-# This example filters out altitude and some fields computed by gpsd's error 
-# modeling - these are fragile in the prsence of changes to the fix-buffering 
+# This example filters out altitude and some fields computed by gpsd's error
+# modeling - these are fragile in the prsence of changes to the fix-buffering
 # logic. Note that as the last attribute mode needs to be handled differently.
 #ALTFILTER="-e s/\"alt\":[^,]*,// -e s/\"ep[vhs]\":[-+0-9.]*// -e s/,\"mode\":[^}]*//"
 
 TMP=/tmp
 
-# Only twirl the baton on a tty, avoids junk in transcripts. 
+# Only twirl the baton on a tty, avoids junk in transcripts.
 if [ -t 1 ]
 then
     opts="$opts -b"
@@ -132,9 +132,11 @@ case $mode in
 		notfound=`expr $notfound + 1`;
 	    fi
 	    total=`expr $total + 1`;
-        done; 
+        done;
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
+            echo "The following test Failed:"
+            echo "==================${error_list}\n=================="
             status=1;
         else
             echo "Regression test successful: no errors in $total tests ($notfound not found).";
@@ -153,7 +155,7 @@ case $mode in
     build)
 	echo "Rebuilding $testing regressions..." >&2
         for f in $*; do
-	    case $testing in 
+	    case $testing in
             daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
 	    clientlib) $GPSD_HOME/libgps -b <${f} >${f}.chk ;;
             esac
@@ -163,7 +165,7 @@ case $mode in
     view)
         echo "Viewing..." >&2
         for f in $*; do
-	    case $testing in 
+	    case $testing in
             daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
             clientlib) $GPSD_HOME/libgps -b <${f} ;;
             esac
@@ -177,7 +179,7 @@ endtime=`date +"%s" 2>/dev/null`
 
 if [ "$starttime" -a "$endtime" ]
 then
-    echo -n "Elapsed time: " 
+    echo -n "Elapsed time: "
     echo "scale=2; ${endtime} - ${starttime}" | bc
 fi
 
