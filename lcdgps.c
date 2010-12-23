@@ -53,8 +53,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
-#include <time.h>
 #ifndef S_SPLINT_S
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 

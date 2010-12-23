@@ -4,8 +4,10 @@
  *
  * Driver for the iTalk binary protocol used by FasTrax
  */
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <termios.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

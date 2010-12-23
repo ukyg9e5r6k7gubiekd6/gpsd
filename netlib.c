@@ -3,18 +3,18 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
-#include <errno.h>
 #include <string.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
 #ifndef AF_UNSPEC
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#include <sys/un.h>
 #include <arpa/inet.h>     /* for htons() and friends */
 #include <unistd.h>
 #endif /* S_SPLINT_S */

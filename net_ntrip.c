@@ -3,12 +3,15 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#include <strings.h>
 #ifndef S_SPLINT_S
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>

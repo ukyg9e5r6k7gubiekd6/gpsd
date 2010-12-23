@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <math.h>
+#include <time.h>
 
 #include "gpsd.h"
 #include "bits.h"

@@ -651,7 +651,7 @@ xmllint: $(XML)
 ENABLES = -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
 deheader:
 	make --quiet clean
-	deheader -r -x 'cpp' -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
+	deheader -x 'cpp' -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make --quiet clean
 
 # Re-indent the codebase in a uniform style for readability.

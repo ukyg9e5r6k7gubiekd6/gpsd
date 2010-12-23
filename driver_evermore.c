@@ -41,7 +41,7 @@
  * 100303 - date of firmware release DDMMYY
  * 180 -  datum ID; 001 is WGS-84
  * 05 - default elevation mask; see message 0x86
- * 1 - default DOP select (1 is auto DOP mask); see message 0x87
+ * 1 - default DOP select, 1 is auto DOP mask; see message 0x87
  * 20 - default GDOP; see message 0x87
  * 15 - default PDOP
  * 08 - default HDOP
@@ -117,9 +117,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #if defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE)

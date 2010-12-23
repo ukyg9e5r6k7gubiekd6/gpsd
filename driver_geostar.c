@@ -10,8 +10,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-#include <sys/types.h>
 #include <sys/time.h>		/* for select() */
+#include <stdio.h>
 #include <math.h>
 #include <string.h>
 

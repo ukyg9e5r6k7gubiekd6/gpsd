@@ -4,14 +4,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <time.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <fcntl.h>
 #include <libgen.h>
 #ifndef S_SPLINT_S
-#include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */

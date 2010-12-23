@@ -3,16 +3,21 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <math.h>
 #include <locale.h>
 #include <assert.h>
 #include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
+#include <sys/types.h>
+#include <sys/stat.h>
 #ifndef S_SPLINT_S
+#include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 

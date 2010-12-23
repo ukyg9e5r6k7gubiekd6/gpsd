@@ -7,10 +7,12 @@
  */
 #include <sys/time.h>		/* for select() */
 #include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-#include <math.h>
 
 #include "gpsd.h"
 #include "bits.h"

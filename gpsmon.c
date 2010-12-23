@@ -4,17 +4,21 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
 #include <setjmp.h>
-#include <fcntl.h>		/* for O_RDWR */
 #include <errno.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <time.h>
+#include <termios.h>
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
