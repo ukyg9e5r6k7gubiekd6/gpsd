@@ -3,6 +3,8 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

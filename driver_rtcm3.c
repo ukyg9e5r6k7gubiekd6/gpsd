@@ -27,6 +27,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
+#include <sys/types.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
