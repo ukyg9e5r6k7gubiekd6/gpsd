@@ -92,6 +92,7 @@ stamp-*
 libtool
 NEWS
 ChangeLog
+m4
 # Documentation
 www/AIVDM.html
 www/NMEA.html
