@@ -421,8 +421,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-    if ( (session->gpsdata.dev.baudrate >= 38400)
-      || (session->sourcetype == source_usb) ) {
+    if (session->gpsdata.dev.baudrate >= 38400) {
+        /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     }
@@ -450,8 +450,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     (void)gpsd_interpret_subframe_raw(session, svid, words);
 
 #ifdef ALLOW_RECONFIGURE
-    if ( (session->gpsdata.dev.baudrate < 38400) 
-      && (session->sourcetype != source_usb) ) {
+    if ( session->gpsdata.dev.baudrate < 38400) {
+        /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Disabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
     }
