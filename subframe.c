@@ -86,9 +86,11 @@ static void subframe_almanac( unsigned int svid, unsigned int words[],
 {
     uint32_t e, toa, svh, sqrtA;
     int32_t deltai, omegad, Omega0, omega, M0, af0, af1;
+    double d_eccentricity;
     
 
     e      = ( words[2] & 0x00FFFF);
+    d_eccentricity  = pow(2.0,-21) * e;
     /* carefull, each SV can have more than 2 toa's active at the same time 
      * you can not just store one or two almanacs for each sat */
     toa    = ((words[3] >> 16) & 0x0000FF);
@@ -111,10 +113,10 @@ static void subframe_almanac( unsigned int svid, unsigned int words[],
     af0   |= ((words[9] >>  2) & 0x000007);
     af0    = uint2int(af0, BIT11);
     gpsd_report(LOG_PROG,
-	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%u toa:%u deltai:%d omegad:%d"
+	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%f toa:%u deltai:%d omegad:%d"
 	" svh:%u sqrtA:%u Omega0:%d omega:%d M0:%d af0:%d af1:%d\n",
-        subframe, sv, svid, data_id, e, toa, deltai, omegad, svh, sqrtA, 
-	Omega0, omega, M0, af0, af1);
+        subframe, sv, svid, data_id, d_eccentricity, toa, deltai, omegad, 
+	svh, sqrtA, Omega0, omega, M0, af0, af1);
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
@@ -207,6 +209,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	{
 	    uint32_t IODE, e, sqrta, toe, fit, AODO;
 	    int32_t Crs, Cus, Cuc, deltan, M0;
+	    double d_eccentricity;
 
 	    IODE   = ((words[2] >> 16) & 0x00FF);
 	    Crs    = ( words[2] & 0x00FFFF);
@@ -222,6 +225,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    e      = ( words[5] & 0x0000FF);
 	    e    <<= 24;
 	    e     |= ( words[6] & 0x00FFFFFF);
+	    d_eccentricity  = pow(2.0,-33) * e;
 	    Cus    = ((words[7] >>  8) & 0x00FFFF);
 	    Cus    = uint2int(Cus, BIT16);
 	    sqrta  = ( words[7] & 0x0000FF);
@@ -232,9 +236,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    AODO   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
-		"Cuc:%d e:%u Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
+		"Cuc:%d e:%f Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
 		    svid, IODE, Crs, deltan, M0,
-		    Cuc, e, Cus, sqrta, toe, fit, AODO);
+		    Cuc, d_eccentricity, Cus, sqrta, toe, fit, AODO);
 	}
 	break;
     case 3:
