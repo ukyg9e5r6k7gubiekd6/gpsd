@@ -22,7 +22,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 				unsigned int svid, uint32_t words[])
 {
     unsigned int i;
-    unsigned int preamble, parity;
+    uint32_t preamble, parity;
 
     /*
      * This function assumes an array of 10 ints, each of which carries
@@ -67,7 +67,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	if (invert) {
 	    words[i] ^= 0x3fffffc0;
 	}
-	parity = isgps_parity(words[i]);
+	parity = (uint32_t)isgps_parity((isgps30bits_t)words[i]);
 	if (parity != (words[i] & 0x3f)) {
 	    gpsd_report(LOG_IO,
 			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n",
@@ -455,8 +455,16 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 * plus SV health for SV 25 through 32
 		 */
 		{
-		    sv = -1;
 		    unsigned char svf[33];
+		    unsigned char svh25 = ((words[7] >>  0) & 0x00003F);
+		    unsigned char svh26 = ((words[8] >> 18) & 0x00003F);
+		    unsigned char svh27 = ((words[8] >> 12) & 0x00003F);
+		    unsigned char svh28 = ((words[8] >>  6) & 0x00003F);
+		    unsigned char svh29 = ((words[8] >>  0) & 0x00003F);
+		    unsigned char svh30 = ((words[9] >> 18) & 0x00003F);
+		    unsigned char svh31 = ((words[9] >> 12) & 0x00003F);
+		    unsigned char svh32 = ((words[9] >>  6) & 0x00003F);
+		    sv = -1;
 		    svf[1]  = ((words[2] >> 12) & 0x00000F);
 		    svf[2]  = ((words[2] >>  8) & 0x00000F);
 		    svf[3]  = ((words[2] >>  4) & 0x00000F);
@@ -489,15 +497,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    svf[30] = ((words[7] >> 16) & 0x00000F);
 		    svf[31] = ((words[7] >> 12) & 0x00000F);
 		    svf[32] = ((words[7] >>  8) & 0x00000F);
-
-		    unsigned char svh25 = ((words[7] >>  0) & 0x00003F);
-		    unsigned char svh26 = ((words[8] >> 18) & 0x00003F);
-		    unsigned char svh27 = ((words[8] >> 12) & 0x00003F);
-		    unsigned char svh28 = ((words[8] >>  6) & 0x00003F);
-		    unsigned char svh29 = ((words[8] >>  0) & 0x00003F);
-		    unsigned char svh30 = ((words[9] >> 18) & 0x00003F);
-		    unsigned char svh31 = ((words[9] >> 12) & 0x00003F);
-		    unsigned char svh32 = ((words[9] >>  6) & 0x00003F);
 
 		    gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
 			"SV1:%u SV2:%u SV3:%u SV4:%u "
