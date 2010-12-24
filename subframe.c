@@ -142,7 +142,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     /* FIXME!! I really doubt this is Big Endian copmatible */
     unsigned int pageid, subframe, data_id, preamble;
     uint32_t tow17;
-    unsigned char alert, antispoof;
+    bool alert, antispoof;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
@@ -163,11 +163,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     /* The subframe ID is in the Hand Over Word (page 80) */
     tow17 = ((words[1] >> 7) & 0x01FFFF);
     subframe = ((words[1] >> 2) & 0x07);
-    alert = ((words[1] >> 6) & 0x01);
-    antispoof = ((words[1] >> 6) & 0x01);
+    alert = (bool)((words[1] >> 6) & 0x01);
+    antispoof = (bool)((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u\n", 
-			subframe, svid, tow17, alert, antispoof);
+		subframe, svid, tow17, (unsigned)alert, (unsigned)antispoof);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
