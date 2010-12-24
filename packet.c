@@ -128,12 +128,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     switch (lexer->state) {
     case GROUND_STATE:
 	n = 0;
-#ifdef XXX_ALLOW_COMMENT
 	if (c == '#') {
 	    lexer->state = COMMENT_BODY;
 	    break;
 	}
-#endif // XXX_ALLOW_COMMENT
 #ifdef NMEA_ENABLE
 	if (c == '$') {
 	    lexer->state = NMEA_DOLLAR;
@@ -241,8 +239,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case COMMENT_BODY:
 	if (c == '\n')
 	    lexer->state = COMMENT_RECOGNIZED;
-	else if (!isprint(c))
+	else if (!isprint(c)) {
 	    lexer->state = GROUND_STATE;
+	    character_pushback(lexer);
+	}
 	break;
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
@@ -405,11 +405,9 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_RECOGNIZED:
-#ifdef XXX_ALLOW_COMMENT
 	if (c == '#')
 	    lexer->state = COMMENT_BODY;
 	else 
-#endif // XXX_ALLOW_COMMENT
 		if (c == '$')
 	    lexer->state = NMEA_DOLLAR;
 	else if (c == '!')
@@ -1188,7 +1186,6 @@ void packet_parse(struct gps_packet_t *lexer)
 	if (lexer->state == GROUND_STATE) {
 	    character_discard(lexer);
 	} else if (lexer->state == COMMENT_RECOGNIZED) {
-	    packet_accept(lexer, COMMENT_PACKET);
 	    packet_discard(lexer);
 	    lexer->state = GROUND_STATE;
 	    break;
