@@ -810,7 +810,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
  *
  * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/
  */
-/*@-compdef -usedef@*/
+/*@-compdef -usedef -nullpass@*/
 static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 {
     // discover devices
@@ -820,15 +820,13 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
     bool found = false;
 
     gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
-    libusb_init(NULL);
+    (void)libusb_init(NULL);
 
-    /*@-nullpass@*/
     if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
 	gpsd_report(LOG_ERROR, "USB device list call failed.\n");
 	libusb_exit(NULL);
 	return false;
     }
-    /*@+nullpass@*/
 
     for (i = 0; i < cnt; i++) {
 	struct libusb_device_descriptor desc;
@@ -861,7 +859,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
     return found;
 }
 
-/*@-compdef -usedef@*/
+/*@-compdef -usedef -nullpass@*/
 #endif /* HAVE_LIBUSB || S_SPLINT_S */
 
 /*

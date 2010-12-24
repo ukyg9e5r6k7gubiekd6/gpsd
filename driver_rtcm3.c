@@ -28,13 +28,13 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 *****************************************************************************/
 
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
 #include <arpa/inet.h>		/* for ntohl(3) and friends */
+#include <netinet/in.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
