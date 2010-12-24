@@ -47,7 +47,7 @@ static sourcetype_t gpsd_classify(const char *path)
     else if (S_ISSOCK(sb.st_mode))
 	return source_tcp;
     else if (S_ISCHR(sb.st_mode)) {
-	sourcetype_t devtype = source_unknown;
+	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
 	/* Linux major device numbers live here
 	 * ftp://ftp.kernel.org/pub/linux/docs/device-list/devices-2.6+.txt
