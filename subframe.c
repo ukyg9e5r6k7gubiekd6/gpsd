@@ -80,6 +80,9 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     return 0;
 }
 
+/* you can find up to date almanac data for comparision here:
+ * https://gps.afspc.af.mil/gps/Current/current.alm
+ */
 static void subframe_almanac( unsigned int svid, unsigned int words[], 
 			     unsigned int subframe, unsigned int sv,
 			     unsigned int data_id)
