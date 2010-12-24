@@ -275,7 +275,8 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
  */
 static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
-    unsigned int i, words[10], chan, svid;
+    unsigned int i, chan, svid;
+    uint32_t words[10];
 
     chan = (unsigned int)getub(buf, 0);
     svid = (unsigned int)getub(buf, 1);
@@ -283,7 +284,7 @@ static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 
     /* UBX does all the parity checking, but still bad data gets through */
     for (i = 0; i < 10; i++) {
-	words[i] = (unsigned int)getleul(buf, 4 * i + 2) & 0xffffff;
+	words[i] = (uint32_t)getleul(buf, 4 * i + 2) & 0xffffff;
     }
 
     gpsd_interpret_subframe(session, svid, words);

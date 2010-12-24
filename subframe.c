@@ -3,6 +3,7 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <math.h>
 
 #include "gpsd.h"
 #include "timebase.h"
@@ -18,7 +19,7 @@
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
-				unsigned int svid, unsigned int words[])
+				unsigned int svid, uint32_t words[])
 {
     unsigned int i;
     unsigned int preamble, parity;
@@ -83,7 +84,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 /* you can find up to date almanac data for comparision here:
  * https://gps.afspc.af.mil/gps/Current/current.alm
  */
-static void subframe_almanac( unsigned int svid, unsigned int words[], 
+static void subframe_almanac( unsigned int svid, uint32_t words[], 
 			     unsigned int subframe, unsigned int sv,
 			     unsigned int data_id)
 {
@@ -123,7 +124,7 @@ static void subframe_almanac( unsigned int svid, unsigned int words[],
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
-			     unsigned int svid, unsigned int words[])
+			     unsigned int svid, uint32_t words[])
 {
     /*
      * Heavy black magic begins here!
