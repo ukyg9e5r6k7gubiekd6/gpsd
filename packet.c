@@ -1678,7 +1678,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    len = lexer->inbufptr - lexer->inbuffer;
 
 	    /* Calculate checksum */
-	    for (n = 0; n < len; n += sizeof(long)) {
+	    for (n = 0; n < len; n += 4) {
 		cs ^= getleul(lexer->inbuffer, n);
 	    }
 
