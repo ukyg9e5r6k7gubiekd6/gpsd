@@ -901,7 +901,7 @@ endif
 
 # Productions for setting up and performing udev tests.
 #
-# Requires root. Do "udev-install", then "tail -f /var/run/syslog" in
+# Requires root. Do "udev-install", then "tail -f /var/log/syslog" in
 # another window, then run 'make udev-test', then plug and unplug the
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
@@ -916,7 +916,7 @@ udev-uninstall:
 	rm -f /lib/udev/rules.d/025_gpsd.rules
 
 udev-test:
-	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 4
+	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 5
 
 # Release machinery begins here
 #
