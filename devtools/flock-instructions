@@ -47,3 +47,6 @@ To use the test network:
    the #gpsd IRC channel at freenode.  For each failed test, the
    log will be dumped to standard output.
 
+We have access to some the Debian test machines listed as porterboxes
+at <http://db.debian.org/machines.cgi>.  Adding these to the flock is 
+a work in progress.
