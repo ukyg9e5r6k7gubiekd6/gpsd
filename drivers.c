@@ -12,7 +12,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#include "bits.h"		/* for getbeuw(), to extract big-endian words */
+#include "bits.h"		/* for getbeu16(), to extract big-endian words */
 
 extern const struct gps_type_t zodiac_binary;
 extern const struct gps_type_t ubx_binary;
@@ -846,8 +846,8 @@ static const struct gps_type_t rtcm104v2 = {
 
 static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
-    uint16_t length = getbeuw(session->packet.inbuffer, 1);
-    uint16_t type = getbeuw(session->packet.inbuffer, 3) >> 4;
+    uint16_t length = getbeu16(session->packet.inbuffer, 1);
+    uint16_t type = getbeu16(session->packet.inbuffer, 3) >> 4;
 
     /* *INDENT-OFF* */
     gpsd_report(LOG_RAW, "RTCM 3.x packet type %d length %d words: %s\n",

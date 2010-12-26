@@ -97,8 +97,8 @@
 #include "gpsd.h"
 #include "bits.h"
 
-#define GPSD_LE16TOH(x) getlesw((char *)(&(x)), 0)
-#define GPSD_LE32TOH(x) getlesl((char *)(&(x)), 0)
+#define GPSD_LE16TOH(x) getles16((char *)(&(x)), 0)
+#define GPSD_LE32TOH(x) getles32((char *)(&(x)), 0)
 
 #ifdef GARMIN_ENABLE
 

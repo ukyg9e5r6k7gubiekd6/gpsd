@@ -66,8 +66,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 11);
     mask = 0;
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
-	tow = (unsigned int)getleul(buf, 0);
-	gw = (unsigned short)getlesw(buf, 8);
+	tow = (unsigned int)getleu32(buf, 0);
+	gw = (unsigned short)getles16(buf, 8);
 	session->context->gps_week = gw;
 	session->context->gps_tow = tow / 1000.0;
 
@@ -79,20 +79,20 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	mask |= TIME_IS;
     }
 
-    epx = (double)(getlesl(buf, 12) / 100.0);
-    epy = (double)(getlesl(buf, 16) / 100.0);
-    epz = (double)(getlesl(buf, 20) / 100.0);
-    evx = (double)(getlesl(buf, 28) / 100.0);
-    evy = (double)(getlesl(buf, 32) / 100.0);
-    evz = (double)(getlesl(buf, 36) / 100.0);
+    epx = (double)(getles32(buf, 12) / 100.0);
+    epy = (double)(getles32(buf, 16) / 100.0);
+    epz = (double)(getles32(buf, 20) / 100.0);
+    evx = (double)(getles32(buf, 28) / 100.0);
+    evy = (double)(getles32(buf, 32) / 100.0);
+    evz = (double)(getles32(buf, 36) / 100.0);
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     epx, epy, epz, evx, evy, evz);
     mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
     session->newdata.epx = session->newdata.epy =
-	(double)(getlesl(buf, 24) / 100.0) / sqrt(2);
-    session->newdata.eps = (double)(getlesl(buf, 40) / 100.0);
+	(double)(getles32(buf, 24) / 100.0) / sqrt(2);
+    session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
     /* Better to have a single point of truth about DOPs */
-    //session->gpsdata.dop.pdop = (double)(getleuw(buf, 44)/100.0);
+    //session->gpsdata.dop.pdop = (double)(getleu16(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
 
     navmode = (unsigned char)getub(buf, 10);
@@ -147,11 +147,11 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
      * to our calculations from the visiniolity matrix, trusting
      * the firmware algorithms over ours.
      */
-    session->gpsdata.dop.gdop = (double)(getleuw(buf, 4) / 100.0);
-    session->gpsdata.dop.pdop = (double)(getleuw(buf, 6) / 100.0);
-    session->gpsdata.dop.tdop = (double)(getleuw(buf, 8) / 100.0);
-    session->gpsdata.dop.vdop = (double)(getleuw(buf, 10) / 100.0);
-    session->gpsdata.dop.hdop = (double)(getleuw(buf, 12) / 100.0);
+    session->gpsdata.dop.gdop = (double)(getleu16(buf, 4) / 100.0);
+    session->gpsdata.dop.pdop = (double)(getleu16(buf, 6) / 100.0);
+    session->gpsdata.dop.tdop = (double)(getleu16(buf, 8) / 100.0);
+    session->gpsdata.dop.vdop = (double)(getleu16(buf, 10) / 100.0);
+    session->gpsdata.dop.hdop = (double)(getleu16(buf, 12) / 100.0);
     gpsd_report(LOG_DATA, "NAVDOP: gdop=%.2f pdop=%.2f "
 		"hdop=%.2f vdop=%.2f tdop=%.2f mask={DOP}\n",
 		session->gpsdata.dop.gdop,
@@ -174,8 +174,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 16)
 	return 0;
 
-    tow = (unsigned int)getleul(buf, 0);
-    gw = (unsigned int)getlesw(buf, 8);
+    tow = (unsigned int)getleu32(buf, 0);
+    gw = (unsigned int)getles16(buf, 8);
     if (gw > session->context->gps_week)
 	session->context->gps_week = (unsigned short)gw;
 
@@ -226,7 +226,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.PRN[j] = (int)getub(buf, off + 1);
 	session->gpsdata.ss[j] = (float)getub(buf, off + 4);
 	session->gpsdata.elevation[j] = (int)getsb(buf, off + 5);
-	session->gpsdata.azimuth[j] = (int)getlesw(buf, off + 6);
+	session->gpsdata.azimuth[j] = (int)getles16(buf, off + 6);
 	if (session->gpsdata.PRN[j])
 	    st++;
 	/*@ -predboolothers */
@@ -284,7 +284,7 @@ static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 
     /* UBX does all the parity checking, but still bad data gets through */
     for (i = 0; i < 10; i++) {
-	words[i] = (uint32_t)getleul(buf, 4 * i + 2) & 0xffffff;
+	words[i] = (uint32_t)getleu32(buf, 4 * i + 2) & 0xffffff;
     }
 
     gpsd_interpret_subframe(session, svid, words);
@@ -339,7 +339,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
-    data_len = (size_t) getlesw(buf, 4);
+    data_len = (size_t) getles16(buf, 4);
     switch (msgid) {
     case UBX_NAV_POSECEF:
 	gpsd_report(LOG_IO, "UBX_NAV_POSECEF\n");
@@ -678,7 +678,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 	 i++)
 	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
     if (buf[0] == 0x01)		/* set baudrate on serial port only */
-	putlelong(buf, 8, session->gpsdata.dev.baudrate);
+	putle32(buf, 8, session->gpsdata.dev.baudrate);
 
     if (mode == MODE_NMEA) {
 	buf[14] &= ~0x01;	/* turn off UBX output on this port */
@@ -705,7 +705,7 @@ static bool ubx_speed(struct gps_device_t *session,
     if ((!session->driver.ubx.have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
 	return false;
 
-    usart_mode = (unsigned long)getleul(buf, 4);
+    usart_mode = (unsigned long)getleu32(buf, 4);
     usart_mode &= ~0xE00;	/* zero bits 11:9 */
     switch (parity) {
     case (int)'E':
@@ -725,8 +725,8 @@ static bool ubx_speed(struct gps_device_t *session,
     usart_mode &= ~0x03000;	/* zero bits 13:12 */
     if (stopbits == 2)
 	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
-    putlelong(buf, 4, usart_mode);
-    putlelong(buf, 8, speed);
+    putle32(buf, 4, usart_mode);
+    putle32(buf, 8, speed);
     (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
     /*@ -charint +usedef +compdef */
     return true;

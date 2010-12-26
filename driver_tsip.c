@@ -184,7 +184,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 	session->driver.tsip.last_41 = now;	/* keep timestamp for request */
 	f1 = getbef(buf, 0);	/* gpstime */
-	s1 = getbesw(buf, 4);	/* week */
+	s1 = getbes16(buf, 4);	/* week */
 	f2 = getbef(buf, 6);	/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->context->gps_week = s1;
@@ -384,7 +384,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u1 = getub(buf, 0);	/* Source of information */
 	u2 = getub(buf, 1);	/* Mfg. diagnostic */
 	f1 = getbef(buf, 2);	/* gps_time */
-	s1 = getbesw(buf, 6);	/* tsip.gps_week */
+	s1 = getbes16(buf, 6);	/* tsip.gps_week */
 	/*@ +charint @*/
 	if (getub(buf, 0) == 0x01)	/* good current fix? */
 	    session->context->gps_week = s1;
@@ -513,7 +513,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (len < 20 || getub(buf, 0) != 1 || getub(buf, 1) != 2)
 	    break;
 	/*@ -charint @*/
-	s1 = getbesw(buf, 2);	/* number of bytes */
+	s1 = getbes16(buf, 2);	/* number of bytes */
 	u1 = getub(buf, 20);	/* number of SVs */
 	break;
     case 0x70:			/* Filter Report */
@@ -584,7 +584,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	case 0x15:		/* Current Datum Values */
 	    if (len != 43)
 		break;
-	    s1 = getbesw(buf, 1);	/* Datum Index */
+	    s1 = getbes16(buf, 1);	/* Datum Index */
 	    d1 = getbed(buf, 3);	/* DX */
 	    d2 = getbed(buf, 11);	/* DY */
 	    d3 = getbed(buf, 19);	/* DZ */
@@ -598,18 +598,18 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /* CSK sez "why does my Lassen iQ output oversize packets?" */
 	    if ((len != 56) && (len != 64))
 		break;
-	    s1 = getbesw(buf, 2);	/* east velocity */
-	    s2 = getbesw(buf, 4);	/* north velocity */
-	    s3 = getbesw(buf, 6);	/* up velocity */
-	    ul1 = getbeul(buf, 8);	/* time */
-	    sl1 = getbesl(buf, 12);	/* latitude */
-	    ul2 = getbeul(buf, 16);	/* longitude */
-	    sl2 = getbesl(buf, 20);	/* altitude */
+	    s1 = getbes16(buf, 2);	/* east velocity */
+	    s2 = getbes16(buf, 4);	/* north velocity */
+	    s3 = getbes16(buf, 6);	/* up velocity */
+	    ul1 = getbeu32(buf, 8);	/* time */
+	    sl1 = getbes32(buf, 12);	/* latitude */
+	    ul2 = getbeu32(buf, 16);	/* longitude */
+	    sl2 = getbes32(buf, 20);	/* altitude */
 	    u1 = getub(buf, 24);	/* velocity scaling */
 	    u2 = getub(buf, 27);	/* fix flags */
 	    u3 = getub(buf, 28);	/* num svs */
 	    u4 = getub(buf, 29);	/* utc offset */
-	    s4 = getbesw(buf, 30);	/* tsip.gps_week */
+	    s4 = getbes16(buf, 30);	/* tsip.gps_week */
 	    /* PRN/IODE data follows */
 	    gpsd_report(LOG_RAW,
 			"LFwEI %d %d %d %u %d %u %u %x %x %u %u %d\n", s1, s2,
@@ -678,16 +678,16 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /* CSK sez "i don't trust this to not be oversized either." */
 	    if (len < 29)
 		break;
-	    ul1 = getbeul(buf, 1);	/* time */
-	    s1 = getbesw(buf, 5);	/* tsip.gps_week */
+	    ul1 = getbeu32(buf, 1);	/* time */
+	    s1 = getbes16(buf, 5);	/* tsip.gps_week */
 	    u1 = getub(buf, 7);	/* utc offset */
 	    u2 = getub(buf, 8);	/* fix flags */
-	    sl1 = getbesl(buf, 9);	/* latitude */
-	    ul2 = getbeul(buf, 13);	/* longitude */
-	    sl3 = getbesl(buf, 17);	/* altitude */
-	    s2 = getbesw(buf, 21);	/* east velocity */
-	    s3 = getbesw(buf, 23);	/* north velocity */
-	    s4 = getbesw(buf, 25);	/* up velocity */
+	    sl1 = getbes32(buf, 9);	/* latitude */
+	    ul2 = getbeu32(buf, 13);	/* longitude */
+	    sl3 = getbes32(buf, 17);	/* altitude */
+	    s2 = getbes16(buf, 21);	/* east velocity */
+	    s3 = getbes16(buf, 23);	/* north velocity */
+	    s4 = getbes16(buf, 25);	/* up velocity */
 	    gpsd_report(LOG_INF, "CSP %u %d %u %u %d %u %d %d %d %d\n", ul1,
 			s1, u1, u2, sl1, ul2, sl3, s2, s3, s4);
 	    session->context->gps_week = s1;
@@ -757,9 +757,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		break;
 	    }
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
-	    ul1 = getbeul(buf, 1);	/* gpstime */
-	    s1 = (short)getbeuw(buf, 5);	/* week */
-	    s2 = getbesw(buf, 7);	/* leap seconds */
+	    ul1 = getbeu32(buf, 1);	/* gpstime */
+	    s1 = (short)getbeu16(buf, 5);	/* week */
+	    s2 = getbes16(buf, 7);	/* leap seconds */
 
 	    session->context->gps_week = s1;
 	    if ((int)u1 > 10) {
@@ -1022,16 +1022,16 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    putbyte(buf, 0, 0x01);
 	    /* - elevation mask */
 	    i_f.f = 5.0 * DEG_2_RAD;
-	    putbelong(buf, 1, i_f.i);
+	    putbe32(buf, 1, i_f.i);
 	    /* - signal level mask */
 	    i_f.f = 6.0;
-	    putbelong(buf, 5, i_f.i);
+	    putbe32(buf, 5, i_f.i);
 	    /* - PDOP mask */
 	    i_f.f = 8.0;
-	    putbelong(buf, 9, i_f.i);
+	    putbe32(buf, 9, i_f.i);
 	    /* - PDOP switch */
 	    i_f.f = 6.0;
-	    putbelong(buf, 13, i_f.i);
+	    putbe32(buf, 13, i_f.i);
 	    /*@ +shiftimplementation @*/
 	    (void)tsip_write(session, 0x2c, buf, 17);
 	    /* Set Position Fix Mode (auto 2D/3D) */

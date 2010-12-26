@@ -52,24 +52,24 @@ static void bedumpall(void)
     (void)printf("getub: %016llx %016llx %016llx %016llx\n",
 		 (ubig) ub1, (ubig) ub2,
 		 (ubig) getub(buf, 0), (ubig) getub(buf, 8));
-    (void)printf("getbesw: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getbes16: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sw1, (ubig) sw2,
-		 (ubig) getbesw(buf, 0), (ubig) getbesw(buf, 8));
-    (void)printf("getbeuw: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getbes16(buf, 0), (ubig) getbes16(buf, 8));
+    (void)printf("getbeu16: %016llx %016llx %016llx %016llx\n",
 		 (ubig) uw1, (ubig) uw2,
-		 (ubig) getbeuw(buf, 0), (ubig) getbeuw(buf, 8));
-    (void)printf("getbesl: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getbeu16(buf, 0), (ubig) getbeu16(buf, 8));
+    (void)printf("getbes32: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sl1, (ubig) sl2,
-		 (ubig) getbesl(buf, 0), (ubig) getbesl(buf, 8));
-    (void)printf("getbeul: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getbes32(buf, 0), (ubig) getbes32(buf, 8));
+    (void)printf("getbeu32: %016llx %016llx %016llx %016llx\n",
 		 (ubig) ul1, (ubig) ul2,
-		 (ubig) getbeul(buf, 0), (ubig) getbeul(buf, 8));
-    (void)printf("getbesL: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getbeu32(buf, 0), (ubig) getbeu32(buf, 8));
+    (void)printf("getbes64: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sL1, (ubig) sL2,
-		 (ubig) getbesL(buf, 0), (ubig) getbesL(buf, 8));
-    (void)printf("getbeuL: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getbes64(buf, 0), (ubig) getbes64(buf, 8));
+    (void)printf("getbeu64: %016llx %016llx %016llx %016llx\n",
 		 (ubig) uL1, (ubig) uL2,
-		 (ubig) getbeuL(buf, 0), (ubig) getbeuL(buf, 8));
+		 (ubig) getbeu64(buf, 0), (ubig) getbeu64(buf, 8));
     (void)printf("getbef: %f %f\n", f1, getbef(buf, 24));
     (void)printf("getbed: %.16f %.16f\n", d1, getbed(buf, 16));
 }
@@ -82,24 +82,24 @@ static void ledumpall(void)
     (void)printf("getub: %016llx %016llx %016llx %016llx\n",
 		 (ubig) ub1, (ubig) ub2,
 		 (ubig) getub(buf, 0), (ubig) getub(buf, 8));
-    (void)printf("getlesw: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getles16: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sw1, (ubig) sw2,
-		 (ubig) getlesw(buf, 0), (ubig) getlesw(buf, 8));
-    (void)printf("getleuw: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getles16(buf, 0), (ubig) getles16(buf, 8));
+    (void)printf("getleu16: %016llx %016llx %016llx %016llx\n",
 		 (ubig) uw1, (ubig) uw2,
-		 (ubig) getleuw(buf, 0), (ubig) getleuw(buf, 8));
-    (void)printf("getlesl: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getleu16(buf, 0), (ubig) getleu16(buf, 8));
+    (void)printf("getles32: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sl1, (ubig) sl2,
-		 (ubig) getlesl(buf, 0), (ubig) getlesl(buf, 8));
-    (void)printf("getleul: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getles32(buf, 0), (ubig) getles32(buf, 8));
+    (void)printf("getleu32: %016llx %016llx %016llx %016llx\n",
 		 (ubig) ul1, (ubig) ul2,
-		 (ubig) getleul(buf, 0), (ubig) getleul(buf, 8));
-    (void)printf("getlesL: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getleu32(buf, 0), (ubig) getleu32(buf, 8));
+    (void)printf("getles64: %016llx %016llx %016llx %016llx\n",
 		 (ubig) sL1, (ubig) sL2,
-		 (ubig) getlesL(buf, 0), (ubig) getlesL(buf, 8));
-    (void)printf("getleuL: %016llx %016llx %016llx %016llx\n",
+		 (ubig) getles64(buf, 0), (ubig) getles64(buf, 8));
+    (void)printf("getleu64: %016llx %016llx %016llx %016llx\n",
 		 (ubig) uL1, (ubig) uL2,
-		 (ubig) getleuL(buf, 0), (ubig) getleuL(buf, 8));
+		 (ubig) getleu64(buf, 0), (ubig) getleu64(buf, 8));
     (void)printf("getlef: %f %f\n", f1, getlef(buf, 24));
     (void)printf("getled: %.16f %.16f\n", d1, getled(buf, 16));
 }
@@ -148,18 +148,18 @@ int main(void)
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
-    sw1 = getbesw(buf, 0);
-    sw2 = getbesw(buf, 8);
-    uw1 = getbeuw(buf, 0);
-    uw2 = getbeuw(buf, 8);
-    sl1 = getbesl(buf, 0);
-    sl2 = getbesl(buf, 8);
-    ul1 = getbeul(buf, 0);
-    ul2 = getbeul(buf, 8);
-    sL1 = getbesL(buf, 0);
-    sL2 = getbesL(buf, 8);
-    uL1 = getbeuL(buf, 0);
-    uL2 = getbeuL(buf, 8);
+    sw1 = getbes16(buf, 0);
+    sw2 = getbes16(buf, 8);
+    uw1 = getbeu16(buf, 0);
+    uw2 = getbeu16(buf, 8);
+    sl1 = getbes32(buf, 0);
+    sl2 = getbes32(buf, 8);
+    ul1 = getbeu32(buf, 0);
+    ul2 = getbeu32(buf, 8);
+    sL1 = getbes64(buf, 0);
+    sL2 = getbes64(buf, 8);
+    uL1 = getbeu64(buf, 0);
+    uL2 = getbeu64(buf, 8);
     f1 = getbef(buf, 24);
     d1 = getbed(buf, 16);
     /*@+type@*/
@@ -172,18 +172,18 @@ int main(void)
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
-    sw1 = getlesw(buf, 0);
-    sw2 = getlesw(buf, 8);
-    uw1 = getleuw(buf, 0);
-    uw2 = getleuw(buf, 8);
-    sl1 = getlesl(buf, 0);
-    sl2 = getlesl(buf, 8);
-    ul1 = getleul(buf, 0);
-    ul2 = getleul(buf, 8);
-    sL1 = getlesL(buf, 0);
-    sL2 = getlesL(buf, 8);
-    uL1 = getleuL(buf, 0);
-    uL2 = getleuL(buf, 8);
+    sw1 = getles16(buf, 0);
+    sw2 = getles16(buf, 8);
+    uw1 = getleu16(buf, 0);
+    uw2 = getleu16(buf, 8);
+    sl1 = getles32(buf, 0);
+    sl2 = getles32(buf, 8);
+    ul1 = getleu32(buf, 0);
+    ul2 = getleu32(buf, 8);
+    sL1 = getles64(buf, 0);
+    sL2 = getles64(buf, 8);
+    uL1 = getleu64(buf, 0);
+    uL2 = getleu64(buf, 8);
     f1 = getlef(buf, 24);
     d1 = getled(buf, 16);
     /*@+type@*/

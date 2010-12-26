@@ -102,11 +102,11 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     if (session->context->leap_seconds) {
 	unpacked_date.tm_mon = (int)getub(buf, 4) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 5);
-	unpacked_date.tm_year = (int)getbeuw(buf, 6) - 1900;
+	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
 	unpacked_date.tm_hour = (int)getub(buf, 8);
 	unpacked_date.tm_min = (int)getub(buf, 9);
 	unpacked_date.tm_sec = (int)getub(buf, 10);
-	nsec = (uint) getbeul(buf, 11);
+	nsec = (uint) getbeu32(buf, 11);
 
 	/*@ -unrecog */
 	session->newdata.time = (double)timegm(&unpacked_date) + nsec * 1e-9;
@@ -120,12 +120,12 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     }
 
     /*@-type@*/
-    lat = getbesl(buf, 15) / 3600000.0f;
-    lon = getbesl(buf, 19) / 3600000.0f;
-    alt = getbesl(buf, 23) / 100.0f;
-    speed = getbeuw(buf, 31) / 100.0f;
-    track = getbeuw(buf, 33) / 10.0f;
-    dop = getbeuw(buf, 35) / 10.0f;
+    lat = getbes32(buf, 15) / 3600000.0f;
+    lon = getbes32(buf, 19) / 3600000.0f;
+    alt = getbes32(buf, 23) / 100.0f;
+    speed = getbeu16(buf, 31) / 100.0f;
+    track = getbeu16(buf, 33) / 10.0f;
+    dop = getbeu16(buf, 35) / 10.0f;
     /*@+type@*/
 
     gpsd_report(LOG_IO,
@@ -252,7 +252,7 @@ oncore_msg_pps_offset(struct gps_device_t *session, unsigned char *buf,
 	return 0;
 
     gpsd_report(LOG_IO, "oncore PPS offset\n");
-    pps_offset_ns = getbesl(buf, 4);
+    pps_offset_ns = getbes32(buf, 4);
 
     session->driver.oncore.pps_offset_ns = pps_offset_ns;
     return 0;
@@ -286,7 +286,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 
 	sv = (int)getub(buf, off);
 	el = (int)getub(buf, off + 3);
-	az = (int)getbeuw(buf, off + 4);
+	az = (int)getbeu16(buf, off + 4);
 
 	gpsd_report(LOG_IO, "%2d %2d %2d %3d\n", i, sv, el, az);
 

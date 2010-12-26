@@ -91,10 +91,10 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 	unsigned short fl;
 
 	prn = (unsigned char)getub(buf, off + 1);
-	fl = (unsigned short)getleuw(buf, off + 2);
+	fl = (unsigned short)getleu16(buf, off + 2);
 	ss = (unsigned char)getub(buf, off + 4);
 	el = getsb(buf, off + 5);
-	az = getlesw(buf, off + 6);
+	az = getles16(buf, off + 6);
 	(void)wmove(satwin, (int)(i + 2), 4);
 	(void)wprintw(satwin, "%3d %3d %3d  %2d %04x %c",
 		      prn, az, el, ss, fl, (fl & UBX_SAT_USED) ? 'Y' : ' ');
@@ -122,22 +122,22 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     flags = (unsigned int)getub(buf, 11);
 
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
-	tow = (unsigned int)getleul(buf, 0);
-	gw = (unsigned short)getlesw(buf, 8);
+	tow = (unsigned int)getleu32(buf, 0);
+	gw = (unsigned short)getles16(buf, 8);
 	t = gpstime_to_unix((int)gw, tow / 1000.0);
 	tt = (time_t) trunc(t);
     }
 
-    epx = (double)(getlesl(buf, 12) / 100.0);
-    epy = (double)(getlesl(buf, 16) / 100.0);
-    epz = (double)(getlesl(buf, 20) / 100.0);
-    evx = (double)(getlesl(buf, 28) / 100.0);
-    evy = (double)(getlesl(buf, 32) / 100.0);
-    evz = (double)(getlesl(buf, 36) / 100.0);
+    epx = (double)(getles32(buf, 12) / 100.0);
+    epy = (double)(getles32(buf, 16) / 100.0);
+    epz = (double)(getles32(buf, 20) / 100.0);
+    evx = (double)(getles32(buf, 28) / 100.0);
+    evy = (double)(getles32(buf, 32) / 100.0);
+    evz = (double)(getles32(buf, 36) / 100.0);
     ecef_to_wgs84fix(&g.fix, &separation, epx, epy, epz, evx, evy, evz);
-    g.fix.epx = g.fix.epy = (double)(getlesl(buf, 24) / 100.0);
-    g.fix.eps = (double)(getlesl(buf, 40) / 100.0);
-    g.dop.pdop = (double)(getleuw(buf, 44) / 100.0);
+    g.fix.epx = g.fix.epy = (double)(getles32(buf, 24) / 100.0);
+    g.fix.eps = (double)(getles32(buf, 40) / 100.0);
+    g.dop.pdop = (double)(getleu16(buf, 44) / 100.0);
     g.satellites_used = (int)getub(buf, 47);
 
     (void)wmove(navsolwin, 1, 11);
@@ -189,15 +189,15 @@ static void display_nav_dop(unsigned char *buf, size_t data_len)
     if (data_len != 18)
 	return;
     (void)wmove(dopwin, 1, 9);
-    (void)wprintw(dopwin, "%4.1f", getleuw(buf, 12) / 100.0);
+    (void)wprintw(dopwin, "%4.1f", getleu16(buf, 12) / 100.0);
     (void)wmove(dopwin, 1, 18);
-    (void)wprintw(dopwin, "%4.1f", getleuw(buf, 10) / 100.0);
+    (void)wprintw(dopwin, "%4.1f", getleu16(buf, 10) / 100.0);
     (void)wmove(dopwin, 1, 27);
-    (void)wprintw(dopwin, "%4.1f", getleuw(buf, 6) / 100.0);
+    (void)wprintw(dopwin, "%4.1f", getleu16(buf, 6) / 100.0);
     (void)wmove(dopwin, 1, 36);
-    (void)wprintw(dopwin, "%4.1f", getleuw(buf, 8) / 100.0);
+    (void)wprintw(dopwin, "%4.1f", getleu16(buf, 8) / 100.0);
     (void)wmove(dopwin, 1, 45);
-    (void)wprintw(dopwin, "%4.1f", getleuw(buf, 4) / 100.0);
+    (void)wprintw(dopwin, "%4.1f", getleu16(buf, 4) / 100.0);
     (void)wnoutrefresh(dopwin);
 }
 
@@ -209,7 +209,7 @@ static void ubx_update(void)
 
     buf = session.packet.outbuffer;
     msgid = (unsigned short)((buf[2] << 8) | buf[3]);
-    data_len = (size_t) getlesw(buf, 4);
+    data_len = (size_t) getles16(buf, 4);
     switch (msgid) {
     case UBX_NAV_SVINFO:
 	display_nav_svinfo(&buf[6], data_len);

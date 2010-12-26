@@ -175,8 +175,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     switch (type) {
     case 0x02:			/* Navigation Data Output */
-	session->context->gps_week = (unsigned short)getleuw(buf2, 2);
-	session->context->gps_tow = (double)getleul(buf2, 4) * 0.01;
+	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
+	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
 	    gpstime_to_unix(session->context->gps_week,
@@ -185,12 +185,12 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_rollover_check(session, session->newdata.time);
 	/*@ end @*/
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-			 getlesl(buf2, 8) * 1.0, getlesl(buf2, 12) * 1.0,
-			 getlesl(buf2, 16) * 1.0, getlesw(buf2, 20) / 10.0,
-			 getlesw(buf2, 22) / 10.0, getlesw(buf2, 24) / 10.0);
+			 getles32(buf2, 8) * 1.0, getles32(buf2, 12) * 1.0,
+			 getles32(buf2, 16) * 1.0, getles16(buf2, 20) / 10.0,
+			 getles16(buf2, 22) / 10.0, getles16(buf2, 24) / 10.0);
 	used = (unsigned char)getub(buf2, 26) & 0x0f;
 	//visible = (getub(buf2, 26) & 0xf0) >> 4;
-	version = (uint) getleuw(buf2, 27) / 100.0;
+	version = (uint) getleu16(buf2, 27) / 100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
 	    session->newdata.mode = MODE_NO_FIX;
@@ -216,8 +216,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask | CLEAR_IS | REPORT_IS;
 
     case 0x04:			/* DOP Data Output */
-	session->context->gps_week = (unsigned short)getleuw(buf2, 2);
-	session->context->gps_tow = (double)getleul(buf2, 4) * 0.01;
+	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
+	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
 	    gpstime_to_unix(session->context->gps_week,
@@ -266,8 +266,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask;
 
     case 0x06:			/* Channel Status Output */
-	session->context->gps_week = (unsigned short)getleuw(buf2, 2);
-	session->context->gps_tow = (double)getleul(buf2, 4) * 0.01;
+	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
+	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->gpsdata.skyview_time =
 	    gpstime_to_unix(session->context->gps_week,
@@ -294,7 +294,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 		continue;	/* satellite record is not valid */
 	    session->gpsdata.PRN[satcnt] = prn;
 	    session->gpsdata.azimuth[satcnt] =
-		(int)getleuw(buf2, 7 * i + 7 + 4);
+		(int)getleu16(buf2, 7 * i + 7 + 4);
 	    session->gpsdata.elevation[satcnt] =
 		(int)getub(buf2, 7 * i + 7 + 6);
 	    session->gpsdata.ss[satcnt] = (float)getub(buf2, 7 * i + 7 + 7);
@@ -326,9 +326,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x08:			/* Measurement Data Output */
 	/* clock offset is a manufacturer diagnostic */
-	/* (int)getleuw(buf2, 8);  clock offset, 29000..29850 ?? */
-	session->context->gps_week = (unsigned short)getleuw(buf2, 2);
-	session->context->gps_tow = (double)getleul(buf2, 4) * 0.01;
+	/* (int)getleu16(buf2, 8);  clock offset, 29000..29850 ?? */
+	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
+	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
 	    gpstime_to_unix(session->context->gps_week,

@@ -45,8 +45,8 @@ static int geostar_write(struct gps_device_t *session,
     putbyte(session->msgbuf, 3, 'G');
 
     /*@-shiftimplementation +ignoresigns@*/
-    putbeword(session->msgbuf, 4, id);
-    putbeword(session->msgbuf, 6, len);
+    putbe16(session->msgbuf, 4, id);
+    putbe16(session->msgbuf, 6, len);
     /*@+shiftimplementation -ignoresigns@*/
 
     /* Copy content */
@@ -56,11 +56,11 @@ static int geostar_write(struct gps_device_t *session,
 
     /* Calculate checksum */
     for (i = 0; (size_t)i < len; i++) {
-	cs ^= getleul(session->msgbuf, i * 4);
+	cs ^= getleu32(session->msgbuf, i * 4);
     }
 
     /*@-shiftimplementation +ignoresigns@*/
-    putlelong(session->msgbuf, len * 4, cs);
+    putle32(session->msgbuf, len * 4, cs);
     /*@+shiftimplementation -ignoresigns@*/
 
     len += 1; /* Checksum */
@@ -97,7 +97,7 @@ static bool geostar_detect(struct gps_device_t *session)
 
     /* request firmware revision and look for a valid response */
     /*@-shiftimplementation +ignoresigns@*/
-    putbelong(buf, 0, 0);
+    putbe32(buf, 0, 0);
     /*@+shiftimplementation +ignoresigns@*/
     if (geostar_write(session, 0xc1, buf, 1) == 0) {
 	for (n = 0; n < 3; n++) {
@@ -156,7 +156,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     }
     /*@ -charint @*/
 
-    id = (unsigned int)getleuw(session->packet.outbuffer, OFFSET(0));
+    id = (unsigned int)getleu16(session->packet.outbuffer, OFFSET(0));
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "ID%02x", id);
 
@@ -190,7 +190,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->newdata.longitude = getled(buf, OFFSET(5)) * RAD_2_DEG;
 	session->newdata.altitude = getled(buf, OFFSET(7));
 	session->gpsdata.separation = getled(buf, OFFSET(9));
-	session->gpsdata.satellites_used = getlesl(buf, OFFSET(11));
+	session->gpsdata.satellites_used = getles32(buf, OFFSET(11));
 	session->gpsdata.dop.gdop = getled(buf, OFFSET(13));
 	session->gpsdata.dop.pdop = getled(buf, OFFSET(15));
 	session->gpsdata.dop.tdop = getled(buf, OFFSET(17));
@@ -199,7 +199,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->newdata.speed = getled(buf, OFFSET(31));
 	session->newdata.track = getled(buf, OFFSET(33)) * RAD_2_DEG;
 
-	ul1 = getleul(buf, OFFSET(29)); /* status */
+	ul1 = getleu32(buf, OFFSET(29)); /* status */
 
 	if (ul1 != (uint8_t) 0) {
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -227,10 +227,10 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		session->gpsdata.dop.vdop);
 	break;
     case 0x21:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	uw1 = getleuw(buf, OFFSET(3));
-	uw2 = getleuw(buf, OFFSET(3) + 2);
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	uw1 = getleu16(buf, OFFSET(3));
+	uw2 = getleu16(buf, OFFSET(3) + 2);
 	gpsd_report(LOG_INF, "Current receiver telemetry %x %d %d %d\n", ul1, ul2, uw1, uw2);
 	if(ul1 & (1<<3)) {
 	    session->newdata.mode = MODE_2D;
@@ -249,15 +249,15 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	mask |= MODE_IS | STATUS_IS;
 	break;
     case 0x22:
-	ul1 = getleul(buf, OFFSET(1));
+	ul1 = getleu32(buf, OFFSET(1));
 	gpsd_report(LOG_INF, "SVs in view %d\n", ul1);
 	session->gpsdata.satellites_visible = (int)ul1;
 	if(ul1 > GEOSTAR_CHANNELS) ul1 = GEOSTAR_CHANNELS;
 	for(i = 0, j = 0; (uint32_t)i < ul1; i++) {
-	    ul2 = getleul(buf, OFFSET(2) + i * 3 * 4);
-	    s1 = getlesw(buf, OFFSET(3) + i * 3 * 4);
-	    s2 = getlesw(buf, OFFSET(3) + 2 + i * 3 * 4);
-	    s3 = getlesw(buf, OFFSET(4) + 2 + i * 3 * 4);
+	    ul2 = getleu32(buf, OFFSET(2) + i * 3 * 4);
+	    s1 = getles16(buf, OFFSET(3) + i * 3 * 4);
+	    s2 = getles16(buf, OFFSET(3) + 2 + i * 3 * 4);
+	    s3 = getles16(buf, OFFSET(4) + 2 + i * 3 * 4);
 	    gpsd_report(LOG_INF, "ID %d Az %g El %g SNR %g\n",
 			decode_channel_id(ul2), s1*0.001*RAD_2_DEG, s2*0.001*RAD_2_DEG, s3*0.1);
 	    session->gpsdata.PRN[i] = decode_channel_id(ul2);
@@ -272,14 +272,14 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	mask |= SATELLITE_IS | USED_IS;
 	break;
     case 0x3e:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	ul3 = getleul(buf, OFFSET(3));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	ul3 = getleu32(buf, OFFSET(3));
 	gpsd_report(LOG_INF, "Receiver power-up message %d %d %d\n", ul1, ul2, ul3);
 	break;
     case 0x3f:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
 	gpsd_report(LOG_WARN, "Negative acknowledge %x %d\n", ul1, ul2);
 	break;
     case 0x40:
@@ -289,9 +289,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Set serial ports parameters\n");
 	break;
     case 0x42:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	ul3 = getleul(buf, OFFSET(3));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	ul3 = getleu32(buf, OFFSET(3));
 	gpsd_report(LOG_INF, "Response to Set receiver operation mode %d %d %d\n",
 		    ul1, ul2, ul3);
 	break;
@@ -317,11 +317,11 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Set GLONASS ephemeris\n");
 	break;
     case 0x4c:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	ul3 = getleul(buf, OFFSET(3));
-	ul4 = getleul(buf, OFFSET(4));
-	ul5 = getleul(buf, OFFSET(5));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	ul3 = getleu32(buf, OFFSET(3));
+	ul4 = getleu32(buf, OFFSET(4));
+	ul5 = getleu32(buf, OFFSET(5));
 	gpsd_report(LOG_INF, "Response to Set PPS paramters %d %d %d %d %d\n",
 		    ul1, ul2, ul3, ul4, ul5);
 	break;
@@ -332,8 +332,8 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Enable/disable NMEA messages\n");
 	break;
     case 0x4f:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
 	gpsd_report(LOG_INF, "Response to Enable/disable binary messages %x %x\n",
 		    ul1, ul2);
 	break;
@@ -344,9 +344,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Query serial ports parameters\n");
 	break;
     case 0x82:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	ul3 = getleul(buf, OFFSET(3));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	ul3 = getleu32(buf, OFFSET(3));
 	gpsd_report(LOG_INF, "Response to Query receiver operation mode %d %d %d\n",
 		    ul1, ul2, ul3);
 	break;
@@ -357,7 +357,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Query output data rate\n");
 	break;
     case 0x86:
-	session->driver.geostar.physical_port = (unsigned int)getleul(buf, OFFSET(1));
+	session->driver.geostar.physical_port = (unsigned int)getleu32(buf, OFFSET(1));
 	gpsd_report(LOG_INF, "Response to Query data protocol assignment to communication port\n");
 	gpsd_report(LOG_INF, "Connected to physical port %d\n",
 		    session->driver.geostar.physical_port);
@@ -379,11 +379,11 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		    d1, d2, d3);
 	break;
     case 0x8c:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
-	ul3 = getleul(buf, OFFSET(3));
-	ul4 = getleul(buf, OFFSET(4));
-	ul5 = getleul(buf, OFFSET(5));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
+	ul3 = getleu32(buf, OFFSET(3));
+	ul4 = getleu32(buf, OFFSET(4));
+	ul5 = getleu32(buf, OFFSET(5));
 	gpsd_report(LOG_INF, "Response to Query PPS parameters %d %d %d %d %d\n",
 		    ul1, ul2, ul3, ul4, ul5);
 	break;
@@ -394,8 +394,8 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Query enable NMEA messages\n");
 	break;
     case 0x8f:
-	ul1 = getleul(buf, OFFSET(1));
-	ul2 = getleul(buf, OFFSET(2));
+	ul1 = getleu32(buf, OFFSET(1));
+	ul2 = getleu32(buf, OFFSET(2));
 	gpsd_report(LOG_INF, "Response to Query enable binary messages %x %x\n",
 		    ul1, ul2);
 	break;
@@ -403,10 +403,10 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Change operation mode command\n");
 	break;
     case 0xc1:
-	ul4 = getleul(buf, OFFSET(1));
-	ul1 = getleul(buf, OFFSET(2));
-	ul2 = getleul(buf, OFFSET(3));
-	ul3 = getleul(buf, OFFSET(4));
+	ul4 = getleu32(buf, OFFSET(1));
+	ul1 = getleu32(buf, OFFSET(2));
+	ul2 = getleu32(buf, OFFSET(3));
+	ul3 = getleu32(buf, OFFSET(4));
 	/*@ -formattype @*/
 	(void)snprintf(session->subtype, sizeof(session->subtype), "%d.%d %d.%d.%d %x %c-%d\n",
 		ul4>>16, ul4&0xFFFF, ul1>>9, (ul1>>5)&0xF, ul1&0x1F, ul2, ul3>>24, ul3&0x00FFFFFF);
@@ -468,14 +468,14 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
     /*@-shiftimplementation +ignoresigns@*/
     if (event == event_identified && event == event_reactivate) {
 	/* Select binary packets */
-	putbelong(buf, 0, 0xffff0000);
-	putbelong(buf, 4, 0);
+	putbe32(buf, 0, 0xffff0000);
+	putbe32(buf, 4, 0);
 	(void)geostar_write(session, 0x4f, buf, 2);
 
 	/* Poll Ports params */
-	putbelong(buf, 0, 1);
+	putbe32(buf, 0, 1);
 	(void)geostar_write(session, 0x81, buf, 1);
-	putbelong(buf, 0, 0);
+	putbe32(buf, 0, 0);
 	(void)geostar_write(session, 0x81, buf, 1);
 	/* Poll Init params */
 	(void)geostar_write(session, 0x80, buf, 1);
@@ -499,7 +499,7 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
 
     if (event == event_deactivate) {
 	/* Perform cold restart */
-	putbelong(buf, 0, 3);
+	putbe32(buf, 0, 3);
 	(void)geostar_write(session, 0xc2, buf, 1);
     }
     /*@+shiftimplementation -ignoresigns@*/
@@ -528,10 +528,10 @@ static bool geostar_speed_switch(struct gps_device_t *session,
     }
 
     /*@-shiftimplementation@*/
-    putbelong(buf, 0, session->driver.geostar.physical_port);
-    putbelong(buf, 4, speed);
-    putbelong(buf, 8, stopbits);
-    putbelong(buf, 12, parity);
+    putbe32(buf, 0, session->driver.geostar.physical_port);
+    putbe32(buf, 4, speed);
+    putbe32(buf, 8, stopbits);
+    putbe32(buf, 12, parity);
     /*@+shiftimplementation@*/
     (void)geostar_write(session, 0x41, buf, 4);
 
@@ -545,7 +545,7 @@ static void geostar_mode(struct gps_device_t *session, int mode)
     /*@-shiftimplementation@*/
     if (mode == MODE_NMEA) {
 	/* Switch to NMEA mode */
-	putbelong(buf, 0, (session->driver.geostar.physical_port == 0) ? 1 : 0);
+	putbe32(buf, 0, (session->driver.geostar.physical_port == 0) ? 1 : 0);
 	(void)geostar_write(session, 0x46, buf, 1);
     } else if (mode == MODE_BINARY) {
 	/* Switch to binary mode */

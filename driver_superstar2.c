@@ -99,7 +99,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_sec = (int)d;
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
-    tm.tm_year = (int)getleuw(buf, 16) - 1900;
+    tm.tm_year = (int)getleu16(buf, 16) - 1900;
     session->newdata.time = timegm(&tm) + (d - tm.tm_sec);
     mask |= TIME_IS;
 
@@ -113,8 +113,8 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
 
     session->gpsdata.satellites_used = (int)getub(buf, 71) & 0x0f;
-    /*@i3@*/ session->gpsdata.dop.hdop = getleuw(buf, 66) * 0.1;
-    /*@i3@*/ session->gpsdata.dop.vdop = getleuw(buf, 68) * 0.1;
+    /*@i3@*/ session->gpsdata.dop.hdop = getleu16(buf, 66) * 0.1;
+    /*@i3@*/ session->gpsdata.dop.vdop = getleu16(buf, 68) * 0.1;
     /* other DOP if available */
     mask |= DOP_IS | USED_IS;
 
@@ -261,7 +261,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	(void)memset(&tm, '\0', sizeof(tm));
 	tm.tm_mday = (int)getsb(buf, 37);
 	tm.tm_mon = (int)getsb(buf, 38) - 1;
-	tm.tm_year = (int)getlesw(buf, 39) - 1900;
+	tm.tm_year = (int)getles16(buf, 39) - 1900;
 
 	tm.tm_hour = (int)getsb(buf, 41);
 	tm.tm_min = (int)getsb(buf, 42);
@@ -303,8 +303,8 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.PRN[i] = (int)getub(buf, 11 * i + 15) & 0x1f;
 	session->gpsdata.ss[i] = (double)getub(buf, 11 * i * 15 + 1) / 4.0;
 	session->gpsdata.raw.codephase[i] =
-	    (double)getleul(buf, 11 * i * 15 + 2);
-	ul = (unsigned long)getleul(buf, 11 * i * 15 + 6);
+	    (double)getleu32(buf, 11 * i * 15 + 2);
+	ul = (unsigned long)getleu32(buf, 11 * i * 15 + 6);
 
 	session->gpsdata.raw.satstat[i] = (unsigned int)(ul & 0x03L);
 	session->gpsdata.raw.carrierphase[i] = (double)((ul >> 2) & 0x03ffL);

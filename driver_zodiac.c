@@ -127,8 +127,8 @@ static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
     return 1;
 }
 
-#define getzword(n)	getwordz(session->packet.outbuffer, n)
-#define getzlong(n)	getlongz(session->packet.outbuffer, n)
+#define getzword(n)	get16z(session->packet.outbuffer, n)
+#define getzlong(n)	get32z(session->packet.outbuffer, n)
 
 static gps_mask_t handle1000(struct gps_device_t *session)
 /* time-position-velocity report */

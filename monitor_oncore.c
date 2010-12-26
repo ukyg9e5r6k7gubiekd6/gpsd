@@ -194,18 +194,18 @@ static void oncore_update(void)
 
 	mon = (unsigned char)getub(buf, 4);
 	day = (unsigned char)getub(buf, 5);
-	year = (unsigned short)getbeuw(buf, 6);
+	year = (unsigned short)getbeu16(buf, 6);
 	hour = (unsigned char)getub(buf, 8);
 	min = (unsigned char)getub(buf, 9);
 	sec = (unsigned char)getub(buf, 10);
-	nsec = (unsigned int)getbeul(buf, 11);
+	nsec = (unsigned int)getbeu32(buf, 11);
 
-	lat = getbesl(buf, 15) / 3600000.0;
-	lon = getbesl(buf, 19) / 3600000.0;
-	alt = getbesl(buf, 23) / 100.0;
-	speed = (float)(getbeuw(buf, 31) / 100.0);
-	track = (float)(getbeuw(buf, 33) / 10.0);
-	dop = (float)(getbeuw(buf, 35) / 10.0);
+	lat = getbes32(buf, 15) / 3600000.0;
+	lon = getbes32(buf, 19) / 3600000.0;
+	alt = getbes32(buf, 23) / 100.0;
+	speed = (float)(getbeu16(buf, 31) / 100.0);
+	track = (float)(getbeu16(buf, 33) / 10.0);
+	dop = (float)(getbeu16(buf, 35) / 10.0);
 	dopt = (unsigned char)getub(buf, 37);
 	nvis = (unsigned char)getub(buf, 38);
 	nsat = (unsigned char)getub(buf, 39);
@@ -321,9 +321,9 @@ static void oncore_update(void)
 
 	    off = 5 + 7 * i;
 	    sv = (unsigned char)getub(buf, off);
-	    doppl = (int)getbesw(buf, off + 1);
+	    doppl = (int)getbes16(buf, off + 1);
 	    el = (int)getub(buf, off + 3);
-	    az = (int)getbeuw(buf, off + 4);
+	    az = (int)getbeu16(buf, off + 4);
 	    health = (int)getub(buf, off + 5);
 
 	    (void)wmove(Bbwin, (int)Bblines[i], 1);
@@ -349,13 +349,13 @@ static void oncore_update(void)
 	float alarm, sigma;
 
 	traim = (unsigned char)getub(buf, 5);
-	alarm = (float)(getbeuw(buf, 6) / 10.);
+	alarm = (float)(getbeu16(buf, 6) / 10.);
 	ctrl = (unsigned char)getub(buf, 8);
 	pulse = (unsigned char)getub(buf, 19);
 	sync = (unsigned char)getub(buf, 20);
 	sol_stat = (unsigned char)getub(buf, 21);
 	status = (unsigned char)getub(buf, 22);
-	sigma = (float)(getbeuw(buf, 23));
+	sigma = (float)(getbeu16(buf, 23));
 
 	/*@ -predboolothers @*/
 	(void)mvwprintw(Enwin, 1, 24, "%3s", traim ? "on" : "off");
@@ -391,7 +391,7 @@ static void oncore_update(void)
     {
 	double pps_offset;
 
-	pps_offset = getbesl(buf, 4) / 1000000.0;
+	pps_offset = getbes32(buf, 4) / 1000000.0;
 
 	(void)mvwprintw(Aywin, 2, 2, " %7.3f ms", pps_offset);
     }
@@ -415,9 +415,9 @@ static void oncore_update(void)
     {
 	double lat, lon, alt;
 
-	lat = getbesl(buf, 4) / 3600000.0;
-	lon = getbesl(buf, 8) / 3600000.0;
-	alt = getbesl(buf, 12) / 100.0;
+	lat = getbes32(buf, 4) / 3600000.0;
+	lon = getbes32(buf, 8) / 3600000.0;
+	alt = getbes32(buf, 12) / 100.0;
 
 	(void)mvwprintw(Aswin, 1, 5, "%10.6lf %c",
 			fabs(lat), lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');

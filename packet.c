@@ -1257,7 +1257,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    lexer->length = 4 + (size_t) lexer->inbuffer[3] + 2;
 	    for (n = 0; n < lexer->length - 2; n++)
 		a += (unsigned)lexer->inbuffer[n];
-	    b = (unsigned)getleuw(lexer->inbuffer, lexer->length - 2);
+	    b = (unsigned)getleu16(lexer->inbuffer, lexer->length - 2);
 	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
 			lexer->inbuffer[1], (unsigned int)lexer->length,
 			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length,
@@ -1679,7 +1679,7 @@ void packet_parse(struct gps_packet_t *lexer)
 
 	    /* Calculate checksum */
 	    for (n = 0; n < len; n += 4) {
-		cs ^= getleul(lexer->inbuffer, n);
+		cs ^= getleu32(lexer->inbuffer, n);
 	    }
 
 	    if (cs == 0)
