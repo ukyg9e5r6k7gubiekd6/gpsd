@@ -407,8 +407,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case NMEA_RECOGNIZED:
 	if (c == '#')
 	    lexer->state = COMMENT_BODY;
-	else 
-		if (c == '$')
+	else if (c == '$')
 	    lexer->state = NMEA_DOLLAR;
 	else if (c == '!')
 	    lexer->state = NMEA_BANG;
@@ -1186,6 +1185,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	if (lexer->state == GROUND_STATE) {
 	    character_discard(lexer);
 	} else if (lexer->state == COMMENT_RECOGNIZED) {
+	    packet_accept(lexer, COMMENT_PACKET);
 	    packet_discard(lexer);
 	    lexer->state = GROUND_STATE;
 	    break;
