@@ -327,6 +327,25 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 
     session->gpsdata.status = atoi(field[6]);
     mask = STATUS_IS;
+    /*
+     * There are some receivers (the Trimble Placer 450 is an example) that
+     * don't ship a GSA with mode 1 when they lose satellite lock. Instead
+     * they just keep reporting GGA and GSA on subsequent cycles with the
+     * timestamp not advancing and a bogus mode.  On the assumption that GGA
+     * is only issued once per cycle we can detect this here (it would be
+     * nicer to do it on GSA but GSA has no timestamp).
+     */
+    session->driver.nmea.latch_mode = strncmp(field[1], 
+					      session->driver.nmea.last_gga_timestamp,
+					      sizeof(session->driver.nmea.last_gga_timestamp))==0;
+    if (session->driver.nmea.latch_mode) {
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+    } else
+	(void)strncpy(session->driver.nmea.last_gga_timestamp, 
+		       field[1],
+		       sizeof(session->driver.nmea.last_gga_timestamp));
+    /* if we have a fix and the mode latch is off, go... */
     if (session->gpsdata.status > STATUS_NO_FIX) {
 	char *altitude;
 
@@ -414,6 +433,9 @@ static gps_mask_t processGPGSA(int count, char *field[],
      */
     if (count < 17) {
 	gpsd_report(LOG_DATA, "GPGSA: malformed, setting ONLINE_IS only.\n");
+	mask = ONLINE_IS;
+    } else if (session->driver.nmea.latch_mode) {
+	/* last GGA had a non-advancing timestamp; don't trust this GSA */
 	mask = ONLINE_IS;
     } else {
 	int i;

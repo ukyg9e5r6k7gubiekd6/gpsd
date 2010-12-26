@@ -343,6 +343,9 @@ struct gps_device_t {
 	    double subseconds;		/* subsec part of last sentence time */
 	    char *field[NMEA_MAX];
 	    unsigned char fieldcopy[NMEA_MAX+1];
+	    /* detect receivers that ship GGA with non-advancing timestamp */
+	    bool latch_mode;
+	    char last_gga_timestamp[7];
 	    /*
 	     * State for the cycle-tracking machinery.
 	     * The reason these timestamps are separate from the
