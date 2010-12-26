@@ -81,6 +81,7 @@ file in the source distribution.</p>
 <li><a href="#options">Don't add invocation options!</a></li>
 <li><a href="#statics">Don't create static variables in the libraries!</li>
 <li><a href="#malloc">Don't use malloc!</a></li>
+<li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
 </ol>
 <li><a href="#understanding">Understanding the code</a></li>
 <ol>
@@ -440,6 +441,13 @@ instance can't have memory leaks.  The only cost for this turned out
 to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 
 <p>Don't undo this by using malloc/free in a driver or anywhere else.</p>
+
+<h2 id="sizeof">Avoid use of sizeof(&lt;int type&gt;)!</h2>
+<p>It's tempting to extract parts of packets with by using a loop of the
+form "<code>for(i = 0; i < len; i += sizeof(long))</code>". Don't do that;
+not all integer types have the same length across architectures. A long may
+be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
+4 bytes in a packet, then say so.</p>
 
 <h1 id="understanding">Understanding the code</h1>
 

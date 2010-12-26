@@ -50,22 +50,22 @@ static int geostar_write(struct gps_device_t *session,
     /*@+shiftimplementation -ignoresigns@*/
 
     /* Copy content */
-    memcpy(session->msgbuf + 8, data, len * sizeof(long));
+    memcpy(session->msgbuf + 8, data, len * 4);
 
     len += 2; /* PSGG + id + len */
 
     /* Calculate checksum */
     for (i = 0; (size_t)i < len; i++) {
-	cs ^= getleul(session->msgbuf, i * sizeof(long));
+	cs ^= getleul(session->msgbuf, i * 4);
     }
 
     /*@-shiftimplementation +ignoresigns@*/
-    putlelong(session->msgbuf, len * sizeof(long), cs);
+    putlelong(session->msgbuf, len * 4, cs);
     /*@+shiftimplementation -ignoresigns@*/
 
     len += 1; /* Checksum */
 
-    session->msgbuflen = len * sizeof(long);
+    session->msgbuflen = len * 4;
 
     gpsd_report(LOG_IO, "Sent GeoStar packet id 0x%x: %s\n", id,
 		gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
@@ -84,7 +84,7 @@ static int geostar_write(struct gps_device_t *session,
  */
 static bool geostar_detect(struct gps_device_t *session)
 {
-    unsigned char buf[1 * sizeof(long)];
+    unsigned char buf[1 * 4];
     unsigned int n;
     bool ret = false;
     int myfd;
@@ -254,10 +254,10 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->gpsdata.satellites_visible = (int)ul1;
 	if(ul1 > GEOSTAR_CHANNELS) ul1 = GEOSTAR_CHANNELS;
 	for(i = 0, j = 0; (uint32_t)i < ul1; i++) {
-	    ul2 = getleul(buf, OFFSET(2) + i * 3 * sizeof(long));
-	    s1 = getlesw(buf, OFFSET(3) + i * 3 * sizeof(long));
-	    s2 = getlesw(buf, OFFSET(3) + 2 + i * 3 * sizeof(long));
-	    s3 = getlesw(buf, OFFSET(4) + 2 + i * 3 * sizeof(long));
+	    ul2 = getleul(buf, OFFSET(2) + i * 3 * 4);
+	    s1 = getlesw(buf, OFFSET(3) + i * 3 * 4);
+	    s2 = getlesw(buf, OFFSET(3) + 2 + i * 3 * 4);
+	    s3 = getlesw(buf, OFFSET(4) + 2 + i * 3 * 4);
 	    gpsd_report(LOG_INF, "ID %d Az %g El %g SNR %g\n",
 			decode_channel_id(ul2), s1*0.001*RAD_2_DEG, s2*0.001*RAD_2_DEG, s3*0.1);
 	    session->gpsdata.PRN[i] = decode_channel_id(ul2);
@@ -463,7 +463,7 @@ static ssize_t geostar_control_send(struct gps_device_t *session,
 
 static void geostar_event_hook(struct gps_device_t *session, event_t event)
 {
-    unsigned char buf[2 * sizeof(long)];
+    unsigned char buf[2 * 4];
 
     /*@-shiftimplementation +ignoresigns@*/
     if (event == event_identified && event == event_reactivate) {
@@ -509,7 +509,7 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
 static bool geostar_speed_switch(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
-    unsigned char buf[4 * sizeof(long)];
+    unsigned char buf[4 * 4];
 
     switch (parity) {
     case 'E':
@@ -540,7 +540,7 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 
 static void geostar_mode(struct gps_device_t *session, int mode)
 {
-    unsigned char buf[1 * sizeof(long)];
+    unsigned char buf[1 * 4];
 
     /*@-shiftimplementation@*/
     if (mode == MODE_NMEA) {

@@ -12,7 +12,9 @@
  * messages that gpsd needs. Some protocols transmit error estimates
  * separately from the navigation solution; if developing a driver for
  * such a protocol you will need to add a decoder function for that
- * message.
+ * message. Be extra careful when using sizeof(<type>) to extract part
+ * of packets (ie. don't do it). This idiom creates portability problems
+ * between 32 and 64 bit systems.
  *
  * For anyone hacking this driver skeleton: "_PROTO_" and "_proto_" are now
  * reserved tokens. We suggest that they only ever be used as prefixes,
