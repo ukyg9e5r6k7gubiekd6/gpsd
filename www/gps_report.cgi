@@ -36,7 +36,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
 
 	### mail parameters
-	my $from_address = 'HTTP Server <${servaddr}>';
+	my $from_address = "HTTP Server <${servaddr}>";
 	my $mailhost = '127.0.0.1';
 	my $subject = 'new gps report';
 
