@@ -139,6 +139,29 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 		almp->af1);
 }
 
+struct subframe {
+    int subtype;
+    union {
+	struct {
+	    unsigned int l2, ura, hlth, iodc, toc, l2p;
+	    int32_t tgd, af0, af1, af2;
+	} sub1;
+	struct {
+	    uint32_t IODE, e, sqrta, toe, fit, AODO;
+	    int32_t Crs, Cus, Cuc, deltan, M0;
+	    double d_eccentricity;
+	} sub2;
+	struct {
+	    struct almanac almanac;
+	} sub4;
+	struct {
+	    struct almanac almanac;
+	} sub5;
+    };
+};
+
+struct subframe subframe;
+
 void gpsd_interpret_subframe(struct gps_device_t *session,
 			     unsigned int svid, uint32_t words[])
 {
@@ -156,10 +179,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
     /* FIXME!! I really doubt this is Big Endian compatible */
-    unsigned int pageid, subframe, data_id, preamble;
+    unsigned int pageid, data_id, preamble;
     uint32_t tow17;
     bool alert, antispoof;
-    struct almanac alm;
+    struct subframe *subp = &subframe;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
@@ -179,12 +202,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     }
     /* The subframe ID is in the Hand Over Word (page 80) */
     tow17 = ((words[1] >> 7) & 0x01FFFF);
-    subframe = ((words[1] >> 2) & 0x07);
+    subp->subtype = ((words[1] >> 2) & 0x07);
     alert = (bool)((words[1] >> 6) & 0x01);
     antispoof = (bool)((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u\n", 
-		subframe, svid, tow17, (unsigned)alert, (unsigned)antispoof);
+		subp->subtype, svid, tow17, (unsigned)alert, (unsigned)antispoof);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
@@ -192,74 +215,91 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     pageid  = (words[2] >> 16) & 0x00003F; /* only in frames 4 & 5 */
     data_id = (words[2] >> 22) & 0x3;      /* only in frames 4 & 5 */
 
-    switch (subframe) {
+    switch (subp->subtype) {
     case 1:
 	/* subframe 1: clock parameters for transmitting SV */
 	/* get Week Number (WN) from subframe 1 */
 	{
-	    unsigned int l2, ura, hlth, iodc, toc, l2p;
-	    int32_t tgd, af0, af1, af2;
-
+	    /*
+	     * FIXME: This only extracts 10 bits of GPS week.
+	     * This counter is moving to 13 bits, but we don't
+	     * know how or when to look for the other 3 yet.
+	     */
 	    session->context->gps_week =
 		(unsigned short)((words[2] >> 14) & 0x03ff);
-	    l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
-	    ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
-	    hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
-	    iodc = ( words[2] & 0x000003); /* IODC 2 MSB */
-	    l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
-	    tgd  = ( words[6] & 0x0000FF);
-	    tgd  = uint2int(tgd, BIT8);
-	    toc  = ( words[7] & 0x00FFFF);
-	    af2  = ((words[8] >> 16) & 0x0FF);
-	    af2  = uint2int(af2, BIT8);
-	    af1  = ( words[8] & 0x00FFFF);
-	    af1  = uint2int(af1, BIT16);
-	    af0  = ((words[9] >>  1) & 0x03FFFFF);
-	    af0  = uint2int(af0, BIT22);
-	    iodc <<= 8;
-	    iodc |= ((words[7] >> 16) & 0x00FF);
+	    subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
+	    subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
+	    subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
+	    subp->sub1.iodc = (words[2] & 0x000003); /* IODC 2 MSB */
+	    subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
+	    subp->sub1.tgd  = ( words[6] & 0x0000FF);
+	    subp->sub1.tgd  = uint2int(subp->sub1.tgd, BIT8);
+	    subp->sub1.toc  = ( words[7] & 0x00FFFF);
+	    subp->sub1.af2  = ((words[8] >> 16) & 0x0FF);
+	    subp->sub1.af2  = uint2int(subp->sub1.af2, BIT8);
+	    subp->sub1.af1  = ( words[8] & 0x00FFFF);
+	    subp->sub1.af1  = uint2int(subp->sub1.af1, BIT16);
+	    subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
+	    subp->sub1.af0  = uint2int(subp->sub1.af0, BIT22);
+	    subp->sub1.iodc <<= 8;
+	    subp->sub1.iodc |= ((words[7] >> 16) & 0x00FF);
 	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
-		" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%3d"
-	        " af1:%5d af0:%7d\n", svid,
-	    	session->context->gps_week, iodc,
-		l2, ura, hlth, l2p, tgd, toc, af2, af1, af0);
+			" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%3d"
+			" af1:%5d af0:%7d\n", svid,
+			session->context->gps_week,
+			subp->sub1.iodc,
+			subp->sub1.l2,
+			subp->sub1.ura,
+			subp->sub1.hlth,
+			subp->sub1.l2p,
+			subp->sub1.tgd,
+			subp->sub1.toc,
+			subp->sub1.af2,
+			subp->sub1.af1,
+			subp->sub1.af0);
 	}
 	break;
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	{
-	    uint32_t IODE, e, sqrta, toe, fit, AODO;
-	    int32_t Crs, Cus, Cuc, deltan, M0;
-	    double d_eccentricity;
-
-	    IODE   = ((words[2] >> 16) & 0x00FF);
-	    Crs    = ( words[2] & 0x00FFFF);
-	    Crs    = uint2int(Crs, BIT16);
-	    deltan = ((words[3] >>  8) & 0x00FFFF);
-	    deltan = uint2int(deltan, BIT16);
-	    M0     = ( words[3] & 0x0000FF);
-	    M0   <<= 24;
-	    M0    |= ( words[4] & 0x00FFFFFF);
-	    M0     = uint2int(M0, BIT24);
-	    Cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    Cuc    = uint2int(Cuc, BIT16);
-	    e      = ( words[5] & 0x0000FF);
-	    e    <<= 24;
-	    e     |= ( words[6] & 0x00FFFFFF);
-	    d_eccentricity  = pow(2.0,-33) * e;
-	    Cus    = ((words[7] >>  8) & 0x00FFFF);
-	    Cus    = uint2int(Cus, BIT16);
-	    sqrta  = ( words[7] & 0x0000FF);
-	    sqrta <<= 24;
-	    sqrta |= ( words[8] & 0x00FFFFFF);
-	    toe    = ((words[9] >>  8) & 0x00FFFF);
-	    fit    = ((words[9] >>  7) & 0x000001);
-	    AODO   = ((words[9] >>  2) & 0x00001F);
+	    subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
+	    subp->sub2.Crs    = ( words[2] & 0x00FFFF);
+	    subp->sub2.Crs    = uint2int(subp->sub2.Crs, BIT16);
+	    subp->sub2.deltan = ((words[3] >>  8) & 0x00FFFF);
+	    subp->sub2.deltan = uint2int(subp->sub2.deltan, BIT16);
+	    subp->sub2.M0     = ( words[3] & 0x0000FF);
+	    subp->sub2.M0   <<= 24;
+	    subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
+	    subp->sub2.M0     = uint2int(subp->sub2.M0, BIT24);
+	    subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
+	    subp->sub2.Cuc    = uint2int(subp->sub2.Cuc, BIT16);
+	    subp->sub2.e      = ( words[5] & 0x0000FF);
+	    subp->sub2.e    <<= 24;
+	    subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
+	    subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
+	    subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
+	    subp->sub2.Cus    = uint2int(subp->sub2.Cus, BIT16);
+	    subp->sub2.sqrta  = ( words[7] & 0x0000FF);
+	    subp->sub2.sqrta <<= 24;
+	    subp->sub2.sqrta |= ( words[8] & 0x00FFFFFF);
+	    subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
+	    subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
+	    subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
-		"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
-		"Cuc:%d e:%f Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
-		    svid, IODE, Crs, deltan, M0,
-		    Cuc, d_eccentricity, Cus, sqrta, toe, fit, AODO);
+			"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
+			"Cuc:%d e:%f Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
+			svid, 
+			subp->sub2.IODE,
+			subp->sub2.Crs,
+			subp->sub2.deltan,
+			subp->sub2.M0,
+			subp->sub2.Cuc,
+			subp->sub2.d_eccentricity,
+			subp->sub2.Cus,
+			subp->sub2.sqrta,
+			subp->sub2.toe,
+			subp->sub2.fit,
+			subp->sub2.AODO);
 	}
 	break;
     case 3:
@@ -695,7 +735,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		;			/* no op */
 	    }
 	    if ( -1 < sv ) {
-		subframe_almanac(svid, words, subframe, sv, data_id, &alm);
+		subframe_almanac(svid, words, subp->subtype, sv, data_id, 
+				 &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
 		gpsd_report(LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
@@ -711,7 +752,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 * reference time, the almanac reference week number.
 	 */
 	if ( 25 > pageid ) {
-            subframe_almanac(svid, words, subframe, pageid, data_id, &alm);
+            subframe_almanac(svid, words, subp->subtype, pageid, data_id, 
+			     &subp->sub5.almanac);
 	} else if ( 51 == pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
