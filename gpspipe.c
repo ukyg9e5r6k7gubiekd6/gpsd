@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/time.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -54,48 +55,6 @@ static struct termios oldtio, newtio;
 static int fd_out = 1;		/* output initially goes to standard output */
 static char serbuf[255];
 static int debug;
-
-static void daemonize(void)
-/* Daemonize me. */
-{
-    int i;
-    pid_t pid;
-
-    /* Run as my child. */
-    pid = fork();
-    if (pid == -1)
-	exit(1);		/* fork error */
-    if (pid > 0)
-	exit(0);		/* parent exits */
-
-    /* Obtain a new process group. */
-    (void)setsid();
-
-    /* Close all open descriptors. */
-    for (i = getdtablesize(); i >= 0; --i)
-	(void)close(i);
-
-    /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
-    i = open("/dev/null", O_RDWR);	/* STDIN */
-    /*@ -sefparams @*/
-    assert(dup(i) != -1);	/* STDOUT */
-    assert(dup(i) != -1);	/* STDERR */
-
-    /* Know thy mask. */
-    (void)umask(0x033);
-
-    /* Run from a known spot. */
-    assert(chdir("/") != -1);
-    /*@ +sefparams @*/
-
-    /* Catch child sig */
-    (void)signal(SIGCHLD, SIG_IGN);
-
-    /* Ignore tty signals */
-    (void)signal(SIGTSTP, SIG_IGN);
-    (void)signal(SIGTTOU, SIG_IGN);
-    (void)signal(SIGTTIN, SIG_IGN);
-}
 
 static void open_serial(char *device)
 /* open the serial port and set it up */
@@ -157,7 +116,7 @@ int main(int argc, char **argv)
     bool timestamp = false;
     char *format = "%c";
     char tmstr[200];
-    bool daemon = false;
+    bool daemonize = false;
     bool binary = false;
     bool sleepy = false;
     bool new_line = true;
@@ -200,7 +159,7 @@ int main(int argc, char **argv)
 	    binary = true;
 	    break;
 	case 'd':
-	    daemon = true;
+	    daemonize = true;
 	    break;
 	case 'l':
 	    sleepy = true;
@@ -249,7 +208,7 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    if (outfile == NULL && daemon) {
+    if (outfile == NULL && daemonize) {
 	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-f'.\n");
 	exit(1);
     }
@@ -261,8 +220,11 @@ int main(int argc, char **argv)
     }
 
     /* Daemonize if the user requested it. */
-    if (daemon)
-	daemonize();
+    if (daemonize)
+	if (daemon(0, 0) != 0)
+	    (void)fprintf(stderr,
+			  "gpspipe: demonization failed: %s\n",
+			  strerror(errno));
 
     /* Sleep for ten seconds if the user requested it. */
     if (sleepy)
@@ -304,7 +266,7 @@ int main(int argc, char **argv)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);
 
-    if ((isatty(STDERR_FILENO) == 0) || daemon)
+    if ((isatty(STDERR_FILENO) == 0) || daemonize)
 	vflag = 0;
 
     for (;;) {
