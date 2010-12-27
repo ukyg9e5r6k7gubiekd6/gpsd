@@ -168,6 +168,7 @@ int main(int argc, char **argv)
     unsigned int vflag = 0, l = 0;
     FILE *fp;
     unsigned int flags;
+    fd_set fds;
 
     struct fixsource_t source;
     char *serialport = NULL;
@@ -309,16 +310,30 @@ int main(int argc, char **argv)
     for (;;) {
 	int i = 0;
 	int j = 0;
-	int readbytes = 0;
+	int r = 0;
+	struct timeval tv;
+
+	tv.tv_sec = 0;
+	tv.tv_usec = 100000;
+	FD_ZERO(&fds);
+	FD_SET(gpsdata.gps_fd, &fds);
+	errno = 0;
+	r = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
+	if (r == -1 && errno != EINTR) {
+	    (void)fprintf(stderr, "gpspipe: select error %s(%d)\n",
+			  strerror(errno), errno);
+	    exit(1);
+	} else if (r == 0)
+		continue;
 
 	if (vflag)
 	    spinner(vflag, l++);
 
 	/* reading directly from the socket avoids decode overhead */
 	errno = 0;
-	readbytes = (int)read(gpsdata.gps_fd, buf, sizeof(buf));
-	if (readbytes > 0) {
-	    for (i = 0; i < readbytes; i++) {
+	r = (int)read(gpsdata.gps_fd, buf, sizeof(buf));
+	if (r > 0) {
+	    for (i = 0; i < r; i++) {
 		char c = buf[i];
 		if (j < (int)(sizeof(serbuf) - 1)) {
 		    serbuf[j++] = buf[i];
@@ -370,7 +385,7 @@ int main(int argc, char **argv)
 		}
 	    }
 	} else {
-	    if (readbytes == -1) {
+	    if (r == -1) {
 		if (errno == EAGAIN)
 		    continue;
 		else
