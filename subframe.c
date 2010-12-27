@@ -81,46 +81,62 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     return 0;
 }
 
-/* you can find up to date almanac data for comparision here:
- * https://gps.afspc.af.mil/gps/Current/current.alm
- */
-static void subframe_almanac( unsigned int svid, uint32_t words[], 
-			     unsigned int subframe, unsigned int sv,
-			     unsigned int data_id)
+struct almanac
 {
     uint32_t e, toa, svh, sqrtA;
     int32_t deltai, omegad, Omega0, omega, M0, af0, af1;
     double d_eccentricity;
+};
+
+/* you can find up to date almanac data for comparision here:
+ * https://gps.afspc.af.mil/gps/Current/current.alm
+ */
+static void subframe_almanac(unsigned int svid, uint32_t words[], 
+			     unsigned int subframe, unsigned int sv,
+			     unsigned int data_id, 
+			     /*@out@*/struct almanac *almp)
+{
     
 
-    e      = ( words[2] & 0x00FFFF);
-    d_eccentricity  = pow(2.0,-21) * e;
+    almp->e      = ( words[2] & 0x00FFFF);
+    almp->d_eccentricity  = pow(2.0,-21) * almp->e;
     /* carefull, each SV can have more than 2 toa's active at the same time 
      * you can not just store one or two almanacs for each sat */
-    toa    = ((words[3] >> 16) & 0x0000FF);
-    deltai = ( words[3] & 0x00FFFF);
-    deltai = uint2int(deltai, BIT16);
-    omegad = ((words[4] >>  8) & 0x00FFFF);
-    omegad = uint2int(omegad, BIT16);
-    svh    = ( words[4] & 0x0000FF);
-    sqrtA  = ( words[5] & 0xFFFFFF);
-    Omega0 = ( words[6] & 0xFFFFFF);
-    Omega0 = uint2int(Omega0, BIT24);
-    omega  = ( words[7] & 0xFFFFFF);
-    omega  = uint2int(omega, BIT24);
-    M0     = ( words[8] & 0xFFFFFF);
-    M0     = uint2int(M0, BIT24);
-    af1    = ((words[9] >>  5) & 0x0007FF);
-    af1    = uint2int(af1, BIT11);
-    af0    = ((words[9] >> 16) & 0x0000FF);
-    af0 <<= 3;
-    af0   |= ((words[9] >>  2) & 0x000007);
-    af0    = uint2int(af0, BIT11);
+    almp->toa    = ((words[3] >> 16) & 0x0000FF);
+    almp->deltai = ( words[3] & 0x00FFFF);
+    almp->deltai = uint2int(almp->deltai, BIT16);
+    almp->omegad = ((words[4] >>  8) & 0x00FFFF);
+    almp->omegad = uint2int(almp->omegad, BIT16);
+    almp->svh    = ( words[4] & 0x0000FF);
+    almp->sqrtA  = ( words[5] & 0xFFFFFF);
+    almp->Omega0 = ( words[6] & 0xFFFFFF);
+    almp->Omega0 = uint2int(almp->Omega0, BIT24);
+    almp->omega  = ( words[7] & 0xFFFFFF);
+    almp->omega  = uint2int(almp->omega, BIT24);
+    almp->M0     = ( words[8] & 0xFFFFFF);
+    almp->M0     = uint2int(almp->M0, BIT24);
+    almp->af1    = ((words[9] >>  5) & 0x0007FF);
+    almp->af1    = uint2int(almp->af1, BIT11);
+    almp->af0    = ((words[9] >> 16) & 0x0000FF);
+    almp->af0 <<= 3;
+    almp->af0   |= ((words[9] >>  2) & 0x000007);
+    almp->af0    = uint2int(almp->af0, BIT11);
     gpsd_report(LOG_PROG,
-	"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%f toa:%u deltai:%d omegad:%d"
-	" svh:%u sqrtA:%u Omega0:%d omega:%d M0:%d af0:%d af1:%d\n",
-        subframe, sv, svid, data_id, d_eccentricity, toa, deltai, omegad, 
-	svh, sqrtA, Omega0, omega, M0, af0, af1);
+		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%f toa:%u deltai:%d"
+		" omegad:%d svh:%u sqrtA:%u Omega0:%d omega:%d M0:%d"
+		" af0:%d af1:%d\n",
+		subframe, sv, svid, data_id, 
+		almp->d_eccentricity, 
+		almp->toa, 
+		almp->deltai,
+		almp->omegad,
+		almp->svh,
+		almp->sqrtA,
+		almp->Omega0,
+		almp->omega,
+		almp->M0,
+		almp->af0,
+		almp->af1);
 }
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
@@ -139,10 +155,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      *
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
-    /* FIXME!! I really doubt this is Big Endian copmatible */
+    /* FIXME!! I really doubt this is Big Endian compatible */
     unsigned int pageid, subframe, data_id, preamble;
     uint32_t tow17;
     bool alert, antispoof;
+    struct almanac alm;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
@@ -678,7 +695,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		;			/* no op */
 	    }
 	    if ( -1 < sv ) {
-		subframe_almanac(svid, words, subframe, sv, data_id);
+		subframe_almanac(svid, words, subframe, sv, data_id, &alm);
 	    } else if ( -2 == sv ) {
 		gpsd_report(LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
@@ -694,7 +711,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 * reference time, the almanac reference week number.
 	 */
 	if ( 25 > pageid ) {
-            subframe_almanac(svid, words, subframe, pageid, data_id);
+            subframe_almanac(svid, words, subframe, pageid, data_id, &alm);
 	} else if ( 51 == pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
