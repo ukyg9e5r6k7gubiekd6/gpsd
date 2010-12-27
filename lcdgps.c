@@ -65,7 +65,6 @@
 
 /* Prototypes. */
 void latlon2maidenhead(char *st,float n,float e);
-static void daemonize(void);
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
 ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
 int send_lcd(char *buf);
@@ -110,42 +109,6 @@ void latlon2maidenhead(char *st,float n,float e)
 #ifndef CLIMB
   st[5]=(int)(n+0.5)+'A';
 #endif
-}
-
-/* Daemonize me. */
-static void daemonize(void) {
-  int i, ignore;
-
-  /* Run as my child. */
-  i=fork();
-  if (i == -1) exit(1); /* fork error */
-  if (i > 0) exit(0); /* parent exits */
-
-  /* Obtain a new process group. */
-  setsid();
-
-  /* Close all open descriptors. */
-  for(i=getdtablesize();i>=0;--i)
-    close(i);
-
-  /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
-  i=open("/dev/null",O_RDWR); /* STDIN */
-  ignore=dup(i); /* STDOUT */
-  ignore=dup(i); /* STDERR */
-
-  /* Know thy mask. */
-  umask(027);
-
-  /* Run from a known location. */
-  ignore=chdir("/");
-
-  /* Catch child sig */
-  signal(SIGCHLD,SIG_IGN);
-
-  /* Ignore tty signals */
-  signal(SIGTSTP,SIG_IGN);
-  signal(SIGTTOU,SIG_IGN);
-  signal(SIGTTIN,SIG_IGN);
 }
 
 /*  Read a line from a socket  */
@@ -445,12 +408,15 @@ int main(int argc, char *argv[])
       gpsd_source_spec(NULL, &source);
 
     /* Daemonize... */
-    daemonize();
+  if (daemon(0, 0) != 0)
+      (void)fprintf(stderr,
+		    "lcdgps: demonization failed: %s\n",
+		    strerror(errno));
 
     /* Open the stream to gpsd. */
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf( stderr,
-		       "cgps: no gpsd running or network error: %d, %s\n",
+		       "lcdgps: no gpsd running or network error: %d, %s\n",
 		       errno, gps_errstr(errno));
 	exit(2);
     }
@@ -513,7 +479,7 @@ int main(int argc, char *argv[])
 	data = select(gpsdata.gps_fd + 1, &rfds, NULL, NULL, &timeout);
 
 	if (data == -1) {
-	    fprintf( stderr, "cgps: socket error\n");
+	    fprintf( stderr, "lcdgps: socket error\n");
 	    exit(2);
 	}
 	else if (data) {
