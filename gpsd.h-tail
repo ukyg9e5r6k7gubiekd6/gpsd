@@ -284,14 +284,14 @@ struct gps_type_t {
 };
 
 typedef enum {source_unknown,
-	      source_blockdev,
-	      source_rs232,
-	      source_usb,
-	      source_bluetooth,
-	      source_pty,
-	      source_tcp,
-	      source_udp}
-    sourcetype_t;
+	      source_blockdev,	/* block devices can't be GPS sources */
+	      source_rs232,	/* potential GPS source, not discoverable */ 
+	      source_usb,	/* potential GPS source, discoverable */ 
+	      source_bluetooth,	/* potential GPS source, discoverable */ 
+	      source_pty,	/* PTY: case detected but not used */ 
+	      source_tcp,	/* TCP/IP stream: case detected but not used */ 
+	      source_udp,	/* UDP stream: case detected but not used */ 
+} sourcetype_t;
 
 struct gps_device_t {
 /* session object, encapsulates all global state */
