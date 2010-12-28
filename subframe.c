@@ -221,9 +221,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	/* get Week Number (WN) from subframe 1 */
 	{
 	    /*
-	     * FIXME: This only extracts 10 bits of GPS week.
-	     * This counter is moving to 13 bits, but we don't
-	     * know how or when to look for the other 3 yet.
+	     * This only extracts 10 bits of GPS week.
+	     * 13 bits are available in the extension CNAV message,
+	     * which we don't decode yet because we don't know
+	     * of any receiver that reports it.
 	     */
 	    session->context->gps_week =
 		(unsigned short)((words[2] >> 14) & 0x03ff);
