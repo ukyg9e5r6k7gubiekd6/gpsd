@@ -218,7 +218,8 @@ struct subframe {
 	    int32_t Tgd;
 	    double d_Tgd;
 	} sub1;
-        /* subframe 2, part of ephemeris, see IS-GPS-200E, Table 20-II */
+        /* subframe 2, part of ephemeris, see IS-GPS-200E, Table 20-II
+	 * and Table 20-III */
 	struct {
 	    /* Issue of Data (Ephemeris), 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
@@ -227,12 +228,29 @@ struct subframe {
 	    uint8_t AODO;
 	    /* Age of Data Offset for the NMCT, seconds */
 	    uint16_t u_AODO;
-	    /* fit */
-	    uint32_t fit;
+	    /* fit, FIT interval flag, indicates a fit interval greater than
+	     * 4 hour, 1 bit */
+	    uint8_t fit;
 	    /* toe, Reference Time Ephemeris, 16 bits unsigned, seconds */
 	    uint16_t toe;
 	    long l_toe;
-	    int32_t Crs, Cus, Cuc, deltan;
+	    /* Crs, Amplitude of the Sine Harmonic Correction Term to the 
+	     * Orbit Radius, 16 bits, signed, meters */
+	    int16_t Crs;
+	    double d_Crs;
+	    /* Cus, Amplitude of the Sine Harmonic Correction Term to the 
+	     * Argument of Latitude, 16 bits, signed, radians */
+	    int16_t Cus;
+	    double d_Cus;
+	    /* Cuc, Amplitude of the Cosine Harmonic Correction Term to the 
+	     * Argument of Latitude, 16 bits, signed, radians */
+	    int16_t Cuc;
+	    double d_Cuc;
+	    /* deltan, Mean Motion Difference From Computed Value
+	     * Mean Motion Difference From Computed Value
+	     * 16 bits, signed, semi-circles/sec */
+	    int16_t deltan;
+	    double d_deltan;
 	    /* M0, Mean Anomaly at Reference Time, 32 bits signed, 
 	     * semi-circles */
 	    int32_t M0;
@@ -362,22 +380,22 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	{
 	    subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
 	    subp->sub2.Crs    = ( words[2] & 0x00FFFF);
-	    subp->sub2.Crs    = uint2int(subp->sub2.Crs, BIT16);
+	    subp->sub2.d_Crs  = pow(2.0,-5) * subp->sub2.Crs;
 	    subp->sub2.deltan = ((words[3] >>  8) & 0x00FFFF);
-	    subp->sub2.deltan = uint2int(subp->sub2.deltan, BIT16);
+	    subp->sub2.d_deltan  = pow(2.0,-43) * subp->sub2.deltan;
 	    subp->sub2.M0     = ( words[3] & 0x0000FF);
 	    subp->sub2.M0   <<= 24;
 	    subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
 	    subp->sub2.M0     = uint2int(subp->sub2.M0, BIT24);
 	    subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0;
 	    subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    subp->sub2.Cuc    = uint2int(subp->sub2.Cuc, BIT16);
+	    subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
 	    subp->sub2.e      = ( words[5] & 0x0000FF);
 	    subp->sub2.e    <<= 24;
 	    subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
 	    subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
 	    subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
-	    subp->sub2.Cus    = uint2int(subp->sub2.Cus, BIT16);
+	    subp->sub2.d_Cus  = pow(2.0,-29) * subp->sub2.Cus;
 	    subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
 	    subp->sub2.sqrtA <<= 24;
 	    subp->sub2.sqrtA |= ( words[8] & 0x00FFFFFF);
@@ -388,17 +406,17 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
 	    subp->sub2.u_AODO   = subp->sub2.AODO * 900;
 	    gpsd_report(LOG_PROG,
-			"50B: SF:2 SV:%2u IODE:%3u Crs:%d deltan:%d M0:%.11e "
-			"Cuc:%d e:%f Cus:%d sqrtA:%.11g toe:%lu FIT:%u "
-			"AODO:%5u\n", 
+			"50B: SF:2 SV:%2u IODE:%3u Crs:%.6e deltan:%.6e "
+			"M0:%.11e Cuc:%.6e e:%f Cus:%.6e sqrtA:%.11g "
+			"toe:%lu FIT:%u AODO:%5u\n", 
 			svid, 
 			subp->sub2.IODE,
-			subp->sub2.Crs,
-			subp->sub2.deltan,
+			subp->sub2.d_Crs,
+			subp->sub2.d_deltan,
 			subp->sub2.d_M0,
-			subp->sub2.Cuc,
+			subp->sub2.d_Cuc,
 			subp->sub2.d_eccentricity,
-			subp->sub2.Cus,
+			subp->sub2.d_Cus,
 			subp->sub2.d_sqrtA,
 			subp->sub2.l_toe,
 			subp->sub2.fit,
