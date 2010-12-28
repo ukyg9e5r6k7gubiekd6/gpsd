@@ -84,8 +84,15 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 struct almanac
 {
     uint16_t e;
-    uint32_t toa, svh, sqrtA;
-    int32_t deltai, Omega0, omega, M0;
+    uint32_t toa, svh;
+    int32_t deltai, M0;
+    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly Epoch,
+     * 24 bits signed, semi-circles (radians) */
+    int32_t Omega0;
+    double d_Omega0;
+    /* omega, Argument of Perigee, 24 bits signed, semi-circles (radians) */
+    int32_t omega;
+    double d_omega;
     /* af0, SV clock correction constant term
      * 11 bits signed, seconds */
     int16_t af0;
@@ -98,6 +105,7 @@ struct almanac
     double d_eccentricity;
     /* sqrt A, Square Root of the Semi-Major Axis
      * 24 bits unsigned, square_root(meters) */
+    uint32_t sqrtA;
     double d_sqrtA;
     /* Omega dot, Rate of Right Ascension, 16 bits signed, semi-circles/sec */
     int16_t Omegad;
@@ -118,31 +126,33 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->d_eccentricity  = pow(2.0,-21) * almp->e;
     /* carefull, each SV can have more than 2 toa's active at the same time 
      * you can not just store one or two almanacs for each sat */
-    almp->toa    = ((words[3] >> 16) & 0x0000FF);
-    almp->deltai = ( words[3] & 0x00FFFF);
-    almp->deltai = uint2int(almp->deltai, BIT16);
-    almp->Omegad = ((words[4] >>  8) & 0x00FFFF);
+    almp->toa      = ((words[3] >> 16) & 0x0000FF);
+    almp->deltai   = ( words[3] & 0x00FFFF);
+    almp->deltai   = uint2int(almp->deltai, BIT16);
+    almp->Omegad   = ((words[4] >>  8) & 0x00FFFF);
     almp->d_Omegad = pow(2.0, -38) * almp->Omegad;
-    almp->svh    = ( words[4] & 0x0000FF);
-    almp->sqrtA  = ( words[5] & 0xFFFFFF);
+    almp->svh      = ( words[4] & 0x0000FF);
+    almp->sqrtA    = ( words[5] & 0xFFFFFF);
     almp->d_sqrtA  = pow(2.0,-11) * almp->sqrtA;
-    almp->Omega0 = ( words[6] & 0xFFFFFF);
-    almp->Omega0 = uint2int(almp->Omega0, BIT24);
-    almp->omega  = ( words[7] & 0xFFFFFF);
-    almp->omega  = uint2int(almp->omega, BIT24);
-    almp->M0     = ( words[8] & 0xFFFFFF);
-    almp->M0     = uint2int(almp->M0, BIT24);
-    almp->af1    = ((words[9] >>  5) & 0x0007FF);
-    almp->af1    = uint2int(almp->af1, BIT11);
-    almp->d_af1  = pow(2.0,-38) * almp->af1;
-    almp->af0    = ((words[9] >> 16) & 0x0000FF);
-    almp->af0 <<= 3;
-    almp->af0   |= ((words[9] >>  2) & 0x000007);
-    almp->af0    = uint2int(almp->af0, BIT11);
-    almp->d_af0  = pow(2.0,-20) * almp->af0;
+    almp->Omega0   = ( words[6] & 0xFFFFFF);
+    almp->Omega0   = uint2int(almp->Omega0, BIT24);
+    almp->d_Omega0 = pow(2.0, -23) * almp->Omega0;
+    almp->omega    = ( words[7] & 0xFFFFFF);
+    almp->omega    = uint2int(almp->omega, BIT24);
+    almp->d_omega  = pow(2.0, -23) * almp->omega;
+    almp->M0       = ( words[8] & 0xFFFFFF);
+    almp->M0       = uint2int(almp->M0, BIT24);
+    almp->af1      = ((words[9] >>  5) & 0x0007FF);
+    almp->af1      = uint2int(almp->af1, BIT11);
+    almp->d_af1    = pow(2.0,-38) * almp->af1;
+    almp->af0      = ((words[9] >> 16) & 0x0000FF);
+    almp->af0    <<= 3;
+    almp->af0     |= ((words[9] >>  2) & 0x000007);
+    almp->af0      = uint2int(almp->af0, BIT11);
+    almp->d_af0    = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%u deltai:%d"
-		" Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
+		" Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e omega:%.10e M0:%d"
 		" af0:%.5e af1:%.5e\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
@@ -151,8 +161,8 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 		almp->d_Omegad,
 		almp->svh,
 		almp->d_sqrtA,
-		almp->Omega0,
-		almp->omega,
+		almp->d_Omega0,
+		almp->d_omega,
 		almp->M0,
 		almp->d_af0,
 		almp->d_af1);
@@ -363,38 +373,48 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	     * Angle of Inclination, 16 bits signed, radians*/
 	    uint16_t Cic;
 	    double d_Cic;
-	    int32_t Cis, Crc, om0, i0, om;
+	    int32_t Cis, Crc, i0;
+	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly 
+	     * Epoch, 32 bits signed, semi-circles (radians) */
+	    int32_t Omega0;
+	    double d_Omega0;
+	    /* omega, Argument of Perigee, 32 bits signed, semi-circles 
+	     * (radians) */
+	    int32_t omega;
+	    double d_omega;
 	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
 	     * semi-circles/sec */
 	    int32_t Omegad;
 	    double d_Omegad;
 
-	    Cic    = ((words[2] >>  8) & 0x00FFFF);
-	    d_Cic  = pow(2.0, -29) * Cic;
-	    om0    = ( words[2] & 0x0000FF);
-	    om0  <<= 24;
-	    om0   |= ( words[3] & 0x00FFFFFF);
-	    Cis    = ((words[4] >>  8) & 0x00FFFF);
-	    Cis    = uint2int(Cis, BIT16);
-	    i0     = ( words[4] & 0x0000FF);
-	    i0   <<= 24;
-	    i0    |= ( words[5] & 0x00FFFFFF);
-	    Crc    = ((words[6] >>  8) & 0x00FFFF);
-	    Crc    = uint2int(Crc, BIT16);
-	    om     = ( words[6] & 0x0000FF);
-	    om   <<= 24;
-	    om    |= ( words[7] & 0x00FFFFFF);
-	    Omegad = ( words[8] & 0x00FFFFFF);
-	    Omegad = uint2int(Omegad, BIT24);
+	    Cic      = ((words[2] >>  8) & 0x00FFFF);
+	    d_Cic    = pow(2.0, -29) * Cic;
+	    Omega0   = ( words[2] & 0x0000FF);
+	    Omega0 <<= 24;
+	    Omega0  |= ( words[3] & 0x00FFFFFF);
+	    d_Omega0 = pow(2.0, -31) * Omega0;
+	    Cis      = ((words[4] >>  8) & 0x00FFFF);
+	    Cis      = uint2int(Cis, BIT16);
+	    i0       = ( words[4] & 0x0000FF);
+	    i0     <<= 24;
+	    i0      |= ( words[5] & 0x00FFFFFF);
+	    Crc      = ((words[6] >>  8) & 0x00FFFF);
+	    Crc      = uint2int(Crc, BIT16);
+	    omega    = ( words[6] & 0x0000FF);
+	    omega  <<= 24;
+	    omega   |= ( words[7] & 0x00FFFFFF);
+	    d_omega  = pow(2.0, -31) * omega;
+	    Omegad   = ( words[8] & 0x00FFFFFF);
+	    Omegad   = uint2int(Omegad, BIT24);
 	    d_Omegad = pow(2.0, -43) * Omegad;
-	    IODE   = ((words[9] >> 16) & 0x0000FF);
-	    IDOT   = ((words[9] >>  2) & 0x003FFF);
-	    d_IDOT = pow(2.0, -43) * IDOT;
+	    IODE     = ((words[9] >> 16) & 0x0000FF);
+	    IDOT     = ((words[9] >>  2) & 0x003FFF);
+	    d_IDOT   = pow(2.0, -43) * IDOT;
 	    gpsd_report(LOG_PROG,
-		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e om0:%d Cis:%d "
-		"i0:%d crc:%d om:%d Omegad:%.6e\n", 
-			svid, IODE, d_IDOT, d_Cic, om0, Cis, i0, Crc, om, 
-			d_Omegad );
+		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
+		" Cis:%d i0:%d crc:%d omega:%.11e Omegad:%.6e\n", 
+			svid, IODE, d_IDOT, d_Cic, d_Omega0, Cis, i0, Crc,
+			d_omega, d_Omegad );
 	}
 	break;
     case 4:
