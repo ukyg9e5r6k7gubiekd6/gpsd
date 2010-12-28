@@ -86,7 +86,15 @@ struct almanac
     uint16_t e;
     int16_t Omegad;
     uint32_t toa, svh, sqrtA;
-    int32_t deltai, Omega0, omega, M0, af0, af1;
+    int32_t deltai, Omega0, omega, M0;
+    /* af0, SV clock correction constant term
+     * 11 bits signed, seconds */
+    int16_t af0;
+    double d_af0;
+    /* af1, SV clock correction first order term
+     * 11 bits signed, seconds/second */
+    int16_t af1;
+    double d_af1;
     /* eccentricity, 16 bits, unsigned, dimensionless */
     double d_eccentricity;
     /* sqrt A, Square Root of the Semi-Major Axis
@@ -126,14 +134,16 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->M0     = uint2int(almp->M0, BIT24);
     almp->af1    = ((words[9] >>  5) & 0x0007FF);
     almp->af1    = uint2int(almp->af1, BIT11);
+    almp->d_af1  = pow(2.0,-38) * almp->af1;
     almp->af0    = ((words[9] >> 16) & 0x0000FF);
     almp->af0 <<= 3;
     almp->af0   |= ((words[9] >>  2) & 0x000007);
     almp->af0    = uint2int(almp->af0, BIT11);
+    almp->d_af0  = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%u deltai:%d"
 		" Omegad:%.5g svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
-		" af0:%d af1:%d\n",
+		" af0:%.5e af1:%.5e\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
 		almp->toa, 
@@ -144,8 +154,8 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 		almp->Omega0,
 		almp->omega,
 		almp->M0,
-		almp->af0,
-		almp->af1);
+		almp->d_af0,
+		almp->d_af1);
 }
 
 struct subframe {
@@ -153,7 +163,19 @@ struct subframe {
     union {
 	struct {
 	    unsigned int l2, ura, hlth, iodc, toc, l2p;
-	    int32_t tgd, af0, af1, af2;
+	    /* af0, SV clock correction constant term
+	     * 22 bits signed, seconds */
+	    int32_t af0;
+	    double d_af0;
+	    /* af1, SV clock correction first order term
+	     * 22 bits signed, seconds/second */
+	    int16_t af1;
+	    double d_af1;
+	    /* af2, SV clock correction second order term
+	     * 8 bits signed, seconds/second**2 */
+	    int8_t af2;
+	    double d_af2;
+	    int32_t tgd;
 	} sub1;
 	struct {
 	    /* Issue of Data (Ephemeris), 
@@ -256,16 +278,17 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub1.tgd  = uint2int(subp->sub1.tgd, BIT8);
 	    subp->sub1.toc  = ( words[7] & 0x00FFFF);
 	    subp->sub1.af2  = ((words[8] >> 16) & 0x0FF);
-	    subp->sub1.af2  = uint2int(subp->sub1.af2, BIT8);
+	    subp->sub1.d_af2  = pow(2.0, -55) * subp->sub1.af2;
 	    subp->sub1.af1  = ( words[8] & 0x00FFFF);
-	    subp->sub1.af1  = uint2int(subp->sub1.af1, BIT16);
+	    subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
 	    subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
 	    subp->sub1.af0  = uint2int(subp->sub1.af0, BIT22);
+	    subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
 	    subp->sub1.iodc <<= 8;
 	    subp->sub1.iodc |= ((words[7] >> 16) & 0x00FF);
 	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
-			" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%3d"
-			" af1:%5d af0:%7d\n", svid,
+			" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%.4g"
+			" af1:%.6e af0:%.7e\n", svid,
 			session->context->gps_week,
 			subp->sub1.iodc,
 			subp->sub1.l2,
@@ -274,9 +297,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			subp->sub1.l2p,
 			subp->sub1.tgd,
 			subp->sub1.toc,
-			subp->sub1.af2,
-			subp->sub1.af1,
-			subp->sub1.af0);
+			subp->sub1.d_af2,
+			subp->sub1.d_af1,
+			subp->sub1.d_af0);
 	}
 	break;
     case 2:
