@@ -423,11 +423,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
-	    /* Rate of Inclination Angle, 14 bits signed, semi-circles/sec */
+	    /* Rate of Inclination Angle, 14 bits signed, scale2**-43,
+	     * semi-circles/sec */
 	    uint16_t IDOT;
 	    double d_IDOT;
 	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
-	     * Angle of Inclination, 16 bits signed, radians*/
+	     * Angle of Inclination, 16 bits signed, scale 2**-29, radians*/
 	    uint16_t Cic;
 	    double d_Cic;
 	    /* Cis, Amplitude of the Sine Harmonic Correction Term to the
@@ -438,16 +439,20 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	     * Orbit Radius, 16 bits signed, scale 2**-5, meters */
 	    int16_t Crc;
 	    double d_Crc;
+	    /* i0, Inclination Angle at Reference Time, 32 bits, signed,
+	     * scale 2**-31, semi-circles */
 	    int32_t i0;
+	    double d_i0;
 	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly 
 	     * Epoch, 32 bits signed, semi-circles */
 	    int32_t Omega0;
 	    double d_Omega0;
-	    /* omega, Argument of Perigee, 32 bits signed, semi-circles */
+	    /* omega, Argument of Perigee, 32 bits signed, scale 2**-31,
+	     * semi-circles */
 	    int32_t omega;
 	    double d_omega;
 	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
-	     * semi-circles/sec */
+	     * scale 2**-43, semi-circles/sec */
 	    int32_t Omegad;
 	    double d_Omegad;
 
@@ -462,6 +467,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    i0       = ( words[4] & 0x0000FF);
 	    i0     <<= 24;
 	    i0      |= ( words[5] & 0x00FFFFFF);
+	    d_i0     = pow(2.0, -31) * i0;
 	    Crc      = ((words[6] >>  8) & 0x00FFFF);
 	    d_Crc    = pow(2.0, -5) * Crc;
 	    omega    = ( words[6] & 0x0000FF);
@@ -476,8 +482,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    d_IDOT   = pow(2.0, -43) * IDOT;
 	    gpsd_report(LOG_PROG,
 		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
-		" Cis:%.7g i0:%d Crc:%.7g omega:%.11e Omegad:%.6e\n", 
-			svid, IODE, d_IDOT, d_Cic, d_Omega0, d_Cis, i0, d_Crc,
+		" Cis:%.7g i0:%.11e Crc:%.7g omega:%.11e Omegad:%.6e\n", 
+			svid, IODE, d_IDOT, d_Cic, d_Omega0, d_Cis, d_i0, d_Crc,
 			d_omega, d_Omegad );
 	}
 	break;
