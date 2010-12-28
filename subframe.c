@@ -184,6 +184,8 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 struct subframe {
     int subtype;
     union {
+        /* subframe 1, part of ephemeris, see IS-GPS-200E, Table 20-II
+	 * and Table 20-I */
 	struct {
 	    /* IODC, Issue of Data, Clock, 10 bits, unsigned, 
 	     * issued in 8 data ranges at the same time */
@@ -192,7 +194,14 @@ struct subframe {
 	     * issued in 8 data ranges at the same time */
 	    uint16_t toc;
 	    long l_toc;
-	    unsigned int l2, ura, hlth, l2p;
+	    /* l2, code on L2, 2 bits, bit map */
+	    uint8_t l2;
+	    /* l2p, L2 P data flag, 1 bit */
+	    uint8_t l2p;
+	    /* ura, SV accuracy, 4 bits unsigned */
+	    unsigned int ura;
+	    /* hlth, SV health, 6 bits unsigned bitmap */
+	    unsigned int hlth;
 	    /* af0, SV clock correction constant term
 	     * 22 bits signed, seconds */
 	    int32_t af0;
@@ -209,6 +218,7 @@ struct subframe {
 	    int32_t Tgd;
 	    double d_Tgd;
 	} sub1;
+        /* subframe 2, part of ephemeris, see IS-GPS-200E, Table 20-II */
 	struct {
 	    /* Issue of Data (Ephemeris), 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
@@ -217,6 +227,7 @@ struct subframe {
 	    uint8_t AODO;
 	    /* Age of Data Offset for the NMCT, seconds */
 	    uint16_t u_AODO;
+	    /* fit */
 	    uint32_t fit;
 	    /* toe, Reference Time Ephemeris, 16 bits unsigned, seconds */
 	    uint16_t toe;
@@ -234,6 +245,7 @@ struct subframe {
 	    uint32_t sqrtA;
 	    double d_sqrtA;
 	} sub2;
+        /* subframe 3, part of ephemeris, see IS-GPS-200E, Table 20-II */
 	struct {
 	    struct almanac almanac;
 	} sub4;
@@ -630,8 +642,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		{
 		    unsigned char svf[33];
 		    /* SV health data, 6 bits unsigned bit map */
-		    uint8_t svh25, svh26, svh27, svh28, svh29;
-		    uint8_t svh30, svh30, svh31, svh32;
+		    uint8_t svh25, svh26, svh27, svh28;
+		    uint8_t svh29, svh30, svh31, svh32;
 
 		    svh25 = ((words[7] >>  0) & 0x00003F);
 		    svh26 = ((words[8] >> 18) & 0x00003F);
