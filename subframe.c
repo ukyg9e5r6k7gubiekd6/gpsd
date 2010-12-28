@@ -84,7 +84,6 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 struct almanac
 {
     uint16_t e;
-    int16_t Omegad;
     uint32_t toa, svh, sqrtA;
     int32_t deltai, Omega0, omega, M0;
     /* af0, SV clock correction constant term
@@ -101,6 +100,7 @@ struct almanac
      * 24 bits unsigned, square_root(meters) */
     double d_sqrtA;
     /* Omega dot, Rate of Right Ascension, 16 bits signed, semi-circles/sec */
+    int16_t Omegad;
     double d_Omegad;
 };
 
@@ -142,7 +142,7 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->d_af0  = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%u deltai:%d"
-		" Omegad:%.5g svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
+		" Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
 		" af0:%.5e af1:%.5e\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
@@ -162,7 +162,10 @@ struct subframe {
     int subtype;
     union {
 	struct {
-	    unsigned int l2, ura, hlth, iodc, toc, l2p;
+	    /* IODC, Issue of Data, Clock, 10 bits, unsigned, 
+	     * issued in 8 data ranges at the same time */
+	    uint16_t IODC;
+	    unsigned int l2, ura, hlth, toc, l2p;
 	    /* af0, SV clock correction constant term
 	     * 22 bits signed, seconds */
 	    int32_t af0;
@@ -272,7 +275,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
 	    subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
 	    subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
-	    subp->sub1.iodc = (words[2] & 0x000003); /* IODC 2 MSB */
+	    subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
 	    subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
 	    subp->sub1.tgd  = ( words[6] & 0x0000FF);
 	    subp->sub1.tgd  = uint2int(subp->sub1.tgd, BIT8);
@@ -284,13 +287,13 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
 	    subp->sub1.af0  = uint2int(subp->sub1.af0, BIT22);
 	    subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
-	    subp->sub1.iodc <<= 8;
-	    subp->sub1.iodc |= ((words[7] >> 16) & 0x00FF);
+	    subp->sub1.IODC <<= 8;
+	    subp->sub1.IODC |= ((words[7] >> 16) & 0x00FF);
 	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 			" L2:%u ura:%u hlth:%u L2P:%u Tgd:%d toc:%u af2:%.4g"
 			" af1:%.6e af0:%.7e\n", svid,
 			session->context->gps_week,
-			subp->sub1.iodc,
+			subp->sub1.IODC,
 			subp->sub1.l2,
 			subp->sub1.ura,
 			subp->sub1.hlth,
@@ -353,14 +356,21 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
-	    uint32_t IDOT;
-	    int32_t Cic, Cis, Crc, om0, i0, om, Omegad;
+	    /* Rate of Inclination Angle, 14 bits signed, semi-circles/sec */
+	    uint16_t IDOT;
+	    double d_IDOT;
+	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
+	     * Angle of Inclination, 16 bits signed, radians*/
+	    uint16_t Cic;
+	    double d_Cic;
+	    int32_t Cis, Crc, om0, i0, om;
 	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
 	     * semi-circles/sec */
+	    int32_t Omegad;
 	    double d_Omegad;
 
 	    Cic    = ((words[2] >>  8) & 0x00FFFF);
-	    Cic    = uint2int(Cic, BIT16);
+	    d_Cic  = pow(2.0, -29) * Cic;
 	    om0    = ( words[2] & 0x0000FF);
 	    om0  <<= 24;
 	    om0   |= ( words[3] & 0x00FFFFFF);
@@ -379,10 +389,11 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    d_Omegad = pow(2.0, -43) * Omegad;
 	    IODE   = ((words[9] >> 16) & 0x0000FF);
 	    IDOT   = ((words[9] >>  2) & 0x003FFF);
+	    d_IDOT = pow(2.0, -43) * IDOT;
 	    gpsd_report(LOG_PROG,
-		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%u Cic:%d om0:%d Cis:%d "
-		"i0:%d crc:%d om:%d Omegad:%.6g\n", 
-			svid, IODE, IDOT, Cic, om0, Cis, i0, Crc, om, 
+		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e om0:%d Cis:%d "
+		"i0:%d crc:%d om:%d Omegad:%.6e\n", 
+			svid, IODE, d_IDOT, d_Cic, om0, Cis, i0, Crc, om, 
 			d_Omegad );
 	}
 	break;
