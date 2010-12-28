@@ -156,7 +156,14 @@ struct subframe {
 	    int32_t tgd, af0, af1, af2;
 	} sub1;
 	struct {
-	    uint32_t IODE, e, sqrtA, toe, fit, AODO;
+	    /* Issue of Data (Ephemeris), 
+	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
+	    uint8_t IODE;
+	    /* Age of Data Offset for the NMCT, 6 bits, ignore if all ones */
+	    uint8_t AODO;
+	    /* Age of Data Offset for the NMCT, seconds */
+	    uint16_t u_AODO;
+	    uint32_t e, sqrtA, toe, fit;
 	    int32_t Crs, Cus, Cuc, deltan, M0;
 	    /* eccentricity, 32 bits, unsigned, dimensionless */
 	    double d_eccentricity;
@@ -299,9 +306,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
 	    subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
 	    subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
+	    subp->sub2.u_AODO   = subp->sub2.AODO * 900;
 	    gpsd_report(LOG_PROG,
-			"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
-			"Cuc:%d e:%f Cus:%d sqrtA:%.11g toe:%u FIT:%u AODO:%u\n", 
+			"50B: SF:2 SV:%2u IODE:%3u Crs:%d deltan:%d M0:%d "
+			"Cuc:%d e:%f Cus:%d sqrtA:%.11g toe:%u FIT:%u AODO:%5u\n", 
 			svid, 
 			subp->sub2.IODE,
 			subp->sub2.Crs,
@@ -313,13 +321,16 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			subp->sub2.d_sqrtA,
 			subp->sub2.toe,
 			subp->sub2.fit,
-			subp->sub2.AODO);
+			subp->sub2.u_AODO);
 	}
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
 	{
-	    uint32_t IODE, IDOT;
+	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
+	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
+	    uint8_t IODE;
+	    uint32_t IDOT;
 	    int32_t Cic, Cis, Crc, om0, i0, om, Omegad;
 	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
 	     * semi-circles/sec */
