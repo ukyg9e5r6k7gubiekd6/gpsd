@@ -81,13 +81,18 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
     return 0;
 }
 
+/* The almanac is a subset of the clock and ephemeris data, with reduced 
+ * precision. See IS-GPS-200E, Table 20-VI  */
 struct almanac
 {
-    /* toa, 8 bits unsigned, seconds */
+    /* toa, almanac reference time, 8 bits unsigned, seconds */
     uint8_t toa;
     long l_toa;
-    uint32_t svh;
-    int32_t deltai;
+    /* SV health data, 8 bit unsigned bit map */
+    uint8_t svh;
+    /* deltai, correction to inclination, 16 bits signed, semi-circles */
+    int16_t deltai;
+    double d_deltai;
     /* M0, Mean Anomaly at Reference Time, 24 bits signed, semi-circles */
     int32_t M0;
     double d_M0;
@@ -135,7 +140,7 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->toa      = ((words[3] >> 16) & 0x0000FF);
     almp->l_toa    = almp->toa << 12;
     almp->deltai   = ( words[3] & 0x00FFFF);
-    almp->deltai   = uint2int(almp->deltai, BIT16);
+    almp->d_deltai = pow(2.0, -19) * almp->deltai;
     almp->Omegad   = ((words[4] >>  8) & 0x00FFFF);
     almp->d_Omegad = pow(2.0, -38) * almp->Omegad;
     almp->svh      = ( words[4] & 0x0000FF);
@@ -159,13 +164,13 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->af0      = uint2int(almp->af0, BIT11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
-		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu deltai:%d"
-		" Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e omega:%.10e "
-		"M0:%.11e af0:%.5e af1:%.5e\n",
+		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
+		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e "
+		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
 		almp->l_toa, 
-		almp->deltai,
+		almp->d_deltai,
 		almp->d_Omegad,
 		almp->svh,
 		almp->d_sqrtA,
@@ -624,14 +629,18 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 */
 		{
 		    unsigned char svf[33];
-		    unsigned char svh25 = ((words[7] >>  0) & 0x00003F);
-		    unsigned char svh26 = ((words[8] >> 18) & 0x00003F);
-		    unsigned char svh27 = ((words[8] >> 12) & 0x00003F);
-		    unsigned char svh28 = ((words[8] >>  6) & 0x00003F);
-		    unsigned char svh29 = ((words[8] >>  0) & 0x00003F);
-		    unsigned char svh30 = ((words[9] >> 18) & 0x00003F);
-		    unsigned char svh31 = ((words[9] >> 12) & 0x00003F);
-		    unsigned char svh32 = ((words[9] >>  6) & 0x00003F);
+		    /* SV health data, 6 bits unsigned bit map */
+		    uint8_t svh25, svh26, svh27, svh28, svh29;
+		    uint8_t svh30, svh30, svh31, svh32;
+
+		    svh25 = ((words[7] >>  0) & 0x00003F);
+		    svh26 = ((words[8] >> 18) & 0x00003F);
+		    svh27 = ((words[8] >> 12) & 0x00003F);
+		    svh28 = ((words[8] >>  6) & 0x00003F);
+		    svh29 = ((words[8] >>  0) & 0x00003F);
+		    svh30 = ((words[9] >> 18) & 0x00003F);
+		    svh31 = ((words[9] >> 12) & 0x00003F);
+		    svh32 = ((words[9] >>  6) & 0x00003F);
 		    sv = -1;
 		    svf[1]  = (unsigned char)((words[2] >> 12) & 0x00000F);
 		    svf[2]  = (unsigned char)((words[2] >>  8) & 0x00000F);
@@ -871,6 +880,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    /* toa, Almanac reference Time, 8 bits, unsigned, seconds */
 	    uint8_t toa;
 	    long l_toa;
+	    /* WNa, Week Number almanac, 8 bits, GPS Week Number % 256 */
 	    uint8_t WNa;
 	    uint8_t sv[25];
 	    toa   = ((words[2] >> 8) & 0x0000FF);
