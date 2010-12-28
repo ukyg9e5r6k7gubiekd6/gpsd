@@ -83,9 +83,14 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 
 struct almanac
 {
-    uint32_t e, toa, svh, sqrtA;
+    uint16_t e;
+    uint32_t toa, svh, sqrtA;
     int32_t deltai, omegad, Omega0, omega, M0, af0, af1;
+    /* eccentricity, 16 bits, unsigned, dimensionless */
     double d_eccentricity;
+    /* sqrt A, Square Root of the Semi-Major Axis
+     * 24 bits unsigned, square_root(meters) */
+    double d_sqrtA;
 };
 
 /* you can find up to date almanac data for comparision here:
@@ -109,6 +114,7 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->omegad = uint2int(almp->omegad, BIT16);
     almp->svh    = ( words[4] & 0x0000FF);
     almp->sqrtA  = ( words[5] & 0xFFFFFF);
+    almp->d_sqrtA  = pow(2.0,-11) * almp->sqrtA;
     almp->Omega0 = ( words[6] & 0xFFFFFF);
     almp->Omega0 = uint2int(almp->Omega0, BIT24);
     almp->omega  = ( words[7] & 0xFFFFFF);
@@ -122,8 +128,8 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->af0   |= ((words[9] >>  2) & 0x000007);
     almp->af0    = uint2int(almp->af0, BIT11);
     gpsd_report(LOG_PROG,
-		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%f toa:%u deltai:%d"
-		" omegad:%d svh:%u sqrtA:%u Omega0:%d omega:%d M0:%d"
+		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%u deltai:%d"
+		" omegad:%d svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
 		" af0:%d af1:%d\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
@@ -131,7 +137,7 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 		almp->deltai,
 		almp->omegad,
 		almp->svh,
-		almp->sqrtA,
+		almp->d_sqrtA,
 		almp->Omega0,
 		almp->omega,
 		almp->M0,
@@ -147,9 +153,13 @@ struct subframe {
 	    int32_t tgd, af0, af1, af2;
 	} sub1;
 	struct {
-	    uint32_t IODE, e, sqrta, toe, fit, AODO;
+	    uint32_t IODE, e, sqrtA, toe, fit, AODO;
 	    int32_t Crs, Cus, Cuc, deltan, M0;
+	    /* eccentricity, 32 bits, unsigned, dimensionless */
 	    double d_eccentricity;
+	    /* sqrt A, Square Root of the Semi-Major Axis
+	     * 32 bits unsigned, square_root(meters) */
+	    double d_sqrtA;
 	} sub2;
 	struct {
 	    struct almanac almanac;
@@ -279,15 +289,16 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
 	    subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
 	    subp->sub2.Cus    = uint2int(subp->sub2.Cus, BIT16);
-	    subp->sub2.sqrta  = ( words[7] & 0x0000FF);
-	    subp->sub2.sqrta <<= 24;
-	    subp->sub2.sqrta |= ( words[8] & 0x00FFFFFF);
+	    subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
+	    subp->sub2.sqrtA <<= 24;
+	    subp->sub2.sqrtA |= ( words[8] & 0x00FFFFFF);
+	    subp->sub2.d_sqrtA = pow(2.0, -19) * subp->sub2.sqrtA;
 	    subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
 	    subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
 	    subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
 	    gpsd_report(LOG_PROG,
 			"50B: SF:2 SV:%2u IODE:%u Crs:%d deltan:%d M0:%d "
-			"Cuc:%d e:%f Cus:%d sqrtA:%u toe:%u FIT:%u AODO:%u\n", 
+			"Cuc:%d e:%f Cus:%d sqrtA:%.11g toe:%u FIT:%u AODO:%u\n", 
 			svid, 
 			subp->sub2.IODE,
 			subp->sub2.Crs,
@@ -296,7 +307,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 			subp->sub2.Cuc,
 			subp->sub2.d_eccentricity,
 			subp->sub2.Cus,
-			subp->sub2.sqrta,
+			subp->sub2.d_sqrtA,
 			subp->sub2.toe,
 			subp->sub2.fit,
 			subp->sub2.AODO);
