@@ -84,13 +84,16 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 struct almanac
 {
     uint16_t e;
+    int16_t Omegad;
     uint32_t toa, svh, sqrtA;
-    int32_t deltai, omegad, Omega0, omega, M0, af0, af1;
+    int32_t deltai, Omega0, omega, M0, af0, af1;
     /* eccentricity, 16 bits, unsigned, dimensionless */
     double d_eccentricity;
     /* sqrt A, Square Root of the Semi-Major Axis
      * 24 bits unsigned, square_root(meters) */
     double d_sqrtA;
+    /* Omega dot, Rate of Right Ascension, 16 bits signed, semi-circles/sec */
+    double d_Omegad;
 };
 
 /* you can find up to date almanac data for comparision here:
@@ -110,8 +113,8 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->toa    = ((words[3] >> 16) & 0x0000FF);
     almp->deltai = ( words[3] & 0x00FFFF);
     almp->deltai = uint2int(almp->deltai, BIT16);
-    almp->omegad = ((words[4] >>  8) & 0x00FFFF);
-    almp->omegad = uint2int(almp->omegad, BIT16);
+    almp->Omegad = ((words[4] >>  8) & 0x00FFFF);
+    almp->d_Omegad = pow(2.0, -38) * almp->Omegad;
     almp->svh    = ( words[4] & 0x0000FF);
     almp->sqrtA  = ( words[5] & 0xFFFFFF);
     almp->d_sqrtA  = pow(2.0,-11) * almp->sqrtA;
@@ -129,13 +132,13 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->af0    = uint2int(almp->af0, BIT11);
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%u deltai:%d"
-		" omegad:%d svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
+		" Omegad:%.5g svh:%u sqrtA:%.8g Omega0:%d omega:%d M0:%d"
 		" af0:%d af1:%d\n",
 		subframe, sv, svid, data_id, 
 		almp->d_eccentricity, 
 		almp->toa, 
 		almp->deltai,
-		almp->omegad,
+		almp->d_Omegad,
 		almp->svh,
 		almp->d_sqrtA,
 		almp->Omega0,
@@ -317,7 +320,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	/* subframe 3: ephemeris for transmitting SV */
 	{
 	    uint32_t IODE, IDOT;
-	    int32_t Cic, Cis, Crc, om0, i0, om, omd;
+	    int32_t Cic, Cis, Crc, om0, i0, om, Omegad;
+	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
+	     * semi-circles/sec */
+	    double d_Omegad;
 
 	    Cic    = ((words[2] >>  8) & 0x00FFFF);
 	    Cic    = uint2int(Cic, BIT16);
@@ -334,14 +340,16 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    om     = ( words[6] & 0x0000FF);
 	    om   <<= 24;
 	    om    |= ( words[7] & 0x00FFFFFF);
-	    omd    = ( words[8] & 0x00FFFFFF);
-	    omd    = uint2int(omd, BIT24);
+	    Omegad = ( words[8] & 0x00FFFFFF);
+	    Omegad = uint2int(Omegad, BIT24);
+	    d_Omegad = pow(2.0, -43) * Omegad;
 	    IODE   = ((words[9] >> 16) & 0x0000FF);
 	    IDOT   = ((words[9] >>  2) & 0x003FFF);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%u Cic:%d om0:%d Cis:%d "
-		"i0:%d crc:%d om:%d omd:%d\n", 
-			svid, IODE, IDOT, Cic, om0, Cis, i0, Crc, om, omd );
+		"i0:%d crc:%d om:%d Omegad:%.6g\n", 
+			svid, IODE, IDOT, Cic, om0, Cis, i0, Crc, om, 
+			d_Omegad );
 	}
 	break;
     case 4:
