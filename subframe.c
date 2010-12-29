@@ -312,6 +312,16 @@ struct subframe {
 	    /* ai, Availability Indicator, 2bits, bit map */
 	    unsigned char ai;
 	} sub4_13;
+	/* subframe 4, page 25 */
+	struct {
+	    /* svf, A-S status and the configuration code of each SV
+	     * 4 bits unsigned, bitmap */
+	    unsigned char svf[33];
+	    /* svh, SV health data for SV 25 through 32
+	     * 6 bits unsigned bitmap */
+	    uint8_t svh25, svh26, svh27, svh28;
+	    uint8_t svh29, svh30, svh31, svh32;
+	} sub4_25;
 	struct {
 	    struct almanac almanac;
 	} sub5;
@@ -678,77 +688,82 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* A-S flags/SV configurations for 32 SVs, 
 		 * plus SV health for SV 25 through 32
 		 */
-		{
-		    unsigned char svf[33];
-		    /* SV health data, 6 bits unsigned bit map */
-		    uint8_t svh25, svh26, svh27, svh28;
-		    uint8_t svh29, svh30, svh31, svh32;
 
-		    svh25 = ((words[7] >>  0) & 0x00003F);
-		    svh26 = ((words[8] >> 18) & 0x00003F);
-		    svh27 = ((words[8] >> 12) & 0x00003F);
-		    svh28 = ((words[8] >>  6) & 0x00003F);
-		    svh29 = ((words[8] >>  0) & 0x00003F);
-		    svh30 = ((words[9] >> 18) & 0x00003F);
-		    svh31 = ((words[9] >> 12) & 0x00003F);
-		    svh32 = ((words[9] >>  6) & 0x00003F);
-		    sv = -1;
-		    svf[1]  = (unsigned char)((words[2] >> 12) & 0x00000F);
-		    svf[2]  = (unsigned char)((words[2] >>  8) & 0x00000F);
-		    svf[3]  = (unsigned char)((words[2] >>  4) & 0x00000F);
-		    svf[4]  = (unsigned char)((words[2] >>  0) & 0x00000F);
-		    svf[5]  = (unsigned char)((words[3] >> 20) & 0x00000F);
-		    svf[6]  = (unsigned char)((words[3] >> 16) & 0x00000F);
-		    svf[7]  = (unsigned char)((words[3] >> 12) & 0x00000F);
-		    svf[8]  = (unsigned char)((words[3] >>  8) & 0x00000F);
-		    svf[9]  = (unsigned char)((words[3] >>  4) & 0x00000F);
-		    svf[10] = (unsigned char)((words[3] >>  0) & 0x00000F);
-		    svf[11] = (unsigned char)((words[4] >> 20) & 0x00000F);
-		    svf[12] = (unsigned char)((words[4] >> 16) & 0x00000F);
-		    svf[13] = (unsigned char)((words[4] >> 12) & 0x00000F);
-		    svf[14] = (unsigned char)((words[4] >>  8) & 0x00000F);
-		    svf[15] = (unsigned char)((words[4] >>  4) & 0x00000F);
-		    svf[16] = (unsigned char)((words[4] >>  0) & 0x00000F);
-		    svf[17] = (unsigned char)((words[5] >> 20) & 0x00000F);
-		    svf[18] = (unsigned char)((words[5] >> 16) & 0x00000F);
-		    svf[19] = (unsigned char)((words[5] >> 12) & 0x00000F);
-		    svf[20] = (unsigned char)((words[5] >>  8) & 0x00000F);
-		    svf[21] = (unsigned char)((words[5] >>  4) & 0x00000F);
-		    svf[22] = (unsigned char)((words[5] >>  0) & 0x00000F);
-		    svf[23] = (unsigned char)((words[6] >> 20) & 0x00000F);
-		    svf[24] = (unsigned char)((words[6] >> 16) & 0x00000F);
-		    svf[25] = (unsigned char)((words[6] >> 12) & 0x00000F);
-		    svf[26] = (unsigned char)((words[6] >>  8) & 0x00000F);
-		    svf[27] = (unsigned char)((words[6] >>  4) & 0x00000F);
-		    svf[28] = (unsigned char)((words[6] >>  0) & 0x00000F);
-		    svf[29] = (unsigned char)((words[7] >> 20) & 0x00000F);
-		    svf[30] = (unsigned char)((words[7] >> 16) & 0x00000F);
-		    svf[31] = (unsigned char)((words[7] >> 12) & 0x00000F);
-		    svf[32] = (unsigned char)((words[7] >>  8) & 0x00000F);
+		sv = -1;
+		subp->sub4_25.svf[1]  = (unsigned char)((words[2] >> 12) & 0x0F);
+		subp->sub4_25.svf[2]  = (unsigned char)((words[2] >>  8) & 0x0F);
+		subp->sub4_25.svf[3]  = (unsigned char)((words[2] >>  4) & 0x0F);
+		subp->sub4_25.svf[4]  = (unsigned char)((words[2] >>  0) & 0x0F);
+		subp->sub4_25.svf[5]  = (unsigned char)((words[3] >> 20) & 0x0F);
+		subp->sub4_25.svf[6]  = (unsigned char)((words[3] >> 16) & 0x0F);
+		subp->sub4_25.svf[7]  = (unsigned char)((words[3] >> 12) & 0x0F);
+		subp->sub4_25.svf[8]  = (unsigned char)((words[3] >>  8) & 0x0F);
+		subp->sub4_25.svf[9]  = (unsigned char)((words[3] >>  4) & 0x0F);
+		subp->sub4_25.svf[10] = (unsigned char)((words[3] >>  0) & 0x0F);
+		subp->sub4_25.svf[11] = (unsigned char)((words[4] >> 20) & 0x0F);
+		subp->sub4_25.svf[12] = (unsigned char)((words[4] >> 16) & 0x0F);
+		subp->sub4_25.svf[13] = (unsigned char)((words[4] >> 12) & 0x0F);
+		subp->sub4_25.svf[14] = (unsigned char)((words[4] >>  8) & 0x0F);
+		subp->sub4_25.svf[15] = (unsigned char)((words[4] >>  4) & 0x0F);
+		subp->sub4_25.svf[16] = (unsigned char)((words[4] >>  0) & 0x0F);
+		subp->sub4_25.svf[17] = (unsigned char)((words[5] >> 20) & 0x0F);
+		subp->sub4_25.svf[18] = (unsigned char)((words[5] >> 16) & 0x0F);
+		subp->sub4_25.svf[19] = (unsigned char)((words[5] >> 12) & 0x0F);
+		subp->sub4_25.svf[20] = (unsigned char)((words[5] >>  8) & 0x0F);
+		subp->sub4_25.svf[21] = (unsigned char)((words[5] >>  4) & 0x0F);
+		subp->sub4_25.svf[22] = (unsigned char)((words[5] >>  0) & 0x0F);
+		subp->sub4_25.svf[23] = (unsigned char)((words[6] >> 20) & 0x0F);
+		subp->sub4_25.svf[24] = (unsigned char)((words[6] >> 16) & 0x0F);
+		subp->sub4_25.svf[25] = (unsigned char)((words[6] >> 12) & 0x0F);
+		subp->sub4_25.svf[26] = (unsigned char)((words[6] >>  8) & 0x0F);
+		subp->sub4_25.svf[27] = (unsigned char)((words[6] >>  4) & 0x0F);
+		subp->sub4_25.svf[28] = (unsigned char)((words[6] >>  0) & 0x0F);
+		subp->sub4_25.svf[29] = (unsigned char)((words[7] >> 20) & 0x0F);
+		subp->sub4_25.svf[30] = (unsigned char)((words[7] >> 16) & 0x0F);
+		subp->sub4_25.svf[31] = (unsigned char)((words[7] >> 12) & 0x0F);
+		subp->sub4_25.svf[32] = (unsigned char)((words[7] >>  8) & 0x0F);
 
-		    gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
-			"SV1:%u SV2:%u SV3:%u SV4:%u "
-			"SV5:%u SV6:%u SV7:%u SV8:%u "
-			"SV9:%u SV10:%u SV11:%u SV12:%u "
-			"SV13:%u SV14:%u SV15:%u SV16:%u "
-			"SV17:%u SV18:%u SV19:%u SV20:%u "
-			"SV21:%u SV22:%u SV23:%u SV24:%u "
-			"SV25:%u SV26:%u SV27:%u SV28:%u "
-			"SV29:%u SV30:%u SV31:%u SV32:%u "
-			"SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
-			"SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
-				data_id, 
-				svf[1], svf[2], svf[3], svf[4],
-				svf[5], svf[5], svf[6], svf[4],
-				svf[9], svf[10], svf[11], svf[12],
-				svf[13], svf[14], svf[15], svf[16],
-				svf[17], svf[18], svf[19], svf[20],
-				svf[21], svf[22], svf[23], svf[24],
-				svf[25], svf[26], svf[27], svf[28],
-				svf[29], svf[30], svf[31], svf[32],
-				svh25, svh26, svh27, svh28,
-				svh29, svh30, svh31, svh32);
-		}
+		subp->sub4_25.svh25 = ((words[7] >>  0) & 0x00003F);
+		subp->sub4_25.svh26 = ((words[8] >> 18) & 0x00003F);
+		subp->sub4_25.svh27 = ((words[8] >> 12) & 0x00003F);
+		subp->sub4_25.svh28 = ((words[8] >>  6) & 0x00003F);
+		subp->sub4_25.svh29 = ((words[8] >>  0) & 0x00003F);
+		subp->sub4_25.svh30 = ((words[9] >> 18) & 0x00003F);
+		subp->sub4_25.svh31 = ((words[9] >> 12) & 0x00003F);
+		subp->sub4_25.svh32 = ((words[9] >>  6) & 0x00003F);
+
+		gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
+		    "SV1:%u SV2:%u SV3:%u SV4:%u "
+		    "SV5:%u SV6:%u SV7:%u SV8:%u "
+		    "SV9:%u SV10:%u SV11:%u SV12:%u "
+		    "SV13:%u SV14:%u SV15:%u SV16:%u "
+		    "SV17:%u SV18:%u SV19:%u SV20:%u "
+		    "SV21:%u SV22:%u SV23:%u SV24:%u "
+		    "SV25:%u SV26:%u SV27:%u SV28:%u "
+		    "SV29:%u SV30:%u SV31:%u SV32:%u "
+		    "SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
+		    "SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
+			    data_id, 
+			    subp->sub4_25.svf[1],  subp->sub4_25.svf[2], 
+			    subp->sub4_25.svf[3],  subp->sub4_25.svf[4],
+			    subp->sub4_25.svf[5],  subp->sub4_25.svf[6], 
+			    subp->sub4_25.svf[7],  subp->sub4_25.svf[8],
+			    subp->sub4_25.svf[9],  subp->sub4_25.svf[10], 
+			    subp->sub4_25.svf[11], subp->sub4_25.svf[12],
+			    subp->sub4_25.svf[13], subp->sub4_25.svf[14], 
+			    subp->sub4_25.svf[15], subp->sub4_25.svf[16],
+			    subp->sub4_25.svf[17], subp->sub4_25.svf[18], 
+			    subp->sub4_25.svf[19], subp->sub4_25.svf[20],
+			    subp->sub4_25.svf[21], subp->sub4_25.svf[22], 
+			    subp->sub4_25.svf[23], subp->sub4_25.svf[24],
+			    subp->sub4_25.svf[25], subp->sub4_25.svf[26], 
+			    subp->sub4_25.svf[27], subp->sub4_25.svf[28],
+			    subp->sub4_25.svf[29], subp->sub4_25.svf[30], 
+			    subp->sub4_25.svf[31], subp->sub4_25.svf[32],
+			    subp->sub4_25.svh25,   subp->sub4_25.svh26, 
+			    subp->sub4_25.svh27,   subp->sub4_25.svh28,
+			    subp->sub4_25.svh29,   subp->sub4_25.svh30, 
+			    subp->sub4_25.svh31,   subp->sub4_25.svh32);
 		break;
 
 	    case 33:
