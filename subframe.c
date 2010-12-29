@@ -181,6 +181,8 @@ struct subframe {
         /* subframe 1, part of ephemeris, see IS-GPS-200E, Table 20-II
 	 * and Table 20-I */
 	struct {
+	    /* WN, Week Number, 10 bits unsigned, scale 1, weeks */
+	    uint16_t WN;
 	    /* IODC, Issue of Data, Clock, 10 bits, unsigned, 
 	     * issued in 8 data ranges at the same time */
 	    uint16_t IODC;
@@ -301,6 +303,15 @@ struct subframe {
 	struct {
 	    struct almanac almanac;
 	} sub4;
+	/* subframe 4, page 13 */
+	struct {
+	    /* mapping ord ERD# to SV # is non trivial
+	     * leave it alone.  See IS-GPS-200E Section 20.3.3.5.1.9 */
+	    /* Estimated Range Deviation, 6 bits signed, meters */
+	    char ERD[33];
+	    /* ai, Availability Indicator, 2bits, bit map */
+	    unsigned char ai;
+	} sub4_13;
 	struct {
 	    struct almanac almanac;
 	} sub5;
@@ -328,6 +339,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     /* FIXME!! I really doubt this is Big Endian compatible */
     unsigned int pageid, data_id, preamble;
     uint32_t tow17;
+    int i;   /* handy loop counter */
     bool alert, antispoof;
     struct subframe *subp = &subframe;
     gpsd_report(LOG_IO,
@@ -354,7 +366,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     antispoof = (bool)((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u\n", 
-		subp->subtype, svid, tow17, (unsigned)alert, (unsigned)antispoof);
+		subp->subtype, svid, tow17, (unsigned)alert, 
+		(unsigned)antispoof);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
@@ -374,6 +387,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 */
 	session->context->gps_week =
 	    (unsigned short)((words[2] >> 14) & 0x03ff);
+	subp->sub1.WN   = session->context->gps_week;
 	subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
 	subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
 	subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
@@ -395,7 +409,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 		    " L2:%u ura:%u hlth:%u L2P:%u Tgd:%g toc:%lu af2:%.4g"
 		    " af1:%.6e af0:%.7e\n", svid,
-		    session->context->gps_week,
+		    subp->sub1.WN,
 		    subp->sub1.IODC,
 		    subp->sub1.l2,
 		    subp->sub1.ura,
@@ -572,90 +586,89 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 13:
 	    case 52:
 		/* NMCT */
-		{
-		    /* mapping ord ERD# to SV # is non trivial
-		     * leave it alone */
-		    char ERD[33];
-		    unsigned char ai;
-		    int i;
+		sv = -1;
+		subp->sub4_13.ai      = ((words[2] >> 22) & 0x000003);
+		subp->sub4_13.ERD[1]  = (char)((words[2] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[2]  = (char)((words[2] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[3]  = (char)((words[2] >>  0) & 0x000003);
+		subp->sub4_13.ERD[3] <<= 2;
+		subp->sub4_13.ERD[3] |= (char)((words[3] >> 20) & 0x00000F);
 
-		    sv = -1;
-		    ai      = ((words[2] >> 22) & 0x000003);
-		    ERD[1]  = (char)((words[2] >>  8) & 0x00003F);
-		    ERD[2]  = (char)((words[2] >>  2) & 0x00003F);
-		    ERD[3]  = (char)((words[2] >>  0) & 0x000003);
-		    ERD[3] <<= 2;
-		    ERD[3] |= (char)((words[3] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[4]  = (char)((words[3] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[5]  = (char)((words[3] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[6]  = (char)((words[3] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[7]  = (char)((words[3] >>  0) & 0x000003);
 
-		    ERD[4]  = (char)((words[3] >> 14) & 0x00003F);
-		    ERD[5]  = (char)((words[3] >>  8) & 0x00003F);
-		    ERD[6]  = (char)((words[3] >>  2) & 0x00003F);
-		    ERD[7]  = (char)((words[3] >>  0) & 0x000003);
+		subp->sub4_13.ERD[7] <<= 2;
+		subp->sub4_13.ERD[7] |= (char)((words[4] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[8]  = (char)((words[4] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[9]  = (char)((words[4] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[10] = (char)((words[4] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[11] = (char)((words[4] >>  0) & 0x00000F);
 
-		    ERD[7] <<= 2;
-		    ERD[7] |= (char)((words[4] >> 20) & 0x00000F);
-		    ERD[8]  = (char)((words[4] >> 14) & 0x00003F);
-		    ERD[9]  = (char)((words[4] >>  8) & 0x00003F);
-		    ERD[10] = (char)((words[4] >>  2) & 0x00003F);
-		    ERD[11] = (char)((words[4] >>  0) & 0x00000F);
+		subp->sub4_13.ERD[11] <<= 2;
+		subp->sub4_13.ERD[11] |= (char)((words[5] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[12]  = (char)((words[5] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[13]  = (char)((words[5] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[14]  = (char)((words[5] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[15]  = (char)((words[5] >>  0) & 0x000003);
 
-		    ERD[11] <<= 2;
-		    ERD[11] |= (char)((words[5] >> 20) & 0x00000F);
-		    ERD[12]  = (char)((words[5] >> 14) & 0x00003F);
-		    ERD[13]  = (char)((words[5] >>  8) & 0x00003F);
-		    ERD[14]  = (char)((words[5] >>  2) & 0x00003F);
-		    ERD[15]  = (char)((words[5] >>  0) & 0x000003);
+		subp->sub4_13.ERD[15] <<= 2;
+		subp->sub4_13.ERD[15] |= (char)((words[6] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[16]  = (char)((words[6] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[17]  = (char)((words[6] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[18]  = (char)((words[6] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[19]  = (char)((words[6] >>  0) & 0x000003);
 
-		    ERD[15] <<= 2;
-		    ERD[15] |= (char)((words[6] >> 20) & 0x00000F);
-		    ERD[16]  = (char)((words[6] >> 14) & 0x00003F);
-		    ERD[17]  = (char)((words[6] >>  8) & 0x00003F);
-		    ERD[18]  = (char)((words[6] >>  2) & 0x00003F);
-		    ERD[19]  = (char)((words[6] >>  0) & 0x000003);
+		subp->sub4_13.ERD[19] <<= 2;
+		subp->sub4_13.ERD[19] |= (char)((words[7] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[20]  = (char)((words[7] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[21]  = (char)((words[7] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[22]  = (char)((words[7] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[23]  = (char)((words[7] >>  0) & 0x000003);
 
-		    ERD[19] <<= 2;
-		    ERD[19] |= (char)((words[7] >> 20) & 0x00000F);
-		    ERD[20]  = (char)((words[7] >> 14) & 0x00003F);
-		    ERD[21]  = (char)((words[7] >>  8) & 0x00003F);
-		    ERD[22]  = (char)((words[7] >>  2) & 0x00003F);
-		    ERD[23]  = (char)((words[7] >>  0) & 0x000003);
+		subp->sub4_13.ERD[23] <<= 2;
+		subp->sub4_13.ERD[23] |= (char)((words[8] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[24]  = (char)((words[8] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[25]  = (char)((words[8] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[26]  = (char)((words[8] >>  2) & 0x00003F);
+		subp->sub4_13.ERD[27]  = (char)((words[8] >>  0) & 0x000003);
 
-		    ERD[23] <<= 2;
-		    ERD[23] |= (char)((words[8] >> 20) & 0x00000F);
-		    ERD[24]  = (char)((words[8] >> 14) & 0x00003F);
-		    ERD[25]  = (char)((words[8] >>  8) & 0x00003F);
-		    ERD[26]  = (char)((words[8] >>  2) & 0x00003F);
-		    ERD[27]  = (char)((words[8] >>  0) & 0x000003);
+		subp->sub4_13.ERD[27] <<= 2;
+		subp->sub4_13.ERD[27] |= (char)((words[9] >> 20) & 0x00000F);
+		subp->sub4_13.ERD[28]  = (char)((words[9] >> 14) & 0x00003F);
+		subp->sub4_13.ERD[29]  = (char)((words[9] >>  8) & 0x00003F);
+		subp->sub4_13.ERD[30]  = (char)((words[9] >>  2) & 0x00003F);
 
-		    ERD[27] <<= 2;
-		    ERD[27] |= (char)((words[9] >> 20) & 0x00000F);
-		    ERD[28]  = (char)((words[9] >> 14) & 0x00003F);
-		    ERD[29]  = (char)((words[9] >>  8) & 0x00003F);
-		    ERD[30]  = (char)((words[9] >>  2) & 0x00003F);
-
-		    for ( i = 1; i < 31; i++ ) {
-			ERD[i]  = uint2int(ERD[i], 6);
-		    }
-
-		    gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
-			"ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
-			"ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
-			"ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
-			"ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
-			"ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
-			"ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
-			"ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
-			"ERD29:%d ERD30:%d\n",
-				data_id, ai,
-				ERD[1], ERD[2], ERD[3], ERD[4],
-				ERD[5], ERD[5], ERD[6], ERD[4],
-				ERD[9], ERD[10], ERD[11], ERD[12],
-				ERD[13], ERD[14], ERD[15], ERD[16],
-				ERD[17], ERD[18], ERD[19], ERD[20],
-				ERD[21], ERD[22], ERD[23], ERD[24],
-				ERD[25], ERD[26], ERD[27], ERD[28],
-				ERD[29], ERD[30]);
+		for ( i = 1; i < 31; i++ ) {
+		    subp->sub4_13.ERD[i]  = uint2int(subp->sub4_13.ERD[i], 6);
 		}
+
+		gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
+		    "ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
+		    "ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
+		    "ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
+		    "ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
+		    "ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
+		    "ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
+		    "ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
+		    "ERD29:%d ERD30:%d\n",
+			    data_id, subp->sub4_13.ai,
+			    subp->sub4_13.ERD[1], subp->sub4_13.ERD[2], 
+			    subp->sub4_13.ERD[3], subp->sub4_13.ERD[4],
+			    subp->sub4_13.ERD[5], subp->sub4_13.ERD[6], 
+			    subp->sub4_13.ERD[7], subp->sub4_13.ERD[8],
+			    subp->sub4_13.ERD[9], subp->sub4_13.ERD[10], 
+			    subp->sub4_13.ERD[11], subp->sub4_13.ERD[12],
+			    subp->sub4_13.ERD[13], subp->sub4_13.ERD[14], 
+			    subp->sub4_13.ERD[15], subp->sub4_13.ERD[16],
+			    subp->sub4_13.ERD[17], subp->sub4_13.ERD[18], 
+			    subp->sub4_13.ERD[19], subp->sub4_13.ERD[20],
+			    subp->sub4_13.ERD[21], subp->sub4_13.ERD[22], 
+			    subp->sub4_13.ERD[23], subp->sub4_13.ERD[24],
+			    subp->sub4_13.ERD[25], subp->sub4_13.ERD[26], 
+			    subp->sub4_13.ERD[27], subp->sub4_13.ERD[28],
+			    subp->sub4_13.ERD[29], subp->sub4_13.ERD[30]);
 		break;
 
 	    case 25:
