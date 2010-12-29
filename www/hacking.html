@@ -568,7 +568,7 @@ typedefs.</p>
 <h2 id="udev">The moving target that is udev.</h2>
 
 <p>The Linux udev system has been prone to change out from under us,
-breaking our hotplug support for USB receivers.  Accordongly, here's a
+breaking our hotplug support for USB receivers.  Accordingly, here's a
 short guide to verifying that the different pieces are working
 correctly, with indications of where to troubleshoot on failure.<p>
 
@@ -584,9 +584,9 @@ like a <a href="http://en.wikipedia.org/wiki/Mini-DIN_connector#6-pin">6-pin
 mini-DIN connector</a>, with a component housing between that and the
 USB plug, be aware that the serial converter may live in that housing
 and you have to unplug the <b>entire cable</b> from your computer, not
-just separate the halves of the mini-DIN connector. If there os no
+just separate the halves of the mini-DIN connector. If there is no
 such joint, it may be that your receiver is defective or dead. The
-leatt likely failure is for the USB hardware on the PC side to be
+least likely failure is for the USB hardware on the PC side to be
 buggy.</p>
 
 <p>Next thing to try is watching the hotplug events in your system logs.
@@ -618,7 +618,7 @@ udev rules may not be installed correctly. Or the handler they call
 may be unable to run for some reason; it has two layers, a shellscript
 wrapper around a little Python program that does the real work.  You
 may have to figure out where the udev log messages go on your system
-an use udevadm(8) to crank up the log level until you can see what's
+and use udevadm(8) to crank up the log level until you can see what's
 going on.</p>
 
 <p>If your GPS uses an unusual serial-to-USB converter, the GPSD rules
