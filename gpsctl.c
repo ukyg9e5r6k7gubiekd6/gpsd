@@ -60,7 +60,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	if (select(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))
 		continue;
-	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
+	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
 	    exit(2);
 	}
 	/*@ +usedef @*/
@@ -100,7 +100,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
     for (;;) {
 	FD_CLR(gpsdata->gps_fd, &rfds);
 
-	gpsd_report(LOG_PROG, "gps_query(), waiting...\n");
+	gpsd_report(LOG_PROG, "waiting...\n");
 
 	/*@ -usedef @*/
 	tv.tv_sec = 2;
@@ -109,16 +109,16 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	if (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
 		continue;
-	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
+	    gpsd_report(LOG_ERROR, "gosctl: select %s\n", strerror(errno));
 	    exit(2);
 	}
 	/*@ +usedef @*/
 
-	gpsd_report(LOG_PROG, "gps_query(), reading...\n");
+	gpsd_report(LOG_PROG, "reading...\n");
 
 	(void)gps_read(gpsdata);
 	if (ERROR_IS & gpsdata->set) {
-	    gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
+	    gpsd_report(LOG_ERROR, "error '%s'\n", gpsdata->error);
 	    return false;
 	}
 
@@ -126,7 +126,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	    return true;
 	else if (time(NULL) - starttime > timeout) {
 	    gpsd_report(LOG_ERROR, 
-			"gps_query() timed out after %d seconds'\n",
+			"timed out after %d seconds'\n",
 			timeout);
 	    return false;
 	}
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 #endif /* CLIENTDEBUG_ENABLE */
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "gpsctl: version %s (revision %s)\n",
+	    (void)fprintf(stderr, "version %s (revision %s)\n",
 			  VERSION, REVISION);
 	    break;
 	case 'h':
@@ -352,8 +352,15 @@ int main(int argc, char **argv)
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
-			devlistp->path, devlistp->driver, devlistp->baudrate);
+	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?WATCH={\"enable\":true,\"json\":true};\n"))
+		gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
+			    gpsdata.dev.path,
+			    gpsdata.dev.driver,
+			    gpsdata.dev.baudrate);
+	    else
+		gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
+			    devlistp->path);
+	    gps_close(&gpsdata);
 	    exit(0);
 	}
 
