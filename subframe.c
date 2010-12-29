@@ -316,6 +316,72 @@ struct subframe {
 	struct {
 	    char str[24];
 	} sub4_17;
+	/* subframe 4, page 18 */
+	struct {
+	    /* ionospheric and UTC data */
+	    /* A0, Bias coefficient of GPS time scale relative to UTC time 
+	     * scale, 32 bits signed, scale 2**-30, seconds */
+	    int32_t A0;
+	    double d_A0;
+	    /* A1, Drift coefficient of GPS time scale relative to UTC time 
+	     * scale, 24 bits signed, scale 2**-50, seconds/second */
+	    int32_t A1;
+	    double d_A1;
+
+	    /* alphaX, the four coefficients of a cubic equation representing 
+	     * the amplitude of the vertical delay */
+
+	    /* alpha0, 8 bits signed, scale w**-30, seconds */
+	    int8_t alpha0;
+	    double d_alpha0;
+	    /* alpha1, 8 bits signed, scale w**-27, seconds/semi-circle */
+	    int8_t alpha1;
+	    double d_alpha1;
+	    /* alpha2, 8 bits signed, scale w**-24, seconds/semi-circle**2 */
+	    int8_t alpha2;
+	    double d_alpha2;
+	    /* alpha3, 8 bits signed, scale w**-24, seconds/semi-circle**3 */
+	    int8_t alpha3;
+	    double d_alpha3;
+
+	    /* betaX, the four coefficients of a cubic equation representing 
+	     * the period of the model */
+
+	    /* beta0, 8 bits signed, scale w**11, seconds */
+	    int8_t beta0;
+	    double d_beta0;
+	    /* beta1, 8 bits signed, scale w**14, seconds/semi-circle */
+	    int8_t beta1;
+	    double d_beta1;
+	    /* beta2, 8 bits signed, scale w**16, seconds/semi-circle**2 */
+	    int8_t beta2;
+	    double d_beta2;
+	    /* beta3, 8 bits signed, scale w**16, seconds/semi-circle**3 */
+	    int8_t beta3;
+	    double d_beta3;
+	    
+	    /* leap (delta t ls), current leap second, 8 bits signed, 
+	     * scale 1, seconds */
+	    int8_t leap;
+	    /* lsf (delta t lsf), future leap second, 8 bits signed, 
+	     * scale 1, seconds */
+	    int8_t lsf;
+
+	    /* tot, reference time for UTC data,
+	     * 8 bits unsigned, scale 2**12, seconds */
+	    uint8_t tot;
+	    double d_tot;
+
+	    /* WNt, UTC reference week number, 8 bits unsigned, scale 1, 
+	     * weeks */
+	    uint8_t WNt;
+	    /* WNlsf, Leap second reference Week Number,
+	     * 8 bits unsigned, scale 1, weeks */
+	    uint8_t WNlsf;
+	    /* DN, Leap second reference Day Number , 8 bits unsigned,
+	     * scale 1, days */
+	    uint8_t DN;
+	} sub4_18;
 	/* subframe 4, page 25 */
 	struct {
 	    /* svf, A-S status and the configuration code of each SV
@@ -849,73 +915,84 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		/* for some inscrutable reason page 18 is sent
 		 * as page 56, IS-GPS-200E Table 20-V */
 		/* ionospheric and UTC data */
-		{
-		    int32_t A0, A1;
-		    int8_t alpha0, alpha1, alpha2, alpha3;
-		    int8_t beta0, beta1, beta2, beta3;
-		    int8_t leap, lsf;
-		    uint8_t tot, WNt, WNlsf, DN;
 
-		    sv = -1;
-		    /* current leap seconds */
-		    alpha0 = ((words[2] >> 16) & 0x0000FF);
-		    alpha1 = ((words[2] >>  8) & 0x0000FF);
-		    alpha2 = ((words[3] >> 16) & 0x0000FF);
-		    alpha3 = ((words[3] >>  8) & 0x0000FF);
-		    beta0  = ((words[3] >>  0) & 0x0000FF);
-		    beta1  = ((words[4] >> 16) & 0x0000FF);
-		    beta2  = ((words[4] >>  8) & 0x0000FF);
-		    beta3  = ((words[4] >>  0) & 0x0000FF);
-		    A1     = ((words[5] >>  0) & 0xFFFFFF);
-		    A1     = uint2int(A1, 24);
-		    A0     = ((words[6] >>  0) & 0xFFFFFF);
-		    A0   <<= 8;
-		    A0    |= ((words[7] >> 16) & 0x00FFFF);
-		    /* careful WN is 10 bits, but WNt is 8 bits! */
-		    /* WNt (Week Number of LSF) */
-		    tot    = ((words[7] >> 8) & 0x0000FF);
-		    WNt    = ((words[7] >> 0) & 0x0000FF);
-		    leap  = ((words[8] >> 16) & 0x0000FF);
-		    WNlsf  = ((words[8] >>  8) & 0x0000FF);
+		sv = -1;
+		/* current leap seconds */
+		subp->sub4_18.alpha0 = ((words[2] >> 16) & 0x0000FF);
+		subp->sub4_18.d_alpha0 = pow(2.0, -30) * subp->sub4_18.alpha0;
+		subp->sub4_18.alpha1 = ((words[2] >>  8) & 0x0000FF);
+		subp->sub4_18.d_alpha1 = pow(2.0, -27) * subp->sub4_18.alpha2;
+		subp->sub4_18.alpha2 = ((words[3] >> 16) & 0x0000FF);
+		subp->sub4_18.d_alpha2 = pow(2.0, -24) * subp->sub4_18.alpha2;
+		subp->sub4_18.alpha3 = ((words[3] >>  8) & 0x0000FF);
+		subp->sub4_18.d_alpha3 = pow(2.0, -24) * subp->sub4_18.alpha3;
 
-		    /* DN (Day Number of LSF) */
-		    DN = (words[8] & 0x0000FF);	   
-		    /* leap second future */
-		    lsf = ((words[9] >> 16) & 0x0000FF);
-		    /*
-		     * On SiRFs, the 50BPS data is passed on even when the
-		     * parity fails.  This happens frequently.  So the driver 
-		     * must be extra careful that bad data does not reach here.
-		     */
-		    if (LEAP_SECONDS > leap) {
-			/* something wrong */
-			gpsd_report(LOG_ERROR, 
-			    "50B: SF:4-18 Invalid leap_seconds: %d\n",
-				    leap);
-			leap = LEAP_SECONDS;
-			session->context->valid &= ~LEAP_SECOND_VALID;
-		    } else {
-			gpsd_report(LOG_INF,
-			    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
-			    "DN:%d\n",
-				    leap, lsf, WNlsf, DN);
-			gpsd_report(LOG_PROG,
-			    "50B: SF:4-18 a0:%d a1:%d a2:%d a3:%d "
-			    "b0:%d b1:%d b2:%d b3:%d "
-			    "A1:%d A0:%d tot:%u WNt:%u "
-			    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
-				alpha0, alpha1, alpha2, alpha3,
-				beta0, beta1, beta2, beta3,
-				A1, A0, tot, WNt,
-				leap, WNlsf, DN, lsf);
-			session->context->valid |= LEAP_SECOND_VALID;
-			if (leap != lsf) {
-			    gpsd_report(LOG_PROG, 
-				"50B: SF:4-18 leap-second change coming\n");
-			}
+		subp->sub4_18.beta0  = ((words[3] >>  0) & 0x0000FF);
+		subp->sub4_18.d_beta0 = pow(2.0, 11) * subp->sub4_18.beta0;
+		subp->sub4_18.beta1  = ((words[4] >> 16) & 0x0000FF);
+		subp->sub4_18.d_beta1 = pow(2.0, 14) * subp->sub4_18.beta2;
+		subp->sub4_18.beta2  = ((words[4] >>  8) & 0x0000FF);
+		subp->sub4_18.d_beta2 = pow(2.0, 16) * subp->sub4_18.beta2;
+		subp->sub4_18.beta3  = ((words[4] >>  0) & 0x0000FF);
+		subp->sub4_18.d_beta3 = pow(2.0, 16) * subp->sub4_18.beta3;
+
+		subp->sub4_18.A1     = ((words[5] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A1     = uint2int(subp->sub4_18.A1, 24);
+		subp->sub4_18.d_A1   = pow(2.0,-50) * subp->sub4_18.A1;
+		subp->sub4_18.A0     = ((words[6] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A0   <<= 8;
+		subp->sub4_18.A0    |= ((words[7] >> 16) & 0x00FFFF);
+		subp->sub4_18.d_A0   = pow(2.0,-30) * subp->sub4_18.A0;
+
+		/* careful WN is 10 bits, but WNt is 8 bits! */
+		/* WNt (Week Number of LSF) */
+		subp->sub4_18.tot    = ((words[7] >> 8) & 0x0000FF);
+		subp->sub4_18.d_tot  = pow(2.0,12) * subp->sub4_18.d_tot;
+		subp->sub4_18.WNt    = ((words[7] >> 0) & 0x0000FF);
+		subp->sub4_18.leap  = ((words[8] >> 16) & 0x0000FF);
+		subp->sub4_18.WNlsf  = ((words[8] >>  8) & 0x0000FF);
+
+		/* DN (Day Number of LSF) */
+		subp->sub4_18.DN = (words[8] & 0x0000FF);	   
+		/* leap second future */
+		subp->sub4_18.lsf = ((words[9] >> 16) & 0x0000FF);
+		/*
+		 * On SiRFs, the 50BPS data is passed on even when the
+		 * parity fails.  This happens frequently.  So the driver 
+		 * must be extra careful that bad data does not reach here.
+		 */
+		if (LEAP_SECONDS > subp->sub4_18.leap) {
+		    /* something wrong */
+		    gpsd_report(LOG_ERROR, 
+			"50B: SF:4-18 Invalid leap_seconds: %d\n",
+				subp->sub4_18.leap);
+		    subp->sub4_18.leap = LEAP_SECONDS;
+		    session->context->valid &= ~LEAP_SECOND_VALID;
+		} else {
+		    gpsd_report(LOG_INF,
+			"50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
+			"DN:%d\n",
+				subp->sub4_18.leap, subp->sub4_18.lsf, subp->sub4_18.WNlsf, subp->sub4_18.DN);
+		    gpsd_report(LOG_PROG,
+			"50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
+			"b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
+			"A1:%.11e A0:%.11e tot:%.5g WNt:%u "
+			"ls: %d WNlsf:%u DN:%u, lsf:%d\n",
+			    subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1, 
+			    subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
+			    subp->sub4_18.d_beta0, subp->sub4_18.d_beta1, 
+			    subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
+			    subp->sub4_18.d_A1, subp->sub4_18.d_A0, 
+			    subp->sub4_18.d_tot, subp->sub4_18.WNt,
+			    subp->sub4_18.leap, subp->sub4_18.WNlsf, 
+			    subp->sub4_18.DN, subp->sub4_18.lsf);
+		    session->context->valid |= LEAP_SECOND_VALID;
+		    if (subp->sub4_18.leap != subp->sub4_18.lsf) {
+			gpsd_report(LOG_PROG, 
+			    "50B: SF:4-18 leap-second change coming\n");
 		    }
-		    session->context->leap_seconds = (int)leap;
 		}
+		session->context->leap_seconds = (int)subp->sub4_18.leap;
 		break;
 	    default:
 		;			/* no op */
