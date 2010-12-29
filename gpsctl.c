@@ -6,6 +6,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -20,6 +21,7 @@
 #include "revision.h"
 
 static int debuglevel;
+static unsigned int timeout = 4;
 
 /*
  * Set this as high or higher than the maximum number of subtype 
@@ -70,12 +72,17 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
-static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
-/* query a gpsd instance for new data */
+static bool gps_query(struct gps_data_t *gpsdata, 
+		       gps_mask_t expect,
+		       const int timeout,
+		       const char *fmt, ... )
+/* ship a command and wait on an expected response type */
 {
+    static fd_set rfds;
+    struct timeval tv;
     char buf[BUFSIZ];
     va_list ap;
-    int ret;
+    time_t starttime;
 
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
@@ -87,12 +94,43 @@ static int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 	return -1;
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
-    ret = gps_read(gpsdata);
-    if (ERROR_IS & gpsdata->set) {
-	gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
-    }
-    return ret;
 
+    FD_ZERO(&rfds);
+    starttime = time(NULL);
+    for (;;) {
+	FD_CLR(gpsdata->gps_fd, &rfds);
+
+	gpsd_report(LOG_PROG, "gps_query(), waiting...\n");
+
+	/*@ -usedef @*/
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+	errno = 0;
+	if (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
+	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
+		continue;
+	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
+	    exit(2);
+	}
+	/*@ +usedef @*/
+
+	gpsd_report(LOG_PROG, "gps_query(), reading...\n");
+
+	(void)gps_read(gpsdata);
+	if (ERROR_IS & gpsdata->set) {
+	    gpsd_report(LOG_ERROR, "gps_query() error '%s'\n", gpsdata->error);
+	    return false;
+	}
+
+	if ((expect & gpsdata->set) != 0)
+	    return true;
+	else if (time(NULL) - starttime > timeout) {
+	    gpsd_report(LOG_ERROR, 
+			"gps_query() timed out after %d seconds'\n",
+			timeout);
+	    return false;
+	}
+    }
 }
 
 static void onsig(int sig)
@@ -116,7 +154,6 @@ int main(int argc, char **argv)
     struct gps_data_t gpsdata;
     const struct gps_type_t *forcetype = NULL;
     const struct gps_type_t **dp;
-    unsigned int timeout = 4;
 #ifdef ALLOW_CONTROLSEND
     char cooked[BUFSIZ];
     ssize_t cooklen = 0;
@@ -274,13 +311,12 @@ int main(int argc, char **argv)
 	/* OK, there's a daemon instance running.  Do things the easy way */
 	struct devconfig_t *devlistp;
 	(void)gps_read(&gpsdata);
-	if ((gpsdata.set & DEVICELIST_SET) != 0) {
+	if ((gpsdata.set & VERSION_SET) != 0) {
 	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
 	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-	(void)gps_query(&gpsdata, "?DEVICES;\n");
-	if ((gpsdata.set & DEVICELIST_SET) == 0) {
+	if (!gps_query(&gpsdata, DEVICELIST_SET, timeout, "?DEVICES;\n")) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
 	    (void)gps_close(&gpsdata);
 	    exit(1);
@@ -331,16 +367,14 @@ int main(int argc, char **argv)
 
 	/*@-boolops@*/
 	if (to_nmea) {
-	    (void)gps_query(&gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device); 
-	    if ((gpsdata.set & ERROR_SET) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
+	    if (!gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	else if (to_binary) {
-	    (void)gps_query(&gpsdata, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device);
-	    if ((gpsdata.set & ERROR_SET) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
+	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
@@ -352,8 +386,9 @@ int main(int argc, char **argv)
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
 		(void)gps_query(&gpsdata,
-				"?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
-				device, speed);
+				 DEVICE_SET, timeout,
+				 "?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
+				 device, speed);
 	    else {
 		char *modespec = strchr(speed, ':');
 		/*@ +charint @*/
@@ -376,9 +411,10 @@ int main(int argc, char **argv)
 		    }
 		}
 		if (status == 0)
-		    (void)gps_query(&gpsdata, 
-				    "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c\",\"stopbits\":%c}\r\n", 
-				    device, speed, parity, stopbits);
+		    (void)gps_query(&gpsdata,
+				     DEVICE_SET, timeout,
+				     "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c\",\"stopbits\":%c}\r\n", 
+				     device, speed, parity, stopbits);
 	    }
 	    if (atoi(speed) != (int)gpsdata.dev.baudrate) {
 		gpsd_report(LOG_ERROR, "%s driver won't support %s%c%c\n", 
@@ -392,6 +428,7 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(&gpsdata, 
+			     DEVICE_SET, timeout,
 			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n", 
 			    device, rate);
 	}
