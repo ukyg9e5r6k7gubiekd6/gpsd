@@ -14,7 +14,7 @@ GPSD_OPTIONS = os.getenv('GPSD_OPTIONS') or ""
 
 WHEREAMI = __file__
 
-def gpsd_control_connect():
+def gpsd_control_connect(complain=True):
     "Acquire a connection to the GPSD control socket."
     if not os.path.exists(CONTROL_SOCKET):
         syslog.syslog("socket %s doesn't exist" % CONTROL_SOCKET)
@@ -23,7 +23,8 @@ def gpsd_control_connect():
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
         sock.connect(CONTROL_SOCKET)
     except socket.error, msg:
-        syslog.syslog("socket %s creation failure: %s" % (CONTROL_SOCKET, msg))
+        if complain:
+            syslog.syslog("socket %s creation failure: %s" % (CONTROL_SOCKET, msg))
         if sock:
             sock.close()
         sock = None
@@ -34,14 +35,14 @@ def gpsd_control_connect():
 def gpsd_control(action, argument):
     "Pass a command to gpsd; start the daemon if not already running."
     syslog.syslog("gpsd_control(action=%s, arg=%s)" % (action, argument))
-    connect = gpsd_control_connect()
+    connect = gpsd_control_connect(complain=False)
     if connect:
         syslog.syslog("reached a running gpsd")
     elif action == 'add':
         gpsdcmd = "gpsd %s -F %s" % (GPSD_OPTIONS, CONTROL_SOCKET)
         syslog.syslog("launching %s" % gpsdcmd)
         os.system(gpsdcmd)
-        connect = gpsd_control_connect()
+        connect = gpsd_control_connect(complain=True)
     if not connect:
         syslog.syslog("can't reach gpsd")
         return None

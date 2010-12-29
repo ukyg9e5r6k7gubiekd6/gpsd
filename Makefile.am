@@ -907,16 +907,16 @@ endif
 # is plugged in.
 
 udev-install:
-	cp $(srcdir)/gpsd.rules /lib/udev/rules.d/025_gpsd.rules
+	cp $(srcdir)/gpsd.rules /lib/udev/rules.d/25-gpsd.rules
 	cp $(srcdir)/gpsd.hotplug $(srcdir)/gpsd.hotplug.wrapper /lib/udev/
 	chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper
 
 udev-uninstall:
 	rm -f /lib/udev/{gpsd.hotplug,gpsd.hotplug.wrapper}
-	rm -f /lib/udev/rules.d/025_gpsd.rules
+	rm -f /lib/udev/rules.d/25-gpsd.rules
 
 udev-test:
-	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 5
+	$(srcdir)/gpsd -N -n -F /var/run/gpsd.sock -D 5
 
 # Release machinery begins here
 #

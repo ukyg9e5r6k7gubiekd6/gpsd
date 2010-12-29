@@ -10,10 +10,10 @@
 # that it should look at the device that just went active, because it
 # might be a GPS.
 #
-# The following setup works on Debian - something similar will apply on 
-# other distributions:
+# The following setup works on Debian and Ubuntu - something similar
+# will apply on other distributions:
 # 
-#   /lib/udev/rules.d/025_gpsd.rules
+#   /lib/udev/rules.d/25-gpsd.rules
 #   /lib/udev/gpsd.hotplug.wrapper
 #   /lib/udev/gpsd.hotplug
 # 
