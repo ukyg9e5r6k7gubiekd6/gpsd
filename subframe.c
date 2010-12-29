@@ -16,7 +16,8 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 				unsigned int tSVID, uint32_t words[])
 {
     unsigned int i;
-    uint32_t preamble, parity;
+    uint8_t preamble;
+    uint32_t parity;
 
     /*
      * This function assumes an array of 10 ints, each of which carries
@@ -41,7 +42,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (words[0] >> 22) & 0xff;
+    preamble = (uint8_t)((words[0] >> 22) & 0xFF);
     if (preamble == 0x8b) {	/* preamble is inverted */
 	words[0] ^= 0x3fffffc0;	/* invert */
     } else if (preamble != 0x74) {
@@ -446,7 +447,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
     /* FIXME!! I really doubt this is Big Endian compatible */
-    unsigned int preamble;
+    uint8_t preamble;
     int i;   /* handy loop counter */
     struct subframe *subp = &subframe;
     gpsd_report(LOG_IO,
@@ -455,8 +456,9 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		tSVID, words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
-    preamble = (unsigned int)((words[0] >> 16) & 0x0ffL);
+    preamble = (uint8_t)((words[0] >> 16) & 0x0FF);
     if (preamble == 0x8b) {
+    	/* somehow missed an inversion */
 	preamble ^= 0xff;
 	words[0] ^= 0xffffff;
     }
