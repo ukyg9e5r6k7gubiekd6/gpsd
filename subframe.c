@@ -185,30 +185,31 @@ struct subframe {
 	     * issued in 8 data ranges at the same time */
 	    uint16_t IODC;
 	    /* toc, clock data reference time, 16 bits, unsigned, seconds
-	     * issued in 8 data ranges at the same time */
+	     * scale 2**4, issued in 8 data ranges at the same time */
 	    uint16_t toc;
 	    long l_toc;
 	    /* l2, code on L2, 2 bits, bit map */
 	    uint8_t l2;
 	    /* l2p, L2 P data flag, 1 bit */
 	    uint8_t l2p;
-	    /* ura, SV accuracy, 4 bits unsigned */
+	    /* ura, SV accuracy, 4 bits unsigned index */
 	    unsigned int ura;
 	    /* hlth, SV health, 6 bits unsigned bitmap */
 	    unsigned int hlth;
 	    /* af0, SV clock correction constant term
-	     * 22 bits signed, seconds */
+	     * 22 bits signed, scale 2**-31, seconds */
 	    int32_t af0;
 	    double d_af0;
 	    /* af1, SV clock correction first order term
-	     * 22 bits signed, seconds/second */
+	     * 22 bits signed, scale 2**-43, seconds/second */
 	    int16_t af1;
 	    double d_af1;
 	    /* af2, SV clock correction second order term
-	     * 8 bits signed, seconds/second**2 */
+	     * 8 bits signed, scale 2**-55, seconds/second**2 */
 	    int8_t af2;
 	    double d_af2;
-	    /* Tgd,  L1-L2 correction term, 8 bits signed, seconds */
+	    /* Tgd,  L1-L2 correction term, 8 bits signed,  scale 2**-31,
+	     * seconds */
 	    int8_t Tgd;
 	    double d_Tgd;
 	} sub1;
@@ -218,42 +219,43 @@ struct subframe {
 	    /* Issue of Data (Ephemeris), 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
-	    /* Age of Data Offset for the NMCT, 6 bits, ignore if all ones */
+	    /* Age of Data Offset for the NMCT, 6 bits, scale 900,
+	     * ignore if all ones, seconds */
 	    uint8_t AODO;
-	    /* Age of Data Offset for the NMCT, seconds */
 	    uint16_t u_AODO;
 	    /* fit, FIT interval flag, indicates a fit interval greater than
 	     * 4 hour, 1 bit */
 	    uint8_t fit;
-	    /* toe, Reference Time Ephemeris, 16 bits unsigned, seconds */
+	    /* toe, Reference Time Ephemeris, 16 bits unsigned, scale 2**4,
+	     * seconds */
 	    uint16_t toe;
 	    long l_toe;
 	    /* Crs, Amplitude of the Sine Harmonic Correction Term to the 
-	     * Orbit Radius, 16 bits, signed, meters */
+	     * Orbit Radius, 16 bits, scale 2**-5, signed, meters */
 	    int16_t Crs;
 	    double d_Crs;
 	    /* Cus, Amplitude of the Sine Harmonic Correction Term to the 
-	     * Argument of Latitude, 16 bits, signed, radians */
+	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cus;
 	    double d_Cus;
 	    /* Cuc, Amplitude of the Cosine Harmonic Correction Term to the 
-	     * Argument of Latitude, 16 bits, signed, radians */
+	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cuc;
 	    double d_Cuc;
 	    /* deltan, Mean Motion Difference From Computed Value
 	     * Mean Motion Difference From Computed Value
-	     * 16 bits, signed, semi-circles/sec */
+	     * 16 bits, signed, scale 2**-43, semi-circles/sec */
 	    int16_t deltan;
 	    double d_deltan;
 	    /* M0, Mean Anomaly at Reference Time, 32 bits signed, 
-	     * semi-circles */
+	     * scale 2**-31, semi-circles */
 	    int32_t M0;
 	    double d_M0;
-	    /* eccentricity, 32 bits, unsigned, dimensionless */
+	    /* eccentricity, 32 bits, unsigned, scale 2**-33, dimensionless */
 	    uint32_t e;
 	    double d_eccentricity;
 	    /* sqrt A, Square Root of the Semi-Major Axis
-	     * 32 bits unsigned, square_root(meters) */
+	     * 32 bits unsigned, scale 2**-19, square_root(meters) */
 	    uint32_t sqrtA;
 	    double d_sqrtA;
 	} sub2;
