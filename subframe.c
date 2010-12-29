@@ -13,7 +13,7 @@
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
-				unsigned int svid, uint32_t words[])
+				unsigned int tSVID, uint32_t words[])
 {
     unsigned int i;
     uint32_t preamble, parity;
@@ -71,7 +71,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	words[i] = (words[i] >> 6) & 0xffffff;
     }
 
-    gpsd_interpret_subframe(session, svid, words);
+    gpsd_interpret_subframe(session, tSVID, words);
     return 0;
 }
 
@@ -120,7 +120,7 @@ struct almanac
 /* you can find up to date almanac data for comparision here:
  * https://gps.afspc.af.mil/gps/Current/current.alm
  */
-static void subframe_almanac(unsigned int svid, uint32_t words[], 
+static void subframe_almanac(unsigned int tSVID, uint32_t words[], 
 			     unsigned int subframe, unsigned int sv,
 			     unsigned int data_id, 
 			     /*@out@*/struct almanac *almp)
@@ -161,7 +161,7 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
 		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
-		subframe, sv, svid, data_id, 
+		subframe, sv, tSVID, data_id, 
 		almp->d_eccentricity, 
 		almp->l_toa, 
 		almp->d_deltai,
@@ -176,7 +176,25 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
 }
 
 struct subframe {
-    int subtype;
+    /* subframe number, 3 bits, unsigned, 1 to 5 */
+    uint8_t subframe_num;
+    /* data_id, denotes the NAV data structure of D(t), 2 bits, in
+     * IS-GPS-200E always == 0x1 */
+    uint8_t data_id;
+    /* SV/page id used for subframes 4 & 5, 6 bits */
+    uint8_t pageid; 
+    /* tSVID, SV ID of the sat that transmitted this frame, 6 bits unsigned */
+    uint8_t tSVID;
+    /* TOW, Time of Week of NEXT message, 17 bits unsigned, scale 6, seconds */
+    uint32_t TOW17;
+    long l_TOW17;
+    /* integrity, URA bounds flag, 1 bit */
+    bool integrity;
+    /* alert, alert flag, SV URA and/or the SV User Differential Range 
+     * Accuracy (UDRA) may be worse than indicated, 1 bit */
+    bool alert;
+    /* antispoof, A-S mode is ON in that SV, 1 bit */
+    bool antispoof;
     union {
         /* subframe 1, part of ephemeris, see IS-GPS-200E, Table 20-II
 	 * and Table 20-I */
@@ -412,7 +430,7 @@ struct subframe {
 struct subframe subframe;
 
 void gpsd_interpret_subframe(struct gps_device_t *session,
-			     unsigned int svid, uint32_t words[])
+			     unsigned int tSVID, uint32_t words[])
 {
     /*
      * Heavy black magic begins here!
@@ -428,15 +446,13 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested on iTrax, SiRF and ublox.
      */
     /* FIXME!! I really doubt this is Big Endian compatible */
-    unsigned int pageid, data_id, preamble;
-    uint32_t tow17;
+    unsigned int preamble;
     int i;   /* handy loop counter */
-    bool alert, antispoof;
     struct subframe *subp = &subframe;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
-		svid, words[0], words[1], words[2], words[3], words[4],
+		tSVID, words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
 
     preamble = (unsigned int)((words[0] >> 16) & 0x0ffL);
@@ -446,27 +462,31 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     }
     if (preamble != 0x74) {
 	gpsd_report(LOG_WARN,
-		    "50B: gpsd_interpret_subframe bad preamble: 0x%x header 0x%x\n",
-		    preamble, words[0]);
+	    "50B: gpsd_interpret_subframe bad preamble: 0x%x header 0x%x\n",
+	    preamble, words[0]);
 	return;
     }
+    subp->integrity = ((words[0] >> 1) & 0x01);
     /* The subframe ID is in the Hand Over Word (page 80) */
-    tow17 = ((words[1] >> 7) & 0x01FFFF);
-    subp->subtype = ((words[1] >> 2) & 0x07);
-    alert = (bool)((words[1] >> 6) & 0x01);
-    antispoof = (bool)((words[1] >> 6) & 0x01);
+    subp->TOW17 = ((words[1] >> 7) & 0x01FFFF);
+    subp->l_TOW17 = subp->TOW17 * 6;
+    subp->tSVID = tSVID;
+    subp->subframe_num = ((words[1] >> 2) & 0x07);
+    subp->alert = (bool)((words[1] >> 6) & 0x01);
+    subp->antispoof = (bool)((words[1] >> 6) & 0x01);
     gpsd_report(LOG_PROG,
-		"50B: SF:%d SV:%2u TOW17:%6u Alert:%u AS:%u\n", 
-		subp->subtype, svid, tow17, (unsigned)alert, 
-		(unsigned)antispoof);
+		"50B: SF:%d SV:%2u TOW17:%7lu Alert:%u AS:%u IF:%d\n", 
+		subp->subframe_num, subp->tSVID, subp->l_TOW17, 
+		(unsigned)subp->alert, (unsigned)subp->antispoof,
+		(unsigned)subp->integrity);
     /*
      * Consult the latest revision of IS-GPS-200 for the mapping
      * between magic SVIDs and pages.
      */
-    pageid  = (words[2] >> 16) & 0x00003F; /* only in frames 4 & 5 */
-    data_id = (words[2] >> 22) & 0x3;      /* only in frames 4 & 5 */
+    subp->pageid  = (words[2] >> 16) & 0x00003F; /* only in frames 4 & 5 */
+    subp->data_id = (words[2] >> 22) & 0x3;      /* only in frames 4 & 5 */
 
-    switch (subp->subtype) {
+    switch (subp->subframe_num) {
     case 1:
 	/* subframe 1: clock parameters for transmitting SV */
 	/* get Week Number (WN) from subframe 1 */
@@ -499,7 +519,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub1.IODC |= ((words[7] >> 16) & 0x00FF);
 	gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 		    " L2:%u ura:%u hlth:%u L2P:%u Tgd:%g toc:%lu af2:%.4g"
-		    " af1:%.6e af0:%.7e\n", svid,
+		    " af1:%.6e af0:%.7e\n", 
+		    subp->tSVID,
 		    subp->sub1.WN,
 		    subp->sub1.IODC,
 		    subp->sub1.l2,
@@ -545,7 +566,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    "50B: SF:2 SV:%2u IODE:%3u Crs:%.6e deltan:%.6e "
 		    "M0:%.11e Cuc:%.6e e:%f Cus:%.6e sqrtA:%.11g "
 		    "toe:%lu FIT:%u AODO:%5u\n", 
-		    svid, 
+		    subp->tSVID, 
 		    subp->sub2.IODE,
 		    subp->sub2.d_Crs,
 		    subp->sub2.d_deltan,
@@ -587,7 +608,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	gpsd_report(LOG_PROG,
 	    "50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
 	    " Cis:%.7g i0:%.11e Crc:%.7g omega:%.11e Omegad:%.6e\n", 
-		    svid, subp->sub3.IODE, subp->sub3.d_IDOT, 
+		    subp->tSVID, subp->sub3.IODE, subp->sub3.d_IDOT, 
 		    subp->sub3.d_Cic, subp->sub3.d_Omega0, subp->sub3.d_Cis, 
 		    subp->sub3.d_i0, subp->sub3.d_Crc, subp->sub3.d_omega, 
 		    subp->sub3.d_Omegad );
@@ -595,7 +616,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 4:
 	{
 	    int sv = -2;
-	    switch (pageid) {
+	    switch (subp->pageid) {
 	    case 0:
 		/* almanac for dummy sat 0, which is same as transmitting sat */
 		sv = 0;
@@ -744,7 +765,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    "ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
 		    "ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
 		    "ERD29:%d ERD30:%d\n",
-			    data_id, subp->sub4_13.ai,
+			    subp->data_id, subp->sub4_13.ai,
 			    subp->sub4_13.ERD[1], subp->sub4_13.ERD[2], 
 			    subp->sub4_13.ERD[3], subp->sub4_13.ERD[4],
 			    subp->sub4_13.ERD[5], subp->sub4_13.ERD[6], 
@@ -824,7 +845,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    "SV29:%u SV30:%u SV31:%u SV32:%u "
 		    "SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
 		    "SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
-			    data_id, 
+			    subp->data_id, 
 			    subp->sub4_25.svf[1],  subp->sub4_25.svf[2], 
 			    subp->sub4_25.svf[3],  subp->sub4_25.svf[4],
 			    subp->sub4_25.svf[5],  subp->sub4_25.svf[6], 
@@ -1009,12 +1030,12 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		;			/* no op */
 	    }
 	    if ( -1 < sv ) {
-		subframe_almanac(svid, words, subp->subtype, sv, data_id, 
-				 &subp->sub4.almanac);
+		subframe_almanac(subp->tSVID, words, subp->subframe_num, 
+			sv, subp->data_id, &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
 		gpsd_report(LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
-			pageid, data_id);
+			subp->pageid, subp->data_id);
 	    }
 	    /* else, already handled */
 	}
@@ -1025,10 +1046,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	 * Page 25: SV health data for SV 1 through 24, the almanac 
 	 * reference time, the almanac reference week number.
 	 */
-	if ( 25 > pageid ) {
-            subframe_almanac(svid, words, subp->subtype, pageid, data_id, 
-			     &subp->sub5.almanac);
-	} else if ( 51 == pageid ) {
+	if ( 25 > subp->pageid ) {
+            subframe_almanac(subp->tSVID, words, subp->subframe_num, 
+	    	subp->pageid, subp->data_id, &subp->sub5.almanac);
+	} else if ( 51 == subp->pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
 
@@ -1067,7 +1088,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		"SV13:%u SV14:%u SV15:%uSV16:%u "
 		"SV17:%u SV18:%u SV19:%uSV20:%u "
 		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
-			svid, data_id, 
+			subp->tSVID, subp->data_id, 
 			subp->sub5_25.l_toa, subp->sub5_25.WNa,
 			subp->sub5_25.sv[1], subp->sub5_25.sv[2],
 			subp->sub5_25.sv[3], subp->sub5_25.sv[4],
@@ -1084,7 +1105,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	} else {
 	    /* unknown page */
 	    gpsd_report(LOG_PROG, "50B: SF:5-%d data_id %d uknown page\n",
-		pageid, data_id);
+		subp->pageid, subp->data_id);
 	}
 	break;
     default:
