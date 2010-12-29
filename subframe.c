@@ -312,6 +312,10 @@ struct subframe {
 	    /* ai, Availability Indicator, 2bits, bit map */
 	    unsigned char ai;
 	} sub4_13;
+	/* subframe 4, page 17, system message, 23 chars, plus nul */
+	struct {
+	    char str[24];
+	} sub4_17;
 	/* subframe 4, page 25 */
 	struct {
 	    /* svf, A-S status and the configuration code of each SV
@@ -805,44 +809,40 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		 * and shifted the data to a byte boundary, we can just 
 		 * copy it out. */
 
-		{
-		    char str[24];
-		    int j = 0;
-		    /*@ -type @*/
-		    str[j++] = (words[2] >> 8) & 0xff;
-		    str[j++] = (words[2]) & 0xff;
+		/*@ -type @*/
+		subp->sub4_17.str[i++] = (words[2] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[2]) & 0xff;
 
-		    str[j++] = (words[3] >> 16) & 0xff;
-		    str[j++] = (words[3] >> 8) & 0xff;
-		    str[j++] = (words[3]) & 0xff;
+		subp->sub4_17.str[i++] = (words[3] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[3] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[3]) & 0xff;
 
-		    str[j++] = (words[4] >> 16) & 0xff;
-		    str[j++] = (words[4] >> 8) & 0xff;
-		    str[j++] = (words[4]) & 0xff;
+		subp->sub4_17.str[i++] = (words[4] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[4] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[4]) & 0xff;
 
-		    str[j++] = (words[5] >> 16) & 0xff;
-		    str[j++] = (words[5] >> 8) & 0xff;
-		    str[j++] = (words[5]) & 0xff;
+		subp->sub4_17.str[i++] = (words[5] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[5] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[5]) & 0xff;
 
-		    str[j++] = (words[6] >> 16) & 0xff;
-		    str[j++] = (words[6] >> 8) & 0xff;
-		    str[j++] = (words[6]) & 0xff;
+		subp->sub4_17.str[i++] = (words[6] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[6] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[6]) & 0xff;
 
-		    str[j++] = (words[7] >> 16) & 0xff;
-		    str[j++] = (words[7] >> 8) & 0xff;
-		    str[j++] = (words[7]) & 0xff;
+		subp->sub4_17.str[i++] = (words[7] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[7] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[7]) & 0xff;
 
-		    str[j++] = (words[8] >> 16) & 0xff;
-		    str[j++] = (words[8] >> 8) & 0xff;
-		    str[j++] = (words[8]) & 0xff;
+		subp->sub4_17.str[i++] = (words[8] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[8] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = (words[8]) & 0xff;
 
-		    str[j++] = (words[9] >> 16) & 0xff;
-		    str[j++] = (words[9] >> 8) & 0xff;
-		    str[j++] = '\0';
-		    /*@ +type @*/
-		    gpsd_report(LOG_INF, "50B: SF:4-17 system message: %s\n",
-			    str);
-		}
+		subp->sub4_17.str[i++] = (words[9] >> 16) & 0xff;
+		subp->sub4_17.str[i++] = (words[9] >> 8) & 0xff;
+		subp->sub4_17.str[i++] = '\0';
+		/*@ +type @*/
+		gpsd_report(LOG_INF, "50B: SF:4-17 system message: %.24s\n",
+			subp->sub4_17.str);
 		break;
 	    case 18:
 	    case 56:
