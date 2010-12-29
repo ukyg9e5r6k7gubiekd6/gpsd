@@ -916,7 +916,7 @@ udev-uninstall:
 	rm -f /lib/udev/rules.d/25-gpsd.rules
 
 udev-test:
-	$(srcdir)/gpsd -N -F /var/run/gpsd.sock -D 5
+	$(srcdir)/gpsd -N -n -F /var/run/gpsd.sock -D 5
 
 # Release machinery begins here
 #

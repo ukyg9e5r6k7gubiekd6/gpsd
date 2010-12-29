@@ -88,6 +88,8 @@ file in the source distribution.</p>
 <li><a href="#debugging">Debugging</a></li>
 <li><a href="#profiling">Profiling</a></li>
 <li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
+<li><a href="#udev">The moving target that is udev.</a></li>
+
 <li><a href="#architecture">Architecture and how to hack it</a></li>
 <li><a href="#autoconfiguration">Autoconfiguration</a></li>
 <li><a href="#error">Error modeling</a></li>
@@ -562,6 +564,85 @@ directives in .splintrc that are used to define away fixed-width
 typedefs.</p>
 
 <p>(No, we don't know why splint doesn't handle these natively.)</p>
+
+<h2 id="udev">The moving target that is udev.</h2>
+
+<p>The Linux udev system has been prone to change out from under us,
+breaking our hotplug support for USB receivers.  Accordongly, here's a
+short guide to verifying that the different pieces are working
+correctly, with indications of where to troubleshoot on failure.<p>
+
+<p>First, verify that your USB subsystem can see your receiver.  Run
+lsusb(1).  Plug the receiver in and run lsusb(1) again, looking for
+the extra line - it will be identified by a serial-to-USB converter
+chip type such as a PL2303. Unplug the receiver and verify that
+the line describing the device is gone.</p>
+
+<p>If this test fails, something very basic is wrong at hardware
+level.  If your receiver has a two-section cable joined by something
+like a <a href="http://en.wikipedia.org/wiki/Mini-DIN_connector#6-pin">6-pin
+mini-DIN connector</a>, with a component housing between that and the
+USB plug, be aware that the serial converter may live in that housing
+and you have to unplug the <b>entire cable</b> from your computer, not
+just separate the halves of the mini-DIN connector. If there os no
+such joint, it may be that your receiver is defective or dead. The
+leatt likely failure is for the USB hardware on the PC side to be
+buggy.</p>
+
+<p>Next thing to try is watching the hotplug events in your system logs.
+Do <code>tail -f /var/log/syslog</code>; plug in and unplug the receiver.
+You should see messages indicating from the USB subsystem in the kernel 
+indicating device connect and disconnect.  If you don't, check your
+kernel configuration; USB support may be absent or misconfigured.</p>
+
+<p>Now we involve the udev system.  Unplug the receiver. Run
+<code>make udev-install</code> from the source directory to install
+the required udev rules.  (There is a <code>make udev-uninstall</code>
+for cleaning up after this test.)  Do <code>tail -f
+/var/log/syslog</code> if you have not.  Now plug in the receiver.</p>
+
+<p>You should see messages that include something like the following 
+text (the USB device may vary):</p>
+
+<pre><code>
+gpsd.hotplug: gpsd_control(action=add, arg=/dev/ttyUSB0)
+gpsd.hotplug: launching gpsd  -F /var/run/gpsd.sock
+</code></pre>
+
+<p>These are from the gpsd.hotplug handler called by udev on a hotplug
+event matching one of the known udev types for a USB GPS, and indicating
+the launch of a gpsd instance.</p>
+
+<p>If you don't see this, several things could be going wrong. The
+udev rules may not be installed correctly. Or the handler they call
+may be unable to run for some reason; it has two layers, a shellscript
+wrapper around a little Python program that does the real work.  You
+may have to figure out where the udev log messages go on your system
+an use udevadm(8) to crank up the log level until you can see what's
+going on.</p>
+
+<p>If your GPS uses an unusual serial-to-USB converter, the GPSD rules
+may not recognize it as a probable GPS. You'll need to look at the
+converter type indicated in the lsusb(1) listing and match it against
+the rules in the gpsd.rules file. If it's not known, please report
+this as a bug to the GPSD developers.</p>
+
+<p>Once you know that udev can launch gpsd, you'll want to watch what
+it's doing with the hotplug notifications. Unplug the receiver and kill
+the running gpsd instance, if there is one. Now run <code>make
+udev-test</code> and plug in the receiver.</p>
+
+<p>You should see log messages from gpsd indicating that the control
+socket has received a command to add the device, and then data
+from the device.  When you unplug and replug the device, gpsd
+should emit messages about the device closes and opens.</p>
+
+<p>If you don't see this, there's a bug or misconfiguration
+somewhere. Check to make sure the hotplug handler and gpsd have
+matching expectations about the location of the control socket.</p>
+
+<p>If you do see these device file opens and closes logged, the
+udev end of the configuration is working.</p>
 
 <h2 id="architecture">Architecture and how to hack it</h2>
 
