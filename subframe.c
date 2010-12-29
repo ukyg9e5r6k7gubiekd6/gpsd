@@ -395,6 +395,17 @@ struct subframe {
 	struct {
 	    struct almanac almanac;
 	} sub5;
+	struct {
+	    /* toa, Almanac reference Time, 8 bits unsigned, scale 2**12,
+	     * seconds */
+	    uint8_t toa;
+	    long l_toa;
+	    /* WNa, Week Number almanac, 8 bits, scale 2, GPS Week 
+	     * Number % 256 */
+	    uint8_t WNa;
+	    /* sv, SV health status, 6 bits, bitmap */
+	    uint8_t sv[25];
+	} sub5_25;
     };
 };
 
@@ -1020,39 +1031,34 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	} else if ( 51 == pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51 
 	     * IS-GPS-200E Table 20-V */
-	    /* toa, Almanac reference Time, 8 bits, unsigned, seconds */
-	    uint8_t toa;
-	    long l_toa;
-	    /* WNa, Week Number almanac, 8 bits, GPS Week Number % 256 */
-	    uint8_t WNa;
-	    uint8_t sv[25];
-	    toa   = ((words[2] >> 8) & 0x0000FF);
-	    l_toa = toa << 12;
-	    WNa   = ( words[2] & 0x0000FF);
-	    sv[1] = ((words[2] >> 18) & 0x00003F);
-	    sv[2] = ((words[2] >> 12) & 0x00003F);
-	    sv[3] = ((words[2] >>  6) & 0x00003F);
-	    sv[4] = ((words[2] >>  0) & 0x00003F);
-	    sv[5] = ((words[3] >> 18) & 0x00003F);
-	    sv[6] = ((words[3] >> 12) & 0x00003F);
-	    sv[7] = ((words[3] >>  6) & 0x00003F);
-	    sv[8] = ((words[3] >>  0) & 0x00003F);
-	    sv[9] = ((words[4] >> 18) & 0x00003F);
-	    sv[10] = ((words[4] >> 12) & 0x00003F);
-	    sv[11] = ((words[4] >>  6) & 0x00003F);
-	    sv[12] = ((words[4] >>  0) & 0x00003F);
-	    sv[13] = ((words[5] >> 18) & 0x00003F);
-	    sv[14] = ((words[5] >> 12) & 0x00003F);
-	    sv[15] = ((words[5] >>  6) & 0x00003F);
-	    sv[16] = ((words[5] >>  0) & 0x00003F);
-	    sv[17] = ((words[6] >> 18) & 0x00003F);
-	    sv[18] = ((words[6] >> 12) & 0x00003F);
-	    sv[19] = ((words[6] >>  6) & 0x00003F);
-	    sv[20] = ((words[6] >>  0) & 0x00003F);
-	    sv[21] = ((words[7] >> 18) & 0x00003F);
-	    sv[22] = ((words[7] >> 12) & 0x00003F);
-	    sv[23] = ((words[7] >>  6) & 0x00003F);
-	    sv[24] = ((words[7] >>  0) & 0x00003F);
+
+	    subp->sub5_25.toa   = ((words[2] >> 8) & 0x0000FF);
+	    subp->sub5_25.l_toa <<= 12;
+	    subp->sub5_25.WNa   = ( words[2] & 0x0000FF);
+	    subp->sub5_25.sv[1] = ((words[2] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[2] = ((words[2] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[3] = ((words[2] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[4] = ((words[2] >>  0) & 0x00003F);
+	    subp->sub5_25.sv[5] = ((words[3] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[6] = ((words[3] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[7] = ((words[3] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[8] = ((words[3] >>  0) & 0x00003F);
+	    subp->sub5_25.sv[9] = ((words[4] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[10] = ((words[4] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[11] = ((words[4] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[12] = ((words[4] >>  0) & 0x00003F);
+	    subp->sub5_25.sv[13] = ((words[5] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[14] = ((words[5] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[15] = ((words[5] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[16] = ((words[5] >>  0) & 0x00003F);
+	    subp->sub5_25.sv[17] = ((words[6] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[18] = ((words[6] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[19] = ((words[6] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[20] = ((words[6] >>  0) & 0x00003F);
+	    subp->sub5_25.sv[21] = ((words[7] >> 18) & 0x00003F);
+	    subp->sub5_25.sv[22] = ((words[7] >> 12) & 0x00003F);
+	    subp->sub5_25.sv[23] = ((words[7] >>  6) & 0x00003F);
+	    subp->sub5_25.sv[24] = ((words[7] >>  0) & 0x00003F);
 	    gpsd_report(LOG_PROG,
 		"50B: SF:5-25 SV:%2u DI:%u toa:%lu WNa:%u "
 		"SV1:%u SV2:%u SV3:%uSV4:%u "
@@ -1061,13 +1067,20 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		"SV13:%u SV14:%u SV15:%uSV16:%u "
 		"SV17:%u SV18:%u SV19:%uSV20:%u "
 		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
-			svid, data_id, l_toa, WNa,
-			sv[1], sv[2], sv[3], sv[4],
-			sv[5], sv[5], sv[6], sv[4],
-			sv[9], sv[10], sv[11], sv[12],
-			sv[13], sv[14], sv[15], sv[16],
-			sv[17], sv[18], sv[19], sv[20],
-			sv[21], sv[22], sv[23], sv[24]);
+			svid, data_id, 
+			subp->sub5_25.l_toa, subp->sub5_25.WNa,
+			subp->sub5_25.sv[1], subp->sub5_25.sv[2],
+			subp->sub5_25.sv[3], subp->sub5_25.sv[4],
+			subp->sub5_25.sv[5], subp->sub5_25.sv[6],
+			subp->sub5_25.sv[7], subp->sub5_25.sv[8],
+			subp->sub5_25.sv[9], subp->sub5_25.sv[10],
+			subp->sub5_25.sv[11], subp->sub5_25.sv[12],
+			subp->sub5_25.sv[13], subp->sub5_25.sv[14],
+			subp->sub5_25.sv[15], subp->sub5_25.sv[16],
+			subp->sub5_25.sv[17], subp->sub5_25.sv[18],
+			subp->sub5_25.sv[19], subp->sub5_25.sv[20],
+			subp->sub5_25.sv[21], subp->sub5_25.sv[22],
+			subp->sub5_25.sv[23], subp->sub5_25.sv[24]);
 	} else {
 	    /* unknown page */
 	    gpsd_report(LOG_PROG, "50B: SF:5-%d data_id %d uknown page\n",
