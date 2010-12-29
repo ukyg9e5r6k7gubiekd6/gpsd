@@ -8,14 +8,8 @@
 #include "gpsd.h"
 #include "timebase.h"
 
-#define BIT6  0x00020
-#define BIT8  0x00080
-#define BIT11 0x00400
-#define BIT16 0x08000
-#define BIT22 0x0200000
-#define BIT24 0x0800000
 /* convert unsigned to signed */
-#define uint2int( u, m) ( u & m ? u - m : u)
+#define uint2int( u, bit) ( u & (1<<bit) ? u - (1<<bit) : u)
 
 /*@ -usedef @*/
 int gpsd_interpret_subframe_raw(struct gps_device_t *session,
@@ -147,21 +141,21 @@ static void subframe_almanac(unsigned int svid, uint32_t words[],
     almp->sqrtA    = ( words[5] & 0xFFFFFF);
     almp->d_sqrtA  = pow(2.0,-11) * almp->sqrtA;
     almp->Omega0   = ( words[6] & 0xFFFFFF);
-    almp->Omega0   = uint2int(almp->Omega0, BIT24);
+    almp->Omega0   = uint2int(almp->Omega0, 24);
     almp->d_Omega0 = pow(2.0, -23) * almp->Omega0;
     almp->omega    = ( words[7] & 0xFFFFFF);
-    almp->omega    = uint2int(almp->omega, BIT24);
+    almp->omega    = uint2int(almp->omega, 24);
     almp->d_omega  = pow(2.0, -23) * almp->omega;
     almp->M0       = ( words[8] & 0xFFFFFF);
-    almp->M0       = uint2int(almp->M0, BIT24);
+    almp->M0       = uint2int(almp->M0, 24);
     almp->d_M0     = pow(2.0,-23) * almp->M0;
     almp->af1      = ((words[9] >>  5) & 0x0007FF);
-    almp->af1      = uint2int(almp->af1, BIT11);
+    almp->af1      = uint2int(almp->af1, 11);
     almp->d_af1    = pow(2.0,-38) * almp->af1;
     almp->af0      = ((words[9] >> 16) & 0x0000FF);
     almp->af0    <<= 3;
     almp->af0     |= ((words[9] >>  2) & 0x000007);
-    almp->af0      = uint2int(almp->af0, BIT11);
+    almp->af0      = uint2int(almp->af0, 11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
@@ -191,31 +185,32 @@ struct subframe {
 	     * issued in 8 data ranges at the same time */
 	    uint16_t IODC;
 	    /* toc, clock data reference time, 16 bits, unsigned, seconds
-	     * issued in 8 data ranges at the same time */
+	     * scale 2**4, issued in 8 data ranges at the same time */
 	    uint16_t toc;
 	    long l_toc;
 	    /* l2, code on L2, 2 bits, bit map */
 	    uint8_t l2;
 	    /* l2p, L2 P data flag, 1 bit */
 	    uint8_t l2p;
-	    /* ura, SV accuracy, 4 bits unsigned */
+	    /* ura, SV accuracy, 4 bits unsigned index */
 	    unsigned int ura;
 	    /* hlth, SV health, 6 bits unsigned bitmap */
 	    unsigned int hlth;
 	    /* af0, SV clock correction constant term
-	     * 22 bits signed, seconds */
+	     * 22 bits signed, scale 2**-31, seconds */
 	    int32_t af0;
 	    double d_af0;
 	    /* af1, SV clock correction first order term
-	     * 22 bits signed, seconds/second */
+	     * 22 bits signed, scale 2**-43, seconds/second */
 	    int16_t af1;
 	    double d_af1;
 	    /* af2, SV clock correction second order term
-	     * 8 bits signed, seconds/second**2 */
+	     * 8 bits signed, scale 2**-55, seconds/second**2 */
 	    int8_t af2;
 	    double d_af2;
-	    /* Tgd,  L1-L2 correction term, 8 bits signed, seconds */
-	    int32_t Tgd;
+	    /* Tgd,  L1-L2 correction term, 8 bits signed,  scale 2**-31,
+	     * seconds */
+	    int8_t Tgd;
 	    double d_Tgd;
 	} sub1;
         /* subframe 2, part of ephemeris, see IS-GPS-200E, Table 20-II
@@ -224,46 +219,85 @@ struct subframe {
 	    /* Issue of Data (Ephemeris), 
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
-	    /* Age of Data Offset for the NMCT, 6 bits, ignore if all ones */
+	    /* Age of Data Offset for the NMCT, 6 bits, scale 900,
+	     * ignore if all ones, seconds */
 	    uint8_t AODO;
-	    /* Age of Data Offset for the NMCT, seconds */
 	    uint16_t u_AODO;
 	    /* fit, FIT interval flag, indicates a fit interval greater than
 	     * 4 hour, 1 bit */
 	    uint8_t fit;
-	    /* toe, Reference Time Ephemeris, 16 bits unsigned, seconds */
+	    /* toe, Reference Time Ephemeris, 16 bits unsigned, scale 2**4,
+	     * seconds */
 	    uint16_t toe;
 	    long l_toe;
 	    /* Crs, Amplitude of the Sine Harmonic Correction Term to the 
-	     * Orbit Radius, 16 bits, signed, meters */
+	     * Orbit Radius, 16 bits, scale 2**-5, signed, meters */
 	    int16_t Crs;
 	    double d_Crs;
 	    /* Cus, Amplitude of the Sine Harmonic Correction Term to the 
-	     * Argument of Latitude, 16 bits, signed, radians */
+	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cus;
 	    double d_Cus;
 	    /* Cuc, Amplitude of the Cosine Harmonic Correction Term to the 
-	     * Argument of Latitude, 16 bits, signed, radians */
+	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cuc;
 	    double d_Cuc;
 	    /* deltan, Mean Motion Difference From Computed Value
 	     * Mean Motion Difference From Computed Value
-	     * 16 bits, signed, semi-circles/sec */
+	     * 16 bits, signed, scale 2**-43, semi-circles/sec */
 	    int16_t deltan;
 	    double d_deltan;
 	    /* M0, Mean Anomaly at Reference Time, 32 bits signed, 
-	     * semi-circles */
+	     * scale 2**-31, semi-circles */
 	    int32_t M0;
 	    double d_M0;
-	    /* eccentricity, 32 bits, unsigned, dimensionless */
+	    /* eccentricity, 32 bits, unsigned, scale 2**-33, dimensionless */
 	    uint32_t e;
 	    double d_eccentricity;
 	    /* sqrt A, Square Root of the Semi-Major Axis
-	     * 32 bits unsigned, square_root(meters) */
+	     * 32 bits unsigned, scale 2**-19, square_root(meters) */
 	    uint32_t sqrtA;
 	    double d_sqrtA;
 	} sub2;
-        /* subframe 3, part of ephemeris, see IS-GPS-200E, Table 20-II */
+        /* subframe 3, part of ephemeris, see IS-GPS-200E, Table 20-II,
+	 * Table 20-III */
+	struct {
+	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
+	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
+	    uint8_t IODE;
+	    /* Rate of Inclination Angle, 14 bits signed, scale2**-43,
+	     * semi-circles/sec */
+	    uint16_t IDOT;
+	    double d_IDOT;
+	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
+	     * Angle of Inclination, 16 bits signed, scale 2**-29, radians*/
+	    uint16_t Cic;
+	    double d_Cic;
+	    /* Cis, Amplitude of the Sine Harmonic Correction Term to the
+	     * Angle of Inclination, 16 bits, unsigned, scale 2**-29, radians */
+	    int16_t Cis;
+	    double d_Cis;
+            /* Crc, Amplitude of the Cosine Harmonic Correction Term to the
+	     * Orbit Radius, 16 bits signed, scale 2**-5, meters */
+	    int16_t Crc;
+	    double d_Crc;
+	    /* i0, Inclination Angle at Reference Time, 32 bits, signed,
+	     * scale 2**-31, semi-circles */
+	    int32_t i0;
+	    double d_i0;
+	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly 
+	     * Epoch, 32 bits signed, semi-circles */
+	    int32_t Omega0;
+	    double d_Omega0;
+	    /* omega, Argument of Perigee, 32 bits signed, scale 2**-31,
+	     * semi-circles */
+	    int32_t omega;
+	    double d_omega;
+	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
+	     * scale 2**-43, semi-circles/sec */
+	    int32_t Omegad;
+	    double d_Omegad;
+	} sub3;
 	struct {
 	    struct almanac almanac;
 	} sub4;
@@ -332,153 +366,126 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     case 1:
 	/* subframe 1: clock parameters for transmitting SV */
 	/* get Week Number (WN) from subframe 1 */
-	{
-	    /*
-	     * This only extracts 10 bits of GPS week.
-	     * 13 bits are available in the extension CNAV message,
-	     * which we don't decode yet because we don't know
-	     * of any receiver that reports it.
-	     */
-	    session->context->gps_week =
-		(unsigned short)((words[2] >> 14) & 0x03ff);
-	    subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
-	    subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
-	    subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
-	    subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
-	    subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
-	    subp->sub1.Tgd  = ( words[6] & 0x0000FF);
-	    subp->sub1.Tgd  = uint2int(subp->sub1.Tgd, BIT8);
-	    subp->sub1.d_Tgd  = pow(2.0, -31) * subp->sub1.Tgd;
-	    subp->sub1.toc  = ( words[7] & 0x00FFFF);
-	    subp->sub1.l_toc = subp->sub1.toc  << 4;
-	    subp->sub1.af2  = ((words[8] >> 16) & 0x0FF);
-	    subp->sub1.d_af2  = pow(2.0, -55) * subp->sub1.af2;
-	    subp->sub1.af1  = ( words[8] & 0x00FFFF);
-	    subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
-	    subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
-	    subp->sub1.af0  = uint2int(subp->sub1.af0, BIT22);
-	    subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
-	    subp->sub1.IODC <<= 8;
-	    subp->sub1.IODC |= ((words[7] >> 16) & 0x00FF);
-	    gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
-			" L2:%u ura:%u hlth:%u L2P:%u Tgd:%g toc:%lu af2:%.4g"
-			" af1:%.6e af0:%.7e\n", svid,
-			session->context->gps_week,
-			subp->sub1.IODC,
-			subp->sub1.l2,
-			subp->sub1.ura,
-			subp->sub1.hlth,
-			subp->sub1.l2p,
-			subp->sub1.d_Tgd,
-			subp->sub1.l_toc,
-			subp->sub1.d_af2,
-			subp->sub1.d_af1,
-			subp->sub1.d_af0);
-	}
+	/*
+	 * This only extracts 10 bits of GPS week.
+	 * 13 bits are available in the extension CNAV message,
+	 * which we don't decode yet because we don't know
+	 * of any receiver that reports it.
+	 */
+	session->context->gps_week =
+	    (unsigned short)((words[2] >> 14) & 0x03ff);
+	subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
+	subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
+	subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
+	subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
+	subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
+	subp->sub1.Tgd  = ( words[6] & 0x0000FF);
+	subp->sub1.d_Tgd  = pow(2.0, -31) * subp->sub1.Tgd;
+	subp->sub1.toc  = ( words[7] & 0x00FFFF);
+	subp->sub1.l_toc = subp->sub1.toc  << 4;
+	subp->sub1.af2  = ((words[8] >> 16) & 0x0FF);
+	subp->sub1.d_af2  = pow(2.0, -55) * subp->sub1.af2;
+	subp->sub1.af1  = ( words[8] & 0x00FFFF);
+	subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
+	subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
+	subp->sub1.af0  = uint2int(subp->sub1.af0, 22);
+	subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
+	subp->sub1.IODC <<= 8;
+	subp->sub1.IODC |= ((words[7] >> 16) & 0x00FF);
+	gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
+		    " L2:%u ura:%u hlth:%u L2P:%u Tgd:%g toc:%lu af2:%.4g"
+		    " af1:%.6e af0:%.7e\n", svid,
+		    session->context->gps_week,
+		    subp->sub1.IODC,
+		    subp->sub1.l2,
+		    subp->sub1.ura,
+		    subp->sub1.hlth,
+		    subp->sub1.l2p,
+		    subp->sub1.d_Tgd,
+		    subp->sub1.l_toc,
+		    subp->sub1.d_af2,
+		    subp->sub1.d_af1,
+		    subp->sub1.d_af0);
 	break;
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
-	{
-	    subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
-	    subp->sub2.Crs    = ( words[2] & 0x00FFFF);
-	    subp->sub2.d_Crs  = pow(2.0,-5) * subp->sub2.Crs;
-	    subp->sub2.deltan = ((words[3] >>  8) & 0x00FFFF);
-	    subp->sub2.d_deltan  = pow(2.0,-43) * subp->sub2.deltan;
-	    subp->sub2.M0     = ( words[3] & 0x0000FF);
-	    subp->sub2.M0   <<= 24;
-	    subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
-	    subp->sub2.M0     = uint2int(subp->sub2.M0, BIT24);
-	    subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0;
-	    subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
-	    subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
-	    subp->sub2.e      = ( words[5] & 0x0000FF);
-	    subp->sub2.e    <<= 24;
-	    subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
-	    subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
-	    subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
-	    subp->sub2.d_Cus  = pow(2.0,-29) * subp->sub2.Cus;
-	    subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
-	    subp->sub2.sqrtA <<= 24;
-	    subp->sub2.sqrtA |= ( words[8] & 0x00FFFFFF);
-	    subp->sub2.d_sqrtA = pow(2.0, -19) * subp->sub2.sqrtA;
-	    subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
-	    subp->sub2.l_toe  = subp->sub2.toe << 4;
-	    subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
-	    subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
-	    subp->sub2.u_AODO   = subp->sub2.AODO * 900;
-	    gpsd_report(LOG_PROG,
-			"50B: SF:2 SV:%2u IODE:%3u Crs:%.6e deltan:%.6e "
-			"M0:%.11e Cuc:%.6e e:%f Cus:%.6e sqrtA:%.11g "
-			"toe:%lu FIT:%u AODO:%5u\n", 
-			svid, 
-			subp->sub2.IODE,
-			subp->sub2.d_Crs,
-			subp->sub2.d_deltan,
-			subp->sub2.d_M0,
-			subp->sub2.d_Cuc,
-			subp->sub2.d_eccentricity,
-			subp->sub2.d_Cus,
-			subp->sub2.d_sqrtA,
-			subp->sub2.l_toe,
-			subp->sub2.fit,
-			subp->sub2.u_AODO);
-	}
+	subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
+	subp->sub2.Crs    = ( words[2] & 0x00FFFF);
+	subp->sub2.d_Crs  = pow(2.0,-5) * subp->sub2.Crs;
+	subp->sub2.deltan = ((words[3] >>  8) & 0x00FFFF);
+	subp->sub2.d_deltan  = pow(2.0,-43) * subp->sub2.deltan;
+	subp->sub2.M0     = ( words[3] & 0x0000FF);
+	subp->sub2.M0   <<= 24;
+	subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
+	subp->sub2.M0     = uint2int(subp->sub2.M0, 24);
+	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0;
+	subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
+	subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
+	subp->sub2.e      = ( words[5] & 0x0000FF);
+	subp->sub2.e    <<= 24;
+	subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
+	subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
+	subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
+	subp->sub2.d_Cus  = pow(2.0,-29) * subp->sub2.Cus;
+	subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
+	subp->sub2.sqrtA <<= 24;
+	subp->sub2.sqrtA |= ( words[8] & 0x00FFFFFF);
+	subp->sub2.d_sqrtA = pow(2.0, -19) * subp->sub2.sqrtA;
+	subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
+	subp->sub2.l_toe  = subp->sub2.toe << 4;
+	subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
+	subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
+	subp->sub2.u_AODO   = subp->sub2.AODO * 900;
+	gpsd_report(LOG_PROG,
+		    "50B: SF:2 SV:%2u IODE:%3u Crs:%.6e deltan:%.6e "
+		    "M0:%.11e Cuc:%.6e e:%f Cus:%.6e sqrtA:%.11g "
+		    "toe:%lu FIT:%u AODO:%5u\n", 
+		    svid, 
+		    subp->sub2.IODE,
+		    subp->sub2.d_Crs,
+		    subp->sub2.d_deltan,
+		    subp->sub2.d_M0,
+		    subp->sub2.d_Cuc,
+		    subp->sub2.d_eccentricity,
+		    subp->sub2.d_Cus,
+		    subp->sub2.d_sqrtA,
+		    subp->sub2.l_toe,
+		    subp->sub2.fit,
+		    subp->sub2.u_AODO);
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
-	{
-	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
-	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
-	    uint8_t IODE;
-	    /* Rate of Inclination Angle, 14 bits signed, semi-circles/sec */
-	    uint16_t IDOT;
-	    double d_IDOT;
-	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
-	     * Angle of Inclination, 16 bits signed, radians*/
-	    uint16_t Cic;
-	    double d_Cic;
-	    int32_t Cis, Crc, i0;
-	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly 
-	     * Epoch, 32 bits signed, semi-circles */
-	    int32_t Omega0;
-	    double d_Omega0;
-	    /* omega, Argument of Perigee, 32 bits signed, semi-circles */
-	    int32_t omega;
-	    double d_omega;
-	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
-	     * semi-circles/sec */
-	    int32_t Omegad;
-	    double d_Omegad;
-
-	    Cic      = ((words[2] >>  8) & 0x00FFFF);
-	    d_Cic    = pow(2.0, -29) * Cic;
-	    Omega0   = ( words[2] & 0x0000FF);
-	    Omega0 <<= 24;
-	    Omega0  |= ( words[3] & 0x00FFFFFF);
-	    d_Omega0 = pow(2.0, -31) * Omega0;
-	    Cis      = ((words[4] >>  8) & 0x00FFFF);
-	    Cis      = uint2int(Cis, BIT16);
-	    i0       = ( words[4] & 0x0000FF);
-	    i0     <<= 24;
-	    i0      |= ( words[5] & 0x00FFFFFF);
-	    Crc      = ((words[6] >>  8) & 0x00FFFF);
-	    Crc      = uint2int(Crc, BIT16);
-	    omega    = ( words[6] & 0x0000FF);
-	    omega  <<= 24;
-	    omega   |= ( words[7] & 0x00FFFFFF);
-	    d_omega  = pow(2.0, -31) * omega;
-	    Omegad   = ( words[8] & 0x00FFFFFF);
-	    Omegad   = uint2int(Omegad, BIT24);
-	    d_Omegad = pow(2.0, -43) * Omegad;
-	    IODE     = ((words[9] >> 16) & 0x0000FF);
-	    IDOT     = ((words[9] >>  2) & 0x003FFF);
-	    d_IDOT   = pow(2.0, -43) * IDOT;
-	    gpsd_report(LOG_PROG,
-		"50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
-		" Cis:%d i0:%d crc:%d omega:%.11e Omegad:%.6e\n", 
-			svid, IODE, d_IDOT, d_Cic, d_Omega0, Cis, i0, Crc,
-			d_omega, d_Omegad );
-	}
+	subp->sub3.Cic      = ((words[2] >>  8) & 0x00FFFF);
+	subp->sub3.d_Cic    = pow(2.0, -29) * subp->sub3.Cic;
+	subp->sub3.Omega0   = ( words[2] & 0x0000FF);
+	subp->sub3.Omega0 <<= 24;
+	subp->sub3.Omega0  |= ( words[3] & 0x00FFFFFF);
+	subp->sub3.d_Omega0 = pow(2.0, -31) * subp->sub3.Omega0;
+	subp->sub3.Cis      = ((words[4] >>  8) & 0x00FFFF);
+	subp->sub3.d_Cis    = pow(2.0, -29) * subp->sub3.Cis;
+	subp->sub3.i0       = ( words[4] & 0x0000FF);
+	subp->sub3.i0     <<= 24;
+	subp->sub3.i0      |= ( words[5] & 0x00FFFFFF);
+	subp->sub3.d_i0     = pow(2.0, -31) * subp->sub3.i0;
+	subp->sub3.Crc      = ((words[6] >>  8) & 0x00FFFF);
+	subp->sub3.d_Crc    = pow(2.0, -5) * subp->sub3.Crc;
+	subp->sub3.omega    = ( words[6] & 0x0000FF);
+	subp->sub3.omega  <<= 24;
+	subp->sub3.omega   |= ( words[7] & 0x00FFFFFF);
+	subp->sub3.d_omega  = pow(2.0, -31) * subp->sub3.omega;
+	subp->sub3.Omegad   = ( words[8] & 0x00FFFFFF);
+	subp->sub3.Omegad   = uint2int(subp->sub3.Omegad, 24);
+	subp->sub3.d_Omegad = pow(2.0, -43) * subp->sub3.Omegad;
+	subp->sub3.IODE     = ((words[9] >> 16) & 0x0000FF);
+	subp->sub3.IDOT     = ((words[9] >>  2) & 0x003FFF);
+	subp->sub3.d_IDOT   = pow(2.0, -43) * subp->sub3.IDOT;
+	gpsd_report(LOG_PROG,
+	    "50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
+	    " Cis:%.7g i0:%.11e Crc:%.7g omega:%.11e Omegad:%.6e\n", 
+		    svid, subp->sub3.IODE, subp->sub3.d_IDOT, 
+		    subp->sub3.d_Cic, subp->sub3.d_Omega0, subp->sub3.d_Cis, 
+		    subp->sub3.d_i0, subp->sub3.d_Crc, subp->sub3.d_omega, 
+		    subp->sub3.d_Omegad );
 	break;
     case 4:
 	{
@@ -627,7 +634,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    ERD[30]  = (char)((words[9] >>  2) & 0x00003F);
 
 		    for ( i = 1; i < 31; i++ ) {
-			ERD[i]  = uint2int(ERD[i], BIT6);
+			ERD[i]  = uint2int(ERD[i], 6);
 		    }
 
 		    gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
@@ -832,7 +839,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 		    beta2  = ((words[4] >>  8) & 0x0000FF);
 		    beta3  = ((words[4] >>  0) & 0x0000FF);
 		    A1     = ((words[5] >>  0) & 0xFFFFFF);
-		    A1     = uint2int(A1, BIT24);
+		    A1     = uint2int(A1, 24);
 		    A0     = ((words[6] >>  0) & 0xFFFFFF);
 		    A0   <<= 8;
 		    A0    |= ((words[7] >> 16) & 0x00FFFF);
