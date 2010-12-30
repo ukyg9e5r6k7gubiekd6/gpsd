@@ -1365,13 +1365,18 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
+	    speed_t speed = gpsd_get_speed(&session->ttyset);
+
 	    /*@-nullderef@*/
 	    gpsd_report(LOG_INF,
 			"%s identified as type %s (%f sec @ %dbps)\n",
 			session->gpsdata.dev.path,
 			session->device_type->type_name,
 			timestamp() - session->opentime,
-			gpsd_get_speed(&session->ttyset));
+			speed);
+	    if ( 38400 > speed ) {
+		gpsd_report(LOG_WARN, "WARNING: speed less than 38,400 may cause data lag and loss of functionality\n");
+	    }
 	    /*@+nullderef@*/
 	    /* fire the identified hook */
 	    if (session->device_type != NULL
