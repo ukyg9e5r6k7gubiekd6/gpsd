@@ -810,7 +810,7 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 void gpsd_rollover_check(/*@in@ */ struct gps_device_t *session, const double unixtime)
 {
     if (session->context->start_time >= GPS_EPOCH && unixtime < (double)session->context->start_time)
-	gpsd_report(LOG_WARN, "GPS week rollover makes time invalid");
+	gpsd_report(LOG_WARN, "GPS week rollover makes time invalid\n");
 }
 
 /*****************************************************************************
@@ -1375,7 +1375,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			timestamp() - session->opentime,
 			speed);
 	    if ( 38400 > speed ) {
-		gpsd_report(LOG_WARN, "WARNING: speed less than 38,400 may cause data lag and loss of functionality\n");
+		gpsd_report(LOG_WARN, "speed less than 38,400 may cause data lag and loss of functionality\n");
 	    }
 	    /*@+nullderef@*/
 	    /* fire the identified hook */

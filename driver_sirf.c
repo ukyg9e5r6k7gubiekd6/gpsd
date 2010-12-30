@@ -214,7 +214,7 @@ static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
     gpsd_report(LOG_PROG, "SiRF: sirf_speed(%d,%c,%d)\n",
 		speed, parity, stopbits);
     if (9600 >= speed) {
-	gpsd_report(LOG_WARN, "WARNING: SiRF may lag at 9600bps or less.\n");
+	gpsd_report(LOG_WARN, "SiRF may lag at 9600bps or less.\n");
     }
 
     switch (parity) {
@@ -426,8 +426,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
     } else {
-	gpsd_report(LOG_WARN, 
-		"WARNING: SiRF: link too slow, disabling subframes.\n");
+	gpsd_report(LOG_WARN, "SiRF: link too slow, disabling subframes.\n");
     }
     gpsd_report(LOG_DATA, "SiRF: FV 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);

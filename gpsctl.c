@@ -109,7 +109,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	if (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
 		continue;
-	    gpsd_report(LOG_ERROR, "gosctl: select %s\n", strerror(errno));
+	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
 	    exit(2);
 	}
 	/*@ +usedef @*/
