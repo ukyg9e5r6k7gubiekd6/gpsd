@@ -186,6 +186,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 #ifndef SQUELCH_ENABLE
     if (errlevel <= debuglevel) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
+	char *err_str;
 	va_list ap;
 
 #if defined(PPS_ENABLE)
@@ -193,7 +194,37 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 	(void)pthread_mutex_lock(&report_mutex);
 	/* +unrecog */
 #endif /* PPS_ENABLE */
-	(void)strlcpy(buf, "gpsd: ", BUFSIZ);
+	switch ( errlevel ) {
+	case 0:
+		err_str = "ERROR: ";
+		break;
+	case 1:
+		err_str = "WARN: ";
+		break;
+	case 2:
+		err_str = "INFO: ";
+		break;
+	case 3:
+		err_str = "DATA: ";
+		break;
+	case 4:
+		err_str = "PROG: ";
+		break;
+	case 5:
+		err_str = "IO: ";
+		break;
+	case 6:
+		err_str = "SPIN: ";
+		break;
+	case 7:
+		err_str = "RAW: ";
+		break;
+	default:
+		err_str = "UNK: ";
+	}
+
+	(void)strlcpy(buf, "gpsd:", BUFSIZ);
+	(void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
