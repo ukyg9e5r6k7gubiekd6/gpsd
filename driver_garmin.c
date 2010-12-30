@@ -819,7 +819,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
     ssize_t i = 0;
     bool found = false;
 
-    gpsd_report(LOG_SHOUT, "attempting USB device enumeration.\n");
+    gpsd_report(LOG_INF, "attempting USB device enumeration.\n");
     (void)libusb_init(NULL);
 
     if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
@@ -840,7 +840,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 	}
 
 	/* we can extract device descriptor data */
-	gpsd_report(LOG_SHOUT, "%04x:%04x (bus %d, device %d)\n",
+	gpsd_report(LOG_INF, "%04x:%04x (bus %d, device %d)\n",
 		    desc.idVendor, desc.idProduct,
 		    libusb_get_bus_number(dev),
 		    libusb_get_device_address(dev));
@@ -903,52 +903,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
 	if (!is_usb_device(session->gpsdata.dev.path, 0x091e, 0x0003))
 	    return false;
 #else
-	/*
-	 * This is ONLY for USB devices reporting as: 091e:0003.
-	 *
-	 * Check that the garmin_gps driver is installed in the kernel
-	 * and that an active USB device is using it.
-	 *
-	 * BUG: It does not yet check that the currect device is the one
-	 * attached to the Garmin.  So if you have a Garmin and another
-	 * USB gps this could be a problem.
-	 *
-	 * Return true if garmin_gps device found, false otherwise.
-	 */
-	FILE *fp = NULL;
-	char buf[256];
-	bool ok = false;
-
-	/* check for garmin USB serial driver -- very Linux-specific */
-	if (access("/sys/module/garmin_gps", R_OK) != 0) {
-	    gpsd_report(LOG_WARN,
-			"Garmin: garmin_gps Linux USB module not active.\n");
-	    return false;
-	}
-	/* check for a garmin_gps device in /proc
-	 * if we can */
-	if (NULL != (fp = fopen("/proc/bus/usb/devices", "r"))) {
-
-	    ok = false;
-	    while (0 != fgets(buf, (int)sizeof(buf), fp)) {
-		if (strstr(buf, "garmin_gps")) {
-		    ok = true;
-		    break;
-		}
-	    }
-	    (void)fclose(fp);
-	    if (!ok) {
-		// no device using garmin_gps now
-		gpsd_report(LOG_WARN,
-			    "Garmin: garmin_gps not in /proc/bus/usb/devices.\n");
-		gpsd_report(LOG_WARN,
-			    "Garmin: garmin_gps driver present, but not in use\n");
-		return false;
-	    }
-	} else {
-	    gpsd_report(LOG_WARN,
-			"Garmin: Can't open /proc/bus/usb/devices, will try anyway\n");
-	}
+	return false;
 #endif /* HAVE_LIBUSB */
 
 	if (!gpsd_set_raw(session)) {
@@ -957,25 +912,16 @@ static bool garmin_usb_detect(struct gps_device_t *session)
 			strerror(errno));
 	    return false;
 	}
-#ifdef __UNUSED
-	Packet_t *thePacket = NULL;
-	uint8_t *buffer = NULL;
-	/* reset the buffer and buffer length */
-	memset(session->driver.garmin.Buffer, 0,
-	       sizeof(session->driver.garmin.Buffer));
-	session->driver.garmin.BufferLen = 0;
 
 	if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
+	    /* dunno how this happens, but it does on some compilers */
 	    gpsd_report(LOG_ERROR,
 			"Garmin: garmin_usb_detect: Compile error, garmin.Buffer too small.\n",
 			strerror(errno));
 	    return false;
 	}
 
-	buffer = (uint8_t *) session->driver.garmin.Buffer;
-	thePacket = (Packet_t *) buffer;
-#endif /* __UNUSED__ */
-
+	// FIXME!!! needs to use libusb totally and move garmin_gps aside */
 	// set Mode 1, mode 0 is broken somewhere past 2.6.14
 	// but how?
 	gpsd_report(LOG_PROG, "Garmin: Set garmin_gps driver mode = 0\n");
