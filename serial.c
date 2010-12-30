@@ -263,6 +263,9 @@ void gpsd_set_speed(struct gps_device_t *session,
     gpsd_report(LOG_INF, "speed %u, %d%c%d\n",
 		gpsd_get_speed(&session->ttyset), 9 - stopbits, parity,
 		stopbits);
+    if ( 38400 > speed ) {
+	gpsd_report(LOG_WARN, "WARNING: speed less than 38,400 may cause data lag and loss of functionality\n");
+    }
 
     session->gpsdata.dev.baudrate = (unsigned int)speed;
     session->gpsdata.dev.parity = parity;
