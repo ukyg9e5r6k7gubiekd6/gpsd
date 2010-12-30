@@ -809,8 +809,18 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 
 void gpsd_rollover_check(/*@in@ */ struct gps_device_t *session, const double unixtime)
 {
-    if (session->context->start_time >= GPS_EPOCH && unixtime < (double)session->context->start_time)
-	gpsd_report(LOG_WARN, "GPS week rollover makes time invalid\n");
+    /*
+     * The reason for the 12-hour slop is that our recorded start time is local,
+     * but GPSes deliver time as though in UTC.  This test could be exact if we
+     * counted on knowing our timezone at startup, but since we can't count on
+     * knowing location...
+     */
+    if (session->context->start_time >= GPS_EPOCH && unixtime + (12*60*60) < (double)session->context->start_time) {
+    char scr[128];
+    (void)unix_to_iso8601(unixtime, scr, sizeof(scr));
+    gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n", 
+		scr, unixtime);
+    }
 }
 
 /*****************************************************************************

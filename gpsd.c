@@ -1755,12 +1755,16 @@ int main(int argc, char *argv[])
 		    "may not be reliable.\n");
     else {
 	struct tm *now = localtime(&context.start_time);
+	char scr[128];
 	/*
 	 * This is going to break our regression-test suite once a century.
 	 * I think we can live with that consequence.
 	 */
 	now->tm_year += 1900;
 	context.century = now->tm_year - (now->tm_year % 100);
+	unix_to_iso8601(context.start_time, scr, sizeof(scr));
+	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
+		    scr, (int)context.start_time);
     }
 
     /* optimization hack to defer having to read subframe data */
