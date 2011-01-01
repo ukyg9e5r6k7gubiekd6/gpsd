@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.3, December 2010
+v1.4, January 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -19,12 +19,35 @@ for avoiding being cut.
 GPSD handles two main kinds of sensors: GPS receivers and AIS
 receivers. It has rudimentary support for some other kinds of
 specialized geolocation-related sensors as well, notably compass and
-yaw/pitch/roll, but those sensors are usually combined with GPS
+yaw/pitch/roll, but those sensors are usually combined with GPS/AIS
 receivers and behave like them.
 
-In an ideal world, GPS sensors would be oracles that you could
-poll at any time to get a clean fix.  Real GPSes fail to be like 
-that in at least the following ways: 
+In an ideal world, GPS/AIS sensors would be oracles that you could
+poll at any time to get clean data. But despite the existence of some
+vendor-specific query and control strings on some devices, a GPS/AIS
+sensor is not a synchronous device you can query for specified data
+and count on getting a response back from in a fixed period of time.
+It gets radio data on its own schedule (usually once per second for a
+GPS), and emits the reports it feels like reporting asynchronously
+with variable lag during the following second.  *If* it supports query
+strings, reports from these are intermixed with the regular
+reports, and usually scheduled at a lower priority (often with a lag
+of more than a second).
+
+A GPS/AIS receiver, or any sensor that behaves like one, is in effect
+a datagram emitter similar to a UDP data source; you get no guarantees
+about sequence or timing at finer resolution than "TPV roughly once
+per second" (or whatever the main type of report and report interval
+is).
+
+The only way to simulate synchronous querying of such a sensor is to
+have an agent between you and it that caches the data coming out of
+the device; you can then query the agent and expect a reasonably
+synchronous response from the cache (we support this for
+GPSes). However, note that this doesn't work for a freshly opened
+device - there's no cached data.
+
+Consider what this implies for GPses, in particular:
 
 * You can't actually poll them. They report to you over a serial
   (RS232 or USB-serial) interface at a fixed interval, usually once
@@ -56,6 +79,12 @@ powered up. Furthermore, they're not normally battery constrained.
 However, you don't poll them either; they receive information
 packets over the air and ship them to you at unpredictable intervals
 over a serial port.
+
+The design of the GPSD reporting protocol surrenders to reality. Its data
+packets translate the GPS's stream of datagrams into
+device-type-independent datagrams, but it can't impose timing and
+sequencing regularities on them that the underlying device doesn't
+already obey.
 
 == What GPSD does, and what it cannot do ==
 
