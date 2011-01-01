@@ -91,7 +91,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	(void)strlcat(buf, "\n", BUFSIZ);
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
 	gpsd_report(LOG_ERROR, "gps_query(), write failed\n");
-	return -1;
+	return false;
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
 
@@ -122,6 +122,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	    return false;
 	}
 
+	/*@ +ignorequals @*/
 	if ((expect & gpsdata->set) != 0)
 	    return true;
 	else if (time(NULL) - starttime > timeout) {
@@ -130,7 +131,10 @@ static bool gps_query(struct gps_data_t *gpsdata,
 			timeout);
 	    return false;
 	}
+	/*@ -ignorequals @*/
     }
+
+    return false;
 }
 
 static void onsig(int sig)
@@ -316,7 +320,7 @@ int main(int argc, char **argv)
 	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-	if (!gps_query(&gpsdata, DEVICELIST_SET, timeout, "?DEVICES;\n")) {
+	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
 	    (void)gps_close(&gpsdata);
 	    exit(1);
@@ -352,7 +356,7 @@ int main(int argc, char **argv)
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?WATCH={\"enable\":true,\"json\":true};\n"))
+	    if (gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?WATCH={\"enable\":true,\"json\":true};\n"))
 		gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
 			    gpsdata.dev.path,
 			    gpsdata.dev.driver,
@@ -360,7 +364,7 @@ int main(int argc, char **argv)
 	    else
 		gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
 			    devlistp->path);
-	    gps_close(&gpsdata);
+	    (void)gps_close(&gpsdata);
 	    exit(0);
 	}
 
@@ -374,14 +378,14 @@ int main(int argc, char **argv)
 
 	/*@-boolops@*/
 	if (to_nmea) {
-	    if (!gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
+	    if (!gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	else if (to_binary) {
-	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
+	    if (gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
@@ -393,7 +397,7 @@ int main(int argc, char **argv)
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
 		(void)gps_query(&gpsdata,
-				 DEVICE_SET, timeout,
+				DEVICE_SET, (int)timeout,
 				 "?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
 				 device, speed);
 	    else {
@@ -419,7 +423,7 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(&gpsdata,
-				     DEVICE_SET, timeout,
+				    DEVICE_SET, (int)timeout,
 				     "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c\",\"stopbits\":%c}\r\n", 
 				     device, speed, parity, stopbits);
 	    }
@@ -435,7 +439,7 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(&gpsdata, 
-			     DEVICE_SET, timeout,
+			    DEVICE_SET, (int)timeout,
 			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n", 
 			    device, rate);
 	}

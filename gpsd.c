@@ -1762,7 +1762,7 @@ int main(int argc, char *argv[])
 	 */
 	now->tm_year += 1900;
 	context.century = now->tm_year - (now->tm_year % 100);
-	unix_to_iso8601(context.start_time, scr, sizeof(scr));
+	(void)unix_to_iso8601((double)context.start_time, scr, sizeof(scr));
 	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
 		    scr, (int)context.start_time);
     }

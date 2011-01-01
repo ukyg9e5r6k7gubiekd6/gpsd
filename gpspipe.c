@@ -220,11 +220,13 @@ int main(int argc, char **argv)
     }
 
     /* Daemonize if the user requested it. */
+    /*@ -unrecog @*/
     if (daemonize)
 	if (daemon(0, 0) != 0)
 	    (void)fprintf(stderr,
 			  "gpspipe: demonization failed: %s\n",
 			  strerror(errno));
+    /*@ +unrecog @*/
 
     /* Sleep for ten seconds if the user requested it. */
     if (sleepy)
