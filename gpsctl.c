@@ -311,6 +311,7 @@ int main(int argc, char **argv)
     /*@-nullpass@*/
 
     if (!lowlevel) {
+	int i;
 	/* OK, there's a daemon instance running.  Do things the easy way */
 	(void)gps_read(&gpsdata);
 	if ((gpsdata.set & VERSION_SET) != 0) {
@@ -339,14 +340,11 @@ int main(int argc, char **argv)
 	/* query the devicelist return */
 	if (gpsdata.devices.ndevices == 1 && device == NULL) {
 	    device = gpsdata.dev.path;
+	    i = 0;
 	} else {
-	    int i;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata.devices.ndevices; i++)
 		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {
-		    (void)memcpy(&gpsdata.dev, 
-				 &gpsdata.devices.list[i],
-				 sizeof(struct devconfig_t));
 		    goto devicelist_entry_matches;
 		}
 	    gpsd_report(LOG_ERROR, "specified device not found.\n");
@@ -354,6 +352,9 @@ int main(int argc, char **argv)
 	    exit(1);
 	devicelist_entry_matches:;
 	}
+	(void)memcpy(&gpsdata.dev, 
+		     &gpsdata.devices.list[i],
+		     sizeof(struct devconfig_t));
 	devcount = gpsdata.devices.ndevices;
 
 	/* if the device has not identified, watch it until it does so */
