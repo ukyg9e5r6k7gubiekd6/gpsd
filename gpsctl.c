@@ -150,7 +150,7 @@ static void onsig(int sig)
 
 int main(int argc, char **argv)
 {
-    int option, status;
+    int option, status, devcount;
     char *device = NULL, *devtype = NULL; 
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
@@ -299,7 +299,7 @@ int main(int argc, char **argv)
     (void) signal(SIGTERM, onsig);
     (void) signal(SIGQUIT, onsig);
 
-    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen_r() params */
+    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen() params */
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
 	if (gps_open(NULL, NULL, &gpsdata) != 0) {
@@ -310,10 +310,8 @@ int main(int argc, char **argv)
     }
     /*@-nullpass@*/
 
-    /* ^ someday, add out annotation to the gps_poll() param  and remove */
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
-	struct devconfig_t *devlistp;
 	(void)gps_read(&gpsdata);
 	if ((gpsdata.set & VERSION_SET) != 0) {
 	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
@@ -338,32 +336,65 @@ int main(int argc, char **argv)
 	}
 	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata.devices.ndevices);
 
+	/* query the devicelist return */
 	if (gpsdata.devices.ndevices == 1 && device == NULL) {
-	    devlistp = &gpsdata.devices.list[0];
-	    device = devlistp->path;
+	    device = gpsdata.dev.path;
 	} else {
 	    int i;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata.devices.ndevices; i++)
-		if (strcmp(device, gpsdata.devices.list[i].path) == 0)
-		    goto foundit;
+		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {
+		    (void)memcpy(&gpsdata.dev, 
+				 &gpsdata.devices.list[i],
+				 sizeof(struct devconfig_t));
+		    goto devicelist_entry_matches;
+		}
 	    gpsd_report(LOG_ERROR, "specified device not found.\n");
 	    (void)gps_close(&gpsdata);
 	    exit(1);
-	foundit:
-	    devlistp = &gpsdata.devices.list[i];
+	devicelist_entry_matches:;
+	}
+	devcount = gpsdata.devices.ndevices;
+
+	/* if the device has not identified, watch it until it does so */
+	if (gpsdata.dev.driver[0] == '\0') {
+	    if (gps_stream(&gpsdata, WATCH_ENABLE|WATCH_JSON, NULL) == -1) {
+		gpsd_report(LOG_ERROR, "stream set failed.\n");
+		(void)gps_close(&gpsdata);
+		exit(1);
+	    }
+
+	    while (devcount > 0) {
+		errno = 0;
+		if (gps_read(&gpsdata) == -1) {
+		    gpsd_report(LOG_ERROR, "data read failed.\n");
+		    (void)gps_close(&gpsdata);
+		    exit(1);
+		}
+
+		if (gpsdata.set & DEVICE_SET) {
+		    --devcount;
+		    assert(gpsdata.dev.path[0]!=0 && gpsdata.dev.driver[0]!=0);
+		    if (strcmp(gpsdata.dev.path, device) == 0) {
+			goto matching_device_seen;
+		    }
+		}
+	    }
+	    gpsd_report(LOG_ERROR, "data read failed.\n");
+	    (void)gps_close(&gpsdata);
+	    exit(1);
+	matching_device_seen:;
 	}
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    if (gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?WATCH={\"enable\":true,\"json\":true};\n"))
-		gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
-			    gpsdata.dev.path,
-			    gpsdata.dev.driver,
-			    gpsdata.dev.baudrate);
-	    else
-		gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
-			    devlistp->path);
+	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
+			gpsdata.dev.path,
+			gpsdata.dev.driver,
+			gpsdata.dev.baudrate);
+	} else {
+	    gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
+			gpsdata.dev.path);
 	    (void)gps_close(&gpsdata);
 	    exit(0);
 	}
