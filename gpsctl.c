@@ -21,7 +21,7 @@
 #include "revision.h"
 
 static int debuglevel;
-static unsigned int timeout = 4;
+static unsigned int timeout = 8;
 
 /*
  * Set this as high or higher than the maximum number of subtype 
@@ -548,9 +548,9 @@ int main(int argc, char **argv)
 		    gpsd_report(LOG_ERROR,
 				"autodetection failed.\n");
 		    exit(2);
-		} else {
+		} else if (session.packet.type > COMMENT_PACKET) {
 		    gpsd_report(LOG_IO,
-				"autodetection after %d reads.\n", seq);
+				"autodetection after %d reads finds packet type %d.\n", seq, session.packet.type);
 		    (void) alarm(0);
 		    break;
 		}
