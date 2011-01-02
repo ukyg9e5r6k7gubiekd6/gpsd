@@ -133,12 +133,10 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *,
 				   size_t);
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *,
 				  size_t);
-#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *,
 				     size_t);
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *,
 				    size_t);
-#endif /* ALLOW_RECONFIGURE */
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *,
 				 size_t);
 
@@ -390,7 +388,6 @@ static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session UNUSED,
     return 0;
 }
 
-#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 				     unsigned char *buf, size_t len)
 {
@@ -408,11 +405,13 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	    sirfbin_mode(session, 0);
     } else if (fv < 232) {
 	session->driver.sirf.driverstate |= SIRF_EQ_231;
+#ifdef ALLOW_RECONFIGURE
     } else {
 	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, enablemid52);
 	session->driver.sirf.driverstate |= SIRF_GE_232;
 	session->context->valid |= LEAP_SECOND_VALID;
+#endif /* ALLOW_RECONFIGURE */
     }
     if (strstr((char *)(buf + 1), "ES"))
 	gpsd_report(LOG_INF, "SiRF: Firmware has XTrac capability\n");
@@ -421,6 +420,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
+#ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.dev.baudrate >= 38400) {
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
@@ -428,11 +428,11 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     } else {
 	gpsd_report(LOG_WARN, "SiRF: link too slow, disabling subframes.\n");
     }
+#endif /* ALLOW_RECONFIGURE */
     gpsd_report(LOG_DATA, "SiRF: FV 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);
     return DEVICEID_IS;
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 				   unsigned char *buf, size_t len)
@@ -837,7 +837,6 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 }
 #endif /* __UNUSED__ */
 
-#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
@@ -854,11 +853,12 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.degraded_timeout = (unsigned char)getub(buf, 10);
     session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
+#ifdef ALLOW_RECONFIGURE
     gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
     (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
+#endif /* ALLOW_RECONFIGURE */
     return 0;
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 				 unsigned char *buf, size_t len UNUSED)
@@ -1022,10 +1022,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(LOG_PROG, "SiRF: unused Raw Tracker Data 0x05\n");
 	return 0;
 
-#ifdef ALLOW_RECONFIGURE
     case 0x06:			/* Software Version String MID 6 */
 	return sirf_msg_swversion(session, buf, len);
-#endif /* ALLOW_RECONFIGURE */
 
     case 0x07:			/* Clock Status Data MID 7 */
 	gpsd_report(LOG_PROG, "SiRF: unused CLK 0x07\n");
@@ -1088,10 +1086,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 		    getub(buf, 1));
 	return 0;
 
-#ifdef ALLOW_RECONFIGURE
     case 0x13:			/* Navigation Parameters MID 19 */
 	return sirf_msg_sysparam(session, buf, len);
-#endif /* ALLOW_RECONFIGURE */
 
     case 0x1b:			/* DGPS status (undocumented) MID 27 */
 	gpsd_report(LOG_PROG, "SiRF: unused DGPSF 0x1b %s\n",
