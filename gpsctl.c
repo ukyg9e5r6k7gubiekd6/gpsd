@@ -312,19 +312,13 @@ int main(int argc, char **argv)
 
     if (!lowlevel) {
 	int i;
-	/* OK, there's a daemon instance running.  Do things the easy way */
-	(void)gps_read(&gpsdata);
-	if ((gpsdata.set & VERSION_SET) != 0) {
-	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
-	    (void)gps_close(&gpsdata);
-	    exit(1);
-	}
+
+	/* what devices have we available? */
 	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
 	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-
 	if (gpsdata.devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(&gpsdata);
@@ -337,7 +331,7 @@ int main(int argc, char **argv)
 	}
 	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata.devices.ndevices);
 
-	/* query the devicelist return */
+	/* try to mine the devicelist return for the data we want */
 	if (gpsdata.devices.ndevices == 1 && device == NULL) {
 	    device = gpsdata.dev.path;
 	    i = 0;
@@ -347,7 +341,7 @@ int main(int argc, char **argv)
 		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {
 		    goto devicelist_entry_matches;
 		}
-	    gpsd_report(LOG_ERROR, "specified device not found.\n");
+	    gpsd_report(LOG_ERROR, "specified device not found in device list.\n");
 	    (void)gps_close(&gpsdata);
 	    exit(1);
 	devicelist_entry_matches:;
