@@ -387,17 +387,20 @@ int main(int argc, char **argv)
 	matching_device_seen:;
 	}
 
-	/* if no control operation was specified, just ID the device */
-	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
-			gpsdata.dev.path,
-			gpsdata.dev.driver,
-			gpsdata.dev.baudrate);
-	} else {
+	/* sanity check */
+	if (gpsdata.dev.driver[0] == '\0') {
 	    gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
 			gpsdata.dev.path);
 	    (void)gps_close(&gpsdata);
 	    exit(0);
+	}
+
+	/* if no control operation was specified, just ID the device */
+	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
+		gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
+			    gpsdata.dev.path,
+			    gpsdata.dev.driver,
+			    gpsdata.dev.baudrate);
 	}
 
 	status = 0;
