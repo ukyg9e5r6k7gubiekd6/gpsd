@@ -135,10 +135,8 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *,
 				  size_t);
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *,
 				     size_t);
-#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *,
 				    size_t);
-#endif /* ALLOW_RECONFIGURE */
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *,
 				 size_t);
 
@@ -839,7 +837,6 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 }
 #endif /* __UNUSED__ */
 
-#ifdef ALLOW_RECONFIGURE
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
@@ -856,11 +853,12 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.degraded_timeout = (unsigned char)getub(buf, 10);
     session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
+#ifdef ALLOW_RECONFIGURE
     gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
     (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
+#endif /* ALLOW_RECONFIGURE */
     return 0;
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 				 unsigned char *buf, size_t len UNUSED)
@@ -1088,10 +1086,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 		    getub(buf, 1));
 	return 0;
 
-#ifdef ALLOW_RECONFIGURE
     case 0x13:			/* Navigation Parameters MID 19 */
 	return sirf_msg_sysparam(session, buf, len);
-#endif /* ALLOW_RECONFIGURE */
 
     case 0x1b:			/* DGPS status (undocumented) MID 27 */
 	gpsd_report(LOG_PROG, "SiRF: unused DGPSF 0x1b %s\n",
