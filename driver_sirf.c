@@ -429,7 +429,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	gpsd_report(LOG_WARN, "SiRF: link too slow, disabling subframes.\n");
     }
 #endif /* ALLOW_RECONFIGURE */
-    gpsd_report(LOG_DATA, "SiRF: MID 0x06: subtype='%s' mask={DEVICEID}\n",
+    gpsd_report(LOG_DATA, "SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);
     return DEVICEID_IS;
 }
