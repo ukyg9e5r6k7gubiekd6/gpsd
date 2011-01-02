@@ -1042,6 +1042,7 @@ static void handle_request(struct subscriber_t *sub,
 		if (devconf.path[0] != '\0') {
 		    /* user specified a path, try to assign it */
 		    device = find_device(devconf.path);
+		    /* do not optimize away, we need 'device' later on! */
 		    if (!awaken(device)) {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
