@@ -916,8 +916,7 @@ static bool garmin_usb_detect(struct gps_device_t *session)
 	if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
 	    /* dunno how this happens, but it does on some compilers */
 	    gpsd_report(LOG_ERROR,
-			"Garmin: garmin_usb_detect: Compile error, garmin.Buffer too small.\n",
-			strerror(errno));
+			"Garmin: garmin_usb_detect: Compile error, garmin.Buffer too small.\n");
 	    return false;
 	}
 
