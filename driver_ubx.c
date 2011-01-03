@@ -399,6 +399,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_RXM_SFRB:
 	ubx_msg_sfrb(session, &buf[6]);
+	mask = SUBFRAME_IS;
 	break;
     case UBX_RXM_SVSI:
 	gpsd_report(LOG_PROG, "UBX_RXM_SVSI\n");

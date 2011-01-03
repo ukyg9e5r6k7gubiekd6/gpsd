@@ -336,11 +336,12 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s,",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"subframe\":%s,\"scaled\":%s,\"timing\":%s,",
 		   ccp->watcher ? "true" : "false",
 		   ccp->json ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
 		   ccp->raw,
+		   ccp->subframe ? "true" : "false",
 		   ccp->scaled ? "true" : "false",
 		   ccp->timing ? "true" : "false");
     if (ccp->devpath[0] != '\0')
@@ -350,6 +351,12 @@ void json_watch_dump(const struct policy_t *ccp,
 	reply[strlen(reply) - 1] = '\0';
     (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
     /*@+compdef@*/
+}
+
+void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
+		     size_t buflen)
+{
+    // FIXME: to be filled in
 }
 
 #if defined(RTCM104V2_ENABLE)

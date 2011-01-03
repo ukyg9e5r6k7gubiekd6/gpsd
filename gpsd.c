@@ -1286,6 +1286,19 @@ static void json_report(struct subscriber_t *sub,
 		      buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }
+    /*
+     * Subframe reporting works a bit differently because
+     * it has to be enabled at device level in order for
+     * *any* subscriber to see it, but *not all* subscribers
+     * necessarily want it.  So we leave it up to the device
+     * drivers to decide whether to turn subframe reporting on,
+     * and gate the reports here.
+     */
+    if (sub->policy.subframe && (changed & SUBFRAME_IS) != 0) {
+	subframe_json_dump(&device->gpsdata.subframe,
+			   buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
 #ifdef COMPASS_ENABLE
     if ((changed & ATT_IS) != 0) {
 	json_att_dump(&device->gpsdata,

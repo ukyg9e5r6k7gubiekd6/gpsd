@@ -244,7 +244,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 	words[i] = (uint32_t)(getleu32(buf, 7 + 14 + 4 * i) >> 6) & 0xffffff;
 
     gpsd_interpret_subframe(session, prn, words);
-    return ONLINE_IS;
+    return SUBFRAME_IS;
 }
 
 static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,

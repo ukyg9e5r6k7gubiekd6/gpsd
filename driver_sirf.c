@@ -460,7 +460,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
     }
 #endif /* ALLOW_RECONFIGURE */
-    return 0;
+
+    return SUBFRAME_IS;
 }
 
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */

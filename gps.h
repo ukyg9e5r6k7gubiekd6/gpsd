@@ -1211,6 +1211,7 @@ struct policy_t {
     bool json;				/* requesting JSON? */
     bool nmea;				/* requesting dumping as NMEA? */
     int raw;				/* requesting raw data? */
+    bool subframe;			/* requesting subframe output? */
     bool scaled;			/* requesting report scaling? */ 
     bool timing;			/* requesting timing info */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */   
