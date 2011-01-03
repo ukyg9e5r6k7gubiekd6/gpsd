@@ -37,28 +37,28 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 	va_list ap;
 	va_start(ap, fmt);
 	switch ( errlevel ) {
-	case 0:
+	case LOG_ERROR:
 		err_str = "ERROR: ";
 		break;
-	case 1:
+	case LOG_WARN:
 		err_str = "WARN: ";
 		break;
-	case 2:
+	case LOG_INF:
 		err_str = "INFO: ";
 		break;
-	case 3:
+	case LOG_DATA:
 		err_str = "DATA: ";
 		break;
-	case 4:
+	case LOG_PROG:
 		err_str = "PROG: ";
 		break;
-	case 5:
+	case LOG_IO:
 		err_str = "IO: ";
 		break;
-	case 6:
+	case LOG_SPIN:
 		err_str = "SPIN: ";
 		break;
-	case 7:
+	case LOG_RAW:
 		err_str = "RAW: ";
 		break;
 	default:
