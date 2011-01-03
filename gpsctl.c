@@ -32,10 +32,41 @@ static unsigned int timeout = 8;
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
+    char *err_str;
     if (errlevel <= debuglevel) {
 	va_list ap;
 	va_start(ap, fmt);
-	(void)fputs("gpsctl: ", stderr);
+	switch ( errlevel ) {
+	case 0:
+		err_str = "ERROR: ";
+		break;
+	case 1:
+		err_str = "WARN: ";
+		break;
+	case 2:
+		err_str = "INFO: ";
+		break;
+	case 3:
+		err_str = "DATA: ";
+		break;
+	case 4:
+		err_str = "PROG: ";
+		break;
+	case 5:
+		err_str = "IO: ";
+		break;
+	case 6:
+		err_str = "SPIN: ";
+		break;
+	case 7:
+		err_str = "RAW: ";
+		break;
+	default:
+		err_str = "UNK: ";
+	}
+
+	(void)fputs("gpsctl:", stderr);
+	(void)fputs(err_str, stderr);
 	(void)vfprintf(stderr, fmt, ap);
 	va_end(ap);
     }
