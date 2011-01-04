@@ -484,6 +484,7 @@ struct rtcm3_t {
  * precision. See IS-GPS-200E, Table 20-VI  */
 struct almanac_t
 {
+    uint8_t sv;  /* The satellite this refers to */
     /* toa, almanac reference time, 8 bits unsigned, seconds */
     uint8_t toa;
     long l_toa;

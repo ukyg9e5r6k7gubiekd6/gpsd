@@ -12,7 +12,7 @@
 #define uint2int( u, bit) ( u & (1<<bit) ? u - (1<<bit) : u)
 
 /*@ -usedef @*/
-int gpsd_interpret_subframe_raw(struct gps_device_t *session,
+gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 				unsigned int tSVID, uint32_t words[])
 {
     unsigned int i;
@@ -72,8 +72,7 @@ int gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	words[i] = (words[i] >> 6) & 0xffffff;
     }
 
-    gpsd_interpret_subframe(session, tSVID, words);
-    return 0;
+    return gpsd_interpret_subframe(session, tSVID, words);
 }
 
 /* you can find up to date almanac data for comparision here:
@@ -84,6 +83,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
 			     unsigned int data_id, 
 			     /*@out@*/struct almanac_t *almp)
 {
+    almp->sv     = sv; /* ignore the 0 sv problem for now */
     almp->e      = ( words[2] & 0x00FFFF);
     almp->d_eccentricity  = pow(2.0,-21) * almp->e;
     /* carefull, each SV can have more than 2 toa's active at the same time 
@@ -118,7 +118,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
 		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
-		subframe, sv, tSVID, data_id, 
+		subframe, almp->sv, tSVID, data_id, 
 		almp->d_eccentricity, 
 		almp->l_toa, 
 		almp->d_deltai,
