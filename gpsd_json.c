@@ -336,11 +336,12 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"subframe\":%s,\"scaled\":%s,\"timing\":%s,",
 		   ccp->watcher ? "true" : "false",
 		   ccp->json ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
 		   ccp->raw,
+		   ccp->subframe ? "true" : "false",
 		   ccp->scaled ? "true" : "false",
 		   ccp->timing ? "true" : "false");
     if (ccp->devpath[0] != '\0')
@@ -349,6 +350,39 @@ void json_watch_dump(const struct policy_t *ccp,
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';
     (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
+    /*@+compdef@*/
+}
+
+void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
+		     size_t buflen)
+{
+    /* only do subframe 5 almanac right now */
+    if ( 5 != subframe->subframe_num ) {
+    	return;
+    }
+    if ( (  1 > subframe->subframe_num )
+      || ( 24 < subframe->subframe_num )) {
+    	return;
+    }
+    /*@-compdef@*/
+    (void)snprintf(buf, buflen,
+		"{\"class\":\"ALMANAC\",\"ID\":%d,\"Health\":%u,"
+		"\"e\":%g,\"toa\":%lu,"
+		"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.8g,"
+		"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,\"af0\":%.5e,"
+		"\"af1\":%.5e}\r\n",
+		subframe->sub5.almanac.sv,
+		subframe->sub5.almanac.svh,
+		subframe->sub5.almanac.d_eccentricity, 
+		subframe->sub5.almanac.l_toa, 
+		subframe->sub5.almanac.d_deltai,
+		subframe->sub5.almanac.d_Omegad,
+		subframe->sub5.almanac.d_sqrtA,
+		subframe->sub5.almanac.d_Omega0,
+		subframe->sub5.almanac.d_omega,
+		subframe->sub5.almanac.d_M0,
+		subframe->sub5.almanac.d_af0,
+		subframe->sub5.almanac.d_af1);
     /*@+compdef@*/
 }
 

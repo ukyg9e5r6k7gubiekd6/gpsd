@@ -195,28 +195,28 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 	/* +unrecog */
 #endif /* PPS_ENABLE */
 	switch ( errlevel ) {
-	case 0:
+	case LOG_ERROR:
 		err_str = "ERROR: ";
 		break;
-	case 1:
+	case LOG_WARN:
 		err_str = "WARN: ";
 		break;
-	case 2:
+	case LOG_INF:
 		err_str = "INFO: ";
 		break;
-	case 3:
+	case LOG_DATA:
 		err_str = "DATA: ";
 		break;
-	case 4:
+	case LOG_PROG:
 		err_str = "PROG: ";
 		break;
-	case 5:
+	case LOG_IO:
 		err_str = "IO: ";
 		break;
-	case 6:
+	case LOG_SPIN:
 		err_str = "SPIN: ";
 		break;
-	case 7:
+	case LOG_RAW:
 		err_str = "RAW: ";
 		break;
 	default:
@@ -1041,7 +1041,9 @@ static void handle_request(struct subscriber_t *sub,
 	    } else {
 		if (devconf.path[0] != '\0') {
 		    /* user specified a path, try to assign it */
-		    if (!awaken(find_device(devconf.path))) {
+		    device = find_device(devconf.path);
+		    /* do not optimize away, we need 'device' later on! */
+		    if (!awaken(device)) {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
@@ -1282,6 +1284,19 @@ static void json_report(struct subscriber_t *sub,
     if ((changed & SATELLITE_IS) != 0) {
 	json_sky_dump(&device->gpsdata,
 		      buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+    /*
+     * Subframe reporting works a bit differently because
+     * it has to be enabled at device level in order for
+     * *any* subscriber to see it, but *not all* subscribers
+     * necessarily want it.  So we leave it up to the device
+     * drivers to decide whether to turn subframe reporting on,
+     * and gate the reports here.
+     */
+    if (sub->policy.subframe && (changed & SUBFRAME_IS) != 0) {
+	subframe_json_dump(&device->gpsdata.subframe,
+			   buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }
 #ifdef COMPASS_ENABLE
@@ -1762,7 +1777,7 @@ int main(int argc, char *argv[])
 	 */
 	now->tm_year += 1900;
 	context.century = now->tm_year - (now->tm_year % 100);
-	unix_to_iso8601(context.start_time, scr, sizeof(scr));
+	(void)unix_to_iso8601((double)context.start_time, scr, sizeof(scr));
 	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
 		    scr, (int)context.start_time);
     }

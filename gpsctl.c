@@ -21,7 +21,7 @@
 #include "revision.h"
 
 static int debuglevel;
-static unsigned int timeout = 4;
+static unsigned int timeout = 8;
 
 /*
  * Set this as high or higher than the maximum number of subtype 
@@ -32,10 +32,41 @@ static unsigned int timeout = 4;
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
+    char *err_str;
     if (errlevel <= debuglevel) {
 	va_list ap;
 	va_start(ap, fmt);
-	(void)fputs("gpsctl: ", stderr);
+	switch ( errlevel ) {
+	case LOG_ERROR:
+		err_str = "ERROR: ";
+		break;
+	case LOG_WARN:
+		err_str = "WARN: ";
+		break;
+	case LOG_INF:
+		err_str = "INFO: ";
+		break;
+	case LOG_DATA:
+		err_str = "DATA: ";
+		break;
+	case LOG_PROG:
+		err_str = "PROG: ";
+		break;
+	case LOG_IO:
+		err_str = "IO: ";
+		break;
+	case LOG_SPIN:
+		err_str = "SPIN: ";
+		break;
+	case LOG_RAW:
+		err_str = "RAW: ";
+		break;
+	default:
+		err_str = "UNK: ";
+	}
+
+	(void)fputs("gpsctl:", stderr);
+	(void)fputs(err_str, stderr);
 	(void)vfprintf(stderr, fmt, ap);
 	va_end(ap);
     }
@@ -91,7 +122,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	(void)strlcat(buf, "\n", BUFSIZ);
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
 	gpsd_report(LOG_ERROR, "gps_query(), write failed\n");
-	return -1;
+	return false;
     }
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
 
@@ -122,6 +153,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	    return false;
 	}
 
+	/*@ +ignorequals @*/
 	if ((expect & gpsdata->set) != 0)
 	    return true;
 	else if (time(NULL) - starttime > timeout) {
@@ -130,7 +162,10 @@ static bool gps_query(struct gps_data_t *gpsdata,
 			timeout);
 	    return false;
 	}
+	/*@ -ignorequals @*/
     }
+
+    return false;
 }
 
 static void onsig(int sig)
@@ -146,7 +181,7 @@ static void onsig(int sig)
 
 int main(int argc, char **argv)
 {
-    int option, status;
+    int option, status, devcount;
     char *device = NULL, *devtype = NULL; 
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
@@ -295,7 +330,7 @@ int main(int argc, char **argv)
     (void) signal(SIGTERM, onsig);
     (void) signal(SIGQUIT, onsig);
 
-    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen_r() params */
+    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen() params */
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
 	if (gps_open(NULL, NULL, &gpsdata) != 0) {
@@ -306,22 +341,15 @@ int main(int argc, char **argv)
     }
     /*@-nullpass@*/
 
-    /* ^ someday, add out annotation to the gps_poll() param  and remove */
     if (!lowlevel) {
-	/* OK, there's a daemon instance running.  Do things the easy way */
-	struct devconfig_t *devlistp;
-	(void)gps_read(&gpsdata);
-	if ((gpsdata.set & VERSION_SET) != 0) {
-	    gpsd_report(LOG_ERROR, "no VERSION response received; update your gpsd.\n"); 
-	    (void)gps_close(&gpsdata);
-	    exit(1);
-	}
-	if (!gps_query(&gpsdata, DEVICELIST_SET, timeout, "?DEVICES;\n")) {
+	int i;
+
+	/* what devices have we available? */
+	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
 	    (void)gps_close(&gpsdata);
 	    exit(1);
 	}
-
 	if (gpsdata.devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(&gpsdata);
@@ -334,34 +362,70 @@ int main(int argc, char **argv)
 	}
 	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata.devices.ndevices);
 
-	if (gpsdata.devices.ndevices == 1) {
-	    devlistp = &gpsdata.devices.list[0];
-	    device = devlistp->path;
+	/* try to mine the devicelist return for the data we want */
+	if (gpsdata.devices.ndevices == 1 && device == NULL) {
+	    device = gpsdata.dev.path;
+	    i = 0;
 	} else {
-	    int i;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata.devices.ndevices; i++)
-		if (strcmp(device, gpsdata.devices.list[i].path) == 0)
-		    goto foundit;
-	    gpsd_report(LOG_ERROR, "specified device not found.\n");
+		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {
+		    goto devicelist_entry_matches;
+		}
+	    gpsd_report(LOG_ERROR, "specified device not found in device list.\n");
 	    (void)gps_close(&gpsdata);
 	    exit(1);
-	foundit:
-	    devlistp = &gpsdata.devices.list[i];
+	devicelist_entry_matches:;
+	}
+	(void)memcpy(&gpsdata.dev, 
+		     &gpsdata.devices.list[i],
+		     sizeof(struct devconfig_t));
+	devcount = gpsdata.devices.ndevices;
+
+	/* if the device has not identified, watch it until it does so */
+	if (gpsdata.dev.driver[0] == '\0') {
+	    if (gps_stream(&gpsdata, WATCH_ENABLE|WATCH_JSON, NULL) == -1) {
+		gpsd_report(LOG_ERROR, "stream set failed.\n");
+		(void)gps_close(&gpsdata);
+		exit(1);
+	    }
+
+	    while (devcount > 0) {
+		errno = 0;
+		if (gps_read(&gpsdata) == -1) {
+		    gpsd_report(LOG_ERROR, "data read failed.\n");
+		    (void)gps_close(&gpsdata);
+		    exit(1);
+		}
+
+		if (gpsdata.set & DEVICE_SET) {
+		    --devcount;
+		    assert(gpsdata.dev.path[0]!=0 && gpsdata.dev.driver[0]!=0);
+		    if (strcmp(gpsdata.dev.path, device) == 0) {
+			goto matching_device_seen;
+		    }
+		}
+	    }
+	    gpsd_report(LOG_ERROR, "data read failed.\n");
+	    (void)gps_close(&gpsdata);
+	    exit(1);
+	matching_device_seen:;
+	}
+
+	/* sanity check */
+	if (gpsdata.dev.driver[0] == '\0') {
+	    gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
+			gpsdata.dev.path);
+	    (void)gps_close(&gpsdata);
+	    exit(0);
 	}
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?WATCH={\"enable\":true,\"json\":true};\n"))
 		gpsd_report(LOG_SHOUT, "%s identified as %s at %d\n",
 			    gpsdata.dev.path,
 			    gpsdata.dev.driver,
 			    gpsdata.dev.baudrate);
-	    else
-		gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
-			    devlistp->path);
-	    gps_close(&gpsdata);
-	    exit(0);
 	}
 
 	status = 0;
@@ -374,14 +438,14 @@ int main(int argc, char **argv)
 
 	/*@-boolops@*/
 	if (to_nmea) {
-	    if (!gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
+	    if (!gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
 		gpsd_report(LOG_ERROR, "%s mode change to NMEA failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
 		gpsd_report(LOG_PROG, "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	else if (to_binary) {
-	    if (gps_query(&gpsdata, DEVICE_SET, timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
+	    if (gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
 		gpsd_report(LOG_ERROR, "%s mode change to native mode failed\n", gpsdata.dev.path);
 		status = 1;
 	    } else
@@ -393,7 +457,7 @@ int main(int argc, char **argv)
 	    char stopbits = '1';
 	    if (strchr(speed, ':') == NULL)
 		(void)gps_query(&gpsdata,
-				 DEVICE_SET, timeout,
+				DEVICE_SET, (int)timeout,
 				 "?DEVICE={\"path\":\"%s\",\"bps\":%s}\r\n", 
 				 device, speed);
 	    else {
@@ -419,7 +483,7 @@ int main(int argc, char **argv)
 		}
 		if (status == 0)
 		    (void)gps_query(&gpsdata,
-				     DEVICE_SET, timeout,
+				    DEVICE_SET, (int)timeout,
 				     "?DEVICE={\"path\":\"%s\",\"bps\":%s,\"parity\":\"%c\",\"stopbits\":%c}\r\n", 
 				     device, speed, parity, stopbits);
 	    }
@@ -435,7 +499,7 @@ int main(int argc, char **argv)
 	}
 	if (rate != NULL) {
 	    (void)gps_query(&gpsdata, 
-			     DEVICE_SET, timeout,
+			    DEVICE_SET, (int)timeout,
 			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n", 
 			    device, rate);
 	}
@@ -515,9 +579,9 @@ int main(int argc, char **argv)
 		    gpsd_report(LOG_ERROR,
 				"autodetection failed.\n");
 		    exit(2);
-		} else {
+		} else if (session.packet.type > COMMENT_PACKET) {
 		    gpsd_report(LOG_IO,
-				"autodetection after %d reads.\n", seq);
+				"autodetection after %d reads finds packet type %d.\n", seq, session.packet.type);
 		    (void) alarm(0);
 		    break;
 		}
