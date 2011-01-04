@@ -999,7 +999,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * packets.  This may be a generic bug of all Garmin chipsets.
      */
     if (strlen(sentence) > NMEA_MAX) {
-	gpsd_report(LOG_WARN, "Overlong packet rejected.\n");
+	gpsd_report(LOG_WARN, "Overlong packet of %zd chars rejected.\n",
+		    strlen(sentence));
 	return ONLINE_IS;
     }
 
