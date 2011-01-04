@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.4, Dec 2010
+v2.5, Jan 2011
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -47,7 +47,7 @@ distribution, but adds more information on the following topics:
 The NMEA specification requires a physical-level protocol compatible
 with RS422 at 4800bps, 8N1 or 7N2.  It is RS422 rather than RS232
 because NMEA expects many navigational devices to feed a common serial
-bus.  The darta encoding is ASCII with the high data bit not used and zeroed.
+bus.  The data encoding is ASCII with the high data bit not used and zeroed.
 
 Consumer-grade GPS sensors normally report over an RS232 port or a USB
 port emulating an RS232 serial device; some use Bluetooth. Baud rate
@@ -84,6 +84,10 @@ the Status field will be set to "A" (data valid) for Mode Indicators A
 and D, and to "V" (data invalid) for all other values of the Mode
 Indicator.  This is confirmed by [IEC].
 
+In NMEA 3.0, the GBS sentence reports a complete set of error estimates. Note
+however that many receivers claiming to emit "3.0" or "3.01" don't
+actually ship this sentence.
+
 == NMEA Encoding Conventions ==
 
 An NMEA sentence consists of a start delimiter, followed by a
@@ -118,7 +122,17 @@ common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
 Date and time in GPS is computed as number of weeks from the zero
-second of 6 January 1980, plus number of seconds into the week.
+second of 6 January 1980, plus number of seconds into the week.  GPS
+time is not leap-second corrected, though satellites also broadcast a
+current leap-second correction which is updated on six-month
+boundaries according to rotational bulletins issued by the
+International Earth Rotation and Reference Systems Service (IERS).
+
+GPS date and time are subject to a rollover problem in the 10-bit
+week number counter, which will re-zero every 1024 weeks (roughly
+every 20 years). The next rollover would fall in 2019, but plans
+are afoot to upgrade the satellite counters to 13 bits; this will
+delay the next rollover until 2173.
 
 == Error status indications
 
