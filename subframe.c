@@ -132,7 +132,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
 		almp->d_af1);
 }
 
-void gpsd_interpret_subframe(struct gps_device_t *session,
+gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			     unsigned int tSVID, uint32_t words[])
 {
     /*
@@ -169,7 +169,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	gpsd_report(LOG_WARN,
 	    "50B: gpsd_interpret_subframe bad preamble: 0x%x header 0x%x\n",
 	    preamble, words[0]);
-	return;
+	return 0;
     }
     subp->integrity = ((words[0] >> 1) & 0x01);
     /* The subframe ID is in the Hand Over Word (page 80) */
@@ -816,9 +816,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	break;
     default:
 	/* unknown/illegal subframe */
+        return 0;
 	break;
     }
-    return;
+    return SUBFRAME_IS;
 }
 
 /*@ +usedef @*/

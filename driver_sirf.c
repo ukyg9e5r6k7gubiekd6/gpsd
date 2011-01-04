@@ -450,7 +450,6 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	words[i] = (uint32_t)getbeu32(buf, 4 * i + 3);
     }
 
-    (void)gpsd_interpret_subframe_raw(session, svid, words);
 
 #ifdef ALLOW_RECONFIGURE
     if ( session->gpsdata.dev.baudrate < 38400) {
@@ -461,7 +460,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     }
 #endif /* ALLOW_RECONFIGURE */
 
-    return SUBFRAME_IS;
+    return gpsd_interpret_subframe_raw(session, svid, words);
 }
 
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */

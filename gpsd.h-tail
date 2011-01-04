@@ -149,8 +149,8 @@ extern unsigned int isgps_parity(isgps30bits_t);
 extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 
 extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
-extern void subframe_json_dump(const struct subframe_t *, /*@out@*/ char buf[],
-			       size_t);
+extern void subframe_json_dump(const struct subframe_t *, /*@out@*/ char buf[], 
+				size_t);
 extern void rtcm2_sager_dump(const struct rtcm2_t *, /*@out@*/char[], size_t);
 extern void rtcm2_json_dump(const struct rtcm2_t *, /*@out@*/char[], size_t);
 extern int rtcm2_undump(/*@out@*/struct rtcm2_t *, char *);
@@ -561,7 +561,7 @@ extern void gpsd_assert_sync(struct gps_device_t *);
 extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
-extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int, uint32_t[]);
+extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int, uint32_t[]);
 extern int gpsd_interpret_subframe_raw(struct gps_device_t *, unsigned int, uint32_t[]);
 extern int gpsd_hexdump_level;
 extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);

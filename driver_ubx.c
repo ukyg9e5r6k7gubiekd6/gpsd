@@ -273,7 +273,7 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 /*
  * Raw Subframes
  */
-static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
+static gps_mask_t ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
     unsigned int i, chan, svid;
     uint32_t words[10];
@@ -287,7 +287,7 @@ static void ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
 	words[i] = (uint32_t)getleu32(buf, 4 * i + 2) & 0xffffff;
     }
 
-    gpsd_interpret_subframe(session, svid, words);
+    return gpsd_interpret_subframe(session, svid, words);
 }
 
 static void ubx_msg_inf(unsigned char *buf, size_t data_len)
@@ -398,8 +398,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(LOG_IO, "UBX_RXM_RAW\n");
 	break;
     case UBX_RXM_SFRB:
-	ubx_msg_sfrb(session, &buf[6]);
-	mask = SUBFRAME_IS;
+	mask = ubx_msg_sfrb(session, &buf[6]);
 	break;
     case UBX_RXM_SVSI:
 	gpsd_report(LOG_PROG, "UBX_RXM_SVSI\n");
