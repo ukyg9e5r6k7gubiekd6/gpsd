@@ -158,7 +158,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 	    return true;
 	else if (time(NULL) - starttime > timeout) {
 	    gpsd_report(LOG_ERROR, 
-			"timed out after %d seconds'\n",
+			"timed out after %d seconds\n",
 			timeout);
 	    return false;
 	}
