@@ -448,7 +448,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     /* FIXME!! I really doubt this is Big Endian compatible */
     uint8_t preamble;
-    int i;   /* handy loop counter */
+    int i = 0;   /* handy loop counter */
     struct subframe *subp = &subframe;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
