@@ -105,7 +105,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
     almp->d_omega  = pow(2.0, -23) * almp->omega;
     almp->M0       = ( words[8] & 0x00FFFFFF);
     almp->M0       = uint2int(almp->M0, 24);
-    almp->d_M0     = pow(2.0,-23) * almp->M0;
+    almp->d_M0     = pow(2.0,-23) * almp->M0 * GPS_PI;
     almp->af1      = ((words[9] >>  5) & 0x0007FF);
     almp->af1      = uint2int(almp->af1, 11);
     almp->d_af1    = pow(2.0,-38) * almp->af1;
@@ -250,7 +250,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub2.M0   <<= 24;
 	subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
 	subp->sub2.M0     = uint2int(subp->sub2.M0, 24);
-	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0;
+	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0 * GPS_PI;
 	subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
 	subp->sub2.e      = ( words[5] & 0x0000FF);
