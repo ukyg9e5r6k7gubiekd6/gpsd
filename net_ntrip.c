@@ -195,7 +195,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	memset(&buf[len], 0, (size_t) (blen - len));
 
 	if ((rlen = recv(fd, &buf[len], (size_t) (blen - 1 - len), 0)) == -1) {
-	    if (errno == EINTR || errno == EAGAIN)
+	    if (errno == EINTR)
 		continue;
 	    gpsd_report(LOG_ERROR, "ntrip stream read error %d on fd %d\n",
 		        errno, fd);
@@ -393,7 +393,7 @@ static int ntrip_stream_open(const char *caster, const char *port,
 
     memset(buf, 0, sizeof(buf));
     while (read(context->dsock, buf, sizeof(buf) - 1) == -1) {
-	if (errno == EINTR || errno == EAGAIN)
+	if (errno == EINTR)
 	    continue;
 	gpsd_report(LOG_ERROR, "ntrip stream read error %d on fd %d\n", errno,
 		    context->dsock);
