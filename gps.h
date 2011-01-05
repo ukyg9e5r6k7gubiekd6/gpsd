@@ -543,6 +543,7 @@ struct subframe_t {
     bool alert;
     /* antispoof, A-S mode is ON in that SV, 1 bit */
     bool antispoof;
+    int is_almanac;
     union {
         /* subframe 1, part of ephemeris, see IS-GPS-200E, Table 20-II
 	 * and Table 20-I */

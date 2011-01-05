@@ -364,10 +364,8 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		subframe->TOW17,
 	        subframe->subframe_num);
     	
-    /* only do subframe 5 almanac right now */
-    if ( 5 == subframe->subframe_num ) {
-	if ( (  0 < subframe->pageid )
-	  && ( 25 > subframe->pageid )) {
+    /* only do almanac right now */
+    if ( subframe->is_almanac ) {
 	    /*@-compdef@*/
 	    len = strlen(buf);
 	    (void)snprintf(buf + len, buflen - len,
@@ -388,7 +386,6 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			subframe->sub5.almanac.d_M0,
 			subframe->sub5.almanac.d_af0,
 			subframe->sub5.almanac.d_af1);
-	}
     }
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+compdef@*/

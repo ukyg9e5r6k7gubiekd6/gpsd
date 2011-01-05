@@ -190,6 +190,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
      */
     subp->pageid  = (words[2] >> 16) & 0x00003F; /* only in frames 4 & 5 */
     subp->data_id = (words[2] >> 22) & 0x3;      /* only in frames 4 & 5 */
+    subp->is_almanac = 0;
 
     switch (subp->subframe_num) {
     case 1:
@@ -736,6 +737,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		;			/* no op */
 	    }
 	    if ( -1 < sv ) {
+	        subp->is_almanac = 1;
 		subframe_almanac(subp->tSVID, words, subp->subframe_num, 
 			sv, subp->data_id, &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
@@ -753,6 +755,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	 * reference time, the almanac reference week number.
 	 */
 	if ( 25 > subp->pageid ) {
+	    subp->is_almanac = 1;
             subframe_almanac(subp->tSVID, words, subp->subframe_num, 
 	    	subp->pageid, subp->data_id, &subp->sub5.almanac);
 	} else if ( 51 == subp->pageid ) {
