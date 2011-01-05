@@ -371,7 +371,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 	    (void)snprintf(buf + len, buflen - len,
 			",\"ID\":%d,\"Health\":%u,"
 			"\"e\":%g,\"toa\":%lu,"
-			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.8g,"
+			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.10g,"
 			"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,"
 			"\"af0\":%.5e,\"af1\":%.5e",
 			subframe->sub5.almanac.sv,

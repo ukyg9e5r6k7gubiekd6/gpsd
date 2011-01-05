@@ -116,7 +116,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
     almp->d_af0    = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
-		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.8g Omega0:%.10e "
+		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.10g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
 		subframe, almp->sv, tSVID, data_id, 
 		almp->d_eccentricity, 
