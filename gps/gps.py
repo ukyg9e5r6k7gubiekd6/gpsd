@@ -16,7 +16,7 @@
 #
 import time
 from client import *
-import misc
+from misc import isotime
 
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
@@ -267,6 +267,8 @@ class gps(gpsdata, gpsjson):
         elif self.data.get("class") == "TPV":
             self.valid = ONLINE_SET
             self.fix.time = default("time", NaN, TIME_SET)
+            if not isnan(self.fix.time):
+                self.utc = isotime(self.fix.time)
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)
             self.fix.latitude =  default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)
@@ -316,7 +318,7 @@ class gps(gpsdata, gpsjson):
         return 0
 
     def next(self):
-        if self.poll() == -1:
+        if self.read() == -1:
             raise StopIteration
         if hasattr(self, "data"):
             return self.data
@@ -329,7 +331,7 @@ class gps(gpsdata, gpsjson):
             # If we're looking at a daemon that speaks JSON, this
             # should have been set when we saw the initial VERSION
             # response.  Note, however, that this requires at
-            # least one poll() before stream() is called
+            # least one read() before stream() is called
             if self.newstyle or flags & WATCH_NEWSTYLE:
                 flags |= WATCH_JSON
             else:
