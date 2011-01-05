@@ -642,7 +642,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
-    if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW)) == 0) {
+    if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW | WATCH_SUBFRAMES)) == 0) {
 	flags |= WATCH_JSON;
     }
 #ifndef USE_QT
