@@ -400,7 +400,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    subframe->sub2.u_AODO);
     } else if ( 3 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
-	    "\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
+	    ",\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
 	    "\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,\"omega\":%.11e,"
 	    "\"Omegad\":%.6e", 
 		    subframe->sub3.IODE, 
@@ -432,6 +432,20 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			subframe->sub5.almanac.d_M0,
 			subframe->sub5.almanac.d_af0,
 			subframe->sub5.almanac.d_af1);
+    } else if ( 4 == subframe->subframe_num ) {
+	(void)snprintf(buf + len, buflen - len,
+	    ",\"pageid\":%u",
+		subframe->pageid);
+	len = strlen(buf);
+	if ( 55 == subframe->pageid ) {
+		(void)snprintf(buf + len, buflen - len,
+		    ",\"system_message\":%.50s",
+			subframe->sub4_17.str);
+	}
+    } else if ( 5 == subframe->subframe_num ) {
+	(void)snprintf(buf + len, buflen - len,
+	    ",\"pageid\":%u",
+		subframe->pageid);
     }
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+compdef@*/
