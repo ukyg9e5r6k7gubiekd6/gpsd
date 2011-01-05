@@ -356,33 +356,40 @@ void json_watch_dump(const struct policy_t *ccp,
 void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		     size_t buflen)
 {
+    int len = 0;
+
+    (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
+    		"\"frame\":%u",
+		(unsigned int)subframe->tSVID,
+	        subframe->subframe_num);
+    	
     /* only do subframe 5 almanac right now */
-    if ( 5 != subframe->subframe_num ) {
-    	return;
+    if ( 5 == subframe->subframe_num ) {
+	if ( (  0 < subframe->pageid )
+	  && ( 25 > subframe->pageid )) {
+	    /*@-compdef@*/
+	    len = strlen(buf);
+	    (void)snprintf(buf + len, buflen - len,
+			",\"ID\":%d,\"Health\":%u,"
+			"\"e\":%g,\"toa\":%lu,"
+			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.8g,"
+			"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,"
+			"\"af0\":%.5e,\"af1\":%.5e",
+			subframe->sub5.almanac.sv,
+			subframe->sub5.almanac.svh,
+			subframe->sub5.almanac.d_eccentricity, 
+			subframe->sub5.almanac.l_toa, 
+			subframe->sub5.almanac.d_deltai,
+			subframe->sub5.almanac.d_Omegad,
+			subframe->sub5.almanac.d_sqrtA,
+			subframe->sub5.almanac.d_Omega0,
+			subframe->sub5.almanac.d_omega,
+			subframe->sub5.almanac.d_M0,
+			subframe->sub5.almanac.d_af0,
+			subframe->sub5.almanac.d_af1);
+	}
     }
-    if ( (  1 > subframe->subframe_num )
-      || ( 24 < subframe->subframe_num )) {
-    	return;
-    }
-    /*@-compdef@*/
-    (void)snprintf(buf, buflen,
-		"{\"class\":\"ALMANAC\",\"ID\":%d,\"Health\":%u,"
-		"\"e\":%g,\"toa\":%lu,"
-		"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.8g,"
-		"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,\"af0\":%.5e,"
-		"\"af1\":%.5e}\r\n",
-		subframe->sub5.almanac.sv,
-		subframe->sub5.almanac.svh,
-		subframe->sub5.almanac.d_eccentricity, 
-		subframe->sub5.almanac.l_toa, 
-		subframe->sub5.almanac.d_deltai,
-		subframe->sub5.almanac.d_Omegad,
-		subframe->sub5.almanac.d_sqrtA,
-		subframe->sub5.almanac.d_Omega0,
-		subframe->sub5.almanac.d_omega,
-		subframe->sub5.almanac.d_M0,
-		subframe->sub5.almanac.d_af0,
-		subframe->sub5.almanac.d_af1);
+    (void)strlcat(buf, "}\r\n", buflen);
     /*@+compdef@*/
 }
 
