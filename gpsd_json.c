@@ -358,16 +358,62 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 {
     int len = 0;
 
-    (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
+    (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%02u,"
     		"\"TOW17\":%u,\"frame\":%u",
 		(unsigned int)subframe->tSVID,
 		subframe->TOW17,
 	        subframe->subframe_num);
+    len = strlen(buf);
     	
     /* only do almanac right now */
-    if ( subframe->is_almanac ) {
+    if ( 1 == subframe->subframe_num ) {
+	(void)snprintf(buf + len, buflen - len,
+	            ",\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
+		    "\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,\"toc\":%lu,"
+		    "\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e", 
+		    subframe->sub1.WN,
+		    subframe->sub1.IODC,
+		    subframe->sub1.l2,
+		    subframe->sub1.ura,
+		    subframe->sub1.hlth,
+		    subframe->sub1.l2p,
+		    subframe->sub1.d_Tgd,
+		    subframe->sub1.l_toc,
+		    subframe->sub1.d_af2,
+		    subframe->sub1.d_af1,
+		    subframe->sub1.d_af0);
+    } else if ( 2 == subframe->subframe_num ) {
+	(void)snprintf(buf + len, buflen - len,
+		    ",\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
+		    "\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
+		    "\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u", 
+		    subframe->sub2.IODE,
+		    subframe->sub2.d_Crs,
+		    subframe->sub2.d_deltan,
+		    subframe->sub2.d_M0,
+		    subframe->sub2.d_Cuc,
+		    subframe->sub2.d_eccentricity,
+		    subframe->sub2.d_Cus,
+		    subframe->sub2.d_sqrtA,
+		    subframe->sub2.l_toe,
+		    subframe->sub2.fit,
+		    subframe->sub2.u_AODO);
+    } else if ( 3 == subframe->subframe_num ) {
+	(void)snprintf(buf + len, buflen - len,
+	    "\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
+	    "\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,\"omega\":%.11e,"
+	    "\"Omegad\":%.6e", 
+		    subframe->sub3.IODE, 
+		    subframe->sub3.d_IDOT, 
+		    subframe->sub3.d_Cic, 
+		    subframe->sub3.d_Omega0, 
+		    subframe->sub3.d_Cis, 
+		    subframe->sub3.d_i0, 
+		    subframe->sub3.d_Crc, 
+		    subframe->sub3.d_omega, 
+		    subframe->sub3.d_Omegad );
+    } else if ( subframe->is_almanac ) {
 	    /*@-compdef@*/
-	    len = strlen(buf);
 	    (void)snprintf(buf + len, buflen - len,
 			",\"ID\":%d,\"Health\":%u,"
 			"\"e\":%g,\"toa\":%lu,"
