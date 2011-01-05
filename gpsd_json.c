@@ -437,10 +437,35 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 	    ",\"pageid\":%u",
 		subframe->pageid);
 	len = strlen(buf);
-	if ( 55 == subframe->pageid ) {
+	switch (subframe->pageid ) {
+	case 55:
 		(void)snprintf(buf + len, buflen - len,
 		    ",\"system_message\":%.50s",
 			subframe->sub4_17.str);
+		break;
+	case 56:
+		(void)snprintf(buf + len, buflen - len,
+			",\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,\"a3\":%.5g,"
+			"\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,\"b3\":%.5g,"
+			"\"A1\":%.11e,\"A0\":%.11e,\"tot\":%.5g,\"WNt\":%u,"
+			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d",
+			    subframe->sub4_18.d_alpha0,
+			    subframe->sub4_18.d_alpha1, 
+			    subframe->sub4_18.d_alpha2, 
+			    subframe->sub4_18.d_alpha3,
+			    subframe->sub4_18.d_beta0, 
+			    subframe->sub4_18.d_beta1, 
+			    subframe->sub4_18.d_beta2, 
+			    subframe->sub4_18.d_beta3,
+			    subframe->sub4_18.d_A1, 
+			    subframe->sub4_18.d_A0, 
+			    subframe->sub4_18.d_tot, 
+			    subframe->sub4_18.WNt,
+			    subframe->sub4_18.leap, 
+			    subframe->sub4_18.WNlsf, 
+			    subframe->sub4_18.DN, 
+			    subframe->sub4_18.lsf);
+		break;
 	}
     } else if ( 5 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
