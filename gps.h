@@ -1237,6 +1237,7 @@ typedef int socket_t;
 #define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
 #define WATCH_DEVICE	0x0100u	/* watch specific device */
 #define WATCH_DISABLE	0x0200u	/* disable watching */
+#define WATCH_SUBFRAMES	0x0400u	/* enable subframe output */
 #define POLL_NONBLOCK	0x1000u	/* set non-blocking poll (experimental!) */
 
 /* 

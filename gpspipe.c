@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
     /*@-branchstate@*/
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRSwtT:vVn:s:o:")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -157,6 +157,9 @@ int main(int argc, char **argv)
 	case 'R':
 	    flags |= WATCH_RAW;
 	    binary = true;
+	    break;
+	case 'S':
+	    flags |= WATCH_SUBFRAMES;
 	    break;
 	case 'd':
 	    daemonize = true;
