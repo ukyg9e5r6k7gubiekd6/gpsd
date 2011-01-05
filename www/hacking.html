@@ -25,7 +25,7 @@
     <a href="hardware.html">Hardware</a><br/>
     <a href="for-vendors.html">For GPS Vendors</a><br/>
     <a href="hall-of-shame.html">Hall of Shame</a><br/>
-    Hacker's Guide<<br/>
+    Hacker's Guide<br/>
     <a href="protocol-transition.html">Application Compatibility</a>
     <a href="references.html">References</a><br/>
     <a href="history.html">History</a><br/>
@@ -79,7 +79,7 @@ file in the source distribution.</p>
 <li><a href="#patches">Send patches in diff -u or -c format</a></li>
 <li><a href="#license">The license on contributions</a></li>
 <li><a href="#options">Don't add invocation options!</a></li>
-<li><a href="#statics">Don't create static variables in the libraries!</li>
+<li><a href="#statics">Don't create static variables in the libraries!</a></li>
 <li><a href="#malloc">Don't use malloc!</a></li>
 <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
 </ol>
@@ -88,8 +88,6 @@ file in the source distribution.</p>
 <li><a href="#debugging">Debugging</a></li>
 <li><a href="#profiling">Profiling</a></li>
 <li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
-<li><a href="#udev">The moving target that is udev.</a></li>
-
 <li><a href="#architecture">Architecture and how to hack it</a></li>
 <li><a href="#autoconfiguration">Autoconfiguration</a></li>
 <li><a href="#error">Error modeling</a></li>
@@ -123,7 +121,14 @@ file in the source distribution.</p>
 <li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
 <li><a href="#subsecond">Subsecond polling</a></li>
 </ol>
-<li><a href='#release'>Release Checklist</a>
+<li><a href="#release">Release Checklist</a>
+<li><a href="#installationtroubleshooting" >Installation Troubleshooting</a>
+<ol>
+  <li><a href="#generaltroubleshooting" >General Troubleshooting</a></li>
+  <li><a href="#troubleshootingstartatboot" >Start at Boot Troubleshooting</a></li>
+  <li><a href="#hotplugtroubleshooting" >Udev Hotplug Troubleshooting</a></li>
+</ol>
+</li>
 </ol>
 
 <h1 id="goals">Goals and philosophy of the project</h1>
@@ -565,89 +570,6 @@ typedefs.</p>
 
 <p>(No, we don't know why splint doesn't handle these natively.)</p>
 
-<h2 id="udev">The moving target that is udev.</h2>
-
-<p>The Linux udev system has been prone to change out from under us,
-breaking our hotplug support for USB receivers.  Accordingly, here's a
-short guide to verifying that the different pieces are working
-correctly, with indications of where to troubleshoot on failure.<p>
-
-<p>First, verify that your USB subsystem can see your receiver.  Run
-lsusb(1).  Plug the receiver in and run lsusb(1) again, looking for
-the extra line - it will be identified by a serial-to-USB converter
-chip type such as a PL2303. Unplug the receiver and verify that
-the line describing the device is gone.</p>
-
-<p>If this test fails, something very basic is wrong at hardware
-level.  If your receiver has a two-section cable joined by something
-like a <a href="http://en.wikipedia.org/wiki/Mini-DIN_connector#6-pin">6-pin
-mini-DIN connector</a>, with a component housing between that and the
-USB plug, be aware that the serial converter may live in that housing
-and you have to unplug the <b>entire cable</b> from your computer, not
-just separate the halves of the mini-DIN connector. If there is no
-such joint, it may be that your receiver is defective or dead. The
-least likely failure is for the USB hardware on the PC side to be
-buggy.</p>
-
-<p>Next thing to try is watching the hotplug events in your system logs.
-Do <code>tail -f /var/log/syslog</code>; plug in and unplug the receiver.
-You should see messages indicating from the USB subsystem in the kernel 
-indicating device connect and disconnect.  If you don't, check your
-kernel configuration; USB support may be absent or misconfigured.</p>
-
-<p>Now we involve the udev system.  Unplug the receiver. Run
-<code>make udev-install</code> from the source directory to install
-the required udev rules.  (There is a <code>make udev-uninstall</code>
-for cleaning up after this test.)  Do <code>tail -f
-/var/log/syslog</code> if you have not.  Now plug in the receiver.</p>
-
-<p>You should see messages that include something like the following 
-text (the USB device may vary):</p>
-
-<pre><code>
-gpsd.hotplug: gpsd_control(action=add, arg=/dev/ttyUSB0)
-gpsd.hotplug: launching gpsd  -F /var/run/gpsd.sock
-</code></pre>
-
-<p>These are from the gpsd.hotplug handler called by udev on a hotplug
-event matching one of the known udev types for a USB GPS, and indicating
-the launch of a gpsd instance.</p>
-
-<p>If you don't see this, several things could be going wrong. The
-udev rules may not be installed correctly. Or the handler they call
-may be unable to run for some reason; it has two layers, a shellscript
-wrapper around a little Python program that does the real work.  You
-may have to figure out where the udev log messages go on your system
-and use udevadm(8) to crank up the log level until you can see what's
-going on.</p>
-
-<p>If your GPS uses an unusual serial-to-USB converter, the GPSD rules
-may not recognize it as a probable GPS. You'll need to look at the
-converter type indicated in the lsusb(1) listing and match it against
-the rules in the gpsd.rules file. If it's not known, please report
-this as a bug to the GPSD developers.</p>
-
-<p>Once you know that udev can launch gpsd, you'll want to watch what
-it's doing with the hotplug notifications. Unplug the receiver and kill
-the running gpsd instance, if there is one. Now run <code>make
-udev-test</code> and plug in the receiver.</p>
-
-<p>f you get something like this error message: "gpsd: error while
-loading shared libraries: libgpsd.so.0: cannot open shared object
-file: No such file or directory" then run ldconfig(8) and try again.</p>
-
-<p>You should see log messages from gpsd indicating that the control
-socket has received a command to add the device, and then data
-from the device.  When you unplug and replug the device, gpsd
-should emit messages about the device closes and opens.</p>
-
-<p>If you don't see this, there's a bug or misconfiguration
-somewhere. Check to make sure the hotplug handler and gpsd have
-matching expectations about the location of the control socket.</p>
-
-<p>If you do see these device file opens and closes logged, the
-udev end of the configuration is working.</p>
-
 <h2 id="architecture">Architecture and how to hack it</h2>
 
 <p>There are two useful ways to think about the GPSD architecture.
@@ -774,7 +696,7 @@ disconnecting at random times, and the GPS being unplugged and
 replugged, without leaking file descriptors; also arrange for the GPS
 to be powered up when and only when clients are active.</p>
 
-<p>The special control socket is premarily there to be used by
+<p>The special control socket is primarily there to be used by
 hotplug facilities like Linux udev. It is intended to be written
 to by scripts activated when a relevant device (basically, a USB
 device with one of a particular set of vendor IDs) is connected to
@@ -806,15 +728,15 @@ do when no users are listening to it) and finally releasing
 the <code>gpsd</code> channel block structure for managing the device
 (which typically happens either when <code>gpsd</code> terminates or
 the hotplug system tells <code>gpsd</code> that the device has been
-disconnected).  This is why <code>gpsd_deactivate()</code> and 
-<code>gpsd_wrap() are separate entry points.</code></p>
+disconnected).  This is why <code>gpsd_deactivate()</code> and
+<code>gpsd_wrap()</code> are separate entry points.</p>
 
 <p><code>gpsd</code> has to configure some kinds of GPS devices when
 it recognizes them; this is what the <code>event_identify</code> and
 <code>event_configure</code> hooks are for.  <code>gpsd</code> tries
 to clean up after itself, restoring settings that were changed by the
 configurator method; this is done by <code>gpsd_deactivate()</code>,
-which fires the <code>deactivate</code> event so the druver can revert
+which fires the <code>deactivate</code> event so the driver can revert
 settings.</p>
 
 <h2 id="autoconfiguration">Autoconfiguration</h2>
@@ -1032,11 +954,13 @@ it's Linux-specific.  OpenBSD (at least) features a hotplug daemon
 with similar capabilities.  We ought to do the right thing there as
 well.</p>
 
+<p>Hotplug is nice, but on Linux it appears to be a moving target. For help debugging a hotplug problem, see <a href="#hotplugtroubleshooting" >Udev Hotplug Troubleshooting</a>.</p>
+
 <h2 id="security">Security Issues</h2>
 
 <p>Between versions 2.16 and 2.20, hotplugging was handled in the most
 obvious way, by allowing the F command to declare new GPS devices for
-gpsd to look at.  Because gpsd runs as root, this had problems:</p>
+gpsd to look at.  Because gpsd ran as root, this had problems:</p>
 
 <ol>
 <li>A malicious client with non-root access on the host could use F to
@@ -1521,9 +1445,255 @@ the dev list.</dd>
 
 <h2>Packaging links</h2>
 
-<p><a
-href='https://ssl.recluse.de/svn/debian/packages/gpsd/trunk/debian/'>Debian
+<p><a href='https://ssl.recluse.de/svn/debian/packages/gpsd/trunk/debian/'>Debian
 build controls</a></p>
+
+<h1 id="installationtroubleshooting">Installation Troubleshooting</h1>
+
+<p>Once you have installed gpsd, it should &quot;just
+run&quot;. However&#8230; the next problem might be getting it
+running. This section is to address some of the problems you may
+see.</p>
+
+<p>There are two ways to start gpsd(8). It can start at boot, via an
+initialization script or it can launch from a hot plug event. We'll
+provide some general troubleshooting, and then look at those two
+launching methods</p>
+
+<p>This is a step by step process designed to isolate probems. We
+assume you have general Unix/Linux troubleshooting skills. You should
+also have read <a href="faq.html" >the FAQ</a>. Be aware of the <a
+href="index.html#documentation" >man pages</a>, in particular <a
+href="gpsd.html" >that for gpsd</a>. If you still have problems, join
+us on one of the <a href="index.html#mailing-lists">mailing lists</a>,
+probably <a href="http://lists.berlios.de/mailman/listinfo/gpsd-users"
+>gpsd-users</a>.</p>
+
+<h2 id="generaltroubleshooting">General Troubleshooting</h2>
+
+<p>Before doing anything else, make sure there is no instance of gpsd running:</p>
+
+<pre>killall gpsd</pre>
+
+<p>And remove any sockets gpsd might have left behind, e.g.:</p>
+
+<pre>rm /var/run/gpsd.sock</pre>
+
+<p>You can launch gpsd with the options -N (don't daemonize) and -D
+[0-8] (debug and level). This will let it run and send output,
+including traffic from the GPS receiver, to the terminal. This is a
+recommended first step because it avoids client issues. For example,
+here we give gpsd a control socket but no device:</p>
+
+<pre># gpsd -N -D3 -F /var/run/gpsd.sock
+gpsd: launching (Version 2.96~dev)
+gpsd: listening on port gpsd
+gpsd: running with effective group ID 0
+gpsd: running with effective user ID 0
+^Cgpsd: received terminating signal 2.
+gpsd: exiting.
+#</pre>
+
+<p>If you get something like this error message: "gpsd: error while
+loading shared libraries: libgpsd.so.0: cannot open shared object
+file: No such file or directory" then run ldconfig(8) and try again.</p>
+
+<p>Here we give it a device file. But the device file isn't there, and
+there is no receiver.</p>
+
+<pre># gpsd -N -D3 -F /var/run/gpsd.sock /dev/ttyUSB0
+gpsd: launching (Version 2.96~dev)
+gpsd: listening on port gpsd
+gpsd: running with effective group ID 0
+gpsd: running with effective user ID 0
+gpsd: stashing device /dev/ttyUSB0 at slot 0
+^Cgpsd: received terminating signal 2.
+gpsd: exiting.
+#</pre>
+
+<p>This time, gpsd stashes the device file and waits for some outside
+agency, like udev, to create it. Like so:</p>
+
+<pre># gpsd -N -D3 -F /var/run/gpsd.sock /dev/ttyUSB0
+gpsd: launching (Version 2.96~dev)
+gpsd: listening on port gpsd
+gpsd: running with effective group ID 0
+gpsd: running with effective user ID 0
+gpsd: stashing device /dev/ttyUSB0 at slot 0
+gpsd: control socket connect on fd 6
+gpsd: <= control(6): /dev/ttyUSB0 already active
+^Cgpsd: received terminating signal 2.
+gpsd: exiting.
+#</pre>
+
+<p>If you have udev on your computer, and you don't see gpsd notice
+the device (&quot;control socket connect on fd 6&quot;), check to be
+sure <a href="#hotplugtroubleshooting" >udev is working
+correctly</a>.</p>
+
+<p>If you pull the plug on the receiver, gpsd will note the change.</p>
+
+<p>With the receiver plugged in and gpsd running as above, you can
+launch a client. xgps comes with the distribution. On some Linuxes, it
+may be in a separate package, e.g. gpsd-clients. You should then see a
+lot of traffic between gpsd and the client in the gpsd terminal
+window. For example, here's a fix as reported by gpsd:</p>
+
+<pre>gpsd: SiRF: MND 0x02: time=1293859466.85 lat=42.64 lon=-118.21 alt=1315.15 track=0.00 speed=0.00 mode=1 status=0 hdop=0.00 used=0 mask={TIME|LATLON|ALTITUDE|SPEED|TRACK|STATUS|MODE|DOP|USED}</pre>
+
+<p>Note that gpsd doesn't try to activate the receiver until it has a
+client, and the client asks for data with a ?WATCH request. It also
+shuts down its connection to the receiver when it has no clients. This
+is a power saving feature.</p>
+
+<p>Another way to verify that gpsd can open the device file is with
+lsof(8) (&quot;list open files&quot;):</p>
+
+<pre># lsof | grep ttyU
+gpsd      20895     nobody    7u      CHR      188,0      0t0     851138 /dev/ttyUSB0
+#</pre>
+
+<h2 id="troubleshootingstartatboot">Troubleshooting Start at Boot</h2>
+
+<p>If gpsd launches at boot, you should be able to start it up or shut
+it down with one of the many utilities that manipulate system-V like
+startup environments, e.g. service(8). <code>service gpsd
+start</code>, etc. works on some Linuxes. sysv-rc-conf(8) is a handy
+curses utility for the job. Watch the output.</p>
+
+<p>You can also look at your boot messages with dmesg(1).</p>
+
+<h3>Ubuntu/Debian</h3>
+
+<p>The .deb package supplied for the Debian and Ubuntu linux
+distributions launch at boot from the system V-like script
+<code>/etc/init.d/gpsd</code>. However, it is governed by a control
+file, <code>/etc/default/gpsd</code>. If necessary, edit the control
+file by running <code>dpkg-reconfigure gpsd</code> as root.</p>
+
+<p>You will likely want the gpsd-clients package as a debugging
+tool. These are the clients maintained as part of the gpsd
+project. Other clients may or may not use the right libgpsd or the
+right protocol, or something. So make sure gpsd is working correctly
+with the gpsd clients. You can always purge them later.</p>
+
+<p>If you have a prior installation of gpsd from a deb package, and
+are switching to compiling your own, from a recent tarball or from the
+git repository, it is not enough to <code>apt-get remove</code> the
+prior installation. You must <code>apt-get purge</code> them. This
+removes some configuration files left behind by remove.</p>
+
+<p>If you do compile your own gpsd, be aware that installing gpsd
+client packages can force installation of gpsd as well. One culprit is
+<a href="http://www.tangogps.org/" >tangogps</a>, which requires gpsd
+and libgpsX (where X is 19 as of this writing). Fortunately, you can
+let apt-get install those two packages, and then purge them and
+reinstall your own compiled version. Other client packages may not be
+so lenient, and you will have to force purging the gpsd packages.</p>
+
+<h3>Red Hat</h3>
+
+<p>The rpm package made from the gpsd distribution will launch at boot
+from the script <code>/etc/init/rc.d/gpsd</code>. It is governed by
+the file <code>/etc/sysconfig/gpsd</code>, although it it doesn't find
+that file, it will provide its own defaults.</p>
+
+<p>You will likely want the gpsd-clients package as a debugging
+tool. These are the clients maintained by the gpsd developers. Other
+clients may or may not use the right libgpsd or the right protocol, or
+something. So make sure gpsd is working correctly with the gpsd
+clients. You can always purge them later.</p>
+
+<h2 id="hotplugtroubleshooting">Udev Hotplug Troubleshooting</h2>
+
+<p>The Linux udev system has been prone to change out from under us,
+breaking our hotplug support for USB receivers.  Accordingly, here's a
+short guide to verifying that the different pieces are working
+correctly, with indications of where to troubleshoot on failure.<p>
+
+<p>First, verify that your USB subsystem can see your receiver.  Run
+lsusb(1).  Plug the receiver in and run lsusb(1) again, looking for
+the extra line - it will be identified by a serial-to-USB converter
+chip type such as a PL2303. Unplug the receiver and verify that the
+line describing the device is gone.</p>
+
+<p>If this test fails, something very basic is wrong at hardware
+level.  If your receiver has a two-section cable joined by something
+like a <a
+href="http://en.wikipedia.org/wiki/Mini-DIN_connector#6-pin">6-pin
+mini-DIN connector</a>, with a component housing between that and the
+USB plug, be aware that the serial converter may live in that housing
+and you have to unplug the <b>entire cable</b> from your computer, not
+just separate the halves of the mini-DIN connector. If there is no
+such joint, it may be that your receiver is defective or dead. See
+your vendor documentation for help in diagnosis. The least likely
+failure is for the USB hardware on the PC side to be buggy.</p>
+
+<p>The next thing to try is watching the hotplug events in your system
+logs.  Do <code>tail -f /var/log/syslog</code>; plug in and unplug the
+receiver.  You should see messages indicating from the USB subsystem
+in the kernel indicating device connect and disconnect.  If you don't,
+check your kernel configuration; USB support may be absent or
+misconfigured.</p>
+
+<p>Now we involve the udev system.  Unplug the receiver.  If you are
+compiling gpsd, run <code>make udev-install</code> from the source
+directory to install the required udev rules.  (There is a <code>make
+udev-uninstall</code> for cleaning up after this test.)  If you are
+using a package, your package manager will install these files for
+you.  Do <code>tail -f /var/log/syslog</code>.  Now plug in the
+receiver.</p>
+
+<p>You should see messages that include something like the following
+text (the USB device may vary):</p>
+
+<pre><code>
+gpsd.hotplug: gpsd_control(action=add, arg=/dev/ttyUSB0)
+gpsd.hotplug: launching gpsd  -F /var/run/gpsd.sock
+</code></pre>
+
+<p>These are from the gpsd.hotplug handler called by udev on a hotplug
+event matching one of the known udev types for a USB GPS, and indicating
+the launch of a gpsd instance.</p>
+
+<p>If you don't see this, several things could be going wrong. The
+udev rules may not be installed correctly. Or the handler they call
+may be unable to run for some reason; it has two layers, a shellscript
+wrapper around a little Python program that does the real work.  You
+may have to figure out where the udev log messages go on your system
+and use udevadm(8) to crank up the log level until you can see what's
+going on.</p>
+
+<p>If your GPS uses an unusual serial-to-USB converter, the GPSD rules
+may not recognize it as a probable GPS. You'll need to look at the
+converter type indicated in the lsusb(1) listing and match it against
+the rules in the gpsd.rules file. If it's not known, please report
+this as a bug to the GPSD developers.</p>
+
+<p>Once you know that udev can launch gpsd, you'll want to watch what
+it's doing with the hotplug notifications. Unplug the receiver and
+kill the running gpsd instance, if there is one. Now run <code>make
+udev-test</code> and plug in the receiver. (For those using packages,
+this is the equivalent of <code>gpsd -N -n -F /var/run/gpsd.sock -D
+5</code>.) </p>
+
+<p>You can also launch the hotplug code manually: <code>cd /lib/udev
+&& ./gpsd.hotplug add /dev/ttyUSB0</code> If this fails, there is
+something wrong with the hotplug code. If it succeeds, the problem may
+be in how udev is calling gpsd.hotplug, or udev may never call
+gpsd.hotplug.</p>
+
+<p>You should see log messages from gpsd indicating that the control
+socket has received a command to add the device, and then data
+from the device.  When you unplug and replug the device, gpsd
+should emit messages about the device closes and opens.</p>
+
+<p>If you don't see this, there's a bug or misconfiguration
+somewhere. Check to make sure the hotplug handler and gpsd have
+matching expectations about the location of the control socket.</p>
+
+<p>If you do see these device file opens and closes logged, the
+udev end of the configuration is working.</p>
 
 
 </div>
