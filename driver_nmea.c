@@ -1084,7 +1084,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    (double)mkgmtime(&session->driver.nmea.date) +
 	    session->driver.nmea.subseconds;
 	gpsd_report(LOG_DATA,
-		    "%s time (nearest sec) is %2f = %d-%d-%dT%d:%d%d\n",
+		    "%s time (nearest sec) is %2f = %d-%02d-%02dT%02d:%02d:%02dZ\n",
 		    session->driver.nmea.field[0], session->newdata.time,
 		    1900 + session->driver.nmea.date.tm_year,
 		    session->driver.nmea.date.tm_mon + 1,
