@@ -195,8 +195,10 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	memset(&buf[len], 0, (size_t) (blen - len));
 
 	if ((rlen = recv(fd, &buf[len], (size_t) (blen - 1 - len), 0)) == -1) {
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == EAGAIN)
 		continue;
+	    gpsd_report(LOG_ERROR, "ntrip stream read error %d on fd %d\n",
+		        errno, fd);
 	    return -1;
 	}
 	if (rlen == 0)
@@ -311,13 +313,14 @@ static int ntrip_stream_probe(const char *caster,
 	gpsd_report(LOG_ERROR, "ntrip stream connect error %d\n", dsock);
 	return -1;
     } else
-	gpsd_report(LOG_SPIN, "ntrip stream connectrd on fd %d\n", dsock);
+	gpsd_report(LOG_SPIN, "ntrip stream connected on fd %d\n", dsock);
     (void)snprintf(buf, sizeof(buf),
 		   "GET / HTTP/1.1\r\n"
 		   "User-Agent: NTRIP gpsd/%s\r\n"
 		   "Connection: close\r\n" "\r\n", VERSION);
     if (write(dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
-	gpsd_report(LOG_ERROR, "ntrip stream write error %d\n", dsock);
+	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d\n",
+		    errno, dsock);
 	return -1;
     }
     ret =
@@ -383,13 +386,19 @@ static int ntrip_stream_open(const char *caster, const char *port,
 		   "Connection: close\r\n"
 		   "\r\n", stream->mountpoint, VERSION, authstr);
     if (write(context->dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
-	printf("ntrip stream write error on %d\n", context->dsock);
+	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d\n", errno,
+		    context->dsock);
 	return -1;
     }
 
     memset(buf, 0, sizeof(buf));
-    if (read(context->dsock, buf, sizeof(buf) - 1) == -1)
+    while (read(context->dsock, buf, sizeof(buf) - 1) == -1) {
+	if (errno == EINTR || errno == EAGAIN)
+	    continue;
+	gpsd_report(LOG_ERROR, "ntrip stream read error %d on fd %d\n", errno,
+		    context->dsock);
 	goto close;
+    }
 
     /* parse 401 Unauthorized */
     if (strstr(buf, NTRIP_UNAUTH)) {
