@@ -102,10 +102,11 @@ static void usage(void)
 		  "-t Time stamp the data.\n"
 		  "-T [format] set the timestamp format (strftime(3)-like; implies '-t')\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
+		  "-S Dump gpsd subframe data.\n"
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
 		  "-V Print version and exit.\n\n"
-		  "You must specify one, or both, of -r/-w.\n"
+		  "You must specify one, or more, of -r/-w/-S.\n"
 		  "You must use -o if you use -d.\n");
 }
 
@@ -122,6 +123,7 @@ int main(int argc, char **argv)
     bool new_line = true;
     bool raw = false;
     bool watch = false;
+    bool subframe = false;
     long count = -1;
     int option;
     unsigned int vflag = 0, l = 0;
@@ -159,6 +161,7 @@ int main(int argc, char **argv)
 	    binary = true;
 	    break;
 	case 'S':
+	    subframe = true;
 	    flags |= WATCH_SUBFRAMES;
 	    break;
 	case 'd':
@@ -216,9 +219,9 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    if (!raw && !watch && !binary) {
+    if (!raw && !watch && !binary && !subframe) {
 	(void)fprintf(stderr,
-		      "gpspipe: one of '-R', '-r' or '-w' is required.\n");
+		      "gpspipe: one of '-R', '-r', '-S', or '-w' is required.\n");
 	exit(1);
     }
 
