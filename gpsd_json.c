@@ -471,6 +471,44 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 	(void)snprintf(buf + len, buflen - len,
 	    ",\"pageid\":%u",
 		subframe->pageid);
+	len = strlen(buf);
+	if ( 51 == subframe->pageid ) {
+	    /* subframe5, page 25 */
+	    (void)snprintf(buf + len, buflen - len,
+		",\"toa\":%lu,\"WNa\":%u,"
+		"\"SV1\":%u,\"SV2\":%u,\"SV3\":%u,\"SV4\":%u,"
+		"\"SV5\":%u,\"SV6\":%u,\"SV7\":%u,\"SV8\":%u,"
+		"\"SV9\":%u,\"SV10\":%u,\"SV11\":%u,\"SV12\":%u,"
+		"\"SV13\":%u,\"SV14\":%u,\"SV15\":%u,\"SV16\":%u,"
+		"\"SV17\":%u,\"SV18\":%u,\"SV19\":%u,\"SV20\":%u,"
+		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u",
+			subframe->sub5_25.l_toa, 
+			subframe->sub5_25.WNa,
+			subframe->sub5_25.sv[1], 
+			subframe->sub5_25.sv[2],
+			subframe->sub5_25.sv[3], 
+			subframe->sub5_25.sv[4],
+			subframe->sub5_25.sv[5], 
+			subframe->sub5_25.sv[6],
+			subframe->sub5_25.sv[7], 
+			subframe->sub5_25.sv[8],
+			subframe->sub5_25.sv[9], 
+			subframe->sub5_25.sv[10],
+			subframe->sub5_25.sv[11], 
+			subframe->sub5_25.sv[12],
+			subframe->sub5_25.sv[13], 
+			subframe->sub5_25.sv[14],
+			subframe->sub5_25.sv[15], 
+			subframe->sub5_25.sv[16],
+			subframe->sub5_25.sv[17], 
+			subframe->sub5_25.sv[18],
+			subframe->sub5_25.sv[19], 
+			subframe->sub5_25.sv[20],
+			subframe->sub5_25.sv[21], 
+			subframe->sub5_25.sv[22],
+			subframe->sub5_25.sv[23], 
+			subframe->sub5_25.sv[24]);
+	}
     }
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+compdef@*/

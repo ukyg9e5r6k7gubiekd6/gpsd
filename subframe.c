@@ -790,13 +790,13 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub5_25.sv[23] = ((words[7] >>  6) & 0x00003F);
 	    subp->sub5_25.sv[24] = ((words[7] >>  0) & 0x00003F);
 	    gpsd_report(LOG_PROG,
-		"50B: SF:5-25 SV:%2u DI:%u toa:%lu WNa:%u "
-		"SV1:%u SV2:%u SV3:%uSV4:%u "
-		"SV5:%u SV6:%u SV7:%uSV8:%u "
-		"SV9:%u SV10:%u SV11:%uSV12:%u "
-		"SV13:%u SV14:%u SV15:%uSV16:%u "
-		"SV17:%u SV18:%u SV19:%uSV20:%u "
-		"SV21:%u SV22:%u SV23:%uSV24:%u\n",
+		"50B: SF:5-25 SV:%2u ID:%u toa:%lu WNa:%u "
+		"SV1:%u SV2:%u SV3:%u SV4:%u "
+		"SV5:%u SV6:%u SV7:%u SV8:%u "
+		"SV9:%u SV10:%u SV11:%u SV12:%u "
+		"SV13:%u SV14:%u SV15:%u SV16:%u "
+		"SV17:%u SV18:%u SV19:%u SV20:%u "
+		"SV21:%u SV22:%u SV23:%u SV24:%u\n",
 			subp->tSVID, subp->data_id, 
 			subp->sub5_25.l_toa, subp->sub5_25.WNa,
 			subp->sub5_25.sv[1], subp->sub5_25.sv[2],
