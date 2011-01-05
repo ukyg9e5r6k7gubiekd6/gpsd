@@ -103,7 +103,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
     almp->omega    = ( words[7] & 0xFFFFFF);
     almp->omega    = uint2int(almp->omega, 24);
     almp->d_omega  = pow(2.0, -23) * almp->omega;
-    almp->M0       = ( words[8] & 0xFFFFFF);
+    almp->M0       = ( words[8] & 0x00FFFFFF);
     almp->M0       = uint2int(almp->M0, 24);
     almp->d_M0     = pow(2.0,-23) * almp->M0;
     almp->af1      = ((words[9] >>  5) & 0x0007FF);

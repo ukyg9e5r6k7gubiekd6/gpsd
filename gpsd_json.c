@@ -359,8 +359,9 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
     int len = 0;
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
-    		"\"frame\":%u",
+    		"\"TOW17\":%u,\"frame\":%u",
 		(unsigned int)subframe->tSVID,
+		subframe->TOW17,
 	        subframe->subframe_num);
     	
     /* only do subframe 5 almanac right now */
