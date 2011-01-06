@@ -83,6 +83,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
 			     unsigned int data_id, 
 			     /*@out@*/struct almanac_t *almp)
 {
+    /*@+matchanyintegral -shiftimplementation@*/
     almp->sv     = sv; /* ignore the 0 sv problem for now */
     almp->e      = ( words[2] & 0x00FFFF);
     almp->d_eccentricity  = pow(2.0,-21) * almp->e;
@@ -107,12 +108,12 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
     almp->M0       = uint2int(almp->M0, 24);
     almp->d_M0     = pow(2.0,-23) * almp->M0 * GPS_PI;
     almp->af1      = ((words[9] >>  5) & 0x0007FF);
-    almp->af1      = uint2int(almp->af1, 11);
+    almp->af1      = (short)uint2int(almp->af1, 11);
     almp->d_af1    = pow(2.0,-38) * almp->af1;
     almp->af0      = ((words[9] >> 16) & 0x0000FF);
     almp->af0    <<= 3;
     almp->af0     |= ((words[9] >>  2) & 0x000007);
-    almp->af0      = uint2int(almp->af0, 11);
+    almp->af0      = (short)uint2int(almp->af0, 11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
     gpsd_report(LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
@@ -130,6 +131,7 @@ static void subframe_almanac(unsigned int tSVID, uint32_t words[],
 		almp->d_M0,
 		almp->d_af0,
 		almp->d_af1);
+    /*@-matchanyintegral -shiftimplementation@*/
 }
 
 gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
@@ -171,11 +173,11 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    preamble, words[0]);
 	return 0;
     }
-    subp->integrity = ((words[0] >> 1) & 0x01);
+    subp->integrity = (bool)((words[0] >> 1) & 0x01);
     /* The subframe ID is in the Hand Over Word (page 80) */
     subp->TOW17 = ((words[1] >> 7) & 0x01FFFF);
-    subp->l_TOW17 = subp->TOW17 * 6;
-    subp->tSVID = tSVID;
+    subp->l_TOW17 = (long)(subp->TOW17 * 6);
+    subp->tSVID = (uint8_t)tSVID;
     subp->subframe_num = ((words[1] >> 2) & 0x07);
     subp->alert = (bool)((words[1] >> 6) & 0x01);
     subp->antispoof = (bool)((words[1] >> 6) & 0x01);
@@ -204,21 +206,21 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	 */
 	session->context->gps_week =
 	    (unsigned short)((words[2] >> 14) & 0x03ff);
-	subp->sub1.WN   = session->context->gps_week;
-	subp->sub1.l2   = ((words[2] >> 10) & 0x000003); /* L2 Code */
-	subp->sub1.ura  = ((words[2] >>  8) & 0x00000F); /* URA Index */
-	subp->sub1.hlth = ((words[2] >>  2) & 0x00003F); /* SV health */
+	subp->sub1.WN   = (uint16_t)session->context->gps_week;
+	subp->sub1.l2   = (uint8_t)((words[2] >> 10) & 0x000003); /* L2 Code */
+	subp->sub1.ura  = (unsigned int)((words[2] >>  8) & 0x00000F); /* URA Index */
+	subp->sub1.hlth = (unsigned int)((words[2] >>  2) & 0x00003F); /* SV health */
 	subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
 	subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
-	subp->sub1.Tgd  = ( words[6] & 0x0000FF);
-	subp->sub1.d_Tgd  = pow(2.0, -31) * subp->sub1.Tgd;
+	subp->sub1.Tgd  = (char)( words[6] & 0x0000FF);
+	subp->sub1.d_Tgd  = pow(2.0, -31) * (int)subp->sub1.Tgd;
 	subp->sub1.toc  = ( words[7] & 0x00FFFF);
-	subp->sub1.l_toc = subp->sub1.toc  << 4;
-	subp->sub1.af2  = ((words[8] >> 16) & 0x0FF);
-	subp->sub1.d_af2  = pow(2.0, -55) * subp->sub1.af2;
-	subp->sub1.af1  = ( words[8] & 0x00FFFF);
+	subp->sub1.l_toc = (long)subp->sub1.toc  << 4;
+	subp->sub1.af2  = (char)((words[8] >> 16) & 0x0FF);
+	subp->sub1.d_af2  = pow(2.0, -55) * (int)subp->sub1.af2;
+	subp->sub1.af1  = (short)( words[8] & 0x00FFFF);
 	subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
-	subp->sub1.af0  = ((words[9] >>  1) & 0x03FFFFF);
+	subp->sub1.af0  = (int)((words[9] >>  1) & 0x03FFFFF);
 	subp->sub1.af0  = uint2int(subp->sub1.af0, 22);
 	subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
 	subp->sub1.IODC <<= 8;
@@ -242,29 +244,29 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
-	subp->sub2.Crs    = ( words[2] & 0x00FFFF);
+	subp->sub2.Crs    = (short)( words[2] & 0x00FFFF);
 	subp->sub2.d_Crs  = pow(2.0,-5) * subp->sub2.Crs;
-	subp->sub2.deltan = ((words[3] >>  8) & 0x00FFFF);
+	subp->sub2.deltan = (short)((words[3] >>  8) & 0x00FFFF);
 	subp->sub2.d_deltan  = pow(2.0,-43) * subp->sub2.deltan;
-	subp->sub2.M0     = ( words[3] & 0x0000FF);
+	subp->sub2.M0     = (int)( words[3] & 0x0000FF);
 	subp->sub2.M0   <<= 24;
 	subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
 	subp->sub2.M0     = uint2int(subp->sub2.M0, 24);
 	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0 * GPS_PI;
-	subp->sub2.Cuc    = ((words[5] >>  8) & 0x00FFFF);
+	subp->sub2.Cuc    = (short)((words[5] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
 	subp->sub2.e      = ( words[5] & 0x0000FF);
 	subp->sub2.e    <<= 24;
 	subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
 	subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
-	subp->sub2.Cus    = ((words[7] >>  8) & 0x00FFFF);
+	subp->sub2.Cus    = (short)((words[7] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cus  = pow(2.0,-29) * subp->sub2.Cus;
 	subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
 	subp->sub2.sqrtA <<= 24;
 	subp->sub2.sqrtA |= ( words[8] & 0x00FFFFFF);
 	subp->sub2.d_sqrtA = pow(2.0, -19) * subp->sub2.sqrtA;
 	subp->sub2.toe    = ((words[9] >>  8) & 0x00FFFF);
-	subp->sub2.l_toe  = subp->sub2.toe << 4;
+	subp->sub2.l_toe  = (long)(subp->sub2.toe << 4);
 	subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
 	subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
 	subp->sub2.u_AODO   = subp->sub2.AODO * 900;
@@ -289,23 +291,23 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	/* subframe 3: ephemeris for transmitting SV */
 	subp->sub3.Cic      = ((words[2] >>  8) & 0x00FFFF);
 	subp->sub3.d_Cic    = pow(2.0, -29) * subp->sub3.Cic;
-	subp->sub3.Omega0   = ( words[2] & 0x0000FF);
+	subp->sub3.Omega0   = (int)(words[2] & 0x0000FF);
 	subp->sub3.Omega0 <<= 24;
 	subp->sub3.Omega0  |= ( words[3] & 0x00FFFFFF);
 	subp->sub3.d_Omega0 = pow(2.0, -31) * subp->sub3.Omega0;
-	subp->sub3.Cis      = ((words[4] >>  8) & 0x00FFFF);
+	subp->sub3.Cis      = (short)((words[4] >>  8) & 0x00FFFF);
 	subp->sub3.d_Cis    = pow(2.0, -29) * subp->sub3.Cis;
-	subp->sub3.i0       = ( words[4] & 0x0000FF);
+	subp->sub3.i0       = (int)(words[4] & 0x0000FF);
 	subp->sub3.i0     <<= 24;
 	subp->sub3.i0      |= ( words[5] & 0x00FFFFFF);
 	subp->sub3.d_i0     = pow(2.0, -31) * subp->sub3.i0;
-	subp->sub3.Crc      = ((words[6] >>  8) & 0x00FFFF);
+	subp->sub3.Crc      = (short)((words[6] >>  8) & 0x00FFFF);
 	subp->sub3.d_Crc    = pow(2.0, -5) * subp->sub3.Crc;
-	subp->sub3.omega    = ( words[6] & 0x0000FF);
+	subp->sub3.omega    = (int)(words[6] & 0x0000FF);
 	subp->sub3.omega  <<= 24;
 	subp->sub3.omega   |= ( words[7] & 0x00FFFFFF);
 	subp->sub3.d_omega  = pow(2.0, -31) * subp->sub3.omega;
-	subp->sub3.Omegad   = ( words[8] & 0x00FFFFFF);
+	subp->sub3.Omegad   = (int)(words[8] & 0x00FFFFFF);
 	subp->sub3.Omegad   = uint2int(subp->sub3.Omegad, 24);
 	subp->sub3.d_Omegad = pow(2.0, -43) * subp->sub3.Omegad;
 	subp->sub3.IODE     = ((words[9] >> 16) & 0x0000FF);
@@ -405,7 +407,8 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    case 52:
 		/* NMCT */
 		sv = -1;
-		subp->sub4_13.ai      = ((words[2] >> 22) & 0x000003);
+		subp->sub4_13.ai      = (unsigned char)((words[2] >> 22) & 0x000003);
+		/*@+charint@*/
 		subp->sub4_13.ERD[1]  = (char)((words[2] >>  8) & 0x00003F);
 		subp->sub4_13.ERD[2]  = (char)((words[2] >>  2) & 0x00003F);
 		subp->sub4_13.ERD[3]  = (char)((words[2] >>  0) & 0x000003);
@@ -461,6 +464,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		for ( i = 1; i < 31; i++ ) {
 		    subp->sub4_13.ERD[i]  = uint2int(subp->sub4_13.ERD[i], 6);
 		}
+		/*@-charint@*/
 
 		gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
 		    "ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
@@ -823,7 +827,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     default:
 	/* unknown/illegal subframe */
         return 0;
-	break;
     }
     return SUBFRAME_IS;
 }

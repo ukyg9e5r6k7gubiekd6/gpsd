@@ -356,13 +356,13 @@ void json_watch_dump(const struct policy_t *ccp,
 void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		     size_t buflen)
 {
-    int len = 0;
+    size_t len = 0;
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%02u,"
-    		"\"TOW17\":%u,\"frame\":%u",
-		(unsigned int)subframe->tSVID,
-		subframe->TOW17,
-	        subframe->subframe_num);
+		   "\"TOW17\":%u,\"frame\":%u",
+		   (unsigned int)subframe->tSVID,
+		   (unsigned int)subframe->TOW17,
+		   (unsigned int)subframe->subframe_num);
     len = strlen(buf);
     	
     if ( 1 == subframe->subframe_num ) {
@@ -370,14 +370,14 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 	            ",\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
 		    "\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,\"toc\":%lu,"
 		    "\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e", 
-		    subframe->sub1.WN,
-		    subframe->sub1.IODC,
-		    subframe->sub1.l2,
+		    (unsigned int)subframe->sub1.WN,
+		    (unsigned int)subframe->sub1.IODC,
+		    (unsigned int)subframe->sub1.l2,
 		    subframe->sub1.ura,
 		    subframe->sub1.hlth,
-		    subframe->sub1.l2p,
+		    (unsigned int)subframe->sub1.l2p,
 		    subframe->sub1.d_Tgd,
-		    subframe->sub1.l_toc,
+		    (unsigned long)subframe->sub1.l_toc,
 		    subframe->sub1.d_af2,
 		    subframe->sub1.d_af1,
 		    subframe->sub1.d_af0);
@@ -386,7 +386,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    ",\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
 		    "\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
 		    "\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u", 
-		    subframe->sub2.IODE,
+		    (unsigned int)subframe->sub2.IODE,
 		    subframe->sub2.d_Crs,
 		    subframe->sub2.d_deltan,
 		    subframe->sub2.d_M0,
@@ -394,15 +394,15 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    subframe->sub2.d_eccentricity,
 		    subframe->sub2.d_Cus,
 		    subframe->sub2.d_sqrtA,
-		    subframe->sub2.l_toe,
-		    subframe->sub2.fit,
-		    subframe->sub2.u_AODO);
+		    (unsigned long)subframe->sub2.l_toe,
+		    (unsigned int)subframe->sub2.fit,
+		    (unsigned int)subframe->sub2.u_AODO);
     } else if ( 3 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
 	    ",\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
 	    "\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,\"omega\":%.11e,"
 	    "\"Omegad\":%.6e", 
-		    subframe->sub3.IODE, 
+		    (unsigned int)subframe->sub3.IODE, 
 		    subframe->sub3.d_IDOT, 
 		    subframe->sub3.d_Cic, 
 		    subframe->sub3.d_Omega0, 
@@ -419,10 +419,10 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.10g,"
 			"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,"
 			"\"af0\":%.5e,\"af1\":%.5e",
-			subframe->sub5.almanac.sv,
-			subframe->sub5.almanac.svh,
+			(int)subframe->sub5.almanac.sv,
+			(unsigned int)subframe->sub5.almanac.svh,
 			subframe->sub5.almanac.d_eccentricity, 
-			subframe->sub5.almanac.l_toa, 
+			(unsigned long)subframe->sub5.almanac.l_toa, 
 			subframe->sub5.almanac.d_deltai,
 			subframe->sub5.almanac.d_Omegad,
 			subframe->sub5.almanac.d_sqrtA,
@@ -434,11 +434,12 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
     } else if ( 4 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
 	    ",\"pageid\":%u",
-		subframe->pageid);
+		       (unsigned int)subframe->pageid);
 	len = strlen(buf);
 	switch (subframe->pageid ) {
 	case 13:
 	case 52:
+	    /*@+charint@*/
 		/* decoding of ERD to SV is non trivial and not done yet */
 		(void)snprintf(buf + len, buflen - len,
 		    "\"ai\":%u,"
@@ -482,6 +483,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			    subframe->sub4_13.ERD[29], 
 			    subframe->sub4_13.ERD[30]);
 		break;
+	    /*@-charint@*/
 	case 55:
 		/* FIXME! JSON is UTF-8. double quote, backslash and
 		 * control charactores (U+0000 through U+001F).must be 
@@ -507,19 +509,20 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			    subframe->sub4_18.d_A1, 
 			    subframe->sub4_18.d_A0, 
 			    subframe->sub4_18.d_tot, 
-			    subframe->sub4_18.WNt,
-			    subframe->sub4_18.leap, 
-			    subframe->sub4_18.WNlsf, 
-			    subframe->sub4_18.DN, 
-			    subframe->sub4_18.lsf);
+			    (unsigned int)subframe->sub4_18.WNt,
+			    (int)subframe->sub4_18.leap, 
+			    (unsigned int)subframe->sub4_18.WNlsf, 
+			    (unsigned int)subframe->sub4_18.DN, 
+			    (int)subframe->sub4_18.lsf);
 		break;
 	}
     } else if ( 5 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
 	    ",\"pageid\":%u",
-		subframe->pageid);
+		       (unsigned int)subframe->pageid);
 	len = strlen(buf);
 	if ( 51 == subframe->pageid ) {
+	    /*@+matchanyintegral@*/
 	    /* subframe5, page 25 */
 	    (void)snprintf(buf + len, buflen - len,
 		",\"toa\":%lu,\"WNa\":%u,"
@@ -529,7 +532,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		"\"SV13\":%u,\"SV14\":%u,\"SV15\":%u,\"SV16\":%u,"
 		"\"SV17\":%u,\"SV18\":%u,\"SV19\":%u,\"SV20\":%u,"
 		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u",
-			subframe->sub5_25.l_toa, 
+			(unsigned long)subframe->sub5_25.l_toa, 
 			subframe->sub5_25.WNa,
 			subframe->sub5_25.sv[1], 
 			subframe->sub5_25.sv[2],
@@ -555,6 +558,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			subframe->sub5_25.sv[22],
 			subframe->sub5_25.sv[23], 
 			subframe->sub5_25.sv[24]);
+	    /*@-matchanyintegral@*/
 	}
     }
     (void)strlcat(buf, "}\r\n", buflen);

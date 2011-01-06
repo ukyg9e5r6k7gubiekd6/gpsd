@@ -103,7 +103,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
-static bool gps_query(struct gps_data_t *gpsdata, 
+static bool gps_query(/*@out@*/struct gps_data_t *gpsdata, 
 		       gps_mask_t expect,
 		       const int timeout,
 		       const char *fmt, ... )
@@ -120,10 +120,12 @@ static bool gps_query(struct gps_data_t *gpsdata,
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
 	(void)strlcat(buf, "\n", BUFSIZ);
+    /*@-usedef@*/
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
 	gpsd_report(LOG_ERROR, "gps_query(), write failed\n");
 	return false;
     }
+    /*@+usedef@*/
     gpsd_report(LOG_PROG, "gps_query(), wrote, %s\n", buf);
 
     FD_ZERO(&rfds);
@@ -400,7 +402,7 @@ int main(int argc, char **argv)
 
 		if (gpsdata.set & DEVICE_SET) {
 		    --devcount;
-		    assert(gpsdata.dev.path[0]!=0 && gpsdata.dev.driver[0]!=0);
+		    assert(gpsdata.dev.path[0]!='\0' && gpsdata.dev.driver[0]!='\0');
 		    if (strcmp(gpsdata.dev.path, device) == 0) {
 			goto matching_device_seen;
 		    }
