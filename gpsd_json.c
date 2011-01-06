@@ -489,7 +489,7 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		 * control charactores (U+0000 through U+001F).must be 
 		 * escaped.  That escaping not done yet */
 		(void)snprintf(buf + len, buflen - len,
-		    ",\"system_message\":%.50s",
+		    ",\"system_message\":\"%.50s\"",
 			subframe->sub4_17.str);
 		break;
 	case 56:
