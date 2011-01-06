@@ -741,9 +741,11 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subframe_almanac(subp->tSVID, words, subp->subframe_num, 
 			sv, subp->data_id, &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
+	        /* unknown or secret page */
 		gpsd_report(LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
 			subp->pageid, subp->data_id);
+                return 0;
 	    }
 	    /* else, already handled */
 	}
@@ -815,6 +817,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    /* unknown page */
 	    gpsd_report(LOG_PROG, "50B: SF:5-%d data_id %d uknown page\n",
 		subp->pageid, subp->data_id);
+            return 0;
 	}
 	break;
     default:

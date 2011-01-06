@@ -365,7 +365,6 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 	        subframe->subframe_num);
     len = strlen(buf);
     	
-    /* only do almanac right now */
     if ( 1 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
 	            ",\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
@@ -438,7 +437,55 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		subframe->pageid);
 	len = strlen(buf);
 	switch (subframe->pageid ) {
+	case 13:
+	case 52:
+		/* decoding of ERD to SV is non trivial and not done yet */
+		(void)snprintf(buf + len, buflen - len,
+		    "\"ai\":%u,"
+		    "\"ERD1\":%d,\"ERD2\":%d,\"ERD3\":%d,\"ERD4\":%d,"
+		    "\"ERD5\":%d,\"ERD6\":%d,\"ERD7\":%d,\"ERD8\":%d,"
+		    "\"ERD9\":%d,\"ERD10\":%d,\"ERD11\":%d,\"ERD12\":%d,"
+		    "\"ERD13\":%d,\"ERD14\":%d,\"ERD15\":%d,\"ERD16\":%d,"
+		    "\"ERD17\":%d,\"ERD18\":%d,\"ERD19\":%d,\"ERD20\":%d,"
+		    "\"ERD21\":%d,\"ERD22\":%d,\"ERD23\":%d,\"ERD24\":%d,"
+		    "\"ERD25\":%d,\"ERD26\":%d,\"ERD27\":%d,\"ERD28\":%d,"
+		    "\"ERD29\":%d,\"ERD30\":%d",
+			    subframe->sub4_13.ai,
+			    subframe->sub4_13.ERD[1], 
+			    subframe->sub4_13.ERD[2], 
+			    subframe->sub4_13.ERD[3], 
+			    subframe->sub4_13.ERD[4],
+			    subframe->sub4_13.ERD[5], 
+			    subframe->sub4_13.ERD[6], 
+			    subframe->sub4_13.ERD[7], 
+			    subframe->sub4_13.ERD[8],
+			    subframe->sub4_13.ERD[9], 
+			    subframe->sub4_13.ERD[10], 
+			    subframe->sub4_13.ERD[11], 
+			    subframe->sub4_13.ERD[12],
+			    subframe->sub4_13.ERD[13], 
+			    subframe->sub4_13.ERD[14], 
+			    subframe->sub4_13.ERD[15], 
+			    subframe->sub4_13.ERD[16],
+			    subframe->sub4_13.ERD[17], 
+			    subframe->sub4_13.ERD[18], 
+			    subframe->sub4_13.ERD[19], 
+			    subframe->sub4_13.ERD[20],
+			    subframe->sub4_13.ERD[21], 
+			    subframe->sub4_13.ERD[22], 
+			    subframe->sub4_13.ERD[23], 
+			    subframe->sub4_13.ERD[24],
+			    subframe->sub4_13.ERD[25], 
+			    subframe->sub4_13.ERD[26], 
+			    subframe->sub4_13.ERD[27], 
+			    subframe->sub4_13.ERD[28],
+			    subframe->sub4_13.ERD[29], 
+			    subframe->sub4_13.ERD[30]);
+		break;
 	case 55:
+		/* FIXME! JSON is UTF-8. double quote, backslash and
+		 * control charactores (U+0000 through U+001F).must be 
+		 * escaped.  That escaping not done yet */
 		(void)snprintf(buf + len, buflen - len,
 		    ",\"system_message\":%.50s",
 			subframe->sub4_17.str);
