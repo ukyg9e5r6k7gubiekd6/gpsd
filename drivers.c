@@ -92,7 +92,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t * session)
 static void nmea_event_hook(struct gps_device_t *session, event_t event)
 {
     /*
-     * This is where we try to tickle NMEA devices into erevrealing their
+     * This is where we try to tickle NMEA devices into revealing their
      * inner natures.
      */
     if (event == event_configure) {
