@@ -367,9 +367,9 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
     	
     if ( 1 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
-	            ",\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
+	            ",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
 		    "\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,\"toc\":%lu,"
-		    "\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e", 
+		    "\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}", 
 		    (unsigned int)subframe->sub1.WN,
 		    (unsigned int)subframe->sub1.IODC,
 		    (unsigned int)subframe->sub1.l2,
@@ -383,9 +383,9 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    subframe->sub1.d_af0);
     } else if ( 2 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
-		    ",\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
+		    ",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
 		    "\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
-		    "\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u", 
+		    "\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
 		    (unsigned int)subframe->sub2.IODE,
 		    subframe->sub2.d_Crs,
 		    subframe->sub2.d_deltan,
@@ -399,9 +399,9 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    (unsigned int)subframe->sub2.u_AODO);
     } else if ( 3 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
-	    ",\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
+	    ",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
 	    "\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,\"omega\":%.11e,"
-	    "\"Omegad\":%.6e", 
+	    "\"Omegad\":%.6e}", 
 		    (unsigned int)subframe->sub3.IODE, 
 		    subframe->sub3.d_IDOT, 
 		    subframe->sub3.d_Cic, 
@@ -414,11 +414,11 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
     } else if ( subframe->is_almanac ) {
 	    /*@-compdef@*/
 	    (void)snprintf(buf + len, buflen - len,
-			",\"ID\":%d,\"Health\":%u,"
+			",\"ALMANAC\":{\"ID\":%d,\"Health\":%u,"
 			"\"e\":%g,\"toa\":%lu,"
 			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.10g,"
 			"\"Omega0\":%.10e,\"omega\":%.10e,\"M0\":%.11e,"
-			"\"af0\":%.5e,\"af1\":%.5e",
+			"\"af0\":%.5e,\"af1\":%.5e}",
 			(int)subframe->sub5.almanac.sv,
 			(unsigned int)subframe->sub5.almanac.svh,
 			subframe->sub5.almanac.d_eccentricity, 
