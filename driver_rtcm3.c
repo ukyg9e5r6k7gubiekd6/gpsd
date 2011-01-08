@@ -134,7 +134,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.ambiguity =
 		(bool) ugrab(8);
 	    rtcm->rtcmtypes.rtcm3_1002.rtk_data[i].L1.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		(ugrab(8)) * CARRIER_NOISE_RATIO_UNITS;
 	}
 	assert(bitcount ==
 	       64 + 74 * rtcm->rtcmtypes.rtcm3_1002.header.satcount);
@@ -214,7 +214,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.ambiguity =
 		(bool) ugrab(8);
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L1.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.indicator =
 		(unsigned char)ugrab(2);
 	    temp = (unsigned long)ugrab(24);
@@ -234,7 +234,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.ambiguity =
 		(bool) ugrab(8);
 	    rtcm->rtcmtypes.rtcm3_1004.rtk_data[i].L2.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 	assert(bitcount ==
 	       64 + 125 * rtcm->rtcmtypes.rtcm3_1004.header.satcount);
@@ -374,7 +374,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.ambiguity =
 		(bool) ugrab(7);
 	    rtcm->rtcmtypes.rtcm3_1010.rtk_data[i].L1.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 	assert(bitcount ==
 	       61 + 79 * rtcm->rtcmtypes.rtcm3_1010.header.satcount);
@@ -411,7 +411,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.ambiguity =
 		(bool) ugrab(7);
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L1.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.indicator =
 		(bool) ugrab(1);
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.channel =
@@ -433,7 +433,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.ambiguity =
 		(bool) ugrab(7);
 	    rtcm->rtcmtypes.rtcm3_1011.rtk_data[i].L2.CNR =
-		(bool) ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 	assert(bitcount ==
 	       61 + 107 * rtcm->rtcmtypes.rtcm3_1011.header.satcount);
