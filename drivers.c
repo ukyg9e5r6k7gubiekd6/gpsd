@@ -23,22 +23,7 @@ ssize_t generic_get(struct gps_device_t *session)
     return packet_get(session->gpsdata.gps_fd, &session->packet);
 }
 
-#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITRAX_ENABLE)  || defined(NAVCOM_ENABLE)
-ssize_t pass_rtcm(struct gps_device_t * session, char *buf, size_t rtcmbytes)
-/* most GPSes take their RTCM corrections straight up */
-{
-    return gpsd_write(session, buf, rtcmbytes);
-}
-#endif
-
-#ifdef NMEA_ENABLE
-/**************************************************************************
- *
- * Generic driver -- straight NMEA 0183
- *
- **************************************************************************/
-
-gps_mask_t nmea_parse_input(struct gps_device_t * session)
+gps_mask_t generic_parse_input(struct gps_device_t *session)
 {
     const struct gps_type_t **dp;
 
@@ -88,6 +73,21 @@ gps_mask_t nmea_parse_input(struct gps_device_t * session)
 	return st;
     }
 }
+
+#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITRAX_ENABLE)  || defined(NAVCOM_ENABLE)
+ssize_t pass_rtcm(struct gps_device_t * session, char *buf, size_t rtcmbytes)
+/* most GPSes take their RTCM corrections straight up */
+{
+    return gpsd_write(session, buf, rtcmbytes);
+}
+#endif
+
+#ifdef NMEA_ENABLE
+/**************************************************************************
+ *
+ * Generic driver -- straight NMEA 0183
+ *
+ **************************************************************************/
 
 static void nmea_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -223,7 +223,7 @@ const struct gps_type_t nmea = {
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use generic packet getter */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -321,7 +321,7 @@ const struct gps_type_t garmin = {
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use generic packet getter */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
     .event_hook     = garmin_nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -379,7 +379,7 @@ const struct gps_type_t ashtech = {
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .event_hook     = ashtech_event_hook, /* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -426,7 +426,7 @@ const struct gps_type_t fv18 = {
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .event_hook     = fv18_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -476,7 +476,7 @@ const struct gps_type_t gpsclock = {
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .event_hook     = gpsclock_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -528,7 +528,7 @@ static const struct gps_type_t tripmate = {
     .channels      = 12,			/* consumer-grade GPS */
     .probe_detect  = NULL,			/* no probe */
     .get_packet    = generic_get,		/* how to get a packet */
-    .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
+    .parse_packet  = generic_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
     .event_hook    = tripmate_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -576,7 +576,7 @@ static const struct gps_type_t earthmate = {
     .channels      = 12,			/* not used by NMEA parser */
     .probe_detect  = NULL,			/* no probe */
     .get_packet    = generic_get,		/* how to get a packet */
-    .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
+    .parse_packet  = generic_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
     .event_hook    = earthmate_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -700,7 +700,7 @@ const struct gps_type_t trueNorth = {
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
     .event_hook     = tnt_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
@@ -773,7 +773,7 @@ static const struct gps_type_t oceanServer = {
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
     .event_hook     = oceanserver_event_hook,
 #ifdef ALLOW_RECONFIGURE
@@ -1035,7 +1035,7 @@ const struct gps_type_t mtk3301 = {
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE

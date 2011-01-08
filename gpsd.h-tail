@@ -517,14 +517,14 @@ struct gps_device_t {
 extern const struct gps_type_t **gpsd_drivers;
 
 /* gpsd library internal prototypes */
-extern gps_mask_t nmea_parse_input(struct gps_device_t *);
+extern gps_mask_t generic_parse_input(struct gps_device_t *);
+extern ssize_t generic_get(struct gps_device_t *);
+extern ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
+
 extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len);
 extern ssize_t nmea_send(struct gps_device_t *session, const char *, ... );
 extern void nmea_add_checksum(char *);
-
-ssize_t generic_get(struct gps_device_t *);
-ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
