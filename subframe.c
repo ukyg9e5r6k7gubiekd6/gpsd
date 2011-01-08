@@ -78,9 +78,9 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 /* you can find up to date almanac data for comparision here:
  * https://gps.afspc.af.mil/gps/Current/current.alm
  */
-static void subframe_almanac(unsigned int tSVID, uint32_t words[], 
-			     unsigned int subframe, unsigned int sv,
-			     unsigned int data_id, 
+static void subframe_almanac(uint8_t tSVID, uint32_t words[], 
+			     uint8_t subframe, uint8_t sv,
+			     uint8_t data_id, 
 			     /*@out@*/struct almanac_t *almp)
 {
     /*@+matchanyintegral -shiftimplementation@*/
@@ -661,28 +661,28 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 
 		sv = -1;
 		/* current leap seconds */
-		subp->sub4_18.alpha0 = ((words[2] >> 16) & 0x0000FF);
-		subp->sub4_18.d_alpha0 = pow(2.0, -30) * subp->sub4_18.alpha0;
-		subp->sub4_18.alpha1 = ((words[2] >>  8) & 0x0000FF);
-		subp->sub4_18.d_alpha1 = pow(2.0, -27) * subp->sub4_18.alpha2;
-		subp->sub4_18.alpha2 = ((words[3] >> 16) & 0x0000FF);
-		subp->sub4_18.d_alpha2 = pow(2.0, -24) * subp->sub4_18.alpha2;
-		subp->sub4_18.alpha3 = ((words[3] >>  8) & 0x0000FF);
-		subp->sub4_18.d_alpha3 = pow(2.0, -24) * subp->sub4_18.alpha3;
+		subp->sub4_18.alpha0 = (char)((words[2] >> 16) & 0x0000FF);
+		subp->sub4_18.d_alpha0 = pow(2.0, -30) * (int)subp->sub4_18.alpha0;
+		subp->sub4_18.alpha1 = (char)((words[2] >>  8) & 0x0000FF);
+		subp->sub4_18.d_alpha1 = pow(2.0, -27) * (int)subp->sub4_18.alpha2;
+		subp->sub4_18.alpha2 = (char)((words[3] >> 16) & 0x0000FF);
+		subp->sub4_18.d_alpha2 = pow(2.0, -24) * (int)subp->sub4_18.alpha2;
+		subp->sub4_18.alpha3 = (char)((words[3] >>  8) & 0x0000FF);
+		subp->sub4_18.d_alpha3 = pow(2.0, -24) * (int)subp->sub4_18.alpha3;
 
-		subp->sub4_18.beta0  = ((words[3] >>  0) & 0x0000FF);
-		subp->sub4_18.d_beta0 = pow(2.0, 11) * subp->sub4_18.beta0;
-		subp->sub4_18.beta1  = ((words[4] >> 16) & 0x0000FF);
-		subp->sub4_18.d_beta1 = pow(2.0, 14) * subp->sub4_18.beta2;
-		subp->sub4_18.beta2  = ((words[4] >>  8) & 0x0000FF);
-		subp->sub4_18.d_beta2 = pow(2.0, 16) * subp->sub4_18.beta2;
-		subp->sub4_18.beta3  = ((words[4] >>  0) & 0x0000FF);
-		subp->sub4_18.d_beta3 = pow(2.0, 16) * subp->sub4_18.beta3;
+		subp->sub4_18.beta0  = (char)((words[3] >>  0) & 0x0000FF);
+		subp->sub4_18.d_beta0 = pow(2.0, 11) * (int)subp->sub4_18.beta0;
+		subp->sub4_18.beta1  = (char)((words[4] >> 16) & 0x0000FF);
+		subp->sub4_18.d_beta1 = pow(2.0, 14) * (int)subp->sub4_18.beta2;
+		subp->sub4_18.beta2  = (char)((words[4] >>  8) & 0x0000FF);
+		subp->sub4_18.d_beta2 = pow(2.0, 16) * (int)subp->sub4_18.beta2;
+		subp->sub4_18.beta3  = (char)((words[4] >>  0) & 0x0000FF);
+		subp->sub4_18.d_beta3 = pow(2.0, 16) * (int)subp->sub4_18.beta3;
 
-		subp->sub4_18.A1     = ((words[5] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A1     = (int)((words[5] >>  0) & 0xFFFFFF);
 		subp->sub4_18.A1     = uint2int(subp->sub4_18.A1, 24);
 		subp->sub4_18.d_A1   = pow(2.0,-50) * subp->sub4_18.A1;
-		subp->sub4_18.A0     = ((words[6] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A0     = (int)((words[6] >>  0) & 0xFFFFFF);
 		subp->sub4_18.A0   <<= 8;
 		subp->sub4_18.A0    |= ((words[7] >> 16) & 0x00FFFF);
 		subp->sub4_18.d_A0   = pow(2.0,-30) * subp->sub4_18.A0;
@@ -692,24 +692,24 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.tot    = ((words[7] >> 8) & 0x0000FF);
 		subp->sub4_18.d_tot  = pow(2.0,12) * subp->sub4_18.d_tot;
 		subp->sub4_18.WNt    = ((words[7] >> 0) & 0x0000FF);
-		subp->sub4_18.leap  = ((words[8] >> 16) & 0x0000FF);
+		subp->sub4_18.leap  = (char)((words[8] >> 16) & 0x0000FF);
 		subp->sub4_18.WNlsf  = ((words[8] >>  8) & 0x0000FF);
 
 		/* DN (Day Number of LSF) */
 		subp->sub4_18.DN = (words[8] & 0x0000FF);	   
 		/* leap second future */
-		subp->sub4_18.lsf = ((words[9] >> 16) & 0x0000FF);
+		subp->sub4_18.lsf = (char)((words[9] >> 16) & 0x0000FF);
 		/*
 		 * On SiRFs, the 50BPS data is passed on even when the
 		 * parity fails.  This happens frequently.  So the driver 
 		 * must be extra careful that bad data does not reach here.
 		 */
-		if (LEAP_SECONDS > subp->sub4_18.leap) {
+		if (LEAP_SECONDS > (int)subp->sub4_18.leap) {
 		    /* something wrong */
 		    gpsd_report(LOG_ERROR, 
 			"50B: SF:4-18 Invalid leap_seconds: %d\n",
 				subp->sub4_18.leap);
-		    subp->sub4_18.leap = LEAP_SECONDS;
+		    subp->sub4_18.leap = (char)LEAP_SECONDS;
 		    session->context->valid &= ~LEAP_SECOND_VALID;
 		} else {
 		    gpsd_report(LOG_INF,
@@ -743,7 +743,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    if ( -1 < sv ) {
 	        subp->is_almanac = 1;
 		subframe_almanac(subp->tSVID, words, subp->subframe_num, 
-			sv, subp->data_id, &subp->sub4.almanac);
+				 (uint8_t)sv, subp->data_id, &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
 	        /* unknown or secret page */
 		gpsd_report(LOG_PROG,
