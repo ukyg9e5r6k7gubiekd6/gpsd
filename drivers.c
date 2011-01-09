@@ -931,28 +931,6 @@ static const struct gps_type_t rtcm104v3 = {
  *
  **************************************************************************/
 
-static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
-{
-    if (session->packet.type == COMMENT_PACKET) {
-	return 0;
-    } else if (session->packet.type == GARMINTXT_PACKET) {	
-	//gpsd_report(LOG_PROG, "Garmin Simple Text packet\n");
-	return garmintxt_parse(session);
-    } else {
-	const struct gps_type_t **dp;
-
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    if (session->packet.type == (*dp)->packet_type) {
-		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
-			    (*dp)->type_name);
-		(void)gpsd_switch_driver(session, (*dp)->type_name);
-		return (*dp)->parse_packet(session);
-	    }
-	}
-	return 0;
-    }
-}
-
 /* *INDENT-OFF* */
 static const struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
@@ -961,7 +939,7 @@ static const struct gps_type_t garmintxt = {
     .channels      = 0,			/* not used */
     .probe_detect  = NULL,		/* no probe */
     .get_packet    = generic_get,	/* how to get a packet */
-    .parse_packet  = garmintxt_parse_input,	/*  */
+    .parse_packet  = generic_parse_input,	/* how to parse one */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .event_hook    = NULL,		/* no event hook */
 #ifdef ALLOW_RECONFIGURE
