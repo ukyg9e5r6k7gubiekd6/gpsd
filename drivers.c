@@ -32,8 +32,6 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
     } else if (session->packet.type != NMEA_PACKET) {
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    if (session->packet.type == (*dp)->packet_type) {
-		gpsd_report(LOG_WARN, "%s packet seen when NMEA expected.\n",
-			    (*dp)->type_name);
 		(void)gpsd_switch_driver(session, (*dp)->type_name);
 		return (*dp)->parse_packet(session);
 	    }
