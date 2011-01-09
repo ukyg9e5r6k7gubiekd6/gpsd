@@ -428,7 +428,7 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
 
 static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_wakeup)
+    if (event == event_identified)
 	(void)oncore_control_send(session, getfirmware, sizeof(getfirmware));
 
     /*
