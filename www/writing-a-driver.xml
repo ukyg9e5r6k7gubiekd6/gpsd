@@ -16,6 +16,16 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.10</revnumber>
+      <date>9 Jan 2011</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; event_wakeup no longer fires for USB devices,
+	 in order to avoid spamming unidentified devices behind
+	 USB-to-serial adapters that may not be GPSes at all.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.9</revnumber>
       <date>13 Apr 2010</date>
       <authorinitials>er</authorinitials>
@@ -618,7 +628,10 @@ called in the following circumstances:</para>
 <itemizedlist>
 
 <listitem><para>When the main auto-baud hunt loop in the daemon offers
-a new speed to probe at, with event argument 'event_wakeup'.</para></listitem>
+a new speed to probe at, with event argument 'event_wakeup'. Note that
+this event does <emphasis>not</emphasis> fire for USB devices, in
+order to avoid spamming unidentified devices behind USB-to-serial adapters
+that may not be GPSes at all.</para></listitem>
 
 <listitem><para>When the driver has a trigger string and the NMEA driver 
 sees it, 'event_triggermatch' fires.  An 'event_switch_driver' should
@@ -630,7 +643,7 @@ with a device, with event type 'identified'.
 </para></listitem>
 
 <listitem><para> Whenever a full packet is received, with event type
-'event_configure'.  On the first such packet, thepacket sequence
+'event_configure'.  On the first such packet, the packet sequence
 number is zeroed, then 'event_identify' fires, then 'event_configure'
 fires. On later packets, 'event_configure fires with the packet
 sequence number as its argument.  </para></listitem>

@@ -370,10 +370,10 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup) {
        /*
-	* Code to make the device ready to communicate. This is
-	* run every time we are about to try a different baud
-	* rate in the autobaud sequence. Only needed if the
-	* device is in some kind of sleeping state.
+	* Code to make the device ready to communicate.  Only needed if the
+	* device is in some kind of sleeping state, and only shipped to
+	* RS232C (so that gpsd won't send strings to unidentified USB devices)
+	* that might not be GPSes at all.
 	*/
     }
     if (event == event_identified) {

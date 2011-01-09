@@ -268,12 +268,14 @@ void gpsd_set_speed(struct gps_device_t *session,
     session->gpsdata.dev.parity = parity;
     session->gpsdata.dev.stopbits = stopbits;
 
-    if (!session->context->readonly) {
-	/*
-	 * The device might need a wakeup string before it will send data.
-	 * If we don't know the device type, ship it every driver's wakeup
-	 * in hopes it will respond.
-	 */
+    /*
+     * The device might need a wakeup string before it will send data.
+     * If we don't know the device type, ship it every driver's wakeup
+     * in hopes it will respond.  But not to USB, because shipping
+     * probe strings to unknown USB serial adaptors may spam devices
+     * that aren't GPSes at all and could become confused.
+     */
+    if (!session->context->readonly && session->sourcetype != source_usb) {
 	if (isatty(session->gpsdata.gps_fd) != 0
 	    && !session->context->readonly) {
 	    const struct gps_type_t **dp;
