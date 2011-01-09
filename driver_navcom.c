@@ -178,27 +178,19 @@ static void navcom_cmd_0x11(struct gps_device_t *session,
 
 static void navcom_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_wakeup) {
-	/* NOTE - This allows us to know into which of the unit's various
-	 * serial ports we are connected.
+    /* Request the following messages: */
+    if (event == event_identified) {
+	/* NOTE - Channel Status allows us to know into which of the
+	 * unit's various serial ports we are connected.
 	 * Its value gets updated every time we receive a 0x06 (Ack)
 	 * message.  Note that if commands are being fed into the
 	 * unit from more than one port (which is entirely possible
 	 * although not necessarily a bright idea), there is a good
 	 * chance that we might misidentify our port */
-	/*@ -type @*/
+	/*@ +charint @*/
 	navcom_cmd_0x1c(session, 0x02, 0);	/* Test Support Block */
 	navcom_cmd_0x20(session, 0xae, 0x0000);	/* Identification Block */
 	navcom_cmd_0x20(session, 0x86, 0x000a);	/* Channel Status */
-	/*@ +type @*/
-    }
-    /* Request the following messages: */
-    /*
-     * FIX-ME: It might not be necessary to call this on reactivate.
-     * Experiment to see if the holds its settings through a close.
-     */
-    if (event == event_identified || event == event_reactivate) {
-	/*@ +charint @*/
 	navcom_cmd_0x1c(session, 0x01, 5);	/* Blink LEDs on receiver */
 	navcom_cmd_0x20(session, 0xae, 0x1770);	/* Identification Block - send every 10 min */
 	navcom_cmd_0x20(session, 0xb1, 0x4000);	/* PVT Block */
