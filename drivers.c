@@ -82,10 +82,48 @@ ssize_t pass_rtcm(struct gps_device_t * session, char *buf, size_t rtcmbytes)
 }
 #endif
 
+/**************************************************************************
+ *
+ * Generic driver -- make no assumptions about the device type
+ *
+ **************************************************************************/
+
+/* *INDENT-OFF* */
+const struct gps_type_t unknown = {
+    .type_name      = "Unknown",	/* full name of type */
+    .packet_type    = COMMENT_PACKET,	/* associated lexer packet type */
+    .trigger	    = NULL,		/* it's the default */
+    .channels       = 12,		/* consumer-grade GPS */
+    .probe_detect   = NULL,		/* no probe */
+    .get_packet     = generic_get,	/* use generic packet getter */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* write RTCM data straight */
+    .event_hook     = NULL,		/* lifetime event handler */
+#ifdef ALLOW_RECONFIGURE
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
+#endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = NULL,		/* how to send control strings */
+#endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
+};
+/* *INDENT-ON* */
+
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
- * Generic driver -- straight NMEA 0183
+ * NMEA 0183
+ *
+ * This is separate from the 'unknown' driver because we don't want to
+ * ship NMEA subtype probe strings to a device until we've seen at
+ * least one NMEA packet.  This avoids spamming devices that might
+ * actually be USB modems or other things in USB device class FF that
+ * just happen to have one of 'our' adaptor chips in pront of them.
  *
  **************************************************************************/
 
@@ -97,7 +135,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
      */
     if (event == event_configure) {
 	/* change this guard if the probe count goes up */
-	if (session->packet.counter <= 8)
+	if (session->packet.counter <= 9)
 	    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n",
 			session->packet.counter);
 	/*
@@ -195,6 +233,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
 #endif /* MTK3301_ENABLE */
+	    /* when adding a case here, don't forget the probe count guard */
 	default:
 	    break;
 	}
@@ -1129,6 +1168,7 @@ extern const struct gps_type_t navcom_binary, superstar2_binary;
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
 static const struct gps_type_t *gpsd_driver_array[] = {
+    &unknown,
 #ifdef NMEA_ENABLE
     &nmea,
 #ifdef ASHTECH_ENABLE
