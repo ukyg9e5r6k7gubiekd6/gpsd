@@ -40,25 +40,21 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	}
 	return 0;
     } else {			/* session->packet.type == NMEA_PACKET) */
-
 	gps_mask_t st = 0;
-	/*
-	 * Some packets do not end in \n, append one
-	 * for good logging
-	 */
-	gpsd_report(LOG_IO, "<= GPS: %s\n", session->packet.outbuffer);
+	char *sentence = (char *)session->packet.outbuffer;
 
-	if ((st =
-	     nmea_parse((char *)session->packet.outbuffer, session)) == 0) {
-	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n",
-			session->packet.outbuffer);
+	if (sentence[strlen(sentence)-1] != '\n')
+	    gpsd_report(LOG_IO, "<= GPS: %s\n", sentence);
+	else
+	    gpsd_report(LOG_IO, "<= GPS: %s", sentence);
+
+	if ((st=nmea_parse(sentence, session)) == 0) {
+	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n",	sentence);
 	}
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char *trigger = (*dp)->trigger;
 
-	    if (trigger != NULL
-		&& strncmp((char *)session->packet.outbuffer, trigger,
-			   strlen(trigger)) == 0) {
+	    if (trigger!=NULL && strncmp(sentence,trigger,strlen(trigger))==0) {
 		gpsd_report(LOG_PROG, "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
