@@ -430,43 +430,16 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
  * Externally called routines below here
  *
  **********************************************************/
-/*@ +charint @*/
-/* canned config messages */
-/* Initiate Link ID# 63 */
-static unsigned char link_msg[] = { 0x01, 0x3f, 0xc0, 0x08,
-    0x55, 0x47, 0x50, 0x53, 0x2d, 0x30, 0x30, 0x30,
-    0x00, 0x00
-};
-
-/* Request Hardware/Software Identification ID# 45 */
-static unsigned char version_msg[] = { 0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01 };
-
-/*@ -charint @*/
 
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_wakeup) {
-	(void)superstar2_write(session, (char *)link_msg, sizeof(link_msg));
-	(void)usleep(320000);
-	(void)superstar2_write(session, (char *)version_msg,
-			       sizeof(version_msg));
-	return;
-    }
-
-    /* query firmware version */
-    if (event == event_identified)
-	(void)superstar2_write(session, (char *)version_msg,
-			       sizeof(version_msg));
-
-    /* FIX-ME: check to see if this really needs to be resent on reactivation */
-    if (event == event_identified || event == event_reactivate) {
+    if (event == event_identified) {
 	/*@ +charint @*/
-	unsigned char svinfo_msg[] = { 0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01 };
-	unsigned char timing_msg[] = { 0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01 };
-	unsigned char navsol_lla_msg[] =
-	    { 0x01, 0x94, 0x6b, 0x00, 0x00, 0x01 };
-	unsigned char ephemeris_msg[] =
-	    { 0x01, 0x96, 0x69, 0x00, 0x00, 0x01 };
+	unsigned char version_msg[]    = { 0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01 };
+	unsigned char svinfo_msg[]     = { 0x01, 0xa1, 0x5e, 0x00, 0x00, 0x01 };
+	unsigned char timing_msg[]     = { 0x01, 0xf1, 0x0e, 0x00, 0x00, 0x01 };
+	unsigned char navsol_lla_msg[] = { 0x01, 0x94, 0x6b, 0x00, 0x00, 0x01 };
+	unsigned char ephemeris_msg[]  = { 0x01, 0x96, 0x69, 0x00, 0x00, 0x01 };
 	unsigned char measurement_msg[] =
 	    { 0x01, 0x97, 0x68, 0x01, 0x00, 0x01, 0x01 };
 	/*@ -charint @*/
