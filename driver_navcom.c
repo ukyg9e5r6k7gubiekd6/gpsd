@@ -1303,7 +1303,7 @@ const struct gps_type_t navcom_binary =
 {
     .type_name      = "Navcom binary",  	/* full name of type */
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
-    .trigger	    = "\x02\x99\x66",		/* packet leader */
+    .trigger	    = NULL,			/* none */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
