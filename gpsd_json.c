@@ -520,7 +520,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    /*@+charint@*/
 		/* decoding of ERD to SV is non trivial and not done yet */
 		(void)snprintf(buf + len, buflen - len,
-		    "\"ai\":%u,"
+		    ",\"ERD\":{\"ai\":%u,"
 		    "\"ERD1\":%d,\"ERD2\":%d,\"ERD3\":%d,\"ERD4\":%d,"
 		    "\"ERD5\":%d,\"ERD6\":%d,\"ERD7\":%d,\"ERD8\":%d,"
 		    "\"ERD9\":%d,\"ERD10\":%d,\"ERD11\":%d,\"ERD12\":%d,"
@@ -528,7 +528,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		    "\"ERD17\":%d,\"ERD18\":%d,\"ERD19\":%d,\"ERD20\":%d,"
 		    "\"ERD21\":%d,\"ERD22\":%d,\"ERD23\":%d,\"ERD24\":%d,"
 		    "\"ERD25\":%d,\"ERD26\":%d,\"ERD27\":%d,\"ERD28\":%d,"
-		    "\"ERD29\":%d,\"ERD30\":%d",
+		    "\"ERD29\":%d,\"ERD30\":%d}",
 			    subframe->sub4_13.ai,
 			    subframe->sub4_13.ERD[1], 
 			    subframe->sub4_13.ERD[2], 
@@ -573,10 +573,11 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	case 56:
 	    if (scaled) {
 		(void)snprintf(buf + len, buflen - len,
-			",\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,\"a3\":%.5g,"
-			"\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,\"b3\":%.5g,"
-			"\"A1\":%.11e,\"A0\":%.11e,\"tot\":%.5g,\"WNt\":%u,"
-			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d",
+			",\"IONO\":{\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,"
+			"\"a3\":%.5g,\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,"
+			"\"b3\":%.5g,\"A1\":%.11e,\"A0\":%.11e,\"tot\":%.5g,"
+			"\"WNt\":%u,\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,"
+			"\"lsf\":%d}",
 			    subframe->sub4_18.d_alpha0,
 			    subframe->sub4_18.d_alpha1, 
 			    subframe->sub4_18.d_alpha2, 
@@ -595,10 +596,10 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			    (int)subframe->sub4_18.lsf);
 	    } else {
 		(void)snprintf(buf + len, buflen - len,
-			",\"a0\":%d,\"a1\":%d,\"a2\":%d,\"a3\":%d,"
+			",\"IONO\":{\"a0\":%d,\"a1\":%d,\"a2\":%d,\"a3\":%d,"
 			"\"b0\":%d,\"b1\":%d,\"b2\":%d,\"b3\":%d,"
 			"\"A1\":%ld,\"A0\":%ld,\"tot\":%u,\"WNt\":%u,"
-			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d",
+			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d}",
 			    subframe->sub4_18.alpha0,
 			    subframe->sub4_18.alpha1, 
 			    subframe->sub4_18.alpha2, 
@@ -663,13 +664,13 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    /*@+matchanyintegral@*/
 	    /* subframe5, page 25 */
 	    (void)snprintf(buf + len, buflen - len,
-		",\"toa\":%lu,\"WNa\":%u,"
+		",\"HEALTH2\":{\"toa\":%lu,\"WNa\":%u,"
 		"\"SV1\":%u,\"SV2\":%u,\"SV3\":%u,\"SV4\":%u,"
 		"\"SV5\":%u,\"SV6\":%u,\"SV7\":%u,\"SV8\":%u,"
 		"\"SV9\":%u,\"SV10\":%u,\"SV11\":%u,\"SV12\":%u,"
 		"\"SV13\":%u,\"SV14\":%u,\"SV15\":%u,\"SV16\":%u,"
 		"\"SV17\":%u,\"SV18\":%u,\"SV19\":%u,\"SV20\":%u,"
-		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u",
+		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u}",
 			(unsigned long)subframe->sub5_25.l_toa, 
 			subframe->sub5_25.WNa,
 			subframe->sub5_25.sv[1], 
