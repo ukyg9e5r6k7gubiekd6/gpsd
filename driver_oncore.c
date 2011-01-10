@@ -428,7 +428,13 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
 
 static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_identified)
+    /* 
+     * An oncore VP device that has not been used after long
+     * power-down is by itself silent (we're told other Oncore models
+     * such as the UT series don't have this quirk).  Provoke
+     * identification by requesting the firmware version.
+     */
+    if (event == event_wakeup)
 	(void)oncore_control_send(session, getfirmware, sizeof(getfirmware));
 
     /*
