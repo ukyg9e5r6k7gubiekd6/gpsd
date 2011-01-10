@@ -1,9 +1,11 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Description" content="Programmer's references for GPSD">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta name="Description" content="Programmer's references for GPSD"/>
+   <meta name="Keywords" content="GPS, translator, GIS"/>
    <title>Hacker's Guide to GPSD</title>
    <link rel="stylesheet" href="main.css" type="text/css"/>
 </head>
@@ -12,7 +14,7 @@
 <div id="Header">Hacker's Guide to GPSD</div>
 
 <div id="Menu">
-    <img src="gpsd-logo-small.png"/><br />
+    <img src="gpsd-logo-small.png" alt="Small gpsd Logo" /><br />
     <a href="index.html">Home</a><br/>
     <a href="index.html#news">News</a><br/>
     <a href="index.html#downloads">Downloads</a><br/>
@@ -64,71 +66,70 @@
 <p>If you're looking for things to hack on, first see the TODO
 file in the source distribution.</p>
 
-<ol type="I">
-<li><a href="#goals">Goals and philosophy of the project</a></li>
-<li><a href="#audience">Audience and supported hardware</a></li>
-<ol>
-<li><a href="#service">The time and location service</a></li>
-<li><a href="#tuning">The testing and tuning tools</a></li>
-<li><a href="#upgrading">The upgrading tools</a></li>
-<li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
-</ol>
-<li><a href="#contribution">Contribution guidelines</a></li>
-<ol>
-<li><a href="#verify">Verify your patch or commit</a></li>
-<li><a href="#patches">Send patches in diff -u or -c format</a></li>
-<li><a href="#license">The license on contributions</a></li>
-<li><a href="#options">Don't add invocation options!</a></li>
-<li><a href="#statics">Don't create static variables in the libraries!</a></li>
-<li><a href="#malloc">Don't use malloc!</a></li>
-<li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
-</ol>
-<li><a href="#understanding">Understanding the code</a></li>
-<ol>
-<li><a href="#debugging">Debugging</a></li>
-<li><a href="#profiling">Profiling</a></li>
-<li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
-<li><a href="#architecture">Architecture and how to hack it</a></li>
-<li><a href="#autoconfiguration">Autoconfiguration</a></li>
-<li><a href="#error">Error modeling</a></li>
-<li><a href="#ancient">Ancient history</a></li>
-</ol>
-<li><a href="#trouble">Known trouble spots</a></li>
-<ol>
-<li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
-<li><a href="#hotplug">Hotplug interface problems</a></li>
-<li><a href="#security">Security Issues</a></li>
-</ol>
-<li><a href="#newtypes">Adding new GPS types</a></li>
-<ol>
-<li><a href="#drivers">Driver architecture</a></li>
-<li><a href="#notdriver">When not to add a driver</a></li>
-<li><a href="#init">Initializing time and date</a></li>
-<li><a href="#invocation">How drivers are invoked</a></li>
-<li><a href="#reports">Where to put the data you get from the GPS</a></li>
-<li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
-<li><a href="#logfiles">Log files for regression testing</a></li>
-</ol>
-<li><a href="#designahead">Future Protocol Directions</a></li>
-<ol>
-<li><a href="#proposed">Proposed sentences</a></li>
-</ol>
-<li><a href="#blindalleys">Blind alleys</a></li>
-<ol>
-<li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
-<li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
-<li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
-<li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
-<li><a href="#subsecond">Subsecond polling</a></li>
-</ol>
-<li><a href="#release">Release Checklist</a>
-<li><a href="#installationtroubleshooting" >Installation Troubleshooting</a>
-<ol>
-  <li><a href="#generaltroubleshooting" >General Troubleshooting</a></li>
-  <li><a href="#troubleshootingstartatboot" >Start at Boot Troubleshooting</a></li>
-  <li><a href="#hotplugtroubleshooting" >Udev Hotplug Troubleshooting</a></li>
-</ol>
-</li>
+<ol class="ToC">
+  <li><a href="#goals">Goals and philosophy of the project</a></li>
+  <li><a href="#audience">Audience and supported hardware</a>
+  <ol>
+    <li><a href="#service">The time and location service</a></li>
+    <li><a href="#tuning">The testing and tuning tools</a></li>
+    <li><a href="#upgrading">The upgrading tools</a></li>
+    <li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
+  </ol></li>
+  <li><a href="#contribution">Contribution guidelines</a>
+  <ol>
+    <li><a href="#verify">Verify your patch or commit</a></li>
+    <li><a href="#patches">Send patches in diff -u or -c format</a></li>
+    <li><a href="#license">The license on contributions</a></li>
+    <li><a href="#options">Don't add invocation options!</a></li>
+    <li><a href="#statics">Don't create static variables in the libraries!</a></li>
+    <li><a href="#malloc">Don't use malloc!</a></li>
+    <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
+  </ol></li>
+  <li><a href="#understanding">Understanding the code</a>
+  <ol>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#profiling">Profiling</a></li>
+    <li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
+    <li><a href="#architecture">Architecture and how to hack it</a></li>
+    <li><a href="#autoconfiguration">Autoconfiguration</a></li>
+    <li><a href="#error">Error modeling</a></li>
+    <li><a href="#ancient">Ancient history</a></li>
+  </ol></li>
+  <li><a href="#trouble">Known trouble spots</a>
+  <ol>
+    <li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
+    <li><a href="#hotplug">Hotplug interface problems</a></li>
+    <li><a href="#security">Security Issues</a></li>
+  </ol></li>
+  <li><a href="#newtypes">Adding new GPS types</a>
+  <ol>
+    <li><a href="#drivers">Driver architecture</a></li>
+    <li><a href="#notdriver">When not to add a driver</a></li>
+    <li><a href="#init">Initializing time and date</a></li>
+    <li><a href="#invocation">How drivers are invoked</a></li>
+    <li><a href="#reports">Where to put the data you get from the GPS</a></li>
+    <li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
+    <li><a href="#logfiles">Log files for regression testing</a></li>
+  </ol></li>
+  <li><a href="#designahead">Future Protocol Directions</a>
+  <ol>
+    <li><a href="#proposed">Proposed sentences</a></li>
+  </ol></li>
+  <li><a href="#blindalleys">Blind alleys</a>
+  <ol>
+    <li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
+    <li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
+    <li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
+    <li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
+    <li><a href="#subsecond">Subsecond polling</a></li>
+  </ol></li>
+  <li><a href="#release">Release Checklist</a></li>
+  <li><a href="#installationtroubleshooting">Installation Troubleshooting</a>
+  <ol>
+    <li><a href="#generaltroubleshooting">General Troubleshooting</a></li>
+    <li><a href="#troubleshootingstartatboot">Start at Boot Troubleshooting</a></li>
+    <li><a href="#hotplugtroubleshooting">Udev Hotplug Troubleshooting</a></li>
+  </ol></li>
 </ol>
 
 <h1 id="goals">Goals and philosophy of the project</h1>
@@ -150,7 +151,7 @@ interfaces and power/duty-cycle management.  The one place where
 they differ substantially is that in the SBC case we generally
 know in advance what devices will be connected and when.  Thus, by
 designing for the less predictable laptop/PDA environment, we
-cover both.  But it is not by accident that the source code can be built 
+cover both.  But it is not by accident that the source code can be built
 with support for only any single GPS type compiled in.</p>
 
 <p>While we will support survey-grade GPSes when and if we have that
@@ -261,7 +262,7 @@ Anything that links direct to the core libraries should also be in C,
 because Python's alien-type facilities are still just a little too
 complex and painful to be a net win for our situation. (We know this
 may be about to change with the advent of the ctypes module in Python
-2.6 and will keep an open mind, especially to anyone who actually 
+2.6 and will keep an open mind, especially to anyone who actually
 supplies a ctypes Python wrapper for libgpsd.)</p>
 
 <p>We prefer Python anywhere we aren't required to use C by
@@ -324,9 +325,9 @@ go through the following checklist:</p>
     already-supported GPS.</li>
 
 <li>In the rare case where your patch or commit breaks the
-    regression test and it's for a good reason, part of your 
+    regression test and it's for a good reason, part of your
     responsibility is to (a) rebuild the regression tests, (b)
-    include the test changes in your patch, and (c) <b>explain 
+    include the test changes in your patch, and (c) <b>explain
     in detail why the regression broke</b> in your change comment.</li>
 
 <li>Check that the patched code displays no warnings when you run '<code>make
@@ -356,14 +357,14 @@ problems. Getting the code splint-clean tends to prevent these.</p>
 following things:</p>
 
 <ol>
-<li>Send us a representative sample of the GPS output for future 
-    regression-testing.</li>
+  <li>Send us a representative sample of the GPS output for future
+  regression-testing.</li>
 
-<li>Write a hardware entry describing the GPS for the <a 
-href="hardware.html">hardware page</a>.</li>
+  <li>Write a hardware entry describing the GPS for the <a
+  href="hardware.html">hardware page</a>.</li>
+</ol>
 
 <p>There's a whole section on adding new drivers later in this document.</p>
-</ol>
 
 <h2 id="patches">Send patches in diff -u or -c format</h2>
 
@@ -377,7 +378,7 @@ far more likely your patch will be accepted.</p>
 
 <h2 id="license">The license on contributions</h2>
 
-<p>The GPSD libraries are under the BSD license.  Please do not send 
+<p>The GPSD libraries are under the BSD license.  Please do not send
 contributions with GPL attached!</p>
 
 <p>The reason for this policy is to avoid making people nervous about
@@ -415,9 +416,9 @@ disappear.  Suddenly we'd be back to end-users having to fiddle with
 settings the software ought to figure out for itself, which is
 unacceptable.</p>
 
-<p>(2) Command-line switches without corresponding protocol commands 
+<p>(2) Command-line switches without corresponding protocol commands
 pin the daemon's behavior for its entire lifespan. Why should the user
-have to fix a policy at startup time and never get to change his/her 
+have to fix a policy at startup time and never get to change his/her
 mind afterwards?  Stupid design...</p>
 
 <p>(3) The command-line switches used for a normal <code>gpsd</code>
@@ -428,7 +429,7 @@ admin space) is a crash landing.</p>
 <h2 id="statics">Don't create static variables in the libraries!</h2>
 
 <p>Don't create static variables in library or driver files; it makes
-them non-reentrant <s>and hard to light</s>.  In practice, this means
+them non-reentrant<span class="strikeout"> and hard to light</span>.  In practice, this means
 you shouldn't declare a static in any file that doesn't have a main()
 function of its own, and silly little test mains cordoned off by a
 preprocessor conditional don't count.</p>
@@ -436,7 +437,7 @@ preprocessor conditional don't count.</p>
 <p>Instead, use the 'driver' union in gps_device_t and the gps_context_t
 storage area that's passed in common in a lot of the calls.
 These are intended as places to stash stuff that needs to be shared
-within a session, but would be thread-local if the code were 
+within a session, but would be thread-local if the code were
 running in a thread.</p>
 
 <h2 id="malloc">Don't use malloc!</h2>
@@ -452,7 +453,7 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 <h2 id="sizeof">Avoid use of sizeof(&lt;int type&gt;)!</h2>
 
 <p>It's tempting to extract parts of packets with by using a loop of the
-form "<code>for(i = 0; i < len; i += sizeof(long))</code>". Don't do that;
+form "<code>for(i = 0; i &amp; len; i += sizeof(long))</code>". Don't do that;
 not all integer types have the same length across architectures. A long may
 be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 4 bytes in a packet, then say so (or use sizeof(int32_t)).</p>
@@ -480,7 +481,7 @@ repeatable bug pretty quickly.</p>
 <p>Almost all the C programs have a -D option that enables logging
 of progress messages to standard error.  In gpsd itself this ups the
 syslogging level if it is running in background; see the LOG_* defines
-in gpsd.h to get an idea of what the log levels do.  Most of the test 
+in gpsd.h to get an idea of what the log levels do.  Most of the test
 clients accept this switch to enable progress message from the libgps
 code; you can use it, for example, to watch what the client-side
 parser for the wire protocol is actually doing.</p>
@@ -509,9 +510,9 @@ The TIMING response contains the following attributed:</p>
     the packet.</li>
 
 <li>xmit: An offset from the timestamp telling when gpsd believes the
-    transmission of the current packet started (this is actually 
+    transmission of the current packet started (this is actually
     recorded just before the first read of the new packet).  If
-    the sentence timestamp was zero, this offset is a full timestamp 
+    the sentence timestamp was zero, this offset is a full timestamp
     and the base time of the packet.</li>
 
 <li>recv: An offset from the base time telling when <code>gpsd</code>
@@ -521,7 +522,7 @@ The TIMING response contains the following attributed:</p>
     data.</li>
 
 <li>poll: An offset from the base time taken just before encoding the
-    response &mdash; effectively, when gpsd was polled to transmit the 
+    response &mdash; effectively, when gpsd was polled to transmit the
     data.</li>
 
 <li>elapsed: An offset from the base time to the time of the TIMING emission.</li>
@@ -589,18 +590,18 @@ change its mode or baud rate, probe for device subtype, etc. See <a
 href="#drivers">Driver Architecture</a> for more details about
 them.</p>
 
-<p>The <b>packet sniffer</b> is responsible for mining data packets 
+<p>The <b>packet sniffer</b> is responsible for mining data packets
 out of serial input streams.  It's basically a state machine that's
 watching for anything that looks like a properly checksummed packet.
-Because devices can hotplug or change modes, the type of packet 
+Because devices can hotplug or change modes, the type of packet
 that will come up the wire from a serial or USB port isn't necessarily
 fixed forever by the first one recognized.</p>
 
 <p>The <b>core library</b> manages a session with a GPS device.  The
-key entry points are (a) Starting a session by opening the device and 
+key entry points are (a) Starting a session by opening the device and
 reading data from it, hunting through baud rates and parity/stopbit
 combinations until the packet sniffer achieves synchronization
-lock with a known packet type, (b) polling the device for a packet, 
+lock with a known packet type, (b) polling the device for a packet,
 and (b) closing the device and wrapping up the session.</p>
 
 <p>A key feature of the core library is that it's responsible for
@@ -609,12 +610,12 @@ depending on the packet type that the sniffer returns.  This is
 <em>not configured in advance</em> and may change over time, notably
 if the device switches between different reporting protocols (most
 chipsets support NMEA and one or more vendor binary protocols, and
-devices like AIS receivers may report packets in two different 
+devices like AIS receivers may report packets in two different
 protcols on the same wire).</p>
 
-<p>Finally, the <b>multiplexor</b> is the part of the daemon that 
+<p>Finally, the <b>multiplexor</b> is the part of the daemon that
 handles client sessions and device assignment.  It is responsible
-for passing TPV reports up to clients, accepting client commands, 
+for passing TPV reports up to clients, accepting client commands,
 and responding to hotplug notifications. It is essentially all
 contained in the gpsd.c sourcefile.</p>
 
@@ -633,19 +634,19 @@ something approximating realistic timing.</p>
 
 <h3>The data-flow view</h3>
 
-Essentially, <code>gpsd</code> spins in a loop polling for input from
+<p>Essentially, <code>gpsd</code> spins in a loop polling for input from
 one of these sources:</p>
 
 <ol>
-<li>A set of clients making requests over a TCP/IP port.</li>
+  <li>A set of clients making requests over a TCP/IP port.</li>
 
-<li>A set of GPSes, connected via serial or USB devices.</li>
+  <li>A set of GPSes, connected via serial or USB devices.</li>
 
-<li>A set of DGPS or NTRIP servers issuing periodic differential-GPS
-updates.</li>
+  <li>A set of DGPS or NTRIP servers issuing periodic differential-GPS
+  updates.</li>
 
-<li>The special control socket used by hotplug scripts and some 
-configuration tools.</p>
+  <li>The special control socket used by hotplug scripts and some
+  configuration tools.</li>
 </ol>
 
 <p>The daemon only connects to a GPS when clients are connected to it.
@@ -654,11 +655,11 @@ Otherwise all GPS devices are closed and the daemon is quiescent.</p>
 <p>All writes to client sockets go through throttled_write().
 This code addresses two cases.  First, client has dropped the connection.
 Second, client is connected but not picking up data and our buffers are
-backing up.  If we let this continue, the write buffers will fill and 
+backing up.  If we let this continue, the write buffers will fill and
 the effect will be denial-of-service to clients that are better behaved.</p>
 
 <p>Our strategy is brutally simple and takes advantage of the fact that
-GPS data has a short shelf life.  If the client doesn't pick it up 
+GPS data has a short shelf life.  If the client doesn't pick it up
 within a few minutes, it's probably not useful to that client.  So if
 data is backing up to a client, drop that client.  That's why we set
 the client socket to nonblocking.</p>
@@ -701,23 +702,23 @@ hotplug facilities like Linux udev. It is intended to be written
 to by scripts activated when a relevant device (basically, a USB
 device with one of a particular set of vendor IDs) is connected to
 or disconnected from the system. On receipt of these messages,
-<code>gpsd</code> may add a device to its pool, or remove one and 
+<code>gpsd</code> may add a device to its pool, or remove one and
 (if possible) shift clients to a different one.</p>
 
 <p>The reason these scripts have to look for vendor IDs is that USB
 has no GPS class.  Thus, GPSes present the ID of whatever
 serial-to-USB converter chip they happen to be using. Fortunately
 there are fewer types of these in use than there are GPS chipsets;
-in fact, just two of them account for 80% of the USB GPS market 
+in fact, just two of them account for 80% of the USB GPS market
 and don't seem to be used by other consumer-grade devices.</p>
 
 <h2 id="initialization">Driver initialization and wrapup</h2>
 
 <p>Part of the job <code>gpsd</code> does is to minimize the amount
 of time attached GPSes are in a fully powered-up state.  So there
-is a distinction between initializing the <code>gpsd</code> internal 
+is a distinction between initializing the <code>gpsd</code> internal
 channel block structure for managing a GPS device (which we do when
-the hotplug system tells us it's available) and activating the device 
+the hotplug system tells us it's available) and activating the device
 (when a client wants data from it) which actually involves opening it
 and preparing to read data from it.  This is why
 <code>gpsd_init()</code> and <code>gpsd_activate()</code> are separate
@@ -786,7 +787,7 @@ works.</p>
 <li>If it finds a NMEA packet, it selects the NMEA driver.  This
    initializes by shipping all vendor-specific initialization strings
    to the device.  The objectives are to enable GSA, disable GLL, and
-   disable VTG.  Probe strings go here too, like the one that turns 
+   disable VTG.  Probe strings go here too, like the one that turns
    on SiRF debugging output in order to detect SiRF chips.</li>
 
 <li>Now gpsd reads NMEA packets.  If it sees a driver trigger string it
@@ -796,7 +797,7 @@ works.</p>
 <p>The outcome is that we know exactly what we're looking at, without any
 driver-type or baud rate options.</p>
 
-<p>(The above sequence of steps may be out of date.  If so, it will 
+<p>(The above sequence of steps may be out of date.  If so, it will
 be because we have added more recognized packet types and drivers.)</p>
 
 <h2 id="error">Error modeling</h2>
@@ -811,17 +812,17 @@ the squares of individual error estimates from a physical model.  The
 following is a representative physical error model for satellite range
 measurements:</p>
 
-<p>From R.B Langley's 1997 "The GPS error budget". 
+<p>From R.B Langley's 1997 "The GPS error budget".
 GPS World , Vol. 8, No. 3, pp. 51-56</p>
 
 <div>&nbsp;</div>
 
 <table border='1'>
-<tr><td>Atmospheric error &mdash; ionosphere</td>         <td>7.0m</td></tr>
-<tr><td>Atmospheric error &mdash; troposphere</td>        <td>0.7m</td></tr>
-<tr><td>Clock and ephemeris error</td>               <td>3.6m</td></tr>
-<tr><td>Receiver noise</td>                          <td>1.5m</td></tr>
-<tr><td>Multipath effect</td>                        <td>1.2m</td></tr>
+  <tr><td>Atmospheric error &mdash; ionosphere</td><td>7.0m</td></tr>
+  <tr><td>Atmospheric error &mdash; troposphere</td><td>0.7m</td></tr>
+  <tr><td>Clock and ephemeris error</td><td>3.6m</td></tr>
+  <tr><td>Receiver noise</td><td>1.5m</td></tr>
+  <tr><td>Multipath effect</td><td>1.2m</td></tr>
 </table>
 
 <p>From Hoffmann-Wellenhof et al. (1997), "GPS: Theory and Practice", 4th
@@ -830,16 +831,16 @@ Ed., Springer.</p>
 <div>&nbsp;</div>
 
 <table border='1'>
-<tr><td>Code range noise (C/A)                       <td>0.3m</td></tr>
-<tr><td>Code range noise (P-code)                    <td>0.03m</td></tr>
-<tr><td>Phase range                                  <td>0.005m</td></tr>
+  <tr><td>Code range noise (C/A)</td><td>0.3m</td></tr>
+  <tr><td>Code range noise (P-code)</td><td>0.03m</td></tr>
+  <tr><td>Phase range</td><td>0.005m</td></tr>
 </table>
 
 <p>We're assuming these are 2-sigma error ranges. This needs to
 be checked in the sources.  If they're 1-sigma the resulting UEREs
 need to be doubled.</p>
 
-<p>See <a 
+<p>See <a
 href="http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/">
 this discussion</a> of conversion factors.</p>
 
@@ -894,37 +895,36 @@ still exist as tags.</p>
 <h2 id="y2k1">The Y2.1K problem and other calendar issues</h2>
 
 <p>Because of limitations in various GPS protocols (e.g., they were
-designed by fools who weren't looking past the ends of their noses) 
+designed by fools who weren't looking past the ends of their noses)
 this code unavoidably includes some assumptions that will turn around
 and bite on various future dates. </p>
 
 <p>The three specific problems are:</p>
 
 <ol>
+  <li>The GPS radio format has a Y2K-style bug, the week counter
+  rollover, which happens either every 1024 weeks (roughly 20 years) or
+  every 8192 weeks (roughly 157 years), depending on whether your
+  receiver can decode a 10-bit or 13-bit GPS week field. At time of
+  writing the last 0 week was in 1999, the next 10-bit wraparound will
+  be in 2019, and the next 13-bit wraparound will be in 2157.</li>
 
-<li><p>The GPS radio format has a Y2K-style bug, the week counter
-rollover, which happens either every 1024 weeks (roughly 20 years) or
-every 8192 weeks (roughly 157 years), depending on whether your
-receiver can decode a 10-bit or 13-bit GPS week field. At time of
-writing the last 0 week was in 1999, the next 10-bit wraparound will
-be in 2019, and the next 13-bit wraparound will be in 2157.</p>
+  <li>NMEA delivers only two-digit years.</li>
 
-<li><p>NMEA delivers only two-digit years.</p></li>
-
-<li><p>SiRF chips at firmware level 231 deliver only GPS time in binary mode,
-not leap-second-corrected UTC.</p></li>
+  <li>SiRF chips at firmware level 231 deliver only GPS time in binary mode,
+  not leap-second-corrected UTC.</li>
 </ol>
 
 <p>Because of the first problem, the receiver's notion of the year may
-reset to the year of the last zero week if it is cold-booted on a date 
+reset to the year of the last zero week if it is cold-booted on a date
 after a rollover.  This can have side effects:</p>
 
 <ol>
-<li><p>The year part of the reported date will be invalid.</p></li>
-<li><p>UTC time will be correct, but a local time calculated on this 
-    will sometimes be off +- 1 hour, due to incorrect DST calculation.</p></li>
-<li><p>Some receivers may fail to get a fix, especially if they don't
-    have a recent ephemeris.</p></li>
+  <li>The year part of the reported date will be invalid.</li>
+  <li>UTC time will be correct, but a local time calculated on this
+  will sometimes be off +- 1 hour, due to incorrect DST calculation.</li>
+  <li>Some receivers may fail to get a fix, especially if they don't
+  have a recent ephemeris.</li>
 </ol>
 
 <p>The public documentation is unclear, but it appears from a
@@ -954,7 +954,7 @@ it's Linux-specific.  OpenBSD (at least) features a hotplug daemon
 with similar capabilities.  We ought to do the right thing there as
 well.</p>
 
-<p>Hotplug is nice, but on Linux it appears to be a moving target. For help debugging a hotplug problem, see <a href="#hotplugtroubleshooting" >Udev Hotplug Troubleshooting</a>.</p>
+<p>Hotplug is nice, but on Linux it appears to be a moving target. For help debugging a hotplug problem, see <a href="#hotplugtroubleshooting">Udev Hotplug Troubleshooting</a>.</p>
 
 <h2 id="security">Security Issues</h2>
 
@@ -1026,7 +1026,7 @@ before you do; driver helper functions live there.  Also read some
 existing drivers for clues.</p>
 
 <p>You can read an implementor's <a href="writing-a-driver.html">Notes
-On Writing A GPSD Driver.</a></para>
+On Writing A GPSD Driver.</a></p>
 
 <p>There's a second kind of driver architecture for
 <code>gpsmon</code>, the real-time packet monitor and diagnostic tool.
@@ -1067,7 +1067,7 @@ packet state machine in packet.c recognizes a special packet type, or
 (3) when a probe function returns true during device open.</p>
 
 <p>Each driver may have a trigger string that the NMEA interpreter
-watches for.  When that string is recognized at the start of a 
+watches for.  When that string is recognized at the start of a
 line, the interpreter switches to its driver.</p>
 
 <p>When a driver switch takes place, the old driver's wrapup method is
@@ -1085,12 +1085,12 @@ command set, not only would the prefix and any suffix characters have
 to match, but the checksum algorithm would have to be identical.</p>
 
 <p>Incoming characters from the GPS device are gathered into packets
-by an elaborate state machine in packet.c.  The purpose of this 
+by an elaborate state machine in packet.c.  The purpose of this
 state machine is so gpsd can autobaud and recognize GPS types
-automatically. The other way for a driver to be invoked is for 
+automatically. The other way for a driver to be invoked is for
 the state machine to recognize a special packet type associated
-with the driver. It will look through the list of drivers compiled 
-in to find the (first) one that handles that packet type.<p>
+with the driver. It will look through the list of drivers compiled
+in to find the (first) one that handles that packet type.</p>
 
 <p>If you have to add a new packet type to packet.c, add tests for the
 type to the TESTMAIN code.</p>
@@ -1117,13 +1117,13 @@ _SET macros in gps.h), suitable to be put in session->gpsdata.valid.
 The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
-this.  Finally, you must set gpsdata.status to indicate when DGPS 
+this.  Finally, you must set gpsdata.status to indicate when DGPS
 fixes are available, whether through RTCM or WAAS/Egnos.</p>
 
-<p>Your packet parser is also responsible for setting the tag field 
+<p>Your packet parser is also responsible for setting the tag field
 in the gps_data_t structure.  This is the string that will be emitted
 as the first field of each $ record for profiling.  The packet getter
-will set the sentence-length for you; it will be raw byte length, 
+will set the sentence-length for you; it will be raw byte length,
 including both payload and header/trailer bytes.</p>
 
 <p>Note, also, that all the timestamps your driver puts in the session
@@ -1135,7 +1135,7 @@ does <em>not</em> apply a timezone offset.</p>
 
 <p>gpsd drivers are expected to report position error estimates with
 a 95% confidence interval.  A few devices (Garmins and Zodiacs)
-actually report error estimates.  For the rest we have to compute them 
+actually report error estimates.  For the rest we have to compute them
 using an error model.</p>
 
 <p>Here's a table that explains how to convert from various
@@ -1175,8 +1175,8 @@ a fix but is stationary, and a portion during which it is moving.</p>
 
 <h1 id="designahead">Future Protocol Directions</h1>
 
-<p>The new protocol based on <a href="http://www.json.org/">JSON</a> 
-(JavaScript Object Notation) shipped in 2.90.</a>
+<p>The new protocol based on <a href="http://www.json.org/">JSON</a>
+(JavaScript Object Notation) shipped in 2.90.</p>
 
 <p>A major virtue of JSON is its extensibility. There are
 <em>lots</em> of other things a sensor wedded to a GPS might report
@@ -1222,7 +1222,7 @@ report on every packet, clear at start-of-cycle" policy.</p>
 <h2 id="shipstrings">Allowing clients to ship arbitrary control strings to a GPS</h2>
 
 <p>Tempting &mdash; it would allow us to do gpsmon-like things with the
-daemon running &mdash; but a bad idea.  It would make denial-of-service 
+daemon running &mdash; but a bad idea.  It would make denial-of-service
 attacks on applications using the GPS far too easy.  For example,
 suppose the control string were a baud-rate change?</p>
 
@@ -1318,7 +1318,7 @@ their drivers with high confidence.</p>
 
 <p>Core code is shared among all device types; most notably, it includes
 the packet-getter state machine, the channel-management logic, and
-the error-modeling code.  Historically these are the three most 
+the error-modeling code.  Historically these are the three most
 bug-prone areas in the code.</p>
 
 <p>We also need to notice that there are two different kinds of devices
@@ -1366,10 +1366,10 @@ the driver for a problem child.  In state 2, devs with release
 authority (presently myself, Chris, and Gary) may ship a release
 candidate at any time.</p>
 
-<p>State 3 (green): We've been in state 2 for 7 days.  In state 3, a dev 
+<p>State 3 (green): We've been in state 2 for 7 days.  In state 3, a dev
 with release authority can call a freeze for release.</p>
 
-<p>State 4: (freeze): No new features that could destabilize existing code.  
+<p>State 4: (freeze): No new features that could destabilize existing code.
 Release drops us to state 3.</p>
 
 <p>When you do something that changes our release state -- in particular,
@@ -1418,15 +1418,15 @@ may need to be adjusted.</dd>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>6. Run the regression tests and other checks</dt> 
+<dt>6. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship. This is
 the time to run valgrind-audit, 'make splint', 'make xmllint', and
 'make cppcheck' as well and check that those reports are clean. Use
 flocktest to verify operation on the remote test machines.</dd>
 
 <dt>7. Ship to Berlios</dt>
-<dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp), 
-and do Berlios's 
+<dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp),
+and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 
 <dt>8. Tag the release in git</dt>
@@ -1462,9 +1462,9 @@ launching methods</p>
 
 <p>This is a step by step process designed to isolate probems. We
 assume you have general Unix/Linux troubleshooting skills. You should
-also have read <a href="faq.html" >the FAQ</a>. Be aware of the <a
-href="index.html#documentation" >man pages</a>, in particular <a
-href="gpsd.html" >that for gpsd</a>. If you still have problems, join
+also have read <a href="faq.html">the FAQ</a>. Be aware of the <a
+href="index.html#documentation">man pages</a>, in particular <a
+href="gpsd.html">that for gpsd</a>. If you still have problems, join
 us on one of the <a href="index.html#mailing-lists">mailing lists</a>,
 probably <a href="http://lists.berlios.de/mailman/listinfo/gpsd-users"
 >gpsd-users</a>.</p>
@@ -1521,15 +1521,14 @@ gpsd: running with effective group ID 0
 gpsd: running with effective user ID 0
 gpsd: stashing device /dev/ttyUSB0 at slot 0
 gpsd: control socket connect on fd 6
-gpsd: <= control(6): /dev/ttyUSB0 already active
+gpsd: &lt;= control(6): /dev/ttyUSB0 already active
 ^Cgpsd: received terminating signal 2.
 gpsd: exiting.
 #</pre>
 
 <p>If you have udev on your computer, and you don't see gpsd notice
 the device (&quot;control socket connect on fd 6&quot;), check to be
-sure <a href="#hotplugtroubleshooting" >udev is working
-correctly</a>.</p>
+sure <a href="#hotplugtroubleshooting">udev is working correctly</a>.</p>
 
 <p>If you pull the plug on the receiver, gpsd will note the change.</p>
 
@@ -1585,7 +1584,7 @@ removes some configuration files left behind by remove.</p>
 
 <p>If you do compile your own gpsd, be aware that installing gpsd
 client packages can force installation of gpsd as well. One culprit is
-<a href="http://www.tangogps.org/" >tangogps</a>, which requires gpsd
+<a href="http://www.tangogps.org/">tangogps</a>, which requires gpsd
 and libgpsX (where X is 19 as of this writing). Fortunately, you can
 let apt-get install those two packages, and then purge them and
 reinstall your own compiled version. Other client packages may not be
@@ -1609,7 +1608,7 @@ clients. You can always purge them later.</p>
 <p>The Linux udev system has been prone to change out from under us,
 breaking our hotplug support for USB receivers.  Accordingly, here's a
 short guide to verifying that the different pieces are working
-correctly, with indications of where to troubleshoot on failure.<p>
+correctly, with indications of where to troubleshoot on failure.</p>
 
 <p>First, verify that your USB subsystem can see your receiver.  Run
 lsusb(1).  Plug the receiver in and run lsusb(1) again, looking for
@@ -1678,7 +1677,7 @@ this is the equivalent of <code>gpsd -N -n -F /var/run/gpsd.sock -D
 5</code>.) </p>
 
 <p>You can also launch the hotplug code manually: <code>cd /lib/udev
-&& ./gpsd.hotplug add /dev/ttyUSB0</code> If this fails, there is
+&amp;&amp; ./gpsd.hotplug add /dev/ttyUSB0</code> If this fails, there is
 something wrong with the hotplug code. If it succeeds, the problem may
 be in how udev is calling gpsd.hotplug, or udev may never call
 gpsd.hotplug.</p>
@@ -1697,8 +1696,7 @@ udev end of the configuration is working.</p>
 
 
 </div>
-<hr/> <script language="JavaScript" src="datestamp.js"
-type='text/javascript'></script>
+<hr/> <script src="datestamp.js" type='text/javascript'></script>
 </body>
 </html>
 <!--
