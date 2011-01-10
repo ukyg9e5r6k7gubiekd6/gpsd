@@ -369,37 +369,73 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
     len = strlen(buf);
     	
     if ( 1 == subframe->subframe_num ) {
-	(void)snprintf(buf + len, buflen - len,
-	            ",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,\"ura\":%u,"
-		    "\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,\"toc\":%lu,"
-		    "\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}", 
-		    (unsigned int)subframe->sub1.WN,
-		    (unsigned int)subframe->sub1.IODC,
-		    (unsigned int)subframe->sub1.l2,
-		    subframe->sub1.ura,
-		    subframe->sub1.hlth,
-		    (unsigned int)subframe->sub1.l2p,
-		    subframe->sub1.d_Tgd,
-		    (unsigned long)subframe->sub1.l_toc,
-		    subframe->sub1.d_af2,
-		    subframe->sub1.d_af1,
-		    subframe->sub1.d_af0);
+	if (scaled) {
+	    (void)snprintf(buf + len, buflen - len,
+			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
+			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,"
+			"\"toc\":%lu,\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}", 
+			(unsigned int)subframe->sub1.WN,
+			(unsigned int)subframe->sub1.IODC,
+			(unsigned int)subframe->sub1.l2,
+			subframe->sub1.ura,
+			subframe->sub1.hlth,
+			(unsigned int)subframe->sub1.l2p,
+			subframe->sub1.d_Tgd,
+			(unsigned long)subframe->sub1.l_toc,
+			subframe->sub1.d_af2,
+			subframe->sub1.d_af1,
+			subframe->sub1.d_af0);
+	} else {
+	    (void)snprintf(buf + len, buflen - len,
+			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
+			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%d,"
+			"\"toc\":%u,\"af2\":%ld,\"af1\":%d,\"af0\":%d}", 
+			(unsigned int)subframe->sub1.WN,
+			(unsigned int)subframe->sub1.IODC,
+			(unsigned int)subframe->sub1.l2,
+			subframe->sub1.ura,
+			subframe->sub1.hlth,
+			(unsigned int)subframe->sub1.l2p,
+			subframe->sub1.Tgd,
+			subframe->sub1.toc,
+			(long)subframe->sub1.af2,
+			subframe->sub1.af1,
+			subframe->sub1.af0);
+	}
     } else if ( 2 == subframe->subframe_num ) {
-	(void)snprintf(buf + len, buflen - len,
-		    ",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
-		    "\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
-		    "\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
-		    (unsigned int)subframe->sub2.IODE,
-		    subframe->sub2.d_Crs,
-		    subframe->sub2.d_deltan,
-		    subframe->sub2.d_M0,
-		    subframe->sub2.d_Cuc,
-		    subframe->sub2.d_eccentricity,
-		    subframe->sub2.d_Cus,
-		    subframe->sub2.d_sqrtA,
-		    (unsigned long)subframe->sub2.l_toe,
-		    (unsigned int)subframe->sub2.fit,
-		    (unsigned int)subframe->sub2.u_AODO);
+	if (scaled) {
+	    (void)snprintf(buf + len, buflen - len,
+			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
+			"\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
+			"\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
+			(unsigned int)subframe->sub2.IODE,
+			subframe->sub2.d_Crs,
+			subframe->sub2.d_deltan,
+			subframe->sub2.d_M0,
+			subframe->sub2.d_Cuc,
+			subframe->sub2.d_eccentricity,
+			subframe->sub2.d_Cus,
+			subframe->sub2.d_sqrtA,
+			(unsigned long)subframe->sub2.l_toe,
+			(unsigned int)subframe->sub2.fit,
+			(unsigned int)subframe->sub2.u_AODO);
+	} else {
+	    (void)snprintf(buf + len, buflen - len,
+			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%d,\"deltan\":%d,"
+			"\"M0\":%ld,\"Cuc\":%d,\"e\":%ld,\"Cus\":%d,"
+			"\"sqrtA\":%lu,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
+			(unsigned int)subframe->sub2.IODE,
+			subframe->sub2.Crs,
+			subframe->sub2.deltan,
+			(long)subframe->sub2.M0,
+			subframe->sub2.Cuc,
+			(long)subframe->sub2.e,
+			subframe->sub2.Cus,
+			(unsigned long)subframe->sub2.sqrtA,
+			(unsigned long)subframe->sub2.toe,
+			(unsigned int)subframe->sub2.fit,
+			(unsigned int)subframe->sub2.AODO);
+	}
     } else if ( 3 == subframe->subframe_num ) {
 	if (scaled) {
 	    (void)snprintf(buf + len, buflen - len,
