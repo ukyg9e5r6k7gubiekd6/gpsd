@@ -456,7 +456,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	} else {
 	    (void)snprintf(buf + len, buflen - len,
 		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%u,\"Cic\":%u,"
-		"\"Omega0\":%ld,\"Cis\":%u,\"i0\":%ld,\"Crc\":%u,"
+		"\"Omega0\":%ld,\"Cis\":%d,\"i0\":%ld,\"Crc\":%d,"
 		"\"omega\":%ld,\"Omegad\":%ld}", 
 			(unsigned int)subframe->sub3.IODE, 
 			subframe->sub3.IDOT, 
@@ -568,8 +568,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		 * escaped. */
 		json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
 		(void)snprintf(buf + len, buflen - len,
-		    ",\"system_message\":\"%.50s\"",
-			buf1);
+		    ",\"system_message\":\"%.50s\"", buf1);
 		break;
 	case 56:
 	    if (scaled) {
@@ -617,6 +616,42 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			    (unsigned int)subframe->sub4_18.DN, 
 			    (int)subframe->sub4_18.lsf);
 	    }
+	    break;
+	case 25:
+	case 63:
+	    (void)snprintf(buf + len, buflen - len,
+	        "\"HEALTH\":{\"data_id\":%d,"
+		"\"SV1\":%u,\"SV2\":%u,\"SV3\"\":%u,\"SV4\":%u,"
+		"\"SV5\":%u,\"SV6\":%u,\"SV7\":%u,\"SV8\":%u,"
+		"\"SV9\":%u,\"SV10\":%u,\"SV11\":%u,\"SV12\":%u,"
+		"\"SV13\":%u,\"SV14\":%u,\"SV15\":%u,\"SV16\":%u,"
+		"\"SV17\":%u,\"SV18\":%u,\"SV19\":%u,\"SV20\":%u,"
+		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u,"
+		"\"SV25\":%u,\"SV26\":%u,\"SV27\":%u,\"SV28\":%u,"
+		"\"SV29\":%u,\"SV30\":%u,\"SV31\":%u,\"SV32\":%u,"
+		"\"SVH25\":%u,\"SVH26\":%u,\"SVH27\":%u,\"SVH28\":%u,"
+		"\"SVH29\":%u,\"SVH30\":%u,\"SVH31\":%u,\"SVH32\":%u}",
+			subframe->data_id, 
+			subframe->sub4_25.svf[1],  subframe->sub4_25.svf[2], 
+			subframe->sub4_25.svf[3],  subframe->sub4_25.svf[4],
+			subframe->sub4_25.svf[5],  subframe->sub4_25.svf[6], 
+			subframe->sub4_25.svf[7],  subframe->sub4_25.svf[8],
+			subframe->sub4_25.svf[9],  subframe->sub4_25.svf[10], 
+			subframe->sub4_25.svf[11], subframe->sub4_25.svf[12],
+			subframe->sub4_25.svf[13], subframe->sub4_25.svf[14], 
+			subframe->sub4_25.svf[15], subframe->sub4_25.svf[16],
+			subframe->sub4_25.svf[17], subframe->sub4_25.svf[18], 
+			subframe->sub4_25.svf[19], subframe->sub4_25.svf[20],
+			subframe->sub4_25.svf[21], subframe->sub4_25.svf[22], 
+			subframe->sub4_25.svf[23], subframe->sub4_25.svf[24],
+			subframe->sub4_25.svf[25], subframe->sub4_25.svf[26], 
+			subframe->sub4_25.svf[27], subframe->sub4_25.svf[28],
+			subframe->sub4_25.svf[29], subframe->sub4_25.svf[30], 
+			subframe->sub4_25.svf[31], subframe->sub4_25.svf[32],
+			subframe->sub4_25.svh25,   subframe->sub4_25.svh26, 
+			subframe->sub4_25.svh27,   subframe->sub4_25.svh28,
+			subframe->sub4_25.svh29,   subframe->sub4_25.svh30, 
+			subframe->sub4_25.svh31,   subframe->sub4_25.svh32);
 	    break;
 	}
     } else if ( 5 == subframe->subframe_num ) {
