@@ -1292,9 +1292,9 @@ static void json_report(struct subscriber_t *sub,
      * *any* subscriber to see it, but *not all* subscribers
      * necessarily want it.  So we leave it up to the device
      * drivers to decide whether to turn subframe reporting on,
-     * and gate the reports here.
+     * and just pass the through here.
      */
-    if (sub->policy.subframe && (changed & SUBFRAME_IS) != 0) {
+    if ((changed & SUBFRAME_IS) != 0) {
 	subframe_json_dump(&device->gpsdata.subframe,
 			sub->policy.scaled,
 			buf, sizeof(buf));

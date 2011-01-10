@@ -642,7 +642,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
-    if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW | WATCH_SUBFRAMES)) == 0) {
+    if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW)) == 0) {
 	flags |= WATCH_JSON;
     }
 #ifndef USE_QT
@@ -664,8 +664,6 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
 	    if (flags & WATCH_RARE)
 		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
-	    if (flags & WATCH_SUBFRAMES)
-		(void)strlcat(buf, "\"subframes\":false,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
 	    if (buf[strlen(buf) - 1] == ',')
@@ -690,8 +688,6 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
 	    if (flags & WATCH_RAW)
 		(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
-	    if (flags & WATCH_SUBFRAMES)
-		(void)strlcat(buf, "\"subframes\":true,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
 	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */

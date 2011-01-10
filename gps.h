@@ -1213,7 +1213,6 @@ struct policy_t {
     bool json;				/* requesting JSON? */
     bool nmea;				/* requesting dumping as NMEA? */
     int raw;				/* requesting raw data? */
-    bool subframe;			/* requesting subframe output? */
     bool scaled;			/* requesting report scaling? */ 
     bool timing;			/* requesting timing info */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */   
@@ -1238,7 +1237,6 @@ typedef int socket_t;
 #define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
 #define WATCH_DEVICE	0x0100u	/* watch specific device */
 #define WATCH_DISABLE	0x0200u	/* disable watching */
-#define WATCH_SUBFRAMES	0x0400u	/* enable subframe output */
 #define POLL_NONBLOCK	0x1000u	/* set non-blocking poll (experimental!) */
 
 /* 
