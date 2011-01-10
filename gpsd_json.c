@@ -569,6 +569,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			subframe->sub4_17.str);
 		break;
 	case 56:
+	    if (scaled) {
 		(void)snprintf(buf + len, buflen - len,
 			",\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,\"a3\":%.5g,"
 			"\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,\"b3\":%.5g,"
@@ -590,7 +591,30 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			    (unsigned int)subframe->sub4_18.WNlsf, 
 			    (unsigned int)subframe->sub4_18.DN, 
 			    (int)subframe->sub4_18.lsf);
-		break;
+	    } else {
+		(void)snprintf(buf + len, buflen - len,
+			",\"a0\":%d,\"a1\":%d,\"a2\":%d,\"a3\":%d,"
+			"\"b0\":%d,\"b1\":%d,\"b2\":%d,\"b3\":%d,"
+			"\"A1\":%ld,\"A0\":%ld,\"tot\":%u,\"WNt\":%u,"
+			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d",
+			    subframe->sub4_18.alpha0,
+			    subframe->sub4_18.alpha1, 
+			    subframe->sub4_18.alpha2, 
+			    subframe->sub4_18.alpha3,
+			    subframe->sub4_18.beta0, 
+			    subframe->sub4_18.beta1, 
+			    subframe->sub4_18.beta2, 
+			    subframe->sub4_18.beta3,
+			    (long)subframe->sub4_18.A1, 
+			    (long)subframe->sub4_18.A0, 
+			    subframe->sub4_18.tot, 
+			    (unsigned int)subframe->sub4_18.WNt,
+			    (int)subframe->sub4_18.leap, 
+			    (unsigned int)subframe->sub4_18.WNlsf, 
+			    (unsigned int)subframe->sub4_18.DN, 
+			    (int)subframe->sub4_18.lsf);
+	    }
+	    break;
 	}
     } else if ( 5 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
