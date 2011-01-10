@@ -5,6 +5,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -372,7 +373,13 @@ int gpsd_open(struct gps_device_t *session)
 #endif /* BLUEZ */
     {
 #ifdef __linux__
-	if (anyopen(session->gpsdata.dev.path)) {
+	/*
+	 * Don't touch devices already opened by another process.  We
+	 * have to make an exception for ptys, which are intentionally
+	 * opened by nother process on the master side, otherwise we'll
+	 * break all our regression tests.
+	 */
+	if (session->sourcetype != source_pty && anyopen(session->gpsdata.dev.path)) {
             gpsd_report(LOG_ERROR, 
 			"%s already opened by another process\n",
 			session->gpsdata.dev.path);
@@ -396,6 +403,13 @@ int gpsd_open(struct gps_device_t *session)
 			strerror(errno));
 	}
     }
+
+    /*
+     * Try to block other processes from using this device while we
+     * have it open (later opens should return EBUSY).  Won't work
+     * against anything with root privileges, alas.
+     */
+    (void)ioctl(session->gpsdata.gps_fd, TIOCEXCL);
 
 #ifdef FIXED_PORT_SPEED
     session->saved_baud = FIXED_PORT_SPEED;
