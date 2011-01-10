@@ -85,7 +85,9 @@ char *json_stringify( /*@out@*/ char *to,
 		break;
 	    default:
 		/* ugh, we'd prefer a C-style escape here, but this is JSON */
-		(void)snprintf(tp, 5, "%u04x", (unsigned int)*sp);
+		/* http://www.ietf.org/rfc/rfc4627.txt
+		 * section 2.5, escape is \uXXXX */
+		(void)snprintf(tp, 5, "\\u%u4x", (unsigned int)*sp);
 		tp += strlen(tp);
 	    }
 	} else {
@@ -358,6 +360,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	/*@out@*/ char buf[], size_t buflen)
 {
     size_t len = 0;
+    char buf1[256];  /* need to verify this is big enough */
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%02u,"
 		   "\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
@@ -560,12 +563,13 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		break;
 	    /*@-charint@*/
 	case 55:
-		/* FIXME! JSON is UTF-8. double quote, backslash and
+		/* JSON is UTF-8. double quote, backslash and
 		 * control charactores (U+0000 through U+001F).must be 
-		 * escaped.  That escaping not done yet */
+		 * escaped. */
+		json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
 		(void)snprintf(buf + len, buflen - len,
 		    ",\"system_message\":\"%.50s\"",
-			subframe->sub4_17.str);
+			buf1);
 		break;
 	case 56:
 	    if (scaled) {
