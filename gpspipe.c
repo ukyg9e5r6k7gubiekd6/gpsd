@@ -105,7 +105,7 @@ static void usage(void)
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
 		  "-V Print version and exit.\n\n"
-		  "You must specify one, or more, of -r/-w/-S.\n"
+		  "You must specify one, or more, of -r, -R, or -w\n"
 		  "You must use -o if you use -d.\n");
 }
 
