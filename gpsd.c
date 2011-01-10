@@ -1790,7 +1790,7 @@ int main(int argc, char *argv[])
     for (i = optind; i < argc; i++) {
 	if (!add_device(argv[i])) {
 	    gpsd_report(LOG_ERROR,
-			"GPS device %s nonexistent or can't be read\n",
+			"GPS device %s open failed\n",
 			argv[i]);
 	}
     }

@@ -67,6 +67,46 @@ static sourcetype_t gpsd_classify(const char *path)
 	return source_unknown;
 }
 
+#ifdef __linux__
+#include <dirent.h>
+#include <ctype.h>
+
+static bool anyopen(const char *path)
+/* return true if any process has the specified path open */
+{
+    DIR *procd, *fdd;
+    struct dirent *procentry, *fdentry;
+    char procpath[32], fdpath[64], linkpath[64];
+
+    if ((procd = opendir("/proc")) == NULL)
+	return false;
+    while ((procentry = readdir(procd)) != NULL) {
+	if (isdigit(procentry->d_name[0])==0)
+	    continue;
+	(void)snprintf(procpath, sizeof(procpath), 
+		       "/proc/%s/fd/", procentry->d_name);
+	if ((fdd = opendir(procpath)) == NULL)
+	    continue;
+	while ((fdentry = readdir(fdd)) != NULL) {
+	    (void)strlcpy(fdpath, procpath, sizeof(fdpath));
+	    (void)strlcat(fdpath, fdentry->d_name, sizeof(fdpath));
+	    (void)memset(linkpath, '\0', sizeof(linkpath));
+	    if (readlink(fdpath, linkpath, sizeof(linkpath)) == -1)
+		continue;
+	    if (strcmp(linkpath, path) == 0) {
+		(void)closedir(fdd);
+		(void)closedir(procd);
+		return true;
+	    }
+	}
+    }
+
+    (void)closedir(fdd);
+    (void)closedir(procd);
+    return false;
+}
+#endif /* __linux__ */
+
 void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
 {
@@ -331,6 +371,14 @@ int gpsd_open(struct gps_device_t *session)
     } else 
 #endif /* BLUEZ */
     {
+#ifdef __linux__
+	if (anyopen(session->gpsdata.dev.path)) {
+            gpsd_report(LOG_ERROR, 
+			"%s already opened by another process\n",
+			session->gpsdata.dev.path);
+	    return -1;
+	}
+#endif /* __linux__ */
         if ((session->gpsdata.gps_fd =
 	     open(session->gpsdata.dev.path,
 		      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
