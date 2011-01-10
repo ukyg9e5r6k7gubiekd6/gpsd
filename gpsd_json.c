@@ -25,6 +25,8 @@ PERMISSIONS
 #include "revision.h"
 
 /* *INDENT-OFF* */
+#define JSON_BOOL(x)	((x)?"true":"false")
+
 /*
  * Manifest names for the gnss_type enum - must be kept synced with it.
  * Also, masks so we can tell what packet types correspond to each class.
@@ -353,16 +355,17 @@ void json_watch_dump(const struct policy_t *ccp,
     /*@+compdef@*/
 }
 
-void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
-		     size_t buflen)
+void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
+	/*@out@*/ char buf[], size_t buflen)
 {
     size_t len = 0;
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%02u,"
-		   "\"TOW17\":%u,\"frame\":%u",
+		   "\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
 		   (unsigned int)subframe->tSVID,
 		   (unsigned int)subframe->TOW17,
-		   (unsigned int)subframe->subframe_num);
+		   (unsigned int)subframe->subframe_num,
+		   JSON_BOOL(scaled));
     len = strlen(buf);
     	
     if ( 1 == subframe->subframe_num ) {
@@ -398,20 +401,37 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 		    (unsigned int)subframe->sub2.fit,
 		    (unsigned int)subframe->sub2.u_AODO);
     } else if ( 3 == subframe->subframe_num ) {
-	(void)snprintf(buf + len, buflen - len,
-	    ",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,\"Omega0\":%.11e,"
-	    "\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,\"omega\":%.11e,"
-	    "\"Omegad\":%.6e}", 
-		    (unsigned int)subframe->sub3.IODE, 
-		    subframe->sub3.d_IDOT, 
-		    subframe->sub3.d_Cic, 
-		    subframe->sub3.d_Omega0, 
-		    subframe->sub3.d_Cis, 
-		    subframe->sub3.d_i0, 
-		    subframe->sub3.d_Crc, 
-		    subframe->sub3.d_omega, 
-		    subframe->sub3.d_Omegad );
+	if (scaled) {
+	    (void)snprintf(buf + len, buflen - len,
+		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,"
+		"\"Omega0\":%.11e,\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,"
+		"\"omega\":%.11e,\"Omegad\":%.6e}", 
+			(unsigned int)subframe->sub3.IODE, 
+			subframe->sub3.d_IDOT, 
+			subframe->sub3.d_Cic, 
+			subframe->sub3.d_Omega0, 
+			subframe->sub3.d_Cis, 
+			subframe->sub3.d_i0, 
+			subframe->sub3.d_Crc, 
+			subframe->sub3.d_omega, 
+			subframe->sub3.d_Omegad );
+	} else {
+	    (void)snprintf(buf + len, buflen - len,
+		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%u,\"Cic\":%u,"
+		"\"Omega0\":%ld,\"Cis\":%u,\"i0\":%ld,\"Crc\":%u,"
+		"\"omega\":%ld,\"Omegad\":%ld}", 
+			(unsigned int)subframe->sub3.IODE, 
+			subframe->sub3.IDOT, 
+			subframe->sub3.Cic, 
+			(long int)subframe->sub3.Omega0, 
+			subframe->sub3.Cis, 
+			(long int)subframe->sub3.i0, 
+			subframe->sub3.Crc, 
+			(long int)subframe->sub3.omega, 
+			(long int)subframe->sub3.Omegad );
+	}
     } else if ( subframe->is_almanac ) {
+	if (scaled) {
 	    /*@-compdef@*/
 	    (void)snprintf(buf + len, buflen - len,
 			",\"ALMANAC\":{\"ID\":%d,\"Health\":%u,"
@@ -431,6 +451,26 @@ void subframe_json_dump(const struct subframe_t *subframe, /*@out@*/ char buf[],
 			subframe->sub5.almanac.d_M0,
 			subframe->sub5.almanac.d_af0,
 			subframe->sub5.almanac.d_af1);
+	} else {
+	    (void)snprintf(buf + len, buflen - len,
+			",\"ALMANAC\":{\"ID\":%d,\"Health\":%u,"
+			"\"e\":%u,\"toa\":%u,"
+			"\"deltai\":%d,\"Omegad\":%d,\"sqrtA\":%lu,"
+			"\"Omega0\":%ld,\"omega\":%ld,\"M0\":%ld,"
+			"\"af0\":%d,\"af1\":%d}",
+			(int)subframe->sub5.almanac.sv,
+			(unsigned int)subframe->sub5.almanac.svh,
+			subframe->sub5.almanac.e,
+			subframe->sub5.almanac.toa, 
+			subframe->sub5.almanac.deltai,
+			subframe->sub5.almanac.Omegad,
+			(unsigned long)subframe->sub5.almanac.sqrtA,
+			(long)subframe->sub5.almanac.Omega0,
+			(long)subframe->sub5.almanac.omega,
+			(long)subframe->sub5.almanac.M0,
+			subframe->sub5.almanac.af0,
+			subframe->sub5.almanac.af1);
+	}
     } else if ( 4 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
 	    ",\"pageid\":%u",
@@ -625,7 +665,6 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 	break;
 
     case 5:
-#define JSON_BOOL(x)	((x)?"true":"false")
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->conhealth.nentries; n++) {
 	    const struct consat_t *csp = &rtcm->conhealth.sat[n];
@@ -639,7 +678,6 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 			   JSON_BOOL(csp->new_data),
 			   JSON_BOOL(csp->los_warning), csp->tou);
 	}
-#undef JSON_BOOL
 	if (buf[strlen(buf) - 1] == ',')
 	    buf[strlen(buf) - 1] = '\0';
 	(void)strlcat(buf, "]", buflen);
