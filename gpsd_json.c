@@ -362,7 +362,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
     size_t len = 0;
     char buf1[256];  /* need to verify this is big enough */
 
-    (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%02u,"
+    (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
 		   "\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
 		   (unsigned int)subframe->tSVID,
 		   (unsigned int)subframe->TOW17,
@@ -455,7 +455,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			subframe->sub3.d_Omegad );
 	} else {
 	    (void)snprintf(buf + len, buflen - len,
-		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%u,\"Cic\":%u,"
+		",\"EPHEM3\":{\"IODE\":%u,\"IDOT\":%u,\"Cic\":%u,"
 		"\"Omega0\":%ld,\"Cis\":%d,\"i0\":%ld,\"Crc\":%d,"
 		"\"omega\":%ld,\"Omegad\":%ld}", 
 			(unsigned int)subframe->sub3.IODE, 
