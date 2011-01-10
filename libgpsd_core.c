@@ -8,6 +8,10 @@
 #include <math.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <libgen.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
@@ -94,6 +98,27 @@
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t oncore_binary;
 #endif
+
+static void gpsd_run_device_hook(char *device_name, char *hook)
+{
+    struct stat statbuf;
+    if (stat(DEVICEHOOKPATH, &statbuf) == -1)
+	gpsd_report(LOG_PROG, "no %s present, skipped running hook\n",
+	    DEVICEHOOKPATH); 
+    else {
+	char buf[PATH_MAX];
+	int status;
+	(void)snprintf(buf, sizeof(buf), "%s %s %s",
+	    DEVICEHOOKPATH, device_name, hook);
+	gpsd_report(LOG_INF, "running %s\n", buf);
+	status = system(buf);
+	if (status == -1)
+	    gpsd_report(LOG_ERROR, "error running %s\n", buf);
+	else
+	    gpsd_report(LOG_INF, "%s returned %d\n", DEVICEHOOKPATH,
+		WEXITSTATUS(status));
+    }
+}
 
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
@@ -195,6 +220,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
+    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
 }
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
@@ -646,6 +672,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
+    gpsd_run_device_hook(session->gpsdata.dev.path, "ACTIVATE");
     /* special case: source may be a URI to a remote GNSS or DGPS service */
     if (netgnss_uri_check(session->gpsdata.dev.path)) {
 	session->gpsdata.gps_fd = netgnss_uri_open(session->context,

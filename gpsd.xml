@@ -303,6 +303,13 @@ added by a control-socket command (see <xref linkend='devices'/> for
 details on this).  Daemon startup will abort with an error if neither
 any devices nor a control socket are specified.</para>
 
+<para>When a device is activated (i.e. a client requests data from it),
+gpsd attempts to execute a hook from
+<filename>/etc/gpsd/device-hook</filename> with first command line argument
+set to the pathname of the device and the second to
+<option>ACTIVATE</option>. On deactivatation it does the same passing
+<option>DEACTIVATE</option> for the second argument.</para>
+
 <para>Clients communicate with the daemon via textual request and
 responses. It is a bad idea for applications to speak the protocol
 directly: rather, they should use the
@@ -1864,6 +1871,13 @@ past and problems may still lurk there.</para>
 <application>gpsd</application> sets its group ID to the owner of this
 device if no GPS device was specified on the command line does not
 exist.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/etc/gpsd/device-hook</filename></term>
+<listitem>
+<para>Optional file containing the device activation/deactivation script.
+</para>
 </listitem>
 </varlistentry>
 <!--

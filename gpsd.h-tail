@@ -672,6 +672,8 @@ extern float roundf(float x);
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 
+#define DEVICEHOOKPATH SYSCONFDIR"/gpsd/device-hook"
+
 #endif /* _GPSD_H_ */
 // Local variables:
 // mode: c

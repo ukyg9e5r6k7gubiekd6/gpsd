@@ -6,7 +6,7 @@
 #
 
 # The deheader production uses this to pass in stop-on-error flags
-CFLAGS += $(MORECFLAGS)
+CFLAGS += $(MORECFLAGS) -DSYSCONFDIR=\"$(sysconfdir)\"
 
 ACLOCAL_AMDFLAGS = -I m4
 
@@ -607,7 +607,7 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 
 
 # Report splint warnings
-SPLINTOPTS = -I/usr/include/dbus-1.0/ $(LIBUSB_CFLAGS) +quiet
+SPLINTOPTS = -I/usr/include/dbus-1.0/ -DSYSCONFDIR=\"$(sysconfdir)\" $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources)
