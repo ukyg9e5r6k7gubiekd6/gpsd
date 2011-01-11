@@ -65,7 +65,7 @@ char *json_stringify( /*@out@*/ char *to,
      * escape
      */
     for (sp = from; *sp != '\0' && ((tp - to) < ((int)len - 5)); sp++) {
-	if (iscntrl(*sp)) {
+	if (iscntrl(*sp) || !isascii(*sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
 	    case '\b':
