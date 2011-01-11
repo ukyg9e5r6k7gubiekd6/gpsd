@@ -376,7 +376,7 @@ int gpsd_open(struct gps_device_t *session)
 	/*
 	 * Don't touch devices already opened by another process.  We
 	 * have to make an exception for ptys, which are intentionally
-	 * opened by nother process on the master side, otherwise we'll
+	 * opened by another process on the master side, otherwise we'll
 	 * break all our regression tests.
 	 */
 	if (session->sourcetype != source_pty && anyopen(session->gpsdata.dev.path)) {
