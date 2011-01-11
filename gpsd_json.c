@@ -87,7 +87,8 @@ char *json_stringify( /*@out@*/ char *to,
 		/* ugh, we'd prefer a C-style escape here, but this is JSON */
 		/* http://www.ietf.org/rfc/rfc4627.txt
 		 * section 2.5, escape is \uXXXX */
-		(void)snprintf(tp, 5, "u%04x", (unsigned int)*sp);
+		/* don't forget the NUL in the output count! */
+		(void)snprintf(tp, 6, "u%04x", 0x00ff & (unsigned int)*sp);
 		tp += strlen(tp);
 	    }
 	} else {
