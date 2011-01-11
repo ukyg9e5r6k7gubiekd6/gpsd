@@ -64,7 +64,7 @@ char *json_stringify( /*@out@*/ char *to,
      * each character to generate an up to 6-character Java-style
      * escape
      */
-    for (sp = from; *sp != '\0' && ((tp - to) < ((int)len - 5)); sp++) {
+    for (sp = from; *sp != '\0' && ((tp - to) < ((int)len - 6)); sp++) {
 	if (!isascii((unsigned char) *sp) || iscntrl((unsigned char) *sp)) {
 	    *tp++ = '\\';
 	    switch (*sp) {
