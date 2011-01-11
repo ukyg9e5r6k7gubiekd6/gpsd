@@ -253,7 +253,7 @@ static gps_mask_t processGPGLL(int count, char *field[],
      *
      * Unless you care about the FAA indicator, this sentence supplies nothing
      * that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
-     * actually ships updates in GPLL that aren't redundant.
+     * actually ships updates in GLL that aren't redundant.
      */
     char *status = field[7];
     gps_mask_t mask = 0;
