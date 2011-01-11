@@ -652,7 +652,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_17.str[i++] = (words[9] >> 8) & 0xff;
 		subp->sub4_17.str[i++] = '\0';
 		/*@ +type @*/
-		gpsd_report(LOG_INF, "50B: SF:4-17 system message: %.24s\n",
+		gpsd_report(LOG_PROG, "50B: SF:4-17 system message: %.24s\n",
 			subp->sub4_17.str);
 		break;
 	    case 18:

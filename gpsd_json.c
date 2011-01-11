@@ -569,9 +569,11 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		/* JSON is UTF-8. double quote, backslash and
 		 * control charactores (U+0000 through U+001F).must be 
 		 * escaped. */
+		/* system message can be 24 bytes, JSON can escape all
+		 * chars so up to 24*6 long. */
 		json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
 		(void)snprintf(buf + len, buflen - len,
-		    ",\"system_message\":\"%.50s\"", buf1);
+		    ",\"system_message\":\"%.144s\"", buf1);
 		break;
 	case 56:
 	    if (scaled) {
