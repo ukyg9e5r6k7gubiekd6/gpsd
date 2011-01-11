@@ -1360,8 +1360,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    break;
 		}
-	} else if (session->getcount++ > 1 && !gpsd_next_hunt_setting(session))
+	} else if (session->getcount++ > 1 && !gpsd_next_hunt_setting(session)) {
+	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
 	    return ERROR_IS;
+	}
     }
 
     /* update the scoreboard structure from the GPS */

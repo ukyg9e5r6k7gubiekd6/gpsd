@@ -1868,7 +1868,7 @@ past and problems may still lurk there.</para>
 <term><filename>/dev/ttyS0</filename></term>
 <listitem>
 <para>Prototype TTY device. After startup,
-<application>gpsd</application> sets its group ID to the owner of this
+<application>gpsd</application> sets its group ID to the owning group of this
 device if no GPS device was specified on the command line does not
 exist.</para>
 </listitem>
@@ -1877,7 +1877,9 @@ exist.</para>
 <term><filename>/etc/gpsd/device-hook</filename></term>
 <listitem>
 <para>Optional file containing the device activation/deactivation script.
-</para>
+Note that while <filename>/etc/gpsd</filename> is the default system
+configuration directory, it is possible to build the GPSD source code
+with different assumptions.</para>
 </listitem>
 </varlistentry>
 <!--
