@@ -286,12 +286,34 @@ struct gps_type_t {
 #endif /* NTPSHM_ENABLE */
 };
 
+/*
+ * Each input source has an associated type.  This is currently used in two
+ * ways:
+ *
+ * (1) To determince if we require that gpsd be the only process opening a 
+ * device.  We make an exception for PTYs because the master side has to be
+ * opened by test code,
+ *
+ * (2) To determine whether it's safe to send wakeup strings.  These are
+ * required on some unusual RS-232 devices (such as the TNT compass and
+ * Thales/Ashtech GPSes) but should not be shipped to unidentified USB 
+ * or Bluetooth devices as we don't even know in advance those are GPSEs;
+ * they might not cope well.
+ *
+ * Where it says "case detected but not used" it means that we can identify
+ * a source type but no behavior is yet contingent on it.  A "discoverable"
+ * device is one for which there is discoverable metadata such as a 
+ * vendor/product ID.
+ *
+ * We should never see a block device; that would indicate a serious error
+ * in command-line usage or the hotplug system.
+ */
 typedef enum {source_unknown,
 	      source_blockdev,	/* block devices can't be GPS sources */
 	      source_rs232,	/* potential GPS source, not discoverable */ 
 	      source_usb,	/* potential GPS source, discoverable */ 
 	      source_bluetooth,	/* potential GPS source, discoverable */ 
-	      source_pty,	/* PTY: case detected but not used */ 
+	      source_pty,	/* PTY: we don't require exclusive access */ 
 	      source_tcp,	/* TCP/IP stream: case detected but not used */ 
 	      source_udp,	/* UDP stream: case detected but not used */ 
 } sourcetype_t;
