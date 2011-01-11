@@ -360,7 +360,9 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	/*@out@*/ char buf[], size_t buflen)
 {
     size_t len = 0;
-    char buf1[256];  /* need to verify this is big enough */
+    /* system message is 24 chars, but they could ALL require escaping,
+     * like \uXXXX for each char */
+    char buf1[25 * 6];  
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
 		   "\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
