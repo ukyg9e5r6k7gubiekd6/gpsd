@@ -639,7 +639,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		for(i = 0 ; i < 24; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SV%d\":%d,", i+1, subframe->sub5_25.sv[1]);
+			"\"SV%d\":%d,", i+1, subframe->sub5_25.sv[i]);
 		}
 		len = strlen(buf)-1;
 		buf[len] = '\0';
