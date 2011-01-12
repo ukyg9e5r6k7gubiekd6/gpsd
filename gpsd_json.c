@@ -527,11 +527,11 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		(void)snprintf(buf + len, buflen - len,
 		    ",\"ERD\":{\"ai\":%u,", subframe->sub4_13.ai);
 
-		/* loop to construct json, rather than giant snprintf */
-		for(i = 0 ; i < 30; i++){
+		/* 1-index loop to construct json, rather than giant snprintf */
+		for(i = 1 ; i <= 30; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"ERD%d\":%d,", i+1, subframe->sub4_13.ERD[i]);
+			"\"ERD%d\":%d,", i, subframe->sub4_13.ERD[i]);
 		}
 		len = strlen(buf)-1;
 		buf[len] = '\0';
@@ -604,13 +604,13 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    (void)snprintf(buf + len, buflen - len,
 		"\"HEALTH\":{\"data_id\":%d,", subframe->data_id);
 
-		/* loop to construct json, rather than giant snprintf */
-		for(i = 0 ; i < 32; i++){
+		/* 1-index loop to construct json, rather than giant snprintf */
+		for(i = 1 ; i <= 32; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SV%d\":%d,", i+1, subframe->sub4_25.svf[i]);
+			"\"SV%d\":%d,", i, subframe->sub4_25.svf[i]);
 		}
-		for(i = 0 ; i < 8; i++){
+		for(i = 0 ; i < 8; i++){ /* 0-index */
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
 			"\"SVH%d\":%d,", i+25, subframe->sub4_25.svhx[i]);
@@ -636,10 +636,10 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		(unsigned long)subframe->sub5_25.l_toa,
 		subframe->sub5_25.WNa);
 		/* loop to construct json, rather than giant snprintf */
-		for(i = 0 ; i < 24; i++){
+		for(i = 1 ; i <= 24; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SV%d\":%d,", i+1, subframe->sub5_25.sv[i]);
+			"\"SV%d\":%d,", i, subframe->sub5_25.sv[i]);
 		}
 		len = strlen(buf)-1;
 		buf[len] = '\0';
