@@ -173,11 +173,12 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 
     buf2[0] = '\0';
     for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') || (sp[0] == '\r' && sp[2] == '\0'))
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') 
+	  || (sp[0] == '\r' && sp[2] == '\0'))
 	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	else
 	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			   (unsigned)*sp);
+			   0x00ff & (unsigned)*sp);
 }
 
 void gpsd_report(int errlevel, const char *fmt, ...)
