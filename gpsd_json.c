@@ -363,7 +363,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
     size_t len = 0;
     /* system message is 24 chars, but they could ALL require escaping,
      * like \uXXXX for each char */
-    char buf1[25 * 6];  
+    char buf1[25 * 6];
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"tSV\":%u,"
 		   "\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
@@ -372,13 +372,13 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		   (unsigned int)subframe->subframe_num,
 		   JSON_BOOL(scaled));
     len = strlen(buf);
-    	
+    
     if ( 1 == subframe->subframe_num ) {
 	if (scaled) {
 	    (void)snprintf(buf + len, buflen - len,
 			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
 			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,"
-			"\"toc\":%lu,\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}", 
+			"\"toc\":%lu,\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}",
 			(unsigned int)subframe->sub1.WN,
 			(unsigned int)subframe->sub1.IODC,
 			(unsigned int)subframe->sub1.l2,
@@ -394,7 +394,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    (void)snprintf(buf + len, buflen - len,
 			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
 			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%d,"
-			"\"toc\":%u,\"af2\":%ld,\"af1\":%d,\"af0\":%d}", 
+			"\"toc\":%u,\"af2\":%ld,\"af1\":%d,\"af0\":%d}",
 			(unsigned int)subframe->sub1.WN,
 			(unsigned int)subframe->sub1.IODC,
 			(unsigned int)subframe->sub1.l2,
@@ -412,7 +412,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    (void)snprintf(buf + len, buflen - len,
 			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
 			"\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
-			"\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
+			"\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}",
 			(unsigned int)subframe->sub2.IODE,
 			subframe->sub2.d_Crs,
 			subframe->sub2.d_deltan,
@@ -428,7 +428,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    (void)snprintf(buf + len, buflen - len,
 			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%d,\"deltan\":%d,"
 			"\"M0\":%ld,\"Cuc\":%d,\"e\":%ld,\"Cus\":%d,"
-			"\"sqrtA\":%lu,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}", 
+			"\"sqrtA\":%lu,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}",
 			(unsigned int)subframe->sub2.IODE,
 			subframe->sub2.Crs,
 			subframe->sub2.deltan,
@@ -446,29 +446,29 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    (void)snprintf(buf + len, buflen - len,
 		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,"
 		"\"Omega0\":%.11e,\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,"
-		"\"omega\":%.11e,\"Omegad\":%.6e}", 
-			(unsigned int)subframe->sub3.IODE, 
-			subframe->sub3.d_IDOT, 
-			subframe->sub3.d_Cic, 
-			subframe->sub3.d_Omega0, 
-			subframe->sub3.d_Cis, 
-			subframe->sub3.d_i0, 
-			subframe->sub3.d_Crc, 
-			subframe->sub3.d_omega, 
+		"\"omega\":%.11e,\"Omegad\":%.6e}",
+			(unsigned int)subframe->sub3.IODE,
+			subframe->sub3.d_IDOT,
+			subframe->sub3.d_Cic,
+			subframe->sub3.d_Omega0,
+			subframe->sub3.d_Cis,
+			subframe->sub3.d_i0,
+			subframe->sub3.d_Crc,
+			subframe->sub3.d_omega,
 			subframe->sub3.d_Omegad );
 	} else {
 	    (void)snprintf(buf + len, buflen - len,
 		",\"EPHEM3\":{\"IODE\":%u,\"IDOT\":%u,\"Cic\":%u,"
 		"\"Omega0\":%ld,\"Cis\":%d,\"i0\":%ld,\"Crc\":%d,"
-		"\"omega\":%ld,\"Omegad\":%ld}", 
-			(unsigned int)subframe->sub3.IODE, 
-			subframe->sub3.IDOT, 
-			subframe->sub3.Cic, 
-			(long int)subframe->sub3.Omega0, 
-			subframe->sub3.Cis, 
-			(long int)subframe->sub3.i0, 
-			subframe->sub3.Crc, 
-			(long int)subframe->sub3.omega, 
+		"\"omega\":%ld,\"Omegad\":%ld}",
+			(unsigned int)subframe->sub3.IODE,
+			subframe->sub3.IDOT,
+			subframe->sub3.Cic,
+			(long int)subframe->sub3.Omega0,
+			subframe->sub3.Cis,
+			(long int)subframe->sub3.i0,
+			subframe->sub3.Crc,
+			(long int)subframe->sub3.omega,
 			(long int)subframe->sub3.Omegad );
 	}
     } else if ( subframe->is_almanac ) {
@@ -482,8 +482,8 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			"\"af0\":%.5e,\"af1\":%.5e}",
 			(int)subframe->sub5.almanac.sv,
 			(unsigned int)subframe->sub5.almanac.svh,
-			subframe->sub5.almanac.d_eccentricity, 
-			(unsigned long)subframe->sub5.almanac.l_toa, 
+			subframe->sub5.almanac.d_eccentricity,
+			(unsigned long)subframe->sub5.almanac.l_toa,
 			subframe->sub5.almanac.d_deltai,
 			subframe->sub5.almanac.d_Omegad,
 			subframe->sub5.almanac.d_sqrtA,
@@ -502,7 +502,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			(int)subframe->sub5.almanac.sv,
 			(unsigned int)subframe->sub5.almanac.svh,
 			subframe->sub5.almanac.e,
-			subframe->sub5.almanac.toa, 
+			subframe->sub5.almanac.toa,
 			subframe->sub5.almanac.deltai,
 			subframe->sub5.almanac.Omegad,
 			(unsigned long)subframe->sub5.almanac.sqrtA,
@@ -541,7 +541,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	}
 	case 55:
 		/* JSON is UTF-8. double quote, backslash and
-		 * control charactores (U+0000 through U+001F).must be 
+		 * control charactores (U+0000 through U+001F).must be
 		 * escaped. */
 		/* system message can be 24 bytes, JSON can escape all
 		 * chars so up to 24*6 long. */
@@ -558,20 +558,20 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			"\"WNt\":%u,\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,"
 			"\"lsf\":%d}",
 			    subframe->sub4_18.d_alpha0,
-			    subframe->sub4_18.d_alpha1, 
-			    subframe->sub4_18.d_alpha2, 
+			    subframe->sub4_18.d_alpha1,
+			    subframe->sub4_18.d_alpha2,
 			    subframe->sub4_18.d_alpha3,
-			    subframe->sub4_18.d_beta0, 
-			    subframe->sub4_18.d_beta1, 
-			    subframe->sub4_18.d_beta2, 
+			    subframe->sub4_18.d_beta0,
+			    subframe->sub4_18.d_beta1,
+			    subframe->sub4_18.d_beta2,
 			    subframe->sub4_18.d_beta3,
-			    subframe->sub4_18.d_A1, 
-			    subframe->sub4_18.d_A0, 
-			    subframe->sub4_18.d_tot, 
+			    subframe->sub4_18.d_A1,
+			    subframe->sub4_18.d_A0,
+			    subframe->sub4_18.d_tot,
 			    (unsigned int)subframe->sub4_18.WNt,
-			    (int)subframe->sub4_18.leap, 
-			    (unsigned int)subframe->sub4_18.WNlsf, 
-			    (unsigned int)subframe->sub4_18.DN, 
+			    (int)subframe->sub4_18.leap,
+			    (unsigned int)subframe->sub4_18.WNlsf,
+			    (unsigned int)subframe->sub4_18.DN,
 			    (int)subframe->sub4_18.lsf);
 	    } else {
 		(void)snprintf(buf + len, buflen - len,
@@ -580,20 +580,20 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 			"\"A1\":%ld,\"A0\":%ld,\"tot\":%u,\"WNt\":%u,"
 			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d}",
 			    subframe->sub4_18.alpha0,
-			    subframe->sub4_18.alpha1, 
-			    subframe->sub4_18.alpha2, 
+			    subframe->sub4_18.alpha1,
+			    subframe->sub4_18.alpha2,
 			    subframe->sub4_18.alpha3,
-			    subframe->sub4_18.beta0, 
-			    subframe->sub4_18.beta1, 
-			    subframe->sub4_18.beta2, 
+			    subframe->sub4_18.beta0,
+			    subframe->sub4_18.beta1,
+			    subframe->sub4_18.beta2,
 			    subframe->sub4_18.beta3,
-			    (long)subframe->sub4_18.A1, 
-			    (long)subframe->sub4_18.A0, 
-			    subframe->sub4_18.tot, 
+			    (long)subframe->sub4_18.A1,
+			    (long)subframe->sub4_18.A0,
+			    subframe->sub4_18.tot,
 			    (unsigned int)subframe->sub4_18.WNt,
-			    (int)subframe->sub4_18.leap, 
-			    (unsigned int)subframe->sub4_18.WNlsf, 
-			    (unsigned int)subframe->sub4_18.DN, 
+			    (int)subframe->sub4_18.leap,
+			    (unsigned int)subframe->sub4_18.WNlsf,
+			    (unsigned int)subframe->sub4_18.DN,
 			    (int)subframe->sub4_18.lsf);
 	    }
 	    break;
@@ -1186,7 +1186,7 @@ void aivdm_json_dump(const struct ais_t *ais, bool scaled,
 	    else if (ais->type9.alt == AIS_ALT_HIGH)
 		(void)strlcpy(altlegend, "\"high\"", sizeof(altlegend));
 	    else
-		(void)snprintf(altlegend, sizeof(altlegend), 
+		(void)snprintf(altlegend, sizeof(altlegend),
 			       "%u", ais->type9.alt);
 
 	    /*
