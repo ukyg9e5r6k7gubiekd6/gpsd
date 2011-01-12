@@ -401,8 +401,8 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			subframe->sub1.ura,
 			subframe->sub1.hlth,
 			(unsigned int)subframe->sub1.l2p,
-			subframe->sub1.Tgd,
-			subframe->sub1.toc,
+			(int)subframe->sub1.Tgd,
+			(unsigned int)subframe->sub1.toc,
 			(long)subframe->sub1.af2,
 			subframe->sub1.af1,
 			subframe->sub1.af0);
@@ -462,8 +462,8 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 		"\"Omega0\":%ld,\"Cis\":%d,\"i0\":%ld,\"Crc\":%d,"
 		"\"omega\":%ld,\"Omegad\":%ld}",
 			(unsigned int)subframe->sub3.IODE,
-			subframe->sub3.IDOT,
-			subframe->sub3.Cic,
+			(unsigned int)subframe->sub3.IDOT,
+			(unsigned int)subframe->sub3.Cic,
 			(long int)subframe->sub3.Omega0,
 			subframe->sub3.Cis,
 			(long int)subframe->sub3.i0,
@@ -501,8 +501,8 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			"\"af0\":%d,\"af1\":%d}",
 			(int)subframe->sub5.almanac.sv,
 			(unsigned int)subframe->sub5.almanac.svh,
-			subframe->sub5.almanac.e,
-			subframe->sub5.almanac.toa,
+			(unsigned int)subframe->sub5.almanac.e,
+			(unsigned int)subframe->sub5.almanac.toa,
 			subframe->sub5.almanac.deltai,
 			subframe->sub5.almanac.Omegad,
 			(unsigned long)subframe->sub5.almanac.sqrtA,
@@ -545,7 +545,7 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 		 * escaped. */
 		/* system message can be 24 bytes, JSON can escape all
 		 * chars so up to 24*6 long. */
-		json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
+		(void)json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
 		(void)snprintf(buf + len, buflen - len,
 		    ",\"system_message\":\"%.144s\"", buf1);
 		break;
@@ -579,17 +579,17 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			"\"b0\":%d,\"b1\":%d,\"b2\":%d,\"b3\":%d,"
 			"\"A1\":%ld,\"A0\":%ld,\"tot\":%u,\"WNt\":%u,"
 			"\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,\"lsf\":%d}",
-			    subframe->sub4_18.alpha0,
-			    subframe->sub4_18.alpha1,
-			    subframe->sub4_18.alpha2,
-			    subframe->sub4_18.alpha3,
-			    subframe->sub4_18.beta0,
-			    subframe->sub4_18.beta1,
-			    subframe->sub4_18.beta2,
-			    subframe->sub4_18.beta3,
+			    (int)subframe->sub4_18.alpha0,
+			    (int)subframe->sub4_18.alpha1,
+			    (int)subframe->sub4_18.alpha2,
+			    (int)subframe->sub4_18.alpha3,
+			    (int)subframe->sub4_18.beta0,
+			    (int)subframe->sub4_18.beta1,
+			    (int)subframe->sub4_18.beta2,
+			    (int)subframe->sub4_18.beta3,
 			    (long)subframe->sub4_18.A1,
 			    (long)subframe->sub4_18.A0,
-			    subframe->sub4_18.tot,
+			    (unsigned int)subframe->sub4_18.tot,
 			    (unsigned int)subframe->sub4_18.WNt,
 			    (int)subframe->sub4_18.leap,
 			    (unsigned int)subframe->sub4_18.WNlsf,
@@ -602,18 +602,21 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 	{
 	    int i;
 	    (void)snprintf(buf + len, buflen - len,
-		",\"HEALTH\":{\"data_id\":%d,", subframe->data_id);
+			   ",\"HEALTH\":{\"data_id\":%d,", 
+			   (int)subframe->data_id);
 
 		/* 1-index loop to construct json, rather than giant snprintf */
 		for(i = 1 ; i <= 32; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SV%d\":%d,", i, subframe->sub4_25.svf[i]);
+				   "\"SV%d\":%d,", 
+				   i, (int)subframe->sub4_25.svf[i]);
 		}
 		for(i = 0 ; i < 8; i++){ /* 0-index */
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SVH%d\":%d,", i+25, subframe->sub4_25.svhx[i]);
+				   "\"SVH%d\":%d,", 
+				   i+25, (int)subframe->sub4_25.svhx[i]);
 		}
 		len = strlen(buf)-1;
 		buf[len] = '\0';

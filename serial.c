@@ -408,7 +408,7 @@ int gpsd_open(struct gps_device_t *session)
 	 * have it open (later opens should return EBUSY).  Won't work
 	 * against anything with root privileges, alas.
 	 */
-	(void)ioctl(session->gpsdata.gps_fd, TIOCEXCL);
+	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCEXCL);
 
 #ifdef __linux__
 	/*
