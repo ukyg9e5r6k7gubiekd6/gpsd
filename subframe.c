@@ -537,14 +537,14 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_25.svf[31] = (unsigned char)((words[7] >> 12) & 0x0F);
 		subp->sub4_25.svf[32] = (unsigned char)((words[7] >>  8) & 0x0F);
 
-		subp->sub4_25.svh25 = ((words[7] >>  0) & 0x00003F);
-		subp->sub4_25.svh26 = ((words[8] >> 18) & 0x00003F);
-		subp->sub4_25.svh27 = ((words[8] >> 12) & 0x00003F);
-		subp->sub4_25.svh28 = ((words[8] >>  6) & 0x00003F);
-		subp->sub4_25.svh29 = ((words[8] >>  0) & 0x00003F);
-		subp->sub4_25.svh30 = ((words[9] >> 18) & 0x00003F);
-		subp->sub4_25.svh31 = ((words[9] >> 12) & 0x00003F);
-		subp->sub4_25.svh32 = ((words[9] >>  6) & 0x00003F);
+		subp->sub4_25.svhx[0] = ((words[7] >>  0) & 0x00003F);
+		subp->sub4_25.svhx[1] = ((words[8] >> 18) & 0x00003F);
+		subp->sub4_25.svhx[2] = ((words[8] >> 12) & 0x00003F);
+		subp->sub4_25.svhx[3] = ((words[8] >>  6) & 0x00003F);
+		subp->sub4_25.svhx[4] = ((words[8] >>  0) & 0x00003F);
+		subp->sub4_25.svhx[5] = ((words[9] >> 18) & 0x00003F);
+		subp->sub4_25.svhx[6] = ((words[9] >> 12) & 0x00003F);
+		subp->sub4_25.svhx[7] = ((words[9] >>  6) & 0x00003F);
 
 		gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
 		    "SV1:%u SV2:%u SV3:%u SV4:%u "
@@ -574,10 +574,10 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			    subp->sub4_25.svf[27], subp->sub4_25.svf[28],
 			    subp->sub4_25.svf[29], subp->sub4_25.svf[30], 
 			    subp->sub4_25.svf[31], subp->sub4_25.svf[32],
-			    subp->sub4_25.svh25,   subp->sub4_25.svh26, 
-			    subp->sub4_25.svh27,   subp->sub4_25.svh28,
-			    subp->sub4_25.svh29,   subp->sub4_25.svh30, 
-			    subp->sub4_25.svh31,   subp->sub4_25.svh32);
+			    subp->sub4_25.svhx[0],   subp->sub4_25.svhx[1], 
+			    subp->sub4_25.svhx[2],   subp->sub4_25.svhx[3],
+			    subp->sub4_25.svhx[4],   subp->sub4_25.svhx[5], 
+			    subp->sub4_25.svhx[6],   subp->sub4_25.svhx[7]);
 		break;
 
 	    case 33:

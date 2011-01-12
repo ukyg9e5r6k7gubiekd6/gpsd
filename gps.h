@@ -756,8 +756,7 @@ struct subframe_t {
 	    unsigned char svf[33];
 	    /* svh, SV health data for SV 25 through 32
 	     * 6 bits unsigned bitmap */
-	    uint8_t svh25, svh26, svh27, svh28;
-	    uint8_t svh29, svh30, svh31, svh32;
+	    uint8_t svhx[8];
 	} sub4_25;
 	struct {
 	    struct almanac_t almanac;

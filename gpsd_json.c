@@ -599,40 +599,28 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	    break;
 	case 25:
 	case 63:
+	{
+	    int i;
 	    (void)snprintf(buf + len, buflen - len,
-	        "\"HEALTH\":{\"data_id\":%d,"
-		"\"SV1\":%u,\"SV2\":%u,\"SV3\"\":%u,\"SV4\":%u,"
-		"\"SV5\":%u,\"SV6\":%u,\"SV7\":%u,\"SV8\":%u,"
-		"\"SV9\":%u,\"SV10\":%u,\"SV11\":%u,\"SV12\":%u,"
-		"\"SV13\":%u,\"SV14\":%u,\"SV15\":%u,\"SV16\":%u,"
-		"\"SV17\":%u,\"SV18\":%u,\"SV19\":%u,\"SV20\":%u,"
-		"\"SV21\":%u,\"SV22\":%u,\"SV23\":%u,\"SV24\":%u,"
-		"\"SV25\":%u,\"SV26\":%u,\"SV27\":%u,\"SV28\":%u,"
-		"\"SV29\":%u,\"SV30\":%u,\"SV31\":%u,\"SV32\":%u,"
-		"\"SVH25\":%u,\"SVH26\":%u,\"SVH27\":%u,\"SVH28\":%u,"
-		"\"SVH29\":%u,\"SVH30\":%u,\"SVH31\":%u,\"SVH32\":%u}",
-			subframe->data_id, 
-			subframe->sub4_25.svf[1],  subframe->sub4_25.svf[2], 
-			subframe->sub4_25.svf[3],  subframe->sub4_25.svf[4],
-			subframe->sub4_25.svf[5],  subframe->sub4_25.svf[6], 
-			subframe->sub4_25.svf[7],  subframe->sub4_25.svf[8],
-			subframe->sub4_25.svf[9],  subframe->sub4_25.svf[10], 
-			subframe->sub4_25.svf[11], subframe->sub4_25.svf[12],
-			subframe->sub4_25.svf[13], subframe->sub4_25.svf[14], 
-			subframe->sub4_25.svf[15], subframe->sub4_25.svf[16],
-			subframe->sub4_25.svf[17], subframe->sub4_25.svf[18], 
-			subframe->sub4_25.svf[19], subframe->sub4_25.svf[20],
-			subframe->sub4_25.svf[21], subframe->sub4_25.svf[22], 
-			subframe->sub4_25.svf[23], subframe->sub4_25.svf[24],
-			subframe->sub4_25.svf[25], subframe->sub4_25.svf[26], 
-			subframe->sub4_25.svf[27], subframe->sub4_25.svf[28],
-			subframe->sub4_25.svf[29], subframe->sub4_25.svf[30], 
-			subframe->sub4_25.svf[31], subframe->sub4_25.svf[32],
-			subframe->sub4_25.svh25,   subframe->sub4_25.svh26, 
-			subframe->sub4_25.svh27,   subframe->sub4_25.svh28,
-			subframe->sub4_25.svh29,   subframe->sub4_25.svh30, 
-			subframe->sub4_25.svh31,   subframe->sub4_25.svh32);
+		"\"HEALTH\":{\"data_id\":%d,", subframe->data_id);
+
+		/* loop to construct json, rather than giant snprintf */
+		for(i = 0 ; i < 32; i++){
+		    len = strlen(buf);
+		    (void)snprintf(buf + len, buflen - len,
+			"\"SV%d\":%d,", i+1, subframe->sub4_25.svf[i]);
+		}
+		for(i = 0 ; i < 8; i++){
+		    len = strlen(buf);
+		    (void)snprintf(buf + len, buflen - len,
+			"\"SVH%d\":%d,", i+25, subframe->sub4_25.svhx[i]);
+		}
+		len = strlen(buf)-1;
+		buf[len] = '\0';
+		(void)snprintf(buf + len, buflen - len, "}");
+
 	    break;
+	    }
 	}
     } else if ( 5 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,
