@@ -10,11 +10,11 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
 #ifndef S_SPLINT_S
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
