@@ -50,7 +50,6 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #ifndef S_SPLINT_S

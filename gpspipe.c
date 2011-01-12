@@ -33,7 +33,6 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <assert.h>
-#include <signal.h>
 #include <time.h>
 #include <sys/time.h>
 #ifndef S_SPLINT_S
