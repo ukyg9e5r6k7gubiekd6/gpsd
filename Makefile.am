@@ -24,12 +24,12 @@ CURSESPROGS = cgps gpsmon
 endif
 
 # Conditional includes.
-INCLUDES = $(LIBUSB_CFLAGS)
+CFLAGS += $(LIBUSB_CFLAGS)
 if HAVE_DBUS
-INCLUDES += $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
+CFLAGS += $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 endif
 if HAVE_BLUEZ
-INCLUDES += $(BLUEZ_CFLAGS)
+CFLAGS += $(BLUEZ_CFLAGS)
 endif
 
 RTCM104PAGES_DIST = gpsdecode.1
@@ -648,9 +648,9 @@ xmllint: $(XML)
 
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
-ENABLES = -DDEBUG -DDBUS_ENABLE -DPPS_ENABLE -DRAW_ENABLE
+ENABLES = -DDEBUG -DPPS_ENABLE -DRAW_ENABLE
 deheader:
-	make --quiet clean
+	make --quiet clean gpsd.h
 	deheader -x 'cpp' -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make --quiet clean
 
@@ -684,6 +684,9 @@ indent:
 
 version:
 	@echo $(VERSION)
+
+cflags:
+	@echo $(CFLAGS)
 
 #
 # Regression tests begin here
