@@ -635,7 +635,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 		",\"HEALTH2\":{\"toa\":%lu,\"WNa\":%u,",
 		(unsigned long)subframe->sub5_25.l_toa,
 		subframe->sub5_25.WNa);
-		/* loop to construct json, rather than giant snprintf */
+		/* 1-index loop to construct json */
 		for(i = 1 ; i <= 24; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
