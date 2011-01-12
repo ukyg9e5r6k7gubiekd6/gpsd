@@ -72,13 +72,12 @@ static sourcetype_t gpsd_classify(const char *path)
 #include <dirent.h>
 #include <ctype.h>
 
-static int fusercount(const char *path)
+static bool anyopen(const char *path)
 /* return true if any process has the specified path open */
 {
     DIR *procd, *fdd;
     struct dirent *procentry, *fdentry;
     char procpath[32], fdpath[64], linkpath[64];
-    int cnt = 0;
 
     if ((procd = opendir("/proc")) == NULL)
 	return false;
@@ -96,14 +95,16 @@ static int fusercount(const char *path)
 	    if (readlink(fdpath, linkpath, sizeof(linkpath)) == -1)
 		continue;
 	    if (strcmp(linkpath, path) == 0) {
-		++cnt;
+		(void)closedir(fdd);
+		(void)closedir(procd);
+		return true;
 	    }
 	}
-	(void)closedir(fdd);
     }
-    (void)closedir(procd);
 
-    return cnt;
+    (void)closedir(fdd);
+    (void)closedir(procd);
+    return false;
 }
 #endif /* __linux__ */
 
@@ -374,6 +375,20 @@ int gpsd_open(struct gps_device_t *session)
     } else 
 #endif /* BLUEZ */
     {
+#ifdef __linux__
+	/*
+	 * Don't touch devices already opened by another process.  We
+	 * have to make an exception for ptys, which are intentionally
+	 * opened by another process on the master side, otherwise we'll
+	 * break all our regression tests.
+	 */
+	if (session->sourcetype != source_pty && anyopen(session->gpsdata.dev.path)) {
+            gpsd_report(LOG_ERROR, 
+			"%s already opened by another process\n",
+			session->gpsdata.dev.path);
+	    return -1;
+	}
+#endif /* __linux__ */
         if ((session->gpsdata.gps_fd =
 	     open(session->gpsdata.dev.path,
 		      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
@@ -385,7 +400,6 @@ int gpsd_open(struct gps_device_t *session)
 			  O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
 		gpsd_report(LOG_ERROR, "read-only device open failed: %s\n",
 				strerror(errno));
-		session->gpsdata.gps_fd = -1;
 		return -1;
 	    }
 	    gpsd_report(LOG_PROG, "file device open success: %s\n",
@@ -394,36 +408,11 @@ int gpsd_open(struct gps_device_t *session)
     }
 
     /*
-     * Ideally we want to exclusion-lock the device before doing any reads.
-     * It would have been best to do this at open(2) time, but O_EXCL
-     * doesn't work wuthout O_CREAT.
-     *
-     * We have to make an exception for ptys, which are intentionally
-     * opened by another process on the master side, otherwise we'll
-     * break all our regression tests.
+     * Try to block other processes from using this device while we
+     * have it open (later opens should return EBUSY).  Won't work
+     * against anything with root privileges, alas.
      */
-    if (session->sourcetype != source_pty) {
-	/*
-	 * Try to block other processes from using this device while we
-	 * have it open (later opens should return EBUSY).  Won't work
-	 * against anything with root privileges, alas.
-	 */
-	(void)ioctl(session->gpsdata.gps_fd, TIOCEXCL);
-
-#ifdef __linux__
-	/*
-	 * Don't touch devices already opened by another process.
-	 */
-	if (fusercount(session->gpsdata.dev.path) > 1) {
-            gpsd_report(LOG_ERROR, 
-			"%s already opened by another process\n",
-			session->gpsdata.dev.path);
-	    (void)close(session->gpsdata.gps_fd);
-	    session->gpsdata.gps_fd = -1;
-	    return -1;
-	}
-#endif /* __linux__ */
-    }
+    (void)ioctl(session->gpsdata.gps_fd, TIOCEXCL);
 
 #ifdef FIXED_PORT_SPEED
     session->saved_baud = FIXED_PORT_SPEED;
@@ -441,10 +430,8 @@ int gpsd_open(struct gps_device_t *session)
     session->packet.type = BAD_PACKET;
     if (isatty(session->gpsdata.gps_fd) != 0) {
 	/* Save original terminal parameters */
-	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0) {
-	    session->gpsdata.gps_fd = -1;
+	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
 	    return -1;
-        }
 	(void)memcpy(&session->ttyset,
 		     &session->ttyset_old, sizeof(session->ttyset));
 	/*
