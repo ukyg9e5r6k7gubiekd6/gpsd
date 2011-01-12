@@ -602,7 +602,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 	{
 	    int i;
 	    (void)snprintf(buf + len, buflen - len,
-		"\"HEALTH\":{\"data_id\":%d,", subframe->data_id);
+		",\"HEALTH\":{\"data_id\":%d,", subframe->data_id);
 
 		/* 1-index loop to construct json, rather than giant snprintf */
 		for(i = 1 ; i <= 32; i++){
