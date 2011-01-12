@@ -357,7 +357,7 @@ void json_watch_dump(const struct policy_t *ccp,
     /*@+compdef@*/
 }
 
-void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
+void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 	/*@out@*/ char buf[], size_t buflen)
 {
     size_t len = 0;
@@ -653,7 +653,7 @@ void subframe_json_dump(const struct subframe_t *subframe, bool scaled,
 }
 
 #if defined(RTCM104V2_ENABLE)
-void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
+void json_rtcm2_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 		     size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
@@ -776,7 +776,7 @@ void rtcm2_json_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 
 #if defined(AIVDM_ENABLE)
 
-void aivdm_json_dump(const struct ais_t *ais, bool scaled,
+void json_aivdm_dump(const struct ais_t *ais, bool scaled,
 		     /*@out@*/ char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX * 2 + 1];

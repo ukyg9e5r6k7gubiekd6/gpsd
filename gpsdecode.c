@@ -376,7 +376,7 @@ static void decode(FILE * fpin, FILE * fpout)
 	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
 	    if (json)
-		rtcm2_json_dump(&rtcm2, buf, sizeof(buf));
+		json_rtcm2_dump(&rtcm2, buf, sizeof(buf));
 	    else
 		rtcm2_sager_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
@@ -397,7 +397,7 @@ static void decode(FILE * fpin, FILE * fpout)
 		if (!json)
 		    aivdm_csv_dump(&ais, buf, sizeof(buf));
 		else
-		    aivdm_json_dump(&ais, scaled, buf, sizeof(buf));
+		    json_aivdm_dump(&ais, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
 
@@ -433,12 +433,12 @@ static void encode(FILE * fpin, FILE * fpout)
 	if ((gpsdata.set & RTCM2_SET) != 0) {
 	    /* this works */
 	    char outbuf[BUFSIZ];
-	    rtcm2_json_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
+	    json_rtcm2_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
 	if ((gpsdata.set & AIS_SET) != 0) {
 	    char outbuf[BUFSIZ];
-	    aivdm_json_dump(&gpsdata.ais, false, outbuf, sizeof(outbuf));
+	    json_aivdm_dump(&gpsdata.ais, false, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
     }

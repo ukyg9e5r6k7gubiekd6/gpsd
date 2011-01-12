@@ -1296,7 +1296,7 @@ static void json_report(struct subscriber_t *sub,
      * and just pass the through here.
      */
     if ((changed & SUBFRAME_IS) != 0) {
-	subframe_json_dump(&device->gpsdata.subframe,
+	json_subframe_dump(&device->gpsdata.subframe,
 			sub->policy.scaled,
 			buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
@@ -1310,14 +1310,14 @@ static void json_report(struct subscriber_t *sub,
 #endif /* COMPASS_ENABLE */
 #ifdef RTCM104V2_ENABLE
     if ((changed & RTCM2_IS) != 0) {
-	rtcm2_json_dump(&device->gpsdata.rtcm2, buf,
+	json_rtcm2_dump(&device->gpsdata.rtcm2, buf,
 			sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }
 #endif /* RTCM104V2_ENABLE */
 #ifdef AIVDM_ENABLE
     if ((changed & AIS_IS) != 0) {
-	aivdm_json_dump(&device->gpsdata.ais,
+	json_aivdm_dump(&device->gpsdata.ais,
 			sub->policy.scaled,
 			buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
