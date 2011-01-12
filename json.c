@@ -9,7 +9,7 @@ Notation).  Unlike more general JSON parsers, it doesn't use malloc(3)
 and doesn't support polymorphism; you need to give it a set of
 template structures describing the expected shape of the incoming
 JSON, and it will error out if that shape is not matched.  When the
-parse succeds, attribute values will be extracted into static
+parse succeeds, attribute values will be extracted into static
 locations specified in the template structures.
 
    The "shape" of a JSON object in the type signature of its
@@ -36,7 +36,7 @@ structobject.
 
    Object arrays take one base address per object subfield, and are 
 mapped into parallel C arrays (one per subfield).  Strings are not
-supported in this kind of array, as the don't have a "natural" size
+supported in this kind of array, as they don't have a "natural" size
 to use as an offset multiplier.
 
    Structobjects arrays are a way to parse a list of objects to a set
