@@ -11,6 +11,7 @@
  */
 
 #include <sys/time.h>		/* for select() */
+#include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

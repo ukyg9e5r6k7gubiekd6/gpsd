@@ -58,6 +58,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
+#include <stdbool.h>
 #include "gpsd.h"
 
 #define MAG_SHIFT 6u

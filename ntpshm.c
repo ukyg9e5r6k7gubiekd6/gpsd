@@ -8,6 +8,7 @@
  */
 
 #include <string.h>
+#include <stdbool.h>
 #include <math.h>
 #include <errno.h>
 #ifndef S_SPLINT_S

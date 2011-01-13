@@ -18,7 +18,6 @@
 #include <setjmp.h>
 #include <assert.h>
 #include <pwd.h>
-#include <grp.h>
 #include <math.h>
 #include <syslog.h>
 #include <errno.h>
