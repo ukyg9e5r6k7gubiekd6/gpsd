@@ -282,7 +282,6 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 			   size_t data_len UNUSED)
 {
     gps_mask_t mask = 0;
-#ifdef RAW_ENABLE
     int i, n;
     unsigned long ul;
     double t;
@@ -310,7 +309,6 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     }
 
     mask |= RAW_IS;
-#endif /* RAW_ENABLE */
     return mask;
 }
 

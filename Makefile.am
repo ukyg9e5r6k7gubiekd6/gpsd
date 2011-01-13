@@ -648,7 +648,7 @@ xmllint: $(XML)
 
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
-ENABLES = -DDEBUG -DPPS_ENABLE -DRAW_ENABLE
+ENABLES = -DDEBUG -DPPS_ENABLE
 NOHEADCHECK = -x 'cpp' -x 'contrib' -x 'gpspacket.c' -x 'gpsclient.c' -x 'monitor_proto.c'
 deheader:
 	make --quiet clean $(BUILT_SOURCES)
