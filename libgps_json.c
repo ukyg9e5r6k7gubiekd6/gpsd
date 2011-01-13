@@ -14,6 +14,7 @@ PERMISSIONS
 
 ***************************************************************************/
 
+#include <stdbool.h>
 #include <math.h>
 #include <string.h>
 #include <stddef.h>

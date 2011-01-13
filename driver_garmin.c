@@ -80,6 +80,7 @@
 #define __USE_POSIX199309 1
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
 #include <string.h>
 #include <errno.h>

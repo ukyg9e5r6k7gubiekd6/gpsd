@@ -8,6 +8,7 @@
 #include <sys/time.h>		/* for select() */
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
 #include <time.h>
 #ifndef S_SPLINT_S

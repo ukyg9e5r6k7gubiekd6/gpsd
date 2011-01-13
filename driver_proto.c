@@ -36,6 +36,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #if defined(_PROTO__ENABLE) && defined(BINARY_ENABLE)

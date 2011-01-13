@@ -2,13 +2,16 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <syslog.h>
 #include <math.h>
+#include <time.h>
 #include <errno.h>
 #include <libgen.h>
+#include <signal.h>
 #include <sys/time.h>		/* for select() */
 #ifndef S_SPLINT_S
 #include <unistd.h>

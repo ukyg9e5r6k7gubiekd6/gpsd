@@ -50,9 +50,9 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include <signal.h>
 #include <stdio.h>
 #ifndef S_SPLINT_S
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>

@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdio.h>
+#include <stdbool.h>
 #include "gpsd.h"
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)

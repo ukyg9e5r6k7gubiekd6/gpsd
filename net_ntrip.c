@@ -4,6 +4,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>

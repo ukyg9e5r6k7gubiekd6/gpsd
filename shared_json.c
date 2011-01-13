@@ -16,6 +16,7 @@ PERMISSIONS
 ***************************************************************************/
 
 #include <math.h>
+#include <stdbool.h>
 
 #include "gpsd.h"
 #include "gps_json.h"

@@ -9,13 +9,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
+#include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <setjmp.h>
 #include <assert.h>
 #include <pwd.h>
-#include <grp.h>
 #include <math.h>
 #include <syslog.h>
 #include <errno.h>
