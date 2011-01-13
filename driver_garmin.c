@@ -693,6 +693,7 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 /*@ +branchstate @*/
 
 
+#if defined(__linux__) || defined(S_SPLINT_S)
 /* build and send a packet w/ USB protocol */
 static void Build_Send_USB_Packet(struct gps_device_t *session,
 				  uint32_t layer_id, uint32_t pkt_id,
@@ -736,6 +737,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 	theBytesReturned = gpsd_write(session, &n, 0);
     }
 }
+#endif /* __linux__ || S_SPLINT_S */
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */
@@ -888,7 +890,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
  * return 1 is device found
  * return 0 if not
  */
-static bool garmin_usb_detect(struct gps_device_t *session)
+static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 {
 #if defined(__linux__) || defined(S_SPLINT_S)
     /*
