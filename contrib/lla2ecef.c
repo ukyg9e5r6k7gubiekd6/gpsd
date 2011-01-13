@@ -3,21 +3,22 @@
  */
 #include <sys/types.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 
 extern char *__progname;
 double A = 6378137.0, B = 6356752.3142;
 
-double rad2deg(double r){
+static double rad2deg(double r){
 	return (180.0 * r / M_PI);
 }
 
-double deg2rad(double r){
+static double deg2rad(double r){
 	return (M_PI * r / 180.0);
 }
 
-void lla2ecef(double *lla, double *ecef){
+static void lla2ecef(double *lla, double *ecef){
 	double N;
 
 	lla[0] = deg2rad(lla[0]);
@@ -35,7 +36,7 @@ void lla2ecef(double *lla, double *ecef){
 	return;
 }
 
-void ecef2lla(double *ecef, double *lla){
+static void ecef2lla(double *ecef, double *lla){
 	double E, F, N, P, T;
 
 	E = (pow(A,2) - pow(B,2)) / pow(A,2);

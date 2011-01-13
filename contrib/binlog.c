@@ -3,6 +3,7 @@
  */
 #include <sys/types.h>
 #include <err.h>
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
 	while (1){
 		l = read(ifd, buf, BUFSIZ);
 		if (l > 0)
-			write(ofd, buf, l);
+		    assert(write(ofd, buf, l) > 0);
 		usleep(1000);
 		bzero(buf, BUFSIZ);
 		spinner( n++ );

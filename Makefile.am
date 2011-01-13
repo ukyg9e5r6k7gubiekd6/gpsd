@@ -650,7 +650,7 @@ xmllint: $(XML)
 # ends with other than '0 removed' there's work to be done.
 ENABLES = -DDEBUG -DPPS_ENABLE -DRAW_ENABLE
 deheader:
-	make --quiet clean gpsd.h
+	make --quiet clean gpsd.h packet_names.h
 	deheader -x 'cpp' -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make --quiet clean
 

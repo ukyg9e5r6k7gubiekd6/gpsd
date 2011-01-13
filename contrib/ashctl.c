@@ -68,8 +68,8 @@ u:		fprintf(stderr, "usage: ashctl <port> [raw|normal]\n"
 		}
 
 		sleep(1);
-		read(fd, buf, BUFSIZ-1);
-		buf[BUFSIZ-1] = '\0';
+		i = read(fd, buf, BUFSIZ-1);
+		buf[i] = '\0';
 		if (strstr(buf, "$PASH") || strstr(buf, "$GP"))
 			goto done;
 	}

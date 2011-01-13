@@ -89,6 +89,7 @@ static int PROTO_command(char line[])
      * driver-specific commands and leave lowercase ones for the
      * generic gpsmon ones.
      */
+    assert(strlen(line));
 
     /* 
      * Return COMMAND_UNKNOWN to tell gpsmon you can't interpret the line, and
