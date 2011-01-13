@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
+#include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>

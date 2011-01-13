@@ -6,18 +6,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
+#include <sys/socket.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
-#ifndef S_SPLINT_S
-#include <sys/socket.h>
-#endif /* S_SPLINT_S */
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>

@@ -28,7 +28,8 @@ PERMISSIONS
 
 ***************************************************************************/
 #include <sys/types.h>
-#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>

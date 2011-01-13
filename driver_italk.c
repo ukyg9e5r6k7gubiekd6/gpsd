@@ -5,6 +5,7 @@
  * Driver for the iTalk binary protocol used by FasTrax
  */
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <math.h>
 #include <termios.h>
