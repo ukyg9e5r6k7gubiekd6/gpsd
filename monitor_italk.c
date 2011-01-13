@@ -12,6 +12,10 @@
 #ifdef ITRAX_ENABLE
 #include "driver_italk.h"
 
+#ifdef HAVE_STRLCAT
+#include <string.h>
+#endif
+
 extern const struct gps_type_t italk_binary;
 static WINDOW *satwin, *navfixwin;
 
