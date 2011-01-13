@@ -3,7 +3,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
-#include <stdio.h>
 #include "gpsd_config.h"
 #ifdef DBUS_ENABLE
 #include "gpsd_dbus.h"
