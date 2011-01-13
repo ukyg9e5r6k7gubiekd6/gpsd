@@ -170,11 +170,11 @@ else
 We strongly recommend running test_float on the target platform.])
 fi
 
-# Enable all warnings except missing-field-initializers, which we
-# can't help triggering because of the way some of the JSON code is
-# generated.
+# Enable all warnings except uninitialized and
+# missing-field-initializers, which we can't help triggering because
+# of the way some of the JSON code is generated.
 if eval "test x$GCC = xyes"; then
-	CFLAGS="$CFLAGS -Wextra -Wall -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE"
+	CFLAGS="$CFLAGS -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE"
 	dnl -Wcast-qual -W
 fi
 
