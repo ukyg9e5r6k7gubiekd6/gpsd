@@ -3,10 +3,10 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="Author" content="Remco Treffkorn">
-   <meta name="Description" content="GPSd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format.">
+   <meta name="Description" content="Blutooth setup instructions for GPSD">
    <meta name="Keywords" content="GPS, translator, mxmap, GIS">
    <link rel="stylesheet" href="main.css" type="text/css"/>
-   <title>Bluetooth and GPSd</title>
+   <title>Bluetooth and GPSD</title>
 </head>
 
 <body>
@@ -119,44 +119,28 @@ GPS address and to enable binding.</p></li>
 </pre>
 
 <li><p>Bind rfcomm0 (unless you are planning to reboot, in which case
-it will be automatically bound, but there is really no reason to
-reboot).</p></li>
+it will be automatically bound).</p></li>
 
 <pre>
 	# rfcomm bind rfcomm0
 </pre>
 
-<li><p>Edit /etc/init.d/gpsd so that it automatically starts up
-listening to /dev/rfcomm0</p>
+<li>
+<p>Under most Linixes, GPSD is by default configured to start gpsd on
+a hotplug event announcing a USB GPS. You need to reconfigure the GPSD
+installation so the daemon will be started at boot time listening to
+/dev/rfcomm0 (it will still work with hotplugged USB GPses after you
+do this).</p>
 
-<pre>
-	...
-	#GPS_DEV="/dev/ttyS3"
-	GPS_DEV="/dev/rfcomm0"
-	...
-</pre>
-
-<li><p>Restart gpsd to apply the change above</p>
-<pre>
-	# killall -HUP gpsd
-</pre>
-
-<li><p>Connect to gpsd to test</p>
-<pre>
-	# telnet localhost 2947
-	# r
-</pre>
-
-<p>You should see NMEA sentences stream by.  Close telnet.</p>
-<pre>
-	# ^c
-	# e
-</pre>
-
+<p>Under Debian and Ubuntu Linux, <code>"dpkg reconfigure gpsd"</code> 
+will start a dialog that will reconfigure the device for you. You
+will neet to reboot for this change to take effect.</p>
+</li>
 </ol>
 
 <p>At this point, your system should be configured to use gpsd with
-your BT GPS device!</p>
+your BT GPS device. You should test operation in the normal way
+described in the <a href="troubleshooting.html">Troubleshooting Guide</a>.</p>
 
 <h2>Known Issues:</h2>
 <ul>
@@ -174,6 +158,7 @@ a symlink to the gpsd init.d script to a later runlevel.</p></li>
 <li><p>Jean-Michel Bouffard</p></li>
 <li><p>Joshua Layne</p></li>
 <li><p>Lukasz Stelmach</p></li>
+<li><p>Bertolt Loprets</p></li>
 </ul>
 
 </div>
