@@ -11,7 +11,8 @@
 #
 # With the -o option, take a date in Unix local time and convert to RFC822.
 #
-# With -l, generate a table that maps leap-second offset to plausible years.
+# With -c, generate a C table that maps leap-second offset to plausible years.
+# With -p, generate a Python table.
 #
 # With the -n option, compute Unix local time for an IERS leap-second event
 # given as a three-letter English Gregorian month abbreviation followed by
@@ -119,17 +120,19 @@ if __name__ == '__main__':
     next = False
     from_rfc822 = False
     to_rfc822 = False
-    listepochs = False
-    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:o:l")
+    listepochs = c_epochs = py_epochs = False
+    (options, arguments) = getopt.getopt(sys.argv[1:], "ci:n:o:p")
     for (switch, val) in options:
-        if (switch == '-i'):  # Compute Unix time from RFC822 date
+        if (switch == '-c'):
+            listepochs = c_epochs = True
+        elif (switch == '-i'):  # Compute Unix time from RFC822 date
             from_rfc822 = True
         elif (switch == '-n'):  # Compute possible next leapsecond
             next = True
         elif (switch == '-o'):  # Compute RFC822 date from Unix time
             to_rfc822 = True
-        elif (switch == '-l'):
-            listepochs = True
+        elif (switch == '-p'):
+            listepochs = py_epochs = True
 
     if not next and not from_rfc822 and not to_rfc822 and not listepochs:
         print "Current leap second:", retrieve()
@@ -146,14 +149,42 @@ if __name__ == '__main__':
     if listepochs:
         skip = True
         leapsecs = []
+        # This code assumes that after 1980, leap-second increments are
+        # always integrally one second and every increment is listed here
         for line in urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat"):
             if line.startswith(" 1980"):
                 skip = False
             if skip:
                 continue
             fields = line.strip().split()
-            leapsecs.append((int(fields[0]), fields[1], int(fields[6][:-2])-19))
-        print leapsecs
+            leapsecs.append((int(fields[0]), fields[1]))
+        yearbounds = []
+        for i in range(len(leapsecs)-1):
+            start = leapsecs[i][0]
+            if leapsecs[i+1][1] == "JAN":
+                end = leapsecs[i+1][0] - 1
+            else:
+                end = leapsecs[i+1][0]
+            yearbounds.append((start, end))
+        if c_epochs:
+            print """
+int gpsd_check_leapsecond(int leap, int year)
+{
+    static int c_epochs[2][] = {\
+"""
+            for (i, b) in enumerate(yearbounds):
+                print "        {%d, %d},    // %d" % (b[0], b[1], i)
+            print """\
+    };
+
+    if (leap < 0 || leap >= sizeof(c_epochs)/sizeof(c_epochs[0]))
+        return -1;
+    else if (year >= c_epochs[leap][0] && year <= c_epochs[leap][1])
+        return 1;
+    else
+        return 0;
+}
+"""
         raise SystemExit, 0
 
     if val[:3].lower() not in ("jun", "dec"):
