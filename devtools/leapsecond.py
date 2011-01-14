@@ -11,6 +11,8 @@
 #
 # With the -o option, take a date in Unix local time and convert to RFC822.
 #
+# With -l, generate a table that maps leap-second offset to plausible years.
+#
 # With the -n option, compute Unix local time for an IERS leap-second event
 # given as a three-letter English Gregorian month abbreviation followed by
 # a 4-digit year.
@@ -117,7 +119,8 @@ if __name__ == '__main__':
     next = False
     from_rfc822 = False
     to_rfc822 = False
-    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:o:")
+    listepochs = False
+    (options, arguments) = getopt.getopt(sys.argv[1:], "i:n:o:l")
     for (switch, val) in options:
         if (switch == '-i'):  # Compute Unix time from RFC822 date
             from_rfc822 = True
@@ -125,8 +128,10 @@ if __name__ == '__main__':
             next = True
         elif (switch == '-o'):  # Compute RFC822 date from Unix time
             to_rfc822 = True
+        elif (switch == '-l'):
+            listepochs = True
 
-    if not next and not from_rfc822 and not to_rfc822:
+    if not next and not from_rfc822 and not to_rfc822 and not listepochs:
         print "Current leap second:", retrieve()
         raise SystemExit, 0
 
@@ -136,6 +141,19 @@ if __name__ == '__main__':
 
     if to_rfc822:
         print unix_to_rfc822(float(val))
+        raise SystemExit, 0
+
+    if listepochs:
+        skip = True
+        leapsecs = []
+        for line in urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat"):
+            if line.startswith(" 1980"):
+                skip = False
+            if skip:
+                continue
+            fields = line.strip().split()
+            leapsecs.append((int(fields[0]), fields[1], int(fields[6][:-2])-19))
+        print leapsecs
         raise SystemExit, 0
 
     if val[:3].lower() not in ("jun", "dec"):
