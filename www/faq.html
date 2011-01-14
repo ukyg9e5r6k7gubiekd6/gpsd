@@ -65,8 +65,8 @@ GPSD Frequently Asked Questions
 <div id="Content">
 
 <ul>
+<li><a href='#verify'>How can I verify operation of a new GPS?</a><br/>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a><br/>
-<li><a href='#nodata'>I get no data from my GPS</a></h1>
 <li><a href='#startup'>Why does getting a fix take so long after powerup?</li>
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a><br/>
@@ -82,6 +82,60 @@ GPSD Frequently Asked Questions
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
 </ul>
+
+<h1 id='verify'>How can I verify operation of a new GPS?</h1>
+
+<p>1. First, check that the GPS has power. If it is a USB device, it
+needs to be cabled to a USB port to have power. All Bluetooth GPSes
+and some serial GPSes are powered by an on-board battery; check that
+the battery is present and charged. The GPS may have an on-off switch
+which needs to be in the 'on' position.</p>
+
+<p>2. Most GPSes have a power-on LED; it should be continuously on
+or blinking once a second. If it is continuously off, your GPS is dead
+or disconnected. Check that it has power.</p>
+
+<p>3. For anything other than a serial (RS232) device, there should be
+a discovery utility that allows you to check that the device is connected.</p>
+
+<p>3a. For a USB device, run <code>"lsusb"</code> before and after
+connecting your GPS; after, you should see an additional line
+indicating a new device.  Expect the new line to describe a
+serial-to-USB adapter chip, often (but not always) the Prolific
+Technology PL2303.  Then run "dmesg", looking for a message indicating
+a new USB device of that kind and giving you the device path -
+<code>/dev/ttyUSBn</code> for some number n.</p>
+
+<p>3b. For a Bluetooth device, see our <a href="bt.html">Bluetooth
+instructions</a>.</p>
+
+<p>4. If you have installed a GPSD binary package on a Linux system and
+are using a USB GPS, you should not need to start gpsd manually,
+because the hotplug system will have done it for you.  You should be
+able to start a test client (such as <code>cgps</code> or <code>xgps</code>)
+and watch it report fixes.</p>
+
+<p>5. If your test client fails to run, a good test to try is to run
+<code>gpsmon</code> on the device. If yours reports no data at all, you
+probably have some low-level system problem with serial or USB that
+you'll need to fix before <code>gpsd</code> will operate.</p>
+
+<p>6. USB GPSes actually emulate RS232 serial using converter chips.
+Under Linux, the usbserial kernel module must be loaded for correct
+operation of this class of device. Normally this module load should
+happen automatically when the device activates, but if you don't
+receive data check for it with <b>lsmod(1)</b>.</p>
+
+<p>On Linux systems with module autoloading disabled or misconfigured,
+it is possible you may need to load the module manually with a command
+such as <code>sudo modprobe usbserial vendor=0×1a86
+product=0×7523</code>.  Do not copy those hex numbers slavishly, they
+are examples.  To get the right numbers, you will need to dig up the
+vendor and product ID of your USB-serial converter device.</p>
+
+<p>For more detailed troubleshooting instructions, <a
+href="hacking.html#generaltroubleshooting">see the Hacking
+Guide</a>.</p>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 <blockquote>
@@ -289,35 +343,6 @@ href="http://developer.berlios.de/bugs/?group_id=2116">gpsd bug tracker</a>.
 Use that.  If your bug narrative does not fit the tracker template well, 
 it's acceptable to send an email report to the gpsd-dev list.</p>
 </blockquote>
-
-<h1 id="nodata">I get no data from my GPS</h1>
-
-<p>This answer may apply if you have followed the Quick Start
-procedure on the manual page but <code>gpsd</code> reports no data.</p>
-
-<p>Check for the obvious thing &mdash; a disconnected or loose cable
-&mdash; first. Make sure you specified the device your GPS is
-actually plugged into.</p>
-
-<p>A good test to try is to run <b>gpscat(1)</b> on the device with
-speed set to 4800, then 9600. Most devices will report NMEA text 
-at one of these speeds; a few will report binary spewage. Either
-is a good sign.  If yours reports no data at all, you probably
-have some low-level system problem with serial or USB that you'll
-need to fix before <code>gpsd</code> will operate.</p>
-
-<para>USB GPSes actually emulate RS232 serial using converter chips.
-Under Linux, the usbserial kernel module must be loaded for correct
-operation of this class of device. Normally this module load should
-happen automatically when the device activates, but if you don't
-receive data check for it with <b>lsmod(1)</b>.</p>
-
-<p>On Linux systems with module autoloading disabled or misconfigured,
-it is possible you may need to load the module manually with a command
-such as <code>sudo modprobe usbserial vendor=0×1a86
-product=0×7523</code>.  Do not copy those hex numbers slavishly, they
-are examples.  To get the right numbers, you will need to dig up the
-vendor and product ID of your USB-serial converter device.</p>
 
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
 
@@ -536,7 +561,7 @@ becomes easier for the convergence filters in your GPS to spot
 and discard delayed signal, so multipath effects are proprtionately
 less important in fast-moving vehicles.</p>
 
-<p>If you're using <tt>gpsd</tt> with software that plots your
+<p>If you're using <code>gpsd</code> with software that plots your
 position on a map, and you seem to be getting latitude/longitude that
 is at a fixed offset from reality, it is possible the base datum of
 the map is something other than the WGS84 GPS uses. A
@@ -586,16 +611,16 @@ USB/serial adaptor, but on what order you plug devices in: 1st device
 gets /dev/ttyUSB0, 2nd gets /dev/ttyUSB1, etc....
 
 <p>This collides with what happens during a suspend/resume. If you
-suspends while <tt>gpsd</tt> has a device active, it will hold the
+suspends while <code>gpsd</code> has a device active, it will hold the
 device open while your laptop is asleep - but, meanwhile, the suspend
 logic is shutting down hotpluggable devices to be recreated at
 resume time. On resume, Linux will see that the old device is open
-<em>and recreate one with a different name</em>, leaving <tt>gpsd</tt>
+<em>and recreate one with a different name</em>, leaving <code>gpsd</code>
 looking at a bad file descriptor.</p>
 
 <p>There is a solution to this problem: create a stable gps-usb device
 that is actually a symlink which gets modified by hotplug events, and
-give <tt>gpsd</tt> that device when you invoke it.  You'll need <a
+give <code>gpsd</code> that device when you invoke it.  You'll need <a
 href="70-persistent-usb-gps.rules">these replacement udev rules</a>,
 and the experience required to patch them so the vendor ID in the last
 one matches your GPS hardware (look in your lsusb output).
@@ -658,7 +683,7 @@ srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
 
 <h1 id='baud'>Why is there no option to fix baud rate?</h1>
 
-<p>There is no option to fix baud rate because <tt>gpsd</tt> is
+<p>There is no option to fix baud rate because <code>gpsd</code> is
 designed to (a) be autoconfiguring, and (b) handle multiple devices.
 There are some more philosophical reasons as well; read the 
 <a href="hacking.html">Hacker's Guide</a> for discussion.</p>
@@ -666,13 +691,13 @@ There are some more philosophical reasons as well; read the
 <p>Unfortunately, this causes problems with some devices (notably
 Bluetooth GPSes) that are designed to operate at fixed baud rates.
 Some of these go catatonic if you try to set the baud rate, which is
-why we have a -b option that prevents <tt>gpsd</tt> from trying to
+why we have a -b option that prevents <code>gpsd</code> from trying to
 configure the GPSes it talks to.</p>
 
 <p>On Linux systems, there's trick you can play to simulate fixing the
 baud rate.  It utilizes the fact that under Linux, setting baud rate 0
 is interpreted as "use the hardware port's existing baud rate without
-change".  The autoconfiguring hunt loop in <tt>gpsd</tt> always starts
+change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
 with this behavior.</p>
 
 <p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set 
