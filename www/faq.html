@@ -82,6 +82,7 @@ GPSD Frequently Asked Questions
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a><br/>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
+<li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a><br/>
 </ul>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
@@ -709,6 +710,35 @@ can set that up like this:</p>
         stty speed 54600 &lt;/dev/ttyS0
         gpsd -nN /dev/ttyS0
 </pre></code>
+
+<h1 id='willitwork'>Will this gps work? It's not on the hardware list.</h1>
+<p>Probably.</p>
+
+<p>Gpsd's support for the NMEA protocol is mature and stable. If the
+specification for your receiver says "NMEA 0183" (maybe with a version 2.x
+or 3.x qualifier) it should just work.</p>
+
+<p>Beware of receivers that do not say "NMEA" somewhere in the specification;
+while it may indicate that the receiver only uses a binary protocol, it often
+means that the receiver cannot be used as data source for a computer, as is
+usually the case with car navigation devices.</p>
+
+<p>We also support many proprietary protocols, in case your receiver doesn't
+emit NMEA. Datasheets often indicate which chip the receiver is based on, for
+example a <i>NavCorp NX666</i>. Check to see if other <i>NavCorp</i> receivers
+are listed, either as a vendor or a chipset. Compare this with the output of
+<code>gpsd -l</code> which will list the protocols compiled into gpsd. If your
+receiver doesn't support NMEA and we don't have special driver for the chipset
+talk to us. But it'll probably just work.</p>
+
+<p>Assuming the receiver has a USB interface, do a web search to see if someone
+has tried it with linux already, eg. "<code>NavCorp NX666 linux</code>". Search
+for the product and "driver install" to find instructions on installing windows
+drivers for the product - these often hint at which bridge chip is used, if the
+specifications don't say so. A receiver claiming mac compatibility is usually
+based on one of the common bridge chips from FTDI, Prolific or Silicon
+Laboritories. These just work.</p>
+
 </div>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
