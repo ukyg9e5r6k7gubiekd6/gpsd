@@ -115,6 +115,18 @@ def unix_to_rfc822(tv):
     "RFC822 date to local Unix time."
     return time.strftime("%d %b %Y %H:%M:%S", time.localtime(tv))
 
+def leapbound(year, month):
+    "Return a leap-second date in RFC822 form."
+    # USNO lists JAN and JUL (month following the leap second).
+    # IERS lists DEC and JUN (month preceding the leap second).
+    if month.upper() == "JAN":
+        tv = "31 Dec %s 23:59:60" % (int(year)-1)
+    elif month.upper() in ("JUN", "JUL"):
+        tv = "30 Jun %s 23:59:59" % year
+    elif month.upper() == "DEC":
+        tv = "31 Dec %s 23:59:59" % year
+    return tv
+
 if __name__ == '__main__':
     import sys, getopt
     next = False
@@ -151,40 +163,41 @@ if __name__ == '__main__':
         leapsecs = []
         # This code assumes that after 1980, leap-second increments are
         # always integrally one second and every increment is listed here
+        leapsecs = []
         for line in urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat"):
             if line.startswith(" 1980"):
                 skip = False
             if skip:
                 continue
             fields = line.strip().split()
-            leapsecs.append((int(fields[0]), fields[1]))
-        yearbounds = []
-        for i in range(len(leapsecs)-1):
-            start = leapsecs[i][0]
-            if leapsecs[i+1][1] == "JAN":
-                end = leapsecs[i+1][0] - 1
-            else:
-                end = leapsecs[i+1][0]
-            yearbounds.append((start, end))
+            leapsecs.append(leapbound(fields[0], fields[1]))
         if c_epochs:
-            print """
-int gpsd_check_leapsecond(int leap, int year)
-{
-    static int c_epochs[2][] = {\
-"""
-            for (i, b) in enumerate(yearbounds):
-                print "        {%d, %d},    // %d" % (b[0], b[1], i)
-            print """\
-    };
+            print '''
+/* This code is generated from leapsecond.py; do not hand-hack! */
 
-    if (leap < 0 || leap >= sizeof(c_epochs)/sizeof(c_epochs[0]))
-        return -1;
-    else if (year >= c_epochs[leap][0] && year <= c_epochs[leap][1])
-        return 1;
+#include "gpsd.h"
+
+int gpsd_check_leapsecond(const int leap, const double unixtime)
+/* consistency-check a GPS-reported time against a leap second */
+{
+    static double c_epochs[] = {\
+'''
+            for (i, b) in enumerate(leapsecs):
+                print "        %s,    // %s -> %d" % (rfc822_to_unix(b), b, i)
+            print '''\
+    };
+    #define DIM(a) (sizeof(a)/sizeof(a[0]))
+
+    if (leap < 0 || leap >= DIM(c_epochs))
+        return -1;   /* cannot tell, leap second out of table bounds */
+    else if (unixtime < c_epochs[0] || unixtime >= c_epochs[DIM(c_epochs)-1])
+        return -1;   /* cannot tell, time not in table */
+    else if (unixtime >= c_epochs[leap] && unixtime <= c_epochs[leap+1])
+        return 1;    /* leap second consistent with specified year */
     else
-        return 0;
+        return 0;    /* leap second inconsistent, probable rollover error */
 }
-"""
+'''
         raise SystemExit, 0
 
     if val[:3].lower() not in ("jun", "dec"):
@@ -204,8 +217,5 @@ int gpsd_check_leapsecond(int leap, int year)
                   "with a 4-digit year."
             raise SystemExit, 1
         # Date looks valid
-        if month == "jun":
-            tv = "30 Jun %d 23:59:59" % year
-        else:
-            tv = "31 Dec %d 23:59:59" % year
+        tv = leapbound(year, month)
         print "#define START_SUBFRAME	%d	/* %s */" % (rfc822_to_unix(tv), tv)

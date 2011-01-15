@@ -54,14 +54,16 @@ srec.html
 *.so
 *.la
 *~
+# Built sources
 gps_maskdump.c
 gpsd_maskdump.c
 gpsd.h
 gpsd_config.h.in
 gpsd_config.h
 packet_names.h
-gpsd.spec
+leapcheck.c
 revision.h
+gpsd.spec
 MANIFEST
 .kdbgrc.*
 tags
