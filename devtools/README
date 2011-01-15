@@ -58,10 +58,6 @@ explanation.
 Retrieves the latest build logs from Debian's buildds and extracts a
 list of failed regression tests, sorted by architecture.
 
-== leapsecond.py ==
-
-Gets the current leap-second correction forom IERS and/or the USNO.
-
 == logextract ==
 
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 

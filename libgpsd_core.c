@@ -851,7 +851,8 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
      * time far enough in the past that it won't be consistent with the
      * leap-second value.
      */
-    if (gpsd_check_leapsecond(session->context->leap_seconds, unixtime) == 0) {
+    if ((session->context->valid & LEAP_SECOND_VALID)!=0 && 
+	gpsd_check_leapsecond(session->context->leap_seconds, unixtime) == 0) {
 	char scr[128];
 	(void)unix_to_iso8601(unixtime, scr, sizeof(scr));
 	gpsd_report(LOG_WARN, "leap-second %d is impossible at time %s (%f)\n", 

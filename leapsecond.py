@@ -171,6 +171,7 @@ if __name__ == '__main__':
                 continue
             fields = line.strip().split()
             leapsecs.append(leapbound(fields[0], fields[1]))
+        leapsecs.append(unix_to_rfc822(time.time()))
         if c_epochs:
             print '''
 /* This code is generated from leapsecond.py; do not hand-hack! */
@@ -183,7 +184,11 @@ int gpsd_check_leapsecond(const int leap, const double unixtime)
     static double c_epochs[] = {\
 '''
             for (i, b) in enumerate(leapsecs):
-                print "        %s,    // %s -> %d" % (rfc822_to_unix(b), b, i)
+                if i == len(b) - 1:
+                    label = '?'
+                else:
+                    label = `i`
+                print "        %s,    // %s -> %s" % (rfc822_to_unix(b), b, label)
             print '''\
     };
     #define DIM(a) (sizeof(a)/sizeof(a[0]))
