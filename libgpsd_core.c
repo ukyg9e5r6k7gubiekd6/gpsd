@@ -330,7 +330,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    int pulse_delay_ns = 0;
     struct timeval  tv;
     struct timespec ts;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
@@ -641,7 +640,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 	    /*@-noeffect@*/
 	    if (session->device_type == &oncore_binary) {
-		pulse_delay_ns = session->driver.oncore.pps_offset_ns;
+		int pulse_delay_ns = session->driver.oncore.pps_offset_ns;
 	        sample.offset += (double)pulse_delay_ns / 1000000000;
 	        ts.tv_nsec    -= pulse_delay_ns;
 	        TS_NORM( &ts );
