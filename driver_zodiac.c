@@ -337,8 +337,10 @@ static void handle1108(struct gps_device_t *session)
     /* sequence           = getzword(8); */
     /* utc_week_seconds   = getzlong(14); */
     /* leap_nanoseconds   = getzlong(17); */
-    if ((int)(getzword(19) & 3) == 3)
+    if ((int)(getzword(19) & 3) == 3) {
+	session->context->valid |= LEAP_SECOND_VALID;
 	session->context->leap_seconds = (int)getzword(16);
+    }
 }
 
 static gps_mask_t zodiac_analyze(struct gps_device_t *session)
