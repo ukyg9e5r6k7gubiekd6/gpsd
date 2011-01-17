@@ -1654,10 +1654,13 @@ accuracy limit,the satellites only emit navigation messages at
 messages are normally accurate only to 1/100th of a second.</para>
 
 <para>GPS date reporting has a Y2K-like problem for which
-<application>gpsd</application> cannot compensate; GPS dates
-are shipped as (week, second) pairs in which the week part is a 10 
-or 13-bit counter. When the counter rolls over, a GPS receiver
-may see and report a date 1024 or 8192 weeks in the past.</para>
+<application>gpsd</application> cannot fully compensate; GPS dates are
+shipped as (week, second) pairs in which the week part is a 10 or
+13-bit counter. When the counter rolls over, a GPS receiver may see
+and report a date 1024 or 8192 weeks in the past.
+<application>gpsd</application> will detect and compensate for
+rollovers while it is running, but cannot recover if the receiver 
+starts up already confused about the date.</para>
 
 <para>To interpret the 2-digit years shipped in NMEA sentences,
 <application>gpsd</application> needs to know the base century and may

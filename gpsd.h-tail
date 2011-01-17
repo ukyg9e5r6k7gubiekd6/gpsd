@@ -194,6 +194,7 @@ struct gps_context_t {
     unsigned short gps_week;            /* GPS week, actually 10 bits */
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
+    int rollovers;			/* rollovers since start of run */
 #ifdef NTPSHM_ENABLE
     bool enable_ntpshm;
     /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];

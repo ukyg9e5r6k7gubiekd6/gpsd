@@ -147,6 +147,7 @@ struct gps_context_t context = {
     .gps_week	    = 0,
     .gps_tow        = 0,
     .century	    = CENTURY_BASE,
+    .rollovers      = 0,
 #ifdef NTPSHM_ENABLE
     .enable_ntpshm  = false,
     .shmTime	    = {0},
