@@ -361,8 +361,12 @@ static void decode(FILE * fpin, FILE * fpout)
 /* RTCM or AIS packets on fpin to dump format on fpout */
 {
     struct gps_packet_t lexer;
+#ifdef RTCM104V2_ENABLE
     struct rtcm2_t rtcm2;
+#endif
+#ifdef RTCM104V3_ENABLE
     struct rtcm3_t rtcm3;
+#endif
     struct ais_t ais;
     struct aivdm_context_t aivdm[AIVDM_CHANNELS];
     char buf[BUFSIZ];

@@ -301,7 +301,7 @@ const struct monitor_object_t nmea_mmt = {
  *
  *****************************************************************************/
 
-#ifdef ALLOW_CONTROLSEND
+#if defined(ALLOW_CONTROLSEND) && defined(ASHTECH_ENABLE)
 static void monitor_nmea_send(const char *fmt, ...)
 {
     char buf[BUFSIZ];
@@ -312,7 +312,7 @@ static void monitor_nmea_send(const char *fmt, ...)
     va_end(ap);
     (void)monitor_control_send((unsigned char *)buf, strlen(buf));
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* defined(ALLOW_CONTROLSEND) && defined(ASHTECH_ENABLE) */
 
 /*
  * Yes, it's OK for most of these to be clones of the generic NMEA monitor
