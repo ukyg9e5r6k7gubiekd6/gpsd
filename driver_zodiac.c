@@ -239,12 +239,9 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    session->context->gps_week = (unsigned short)gps_week;
-    session->context->gps_tow = (double)gps_seconds;
-    session->gpsdata.skyview_time =
-	gpstime_to_unix(gps_week, session->context->gps_tow);
-    session->context->valid |= GPS_TIME_VALID; 
-    gpsd_rollover_check(session, session->gpsdata.skyview_time);
+    session->gpsdata.skyview_time = gpsd_resolve_time(session,
+						      (unsigned short)gps_week,
+						      (double)gps_seconds);
     gpsd_report(LOG_DATA, "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
