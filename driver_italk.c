@@ -35,7 +35,6 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     unsigned short flags, cflags, pflags;
     gps_mask_t mask = 0;
     double epx, epy, epz, evx, evy, evz, eph;
-    double t;
 
     if (len != 296) {
 	gpsd_report(LOG_PROG, "ITALK: bad NAV_FIX (len %zu, should be 296)\n",
@@ -119,7 +118,6 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 				       unsigned char *buf, size_t len)
 {
     unsigned int i, nsv, nchan, st;
-    double t;
     gps_mask_t mask;
 
     if (len < 62) {
@@ -168,7 +166,6 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 {
     int leap;
     unsigned short flags;
-    double t;
 
     if (len != 64) {
 	gpsd_report(LOG_PROG,
