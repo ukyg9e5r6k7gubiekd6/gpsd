@@ -171,7 +171,7 @@ libgpsd_c_sources = \
 	gpsd_json.c \
 	isgps.c \
 	gpsd_maskdump.c \
-	leapcheck.c \
+	rollover.c \
 	libgpsd_core.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \

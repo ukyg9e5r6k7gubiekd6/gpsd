@@ -834,47 +834,6 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
-void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
-			 const double unixtime)
-{
-    /*
-     * If the system clock is zero or has a small-integer value,
-     * no sanity-checking is possible.
-     */
-    if (session->context->start_time < GPS_EPOCH)
-	return;
-
-    /*
-     * Check the time passed in against the leap-second offset the satellites
-     * are reporting.  After a rollover, the receiver will probably report a
-     * time far enough in the past that it won't be consistent with the
-     * leap-second value.
-     */
-    if ((session->context->valid & LEAP_SECOND_VALID)!=0 && 
-	gpsd_check_leapsecond(session->context->leap_seconds, unixtime) == 0) {
-	char scr[128];
-	(void)unix_to_iso8601(unixtime, scr, sizeof(scr));
-	gpsd_report(LOG_WARN, "leap-second %d is impossible at time %s (%f)\n", 
-		    session->context->leap_seconds, scr, unixtime);
-    }
-
-    /*
-     * If the GPS is reporting a time from before the daemon started, we've
-     * had a rollover event while the daemon was running.
-     *
-     * The reason for the 12-hour slop is that our recorded start time is local,
-     * but GPSes deliver time as though in UTC.  This test could be exact if we
-     * counted on knowing our timezone at startup, but since we can't count on
-     * knowing location...
-     */
-    if (unixtime + (12*60*60) < (double)session->context->start_time) {
-	char scr[128];
-	(void)unix_to_iso8601(unixtime, scr, sizeof(scr));
-	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n", 
-		    scr, unixtime);
-    }
-}
-
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from
