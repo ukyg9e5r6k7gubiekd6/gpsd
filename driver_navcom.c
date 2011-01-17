@@ -398,14 +398,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     /* Timestamp */
     week = (uint16_t) getleu16(buf, 3);
-    session->context->gps_week = week;
     tow = (uint32_t) getleu32(buf, 5);
-    session->context->gps_tow = tow / 1000.0;
-    session->context->valid |= GPS_TIME_VALID;
-    session->newdata.time =
-	gpstime_to_unix((int)week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    gpsd_rollover_check(session, session->newdata.time);
+    session->newdata.time = gpsd_resolve_time(session, week, tow / 1000.0);
 
     /* Satellites used */
     sats_used = (uint32_t) getleu32(buf, 9);
@@ -722,16 +716,11 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     uint8_t sats_used = getub(buf, 14);
     //uint8_t pdop = getub(buf, 15);
 
-    /* Timestamp and PDOP */
-    session->context->gps_week = (unsigned short)week;
-    session->context->gps_tow = (double)tow / 1000.0f;
-    session->context->valid |= GPS_TIME_VALID;
-    /*@ ignore @*//*@ splint is confused @ */
-    session->gpsdata.skyview_time =
-	gpstime_to_unix((int)week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    gpsd_rollover_check(session, session->gpsdata.skyview_time);
-    /*@ end @*/
+    /* Timestamp */
+    session->gpsdata.skyview_time = gpsd_resolve_time(session,
+						      (unsigned short)week,
+						      tow / 1000.0f);
+
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
 
@@ -923,15 +912,9 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.epv = alt_sd * 1.96;
 	mask |= (HERR_IS | VERR_IS);
 #endif /*  __UNUSED__ */
-	session->context->gps_week = (unsigned short)week;
-	session->context->gps_tow = (double)tow / 1000.0f;
-	session->context->valid |= GPS_TIME_VALID;
-	/*@ ignore @*//*@ splint is confused @ */
-	session->newdata.time =
-	    gpstime_to_unix((int)week, session->context->gps_tow)
-	    - session->context->leap_seconds;
-	gpsd_rollover_check(session, session->newdata.time);
-	/*@ end @*/
+	session->newdata.time = gpsd_resolve_time(session,
+						  (unsigned short)week,
+						  (double)tow / 1000.0f);
 	gpsd_report(LOG_PROG,
 		    "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_report(LOG_IO, "Navcom: epe = %f\n", session->gpsdata.epe);

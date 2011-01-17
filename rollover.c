@@ -160,6 +160,7 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
     double t;
     session->context->gps_week = week;
     session->context->gps_tow = tow;
+    session->context->valid |= GPS_TIME_VALID;
     t = gpstime_to_unix((int)week, session->context->gps_tow)
 	- session->context->leap_seconds;
     gpsd_rollover_check(session, session->newdata.time);
