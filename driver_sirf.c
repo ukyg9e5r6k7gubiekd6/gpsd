@@ -478,6 +478,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     gpsd_zero_satellites(&session->gpsdata);
     session->context->gps_week = (unsigned short)getbes16(buf, 1);
     session->context->gps_tow = (double)getbeu32(buf, 3) * 1e-2;
+    session->context->valid |= GPS_TIME_VALID;
     /*@ ignore @*//*@ splint is confused @ */
     session->gpsdata.skyview_time
 	=
@@ -637,6 +638,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* byte 21 is "mode 2", not clear how to interpret that */
     session->context->gps_week = (unsigned short)getbes16(buf, 22);
     session->context->gps_tow = (double)getbeu32(buf, 24) * 1e-2;
+    session->context->valid |= GPS_TIME_VALID;
     /*@ ignore @*//*@ splint is confused @ */
     session->newdata.time =
 	gpstime_to_unix(session->context->gps_week,

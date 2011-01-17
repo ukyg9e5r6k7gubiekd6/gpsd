@@ -192,6 +192,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 	    session->context->gps_tow = f1;
+	    session->context->valid |= GPS_TIME_VALID;
 
 	    session->newdata.time =
 		gpstime_to_unix(session->context->gps_week,
@@ -290,7 +291,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f1 = getbef(buf, 12);	/* clock bias */
 	f2 = getbef(buf, 16);	/* time-of-fix */
 	session->context->gps_tow = f2;
-	if (session->context->gps_week) {
+	if ((session->context->valid & GPS_TIME_VALID)!=0 && session->context->gps_week) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
 				session->context->gps_tow)
@@ -554,7 +555,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	d1 = getbed(buf, 24);	/* clock bias */
 	f1 = getbef(buf, 32);	/* time-of-fix */
 	session->context->gps_tow = f1;
-	if (session->context->gps_week) {
+	if ((session->context->valid & GPS_TIME_VALID)!=0 && session->context->gps_week) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
 				session->context->gps_tow)
@@ -655,6 +656,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    }
 	    session->context->gps_week = (unsigned short)s4;
 	    session->context->gps_tow = (double)ul1 *1e-3;
+	    session->context->valid |= GPS_TIME_VALID; 
 	    /*@ ignore @*//*@ splint is confused @ */
 	    session->newdata.time =
 		gpstime_to_unix((int)s4, session->context->gps_tow)
@@ -698,6 +700,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    }
 	    session->context->gps_week = (unsigned short)s1;
 	    session->context->gps_tow = (double)ul1 *1e3;
+	    session->context->valid |= GPS_TIME_VALID; 
 	    /*@ ignore @*//*@ splint is confused @ */
 	    session->newdata.time =
 		gpstime_to_unix(session->context->gps_week,
@@ -769,6 +772,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 		session->context->gps_week = s1;
 		session->context->gps_tow = (double)ul1;
+		session->context->valid |= GPS_TIME_VALID; 
 		session->newdata.time =
 		    gpstime_to_unix((int)s1, session->context->gps_tow)
 		    - (double)s2;

@@ -154,6 +154,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->gps_week = gps_week;
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
     session->context->gps_tow = tow / 1000.0;
+    session->context->valid |= GPS_TIME_VALID
 
     t = gpstime_to_unix(gps_week, session->context->gps_tow)
 	- session->context->leap_seconds;

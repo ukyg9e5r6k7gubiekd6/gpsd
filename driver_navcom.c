@@ -401,6 +401,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->context->gps_week = week;
     tow = (uint32_t) getleu32(buf, 5);
     session->context->gps_tow = tow / 1000.0;
+    session->context->valid |= GPS_TIME_VALID;
     session->newdata.time =
 	gpstime_to_unix((int)week, session->context->gps_tow)
 	- session->context->leap_seconds;
@@ -724,6 +725,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Timestamp and PDOP */
     session->context->gps_week = (unsigned short)week;
     session->context->gps_tow = (double)tow / 1000.0f;
+    session->context->valid |= GPS_TIME_VALID;
     /*@ ignore @*//*@ splint is confused @ */
     session->gpsdata.skyview_time =
 	gpstime_to_unix((int)week, session->context->gps_tow)
@@ -923,6 +925,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 #endif /*  __UNUSED__ */
 	session->context->gps_week = (unsigned short)week;
 	session->context->gps_tow = (double)tow / 1000.0f;
+	session->context->valid |= GPS_TIME_VALID;
 	/*@ ignore @*//*@ splint is confused @ */
 	session->newdata.time =
 	    gpstime_to_unix((int)week, session->context->gps_tow)
