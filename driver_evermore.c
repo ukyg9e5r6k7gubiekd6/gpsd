@@ -176,15 +176,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     switch (type) {
     case 0x02:			/* Navigation Data Output */
-	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
-	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
-	session->context->valid |= GPS_TIME_VALID;
-	/*@ ignore @*//*@ splint is confused @ */
-	session->newdata.time =
-	    gpstime_to_unix(session->context->gps_week,
-			    session->context->gps_tow) -
-	    session->context->leap_seconds;
-	gpsd_rollover_check(session, session->newdata.time);
+	session->newdata.time = gpsd_resolve_time(session,
+	    (unsigned short)getleu16(buf2, 2),
+						  (double)getleu32(buf2, 4) * 0.01);
 	/*@ end @*/
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 			 getles32(buf2, 8) * 1.0, getles32(buf2, 12) * 1.0,
@@ -218,16 +212,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask | CLEAR_IS | REPORT_IS;
 
     case 0x04:			/* DOP Data Output */
-	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
-	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
-	session->context->valid |= GPS_TIME_VALID;
-	/*@ ignore @*//*@ splint is confused @ */
-	session->newdata.time =
-	    gpstime_to_unix(session->context->gps_week,
-			    session->context->gps_tow) -
-	    session->context->leap_seconds;
-	gpsd_rollover_check(session, session->newdata.time);
-	/*@ end @*/
+	session->newdata.time = gpsd_resolve_time(session,
+	    (unsigned short)getleu16(buf2, 2),
+						  (double)getleu32(buf2, 4) * 0.01);
 	/*
 	 * We make a deliberate choice not to clear DOPs from the
 	 * last skyview here, but rather to treat this as a supplement
@@ -269,16 +256,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask;
 
     case 0x06:			/* Channel Status Output */
-	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
-	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
-	session->context->valid |= GPS_TIME_VALID;
-	/*@ ignore @*//*@ splint is confused @ */
-	session->gpsdata.skyview_time =
-	    gpstime_to_unix(session->context->gps_week,
-			    session->context->gps_tow) -
-	    session->context->leap_seconds;
-	gpsd_rollover_check(session, session->gpsdata.skyview_time);
-	/*@ end @*/
+	session->gpsdata.skyview_time = gpsd_resolve_time(session,
+	    (unsigned short)getleu16(buf2, 2),
+	    (double)getleu32(buf2, 4) * 0.01);
 	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
 	gpsd_zero_satellites(&session->gpsdata);
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
@@ -331,16 +311,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x08:			/* Measurement Data Output */
 	/* clock offset is a manufacturer diagnostic */
 	/* (int)getleu16(buf2, 8);  clock offset, 29000..29850 ?? */
-	session->context->gps_week = (unsigned short)getleu16(buf2, 2);
-	session->context->gps_tow = (double)getleu32(buf2, 4) * 0.01;
-	session->context->valid |= GPS_TIME_VALID;
-	/*@ ignore @*//*@ splint is confused @ */
-	session->newdata.time =
-	    gpstime_to_unix(session->context->gps_week,
-			    session->context->gps_tow) -
-	    session->context->leap_seconds;
-	gpsd_rollover_check(session, session->newdata.time);
-	/*@ end @*/
+	session->newdata.time = gpsd_resolve_time(session,
+	    (unsigned short)getleu16(buf2, 2),
+	    (double)getleu32(buf2, 4) * 0.01);
 	visible = (unsigned char)getub(buf2, 10);
 	/*
 	 * Note: This code is untested. It was written from the manual.

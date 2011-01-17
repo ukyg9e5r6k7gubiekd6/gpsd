@@ -154,4 +154,16 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
     }
 }
 
+double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
+			 unsigned short week, double tow)
+{
+    double t;
+    session->context->gps_week = week;
+    session->context->gps_tow = tow;
+    t = gpstime_to_unix((int)week, session->context->gps_tow)
+	- session->context->leap_seconds;
+    gpsd_rollover_check(session, session->newdata.time);
+    return t;
+}
+
 /* end */

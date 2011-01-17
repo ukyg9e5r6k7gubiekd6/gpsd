@@ -32,8 +32,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *, unsigned char *,
 static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
-    unsigned int tow;
-    unsigned short gps_week, flags, cflags, pflags;
+    unsigned short flags, cflags, pflags;
     gps_mask_t mask = 0;
     double epx, epy, epz, evx, evy, evz, eph;
     double t;
@@ -57,15 +56,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 	|| 0 == (flags & FIXINFO_FLAG_VALID))
 	return mask;
 
-    gps_week = (ushort) getles16(buf, 7 + 82);
-    session->context->gps_week = gps_week;
-    tow = (uint) getleu32(buf, 7 + 84);
-    session->context->gps_tow = tow / 1000.0;
-    session->context->valid |= GPS_TIME_VALID;
-    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    session->newdata.time = t;
-    gpsd_rollover_check(session, session->newdata.time);
+    session->newdata.time = gpsd_resolve_time(session,
+	(unsigned short) getles16(buf, 7 + 82),
+	(unsigned int)getleu32(buf, 7 + 84) / 1000.0);
     mask |= TIME_IS;
 
     epx = (double)(getles32(buf, 7 + 96) / 100.0);
@@ -125,8 +118,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 				       unsigned char *buf, size_t len)
 {
-    unsigned int i, tow, nsv, nchan, st;
-    unsigned short gps_week;
+    unsigned int i, nsv, nchan, st;
     double t;
     gps_mask_t mask;
 
@@ -134,16 +126,9 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%zu)\n", len);
 	mask = 0;
     } else {
-	gps_week = (ushort) getleu16(buf, 7 + 4);
-	session->context->gps_week = gps_week;
-	tow = (uint) getleu32(buf, 7 + 6);
-	session->context->valid |= GPS_TIME_VALID;
-	session->context->gps_tow = tow / 1000.0;
-	t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
-	    - session->context->leap_seconds;
-	session->gpsdata.skyview_time = t;
-	gpsd_rollover_check(session, session->gpsdata.skyview_time);
-
+	session->gpsdata.skyview_time = gpsd_resolve_time(session,
+	    (unsigned short)getleu16(buf, 7 + 4),
+	    (unsigned int)getleu32(buf, 7 + 6) / 1000.0),
 	gpsd_zero_satellites(&session->gpsdata);
 	nsv = 0;
 	nchan = (unsigned int)getleu16(buf, 7 + 50);
@@ -181,9 +166,8 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 					  unsigned char *buf, size_t len)
 {
-    unsigned int tow;
     int leap;
-    unsigned short gps_week, flags;
+    unsigned short flags;
     double t;
 
     if (len != 64) {
@@ -201,16 +185,9 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     if (session->context->leap_seconds < leap)
 	session->context->leap_seconds = leap;
 
-    gps_week = (ushort) getleu16(buf, 7 + 36);
-    session->context->gps_week = gps_week;
-    tow = (uint) getleu32(buf, 7 + 38);
-    session->context->gps_tow = tow / 1000.0;
-    session->context->valid |= GPS_TIME_VALID;
-    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    session->newdata.time = t;
-    gpsd_rollover_check(session, session->newdata.time);
-
+    session->newdata.time = gpsd_resolve_time(session,
+	(unsigned short) getleu16(buf, 7 + 36),
+	(unsigned int)getleu32(buf, 7 + 38)  / 1000.0);
     gpsd_report(LOG_DATA,
 		"UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
 		session->newdata.time);
@@ -253,8 +230,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 				      unsigned char *buf, size_t len)
 {
-    unsigned short gps_week, flags, n, i;
-    unsigned int tow;
+    unsigned short flags, n, i;
     union long_double l_d;
     double t;
 
@@ -274,15 +250,9 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     if ((flags & 0x3) != 0x3)
 	return 0; // bail if measurement time not valid.
 
-    gps_week = (ushort) getleu16(buf, 7 + 8);
-    tow = (uint) getleu32(buf, 7 + 38);
-    session->context->gps_week = gps_week;
-    session->context->gps_tow = tow / 1000.0;
-    session->context->valid |= GPS_TIME_VALID;
-    t = gpstime_to_unix((int)gps_week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    session->newdata.time = t;
-    gpsd_rollover_check(session, session->newdata.time);
+    session->newdata.time = gpsd_resolve_time(session,
+	(short) getleu16(buf, 7 + 8),
+	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
     /*@-type@*/
     for (i = 0; i < n; i++){

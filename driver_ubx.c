@@ -59,7 +59,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
     gps_mask_t mask;
-    double t;
 
     if (data_len != 52)
 	return 0;
@@ -69,15 +68,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
-	session->context->gps_week = gw;
-	session->context->gps_tow = tow / 1000.0;
-	session->context->valid |= GPS_TIME_VALID; 
-
-	t = gpstime_to_unix((int)session->context->gps_week,
-			    session->context->gps_tow)
-	    - session->context->leap_seconds;
-	session->newdata.time = t;
-	gpsd_rollover_check(session, session->newdata.time);
+	session->newdata.time = gpsd_resolve_time(session, gw, tow / 1000.0);
 	mask |= TIME_IS;
     }
 
@@ -171,27 +162,16 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 		    size_t data_len)
 {
     unsigned int gw, tow, flags;
-    double t;
 
     if (data_len != 16)
 	return 0;
 
     tow = (unsigned int)getleu32(buf, 0);
     gw = (unsigned int)getles16(buf, 8);
-    if (gw > session->context->gps_week)
-	session->context->gps_week = (unsigned short)gw;
-    session->context->gps_tow = tow / 1000.0;
-    session->context->valid |= GPS_TIME_VALID; 
-
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
-
-    t = gpstime_to_unix((int)session->context->gps_week,
-			session->context->gps_tow)
-	- session->context->leap_seconds;
-    session->newdata.time = t;
-    gpsd_rollover_check(session, session->newdata.time);
+    session->newdata.time = gpsd_resolve_time(session, gw, tow / 1000.0);
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->newdata.time);

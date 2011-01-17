@@ -475,17 +475,11 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     if (len != 188)
 	return 0;
 
+    session->gpsdata.skyview_time = gpsd_resolve_time(session,
+	(unsigned short)getbes16(buf, 1),
+	(unsigned int)getbeu32(buf, 3) * 1e-2);
+
     gpsd_zero_satellites(&session->gpsdata);
-    session->context->gps_week = (unsigned short)getbes16(buf, 1);
-    session->context->gps_tow = (double)getbeu32(buf, 3) * 1e-2;
-    session->context->valid |= GPS_TIME_VALID;
-    /*@ ignore @*//*@ splint is confused @ */
-    session->gpsdata.skyview_time
-	=
-	gpstime_to_unix(session->context->gps_week, session->context->gps_tow)
-	- session->context->leap_seconds;
-    gpsd_rollover_check(session, session->gpsdata.skyview_time);
-    /*@ end @*/
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
 	bool good;
@@ -636,16 +630,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		navtype, session->gpsdata.status, session->newdata.mode);
     /* byte 20 is HDOP, see below */
     /* byte 21 is "mode 2", not clear how to interpret that */
-    session->context->gps_week = (unsigned short)getbes16(buf, 22);
-    session->context->gps_tow = (double)getbeu32(buf, 24) * 1e-2;
-    session->context->valid |= GPS_TIME_VALID;
-    /*@ ignore @*//*@ splint is confused @ */
-    session->newdata.time =
-	gpstime_to_unix(session->context->gps_week,
-			session->context->gps_tow) 
-	- session->context->leap_seconds;
-    gpsd_rollover_check(session, session->newdata.time);
-    /*@ end @*/
+    session->newdata.time = gpsd_resolve_time(session,
+	(unsigned short)getbes16(buf, 22), (double)getbeu32(buf, 24) * 1e-2);
 #ifdef NTPSHM_ENABLE
     if (session->newdata.mode <= MODE_NO_FIX) {
 	gpsd_report(LOG_PROG, "SiRF: NTPD no fix, mode: %d\n",
