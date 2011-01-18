@@ -719,7 +719,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Timestamp */
     session->gpsdata.skyview_time = gpsd_resolve_time(session,
 						      (unsigned short)week,
-						      tow / 1000.0f);
+						      (double)tow / 1000.0f);
 
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;

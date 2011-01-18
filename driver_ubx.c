@@ -171,7 +171,9 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
-    session->newdata.time = gpsd_resolve_time(session, gw, tow / 1000.0);
+    session->newdata.time = gpsd_resolve_time(session, 
+					      (unsigned short int)gw, 
+					      (double)tow / 1000.0);
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->newdata.time);

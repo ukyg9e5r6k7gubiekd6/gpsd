@@ -166,11 +166,11 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
      * work even when Block III satellites increase the week counter width
      * to 13 bits,
      */
-    if (week < (session->context->gps_week & 0x3ff)) {
+    if ((int)week < (session->context->gps_week & 0x3ff)) {
 	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
-    session->context->gps_week = week + session->context->rollovers * 1024;
+    session->context->gps_week = (unsigned short int)(week + session->context->rollovers * 1024);
     session->context->gps_tow = tow;
     session->context->valid |= GPS_TIME_VALID;
     t = gpstime_to_unix((int)week, session->context->gps_tow)

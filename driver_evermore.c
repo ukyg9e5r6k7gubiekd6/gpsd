@@ -177,9 +177,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     switch (type) {
     case 0x02:			/* Navigation Data Output */
 	session->newdata.time = gpsd_resolve_time(session,
-	    (unsigned short)getleu16(buf2, 2),
-						  (double)getleu32(buf2, 4) * 0.01);
-	/*@ end @*/
+	  (unsigned short)getleu16(buf2, 2),
+	  (double)getleu32(buf2, 4) * 0.01);
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 			 getles32(buf2, 8) * 1.0, getles32(buf2, 12) * 1.0,
 			 getles32(buf2, 16) * 1.0, getles16(buf2, 20) / 10.0,

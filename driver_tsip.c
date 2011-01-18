@@ -291,7 +291,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f1 = getbef(buf, 12);	/* clock bias */
 	f2 = getbef(buf, 16);	/* time-of-fix */
 	session->context->gps_tow = f2;
-	if ((session->context->valid & GPS_TIME_VALID)!=0 && session->context->gps_week) {
+	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
 				session->context->gps_tow)
@@ -555,7 +555,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	d1 = getbed(buf, 24);	/* clock bias */
 	f1 = getbef(buf, 32);	/* time-of-fix */
 	session->context->gps_tow = f1;
-	if ((session->context->valid & GPS_TIME_VALID)!=0 && session->context->gps_week) {
+	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
 		gpstime_to_unix((int)session->context->gps_week,
 				session->context->gps_tow)
