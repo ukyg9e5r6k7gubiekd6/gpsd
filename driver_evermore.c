@@ -217,7 +217,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	/*
 	 * We make a deliberate choice not to clear DOPs from the
 	 * last skyview here, but rather to treat this as a supplement
-	 * to our calculations from the visiniolity matrix, trusting
+	 * to our calculations from the visibility matrix, trusting
 	 * the firmware algorithms over ours.
 	 */
 	session->gpsdata.dop.gdop = (double)getub(buf2, 8) * 0.1;
