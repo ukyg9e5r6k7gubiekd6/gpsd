@@ -6,7 +6,6 @@
 #include <math.h>
 
 #include "gpsd.h"
-#include "timebase.h"
 
 /* convert unsigned to signed */
 #define uint2int( u, bit) ( u & (1<<bit) ? u - (1<<bit) : u)
@@ -701,43 +700,29 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.DN = (words[8] & 0x0000FF);
 		/* leap second future */
 		subp->sub4_18.lsf = (char)((words[9] >> 16) & 0x0000FF);
-		/*
-		 * On SiRFs, the 50BPS data is passed on even when the
-		 * parity fails.  This happens frequently.  So the driver
-		 * must be extra careful that bad data does not reach here.
-		 */
-		if (LEAP_SECONDS > (int)subp->sub4_18.leap) {
-		    /* something wrong */
-		    gpsd_report(LOG_ERROR,
-			"50B: SF:4-18 Invalid leap_seconds: %d\n",
-				subp->sub4_18.leap);
-		    subp->sub4_18.leap = (char)LEAP_SECONDS;
-		    session->context->valid &= ~LEAP_SECOND_VALID;
-		} else {
-		    gpsd_report(LOG_INF,
-			"50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
-			"DN:%d\n",
-				subp->sub4_18.leap, subp->sub4_18.lsf, subp->sub4_18.WNlsf, subp->sub4_18.DN);
+		gpsd_report(LOG_INF,
+		    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
+		    "DN:%d\n",
+			    subp->sub4_18.leap, subp->sub4_18.lsf, subp->sub4_18.WNlsf, subp->sub4_18.DN);
+		gpsd_report(LOG_PROG,
+		    "50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
+		    "b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
+		    "A1:%.11e A0:%.11e tot:%.5g WNt:%u "
+		    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
+			subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1,
+			subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
+			subp->sub4_18.d_beta0, subp->sub4_18.d_beta1,
+			subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
+			subp->sub4_18.d_A1, subp->sub4_18.d_A0,
+			subp->sub4_18.d_tot, subp->sub4_18.WNt,
+			subp->sub4_18.leap, subp->sub4_18.WNlsf,
+			subp->sub4_18.DN, subp->sub4_18.lsf);
+		if (subp->sub4_18.leap != subp->sub4_18.lsf) {
 		    gpsd_report(LOG_PROG,
-			"50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
-			"b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
-			"A1:%.11e A0:%.11e tot:%.5g WNt:%u "
-			"ls: %d WNlsf:%u DN:%u, lsf:%d\n",
-			    subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1,
-			    subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
-			    subp->sub4_18.d_beta0, subp->sub4_18.d_beta1,
-			    subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
-			    subp->sub4_18.d_A1, subp->sub4_18.d_A0,
-			    subp->sub4_18.d_tot, subp->sub4_18.WNt,
-			    subp->sub4_18.leap, subp->sub4_18.WNlsf,
-			    subp->sub4_18.DN, subp->sub4_18.lsf);
-		    session->context->valid |= LEAP_SECOND_VALID;
-		    if (subp->sub4_18.leap != subp->sub4_18.lsf) {
-			gpsd_report(LOG_PROG,
-			    "50B: SF:4-18 leap-second change coming\n");
-		    }
+			"50B: SF:4-18 leap-second change coming\n");
 		}
 		session->context->leap_seconds = (int)subp->sub4_18.leap;
+		session->context->valid |= LEAP_SECOND_VALID;
 		break;
 	    default:
 		;			/* no op */
