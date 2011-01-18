@@ -930,7 +930,7 @@ receiver firmware also has to know that the extra three bits are
 present; at time of writing in late 2010 this capability is at best
 rare and possibly nonexistent.</p>
 
-<p>See the timebase.h file for various constants that will need to
+<p>See the timebase.h file for one or more constants that need to
 be tweaked occasionally to cope with these problems.</p>
 
 <p>Note that gpsd does not rely on the system clock in any way.  This
@@ -1408,7 +1408,7 @@ will have a day or so to get their urgent fixes in.</dd>
 done.  Make sure the 'dev' suffix is gone.</dd>
 
 <dt>5. Check timebase.h.</dt>
-<dd>The values for leap-second offset and default century may need to be adjusted.</dd>
+<dd>The value for default century may need to be adjusted.</dd>
 
 <dt>6. Rebuilt leapcheck.i.</dt>
 <dd>Rebuild the leap-second list used for rollover checks 
