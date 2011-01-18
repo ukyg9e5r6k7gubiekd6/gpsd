@@ -246,7 +246,7 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 
 leapcheck.i: leapsecond.py
 	rm -f leapcheck.i && \
-	$(PYTHON) leapsecond.py -c >leapcheck.i && \
+	$(PYTHON) leapsecond.py -c leapcheck.i && \
 	chmod a-w leapcheck.i
 
 libgps_la_SOURCES = $(libgps_c_sources)
