@@ -136,7 +136,7 @@ if __name__ == '__main__':
     c_epochs = None
     (options, arguments) = getopt.getopt(sys.argv[1:], "c:i:n:o:p")
     for (switch, val) in options:
-        if (switch == '-c'):
+        if (switch == '-c'):    # Generate C initializer listing leap seconds
             c_epochs = val
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
             from_rfc822 = True
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             next = True
         elif (switch == '-o'):  # Compute RFC822 date from Unix time
             to_rfc822 = True
-        elif (switch == '-p'):
+        elif (switch == '-p'):  # Generate Python list of leap seconds
             py_epochs = True
 
     if not next and not from_rfc822 and not to_rfc822 and not c_epochs and not py_epochs:
