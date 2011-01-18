@@ -209,7 +209,7 @@ libgpsd_h_sources = \
 
 libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c leapcheck.i
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
@@ -244,10 +244,9 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
+# This gets kept in the repo so we can build without Internet access
 leapcheck.i: leapsecond.py
-	rm -f leapcheck.i && \
-	$(PYTHON) leapsecond.py -c leapcheck.i && \
-	chmod a-w leapcheck.i
+	$(PYTHON) leapsecond.py -c leapcheck.i
 
 libgps_la_SOURCES = $(libgps_c_sources)
 

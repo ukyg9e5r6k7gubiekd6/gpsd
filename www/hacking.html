@@ -1408,8 +1408,11 @@ will have a day or so to get their urgent fixes in.</dd>
 done.  Make sure the 'dev' suffix is gone.</dd>
 
 <dt>5. Check timebase.h.</dt>
-<dd>The values for leap-second offset and the start-subframe time
-may need to be adjusted.</dd>
+<dd>The values for leap-second offset and default century may need to be adjusted.</dd>
+
+<dt>6. Rebuilt leapcheck.i.</dt>
+<dd>Rebuild the leap-second list used for rollover checks 
+with 'make leapcheck.i'</dd>
 
 <dt>5. Update the NEWS file</dt>
 <dd>Make sure the topmost entry in the changelog portion of

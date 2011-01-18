@@ -61,7 +61,6 @@ gpsd.h
 gpsd_config.h.in
 gpsd_config.h
 packet_names.h
-leapcheck.i
 revision.h
 gpsd.spec
 MANIFEST
