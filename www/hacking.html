@@ -1400,7 +1400,7 @@ tracker</a> for release blockers.</dt>  <dd></dd>
 <dd>About 48 hours before release, announce that it's coming so people
 will have a day or so to get their urgent fixes in.</dd>
 
-<dt>3. Final pull from the public repo</dt>
+<dt>3. Code pull from the public repo</dt>
 <dd>This is the revision the release will be built from.</dd>
 
 <dt>4. Check that the version number is correct</dt>
@@ -1410,9 +1410,10 @@ done.  Make sure the 'dev' suffix is gone.</dd>
 <dt>5. Check timebase.h.</dt>
 <dd>The value for default century may need to be adjusted.</dd>
 
-<dt>6. Rebuilt leapcheck.i.</dt>
-<dd>Rebuild the leap-second list used for rollover checks 
-with 'make leapcheck.i'</dd>
+<dt>6. Rebuild leapcheck.i.</dt>  <dd>Rebuild the leap-second list
+used for rollover checks with 'make leapcheck.i' Note: This will
+require Internet access, and fail (leaving the existing leap-second
+list in place) if that is not available.</dd>
 
 <dt>5. Update the NEWS file</dt>
 <dd>Make sure the topmost entry in the changelog portion of
