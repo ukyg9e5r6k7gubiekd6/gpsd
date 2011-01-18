@@ -1,8 +1,18 @@
 /*
  *
- * This is the gpsd driver for EverMore GPSes operating in binary mode.
- * About the only thing this gives us that NMEA won't is TDOP.
- * But we'll get atomic position reports from it, which is good.
+ * This is the gpsd driver for EverMore GPSes.  They have both an NMEA and
+ * a binary reporting mode, with the interesting property that they will 
+ * cheerfully accept binary commands (such as speed changes) while in NMEA
+ * mode.
+ *
+ * Binary mode would give us atomic fix reports, but it has one large drawback:
+ * the Navigation Data Out message doesn't report a leap-second offset, so ut
+ * is not actually possible to colloect a leap-second offset from it. Therefore
+ * we'll normally run the driver in NMEA mode.  
+ *
+ * About the only thing binary mode gives that NMEA won't is TDOP and raw
+ * pseudoranges, but gpsd does its own DOPs from skyview. By default we'll
+ * trade away raw data to get accurate time.
  *
  * The vendor site is <http://www.emt.com.tw>.
  *
@@ -512,11 +522,17 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
      * Experiment to see if the holds its settings through a close.
      */
     if (event == event_identified || event == event_reactivate) {
-	if (session->packet.type == NMEA_PACKET) {
-	    (void)evermore_nmea_config(session, 1);	/* configure NMEA messages for gpsd (GPGSV every 5s) */
-	}
-	(void)evermore_mode(session, 1);	/* switch GPS to binary mode */
-	session->back_to_nmea = true;
+	/*
+	 * We used to run this driver in binary mode, but that has the
+	 * problem that Evermore binary mode doesn't report a
+	 * leap-second correction in the Navigation Data Out sentence.
+	 * So, run it in NMEA mode to getbUTC corrected by firmware.
+	 * Fortunately the Evermore firmware interprets binary
+	 * commands in NMEA mode, so nothing else needs to change.
+	 */
+	(void)evermore_mode(session, 0);	/* switch GPS to NMEA mode */
+	(void)evermore_nmea_config(session, 1);	/* configure NMEA messages for gpsd (GPGSV every 5s) */
+	session->back_to_nmea = false;
     } else if (event == event_deactivate) {
 	(void)evermore_nmea_config(session, 0);	/* configure NMEA messages to default */
     }
