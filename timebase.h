@@ -35,10 +35,6 @@
  */
 #define LEAP_SECONDS	15
 
-/* Date of next possible leap second adjustment, according to IERS
- */
-#define START_SUBFRAME	1309492799	/* 30 Jun 2011 23:59:59 */
-
 /*
  * Default century.  Gets used if the system clock value at startup
  * time looks invalid.

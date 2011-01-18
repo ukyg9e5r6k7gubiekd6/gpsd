@@ -1789,10 +1789,6 @@ int main(int argc, char *argv[])
 		    scr, (int)context.start_time);
     }
 
-    /* optimization hack to defer having to read subframe data */
-    if (time(NULL) < START_SUBFRAME)
-	context.valid |= LEAP_SECOND_VALID;
-
     for (i = optind; i < argc; i++) {
 	if (!add_device(argv[i])) {
 	    gpsd_report(LOG_ERROR,
