@@ -41,7 +41,6 @@
 
 #include "gpsd.h"
 #include "bits.h"
-#include "timebase.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)		((n) >> 8)
@@ -954,15 +953,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	session->newdata.time = (double)mkgmtime(&unpacked_date);
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeu16(buf, 8);
-	if (LEAP_SECONDS > session->context->leap_seconds) {
-	    /* something wrong */
-	    gpsd_report(LOG_ERROR, "SiRF: Invalid leap_seconds: %d\n",
-			session->context->leap_seconds);
-	    session->context->leap_seconds = LEAP_SECONDS;
-	    session->context->valid &= ~LEAP_SECOND_VALID;
-	} else {
-	    session->context->valid |= LEAP_SECOND_VALID;
-	}
+	session->context->valid |= LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
 	    gpsd_report(LOG_RAW, "SiRF: NTPD just SEEN_UTC_2\n");
