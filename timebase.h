@@ -2,22 +2,6 @@
 #define _GPSD_TIMEBASE_H_
 
 /* timebase.h -- constants that will require patching over time */
-/*
- * The current (fixed) leap-second correction, and the future Unix
- * time after which to start hunting leap-second corrections from GPS
- * subframe data if the GPS doesn't supply them any more readily.
- *
- * Deferring the check is a hack to speed up fix acquisition --
- * subframe data is bulky enough to substantially increase latency.
- * To update LEAP_SECONDS and START_SUBFRAME, see the IERS leap-second
- * bulletin page at:
- * <http://hpiers.obspm.fr/eop-pc/products/bulletins/bulletins.html>
- *
- * You can use the Python expression
- *	time.mktime(time.strptime(... , "%d %b %Y %H:%M:%S"))
- * to generate an integer value for START_SUBFRAME, or use the
- * -n option of devtools/leapsecond.py in the source distribution
- */
 
 /*
  * This constant is used to get UTC from chipsets that report GPS time only.

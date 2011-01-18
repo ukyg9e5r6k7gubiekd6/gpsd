@@ -212,4 +212,4 @@ if __name__ == '__main__':
             raise SystemExit, 1
         # Date looks valid
         tv = leapbound(year, month)
-        print "#define START_SUBFRAME	%d	/* %s */" % (rfc822_to_unix(tv), tv)
+        print "%d	/* %s */" % (rfc822_to_unix(tv), tv)
