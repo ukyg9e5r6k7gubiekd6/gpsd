@@ -133,6 +133,10 @@ def save_leapseconds(outfile):
     except IOError:
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
 
+def graph_history():
+    "Generate a plot of the leap-second history."
+    pass
+
 def rfc822_to_unix(tv):
     "Local Unix time to RFC822 date."
     return time.mktime(time.strptime(tv, "%d %b %Y %H:%M:%S"))
@@ -141,51 +145,8 @@ def unix_to_rfc822(tv):
     "RFC822 date to local Unix time."
     return time.strftime("%d %b %Y %H:%M:%S", time.localtime(tv))
 
-def leapbound(year, month):
-    "Return a leap-second date in RFC822 form."
-    # USNO lists JAN and JUL (month following the leap second).
-    # IERS lists DEC and JUN (month preceding the leap second).
-    if month.upper() == "JAN":
-        tv = "31 Dec %s 23:59:60" % (int(year)-1)
-    elif month.upper() in ("JUN", "JUL"):
-        tv = "30 Jun %s 23:59:59" % year
-    elif month.upper() == "DEC":
-        tv = "31 Dec %s 23:59:59" % year
-    return tv
-
-if __name__ == '__main__':
-    import sys, getopt
-    next = False
-    from_rfc822 = False
-    to_rfc822 = False
-    c_epochs = None
-    (options, arguments) = getopt.getopt(sys.argv[1:], "c:i:n:o:")
-    for (switch, val) in options:
-        if (switch == '-c'):    # Generate C initializer listing leap seconds
-            c_epochs = val
-        elif (switch == '-i'):  # Compute Unix time from RFC822 date
-            from_rfc822 = True
-        elif (switch == '-n'):  # Compute possible next leapsecond
-            next = True
-        elif (switch == '-o'):  # Compute RFC822 date from Unix time
-            to_rfc822 = True
-
-    if not next and not from_rfc822 and not to_rfc822 and not c_epochs:
-        print "Current leap second:", retrieve()
-        raise SystemExit, 0
-
-    if from_rfc822:
-        print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)
-        raise SystemExit, 0
-
-    if to_rfc822:
-        print unix_to_rfc822(float(val))
-        raise SystemExit, 0
-
-    if c_epochs:
-        save_leapseconds(c_epochs)
-        raise SystemExit, 0
-
+def printnext(val):
+    "Compute Unix time correponsing to a scheduled leap second."
     if val[:3].lower() not in ("jun", "dec"):
         print >>sys.stderr, "leapsecond.py: -n argument must begin with "\
               "'Jun' or 'Dec'"
@@ -205,3 +166,40 @@ if __name__ == '__main__':
         # Date looks valid
         tv = leapbound(year, month)
         print "%d	/* %s */" % (rfc822_to_unix(tv), tv)
+
+def leapbound(year, month):
+    "Return a leap-second date in RFC822 form."
+    # USNO lists JAN and JUL (month following the leap second).
+    # IERS lists DEC and JUN (month preceding the leap second).
+    if month.upper() == "JAN":
+        tv = "31 Dec %s 23:59:60" % (int(year)-1)
+    elif month.upper() in ("JUN", "JUL"):
+        tv = "30 Jun %s 23:59:59" % year
+    elif month.upper() == "DEC":
+        tv = "31 Dec %s 23:59:59" % year
+    return tv
+
+if __name__ == '__main__':
+    import sys, getopt
+    (options, arguments) = getopt.getopt(sys.argv[1:], "c:gi:n:o:")
+    for (switch, val) in options:
+        if (switch == '-c'):    # Generate C initializer listing leap seconds
+            save_leapseconds(val)
+            raise SystemExit, 0
+        elif (switch == '-g'):  # Graph the leap_second history
+            graph_history()
+            raise SystemExit, 0
+        elif (switch == '-i'):  # Compute Unix time from RFC822 date
+            print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)
+            raise SystemExit, 0
+        elif (switch == '-n'):  # Compute possible next leapsecond
+            printnext(val)
+            raise SystemExit, 0
+        elif (switch == '-o'):  # Compute RFC822 date from Unix time
+            print unix_to_rfc822(float(val))
+            raise SystemExit, 0
+
+        print "Current leap second:", retrieve()
+        raise SystemExit, 0
+
+# End
