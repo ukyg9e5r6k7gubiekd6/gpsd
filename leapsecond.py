@@ -136,13 +136,18 @@ def save_leapseconds(outfile):
     except IOError:
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
 
-def graph_history(filename):
-    "Generate a GNUPLOT plot of the leap-second history."
+def fetch_leapsecs(filename):
+    "Get a list of leap seconds from the local cache of the USNO history"
     leapsecs = []
     with open(filename) as fp:
         leapsecs = map(lambda x: int(x.split(',')[0][:-2]), fp.readlines())
     leapsecs.pop()          # Remove the sentinel entry
-    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)),leapsecs)
+    return leapsecs
+
+def graph_history(filename):
+    "Generate a GNUPLOT plot of the leap-second history."
+    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)),
+                fetch_leapsecs(filename))
     fmt = 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
     fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
