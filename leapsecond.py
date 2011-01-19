@@ -13,6 +13,9 @@
 #
 # With -c, generate a C initializer listing leap seconds in Unix time.
 #
+# With -g, generate a plot of the leap-second trend over time. The command
+# you probably want is "leapsecond.py -g leapcheck.i | gnuplot -persist".
+#
 # With the -n option, compute Unix local time for an IERS leap-second event
 # given as a three-letter English Gregorian month abbreviation followed by
 # a 4-digit year.
@@ -149,6 +152,7 @@ def graph_history(filename):
     fmt += 'set format y "%Y-%m-%d"\n'
     fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
+    fmt += 'set data style linespoints\n'
     fmt += 'plot "-" using 1:2 title "Leap-second trend"\n'
     for (i, d) in enumerate(dates):
         fmt += "%d\t%s\n" % (i, d)
