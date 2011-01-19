@@ -167,9 +167,17 @@ def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
     raw = fetch_leapsecs(filename)
     (b, c) = leastsquares(zip(range(len(raw)), raw))
+    maxerr = 0
+    for (i, r) in enumerate(raw):
+        err = r - (i * b + c)
+        if err > maxerr:
+            maxerr = err
+    maxerr /= (60 * 60 * 24 * 7)
     dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)), raw)
     fmt = ''
+    fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
+    fmt += '# Maximum residual error is %.2f weeks\n' % maxerr 
     fmt += 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
     fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
