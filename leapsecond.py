@@ -147,7 +147,7 @@ def graph_history(filename):
     fmt += 'set timefmt "%Y-%m-%d"\n'
     fmt += 'set ydata time\n'
     fmt += 'set format y "%Y-%m-%d"\n'
-    fmt += 'set yrange [%s:%s]\n' % (dates[0], dates[-1])
+    fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
     fmt += 'plot "-" using 1:2 title "Leap-second trend"\n'
     for (i, d) in enumerate(dates):
