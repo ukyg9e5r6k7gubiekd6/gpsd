@@ -244,12 +244,14 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-leapcheck.h: leapsecond.py #leapcheck.i
-	$(PYTHON) leapsecond.py -h leapcheck.i >leapcheck.h
+leapcheck.h: leapsecond.py #leapseconds.i
+	$(PYTHON) leapsecond.py -h leapseconds.cache >leapcheck.h
 
-# This gets kept in the repo so we can build without Internet access
-leapcheck.i: leapsecond.py
-	$(PYTHON) leapsecond.py -f leapcheck.i
+# leapseconds.cache is a local cache for information on leapseconds issued
+# by the U.S. Naval observatory. # It gets kept in the reposiory so we can
+# build without Internet access
+leapseconds.cacche: leapsecond.py
+	$(PYTHON) leapsecond.py -f leapseconds.cache
 
 libgps_la_SOURCES = $(libgps_c_sources)
 
