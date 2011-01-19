@@ -121,7 +121,7 @@ def save_leapseconds(outfile):
                 continue
             fields = line.strip().split()
             leapsecs.append(leapbound(fields[0], fields[1]))
-        leapsecs.append(unix_to_rfc822(time.time()))
+        leapsecs.append(unix_to_rfc822(time.time()))          # Add sentinel
         def label(i):
             if i == len(leapsecs) - 1:
                 return '?'
@@ -133,9 +133,13 @@ def save_leapseconds(outfile):
     except IOError:
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
 
-def graph_history():
+def graph_history(filename):
     "Generate a plot of the leap-second history."
-    pass
+    leapsecs = []
+    with open(filename) as fp:
+        leapsecs = map(lambda x: float(x.split(',')[0]), fp.readlines())
+    leapsecs.pop()          # Remove the sentinel entry
+    print leapsecs
 
 def rfc822_to_unix(tv):
     "Local Unix time to RFC822 date."
@@ -181,13 +185,13 @@ def leapbound(year, month):
 
 if __name__ == '__main__':
     import sys, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "c:gi:n:o:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "c:g:i:n:o:")
     for (switch, val) in options:
         if (switch == '-c'):    # Generate C initializer listing leap seconds
             save_leapseconds(val)
             raise SystemExit, 0
         elif (switch == '-g'):  # Graph the leap_second history
-            graph_history()
+            graph_history(val)
             raise SystemExit, 0
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
             print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)
