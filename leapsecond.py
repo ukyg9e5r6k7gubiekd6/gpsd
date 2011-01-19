@@ -134,12 +134,26 @@ def save_leapseconds(outfile):
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
 
 def graph_history(filename):
-    "Generate a plot of the leap-second history."
+    "Generate a GNUPLOT plot of the leap-second history."
     leapsecs = []
     with open(filename) as fp:
-        leapsecs = map(lambda x: float(x.split(',')[0]), fp.readlines())
+        leapsecs = map(lambda x: int(x.split(',')[0][:-2]), fp.readlines())
     leapsecs.pop()          # Remove the sentinel entry
-    print leapsecs
+    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)),leapsecs)
+    fmt = 'set autoscale\n'
+    fmt += 'set xlabel "Leap second offset"\n'
+    fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
+    fmt += 'set ylabel "Leap second date"\n'
+    fmt += 'set timefmt "%Y-%m-%d"\n'
+    fmt += 'set ydata time\n'
+    fmt += 'set format y "%Y-%m-%d"\n'
+    fmt += 'set yrange [%s:%s]\n' % (dates[0], dates[-1])
+    fmt += 'set key left top box\n'
+    fmt += 'plot "-" using 1:2 title "Leap-second trend"\n'
+    for (i, d) in enumerate(dates):
+        fmt += "%d\t%s\n" % (i, d)
+    fmt += 'e\n'
+    print fmt
 
 def rfc822_to_unix(tv):
     "Local Unix time to RFC822 date."
