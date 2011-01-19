@@ -23,7 +23,7 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
-import os, urllib, re, random, time, calendar
+import os, urllib, re, random, time, calendar, math
 
 __locations = [
     (
@@ -144,11 +144,33 @@ def fetch_leapsecs(filename):
     leapsecs.pop()          # Remove the sentinel entry
     return leapsecs
 
+def leastsquares(tuples):
+    "Generate coefficients for a least-squares fit to the specified data."
+    sum_x=0
+    sum_y=0
+    sum_xx=0
+    sum_xy=0
+    for (x, y) in tuples:
+        sum_x = sum_x+x
+        sum_y = sum_y+y
+        xx = math.pow(x,2)
+        sum_xx = sum_xx+xx
+        xy = x*y
+        sum_xy = sum_xy+xy
+    n = len(tuples)
+    c = (-sum_x*sum_xy+sum_xx*sum_y)/(n*sum_xx-sum_x*sum_x)
+    b = (-sum_x*sum_y+n*sum_xy)/(n*sum_xx-sum_x*sum_x)
+    # y = b * x + c 
+    return (b, c)
+
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
-    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)),
-                fetch_leapsecs(filename))
-    fmt = 'set autoscale\n'
+    raw = fetch_leapsecs(filename)
+    (b, c) = leastsquares(zip(range(len(raw)), raw))
+    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)), raw)
+    fmt = ''
+    fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
+    fmt += 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
     fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
     fmt += 'set ylabel "Leap second date"\n'
@@ -158,9 +180,9 @@ def graph_history(filename):
     fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
     fmt += 'set data style linespoints\n'
-    fmt += 'plot "-" using 1:2 title "Leap-second trend"\n'
-    for (i, d) in enumerate(dates):
-        fmt += "%d\t%s\n" % (i, d)
+    fmt += 'plot "-" using 1:3 title "Leap-second trend";\n'
+    for (i, (r, d)) in enumerate(zip(raw, dates)):
+        fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
     print fmt
 
