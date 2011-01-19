@@ -161,23 +161,23 @@ def leastsquares(tuples):
     c = (-sum_x*sum_xy+sum_xx*sum_y)/(n*sum_xx-sum_x*sum_x)
     b = (-sum_x*sum_y+n*sum_xy)/(n*sum_xx-sum_x*sum_x)
     # y = b * x + c 
-    return (b, c)
+    maxerr = 0
+    for (x, y) in tuples:
+        err = y - (x * b + c)
+        if err > maxerr:
+            maxerr = err
+    return (b, c, maxerr)
 
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
     raw = fetch_leapsecs(filename)
-    (b, c) = leastsquares(zip(range(len(raw)), raw))
-    maxerr = 0
-    for (i, r) in enumerate(raw):
-        err = r - (i * b + c)
-        if err > maxerr:
-            maxerr = err
-    maxerr /= (60 * 60 * 24 * 7)
+    (b, c, e) = leastsquares(zip(range(len(raw)), raw))
+    e /= (60 * 60 * 24 * 7)
     dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)), raw)
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
-    fmt += '# Maximum residual error is %.2f weeks\n' % maxerr 
+    fmt += '# Maximum residual error is %.2f weeks\n' % e 
     fmt += 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
     fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
