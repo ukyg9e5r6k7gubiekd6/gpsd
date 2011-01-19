@@ -14,7 +14,7 @@
 # With -c, generate a C initializer listing leap seconds in Unix time.
 #
 # With -g, generate a plot of the leap-second trend over time. The command
-# you probably want is "leapsecond.py -g leapcheck.i | gnuplot -persist".
+# you probably want is "leapsecond.py -g leapseconds.cache | gnuplot -persist".
 #
 # With the -n option, compute Unix local time for an IERS leap-second event
 # given as a three-letter English Gregorian month abbreviation followed by

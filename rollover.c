@@ -55,21 +55,6 @@ Hint: This problem is a Chinese finger-trap for careful and conscientious
 programmers. The better you are, the worse this problem is likely to hurt
 your brain. Embrace the suck.
 
-I continue:
-
-*Good* programmers try to solve this problem by using the leap second to
-pin down the epoch date of the current rollover period so they can correct
-the week counter.  There are several reasons this cannot work.
-
-One is that you will not *know* the cumulative leap-second offset for
-times after your software ships, so there is no way to know how the
-leap-second offset you are handed maps to a year in that case.  Even
-if you did, somehow, havd a list of all future leap seconds, the
-mapping from leap second to year has about two years of uncertainty on
-average.  This means applying that mapping could lead you to guess a
-year on the wrong side of the nearest rollover line about one tenth of
-the time.
-
 Here is what you can do.
 
 If the timestamp you are handed is within the range of the first and
@@ -94,14 +79,14 @@ their brains trying to come up with a solution that does not punt any cases.
 
 #include "gpsd.h"
 
+static double c_epochs[] = {
+#include "leapcheck.h"
+};
+#define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
+
 static int gpsd_check_utc(const int leap, const double unixtime)
 /* consistency-check a GPS-reported UTC against a leap second */
 {
-    static double c_epochs[] = {
-#include "leapcheck.h"
-    };
-    #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
-
     if (leap < 0 || leap >= DIM(c_epochs))
         return -1;   /* cannot tell, leap second out of table bounds */
     else if (unixtime < c_epochs[0] || unixtime >= c_epochs[DIM(c_epochs)-1])
@@ -115,7 +100,6 @@ static int gpsd_check_utc(const int leap, const double unixtime)
 void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
 			 const double unixtime)
 {
-
     /*
      * Check the time passed in against the leap-second offset the satellites
      * are reporting.  After a rollover, the receiver will probably report a
