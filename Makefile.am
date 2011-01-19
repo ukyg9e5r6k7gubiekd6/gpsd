@@ -209,7 +209,7 @@ libgpsd_h_sources = \
 
 libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c leapcheck.h
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
@@ -244,14 +244,17 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
+leapcheck.h: leapsecond.py #leapcheck.i
+	$(PYTHON) leapsecond.py -h leapcheck.i >leapcheck.h
+
 # This gets kept in the repo so we can build without Internet access
 leapcheck.i: leapsecond.py
-	$(PYTHON) leapsecond.py -c leapcheck.i
+	$(PYTHON) leapsecond.py -f leapcheck.i
 
 libgps_la_SOURCES = $(libgps_c_sources)
 
 libgpsd_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				driver_rtcm2.h packet_states.h
+				driver_rtcm2.h packet_states.h leapcheck.h
 
 # Warning: This overrides autoconf's normal link-line generation process
 if LIBGPSMM_ENABLE

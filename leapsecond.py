@@ -110,29 +110,23 @@ def get():
         return current_offset
 
 def save_leapseconds(outfile):
-    "Fetch the USNO leap-second history data and makw a leap-second list."
+    "Fetch the USNO leap-second history data and make a leap-second list."
     skip = True
     leapsecs = []
     # This code assumes that after 1980, leap-second increments are
     # always integrally one second and every increment is listed here
     leapsecs = []
     try:
+        fp = open(outfile, "w")
         for line in urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat"):
             if line.startswith(" 1980"):
                 skip = False
             if skip:
                 continue
             fields = line.strip().split()
-            leapsecs.append(leapbound(fields[0], fields[1]))
-        leapsecs.append(unix_to_rfc822(time.time()))          # Add sentinel
-        def label(i):
-            if i == len(leapsecs) - 1:
-                return '?'
-            else:
-                return str(i)
-        with open(outfile, "w") as fp: 
-            for (i, b) in enumerate(leapsecs):
-                fp.write("        %s,    // %s -> %s\n" % (rfc822_to_unix(b), b, label(i)))
+            md = leapbound(fields[0], fields[1])
+            fp.write(repr(rfc822_to_unix(md)) + "\n")
+        fp.close()
     except IOError:
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
 
@@ -140,9 +134,23 @@ def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
     leapsecs = []
     with open(filename) as fp:
-        leapsecs = map(lambda x: int(x.split(',')[0][:-2]), fp.readlines())
-    leapsecs.pop()          # Remove the sentinel entry
+        leapsecs = map(lambda x: float(x.strip()), fp.readlines())
     return leapsecs
+
+def make_leapsecond_include(infile):
+    leapsecs = fetch_leapsecs(infile)
+    leapsecs.append(time.time())          # Add sentinel
+    (b, c, e) = leastsquares(zip(range(len(leapsecs)), leapsecs))
+    def label(i):
+        if i == len(leapsecs) - 1:
+            return '?'
+        else:
+            return str(i)
+    for (i, b) in enumerate(leapsecs):
+        sys.stdout.write("    %s,    // %s -> %s\n" % (b, unix_to_rfc822(b), label(i)))
+    sys.stdout.write("#define LEAPSECOND_B\t%s\n" % b)
+    sys.stdout.write("#define LEAPSECOND_C\t%s\n" % c)
+    sys.stdout.write("#define LEAPSECOND_E\t%s\n" % e)
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
@@ -238,13 +246,16 @@ def leapbound(year, month):
 
 if __name__ == '__main__':
     import sys, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "c:g:i:n:o:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:g:h:i:n:o:")
     for (switch, val) in options:
-        if (switch == '-c'):    # Generate C initializer listing leap seconds
+        if (switch == '-f'):    # Fetch USNO data to cache locally
             save_leapseconds(val)
             raise SystemExit, 0
         elif (switch == '-g'):  # Graph the leap_second history
             graph_history(val)
+            raise SystemExit, 0
+        elif (switch == '-h'):  # make leapsecond include
+            make_leapsecond_include(val)
             raise SystemExit, 0
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
             print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)

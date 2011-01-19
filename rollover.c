@@ -98,7 +98,7 @@ static int gpsd_check_utc(const int leap, const double unixtime)
 /* consistency-check a GPS-reported UTC against a leap second */
 {
     static double c_epochs[] = {
-#include "leapcheck.i"
+#include "leapcheck.h"
     };
     #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
 

@@ -62,6 +62,7 @@ gpsd_config.h.in
 gpsd_config.h
 packet_names.h
 revision.h
+leapcheck.h
 gpsd.spec
 MANIFEST
 .kdbgrc.*
