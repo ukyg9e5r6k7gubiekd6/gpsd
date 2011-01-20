@@ -1,7 +1,10 @@
-# HP (Symmetricom) 58534AGPS
-# reported by aquarat
-# submitted: 26Oct10
-# shows GPZDA bug in gpsd 2.95
+# Name: HP (Symmetricom) 58534AGPS
+# Submitted-by: aquarat
+# Date: 26 Oct 10
+# Notes: shows GPZDA bug in gpsd 2.95
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
 $GPGGA,222449,3349.0337,S,01843.9282,E,1,07,02.31,000115.4,M,0033.3,M,,
 $GPZDA,222449,25,10,2010,+00,00
 $GPGSV,3,1,09,07,38,351,00,08,60,306,31,11,73,114,35,17,36,265,46

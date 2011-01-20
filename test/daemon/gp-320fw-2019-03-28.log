@@ -2,7 +2,7 @@
 # Chipset: SE4100L + PL-6313
 # Description: OEM module from RF Solutions, Inc
 # Submitted-by: f4eru <f4eru@free.fr> 
-# Date: 16-Oct-2010
+# Date: 16 Oct 2010
 # Notes: This is the chip in normal operation, but with a sat simulator
 #        spoofing it into thinking it is 2019-03-28.  The chip is known to have
 #        bugs that result in incorrect time reporting at GPS week 10-bit

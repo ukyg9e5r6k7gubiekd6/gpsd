@@ -1,8 +1,8 @@
 # Name: CH-4711
 # Chipset: CH-4706, rev "m4706 03.10 02/06/09 | 12044 | M2002 05.01 02/06/09"
 # Description: Russian-made GPS mouse emitting GLONASS sentences.
-# Cycle-time: 1 sec
 # Submitted-by: walkie@mail.ru
+# Date: 05 Dec 2009
 # Location = Moscow, Russia, 55.71N 37.41E
 # Notes: Emits GLONASS sentences. Mostly 2D fixes but it loses
 #	satellite lock near the end and the sentence mix changes.

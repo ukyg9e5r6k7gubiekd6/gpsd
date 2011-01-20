@@ -7,7 +7,6 @@ Structured headers are as follows:
 # Name: Product name
 # Chipset: chipset name and (if possible) firmware revision level.
 # Description: product description (optional)
-# Cycle time: sampling interval, time to repeat a sentence in seconds
 # Submitted-by: who sent it
 # Date: when it was received
 # Location: city, state/province, country, approximate lat/lon

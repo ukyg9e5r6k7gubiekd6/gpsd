@@ -1,8 +1,9 @@
 # Name: RTCM-104 source from a DGPSIP server
 # Type: RTCM
 # Submitted-by: Wolfgang Rupprecht <wolfgang@dwsrcc.com>
-# Has leading garbage, to test parity locking.  This is a truncated version
-# of the sample.rtcm file used to test gpsdecode.
+# Notes: Has leading garbage, to test parity locking.  
+#        This is a truncated version of the sample.rtcm file used to test 
+#        gpsdecode.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
