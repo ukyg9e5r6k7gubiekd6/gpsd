@@ -128,6 +128,39 @@ static int gpsd_check_utc(const int leap, const double unixtime)
         return 0;    /* leap second inconsistent, probable rollover error */
 }
 
+/*
+ * The 'week' part of GPS dates are specified in weeks since 0000 on 06
+ * January 1980, with a rollover at 1024.  At time of writing the last
+ * rollover happened at 0000 22 August 1999.  Time-of-week is in seconds.
+ *
+ * This code copes with both conventional GPS weeks and the "extended"
+ * 15-or-16-bit version with no wraparound that appears in Zodiac
+ * chips and is supposed to appear in the Geodetic Navigation
+ * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
+ * (notably 231) actually ship the wrapped 10-bit week, despite what
+ * the protocol reference claims.
+ *
+ * Note: This time will need to be corrected for leap seconds.
+ */
+#define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
+#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
+
+static double gpstime_to_unix(int week, double tow)
+{
+    double fixtime;
+
+    if (week >= 1024)
+	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
+    else {
+	time_t now, last_rollover;
+	(void)time(&now);
+	last_rollover =
+	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
+	/*@i@*/ fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+    }
+    return fixtime;
+}
+
 void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
 			 const double unixtime)
 {

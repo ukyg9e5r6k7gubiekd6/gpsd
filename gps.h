@@ -1381,8 +1381,6 @@ extern time_t mkgmtime(register struct tm *);
 extern double timestamp(void);
 extern double iso8601_to_unix(char *);
 extern /*@observer@*/char *unix_to_iso8601(double t, /*@ out @*/char[], size_t len);
-extern double gpstime_to_unix(int, double);
-extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double earth_distance_and_bearings(double, double, double, double, 
 					  /*@null@*//*@out@*/double *, 
