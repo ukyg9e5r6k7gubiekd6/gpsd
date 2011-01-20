@@ -749,6 +749,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 const struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX binary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
+    .flags	      = DRIVER_NOFLAGS,	/* no flags set */
     .trigger          = "$GPTXT,01,01,02,MOD",
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */

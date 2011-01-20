@@ -482,6 +482,7 @@ const struct gps_type_t zodiac_binary =
 {
     .type_name      = "Zodiac binary",	/* full name of type */
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */

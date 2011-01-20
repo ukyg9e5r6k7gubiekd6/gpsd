@@ -520,41 +520,29 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 /* This is everything we export */
 /* *INDENT-OFF* */
 const struct gps_type_t oncore_binary = {
-    /* Full name of type */
-    .type_name        = "oncore binary",
-    /* associated lexer packet type */
-    .packet_type      = ONCORE_PACKET,
-    /* Response string that identifies device (not active) */
-    .trigger          = NULL,
-    /* Number of satellite channels supported by the device */
-    .channels         = 12,
-    /* Startup-time device detector */
-    .probe_detect     = NULL,
-    /* Wakeup to be done before each baud hunt */
-    .get_packet       = generic_get,
-    /* Parse message packets */
-    .parse_packet     = oncore_parse_input,
-    /* RTCM handler (using default routine) */
-    .rtcm_writer      = pass_rtcm,
-    /* Fire on various lifetime events */
-    .event_hook     = oncore_event_hook,
+
+    .type_name        = "oncore binary",	/* Full name of type */
+    .packet_type      = ONCORE_PACKET,		/* numeric packet type */
+    .flags	      = DRIVER_NOFLAGS,		/* no flags set */
+    .trigger          = NULL,			/* identifying response */
+    .channels         = 12,			/* device channel count */
+    .probe_detect     = NULL,			/* no probe */
+    .get_packet       = generic_get,		/* packet getter */
+    .parse_packet     = oncore_parse_input,	/* packet parser */
+    .rtcm_writer      = pass_rtcm,		/* device accepts RTCM */
+    .event_hook     = oncore_event_hook,	/* lifetime event hook */
 #ifdef ALLOW_RECONFIGURE
-    /* Speed (baudrate) switch */
-    .speed_switcher   = oncore_set_speed,
-    /* Switch to NMEA mode */
-    .mode_switcher    = oncore_set_mode,
-    /* Message delivery rate switcher (not active) */
-    .rate_switcher    = NULL,
-    /* Minimum cycle time of the device */
-    .min_cycle        = 1,
-    /* Undo actions at configure_event time */
+    .speed_switcher   = oncore_set_speed,	/* no speed setter */
+    .mode_switcher    = oncore_set_mode,	/* no mode setter */
+    .rate_switcher    = NULL,			/* no speed setter */
+    .min_cycle        = 1,			/* 1Hz */
 #endif /* ALLOW_RECONFIGURE */
 #ifdef ALLOW_CONTROLSEND
     /* Control string sender - should provide checksum and headers/trailer */
-    .control_send   = oncore_control_send,
+    .control_send   = oncore_control_send,	/* to send control strings */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef NTPSHM_ENABLE
-    .ntp_offset = oncore_ntp_offset,
+    .ntp_offset = oncore_ntp_offset,		/* NTP offset array */
 #endif /* NTPSHM_ENABLE */
 };
 /* *INDENT-ON* */

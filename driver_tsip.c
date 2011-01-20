@@ -1161,7 +1161,8 @@ const struct gps_type_t tsip_binary =
 {
     .type_name      = "Trimble TSIP",	/* full name of type */
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */
-    .trigger	= NULL,		/* no trigger */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .trigger	    = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = tsip_detect,	/* probe for 9600O81 device */
     .get_packet     = generic_get,	/* use the generic packet getter */

@@ -16,6 +16,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.11</revnumber>
+      <date>19 Jan 2011</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; driver type flag field added.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.10</revnumber>
       <date>9 Jan 2011</date>
       <authorinitials>er</authorinitials>
@@ -597,6 +605,10 @@ driver expects to see. This value must be one of those produced by the
 packet sniffer and <emphasis>must be unique to each
 driver</emphasis>. It is used internally to dispatch to the correct
 driver when it collects a complete packet.</para>
+
+<!-- added by ESR, 2010 -->
+<para><structfield>.flags</structfield> Driver property flags. This
+field is rserved for future expansion.</para>
 
 <para><structfield>.trigger</structfield> is the unique string that,
 when seen, will confirm your device is present. This will be detected
