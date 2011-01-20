@@ -224,7 +224,7 @@ static void decode_time(int week, int tow)
     /* day and h:m:s within week */
     (void)wmove(mid2win, 3, 30);
     (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h, m, (double)s / 100);
-    /* skew from leap-seconds */
+    /* reoierted leap-second offset */
     (void)wmove(mid2win, 4, 8);
     (void)wattrset(mid2win, A_UNDERLINE);
     (void)wprintw(mid2win, "%d", leapseconds);

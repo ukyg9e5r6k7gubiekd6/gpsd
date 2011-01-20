@@ -48,7 +48,7 @@ static bool ubx_initialize(void)
     (void)wprintw(navsolwin, "LTP Vel:");
 
     (void)wmove(navsolwin, 7, 1);
-    (void)wprintw(navsolwin, "Time UTC:");
+    (void)wprintw(navsolwin, "Time:");
     (void)wmove(navsolwin, 8, 1);
     (void)wprintw(navsolwin, "Time GPS:                     Day:");
 
@@ -110,8 +110,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     unsigned int tow = 0, flags;
     double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
-    double t;
-    time_t tt;
     struct gps_data_t g;
     double separation;
 
@@ -124,8 +122,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
-	t = gpstime_to_unix((int)gw, tow / 1000.0);
-	tt = (time_t) trunc(t);
     }
 
     epx = (double)(getles32(buf, 12) / 100.0);
@@ -155,9 +151,19 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 		  g.fix.speed, g.fix.track, g.fix.climb);
     (void)mvwaddch(navsolwin, 5, 26, ACS_DEGREE);
 
-    (void)wmove(navsolwin, 7, 11);
+    (void)wmove(navsolwin, 7, 7);
     /*@ -compdef @*/
-    (void)wprintw(navsolwin, "%s", ctime(&tt));
+    {
+	int day = tow / 8640000;
+	int tod = tow % 8640000;
+	int h = tod / 360000;
+	int m = tod % 360000;
+	int s = m % 6000;
+
+	m = (m - s) / 6000;
+
+	(void)wprintw(navsolwin, "%d %02d:%02d:%05.2f", day, h, m, (double)s / 100);
+    }
     /*@ +compdef @*/
     (void)wmove(navsolwin, 8, 11);
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
