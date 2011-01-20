@@ -78,11 +78,43 @@ their brains trying to come up with a solution that does not punt any cases.
 *****************************************************************************/
 
 #include "gpsd.h"
+#include "timebase.h"
 
 static double c_epochs[] = {
 #include "leapcheck.h"
 };
 #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
+
+void gpsd_time_init(struct gps_context_t *context)
+/* initialize the GPS context's time fields */
+{
+    /*
+     * We might be able to use the system clock to get the century.
+     * Do this, just in case one of our embedded deployments is
+     * still in place in the year 2.1K.  Still likely to fail if we
+     * bring up the daemon just before a century mark, but that
+     * case is probably doomed anyhow because of 2-digit years.
+     */
+    context->leap_seconds = LEAPSECOND_NOW;
+    context->century = CENTURY_BASE;
+    context->start_time = time(NULL);
+    if (context->start_time < GPS_EPOCH)
+	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in"
+		    " NMEA dates may not be reliable.\n");
+    else {
+	struct tm *now = localtime(&context->start_time);
+	char scr[128];
+	/*
+	 * This is going to break our regression-test suite once a century.
+	 * I think we can live with that consequence.
+	 */
+	now->tm_year += 1900;
+	context->century = now->tm_year - (now->tm_year % 100);
+	(void)unix_to_iso8601((double)context->start_time, scr, sizeof(scr));
+	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
+		    scr, (int)context->start_time);
+    }
+}
 
 static int gpsd_check_utc(const int leap, const double unixtime)
 /* consistency-check a GPS-reported UTC against a leap second */

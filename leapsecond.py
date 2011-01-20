@@ -148,6 +148,7 @@ def make_leapsecond_include(infile):
             return str(i)
     for (i, b) in enumerate(leapsecs):
         sys.stdout.write("    %s,    // %s -> %s\n" % (b, unix_to_rfc822(b), label(i)))
+    sys.stdout.write("#define LEAPSECOND_NOW\t%d\n" % (i-1)) 
     sys.stdout.write("#define LEAPSECOND_B\t%s\n" % b)
     sys.stdout.write("#define LEAPSECOND_C\t%s\n" % c)
     sys.stdout.write("#define LEAPSECOND_E\t%s\n" % e)

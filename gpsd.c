@@ -49,7 +49,6 @@
 #include "gpsd.h"
 #include "sockaddr.h"
 #include "gps_json.h"
-#include "timebase.h"
 #include "revision.h"
 
 /*
@@ -146,7 +145,7 @@ struct gps_context_t context = {
     .leap_seconds   = 0,
     .gps_week	    = 0,
     .gps_tow        = 0,
-    .century	    = CENTURY_BASE,
+    .century	    = 0,
     .rollovers      = 0,
 #ifdef NTPSHM_ENABLE
     .enable_ntpshm  = false,
@@ -1764,30 +1763,8 @@ int main(int argc, char *argv[])
 	}
     FD_ZERO(&control_fds);
 
-    /*
-     * We might be able to use the system clock to get the century.
-     * Do this, just in case one of our embedded deployments is
-     * still in place in the year 2.1K.  Still likely to fail if we
-     * bring up the daemon just before a century mark, but that
-     * case is probably doomed anyhow because of 2-digit years.
-     */
-    context.start_time = time(NULL);
-    if (context.start_time < GPS_EPOCH)
-	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in"
-		    " NMEA dates may not be reliable.\n");
-    else {
-	struct tm *now = localtime(&context.start_time);
-	char scr[128];
-	/*
-	 * This is going to break our regression-test suite once a century.
-	 * I think we can live with that consequence.
-	 */
-	now->tm_year += 1900;
-	context.century = now->tm_year - (now->tm_year % 100);
-	(void)unix_to_iso8601((double)context.start_time, scr, sizeof(scr));
-	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
-		    scr, (int)context.start_time);
-    }
+    /* initialize the GPS context's time fields */
+    gpsd_time_init(&context);
 
     for (i = optind; i < argc; i++) {
 	if (!add_device(argv[i])) {

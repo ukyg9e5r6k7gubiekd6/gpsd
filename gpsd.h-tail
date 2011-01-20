@@ -603,6 +603,7 @@ extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);
 extern void ntpd_link_activate(struct gps_device_t *);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
+extern void gpsd_time_init(struct gps_context_t *);
 extern void gpsd_rollover_check(/*@in@ */ struct gps_device_t *, const double);
 extern double gpsd_resolve_time(/*@in@ */ struct gps_device_t *, 
 			      const unsigned short, const double);
