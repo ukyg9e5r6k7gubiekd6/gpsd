@@ -927,14 +927,12 @@ PIRN-002 that whether you can get 10 or 13 bits is a function of the
 satellite firmware revision, with 13 bits in the Block IIF and later
 birds (the first of these was launched in May 2010). Of course your
 receiver firmware also has to know that the extra three bits are
-present; at time of writing in late 2010 this capability is at best
-rare and possibly nonexistent.</p>
+present; at time of writing in late 2010 this capability is very rare
+and unavailable on consumer-grade receivers.</p>
 
-<p>See the timebase.h file for one or more constants that need to
-be tweaked occasionally to cope with these problems.</p>
-
-<p>Note that gpsd does not rely on the system clock in any way.  This
-is so you can use it to set the system clock.</p>
+<p>For these reasons, GPSD needs the host computer's system clock to
+be accurate to within one second. (Work is in progress to relax this
+requirement to accuracy within half of a rollover period.)</p>
 
 <p>When debugging time and date issues, you may find an
 <a href="http://adn.agi.com/GNSSWeb/">interactive GPS calendar</a>

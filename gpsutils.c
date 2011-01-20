@@ -157,17 +157,6 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
 }
 /* *INDENT-ON* */
 
-#ifdef __UNUSED__
-void unix_to_gpstime(double unixtime,
-		     /*@out@*/ int *week,
-		     /*@out@*/ double *tow)
-{
-    unixtime -= GPS_EPOCH;
-    *week = (int)(unixtime / SECS_PER_WEEK);
-    *tow = fmod(unixtime, SECS_PER_WEEK);
-}
-#endif
-
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 
 /* Distance in meters between two points specified in degrees, optionally

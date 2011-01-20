@@ -1,79 +1,42 @@
 /*****************************************************************************
 
-Excerpted from my blog entry on this code:
+All of gpsd's assumptions about time and GPS time reporting live in this file.
 
-The root cause of the Rollover of Doom is the peculiar time
-reference that GPS uses.  Times are expressed as two numbers: a count
-of weeks since the start of 1980, and a count of seconds in the
-week. So far so good - except that, for hysterical raisins, the week
-counter is only 10 bits long.  The first week rollover was in 1999;
-the second will be in 2019.
+This is a work in progress.  Currently GPSD requires that the host system 
+clock be accurate to within one second.  We are attempting to relax this
+to "accurate within one GPS rollover period".
 
-So, what happens on your GPS when you reach counter zero?  Why, the
-time it reports warps back to the date of the last rollover, currently
-1999.  Obviously, if you are logging or computing anything
-time-dependent through a rollover and relying on GPS time, you are
-screwed.
+Date and time in GPS is represented as number of weeks from the start
+of zero second of 6 January 1980, plus number of seconds into the
+week.  GPS time is not leap-second corrected, though satellites also
+broadcast a current leap-second correction which is updated on
+six-month boundaries according to rotational bulletins issued by the
+International Earth Rotation and Reference Systems Service (IERS).
 
-Now, we do get one additional piece of time information: the current 
-leap-second offset. The object of this exercise is to figure out what 
-you can do with it.
+The leap-second correction is only included in the satellite subframre
+broadcast, roughly once ever 20 minutes.  While the satellites do
+notify GPSes of upcoming leap-seconds, this notification is not
+necessarily processed correctly on consumer-grade devices, and will
+not be available at all when a GPS receiver has just
+cold-booted. Thus, UTC time reported from NMEA devices may be slightly
+inaccurate between a cold boot or leap second and the following
+subframe broadcast.
 
-In order to allow UTC to be computed from the GPS-week/GPS-second
-pair, the satellite also broadcasts a cumulative leap-second offset.
-The offset was 0 when the system first went live; in January 2010
-it is 15 seconds. It is updated every 6 months based on spin measurements
-by the <a href="http://www.iers.org/">IERS</a>.
+GPS date and time are subject to a rollover problem in the 10-bit week
+number counter, which will re-zero every 1024 weeks (roughly every 20
+years). The last rollover (and the first since GPS went live in 1980)
+was in 1999; the next would fall in 2019, but plans are afoot to
+upgrade the satellite counters to 13 bits; this will delay the next
+rollover until 2173.
 
-For purposes of this exercise, you get to assume that you have a table
-of leap seconds handy, in Unix time (seconds since midnight before 1
-Jan 1970, UTC corrected).  You do *not* get to assume that your table
-of leap seconds is current to date, only up to when you shipped your
-software.
+For accurate time reporting, therefore, a GPS requires a supplemental
+time references sufficient to identify the current rollover period,
+e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
+assumption about the UTC time of the last rollover and will thus report
+incorrect times outside the rollover period they were designed in.
 
-For extra evilness, you also do not get to assume that the week rollover
-period is constant. The not-yet-deployed Block III satellites will have
-13-bit week rollover counters, pushing the next rollover back to 2173AD.
-
-For extra-special evilness, there are two different ways your GPS date
-could be clobbered. after a rollover.  If your receiver firmware was
-designed by an idiot, all GPS week/second pairs will be translated
-into an offset from the last rollover, and date reporting will go
-wonky precisely on the next rollover.  If your designer is slightly
-more clever, GPS dates between the last rollover and the ship date of
-the receiver firmware will be mapped into offsets from the *next*
-rollover, and date reporting will stay sane for an entire 19 years
-from that ship date.
-
-You are presented with a GPS time (a week-counter/seconds-in-week
-pair), and a leap-second offset. You also have your (incomplete) table
-of leap seconds. The GPS week counter may invalid due to the Rollover
-of Doom. Specify an algorithm that detects rollover cases as often as
-possible, and explain which cases you cannot detect.
-
-Hint: This problem is a Chinese finger-trap for careful and conscientious
-programmers. The better you are, the worse this problem is likely to hurt
-your brain. Embrace the suck.
-
-Here is what you can do.
-
-If the timestamp you are handed is within the range of the first and
-last entries, check the leap-second offset.  If it is correct for that
-range, there has been no rollover.  If it does not match the
-leap-second offset for that range, your date is from a later rollover
-period than your receiver was designed to handle and has gotten
-clobbered.
-
-The odd thing about this test is the range of rollover cases it can detect.
-If your table covers a range of N seconds after the last rollover, it will
-detect rollover from all future weeks as long as they are within N seconds
-after *their* rollover.  It will be leaast effective from a software release
-immediately after a rollover and most effective from a release immediately
-before one.
-
-Much of the time, this algorithm will return "I cannot tell".  The reason this
-problem is like a Chinese finger trap is because good programmers will hurt
-their brains trying to come up with a solution that does not punt any cases.
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
@@ -145,22 +108,6 @@ static int gpsd_check_utc(const int leap, const double unixtime)
 #define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-static double gpstime_to_unix(int week, double tow)
-{
-    double fixtime;
-
-    if (week >= 1024)
-	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
-    else {
-	time_t now, last_rollover;
-	(void)time(&now);
-	last_rollover =
-	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
-	/*@i@*/ fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
-    }
-    return fixtime;
-}
-
 void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
 			 const double unixtime)
 {
@@ -200,6 +147,33 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
 	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n", 
 		    scr, unixtime);
     }
+}
+
+#ifdef __UNUSED__
+void unix_to_gpstime(double unixtime,
+		     /*@out@*/ int *week,
+		     /*@out@*/ double *tow)
+{
+    unixtime -= GPS_EPOCH;
+    *week = (int)(unixtime / SECS_PER_WEEK);
+    *tow = fmod(unixtime, SECS_PER_WEEK);
+}
+#endif
+
+static double gpstime_to_unix(int week, double tow)
+{
+    double fixtime;
+
+    if (week >= 1024)
+	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
+    else {
+	time_t now, last_rollover;
+	(void)time(&now);
+	last_rollover =
+	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
+	/*@i@*/ fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+    }
+    return fixtime;
 }
 
 double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,

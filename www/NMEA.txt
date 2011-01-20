@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.6, Jan 2011
+v2.7, Jan 2011
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -121,18 +121,45 @@ no valid data for it.  However, many receivers violate this.  It's
 common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
-Date and time in GPS is computed as number of weeks from the zero
-second of 6 January 1980, plus number of seconds into the week.  GPS
-time is not leap-second corrected, though satellites also broadcast a
-current leap-second correction which is updated on six-month
-boundaries according to rotational bulletins issued by the
+== Dates and times ==
+
+NMEA devices report date and time in UTC, aka GMT, aka Zulu time (as
+opposed to local time).  But the way this report is computed results
+in some odd bugs and inaccuracies.
+
+Date and time in GPS is represented as number of weeks from the start
+of zero second of 6 January 1980, plus number of seconds into the
+week.  GPS time is not leap-second corrected, though satellites also
+broadcast a current leap-second correction which is updated on
+six-month boundaries according to rotational bulletins issued by the
 International Earth Rotation and Reference Systems Service (IERS).
 
-GPS date and time are subject to a rollover problem in the 10-bit
-week number counter, which will re-zero every 1024 weeks (roughly
-every 20 years). The next rollover would fall in 2019, but plans
-are afoot to upgrade the satellite counters to 13 bits; this will
-delay the next rollover until 2173.
+The leap-second correction is only included in the satellite subframre
+broadcast, roughly once ever 20 minutes.  While the satellites do
+notify GPSes of upcoming leap-seconds, this notification is not
+necessarily processed correctly on consumer-grade devices, and will
+not be available at all when a GPS receiver has just
+cold-booted. Thus, reported UTC time may be slightly inaccurate
+between a cold boot or leap second and the following subframe
+broadcast.
+
+GPS date and time are subject to a rollover problem in the 10-bit week
+number counter, which will re-zero every 1024 weeks (roughly every 20
+years). The last rollover (and the first since GPS went live in 1980)
+was in 1999; the next would fall in 2019, but plans are afoot to
+upgrade the satellite counters to 13 bits; this will delay the next
+rollover until 2173.
+
+For accurate time reporting, therefore, a GPS requires a supplemental
+time references sufficient to identify the current rollover period,
+e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
+assumption about the UTC time of the last rollover and will thus report
+incorrect times outside the rollover period they were designed in.
+
+For these reasons, NMEA GPS should not be considered high-quality
+references for absolute time.  Some do, however, emit pulse-per-second
+RS232 signals which can be used to improve the precision of an
+external clock. See [PPS] for discussion.
 
 == Error status indications
 
@@ -2229,3 +2256,7 @@ Only emitted by uBlox Antaris chipset.
 - [[[WAAS]]]
     "WAAS Information"
     http://gpsinformation.net/exe/waas.html
+
+- [[[PPS]]]
+    "Pulse per second"
+    http://en.wikipedia.org/wiki/Pulse_per_second
