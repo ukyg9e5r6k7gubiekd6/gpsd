@@ -78,10 +78,9 @@ their brains trying to come up with a solution that does not punt any cases.
 *****************************************************************************/
 
 #include "gpsd.h"
-#include "timebase.h"
 
 static double c_epochs[] = {
-#include "leapcheck.h"
+#include "timebase.h"
 };
 #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
 

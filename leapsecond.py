@@ -146,8 +146,10 @@ def make_leapsecond_include(infile):
             return '?'
         else:
             return str(i)
+    year = time.strftime("%Y", time.localtime(time.time()))
     for (i, b) in enumerate(leapsecs):
         sys.stdout.write("    %s,    // %s -> %s\n" % (b, unix_to_rfc822(b), label(i)))
+    sys.stdout.write("#define CENTURY_BASE\t%s00\n" % year[:2])
     sys.stdout.write("#define LEAPSECOND_NOW\t%d\n" % (i-1)) 
     sys.stdout.write("#define LEAPSECOND_B\t%s\n" % b)
     sys.stdout.write("#define LEAPSECOND_C\t%s\n" % c)

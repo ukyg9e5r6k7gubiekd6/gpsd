@@ -171,7 +171,7 @@ libgpsd_c_sources = \
 	gpsd_json.c \
 	isgps.c \
 	gpsd_maskdump.c \
-	rollover.c \
+	timebase.c \
 	libgpsd_core.c \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
@@ -203,13 +203,12 @@ libgpsd_c_sources = \
 libgpsd_h_sources = \
 	sockaddr.h \
 	bsd-base64.h \
-	timebase.h \
 	bits.h \
 	crc24q.h
 
 libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c leapcheck.h
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c timebase.h
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
@@ -244,8 +243,8 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-leapcheck.h: leapsecond.py #leapseconds.i
-	$(PYTHON) leapsecond.py -h leapseconds.cache >leapcheck.h
+timebase.h: leapsecond.py #leapseconds.i
+	$(PYTHON) leapsecond.py -h leapseconds.cache >timebase.h
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. # It gets kept in the reposiory so we can
@@ -256,7 +255,7 @@ leapseconds.cacche: leapsecond.py
 libgps_la_SOURCES = $(libgps_c_sources)
 
 libgpsd_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				driver_rtcm2.h packet_states.h leapcheck.h
+				driver_rtcm2.h packet_states.h timebase.h
 
 # Warning: This overrides autoconf's normal link-line generation process
 if LIBGPSMM_ENABLE

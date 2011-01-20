@@ -1407,39 +1407,36 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It may need to be modified in configure.ac, and another autogen.sh
 done.  Make sure the 'dev' suffix is gone.</dd>
 
-<dt>5. Check timebase.h.</dt>
-<dd>The value for default century may need to be adjusted.</dd>
-
-<dt>6. Rebuild leapcheck.i.</dt>  <dd>Rebuild the leap-second list
-used for rollover checks with 'make leapcheck.i' Note: This will
+<dt>5. Rebuild leapcheck.cache.</dt>  <dd>Rebuild the leap-second list
+used for rollover checks with 'make leapcheck.cache' Note: This will
 require Internet access, and fail (leaving the existing leap-second
 list in place) if that is not available.</dd>
 
-<dt>5. Update the NEWS file</dt>
+<dt>6. Update the NEWS file</dt>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>6. Run the regression tests and other checks</dt>
+<dt>7. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship. This is
 the time to run valgrind-audit, 'make splint', 'make xmllint', and
 'make cppcheck' as well and check that those reports are clean. Use
 flocktest to verify operation on the remote test machines.</dd>
 
-<dt>7. Ship to Berlios</dt>
+<dt>8. Ship to Berlios</dt>
 <dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp),
 and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 
-<dt>8. Tag the release in git</dt>
+<dt>9. Tag the release in git</dt>
 <dd>Doing 'make release-tag' should accomplish this. The tag push
 will trigger mail to the announce list.</dd>
 
-<dt>9. Bump the release number and push that commit</dt>
+<dt>10. Bump the release number and push that commit</dt>
 <dd>Bump the release number in configure.ac, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>10. Announce the release</dt>
+<dt>11. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>
