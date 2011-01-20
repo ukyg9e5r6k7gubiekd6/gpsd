@@ -268,8 +268,6 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     }
     /*@ -relaxtypes -charint @*/
 
-    //gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
-
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0x83 (Ionosphere and UTC Data)\n");
     gpsd_report(LOG_IO, "Navcom: Scaled parameters follow:\n");
@@ -633,18 +631,17 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 	(int16_t) (((getles16_be(buf, 82) & 0xfffc) /
 		    4) | (getub(buf, 82) & 80 ? 0xc000 : 0x0000));
     /*@ +predboolothers @*/
-    char time_str[24];
     session->context->gps_week = (unsigned short)wn;
     session->context->gps_tow = (double)(toc * SF_TOC);
     /* leap second? */
-    (void)unix_to_iso8601(gpstime_to_unix((int)wn, session->context->gps_tow),
-			  time_str, sizeof(time_str));
-
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0x81 (Packed Ephemeris Data)\n");
     gpsd_report(LOG_IO,
-		"Navcom: PRN: %u, Epoch: %u (%s), SV clock bias/drift/drift rate: %#19.12E/%#19.12E/%#19.12E\n",
-		prn, toc * SF_TOC, time_str, ((double)af0) * SF_AF0,
+		"Navcom: PRN: %u, Week: %u, TOW: %.3f SV clock bias/drift/drift rate: %#19.12E/%#19.12E/%#19.12E\n",
+		prn,
+		session->context->gps_week,
+		session->context->gps_tow,
+		((double)af0) * SF_AF0,
 		((double)af1) * SF_AF1, ((double)af2) * SF_AF2);
     gpsd_report(LOG_IO,
 		"Navcom: IODE (!AODE): %u Crs: %19.12e, Delta n: %19.12e, M0: %19.12e\n",
@@ -816,20 +813,17 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     uint8_t tm_slew_acc = getub(buf, 9);
     uint8_t status = getub(buf, 10);
 
-    char time_str[24];
     session->context->gps_week = (unsigned short)week;
     session->context->gps_tow = (double)tow / 1000.0;
-    (void)
-	unix_to_iso8601(gpstime_to_unix((int)week, session->context->gps_tow),
-			time_str, sizeof(time_str));
 
     gpsd_report(LOG_PROG,
 		"Navcom: received packet type 0xb0 (Raw Meas. Data Block)\n");
     /*@ -predboolothers @*/
     gpsd_report(LOG_IO,
-		"Navcom: Epoch = %s, time slew accumulator = %u (1/1023mS), status = 0x%02x "
+		"Navcom: week = %u, tow = %.3f, time slew accumulator = %u (1/1023mS), status = 0x%02x "
 		"(%sclock %s - %u blocks follow)\n",
-		time_str,
+		session->context->gps_week,
+		session->context->gps_tow,
 		tm_slew_acc, status,
 		(status & 0x80 ? "channel time set - " : ""),
 		(status & 0x40 ? "stable" : "not stable"), status & 0x0f);
@@ -1099,8 +1093,6 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 	nav_clock_drift = NAN;
 	osc_filter_drift_est = NAN;
     }
-
-    //gpstime_to_unix((int)week, tow/1000.0) - session->context->leap_seconds;
 
     gpsd_report(LOG_IO,
 		"Navcom: oscillator temp. = %d, nav. status = 0x%02x, "
