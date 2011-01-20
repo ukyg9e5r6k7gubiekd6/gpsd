@@ -1329,6 +1329,7 @@ const struct gps_type_t garmin_usb_binary_old =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = garmin_usb_detect,/* how to detect at startup time */
@@ -1357,6 +1358,7 @@ const struct gps_type_t garmin_usb_binary =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = garmin_usb_detect,/* how to detect at startup time */
@@ -1384,6 +1386,7 @@ const struct gps_type_t garmin_ser_binary =
 {
     .type_name      = "Garmin Serial binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = NULL,        	/* how to detect at startup time */

@@ -262,10 +262,14 @@ typedef enum {
 #define NODATA_IS	0x80000000u	/* no data read from fd */ 
 #define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
 
+typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
+#define DRIVER_NOFLAGS	0x00000000u
+
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *type_name;
     int packet_type;
+    driver_mask_t flags;	/* reserved for expansion */
     /*@observer@*//*@null@*/char *trigger;
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);

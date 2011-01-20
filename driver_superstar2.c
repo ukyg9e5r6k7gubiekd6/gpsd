@@ -543,6 +543,8 @@ const struct gps_type_t superstar2_binary = {
     .type_name		= "SuperStarII binary",
     /* Associated lexer packet type */
     .packet_type        = SUPERSTAR2_PACKET,
+    /* Driver type flags */
+    .flags	         = DRIVER_NOFLAGS,
     /* Response string that identifies device (not active) */
     .trigger		= NULL,
     /* Number of satellite channels supported by the device */

@@ -472,6 +472,7 @@ const struct gps_type_t italk_binary =
 {
     .type_name      = "iTalk binary",	/* full name of type */
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* how to detect at startup time */

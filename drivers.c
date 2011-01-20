@@ -87,6 +87,7 @@ ssize_t pass_rtcm(struct gps_device_t * session, char *buf, size_t rtcmbytes)
 const struct gps_type_t unknown = {
     .type_name      = "Unknown",	/* full name of type */
     .packet_type    = COMMENT_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
@@ -253,6 +254,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
@@ -351,6 +353,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 const struct gps_type_t garmin = {
     .type_name      = "Garmin NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -409,6 +412,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_detect   = NULL,		/* no probe */
@@ -456,6 +460,7 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -506,6 +511,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -558,6 +564,7 @@ static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
+    .flags	   = DRIVER_NOFLAGS,		/* no rollover or other flags */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
     .probe_detect  = NULL,			/* no probe */
@@ -606,6 +613,7 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t earthmate = {
     .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	   = DRIVER_NOFLAGS,		/* no rollover or other flags */
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
     .probe_detect  = NULL,			/* no probe */
@@ -730,6 +738,7 @@ static void tnt_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PTNTHTM",	/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
@@ -803,6 +812,7 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger	    = "$OHPR,",		/* detect their main sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
@@ -849,6 +859,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 static const struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
+    .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_detect  = NULL,		/* no probe */
@@ -896,6 +907,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 static const struct gps_type_t rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
+    .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_detect  = NULL,		/* no probe */
@@ -930,6 +942,7 @@ static const struct gps_type_t rtcm104v3 = {
 static const struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
     .packet_type   = GARMINTXT_PACKET,	/* associated lexer packet type */
+    .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_detect  = NULL,		/* no probe */
@@ -1043,6 +1056,7 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 const struct gps_type_t mtk3301 = {
     .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = "$PMTK705,",	/* MTK-3301s send firmware release name and version */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -1094,39 +1108,27 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 /* *INDENT-OFF* */
 static const struct gps_type_t aivdm = {
     /* Full name of type */
-    .type_name        = "AIVDM",
-    /* Associated lexer packet type */
-    .packet_type      = AIVDM_PACKET,
-    /* Response string that identifies device (not active) */
-    .trigger          = NULL,
-    /* Number of satellite channels supported by the device */
-    .channels         = 0,
-    /* Startup-time device detector */
-    .probe_detect     = NULL,
-    /* Packet getter (using default routine) */
-    .get_packet       = generic_get,
-    /* Parse message packets */
-    .parse_packet     = aivdm_analyze,
-    /* RTCM handler (using default routine) */
-    .rtcm_writer      = NULL,
-    /* Handle various lifetime events */
-    .event_hook       = NULL,
+    .type_name        = "AIVDM",    	/* associated lexer packet type */
+    .packet_type      = AIVDM_PACKET,	/* numeric packet type */
+    .flags	      = DRIVER_NOFLAGS,	/* no rollover or other flags */
+    .trigger          = NULL,		/* identifying response */
+    .channels         = 0,		/* not used by this driver */
+    .probe_detect     = NULL,		/* no probe */
+    .get_packet       = generic_get,	/* how to get a packet */
+    .parse_packet     = aivdm_analyze,	/* how to analyze a packet */
+    .rtcm_writer      = NULL,		/* don't send RTCM data,  */
+    .event_hook       = NULL,		/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    /* Speed (baudrate) switch */
-    .speed_switcher   = NULL,
-    /* Switch to NMEA mode */
-    .mode_switcher    = NULL,
-    /* Message delivery rate switcher (not active) */
-    .rate_switcher    = NULL,
-    /* Minimum cycle time of the device */
-    .min_cycle        = 1,
+    .speed_switcher   = NULL,		/* no speed switcher */
+    .mode_switcher    = NULL,		/* no mode switcher */
+    .rate_switcher    = NULL,		/* no rate switcher */
+    .min_cycle        = 1,		/* max 1Hz */
 #endif /* ALLOW_RECONFIGURE */
 #ifdef ALLOW_CONTROLSEND
-    /* Control string sender - should provide checksum and headers/trailer */
-    .control_send     = NULL,
+    .control_send     = NULL,		/* no control sender */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,
+    .ntp_offset     = NULL,		/* no NTP communication */
 #endif /* NTPSHM_ ENABLE */
 };
 /* *INDENT-ON* */
