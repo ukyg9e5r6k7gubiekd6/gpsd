@@ -217,14 +217,18 @@ static void decode_time(int week, int tow)
 
     m = (m - s) / 6000;
 
+    /* week + tow */
     (void)wmove(mid2win, 3, 10);
     (void)wprintw(mid2win, "%4d+%9.2f", week, (double)tow / 100);
+    /* day and h:m:s within week */
     (void)wmove(mid2win, 3, 30);
     (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h, m, (double)s / 100);
+    /* skew from leap-seconds */
     (void)wmove(mid2win, 4, 8);
     (void)wattrset(mid2win, A_UNDERLINE);
     (void)wprintw(mid2win, "%f",
 		  timestamp() - gpstime_to_unix(week, tow / 100.0));
+    /* offset from gmt in seconds */
     (void)wmove(mid2win, 4, 29);
     (void)wprintw(mid2win, "%d", gmt_offset);
     (void)wattrset(mid2win, A_NORMAL);
@@ -263,6 +267,7 @@ static void decode_ecef(double x, double y, double z,
     if (heading < 0)
 	heading += 2 * GPS_PI;
 
+    /* North and East position fields */
     (void)wattrset(mid2win, A_UNDERLINE);
     (void)wmove(mid2win, 1, 40);
     (void)wprintw(mid2win, "%9.5f %9.5f", (double)(RAD_2_DEG * phi),
@@ -272,11 +277,13 @@ static void decode_ecef(double x, double y, double z,
     (void)wmove(mid2win, 1, 61);
     (void)wprintw(mid2win, "%8d", (int)h);
 
+    /* North and East velocity fields */
     (void)wmove(mid2win, 2, 40);
     (void)wprintw(mid2win, "%9.1f %9.1f", vnorth, veast);
     (void)wmove(mid2win, 2, 61);
     (void)wprintw(mid2win, "%8.1f", vup);
 
+    /* heading and speed fields */
     (void)wmove(mid2win, 3, 54);
     (void)wprintw(mid2win, "%5.1f", (double)(RAD_2_DEG * heading));
     (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
