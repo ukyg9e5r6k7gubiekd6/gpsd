@@ -23,6 +23,11 @@ import cairo
 
 import gps, gps.clienthelpers
 
+# how to sort the Satellite List
+# some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
+# by default, used at the top, then sort PRN
+SKY_VIEW_SORT_FIELDS=('-used','PRN')
+
 class unit_adjustments:
     "Encapsulate adjustments for unit systems."
     def __init__(self, units=None):
@@ -627,6 +632,13 @@ class Base:
         "Update the satellite list and skyview."
         if hasattr(data, 'satellites'):
             satellites = data.satellites
+            for fld in reversed(SKY_VIEW_SORT_FIELDS):
+                rev =  (fld[0] == '-')
+                if (rev): fld = fld[1:]
+                satellites = sorted(satellites[:],
+                                    cmp=lambda x,y: cmp(x[fld], 
+                                                        y[fld]),
+                                    reverse = rev)
             for (i, satellite) in enumerate(satellites): 
                 self.set_satlist_field(i, 0, satellite.PRN)
                 self.set_satlist_field(i, 1, satellite.el)
