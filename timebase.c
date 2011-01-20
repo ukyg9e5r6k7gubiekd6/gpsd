@@ -4,7 +4,8 @@ All of gpsd's assumptions about time and GPS time reporting live in this file.
 
 This is a work in progress.  Currently GPSD requires that the host system 
 clock be accurate to within one second.  We are attempting to relax this
-to "accurate within one GPS rollover period".
+to "accurate within one GPS rollover period" for receivers reporting
+GPS week+TOW.
 
 Date and time in GPS is represented as number of weeks from the start
 of zero second of 6 January 1980, plus number of seconds into the
@@ -34,6 +35,42 @@ time references sufficient to identify the current rollover period,
 e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
 assumption about the UTC time of the last rollover and will thus report
 incorrect times outside the rollover period they were designed in.
+
+These conditions leave gpsd in a serious hole.  Actually there are several
+interrelated problems:
+
+1) Every NMEA device has some assumption about base epoch (date of
+last rollover) that we don't have access to.  Thus, there's no way to
+check whether a rollover the device wasn't prepared for has occurred
+before gpsd startup time (making the reported UTC date invalid)
+without some other time source.  (Some NMEA devices may keep a
+rollover count in RAM and avoid the problem; we can't tell when that's
+happening, either.)
+
+2) Many NMEA devices - in fact, all that don't report ZDA - never tell
+us what century they think it is. Those that do report century are
+still subject to rollover problems. We need an external time reference
+for this, too.
+
+3) Supposing we're looking at a binary protocol that returns week/tow,
+we can't know which rollover period we're in without an external time
+source.
+
+4) Only one external time source, the host system clock, is reliably
+available.
+
+5) Another source *may* be available - the GPS leap second count, if we can
+get the device to report it. The latter is not a given; SiRFs before 
+firmware rev 2.3.2 don't report it unless special subframe data reporting
+is enabled, which requires 38400bps. Evermore GPSes can't be made to
+report it at all.  
+
+Conclusion: if the system clock isn't accurate enough that we can deduce 
+what rollover period we're in, we're utterly hosed. Furthermore, if it's
+not accurate to within a second and only NMEA devices are reporting, 
+we don't know what century it is! 
+
+Therefore, we must assume the system clock is reliable.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.

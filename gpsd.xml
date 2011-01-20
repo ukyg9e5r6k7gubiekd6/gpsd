@@ -1653,25 +1653,37 @@ accuracy limit,the satellites only emit navigation messages at
 <application>gpsd</application> reports in time/position/velocity
 messages are normally accurate only to 1/100th of a second.</para>
 
+<para>If your GPS uses a SiRF chipset at firmware level 231, reported
+UTC time may be off by the difference between whatever default
+leap-second offset has been compiled in and whatever leap-second
+correction is currently applicable, from startup until complete
+subframe information is received.  Firmware levels 232 and up don't
+have this problem.  You may run <application>gpsd</application> at
+debug level 4 to see the chipset type and firmware revision
+level.</para>
+
+<para>There are exactly two circumstances under which
+<application>gpsd</application> relies on the host-system
+clock:</para>
+
 <para>GPS date reporting has a Y2K-like problem for which
 <application>gpsd</application> cannot fully compensate; GPS dates are
 shipped as (week, second) pairs in which the week part is a 10 or
 13-bit counter. When the counter rolls over, a GPS receiver may see
 and report a date 1024 or 8192 weeks in the past.
 <application>gpsd</application> will detect and compensate for
-rollovers while it is running, but cannot recover if the receiver 
-starts up already confused about the date.</para>
+rollovers while it is running, but relies on the system clock to
+correct the epoch.</para>
 
-<para>To interpret the 2-digit years shipped in NMEA sentences,
-<application>gpsd</application> needs to know the base century and may
-not have it in advance of a GPZDA sentence. If the system clock at
-daemon startup time was at or later than the GPS epoch of 6 Jan 1981
-00:00:00 (excluding negative, 0, and small positive values), it is
-used to compute the base century.  (This is the
-<emphasis>only</emphasis> way in which <application>gpsd</application>
-relies on the system clock.)  Note that this computation may lead to
-errors if the daemon is started up before a transition but continues
-running after it wuthout a ZDA.</para>
+<para>If you are using an NMEA-only GPS (that is, not using SiRF or
+Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the
+start of its update cycle (which most consumer-grade NMEA GPSes do
+not) then <application>gpsd</application> century part of the dates
+<application>gpsd</application> delivers will be wrong. Additionally,
+near the century turnover, a range of dates as wide in seconds as the
+accuracy of your system clock may be referred to the wrong
+century.</para>
+
 </refsect1>
 
 <refsect1 id='ntp'><title>USE WITH NTP</title>
@@ -1834,14 +1846,6 @@ result of inadequacies in NMEA and the vendor binary GPS protocols,
 which often do not give clients any way to query the values of control
 settings in order to be able to restore them later.</para>
 
-<para>If your GPS uses a SiRF chipset at firmware level 231, reported
-UTC time may be off by the difference between 13 seconds and whatever
-leap-second correction is currently applicable, from startup until
-complete subframe information is received (normally about six
-seconds).  Firmware levels 232 and up don't have this problem.  You
-may run <application>gpsd</application> at debug level 4 to see the
-chipset type and firmware revision level.</para>
-
 <para>When using SiRF chips, the VDOP/TDOP/GDOP figures and associated
 error estimates are computed by <application>gpsd</application> rather
 than reported by the chip.  The computation does not exactly match
@@ -1850,12 +1854,6 @@ using parameters <application>gpsd</application> cannot see.</para>
 
 <para>Autobauding on the Trimble GPSes can take as long as 5 seconds
 if the device speed is not matched to the GPS speed.</para>
-
-<para>If you are using an NMEA-only GPS (that is, not using SiRF or
-Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the
-start of its update cycle (which most consumer-grade NMEA GPSes do
-not) and it is after 2099, then the century part of the dates
-<application>gpsd</application> delivers will be wrong.</para>
 
 <para>Generation of position error estimates (eph, epv, epd, eps, epc)
 from the incomplete data handed back by GPS reporting protocols
