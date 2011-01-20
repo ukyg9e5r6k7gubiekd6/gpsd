@@ -405,14 +405,14 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	    sirfbin_mode(session, 0);
     } else if (fv < 232) {
 	session->driver.sirf.driverstate |= SIRF_EQ_231;
-#ifdef ALLOW_RECONFIGURE
     } else {
-	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, enablemid52);
 	session->driver.sirf.driverstate |= SIRF_GE_232;
-	session->context->valid |= LEAP_SECOND_VALID;
-#endif /* ALLOW_RECONFIGURE */
     }
+#ifdef ALLOW_RECONFIGURE
+    gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
+    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
+#endif /* ALLOW_RECONFIGURE */
+
     if (strstr((char *)(buf + 1), "ES"))
 	gpsd_report(LOG_INF, "SiRF: Firmware has XTrac capability\n");
     gpsd_report(LOG_PROG, "SiRF: fv: %0.2f, Driver state flags are: %0x\n",

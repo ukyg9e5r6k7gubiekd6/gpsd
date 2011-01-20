@@ -24,6 +24,7 @@ static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
 static bool dispmode = false, subframe_enabled = false;
 static int nfix, fix[20];
+static int leapseconds;
 
 /*@ -nullassign @*/
 static char *verbpat[] = {
@@ -108,7 +109,7 @@ static bool sirf_initialize(void)
 		  "Week+TOW:               Day:                Heading:                 speed m/s");
     (void)wmove(mid2win, 4, 1);
     (void)wprintw(mid2win,
-		  "Skew:                   TZ:                HDOP:      M1:        M2:    ");
+		  "Leap:                   TZ:                HDOP:      M1:        M2:    ");
     (void)wmove(mid2win, 5, 1);
     (void)wprintw(mid2win, "Fix:");
     display(mid2win, 6, 24, " Packet type 2 (0x02) ");
@@ -226,8 +227,7 @@ static void decode_time(int week, int tow)
     /* skew from leap-seconds */
     (void)wmove(mid2win, 4, 8);
     (void)wattrset(mid2win, A_UNDERLINE);
-    (void)wprintw(mid2win, "%f",
-		  timestamp() - gpstime_to_unix(week, tow / 100.0));
+    (void)wprintw(mid2win, "%d", leapseconds);
     /* offset from gmt in seconds */
     (void)wmove(mid2win, 4, 29);
     (void)wprintw(mid2win, "%d", gmt_offset);
@@ -554,6 +554,7 @@ static void sirf_update(void)
 	monitor_log("SBP 0x32=");
 	break;
     case 0x34:			/* PPS Time */
+	leapseconds = (int)getbeu16(buf, 8);
 	monitor_log("PPS 0x34=");
 	break;
 
