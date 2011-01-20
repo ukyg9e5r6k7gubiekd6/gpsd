@@ -154,15 +154,15 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wmove(navsolwin, 7, 7);
     /*@ -compdef @*/
     {
-	int day = tow / 8640000;
-	int tod = tow % 8640000;
-	int h = tod / 360000;
-	int m = tod % 360000;
-	int s = m % 6000;
+	unsigned int day = tow / 8640000;
+	unsigned int tod = tow % 8640000;
+	unsigned int h = tod / 360000;
+	unsigned int m = tod % 360000;
+	unsigned int s = m % 6000;
 
 	m = (m - s) / 6000;
 
-	(void)wprintw(navsolwin, "%d %02d:%02d:%05.2f", day, h, m, (double)s / 100);
+	(void)wprintw(navsolwin, "%u %02u:%02u:%05.2f", day, h, m, (double)s / 100);
     }
     /*@ +compdef @*/
     (void)wmove(navsolwin, 8, 11);
