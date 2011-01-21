@@ -197,22 +197,6 @@ void unix_to_gpstime(double unixtime,
 }
 #endif
 
-static double gpstime_to_unix(int week, double tow)
-{
-    double fixtime;
-
-    if (week >= 1024)
-	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
-    else {
-	time_t now, last_rollover;
-	(void)time(&now);
-	last_rollover =
-	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
-	/*@i@*/ fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
-    }
-    return fixtime;
-}
-
 double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
@@ -222,7 +206,7 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
      * This code detects and compensates for week counter rollovers that
      * happen while gpsd is running. It will not save you if there was a 
      * rollover that confused the receiver before gpsd booted up.  It *will*
-     * work even when Block III satellites increase the week counter width
+     * work even when Block IIF satellites increase the week counter width
      * to 13 bits,
      */
     if ((int)week < (session->context->gps_week & 0x3ff)) {
@@ -232,8 +216,17 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
     session->context->gps_week = (unsigned short int)(week + session->context->rollovers * 1024);
     session->context->gps_tow = tow;
     session->context->valid |= GPS_TIME_VALID;
-    t = gpstime_to_unix((int)week, session->context->gps_tow)
-	- session->context->leap_seconds;
+
+    if (week >= 1024)
+	t = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
+    else {
+	time_t now, last_rollover;
+	(void)time(&now);
+	last_rollover =
+	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
+	/*@i@*/ t = last_rollover + (week * SECS_PER_WEEK) + tow;
+    }
+    t -= session->context->leap_seconds;
     gpsd_rollover_check(session, session->newdata.time);
     return t;
 }
