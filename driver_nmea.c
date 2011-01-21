@@ -53,13 +53,14 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
  * Scary timestamp fudging begins here
  *
  * Four sentences, GGA and GLL and RMC and ZDA, contain timestamps.
- * GGA/GLL/RMC timestamps look like hhmmss.ss, with the trailing .ss part
- * optional.  RMC has a date field, in the format ddmmyy.  ZDA has
- * separate fields for day/month/year, with a 4-digit year.  This
+ * GGA/GLL/RMC timestamps look like hhmmss.ss, with the trailing .ss
+ * part optional.  RMC has a date field, in the format ddmmyy.  ZDA
+ * has separate fields for day/month/year, with a 4-digit year.  This
  * means that for RMC we must supply a century and for GGA and GLL we
  * must supply a century, year, and day.  We get the missing data from
- * a previous RMC or ZDA; century in RMC is supplied by a constant if
- * there has been no previous ZDA.
+ * a previous RMC or ZDA; century in RMC is supplied from the daemon's
+ * context (initialized at startup time) if there has been no previous
+ * ZDA.
  *
  **************************************************************************/
 
