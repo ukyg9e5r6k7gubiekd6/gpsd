@@ -82,7 +82,8 @@ GPSD Frequently Asked Questions
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a><br/>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
-<li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a><br/>
+<li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a>
+<li><a href='#nmea2000'>Does gpsd support NMEA2000?.</a><br/>
 </ul>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
@@ -118,9 +119,10 @@ able to start a test client (such as <code>cgps</code> or <code>xgps</code>)
 and watch it report fixes.</p>
 
 <p>5. If your test client fails to run, a good test to try is to run
-<code>gpsmon</code> on the device. If yours reports no data at all, you
-probably have some low-level system problem with serial or USB that
-you'll need to fix before <code>gpsd</code> will operate.</p>
+<code>gpsmon</code> on the device (give it the device path as an
+argument). If yours reports no data at all, you probably have some
+low-level system problem with serial or USB that you'll need to fix
+before <code>gpsd</code> will operate.</p>
 
 <p>6. USB GPSes actually emulate RS232 serial using converter chips.
 Under Linux, the usbserial kernel module must be loaded for correct
@@ -738,6 +740,20 @@ drivers for the product - these often hint at which bridge chip is used, if the
 specifications don't say so. A receiver claiming mac compatibility is usually
 based on one of the common bridge chips from FTDI, Prolific or Silicon
 Laboritories. These just work.</p>
+
+<h1 id='nmea2000'>Does gpsd support NMEA2000?</h1>
+
+<p>The short answer is 'No'.  The longer answer is 'Only if you have a
+hardware adapter that down-converts it to NMEA 0183 or something else we
+understand.' Such devices do exist, they're used to enable navigation
+software using NMEA 0183 to NMEA 2000 boat networks.</p>
+
+<p>NMEA2000 is not a byte-stream protocol; it can't be shipped over
+serial or USB links. It relies on a message-oriented physical layer
+called Controller Area Network (CAN) that is widely used to network
+automotive electronics.  Without hardware mediation to map the
+message into self-describing packets on a serial link, there's no
+way gpsd will ever see these.</p>
 
 </div>
 <hr/>
