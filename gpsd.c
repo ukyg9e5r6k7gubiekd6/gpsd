@@ -1764,7 +1764,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&control_fds);
 
     /* initialize the GPS context's time fields */
-    gpsd_time_init(&context);
+    gpsd_time_init(&context, time(NULL));
 
     for (i = optind; i < argc; i++) {
 	if (!add_device(argv[i])) {

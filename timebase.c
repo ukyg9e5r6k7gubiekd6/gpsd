@@ -84,19 +84,19 @@ static double c_epochs[] = {
 };
 #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
 
-void gpsd_time_init(struct gps_context_t *context)
+void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 /* initialize the GPS context's time fields */
 {
     /*
-     * We might be able to use the system clock to get the century.
-     * Do this, just in case one of our embedded deployments is
-     * still in place in the year 2.1K.  Still likely to fail if we
-     * bring up the daemon just before a century mark, but that
-     * case is probably doomed anyhow because of 2-digit years.
+     * Provides a start time for getting the century.  Do this, just
+     * in case one of our embedded deployments is still in place in
+     * the year 2.1K.  Still likely to fail if we bring up the daemon
+     * just before a century mark, but that case is probably doomed
+     * anyhow because of 2-digit years.
      */
     context->leap_seconds = LEAPSECOND_NOW;
     context->century = CENTURY_BASE;
-    context->start_time = time(NULL);
+    context->start_time = starttime;
     if (context->start_time < GPS_EPOCH)
 	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in"
 		    " NMEA dates may not be reliable.\n");
@@ -216,7 +216,7 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 	(void)time(&now);
 	last_rollover =
 	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
-	/*@i@*/ t = last_rollover + (week * SECS_PER_WEEK) + tow;
+	t = (double)(last_rollover + (week * SECS_PER_WEEK)) + tow;
     }
     t -= session->context->leap_seconds;
 
