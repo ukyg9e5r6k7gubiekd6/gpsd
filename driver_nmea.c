@@ -1077,11 +1077,21 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_IS) != 0) {
+	session->newdata.time = gpsd_utc_resolve(session);
 	/*
 	 * WARNING: This assumes time is always field 0, and that field 0
 	 * is a timestamp whenever TIME_IS is set.
 	 */
-	session->newdata.time = gpsd_utc_resolve(session);
+	gpsd_report(LOG_DATA,
+		    "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02d.%dZ\n",
+		    session->driver.nmea.field[0], session->newdata.time,
+		    1900 + session->driver.nmea.date.tm_year,
+		    session->driver.nmea.date.tm_mon + 1,
+		    session->driver.nmea.date.tm_mday,
+		    session->driver.nmea.date.tm_hour,
+		    session->driver.nmea.date.tm_min,
+		    session->driver.nmea.date.tm_sec,
+		    session->driver.nmea.subseconds);
     }
 
     /*

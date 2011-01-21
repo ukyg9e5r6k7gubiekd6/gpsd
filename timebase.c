@@ -133,9 +133,15 @@ static int gpsd_check_utc(const int leap, const double unixtime)
         return 0;    /* leap second inconsistent, probable rollover error */
 }
 
-void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
-			 const double unixtime)
+double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
+/* resolve a UTC date, checking for century overflow */
 {
+    double t;
+
+    t = (double)mkgmtime(&session->driver.nmea.date) +
+	session->driver.nmea.subseconds;
+    session->context->valid &=~ GPS_TIME_VALID;
+
     /*
      * Check the time passed in against the leap-second offset the satellites
      * are reporting.  After a rollover, the receiver will probably report a
@@ -143,11 +149,11 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
      * leap-second value.
      */
     if ((session->context->valid & LEAP_SECOND_VALID)!=0 && 
-	gpsd_check_utc(session->context->leap_seconds, unixtime) == 0) {
+	gpsd_check_utc(session->context->leap_seconds, session->newdata.time) == 0) {
 	char scr[128];
-	(void)unix_to_iso8601(unixtime, scr, sizeof(scr));
+	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_report(LOG_WARN, "leap-second %d is impossible at time %s (%f)\n", 
-		    session->context->leap_seconds, scr, unixtime);
+		    session->context->leap_seconds, scr, session->newdata.time);
     }
 
     /*
@@ -155,7 +161,7 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
      * no further sanity-checking is possible.
      */
     if (session->context->start_time < GPS_EPOCH)
-	return;
+	return t;
 
     /*
      * If the GPS is reporting a time from before the daemon started, we've
@@ -166,34 +172,13 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
      * counted on knowing our timezone at startup, but since we can't count on
      * knowing location...
      */
-    if (unixtime + (12*60*60) < (double)session->context->start_time) {
+    if (session->newdata.time + (12*60*60) < (double)session->context->start_time) {
 	char scr[128];
-	(void)unix_to_iso8601(unixtime, scr, sizeof(scr));
+	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n", 
-		    scr, unixtime);
+		    scr, session->newdata.time);
     }
-}
 
-double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
-/* resolve a UTC date, checking for century overflow */
-{
-    double t;
-
-    t = (double)mkgmtime(&session->driver.nmea.date) +
-	session->driver.nmea.subseconds;
-    session->context->valid &=~ GPS_TIME_VALID;
-
-    gpsd_rollover_check(session, session->newdata.time);
-
-    gpsd_report(LOG_DATA,
-		"%s time (nearest sec) is %2f = %d-%02d-%02dT%02d:%02d:%02dZ\n",
-		session->driver.nmea.field[0], session->newdata.time,
-		1900 + session->driver.nmea.date.tm_year,
-		session->driver.nmea.date.tm_mon + 1,
-		session->driver.nmea.date.tm_mday,
-		session->driver.nmea.date.tm_hour,
-		session->driver.nmea.date.tm_min,
-		session->driver.nmea.date.tm_sec);
     return t;
 }
 
