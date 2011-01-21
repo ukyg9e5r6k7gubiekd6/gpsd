@@ -175,17 +175,6 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
     }
 }
 
-#ifdef __UNUSED__
-void unix_to_gpstime(double unixtime,
-		     /*@out@*/ int *week,
-		     /*@out@*/ double *tow)
-{
-    unixtime -= GPS_EPOCH;
-    *week = (int)(unixtime / SECS_PER_WEEK);
-    *tow = fmod(unixtime, SECS_PER_WEEK);
-}
-#endif
-
 double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
@@ -221,7 +210,6 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
     session->context->gps_tow = tow;
     session->context->valid |= GPS_TIME_VALID;
 
-    gpsd_rollover_check(session, session->newdata.time);
     return t;
 }
 
