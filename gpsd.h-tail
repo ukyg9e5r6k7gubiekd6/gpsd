@@ -590,6 +590,11 @@ extern speed_t gpsd_get_speed(const struct termios *);
 extern void gpsd_assert_sync(struct gps_device_t *);
 extern void gpsd_close(struct gps_device_t *);
 
+extern void gpsd_time_init(struct gps_context_t *, time_t);
+extern double gpsd_gpstime_resolve(/*@in@ */ struct gps_device_t *, 
+			      const unsigned short, const double);
+extern double gpsd_utc_resolve(/*@in@*/struct gps_device_t *);
+
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
 extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int, 
 				uint32_t[]);
@@ -603,10 +608,6 @@ extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);
 extern void ntpd_link_activate(struct gps_device_t *);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
-extern void gpsd_time_init(struct gps_context_t *, time_t);
-extern void gpsd_rollover_check(/*@in@ */ struct gps_device_t *, const double);
-extern double gpsd_resolve_time(/*@in@ */ struct gps_device_t *, 
-			      const unsigned short, const double);
 extern void gpsd_position_fix_dump(struct gps_device_t *, 
 				   /*@out@*/char[], size_t);
 extern void gpsd_clear_data(struct gps_device_t *);

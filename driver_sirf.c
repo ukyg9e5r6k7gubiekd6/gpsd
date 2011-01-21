@@ -474,7 +474,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     if (len != 188)
 	return 0;
 
-    session->gpsdata.skyview_time = gpsd_resolve_time(session,
+    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 	(unsigned short)getbes16(buf, 1),
 	(unsigned int)getbeu32(buf, 3) * 1e-2);
 
@@ -629,7 +629,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		navtype, session->gpsdata.status, session->newdata.mode);
     /* byte 20 is HDOP, see below */
     /* byte 21 is "mode 2", not clear how to interpret that */
-    session->newdata.time = gpsd_resolve_time(session,
+    session->newdata.time = gpsd_gpstime_resolve(session,
 	(unsigned short)getbes16(buf, 22), (double)getbeu32(buf, 24) * 1e-2);
 #ifdef NTPSHM_ENABLE
     if (session->newdata.mode <= MODE_NO_FIX) {

@@ -73,7 +73,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
-	session->newdata.time = gpsd_resolve_time(session, gw, tow / 1000.0);
+	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
 	mask |= TIME_IS;
     }
 
@@ -176,7 +176,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
-    session->newdata.time = gpsd_resolve_time(session, 
+    session->newdata.time = gpsd_gpstime_resolve(session, 
 					      (unsigned short int)gw, 
 					      (double)tow / 1000.0);
 

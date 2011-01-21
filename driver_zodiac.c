@@ -245,7 +245,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    session->gpsdata.skyview_time = gpsd_resolve_time(session,
+    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 						      (unsigned short)gps_week,
 						      (double)gps_seconds);
     gpsd_report(LOG_DATA, "1002: visible=%d used=%d mask={SATELLITE|USED}\n",

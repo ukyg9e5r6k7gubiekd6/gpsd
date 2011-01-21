@@ -104,8 +104,7 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     context->rollovers = ((context->start_time - GPS_EPOCH) / GPS_ROLLOVER);
 
     if (context->start_time < GPS_EPOCH)
-	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in"
-		    " NMEA dates may not be reliable.\n");
+	gpsd_report(LOG_ERROR, "system time looks bogus, dates may not be reliable.\n");
     else {
 	struct tm *now = localtime(&context->start_time);
 	char scr[128];
@@ -175,7 +174,30 @@ void gpsd_rollover_check(/*@in@*/struct gps_device_t *session,
     }
 }
 
-double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
+double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
+/* resolve a UTC date, checking for century overflow */
+{
+    double t;
+
+    t = (double)mkgmtime(&session->driver.nmea.date) +
+	session->driver.nmea.subseconds;
+    session->context->valid &=~ GPS_TIME_VALID;
+
+    gpsd_rollover_check(session, session->newdata.time);
+
+    gpsd_report(LOG_DATA,
+		"%s time (nearest sec) is %2f = %d-%02d-%02dT%02d:%02d:%02dZ\n",
+		session->driver.nmea.field[0], session->newdata.time,
+		1900 + session->driver.nmea.date.tm_year,
+		session->driver.nmea.date.tm_mon + 1,
+		session->driver.nmea.date.tm_mday,
+		session->driver.nmea.date.tm_hour,
+		session->driver.nmea.date.tm_min,
+		session->driver.nmea.date.tm_sec);
+    return t;
+}
+
+double gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
     double t;

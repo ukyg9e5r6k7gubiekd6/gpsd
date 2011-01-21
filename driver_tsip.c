@@ -196,7 +196,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 	    session->newdata.time = 
-		gpsd_resolve_time(session, (unsigned short)s1, (double)f1);
+		gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
 	    mask |= TIME_IS;
 	}
 	gpsd_report(LOG_INF, "GPS Time %f %d %f\n", f1, s1, f2);
@@ -291,7 +291,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getbef(buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time = 
-		gpsd_resolve_time(session,
+		gpsd_gpstime_resolve(session,
 				  (unsigned short)session->context->gps_week,
 				  (double)f2);
 	    mask |= TIME_IS;
@@ -386,7 +386,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	s1 = getbes16(buf, 6);	/* tsip.gps_week */
 	/*@ +charint @*/
 	if (getub(buf, 0) == 0x01)	/* good current fix? */
-	    (void)gpsd_resolve_time(session, (unsigned short)s1, (double)f1);
+	    (void)gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
 	/*@ -charint @*/
 	gpsd_report(LOG_INF, "Fix info %02x %02x %d %f\n", u1, u2, s1, f1);
 	break;
@@ -553,7 +553,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f1 = getbef(buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
-		gpsd_resolve_time(session,
+		gpsd_gpstime_resolve(session,
 				  (unsigned short)session->context->gps_week, 
 				  (double)f1);
 	    mask |= TIME_IS;
@@ -649,7 +649,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->newdata.time = gpsd_resolve_time(session, 
+	    session->newdata.time = gpsd_gpstime_resolve(session, 
 						      (unsigned short)s4, 
 						      (double)ul1 *1e-3);
 	    mask |=
@@ -687,7 +687,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 	    session->newdata.time =
-		gpsd_resolve_time(session,
+		gpsd_gpstime_resolve(session,
 				  (unsigned short)s1, (double)ul1 *1e3);
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
@@ -750,7 +750,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;
 		session->newdata.time =
-		    gpsd_resolve_time(session, s1, (double)ul1);
+		    gpsd_gpstime_resolve(session, s1, (double)ul1);
 		mask |= TIME_IS | CLEAR_IS;
 		gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",
 			    session->newdata.time);

@@ -1081,20 +1081,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * WARNING: This assumes time is always field 0, and that field 0
 	 * is a timestamp whenever TIME_IS is set.
 	 */
-	session->newdata.time =
-	    (double)mkgmtime(&session->driver.nmea.date) +
-	    session->driver.nmea.subseconds;
-	session->context->valid &=~ GPS_TIME_VALID;
-	gpsd_rollover_check(session, session->newdata.time);
-	gpsd_report(LOG_DATA,
-		    "%s time (nearest sec) is %2f = %d-%02d-%02dT%02d:%02d:%02dZ\n",
-		    session->driver.nmea.field[0], session->newdata.time,
-		    1900 + session->driver.nmea.date.tm_year,
-		    session->driver.nmea.date.tm_mon + 1,
-		    session->driver.nmea.date.tm_mday,
-		    session->driver.nmea.date.tm_hour,
-		    session->driver.nmea.date.tm_min,
-		    session->driver.nmea.date.tm_sec);
+	session->newdata.time = gpsd_utc_resolve(session);
     }
 
     /*
