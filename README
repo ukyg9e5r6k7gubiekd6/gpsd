@@ -1,14 +1,8 @@
-COPYRIGHT
-=========
-
-This software (gpsd) released under the terms and conditions of the BSD
-License, a copy of which is included in the file COPYING.
-
 GENERAL
 =======
 
-gpsd is a userland daemon acting as a translator between GPS or
-Loran-C receivers and clients. gpsd listens on port 2947 for clients
+gpsd is a userland daemon acting as a translator between GPS and
+AIS receivers and their clients. gpsd listens on port 2947 for clients
 requesting position/time/velocity information.  The receivers are
 expected to generate position information in a well-known format -- as
 NMEA-0183 sentences, SiRF binary, Rockwell binary, Garmin binary
@@ -30,6 +24,12 @@ when a potential GPS device goes active and should be polled.  The
 goal is zero configuration; users should never have to tell gpsd how
 to configure itself.  If you can't use RPM, use what you see in the
 specfile as a model.
+
+LICENSE
+=======
+
+This software (gpsd) is released under the terms and conditions of the BSD
+License, a copy of which is included in the file COPYING.
 
 1.X CREDITS
 ===========
@@ -54,29 +54,25 @@ for the Earthmate.
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
-None of these people are active in 2.X, through Remco de-lurks on the
-mailing list occasionally.
+None of these people have been active in 2.X and later versions; gpsd
+has evolved out of recognition from the 1.X codebase.
 
 2.X CREDITS
 ===========
 
-Eric S. Raymond drastically rewrote this code to clean it up and extend it.
-The 2.X architecture has become significantly different and far more 
-modularized. His new features include:
+Eric S. Raymond drastically rewrote this code in late 2004/early 2005
+to clean it up and extend it.  The 2.X architecture has become
+significantly different and far more modularized. His new features
+included:
+
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
    * Now understands the GLL (Geographic position - Latitude, Longitude)
      sentence from NMEA 3.0. 
    * Now parses both the NMEA 3.01 and pre-3.01 variants of the VTG sentence 
      correctly.
-   * New 'y' command supports satellite location -- it should no longer ever
-     be necessary for clients to go to raw mode unless they want to monitor and
-     and log the NMEA stream itself.
-   * New 'w' command toggles 'watcher' mode. In watcher mode gpsd ships
-     a gpsd-style response for each incoming sentence as if the client
-     had just sent all commands that asked for data contained in the sentence.
-   * New 'x' command allows the client to query whether or not the GPS
-     is on-line.
+   * New commands including 'y', 'w', and 'x', since obsolesced by a
+     JSON-based protocol.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code the daemon uses can now be directly linked as a
@@ -94,17 +90,18 @@ modularized. His new features include:
    * Autobauding, self-configuration, and hotplugging.  gpsd can now get
      its device from a hotplug script, and figures out itself which baud 
      rate to use and what the GPS's device type is.
-   * More new commands: 'I', 'U', 'E', 'B', 'Z'. See the docs.
    * Support for SiRF binary mode.
    * Support for RTCM104 and AIVDM.
    * Support for multiple devices.
-   * Other test tools -- gpsfake, gpscat.
+   * Other test tools -- gpsfake, gpscat, gpsmon.
 
 Chris Kuethe <ckuethe@mail.berlios.de> maintains the OpenBSD port, shipped
 the 2.34 release, is our SiRF and low-level protocols expert, and does a 
-lot of general hacking and support.
+lot of general hacking and support.  He has release authority.
 
-Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.
+Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol
+and most of the support for PPS handling on serial devices. He has release
+authority.
 
 Amaury Jacquot <sxpert@esitcom.org> added DBUS support.
 
@@ -118,3 +115,10 @@ light on murky aspects of the chip's behavior.
 We are also delighted to acknowlege the assistance of Timo Ylhainen, VP of
 Software Operations at Fastrax. He clarified a number of points about
 the iTalk protocol, helping to further development of iTalk support.
+
+3.X CREDITS
+===========
+
+The main feature of the 3.x version will be a stabilized and finalized 
+version of the JSON command/response protocol. This was designed and mainly
+implemented by ESR.  Gary Miller wrote the subframe support.
