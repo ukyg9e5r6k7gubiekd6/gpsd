@@ -1954,8 +1954,9 @@ radiocommunication equipment and systems</citetitle></para>
 
 <refsect1 id='maintainer'><title>AUTHORS</title>
 
-<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond,
-Chris Kuethe.  This manual page by Eric S. Raymond
+<para>Authors: Eric S. Raymond, Chris Kuethe, Gary Miller.  Former
+authors whose bits have been plowed under by code turnover: Remco
+Treffcorn, Derrick Brashear, Russ Nelson. This manual page by Eric S. Raymond
 <email>esr@thyrsus.com</email>.  There is a <ulink
 url="http://gpsd.berlios.de/">project site</ulink>.</para>
 </refsect1>
