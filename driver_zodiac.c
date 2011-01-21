@@ -1,6 +1,11 @@
 /*
  * Handle the Rockwell binary packet format supported by the old Zodiac chipset
  *
+ * Week counters are not limited to 10 bits. It's unknown what
+ * the firmware is doing to disambiguate them, if anything; it might just
+ * be adding a fixed offset based on a hidden epoch value, in which case 
+ * unhappy things will occur on the next rollover.
+ *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
@@ -221,6 +226,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     int gps_seconds = getzlong(11);
     /* gps_nanoseconds            = getzlong(13); */
     /*@-charint@*/
+    /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));

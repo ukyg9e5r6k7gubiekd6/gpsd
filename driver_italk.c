@@ -3,6 +3,11 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  * Driver for the iTalk binary protocol used by FasTrax
+ *
+ * Week counters are not limited to 10 bits. It's unknown what
+ * the firmware is doing to disambiguate them, if anything; it might just
+ * be adding a fixed offset based on a hidden epoch value, in which case 
+ * unhappy things will occur on the next rollover.
  */
 #include <stdio.h>
 #include <stdbool.h>
