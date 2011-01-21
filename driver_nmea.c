@@ -76,8 +76,11 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	year = (session->context->century + yy) - 1900;
     } else if (year % 100 != yy) {
 	/* update year */
-	if (year % 100 == 99 && yy == 0)
-	    yy += 100;		/* century change */
+	if (year % 100 == 99 && yy == 0) {
+	    yy += 100;
+	    session->context->century += 100;
+	    gpsd_report(LOG_WARN, "century rollover detected.\n");
+	}
 	year = year / 100 * 100 + yy;
     }
     if ( (1 > year ) || (2200 < year ) ) {
@@ -1083,15 +1086,14 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * is a timestamp whenever TIME_IS is set.
 	 */
 	gpsd_report(LOG_DATA,
-		    "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02d.%dZ\n",
+		    "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
 		    session->driver.nmea.field[0], session->newdata.time,
 		    1900 + session->driver.nmea.date.tm_year,
 		    session->driver.nmea.date.tm_mon + 1,
 		    session->driver.nmea.date.tm_mday,
 		    session->driver.nmea.date.tm_hour,
 		    session->driver.nmea.date.tm_min,
-		    session->driver.nmea.date.tm_sec,
-		    session->driver.nmea.subseconds);
+		    session->driver.nmea.date.tm_sec + session->driver.nmea.subseconds);
     }
 
     /*

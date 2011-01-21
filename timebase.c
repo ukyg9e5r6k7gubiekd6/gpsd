@@ -134,8 +134,14 @@ static int gpsd_check_utc(const int leap, const double unixtime)
 }
 
 double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
-/* resolve a UTC date, checking for century overflow */
+/* resolve a UTC date, checking for rollovers */
 {
+    /*
+     * We'd like to *correct* for rollover the way we do for GPS week.
+     * In theory, comparing extracted UTC against present time should 
+     * allow us to compute the device's epoch assumption.  In practice,
+     * this will be hairy and risky.
+     */
     double t;
 
     t = (double)mkgmtime(&session->driver.nmea.date) +
