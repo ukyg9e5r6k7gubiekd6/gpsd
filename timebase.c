@@ -199,9 +199,7 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
-    session->context->gps_week = (unsigned short int)(week + session->context->rollovers * 1024);
-    session->context->gps_tow = tow;
-    session->context->valid |= GPS_TIME_VALID;
+    week += session->context->rollovers * 1024;
 
     /*
      * This code copes with both conventional GPS weeks and the "extended"
@@ -221,6 +219,11 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 	/*@i@*/ t = last_rollover + (week * SECS_PER_WEEK) + tow;
     }
     t -= session->context->leap_seconds;
+
+    session->context->gps_week = week;
+    session->context->gps_tow = tow;
+    session->context->valid |= GPS_TIME_VALID;
+
     gpsd_rollover_check(session, session->newdata.time);
     return t;
 }
