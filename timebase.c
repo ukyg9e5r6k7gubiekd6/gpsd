@@ -84,6 +84,9 @@ static double c_epochs[] = {
 };
 #define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
 
+#define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
+#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
+
 void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 /* initialize the GPS context's time fields */
 {
@@ -97,6 +100,9 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     context->leap_seconds = LEAPSECOND_NOW;
     context->century = CENTURY_BASE;
     context->start_time = starttime;
+
+    context->rollovers = ((context->start_time - GPS_EPOCH) / GPS_ROLLOVER);
+
     if (context->start_time < GPS_EPOCH)
 	gpsd_report(LOG_ERROR, "system time looks bogus, centuries in"
 		    " NMEA dates may not be reliable.\n");
@@ -127,9 +133,6 @@ static int gpsd_check_utc(const int leap, const double unixtime)
     else
         return 0;    /* leap second inconsistent, probable rollover error */
 }
-
-#define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
-#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
 void gpsd_rollover_check(/*@in@*/struct gps_device_t *session, 
 			 const double unixtime)
@@ -199,25 +202,19 @@ double gpsd_resolve_time(/*@in@*/struct gps_device_t *session,
 	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
-    week += session->context->rollovers * 1024;
 
     /*
-     * This code copes with both conventional GPS weeks and the "extended"
+     * This guard copes with both conventional GPS weeks and the "extended"
      * 15-or-16-bit version with no wraparound that appears in Zodiac
      * chips and is supposed to appear in the Geodetic Navigation
      * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
      * (notably 231) actually ship the wrapped 10-bit week, despite what
      * the protocol reference claims.
      */
-    if (week >= 1024)
-	t = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
-    else {
-	time_t now, last_rollover;
-	(void)time(&now);
-	last_rollover =
-	    GPS_EPOCH + ((now - GPS_EPOCH) / GPS_ROLLOVER) * GPS_ROLLOVER;
-	t = (double)(last_rollover + (week * SECS_PER_WEEK)) + tow;
-    }
+    if (week < 1024)
+	week += session->context->rollovers * 1024;
+
+    t = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
     t -= session->context->leap_seconds;
 
     session->context->gps_week = week;
