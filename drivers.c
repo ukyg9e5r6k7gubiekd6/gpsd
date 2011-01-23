@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <termios.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
@@ -29,6 +30,21 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
     const struct gps_type_t **dp;
 
     if (session->packet.type == COMMENT_PACKET) {
+	unsigned char *cp;
+	int year;
+	/*
+	 * Interpret "Date: dd mmm yyyy", setting the session context
+	 * century from the year.  We do this so the behavior of the
+	 * regression tests won't depend on what century the daemon
+	 * started up in.
+	 */
+	if (strstr((char *)session->packet.outbuffer, "Date:") != NULL) {
+	    cp = session->packet.outbuffer + strlen((char *)session->packet.outbuffer) - 1;
+	    while (isspace(*cp))
+		--cp;
+	    year = atoi((char *)cp - 4);
+	    session->context->century = year - (year % 100);
+	}
 	return 0;
     } else if (session->packet.type != NMEA_PACKET) {
 	for (dp = gpsd_drivers; *dp; dp++) {
