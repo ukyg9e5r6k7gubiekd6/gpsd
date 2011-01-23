@@ -74,7 +74,7 @@ import packet as sniffer
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
 # check file.  These numbers might have to be adjusted upward on faster
-# machines.  The need for them may be symnptomatic of race conditions
+# machines.  The need for them may be symptomatic of race conditions
 # in the pty layer or elsewhere.
 
 # Define a per-line delay on writes so we won't spam the buffers in
@@ -90,7 +90,7 @@ WRITE_PAD = 0.001
 # value, but it is not guaranteed by Python that the C implementation
 # underneath will return with precision finer than 1 second. (Linux
 # and *BSD return full precision.)
-CLOSE_DELAY = 1
+CLOSE_DELAY = 0.1
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
