@@ -66,7 +66,7 @@
 
 <p>References like <b>foobar(n)</b> are a Unix convention meaning you
 should look up the program <b>foobar</b> using the <b>man</b> utility
-for browsing manuaL pages. Numeric section 1 refers to general
+for browsing manual pages. Numeric section 1 refers to general
 commands and section 8 to administrative commands.</p>
 
 <ol class="ToC">
@@ -90,11 +90,12 @@ instructions</a> and run <code>xgps</code> or <code>cgps</code>.  Very
 likely you will see fix data appear in the client.  If so, you're
 done.</p>
 
-<p>If you have a serial (RS232) GPS, plug it into a serial port connector
-and jump to <a href="#generaltroubleshooting">General Troubleshooting</a>
+<p>If you have a serial (RS232) GPS, plug it into a serial port
+connector and jump to <a href="#generaltroubleshooting">General
+Troubleshooting</a></p>
 
 <p>We do not yet have troubleshooting instructions for GPSes using
-CF (Compact Flash) interfaces.  Please contribnute some if you can.</p>
+CF (Compact Flash) interfaces. Please contribute some if you can.</p>
 
 <p>If your test client does not show data, keep reading.</p> 
 
@@ -157,8 +158,8 @@ running:</p>
 
 <p>Try running <b>gpsmon(1)</b>, giving it your GPS device path as an
 argument (for example. <code>"gpsmon /dev/ttyUSB0"</code>). After a
-few monents to sync up, it should display a screenfull of data on the
-device, including displaying the raw oacket data streaming from it.</p>
+few moments to sync up, it should display a screenfull of data on the
+device, including displaying the raw packet data streaming from it.</p>
 
 <p>If <b>gpsmon(1)</b> reports no data at all, you mat have the device
 path wrong; check that using <b>dmesg(8)</b> or by whatever means you
@@ -254,7 +255,7 @@ curses utility for the job. Watch the output.</p>
 
 <h2>Ubuntu/Debian</h2>
 
-<p>The .deb package supplied for the Debian and Ubuntu linux
+<p>The .deb package supplied for the Debian and Ubuntu Linux
 distributions launch at boot from the system V-like script
 <code>/etc/init.d/gpsd</code>. However, it is governed by a control
 file, <code>/etc/default/gpsd</code>. If necessary, edit the control
@@ -273,12 +274,23 @@ prior installation. You must <code>apt-get purge</code> them. This
 removes some configuration files left behind by remove.</p>
 
 <p>If you do compile your own gpsd, be aware that installing gpsd
-client packages can force installation of gpsd as well. One culprit is
-<a href="http://www.tangogps.org/">tangogps</a>, which requires gpsd
-and libgpsX (where X is 19 as of this writing). Fortunately, you can
-let apt-get install those two packages, and then purge them and
-reinstall your own compiled version. Other client packages may not be
-so lenient, and you will have to force purging the gpsd packages.</p>
+client packages can force installation of gpsd as well. This can also
+happen on debian sysems when apt is set up to install recommended
+packages as dependencies.</p>
+
+<p>One culprit is <a href="http://www.tangogps.org/">tangogps</a>,
+which recommends gpsd. Fortunately, since it recommends gpsd, you can
+let apt-get install it, and then purge it and reinstall your own
+compiled version. Other client packages may not be so lenient, and you
+will have to force purging the gpsd packages.</p>
+
+<p>A more elegant and more permanent solution is to turn off
+installing recommended packages as dependencies. Put the following in
+a file with a high leading number in <code>/etc/apt/apt.conf.d</code>,
+e.g. <code>90no.recommendations</code>:</p>
+
+<pre>APT::Install-Recommends &quot;false&quot;;
+</pre>
 
 <h2>Red Hat</h2>
 
@@ -336,10 +348,10 @@ receiver.</p>
 <p>You should see messages that include something like the following
 text (the USB device may vary):</p>
 
-<pre><code>
+<pre>
 gpsd.hotplug: gpsd_control(action=add, arg=/dev/ttyUSB0)
 gpsd.hotplug: launching gpsd  -F /var/run/gpsd.sock
-</code></pre>
+</pre>
 
 <p>These are from the gpsd.hotplug handler called by udev on a hotplug
 event matching one of the known udev types for a USB GPS, and indicating
@@ -347,7 +359,7 @@ the launch of a gpsd instance.</p>
 
 <p>If you don't see this, several things could be going wrong. The
 udev rules may not be installed correctly. Or the handler they call
-may be unable to run for some reason; it has two layers, a shellscript
+may be unable to run for some reason; it has two layers, a shell script
 wrapper around a little Python program that does the real work.  You
 may have to figure out where the udev log messages go on your system
 and use udevadm(8) to crank up the log level until you can see what's
@@ -363,8 +375,8 @@ this as a bug to the GPSD developers.</p>
 it's doing with the hotplug notifications. Unplug the receiver and
 kill the running gpsd instance, if there is one. Now run <code>make
 udev-test</code> and plug in the receiver. (For those using packages,
-this is the equivalent of <code>gpsd -N -n -F /var/run/gpsd.sock -D
-5</code>.) </p>
+this is the equivalent of &quot;<code>gpsd -N -n -F /var/run/gpsd.sock
+-D 5</code>&quot;.) </p>
 
 <p>You can also launch the hotplug code manually: <code>cd /lib/udev
 &amp;&amp; ./gpsd.hotplug add /dev/ttyUSB0</code> If this fails, there is

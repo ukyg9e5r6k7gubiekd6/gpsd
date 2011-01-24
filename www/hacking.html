@@ -493,7 +493,7 @@ command that will cause it to emit a TIMING object on every sentence.
 The TIMING response contains the following attributed:</p>
 
 <ol>
-<li>tag: An identifing sentence tag.</li>
+<li>tag: An identifying sentence tag.</li>
 
 <li>len: The character length of the sentence containing the timestamp
     data.</li>
@@ -575,11 +575,11 @@ of the normal flow of information through it.</p>
 
 <p> The <code>gpsd</code> breaks naturally into four pieces: the
 <b>drivers</b>, the <b>packet sniffer</b>, the <b>core library</b> and
-the <b>multiplexor</b>. We'll describe these from the bottom up.</p>
+the <b>multiplexer</b>. We'll describe these from the bottom up.</p>
 
 <p>The <b>drivers</b> are essentially user-space device drivers for
 each kind of chipset we support.  The key entry points are methods to
-parse a data packet into time-poaition-velocity or status information,
+parse a data packet into time-position-velocity or status information,
 change its mode or baud rate, probe for device subtype, etc. See <a
 href="#drivers">Driver Architecture</a> for more details about
 them.</p>
@@ -605,24 +605,24 @@ depending on the packet type that the sniffer returns.  This is
 if the device switches between different reporting protocols (most
 chipsets support NMEA and one or more vendor binary protocols, and
 devices like AIS receivers may report packets in two different
-protcols on the same wire).</p>
+protocols on the same wire).</p>
 
-<p>Finally, the <b>multiplexor</b> is the part of the daemon that
+<p>Finally, the <b>multiplexer</b> is the part of the daemon that
 handles client sessions and device assignment.  It is responsible
 for passing TPV reports up to clients, accepting client commands,
 and responding to hotplug notifications. It is essentially all
-contained in the gpsd.c sourcefile.</p>
+contained in the gpsd.c source file.</p>
 
-<p>The first three components (other than the multiplexor) are linked
+<p>The first three components (other than the multiplexer) are linked
 together in a library called libgpsd and can be used separately from
-the multiplexor. Our other tools that talk to GPSes directly, such as
+the multiplexer. Our other tools that talk to GPSes directly, such as
 <code>gpsmon</code> and <code>gpsctl</code>, do it by calling into the
 core library and driver layer directly.</p>
 
 <p>Under some circumstances, the packet sniffer by itself is
 separately useful. <code>gpscat</code> uses it without the rest of the
 lower layer in order to detect and report packet boundaries in raw
-data. So does <code>gpsfake</code>, in order to chunk logfiles so they
+data. So does <code>gpsfake</code>, in order to chunk log files so they
 can be fed to a test instance of the daemon packet-by-packet with
 something approximating realistic timing.</p>
 
@@ -656,7 +656,7 @@ the effect will be denial-of-service to clients that are better behaved.</p>
 GPS data has a short shelf life.  If the client doesn't pick it up
 within a few minutes, it's probably not useful to that client.  So if
 data is backing up to a client, drop that client.  That's why we set
-the client socket to nonblocking.</p>
+the client socket to non-blocking.</p>
 
 <p>For similar reasons, we don't try to recover from short writes to
 the GPS, e.g. of DGPS corrections.  They're packetized, so the device
@@ -772,7 +772,7 @@ works.</p>
 <li>If it finds a UBX binary packet (led with  &mu;B ), it
    switches to the UBX driver.  We're done.</li>
 
-<li>If it finds EARTHA, it selects the Earthmade driver, which then
+<li>If it finds EARTHA, it selects the Earthmate driver, which then
    flips the connection to Zodiac binary mode.  We're done.</li>
 
 <li>If it finds ASTRAL, it feeds the TripMate on the other end what
@@ -1020,7 +1020,7 @@ the guts of the analyzer and writer functions.  Look in gpsutils.c
 before you do; driver helper functions live there.  Also read some
 existing drivers for clues.</p>
 
-<p>You can read an implementor's <a href="writing-a-driver.html">Notes
+<p>You can read an implementer's <a href="writing-a-driver.html">Notes
 On Writing A GPSD Driver.</a></p>
 
 <p>There's a second kind of driver architecture for
