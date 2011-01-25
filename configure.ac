@@ -112,38 +112,6 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_C_BIGENDIAN
-type_error="no"
-AC_CHECK_SIZEOF([char])
-AC_CHECK_SIZEOF([short])
-AC_CHECK_SIZEOF([int])
-AC_CHECK_SIZEOF([long])
-AC_CHECK_SIZEOF([float])
-AC_CHECK_SIZEOF([double])
-if test x"$ac_cv_sizeof_char" != "x1" ; then
-	AC_MSG_WARN(gpsd requires sizeof(char)==1);
-	type_error="yes"
-fi
-if test x"$ac_cv_sizeof_short" != "x2" ; then
-	AC_MSG_WARN(gpsd requires sizeof(short)==2);
-	type_error="yes"
-fi
-if test x"$ac_cv_sizeof_int" != "x4" ; then
-	AC_MSG_WARN(gpsd requires sizeof(int)==4);
-	type_error="yes"
-fi
-if test x"$ac_cv_sizeof_float" != "x4" ; then
-	AC_MSG_WARN(gpsd requires sizeof(float)==4);
-	type_error="yes"
-fi
-if test x"$ac_cv_sizeof_double" != "x8" ; then
-	AC_MSG_WARN(gpsd requires sizeof(double)==8);
-	type_error="yes"
-fi
-if test x"$type_error" = "xyes" ; then
-	AC_ERROR(Your system does not provide all required data types);
-fi
-
-AC_FUNC_ALLOCA
 AC_STDC_HEADERS
 AC_C_CONST
 
