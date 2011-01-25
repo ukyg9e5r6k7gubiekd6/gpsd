@@ -672,7 +672,6 @@ extern struct protoent *getprotobyname(const char *);
 extern /*@observer@*/char *strptime(const char *,const char *tp,/*@out@*/struct tm *)/*@modifies tp@*/;
 extern struct tm *gmtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
 extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
-extern float roundf(float x);
 #endif /* S_SPLINT_S */
 
 /*
@@ -681,12 +680,6 @@ extern float roundf(float x);
  * NMEA 3.x devices reporting $GPGBS are the exception.
  */
 #define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
-
-/* some OSes don't have round(). fake it if need be */
-#ifndef HAVE_ROUND
-#define	round(x) ((double)rint(x))
-#define roundf(x) ((float)rintf((double)x))
-#endif /* !HAVE_ROUND */
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 

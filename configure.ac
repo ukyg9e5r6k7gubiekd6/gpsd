@@ -141,11 +141,8 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -W
 fi
 
-AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(strlcat)
-AC_CHECK_FUNCS(setlocale)
-AC_CHECK_FUNCS(vsnprintf)
 AC_CHECK_FUNCS(daemon)
 
 AM_CONDITIONAL([NO_DAEMON3], [test x"ac_cv_func_daemon" != xyes])
