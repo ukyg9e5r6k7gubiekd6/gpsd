@@ -335,8 +335,6 @@ Here is a complete table of the binding entry points:
 Function
 |gps_open()		|gpsmm.gpsmm()		|gps.\_\_init__()	|
 In OO languages the client class initializer opens the daemon socket.
-|gps_set_raw_hook()	|			|gps.set_raw_hook()	|
-Set a hook function to be executed on each raw packet as it arrives.
 |gps_send()		|gpsmm.send()		|gps.send()		|
 Send wire-protocol commands to the daemon. Deprecated and unstable.
 |gps_stream()		|gpsmm.stream()		|gps.stream()		|
@@ -415,7 +413,6 @@ The heart of it is this code:
 
 -----------------------------------------------------------------------------
     session = gps(**opts)
-    session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
     session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
     for report in session:
         print report
@@ -441,6 +438,9 @@ In major versions before 5:
 * Clients needed to define a gpsd_report() function for client-side logging
   if they didn't want code in netlib.c and libgps_core.c to occasionally
   senfd messages to stderr.  This requirement is now gone.
+
+* There was a set_raw_hook() method ion the C and Python bindings, now gone.
+  Clients can simply look at the response buffer.
 
 See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
 for details.

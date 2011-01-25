@@ -295,8 +295,7 @@ static int dbus_mainloop(void)
 
 static struct fixsource_t source;
 
-static void process(struct gps_data_t *gpsdata,
-		    char *buf UNUSED, size_t len UNUSED)
+static void process(struct gps_data_t *gpsdata)
 {
     /* this is where we implement source-device filtering */
     if (gpsdata->dev.path[0] != '\0' && source.device != NULL
@@ -319,7 +318,6 @@ static int socket_mainloop(void)
 	exit(1);
     }
 
-    gps_set_raw_hook(&gpsdata, process);
     (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
 
     for (;;) {
@@ -336,8 +334,10 @@ static int socket_mainloop(void)
 	if (data == -1) {
 	    (void)fprintf(stderr, "%s\n", strerror(errno));
 	    break;
-	} else if (data)
+	} else if (data) {
 	    (void)gps_read(&gpsdata);
+	    process(&gpsdata);
+	}
     }
     (void)gps_close(&gpsdata);
     return 0;

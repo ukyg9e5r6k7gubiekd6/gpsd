@@ -122,7 +122,6 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
-    gpsdata->raw_hook = NULL;
     gps_clear_fix(&gpsdata->fix);
 
     /* set up for line-buffered I/O over the daemon socket */
@@ -157,12 +156,6 @@ int gps_close(struct gps_data_t *gpsdata)
 }
 
 /*@+compdef +usereleased@*/
-
-void gps_set_raw_hook(struct gps_data_t *gpsdata,
-		      void (*hook) (struct gps_data_t *, char *, size_t len))
-{
-    gpsdata->raw_hook = hook;
-}
 
 #ifdef LIBGPS_DEBUG
 static void libgps_dump_state(struct gps_data_t *collect)
@@ -495,11 +488,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 #endif /* OLDSTYLE_ENABLE */
 
-/*@ -compdef @*/
-    if (gpsdata->raw_hook) {
-	//libgps_debug_trace((stderr, "libgps: raw hook called on '%s'\n", buf));
-	gpsdata->raw_hook(gpsdata, buf, strlen(buf));
-    }
 #ifndef USE_QT
     libgps_debug_trace((DEBUG_CALLS, "final flags: (0x%04x) %s\n", gpsdata->set,
 			gps_maskdump(gpsdata->set)));
@@ -653,7 +641,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
     if ((flags & WATCH_DISABLE) != 0) {
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w-", sizeof(buf));
-	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA) != 0)
+	    if ((flags & WATCH_NMEA) != 0)
 		(void)strlcat(buf, "r-", sizeof(buf));
 	} else {
 	    (void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
@@ -677,7 +665,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w+x", sizeof(buf));
-	    if (gpsdata->raw_hook != NULL || (flags & WATCH_NMEA) != 0)
+	    if ((flags & WATCH_NMEA) != 0)
 		(void)strlcat(buf, "r+", sizeof(buf));
 	} else {
 	    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
@@ -723,12 +711,6 @@ extern char /*@observer@*/ *gps_errstr(const int err)
  * A simple command-line exerciser for the library.
  * Not really useful for anything but debugging.
  */
-
-static void dumpline(struct gps_data_t *ud UNUSED,
-		     char *buf, size_t ulen UNUSED)
-{
-    puts(buf);
-}
 
 #ifndef S_SPLINT_S
 #include <unistd.h>
@@ -794,7 +776,6 @@ int main(int argc, char *argv[])
 	(void)fputs("Daemon is not running.\n", stdout);
 	exit(1);
     } else if (optind < argc) {
-	gps_set_raw_hook(&collect, dumpline);
 	(void)strlcpy(buf, argv[optind], BUFSIZ);
 	(void)strlcat(buf, "\n", BUFSIZ);
 	(void)gps_send(&collect, buf);
@@ -804,7 +785,6 @@ int main(int argc, char *argv[])
     } else {
 	int tty = isatty(0);
 
-	gps_set_raw_hook(&collect, dumpline);
 	if (tty)
 	    (void)fputs("This is the gpsd exerciser.\n", stdout);
 	for (;;) {

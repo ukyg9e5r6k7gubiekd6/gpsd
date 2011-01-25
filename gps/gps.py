@@ -158,13 +158,9 @@ class gps(gpsdata, gpsjson):
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
         gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
-        self.raw_hook = None
         self.newstyle = False
         if mode:
             self.stream(mode)
-
-    def set_raw_hook(self, hook):
-        self.raw_hook = hook
 
     def __oldstyle_unpack(self, buf):
         # unpack a daemon response into the gps instance members
@@ -305,8 +301,6 @@ class gps(gpsdata, gpsjson):
         status = gpscommon.read(self)
         if status <= 0:
             return status
-        if self.raw_hook:
-            self.raw_hook(self.response);
         if self.response.startswith("{") and self.response.endswith("}\r\n"):
             self.json_unpack(self.response)
             self.__oldstyle_shim()
@@ -344,7 +338,7 @@ class gps(gpsdata, gpsjson):
                     return self.send(arg)
             else: # flags & WATCH_ENABLE:
                 arg = 'w+'
-                if self.raw_hook or (flags & WATCH_NMEA):
+                if (flags & WATCH_NMEA):
                     arg += 'r+'
                     return self.send(arg)
         else: # flags & WATCH_NEWSTYLE:
@@ -369,7 +363,6 @@ if __name__ == '__main__':
         opts["port"] = arguments[1]
 
     session = gps(**opts)
-    session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
     session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
     for report in session:
         print report

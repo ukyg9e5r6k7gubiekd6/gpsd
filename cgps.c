@@ -416,8 +416,7 @@ static void resize(int sig UNUSED)
 
 #ifdef TRUENORTH
 /* This gets called once for each new compass sentence. */
-static void update_compass_panel(struct gps_data_t *gpsdata,
-				 char *message, size_t len UNUSED)
+static void update_compass_panel(struct gps_data_t *gpsdata)
 {
     char scr[128];
     /* Print time/date. */
@@ -471,8 +470,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 #endif /* TRUENORTH */
 
 /* This gets called once for each new GPS sentence. */
-static void update_gps_panel(struct gps_data_t *gpsdata,
-			     char *message, size_t len UNUSED)
+static void update_gps_panel(struct gps_data_t *gpsdata)
 {
     int i, j, n;
     int newstate;
@@ -708,7 +706,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
     /* Be quiet if the user requests silence. */
     if (!silent_flag && raw_flag) {
-	(void)waddstr(messages, message);
+	(void)waddstr(messages, gpsdata->buffer);
     }
 
     /* Reset the status_timer if the state has changed. */
@@ -870,16 +868,6 @@ int main(int argc, char *argv[])
 
     windowsetup();
 
-    /* Here's where updates go now that things are established. */
-#ifdef TRUENORTH
-    if (compass_flag) {
-	gps_set_raw_hook(&gpsdata, update_compass_panel);
-    } else
-#endif /* TRUENORTH */
-    {
-	gps_set_raw_hook(&gpsdata, update_gps_panel);
-    }
-
     status_timer = time(NULL);
 
     (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
@@ -909,6 +897,14 @@ int main(int argc, char *argv[])
 	    if (gps_read(&gpsdata) == -1) {
 		fprintf(stderr, "cgps: socket error 4\n");
 		die(errno == 0 ? GPS_GONE : GPS_ERROR);
+	    } else {
+		/* Here's where updates go now that things are established. */
+#ifdef TRUENORTH
+		if (compass_flag)
+		    update_compass_panel(&gpsdata);
+		else
+#endif /* TRUENORTH */
+		    update_gps_panel(&gpsdata);
 	    }
 	}
 

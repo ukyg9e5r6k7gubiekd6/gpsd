@@ -418,7 +418,6 @@ def plotframe(await, fname, speed, threshold, title):
     if formatter not in (spaceplot, uninstrumented):
         options = ',"timing":true'
     try:
-        #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         session.send('?WATCH={"enable":true%s}' % options)
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await

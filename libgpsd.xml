@@ -96,16 +96,6 @@ on the one where it sees valid packets.  By setting this field you can
 designate a speed to be tried at the front of the hunt queue</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term><structfield>raw_hook</structfield></term>
-<listitem>
-<para>A hook function to be executed on each NMEA
-sentence or as it is read from the GPS.  The data from non-NMEA GPSes like
-the EarthMate will be translated to an NMEA sentence before being
-passed to the hook.  Parameters are a pointer to a gps_data structure
-full of parsed data, the sentence, and the length of the sentene..</para>
-</listitem>
-</varlistentry>
 </variablelist>
 
 <para><function>gpsd_activate()</function>

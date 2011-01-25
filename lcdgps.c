@@ -211,9 +211,7 @@ static void reset_lcd(void) {
 static enum deg_str_type deg_type = deg_dd;
 
 /* This gets called once for each new sentence. */
-static void update_lcd(struct gps_data_t *gpsdata,
-                       char *message UNUSED,
-                       size_t len UNUSED)
+static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
 #ifdef CLIMB
@@ -461,7 +459,6 @@ int main(int argc, char *argv[])
     reset_lcd();
 
     /* Here's where updates go. */
-    gps_set_raw_hook(&gpsdata, update_lcd);
     gps_stream(&gpsdata, WATCH_ENABLE, NULL);
 
     for (;;) { /* heart of the client */
@@ -483,6 +480,7 @@ int main(int argc, char *argv[])
 	}
 	else if (data) {
 	    (void)gps_read(&gpsdata);
+	    update_lcd(&gpsdata);
 	}
 
     }

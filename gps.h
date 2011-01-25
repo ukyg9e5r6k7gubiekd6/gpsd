@@ -1327,8 +1327,6 @@ struct gps_data_t {
     ssize_t waiting;
     char buffer[GPS_BUFFER_MAX * 2];
 
-    void (*raw_hook)(struct gps_data_t *, char *, size_t len);	/* Raw-mode hook for GPS data. */
-
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
     gps_mask_t auxmask;	/* for future expansion */
@@ -1361,8 +1359,6 @@ extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
 extern bool gps_waiting(struct gps_data_t *);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
-extern void gps_set_raw_hook(struct gps_data_t *, 
-			     void (*)(struct gps_data_t *, char *, size_t));
 extern char /*@observer@*/ *gps_errstr(const int);
 
 /* this only needs to be visible for the unit tests */

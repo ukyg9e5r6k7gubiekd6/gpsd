@@ -403,10 +403,9 @@ of the gpsdata structure. Two new DOPs, xdop and ydop, are available;
 these express dilution of precision in longitude and latitude,
 respectively.
 
-The signature of the raw_hook member has changed.  It no longer takes
-the final 'level' argument, which libgps had always set to 1.
+The raw_hook member is gone.
 
-The 2.91 API will include a gps_waiting() method analogous to the 
+The 2.91 API includes a gps_waiting() method analogous to the 
 waiting() method in the Python class -- a non-blocking way to check
 if input is waiting from the daemon.
 

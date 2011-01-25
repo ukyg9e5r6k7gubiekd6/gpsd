@@ -47,10 +47,6 @@
   result.</para></entry>
 </row>
 <row>
-  <entry><function>void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *, char *, size_t len, int level))</function></entry>
-  <entry><para>Fill in the hook to the data for use in raw mode.</para></entry>
-</row>
-<row>
   <entry><function>static void gps_unpack(char *buf, struct gps_data_t *gpsdata)</function></entry>
   <entry><para>Keep looping through the data in
   <function>buf</function> for JSON objects. Each time one is found,

@@ -38,12 +38,6 @@ C:
     <paramdef>char *<parameter>fmt</parameter>...</paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_set_raw_hook</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>void (*<parameter>hook</parameter>)(struct gps_data_t *,
-    char *buf, size_t len)</paramdef>
-</funcprototype>
-<funcprototype>
 <funcdef>int <function>gps_read</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
@@ -72,8 +66,6 @@ Python:
 import gps
 
 session = gps.gps(host="localhost", port="2947")
-
-session.set_raw_hook(raw_hook)
 
 session.stream(flags=WATCH_JSON)
 
@@ -231,13 +223,6 @@ immediately with a value of 0 if there is no input waiting.</para>
 </varlistentry>
 </variablelist>
 
-<para><function>gps_set_raw_hook()</function> takes a function you
-specify and run it (synchronously) on the raw data pulled by a
-<function>gps_query()</function> or <function>gps_read()</function>
-call.  The arguments passed to this hook will be a pointer to a
-structure containing parsed data, and a buffer containining the
-raw <application>gpsd</application> response.</para>
-
 <para><function>gps_errstr()</function> returns an ASCII string (in
 English) describing the error indicated by a nonzero return value from
 <function>gps_open()</function>.</para>
@@ -272,8 +257,6 @@ code that calls gps_poll(gpsdata).
 
     build_gui(toplevel);
 
-    gps_set_raw_hook(gpsdata, update_panel);
-	
     (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
 
     (void)XtAppAddInput(app, gpsdata->gps_fd, 

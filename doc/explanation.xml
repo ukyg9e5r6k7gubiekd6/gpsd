@@ -46,6 +46,12 @@
 </author>
 <revhistory>
    <revision>
+      <revnumber>2.2</revnumber>
+      <date>25 Jan 2011</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>The raw_hook member is gone.</revremark>
+   </revision>
+   <revision>
       <revnumber>2.1</revnumber>
       <date>6 April 2010</date>
       <authorinitials>esr</authorinitials>
