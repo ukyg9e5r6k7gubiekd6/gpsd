@@ -350,7 +350,7 @@ void json_watch_dump(const struct policy_t *ccp,
 		   ccp->timing ? "true" : "false");
     if (ccp->devpath[0] != '\0')
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
-		       "\"device\":%s,", ccp->devpath);
+		       "\"device\":\"%s\",", ccp->devpath);
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';
     (void)strlcat(reply, "}\r\n", replylen - strlen(reply));

@@ -988,7 +988,7 @@ static void handle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid WATCH: %s\"}\r\n",
 			       json_error_string(status));
-		gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+		gpsd_report(LOG_ERROR, "response: %s\n", reply);
 	    } else if (sub->policy.watcher) {
 		if (sub->policy.devpath[0] == '\0') {
 		    /* awaken all devices */
@@ -999,16 +999,17 @@ static void handle_request(struct subscriber_t *sub,
 		    devp = find_device(sub->policy.devpath);
 		    if (devp == NULL) {
 			(void)snprintf(reply, replylen,
-				       "{\"class\":\"ERROR\",\"message\":\"Do nuch device as %s\"}\r\n",
+				       "{\"class\":\"ERROR\",\"message\":\"No such device as %s\"}\r\n",
 				       sub->policy.devpath);
-			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+			gpsd_report(LOG_ERROR, "response: %s\n", reply);
 			goto bailout;
-		    } else if (!awaken(devp))
+		    } else if (!awaken(devp)) {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n",
 				       sub->policy.devpath);
-		    gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
-		    goto bailout;
+			gpsd_report(LOG_ERROR, "response: %s\n", reply);
+			goto bailout;
+		    }
 		}
 	    }
 	}
@@ -1039,7 +1040,7 @@ static void handle_request(struct subscriber_t *sub,
 	    /*@-branchstate@*/
 	    if (status != 0) {
 		(void)snprintf(reply, replylen,
-			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: %s\"}\r\n",
+			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: \"%s\"}\r\n",
 			       json_error_string(status));
 		gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
 		goto bailout;
