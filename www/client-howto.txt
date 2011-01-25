@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.4, January 2011
+v1.5, January 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -411,6 +411,16 @@ to wait on either data from the daemon or a keystroke.
 There's a very simple Python example analogous to gpxlogger attached
 to the source code for the gps.py library.
 
+The heart of it is this code:
+
+-----------------------------------------------------------------------------
+    session = gps(**opts)
+    session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
+    session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
+    for report in session:
+        print report
+-----------------------------------------------------------------------------
+
 For more interesting example integrated with X and GTK, see xgps and
 xgpsspeed.
 
@@ -428,7 +438,7 @@ In major versions before 5:
   a different return convention. The name 'poll()' will at some point
   be reintroduced as an interface to the wire-protocol POLL command.
 
-* Clients needed to define a gpsd_report() function for c;ient-side logging
+* Clients needed to define a gpsd_report() function for client-side logging
   if they didn't want code in netlib.c and libgps_core.c to occasionally
   senfd messages to stderr.  This requirement is now gone.
 
