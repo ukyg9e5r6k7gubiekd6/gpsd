@@ -133,8 +133,8 @@ def save_leapseconds(outfile):
 def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
     leapsecs = []
-    with open(filename) as fp:
-        leapsecs = map(lambda x: float(x.strip()), fp.readlines())
+    for line in open(filename):
+        leapsecs.append(float(line.strip()))
     return leapsecs
 
 def make_leapsecond_include(infile):
