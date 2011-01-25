@@ -8,11 +8,7 @@
  * By defining the GET_ORIGIN and PUT_ORIGIN macros before including
  * this header, it's possible to change the origin of the indexing.
  *
- * Assumptions:
- *  char is 8 bits, short is 16 bits, int is 32 bits, long long is 64 bits,
- *  float is 32 bits IEEE754, double is 64 bits IEEE754.
- *
- * The use of fixed-length types in the casts enforces these.
+ * We enforce data sizes of integral types in the casts on these.
  * Both 32- and 64-bit systems with gcc are OK with this set.
  *
  * This file is Copyright (c)2010 by the GPSD project
@@ -85,7 +81,7 @@ union long_double {
     (void)memcpy(to, from+2*(s)-2, 2*((e)-(s)+1))
 
 /* bitfield extraction */
-extern unsigned long long ubits(char buf[], unsigned int, unsigned int);
-extern signed long long sbits(char buf[], unsigned int, unsigned int);
+extern uint64_t ubits(char buf[], unsigned int, unsigned int);
+extern int64_t sbits(char buf[], unsigned int, unsigned int);
 
 #endif /* _GPSD_BITS_H_ */

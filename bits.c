@@ -4,13 +4,13 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  * Bitfield extraction functions.  In each, start is a bit index  - not
- * a byte index - and width is a bit width.  The width bounded above by
- * the bit width of a long long, which is 64 bits in all standard data
- * models for 32- and 64-bit processors.
+ * a byte index - and width is a bit width.  The width is bounded above by
+ * 64 bits.
  *
  * The sbits() function assumes twos-complement arithmetic.
  */
 #include <assert.h>
+#include <stdint.h>
 
 #include "bits.h"
 #ifdef DEBUG
@@ -20,14 +20,14 @@
 
 #define BITS_PER_BYTE	8
 
-unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
-/* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian long long */
+uint64_t ubits(char buf[], unsigned int start, unsigned int width)
+/* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
 {
-    unsigned long long fld = 0;
+    uint64_t fld = 0;
     unsigned int i;
     unsigned end;
 
-    /*@i1@*/ assert(width <= sizeof(long long) * BITS_PER_BYTE);
+    /*@i1@*/ assert(width <= sizeof(uint64_t) * BITS_PER_BYTE);
     for (i = start / BITS_PER_BYTE;
 	 i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
 	fld <<= BITS_PER_BYTE;
@@ -64,10 +64,10 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     return fld;
 }
 
-signed long long sbits(char buf[], unsigned int start, unsigned int width)
+int64_t sbits(char buf[], unsigned int start, unsigned int width)
 /* extract a bitfield from the buffer as a signed big-endian long */
 {
-    unsigned long long fld = ubits(buf, start, width);
+    uint64_t fld = ubits(buf, start, width);
 
 #ifdef SDEBUG
     (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
@@ -83,8 +83,8 @@ signed long long sbits(char buf[], unsigned int start, unsigned int width)
     }
 #ifdef SDEBUG
     (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width,
-		  (signed long long)fld);
+		  (int64_t)fld);
 #endif /* SDEBUG */
-    return (signed long long)fld;
+    return (int64_t)fld;
     /*@ -relaxtypes */
 }

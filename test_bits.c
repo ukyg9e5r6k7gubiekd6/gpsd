@@ -7,10 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "bits.h"
 
 /*@ -duplicatequals -formattype */
-typedef unsigned long long ubig;
+typedef uint64_t ubig;
 
 static unsigned char buf[80];
 static union int_float i_f;
@@ -22,7 +23,7 @@ static unsigned short uw1, uw2;
 static int sl1, sl2;
 static unsigned int ul1, ul2;
 static long long sL1, sL2;
-static unsigned long long uL1, uL2;
+static uint64_t uL1, uL2;
 static float f1;
 static double d1;
 
@@ -108,7 +109,7 @@ struct unsigned_test
 {
     unsigned char *buf;
     unsigned int start, width;
-    unsigned long long expected;
+    uint64_t expected;
     char *description;
 };
 
@@ -195,7 +196,7 @@ int main(void)
 	 up <
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
 	 up++) {
-	unsigned long long res = ubits((char *)buf, up->start, up->width);
+	uint64_t res = ubits((char *)buf, up->start, up->width);
 	(void)printf("ubits(%s, %d, %d) %s should be %llu, is %llu: %s\n",
 		     hexdump(buf, strlen((char *)buf)),
 		     up->start, up->width, up->description, up->expected, res,
