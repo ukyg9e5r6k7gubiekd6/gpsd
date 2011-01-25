@@ -529,7 +529,7 @@ struct gps_device_t {
 };
 
 /* logging levels */
-#define LOG_ERROR 	0	/* errors, display always */
+#define LOG_ERROR 	-1	/* errors, display always */
 #define LOG_SHOUT	0	/* not an error but we should always see it */
 #define LOG_WARN	1	/* not errors but may indicate a problem */
 #define LOG_INF 	2	/* key informative messages */

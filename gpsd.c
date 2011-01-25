@@ -203,6 +203,9 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 	case LOG_ERROR:
 		err_str = "ERROR: ";
 		break;
+	case LOG_SHOUT:
+		err_str = "SHOUT: ";
+		break;
 	case LOG_WARN:
 		err_str = "WARN: ";
 		break;
@@ -537,6 +540,7 @@ static void detach_client(struct subscriber_t *sub)
     adjust_max_fd(sub->fd, false);
     sub->active = 0;
     sub->policy.watcher = false;
+    sub->policy.json = false;
     sub->policy.nmea = false;
     sub->policy.raw = 0;
     sub->policy.scaled = false;
@@ -1042,7 +1046,7 @@ static void handle_request(struct subscriber_t *sub,
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: \"%s\"}\r\n",
 			       json_error_string(status));
-		gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+		gpsd_report(LOG_ERROR, "response: %s\n", reply);
 		goto bailout;
 	    } else {
 		if (devconf.path[0] != '\0') {
@@ -1053,7 +1057,7 @@ static void handle_request(struct subscriber_t *sub,
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't open %s.\"}\r\n",
 				       devconf.path);
-			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+			gpsd_report(LOG_ERROR, "response: %s\n", reply);
 			goto bailout;
 		    }
 		} else {
@@ -1068,13 +1072,13 @@ static void handle_request(struct subscriber_t *sub,
 			(void)strlcat(reply,
 				      "{\"class\":\"ERROR\",\"message\":\"Can't perform DEVICE configuration, no devices attached.\"}\r\n",
 				      replylen);
-			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+			gpsd_report(LOG_ERROR, "response: %s\n", reply);
 			goto bailout;
 		    } else if (devcount > 1) {
 			(void)snprintf(reply + strlen(reply),
 				       replylen - strlen(reply),
 				       "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple devices are attached.\"}\r\n");
-			gpsd_report(LOG_ERROR, "ERROR response: %s\n", reply);
+			gpsd_report(LOG_ERROR, "response: %s\n", reply);
 			goto bailout;
 		    }
 		    /* we should have exactly one device now */
