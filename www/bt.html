@@ -146,11 +146,19 @@ described in the <a href="troubleshooting.html">Troubleshooting Guide</a>.</p>
 <ul>
 <li><p>On system startup, gpsd starts before rfcomm0 is bound by rfcomm
 and fails (at least on some systems) - a workaround for this is to add
-a symlink to the gpsd init.d script to a later runlevel.</p></li>
+a symlink to the gpsd init.d script to a later runlevel.</p>
 <pre>
 # cd /etc/rcS.d/
 # ln -s ../init.d/gpsd S89gpsd
 </pre>
+</li>
+<li>
+<p>In February 2009 it was reported that there are some issues with
+the Bluetooth stack in Ubuntu Intrepid. <a
+href="http://cris.bytesnblades.net/2009/02/20/starting-gpsd-automatically-with-a-bluetooth-gps/">This
+report advocates using a different Bluetooth device manager and describes some
+additional udev rules.</p>
+</li>
 </ul>
 
 <h2>Contributors:</h2>
