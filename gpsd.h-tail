@@ -683,14 +683,6 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 
-/* OpenBSD and FreeBSD and Cygwin don't seem to have NAN, NetBSD does, others? */
-/* FIX-ME: test for this in configure? */
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__CYGWIN__)
-#ifndef NAN
-#define NAN (0.0/0.0)
-#endif /* !NAN */
-#endif /* list of Operating Systems */
-
 /* Cygwin, in addition to NAN, doesn't have cfmakeraw */
 #if defined(__CYGWIN__)
 void cfmakeraw(struct termios *);
