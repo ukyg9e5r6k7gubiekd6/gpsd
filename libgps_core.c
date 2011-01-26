@@ -655,6 +655,8 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
+	    if (flags & WATCH_TIMING)
+		(void)strlcat(buf, "\"timing\":false,", sizeof(buf));
 	    if (buf[strlen(buf) - 1] == ',')
 		buf[strlen(buf) - 1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
@@ -679,6 +681,8 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
 	    if (flags & WATCH_SCALED)
 		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+	    if (flags & WATCH_TIMING)
+		(void)strlcat(buf, "\"timing\":true,", sizeof(buf));
 	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */
 	    if (flags & WATCH_DEVICE)
 		(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),

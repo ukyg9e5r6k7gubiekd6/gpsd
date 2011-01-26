@@ -1226,17 +1226,18 @@ struct policy_t {
 typedef int socket_t;
 
 /* mode flags for setting streaming policy */
-#define WATCH_ENABLE	0x0001u	/* enable streaming */
-#define WATCH_JSON	0x0002u	/* enable JSON output */
-#define WATCH_NMEA	0x0004u	/* enable output in NMEA */
-#define WATCH_RARE	0x0008u	/* enable output of packets in hex */
-#define WATCH_RAW	0x0010u	/* enable output of raw packets */
-#define WATCH_SCALED	0x0020u	/* scale output to floats, when applicable */ 
-#define WATCH_NEWSTYLE	0x0040u	/* force JSON streaming */
-#define WATCH_OLDSTYLE	0x0080u	/* force old-style streaming */
-#define WATCH_DEVICE	0x0100u	/* watch specific device */
-#define WATCH_DISABLE	0x0200u	/* disable watching */
-#define POLL_NONBLOCK	0x1000u	/* set non-blocking poll (experimental!) */
+#define WATCH_ENABLE	0x000001u	/* enable streaming */
+#define WATCH_DISABLE	0x000002u	/* disable watching */
+#define WATCH_JSON	0x000010u	/* JSON output */
+#define WATCH_NMEA	0x000020u	/* output in NMEA */
+#define WATCH_RARE	0x000040u	/* output of packets in hex */
+#define WATCH_RAW	0x000080u	/* output of raw packets */
+#define WATCH_SCALED	0x000100u	/* scale output to floats */ 
+#define WATCH_TIMING	0x000200u	/* timing information */
+#define WATCH_DEVICE	0x000800u	/* watch specific device */
+#define POLL_NONBLOCK	0x001000u	/* set non-blocking poll */
+#define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
+#define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 
 /* 
  * Main structure that includes all previous substructures

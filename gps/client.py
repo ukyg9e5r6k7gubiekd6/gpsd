@@ -110,14 +110,16 @@ class gpscommon:
             commands += "\n"
         self.sock.send(commands)
 
-WATCH_DISABLE	= 0x0000
-WATCH_ENABLE	= 0x0001
-WATCH_JSON	= 0x0002
-WATCH_NMEA	= 0x0004
-WATCH_RARE	= 0x0008
-WATCH_RAW	= 0x0010
-WATCH_SCALED	= 0x0020
-WATCH_DEVICE	= 0x0040
+WATCH_ENABLE	= 0x000001	# enable streaming
+WATCH_DISABLE	= 0x000002	# disable watching
+WATCH_JSON	= 0x000010	# JSON output
+WATCH_NMEA	= 0x000020	# output in NMEA
+WATCH_RARE	= 0x000040	# output of packets in hex
+WATCH_RAW	= 0x000080	# output of raw packets
+WATCH_SCALED	= 0x000100	# scale output to floats 
+WATCH_TIMING	= 0x000200	# timing information
+WATCH_DEVICE	= 0x000800	# watch specific device
+POLL_NONBLOCK	= 0x001000	# set non-blocking poll
 
 class gpsjson(gpscommon):
     "Basic JSON decoding."
@@ -159,6 +161,8 @@ class gpsjson(gpscommon):
                 arg += ',"raw":2'
             if flags & WATCH_SCALED:
                 arg += ',"scaled":false'
+            if flags & WATCH_TIMING:
+                arg += ',"scaled":false'
         else: # flags & WATCH_ENABLE:
             arg = '?WATCH={"enable":true'
             if flags & WATCH_JSON:
@@ -170,6 +174,8 @@ class gpsjson(gpscommon):
             if flags & WATCH_RARE:
                 arg += ',"raw":0'
             if flags & WATCH_SCALED:
+                arg += ',"scaled":true'
+            if flags & WATCH_TIMING:
                 arg += ',"scaled":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % outfile

@@ -64,8 +64,8 @@ MODE_3D = 3
 MAXCHANNELS = 20
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
-WATCH_NEWSTYLE	= 0x00080
-WATCH_OLDSTYLE	= 0x10000
+WATCH_NEWSTYLE	= 0x010000	# force JSON streaming
+WATCH_OLDSTYLE	= 0x020000	# force old-style streaming
 
 class gpsfix:
     def __init__(self):
