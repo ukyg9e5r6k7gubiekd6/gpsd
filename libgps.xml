@@ -93,17 +93,14 @@ the protocol and API changes.</para></warning>
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
 attached to
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. 
-<function>gps_open()</function> returns NULL on errors.  errno is
-set depending on the error returned from the the socket layer; see
-<filename>gps.h</filename> for values and explanations. The host
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+
+<function>gps_open()</function> returns NULL on errors and is
+re-entrant.  errno is set depending on the error returned from the the
+socket layer; see <filename>gps.h</filename> for values and
+explanations; also see <function>gps_errstr()</function>. The host
 address may be a DNS name, an IPv4 dotted quad, or an IPV6 address;
 the library will do the right thing for any of these.</para>
-
-<para><function>gps_open_r()</function> is a reentrent-friendly
-version that puts the session storage where you wish to allocate it.
-It returns 0 on success and -1 on failure, with errno set
-appropriately.</para>
 
 <para><function>gps_close()</function> ends the session.</para>
 
@@ -116,7 +113,8 @@ It may have % elements as for
 which will be filled in from any following arguments.  This function
 returns a -1 if there was a Unix-level write error, otherwise
 0. Please read the LIMITATIONS section for additional information and
-cautions.</para>
+cautions. See <function>gps_stream()</function> as a possible
+alternative.</para>
 
 <para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
@@ -134,13 +132,13 @@ waiting for input.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
-to be made available whenn you poll.  It is preferable to the
+to be made available when you poll.  It is preferable to the
 older-style (pre-2.90) way of doing this,
 <function>gps_query()</function> with a "w+" argument, because it
 insulates your code from whether your client library and your
 <application>gpsd</application> are using old or new protocol.
-The second argument is a flag mask that sets various policy bits; 
-see trhe list below.  Calling <function>gps_stream()</function>
+The second argument is a flag mask that sets various policy bits;
+see the list below.  Calling <function>gps_stream()</function>
 more than once with different flag masks is allowed.</para>
 
 <variablelist>
@@ -180,35 +178,35 @@ other WATCH flags are set, this is the default.</para>
 <varlistentry>
 <term>WATCH_RAW</term>
 <listitem>
-<para>Enable literal passtrough of binary packets.</para>
+<para>Enable literal passthrough of binary packets.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>WATCH_SCALED</term>
 <listitem>
-<para>When reporting AIS data, scale integer quantities to floats if 
-they have a divisor or rendering formula assosiated with them.</para>
+<para>When reporting AIS data, scale integer quantities to floats if
+they have a divisor or rendering formula associated with them.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>WATCH_NEWSTYLE</term>
 <listitem>
-<para>Force issuing a JSON initialization and getting new-style 
-responses. This will become the default in a future release. </para>
+<para>Force issuing a JSON initialization and getting new-style
+responses. This is the default. </para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>WATCH_OLDSTYLE</term>
 <listitem>
 <para>Force issuing a W or R command and getting old-style
-responses. This is now the default behavior, but will be removed
+responses. Warning: this flag (and the capability) will be removed
 in a future release.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>WATCH_DEVICE</term>
 <listitem>
-<para>Restrict watching to a speciied device, patch given as second 
+<para>Restrict watching to a specified device, patch given as second
 argument.</para>
 </listitem>
 </varlistentry>
@@ -216,7 +214,7 @@ argument.</para>
 <term>POLL_NONBLOCK</term>
 <listitem>
 <para>Normally <function>gps_read()</function> blocks until
-either there is a read error or some data is received from tha 
+either there is a read error or some data is received from the
 daemon.  In this mode, <function>gps_read()</function> returns
 immediately with a value of 0 if there is no input waiting.</para>
 </listitem>
@@ -239,7 +237,7 @@ library. <function>gps_open()</function> is replaced by the
 initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
 Resources within the session object will be properly released when it
-is garbage-collected. Note one limitation: POLL_NOBLOCK is not yet 
+is garbage-collected. Note one limitation: POLL_NOBLOCK is not yet
 supported in Python; use the waiting() method instead.</para>
 </refsect1>
 
@@ -247,23 +245,29 @@ supported in Python; use the waiting() method instead.</para>
 
 <para>The following is an excerpted and simplified version of the
 libgps interface code from
-<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-The function <function>handle_input()</function> is a trivial piece of
-code that calls gps_poll(gpsdata).
-</para>
+<citerefentry><refentrytitle>cgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
 
 <programlisting>
-    gpsdata = gps_open(server, port);
+    struct gps_data_t gps_data;
 
-    build_gui(toplevel);
+    ret = gps_open(hostName, hostPort, &amp;gps_data);
 
-    (void)gps_stream(gpsdata, WATCH_ENABLE, NULL);
+    (void) gps_stream(&amp;gps_data, WATCH_ENABLE | WATCH_JSON, NULL);
 
-    (void)XtAppAddInput(app, gpsdata->gps_fd, 
-		  (XtPointer)XtInputReadMask, handle_input, NULL);
-    (void)XtAppMainLoop(app);
+    /* Put this in a loop with a call to a high resolution sleep () in it. */
+    if (gps_waiting (&amp;gps_data)) {
+        errno = 0;
+        if (gps_read (&amp;gps_data) == -1) {
+            ...
+        } else {
+            /* Display data from the GPS receiver. */
+            if (gps_data.set &amp; ...
+        }
+    }
 
-    (void)gps_close(gpsdata);
+    /* When you are done... */
+    (void) gps_stream(&amp;gps_data, WATCH_DISABLE, NULL);
+    gps_close (&amp;gps_data);
 </programlisting>
 
 </refsect1>
@@ -291,14 +295,14 @@ to request any of these responses.</para>
 <para>The <function>gps_query()</function> supported in major versions
 1 and 2 of this library has been removed.  With the new
 streaming-oriented wire protocol behind this library, it is extremely
-unwise to assume that the first transmission from the damon after a
-command is shipped to it will be the reponse to command.</para>
+unwise to assume that the first transmission from the daemon after a
+command is shipped to it will be the response to command.</para>
 
-<para>If you must send commands to the daemon explicity, use
+<para>If you must send commands to the daemon explicitly, use
 <function>gps_send()</function> but beware that this ties your code to
 the GPSD wire protocol. It is not recommended.</para>
 
-<para>See gthe comment above the symbol GPSD_API_MAJOR_VERSION
+<para>See the comment above the symbol GPSD_API_MAJOR_VERSION
 in <filename>gps.h</filename> for recent changes.</para>
 </refsect1>
 
@@ -312,9 +316,7 @@ in <filename>gps.h</filename> for recent changes.</para>
 </refsect1>
 
 <refsect1 id='author'><title>AUTHOR</title>
-<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, Thread-callback methods
-in the C binding added by Alfredo Pironti
-&lt;alfredo@users.sourceforge.net&gt;.</para>
+<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, C sample code Charles Curley &lt;charlescurley@charlescurley.com&gt;</para>
 </refsect1>
 </refentry>
 
