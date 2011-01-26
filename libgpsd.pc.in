@@ -6,4 +6,5 @@ includedir=${prefix}/include
 Name: libgpsd
 Description: Lowlevel GPSD control library
 Version: @VERSION@
+Cflags: -I${includedir}
 Libs: -L${libdir} -lgpsd

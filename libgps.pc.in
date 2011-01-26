@@ -6,4 +6,5 @@ includedir=${prefix}/include
 Name: GPSD
 Description: GPS Daemon communication library
 Version: @VERSION@
+Cflags: -I${includedir}
 Libs: -L${libdir} -lgps
