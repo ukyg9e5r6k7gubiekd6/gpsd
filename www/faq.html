@@ -84,6 +84,7 @@ GPSD Frequently Asked Questions
 <li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
 <li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a>
 <li><a href='#nmea2000'>Does gpsd support NMEA2000?.</a><br/>
+<li><a href='#conflict'>Why does GPSD interfere with non-GPS USB devices?</a></br>
 </ul>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
@@ -754,6 +755,50 @@ called Controller Area Network (CAN) that is widely used to network
 automotive electronics.  Without hardware mediation to map the
 message into self-describing packets on a serial link, there's no
 way gpsd will ever see these.</p>
+
+<h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
+
+<p>Most USB devices have a defined <a
+href="http://www.usb.org/developers/defined_class">device class</a> -
+mass storage, video, hub, and human interface device are three of the
+more common ones.  Using GPSD will never interfere with such devices,
+nor will they interfere with GPSD.</p>
+
+<p>Unfortunately, there is no device class for USB GPSes. Nor is there
+a device class for USB-to-serial adapter chips.  Both are assigned the
+catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen 
+consists of a GPS module with TTL-level RS232 outputs connected to an
+RS232-to-USB adapter chip, and presents the class ID 0xFF to your USB
+subsystem.</p>
+
+<p>When you install GPSD, it puts in place rules that watch for
+hotplug activation events from devices that might be GPSes. When such
+a hotplug event happens, a <code>gpsd</code> instance is started (if
+one is not already running) and puts a copy of the device path in an
+internal stash list. Later, if a client application requests GPS data,
+<code>gpsd</code> will try to read from the device, and discard it
+from the stash list if it is not emitting data that <code>gpsd</code>
+recognizes.<p>
+
+<p>GPSD's notion of "might be a GPS" depends on the fact that all USB
+GPSes are made with one of a small number of USB-to-serial adapter
+chips, the most common of which is the Prolific Logic 2303.  GPSD's
+hotplug rules expect that anything exhibiting the USB vendor:product
+ID pair of one of these chips will be a GPS.</p>
+
+<p>A problem can arise if you have other devices connected to your
+system through one of these specific adaptor chips. When these
+activate, the GPSD hotplug rules will believe they are GPSes, and
+<code>gpsd</code> will try to read from them when a GPS-ware client
+application requests data.  We've had reports of this happening with
+USB modems and various microcontroller kits. It's not a problem we can
+solve with clever programming, the devices simply don't yield 
+enough information about themselves to avoid conflicts.</p>
+
+<p>If this sort of conflict becomes a problem, you can work around
+it by disabling the GPSD hotplug rules.  Unfortunately, this means
+you will have to start <code>gpsd</code> manually with a device-path
+argument when you want to use a GPS.</p>
 
 </div>
 <hr/>
