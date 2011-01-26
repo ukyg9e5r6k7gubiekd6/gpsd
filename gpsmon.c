@@ -310,18 +310,9 @@ static long tzoffset(void)
     long res = 0;
 
     tzset();
-#ifdef HAVE_TIMEZONE
     res = timezone;
-#else
-    res = localtime_r(&now, &tm)->tm_gmtoff;
-#endif
-#ifdef HAVE_DAYLIGHT
-    if (daylight != 0 && localtime_r(&now, &tm)->tm_isdst != 0)
-	res -= 3600;
-#else
     if (localtime_r(&now, &tm)->tm_isdst)
 	res -= 3600;
-#endif
     return res;
 }
 
