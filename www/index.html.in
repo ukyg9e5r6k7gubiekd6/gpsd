@@ -541,6 +541,6 @@ Here</a>.</font></td></tr></table></td></tr></table></noscript>
 
 <!--
 Local Variables:
-compile-command: "(make html; scp index.html shell.berlios.de:/home/groups/gpsd/htdocs)"
+compile-command: "(cd ..; make website; cd www; scp index.html shell.berlios.de:/home/groups/gpsd/htdocs)"
 End:
 -->
