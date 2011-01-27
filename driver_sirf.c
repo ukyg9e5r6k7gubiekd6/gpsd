@@ -392,13 +392,16 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 				     unsigned char *buf, size_t len)
 {
     double fv;
+    unsigned char *cp;
 
     if (len < 20)
 	return 0;
 
     (void)strlcpy(session->subtype, (char *)buf + 1,
 		  sizeof(session->subtype));
-    fv = atof((char *)(buf + 1));
+    for (cp = buf+1; *cp!='\0' && isdigit(*cp)==0; cp++)
+	continue;
+    fv = atof((const char *)cp);
     if (fv < 231) {
 	session->driver.sirf.driverstate |= SIRF_LT_231;
 	if (fv > 200)
