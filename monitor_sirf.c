@@ -121,6 +121,7 @@ static bool sirf_initialize(void)
     for (i = 0; i < MAXSATS; i++) {
 	display(mid4win, (int)(i + 2), 1, "%2d", i);
     }
+    display(mid4win, 0, 1, " Measured Tracker ");
     display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
     (void)wattrset(mid4win, A_NORMAL);
 
@@ -160,12 +161,13 @@ static bool sirf_initialize(void)
 
     (void)wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid6win, A_BOLD);
-    display(mid6win, 1, 1, "Version:");
+    display(mid6win, 0, 1, " Firmware Version ");
     display(mid6win, 2, 8, " Packet Type 6 (0x06) ");
     (void)wattrset(mid6win, A_NORMAL);
 
     (void)wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid7win, A_BOLD);
+    display(mid7win, 0, 1, " Clock Status ");
     display(mid7win, 1, 1, "SVs: ");
     display(mid7win, 1, 9, "Drift: ");
     display(mid7win, 1, 23, "Bias: ");
@@ -175,6 +177,7 @@ static bool sirf_initialize(void)
 
     (void)wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid9win, A_BOLD);
+    display(mid9win, 0, 1, " CPU Throughput ");
     display(mid9win, 1, 1, "Max: ");
     display(mid9win, 1, 13, "Lat: ");
     display(mid9win, 1, 25, "Time: ");
@@ -184,15 +187,15 @@ static bool sirf_initialize(void)
 
     (void)wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid13win, A_BOLD);
-    display(mid13win, 1, 1, "SVs: ");
-    display(mid13win, 1, 9, "=");
+    display(mid13win, 0, 1, " Visible List ");
+    display(mid13win, 1, 4, "=");
     display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
     (void)wattrset(mid13win, A_NORMAL);
 
     (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid27win, A_BOLD);
-    display(mid27win, 1, 1, "DGPS source: ");
-    display(mid27win, 1, 31, "Corrections: ");
+    display(mid27win, 0, 1, " DGPS Status ");
+    display(mid27win, 1, 10, "=");
     display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
     /*@ +nullpass @*/
@@ -399,7 +402,7 @@ static void sirf_update(void)
 #endif /* __UNUSED */
 
     case 0x06:			/* firmware version */
-	display(mid6win, 1, 10, "%s", buf + 1);
+	display(mid6win, 1, 1, "%s", buf + 1);
 	monitor_log("FV  0x06=");
 	break;
 
@@ -436,8 +439,8 @@ static void sirf_update(void)
 	break;
 
     case 0x0d:			/* Visible List */
-	display(mid13win, 1, 6, "%02d", getub(buf, 1));
-	(void)wmove(mid13win, 1, 10);
+	display(mid13win, 1, 1, "%02d", getub(buf, 1));
+	(void)wmove(mid13win, 1, 5);
 	for (i = 0; i < MAXSATS; i++) {
 	    if (i < (int)getub(buf, 1))
 		(void)wprintw(mid13win, " %2d", getub(buf, 2 + 5 * i));
@@ -526,18 +529,17 @@ static void sirf_update(void)
 	total               3 x 12 = 36 bytes
 	******************************************************************/
 	dgps = getub(buf, 1);
-	display(mid27win, 1, 14, "%d (%s)",
-		dgps, (CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
+	display(mid27win, 1, 1, "%s",
+		(CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
 	/*@ -type @*/
-	//(void) wmove(mid27win, 2, 0);
-	for (i = j = 0; i < 12; i++) {
-	    if (getub(buf, 16 + 3 * i) != '\0') {
-		//(void)wprintw(mid27win, " %d=%d", getub(buf, 16+3*i), getbes16(buf, 16+3*i+1));
-		j++;
-	    }
+	(void)wmove(mid27win, 1, 12);
+	for (i = 0; i < MAXSATS; i++) {
+	    if (getub(buf, 16 + 3 * i) != '\0')
+		(void)wprintw(mid27win, " %2d", getub(buf, 16+3*i));
+	    else
+		(void)wprintw(mid27win, "   ");
 	}
 	/*@ +type @*/
-	display(mid27win, 1, 44, "%d", j);
 	monitor_log("DST 0x1b=");
 	break;
 
