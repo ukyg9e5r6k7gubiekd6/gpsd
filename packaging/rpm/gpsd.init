@@ -35,8 +35,6 @@ PIDFILE=/var/run/gpsd.pid
 CONTROL_SOCKET=/var/run/gpsd.sock
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
-: ${OPTIONS:=-n}
-: ${DEVICE:=/dev/ttyUSB0}
 
 lockfile=/var/lock/subsys/$prog
 
