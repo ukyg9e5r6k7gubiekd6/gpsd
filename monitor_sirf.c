@@ -188,14 +188,12 @@ static bool sirf_initialize(void)
     (void)wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid13win, A_BOLD);
     display(mid13win, 0, 1, " Visible List ");
-    display(mid13win, 1, 4, "=");
     display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
     (void)wattrset(mid13win, A_NORMAL);
 
     (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid27win, A_BOLD);
     display(mid27win, 0, 1, " DGPS Status ");
-    display(mid27win, 1, 10, "=");
     display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
     /*@ +nullpass @*/
@@ -439,14 +437,13 @@ static void sirf_update(void)
 	break;
 
     case 0x0d:			/* Visible List */
-	display(mid13win, 1, 1, "%02d", getub(buf, 1));
+	display(mid13win, 1, 1, "%02d =                                            ",
+				 getub(buf, 1));
 	(void)wmove(mid13win, 1, 5);
-	for (i = 0; i < MAXSATS; i++) {
-	    if (i < (int)getub(buf, 1))
-		(void)wprintw(mid13win, " %2d", getub(buf, 2 + 5 * i));
-	    else
-		(void)wprintw(mid13win, "   ");
-	}
+	for (i = 0; i < MAXSATS; i++)
+	    (void)wprintw(mid13win, " %2d", getub(buf, 2 + 5 * i));
+	if (MAXSATS < (int)getub(buf, 1))
+	    (void)wprintw(mid13win, " ...");
 	monitor_log("VL  0x0d=");
 	break;
 
@@ -529,32 +526,33 @@ static void sirf_update(void)
 	total               3 x 12 = 36 bytes
 	******************************************************************/
 	dgps = getub(buf, 1);
-	display(mid27win, 1, 1, "%s",
+	display(mid27win, 1, 1, "%8s =                                      ",
 		(CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
 	/*@ -type @*/
 	(void)wmove(mid27win, 1, 12);
-	for (i = 0; i < MAXSATS; i++) {
+	for (i = 0; i < MAXSATS; i++)
 	    if (getub(buf, 16 + 3 * i) != '\0')
 		(void)wprintw(mid27win, " %2d", getub(buf, 16+3*i));
-	    else
-		(void)wprintw(mid27win, "   ");
-	}
 	/*@ +type @*/
 	monitor_log("DST 0x1b=");
 	break;
 
-    case 0x1C:			/* NL Measurement Data */
-    case 0x1D:			/* DGPS Data */
-    case 0x1E:			/* SV State Data */
-    case 0x1F:			/* NL Initialized Data */
+    case 0x1c:			/* NL Measurement Data */
+    case 0x1d:			/* NL DGPS Data */
+    case 0x1e:			/* NL SV State Data */
+    case 0x1f:			/* NL Initialized Data */
 	subframe_enabled = true;
+	monitor_log("NL  0x%02x=", buf[0]);
 	break;
+
     case 0x29:			/* Geodetic Navigation Message */
 	monitor_log("GNM 0x29=");
 	break;
+
     case 0x32:			/* SBAS Parameters */
 	monitor_log("SBP 0x32=");
 	break;
+
     case 0x34:			/* PPS Time */
 	leapseconds = (int)getbeu16(buf, 8);
 	monitor_log("PPS 0x34=");
@@ -646,7 +644,7 @@ static void sirf_update(void)
 	break;
 
     default:
-	monitor_log("    0x%02x=", buf[4]);
+	monitor_log("UNK 0x%02x=", buf[0]);
 	break;
     }
 
