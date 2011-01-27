@@ -1481,7 +1481,7 @@ static void consume_packets(struct gps_device_t *device)
 	/* update all subscribers associated with this device */
 	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 	    /*@-nullderef@*/
-	    if (sub == NULL || sub->active == 0)
+	    if (sub == NULL || sub->active == 0 || !subscribed(sub, device))
 		continue;
 
 	    /* report raw packets to users subscribed to those */
