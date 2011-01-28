@@ -243,12 +243,12 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-timebase.h: $(srcdir)/leapsecond.py leapseconds.cache
-	$(PYTHON) $(srcdir)/leapsecond.py -h leapseconds.cache >timebase.h
+timebase.h: $(srcdir)/leapsecond.py $(srcdir)/leapseconds.cache
+	$(PYTHON) $(srcdir)/leapsecond.py -h $(srcdir)/leapseconds.cache >timebase.h
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
-# build without Internet access.
+# build without Internet access. This production is never called by hand.
 leapseconds.cache: $(srcdir)/leapsecond.py
 	$(PYTHON) $(srcdir)/leapsecond.py -f leapseconds.cache
 
