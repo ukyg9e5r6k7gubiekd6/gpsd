@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.27, July 2010
+v1.28, Jan 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -442,7 +442,7 @@ of 669.
 
 Detailed descriptions of message types 1-24 follow. Message types 1-22
 are derived from <<IALA>>. Message type 23 was decribed to me by Mike
-Greene based on <<IEC62287>>.  Message type 24 was described to me by
+Greene based on <<IEC-62287>>.  Message type 24 was described to me by
 <<Schwehr>>, whose Python toolkit decodes it. Message types 25-26 are
 reported by <<Schwehr>>, who observes they were added in Version 3 of
 <<ITU1371>>.
@@ -823,9 +823,9 @@ type 6:
 
 |==============================================================================
 | DAC |FID | Sub | Source     | Status       | Description     
-|   1 | 23 |     | <<NAV55>>  | Proposed     | Area notice
-|   1 | 28 |     | <<NAV55>>  | Proposed     | Route info addressed
-|   1 | 30 |     | <<NAV55>>  | Proposed     | Text description addressed
+|   1 | 23 |     | <<IMO289>>  | Standard  | Area notice addressed
+|   1 | 28 |     | <<IMO289>>  | Standard  | Route info addressed
+|   1 | 30 |     | <<IMO289>>  | Standard  | Text description addressed
 |==============================================================================
 
 DAC/FID pairs are assigned separately per message type.
@@ -881,25 +881,25 @@ pairs in use for type 8:
 [frame="topbot",options="header"]
 |==============================================================================
 | DAC     |FID | Sub | Source     | Status     | Description     
-|   1     | 11 |     | <<IMO236>> | Deprecated | Meteorological/Hydrological Data
+|   1     | 11 |     | <<IMO236>> | Deprecated/In Use | Meteorological/Hydrological Data
 |   1     | 12 |     | <<IMO236>> | Deprecated | Dangerous cargo indication
 |   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
 |   1     | 14 |     | <<IMO236>> | Deprecated | Tidal window
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
 |   1     | 16 |     | <<IMO236>> | In use     | Num persons on board
 |   1     | 17 |     | <<IMO236>> | In use     | VTS-Generated/Synthetic targets
-|   1     | 18 |     | <<NAV55>>  | Proposed   | Clearance time to enter port
-|   1     | 19 |     | <<NAV55>>  | Proposed   | Marine traffic signals
-|   1     | 20 |     | <<NAV55>>  | Proposed   | Berthing data
-|   1     | 21 |     | <<NAV55>>  | Proposed   | Weather obs from ship
-|   1     | 22 |     | <<NAV55>>  | Proposed   | Area notice broadcast
-|   1     | 24 |     | <<NAV55>>  | Proposed   | Extended ship and voyage
-|   1     | 25 |     | <<NAV55>>  | Proposed   | Dangerous cargo
-|   1     | 26 |     | <<NAV55>>  | Proposed   | Environmental
-|   1     | 27 |     | <<NAV55>>  | Proposed   | Route info broadcast
-|   1     | 29 |     | <<NAV55>>  | Proposed   | Text description broadcast
-|   1     | 31 |     | <<NAV55>>  | Proposed   | Meteorological and Hydrological
-|   1     | 32 |     | <<NAV55>>  | Proposed   | Tidal Window
+|   1     | 18 |     | <<IMO289>>  | Standard   | Clearance time to enter port
+|   1     | 19 |     | <<IMO289>>  | Standard   | Marine traffic signals
+|   1     | 20 |     | <<IMO289>>  | Standard   | Berthing data
+|   1     | 21 |     | <<IMO289>>  | Standard   | Weather obs from ship
+|   1     | 22 |     | <<IMO289>>  | In use  | Area notice broadcast
+|   1     | 24 |     | <<IMO289>>  | Standard   | Extended ship and voyage
+|   1     | 25 |     | <<IMO289>>  | Standard   | Dangerous cargo
+|   1     | 26 |     | <<IMO289>>  | Standard   | Environmental
+|   1     | 27 |     | <<IMO289>>  | Standard   | Route info broadcast
+|   1     | 29 |     | <<IMO289>>  | Standard   | Text description broadcast
+|   1     | 31 |     | <<IMO289>>  | In use   | Meteorological and Hydrological
+|   1     | 32 |     | <<IMO289>>  | Standard   | Tidal Window
 | 316/366 |  1 |   2 | <<SEAWAY>> | In use     | Wind
 | 316/366 |  1 |   1 | <<SEAWAY>> | In use     | Weather station
 | 316/366 |  1 |   3 | <<SEAWAY>> | In use     | Water level
@@ -918,7 +918,7 @@ on the transmitter location.
 
 FID types 11-15 are being phased out and are not to be used after 1
 Jan 2013. FID types 16 and 17 are in use; there are proposed updates 
-for these in <<NAV55>>.
+for these in <<IMO289>>.
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
@@ -1940,16 +1940,15 @@ Identification System]
 
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
 
-- [[[IMO236] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
+- [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
   Circular 236: Guidance on the Application of AIS Binary Messages (2004)]
 
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
 
-- [[[NAV55]]]
-  http://vislab-ccom.unh.edu/~schwehr/papers/2009-Nav55-CG-AIX-Report-Annex1.pdf[IMO
-  NAV 55 Report Annex 1: Guidance on the Application of AIS Binary
-  Messages (2009)]
+- [[[IMO289]]]
+  http://vislab-ccom.unh.edu/~schwehr/papers/2010-IMO-SN.1-Circ.289.pdf[IMO
+  SN.1/Circ.289 GUIDANCE ON THE USE OF AIS APPLICATION-SPECIFIC MESSAGES (2010)]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
@@ -1958,7 +1957,7 @@ Identification System]
   is described on page 26 of Annex C, Table C-1. Communicated by 
   Kurt Schwehr; I have not looked at it.
 
-- [[[IEC 62287]]] "Maritime Navigation and Radiocommunication
+- [[[IEC-62287]]] "Maritime Navigation and Radiocommunication
   Equipment and Systems – Class B Shipborne Equipment of the
   Automatic Identification System (AIS)" Communicated by Mike Greene;
   I have not looked at it.
@@ -2067,3 +2066,5 @@ AIS Type 1, 2, and 3 messages,
 Version 1.27 describes the sometime U.S. practice of omitting the leading
 '3' region code from MMSIs.
   
+Version 1.28 merges updates from IMO 289, communicated by Kurt Schwehr.
+
