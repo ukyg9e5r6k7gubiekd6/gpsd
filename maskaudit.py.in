@@ -55,12 +55,17 @@ if __name__ == '__main__':
             if (switch == '-t'):
                 tabulate = True
 
+        if not arguments:
+            srcdir = '.'
+        else:
+            srcdir = arguments[0]
+
         if clientgen:
-            source = SourceExtractor("./gps.h", "_SET", clientside=True)
+            source = SourceExtractor(srcdir + "/gps.h", "_SET", clientside=True)
             prefix = "gps"
             banner = "Library"
         elif daemongen:
-            source = SourceExtractor("./gpsd.h", "_IS", clientside=False)
+            source = SourceExtractor(srcdir + "/gpsd.h", "_IS", clientside=False)
             prefix = "gpsd"
             banner = "Daemon"
 

@@ -219,7 +219,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	rm -f gpsd.h && \
 	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h && \
 	cat $(srcdir)/gpsd.h-head >>gpsd.h && \
-	cat $(srcdir)/gpsd_config.h >>gpsd.h && \
+	cat gpsd_config.h >>gpsd.h && \
 	cat $(srcdir)/gpsd.h-tail >>gpsd.h && \
 	chmod a-w gpsd.h
 
@@ -235,7 +235,7 @@ revision.h: Makefile
 
 gps_maskdump.c: gps.h maskaudit.py
 	rm -f gps_maskdump.c && \
-	$(PYTHON) maskaudit.py -c >gps_maskdump.c && \
+	$(PYTHON) maskaudit.py -c $(srcdir) >gps_maskdump.c && \
 	chmod a-w gps_maskdump.c
 
 gpsd_maskdump.c: gpsd.h maskaudit.py
@@ -243,14 +243,14 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-timebase.h: leapsecond.py #leapseconds.i
-	$(PYTHON) leapsecond.py -h leapseconds.cache >timebase.h
+timebase.h: leapsecond.py leapseconds.cache
+	$(PYTHON) $(srcdir)/leapsecond.py -h leapseconds.cache >timebase.h
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. # It gets kept in the reposiory so we can
 # build without Internet access
-leapseconds.cacche: leapsecond.py
-	$(PYTHON) leapsecond.py -f leapseconds.cache
+leapseconds.cache: leapsecond.py
+	$(PYTHON) $(srcdir)/leapsecond.py -f leapseconds.cache
 
 libgps_la_SOURCES = $(libgps_c_sources)
 
@@ -888,7 +888,7 @@ www/hardware.html: www/hardware-head.html gpscap.ini www/hardware-tail.html
 www/performance/performance.html: www/performance/performance.xml
 	(cd www/performance; xmlto xhtml-nochunks performance.xml)
 
-www/internals.html: $(shell ls doc/*.xml)
+www/internals.html: $(shell ls $(srcdir)/doc/*.xml)
 	cd doc; xmlto xhtml-nochunks explanation.xml; cp explanation.html ../www/internals.html
 
 if HAVE_PYTHON
