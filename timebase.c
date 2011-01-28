@@ -101,7 +101,7 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     context->century = CENTURY_BASE;
     context->start_time = starttime;
 
-    context->rollovers = ((context->start_time - GPS_EPOCH) / GPS_ROLLOVER);
+    context->rollovers = (int)((context->start_time-GPS_EPOCH) / GPS_ROLLOVER);
 
     if (context->start_time < GPS_EPOCH)
 	gpsd_report(LOG_ERROR, "system time looks bogus, dates may not be reliable.\n");

@@ -399,7 +399,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 
     (void)strlcpy(session->subtype, (char *)buf + 1,
 		  sizeof(session->subtype));
-    for (cp = buf+1; *cp!='\0' && isdigit(*cp)==0; cp++)
+    for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
 	continue;
     fv = atof((const char *)cp);
     if (fv < 231) {
