@@ -135,7 +135,7 @@ void monitor_fixframe(WINDOW * win)
  *
  ******************************************************************************/
 
-void gpsd_report(int errlevel UNUSED, const char *fmt, ...)
+void gpsd_report(int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
     if (errlevel <= debuglevel && packetwin != NULL) {

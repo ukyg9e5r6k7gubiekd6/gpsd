@@ -53,10 +53,10 @@ with the GPS chipset type.</para>
 
 <para>This tool used to be called 'sirfmon', and worked only on SiRF
 devices (and the command set has changed to resemble the command
-switches of <application>gpsctl</application>). It now has support for a range
-of NMEA devices as well; support for other (binary-protocol) device
-types is planned. It will behave sanely, just dumping packets, when
-connected to a GPS type it knows nothing about.</para>
+switches of <application>gpsctl</application>). It now has support for
+a range of NMEA and other other binary-protocol devices as well.  It
+will behave sanely, just dumping packets, when connected to a GPS type
+it knows nothing about.</para>
 
 <para><application>gpsmon</application> differs from a navigation
 client in that it mostly dumps raw data from the GPS, with only enough
