@@ -56,7 +56,8 @@ if not 'clean' in sys.argv:
 
 gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
             "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
-include_dirs = [ os.path.realpath(os.path.dirname(__file__)) ]
+include_dirs = [ os.path.realpath(os.path.dirname(__file__)),
+                 abs_builddir]
 
 setup( name="gps",
        version=os.environ['version'],
