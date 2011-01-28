@@ -63,7 +63,7 @@ PYTHONMODULES_DIST = gps/__init__.py gps/misc.py gps/fake.py gps/gps.py gps/clie
 
 PYTHONPAGES_DIST = gpsprof.1 gpsfake.1 gpscat.1 xgpsspeed.1 xgps.1
 if HAVE_PYTHON
-python_PYTHON = gpscap.py
+pyexec_PYTHON = gpscap.py
 PYTHONPAGES = $(PYTHONPAGES_DIST)
 endif
 
