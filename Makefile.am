@@ -243,13 +243,13 @@ gpsd_maskdump.c: gpsd.h maskaudit.py
 	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
 	chmod a-w gpsd_maskdump.c
 
-timebase.h: leapsecond.py leapseconds.cache
+timebase.h: $(srcdir)/leapsecond.py leapseconds.cache
 	$(PYTHON) $(srcdir)/leapsecond.py -h leapseconds.cache >timebase.h
 
 # leapseconds.cache is a local cache for information on leapseconds issued
-# by the U.S. Naval observatory. # It gets kept in the reposiory so we can
-# build without Internet access
-leapseconds.cache: leapsecond.py
+# by the U.S. Naval observatory. It gets kept in the repository so we can
+# build without Internet access.
+leapseconds.cache: $(srcdir)/leapsecond.py
 	$(PYTHON) $(srcdir)/leapsecond.py -f leapseconds.cache
 
 libgps_la_SOURCES = $(libgps_c_sources)
@@ -290,7 +290,7 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
-	env abs_builddir='$(abs_builddir)' \
+	env version='$(VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 		$(PYTHON) setup.py build \
 			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
@@ -360,7 +360,7 @@ clean-local:
 # Clean up after Python and QT
 if HAVE_PYTHON
 	(cd '$(srcdir)' && \
-	env abs_builddir='$(abs_builddir)' \
+	env version='$(VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 	        $(PYTHON) setup.py clean \
 	                --build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
