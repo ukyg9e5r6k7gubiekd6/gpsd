@@ -1794,7 +1794,7 @@ bits over their theoretically correct length.
 
 For messages with a variable-length trailing payload (6, 8, 12, 14,
 17, 25, 26) there is no way to detect that the pad character might
-be wrong.  If it is, this will manifest as truncation of rhe last
+be wrong.  If it is, this will manifest as truncation of the last
 nibble or extra trailing zero data.
 
 === Bit Stuffing ===
