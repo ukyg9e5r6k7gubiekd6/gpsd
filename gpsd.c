@@ -862,7 +862,6 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (strcmp(buf, "?devices")==0) {
-	struct gps_device_t *devp;
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    char *path = devp->gpsdata.dev.path;
 	    ignore_return(write(sfd, path, strlen(path)));
