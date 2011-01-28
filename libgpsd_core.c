@@ -92,8 +92,6 @@
         TS_NORM( ts ); \
     } while (0)
 
-/* convert timespec to double */
-#define TSTOD(ts) ((double)((ts)->tv_sec+((double)((ts)->tv_nsec)/1000000000)))
 #endif
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -616,9 +614,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	if (0 != ok) {
 	    /* chrony expects tv-sec since Jan 1970 */
-	    /* FIXME!! sample.tv is time of sample */
 	    /* FIXME!! offset is double of the error from local time */
-	    sample.offset = 1 + session->last_fixtime;
 	    sample.pulse = 0;
 	    sample.leap = 0;
 	    sample.magic = SOCK_MAGIC;
@@ -636,7 +632,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    {
 		sample.tv = tv; 	/* structure copy */
 	    } 
-	    sample.offset -= TSTOD( &ts );
+	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
+	    /* carefull, unix time to nSec is more precision that a double */
+	    sample.offset = 1 + session->last_fixtime - ts.tv_sec;
+	    sample.offset -= ts.tv_nsec / 1e9;
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 	    /*@-noeffect@*/
 	    if (session->device_type == &oncore_binary) {
