@@ -195,6 +195,9 @@ if __name__ == '__main__':
         except socket.error, msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
             raise SystemExit, 1
+        except gps.client.json_error, e:
+            sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (`e.data`, e.explanation))
+            raise SystemExit, 1
     finally:
         test.cleanup();
 

@@ -10,6 +10,11 @@ else:
 
 GPSD_PORT="2947"
 
+class json_error:
+    def __init__(self, data, explanation):
+        self.data = data
+        self.explanation = explanation
+
 class gpscommon:
     "Isolate socket handling and buffering from the protcol interpretation."
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
@@ -142,7 +147,10 @@ class gpsjson(gpscommon):
                     va = v
                 t[ka] = va
             return t
-        self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
+        try:
+            self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
+        except ValueError, e:
+            raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
         if self.data["class"] == "SKY" and hasattr(self.data, "satellites"):
             self.data.satellites = map(lambda x: dictwrapper(**x), self.data.satellites)
