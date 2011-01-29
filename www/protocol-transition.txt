@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.8, September 2010
+v1.9, January 2011
 
 == Why a new protocol? ==
 
@@ -46,24 +46,11 @@ protocol will be removed when 3.0 ships.
 The 2.92 version, with the new protocol deployed, is be in Lucid
 Lynx, the Ubuntu LTS release of April 2010.
 
-This is our schedule for the changeover:
-
-[options="header"]
-|================================================================
-| Release | Timing                      | Description
-| 2.96    | July-Aug 2010               |
-Object-file format bump.
-
-| 3.0     | Before 30 Oct 2010          |
-Old protocol support will be removed from the library.
-
-|================================================================
-
 If you follow our transition advice now, you will be able to talk to
-all old-protocol and new-protocol versions of the daemon until the
-3.0 shared client library is deployed in late 2010, at which point your
-runtime will silently get smaller but you won't be able to use 2.x 
-daemon versions any more.
+all old-protocol and new-protocol versions of the daemon until the 3.0
+shared client library is deployed, at which point your runtime will
+silently get smaller but you won't be able to use 2.x daemon versions
+any more.
 
 We're counting on binary-package dependencies to make the transition
 easier.  When you ship a release using the new interface library,
@@ -98,8 +85,14 @@ it right, you have been telling gpsd to stream data at you with the
 
 -------------------------------------------------------------------
 
-If you have been virtuous, you need only to make two small changes to
-your code.  Replace the gps_query() call with:
+If you have been virtuous, you need only to make four small changes to
+your code.
+
+1. Give gps_open() a third argument that is the address of a struct gps_data_t.
+(This interface changed to avoid malloc(3) and make it possible to write
+re-entrant client code.)
+
+2. Replace the gps_query() call with:
 
 -------------------------------------------------------------------
 gps_stream(gpsdata, WATCH_ENABLE, NULL) 
@@ -111,7 +104,9 @@ or new protocol. Unless a target system carries a version of the
 libgps shared library different from the gpsd version, everything
 should work and continue to work through future updates.
 
-Next, if you have references to the 'satellites' member of the structure,
+3. Change gps_poll calls to gps_read calls.
+
+4. If you have references to the 'satellites' member of the structure,
 those need to change them to 'satellites_visible'.  
 
 There. You're probably done, unless you relied on some parts of 
@@ -129,8 +124,8 @@ unusual configuration commands. Here are the exceptions:
   fail.  Later in this document you will learn how to fix these
   problems.
 
-* You set a per-packet raw hook.  This feature was documented
-  incorrectly.  It no longer takes a level argument.
+* You set a per-packet raw hook.  This feature is gone; code
+  can now just look at the response buffer directly.
 
 * You set a thread hook.  We have deleted the thread-hook portion of
   the API; for discussion, see "Why threads are gone" below.
@@ -288,11 +283,11 @@ can do one read call end expect the daemon to hand it an entire
 \n-terminated packet. 99.9% of the time this is true, but socket
 layers can do some remarkably perverse things.
 
-In 2.91 and later, gps_poll() behaves in a subtly different way.
-Each call does exactly one read() call as before, but the incoming
-data is now buffered; the logic to interpret the buffer and empty
-it is called only when the read() contains a \n.  When that happens,
-the validity flags include the PACKET_SET mask.
+In 2.91 and later, what was gps_poll() and is now gps_read() behaves
+in a subtly different way.  Each call does exactly one read() call as
+before, but the incoming data is now buffered; the logic to interpret
+the buffer and empty it is called only when the read() contains a \n.
+When that happens, the validity flags include the PACKET_SET mask.
 
 == How the command set has changed == 
 
@@ -359,6 +354,9 @@ are undocumented.
 
 == How the C API and gps_data_t structure has changed == 
 
+gps_open() now takes a third artgument and is re-entrant - it's the
+old undocumented gps_open_r().
+
 The gps_query() entry point is gone.  With the new streaming-oriented
 wire protocol, it is extremely unwise to assume that the first
 transmission from the damon after a command is shipped to it will be
@@ -366,6 +364,8 @@ the reponse to command.  If you must send explicit
 commands to the daemon, use gps_send() and handle the response in
 your main event-polling loop -- but beware, as using gps_send()
 ties your code to the GPSD wire protocol and is not recommended.
+
+gps_poll() is renamed gps_read().
 
 The client library's reporting structure, struct gpsdata_t, has a new
 substructure (struct devconfig_t) named "dev" that groups together
