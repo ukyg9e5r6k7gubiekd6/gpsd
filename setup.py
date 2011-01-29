@@ -35,8 +35,8 @@ if not manpages:
     print("No XML processor, omitting manual-page installation.")
 
 MAKE = ("MAKE" in os.environ) and os.environ["MAKE"] or "make"
+abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
 if not 'clean' in sys.argv:
-    abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
     if not os.path.exists(os.path.join(abs_builddir, 'gpsd_config.h')):
         sys.stderr.write('\nPlease run configure first!\n')
         sys.exit(1)
