@@ -262,9 +262,9 @@ class gps(gpsdata, gpsjson):
             self.mincycle    = default("mincycle", NaN)
         elif self.data.get("class") == "TPV":
             self.valid = ONLINE_SET
-            self.fix.time = default("time", NaN, TIME_SET)
-            if not isnan(self.fix.time):
-                self.utc = isotime(self.fix.time)
+            self.utc = default("time", None, TIME_SET)
+            if self.utc is not None:
+                self.fix.time = isotime(self.utc)
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)
             self.fix.latitude =  default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)

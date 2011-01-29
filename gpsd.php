@@ -46,13 +46,13 @@ require_once("gpsd_config.inc");
 
 # sample data
 $resp = <<<EOF
-{"class":"POLL","timestamp":1270517274.846,"active":1,
+{"class":"POLL","timestamp":"2010-04-05T21:27:54.84Z","active":1,
  "fixes":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
            "time":1270517264.240,"ept":0.005,"lat":40.035093060,
            "lon":-75.519748733,"alt":31.1,"track":99.4319,
            "speed":0.123,"mode":3}],
  "skyviews":[{"class":"SKY","tag":"MID41","device":"/dev/ttyUSB0",
-              "time":1270517264.240,"hdop":9.20,"vdop":12.1,
+              "time":"2010-04-05T21:27:44.84Z","hdop":9.20,"vdop":12.1,
               "satellites":[{"PRN":16,"el":55,"az":42,"ss":36,"used":true},
                             {"PRN":19,"el":25,"az":177,"ss":0,"used":false},
                             {"PRN":7,"el":13,"az":295,"ss":0,"used":false},
@@ -437,7 +437,7 @@ EOF;
 		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else {
 		$nsv = count($GPS['skyviews'][0]['satellites']);
-		$ts = gmdate("r", $GPS['fixes'][0]['time']);
+		$ts = $GPS['fixes'][0]['time'];
 		$part4 = <<<EOF
 <!-- ------------------------------------------------------------ -->
         <tr><td align=center valign=top>

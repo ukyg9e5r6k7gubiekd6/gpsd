@@ -546,7 +546,7 @@ class Base:
 
     def update_time(self, data):
         if hasattr(data, "time"):
-            return gps.isotime(data.time)
+            return data.time
         else:
             return "n/a"
 

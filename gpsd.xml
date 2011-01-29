@@ -387,8 +387,8 @@ depending on the fix quality.</para>
 <row>
 	<entry>time</entry>
 	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Seconds since the Unix epoch, UTC. May have a
+	<entry>string</entry>
+        <entry>Time/date stamp in ISO8601 format. May have a
 	fractional part of up to .01sec precision.</entry>
 </row>
 <row>
@@ -489,7 +489,7 @@ field actually received; see gps.h for bitmask names and values.</para>
 
 <programlisting>
 {"class":"TPV","tag":"MID2","device":"/dev/pts/1",
-    "time":1118327688.280,"ept":0.005,
+    "time":"2005-06-08T10:34:48.28Z,"ept":0.005,
     "lat":46.498293369,"lon":7.567411672,"alt":1343.127, 
     "eph":36.000,"epv":32.321,
     "track":10.3788,"speed":0.091,"climb":-0.085,"mode":3}
@@ -683,7 +683,8 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"SKY","tag":"MID2","device":"/dev/pts/1","time":1118327688.280
+{"class":"SKY","tag":"MID2","device":"/dev/pts/1",
+    "time":"2005-07-08T11:28:07.11Z",
     "xdop":1.55,"hdop":1.24,"pdop":1.99,
     "satellites":[
         {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
@@ -1208,8 +1209,8 @@ will be reported with a mode field of zero.</para>
 	<entry>time</entry>
 	<entry>Yes</entry>
 	<entry>Numeric</entry>
-        <entry>Seconds since the Unix epoch, UTC. May have a
-	fractional part of up to .001sec precision.</entry>
+        <entry>Timestamp in ISO 8601 format. May have a
+	fractional part of up to .01sec precision.</entry>
 </row>
 <row>
 	<entry>active</entry>
@@ -1238,7 +1239,8 @@ will be reported with a mode field of zero.</para>
 <programlisting>
 {"class":"POLL","timestamp":1270517274.846,"active":1,
     "fixes":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
-              "time":1270517264.240,"ept":0.005,"lat":40.035093060,
+              "time":"2010-09-08T13:33:06.09Z",
+	      "ept":0.005,"lat":40.035093060,
               "lon":-75.519748733,"track":99.4319,"speed":0.123,"mode":2}],
     "skyviews":[{"class":"SKY","tag":"MID41","device":"/dev/ttyUSB0",
                  "time":1270517264.240,"hdop":9.20,

@@ -114,6 +114,8 @@ void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 void json_tpv_dump(const struct gps_data_t *gpsdata,
 		   /*@out@*/ char *reply, size_t replylen)
 {
+    char tbuf[JSON_DATE_MAX+1];
+
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
     (void)snprintf(reply + strlen(reply),
@@ -126,7 +128,8 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
     if (isnan(gpsdata->fix.time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
-		       "\"time\":%.3f,", gpsdata->fix.time);
+		       "\"time\":\"%s\",", 
+		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
     if (isnan(gpsdata->fix.ept) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -203,6 +206,8 @@ void json_sky_dump(const struct gps_data_t *datap,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     int i, j, used, reported = 0;
+    char tbuf[JSON_DATE_MAX+1];
+
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
     (void)snprintf(reply + strlen(reply),
@@ -215,7 +220,8 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (isnan(datap->skyview_time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
-		       "\"time\":%.3f,", datap->skyview_time);
+		       "\"time\":\"%s\",", 
+		       unix_to_iso8601(datap->skyview_time, tbuf, sizeof(tbuf)));
     if (isnan(datap->dop.xdop) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),

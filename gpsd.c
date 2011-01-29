@@ -1158,6 +1158,7 @@ static void handle_request(struct subscriber_t *sub,
 				 replylen - strlen(reply));
 	    }
     } else if (strncmp(buf, "POLL;", 5) == 0) {
+	char tbuf[JSON_DATE_MAX+1];
 	int active = 0;
 	buf += 5;
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
@@ -1165,8 +1166,8 @@ static void handle_request(struct subscriber_t *sub,
 		if ((devp->observed & GPS_TYPEMASK) != 0)
 		    active++;
 	(void)snprintf(reply, replylen,
-		       "{\"class\":\"POLL\",\"timestamp\":%.3f,\"active\":%d,\"fixes\":[",
-		       timestamp(), active);
+		       "{\"class\":\"POLL\",\"timestamp\":\"%s\",\"active\":%d,\"fixes\":[",
+		       unix_to_iso8601(timestamp(), tbuf, sizeof(tbuf)), active);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK) != 0) {
