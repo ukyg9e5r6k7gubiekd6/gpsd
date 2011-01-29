@@ -40,7 +40,7 @@ extern "C" {
  * 4.2 - AIS application IDs split into DAC and FID (May 2010)
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (July 2010)
  *       gps_open() becomes reentrant, what gps_open_r() used to be. 
- *       gps_poll() removed in favor of gps_read().
+ *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
