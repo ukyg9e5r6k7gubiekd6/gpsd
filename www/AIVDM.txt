@@ -15,7 +15,7 @@ interpreting these messages.
 AIVDM/AIVDO sentences are emitted by receivers for AIS, the marine
 Automatic Identification System. AIS transmitters are fitted to
 vessels, navigation markers, and certain types of shore station. They
-periodically squawk their position and course (if applicable), using
+periodically squawk their position (and course, when applicable), using
 TDMA (Time Division Multiple Access) technology similar to the way
 cellphones do to avoid mutual interference. AIS receivers make this data
 available for navigation, anti-collision systems, and other uses.
@@ -144,9 +144,6 @@ is research code rather than a production tool.
 There is a http://gnuais.sourceforge.net/[GNU AIS] project at
 SourceForge.  It seems intended primarily to work directly
 with AIS radios.
-
-There's a http://rl.se/aivdm[web form] that does sentence decoding.
-It only understands message types 1-4 and 24.
 
 == AIVDM/AIVDO Sentence Layer ==
 
@@ -1671,12 +1668,16 @@ The St. Lawrence Seaway broadcasts hydrological and lock-scheduling
 messages using special encodings of the binary data of message types 6
 and 8 (described in <<SEAWAY>>, freely available), and safety
 information using types 12 and 14.  These message types are listed
-under the descriptions of types 6 and 8.
+under the description of type 8.
 
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
 System) which uses extended AIS binary formats. <<SEAWAY>> says it's
 intercompatible with the St. Lawrence Seaway system and describes three 
 PAWSS-specific messages in its Appendix A.
+
+<<IMO289>> standardizes some subtypes of messages 6 and 8 similar to
+PAWSS messages for DAC 1, the unternational jurisdiction code. However,
+in some cases identically named subtypes are assigned different FIDs.
 
 === U.S. Coast Guard Extended AIVDM ===
 
