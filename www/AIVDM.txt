@@ -818,11 +818,11 @@ Interpretation of the binary payload is controlled by:
 
 * The FID, which is the Functional ID for a message subtype.
 
-The following is a non-exhaustive list of DAC-FID pairs in use for
-type 6:
+The following is a non-exhaustive list of standardized DAC-FID pairs
+in use for type 6.
 
 |==============================================================================
-| DAC |FID | Sub | Source     | Status       | Description     
+| DAC |FID | Sub | Source      | Status    | Description     
 |   1 | 23 |     | <<IMO289>>  | Standard  | Area notice addressed
 |   1 | 28 |     | <<IMO289>>  | Standard  | Route info addressed
 |   1 | 30 |     | <<IMO289>>  | Standard  | Text description addressed
@@ -875,8 +875,8 @@ maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 |==============================================================================
 
 Interpretation of the binary payload is controlled by DAC/FID as in
-message type 6. The following is a non-exhaustive list of DAC-FID
-pairs in use for type 8:
+message type 6. The following is a non-exhaustive list of standardized
+DAC-FID pairs in use for type 8:
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -888,18 +888,18 @@ pairs in use for type 8:
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
 |   1     | 16 |     | <<IMO236>> | In use     | Num persons on board
 |   1     | 17 |     | <<IMO236>> | In use     | VTS-Generated/Synthetic targets
-|   1     | 18 |     | <<IMO289>>  | Standard   | Clearance time to enter port
-|   1     | 19 |     | <<IMO289>>  | Standard   | Marine traffic signals
-|   1     | 20 |     | <<IMO289>>  | Standard   | Berthing data
-|   1     | 21 |     | <<IMO289>>  | Standard   | Weather obs from ship
-|   1     | 22 |     | <<IMO289>>  | In use  | Area notice broadcast
-|   1     | 24 |     | <<IMO289>>  | Standard   | Extended ship and voyage
-|   1     | 25 |     | <<IMO289>>  | Standard   | Dangerous cargo
-|   1     | 26 |     | <<IMO289>>  | Standard   | Environmental
-|   1     | 27 |     | <<IMO289>>  | Standard   | Route info broadcast
-|   1     | 29 |     | <<IMO289>>  | Standard   | Text description broadcast
-|   1     | 31 |     | <<IMO289>>  | In use   | Meteorological and Hydrological
-|   1     | 32 |     | <<IMO289>>  | Standard   | Tidal Window
+|   1     | 18 |     | <<IMO289>> | Standard   | Clearance time to enter port
+|   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
+|   1     | 20 |     | <<IMO289>> | Standard   | Berthing data
+|   1     | 21 |     | <<IMO289>> | Standard   | Weather obs from ship
+|   1     | 22 |     | <<IMO289>> | In use     | Area notice broadcast
+|   1     | 24 |     | <<IMO289>> | Standard   | Extended ship and voyage
+|   1     | 25 |     | <<IMO289>> | Standard   | Dangerous cargo
+|   1     | 26 |     | <<IMO289>> | Standard   | Environmental
+|   1     | 27 |     | <<IMO289>> | Standard   | Route info broadcast
+|   1     | 29 |     | <<IMO289>> | Standard   | Text description broadcast
+|   1     | 31 |     | <<IMO289>> | In use     | Meteorological and Hydrological
+|   1     | 32 |     | <<IMO289>> | Standard   | Tidal Window
 | 316/366 |  1 |   2 | <<SEAWAY>> | In use     | Wind
 | 316/366 |  1 |   1 | <<SEAWAY>> | In use     | Weather station
 | 316/366 |  1 |   3 | <<SEAWAY>> | In use     | Water level
@@ -915,6 +915,9 @@ pairs in use for type 8:
 DAC/FID pairs are assigned separately per message type.  For St. Lawrence
 Seaway messages, the DAC may be 316 (Canada) or 366 (U.S.) depending
 on the transmitter location.
+
+DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions descrubed
+under type 6.
 
 FID types 11-15 are being phased out and are not to be used after 1
 Jan 2013. FID types 16 and 17 are in use; there are proposed updates 
