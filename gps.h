@@ -893,7 +893,44 @@ struct ais_t
 	    unsigned int fid;       	/* Functional ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    size_t bitcount;		/* bit count of the data */
-	    char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+	    union {
+		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+#ifdef __UNUSED__
+		struct {
+#define DAC1FID31_LATLON_SCALE	1000
+		    int lon;		/* longitude in minutes * .001 */
+#define DAC1FID31_LON_NOT_AVAILABLE	(181*60*DAC1FID31_LATLON_SCALE)
+		    int lat;		/* longitude in minutes * .001 */
+#define DAC1FID31_LAT_NOT_AVAILABLE	(91*60*DAC1FID31_LATLON_SCALE)
+		    bool accuracy;	/* position accuracy, <10m if true */
+		    unsigned int day;		/* UTC day */
+		    unsigned int hour;		/* UTC hour */
+		    unsigned int minute;	/* UTC minute */
+		    unsigned int wspeed;	/* average wind speed */
+		    unsigned int wgust;		/* wind gust */
+#define DAC1FID31_WIND_HIGH			126
+#define DAC1FID31_WIND_NOT_AVAILABLE		127
+		    unsigned int wdir;		/* wind direction */
+		    unsigned int wgustdir;	/* wind gust direction */
+#define DAC1FID31_DIR_NOT_AVAILABLE		360
+		    int temperature;		/* temperature, units 0.1C */
+#define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1024
+		    unsigned int humidity;	/* relative humidity, % */
+#define DAC1FID31_HUMIDITY_NOT_AVAILABLE	101
+		    int dewpoint;		/* dew point, units 0.1C */
+#define DAC1FID31_DEWPOINT_NOT_AVAILABLE	501
+		    unsigned int pressure;	/* air pressure, hpa */
+#define DAC1FID31_PRESSURE_NOT_AVAILABLE	511
+#define DAC1FID31_PRESSURE_HIGH			402
+		    unsigned int pressuretend;	/* tendency */
+		    bool visgreater;		/* vis. > than following */
+		    unsigned int visibility;	/* units 0.1 nautical miles */
+#define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
+		    unsigned int waterlevel;	/* decimeters + 100 */
+#define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	4001
+		} dac1fid31;
+#endif /* __UNUSED_ */
+	    };
 	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
 	struct {

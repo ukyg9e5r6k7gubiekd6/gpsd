@@ -917,8 +917,9 @@ DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions descrubed
 under type 6.
 
 FID types 11-15 are being phased out and are not to be used after 1
-Jan 2013. FID types 16 and 17 are in use; there are proposed updates 
-for these in <<IMO289>>.
+Jan 2013.The deprecated IMO236 1/11 has a different binary layout from
+the IMO289 1/31.  FID types 16 and 17 are in use; there are proposed
+updates for these in <<IMO289>>.
 
 === Type 9: Standard SAR Aircraft Position Report ===
 

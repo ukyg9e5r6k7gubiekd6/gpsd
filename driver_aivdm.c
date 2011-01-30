@@ -373,9 +373,70 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type8.dac            = UBITS(40, 10);
 	    ais->type8.fid            = UBITS(40, 6);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
+#ifdef __UNUSED__
+	    if (ais->type8.dac == 1)
+		/*
+		 * The strange order in which these FIDs occur is
+		 * direct from IMO circular 289.
+		 */
+		switch (ais->type8.fid) {
+		case 31:        /* Meteorological-Hydrological data */
+		    ais->type8.dac1fid31.lon		= SBITS(56, 25);
+		    ais->type8.dac1fid31.lat		= SBITS(81, 24);
+		    ais->type8.dac1fid31.accuracy       = (bool)UBITS(105, 1);
+		    ais->type8.dac1fid31.day		= UBITS(106, 5);
+		    ais->type8.dac1fid31.hour		= UBITS(111, 5);
+		    ais->type8.dac1fid31.minute		= UBITS(116, 6);
+		    ais->type8.dac1fid31.wspeed		= UBITS(122, 7);
+		    ais->type8.dac1fid31.wgust		= UBITS(129, 7);
+		    ais->type8.dac1fid31.wdir		= UBITS(129, 7);
+		    ais->type8.dac1fid31.wgustdir	= UBITS(136, 7); 
+		    ais->type8.dac1fid31.temperature	= SBITS(143, 11);
+		    ais->type8.dac1fid31.humidity	= UBITS(154, 7);
+		    ais->type8.dac1fid31.dewpoint	= SBITS(154, 10);
+		    ais->type8.dac1fid31.pressure	= UBITS(164, 9);
+		    ais->type8.dac1fid31.pressuretend	= UBITS(173, 3);
+		    ais->type8.dac1fid31.visgreater	= (bool)UBITS(174, 1);
+		    ais->type8.dac1fid31.visibility	= UBITS(175, 8);
+		    ais->type8.dac1fid31.waterlevel	= UBITS(183, 12);
+		    goto nocopy;
+		case 25:        /* Dangerous Cargo Indication */
+		    goto nocopy;
+		case 32:        /* Tidal Window */
+		    goto nocopy;
+		case 24:        /* Extended ship static & voyage-related data */
+		    goto nocopy;
+		case 16:        /* Number of persons on board */
+		    goto nocopy;
+		case 17:        /* VTS-generated/synthetic targets */
+		    goto nocopy;
+		case 18:        /* Clearance time to enter port */
+		    goto nocopy;
+		case 19:        /* Marine Traffic Signal */
+		    goto nocopy;
+		case 20:        /* Berthing Data */
+		    goto nocopy;
+		case 21:        /* Weather observation report from ship */
+		    goto nocopy;
+		case 22:        /* Area notice - broadcast */
+		    goto nocopy;
+		case 23:        /* Area notice - addressed */
+		    goto nocopy;
+		case 27:        /* Route information - broadcast */
+		    goto nocopy;
+		case 29:        /* Text Description - broadcast */
+		    goto nocopy;
+		case 30:        /* Text Description - addressed */
+		    goto nocopy;
+		}
+	    /* land here if we failed to match a known DAC/FID */
+#endif /* __UNUSED_ */
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)ais_context->bits + (56 / BITS_PER_BYTE),
 			 (ais->type8.bitcount + 7) / 8);
+#ifdef __UNUSED__
+	nocopy:
+#endif /* __UNUSED_ */
 	    gpsd_report(LOG_INF, "dac=%u, fid=%u, cnt=%zd\n",
 			ais->type8.dac,
 			ais->type8.fid,
