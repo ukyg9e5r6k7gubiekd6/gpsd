@@ -819,13 +819,104 @@ The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6.
 
 |==============================================================================
-| DAC |FID | Sub | Source      | Status    | Description     
-|   1 | 23 |     | <<IMO289>>  | Standard  | Area notice addressed
-|   1 | 28 |     | <<IMO289>>  | Standard  | Route info addressed
-|   1 | 30 |     | <<IMO289>>  | Standard  | Text description addressed
+| DAC |FID | Sub | Source      | Status            | Description     
+|   1 | 12 |     | <<IMO236>>  | Deprecated        | Dangerous cargo indication
+|   1 | 14 |     | <<IMO236>>  | Deprecated        | Tidal window
+|   1 | 16 |     | <<IMO236>>  | Deprecated/In Use | Num persons on board
+|   1 | 23 |     | <<IMO289>>  | Standard          | Num persons on board
+|   1 | 25 |     | <<IMO289>>  | Standard          | Dangerous Cargo indication
+|   1 | 28 |     | <<IMO289>>  | Standard          | Route info addressed
+|   1 | 30 |     | <<IMO289>>  | Standard          | Text description addressed
 |==============================================================================
 
 DAC/FID pairs are assigned separately per message type.
+
+A list of binary layouts for selected subtypes of message 6 follows.
+
+==== Number of persons on board ====
+
+A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>, DAC = 001 FID = 23 
+in <<IMO289>>.  The versions describe trailing padding and length differently,
+but the same 13-bit payload field.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member    |Units
+|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 16
+|88-110  | 13 |# persons on board   |persons   |Unsigned integer
+|==============================================================================
+
+FID type 16 is in use; FID23 is a proposed update for it in <<IMO289>>.
+
+The value 0 (the default) means the information is not available. The value
+8191 indicates 8191 or more persons.
+
+==== Dangerous Cargo Indication ====
+
+A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
+This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
+with a different layout, not reported in use and deprecated in <<IMO289>>.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member    |Units
+|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 25
+|88-89   |  2 |Unit of Quantity     |unit      |cargounit
+|90-99   | 10 |Amount of Cargo      |amount    |Unsigned integer
+|100-103 |  4 |Cargo code           |code      |cargocode
+|104-116 | 13 |Cargo subtype        |subtype   |Unsigned integer
+|==============================================================================
+
+The last two fields may repeat to describe up to 28 subcargos. The count
+of repetitions must be computed from the message payload length.
+
+.Dangerous Cargo Indication: cargounit codes
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Unit
+|0    |Not available (default)
+|1    |kg
+|2    |metric tons 
+|3    |metric kilotons
+|===================================
+
+.Dangerous Cargo Indication: cargotype codes
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Code under which cargo is carried
+|0    |Not available (default)
+|1    |IMDG Code (in packed form)
+|2    |IGC code
+|3    |BC Code (from 1.1.2011 IMSBC)
+|4    |MARPOL Annex I List of oils (Appendix 1)
+|5    |MARPOL Annex II IBC Code
+|6    |Regional use
+|7-15 |Reserved for future use
+|===================================
+
+The subtype field may be interpreted as an IMDG class or division code
+(if the cargotype is 1 = IMDG code) or as a UN number (if the
+cargotype is 2 = IGC code) or as a pair of BC class and IMDG class (if
+the cargotype is 3 = BC code) or as a MARPOL Annex I code (if
+the cargotype is 4 = MARPOL Annex I) or as a MARPOL Annex II code (if
+the cargotype is 5 = MARPOL Annex II).
+
+==== Text description (addressed) ====
+
+A message 6 subtype. DAC = 001 FID = 30. Variable length: 104-1028 bits.
+
+Intended to be used to assiciate a text annotation with another message 
+via the Message Linkage ID field.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len    |Description          |Member      |Units
+|72-87   | 16    |DAC/FID              |            |DAC = 001 FID = 30
+|88-97   | 10    |Message Linkage ID   |linkage     |Unsigned integer
+|98-?    | 6-930 |Description          |description |String
+|==============================================================================
+
+There is an equivalent subtype of message 8 that is a broadcast description.
 
 === Type 7: Binary Acknowledge ===
 
@@ -879,11 +970,8 @@ DAC-FID pairs in use for type 8:
 |==============================================================================
 | DAC     |FID | Sub | Source     | Status     | Description     
 |   1     | 11 |     | <<IMO236>> | Deprecated/In Use | Meteorological/Hydrological Data
-|   1     | 12 |     | <<IMO236>> | Deprecated | Dangerous cargo indication
 |   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
-|   1     | 14 |     | <<IMO236>> | Deprecated | Tidal window
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
-|   1     | 16 |     | <<IMO236>> | In use     | Num persons on board
 |   1     | 17 |     | <<IMO236>> | In use     | VTS-Generated/Synthetic targets
 |   1     | 18 |     | <<IMO289>> | Standard   | Clearance time to enter port
 |   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
@@ -891,7 +979,6 @@ DAC-FID pairs in use for type 8:
 |   1     | 21 |     | <<IMO289>> | Standard   | Weather obs from ship
 |   1     | 22 |     | <<IMO289>> | In use     | Area notice broadcast
 |   1     | 24 |     | <<IMO289>> | Standard   | Extended ship and voyage
-|   1     | 25 |     | <<IMO289>> | Standard   | Dangerous cargo
 |   1     | 26 |     | <<IMO289>> | Standard   | Environmental
 |   1     | 27 |     | <<IMO289>> | Standard   | Route info broadcast
 |   1     | 29 |     | <<IMO289>> | Standard   | Text description broadcast
@@ -918,8 +1005,27 @@ under type 6.
 
 FID types 11-15 are being phased out and are not to be used after 1
 Jan 2013.The deprecated IMO236 1/11 has a different binary layout from
-the IMO289 1/31.  FID types 16 and 17 are in use; there are proposed
-updates for these in <<IMO289>>.
+the IMO289 1/31.  FID type 17 is in use; there is a proposed
+updates for tit in <<IMO289>>.
+
+Breakdowns of selected Message 8 subtypes from <<IMO289>> follow.
+
+==== Text description (broadcast) ====
+
+A message 8 subtype. DAC = 001 FID = 29. Variable length: 104-1028 bits.
+
+Intended to be used to assiciate a text annotation with another message 
+via the Message Linkage ID field.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len    |Description          |Member      |Units
+|72-87   | 16    |DAC/FID              |            |DAC = 001 FID = 29
+|88-97   | 10    |Message Linkage ID   |linkage     |Unsigned integer
+|98-?    | 6-930 |Description          |description |String
+|==============================================================================
+
+There is an equivalent subtype of message 6 that is an addressed description.
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
