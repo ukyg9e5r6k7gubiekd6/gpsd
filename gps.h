@@ -36,8 +36,8 @@ extern "C" {
 #endif
 
 /*
- * 4.1 - Base version for initial JSON protocol (Dec 2009)
- * 4.2 - AIS application IDs split into DAC and FID (May 2010)
+ * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)
+ * 4.2 - AIS application IDs split into DAC and FID (July 2010, release 2.95)
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (July 2010)
  *       gps_open() becomes reentrant, what gps_open_r() used to be. 
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
