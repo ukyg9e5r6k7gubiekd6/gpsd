@@ -103,14 +103,14 @@ struct gps_fix_t {
 /* 
  * The structure describing the pseudorange errors (GPGST)
  */
-struct gps_noise_stats_t {
+struct noise_t {
     double utctime;
     double rms_deviation;
     double smajor_deviation;
     double sminor_deviation;
     double smajor_orientation;
     double lat_err_deviation;
-    double longt_err_deviation;
+    double lon_err_deviation;
     double alt_err_deviation;
 };
 
@@ -1380,7 +1380,7 @@ struct gps_data_t {
     char buffer[GPS_BUFFER_MAX * 2];
 
     /* pack things never reported together to reduce structure size */ 
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|NOISE_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
@@ -1389,6 +1389,7 @@ struct gps_data_t {
 	struct ais_t ais;
 	struct attitude_t attitude;
 	struct rawdata_t raw;
+	struct noise_t noise_stats;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	struct {
@@ -1396,8 +1397,7 @@ struct gps_data_t {
 	    int ndevices;
 	    struct devconfig_t list[MAXUSERDEVS];
 	} devices;
-	struct gps_noise_stats_t noise_stats; /* GPGST stats */
-	char error[80];
+	char error[256];
     };
 
     /* Private data - client code must not set this */

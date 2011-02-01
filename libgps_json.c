@@ -34,7 +34,7 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
     int status;
-    char tbuf[JSON_DATE_MAX];
+    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
@@ -125,6 +125,7 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
                            /*@null@*/ const char **endptr)
 {
     int status;
+    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
@@ -133,8 +134,8 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 			         .len = sizeof(gpsdata->dev.path)},
 	{"tag",    t_string,  .addr.string = gpsdata->tag,
 			         .len = sizeof(gpsdata->tag)},
-	{"time",   t_real,    .addr.real = &gpsdata->noise_stats.utctime,
-			         .dflt.real = NAN},
+	{"time",   t_string,  .addr.string = tbuf,
+			         .len = sizeof(tbuf)},
 	{"rms",    t_real,    .addr.real = &gpsdata->noise_stats.rms_deviation,
 			         .dflt.real = NAN},
 	{"major",  t_real,    .addr.real = &gpsdata->noise_stats.smajor_deviation,
@@ -145,7 +146,7 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"lat",    t_real,    .addr.real = &gpsdata->noise_stats.lat_err_deviation,
 			         .dflt.real = NAN},
-	{"longt",  t_real,    .addr.real = &gpsdata->noise_stats.longt_err_deviation,
+	{"lon",    t_real,    .addr.real = &gpsdata->noise_stats.lon_err_deviation,
 			         .dflt.real = NAN},
 	{"alt",    t_real,    .addr.real = &gpsdata->noise_stats.alt_err_deviation,
 			         .dflt.real = NAN},
@@ -158,6 +159,13 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     if (status != 0)
 	return status;
 
+    /*@-usedef@*/
+    if (tbuf[0] == '\0')
+	gpsdata->noise_stats.utctime = NAN;
+    else
+	gpsdata->noise_stats.utctime = iso8601_to_unix(tbuf);
+    /*@+usedef@*/
+
     gpsdata->set |= NOISE_SET;
     return 0;
 }
@@ -166,7 +174,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
-    char tbuf[JSON_DATE_MAX];
+    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_2_1[] = {
 	/* *INDENT-OFF* */

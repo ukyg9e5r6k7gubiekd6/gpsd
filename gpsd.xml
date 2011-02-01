@@ -388,7 +388,7 @@ depending on the fix quality.</para>
 	<entry>time</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>Time/date stamp in ISO8601 format. May have a
+        <entry>Time/date stamp in ISO8601 format, UTC. May have a
 	fractional part of up to .01sec precision.</entry>
 </row>
 <row>
@@ -538,7 +538,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>time</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Seconds since the Unix epoch, UTC. May have a
+        <entry>Time/date stamp in ISO8601 format, UTC. May have a
 	fractional part of up to .01sec precision.</entry>
 </row>
 <row>
@@ -727,7 +727,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Type tag associated with this GPS sentence; from an NMEA
-device this is just the NMEA sentence type..</entry>
+device this is just the NMEA sentence type.</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -781,7 +781,7 @@ corrections)</entry>
 </row>
 
 <row>
-	<entry>longt</entry>
+	<entry>lon</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Standard deviation of longitude error, in meters</entry>
@@ -802,9 +802,9 @@ corrections)</entry>
 
 <programlisting>
 {"class":"NOISE","tag":"GST","device":"/dev/ttyUSB0",
-        "time":5208.000,"rms":2.440,
+        "time":"2010-12-07T10:23:07.09Z","rms":2.440,
         "major":1.660,"minor":1.120,"orient":68.989,
-        "lat":1.600,"longt":1.200,"alt":2.520}
+        "lat":1.600,"lon":1.200,"alt":2.520}
 </programlisting>
 </listitem>
 </varlistentry>

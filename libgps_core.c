@@ -751,12 +751,12 @@ int main(int argc, char *argv[])
 	case 's':
 	    (void)
 		printf
-		("Sizes: gpsdata=%zd rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd\n",
+		("Sizes: gpsdata=%zd rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd, noise=%zd\n",
 		 sizeof(struct gps_data_t), sizeof(struct rtcm2_t),
 		 sizeof(struct rtcm3_t), sizeof(struct ais_t),
 		 sizeof(struct attitude_t), sizeof(struct rawdata_t),
 		 sizeof(collect.devices), sizeof(struct policy_t),
-		 sizeof(struct version_t));
+		 sizeof(struct version_t), sizeof(struct noise_t));
 	    exit(0);
 	case 'D':
 	    debug = atoi(optarg);

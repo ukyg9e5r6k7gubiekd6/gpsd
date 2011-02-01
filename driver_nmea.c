@@ -438,7 +438,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
     session->gpsdata.noise_stats.sminor_deviation    = PARSE_FIELD(4);
     session->gpsdata.noise_stats.smajor_orientation  = PARSE_FIELD(5);
     session->gpsdata.noise_stats.lat_err_deviation   = PARSE_FIELD(6);
-    session->gpsdata.noise_stats.longt_err_deviation = PARSE_FIELD(7);
+    session->gpsdata.noise_stats.lon_err_deviation   = PARSE_FIELD(7);
     session->gpsdata.noise_stats.alt_err_deviation   = PARSE_FIELD(8);
 #undef PARSE_FIELD
 
@@ -450,7 +450,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
                 session->gpsdata.noise_stats.sminor_deviation,
                 session->gpsdata.noise_stats.smajor_orientation,
                 session->gpsdata.noise_stats.lat_err_deviation,
-                session->gpsdata.noise_stats.longt_err_deviation,
+                session->gpsdata.noise_stats.lon_err_deviation,
                 session->gpsdata.noise_stats.alt_err_deviation);
 
     return NOISE_IS | ONLINE_IS;
