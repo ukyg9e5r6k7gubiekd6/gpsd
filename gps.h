@@ -1328,7 +1328,6 @@ struct gps_data_t {
 #define PACKET_SET	0x20000000u
 #define SUBFRAME_SET	0x40000000u
 #define NOISE_SET	0x80000000u
-#define AUXDATA_SET	0x8000000000000000llu	/* reserved */
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1345,8 +1344,6 @@ struct gps_data_t {
     void* gps_fd;
 #endif
     struct gps_fix_t	fix;	/* accumulated PVT data */
-
-    struct gps_noise_stats_t noise_stats; /* GPGST stats */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
@@ -1384,7 +1381,6 @@ struct gps_data_t {
 
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET)
-    gps_mask_t auxmask;	/* for future expansion */
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
@@ -1400,6 +1396,7 @@ struct gps_data_t {
 	    int ndevices;
 	    struct devconfig_t list[MAXUSERDEVS];
 	} devices;
+	struct gps_noise_stats_t noise_stats; /* GPGST stats */
 	char error[80];
     };
 

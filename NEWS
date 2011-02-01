@@ -9,7 +9,8 @@
   are no longer required to define a gpsd_report() hook. gpsd no longer
   emits probe strings to unidentified USB devices at startup.  The client
   API cleanup is finished; set_raw_hook is gone. JSON timestamps in TPV and
-  SKY are now ISO8601 rather than seconds since the Unix epoch.
+  SKY are now ISO8601 rather than seconds since the Unix epoch. GPGST sentences
+  are now parsed for noise statistics when a device emits them.
 
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!
