@@ -208,7 +208,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
     char tbuf[JSON_DATE_MAX+1];
 
     assert(replylen > 2);
-    (void)strlcpy(reply, "{\"class\":\"NOISE\",", replylen);
+    (void)strlcpy(reply, "{\"class\":\"GST\",", replylen);
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
@@ -219,23 +219,23 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"time\":\"%s\",",
-		   unix_to_iso8601(gpsdata->noise_stats.utctime, tbuf, sizeof(tbuf)));
-#define ADD_NOISE_FIELD(tag, field) do {                     \
-    if (isnan(gpsdata->noise_stats.field) == 0)              \
+		   unix_to_iso8601(gpsdata->gst.utctime, tbuf, sizeof(tbuf)));
+#define ADD_GST_FIELD(tag, field) do {                     \
+    if (isnan(gpsdata->gst.field) == 0)              \
 	(void)snprintf(reply + strlen(reply),                \
 		       replylen - strlen(reply),             \
-		       "\"" tag "\":%.3f,", gpsdata->noise_stats.field); \
+		       "\"" tag "\":%.3f,", gpsdata->gst.field); \
     } while(0)
 
-    ADD_NOISE_FIELD("rms",    rms_deviation);
-    ADD_NOISE_FIELD("major",  smajor_deviation);
-    ADD_NOISE_FIELD("minor",  sminor_deviation);
-    ADD_NOISE_FIELD("orient", smajor_orientation);
-    ADD_NOISE_FIELD("lat",    lat_err_deviation);
-    ADD_NOISE_FIELD("lon",    lon_err_deviation);
-    ADD_NOISE_FIELD("alt",    alt_err_deviation);
+    ADD_GST_FIELD("rms",    rms_deviation);
+    ADD_GST_FIELD("major",  smajor_deviation);
+    ADD_GST_FIELD("minor",  sminor_deviation);
+    ADD_GST_FIELD("orient", smajor_orientation);
+    ADD_GST_FIELD("lat",    lat_err_deviation);
+    ADD_GST_FIELD("lon",    lon_err_deviation);
+    ADD_GST_FIELD("alt",    alt_err_deviation);
 
-#undef ADD_NOISE_FIELD
+#undef ADD_GST_FIELD
 
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */

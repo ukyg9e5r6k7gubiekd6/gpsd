@@ -129,26 +129,26 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
-	{"class",  t_check,   .dflt.check = "NOISE"},
+	{"class",  t_check,   .dflt.check = "GST"},
 	{"device", t_string,  .addr.string = gpsdata->dev.path,
 			         .len = sizeof(gpsdata->dev.path)},
 	{"tag",    t_string,  .addr.string = gpsdata->tag,
 			         .len = sizeof(gpsdata->tag)},
 	{"time",   t_string,  .addr.string = tbuf,
 			         .len = sizeof(tbuf)},
-	{"rms",    t_real,    .addr.real = &gpsdata->noise_stats.rms_deviation,
+	{"rms",    t_real,    .addr.real = &gpsdata->gst.rms_deviation,
 			         .dflt.real = NAN},
-	{"major",  t_real,    .addr.real = &gpsdata->noise_stats.smajor_deviation,
+	{"major",  t_real,    .addr.real = &gpsdata->gst.smajor_deviation,
 			         .dflt.real = NAN},
-	{"minor",  t_real,    .addr.real = &gpsdata->noise_stats.sminor_deviation,
+	{"minor",  t_real,    .addr.real = &gpsdata->gst.sminor_deviation,
 			         .dflt.real = NAN},
-	{"orient", t_real,    .addr.real = &gpsdata->noise_stats.smajor_orientation,
+	{"orient", t_real,    .addr.real = &gpsdata->gst.smajor_orientation,
 			         .dflt.real = NAN},
-	{"lat",    t_real,    .addr.real = &gpsdata->noise_stats.lat_err_deviation,
+	{"lat",    t_real,    .addr.real = &gpsdata->gst.lat_err_deviation,
 			         .dflt.real = NAN},
-	{"lon",    t_real,    .addr.real = &gpsdata->noise_stats.lon_err_deviation,
+	{"lon",    t_real,    .addr.real = &gpsdata->gst.lon_err_deviation,
 			         .dflt.real = NAN},
-	{"alt",    t_real,    .addr.real = &gpsdata->noise_stats.alt_err_deviation,
+	{"alt",    t_real,    .addr.real = &gpsdata->gst.alt_err_deviation,
 			         .dflt.real = NAN},
 	{NULL},
 	/* *INDENT-ON* */
@@ -161,12 +161,12 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 
     /*@-usedef@*/
     if (tbuf[0] == '\0')
-	gpsdata->noise_stats.utctime = NAN;
+	gpsdata->gst.utctime = NAN;
     else
-	gpsdata->noise_stats.utctime = iso8601_to_unix(tbuf);
+	gpsdata->gst.utctime = iso8601_to_unix(tbuf);
     /*@+usedef@*/
 
-    gpsdata->set |= NOISE_SET;
+    gpsdata->set |= GST_SET;
     return 0;
 }
 

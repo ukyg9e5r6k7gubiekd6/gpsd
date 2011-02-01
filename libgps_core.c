@@ -756,7 +756,7 @@ int main(int argc, char *argv[])
 		 sizeof(struct rtcm3_t), sizeof(struct ais_t),
 		 sizeof(struct attitude_t), sizeof(struct rawdata_t),
 		 sizeof(collect.devices), sizeof(struct policy_t),
-		 sizeof(struct version_t), sizeof(struct noise_t));
+		 sizeof(struct version_t), sizeof(struct gst_t));
 	    exit(0);
 	case 'D':
 	    debug = atoi(optarg);

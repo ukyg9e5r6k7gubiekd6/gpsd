@@ -701,11 +701,11 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 </varlistentry>
 
 <varlistentry>
-<term>NOISE</term> 
+<term>GST</term> 
 <listitem>
-<para>A NOISE object is a pseudorange noise report.</para>
+<para>A GST object is a pseudorange noise report.</para>
 
-<table frame="all" pgwide="0"><title>NOISE object</title>
+<table frame="all" pgwide="0"><title>GST object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
@@ -720,7 +720,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 	<entry>class</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Fixed: "NOISE"</entry>
+        <entry>Fixed: "GST"</entry>
 </row>
 <row>
 	<entry>tag</entry>
@@ -747,51 +747,51 @@ fractional part of up to .01sec precision.</entry>
 	<entry>rms</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>value of the standard deviation of the range inputs to the
+        <entry>Value of the standard deviation of the range inputs to the
 navigation process (range inputs include pseudoranges and DGPS
-corrections)</entry>
+corrections).</entry>
 </row>
 
 <row>
 	<entry>major</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of semi-major axis of error ellipse, in meters</entry>
+        <entry>Standard deviation of semi-major axis of error ellipse, in meters.</entry>
 </row>    
 
 <row>
 	<entry>minor</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of semi-minor axis of error ellipse, in meters</entry>
+        <entry>Standard deviation of semi-minor axis of error ellipse, in meters.</entry>
 </row>    
 
 <row>
 	<entry>orient</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Orientation of semi-major axis of error ellipse, in degrees from true north</entry>
+        <entry>Orientation of semi-major axis of error ellipse, in degrees from true north.</entry>
 </row>
 
 <row>
 	<entry>lat</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of latitude error, in meters</entry>
+        <entry>Standard deviation of latitude error, in meters.</entry>
 </row>
 
 <row>
 	<entry>lon</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of longitude error, in meters</entry>
+        <entry>Standard deviation of longitude error, in meters.</entry>
 </row>
 
 <row>
 	<entry>alt</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of altitude error, in meters</entry>
+        <entry>Standard deviation of altitude error, in meters.</entry>
 </row> 
 
 </tbody>
@@ -801,7 +801,7 @@ corrections)</entry>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"NOISE","tag":"GST","device":"/dev/ttyUSB0",
+{"class":"GST","tag":"GST","device":"/dev/ttyUSB0",
         "time":"2010-12-07T10:23:07.09Z","rms":2.440,
         "major":1.660,"minor":1.120,"orient":68.989,
         "lat":1.600,"lon":1.200,"alt":2.520}

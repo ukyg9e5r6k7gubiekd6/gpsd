@@ -103,7 +103,7 @@ struct gps_fix_t {
 /* 
  * The structure describing the pseudorange errors (GPGST)
  */
-struct noise_t {
+struct gst_t {
     double utctime;
     double rms_deviation;
     double smajor_deviation;
@@ -1327,7 +1327,7 @@ struct gps_data_t {
 #define AIS_SET 	0x10000000u
 #define PACKET_SET	0x20000000u
 #define SUBFRAME_SET	0x40000000u
-#define NOISE_SET	0x80000000u
+#define GST_SET	0x80000000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1380,7 +1380,7 @@ struct gps_data_t {
     char buffer[GPS_BUFFER_MAX * 2];
 
     /* pack things never reported together to reduce structure size */ 
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|NOISE_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|GST_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
@@ -1389,7 +1389,7 @@ struct gps_data_t {
 	struct ais_t ais;
 	struct attitude_t attitude;
 	struct rawdata_t raw;
-	struct noise_t noise_stats;
+	struct gst_t gst;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	struct {

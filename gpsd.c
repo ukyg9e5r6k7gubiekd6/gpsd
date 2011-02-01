@@ -1181,7 +1181,7 @@ static void handle_request(struct subscriber_t *sub,
 	}
 	if (reply[strlen(reply) - 1] == ',')
 	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-	(void)strlcat(reply, "],\"noise_stats\":[", replylen);
+	(void)strlcat(reply, "],\"gst\":[", replylen);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK) != 0) {
