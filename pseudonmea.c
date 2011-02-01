@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
@@ -36,7 +37,7 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 
     intfixtime = (time_t) session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
-    if (session->gpsdata.fix.mode > 1) {
+    if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	(void)snprintf(bufp, len,
 		       "$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,",
 		       tm.tm_hour,
@@ -219,14 +220,47 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 #undef ZEROIZE
 }
 
+static void gpsd_binary_time_dump(struct gps_device_t *session,
+				     char bufp[], size_t len)
+{
+    struct tm tm;
+    double integral, fractional;
+    time_t integral_time;
+    int tz_hour, tz_min;
+
+    if (session->newdata.mode > MODE_NO_FIX) {
+	fractional = modf(session->newdata.time, &integral);
+	integral_time = (time_t) integral;
+	(void)gmtime_r(&integral_time, &tm);
+	(void)tzset();
+	tz_hour = timezone / 3600;
+	tz_min = abs(timezone / 60 - tz_hour * 60);
+	(void)snprintf(bufp, len,
+		       "$GPZDA,%02d%02d%05.2f,%02d,%02d,%04d,%+03d,%02d",
+		       tm.tm_hour,
+		       tm.tm_min,
+		       (double)tm.tm_sec + fractional,
+		       tm.tm_mday,
+		       tm.tm_mon + 1,
+		       tm.tm_year + 1900,
+		       tz_hour,
+		       tz_min);
+	nmea_add_checksum(bufp);
+    }
+}
+
 /*@-compdef -mustdefine@*/
 /* *INDENT-OFF* */
 void nmea_tpv_dump(struct gps_device_t *session,
 		   /*@out@*/ char bufp[], size_t len)
 {
     bufp[0] = '\0';
+    if ((session->gpsdata.set & TIME_IS) != 0)
+	gpsd_binary_time_dump(session, bufp + strlen(bufp),
+			      len - strlen(bufp));
     if ((session->gpsdata.set & LATLON_IS) != 0) {
-	gpsd_position_fix_dump(session, bufp, len);
+	gpsd_position_fix_dump(session, bufp + strlen(bufp), 
+			       len - strlen(bufp));
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp),
 			      len - strlen(bufp));
     }
