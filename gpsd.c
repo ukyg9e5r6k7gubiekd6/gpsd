@@ -1181,6 +1181,20 @@ static void handle_request(struct subscriber_t *sub,
 	}
 	if (reply[strlen(reply) - 1] == ',')
 	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	(void)strlcat(reply, "],\"noise_stats\":[", replylen);
+	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
+	    if (allocated_device(devp) && subscribed(sub, devp)) {
+		if ((devp->observed & GPS_TYPEMASK) != 0) {
+		    json_noise_dump(&devp->gpsdata,
+				  reply + strlen(reply),
+				  replylen - strlen(reply));
+		    rstrip(reply);
+		    (void)strlcat(reply, ",", replylen);
+		}
+	    }
+	}
+	if (reply[strlen(reply) - 1] == ',')
+	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "],\"skyviews\":[", replylen);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
@@ -1298,6 +1312,12 @@ static void json_report(struct subscriber_t *sub,
     buf[0] = '\0';
     if ((changed & REPORT_IS) != 0) {
 	json_tpv_dump(&device->gpsdata,
+		      buf, sizeof(buf));
+	(void)throttled_write(sub, buf, strlen(buf));
+    }
+
+    if ((changed & NOISE_IS) != 0) {
+	json_noise_dump(&device->gpsdata,
 		      buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }

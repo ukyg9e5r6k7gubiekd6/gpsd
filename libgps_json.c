@@ -121,6 +121,47 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
     return status;
 }
 
+static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
+                           /*@null@*/ const char **endptr)
+{
+    int status;
+    /*@ -fullinitblock @*/
+    const struct json_attr_t json_attrs_1[] = {
+	/* *INDENT-OFF* */
+	{"class",  t_check,   .dflt.check = "NOISE"},
+	{"device", t_string,  .addr.string = gpsdata->dev.path,
+			         .len = sizeof(gpsdata->dev.path)},
+	{"tag",    t_string,  .addr.string = gpsdata->tag,
+			         .len = sizeof(gpsdata->tag)},
+	{"time",   t_real,    .addr.real = &gpsdata->noise_stats.utctime,
+			         .dflt.real = NAN},
+	{"rms",    t_real,    .addr.real = &gpsdata->noise_stats.rms_deviation,
+			         .dflt.real = NAN},
+	{"major",  t_real,    .addr.real = &gpsdata->noise_stats.smajor_deviation,
+			         .dflt.real = NAN},
+	{"minor",  t_real,    .addr.real = &gpsdata->noise_stats.sminor_deviation,
+			         .dflt.real = NAN},
+	{"orient", t_real,    .addr.real = &gpsdata->noise_stats.smajor_orientation,
+			         .dflt.real = NAN},
+	{"lat",    t_real,    .addr.real = &gpsdata->noise_stats.lat_err_deviation,
+			         .dflt.real = NAN},
+	{"longt",  t_real,    .addr.real = &gpsdata->noise_stats.longt_err_deviation,
+			         .dflt.real = NAN},
+	{"alt",    t_real,    .addr.real = &gpsdata->noise_stats.alt_err_deviation,
+			         .dflt.real = NAN},
+	{NULL},
+	/* *INDENT-ON* */
+    };
+    /*@ +fullinitblock @*/
+
+    status = json_read_object(buf, json_attrs_1, endptr);
+    if (status != 0)
+	return status;
+
+    gpsdata->set |= NOISE_SET;
+    return 0;
+}
+
 static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
@@ -372,6 +413,8 @@ int libgps_json_unpack(const char *buf,
 #define STARTSWITH(str, prefix)	strncmp(str, prefix, sizeof(prefix)-1)==0
     if (STARTSWITH(classtag, "\"class\":\"TPV\"")) {
 	return json_tpv_read(buf, gpsdata, end);
+    } else if (STARTSWITH(classtag, "\"class\":\"NOISE\"")) {
+	return json_noise_read(buf, gpsdata, end);
     } else if (STARTSWITH(classtag, "\"class\":\"SKY\"")) {
 	return json_sky_read(buf, gpsdata, end);
     } else if (STARTSWITH(classtag, "\"class\":\"ATT\"")) {

@@ -262,7 +262,8 @@ typedef enum {
 #define PACKET_IS	0x10000000u
 #define CLEAR_IS	0x20000000u	/* sentence starts a reporting cycle */
 #define REPORT_IS	0x40000000u	/* sentence ends a reporting cycle */
-#define NODATA_IS	0x80000000u	/* no data read from fd */ 
+#define NOISE_IS	0x80000000u	/* sentence contains pseudorange noise information */
+#define NODATA_IS	0x8000000000000000llu	/* no data read from fd */ 
 #define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;

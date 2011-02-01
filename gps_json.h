@@ -15,6 +15,7 @@ extern "C" {
 #endif
 char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
 void json_tpv_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
+void json_noise_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_att_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_device_dump(const struct gps_device_t *, /*@out@*/char *, size_t);

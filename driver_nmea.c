@@ -411,6 +411,52 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
     return mask;
 }
 
+
+static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *session)
+/* GST - GPS Pseudorange Noise Statistics */
+{
+    /*
+     * GST,hhmmss.ss,x,x,x,x,x,x,x,*hh
+     * 1 TC time of associated GGA fix
+     * 2 Total RMS standard deviation of ranges inputs to the navigation solution
+     * 3 Standard deviation (meters) of semi-major axis of error ellipse
+     * 4 Standard deviation (meters) of semi-minor axis of error ellipse
+     * 5 Orientation of semi-major axis of error ellipse (true north degrees)
+     * 6 Standard deviation (meters) of latitude error
+     * 7 Standard deviation (meters) of longitude error
+     * 8 Standard deviation (meters) of altitude error
+     * 9 Checksum
+*/
+    if (count < 8) {
+      return 0;
+    }
+
+#define PARSE_FIELD(n) (*field[n] ? atof(field[n]) : NAN)
+    session->gpsdata.noise_stats.utctime             = PARSE_FIELD(1);
+    session->gpsdata.noise_stats.rms_deviation       = PARSE_FIELD(2);
+    session->gpsdata.noise_stats.smajor_deviation    = PARSE_FIELD(3);
+    session->gpsdata.noise_stats.sminor_deviation    = PARSE_FIELD(4);
+    session->gpsdata.noise_stats.smajor_orientation  = PARSE_FIELD(5);
+    session->gpsdata.noise_stats.lat_err_deviation   = PARSE_FIELD(6);
+    session->gpsdata.noise_stats.longt_err_deviation = PARSE_FIELD(7);
+    session->gpsdata.noise_stats.alt_err_deviation   = PARSE_FIELD(8);
+#undef PARSE_FIELD
+
+    gpsd_report(LOG_DATA,
+		"GST: utc = %.2f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
+                session->gpsdata.noise_stats.utctime,
+                session->gpsdata.noise_stats.rms_deviation,
+                session->gpsdata.noise_stats.smajor_deviation,
+                session->gpsdata.noise_stats.sminor_deviation,
+                session->gpsdata.noise_stats.smajor_orientation,
+                session->gpsdata.noise_stats.lat_err_deviation,
+                session->gpsdata.noise_stats.longt_err_deviation,
+                session->gpsdata.noise_stats.alt_err_deviation);
+
+    return NOISE_IS | ONLINE_IS;
+}
+
+
 static gps_mask_t processGPGSA(int count, char *field[],
 			       struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
@@ -967,6 +1013,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{
 	"RMC", 8, processGPRMC}, {
 	"GGA", 13, processGPGGA}, {
+        "GST", 8, processGPGST}, {
 	"GLL", 7, processGPGLL}, {
 	"GSA", 17, processGPGSA}, {
 	"GSV", 0, processGPGSV}, {

@@ -22,7 +22,7 @@
 #ifdef NMEA_ENABLE
 extern const struct gps_type_t nmea;
 
-static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin;
+static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
 static double last_tick, tick_interval;
 
 /*****************************************************************************
@@ -102,6 +102,23 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpggawin, 7, 1, "Geoid: ");
     (void)mvwprintw(gpggawin, 8, 12, " GGA ");
     (void)wattrset(gpggawin, A_NORMAL);
+
+    gpgstwin = derwin(devicewin, 6, 30, 15, 50);
+    (void)wborder(gpgstwin, 0, 0, 0, 0, 0, 0, 0, 0),
+	(void)syncok(gpgstwin, true);
+    (void)wattrset(gpgstwin, A_BOLD);
+    (void)mvwprintw(gpgstwin, 1,  1, "UTC: ");
+    (void)mvwprintw(gpgstwin, 1, 16, "RMS: ");
+    (void)mvwprintw(gpgstwin, 2,  1, "MAJ: ");
+    (void)mvwprintw(gpgstwin, 2, 16, "MIN: ");
+    (void)mvwprintw(gpgstwin, 3,  1, "ORI: ");
+    (void)mvwprintw(gpgstwin, 3, 16, "LAT: ");
+    (void)mvwprintw(gpgstwin, 4,  1, "LON: ");
+    (void)mvwprintw(gpgstwin, 4, 16, "ALT: ");
+    (void)mvwprintw(gpgstwin, 5, 12, " GST ");
+    (void)wattrset(gpgstwin, A_NORMAL);
+
+
     /*@ +onlytrans @*/
 
     last_tick = timestamp();
@@ -153,6 +170,7 @@ static void nmea_update(void)
     assert(gpgsawin != NULL);
     assert(gpggawin != NULL);
     assert(gprmcwin != NULL);
+    assert(gpgstwin != NULL);
 
     fields = session.driver.nmea.field;
 
@@ -270,6 +288,16 @@ static void nmea_update(void)
 	    (void)mvwprintw(gpggawin, 5, 22, "%2.2s", fields[7]);
 	    (void)mvwprintw(gpggawin, 6, 12, "%-5.5s", fields[8]);
 	    (void)mvwprintw(gpggawin, 7, 12, "%-5.5s", fields[11]);
+	}
+	if (strcmp(fields[0], "GPGST") == 0) {
+	    (void)mvwprintw(gpgstwin, 1,  6, "%-10s", fields[1]);
+	    (void)mvwprintw(gpgstwin, 1, 21,  "%-8s", fields[2]);
+	    (void)mvwprintw(gpgstwin, 2,  6, "%-10s", fields[3]);
+	    (void)mvwprintw(gpgstwin, 2, 21,  "%-8s", fields[4]);
+	    (void)mvwprintw(gpgstwin, 3,  6, "%-10s", fields[5]);
+	    (void)mvwprintw(gpgstwin, 3, 21,  "%-8s", fields[6]);
+	    (void)mvwprintw(gpgstwin, 4,  6, "%-10s", fields[7]);
+	    (void)mvwprintw(gpgstwin, 4, 21,  "%-8s", fields[8]);
 	}
     }
 }

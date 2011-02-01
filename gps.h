@@ -100,6 +100,20 @@ struct gps_fix_t {
     double epc;		/* Vertical speed uncertainty */
 };
 
+/* 
+ * The structure describing the pseudorange errors (GPGST)
+ */
+struct gps_noise_stats_t {
+    double utctime;
+    double rms_deviation;
+    double smajor_deviation;
+    double sminor_deviation;
+    double smajor_orientation;
+    double lat_err_deviation;
+    double longt_err_deviation;
+    double alt_err_deviation;
+};
+
 /*  
  * From the RCTM104 2.x standard:
  *
@@ -775,7 +789,7 @@ struct subframe_t {
     };
 };
 
-typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
+typedef /*@unsignedintegraltype@*/ uint64_t gps_mask_t;
 
 /* 
  * Is an MMSI number that of an auxiliary associated with a mother ship?
@@ -1313,7 +1327,8 @@ struct gps_data_t {
 #define AIS_SET 	0x10000000u
 #define PACKET_SET	0x20000000u
 #define SUBFRAME_SET	0x40000000u
-#define AUXDATA_SET	0x80000000u	/* reserved */
+#define NOISE_SET	0x80000000u
+#define AUXDATA_SET	0x8000000000000000llu	/* reserved */
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1330,6 +1345,8 @@ struct gps_data_t {
     void* gps_fd;
 #endif
     struct gps_fix_t	fix;	/* accumulated PVT data */
+
+    struct gps_noise_stats_t noise_stats; /* GPGST stats */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 

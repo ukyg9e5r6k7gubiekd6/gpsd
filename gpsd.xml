@@ -616,7 +616,7 @@ yet, only the "class" field will reliably be present.</para>
 </tgroup>
 </table>
 
-<para>Many devices compute dilution of precision factors but do nit
+<para>Many devices compute dilution of precision factors but do not
 include them in their reports.  Many that do report DOPs report only
 HDOP, two-dimensial circular error. <application>gpsd</application>
 always passes through whatever the device actually reports, then
@@ -697,6 +697,115 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
         {"PRN":27,"el":71,"az":76,"ss":43,"used":true}]}
 </programlisting>
 
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>NOISE</term> 
+<listitem>
+<para>A NOISE object is a pseudorange noise report.</para>
+
+<table frame="all" pgwide="0"><title>NOISE object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "NOISE"</entry>
+</row>
+<row>
+	<entry>tag</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Type tag associated with this GPS sentence; from an NMEA
+device this is just the NMEA sentence type..</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Name of originating device</entry>
+</row>
+<row>
+	<entry>time</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Seconds since the Unix epoch, UTC. May have a
+fractional part of up to .01sec precision.</entry>
+</row>
+
+<row>
+	<entry>rms</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>value of the standard deviation of the range inputs to the
+navigation process (range inputs include pseudoranges and DGPS
+corrections)</entry>
+</row>
+
+<row>
+	<entry>major</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Standard deviation of semi-major axis of error ellipse, in meters</entry>
+</row>    
+
+<row>
+	<entry>minor</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Standard deviation of semi-minor axis of error ellipse, in meters</entry>
+</row>    
+
+<row>
+	<entry>orient</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Orientation of semi-major axis of error ellipse, in degrees from true north</entry>
+</row>
+
+<row>
+	<entry>lat</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Standard deviation of latitude error, in meters</entry>
+</row>
+
+<row>
+	<entry>longt</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Standard deviation of longitude error, in meters</entry>
+</row>
+
+<row>
+	<entry>alt</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Standard deviation of altitude error, in meters</entry>
+</row> 
+
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"NOISE","tag":"GST","device":"/dev/ttyUSB0",
+        "time":5208.000,"rms":2.440,
+        "major":1.660,"minor":1.120,"orient":68.989,
+        "lat":1.600,"longt":1.200,"alt":2.520}
+</programlisting>
 </listitem>
 </varlistentry>
 
