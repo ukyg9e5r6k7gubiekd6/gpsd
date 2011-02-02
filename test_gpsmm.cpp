@@ -13,63 +13,115 @@
 
 using namespace std;
 
-#ifdef SAMPLE_USAGE
-static void callback(struct gps_data_t* p, char* buf, size_t len);
+static void libgps_dump_state(struct gps_data_t *collect)
+{
+    /* no need to dump the entire state, this is a sanity check */
+#ifndef USE_QT
+    /* will fail on a 32-bit macine */
+    (void)fprintf(stdout, "flags: (0x%04x) %s\n",
+		  (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
+    if (collect->set & ONLINE_SET)
+	(void)fprintf(stdout, "ONLINE: %lf\n", collect->online);
+    if (collect->set & TIME_SET)
+	(void)fprintf(stdout, "TIME: %lf\n", collect->fix.time);
+    if (collect->set & LATLON_SET)
+	(void)fprintf(stdout, "LATLON: lat/lon: %lf %lf\n",
+		      collect->fix.latitude, collect->fix.longitude);
+    if (collect->set & ALTITUDE_SET)
+	(void)fprintf(stdout, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
+		      collect->fix.altitude, collect->fix.climb);
+    if (collect->set & SPEED_SET)
+	(void)fprintf(stdout, "SPEED: %lf\n", collect->fix.speed);
+    if (collect->set & TRACK_SET)
+	(void)fprintf(stdout, "TRACK: track: %lf\n", collect->fix.track);
+    if (collect->set & CLIMB_SET)
+	(void)fprintf(stdout, "CLIMB: climb: %lf\n", collect->fix.climb);
+    if (collect->set & STATUS_SET)
+	(void)fprintf(stdout, "STATUS: status: %d\n", collect->status);
+    if (collect->set & MODE_SET)
+	(void)fprintf(stdout, "MODE: mode: %d\n", collect->fix.mode);
+    if (collect->set & DOP_SET)
+	(void)fprintf(stdout,
+		      "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+		      collect->satellites_used, collect->dop.pdop,
+		      collect->dop.hdop, collect->dop.vdop);
+    if (collect->set & VERSION_SET)
+	(void)fprintf(stdout, "VERSION: release=%s rev=%s proto=%d.%d\n",
+		      collect->version.release,
+		      collect->version.rev,
+		      collect->version.proto_major,
+		      collect->version.proto_minor);
+    if (collect->set & POLICY_SET)
+	(void)fprintf(stdout,
+		      "POLICY: watcher=%s nmea=%s raw=%d scaled=%s timing=%s, devpath=%s\n",
+		      collect->policy.watcher ? "true" : "false",
+		      collect->policy.nmea ? "true" : "false",
+		      collect->policy.raw,
+		      collect->policy.scaled ? "true" : "false",
+		      collect->policy.timing ? "true" : "false",
+		      collect->policy.devpath);
+    if (collect->set & SATELLITE_SET) {
+	int i;
 
-int main(void) {
-	gpsmm gps_rec;
-	struct gps_data_t *resp;
-
-	resp=gps_rec.open();
-	if (resp==NULL) {
-		cout << "Error opening gpsd\n";
-		return (1);
+	(void)fprintf(stdout, "SKY: satellites in view: %d\n",
+		      collect->satellites_visible);
+	for (i = 0; i < collect->satellites_visible; i++) {
+	    (void)fprintf(stdout, "    %2.2d: %2.2d %3.3d %3.0f %c\n",
+			  collect->PRN[i], collect->elevation[i],
+			  collect->azimuth[i], collect->ss[i],
+			  collect->used[i] ? 'Y' : 'N');
 	}
-
-#ifdef SAMPLE_USAGE
-	cout << "Going to set the callback...\n";
-	if (gps_rec.set_callback(callback)!=0 ) {
-		cout << "Error setting callback.\n";
-		return (1);
+    }
+    if (collect->set & DEVICE_SET)
+	(void)fprintf(stdout, "DEVICE: Device is '%s', driver is '%s'\n",
+		      collect->dev.path, collect->dev.driver);
+#ifdef OLDSTYLE_ENABLE
+    if (collect->set & DEVICEID_SET)
+	(void)fprintf(stdout, "GPSD ID is %s\n", collect->dev.subtype);
+#endif /* OLDSTYLE_ENABLE */
+    if (collect->set & DEVICELIST_SET) {
+	int i;
+	(void)fprintf(stdout, "DEVICELIST:%d devices:\n",
+		      collect->devices.ndevices);
+	for (i = 0; i < collect->devices.ndevices; i++) {
+	    (void)fprintf(stdout, "%d: path='%s' driver='%s'\n",
+			  collect->devices.ndevices,
+			  collect->devices.list[i].path,
+			  collect->devices.list[i].driver);
 	}
-
-	cout << "Callback setted, sleeping...\n";
-	sleep(10);
-	cout << "Exited from sleep...\n";
-#endif
-
-#ifdef SAMPLE_USAGE
-	if (gps_rec.del_callback()!=0) {
-		cout << "Error deleting callback\n";
-		return (1);
-	}
-	cout << "Sleeping again, to make sure the callback is disabled\n";
-	sleep(4);
-#endif
-
-	cout << "Exiting\n";
-	return 0;
+    }
 }
 
-#ifdef SAMPLE_USAGE
-static void callback(struct gps_data_t* p, char* buf, size_t len) {
-	if (p==NULL) {
-		cout << "Error polling gpsd\n";
-		return;
+
+int main(void) 
+{
+    gpsmm gps_rec;
+    struct gps_data_t *resp;
+
+    resp = gps_rec.open();
+    if (resp==NULL) {
+	    cout << "Error opening gpsd\n";
+	    return (1);
+    }
+
+    gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
+
+    for (;;) {
+	struct gps_data_t* newdata;
+
+	if (!gps_rec.waiting())
+	  continue;
+
+	if ((newdata = gps_rec.read()) == NULL) {
+	    cerr << "Read error.\n";
+	    return 1;
+	} else {
+	    libgps_dump_state(newdata);
 	}
-	cout << "Online:\t" << p->online << "\n";
-	cout << "Status:\t" << p->status << "\n";
-	cout << "Mode:\t" << p->fix.mode << "\n";
-	if (p->fix.mode>=MODE_2D) {
-		if (p->set & LATLON_SET) {
-			cout << "LatLon changed\n";
-		}
-		else {
-			cout << "LatLon unchanged\n";
-		}
-		cout << "Longitude:\t" << p->fix.longitude <<"\n";
-		cout << "Latitude:\t" << p->fix.latitude <<"\n";
-	}
+    }
+
+    cout << "Exiting\n";
+    return 0;
 }
-#endif
+
