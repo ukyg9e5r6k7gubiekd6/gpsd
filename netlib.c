@@ -76,7 +76,8 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		  sizeof(one)) == -1) {
-	    (void)close(s);
+	    if (s > -1)
+		(void)close(s);
 	    ret = NL_NOSOCKOPT;
 	} else {
 	    if (bind_me) {
@@ -92,7 +93,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	    }
 	}
 
-	if (s > 0) {
+	if (s > -1) {
 	    (void)close(s);
 	}
     }
