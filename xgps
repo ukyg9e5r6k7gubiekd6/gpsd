@@ -375,13 +375,13 @@ class Base:
         ("EPC", lambda s, r: s.update_err(r, "epc")),
         ("EPD", lambda s, r: s.update_err(r, "epd")),
         # third column, GPGST data
-        ("RMS",    lambda s, r: s.update_err(r, "rms")),
-        ("Major",  lambda s, r: s.update_err(r, "major")),
-        ("Minor",  lambda s, r: s.update_err(r, "minor")),
-        ("Orient", lambda s, r: s.update_err(r, "orient")),
-        ("Lat",    lambda s, r: s.update_err(r, "lat")),
-        ("Long",   lambda s, r: s.update_err(r, "longt")),
-        ("Alt",    lambda s, r: s.update_err(r, "alt")),
+        #("RMS",    lambda s, r: s.update_err(r, "rms")),
+        #("Major",  lambda s, r: s.update_err(r, "major")),
+        #("Minor",  lambda s, r: s.update_err(r, "minor")),
+        #("Orient", lambda s, r: s.update_err(r, "orient")),
+        #("Lat",    lambda s, r: s.update_err(r, "lat")),
+        #("Long",   lambda s, r: s.update_err(r, "longt")),
+        #("Alt",    lambda s, r: s.update_err(r, "alt")),
         )
     def __init__(self, deg_type):
         self.deg_type = deg_type
@@ -492,7 +492,11 @@ class Base:
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
-            colbase = (i / (len(Base.gpsfields) / Base.COLUMNS)) * 2
+            if i < len(Base.gpsfields) / 2:
+                colbase = 0
+            else:
+                colbase = 2
+            #colbase = (i / (len(Base.gpsfields) / Base.COLUMNS)) * 2
             label = gtk.Label(Base.gpsfields[i][0] + ": ")
             # Wacky way to force right alignment 
             label.set_alignment(xalign=1, yalign=0.5)
@@ -699,8 +703,8 @@ class Base:
                 self.update_skyview(self.daemon.data)
             elif self.daemon.data["class"] == "TPV":
                 self.update_gpsdata(self.daemon.data)
-            elif self.daemon.data["class"] == "NOISE":
-                self.update_noisedata(self.daemon.data)
+            #elif self.daemon.data["class"] == "GST":
+            #    self.update_noisedata(self.daemon.data)
             elif self.daemon.data["class"] == "AIS":
                 self.aisview.update(self.daemon.data)
                 if self.ais_latch == False:
