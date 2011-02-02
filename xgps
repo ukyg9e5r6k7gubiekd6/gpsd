@@ -355,6 +355,8 @@ class AISView:
                     (ais.type, ais.name, "(%s navaid)" % ais.epfd, "", where, ais.aid_type))
                     
 class Base:
+    COLUMNS = 3
+    ROWS = 7
     gpsfields = (
         # First column
         ("Time", lambda s, r: s.update_time(r)),
@@ -490,13 +492,15 @@ class Base:
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
-            colbase = (i / (len(Base.gpsfields) / 3)) * 2
+            colbase = (i / (len(Base.gpsfields) / Base.COLUMNS)) * (Base.COLUMNS-1)
             label = gtk.Label(Base.gpsfields[i][0] + ": ")
             # Wacky way to force right alignment 
             label.set_alignment(xalign=1, yalign=0.5)
-            datatable.attach(label, colbase, colbase+1, i % 7, i % 7 + 1)
+            datatable.attach(label, colbase, colbase+1,
+                             i % Base.ROWS, i % Base.ROWS + 1)
             entry = gtk.Entry()
-            datatable.attach(entry, colbase+1, colbase+2, i % 7, i % 7 + 1)
+            datatable.attach(entry, colbase+1, colbase+2,
+                             i % Base.ROWS, i % Base.ROWS + 1)
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
