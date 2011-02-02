@@ -492,11 +492,7 @@ class Base:
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
-            if i < len(Base.gpsfields) / 2:
-                colbase = 0
-            else:
-                colbase = 2
-            #colbase = (i / (len(Base.gpsfields) / Base.COLUMNS)) * 2
+            colbase = (i / Base.ROWS) * 2
             label = gtk.Label(Base.gpsfields[i][0] + ": ")
             # Wacky way to force right alignment 
             label.set_alignment(xalign=1, yalign=0.5)
