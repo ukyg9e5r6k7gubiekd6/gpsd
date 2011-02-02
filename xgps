@@ -499,6 +499,8 @@ class Base:
             datatable.attach(label, colbase, colbase+1,
                              i % Base.ROWS, i % Base.ROWS + 1)
             entry = gtk.Entry()
+            # The right size for the ISO8601 timestamp
+            entry.set_width_chars(20)
             entry.set_text("n/a")
             datatable.attach(entry, colbase+1, colbase+2,
                              i % Base.ROWS, i % Base.ROWS + 1)
