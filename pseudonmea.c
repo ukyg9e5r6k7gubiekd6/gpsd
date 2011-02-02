@@ -231,6 +231,15 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
 	fractional = modf(session->newdata.time, &integral);
 	integral_time = (time_t) integral;
 	(void)gmtime_r(&integral_time, &tm);
+	/*
+	 * We pin this report to the GMT/UTC timezone.  This may be technically
+	 * incorrect; our sources on ZDA suggest that it should report local
+	 * timezone. But no GPS we've ever seen actually does this, because it
+	 * would require embedding a location-to-TZ database in the receiver.
+	 * And even if we could do that, it would make our regression tests 
+	 * break any time they were run in a timezone different from the one
+	 * where they were generated.
+	 */
 	(void)snprintf(bufp, len,
 		       "$GPZDA,%02d%02d%05.2f,%02d,%02d,%04d,00,00",
 		       tm.tm_hour,
