@@ -403,17 +403,47 @@ of the gpsdata structure. Two new DOPs, xdop and ydop, are available;
 these express dilution of precision in longitude and latitude,
 respectively.
 
-The raw_hook member is gone.
+There is a gps_waiting() method analogous to the waiting() method in
+the Python class -- a non-blocking way to check if input is waiting
+from the daemon.
 
-The 2.91 API includes a gps_waiting() method analogous to the 
-waiting() method in the Python class -- a non-blocking way to check
-if input is waiting from the daemon.
+The raw_hook member is gone.
 
 == C++  client library changes ==
 
-The C++ client library continues to be a trivial class wrpapper around
-the C.  About all you need to know is that the query() method is gone
-and there is a new stream() method that calls gps_stream().
+In API version 5, the C++ library defines a single object using RAII.
+There are no explicit open() and close() methods; instead, you initialize
+the object handing it a host and server, and the connection is shut down
+when the object is deleted or goes out of scope.
+
+The following code skeleton implements a C++ client:
+
+----------------------------------------------------------------------
+
+int main(void) 
+{
+    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
+
+    gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
+
+    for (;;) {
+	struct gps_data_t* newdata;
+
+	if (!gps_rec.waiting())
+	  continue;
+
+	if ((newdata = gps_rec.read()) == NULL) {
+	    cerr << "Read error.\n";
+	    return 1;
+	} else {
+	    PROCESS(newdata);
+	}
+    }
+    return 0;
+}
+
+----------------------------------------------------------------------
+
 
 == Python client library changes ==
 

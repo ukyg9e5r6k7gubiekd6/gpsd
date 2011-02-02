@@ -11,16 +11,7 @@
 #include "libgpsmm.h"
 
 
-gpsmm::gpsmm() : to_user(0)
-{
-}
-
-struct gps_data_t* gpsmm::open(void) 
-{
-	return open("localhost",DEFAULT_GPSD_PORT);
-}
-
-struct gps_data_t* gpsmm::open(const char *host, const char *port) 
+struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port) 
 {
 	const bool err = (gps_open(host, port, gps_data()) != 0);
 	if ( err ) {
@@ -63,11 +54,6 @@ struct gps_data_t* gpsmm::read(void)
 	else {
 		return backup();
 	}
-}
-
-int gpsmm::close(void)
-{
-	return gps_close(gps_data());
 }
 
 bool gpsmm::waiting(void)

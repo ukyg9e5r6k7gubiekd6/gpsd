@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Alfredo Pironti
+ * Copyright (C) 2010 Eric S. Raymond.
  *
  * This software is distributed under a BSD-style license. See the
  * file "COPYING" in the top-level directory of the distribution for details.
@@ -96,14 +96,7 @@ static void libgps_dump_state(struct gps_data_t *collect)
 
 int main(void) 
 {
-    gpsmm gps_rec;
-    struct gps_data_t *resp;
-
-    resp = gps_rec.open();
-    if (resp==NULL) {
-	    cout << "Error opening gpsd\n";
-	    return (1);
-    }
+    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
 
     gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
 

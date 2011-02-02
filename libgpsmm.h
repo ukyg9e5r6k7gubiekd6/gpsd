@@ -18,10 +18,16 @@ class gpsmm {
 class LIBQGPSMMSHARED_EXPORT gpsmm {
 #endif
 	public:
-		gpsmm();
+		gpsmm(const char *host, const char *port) : to_user(0) {
+			gps_inner_open(host, port);
+		}
+#ifdef __UNUSED__
+		gpsmm(void) : to_user(0) 
+		{
+		        gps_inner_open("localhost", DEFAULT_GPSD_PORT);
+		}
+#endif
 		virtual ~gpsmm();
-		struct gps_data_t* open(const char *host,const char *port); //opens the connection with gpsd, MUST call this before any other method
-		struct gps_data_t* open(void); //open() with default values
 		struct gps_data_t* send(const char *request); //put a command to gpsd and return the updated struct
 		struct gps_data_t* stream(int); //set watcher and policy flags
 		struct gps_data_t* read(void); //block until gpsd returns new data, then return the updated struct
@@ -32,6 +38,8 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 	private:
 		struct gps_data_t *to_user;	//we return the user a copy of the internal structure. This way she can modify it without
 						//integrity loss for the entire class
+		struct gps_data_t* gps_inner_open(const char *host,
+						  const char *port);
 		struct gps_data_t _gps_data;
 		struct gps_data_t * gps_data() { return &_gps_data; }
 		struct gps_data_t* backup(void) { *to_user=*gps_data(); return to_user;}; //return the backup copy
