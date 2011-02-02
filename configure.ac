@@ -1,7 +1,8 @@
 dnl This file is Copyright (c)2010 by the GPSD project
 dnl BSD terms apply: see the file COPYING in the distribution root for details.
 
-AC_INIT(gpsd, 2.96~dev)
+AC_INIT(gpsd, 2.96~dev, [http://developer.berlios.de/bugs/?group_id=2116], ,
+	[http://gpsd.berlios.de/])
 AM_INIT_AUTOMAKE
 dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
@@ -957,7 +958,7 @@ fi
 dnl Output the configuration summary
 echo ""
 echo "=========================================="
-echo "$PACKAGE $VERSION"
+echo "$PACKAGE_NAME $PACKAGE_VERSION"
 echo "------------------------------------------"
 dnl When you add a protocol here, don't forget the null-set check below
 echo "	Protocols"

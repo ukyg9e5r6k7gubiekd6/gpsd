@@ -290,7 +290,7 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
-	env version='$(VERSION)' abs_builddir='$(abs_builddir)' \
+	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 		$(PYTHON) setup.py build \
 			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
@@ -360,7 +360,7 @@ clean-local:
 # Clean up after Python and QT
 if HAVE_PYTHON
 	(cd '$(srcdir)' && \
-	env version='$(VERSION)' abs_builddir='$(abs_builddir)' \
+	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 	        $(PYTHON) setup.py clean \
 	                --build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
@@ -385,9 +385,9 @@ if HAVE_PYTHON
 # when DESTDIR is not defined as distutils would use the current
 # working directory as root directory and not install to ${prefix}.
 	if test -z "$(DESTDIR)"; then \
-		env version='$(VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} ;\
+		env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} ;\
 	else \
-		env version='$(VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
+		env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
 	fi
 endif
 if LIB_Q_GPSMM_ENABLE
@@ -599,7 +599,7 @@ EXTRA_DIST = \
 dist-hook: ais_json.i gpsd_config.h
 	$(MKDIR_P) '$(distdir)/libQgpsmm/mingw'
 	cp -p ais_json.i $(distdir)/libQgpsmm/mingw
-	grep "#define VERSION" gpsd_config.h > $(distdir)/libQgpsmm/mingw/version.h
+	grep "#define PACKAGE_VERSION" gpsd_config.h > $(distdir)/libQgpsmm/mingw/version.h
 	echo "VERSION=$(libgps_VERSION)" > $(distdir)/libQgpsmm/mingw/version.pri
 distclean-local:
 	rm -f $(distdir)/libQgpsmm/mingw/version.* $(distdir)/libQgpsmm/mingw/ais_json.i
@@ -693,7 +693,7 @@ indent:
 	@echo "Diff lines:" `git diff | wc -l`
 
 version:
-	@echo $(VERSION)
+	@echo $(PACKAGE_VERSION)
 
 cflags:
 	@echo $(CFLAGS)
@@ -944,15 +944,15 @@ dist-rpm: distdir
 # It requires developer access verified via ssh.
 #
 upload-ftp: dist
-	shasum gpsd-$(VERSION).tar.gz >gpsd-$(VERSION).sum
-	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(VERSION).tar.gz gpsd-$(VERSION).sum"
+	shasum gpsd-$(PACKAGE_VERSION).tar.gz >gpsd-$(PACKAGE_VERSION).sum
+	lftp -c "open ftp://ftp.berlios.de/incoming; mput gpsd-$(PACKAGE_VERSION).tar.gz gpsd-$(PACKAGE_VERSION).sum"
 
 #
 # This is how to tag a release.
 # It requires developer access verified via ssh.
 #
 release-tag:
-	git tag -s -m "Tagged for external release $(VERSION)" release-$(VERSION)
+	git tag -s -m "Tagged for external release $(PACKAGE_VERSION)" release-$(PACKAGE_VERSION)
 	git push --tags
 
 #
