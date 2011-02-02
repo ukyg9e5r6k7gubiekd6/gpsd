@@ -140,20 +140,14 @@ def fetch_leapsecs(filename):
 def make_leapsecond_include(infile):
     leapsecs = fetch_leapsecs(infile)
     leapsecs.append(time.time())          # Add sentinel
-    (b, c, e) = leastsquares(zip(range(len(leapsecs)), leapsecs))
     def label(i):
         if i == len(leapsecs) - 1:
             return '?'
         else:
             return str(i)
     year = time.strftime("%Y", time.localtime(time.time()))
-    for (i, b) in enumerate(leapsecs):
-        sys.stdout.write("    %s,    // %s -> %s\n" % (b, unix_to_rfc822(b), label(i)))
     sys.stdout.write("#define CENTURY_BASE\t%s00\n" % year[:2])
-    sys.stdout.write("#define LEAPSECOND_NOW\t%d\n" % (i-1)) 
-    sys.stdout.write("#define LEAPSECOND_B\t%s\n" % b)
-    sys.stdout.write("#define LEAPSECOND_C\t%s\n" % c)
-    sys.stdout.write("#define LEAPSECOND_E\t%s\n" % e)
+    sys.stdout.write("#define LEAPSECOND_NOW\t%d\n" % (len(leapsecs)-2)) 
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
@@ -207,11 +201,11 @@ def graph_history(filename):
 
 def rfc822_to_unix(tv):
     "Local Unix time to RFC822 date."
-    return time.mktime(time.strptime(tv, "%d %b %Y %H:%M:%S"))
+    return calendar.timegm(time.strptime(tv, "%d %b %Y %H:%M:%S"))
 
 def unix_to_rfc822(tv):
     "RFC822 date to local Unix time."
-    return time.strftime("%d %b %Y %H:%M:%S", time.localtime(tv))
+    return time.strftime("%d %b %Y %H:%M:%S", time.gmtime(tv))
 
 def printnext(val):
     "Compute Unix time correponsing to a scheduled leap second."
@@ -261,7 +255,7 @@ if __name__ == '__main__':
             make_leapsecond_include(val)
             raise SystemExit, 0
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
-            print "#define FOO	%d	/* %s */" % (rfc822_to_unix(val), val)
+            print rfc822_to_unix(val)
             raise SystemExit, 0
         elif (switch == '-n'):  # Compute possible next leapsecond
             printnext(val)

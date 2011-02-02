@@ -78,11 +78,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 *****************************************************************************/
 
 #include "gpsd.h"
-
-static double c_epochs[] = {
 #include "timebase.h"
-};
-#define DIM(a) (int)(sizeof(a)/sizeof(a[0]))
 
 #define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
@@ -120,19 +116,6 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     }
 }
 
-static int gpsd_check_utc(const int leap, const double unixtime)
-/* consistency-check a GPS-reported UTC against a leap second */
-{
-    if (leap < 0 || leap >= DIM(c_epochs))
-        return -1;   /* cannot tell, leap second out of table bounds */
-    else if (unixtime < c_epochs[0] || unixtime >= c_epochs[DIM(c_epochs)-1])
-        return -1;   /* cannot tell, time not in table */
-    else if (unixtime >= c_epochs[leap] && unixtime <= c_epochs[leap+1])
-        return 1;    /* leap second consistent with specified year */
-    else
-        return 0;    /* leap second inconsistent, probable rollover error */
-}
-
 double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
@@ -147,20 +130,6 @@ double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
     t = (double)mkgmtime(&session->driver.nmea.date) +
 	session->driver.nmea.subseconds;
     session->context->valid &=~ GPS_TIME_VALID;
-
-    /*
-     * Check the time passed in against the leap-second offset the satellites
-     * are reporting.  After a rollover, the receiver will probably report a
-     * time far enough in the past that it won't be consistent with the
-     * leap-second value.
-     */
-    if ((session->context->valid & LEAP_SECOND_VALID)!=0 && 
-	gpsd_check_utc(session->context->leap_seconds, session->newdata.time) == 0) {
-	char scr[128];
-	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
-	gpsd_report(LOG_WARN, "leap-second %d is impossible at time %s (%f)\n", 
-		    session->context->leap_seconds, scr, session->newdata.time);
-    }
 
     /*
      * If the system clock is zero or has a small-integer value,
