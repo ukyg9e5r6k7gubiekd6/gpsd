@@ -226,25 +226,19 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
     struct tm tm;
     double integral, fractional;
     time_t integral_time;
-    int tz_hour, tz_min;
 
     if (session->newdata.mode > MODE_NO_FIX) {
 	fractional = modf(session->newdata.time, &integral);
 	integral_time = (time_t) integral;
 	(void)gmtime_r(&integral_time, &tm);
-	(void)tzset();
-	tz_hour = timezone / 3600;
-	tz_min = abs(timezone / 60 - tz_hour * 60);
 	(void)snprintf(bufp, len,
-		       "$GPZDA,%02d%02d%05.2f,%02d,%02d,%04d,%+03d,%02d",
+		       "$GPZDA,%02d%02d%05.2f,%02d,%02d,%04d,00,00",
 		       tm.tm_hour,
 		       tm.tm_min,
 		       (double)tm.tm_sec + fractional,
 		       tm.tm_mday,
 		       tm.tm_mon + 1,
-		       tm.tm_year + 1900,
-		       tz_hour,
-		       tz_min);
+		       tm.tm_year + 1900);
 	nmea_add_checksum(bufp);
     }
 }
