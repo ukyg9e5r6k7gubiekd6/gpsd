@@ -343,11 +343,11 @@ Set watch policy. What you should use instead of send().
 Nonblocking check to see in input is waiting.
 |gps_read()		|gpsmm.read()		|gps.read()		|
 Blocking read for data from the daemon.
-|gps_close()		|gpsmm.close()		|gps.close()		|
+|gps_close()		|gpsmm.~gpsmm()		|gps.close()		|
 Close the daemon socket and end the session.
 |gps_enable_debug()	|gpsmm_enable_debug()	|			|
 Enable debug tracing.  Only useful for GPSD developers.
-			|gpsmm.clear_fix()	|			|
+|gps_clear_fix()	|gpsmm.clear_fix()	|			|
 Clear the contents of the fix structure.
 |========================================================================
 
