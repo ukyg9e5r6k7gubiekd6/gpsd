@@ -1,6 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 Eric S. Raymond <esr@thyrsus.com>
-v1.9, January 2011
+v1.10, Febuary 2011
 
 == Why a new protocol? ==
 
@@ -416,35 +416,6 @@ There are no explicit open() and close() methods; instead, you initialize
 the object handing it a host and server, and the connection is shut down
 when the object is deleted or goes out of scope.
 
-The following code skeleton implements a C++ client:
-
-----------------------------------------------------------------------
-
-int main(void) 
-{
-    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
-
-    gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
-
-    for (;;) {
-	struct gps_data_t* newdata;
-
-	if (!gps_rec.waiting())
-	  continue;
-
-	if ((newdata = gps_rec.read()) == NULL) {
-	    cerr << "Read error.\n";
-	    return 1;
-	} else {
-	    PROCESS(newdata);
-	}
-    }
-    return 0;
-}
-
-----------------------------------------------------------------------
-
-
 == Python client library changes ==
 
 There is a new stream() method analogous to the gps_stream() call in
@@ -471,30 +442,4 @@ for report in gps(mode=WATCH_ENABLE):
 
 ----------------------------------------------------------------------
 
-Or. if you need to intersperse other processing in a main event loop,
-like this:
-
-----------------------------------------------------------------------
-
-session = gps(mode=WATCH_ENABLE)
-try:
-    while True:
-        # Do stuff
-        report = session.next()
-	# Do more stuff
-except StopIteration:
-    print "GPSD has terminated"
-
-----------------------------------------------------------------------
-
-Each call to the iterator yields a report structure until the daemon
-terminates, at which point the iterator next() method will raise
-StopIteration and the loop will terminate.
-
-The report object returned by next() can be accessed either as a dictionary
-or as an object.  As a dictionary, it is the raw contents of the last
-JSON response re-encoded in plain ASCII.  For convenience, you may
-also access it as an object with members for each attribute in the
-dictionary.  It is especially useful to know that the object will 
-always have a "class" member giving the response type (TPV, SKY,
-DEVICE, etc.) as a string.
+See the Client HOWTO for a more detailed example.

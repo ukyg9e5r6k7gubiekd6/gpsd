@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.5, January 2011
+v1.6, February 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -404,6 +404,38 @@ cgps.c shows what an interactive application using the library and
 also processing user commands works. Observe the use of select(2)
 to wait on either data from the daemon or a keystroke.
 
+== C++ examples ==
+
+The following code skeleton implements a C++ client:
+
+----------------------------------------------------------------------
+
+int main(void) 
+{
+    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
+
+    gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
+
+    for (;;) {
+	struct gps_data_t* newdata;
+
+	if (!gps_rec.waiting())
+	  continue;
+
+	if ((newdata = gps_rec.read()) == NULL) {
+	    cerr << "Read error.\n";
+	    return 1;
+	} else {
+	    PROCESS(newdata);
+	}
+    }
+    return 0;
+}
+
+----------------------------------------------------------------------
+
+Look at test_libgpsmm.cpp in the ditributoion for a full example.
+
 == Python examples ==
 
 There's a very simple Python example analogous to gpxlogger attached
@@ -418,7 +450,35 @@ The heart of it is this code:
         print report
 -----------------------------------------------------------------------------
 
-For more interesting example integrated with X and GTK, see xgps and
+Or. if you need to intersperse other processing in a main event loop,
+like this:
+
+----------------------------------------------------------------------
+
+session = gps(mode=WATCH_ENABLE)
+try:
+    while True:
+        # Do stuff
+        report = session.next()
+	# Do more stuff
+except StopIteration:
+    print "GPSD has terminated"
+
+----------------------------------------------------------------------
+
+Each call to the iterator yields a report structure until the daemon
+terminates, at which point the iterator next() method will raise
+StopIteration and the loop will terminate.
+
+The report object returned by next() can be accessed either as a dictionary
+or as an object.  As a dictionary, it is the raw contents of the last
+JSON response re-encoded in plain ASCII.  For convenience, you may
+also access it as an object with members for each attribute in the
+dictionary.  It is especially useful to know that the object will 
+always have a "class" member giving the response type (TPV, SKY,
+DEVICE, etc.) as a string.
+
+For more interesting examples integrated with X and GTK, see xgps and
 xgpsspeed.
 
 == Backward Incompatibility and Future Changes ==
