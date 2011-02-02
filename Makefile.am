@@ -385,9 +385,9 @@ if HAVE_PYTHON
 # when DESTDIR is not defined as distutils would use the current
 # working directory as root directory and not install to ${prefix}.
 	if test -z "$(DESTDIR)"; then \
-		MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} ;\
+		env version='$(VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} ;\
 	else \
-		MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
+		env version='$(VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
 	fi
 endif
 if LIB_Q_GPSMM_ENABLE
