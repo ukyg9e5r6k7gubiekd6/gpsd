@@ -499,6 +499,7 @@ class Base:
             datatable.attach(label, colbase, colbase+1,
                              i % Base.ROWS, i % Base.ROWS + 1)
             entry = gtk.Entry()
+            entry.set_text("n/a")
             datatable.attach(entry, colbase+1, colbase+2,
                              i % Base.ROWS, i % Base.ROWS + 1)
             gpswidgets.append(entry)
