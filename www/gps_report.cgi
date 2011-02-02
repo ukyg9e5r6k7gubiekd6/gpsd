@@ -236,8 +236,7 @@ print <<EOF;
 
 <p>Please tell us what version you tested with.  If you used us a release,
 give us the full release number, like <code>2.35</code>.  If you built
-your code from our development repository please give the revision number,
-like <code>r4595</code>.</p>
+your code from our development repository please give the revision ID.</p>
 
 EOF
 
