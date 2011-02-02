@@ -269,7 +269,7 @@ libgps interface code from
 
     /* When you are done... */
     (void) gps_stream(&amp;gps_data, WATCH_DISABLE, NULL);
-    gps_close (&amp;gps_data);
+    (void) gps_close (&amp;gps_data);
 </programlisting>
 
 </refsect1>
