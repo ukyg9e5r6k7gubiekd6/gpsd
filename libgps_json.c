@@ -233,7 +233,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	    gpsdata->skyview_time = iso8601_to_unix(tbuf);
 	/*@+usedef@*/
     gpsdata->satellites_used = 0;
+    gpsdata->satellites_visible = 0;
     for (i = j = 0; i < MAXCHANNELS; i++) {
+	if(gpsdata->PRN[i] > 0)
+	    gpsdata->satellites_visible++;
 	if (usedflags[i]) {
 	    gpsdata->used[j++] = gpsdata->PRN[i];
 	    gpsdata->satellites_used++;
