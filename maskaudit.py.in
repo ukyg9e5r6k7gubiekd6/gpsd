@@ -25,7 +25,7 @@ class SourceExtractor:
             if line.startswith("#define") and self.suffix in line:
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
-                if fields[2].startswith("(1<<") or fields[2].startswith("((gps_mask_t)"):
+                if fields[2].startswith("(1u<<") or fields[2].startswith("((gps_mask_t)"):
                     self.primitive_masks.append((fields[1], fields[2]))
     
     def in_library(self, flag):
