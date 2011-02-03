@@ -11,11 +11,8 @@
 -abstract
 
 -Dint8_t=char
--Duint8_t=uchar
 -Dint16_t=short
--Duint16_t=ushort
 -Dint32_t=int
--Duint32_t=uint
 -Din_addr_t=int
 -Dcaddr_t=short
 -Disgps30bits_t=uint
