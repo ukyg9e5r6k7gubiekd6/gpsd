@@ -8,6 +8,8 @@
 # With -c, generate C code to dump client-side masks for debugging purposes.
 #
 # With -d, generate C code to dump demon-side masks for debugging purposes.
+#
+# With -t, rtabulate usage of defines to find unused ones.  Requires -c or -d.
 
 import sys, commands, glob, getopt
 
@@ -16,14 +18,14 @@ class SourceExtractor:
         self.sourcefile = sourcefile
         self.suffix = suffix
         self.clientside = clientside
-        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c") + ["gpsmon.c"] + glob.glob("monitor_*.c")
+        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c") + ["gpsmon.c", "subframe.c"] + glob.glob("monitor_*.c")
         self.masks = []
         self.primitive_masks = []
         for line in file(self.sourcefile):
             if line.startswith("#define") and self.suffix in line:
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
-                if fields[2].endswith("u"):
+                if fields[2].startswith("(1<<") or fields[2].startswith("((gps_mask_t)"):
                     self.primitive_masks.append((fields[1], fields[2]))
     
     def in_library(self, flag):
