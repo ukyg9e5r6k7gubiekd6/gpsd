@@ -789,7 +789,11 @@ struct subframe_t {
     };
 };
 
-typedef /*@unsignedintegraltype@*/ uint64_t gps_mask_t;
+#ifndef S_SPLINT_S
+typedef uint64_t gps_mask_t;
+#else
+typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
+#endif /* S_SPLINT_S */
 
 /* 
  * Is an MMSI number that of an auxiliary associated with a mother ship?
@@ -1296,36 +1300,36 @@ typedef int socket_t;
 
 struct gps_data_t {
     gps_mask_t set;	/* has field been set since this was last cleared? */
-#define ONLINE_SET	(1<<1)
-#define TIME_SET	(1<<2)
-#define TIMERR_SET	(1<<3)
-#define LATLON_SET	(1<<4)
-#define ALTITUDE_SET	(1<<5)
-#define SPEED_SET	(1<<6)
-#define TRACK_SET	(1<<7)
-#define CLIMB_SET	(1<<8)
-#define STATUS_SET	(1<<9)
-#define MODE_SET	(1<<10)
-#define DOP_SET  	(1<<11)
-#define HERR_SET	(1<<12)
-#define VERR_SET	(1<<13)
-#define ATTITUDE_SET	(1<<14)
-#define SATELLITE_SET	(1<<15)
-#define SPEEDERR_SET	(1<<16)
-#define TRACKERR_SET	(1<<17)
-#define CLIMBERR_SET	(1<<18)
-#define DEVICE_SET	(1<<19)
-#define DEVICELIST_SET	(1<<20)
-#define DEVICEID_SET	(1<<21)
-#define RTCM2_SET	(1<<22)
-#define RTCM3_SET	(1<<23)
-#define AIS_SET 	(1<<24)
-#define PACKET_SET	(1<<25)
-#define SUBFRAME_SET	(1<<26)
-#define GST_SET 	(1<<27)
-#define VERSION_SET	(1<<28)
-#define POLICY_SET	(1<<29)
-#define ERROR_SET	(1<<30)
+#define ONLINE_SET	(1<<1llu)
+#define TIME_SET	(1<<2llu)
+#define TIMERR_SET	(1<<3llu)
+#define LATLON_SET	(1<<4llu)
+#define ALTITUDE_SET	(1<<5llu)
+#define SPEED_SET	(1<<6llu)
+#define TRACK_SET	(1<<7llu)
+#define CLIMB_SET	(1<<8llu)
+#define STATUS_SET	(1<<9llu)
+#define MODE_SET	(1<<10llu)
+#define DOP_SET  	(1<<11llu)
+#define HERR_SET	(1<<12llu)
+#define VERR_SET	(1<<13llu)
+#define ATTITUDE_SET	(1<<14llu)
+#define SATELLITE_SET	(1<<15llu)
+#define SPEEDERR_SET	(1<<16llu)
+#define TRACKERR_SET	(1<<17llu)
+#define CLIMBERR_SET	(1<<18llu)
+#define DEVICE_SET	(1<<19llu)
+#define DEVICELIST_SET	(1<<20llu)
+#define DEVICEID_SET	(1<<21llu)
+#define RTCM2_SET	(1<<22llu)
+#define RTCM3_SET	(1<<23llu)
+#define AIS_SET 	(1<<24llu)
+#define PACKET_SET	(1<<25llu)
+#define SUBFRAME_SET	(1<<26llu)
+#define GST_SET 	(1<<27llu)
+#define VERSION_SET	(1<<28llu)
+#define POLICY_SET	(1<<29llu)
+#define ERROR_SET	(1<<30llu)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences

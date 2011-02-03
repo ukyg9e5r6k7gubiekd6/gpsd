@@ -202,7 +202,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
 	ul1 = getleu32(buf, OFFSET(29)); /* status */
 
-	if (ul1 != (uint8_t) 0) {
+	if (ul1 != 0) {
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_IS;
 	} else {

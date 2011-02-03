@@ -526,9 +526,9 @@ static void sirf_update(void)
 	total               3 x 12 = 36 bytes
 	******************************************************************/
 	dgps = getub(buf, 1);
+	/*@ -type @*/
 	display(mid27win, 1, 1, "%8s =                                      ",
 		(CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
-	/*@ -type @*/
 	(void)wmove(mid27win, 1, 12);
 	for (i = 0; i < MAXSATS; i++)
 	    if (getub(buf, 16 + 3 * i) != '\0')

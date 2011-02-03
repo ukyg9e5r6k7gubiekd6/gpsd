@@ -418,7 +418,8 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 		   (unsigned int)subframe->subframe_num,
 		   JSON_BOOL(scaled));
     len = strlen(buf);
-    
+
+    /*@-type@*/
     if ( 1 == subframe->subframe_num ) {
 	if (scaled) {
 	    (void)snprintf(buf + len, buflen - len,
@@ -682,13 +683,13 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 	    /* subframe5, page 25 */
 	    (void)snprintf(buf + len, buflen - len,
 		",\"HEALTH2\":{\"toa\":%lu,\"WNa\":%u,",
-		(unsigned long)subframe->sub5_25.l_toa,
-		subframe->sub5_25.WNa);
+			   (unsigned long)subframe->sub5_25.l_toa,
+			   (unsigned int)subframe->sub5_25.WNa);
 		/* 1-index loop to construct json */
 		for(i = 1 ; i <= 24; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-			"\"SV%d\":%d,", i, subframe->sub5_25.sv[i]);
+				   "\"SV%d\":%d,", i, (int)subframe->sub5_25.sv[i]);
 		}
 		len = strlen(buf)-1;
 		buf[len] = '\0';
@@ -697,6 +698,7 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 	    /*@-matchanyintegral@*/
 	}
     }
+    /*@+type@*/
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+compdef@*/
 }

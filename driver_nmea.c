@@ -431,7 +431,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
       return 0;
     }
 
-#define PARSE_FIELD(n) (*field[n] ? atof(field[n]) : NAN)
+#define PARSE_FIELD(n) (*field[n]!='\0' ? atof(field[n]) : NAN)
     session->gpsdata.gst.utctime             = PARSE_FIELD(1);
     session->gpsdata.gst.rms_deviation       = PARSE_FIELD(2);
     session->gpsdata.gst.smajor_deviation    = PARSE_FIELD(3);

@@ -233,37 +233,37 @@ typedef enum {
     event_reactivate,
 } event_t;
 
-#define ONLINE_IS	0x00000001u
-#define TIME_IS 	0x00000002u
-#define TIMERR_IS	0x00000004u
-#define LATLON_IS	0x00000008u
-#define ALTITUDE_IS	0x00000010u
-#define SPEED_IS	0x00000020u
-#define TRACK_IS	0x00000040u
-#define CLIMB_IS	0x00000080u
-#define STATUS_IS	0x00000100u
-#define MODE_IS 	0x00000200u
-#define DOP_IS  	0x00000400u
-#define HERR_IS 	0x00000800u
-#define VERR_IS 	0x00001000u
-#define PERR_IS 	0x00002000u
-#define SATELLITE_IS	0x00004000u
-#define RAW_IS  	0x00008000u
-#define USED_IS 	0x00010000u
-#define SPEEDERR_IS	0x00020000u
-#define DRIVER_IS	0x00040000u
-#define DEVICEID_IS	0x00100000u
-#define ERROR_IS	0x00200000u
-#define RTCM2_IS	0x00400000u
-#define RTCM3_IS	0x00800000u
-#define AIS_IS  	0x01000000u
-#define ATT_IS		0x02000000u
-#define SUBFRAME_IS	0x04000000u
-#define PACKET_IS	0x10000000u
-#define CLEAR_IS	0x20000000u	/* sentence starts a reporting cycle */
-#define REPORT_IS	0x40000000u	/* sentence ends a reporting cycle */
-#define NOISE_IS	0x80000000u	/* sentence contains pseudorange noise information */
-#define NODATA_IS	0x8000000000000000llu	/* no data read from fd */ 
+#define ONLINE_IS	((gps_mask_t)(1<<1))
+#define TIME_IS 	((gps_mask_t)(1<<2))
+#define TIMERR_IS	((gps_mask_t)(1<<3))
+#define LATLON_IS	((gps_mask_t)(1<<4))
+#define ALTITUDE_IS	((gps_mask_t)(1<<5))
+#define SPEED_IS	((gps_mask_t)(1<<6))
+#define TRACK_IS	((gps_mask_t)(1<<7))
+#define CLIMB_IS	((gps_mask_t)(1<<8))
+#define STATUS_IS	((gps_mask_t)(1<<9))
+#define MODE_IS 	((gps_mask_t)(1<<10))
+#define DOP_IS  	((gps_mask_t)(1<<11))
+#define HERR_IS 	((gps_mask_t)(1<<12))
+#define VERR_IS 	((gps_mask_t)(1<<13))
+#define PERR_IS 	((gps_mask_t)(1<<14))
+#define SATELLITE_IS	((gps_mask_t)(1<<15))
+#define RAW_IS  	((gps_mask_t)(1<<16))
+#define USED_IS 	((gps_mask_t)(1<<17))
+#define SPEEDERR_IS	((gps_mask_t)(1<<18))
+#define DRIVER_IS	((gps_mask_t)(1<<19))
+#define DEVICEID_IS	((gps_mask_t)(1<<20))
+#define ERROR_IS	((gps_mask_t)(1<<21))
+#define RTCM2_IS	((gps_mask_t)(1<<22))
+#define RTCM3_IS	((gps_mask_t)(1<<23))
+#define AIS_IS  	((gps_mask_t)(1<<24))
+#define ATT_IS		((gps_mask_t)(1<<25))
+#define SUBFRAME_IS	((gps_mask_t)(1<<26))
+#define PACKET_IS	((gps_mask_t)(1<<27))
+#define CLEAR_IS	((gps_mask_t)(1<<28))	/* starts a reporting cycle */
+#define REPORT_IS	((gps_mask_t)(1<<29))	/* ends a reporting cycle */
+#define NOISE_IS	((gps_mask_t)(1<<30))
+#define NODATA_IS	((gps_mask_t)(1<<31))	/* no data read from fd */
 #define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;

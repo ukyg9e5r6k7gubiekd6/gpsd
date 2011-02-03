@@ -430,9 +430,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
     } else {
-	session->newdata.mode = (nav_mode & 0x40 ? MODE_3D : MODE_2D);
+	session->newdata.mode = ((nav_mode & 0x40)!=0 ? MODE_3D : MODE_2D);
 	session->gpsdata.status =
-	    (nav_mode & 0x03 ? STATUS_DGPS_FIX : STATUS_FIX);
+	    ((nav_mode & 0x03)!=0 ? STATUS_DGPS_FIX : STATUS_FIX);
     }
 
     /* Height Data */
@@ -489,13 +489,13 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	session->gpsdata.dop.vdop = vdop / 10.0;
     if (tdop != DOP_UNDEFINED)
 	session->gpsdata.dop.tdop = tdop / 10.0;
-    /*@ +type @*/
 
     gpsd_report(LOG_PROG, "Navcom: received packet type 0xb1 (PVT Report)\n");
     gpsd_report(LOG_IO, "Navcom: navigation mode %s (0x%02x) - %s - %s\n",
-		(-nav_mode & 0x80 ? "invalid" : "valid"), nav_mode,
-		(nav_mode & 0x40 ? "3D" : "2D"),
-		(nav_mode & 0x03 ? "DGPS" : "GPS"));
+		((-nav_mode & 0x80)!='\0' ? "invalid" : "valid"), nav_mode,
+		((nav_mode & 0x40)!='\0' ? "3D" : "2D"),
+		((nav_mode & 0x03)!='\0' ? "DGPS" : "GPS"));
+    /*@ +type @*/
     gpsd_report(LOG_IO,
 		"Navcom: latitude = %f, longitude = %f, altitude = %f, geoid = %f\n",
 		session->newdata.latitude, session->newdata.longitude,

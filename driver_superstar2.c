@@ -111,8 +111,8 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
 
     session->gpsdata.satellites_used = (int)getub(buf, 71) & 0x0f;
-    /*@i3@*/ session->gpsdata.dop.hdop = getleu16(buf, 66) * 0.1;
-    /*@i3@*/ session->gpsdata.dop.vdop = getleu16(buf, 68) * 0.1;
+    /*@i2@*/ session->gpsdata.dop.hdop = getleu16(buf, 66) * 0.1;
+    /*@i2@*/ session->gpsdata.dop.vdop = getleu16(buf, 68) * 0.1;
     /* other DOP if available */
     mask |= DOP_IS | USED_IS;
 
