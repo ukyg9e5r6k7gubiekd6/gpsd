@@ -138,7 +138,7 @@ case $mode in
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             echo "The following test Failed:"
             echo "==================${error_list}"
-	    eccho "=================="
+	    echo "=================="
             status=1;
         else
             echo "Regression test successful: no errors in $total tests ($notfound not found).";
