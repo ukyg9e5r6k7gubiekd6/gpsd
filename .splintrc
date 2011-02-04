@@ -10,10 +10,8 @@
 -nestedextern
 -abstract
 
--Din_addr_t=int
--Dcaddr_t=short
--Disgps30bits_t=uint
 -Ddbus_uint32_t=uint
+-Disgps30bits_t=uint
 -DFD_SETSIZE=31
 -DB57600=010001
 -DB115200=0010011
