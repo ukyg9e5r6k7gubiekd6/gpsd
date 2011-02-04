@@ -200,9 +200,9 @@ static void oncore_update(void)
 	sec = (unsigned char)getub(buf, 10);
 	nsec = (unsigned int)getbeu32(buf, 11);
 
-	lat = getbes32(buf, 15) / 3600000.0;
-	lon = getbes32(buf, 19) / 3600000.0;
-	alt = getbes32(buf, 23) / 100.0;
+	lat = (double)getbes32(buf, 15) / 3600000.0;
+	lon = (double)getbes32(buf, 19) / 3600000.0;
+	alt = (double)getbes32(buf, 23) / 100.0;
 	speed = (float)(getbeu16(buf, 31) / 100.0);
 	track = (float)(getbeu16(buf, 33) / 10.0);
 	dop = (float)(getbeu16(buf, 35) / 10.0);
@@ -391,7 +391,7 @@ static void oncore_update(void)
     {
 	double pps_offset;
 
-	pps_offset = getbes32(buf, 4) / 1000000.0;
+	pps_offset = (double)getbes32(buf, 4) / 1000000.0;
 
 	(void)mvwprintw(Aywin, 2, 2, " %7.3f ms", pps_offset);
     }
@@ -415,9 +415,9 @@ static void oncore_update(void)
     {
 	double lat, lon, alt;
 
-	lat = getbes32(buf, 4) / 3600000.0;
-	lon = getbes32(buf, 8) / 3600000.0;
-	alt = getbes32(buf, 12) / 100.0;
+	lat = (double)getbes32(buf, 4) / 3600000.0;
+	lon = (double)getbes32(buf, 8) / 3600000.0;
+	alt = (double)getbes32(buf, 12) / 100.0;
 
 	(void)mvwprintw(Aswin, 1, 5, "%10.6lf %c",
 			fabs(lat), lat < 0 ? 'S' : lat > 0 ? 'N' : ' ');

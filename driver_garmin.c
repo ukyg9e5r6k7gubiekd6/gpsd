@@ -369,7 +369,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	time_l = (time_t) (631065600 + (GPSD_LE32TOH(pvt->grmn_days) * 86400));
 	// TODO, convert grmn_days to context->gps_week
 	time_l -= GPSD_LE16TOH(pvt->leap_sec);
-	session->context->leap_seconds = GPSD_LE16TOH(pvt->leap_sec);
+	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
@@ -513,9 +513,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			GPSD_LE32TOH(rmd->sv[i].cycles), 
 			rmd->sv[i].pr,
 			(GPSD_LE16TOH(rmd->sv[i].phase) * 360.0) / 2048.0,
-			rmd->sv[i].slp_dtct != '\0' ? "Yes" : "No",
+			rmd->sv[i].slp_dtct != 0 ? "Yes" : "No",
 			rmd->sv[i].snr_dbhz,
-			rmd->sv[i].valid != '\0' ? "Yes" : "No");
+			rmd->sv[i].valid != 0 ? "Yes" : "No");
 	}
 	break;
 

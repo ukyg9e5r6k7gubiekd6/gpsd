@@ -451,8 +451,8 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			(int)subframe->sub1.Tgd,
 			(unsigned int)subframe->sub1.toc,
 			(long)subframe->sub1.af2,
-			subframe->sub1.af1,
-			subframe->sub1.af0);
+			(int)subframe->sub1.af1,
+			(int)subframe->sub1.af0);
 	}
     } else if ( 2 == subframe->subframe_num ) {
 	if (scaled) {
@@ -477,12 +477,12 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			"\"M0\":%ld,\"Cuc\":%d,\"e\":%ld,\"Cus\":%d,"
 			"\"sqrtA\":%lu,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}",
 			(unsigned int)subframe->sub2.IODE,
-			subframe->sub2.Crs,
-			subframe->sub2.deltan,
+			(int)subframe->sub2.Crs,
+			(int)subframe->sub2.deltan,
 			(long)subframe->sub2.M0,
-			subframe->sub2.Cuc,
+			(int)subframe->sub2.Cuc,
 			(long)subframe->sub2.e,
-			subframe->sub2.Cus,
+			(int)subframe->sub2.Cus,
 			(unsigned long)subframe->sub2.sqrtA,
 			(unsigned long)subframe->sub2.toe,
 			(unsigned int)subframe->sub2.fit,
@@ -512,9 +512,9 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			(unsigned int)subframe->sub3.IDOT,
 			(unsigned int)subframe->sub3.Cic,
 			(long int)subframe->sub3.Omega0,
-			subframe->sub3.Cis,
+			(int)subframe->sub3.Cis,
 			(long int)subframe->sub3.i0,
-			subframe->sub3.Crc,
+			(int)subframe->sub3.Crc,
 			(long int)subframe->sub3.omega,
 			(long int)subframe->sub3.Omegad );
 	}
@@ -550,14 +550,14 @@ void json_subframe_dump(const struct subframe_t *subframe, bool scaled,
 			(unsigned int)subframe->sub5.almanac.svh,
 			(unsigned int)subframe->sub5.almanac.e,
 			(unsigned int)subframe->sub5.almanac.toa,
-			subframe->sub5.almanac.deltai,
-			subframe->sub5.almanac.Omegad,
+			(int)subframe->sub5.almanac.deltai,
+			(int)subframe->sub5.almanac.Omegad,
 			(unsigned long)subframe->sub5.almanac.sqrtA,
 			(long)subframe->sub5.almanac.Omega0,
 			(long)subframe->sub5.almanac.omega,
 			(long)subframe->sub5.almanac.M0,
-			subframe->sub5.almanac.af0,
-			subframe->sub5.almanac.af1);
+			(int)subframe->sub5.almanac.af0,
+			(int)subframe->sub5.almanac.af1);
 	}
     } else if ( 4 == subframe->subframe_num ) {
 	(void)snprintf(buf + len, buflen - len,

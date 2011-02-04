@@ -253,7 +253,7 @@ oncore_msg_pps_offset(struct gps_device_t *session, unsigned char *buf,
 	return 0;
 
     gpsd_report(LOG_IO, "oncore PPS offset\n");
-    pps_offset_ns = getbes32(buf, 4);
+    pps_offset_ns = (int)getbes32(buf, 4);
 
     session->driver.oncore.pps_offset_ns = pps_offset_ns;
     return 0;

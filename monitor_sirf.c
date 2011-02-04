@@ -318,7 +318,7 @@ static void sirf_update(void)
 		    (double)getbes32(buf, 9), (double)getbes16(buf, 13) / 8,
 		    (double)getbes16(buf, 15) / 8, (double)getbes16(buf,
 								  17) / 8);
-	decode_time((int)getbeu16(buf, 22), getbes32(buf, 24));
+	decode_time((int)getbeu16(buf, 22), (int)getbes32(buf, 24));
 	/* line 4 */
 	(void)wmove(mid2win, 4, 49);
 	(void)wprintw(mid2win, "%4.1f", (double)getub(buf, 20) / 5);	/* HDOP */
@@ -340,7 +340,7 @@ static void sirf_update(void)
 	break;
 
     case 0x04:			/* Measured Tracking Data */
-	decode_time((int)getbeu16(buf, 1), getbes32(buf, 3));
+	decode_time((int)getbeu16(buf, 1), (int)getbes32(buf, 3));
 	ch = (int)getub(buf, 7);
 	for (i = 0; i < ch; i++) {
 	    int sv, st;
@@ -405,7 +405,7 @@ static void sirf_update(void)
 	break;
 
     case 0x07:			/* Response - Clock Status Data */
-	decode_time((int)getbeu16(buf, 1), getbes32(buf, 3));
+	decode_time((int)getbeu16(buf, 1), (int)getbes32(buf, 3));
 	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
 	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */

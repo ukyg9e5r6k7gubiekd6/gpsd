@@ -610,9 +610,12 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	session->gpsdata.used[i] = (int)getub(buf, 29 + i);
     /* position/velocity is bytes 1-18 */
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-		     getbes32(buf, 1) * 1.0, getbes32(buf, 5) * 1.0,
-		     getbes32(buf, 9) * 1.0, getbes16(buf, 13) / 8.0,
-		     getbes16(buf, 15) / 8.0, getbes16(buf, 17) / 8.0);
+		     (double)getbes32(buf, 1) * 1.0, 
+		     (double)getbes32(buf, 5) * 1.0,
+		     (double)getbes32(buf, 9) * 1.0, 
+		     (double)getbes16(buf, 13) / 8.0,
+		     (double)getbes16(buf, 15) / 8.0, 
+		     (double)getbes16(buf, 17) / 8.0);
     /* fix status is byte 19 */
     navtype = (unsigned short)getub(buf, 19);
     session->gpsdata.status = STATUS_NO_FIX;
@@ -863,16 +866,16 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     /* this packet is only sent by uBlox firmware from version 1.32 */
     mask = LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS |
 	STATUS_IS | MODE_IS | DOP_IS;
-    session->newdata.latitude = getbes32(buf, 1) * RAD_2_DEG * 1e-8;
-    session->newdata.longitude = getbes32(buf, 5) * RAD_2_DEG * 1e-8;
+    session->newdata.latitude = (double)getbes32(buf, 1) * RAD_2_DEG * 1e-8;
+    session->newdata.longitude = (double)getbes32(buf, 5) * RAD_2_DEG * 1e-8;
     session->gpsdata.separation =
 	wgs84_separation(session->newdata.latitude,
 			 session->newdata.longitude);
     session->newdata.altitude =
-	getbes32(buf, 9) * 1e-3 - session->gpsdata.separation;
-    session->newdata.speed = getbes32(buf, 13) * 1e-3;
-    session->newdata.climb = getbes32(buf, 17) * 1e-3;
-    session->newdata.track = getbes32(buf, 21) * RAD_2_DEG * 1e-8;
+	(double)getbes32(buf, 9) * 1e-3 - session->gpsdata.separation;
+    session->newdata.speed = (double)getbes32(buf, 13) * 1e-3;
+    session->newdata.climb = (double)getbes32(buf, 17) * 1e-3;
+    session->newdata.track = (double)getbes32(buf, 21) * RAD_2_DEG * 1e-8;
 
     navtype = (unsigned short)getub(buf, 25);
     session->gpsdata.status = STATUS_NO_FIX;

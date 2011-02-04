@@ -10,9 +10,6 @@
 -nestedextern
 -abstract
 
--Dint8_t=char
--Dint16_t=short
--Dint32_t=int
 -Din_addr_t=int
 -Dcaddr_t=short
 -Disgps30bits_t=uint

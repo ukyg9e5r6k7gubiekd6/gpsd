@@ -93,8 +93,8 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
 	prn = (unsigned char)getub(buf, off + 1);
 	fl = (unsigned short)getleu16(buf, off + 2);
 	ss = (unsigned char)getub(buf, off + 4);
-	el = getsb(buf, off + 5);
-	az = getles16(buf, off + 6);
+	el = (char)getsb(buf, off + 5);
+	az = (short)getles16(buf, off + 6);
 	(void)wmove(satwin, (int)(i + 2), 4);
 	(void)wprintw(satwin, "%3d %3d %3d  %2d %04x %c",
 		      prn, az, el, ss, fl, (fl & UBX_SAT_USED) ? 'Y' : ' ');

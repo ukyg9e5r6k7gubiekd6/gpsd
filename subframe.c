@@ -213,15 +213,15 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub1.hlth = (unsigned int)((words[2] >>  2) & 0x00003F); /* SV health */
 	subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
 	subp->sub1.l2p  = ((words[3] >> 23) & 0x000001); /* L2 P flag */
-	subp->sub1.Tgd  = (char)( words[6] & 0x0000FF);
+	subp->sub1.Tgd  = (int8_t)( words[6] & 0x0000FF);
 	subp->sub1.d_Tgd  = pow(2.0, -31) * (int)subp->sub1.Tgd;
 	subp->sub1.toc  = ( words[7] & 0x00FFFF);
 	subp->sub1.l_toc = (long)subp->sub1.toc  << 4;
-	subp->sub1.af2  = (char)((words[8] >> 16) & 0x0FF);
+	subp->sub1.af2  = (int8_t)((words[8] >> 16) & 0x0FF);
 	subp->sub1.d_af2  = pow(2.0, -55) * (int)subp->sub1.af2;
-	subp->sub1.af1  = (short)( words[8] & 0x00FFFF);
+	subp->sub1.af1  = (int16_t)( words[8] & 0x00FFFF);
 	subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
-	subp->sub1.af0  = (int)((words[9] >>  1) & 0x03FFFFF);
+	subp->sub1.af0  = (int32_t)((words[9] >>  1) & 0x03FFFFF);
 	subp->sub1.af0  = uint2int(subp->sub1.af0, 22);
 	subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
 	subp->sub1.IODC <<= 8;
@@ -245,22 +245,22 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     case 2:
 	/* subframe 2: ephemeris for transmitting SV */
 	subp->sub2.IODE   = ((words[2] >> 16) & 0x00FF);
-	subp->sub2.Crs    = (short)( words[2] & 0x00FFFF);
+	subp->sub2.Crs    = (int16_t)( words[2] & 0x00FFFF);
 	subp->sub2.d_Crs  = pow(2.0,-5) * subp->sub2.Crs;
-	subp->sub2.deltan = (short)((words[3] >>  8) & 0x00FFFF);
+	subp->sub2.deltan = (int16_t)((words[3] >>  8) & 0x00FFFF);
 	subp->sub2.d_deltan  = pow(2.0,-43) * subp->sub2.deltan;
-	subp->sub2.M0     = (int)( words[3] & 0x0000FF);
+	subp->sub2.M0     = (int32_t)( words[3] & 0x0000FF);
 	subp->sub2.M0   <<= 24;
 	subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
 	subp->sub2.M0     = uint2int(subp->sub2.M0, 24);
 	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0 * GPS_PI;
-	subp->sub2.Cuc    = (short)((words[5] >>  8) & 0x00FFFF);
+	subp->sub2.Cuc    = (int16_t)((words[5] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
 	subp->sub2.e      = ( words[5] & 0x0000FF);
 	subp->sub2.e    <<= 24;
 	subp->sub2.e     |= ( words[6] & 0x00FFFFFF);
 	subp->sub2.d_eccentricity  = pow(2.0,-33) * subp->sub2.e;
-	subp->sub2.Cus    = (short)((words[7] >>  8) & 0x00FFFF);
+	subp->sub2.Cus    = (int16_t)((words[7] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cus  = pow(2.0,-29) * subp->sub2.Cus;
 	subp->sub2.sqrtA  = ( words[7] & 0x0000FF);
 	subp->sub2.sqrtA <<= 24;
@@ -292,23 +292,23 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	/* subframe 3: ephemeris for transmitting SV */
 	subp->sub3.Cic      = ((words[2] >>  8) & 0x00FFFF);
 	subp->sub3.d_Cic    = pow(2.0, -29) * subp->sub3.Cic;
-	subp->sub3.Omega0   = (int)(words[2] & 0x0000FF);
+	subp->sub3.Omega0   = (int32_t)(words[2] & 0x0000FF);
 	subp->sub3.Omega0 <<= 24;
 	subp->sub3.Omega0  |= ( words[3] & 0x00FFFFFF);
 	subp->sub3.d_Omega0 = pow(2.0, -31) * subp->sub3.Omega0;
-	subp->sub3.Cis      = (short)((words[4] >>  8) & 0x00FFFF);
+	subp->sub3.Cis      = (int16_t)((words[4] >>  8) & 0x00FFFF);
 	subp->sub3.d_Cis    = pow(2.0, -29) * subp->sub3.Cis;
-	subp->sub3.i0       = (int)(words[4] & 0x0000FF);
+	subp->sub3.i0       = (int32_t)(words[4] & 0x0000FF);
 	subp->sub3.i0     <<= 24;
 	subp->sub3.i0      |= ( words[5] & 0x00FFFFFF);
 	subp->sub3.d_i0     = pow(2.0, -31) * subp->sub3.i0;
-	subp->sub3.Crc      = (short)((words[6] >>  8) & 0x00FFFF);
+	subp->sub3.Crc      = (int16_t)((words[6] >>  8) & 0x00FFFF);
 	subp->sub3.d_Crc    = pow(2.0, -5) * subp->sub3.Crc;
-	subp->sub3.omega    = (int)(words[6] & 0x0000FF);
+	subp->sub3.omega    = (int32_t)(words[6] & 0x0000FF);
 	subp->sub3.omega  <<= 24;
 	subp->sub3.omega   |= ( words[7] & 0x00FFFFFF);
 	subp->sub3.d_omega  = pow(2.0, -31) * subp->sub3.omega;
-	subp->sub3.Omegad   = (int)(words[8] & 0x00FFFFFF);
+	subp->sub3.Omegad   = (int32_t)(words[8] & 0x00FFFFFF);
 	subp->sub3.Omegad   = uint2int(subp->sub3.Omegad, 24);
 	subp->sub3.d_Omegad = pow(2.0, -43) * subp->sub3.Omegad;
 	subp->sub3.IODE     = ((words[9] >> 16) & 0x0000FF);
@@ -662,28 +662,28 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 
 		sv = -1;
 		/* current leap seconds */
-		subp->sub4_18.alpha0 = (char)((words[2] >> 16) & 0x0000FF);
+		subp->sub4_18.alpha0 = (int8_t)((words[2] >> 16) & 0x0000FF);
 		subp->sub4_18.d_alpha0 = pow(2.0, -30) * (int)subp->sub4_18.alpha0;
-		subp->sub4_18.alpha1 = (char)((words[2] >>  8) & 0x0000FF);
+		subp->sub4_18.alpha1 = (int8_t)((words[2] >>  8) & 0x0000FF);
 		subp->sub4_18.d_alpha1 = pow(2.0, -27) * (int)subp->sub4_18.alpha2;
-		subp->sub4_18.alpha2 = (char)((words[3] >> 16) & 0x0000FF);
+		subp->sub4_18.alpha2 = (int8_t)((words[3] >> 16) & 0x0000FF);
 		subp->sub4_18.d_alpha2 = pow(2.0, -24) * (int)subp->sub4_18.alpha2;
-		subp->sub4_18.alpha3 = (char)((words[3] >>  8) & 0x0000FF);
+		subp->sub4_18.alpha3 = (int8_t)((words[3] >>  8) & 0x0000FF);
 		subp->sub4_18.d_alpha3 = pow(2.0, -24) * (int)subp->sub4_18.alpha3;
 
-		subp->sub4_18.beta0  = (char)((words[3] >>  0) & 0x0000FF);
+		subp->sub4_18.beta0  = (int8_t)((words[3] >>  0) & 0x0000FF);
 		subp->sub4_18.d_beta0 = pow(2.0, 11) * (int)subp->sub4_18.beta0;
-		subp->sub4_18.beta1  = (char)((words[4] >> 16) & 0x0000FF);
+		subp->sub4_18.beta1  = (int8_t)((words[4] >> 16) & 0x0000FF);
 		subp->sub4_18.d_beta1 = pow(2.0, 14) * (int)subp->sub4_18.beta2;
-		subp->sub4_18.beta2  = (char)((words[4] >>  8) & 0x0000FF);
+		subp->sub4_18.beta2  = (int8_t)((words[4] >>  8) & 0x0000FF);
 		subp->sub4_18.d_beta2 = pow(2.0, 16) * (int)subp->sub4_18.beta2;
-		subp->sub4_18.beta3  = (char)((words[4] >>  0) & 0x0000FF);
+		subp->sub4_18.beta3  = (int8_t)((words[4] >>  0) & 0x0000FF);
 		subp->sub4_18.d_beta3 = pow(2.0, 16) * (int)subp->sub4_18.beta3;
 
-		subp->sub4_18.A1     = (int)((words[5] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A1     = (int32_t)((words[5] >>  0) & 0xFFFFFF);
 		subp->sub4_18.A1     = uint2int(subp->sub4_18.A1, 24);
 		subp->sub4_18.d_A1   = pow(2.0,-50) * subp->sub4_18.A1;
-		subp->sub4_18.A0     = (int)((words[6] >>  0) & 0xFFFFFF);
+		subp->sub4_18.A0     = (int32_t)((words[6] >>  0) & 0xFFFFFF);
 		subp->sub4_18.A0   <<= 8;
 		subp->sub4_18.A0    |= ((words[7] >> 16) & 0x00FFFF);
 		subp->sub4_18.d_A0   = pow(2.0,-30) * subp->sub4_18.A0;
@@ -693,13 +693,13 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.tot    = ((words[7] >> 8) & 0x0000FF);
 		subp->sub4_18.d_tot  = pow(2.0,12) * subp->sub4_18.d_tot;
 		subp->sub4_18.WNt    = ((words[7] >> 0) & 0x0000FF);
-		subp->sub4_18.leap  = (char)((words[8] >> 16) & 0x0000FF);
+		subp->sub4_18.leap  = (int8_t)((words[8] >> 16) & 0x0000FF);
 		subp->sub4_18.WNlsf  = ((words[8] >>  8) & 0x0000FF);
 
 		/* DN (Day Number of LSF) */
 		subp->sub4_18.DN = (words[8] & 0x0000FF);
 		/* leap second future */
-		subp->sub4_18.lsf = (char)((words[9] >> 16) & 0x0000FF);
+		subp->sub4_18.lsf = (int8_t)((words[9] >> 16) & 0x0000FF);
 		gpsd_report(LOG_INF,
 		    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
 		    "DN:%d\n",

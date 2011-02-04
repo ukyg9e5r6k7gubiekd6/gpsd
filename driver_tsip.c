@@ -616,15 +616,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
-	    d1 = s1 * d5;	/* east velocity m/s */
-	    d2 = s2 * d5;	/* north velocity m/s */
-	    session->newdata.climb = s3 * d5;	/* up velocity m/s */
+	    d1 = (double)s1 * d5;	/* east velocity m/s */
+	    d2 = (double)s2 * d5;	/* north velocity m/s */
+	    session->newdata.climb = (double)s3 * d5;	/* up velocity m/s */
 	    /*@ -evalorder @*/
 	    session->newdata.speed = sqrt(pow(d2, 2) + pow(d1, 2));
 	    /*@ +evalorder @*/
 	    if ((session->newdata.track = atan2(d1, d2) * RAD_2_DEG) < 0)
 		session->newdata.track += 360.0;
-	    session->newdata.latitude = sl1 * SEMI_2_DEG;
+	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
 	    /*@i1@*/session->newdata.longitude = ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
@@ -632,7 +632,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
 	    session->newdata.altitude =
-		sl2 * 1e-3 - session->gpsdata.separation;;
+		(double)sl2 * 1e-3 - session->gpsdata.separation;;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t) 0) {	/* Fix Available */
@@ -700,22 +700,22 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		else
 		    session->newdata.mode = MODE_3D;
 	    }
-	    session->newdata.latitude = sl1 * SEMI_2_DEG;
-	    /*@i1@*/session->newdata.longitude = ul2 * SEMI_2_DEG;
+	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
+	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
 	    session->gpsdata.separation =
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
 	    session->newdata.altitude =
-		sl3 * 1e-3 - session->gpsdata.separation;;
+		(double)sl3 * 1e-3 - session->gpsdata.separation;;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
-	    d1 = s2 * d5;	/* east velocity m/s */
-	    d2 = s3 * d5;	/* north velocity m/s */
-	    session->newdata.climb = s4 * d5;	/* up velocity m/s */
+	    d1 = (double)s2 * d5;	/* east velocity m/s */
+	    d2 = (double)s3 * d5;	/* north velocity m/s */
+	    session->newdata.climb = (double)s4 * d5;	/* up velocity m/s */
 	    /*@ -evalorder @*/
 	    session->newdata.speed =
 		sqrt(pow(d2, 2) + pow(d1, 2)) * MPS_TO_KNOTS;
@@ -743,14 +743,14 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    }
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
 	    ul1 = getbeu32(buf, 1);	/* gpstime */
-	    s1 = (short)getbeu16(buf, 5);	/* week */
+	    s1 = (int16_t)getbeu16(buf, 5);	/* week */
 	    s2 = getbes16(buf, 7);	/* leap seconds */
 
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;
 		session->newdata.time =
-		    gpsd_gpstime_resolve(session, s1, (double)ul1);
+		    gpsd_gpstime_resolve(session, (unsigned short)s1, (double)ul1);
 		mask |= TIME_IS | CLEAR_IS;
 		gpsd_report(LOG_DATA, "SP-TTS 0xab time=%.2f mask={TIME}\n",
 			    session->newdata.time);

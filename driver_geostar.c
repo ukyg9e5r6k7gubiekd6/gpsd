@@ -191,7 +191,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->newdata.longitude = getled(buf, OFFSET(5)) * RAD_2_DEG;
 	session->newdata.altitude = getled(buf, OFFSET(7));
 	session->gpsdata.separation = getled(buf, OFFSET(9));
-	session->gpsdata.satellites_used = getles32(buf, OFFSET(11));
+	session->gpsdata.satellites_used = (int)getles32(buf, OFFSET(11));
 	session->gpsdata.dop.gdop = getled(buf, OFFSET(13));
 	session->gpsdata.dop.pdop = getled(buf, OFFSET(15));
 	session->gpsdata.dop.tdop = getled(buf, OFFSET(17));
@@ -262,9 +262,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    gpsd_report(LOG_INF, "ID %d Az %g El %g SNR %g\n",
 			decode_channel_id(ul2), s1*0.001*RAD_2_DEG, s2*0.001*RAD_2_DEG, s3*0.1);
 	    session->gpsdata.PRN[i] = decode_channel_id(ul2);
-	    session->gpsdata.azimuth[i] = (int)round(s1*0.001 * RAD_2_DEG);
-	    session->gpsdata.elevation[i] = (int)round(s2*0.001 * RAD_2_DEG);
-	    session->gpsdata.ss[i] = s3*0.1;
+	    session->gpsdata.azimuth[i] = (int)round((double)s1*0.001 * RAD_2_DEG);
+	    session->gpsdata.elevation[i] = (int)round((double)s2*0.001 * RAD_2_DEG);
+	    session->gpsdata.ss[i] = (double)s3*0.1;
 	    if(ul2 & (1<<27)) {
 		session->gpsdata.used[j++] = decode_channel_id(ul2);
 	    }

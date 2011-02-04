@@ -51,7 +51,7 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 	/*@ -charint */
 
 	ss = (unsigned char)getub(buf, off + 4);
-	el = getsb(buf, off + 1);
+	el = (char)getsb(buf, off + 1);
 	az = (unsigned short)(getub(buf, off + 2) +
 			      ((getub(buf, off + 3) & 0x1) << 1));
 	fl = (unsigned char)getub(buf, off) & 0xe0;

@@ -190,9 +190,12 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	  (unsigned short)getleu16(buf2, 2),
 	  (double)getleu32(buf2, 4) * 0.01);
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-			 getles32(buf2, 8) * 1.0, getles32(buf2, 12) * 1.0,
-			 getles32(buf2, 16) * 1.0, getles16(buf2, 20) / 10.0,
-			 getles16(buf2, 22) / 10.0, getles16(buf2, 24) / 10.0);
+			 (double)getles32(buf2, 8) * 1.0, 
+			 (double)getles32(buf2, 12) * 1.0,
+			 (double)getles32(buf2, 16) * 1.0,
+			 (double)getles16(buf2, 20) / 10.0,
+			 (double)getles16(buf2, 22) / 10.0, 
+			 (double)getles16(buf2, 24) / 10.0);
 	used = (unsigned char)getub(buf2, 26) & 0x0f;
 	//visible = (getub(buf2, 26) & 0xf0) >> 4;
 	version = (uint) getleu16(buf2, 27) / 100.0;
