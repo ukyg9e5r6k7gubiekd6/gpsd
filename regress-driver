@@ -119,7 +119,7 @@ case $mode in
 		fi
 		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
-                    error_list="${error_list}\n${f}"
+                    error_list="$error_list \"${f}\""
 		    if [ -z "$logfile" ]
 		    then
 			cat ${TMP}/diff-$$
@@ -135,10 +135,14 @@ case $mode in
 	    total=`expr $total + 1`;
         done;
         if test $errors -gt 0; then
-            echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
+            echo "Regression test FAILED: $errors errors in $total tests total ($notfound not found).";
             echo "The following test Failed:"
-            echo "==================${error_list}"
-	    echo "=================="
+            echo "================================================================"
+            for err in $error_list
+            do
+		echo $err
+            done
+            echo "================================================================"
             status=1;
         else
             echo "Regression test successful: no errors in $total tests ($notfound not found).";
