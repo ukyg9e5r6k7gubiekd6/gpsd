@@ -836,6 +836,74 @@ DAC/FID pairs are assigned separately per message type.
 A list of binary layouts for selected subtypes of message 6 follows.
 (These are not yet implemented by GPSD.)
 
+==== Meteorological and Hydrological Data (IMO236) ===
+
+A message 8 subtype. DAC = 001 FID = 11. Fixed length, 352 bits.
+This is in use and described in <<IMO236>>, but has been deprecated by
+<<289>> in favor of a message with the same title but FID = 31 and a
+different binary layout.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member      |Units
+|0-5     |  6 |Message Type       |type        |Unsigned integer: 6
+|6-7     |  2 |Repeat Indicator   |repeat      |As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi        |Unsigned integer: 9 digits
+|38-39   |  2 |Spare              |            |Not used
+|40-55   | 16 |DAC/FID            |            |DAC = 001 FID = 11
+|56-79   | 24 |Longitude          |lon         |Signed: unit minutes * 0.001
+|        |    |                   |            |181000 = N/A (default)
+|80-104  | 25 |Latitude           |lat         |Signed: unit minutes * 0.001
+|        |    |                   |            |91000 = N/A (default)
+|105-111 |  7 |Average Wind Speed |wspeed      |10-min avg wind speed, knots
+|112-118 |  7 |Gust Speed         |wgust       |10-min max wind speed, knots
+|119-127 |  9 |Wind Direction     |wdir        |0-359, degrees fom true north
+|128-136 |  9 |Wind Gust Direction|wgustdir    |0-359, degrees fom true north
+|137-147 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
+|        |    |                   |            |-60.0 to +60.0,
+|148-154 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
+|155-164 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|165-173 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
+|174-175 |  2 |Pressure Tendency  |pressuretend|0 = steady
+|        |    |                   |            |1 = decreasing
+|        |    |                   |            |2 = increasing
+|176-183 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
+|184-192 |  9 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
+|193-194 |  2 |Water Level Trend  |leveltrend  |0 = steady
+|        |    |                   |            |1 = decreasing
+|        |    |                   |            |2 = increasing
+|195-202 |  8 |Surface Current Speed     |curspeed  |0.0-25.0 knots, units 0.1 knot
+|203-211 |  9 |Surface Current Direction |curdir    |0-359, degrees fom true north
+|212-219 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|220-228 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|229-233 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
+|234-241 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|242-250 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|251-255 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
+|256-263 |  8 |Wave height          |waveheight|0-25m, units 0.1m
+|264-269 |  6 |Wave period          |waveperiod|Seconds, 0-60, units 1s
+|270-278 |  9 |Wave direction       |wavedir   |0-359, degrees fom true north
+|279-286 |  8 |Swell height         |swellheight|0-25m, units 0.1m
+|287-292 |  6 |Swell period         |swellperiod|Seconds, 0-60, units 1s
+|293-301 |  9 |Swell direction      |swelldir   |0-359, degrees fom true north
+|302-305 |  4 |Sea state            |seastate   |Beaufort scale, 0-12
+|306-315 | 10 |Water Temperature    |watertemp  |-10.0 to 50.0 C, 0.1 deg
+|316-318 |  3 |Precipitation        |precipitation  |According to WNO
+|319-327 |  9 |Salinity             |salinity   |0.0-50.0%, units of 0.1%
+|328-329 |  2 |Ice                  |ice        |Yes/No
+|330-335 |  6 |Spare                |           |Not used
+|==============================================================================
+
+<<IMO236>> gives the length of thiss message as 352, but lists only 336 
+payload bits.
+
+Water level is deviation from local chart datum and includes tide.
+
+The waveheight field is labeled as "Significant" in <<IMO238>>, 
+for whatever that means.
+
+The seastate field has a note in <<IMO236>> reading "(manual input?)"?
+
 ==== Number of persons on board (IMO236) ====
 
 A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
