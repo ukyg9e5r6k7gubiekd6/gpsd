@@ -894,7 +894,11 @@ different binary layout.
 |330-335 |  6 |Spare                |           |Not used
 |==============================================================================
 
-<<IMO236>> gives the length of thiss message as 352, but lists only 336 
+<<IMO236>> says "If there is no data available, default value to be
+transmitted is the highest available binary value for that particular
+data field."
+
+<<IMO236>> gives the length of this message as 352, but lists only 336 
 payload bits.
 
 Water level is deviation from local chart datum and includes tide.
