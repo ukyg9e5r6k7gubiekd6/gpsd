@@ -836,7 +836,7 @@ DAC/FID pairs are assigned separately per message type.
 A list of binary layouts for selected subtypes of message 6 follows.
 (These are not yet implemented by GPSD.)
 
-==== Dangerous Cargo Indication (IMO236) ====
+==== IMO236 Dangerous Cargo Indication ====
 
 A message 6 subtype. DAC = 001 FID = 12. Variable length: 370 bits
 This is the <<IMO236>> version, now deprecated; there is a later 
@@ -872,7 +872,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |357-359 |  3 |Spare                |          |Not used
 |==============================================================================
 
-==== Tidal Window (IMO236) ====
+==== IMO236 Tidal Window ====
 
 A message 6 subtype. DAC = 001 FID = 14. Variable length: 190-376 bits
 This is the <<IMO236>> version; there is an <<IMO289>> version with
@@ -895,10 +895,10 @@ different widths for the latitude, longitude, and current-speed fields
 |92-96   |  5 |Day                    |day       |1-31; 0 = N/A (default)
 |97-123  | 27 |Latitude               |lat       |Signed: unit minutes * 0.001
 |        |    |                       |          |91000 = N/A (default)
-|        |    |                       |          |N postive, S negative
+|        |    |                       |          |N positive, S negative
 |124-151 | 28 |Longitude              |lon       |Signed: unit minutes * 0.001
 |        |    |                       |          |181000 = N/A (default)
-|        |    |                       |          |E postive, W negative
+|        |    |                       |          |E positive, W negative
 |152-156 |  5 |From UTC Hour          |from_hour |0-23, 24 = N/A (default)
 |157-162 |  6 |From UTC Minute        |from_min  |0-59, 60 = N/A (default)
 |163-167 |  5 |To UTC Hour            |to_hour   |0-23, 24 = N/A (default)
@@ -911,7 +911,7 @@ different widths for the latitude, longitude, and current-speed fields
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
-==== Number of persons on board (IMO236) ====
+==== IMO236 Number of persons on board ====
 
 A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
 
@@ -933,7 +933,7 @@ Note that though this is a message 6 subtype, there is no destination address.
 A strikeout in <<IMO236>> suggests that this was originally a subtype of 8.
 It would be good defensive implementation for a decoder to accept either.
 
-==== Number of persons on board (IMO289) ====
+==== IMO289 Number of persons on board ====
 
 A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
 
@@ -959,7 +959,7 @@ A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
 sum to 146.  It would be good practice to accept either length and
 ignore trailing padding.
 
-==== Dangerous Cargo Indication (IMO289) ====
+==== IMO289 Dangerous Cargo Indication ====
 
 A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
 This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
@@ -1017,7 +1017,58 @@ the cargotype is 3 = BC code) or as a MARPOL Annex I code (if
 the cargotype is 4 = MARPOL Annex I) or as a MARPOL Annex II code (if
 the cargotype is 5 = MARPOL Annex II).
 
-==== Text description (addressed) ====
+==== IMO 289 Route Information (addressed) ====
+
+A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description       |Member    |Units
+|0-5     |  6 |Message Type      |type      |Unsigned integer: 6
+|6-7     |  2 |Repeat Indicator  |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI       |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Sequence Number   |seqno     |Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI  |dest_mmsi |Unsigned integer: 9 digits
+|70-70   |  1 |Retransmit flag   |retransmit|0 = no retransmission (default)
+|        |    |                  |          |1 = retransmitted
+|71-71   |  1 |Spare             |          |Not used
+|72-87   | 16 |DAC/FID           |          |DAC = 001 FID = 28
+|88-97   | 10 |Message Linkage ID|linkage   |Unsigned integer
+|98-100  |  3 |Sender Class      |sender    |0 = ship (default), 1 = authority
+|        |    |                  |          |27 = reserved for future use
+|101-105 |  5 |Route Type        |rtype     |See table below
+|106-109 |  4 |Start month       |month     |1-12, 0=N/A (default)
+|110-114 |  5 |Start day         |day       |1-31, 0=N/A (default)
+|115-119 |  5 |Start hour        |hour      |0-23, 24=N/A (default)
+|120-125 |  6 |Start minute      |minute    |0-59, 60=N/A (default)
+|126-143 | 18 |Duration          |duration  |Minutes from start time
+|        |    |                  |          |0 = cancel route
+|        |    |                  |          |262,143 = not available = default
+|144-148 |  5 |                  |waycount  |Waypoint count (1-6)
+|        |    |                  |          |Values 17-31 are not used
+|149-176 | 28 |Longitude         |lon       |Signed: unit minutes * 0.001
+|        |    |                  |          |181000 = N/A (default)
+|        |    |                  |          |E positive, W negative
+|177-203 | 27 |Latitude          |lat       |Signed: unit minutes * 0.001
+|        |    |                  |          |91000 = N/A (default)
+|        |    |                  |          |N positive, S negative
+|==============================================================================
+
+.Route type codes
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Position Fix Type
+|0    |Undefined (default)
+|1    |Mandatory
+|2    |Recommended
+|3    |Alternative
+|4    |Recommended route through ice
+|5    |Ship routr plan
+|6-30 |Reserved for future usage
+|31   |Cancel route identified by message linkage
+|===================================
+
+==== IMO289 Text description (addressed) ====
 
 A message 6 subtype. DAC = 001 FID = 30. Variable length: 104-1028 bits.
 
@@ -1027,7 +1078,7 @@ via the Message Linkage ID field.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len    |Description          |Member    |Units
-|0-5     |  6    |Message Type         |type      |Unsigned integer: 8
+|0-5     |  6    |Message Type         |type      |Unsigned integer: 6
 |6-7     |  2    |Repeat Indicator     |repeat    |As in Common Navigation Block
 |8-37    | 30    |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2    |Sequence Number      |seqno     |Unsigned integer 0-3
@@ -2327,14 +2378,15 @@ Identification System]
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
 
 - [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
-  Circular 236: Guidance on the Application of AIS Binary Messages (2004)]
+  Circular 236: Guidance on the Application of AIS Binary Messages (May 2004)]
 
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
 
 - [[[IMO289]]]
   http://vislab-ccom.unh.edu/~schwehr/papers/2010-IMO-SN.1-Circ.289.pdf[IMO
-  SN.1/Circ.289 GUIDANCE ON THE USE OF AIS APPLICATION-SPECIFIC MESSAGES (2010)]
+  SN.1/Circ.289 GUIDANCE ON THE USE OF AIS APPLICATION-SPECIFIC MESSAGES 
+  (June 2010)]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
