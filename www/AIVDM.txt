@@ -984,7 +984,7 @@ It would be good defensive implementation for a decoder to accept either.
 
 See the <<IMO236>> variant for the meaning of this message.
 
-A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
+A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 136 bits.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -998,15 +998,11 @@ A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
 |        |    |                     |          |1 = retransmitted
 |71-71   |  1 |Spare                |          |Not used
 |72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 16
-|88-110  | 13 |# persons on board   |persons   |Unsigned integer
+|88-100  | 13 |# persons on board   |persons   |Unsigned integer
 |        |    |                     |          |0 = N/A (default)
 |        |    |                     |          |8191 = >= 8191 persons.
-|111-146 | 35 |Spare                |          |Not used
+|101-135 | 35 |Spare                |          |Not used
 |==============================================================================
-
-<<IMO289>> claims this message is 136 bits long, but the field lengths
-sum to 146.  It would be good practice to accept either length and
-ignore trailing padding.
 
 ==== IMO289 Dangerous Cargo Indication ====
 
