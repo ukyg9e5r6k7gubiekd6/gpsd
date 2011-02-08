@@ -890,6 +890,11 @@ This is the <<IMO236>> version, now deprecated; there is a later
 
 ==== IMO236 Tidal Window ====
 
+This message should be used by shore stations to inform vessels about
+tidal windows which allow a vessel the safe passage of a fairway.  The
+message includes 1-3 predictions of current speed and current direction.
+Acknowledgment is required.
+
 A message 6 subtype. DAC = 001 FID = 14. Variable length: 190-376 bits
 This is the <<IMO236>> version; there is an <<IMO289>> version with
 different widths for the latitude, longitude, and current-speed fields
@@ -927,9 +932,35 @@ different widths for the latitude, longitude, and current-speed fields
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
+==== IMO236 Extended Ship Static and Voyage Related Data ====
+
+This message should be used by a ship to report the height over keel.
+
+A message 6 subtype. DAC = 001 FID = 15 in <<IMO236>>.  Fixed length, 72 bits.
+Deprecated in <<IMO289>>.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member    |Units
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare                |          |Not used
+|40-55   | 16 |DAC/FID              |          |DAC = 001 FID = 15
+|55-66   | 11 |Air Draught          |airdraught|Unsigned integer, height in m
+|        |    |                     |          |0 = N/A (default)
+|        |    |                     |          |2047 = >= 2047 m
+|67-71   |  5 |Spare                |          |Not used
+|==============================================================================
+
 ==== IMO236 Number of persons on board ====
 
+This message should be used by a ship to report the number of persons
+on board, e.g. on request by a competent authority.  Acknowledgement
+required.
+
 A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
+Deprecated in <<IMO289>>.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -939,10 +970,10 @@ A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
 |8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Spare                |          |Not used
 |40-55   | 16 |DAC/FID              |          |DAC = 001 FID = 16
-|55-69   | 13 |# persons on board   |persons   |Unsigned integer
+|55-68   | 13 |# persons on board   |persons   |Unsigned integer
 |        |    |                     |          |0 = N/A (default)
 |        |    |                     |          |8191 = >= 8191 persons.
-|70-71   |  2 |Spare                |          |Not used
+|69-71   |  3 |Spare                |          |Not used
 |==============================================================================
 
 Note that though this is a message 6 subtype, there is no destination address.
@@ -950,6 +981,8 @@ A strikeout in <<IMO236>> suggests that this was originally a subtype of 8.
 It would be good defensive implementation for a decoder to accept either.
 
 ==== IMO289 Number of persons on board ====
+
+See the <<IMO236>> variant for the meaning of this message.
 
 A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
 
@@ -977,7 +1010,7 @@ ignore trailing padding.
 
 ==== IMO289 Dangerous Cargo Indication ====
 
-See the IMO236 variant for the meaning of this message
+See the IMO236 variant for the meaning of this message.
 
 A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
 This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
