@@ -956,11 +956,47 @@ A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 146 bits.
 sum to 146.  It would be good practice to accept either length and
 ignore trailing padding.
 
-==== Dangerous Cargo Indication ====
+==== Dangerous Cargo Indication (IMO236) ====
+
+A message 6 subtype. DAC = 001 FID = 12. Variable length: 370 bits
+This is the <<IMO236>> version, now deprecated; there is a later 
+<<IMO289>> version. 
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member    |Units
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Sequence Number      |seqno     |Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI     |dest_mmsi |Unsigned integer: 9 digits
+|70-70   |  1 |Retransmit flag      |retransmit|0 = no retransmission (default)
+|        |    |                     |          |1 = retransmitted
+|71-71   |  1 |Spare                |          |Not used
+|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 12
+|88-117  | 30 |Last Port Of Call    |lastport  |5 6-bit characters, UN locode
+|118-121 |  4 |ETA month            |lmonth    |1-12, 0=N/A (default)
+|122-126 |  5 |ETA day              |lday      |1-31, 0=N/A (default)
+|127-131 |  5 |ETA hour             |lhour     |0-23, 24=N/A (default)
+|132-137 |  6 |ETA minute           |lminute   |0-59, 60=N/A (default)
+|138-167 | 30 |Last Port Of Call    |nextport  |5 6-bit characters, UN locode
+|168-171 |  4 |ETA month            |nmonth    |1-12, 0=N/A (default)
+|172-176 |  5 |ETA day              |nday      |1-31, 0=N/A (default)
+|177-181 |  5 |ETA hour             |nhour     |0-23, 24=N/A (default)
+|182-187 |  6 |ETA minute           |nminute   |0-59, 60=N/A (default)
+|188-307 |120 |Main Dangerous Good  |dangerous |20 6-bit characcters
+|308-331 | 24 |IMD Category         |imdcat    |4  6-bit characcters
+|332-344 | 13 |UN Number            |unid      |1-3363 UN Number
+|345-354 | 10 |Amount of Cargo      |amount    |cargotype
+|355-356 |  2 |Unit of Quantity     |unit      |cargounit
+|357-359 |  3 |Spare                |          |Not used
+|==============================================================================
+
+==== Dangerous Cargo Indication (IMO289) ====
 
 A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
 This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
-with a different layout, not reported in use and deprecated in <<IMO289>>.
+with a different layout, deprecated in <<IMO289>>.
 
 [frame="topbot",options="header"]
 |==============================================================================
