@@ -908,6 +908,45 @@ for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
 
+==== Tidal Window (IMO236) ====
+
+A message 6 subtype. DAC = 001 FID = 14. Variable length: 190-376 bits
+This is the <<IMO236>> version; there is an <<IMO289>> version with
+different widths for the latitude, longitude, and current-speed fields
+(also the order of lat/lon is swapped).
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description            |Member    |Units
+|0-5     |  6 |Message Type           |type      |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator       |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI            |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Sequence Number        |seqno     |Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI       |dest_mmsi |Unsigned integer: 9 digits
+|70-70   |  1 |Retransmit flag        |retransmit|0 = no retransmission (default)
+|        |    |                       |          |1 = retransmitted
+|71-71   |  1 |Spare                  |          |Not used
+|72-87   | 16 |DAC/FID                |          |DAC = 001 FID = 32
+|88-91   |  4 |Month                  |month     |1-12; 0 = N/A (default)
+|92-96   |  5 |Day                    |day       |1-31; 0 = N/A (default)
+|97-123  | 27 |Latitude               |lat       |Signed: unit minutes * 0.001
+|        |    |                       |          |91000 = N/A (default)
+|        |    |                       |          |N postive, S negative
+|124-151 | 28 |Longitude              |lon       |Signed: unit minutes * 0.001
+|        |    |                       |          |181000 = N/A (default)
+|        |    |                       |          |E postive, W negative
+|152-156 |  5 |From UTC Hour          |from_hour |0-23, 24 = N/A (default)
+|157-162 |  6 |From UTC Minute        |from_min  |0-59, 60 = N/A (default)
+|163-167 |  5 |To UTC Hour            |to_hour   |0-23, 24 = N/A (default)
+|168-173 |  6 |To UTC Minute          |to_min    |0-59, 60 = N/A (default)
+|174-182 |  9 |Current Dir. Predicted |cdir      |0-359 deg, 360-N/A (default)
+|183-189 |  7 |Current Speed Predicted|cspeed    |0-126, units of 0.1 knots.
+|        |    |                       |          |127 = N/A (default)
+|=============================================================================
+
+The group of fields from longitude on may repeat twice more to convey up to
+three points of tidal information. 
+
 ==== Number of persons on board (IMO236) ====
 
 A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
@@ -1075,14 +1114,16 @@ via the Message Linkage ID field.
 
 There is an equivalent subtype of message 8 that is a broadcast description.
 
-==== Tidal Window ====
+==== Tidal Window (IMO289) ====
 
-A message 6 subtype. DAC = 001 FID = 32. Fixed length: 350 bits.
+A message 6 subtype. DAC = 001 FID = 32. Variable length: 185-350 bits.
+This is the <<IMO289>> version; there is an <<IMO289>> version with 
+different bit widths for the latitude and longitude fields.
 
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            |Member    |Units
-|0-5     |  6 |Message Type           |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type           |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator       |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI            |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Sequence Number        |seqno     |Unsigned integer 0-3
@@ -1093,16 +1134,16 @@ A message 6 subtype. DAC = 001 FID = 32. Fixed length: 350 bits.
 |72-87   | 16 |DAC/FID                |          |DAC = 001 FID = 32
 |88-91   |  4 |Month                  |month     |1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |1-31; 0 = N/A (default)
-|97-123  | 27 |Longitude              |lon       |Signed: unit minutes * 0.001
+|97-121  | 25 |Longitude              |lon       |Signed: unit minutes * 0.001
 |        |    |                       |          |181000 = N/A (default)
-|124-151 | 28 |Latitude               |lat       |Signed: unit minutes * 0.001
+|122-145 | 24 |Latitude               |lat       |Signed: unit minutes * 0.001
 |        |    |                       |          |91000 = N/A (default)
-|152-156 |  5 |From UTC Hour          |from_hour |0-23, 24 = N/A (default)
-|156-161 |  6 |From UTC Minute        |from_min  |0-59, 60 = N/A (default)
-|162-166 |  5 |To UTC Hour            |to_hour   |0-23, 24 = N/A (default)
-|167-172 |  6 |To UTC Minute          |to_min    |0-59, 60 = N/A (default)
-|172-180 |  9 |Current Dir. Predicted |cdir      |0-359 deg, 360-N/A (default)
-|181-189 |  9 |Current Speed Predicted|cspeed    |0-250, uniits of 0.1 knots.
+|146-150 |  5 |From UTC Hour          |from_hour |0-23, 24 = N/A (default)
+|151-156 |  6 |From UTC Minute        |from_min  |0-59, 60 = N/A (default)
+|157-161 |  5 |To UTC Hour            |to_hour   |0-23, 24 = N/A (default)
+|162-167 |  6 |To UTC Minute          |to_min    |0-59, 60 = N/A (default)
+|168-176 |  9 |Current Dir. Predicted |cdir      |0-359 deg, 360-N/A (default)
+|177-184 |  8 |Current Speed Predicted|cspeed    |0-250, uniits of 0.1 knots.
 |        |    |                       |          |251 = speed >= 25.1 knots
 |        |    |                       |          |255 = N/A (default)
 |=============================================================================
