@@ -838,6 +838,12 @@ A list of binary layouts for selected subtypes of message 6 follows.
 
 ==== IMO236 Dangerous Cargo Indication ====
 
+This message should be used as a response to a request for Dangerous
+Cargo Indication from a competent authority. The message content is
+used to identify the port where the documents for the dangerous goods
+cargo can be found, e. g. last and next port of call, and to allow
+the requesting authority to form a danger estimate.
+
 A message 6 subtype. DAC = 001 FID = 12. Variable length: 370 bits
 This is the <<IMO236>> version, now deprecated; there is a later 
 <<IMO289>> version. 
@@ -845,7 +851,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |Units
-|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Sequence Number      |seqno     |Unsigned integer 0-3
@@ -871,6 +877,16 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |355-356 |  2 |Unit of Quantity     |unit      |cargounit
 |357-359 |  3 |Spare                |          |Not used
 |==============================================================================
+
+.Dangerous Cargo Indication: cargounit codes
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Unit
+|0    |Not available (default)
+|1    |kg
+|2    |metric tons 
+|3    |metric kilotons
+|===================================
 
 ==== IMO236 Tidal Window ====
 
@@ -961,6 +977,8 @@ ignore trailing padding.
 
 ==== IMO289 Dangerous Cargo Indication ====
 
+See the IMO236 variant for the meaning of this message
+
 A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
 This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
 with a different layout, deprecated in <<IMO289>>.
@@ -986,15 +1004,8 @@ with a different layout, deprecated in <<IMO289>>.
 The last two fields may repeat to describe up to 28 subcargos. The count
 of repetitions must be computed from the message payload length.
 
-.Dangerous Cargo Indication: cargounit codes
-[width="50%",frame="topbot",options="header"]
-|===================================
-|Code |Unit
-|0    |Not available (default)
-|1    |kg
-|2    |metric tons 
-|3    |metric kilotons
-|===================================
+For cargounit codes, see the description of the IMO236 variant of 
+this message.
 
 .Dangerous Cargo Indication: cargotype codes
 [width="50%",frame="topbot",options="header"]
@@ -1293,6 +1304,39 @@ The waveheight field is labeled as "Significant" in <<IMO238>>,
 for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
+
+==== Fairway Closed ====
+
+This message should be broadcast from shore stations to inform ships,
+in particular to give guidance to large vessels about temporary closed
+fairways or sections in ports.
+
+A message 8 subtype. DAC = 001 FID = 13. Fixed length, 472 bits.
+Described in <<IMO236>> but deprecated by <<IMO289>>.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description             |Member    |Units
+|0-5     |  6 |Message Type            |type      |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator        |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI             |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare                   |          |Not used
+|40-55   | 16 |DAC/FID                 |          |DAC = 001 FID = 13
+|56-175  |120 |Reason For Closing      |dangerous |20 6-bit characcters
+|176-295 |120 |Location Of Closing From|dangerous |20 6-bit characcters
+|296-415 |120 |Location of Closing To  |dangerous |20 6-bit characcters
+|416-425 | 10 |Radius extension        |radius    |0-1000, 10001 = N/A (default)
+|426-427 |  2 |Unit of extension       |extunit   |0=m, 1=km, 2=nm, 3=cables
+|428-432 |  5 |From day                |fday      |1-31, 0=N/A (default)
+|433-436 |  4 |From month              |fmonth    |1-12, 0=N/A (default)
+|437-441 |  5 |From hour               |fhour     |0-23, 24=N/A (default)
+|442-447 |  6 |From minute             |fminute   |0-59, 60=N/A (default)
+|448-452 |  5 |To day                  |tday      |1-31, 0=N/A (default)
+|453-456 |  4 |To month                |tmonth    |1-12, 0=N/A (default)
+|457-461 |  5 |To hour                 |thour     |0-23, 24=N/A (default)
+|462-467 |  6 |To minute               |tminute   |0-59, 60=N/A (default)
+|468-471 |  4 |Spare                   |          |Not used
+|==============================================================================
 
 ==== VTS-Generated/Synthetic targets ====
 
