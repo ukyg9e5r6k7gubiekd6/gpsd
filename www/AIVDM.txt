@@ -1372,7 +1372,7 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 A message 8 subtype. DAC = 001 FID = 17. Variable length: 176-556 bits.
 This message is laid out identically in <<IMO236>> and <<IMO289>>, but
 both give the maximum length as 536. This is inconsistent with the actual
-sum of the field lengths at maximum extent, which is 556.  In <<INO236>>
+sum of the field lengths at maximum extent, which is 556.  In <<IMO236>>
 it is titled "Pseudo-AIS Targets".
 
 [frame="topbot",options="header"]
@@ -1387,11 +1387,18 @@ it is titled "Pseudo-AIS Targets".
 |        |    |                     |            |1 = id is the IMO number
 |        |    |                     |            |2 = id is the call sign
 |        |    |                     |            |3 = Other (default)
-|58-99   | 42 |Target identifier    |See below   |Target ID data. 
+|58-99   | 42 |Target identifier    |See below   |Target ID data.
 |100-103 |  4 |Spare                |            |Not used
+|104-127 | 24 |Latitude             |lat         |Signed: unit minutes * 0.001
+|        |    |                     |            |91000 = N/A (default)
+|128-152 | 25 |Longitude            |lon         |Signed: unit minutes * 0.001
+|        |    |                     |            |181000 = N/A (default)
+|153-161 |  9 |Course Over Ground   |course      |0-359 Relative to true north,
+|162-167 |  6 |Time Stamp           |second      |Second of UTC timestamp
+|168-177 | 10 |Speed Over Ground    |speed       |0-254 in knots, 255 = N/A
 |==============================================================================
 
-The interpretation of the target idenifier field depends on the ppreceding type
+The interpretation of the target identifier field depends on the ppreceding type
 key.  For type 2 and 3 it is 6-bit ASCII text, for 0 and 1 it is a big-endian
 binary integer. An unkbnown target is expressed by type 3 and the string
 "@@@@@@@".
