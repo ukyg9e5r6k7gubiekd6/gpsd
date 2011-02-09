@@ -1059,6 +1059,9 @@ the cargotype is 5 = MARPOL Annex II).
 
 ==== IMO 289 Route Information (addressed) ====
 
+The content of this message is a time and a list of waypoints describing a
+course.
+
 A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 
 [frame="topbot",options="header"]
@@ -1110,6 +1113,10 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 
 ==== IMO289 Text description (addressed) ====
 
+This message may be used to attach a text description to another message with 
+a Message Linkage ID matching this one.  It is intended that the combination
+of MMSI and Message Linkage ID should be unique.
+
 A message 6 subtype. DAC = 001 FID = 30. Variable length: 104-1028 bits.
 
 Intended to be used to associate a text annotation with another message 
@@ -1134,6 +1141,8 @@ via the Message Linkage ID field.
 There is an equivalent subtype of message 8 that is a broadcast description.
 
 ==== Tidal Window (IMO289) ====
+
+See the <<IMO239>> version of this message for intended meaning.
 
 A message 6 subtype. DAC = 001 FID = 32. Variable length: 185-350 bits.
 This is the <<IMO289>> version; there is an <<IMO289>> version with 
