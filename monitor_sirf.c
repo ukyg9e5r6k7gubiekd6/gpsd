@@ -22,7 +22,7 @@ extern const struct gps_type_t sirf_binary;
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
-static bool dispmode = false, subframe_enabled = false;
+static bool dispmode = false, subframe_enabled = false, ppstime_enabled = false;
 static int nfix, fix[20];
 static int leapseconds;
 
@@ -66,14 +66,14 @@ static bool sirf_initialize(void)
     unsigned int i;
 
     /*@ -onlytrans @*/
-    mid2win = subwin(devicewin, 7, 80, 1, 0);
-    mid4win = subwin(devicewin, MAXSATS + 3, 30, 8, 0);
-    mid6win = subwin(devicewin, 3, 50, 8, 30);
-    mid7win = subwin(devicewin, 4, 50, 11, 30);
-    mid9win = subwin(devicewin, 3, 50, 15, 30);
-    mid13win = subwin(devicewin, 3, 50, 18, 30);
-    mid19win = newwin(16, 50, 8, 30);
-    mid27win = subwin(devicewin, 3, 50, 21, 30);
+    mid2win = subwin(devicewin, 6, 80, 1, 0);
+    mid4win = subwin(devicewin, MAXSATS + 3, 30, 7, 0);
+    mid6win = subwin(devicewin, 3, 50, 7, 30);
+    mid7win = subwin(devicewin, 4, 50, 13, 30);
+    mid9win = subwin(devicewin, 3, 50, 10, 30);
+    mid13win = subwin(devicewin, 3, 50, 17, 30);
+    mid19win = newwin(16, 50, 7, 30);
+    mid27win = subwin(devicewin, 3, 50, 20, 30);
     if (mid2win == NULL || mid4win == NULL || mid6win == NULL
 	|| mid9win == NULL || mid13win == NULL || mid19win == NULL
 	|| mid27win == NULL)
@@ -106,13 +106,11 @@ static bool sirf_initialize(void)
 		  "Vel:                            m/s                                  climb m/s");
     (void)wmove(mid2win, 3, 1);
     (void)wprintw(mid2win,
-		  "Week+TOW:               Day:                Heading:                 speed m/s");
+		  "Time:                          Leap:        Heading:                 speed m/s");
     (void)wmove(mid2win, 4, 1);
     (void)wprintw(mid2win,
-		  "Leap:                   TZ:                HDOP:      M1:        M2:    ");
-    (void)wmove(mid2win, 5, 1);
-    (void)wprintw(mid2win, "Fix:");
-    display(mid2win, 6, 24, " Packet type 2 (0x02) ");
+		  "Fix:                                                 HDOP:      M1:     M2:   ");
+    display(mid2win, 5, 24, " Packet type 2 (0x02) ");
     (void)wattrset(mid2win, A_NORMAL);
 
     (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -206,33 +204,10 @@ static bool sirf_initialize(void)
     /*@ +compdef @*/
 #endif /* ALLOW_CONTROLSEND */
 
+    /* initialize the GPS context's time fields */
+    gpsd_time_init(session.context, time(NULL));
+
     return true;
-}
-
-static void decode_time(int week, int tow)
-{
-    int day = tow / 8640000;
-    int tod = tow % 8640000;
-    int h = tod / 360000;
-    int m = tod % 360000;
-    int s = m % 6000;
-
-    m = (m - s) / 6000;
-
-    /* week + tow */
-    (void)wmove(mid2win, 3, 10);
-    (void)wprintw(mid2win, "%4d+%9.2f", week, (double)tow / 100);
-    /* day and h:m:s within week */
-    (void)wmove(mid2win, 3, 30);
-    (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h, m, (double)s / 100);
-    /* reoierted leap-second offset */
-    (void)wmove(mid2win, 4, 8);
-    (void)wattrset(mid2win, A_UNDERLINE);
-    (void)wprintw(mid2win, "%d", leapseconds);
-    /* offset from gmt in seconds */
-    (void)wmove(mid2win, 4, 29);
-    (void)wprintw(mid2win, "%d", gmt_offset);
-    (void)wattrset(mid2win, A_NORMAL);
 }
 
 static void decode_ecef(double x, double y, double z,
@@ -271,25 +246,21 @@ static void decode_ecef(double x, double y, double z,
     /* North and East position fields */
     (void)wattrset(mid2win, A_UNDERLINE);
     (void)wmove(mid2win, 1, 40);
-    (void)wprintw(mid2win, "%9.5f %9.5f", (double)(RAD_2_DEG * phi),
-		  (double)(RAD_2_DEG * lambda));
+    (void)wprintw(mid2win, "%9.5f %9.5f %9d",
+			(double)(RAD_2_DEG * phi),
+			(double)(RAD_2_DEG * lambda),
+			(int)h);
     (void)mvwaddch(mid2win, 1, 49, ACS_DEGREE);
     (void)mvwaddch(mid2win, 1, 59, ACS_DEGREE);
-    (void)wmove(mid2win, 1, 61);
-    (void)wprintw(mid2win, "%8d", (int)h);
 
     /* North and East velocity fields */
     (void)wmove(mid2win, 2, 40);
-    (void)wprintw(mid2win, "%9.1f %9.1f", vnorth, veast);
-    (void)wmove(mid2win, 2, 61);
-    (void)wprintw(mid2win, "%8.1f", vup);
+    (void)wprintw(mid2win, "%9.1f %9.1f %9.1f", vnorth, veast, vup);
 
     /* heading and speed fields */
     (void)wmove(mid2win, 3, 54);
-    (void)wprintw(mid2win, "%5.1f", (double)(RAD_2_DEG * heading));
+    (void)wprintw(mid2win, "%5.1f %9.1f", (double)(RAD_2_DEG * heading), speed);
     (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
-    (void)wmove(mid2win, 3, 61);
-    (void)wprintw(mid2win, "%8.1f", speed);
     (void)wattrset(mid2win, A_NORMAL);
 }
 
@@ -300,6 +271,7 @@ static void sirf_update(void)
     unsigned char *buf;
     size_t len;
     uint8_t dgps;
+    char tbuf[128];
 
     assert(mid27win != NULL);
     buf = session.packet.outbuffer + 4;
@@ -318,15 +290,26 @@ static void sirf_update(void)
 		    (double)getbes32(buf, 9), (double)getbes16(buf, 13) / 8,
 		    (double)getbes16(buf, 15) / 8, (double)getbes16(buf,
 								  17) / 8);
-	decode_time((int)getbeu16(buf, 22), (int)getbes32(buf, 24));
+	/* line 3 */
+	(void)wmove(mid2win, 3, 7);
+	(void)wprintw(mid2win, "%-22s",
+			unix_to_iso8601(session.gpsdata.fix.time, tbuf, sizeof(tbuf))
+			);
+	(void)wmove(mid2win, 3, 38);
+	(void)wattrset(mid2win, A_UNDERLINE);
+	if (ppstime_enabled)
+	   (void)wprintw(mid2win, "%02d", leapseconds);
+	else
+	   (void)wprintw(mid2win, "??");
+	(void)wattrset(mid2win, A_NORMAL);
 	/* line 4 */
-	(void)wmove(mid2win, 4, 49);
+	(void)wmove(mid2win, 4, 59);
 	(void)wprintw(mid2win, "%4.1f", (double)getub(buf, 20) / 5);	/* HDOP */
-	(void)wmove(mid2win, 4, 58);
+	(void)wmove(mid2win, 4, 69);
 	(void)wprintw(mid2win, "%02x", getub(buf, 19));	/* Mode 1 */
-	(void)wmove(mid2win, 4, 70);
+	(void)wmove(mid2win, 4, 77);
 	(void)wprintw(mid2win, "%02x", getub(buf, 21));	/* Mode 2 */
-	(void)wmove(mid2win, 5, 7);
+	(void)wmove(mid2win, 4, 7);
 	nfix = (int)getub(buf, 28);
 	(void)wprintw(mid2win, "%d = ", nfix);	/* SVs in fix */
 	for (i = 0; i < MAXSATS; i++) {	/* SV list */
@@ -340,7 +323,6 @@ static void sirf_update(void)
 	break;
 
     case 0x04:			/* Measured Tracking Data */
-	decode_time((int)getbeu16(buf, 1), (int)getbes32(buf, 3));
 	ch = (int)getub(buf, 7);
 	for (i = 0; i < ch; i++) {
 	    int sv, st;
@@ -405,7 +387,6 @@ static void sirf_update(void)
 	break;
 
     case 0x07:			/* Response - Clock Status Data */
-	decode_time((int)getbeu16(buf, 1), (int)getbes32(buf, 3));
 	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
 	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
@@ -554,6 +535,7 @@ static void sirf_update(void)
 	break;
 
     case 0x34:			/* PPS Time */
+	ppstime_enabled = true;
 	leapseconds = (int)getbeu16(buf, 8);
 	monitor_log("PPS 0x34=");
 	break;
@@ -731,7 +713,7 @@ const struct monitor_object_t sirf_mmt = {
     .command = NULL,
 #endif /* ALLOW_CONTROLSEND */
     .wrap = sirf_wrap,
-    .min_y = 23,.min_x = 80,
+    .min_y = 22,.min_x = 80,
     .driver = &sirf_binary,
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

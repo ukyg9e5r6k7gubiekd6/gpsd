@@ -54,7 +54,6 @@ extern struct monitor_object_t oncore_mmt, tnt_mmt;
 /* These are public */
 struct gps_device_t session;
 WINDOW *devicewin;
-int gmt_offset;
 
 /* These are private */
 static struct gps_context_t context;
@@ -303,19 +302,6 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
  *
  *****************************************************************************/
 
-static long tzoffset(void)
-{
-    time_t now = time(NULL);
-    struct tm tm;
-    long res = 0;
-
-    tzset();
-    res = timezone;
-    if (localtime_r(&now, &tm)->tm_isdst)
-	res -= 3600;
-    return res;
-}
-
 void monitor_complain(const char *fmt, ...)
 {
     va_list ap;
@@ -411,9 +397,8 @@ int main(int argc, char **argv)
     char line[80], *explanation;
     int bailout = 0;
 
-    gmt_offset = (int)tzoffset();
     /*@ -observertrans @*/
-    (void)putenv("TZ=GMT");	// for ctime()
+    (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "D:F:LVhl:")) != -1) {

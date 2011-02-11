@@ -34,7 +34,6 @@ extern void monitor_complain(const char *fmt, ...);
 
 extern WINDOW *devicewin;
 extern struct gps_device_t	session;
-extern int gmt_offset;
 
 #endif /* _GPSD_GPSMON_H_ */
 /* gpsmon.h ends here */
