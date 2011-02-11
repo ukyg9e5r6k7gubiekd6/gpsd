@@ -851,7 +851,7 @@ used to identify the port where the documents for the dangerous goods
 cargo can be found, e. g. last and next port of call, and to allow
 the requesting authority to form a danger estimate.
 
-A message 6 subtype. DAC = 001 FID = 12. Variable length: 370 bits
+A message 6 subtype. DAC = 001 FID = 12. Variable length: 360 bits
 This is the <<IMO236>> version, now deprecated; there is a later 
 <<IMO289>> version. 
 
