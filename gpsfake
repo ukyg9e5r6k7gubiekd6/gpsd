@@ -88,7 +88,7 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pr:s:uvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pP:r:s:uvx")
     except getopt.GetoptError, msg:
         print "gpsfake: " + str(msg)
         raise SystemExit, 1
@@ -137,6 +137,8 @@ if __name__ == '__main__':
             doptions = val
         elif (switch == '-p'):
             pipe = True
+        elif (switch == '-P'):
+            port = int(val)
         elif (switch == '-r'):
             client_init = val
         elif (switch == '-s'):
