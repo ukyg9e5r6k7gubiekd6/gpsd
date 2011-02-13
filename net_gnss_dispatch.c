@@ -54,25 +54,6 @@ int netgnss_uri_open(struct gps_context_t *context, char *netgnss_service)
 
 /*@ +branchstate */
 
-int netgnss_poll(struct gps_context_t *context)
-/* poll the DGNSS service for a correction report */
-{
-    if (context->dsock > -1) {
-	ssize_t rtcmbytes =
-	    read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
-	if ((rtcmbytes == -1 && errno != EAGAIN) || (rtcmbytes == 0)) {
-	    (void)shutdown(context->dsock, SHUT_RDWR);
-	    (void)close(context->dsock);
-	    context->rtcmbytes = 0;
-	    return -1;
-	} else {
-	    context->rtcmbytes = (size_t) rtcmbytes;
-	    context->rtcmtime = timestamp();
-	}
-    }
-    return 0;
-}
-
 void netgnss_report(struct gps_device_t *session)
 /* may be time to ship a usage report to the DGNSS service */
 {

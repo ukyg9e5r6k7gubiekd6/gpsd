@@ -115,6 +115,9 @@ static void ntrip_str_parse(char *str, size_t len,
 	    hold->format = fmt_rtcm2_2;
 	else if (strcasecmp("RTCM 2.3", s) == 0)
 	    hold->format = fmt_rtcm2_3;
+	/* required for the SAPOS derver in Gemany, confirmed as RTCM2.3 */
+	else if (strcasecmp("RTCM1_", s) == 0)
+	    hold->format = fmt_rtcm2_3;
 	else if (strcasecmp("RTCM 3.0", s) == 0)
 	    hold->format = fmt_rtcm3;
 	else

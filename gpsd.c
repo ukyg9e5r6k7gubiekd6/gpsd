@@ -1489,6 +1489,7 @@ static void consume_packets(struct gps_device_t *device)
 		memcpy(context.rtcmbuf, 
 		       device->packet.outbuffer, 
 		       context.rtcmbytes);
+		context.rtcmtime = time(NULL);
 	    }
 	}
 
@@ -1921,15 +1922,6 @@ int main(int argc, char *argv[])
 		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(csock, &rfds);
-	}
-
-	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds)) {
-	    /* be ready for DGPS reports */
-	    if (netgnss_poll(&context) == -1) {
-		FD_CLR(context.dsock, &all_fds);
-		FD_CLR(context.dsock, &rfds);
-		context.dsock = -1;
-	    }
 	}
 
 	/* read any commands that came in over control sockets */

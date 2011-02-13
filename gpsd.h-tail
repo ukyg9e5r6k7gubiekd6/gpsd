@@ -569,7 +569,6 @@ extern gps_mask_t aivdm_parse(struct gps_device_t *);
 
 extern bool netgnss_uri_check(char *);
 extern int netgnss_uri_open(struct gps_context_t *, char *);
-extern int netgnss_poll(struct gps_context_t *);
 extern void netgnss_report(struct gps_device_t *);
 extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 
