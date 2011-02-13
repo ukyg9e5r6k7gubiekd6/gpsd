@@ -141,7 +141,7 @@ will print a notification each time it cycles.</para>
 <para>Normally, gpsfake creates a pty for each logfile and passes the
 slave side of the debice to the daemon.  If the header comment in the
 logfile contains the string "UDP", packets are instead shipped via UDP
-port 5000 to the addess 192.168.0.1.255.  You can monitoer them with
+port 5000 to the addess 192.168.0.1.255.  You can monitor them with
 this: <command>tcpdump -s0 -n -A -i lo udp and port 5000</command>.</para>
 
 </refsect1>
