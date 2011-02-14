@@ -1367,6 +1367,37 @@ The seastate field has a note in <<IMO236>> reading "(manual input?)"?
 |7    |N/A (default)
 |===================================
 
+.Beaufort scale
+[width="50%",frame="topbot",options="header"]
+|===========================================================================
+|Scale|Description    | Sea Conditions
+|0    |Calm           |Flat.
+|1    |Light air      |Ripples without crests.
+|2    |Light breeze   |Small wavelets. 
+|     |               |Crests of glassy appearance, not breaking.
+|3    |Gentle breeze  |Large wavelets. 
+|     |               |Crests begin to break; scattered whitecaps.
+|4    |Moderate breeze|Small waves.
+|5    |Fresh breeze   |Moderate (1.2 m) longer waves. Some foam and spray.
+|6    |Strong beeeze  |Large waves with foam crests and some spray.
+|7    |High wind      |Sea heaps up and foam begins to streak.
+|8    |Gale           |Moderately high waves with breaking crests 
+|     |               |forming spindrift. Streaks of foam.
+|9    |Strong gale    |High waves (6-7 m) with dense foam. 
+|     |               |Wave crests start to roll over. Considerable spray.
+|10   |Storm          |Very high waves. The sea surface is white and there 
+|     |               |is considerable tumbling. Visibility is reduced.
+|11   |Violent storm  |Exceptionally high waves.
+|12   |Hurricane force|Huge waves. Air filled with foam and spray. Sea
+|     |               |completely white with driving spray. Visibility 
+|     |               |greatly reduced.
+|13   |               |N/A (default)
+|14-15|               |Reserved
+|===========================================================================
+
+As the Beaufort scale is usually quoted numerically it is optional to
+use the vocabulary when reporting.
+
 ==== Fairway Closed ====
 
 This message should be broadcast from shore stations to inform ships,
@@ -1531,7 +1562,7 @@ than 9, and (c) end padding changes from 6 to 10 bits.
 |350-359 | 10 |Spare                |           |Not used
 |==============================================================================
 
-Preciptation ytyes are as for the <<IMO236>> version.
+Precipitation types and Beaufort scale are as for the <<IMO236>> version.
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
