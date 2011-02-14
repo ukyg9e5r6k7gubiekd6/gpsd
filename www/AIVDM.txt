@@ -1293,10 +1293,10 @@ different binary layout.
 |8-37    | 30 |Source MMSI        |mmsi        |Unsigned integer: 9 digits
 |38-39   |  2 |Spare              |            |Not used
 |40-55   | 16 |DAC/FID            |            |DAC = 001 FID = 11
-|56-79   | 24 |Longitude          |lon         |Signed: unit minutes * 0.001
-|        |    |                   |            |181000 = N/A (default)
-|80-104  | 25 |Latitude           |lat         |Signed: unit minutes * 0.001
+|56-79   | 24 |Latitude           |lat         |Signed: unit minutes * 0.001
 |        |    |                   |            |91000 = N/A (default)
+|80-104  | 25 |Longitude          |lon         |Signed: unit minutes * 0.001
+|        |    |                   |            |181000 = N/A (default)
 |105-109 |  5 |Day                |day         |1-31, 0=N/A (default)
 |110-114 |  5 |Hour               |hour        |0-23, 24=N/A (default)
 |115-120 |  6 |Minute             |minute      |0-59, 60=N/A (default)
@@ -1333,7 +1333,7 @@ different binary layout.
 |309-317 |  9 |Swell direction      |swelldir   |0-359, degrees fom true north
 |318-321 |  4 |Sea state            |seastate   |Beaufort scale, 0-12
 |322-331 | 10 |Water Temperature    |watertemp  |-10.0 to 50.0 C, 0.1 deg
-|332-334 |  3 |Precipitation        |precipitation  |According to WNO
+|332-334 |  3 |Precipitation        |precipitation  |preciptype
 |335-343 |  9 |Salinity             |salinity   |0.0-50.0%, units of 0.1%
 |344-345 |  2 |Ice                  |ice        |Yes/No
 |346-351 |  6 |Spare                |           |Not used
@@ -1352,6 +1352,20 @@ The waveheight field is labeled as "Significant" in <<IMO238>>,
 for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
+
+.preciptype values (According to WMO 306 Code table 4.201)
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Position Fix Type
+|0    |Reserved
+|1    |Rain
+|2    |Thunderstorm
+|3    |Freezing rain
+|4    |Mixed/ice
+|5    |Snow
+|6    |Reserved
+|7    |N/A (default)
+|===================================
 
 ==== Fairway Closed ====
 
@@ -1451,6 +1465,73 @@ via the Message Linkage ID field.
 |==============================================================================
 
 There is an equivalent subtype of message 6 that is an addressed description.
+
+==== Meteorological and Hydrological Data (IMO289) ===
+
+A message 8 subtype. DAC = 001 FID = 31. Fixed length, 360 bits.
+Supersedes an <<IMO236>> message with the same title but FID = 11 and a
+different binary layout.  The exact differences are: (a) The addition of the
+Position Accuracy field, (b) water level has 12 bits of precision rather
+than 9, and (c) end padding changes from 6 to 10 bits.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member      |Units
+|0-5     |  6 |Message Type       |type        |Unsigned integer: 6
+|6-7     |  2 |Repeat Indicator   |repeat      |As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi        |Unsigned integer: 9 digits
+|38-39   |  2 |Spare              |            |Not used
+|40-55   | 16 |DAC/FID            |            |DAC = 001 FID = 11
+|56-80   | 25 |Longitude          |lon         |Signed: unit minutes * 0.001
+|        |    |                   |            |181000 = N/A (default)
+|81-104  | 24 |Latitude           |lat         |Signed: unit minutes * 0.001
+|        |    |                   |            |91000 = N/A (default)
+|105-105 |  1 |Fix quality        |accuracy    |As in Common Navigation Block
+|106-110 |  5 |Day                |day         |1-31, 0=N/A (default)
+|111-115 |  5 |Hour               |hour        |0-23, 24=N/A (default)
+|116-121 |  6 |Minute             |minute      |0-59, 60=N/A (default)
+|122-128 |  7 |Average Wind Speed |wspeed      |10-min avg wind speed, knots
+|129-135 |  7 |Gust Speed         |wgust       |10-min max wind speed, knots
+|136-144 |  9 |Wind Direction     |wdir        |0-359, degrees fom true north
+|145-153 |  9 |Wind Gust Direction|wgustdir    |0-359, degrees fom true north
+|154-164 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
+|        |    |                   |            |-60.0 to +60.0,
+|165-171 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
+|172-181 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|182-190 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
+|191-192 |  2 |Pressure Tendency  |pressuretend|0 = steady
+|        |    |                   |            |1 = decreasing
+|        |    |                   |            |2 = increasing
+|193-200 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
+|201-212 | 12 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
+|        |    |                   |            |Subtract 10.0m after scaling
+|        |    |                   |            |40001 = N/A (default)
+|213-214 |  2 |Water Level Trend  |leveltrend  |0 = steady
+|        |    |                   |            |1 = decreasing
+|        |    |                   |            |2 = increasing
+|215-222 |  8 |Surface Current Speed     |curspeed  |0.0-25.0 knots, units 0.1 knot
+|223-231 |  9 |Surface Current Direction |curdir    |0-359, degrees fom true north
+|232-239 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|240-248 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|249-253 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
+|254-261 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|262-270 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|271-275 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
+|276-283 |  8 |Wave height          |waveheight|0-25m, units 0.1m
+|284-289 |  6 |Wave period          |waveperiod|Seconds, 0-60, units 1s
+|290-298 |  9 |Wave direction       |wavedir   |0-359, degrees fom true north
+|299-306 |  8 |Swell height         |swellheight|0-25m, units 0.1m
+|307-312 |  6 |Swell period         |swellperiod|Seconds, 0-60, units 1s
+|313-321 |  9 |Swell direction      |swelldir   |0-359, degrees fom true north
+|322-325 |  4 |Sea state            |seastate   |Beaufort scale, 0-12
+|326-335 | 10 |Water Temperature    |watertemp  |-10.0 to 50.0 C, 0.1 deg
+|336-338 |  3 |Precipitation        |precipitation  |preciptype
+|339-347 |  9 |Salinity             |salinity   |0.0-50.0%, units of 0.1%
+|348-349 |  2 |Ice                  |ice        |Yes/No
+|350-359 | 10 |Spare                |           |Not used
+|==============================================================================
+
+Preciptation ytyes are as for the <<IMO236>> version.
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
@@ -2436,8 +2517,9 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 6(1/25)| cargocode                     | cargocode
 | 6(1/28)| lon, lat                      |
 | 6(1/32)| lon, lat, cdir, cspeed        |
-| 8(1/11)| lon, lat                      |
+| 8(1/11)| lon, lat                      | preciptype
 | 8(1/17)| lon, lat                      |
+| 8(1/31)| lon, lat                      | preciptype
 | 9      | alt, speed                    | -
 | 17-18  | lon, lat                      | -
 | 19     | lon, lat                      | shiptype, epfd
