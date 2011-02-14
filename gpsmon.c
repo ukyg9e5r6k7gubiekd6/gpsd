@@ -497,11 +497,17 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
-	if (source.device != NULL)
+	if (source.device != NULL) {
 	    (void)gps_send(&session.gpsdata,
 			   "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n",
 			   source.device);
-	else
+	    /*
+	     *  The gpsdata.dev is filled only in JSON mode,
+	     *  but we in super-raw mode.
+	     */
+	    (void)strlcpy(session.gpsdata.dev.path, source.device,
+			  sizeof(session.gpsdata.dev.path));
+	} else
 	    (void)gps_send(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
 	serial = false;
     } else {

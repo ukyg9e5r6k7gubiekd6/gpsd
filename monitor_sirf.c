@@ -397,8 +397,8 @@ static void sirf_update(void)
     case 0x08:			/* 50 BPS data */
 	ch = (int)getub(buf, 1);
 	display(mid4win, ch + 2, 27, "Y");
-	monitor_log("50B 0x08=");
 	subframe_enabled = true;
+	monitor_log("50B 0x08=");
 	break;
 
     case 0x09:			/* Throughput */
@@ -462,6 +462,7 @@ static void sirf_update(void)
 	display(mid19win, 13, 42, "%d", getub(buf, 63));	/* Response Time Max */
 	display(mid19win, 14, 42, "%d", getub(buf, 64));	/* Time/Accu & Duty Cycle Priority */
 #undef YESNO
+	monitor_log("NP  0x13=");
 	break;
 
     case 0x1b:
@@ -657,9 +658,10 @@ static int sirf_command(char line[])
     case 'A':			/* toggle 50bps subframe data */
 	(void)memset(buf, '\0', sizeof(buf));
 	putbyte(buf, 0, 0x80);
-	putbyte(buf, 23, 12);
+	putbyte(buf, 23, 0x0c);
 	putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
 	(void)monitor_control_send(buf, 25);
+	subframe_enabled = !subframe_enabled;
 	return COMMAND_MATCH;
 
     case 'M':			/* static navigation */
@@ -685,6 +687,24 @@ static int sirf_command(char line[])
 
     case 'P':			/* poll navigation params */
 	dispmode = !dispmode;
+	if (dispmode) {
+	    (void)syncok(mid6win, false);
+	    (void)syncok(mid7win, false);
+	    (void)syncok(mid9win, false);
+	    (void)syncok(mid13win, false);
+	    (void)syncok(mid27win, false);
+	} else {
+	    (void)syncok(mid6win, true);
+	    (void)wsyncup(mid6win);
+	    (void)syncok(mid7win, true);
+	    (void)wsyncup(mid7win);
+	    (void)syncok(mid9win, true);
+	    (void)wsyncup(mid9win);
+	    (void)syncok(mid13win, true);
+	    (void)wsyncup(mid13win);
+	    (void)syncok(mid27win, true);
+	    (void)wsyncup(mid27win);
+	}
 	return COMMAND_MATCH;
     }
 
