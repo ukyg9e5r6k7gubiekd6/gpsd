@@ -477,11 +477,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     char scr[128];
     bool usedflags[MAXCHANNELS];
 
-    /* this is where we implement source-device filtering */
-    if (gpsdata->dev.path[0] != '\0' && source.device != NULL
-	&& strcmp(source.device, gpsdata->dev.path) != 0)
-	return;
-
     /* must build bit vector of which statellites are used from list */
     for (i = 0; i < MAXCHANNELS; i++) {
 	usedflags[i] = false;
@@ -633,22 +628,11 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in receiver type. */
-    if (gpsdata->set & (DEVICE_SET | DEVICELIST_SET)) {
-#ifdef CLIENTDEBUG_ENABLE
-	if (debug > 0)
-	    (void)fprintf(stderr, "Device ID or list set.\n");
-#endif
-	if (gpsdata->set & DEVICE_SET) {
-	    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->dev.driver);
-	} else if (gpsdata->devices.ndevices == 1) {
-	    (void)snprintf(scr, sizeof(scr), "%s",
-			   gpsdata->devices.list[0].driver);
-	} else {
-	    (void)snprintf(scr, sizeof(scr), "%d devices",
-			   gpsdata->devices.ndevices);
-	}
-	(void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
-    }
+    for (i = 0; i < gpsdata->devices.ndevices; i++)
+	if (strcmp(gpsdata->devices.list[i].path, gpsdata->dev.path) == 0)
+	   break;
+    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[i].driver);
+    (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
     /* Note that the following four fields are exceptions to the
      * sizing rule.  The minimum window size does not include these
      * fields, if the window is too small, they get excluded.  This
@@ -870,7 +854,10 @@ int main(int argc, char *argv[])
 
     status_timer = time(NULL);
 
-    (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
+    unsigned int flags = WATCH_ENABLE;
+    if (source.device != NULL)
+	flags |= WATCH_DEVICE;
+    (void)gps_stream(&gpsdata, flags, source.device);
 
     /* heart of the client */
     for (;;) {

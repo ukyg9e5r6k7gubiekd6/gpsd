@@ -225,10 +225,6 @@ static void update_lcd(struct gps_data_t *gpsdata)
   char *s;
   int track;
 
-  /* this is where we implement source-device filtering */
-  if (gpsdata->dev.path[0] && source.device!=NULL && strcmp(source.device, gpsdata->dev.path) != 0)
-      return;
-
   /* Get our location in Maidenhead. */
   latlon2maidenhead(maidenhead,gpsdata->fix.latitude,gpsdata->fix.longitude);
 
@@ -459,7 +455,10 @@ int main(int argc, char *argv[])
     reset_lcd();
 
     /* Here's where updates go. */
-    gps_stream(&gpsdata, WATCH_ENABLE, NULL);
+    unsigned int flags = WATCH_ENABLE;
+    if (source.device != NULL)
+	flags |= WATCH_DEVICE;
+    (void)gps_stream(&gpsdata, flags, source.device);
 
     for (;;) { /* heart of the client */
 

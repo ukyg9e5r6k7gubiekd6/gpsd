@@ -295,16 +295,6 @@ static int dbus_mainloop(void)
 
 static struct fixsource_t source;
 
-static void process(struct gps_data_t *gpsdata)
-{
-    /* this is where we implement source-device filtering */
-    if (gpsdata->dev.path[0] != '\0' && source.device != NULL
-	&& strcmp(source.device, gpsdata->dev.path) != 0)
-	return;
-
-    conditionally_log_fix(&gpsdata->fix);
-}
-
 /*@-mustfreefresh -compdestroy@*/
 static int socket_mainloop(void)
 {
@@ -318,7 +308,10 @@ static int socket_mainloop(void)
 	exit(1);
     }
 
-    (void)gps_stream(&gpsdata, WATCH_ENABLE, NULL);
+    unsigned int flags = WATCH_ENABLE;
+    if (source.device != NULL)
+	flags |= WATCH_DEVICE;
+    (void)gps_stream(&gpsdata, flags, source.device);
 
     for (;;) {
 	int data;
@@ -336,7 +329,7 @@ static int socket_mainloop(void)
 	    break;
 	} else if (data) {
 	    (void)gps_read(&gpsdata);
-	    process(&gpsdata);
+	    conditionally_log_fix(&(gpsdata.fix));
 	}
     }
     (void)gps_close(&gpsdata);
