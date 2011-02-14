@@ -78,6 +78,9 @@ May be useful for comparing logs when regression tests break.
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do
 this itself now, so this script has a lot of dust on it. 
 
+== tablecheck.py ==
 
+Redo bit offsets of AIVDM message layout tables to be conformant with list 
+lengths.
 
 
