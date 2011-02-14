@@ -1064,6 +1064,32 @@ the cargotype is 3 = BC code) or as a MARPOL Annex I code (if
 the cargotype is 4 = MARPOL Annex I) or as a MARPOL Annex II code (if
 the cargotype is 5 = MARPOL Annex II).
 
+.Dangerous Cargo Indication: MARPOL Annex I list of oils
+[width="50%",frame="topbot",options="header"]
+|===================================
+|0    | N/A (default)
+|1    | asphalt solutions
+|2    | oils
+|3    | distillates
+|4    | gas oil
+|5    | gasoline blending stocks
+|6    | gasoline
+|7    | jet fuels
+|8    | naphtha
+|9-15 | reserved for future use
+|===================================
+
+.Dangerous Cargo Indication: MARPOL Annex II list of oils
+[width="50%",frame="topbot",options="header"]
+|===================================
+|0    | N/A (default)
+|1    | Category X
+|2    | Category Y
+|3    | Category Z
+|4    | Other substances
+|5-7  | reserved for future use
+|===================================
+
 ==== IMO 289 Route Information (addressed) ====
 
 The content of this message is a time and a list of waypoints describing a
@@ -1104,7 +1130,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |        |    |                  |          |N positive, S negative
 |==============================================================================
 
-.Route type codes
+.Route Information: Route type codes
 [width="50%",frame="topbot",options="header"]
 |===================================
 |Code |Position Fix Type
@@ -1113,7 +1139,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |2    |Recommended
 |3    |Alternative
 |4    |Recommended route through ice
-|5    |Ship routr plan
+|5    |Ship route plan
 |6-30 |Reserved for future usage
 |31   |Cancel route identified by message linkage
 |===================================
@@ -1394,9 +1420,6 @@ The seastate field has a note in <<IMO236>> reading "(manual input?)"?
 |13   |               |N/A (default)
 |14-15|               |Reserved
 |===========================================================================
-
-As the Beaufort scale is usually quoted numerically it is optional to
-use the vocabulary when reporting.
 
 ==== Fairway Closed ====
 
@@ -2558,6 +2581,9 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 22-23  | ne_lon,ne_lat, sw_lon, sw_lat | -
 | 24     | -                             | shiptype
 |===========================================================================
+
+As the Beaufort scale is usually quoted numerically, conforming implementations
+should do so rather than exoanding to its controlled vocabulary.
 
 .String special values in scaled mode
 [frame="topbot",options="header"]
