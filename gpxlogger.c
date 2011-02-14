@@ -35,6 +35,7 @@ static char *author = "Amaury Jacquot, Chris Kuethe";
 static char *license = "BSD";
 static char *progname;
 
+static struct gps_data_t gpsdata;
 static FILE *logfile;
 static bool intrack = false;
 static time_t timeout = 5;	/* seconds */
@@ -81,65 +82,62 @@ static void print_gpx_trk_start(void)
     (void)fflush(logfile);
 }
 
-static void print_fix(struct gps_fix_t *fix, struct tm *time)
+static void print_fix(struct gps_data_t *gpsdata, double time)
 {
-    (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
-		 fix->latitude, fix->longitude);
-    (void)fprintf(logfile,"    <ele>%f</ele>\n", fix->altitude);
-    (void)fprintf(logfile,"    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
-		 time->tm_year + 1900, time->tm_mon + 1, time->tm_mday,
-		 time->tm_hour, time->tm_min, time->tm_sec);
-    if (fix->mode == MODE_NO_FIX)
-	(void)fprintf(logfile, "    <fix>none</fix>\n");
-    else
-	(void)fprintf(logfile, "    <fix>%dd</fix>\n", fix->mode);
-#if 0
-    /*
-     * Can't print this more detailed report because in D-Bus mode
-     * we don't necessarily have access to some of the stuff in gsdata.
-     * Might mean some of this stuff should be promoted.
-     */
-    if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= MODE_3D)) {
-	/* dgps or pps */
-	if (gpsdata->fix.mode == 4) {	/* military pps */
-	    (void)fprintf(logfile,"        <fix>pps</fix>\n");
-	} else {		/* civilian dgps or sbas */
-	    (void)fprintf(logfile,"        <fix>dgps</fix>\n");
-	}
-    } else {			/* no dgps or pps */
-	if (gpsdata->fix.mode == MODE_3D) {
-	    (void)fprintf(logfile,"        <fix>3d</fix>\n");
-	} else if (gpsdata->fix.mode == MODE_2D) {
-	    (void)fprintf(logfile,"        <fix>2d</fix>\n");
-	} else if (gpsdata->fix.mode == MODE_NOFIX) {
-	    (void)fprintf(logfile,"        <fix>none</fix>\n");
-	}			/* don't print anything if no fix indicator */
-    }
+    char tbuf[128];
 
-    /* print # satellites used in fix, if reasonable to do so */
-    if (gpsdata->fix.mode >= MODE_2D) {
-	(void)fprintf(logfile,"        <hdop>%.1f</hdop>\n", gpsdata->hdop);
-	(void)fprintf(logfile,"        <sat>%d</sat>\n", gpsdata->satellites_used);
-    }
-#endif
+    (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
+		 gpsdata->fix.latitude, gpsdata->fix.longitude);
+    if ((isnan(gpsdata->fix.altitude) == 0))
+	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
+    (void)fprintf(logfile,"    <time>%s</time>\n",
+		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
+    if (gpsdata->status == STATUS_DGPS_FIX)
+	(void)fprintf(logfile,"    <fix>dgps</fix>\n");
+    else
+	switch (gpsdata->fix.mode) {
+	case MODE_3D:
+	    (void)fprintf(logfile,"    <fix>3d</fix>\n");
+	    break;
+	case MODE_2D:
+	    (void)fprintf(logfile,"    <fix>2d</fix>\n");
+	    break;
+	case MODE_NO_FIX:
+	    (void)fprintf(logfile,"    <fix>none</fix>\n");
+	    break;
+	default:
+	    /* don't print anything if no fix indicator */
+	    break;
+	}
+
+    if ((gpsdata->fix.mode > MODE_NO_FIX) && (gpsdata->satellites_used > 0))
+	(void)fprintf(logfile,"    <sat>%d</sat>\n", gpsdata->satellites_used);
+    if (isnan(gpsdata->dop.hdop) == 0)
+	(void)fprintf(logfile,"    <hdop>%.1f</hdop>\n", gpsdata->dop.hdop);
+    if (isnan(gpsdata->dop.vdop) == 0)
+	(void)fprintf(logfile,"    <vdop>%.1f</vdop>\n", gpsdata->dop.vdop);
+    if (isnan(gpsdata->dop.pdop) == 0)
+	(void)fprintf(logfile,"    <pdop>%.1f</pdop>\n", gpsdata->dop.pdop);
 
     (void)fprintf(logfile,"   </trkpt>\n");
     (void)fflush(logfile);
 }
 
-static void conditionally_log_fix(struct gps_fix_t *gpsfix)
+static void conditionally_log_fix(struct gps_data_t *gpsdata)
 {
-    static time_t int_time, old_int_time;
+    static double int_time, old_int_time;
     static double old_lat, old_lon;
     static bool first = true;
 
-    int_time = (time_t) floor(gpsfix->time);
-    if ((int_time == old_int_time) || gpsfix->mode < MODE_2D)
+    int_time = gpsdata->fix.time;
+    if ((int_time == old_int_time) || gpsdata->fix.mode < MODE_2D)
 	return;
 
     /* may not be worth logging if we've moved only a very short distance */ 
-    if (minmove>0 && !first && earth_distance(gpsfix->latitude, gpsfix->longitude,
-					    old_lat, old_lon) < minmove)
+    if (minmove>0 && !first && earth_distance(
+					gpsdata->fix.latitude,
+					gpsdata->fix.longitude,
+					old_lat, old_lon) < minmove)
 	return;
 
     /* 
@@ -165,10 +163,10 @@ static void conditionally_log_fix(struct gps_fix_t *gpsfix)
 
     old_int_time = int_time;
     if (minmove > 0) {
-	old_lat = gpsfix->latitude;
-	old_lon = gpsfix->longitude;
+	old_lat = gpsdata->fix.latitude;
+	old_lon = gpsdata->fix.longitude;
     }
-    print_fix(gpsfix, gmtime(&int_time));
+    print_fix(gpsdata, int_time);
 }
 
 static void quit_handler(int signum)
@@ -179,8 +177,6 @@ static void quit_handler(int signum)
     print_gpx_footer();
     exit(0);
 }
-
-static struct gps_fix_t gpsfix;
 
 #ifdef DBUS_ENABLE
 /**************************************************************************
@@ -206,29 +202,34 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
 {
     DBusError error;
     /* this packet format was designed before we split eph */
-    double eph = EMIX(gpsfix.epx, gpsfix.epy);
+    double eph = EMIX(gpsdata.fix.epx, gpsdata.fix.epy);
 
     dbus_error_init(&error);
 
     dbus_message_get_args(message,
 			  &error,
-			  DBUS_TYPE_DOUBLE, &gpsfix.time,
-			  DBUS_TYPE_INT32, &gpsfix.mode,
-			  DBUS_TYPE_DOUBLE, &gpsfix.ept,
-			  DBUS_TYPE_DOUBLE, &gpsfix.latitude,
-			  DBUS_TYPE_DOUBLE, &gpsfix.longitude,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.time,
+			  DBUS_TYPE_INT32, &gpsdata.fix.mode,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.ept,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.latitude,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.longitude,
 			  DBUS_TYPE_DOUBLE, &eph,
-			  DBUS_TYPE_DOUBLE, &gpsfix.altitude,
-			  DBUS_TYPE_DOUBLE, &gpsfix.epv,
-			  DBUS_TYPE_DOUBLE, &gpsfix.track,
-			  DBUS_TYPE_DOUBLE, &gpsfix.epd,
-			  DBUS_TYPE_DOUBLE, &gpsfix.speed,
-			  DBUS_TYPE_DOUBLE, &gpsfix.eps,
-			  DBUS_TYPE_DOUBLE, &gpsfix.climb,
-			  DBUS_TYPE_DOUBLE, &gpsfix.epc,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.altitude,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epv,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.track,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epd,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.speed,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.eps,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.climb,
+			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epc,
 			  DBUS_TYPE_STRING, &gpsd_devname, DBUS_TYPE_INVALID);
 
-    conditionally_log_fix(&gpsfix);
+    if (gpsdata.fix.mode > MODE_NO_FIX )
+	gpsdata.status = STATUS_FIX;
+    else
+	gpsdata.status = STATUS_NO_FIX;
+
+    conditionally_log_fix(&gpsdata);
     return DBUS_HANDLER_RESULT_HANDLED;
 }
 
@@ -299,7 +300,6 @@ static struct fixsource_t source;
 static int socket_mainloop(void)
 {
     fd_set fds;
-    struct gps_data_t gpsdata;
 
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
@@ -329,7 +329,7 @@ static int socket_mainloop(void)
 	    break;
 	} else if (data) {
 	    (void)gps_read(&gpsdata);
-	    conditionally_log_fix(&(gpsdata.fix));
+	    conditionally_log_fix(&gpsdata);
 	}
     }
     (void)gps_close(&gpsdata);
@@ -428,8 +428,13 @@ int main(int argc, char **argv)
 		 source.server, source.port, source.device);
 #endif
 
-    /* initializes the gpsfix data structure */
-    gps_clear_fix(&gpsfix);
+    /* initializes the some gpsdata data structure */
+    gpsdata.status = STATUS_NO_FIX;
+    gpsdata.satellites_used = 0;
+    gpsdata.dop.hdop = NAN;
+    gpsdata.dop.vdop = NAN;
+    gpsdata.dop.pdop = NAN;
+    gps_clear_fix(&(gpsdata.fix));
 
     /* catch all interesting signals */
     (void)signal(SIGTERM, quit_handler);
