@@ -831,7 +831,7 @@ in use for type 6.
 |   1 | 12 |     | <<IMO236>>  | Deprecated        | Dangerous cargo indication
 |   1 | 14 |     | <<IMO236>>  | Deprecated        | Tidal window
 |   1 | 16 |     | <<IMO236>>  | Deprecated/In Use | Num persons on board
-|   1 | 23 |     | <<IMO289>>  | Standard          | Num persons on board
+|   1 | 16 |     | <<IMO289>>  | Standard          | Num persons on board
 |   1 | 25 |     | <<IMO289>>  | Standard          | Dangerous Cargo indication
 |   1 | 28 |     | <<IMO289>>  | Standard          | Route info addressed
 |   1 | 30 |     | <<IMO289>>  | Standard          | Text description addressed
@@ -939,14 +939,15 @@ different widths for the latitude, longitude, and current-speed fields
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
-==== IMO236 Number of persons on board ====
+==== Number of persons on board ====
 
 This message should be used by a ship to report the number of persons
 on board, e.g. on request by a competent authority.  Acknowledgement
 required.
 
-A message 6 subtype. DAC = 001 FID = 16 in <<IMO236>>.  Fixed length, 72 bits.
-Deprecated in <<IMO289>>.
+A message 6 subtype. DAC = 001 FID = 16.  
+
+<<IMO236>> describes a fixed-length, 72-bit message with this layout:
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -968,11 +969,7 @@ address.  A strikeout in <<IMO236>> suggests that this was originally
 a subtype of 8.  It would be good defensive implementation for a
 decoder to accept either.
 
-==== IMO289 Number of persons on board ====
-
-See the <<IMO236>> variant for the meaning of this message.
-
-A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 136 bits.
+<<IMO289>> describes a fixed-length, 136-bit message with this layout:
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -985,7 +982,7 @@ A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 136 bits.
 |70-70   |  1 |Retransmit flag      |retransmit|0 = no retransmission (default)
 |        |    |                     |          |1 = retransmitted
 |71-71   |  1 |Spare                |          |Not used
-|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 16
+|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 23
 |88-100  | 13 |# persons on board   |persons   |Unsigned integer
 |        |    |                     |          |0 = N/A (default)
 |        |    |                     |          |8191 = >= 8191 persons.
