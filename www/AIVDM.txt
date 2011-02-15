@@ -827,15 +827,16 @@ The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6.
 
 |==============================================================================
-| DAC |FID | Sub | Source      | Status            | Description     
-|   1 | 12 |     | <<IMO236>>  | Deprecated        | Dangerous cargo indication
-|   1 | 14 |     | <<IMO236>>  | Deprecated        | Tidal window
-|   1 | 16 |     | <<IMO236>>  | Deprecated/In Use | Num persons on board
-|   1 | 16 |     | <<IMO289>>  | Standard          | Num persons on board
-|   1 | 25 |     | <<IMO289>>  | Standard          | Dangerous Cargo indication
-|   1 | 28 |     | <<IMO289>>  | Standard          | Route info addressed
-|   1 | 30 |     | <<IMO289>>  | Standard          | Text description addressed
-|   1 | 32 |     | <<IMO289>>  | Standard          | Tidal Window
+| DAC |FID | Sub | Source      | Status           | Description     
+|   1 | 12 |     | <<IMO236>>  | Deprecated       | Dangerous cargo indication
+|   1 | 14 |     | <<IMO236>>  | Deprecated       | Tidal window
+|   1 | 16 |     | <<IMO236>>  | Deprecated/In Use| Num persons on board
+|   1 | 16 |     | <<IMO289>>  | Standard         | Num persons on board
+|   1 | 18 |     | <<IMO289>>  | Standard         | Clearance time to enter port
+|   1 | 25 |     | <<IMO289>>  | Standard         | Dangerous Cargo indication
+|   1 | 28 |     | <<IMO289>>  | Standard         | Route info addressed
+|   1 | 30 |     | <<IMO289>>  | Standard         | Text description addressed
+|   1 | 32 |     | <<IMO289>>  | Standard         | Tidal Window
 |==============================================================================
 
 DAC/FID pairs are assigned separately per message type.
@@ -1275,7 +1276,6 @@ DAC-FID pairs in use for type 8:
 |   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
 |   1     | 17 |     | <<IMO89>>  | In use     | VTS-Generated/Synthetic targets
-|   1     | 18 |     | <<IMO289>> | Standard   | Clearance time to enter port
 |   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
 |   1     | 20 |     | <<IMO289>> | Standard   | Berthing data
 |   1     | 21 |     | <<IMO289>> | Standard   | Weather obs from ship
@@ -1387,7 +1387,9 @@ for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
 
-.preciptype values (According to WMO 306 Code table 4.201)
+WMO 306 Code table 4.201 specifies the following precipitatiuon type values:
+
+.Metereological and Hydrological Data: preciptype values
 [width="50%",frame="topbot",options="header"]
 |===================================
 |Code |Position Fix Type
@@ -1525,6 +1527,64 @@ big-endian encoding. Settling this awaits live testing.
 
 The trailing three fields may be repeated up to 3 times (for a total of 1 to 4
 field groups) to represent up to 4 targets.
+
+==== Marine Traffic Signal ====
+
+A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 19. Fixed
+length: 360 bits.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len  |Description           |Member    |Units
+|0-5     |   6 |Message Type          |type      |Unsigned integer: 8
+|6-7     |   2 |Repeat Indicator      |repeat    |As in Common Navigation Block
+|8-37    |  30 |Source MMSI           |mmsi      |Unsigned integer: 9 digits
+|38-39   |   2 |Spare                 |          |Not used
+|40-55   |  16 |DAC/FID               |          |DAC = 001 FID = 29
+|56-65   |  10 |Message Linkage ID    |linkage   |Unsigned integer
+|66-185  | 120 |Name of Signal Station|station   |20 6-bit chars
+|186-210 |  25 |Longitude             |lon       |Signed: unit minutes * 0.001
+|        |     |                      |          |181000 = N/A (default)
+|211-234 |  24 |Latitude              |lat       |Signed: unit minutes * 0.001
+|        |     |                      |          |91000 = N/A (default)
+|235-236 |   2 |Status of Signal      |status    |0=N/A (default
+|        |     |                      |          |1 = In regular service
+|        |     |                      |          |2 = Irregular service
+|        |     |                      |          |3 = Reserved for future use
+|237-241 |   5 |Signal In Service     |signal    |See below
+|242-246 |   5 |UTC hour              |hour      |0-23, 24=N/A (default)
+|247-252 |   6 |UTC minute            |minute    |0-59, 60=N/A (default)
+|253-257 |   5 |Expected Next Signal  |nextsignal|See below
+|258-359 | 102 |Spare                 |          |Not used
+|==============================================================================
+
+.Marine Traffic Signal: Signal values
+[width="50%",frame="topbot",options="header"]
+|===========================================================================
+|Code |Position Fix Type
+|  0  |N/A (default)
+|  1  |IALA port traffic signal 1: Serious emergency – all vessels to stop 
+|     |or divert according to instructions.
+|  2  |IALA port traffic signal 2: Vessels shall not proceed.
+|  3  |IALA port traffic signal 3: Vessels may proceed. One way traffic.
+|  4  |IALA port traffic signal 4: Vessels may proceed. Two way traffic.
+|  5  |IALA port traffic signal 5: A vessel may proceed only when it has 
+|     |received specific orders to do so.
+|  6  |IALA port traffic signal 2a: Vessels shall not proceed, except that 
+|     |vessels which navigate outside the main channel need not comply with
+|     |the main message.
+|  7  |IALA port traffic signal 5a: A vessel may proceed only when it has
+|     |received specific orders to do so; except that vessels which navigate
+|     |outside the main channel need not comply with the main message.
+|  8  |Japan Traffic Signal - I = "in-bound" only acceptable.
+|  9  |Japan Traffic Signal - O = "out-bound" only acceptable.
+| 10  |Japan Traffic Signal - F = both "in- and out-bound" acceptable.
+| 11  |Japan Traffic Signal - XI = Code will shift to "I" in due time.
+| 12  |Japan Traffic Signal - XO = Code will shift to "O" in due time.
+| 13  |Japan Traffic Signal - X = Vessels shall not proceed, except a vessel
+|     |which receives the direction from the competent authority.
+|14-31|Reserved
+|===========================================================================
 
 ==== Text description (broadcast) ====
 
