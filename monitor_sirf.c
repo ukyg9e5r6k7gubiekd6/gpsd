@@ -661,7 +661,11 @@ static int sirf_command(char line[])
 	putbyte(buf, 23, 0x0c);
 	putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
 	(void)monitor_control_send(buf, 25);
-	subframe_enabled = !subframe_enabled;
+	/*
+	 * The subframe_enabled off because we're counting on receipt of
+	 * a subframe packet to turn it on if the command succeeds.
+	 */
+	subframe_enabled = false;
 	return COMMAND_MATCH;
 
     case 'M':			/* static navigation */

@@ -227,7 +227,7 @@ static void monitor_dump_send(void)
 #ifdef ALLOW_CONTROLSEND
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if (controlfd == -1)
+    if ((controlfd == -1) || (session.gpsdata.dev.path[0] == '\0'))
 	return false;
     else {
 	int savefd;
@@ -266,7 +266,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 
 static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if (controlfd == -1)
+    if ((controlfd == -1) || (session.gpsdata.dev.path[0] == '\0'))
 	return false;
     else {
 	ssize_t st;
@@ -507,8 +507,10 @@ int main(int argc, char **argv)
 	     */
 	    (void)strlcpy(session.gpsdata.dev.path, source.device,
 			  sizeof(session.gpsdata.dev.path));
-	} else
+	} else {
 	    (void)gps_send(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
+	    session.gpsdata.dev.path[0] = '\0';
+	}
 	serial = false;
     } else {
 	(void)strlcpy(session.gpsdata.dev.path, argv[optind],
