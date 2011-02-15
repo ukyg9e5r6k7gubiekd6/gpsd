@@ -910,7 +910,7 @@ different widths for the latitude, longitude, and current-speed fields
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            |Member    |Units
-|0-5     |  6 |Message Type           |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type           |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator       |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI            |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Sequence Number        |seqno     |Unsigned integer 0-3
@@ -939,27 +939,6 @@ different widths for the latitude, longitude, and current-speed fields
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
-==== IMO236 Extended Ship Static and Voyage Related Data ====
-
-This message should be used by a ship to report the height over keel.
-
-A message 6 subtype. DAC = 001 FID = 15 in <<IMO236>>.  Fixed length, 72 bits.
-Deprecated in <<IMO289>>.
-
-[frame="topbot",options="header"]
-|==============================================================================
-|Field   |Len |Description          |Member    |Units
-|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
-|6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
-|8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
-|38-39   |  2 |Spare                |          |Not used
-|40-55   | 16 |DAC/FID              |          |DAC = 001 FID = 15
-|55-66   | 11 |Air Draught          |airdraught|Unsigned integer, height in m
-|        |    |                     |          |0 = N/A (default)
-|        |    |                     |          |2047 = >= 2047 m
-|67-71   |  5 |Spare                |          |Not used
-|==============================================================================
-
 ==== IMO236 Number of persons on board ====
 
 This message should be used by a ship to report the number of persons
@@ -972,7 +951,7 @@ Deprecated in <<IMO289>>.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |Units
-|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Spare                |          |Not used
@@ -983,9 +962,11 @@ Deprecated in <<IMO289>>.
 |69-71   |  3 |Spare                |          |Not used
 |==============================================================================
 
-Note that though this is a message 6 subtype, there is no destination address.
-A strikeout in <<IMO236>> suggests that this was originally a subtype of 8.
-It would be good defensive implementation for a decoder to accept either.
+Note that though this is a message 6 subtype and descrubed in
+<<IMO236>> with the attribute "addressed", there is no destination
+address.  A strikeout in <<IMO236>> suggests that this was originally
+a subtype of 8.  It would be good defensive implementation for a
+decoder to accept either.
 
 ==== IMO289 Number of persons on board ====
 
@@ -996,7 +977,7 @@ A message 6 subtype. DAC = 001 FID = 23 in <<IMO289>>. Fixed length, 136 bits.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |Units
-|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Sequence Number      |seqno     |Unsigned integer 0-3
@@ -1022,7 +1003,7 @@ with a different layout, deprecated in <<IMO289>>.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |Units
-|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
 |8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
 |38-39   |  2 |Sequence Number      |seqno     |Unsigned integer 0-3
@@ -1452,6 +1433,27 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |457-461 |  5 |To hour                 |thour     |0-23, 24=N/A (default)
 |462-467 |  6 |To minute               |tminute   |0-59, 60=N/A (default)
 |468-471 |  4 |Spare                   |          |Not used
+|==============================================================================
+
+==== IMO236 Extended Ship Static and Voyage Related Data ====
+
+This message should be used by a ship to report the height over keel.
+
+A message 8 subtype. DAC = 001 FID = 15 in <<IMO236>>.  Fixed length, 72 bits.
+Deprecated in <<IMO289>>.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member    |Units
+|0-5     |  6 |Message Type         |type      |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator     |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare                |          |Not used
+|40-55   | 16 |DAC/FID              |          |DAC = 001 FID = 15
+|55-66   | 11 |Air Draught          |airdraught|Unsigned integer, height in m
+|        |    |                     |          |0 = N/A (default)
+|        |    |                     |          |2047 = >= 2047 m
+|67-71   |  5 |Spare                |          |Not used
 |==============================================================================
 
 ==== VTS-Generated/Synthetic targets ====
