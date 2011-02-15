@@ -1522,6 +1522,151 @@ via the Message Linkage ID field.
 
 There is an equivalent subtype of message 6 that is an addressed description.
 
+==== IMO289 Extended Ship Static and Voyage Related Data ====
+
+This message should be used by a ship to report the height over keel.
+
+A message 8 subtype. DAC = 001 FID = 24 in <<IMO289>>.  Fixed length, 360 bits.
+Replaces a deprecated trial message from <<IMO236>>.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description            |Member        |Units
+|0-5     |  6 |Message Type           |type          |Unsigned integer: 8
+|6-7     |  2 |Repeat Indicator       |repeat        |As in CNB
+|8-37    | 30 |Source MMSI            |mmsi          |Unsigned integer: 9 digits
+|38-39   |  2 |Spare                  |              |Not used
+|40-55   | 16 |DAC/FID                |              |DAC = 001 FID = 24
+|56-65   | 10 |Message Linkage ID     |linkage       |Unsigned integer
+|66-78   | 13 |Air Draught            |airdraught    |Unsigned int, in 0.1m
+|        |    |                       |              |1-81.9 m.
+|        |    |                       |              |0 = N/A (default)
+|        |    |                       |              |81.91 = >= 81.91 m
+|79-108  | 30 |Last Port Of Call      |lastport      |5 6-bit chars, UN locode
+|109-138 | 30 |Next Port Of Call      |nextport      |5 6-bit chars, UN locode
+|139-168 | 30 |Second Port Of Call    |secondport    |5 6-bit chars, UN locode
+|169-170 |  2 |AIS Class A            |ais_state     |SOLAS status
+|171-172 |  2 |Automatic Tracking Aid |ata_state     |SOLAS status
+|173-174 |  2 |BNWAS                  |bnwas_state   |SOLAS status
+|175-176 |  2 |ECDIS Back-up          |ecdisb_state  |SOLAS status
+|177-178 |  2 |Paper Nautical Chart   |chart_state   |SOLAS status
+|179-180 |  2 |Echo sounder           |sounder_state |SOLAS status
+|181-182 |  2 |Electronic plotting aid|epaid_state   |SOLAS status
+|183-184 |  2 |Emergency steering gear|steer_state   |SOLAS status
+|185-186 |  2 |GNSS                   |gnss_state    |SOLAS status
+|187-188 |  2 |Gyro compass           |gyro_state    |SOLAS status
+|189-190 |  2 |LRIT                   |lrit_state    |SOLAS status
+|191-192 |  2 |Magnetic compass       |magcomp_state |SOLAS status
+|193-194 |  2 |NAVTEX                 |navtex_state  |SOLAS status
+|195-196 |  2 |Radar (ARPA)           |arpa_state    |SOLAS status
+|197-198 |  2 |Radar (S-band)         |sband_state   |SOLAS status
+|199-200 |  2 |Radar (X-band)         |xband_state   |SOLAS status
+|201-202 |  2 |Radio HF               |hfradio_state |SOLAS status
+|203-204 |  2 |Radio INMARSAT         |inmarsat_state|SOLAS status
+|205-206 |  2 |Radio MF               |mfradio_state |SOLAS status
+|207-208 |  2 |Radio VHF              |vhfradio_state|SOLAS status
+|209-210 |  2 |Speed Log over ground  |grndlog_state |SOLAS status
+|211-212 |  2 |Speed Log through water|waterlog_state|SOLAS status
+|213-214 |  2 |THD                    |thd_state     |SOLAS status
+|215-216 |  2 |Track control system   |tcs_state     |SOLAS status
+|217-218 |  2 |VDR/S-VDR              |vdr_state     |SOLAS status
+|219-220 |  2 |Reserved               |              |Not used
+|221-224 |  4 |Ice Class              |iceclass      |See below
+|225-242 | 18 |Shaft Horsepower       |horsepower    |Total ship HP, 1hp units
+|        |    |                       |              |262,142 = >= 262,142hp
+|        |    |                       |              |262,143 = N/A (default)
+|243-254 | 12 |VHF Working Channel    |vhfchan       |Channel number
+|        |    |                       |              |0 = N/A (default)
+|255-296 | 42 |Lloyd's Ship Type      |lshiptype     |7 six-bit characters
+|297-314 | 18 |Gross Tonnage          |tonnage       |0-262,141
+|        |    |                       |              |262,142 = >= 262,142hp
+|        |    |                       |              |262,143 = N/A (default)
+|315-316 |  2 |Laden or Ballast       |lading        |0 = N/A (default)
+|        |    |                       |              |1 = Laden
+|        |    |                       |              |2 = Ballast
+|        |    |                       |              |3 = Not in use
+|317-318 |  2 |Heavy Fuel Oil Bunkered|heavyoil      |0 = N/A (default)
+|        |    |                       |              |1 = No
+|        |    |                       |              |2 = Yes
+|        |    |                       |              |3 = Not in use
+|319-320 |  2 |Light Fuel Oil Bunkered|lightoil      |0 = N/A (default)
+|        |    |                       |              |1 = No
+|        |    |                       |              |2 = Yes
+|        |    |                       |              |3 = Not in use
+|321-322 |  2 |Diesel Oil Bunkered    |dieseloil     |0 = N/A (default)
+|        |    |                       |              |1 = No
+|        |    |                       |              |2 = Yes
+|        |    |                       |              |3 = Not in use
+|323-336 | 14 |Total Bunker Oil       |totaloil      |0-16381 in tonnes
+|        |    |                       |              |16382 = >= 16382 tonnes
+|        |    |                       |              |16382 = N/A (default)
+|337-349 | 13 |Number of persons      |persons       |0 = N/A (default)
+|        |    |                       |              |1-8190
+|        |    |                       |              |8191 = >= 8191
+|350-359 | 10 |Spare                  |              |Not used
+|==============================================================================
+
+The special value of 81.91 for air draught is probably a drafting
+error in <<IMO289>>, as the scaled field does not have the precision
+required to represent it. The actual special value is unknown.
+
+The 2-bit _state fields describe the operational state of various sorts of
+SOLAS-required navigational equipment.  GNSS systems may include GPS, Loran-C, or GLONASS. BNWAS is the Bridge Navigational Watch Alarm System.  THD is a 
+Transmitting Heading Device.  Paper Nautical Chart state is officially 
+"ECDIS/Paper Nautical Chart" state in <<IMO289>>.  Status codes should be 
+interpreted according to the following table:
+
+.Extended Ship Static and Voyage Related Data: SOLAS Status
+[width="50%",frame="topbot",options="header"]
+|=============================================================================
+|Code |Meaning
+|0    |Not available ore requested (default)
+|1    |Equipment operational
+|2    |Equipment not operational
+|3    |No data (equipment may or may not be on board/or its status is unknown)
+|=============================================================================
+
+.Extended Ship Static and Voyage Related Data: Ice Class
+[width="50%",frame="topbot",options="header"]
+|=============================================================================
+|Code |Meaning
+|0    |Not classified
+|1    |IACS PC 1
+|2    |IACS PC 2
+|3    |IACS PC 3
+|4    |IACS PC 4
+|5    |IACS PC 5
+|6    |IACS PC 6 / FSICR IA Super / RS Arc5
+|7    |IACS PC 7 / FSICR IA / RS Arc4
+|8    |FSICR IB / RS Ice3
+|9    |FSICR IC / RS Ice2
+|10   |RS Ice1
+|11-14|Reserved for future use
+|15   |Not available = default
+|=============================================================================
+
+ACS = International Association of Classification Societies
+
+PC = Polar Class. For further details, see IACS Req. 2007 Requirements
+concerning POLAR CLASS and MSC/Circ.1056 and MEPC/Circ.399 on
+Guidelines for ships operating in Arctic ice-covered waters.
+
+FSICR = Finnish-Swedish Ice Class Rules. For further details, see
+Finnish Maritime Administration's Bulletin No.10/10.12.2008 Ice class
+regulations 2008 (Finnish-Swedish ice class rules). Note: Authorized
+classification society equivalents for the Finnish-Swedish Ice Class
+Rules should also be recognized, as issued in the Finnish Maritime
+Administration's Bulletin No.4/2.4.2007 (as amended). Both bulletins
+can be found at www.fma.fi.
+
+RS = Russian Maritime Register of Shipping. For further details see
+Rules for the classification and construction of seagoing ships,
+Edition 2008.
+
+VHF channel number is encoded according to Recommendation ITU-R M.1084.
+
+The lshiptype field uses Lloyd's Register STATCODE 5 encoding.
+
 ==== Meteorological and Hydrological Data (IMO289) ===
 
 A message 8 subtype. DAC = 001 FID = 31. Fixed length, 360 bits.
@@ -2575,6 +2720,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 6(1/32)| lon, lat, cdir, cspeed        |
 | 8(1/11)| lon, lat                      | preciptype
 | 8(1/17)| lon, lat                      |
+| 8(1/27)| airdraught                    | iceclass
 | 8(1/31)| lon, lat                      | preciptype
 | 9      | alt, speed                    | -
 | 17-18  | lon, lat                      | -
