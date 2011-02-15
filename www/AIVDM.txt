@@ -1455,11 +1455,9 @@ Deprecated in <<IMO289>>.
 
 ==== VTS-Generated/Synthetic targets ====
 
-A message 8 subtype. DAC = 001 FID = 17. Variable length: 176-556 bits.
-This message is laid out identically in <<IMO236>> and <<IMO289>>, but
-both give the maximum length as 536. This is inconsistent with the actual
-sum of the field lengths at maximum extent, which is 556.  In <<IMO236>>
-it is titled "Pseudo-AIS Targets".
+A message 8 subtype. DAC = 001 FID = 17. Variable length: 176-536
+bits.  This message is laid out identically in <<IMO236>> and
+<<IMO289>>.  In <<IMO236>> it is titled "Pseudo-AIS Targets".
 
 [frame="topbot",options="header"]
 |==============================================================================
