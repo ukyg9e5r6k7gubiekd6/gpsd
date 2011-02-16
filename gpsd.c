@@ -1312,84 +1312,6 @@ static void pseudonmea_report(struct subscriber_t *sub,
     }
 }
 
-static void json_inner_report(gps_mask_t changed,
-			      struct gps_data_t *datap,
-			      struct policy_t *policy,
-			      /*@out@*/char *buf, size_t buflen)
-/* report the session state in JSON */
-{
-    buf[0] = '\0';
- 
-    if ((changed & REPORT_IS) != 0) {
-	json_tpv_dump(datap, buf+strlen(buf), buflen-strlen(buf));
-    }
-
-    if ((changed & NOISE_IS) != 0) {
-	json_noise_dump(datap, buf+strlen(buf), buflen-strlen(buf));
-    }
-
-    if ((changed & SATELLITE_IS) != 0) {
-	json_sky_dump(datap, buf+strlen(buf), buflen-strlen(buf));
-    }
-
-    if ((changed & SUBFRAME_IS) != 0) {
-	json_subframe_dump(datap, buf+strlen(buf), buflen-strlen(buf));
-    }
-
-#ifdef COMPASS_ENABLE
-    if ((changed & ATT_IS) != 0) {
-	json_att_dump(datap, buf+strlen(buf), buflen-strlen(buf));
-    }
-#endif /* COMPASS_ENABLE */
-
-#ifdef RTCM104V2_ENABLE
-    if ((changed & RTCM2_IS) != 0) {
-	json_rtcm2_dump(&datap->rtcm2, datap->dev.path,
-			buf+strlen(buf), buflen-strlen(buf));
-    }
-#endif /* RTCM104V2_ENABLE */
-
-#ifdef AIVDM_ENABLE
-    if ((changed & AIS_IS) != 0) {
-	json_aivdm_dump(&datap->ais, datap->dev.path,
-			policy->scaled,
-			buf+strlen(buf), buflen-strlen(buf));
-    }
-#endif /* AIVDM_ENABLE */
-}
-
-static void json_report(struct subscriber_t *sub,
-			  gps_mask_t changed,
-			  struct gps_device_t *device)
-/* report in JSON format to a subscriber */
-{
-    char buf[GPS_JSON_RESPONSE_MAX * 4];
-
-    json_inner_report(changed, 
-		      &device->gpsdata, &sub->policy, 
-		      buf, sizeof(buf));
-    if (buf[0] != '\0')
-	(void)throttled_write(sub, buf, strlen(buf));	
-
-#ifdef TIMING_ENABLE
-    if (buf[0] != '\0' && sub->policy.timing) {
-	(void)snprintf(buf, sizeof(buf),
-		       "{\"class\":\"TIMING\","
-		       "\"tag\":\"%s\",\"len\":%d,"
-		       "\"xmit\":%lf,\"recv\":%lf,"
-		       "\"decode\":%lf,"
-		       "\"emit\":%lf}\r\n",
-		       device->gpsdata.tag,
-		       (int)device->packet.outbuflen,
-		       device->d_xmit_time,
-		       device->d_recv_time,
-		       device->d_decode_time,
-		       timestamp());
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-#endif /* TIMING_ENABLE */
-}
-
 static void consume_packets(struct gps_device_t *device)
 /* consume and report packets from a specified device */
 {
@@ -1540,7 +1462,33 @@ static void consume_packets(struct gps_device_t *device)
 			pseudonmea_report(sub, changed, device);
 
 		    if (sub->policy.json)
-			json_report(sub, changed, device);
+		    {
+			char buf[GPS_JSON_RESPONSE_MAX * 4];
+
+			json_data_report(changed, 
+					 &device->gpsdata, &sub->policy, 
+					 buf, sizeof(buf));
+			if (buf[0] != '\0')
+			    (void)throttled_write(sub, buf, strlen(buf));	
+
+#ifdef TIMING_ENABLE
+			if (buf[0] != '\0' && sub->policy.timing) {
+			    (void)snprintf(buf, sizeof(buf),
+					   "{\"class\":\"TIMING\","
+					   "\"tag\":\"%s\",\"len\":%d,"
+					   "\"xmit\":%lf,\"recv\":%lf,"
+					   "\"decode\":%lf,"
+					   "\"emit\":%lf}\r\n",
+					   device->gpsdata.tag,
+					   (int)device->packet.outbuflen,
+					   device->d_xmit_time,
+					   device->d_recv_time,
+					   device->d_decode_time,
+					   timestamp());
+			    (void)throttled_write(sub, buf, strlen(buf));
+			}
+#endif /* TIMING_ENABLE */
+		    }
 		}
 	    }
 	    /*@+nullderef@*/

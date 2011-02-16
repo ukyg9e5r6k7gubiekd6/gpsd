@@ -1793,5 +1793,51 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 }
 #endif /* COMPASS_ENABLE */
 
+void json_data_report(gps_mask_t changed,
+		 struct gps_data_t *datap,
+		 struct policy_t *policy,
+		 /*@out@*/char *buf, size_t buflen)
+/* report a session state in JSON */
+{
+    buf[0] = '\0';
+ 
+    if ((changed & REPORT_IS) != 0) {
+	json_tpv_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & NOISE_IS) != 0) {
+	json_noise_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & SATELLITE_IS) != 0) {
+	json_sky_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & SUBFRAME_IS) != 0) {
+	json_subframe_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+#ifdef COMPASS_ENABLE
+    if ((changed & ATT_IS) != 0) {
+	json_att_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* COMPASS_ENABLE */
+
+#ifdef RTCM104V2_ENABLE
+    if ((changed & RTCM2_IS) != 0) {
+	json_rtcm2_dump(&datap->rtcm2, datap->dev.path,
+			buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* RTCM104V2_ENABLE */
+
+#ifdef AIVDM_ENABLE
+    if ((changed & AIS_IS) != 0) {
+	json_aivdm_dump(&datap->ais, datap->dev.path,
+			policy->scaled,
+			buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* AIVDM_ENABLE */
+}
+
 
 /* gpsd_json.c ends here */
