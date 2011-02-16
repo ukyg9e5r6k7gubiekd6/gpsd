@@ -403,12 +403,12 @@ void json_watch_dump(const struct policy_t *ccp,
     /*@+compdef@*/
 }
 
-void json_subframe_dump(const struct gps_device_t *device,
+void json_subframe_dump(const struct gps_data_t *datap,
 			/*@out@*/ char buf[], size_t buflen)
 {
     size_t len = 0;
-    const struct subframe_t *subframe = &device->gpsdata.subframe;
-    const bool scaled = device->gpsdata.policy.scaled;
+    const struct subframe_t *subframe = &datap->subframe;
+    const bool scaled = datap->policy.scaled;
  
     /* system message is 24 chars, but they could ALL require escaping,
      * like \uXXXX for each char */
@@ -416,7 +416,7 @@ void json_subframe_dump(const struct gps_device_t *device,
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"device\":\"%s\","
 		   "\"tSV\":%u,\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
-		   device->gpsdata.dev.path,
+		   datap->dev.path,
 		   (unsigned int)subframe->tSVID,
 		   (unsigned int)subframe->TOW17,
 		   (unsigned int)subframe->subframe_num,
