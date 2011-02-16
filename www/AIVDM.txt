@@ -1204,7 +1204,7 @@ the cargotype is 5 = MARPOL Annex II).
 ==== IMO 289 Route Information (addressed) ====
 
 The content of this message is a time and a list of waypoints describing a
-course.
+course. It has a broadcast equivalent that is a message 8 subtype.
 
 A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 
@@ -1231,7 +1231,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |126-143 | 18 |Duration          |duration  |Minutes from start time
 |        |    |                  |          |0 = cancel route
 |        |    |                  |          |262,143 = not available = default
-|144-148 |  5 |                  |waycount  |Waypoint count (1-6)
+|144-148 |  5 |                  |waycount  |Waypoint count (1-16)
 |        |    |                  |          |Values 17-31 are not used
 |149-176 | 28 |Longitude         |lon       |Signed: unit minutes * 0.001
 |        |    |                  |          |181000 = N/A (default)
@@ -1240,6 +1240,9 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |        |    |                  |          |91000 = N/A (default)
 |        |    |                  |          |N positive, S negative
 |==============================================================================
+
+The final pair of fields in the table above is a waypoint.  The message may
+end with 1 to 16 waypoints.
 
 .Route Information: Route type codes
 [width="50%",frame="topbot",options="header"]
@@ -1692,6 +1695,48 @@ length: 360 bits.
 |     |which receives the direction from the competent authority.
 |14-31|Reserved
 |===========================================================================
+
+==== Route Information (broadcast) ====
+
+The content of this message is a time and a list of waypoints describing a
+course.  It has an addressed equivalent that is a message 6 subtype.
+
+A message 6 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description       |Member    |Units
+|0-5     |  6 |Message Type      |type      |Unsigned integer: 6
+|6-7     |  2 |Repeat Indicator  |repeat    |As in Common Navigation Block
+|8-37    | 30 |Source MMSI       |mmsi      |Unsigned integer: 9 digits
+|38-39   |  2 |Spare             |          |Not used
+|40-55   | 16 |DAC/FID           |          |DAC = 001 FID = 27
+|56-65   | 10 |Message Linkage ID|linkage   |Unsigned integer
+|66-68   |  3 |Sender Class      |sender    |0 = ship (default), 1 = authority
+|        |    |                  |          |27 = reserved for future use
+|69-73   |  5 |Route Type        |rtype     |See below
+|74-77   |  4 |Start month       |month     |1-12, 0=N/A (default)
+|78-82   |  5 |Start day         |day       |1-31, 0=N/A (default)
+|83-87   |  5 |Start hour        |hour      |0-23, 24=N/A (default)
+|88-93   |  6 |Start minute      |minute    |0-59, 60=N/A (default)
+|94-111  | 18 |Duration          |duration  |Minutes from start time
+|        |    |                  |          |0 = cancel route
+|        |    |                  |          |262,143 = not available = default
+|112-116 |  5 |                  |waycount  |Waypoint count (1-16)
+|        |    |                  |          |Values 17-31 are not used
+|117-144 | 28 |Longitude         |lon       |Signed: unit minutes * 0.001
+|        |    |                  |          |181000 = N/A (default)
+|        |    |                  |          |E positive, W negative
+|145-171 | 27 |Latitude          |lat       |Signed: unit minutes * 0.001
+|        |    |                  |          |91000 = N/A (default)
+|        |    |                  |          |N positive, S negative
+|==============================================================================
+
+The final pair of fields in the table above is a waypoint.  The message may
+end with 1 to 16 waypoints.
+
+For interpretation of the Route Type field, see the table under the "Route
+Information (addressed)" message (DAC=1, FID=28).
 
 ==== Text description (broadcast) ====
 
