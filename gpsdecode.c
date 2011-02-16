@@ -360,7 +360,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 
 /*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE * fpin, FILE * fpout)
-/* RTCM or AIS packets on fpin to dump format on fpout */
+/* sensor data on fpin to dump format on fpout */
 {
     struct gps_packet_t lexer;
 #ifdef RTCM104V2_ENABLE

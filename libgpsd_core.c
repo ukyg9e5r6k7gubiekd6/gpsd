@@ -667,6 +667,31 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 /*@+mustfreefresh +type +unrecog@*/
 #endif /* PPS_ENABLE */
 
+void gpsd_clear(struct gps_device_t *session)
+{
+    session->gpsdata.online = timestamp();
+#ifdef SIRF_ENABLE
+    session->driver.sirf.satcounter = 0;
+#endif /* SIRF_ENABLE */
+    packet_init(&session->packet);
+    gpsd_report(LOG_INF,
+		"gpsd_activate(): opened GPS (fd %d)\n",
+		session->gpsdata.gps_fd);
+    // session->gpsdata.online = 0;
+    session->gpsdata.fix.mode = MODE_NOT_SEEN;
+    session->gpsdata.status = STATUS_NO_FIX;
+    session->gpsdata.fix.track = NAN;
+    session->gpsdata.separation = NAN;
+    session->mag_var = NAN;
+    session->releasetime = 0;
+    session->getcount = 0;
+
+    /* clear the private data union */
+    memset(&session->driver, '\0', sizeof(session->driver));
+
+    session->opentime = timestamp();
+}
+
 /*@ -branchstate @*/
 int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
@@ -750,25 +775,7 @@ int gpsd_activate(struct gps_device_t *session)
 	gpsd_report(LOG_PROG, "no probe matched...\n");
       foundit:
 #endif /* NON_NMEA_ENABLE */
-	session->gpsdata.online = timestamp();
-#ifdef SIRF_ENABLE
-	session->driver.sirf.satcounter = 0;
-#endif /* SIRF_ENABLE */
-	packet_init(&session->packet);
-	gpsd_report(LOG_INF,
-		    "gpsd_activate(): opened GPS (fd %d)\n",
-		    session->gpsdata.gps_fd);
-	// session->gpsdata.online = 0;
-	session->gpsdata.fix.mode = MODE_NOT_SEEN;
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.track = NAN;
-	session->gpsdata.separation = NAN;
-	session->mag_var = NAN;
-	session->releasetime = 0;
-	session->getcount = 0;
-
-	/* clear the private data union */
-	memset(&session->driver, '\0', sizeof(session->driver));
+	gpsd_clear(session);
 	/*
 	 * We might know the device's type, but we shoudn't assume it has
 	 * retained its settings.  A revert hook might well have undone
@@ -779,8 +786,6 @@ int gpsd_activate(struct gps_device_t *session)
 	    && session->device_type->event_hook != NULL)
 	    session->device_type->event_hook(session, event_reactivate);
     }
-
-    session->opentime = timestamp();
     return session->gpsdata.gps_fd;
 }
 
