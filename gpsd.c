@@ -1312,6 +1312,52 @@ static void pseudonmea_report(struct subscriber_t *sub,
     }
 }
 
+static void json_inner_report(gps_mask_t changed,
+			      struct gps_data_t *datap,
+			      struct policy_t *policy,
+			      /*@out@*/char *buf, size_t buflen)
+/* report the session state in JSON */
+{
+    buf[0] = '\0';
+ 
+    if ((changed & REPORT_IS) != 0) {
+	json_tpv_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & NOISE_IS) != 0) {
+	json_noise_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & SATELLITE_IS) != 0) {
+	json_sky_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & SUBFRAME_IS) != 0) {
+	json_subframe_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+#ifdef COMPASS_ENABLE
+    if ((changed & ATT_IS) != 0) {
+	json_att_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* COMPASS_ENABLE */
+
+#ifdef RTCM104V2_ENABLE
+    if ((changed & RTCM2_IS) != 0) {
+	json_rtcm2_dump(&datap->rtcm2, datap->dev.path,
+			buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* RTCM104V2_ENABLE */
+
+#ifdef AIVDM_ENABLE
+    if ((changed & AIS_IS) != 0) {
+	json_aivdm_dump(&datap->ais, datap->dev.path,
+			policy->scaled,
+			buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* AIVDM_ENABLE */
+}
+
 static void json_report(struct subscriber_t *sub,
 			  gps_mask_t changed,
 			  struct gps_device_t *device)
@@ -1319,60 +1365,11 @@ static void json_report(struct subscriber_t *sub,
 {
     char buf[GPS_JSON_RESPONSE_MAX * 4];
 
-    buf[0] = '\0';
-    if ((changed & REPORT_IS) != 0) {
-	json_tpv_dump(&device->gpsdata,
+    json_inner_report(changed, 
+		      &device->gpsdata, &sub->policy, 
 		      buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-
-    if ((changed & NOISE_IS) != 0) {
-	json_noise_dump(&device->gpsdata,
-		      buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-
-    if ((changed & SATELLITE_IS) != 0) {
-	json_sky_dump(&device->gpsdata,
-		      buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-    /*
-     * Subframe reporting works a bit differently because
-     * it has to be enabled at device level in order for
-     * *any* subscriber to see it, but *not all* subscribers
-     * necessarily want it.  So we leave it up to the device
-     * drivers to decide whether to turn subframe reporting on,
-     * and just pass the through here.
-     */
-    if ((changed & SUBFRAME_IS) != 0) {
-	json_subframe_dump(&device->gpsdata, buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-#ifdef COMPASS_ENABLE
-    if ((changed & ATT_IS) != 0) {
-	json_att_dump(&device->gpsdata,
-		      buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-#endif /* COMPASS_ENABLE */
-#ifdef RTCM104V2_ENABLE
-    if ((changed & RTCM2_IS) != 0) {
-	json_rtcm2_dump(&device->gpsdata.rtcm2, 
-			device->gpsdata.dev.path,
-			buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-#endif /* RTCM104V2_ENABLE */
-#ifdef AIVDM_ENABLE
-    if ((changed & AIS_IS) != 0) {
-	json_aivdm_dump(&device->gpsdata.ais,
-			device->gpsdata.dev.path,
-			sub->policy.scaled,
-			buf, sizeof(buf));
-	(void)throttled_write(sub, buf, strlen(buf));
-    }
-#endif /* AIVDM_ENABLE */
+    if (buf[0] != '\0')
+	(void)throttled_write(sub, buf, strlen(buf));	
 
 #ifdef TIMING_ENABLE
     if (buf[0] != '\0' && sub->policy.timing) {
