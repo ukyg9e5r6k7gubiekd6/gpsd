@@ -465,7 +465,8 @@ serial data stream which is a word boundary.
 described above, except that they are wrapped in a single JSON
 object per message and appear as attributes of that object.  Arrays of
 satellite, station, and constellation statistics become arrays of
-JSON sub-objects.</para>
+JSON sub-objects. Each entence will also have a "device" field
+containing the pathname of the originating device.</para>
 
 <para>(One exception: The zcount field included in the Sager-format
 per-satellite reports in type 1 and 9 messages is omitted from the 

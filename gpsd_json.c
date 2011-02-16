@@ -708,8 +708,8 @@ void json_subframe_dump(const struct gps_data_t *datap,
 }
 
 #if defined(RTCM104V2_ENABLE)
-void json_rtcm2_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
-		     size_t buflen)
+void json_rtcm2_dump(const struct rtcm2_t *rtcm, const char *device, 
+		     /*@out@*/ char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
     /*@-mustfreefresh@*/
@@ -723,8 +723,12 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 
     unsigned int n;
 
-    (void)snprintf(buf, buflen,
-		   "{\"class\":\"RTCM2\",\"type\":%u,\"station_id\":%u,\"zcount\":%0.1f,\"seqnum\":%u,\"length\":%u,\"station_health\":%u,",
+    (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",");
+    if (device != NULL)
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"device\":\"%s\",", device);
+    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		   "\"type\":%u,\"station_id\":%u,\"zcount\":%0.1f,\"seqnum\":%u,\"length\":%u,\"station_health\":%u,",
 		   rtcm->type, rtcm->refstaid, rtcm->zcount, rtcm->seqnum,
 		   rtcm->length, rtcm->stathlth);
 

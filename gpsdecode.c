@@ -381,7 +381,7 @@ static void decode(FILE * fpin, FILE * fpout)
 	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
 	    if (json)
-		json_rtcm2_dump(&rtcm2, buf, sizeof(buf));
+		json_rtcm2_dump(&rtcm2, NULL, buf, sizeof(buf));
 	    else
 		rtcm2_sager_dump(&rtcm2, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
@@ -438,7 +438,7 @@ static void encode(FILE * fpin, FILE * fpout)
 	if ((gpsdata.set & RTCM2_SET) != 0) {
 	    /* this works */
 	    char outbuf[BUFSIZ];
-	    json_rtcm2_dump(&gpsdata.rtcm2, outbuf, sizeof(outbuf));
+	    json_rtcm2_dump(&gpsdata.rtcm2, NULL, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
 	if ((gpsdata.set & AIS_SET) != 0) {

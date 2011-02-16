@@ -1358,8 +1358,9 @@ static void json_report(struct subscriber_t *sub,
 #endif /* COMPASS_ENABLE */
 #ifdef RTCM104V2_ENABLE
     if ((changed & RTCM2_IS) != 0) {
-	json_rtcm2_dump(&device->gpsdata.rtcm2, buf,
-			sizeof(buf));
+	json_rtcm2_dump(&device->gpsdata.rtcm2, 
+			device->gpsdata.dev.path,
+			buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }
 #endif /* RTCM104V2_ENABLE */
