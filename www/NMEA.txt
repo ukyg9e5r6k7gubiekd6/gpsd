@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.7, Jan 2011
+v2.8, Feb 2011
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -449,6 +449,8 @@ Field Number:
 14. F0 Clock Parameter
 15. F1 Clock Parameter
 16. Checksum
+
+Fields 5 through 15 are dumped as raw hex.
 
 Example: $GPALM,1,1,15,1159,00,441d,4e,16be,fd5e,a10c9f,4a2da4,686e81,58cbe1,0a4,001*5B
 
