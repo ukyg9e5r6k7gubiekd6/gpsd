@@ -300,6 +300,7 @@ static struct fixsource_t source;
 static int socket_mainloop(void)
 {
     fd_set fds;
+    unsigned int flags = WATCH_ENABLE;
 
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
@@ -308,7 +309,6 @@ static int socket_mainloop(void)
 	exit(1);
     }
 
-    unsigned int flags = WATCH_ENABLE;
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);

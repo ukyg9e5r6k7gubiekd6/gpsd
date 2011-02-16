@@ -258,19 +258,19 @@ static void gpsd_binary_almanac_dump(struct gps_device_t *session,
     if ( session->gpsdata.subframe.is_almanac ) {
 	(void)snprintf(bufp, len,
 			"$GPALM,1,1,%02d,%04d,%02x,%04x,%02x,%04x,%04x,%05x,%06x,%06x,%06x,%03x,%03x",
-			session->gpsdata.subframe.sub5.almanac.sv,
-			session->context->gps_week % 1024,
-			session->gpsdata.subframe.sub5.almanac.svh,
-			session->gpsdata.subframe.sub5.almanac.e,
-			session->gpsdata.subframe.sub5.almanac.toa,
-			session->gpsdata.subframe.sub5.almanac.deltai,
-			session->gpsdata.subframe.sub5.almanac.Omegad,
-			session->gpsdata.subframe.sub5.almanac.sqrtA,
-			session->gpsdata.subframe.sub5.almanac.omega,
-			session->gpsdata.subframe.sub5.almanac.Omega0,
-			session->gpsdata.subframe.sub5.almanac.M0,
-			session->gpsdata.subframe.sub5.almanac.af0,
-			session->gpsdata.subframe.sub5.almanac.af1);
+		       (int)session->gpsdata.subframe.sub5.almanac.sv,
+		       (int)session->context->gps_week % 1024,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.svh,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.e,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.toa,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.deltai,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.Omegad,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.sqrtA,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.omega,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.Omega0,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.M0,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.af0,
+		       (unsigned int)session->gpsdata.subframe.sub5.almanac.af1);
 	nmea_add_checksum(bufp);
     }
 }

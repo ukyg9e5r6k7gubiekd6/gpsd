@@ -736,6 +736,7 @@ int main(int argc, char *argv[])
     struct timeval timeout;
     fd_set rfds;
     int data;
+    unsigned int flags = WATCH_ENABLE;
 
     /*@ -observertrans @*/
     switch (gpsd_units()) {
@@ -854,7 +855,6 @@ int main(int argc, char *argv[])
 
     status_timer = time(NULL);
 
-    unsigned int flags = WATCH_ENABLE;
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);

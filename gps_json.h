@@ -26,7 +26,7 @@ int json_watch_read(const char *, /*@out@*/struct policy_t *,
 int json_device_read(const char *, /*@out@*/struct devconfig_t *, 
 		     /*@null@*/const char **);
 void json_version_dump(/*@out@*/char *, size_t);
-void json_aivdm_dump(const struct ais_t *, const char *, bool, 
+void json_aivdm_dump(const struct ais_t *, /*@null@*/const char *, bool, 
 		     /*@out@*/char *, size_t);
 int json_rtcm2_read(const char *, char *, size_t, struct rtcm2_t *, 
 		    /*@null@*/const char **);

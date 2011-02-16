@@ -708,8 +708,9 @@ void json_subframe_dump(const struct gps_data_t *datap,
 }
 
 #if defined(RTCM104V2_ENABLE)
-void json_rtcm2_dump(const struct rtcm2_t *rtcm, const char *device, 
-		     /*@out@*/ char buf[], size_t buflen)
+void json_rtcm2_dump(const struct rtcm2_t *rtcm, 
+		     /*@null@*/const char *device, 
+		     /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
     /*@-mustfreefresh@*/
@@ -835,8 +836,9 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm, const char *device,
 
 #if defined(AIVDM_ENABLE)
 
-void json_aivdm_dump(const struct ais_t *ais, const char *device, bool scaled,
-		     /*@out@*/ char *buf, size_t buflen)
+void json_aivdm_dump(const struct ais_t *ais, 
+		     /*@null@*/const char *device, bool scaled,
+		     /*@out@*/char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX * 2 + 1];
     char buf2[JSON_VAL_MAX * 2 + 1];
