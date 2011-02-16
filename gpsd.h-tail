@@ -620,6 +620,7 @@ extern char /*@observer@*/ *netlib_sock2ip(int);
 
 extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern void nmea_subframe_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
 extern void ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_alloc(struct gps_context_t *);

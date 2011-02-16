@@ -1288,14 +1288,24 @@ static void pseudonmea_report(struct subscriber_t *sub,
 
 	gpsd_report(LOG_PROG, "data mask is %s\n",
 		    gpsd_maskdump(device->gpsdata.set));
+
 	if ((changed & REPORT_IS) != 0) {
 	    nmea_tpv_dump(device, buf, sizeof(buf));
-	    gpsd_report(LOG_IO, "<= GPS (binary1) %s: %s\n",
+	    gpsd_report(LOG_IO, "<= GPS (binary tpv) %s: %s\n",
 			device->gpsdata.dev.path, buf);
 	    (void)throttled_write(sub, buf, strlen(buf));
-	} else if ((changed & SATELLITE_IS) != 0) {
+	}
+
+	if ((changed & SATELLITE_IS) != 0) {
 	    nmea_sky_dump(device, buf, sizeof(buf));
-	    gpsd_report(LOG_IO, "<= GPS (binary2) %s: %s\n",
+	    gpsd_report(LOG_IO, "<= GPS (binary sky) %s: %s\n",
+			device->gpsdata.dev.path, buf);
+	    (void)throttled_write(sub, buf, strlen(buf));
+	}
+
+	if ((changed & SUBFRAME_IS) != 0) {
+	    nmea_subframe_dump(device, buf, sizeof(buf));
+	    gpsd_report(LOG_IO, "<= GPS (binary subframe) %s: %s\n",
 			device->gpsdata.dev.path, buf);
 	    (void)throttled_write(sub, buf, strlen(buf));
 	}

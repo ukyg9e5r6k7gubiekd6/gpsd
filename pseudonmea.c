@@ -252,6 +252,29 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
     }
 }
 
+static void gpsd_binary_almanac_dump(struct gps_device_t *session,
+				     char bufp[], size_t len)
+{
+    if ( session->gpsdata.subframe.is_almanac ) {
+	(void)snprintf(bufp, len,
+			"$GPALM,1,1,%02d,%04d,%02x,%04x,%02x,%04x,%04x,%05x,%06x,%06x,%06x,%03x,%03x",
+			session->gpsdata.subframe.sub5.almanac.sv,
+			session->context->gps_week % 1024,
+			session->gpsdata.subframe.sub5.almanac.svh,
+			session->gpsdata.subframe.sub5.almanac.e,
+			session->gpsdata.subframe.sub5.almanac.toa,
+			session->gpsdata.subframe.sub5.almanac.deltai,
+			session->gpsdata.subframe.sub5.almanac.Omegad,
+			session->gpsdata.subframe.sub5.almanac.sqrtA,
+			session->gpsdata.subframe.sub5.almanac.omega,
+			session->gpsdata.subframe.sub5.almanac.Omega0,
+			session->gpsdata.subframe.sub5.almanac.M0,
+			session->gpsdata.subframe.sub5.almanac.af0,
+			session->gpsdata.subframe.sub5.almanac.af1);
+	nmea_add_checksum(bufp);
+    }
+}
+
 /*@-compdef -mustdefine@*/
 /* *INDENT-OFF* */
 void nmea_tpv_dump(struct gps_device_t *session,
@@ -280,6 +303,15 @@ void nmea_sky_dump(struct gps_device_t *session,
     bufp[0] = '\0';
     if ((session->gpsdata.set & SATELLITE_IS) != 0)
 	gpsd_binary_satellite_dump(session, bufp + strlen(bufp),
+				   len - strlen(bufp));
+}
+
+void nmea_subframe_dump(struct gps_device_t *session,
+		   /*@out@*/ char bufp[], size_t len)
+{
+    bufp[0] = '\0';
+    if ((session->gpsdata.set & SUBFRAME_IS) != 0)
+	gpsd_binary_almanac_dump(session, bufp + strlen(bufp),
 				   len - strlen(bufp));
 }
 
