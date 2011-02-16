@@ -40,6 +40,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
     }
 }
 
+#ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
     (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
@@ -355,6 +356,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
     /*@ +formatcode @*/
     (void)strlcat(buf, "\r\n", buflen);
 }
+#endif
 
 /*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE * fpin, FILE * fpout)
@@ -393,6 +395,7 @@ static void decode(FILE * fpin, FILE * fpout)
 	    rtcm3_dump(&rtcm3, stdout);
 	}
 #endif
+#ifdef AIVDM_ENABLE
 	else if (lexer.type == AIVDM_PACKET) {
 	    if (verbose >= 1)
 		(void)fputs((char *)lexer.outbuffer, stdout);
@@ -405,8 +408,8 @@ static void decode(FILE * fpin, FILE * fpout)
 		    json_aivdm_dump(&ais, NULL, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
-
 	    /*@ +uniondef */
+#endif /* AIVDM_ENABLE */
 	}
     }
 }
@@ -435,17 +438,21 @@ static void encode(FILE * fpin, FILE * fpout)
 			  status, json_error_string(status), lineno);
 	    exit(1);
 	}
+#ifdef RTCM104V2_ENABLE
 	if ((gpsdata.set & RTCM2_SET) != 0) {
 	    /* this works */
 	    char outbuf[BUFSIZ];
 	    json_rtcm2_dump(&gpsdata.rtcm2, NULL, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
+#endif
+#ifdef AIVDM_ENABLE
 	if ((gpsdata.set & AIS_SET) != 0) {
 	    char outbuf[BUFSIZ];
 	    json_aivdm_dump(&gpsdata.ais, NULL, false, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
+#endif /* AIVDM_ENABLE */
     }
 }
 
