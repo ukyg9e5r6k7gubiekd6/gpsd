@@ -151,6 +151,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     /*@ +compmempass @*/
 }
 
+/*@-compdestroy@*/
 void gps_context_init(struct gps_context_t *context)
 {
     /* *INDENT-OFF* */
@@ -185,6 +186,7 @@ void gps_context_init(struct gps_context_t *context)
     /* *INDENT-ON* */
     (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
 }
+/*@+compdestroy@*/
 
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	       char *device)

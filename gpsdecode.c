@@ -358,7 +358,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 }
 #endif
 
-/*@ -compdestroy -compdef -usedef @*/
+/*@ -compdestroy -compdef -usedef -uniondef @*/
 static void decode(FILE * fpin, FILE * fpout)
 /* sensor data on fpin to dump format on fpout */
 {
@@ -412,7 +412,7 @@ static void decode(FILE * fpin, FILE * fpout)
 	}
     }
 }
-/*@ +compdestroy +compdef +usedef @*/
+/*@ +compdestroy +compdef +usedef +uniondef @*/
 
 /*@ -compdestroy @*/
 static void encode(FILE * fpin, FILE * fpout)
