@@ -1649,7 +1649,8 @@ a restricted feature set.</para>
 <para>AIS packets are dumped as JSON objects with class "AIS".  Each
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
-dumped in scaled or unscaled form. Other fields have names and types
+dumped in scaled or unscaled form. It will also contain a "device" field
+naming the data source.  Other fields have names and types
 as specified in the <ulink
 url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO Protocol
 Decoding</ulink> document; each message field table may be directly

@@ -402,7 +402,7 @@ static void decode(FILE * fpin, FILE * fpout)
 		if (!json)
 		    aivdm_csv_dump(&ais, buf, sizeof(buf));
 		else
-		    json_aivdm_dump(&ais, scaled, buf, sizeof(buf));
+		    json_aivdm_dump(&ais, NULL, scaled, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
 
@@ -443,7 +443,7 @@ static void encode(FILE * fpin, FILE * fpout)
 	}
 	if ((gpsdata.set & AIS_SET) != 0) {
 	    char outbuf[BUFSIZ];
-	    json_aivdm_dump(&gpsdata.ais, false, outbuf, sizeof(outbuf));
+	    json_aivdm_dump(&gpsdata.ais, NULL, false, outbuf, sizeof(outbuf));
 	    (void)fputs(outbuf, fpout);
 	}
     }

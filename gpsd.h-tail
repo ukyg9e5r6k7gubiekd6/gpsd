@@ -655,8 +655,6 @@ extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 extern bool aivdm_decode(const char *, size_t, 
 			 struct aivdm_context_t [], 
 			 struct ais_t *);
-extern void  json_aivdm_dump(const struct ais_t *, bool, 
-			     /*@out@*/char *, size_t);
 extern gps_mask_t processMTK3301(int c UNUSED, 
 				 char *field[], struct gps_device_t *session);
 

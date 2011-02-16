@@ -831,7 +831,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm, /*@out@*/ char buf[],
 
 #if defined(AIVDM_ENABLE)
 
-void json_aivdm_dump(const struct ais_t *ais, bool scaled,
+void json_aivdm_dump(const struct ais_t *ais, const char *device, bool scaled,
 		     /*@out@*/ char *buf, size_t buflen)
 {
     char buf1[JSON_VAL_MAX * 2 + 1];
@@ -1032,9 +1032,12 @@ void json_aivdm_dump(const struct ais_t *ais, bool scaled,
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
 #define JSON_BOOL(x)	((x)?"true":"false")
-    (void)snprintf(buf, buflen,
-		   "{\"class\":\"AIS\",\"type\":%u,\"repeat\":%u,"
-		   "\"mmsi\":%u,\"scaled\":%s,",
+    (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
+    if (device != NULL)
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"device\":\"%s\",", device);
+    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		   "\"type\":%u,\"repeat\":%u,\"mmsi\":%u,\"scaled\":%s,",
 		   ais->type, ais->repeat, ais->mmsi, JSON_BOOL(scaled));
     /*@ -formatcode -mustfreefresh @*/
     switch (ais->type) {

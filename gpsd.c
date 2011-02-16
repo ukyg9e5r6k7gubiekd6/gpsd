@@ -1366,6 +1366,7 @@ static void json_report(struct subscriber_t *sub,
 #ifdef AIVDM_ENABLE
     if ((changed & AIS_IS) != 0) {
 	json_aivdm_dump(&device->gpsdata.ais,
+			device->gpsdata.dev.path,
 			sub->policy.scaled,
 			buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
