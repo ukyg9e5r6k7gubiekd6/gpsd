@@ -1346,9 +1346,7 @@ static void json_report(struct subscriber_t *sub,
      * and just pass the through here.
      */
     if ((changed & SUBFRAME_IS) != 0) {
-	json_subframe_dump(&device->gpsdata.subframe,
-			sub->policy.scaled,
-			buf, sizeof(buf));
+	json_subframe_dump(device, buf, sizeof(buf));
 	(void)throttled_write(sub, buf, strlen(buf));
     }
 #ifdef COMPASS_ENABLE
