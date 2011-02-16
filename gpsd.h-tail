@@ -642,6 +642,7 @@ extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
 
 /* application interface */
+extern void gps_context_init(struct gps_context_t *context);
 extern void gpsd_init(struct gps_device_t *, 
 		      struct gps_context_t *, 
 		      /*@null@*/char *);

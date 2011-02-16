@@ -127,37 +127,7 @@ static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = false;
 static jmp_buf restartbuf;
-
-/* *INDENT-OFF* */
-/*@ -initallelements -nullassign -nullderef @*/
-struct gps_context_t context = {
-    .valid	    = 0,
-    .readonly	    = false,
-    .sentdgps	    = false,
-    .netgnss_service  = netgnss_none,
-    .fixcnt	    = 0,
-    .dsock	    = -1,
-    .netgnss_privdata = NULL,
-    .rtcmbytes	    = 0,
-    .rtcmbuf	    = {'\0'},
-    .rtcmtime	    = 0,
-    .start_time     = 0,
-    .leap_seconds   = 0,
-    .gps_week	    = 0,
-    .gps_tow        = 0,
-    .century	    = 0,
-    .rollovers      = 0,
-#ifdef NTPSHM_ENABLE
-    .enable_ntpshm  = false,
-    .shmTime	    = {0},
-    .shmTimeInuse   = {0},
-# ifdef PPS_ENABLE
-    .shmTimePPS	    = false,
-# endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
-};
-/*@ +initallelements +nullassign +nullderef @*/
-/* *INDENT-ON* */
+struct gps_context_t context;
 
 static volatile sig_atomic_t signalled;
 
@@ -1539,6 +1509,7 @@ int main(int argc, char *argv[])
     (void)setlocale(LC_NUMERIC, "C");
     debuglevel = 0;
     gpsd_hexdump_level = 0;
+    gps_context_init(&context);
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
 	case 'D':

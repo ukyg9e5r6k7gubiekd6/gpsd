@@ -151,6 +151,40 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     /*@ +compmempass @*/
 }
 
+void gps_context_init(struct gps_context_t *context)
+{
+    /* *INDENT-OFF* */
+    /*@ -initallelements -nullassign -nullderef @*/
+    struct gps_context_t nullcontext = {
+	.valid	    = 0,
+	.readonly	    = false,
+	.sentdgps	    = false,
+	.netgnss_service  = netgnss_none,
+	.fixcnt	    = 0,
+	.dsock	    = -1,
+	.netgnss_privdata = NULL,
+	.rtcmbytes	    = 0,
+	.rtcmbuf	    = {'\0'},
+	.rtcmtime	    = 0,
+	.start_time     = 0,
+	.leap_seconds   = 0,
+	.gps_week	    = 0,
+	.gps_tow        = 0,
+	.century	    = 0,
+	.rollovers      = 0,
+#ifdef NTPSHM_ENABLE
+	.enable_ntpshm  = false,
+	.shmTime	    = {0},
+	.shmTimeInuse   = {0},
+# ifdef PPS_ENABLE
+	.shmTimePPS	    = false,
+# endif /* PPS_ENABLE */
+#endif /* NTPSHM_ENABLE */
+    };
+    /*@ +initallelements +nullassign +nullderef @*/
+    /* *INDENT-ON* */
+    (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
+}
 
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	       char *device)
