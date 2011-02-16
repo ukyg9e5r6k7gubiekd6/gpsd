@@ -362,58 +362,56 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 static void decode(FILE * fpin, FILE * fpout)
 /* sensor data on fpin to dump format on fpout */
 {
-    struct gps_packet_t lexer;
-#ifdef RTCM104V2_ENABLE
-    struct rtcm2_t rtcm2;
-#endif
-#ifdef RTCM104V3_ENABLE
-    struct rtcm3_t rtcm3;
-#endif
-    struct ais_t ais;
-    struct aivdm_context_t aivdm[AIVDM_CHANNELS];
-    char buf[BUFSIZ];
+    struct gps_device_t session;
+    struct gps_context_t context;
+    struct policy_t policy;
+    char buf[GPS_JSON_RESPONSE_MAX * 4];
 
-    memset(&aivdm, '\0', sizeof(aivdm));
-    packet_reset(&lexer);
+    gps_context_init(&context);
+    gpsd_init(&session, &context, NULL);
+    gpsd_clear(&session);
+    memset(&policy, '\0', sizeof(policy));
+    session.gpsdata.gps_fd = fileno(fpin);
+    policy.json = json;
 
-    while (packet_get(fileno(fpin), &lexer) > 0) {
-	if (lexer.type == COMMENT_PACKET)
+    for (;;)
+    {
+	gps_mask_t changed = gpsd_poll(&session);
+
+	if (changed == ERROR_IS || changed == NODATA_IS)
+	    break;
+	else if ((changed & REPORT_IS) != 0)
 	    continue;
+	/*
+	 * We really ought to get rid of the non-JSON cases someday.
+	 * They're not used for production, only regression testing.
+	 */
+	else if (json) {
+	    json_data_report(changed, 
+			     &session.gpsdata, &policy, 
+			     buf, sizeof(buf));
+	    (void)fputs(buf, fpout);	
 #ifdef RTCM104V2_ENABLE
-	else if (lexer.type == RTCM2_PACKET) {
-	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
-	    if (json)
-		json_rtcm2_dump(&rtcm2, NULL, buf, sizeof(buf));
-	    else
-		rtcm2_sager_dump(&rtcm2, buf, sizeof(buf));
-	    (void)fputs(buf, fpout);
-	}
+	} else if (session.packet.type == RTCM2_PACKET) {
+	    rtcm2_sager_dump(&session.gpsdata.rtcm2, buf, sizeof(buf));
+	    (void)fputs(buf, fpout);	
 #endif
 #ifdef RTCM104V3_ENABLE
-	else if (lexer.type == RTCM3_PACKET) {
-	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
-	    rtcm3_dump(&rtcm3, stdout);
-	}
+	} else if (session.packet.type == RTCM3_PACKET) {
+	    rtcm3_dump(&session.gpsdata.rtcm3, fpout);
 #endif
 #ifdef AIVDM_ENABLE
-	else if (lexer.type == AIVDM_PACKET) {
+	} else if (session.packet.type == AIVDM_PACKET) {
 	    if (verbose >= 1)
-		(void)fputs((char *)lexer.outbuffer, stdout);
-	    /*@ -uniondef */
-	    if (aivdm_decode
-		((char *)lexer.outbuffer, lexer.outbuflen, aivdm, &ais)) {
-		if (!json)
-		    aivdm_csv_dump(&ais, buf, sizeof(buf));
-		else
-		    json_aivdm_dump(&ais, NULL, scaled, buf, sizeof(buf));
+		(void)fputs((char *)session.packet.outbuffer, stdout);
+	    if ((changed & AIS_IS)!=0) {
+		aivdm_csv_dump(&session.gpsdata.ais, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
-	    /*@ +uniondef */
-#endif /* AIVDM_ENABLE */
+#endif
 	}
     }
 }
-
 /*@ +compdestroy +compdef +usedef @*/
 
 /*@ -compdestroy @*/
