@@ -5,6 +5,13 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 
+.PHONY: print_libgps_VERSION_CURRENT \
+        print_libgps_VERSION_REVISION \
+        print_libgps_VERSION_AGE \
+        print_libgps_SONAME \
+        print_libgps_VERSION \
+	pydoc
+
 # The deheader production uses this to pass in stop-on-error flags
 CFLAGS += $(MORECFLAGS) -DSYSCONFDIR=\"$(sysconfdir)\"
 
@@ -248,7 +255,7 @@ timebase.h: $(srcdir)/leapsecond.py $(srcdir)/leapseconds.cache
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
-# build without Internet access. This production is never called by hand.
+# build without Internet access.
 leapseconds.cache: $(srcdir)/leapsecond.py
 	$(PYTHON) $(srcdir)/leapsecond.py -f leapseconds.cache
 
@@ -962,10 +969,4 @@ release-tag:
 #
 ship: testregress clean dist upload-ftp release-tag
 
-
-.PHONY: print_libgps_VERSION_CURRENT \
-        print_libgps_VERSION_REVISION \
-        print_libgps_VERSION_AGE \
-        print_libgps_SONAME \
-        print_libgps_VERSION \
-	pydoc
+# End
