@@ -380,7 +380,7 @@ static void decode(FILE * fpin, FILE * fpout)
 
 	if (changed == ERROR_IS || changed == NODATA_IS)
 	    break;
-	else if ((changed & REPORT_IS) != 0)
+	else if ((changed & (REPORT_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
 	    continue;
 	/*
 	 * We really ought to get rid of the non-JSON cases someday.

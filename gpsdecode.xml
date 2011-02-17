@@ -16,7 +16,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsdecode</refname>
-<refpurpose>decode RTCM or AIVDM streams into a readable format</refpurpose>
+<refpurpose>decode GPS, RTCM or AIVDM streams into a readable format</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -34,13 +34,18 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para>This tool is a decoder/encoder for various binary packet formats
+<para>This tool is a decoder/encoder for NMEA and various binary packet formats
 associated with GPS and differential-correction services.  It produces
 a text dump on standard output from binary on standard input, or
 binary packets on standard output from text on standard input, and
 aims to be 100% information-preserving in both directions.  As well as
 data, the decoder also prints decoder status messages to standard
 error as necessary.</para>
+
+<para>NMEA and GPS binary formats can be decoded to JSON (the same
+format used by
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>)
+but not encoded.</para>
 
 <para>Two of the supported formats are RTCM 2 and 3, a pair of obscure
 and complicated serial protocol used for broadcasting pseudorange
@@ -50,7 +55,8 @@ mode of the tool with
 to examine RTCM feeds from DGPSIP servers or Ntrip broadcasters. The
 decoder dump formats for RTCM2 are described in
 <citerefentry><refentrytitle>rtcm</refentrytitle><manvolnum>5</manvolnum></citerefentry>;
-these lines go to standard output.</para>
+these lines go to standard output. RTCM2 can be decoded and encoded; RTCM3 
+can only be decoded, and support is presently incomplete.</para>
 
 <para>Another supported format is AIVDM.  This is the sentence format
 used by the marine Automatic Identification System.  This can be
