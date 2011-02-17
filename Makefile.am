@@ -1,4 +1,3 @@
-
 # Automake description for gpsd
 #
 # This file is Copyright (c) 2010 by the GPSD project
@@ -52,7 +51,7 @@ endif
 bin_PROGRAMS = $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 
-# \todo Add programs to TESTS if not already. used.
+# to-do: Add programs to TESTS if not already used.
 check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_geoid test_json
 if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
