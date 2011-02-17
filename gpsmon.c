@@ -134,16 +134,71 @@ void monitor_fixframe(WINDOW * win)
  *
  ******************************************************************************/
 
+static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
+{
+    const char *sp;
+
+    buf2[0] = '\0';
+    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') 
+	  || (sp[0] == '\r' && sp[2] == '\0'))
+	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	else
+	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
+			   0x00ff & (unsigned)*sp);
+}
+
 void gpsd_report(int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
+    char buf[BUFSIZ]; 
+    char buf2[BUFSIZ];
+    char *err_str;
+
+    switch ( errlevel ) {
+    case LOG_ERROR:
+	err_str = "ERROR: ";
+	break;
+    case LOG_SHOUT:
+	err_str = "SHOUT: ";
+	break;
+    case LOG_WARN:
+	err_str = "WARN: ";
+	break;
+    case LOG_INF:
+	err_str = "INFO: ";
+	break;
+    case LOG_DATA:
+	err_str = "DATA: ";
+	break;
+    case LOG_PROG:
+	err_str = "PROG: ";
+	break;
+    case LOG_IO:
+	err_str = "IO: ";
+	break;
+    case LOG_SPIN:
+	err_str = "SPIN: ";
+	break;
+    case LOG_RAW:
+	err_str = "RAW: ";
+	break;
+    default:
+	err_str = "UNK: ";
+    }
+
+    (void)strlcpy(buf, "gpsd:", BUFSIZ);
+    (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
     if (errlevel <= debuglevel && packetwin != NULL) {
 	va_list ap;
 	va_start(ap, fmt);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+	va_end(ap);
+	visibilize(buf2, sizeof(buf2), buf);
 	if (!curses_active)
-	    (void)vprintf(fmt, ap);
+	    (void)fputs(buf2, stdout);
 	else
-	    (void)wprintw(packetwin, (char *)fmt, ap);
+	    (void)waddstr(packetwin, buf2);
 	va_end(ap);
     }
 }
