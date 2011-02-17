@@ -122,9 +122,10 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
 		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"device\":\"%s\",", gpsdata->dev.path);
+    if (gpsdata->dev.path[0] != '\0')
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"device\":\"%s\",", gpsdata->dev.path);
     if (isnan(gpsdata->fix.time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -213,9 +214,10 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
 		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"device\":\"%s\",", gpsdata->dev.path);
+    if (gpsdata->dev.path[0] != '\0')
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"device\":\"%s\",", gpsdata->dev.path);
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"time\":\"%s\",",
@@ -254,9 +256,10 @@ void json_sky_dump(const struct gps_data_t *datap,
 		   replylen - strlen(reply),
 		   "\"tag\":\"%s\",",
 		   datap->tag[0] != '\0' ? datap->tag : "-");
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"device\":\"%s\",", datap->dev.path);
+    if (datap->dev.path[0] != '\0')
+	(void)snprintf(reply + strlen(reply),
+		       replylen - strlen(reply),
+		       "\"device\":\"%s\",", datap->dev.path);
     if (isnan(datap->skyview_time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
