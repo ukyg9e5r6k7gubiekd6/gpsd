@@ -147,5 +147,9 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 
 if __name__ == "__main__":
     import sys
-    d = GPSDictionary()
-    d.HTMLDump(sys.stdout)
+    try:
+        d = GPSDictionary()
+        d.HTMLDump(sys.stdout)
+    except ConfigParser.Error, e:
+        print >>sys.stderr, sys.argv[0]+":", e._Error__message
+        raise SystemExit, 1

@@ -882,7 +882,7 @@ www/writing-a-driver.html: www/writing-a-driver.xml
 www/index.html: www/index.html.in
 	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <www/index.html.in >www/index.html
 
-www/hardware.html: www/hardware-head.html gpscap.ini www/hardware-tail.html
+www/hardware.html: gpscap.py www/hardware-head.html gpscap.ini www/hardware-tail.html
 	(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html
 
 www/performance/performance.html: www/performance/performance.xml
