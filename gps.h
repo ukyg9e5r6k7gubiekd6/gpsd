@@ -46,7 +46,7 @@ extern "C" {
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
-#define MAXCHANNELS	32	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
+#define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define GPS_PATH_MAX	64	/* dev files usually have short names */
 #define GPS_BUFFER_MAX  3072	/* enough for two maximun-size JSON objects */
