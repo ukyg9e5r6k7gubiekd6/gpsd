@@ -1440,12 +1440,15 @@ different binary layout.
 |110-114 |  5 |Hour               |hour        |0-23, 24=N/A (default)
 |115-120 |  6 |Minute             |minute      |0-59, 60=N/A (default)
 |121-127 |  7 |Average Wind Speed |wspeed      |10-min avg wind speed, knots
+|        |    |                   |            |127 = N/A (default)
 |128-134 |  7 |Gust Speed         |wgust       |10-min max wind speed, knots
 |135-143 |  9 |Wind Direction     |wdir        |0-359, degrees fom true north
+|        |    |                   |            |360 = N/A (default)
 |144-152 |  9 |Wind Gust Direction|wgustdir    |0-359, degrees fom true north
 |153-163 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
 |        |    |                   |            |-60.0 to +60.0,
 |164-170 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
+|        |    |                   |            |127 = N/A (default)
 |171-180 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
 |181-189 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
 |190-191 |  2 |Pressure Tendency  |pressuretend|0 = steady
@@ -1694,6 +1697,89 @@ length: 360 bits.
 | 13  |Japan Traffic Signal - X = Vessels shall not proceed, except a vessel
 |     |which receives the direction from the competent authority.
 |14-31|Reserved
+|===========================================================================
+
+==== Weather observation report from ship ====
+
+There are two variants of this message.  They are distinguashed by bit 56,
+the WMO bit.  Field layouts after that bit vary dependiong on it.
+
+A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 21. Fixed
+length: 360 bits.
+
+.Weather observation report from ship: Non-WMO variant
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len  |Description           |Member    |Units
+|0-5     |   6 |Message Type          |type      |Unsigned integer: 8
+|6-7     |   2 |Repeat Indicator      |repeat    |As in Common Navigation Block
+|8-37    |  30 |Source MMSI           |mmsi      |Unsigned integer: 9 digits
+|38-39   |   2 |Spare                 |          |Not used
+|40-55   |  16 |DAC/FID               |          |DAC = 001 FID = 29
+|56-56   |   1 |Variant               |wmo       |Always 0 in this variant
+|57-176  | 120 |Location              |location  |20 6-bit characters
+|177-201 |  25 |Longitude             |lon       |Signed: unit minutes * 0.001
+|        |     |                      |          |181000 = N/A (default)
+|202-225 |  24 |Latitude              |lat       |Signed: unit minutes * 0.001
+|        |     |                      |          |91000 = N/A (default)
+|226-230 |   5 |UTC Day               |day       |1-31, 0=N/A (default)
+|231-235 |   5 |UTC hour              |hour      |0-23, 24=N/A (default)
+|236-241 |   6 |UTC minute            |minute    |0-59, 60=N/A (default)
+|242-245 |   4 |Present Weather       |weather   |wmocode: 0-15
+|246-246 |   1 |Visibility Limit      |vislimit  |See below
+|247-253 |   7 |Horiz. Visibility     |visibility|0.0-12.6nm, units of nm * 0.1
+|        |     |                      |          |127 = N/A (default)
+|254-260 |   7 |Relative Humidity     |humidity  |0-100%, units of 1%
+|        |     |                      |          |127 = N/A (default)
+|261-267 |   7 |Average Wind Speed    |wspeed    |10-min avg wind speed, knots
+|        |     |                      |          |127 = N/A (default)
+|268-276 |   9 |Wind Direction        |wdir      |0-359, degrees fom true north
+|        |     |                      |          |360 = N/A (default)
+|277-285 |   9 |Air Pressure          |pressure  |800-1200hPa, 1hPa
+|        |     |                      |          |402 = pressure >= 1201 hPa
+|        |     |                      |          |403 - N/A (default)
+|286-289 |   4 |Pressure Tendency     |pressuretend|WMO FM13 code
+|290-300 |  11 |Air Temperature       |airtemp   |Dry bulb temperature, 0.1degC
+|        |     |                      |          |-60.0 to +60.0
+|        |     |                      |          |-1024 = N/A (default)
+|        |     |                      |          |-1024 = N/A (default)
+|301-310 |  10 |Water Temperature     |watertemp |-10.0 to 50.0 C, 0.1 deg
+|        |     |                      |          |501 = N/A (default)
+|311-316 |  6  |Wave period           |waveperiod|Seconds, 0-60, units 1s
+|        |     |                      |          |63 = N/A (default)
+|317-324 |  8  |Wave height           |waveheight|0-25m, units 0.1m
+|        |     |                      |          |255 = N/A (default)
+|325-333 |  9  |Wave direction        |wavedir   |0-359, degrees fom true north
+|        |     |                      |          |360 = N/A (default)
+|334-341 |  8  |Swell height          |swellheight|0-25m, units 0.1m
+|        |     |                      |           |255 = N/A (default)
+|342-350 |  9  |Swell direction       |swelldir   |0-359, degrees fom true north
+|        |     |                      |           |360 = N/A (default)
+|351-356 |  6  |Swell period          |swellperiod|Seconds, 0-60, units 1s
+|        |     |                      |           |63 = N/A (default)
+|357-359 |  3  |Spare                 |           |Not used
+|==============================================================================
+
+The vislimit bit, when on, indicates that the maximum range of the
+visibility equipment was reached and the visibility reading shall be
+regarded as > x.x NM.
+
+The standard (<<IMO289>>) does not list the WMO FM13 codes.
+
+.Weather observation report from ship: WMO Code 45501
+[width="50%",frame="topbot",options="header"]
+|===========================================================================
+|Code |Position Fix Type
+|  0  |Clear (no clouds at any level)
+|  1  |Cloudy
+|  2  |Rain
+|  3  |Fog
+|  4  |Snow
+|  5  |Typhoon/hurricane
+|  6  |Monsoon
+|  7  |Thunderstorm
+|  8  |N/A (default)
+| 9-15|Reserved for future use
 |===========================================================================
 
 ==== Route Information (broadcast) ====
