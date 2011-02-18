@@ -1782,6 +1782,57 @@ The standard (<<IMO289>>) does not list the WMO FM13 codes.
 | 9-15|Reserved for future use
 |===========================================================================
 
+.Weather observation report from ship: WMO variant
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len  |Description           |Member    |Units
+|0-5     |   6 |Message Type          |type      |Unsigned integer: 8
+|6-7     |   2 |Repeat Indicator      |repeat    |As in Common Navigation Block
+|8-37    |  30 |Source MMSI           |mmsi      |Unsigned integer: 9 digits
+|38-39   |   2 |Spare                 |          |Not used
+|40-55   |  16 |DAC/FID               |          |DAC = 001 FID = 29
+|56-56   |   1 |Variant               |wmo       |Always 1 in this variant
+
+|57-176  | 120 |Location              |location  |20 6-bit characters
+|177-201 |  16 |Longitude             |lon       |Unsigned: minutes * 0.01
+|        |     |                      |          |E positive, W negative
+|        |     |                      |          |Lon = (value / 100) – 180
+|        |     |                      |          |65536 = N/A (default)
+|202-225 |  15 |Latitude              |lat       |Unsigned: unit minutes * 0.01
+|        |     |                      |          |N positive, S negative
+|        |     |                      |          |Lat = (value / 100) – 90
+|        |     |                      |          |32767 = N/A (default)
+|226-230 |   4 |UTC Month             |month     |1-12, 0=N/A (default)
+|226-230 |   5 |UTC Day               |day       |1-31, 0=N/A (default)
+|231-235 |   5 |UTC hour              |hour      |0-23, 24=N/A (default)
+|236-241 |   3 |UTC minute            |minute    |0-50, 7=N/A (default)
+|        |     |                      |          |Minute = (value * 10)
+|116-127 |   7 |Course Over Ground    |course    |0-359, unit = 1 degree
+|        |     |                      |          |average over last 10 minutes.
+|116-127 |   5 |Speed Over Ground     |speed     |0-14.5m/s
+|        |     |                      |          |SOG = (value * 0.5) for 0-29
+|        |     |                      |          |30 = 15 m/s and more
+|        |     |                      |          |average over last 10 minutes.
+|        |     |                      |          |31 = N/A (default)
+|333-333 |   7 |Heading of the ship   |heading   |5-360, unit of 5 degrees
+|        |     |                      |          |HDT = (value * 5) for 1-72
+|        |     |                      |          |average over last 10 minutes.
+|        |     |                      |          |127 = N/A (default)
+|333-333 |  11 |Pressure at sea level |pressure  |90-1100 hPa
+|        |     |                      |          |P = (value/10)+900 for 0-2000
+|333-333 |  10 |Pressure Change       |pchange   |-50-+50hPa
+|        |     |                      |          |Tend = (value/10)-50 for 0-100
+|        |     |                      |          |Averaged over last 3 hours
+|        |     |                      |          |1023 = N/A (default)
+|==============================================================================
+
+NOTE: THE TABLE ABOVE IS NOT YET COMPLETE
+
+The "minute" entry actually only identifies the end of a 10-munute interval.
+
+In <<IMO289>>, the Latitude formula is given as "Lat = (value / 100) – 9000".
+This is incorrect; the decrement needs to be 90 for the range to be -90..+90.
+
 ==== Route Information (broadcast) ====
 
 The content of this message is a time and a list of waypoints describing a
