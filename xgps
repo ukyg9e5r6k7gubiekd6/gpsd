@@ -390,6 +390,8 @@ class Base:
         self.ais_latch = False
   
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        if not self.window.get_display():
+            raise Exception("Can't open display")
         self.window.set_title("xgps")
         self.window.connect("delete_event", self.delete_event)
         self.window.set_resizable(False)
