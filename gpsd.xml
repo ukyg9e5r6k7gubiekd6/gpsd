@@ -624,7 +624,7 @@ attempts to fill in other DOPs by calculating the appropriate
 determinants in a covariance matrix based on the satellite view. DOPs
 may be missing if some of these determinants are singular. It can even
 happen that the device reports an error estimate in meters when the
-correspoding DOP is unavailable; some devices use more sophisticated
+corresponding DOP is unavailable; some devices use more sophisticated
 error modeling than the covariance calculation.</para>
 
 <para>The satellite list objects have the following elements:</para>
