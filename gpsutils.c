@@ -7,6 +7,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "gpsd.h"
@@ -152,7 +153,7 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     (void)snprintf(fractstr, sizeof(fractstr), "%.2f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr + 1);
+    (void)snprintf(isotime, len, "%s%sZ", timestr, strchr(fractstr, '.'));
     return isotime;
 }
 /* *INDENT-ON* */
