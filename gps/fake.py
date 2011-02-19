@@ -89,8 +89,9 @@ WRITE_PAD = 0.001
 # CLOSE_DELAY may have no effect; Python time.time() returns a float
 # value, but it is not guaranteed by Python that the C implementation
 # underneath will return with precision finer than 1 second. (Linux
-# and *BSD return full precision.)
-CLOSE_DELAY = 0.1
+# and *BSD return full precision.) Dropping this to 0.1 has been
+# tried but caused failures.
+CLOSE_DELAY = 0.2
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
