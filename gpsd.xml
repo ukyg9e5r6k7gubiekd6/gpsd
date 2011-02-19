@@ -1242,7 +1242,8 @@ object.</para>
 	<entry>No</entry>
 	<entry>boolean</entry>
         <entry>If true, apply scaling divisors to output before
-	dumping; default is false. Applies only to AIS reports.</entry>
+	dumping; default is false. Applies only to AIS and Subframe
+	reports.</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -1262,7 +1263,8 @@ undocumented because that portion of the interface is considered
 unstable and for developer use only.</para>
 
 <para>In watcher mode, GPS reports are dumped as TPV and SKY
-responses. AIS and RTCM reporting is described in the next section.</para>
+responses. AIS, Subframe and RTCM reporting is described in the next 
+section.</para>
 
 <para>When the C client library parses a response of this kind, it
 will assert the POLICY_SET bit in the top-level set member.</para>
@@ -1661,6 +1663,26 @@ JSON object type.</para>
 <citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
 
 </refsect1>
+<refsect1 id='subframe'><title>SUBFRAME DUMP FORMATS</title>
+
+<para>Subframe support is always compiled into
+<application>gpsd</application> but many GPS do not output Subframe data
+or the <application>gpsd</application> driver may not support Subframes.
+</para>
+
+<para>Subframe packets are dumped as JSON objects with class "SUBFRAME".
+Each Subframe report object contains a "frame" field giving the subframe
+number, a "tSV" field for the transmitting satellite number, a "TOW17"
+field containing the 17 MSBs of the start of the next 12-second message
+and a "scaled" field telling whether the remainder of the fields are
+dumped in scaled or unscaled form. It will also contain a "device" field
+naming the data source.  Each SUBFRAME object will have a sub-object
+specific to that subframe page type.  Those sub-object fields have names
+and types similar to those specified in the IS-GPS-200E document; each
+message field table may be directly interpreted as a specification for
+the members of the corresponding JSON object type.</para>
+
+</refsect1>
 <refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
 
 <para><application>gpsd</application> maintains an internal list of
@@ -2049,6 +2071,13 @@ Automatic Identification System Using Time Division Multiple
 Access</citetitle>. The AIVDM/AIVDO format understood by this progeam
 is defined by IEC-PAS 61162-100, <citetitle>Maritime navigation and
 radiocommunication equipment and systems</citetitle></para>
+
+<para>Subframe data is defined by IS-GPS-200E, <citetitle>GLOBAL
+POSITIONING SYSTEM WING (GPSW) SYSTEMS ENGINEERING &amp; INTEGRATION,
+INTERFACE SPECIFICATION IS-GPS-200 Revision E</citetitle>. The format
+understood by this progeam is defined in Section 20 (Appendix II) of
+the IS-GPS-200E, <citetitle>GPS NAVIGATION DATA STRUCTURE FOR DATA,
+D(t)</citetitle></para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
