@@ -199,7 +199,8 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 	    (void)fputs(buf2, stdout);
 	else
 	    (void)waddstr(packetwin, buf2);
-	va_end(ap);
+	if (logfile != NULL)
+	    (void)fputs(buf2, logfile);
     }
 }
 
@@ -231,7 +232,7 @@ static ssize_t readpkt(void)
     if ((changed & ERROR_IS) != 0)
 	longjmp(terminate, TERM_READ_ERROR);
 
-    if (logfile != NULL) {
+    if (logfile != NULL && session.packet.outbuflen > 0) {
 	/*@ -shiftimplementation -sefparams +charint @*/
 	assert(fwrite
 	       (session.packet.outbuffer, sizeof(char),
