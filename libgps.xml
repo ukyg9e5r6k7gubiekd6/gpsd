@@ -184,8 +184,8 @@ other WATCH flags are set, this is the default.</para>
 <varlistentry>
 <term>WATCH_SCALED</term>
 <listitem>
-<para>When reporting AIS data, scale integer quantities to floats if
-they have a divisor or rendering formula associated with them.</para>
+<para>When reporting AIS or Subframe data, scale integer quantities to 
+floats if they have a divisor or rendering formula associated with them.</para>
 </listitem>
 </varlistentry>
 <varlistentry>

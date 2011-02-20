@@ -252,6 +252,8 @@ class Main(object):
         self.debug = debug
         self.speed_unit = speed_unit
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        if not self.window.get_display():
+            raise Exception("Can't open display")
         self.window.set_title('xgpsspeed')
         self.widget = Speedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
