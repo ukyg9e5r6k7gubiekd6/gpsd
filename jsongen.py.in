@@ -486,7 +486,7 @@ def string_to_specifier(strspec):
 
 if __name__ == '__main__':
     try:
-        # The --ais and --target= options are (required) placeho;lders.
+        # The --ais and --target= options are (required) placeholders.
         # In the future, this script will generate more different kinds
         # of code.
         (options, arguments) = getopt.getopt(sys.argv[1:], "g", ["ais", "target="])
@@ -507,7 +507,7 @@ if __name__ == '__main__':
 
     if not specify and (not target or not spec):
         print "jsongen.py: must specify type and target."
-        sys,exit(1)
+        raise SystemExit, 1
 
 
     if specify:
