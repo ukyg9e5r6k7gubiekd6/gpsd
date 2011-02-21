@@ -710,9 +710,6 @@ void gpsd_clear(struct gps_device_t *session)
     session->driver.sirf.satcounter = 0;
 #endif /* SIRF_ENABLE */
     packet_init(&session->packet);
-    gpsd_report(LOG_INF,
-		"gpsd_activate(): opened GPS (fd %d)\n",
-		session->gpsdata.gps_fd);
     // session->gpsdata.online = 0;
     session->gpsdata.fix.mode = MODE_NOT_SEEN;
     session->gpsdata.status = STATUS_NO_FIX;
@@ -812,6 +809,9 @@ int gpsd_activate(struct gps_device_t *session)
       foundit:
 #endif /* NON_NMEA_ENABLE */
 	gpsd_clear(session);
+	gpsd_report(LOG_INF,
+		    "gpsd_activate(): activated GPS (fd %d)\n",
+		    session->gpsdata.gps_fd);
 	/*
 	 * We might know the device's type, but we shoudn't assume it has
 	 * retained its settings.  A revert hook might well have undone
