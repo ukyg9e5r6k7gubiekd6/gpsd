@@ -161,9 +161,11 @@ void gps_context_init(struct gps_context_t *context)
 	.readonly	    = false,
 	.sentdgps	    = false,
 	.netgnss_service  = netgnss_none,
+	.ntrip_conn_state = ntrip_conn_init,
+	.ntrip_sourcetable_parse = false,
+	.ntrip_works = false,
 	.fixcnt	    = 0,
 	.dsock	    = -1,
-	.netgnss_privdata = NULL,
 	.rtcmbytes	    = 0,
 	.rtcmbuf	    = {'\0'},
 	.rtcmtime	    = 0,
@@ -732,7 +734,7 @@ int gpsd_activate(struct gps_device_t *session)
     gpsd_run_device_hook(session->gpsdata.dev.path, "ACTIVATE");
     /* special case: source may be a URI to a remote GNSS or DGPS service */
     if (netgnss_uri_check(session->gpsdata.dev.path)) {
-	session->gpsdata.gps_fd = netgnss_uri_open(session->context,
+	session->gpsdata.gps_fd = netgnss_uri_open(session,
 						   session->gpsdata.dev.path);
 	session->sourcetype = source_tcp;
 	gpsd_report(LOG_SPIN,
@@ -789,25 +791,6 @@ int gpsd_activate(struct gps_device_t *session)
     if (session->gpsdata.gps_fd < 0)
 	return -1;
     else {
-#ifdef NON_NMEA_ENABLE
-	const struct gps_type_t **dp;
-
-	/*@ -mustfreeonly @*/
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
-	    if ((*dp)->probe_detect != NULL
-		&& (*dp)->probe_detect(session) != 0) {
-		gpsd_report(LOG_PROG, "probe found %s driver...\n",
-			    (*dp)->type_name);
-		session->device_type = *dp;
-		gpsd_assert_sync(session);
-		goto foundit;
-	    }
-	}
-	/*@ +mustfreeonly @*/
-	gpsd_report(LOG_PROG, "no probe matched...\n");
-      foundit:
-#endif /* NON_NMEA_ENABLE */
 	gpsd_clear(session);
 	gpsd_report(LOG_INF,
 		    "gpsd_activate(): activated GPS (fd %d)\n",

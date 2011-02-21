@@ -184,9 +184,17 @@ struct gps_context_t {
     /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPS report? */
     enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip} netgnss_service;	/* type of GNSS service */
+    enum {
+	ntrip_conn_init,
+	ntrip_conn_sent_probe,
+	ntrip_conn_sent_get,
+	ntrip_conn_established,
+	ntrip_conn_err
+    } ntrip_conn_state; 		/* ntrip connection state for multi stage connect */
+    bool ntrip_works;			/* this marks a working connection, so we try to reconnect once */
+    bool ntrip_sourcetable_parse;		/* have we read the sourcetable header? */
     int fixcnt;				/* count of good fixes seen */
     socket_t dsock;			/* socket to DGPSIP server/Ntrip caster */
-    void *netgnss_privdata;		/* DGNSS service specific data */
     size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
@@ -567,7 +575,7 @@ extern gps_mask_t garmintxt_parse(struct gps_device_t *);
 extern gps_mask_t aivdm_parse(struct gps_device_t *);
 
 extern bool netgnss_uri_check(char *);
-extern int netgnss_uri_open(struct gps_context_t *, char *);
+extern int netgnss_uri_open(struct gps_device_t *, char *);
 extern void netgnss_report(struct gps_device_t *);
 extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 
@@ -578,7 +586,7 @@ extern int dgpsip_open(struct gps_context_t *, const char *);
 extern void dgpsip_report(struct gps_device_t *);
 extern void dgpsip_autoconnect(struct gps_context_t *, 
 			       double, double, const char *);
-extern int ntrip_open(struct gps_context_t *, char *);
+extern int ntrip_open(struct gps_device_t *, char *);
 extern void ntrip_report(struct gps_device_t *);
 
 extern void gpsd_tty_init(struct gps_device_t *);

@@ -31,19 +31,19 @@ bool netgnss_uri_check(char *name)
 
 
 /*@ -branchstate */
-int netgnss_uri_open(struct gps_context_t *context, char *netgnss_service)
+int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
 /* open a connection to a DGNSS service */
 {
 #ifdef NTRIP_ENABLE
     if (strncmp(netgnss_service, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP)) == 0)
-	return ntrip_open(context, netgnss_service + strlen(NETGNSS_NTRIP));
+	return ntrip_open(dev, netgnss_service + strlen(NETGNSS_NTRIP));
 #endif
 
     if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP)) == 0)
-	return dgpsip_open(context, netgnss_service + strlen(NETGNSS_DGPSIP));
+	return dgpsip_open(dev->context, netgnss_service + strlen(NETGNSS_DGPSIP));
 
 #ifndef REQUIRE_DGNSS_PROTO
-    return dgpsip_open(context, netgnss_service);
+    return dgpsip_open(dev->context, netgnss_service);
 #else
     gpsd_report(LOG_ERROR,
 		"Unknown or unspecified DGNSS protocol for service %s\n",

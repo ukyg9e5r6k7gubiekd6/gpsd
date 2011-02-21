@@ -588,6 +588,11 @@ static void deactivate_device(struct gps_device_t *device)
     if (device->gpsdata.gps_fd != -1) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
+	if (context.dsock == device->gpsdata.gps_fd) {
+		context.dsock = -1;
+	}
+	context.ntrip_conn_state = ntrip_conn_init;
+	context.ntrip_sourcetable_parse = false;
 	gpsd_deactivate(device);
     }
 }
@@ -1282,7 +1287,29 @@ static void consume_packets(struct gps_device_t *device)
     struct subscriber_t *sub;
 
     gpsd_report(LOG_RAW + 1, "polling %d\n",
-		device->gpsdata.gps_fd);
+	    device->gpsdata.gps_fd);
+
+    if (device->context->netgnss_service == netgnss_ntrip
+	    && device->context->ntrip_conn_state != ntrip_conn_established) {
+
+	/* the socket descriptor might change during connection */
+	if (device->gpsdata.gps_fd != -1) {
+	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+	}
+	(void)ntrip_open(device, "");
+	if (device->context->ntrip_conn_state == ntrip_conn_err) {
+	    gpsd_report(LOG_WARN,
+		    "connection to ntrip server failed\n");
+	    device->context->ntrip_conn_state = ntrip_conn_init;
+	    deactivate_device(device);
+	} else {
+	    if (device->context->ntrip_conn_state == ntrip_conn_established) {
+		device->context->dsock = device->gpsdata.gps_fd;
+	    }
+	    FD_SET(device->gpsdata.gps_fd, &all_fds);
+	}
+	return;
+    }
 
     for (fragments = 0; ; fragments++) {
 	changed = gpsd_poll(device);
@@ -1293,7 +1320,7 @@ static void consume_packets(struct gps_device_t *device)
 			device->gpsdata.dev.path,
 			gpsd_maskdump(changed));
 	    deactivate_device(device);
-	    break;
+    break;
 	} else if (changed == NODATA_IS) {
 	    /*
 	     * No data on the first fragment read means the device
@@ -1303,10 +1330,19 @@ static void consume_packets(struct gps_device_t *device)
 		gpsd_report(LOG_DATA,
 			    "%s returned zero bytes\n",
 			    device->gpsdata.dev.path);
-		if (device->zerokill)
+		if (device->zerokill) {
 		    /* failed timeout-and-reawake, kill it */
 		    deactivate_device(device);
-		else {
+		    if (device->context->ntrip_works) {
+			device->context->ntrip_works = false; // reset so we try this once only
+			if (gpsd_activate(device) < 0) {
+			    gpsd_report(LOG_WARN, "reconnect to ntrip server failed\n");
+			} else {
+			    gpsd_report(LOG_INFO, "reconnecting to ntrip server\n");
+			    FD_SET(device->gpsdata.gps_fd, &all_fds);
+			}
+		    }
+		} else {
 		    /*
 		     * Disable listening to this fd for long enough
 		     * that the buffer can fill up again.
