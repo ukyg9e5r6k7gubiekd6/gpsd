@@ -127,7 +127,7 @@ static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = false;
 static jmp_buf restartbuf;
-struct gps_context_t context;
+static struct gps_context_t context;
 
 static volatile sig_atomic_t signalled;
 
@@ -444,8 +444,8 @@ struct subscriber_t
 #define initialized_device(devp) ((devp)->context != NULL)
 #define subscribed(sub, devp)    (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0)
 
-struct gps_device_t devices[MAXDEVICES];
-struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
+static struct gps_device_t devices[MAXDEVICES];
+static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
 
 static void adjust_max_fd(int fd, bool on)
 /* track the largest fd currently in use */
