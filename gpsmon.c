@@ -62,7 +62,7 @@ static bool serial, curses_active;
 static int debuglevel = 0;
 static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
-static FILE *logfile;
+/*@null@*/ static FILE *logfile;
 static char *type_name;
 /*@ -nullassign @*/
 static const struct monitor_object_t *monitor_objects[] = {
