@@ -1141,9 +1141,9 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	const char switcher[] =
 	    { 0x10, 0x0A, 0x02, 0x26, 0x00, 0xCE, 0x10, 0x03 };
 	// Note hard-coded string length in the next line...
-	int status = (int)gpsd_write(session, switcher, sizeof(switcher));
+	ssize_t status = gpsd_write(session, switcher, sizeof(switcher));
 	/*@ -charint @*/
-	if (status == (int)sizeof(switcher)) {
+	if (status == (ssize_t)sizeof(switcher)) {
 	    gpsd_report(LOG_IO,
 			"Garmin: => GPS: turn off binary %02x %02x %02x... \n",
 			switcher[0], switcher[1], switcher[2]);
