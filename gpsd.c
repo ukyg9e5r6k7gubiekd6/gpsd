@@ -593,16 +593,18 @@ static void deactivate_device(struct gps_device_t *device)
 }
 
 /* *INDENT-OFF* */
-/*@null@*//*@observer@*/ static struct gps_device_t *find_device(const char
+/*@null@*//*@observer@*/ static struct gps_device_t *find_device(/*@null@*/const char
 								 *device_name)
 /* find the device block for an existing device name */
 {
     struct gps_device_t *devp;
 
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (allocated_device(devp)
-	    && strcmp(devp->gpsdata.dev.path, device_name) == 0)
-	    return devp;
+    {
+        if (allocated_device(devp) && NULL != device_name &&
+            strcmp(devp->gpsdata.dev.path, device_name) == 0)
+            return devp;
+    }
     return NULL;
 }
 /* *INDENT-ON* */
