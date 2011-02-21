@@ -36,7 +36,7 @@
   indicate a device switch.</para></entry>
 </row>
 <row>
-  <entry><function>void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char *device)</function></entry>
+  <entry><function>void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, const char *device)</function></entry>
   <entry><para>Copy the device name to the session data structure,
   initialise important data fields and call
   <function>gpsd_tty_init()</function>,

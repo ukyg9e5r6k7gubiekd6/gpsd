@@ -189,7 +189,7 @@ void gps_context_init(struct gps_context_t *context)
 /*@+compdestroy@*/
 
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
-	       char *device)
+	       const char *device)
 /* initialize GPS polling */
 {
     /*@ -mayaliasunique @*/
