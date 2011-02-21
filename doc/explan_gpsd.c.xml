@@ -143,7 +143,7 @@
   <entry><para>Check if we have a high enough debug level active to warrant printing out the information we are about to send to the client.</para><para>Make the actual <function>write()</function> call and if that was successful, return the counter value from that operation.</para><para>If we have suffered some kind of failure, try to analyse it.</para><para>On a short write, detach the client and return a 0.</para><para>Trap <function>EAGAIN</function> or <function>EINTR</function> and return a 0.</para><para>Trap <function>EBADF</function> or a <function>EWOULDBLOCK</function> where the client has not read data for more than a reasonable amount of time and generate a suitable report.</para><para>For all other errors, generate a general error. In these last several cases, call <function>detach_cient()</function>.</para><para>Finally, return the status (-1 in this case).</para></entry>
 </row>
 <row>
-  <entry><function>static void notify_watchers(struct gps_device_t *device, char *sentence, ...)</function></entry>
+  <entry><function>static void notify_watchers(struct gps_device_t *device, const char *sentence, ...)</function></entry>
   <entry><para>For every possible subscriber, check if the subscriber is in watcher mode and is interested in the gps device indicated in the calling parameter <function>gps_device_t</function>.</para><para>If so, send the data via a call to <function>throttled_write()</function>.</para></entry>
 </row>
 <row>

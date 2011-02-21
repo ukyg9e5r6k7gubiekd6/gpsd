@@ -563,7 +563,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
     return status;
 }
 
-static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
+static void notify_watchers(struct gps_device_t *device, const char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
     va_list ap;
