@@ -153,7 +153,7 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     (void)snprintf(fractstr, sizeof(fractstr), "%.2f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    /*@i1@*/(void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
+    /*@i2@*/(void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
     return isotime;
 }
 /* *INDENT-ON* */
