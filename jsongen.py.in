@@ -15,7 +15,7 @@ import sys, getopt
 #
 # Here is the information that makes it all work - attribute, type, and
 # defult information for all fields.  We can generate either a JSON
-# parser template spec or the C code for the correspondong dump functio
+# parser template spec or the C code for the corresponding dump functio
 # from this information. Doing it this way guarantees consistency.
 #
 ais_specs = (

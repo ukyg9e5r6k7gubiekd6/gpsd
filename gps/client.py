@@ -210,7 +210,7 @@ class dictwrapper:
     __repr__ = __str__
 
 #
-# Someday a cleaner Python iterface using this machiner will live here
+# Someday a cleaner Python iterface using this machinery will live here
 #
 
 # End
