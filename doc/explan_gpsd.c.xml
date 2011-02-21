@@ -147,7 +147,7 @@
   <entry><para>For every possible subscriber, check if the subscriber is in watcher mode and is interested in the gps device indicated in the calling parameter <function>gps_device_t</function>.</para><para>If so, send the data via a call to <function>throttled_write()</function>.</para></entry>
 </row>
 <row>
-  <entry><function>static struct gps_device_t *find_device(char *device_name)</function></entry>
+  <entry><function>static struct gps_device_t *find_device(const char *device_name)</function></entry>
   <entry><para>For every possible channel, check if the channel is allocated and if the device on the channel is the one passed to us.</para><para>If it is so, exit early and return the channel number.</para><para>If there is no match, return a NULL.</para></entry>
 </row>
 <row>
@@ -169,7 +169,7 @@
   number allocated.</para></entry>
 </row>
 <row>
-  <entry><function>static bool add_device(char *device_name)</function></entry>
+  <entry><function>static bool add_device(const char *device_name)</function></entry>
   <entry><para>Add a device to the pool of those available. If in
   nowait mode, open it immediately; otherwise initialize it and make
   it available for future watches, but don't open it yet.</para></entry>

@@ -594,7 +594,7 @@ static void deactivate_device(struct gps_device_t *device)
 
 /* *INDENT-OFF* */
 /*@ -globstate @*/
-/*@null@*//*@observer@*/ static struct gps_device_t *find_device(char
+/*@null@*//*@observer@*/ static struct gps_device_t *find_device(const char
 								 *device_name)
 /* find the device block for an existing device name */
 {
@@ -622,7 +622,7 @@ static bool open_device(struct gps_device_t *device)
 	return true;
 }
 
-static bool add_device(char *device_name)
+static bool add_device(const char *device_name)
 /* add a device to the pool; open it right away if in nowait mode */
 {
 	struct gps_device_t *devp;
