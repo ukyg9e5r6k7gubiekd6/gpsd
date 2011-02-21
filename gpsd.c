@@ -610,48 +610,40 @@ static void deactivate_device(struct gps_device_t *device)
 
 /*@ -nullret @*/
 /*@ -statictrans @*/
-static bool open_device(char *device_name)
-/* open and initialize a new device block */
+static bool open_device(struct gps_device_t *device)
 {
-    struct gps_device_t *devp;
-
-    for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	if (!allocated_device(devp)
-	    || (strcmp(devp->gpsdata.dev.path, device_name) == 0
-		&& !initialized_device(devp))) {
-	    goto found;
+	if (gpsd_activate(device) < 0) {
+		return false;
 	}
-    return false;
-  found:
-    gpsd_init(devp, &context, device_name);
-    if (gpsd_activate(devp) < 0)
-	return false;
-    FD_SET(devp->gpsdata.gps_fd, &all_fds);
-    adjust_max_fd(devp->gpsdata.gps_fd, true);
-    return true;
+	gpsd_report(LOG_INF, "device %s activated\n",
+			device->gpsdata.dev.path);
+	FD_SET(device->gpsdata.gps_fd, &all_fds);
+	adjust_max_fd(device->gpsdata.gps_fd, true);
+	return true;
 }
 
 static bool add_device(char *device_name)
 /* add a device to the pool; open it right away if in nowait mode */
 {
-    if (nowait)
-	return open_device(device_name);
-    else {
 	struct gps_device_t *devp;
+	bool ret = false;
 	/* stash devicename away for probing when the first client connects */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (!allocated_device(devp)) {
 		gpsd_init(devp, &context, device_name);
 		gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			    device_name, (int)(devp - devices));
-		devp->gpsdata.gps_fd = -1;
+		if (nowait) {
+			ret = open_device(devp);
+		} else {
+			devp->gpsdata.gps_fd = -1;
+		}
 		notify_watchers(devp,
 				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%ld}\r\n",
 				devp->gpsdata.dev.path, timestamp());
-		return true;
+		break;
 	    }
-	return false;
-    }
+	return ret;
 }
 
 /*@ +nullret @*/
@@ -663,7 +655,7 @@ static bool awaken(struct gps_device_t *device)
 {
     /* open that device */
     if (!initialized_device(device)) {
-	if (!open_device(device->gpsdata.dev.path)) {
+	if (!open_device(device)) {
 	    gpsd_report(LOG_PROG, "%s: open failed\n",
 			device->gpsdata.dev.path);
 	    free_device(device);
