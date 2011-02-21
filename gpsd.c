@@ -147,7 +147,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 
     buf2[0] = '\0';
     for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') 
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
 	  || (sp[0] == '\r' && sp[2] == '\0'))
 	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	else
@@ -1290,14 +1290,14 @@ static void consume_packets(struct gps_device_t *device)
 	if (changed == ERROR_IS) {
 	    gpsd_report(LOG_WARN,
 			"device read of %s returned error or packet sniffer failed sync (flags %s)\n",
-			device->gpsdata.dev.path, 
+			device->gpsdata.dev.path,
 			gpsd_maskdump(changed));
 	    deactivate_device(device);
 	    break;
 	} else if (changed == NODATA_IS) {
 	    /*
 	     * No data on the first fragment read means the device
-	     * fd may have been in an end-of-file condition on select. 
+	     * fd may have been in an end-of-file condition on select.
 	     */
 	    if (fragments == 0) {
 		gpsd_report(LOG_DATA,
@@ -1337,7 +1337,7 @@ static void consume_packets(struct gps_device_t *device)
 	    break;
 
 	gpsd_report(LOG_DATA,
-		    "packet from %s with %s\n", 
+		    "packet from %s with %s\n",
 		    device->gpsdata.dev.path,
 		    gpsd_maskdump(device->gpsdata.set));
 
@@ -1366,19 +1366,19 @@ static void consume_packets(struct gps_device_t *device)
 	    }
 	}
 
-	/* 
-	 * If the device provided an RTCM packet, stash it 
+	/*
+	 * If the device provided an RTCM packet, stash it
 	 * in the context structure for use as a future correction.
 	 */
 	if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
 	    if (device->packet.outbuflen > RTCM_MAX) {
-		gpsd_report(LOG_ERROR, 
+		gpsd_report(LOG_ERROR,
 			    "overlong RTCM packet (%zd bytes)\n",
 			    device->packet.outbuflen);
 	    } else {
 		context.rtcmbytes = device->packet.outbuflen;
-		memcpy(context.rtcmbuf, 
-		       device->packet.outbuffer, 
+		memcpy(context.rtcmbuf,
+		       device->packet.outbuffer,
 		       context.rtcmbytes);
 		context.rtcmtime = (double)time(NULL);
 	    }
@@ -1427,11 +1427,11 @@ static void consume_packets(struct gps_device_t *device)
 		    {
 			char buf[GPS_JSON_RESPONSE_MAX * 4];
 
-			json_data_report(changed, 
-					 &device->gpsdata, &sub->policy, 
+			json_data_report(changed,
+					 &device->gpsdata, &sub->policy,
 					 buf, sizeof(buf));
 			if (buf[0] != '\0')
-			    (void)throttled_write(sub, buf, strlen(buf));	
+			    (void)throttled_write(sub, buf, strlen(buf));
 
 #ifdef TIMING_ENABLE
 			if (buf[0] != '\0' && sub->policy.timing) {
