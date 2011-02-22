@@ -90,8 +90,13 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	FD_CLR(session->gpsdata.gps_fd, &rfds);
 
 	/*@ -usedef @*/
-	tv.tv_sec = 0;
-	tv.tv_usec = 300;
+	/*
+	 * If the timeout on this select isn't longer than the device's
+	 * cycle time, the code will be prone to flaky timing-dependent
+	 * failures.
+	 */
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
 	errno = 0;
 	if (select(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
 	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))

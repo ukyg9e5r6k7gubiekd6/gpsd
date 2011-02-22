@@ -216,7 +216,12 @@ static ssize_t readpkt(void)
     FD_SET(session.gpsdata.gps_fd, &select_set);
     if (controlfd > -1)
 	FD_SET(controlfd, &select_set);
-    timeval.tv_sec = 3;
+    /*
+     * If the timeout on this select isn't longer than the device's
+     * cycle time, the code will be prone to flaky timing-dependent
+     * failures.
+     */
+    timeval.tv_sec = 2;
     timeval.tv_usec = 0;
     if (select(session.gpsdata.gps_fd + 1, &select_set, NULL, NULL, &timeval)
 	== -1)
