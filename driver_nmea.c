@@ -72,29 +72,23 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int yy = DD(ddmmyy + 4);
     int mon = DD(ddmmyy + 2);
     int mday = DD(ddmmyy);
-    int year = session->driver.nmea.date.tm_year;
+    int year;
 
-    if (year <= 0) {
-	year = (session->context->century + yy) - 1900;
-    } else if (year % 100 != yy) {
-	/* update year */
-	if (year % 100 == 99 && yy == 0) {
-	    yy += 100;
-	    session->context->century += 100;
-	    gpsd_report(LOG_WARN, "century rollover detected.\n");
-	}
-	year = year / 100 * 100 + yy;
+    /* check for century wrap */
+    if (session->driver.nmea.date.tm_year % 100 == 99 && yy == 0) {
+	session->context->century += 100;
+	gpsd_report(LOG_WARN, "century rollover detected.\n");
     }
-    if ( (1 > year ) || (2200 < year ) ) {
-	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), bad year: %d\n",  ddmmyy, year);
-    } else if ( (1 > mon ) || (12 < mon ) ) {
+    year = (session->context->century + yy);
+
+    if ( (1 > mon ) || (12 < mon ) ) {
 	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
     } else if ( (1 > mday ) || (31 < mday ) ) {
 	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
     } else {
 	gpsd_report(LOG_DATA, "merge_ddmmyy(%s) sets year %d\n",
 		    ddmmyy, year);
-	session->driver.nmea.date.tm_year = year;
+	session->driver.nmea.date.tm_year = year - 1900;
 	session->driver.nmea.date.tm_mon = mon - 1;
 	session->driver.nmea.date.tm_mday = mday;
     }
@@ -766,7 +760,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 		gpsd_report(LOG_WARN, "ZDA year %d less than clock year, "  
 			    "probable GPS week rollover lossage\n", year);
 	    }
-	    session->driver.nmea.date.tm_year = year- 1900;
+	    session->driver.nmea.date.tm_year = year - 1900;
 	    session->driver.nmea.date.tm_mon = mon - 1;
 	    session->driver.nmea.date.tm_mday = mday;
 	    mask = TIME_IS;
