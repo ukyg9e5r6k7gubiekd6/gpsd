@@ -533,6 +533,7 @@ int main(int argc, char **argv)
     } else
 	gpsd_source_spec(NULL, &source);
 
+    gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
 
     /*@ -boolops */
