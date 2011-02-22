@@ -22,11 +22,12 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <cmdsynopsis>
   <command>gpsmon</command>  
-      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>-L </arg>
       <arg choice='opt'>-V </arg>
-      <arg>-l <replaceable>logfile</replaceable></arg>
-      <arg>-F <replaceable>control-socket</replaceable></arg>
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
+      <arg choice='opt'>-t <replaceable>driver-prefix</replaceable></arg>
       <arg choice='opt'>
 	<group>
 	  <arg choice='plain'>
@@ -108,6 +109,13 @@ with individual GPS types.</para>
 immediately on device open.  This may be useful is, for example,
 you want to capture the startup message from a device that displays
 firmware version information there.</para>
+
+<para>The -t option sets up a fallback type. Give it a string that
+is a distinguishing prefix of exactly one driver type name; this will
+be used for mode, speed, and rate switching if the driver selected
+by the packet type lacks those capabilities.  Most useful when the
+packet type is NMEA but the device is known to have a binary mode,
+such as SiRF binary.</para>
 
 <para>After startup, the top part of the screen reports the contents
 of several especially interesting packet types.  The bottom half of

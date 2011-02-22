@@ -105,7 +105,7 @@ static const struct monitor_object_t *monitor_objects[] = {
     NULL,
 };
 
-static const struct monitor_object_t **active;
+static const struct monitor_object_t **active, **fallback;
 /*@ +nullassign @*/
 
 static jmp_buf terminate;
@@ -460,13 +460,13 @@ int main(int argc, char **argv)
     fd_set select_set;
     unsigned char buf[BUFLEN];
     char line[80], *explanation;
-    int bailout = 0;
+    int bailout = 0, matches = 0;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:F:LVhl:")) != -1) {
+    while ((option = getopt(argc, argv, "D:F:LVhl:t:?")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = atoi(optarg);
@@ -474,9 +474,6 @@ int main(int argc, char **argv)
 	case 'F':
 	    controlsock = optarg;
 	    break;
-	case 'V':
-	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
-	    exit(0);
 	case 'L':		/* list known device types */
 	    (void)
 		fputs
@@ -518,6 +515,9 @@ int main(int argc, char **argv)
 		(void)fputc('\n', stdout);
 	    }
 	    exit(0);
+	case 'V':
+	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
+	    exit(0);
 	case 'l':		/* enable logging at startup */
 	    logfile = fopen(optarg, "w");
 	    if (logfile == NULL) {
@@ -525,12 +525,31 @@ int main(int argc, char **argv)
 		exit(1);
 	    }
 	    break;
+        case 't':
+	    fallback = NULL;
+	    for (active = monitor_objects; *active; active++) {
+		if (strncmp((*active)->driver->type_name, optarg, strlen(optarg)) == 0)
+		{
+		    fallback = active;
+		    matches++;
+		}
+	    }
+	    if (matches > 1) { 
+		(void)fprintf(stderr, "-T option matched more than one driver.\n");
+		exit(1);
+	    }
+	    else if (matches == 0) { 
+		(void)fprintf(stderr, "-T option didn't match any driver.\n");
+		exit(1);
+	    }
+	    active = NULL;
+	    break;
 	case 'h':
 	case '?':
 	default:
 	    (void)
 		fputs
-		("usage:  gpsmon [-?hVl] [-D debuglevel] [-F controlsock] [server[:port:[device]]]\n",
+		("usage:  gpsmon [-?hVl] [-D debuglevel] [-F controlsock] [-t type] [server[:port:[device]]]\n",
 		 stderr);
 	    exit(1);
 	}
@@ -736,14 +755,19 @@ int main(int argc, char **argv)
 			monitor_complain("No device defined yet");
 		    else if (serial) {
 			double rate = strtod(arg, NULL);
+			const struct monitor_object_t **switcher = active;
+
+			if (!(*active)->driver->rate_switcher
+			    && (*fallback)->driver->rate_switcher)
+			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
 			 */
-			if ((*active)->driver->rate_switcher) {
+			if ((*switcher)->driver->rate_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
 			    /* *INDENT-OFF* */
-			    if ((*active)->driver->rate_switcher(&session, rate)) {
+			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
 				announce_log("Rate switcher callled.");
 			    } else
 				monitor_complain("Rate not supported.");
@@ -808,13 +832,18 @@ int main(int argc, char **argv)
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
 		    else if (serial) {
+			const struct monitor_object_t **switcher = active;
+
+			if (!(*active)->driver->mode_switcher
+			    && (*fallback)->driver->mode_switcher)
+			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
 			 */
-			if ((*active)->driver->mode_switcher) {
+			if ((*switcher)->driver->mode_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    (*active)->driver->mode_switcher(&session,
+			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    announce_log("Mode switcher called");
 			    (void)tcdrain(session.gpsdata.gps_fd);
@@ -852,6 +881,11 @@ int main(int argc, char **argv)
 			unsigned int stopbits =
 			    (unsigned int)session.gpsdata.dev.stopbits;
 			char *modespec;
+			const struct monitor_object_t **switcher = active;
+
+			if (!(*active)->driver->speed_switcher
+			    && (*fallback)->driver->speed_switcher)
+			    switcher = fallback;
 
 			modespec = strchr(arg, ':');
 			/*@ +charint @*/
@@ -880,10 +914,10 @@ int main(int argc, char **argv)
 			 * in the session structure, really
 			 */
 			/* *INDENT-OFF* */
-			if ((*active)->driver->speed_switcher) {
+			if ((*switcher)->driver->speed_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
-			    if ((*active)->
+			    if ((*switcher)->
 				driver->speed_switcher(&session, speed,
 						       parity, (int)
 						       stopbits)) {
