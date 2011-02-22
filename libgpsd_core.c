@@ -402,9 +402,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
     if( 0 == getuid() ) {
         /* only root can use /var/run */
-    	strcpy( chrony_path, "/var/run/chrony");
+    	strlcpy (chrony_path, "/var/run/chrony", strlen(chrony_path));
     } else {
-    	strcpy( chrony_path, "/tmp/chrony");
+    	strlcpy (chrony_path, "/tmp/chrony", strlen(chrony_path));
     }
 
     s.sun_family = AF_UNIX;

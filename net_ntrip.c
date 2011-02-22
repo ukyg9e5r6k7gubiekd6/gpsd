@@ -477,7 +477,7 @@ int ntrip_open(struct gps_device_t *dev, char *caster)
     switch (context->ntrip_conn_state) {
 	case ntrip_conn_init:
 	    ntrip_stream.set = false;
-	    strcpy(tmp, caster);
+	    (void)strlcpy(tmp, caster, strlen(caster));
 
 	    /*@ -boolops @*/
 	    if ((amp = strchr(tmp, '@')) != NULL) {
