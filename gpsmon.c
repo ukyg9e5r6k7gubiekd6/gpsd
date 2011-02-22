@@ -287,7 +287,10 @@ static void announce_log(/*@in@*/ const char *str)
 	(void)waddstr(packetwin, str);
 	(void)wattrset(packetwin, A_NORMAL);
 	(void)wprintw(packetwin, "\n");
-    }
+   }
+   if (logfile != NULL) {
+       (void)fprintf(logfile, ">>>%s\n", str);
+   }
 }
 #endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
 
