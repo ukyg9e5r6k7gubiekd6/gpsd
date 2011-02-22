@@ -765,7 +765,7 @@ int main(int argc, char **argv)
 			double rate = strtod(arg, NULL);
 			const struct monitor_object_t **switcher = active;
 
-			if ((*fallback)->driver->rate_switcher)
+			if (fallback != NULL && (*fallback)->driver->rate_switcher != NULL)
 			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
@@ -843,7 +843,7 @@ int main(int argc, char **argv)
 		    else if (serial) {
 			const struct monitor_object_t **switcher = active;
 
-			if ((*fallback)->driver->mode_switcher)
+			if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
 			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
@@ -893,7 +893,7 @@ int main(int argc, char **argv)
 			char *modespec;
 			const struct monitor_object_t **switcher = active;
 
-			if ((*fallback)->driver->speed_switcher)
+			if (fallback != NULL && (*fallback)->driver->speed_switcher != NULL)
 			    switcher = fallback;
 
 			modespec = strchr(arg, ':');
