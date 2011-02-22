@@ -369,8 +369,8 @@ fi
 
 dnl check for Garmin Simple Text support
 AC_ARG_ENABLE(garmintxt,
-  AC_HELP_STRING([--enable-garmintxt],
-		 [enable Garmin Simple Text support]),
+  AC_HELP_STRING([--disable-garmintxt],
+		 [disable Garmin Simple Text support]),
   [ac_garmintxt=$enableval], [ac_garmintxt=yes])
 AC_MSG_CHECKING([for Garmin Simple Text support])
 if test x"$ac_garmintxt" = "xyes"; then
@@ -382,7 +382,7 @@ fi
 
 dnl check for True North support
 AC_ARG_ENABLE(tnt,
-  AC_HELP_STRING([--enable-tnt],
+  AC_HELP_STRING([--disable-tnt],
 		 [disable True North Technologies support]),
   [ac_tnt=$enableval], [ac_tnt=yes])
 AC_MSG_CHECKING([for True North support])
