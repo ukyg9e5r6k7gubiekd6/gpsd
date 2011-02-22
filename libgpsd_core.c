@@ -1420,9 +1420,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			session->device_type->type_name,
 			timestamp() - session->opentime,
 			speed);
-	    if ( 38400 > speed ) {
-		gpsd_report(LOG_WARN, "speed less than 38,400 may cause data lag and loss of functionality\n");
-	    }
 	    /*@+nullderef@*/
 	    /* fire the identified hook */
 	    if (session->device_type != NULL

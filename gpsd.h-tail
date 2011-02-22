@@ -350,6 +350,7 @@ struct gps_device_t {
     int saved_baud;
     struct gps_packet_t packet;
     int getcount;
+    int subframe_count;
     char subtype[64];			/* firmware version or subtype ID */
     double opentime;
     double releasetime;
