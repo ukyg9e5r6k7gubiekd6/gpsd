@@ -760,8 +760,7 @@ int main(int argc, char **argv)
 			double rate = strtod(arg, NULL);
 			const struct monitor_object_t **switcher = active;
 
-			if (!(*active)->driver->rate_switcher
-			    && (*fallback)->driver->rate_switcher)
+			if ((*fallback)->driver->rate_switcher)
 			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
@@ -770,10 +769,12 @@ int main(int argc, char **argv)
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
 			    /* *INDENT-OFF* */
+			    context.readonly = false;
 			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
 				announce_log("Rate switcher callled.");
 			    } else
 				monitor_complain("Rate not supported.");
+			    context.readonly = true;
 			    /* *INDENT-ON* */
 			    session.gpsdata.gps_fd = dfd;
 			} else
@@ -837,8 +838,7 @@ int main(int argc, char **argv)
 		    else if (serial) {
 			const struct monitor_object_t **switcher = active;
 
-			if (!(*active)->driver->mode_switcher
-			    && (*fallback)->driver->mode_switcher)
+			if ((*fallback)->driver->mode_switcher)
 			    switcher = fallback;
 			/* Ugh...should have a controlfd slot
 			 * in the session structure, really
@@ -846,8 +846,10 @@ int main(int argc, char **argv)
 			if ((*switcher)->driver->mode_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
+			    context.readonly = false;
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
+			    context.readonly = true;
 			    announce_log("Mode switcher called");
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
@@ -886,8 +888,7 @@ int main(int argc, char **argv)
 			char *modespec;
 			const struct monitor_object_t **switcher = active;
 
-			if (!(*active)->driver->speed_switcher
-			    && (*fallback)->driver->speed_switcher)
+			if ((*fallback)->driver->speed_switcher)
 			    switcher = fallback;
 
 			modespec = strchr(arg, ':');
@@ -920,6 +921,7 @@ int main(int argc, char **argv)
 			if ((*switcher)->driver->speed_switcher) {
 			    int dfd = session.gpsdata.gps_fd;
 			    session.gpsdata.gps_fd = controlfd;
+			    context.readonly = false;
 			    if ((*switcher)->
 				driver->speed_switcher(&session, speed,
 						       parity, (int)
@@ -940,6 +942,7 @@ int main(int argc, char **argv)
 			    } else
 				monitor_complain
 				    ("Speed/mode combination not supported.");
+			    context.readonly = true;
 			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
