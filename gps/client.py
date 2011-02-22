@@ -152,7 +152,8 @@ class gpsjson(gpscommon):
         except ValueError, e:
             raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
-        if self.data["class"] == "SKY" and hasattr(self.data, "satellites"):
+        # This particular logic can fire on SKY or RTCM2 objects.
+        if hasattr(self.data, "satellites"):
             self.data.satellites = map(lambda x: dictwrapper(**x), self.data.satellites)
 
     def stream(self, flags=0, outfile=None):
