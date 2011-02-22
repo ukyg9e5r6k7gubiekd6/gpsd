@@ -245,7 +245,7 @@ static ssize_t readpkt(void)
 
 /*@ +globstate @*/
 
-static void packet_dump(char *buf, size_t buflen)
+static void packet_dump(const char *buf, size_t buflen)
 {
     if (packetwin != NULL) {
 	size_t i;
@@ -269,13 +269,24 @@ static void packet_dump(char *buf, size_t buflen)
 }
 
 #if defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE)
-static void monitor_dump_send(void)
+static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 {
     if (packetwin != NULL) {
 	(void)wattrset(packetwin, A_BOLD);
 	(void)wprintw(packetwin, ">>>");
-	packet_dump(session.msgbuf, session.msgbuflen);
+	packet_dump(buf, len);
 	(void)wattrset(packetwin, A_NORMAL);
+    }
+}
+
+static void announce_log(/*@in@*/ const char *str)
+{
+   if (packetwin != NULL) {
+	(void)wattrset(packetwin, A_BOLD);
+	(void)wprintw(packetwin, ">>>");
+	(void)waddstr(packetwin, str);
+	(void)wattrset(packetwin, A_NORMAL);
+	(void)wprintw(packetwin, "\n");
     }
 }
 #endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
@@ -315,7 +326,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	    assert(read(controlfd, buf, 8) != -1);
 	    /*@ +sefparams @*/
 	}
-	monitor_dump_send();
+	monitor_dump_send((const char *)buf, len);
 	return (st != -1);
     }
 }
@@ -344,9 +355,7 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 	    assert(read(controlfd, buf, 8) != -1);
 	    /*@ +sefparams @*/
 	}
-	(void)memcpy(session.msgbuf, buf, len);
-	session.msgbuflen = len;
-	monitor_dump_send();
+	monitor_dump_send((const char *)buf, len);
 	return (st > 0 && (size_t) st == len);
     }
 }
@@ -735,7 +744,7 @@ int main(int argc, char **argv)
 			    session.gpsdata.gps_fd = controlfd;
 			    /* *INDENT-OFF* */
 			    if ((*active)->driver->rate_switcher(&session, rate)) {
-				monitor_dump_send();
+				announce_log("Rate switcher callled.");
 			    } else
 				monitor_complain("Rate not supported.");
 			    /* *INDENT-ON* */
@@ -807,7 +816,7 @@ int main(int argc, char **argv)
 			    session.gpsdata.gps_fd = controlfd;
 			    (*active)->driver->mode_switcher(&session,
 							     (int)v);
-			    monitor_dump_send();
+			    announce_log("Mode switcher called");
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			    session.gpsdata.gps_fd = dfd;
@@ -878,7 +887,7 @@ int main(int argc, char **argv)
 				driver->speed_switcher(&session, speed,
 						       parity, (int)
 						       stopbits)) {
-				monitor_dump_send();
+				announce_log("Speed switcher called.");
 				/*
 				 * See the comment attached to the 'B'
 				 * command in gpsd.  Allow the control
