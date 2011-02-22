@@ -598,7 +598,6 @@ static void deactivate_device(struct gps_device_t *device)
 }
 
 /* *INDENT-OFF* */
-/*@ -globstate @*/
 /*@null@*//*@observer@*/ static struct gps_device_t *find_device(const char
 								 *device_name)
 /* find the device block for an existing device name */
@@ -613,8 +612,6 @@ static void deactivate_device(struct gps_device_t *device)
 }
 /* *INDENT-ON* */
 
-/*@ -nullret @*/
-/*@ -statictrans @*/
 static bool open_device(struct gps_device_t *device)
 {
 	if (gpsd_activate(device) < 0) {
@@ -650,10 +647,6 @@ static bool add_device(const char *device_name)
 	    }
 	return ret;
 }
-
-/*@ +nullret @*/
-/*@ +statictrans @*/
-/*@ +globstate @*/
 
 static bool awaken(struct gps_device_t *device)
 /* awaken a device and notify all watchers*/
