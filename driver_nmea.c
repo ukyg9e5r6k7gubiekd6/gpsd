@@ -69,9 +69,10 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 /* sentence supplied ddmmyy, but no century part */
 {
-    int yy = DD(ddmmyy + 4), year = session->driver.nmea.date.tm_year;
+    int yy = DD(ddmmyy + 4);
     int mon = DD(ddmmyy + 2);
     int mday = DD(ddmmyy);
+    int year = session->driver.nmea.date.tm_year;
 
     if (year <= 0) {
 	year = (session->context->century + yy) - 1900;
@@ -85,14 +86,14 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	year = year / 100 * 100 + yy;
     }
     if ( (1 > year ) || (2200 < year ) ) {
-	gpsd_report(LOG_WARN, "merge_ddmmyy(), bad year: %d\n",  year);
+	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), bad year: %d\n",  ddmmyy, year);
     } else if ( (1 > mon ) || (12 < mon ) ) {
-	gpsd_report(LOG_WARN, "merge_ddmmyy(), malformed month: %2s\n",  ddmmyy + 2);
+	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
     } else if ( (1 > mday ) || (31 < mday ) ) {
-	gpsd_report(LOG_WARN, "merge_ddmmyy(), malformed day: %2s\n",  ddmmyy);
+	gpsd_report(LOG_WARN, "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
     } else {
-	gpsd_report(LOG_DATA, "merge_ddmmyy(ddmmyy) sets year %d from %s\n",
-		    year, ddmmyy);
+	gpsd_report(LOG_DATA, "merge_ddmmyy(%s) sets year %d\n",
+		    ddmmyy, year);
 	session->driver.nmea.date.tm_year = year;
 	session->driver.nmea.date.tm_mon = mon - 1;
 	session->driver.nmea.date.tm_mday = mday;
