@@ -280,7 +280,7 @@ const struct gps_type_t nmea = {
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = nmea_mode_switch,	/* no mode switcher */
+    .mode_switcher  = nmea_mode_switch,	/* maybe switchable if it was a SiRF */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
