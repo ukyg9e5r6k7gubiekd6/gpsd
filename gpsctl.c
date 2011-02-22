@@ -113,6 +113,17 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
+static void settle(struct gps_device_t *session)
+/* allow the device to settle after a control operation */
+{
+    /*
+     * See the 'deep black magic' comment in serial.c:set_serial().
+     */
+    (void)tcdrain(session->gpsdata.gps_fd);
+    (void)usleep(50000);
+    (void)tcdrain(session->gpsdata.gps_fd);
+}
+
 static bool gps_query(/*@out@*/struct gps_data_t *gpsdata, 
 		       gps_mask_t expect,
 		       const int timeout,
@@ -577,6 +588,7 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_ERROR, "device must be specified for low-level access.\n");
 		exit(1);
 	    }
+	    gpsd_time_init(&context, time(NULL));
 	    gpsd_init(&session, &context, device);
 	    gpsd_report(LOG_PROG, "initialization passed.\n");
 	    if (gpsd_activate(&session) == -1) {
@@ -640,6 +652,8 @@ int main(int argc, char **argv)
 #ifdef ALLOW_RECONFIGURE
 	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
+	    bool write_enable = context.readonly;
+	    context.readonly = false;
 	    if (session.device_type->mode_switcher == NULL) {
 		gpsd_report(LOG_SHOUT, 
 			      "%s devices have no mode switch.\n",
@@ -647,43 +661,14 @@ int main(int argc, char **argv)
 		status = 1;
 	    } else {
 		int target_mode = to_nmea ? MODE_NMEA : MODE_BINARY;
-		int target_type = to_nmea ? NMEA_PACKET : session.device_type->packet_type;
 
 		gpsd_report(LOG_SHOUT, 
 			      "switching to mode %s.\n",
 			    to_nmea ? "NMEA" : "BINARY");
 		session.device_type->mode_switcher(&session, target_mode);
-
-
-		/* 
-		 * Hunt for packet type again (mode might have
-		 * changed).  We've found by experiment that you can't
-		 * close the connection to the device after a mode
-		 * change but before you see a packet of the right
-		 * type come back from it - otherwise you can hit a
-		 * timing window where the mode-change control message
-		 * gets ignored or flushed.
-		 */
-		if (!echo) {
-		    /* suppresses probing for subtypes */
-		    context.readonly = true;
-		    (void)sleep(1);
-		    (void) alarm(timeout);
-		    for (;;) {
-			if (get_packet(&session) == ERROR_SET) {
-			    continue;
-			} else if (session.packet.type == target_type) {
-			    (void)alarm(0);
-			    break;
-			}
-		    }
-		    context.readonly = false;
-		}
-		/*@ -nullpass @*/
-		gpsd_report(LOG_SHOUT, "after mode change, %s looks like a %s at %d.\n",
-			    device, gpsd_id(&session), session.gpsdata.dev.baudrate);
-		/*@ +nullpass @*/
+		settle(&session);
 	    }
+	    context.readonly = write_enable;
 	}
 	if (speed) {
 	    char parity = echo ? 'N': session.gpsdata.dev.parity;
@@ -722,13 +707,7 @@ int main(int argc, char **argv)
 							     (speed_t)atoi(speed),
 							     parity, 
 							     stopbits)) {
-		    /*
-		     * See the 'deep black magic' comment in
-		     * gpsd.c:set_serial() Probably not needed here,
-		     * but it can't hurt.
-		     */
-		    (void)tcdrain(session.gpsdata.gps_fd);
-		    (void)usleep(50000);
+		    settle(&session);
 		    gpsd_report(LOG_PROG, "%s change to %s%c%d succeeded\n", 
 			    session.gpsdata.dev.path,
 			    speed, parity, stopbits);
@@ -755,6 +734,7 @@ int main(int argc, char **argv)
 		    gpsd_report(LOG_ERROR, "rate switch failed.\n");
 		    status = 1;
 		}
+		settle(&session);
 	    }
 	    context.readonly = write_enable;
 	}
@@ -776,22 +756,13 @@ int main(int argc, char **argv)
 		    gpsd_report(LOG_ERROR, "control transmission failed.\n");
 		    status = 1;
 		}
+		settle(&session);
 	    }
 	    context.readonly = write_enable;
 	}
 	/*@ +compdef @*/
 #endif /* ALLOW_CONTROLSEND */
 
-	if (forcetype == NULL || !echo) {
-	    /*
-	     * Give the device time to settle before closing it.  Alas, this is
-	     * voodoo programming; we don't know it will have any effect, but
-	     * GPSes are notoriously prone to timing-dependent errors.
-	     */
-	    (void)usleep(300000);
-
-	    gpsd_wrap(&session);
-	}
 	exit(status);
 	/*@ +nullderef @*/
 	/*@ +mustfreeonly +immediatetrans @*/
