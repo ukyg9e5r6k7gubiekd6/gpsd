@@ -42,6 +42,9 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 	case LOG_ERROR:
 		err_str = "ERROR: ";
 		break;
+	case LOG_SHOUT:
+		err_str = "SHOUT: ";
+		break;
 	case LOG_WARN:
 		err_str = "WARN: ";
 		break;
