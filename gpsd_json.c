@@ -728,7 +728,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     unsigned int n;
 
     (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",");
-    if (device != NULL)
+    if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"device\":\"%s\",", device);
     (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1042,7 +1042,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define JSON_BOOL(x)	((x)?"true":"false")
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
-    if (device != NULL)
+    if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"device\":\"%s\",", device);
     (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
