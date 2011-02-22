@@ -132,21 +132,21 @@ class gpsjson(gpscommon):
         return self
 
     def json_unpack(self, buf):
-        def asciify(d):
+        def asciify(v):
             "De-Unicodify everything so we can copy dicts into Python objects."
-            t = {}
-            for (k, v) in d.items():
-                ka = k.encode("ascii")
-                if type(v) == type(u"x"):
-                    va = v.encode("ascii")
-                elif type(v) == type({}):
-                    va = asciify(v)
-                elif type(v) == type([]):
-                    va = map(asciify, v)
-                else:
-                    va = v
-                t[ka] = va
-            return t
+            if type(v) == type(u"x"):
+                return v.encode("ascii")
+            elif type(v) == type({}):
+                va = {}
+                for (k, v) in v.items():
+                    ka = k.encode("ascii")
+                    kv = asciify(v)
+                    va[ka] = kv
+                return va
+            elif type(v) == type([]):
+                return map(asciify, v)
+            else:
+                return v
         try:
             self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
         except ValueError, e:
