@@ -157,16 +157,12 @@
   subsequent client opens.</para></entry>
 </row>
 <row>
-  <entry><function>static struct gps_device_t *open_device(char *device_name)</function></entry>
-  <entry><para>Scan all devices looking for an unallocated one. Exit
-  early on a successful search. If none is found, return a
-  NULL.</para><para>If one is found, make a call to
-  <function>gpsd_init()</function>.</para><para>Try to activate the
-  device via a call to
+  <entry><function>bool open_device(struct gps_device_t *devp)</function></entry>
+  <entry><para>Try to activate the device via a call to
   <function>gpsd_activate()</function>.</para><para>If this fails
-  return a NULL.</para><para>If it succeeds, add the fd to our list of
-  active fds, housekeep the highest fd number and return the channel
-  number allocated.</para></entry>
+  return <quote>false</quote>.</para><para>If it succeeds, add the
+  fd to our list of active fds, housekeep the highest fd number
+  and return <quote>true</quote>.</para></entry>
 </row>
 <row>
   <entry><function>static bool add_device(const char *device_name)</function></entry>
@@ -177,9 +173,9 @@
 <row>
   <entry><function>static bool awaken(struct subscriber_t *user, struct gps_device_t *device)</function></entry>
 
-  <entry><para>If the device is niot initialized, attempt to open the
+  <entry><para>If the device is not initialized, attempt to open the
   specified device on behalf of the specified user. If you succeed
-  and the device has an active fd, you're done If it does not, make a call to
+  and the device has an active fd, you're done. If it does not, make a call to
   <function>gpsd_activate()</function>.</para><para>If this fails,
   return <quote>false</quote>, if not, add the fd to our list of
   active fds and housekeep the highest fd.</para><para>Check if the
