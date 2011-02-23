@@ -753,7 +753,7 @@ rtcm-regress: gpsdecode
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.rtcm2; do \
 		echo "Testing $${f}..."; \
-		$(srcdir)/gpsdecode <$${f} >/tmp/test-$$$$.chk; \
+		$(srcdir)/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; \
 		diff -ub $${f}.chk /tmp/test-$$$$.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for RTCM2"

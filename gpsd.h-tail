@@ -152,7 +152,6 @@ extern unsigned int isgps_parity(isgps30bits_t);
 extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 
 extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
-extern void rtcm2_sager_dump(const struct rtcm2_t *, /*@out@*/char[], size_t);
 extern void json_rtcm2_dump(const struct rtcm2_t *, 
 			    /*@null@*/const char *, /*@out@*/char[], size_t);
 extern int rtcm2_undump(/*@out@*/struct rtcm2_t *, char *);

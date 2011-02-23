@@ -76,31 +76,78 @@ payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
 algorithm.</para>
 
 </refsect1>
-<refsect1 id='sager-dump-format2'><title>SAGER RTCM2 DUMP FORMAT</title>
+<refsect1 id='sager-dump-format2'><title>JSON RTCM2 DUMP FORMAT</title>
 
-<para>For each message, the header is listed first, followed by zero
-or more lines containing the specific data for that message, followed
-by a trailing sentinel line containing a single dot. The general format is a
-line beginning with a capital letter, followed by a tab, followed by
-the fields of the message separated by tabs, terminated by a
-newline.</para>
+<para>Each RTCM2 message is dumped as a single JSON object per
+message, with the message fields as attributes of that object.  Arrays
+of satellite, station, and constellation statistics become arrays of
+JSON sub-objects. Each sentence will normally also have a "device"
+field containing the pathname of the originating device.</para>
 
-<refsect2><title>Header message (H)</title>
+<para>All attributes otner than the device field are mandatory</para>
 
-<literallayout>
-H &lt;message type&gt; &lt;reference station id&gt; &lt;modified z_count&gt; &lt;sequence number&gt;
-  &lt;message length&gt; &lt;station health&gt; [T &lt;useful length&gt;]
-</literallayout>
+<refsect2><title>Header portion</title>
 
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-H	9	268	249.6	1	5	0
-S	13	0	3	249.6	-26.120	0.068
-S	2	0	73	249.6	1.220	-0.080
-S	8	0	22	249.6	23.760	0.030
-.
-</literallayout></informalexample>
+<table frame="all" pgwide="0"><title>SKY object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>string</entry>
+        <entry><para>Fixed: "RTCM2".</para></entry>
+</row>
+<row>
+	<entry>type</entry>
+	<entry>integer</entry>
+        <entry><para>Message type (1-9).</para></entry>
+</row>
+<row>
+	<entry>station_id</entry>
+	<entry>integer</entry>
+        <entry><para>The id of the GPS reference receiver. The
+	LF transmitters also have (different) id numbers.</para></entry>
+</row>
+<row>
+	<entry>zcount</entry>
+	<entry>float</entry>
+        <entry><para>The reference time of the
+	corrections in the message in seconds within the current hour. Note
+	that it is in GPS time, which is some seconds ahead of UTC (see the
+	U.S. Naval Observatory's <ulink
+	url="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">table of leap second
+	corrections</ulink>).</para></entry>
+</row>
+<row>
+	<entry>seqnum</entry>
+	<entry>integer</entry>
+        <entry><para>Sequence number. Only 3 bits wide, wraps after 7.</para></entry>
+</row>
+<row>
+	<entry>length</entry>
+	<entry>integer</entry>
+        <entry><para>The number of words after the header that comprise the
+        message.</para></entry>
+</row>
+<row>
+	<entry>station_health</entry>
+	<entry>integer</entry>
+        <entry><para>Station transmisssion status. Indicates the health of
+        the beacon as a reference source.  Any nonzero value means the
+        satellite is probably transmitting bad data and should not be
+        used in a fix. 6 means the transmission is unmonitored. 7
+        means the station is not working properly. Other values are
+        defined by the beacon operator.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 <para>&lt;message type&gt; is one of</para>
 
@@ -126,7 +173,7 @@ referred.</para></listitem>
 <varlistentry>
 <term>5</term>
 <listitem><para>constellation health &mdash; information about the
-satellites the beacon can see</para></listitem>
+satellites the beacon can see.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -152,106 +199,113 @@ operator.</para></listitem>
 </varlistentry>
 </variablelist>
 
-<para>&lt;reference station id&gt; is the id of the GPS reference receiver. The
-LF transmitters also have (different) id numbers.</para>
-
-<para>&lt;modified z_count&gt; is the reference time of the
-corrections in the message in seconds within the current hour. Note
-that it is in GPS time, which is some seconds ahead of UTC (see the
-U.S. Naval Observatory's <ulink
-url="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">table of leap second
-corrections</ulink>).</para>
-
-<para>&lt;sequence no&gt; is a number which increments, modulo 8, for each
-message transmitted.</para>
-
-<para>&lt;message length&gt; is the number of words after the header that
-comprise the message.</para>
-
-<para>&lt;station health&gt; indicates the health of the beacon as a
-reference source.  Any nonzero value means the satellite is probably
-transmitting bad data and should not be used in a fix. 6 means the
-transmission is unmonitored. 7 means the station is not working
-properly. Other values are defined by the beacon operator.
-</para>
-
-<para>If the message contains a parity error after the header but before
-the end of the message, then the extra fields [T &lt;useful length&gt;]
-are appended to indicate a truncated message.</para>
-
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-H	9	687	331.8	1	5	0	T	4
-</literallayout></informalexample>
-
-<para>&lt;useful length&gt; indicates the number of useful words before the
-parity error. Depending on the message type, useful information
-may still be extracted.</para>
-
 </refsect2>
-<refsect2><title>Correction data (S)</title>
+<refsect2><title>Type 1 and 9: Correction data</title>
 
-<para>One or more of these follow the header for type 1 or type 9
+<para>One or more satellite objects follow the header for type 1 or type 9
 messages. Here is the format:</para>
 
-<literallayout>
-S &lt;satellite&gt; &lt;udre&gt; &lt;iod&gt; &lt;modified z_count&gt; &lt;range error&gt;
-  &lt;range error rate&gt;
-</literallayout>
+<table frame="all" pgwide="0"><title>Satellite object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>ident</entry>
+	<entry>integer</entry>
+        <entry><para>The PRN number of the satellite for which this is
+	correction data.</para></entry>
+</row>
+<row>
+	<entry>udre</entry>
+	<entry>integer</entry>
+        <entry><para>User Differential Range Error (0-3). See the
+        table following for values.</para></entry>
+</row>
+<row>
+	<entry>issuedata</entry>
+	<entry>integer</entry>
+        <entry><para>Issue Of Data, matching the IOD for the current
+        ephemeris of this satellite, as transmitted by the satellite.
+        The IOD is a unique tag that identifies the ephemeris; the GPS
+        using the DGPS correction and the DGPS generating the data
+        must use the same orbital positions for the
+        satellite.</para></entry>
+</row>
+<row>
+	<entry>rangerr</entry>
+	<entry>float</entry>
+        <entry><para>The pseudorange error in meters for this
+        satellite as measured by the beacon reference receiver at the
+        epoch indicated by the z_count in the parent
+        record.</para></entry>
+</row>
+<row>
+	<entry>rangerate</entry>
+	<entry>float</entry>
+        <entry><para>The rate of change of pseudorange error in
+        meters/sec for this satellite as measured by the beacon
+        reference receiver at the epoch indicated by the z_count field
+        in the parent record. This is used to calculate pseudorange
+        errors at other epochs, if required by the GPS
+        receiver.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
-<para>Here is an example:</para>
+<para>User Differential Range Error values are as follows:</para>
 
-<informalexample><literallayout>
-S	7	0	199	331.8	-12.160	0.288
-</literallayout></informalexample>
-
-<para>&lt;satellite&gt; is the PRN number of the satellite for which this is
-correction data.</para>
-
-<para>&lt;udre&gt; is User Differential Range Error with the following
-values:</para>
-
-<literallayout>
-0	1-sigma error	&lt;= 1m
-1	1-sigma error	&lt;= 4m
-2	1-sigma error	&lt;= 8m
-3	1-sigma error	&gt;  8m
-</literallayout>
-
-<para>&lt;iod&gt; is Issue Of Data, matching the IOD for the current
-ephemeris of this satellite, as transmitted by the satellite.  The IOD
-is a unique tag that identifies the ephemeris; the GPS using the DGPS
-correction and the DGPS generating the data must use the same orbital
-positions for the satellite.</para>
-
-<para>&lt;modified z_count&gt; is just a copy of the same field from
-the header.</para>
-
-<para>&lt;range error&gt; is the pseudorange error in meters for this satellite
-as measured by the beacon reference receiver at the epoch indicated
-by &lt;modified z_count&gt;</para>
-
-<para>&lt;range error rate&gt; is the rate of change of pseudorange error in
-meters/sec for this satellite as measured by the beacon reference
-receiver at the epoch indicated by &lt;modified z_count&gt;. This is
-used to calculate pseudorange errors at other epochs, if
-required by the GPS receiver.</para>
+<table frame="all" pgwide="0"><title>UDRE values</title>
+<tgroup cols="2" align="left" colsep="1" rowsep="1">
+<tbody>
+<row><entry>0</entry><entry>1-sigma error	&lt;= 1m</entry></row>
+<row><entry>1</entry><entry>1-sigma error	&lt;= 4m</entry></row>
+<row><entry>2</entry><entry>1-sigma error	&lt;= 8m</entry></row>
+<row><entry>3</entry><entry>1-sigma error	&gt;  8m</entry></row>
+</tbody>
+</tgroup>
+</table>
 
 </refsect2>
-<refsect2><title>Reference Station Parameters (R)</title>
+<refsect2><title>Type 3: Reference Station Parameters</title>
 
-<para>Here is the format:</para>
+<para>Here are the payload members of a type 3 (Reference Station
+Parameters) message:</para>
 
-<literallayout>
-R &lt;X-coordinate&gt; &lt;Y-coordinate&gt; &lt;Z-coordinate&gt;
-</literallayout>
-
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-R	3746729.40	-5086.23	5144450.67
-</literallayout></informalexample>
+<table frame="all" pgwide="0"><title>Reference Station Parameters</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>x</entry>
+	<entry>float</entry>
+        <entry><para>ECEF X coordinate.</para></entry>
+</row>
+<row>
+	<entry>y</entry>
+	<entry>float</entry>
+        <entry><para>ECEF Y coordinate.</para></entry>
+</row>
+<row>
+	<entry>z</entry>
+	<entry>float</entry>
+        <entry><para>ECEF Z coordinate.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 <para>The coordinates are the position of the station, in meters to two
 decimal places, in Earth Centred Earth Fixed coordinates.
@@ -260,107 +314,191 @@ be referred to NAD83 in the US (essentially identical to WGS84 for
 all except geodesists), or to some other reference frame in other
 parts of the world.</para>
 
+<para>An invalid reference message is represented by a type 3 header 
+without payload fields.</para>
+
 </refsect2>
-<refsect2><title>Datum (D)</title>
+<refsect2><title>Type 4: Datum</title>
 
-<para>Here is the format:</para>
+<para>Here are the payload members of a type 4 (Datum) message:</para>
 
-<literallayout>
-D &lt;dgnss type&gt; &lt;dat&gt; &lt;datum name&gt; [ &lt;dx&gt; &lt;dy&gt; &lt;dz&gt; ]
-</literallayout>
+<table frame="all" pgwide="0"><title>Datum</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>dgnss_type</entry>
+	<entry>string</entry>
+        <entry><para>Either "GPS", "GLONASS", "GALILEO", or
+        "UNKNOWN".</para></entry>
+</row>
+<row>
+	<entry>dat</entry>
+	<entry>integer</entry>
+        <entry><para>0 or 1 and indicates the sense of the offset
+        shift given by dx, dy, dz. dat = 0 means that the station
+        coordinates (in the reference message) are referred to a local
+        datum and that adding dx, dy, dz to that position will render
+        it in GNSS coordinates (WGS84 for GPS). If dat = 1 then the
+        ref station position is in GNSS coordinates and adding dx, dy,
+        dz will give it referred to the local datum.</para></entry>
+</row>
+<row>
+	<entry>datum_name</entry>
+	<entry>string</entry>
+        <entry><para>A standard name for the datum.</para></entry>
+</row>
 
-<para>Here is an (artificial) example:</para>
-
-<informalexample><literallayout>
-D	GPS	0	ABC12	25.8	30.5	33.0
-</literallayout></informalexample>
-
-<para>&lt;dgnss type&gt; is either GPS or GLONASS.</para>
-
-<para>&lt;dat&gt; is 0 or 1 and indicates the sense of the offset
-shift given by dx, dy, dz. dat = 0 means that the station coordinates
-(in the reference message) are referred to a local datum and that
-adding dx, dy, dz to that position will render it in GNSS coordinates
-(WGS84 for GPS). If dat = 1 then the ref station position is in GNSS
-coordinates and adding dx, dy, dz will give it referred to the local
-datum.</para>
-
-<para>&lt;datum name&gt; is a standard name for the datum.</para>
+<row>
+	<entry>dx</entry>
+	<entry>float</entry>
+        <entry><para>X offset.</para></entry>
+</row>
+<row>
+	<entry>dy</entry>
+	<entry>float</entry>
+        <entry><para>Y offset.</para></entry>
+</row>
+<row>
+	<entry>dz</entry>
+	<entry>float</entry>
+        <entry><para>Z offset.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 <para>&lt;dx&gt; &lt;dy&gt; &lt;dz&gt; are offsets to convert from
 local datum to GNSS datum or vice versa. These fields are
 optional.</para>
 
+<para>An invalid datum message is represented by a type 4 header 
+without payload fields.</para>
+
 </refsect2>
-<refsect2><title>Constellation Health (C)</title>
+<refsect2><title>Type 5: Constellation Health</title>
 
 <para>One or more of these follow the header for type 5 messages &mdash; one
 for each satellite.</para>
 
 <para>Here is the format:</para>
 
-<literallayout>
-C &lt;sat&gt; &lt;iodl&gt; &lt;health&gt; &lt;snr&gt; &lt;hlth en&gt; &lt;new data&gt; &lt;los warning&gt;
-  &lt;time to unhealthy&gt;
-</literallayout>
-
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-C	29	0  0	53	0  0  0	 0
-</literallayout></informalexample>
-
-<para>&lt;sat&gt; is the PRN number of the satellite.</para>
-
-<para>&lt;iodl&gt; is 1 bit. 0 indicates that this information relates to the
-satellite information in an accompanying type 1 or type 9 message.</para>
-
-<para>&lt;health&gt; 0 indicates that the satellite is healthy. Any other value
-indicates a problem (coding is not known).</para>
-
-<para>&lt;snr&gt; gives the carrier/noise ratio of the received signal in the
-range 25 to 55 dB(Hz).</para>
-
-<para>&lt;health en&gt; is 1 bit. If set to 1 it indicates that the
-satellite is healthy even if the satellite navigation data says it is
-unhealthy.</para>
-
-<para>&lt;new data&gt; is 1 bit. a 1 indicates that the IOD for this
-satellite will soon be updated in type 1 or 9 messages.</para>
-
-<para>&lt;los warning&gt; is 1 bit. a 1 indicates that the satellite
-will shortly go unhealthy. The healthy time remaining is given in the
-&lt;time to unhealthy&gt; field.</para>
+<table frame="all" pgwide="0"><title>Contellation health</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>ident</entry>
+	<entry>integer</entry>
+        <entry><para>The PRN number of the satellite.</para></entry>
+</row>
+<row>
+	<entry>iodl</entry>
+	<entry>bool</entry>
+        <entry><para>True indicates that this information relates to
+        the satellite information in an accompanying type 1 or type 9
+        message.</para></entry>
+</row>
+<row>
+	<entry>health</entry>
+	<entry>integer</entry>
+        <entry>0 indicates that the satellite is healthy. Any other value
+	indicates a problem (coding is not known).<para></para></entry>
+</row>
+<row>
+	<entry>snr</entry>
+	<entry>integer</entry>
+        <entry><para>The carrier/noise ratio of the received signal in
+        the range 25 to 55 dB(Hz).</para></entry>
+</row>
+<row>
+	<entry>health_en</entry>
+	<entry>bool</entry>
+        <entry><para>If set to Teue it indicates that the satellite is
+        healthy even if the satellite navigation data says it is
+        unhealthy.</para></entry>
+</row>
+<row>
+	<entry>new_data</entry>
+	<entry>bool</entry>
+        <entry>True indicates that the IOD for this satellite will
+        soon be updated in type 1 or 9 messages.<para></para></entry>
+</row>
+<row>
+	<entry>los_warning</entry>
+	<entry>bool</entry>
+        <entry><para>Line-of-sight warning. True indicates that the
+        satellite will shortly go unhealthy.</para></entry>
+</row>
+<row>
+	<entry>tou</entry>
+	<entry>integer</entry>
+        <entry><para>Healthy time remaining in seconds.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 </refsect2>
-<refsect2><title>Radio Beacon Almanac (A)</title>
+<refsect2><title>Type 7: Radio Beacon Almanac</title>
 
 <para>Here is the format:</para>
 
-<literallayout>
-A &lt;latitude&gt; &lt;longitude&gt; &lt;range&gt; &lt;frequency&gt; &lt;health&gt; &lt;station id&gt;
-  &lt;bitrate&gt;
-</literallayout>
-
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-A	54.1176	-0.0714	100	302.5	0	447	2
-</literallayout></informalexample>
-
-<para>&lt;latitude&gt; and &lt;longitude&gt; give the position, in
-degrees, of the LF transmitter antenna for the station for which this
-is an almanac.  North and East are positive.</para>
-
-<para>&lt;range&gt; is the published range of the station in km.</para>
-
-<para>&lt;frequency&gt; is the broadcast frequency in kHz.</para>
-
-<para>&lt;health&gt; is the health of the station for which this is an
-almanac. If it is non-zero, the station is issuing suspect data and
-should not be used for fixes.  The ITU and RTCM104 standards differ
-about the mode detailed interpretation of
-the &lt;health&gt; field and even about its bit width.
+<table frame="all" pgwide="0"><title>Contellation health</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>lat</entry>
+	<entry>float</entry>
+        <entry><para>Latitude in degrees, of the LF transmitter
+        antenna for the station for which this is an almanac.  North
+        is positive.</para></entry>
+</row>
+<row>
+	<entry>lon</entry>
+	<entry>float</entry>
+        <entry><para>Longitude in degrees, of the LF transmitter
+        antenna for the station for which this is an almanac.
+        East is positive.</para></entry>
+</row>
+<row>
+	<entry>range</entry>
+	<entry>integer</entry>
+        <entry>Published range of the station in km.<para></para></entry>
+</row>
+<row>
+	<entry>frequency</entry>
+	<entry>float</entry>
+        <entry><para>Station broadcast frequency in kHz.</para></entry>
+</row>
+<row>
+	<entry>health</entry>
+	<entry>integer</entry>
+        <entry><para>&lt;health&gt; is the health of the station for
+        which this is an almanac. If it is non-zero, the station is
+        issuing suspect data and should not be used for fixes.  The
+        ITU and RTCM104 standards differ about the mode detailed
+        interpretation of the &lt;health&gt; field and even about its
+        bit width.
 <!--
 From itu p.9 just under the type7 msg figure:
  
@@ -374,105 +512,85 @@ RTCM104, in the other hand, makes it 3 bits wide.
 The Sager documentation said health has the same meaning as in the header.
 but this cannot be true unless the field is 3 bits wide.
 -->
-</para>
-
-<para>&lt;station id&gt; is the id of the transmitter. This is not the same
-as the reference id in the header, the latter being the id of
-the reference receiver. 
-<!-- John Sager noted: "However I know of at least one station
-that gets it wrong." --></para>
-
-<para>&lt;bitrate&gt; indicates the transmitted bitrate.</para>
-
-</refsect2>
-<refsect2><title>Special Message (T)</title>
-
-<para>Here is the format:</para>
-
-<literallayout>
-T &lt;text&gt;
-</literallayout>
-
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-T	THLS TRIAL SERVICE
-</literallayout></informalexample>
-
-<para>&lt;text&gt; is just a text message sent by the beacon operator.</para>
+	</para></entry>
+</row>
+<row>
+	<entry>station_id</entry>
+	<entry>integer</entry>
+        <entry><para>The id of the transmitter. This is not the same
+        as the reference id in the header, the latter being the id of
+        the reference receiver. <!-- John Sager noted: "However I know 
+	of at least one stationthat gets it wrong." --></para></entry>
+</row>
+<row>
+	<entry>bitrate</entry>
+	<entry>integer</entry>
+        <entry><para>The transmitted bitrate.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
 </refsect2>
-<refsect2><title>Null (N)</title>
+<refsect2><title>Type 16: Special Message</title>
 
-<para>This just indicates a null message. There are no fields.</para>
+<table frame="all" pgwide="0"><title>Special Message</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>message</entry>
+	<entry>string</entry>
+        <entry><para>A text message sent by the beacon operator.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
 </refsect2>
-<refsect2><title>Unknown message (U)</title>
+<refsect2><title>Type 6: Null</title>
+
+<para>This just indicates a null message. There are no payload fields.</para>
+</refsect2>
+
+<refsect2><title>Unknown message</title>
 <!-- The Sager decoder didn't have this -->
 
-<para>This is used to dump message words in hexadecimal when the
+<para>This format is used to dump message words in hexadecimal when the
 message type field doesn't match any of the known ones.</para>
 
 <para>Here is the format:</para>
 
-<literallayout>
-U &lt;hex-literal&gt;
-</literallayout>
+<table frame="all" pgwide="0"><title>Unknown Message</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>data</entry>
+	<entry>list</entry>
+        <entry><para>A list of strings.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 
-<para>Here is an example:</para>
-
-<informalexample><literallayout>
-U	0x76423055
-</literallayout></informalexample>
-
-<para>The &lt;hex-literal&gt; will represent 32 bits of information,
-after parity checks and inversion.  The high two bits should be
-ignored.</para>
+<para>Each string in the array is a hex literal representing 30 bits
+of information, after parity checks and inversion.  The high two bits
+should be ignored.</para>
 
 </refsect2>
-<refsect2><title>Null (N)</title>
-
-<para>This just indicates a null message. There are no fields.</para>
-</refsect2>
-
-<!--
-Decoder Status Messages (M)
-
-format:
-
-M &lt;type&gt;: &lt;information&gt;
-
-examples:
-
-M	state change: NO_SYNC -&gt; WORD_SYNCING
-M	sync_bit: 5
-
-&lt;type&gt; indicates textually the type of message. There are
-only the two types shown above.
-
-&lt;information&gt;
-For &lt;type&gt; = state change it describes the internal state
-transition of the decoder when it changes state as a result
-of the incoming data.
-
-For &lt;type&gt; = sync_bit this indicates the bit position in the
-serial data stream which is a word boundary.
--->
-
-</refsect1>
-<refsect1 id='json-dump-format2'><title>JSON RTCM2 DUMP FORMAT</title>
-
-<para>Fields are dumped in the order and with the conversions
-described above, except that they are wrapped in a single JSON
-object per message and appear as attributes of that object.  Arrays of
-satellite, station, and constellation statistics become arrays of
-JSON sub-objects. Each entence will also have a "device" field
-containing the pathname of the originating device.</para>
-
-<para>(One exception: The zcount field included in the Sager-format
-per-satellite reports in type 1 and 9 messages is omitted from the 
-JSON version, as it is redundant with the zcount attribute of the
-parent object.)</para>
-
 </refsect1>
 <refsect1 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>
 
@@ -491,12 +609,6 @@ buggy. Anyone interested in it should read the source code.</para>
 </para>
 </refsect1>
 
-<refsect1 id='compatibility'><title>COMPATIBILITY NOTE</title> 
-
-<para>In versions of the RTCM2 dump format prior to gpsd 2.28, there was
-no trailing sentinel line after each stanza of the Sager-format dump.</para>
-
-</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Much of the portion of this text describing RTCM2 was originally

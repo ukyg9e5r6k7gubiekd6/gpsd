@@ -391,11 +391,6 @@ static void decode(FILE * fpin, FILE * fpout)
 			     &session.gpsdata, &policy, 
 			     buf, sizeof(buf));
 	    (void)fputs(buf, fpout);	
-#ifdef RTCM104V2_ENABLE
-	} else if (session.packet.type == RTCM2_PACKET) {
-	    rtcm2_sager_dump(&session.gpsdata.rtcm2, buf, sizeof(buf));
-	    (void)fputs(buf, fpout);	
-#endif
 #ifdef RTCM104V3_ENABLE
 	} else if (session.packet.type == RTCM3_PACKET) {
 	    rtcm3_dump(&session.gpsdata.rtcm3, fpout);

@@ -812,6 +812,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	    buf[strlen(buf) - 1] = '\0';
 	(void)strlcat(buf, "]", buflen);
 	break;
+
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"message\":\"%s\"", json_stringify(buf1,
