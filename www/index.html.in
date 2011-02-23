@@ -307,9 +307,6 @@ standard output.</dd>
 <dt><a href="gpsflash.html">gpsflash(1)</a></dt>
 <dd>The <code>src</code> GPS firmware uploader..</dd>
 
-<dt><a href="rtcm-104.html">rtcm-104.5</a></dt>
-<dd>The <code>gpsdecode</code> RTCM104 decoder dump format.</dd>
-
 <dt><a href="srec.html">srec.5</a></dt>
 <dd>The <code>src</code> Motorola S-record and file format.</dd>
 -->

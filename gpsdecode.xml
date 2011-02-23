@@ -66,18 +66,13 @@ decoded, but not yet encoded.</para>
 <refsect1 id='options'><title>OPTIONS</title>
 
 <para>The <option>-d</option> option tells the program to decode
-packets presented on standard input to a text dump on standard
+packets presented on standard input to a JSON dump on standard
 output. This is the default behavior.</para>
 
-<para>RTCM2 will be dumped in one of the formats of
-<citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-on standard output. </para>
-
 <para>The <option>-e</option> option option tells the program to
-encode a text dump in one of the formats of
-<citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-to standard output. This option is a placeholder: support for RTCM2
-encoding from the Sager format has been removed</para>
+encode a text dump to binary on standard output. This option is a
+placeholder: support for RTCM2 encoding from the Sager format has been
+removed</para>
 
 <para>The <option>-u</option> suppresses scaling of AIS data to float quantities
 and text expansion of numeric codes.  A dump with this option is
@@ -194,7 +189,6 @@ other string fields can contain commas.</para>
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 </para>
 </refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 

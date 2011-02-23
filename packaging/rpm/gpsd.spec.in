@@ -173,7 +173,6 @@ fi
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
-%{_mandir}/man5/rtcm-104.5*
 %{_mandir}/man5/srec.5*
 
 %files -n libQgpsmm

@@ -470,7 +470,6 @@ MANPAGES_BASE = \
 	gpsmon.1 \
 	gpsctl.1 \
 	gpspipe.1 \
-	rtcm-104.5 \
 	srec.5
 
 if HAVE_XSLT_PROCESSOR
@@ -537,7 +536,6 @@ XML = \
 	gpsctl.xml \
 	gpscat.xml \
 	gpspipe.xml \
-	rtcm-104.xml \
 	srec.xml
 
 # Note: packaging/rpm/gpsd.spec is generated, but it needs to be in the
@@ -859,7 +857,7 @@ website: www/gpscat.html www/gpsctl.html www/gpsdecode.html \
 		www/gpsd.html www/gpsfake.html www/gpsmon.html \
 		www/gpspipe.html www/gpsprof.html www/gps.html \
 		www/libgpsd.html www/libgpsmm.html www/libgps.html \
-		www/rtcm-104.html www/srec.html \
+		www/srec.html \
 		www/AIVDM.html www/NMEA.html \
 		www/protocol-evolution.html www/protocol-transition.html \
 		www/client-howto.html www/writing-a-driver.html \
