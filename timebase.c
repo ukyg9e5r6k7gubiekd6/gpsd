@@ -116,6 +116,7 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     }
 }
 
+#ifdef NMEA_ENABLE
 double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
@@ -156,6 +157,7 @@ double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 
     return t;
 }
+#endif /* NMEA_ENABLE */
 
 double gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
