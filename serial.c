@@ -338,6 +338,67 @@ int gpsd_open(struct gps_device_t *session)
 {
     mode_t mode = (mode_t) O_RDWR;
 
+    /* special case: source may be a URI to a remote GNSS or DGPS service */
+    if (netgnss_uri_check(session->gpsdata.dev.path)) {
+	session->gpsdata.gps_fd = netgnss_uri_open(session,
+						   session->gpsdata.dev.path);
+	session->sourcetype = source_tcp;
+	gpsd_report(LOG_SPIN,
+		    "netgnss_uri_open(%s) returns socket on fd %d\n",
+		    session->gpsdata.dev.path, session->gpsdata.gps_fd);
+	return session->gpsdata.gps_fd;
+    /* otherwise, could be an TCP data feed */
+    } else if (strncmp(session->gpsdata.dev.path, "tcp://", 6) == 0) {
+	char server[GPS_PATH_MAX], *port;
+	socket_t dsock;
+	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
+	session->gpsdata.gps_fd = -1;
+	port = strchr(server, ':');
+	if (port == NULL) {
+	    gpsd_report(LOG_ERROR, "Missing colon in TCP feed spec.\n");
+	    return -1;
+	}
+	*port++ = '\0';
+	gpsd_report(LOG_INF, "opening TCP feed at %s, port %s.\n", server,
+		    port);
+	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	    gpsd_report(LOG_ERROR, "TCP device open error %s.\n",
+			netlib_errstr(dsock));
+	    return -1;
+	} else
+	    gpsd_report(LOG_SPIN, "TCP device opened on fd %d\n", dsock);
+	session->gpsdata.gps_fd = dsock;
+	session->sourcetype = source_tcp;
+	return session->gpsdata.gps_fd;
+    /* or could be UDP */
+    } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
+	char server[GPS_PATH_MAX], *port;
+	socket_t dsock;
+	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
+	session->gpsdata.gps_fd = -1;
+	port = strchr(server, ':');
+	if (port == NULL) {
+	    gpsd_report(LOG_ERROR, "Missing colon in UDP feed spec.\n");
+	    return -1;
+	}
+	*port++ = '\0';
+	gpsd_report(LOG_INF, "opening UDP feed at %s, port %s.\n", server,
+		    port);
+	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
+	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
+			netlib_errstr(dsock));
+	    return -1;
+	} else
+	    gpsd_report(LOG_SPIN, "UDP device opened on fd %d\n", dsock);
+	session->gpsdata.gps_fd = dsock;
+	session->sourcetype = source_udp;
+	return session->gpsdata.gps_fd;
+    }
+
+    /*
+     * Fall through to local open.
+     */
+
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
 
     /*@ -boolops -type @*/
