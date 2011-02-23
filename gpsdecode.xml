@@ -40,21 +40,22 @@ services.  It produces a JSON dump on standard output from binary on
 standard input. The JSON is the same format documented in
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>; 
 this tool uses the same decoding logic as gpsd, but with a simpler interface
-for batch processing of data files.
+intended for batch processing of data files.
 </para>
 
-<para>NMEA, AIVDM (the NMEA-derived sentence format
-used by AIS, the marine Automatic Identification System), and all 
-GPS binary formats known to
+<para>All sensor-input formats known to the GPSD project can be
+decoded by this tool.  These include: NMEA, AIVDM (the NMEA-derived
+sentence format used by AIS, the marine Automatic Identification
+System), RTCM2, RTCM3 and all supported GPS binary formats (notably
+including SiRF). See
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
-can be decoded.</para>
+for applicable standards and known limitations of the decoding
+logic.</para>
 
-<para>Two more supported formats are RTCM 2 and 3, a pair of obscure
-and complicated serial protocol used for broadcasting pseudorange
-corrections from differential-GPS reference stations. You can use this
-mode of the tool with
+<para>You can use this tool with
 <citerefentry><refentrytitle>nc</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-to examine RTCM feeds from DGPSIP servers or NTRIP broadcasters.</para>
+to examine AIS feeds from AIS pooling services, RTCM feeds from RTCM
+receivers or NTRIP broadcasters.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -62,6 +63,9 @@ to examine RTCM feeds from DGPSIP servers or NTRIP broadcasters.</para>
 <para>The <option>-d</option> option tells the program to decode
 packets presented on standard input to standard output. This is the
 default behavior.</para>
+
+<para>The <option>-j</option> explicitly sets the output dump format
+to JSON (the default behavior).</para>
 
 <para>The <option>-e</option> option option tells the program to
 encode JSON on standard input to JSON on standard output. This option
@@ -71,9 +75,6 @@ code.</para>
 <para>The <option>-u</option> suppresses scaling of AIS data to float
 quantities and text expansion of numeric codes.  A dump with this
 option is lossless.</para>
-
-<para>The <option>-j</option> explicitly sets the output dump format
-to JSON (the default behavior).</para>
 
 <para>The <option>-c</option> sets the AIS dump format to separate
 fields with an ASCII pipe symbol.  Fields are dumped in the order they
@@ -113,12 +114,9 @@ dump.</para>
 </refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This is a
-somewhat hacked version of an RTCM decoder originally written by
-Wolfgang Rupprecht.  There is a project page for
-<application>gpsd</application> <ulink
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
+project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
-
 </refsect1>
 
 </refentry>

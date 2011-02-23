@@ -1646,7 +1646,8 @@ will assert the ERR_SET bit in the top-level set member.</para>
 <refsect1 id='overview'><title>RTCM2</title>
 
 <para>RTCM-104 is a family of serial protocols used for broadcasting pseudorange
-corrections from differential-GPS reference stations.</para>
+corrections from differential-GPS reference stations. Many GPS receivers can
+accept these corrections to improve their reporting accuracy.</para>
 
 <para>RTCM-104 comes in two major and incompatible flavors, 2.x and
 3.x.  Each major flavor has minor (compatible) revisions.</para>
