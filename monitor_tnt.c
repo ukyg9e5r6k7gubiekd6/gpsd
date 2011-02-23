@@ -38,7 +38,7 @@ static void tnt_update(void)
 {
     /* 
      * We have to do our own field parsing because the way this
-     * gets valled, nmea_parse() is never called on the sentence.
+     * gets called, nmea_parse() is never called on the sentence.
      */
     (void)nmea_parse((char *)session.packet.outbuffer, &session);
 

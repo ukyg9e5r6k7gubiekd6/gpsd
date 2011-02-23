@@ -46,15 +46,8 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	    session->context->century = year - (year % 100);
 	}
 	return 0;
-    } else if (session->packet.type != NMEA_PACKET) {
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    if (session->packet.type == (*dp)->packet_type) {
-		(void)gpsd_switch_driver(session, (*dp)->type_name);
-		return (*dp)->parse_packet(session);
-	    }
-	}
-	return 0;
-    } else {			/* session->packet.type == NMEA_PACKET) */
+#ifdef NMEA_ENABLE
+    } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;
 	char *sentence = (char *)session->packet.outbuffer;
 
@@ -82,6 +75,15 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	    }
 	}
 	return st;
+#endif /* NMEA_ENABLE */
+    } else {
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if (session->packet.type == (*dp)->packet_type) {
+		(void)gpsd_switch_driver(session, (*dp)->type_name);
+		return (*dp)->parse_packet(session);
+	    }
+	}
+	return 0;
     }
 }
 
