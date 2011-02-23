@@ -37,6 +37,9 @@
    from the 'datawin' window for the GPS mode. */
 #define DATAWIN_GPS_FIELDS 9
 
+/* Count of optional fields that we'll display if we have the room. */
+#define DATAWIN_OPTIONAL_FIELDS 5
+
 /* This is how many display fields are output in the 'datawin' window
    when in COMPASS mode.  Change this value if you add or remove fields
    from the 'datawin' window for the COMPASS mode. */
@@ -67,6 +70,9 @@
 /* This is the minimum size we'll accept for the 'datawin' window in
    GPS mode. */
 #define MIN_GPS_DATAWIN_SIZE (DATAWIN_GPS_FIELDS + DATAWIN_OVERHEAD)
+
+/* And the maximum size we'll try to use */
+#define MAX_GPS_DATAWIN_SIZE (DATAWIN_GPS_FIELDS + DATAWIN_OPTIONAL_FIELDS + DATAWIN_OVERHEAD)
 
 /* This is the minimum size we'll accept for the 'datawin' window in
    COMPASS mode. */
@@ -282,26 +288,18 @@ static void windowsetup(void)
     } else
 #endif /* TRUENORTH */
     {
-	if (ysize == MAX_SATWIN_SIZE) {
+	if (ysize > MAX_GPS_DATAWIN_SIZE) {
+	    raw_flag = true;
+	    window_length = MAX_GPS_DATAWIN_SIZE;
+	} else if (ysize == MAX_GPS_DATAWIN_SIZE) {
 	    raw_flag = false;
-	    window_length = MAX_SATWIN_SIZE;
-	    display_sats = MAX_POSSIBLE_SATS;
-	} else if (ysize == MAX_SATWIN_SIZE + 1) {
-	    raw_flag = true;
-	    window_length = MAX_SATWIN_SIZE;
-	    display_sats = MAX_POSSIBLE_SATS;
-	} else if (ysize > MAX_SATWIN_SIZE + 2) {
-	    raw_flag = true;
-	    window_length = MAX_SATWIN_SIZE;
-	    display_sats = MAX_POSSIBLE_SATS;
+	    window_length = MAX_GPS_DATAWIN_SIZE;
 	} else if (ysize > MIN_GPS_DATAWIN_SIZE) {
-	    raw_flag = false;
-	    window_length = ysize - (int)raw_flag;
-	    display_sats = window_length - SATWIN_OVERHEAD - (int)raw_flag;
+	    raw_flag = true;
+	    window_length = MIN_GPS_DATAWIN_SIZE;
 	} else if (ysize == MIN_GPS_DATAWIN_SIZE) {
 	    raw_flag = false;
 	    window_length = MIN_GPS_DATAWIN_SIZE;
-	    display_sats = window_length - SATWIN_OVERHEAD - 1;
 	} else {
 	    (void)mvprintw(0, 0,
 			   "Your screen must be at least 80x%d to run cgps.",
@@ -312,6 +310,7 @@ static void windowsetup(void)
 	    (void)sleep(5);
 	    die(0);
 	}
+	display_sats = window_length - SATWIN_OVERHEAD - (int)raw_flag;
     }
 
 #ifdef TRUENORTH
@@ -385,7 +384,7 @@ static void windowsetup(void)
 	 * there in the first place because I arbitrarily thought they
 	 * sounded interesting. ;^) */
 
-	if (window_length >= (MIN_GPS_DATAWIN_SIZE + 5)) {
+	if (window_length == MAX_GPS_DATAWIN_SIZE) {
 	    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET,
 			    "Longitude Err:");
 	    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET,
