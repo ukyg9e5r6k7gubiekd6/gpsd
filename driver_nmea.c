@@ -1104,7 +1104,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 					      session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
 		/*
-		 * Must force this to be nz, as we're gong to rely on a zero
+		 * Must force this to be nz, as we're going to rely on a zero
 		 * value to mean "no previous tag" later.
 		 */
 		thistag = i + 1;

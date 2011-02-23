@@ -322,7 +322,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
     }
     if (event == event_configure) {
 	/*
-	 * And here's that reconfigure.  It's spplit up like this because
+	 * And here's that reconfigure.  It's split up like this because
 	 * receivers like the Garmin GPS-10 don't handle having having a lot of
 	 * probes shoved at them very well.
 	 */
