@@ -16,7 +16,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsdecode</refname>
-<refpurpose>decode GPS, RTCM or AIVDM streams into a readable format</refpurpose>
+<refpurpose>decode GPS, RTCM or AIS streams into a readable format</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -27,6 +27,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-e</arg>
       <arg choice='opt'>-j</arg>
       <arg choice='opt'>-u</arg>
+      <arg choice='opt'>-v</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V</arg>
 </cmdsynopsis>
@@ -38,10 +39,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 packet formats associated with GPS, AIS, and differential-correction
 services.  It produces a JSON dump on standard output from binary on
 standard input. The JSON is the same format documented in
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>; 
-this tool uses the same decoding logic as gpsd, but with a simpler interface
-intended for batch processing of data files.
-</para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>;
+this tool uses the same decoding logic as gpsd, but with a simpler
+interface intended for batch processing of data files.</para>
 
 <para>All sensor-input formats known to the GPSD project can be
 decoded by this tool.  These include: NMEA, AIVDM (the NMEA-derived
@@ -75,6 +75,10 @@ code.</para>
 <para>The <option>-u</option> suppresses scaling of AIS data to float
 quantities and text expansion of numeric codes.  A dump with this
 option is lossless.</para>
+
+<para>The <option>-v</option> enables dumping of textual packets
+to output as they are received on input, immediately preceding 
+corresponding output.</para>
 
 <para>The <option>-c</option> sets the AIS dump format to separate
 fields with an ASCII pipe symbol.  Fields are dumped in the order they

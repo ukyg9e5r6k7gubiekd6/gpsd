@@ -380,7 +380,9 @@ static void decode(FILE * fpin, FILE * fpout)
 
 	if (changed == ERROR_IS || changed == NODATA_IS)
 	    break;
-	else if ((changed & (REPORT_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
+	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
+	    (void)fputs((char *)session.packet.outbuffer, stdout);
+	if ((changed & (REPORT_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
 	    continue;
 	/*
 	 * We really ought to get rid of the non-JSON cases someday.
@@ -397,8 +399,6 @@ static void decode(FILE * fpin, FILE * fpout)
 #endif
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
-	    if (verbose >= 1)
-		(void)fputs((char *)session.packet.outbuffer, stdout);
 	    if ((changed & AIS_IS)!=0) {
 		aivdm_csv_dump(&session.gpsdata.ais, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
@@ -457,7 +457,7 @@ int main(int argc, char **argv)
     enum
     { doencode, dodecode } mode = dodecode;
 
-    while ((c = getopt(argc, argv, "cdejpuVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejpuvVD:")) != EOF) {
 	switch (c) {
 	case 'c':
 	    json = false;
@@ -479,6 +479,10 @@ int main(int argc, char **argv)
 	    scaled = false;
 	    break;
 
+	case 'v':
+	    verbose = 1;
+	    break;
+		
 	case 'D':
 	    verbose = atoi(optarg);
 	    gpsd_hexdump_level = verbose;
