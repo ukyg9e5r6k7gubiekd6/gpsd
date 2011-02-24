@@ -369,6 +369,7 @@ int gpsd_open(struct gps_device_t *session)
 	    gpsd_report(LOG_SPIN, "TCP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_tcp;
+	session->servicetype = service_sensor;
 	return session->gpsdata.gps_fd;
     /* or could be UDP */
     } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
@@ -392,6 +393,7 @@ int gpsd_open(struct gps_device_t *session)
 	    gpsd_report(LOG_SPIN, "UDP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_udp;
+	session->servicetype = service_sensor;
 	return session->gpsdata.gps_fd;
     }
 
@@ -400,6 +402,7 @@ int gpsd_open(struct gps_device_t *session)
      */
 
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
+    session->servicetype = service_sensor;
 
     /*@ -boolops -type @*/
     if (session->context->readonly

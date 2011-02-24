@@ -42,9 +42,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn,
 		       VERSION);
-	if (write(device->gpsdata.gps_fd, buf, strlen(buf)) == (ssize_t) strlen(buf))
-	    device->context->netgnss_service = netgnss_dgpsip;
-	else
+	if (write(device->gpsdata.gps_fd, buf, strlen(buf)) != (ssize_t) strlen(buf))
 	    gpsd_report(LOG_ERROR, "hello to DGPS server %s failed\n",
 			dgpsserver);
     } else
@@ -55,6 +53,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 
     if (opts >= 0)
 	(void)fcntl(device->gpsdata.gps_fd, F_SETFL, opts | O_NONBLOCK);
+    device->servicetype = service_dgpsip;
     return device->gpsdata.gps_fd;
 }
 

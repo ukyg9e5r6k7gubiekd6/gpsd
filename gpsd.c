@@ -1277,7 +1277,7 @@ static void consume_packets(struct gps_device_t *device)
     gpsd_report(LOG_RAW + 1, "polling %d\n",
 	    device->gpsdata.gps_fd);
 
-    if (device->context->netgnss_service == netgnss_ntrip
+    if (device->servicetype == service_ntrip
 	    && device->driver.ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */

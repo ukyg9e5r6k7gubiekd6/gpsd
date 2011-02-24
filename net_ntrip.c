@@ -471,10 +471,10 @@ int ntrip_open(struct gps_device_t *device, char *caster)
     int ret;
     char t[strlen(caster + 1)];
     char *tmp = t;
-    struct gps_context_t *context = device->context;
 
     switch (device->driver.ntrip.conn_state) {
 	case ntrip_conn_init:
+	    device->servicetype = service_ntrip;
 	    ntrip_stream.set = false;
 	    (void)strlcpy(tmp, caster, strlen(caster));
 
@@ -515,7 +515,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    }
 
 	    /* this has to be done here, because it is needed for multi-stage connection */
-	    context->netgnss_service = netgnss_ntrip;
 	    strncpy(ntrip_stream.mountpoint, stream, 101); /* magic numbers from struct definitions */
 	    strncpy(ntrip_stream.credentials, auth, 128); /* magic numbers from struct definitions */
 	    strncpy(ntrip_stream.url, url, 256);

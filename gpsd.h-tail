@@ -181,7 +181,6 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
     /* DGPS status */
-    enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip} netgnss_service;	/* type of GNSS service */
     int fixcnt;				/* count of good fixes seen */
     size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
@@ -323,6 +322,15 @@ typedef enum {source_unknown,
 	      source_udp,	/* UDP stream: case detected but not used */ 
 } sourcetype_t;
 
+/*
+ * Each input source also has an associated service type.
+ */
+typedef enum {service_none,
+	      service_sensor,
+	      service_dgpsip,
+	      service_ntrip
+} servicetype_t;
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
@@ -330,6 +338,7 @@ struct gps_device_t {
     struct gps_context_t	*context;
     bool is_serial;
     sourcetype_t sourcetype;
+    servicetype_t servicetype;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
