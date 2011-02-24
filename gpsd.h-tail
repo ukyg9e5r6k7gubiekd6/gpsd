@@ -325,7 +325,7 @@ typedef enum {source_unknown,
 /*
  * Each input source also has an associated service type.
  */
-typedef enum {service_none,
+typedef enum {service_unknown,
 	      service_sensor,
 	      service_dgpsip,
 	      service_ntrip
@@ -336,7 +336,6 @@ struct gps_device_t {
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
     struct gps_context_t	*context;
-    bool is_serial;
     sourcetype_t sourcetype;
     servicetype_t servicetype;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */

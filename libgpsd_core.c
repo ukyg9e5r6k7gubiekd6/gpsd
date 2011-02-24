@@ -196,8 +196,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->device_type = NULL;	/* start by hunting packets */
     session->observed = 0;
     session->rtcmtime = 0;
-    session->is_serial = false;	/* gpsd_open() sets this */
     session->sourcetype = source_unknown;	/* gpsd_open() sets this */
+    session->servicetype = service_unknown;	/* gpsd_open() sets this */
     /*@ -temptrans @*/
     session->context = context;
     /*@ +temptrans @*/
@@ -732,7 +732,8 @@ int gpsd_activate(struct gps_device_t *session)
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE
-	if (session->is_serial)  {
+	/* if it's a sensor, it must be probed */
+	if (session->servicetype == service_sensor)  {
 	    const struct gps_type_t **dp;
 
 	    /*@ -mustfreeonly @*/
