@@ -730,53 +730,57 @@ class Base:
         gtk.main()
 
 if __name__ == "__main__":
-    (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:V?",
-                                         ['verbose'])
-    debug = 0
-    degreefmt = 'd'
-    unit_system = None
-    for (opt, val) in options:
-        if opt in '-D':
-            debug = int(val)
-        elif opt == '-l':
-            degreeformat = val
-        elif opt == '-u':
-            unit_system = val
-        elif opt in ('-?', '-h', '--help'):
-            print __doc__
-            sys.exit(0)
-        elif opt == 'V':
-            sys.stderr.write("xgps 1.0\n")
-            sys.exit(0)
-
-    degreefmt = {'d':gps.clienthelpers.deg_dd,
-                 'm':gps.clienthelpers.deg_ddmm,
-                 's':gps.clienthelpers.deg_ddmmss}[degreefmt]
-
-    (host, port, device) = ("localhost", "2947", None)
-    if len(arguments):
-        args = arguments[0].split(":")
-        if len(args) >= 1:
-            host = args[0]
-        if len(args) >= 2:
-            port = args[1]
-        if len(args) >= 3:
-            device = args[2]
-
-    base = Base(deg_type=degreefmt)
-    base.set_units(unit_system)
     try:
-        daemon = gps.gps(host=host,
-                         port=port,
-                         mode=gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
-                         verbose=debug)
-        base.watch(daemon, device)
-        base.main()
-    except socket.error:
-        w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
-                              flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                              buttons=gtk.BUTTONS_CANCEL)
-        w.set_markup("gpsd is not running.")
-        w.run()
-        w.destroy()
+        (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:V?",
+                                             ['verbose'])
+        debug = 0
+        degreefmt = 'd'
+        unit_system = None
+        for (opt, val) in options:
+            if opt in '-D':
+                debug = int(val)
+            elif opt == '-l':
+                degreeformat = val
+            elif opt == '-u':
+                unit_system = val
+            elif opt in ('-?', '-h', '--help'):
+                print __doc__
+                sys.exit(0)
+            elif opt == 'V':
+                sys.stderr.write("xgps 1.0\n")
+                sys.exit(0)
+
+        degreefmt = {'d':gps.clienthelpers.deg_dd,
+                     'm':gps.clienthelpers.deg_ddmm,
+                     's':gps.clienthelpers.deg_ddmmss}[degreefmt]
+
+        (host, port, device) = ("localhost", "2947", None)
+        if len(arguments):
+            args = arguments[0].split(":")
+            if len(args) >= 1:
+                host = args[0]
+            if len(args) >= 2:
+                port = args[1]
+            if len(args) >= 3:
+                device = args[2]
+
+        base = Base(deg_type=degreefmt)
+        base.set_units(unit_system)
+        try:
+            daemon = gps.gps(host=host,
+                             port=port,
+                             mode=gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
+                             verbose=debug)
+            base.watch(daemon, device)
+            base.main()
+        except socket.error:
+            w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
+                                  flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                                  buttons=gtk.BUTTONS_CANCEL)
+            w.set_markup("gpsd is not running.")
+            w.run()
+            w.destroy()
+    except KeyboardInterrupt:
+        pass
+
 
