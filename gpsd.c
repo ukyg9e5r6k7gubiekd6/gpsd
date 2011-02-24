@@ -591,8 +591,6 @@ static void deactivate_device(struct gps_device_t *device)
 	if (context.dsock == device->gpsdata.gps_fd) {
 		context.dsock = -1;
 	}
-	context.ntrip_conn_state = ntrip_conn_init;
-	context.ntrip_sourcetable_parse = false;
 	gpsd_deactivate(device);
     }
 }
@@ -1283,20 +1281,20 @@ static void consume_packets(struct gps_device_t *device)
 	    device->gpsdata.gps_fd);
 
     if (device->context->netgnss_service == netgnss_ntrip
-	    && device->context->ntrip_conn_state != ntrip_conn_established) {
+	    && device->driver.ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */
 	if (device->gpsdata.gps_fd != -1) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	}
 	(void)ntrip_open(device, "");
-	if (device->context->ntrip_conn_state == ntrip_conn_err) {
+	if (device->driver.ntrip.conn_state == ntrip_conn_err) {
 	    gpsd_report(LOG_WARN,
 		    "connection to ntrip server failed\n");
-	    device->context->ntrip_conn_state = ntrip_conn_init;
+	    device->driver.ntrip.conn_state = ntrip_conn_init;
 	    deactivate_device(device);
 	} else {
-	    if (device->context->ntrip_conn_state == ntrip_conn_established) {
+	    if (device->driver.ntrip.conn_state == ntrip_conn_established) {
 		device->context->dsock = device->gpsdata.gps_fd;
 	    }
 	    FD_SET(device->gpsdata.gps_fd, &all_fds);
@@ -1326,8 +1324,8 @@ static void consume_packets(struct gps_device_t *device)
 		if (device->zerokill) {
 		    /* failed timeout-and-reawake, kill it */
 		    deactivate_device(device);
-		    if (device->context->ntrip_works) {
-			device->context->ntrip_works = false; // reset so we try this once only
+		    if (device->driver.ntrip.works) {
+			device->driver.ntrip.works = false; // reset so we try this once only
 			if (gpsd_activate(device) < 0) {
 			    gpsd_report(LOG_WARN, "reconnect to ntrip server failed\n");
 			} else {
