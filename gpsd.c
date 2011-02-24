@@ -1282,17 +1282,17 @@ static void consume_packets(struct gps_device_t *device)
      * may not yet be completed.  Try to ratchet things forward.
      */
     if (device->servicetype == service_ntrip
-	    && device->driver.ntrip.conn_state != ntrip_conn_established) {
+	    && device->ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */
 	if (device->gpsdata.gps_fd != -1) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	}
 	(void)ntrip_open(device, "");
-	if (device->driver.ntrip.conn_state == ntrip_conn_err) {
+	if (device->ntrip.conn_state == ntrip_conn_err) {
 	    gpsd_report(LOG_WARN,
 		    "connection to ntrip server failed\n");
-	    device->driver.ntrip.conn_state = ntrip_conn_init;
+	    device->ntrip.conn_state = ntrip_conn_init;
 	    deactivate_device(device);
 	} else {
 	    FD_SET(device->gpsdata.gps_fd, &all_fds);
@@ -1322,8 +1322,8 @@ static void consume_packets(struct gps_device_t *device)
 		if (device->zerokill) {
 		    /* failed timeout-and-reawake, kill it */
 		    deactivate_device(device);
-		    if (device->driver.ntrip.works) {
-			device->driver.ntrip.works = false; // reset so we try this once only
+		    if (device->ntrip.works) {
+			device->ntrip.works = false; // reset so we try this once only
 			if (gpsd_activate(device) < 0) {
 			    gpsd_report(LOG_WARN, "reconnect to ntrip server failed\n");
 			} else {

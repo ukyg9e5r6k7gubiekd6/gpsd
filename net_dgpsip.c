@@ -25,7 +25,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
     char *colon, *dgpsport = "rtcm-sc104";
     int opts;
 
-    device->driver.dgpsip.reported = false;
+    device->dgpsip.reported = false;
     if ((colon = strchr(dgpsserver, ':')) != NULL) {
 	dgpsport = colon + 1;
 	*colon = '\0';
@@ -66,8 +66,8 @@ void dgpsip_report(struct gps_device_t *session)
      * 10 is an arbitrary number, the point is to have gotten several good
      * fixes before reporting usage to our DGPSIP server.
      */
-    if (session->context->fixcnt > 10 && !session->driver.dgpsip.reported) {
-	session->driver.dgpsip.reported = true;
+    if (session->context->fixcnt > 10 && !session->dgpsip.reported) {
+	session->dgpsip.reported = true;
 	if (session->gpsdata.gps_fd > -1) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",

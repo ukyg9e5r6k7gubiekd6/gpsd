@@ -228,13 +228,13 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 
 	gpsd_report(LOG_RAW, "Ntrip source table buffer %s\n", buf);
 
-	sourcetable = device->driver.ntrip.sourcetable_parse;
+	sourcetable = device->ntrip.sourcetable_parse;
 	if (!sourcetable) {
 	    /* parse SOURCETABLE */
 	    if (strncmp(line, NTRIP_SOURCETABLE, strlen(NTRIP_SOURCETABLE)) ==
 		    0) {
 		sourcetable = true;
-		device->driver.ntrip.sourcetable_parse = true;
+		device->ntrip.sourcetable_parse = true;
 		llen = (ssize_t) strlen(NTRIP_SOURCETABLE);
 		line += llen;
 		len -= llen;
@@ -472,9 +472,11 @@ int ntrip_open(struct gps_device_t *device, char *caster)
     char t[strlen(caster + 1)];
     char *tmp = t;
 
-    switch (device->driver.ntrip.conn_state) {
+    switch (device->ntrip.conn_state) {
 	case ntrip_conn_init:
 	    device->servicetype = service_ntrip;
+	    device->ntrip.works = false;
+	    device->ntrip.sourcetable_parse = false;
 	    ntrip_stream.set = false;
 	    (void)strlcpy(tmp, caster, strlen(caster));
 
@@ -489,7 +491,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    gpsd_report(LOG_ERROR,
 			    "can't extract user-ID and password from %s\n",
 			    caster);
-		    device->driver.ntrip.conn_state = ntrip_conn_err;
+		    device->ntrip.conn_state = ntrip_conn_err;
 		    return -1;
 		}
 	    }
@@ -501,7 +503,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		/* todo: add autoconnect like in dgpsip.c */
 		gpsd_report(LOG_ERROR, "can't extract Ntrip stream from %s\n",
 			caster);
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
 	    if ((colon = strchr(tmp, ':')) != NULL) {
@@ -522,16 +524,16 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 
 	    ret = ntrip_stream_req_probe();
 	    if (ret == -1) {
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
 	    device->gpsdata.gps_fd = ret;
-	    device->driver.ntrip.conn_state = ntrip_conn_sent_probe;
+	    device->ntrip.conn_state = ntrip_conn_sent_probe;
 	    return ret;
 	case ntrip_conn_sent_probe:
 	    ret = ntrip_sourcetable_parse(device);
 	    if (ret == -1) {
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
 	    if (ret == 0 && ntrip_stream.set == false) {
@@ -539,25 +541,25 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    }
 	    (void)close(device->gpsdata.gps_fd);
 	    if (ntrip_auth_encode(&ntrip_stream, ntrip_stream.credentials, ntrip_stream.authStr, 128) != 0) {
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
 	    ret = ntrip_stream_get_req();
 	    if (ret == -1) {
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
 	    device->gpsdata.gps_fd = ret;
-	    device->driver.ntrip.conn_state = ntrip_conn_sent_get;
+	    device->ntrip.conn_state = ntrip_conn_sent_get;
 	    break;
 	case ntrip_conn_sent_get:
 	    ret = ntrip_stream_get_parse(device->gpsdata.gps_fd);
 	    if (ret == -1) {
-		device->driver.ntrip.conn_state = ntrip_conn_err;
+		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
-	    device->driver.ntrip.conn_state = ntrip_conn_established;
-	    device->driver.ntrip.works = true; // we know, this worked.
+	    device->ntrip.conn_state = ntrip_conn_established;
+	    device->ntrip.works = true; // we know, this worked.
 	    break;
 	case ntrip_conn_established:
 	case ntrip_conn_err:

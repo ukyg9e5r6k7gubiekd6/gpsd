@@ -516,27 +516,6 @@ struct gps_device_t {
 	    unsigned int    bufindex;
 	} isgps;
 #endif /* BINARY_ENABLE */
-
-	/* 
-	 * State of an NTRIP connection.  Havoc will ensue if ntrip_conn_init
-	 * is not 0, as this is initialized by memset(... '\0', ...).
-	 */
-	struct {
-	    enum {
-		ntrip_conn_init,
-		ntrip_conn_sent_probe,
-		ntrip_conn_sent_get,
-		ntrip_conn_established,
-		ntrip_conn_err
-	    } conn_state; 	/* connection state for multi stage connect */
-	    bool works;		/* marks a working connection, so we try to reconnect once */
-	    bool sourcetable_parse;	/* have we read the sourcetable header? */
-	} ntrip;
-
-	/* State of a DGPSIP connection */
-	struct {
-	    bool reported;
-	} dgpsip;
     } driver;
     /*
      * Auxiliary structures for parsing data that can be interleaved with
@@ -556,6 +535,25 @@ struct gps_device_t {
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */
     double emit_time;		/* emission time (-> E2) */
 #endif /* TIMING_ENABLE */
+    /* 
+     * State of an NTRIP connection.  We don't want to zero this on every
+     * activation, otherwise the connection state will get lost 
+     */
+    struct {
+	enum {
+	    ntrip_conn_init,
+	    ntrip_conn_sent_probe,
+	    ntrip_conn_sent_get,
+	    ntrip_conn_established,
+	    ntrip_conn_err
+	} conn_state; 	/* connection state for multi stage connect */
+	bool works;		/* marks a working connection, so we try to reconnect once */
+	bool sourcetable_parse;	/* have we read the sourcetable header? */
+    } ntrip;
+    /* State of a DGPSIP connection */
+    struct {
+	bool reported;
+    } dgpsip;
 };
 
 /* logging levels */
