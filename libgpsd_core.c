@@ -338,7 +338,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
         if ( 0 > time_pps_getcap(kernelpps_handle, &caps)) {
 	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
         } else {
-	    gpsd_report(LOG_ERROR, "KPPS caps %0x\n", caps);
+	    gpsd_report(LOG_INF, "KPPS caps %0x\n", caps);
         }
 
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
