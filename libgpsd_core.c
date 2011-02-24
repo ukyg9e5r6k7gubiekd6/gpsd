@@ -737,6 +737,25 @@ int gpsd_activate(struct gps_device_t *session)
     if (session->gpsdata.gps_fd < 0)
 	return -1;
     else {
+#ifdef NON_NMEA_ENABLE
+       const struct gps_type_t **dp;
+
+       /*@ -mustfreeonly @*/
+       for (dp = gpsd_drivers; *dp; dp++) {
+           (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+           if ((*dp)->probe_detect != NULL
+               && (*dp)->probe_detect(session) != 0) {
+               gpsd_report(LOG_PROG, "probe found %s driver...\n",
+                           (*dp)->type_name);
+               session->device_type = *dp;
+               gpsd_assert_sync(session);
+               goto foundit;
+           }
+       }
+       /*@ +mustfreeonly @*/
+       gpsd_report(LOG_PROG, "no probe matched...\n");
+      foundit:
+#endif /* NON_NMEA_ENABLE */
 	gpsd_clear(session);
 	gpsd_report(LOG_INF,
 		    "gpsd_activate(): activated GPS (fd %d)\n",
