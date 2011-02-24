@@ -1201,8 +1201,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
     &evermore_binary,
 #endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE
-    &garmin_usb_binary,
+    /* be sure to try Garmin Serial Binary before Garmin USB Binary */
     &garmin_ser_binary,
+    &garmin_usb_binary,
 #endif /* GARMIN_ENABLE */
 #ifdef GEOSTAR_ENABLE
     &geostar_binary,
