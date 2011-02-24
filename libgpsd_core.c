@@ -738,7 +738,7 @@ int gpsd_activate(struct gps_device_t *session)
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE
-	if (session->context->netgnss_service != netgnss_ntrip)  {
+	if (session->is_serial)  {
 	    const struct gps_type_t **dp;
 
 	    /*@ -mustfreeonly @*/
