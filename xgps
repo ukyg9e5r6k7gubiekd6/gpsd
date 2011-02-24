@@ -560,7 +560,8 @@ class Base:
 
     def update_time(self, data):
         if hasattr(data, "time"):
-            return data.time
+            # str() just in case we get an old-style float.
+            return str(data.time)
         else:
             return "n/a"
 
