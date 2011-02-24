@@ -362,7 +362,11 @@ void json_device_dump(const struct gps_device_t *device,
 	    (void)strlcat(reply, "\",", replylen);
 	}
 	/*@+mustfreefresh@*/
-	if (device->is_serial) {
+	/*
+	 * There's an assumption here: Anything that we type service_sensor is 
+	 * a serial device with the usual control parameters.
+	 */
+	if (device->servicetype == service_sensor) {
 	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 			   device->gpsdata.dev.driver_mode,
