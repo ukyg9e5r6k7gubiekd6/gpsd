@@ -18,9 +18,6 @@
 #define NETGNSS_DGPSIP	"dgpsip://"
 #define NETGNSS_NTRIP	"ntrip://"
 
-/* Where to find the list of DGPSIP correction servers, if there is one */
-#define DGPSIP_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
-
 bool netgnss_uri_check(char *name)
 /* is given string a valid URI for GNSS/DGPS service? */
 {
@@ -40,10 +37,10 @@ int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
 #endif
 
     if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP)) == 0)
-	return dgpsip_open(dev->context, netgnss_service + strlen(NETGNSS_DGPSIP));
+	return dgpsip_open(dev, netgnss_service + strlen(NETGNSS_DGPSIP));
 
 #ifndef REQUIRE_DGNSS_PROTO
-    return dgpsip_open(dev->context, netgnss_service);
+    return dgpsip_open(dev, netgnss_service);
 #else
     gpsd_report(LOG_ERROR,
 		"Unknown or unspecified DGNSS protocol for service %s\n",
@@ -63,14 +60,6 @@ void netgnss_report(struct gps_device_t *session)
     else if (session->context->netgnss_service == netgnss_ntrip)
 	ntrip_report(session);
 #endif
-}
-
-void netgnss_autoconnect(struct gps_context_t *context, double lat,
-			 double lon)
-{
-    if (context->netgnss_service == netgnss_dgpsip) {
-	dgpsip_autoconnect(context, lat, lon, DGPSIP_SERVER_LIST);
-    }
 }
 
 /* *INDENT-OFF* */

@@ -18,7 +18,7 @@
 #include "gpsd.h"
 
 /*@ -branchstate */
-int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
+int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 /* open a connection to a DGPSIP server */
 {
     char hn[256], buf[BUFSIZ];
@@ -32,29 +32,29 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
     if (!getservbyname(dgpsport, "tcp"))
 	dgpsport = DEFAULT_RTCM_PORT;
 
-    context->dsock =
+    device->gpsdata.gps_fd =
 	netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
-    if (context->dsock >= 0) {
+    if (device->gpsdata.gps_fd >= 0) {
 	gpsd_report(LOG_PROG, "connection to DGPS server %s established.\n",
 		    dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn,
 		       VERSION);
-	if (write(context->dsock, buf, strlen(buf)) == (ssize_t) strlen(buf))
-	    context->netgnss_service = netgnss_dgpsip;
+	if (write(device->gpsdata.gps_fd, buf, strlen(buf)) == (ssize_t) strlen(buf))
+	    device->context->netgnss_service = netgnss_dgpsip;
 	else
 	    gpsd_report(LOG_ERROR, "hello to DGPS server %s failed\n",
 			dgpsserver);
     } else
 	gpsd_report(LOG_ERROR,
 		    "can't connect to DGPS server %s, netlib error %d.\n",
-		    dgpsserver, context->dsock);
-    opts = fcntl(context->dsock, F_GETFL);
+		    dgpsserver, device->gpsdata.gps_fd);
+    opts = fcntl(device->gpsdata.gps_fd, F_GETFL);
 
     if (opts >= 0)
-	(void)fcntl(context->dsock, F_SETFL, opts | O_NONBLOCK);
-    return context->dsock;
+	(void)fcntl(device->gpsdata.gps_fd, F_SETFL, opts | O_NONBLOCK);
+    return device->gpsdata.gps_fd;
 }
 
 /*@ +branchstate */
@@ -68,13 +68,13 @@ void dgpsip_report(struct gps_device_t *session)
      */
     if (session->context->fixcnt > 10 && !session->context->sentdgps) {
 	session->context->sentdgps = true;
-	if (session->context->dsock > -1) {
+	if (session->gpsdata.gps_fd > -1) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",
 			   session->gpsdata.fix.latitude,
 			   session->gpsdata.fix.longitude,
 			   session->gpsdata.fix.altitude);
-	    if (write(session->context->dsock, buf, strlen(buf)) ==
+	    if (write(session->gpsdata.gps_fd, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
 	    else
@@ -83,80 +83,3 @@ void dgpsip_report(struct gps_device_t *session)
     }
 }
 
-#define DGPS_THRESHOLD	1600000	/* max. useful dist. from DGPS server (m) */
-#define SERVER_SAMPLE	12	/* # of servers within threshold to check */
-
-struct dgps_server_t
-{
-    double lat, lon;
-    char server[257];
-    double dist;
-};
-
-static int srvcmp(const void *s, const void *t)
-{
-    return (int)(((const struct dgps_server_t *)s)->dist - ((const struct dgps_server_t *)t)->dist);	/* fixes: warning: cast discards qualifiers from pointer target type */
-}
-
-void dgpsip_autoconnect(struct gps_context_t *context,
-			double lat, double lon, const char *serverlist)
-/* tell the library to talk to the nearest DGPSIP server */
-{
-    struct dgps_server_t keep[SERVER_SAMPLE], hold, *sp, *tp;
-    char buf[BUFSIZ];
-    FILE *sfp = fopen(serverlist, "r");
-
-    if (sfp == NULL) {
-	gpsd_report(LOG_ERROR, "no DGPS server list found.\n");
-	context->dsock = -2;	/* don't try this again */
-	return;
-    }
-
-    for (sp = keep; sp < keep + SERVER_SAMPLE; sp++) {
-	sp->dist = DGPS_THRESHOLD;
-	sp->server[0] = '\0';
-    }
-    /*@ -usedef @*/
-    while (fgets(buf, (int)sizeof(buf), sfp)) {
-	char *cp = strchr(buf, '#');
-	if (cp != NULL)
-	    *cp = '\0';
-	if (sscanf(buf, "%lf %lf %256s", &hold.lat, &hold.lon, hold.server) ==
-	    3) {
-	    hold.dist = earth_distance(lat, lon, hold.lat, hold.lon);
-	    tp = NULL;
-	    /*
-	     * The idea here is to look for a server in the sample array
-	     * that is (a) closer than the one we're checking, and (b)
-	     * furtherest away of all those that are closer.  Replace it.
-	     * In this way we end up with the closest possible set.
-	     */
-	    for (sp = keep; sp < keep + SERVER_SAMPLE; sp++)
-		if (hold.dist < sp->dist
-		    && (tp == NULL || hold.dist > tp->dist))
-		    tp = sp;
-	    if (tp != NULL)
-		memcpy(tp, &hold, sizeof(struct dgps_server_t));
-	}
-    }
-    (void)fclose(sfp);
-
-    if (keep[0].server[0] == '\0') {
-	gpsd_report(LOG_ERROR, "no DGPS servers within %dm.\n",
-		    (int)(DGPS_THRESHOLD / 1000));
-	context->dsock = -2;	/* don't try this again */
-	return;
-    }
-    /*@ +usedef @*/
-
-    /* sort them and try the closest first */
-    qsort((void *)keep, SERVER_SAMPLE, sizeof(struct dgps_server_t), srvcmp);
-    for (sp = keep; sp < keep + SERVER_SAMPLE; sp++) {
-	if (sp->server[0] != '\0') {
-	    gpsd_report(LOG_INF, "%s is %dkm away.\n", sp->server,
-			(int)(sp->dist / 1000));
-	    if (dgpsip_open(context, sp->server) >= 0)
-		break;
-	}
-    }
-}

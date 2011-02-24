@@ -184,7 +184,6 @@ struct gps_context_t {
     bool sentdgps;			/* have we sent a DGPS report? */
     enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip} netgnss_service;	/* type of GNSS service */
     int fixcnt;				/* count of good fixes seen */
-    socket_t dsock;			/* socket to DGPSIP server/Ntrip caster */
     size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
@@ -589,7 +588,7 @@ extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 extern void rtcm_relay(struct gps_device_t *);
 extern void rtcm2_output_mag(isgps30bits_t *, FILE *);
 
-extern int dgpsip_open(struct gps_context_t *, const char *);
+extern int dgpsip_open(struct gps_device_t *, const char *);
 extern void dgpsip_report(struct gps_device_t *);
 extern void dgpsip_autoconnect(struct gps_context_t *, 
 			       double, double, const char *);

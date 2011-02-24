@@ -162,7 +162,6 @@ void gps_context_init(struct gps_context_t *context)
 	.sentdgps	    = false,
 	.netgnss_service  = netgnss_none,
 	.fixcnt	    = 0,
-	.dsock	    = -1,
 	.rtcmbytes	    = 0,
 	.rtcmbuf	    = {'\0'},
 	.rtcmtime	    = 0,

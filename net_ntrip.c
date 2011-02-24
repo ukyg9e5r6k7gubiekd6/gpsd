@@ -582,10 +582,10 @@ void ntrip_report(struct gps_device_t *session)
     count ++;
     if (ntrip_stream.nmea != 0
 	    && session->context->fixcnt > 10 && (count % 5)==0) {
-	if (session->context->dsock > -1) {
+	if (session->gpsdata.gps_fd > -1) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(session, buf, sizeof(buf));
-	    if (write(session->context->dsock, buf, strlen(buf)) ==
+	    if (write(session->gpsdata.gps_fd, buf, strlen(buf)) ==
 		    (ssize_t) strlen(buf)) {
 		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
 	    } else {
