@@ -321,7 +321,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case NMEA_BINARY_NL:
 	if (c == '$') {
 	    character_pushback(lexer);
-	    lexer->state = NMEA_RECOGNIZED;	/* CRC will reject it */
+	    lexer->state = NMEA_RECOGNIZED;
 	} else
 	    lexer->state = NMEA_BINARY_BODY;
 	break;
@@ -1193,41 +1193,50 @@ void packet_parse(struct gps_packet_t *lexer)
 	}
 #ifdef NMEA_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
-	    bool checksum_ok = true;
-	    char csum[3] = { '0', '0', '0' };
-	    char *end;
 	    /*
-	     * Back up past any whitespace.  Need to do this because
-	     * at least one GPS (the Firefly 1a) emits \r\r\n
+	     * $PASHR packets have no checksum. Avoid the possibility
+	     * that random garbage might make it look like they do.
 	     */
-	    for (end = (char *)lexer->inbufptr - 1; isspace(*end); end--)
-		continue;
-	    while (strchr("0123456789ABCDEF", *end))
-		--end;
-	    if (*end == '*') {
-		unsigned int n, crc = 0;
-		for (n = 1; (char *)lexer->inbuffer + n < end; n++)
-		    crc ^= lexer->inbuffer[n];
-		(void)snprintf(csum, sizeof(csum), "%02X", crc);
-		checksum_ok = (csum[0] == toupper(end[1])
-			       && csum[1] == toupper(end[2]));
+	    if (strncmp((const char *)lexer->inbuffer, "$PASHR,", 7) != 0)
+	    {
+		bool checksum_ok = true;
+		char csum[3] = { '0', '0', '0' };
+		char *end;
+		/*
+		 * Back up past any whitespace.  Need to do this because
+		 * at least one GPS (the Firefly 1a) emits \r\r\n
+		 */
+		for (end = (char *)lexer->inbufptr - 1; isspace(*end); end--)
+		    continue;
+		while (strchr("0123456789ABCDEF", *end))
+		    --end;
+		if (*end == '*') {
+		    unsigned int n, crc = 0;
+		    for (n = 1; (char *)lexer->inbuffer + n < end; n++)
+			crc ^= lexer->inbuffer[n];
+		    (void)snprintf(csum, sizeof(csum), "%02X", crc);
+		    checksum_ok = (csum[0] == toupper(end[1])
+				   && csum[1] == toupper(end[2]));
+		}
+		if (!checksum_ok) {
+		    gpsd_report(LOG_WARN,
+				"bad checksum in NMEA packet; expected %s.\n",
+				csum);
+		    packet_accept(lexer, BAD_PACKET);
+		    lexer->state = GROUND_STATE;
+		    packet_discard(lexer);
+		    break;    /* exit case */
+		}
 	    }
-	    if (checksum_ok) {
+	    /* checksum passed or not present */
 #ifdef AIVDM_ENABLE
-		if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
-		    packet_accept(lexer, AIVDM_PACKET);
-		else if (strncmp((char *)lexer->inbuffer, "!AIVDO", 6) == 0)
-		    packet_accept(lexer, AIVDM_PACKET);
-		else
+	    if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (strncmp((char *)lexer->inbuffer, "!AIVDO", 6) == 0)
+		packet_accept(lexer, AIVDM_PACKET);
+	    else
 #endif /* AIVDM_ENABLE */
-		    packet_accept(lexer, NMEA_PACKET);
-	    } else {
-		gpsd_report(LOG_WARN,
-			    "bad checksum in NMEA packet; expected %s.\n",
-			    csum);
-		packet_accept(lexer, BAD_PACKET);
-		lexer->state = GROUND_STATE;
-	    }
+		packet_accept(lexer, NMEA_PACKET);
 	    packet_discard(lexer);
 	    break;
 	}
