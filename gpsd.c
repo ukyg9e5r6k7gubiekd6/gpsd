@@ -1277,6 +1277,10 @@ static void consume_packets(struct gps_device_t *device)
     gpsd_report(LOG_RAW + 1, "polling %d\n",
 	    device->gpsdata.gps_fd);
 
+    /*
+     * Strange special case - the opening transaction on an NTRIP connection
+     * may not yet be completed.  Try to ratchet things forward.
+     */
     if (device->servicetype == service_ntrip
 	    && device->driver.ntrip.conn_state != ntrip_conn_established) {
 
