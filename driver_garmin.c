@@ -2,10 +2,15 @@
  * This file contains two drivers for Garmin receivers and some code
  * shared by both drivers.
  *
- * The driver "garmin_binary" handles the Garmin binary packet
+ * One driver "garmin_usb_binary" handles the Garmin binary packet
  * format supported by the USB Garmins tested with the Garmin 18 and
  * other models.  (There is also "garmin_usb_binary_old".)  These are ONLY
  * for USB devices reporting as: 091e:0003.
+ *
+ * The other driver "garmin_ser_binary" is for Garmin receivers via a
+ * serial port, whether or not one uses a USB/serial adaptor or a real
+ * serial port.  These receivers provide adequate NMEA support, so it
+ * often makes sense to just put them into NMEA mode.
  *
  * On Linux, USB Garmins (091e:0003) need the Linux garmin_gps driver and
  * will not function without it.  On other operating systems, it is clear
@@ -1350,9 +1355,9 @@ const struct gps_type_t garmin_usb_binary_old =
 #endif /* __UNUSED__ */
 
 /* *INDENT-OFF* */
-const struct gps_type_t garmin_binary =
+const struct gps_type_t garmin_usb_binary =
 {
-    .type_name      = "Garmin binary",	/* full name of type */
+    .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger        = NULL,		/* no trigger, it has a probe */
@@ -1364,7 +1369,35 @@ const struct gps_type_t garmin_binary =
     .event_hook     = garmin_event_hook,/* lifetime ebent handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = garmin_switcher,	/* Garmin USB Binary has no NMEA */
+    .mode_switcher  = NULL,	        /* Garmin USB Binary has no NMEA */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
+#endif /* ALLOW_RECONFIGURE */
+#ifdef ALLOW_CONTROLSEND
+    .control_send   = garmin_control_send,	/* send raw bytes */
+#endif /* ALLOW_CONTROLSEND */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = garmin_ntp_offset,
+#endif /* NTPSHM_ ENABLE */
+};
+/* *INDENT-ON* */
+
+/* *INDENT-OFF* */
+const struct gps_type_t garmin_ser_binary =
+{
+    .type_name      = "Garmin Serial binary",	/* full name of type */
+    .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .trigger        = NULL,		/* no trigger, it has a probe */
+    .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
+    .probe_detect   = NULL,        	/* how to detect at startup time */
+    .get_packet     = generic_get,       /* how to grab a packet */
+    .parse_packet   = garmin_ser_parse,	/* parse message packets */
+    .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+    .event_hook     = NULL,	        /* lifetime event handler */
+#ifdef ALLOW_RECONFIGURE
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */

@@ -1152,7 +1152,8 @@ static const struct gps_type_t aivdm = {
 /* *INDENT-ON* */
 #endif /* AIVDM_ENABLE */
 
-extern const struct gps_type_t garmin_binary, geostar_binary;
+extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
+extern const struct gps_type_t geostar_binary;
 extern const struct gps_type_t tsip_binary, oncore_binary;
 extern const struct gps_type_t evermore_binary, italk_binary;
 extern const struct gps_type_t navcom_binary, superstar2_binary;
@@ -1200,7 +1201,8 @@ static const struct gps_type_t *gpsd_driver_array[] = {
     &evermore_binary,
 #endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE
-    &garmin_binary,
+    &garmin_usb_binary,
+    &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */
 #ifdef GEOSTAR_ENABLE
     &geostar_binary,
