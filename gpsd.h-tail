@@ -180,8 +180,7 @@ struct gps_context_t {
     bool readonly;			/* if true, never write to device */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
-    /* DGPSIP status */
-    bool sentdgps;			/* have we sent a DGPS report? */
+    /* DGPS status */
     enum { netgnss_none, netgnss_dgpsip, netgnss_ntrip} netgnss_service;	/* type of GNSS service */
     int fixcnt;				/* count of good fixes seen */
     size_t rtcmbytes;			/* byte count of last RTCM104 report */
@@ -524,6 +523,11 @@ struct gps_device_t {
 	    bool works;		/* marks a working connection, so we try to reconnect once */
 	    bool sourcetable_parse;	/* have we read the sourcetable header? */
 	} ntrip;
+
+	/* State of a DGPSIP connection */
+	struct {
+	    bool reported;
+	} dgpsip;
     } driver;
     /*
      * Auxiliary structures for parsing data that can be interleaved with

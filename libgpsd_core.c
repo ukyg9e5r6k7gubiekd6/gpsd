@@ -159,7 +159,6 @@ void gps_context_init(struct gps_context_t *context)
     struct gps_context_t nullcontext = {
 	.valid	    = 0,
 	.readonly	    = false,
-	.sentdgps	    = false,
 	.netgnss_service  = netgnss_none,
 	.fixcnt	    = 0,
 	.rtcmbytes	    = 0,
