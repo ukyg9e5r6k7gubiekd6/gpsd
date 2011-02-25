@@ -141,7 +141,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *,
 				 size_t);
 
 
-static bool sirf_write(int fd, unsigned char *msg)
+static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 {
     unsigned int crc;
     size_t i, len;
@@ -159,13 +159,8 @@ static bool sirf_write(int fd, unsigned char *msg)
     msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
-    gpsd_report(LOG_IO, "SiRF: Writing control type %02x:%s\n", msg[4],
-		gpsd_hexdump_wrapper(msg, len + 8, LOG_IO));
-    ok = (write(fd, msg, len + 8) == (ssize_t) (len + 8));
-    if (!ok) {
-	gpsd_report(LOG_WARN, "SiRF: Writing error.\n");
-    }
-    (void)tcdrain(fd);
+    gpsd_report(LOG_IO, "SiRF: Writing control type %02x:\n", msg[4]);
+    ok = (gpsd_write(session, msg, len + 8) == (ssize_t) (len + 8));
     return (ok);
 }
 
@@ -184,7 +179,7 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
     session->msgbuflen = len + 8;
 
     /* *INDENT-OFF* */
-    return sirf_write(session->gpsdata.gps_fd,
+    return sirf_write(session,
 	      (unsigned char *)session->msgbuf) ? (int)session->msgbuflen : -1;
     /* *INDENT-ON* */
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
@@ -192,7 +187,7 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
 #endif /* ALLOW_CONTROLSEND */
 
 #ifdef ALLOW_RECONFIGURE
-static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
+static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
 {
     /*@ +charint @*/
@@ -234,10 +229,10 @@ static bool sirf_speed(int ttyfd, speed_t speed, char parity, int stopbits)
     msg[8] = (unsigned char)LO(speed);
     msg[10] = (unsigned char)stopbits;
     msg[11] = (unsigned char)parity;
-    return (sirf_write(ttyfd, msg));
+    return (sirf_write(session, msg));
 }
 
-static bool sirf_to_nmea(int ttyfd, speed_t speed)
+static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 /* switch from binary to NMEA at specified baud */
 {
     /*@ +charint @*/
@@ -261,15 +256,14 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 
     msg[26] = (unsigned char)HI(speed);
     msg[27] = (unsigned char)LO(speed);
-    return (sirf_write(ttyfd, msg));
+    return (sirf_write(session, msg));
 }
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     char parity = '0';
     if (mode == MODE_NMEA) {
-	(void)sirf_to_nmea(session->gpsdata.gps_fd,
-			   session->gpsdata.dev.baudrate);
+	(void)sirf_to_nmea(session, session->gpsdata.dev.baudrate);
     } else if (mode == MODE_BINARY) {
 	switch (session->gpsdata.dev.parity) {
 	default:
@@ -413,7 +407,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     }
 #ifdef ALLOW_RECONFIGURE
     gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
-    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
+    (void)sirf_write(session, enablemid52);
 #endif /* ALLOW_RECONFIGURE */
 
     if (strstr((char *)(buf + 1), "ES"))
@@ -427,7 +421,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     if (session->gpsdata.dev.baudrate >= 38400) {
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	(void)sirf_write(session, enablesubframe);
     } else {
 	gpsd_report(LOG_WARN, "SiRF: link too slow, disabling subframes.\n");
     }
@@ -459,7 +453,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_WARN, 
 		"WARNING: SiRF: link too slow, disabling subframes.\n");
-	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
+	(void)sirf_write(session, disablesubframe);
     }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -849,7 +843,7 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
 #ifdef ALLOW_RECONFIGURE
     gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
-    (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
+    (void)sirf_write(session, modecontrol);
 #endif /* ALLOW_RECONFIGURE */
     return 0;
 }
@@ -1274,30 +1268,30 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 			session->gpsdata.dev.baudrate);
 	    (void)usleep(3330);	/* guessed settling time */
 	    gpsd_report(LOG_PROG, "SiRF: unset MID 30...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid30);
+	    (void)sirf_write(session, unsetmid30);
 	    (void)usleep(3330);	/* guessed settling time */
 
 	    gpsd_report(LOG_PROG,
 			"SiRF: Requesting periodic ecef reports...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, requestecef);
+	    (void)sirf_write(session, requestecef);
 	    gpsd_report(LOG_PROG,
 			"SiRF: Requesting periodic tracker reports...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, requesttracker);
+	    (void)sirf_write(session, requesttracker);
 	    gpsd_report(LOG_PROG,
 			"SiRF: Setting DGPS control to use SBAS...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
+	    (void)sirf_write(session, dgpscontrol);
 	    gpsd_report(LOG_PROG,
 			"SiRF: Setting SBAS to auto/integrity mode...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, sbasparams);
+	    (void)sirf_write(session, sbasparams);
 
 	    gpsd_report(LOG_PROG, "SiRF: unset MID 29...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, unsetmid29);
+	    (void)sirf_write(session, unsetmid29);
 
 	    gpsd_report(LOG_PROG, "SiRF: Probing for firmware version...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, versionprobe);
+	    (void)sirf_write(session, versionprobe);
 	    gpsd_report(LOG_PROG,
 			"SiRF: Requesting navigation parameters...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, navparams);
+	    (void)sirf_write(session, navparams);
 	}
     }
     if (event == event_deactivate) {
@@ -1327,17 +1321,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	putbyte(moderevert, 17, session->driver.sirf.track_smooth_mode);
 	/*@ +shiftimplementation @*/
 	gpsd_report(LOG_PROG, "SiRF: Reverting navigation parameters...\n");
-	(void)sirf_write(session->gpsdata.gps_fd, moderevert);
+	(void)sirf_write(session, moderevert);
     }
 }
-
-#ifdef ALLOW_RECONFIGURE
-static bool sirfbin_speed(struct gps_device_t *session,
-			  speed_t speed, char parity, int stopbits)
-{
-    return sirf_speed(session->gpsdata.gps_fd, speed, parity, stopbits);
-}
-#endif /* ALLOW_RECONFIGURE */
 
 /* this is everything we export */
 /* *INDENT-OFF* */

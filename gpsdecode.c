@@ -371,9 +371,11 @@ static void decode(FILE *fpin, FILE *fpout)
     policy.json = json;
 
     gps_context_init(&context);
+    context.readonly = true;
     gpsd_init(&session, &context, NULL);
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
+    session.gpsdata.dev.baudrate = 38400;     /* hack to enable subframes */
 
     for (;;)
     {
