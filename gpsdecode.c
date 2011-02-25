@@ -359,7 +359,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 #endif
 
 /*@ -compdestroy -compdef -usedef -uniondef @*/
-static void decode(FILE * fpin, FILE * fpout)
+static void decode(FILE *fpin, FILE *fpout)
 /* sensor data on fpin to dump format on fpout */
 {
     struct gps_device_t session;
@@ -367,12 +367,13 @@ static void decode(FILE * fpin, FILE * fpout)
     struct policy_t policy;
     char buf[GPS_JSON_RESPONSE_MAX * 4];
 
+    memset(&policy, '\0', sizeof(policy));
+    policy.json = json;
+
     gps_context_init(&context);
     gpsd_init(&session, &context, NULL);
     gpsd_clear(&session);
-    memset(&policy, '\0', sizeof(policy));
     session.gpsdata.gps_fd = fileno(fpin);
-    policy.json = json;
 
     for (;;)
     {
@@ -381,7 +382,7 @@ static void decode(FILE * fpin, FILE * fpout)
 	if (changed == ERROR_IS || changed == NODATA_IS)
 	    break;
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
-	    (void)fputs((char *)session.packet.outbuffer, stdout);
+	    (void)fputs((char *)session.packet.outbuffer, fpout);
 	if ((changed & (REPORT_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
 	    continue;
 	/*
