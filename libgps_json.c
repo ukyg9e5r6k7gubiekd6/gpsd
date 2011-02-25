@@ -219,8 +219,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
     /*@ +fullinitblock @*/
     int status, i, j;
 
-    for (i = 0; i < MAXCHANNELS; i++)
+    for (i = 0; i < MAXCHANNELS; i++) {
+	gpsdata->PRN[i] = 0;
 	usedflags[i] = false;
+    }
 
     status = json_read_object(buf, json_attrs_2, endptr);
     if (status != 0)
