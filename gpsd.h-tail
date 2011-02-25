@@ -606,7 +606,7 @@ extern int ntrip_open(struct gps_device_t *, char *);
 extern void ntrip_report(struct gps_device_t *);
 
 extern void gpsd_tty_init(struct gps_device_t *);
-extern int gpsd_open(struct gps_device_t *);
+extern int gpsd_serial_open(struct gps_device_t *);
 extern bool gpsd_set_raw(struct gps_device_t *);
 extern ssize_t gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
@@ -671,6 +671,7 @@ extern void gpsd_init(struct gps_device_t *,
 		      struct gps_context_t *, 
 		      /*@null@*/const char *);
 extern void gpsd_clear(struct gps_device_t *);
+extern int gpsd_open(struct gps_device_t *);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
