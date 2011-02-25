@@ -16,7 +16,7 @@
 
 static int verbose = 0;
 static bool scaled = true;
-static bool json = false;
+static bool json = true;
 
 /**************************************************************************
  *
