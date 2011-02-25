@@ -4,6 +4,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,28 +46,28 @@ static char /*@ observer @*/ *hexdump(const void *binbuf, size_t len)
 
 static void bedumpall(void)
 {
-    (void)printf("getsb: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getsb: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sb1, (uint64_t) sb2,
 		 (uint64_t) getsb(buf, 0), (uint64_t) getsb(buf, 8));
-    (void)printf("getub: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getub: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) ub1, (uint64_t) ub2,
 		 (uint64_t) getub(buf, 0), (uint64_t) getub(buf, 8));
-    (void)printf("getbes16: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbes16: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sw1, (uint64_t) sw2,
 		 (uint64_t) getbes16(buf, 0), (uint64_t) getbes16(buf, 8));
-    (void)printf("getbeu16: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbeu16: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uw1, (uint64_t) uw2,
 		 (uint64_t) getbeu16(buf, 0), (uint64_t) getbeu16(buf, 8));
-    (void)printf("getbes32: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbes32: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sl1, (uint64_t) sl2,
 		 (uint64_t) getbes32(buf, 0), (uint64_t) getbes32(buf, 8));
-    (void)printf("getbeu32: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbeu32: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) ul1, (uint64_t) ul2,
 		 (uint64_t) getbeu32(buf, 0), (uint64_t) getbeu32(buf, 8));
-    (void)printf("getbes64: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbes64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sL1, (uint64_t) sL2,
 		 (uint64_t) getbes64(buf, 0), (uint64_t) getbes64(buf, 8));
-    (void)printf("getbeu64: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getbeu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getbeu64(buf, 0), (uint64_t) getbeu64(buf, 8));
     (void)printf("getbef: %f %f\n", f1, getbef(buf, 24));
@@ -75,28 +76,28 @@ static void bedumpall(void)
 
 static void ledumpall(void)
 {
-    (void)printf("getsb: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getsb: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sb1, (uint64_t) sb2,
 		 (uint64_t) getsb(buf, 0), (uint64_t) getsb(buf, 8));
-    (void)printf("getub: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getub: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) ub1, (uint64_t) ub2,
 		 (uint64_t) getub(buf, 0), (uint64_t) getub(buf, 8));
-    (void)printf("getles16: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getles16: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sw1, (uint64_t) sw2,
 		 (uint64_t) getles16(buf, 0), (uint64_t) getles16(buf, 8));
-    (void)printf("getleu16: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getleu16: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uw1, (uint64_t) uw2,
 		 (uint64_t) getleu16(buf, 0), (uint64_t) getleu16(buf, 8));
-    (void)printf("getles32: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getles32: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sl1, (uint64_t) sl2,
 		 (uint64_t) getles32(buf, 0), (uint64_t) getles32(buf, 8));
-    (void)printf("getleu32: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getleu32: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) ul1, (uint64_t) ul2,
 		 (uint64_t) getleu32(buf, 0), (uint64_t) getleu32(buf, 8));
-    (void)printf("getles64: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getles64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) sL1, (uint64_t) sL2,
 		 (uint64_t) getles64(buf, 0), (uint64_t) getles64(buf, 8));
-    (void)printf("getleu64: %016lx %016lx %016lx %016lx\n",
+    (void)printf("getleu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getleu64(buf, 0), (uint64_t) getleu64(buf, 8));
     (void)printf("getlef: %f %f\n", f1, getlef(buf, 24));
