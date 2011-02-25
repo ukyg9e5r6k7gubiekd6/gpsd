@@ -196,7 +196,7 @@ int main(void)
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
 	 up++) {
 	uint64_t res = ubits((char *)buf, up->start, up->width);
-	(void)printf("ubits(%s, %d, %d) %s should be %llu, is %llu: %s\n",
+	(void)printf("ubits(%s, %d, %d) %s should be %" PRIx64 ", is %" PRIx64 ": %s\n",
 		     hexdump(buf, strlen((char *)buf)),
 		     up->start, up->width, up->description, up->expected, res,
 		     res == up->expected ? "succeeded" : "FAILED");
