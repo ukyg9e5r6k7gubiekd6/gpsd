@@ -236,6 +236,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	/*@+usedef@*/
     gpsdata->satellites_used = 0;
     gpsdata->satellites_visible = 0;
+    (void)memset(gpsdata->used, '\0', sizeof(gpsdata->used));
     for (i = j = 0; i < MAXCHANNELS; i++) {
 	if(gpsdata->PRN[i] > 0)
 	    gpsdata->satellites_visible++;
