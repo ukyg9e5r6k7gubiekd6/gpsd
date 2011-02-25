@@ -244,9 +244,10 @@ static void windowsetup(void)
     /* Set the window sizes per the following criteria:
      * 
      * 1.  Set the window size to display the maximum number of
-     * satellites possible, but not more than the size required to
-     * display the maximum number of satellites gpsd is capable of
-     * tracking (MAXCHANNELS - 2).
+     * satellites possible, but not more than can be fit in a 
+     * window the size of the GPS report window. We have to set
+     * the limit that way because MAXCHANNELS has been made large
+     * in order to prepare for survey-grade receivers..
      * 
      * 2.  If the screen size will not allow for the full complement of
      * satellites to be displayed, set the windows sizes smaller, but
