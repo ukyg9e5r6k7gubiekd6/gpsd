@@ -63,6 +63,29 @@ size_t strlcat(char *dst, const char *src, size_t siz)
 #endif /* HAVE_STRLCAT */
 
 #ifndef HAVE_STRLCPY
+/*
+ * Copy src to string dst of size siz.  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz == 0).
+ * Returns strlen(src); if retval >= siz, truncation occurred.
+ *
+ * This version uses memcpy and strlen() because these are often
+ * heavily optimized down to assembler level. Thus, likely to be
+ * faster even with the function call overhead. 
+ */
+size_t strlcpy(char *dst, const char *src, size_t siz)
+{
+    size_t len = strlen(src);
+    if (siz != 0) {
+	if (len >= siz) {
+	    memcpy(dst, src, siz - 1);
+	    dst[siz - 1] = '\0';
+	} else
+	    memcpy(dst, src, len + 1);
+    }
+    return len;
+}
+
+#ifdef __UNUSED__
 /*	$OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38 millert Exp $	*/
 
 /*
@@ -79,12 +102,6 @@ size_t strlcat(char *dst, const char *src, size_t siz)
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-/*
- * Copy src to string dst of size siz.  At most siz-1 characters
- * will be copied.  Always NUL terminates (unless siz == 0).
- * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 size_t strlcpy(char *dst, const char *src, size_t siz)
 {
@@ -110,4 +127,5 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 
     return ((size_t) (s - src - 1));	/* count does not include NUL */
 }
+#endif /* __UNUSED__ */
 #endif /* HAVE_STRLCPY */
