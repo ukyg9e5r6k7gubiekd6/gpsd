@@ -474,11 +474,12 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 
     switch (device->ntrip.conn_state) {
 	case ntrip_conn_init:
+	    /* this has to be done here, because it is needed for multi-stage connection */
 	    device->servicetype = service_ntrip;
 	    device->ntrip.works = false;
 	    device->ntrip.sourcetable_parse = false;
 	    ntrip_stream.set = false;
-	    (void)strlcpy(tmp, caster, strlen(caster));
+	    (void)strlcpy(tmp, caster, strlen(caster) + 1);
 
 	    /*@ -boolops @*/
 	    if ((amp = strchr(tmp, '@')) != NULL) {
@@ -516,7 +517,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    port = DEFAULT_RTCM_PORT;
 	    }
 
-	    /* this has to be done here, because it is needed for multi-stage connection */
 	    strncpy(ntrip_stream.mountpoint, stream, 101); /* magic numbers from struct definitions */
 	    strncpy(ntrip_stream.credentials, auth, 128); /* magic numbers from struct definitions */
 	    strncpy(ntrip_stream.url, url, 256);
