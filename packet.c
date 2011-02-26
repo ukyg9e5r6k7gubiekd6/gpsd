@@ -1116,7 +1116,7 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 	gpsd_report(LOG_RAW + 1, "Packet type %d accepted %zu = %s\n",
 		    packet_type, packetlen,
 		    gpsd_hexdump_wrapper(lexer->outbuffer, lexer->outbuflen,
-					 LOG_IO));
+					 LOG_RAW+1));
 #endif /* STATE_DEBUG */
     } else {
 	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %zu\n",
@@ -1136,7 +1136,7 @@ static void packet_discard(struct gps_packet_t *lexer)
 		"Packet discard of %zu, chars remaining is %zu = %s\n",
 		discard, remaining,
 		gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
-				     LOG_RAW));
+				     LOG_RAW + 1));
 #endif /* STATE_DEBUG */
 }
 
@@ -1149,7 +1149,7 @@ static void character_discard(struct gps_packet_t *lexer)
     gpsd_report(LOG_RAW + 1, "Character discarded, buffer %zu chars = %s\n",
 		lexer->inbuflen,
 		gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
-				     LOG_RAW));
+				     LOG_RAW + 1));
 #endif /* STATE_DEBUG */
 }
 
@@ -1271,7 +1271,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
 			lexer->inbuffer[1], (unsigned int)lexer->length,
 			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length,
-					     LOG_RAW));
+					     LOG_IO));
 	    if (a != b) {
 		gpsd_report(LOG_IO, "REJECT SuperStarII packet type 0x%02x"
 			    "%zd bad checksum 0x%04x, expecting 0x%04x\n",

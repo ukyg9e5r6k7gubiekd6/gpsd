@@ -379,7 +379,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(LOG_WARN,
 		    "unknown EverMore packet EID 0x%02x, length %zd: %s\n",
 		    buf2[0], datalen, gpsd_hexdump_wrapper(buf2, datalen,
-							   LOG_IO));
+							   LOG_WARN));
 	return 0;
     }
 }
