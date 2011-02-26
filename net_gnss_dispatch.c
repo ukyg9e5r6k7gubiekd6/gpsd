@@ -51,14 +51,15 @@ int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
 
 /*@ +branchstate */
 
-void netgnss_report(struct gps_device_t *session)
+void netgnss_report(struct gps_context_t *context,
+		    struct gps_device_t *gps, struct gps_device_t *dgnss)
 /* may be time to ship a usage report to the DGNSS service */
 {
-    if (session->servicetype == service_dgpsip)
-	dgpsip_report(session);
+    if (dgnss->servicetype == service_dgpsip)
+	dgpsip_report(context, gps, dgnss);
 #ifdef NTRIP_ENABLE
-    else if (session->servicetype == service_ntrip)
-	ntrip_report(session);
+    else if (dgnss->servicetype == service_ntrip)
+	ntrip_report(context, gps, dgnss);
 #endif
 }
 

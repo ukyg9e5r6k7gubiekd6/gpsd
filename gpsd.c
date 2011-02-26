@@ -1419,8 +1419,17 @@ static void consume_packets(struct gps_device_t *device)
 
 	/* a few things are not per-subscriber reports */
 	if ((changed & REPORT_IS) != 0) {
-	    if (device->gpsdata.fix.mode == MODE_3D)
-		netgnss_report(device);
+	    if (device->gpsdata.fix.mode == MODE_3D) {
+		struct gps_device_t *dgnss;
+		/*
+		 * Pass the fix to every potential caster, here.
+		 * netgnss_report() individual caster types get to
+		 * make filtering decisiona.
+		 */
+		for (dgnss = devices; dgnss < devices + MAXDEVICES; dgnss++)
+		    if (dgnss != device)
+			netgnss_report(&context, device, dgnss);
+	    }
 #ifdef DBUS_ENABLE
 	    send_dbus_fix(device);
 #endif /* DBUS_ENABLE */

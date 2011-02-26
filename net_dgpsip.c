@@ -59,22 +59,24 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 
 /*@ +branchstate */
 
-void dgpsip_report(struct gps_device_t *session)
+void dgpsip_report(struct gps_context_t *context,
+		   struct gps_device_t *gps,
+		   struct gps_device_t *dgpsip)
 /* may be time to ship a usage report to the DGPSIP server */
 {
     /*
      * 10 is an arbitrary number, the point is to have gotten several good
      * fixes before reporting usage to our DGPSIP server.
      */
-    if (session->context->fixcnt > 10 && !session->dgpsip.reported) {
-	session->dgpsip.reported = true;
-	if (session->gpsdata.gps_fd > -1) {
+    if (context->fixcnt > 10 && !dgpsip->dgpsip.reported) {
+	dgpsip->dgpsip.reported = true;
+	if (dgpsip->gpsdata.gps_fd > -1) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",
-			   session->gpsdata.fix.latitude,
-			   session->gpsdata.fix.longitude,
-			   session->gpsdata.fix.altitude);
-	    if (write(session->gpsdata.gps_fd, buf, strlen(buf)) ==
+			   gps->gpsdata.fix.latitude,
+			   gps->gpsdata.fix.longitude,
+			   gps->gpsdata.fix.altitude);
+	    if (write(dgpsip->gpsdata.gps_fd, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
 	    else

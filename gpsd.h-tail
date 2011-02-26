@@ -331,6 +331,39 @@ typedef enum {service_unknown,
 	      service_ntrip
 } servicetype_t;
 
+/*
+ * Private state information about an NTRIP stream.
+ */
+struct ntrip_stream_t
+{
+    char mountpoint[101];
+    char credentials[128];
+    char authStr[128];
+    char url[256];
+    char port[32]; /* in my /etc/services 16 was the longest */
+    bool set; /* found and set */
+    enum
+    {
+	fmt_rtcm2,
+	fmt_rtcm2_0,
+	fmt_rtcm2_1,
+	fmt_rtcm2_2,
+	fmt_rtcm2_3,
+	fmt_rtcm3,
+	fmt_unknown
+    } format;
+    int carrier;
+    double latitude;
+    double longitude;
+    int nmea;
+    enum
+    { cmp_enc_none, cmp_enc_unknown } compr_encryp;
+    enum
+    { auth_none, auth_basic, auth_digest, auth_unknown } authentication;
+    int fee;
+    int bitrate;
+};
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
@@ -534,11 +567,17 @@ struct gps_device_t {
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */
     double emit_time;		/* emission time (-> E2) */
 #endif /* TIMING_ENABLE */
+
     /* 
      * State of an NTRIP connection.  We don't want to zero this on every
-     * activation, otherwise the connection state will get lost 
+     * activation, otherwise the connection state will get lost.  Information
+     * in this substructure is only valid if servicetype is service_ntrip.
      */
     struct {
+	/* state information about the stream */
+	struct ntrip_stream_t stream;
+	
+	/* state information about our response parsing */
 	enum {
 	    ntrip_conn_init,
 	    ntrip_conn_sent_probe,
@@ -592,18 +631,24 @@ extern gps_mask_t aivdm_parse(struct gps_device_t *);
 
 extern bool netgnss_uri_check(char *);
 extern int netgnss_uri_open(struct gps_device_t *, char *);
-extern void netgnss_report(struct gps_device_t *);
+extern void netgnss_report(struct gps_context_t *, 
+			 struct gps_device_t *,
+			 struct gps_device_t *);
 extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 
 extern void rtcm_relay(struct gps_device_t *);
 extern void rtcm2_output_mag(isgps30bits_t *, FILE *);
 
 extern int dgpsip_open(struct gps_device_t *, const char *);
-extern void dgpsip_report(struct gps_device_t *);
+extern void dgpsip_report(struct gps_context_t *, 
+			 struct gps_device_t *,
+			 struct gps_device_t *);
 extern void dgpsip_autoconnect(struct gps_context_t *, 
 			       double, double, const char *);
 extern int ntrip_open(struct gps_device_t *, char *);
-extern void ntrip_report(struct gps_device_t *);
+extern void ntrip_report(struct gps_context_t *, 
+			 struct gps_device_t *,
+			 struct gps_device_t *);
 
 extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_serial_open(struct gps_device_t *);
