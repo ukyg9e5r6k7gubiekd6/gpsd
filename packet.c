@@ -429,7 +429,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case ASTRAL_1:
 	if (c == 'S') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -441,7 +444,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case ASTRAL_2:
 	if (c == 'T') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -453,7 +459,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case ASTRAL_3:
 	if (c == 'R') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -465,7 +474,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case ASTRAL_4:
 	if (c == 'A') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -477,7 +489,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case ASTRAL_5:
 	if (c == 'L') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -491,7 +506,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case EARTHA_1:
 	if (c == 'A') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -503,7 +521,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case EARTHA_2:
 	if (c == 'R') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -515,7 +536,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case EARTHA_3:
 	if (c == 'T') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -527,7 +551,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case EARTHA_4:
 	if (c == 'H') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -539,7 +566,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case EARTHA_5:
 	if (c == 'A') {
 #ifdef RTCM104V2_ENABLE
-	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+	    if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
+		lexer->state = RTCM2_SYNC_STATE;
+		break;
+	    } else if (isgpsstat == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
@@ -1107,18 +1137,8 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
     size_t packetlen = lexer->inbufptr - lexer->inbuffer;
-    unsigned char *packetbase;
-
-    if (packet_type == RTCM2_PACKET) {
-	packetlen = lexer->isgps.buflen;
-	packetbase = (unsigned char *)lexer->isgps.buf;
-    } else {
-	packetlen = lexer->inbufptr - lexer->inbuffer;
-	packetbase = lexer->inbuffer;
-    }
-
     if (packetlen < sizeof(lexer->outbuffer)) {
-	memcpy(lexer->outbuffer, packetbase, packetlen);
+	memcpy(lexer->outbuffer, lexer->inbuffer, packetlen);
 	lexer->outbuflen = packetlen;
 	lexer->outbuffer[packetlen] = '\0';
 	lexer->type = packet_type;
