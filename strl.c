@@ -72,6 +72,7 @@ size_t strlcat(char *dst, const char *src, size_t siz)
  * heavily optimized down to assembler level. Thus, likely to be
  * faster even with the function call overhead. 
  */
+/*@ -mayaliasunique -mustdefine @*/
 size_t strlcpy(char *dst, const char *src, size_t siz)
 {
     size_t len = strlen(src);
@@ -84,6 +85,7 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
     }
     return len;
 }
+/*@ -mayaliasunique -mustdefine @*/
 
 #ifdef __UNUSED__
 /*	$OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38 millert Exp $	*/
