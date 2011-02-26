@@ -54,7 +54,6 @@ typedef unsigned int speed_t;
 enum isgpsstat_t {
     ISGPS_NO_SYNC, ISGPS_SYNC, ISGPS_SKIP, ISGPS_MESSAGE,
 };
-#define ISGPS_ERRLEVEL_BASE	5
 
 #define RTCM_MAX	(RTCM2_WORDS_MAX * sizeof(isgps30bits_t))
 
@@ -609,6 +608,8 @@ struct gps_device_t {
 #define LOG_IO  	5	/* IO to and from devices */
 #define LOG_SPIN	6	/* logging for catching spin bugs */
 #define LOG_RAW 	7	/* raw low-level I/O */
+
+#define ISGPS_ERRLEVEL_BASE	LOG_RAW
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 

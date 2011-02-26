@@ -871,6 +871,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 		gpsd_hexdump_wrapper(session->packet.isgps.buf,
 				     (session->gpsdata.rtcm2.length +
 				      2) * sizeof(isgps30bits_t), LOG_RAW));
+    session->cycle_end_reliable = true;
     return RTCM2_IS;
 }
 
@@ -919,6 +920,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 				   (size_t) (session->gpsdata.rtcm3.length),
 				   LOG_RAW));
     /* *INDENT-ON* */
+    session->cycle_end_reliable = true;
     return RTCM3_IS;
 }
 
