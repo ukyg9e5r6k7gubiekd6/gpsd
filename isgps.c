@@ -171,6 +171,7 @@ void isgps_init( /*@out@*/ struct gps_packet_t *session)
     session->isgps.curr_offset = 24;	/* first word */
     session->isgps.locked = false;
     session->isgps.bufindex = 0;
+    session->isgps.buflen = 0;
 }
 
 /*@ -usereleased -compdef @*/
@@ -278,6 +279,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 
 		    if (length_check(session)) {
 			/* jackpot, we have a complete packet */
+			session->isgps.buflen = session->isgps.bufindex * sizeof(isgps30bits_t);
 			session->isgps.bufindex = 0;
 			res = ISGPS_MESSAGE;
 		    }

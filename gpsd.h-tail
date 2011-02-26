@@ -129,8 +129,13 @@ struct gps_packet_t {
 	bool            locked;
 	int             curr_offset;
 	isgps30bits_t   curr_word;
-	isgps30bits_t   buf[RTCM2_WORDS_MAX];
 	unsigned int    bufindex;
+	/*
+	 * Only these sgould be referenced from elsewhere, and only when 
+	 * RTCM_MESSAGE has just been returned.
+	 */
+	isgps30bits_t   buf[RTCM2_WORDS_MAX];   /* packet data */
+	unsigned int    buflen;                 /* packet length in bytes */
     } isgps;
 };
 
