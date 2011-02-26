@@ -620,6 +620,7 @@ libgps: libgps_core.c gps.h .libs/libgps.a
 
 
 # Report splint warnings
+# Note: test_bits.c is unsplintable because of the PRI64 macros.
 SPLINTOPTS = -I/usr/include/dbus-1.0/ -DSYSCONFDIR=\"$(sysconfdir)\" $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon..."
@@ -640,8 +641,6 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) $(gpsdecode_SOURCES)
 	@echo "Running splint on gpxlogger..."
 	-splint $(SPLINTOPTS) $(gpxlogger_SOURCES)
-	@echo "Running splint on test_bits test harness..."
-	-splint $(SPLINTOPTS) $(test_bits_SOURCES)
 	@echo "Running splint on test_packet test harness..."
 	-splint $(SPLINTOPTS) $(test_packet_SOURCES)
 	@echo "Running splint on test_mkgmtime test harness..."
