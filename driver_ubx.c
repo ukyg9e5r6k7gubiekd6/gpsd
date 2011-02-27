@@ -760,7 +760,7 @@ const struct gps_type_t ubx_binary = {
     .probe_detect     = NULL,           /* Startup-time device detector */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
-    .rtcm_writer      = pass_rtcm,      /* RTCM handler (using default routine) */
+    .rtcm_writer      = gpsd_write,      /* RTCM handler (using default routine) */
     .event_hook       = ubx_event_hook,	/* Fiew in variious lifetime events */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */

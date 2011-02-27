@@ -473,7 +473,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     return session->gpsdata.gps_fd;
 }
 
-ssize_t gpsd_write(struct gps_device_t * session, void const *buf, size_t len)
+ssize_t gpsd_write(struct gps_device_t * session, char const *buf, size_t len)
 {
     ssize_t status;
     bool ok;

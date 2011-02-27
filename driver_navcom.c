@@ -82,7 +82,7 @@ static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd,
 {
     gpsd_report(LOG_RAW, "Navcom: command dump: %s\n",
 		gpsd_hexdump_wrapper(cmd, len, LOG_RAW));
-    return (gpsd_write(session, cmd, len) == (ssize_t) len);
+    return (gpsd_write(session, (const char *)cmd, len) == (ssize_t) len);
 }
 
 /* Data Request */
@@ -1293,7 +1293,7 @@ const struct gps_type_t navcom_binary =
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = navcom_parse_input,	/* parse message packets */
-    .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+    .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
     .event_hook     = navcom_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = navcom_speed,		/* we do change baud rates */

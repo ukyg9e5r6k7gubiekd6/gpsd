@@ -720,7 +720,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 #endif
     (void)PrintUSBPacket(session, thePacket);
 
-    theBytesReturned = gpsd_write(session, thePacket,
+    theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
     gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);
@@ -735,7 +735,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
     // So here goes just in case
     if (0 == (theBytesToWrite % ASYNC_DATA_SIZE)) {
 	char *n = "";
-	theBytesReturned = gpsd_write(session, &n, 0);
+	theBytesReturned = gpsd_write(session, n, 0);
     }
 }
 #endif /* __linux__ || S_SPLINT_S */
@@ -797,7 +797,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 			 (unsigned char)buffer0[1],
 			 (int)buffer0[2], (unsigned char *)(buffer0 + 3));
 
-    theBytesReturned = gpsd_write(session, thePacket,
+    theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
     gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);

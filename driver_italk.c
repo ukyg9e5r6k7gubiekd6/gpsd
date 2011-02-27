@@ -412,7 +412,7 @@ const struct gps_type_t italk_binary =
     .probe_detect   = NULL,		/* how to detect at startup time */
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
-    .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* send RTCM data straight */
     .event_hook     = NULL,		/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */

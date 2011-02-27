@@ -103,7 +103,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
 }
 
 static void send_rtcm(struct gps_device_t *session,
-		      char *rtcmbuf, size_t rtcmbytes)
+		      const char *rtcmbuf, size_t rtcmbytes)
 {
     unsigned short data[34];
     int n = 1 + (int)(rtcmbytes / 2 + rtcmbytes % 2);
@@ -120,7 +120,7 @@ static void send_rtcm(struct gps_device_t *session,
 }
 
 static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
-				char *rtcmbuf, size_t rtcmbytes)
+				const char *rtcmbuf, size_t rtcmbytes)
 {
     size_t len;
 

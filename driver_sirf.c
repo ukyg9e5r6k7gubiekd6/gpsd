@@ -160,7 +160,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
     gpsd_report(LOG_IO, "SiRF: Writing control type %02x:\n", msg[4]);
-    ok = (gpsd_write(session, msg, len + 8) == (ssize_t) (len + 8));
+    ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
     return (ok);
 }
 
@@ -1337,7 +1337,7 @@ const struct gps_type_t sirf_binary =
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
-    .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* send RTCM data straight */
     .event_hook     = sirfbin_event_hook,/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */

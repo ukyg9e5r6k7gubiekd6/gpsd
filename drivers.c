@@ -87,14 +87,6 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
     }
 }
 
-#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITRAX_ENABLE)  || defined(NAVCOM_ENABLE) || defined(UBX_ENABLE)
-ssize_t pass_rtcm(struct gps_device_t * session, char *buf, size_t rtcmbytes)
-/* most GPSes take their RTCM corrections straight up */
-{
-    return gpsd_write(session, buf, rtcmbytes);
-}
-#endif
-
 /**************************************************************************
  *
  * Generic driver -- make no assumptions about the device type
@@ -272,7 +264,7 @@ const struct gps_type_t nmea = {
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
-    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -430,7 +422,7 @@ const struct gps_type_t ashtech = {
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
-    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = ashtech_event_hook, /* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -478,7 +470,7 @@ const struct gps_type_t fv18 = {
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
-    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = fv18_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -529,7 +521,7 @@ const struct gps_type_t gpsclock = {
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
-    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = gpsclock_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -582,7 +574,7 @@ static const struct gps_type_t tripmate = {
     .probe_detect  = NULL,			/* no probe */
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = generic_parse_input,		/* how to interpret a packet */
-    .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
+    .rtcm_writer   = gpsd_write,			/* send RTCM data straight */
     .event_hook    = tripmate_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher= NULL,			/* no speed switcher */
@@ -1077,7 +1069,7 @@ const struct gps_type_t mtk3301 = {
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
-    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */

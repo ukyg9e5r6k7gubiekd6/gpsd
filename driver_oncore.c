@@ -529,7 +529,7 @@ const struct gps_type_t oncore_binary = {
     .probe_detect     = NULL,			/* no probe */
     .get_packet       = generic_get,		/* packet getter */
     .parse_packet     = oncore_parse_input,	/* packet parser */
-    .rtcm_writer      = pass_rtcm,		/* device accepts RTCM */
+    .rtcm_writer      = gpsd_write,		/* device accepts RTCM */
     .event_hook     = oncore_event_hook,	/* lifetime event hook */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher   = oncore_set_speed,	/* no speed setter */

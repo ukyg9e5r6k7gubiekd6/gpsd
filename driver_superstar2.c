@@ -556,7 +556,7 @@ const struct gps_type_t superstar2_binary = {
     /* Parse message packets */
     .parse_packet	= superstar2_parse_input,
     /* RTCM handler (using default routine) */
-    .rtcm_writer	= pass_rtcm,
+    .rtcm_writer	= gpsd_write,
     /* Fire on various lifetime events */
     .event_hook		= superstar2_event_hook,
 #ifdef ALLOW_RECONFIGURE

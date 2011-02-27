@@ -619,7 +619,7 @@ const struct gps_type_t evermore_binary =
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
-    .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+    .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
     .event_hook     = evermore_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = evermore_speed,		/* we can change baud rates */
