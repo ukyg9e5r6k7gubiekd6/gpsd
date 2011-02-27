@@ -976,38 +976,48 @@ static const struct gps_type_t garmintxt = {
 #ifdef MTK3301_ENABLE
 /**************************************************************************
  *
- * MTK-3301
+ * MediaTek MTK-3301
+ *
+ * OEMs for several GPS vendors, notably including Garmin and FasTrax.
+ * Website at <http://www.mediatek.com/>.
  *
  **************************************************************************/
-const char *mtk_reasons[4] =
-    { "Invalid", "Unsupported", "Valid but Failed", "Valid success" };
 
-gps_mask_t processMTK3301(int c UNUSED, char *field[],
-			  struct gps_device_t *session)
+static gps_mask_t processMTK3301(struct gps_device_t *session)
 {
+    const char *mtk_reasons[4] =
+	{ "Invalid", "Unsupported", "Valid but Failed", "Valid success" };
     int msg, reason;
     gps_mask_t mask;
-    mask = 1;			//ONLINE_IS;
 
-    switch (msg = atoi(&(field[0])[4])) {
-    case 705:			/*  */
-	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
-	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
-	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
-	return 0;		/* return a unknown sentence, which will cause the driver switch */
-    case 001:			/* ACK / NACK */
-	reason = atoi(field[2]);
-	if (atoi(field[1]) == -1)
-	    gpsd_report(LOG_WARN, "MTK NACK: unknown sentence\n");
-	else if (reason < 3)
-	    gpsd_report(LOG_WARN, "MTK NACK: %s, reason: %s\n", field[1],
-			mtk_reasons[reason]);
-	else
-	    gpsd_report(LOG_WARN, "MTK ACK: %s\n", field[1]);
-	break;
-    default:
-	return 0;		/* ignore */
+    /* try a straight NMEA parse, this will set up fields */ 
+    mask = generic_get(session);
+
+    if (session->packet.type == NMEA_PACKET 
+	&& strncmp(session->driver.nmea.field[0], "$PMTK", 5) == 0)
+    {
+	msg = atoi(&(session->driver.nmea.field[0])[4]);
+	switch (msg) {
+	case 705:			/*  */
+	    (void)strlcat(session->subtype, session->driver.nmea.field[1], sizeof(session->subtype));
+	    (void)strlcat(session->subtype, "-", sizeof(session->subtype));
+	    (void)strlcat(session->subtype, session->driver.nmea.field[2], sizeof(session->subtype));
+	    return ONLINE_IS;
+	case 001:			/* ACK / NACK */
+	    reason = atoi(session->driver.nmea.field[2]);
+	    if (atoi(session->driver.nmea.field[1]) == -1)
+		gpsd_report(LOG_WARN, "MTK NACK: unknown sentence\n");
+	    else if (reason < 3)
+		gpsd_report(LOG_WARN, "MTK NACK: %s, reason: %s\n", session->driver.nmea.field[1],
+			    mtk_reasons[reason]);
+	    else
+		gpsd_report(LOG_WARN, "MTK ACK: %s\n", session->driver.nmea.field[1]);
+	    break;
+	default:
+	    return ONLINE_IS;		/* ignore */
+	}
     }
+
     return mask;
 }
 
@@ -1047,13 +1057,14 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 {
     char buf[78];
+
     /*@i1@*/ unsigned int milliseconds = 1000 * rate;
     if (rate > 1)
 	milliseconds = 1000;
     else if (rate < 0.2)
 	milliseconds = 200;
 
-    (void)snprintf(buf, 78, "$PMTK300,%u,0,0,0,0", milliseconds);
+    (void)snprintf(buf, sizeof(buf), "$PMTK300,%u,0,0,0,0", milliseconds);
     (void)nmea_send(session, buf);	/* Fix interval */
     return true;
 }
@@ -1064,11 +1075,11 @@ const struct gps_type_t mtk3301 = {
     .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* no flags set */
-    .trigger	    = "$PMTK705,",	/* MTK-3301s send firmware release name and version */
+    .trigger	    = "$PMTK705,",	/* firmware release name and version */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
+    .parse_packet   = processMTK3301,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
