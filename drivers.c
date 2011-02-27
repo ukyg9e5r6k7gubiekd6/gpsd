@@ -149,7 +149,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
      */
     if (event == event_configure) {
 	/* change this guard if the probe count goes up */
-	if (session->packet.counter <= 9)
+	if (session->packet.counter <= 8)
 	    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n",
 			session->packet.counter);
 	/*
@@ -217,32 +217,26 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 			     22);
 	    break;
 #endif /* EVERMORE_ENABLE */
-#ifdef ITRAX_ENABLE
-	case 5:
-	    /* probe for iTrax, looking for "$PFST,OK" */
-	    (void)nmea_send(session, "$PFST");
-	    break;
-#endif /* ITRAX_ENABLE */
 #ifdef GPSCLOCK_ENABLE
-	case 6:
+	case 5:
 	    /* probe for Furuno Electric GH-79L4-N (GPSClock); expect $PFEC,GPssd */
 	    (void)nmea_send(session, "$PFEC,GPsrq");
 	    break;
 #endif /* GPSCLOCK_ENABLE */
 #ifdef ASHTECH_ENABLE
-	case 7:
+	case 6:
 	    /* probe for Ashtech -- expect $PASHR,RID */
 	    (void)nmea_send(session, "$PASHQ,RID");
 	    break;
 #endif /* ASHTECH_ENABLE */
 #ifdef UBX_ENABLE
-	case 8:
+	case 7:
 	    /* probe for UBX -- query software version */
 	    (void)ubx_write(session, 0x0au, 0x04, NULL, 0);
 	    break;
 #endif /* UBX_ENABLE */
 #ifdef MTK3301_ENABLE
-	case 9:
+	case 8:
 	    /* probe for MTK-3301 -- expect $PMTK705 */
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
