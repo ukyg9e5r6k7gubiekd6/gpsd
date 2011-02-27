@@ -392,77 +392,6 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
-/*@ +charint -usedef -compdef @*/
-static ssize_t italk_control_send(struct gps_device_t *session,
-				  char *msg, size_t msglen)
-{
-    ssize_t status;
-
-    /*@ -mayaliasunique @*/
-    session->msgbuflen = msglen;
-    (void)memcpy(session->msgbuf, msg, msglen);
-    /*@ +mayaliasunique @*/
-    /* we may need to dump the message */
-    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
-		msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-    status = write(session->gpsdata.gps_fd, msg, msglen);
-    (void)tcdrain(session->gpsdata.gps_fd);
-    return status;
-}
-
-/*@ -charint +usedef +compdef @*/
-#endif /* ALLOW_CONTROLSEND */
-
-static bool italk_set_mode(struct gps_device_t *session UNUSED,
-			   speed_t speed UNUSED,
-			   char parity UNUSED, int stopbits UNUSED,
-			   bool mode UNUSED)
-{
-#ifdef __NOT_YET__
-    /*@ +charint @*/
-    char msg[] = { 0, };
-
-    /* HACK THE MESSAGE */
-
-    return (italk_control_send(session, msg, sizeof(msg)) != -1);
-    /*@ +charint @*/
-#endif
-
-    return false;		/* until this actually works */
-}
-
-#ifdef ALLOW_RECONFIGURE
-static bool italk_speed(struct gps_device_t *session,
-			speed_t speed, char parity, int stopbits)
-{
-    return italk_set_mode(session, speed, parity, stopbits, true);
-}
-
-static void italk_mode(struct gps_device_t *session, int mode)
-{
-    if (mode == MODE_NMEA) {
-	(void)italk_set_mode(session,
-			     session->gpsdata.dev.baudrate,
-			     (char)session->gpsdata.dev.parity,
-			     (int)session->gpsdata.dev.stopbits, false);
-    }
-}
-#endif /* ALLOW_RECONFIGURE */
-
-static void italk_event_hook(struct gps_device_t *session, event_t event)
-{
-    /*
-     * FIX-ME: It might not be necessary to call this on reactivate.
-     * Experiment to see if the holds its settings through a close.
-     */
-    if ((event == event_identified || event == event_reactivate)
-	&& session->packet.type == NMEA_PACKET)
-	(void)italk_set_mode(session, session->gpsdata.dev.baudrate,
-			     (char)session->gpsdata.dev.parity,
-			     (int)session->gpsdata.dev.stopbits, true);
-}
-
 #ifdef __not_yet__
 static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
@@ -484,15 +413,15 @@ const struct gps_type_t italk_binary =
     .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
-    .event_hook     = italk_event_hook,	/* lifetime event handler */
+    .event_hook     = NULL,		/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
-    .speed_switcher = italk_speed,	/* we can change baud rates */
-    .mode_switcher  = italk_mode,	/* there is a mode switcher */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */
 #ifdef ALLOW_CONTROLSEND
-    .control_send   = italk_control_send,	/* how to send a control string */
+    .control_send   = NULL,		/* no control string sender */
 #endif /* ALLOW_CONTROLSEND */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
