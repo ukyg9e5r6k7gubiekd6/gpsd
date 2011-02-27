@@ -19,6 +19,7 @@
  * Returns strlen(src) + MIN(siz, strlen(initial dst)).
  * If retval >= siz, truncation occurred.
  */
+/*@ -compdef -mayaliasunique -mustdefine @*/
 size_t strlcat(char *dst, const char *src, size_t siz)
 {
     size_t slen = strlen(src);
@@ -33,6 +34,7 @@ size_t strlcat(char *dst, const char *src, size_t siz)
     }
     return dlen + slen;
 }
+/*@ +compdef +mayaliasunique +mustdefine @*/
 
 #ifdef __UNUSED__
 /*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
