@@ -5,7 +5,36 @@
 #include <string.h>
 #include "gpsd_config.h"
 
+/*
+ * These versions use memcpy and strlen() because they are often
+ * heavily optimized down to assembler level. Thus, likely to be
+ * faster even with the function call overhead. 
+ */
+
 #ifndef HAVE_STRLCAT
+/*
+ * Appends src to string dst of size siz (unlike strncat, siz is the
+ * full size of dst, not space left).  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
+ * Returns strlen(src) + MIN(siz, strlen(initial dst)).
+ * If retval >= siz, truncation occurred.
+ */
+size_t strlcat(char *dst, const char *src, size_t siz)
+{
+    size_t slen = strlen(src);
+    size_t dlen = strlen(dst);
+    if (siz != 0) {
+	if (dlen + slen < siz)
+	    memcpy(dst + dlen, src, slen + 1);
+	else {
+	    memcpy(dst + dlen, src, siz - dlen - 1);
+	    dst[siz - 1] = '\0';
+	}
+    }
+    return dlen + slen;
+}
+
+#ifdef __UNUSED__
 /*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
 
 /*
@@ -24,13 +53,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * Appends src to string dst of size siz (unlike strncat, siz is the
- * full size of dst, not space left).  At most siz-1 characters
- * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
- * Returns strlen(src) + MIN(siz, strlen(initial dst)).
- * If retval >= siz, truncation occurred.
- */
 /*@ -usedef -mustdefine @*/
 size_t strlcat(char *dst, const char *src, size_t siz)
 {
@@ -58,7 +80,7 @@ size_t strlcat(char *dst, const char *src, size_t siz)
 
     return (dlen + (s - src));	/* count does not include NUL */
 }
-
+#endif /* __UNUSED__ */
 /*@ +usedef +mustdefine @*/
 #endif /* HAVE_STRLCAT */
 
@@ -67,10 +89,6 @@ size_t strlcat(char *dst, const char *src, size_t siz)
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
- *
- * This version uses memcpy and strlen() because these are often
- * heavily optimized down to assembler level. Thus, likely to be
- * faster even with the function call overhead. 
  */
 /*@ -mayaliasunique -mustdefine @*/
 size_t strlcpy(char *dst, const char *src, size_t siz)
