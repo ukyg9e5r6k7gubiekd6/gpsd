@@ -262,7 +262,7 @@ class gps(gpsdata, gpsjson):
             self.valid = ONLINE_SET
             self.utc = default("time", None, TIME_SET)
             if self.utc is not None:
-                self.fix.time = isotime(self.utc)
+                self.fix.time = isotime(self.utc.encode("ascii"))
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)
             self.fix.latitude =  default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)

@@ -132,29 +132,14 @@ class gpsjson(gpscommon):
         return self
 
     def json_unpack(self, buf):
-        def asciify(v):
-            "De-Unicodify everything so we can copy dicts into Python objects."
-            if type(v) == type(u"x"):
-                return v.encode("ascii")
-            elif type(v) == type({}):
-                va = {}
-                for (k, v) in v.items():
-                    ka = k.encode("ascii")
-                    kv = asciify(v)
-                    va[ka] = kv
-                return va
-            elif type(v) == type([]):
-                return map(asciify, v)
-            else:
-                return v
         try:
-            self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
+            self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
         except ValueError, e:
             raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
         if hasattr(self.data, "satellites"):
-            self.data.satellites = map(lambda x: dictwrapper(**x), self.data.satellites)
+            self.data.satellites = map(lambda x: dictwrapper(x), self.data.satellites)
 
     def stream(self, flags=0, outfile=None):
         "Control streaming reports from the daemon,"
@@ -192,7 +177,7 @@ class gpsjson(gpscommon):
 
 class dictwrapper:
     "Wrapper that yields both class and dictionary behavior,"
-    def __init__(self, **ddict):
+    def __init__(self, ddict):
         self.__dict__ = ddict
     def get(self, k, d=None):
         return self.__dict__.get(k, d)
