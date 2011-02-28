@@ -140,10 +140,6 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
      * inner natures.
      */
     if (event == event_configure) {
-	/* change this guard if the probe count goes up */
-	if (session->packet.counter <= 8)
-	    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n",
-			session->packet.counter);
 	/*
 	 * The reason for splitting these probes up by packet sequence
 	 * number, interleaving them with the first few packet receives,
@@ -165,6 +161,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef NMEA_ENABLE
 	case 0:
 	    /* probe for Garmin serial GPS -- expect $PGRMC followed by data */
+	    gpsd_report(LOG_PROG, "=> Probing for Garmin NMEA\n");
 	    (void)nmea_send(session, "$PGRMCE");
 	    break;
 #endif /* NMEA_ENABLE */
@@ -182,6 +179,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	     * select the NMEA driver without switching the device back to
 	     * binary mode!  Fix this if we ever find a nondisruptive probe string.
 	     */
+	    gpsd_report(LOG_PROG, "=> Probing for SiRF\n");
 	    (void)nmea_send(session,
 			    "$PSRF100,0,%d,%d,%d,0",
 			    session->gpsdata.dev.baudrate,
@@ -193,15 +191,18 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef NMEA_ENABLE
 	case 2:
 	    /* probe for the FV-18 -- expect $PFEC,GPint followed by data */
+	    gpsd_report(LOG_PROG, "=> Probing for FV-18\n");
 	    (void)nmea_send(session, "$PFEC,GPint");
 	    break;
 	case 3:
 	    /* probe for the Trimble Copernicus */
+	    gpsd_report(LOG_PROG, "=> Probing for Trimble Copernicus\n");
 	    (void)nmea_send(session, "$PTNLSNM,0139,01");
 	    break;
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
 	case 4:
+	    gpsd_report(LOG_PROG, "=> Probing for Evermore\n");
 	    /* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(1s) */
 	    /* EverMore will reply with: \x10\x02\x04\x38\x8E\xC6\x10\x03 */
 	    (void)gpsd_write(session,
@@ -212,28 +213,31 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef GPSCLOCK_ENABLE
 	case 5:
 	    /* probe for Furuno Electric GH-79L4-N (GPSClock); expect $PFEC,GPssd */
+	    gpsd_report(LOG_PROG, "=> Probing for GPSClock\n");
 	    (void)nmea_send(session, "$PFEC,GPsrq");
 	    break;
 #endif /* GPSCLOCK_ENABLE */
 #ifdef ASHTECH_ENABLE
 	case 6:
 	    /* probe for Ashtech -- expect $PASHR,RID */
+	    gpsd_report(LOG_PROG, "=> Probing for Ashtech\n");
 	    (void)nmea_send(session, "$PASHQ,RID");
 	    break;
 #endif /* ASHTECH_ENABLE */
 #ifdef UBX_ENABLE
 	case 7:
 	    /* probe for UBX -- query software version */
+	    gpsd_report(LOG_PROG, "=> Probing for UBX\n");
 	    (void)ubx_write(session, 0x0au, 0x04, NULL, 0);
 	    break;
 #endif /* UBX_ENABLE */
 #ifdef MTK3301_ENABLE
 	case 8:
 	    /* probe for MTK-3301 -- expect $PMTK705 */
+	    gpsd_report(LOG_PROG, "=> Probing for MediaTek\n");
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
 #endif /* MTK3301_ENABLE */
-	    /* when adding a case here, don't forget the probe count guard */
 	default:
 	    break;
 	}
