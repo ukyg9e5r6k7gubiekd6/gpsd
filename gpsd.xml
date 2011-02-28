@@ -2388,20 +2388,24 @@ level.</para>
 <application>gpsd</application> relies on the host-system
 clock:</para>
 
-<para>GPS date reporting has a Y2K-like problem for which
-<application>gpsd</application> cannot fully compensate; GPS dates are
-shipped as (week, second) pairs in which the week part is a 10 or
-13-bit counter. When the counter rolls over, a GPS receiver may see
-and report a date 1024 or 8192 weeks in the past.
-<application>gpsd</application> will detect and compensate for
-rollovers while it is running, but relies on the system clock to
-correct the epoch.</para>
+<para>In the GPS broadcast signal, GPS time is represented using a
+week number that rolls over after 2^10 or 2^13 weeks (about 19.6
+years, or 157 years), depending on the spacecraft.  Receivers are
+required to disambiguate this to the correct date, but may have
+difficulty due to not knowing time to within half this interval, or
+may have bugs.  Users have reported incorrect dates which appear to be
+due to this issue.  <application>gpsd</application> uses the startup
+time of the daemon detect and compensate for rollovers while it is
+running, but otherwise reports the date at is reported by the receiver
+without attempting to correct it.</para>
 
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
-Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the
-start of its update cycle (which most consumer-grade NMEA GPSes do
-not) then <application>gpsd</application> century part of the dates
-<application>gpsd</application> delivers will be wrong. Additionally,
+Garmin or Zodiac binary mode), <application>gpsd</application> relies
+on the system clock to tell it the current century. If the system clock
+returns an invalid value near zero, and the GPS does not emit GPZDA at
+the start of its update cycle (which most consumer-grade NMEA GPSes do
+not) then the century part of the dates
+<application>gpsd</application> delivers may be wrong. Additionally,
 near the century turnover, a range of dates as wide in seconds as the
 accuracy of your system clock may be referred to the wrong
 century.</para>
