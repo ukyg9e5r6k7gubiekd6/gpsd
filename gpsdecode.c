@@ -385,7 +385,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	    break;
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
-	if ((changed & (REPORT_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
+	if ((changed & (REPORT_IS|SUBFRAME_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
 	    continue;
 	/*
 	 * We really ought to get rid of the non-JSON cases someday.
