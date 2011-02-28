@@ -867,7 +867,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 #endif /* HAVE_LIBUSB || S_SPLINT_S */
 
 /*
- * garmin_usb_detect() - detect a Garmin USB device connected to ession fd.
+ * garmin_usb_detect() - detect a Garmin USB device connected to session fd.
  *
  * This is ONLY for USB devices reporting as: 091e:0003.
  *
