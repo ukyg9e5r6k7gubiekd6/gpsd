@@ -135,6 +135,8 @@ const struct gps_type_t unknown = {
 
 static void nmea_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     /*
      * This is where we try to tickle NMEA devices into revealing their
      * inner natures.
@@ -320,6 +322,9 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
 static void garmin_nmea_event_hook(struct gps_device_t *session,
 				   event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     if (event == event_driver_switch) {
 	/* forces a reconfigure as the following packets come in */
 	session->packet.counter = 0;
@@ -406,6 +411,9 @@ const struct gps_type_t garmin = {
 
 static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     if (event == event_wakeup)
 	(void)nmea_send(session, "$PASHQ,RID");
     if (event == event_identified) {
@@ -465,6 +473,9 @@ const struct gps_type_t ashtech = {
 
 static void fv18_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     /*
      * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
      * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
@@ -517,6 +528,8 @@ const struct gps_type_t fv18 = {
 
 static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     /*
      * Michael St. Laurent <mikes@hartwellcorp.com> reports that you have to
      * ignore the trailing PPS edge when extracting time from this chip.
@@ -572,6 +585,8 @@ const struct gps_type_t gpsclock = {
 
 static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     if (event == event_identified)
 	(void)nmea_send(session, "$IIGPQ,ASTRAL");
@@ -621,6 +636,8 @@ static const struct gps_type_t tripmate = {
 
 static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     if (event == event_identified) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
@@ -748,6 +765,8 @@ static bool tnt_speed(struct gps_device_t *session,
 static void tnt_event_hook(struct gps_device_t *session, event_t event)
 /* TNT lifetime event hook */
 {
+    if (session->context->readonly)
+	return;
     if (event == event_wakeup) {
 	(void)tnt_send(session, "@F0.3=1");	/* set run mode */
 	(void)tnt_send(session, "@F2.2=1");	/* report in degrees */
@@ -820,6 +839,8 @@ static int oceanserver_send(int fd, const char *fmt, ...)
 static void oceanserver_event_hook(struct gps_device_t *session,
 				   event_t event)
 {
+    if (session->context->readonly)
+	return;
     if (event == event_configure && session->packet.counter == 0) {
 	/* report in NMEA format */
 	(void)oceanserver_send(session->gpsdata.gps_fd, "2\n");
@@ -1058,6 +1079,8 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 "$PMTK314,1,1,1,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0"
 
 */
+    if (session->context->readonly)
+	return;
     /* FIX-ME: Do we need to resend this on reactivation? */
     if (event == event_identified) {
 	(void)nmea_send(session, "$PMTK320,0");	/* power save off */

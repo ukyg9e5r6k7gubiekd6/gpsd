@@ -941,6 +941,8 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     /*
      * FIX-ME: It might not be necessary to call this on reactivate.
      * Experiment to see if the holds its settings through a close.

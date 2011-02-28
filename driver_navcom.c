@@ -184,6 +184,9 @@ static void navcom_cmd_0x11(struct gps_device_t *session,
 
 static void navcom_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     /* Request the following messages: */
     if (event == event_identified) {
 	/* NOTE - Channel Status allows us to know into which of the

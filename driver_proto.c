@@ -363,6 +363,9 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 #ifdef ALLOW_RECONFIGURE
 static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     if (event == event_wakeup) {
        /*
 	* Code to make the device ready to communicate.  Only needed if the

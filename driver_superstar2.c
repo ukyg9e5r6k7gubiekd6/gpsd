@@ -429,6 +429,9 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
 
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     if (event == event_identified) {
 	/*@ +charint @*/
 	unsigned char version_msg[]    = { 0x01, 0x2d, 0xd2, 0x00, 0x00, 0x01 };

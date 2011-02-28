@@ -596,6 +596,8 @@ static void ubx_catch_model(struct gps_device_t *session, unsigned char *buf,
 
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
     if (event == event_triggermatch)
 	ubx_catch_model(session,
 			session->packet.outbuffer, session->packet.outbuflen);
