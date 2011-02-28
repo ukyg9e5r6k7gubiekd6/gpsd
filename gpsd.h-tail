@@ -119,18 +119,19 @@ struct gps_packet_t {
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
     /*
+     * ISGPS200 decoding context.
+     *
      * This is not conditionalized on RTCM104_ENABLE because we need to
      * be able to build gpsdecode even when RTCM support is not
      * configured in the daemon.
      */
     struct {
-	/* ISGPS200 decoding */
 	bool            locked;
 	int             curr_offset;
 	isgps30bits_t   curr_word;
 	unsigned int    bufindex;
 	/*
-	 * Only these sgould be referenced from elsewhere, and only when 
+	 * Only these should be referenced from elsewhere, and only when 
 	 * RTCM_MESSAGE has just been returned.
 	 */
 	isgps30bits_t   buf[RTCM2_WORDS_MAX];   /* packet data */
