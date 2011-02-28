@@ -406,8 +406,10 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	session->driver.sirf.driverstate |= SIRF_GE_232;
     }
 #ifdef ALLOW_RECONFIGURE
-    gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
-    (void)sirf_write(session, enablemid52);
+    if (!session->context->readonly) {
+	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
+	(void)sirf_write(session, enablemid52);
+    }
 #endif /* ALLOW_RECONFIGURE */
 
     if (strstr((char *)(buf + 1), "ES"))
@@ -418,12 +420,10 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
 #ifdef ALLOW_RECONFIGURE
-    if (session->gpsdata.dev.baudrate >= 38400) {
-        /* some USB are also too slow, no way to tell which ones */
+    if (!session->context->readonly && session->gpsdata.dev.baudrate >= 38400) {
+        /* some USB devices are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session, enablesubframe);
-    } else {
-	gpsd_report(LOG_WARN, "SiRF: link too slow, disabling subframes.\n");
     }
 #endif /* ALLOW_RECONFIGURE */
     gpsd_report(LOG_DATA, "SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
@@ -449,7 +449,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 
 
 #ifdef ALLOW_RECONFIGURE
-    if ( session->gpsdata.dev.baudrate < 38400) {
+    if (!session->context->readonly && session->gpsdata.dev.baudrate < 38400) {
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_WARN, 
 		"WARNING: SiRF: link too slow, disabling subframes.\n");
@@ -842,8 +842,10 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
 #ifdef ALLOW_RECONFIGURE
-    gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
-    (void)sirf_write(session, modecontrol);
+    if (!session->context->readonly) {
+	gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
+	(void)sirf_write(session, modecontrol);
+    }
 #endif /* ALLOW_RECONFIGURE */
     return 0;
 }
@@ -1172,6 +1174,9 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
+    if (session->context->readonly)
+	return;
+
     if (event == event_identified || event == event_reactivate) {
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_PROG, "SiRF: Switching chip mode to binary.\n");
