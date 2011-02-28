@@ -261,7 +261,7 @@ leapseconds.cache: $(srcdir)/leapsecond.py
 libgps_la_SOURCES = $(libgps_c_sources)
 
 libgpsd_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				driver_rtcm2.h packet_states.h timebase.h
+				packet_states.h timebase.h
 
 # Warning: This overrides autoconf's normal link-line generation process
 if LIBGPSMM_ENABLE
