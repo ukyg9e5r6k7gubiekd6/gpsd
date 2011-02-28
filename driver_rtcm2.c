@@ -278,6 +278,17 @@ struct rtcm2_msg_t {
 	    } almanac[(RTCM2_WORDS_MAX - 2)/3];
 	} type7;
 
+	/* msg 14 - GPS Time of Week (RTCM2.3 only) */
+	struct rtcm2_msg14 {
+	    struct {
+		uint        parity:6;
+		uint        leapsecs:6;
+		uint        hour:8;
+		uint        week:10;
+		uint        _pad:2;
+	    } w1;
+	} type14;
+
 	/* msg 16 - text msg */
 	struct rtcm2_msg16 {
 	    struct {
@@ -297,7 +308,6 @@ struct rtcm2_msg_t {
 #endif /* LITTLE_ENDIAN */
 
 #ifdef WORDS_BIGENDIAN
-/* This struct was generated from the above using invert-bitfields.pl */
 #ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
 
 struct rtcm2_msg_t {
@@ -478,6 +488,17 @@ struct rtcm2_msg_t {
 	    } almanac[(RTCM2_WORDS_MAX - 2)/3];
 	} type7;
 
+	/* msg 14 - GPS Time of Week (RTCM2.3 only) */
+	struct rtcm2_msg14 {
+	    struct {
+		uint        _pad:2;
+		uint        week:10;
+		uint        hour:8;
+		uint        leapsecs:6;
+		uint        parity:6;
+	    } w1;
+	} type14;
+
 	/* msg 16 - text msg */
 	struct rtcm2_msg16 {
 	    struct {
@@ -649,6 +670,11 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    n++;
 	}
 	tp->almanac.nentries = (unsigned)(len / 3);
+	break;
+    case 14:
+	tp->gpstime.week = msg->msg_type.type14.w1.week;
+	tp->gpstime.hour = msg->msg_type.type14.w1.hour;
+	tp->gpstime.leapsecs = msg->msg_type.type14.w1.leapsecs;
 	break;
     case 16:
 	/*@ -boolops @*/

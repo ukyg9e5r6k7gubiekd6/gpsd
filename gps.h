@@ -215,6 +215,11 @@ struct rtcm2_t {
 		unsigned int bitrate;		/* of station transmissions */
 	    } station[MAXSTATIONS];
 	} almanac;
+	struct {		/* data from type 14 messages */
+	    unsigned int week;			/* GPS week (0-1023) */
+	    unsigned int hour;			/* Hour in week (0-167) */
+	    unsigned int leapsecs;		/* Leap seconds (0-63) */
+	} gpstime;
 	/* data from type 16 messages */
 	char message[(RTCM2_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */

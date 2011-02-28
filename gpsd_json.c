@@ -817,6 +817,14 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	(void)strlcat(buf, "]", buflen);
 	break;
 
+    case 14:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"week\":%u,\"hour\":%u,\"leapsecs\":%u,",
+		       rtcm->gpstime.week, 
+		       rtcm->gpstime.hour,
+		       rtcm->gpstime.leapsecs);
+	break;
+
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"message\":\"%s\"", json_stringify(buf1,

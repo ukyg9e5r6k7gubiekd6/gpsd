@@ -78,7 +78,7 @@ int json_rtcm2_read(const char *buf,
 
     /*
      * Beware! Needs to stay synchronized with a corresponding
-     * nam,e array in the RTCM2 JSON dump code. This interpretation of
+     * name array in the RTCM2 JSON dump code. This interpretation of
      * NAVSYSTEM_GALILEO is assumed from RTCM3, it's not actually
      * documented in RTCM 2.1.
      */
@@ -147,6 +147,14 @@ int json_rtcm2_read(const char *buf,
     };
     /*@+type@*/
 
+    const struct json_attr_t json_rtcm14[] = {
+	RTCM2_HEADER
+	{"week",              t_uinteger, .addr.uinteger = &rtcm2->gpstime.week},
+	{"hour",              t_uinteger, .addr.uinteger = &rtcm2->gpstime.hour},
+	{"leapsecs",          t_uinteger, .addr.uinteger = &rtcm2->gpstime.leapsecs},
+	{NULL},
+    };
+
     const struct json_attr_t json_rtcm16[] = {
 	RTCM2_HEADER
 	{"message",        t_string,  .addr.string = rtcm2->message,
@@ -200,6 +208,8 @@ int json_rtcm2_read(const char *buf,
 	status = json_read_object(buf, json_rtcm7, endptr);
 	if (status == 0)
 	    rtcm2->almanac.nentries = (unsigned)satcount;
+    } else if (strstr(buf, "\"type\":14,") != NULL) {
+	status = json_read_object(buf, json_rtcm14, endptr);
     } else if (strstr(buf, "\"type\":16,") != NULL) {
 	status = json_read_object(buf, json_rtcm16, endptr);
     } else {

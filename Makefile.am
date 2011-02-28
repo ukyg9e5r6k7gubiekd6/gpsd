@@ -512,7 +512,7 @@ CLEANFILES += stamp-gps-manpages stamp-gps-manpages.tmp
 endif
 
 noinst_HEADERS = gpsd_config.h \
-	driver_italk.h driver_rtcm2.h driver_superstar2.h \
+	driver_italk.h driver_superstar2.h \
 	driver_ubx.h gpsmon.h gpsdclient.h json.h gps_json.h \
 	revision.h TachometerP.h Tachometer.h
 nodist_include_HEADERS = gpsd.h

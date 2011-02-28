@@ -1696,7 +1696,7 @@ payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
 algorithm.</para>
 
 </refsect2>
-<refsect2 id='sager-dump-format2'><title>RTCM2 JSON FORMAT</title>
+<refsect2 id='rtcm2-dump-format2'><title>RTCM2 JSON FORMAT</title>
 
 <para>Each RTCM2 message is dumped as a single JSON object per
 message, with the message fields as attributes of that object.  Arrays
@@ -1704,7 +1704,7 @@ of satellite, station, and constellation statistics become arrays of
 JSON sub-objects. Each sentence will normally also have a "device"
 field containing the pathname of the originating device.</para>
 
-<para>All attributes otner than the device field are mandatory</para>
+<para>All attributes other than the device field are mandatory.</para>
 
 <refsect3><title>Header portion</title>
 
@@ -2152,6 +2152,51 @@ but this cannot be true unless the field is 3 bits wide.
 </table>
 
 </refsect3>
+<refsect3><title>Type 14: GPS Time of Week</title>
+
+<para>Here are the payload members of a type 14 (GPS Time of Week)
+message:</para>
+
+<table frame="all" pgwide="0"><title>Reference Station Parameters</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>week</entry>
+	<entry>integer</entry>
+        <entry><para>GPS week (0-123).</para></entry>
+</row>
+<row>
+	<entry>hour</entry>
+	<entry>integer</entry>
+        <entry><para>Hour of week (0-167).</para></entry>
+</row>
+<row>
+	<entry>leapsecs</entry>
+	<entry>integer</entry>
+        <entry><para>Leap Seconds (0-63).</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>The coordinates are the position of the station, in meters to two
+decimal places, in Earth Centred Earth Fixed coordinates.
+These are usually referred to the WGS84 reference frame, but may
+be referred to NAD83 in the US (essentially identical to WGS84 for
+all except geodesists), or to some other reference frame in other
+parts of the world.</para>
+
+<para>An invalid reference message is represented by a type 3 header 
+without payload fields.</para>
+
+</refsect3>
 <refsect3><title>Type 16: Special Message</title>
 
 <table frame="all" pgwide="0"><title>Special Message</title>
@@ -2396,8 +2441,8 @@ difficulty due to not knowing time to within half this interval, or
 may have bugs.  Users have reported incorrect dates which appear to be
 due to this issue.  <application>gpsd</application> uses the startup
 time of the daemon detect and compensate for rollovers while it is
-running, but otherwise reports the date at is reported by the receiver
-without attempting to correct it.</para>
+running, but otherwise reports the date as it is reported by the
+receiver without attempting to correct it.</para>
 
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
 Garmin or Zodiac binary mode), <application>gpsd</application> relies
@@ -2665,10 +2710,11 @@ RTCM Paper 194-93/SC 104-STD.  The applicable standard for RTCM-104 V3
 is <citetitle>RTCM Standard 10403.1 for Differential GNSS Services -
 Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 
-<para>Note that GPSD presently recognizes only the 2.1 level of RTCM;
+<para>Note that GPSD presently fully recognizes only the 2.1 level of RTCM;
 the protocol was revised up to a version 2.3 including additional
 messages relating to GLONASS and real-time kinematics before being
-deprecated in favor of V3. It is now semi-obsolete.</para>
+deprecated in favor of V3. The 2.3 message type 14 (supplemental GPS
+time information) is recognized.</para>
 
 <para>Ordering instructions for the RTCM standards are accessible from
 the website of the <ulink url='http://www.rtcm.org/'>Radio Technical
