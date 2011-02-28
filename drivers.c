@@ -252,12 +252,15 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
     {
 	const struct gps_type_t **dp;
 
+	/*@-shiftnegative@*/
 	for (dp = gpsd_drivers; *dp; dp++) {
-	    if ((session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) { 
+	    if ((*dp)->packet_type > 0 &&
+	    	    (session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) { 
 		(*dp)->mode_switcher(session, mode);
 		break;
 	    }
 	}
+	/*@+shiftnegative@*/
     }
 #endif /* BINARY_ENABLE */
 }
