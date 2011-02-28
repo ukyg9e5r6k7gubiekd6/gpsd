@@ -29,11 +29,9 @@ takes over.  struct rtcm2_msg_t is overlaid on the buffer and the bitfields
 are used to extract pieces of it.  Those pieces are copied and (where
 necessary) reassembled into a struct rtcm2_t.
 
-This code and the contents of isgps.c are evolved from code by Wolfgang
-Rupprecht.  Wolfgang's decoder was loosely based on one written by
-John Sager in 1999 (in particular the dump function emits a close
-descendant of Sager's dump format).  Here are John Sager's original
-notes:
+This code and the contents of isgps.c are evolved from code by
+Wolfgang Rupprecht.  Wolfgang's decoder was loosely based on one
+written by John Sager in 1999.  Here are John Sager's original notes:
 
 The RTCM decoder prints a legible representation of the input data.
 The RTCM SC-104 specification is copyrighted, so I cannot
