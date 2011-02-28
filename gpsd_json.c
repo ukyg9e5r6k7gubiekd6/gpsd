@@ -817,6 +817,17 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	(void)strlcat(buf, "]", buflen);
 	break;
 
+    case 13:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"status\":%s,\"rangeflag\":%s,"
+		       "\"lat\":%.2f,\"lon\":%.2f,\"range\":%u,",
+		       JSON_BOOL(rtcm->xmitter.status), 
+		       JSON_BOOL(rtcm->xmitter.rangeflag),
+		       rtcm->xmitter.lat,
+		       rtcm->xmitter.lon,
+		       rtcm->xmitter.range);
+	break;
+
     case 14:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"week\":%u,\"hour\":%u,\"leapsecs\":%u,",

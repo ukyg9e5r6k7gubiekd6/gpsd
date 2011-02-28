@@ -2152,6 +2152,62 @@ but this cannot be true unless the field is 3 bits wide.
 </table>
 
 </refsect3>
+<refsect3><title>Type 13: GPS Time of Week</title>
+
+<para>Here are the payload members of a type 13 (Groumf Tramitter Parameters)
+message:</para>
+
+<table frame="all" pgwide="0"><title>Grund Transmitter Parameters</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>status</entry>
+	<entry>bool</entry>
+        <entry><para>If True, signals user to expect a type 16 explanatory 
+	message associated with this station. Probably indicates some
+	sort of unusual event.</para></entry>
+</row>
+<row>
+	<entry>rangeflag</entry>
+	<entry>bool</entry>
+        <entry><para>If True, indicates that the estimated range is
+	different from that found in the Type 7 message (which contains the
+	beacon's listed range). Generally indicates a range reduction due to
+	causes such as poor ionospheric conditions or reduced transmission
+	power.</para></entry>
+</row>
+<row>
+	<entry>lat</entry>
+	<entry>float</entry>
+        <entry><para>Degrees latitude, signed. 
+	Positive is N, negative is S.</para></entry>
+</row>
+<row>
+	<entry>lon</entry>
+	<entry>float</entry>
+        <entry><para>Degrees longitude, signed. 
+	Positive is E, negative is W.</para></entry>
+</row>
+<row>
+	<entry>range</entry>
+	<entry>integer</entry>
+        <entry><para>Transmission reange in km (1-1024).</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>This message type replaces message type 3 (Reference Station Parameters)
+in RTCM 2.3.</para>
+
+</refsect3>
 <refsect3><title>Type 14: GPS Time of Week</title>
 
 <para>Here are the payload members of a type 14 (GPS Time of Week)
@@ -2185,16 +2241,6 @@ message:</para>
 </tbody>
 </tgroup>
 </table>
-
-<para>The coordinates are the position of the station, in meters to two
-decimal places, in Earth Centred Earth Fixed coordinates.
-These are usually referred to the WGS84 reference frame, but may
-be referred to NAD83 in the US (essentially identical to WGS84 for
-all except geodesists), or to some other reference frame in other
-parts of the world.</para>
-
-<para>An invalid reference message is represented by a type 3 header 
-without payload fields.</para>
 
 </refsect3>
 <refsect3><title>Type 16: Special Message</title>
@@ -2713,8 +2759,8 @@ Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 <para>Note that GPSD presently fully recognizes only the 2.1 level of RTCM;
 the protocol was revised up to a version 2.3 including additional
 messages relating to GLONASS and real-time kinematics before being
-deprecated in favor of V3. The 2.3 message type 14 (supplemental GPS
-time information) is recognized.</para>
+deprecated in favor of V3. The 2.3 message types 13 and 14 are, however, 
+recognized and reported.</para>
 
 <para>Ordering instructions for the RTCM standards are accessible from
 the website of the <ulink url='http://www.rtcm.org/'>Radio Technical

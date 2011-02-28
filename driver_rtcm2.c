@@ -68,8 +68,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  * Very few of these are left in 2008.)
  *
  * The RTCM 2.1 standard is less explicit than it should be about signed-integer
- * representations.  Two's complement is specified for prc and rrc (msg1wX),
- * but not everywhere.
+ * representations.  Two's complement is specified forsome but not all.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
@@ -89,6 +88,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #define	FREQ_OFFSET	190.0	/* kHz */
 #define CNR_OFFSET	24	/* dB */
 #define TU_SCALE	5	/* minutes */
+
+#define LATLON_SCALE	0.01	/* degrees */
+#define RANGE_SCALE	4	/* kilometers */
 
 #pragma pack(1)
 
@@ -277,6 +279,24 @@ struct rtcm2_msg_t {
 		} w5;
 	    } almanac[(RTCM2_WORDS_MAX - 2)/3];
 	} type7;
+
+	/* msg 13 - Ground Transmitter Parameters (RTCM2.3 only) */
+	struct rtcm2_msg13 {
+	    struct {
+		uint        parity:6;
+		int         lat:16;
+		uint        reserved:6;
+		uint        rangeflag:1;
+		uint        status:1;
+		uint        _pad:2;
+	    } w1;
+	    struct {
+		uint        parity:6;
+		uint        range:8;
+		int         lon:16;
+		uint        _pad:2;
+	    } w2;
+	} type13;
 
 	/* msg 14 - GPS Time of Week (RTCM2.3 only) */
 	struct rtcm2_msg14 {
@@ -488,6 +508,24 @@ struct rtcm2_msg_t {
 	    } almanac[(RTCM2_WORDS_MAX - 2)/3];
 	} type7;
 
+	/* msg 13 - Ground Transmitter Parameters (RTCM2.3 only) */
+	struct rtcm2_msg13 {
+	    struct {
+		uint        _pad:2;
+		uint        status:1;
+		uint        rangeflag:1;
+		uint        reserved:6;
+		int         lat:16;
+		uint        parity:6;
+	    } w1;
+	    struct {
+		uint        _pad:2;
+		int         lon:16;
+		uint        range:8;
+		uint        parity:6;
+	    } w2;
+	} type13;
+
 	/* msg 14 - GPS Time of Week (RTCM2.3 only) */
 	struct rtcm2_msg14 {
 	    struct {
@@ -670,6 +708,15 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    n++;
 	}
 	tp->almanac.nentries = (unsigned)(len / 3);
+	break;
+    case 13:
+	tp->xmitter.status = (bool)msg->msg_type.type13.w1.status;
+	tp->xmitter.rangeflag = (bool)msg->msg_type.type13.w1.rangeflag;
+	tp->xmitter.lat = msg->msg_type.type13.w1.lat * LATLON_SCALE;
+	tp->xmitter.lon = msg->msg_type.type13.w2.lon * LATLON_SCALE;
+	tp->xmitter.range = msg->msg_type.type13.w2.range * RANGE_SCALE;
+	if (tp->xmitter.range == 0)
+	    tp->xmitter.range = 1024;
 	break;
     case 14:
 	tp->gpstime.week = msg->msg_type.type14.w1.week;

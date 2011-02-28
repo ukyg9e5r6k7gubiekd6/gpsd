@@ -147,6 +147,18 @@ int json_rtcm2_read(const char *buf,
     };
     /*@+type@*/
 
+    const struct json_attr_t json_rtcm13[] = {
+	RTCM2_HEADER
+        {"status",       t_boolean,  .addr.boolean = &rtcm2->xmitter.status},
+        {"rangeflag",    t_boolean,  .addr.boolean = &rtcm2->xmitter.rangeflag},
+	{"lat",          t_real,     .addr.real = &rtcm2->xmitter.lat,
+			                .dflt.real = NAN},
+	{"lon",          t_real,     .addr.real = &rtcm2->xmitter.lon,
+			                .dflt.real = NAN},
+	{"range",        t_uinteger, .addr.uinteger = &rtcm2->xmitter.range},
+	{NULL},
+    };
+
     const struct json_attr_t json_rtcm14[] = {
 	RTCM2_HEADER
 	{"week",              t_uinteger, .addr.uinteger = &rtcm2->gpstime.week},
@@ -208,6 +220,8 @@ int json_rtcm2_read(const char *buf,
 	status = json_read_object(buf, json_rtcm7, endptr);
 	if (status == 0)
 	    rtcm2->almanac.nentries = (unsigned)satcount;
+    } else if (strstr(buf, "\"type\":13,") != NULL) {
+	status = json_read_object(buf, json_rtcm13, endptr);
     } else if (strstr(buf, "\"type\":14,") != NULL) {
 	status = json_read_object(buf, json_rtcm14, endptr);
     } else if (strstr(buf, "\"type\":16,") != NULL) {

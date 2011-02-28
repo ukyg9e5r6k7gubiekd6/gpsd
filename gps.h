@@ -215,6 +215,12 @@ struct rtcm2_t {
 		unsigned int bitrate;		/* of station transmissions */
 	    } station[MAXSTATIONS];
 	} almanac;
+	struct {		/* data for type 13 messages */
+	    bool status;		/* expect a text message */
+	    bool rangeflag;		/* station range altered? */
+	    double lat, lon;		/* station longitude/latitude */
+	    unsigned int range;		/* transmission range in km */
+	} xmitter;
 	struct {		/* data from type 14 messages */
 	    unsigned int week;			/* GPS week (0-1023) */
 	    unsigned int hour;			/* Hour in week (0-167) */
