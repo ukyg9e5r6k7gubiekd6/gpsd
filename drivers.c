@@ -243,14 +243,23 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef ALLOW_RECONFIGURE
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
-    if (mode == MODE_BINARY) {
-#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-	if (0 != (SIRF_PACKET & session->observed)) {
-	    /* it was SiRF binary once, do it again */
-	    sirf_binary.mode_switcher(session, mode);
+#ifdef BINARY_ENABLE
+    /*
+     * If the daemon has seen this device in a binary mode, we may
+     * actually know how to switch back.
+     */
+    if (mode == MODE_BINARY)
+    {
+	const struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if ((session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) { 
+		(*dp)->mode_switcher(session, mode);
+		break;
+	    }
 	}
-#endif
     }
+#endif /* BINARY_ENABLE */
 }
 #endif /* ALLOW_RECONFIGURE */
 
