@@ -43,16 +43,17 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #ifdef RTCM104V3_ENABLE
 
 /* scaling constants for RTCM3 real number types */
-#define PSEUDORANGE_RESOLUTION		0.2	/* DF011 */
-#define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012 */
+#define GPS_PSEUDORANGE_RESOLUTION	0.2	/* DF011 */
+#define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012,DF042 */
 #define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
 #define ANTENNA_POSITION_RESOLUTION	0.0001	/* DF025-027 */
+#define GLONASS_PSEUDORANGE_RESOLUTION	0.2	/* DF041 */
 #define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
 #define GPS_EPOCH_TIME_RESOLUTION	0.1	/* DF065 */
 #define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
 
 /* Other magic values */
-#define INVALID_PSEUDORANGE		0x80000	/* DF012 */
+#define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
 /* Large case statements make GNU indent very confused */
 /* *INDENT-OFF* */
@@ -69,6 +70,13 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     /*@ -evalorder -sefparams -mayaliasunique @*/
 #define ugrab(width)	(bitcount += width, ubits(buf, bitcount-width, width))
 #define sgrab(width)	(bitcount += width, sbits(buf, bitcount-width, width))
+#define GPS_PSEUDORANGE(fld, len) \
+    {temp = (unsigned long)ugrab(len);		\
+    if (temp == GPS_INVALID_PSEUDORANGE)		\
+	fld.pseudorange = 0;			\
+    else					\
+	fld.pseudorange = temp * GPS_PSEUDORANGE_RESOLUTION;}
+
     assert(ugrab(8) == 0xD3);
     assert(ugrab(6) == 0x00);
 
@@ -87,13 +95,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
 	    R1001.ident = (ushort)ugrab(6);
 	    R1001.L1.indicator = (unsigned char)ugrab(1);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1001.L1.pseudorange = 0;
-	    else
-		R1001.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1001.L1, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1001.L1.rangediff = 0;
 	    else
 		R1001.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -115,13 +119,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
 	    R1002.ident = (ushort)ugrab(6);
 	    R1002.L1.indicator = (unsigned char)ugrab(1);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1002.L1.pseudorange = 0;
-	    else
-		R1002.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1002.L1, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1002.L1.rangediff = 0;
 	    else
 		R1002.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -146,25 +146,17 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1003.ident = (ushort)ugrab(6);
 	    R1003.L1.indicator =
 		(unsigned char)ugrab(1);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1003.L1.pseudorange = 0;
-	    else
-		R1003.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1003.L1, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1003.L1.rangediff = 0;
 	    else
 		R1003.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    R1003.L1.locktime =	(unsigned char)sgrab(7);
 	    R1003.L2.indicator = (unsigned char)ugrab(2);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1003.L2.pseudorange = 0;
-	    else
-		R1003.L2.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1003.L2, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1003.L2.rangediff = 0;
 	    else
 		R1003.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -186,13 +178,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1004.header.satcount; i++) {
 	    R1004.ident = (ushort)ugrab(6);
 	    R1004.L1.indicator = (bool)ugrab(1);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1004.L1.pseudorange = 0;
-	    else
-		R1004.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1004.L1, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1004.L1.rangediff = 0;
 	    else
 		R1004.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -200,13 +188,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1004.L1.ambiguity = (unsigned char)ugrab(8);
 	    R1004.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1004.L2.indicator = (unsigned char)ugrab(2);
-	    temp = (unsigned long)ugrab(24);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1004.L2.pseudorange = 0;
-	    else
-		R1004.L2.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    GPS_PSEUDORANGE(R1004.L2, 24);
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1004.L2.rangediff = 0;
 	    else
 		R1004.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -302,13 +286,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1009.ident = (ushort)ugrab(6);
 	    R1009.L1.indicator = (bool)ugrab(1);
 	    R1009.L1.channel = (ushort)ugrab(5);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1009.L1.pseudorange = 0;
-	    else
-		R1009.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1009.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1009.L1.rangediff = 0;
 	    else
 		R1009.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -333,13 +313,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1010.ident = (ushort)ugrab(6);
 	    R1010.L1.indicator = (bool)ugrab(1);
 	    R1010.L1.channel = (ushort)ugrab(5);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1010.L1.pseudorange = 0;
-	    else
-		R1010.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1010.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1010.L1.rangediff = 0;
 	    else
 		R1010.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -366,13 +342,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1011.ident = (ushort)ugrab(6);
 	    R1011.L1.indicator = (bool)ugrab(1);
 	    R1011.L1.channel = (ushort)ugrab(5);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1011.L1.pseudorange = 0;
-	    else
-		R1011.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1011.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1011.L1.rangediff = 0;
 	    else
 		R1011.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -381,13 +353,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1011.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1011.L2.indicator = (bool)ugrab(1);
 	    R1011.L2.channel = (ushort)ugrab(5);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1011.L2.pseudorange = 0;
-	    else
-		R1011.L2.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1011.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1011.L2.rangediff = 0;
 	    else
 		R1011.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
@@ -413,25 +381,17 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1012.ident = (ushort)ugrab(6);
 	    R1012.L1.indicator = (bool)ugrab(1);
 	    R1012.L1.channel = (ushort)ugrab(5);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1012.L1.pseudorange = 0;
-	    else
-		R1012.L1.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1012.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1012.L1.rangediff = 0;
 	    else
 		R1012.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
 	    R1012.L1.locktime =	(unsigned char)sgrab(7);
 	    R1012.L2.indicator = (bool)ugrab(1);
-	    temp = (unsigned long)ugrab(25);
-	    if (temp == INVALID_PSEUDORANGE)
-		R1012.L2.pseudorange = 0;
-	    else
-		R1012.L2.pseudorange = temp * PSEUDORANGE_RESOLUTION;
+	    R1012.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    temp = (long)sgrab(20);
-	    if (temp == INVALID_PSEUDORANGE)
+	    if (temp == GPS_INVALID_PSEUDORANGE)
 		R1012.L2.rangediff = 0;
 	    else
 		R1012.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
