@@ -105,8 +105,8 @@ case $mode in
 	    then
 		trap 'rm -f ${TMP}/test-$$.chk; exit $errors' EXIT HUP INT TERM
 		case $testing in
-		daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
-		clientlib) $GPSD_HOME/libgps -b <${f} >${TMP}/test-$$.chk ;;
+		daemon) ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
+		clientlib) ${GPSD_HOME}/libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		if [ "${ALTFILTER}" ]
 		then
@@ -152,7 +152,7 @@ case $mode in
     superraw)
         echo "Testing super-raw mode..." >&2
         for f in $*; do
-            gpsfake -s 38400 -1 -p $opts -r '{"class":"WATCH","enable":False,"raw":2}' $opts ${f} \
+            ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts -r '{"class":"WATCH","enable":False,"raw":2}' $opts ${f} \
             | ./devtools/striplog -1 >${TMP}/test1-$$.chk;
             ./devtools/striplog <${f} >${TMP}/test2-$$.chk;
             cmp ${TMP}/test[12]-$$.chk;
@@ -162,8 +162,8 @@ case $mode in
 	echo "Rebuilding $testing regressions..." >&2
         for f in $*; do
 	    case $testing in
-            daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
-	    clientlib) $GPSD_HOME/libgps -b <${f} >${f}.chk ;;
+            daemon) ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
+	    clientlib) ${GPSD_HOME}/libgps -b <${f} >${f}.chk ;;
             esac
         done
         status=0
@@ -172,8 +172,8 @@ case $mode in
         echo "Viewing..." >&2
         for f in $*; do
 	    case $testing in
-            daemon) gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
-            clientlib) $GPSD_HOME/libgps -b <${f} ;;
+            daemon) ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
+            clientlib) ${GPSD_HOME}/libgps -b <${f} ;;
             esac
         done
         status=0
