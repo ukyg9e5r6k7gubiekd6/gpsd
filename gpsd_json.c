@@ -879,6 +879,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       "\"device\":\"%s\",", device);
     (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		   "\"type\":%u,", rtcm->type);
+    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		   "\"length\":%u,", rtcm->length);
 
 #define CODE(x) (unsigned int)(x)
 #define INT(x) (unsigned int)(x)

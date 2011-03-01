@@ -498,7 +498,7 @@ struct rtcm3_t {
 	    unsigned char unicode_units;
 	    unsigned char text[128];
 	} rtcm3_1029;
-	char data[4096];
+	char data[1024];		/* Max RTCM3 msg length is 1023 bytes */
     } rtcmtypes;
 };
 

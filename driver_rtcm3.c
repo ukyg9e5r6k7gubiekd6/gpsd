@@ -89,6 +89,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
 
+    gpsd_report(LOG_RAW, "RTCM3: Raw packet type 0x%02x length %d: %s\n",
+		rtcm->type, rtcm->length, gpsd_hexdump_wrapper(buf, rtcm->length, LOG_RAW));
+
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */
 	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
@@ -423,8 +426,11 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     default:
-	//memcpy(tp->rtcmtypes.data, msg->msg_type.rtcm2_msgunk,
-	//       (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
+	/* 
+	 * Leader bytes, message length, and checksum won't be copied.
+	 * The first 12 bits of the copied payload will be the type field.
+	 */
+	memcpy(rtcm->rtcmtypes.data, buf+3, rtcm->length);
 	break;
     }
 #undef RANGEDIFF
