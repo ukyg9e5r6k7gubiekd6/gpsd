@@ -1341,7 +1341,8 @@ struct gps_data_t {
 #define GST_SET 	(1u<<27)
 #define VERSION_SET	(1u<<28)
 #define POLICY_SET	(1u<<29)
-#define ERROR_SET	(1u<<30)
+#define LOGMESSAGE_SET	(1u<<30)
+#define ERROR_SET	(1u<<31)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1394,7 +1395,7 @@ struct gps_data_t {
     char buffer[GPS_BUFFER_MAX * 2];
 
     /* pack things never reported together to reduce structure size */ 
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|GST_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|GST_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
