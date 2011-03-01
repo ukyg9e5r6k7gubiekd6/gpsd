@@ -857,6 +857,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef RTCM104V3_ENABLE
     case RTCM3_LEADER_1:
+	/* high 6 bits must be zero, low 2 bits are MSB of a 10-bit length */
 	if ((c & 0xFC) == 0) {
 	    lexer->length = (size_t) (c << 8);
 	    lexer->state = RTCM3_LEADER_2;
@@ -865,6 +866,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case RTCM3_LEADER_2:
+	/* third byte is the low 8 bits of the RTCM3 packet length */
 	lexer->length |= c;
 	lexer->length += 3;	/* to get the three checksum bytes */
 	lexer->state = RTCM3_PAYLOAD;
