@@ -634,6 +634,7 @@ static bool add_device(const char *device_name)
 			ret = open_device(devp);
 		} else {
 			devp->gpsdata.gps_fd = -1;
+			ret = true;
 		}
 		notify_watchers(devp,
 				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%ld}\r\n",
