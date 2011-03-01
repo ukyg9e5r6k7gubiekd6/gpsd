@@ -83,11 +83,12 @@ Lexer_get(LexerObject *self, PyObject *args)
     if (PyErr_Occurred())
 	return NULL;
 
-    return Py_BuildValue("(i, i, s#)",
+    return Py_BuildValue("(i, i, s#, i)",
 			 len,
 			 self->lexer.type, 
 			 self->lexer.outbuffer, 
-			 self->lexer.outbuflen);
+			 self->lexer.outbuflen,
+			 self->lexer.char_counter);
 }
 
 static PyObject *

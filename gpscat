@@ -118,7 +118,7 @@ if __name__ == '__main__':
                     sys.stdout.write(hexdump(buf))
                     buf = ""
                 else:
-                    (length, ptype, packet) = getter.get(tty)
+                    (length, ptype, packet, counter) = getter.get(tty)
                     seqno += 1
                     if length == 0:
                         break

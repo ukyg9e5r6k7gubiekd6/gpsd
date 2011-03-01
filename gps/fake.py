@@ -115,7 +115,7 @@ class TestLoad:
         #gps.packet.register_report(reporter)
         type_latch = None
         while True:
-            (len, ptype, packet) = getter.get(logfp.fileno())
+            (len, ptype, packet, counter) = getter.get(logfp.fileno())
             if len <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
