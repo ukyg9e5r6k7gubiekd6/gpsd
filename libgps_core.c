@@ -160,8 +160,8 @@ int gps_close(struct gps_data_t *gpsdata)
 #ifdef LIBGPS_DEBUG
 static void libgps_dump_state(struct gps_data_t *collect)
 {
-    char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
-    char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
+    const char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
+    const char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
 
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
