@@ -698,7 +698,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
     }
 }
 
-extern char /*@observer@*/ *gps_errstr(const int err)
+extern const char /*@observer@*/ *gps_errstr(const int err)
 {
     /* 
      * We might add our own error codes in the future, e.g for

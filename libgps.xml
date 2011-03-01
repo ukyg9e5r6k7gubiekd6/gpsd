@@ -56,7 +56,7 @@ C:
     <paramdef>void *<parameter>data</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>char *<function>gps_errstr</function></funcdef>
+<funcdef>const char *<function>gps_errstr</function></funcdef>
     <paramdef>int <parameter>err</parameter></paramdef>
 </funcprototype>
 <funcsynopsisinfo>

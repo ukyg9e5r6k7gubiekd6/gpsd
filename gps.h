@@ -1427,7 +1427,7 @@ extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
 extern bool gps_waiting(struct gps_data_t *);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
-extern char /*@observer@*/ *gps_errstr(const int);
+extern const char /*@observer@*/ *gps_errstr(const int);
 
 /* this only needs to be visible for the unit tests */
 extern int gps_unpack(char *, struct gps_data_t *);
