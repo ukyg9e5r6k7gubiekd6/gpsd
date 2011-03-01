@@ -414,13 +414,16 @@ static void decode(FILE *fpin, FILE *fpout)
 
 /*@ -compdestroy @*/
 static void encode(FILE * fpin, FILE * fpout)
-/* dump format on fpin to RTCM-104 on fpout */
+/* JSON format on fpin to JSON on fpout - idempotency test */
 {
     char inbuf[BUFSIZ];
+    struct policy_t policy;
     struct gps_data_t gpsdata;
     int lineno = 0;
 
-    memset(&gpsdata, '\0', sizeof(gpsdata));	/* avoid segfault due to garbage in thread-hook slots */
+    memset(&policy, '\0', sizeof(policy));
+    policy.json = json;
+
     while (fgets(inbuf, (int)sizeof(inbuf), fpin) != NULL) {
 	int status;
 
@@ -434,21 +437,10 @@ static void encode(FILE * fpin, FILE * fpout)
 			  status, json_error_string(status), lineno);
 	    exit(1);
 	}
-#ifdef RTCM104V2_ENABLE
-	if ((gpsdata.set & RTCM2_SET) != 0) {
-	    /* this works */
-	    char outbuf[BUFSIZ];
-	    json_rtcm2_dump(&gpsdata.rtcm2, NULL, outbuf, sizeof(outbuf));
-	    (void)fputs(outbuf, fpout);
-	}
-#endif
-#ifdef AIVDM_ENABLE
-	if ((gpsdata.set & AIS_SET) != 0) {
-	    char outbuf[BUFSIZ];
-	    json_aivdm_dump(&gpsdata.ais, NULL, false, outbuf, sizeof(outbuf));
-	    (void)fputs(outbuf, fpout);
-	}
-#endif /* AIVDM_ENABLE */
+	json_data_report(gpsdata.set, 
+			 &gpsdata, &policy, 
+			 inbuf, sizeof(inbuf));
+	(void)fputs(inbuf, fpout);	
     }
 }
 
