@@ -159,10 +159,10 @@ extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
 extern void json_rtcm2_dump(const struct rtcm2_t *, 
 			    /*@null@*/const char *, /*@out@*/char[], size_t);
-extern int rtcm2_undump(/*@out@*/struct rtcm2_t *, char *);
 extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
+extern void json_rtcm3_dump(const struct rtcm3_t *, 
+			    /*@null@*/const char *, /*@out@*/char[], size_t);
 extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
-extern void rtcm3_dump(struct rtcm3_t *rtcm, FILE *);
 
 /* Next, declarations for the core library... */
 

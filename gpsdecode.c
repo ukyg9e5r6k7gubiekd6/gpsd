@@ -387,26 +387,18 @@ static void decode(FILE *fpin, FILE*fpout)
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
 	if ((changed & (REPORT_IS|SUBFRAME_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
 	    continue;
-	/*
-	 * We really ought to get rid of the non-JSON cases someday.
-	 * They're not used for production, only regression testing.
-	 */
 	else if (json) {
 	    json_data_report(changed, 
 			     &session.gpsdata, &policy, 
 			     buf, sizeof(buf));
 	    (void)fputs(buf, fpout);	
-#ifdef RTCM104V3_ENABLE
-	} else if (session.packet.type == RTCM3_PACKET) {
-	    rtcm3_dump(&session.gpsdata.rtcm3, fpout);
-#endif
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
 	    if ((changed & AIS_IS)!=0) {
 		aivdm_csv_dump(&session.gpsdata.ais, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
-#endif
+#endif /* AIVDM_ENABLE */
 	}
     }
 }
