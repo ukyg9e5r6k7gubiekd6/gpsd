@@ -607,9 +607,9 @@ static void deactivate_device(struct gps_device_t *device)
 }
 /* *INDENT-ON* */
 
-static bool open_device(struct gps_device_t *device)
+static bool open_device( /*@null@*/struct gps_device_t *device)
 {
-	if (gpsd_activate(device) < 0) {
+	if (NULL == device || gpsd_activate(device) < 0) {
 		return false;
 	}
 	gpsd_report(LOG_INF, "device %s activated\n",
