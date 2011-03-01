@@ -11,8 +11,10 @@
   API cleanup is finished; set_raw_hook is gone. JSON timestamps in TPV and
   SKY are now ISO8601 rather than seconds since the Unix epoch. GPGST sentences
   are now parsed for noise statistics when a device emits them.  AIS and
-  RTCM2 JSON dumps have device fields. gpsdecode can now dump NMEA
-  and GPS binary data to JSON.
+  RTCM2 JSON dumps have device fields. JSON reports now include 50bps subframe 
+  data if the device allows access to it. gpsdecode can now dump NMEA
+  GPS binary, and subframe data to JSON. The RTCM2 code now understands and 
+  analyzes RTCM2.3 messages 13 and 14.
 
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!
