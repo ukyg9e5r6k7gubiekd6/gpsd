@@ -72,10 +72,16 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 #define sgrab(width)	(bitcount += width, sbits(buf, bitcount-width, width))
 #define GPS_PSEUDORANGE(fld, len) \
     {temp = (unsigned long)ugrab(len);		\
-    if (temp == GPS_INVALID_PSEUDORANGE)		\
+    if (temp == GPS_INVALID_PSEUDORANGE)	\
 	fld.pseudorange = 0;			\
     else					\
 	fld.pseudorange = temp * GPS_PSEUDORANGE_RESOLUTION;}
+#define RANGEDIFF(fld, len) \
+    temp = (long)sgrab(len);			\
+    if (temp == GPS_INVALID_PSEUDORANGE)	\
+	fld.rangediff = 0;			\
+    else					\
+	fld.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
 
     assert(ugrab(8) == 0xD3);
     assert(ugrab(6) == 0x00);
@@ -96,11 +102,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1001.ident = (ushort)ugrab(6);
 	    R1001.L1.indicator = (unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1001.L1, 24);
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1001.L1.rangediff = 0;
-	    else
-		R1001.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1001.L1, 20);
 	    R1001.L1.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1001
@@ -120,11 +122,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1002.ident = (ushort)ugrab(6);
 	    R1002.L1.indicator = (unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1002.L1, 24);
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1002.L1.rangediff = 0;
-	    else
-		R1002.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1002.L1, 20);
 	    R1002.L1.locktime =	(unsigned char)sgrab(7);
 	    R1002.L1.ambiguity = (unsigned char)ugrab(8);
 	    R1002.L1.CNR = (ugrab(8)) * CARRIER_NOISE_RATIO_UNITS;
@@ -147,11 +145,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1003.L1.indicator =
 		(unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1003.L1, 24);
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1003.L1.rangediff = 0;
-	    else
-		R1003.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1003.L1, 20);
 	    R1003.L1.locktime =	(unsigned char)sgrab(7);
 	    R1003.L2.indicator = (unsigned char)ugrab(2);
 	    GPS_PSEUDORANGE(R1003.L2, 24);
@@ -179,21 +173,13 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1004.ident = (ushort)ugrab(6);
 	    R1004.L1.indicator = (bool)ugrab(1);
 	    GPS_PSEUDORANGE(R1004.L1, 24);
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1004.L1.rangediff = 0;
-	    else
-		R1004.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1004.L1, 20);
 	    R1004.L1.locktime =	(unsigned char)sgrab(7);
 	    R1004.L1.ambiguity = (unsigned char)ugrab(8);
 	    R1004.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1004.L2.indicator = (unsigned char)ugrab(2);
 	    GPS_PSEUDORANGE(R1004.L2, 24);
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1004.L2.rangediff = 0;
-	    else
-		R1004.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1004.L2, 20);
 	    R1004.L2.locktime =	(unsigned char)sgrab(7);
 	    R1004.L2.ambiguity = (unsigned char)ugrab(8);
 	    R1004.L2.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
@@ -204,48 +190,47 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1005:			/* Stationary Antenna Reference Point, No Height Information */
-	rtcm->rtcmtypes.rtcm3_1005.station_id = (unsigned short)ugrab(12);
+#define R1005 rtcm->rtcmtypes.rtcm3_1005
+	R1005.station_id = (unsigned short)ugrab(12);
 	ugrab(6);		/* reserved */
-	if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1005.system = NAVSYSTEM_GPS;
-	else if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1005.system = NAVSYSTEM_GLONASS;
-	else if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1005.system = NAVSYSTEM_GALILEO;
-	rtcm->rtcmtypes.rtcm3_1005.reference_station = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1005.ecef_x =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	rtcm->rtcmtypes.rtcm3_1005.single_receiver = ugrab(1);
+	temp = ugrab(3);
+	if ((temp & 0x04)!=0)
+	    R1005.system = NAVSYSTEM_GPS;
+	if ((temp & 0x02)!=0)
+	    R1005.system = NAVSYSTEM_GLONASS;
+	if ((temp & 0x01)!=0)
+	    R1005.system = NAVSYSTEM_GALILEO;
+	R1005.reference_station = (bool)ugrab(1);
+	R1005.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1005.single_receiver = ugrab(1);
 	ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1005.ecef_y =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1005.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	ugrab(2);
-	rtcm->rtcmtypes.rtcm3_1005.ecef_z =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+#undef R1005
 	assert(bitcount == 152);
 	break;
 
     case 1006:			/* Stationary Antenna Reference Point, with Height Information */
-	rtcm->rtcmtypes.rtcm3_1006.station_id = (unsigned short)ugrab(12);
+#define R1006 rtcm->rtcmtypes.rtcm3_1006
+	R1006.station_id = (unsigned short)ugrab(12);
+	temp = ugrab(3);
+	if ((temp & 0x04)!=0)
+	    R1006.system = NAVSYSTEM_GPS;
+	if ((temp & 0x02)!=0)
+	    R1006.system = NAVSYSTEM_GLONASS;
+	if ((temp & 0x01)!=0)
+	    R1006.system = NAVSYSTEM_GALILEO;
 	ugrab(6);		/* reserved */
-	if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1006.system = NAVSYSTEM_GPS;
-	else if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1006.system = NAVSYSTEM_GLONASS;
-	else if ((bool)ugrab(1))
-	    rtcm->rtcmtypes.rtcm3_1006.system = NAVSYSTEM_GALILEO;
-	rtcm->rtcmtypes.rtcm3_1006.reference_station = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1006.ecef_x =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	rtcm->rtcmtypes.rtcm3_1006.single_receiver = ugrab(1);
+	R1006.reference_station = (bool)ugrab(1);
+	R1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1006.single_receiver = ugrab(1);
 	ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1006.ecef_y =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1006.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	ugrab(2);
-	rtcm->rtcmtypes.rtcm3_1006.ecef_z =
-	    sgrab(38) * ANTENNA_POSITION_RESOLUTION;
-	rtcm->rtcmtypes.rtcm3_1006.height =
-	    ugrab(16) * ANTENNA_POSITION_RESOLUTION;
+	R1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	R1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
+#undef R1006
 	assert(bitcount == 168);
 	break;
 
@@ -287,13 +272,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1009.L1.indicator = (bool)ugrab(1);
 	    R1009.L1.channel = (ushort)ugrab(5);
 	    R1009.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1009.L1.rangediff = 0;
-	    else
-		R1009.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
-	    R1009.L1.locktime =
-		(unsigned char)sgrab(7);
+	    RANGEDIFF(R1009.L1, 20);
+	    R1009.L1.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1009
 	assert(bitcount ==
@@ -314,13 +294,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1010.L1.indicator = (bool)ugrab(1);
 	    R1010.L1.channel = (ushort)ugrab(5);
 	    R1010.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1010.L1.rangediff = 0;
-	    else
-		R1010.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
-	    R1010.L1.locktime =
-		(unsigned char)sgrab(7);
+	    RANGEDIFF(R1010.L1, 20);
+	    R1010.L1.locktime =	(unsigned char)sgrab(7);
 	    R1010.L1.ambiguity = (unsigned char)ugrab(7);
 	    R1010.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
@@ -343,22 +318,14 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1011.L1.indicator = (bool)ugrab(1);
 	    R1011.L1.channel = (ushort)ugrab(5);
 	    R1011.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1011.L1.rangediff = 0;
-	    else
-		R1011.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1011.L1, 20);
 	    R1011.L1.locktime =	(unsigned char)sgrab(7);
 	    R1011.L1.ambiguity = (unsigned char)ugrab(7);
 	    R1011.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1011.L2.indicator = (bool)ugrab(1);
 	    R1011.L2.channel = (ushort)ugrab(5);
 	    R1011.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1011.L2.rangediff = 0;
-	    else
-		R1011.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1011.L2, 20);
 	    R1011.L2.locktime =	(unsigned char)sgrab(7);
 	    R1011.L2.ambiguity = (unsigned char)ugrab(7);
 	    R1011.L2.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
@@ -382,19 +349,11 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1012.L1.indicator = (bool)ugrab(1);
 	    R1012.L1.channel = (ushort)ugrab(5);
 	    R1012.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1012.L1.rangediff = 0;
-	    else
-		R1012.L1.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1012.L1, 20);
 	    R1012.L1.locktime =	(unsigned char)sgrab(7);
 	    R1012.L2.indicator = (bool)ugrab(1);
 	    R1012.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
-	    temp = (long)sgrab(20);
-	    if (temp == GPS_INVALID_PSEUDORANGE)
-		R1012.L2.rangediff = 0;
-	    else
-		R1012.L2.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
+	    RANGEDIFF(R1012.L2, 20);
 	    R1012.L2.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1012
@@ -468,6 +427,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	//       (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
 	break;
     }
+#undef RANGEDIFF
+#undef GPS_PSEUDORANGE
 #undef sgrab
 #undef ugrab
     /*@ +evalorder +sefparams +mayaliasunique @*/
