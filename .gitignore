@@ -53,6 +53,7 @@ srec.html
 *.so
 *.la
 *~
+*.swp
 # Built sources
 gps_maskdump.c
 gpsd_maskdump.c
