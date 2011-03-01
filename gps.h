@@ -1280,7 +1280,8 @@ struct policy_t {
     int raw;				/* requesting raw data? */
     bool scaled;			/* requesting report scaling? */ 
     bool timing;			/* requesting timing info */
-    char devpath[GPS_PATH_MAX];		/* specific device to watch */   
+    int loglevel;			/* requested log level of messages */
+    char devpath[GPS_PATH_MAX];		/* specific device to watch */
 };
 
 /* 
