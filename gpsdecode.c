@@ -359,7 +359,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 #endif
 
 /*@ -compdestroy -compdef -usedef -uniondef @*/
-static void decode(FILE *fpin, FILE *fpout)
+static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
 {
     struct gps_device_t session;
@@ -410,10 +410,8 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
     }
 }
-/*@ +compdestroy +compdef +usedef +uniondef @*/
 
-/*@ -compdestroy @*/
-static void encode(FILE * fpin, FILE * fpout)
+static void encode(FILE *fpin, FILE *fpout)
 /* JSON format on fpin to JSON on fpout - idempotency test */
 {
     char inbuf[BUFSIZ];
@@ -422,7 +420,7 @@ static void encode(FILE * fpin, FILE * fpout)
     int lineno = 0;
 
     memset(&policy, '\0', sizeof(policy));
-    policy.json = json;
+    policy.json = true;
 
     while (fgets(inbuf, (int)sizeof(inbuf), fpin) != NULL) {
 	int status;
@@ -433,7 +431,7 @@ static void encode(FILE * fpin, FILE * fpout)
 	status = libgps_json_unpack(inbuf, &gpsdata, NULL);
 	if (status != 0) {
 	    (void)fprintf(stderr,
-			  "gpsdecode: bailing out with status %d (%s) on line %d\n",
+			  "gpsdecode: dying with status %d (%s) on line %d\n",
 			  status, json_error_string(status), lineno);
 	    exit(1);
 	}
@@ -443,8 +441,7 @@ static void encode(FILE * fpin, FILE * fpout)
 	(void)fputs(inbuf, fpout);	
     }
 }
-
-/*@ +compdestroy @*/
+/*@ +compdestroy +compdef +usedef @*/
 
 int main(int argc, char **argv)
 {
