@@ -83,8 +83,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     else					\
 	fld.rangediff = temp * PSEUDORANGE_DIFF_RESOLUTION;
 
-    assert(ugrab(8) == 0xD3);
-    assert(ugrab(6) == 0x00);
+    //assert(ugrab(8) == 0xD3);
+    //assert(ugrab(6) == 0x00);
+    ugrab(14);
 
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
