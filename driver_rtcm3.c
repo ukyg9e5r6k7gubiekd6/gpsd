@@ -370,14 +370,13 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1013.sod = (unsigned short)ugrab(17);
 	rtcm->rtcmtypes.rtcm3_1013.ncount = (unsigned long)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1013.leapsecs = (unsigned char)ugrab(8);
+#define R1013 rtcm->rtcmtypes.rtcm3_1013.announcements[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1013.ncount; i++) {
-	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].id =
-		(unsigned short)ugrab(12);
-	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].sync =
-		(bool)ugrab(1);
-	    rtcm->rtcmtypes.rtcm3_1013.announcements[i].interval =
-		(unsigned short)ugrab(16);
+	    R1013.id = (unsigned short)ugrab(12);
+	    R1013.sync = (bool)ugrab(1);
+	    R1013.interval = (unsigned short)ugrab(16);
 	}
+#undef R1013
 	assert(bitcount == 70 + 29 * rtcm->rtcmtypes.rtcm3_1013.ncount);
 	break;
 
