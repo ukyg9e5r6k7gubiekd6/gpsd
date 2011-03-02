@@ -669,7 +669,7 @@ type25 = (
     bitfield("data",       None, 'raw',         None, "Data"),
     )
 
-# No type 26 handling yet, we'd need new machinery to contrain how many
+# No type 26 handling yet, we'd need new machinery to constrain how many
 # bits the data spec eats in order to recover the radio bits after it.
 
 aivdm_decode = (
