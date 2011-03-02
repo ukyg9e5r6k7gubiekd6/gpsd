@@ -46,7 +46,7 @@ interface intended for batch processing of data files.</para>
 <para>All sensor-input formats known to the GPSD project can be
 decoded by this tool.  These include: NMEA, AIVDM (the NMEA-derived
 sentence format used by AIS, the marine Automatic Identification
-System), RTCM2, RTCM3 and all supported GPS binary formats (notably
+System), RTCM2, and all supported GPS binary formats (notably
 including SiRF). See
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 for applicable standards and known limitations of the decoding

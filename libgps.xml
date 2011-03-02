@@ -284,11 +284,12 @@ for fields associated with certain responses are combined in a
 union.</para>
 
 <para>The risky set of responses includes VERSION, DEVICELIST, RTCM2,
-RTCM3, and AIS; it may not be limited to that set.  The logic of the
-daemon's watcher mode is careful to avoid dangerous sequences, but
-you should read and understand the layout of <structname>struct
-gps_data_t</structname> before using <function>gps_send()</function>
-to request any of these responses.</para>
+RTCM3, SUBFRAME, AIS, GST, and ERROR; it may not be limited to that
+set.  The logic of the daemon's watcher mode is careful to avoid
+dangerous sequences, but you should read and understand the layout of
+<structname>struct gps_data_t</structname> before using
+<function>gps_send()</function> to request any of these
+responses.</para>
 
 </refsect1>
 
