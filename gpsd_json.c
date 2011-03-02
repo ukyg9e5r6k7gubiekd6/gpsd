@@ -1019,6 +1019,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	break;
 
     case 1005:
+    case 1006:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"system\":\"%s\","
 		       "\"refstation\":\"%s\",\"sro\":\"%s\","
@@ -1030,21 +1031,10 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_x,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_y,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_z);
-	break;
-
-    case 1006:
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"station_id\":%u,\"system\":\"%s\","
-		       "\"refstation\":\"%s\",\"sro\":\"%s\","
-		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,\"a\":%.4f,",
-		       rtcm->rtcmtypes.rtcm3_1006.station_id,
-		       systems[rtcm->rtcmtypes.rtcm3_1006.system],
-		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1006.reference_station),
-		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1006.single_receiver),
-		       rtcm->rtcmtypes.rtcm3_1006.ecef_x,
-		       rtcm->rtcmtypes.rtcm3_1006.ecef_y,
-		       rtcm->rtcmtypes.rtcm3_1006.ecef_z,
-		       rtcm->rtcmtypes.rtcm3_1006.height);
+	if (rtcm->type == 1006)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"h\":%.4f,",
+			   rtcm->rtcmtypes.rtcm3_1006.height);
 	break;
 
     case 1007:
