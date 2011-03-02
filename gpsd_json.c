@@ -1257,12 +1257,12 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
     case 1029:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"mjd\":%u,\"sec\":%u,"
-		       "\"len\":%u,\"units\":%u,\"msg\"=\"%s\",",
+		       "\"len\":%zd,\"units\":%zd,\"msg\"=\"%s\",",
 		       rtcm->rtcmtypes.rtcm3_1029.station_id,
 		       rtcm->rtcmtypes.rtcm3_1029.mjd,
 		       rtcm->rtcmtypes.rtcm3_1029.sod,
-		       INT(rtcm->rtcmtypes.rtcm3_1029.len),
-		       INT(rtcm->rtcmtypes.rtcm3_1029.unicode_units),
+		       rtcm->rtcmtypes.rtcm3_1029.len,
+		       rtcm->rtcmtypes.rtcm3_1029.unicode_units,
 		       json_stringify(buf1, sizeof(buf1),
 				      (char *)rtcm->rtcmtypes.rtcm3_1029.text));
 	break;

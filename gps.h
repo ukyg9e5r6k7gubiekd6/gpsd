@@ -494,8 +494,8 @@ struct rtcm3_t {
 	    unsigned int station_id;	/* Reference Station ID */
 	    unsigned short mjd;		/* Modified Julian Day (MJD) Number */
 	    unsigned int sod;		/* Seconds of Day (UTC) */
-	    unsigned char len;		/* # Chars to follow */
-	    unsigned char unicode_units;
+	    size_t len;			/* # chars to follow */
+	    size_t unicode_units;	/* # Unicode units in text */
 	    unsigned char text[128];
 	} rtcm3_1029;
 	char data[1024];		/* Max RTCM3 msg length is 1023 bytes */

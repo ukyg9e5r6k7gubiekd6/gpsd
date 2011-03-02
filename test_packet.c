@@ -205,6 +205,7 @@ static struct map singletests[] = {
 	.type = EVERMORE_PACKET,                         
     },
     {
+	/* from page 4-3 of the RTCM3.0 standard */
 	.legend = "RTCM104V3 type 1005 packet",
 	/*
 	 * Reference Station Id = 2003
@@ -234,6 +235,21 @@ static struct map singletests[] = {
 	.testlen = 25,
 	.garbage_offset = 0,
 	.type = BAD_PACKET,                         
+    },
+    {
+	/* from page 3-71 of the RTCM3.0 standard */
+	.legend = "RTCM104V3 type 1029 packet",
+	.test = {
+	    0xD3, 0x00, 0x27, 0x40, 0x50, 0x17, 0x00, 0x84, 
+	    0x73, 0x6E, 0x15, 0x1E, 0x55, 0x54, 0x46, 0x2D,
+	    0x38, 0x20, 0xD0, 0xBF, 0xD1, 0x80, 0xD0, 0xBE,
+	    0xD0, 0xB2, 0xD0, 0xB5, 0xD1, 0x80, 0xD0, 0xBA,
+	    0xD0, 0xB0, 0x20, 0x77, 0xC3, 0xB6, 0x72, 0x74,
+	    0x65, 0x72, 0xED, 0xA3, 0x3B
+	    },
+	.testlen = 45,
+	.garbage_offset = 0,
+	.type = RTCM3_PACKET,                         
     },
 };
 /*@ +initallelements -charint +usedef @*/
@@ -310,7 +326,7 @@ static void runon_test(struct map *mp)
     (void)fputs(mp->test, stdout);
     do {
 	st = packet_get(nullfd, &packet);
-	printf("packet_parse() returned %zd\n", st);
+	//printf("packet_parse() returned %zd\n", st);
     } while (st > 0);
     /*@ +compdef +uniondef +usedef +formatcode @*/
 }

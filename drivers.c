@@ -934,15 +934,15 @@ static const struct gps_type_t rtcm104v2 = {
 
 static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
-    uint16_t length = getbeu16(session->packet.inbuffer, 1);
     uint16_t type = getbeu16(session->packet.inbuffer, 3) >> 4;
 
-    /* *INDENT-OFF* */
-    gpsd_report(LOG_RAW, "RTCM 3.x packet type %d length %d words: %s\n",
-		type, length, gpsd_hexdump_wrapper(session->packet.inbuffer,
-				   (size_t) (session->gpsdata.rtcm3.length),
-				   LOG_RAW));
-    /* *INDENT-ON* */
+    gpsd_report(LOG_RAW, "RTCM 3.x packet %d type length %zd bytes: %s\n",
+		type,
+		session->packet.outbuflen, 
+		gpsd_hexdump_wrapper(session->packet.outbuffer,
+				     session->packet.outbuflen,
+				     LOG_RAW));
+    rtcm3_unpack(&session->gpsdata.rtcm3, (char *)session->packet.outbuffer);
     session->cycle_end_reliable = true;
     return RTCM3_IS;
 }

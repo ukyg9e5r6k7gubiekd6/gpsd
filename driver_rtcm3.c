@@ -89,8 +89,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
 
-    gpsd_report(LOG_RAW, "RTCM3: Raw packet type 0x%02x length %d: %s\n",
-		rtcm->type, rtcm->length, gpsd_hexdump_wrapper(buf, rtcm->length, LOG_RAW));
+    gpsd_report(LOG_RAW, "RTCM3: type %d payload length %d: %s\n",
+		rtcm->type, rtcm->length, 
+		gpsd_hexdump_wrapper(buf+3, rtcm->length, LOG_RAW));
 
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */
@@ -211,12 +212,12 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	ugrab(2);
 	R1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 #undef R1005
-	assert(bitcount == 152);
 	break;
 
     case 1006:			/* Stationary Antenna Reference Point, with Height Information */
 #define R1006 rtcm->rtcmtypes.rtcm3_1006
 	R1006.station_id = (unsigned short)ugrab(12);
+	ugrab(6);		/* reserved */
 	temp = ugrab(3);
 	if ((temp & 0x04)!=0)
 	    R1006.system = NAVSYSTEM_GPS;
@@ -224,7 +225,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1006.system = NAVSYSTEM_GLONASS;
 	if ((temp & 0x01)!=0)
 	    R1006.system = NAVSYSTEM_GALILEO;
-	ugrab(6);		/* reserved */
 	R1006.reference_station = (bool)ugrab(1);
 	R1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	R1006.single_receiver = ugrab(1);
@@ -418,11 +418,9 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
 	rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
 	rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
-	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units =
-	    (unsigned long)ugrab(8);
-	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, buf + 9, n);
-	bitcount += 8 * n;
-	assert(bitcount == (int)(72 + 8 * n));
+	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (size_t)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, 
+		     buf + 12, rtcm->rtcmtypes.rtcm3_1029.unicode_units);
 	break;
 
     default:

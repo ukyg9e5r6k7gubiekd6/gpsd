@@ -16,9 +16,7 @@
 15: EverMore packet 0x04, 0x10 three times at the beginning test succeeded.
 16: RTCM104V3 type 1005 packet test succeeded.
 17: RTCM104V3 type 1005 packet with 4th byte garbled test succeeded.
+18: RTCM104V3 type 1029 packet test succeeded.
 === EOF with buffer nonempty test ===
 $GPVTG,308.74,T,,M,0.00,N,0.0,K*68
 $GPGGA,110534.994,4002.1425,N,07531.2585,W,0,00,50.0,172.7,M,-33.8,M,0.0,0000*7A
-packet_parse() returned 36
-packet_parse() returned 82
-packet_parse() returned 0
