@@ -1,5 +1,5 @@
-=== Packet identification tests
- === 1: NMEA packet with checksum (1) test succeeded.
+=== Packet identification tests ===
+ 1: NMEA packet with checksum (1) test succeeded.
  2: NMEA packet with checksum (2) test succeeded.
  3: NMEA packet with checksum and 4 chars of leading garbage test succeeded.
  4: NMEA packet without checksum test succeeded.

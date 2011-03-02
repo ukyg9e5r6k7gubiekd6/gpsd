@@ -322,8 +322,12 @@ int main(int argc, char *argv[])
     int option, singletest = 0;
 
     verbose = 0;
-    while ((option = getopt(argc, argv, "t:v:")) != -1) {
+    while ((option = getopt(argc, argv, "e:t:v:")) != -1) {
 	switch (option) {
+	case 'e':
+	    mp = singletests + atoi(optarg) - 1;
+	    (void)fwrite(mp->test, mp->testlen, sizeof(char), stdout);
+	    exit(0);
 	case 't':
 	    singletest = atoi(optarg);
 	    break;
@@ -336,7 +340,7 @@ int main(int argc, char *argv[])
     if (singletest)
 	failcount += packet_test(singletests + singletest - 1);
     else {
-	(void)fputs("=== Packet identification tests\n ===", stdout);
+	(void)fputs("=== Packet identification tests ===\n", stdout);
 	for (mp = singletests;
 	     mp < singletests + sizeof(singletests) / sizeof(singletests[0]);
 	     mp++)
