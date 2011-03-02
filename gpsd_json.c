@@ -1022,7 +1022,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"system\":\"%s\","
 		       "\"refstation\":\"%s\",\"sro\":\"%s\","
-		       "\"x\":%f,\"y\":%f,\"z\":%f,",
+		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
 		       rtcm->rtcmtypes.rtcm3_1005.station_id,
 		       systems[rtcm->rtcmtypes.rtcm3_1005.system],
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1005.reference_station),
@@ -1036,7 +1036,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"system\":\"%s\","
 		       "\"refstation\":\"%s\",\"sro\":\"%s\","
-		       "\"x\":%f,\"y\":%f,\"z\":%f,\"a\":%f,",
+		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,\"a\":%.4f,",
 		       rtcm->rtcmtypes.rtcm3_1006.station_id,
 		       systems[rtcm->rtcmtypes.rtcm3_1006.system],
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1006.reference_station),
