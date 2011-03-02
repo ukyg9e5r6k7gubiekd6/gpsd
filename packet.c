@@ -1605,7 +1605,6 @@ void packet_parse(struct gps_packet_t *lexer)
 	    if (crc24q_check(lexer->inbuffer,
 			     lexer->inbufptr - lexer->inbuffer)) {
 		packet_accept(lexer, RTCM3_PACKET);
-		packet_discard(lexer);
 	    } else {
 		gpsd_report(LOG_IO, "RTCM3 data checksum failure, "
 			    "%0x against %02x %02x %02x\n",
@@ -1614,9 +1613,9 @@ void packet_parse(struct gps_packet_t *lexer)
 					3), lexer->inbufptr[-3],
 			    lexer->inbufptr[-2], lexer->inbufptr[-1]);
 		packet_accept(lexer, BAD_PACKET);
-		lexer->state = GROUND_STATE;
-		packet_discard(lexer);
 	    }
+	    packet_discard(lexer);
+	    lexer->state = GROUND_STATE;
 	    break;
 	}
 #endif /* RTCM104V3_ENABLE */
