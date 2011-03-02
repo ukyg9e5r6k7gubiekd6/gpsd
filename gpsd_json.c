@@ -898,7 +898,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
 #define R1001 rtcm->rtcmtypes.rtcm3_1001.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"prange\"=%8.1f,"
+			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.1f,"
 			   "\"delta\":%6.4f,\"lockt\":%u},",
 			   R1001.ident,
 			   CODE(R1001.L1.indicator),
@@ -1204,7 +1204,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       INT(rtcm->rtcmtypes.rtcm3_1013.leapsecs));
 	for (i = 0; i < (unsigned short)rtcm->rtcmtypes.rtcm3_1013.ncount; i++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"id\":%u,\"sync\"=\"%s\",\"interval\":%u}",
+			   "{\"id\":%u,\"sync\":\"%s\",\"interval\":%u}",
 			   rtcm->rtcmtypes.rtcm3_1013.announcements[i].id,
 			   JSON_BOOL(rtcm->rtcmtypes.rtcm3_1013.
 				announcements[i].sync),
@@ -1247,7 +1247,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
     case 1029:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"mjd\":%u,\"sec\":%u,"
-		       "\"len\":%zd,\"units\":%zd,\"msg\"=\"%s\",",
+		       "\"len\":%zd,\"units\":%zd,\"msg\":\"%s\",",
 		       rtcm->rtcmtypes.rtcm3_1029.station_id,
 		       rtcm->rtcmtypes.rtcm3_1029.mjd,
 		       rtcm->rtcmtypes.rtcm3_1029.sod,
