@@ -32,8 +32,10 @@ int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
 /* open a connection to a DGNSS service */
 {
 #ifdef NTRIP_ENABLE
-    if (strncmp(netgnss_service, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP)) == 0)
+    if (strncmp(netgnss_service, NETGNSS_NTRIP, strlen(NETGNSS_NTRIP)) == 0) {
+	dev->ntrip.conn_state = ntrip_conn_init;
 	return ntrip_open(dev, netgnss_service + strlen(NETGNSS_NTRIP));
+    }
 #endif
 
     if (strncmp(netgnss_service, NETGNSS_DGPSIP, strlen(NETGNSS_DGPSIP)) == 0)
