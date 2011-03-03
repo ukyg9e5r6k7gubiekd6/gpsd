@@ -39,3 +39,10 @@ lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If
 invoked as "ecef2lla" it will transform coordinates in the opposite manner.
 
+webgps.py draws a sky view of the satellites and their tracks using HTML5. It
+needs to run continuously in order to build a history and generate the
+satellite tracks. Your browser must be able to display the <canvas> element to
+display the satellite view properly. webgps.py can be called with the argument
+"c" to run continously, with an integer duration and a unit suffix to run this
+long (units allowed are "s", "m", "h" and "d", e.g. "4h"), or without argument
+to create a snapshot of the current sat view.
