@@ -205,7 +205,7 @@ static struct map singletests[] = {
 	.type = EVERMORE_PACKET,                         
     },
     {
-	/* from page 4-3 of the RTCM3.0 standard */
+	/* from page 4-3 of RTCM 10403.1 */
 	.legend = "RTCM104V3 type 1005 packet",
 	/*
 	 * Reference Station Id = 2003
@@ -237,7 +237,7 @@ static struct map singletests[] = {
 	.type = BAD_PACKET,                         
     },
     {
-	/* from page 3-71 of the RTCM3.0 standard */
+	/* from page 3-71 of the RTCM 10403.1 */
 	.legend = "RTCM104V3 type 1029 packet",
 	.test = {
 	    0xD3, 0x00, 0x27, 0x40, 0x50, 0x17, 0x00, 0x84, 
