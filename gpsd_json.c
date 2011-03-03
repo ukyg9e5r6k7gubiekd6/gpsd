@@ -1245,6 +1245,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	break;
 
     case 1029:
+	/*@-formatcode@*//* splint has a bug */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"mjd\":%u,\"sec\":%u,"
 		       "\"len\":%zd,\"units\":%zd,\"msg\":\"%s\",",
@@ -1255,6 +1256,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       rtcm->rtcmtypes.rtcm3_1029.unicode_units,
 		       json_stringify(buf1, sizeof(buf1),
 				      (char *)rtcm->rtcmtypes.rtcm3_1029.text));
+	/*@+formatcode@*/
 	break;
 
     default:
