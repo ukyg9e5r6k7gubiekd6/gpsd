@@ -14,7 +14,8 @@
   RTCM2 JSON dumps have device fields. JSON reports now include 50bps subframe 
   data if the device allows access to it. gpsdecode can now dump NMEA
   GPS binary, and subframe data to JSON. The RTCM2 code now understands and 
-  analyzes RTCM2.3 messages 13 and 14.
+  analyzes RTCM2.3 messages 13 and 14.  The ancient Sager dump format for RTCM2
+  is abolished in favor of a JSON profile.
 
 * Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
   The autonomous robot submarine total world domination release!
