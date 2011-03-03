@@ -106,7 +106,7 @@ case $mode in
 		trap 'rm -f ${TMP}/test-$$.chk; exit $errors' EXIT HUP INT TERM
 		case $testing in
 		daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
-		clientlib) ${PYTHON} ${GPSD_HOME}/libgps -b <${f} >${TMP}/test-$$.chk ;;
+		clientlib) ${GPSD_HOME}/libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		if [ "${ALTFILTER}" ]
 		then
@@ -163,7 +163,7 @@ case $mode in
         for f in $*; do
 	    case $testing in
             daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
-	    clientlib) ${PYTHON} ${GPSD_HOME}/libgps -b <${f} >${f}.chk ;;
+	    clientlib) ${GPSD_HOME}/libgps -b <${f} >${f}.chk ;;
             esac
         done
         status=0
@@ -173,7 +173,7 @@ case $mode in
         for f in $*; do
 	    case $testing in
             daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
-            clientlib) ${PYTHON} ${GPSD_HOME}/libgps -b <${f} ;;
+            clientlib) ${GPSD_HOME}/libgps -b <${f} ;;
             esac
         done
         status=0
