@@ -368,10 +368,10 @@ function write_html($resp){
 <style>
 .warning {
     color: #FF0000;
- }
+}
 
 .fixed {
-    font-family: courier, fixed;
+    font-family: mono-space;
 }
 
 .caption {
@@ -409,7 +409,7 @@ width="600" height="600"/>
 <br clear="all"/>
 <p class="caption">A filled circle means the satellite was used in
 the last fix. Green-yellow-red colors indicate signal strength in dB,
- green=most and red=least.  Diamonds indicate SBAS satellites.</p>
+green=most and red=least.  Diamonds indicate SBAS satellites.</p>
 {$gmap_code}</td>
 </tr>
 EOF;
@@ -434,41 +434,58 @@ Use a different server:<br/>
 EOF;
 
 	if ($testmode && !$sock)
-		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
+		$part4 = "<tr><td class='warning'>The gpsd instance that this page monitors is not running.</td></tr>";
 	else {
-		$nsv = count($GPS['skyviews'][0]['satellites']);
-		$ts = $GPS['fixes'][0]['time'];
+		$fix = $GPS['fixes'][0];
+		$sky = $GPS['skyviews'][0];
+		$sats = $sky['satellites'];
+
+		$nsv = count($sats);
+                $ts = $fix['time'];
+                $sat = '';
+                foreach($sats as $s)
+                        $sat .= sprintf(
+                                "\t<tr><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>\n",
+                                $s['PRN'], $s['el'], $s['az'], $s['ss'], $s['used'] ? 'Y' : 'N'
+                        );
 		$part4 = <<<EOF
 <!-- ------------------------------------------------------------ -->
-        <tr><td align=center valign=top>
-	<table border=1>
-	<tr><td colspan=2 align=center><b>Current Information</b></td></tr>
-	<tr><td>Time (UTC)</td><td>{$ts}</td></tr>
-	<tr><td>Latitude</td><td>{$GPS['fixes'][0]['lat']}</td></tr>
-	<tr><td>Longitude</td><td>{$GPS['fixes'][0]['lon']}</td></tr>
-	<tr><td>Altitude</td><td>{$GPS['fixes'][0]['alt']}</td></tr>
-	<tr><td>Fix Type</td><td>{$GPS['fixes'][0]['mode']}</td></tr>
-	<tr><td>Satellites</td><td>{$nsv}</td></tr>
-	<tr><td>HDOP</td><td>{$GPS['skyviews'][0]['hdop']}</td></tr>
-	</table>
-</tr>
-<!-- raw response
+<tr><td align=center valign=top>
+    <table border=1>
+        <tr><th colspan=2 align=center>Current Information</th></tr>
+        <tr><td>Time (UTC)</td><td>{$ts}</td></tr>
+        <tr><td>Latitude</td><td>{$fix['lat']}</td></tr>
+        <tr><td>Longitude</td><td>{$fix['lon']}</td></tr>
+        <tr><td>Altitude</td><td>{$fix['alt']}</td></tr>
+        <tr><td>Fix Type</td><td>{$fix['mode']}</td></tr>
+        <tr><td>Satellites</td><td>{$nsv}</td></tr>
+        <tr><td>HDOP</td><td>{$sky['hdop']}</td></tr>
+        <tr><td>VDOP</td><td>{$sky['vdop']}</td></tr>
+    </table>
+    <br/>
+    <table border=1>
+        <tr><th colspan=5 align=center>Current Satellites</th></tr>
+        <tr><th>PRN</th><th>Elevation</th><th>Azimuth</th><th>SS</th><th>Used</th></tr>
+$sat    </table>
+</td></tr>
+
+<!-- raw response:
 {$resp}
 -->
 EOF;
 	}
 
 	$part5 = <<<EOF
+
 </table>
 </center>
-
 {$footer}
-
 <hr/>
-<span class="administrivia">This script is distributed by the <a href="http://gpsd.berlios.de">GPSD project</a>.</span><br/>
-</body>
-</body>
+<p class="administrivia">This script is distributed by the
+<a href="http://gpsd.berlios.de">GPSD project</a>.</p>
 
+</body>
+</html>
 EOF;
 
 print $part1 . $part2 . $part3 . $part4 . $part5;
@@ -534,9 +551,9 @@ global $gmap_key;
 return <<<EOT
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={$gmap_key}" type="text/javascript"></script>
 <script type="text/javascript">
-    <!--
-    // Create a base icon for all of our markers that specifies the shadow, icon
-    // dimensions, etc.
+<!--
+// Create a base icon for all of our markers that specifies the shadow, icon
+// dimensions, etc.
 function Load() {
   if (GBrowserIsCompatible()) {
     var map = new GMap2(document.getElementById("map"));
@@ -559,22 +576,21 @@ function Load() {
     map.addOverlay(marker);
   }
 }
-
-    -->
-    </script>
+-->
+</script>
 EOT;
 
 }
+
 function gen_gmap_code() {
 return <<<EOT
 <br/>
-    <div id="map" style="width: 550px; height: 400px; border:1px; border-style: solid;">
+<div id="map" style="width: 550px; height: 400px; border:1px; border-style: solid;">
     Loading...
     <noscript>
-<span class='warning'>Sorry: you must enable javascript to view our maps.</span><br/>
+        <span class='warning'>Sorry: you must enable javascript to view our maps.</span><br/>
     </noscript>
 </div>
-
 
 EOT;
 }
