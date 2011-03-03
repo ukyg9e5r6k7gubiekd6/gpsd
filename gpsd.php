@@ -241,7 +241,7 @@ function imageFilledDiamond($im, $x, $y, $r, $color){
 		imagepolygon($im, $vx, 4, $color);
 		$t -= 0.5;
 	}
-}       
+}
 
 function elevation($im, $sz, $C, $a){
 	$b = 90 - $a;
@@ -375,12 +375,12 @@ function write_html($resp){
 }
 
 .caption {
-    text-align: left; 
+    text-align: left;
     margin: 1ex 3em 1ex 3em; /* top right bottom left */
 }
 
 .administrivia {
-    font-size: small; 
+    font-size: small;
     font-family: verdana, sans-serif;
 }
 </style>
@@ -408,7 +408,7 @@ EOF;
 width="600" height="600"/>
 <br clear="all"/>
 <p class="caption">A filled circle means the satellite was used in
-the last fix. Green-yellow-red colors indicate signal strength in dB, 
+the last fix. Green-yellow-red colors indicate signal strength in dB,
  green=most and red=least.  Diamonds indicate SBAS satellites.</p>
 {$gmap_code}</td>
 </tr>
