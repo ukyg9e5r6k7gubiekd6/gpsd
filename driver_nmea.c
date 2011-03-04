@@ -175,7 +175,7 @@ static gps_mask_t processGPRMC(int count, char *field[],
 	mask |= ONLINE_IS;
     } else if (strcmp(field[2], "A") == 0) {
 	/*
-	 * The MKT3301, Royaltek RGM-3800, and possibly other
+	 * The MTK3301, Royaltek RGM-3800, and possibly other
 	 * devices deliver bogus time values when the navigation
 	 * warning bit is set.
 	 */
@@ -1113,13 +1113,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    break;
 	}
     }
-
-    /* general handler for MKT3301 vendor specifics */
-#ifdef MKT3301_ENABLE
-    if (strncmp("PMTK", session->driver.nmea.field[0], 4) == 0)
-	retval = processMKT3301(count, session->driver.nmea.field, session);
-#endif /* MKT3301_ENABLE */
-    /*@ +usedef @*/
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_IS) != 0) {
