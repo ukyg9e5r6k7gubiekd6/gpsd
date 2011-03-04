@@ -242,7 +242,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
  */
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 {
-#ifdef UBX_SBAS_DEBUG
+#ifdef __UNUSED_DEBUG__
     unsigned int i, nsv;
 
     gpsd_report(LOG_WARN, "SBAS: %d %d %d %d %d\n",
@@ -254,7 +254,7 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 	int off = 12 + 12 * i;
 	gpsd_report(LOG_WARN, "SBAS info on SV: %d\n", (int)getub(buf, off));
     }
-#endif
+#endif /* __UNUSED_DEBUG__ */
 /* really 'in_use' depends on the sats info, EGNOS is still in test */
 /* In WAAS areas one might also check for the type of corrections indicated */
     session->driver.ubx.sbas_in_use = (unsigned char)getub(buf, 4);

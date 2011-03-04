@@ -1514,7 +1514,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
     return (int)throttled_write(sub, reply, strlen(reply));
 }
 
-#ifdef AUTOCONNECT_UNUSED
+#ifdef __UNUSED_AUTOCONNECT__
 #define DGPS_THRESHOLD	1600000	/* max. useful dist. from DGPS server (m) */
 #define SERVER_SAMPLE	12	/* # of servers within threshold to check */
 
@@ -1590,7 +1590,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 	}
     }
 }
-#endif /* AUTOCONNECT_UNUSED */
+#endif /* __UNUSED_AUTOCONNECT__ */
 
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
@@ -1999,7 +1999,7 @@ int main(int argc, char *argv[])
 		    }
 	} /* devices */
 
-#ifdef AUTOCONNECT_UNUSED
+#ifdef __UNUSED_AUTOCONNECT__
 	if (context.fixcnt > 0 && !context.autconnect) {
 	    for (device = devices; device < devices + MAXDEVICES; device++) {
 		if (device->gpsdata.fix.mode > MODE_NO_FIX) {
@@ -2011,7 +2011,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	}
-#endif /* AUTOCONNECT_UNUSED */
+#endif /* __UNUSED_AUTOCONNECT__ */
 
 	/* accept and execute commands for all clients */
 	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
