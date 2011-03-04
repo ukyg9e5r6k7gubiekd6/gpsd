@@ -291,24 +291,7 @@ static int packet_test(struct map *mp)
 	++failure;
     } else
 	printf("%2zi: %s test succeeded.\n", mp - singletests + 1,
-	       mp->legend);
-#ifdef DUMPIT
-    for (cp = packet.outbuffer;
-	 cp < packet.outbuffer + packet.outbuflen; cp++) {
-	if (lexer->type != NMEA_PACKET)
-	    (void)printf(" 0x%02x", *cp);
-	else if (*cp == '\r')
-	    (void)fputs("\\r", stdout);
-	else if (*cp == '\n')
-	    (void)fputs("\\n", stdout);
-	else if (isprint(*cp))
-	    (void)putchar(*cp);
-	else
-	    (void)printf("\\x%02x", *cp);
-    }
-    (void)putchar('\n');
-#endif /* DUMPIT */
-    /*@ +compdef +uniondef +usedef +formatcode @*/
+	       mp->legend);    /*@ +compdef +uniondef +usedef +formatcode @*/
 
     return failure;
 }
