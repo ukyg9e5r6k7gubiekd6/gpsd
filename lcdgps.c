@@ -74,10 +74,7 @@ static float altfactor = METERS_TO_FEET;
 static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
-
-#ifdef CLIMB
 double avgclimb, climb[CLIMB];
-#endif
 
 /* Global socket descriptor for LCDd. */
 int sd;
