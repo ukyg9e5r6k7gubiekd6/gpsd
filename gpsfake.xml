@@ -52,7 +52,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of one or more test logfiles through the master side to the
 GPS. If there are multiple logfiles, sentences from them are
-interleaved in the order the fuiles are specified.</para>
+interleaved in the order the files are specified.</para>
 
 <para><application>gpsfake</application> does not require root
 privileges, and can be run concurrently with a production 
