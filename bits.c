@@ -69,22 +69,22 @@ int64_t sbits(char buf[], unsigned int start, unsigned int width)
 {
     uint64_t fld = ubits(buf, start, width);
 
-#ifdef SDEBUG
+#ifdef __UNUSED_DEBUG__
     (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
-#endif /* SDEBUG */
+#endif /* __UNUSED_DEBUG__ */
     /*@ +relaxtypes */
     if (fld & (1 << (width - 1))) {
-#ifdef SDEBUG
+#ifdef __UNUSED_DEBUG__
 	(void)fprintf(stderr, "%llx is signed\n", fld);
-#endif /* SDEBUG */
+#endif /* __UNUSED_DEBUG__ */
 	/*@ -shiftimplementation @*/
 	fld |= (-1LL << (width - 1));
 	/*@ +shiftimplementation @*/
     }
-#ifdef SDEBUG
+#ifdef __UNUSED_DEBUG__
     (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width,
 		  (int64_t)fld);
-#endif /* SDEBUG */
+#endif /* __UNUSED_DEBUG__ */
     return (int64_t)fld;
     /*@ -relaxtypes */
 }

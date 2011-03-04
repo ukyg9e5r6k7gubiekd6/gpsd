@@ -422,7 +422,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 	/* reset to known output state */
 	(void)nmea_send(session, "$PASHS,NME,ALL,A,OFF");
 	/* then turn on some useful sentences */
-#ifdef ASHTECH_NOTYET
+#ifdef __future__
 	/* we could parse these, but they're oversize so they get dropped */
 	(void)nmea_send(session, "$PASHS,NME,POS,A,ON");
 	(void)nmea_send(session, "$PASHS,NME,SAT,A,ON");
