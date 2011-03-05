@@ -236,7 +236,7 @@ an eye on the fix and sentence timestamps.</para>
 library. <function>gps_open()</function> is replaced by the
 initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
-However, it is simpler just to use the sessiion object as an iterator,
+However, it is simpler just to use the session object as an iterator,
 as in the example given below.  Resources within the session object
 will be properly released when it is garbage-collected. Note one
 limitation: POLL_NONBLOCK is not yet supported in Python; use the
