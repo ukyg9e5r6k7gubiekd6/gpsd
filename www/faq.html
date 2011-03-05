@@ -172,7 +172,7 @@ version from the <a
 href='http://developer.berlios.de/projects/gpsd/'>project page</a> and
 test it.  To be really helpful, check out the <a
 href='https://developer.berlios.de/git/?group_id=2116'>git
-head</a> and test that.  We don't mind getting bug reports that say 
+head</a> and test that.  We don't mind getting bug reports that say
 "I saw version foo had the following bug, but you've fixed it."</p>
 
 <h3>5. Capture a log that triggers the problem</h3>
@@ -234,7 +234,7 @@ Here is the beginning of one log file I already have:</p>
 #
 # mode V2.1 GSA
 # Lines up to but not including the first GPGLL are
-# `cat /dev/ttyACM0` at startup 
+# `cat /dev/ttyACM0` at startup
 # Following lines are
 # `cat /dev/ttyACM0` stationary
 $GPGSV,3,1,00,,,,,,,,,,,,,,,,*7B
@@ -275,7 +275,7 @@ firmware revision  of the chipset in the GPS.</p>
 <p>Please also include a Location header giving your city,
 state/province, country code, and a rough latitude/longitude.</p>
 
-<p>A log file is most useful when it contains (a) some sentences 
+<p>A log file is most useful when it contains (a) some sentences
 generated when the GPS has no fix, (b) some sentences representing
 a fix with the GPS stationary, and (c) some sentences representing
 a fix with the GPS moving.</p>
@@ -344,7 +344,7 @@ the version.</p>
 
 <p>There is a <a
 href="http://developer.berlios.de/bugs/?group_id=2116">gpsd bug tracker</a>.
-Use that.  If your bug narrative does not fit the tracker template well, 
+Use that.  If your bug narrative does not fit the tracker template well,
 it's acceptable to send an email report to the gpsd-dev list.</p>
 </blockquote>
 
@@ -439,7 +439,7 @@ report of the daemon ceasing to respond to queries when run for
 more than a day or so; the user, quite reasonably, suspected some sort
 of resource leak in the daemon.  On the other hand, other users reported
 good operation over much longer periods with the same version of
-the software. That suggests a bug at the level of the user's operating 
+the software. That suggests a bug at the level of the user's operating
 system or local site configuration.</p>
 
 <p>Nevertheless, the possibility of a resource-leak bug alarmed us
@@ -464,10 +464,10 @@ swapping like mad."</p>
 <p>If Rob's analysis is correct, <code>gpsd</code> is a canary in a
 coal mine.  If your <code>gpsd</code> locks up after a long period of
 operation, you should look at your logs and see if you can connect the
-point at which it stopped responding to some kind of resource crisis 
+point at which it stopped responding to some kind of resource crisis
 brought on by lots of I/O activity.</p>
 
-<p>Another thing to try is running <code>gpsd</code> under Valgrind overnight 
+<p>Another thing to try is running <code>gpsd</code> under Valgrind overnight
 and seeing if it reports any leaks.</p>
 
 <h1 id='why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</h1>
@@ -578,7 +578,7 @@ world has an older datum that only agrees at the 100m level.</p>
 <h1 id='time'>How can I improve time reference accuracy from my GPS?</h1>
 
 <p>All the measures you'd take to improve <a href="#accuracy">fix
-accuracy</a> will help. Time referencing at accuracies below 
+accuracy</a> will help. Time referencing at accuracies below
 0.01sec has its own set of issues related to latency in your
 sensor and computer.</p>
 
@@ -632,7 +632,7 @@ one matches your GPS hardware (look in your lsusb output).
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
 <p>The <code>gpsd</code> source-code distribution now includes a PHP
-script that makes this easy.  The script shows current fix data, a 
+script that makes this easy.  The script shows current fix data, a
 satellite view, and can even incorporate a Google Maps display
 if you have a Google API key. Look at the end of the file INSTALL for
 instructions.</p>
@@ -689,7 +689,7 @@ srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
 
 <p>There is no option to fix baud rate because <code>gpsd</code> is
 designed to (a) be autoconfiguring, and (b) handle multiple devices.
-There are some more philosophical reasons as well; read the 
+There are some more philosophical reasons as well; read the
 <a href="hacking.html">Hacker's Guide</a> for discussion.</p>
 
 <p>Unfortunately, this causes problems with some devices (notably
@@ -704,9 +704,9 @@ is interpreted as "use the hardware port's existing baud rate without
 change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
 with this behavior.</p>
 
-<p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set 
-the bit rate just before starting gpsd.  For example, suppose you know that 
-your GPS is on serial port 0 and operates at a fixed bps of 54600.  You 
+<p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set
+the bit rate just before starting gpsd.  For example, suppose you know that
+your GPS is on serial port 0 and operates at a fixed bps of 54600.  You
 can set that up like this:</p>
 
 <code><pre>
@@ -766,7 +766,7 @@ nor will they interfere with GPSD.</p>
 
 <p>Unfortunately, there is no device class for USB GPSes. Nor is there
 a device class for USB-to-serial adapter chips.  Both are assigned the
-catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen 
+catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen
 consists of a GPS module with TTL-level RS232 outputs connected to an
 RS232-to-USB adapter chip, and presents the class ID 0xFF to your USB
 subsystem.</p>
@@ -792,7 +792,7 @@ activate, the GPSD hotplug rules will believe they are GPSes, and
 <code>gpsd</code> will try to read from them when a GPS-ware client
 application requests data.  We've had reports of this happening with
 USB modems and various microcontroller kits. It's not a problem we can
-solve with clever programming, the devices simply don't yield 
+solve with clever programming, the devices simply don't yield
 enough information about themselves to avoid conflicts.</p>
 
 <p>If this sort of conflict becomes a problem, you can work around
