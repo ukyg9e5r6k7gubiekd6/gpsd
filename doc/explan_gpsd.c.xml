@@ -50,7 +50,7 @@
   <entry><function>void gpsd_report(int errlevel, const char *fmt, ... )</function></entry>
   <entry><para>This code is used for error reporting, but is dependant
   on SQUELCH_DISABLE so that embedded systems (for example) are not
-  burdened with unneccessary noise. The first thing to check is if the
+  burdened with unnecessary noise. The first thing to check is if the
   error level offered is high enough to be of interest (controlled by
   the debug level we are running at).</para><para>If we are
   interested, the first step is to protect the code with a mutex if we
@@ -93,7 +93,7 @@
   warning if the error indicates that <application>gpsd</application>
   may already be active on the socket.</para><para>If we are using a
   stream type socket and we are unable to listen to the port we exit
-  with -1.</para><para>The last possibilty is a successful set of
+  with -1.</para><para>The last possibility is a successful set of
   operations which is signalled by returning the socket fd
   number.</para></entry>
 </row>
@@ -153,7 +153,7 @@
 <row>
   <entry><function>static void deactivate_device(struct gps_device_t *device)</function></entry>
   <entry><para>Deactivate device, but leave it in the device pool; do
-  not frede it.  This means it will be available to be watched on
+  not free it.  This means it will be available to be watched on
   subsequent client opens.</para></entry>
 </row>
 <row>
@@ -189,7 +189,7 @@
 </row>
 <row>
   <entry><function>static bool privileged_user(struct gps_device_t *device)</function></entry>
-  <entry><para>Scan all susbcribers and count all who are connected to
+  <entry><para>Scan all subscribers and count all who are connected to
   the device. If only the one user is connected, return
   <quote>true</quote>, otherwise return
   <quote>false</quote>.</para></entry>
@@ -197,7 +197,7 @@
 <row>
   <entry><function>static void handle_request(struct subscriber_t* sub, char *buf, const char **after, char *reply, size_t replylen)</function></entry>
   <entry><para>Perform a single GPSD JSON command. Accept the command
-  response into a reply buffer, and update the after ponterr to point
+  response into a reply buffer, and update the after pointer to point
   just after the parsed JSON object.</para></entry>
 </row>
 <row>
@@ -237,7 +237,7 @@
   local mutex structure for use by the program.</para><para>A
   <function>while()</function> loop reads in any command line
   arguments which are options and handles the options. Most set an
-  internal variable to contol action when running, either to a fixed
+  internal variable to control action when running, either to a fixed
   value or to the associated option's parameter.</para><para>Carry out
   a series of calls to routines to set things up ready for the main
   task (e.g. opening a control socket if one is needed). We also take
@@ -293,7 +293,7 @@
   <function>handle_gpsd_request()</function>.</para><para>If we care
   about DBUS, send the fix to the DBUS.</para><para><emphasis>Note
   that this small section of code is presently disabled pending
-  development of the DGNSS function.</emphasis> If DGNSS is avalable
+  development of the DGNSS function.</emphasis> If DGNSS is available
   and we have a fix, we poll a DGNSS report via
   <function>dgnss_autoconnect()</function>.</para><para>Loop round all
   clients and process active ones. We check for input from them and if
@@ -315,7 +315,7 @@
   we reach here, we are out of the endless while loop. We check if the
   signal was <function>SIGHUP</function> and restart the program if it
   was. If it is any other signal, we deallocate all channels and wrap
-  up any devices. Finally we check for the existance of a control
+  up any devices. Finally we check for the existence of a control
   socket or a pid file and delete them.</para></entry>
 </row>
 </tbody>
