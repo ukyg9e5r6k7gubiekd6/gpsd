@@ -15,7 +15,7 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on thge code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
+  <entry spanname='s1' align='left'>Notes based on the code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
 </row>
 </tfoot>
 
@@ -30,7 +30,7 @@
 <row>
   <entry><function>char *sock2ip(int fd)</function></entry>
   <entry><para>This makes a call to <function>getpeername</function>
-  using the spplied fd. On success, the returned string is the ip
+  using the supplied fd. On success, the returned string is the ip
   address in dotted notation. On error, "&lt;unknown&gt;" is
   returned.</para></entry>
 </row>
