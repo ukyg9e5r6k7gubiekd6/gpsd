@@ -31,7 +31,7 @@
   <entry><function>void ecef_to_wgs84fix(struct gps_data_t *gpsdata, double x, double y, double z, double vx, double vy, double vz, float *separation)</function></entry>
   <entry><para>This does exactly what it says! Co-ordinate system
   conversion from ecef to the wgs84 equivalent. Geodetic separation
-  for the fix is left in *separaation</para></entry>
+  for the fix is left in *separation</para></entry>
 </row>
 <row>
   <entry><function>static double fix_minuz(double d)</function></entry>
