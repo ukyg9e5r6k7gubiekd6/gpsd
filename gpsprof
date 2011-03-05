@@ -281,7 +281,7 @@ plot \
      "-" using 0:%d title "T2 = TCP/IP latency" with impulses, \
      "-" using 0:%d title "E2 = Daemon encode time" with impulses, \
      "-" using 0:%d title "D1 = Daemon decode time" with impulses, \
-     "-" using 0:%d title "T1 = RS3232 time" with impulses, \
+     "-" using 0:%d title "T1 = RS232 time" with impulses, \
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
