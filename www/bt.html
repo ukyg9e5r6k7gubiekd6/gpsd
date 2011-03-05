@@ -80,7 +80,7 @@ allow for serial port emulation.</p></li>
 </pre>
 </p></li>
 
-<li><p>If the modules have loaded successfully, type "hciconfig" and you 
+<li><p>If the modules have loaded successfully, type "hciconfig" and you
 should see your BT interface listed under the "hci0" name.</p></li>
 </ol>
 
@@ -104,17 +104,17 @@ GPS address and to enable binding.</p></li>
 	#
 	# $Id: rfcomm.conf,v 1.1 2002/10/07 05:58:18 maxk Exp $
 	#
-	
+
 	rfcomm0 {
 	        # Automatically bind the device at startup
 	        bind yes;
-	
+
 	        # Bluetooth address of the device
 	        device xx:xx:xx:xx:xx:xx;
-	
+
 	        # RFCOMM channel for the connection
 	        channel 1;
-	
+
 	        # Description of the connection
 	        comment "Your GPS Device Here";
 	}
@@ -134,7 +134,7 @@ installation so the daemon will be started at boot time listening to
 /dev/rfcomm0 (it will still work with hotplugged USB GPses after you
 do this).</p>
 
-<p>Under Debian and Ubuntu Linux, <code>"dpkg reconfigure gpsd"</code> 
+<p>Under Debian and Ubuntu Linux, <code>"dpkg reconfigure gpsd"</code>
 will start a dialog that will reconfigure the device for you. You
 will need to reboot for this change to take effect.</p>
 </li>
