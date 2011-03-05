@@ -113,7 +113,7 @@ plain text rather than a gnuplot script.)</para>
 <para>Time required to send the sentence from the GPS to
 <application>gpsd</application>. This measured from the time of 
 the last zero-length read before the packet to when the packet sniffer
-recognizes a complete sentence, so there is a small aountt of
+recognizes a complete sentence, so there is a small amount of
 computational overhead mixed in.</para>
 </listitem>
 </varlistentry>
