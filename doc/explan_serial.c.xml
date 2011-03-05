@@ -62,7 +62,7 @@
   saved baudrate and if so, activate it.</para><para>Preset the packet
   type to BAD_PACKET.</para><para>Check if the device we have opened
   is a tty. If it is a tty, read the original terminal
-  paramters.</para><para>Exit with an error code -1 on failure to do
+  parameters.</para><para>Exit with an error code -1 on failure to do
   so.</para><para>Save the old parameters, set important control
   flags, then set the speed.</para><para>Finally, return the allocated
   fd.</para></entry>
@@ -71,7 +71,7 @@
   <entry><function>bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)</function></entry>
   <entry><para>If the device is read-only, simply return
   0.</para><para>If not, try to write <function>len</function>
-  characters to the device. waiting until all data has been
+  characters to the device. Waiting until all data has been
   sent.</para><para>Return the number of bytes written.</para></entry>
 </row>
 <row>
