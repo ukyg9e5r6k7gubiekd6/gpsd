@@ -105,7 +105,7 @@ of GPS satellites and the control system.</p>
 <p>Each satellite broadcasts identification pulses, each one including
 the clock time it was sent. A GPS receiver, picking up one of these
 pulses, can compare it to an internal clock and know the time it took
-to arrive. Multiplying by lightspeed gives the distance to the
+to arrive. Multiplying by light speed gives the distance to the
 satellite.  This starts to be useful when the GPS can get accurate
 timings to three or more satellites; at that point, computing the
 GPS's exact position with respect to the satellites becomes a relatively
@@ -305,7 +305,7 @@ SiRF chipset in 2003) are still around.</p>
 <p>2004's equivalent of the Zodiac is the SiRF-II chipset, which seems
 to be nearly ubiquitous in inexpensive GPS sensors.  It too speaks 
 a binary protocol, but only if you ask it to; it's fully capable
-in NMEA mode. which is where it boots up.  The idea seems to be 
+in NMEA mode. Which is where it boots up.  The idea seems to be
 that you can switch to binary to improve your bits-per-second
 in latency-critical applications.</p>
 
@@ -370,14 +370,14 @@ an almanac but no valid satellite ephemerides, and must download at
 least three before it can generate an accurate fix.  This is sometimes
 called a <dfn>cold start</dfn>.  Each satellite has its own ephemeris that must
 be downloaded if a current copy is not fresh.  It takes about a minute
-per sat to get the emphemeris, or a minute total if your GPS has
+per sat to get the ephemeris, or a minute total if your GPS has
 multiple receivers as most do now.</p>
 
 <p>GPSes store ephemerides is non-volatile memory, either internal
 flash storage or battery-backed SRAM.  Thus, a GPS does not need to
 have been on continuously to have ephemerides available, but it will
 consider old data to be invalid after a while.  In normal operation
-the GPS accasionally gets refreshes of ephemeris and almanac data
+the GPS occasionally gets refreshes of ephemeris and almanac data
 from the satellites it's listening to.</p>
 
 <p>For both an autonomous start and a cold start if the sat signal is
