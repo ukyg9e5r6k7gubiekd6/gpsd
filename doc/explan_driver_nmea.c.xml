@@ -146,8 +146,8 @@
   <entry><function>static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>
   <entry><para>Check that the error estimate data is good. If not, set
   all error estimate fields to 100m and return an error
-  flag.</para><para>If they are good, calcluate the error value and
-  store it. Return the approriate flag values.</para></entry>
+  flag.</para><para>If they are good, calculate the error value and
+  store it. Return the appropriate flag values.</para></entry>
 </row>
 <row>
   <entry><function>static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>

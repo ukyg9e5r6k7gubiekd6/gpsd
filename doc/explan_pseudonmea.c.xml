@@ -46,7 +46,7 @@
 </row>
 <row>
   <entry><function>static void gpsd_binary_dump(struct gps_device_t *session, char bufp[], size_t len)</function></entry>
-  <entry><para>Dump such binary data as we have available; a fix, a quality value and a satellite status block. Each is enabled by the approriate status bits in the session mask variable.</para></entry>
+  <entry><para>Dump such binary data as we have available; a fix, a quality value and a satellite status block. Each is enabled by the appropriate status bits in the session mask variable.</para></entry>
 </row>
 </tbody>
 

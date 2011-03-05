@@ -288,7 +288,7 @@
   available data to all subscribers who are connected to this
   device. If the data is RTCM information, pass it to all GPS devices
   that can accept the data.</para><para>Handle any subscribers who are
-  in watcher mode building up an approriate set of requests, depending
+  in watcher mode building up an appropriate set of requests, depending
   on the available data and passing the requests to
   <function>handle_gpsd_request()</function>.</para><para>If we care
   about DBUS, send the fix to the DBUS.</para><para><emphasis>Note

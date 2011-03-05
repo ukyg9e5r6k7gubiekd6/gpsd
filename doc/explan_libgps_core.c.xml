@@ -62,7 +62,7 @@
   return -1.</para><para>If there is something to read, clear the
   buffer, note the time as the received data time and the online time,
   then unpack the data.</para><para>If profiling is active, use the
-  received data time, the fix time and the present time to calcluate
+  received data time, the fix time and the present time to calculate
   the decode time and the client receipt time.</para></entry>
 </row>
 <row>
