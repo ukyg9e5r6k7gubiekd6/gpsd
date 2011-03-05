@@ -10,7 +10,7 @@ http://gpsd.berlios.de/client-howto.txt[]
 
 This document is a guide to interfacing client applications with GPSD.
 It surveys the available bindings and their use cases.  It also explains
-some sharp edges in the client API which, unfortunely, are fundamental
+some sharp edges in the client API which, unfortunately, are fundamental
 results of the way GPS sensor devices operate, and suggests tactics
 for avoiding being cut.
 
@@ -98,7 +98,7 @@ facility (like Linux udev), GPSD will handle all the device
 management as USB devices are plugged in and unplugged.
 
 What GPSD can't do is pull fix data out of thin air when your
-device han't reported any.  Nor is it a magic power supply,
+device hasn't reported any.  Nor is it a magic power supply,
 so its device management has to be designed around keeping the
 attached sensors open only when a client application actually
 needs a fix.
@@ -159,7 +159,7 @@ are.
 
 Up to this point, nothing has been dependent on the state of the
 sensors. At this time, it may well be that none of those devices is
-fully powered up yet. In fact, thet won't be, unless another
+fully powered up yet. In fact, that won't be, unless another
 GPSD-enabled application is already watching when you open your
 connection.  If that's the case, you will start seeing data
 immediately.
@@ -199,7 +199,7 @@ of every client that has issued a ?WATCH.
 
 In order to make this work, gpsd has a packet sniffer inside it that
 does autobauding and packet-protocol detection. Normally the packet
-sniffer will achive sync in well under a second (my measured times
+sniffer will achieve sync in well under a second (my measured times
 range from 0.10 to 0.53 sec at 4800bps), but it can take longer if
 your serial traffic is degraded by dodgy cables or electrical noise,
 or if the GPS is configured to run at an unusual speed/parity/stopbit
@@ -214,7 +214,7 @@ The sensor will start shipping fix reports at a constant interval,
 usually every second, and the daemon will massage them into JSON and
 pass them up the client to your application.
 
-However, until the sensor achives satellite lock, those fixes will be
+However, until the sensor achieves satellite lock, those fixes will be
 "mode 1" - no valid data (mode 2 is a 2D fix, mode 3 is a 3D fix).
 Here's what that looks like:
 
@@ -434,7 +434,7 @@ int main(void)
 
 ----------------------------------------------------------------------
 
-Look at test_libgpsmm.cpp in the ditributoion for a full example.
+Look at test_libgpsmm.cpp in the distribution for a full example.
 
 == Python examples ==
 
@@ -497,7 +497,7 @@ In major versions before 5:
 
 * Clients needed to define a gpsd_report() function for client-side logging
   if they didn't want code in netlib.c and libgps_core.c to occasionally
-  senfd messages to stderr.  This requirement is now gone.
+  send messages to stderr.  This requirement is now gone.
 
 * There was a set_raw_hook() method ion the C and Python bindings, now gone.
   Clients can simply look at the response buffer.
