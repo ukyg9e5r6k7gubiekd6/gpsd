@@ -354,7 +354,7 @@ are undocumented.
 
 == How the C API and gps_data_t structure has changed == 
 
-gps_open() now takes a third artgument and is re-entrant - it's the
+gps_open() now takes a third argument and is re-entrant - it's the
 old undocumented gps_open_r().
 
 The gps_query() entry point is gone.  With the new streaming-oriented
