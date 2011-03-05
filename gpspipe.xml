@@ -105,7 +105,7 @@ output.</para>
 <citerefentry><refentrytitle>strftime</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 for the available placeholders. Setting this option implies -t.</para>
 
-<para>-n [count] causes [count] sentences to be output.  
+<para>-n [count] causes [count] sentences to be output.
 <application>gpspipe</application> will then exit gracefully.</para>
 
 <para>-v causes <application>gpspipe</application> to show a spinning
@@ -119,7 +119,7 @@ of messages required to rotate the spinner.</para>
 <para>At least one of -R, -r or -w must be specified.</para>
 </refsect1>
 
-<refsect1 id='exampletitle'><title>EXAMPLE</title> 
+<refsect1 id='exampletitle'><title>EXAMPLE</title>
 <para>When <application>gpsd is running</application> <command>gpspipe
 -r -n 100</command> will send one hundred raw NMEA sentences to
 standard output, then exit.</para>
