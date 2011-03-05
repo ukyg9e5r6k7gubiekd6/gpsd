@@ -23,7 +23,7 @@
   <entry><para>To be called on allocating a device. Mark GPS fd closed
   and its baud rate unknown.</para><para>If we are supporting
   <function>ntpd</function> shared memory segments, ensure they are
-  initally unused.</para></entry>
+  initially unused.</para></entry>
 </row>
 <row>
   <entry><function>void cfmakeraw(struct termios *termios_p)</function></entry>
