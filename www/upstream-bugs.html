@@ -126,7 +126,7 @@ may have to open the case and unsolder the backup battery so the chip
 forgets its configuration settings.</p>
 
 <p>A separate bug with less severe symptoms afflicts some USB devices.
-The probe strings <tt>gpsd</tt> sends in orderv to determine device
+The probe strings <tt>gpsd</tt> sends in order to determine device
 type and subtype may be more than a device can handle, causing it to
 hang; power-cycling should fix this.  Newer versions of <tt>gpsd</tt>
 break up the probe writes into smaller pieces, interleaving them with
@@ -158,7 +158,7 @@ created fine and pthread_create() returns right away.  If this is
 called when gpsd is in the background then the thread is created fine,
 but it may return!  That freezes the main loop of gpsd. There is a <a
 href="http://marc.info/?l=gpsd-dev&m=120124952704634&w=2">workaround</a>,
-but the nature of the workaround only makes ther bug more mysterious.</p>
+but the nature of the workaround only makes their bug more mysterious.</p>
 
 <h2 id="shm_damage">NTPSHM clobbers altitude under 2.4 Linux</h2>
 
@@ -205,7 +205,7 @@ in.</p>
 Makefile.  This prevents the <code>gpsd</code> Python components from
 building correctly.</p>
 
-<h2 id="gcc421">Compiler optimizer bugs can produce error-modeling errors<</h2>
+<h2 id="gcc421">Compiler optimizer bugs can produce error-modeling errors</h2>
 
 <p>The floating-point code in the daemon's error modeler (the logic
 that produces uncertainty estimates in the sensor doesn't supply them)
@@ -275,7 +275,7 @@ gpsprof: gpsd unreachable.
 </pre>
 
 <p>This is with Python 2.4.4 under Red Hat Linux, kernel version 2.6.18.
-This was filed upstream as Python bug 1603527 on trheir old tracker, and
+This was filed upstream as Python bug 1603527 on their old tracker, and
 is no longer open on their new one.</p>
 
 <h2 id="isgps">isgps.c triggers an optimizer bug in older gcc versions</h2>
