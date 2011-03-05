@@ -607,8 +607,9 @@ driver</emphasis>. It is used internally to dispatch to the correct
 driver when it collects a complete packet.</para>
 
 <!-- added by ESR, 2010 -->
+<!--
 <para><structfield>.flags</structfield> Driver property flags. This
-field is rserved for future expansion.</para>
+field is reserved for future expansion.</para>
 
 <para><structfield>.trigger</structfield> is the unique string that,
 when seen, will confirm your device is present. This will be detected
@@ -748,7 +749,7 @@ gpsmon to display the control messages it sends for you.</para>
 <!-- added by ESR, 2009 -->
 <para><structfield>.ntp_offset</structfield> points to code to compute
 an offset to be added, additionally to that in
-<filename>ntp.conf</filename> (if any) whe shipping time notifications
+<filename>ntp.conf</filename> (if any) when shipping time notifications
 to NTP. If multiple sentences set TIME_IS, this will differ by
 sentence type; it should differ by baud rare, as well. </para>
 
