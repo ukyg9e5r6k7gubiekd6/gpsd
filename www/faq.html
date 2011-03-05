@@ -355,7 +355,7 @@ between 0.1 and 0.6 seconds to handshake with your hardware.  After
 that you will receive GPS reports within a second of when the sensor
 issues them.  GPSD itself adds <a
 href="http://gpsd.berlios.de/performance.html">no measurable
-latency</a>, but RS-323 transmission time to <code>gpsd</code> can be
+latency</a>, but RS-232 transmission time to <code>gpsd</code> can be
 significant; you can cut this time by increasing the baud rate.</p>
 
 <p>Longer handshake delays have been reported from other platforms.
@@ -559,10 +559,10 @@ and on the ground. If you're in a car, don't put the GPS antenna on
 the roof, put it on the towbar or some similar location.</p>
 
 <p>If you're driving in a heavily built up area, you're going to get
-signal bounce off buildings and and reduced accuracy. That's just how
+signal bounce off buildings and reduced accuracy. That's just how
 the physics works. Note, however, that as your velocity goes up it
 becomes easier for the convergence filters in your GPS to spot
-and discard delayed signal, so multipath effects are proprtionately
+and discard delayed signal, so multipath effects are proportionally
 less important in fast-moving vehicles.</p>
 
 <p>If you're using <code>gpsd</code> with software that plots your
@@ -740,7 +740,7 @@ for the product and "driver install" to find instructions on installing windows
 drivers for the product - these often hint at which bridge chip is used, if the
 specifications don't say so. A receiver claiming mac compatibility is usually
 based on one of the common bridge chips from FTDI, Prolific or Silicon
-Laboritories. These just work.</p>
+Laboratories. These just work.</p>
 
 <h1 id='nmea2000'>Does gpsd support NMEA2000?</h1>
 
