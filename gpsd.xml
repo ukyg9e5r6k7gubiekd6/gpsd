@@ -68,7 +68,7 @@ be <option>-b</option> (which see).</para>
 
 <para>On Linux systems supporting udev, <application>gpsd</application>
 is normally started automatically when a USB plugin event fires (if it
-is not already running) and is handed the name of the newly active 
+is not already running) and is handed the name of the newly active
 device. In that case no invocation is required at all.</para>
 
 <para>For your initial tests set your GPS hardware to speak NMEA, as
@@ -118,7 +118,7 @@ instance, see the output of <command>gpsd -l</command></para>
 <para><application>gpsd</application> effectively hides the
 differences among the GPS types it supports. It also knows about and
 uses commands that tune these GPSes for lower latency. By using
-<application>gpsd</application> as an intermediary applications 
+<application>gpsd</application> as an intermediary applications
 avoid contention for serial devices.</para>
 
 <para><application>gpsd</application> can use differential-GPS
@@ -129,7 +129,7 @@ When <application>gpsd</application> opens a serial device emitting
 RTCM-104, it automatically recognizes this and uses the device as a
 correction source for all connected GPSes that accept RTCM corrections
 (this is dependent on the type of the GPS; not all GPSes have the
-firmware capability to accept RTCM correction packets). See 
+firmware capability to accept RTCM correction packets). See
 <xref linkend='accuracy'/> and <xref linkend='files'/> for discussion.</para>
 
 <para>Client applications will communicate with <application>gpsd</application>
@@ -177,7 +177,7 @@ an effort to expose this to the world.</para></listitem>
 <term>-l</term>
 <listitem><para>List all drivers compiled into this
 <application>gpsd</application> instance. The letters to the left of
-each driver name are the <application>gpsd</application> 
+each driver name are the <application>gpsd</application>
 control commands supported by that driver.</para>
 </listitem>
 </varlistentry>
@@ -245,7 +245,7 @@ sensor is attached. Example:
 <listitem>
 <para>A URI with the prefix "tcp://", followed by a hostname, a
 colon, and a port number. The daemon will open a socket to the
-indicated address and port and read data packets from it, which will 
+indicated address and port and read data packets from it, which will
 be interpreted as though they had been issued by a serial device. Example:
 <filename>tcp://data.aishub.net:4006</filename>.</para>
 </listitem>
@@ -255,7 +255,7 @@ be interpreted as though they had been issued by a serial device. Example:
 <listitem>
 <para>A URI with the prefix "udp://", followed by a hostname, a
 colon, and a port number. The daemon will open a socket listening for
-UDP datagrams arriving on the indicated address and port, which will 
+UDP datagrams arriving on the indicated address and port, which will
 be interpreted as though they had been issued by a serial device. Example:
 <filename>udp://127.0.0.1:5000</filename>.</para>
 </listitem>
@@ -281,7 +281,7 @@ to accept them.</para>
 <listitem>
 <para>A URI with the prefix "dgpsip://" followed by a hostname, a
 colon, and an optional colon-separated port number (defaulting to
-2101). The daemon will handshake with the DGPSIP server and 
+2101). The daemon will handshake with the DGPSIP server and
 read RTCM2 correction data from it. Corrections
 from the server will be set to each attached GPS with the capability
 to accept them.Example:
@@ -335,20 +335,20 @@ composed of US-ASCII characters and may be no more than 80 characters
 in length, exclusive of the trailing newline.</para>
 
 <para>Responses are JSON objects all of which have a "class" attribute
-the value of which is either the name of the invoking command 
+the value of which is either the name of the invoking command
 or one of the strings "DEVICE" or "ERROR". Their length
 limit is 1024 characters, including trailing newline.</para>
 
 <para>The remainder of this section documents the core GPSD protocol.
-Extensions are docomented in the following sections. The extensions 
-may not be supported in your <application>gpsd</application> instance 
+Extensions are docomented in the following sections. The extensions
+may not be supported in your <application>gpsd</application> instance
 if it has been compiled with a restricted feature set.</para>
 
 <para>Here are the core-protocol responses:</para>
 
 <variablelist>
 <varlistentry>
-<term>TPV</term> 
+<term>TPV</term>
 <listitem>
 <para>A TPV object is a time-position-velocity report. The "class" and "mode"
 fields will reliably be present.  Others may be reported or not
@@ -449,7 +449,7 @@ depending on the fix quality.</para>
 	<entry>climb</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Climb (positive) or sink (negative) rate, meters per 
+        <entry>Climb (positive) or sink (negative) rate, meters per
 	second.</entry>
 </row>
 <row>
@@ -490,7 +490,7 @@ field actually received; see gps.h for bitmask names and values.</para>
 <programlisting>
 {"class":"TPV","tag":"MID2","device":"/dev/pts/1",
     "time":"2005-06-08T10:34:48.28Z,"ept":0.005,
-    "lat":46.498293369,"lon":7.567411672,"alt":1343.127, 
+    "lat":46.498293369,"lon":7.567411672,"alt":1343.127,
     "eph":36.000,"epv":32.321,
     "track":10.3788,"speed":0.091,"climb":-0.085,"mode":3}
 </programlisting>
@@ -498,7 +498,7 @@ field actually received; see gps.h for bitmask names and values.</para>
 </varlistentry>
 
 <varlistentry>
-<term>SKY</term> 
+<term>SKY</term>
 <listitem>
 <para>A SKY object reports a sky view of the GPS satellite positions.
 If there is no GPS device available, or no skyview has been reported
@@ -701,7 +701,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 </varlistentry>
 
 <varlistentry>
-<term>GST</term> 
+<term>GST</term>
 <listitem>
 <para>A GST object is a pseudorange noise report.</para>
 
@@ -757,14 +757,14 @@ corrections).</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Standard deviation of semi-major axis of error ellipse, in meters.</entry>
-</row>    
+</row>
 
 <row>
 	<entry>minor</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Standard deviation of semi-minor axis of error ellipse, in meters.</entry>
-</row>    
+</row>
 
 <row>
 	<entry>orient</entry>
@@ -792,7 +792,7 @@ corrections).</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Standard deviation of altitude error, in meters.</entry>
-</row> 
+</row>
 
 </tbody>
 </tgroup>
@@ -810,12 +810,12 @@ corrections).</entry>
 </varlistentry>
 
 <varlistentry>
-<term>ATT</term> 
+<term>ATT</term>
 <listitem>
 <para>An ATT object is a vehicle-attitude report. It is returned by
-digital-compass and gyroscope sensors; depending on device, it may 
+digital-compass and gyroscope sensors; depending on device, it may
 include: heading, pitch, roll, yaw, gyroscope, and magnetic-field
-readings. Because such sensors are often bundled as part of 
+readings. Because such sensors are often bundled as part of
 marine-navigation systems, the ATT response may also include
 water depth.</para>
 
@@ -1057,7 +1057,7 @@ will assert ATT_IS.</para>
 <variablelist>
 
 <varlistentry>
-<term>?VERSION;</term> 
+<term>?VERSION;</term>
 <listitem><para>Returns an object with the following attributes:</para>
 
 <table frame="all" pgwide="0"><title>VERSION object</title>
@@ -1122,7 +1122,7 @@ will assert the VERSION_SET bit in the top-level set member.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?DEVICES;</term> 
+<term>?DEVICES;</term>
 <listitem><para>Returns a device list object with the
 following elements:</para>
 
@@ -1173,7 +1173,7 @@ notifications.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?WATCH;</term> 
+<term>?WATCH;</term>
 <listitem>
 
 <para>This command sets watcher mode. It also sets or elicits a report
@@ -1224,8 +1224,8 @@ object.</para>
 	is false.</entry>
 </row>
 <row>
-	<entry>raw</entry> 
-        <entry>No</entry> 
+	<entry>raw</entry>
+        <entry>No</entry>
         <entry>integer</entry>
 
 	<entry>Controls 'raw' mode. When this attribute is set to 1
@@ -1234,7 +1234,7 @@ object.</para>
 	Binary GPS packets are hex-dumped.  RTCM2 and RTCM3
         packets are not dumped in raw mode. When this attribute is set to
 	2 for a channel that processes binary data,
-	<application>gpsd</application> reports the received data verbatim 
+	<application>gpsd</application> reports the received data verbatim
 	without hex-dumping.</entry>
 </row>
 <row>
@@ -1258,12 +1258,12 @@ object.</para>
 </tgroup>
 </table>
 
-<para>There is an additional boolean "timing" attribute which is 
+<para>There is an additional boolean "timing" attribute which is
 undocumented because that portion of the interface is considered
 unstable and for developer use only.</para>
 
 <para>In watcher mode, GPS reports are dumped as TPV and SKY
-responses. AIS, Subframe and RTCM reporting is described in the next 
+responses. AIS, Subframe and RTCM reporting is described in the next
 section.</para>
 
 <para>When the C client library parses a response of this kind, it
@@ -1279,7 +1279,7 @@ will assert the POLICY_SET bit in the top-level set member.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?POLL;</term> 
+<term>?POLL;</term>
 <listitem>
 
 <para>The POLL command requests data from the last-seen fixes on all
@@ -1371,7 +1371,7 @@ will be reported with a mode field of zero.</para>
 <para>Client software should not assime the field inventory of the
 POLL response is fixed for all time.  As
 <application>gpsd</application> collects and caches more data from
-more sensor types, those data are likely to find their way 
+more sensor types, those data are likely to find their way
 into this response.</para>
 </note>
 
@@ -1379,7 +1379,7 @@ into this response.</para>
 </varlistentry>
 
 <varlistentry>
-<term>?DEVICE</term> 
+<term>?DEVICE</term>
 <listitem>
 
 <para>This command reports (when followed by ';') the state of a
@@ -1427,15 +1427,15 @@ backup battery.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Name the device for which the control bits are
-	being reported, or for which they are to be applied. This 
-        attribute may be omitted only when there is exactly one 
+	being reported, or for which they are to be applied. This
+        attribute may be omitted only when there is exactly one
         subscribed channel.</entry>
 </row>
 <row>
 	<entry>activated</entry>
 	<entry>At device activation and device close time.</entry>
 	<entry>numeric</entry>
-        <entry>Time the device was activated, 
+        <entry>Time the device was activated,
 	or 0 if it is being closed.</entry>
 </row>
 <row>
@@ -1470,14 +1470,14 @@ backup battery.</para>
         <entry>Device speed in bits per second.</entry>
 </row>
 <row>
-	<entry>parity</entry> 
-        <entry>Yes</entry> 
+	<entry>parity</entry>
+        <entry>Yes</entry>
         <entry>string</entry>
 	<entry><para>N, O or E for no parity, odd, or even.</para></entry>
 </row>
 <row>
-	<entry>stopbits</entry> 
-        <entry>Yes</entry> 
+	<entry>stopbits</entry>
+        <entry>Yes</entry>
         <entry>string</entry>
 	<entry><para>Stop bits (1 or 2).</para></entry>
 </row>
@@ -1500,15 +1500,15 @@ backup battery.</para>
 	<entry>mincycle</entry>
 	<entry>No</entry>
 	<entry>real</entry>
-        <entry>Device minimum cycle time in seconds. Reported from 
-	?CONFIGDEV when (and only when) the rate is switchable. It is 
+        <entry>Device minimum cycle time in seconds. Reported from
+	?CONFIGDEV when (and only when) the rate is switchable. It is
 	read-only and not settable.</entry>
 </row>
 </tbody>
 </tgroup>
 </table>
 
-<para>The serial parameters will be omitted in a response describing a 
+<para>The serial parameters will be omitted in a response describing a
 TCP/IP source such as an Ntrip, DGPSIP, or AIS feed.</para>
 
 <para>The contents of the flags field should be interpreted as follows:</para>
@@ -1691,7 +1691,7 @@ words, depending upon message type.</para>
 
 <para>An RTCM 3.x message begins with a fixed leader byte 0xD3.  That
 is followed by six bits of version information and 10 bits of payload
-length information.  Following that is the payload; following the 
+length information.  Following that is the payload; following the
 payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
 algorithm.</para>
 
@@ -1934,7 +1934,7 @@ be referred to NAD83 in the US (essentially identical to WGS84 for
 all except geodesists), or to some other reference frame in other
 parts of the world.</para>
 
-<para>An invalid reference message is represented by a type 3 header 
+<para>An invalid reference message is represented by a type 3 header
 without payload fields.</para>
 
 </refsect3>
@@ -1998,7 +1998,7 @@ without payload fields.</para>
 local datum to GNSS datum or vice versa. These fields are
 optional.</para>
 
-<para>An invalid datum message is represented by a type 4 header 
+<para>An invalid datum message is represented by a type 4 header
 without payload fields.</para>
 
 </refsect3>
@@ -2121,7 +2121,7 @@ for each satellite.</para>
         bit width.
 <!--
 From itu p.9 just under the type7 msg figure:
- 
+
     *** Radiobeacon health:
                   00     (0) Radiobeacon operation normal
                   01     (1) No integrity monitor operating
@@ -2139,7 +2139,7 @@ but this cannot be true unless the field is 3 bits wide.
 	<entry>integer</entry>
         <entry><para>The id of the transmitter. This is not the same
         as the reference id in the header, the latter being the id of
-        the reference receiver. <!-- John Sager noted: "However I know 
+        the reference receiver. <!-- John Sager noted: "However I know
 	of at least one stationthat gets it wrong." --></para></entry>
 </row>
 <row>
@@ -2170,7 +2170,7 @@ message:</para>
 <row>
 	<entry>status</entry>
 	<entry>bool</entry>
-        <entry><para>If True, signals user to expect a type 16 explanatory 
+        <entry><para>If True, signals user to expect a type 16 explanatory
 	message associated with this station. Probably indicates some
 	sort of unusual event.</para></entry>
 </row>
@@ -2186,13 +2186,13 @@ message:</para>
 <row>
 	<entry>lat</entry>
 	<entry>float</entry>
-        <entry><para>Degrees latitude, signed. 
+        <entry><para>Degrees latitude, signed.
 	Positive is N, negative is S.</para></entry>
 </row>
 <row>
 	<entry>lon</entry>
 	<entry>float</entry>
-        <entry><para>Degrees longitude, signed. 
+        <entry><para>Degrees longitude, signed.
 	Positive is E, negative is W.</para></entry>
 </row>
 <row>
@@ -2741,7 +2741,7 @@ by GLONASS, or with the II prefix emitted by Seahawk Autohelm marine
 navigation systems, or with the IN prefix emitted by some Garmin
 units.  It recognizes some vendor extensions: the PGRME emitted by some
 Garmin GPS models, the OHPR emitted by Oceanserver digital compasses,
-the PTNTHTM emitted by True North digital compasses, and the PASHR 
+the PTNTHTM emitted by True North digital compasses, and the PASHR
 sentences emitted by some Ashtech GPSes.</para>
 
 <para>Note that <application>gpsd</application> JSON returns pure decimal
@@ -2758,7 +2758,7 @@ Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 <para>Note that GPSD presently fully recognizes only the 2.1 level of RTCM;
 the protocol was revised up to a version 2.3 including additional
 messages relating to GLONASS and real-time kinematics before being
-deprecated in favor of V3. The 2.3 message types 13 and 14 are, however, 
+deprecated in favor of V3. The 2.3 message types 13 and 14 are, however,
 recognized and reported.</para>
 
 <para>Ordering instructions for the RTCM standards are accessible from
