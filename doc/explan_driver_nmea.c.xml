@@ -188,7 +188,7 @@
 </row>
 <row>
   <entry><function>void nmea_add_checksum(char *sentence)</function></entry>
-  <entry><para>Calcluate the checksum then append '*' + the checksum + CR/LF to the end of an NMEA sentence, skipping any existing '*'.</para></entry>
+  <entry><para>Calculate the checksum then append '*' + the checksum + CR/LF to the end of an NMEA sentence, skipping any existing '*'.</para></entry>
 </row>
 <row>
   <entry><function>int nmea_write(struct gps_device_t *session, const char *fmt, ... )</function></entry>
