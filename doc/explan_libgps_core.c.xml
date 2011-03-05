@@ -75,7 +75,7 @@
 </row>
 <row>
   <entry><function>bool gps_waiting(struct gps_data_t *gpsdata)</function></entry>
-  <entry><para>Returnn a boolean indicating whether input data is waiting on 
+  <entry><para>Returnn a boolean indicating whether input data is waiting on
   the daemon socket.  Does not block.</para></entry>
 </row>
 <row>
