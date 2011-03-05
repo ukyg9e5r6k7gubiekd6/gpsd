@@ -323,7 +323,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul3 = getleu32(buf, OFFSET(3));
 	ul4 = getleu32(buf, OFFSET(4));
 	ul5 = getleu32(buf, OFFSET(5));
-	gpsd_report(LOG_INF, "Response to Set PPS paramters %d %d %d %d %d\n",
+	gpsd_report(LOG_INF, "Response to Set PPS parameters %d %d %d %d %d\n",
 		    ul1, ul2, ul3, ul4, ul5);
 	break;
     case 0x4d:
@@ -581,7 +581,7 @@ const struct gps_type_t geostar_binary =
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = geostar_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
-    .event_hook     = geostar_event_hook,	/* ifire on various lifetime events */
+    .event_hook     = geostar_event_hook,	/* fire on various lifetime events */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = geostar_speed_switch,/* change baud rate */
     .mode_switcher  = geostar_mode,	/* there is a mode switcher */

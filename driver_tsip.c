@@ -454,8 +454,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	 * the satellite constellation looks good to the chip but no
 	 * actual fix has yet been acquired.  We should set the mode
 	 * field (which controls gpsd's fix reporting) only from sentences
-	 * that convey actual fix information, like 0x20, othewise we
-	 * get results like triggering ther error modeler spuriously.
+	 * that convey actual fix information, like 0x20, otherwise we
+	 * get results like triggering their error modeler spuriously.
 	 */
 	switch (u1 & 7) {	/* dimension */
 	case 3:
@@ -772,7 +772,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    f1 = getbef(buf, 16);	/* clock bias */
 
 	    u1 = getub(buf, 12);	/* GPS Decoding Status */
-	    u2 = getub(buf, 1);	/* Reciever Mode */
+	    u2 = getub(buf, 1);	/* Receiver Mode */
 	    if (u1 != (uint8_t) 0) {
 		session->gpsdata.status = STATUS_NO_FIX;
 		mask |= STATUS_IS;
@@ -1144,7 +1144,7 @@ const struct gps_type_t tsip_binary =
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
-    .event_hook     = tsip_event_hook,	/* ifire on various lifetime events */
+    .event_hook     = tsip_event_hook,	/* fire on various lifetime events */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = tsip_mode,	/* there is a mode switcher */
