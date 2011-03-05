@@ -26,8 +26,8 @@
 </row>
 <row>
   <entry><function>void ntpshm_init(struct gps_context_t *context, bool enablepps)</function></entry>
-  <entry><para>Attaches all ntp shared memeory segments, flagging the
-  avaliablilty of the NMEA and 1pps capabilities as
+  <entry><para>Attaches all ntp shared memory segments, flagging the
+  availability of the NMEA and 1pps capabilities as
   appropriate.</para></entry>
 </row>
 <row>
