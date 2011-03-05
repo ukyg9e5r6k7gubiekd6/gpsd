@@ -57,7 +57,7 @@ Consider what this implies for GPses, in particular:
   get one when they have satellite lock.
 
 * They may fail to have satellite lock when your skyview is poor.
-  If you are moving through uneven terrain or anywhere with trees 
+  If you are moving through uneven terrain or anywhere with trees
   or buildings, your skyview can degrade in an instant.
 
 * They may also fail to have lock because they're initially powering
@@ -94,17 +94,17 @@ without having to contend for a single serial device.  Second:
 coping with the hideous gallimaufry of badly-designed protocols these
 devices use -- regardless of device type, you will get data in a single
 well-documented format.  Third: on operating systems with a hotplug
-facility (like Linux udev), GPSD will handle all the device 
+facility (like Linux udev), GPSD will handle all the device
 management as USB devices are plugged in and unplugged.
 
-What GPSD can't do is pull fix data out of thin air when your 
+What GPSD can't do is pull fix data out of thin air when your
 device han't reported any.  Nor is it a magic power supply,
 so its device management has to be designed around keeping the
 attached sensors open only when a client application actually
-needs a fix. 
+needs a fix.
 
 As you'll see, these constraints explain most of the design of the GPSD
-wire protocol, and of the library APIs your client application 
+wire protocol, and of the library APIs your client application
 will be using.
 
 == How the GPSD wire protocol works ==
@@ -113,7 +113,7 @@ While GPSD project ships several library bindings that will hide the
 details of the wire protocol from you, you'll understand the library APIs
 better by knowing what a wire-protocol session looks like. After
 reading this section, you can forget the details about commands and
-responses and attributes as long as you hold on to the basic 
+responses and attributes as long as you hold on to the basic
 logical flow of a session.
 
 Your client library's open function is going to connect a socket to
@@ -186,7 +186,7 @@ the GPS.
 The GPSD daemon is designed so it doesn't have to know anything about the
 sensor in advance - not which of a dozen reporting protocols it uses,
 and not even the baud rate of the serial device.  The reason for this
-agnosticism is so the daemon can adapt properly to anything a hotplug 
+agnosticism is so the daemon can adapt properly to anything a hotplug
 event night throw at it.  If you unplug your GPS while your
 application is running, and then plug one one of a different type, the
 daemon will cope.  Your application won't know the difference unless
@@ -205,14 +205,14 @@ your serial traffic is degraded by dodgy cables or electrical noise,
 or if the GPS is configured to run at an unusual speed/parity/stopbit
 configuration.
 
-The real point here is that the delay is *variable*.  The client 
+The real point here is that the delay is *variable*.  The client
 library, and your application, can't assume a neat lockstep of
 request and instant response.
 
 Once you do get your device(s) synced, things become more predictable.
 The sensor will start shipping fix reports at a constant interval,
 usually every second, and the daemon will massage them into JSON and
-pass them up the client to your application.  
+pass them up the client to your application.
 
 However, until the sensor achives satellite lock, those fixes will be
 "mode 1" - no valid data (mode 2 is a 2D fix, mode 3 is a 3D fix).
@@ -266,8 +266,8 @@ But it is good manners.
 If you're a clever sort, you're already wondering what the daemon does
 if the application at the other end of the client socket doesn't read data
 out of it as fast as gpsd is shipping it upwards.  And the answer is
-this: eventually the socket buffer fills up, a write from the daemon 
-throws an error, and the daemon shuts down that client socket.  
+this: eventually the socket buffer fills up, a write from the daemon
+throws an error, and the daemon shuts down that client socket.
 
 From the point of view of the application, it reads all the buffered
 data and then gets a read return indicating the socket shutdown. We'll
@@ -283,7 +283,7 @@ time in which to come back around your main loop.
 The GPSD project provides client-side libraries in C, C++, and Python.
 A Perl module is separately available from CPAN.  While the details of
 these libraries vary, they all have the same two purposes and the same
-limitations. 
+limitations.
 
 One purpose of the libraries is to handle the details of unpacking
 JSON-based wire-protocol objects into whatever native structure/record
@@ -298,7 +298,7 @@ on wire-protocol details only at your own risk!
 
 The limitations the libraries have to cope with are the nature of
 the data flow from the sensors, and the simple fact that they're
-not necessarily delivering fixes at any given time.  
+not necessarily delivering fixes at any given time.
 
 For details of the libraries' APIs, see their reference
 documentation; the objective of the rest of this section is to teach
@@ -313,7 +313,7 @@ Each library has the following entry points:
 
 * Send wire-protocol commands to the daemon. Deprecated; makes your
   code dependent on the wire protocol. There is no longer a real
-  use case for this entry point; if you think you need no use it, 
+  use case for this entry point; if you think you need no use it,
   you have probably failed to understand the rest of the interface.
 
 * Nonblocking check to see if data from the daemon is waiting. Named
@@ -353,7 +353,7 @@ Clear the contents of the fix structure.
 
 The tricky part is interpreting what you get from the blocking
 read. The reason it's tricky is that you're not guaranteed that
-every read will pick up exactly one complete JSON object from the 
+every read will pick up exactly one complete JSON object from the
 daemon. It may grab one response object, or more than one, or
 part of one, or one or more followed by a fragment.
 
@@ -390,8 +390,8 @@ point when the socket is closed from the daemon side.
 
 == C Examples ==
 
-The source distribution includes two example clients in C; 
-gpxlogger.c and cgps.c.  
+The source distribution includes two example clients in C;
+gpxlogger.c and cgps.c.
 
 gpxlogger.c illustrates the simplest possible program flow; open,
 followed by stream, followed by blocking reads forever.  The use of
@@ -410,7 +410,7 @@ The following code skeleton implements a C++ client:
 
 ----------------------------------------------------------------------
 
-int main(void) 
+int main(void)
 {
     gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
 
@@ -474,7 +474,7 @@ The report object returned by next() can be accessed either as a dictionary
 or as an object.  As a dictionary, it is the raw contents of the last
 JSON response re-encoded in plain ASCII.  For convenience, you may
 also access it as an object with members for each attribute in the
-dictionary.  It is especially useful to know that the object will 
+dictionary.  It is especially useful to know that the object will
 always have a "class" member giving the response type (TPV, SKY,
 DEVICE, etc.) as a string.
 
