@@ -211,9 +211,14 @@ static enum deg_str_type deg_type = deg_dd;
 static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
+#ifdef CLIMB
   char maidenhead[5];
   maidenhead[4]=0;
   int n;
+#else
+  char maidenhead[7];
+  maidenhead[6]=0;
+#endif
   char *s;
   int track;
 
@@ -250,6 +255,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
 
   /* Fill in the altitude and fix status. */
   if (gpsdata->fix.mode == MODE_3D) {
+#ifdef CLIMB
     for(n=0;n<CLIMB-2;n++) climb[n]=climb[n+1];
     climb[CLIMB-1]=gpsdata->fix.climb;
     avgclimb=0.0;
@@ -260,6 +266,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
 #else
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%.1f %s  %s}\n",
             gpsdata->fix.altitude*altfactor, altunits, maidenhead);
+#endif
   } else {
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {n/a}\n");
   }
@@ -297,8 +304,10 @@ int main(int argc, char *argv[])
     fd_set rfds;
     int data;
 
+#ifdef CLIMB
     int n;
     for(n=0;n<CLIMB;n++) climb[n]=0.0;
+#endif 
 
     /*@ -observertrans @*/
     switch (gpsd_units())
