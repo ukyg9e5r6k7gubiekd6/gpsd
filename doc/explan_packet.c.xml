@@ -75,7 +75,7 @@
 </row>
 <row>
   <entry><function>void packet_nit(struct gps_packet_t *lexer)</function></entry>
-  <entry><para>Zeros some couinters, then resets the entire packet
+  <entry><para>Zeros some counters, then resets the entire packet
   state machine to the ground state.</para></entry>
 </row>
 <row>
