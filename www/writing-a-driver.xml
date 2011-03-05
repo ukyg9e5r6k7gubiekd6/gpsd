@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE article PUBLIC 
+<!DOCTYPE article PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY homepage      "http://gpsd.berlios.de">
@@ -156,7 +156,7 @@ sigma).</para>
 
 <para>So for me, the decision whether to write a
 driver or not was already made; either write one or forget
-connecting this high quality time source to my network, as 
+connecting this high quality time source to my network, as
 <application>gpsd</application> can also use the GPS device to
 synchronise the ntpd daemon either to the GPS data or to the
 1PPS, if it is available. A 25ns accurate input to <filename>
@@ -171,7 +171,7 @@ to be able to code in C and compile/install the results. If you
 can't do that, you should temporarily shelve the driver project
 and start learning to code. While I would not advise this as
 the way to go for a complete novice, you will find some good
-code to follow in the 
+code to follow in the
 <application>gpsd</application> files and there are some good
 clues in the existing drivers.</para>
 
@@ -371,7 +371,7 @@ want compiling and then issue a
 the software to that configuration. If it compiles
 successfully, you can then issue a <quote>
 <command>make install</command></quote> command to
-install the driver. This last command will need to be done as 
+install the driver. This last command will need to be done as
 <function>root</function> because the daemon is designed to
 be invoked by root.</para>
 
@@ -561,11 +561,11 @@ code <quote>
 <function>packet_parse</function></quote> and is based
 on existing drivers.</para>
 
-<para>The file 
+<para>The file
 <quote><filename>packet_states.h</filename></quote> is simply
 a list of every state needed by every type of GPS which will
-produce a long list of unique entries (a big 
-<filename>enum</filename> list) for use in the 
+produce a long list of unique entries (a big
+<filename>enum</filename> list) for use in the
 <quote><filename>packet.c</filename></quote> state engine.
 The changes here are limited to a small change to the TNT
 code, since both drivers share a common first character,
@@ -583,8 +583,8 @@ I did not know what would need to be updated; you, on the other
 hand, now have a nice list to guide you.</para>
 
 <para>The basic entry points or data values
-required of every driver are in visible in the 
-<userinput>struct gps_type_t proto_binary</userinput> in 
+required of every driver are in visible in the
+<userinput>struct gps_type_t proto_binary</userinput> in
 <quote><filename>drivers_proto.c</filename></quote>. If
 any functions are not needed or not provided for your
 device, then the corresponding table entry should be a
@@ -646,13 +646,13 @@ this event does <emphasis>not</emphasis> fire for USB devices, in
 order to avoid spamming unidentified devices behind USB-to-serial adapters
 that may not be GPSes at all.</para></listitem>
 
-<listitem><para>When the driver has a trigger string and the NMEA driver 
+<listitem><para>When the driver has a trigger string and the NMEA driver
 sees it, 'event_triggermatch' fires.  An 'event_switch_driver' should
 follow immediately.</para></listitem>
 
-<listitem><para> 
+<listitem><para>
 Whenever <application>gpsd</application> first achieves packet lock
-with a device, with event type 'identified'.  
+with a device, with event type 'identified'.
 </para></listitem>
 
 <listitem><para> Whenever a full packet is received, with event type
@@ -701,7 +701,7 @@ or someting triggers a device change.</para>
 
 <para><structfield>.get_packet</structfield> points to a block of code
 that actually gets the packets from the serial stream. You will
-almost certainly use the generic routine 
+almost certainly use the generic routine
 <function>packet_get</function>. If you know this won't do,
 you already know enough not to need this explaining.</para>
 
@@ -713,7 +713,7 @@ driver.</para>
 used if the GPS type is capable of accepting differential-GPS
 corrections in RTCM-104 format. This is the routine needed to
 ship the data to the device. Usually it is a straight binary
-write of the data, which is provided by the default routine 
+write of the data, which is provided by the default routine
 <function>pass_rtcm</function>. If the device does not
 accept differential data, the value is NULL.</para>
 
@@ -729,8 +729,8 @@ binary mode (1).</para>
 
 <para><structfield>.rate_switcher</structfield> points to a block of code
 to change the maximum number of fixes your device can generate
-in 1 second. If this method is present, you should also fill in 
-<structfield>.min_cycle</structfield> to indicate the device's 
+in 1 second. If this method is present, you should also fill in
+<structfield>.min_cycle</structfield> to indicate the device's
 minimum cycle time in seconds; a 0 value indicates that it is limited
 only by the data throughput of the reporting channel.</para>
 
@@ -743,7 +743,7 @@ though, you may find it useful for implementing the other switcher
 methods and whatever other probe strings you need to send.  Note: if
 possible, assemble your packet in
 <structfield>session->msgbuf</structfield> and put the length in
-<structfield>session->msgbuflen</structfield>; this will allow 
+<structfield>session->msgbuflen</structfield>; this will allow
 gpsmon to display the control messages it sends for you.</para>
 
 <!-- added by ESR, 2009 -->
@@ -781,7 +781,7 @@ available. In my case, all the fields could be filled directly from
 the data shipped by the GPS in the two messages which I activated.
 The satellite status data contained exactly what was needed. The
 navigation data was all present but some fields did need some
-massaging; for example, my GPS reports location data in 
+massaging; for example, my GPS reports location data in
 milliArcseconds whilst <application>gpsd</application> works in
 degrees. All conversions were achieved by simple division by
 constants. A few of the more exotic fields such as the quality of the
@@ -792,8 +792,8 @@ were extracted by simple masking and testing.</para>
 results from just the two command/report strings that were set
 in Windows, but later on I added the capability to bring the
 device into use from a cold start through the daemon by adding
-the routines such as 
-<structfield>.probe_detect</structfield> and 
+the routines such as
+<structfield>.probe_detect</structfield> and
 <structfield>.trigger</structfield> along with some status
 requests.</para>
 
@@ -819,11 +819,11 @@ off&gt;</para>
 <para>As I mentioned earlier, my GPS device
 needed to be <quote>woken up</quote>,
 otherwise it would never be detected by the normal packet
-scanner. The 
+scanner. The
 <structfield>.probe_detect</structfield> function is intended for
 just such a case and allows you to seek your device and claim
 the port ahead of the normal initialisation, since a check for
-devices supporting the 
+devices supporting the
 <structfield>.probe_detect</structfield> is made at a very early
 point in the startup. The unfortunate thing is that to
 implement the function could mean getting down to low level
@@ -837,9 +837,9 @@ this process in some detail in the hope that it may save some other
 poor soul the trials I went through.</para>
 
 <!-- Mick actually looked at sirfmon -->
-<para>I looked at the code in 
-<quote><filename>serial.c</filename></quote>, 
-<quote><filename>garmin.c</filename></quote> and 
+<para>I looked at the code in
+<quote><filename>serial.c</filename></quote>,
+<quote><filename>garmin.c</filename></quote> and
 <quote><filename>gpsmon.c</filename></quote> for inspiration
 and noticed some important things:</para>
 
