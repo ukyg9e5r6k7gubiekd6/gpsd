@@ -41,7 +41,7 @@ backet; this is intentional.</para>
 
 <para>In raw mode (the default) <application>gpscat</application>
 simply dumps its input to standard output.  Nonprintable characters
-other than ASCII whitepace are rendered as hexadecimal string escapes.</para>
+other than ASCII whitespace are rendered as hexadecimal string escapes.</para>
 
 <para>In packetizing mode, <application>gpscat</application> uses the
 same code as
