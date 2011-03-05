@@ -62,7 +62,7 @@ is a service library which supports querying GPS devices; link it with
 the linker option -lgpsd.  It is a set of low-level
 device-handling calls, which
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-itself uses.  See 
+itself uses.  See
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 for a description of the high-level interface, which is almost
 certainly what you want.</para>
@@ -71,8 +71,8 @@ certainly what you want.</para>
 <function>gpsd_init()</function>
 initializes a session structure to hold the data collected by the GPS.</para>
 
-<para>The second argument must be a context structure.  The library 
-will use it for information that need to be shared between sessions; 
+<para>The second argument must be a context structure.  The library
+will use it for information that need to be shared between sessions;
 presently this includes the leap-second correction and possibly a
 pointer to a shared-memory segment used to communicate with the
 Network Time Protocol daemon.</para>
@@ -99,7 +99,7 @@ designate a speed to be tried at the front of the hunt queue</para>
 </variablelist>
 
 <para><function>gpsd_activate()</function>
-initializes the connection to the GPS. 
+initializes the connection to the GPS.
 <function>gpsd_deactivate()</function>
 closes the connection. These functions are provided so that
 long-running programs can release a connection when there is no
@@ -111,7 +111,7 @@ holds position, speed, GPS signal quality, and other data returned
 by the GPS. It returns a mask describing which fields have changed.</para>
 
 <para><function>gpsd_wrap()</function>
-ends the session, implicitly performing a 
+ends the session, implicitly performing a
 <function>gpsd_deactivate()</function>.</para>
 
 <para>The calling application must define one additional function:
@@ -120,7 +120,7 @@ The library will use this to issue ordinary status messages.
 See <filename>gpsd.h</filename> in the source distribution for
 the set of logging levels.</para>
 
-<para>The low-level functions do not allocate or free any dynamic 
+<para>The low-level functions do not allocate or free any dynamic
 storage.  They can thus be used in a long-running application (such as
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 itself) with a guarantee that they won't cause memory leaks.</para>
