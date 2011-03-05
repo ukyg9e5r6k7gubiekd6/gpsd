@@ -126,7 +126,7 @@ GPS.</para>
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>
 
-<para>The following device-independent comands are available while 
+<para>The following device-independent commands are available while
 <application>gpsmon</application> is running:</para>
 
 <variablelist>
@@ -187,7 +187,7 @@ have such modes.</para>
 <term>q</term>
 <listitem>
 <para>Quit <application>gpsmon</application>.  Control-C, or whatever
-your current interrupt chracter is, works as well.</para>
+your current interrupt character is, works as well.</para>
 </listitem>
 </varlistentry>
 
@@ -204,7 +204,7 @@ this command may fail with a message.</para>
 <para>Use this command with caution.  On USB and Bluetooth GPSes it is
 also possible for serial mode setting to fail either because the
 serial adaptor chip does not support non-8N1 modes or because the
-device firmware does not properly synchronize the serrial adaptor chip
+device firmware does not properly synchronize the serial adaptor chip
 with the UART on the GPS chipset when the speed changes. These
 failures can hang your device, possibly requiring a GPS power cycle or (in
 extreme cases) physically disconnecting the NVRAM backup battery.</para>
