@@ -263,7 +263,6 @@ static void update_lcd(struct gps_data_t *gpsdata)
     avgclimb/=CLIMB;
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
             (int)(gpsdata->fix.altitude*altfactor), altunits, maidenhead, (int)(avgclimb * METERS_TO_FEET * 60));
-#else
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%.1f %s  %s}\n",
             gpsdata->fix.altitude*altfactor, altunits, maidenhead);
 #endif
