@@ -514,7 +514,7 @@ give the address of the entry point table in my driver.</para>
 <para>The <quote><filename>gpsd.h</filename></quote> file is a
 conventional header file with declarations common to the whole
 application. The changes are again quite simple. There is an entry
-added to put my driver in the the list of drivers that use binary
+added to put my driver in the list of drivers that use binary
 mode. This depends if your driver is binary or not.  I then modified
 the code which sets the maximum packet size as by default the largest
 packet was set to 196 bytes for the SiRF driver and the Jupiter-T can

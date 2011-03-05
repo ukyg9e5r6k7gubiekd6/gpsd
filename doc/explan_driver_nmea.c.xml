@@ -162,7 +162,7 @@
 </row>
 <row>
   <entry><function>static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>
-  <entry><para>Set the local variable to indicate the the unit is
+  <entry><para>Set the local variable to indicate the unit is
   on-line.</para><para>Fill all appropriate fields from the sentence
   and set the associated flags in the local flag
   variable.</para><para>Set the fix status and return all the locally

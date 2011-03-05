@@ -205,7 +205,7 @@ this command may fail with a message.</para>
 also possible for serial mode setting to fail either because the
 serial adaptor chip does not support non-8N1 modes or because the
 device firmware does not properly synchronize the serrial adaptor chip
-with the UART on the GPS chipset whjen the speed changes. These
+with the UART on the GPS chipset when the speed changes. These
 failures can hang your device, possibly requiring a GPS power cycle or (in
 extreme cases) physically disconnecting the NVRAM backup battery.</para>
 </listitem>

@@ -871,7 +871,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
  *
  * This is ONLY for USB devices reporting as: 091e:0003.
  *
- * This driver ONLY works in Linux and ONLY when the the garmin_gps kernel
+ * This driver ONLY works in Linux and ONLY when the garmin_gps kernel
  * module is installed.
  *
  * This is only necessary because under Linux Garmin USB devices need a

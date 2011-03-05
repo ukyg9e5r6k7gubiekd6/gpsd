@@ -73,7 +73,7 @@ device. In that case no invocation is required at all.</para>
 
 <para>For your initial tests set your GPS hardware to speak NMEA, as
 <application>gpsd</application> is guaranteed to be able to process
-that. If your GPS has a native or binary mode with better perfornance
+that. If your GPS has a native or binary mode with better performance
 that <application>gpsd</application> knows how to speak,
 <application>gpsd</application> will autoconfigure that mode.</para>
 
@@ -168,7 +168,7 @@ also be nice.</para></listitem>
 <varlistentry>
 <term>-G</term>
 <listitem><para>This flag causes <application>gpsd</application> to
-listen on all addresses (INADDR_ANY) rather than just the loopback
+listen on all addresses (INADDR_ANY) rather than just the loop back
 (INADDR_LOOPBACK) address. For the sake of privacy and security, TPV
 information is now private to the local machine until the user makes
 an effort to expose this to the world.</para></listitem>
@@ -307,7 +307,7 @@ any devices nor a control socket are specified.</para>
 gpsd attempts to execute a hook from
 <filename>/etc/gpsd/device-hook</filename> with first command line argument
 set to the pathname of the device and the second to
-<option>ACTIVATE</option>. On deactivatation it does the same passing
+<option>ACTIVATE</option>. On deactivation it does the same passing
 <option>DEACTIVATE</option> for the second argument.</para>
 
 <para>Clients communicate with the daemon via textual request and
@@ -340,7 +340,7 @@ or one of the strings "DEVICE" or "ERROR". Their length
 limit is 1024 characters, including trailing newline.</para>
 
 <para>The remainder of this section documents the core GPSD protocol.
-Extensions are docomented in the following sections. The extensions
+Extensions are documented in the following sections. The extensions
 may not be supported in your <application>gpsd</application> instance
 if it has been compiled with a restricted feature set.</para>
 
@@ -545,7 +545,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>xdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitudinal dilution of precision, a dimensionsless
+        <entry>Longitudinal dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -553,7 +553,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>ydop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Latitudinal dilution of precision, a dimensionsless
+        <entry>Latitudinal dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -561,7 +561,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>vdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Altitude dilution of precision, a dimensionsless
+        <entry>Altitude dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -569,7 +569,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>tdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Time dilution of precision, a dimensionsless
+        <entry>Time dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -577,7 +577,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>hdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Horizontal dilution of precision, a dimensionsless
+        <entry>Horizontal dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get a
 	circular error estimate.</entry>
 </row>
@@ -585,7 +585,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>pdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Spherical dilution of precision, a dimensionsless
+        <entry>Spherical dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -593,7 +593,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>gdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Hyperspherical dilution of precision, a dimensionsless
+        <entry>Hyperspherical dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -601,7 +601,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>xdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitudinal dilution of precision, a dimensionsless
+        <entry>Longitudinal dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
@@ -618,7 +618,7 @@ yet, only the "class" field will reliably be present.</para>
 
 <para>Many devices compute dilution of precision factors but do not
 include them in their reports.  Many that do report DOPs report only
-HDOP, two-dimensial circular error. <application>gpsd</application>
+HDOP, two-dimensional circular error. <application>gpsd</application>
 always passes through whatever the device actually reports, then
 attempts to fill in other DOPs by calculating the appropriate
 determinants in a covariance matrix based on the satellite view. DOPs
@@ -983,7 +983,7 @@ may be reported or not depending on the specific device type.</para>
 	<entry>temperature</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Temperature at sensir, degrees centigrade.</entry>
+        <entry>Temperature at sensor, degrees centigrade.</entry>
 </row>
 
 
@@ -1178,7 +1178,7 @@ notifications.</para>
 
 <para>This command sets watcher mode. It also sets or elicits a report
 of per-subscriber policy and the raw bit.  An argument WATCH object
-changes the subscriber's policy. The responce describes the
+changes the subscriber's policy. The response describes the
 subscriber's policy. The response will also include a DEVICES
 object.</para>
 
@@ -1368,7 +1368,7 @@ will be reported with a mode field of zero.</para>
 </programlisting>
 
 <note>
-<para>Client software should not assime the field inventory of the
+<para>Client software should not assume the field inventory of the
 POLL response is fixed for all time.  As
 <application>gpsd</application> collects and caches more data from
 more sensor types, those data are likely to find their way
@@ -1398,7 +1398,7 @@ continue to communicate at the old speed.</para>
 Bluetooth GPSes it is also possible for serial mode setting to fail
 either because the serial adaptor chip does not support non-8N1 modes
 or because the device firmware does not properly synchronize the
-serial adaptor chip with the UART on the GPS chipset whjen the speed
+serial adaptor chip with the UART on the GPS chipset when the speed
 changes. These failures can hang your device, possibly requiring a GPS
 power cycle or (in extreme cases) physically disconnecting the NVRAM
 backup battery.</para>
@@ -1671,7 +1671,7 @@ RTCM104. It ships the RTCM104 to the LF transmitter over serial rs-232
 signal at 100 baud or 200 baud depending on the requirements of the
 transmitter.</para>
 
-<para>The LF transmitter broadcasts the the approximately 300khz radio
+<para>The LF transmitter broadcasts the approximately 300khz radio
 signal that differential-GPS radio receivers pick up.  Transmitters
 that are meant to have a higher range will need to transmit at the
 slower rate.  The higher the data rate the harder it will be for the
@@ -1758,7 +1758,7 @@ field containing the pathname of the originating device.</para>
 <row>
 	<entry>station_health</entry>
 	<entry>integer</entry>
-        <entry><para>Station transmisssion status. Indicates the health of
+        <entry><para>Station transmission status. Indicates the health of
         the beacon as a reference source.  Any nonzero value means the
         satellite is probably transmitting bad data and should not be
         used in a fix. 6 means the transmission is unmonitored. 7
@@ -2198,7 +2198,7 @@ message:</para>
 <row>
 	<entry>range</entry>
 	<entry>integer</entry>
-        <entry><para>Transmission reange in km (1-1024).</para></entry>
+        <entry><para>Transmission range in km (1-1024).</para></entry>
 </row>
 </tbody>
 </tgroup>
@@ -2408,7 +2408,7 @@ control socket a '&amp;', followed by the device name, followed by '=',
 followed by the control string in paired hex digits.</para>
 
 <para>Your client may await a response, which will be a line beginning
-with either "OK" or "ERROR".  An ERROR reponse to an add command means
+with either "OK" or "ERROR".  An ERROR response to an add command means
 the device did not emit data recognizable as GPS packets; an ERROR
 response to a remove command means the specified device was not in
 <application>gpsd</application>'s device pool. An ERROR response to a
@@ -2535,7 +2535,7 @@ system clock.</para>
 
 <para>Here is a sample <filename>ntp.conf</filename> configuration
 stanza telling <application>ntpd</application> how to read the GPS
-notfications:</para>
+notifications:</para>
 
 <programlisting>
 server 127.127.28.0 minpoll 4 maxpoll 4

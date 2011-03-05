@@ -466,7 +466,7 @@ expect this to continue to be the case even with cycle times as
 low as 0.25sec.</para>
 
 <para>More generally, binary protocols are largely pointless except as
-market-control devices for the the manufacturers.  The additional
+market-control devices for the manufacturers.  The additional
 capabilities they support could be just as effectively supported
 through NMEA's $P-prefix extension mechanism.</para>
 

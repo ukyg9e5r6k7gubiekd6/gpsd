@@ -96,7 +96,7 @@ attached to
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 
 <function>gps_open()</function> returns 0 on success, -1 on errors and is
-re-entrant.  errno is set depending on the error returned from the the
+re-entrant.  errno is set depending on the error returned from the
 socket layer; see <filename>gps.h</filename> for values and
 explanations; also see <function>gps_errstr()</function>. The host
 address may be a DNS name, an IPv4 dotted quad, or an IPV6 address;
