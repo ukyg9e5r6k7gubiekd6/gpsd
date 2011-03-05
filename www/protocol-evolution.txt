@@ -141,7 +141,7 @@ namespace, we ran out of letters completely. As the PADE example
 shows, the protocol parser interprets command words letter
 by latter, so trying to wedge longer commands in by simple 
 fiat wouldn't work. Recruiting non-letter characters as
-command chareacters would have been ugly and only postponed
+command characters would have been ugly and only postponed
 the problem a bit, not solved it.
 
 'H' is actually still left, but at the time I believed we couldn't
