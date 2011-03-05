@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsmon.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsmon</command>  
+  <command>gpsmon</command>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>-L </arg>
       <arg choice='opt'>-V </arg>
@@ -32,8 +32,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 	<group>
 	  <arg choice='plain'>
             <replaceable>server</replaceable>
-            <group> 
-	      <replaceable>:port</replaceable> 
+            <group>
+	      <replaceable>:port</replaceable>
               <group><replaceable>:device</replaceable></group>
             </group>
           </arg>
@@ -63,7 +63,7 @@ it knows nothing about.</para>
 client in that it mostly dumps raw data from the GPS, with only enough
 data-massaging to allow checks against expected output.  In
 particular, this tool does not do any interpolation or modeling
-to derive climb/sink or error estimates. Nor does it discard 
+to derive climb/sink or error estimates. Nor does it discard
 altitude reports when the fix quality is too low.</para>
 
 <para><application>gpsmon</application> is a designed to run in a
@@ -242,7 +242,7 @@ of
 <term>X</term>
 <listitem>
 <para>Send raw hex bytes to device. Following the command letter you
-may type hex digit pairs; end with a newline.  These will be shipped 
+may type hex digit pairs; end with a newline.  These will be shipped
 to the device.</para>
 </listitem>
 </varlistentry>
@@ -270,7 +270,7 @@ but all extended NMEA devices for which
 <para>All fields are raw data from the GPS except the "Cooked PVT"
 window near top of screen, provided as a sheck.</para>
 
-<para>There are no device-specific commands. Which generic 
+<para>There are no device-specific commands. Which generic
 commands are available may vary by type: examine the output
 of <command>gpsmon -l</command> to learn more.</para>
 </refsect2>
@@ -348,7 +348,7 @@ by '>>>') are only supported for the following drivers: NMEA, SiRF,
 EverMore, Navcom, UBX, TSIP, iTalk, Garmintxt. This feature will not
 work for Zodiacs and not always work for Garmins in binary
 mode.
---> 
+-->
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
@@ -365,7 +365,7 @@ mode.
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This code is
 part of the gpsd toolset; there is a project page for
