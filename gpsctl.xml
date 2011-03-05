@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsctl.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsctl</command>  
+  <command>gpsctl</command>
       <arg choice='opt'>-h </arg>
       <group>
 	<arg choice='plain'>-b</arg>
@@ -60,7 +60,7 @@ running as root in order to have write access to the device.</para>
 <varlistentry>
 <term>-b</term>
 <listitem>
-<para>Put the GPS into binary mode.  After the GPS resets itself, autobaud to 
+<para>Put the GPS into binary mode.  After the GPS resets itself, autobaud to
 the new speed.</para>
 </listitem>
 </varlistentry>
@@ -102,7 +102,7 @@ to which device types, and exit.</para>
 <varlistentry>
 <term>-n</term>
 <listitem>
-<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to 
+<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to
 its new speed.</para>
 </listitem>
 </varlistentry>
@@ -154,7 +154,7 @@ will be replaced with ESC. This switch implies
 <term>-T</term>
 <listitem>
 <para>Change the sampling timeout. Defaults to 4 seconds, which
-should always be sufficient to get a packet from a device emitting at 
+should always be sufficient to get a packet from a device emitting at
 the normal rate of 1 per second.</para>
 </listitem>
 </varlistentry>
@@ -185,7 +185,7 @@ the normal rate of 1 per second.</para>
 string which should be contained in exactly one of the known driver
 names; for a list, do <command>gpsctl -l</command>.</para>
 
-<para>Forcing the device type behaves somewhat differently depending 
+<para>Forcing the device type behaves somewhat differently depending
 on whether this tool is going through the daemon or not. In high-level
 mode, if the device that daemon selects for you doesn't match the
 driver you specified, <application>gpsctl</application> exits with
@@ -216,7 +216,7 @@ last.</para>
 <listitem>
 <para>Attempt to identify the device on USB serial device 0. Time out
 after the default number of seconds. Adding the <option>-f</option> will
-force low-level access and suppress the normal complaint when this 
+force low-level access and suppress the normal complaint when this
 tool can't find a GPSD to work through.</para>
 </listitem>
 </varlistentry>
@@ -225,7 +225,7 @@ tool can't find a GPSD to work through.</para>
 <term>gpsctl -f -n -s 9600 /dev/ttyUSB0</term>
 <listitem>
 <para>Use low-level operations (not going through a gpsd instance) to
-switch a GPS to NMEA mode at 9600bps.  The tool will identify the 
+switch a GPS to NMEA mode at 9600bps.  The tool will identify the
 GPS type itself.</para>
 </listitem>
 </varlistentry>
@@ -252,7 +252,7 @@ these running in NMEA will change its behavior.</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
 project page for <application>gpsd</application> <ulink
