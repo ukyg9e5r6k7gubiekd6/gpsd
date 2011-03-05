@@ -174,7 +174,7 @@ href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 the *BSD family.  Presently Linux and OpenBSD are directly supported.
 We'll support proprietary Unixes if it's not too much work (and it
 usually isn't). Apple's OS X is back in our good books, but it is
-criticial that you have all your USB drivers updated. Older drivers
+critical that you have all your USB drivers updated. Older drivers
 are buggy and prevent <code>gpsd</code> from being able to read from
 USB-serial devices.</p>
 
@@ -400,7 +400,7 @@ gpsd process and forwards it to a remote server via an UDP
 connection. GPSDproxy is intended to be run on GPS enabled mobile
 devices.</p>
 
-<p>You can read detailed intructions on <a
+<p>You can read detailed instructions on <a
 href="http://www.rjsystems.nl/en/2100-ntpd-garmin-gps-18-lvc-gpsd.php">
 Synchronizing ntpd to a Garmin GPS 18 LVC via gpsd</a>. This may be a
 useful tutorial even if your actual device isn't a Garmin 18; many
@@ -473,7 +473,7 @@ for testing GPS-aware applications.</p>
 Greenville Public School District nor the Greater Peoria Sanitary
 District, nor even the Greater Portland Soccer District, nor the Green
 Party of San Diego, nor do we have anything to do with the General
-Product Safety Directive, the the Guiding Principles of Sustainable
+Product Safety Directive, the Guiding Principles of Sustainable
 Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 
 <div style="text-align: center;">
