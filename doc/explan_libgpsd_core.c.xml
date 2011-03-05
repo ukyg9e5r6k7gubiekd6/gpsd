@@ -65,7 +65,7 @@
   still hanging in there, we now see if we already have had more than
   4 good fixes, otherwise we can't trust the 1PPS.</para><para>We then
   finally test the pulse duration. If it is either a genuine 1PPS or a
-  2Hz squarewave, we call
+  2Hz square wave, we call
   <function>ntpshm_pps()</function>.</para><para>Short or long PPS
   pulses are dropped with an error report.</para></entry>
 </row>
@@ -109,7 +109,7 @@
   or the packet is incomplete, using the stashed count of characters
   and the full packet indicator.</para><para>If a full packet is
   available, we try to get the fix data and update the main data
-  stucture. We also compute the DOPs so we can fill them in if they
+  structure. We also compute the DOPs so we can fill them in if they
   are not included in the gps device output.</para><para>Mopst of the
   possible driver events are called from somewhere in
   here.</para></entry>
