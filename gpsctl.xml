@@ -115,7 +115,7 @@ its new speed.</para>
 <para>Use this option with caution.  On USB and Bluetooth GPSes it is
 also possible for serial mode setting to fail either because the
 serial adaptor chip does not support non-8N1 modes or because the
-device firmware does not properly synchronize the serrial adaptor chip
+device firmware does not properly synchronize the serial adaptor chip
 with the UART on the GPS chipset when the speed changes. These
 failures can hang your device, possibly requiring a GPS power cycle or (in
 extreme cases) physically disconnecting the NVRAM backup battery.</para>
@@ -202,7 +202,7 @@ probe.)</para>
 identifying the GPS type of the selected device and exit.</para>
 
 <para>Reset (-r) operations must stand alone; others can be combined.
-Multiple opations will be executed in tis order: mode changes (-b and
+Multiple options will be executed in tis order: mode changes (-b and
 -n) first, speed changes (-s) second, and control-string sends (-c)
 last.</para>
 
