@@ -394,6 +394,10 @@ by Holux that may result in <code>gpsd</code> bricking your GPS.  See this
 <a href="upstream-bugs.html#bluetooth">bug warning</a> for a description 
 of the problem.</p>
 
+<p>If you have an Android phone, it is possible to access its onboard
+GPS by pairing it as a Bluetooth device.  Directions from <a
+href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville.</p>
+
 <p>The <a href="http://gpsdproxy.sourceforge.net/">gGPSDproxy
 project</a> is a small program which reads GPS data from a running
 gpsd process and forwards it to a remote server via an UDP
