@@ -562,7 +562,8 @@ static gps_mask_t processGPGSV(int count, char *field[],
 
     for (fldnum = 4; fldnum < count;) {
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
-	    gpsd_report(LOG_ERROR, "internal error - too many satellites!\n");
+	    gpsd_report(LOG_ERROR, "internal error - too many satellites [%d]!\n",
+                    session->gpsdata.satellites_visible);
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
 	}
