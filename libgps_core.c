@@ -635,10 +635,6 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
     if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW)) == 0) {
 	flags |= WATCH_JSON;
     }
-#ifndef USE_QT
-    if (flags & POLL_NONBLOCK)
-	(void)fcntl(gpsdata->gps_fd, F_SETFL, O_NONBLOCK);
-#endif
     if ((flags & WATCH_DISABLE) != 0) {
 	if ((flags & WATCH_OLDSTYLE) != 0) {
 	    (void)strlcpy(buf, "w-", sizeof(buf));

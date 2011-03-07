@@ -1303,7 +1303,6 @@ typedef int socket_t;
 #define WATCH_SCALED	0x000100u	/* scale output to floats */ 
 #define WATCH_TIMING	0x000200u	/* timing information */
 #define WATCH_DEVICE	0x000800u	/* watch specific device */
-#define POLL_NONBLOCK	0x001000u	/* set non-blocking poll */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 

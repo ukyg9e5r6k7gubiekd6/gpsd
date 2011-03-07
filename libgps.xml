@@ -119,11 +119,11 @@ alternative.</para>
 <para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).  This function
-does a blocking read waiting for data from the daemon (but see
-POLL_NONBLOCK below); it returns a count of bytes read for success,
--1 with errno set on a Unix-level read error, -1 with errno not set
-if the socket to the daemon has closed, and 0 if POLL_NONBLOCK was
-passed to gps_stream() and no data is yet available.</para>
+does a nonblocking read waiting for data from the daemon; it returns a
+count of bytes read for success, -1 with errno set on a Unix-level
+read error, -1 with errno not set if the socket to the daemon has
+closed, and 0 if POLL_NONBLOCK was passed to gps_stream() and no data
+is yet available.</para>
 
 <para><function>gps_waiting()</function> can be used to check
 whether there is data from the daemon. It returns true if there is,
@@ -145,8 +145,7 @@ more than once with different flag masks is allowed.</para>
 <varlistentry>
 <term>WATCH_DISABLE</term>
 <listitem>
-<para>Disable the reporting modes specified by the other WATCH_ flags.
-Cannot be used to disable POLL_NONBLOCK.</para>
+<para>Disable the reporting modes specified by the other WATCH_ flags.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -208,15 +207,6 @@ in a future release.</para>
 <listitem>
 <para>Restrict watching to a specified device, patch given as second
 argument.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>POLL_NONBLOCK</term>
-<listitem>
-<para>Normally <function>gps_read()</function> blocks until
-either there is a read error or some data is received from the
-daemon.  In this mode, <function>gps_read()</function> returns
-immediately with a value of 0 if there is no input waiting.</para>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -304,6 +294,11 @@ command is shipped to it will be the response to command.</para>
 <para>If you must send commands to the daemon explicitly, use
 <function>gps_send()</function> but beware that this ties your code to
 the GPSD wire protocol. It is not recommended.</para>
+
+<para>In earlier versions of the API <function>gps_read()</function> was
+a blocking call and there was a POLL_NONBLOCK option to make it nonblocking.
+<function>gps_waiting()</function> was added to reduce the number of
+wrong ways to code a polling look.</para>
 
 <para>See the comment above the symbol GPSD_API_MAJOR_VERSION
 in <filename>gps.h</filename> for recent changes.</para>
