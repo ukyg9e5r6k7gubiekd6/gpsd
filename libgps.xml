@@ -298,7 +298,7 @@ the GPSD wire protocol. It is not recommended.</para>
 <para>In earlier versions of the API <function>gps_read()</function> was
 a blocking call and there was a POLL_NONBLOCK option to make it nonblocking.
 <function>gps_waiting()</function> was added to reduce the number of
-wrong ways to code a polling look.</para>
+wrong ways to code a polling loop.</para>
 
 <para>See the comment above the symbol GPSD_API_MAJOR_VERSION
 in <filename>gps.h</filename> for recent changes.</para>
