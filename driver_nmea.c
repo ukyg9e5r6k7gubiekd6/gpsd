@@ -436,6 +436,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
     session->gpsdata.gst.lon_err_deviation   = PARSE_FIELD(7);
     session->gpsdata.gst.alt_err_deviation   = PARSE_FIELD(8);
 #undef PARSE_FIELD
+    register_fractional_time(field[0], field[1], session);
 
     gpsd_report(LOG_DATA,
 		"GST: utc = %.2f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
