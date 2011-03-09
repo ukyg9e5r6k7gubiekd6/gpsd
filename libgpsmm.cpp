@@ -56,9 +56,9 @@ struct gps_data_t* gpsmm::read(void)
 	}
 }
 
-bool gpsmm::waiting(void)
+bool gpsmm::waiting(int timeout)
 {
-	return gps_waiting(gps_data());
+  return gps_waiting(gps_data(), timeout);
 }
 
 void gpsmm::clear_fix(void)

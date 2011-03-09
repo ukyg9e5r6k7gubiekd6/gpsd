@@ -499,21 +499,24 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /*@ +compdef @*/
 /*@ -branchstate +usereleased +mustfreefresh +nullstate +usedef @*/
 
-bool gps_waiting(struct gps_data_t * gpsdata)
+bool gps_waiting(struct gps_data_t * gpsdata, int timeout)
 /* is there input waiting from the GPS? */
 {
 #ifndef USE_QT
     fd_set rfds;
     struct timeval tv;
 
-    libgps_debug_trace((DEBUG_CALLS, "gps_waiting(): %d\n", waitcount++));
+    libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, waitcount++));
     if (gpsdata->waiting > 0)
 	return true;
 
+    /* we might want to check for EINTR if this returns false */
+    errno = 0;
+
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
-    tv.tv_sec = 0;
-    tv.tv_usec = 1;
+    tv.tv_sec = timeout / 1000000;
+    tv.tv_usec = timeout % 1000000;
     /* all error conditions return "not waiting" -- crude but effective */
     return (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == 1);
 #else

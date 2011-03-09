@@ -45,7 +45,6 @@
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#include <sys/time.h>		/* for select() */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -290,10 +289,6 @@ int main(int argc, char *argv[])
     struct sockaddr_in localAddr, servAddr;
     struct hostent *h;
 
-    struct timeval timeout;
-    fd_set rfds;
-    int data;
-
     int n;
     for(n=0;n<CLIMB;n++) climb[n]=0.0;
 
@@ -446,23 +441,10 @@ int main(int argc, char *argv[])
     (void)gps_stream(&gpsdata, flags, source.device);
 
     for (;;) { /* heart of the client */
-
-	/* watch to see when it has input */
-	FD_ZERO(&rfds);
-	FD_SET(gpsdata.gps_fd, &rfds);
-
-	/* wait up to five seconds. */
-	timeout.tv_sec = 5;
-	timeout.tv_usec = 0;
-
-	/* check if we have new information */
-	data = select(gpsdata.gps_fd + 1, &rfds, NULL, NULL, &timeout);
-
-	if (data == -1) {
-	    fprintf( stderr, "lcdgps: socket error\n");
+	if (!gps_waiting(&gpsdata, 50000000)) {
+	    fprintf( stderr, "lcdgps: error while waiting\n");
 	    exit(2);
-	}
-	else if (data) {
+	} else {
 	    (void)gps_read(&gpsdata);
 	    update_lcd(&gpsdata);
 	}

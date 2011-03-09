@@ -1424,7 +1424,7 @@ extern int gps_open(/*@null@*/const char *, /*@null@*/const char *,
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
-extern bool gps_waiting(struct gps_data_t *);
+extern bool gps_waiting(struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 

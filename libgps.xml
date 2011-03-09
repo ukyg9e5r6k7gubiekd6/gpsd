@@ -44,6 +44,7 @@ C:
 <funcprototype>
 <funcdef>bool <function>gps_waiting</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>int <parameter>timeout</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_close</function></funcdef>
@@ -119,16 +120,21 @@ alternative.</para>
 <para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).  This function
-does a nonblocking read waiting for data from the daemon; it returns a
+does a nonblocking read for data from the daemon; it returns a
 count of bytes read for success, -1 with errno set on a Unix-level
 read error, -1 with errno not set if the socket to the daemon has
 closed, and 0 if POLL_NONBLOCK was passed to gps_stream() and no data
 is yet available.</para>
 
-<para><function>gps_waiting()</function> can be used to check
-whether there is data from the daemon. It returns true if there is,
-false on no data waiting or error condition. It does not block
-waiting for input.</para>
+<para><function>gps_waiting()</function> can be used to check whether
+there is data from the daemon. The argument is the maximum amount of
+time to wait on input before returning.  It returns true if there
+inmput waiting, false on timeout (no data waiting) or error
+condition. This function is a convenience wrapper around a
+<citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
+call, and zeros <varname>errno</varname> on entry; you can test
+<varname>errno</varname> after exit to get more information about
+error conditions.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
@@ -136,10 +142,10 @@ to be made available when you poll.  It is preferable to the
 older-style (pre-2.90) way of doing this,
 <function>gps_query()</function> with a "w+" argument, because it
 insulates your code from whether your client library and your
-<application>gpsd</application> are using old or new protocol.
-The second argument is a flag mask that sets various policy bits;
-see the list below.  Calling <function>gps_stream()</function>
-more than once with different flag masks is allowed.</para>
+<application>gpsd</application> are using old or new protocol.  The
+second argument is a flag mask that sets various policy bits; see the
+list below.  Calling <function>gps_stream()</function> more than once
+with different flag masks is allowed.</para>
 
 <variablelist>
 <varlistentry>
@@ -247,7 +253,7 @@ libgps interface code from
     (void) gps_stream(&amp;gps_data, WATCH_ENABLE | WATCH_JSON, NULL);
 
     /* Put this in a loop with a call to a high resolution sleep () in it. */
-    if (gps_waiting (&amp;gps_data)) {
+    if (gps_waiting (&amp;gps_data, 500)) {
         errno = 0;
         if (gps_read (&amp;gps_data) == -1) {
             ...

@@ -84,7 +84,6 @@
 /* This is the maximum size we need for the 'satellites' window. */
 #define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
 
-#include <sys/time.h>		/* for select() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -732,10 +731,6 @@ int main(int argc, char *argv[])
 {
     int option;
     int c;
-
-    struct timeval timeout;
-    fd_set rfds;
-    int data;
     unsigned int flags = WATCH_ENABLE;
 
     /*@ -observertrans @*/
@@ -861,25 +856,10 @@ int main(int argc, char *argv[])
 
     /* heart of the client */
     for (;;) {
-
-	/* watch to see when it has input */
-	FD_ZERO(&rfds);
-	FD_SET(gpsdata.gps_fd, &rfds);
-
-	/* wait up to five seconds. */
-	timeout.tv_sec = 5;
-	timeout.tv_usec = 0;
-
-	/* check if we have new information */
-	data = select(gpsdata.gps_fd + 1, &rfds, NULL, NULL, &timeout);
-
-	if (data == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
-	    fprintf(stderr, "cgps: socket error 3\n");
+	if (!gps_waiting(&gpsdata, 5000000)) {
+	    fprintf(stderr, "cgps: error while waiting\n");
 	    exit(2);
-	} else if (data) {
+	} else {
 	    errno = 0;
 	    if (gps_read(&gpsdata) == -1) {
 		fprintf(stderr, "cgps: socket error 4\n");
@@ -918,7 +898,4 @@ int main(int argc, char *argv[])
 	    break;
 	}
     }
-
-    /* this chould not actually be reachable */
-    exit(0);
 }

@@ -12,7 +12,6 @@
 #include <errno.h>
 #include <libgen.h>
 #include <signal.h>
-#include <sys/time.h>		/* for select() */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -299,7 +298,6 @@ static struct fixsource_t source;
 /*@-mustfreefresh -compdestroy@*/
 static int socket_mainloop(void)
 {
-    fd_set fds;
     unsigned int flags = WATCH_ENABLE;
 
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
@@ -314,20 +312,10 @@ static int socket_mainloop(void)
     (void)gps_stream(&gpsdata, flags, source.device);
 
     for (;;) {
-	int data;
-	struct timeval tv;
-
-	FD_ZERO(&fds);
-	FD_SET(gpsdata.gps_fd, &fds);
-
-	tv.tv_usec = 250000;
-	tv.tv_sec = 0;
-	data = select(gpsdata.gps_fd + 1, &fds, NULL, NULL, &tv);
-
-	if (data == -1) {
-	    (void)fprintf(stderr, "%s\n", strerror(errno));
+	if (!gps_waiting(&gpsdata, 5000000)) {
+	    (void)fprintf(stderr, "%s: error whille waiting\n", progname);
 	    break;
-	} else if (data) {
+	} else {
 	    (void)gps_read(&gpsdata);
 	    conditionally_log_fix(&gpsdata);
 	}
