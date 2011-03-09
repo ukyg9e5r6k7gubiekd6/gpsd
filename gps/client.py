@@ -63,11 +63,11 @@ class gpscommon:
     def __del__(self):
         self.close()
 
-    def waiting(self):
+    def waiting(self, timeout=0):
         "Return True if data is ready for the client."
         if self.linebuffer:
             return True
-        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), 0)
+        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), timeout)
         return winput != []
 
     def read(self):
