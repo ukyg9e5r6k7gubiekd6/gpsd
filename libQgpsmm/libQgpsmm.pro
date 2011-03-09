@@ -15,6 +15,7 @@ isEmpty( MAKE ) {
     MAKE = make
 }
 
+
 SOURCES += \
     gpsutils.cpp \
     libgps_core.cpp \
@@ -34,12 +35,17 @@ HEADERS += libQgpsmm_global.h \
 
 !win32 {
 
+    isEmpty( ABS_BUILDDIR ) {
+        ABS_BUILDDIR = ..
+    }
+    INCLUDEPATH += $${ABS_BUILDDIR}
+
     isEmpty( VERSION ) {
         VERSION = $$system($${MAKE} -s -C .. print_libgps_VERSION)
     }
     HEADERS += \
-        ../gpsd.h \
-	../ais_json.i
+        $${ABS_BUILDDIR}/gpsd.h \
+	$${ABS_BUILDDIR}/ais_json.i
 
     # Prefix: base instalation directory
     isEmpty( PREFIX ) {

@@ -347,6 +347,7 @@ QTLIB_sources = gpsutils.c \
 
 QMAKE_OPTS = "PREFIX=${prefix}" \
 	     "MAKE=$(MAKE)" \
+             "ABS_BUILDDIR=`cd $(abs_builddir); pwd`" \
 	     "QMAKE_CXX=$(CXX)" \
 	     "QMAKE_CC=$(CC)" \
 	     "QMAKE_CFLAGS+=$(CFLAGS)" \
