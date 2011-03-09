@@ -166,6 +166,9 @@ libgps_c_sources = \
 	shared_json.c \
 	strl.c
 
+$(srcdir)/gpsutils.c: gpsd.h
+	touch $@
+
 if NO_DAEMON3
 libgps_c_sources += daemon.c
 endif
