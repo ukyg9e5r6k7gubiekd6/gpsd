@@ -103,7 +103,7 @@ int main(void)
     for (;;) {
 	struct gps_data_t* newdata;
 
-	if (!gps_rec.waiting())
+	if (!gps_rec.waiting(5000000))
 	  continue;
 
 	if ((newdata = gps_rec.read()) == NULL) {
