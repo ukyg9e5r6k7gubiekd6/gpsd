@@ -520,7 +520,7 @@ bool gps_waiting(struct gps_data_t * gpsdata, int timeout)
     /* all error conditions return "not waiting" -- crude but effective */
     return (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == 1);
 #else
-    return ((QTcpSocket *) (gpsdata->gps_fd))->waitForReadyRead(250);
+    return ((QTcpSocket *) (gpsdata->gps_fd))->waitForReadyRead(timeout / 1000);
 #endif
 }
 
