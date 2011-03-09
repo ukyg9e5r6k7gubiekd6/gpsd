@@ -120,11 +120,10 @@ alternative.</para>
 <para><function>gps_read()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).  This function
-does a nonblocking read for data from the daemon; it returns a
-count of bytes read for success, -1 with errno set on a Unix-level
-read error, -1 with errno not set if the socket to the daemon has
-closed, and 0 if POLL_NONBLOCK was passed to gps_stream() and no data
-is yet available.</para>
+does a nonblocking read for data from the daemon; it returns a count
+of bytes read for success, -1 with errno set on a Unix-level read
+error, -1 with errno not set if the socket to the daemon has closed,
+and 0 if no data is available.</para>
 
 <para><function>gps_waiting()</function> can be used to check whether
 there is data from the daemon. The argument is the maximum amount of
@@ -234,9 +233,7 @@ initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
 However, it is simpler just to use the session object as an iterator,
 as in the example given below.  Resources within the session object
-will be properly released when it is garbage-collected. Note one
-limitation: POLL_NONBLOCK is not yet supported in Python; use the
-waiting() method instead.</para>
+will be properly released when it is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='example'><title>CODE EXAMPLE</title>
