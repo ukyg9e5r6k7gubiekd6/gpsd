@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.6, February 2011
+v1.7, March 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -340,9 +340,9 @@ Send wire-protocol commands to the daemon. Deprecated and unstable.
 |gps_stream()		|gpsmm.stream()		|gps.stream()		|
 Set watch policy. What you should use instead of send().
 |gps_waiting()		|gpsmm.waiting()	|gps.waiting()		|
-Nonblocking check to see in input is waiting.
+Blocking check with timeout to see in input is waiting.
 |gps_read()		|gpsmm.read()		|gps.read()		|
-Blocking read for data from the daemon.
+Nonblocking read for data from the daemon.
 |gps_close()		|gpsmm.~gpsmm()		|gps.close()		|
 Close the daemon socket and end the session.
 |gps_enable_debug()	|gpsmm_enable_debug()	|			|
@@ -491,15 +491,16 @@ In major versions before 5:
 
 * gps_open() didn't take a third argument; instead, it returned malloc storage.
 
-* The 'read()' method in various bindings was named 'poll()' and had
-  a different return convention. The name 'poll()' will at some point
-  be reintroduced as an interface to the wire-protocol POLL command.
+* The 'read()' method in various bindings was named 'poll()', blocked
+  waiting for input, and had a different return convention. The name
+  'poll()' will at some point be reintroduced as an interface to the
+  wire-protocol POLL command.
 
 * Clients needed to define a gpsd_report() function for client-side logging
   if they didn't want code in netlib.c and libgps_core.c to occasionally
   send messages to stderr.  This requirement is now gone.
 
-* There was a set_raw_hook() method ion the C and Python bindings, now gone.
+* There was a set_raw_hook() method in the C and Python bindings, now gone.
   Clients can simply look at the response buffer.
 
 See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
