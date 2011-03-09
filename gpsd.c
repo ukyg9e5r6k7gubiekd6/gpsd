@@ -1408,7 +1408,7 @@ static void consume_packets(struct gps_device_t *device)
 		memcpy(context.rtcmbuf,
 		       device->packet.outbuffer,
 		       context.rtcmbytes);
-		context.rtcmtime = (double)time(NULL);
+		context.rtcmtime = time(NULL);
 	    }
 	}
 
