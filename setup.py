@@ -1,12 +1,17 @@
+#!/usr/bin/python
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # Creates build/lib.linux-${arch}-${pyvers}/gpspacket.so,
 # where ${arch} is an architecture and ${pyvers} is a Python version.
 
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
 
 import os
+import re
 import sys
 
 # For VPATH builds, this script must be run from $(srcdir) with the
@@ -14,11 +19,52 @@ import sys
 # directory.  This is necessary because Python's distutils package
 # does not have built-in support for VPATH builds.
 
+MAKE = os.getenv('MAKE', "make")
+abs_builddir = os.getenv("abs_builddir", os.curdir)
+
 # These dependencies are enforced here and not in the Makefile to make
 # it easier to build the Python parts without building everything else
 # (the user can run 'python setup.py' without having to run 'make').
 needed_files = ['gpsd.h', 'packet_names.h']
-created_files = []
+
+# Sources and include directories
+gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
+            "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
+include_dirs = [ os.path.realpath(os.path.dirname(__file__)),
+                 abs_builddir]
+
+def make(f_name):
+    cmd = "%s -C %s %s" %(MAKE, abs_builddir, f_name)
+    print(cmd)
+    make_cmd = os.popen(cmd)
+    make_out = make_cmd.read()
+    print(make_out)
+    if make_cmd.close():
+        sys.exit(1)
+    return make_out
+
+
+version = os.getenv('version', None) or re.findall(r'^[0-9].*', make('version'), re.M)[0] 
+
+if not 'clean' in sys.argv:
+    # Ensure we have a properly configured environment if not being called
+    # from make.
+    if not os.getenv('MAKE', None):
+        if not os.path.exists(os.path.join(abs_builddir, 'Makefile')):
+            sys.stderr.write('\nPlease run configure first!\n')
+            sys.exit(1)
+        else:
+            make('Makefile')
+    if not os.path.exists(os.path.join(abs_builddir, 'gpsd_config.h')):
+        sys.stderr.write('\nPlease run configure first!\n')
+        sys.exit(1)
+
+    for f_name in needed_files:
+        # TODO:  Shouldn't make be run unconditionally in case a
+        # dependency of f_name has been updated?
+        if not os.path.exists(os.path.join(abs_builddir, f_name)):
+            make(f_name)
+
 
 manpages = []
 try:
@@ -34,33 +80,12 @@ except ValueError:
 if not manpages:
     print("No XML processor, omitting manual-page installation.")
 
-MAKE = ("MAKE" in os.environ) and os.environ["MAKE"] or "make"
-abs_builddir = ("abs_builddir" in os.environ) and os.environ["abs_builddir"] or ""
-if not 'clean' in sys.argv:
-    if not os.path.exists(os.path.join(abs_builddir, 'gpsd_config.h')):
-        sys.stderr.write('\nPlease run configure first!\n')
-        sys.exit(1)
 
-    cdcmd = abs_builddir and ("cd '" + abs_builddir + "' && ") or ""
-    for f_name in needed_files:
-        # TODO:  Shouldn't make be run unconditionally in case a
-        # dependency of f_name has been updated?
-        if not os.path.exists(os.path.join(abs_builddir, f_name)):
-            cmd = cdcmd + MAKE + " '" + f_name + "'"
-            print(cmd)
-            make_out = os.popen(cmd)
-            print(make_out.read())
-            if make_out.close():
-                sys.exit(1)
-            created_files.append(f_name)
 
-gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
-            "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
-include_dirs = [ os.path.realpath(os.path.dirname(__file__)),
-                 abs_builddir or "."]
+
 
 setup( name="gps",
-       version=os.environ['version'],
+       version=version,
        description='Python libraries for the gpsd service daemon',
        url="http://gpsd.berlios.de/",
        author='the GPSD project',
