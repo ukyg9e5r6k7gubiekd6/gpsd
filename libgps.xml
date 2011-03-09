@@ -126,9 +126,9 @@ error, -1 with errno not set if the socket to the daemon has closed,
 and 0 if no data is available.</para>
 
 <para><function>gps_waiting()</function> can be used to check whether
-there is data from the daemon. The argument is the maximum amount of
-time to wait on input before returning.  It returns true if there
-inmput waiting, false on timeout (no data waiting) or error
+there is data from the daemon. The second argument is the maximum amount of
+time to wait (in microseconds) on input before returning.  It returns true if there
+input waiting, false on timeout (no data waiting) or error
 condition. This function is a convenience wrapper around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
