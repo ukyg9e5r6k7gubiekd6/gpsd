@@ -20,6 +20,12 @@ advance what the type of each attribute value will be and where the
 parsed value will be stored. The template structures may supply
 default values to be used when an expected attribute is omitted.
 
+   The preceding paragraph told one fib.  A single attribute may 
+actually have a span of multiple specifications with different
+syntactically distinguishable types (e.g. string vs. real vs. integer
+vs boolean, but not signed integer vs. unsigned integer or strong vs. map).
+The parser will match the right spec against the actual data.
+
    The dialect this parses has some limitations.  First, it cannot
 recognize the JSON "null" value.  Secondly, arrays may only have
 objects or strings - not reals or integers or floats - as elements
@@ -365,6 +371,34 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = *cp;
 	    break;
 	case post_val:
+	    /*
+	     * We know that cursor points at the first spec matching
+	     * the current attribute.  We don't know that it's *the*
+	     * correct spec; our dialect allows there to be any number
+	     * of adjacent ones with the same attrname but different
+	     * types.  Here's where we try to seek forward for a
+	     * matching type/attr pair if we're not looking at one.
+	     */
+	    for (;;) {
+		int seeking = cursor->type;
+		if (value_quoted && cursor->type == t_string)
+		    break;
+		if ((strcmp(valbuf, "true")==0 || strcmp(valbuf, "false")==0)
+			&& seeking == t_boolean)
+		    break;
+		if (isdigit(valbuf[0])) {
+		    bool decimal = strchr(valbuf, '.') != NULL;
+		    if (decimal && seeking == t_real)
+			break;
+		    if (!decimal && (seeking == t_integer || seeking == t_uinteger))
+			break;
+		}
+		if (cursor[1].attribute==NULL)	/* out of possiblities */
+		    break;
+		if (strcmp(cursor[1].attribute, attrbuf)!=0)
+		    break;
+		++cursor;
+	    }
 	    if (value_quoted
 		&& (cursor->type != t_string && cursor->type != t_character
 		    && cursor->type != t_check && cursor->map == 0)) {

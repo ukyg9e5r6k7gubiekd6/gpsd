@@ -45,6 +45,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .len = sizeof(gpsdata->tag)},
 	{"time",   t_string,  .addr.string = tbuf,
 			         .len = sizeof(tbuf)},
+	{"time",   t_real,    .addr.real = &gpsdata->fix.time,
+			         .dflt.real = NAN},
 	{"ept",    t_real,    .addr.real = &gpsdata->fix.ept,
 			         .dflt.real = NAN},
 	{"lon",    t_real,    .addr.real = &gpsdata->fix.longitude,
@@ -84,10 +86,12 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 	gpsdata->status = STATUS_FIX;
 	gpsdata->set = STATUS_SET;
 	/*@-usedef@*/
-	if (tbuf[0] == '\0')
-	    gpsdata->fix.time = NAN;
-	else
-	    gpsdata->fix.time = iso8601_to_unix(tbuf);
+	if (isnan(gpsdata->fix.time)!=0) {
+	    if (tbuf[0] == '\0')
+		gpsdata->fix.time = NAN;
+	    else
+		gpsdata->fix.time = iso8601_to_unix(tbuf);
+	}
 	/*@+usedef@*/
 	if (isnan(gpsdata->fix.time) == 0)
 	    gpsdata->set |= TIME_SET;
@@ -136,6 +140,8 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 			         .len = sizeof(gpsdata->tag)},
 	{"time",   t_string,  .addr.string = tbuf,
 			         .len = sizeof(tbuf)},
+	{"time",   t_real,    .addr.real = &gpsdata->gst.utctime,
+			         .dflt.real = NAN},
 	{"rms",    t_real,    .addr.real = &gpsdata->gst.rms_deviation,
 			         .dflt.real = NAN},
 	{"major",  t_real,    .addr.real = &gpsdata->gst.smajor_deviation,
@@ -160,10 +166,12 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 	return status;
 
     /*@-usedef@*/
-    if (tbuf[0] == '\0')
-	gpsdata->gst.utctime = NAN;
-    else
-	gpsdata->gst.utctime = iso8601_to_unix(tbuf);
+    if (isnan(gpsdata->fix.time)!=0) {
+	if (tbuf[0] == '\0')
+	    gpsdata->gst.utctime = NAN;
+	else
+	    gpsdata->gst.utctime = iso8601_to_unix(tbuf);
+    }
     /*@+usedef@*/
 
     gpsdata->set |= GST_SET;
@@ -195,6 +203,8 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	                             .len = sizeof(gpsdata->tag)},
 	{"time",       t_string,  .addr.string = tbuf,
 			             .len = sizeof(tbuf)},
+	{"time",       t_real,    .addr.real = &gpsdata->fix.time,
+	      	                     .dflt.real = NAN},
 	{"hdop",       t_real,    .addr.real    = &gpsdata->dop.hdop,
 	                             .dflt.real = NAN},
 	{"xdop",       t_real,    .addr.real    = &gpsdata->dop.xdop,
@@ -228,12 +238,14 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
     if (status != 0)
 	return status;
 
-	/*@-usedef@*/
+    /*@-usedef@*/
+    if (isnan(gpsdata->fix.time)!=0) {
 	if (tbuf[0] == '\0')
 	    gpsdata->skyview_time = NAN;
 	else
 	    gpsdata->skyview_time = iso8601_to_unix(tbuf);
-	/*@+usedef@*/
+    }
+    /*@+usedef@*/
     gpsdata->satellites_used = 0;
     gpsdata->satellites_visible = 0;
     (void)memset(gpsdata->used, '\0', sizeof(gpsdata->used));
