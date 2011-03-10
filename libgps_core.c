@@ -540,6 +540,8 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     if (*eol != '\n')
 	eol = NULL;
 
+    errno = 0;
+
     if (eol == NULL) {
 #ifndef USE_QT
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
