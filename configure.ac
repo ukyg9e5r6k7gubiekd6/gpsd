@@ -963,17 +963,21 @@ echo "------------------------------------------"
 dnl When you add a protocol here, don't forget the null-set check below
 echo "	Protocols"
 echo "	---------"
+echo "Generic NMEA            : $ac_nmea"
+echo "AIVDM/AIVDO             : $ac_aivdm"
 echo "Ashtech                 : $ac_ashtech"
 echo "Earthmate               : $ac_earthmate"
 echo "EverMore                : $ac_evermore"
+echo "Furuno GPSclock         : $ac_gpsclock"
 echo "FV-18                   : $ac_fv18"
 echo "Garmin                  : $ac_garmin"
 echo "Garmin Simple Text      : $ac_garmintxt"
 echo "Geostar                 : $ac_geostar"
 echo "iTrax                   : $ac_itrax"
-echo "NMEA                    : $ac_nmea"
+echo "MTK-3301                : $ac_mtk3301"
 echo "NTRIP                   : $ac_ntrip"
 echo "Navcom                  : $ac_navcom"
+echo "OceanServer             : $ac_oceanserver"
 echo "OnCore                  : $ac_oncore"
 echo "RTCM104V2               : $ac_rtcm104v2"
 echo "RTCM104V3               : $ac_rtcm104v3"
@@ -982,16 +986,11 @@ echo "SuperStarII             : $ac_superstar2"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "True North              : $ac_tnt"
-echo "OceanServer             : $ac_oceanserver"
 echo "UBX                     : $ac_ubx"
-echo "GPSclock                : $ac_gpsclock"
-echo "AIVDM support           : $ac_aivdm"
-echo "Timing support          : $ac_timing"
-echo "Client debugging support: $ac_clientdebug"
-echo "MTK-3301                : $ac_mtk3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
+echo "Timing support          : $ac_timing"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac
@@ -1009,6 +1008,7 @@ echo "Squelch logging/hexdump : $ac_squelch"
 echo "libusb device discovery : $ac_libusb"
 echo "	Client Features"
 echo "	---------------"
+echo "Client debugging support: $ac_clientdebug"
 echo "Old protocol in libgps  : $ac_oldstyle"
 echo "Build ncurses programs  : $ac_ncurses"
 echo "Enable Python support   : $ac_python"
@@ -1018,22 +1018,30 @@ echo "------------------------------------------"
 echo ""
 
 if test "xdummy" = "xdummy" -a \
+    x"$ac_nmea" = "xno" -a \
+    x"$ac_aivdm" = "xno" -a \
+    x"$ac_ashtech" = "xno" -a \
     x"$ac_earthmate" = "xno" -a \
     x"$ac_evermore" = "xno" -a \
+    x"$ac_gpsclock" = "xno" -a \
     x"$ac_fv18" = "xno" -a \
     x"$ac_garmin" = "xno" -a \
     x"$ac_garmintxt" = "xno" -a \
     x"$ac_geostar" = "xno" -a \
     x"$ac_itrax" = "xno" -a \
-    x"$ac_navcom" = "xno" -a \
-    x"$ac_nmea" = "xno" -a \
+    x"$ac_mtk3301" = "xno" -a \
     x"$ac_ntrip" = "xno" -a \
+    x"$ac_navcom" = "xno" -a \
+    x"$ac_ntrip" = "xno" -a \
+    x"$ac_oceanserver" = "xno" -a \
+    x"$ac_oncore" = "xno" -a \
+    x"$ac_oceanserver" = "xno" -a \
     x"$ac_oncore" = "xno" -a \
     x"$ac_rtcm104v2" = "xno" -a \
+    x"$ac_rtcm104v3" = "xno" -a \
     x"$ac_sirf" = "xno" -a \
     x"$ac_superstar2" = "xno" -a \
     x"$ac_tnt" = "xno" -a \
-    x"$ac_oceanserver" = "xno" -a \
     x"$ac_tripmate" = "xno" -a \
     x"$ac_tsip" = "xno" -a \
     x"$ac_ubx" = "xno"; then
