@@ -110,14 +110,14 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 	 */
 	now->tm_year += 1900;
 	context->century = now->tm_year - (now->tm_year % 100);
-	(void)unix_to_iso8601((double)context->start_time, scr, sizeof(scr));
+	(void)unix_to_iso8601((timestamp_t)context->start_time, scr, sizeof(scr));
 	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
 		    scr, (int)context->start_time);
     }
 }
 
 #ifdef NMEA_ENABLE
-double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
+timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
     /*
@@ -126,9 +126,9 @@ double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
      * allow us to compute the device's epoch assumption.  In practice,
      * this will be hairy and risky.
      */
-    double t;
+    timestamp_t t;
 
-    t = (double)mkgmtime(&session->driver.nmea.date) +
+    t = (timestamp_t)mkgmtime(&session->driver.nmea.date) +
 	session->driver.nmea.subseconds;
     session->context->valid &=~ GPS_TIME_VALID;
 
@@ -148,7 +148,7 @@ double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
      * counted on knowing our timezone at startup, but since we can't count on
      * knowing location...
      */
-    if (session->newdata.time + (12*60*60) < (double)session->context->start_time) {
+    if (session->newdata.time + (12*60*60) < (timestamp_t)session->context->start_time) {
 	char scr[128];
 	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n", 
@@ -159,10 +159,10 @@ double gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 }
 #endif /* NMEA_ENABLE */
 
-double gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
+timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
-    double t;
+    timestamp_t t;
 
     /*
      * This code detects and compensates for week counter rollovers that

@@ -1300,7 +1300,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 		&& isnan(oldfix->epx) == 0 && isnan(oldfix->epy) == 0
 		&& isnan(oldfix->time) == 0 && isnan(oldfix->time) == 0
 		&& fix->time > oldfix->time) {
-		double t = fix->time - oldfix->time;
+		timestamp_t t = fix->time - oldfix->time;
 		double e =
 		    EMIX(oldfix->epx, oldfix->epy) + EMIX(fix->epx, fix->epy);
 		fix->eps = e / t;
@@ -1310,7 +1310,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 	if ((fix->mode >= MODE_3D)
 	    && isnan(fix->epc) != 0 && fix->time > oldfix->time) {
 	    if (oldfix->mode > MODE_3D && fix->mode > MODE_3D) {
-		double t = fix->time - oldfix->time;
+		timestamp_t t = fix->time - oldfix->time;
 		double e = oldfix->epv + fix->epv;
 		/* if vertical uncertainties are zero this will be too */
 		fix->epc = e / t;

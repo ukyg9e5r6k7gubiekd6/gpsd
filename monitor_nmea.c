@@ -23,7 +23,7 @@
 extern const struct gps_type_t nmea;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
-static double last_tick, tick_interval;
+static timestamp_t last_tick, tick_interval;
 
 /*****************************************************************************
  *
@@ -176,7 +176,7 @@ static void nmea_update(void)
 
     if (session.packet.outbuffer[0] == (unsigned char)'$') {
 	int ymax, xmax;
-	double now;
+	timestamp_t now;
 	getmaxyx(nmeawin, ymax, xmax);
 	if (strstr(sentences, fields[0]) == NULL) {
 	    char *s_end = sentences + strlen(sentences);

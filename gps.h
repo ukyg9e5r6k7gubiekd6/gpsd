@@ -78,10 +78,10 @@ extern "C" {
  *
  * Error estimates are at 95% confidence.
  */
-typedef double timestamp_t;	/* someday, this will become integral */
+typedef double timestamp_t;	/* Unix time in seconds with fractional part */
 
 struct gps_fix_t {
-    timestamp_t time;	/* Time of update, seconds since Unix epoch */
+    timestamp_t time;	/* Time of update */
     int    mode;	/* Mode of fix */
 #define MODE_NOT_SEEN	0	/* mode update not seen yet */
 #define MODE_NO_FIX	1	/* none */
