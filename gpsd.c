@@ -1434,7 +1434,8 @@ static void consume_packets(struct gps_device_t *device)
 			netgnss_report(&context, device, dgnss);
 	    }
 #ifdef DBUS_ENABLE
-	    send_dbus_fix(device);
+	    if (device->gpsdata.fix.mode > MODE_NO_FIX)
+		send_dbus_fix(device);
 #endif /* DBUS_ENABLE */
 	}
 
