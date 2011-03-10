@@ -639,7 +639,7 @@ static bool add_device(const char *device_name)
 			ret = true;
 		}
 		notify_watchers(devp,
-				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%ld}\r\n",
+				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
 				devp->gpsdata.dev.path, timestamp());
 		break;
 	    }

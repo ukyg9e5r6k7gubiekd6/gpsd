@@ -195,7 +195,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
     session->observed = 0;
-    session->rtcmtime = 0;
+    session->rtcmtime = (timestamp_t)0;
     session->sourcetype = source_unknown;	/* gpsd_open() sets this */
     session->servicetype = service_unknown;	/* gpsd_open() sets this */
     /*@ -temptrans @*/

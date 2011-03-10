@@ -374,7 +374,7 @@ struct gps_device_t {
     struct gps_context_t	*context;
     sourcetype_t sourcetype;
     servicetype_t servicetype;
-    double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
+    timestamp_t rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif
@@ -426,11 +426,11 @@ struct gps_device_t {
 	     * The reason these timestamps are separate from the
 	     * general sentence timestamps is that we can
 	     * use the minutes and seconds part of a sentence
-	     * with an incomplete timestasmp (like GGA) for
+	     * with an incomplete timestamp (like GGA) for
 	     * end-cycle recognition, even if we don't have a previous
 	     * RMC or ZDA that lets us get full time from it.
 	     */
-	    double this_frac_time, last_frac_time;
+	    timestamp_t this_frac_time, last_frac_time;
 	    bool latch_frac_time;
 	    unsigned int lasttag;
 	    unsigned int cycle_enders;
@@ -565,10 +565,10 @@ struct gps_device_t {
 #ifdef TIMING_ENABLE
     /* profiling data for last sentence */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
-    double d_xmit_time;		/* beginning of sentence transmission */
-    double d_recv_time;		/* daemon receipt time (-> E1+T1) */
-    double d_decode_time;	/* daemon end-of-decode time (-> D1) */
-    double emit_time;		/* emission time (-> E2) */
+    timestamp_t d_xmit_time;		/* beginning of sentence transmission */
+    timestamp_t d_recv_time;		/* daemon receipt time (-> E1+T1) */
+    timestamp_t d_decode_time;	/* daemon end-of-decode time (-> D1) */
+    timestamp_t emit_time;		/* emission time (-> E2) */
 #endif /* TIMING_ENABLE */
 
     /* 
@@ -623,8 +623,6 @@ extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern ssize_t nmea_write(struct gps_device_t *, char *, size_t);
 extern ssize_t nmea_send(struct gps_device_t *, const char *, ... );
 extern void nmea_add_checksum(char *);
-
-extern int gpsd_check_leapsecond(const int, const double);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
