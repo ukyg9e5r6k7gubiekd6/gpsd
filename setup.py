@@ -44,7 +44,6 @@ def make(f_name):
     return make_out
 
 
-version = os.getenv('version', None) or re.findall(r'^[0-9].*', make('version'), re.M)[0] 
 
 if not 'clean' in sys.argv:
     # Ensure we have a properly configured environment if not being called
@@ -65,6 +64,9 @@ if not 'clean' in sys.argv:
         if not os.path.exists(os.path.join(abs_builddir, f_name)):
             make(f_name)
 
+    version = os.getenv('version', None) or re.findall(r'^[0-9].*', make('version'), re.M)[0] 
+else:
+    version=''
 
 manpages = []
 try:
