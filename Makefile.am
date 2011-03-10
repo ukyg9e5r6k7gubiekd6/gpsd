@@ -288,7 +288,7 @@ noinst_SCRIPTS += stamp-python setup.py
 
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
-stamp-python: gpspacket.c gpsclient.c libgps.la gpsd.h setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST)
+stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $(PYTHONSCRIPTS_DIST) $(BUILT_SOURCES)
 # Build Python modules and scripts using distutils via setup.py.
 # We define build-lib and build-scripts as distutils might have been
 # configured to use different directories, but we want to use the
@@ -302,12 +302,12 @@ stamp-python: gpspacket.c gpsclient.c libgps.la gpsd.h setup.py $(PYTHONMODULES_
 	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 		$(PYTHON) setup.py build \
-			--build-lib '$(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)' \
-			--build-scripts '$(abs_builddir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
+			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
+			--build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
 			--mangenerator '$(XMLPROC)') && \
 	(cd '$(srcdir)/gps' && \
 	    rm -f *.so && \
-	    ln -s $(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
+	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
 	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python stamp-python.tmp
 endif
@@ -373,10 +373,10 @@ if HAVE_PYTHON
 	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 	        $(PYTHON) setup.py clean \
-	                --build-lib '$(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)' \
-	                --build-scripts '$(abs_builddir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
+	                --build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
+	                --build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
 	                --mangenerator '$(XMLPROC)')
-	rm -rf $(abs_builddir)/build
+	rm -rf $(srcdir)/build
 	rm -f gps/*.so gps/*.pyc stamp-python*.tmp
 	for i in $(PYTHONSCRIPTS_DIST); do rm -f $${i}c; done
 endif
@@ -394,18 +394,11 @@ if HAVE_PYTHON
 # Make sure we do not use --root as option to setup.py install
 # when DESTDIR is not defined as distutils would use the current
 # working directory as root directory and not install to ${prefix}.
-	if test -z "$(DESTDIR)"; then extra_opts="--root=$(DESTDIR)"; fi ;\
-	env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) \
-		$(PYTHON) setup.py install_lib \
-			--prefix=${prefix} \
-			--build-dir='$(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)' \
-			$$extra_opts ;\
-	env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) \
-		$(PYTHON) setup.py install_scripts \
-			--prefix=${prefix} \
-			--build-dir='$(abs_builddir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
-			$$extra_opts
-
+	if test -z "$(DESTDIR)"; then \
+		env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} ;\
+	else \
+		env version='$(PACKAGE_VERSION)' MAKE=$(MAKE) $(PYTHON) setup.py install --prefix=${prefix} --root=$(DESTDIR) ;\
+	fi
 endif
 if LIB_Q_GPSMM_ENABLE
 	$(MAKE) -C libQgpsmm install INSTALL_ROOT=$(DESTDIR)
@@ -839,7 +832,7 @@ bits-regress: test_bits
 
 python-indentation-regress:
 	set -e; for pyfile in $(PYTHONSCRIPTS_DIST) $(PYTHONMODULES_DIST); do \
-		$(PYTHON) -tt -m py_compile $(srcdir)/$$pyfile ;\
+		$(PYTHON) -tt -m py_compile $$pyfile ;\
 	done
 
 # Do all normal regression tests.
