@@ -414,7 +414,7 @@ static int filesock(char *filename)
 struct subscriber_t
 {
     int fd;			/* client file descriptor. -1 if unused */
-    double active;		/* when subscriber last polled for data */
+    timestamp_t active;		/* when subscriber last polled for data */
     struct policy_t policy;	/* configurable bits */
 };
 
@@ -508,7 +508,7 @@ static void detach_client(struct subscriber_t *sub)
 		c_ip, sub_index(sub), sub->fd);
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
-    sub->active = 0;
+    sub->active = (timestamp_t)0;
     sub->policy.watcher = false;
     sub->policy.json = false;
     sub->policy.nmea = false;
@@ -1358,7 +1358,7 @@ static void consume_packets(struct gps_device_t *device)
 
 	/* we got actual data, head off the reawake special case */
 	device->zerokill = false;
-	device->reawake = 0;
+	device->reawake = (timestamp_t)0;
 
 	/* must have a full packet to continue */
 	if ((changed & PACKET_IS) == 0)
@@ -1408,7 +1408,7 @@ static void consume_packets(struct gps_device_t *device)
 		memcpy(context.rtcmbuf,
 		       device->packet.outbuffer,
 		       context.rtcmbytes);
-		context.rtcmtime = time(NULL);
+		context.rtcmtime = timestamp();
 	    }
 	}
 
@@ -1991,7 +1991,7 @@ int main(int argc, char *argv[])
 		    gpsd_report(LOG_DATA,
 				"%s reawakened after zero-length read\n",
 				device->gpsdata.dev.path);
-		    device->reawake = 0;
+		    device->reawake = (timestamp_t)0;
 		    device->zerokill = true;
 		    FD_SET(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, true);

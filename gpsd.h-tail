@@ -187,7 +187,7 @@ struct gps_context_t {
     int fixcnt;				/* count of good fixes seen */
     size_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
-    time_t rtcmtime;			/* timestamp of last RTCM104 report */ 
+    timestamp_t rtcmtime;		/* timestamp of last RTCM104 report */ 
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
     int leap_seconds;			/* Unix seconds to UTC */
@@ -384,13 +384,13 @@ struct gps_device_t {
     int getcount;
     int subframe_count;
     char subtype[64];			/* firmware version or subtype ID */
-    double opentime;
-    double releasetime;
+    timestamp_t opentime;
+    timestamp_t releasetime;
     bool zerokill;
-    double reawake;
+    timestamp_t reawake;
 #ifdef NTPSHM_ENABLE
     int shmindex;
-    double last_fixtime;		/* so updates happen once */
+    timestamp_t last_fixtime;		/* so updates happen once */
 # ifdef PPS_ENABLE
     int shmTimeP;
 # endif /* PPS_ENABLE */

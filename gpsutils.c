@@ -73,11 +73,11 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 	to->eps = from->eps;
 }
 
-double timestamp(void)
+timestamp_t timestamp(void)
 {
     struct timeval tv;
     (void)gettimeofday(&tv, NULL);
-    /*@i1@*/ return (tv.tv_sec + tv.tv_usec * 1e-6);
+    return (timestamp_t)(tv.tv_sec + tv.tv_usec * 1e-6);
 }
 
 time_t mkgmtime(register struct tm * t)
@@ -108,7 +108,7 @@ time_t mkgmtime(register struct tm * t)
     return (result);
 }
 
-double iso8601_to_unix( /*@in@*/ char *isotime)
+timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
 #ifndef USE_QT
@@ -121,7 +121,7 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-    return (double)mkgmtime(&tm) + usec;
+    return (timestamp_t)mkgmtime(&tm) + usec;
 #else
     double usec = 0;
 
@@ -130,12 +130,12 @@ double iso8601_to_unix( /*@in@*/ char *isotime)
     QStringList sl = t.split(".");
     if (sl.size() > 1)
 	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
-    return d.toTime_t() + usec;
+    return (timestamp_t)(d.toTime_t() + usec);
 #endif
 }
 
 /* *INDENT-OFF* */
-/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/
+/*@observer@*/char *unix_to_iso8601(timestamp_t fixtime, /*@ out @*/
 				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.03Z */

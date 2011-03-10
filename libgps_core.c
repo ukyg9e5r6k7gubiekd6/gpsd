@@ -412,7 +412,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			break;
 		    case 'X':
 			if (sp[2] == '?')
-			    gpsdata->online = -1;
+			    gpsdata->online = (timestamp_t)-1;
 			else {
 			    (void)sscanf(sp, "X=%lf", &gpsdata->online);
 			    gpsdata->set |= ONLINE_SET;

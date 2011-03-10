@@ -122,7 +122,7 @@ void gpsd_tty_init(struct gps_device_t *session)
 # endif	/* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     session->zerokill = false;
-    session->reawake = 0;
+    session->reawake = (timestamp_t)0;
 }
 
 #if defined(__CYGWIN__)

@@ -713,7 +713,7 @@ void gpsd_clear(struct gps_device_t *session)
     session->gpsdata.fix.track = NAN;
     session->gpsdata.separation = NAN;
     session->mag_var = NAN;
-    session->releasetime = 0;
+    session->releasetime = (timestamp_t)0;
     session->getcount = 0;
 
     /* clear the private data union */
@@ -1407,7 +1407,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "GPS on %s returned error %zd (%lf sec since data)\n",
 		    session->gpsdata.dev.path, newlen,
 		    timestamp() - session->gpsdata.online);
-	session->gpsdata.online = 0;
+	session->gpsdata.online = (timestamp_t)0;
 	return ERROR_IS;
     } else if (newlen == 0) {		/* zero length read, possible EOF */
 	/*
@@ -1418,7 +1418,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    gpsd_report(LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
 			session->gpsdata.dev.path,
 			timestamp() - session->gpsdata.online);
-	    session->gpsdata.online = 0;
+	    session->gpsdata.online = (timestamp_t)0;
 	}
 	return NODATA_IS;
     } else if (session->packet.outbuflen == 0) {	/* got new data, but no packet */

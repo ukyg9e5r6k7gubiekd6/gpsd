@@ -78,8 +78,10 @@ extern "C" {
  *
  * Error estimates are at 95% confidence.
  */
+typedef double timestamp_t;	/* someday, this will become integral */
+
 struct gps_fix_t {
-    double time;	/* Time of update, seconds since Unix epoch */
+    timestamp_t time;	/* Time of update, seconds since Unix epoch */
     int    mode;	/* Mode of fix */
 #define MODE_NOT_SEEN	0	/* mode update not seen yet */
 #define MODE_NO_FIX	1	/* none */
@@ -1343,7 +1345,7 @@ struct gps_data_t {
 #define POLICY_SET	(1u<<29)
 #define LOGMESSAGE_SET	(1u<<30)
 #define ERROR_SET	(1u<<31)
-    double online;		/* NZ if GPS is on line, 0 if not.
+    timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
 				 * fail to show up within the GPS's normal
@@ -1377,7 +1379,7 @@ struct gps_data_t {
     double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites_visible > 0 */
-    double skyview_time;	/* skyview timestamp */
+    timestamp_t skyview_time;	/* skyview timestamp */
     int satellites_visible;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
@@ -1408,7 +1410,7 @@ struct gps_data_t {
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	struct {
-	    double time;
+	    timestamp_t time;
 	    int ndevices;
 	    struct devconfig_t list[MAXUSERDEVS];
 	} devices;
@@ -1441,9 +1443,9 @@ extern void gps_enable_debug(int, FILE *);
 extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
 
 extern time_t mkgmtime(register struct tm *);
-extern double timestamp(void);
-extern double iso8601_to_unix(char *);
-extern /*@observer@*/char *unix_to_iso8601(double t, /*@ out @*/char[], size_t len);
+extern timestamp_t timestamp(void);
+extern timestamp_t iso8601_to_unix(char *);
+extern /*@observer@*/char *unix_to_iso8601(timestamp_t t, /*@ out @*/char[], size_t len);
 extern double earth_distance(double, double, double, double);
 extern double earth_distance_and_bearings(double, double, double, double, 
 					  /*@null@*//*@out@*/double *, 
