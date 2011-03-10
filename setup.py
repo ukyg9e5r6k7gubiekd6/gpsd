@@ -5,10 +5,7 @@
 # Creates build/lib.linux-${arch}-${pyvers}/gpspacket.so,
 # where ${arch} is an architecture and ${pyvers} is a Python version.
 
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    from distutils.core import setup, Extension
+from distutils.core import setup, Extension
 
 import os
 import re
