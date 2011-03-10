@@ -30,11 +30,11 @@
  *     (use whatever -O level you like)
  */
 
-int main( void );
-int test_single( void );
-int test_double( void );
+int main(void);
+int test_single(void);
+int test_double(void);
 
-int main() {
+int main(void) {
 	int i, j;
 
 	if ((i = test_single()))
@@ -51,7 +51,7 @@ int main() {
 	return i;
 }
 
-int test_single() {
+int test_single(void) {
 	static float f;
 	static int i;
 	static int e = 0;
@@ -155,7 +155,7 @@ int test_single() {
 }
 
 
-int test_double() {
+int test_double(void) {
 	static double f;
 	static int i;
 	static int e = 0;

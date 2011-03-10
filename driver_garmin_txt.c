@@ -314,7 +314,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	session->driver.garmintxt.date.tm_sec = (int)result;
 	session->driver.garmintxt.subseconds = 0;
 	session->newdata.time =
-	    (double)mkgmtime(&session->driver.garmintxt.date) +
+	    (timestamp_t)mkgmtime(&session->driver.garmintxt.date) +
 	    session->driver.garmintxt.subseconds;
 	mask |= TIME_IS;
     } while (0);

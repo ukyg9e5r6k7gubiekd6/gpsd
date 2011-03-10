@@ -245,7 +245,7 @@ typedef struct
 } Packet_t;
 
 // useful funcs to read/write ints
-//  floats and doubles are Intel order only...
+//  floats and doubles are Intel (little-endian) order only...
 static inline void set_int16(uint8_t * buf, uint32_t value)
 {
     buf[0] = (uint8_t) (0x0FF & value);
@@ -374,7 +374,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
 	session->context->gps_tow = pvt->gps_tow;
-	session->newdata.time = (double)time_l;
+	session->newdata.time = (timestamp_t)time_l;
 	gpsd_report(LOG_PROG, "Garmin: time_l: %ld\n", (long int)time_l);
 
 	session->newdata.latitude = radtodeg(pvt->lat);
