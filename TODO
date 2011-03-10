@@ -107,17 +107,20 @@ packet-cracking needed to get the data off the chips.
 
 Several commodity chipsets (ANTARIS, iTrax3, SiRF and Trimble) readily
 output enough data to make this a chore, rather than a hard problem.
+And pseudoranges, if available, are now part of the SKY report.
 
-It has been suggested one way to do this is to have a generic structure
-in memory and corresponding output message with clock, doppler carrier
-phase and pseudoranges. This message is then reformatted by a client
-program. There are numerous formats for this information, and it would
-be easier to adapt to new formats if the formatting and use was handled
-by something other than the gpsd daemon. Currently the RT-IGS format is
-looking like the favorite for implementation; it's a fairly lightweight
-protocol, flexible enough to handle all the quantities required, and it
-is actually in use in production reference networks. RT-IGS is also a
-packet-oriented format, rather than a file-oriented format like RINEX.
+Probably the best way to do this would be to add support for unscaled
+output of peudoranges in SKY and add clock and doppler carrier
+phase. This message could then be interpreted by a client program.
+
+There are numerous formats for this information, and it would be
+easier to adapt to new formats if the formatting and use was handled
+by something other than the gpsd daemon. Currently the RT-IGS format
+is looking like the favorite for implementation; it's a fairly
+lightweight protocol, flexible enough to handle all the quantities
+required, and it is actually in use in production reference
+networks. RT-IGS is also a packet-oriented format, rather than a
+file-oriented format like RINEX.
 
 *** RTCM3 support.
 
@@ -131,12 +134,18 @@ boundaries right.
 
 ** Future features (?)
 
+*** NOFLOAT build
+
+We want to be able to build a minimalist version that doesn't require
+floating-point arithmetic, for deployment on low-power ARM devices 
+without FPU.
+
 *** Support for more survey / professional / up-scale receivers.
 
 Devices such as the Javad JNSCore, Hemisphere Crescent, Septentrio
 AsteRx and PolaRx, NovAtel Superstar2 and OEMV, Thales (Magellan
 Professional) AC12 and DG14 would all be welcome. Of course, these
-are not $50 usb mice...
+are not $50 USB mice...
 
 *** Audio cues in the client when the fix status changes
 
