@@ -166,8 +166,6 @@ libgps_c_sources = \
 	shared_json.c \
 	strl.c
 
-$(srcdir)/gpsutils.c: gpsd.h
-	touch $@
 
 if NO_DAEMON3
 libgps_c_sources += daemon.c
@@ -218,6 +216,9 @@ libgpsd_h_sources = \
 libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
 BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c timebase.h
+
+$(srcdir)/gpsutils.c $(srcdir)/gpsd.c: $(BUILT_SOURCES)
+	touch $@
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
