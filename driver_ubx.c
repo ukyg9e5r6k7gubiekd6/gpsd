@@ -494,21 +494,28 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
+    gps_mask_t st = 0;
 
     if (session->packet.type == UBX_PACKET) {
 	st = ubx_parse(session, session->packet.outbuffer,
 		       session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
 	session->gpsdata.dev.driver_mode = MODE_NMEA;
-	return st;
 #endif /* NMEA_ENABLE */
-    } else
-	return 0;
+    }
+#ifdef NTPSHM_ENABLE
+    if (session->context->enable_ntpshm 
+	&& 0 != (st & TIME_SET)
+	&& (session->gpsdata.fix.time != session->last_fixtime)) {
+	    /* FIXME!! this needs an empirical fudge */
+	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);
+	    session->last_fixtime = session->gpsdata.fix.time;
+    }
+#endif /* NTPSHM_ENABLE */
+    return st;
 }
 
 bool ubx_write(struct gps_device_t * session,
