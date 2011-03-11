@@ -38,17 +38,7 @@ if HAVE_BLUEZ
 INCLUDES += $(BLUEZ_CFLAGS)
 endif
 
-RTCM104PAGES_DIST = gpsdecode.1
-if HAVE_RTCM104V2
-if HAVE_RTCM104V3
-if HAVE_AIVDM
-RTCM104PROGS = gpsdecode
-RTCM104PAGES = $(RTCM104PAGES_DIST)
-endif
-endif
-endif
-
-bin_PROGRAMS = $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpxlogger lcdgps
+bin_PROGRAMS = $(CURSESPROGS) gpsdecode gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 
 # to-do: Add programs to TESTS if not already used.
@@ -475,17 +465,16 @@ MANPAGES_BASE = \
 	gpsmon.1 \
 	gpsctl.1 \
 	gpspipe.1 \
+	gpsdecode.1 \
 	srec.5
 
 if HAVE_XSLT_PROCESSOR
 MANPAGES_DIST = \
 	$(MANPAGES_BASE) \
-	$(RTCM104PAGES_DIST) \
 	$(PYTHONPAGES_DIST)
 
 man_MANS = \
 	$(MANPAGES_BASE) \
-	$(RTCM104PAGES) \
 	$(PYTHONPAGES)
 
 #
