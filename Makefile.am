@@ -68,38 +68,38 @@ endif
 # Build cgps
 #
 cgps_SOURCES = cgps.c
-cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
+cgps_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la $(LIBM) $(LIBPTHREAD)
 
 #
 # Build gpxlogger
 #
 gpxlogger_SOURCES = gpxlogger.c
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la -lm
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la $(LIBM)
 
 #
 # Build gpsd
 #
 gpsd_c_sources = gpsd.c gpsd_dbus.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB_LIBS)
+gpsd_LDADD = $(DBUS_LIBS) libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD) $(LIBUSB_LIBS)
 
 #
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD) $(LIBUSB_LIBS)
+gpsctl_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD) $(LIBUSB_LIBS)
 
 #
 # Build gpspipe
 #
 gpspipe_SOURCES = gpspipe.c
-gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
+gpspipe_LDADD = $(DBUS_LIBS) libgps.la $(LIBM)
 
 #
 # Build lcdgps
 #
 lcdgps_SOURCES = lcdgps.c
-lcdgps_LDADD = $(LIBM) libgps.la -lm
+lcdgps_LDADD = libgps.la $(LIBM)
 
 #
 # Build gpsmon
@@ -107,14 +107,14 @@ lcdgps_LDADD = $(LIBM) libgps.la -lm
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS) $(BLUEZ_LIBS)
+gpsmon_LDADD = $(NCURSES_LIBS) libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD)  $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
 
 #
 # Build gpsdecode
 #
 gpsdecode_SOURCES = gpsdecode.c
-gpsdecode_LDADD = $(LIBM) libgpsd.la libgps.la -lm $(LIBPTHREAD)  $(LIBUSB_LIBS)
+gpsdecode_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD)  $(LIBUSB_LIBS)
 
 #
 # Build shared libraries
@@ -399,20 +399,20 @@ endif
 # Build test_float
 #
 test_float_SOURCES = test_float.c
-test_float_LDADD = $(LIBC) -lm
+test_float_LDADD = $(LIBC) $(LIBM)
 
 #
 # Build test_trig
 #
 test_trig_SOURCES = test_trig.c
-test_trig_LDADD = $(LIBC) -lm
+test_trig_LDADD = $(LIBC) $(LIBM)
 
 if LIBGPSMM_ENABLE
 #
 # Build test_gpsmm
 #
 test_gpsmm_SOURCES = test_gpsmm.cpp
-test_gpsmm_LDADD = $(LIBC) libgps.la -lm  $(LIBUSB_LIBS)
+test_gpsmm_LDADD = $(LIBC) libgps.la $(LIBM)  $(LIBUSB_LIBS)
 endif
 
 if LIB_Q_GPSMM_ENABLE
@@ -435,24 +435,24 @@ test_bits_LDADD = $(LIBC) bits.o libgps.la $(LIBUSB_LIBS)
 # Build packets tester
 #
 test_packet_SOURCES = test_packet.c
-test_packet_LDADD = $(LIBC) libgpsd.la libgps.la -lm  $(LIBUSB_LIBS)
+test_packet_LDADD = $(LIBC) libgpsd.la libgps.la $(LIBM)  $(LIBUSB_LIBS)
 
 #
 # Build geoid model tester
 #
 test_geoid_SOURCES = test_geoid.c
-test_geoid_LDADD = $(LIBC) libgps.la -lm
+test_geoid_LDADD = $(LIBC) libgps.la $(LIBM)
 
 #
 # Build time functions tester
 #
 test_mkgmtime_SOURCES = test_mkgmtime.c
-test_mkgmtime_LDADD = $(LIBC) libgps.la -lm
+test_mkgmtime_LDADD = $(LIBC) libgps.la $(LIBM)
 
 #
 # Build JSON parse tester
 test_json_SOURCES = test_json.c
-test_json_LDADD = $(LIBC) libgps.la -lm
+test_json_LDADD = $(LIBC) libgps.la $(LIBM)
 
 MANPAGES_BASE = \
 	gpsd.8 \
@@ -610,7 +610,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 # These are not distributed
 libgps: libgps_core.c gps.h .libs/libgps.a
-	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
+	$(CC) $(CFLAGS) -o libgps $(LIBM) -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
 
 
 # Report splint warnings
