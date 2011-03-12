@@ -571,6 +571,7 @@ EXTRA_DIST = \
 	driver_proto.c \
 	monitor_proto.c \
 	setup.py \
+	leapsecond.py \
 	packet_states.h \
 	libgps.pc.in \
 	libgpsd.pc.in \
