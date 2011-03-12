@@ -129,6 +129,7 @@ static bool compass_flag = false;
 #define CGPS_QUIT	0	/* voluntary yterminastion */
 #define GPS_GONE	-1	/* GPS device went away */
 #define GPS_ERROR	-2	/* low-level failure in GPS read */
+#define GPS_TIMEOUT	-3	/* low-level failure in GPS waiting */
 
 /* Convert true heading to magnetic.  Taken from the Aviation
    Formulary v1.43.  Valid to within two degrees within the
@@ -224,6 +225,9 @@ static void die(int sig)
 	break;
     case GPS_ERROR:
 	(void)fprintf(stderr, "cgps: GPS read returned error\n");
+	break;
+    case GPS_TIMEOUT:
+	(void)fprintf(stderr, "cgps: GPS timeout\n");
 	break;
     default:
 	(void)fprintf(stderr, "cgps: caught signal %d\n", sig);
@@ -857,8 +861,7 @@ int main(int argc, char *argv[])
     /* heart of the client */
     for (;;) {
 	if (!gps_waiting(&gpsdata, 5000000)) {
-	    fprintf(stderr, "cgps: error while waiting\n");
-	    exit(2);
+	    die(GPS_TIMEOUT);
 	} else {
 	    errno = 0;
 	    if (gps_read(&gpsdata) == -1) {
