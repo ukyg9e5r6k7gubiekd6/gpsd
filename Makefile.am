@@ -701,10 +701,6 @@ cflags:
 #
 # Note that the *-makeregress targets re-create the *.log.chk source
 # files from the *.log source files.
-#
-# These require gcc4; use of the math coprocessor's on-board trig functions
-# apparently increases the accuracy of computation in a way that affects
-# the low-order digits of the track field in the O response.
 
 # Our regression tests are make targets, while automake expects
 # programs.  Thus, our approach is to construct the test
