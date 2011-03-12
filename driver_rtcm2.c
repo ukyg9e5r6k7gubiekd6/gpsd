@@ -68,7 +68,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  * Very few of these are left in 2008.)
  *
  * The RTCM 2.1 standard is less explicit than it should be about signed-integer
- * representations.  Two's complement is specified forsome but not all.
+ * representations.  Two's complement is specified for some but not all.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
