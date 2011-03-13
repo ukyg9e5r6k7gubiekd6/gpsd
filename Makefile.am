@@ -52,8 +52,8 @@ check_PROGRAMS += test_qgpsmm
 endif
 
 check_programs: $(check_PROGRAMS)
-	# nothing to do here - this is just a target which allows
-	# to ask make to build our check_programs without running them.
+# nothing to do here - this is just a target which allows
+# to ask make to build our check_programs without running them.
 
 # List of Python scripts and modules, which are handled by setup.py.
 # Required to ensure that the extensions/modules/scripts are rebuilt via
