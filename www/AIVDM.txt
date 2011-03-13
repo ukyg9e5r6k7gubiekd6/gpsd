@@ -1742,7 +1742,6 @@ length: 360 bits.
 |290-300 |  11 |Air Temperature       |airtemp   |Dry bulb temperature, 0.1degC
 |        |     |                      |          |-60.0 to +60.0
 |        |     |                      |          |-1024 = N/A (default)
-|        |     |                      |          |-1024 = N/A (default)
 |301-310 |  10 |Water Temperature     |watertemp |-10.0 to 50.0 C, 0.1 deg
 |        |     |                      |          |501 = N/A (default)
 |311-316 |  6  |Wave period           |waveperiod|Seconds, 0-60, units 1s
@@ -1785,50 +1784,100 @@ The standard (<<IMO289>>) does not list the WMO FM13 codes.
 .Weather observation report from ship: WMO variant
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len  |Description           |Member    |Units
-|0-5     |   6 |Message Type          |type      |Unsigned integer: 8
-|6-7     |   2 |Repeat Indicator      |repeat    |As in Common Navigation Block
-|8-37    |  30 |Source MMSI           |mmsi      |Unsigned integer: 9 digits
-|38-39   |   2 |Spare                 |          |Not used
-|40-55   |  16 |DAC/FID               |          |DAC = 001 FID = 29
-|56-56   |   1 |Variant               |wmo       |Always 1 in this variant
-
-|57-176  | 120 |Location              |location  |20 6-bit characters
-|177-201 |  16 |Longitude             |lon       |Unsigned: minutes * 0.01
-|        |     |                      |          |E positive, W negative
-|        |     |                      |          |Lon = (value / 100) – 180
-|        |     |                      |          |65536 = N/A (default)
-|202-225 |  15 |Latitude              |lat       |Unsigned: unit minutes * 0.01
-|        |     |                      |          |N positive, S negative
-|        |     |                      |          |Lat = (value / 100) – 90
-|        |     |                      |          |32767 = N/A (default)
-|226-230 |   4 |UTC Month             |month     |1-12, 0=N/A (default)
-|226-230 |   5 |UTC Day               |day       |1-31, 0=N/A (default)
-|231-235 |   5 |UTC hour              |hour      |0-23, 24=N/A (default)
-|236-241 |   3 |UTC minute            |minute    |0-50, 7=N/A (default)
-|        |     |                      |          |Minute = (value * 10)
-|116-127 |   7 |Course Over Ground    |course    |0-359, unit = 1 degree
-|        |     |                      |          |average over last 10 minutes.
-|116-127 |   5 |Speed Over Ground     |speed     |0-14.5m/s
-|        |     |                      |          |SOG = (value * 0.5) for 0-29
-|        |     |                      |          |30 = 15 m/s and more
-|        |     |                      |          |average over last 10 minutes.
-|        |     |                      |          |31 = N/A (default)
-|333-333 |   7 |Heading of the ship   |heading   |5-360, unit of 5 degrees
-|        |     |                      |          |HDT = (value * 5) for 1-72
-|        |     |                      |          |average over last 10 minutes.
-|        |     |                      |          |127 = N/A (default)
-|333-333 |  11 |Pressure at sea level |pressure  |90-1100 hPa
-|        |     |                      |          |P = (value/10)+900 for 0-2000
-|333-333 |  10 |Pressure Change       |pchange   |-50-+50hPa
-|        |     |                      |          |Tend = (value/10)-50 for 0-100
-|        |     |                      |          |Averaged over last 3 hours
-|        |     |                      |          |1023 = N/A (default)
+|Field   |Len  |Description            |Member    |Units
+|0-5     |   6 |Message Type           |type      |Unsigned integer: 8
+|6-7     |   2 |Repeat Indicator       |repeat    |As in Common Navigation Block
+|8-37    |  30 |Source MMSI            |mmsi      |Unsigned integer: 9 digits
+|38-39   |   2 |Spare                  |          |Not used
+|40-55   |  16 |DAC/FID                |          |DAC = 001 FID = 21
+|56-56   |   1 |Variant                |wmo       |Always 1 in this variant
+|57-72   |  16 |Longitude              |lon       |Unsigned: minutes * 0.01
+|        |     |                       |          |E positive, W negative
+|        |     |                       |          |Lon = (value / 100) – 180
+|        |     |                       |          |65536 = N/A (default)
+|73-87   |  15 |Latitude               |lat       |Unsigned: unit minutes * 0.01
+|        |     |                       |          |N positive, S negative
+|        |     |                       |          |Lat = (value / 100) – 90
+|        |     |                       |          |32767 = N/A (default)
+|88-91   |   4 |UTC Month              |month     |1-12, 0=N/A (default)
+|92-96   |   5 |UTC Day                |day       |1-31, 0=N/A (default)
+|97-101  |   5 |UTC hour               |hour      |0-23, 24=N/A (default)
+|102-104 |   3 |UTC minute             |minute    |0-50, 7=N/A (default)
+|        |     |                       |          |Minute = (value * 10)
+|105-111 |   7 |Course Over Ground     |course    |0-359, unit = 1 degree
+|        |     |                       |          |average over last 10 minutes.
+|112-116 |   5 |Speed Over Ground      |speed     |0-14.5m/s
+|        |     |                       |          |SOG = (value * 0.5) for 0-29
+|        |     |                       |          |30 = 15 m/s and more
+|        |     |                       |          |average over last 10 minutes.
+|        |     |                       |          |31 = N/A (default)
+|117-123 |   7 |Heading of the ship    |heading   |5-360, unit of 5 degrees
+|        |     |                       |          |HDT = (value * 5) for 1-72
+|        |     |                       |          |average over last 10 minutes.
+|        |     |                       |          |127 = N/A (default)
+|124-134 |  11 |Pressure at sea level  |pressure  |90-1100 hPa
+|        |     |                       |          |P = (value/10)+900 for 0-2000
+|135-144 |  10 |Pressure Change        |pchange   |-50-+50hPa
+|        |     |                       |          |Chg = (value/10)-50 for 0-100
+|        |     |                       |          |Averaged over last 3 hours
+|        |     |                       |          |1023 = N/A (default)
+|145-148 |   4 |Pressure Tendency      |ptend     |WMO BUFR table 010063
+|        |     |                       |          |Averaged over last 3 hours
+|        |     |                       |          |0-8, 15 = N/A
+|149-155 |   7 |True Wind Direction    |twinddir  |005-360 deg
+|        |     |                       |          |average over last 10 minutes
+|        |     |                       |          |dir = (value*5), value 1-72
+|        |     |                       |          |0 = calm
+|        |     |                       |          |127 = N/A (default)
+|156-163 |   8 |True Wind Speed        |twindspeed|0-127 m/s
+|        |     |                       |          |average over last 10 minutes
+|        |     |                       |          |speed = value * 0.5
+|        |     |                       |          |255 = N/A (default)
+|164-170 |   7 |Relative Wind Direction|rwinddir  |005-360 deg
+|        |     |                       |          |average over last 10 minutes
+|        |     |                       |          |dir = (value*5) for 1-72
+|        |     |                       |          |0 = calm
+|        |     |                       |          |127 = N/A (default)
+|171-178 |   8 |Relative Wind Speed    |rwindspeed|0-127 m/s
+|        |     |                       |          |average over last 10 minutes
+|        |     |                       |          |speed = value * 0.5 for 0-254
+|        |     |                       |          |255 = N/A (default)
+|179-186 |   8 |Maximum Gust Speed     |mgustspeed|0-127 m/s
+|        |     |                       |          |speed = value * 0.5 for 0-254
+|        |     |                       |          |255 = N/A (default)
+|187-193 |   7 |Maximum Gust Direction |mgustdir  |005-360 deg
+|        |     |                       |          |dir = (value*5) for 1-72
+|        |     |                       |          |0 = calm
+|        |     |                       |          |127 = N/A (default)
+|194-203 |  10 |Air Temperature        |airtemp   |Dry bulb temperature, 0.1degC
+|        |     |                       |          |223-323K (c.-50C - +50C).
+|        |     |                       |          |T = (value/10)+223 for 0-1000
+|        |     |                       |          |1023 = N/A (default)
+|204-210 |   7 |Relative Humidity      |humidity  |0-100%, units of 1%
+|        |     |                       |          |127 = N/A (default)
+|211-219 |   9 |Sea Surface Temperature|surftemp  |268-318K (c.-5C - +45C)
+|        |     |                       |          |T = (value/10)+268 for 0-500
+|        |     |                       |          |511 = N/A (default)
+|220-225 |   6 |Horiz. Visibility      |visibility|0-50000m
+|        |     |                       |          |Vis = (value**2)*13.073 for 0-62
+|        |     |                       |          |63 = N/A (default)
+|226-234 |   9 |Present Weather        |weather   |BUFR table 020003
+|        |     |                       |          |Codes 0-510
+|        |     |                       |          |511 = N/A (default)
+|235-239 |   5 |Past Weather 1         |pweather1 |BUFR table 020004
+|        |     |                       |          |Codes 0-30
+|        |     |                       |          |31 = N/A (default)
+|240-244 |   5 |Past Weather 2         |pweather2 |BUFR table 020004
+|        |     |                       |          |Codes 0-30
+|        |     |                       |          |31 = N/A (default)
+|245-248 |   4 |Total Cloud Cover      |totalcloud|0-100%
+|        |     |                       |          |Cover = value * 10% for 0-10
+|        |     |                       |          |15 = N/A (default)
 |==============================================================================
 
 NOTE: THE TABLE ABOVE IS NOT YET COMPLETE
 
-The "minute" entry actually only identifies the end of a 10-munute interval.
+The "minute" entry actually only identifies the end of a 10-minute interval.
 
 In <<IMO289>>, the Latitude formula is given as "Lat = (value / 100) – 9000".
 This is incorrect; the decrement needs to be 90 for the range to be -90..+90.
