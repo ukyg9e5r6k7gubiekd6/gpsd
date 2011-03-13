@@ -1784,7 +1784,6 @@ The standard (<<IMO289>>) does not list the WMO FM13 codes.
 .Weather observation report from ship: WMO variant
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len  |Description            |Member    |Units
 |0-5     |   6 |Message Type           |type      |Unsigned integer: 8
 |6-7     |   2 |Repeat Indicator       |repeat    |As in Common Navigation Block
 |8-37    |  30 |Source MMSI            |mmsi      |Unsigned integer: 9 digits
@@ -1799,83 +1798,133 @@ The standard (<<IMO289>>) does not list the WMO FM13 codes.
 |        |     |                       |          |N positive, S negative
 |        |     |                       |          |Lat = (value / 100) – 90
 |        |     |                       |          |32767 = N/A (default)
-|88-91   |   4 |UTC Month              |month     |1-12, 0=N/A (default)
-|92-96   |   5 |UTC Day                |day       |1-31, 0=N/A (default)
-|97-101  |   5 |UTC hour               |hour      |0-23, 24=N/A (default)
-|102-104 |   3 |UTC minute             |minute    |0-50, 7=N/A (default)
+|88-91   |   4 |UTC Month              |month     |1-12, 15=N/A (default)
+|92-97   |   6 |UTC Day                |day       |1-31, 63=N/A (default)
+|98-102  |   5 |UTC hour               |hour      |0-23, 31=N/A (default)
+|103-105 |   3 |UTC minute             |minute    |0-50, 7=N/A (default)
 |        |     |                       |          |Minute = (value * 10)
-|105-111 |   7 |Course Over Ground     |course    |0-359, unit = 1 degree
+|106-112 |   7 |Course Over Ground     |course    |0-359, unit = 1 degree
 |        |     |                       |          |average over last 10 minutes.
-|112-116 |   5 |Speed Over Ground      |speed     |0-14.5m/s
+|113-117 |   5 |Speed Over Ground      |speed     |0-14.5m/s
 |        |     |                       |          |SOG = (value * 0.5) for 0-29
 |        |     |                       |          |30 = 15 m/s and more
 |        |     |                       |          |average over last 10 minutes.
 |        |     |                       |          |31 = N/A (default)
-|117-123 |   7 |Heading of the ship    |heading   |5-360, unit of 5 degrees
+|118-124 |   7 |Heading of the ship    |heading   |5-360, unit of 5 degrees
 |        |     |                       |          |HDT = (value * 5) for 1-72
 |        |     |                       |          |average over last 10 minutes.
 |        |     |                       |          |127 = N/A (default)
-|124-134 |  11 |Pressure at sea level  |pressure  |90-1100 hPa
+|125-135 |  11 |Pressure at sea level  |pressure  |90-1100 hPa
 |        |     |                       |          |P = (value/10)+900 for 0-2000
-|135-144 |  10 |Pressure Change        |pchange   |-50-+50hPa
+|136-145 |  10 |Pressure Change        |pchange   |-50-+50hPa
 |        |     |                       |          |Chg = (value/10)-50 for 0-100
 |        |     |                       |          |Averaged over last 3 hours
 |        |     |                       |          |1023 = N/A (default)
-|145-148 |   4 |Pressure Tendency      |ptend     |WMO BUFR table 010063
+|146-149 |   4 |Pressure Tendency      |ptend     |WMO BUFR table 010063
 |        |     |                       |          |Averaged over last 3 hours
 |        |     |                       |          |0-8, 15 = N/A
-|149-155 |   7 |True Wind Direction    |twinddir  |005-360 deg
+|150-156 |   7 |True Wind Direction    |twinddir  |005-360 deg
 |        |     |                       |          |average over last 10 minutes
 |        |     |                       |          |dir = (value*5), value 1-72
 |        |     |                       |          |0 = calm
 |        |     |                       |          |127 = N/A (default)
-|156-163 |   8 |True Wind Speed        |twindspeed|0-127 m/s
+|157-164 |   8 |True Wind Speed        |twindspeed|0-127 m/s
 |        |     |                       |          |average over last 10 minutes
 |        |     |                       |          |speed = value * 0.5
 |        |     |                       |          |255 = N/A (default)
-|164-170 |   7 |Relative Wind Direction|rwinddir  |005-360 deg
+|165-171 |   7 |Relative Wind Direction|rwinddir  |005-360 deg
 |        |     |                       |          |average over last 10 minutes
 |        |     |                       |          |dir = (value*5) for 1-72
 |        |     |                       |          |0 = calm
 |        |     |                       |          |127 = N/A (default)
-|171-178 |   8 |Relative Wind Speed    |rwindspeed|0-127 m/s
+|172-179 |   8 |Relative Wind Speed    |rwindspeed|0-127 m/s
 |        |     |                       |          |average over last 10 minutes
 |        |     |                       |          |speed = value * 0.5 for 0-254
 |        |     |                       |          |255 = N/A (default)
-|179-186 |   8 |Maximum Gust Speed     |mgustspeed|0-127 m/s
+|180-187 |   8 |Maximum Gust Speed     |mgustspeed|0-127 m/s
 |        |     |                       |          |speed = value * 0.5 for 0-254
 |        |     |                       |          |255 = N/A (default)
-|187-193 |   7 |Maximum Gust Direction |mgustdir  |005-360 deg
+|188-194 |   7 |Maximum Gust Direction |mgustdir  |005-360 deg
 |        |     |                       |          |dir = (value*5) for 1-72
 |        |     |                       |          |0 = calm
 |        |     |                       |          |127 = N/A (default)
-|194-203 |  10 |Air Temperature        |airtemp   |Dry bulb temperature, 0.1degC
+|195-204 |  10 |Air Temperature        |airtemp   |Dry bulb temperature, 0.1degC
 |        |     |                       |          |223-323K (c.-50C - +50C).
 |        |     |                       |          |T = (value/10)+223 for 0-1000
 |        |     |                       |          |1023 = N/A (default)
-|204-210 |   7 |Relative Humidity      |humidity  |0-100%, units of 1%
+|205-211 |   7 |Relative Humidity      |humidity  |0-100%, units of 1%
 |        |     |                       |          |127 = N/A (default)
-|211-219 |   9 |Sea Surface Temperature|surftemp  |268-318K (c.-5C - +45C)
+|212-220 |   9 |Sea Surface Temperature|surftemp  |268-318K (c.-5C - +45C)
 |        |     |                       |          |T = (value/10)+268 for 0-500
 |        |     |                       |          |511 = N/A (default)
-|220-225 |   6 |Horiz. Visibility      |visibility|0-50000m
+|221-226 |   6 |Horiz. Visibility      |visibility|0-50000m
 |        |     |                       |          |Vis = (value**2)*13.073 for 0-62
 |        |     |                       |          |63 = N/A (default)
-|226-234 |   9 |Present Weather        |weather   |BUFR table 020003
+|227-235 |   9 |Present Weather        |weather   |BUFR table 020003
 |        |     |                       |          |Codes 0-510
 |        |     |                       |          |511 = N/A (default)
-|235-239 |   5 |Past Weather 1         |pweather1 |BUFR table 020004
+|236-240 |   5 |Past Weather 1         |pweather1 |BUFR table 020004
 |        |     |                       |          |Codes 0-30
 |        |     |                       |          |31 = N/A (default)
-|240-244 |   5 |Past Weather 2         |pweather2 |BUFR table 020004
+|241-245 |   5 |Past Weather 2         |pweather2 |BUFR table 020004
 |        |     |                       |          |Codes 0-30
 |        |     |                       |          |31 = N/A (default)
-|245-248 |   4 |Total Cloud Cover      |totalcloud|0-100%
+|246-249 |   4 |Total Cloud Cover      |totalcloud|0-100%
 |        |     |                       |          |Cover = value * 10% for 0-10
 |        |     |                       |          |15 = N/A (default)
+|250-253 |   4 |Cloud amount (low)     |lowclouda |0-14: BUFR table 020011
+|        |     |                       |          |15 = N/A (default)
+|254-259 |   6 |Cloud type (low)       |lowcloudt |0-62: BUFR table 020012
+|        |     |                       |          |63 = N/A (default)
+|260-265 |   6 |Cloud type (middle)    |midcloudt |0-62: BUFR table 020012
+|        |     |                       |          |63 = N/A (default)
+|266-271 |   6 |Cloud type (high)      |highcloudt|0-62: BUFR table 020012
+|        |     |                       |          |63 = N/A (default)
+|272-278 |   7 |Height of cloud base   |cloudbase |0-2500m
+|        |     |                       |          |h = (value**2)*.0.16 for 0-125
+|        |     |                       |          |126 = more than 2500m
+|        |     |                       |          |127 = N/A (default)
+|279-283 |   5 |Period of Wind Waves   |wwperiod  |Period in seconds, 0-30
+|        |     |                       |          |31 = N/A (default)
+|284-289 |   6 |Height of Wind Waves   |wwheight  |Height in meters, 0-30
+|        |     |                       |          |h = (value * 0.5) for 0-60
+|        |     |                       |          |63 = N/A (default)
+|290-295 |   6 |First Swell Direction  |swelldir1 |10-360 deg
+|        |     |                       |          |dir = (value*10) for 1-36
+|        |     |                       |          |0 = calm
+|        |     |                       |          |63 = N/A (default)
+|296-300 |   5 |First Swell Period     |swperiod1 |Period in seconds, 0-30
+|        |     |                       |          |31 = N/A (default)
+|301-306 |   6 |First Swell Height     |swheight1 |Height in meters, 0-30
+|        |     |                       |          |h = (value * 0.5) for 0-60
+|        |     |                       |          |63 = N/A (default)
+|307-312 |   6 |Second Swell Direction |swelldir2 |10-360 deg
+|        |     |                       |          |dir = (value*10) for 1-36
+|        |     |                       |          |0 = calm
+|        |     |                       |          |63 = N/A (default)
+|313-317 |   5 |Second Swell Period    |swperiod2 |Period in seconds, 0-30
+|        |     |                       |          |31 = N/A (default)
+|318-323 |   6 |Second Swell Height    |swheight2 |Height in meters, 0-30
+|        |     |                       |          |h = (value * 0.5) for 0-60
+|        |     |                       |          |63 = N/A (default)
+|324-330 |   7 |Ice deposit (thickness)|icedeposit|0-126cm
+|        |     |                       |          |127 = N/A (default)
+|331-333 |   3 |Rate of Ice Accretion  |icerate   |0-6: BUFR table 020032
+|        |     |                       |          |7 = N/A (default)
+|334-336 |   3 |Cause of Ice Accretion |icecause  |0-6: BUFR table 020033
+|        |     |                       |          |7 = N/A (default)
+|337-341 |   5 |Sea Ice Concentration  |seaice    |0-30: BUFR table 020034
+|        |     |                       |          |31 = N/A (default)
+|342-345 |   4 |Amount and Type of Ice |icetype   |0-14: BUFR table 020035
+|        |     |                       |          |15 = N/A (default)
+|346-350 |   5 |Ice Situation          |icestate  |0-30: BUFR table 020036
+|        |     |                       |          |31 = N/A (default)
+|351-355 |   5 |Ice Development        |icedevel  |0-30: BUFR table 020037
+|        |     |                       |          |31 = N/A (default)
+|356-359 |   4 |Bearing of Ice Edge    |icebearing|45-360 deg
+|        |     |                       |          |dir = (value*45) for 1-8
+|        |     |                       |          |15 = N/A (default)
 |==============================================================================
-
-NOTE: THE TABLE ABOVE IS NOT YET COMPLETE
 
 The "minute" entry actually only identifies the end of a 10-minute interval.
 
