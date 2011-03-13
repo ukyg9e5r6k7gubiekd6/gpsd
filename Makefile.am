@@ -9,7 +9,8 @@
         print_libgps_VERSION_AGE \
         print_libgps_SONAME \
         print_libgps_VERSION \
-	pydoc
+	pydoc \
+	check_programs
 
 # The deheader production uses this to pass in stop-on-error flags
 CFLAGS += $(MORECFLAGS) -DSYSCONFDIR=\"$(sysconfdir)\"
@@ -49,6 +50,10 @@ endif
 if LIB_Q_GPSMM_ENABLE
 check_PROGRAMS += test_qgpsmm
 endif
+
+check_programs: $(check_PROGRAMS)
+	# nothing to do here - this is just a target which allows
+	# to ask make to build our check_programs without running them.
 
 # List of Python scripts and modules, which are handled by setup.py.
 # Required to ensure that the extensions/modules/scripts are rebuilt via
