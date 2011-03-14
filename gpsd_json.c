@@ -744,8 +744,8 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     case 1:
     case 9:
 	(void)strlcat(buf, "\"satellites\":[", buflen);
-	for (n = 0; n < rtcm->ranges.nentries; n++) {
-	    const struct rangesat_t *rsp = &rtcm->ranges.sat[n];
+	for (n = 0; n < rtcm->gps_ranges.nentries; n++) {
+	    const struct gps_rangesat_t *rsp = &rtcm->gps_ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
 			   rsp->ident,

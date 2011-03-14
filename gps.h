@@ -166,14 +166,14 @@ struct rtcm2_t {
     union {
 	struct {
 	    unsigned int nentries;
-	    struct rangesat_t {		/* data from messages 1 & 9 */
+	    struct gps_rangesat_t {	/* data from messages 1 & 9 */
 		unsigned ident;		/* satellite ID */
 		unsigned udre;		/* user diff. range error */
 		unsigned issuedata;	/* issue of data */
 		double rangerr;		/* range error */
 		double rangerate;	/* range error rate */
 	    } sat[MAXCORRECTIONS];
-	} ranges;
+	} gps_ranges;
 	struct {		/* data for type 3 messages */
 	    bool valid;		/* is message well-formed? */
 	    double x, y, z;
@@ -228,6 +228,17 @@ struct rtcm2_t {
 	    unsigned int hour;			/* Hour in week (0-167) */
 	    unsigned int leapsecs;		/* Leap seconds (0-63) */
 	} gpstime;
+	struct {
+	    unsigned int nentries;
+	    struct glonass_rangesat_t {		/* data from message type 31 */
+		unsigned ident;		/* satellite ID */
+		unsigned udre;		/* user diff. range error */
+		unsigned tod;		/* issue of data */
+		bool change;		/* ephemeris change bit */
+		double rangerr;		/* range error */
+		double rangerate;	/* range error rate */
+	    } sat[MAXCORRECTIONS];
+	} glonass_ranges;
 	/* data from type 16 messages */
 	char message[(RTCM2_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */

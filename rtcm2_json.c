@@ -49,17 +49,17 @@ int json_rtcm2_read(const char *buf,
 
     /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1_satellite[] = {
-	{"ident",     t_uinteger, STRUCTOBJECT(struct rangesat_t, ident)},
-	{"udre",      t_uinteger, STRUCTOBJECT(struct rangesat_t, udre)},
-	{"issuedata", t_uinteger, STRUCTOBJECT(struct rangesat_t, issuedata)},
-	{"rangerr",   t_real,     STRUCTOBJECT(struct rangesat_t, rangerr)},
-	{"rangerate", t_real,     STRUCTOBJECT(struct rangesat_t, rangerate)},
+	{"ident",     t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, ident)},
+	{"udre",      t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, udre)},
+	{"issuedata", t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, issuedata)},
+	{"rangerr",   t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerr)},
+	{"rangerate", t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerate)},
 	{NULL},
     };
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
-        {"satellites", t_array,	STRUCTARRAY(rtcm2->ranges.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->gps_ranges.sat, 
 					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
@@ -197,7 +197,7 @@ int json_rtcm2_read(const char *buf,
 	|| strstr(buf, "\"type\":9,") != NULL) {
 	status = json_read_object(buf, json_rtcm1, endptr);
 	if (status == 0)
-	    rtcm2->ranges.nentries = (unsigned)satcount;
+	    rtcm2->gps_ranges.nentries = (unsigned)satcount;
     } else if (strstr(buf, "\"type\":3,") != NULL) {
 	status = json_read_object(buf, json_rtcm3, endptr);
 	if (status == 0) {

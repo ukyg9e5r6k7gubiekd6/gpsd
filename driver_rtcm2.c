@@ -117,7 +117,7 @@ struct rtcm2_msg_t {
     union {
 	/* msg 1 - differential gps corrections */
 	struct rtcm2_msg1 {
-	    struct b_correction_t {
+	    struct gps_correction_t {
 		struct {			/* msg 1 word 3 */
 		    uint            parity:6;
 		    int             pc1:16;
@@ -349,9 +349,9 @@ struct rtcm2_msg_t {
     } w2;
 
     union {
-	/* msg 1 - differential gps corrections */
+	/* msg 1 - differential GPS corrections */
 	struct rtcm2_msg1 {
-	    struct b_correction_t {
+	    struct gps_correction_t {
 		struct {			/* msg 1 word 3 */
 		    uint            _pad:2;
 		    uint            scale1:1;
@@ -584,38 +584,38 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
     case 1:
     case 9:
     {
-	struct b_correction_t *m = &msg->msg_type.type1.corrections[0];
+	struct gps_correction_t *m = &msg->msg_type.type1.corrections[0];
 
 	while (len >= 0) {
 	    if (len >= 2) {
-		tp->ranges.sat[n].ident = m->w3.satident1;
-		tp->ranges.sat[n].udre = m->w3.udre1;
-		tp->ranges.sat[n].issuedata = m->w4.issuedata1;
-		tp->ranges.sat[n].rangerr = m->w3.pc1 *
+		tp->gps_ranges.sat[n].ident = m->w3.satident1;
+		tp->gps_ranges.sat[n].udre = m->w3.udre1;
+		tp->gps_ranges.sat[n].issuedata = m->w4.issuedata1;
+		tp->gps_ranges.sat[n].rangerr = m->w3.pc1 *
 		    (m->w3.scale1 ? PCLARGE : PCSMALL);
-		tp->ranges.sat[n].rangerate = m->w4.rangerate1 *
+		tp->gps_ranges.sat[n].rangerate = m->w4.rangerate1 *
 		    (m->w3.scale1 ? RRLARGE : RRSMALL);
 		n++;
 	    }
 	    if (len >= 4) {
-		tp->ranges.sat[n].ident = m->w4.satident2;
-		tp->ranges.sat[n].udre = m->w4.udre2;
-		tp->ranges.sat[n].issuedata = m->w6.issuedata2;
-		tp->ranges.sat[n].rangerr = m->w5.pc2 *
+		tp->gps_ranges.sat[n].ident = m->w4.satident2;
+		tp->gps_ranges.sat[n].udre = m->w4.udre2;
+		tp->gps_ranges.sat[n].issuedata = m->w6.issuedata2;
+		tp->gps_ranges.sat[n].rangerr = m->w5.pc2 *
 		    (m->w4.scale2 ? PCLARGE : PCSMALL);
-		tp->ranges.sat[n].rangerate = m->w5.rangerate2 *
+		tp->gps_ranges.sat[n].rangerate = m->w5.rangerate2 *
 		    (m->w4.scale2 ? RRLARGE : RRSMALL);
 		n++;
 	    }
 	    if (len >= 5) {
-		tp->ranges.sat[n].ident = m->w6.satident3;
-		tp->ranges.sat[n].udre = m->w6.udre3;
-		tp->ranges.sat[n].issuedata = m->w7.issuedata3;
+		tp->gps_ranges.sat[n].ident = m->w6.satident3;
+		tp->gps_ranges.sat[n].udre = m->w6.udre3;
+		tp->gps_ranges.sat[n].issuedata = m->w7.issuedata3;
 		/*@ -shiftimplementation @*/
-		tp->ranges.sat[n].rangerr =
+		tp->gps_ranges.sat[n].rangerr =
 		    ((m->w6.pc3_h << 8) | (m->w7.pc3_l)) *
 		    (m->w6.scale3 ? PCLARGE : PCSMALL);
-		tp->ranges.sat[n].rangerate =
+		tp->gps_ranges.sat[n].rangerate =
 		    m->w7.rangerate3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
 		/*@ +shiftimplementation @*/
 		n++;
@@ -623,7 +623,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    len -= 5;
 	    m++;
 	}
-	tp->ranges.nentries = n;
+	tp->gps_ranges.nentries = n;
     }
 	break;
     case 3:
