@@ -607,7 +607,6 @@ driver</emphasis>. It is used internally to dispatch to the correct
 driver when it collects a complete packet.</para>
 
 <!-- added by ESR, 2010 -->
-<!--
 <para><structfield>.flags</structfield> Driver property flags. This
 field is reserved for future expansion.</para>
 
