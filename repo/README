@@ -9,7 +9,7 @@ config: Repository configuration, including config details for the
 
 hooks/acl.sh: see hooks/update
 
-hooks/ciabot.sh: see hooks/update
+hooks/ciabot.py: see hooks/update
 
 hooks/post-receive: This script is run after receive-pack has accepted a
                     pack and the repository has been updated.

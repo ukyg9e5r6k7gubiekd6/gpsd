@@ -49,8 +49,8 @@ Lynx, the Ubuntu LTS release of April 2010.
 If you follow our transition advice now, you will be able to talk to
 all old-protocol and new-protocol versions of the daemon until the 3.0
 shared client library is deployed, at which point your runtime will
-silently get smaller but you won't be able to use 2.x daemon versions
-any more.
+silently get smaller but you may no longer be able to use 2.x daemon
+versions any more.
 
 We're counting on binary-package dependencies to make the transition
 easier.  When you ship a release using the new interface library,
@@ -404,8 +404,8 @@ these express dilution of precision in longitude and latitude,
 respectively.
 
 There is a gps_waiting() method analogous to the waiting() method in
-the Python class -- a non-blocking way to check if input is waiting
-from the daemon.
+the Python class -- a way to check if input is waiting from the
+daemon. It blocks but takes a timeout value.
 
 The raw_hook member is gone.
 
