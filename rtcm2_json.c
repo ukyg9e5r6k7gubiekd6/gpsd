@@ -52,8 +52,8 @@ int json_rtcm2_read(const char *buf,
 	{"ident",     t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, ident)},
 	{"udre",      t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, udre)},
 	{"iod",       t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, iod)},
-	{"rangerr",   t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerr)},
-	{"rangerate", t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerate)},
+	{"prc",       t_real,     STRUCTOBJECT(struct gps_rangesat_t, prc)},
+	{"rrc",       t_real,     STRUCTOBJECT(struct gps_rangesat_t, rrc)},
 	{NULL},
     };
     /*@-type@*//* STRUCTARRAY confuses splint */

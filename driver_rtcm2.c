@@ -72,8 +72,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
-#define	PCSMALL		0.02	/* meters */
-#define	PCLARGE		0.32	/* meters */
+#define	PRCSMALL	0.02	/* meters */
+#define	PRCLARGE	0.32	/* meters */
 #define	RRSMALL		0.002	/* meters/sec */
 #define	RRLARGE		0.032	/* meters/sec */
 
@@ -120,7 +120,7 @@ struct rtcm2_msg_t {
 	    struct gps_correction_t {
 		struct {			/* msg 1 word 3 */
 		    uint            parity:6;
-		    int             pc1:16;
+		    int             prc1:16;
 		    uint            satident1:5;	/* satellite ID */
 		    uint            udre1:2;
 		    uint            scale1:1;
@@ -133,20 +133,20 @@ struct rtcm2_msg_t {
 		    uint            udre2:2;
 		    uint            scale2:1;
 		    uint            iod1:8;
-		    int             rangerate1:8;
+		    int             rrc1:8;
 		    uint            _pad:2;
 		} w4;
 
 		struct {			/* msg 1 word 5 */
 		    uint            parity:6;
-		    int             rangerate2:8;
-		    int             pc2:16;
+		    int             rrc2:8;
+		    int             prc2:16;
 		    uint            _pad:2;
 		} w5;
 
 		struct {			/* msg 1 word 6 */
 		    uint            parity:6;
-		    int             pc3_h:8;
+		    int             prc3_h:8;
 		    uint            satident3:5;	/* satellite ID */
 		    uint            udre3:2;
 		    uint            scale3:1;
@@ -157,8 +157,8 @@ struct rtcm2_msg_t {
 		struct {			/* msg 1 word 7 */
 		    uint            parity:6;
 		    uint            iod3:8;
-		    int             rangerate3:8;
-		    uint            pc3_l:8;		/* NOTE: uint for low byte */
+		    int             rrc3:8;
+		    uint            prc3_l:8;		/* NOTE: uint for low byte */
 		    uint            _pad:2;
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
@@ -357,13 +357,13 @@ struct rtcm2_msg_t {
 		    uint            scale1:1;
 		    uint            udre1:2;
 		    uint            satident1:5;	/* satellite ID */
-		    int             pc1:16;
+		    int             prc1:16;
 		    uint            parity:6;
 		} w3;
 
 		struct {			/* msg 1 word 4 */
 		    uint            _pad:2;
-		    int             rangerate1:8;
+		    int             rrc1:8;
 		    uint            iod1:8;
 		    uint            scale2:1;
 		    uint            udre2:2;
@@ -373,8 +373,8 @@ struct rtcm2_msg_t {
 
 		struct {			/* msg 1 word 5 */
 		    uint            _pad:2;
-		    int             pc2:16;
-		    int             rangerate2:8;
+		    int             prc2:16;
+		    int             rrc2:8;
 		    uint            parity:6;
 		} w5;
 
@@ -384,14 +384,14 @@ struct rtcm2_msg_t {
 		    uint            scale3:1;
 		    uint            udre3:2;
 		    uint            satident3:5;	/* satellite ID */
-		    int             pc3_h:8;
+		    int             prc3_h:8;
 		    uint            parity:6;
 		} w6;
 
 		struct {			/* msg 1 word 7 */
 		    uint            _pad:2;
-		    uint            pc3_l:8;		/* NOTE: uint for low byte */
-		    int             rangerate3:8;
+		    uint            prc3_l:8;		/* NOTE: uint for low byte */
+		    int             rrc3:8;
 		    uint            iod3:8;
 		    uint            parity:6;
 		} w7;
@@ -591,9 +591,9 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 		tp->gps_ranges.sat[n].ident = m->w3.satident1;
 		tp->gps_ranges.sat[n].udre = m->w3.udre1;
 		tp->gps_ranges.sat[n].iod = m->w4.iod1;
-		tp->gps_ranges.sat[n].rangerr = m->w3.pc1 *
-		    (m->w3.scale1 ? PCLARGE : PCSMALL);
-		tp->gps_ranges.sat[n].rangerate = m->w4.rangerate1 *
+		tp->gps_ranges.sat[n].prc = m->w3.prc1 *
+		    (m->w3.scale1 ? PRCLARGE : PRCSMALL);
+		tp->gps_ranges.sat[n].rrc = m->w4.rrc1 *
 		    (m->w3.scale1 ? RRLARGE : RRSMALL);
 		n++;
 	    }
@@ -601,9 +601,9 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 		tp->gps_ranges.sat[n].ident = m->w4.satident2;
 		tp->gps_ranges.sat[n].udre = m->w4.udre2;
 		tp->gps_ranges.sat[n].iod = m->w6.iod2;
-		tp->gps_ranges.sat[n].rangerr = m->w5.pc2 *
-		    (m->w4.scale2 ? PCLARGE : PCSMALL);
-		tp->gps_ranges.sat[n].rangerate = m->w5.rangerate2 *
+		tp->gps_ranges.sat[n].prc = m->w5.prc2 *
+		    (m->w4.scale2 ? PRCLARGE : PRCSMALL);
+		tp->gps_ranges.sat[n].rrc = m->w5.rrc2 *
 		    (m->w4.scale2 ? RRLARGE : RRSMALL);
 		n++;
 	    }
@@ -612,11 +612,11 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 		tp->gps_ranges.sat[n].udre = m->w6.udre3;
 		tp->gps_ranges.sat[n].iod = m->w7.iod3;
 		/*@ -shiftimplementation @*/
-		tp->gps_ranges.sat[n].rangerr =
-		    ((m->w6.pc3_h << 8) | (m->w7.pc3_l)) *
-		    (m->w6.scale3 ? PCLARGE : PCSMALL);
-		tp->gps_ranges.sat[n].rangerate =
-		    m->w7.rangerate3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
+		tp->gps_ranges.sat[n].prc =
+		    ((m->w6.prc3_h << 8) | (m->w7.prc3_l)) *
+		    (m->w6.scale3 ? PRCLARGE : PRCSMALL);
+		tp->gps_ranges.sat[n].rrc =
+		    m->w7.rrc3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
 		/*@ +shiftimplementation @*/
 		n++;
 	    }

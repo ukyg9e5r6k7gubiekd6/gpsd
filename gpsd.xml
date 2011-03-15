@@ -1736,7 +1736,7 @@ field containing the pathname of the originating device.</para>
 </row>
 <row>
 	<entry>zcount</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>The reference time of the
 	corrections in the message in seconds within the current hour. Note
 	that it is in GPS time, which is some seconds ahead of UTC (see the
@@ -1858,16 +1858,16 @@ messages. Here is the format:</para>
         satellite.</para></entry>
 </row>
 <row>
-	<entry>rangerr</entry>
-	<entry>float</entry>
+	<entry>prc</entry>
+	<entry>real</entry>
         <entry><para>The pseudorange error in meters for this
         satellite as measured by the beacon reference receiver at the
         epoch indicated by the z_count in the parent
         record.</para></entry>
 </row>
 <row>
-	<entry>rangerate</entry>
-	<entry>float</entry>
+	<entry>rrc</entry>
+	<entry>real</entry>
         <entry><para>The rate of change of pseudorange error in
         meters/sec for this satellite as measured by the beacon
         reference receiver at the epoch indicated by the z_count field
@@ -1910,17 +1910,17 @@ Parameters) message:</para>
 <tbody>
 <row>
 	<entry>x</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>ECEF X coordinate.</para></entry>
 </row>
 <row>
 	<entry>y</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>ECEF Y coordinate.</para></entry>
 </row>
 <row>
 	<entry>z</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>ECEF Z coordinate.</para></entry>
 </row>
 </tbody>
@@ -1977,17 +1977,17 @@ without payload fields.</para>
 
 <row>
 	<entry>dx</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>X offset.</para></entry>
 </row>
 <row>
 	<entry>dy</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Y offset.</para></entry>
 </row>
 <row>
 	<entry>dz</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Z offset.</para></entry>
 </row>
 </tbody>
@@ -2088,14 +2088,14 @@ for each satellite.</para>
 <tbody>
 <row>
 	<entry>lat</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Latitude in degrees, of the LF transmitter
         antenna for the station for which this is an almanac.  North
         is positive.</para></entry>
 </row>
 <row>
 	<entry>lon</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Longitude in degrees, of the LF transmitter
         antenna for the station for which this is an almanac.
         East is positive.</para></entry>
@@ -2107,7 +2107,7 @@ for each satellite.</para>
 </row>
 <row>
 	<entry>frequency</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Station broadcast frequency in kHz.</para></entry>
 </row>
 <row>
@@ -2185,13 +2185,13 @@ message:</para>
 </row>
 <row>
 	<entry>lat</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Degrees latitude, signed.
 	Positive is N, negative is S.</para></entry>
 </row>
 <row>
 	<entry>lon</entry>
-	<entry>float</entry>
+	<entry>real</entry>
         <entry><para>Degrees longitude, signed.
 	Positive is E, negative is W.</para></entry>
 </row>

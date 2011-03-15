@@ -170,8 +170,8 @@ struct rtcm2_t {
 		unsigned ident;		/* satellite ID */
 		unsigned udre;		/* user diff. range error */
 		unsigned iod;		/* issue of data */
-		double rangerr;		/* range error */
-		double rangerate;	/* range error rate */
+		double prc;		/* range error */
+		double rrc;		/* range error rate */
 	    } sat[MAXCORRECTIONS];
 	} gps_ranges;
 	struct {		/* data for type 3 messages */
@@ -235,8 +235,8 @@ struct rtcm2_t {
 		unsigned udre;		/* user diff. range error */
 		unsigned tod;		/* issue of data */
 		bool change;		/* ephemeris change bit */
-		double rangerr;		/* range error */
-		double rangerate;	/* range error rate */
+		double prc;		/* range error */
+		double rrc;		/* range error rate */
 	    } sat[MAXCORRECTIONS];
 	} glonass_ranges;
 	/* data from type 16 messages */
