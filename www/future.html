@@ -98,7 +98,7 @@ finishes.</p>
 
 <p>We're going to stop shipping DBUS notifications directly at some point.  
 <b>Note: This is no longer a near-term prospect, as geoclue is reported
-not sufficientrly stable to bear the weight.</b></p>
+not sufficiently stable to bear the weight.</b></p>
 
 <p>The reason for this is <a
 href="http://www.freedesktop.org/wiki/Software/GeoClue">GeoClue</a>.
@@ -140,9 +140,6 @@ be able to look at the packet buffer directly. (Of course, this is
 only recommended when the PACKET_SET flag is up.) (Done in 2.96~dev.)</p></li>
 
 <li><p>gps_poll() will be renamed to gps_read(). (Done in 2.96~dev.)</p></li>
-<li><p>There will be a new gps_poll() entry point that will perform
-a nonblocking poll of the daemon, using the (now experimental) ?POLL
-command).</p></li>
 
 <li><p>The message 24 structure may be split into part A and B so these
 are in effect separate messages.</p>
@@ -150,12 +147,6 @@ are in effect separate messages.</p>
 
 <p>Client API users will have the API_MAJOR_VERSION symbol available to
 conditionalize their code so it will work with any version.</p>
-
-<p>What is most likely to trigger this change is the restoration of
-polling as a fully-supported mode in the wire protocol (it is
-presently experimental and buggy and <b>not recommended</b> for production
-use). At that point, the skew between what ?POLL does and what and
-gps_poll() does will become severe.</p>
 
 </div>
 </body>
