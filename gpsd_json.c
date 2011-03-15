@@ -747,10 +747,10 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	for (n = 0; n < rtcm->gps_ranges.nentries; n++) {
 	    const struct gps_rangesat_t *rsp = &rtcm->gps_ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"udre\":%u,\"issuedata\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
+			   "{\"ident\":%u,\"udre\":%u,\"iod\":%u,\"rangerr\":%0.3f,\"rangerate\":%0.3f},",
 			   rsp->ident,
-			   rsp->udre,
-			   rsp->issuedata, rsp->rangerr, rsp->rangerate);
+			   rsp->udre, rsp->iod, 
+			   rsp->rangerr, rsp->rangerate);
 	}
 	if (buf[strlen(buf) - 1] == ',')
 	    buf[strlen(buf) - 1] = '\0';

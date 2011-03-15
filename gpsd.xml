@@ -1848,7 +1848,7 @@ messages. Here is the format:</para>
         table following for values.</para></entry>
 </row>
 <row>
-	<entry>issuedata</entry>
+	<entry>iod</entry>
 	<entry>integer</entry>
         <entry><para>Issue Of Data, matching the IOD for the current
         ephemeris of this satellite, as transmitted by the satellite.

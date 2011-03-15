@@ -51,7 +51,7 @@ int json_rtcm2_read(const char *buf,
     const struct json_attr_t rtcm1_satellite[] = {
 	{"ident",     t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, ident)},
 	{"udre",      t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, udre)},
-	{"issuedata", t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, issuedata)},
+	{"iod",       t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, iod)},
 	{"rangerr",   t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerr)},
 	{"rangerate", t_real,     STRUCTOBJECT(struct gps_rangesat_t, rangerate)},
 	{NULL},

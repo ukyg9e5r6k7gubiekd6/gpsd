@@ -169,7 +169,7 @@ struct rtcm2_t {
 	    struct gps_rangesat_t {	/* data from messages 1 & 9 */
 		unsigned ident;		/* satellite ID */
 		unsigned udre;		/* user diff. range error */
-		unsigned issuedata;	/* issue of data */
+		unsigned iod;		/* issue of data */
 		double rangerr;		/* range error */
 		double rangerate;	/* range error rate */
 	    } sat[MAXCORRECTIONS];

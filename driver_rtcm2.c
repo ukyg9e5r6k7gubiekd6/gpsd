@@ -132,7 +132,7 @@ struct rtcm2_msg_t {
 		    uint            satident2:5;	/* satellite ID */
 		    uint            udre2:2;
 		    uint            scale2:1;
-		    uint            issuedata1:8;
+		    uint            iod1:8;
 		    int             rangerate1:8;
 		    uint            _pad:2;
 		} w4;
@@ -150,13 +150,13 @@ struct rtcm2_msg_t {
 		    uint            satident3:5;	/* satellite ID */
 		    uint            udre3:2;
 		    uint            scale3:1;
-		    uint            issuedata2:8;
+		    uint            iod2:8;
 		    uint            _pad:2;
 		} w6;
 
 		struct {			/* msg 1 word 7 */
 		    uint            parity:6;
-		    uint            issuedata3:8;
+		    uint            iod3:8;
 		    int             rangerate3:8;
 		    uint            pc3_l:8;		/* NOTE: uint for low byte */
 		    uint            _pad:2;
@@ -364,7 +364,7 @@ struct rtcm2_msg_t {
 		struct {			/* msg 1 word 4 */
 		    uint            _pad:2;
 		    int             rangerate1:8;
-		    uint            issuedata1:8;
+		    uint            iod1:8;
 		    uint            scale2:1;
 		    uint            udre2:2;
 		    uint            satident2:5;	/* satellite ID */
@@ -380,7 +380,7 @@ struct rtcm2_msg_t {
 
 		struct {			/* msg 1 word 6 */
 		    uint            _pad:2;
-		    uint            issuedata2:8;
+		    uint            iod2:8;
 		    uint            scale3:1;
 		    uint            udre3:2;
 		    uint            satident3:5;	/* satellite ID */
@@ -392,7 +392,7 @@ struct rtcm2_msg_t {
 		    uint            _pad:2;
 		    uint            pc3_l:8;		/* NOTE: uint for low byte */
 		    int             rangerate3:8;
-		    uint            issuedata3:8;
+		    uint            iod3:8;
 		    uint            parity:6;
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
@@ -590,7 +590,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 2) {
 		tp->gps_ranges.sat[n].ident = m->w3.satident1;
 		tp->gps_ranges.sat[n].udre = m->w3.udre1;
-		tp->gps_ranges.sat[n].issuedata = m->w4.issuedata1;
+		tp->gps_ranges.sat[n].iod = m->w4.iod1;
 		tp->gps_ranges.sat[n].rangerr = m->w3.pc1 *
 		    (m->w3.scale1 ? PCLARGE : PCSMALL);
 		tp->gps_ranges.sat[n].rangerate = m->w4.rangerate1 *
@@ -600,7 +600,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 4) {
 		tp->gps_ranges.sat[n].ident = m->w4.satident2;
 		tp->gps_ranges.sat[n].udre = m->w4.udre2;
-		tp->gps_ranges.sat[n].issuedata = m->w6.issuedata2;
+		tp->gps_ranges.sat[n].iod = m->w6.iod2;
 		tp->gps_ranges.sat[n].rangerr = m->w5.pc2 *
 		    (m->w4.scale2 ? PCLARGE : PCSMALL);
 		tp->gps_ranges.sat[n].rangerate = m->w5.rangerate2 *
@@ -610,7 +610,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 5) {
 		tp->gps_ranges.sat[n].ident = m->w6.satident3;
 		tp->gps_ranges.sat[n].udre = m->w6.udre3;
-		tp->gps_ranges.sat[n].issuedata = m->w7.issuedata3;
+		tp->gps_ranges.sat[n].iod = m->w7.iod3;
 		/*@ -shiftimplementation @*/
 		tp->gps_ranges.sat[n].rangerr =
 		    ((m->w6.pc3_h << 8) | (m->w7.pc3_l)) *
