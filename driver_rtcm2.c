@@ -5,13 +5,12 @@ protocol used for broadcasting pseudorange corrections from
 differential-GPS reference stations.  The applicable
 standard is
 
-RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL NAVSTAR GPS SERVICE,
-RTCM PAPER 194-93/SC 104-STD
+RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL GNSS (GLOBAL NAVIGATION
+SATELLITE) SERVICE, VERSION 2.3 (RTCM PAPER 136-2001/SC104-STD)
 
 Ordering instructions are accessible from <http://www.rtcm.org/>
-under "Publications".  This describes version 2.1 of the RTCM specification.
-RTCM-104 was later incrementally revised up to a 2.3 level before being 
-completely redesigned as level 3.0.
+under "Publications".  This describes version 2.3 of the RTCM specification.
+RTCM-104 was later completely redesigned as level 3.0.
 
 Also applicable is ITU-R M.823: "Technical characteristics of
 differential transmissions for global navigation satellite systems
@@ -44,6 +43,13 @@ are one or two annoying and vital omissions!). Information
 about the serial interface format was gleaned from studying
 the output of a beacon receiver test program made available on
 Starlink's website.
+
+This code has been checked against ASCII dumps made by a proprietary
+decoder running under Windows and is known to be consistent with it
+with respect to message types 1, 3, 9, 14, 16, and 31.  Decoding of
+message types 4, 5, 6, 7, and 13 has not been checked. Message types
+8, 10-12, 15-27, 28-30 (undefined), 31-37, 38-58 (undefined), and
+60-63 are not yet supported.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.

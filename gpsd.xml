@@ -2750,6 +2750,12 @@ past and problems may still lurk there.</para>
 
 <para>AIDVM decoding of types 16-17, 22-23, and 25-26 is unverified.</para>
 
+<para>GPSD presently fully recognizes only the 2.1 level of RTCM2
+(message types 1, 3, 4, 5, 6, 7, 9, 16). The 2.3 message types 13, 14,
+and 31 are recognized and reported. Message types 8, 10-12, 15-27,
+28-30 (undefined), 31-37, 38-58 (undefined), and 60-63 are not yet
+supported.</para>
+
 <para>The ISGPS used for RTCM2 and subframes decoder logic is
 sufficiently convoluted to confuse some compiler optimizers, notably
 in GCC 3.x at -O2, into generating bad code.</para>
@@ -2819,20 +2825,14 @@ standard.</para>
 
 <para>Differential-GPS corrections are conveyed by the RTCM-104
 protocol. The applicable standard for RTCM-104 V2 is <citetitle>RTCM
-Recommended Standards for Differential NAVSTAR GPS Service</citetitle>
-RTCM Paper 194-93/SC 104-STD.  The applicable standard for RTCM-104 V3
-is <citetitle>RTCM Standard 10403.1 for Differential GNSS Services -
-Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
-
-<para>Note that GPSD presently fully recognizes only the 2.1 level of RTCM;
-the protocol was revised up to a version 2.3 including additional
-messages relating to GLONASS and real-time kinematics before being
-deprecated in favor of V3. The 2.3 message types 13, 14, and 31 are
-recognized and reported, but not types 10-12, 15-30, or 35-63.</para>
-
-<para>Ordering instructions for the RTCM standards are accessible from
-the website of the <ulink url='http://www.rtcm.org/'>Radio Technical
-Commission for Maritime Services</ulink> under "Publications".</para>
+Recommended Standards for Differential GNSS (Global Navigation
+Satellite) Service</citetitle> RTCM Paper 136-2001/SC 104-STD.  The
+applicable standard for RTCM-104 V3 is <citetitle>RTCM Standard
+10403.1 for Differential GNSS Services - Version 3</citetitle> RTCM
+Paper 177-2006-SC104-STD. Ordering instructions for the RTCM standards
+are accessible from the website of the <ulink
+url='http://www.rtcm.org/'>Radio Technical Commission for Maritime
+Services</ulink> under "Publications".</para>
 
 <para>AIS is defined by ITU Recommendation M.1371,
 <citetitle>Technical Characteristics for a Universal Shipborne
