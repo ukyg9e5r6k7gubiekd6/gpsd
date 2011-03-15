@@ -865,7 +865,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 2) {
 		tp->glonass_ranges.sat[n].ident = m->w3.satident1;
 		tp->glonass_ranges.sat[n].udre = m->w3.udre1;
-		tp->glonass_ranges.sat[n].change = m->w4.change1;
+		tp->glonass_ranges.sat[n].change = (bool)m->w4.change1;
 		tp->glonass_ranges.sat[n].tod = m->w4.tod1;
 		tp->glonass_ranges.sat[n].prc = m->w3.prc1 *
 		    (m->w3.scale1 ? PRCLARGE : PRCSMALL);
@@ -876,7 +876,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 4) {
 		tp->glonass_ranges.sat[n].ident = m->w4.satident2;
 		tp->glonass_ranges.sat[n].udre = m->w4.udre2;
-		tp->glonass_ranges.sat[n].change = m->w6.change2;
+		tp->glonass_ranges.sat[n].change = (bool)m->w6.change2;
 		tp->glonass_ranges.sat[n].tod = m->w6.tod2;
 		tp->glonass_ranges.sat[n].prc = m->w5.prc2 *
 		    (m->w4.scale2 ? PRCLARGE : PRCSMALL);
@@ -887,7 +887,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (len >= 5) {
 		tp->glonass_ranges.sat[n].ident = m->w6.satident3;
 		tp->glonass_ranges.sat[n].udre = m->w6.udre3;
-		tp->glonass_ranges.sat[n].change = m->w7.change3;
+		tp->glonass_ranges.sat[n].change = (bool)m->w7.change3;
 		tp->glonass_ranges.sat[n].tod = m->w7.tod3;
 		/*@ -shiftimplementation @*/
 		tp->glonass_ranges.sat[n].prc =
