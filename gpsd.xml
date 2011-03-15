@@ -1901,6 +1901,26 @@ messages. Here is the format:</para>
 </tgroup>
 </table>
 
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"RTCM2","type":1,
+    "station_id":688,"zcount":843.0,"seqnum":5,"length":19,"station_health":6,
+    "satellites":[
+	{"ident":10,"udre":0,"iod":46,"prc":-2.400,"rrc":0.000},
+	{"ident":13,"udre":0,"iod":94,"prc":-4.420,"rrc":0.000},
+	{"ident":7,"udre":0,"iod":22,"prc":-5.160,"rrc":0.002},
+	{"ident":2,"udre":0,"iod":34,"prc":-6.480,"rrc":0.000},
+	{"ident":4,"udre":0,"iod":47,"prc":-8.860,"rrc":0.000},
+	{"ident":8,"udre":0,"iod":76,"prc":-7.980,"rrc":0.002},
+	{"ident":5,"udre":0,"iod":99,"prc":-8.260,"rrc":0.002},
+	{"ident":23,"udre":0,"iod":81,"prc":-8.060,"rrc":0.000},
+	{"ident":16,"udre":0,"iod":70,"prc":-11.740,"rrc":0.000},
+	{"ident":30,"udre":0,"iod":4,"prc":-18.960,"rrc":-0.006},
+	{"ident":29,"udre":0,"iod":101,"prc":-24.960,"rrc":-0.002}
+]}
+</programlisting>
+
 </refsect3>
 <refsect3><title>Type 3: Reference Station Parameters</title>
 
@@ -1945,6 +1965,12 @@ parts of the world.</para>
 
 <para>An invalid reference message is represented by a type 3 header
 without payload fields.</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"RTCM2","type":3,"station_id":652,"zcount":1657.2,"seqnum":2,"length":4,"station_health":6,"x":3878620.92,"y":670281.40,"z":5002093.59}
+</programlisting>
 
 </refsect3>
 <refsect3><title>Type 4: Datum</title>
@@ -2196,6 +2222,18 @@ but this cannot be true unless the field is 3 bits wide.
 </tgroup>
 </table>
 
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"RTCM2","type":9,"station_id":268,"zcount":252.6,
+        "seqnum":4,"length":5,"station_health":0,
+        "satellites":[
+            {"ident":13,"udre":0,"iod":3,"prc":-25.940,"rrc":0.066},
+            {"ident":2,"udre":0,"iod":73,"prc":0.920,"rrc":-0.080},
+            {"ident":8,"udre":0,"iod":22,"prc":23.820,"rrc":0.014}
+]}
+</programlisting>
+
 </refsect3>
 <refsect3><title>Type 13: GPS Time of Week</title>
 
@@ -2287,6 +2325,14 @@ message:</para>
 </tgroup>
 </table>
 
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"RTCM2","type":14,"station_id":652,"zcount":1657.2,
+        "seqnum":3,"length":1,"station_health":6,"week":601,"hour":109,
+        "leapsecs":15}
+</programlisting>
+
 </refsect3>
 <refsect3><title>Type 16: Special Message</title>
 
@@ -2369,6 +2415,24 @@ message:</para>
 </tbody>
 </tgroup>
 </table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"RTCM2","type":31,"station_id":652,"zcount":1642.2,
+    "seqnum":0,"length":14,"station_health":6,
+    "satellites":[
+        {"ident":5,"udre":0,"change":false,"tod":0,"prc":132.360,"rrc":0.000},
+        {"ident":15,"udre":0,"change":false,"tod":0,"prc":134.840,"rrc":0.002},
+        {"ident":14,"udre":0,"change":false,"tod":0,"prc":141.520,"rrc":0.000},
+        {"ident":6,"udre":0,"change":false,"tod":0,"prc":127.000,"rrc":0.000},
+        {"ident":21,"udre":0,"change":false,"tod":0,"prc":128.780,"rrc":0.000},
+        {"ident":22,"udre":0,"change":false,"tod":0,"prc":125.260,"rrc":0.002},
+        {"ident":20,"udre":0,"change":false,"tod":0,"prc":117.280,"rrc":-0.004},
+        {"ident":16,"udre":0,"change":false,"tod":17,"prc":113.460,"rrc":0.018}
+]}
+</programlisting>
+
 </refsect3>
 </refsect2>
 <refsect2 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>
