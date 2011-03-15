@@ -94,6 +94,10 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 #pragma pack(1)
 
+/*
+ * Reminder: Emacs reverse-region is useful...
+ */
+
 #ifndef WORDS_BIGENDIAN	/* little-endian, like x86 */
 
 struct rtcm2_msg_t {
@@ -319,6 +323,58 @@ struct rtcm2_msg_t {
 		uint        _pad:2;
 	    } txt[RTCM2_WORDS_MAX-2];
 	} type16;
+
+	/* msg 31 - differential GLONASS corrections */
+	struct rtcm2_msg31 {
+	    struct glonass_correction_t {
+		struct {			/* msg 1 word 3 */
+		    uint            parity:6;
+		    int             prc1:16;
+		    uint            satident1:5;	/* satellite ID */
+		    uint            udre1:2;
+		    uint            scale1:1;
+		    uint            _pad:2;
+		} w3;
+
+		struct {			/* msg 1 word 4 */
+		    uint            parity:6;
+		    uint            satident2:5;	/* satellite ID */
+		    uint            udre2:2;
+		    uint            scale2:1;
+		    uint            tod1:7;
+		    uint            change1:1;
+		    int             rrc1:8;
+		    uint            _pad:2;
+		} w4;
+
+		struct {			/* msg 1 word 5 */
+		    uint            parity:6;
+		    int             rrc2:8;
+		    int             prc2:16;
+		    uint            _pad:2;
+		} w5;
+
+		struct {			/* msg 1 word 6 */
+		    uint            parity:6;
+		    int             prc3_h:8;
+		    uint            satident3:5;	/* satellite ID */
+		    uint            udre3:2;
+		    uint            scale3:1;
+		    uint            tod2:7;
+		    uint            change2:1;
+		    uint            _pad:2;
+		} w6;
+
+		struct {			/* msg 1 word 7 */
+		    uint            parity:6;
+		    uint            tod3:7;
+		    uint            change3:1;
+		    int             rrc3:8;
+		    uint            prc3_l:8;	/* NOTE: uint for low byte */
+		    uint            _pad:2;
+		} w7;
+	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
+	} type31;
 
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
@@ -548,6 +604,58 @@ struct rtcm2_msg_t {
 	    } txt[RTCM2_WORDS_MAX-2];
 	} type16;
 
+	/* msg 31 - differential GLONASS corrections */
+	struct rtcm2_msg31 {
+	    struct glonass_correction_t {
+		struct {			/* msg 1 word 3 */
+		    uint            _pad:2;
+		    uint            scale1:1;
+		    uint            udre1:2;
+		    uint            satident1:5;	/* satellite ID */
+		    int             prc1:16;
+		    uint            parity:6;
+		} w3;
+
+		struct {			/* msg 1 word 4 */
+		    uint            _pad:2;
+		    int             rrc1:8;
+		    uint            change1:1;
+		    uint            tod1:7;
+		    uint            scale2:1;
+		    uint            udre2:2;
+		    uint            satident2:5;	/* satellite ID */
+		    uint            parity:6;
+		} w4;
+
+		struct {			/* msg 1 word 5 */
+		    uint            _pad:2;
+		    int             prc2:16;
+		    int             rrc2:8;
+		    uint            parity:6;
+		} w5;
+
+		struct {			/* msg 1 word 6 */
+		    uint            _pad:2;
+		    uint            change2:1;
+		    uint            tod2:7;
+		    uint            scale3:1;
+		    uint            udre3:2;
+		    uint            satident3:5;	/* satellite ID */
+		    int             prc3_h:8;
+		    uint            parity:6;
+		} w6;
+
+		struct {			/* msg 1 word 7 */
+		    uint            _pad:2;
+		    uint            prc3_l:8;	/* NOTE: uint for low byte */
+		    int             rrc3:8;
+		    uint            change3:1;
+		    uint            tod3:7;
+		    uint            parity:6;
+		} w7;
+	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
+	} type31;
+
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
     } msg_type;
@@ -741,6 +849,54 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	}
 	/*@ +boolops @*/
 	tp->message[n++] = '\0';
+	break;
+
+    case 31:
+    {
+	struct glonass_correction_t *m = &msg->msg_type.type31.corrections[0];
+
+	while (len >= 0) {
+	    if (len >= 2) {
+		tp->glonass_ranges.sat[n].ident = m->w3.satident1;
+		tp->glonass_ranges.sat[n].udre = m->w3.udre1;
+		tp->glonass_ranges.sat[n].change = m->w4.change1;
+		tp->glonass_ranges.sat[n].tod = m->w4.tod1;
+		tp->glonass_ranges.sat[n].prc = m->w3.prc1 *
+		    (m->w3.scale1 ? PRCLARGE : PRCSMALL);
+		tp->glonass_ranges.sat[n].rrc = m->w4.rrc1 *
+		    (m->w3.scale1 ? RRLARGE : RRSMALL);
+		n++;
+	    }
+	    if (len >= 4) {
+		tp->glonass_ranges.sat[n].ident = m->w4.satident2;
+		tp->glonass_ranges.sat[n].udre = m->w4.udre2;
+		tp->glonass_ranges.sat[n].change = m->w6.change2;
+		tp->glonass_ranges.sat[n].tod = m->w6.tod2;
+		tp->glonass_ranges.sat[n].prc = m->w5.prc2 *
+		    (m->w4.scale2 ? PRCLARGE : PRCSMALL);
+		tp->glonass_ranges.sat[n].rrc = m->w5.rrc2 *
+		    (m->w4.scale2 ? RRLARGE : RRSMALL);
+		n++;
+	    }
+	    if (len >= 5) {
+		tp->glonass_ranges.sat[n].ident = m->w6.satident3;
+		tp->glonass_ranges.sat[n].udre = m->w6.udre3;
+		tp->glonass_ranges.sat[n].change = m->w7.change3;
+		tp->glonass_ranges.sat[n].tod = m->w7.tod3;
+		/*@ -shiftimplementation @*/
+		tp->glonass_ranges.sat[n].prc =
+		    ((m->w6.prc3_h << 8) | (m->w7.prc3_l)) *
+		    (m->w6.scale3 ? PRCLARGE : PRCSMALL);
+		tp->glonass_ranges.sat[n].rrc =
+		    m->w7.rrc3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
+		/*@ +shiftimplementation @*/
+		n++;
+	    }
+	    len -= 5;
+	    m++;
+	}
+	tp->glonass_ranges.nentries = n;
+    }
 	break;
 
     default:

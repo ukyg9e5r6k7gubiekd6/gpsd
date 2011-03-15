@@ -174,6 +174,24 @@ int json_rtcm2_read(const char *buf,
 	{NULL},
     };
 
+    const struct json_attr_t rtcm31_satellite[] = {
+	{"ident",     t_uinteger, STRUCTOBJECT(struct glonass_rangesat_t, ident)},
+	{"udre",      t_uinteger, STRUCTOBJECT(struct glonass_rangesat_t, udre)},
+	{"change",    t_boolean,  STRUCTOBJECT(struct glonass_rangesat_t, change)},
+	{"tod",       t_uinteger, STRUCTOBJECT(struct glonass_rangesat_t, tod)},
+	{"prc",       t_real,     STRUCTOBJECT(struct glonass_rangesat_t, prc)},
+	{"rrc",       t_real,     STRUCTOBJECT(struct glonass_rangesat_t, rrc)},
+	{NULL},
+    };
+    /*@-type@*//* STRUCTARRAY confuses splint */
+    const struct json_attr_t json_rtcm31[] = {
+	RTCM2_HEADER
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->glonass_ranges.sat, 
+					    rtcm31_satellite, &satcount)},
+	{NULL},
+    };
+    /*@+type@*/
+
     /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm2_fallback[] = {
 	RTCM2_HEADER
@@ -226,6 +244,10 @@ int json_rtcm2_read(const char *buf,
 	status = json_read_object(buf, json_rtcm14, endptr);
     } else if (strstr(buf, "\"type\":16,") != NULL) {
 	status = json_read_object(buf, json_rtcm16, endptr);
+    } else if (strstr(buf, "\"type\":31,") != NULL) {
+	status = json_read_object(buf, json_rtcm31, endptr);
+	if (status == 0)
+	    rtcm2->glonass_ranges.nentries = (unsigned)satcount;
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm2_fallback, endptr);

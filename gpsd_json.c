@@ -843,6 +843,23 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 							    rtcm->message));
 	break;
 
+    case 31:
+	(void)strlcat(buf, "\"satellites\":[", buflen);
+	for (n = 0; n < rtcm->glonass_ranges.nentries; n++) {
+	    const struct glonass_rangesat_t *rsp = &rtcm->glonass_ranges.sat[n];
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "{\"ident\":%u,\"udre\":%u,\"change\":%s,\"tod\":%u,\"prc\":%0.3f,\"rrc\":%0.3f},",
+			   rsp->ident,
+			   rsp->udre,
+			   JSON_BOOL(rsp->change),
+			   rsp->tod, 
+			   rsp->prc, rsp->rrc);
+	}
+	if (buf[strlen(buf) - 1] == ',')
+	    buf[strlen(buf) - 1] = '\0';
+	(void)strlcat(buf, "]", buflen);
+	break;
+
     default:
 	(void)strlcat(buf, "\"data\":[", buflen);
 	for (n = 0; n < rtcm->length; n++)

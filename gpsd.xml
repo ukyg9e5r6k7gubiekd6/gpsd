@@ -1775,7 +1775,7 @@ field containing the pathname of the originating device.</para>
 <varlistentry>
 <term>1</term>
 <listitem><para>full corrections - one message containing corrections for
-all satellites in view. This is not common.</para></listitem>
+all GPS satellites in view. This is not common.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -1809,7 +1809,7 @@ satellites the beacon can see.</para></listitem>
 <varlistentry>
 <term>9</term>
 <listitem><para>subset corrections &mdash; a message containing corrections
-for only a subset of the satellites in view.</para></listitem>
+for only a subset of the GPS satellites in view.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -1817,6 +1817,15 @@ for only a subset of the satellites in view.</para></listitem>
 <listitem><para>special message &mdash; a text message from the beacon
 operator.</para></listitem>
 </varlistentry>
+
+<varlistentry>
+<term>31</term>
+<listitem><para>GLONASS subset corrections &mdash; a message
+containing corrections for a set of the GLONASS satellites in
+view.</para></listitem>
+</varlistentry>
+
+
 </variablelist>
 
 </refsect3>
@@ -2072,6 +2081,42 @@ for each satellite.</para>
 </table>
 
 </refsect3>
+<refsect3><title>Type 6: Null</title>
+
+<para>This just indicates a null message. There are no payload fields.</para>
+</refsect3>
+
+<refsect3><title>Unknown message</title>
+
+<para>This format is used to dump message words in hexadecimal when the
+message type field doesn't match any of the known ones.</para>
+
+<para>Here is the format:</para>
+
+<table frame="all" pgwide="0"><title>Unknown Message</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Type</entry>
+	<entry><para>Description</para></entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>data</entry>
+	<entry>list</entry>
+        <entry><para>A list of strings.</para></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Each string in the array is a hex literal representing 30 bits
+of information, after parity checks and inversion.  The high two bits
+should be ignored.</para>
+
+</refsect3>
 <refsect3><title>Type 7: Radio Beacon Almanac</title>
 
 <para>Here is the format:</para>
@@ -2265,19 +2310,12 @@ message:</para>
 </table>
 
 </refsect3>
-<refsect3><title>Type 6: Null</title>
+<refsect3><title>Type 31: Correction data</title>
 
-<para>This just indicates a null message. There are no payload fields.</para>
-</refsect3>
+<para>One or more GLONASS satellite objects follow the header for type
+1 or type 9 messages. Here is the format:</para>
 
-<refsect3><title>Unknown message</title>
-
-<para>This format is used to dump message words in hexadecimal when the
-message type field doesn't match any of the known ones.</para>
-
-<para>Here is the format:</para>
-
-<table frame="all" pgwide="0"><title>Unknown Message</title>
+<table frame="all" pgwide="0"><title>Satellite object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
@@ -2288,18 +2326,49 @@ message type field doesn't match any of the known ones.</para>
 </thead>
 <tbody>
 <row>
-	<entry>data</entry>
-	<entry>list</entry>
-        <entry><para>A list of strings.</para></entry>
+	<entry>ident</entry>
+	<entry>integer</entry>
+        <entry><para>The PRN number of the satellite for which this is
+	correction data.</para></entry>
+</row>
+<row>
+	<entry>udre</entry>
+	<entry>integer</entry>
+        <entry><para>User Differential Range Error (0-3). See the
+        table following for values.</para></entry>
+</row>
+<row>
+	<entry>change</entry>
+	<entry>boolean</entry>
+        <entry><para>Change-of-ephemeris bit.</para></entry>
+</row>
+<row>
+	<entry>tod</entry>
+	<entry>uinteger</entry>
+        <entry><para>Count of 30-second periods since the top of the 
+	hour.</para></entry>
+</row>
+<row>
+	<entry>prc</entry>
+	<entry>real</entry>
+        <entry><para>The pseudorange error in meters for this
+        satellite as measured by the beacon reference receiver at the
+        epoch indicated by the z_count in the parent
+        record.</para></entry>
+</row>
+<row>
+	<entry>rrc</entry>
+	<entry>real</entry>
+        <entry><para>The rate of change of pseudorange error in
+        meters/sec for this satellite as measured by the beacon
+        reference receiver at the epoch indicated by the z_count field
+        in the parent record. This is used to calculate pseudorange
+        errors at other epochs, if required by the GPS
+        receiver.</para></entry>
 </row>
 </tbody>
 </tgroup>
 </table>
-
-<para>Each string in the array is a hex literal representing 30 bits
-of information, after parity checks and inversion.  The high two bits
-should be ignored.</para>
-
 </refsect3>
 </refsect2>
 <refsect2 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>
@@ -2681,9 +2750,9 @@ past and problems may still lurk there.</para>
 
 <para>AIDVM decoding of types 16-17, 22-23, and 25-26 is unverified.</para>
 
-<para>The RTCM2 decoder logic is sufficiently convoluted to confuse some
-compiler optimizers, notably in GCC 3.x at -O2, into generating bad
-code.</para>
+<para>The ISGPS used for RTCM2 and subframes decoder logic is
+sufficiently convoluted to confuse some compiler optimizers, notably
+in GCC 3.x at -O2, into generating bad code.</para>
 
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
@@ -2758,8 +2827,8 @@ Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 <para>Note that GPSD presently fully recognizes only the 2.1 level of RTCM;
 the protocol was revised up to a version 2.3 including additional
 messages relating to GLONASS and real-time kinematics before being
-deprecated in favor of V3. The 2.3 message types 13 and 14 are, however,
-recognized and reported.</para>
+deprecated in favor of V3. The 2.3 message types 13, 14, and 31 are
+recognized and reported, but not types 10-12, 15-30, or 35-63.</para>
 
 <para>Ordering instructions for the RTCM standards are accessible from
 the website of the <ulink url='http://www.rtcm.org/'>Radio Technical
