@@ -76,6 +76,7 @@ commands and section 8 to administrative commands.</p>
   <li><a href="#usbtroubleshooting">USB Troubleshooting</a></li>
   <li><a href="#generaltroubleshooting">General Troubleshooting</a></li>
   <li><a href="#startuptroubleshooting">Start at Boot Troubleshooting</a></li>
+  <li><a href="#telnet" >Telnet</a></li>
   <li><a href="#hotplugtroubleshooting">Udev Hotplug Troubleshooting</a></li>
 </ol>
 
@@ -225,7 +226,7 @@ sure <a href="#hotplugtroubleshooting">udev is working correctly</a>.</p>
 <p>If you pull the plug on the receiver, gpsd will note the change.</p>
 
 <p>With the receiver plugged in and gpsd running as above, you can
-launch a client. xgps comes with the distribution. On some Linuxes, it
+launch a client. <code>xgps</code> comes with the distribution. On some Linuxes, it
 may be in a separate package, e.g. gpsd-clients. You should then see a
 lot of traffic between gpsd and the client in the gpsd terminal
 window. For example, here's a fix as reported by gpsd:</p>
@@ -305,6 +306,31 @@ tool. These are the clients maintained by the gpsd developers. Other
 clients may or may not use the right libgpsd or the right protocol, or
 something. So make sure gpsd is working correctly with the gpsd
 clients. You can always purge them later.</p>
+
+<h1 id="telnet">Telnet</h1>
+
+<p>Telnet provides a quick and dirty acceptance test for gpsd. Other
+clients (<code>cgps</code>, <code>xgps</code>, and other)
+are preferable, so consider telnet a last ditch tool. You can telnet
+into gpsd:</p>
+
+<pre>$ telnet localhost 2947
+Trying ::1...
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+{&quot;class&quot;:&quot;VERSION&quot;,&quot;release&quot;:&quot;2.96~dev&quot;,&quot;rev&quot;:&quot;2011-03-15T03:05:33&quot;,&quot;proto_major&quot;:3,&quot;proto_minor&quot;:4}
+</pre>
+
+<p>To see data from the receiver in JSON (if any), enter the command
+<samp>?WATCH={&quot;enable&quot;:true,&quot;json&quot;:true}</samp>. To
+end JSON output, <samp>?WATCH={&quot;enable&quot;:false}</samp>. Then
+control-] and &quot;exit&quot; to exit the telnet client.</p>
+
+<p>For more information, see <a
+href="client-howto.html#_how_the_gpsd_wire_protocol_works" >How the
+GPSD wire protocol works</a> in the <a href="client-howto.html" >GPSD
+Client HOWTO</a>.</p>
 
 <h1 id="hotplugtroubleshooting">Udev Hotplug Troubleshooting</h1>
 
