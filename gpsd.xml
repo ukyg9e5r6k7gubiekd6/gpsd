@@ -321,10 +321,8 @@ version symbols.</para>
 <refsect1 id='protocol'><title>REQUEST/RESPONSE PROTOCOL</title>
 
 <para>The GPSD protocol is built on top of JSON, JavaScript
-Object Notation. Use of this metaprotocol to pass structured
-data between daemon and client avoids the non-extensibility
-problems of the old protocol, and permits a richer set of record types
-to be passed up to clients.</para>
+Object Notation. GPSD's use of JSON is restricted in some ways
+that make parsing it in fixed-extent languages (such as C) easier.</para>
 
 <para>A request line is introduced by "?" and may include multiple
 commands.  Commands begin with a command identifier, followed either
@@ -337,12 +335,15 @@ in length, exclusive of the trailing newline.</para>
 <para>Responses are JSON objects all of which have a "class" attribute
 the value of which is either the name of the invoking command.  There
 are reports (including but not limited to as "TPV", "SKY", "DEVICE",
-and "ERROR") which are not direct responses to commands. The length
+and "ERROR") which are not direct responses to commands.</para>
+
+<para> The order of JSON attributes within a response object is never
+significant, and you may specify attributes in commands in any
+order. Responses never contain the special JSON value null; instead,
+attributes with empty or undefined values are omitted. The length
 limit for responses and reports is 1536 characters, including trailing
 newline; longer responses will be truncated, so client code must be
-prepared for the possibility of invalid JSON fragments. The order of
-JSON attributes within a response object is never significant, and you
-may specify attributes in commands in any order.</para>
+prepared for the possibility of invalid JSON fragments.</para>
 
 <para>The remainder of this section documents the core GPSD protocol.
 Extensions are documented in the following sections. The extensions
