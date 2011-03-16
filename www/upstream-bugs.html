@@ -189,16 +189,6 @@ bug</a> that will <a href="http://lkml.indiana.edu/hypermail/linux/kernel/0907.2
 development toolchains.  Most of these, thankfully, are non-issues
 if you keep your toolchain up to date.</p>
 
-<h2 id="libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</h2>
-
-<p>Some people building gpsd get 'multiple definitions of symbol
-_gpsd_report' as a warning.  This seems to be a result of two bugs in
-libtool, one of which masks the other on i386. gpsd_report() is indeed
-multiply defined, the problem is that libtool generates libgps.o where
-it should generate -lgps and <em>all</em> instances (rather than just
-the first to be incorporated by other linkage demands) are linked
-in.</p>
-
 <h2 id="pyinstall">Defective Python installation in SuSE 10.3rc</h2>
 
 <p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
