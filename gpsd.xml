@@ -2605,15 +2605,11 @@ over ground, 1 second of lag corresponds to 13.8 meters change in
 position between updates.</para>
 
 <para>The time reporting of the GPS system itself has an intrinsic
-accuracy limit of 0.000,000,340 =
-3.4&times;10<superscript>-7</superscript> seconds.  A more important
-limit is the GPS tick rate.  While the one-per-second PPS pulses
-emitted by serial GPS units are timed to the GPS system's intrinsic
-accuracy limit,the satellites only emit navigation messages at
-0.01-second intervals, and the timestamps in them only carry
-0.01-second precision. Thus, the timestamps that
-<application>gpsd</application> reports in time/position/velocity
-messages are normally accurate only to 1/100th of a second.</para>
+accuracy limit of 14 nanoseconds, but this can only be approximated by
+specialized receivers using that send the high-accuracy PPS
+(Pulse-Per-Second) over RS232 to cue a clock crystal.  Most GPS
+receivers only report time to a precision of 0.01s or 0.001s,
+and with no accuracy guarantees below 1sec.</para>
 
 <para>If your GPS uses a SiRF chipset at firmware level 231, reported
 UTC time may be off by the difference between whatever default
