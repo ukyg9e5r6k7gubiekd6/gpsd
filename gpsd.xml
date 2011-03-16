@@ -320,7 +320,7 @@ version symbols.</para>
 </refsect1>
 <refsect1 id='protocol'><title>REQUEST/RESPONSE PROTOCOL</title>
 
-<para>The GPSD protocol is built on top of JSON, JaveScript
+<para>The GPSD protocol is built on top of JSON, JavaScript
 Object Notation. Use of this metaprotocol to pass structured
 data between daemon and client avoids the non-extensibility
 problems of the old protocol, and permits a richer set of record types
@@ -335,11 +335,14 @@ composed of US-ASCII characters and may be no more than 80 characters
 in length, exclusive of the trailing newline.</para>
 
 <para>Responses are JSON objects all of which have a "class" attribute
-the value of which is either the name of the invoking command
-or one of the strings "DEVICE" or "ERROR". Their length
-limit is 1024 characters, including trailing newline. The order of
-JSON attributes within a response object is never significant, and you may
-specify attributes in commands in any order.<</para>
+the value of which is either the name of the invoking command.  There
+are reports (including but not limited to as "TPV", "SKY", "DEVICE",
+and "ERROR") which are not direct responses to commands. The length
+limit for responses and reports is 1536 characters, including trailing
+newline; longer responses will be truncated, so client code must be
+prepared for the possibility of invalid JSON fragments. The order of
+JSON attributes within a response object is never significant, and you
+may specify attributes in commands in any order.</para>
 
 <para>The remainder of this section documents the core GPSD protocol.
 Extensions are documented in the following sections. The extensions
@@ -384,56 +387,66 @@ depending on the fix quality.</para>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>Name of originating device</entry>
+        <entry>Name of originating device.</entry>
 </row>
 <row>
 	<entry>time</entry>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
-	fractional part of up to .01sec precision.</entry>
+	fractional part of up to .01sec precision. May be absent if mode 
+        is not 2 or 3.</entry>
 </row>
 <row>
 	<entry>ept</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Estimated timestamp error (%f, seconds, 95% confidence).</entry>
+        <entry>Estimated timestamp error (%f, seconds, 95% confidence). 
+        Present if time is present.</entry>
 </row>
 <row>
 	<entry>lat</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Latitude in degrees: +/- signifies West/East</entry>
+        <entry>Latitude in degrees: +/- signifies West/East.  Present
+        when mode is 2 or 3.</entry>
 </row>
 <row>
 	<entry>lon</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitude in degrees: +/- signifies North/South.</entry>
+        <entry>Longitude in degrees: +/- signifies North/South. Present
+        when mode is 2 or 3.</entry>
 </row>
 <row>
 	<entry>alt</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Altitude in meters.</entry>
+        <entry>Altitude in meters. Present if mode is 3.</entry>
 </row>
 <row>
 	<entry>epx</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitude error estimate in meters, 95% confidence.</entry>
+        <entry>Longitude error estimate in meters, 95% confidence. Present 
+        if mode is 2 or 3 and DOPs can be calculated from the satellite 
+        view.</entry>
 </row>
 <row>
 	<entry>epy</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Latitude error estimate in meters, 95% confidence.</entry>
+        <entry>Latitude error estimate in meters, 95% confidence. Present 
+        if mode is 2 or 3 and DOPs can be calculated from the satellite 
+        view.</entry>
 </row>
 <row>
 	<entry>epv</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Estimated vertical error in meters, 95% confidence.</entry>
+        <entry>Estimated vertical error in meters, 95% confidence. Present 
+        if mode is 3 and DOPs can be calculated from the satellite 
+        view.</entry>
 </row>
 <row>
 	<entry>track</entry>
@@ -676,7 +689,7 @@ error modeling than the covariance calculation.</para>
 </tgroup>
 </table>
 
-<para>Note that satellite objects do not have a "class" field.., as
+<para>Note that satellite objects do not have a "class" field, as
 they are never shipped outside of a SKY object.</para>
 
 <para>When the C client library parses a SKY response, it
@@ -1168,8 +1181,7 @@ will assert the DEVICELIST_SET bit in the top-level set member.</para>
 
 <para>The daemon occasionally ships a bare DEVICE object to the client
 (that is, one not inside a DEVICES wrapper). The data content of these
-objects will be described later in the section covering
-notifications.</para>
+objects will be described later as a response to the ?DEVICE command.</para>
 
 </listitem>
 </varlistentry>
