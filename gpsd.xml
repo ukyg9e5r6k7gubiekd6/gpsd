@@ -337,7 +337,9 @@ in length, exclusive of the trailing newline.</para>
 <para>Responses are JSON objects all of which have a "class" attribute
 the value of which is either the name of the invoking command
 or one of the strings "DEVICE" or "ERROR". Their length
-limit is 1024 characters, including trailing newline.</para>
+limit is 1024 characters, including trailing newline. The order of
+JSON attributes within a response object is never significant, and you may
+specify attributes in commands in any order.<</para>
 
 <para>The remainder of this section documents the core GPSD protocol.
 Extensions are documented in the following sections. The extensions
