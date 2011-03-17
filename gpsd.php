@@ -46,7 +46,7 @@ require_once("gpsd_config.inc");
 
 # sample data
 $resp = <<<EOF
-{"class":"POLL","timestamp":"2010-04-05T21:27:54.84Z","active":1,
+{"class":"POLL","time":"2010-04-05T21:27:54.84Z","active":1,
  "fixes":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
            "time":1270517264.240,"ept":0.005,"lat":40.035093060,
            "lon":-75.519748733,"alt":31.1,"track":99.4319,
