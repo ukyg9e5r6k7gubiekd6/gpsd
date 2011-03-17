@@ -49,7 +49,7 @@ Shift 6 bytes of RTCM data in as such:
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from
 message dumping and separate this lower layer from the upper layer 
-handing GPS and RTCM decoding.  
+handing GPS-subframe and RTCM decoding.  
 
 You are not expected to understand any of this.
 
