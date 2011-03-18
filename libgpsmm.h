@@ -31,6 +31,7 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		struct gps_data_t* send(const char *request); //put a command to gpsd and return the updated struct
 		struct gps_data_t* stream(int); //set watcher and policy flags
 		struct gps_data_t* read(void); //block until gpsd returns new data, then return the updated struct
+		const char *data(void);	// return the client data buffer
 		int close(void);	// close the GPS
 		bool waiting(int);	// blocking check for data waiting
 		void clear_fix(void);
@@ -40,8 +41,8 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 						//integrity loss for the entire class
 		struct gps_data_t* gps_inner_open(const char *host,
 						  const char *port);
-		struct gps_data_t _gps_data;
-		struct gps_data_t * gps_data() { return &_gps_data; }
-		struct gps_data_t* backup(void) { *to_user=*gps_data(); return to_user;}; //return the backup copy
+		struct gps_data_t _gps_state;
+		struct gps_data_t * gps_state() { return &_gps_state; }
+		struct gps_data_t* backup(void) { *to_user=*gps_state(); return to_user;}; //return the backup copy
 };
 #endif // _GPSD_GPSMM_H_

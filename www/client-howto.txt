@@ -350,6 +350,8 @@ Blocking check with timeout to see in input is waiting.
 Nonblocking read for data from the daemon.
 |gps_close()		|gpsmm.~gpsmm()		|gps.close()		|
 Close the daemon socket and end the session.
+|gps_data()             |gpsmm.data()           |gps.data()             |
+Get the contents of the client buffer.
 |gps_enable_debug()	|gpsmm_enable_debug()	|			|
 Enable debug tracing.  Only useful for GPSD developers.
 |gps_clear_fix()	|gpsmm.clear_fix()	|			|
@@ -377,7 +379,7 @@ is on, which is the library's way of telling you that at least one
 complete JSON response has arrived since the last read.
 
 Data may accumulate on the blackboard over multiple reads,
-with new TPV reports overwriting old ones;it is guaranteed that
+with new TPV reports overwriting old ones; it is guaranteed that
 overwrites are not partial.  Expect this pattern to be replicated
 in any compiled language with only fixed-extent structures.
 

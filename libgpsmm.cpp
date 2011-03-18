@@ -13,7 +13,7 @@
 
 struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port) 
 {
-	const bool err = (gps_open(host, port, gps_data()) != 0);
+	const bool err = (gps_open(host, port, gps_state()) != 0);
 	if ( err ) {
 		return NULL;
 	}
@@ -25,7 +25,7 @@ struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port)
 
 struct gps_data_t* gpsmm::stream(int flags) 
 {
-	if (gps_stream(gps_data(),flags, NULL)==-1) {
+	if (gps_stream(gps_state(),flags, NULL)==-1) {
 		return NULL;
 	}
 	else {
@@ -35,7 +35,7 @@ struct gps_data_t* gpsmm::stream(int flags)
 
 struct gps_data_t* gpsmm::send(const char *request) 
 {
-	if (gps_send(gps_data(),request)==-1) {
+	if (gps_send(gps_state(),request)==-1) {
 		return NULL;
 	}
 	else {
@@ -45,7 +45,7 @@ struct gps_data_t* gpsmm::send(const char *request)
 
 struct gps_data_t* gpsmm::read(void)
 {
-	if (gps_read(gps_data())<=0) {
+	if (gps_read(gps_state())<=0) {
 		// we return null if there was a read() error, if no
 		// data was ready in POLL_NOBLOCK mode, or if the
 		// connection is closed by gpsd
@@ -58,12 +58,17 @@ struct gps_data_t* gpsmm::read(void)
 
 bool gpsmm::waiting(int timeout)
 {
-  return gps_waiting(gps_data(), timeout);
+  return gps_waiting(gps_state(), timeout);
+}
+
+const char *gpsmm::data(void)
+{
+  return gps_data(gps_state());
 }
 
 void gpsmm::clear_fix(void)
 {
-	gps_clear_fix(&(gps_data()->fix));
+	gps_clear_fix(&(gps_state()->fix));
 }
 
 void gpsmm::enable_debug(int level, FILE *fp)
@@ -76,7 +81,7 @@ void gpsmm::enable_debug(int level, FILE *fp)
 gpsmm::~gpsmm()
 {
 	if ( to_user != NULL ) {
-		gps_close(gps_data());
+		gps_close(gps_state());
 		delete to_user;
 	}
 }

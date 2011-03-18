@@ -109,6 +109,10 @@ class gpscommon:
         # We got a \n-terminated line
         return len(self.response)
 
+    def data(self):
+        "Return the client data buffer."
+        return self.response
+
     def send(self, commands):
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
