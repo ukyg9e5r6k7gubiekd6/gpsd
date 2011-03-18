@@ -394,19 +394,24 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     char *chrony_path = NULL;
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
+#ifdef __UNUSED__
+    /* sadly root was dropped very early, until a way if found to run this
+     * before dropping root it will not work. */
     if( 0 == getuid() ) {
         /* only root can use /var/run */
     	chrony_path = "/var/run/chrony";
-    } else {
+    } else
+#endif
+    {
     	chrony_path = "/tmp/chrony";
     }
 
     s.sun_family = AF_UNIX;
     (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s.%s.sock", chrony_path,
         basename(session->gpsdata.dev.path));
-    /* the socket will be either, for root:
+    /* TODO the socket for root would be
      *   /var/run/chrony.ttyXX.sock
-     * or for non-root:
+     * for now it is always
      *   /tmp/chrony.ttyXX.sock
      */
 

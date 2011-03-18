@@ -2652,9 +2652,8 @@ century.</para>
 
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
-to the time provided by the GPS receiver.  This facility is
-only available when the daemon is started from root.  If you're going
-to use <application>gpsd</application> you probably want to run it
+to the time provided by the GPS receiver. If you're going to
+use <application>gpsd</application> you probably want to run it
 <option>-n</option> mode so the clock will be updated even when no
 clients are active.</para>
 
@@ -2667,7 +2666,9 @@ of every clock second on the carrier-detect lines of some serial
 GPSes; this pulse can be used to update NTP at much higher accuracy
 than message time provides.  You can determine whether your GPS emits
 this pulse by running at -D 5 and watching for carrier-detect state
-change messages in the logfile.</para>
+change messages in the logfile.  In addition, if your kernel provides
+the RFC 2783 kernel PPS API then <application>gpsd</application> will 
+use that for extra accuracy.</para>
 
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
@@ -2740,6 +2741,36 @@ like to receive information about the offsets observed by users for each
 type of receiver.  Please send us the output of the "ntpq -p" command
 and the make and type of receiver.</para>
 
+</refsect1>
+<refsect1 id='chrony'><title>USE WITH CHRONY</title>
+<para>gpsd can provide reference clock information to
+<application>chronyd</application> similar to the way it talks to
+<application>ntpd</application>.  The advantage to using chrony is
+that the PPS time resolution is in nSec.  This is 1,000 times more
+precision than the time resolution provided to ntpd.
+</para>
+<para>gpsd talks to <application>chronyd</application> using a socket
+named /tmp/chrony.ttyXX.sock (where ttyXX is replaced by the GPS
+device name.  This allows multiple GPS to feed one <application>chronyd
+</application>.
+</para>
+<para>No gpsd configuration is required to talk to chronyd.  To get 
+chronyd to connect to gpsd using the SHM method add this to your
+/etc/chrony/chonry.conf file.
+</para>
+<screen>
+# delay 0.0 is right, but use 0.2 to avoid NMEA
+# time fighting with PPS time
+refclock SHM 0 offset 0.0 delay 0.2
+refclock SHM 1 offset 0.0 delay 0.0
+</screen>
+<para>To get chronyd to connect to gpsd using the more precise socket 
+method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
+with your device name): </para> 
+<screen> 
+#refclock PPS
+/dev/pps0 refclock SOCK /var/run/chrony.ttyXX.sock 
+</screen> 
 </refsect1>
 <refsect1 id='dbus'><title>USE WITH D-BUS</title>
 
