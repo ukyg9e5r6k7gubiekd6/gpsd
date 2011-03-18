@@ -171,7 +171,7 @@ the client code.
 
 *** Enable gpsd to open chronyd socket as root in /var/run
 
-At the moment gpsd drops priviledges as soon as the command line
+At the moment gpsd drops privileges as soon as the command line
 options are parsed.  A way needs to be found to open the chronyd
 sockets in /var/run before dropping root.
 
