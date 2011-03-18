@@ -83,7 +83,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     /* extract ECEF navigation solution here */
     /* or extract the local tangential plane (ENU) solution */
     [Px, Py, Pz, Vx, Vy, Vz] = GET_ECEF_FIX();
-    ecef_to_wgs84fix(&session->newdata,  &session->separation,
+    ecef_to_wgs84fix(&session->newdata,  &session->gpsdata.separation,
 		     Px, Py, Pz, Vx, Vy, Vz);
     mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS  ;
 
