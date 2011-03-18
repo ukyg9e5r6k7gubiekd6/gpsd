@@ -49,7 +49,6 @@ extern "C" {
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define GPS_PATH_MAX	64	/* dev files usually have short names */
-#define GPS_BUFFER_MAX  3072	/* enough for two maximun-size JSON objects */
 #define MAXUSERDEVS	4	/* max devices per user */
 
 /* 
@@ -1403,10 +1402,6 @@ struct gps_data_t {
 
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
-    /* data buffered from the last read */
-    ssize_t waiting;
-    char buffer[GPS_BUFFER_MAX * 2];
-
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|GST_SET)
     union {
@@ -1439,6 +1434,7 @@ extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
 extern bool gps_waiting(struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern const char /*@observer@*/ *gps_data(struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
 /* this only needs to be visible for the unit tests */

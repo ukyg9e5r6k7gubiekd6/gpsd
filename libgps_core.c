@@ -44,6 +44,10 @@ extern char *strtok_r(char *, const char *, char **);
 struct privdata_t
 {
     bool newstyle;
+    /* data buffered from the last read */
+    ssize_t waiting;
+    char buffer[GPS_JSON_RESPONSE_MAX * 2];
+
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
@@ -129,9 +133,7 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
     if (gpsdata->privdata == NULL)
 	return -1;
     PRIVATE(gpsdata)->newstyle = false;
-    gpsdata->waiting = 0;
-    /*@i1@*/ gpsdata->buffer[0] = '\0';
-
+    PRIVATE(gpsdata)->waiting = 0;
     return 0;
     /*@ +branchstate @*/
 }
@@ -507,7 +509,7 @@ bool gps_waiting(struct gps_data_t * gpsdata, int timeout)
     struct timeval tv;
 
     libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, waitcount++));
-    if (gpsdata->waiting > 0)
+    if (PRIVATE(gpsdata)->waiting > 0)
 	return true;
 
     /* we might want to check for EINTR if this returns false */
@@ -534,8 +536,8 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     int status = -1;
 
     gpsdata->set &= ~PACKET_SET;
-    for (eol = gpsdata->buffer;
-	 *eol != '\n' && eol < gpsdata->buffer + gpsdata->waiting; eol++)
+    for (eol = PRIVATE(gpsdata)->buffer;
+	 *eol != '\n' && eol < PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting; eol++)
 	continue;
     if (*eol != '\n')
 	eol = NULL;
@@ -546,21 +548,21 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 #ifndef USE_QT
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
 	status = (int)recv(gpsdata->gps_fd,
-			   gpsdata->buffer + gpsdata->waiting,
-			   sizeof(gpsdata->buffer) - gpsdata->waiting, 0);
+			   PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting,
+			   sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting, 0);
 #else
 	status =
-	    ((QTcpSocket *) (gpsdata->gps_fd))->read(gpsdata->buffer +
-						     gpsdata->waiting,
-						     sizeof(gpsdata->buffer) -
-						     gpsdata->waiting);
+	    ((QTcpSocket *) (gpsdata->gps_fd))->read(PRIVATE(gpsdata)->buffer +
+						     PRIVATE(gpsdata)->waiting,
+						     sizeof(PRIVATE(gpsdata)->buffer) -
+						     PRIVATE(gpsdata)->waiting);
 #endif
 
 	/* if we just received data from the socket, it's in the buffer */
 	if (status > -1)
-	    gpsdata->waiting += status;
+	    PRIVATE(gpsdata)->waiting += status;
 	/* buffer is empty - implies no data was read */
-	if (gpsdata->waiting == 0) {
+	if (PRIVATE(gpsdata)->waiting == 0) {
 	    /* 
 	     * If we received 0 bytes, other side of socket is closing.
 	     * Return -1 as end-of-data indication.
@@ -578,8 +580,8 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 		return -1;
 	}
 	/* there's buffered data waiting to be returned */
-	for (eol = gpsdata->buffer;
-	     *eol != '\n' && eol < gpsdata->buffer + gpsdata->waiting; eol++)
+	for (eol = PRIVATE(gpsdata)->buffer;
+	     *eol != '\n' && eol < PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting; eol++)
 	    continue;
 	if (*eol != '\n')
 	    eol = NULL;
@@ -589,19 +591,25 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 
     assert(eol != NULL);
     *eol = '\0';
-    response_length = eol - gpsdata->buffer + 1;
+    response_length = eol - PRIVATE(gpsdata)->buffer + 1;
     received = gpsdata->online = timestamp();
-    status = gps_unpack(gpsdata->buffer, gpsdata);
+    status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
     /*@+matchanyintegral@*/
-    memmove(gpsdata->buffer,
-	    gpsdata->buffer + response_length, gpsdata->waiting - response_length);
+    memmove(PRIVATE(gpsdata)->buffer,
+	    PRIVATE(gpsdata)->buffer + response_length, PRIVATE(gpsdata)->waiting - response_length);
     /*@-matchanyintegral@*/
-    gpsdata->waiting -= response_length;
+    PRIVATE(gpsdata)->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
     return (status == 0) ? (int)response_length : status;
 }
 /*@+compdef -usedef +uniondef@*/
+
+const char /*@observer@*/ *gps_data(struct gps_data_t *gpsdata)
+/* return the contents of the client data buffer */
+{
+    return PRIVATE(gpsdata)->buffer;
+}
 
 int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
 /* send a command to the gpsd instance */

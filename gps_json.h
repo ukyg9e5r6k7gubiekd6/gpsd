@@ -8,7 +8,7 @@
 #include "json.h"
 
 #define GPS_JSON_COMMAND_MAX	80
-#define GPS_JSON_RESPONSE_MAX	1536
+#define GPS_JSON_RESPONSE_MAX	4096
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.7, March 2011
+v1.8, March 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -507,7 +507,7 @@ In major versions before 5:
   send messages to stderr.  This requirement is now gone.
 
 * There was a set_raw_hook() method in the C and Python bindings, now gone.
-  Clients can simply look at the response buffer.
+  C clients should call gps_data(); the buffer is available directly in Python.
 
 See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
 for details.

@@ -47,6 +47,10 @@ C:
     <paramdef>int <parameter>timeout</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcdef>void <function>gps_data</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>void <function>gps_close</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
@@ -139,6 +143,10 @@ the cycle time of your device will be hazardous, as the receiver probably
 will not supply input often enough to prevent a spurious error indication.
 For the typical 1-second cycle time of GPSes this implies a minimum 2-second
 timeout.</para>
+
+<para><function>gps_data()</function> returns the contents of the
+client data buffer. Use with care; this may fail to be a NUL-terminated 
+string if WATCH_RAW is enabled.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
