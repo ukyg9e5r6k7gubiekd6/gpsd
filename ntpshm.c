@@ -126,7 +126,7 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
 		    (int)perms, strerror(errno));
 	return NULL;
     } else {
-	struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
+	volatile struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
 	/*@ -mustfreefresh */
 	if ((int)(long)p == -1) {
 	    gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n",
@@ -193,7 +193,7 @@ bool ntpshm_free(struct gps_context_t * context, int segment)
 int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 /* put a received fix time into shared memory for NTP */
 {
-    struct shmTime *shmTime = NULL;
+    volatile struct shmTime *shmTime = NULL;
     struct timeval tv;
     double seconds, microseconds;
 
@@ -256,7 +256,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  */
 int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
-    struct shmTime *shmTime = NULL, *shmTimeP = NULL;
+    volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
     /* FIX-ME, microseconds needs to be set for 5Hz PPS */
     int microseconds = 0;
