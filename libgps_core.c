@@ -55,10 +55,10 @@ struct privdata_t
 #define DEBUG_CALLS	1	/* shallowest debug level */
 #define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
 static int debuglevel = 0;
+static FILE *debugfp;
 #ifndef USE_QT
 static int waitcount = 0;
-#endif
-static FILE *debugfp;
+#endif /* USE_QT */
 
 void gps_enable_debug(int level, FILE * fp)
 /* control the level and destination of debug trace messages */
@@ -718,7 +718,9 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
 #ifndef USE_QT
     return netlib_errstr(err);
 #else
-    return "";
+    char buf[32];
+    (void)snprintf(buf, sizeof(buf), "Qt error %d", err);
+    return buf;
 #endif
 }
 
