@@ -718,7 +718,7 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
 #ifndef USE_QT
     return netlib_errstr(err);
 #else
-    char buf[32];
+    static char buf[32];
     (void)snprintf(buf, sizeof(buf), "Qt error %d", err);
     return buf;
 #endif
