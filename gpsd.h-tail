@@ -197,7 +197,9 @@ struct gps_context_t {
     int rollovers;			/* rollovers since start of run */
 #ifdef NTPSHM_ENABLE
     bool enable_ntpshm;
-    /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
+    /* we need the volatile here to tell the C compiler not to 
+     * 'optimize' as 'dead code' the writes to SHM */
+    /*@reldef@*/volatile struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
     bool shmTimePPS;

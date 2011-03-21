@@ -105,7 +105,7 @@ struct shmTime
  * ipcrm  -M 0x4e545032
  * ipcrm  -M 0x4e545033
  */
-static /*@null@*/ struct shmTime *getShmTime(int unit)
+static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 {
     int shmid;
     unsigned int perms;
@@ -125,19 +125,18 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
 		    (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
 		    (int)perms, strerror(errno));
 	return NULL;
-    } else {
-	volatile struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
-	/*@ -mustfreefresh */
-	if ((int)(long)p == -1) {
-	    gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n",
-			strerror(errno));
-	    return NULL;
-	}
-	gpsd_report(LOG_PROG, "NTPD shmat(%d,0,0) succeeded, segment %d\n",
-		    shmid, unit);
-	return p;
-	/*@ +mustfreefresh */
+    } 
+    volatile struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
+    /*@ -mustfreefresh */
+    if ((int)(long)p == -1) {
+	gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n",
+		    strerror(errno));
+	return NULL;
     }
+    gpsd_report(LOG_PROG, "NTPD shmat(%d,0,0) succeeded, segment %d\n",
+		shmid, unit);
+    return p;
+    /*@ +mustfreefresh */
 }
 
 void ntpshm_init(struct gps_context_t *context, bool enablepps)
@@ -193,6 +192,9 @@ bool ntpshm_free(struct gps_context_t * context, int segment)
 int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 /* put a received fix time into shared memory for NTP */
 {
+    /* shmTime is volatile to try to prevent C compiler from reordering
+     * writes, or optimizing some 'dead code'.  but CPU cache may still 
+     *write out of order since we do not use memory barriers, yet */
     volatile struct shmTime *shmTime = NULL;
     struct timeval tv;
     double seconds, microseconds;
@@ -228,6 +230,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      */
     shmTime->valid = 0;
     shmTime->count++;
+    /* FIXME need a memory barrier here to prevent write reordering by
+     * the compiler or CPU cache */
     shmTime->clockTimeStampSec = (time_t) seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
@@ -237,6 +241,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      * Any NMEA will be about -1 or -2. 
      * Garmin GPS-18/USB is around -6 or -7.
      */
+    /* FIXME need a memory barrier here to prevent write reordering by
+     * the compiler or CPU cache */
     shmTime->count++;
     shmTime->valid = 1;
 
