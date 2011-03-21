@@ -109,6 +109,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 {
     int shmid;
     unsigned int perms;
+    volatile struct shmTime *p;
     // set the SHM perms the way ntpd does
     if (unit < 2) {
 	// we are root, be careful
@@ -126,7 +127,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 		    (int)perms, strerror(errno));
 	return NULL;
     } 
-    volatile struct shmTime *p = (struct shmTime *)shmat(shmid, 0, 0);
+    p = (struct shmTime *)shmat(shmid, 0, 0);
     /*@ -mustfreefresh */
     if ((int)(long)p == -1) {
 	gpsd_report(LOG_ERROR, "NTPD shmat failed: %s\n",
