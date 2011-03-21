@@ -55,7 +55,9 @@ struct privdata_t
 #define DEBUG_CALLS	1	/* shallowest debug level */
 #define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
 static int debuglevel = 0;
+#ifndef USE_QT
 static int waitcount = 0;
+#endif
 static FILE *debugfp;
 
 void gps_enable_debug(int level, FILE * fp)
