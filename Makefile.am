@@ -832,10 +832,10 @@ python-indentation-regress:
 testregress: python-indentation-regress gps-regress rtcm-regress aivdm-regress packet-regress geoid-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
-# Make sure build-from-tarball works
+# Make sure build-from-tarball works.
 testbuild: dist
 	tar -xzvf gpsd-$(PACKAGE_VERSION).tar.gz
-	cd gpsd-$(PACKAGE_VERSION); configure; make
+	cd gpsd-$(PACKAGE_VERSION); ./configure; make
 	rm -fr gpsd-$(PACKAGE_VERSION)
 
 # do-tests is a shell script that invokes make with target testregress.
