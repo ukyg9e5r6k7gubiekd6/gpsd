@@ -47,11 +47,11 @@ require_once("gpsd_config.inc");
 # sample data
 $resp = <<<EOF
 {"class":"POLL","time":"2010-04-05T21:27:54.84Z","active":1,
- "fixes":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
+ "tpv":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
            "time":1270517264.240,"ept":0.005,"lat":40.035093060,
            "lon":-75.519748733,"alt":31.1,"track":99.4319,
            "speed":0.123,"mode":3}],
- "skyviews":[{"class":"SKY","tag":"MID41","device":"/dev/ttyUSB0",
+ "sky":[{"class":"SKY","tag":"MID41","device":"/dev/ttyUSB0",
               "time":"2010-04-05T21:27:44.84Z","hdop":9.20,"vdop":12.1,
               "satellites":[{"PRN":16,"el":55,"az":42,"ss":36,"used":true},
                             {"PRN":19,"el":25,"az":177,"ss":0,"used":false},
@@ -305,8 +305,8 @@ function gen_image($resp){
 	if ($sz > 240)
 		legend($im, $sz, $C);
 
-	for($i = 0; $i < count($GPS['skyviews'][0]['satellites']); $i++){
-		splot($im, $sz, $C, $GPS['skyviews'][0]['satellites'][$i]);
+	for($i = 0; $i < count($GPS['sky'][0]['satellites']); $i++){
+		splot($im, $sz, $C, $GPS['sky'][0]['satellites'][$i]);
 	}
 
 	header("Content-type: image/png");
@@ -336,8 +336,8 @@ function write_html($resp){
 	header("Content-type: text/html; charset=UTF-8");
 
 	global $lat, $lon;
-	$lat = (float)$GPS['fixes'][0]['lat'];
-	$lon = (float)$GPS['fixes'][0]['lon'];
+	$lat = (float)$GPS['tpv'][0]['lat'];
+	$lon = (float)$GPS['tpv'][0]['lon'];
 	$x = $server; $y = $port;
 	$imgdata = base64_encode($resp);
 	$server = $x; $port = $y;
@@ -436,8 +436,8 @@ EOF;
 	if ($testmode && !$sock)
 		$part4 = "<tr><td class='warning'>The gpsd instance that this page monitors is not running.</td></tr>";
 	else {
-		$fix = $GPS['fixes'][0];
-		$sky = $GPS['skyviews'][0];
+		$fix = $GPS['tpv'][0];
+		$sky = $GPS['sky'][0];
 		$sats = $sky['satellites'];
 
 		$nsv = count($sats);
