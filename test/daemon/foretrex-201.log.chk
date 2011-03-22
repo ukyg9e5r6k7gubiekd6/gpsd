@@ -799,17 +799,17 @@ $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
 $GPRTE,1,1,c,*37
 $GPRMC,200004,A,5504.4343,N,01025.5386,E,0.0,0.0,260810,1.0,E,D*1E
-{"class":"TPV","tag":"RMC","time":"2010-08-26T20:00:04.00Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"track":0.0000,"speed":0.000,"mode":2}
+{"class":"TPV","tag":"RMC","mode":2,"time":"2010-08-26T20:00:04.000Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"track":0.0000,"speed":0.000}
 $GPRMB,A,,,,,,,,,,,,A,D*0E
 $GPGGA,200004,5504.4343,N,01025.5386,E,2,03,2.5,-9.1,M,43.9,M,,*62
-{"class":"TPV","tag":"GGA","time":"2010-08-26T20:00:04.00Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"track":0.0000,"speed":0.000,"mode":3}
+{"class":"TPV","tag":"GGA","mode":3,"time":"2010-08-26T20:00:04.000Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"track":0.0000,"speed":0.000}
 $GPGSA,A,2,06,,,,,,19,22,,,,,2.7,2.5,1.0*3E
 $GPGSV,3,1,12,06,43,153,43,08,05,301,00,11,19,274,00,14,18,127,00*77
 $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,32*78
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":43,"used":true},{"PRN":8,"el":5,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":true},{"PRN":22,"el":55,"az":78,"ss":32,"used":true},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4343,N,01025.5386,E,200004,A,D*4E
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:04.00Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:04.000Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
@@ -823,7 +823,7 @@ $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,31*7B
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":43,"used":true},{"PRN":8,"el":5,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":true},{"PRN":22,"el":55,"az":78,"ss":31,"used":true},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4343,N,01025.5386,E,200006,A,D*4C
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:06.00Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:06.000Z","ept":0.005,"lat":55.073905000,"lon":10.425643333,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
@@ -837,7 +837,7 @@ $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,31*7B
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":44,"used":true},{"PRN":8,"el":4,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":true},{"PRN":22,"el":55,"az":78,"ss":31,"used":true},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4344,N,01025.5385,E,200008,A,D*46
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:08.00Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:08.000Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
@@ -851,7 +851,7 @@ $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,31*7B
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":44,"used":false},{"PRN":8,"el":4,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":false},{"PRN":22,"el":55,"az":78,"ss":31,"used":false},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4344,N,01025.5385,E,200010,A,D*4F
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:10.00Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:10.000Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
@@ -865,7 +865,7 @@ $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,31*7B
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":44,"used":false},{"PRN":8,"el":4,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":false},{"PRN":22,"el":55,"az":78,"ss":31,"used":false},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4344,N,01025.5385,E,200012,A,D*4D
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:12.00Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:12.000Z","ept":0.005,"lat":55.073906667,"lon":10.425641667,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04
@@ -879,7 +879,7 @@ $GPGSV,3,2,12,15,01,013,00,18,25,053,00,19,75,249,43,22,55,078,31*7B
 $GPGSV,3,3,12,24,83,092,00,28,17,327,00,33,23,211,42,37,26,166,42*74
 {"class":"SKY","tag":"GSV","satellites":[{"PRN":6,"el":43,"az":153,"ss":44,"used":false},{"PRN":8,"el":4,"az":301,"ss":0,"used":false},{"PRN":11,"el":19,"az":274,"ss":0,"used":false},{"PRN":14,"el":18,"az":127,"ss":0,"used":false},{"PRN":15,"el":1,"az":13,"ss":0,"used":false},{"PRN":18,"el":25,"az":53,"ss":0,"used":false},{"PRN":19,"el":75,"az":249,"ss":43,"used":false},{"PRN":22,"el":55,"az":78,"ss":31,"used":false},{"PRN":24,"el":83,"az":92,"ss":0,"used":false},{"PRN":28,"el":17,"az":327,"ss":0,"used":false},{"PRN":33,"el":23,"az":211,"ss":42,"used":false},{"PRN":37,"el":26,"az":166,"ss":42,"used":false}]}
 $GPGLL,5504.4344,N,01025.5384,E,200014,A,D*4A
-{"class":"TPV","tag":"GLL","time":"2010-08-26T20:00:14.00Z","ept":0.005,"lat":55.073906667,"lon":10.425640000,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000,"mode":3}
+{"class":"TPV","tag":"GLL","mode":3,"time":"2010-08-26T20:00:14.000Z","ept":0.005,"lat":55.073906667,"lon":10.425640000,"alt":-9.100,"epv":5.750,"track":0.0000,"speed":0.000,"climb":0.000}
 $GPBOD,,T,,M,,*47
 $PGRME,19.9,M,50.0,M,53.8,M*14
 $PGRMZ,-30,f,2*04

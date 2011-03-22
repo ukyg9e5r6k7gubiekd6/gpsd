@@ -126,6 +126,9 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
 		       "\"device\":\"%s\",", gpsdata->dev.path);
+    (void)snprintf(reply + strlen(reply),
+		   replylen - strlen(reply),
+		   "\"mode\":%d,", gpsdata->fix.mode);
     if (isnan(gpsdata->fix.time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -195,9 +198,6 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 			   replylen - strlen(reply),
 			   "\"epc\":%.2f,", gpsdata->fix.epc);
     }
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"mode\":%d,", gpsdata->fix.mode);
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", sizeof(reply) - strlen(reply));

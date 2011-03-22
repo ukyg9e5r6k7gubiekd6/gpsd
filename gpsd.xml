@@ -345,6 +345,10 @@ limit for responses and reports is 1536 characters, including trailing
 newline; longer responses will be truncated, so client code must be
 prepared for the possibility of invalid JSON fragments.</para>
 
+<para>In JSON reports, if an attribute is present only if the parent 
+attribute is present or has a particular range, yjen the parent
+attribute is emitted first.</para>
+
 <para>The remainder of this section documents the core GPSD protocol.
 Extensions are documented in the following sections. The extensions
 may not be supported in your <application>gpsd</application> instance
@@ -389,6 +393,12 @@ depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Name of originating device.</entry>
+</row>
+<row>
+	<entry>mode</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>NMEA mode: %d, 0=no mode value yet seen, 1=no fix, 2=2D, 3=3D.</entry>
 </row>
 <row>
 	<entry>time</entry>
@@ -486,12 +496,6 @@ depending on the fix quality.</para>
 	<entry>numeric</entry>
         <entry>Climb/sink error estinmate in meters/sec, 95% confifdence.</entry>
 </row>
-<row>
-	<entry>mode</entry>
-	<entry>Yes</entry>
-	<entry>numeric</entry>
-        <entry>NMEA mode: %d, 0=no mode value yet seen, 1=no fix, 2=2D, 3=3D.</entry>
-</row>
 
 </tbody>
 </tgroup>
@@ -505,7 +509,7 @@ field actually received; see gps.h for bitmask names and values.</para>
 
 <programlisting>
 {"class":"TPV","tag":"MID2","device":"/dev/pts/1",
-    "time":"2005-06-08T10:34:48.28Z","ept":0.005,
+    "time":"2005-06-08T10:34:48.283Z","ept":0.005,
     "lat":46.498293369,"lon":7.567411672,"alt":1343.127,
     "eph":36.000,"epv":32.321,
     "track":10.3788,"speed":0.091,"climb":-0.085,"mode":3}
@@ -700,7 +704,7 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 
 <programlisting>
 {"class":"SKY","tag":"MID2","device":"/dev/pts/1",
-    "time":"2005-07-08T11:28:07.11Z",
+    "time":"2005-07-08T11:28:07.114Z",
     "xdop":1.55,"hdop":1.24,"pdop":1.99,
     "satellites":[
         {"PRN":23,"el":6,"az":84,"ss":0,"used":false},
@@ -818,7 +822,7 @@ corrections).</entry>
 
 <programlisting>
 {"class":"GST","tag":"GST","device":"/dev/ttyUSB0",
-        "time":"2010-12-07T10:23:07.09Z","rms":2.440,
+        "time":"2010-12-07T10:23:07.096Z","rms":2.440,
         "major":1.660,"minor":1.120,"orient":68.989,
         "lat":1.600,"lon":1.200,"alt":2.520}
 </programlisting>
@@ -1363,9 +1367,9 @@ will be reported with a mode field of zero.</para>
 <para>Here's an example of a POLL response:</para>
 
 <programlisting>
-{"class":"POLL","time":"2010-06-04T10:31:00.28Z","active":1,
+{"class":"POLL","time":"2010-06-04T10:31:00.289Z","active":1,
     "tpv":[{"class":"TPV","tag":"MID41","device":"/dev/ttyUSB0",
-            "time":"2010-09-08T13:33:06.09Z",
+            "time":"2010-09-08T13:33:06.095Z",
 	    "ept":0.005,"lat":40.035093060,
             "lon":-75.519748733,"track":99.4319,"speed":0.123,"mode":2}],
     "sky":[{"class":"SKY","tag":"MID41","device":"/dev/ttyUSB0",

@@ -138,7 +138,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 /*@observer@*/char *unix_to_iso8601(timestamp_t fixtime, /*@ out @*/
 				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
-/* example: 2007-12-11T23:38:51.03Z */
+/* example: 2007-12-11T23:38:51.033Z */
 {
     struct tm when;
     double integral, fractional;
@@ -151,7 +151,12 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
     (void)gmtime_r(&intfixtime, &when);
 
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
-    (void)snprintf(fractstr, sizeof(fractstr), "%.2f", fractional);
+    /*
+     * Do not mess casually with the number of decimal digits in the
+     * format!  Most GPSes report over serial links at 0.01s or 0.001s
+     * precision.
+     */
+    (void)snprintf(fractstr, sizeof(fractstr), "%.3f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
     /*@i2@*/(void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
     return isotime;
