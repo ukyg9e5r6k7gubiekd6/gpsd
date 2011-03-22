@@ -832,6 +832,12 @@ python-indentation-regress:
 testregress: python-indentation-regress gps-regress rtcm-regress aivdm-regress packet-regress geoid-regress time-regress unpack-regress json-regress
 	@echo "Regressions complete."
 
+# Make sure build-from-tarball works
+testbuild: dist
+	tar -xzvf gpsd-$(PACKAGE_VERSION).tar.gz
+	cd gpsd-$(PACKAGE_VERSION); configure; make
+	rm -fr gpsd-$(PACKAGE_VERSION)
+
 # do-tests is a shell script that invokes make with target testregress.
 # This works around automake's lack of support for make targets as tests.
 TESTS_ENVIRONMENT = MAKE=$(MAKE) PYTHON=$(PYTHON)
