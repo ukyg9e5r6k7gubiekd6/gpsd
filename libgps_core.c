@@ -533,7 +533,6 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */
 {
     char *eol;
-    double received = 0;
     ssize_t response_length;
     int status = -1;
 
@@ -594,7 +593,7 @@ int gps_read(/*@out@*/struct gps_data_t *gpsdata)
     assert(eol != NULL);
     *eol = '\0';
     response_length = eol - PRIVATE(gpsdata)->buffer + 1;
-    received = gpsdata->online = timestamp();
+    gpsdata->online = timestamp();
     status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
     /*@+matchanyintegral@*/
     memmove(PRIVATE(gpsdata)->buffer,
