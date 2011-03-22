@@ -349,6 +349,11 @@ prepared for the possibility of invalid JSON fragments.</para>
 attribute is present or has a particular range, yjen the parent
 attribute is emitted first.</para>
 
+<para>There is one constraint on the order in which attributes will
+be omitted. If an optional attribute is present only when a parent
+attribute has a specified value or range of values, the parent
+attribute will be emitted first to make parsing easier.</para>
+
 <para>The remainder of this section documents the core GPSD protocol.
 Extensions are documented in the following sections. The extensions
 may not be supported in your <application>gpsd</application> instance
@@ -361,8 +366,10 @@ if it has been compiled with a restricted feature set.</para>
 <term>TPV</term>
 <listitem>
 <para>A TPV object is a time-position-velocity report. The "class" and "mode"
-fields will reliably be present.  Others may be reported or not
-depending on the fix quality.</para>
+fields will reliably be present. The "mode" field will be emitted
+before optional fields that may be absent when there is no fix. Error
+estimates will be emitted after the fix components they're associated with.
+Others may be reported or not depending on the fix quality.</para>
 
 <table frame="all" pgwide="0"><title>TPV object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -1723,7 +1730,8 @@ of satellite, station, and constellation statistics become arrays of
 JSON sub-objects. Each sentence will normally also have a "device"
 field containing the pathname of the originating device.</para>
 
-<para>All attributes other than the device field are mandatory.</para>
+<para>All attributes other than the device field are mandatory. Header
+attributes are emitted before others.</para>
 
 <refsect3><title>Header portion</title>
 
@@ -2471,7 +2479,8 @@ a restricted feature set.</para>
 <para>AIS packets are dumped as JSON objects with class "AIS".  Each
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
-dumped in scaled or unscaled form. It will also contain a "device" field
+dumped in scaled or unscaled form. (These will be emitted before 
+any type-specific fields.) It will also contain a "device" field
 naming the data source.  Other fields have names and types
 as specified in the <ulink
 url="http://gpsd.berlios.de/AIVDM.html">"AIVDM/AIVDO Protocol
