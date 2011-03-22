@@ -1,4 +1,6 @@
-* Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96~dev
+* Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
+
+* Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
   API version bumped to 5, redesign finished (changes are documented
   in the Client HOWTO). cgps now handles resize signals. Code can now

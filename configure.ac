@@ -1,7 +1,7 @@
 dnl This file is Copyright (c)2010 by the GPSD project
 dnl BSD terms apply: see the file COPYING in the distribution root for details.
 
-AC_INIT(gpsd, 2.96, [http://developer.berlios.de/bugs/?group_id=2116], ,
+AC_INIT(gpsd, 3.0~dev, [http://developer.berlios.de/bugs/?group_id=2116], ,
 	[http://gpsd.berlios.de/])
 AM_INIT_AUTOMAKE
 dnl AC_PREFIX_PROGRAM(gcc)
