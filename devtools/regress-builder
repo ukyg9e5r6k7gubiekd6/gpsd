@@ -22,11 +22,12 @@ import os, sys, random, getopt, time
 driver_names = (
     "aivdm",
     "ashtech",
-    "earthmate",
+    #"earthmate",
     "evermore",
     "fv18",
     "garmin",
     "garmintxt",
+    "geostar",
     "gpsclock",
     "itrax",
     "mtk3301",
@@ -36,13 +37,20 @@ driver_names = (
     "oncore",
     "oceanserver",
     "rtcm104v2",
-    "rtcm104v3",
+    #"rtcm104v3",
     "sirf",
     "superstar2",
-    "tnt",
+    #"tnt",
     "tripmate",
     "tsip",
     "ubx",
+    "timing",
+    "clientdebug",
+    "oldstyle",
+    "ntpshm",
+    "pps",
+    "reconfigure",
+    "controlsend",
 )
 
 
@@ -77,8 +85,6 @@ env	X_LIBS="" \\
 	LDFLAGS=" -L/usr/local/lib -g" \\
 	CFLAGS="-g -O2 -W -Wall" \\
 ./configure --prefix=/home/gpsd --disable-shared \\
-	--without-x \\
-	--disable-itrax \\
 '''
     def n2v(self, n):
         "Number to test-vector"

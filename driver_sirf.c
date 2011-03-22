@@ -447,6 +447,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	words[i] = (uint32_t)getbeu32(buf, 4 * i + 3);
     }
 
+    gpsd_report(LOG_IO, "SiRF: NavData chan %u svid %u\n",chan,svid);
 
 #ifdef ALLOW_RECONFIGURE
     if (!session->context->readonly && session->gpsdata.dev.baudrate < 38400) {

@@ -1411,9 +1411,10 @@ void packet_parse(struct gps_packet_t *lexer)
 	    if (packetlen < 5) {
 		lexer->state = GROUND_STATE;
 	    } else {
-		unsigned int pkt_id, len;
-		size_t n;
+		unsigned int pkt_id;
 #ifdef GARMIN_ENABLE
+		unsigned int len;
+		size_t n;
 		unsigned int ch, chksum;
 		n = 0;
 		/*@ +charint */
