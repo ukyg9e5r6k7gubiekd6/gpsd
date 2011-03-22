@@ -591,6 +591,7 @@ EXTRA_DIST = \
 	packaging/X11/gpsd-logo.png \
 	do-tests \
 	regress-driver \
+	leapsecond.cache \
 	$(PYTHONSCRIPTS_DIST) \
 	$(PYTHONMODULES_DIST) \
 	$(QTLIB_DIST) \
