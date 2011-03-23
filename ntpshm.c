@@ -434,14 +434,13 @@ static int init_kernel_pps(struct gps_device_t *session) {
 	gpsd_report(LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
     }
-    /* Attach the line PPS discpline, so no need to ldattach */
+    /* Attach the line PPS discipline, so no need to ldattach */
     /* This activates the magic /dev/pps0 device */
     if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
 	gpsd_report(LOG_INF, "KPPS cannot set PPS line discipline: %d\n"
 	    , errno);
     	return -1;
     }
-
 
     /* uh, oh, magic file names!, this is not how RFC2783 was designed */
     /* need to look in /sys/devices/virtual/pps/pps?/path
@@ -484,12 +483,14 @@ static int init_kernel_pps(struct gps_device_t *session) {
     /* contruct the magic device path */
     (void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
 
+    /* root privs are required for this device open */
     int ret = open(path, O_RDWR);
     if ( 0 > ret ) {
 	gpsd_report(LOG_INF, "KPPS cannot open %s: %d\n"
 	    , path, errno);
     	return -1;
     }
+    /* root privs are not required past this point */ 
 
     if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
 	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
@@ -517,7 +518,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     }
     return kernelpps_handle;
 }
-#endif
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
@@ -579,6 +580,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      *   /tmp/chrony.ttyXX.sock
      */
 
+    /* root privs are required for this device open */
     chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (chronyfd < 0) {
 	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n",
@@ -594,7 +596,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /* end chrony */
 
+#ifdef __UNUSED__
+    /* wait for the session to go active - makes this safe to call early */
+    while (session->gpsdata.gps_fd == -1) {
+	/* should probably remove this one code is verified */
+	gpsd_report(LOG_PROG, "PPS thread awaiting device activation\n");
+	(void)sleep(1);
+    }
+#endif /* __UNUSED__ */
+
 #if defined(HAVE_SYS_TIMEPPS_H)
+    /* some operations in init_kernel_pps() require root privs */
     int kernelpps_handle = init_kernel_pps( session );
     if ( 0 <= kernelpps_handle ) {
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
