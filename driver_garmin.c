@@ -481,6 +481,13 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		TIME_IS | LATLON_IS | ALTITUDE_IS | STATUS_IS | MODE_IS |
 		SPEED_IS | TRACK_IS | CLIMB_IS | HERR_IS | VERR_IS | PERR_IS |
 		CLEAR_IS | REPORT_IS;
+	    /*
+	     * Garmin documentation says we should wait until four good fixes
+	     * have been seen before trying to use the device for precision 
+	     * time service.
+	     */
+	    if (session->fixcnt > 3)
+		mask |= PPSTIME_IS;
 	}
 	gpsd_report(LOG_DATA,
 		    "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "

@@ -208,7 +208,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->newdata.mode = MODE_3D;
 	    mask |= ALTITUDE_IS | CLIMB_IS;
 	}
-	mask |= TIME_IS | LATLON_IS | TRACK_IS | SPEED_IS | MODE_IS;
+	mask |= TIME_IS | PPSTIME_IS | LATLON_IS | TRACK_IS | SPEED_IS | MODE_IS;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype),
 			   "%3.2f", version);
@@ -258,7 +258,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    break;
 	}
 	/* that's all the information in this packet */
-	mask = TIME_IS | DOP_IS | MODE_IS | STATUS_IS;
+	mask = TIME_IS | PPSTIME_IS | DOP_IS | MODE_IS | STATUS_IS;
 	gpsd_report(LOG_DATA,
 		    "DDO 0x04: gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mode=%d, status=%d mask={TIME| DOP|MODE|STATUS}\n",
 		    session->gpsdata.dop.gdop, session->gpsdata.dop.pdop,
@@ -359,7 +359,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 #undef UBITS
 	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME|RAW}\n",
 		    session->newdata.time);
-	return TIME_IS | RAW_IS;
+	return TIME_IS | PPSTIME_IS | RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
 	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd: %s\n",

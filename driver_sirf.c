@@ -520,7 +520,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 		    session->gpsdata.skyview_time,
 		    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
-	mask |= TIME_IS;
+	mask |= TIME_IS | PPSTIME_IS;
 	/*
 	 * This time stamp, at 4800bps, is so close to 1 sec old as to
 	 * be confusing to ntpd, but ntpshm_put() will ignore it if a better
@@ -650,8 +650,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* fix quality data */
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     mask |=
-	TIME_IS | LATLON_IS | ALTITUDE_IS | TRACK_IS | SPEED_IS | STATUS_IS |
-	MODE_IS | DOP_IS | USED_IS;
+	TIME_IS | PPSTIME_IS | LATLON_IS | ALTITUDE_IS | TRACK_IS |
+	SPEED_IS | STATUS_IS | MODE_IS | DOP_IS | USED_IS;
     gpsd_report(LOG_DATA,
 		"SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
 		session->newdata.time, session->newdata.latitude,
@@ -808,7 +808,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	session->newdata.track = getbeu16(buf, 42) * 1e-2;
 	/* skip 2 bytes of magnetic variation */
 	session->newdata.climb = getbes16(buf, 46) * 1e-2;
-	mask |= TIME_IS | SPEED_IS | TRACK_IS;
+	mask |= TIME_IS | PPSTIME_IS | SPEED_IS | TRACK_IS;
 	if (session->newdata.mode == MODE_3D)
 	    mask |= ALTITUDE_IS | CLIMB_IS;
     }
@@ -892,7 +892,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     if (navtype & 0x40) {	/* UTC corrected timestamp? */
 	struct tm unpacked_date;
 	double subseconds;
-	mask |= TIME_IS;
+	mask |= TIME_IS | PPSTIME_IS;
 	unpacked_date.tm_year = (int)getbeu16(buf, 26) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 29);
@@ -966,7 +966,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 		    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 #endif /* NTPSHM_ENABLE */
-	mask |= TIME_IS;
+	mask |= TIME_IS | PPSTIME_IS;
     }
     return mask;
 }

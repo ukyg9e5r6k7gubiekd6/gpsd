@@ -211,7 +211,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		mask |= STATUS_IS;
 	    }
 	}
-	mask |= TIME_IS | LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | DOP_IS | USED_IS | REPORT_IS;
+	mask |= TIME_IS | PPSTIME_IS | LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | DOP_IS | USED_IS | REPORT_IS;
 
 	gpsd_report(LOG_INF, "Geographic coordinates %f %g %g %g %g %g\n",
 		d1,

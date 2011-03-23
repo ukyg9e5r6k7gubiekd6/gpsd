@@ -515,8 +515,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef DOP_UNDEFINED
 
     mask = LATLON_IS | ALTITUDE_IS | CLIMB_IS | SPEED_IS | TRACK_IS
-	| TIME_IS | STATUS_IS | MODE_IS | USED_IS | HERR_IS | VERR_IS
-	| TIMERR_IS | DOP_IS;
+	| STATUS_IS | MODE_IS | USED_IS | HERR_IS | VERR_IS
+	| TIMERR_IS | DOP_IS
+	| TIME_IS | PPSTIME_IS;
     gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
 		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
 		"epx=%.2f epy=%.2f epv=%.2f "

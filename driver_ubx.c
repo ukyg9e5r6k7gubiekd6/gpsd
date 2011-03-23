@@ -74,7 +74,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
-	mask |= TIME_IS;
+	mask |= TIME_IS | PPSTIME_IS;
     }
 
     epx = (double)(getles32(buf, 12) / 100.0);
@@ -182,7 +182,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->newdata.time);
-    return TIME_IS;
+    return TIME_IS | PPSTIME_IS;
 }
 
 /**
