@@ -20,6 +20,10 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+#if defined(HAVE_SYS_TIMEPPS_H)
+#include <fcntl.h>	/* needed for open() and friends */
+#endif
+
 #ifdef NTPSHM_ENABLE
 #include <sys/time.h>
 #include <sys/ipc.h>
