@@ -17,6 +17,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gps.h"
+#include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
 
