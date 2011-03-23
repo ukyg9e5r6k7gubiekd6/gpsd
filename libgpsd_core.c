@@ -928,6 +928,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Only update the NTP time if we've seen the leap-seconds data.
 	 * Else we may be providing GPS time.
 	 */
+	session->ship_to_ntpd = false;
 	if (session->context->enable_ntpshm == 0) {
 	    //gpsd_report(LOG_PROG, "NTP: off\n");
 	} else if ((received & TIME_IS) == 0) {
