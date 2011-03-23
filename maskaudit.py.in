@@ -9,7 +9,7 @@
 #
 # With -d, generate C code to dump demon-side masks for debugging purposes.
 #
-# With -t, rtabulate usage of defines to find unused ones.  Requires -c or -d.
+# With -t, tabulate usage of defines to find unused ones.  Requires -c or -d.
 
 import sys, commands, glob, getopt
 
@@ -18,7 +18,7 @@ class SourceExtractor:
         self.sourcefile = sourcefile
         self.suffix = suffix
         self.clientside = clientside
-        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c"] + glob.glob("driver_*.c") + ["gpsmon.c", "subframe.c"] + glob.glob("monitor_*.c")
+        self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c", "drivers.c"] + glob.glob("driver_*.c") + ["gpsmon.c", "subframe.c"] + glob.glob("monitor_*.c")
         self.masks = []
         self.primitive_masks = []
         for line in file(self.sourcefile):
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             banner = "Daemon"
 
         if tabulate:
-            print "%-14s	%8s %8s" % (" ", "Library", banner)
+            print "%-14s	%8s" % (" ", banner)
             for (flag, value) in source.masks:
                 print "%-14s	%8s" % (flag, source.relevant(flag))
         if pythonize:
