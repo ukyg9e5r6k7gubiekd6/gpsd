@@ -176,8 +176,10 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		    break;
 		}
 	    st++;
+	    /* bit 7 of the status word: sat used for position */  
 	    if (status & 0x80)
 		session->gpsdata.used[nsv++] = sv;
+	    /* bit 2 of the status word: using for time solution */
 	    if (status & 0x02)
 		session->driver.oncore.good_time = 1;
 	}
