@@ -702,6 +702,7 @@ extern int ntpshm_alloc(struct gps_context_t *);
 extern bool ntpshm_free(struct gps_context_t *, int);
 extern int ntpshm_put(struct gps_device_t *, double, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
+extern void ntpd_link_activate(struct gps_device_t *);
 
 extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
 			     /*@out@*/double *,
