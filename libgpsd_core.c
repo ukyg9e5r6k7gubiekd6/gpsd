@@ -1556,8 +1556,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
 	if ((session->gpsdata.set & LATLON_IS) != 0
-	    && session->gpsdata.status > STATUS_NO_FIX)
+	    && session->gpsdata.status > STATUS_NO_FIX) {
 	    session->context->fixcnt++;
+	    session->fixcnt++;
+	}
 
 #ifdef TIMING_ENABLE
 	session->d_decode_time = timestamp();
