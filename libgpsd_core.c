@@ -94,10 +94,6 @@
 
 #endif
 
-#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t oncore_binary;
-#endif
-
 static void gpsd_run_device_hook(char *device_name, char *hook)
 {
     struct stat statbuf;
@@ -559,13 +555,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
 	/*@ +boolint @*/
-	if (3 < session->context->fixcnt
-#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-	    || (session->device_type == &oncore_binary &&
-		session->driver.oncore.good_time)
-#endif
-	    ) {
-	    /* Garmin doc says PPS is valid after four good fixes. */
+	if (session->ship_to_ntpd) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge. But we
@@ -674,7 +664,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* carefull, unix time to nSec is more precision that a double */
 	    sample.offset = 1 + session->last_fixtime - ts.tv_sec;
 	    sample.offset -= ts.tv_nsec / 1e9;
-#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
+/* was: defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
+#ifdef __UNUSED__
 	    /*@-noeffect@*/
 	    if (session->device_type == &oncore_binary) {
 		int pulse_delay_ns = session->driver.oncore.pps_offset_ns;
@@ -1496,15 +1487,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    //gpsd_report(LOG_PROG, "NTP: bad new time\n");
 	} else if (session->newdata.time == session->last_fixtime) {
 	    //gpsd_report(LOG_PROG, "NTP: Not a new time\n");
-	} else if (session->newdata.mode == MODE_NO_FIX
-#if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-		   && !(session->device_type == &oncore_binary &&
-			session->driver.oncore.good_time!=0)
-#endif
-		   ) {
-	    //gpsd_report(LOG_PROG, "NTP: No fix\n");
+	} else if ((received & PPSTIME_IS) == 0) {
+	    //gpsd_report(LOG_PROG, "NTP: No precision time report\n");
 	} else {
 	    double offset;
+	    session->ship_to_ntpd = true;
 	    //gpsd_report(LOG_PROG, "NTP: Got one\n");
 	    /* assume zero when there's no offset method */
 	    if (session->device_type == NULL

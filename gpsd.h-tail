@@ -397,6 +397,7 @@ struct gps_device_t {
     timestamp_t last_fixtime;		/* so updates happen once */
 # ifdef PPS_ENABLE
     int shmTimeP;
+    bool ship_to_ntpd;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     double mag_var;			/* magnetic variation in degrees */  
@@ -537,7 +538,6 @@ struct gps_device_t {
 	    int PRN[ONCORE_VISIBLE_CH];		/* PRNs of satellite */
 	    int elevation[ONCORE_VISIBLE_CH];	/* elevation of satellite */
 	    int azimuth[ONCORE_VISIBLE_CH];	/* azimuth */
-	    int good_time;
 	    int pps_offset_ns;
 	} oncore;
 #endif /* ONCORE_ENABLE */
