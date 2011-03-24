@@ -392,7 +392,8 @@ this pattern to be replicated in other dynamic OO languages when we
 support them.
 
 The C++ binding is a very thin wrapper around the C.  You get back an
-object, but it's just a reference to the C blackboard structure.
+object, but it's just a reference to the C blackboard structure. There's
+no unpack() method because it doesn't fit the gpsmm object's RAII model.
 
 All bindings will throw a recognizable error from the read entry
 point when the socket is closed from the daemon side.
@@ -443,6 +444,10 @@ int main(void)
 }
 
 ----------------------------------------------------------------------
+
+Note the absence of explicit open and close methods.  The object
+interface is designed on the RAII (Resource Acquisition Is
+Initialization) model; you close it by deallocating it.
 
 Look at test_libgpsmm.cpp in the distribution for a full example.
 

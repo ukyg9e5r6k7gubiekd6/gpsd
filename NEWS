@@ -3,7 +3,8 @@
   Fix a timestamp-clobbering bug in the C library revealed by an
   obscure car-nav device, the MyGuide 3100. The DEVICE 'activated'
   attribute becomes an ISO8601 string; the client libraries will
-  still backward-compatibly read a float value.
+  still backward-compatibly read a float value. gps_unpack() is
+  now a documented part of the library API.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
