@@ -135,7 +135,7 @@ class gpsjson(gpscommon):
     def __iter__(self):
         return self
 
-    def json_unpack(self, buf):
+    def unpack(self, buf):
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
         except ValueError, e:

@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.8, March 2011
+v1.9, March 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -348,6 +348,8 @@ Set watch policy. What you should use instead of send().
 Blocking check with timeout to see in input is waiting.
 |gps_read()		|gpsmm.read()		|gps.read()		|
 Nonblocking read for data from the daemon.
+|gps_unpack()		|			|gps.unpack()		|
+Parse JSON from a specified buffer into a session structure
 |gps_close()		|gpsmm.~gpsmm()		|gps.close()		|
 Close the daemon socket and end the session.
 |gps_data()             |gpsmm.data()           |gps.data()             |

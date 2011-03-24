@@ -304,7 +304,7 @@ class gps(gpsdata, gpsjson):
         if status <= 0:
             return status
         if self.response.startswith("{") and self.response.endswith("}\r\n"):
-            self.json_unpack(self.response)
+            self.unpack(self.response)
             self.__oldstyle_shim()
             self.newstyle = True
             self.valid |= PACKET_SET
