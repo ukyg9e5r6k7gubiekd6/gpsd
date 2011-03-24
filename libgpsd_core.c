@@ -921,7 +921,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Only update the NTP time if we've seen the leap-seconds data.
 	 * Else we may be providing GPS time.
 	 */
-	session->ship_to_ntpd = false;
+	if ( 3 < session->context->fixcnt ) {
+	    session->ship_to_ntpd = true;
+	} else {
+	    session->ship_to_ntpd = false;
+	}
 	if (session->context->enable_ntpshm == 0) {
 	    //gpsd_report(LOG_PROG, "NTP: off\n");
 	} else if ((received & TIME_IS) == 0) {
@@ -934,7 +938,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    //gpsd_report(LOG_PROG, "NTP: No precision time report\n");
 	} else {
 	    double offset;
-	    session->ship_to_ntpd = true;
 	    //gpsd_report(LOG_PROG, "NTP: Got one\n");
 	    /* assume zero when there's no offset method */
 	    if (session->device_type == NULL
