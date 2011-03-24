@@ -1,4 +1,9 @@
-/* libgpsd_core.c -- direct access to GPSes on serial or USB devices.
+/* libgpsd_core.c -- manage access to sensors
+ *
+ * Access to the driver layer goes through the entry points in this file.
+ * The idea is to present a session as an abstraction from which you get 
+ * fixes (and possibly other data updates) by calling gpsd_poll(). The
+ * rest is setup and teardown.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.

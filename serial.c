@@ -468,7 +468,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->baudindex = 0;
 	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
-    gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_open()\n",
+    gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_serial_open()\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     return session->gpsdata.gps_fd;
 }
