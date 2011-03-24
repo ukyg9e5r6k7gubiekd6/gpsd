@@ -923,7 +923,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if ((received & CLEAR_IS)!=0)
 	    session->ship_to_ntpd = false;
-	else if ((received & PPSTIME_IS)!=0)
+	if ((received & PPSTIME_IS)!=0)
 	    session->ship_to_ntpd = true;
 	/*
 	 * Only update the NTP time if we've seen the leap-seconds data.
