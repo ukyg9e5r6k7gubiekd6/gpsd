@@ -541,22 +541,6 @@ void gpsd_assert_sync(struct gps_device_t *session)
      */
     if (session->saved_baud == -1)
 	session->saved_baud = (int)cfgetispeed(&session->ttyset);
-
-#ifdef NTPSHM_ENABLE
-    /*
-     * Now is the right time to grab the shared memory segment(s)
-     * to communicate the navigation message derived and (possibly)
-     * 1pps derived time data to ntpd.
-     */
-
-    /* do not start more than one ntp thread */
-    if (!(session->shmindex >= 0))
-	ntpd_link_activate(session);
-
-    gpsd_report(LOG_INF, "NTPD ntpd_link_activate: %d\n",
-		(int)session->shmindex >= 0);
-
-#endif /* NTPSHM_ENABLE */
 }
 
 void gpsd_close(struct gps_device_t *session)

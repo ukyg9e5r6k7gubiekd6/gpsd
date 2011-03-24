@@ -151,7 +151,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-    ntpd_link_deactivate(session);
 #ifdef ALLOW_RECONFIGURE
     if (!session->context->readonly
 	&& session->device_type != NULL

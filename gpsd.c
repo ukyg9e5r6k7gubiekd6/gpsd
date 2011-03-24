@@ -588,6 +588,9 @@ static void deactivate_device(struct gps_device_t *device)
     if (device->gpsdata.gps_fd != -1) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
+#ifdef NTPSHM_ENABLE
+	ntpd_link_deactivate(device);
+#endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
     }
 }
@@ -630,6 +633,21 @@ static bool add_device(const char *device_name)
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (!allocated_device(devp)) {
 	    gpsd_init(devp, &context, device_name);
+#ifdef NTPSHM_ENABLE
+	    /*
+	     * Now is the right time to grab the shared memory segment(s)
+	     * to communicate the navigation message derived and (possibly)
+	     * 1pps derived time data to ntpd.
+	     */
+
+	    /* do not start more than one ntp thread */
+	    if (!(devp->shmindex >= 0))
+		ntpd_link_activate(devp);
+
+	    gpsd_report(LOG_INF, "NTPD ntpd_link_activate: %d\n",
+			(int)devp->shmindex >= 0);
+
+#endif /* NTPSHM_ENABLE */
 	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
 	    if (nowait) {

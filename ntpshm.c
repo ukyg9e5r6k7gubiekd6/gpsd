@@ -596,14 +596,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /* end chrony */
 
-#ifdef __UNUSED__
-    /* wait for the session to go active - makes this safe to call early */
+    /* wait for the device to go active - makes this safe to call early */
     while (session->gpsdata.gps_fd == -1) {
-	/* should probably remove this one code is verified */
+	/* should probably remove this once code is verified */
 	gpsd_report(LOG_PROG, "PPS thread awaiting device activation\n");
 	(void)sleep(1);
     }
-#endif /* __UNUSED__ */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
