@@ -921,7 +921,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Only update the NTP time if we've seen the leap-seconds data.
 	 * Else we may be providing GPS time.
 	 */
-	if ( 3 < session->context->fixcnt ) {
+	if ( 3 <= session->context->fixcnt ) {
 	    session->ship_to_ntpd = true;
 	} else {
 	    session->ship_to_ntpd = false;
