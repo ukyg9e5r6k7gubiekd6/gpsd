@@ -511,15 +511,11 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 		    "SiRF: NTPD not enough satellites seen: %d\n", st);
     } else {
 	/* SiRF says if 3 sats in view the time is good */
-	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_GPS_1)) {
-	    gpsd_report(LOG_RAW, "SiRF: NTPD just seen GPS_1\n");
-	}
 	gpsd_report(LOG_PROG,
 		    "SiRF: NTPD valid time MID 0x04, seen=0x%02x, time:%.2lf, leap:%d\n",
 		    session->driver.sirf.time_seen,
 		    session->gpsdata.skyview_time,
 		    session->context->leap_seconds);
-	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
 	mask |= TIME_IS | PPSTIME_IS;
 	/*
 	 * This time stamp, at 4800bps, is so close to 1 sec old as to
@@ -637,14 +633,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	gpsd_report(LOG_PROG, "SiRF: NTPD no fix, mode: %d\n",
 		    session->newdata.mode);
     } else {
-	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_GPS_2)) {
-	    gpsd_report(LOG_PROG, "SiRF: NTPD SEEN_GPS_2\n");
-	}
 	gpsd_report(LOG_PROG,
 		    "SiRF: NTPD valid time MID 0x02, seen=0x%02x, time;%.2lf, leap:%d\n",
 		    session->driver.sirf.time_seen,
 		    session->newdata.time, session->context->leap_seconds);
-	session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
     }
 #endif /* NTPSHM_ENABLE */
     /* fix quality data */
@@ -794,13 +786,9 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	    gpsd_report(LOG_PROG, "SiRF: NTPD no year\n",
 			session->newdata.mode);
 	} else {
-	    if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_1)) {
-		gpsd_report(LOG_RAW, "SiRF: NTPD just SEEN_UTC 1\n");
-	    }
 	    gpsd_report(LOG_PROG,
 			"SiRF: NTPD valid time MID 0x29, seen=0x%02x\n",
 			session->driver.sirf.time_seen);
-	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_1;
 	}
 	if ( 3 <= session->gpsdata.satellites_visible ) {
 	    mask |= PPSTIME_IS;

@@ -466,9 +466,6 @@ struct gps_device_t {
 #define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
 	    unsigned long satcounter;
 	    unsigned int time_seen;
-#define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
-#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
-#define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 	    /* fields from Navigation Parameters message */
 	    bool nav_parameters_seen;	/* have we seen one? */
