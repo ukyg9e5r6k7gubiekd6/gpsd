@@ -1330,7 +1330,7 @@ static void consume_packets(struct gps_device_t *device)
 			device->gpsdata.dev.path,
 			gpsd_maskdump(changed));
 	    deactivate_device(device);
-    break;
+	    break;
 	} else if (changed == NODATA_IS) {
 	    /*
 	     * No data on the first fragment read means the device
@@ -1429,6 +1429,43 @@ static void consume_packets(struct gps_device_t *device)
 		context.rtcmtime = timestamp();
 	    }
 	}
+
+#ifdef NTPSHM_ENABLE
+	/*
+	 * Time is eligible for shipping to NTPD if the driver has
+	 * asserted PPSTIME_IS at any point in the current cycle.
+	 */
+	if ((changed & CLEAR_IS)!=0)
+	    device->ship_to_ntpd = false;
+	if ((changed & PPSTIME_IS)!=0)
+	    device->ship_to_ntpd = true;
+	/*
+	 * Only update the NTP time if we've seen the leap-seconds data.
+	 * Else we may be providing GPS time.
+	 */
+	if (device->context->enable_ntpshm == 0) {
+	    //gpsd_report(LOG_PROG, "NTP: off\n");
+	} else if ((changed & TIME_IS) == 0) {
+	    //gpsd_report(LOG_PROG, "NTP: No time this packet\n");
+	} else if (isnan(device->newdata.time)) {
+	    //gpsd_report(LOG_PROG, "NTP: bad new time\n");
+	} else if (device->newdata.time == device->last_fixtime) {
+	    //gpsd_report(LOG_PROG, "NTP: Not a new time\n");
+	} else if (!device->ship_to_ntpd) {
+	    //gpsd_report(LOG_PROG, "NTP: No precision time report\n");
+	} else {
+	    double offset;
+	    //gpsd_report(LOG_PROG, "NTP: Got one\n");
+	    /* assume zero when there's no offset method */
+	    if (device->device_type == NULL
+		|| device->device_type->ntp_offset == NULL)
+		offset = 0.0;
+	    else
+		offset = device->device_type->ntp_offset(device);
+	    (void)ntpshm_put(device, device->newdata.time, offset);
+	    //device->last_fixtime = device->newdata.time;
+	}
+#endif /* NTPSHM_ENABLE */
 
 	/*
 	 * If no reliable end of cycle, must report every time

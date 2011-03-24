@@ -915,43 +915,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		&& session->device_type->parse_packet != NULL)
 		received |= session->device_type->parse_packet(session);
 
-#ifdef NTPSHM_ENABLE
-	/*
-	 * Time is eligible for shipping to NTPD if the driver has
-	 * asserted PPSTIME_IS at any point in the current cycle.
-	 */
-	if ((received & CLEAR_IS)!=0)
-	    session->ship_to_ntpd = false;
-	if ((received & PPSTIME_IS)!=0)
-	    session->ship_to_ntpd = true;
-	/*
-	 * Only update the NTP time if we've seen the leap-seconds data.
-	 * Else we may be providing GPS time.
-	 */
-	if (session->context->enable_ntpshm == 0) {
-	    //gpsd_report(LOG_PROG, "NTP: off\n");
-	} else if ((received & TIME_IS) == 0) {
-	    //gpsd_report(LOG_PROG, "NTP: No time this packet\n");
-	} else if (isnan(session->newdata.time)) {
-	    //gpsd_report(LOG_PROG, "NTP: bad new time\n");
-	} else if (session->newdata.time == session->last_fixtime) {
-	    //gpsd_report(LOG_PROG, "NTP: Not a new time\n");
-	} else if (!session->ship_to_ntpd) {
-	    //gpsd_report(LOG_PROG, "NTP: No precision time report\n");
-	} else {
-	    double offset;
-	    //gpsd_report(LOG_PROG, "NTP: Got one\n");
-	    /* assume zero when there's no offset method */
-	    if (session->device_type == NULL
-		|| session->device_type->ntp_offset == NULL)
-		offset = 0.0;
-	    else
-		offset = session->device_type->ntp_offset(session);
-	    (void)ntpshm_put(session, session->newdata.time, offset);
-	    session->last_fixtime = session->newdata.time;
-	}
-#endif /* NTPSHM_ENABLE */
-
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite any DOPs reported from the packet
