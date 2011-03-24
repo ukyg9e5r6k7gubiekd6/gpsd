@@ -596,6 +596,7 @@ EXTRA_DIST = \
 	$(PYTHONMODULES_DIST) \
 	$(QTLIB_DIST) \
 	$(QTLIB_DIST_MINGW) \
+	doc \
 	test
 
 
@@ -825,7 +826,9 @@ bits-regress: test_bits
 
 python-indentation-regress:
 	set -e; for pyfile in $(PYTHONSCRIPTS_DIST) $(PYTHONMODULES_DIST); do \
-		$(PYTHON) -tt -m py_compile $$pyfile ;\
+	cp $(srcdir)/$$pyfile tmp.py ;\
+	$(PYTHON) -tt -m py_compile tmp.py ;\
+	rm -f tmp.py tmp.pyc ;\
 	done
 
 # Do all normal regression tests.
