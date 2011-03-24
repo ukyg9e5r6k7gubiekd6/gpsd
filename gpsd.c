@@ -611,39 +611,39 @@ static void deactivate_device(struct gps_device_t *device)
 
 static bool open_device( /*@null@*/struct gps_device_t *device)
 {
-	if (NULL == device || gpsd_activate(device) < 0) {
-		return false;
-	}
-	gpsd_report(LOG_INF, "device %s activated\n",
-			device->gpsdata.dev.path);
-	FD_SET(device->gpsdata.gps_fd, &all_fds);
-	adjust_max_fd(device->gpsdata.gps_fd, true);
-	return true;
+    if (NULL == device || gpsd_activate(device) < 0) {
+	return false;
+    }
+    gpsd_report(LOG_INF, "device %s activated\n",
+		device->gpsdata.dev.path);
+    FD_SET(device->gpsdata.gps_fd, &all_fds);
+    adjust_max_fd(device->gpsdata.gps_fd, true);
+    return true;
 }
 
 static bool add_device(const char *device_name)
 /* add a device to the pool; open it right away if in nowait mode */
 {
-	struct gps_device_t *devp;
-	bool ret = false;
-	/* stash devicename away for probing when the first client connects */
-	for (devp = devices; devp < devices + MAXDEVICES; devp++)
-	    if (!allocated_device(devp)) {
-		gpsd_init(devp, &context, device_name);
-		gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
-			    device_name, (int)(devp - devices));
-		if (nowait) {
-			ret = open_device(devp);
-		} else {
-			devp->gpsdata.gps_fd = -1;
-			ret = true;
-		}
-		notify_watchers(devp,
-				"{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
-				devp->gpsdata.dev.path, timestamp());
-		break;
+    struct gps_device_t *devp;
+    bool ret = false;
+    /* stash devicename away for probing when the first client connects */
+    for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	if (!allocated_device(devp)) {
+	    gpsd_init(devp, &context, device_name);
+	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
+			device_name, (int)(devp - devices));
+	    if (nowait) {
+		ret = open_device(devp);
+	    } else {
+		devp->gpsdata.gps_fd = -1;
+		ret = true;
 	    }
-	return ret;
+	    notify_watchers(devp,
+			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
+			    devp->gpsdata.dev.path, timestamp());
+	    break;
+	}
+    return ret;
 }
 
 static bool awaken(struct gps_device_t *device)
