@@ -151,14 +151,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-#ifdef NTPSHM_ENABLE
-    (void)ntpshm_free(session->context, session->shmindex);
-    session->shmindex = -1;
-# ifdef PPS_ENABLE
-    (void)ntpshm_free(session->context, session->shmTimeP);
-    session->shmTimeP = -1;
-# endif	/* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
+    ntpd_link_deactivate(session);
 #ifdef ALLOW_RECONFIGURE
     if (!session->context->readonly
 	&& session->device_type != NULL

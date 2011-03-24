@@ -167,7 +167,7 @@ void ntpshm_init(struct gps_context_t *context, bool enablepps)
     context->enable_ntpshm = true;
 }
 
-int ntpshm_alloc(struct gps_context_t *context)
+static int ntpshm_alloc(struct gps_context_t *context)
 /* allocate NTP SHM segment.  return its segment number, or -1 */
 {
     int i;
@@ -187,7 +187,7 @@ int ntpshm_alloc(struct gps_context_t *context)
     return -1;
 }
 
-bool ntpshm_free(struct gps_context_t * context, int segment)
+static bool ntpshm_free(struct gps_context_t * context, int segment)
 /* free NTP SHM segment */
 {
     if (segment < 0 || segment >= NTPSHMSEGS)
@@ -268,7 +268,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  * good news is that kernel PPS gives us nSec resolution
  * bad news is that ntpshm only has uSec resolution
  */
-int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
+static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
     volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
@@ -612,8 +612,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
     }
     memset( (void *)&pi, 0, sizeof(pps_info_t));
-
 #endif
+
+    /* root privileges are not required after this point */
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
@@ -876,6 +877,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 /*@+mustfreefresh +type +unrecog@*/
 #endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+
+void ntpd_link_deactivate(struct gps_device_t *session)
+{
+#ifdef NTPSHM_ENABLE
+    (void)ntpshm_free(session->context, session->shmindex);
+    session->shmindex = -1;
+# ifdef PPS_ENABLE
+    (void)ntpshm_free(session->context, session->shmTimeP);
+    session->shmTimeP = -1;
+# endif	/* PPS_ENABLE */
+#endif /* NTPSHM_ENABLE */
+}
 
 void ntpd_link_activate(struct gps_device_t *session)
 {

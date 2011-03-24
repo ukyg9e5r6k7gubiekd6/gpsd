@@ -684,7 +684,6 @@ extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
 extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);
-extern void ntpd_link_activate(struct gps_device_t *);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *, 
 				   /*@out@*/char[], size_t);
@@ -698,10 +697,8 @@ extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_subframe_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
 extern void ntpshm_init(struct gps_context_t *, bool);
-extern int ntpshm_alloc(struct gps_context_t *);
-extern bool ntpshm_free(struct gps_context_t *, int);
 extern int ntpshm_put(struct gps_device_t *, double, double);
-extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
+extern void ntpd_link_deactivate(struct gps_device_t *);
 extern void ntpd_link_activate(struct gps_device_t *);
 
 extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
