@@ -335,9 +335,10 @@ void json_device_dump(const struct gps_device_t *device,
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
-    if (device->gpsdata.online > 0) {
+    if (device->gpsdata.online > 0) {	
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
-		       "\"activated\":%2.2f,", device->gpsdata.online);
+		       "\"activated\":\"%s\",", 
+		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
 	if (device->observed != 0) {
 	    int mask = 0;
 	    for (cmp = classmap; cmp < classmap + NITEMS(classmap); cmp++)

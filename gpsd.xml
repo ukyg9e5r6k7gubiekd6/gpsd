@@ -1459,10 +1459,11 @@ backup battery.</para>
 </row>
 <row>
 	<entry>activated</entry>
-	<entry>At device activation and device close time.</entry>
-	<entry>numeric</entry>
-        <entry>Time the device was activated,
-	or 0 if it is being closed.</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Time the device was activated as an ISO8601
+        timestamp. If the device is inactive this attribute is
+        absent.</entry>
 </row>
 <row>
 	<entry>flags</entry>
