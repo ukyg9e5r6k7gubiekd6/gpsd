@@ -128,7 +128,6 @@ WATCH_RAW	= 0x000080	# output of raw packets
 WATCH_SCALED	= 0x000100	# scale output to floats 
 WATCH_TIMING	= 0x000200	# timing information
 WATCH_DEVICE	= 0x000800	# watch specific device
-POLL_NONBLOCK	= 0x001000	# set non-blocking poll
 
 class gpsjson(gpscommon):
     "Basic JSON decoding."
