@@ -506,7 +506,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     }
     session->gpsdata.satellites_visible = st;
 #ifdef NTPSHM_ENABLE
-    if (st <= 3) {
+    if (st < 3) {
 	gpsd_report(LOG_PROG,
 		    "SiRF: NTPD not enough satellites seen: %d\n", st);
     } else {
@@ -650,7 +650,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* fix quality data */
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     mask |=
-	TIME_IS | PPSTIME_IS | LATLON_IS | ALTITUDE_IS | TRACK_IS |
+	TIME_IS | LATLON_IS | ALTITUDE_IS | TRACK_IS |
 	SPEED_IS | STATUS_IS | MODE_IS | DOP_IS | USED_IS;
     gpsd_report(LOG_DATA,
 		"SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
@@ -808,7 +808,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	session->newdata.track = getbeu16(buf, 42) * 1e-2;
 	/* skip 2 bytes of magnetic variation */
 	session->newdata.climb = getbes16(buf, 46) * 1e-2;
-	mask |= TIME_IS | PPSTIME_IS | SPEED_IS | TRACK_IS;
+	mask |= TIME_IS | SPEED_IS | TRACK_IS;
 	if (session->newdata.mode == MODE_3D)
 	    mask |= ALTITUDE_IS | CLIMB_IS;
     }
@@ -892,7 +892,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     if (navtype & 0x40) {	/* UTC corrected timestamp? */
 	struct tm unpacked_date;
 	double subseconds;
-	mask |= TIME_IS | PPSTIME_IS;
+	mask |= TIME_IS;
 	unpacked_date.tm_year = (int)getbeu16(buf, 26) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 29);
@@ -966,7 +966,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 		    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 #endif /* NTPSHM_ENABLE */
-	mask |= TIME_IS | PPSTIME_IS;
+	mask |= TIME_IS;
     }
     return mask;
 }
