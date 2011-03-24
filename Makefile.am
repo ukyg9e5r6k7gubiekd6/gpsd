@@ -292,18 +292,30 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 # need to build them in directories we know about.
 # See configure.ac for the definition of PYTHON_DISTUTILS_LIBDIR
 # and PYTHON_DISTUTILS_SCRIPTDIR.
+# TODO: distutils uses a temporary directory; pass in an appopriate
+# path so that it is under the build directory, not the source
+# directory.  For now, chmod +w the source directory because it's
+# better to have the VPATH build work than to have purity (so that
+# distcheck can work).
+# TODO: the way shlibs are put in the gps directory of the source tree
+# and used for regression is wrong for VPATH builds.  regress-driver
+# should instead load from PYTHON_DISTUTILS_LIBDIR, and then this symlink
+# hack can be removed.  For now, try to be parallel.
 	@rm -f '$@' '$@.tmp'
 	@echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
+	chmod +w . && \
 	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
 	    MAKE='$(MAKE)' \
 		$(PYTHON) setup.py build \
-			--build-lib '$(srcdir)/$(PYTHON_DISTUTILS_LIBDIR)' \
-			--build-scripts '$(srcdir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
+			--build-lib '$(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)' \
+			--build-scripts '$(abs_builddir)/$(PYTHON_DISTUTILS_SCRIPTDIR)' \
 			--mangenerator '$(XMLPROC)') && \
-	(cd '$(srcdir)/gps' && \
+	(cd '$(abs_builddir)' && \
+	    mkdir -p gps && \
+	    cd gps && \
 	    rm -f *.so && \
-	    ln -s ../$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
+	    ln -s $(abs_builddir)/$(PYTHON_DISTUTILS_LIBDIR)/gps/*.so . ) && \
 	mv -f '$@.tmp' '$@'
 CLEANFILES += stamp-python stamp-python.tmp
 endif
