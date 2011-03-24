@@ -400,7 +400,7 @@ static int filesock(char *filename)
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
-    (void)strlcpy(addr.sun_path, filename, 104);	/* from sys/un.h */
+    (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     addr.sun_family = (sa_family_t)AF_UNIX;
     (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
