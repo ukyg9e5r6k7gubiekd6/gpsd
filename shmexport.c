@@ -1,10 +1,13 @@
 /****************************************************************************
 
 NAME
-   shmexport.c - shared-memory exports from the daemon and how to read them
+   shmexport.c - shared-memory export from the daemon
 
 DESCRIPTION
-   
+   This is a very lightweight alternative to JSON-over-sockets.  Clients
+won't be able to filter by device, and won't get device activation/deactivation
+notifications.  But both client and daemon will avoid all the marshalling and 
+unmarshalling overhead.
 
 PERMISSIONS
    This file is Copyright (c) 2010 by the GPSD project
@@ -21,6 +24,9 @@ PERMISSIONS
 #include "gpsd.h"
 
 #ifdef SHM_EXPORT_ENABLE
+
+/*@ -mustfreeonly -nullstate -mayaliasunique @*/
+
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
@@ -35,7 +41,6 @@ bool shm_acquire(struct gps_context_t *context)
 	return false;
     } 
     context->shmexport = (char *)shmat(shmid, 0, 0);
-    /*@ -mustfreefresh */
     if ((int)(long)context->shmexport == -1) {
 	gpsd_report(LOG_ERROR, "shmat failed: %s\n", strerror(errno));
 	context->shmexport = NULL;
@@ -64,16 +69,29 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * Following block of instructions must not be reordered, otherwise 
 	 * havoc will ensue.  asm volatile("sfence") is a GCCism intended
 	 * to prevent reordering.
+	 *
+	 * This is a simple optimistic-concurrency tachnique.  We write
+	 * the second bookend first, then the data, then the first bookend.
+	 * Reader copies what it sees in normal order; that way, if we
+	 * start to write the segment during the read, the second bookend will
+	 * get clobbered first and the data can be detected bad.
 	 */
-	((struct shmexport_t *)context)->bookend2 = tick;
+	((struct shmexport_t *)context->shmexport)->bookend2 = tick;
+#ifndef S_SPLINT_S
 	asm volatile("sfence");
+#endif /* S_SPLINT_S */
 	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
 	       sizeof(struct gps_data_t)); 
+#ifndef S_SPLINT_S
 	asm volatile("sfence");
-	((struct shmexport_t *)context)->bookend1 = tick;
+#endif /* S_SPLINT_S */
+	((struct shmexport_t *)context->shmexport)->bookend1 = tick;
     }
 }
+
+/*@ +mustfreeonly +nullstate +mayaliasunique @*/
+
 #endif /* SHM_EXPORT_ENABLE */
 
 /* end */
