@@ -178,7 +178,7 @@ static void quit_handler(int signum)
     exit(0);
 }
 
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
 /**************************************************************************
  *
  * Doing it with D-Bus
@@ -286,7 +286,7 @@ static int dbus_mainloop(void)
     return 0;
 }
 
-#endif /* DBUS_ENABLE */
+#endif /* DBUS_EXPORT_ENABLE */
 
 /**************************************************************************
  *
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 
     print_gpx_header();
 
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
     /* To force socket use in the default way just give a 'localhost' arg */
     if (optind < argc)
 	return socket_mainloop();

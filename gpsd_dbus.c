@@ -4,7 +4,7 @@
  */
 #include <sys/types.h>
 #include "gpsd_config.h"
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
 #include "gpsd_dbus.h"
 
 static DBusConnection *connection = NULL;
@@ -73,4 +73,4 @@ void send_dbus_fix(struct gps_device_t *channel)
     dbus_message_unref(message);
 }
 
-#endif /* DBUS_ENABLE */
+#endif /* DBUS_EXPORT_ENABLE */

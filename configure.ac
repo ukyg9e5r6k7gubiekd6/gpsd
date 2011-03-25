@@ -570,6 +570,19 @@ fi
 
 AM_CONDITIONAL([CLIENTDEBUG_ENABLE], [test x"$ac_clientdebug" = x"yes"])
 
+dnl check for socket export support
+AC_ARG_ENABLE(socket_export,
+  AC_HELP_STRING([--disable-socket-export],
+		 [disable data export over sockets]),
+  [ac_socket_export=$enableval], [ac_socket_export=yes])
+AC_MSG_CHECKING([for socket-export support])
+if test x"$ac_socket_export" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SOCKET_EXPORT_ENABLE], 1, [socket-export support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for support for oldstyle protocol
 AC_ARG_ENABLE(oldstyle,
   AC_HELP_STRING([--disable-oldstyle],
@@ -702,13 +715,13 @@ fi
 dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
-    AC_HELP_STRING([--enable-dbus],
-		[enable DBUS support]),
-    [ac_dbus=$enableval], [ac_dbus=no])
+    AC_HELP_STRING([--enable-dbus-export],
+		[enable DBUS export support]),
+    [ac_dbus_export=$enableval], [ac_dbus_export=no])
 AC_MSG_CHECKING([for DBUS support])
-if test x"$ac_dbus" = "xyes"; then
+if test x"$ac_dbus_export" = "xyes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
+    AC_DEFINE([DBUS_EXPORT_ENABLE], 1, [DBUS export support])
     # Older versions of autotools barf and die on this.
     #PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
     DBUS_CFLAGS=`pkg-config --cflags dbus-glib-1`
@@ -780,20 +793,20 @@ fi
 dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
 dnl but no DBUS headers.
-dnl ac_dbus=no
+dnl ac_dbus_export=no
 dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS
 dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
 dnl    # Found dbus library, check for required versions and enable it
 dnl
 dnl    AC_MSG_CHECKING([for DBUS support])
 dnl    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
-dnl       [ac_dbus=yes],[ac_dbus=no])
-dnl    AC_MSG_RESULT([$ac_dbus])
+dnl       [ac_dbus_export=yes],[ac_dbus_export=no])
+dnl    AC_MSG_RESULT([$ac_dbus_export])
 dnl    AC_SUBST(DBUS_CFLAGS)
 dnl    AC_SUBST(DBUS_LIBS)
 dnl
-dnl    if test x"ac_dbus" = x"yes" ; then
-dnl       AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
+dnl    if test x"ac_dbus_export" = x"yes" ; then
+dnl       AC_DEFINE([DBUS_EXPORT_ENABLE],1,[Found DBUS libraries])
 dnl    fi
 dnl
 dnl    # Check for glib and dbus-glib, used by gpxlogger
@@ -805,7 +818,7 @@ dnl    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
 dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
 dnl    AC_SUBST(DBUS_GLIB_LIBS)
 dnl fi
-AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
+AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus_export" = x"yes"])
 AM_CONDITIONAL([HAVE_BLUEZ], [test x"$ac_bluetooth" = x"yes"])
 
 dnl mute logging functions?
@@ -990,6 +1003,8 @@ echo "UBX                     : $ac_ubx"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
+echo "Socket export           : $ac_socket_export"
+echo "DBUS export             : $ac_dbus_export"
 echo "Timing support          : $ac_timing"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
@@ -997,7 +1012,6 @@ echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; n
 echo "Fixed port speed        : $ac_baud"
 echo "Priv-drop user          : $ac_user"
 echo "Enable shared libraries : $enable_shared"
-echo "Enable DBUS support     : $ac_dbus"
 echo "Enable BlueZ support    : $ac_bluetooth"
 echo "Enable IPv6 support     : $ac_ipv6"
 echo "Limited max clients     : $ac_maxclients"

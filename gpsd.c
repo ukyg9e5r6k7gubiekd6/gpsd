@@ -42,7 +42,7 @@
 
 #include "gpsd_config.h"
 
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
 #include "gpsd_dbus.h"
 #endif
 
@@ -251,6 +251,77 @@ The following driver types are compiled into this gpsd instance:\n",
     }
 }
 
+static int filesock(char *filename)
+{
+    struct sockaddr_un addr;
+    int sock;
+
+    /*@ -mayaliasunique -usedef @*/
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
+	return -1;
+    }
+    (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
+    addr.sun_family = (sa_family_t)AF_UNIX;
+    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
+    if (listen(sock, QLEN) == -1) {
+	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
+	return -1;
+    }
+    /*@ +mayaliasunique +usedef @*/
+    return sock;
+}
+
+/*
+ * This hackery is intended to support SBCs that are resource-limited
+ * and only need to support one or a few devices each.  It avoids the
+ * space overhead of allocating thousands of unused device structures.
+ * This array fills from the bottom, so as an extreme case you could
+ * reduce LIMITED_MAX_DEVICES to 1.
+ */
+#ifdef LIMITED_MAX_DEVICES
+#define MAXDEVICES	LIMITED_MAX_DEVICES
+#else
+/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
+#define MAXDEVICES	4
+#endif
+
+#define sub_index(s) (int)((s) - subscribers)
+#define allocated_device(devp)	 ((devp)->gpsdata.dev.path[0] != '\0')
+#define free_device(devp)	 (devp)->gpsdata.dev.path[0] = '\0'
+#define initialized_device(devp) ((devp)->context != NULL)
+
+static struct gps_device_t devices[MAXDEVICES];
+
+static void adjust_max_fd(int fd, bool on)
+/* track the largest fd currently in use */
+{
+    if (on) {
+	if (fd > maxfd)
+	    maxfd = fd;
+    }
+#if !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD)
+    /*
+     * I suspect there could be some weird interactions here if
+     * either of these were set lower than FD_SETSIZE.  We'll avoid
+     * potential bugs by not scavenging in this case at all -- should
+     * be OK, as the use case for limiting is SBCs where the limits
+     * will be very low (typically 1) and the maximum size of fd
+     * set to scan through correspondingly small.
+     */
+    else {
+	if (fd == maxfd) {
+	    int tfd;
+
+	    for (maxfd = tfd = 0; tfd < FD_SETSIZE; tfd++)
+		if (FD_ISSET(tfd, &all_fds))
+		    maxfd = tfd;
+	}
+    }
+#endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
+}
+
+#ifdef SOCKET_EXPORT_ENABLE
 static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
@@ -390,27 +461,6 @@ static int passivesocks(char *service, char *tcp_or_udp,
 }
 /* *INDENT-ON* */
 
-static int filesock(char *filename)
-{
-    struct sockaddr_un addr;
-    int sock;
-
-    /*@ -mayaliasunique -usedef @*/
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
-	return -1;
-    }
-    (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
-    addr.sun_family = (sa_family_t)AF_UNIX;
-    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
-    if (listen(sock, QLEN) == -1) {
-	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
-	return -1;
-    }
-    /*@ +mayaliasunique +usedef @*/
-    return sock;
-}
-
 struct subscriber_t
 {
     int fd;			/* client file descriptor. -1 if unused */
@@ -418,62 +468,16 @@ struct subscriber_t
     struct policy_t policy;	/* configurable bits */
 };
 
-/*
- * This hackery is intended to support SBCs that are resource-limited
- * and only need to support one or a few devices each.  It avoids the
- * space overhead of allocating thousands of unused device structures.
- * This array fills from the bottom, so as an extreme case you could
- * reduce LIMITED_MAX_DEVICES to 1.
- */
-#ifdef LIMITED_MAX_DEVICES
-#define MAXDEVICES	LIMITED_MAX_DEVICES
-#else
-/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
-#define MAXDEVICES	4
-#endif
-
 #ifdef LIMITED_MAX_CLIENTS
 #define MAXSUBSCRIBERS LIMITED_MAX_CLIENTS
 #else
 /* subscriber structure is small enough that there's no need to limit this */
 #define MAXSUBSCRIBERS	FD_SETSIZE
 #endif
-#define sub_index(s) (int)((s) - subscribers)
-#define allocated_device(devp)	 ((devp)->gpsdata.dev.path[0] != '\0')
-#define free_device(devp)	 (devp)->gpsdata.dev.path[0] = '\0'
-#define initialized_device(devp) ((devp)->context != NULL)
+
 #define subscribed(sub, devp)    (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0)
 
-static struct gps_device_t devices[MAXDEVICES];
 static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
-
-static void adjust_max_fd(int fd, bool on)
-/* track the largest fd currently in use */
-{
-    if (on) {
-	if (fd > maxfd)
-	    maxfd = fd;
-    }
-#if !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD)
-    /*
-     * I suspect there could be some weird interactions here if
-     * either of these were set lower than FD_SETSIZE.  We'll avoid
-     * potential bugs by not scavenging in this case at all -- should
-     * be OK, as the use case for limiting is SBCs where the limits
-     * will be very low (typically 1) and the maximum size of fd
-     * set to scan through correspondingly small.
-     */
-    else {
-	if (fd == maxfd) {
-	    int tfd;
-
-	    for (maxfd = tfd = 0; tfd < FD_SETSIZE; tfd++)
-		if (FD_ISSET(tfd, &all_fds))
-		    maxfd = tfd;
-	}
-    }
-#endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
-}
 
 #define UNALLOCATED_FD	-1
 
@@ -578,13 +582,16 @@ static void notify_watchers(struct gps_device_t *device, const char *sentence, .
 	if (sub->active != 0 && subscribed(sub, device))
 	    (void)throttled_write(sub, buf, strlen(buf));
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 static void deactivate_device(struct gps_device_t *device)
 /* deactivate device, but leave it in the pool (do not free it) */
 {
+#ifdef SOCKET_EXPORT_ENABLE
     notify_watchers(device,
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
+#endif /* SOCKET_EXPORT_ENABLE */
     if (device->gpsdata.gps_fd != -1) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
@@ -656,47 +663,14 @@ static bool add_device(const char *device_name)
 		devp->gpsdata.gps_fd = -1;
 		ret = true;
 	    }
+#ifdef SOCKET_EXPORT_ENABLE
 	    notify_watchers(devp,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
 			    devp->gpsdata.dev.path, timestamp());
+#endif /* SOCKET_EXPORT_ENABLE */
 	    break;
 	}
     return ret;
-}
-
-static bool awaken(struct gps_device_t *device)
-/* awaken a device and notify all watchers*/
-{
-    /* open that device */
-    if (!initialized_device(device)) {
-	if (!open_device(device)) {
-	    gpsd_report(LOG_PROG, "%s: open failed\n",
-			device->gpsdata.dev.path);
-	    free_device(device);
-	    return false;
-	}
-    }
-
-    if (device->gpsdata.gps_fd != -1) {
-	gpsd_report(LOG_PROG,
-		    "device %d (fd=%d, path %s) already active.\n",
-		    (int)(device - devices),
-		    device->gpsdata.gps_fd, device->gpsdata.dev.path);
-	return true;
-    } else {
-	if (gpsd_activate(device) < 0) {
-	    gpsd_report(LOG_ERROR, "%s: device activation failed.\n",
-			device->gpsdata.dev.path);
-	    return false;
-	} else {
-	    gpsd_report(LOG_RAW,
-			"flagging descriptor %d in assign_channel()\n",
-			device->gpsdata.gps_fd);
-	    FD_SET(device->gpsdata.gps_fd, &all_fds);
-	    adjust_max_fd(device->gpsdata.gps_fd, true);
-	    return true;
-	}
-    }
 }
 
 /*@ observer @*/ static char *snarfline(char *p, /*@out@*/ char **out)
@@ -715,23 +689,6 @@ static bool awaken(struct gps_device_t *device)
     return p;
     /*@ +temptrans +mayaliasunique @*/
 }
-
-#ifdef ALLOW_RECONFIGURE
-static bool privileged_user(struct gps_device_t *device)
-/* is this channel privileged to change a device's behavior? */
-{
-    /* grant user privilege if he's the only one listening to the device */
-    struct subscriber_t *sub;
-    int subcount = 0;
-    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-	if (sub->active == 0)
-	    continue;
-	else if (subscribed(sub, device))
-	    subcount++;
-    }
-    return subcount == 1;
-}
-#endif /* ALLOW_CONFIGURE */
 
 static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
@@ -851,7 +808,58 @@ static void handle_control(int sfd, char *buf)
     /*@ +sefparams @*/
 }
 
+#ifdef SOCKET_EXPORT_ENABLE
+static bool awaken(struct gps_device_t *device)
+/* awaken a device and notify all watchers*/
+{
+    /* open that device */
+    if (!initialized_device(device)) {
+	if (!open_device(device)) {
+	    gpsd_report(LOG_PROG, "%s: open failed\n",
+			device->gpsdata.dev.path);
+	    free_device(device);
+	    return false;
+	}
+    }
+
+    if (device->gpsdata.gps_fd != -1) {
+	gpsd_report(LOG_PROG,
+		    "device %d (fd=%d, path %s) already active.\n",
+		    (int)(device - devices),
+		    device->gpsdata.gps_fd, device->gpsdata.dev.path);
+	return true;
+    } else {
+	if (gpsd_activate(device) < 0) {
+	    gpsd_report(LOG_ERROR, "%s: device activation failed.\n",
+			device->gpsdata.dev.path);
+	    return false;
+	} else {
+	    gpsd_report(LOG_RAW,
+			"flagging descriptor %d in assign_channel()\n",
+			device->gpsdata.gps_fd);
+	    FD_SET(device->gpsdata.gps_fd, &all_fds);
+	    adjust_max_fd(device->gpsdata.gps_fd, true);
+	    return true;
+	}
+    }
+}
+
 #ifdef ALLOW_RECONFIGURE
+static bool privileged_user(struct gps_device_t *device)
+/* is this channel privileged to change a device's behavior? */
+{
+    /* grant user privilege if he's the only one listening to the device */
+    struct subscriber_t *sub;
+    int subcount = 0;
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	if (sub->active == 0)
+	    continue;
+	else if (subscribed(sub, device))
+	    subcount++;
+    }
+    return subcount == 1;
+}
+
 static void set_serial(struct gps_device_t *device,
 		       speed_t speed, char *modestring)
 /* set serial parameters for a device from a speed and modestring */
@@ -1287,13 +1295,16 @@ static void pseudonmea_report(struct subscriber_t *sub,
 	}
     }
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 static void consume_packets(struct gps_device_t *device)
 /* consume and report packets from a specified device */
 {
     gps_mask_t changed;
     int fragments;
+#ifdef SOCKET_EXPORT_ENABLE
     struct subscriber_t *sub;
+#endif /* SOCKET_EXPORT_ENABLE */
 
     gpsd_report(LOG_RAW + 1, "polling %d\n",
 	    device->gpsdata.gps_fd);
@@ -1387,6 +1398,7 @@ static void consume_packets(struct gps_device_t *device)
 		    device->gpsdata.dev.path,
 		    gpsd_maskdump(device->gpsdata.set));
 
+#ifdef SOCKET_EXPORT_ENABLE
 	/* add any just-identified device to watcher lists */
 	if ((changed & DRIVER_IS) != 0) {
 	    bool listeners = false;
@@ -1411,6 +1423,7 @@ static void consume_packets(struct gps_device_t *device)
 		notify_watchers(device, id2);
 	    }
 	}
+#endif /* SOCKET_EXPORT_ENABLE */
 
 	/*
 	 * If the device provided an RTCM packet, stash it
@@ -1488,12 +1501,13 @@ static void consume_packets(struct gps_device_t *device)
 		    if (dgnss != device)
 			netgnss_report(&context, device, dgnss);
 	    }
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
 	    if (device->gpsdata.fix.mode > MODE_NO_FIX)
 		send_dbus_fix(device);
-#endif /* DBUS_ENABLE */
+#endif /* DBUS_EXPORT_ENABLE */
 	}
 
+#ifdef SOCKET_EXPORT_ENABLE
 	/* update all subscribers associated with this device */
 	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 	    /*@-nullderef@*/
@@ -1548,9 +1562,11 @@ static void consume_packets(struct gps_device_t *device)
 	    }
 	    /*@+nullderef@*/
 	} /* subscribers */
+#endif /* SOCKET_EXPORT_ENABLE */
     }
 }
 
+#ifdef SOCKET_EXPORT_ENABLE
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 /* execute GPSD requests from a buffer */
 {
@@ -1569,6 +1585,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
     }
     return (int)throttled_write(sub, reply, strlen(reply));
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 #ifdef __UNUSED_AUTOCONNECT__
 #define DGPS_THRESHOLD	1600000	/* max. useful dist. from DGPS server (m) */
@@ -1655,14 +1672,16 @@ int main(int argc, char *argv[])
     static char *pid_file = NULL;
     static char *control_socket = NULL;
     static int csock = -1;
+#ifdef SOCKET_EXPORT_ENABLE
     static char *gpsd_service = NULL;	/* this static pacifies splint */
+    struct subscriber_t *sub;
+#endif /* SOCKET_EXPORT_ENABLE */
     struct gps_device_t *device;
     sockaddr_t fsin;
     fd_set rfds, control_fds;
     int st, i, option, msocks[2], cfd, dfd;
     bool go_background = true;
     struct timeval tv;
-    struct subscriber_t *sub;
     const struct gps_type_t **dp;
 
 #ifdef PPS_ENABLE
@@ -1714,7 +1733,9 @@ int main(int argc, char *argv[])
 	    }
 	    exit(0);
 	case 'S':
+#ifdef SOCKET_EXPORT_ENABLE
 	    gpsd_service = optarg;
+#endif /* SOCKET_EXPORT_ENABLE */
 	    break;
 	case 'n':
 	    nowait = true;
@@ -1733,9 +1754,17 @@ int main(int argc, char *argv[])
 	}
     }
 
-#ifdef FIXED_PORT_SPEED
-    /* Assume that if we're running with FIXED_PORT_SPEED we're some sort
-     * of embedded configuration where we don't want to wait for connect */
+#if defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE)
+    /*
+     * Force nowait in two circumstances:
+     *
+     * (1) If we're running with FIXED_PORT_SPEED we're some sort
+     * of embedded configuration where we don't want to wait for connect
+     *
+     * (2) Socket export has been disabled.  In this case we have no 
+     * way to know when client apps are watching the export channels,
+     * so we need to be running all the time.
+     */
     nowait = true;
 #endif
 
@@ -1788,6 +1817,8 @@ int main(int argc, char *argv[])
 
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(LOG_INF, "launching (Version %s)\n", VERSION);
+
+#ifdef SOCKET_EXPORT_ENABLE
     /*@ -observertrans @*/
     if (!gpsd_service)
 	gpsd_service =
@@ -1800,6 +1831,7 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
+#endif /* SOCKET_EXPORT_ENABLE */
 
 #ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
@@ -1812,7 +1844,7 @@ int main(int argc, char *argv[])
     (void)ntpshm_init(&context, nowait);
 #endif /* NTPSHM_ENABLE */
 
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
 	/* the connection could not be started */
@@ -1820,7 +1852,7 @@ int main(int argc, char *argv[])
     } else
 	gpsd_report(LOG_PROG,
 		    "successfully connected to the DBUS system bus\n");
-#endif /* DBUS_ENABLE */
+#endif /* DBUS_EXPORT_ENABLE */
 
     if (getuid() == 0 && go_background) {
 	struct passwd *pw;
@@ -1861,8 +1893,10 @@ int main(int argc, char *argv[])
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
 
+#ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++)
 	subscribers[i].fd = UNALLOCATED_FD;
+#endif /* SOCKET_EXPORT_ENABLE*/
 
     /* daemon got termination or interrupt signal */
     if ((st = setjmp(restartbuf)) > 0) {
@@ -1942,6 +1976,7 @@ int main(int argc, char *argv[])
 			dbuf, timestamp(), errno);
 	}
 
+#ifdef SOCKET_EXPORT_ENABLE
 	/* always be open to new client connections */
 	for (i = 0; i < AFCOUNT; i++) {
 	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
@@ -1993,6 +2028,7 @@ int main(int argc, char *argv[])
 		FD_CLR(msocks[i], &rfds);
 	    }
 	}
+#endif /* SOCKET_EXPORT_ENABLE */
 
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
@@ -2069,6 +2105,7 @@ int main(int argc, char *argv[])
 	}
 #endif /* __UNUSED_AUTOCONNECT__ */
 
+#ifdef SOCKET_EXPORT_ENABLE
 	/* accept and execute commands for all clients */
 	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
 	    if (sub->active == 0)
@@ -2155,6 +2192,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* nowait */
+#endif /* SOCKET_EXPORT_ENABLE */
     }
 
     /* if we make it here, we got a signal... deal with it */
@@ -2171,6 +2209,8 @@ int main(int argc, char *argv[])
     }
 
     gpsd_report(LOG_WARN, "exiting.\n");
+
+#ifdef SOCKET_EXPORT_ENABLE
     /*
      * A linger option was set on each client socket when it was
      * created.  Now, shut them down gracefully, letting I/O drain.
@@ -2181,6 +2221,7 @@ int main(int argc, char *argv[])
 	if (sub->active != 0)
 	    detach_client(sub);
     }
+#endif /* SOCKET_EXPORT_ENABLE */
 
     if (control_socket)
 	(void)unlink(control_socket);

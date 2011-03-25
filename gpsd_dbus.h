@@ -5,7 +5,7 @@
 #ifndef _GPSD_DBUS_H_
 #define _GPSD_DBUS_H_
 
-#ifdef DBUS_ENABLE
+#ifdef DBUS_EXPORT_ENABLE
 
 #include <dbus/dbus.h>
 
