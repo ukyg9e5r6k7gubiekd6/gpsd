@@ -570,19 +570,6 @@ fi
 
 AM_CONDITIONAL([CLIENTDEBUG_ENABLE], [test x"$ac_clientdebug" = x"yes"])
 
-dnl check for socket export support
-AC_ARG_ENABLE(socket_export,
-  AC_HELP_STRING([--disable-socket-export],
-		 [disable data export over sockets]),
-  [ac_socket_export=$enableval], [ac_socket_export=yes])
-AC_MSG_CHECKING([for socket-export support])
-if test x"$ac_socket_export" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([SOCKET_EXPORT_ENABLE], 1, [socket-export support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl check for support for oldstyle protocol
 AC_ARG_ENABLE(oldstyle,
   AC_HELP_STRING([--disable-oldstyle],
@@ -710,7 +697,18 @@ else
     AC_MSG_RESULT([no])
 fi
 
-
+dnl check for socket export support
+AC_ARG_ENABLE(socket-export,
+  AC_HELP_STRING([--disable-socket-export],
+		 [disable data export over sockets]),
+  [ac_socket_export=$enableval], [ac_socket_export=yes])
+AC_MSG_CHECKING([for socket-export support])
+if test x"$ac_socket_export" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SOCKET_EXPORT_ENABLE], 1, [socket-export support])
+else
+  AC_MSG_RESULT([no])
+fi
 
 dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
@@ -734,6 +732,19 @@ if test x"$ac_dbus_export" = "xyes"; then
     AC_SUBST(DBUS_GLIB_LIBS)
 else
     AC_MSG_RESULT([no])
+fi
+
+dnl check for shm export support
+AC_ARG_ENABLE(shm-export,
+  AC_HELP_STRING([--enable-shm-export],
+		 [enable export via shared memory]),
+  [ac_shm_export=$enableval], [ac_shm_export=no])
+AC_MSG_CHECKING([for shared-memory-export support])
+if test x"$ac_shm_export" == "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SHM_EXPORT_ENABLE], 1, [shared-memory-export support])
+else
+  AC_MSG_RESULT([no])
 fi
 
 dnl check for limited maximum clients
@@ -1004,6 +1015,7 @@ dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"
 echo "Socket export           : $ac_socket_export"
+echo "Shared-memory export    : $ac_shm_export"
 echo "DBUS export             : $ac_dbus_export"
 echo "Timing support          : $ac_timing"
 echo "NTP SHM                 : $ac_ntpshm"

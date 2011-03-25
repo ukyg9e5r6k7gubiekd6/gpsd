@@ -1507,6 +1507,12 @@ static void consume_packets(struct gps_device_t *device)
 #endif /* DBUS_EXPORT_ENABLE */
 	}
 
+#ifdef SHM_EXPORT_ENABLE
+	if ((changed & (REPORT_IS|NOISE_IS|SATELLITE_IS|SUBFRAME_IS|
+			ATT_IS|RTCM2_IS|RTCM3_IS|AIS_IS)) != 0)
+	    shm_update(&context, &device->gpsdata);
+#endif /* DBUS_EXPORT_ENABLE */
+
 #ifdef SOCKET_EXPORT_ENABLE
 	/* update all subscribers associated with this device */
 	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
@@ -1852,6 +1858,14 @@ int main(int argc, char *argv[])
     } else
 	gpsd_report(LOG_PROG,
 		    "successfully connected to the DBUS system bus\n");
+#endif /* DBUS_EXPORT_ENABLE */
+
+#ifdef SHM_EXPORT_ENABLE
+    /* create the shared segment as root so readers can't mess with it */
+    if (!shm_acquire(&context)) {
+	gpsd_report(LOG_ERROR, "shared-segment creation failed,\n");
+    } else
+	gpsd_report(LOG_PROG, "shared-segment creation succeeded,\n");
 #endif /* DBUS_EXPORT_ENABLE */
 
     if (getuid() == 0 && go_background) {
@@ -2222,6 +2236,10 @@ int main(int argc, char *argv[])
 	    detach_client(sub);
     }
 #endif /* SOCKET_EXPORT_ENABLE */
+
+#ifdef SHM_EXPORT_ENABLE
+    shm_release(&context);
+#endif /* DBUS_EXPORT_ENABLE */
 
     if (control_socket)
 	(void)unlink(control_socket);

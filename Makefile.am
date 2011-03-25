@@ -182,6 +182,7 @@ libgpsd_c_sources = \
 	packet.c \
 	pseudonmea.c \
 	serial.c \
+	shmexport.c \
 	srecord.c \
 	subframe.c \
 	drivers.c \

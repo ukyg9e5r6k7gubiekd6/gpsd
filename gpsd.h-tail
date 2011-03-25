@@ -207,6 +207,11 @@ struct gps_context_t {
     bool shmTimePPS;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+#ifdef SHM_EXPORT_ENABLE
+    /* we don't want the compiler to treat writes to shmexport as dead code,
+     * and we don't want them reordered either */
+    /*@reldef@*/volatile char *shmexport;
+#endif 
 };
 
 struct aivdm_context_t {
@@ -704,6 +709,18 @@ extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
 			     double, double, double, 
 			     double, double, double);
 extern void clear_dop(/*@out@*/struct dop_t *);
+
+/* shmexport.c */
+#define GPSD_KEY	0x47505344	/* "GPSD" */
+struct shmexport_t
+{
+    int bookend1;
+    struct gps_data_t gpsdata;
+    int bookend2;
+};
+extern bool shm_acquire(struct gps_context_t *);
+extern void shm_release(struct gps_context_t *);
+extern void shm_update(struct gps_context_t *, struct gps_data_t *);
 
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);
