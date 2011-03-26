@@ -396,7 +396,11 @@ of the problem.</p>
 
 <p>If you have an Android phone, it is possible to access its onboard
 GPS by pairing it as a Bluetooth device.  Directions from <a
-href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville.</p>
+href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville. There
+is also a <a
+href="http://www.androidzoom.com/android_applications/tools/gps-tether_blgt.html">GPS
+Tether</a> app designed to work with GPSD, but it eems to be in early
+alpha.</p>
 
 <p>The <a href="http://gpsdproxy.sourceforge.net/">gGPSDproxy
 project</a> is a small program which reads GPS data from a running
