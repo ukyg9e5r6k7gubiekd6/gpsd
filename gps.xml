@@ -95,7 +95,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
   <command>gpxlogger</command>  
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-d </arg>
+      <arg choice='opt'>-e <replaceable>export-method</replaceable></arg>
       <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
+      <arg choice='opt'>-l </arg>
       <arg choice='opt'>-m <replaceable>minmove</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
@@ -280,14 +282,21 @@ specified logfile.</para>
 meters (it may include a fractional decimal part).  Motions shorter
 than this will not be logged.</para>
 
-<para>If D-Bus support is available on the host and GPSD is
-configured  to use it, this program listens to DBUS broadcasts 
-from <application>gpsd</application>. (org.gpsd.fix).  Otherwise,
-it uses a conventional socket connection. </para>
+<para><application>gpxlogger</application> can use any of the 
+export methods that <application>gpsd</application> supports.
+For a list of these methods, use the <option>-l</option>.
+To force the method, give the <option>-e</option> one of
+the colon-teminated method names from the <option>-l</option>
+table.</para>
 
-<para>Presence of a server-port-device specification forces use of
-sockets even on a D-Bus capable system, though this is unlikely to be
-of interest to anyone except GPSD developers.</para>
+<para>If D-Bus support is available on the host, GPSD is configured to
+use it, and <command>-e dbus</command> is specified, this program
+listens to DBUS broadcasts from
+<application>gpsd</application> via org.gpsd.fix.</para>
+
+<para>With <command>-e sockets</command>, or if sockets is the method
+defaulted to, you may give a server-port-device specification as
+arguments.</para>
 
 </refsect2>
 </refsect1>

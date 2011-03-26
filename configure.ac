@@ -736,9 +736,9 @@ fi
 
 dnl check for shm export support
 AC_ARG_ENABLE(shm-export,
-  AC_HELP_STRING([--enable-shm-export],
-		 [enable export via shared memory]),
-  [ac_shm_export=$enableval], [ac_shm_export=no])
+  AC_HELP_STRING([--disable-shm-export],
+		 [disable export via shared memory]),
+  [ac_shm_export=$enableval], [ac_shm_export=yes])
 AC_MSG_CHECKING([for shared-memory-export support])
 if test x"$ac_shm_export" == "xyes"; then
     AC_MSG_RESULT([yes])

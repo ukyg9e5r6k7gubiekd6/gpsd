@@ -25,15 +25,15 @@
 extern struct tm *gmtime_r(const time_t *, /*@out@*/ struct tm *tp);
 #endif /* S_SPLINT_S */
 
+static char *author = "Amaury Jacquot, Chris Kuethe, Eric S. Raymond";
+static char *progname;
+static struct fixsource_t source;
+
 /**************************************************************************
  *
  * Transport-layer-independent functions
  *
  **************************************************************************/
-
-static char *author = "Amaury Jacquot, Chris Kuethe";
-static char *license = "BSD";
-static char *progname;
 
 static struct gps_data_t gpsdata;
 static FILE *logfile;
@@ -55,7 +55,6 @@ static void print_gpx_header(void)
     (void)fprintf(logfile," <metadata>\n");
     (void)fprintf(logfile,"  <name>NavSys GPS logger dump</name>\n");
     (void)fprintf(logfile,"  <author>%s</author>\n", author);
-    (void)fprintf(logfile,"  <copyright>%s</copyright>\n", license);
     (void)fprintf(logfile," </metadata>\n");
     (void)fflush(logfile);
 }
@@ -282,19 +281,19 @@ static int dbus_mainloop(void)
 
     dbus_connection_setup_with_g_main(connection, NULL);
 
+    print_gpx_header();
     g_main_loop_run(mainloop);
     return 0;
 }
 
 #endif /* DBUS_EXPORT_ENABLE */
 
+#ifdef SOCKET_EXPORT_ENABLE
 /**************************************************************************
  *
  * Doing it with sockets
  *
  **************************************************************************/
-
-static struct fixsource_t source;
 
 /*@-mustfreefresh -compdestroy@*/
 static int socket_mainloop(void)
@@ -312,9 +311,10 @@ static int socket_mainloop(void)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);
 
+    print_gpx_header();
     for (;;) {
 	if (!gps_waiting(&gpsdata, 5000000)) {
-	    (void)fprintf(stderr, "%s: error whille waiting\n", progname);
+	    (void)fprintf(stderr, "%s: error while waiting\n", progname);
 	    break;
 	} else {
 	    (void)gps_read(&gpsdata);
@@ -325,12 +325,61 @@ static int socket_mainloop(void)
     return 0;
 }
 /*@+mustfreefresh +compdestroy@*/
+#endif /* SOCKET_EXPORT_ENABLE */
+
+#ifdef SHM_EXPORT_ENABLE
+/**************************************************************************
+ *
+ * Doing it with shared memory
+ *
+ **************************************************************************/
+
+/*@-mustfreefresh -compdestroy@*/
+static int shm_mainloop(void)
+{
+    int status;
+    if ((status = gps_shm_open(&gpsdata)) != 0) {
+	(void)fprintf(stderr,
+		      "%s: shm open failed with status %d.\n",
+		      progname, status);
+	return 1;
+    }
+
+    print_gpx_header();
+    for (;;) {
+	(void)gps_shm_read(&gpsdata);
+	conditionally_log_fix(&gpsdata);
+    }
+    /* (void)gps_shm_close(&gpsdata); */
+}
+
+/*@+mustfreefresh +compdestroy@*/
+#endif /* SHM_EXPORT_ENABLE */
 
 /**************************************************************************
  *
  * Main sequence
  *
  **************************************************************************/
+
+struct method_t
+{
+    const char *name;
+    int (*method)(void);
+    const char *description;
+};
+
+static struct method_t methods[] = {
+#ifdef DBUS_EXPORT_ENABLE
+    {"dbus", dbus_mainloop, "DBUS broadcast"},
+#endif /* DBUS_EXPORT_ENABLE */
+#ifdef SHM_EXPORT_ENABLE
+    {"shm", shm_mainloop, "shared menory"},
+#endif /* SOCKET_EXPORT_ENABLE */
+#ifdef SOCKET_EXPORT_ENABLE
+    {"sockets", socket_mainloop, "JSON via sockets"},
+#endif /* SOCKET_EXPORT_ENABLE */
+}; 
 
 static void usage(void)
 {
@@ -347,11 +396,12 @@ int main(int argc, char **argv)
 {
     int ch;
     bool daemonize = false;
+    struct method_t *mp, *method = NULL;
 
     progname = argv[0];
 
     logfile = stdout;
-    while ((ch = getopt(argc, argv, "dD:f:hi:m:V")) != -1) {
+    while ((ch = getopt(argc, argv, "dD:e:f:hi:lm:V")) != -1) {
 	switch (ch) {
 	case 'd':
 	    openlog(basename(progname), LOG_PID | LOG_PERROR, LOG_DAEMON);
@@ -363,6 +413,19 @@ int main(int argc, char **argv)
 	    gps_enable_debug(debug, logfile);
 	    break;
 #endif /* CLIENTDEBUG_ENABLE */
+	case 'e':
+	    for (mp = methods; 
+		 mp < methods + sizeof(methods)/sizeof(methods[0]);
+		 mp++)
+		if (strcmp(mp->name, optarg) == 0)
+		    method = mp;
+	    if (method == NULL) {
+		(void)fprintf(stderr, 
+			      "%s: %s is not a known export method.\n", 
+			      optarg, progname);
+		exit(1);
+	    }
+	    break;
        case 'f':       /* Output file name. */
             {
                 char    fname[PATH_MAX];
@@ -391,6 +454,12 @@ int main(int argc, char **argv)
 		fprintf(stderr,
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
+	case 'l':
+	    for (method = methods; 
+		 method < methods + sizeof(methods)/sizeof(methods[0]);
+		 method++)
+		(void)printf("%s: %s\n", method->name, method->description);
+	    exit(0);
         case 'm':
 	    minmove = (double )atoi(optarg);
 	    break;
@@ -441,16 +510,13 @@ int main(int argc, char **argv)
 
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
-    print_gpx_header();
-
-#ifdef DBUS_EXPORT_ENABLE
-    /* To force socket use in the default way just give a 'localhost' arg */
-    if (optind < argc)
-	return socket_mainloop();
-    else
-	return dbus_mainloop();
-#else
-    return socket_mainloop();
-#endif
+    if (method != NULL) {
+	exit((*method->method)());
+    } else if (sizeof(methods)/sizeof(methods[0]) > 0) {
+	exit((methods[0].method)());
+    } else {
+	(void)fprintf(stderr, "%s: no export methods.\n", progname);
+	exit(1);
+    }	
 }
 /*@+mustfreefresh +globstate@*/
