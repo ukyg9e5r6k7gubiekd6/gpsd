@@ -1438,8 +1438,8 @@ extern const char /*@observer@*/ *gps_data(struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
 extern int gps_shm_open(/*@out@*/struct gps_data_t *);
-extern int gps_shm_read(/*@out@*/struct gps_data_t *);
-extern int gps_shm_close(struct gps_data_t *);
+extern int gps_shm_read(struct gps_data_t *);
+extern void gps_shm_close(struct gps_data_t *);
 
 /* this only needs to be visible for the unit tests */
 extern int gps_unpack(char *, struct gps_data_t *);

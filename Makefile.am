@@ -156,6 +156,7 @@ libgps_c_sources = \
 	json.c \
 	libgps_core.c \
 	libgps_json.c \
+	libgps_shm.c \
 	netlib.c \
 	rtcm2_json.c \
 	shared_json.c \
