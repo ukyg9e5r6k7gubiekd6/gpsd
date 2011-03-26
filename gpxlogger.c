@@ -85,6 +85,8 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 {
     char tbuf[128];
 
+    (void)fprintf(logfile,"   <!-- tag=\"%s\"-->\n", gpsdata->tag);
+
     (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 gpsdata->fix.latitude, gpsdata->fix.longitude);
     if ((isnan(gpsdata->fix.altitude) == 0))

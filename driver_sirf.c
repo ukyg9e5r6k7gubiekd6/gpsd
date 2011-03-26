@@ -516,6 +516,11 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 		    session->driver.sirf.time_seen,
 		    session->gpsdata.skyview_time,
 		    session->context->leap_seconds);
+	/*
+	 * Might be better if we didn't change the fix timestamp here,
+	 * but presently there's no other way to pass the time to NTP.
+	 */
+	session->newdata.time = session->gpsdata.skyview_time;
 	mask |= TIME_IS | PPSTIME_IS;
 	/*
 	 * This time stamp, at 4800bps, is so close to 1 sec old as to
