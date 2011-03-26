@@ -562,11 +562,6 @@ on weird machines.  The regression test should spot these.</p>
 an unusual set of data type widths, take a look at bits.h.  We've
 tried to collect all the architecture dependencies here.</p>
 
-<p>If you are porting to GCC on x64 Atom or any other compiler/machine
-combination where you suspect memcpy(3) might be implemented by
-reverse rather than forward copy, it may screw up the shared-memory
-export. Read the comment about this in libgps_shm.c and beware.</p>
-
 <h2 id="architecture">Architecture and how to hack it</h2>
 
 <p>There are two useful ways to think about the GPSD architecture.

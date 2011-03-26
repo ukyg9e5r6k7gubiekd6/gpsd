@@ -74,7 +74,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * the second bookend first, then the data, then the first bookend.
 	 * Reader copies what it sees in normal order; that way, if we
 	 * start to write the segment during the read, the second bookend will
-	 * get clobbered first and the data can be detected bad.
+	 * get clobbered first and the data can be detected as bad.
 	 */
 	((struct shmexport_t *)context->shmexport)->bookend2 = tick;
 #ifndef S_SPLINT_S

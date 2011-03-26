@@ -54,21 +54,29 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	int before, after;
 	struct shmexport_t *shared = (struct shmexport_t *)gpsdata->privdata;
 
-	before = shared->bookend1;
 	/*
-	 * The bookend-consistency technique wants this to be a forward copy.
-	 * But it is not guaranteed, that memcpy() works this way, and some compilers on some platforms
-	 * are known to implement it as a reverse copy.  Notably GCC does
-	 * this on x64 Atom. 
+	 * Following block of instructions must not be reordered, otherwise 
+	 * havoc will ensue.  asm volatile("sfence") is a GCCism intended
+	 * to prevent reordering.
 	 *
-	 * The safest thing to do here would be to use a naive C implementation
-	 * of forward byte copy, but if we did that we'd be sacrificing the 
-	 * superior performance of the asm optimization GCC does for 
+	 * This is a simple optimistic-concurrency tachnique.  We wrote
+	 * the second bookend first, then the data, then the first bookend.
+	 * Reader copies what it sees in normal order; that way, if we
+	 * start to write the segment during the read, the second bookend will
+	 * get clobbered first and the data can be detected as bad.
 	 */
+	before = shared->bookend1;
+#ifndef S_SPLINT_S
+	asm volatile("sfence");
+#endif /* S_SPLINT_S */
 	(void)memcpy((void *)gpsdata, 
 		     (void *)&shared->gpsdata, 
 		     sizeof(struct gps_data_t));
+#ifndef S_SPLINT_S
+	asm volatile("sfence");
+#endif /* S_SPLINT_S */
 	after = shared->bookend2;
+
 	/*@i1@*/gpsdata->privdata = shared;
 	return (before == after) ? 0 : -1;
     }
