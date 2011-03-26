@@ -422,6 +422,10 @@ href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <p>There's a Perl client library <a
 href="http://search.cpan.org/dist/Net-GPSD3/">on CPAN.</a></p>
 
+<p>A Java binding is <a
+href="http://forge.hoegergroup.de/projects/gpsd4java/">in early
+development</a>.
+
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 
 <p>There's a <a
