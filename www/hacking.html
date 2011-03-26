@@ -560,12 +560,7 @@ on weird machines.  The regression test should spot these.</p>
 
 <p>If you are porting to a true 16-bit machine, or something else with
 an unusual set of data type widths, take a look at bits.h.  We've
-tried to collect all the architecture dependencies here.  If splint
-gives you warnings, it is possible you may need to adjust the -D
-directives in .splintrc that are used to define away fixed-width
-typedefs.</p>
-
-<p>(No, we don't know why splint doesn't handle these natively.)</p>
+tried to collect all the architecture dependencies here.</p>
 
 <p>If you are porting to GCC on x64 Atom or any other compiler/machine
 combination where you suspect memcpy(3) might be implemented by
