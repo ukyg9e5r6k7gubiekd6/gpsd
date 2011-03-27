@@ -21,6 +21,8 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
+#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
+
 #ifdef S_SPLINT_S
 extern struct tm *gmtime_r(const time_t *, /*@out@*/ struct tm *tp);
 #endif /* S_SPLINT_S */
@@ -376,20 +378,20 @@ static struct method_t methods[] = {
     {"dbus", dbus_mainloop, "DBUS broadcast"},
 #endif /* DBUS_EXPORT_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
-    {"shm", shm_mainloop, "shared menory"},
+    {"shm", shm_mainloop, "shared memory"},
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE
     {"sockets", socket_mainloop, "JSON via sockets"},
 #endif /* SOCKET_EXPORT_ENABLE */
-}; 
+};
 
 static void usage(void)
 {
     fprintf(stderr,
-	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [-m minmove] [server[:port:[device]]]\n",
-	    progname);
-    fprintf(stderr,
-	    "\tdefaults to '%s -i 5 -j 0 localhost:2947'\n", progname);
+	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [-m minmove]\n"
+	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
+	    "defaults to '%s -i 5 -j 0 -e %s localhost:2947'\n",
+	    progname, progname, (NITEMS(methods) > 0) ? methods[0].name : "(none)");
     exit(1);
 }
 
@@ -416,15 +418,15 @@ int main(int argc, char **argv)
 	    break;
 #endif /* CLIENTDEBUG_ENABLE */
 	case 'e':
-	    for (mp = methods; 
-		 mp < methods + sizeof(methods)/sizeof(methods[0]);
+	    for (mp = methods;
+		 mp < methods + NITEMS(methods);
 		 mp++)
 		if (strcmp(mp->name, optarg) == 0)
 		    method = mp;
 	    if (method == NULL) {
-		(void)fprintf(stderr, 
-			      "%s: %s is not a known export method.\n", 
-			      optarg, progname);
+		(void)fprintf(stderr,
+			      "%s: %s is not a known export method.\n",
+			      progname, optarg);
 		exit(1);
 	    }
 	    break;
@@ -457,8 +459,8 @@ int main(int argc, char **argv)
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'l':
-	    for (method = methods; 
-		 method < methods + sizeof(methods)/sizeof(methods[0]);
+	    for (method = methods;
+		 method < methods + NITEMS(methods);
 		 method++)
 		(void)printf("%s: %s\n", method->name, method->description);
 	    exit(0);
@@ -514,11 +516,11 @@ int main(int argc, char **argv)
 
     if (method != NULL) {
 	exit((*method->method)());
-    } else if (sizeof(methods)/sizeof(methods[0]) > 0) {
+    } else if (NITEMS(methods)) {
 	exit((methods[0].method)());
     } else {
 	(void)fprintf(stderr, "%s: no export methods.\n", progname);
 	exit(1);
-    }	
+    }
 }
 /*@+mustfreefresh +globstate@*/
