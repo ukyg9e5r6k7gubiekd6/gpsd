@@ -77,15 +77,11 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * get clobbered first and the data can be detected as bad.
 	 */
 	((struct shmexport_t *)context->shmexport)->bookend2 = tick;
-#ifndef S_SPLINT_S
-	asm volatile("sfence");
-#endif /* S_SPLINT_S */
+	barrier();
 	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
 	       sizeof(struct gps_data_t)); 
-#ifndef S_SPLINT_S
-	asm volatile("sfence");
-#endif /* S_SPLINT_S */
+	barrier();
 	((struct shmexport_t *)context->shmexport)->bookend1 = tick;
     }
 }

@@ -66,15 +66,11 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	 * get clobbered first and the data can be detected as bad.
 	 */
 	before = shared->bookend1;
-#ifndef S_SPLINT_S
-	asm volatile("sfence");
-#endif /* S_SPLINT_S */
+	barrier();
 	(void)memcpy((void *)gpsdata, 
 		     (void *)&shared->gpsdata, 
 		     sizeof(struct gps_data_t));
-#ifndef S_SPLINT_S
-	asm volatile("sfence");
-#endif /* S_SPLINT_S */
+	barrier();
 	after = shared->bookend2;
 
 	/*@i1@*/gpsdata->privdata = shared;
