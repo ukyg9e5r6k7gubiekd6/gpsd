@@ -63,6 +63,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
     if (context->shmexport != NULL)
     {
 	static int tick;
+	struct shmexport_t *shared = (struct shmexport_t *)context->shmexport;
 
 	++tick;
 	/*
@@ -76,13 +77,14 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * start to write the segment during the read, the second bookend will
 	 * get clobbered first and the data can be detected as bad.
 	 */
-	((struct shmexport_t *)context->shmexport)->bookend2 = tick;
+	shared->bookend2 = tick;
 	barrier();
 	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
 	       sizeof(struct gps_data_t)); 
+	shared->gpsdata.gps_fd = -1;
 	barrier();
-	((struct shmexport_t *)context->shmexport)->bookend1 = tick;
+	shared->bookend1 = tick;
     }
 }
 

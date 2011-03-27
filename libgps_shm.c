@@ -74,7 +74,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	after = shared->bookend2;
 
 	/*@i1@*/gpsdata->privdata = shared;
-	return (before == after) ? 0 : -1;
+	return (before == after) ? sizeof(struct gps_data_t) : 0;
     }
 }
 

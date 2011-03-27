@@ -351,10 +351,15 @@ static int shm_mainloop(void)
 
     print_gpx_header();
     for (;;) {
-	(void)gps_shm_read(&gpsdata);
-	conditionally_log_fix(&gpsdata);
+	status = gps_shm_read(&gpsdata);
+
+	if (status == -1)
+	    break;
+	if (status > 0)
+	    conditionally_log_fix(&gpsdata);
     }
-    /* (void)gps_shm_close(&gpsdata); */
+    (void)gps_shm_close(&gpsdata);
+    return 0;
 }
 
 /*@+mustfreefresh +compdestroy@*/

@@ -759,7 +759,7 @@ void cfmakeraw(struct termios *);
 #define DEVICEHOOKPATH SYSCONFDIR"/gpsd/device-hook"
 
 /* memory barriers */
-static inline void barrier(void) {
+static /*@unused@*/ inline void barrier(void) {
 #ifdef __GNUC__
 #ifndef S_SPLINT_S
 	asm volatile("sfence");
