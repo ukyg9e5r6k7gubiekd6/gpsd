@@ -508,7 +508,7 @@ static gps_mask_t parse_input(struct gps_device_t *session)
     }
 #ifdef NTPSHM_ENABLE
     if (session->context->enable_ntpshm 
-	&& 0 != (st & TIME_SET)
+	&& 0 != (st & TIME_IS)
 	&& (session->gpsdata.fix.time != session->last_fixtime)) {
 	    /* FIXME!! this needs an empirical fudge */
 	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);

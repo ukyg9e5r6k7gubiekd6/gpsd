@@ -162,7 +162,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     uint8_t preamble;
     int i = 0;   /* handy loop counter */
     struct subframe_t *subp = &session->gpsdata.subframe;
-    session->gpsdata.set |= SUBFRAME_SET;
     gpsd_report(LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
