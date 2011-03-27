@@ -17,10 +17,6 @@
 #include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef S_SPLINT_S
-#include <sys/socket.h>
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #ifndef USE_QT
 #ifndef S_SPLINT_S
@@ -89,151 +85,86 @@ static void gps_trace(int errlevel, const char *fmt, ...)
 # define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
 
-/*@-nullderef@*/
 int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 	       /*@out@*/ struct gps_data_t *gpsdata)
 {
+    int status = -1;
+
     /*@ -branchstate @*/
     if (!gpsdata)
 	return -1;
-    if (!host)
-	host = "localhost";
-    if (!port)
-	port = DEFAULT_GPSD_PORT;
 
     libgps_debug_trace((DEBUG_CALLS, "gps_open(%s, %s)\n", host, port));
 
-#ifndef USE_QT
-    if ((gpsdata->gps_fd =
-	 netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
-	errno = gpsdata->gps_fd;
-	libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
-	return -1;
+#ifdef SHM_EXPORT_ENABLE
+    if (strcmp(port, GPSD_SHARED_MEMORY) == 0) {
+	status = gps_shm_open(gpsdata);
+	if (status == -1)
+	    status = SHM_NOSHARED;
+	else if (status == -2)
+	    status = SHM_NOATTACH;
     }
-    else
-	libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns socket on fd %d\n",
-			    gpsdata->gps_fd));
-#else
-    QTcpSocket *sock = new QTcpSocket();
-    gpsdata->gps_fd = sock;
-    sock->connectToHost(host, QString(port).toInt());
-    if (!sock->waitForConnected())
-	qDebug() << "libgps::connect error: " << sock->errorString();
-    else
-	qDebug() << "libgps::connected!";
-#endif
+#endif /* SHM_EXPORT_ENABLE */
+
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_open(host, port, gpsdata);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
 
-    /* set up for line-buffered I/O over the daemon socket */
-    gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
-    if (gpsdata->privdata == NULL)
-	return -1;
-    PRIVATE(gpsdata)->newstyle = false;
-    PRIVATE(gpsdata)->waiting = 0;
-    return 0;
+    return status;
     /*@ +branchstate @*/
 }
 
-/*@-compdef -usereleased@*/
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
-#ifndef USE_QT
-    free(PRIVATE(gpsdata));
-    (void)close(gpsdata->gps_fd);
-    gpsdata->gps_fd = -1;
-#else
-    QTcpSocket *sock = (QTcpSocket *) gpsdata->gps_fd;
-    sock->disconnectFromHost();
-    delete sock;
-    gpsdata->gps_fd = NULL;
-#endif
-
-    return 0;
-}
-/*@+compdef +usereleased@*/
-
-/*@-compdef -usedef -uniondef@*/
-int gps_read(/*@out@*/struct gps_data_t *gpsdata)
-/* wait for and read data being streamed from the daemon */
-{
-    char *eol;
-    ssize_t response_length;
     int status = -1;
 
-    gpsdata->set &= ~PACKET_SET;
-    for (eol = PRIVATE(gpsdata)->buffer;
-	 *eol != '\n' && eol < PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting; eol++)
-	continue;
-    if (*eol != '\n')
-	eol = NULL;
+    libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
-    errno = 0;
-
-    if (eol == NULL) {
-#ifndef USE_QT
-	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
-	status = (int)recv(gpsdata->gps_fd,
-			   PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting,
-			   sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting, 0);
-#else
-	status =
-	    ((QTcpSocket *) (gpsdata->gps_fd))->read(PRIVATE(gpsdata)->buffer +
-						     PRIVATE(gpsdata)->waiting,
-						     sizeof(PRIVATE(gpsdata)->buffer) -
-						     PRIVATE(gpsdata)->waiting);
-#endif
-
-	/* if we just received data from the socket, it's in the buffer */
-	if (status > -1)
-	    PRIVATE(gpsdata)->waiting += status;
-	/* buffer is empty - implies no data was read */
-	if (PRIVATE(gpsdata)->waiting == 0) {
-	    /* 
-	     * If we received 0 bytes, other side of socket is closing.
-	     * Return -1 as end-of-data indication.
-	     */
-	    if (status == 0)
-		return -1;
-#ifndef USE_QT
-	    /* count transient errors as success, we'll retry later */
-	    else if (errno == EINTR || errno == EAGAIN
-		     || errno == EWOULDBLOCK)
-		return 0;
-#endif
-	    /* hard error return of -1, pass it along */
-	    else
-		return -1;
-	}
-	/* there's buffered data waiting to be returned */
-	for (eol = PRIVATE(gpsdata)->buffer;
-	     *eol != '\n' && eol < PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting; eol++)
-	    continue;
-	if (*eol != '\n')
-	    eol = NULL;
-	if (eol == NULL)
-	    return 0;
+#ifdef SHM_EXPORT_ENABLE
+    if (gpsdata->gps_fd == -1) {
+	gps_shm_close(gpsdata);
+	status = 0;
     }
+#endif /* SHM_EXPORT_ENABLE */
 
-    assert(eol != NULL);
-    *eol = '\0';
-    response_length = eol - PRIVATE(gpsdata)->buffer + 1;
-    gpsdata->online = timestamp();
-    status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
-    /*@+matchanyintegral@*/
-    memmove(PRIVATE(gpsdata)->buffer,
-	    PRIVATE(gpsdata)->buffer + response_length, PRIVATE(gpsdata)->waiting - response_length);
-    /*@-matchanyintegral@*/
-    PRIVATE(gpsdata)->waiting -= response_length;
-    gpsdata->set |= PACKET_SET;
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_close(gpsdata);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
 
-    return (status == 0) ? (int)response_length : status;
+	return status;
 }
-/*@+compdef -usedef +uniondef@*/
+
+int gps_read(struct gps_data_t *gpsdata)
+/* read from a gpsd connection */
+{
+    int status = -1;
+
+    libgps_debug_trace((DEBUG_CALLS, "gps_read()\n"));
+
+#ifdef SHM_EXPORT_ENABLE
+    if (gpsdata->gps_fd == -1) {
+	gps_shm_read(gpsdata);
+	status = 0;
+    }
+#endif /* SHM_EXPORT_ENABLE */
+
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_read(gpsdata);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    return status;
+}
 
 extern const char /*@observer@*/ *gps_errstr(const int err)
 {
