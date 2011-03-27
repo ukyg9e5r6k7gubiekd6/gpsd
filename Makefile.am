@@ -236,7 +236,7 @@ ais_json.i: jsongen.py
 	chmod a-w ais_json.i
 
 revision.h: Makefile
-	@rm -f revision.h && \
+	rm -f revision.h && \
 	echo '#define' REVISION '"'`date -u +%Y-%m-%dT%H:%M:%S`'"' >revision.h && \
 	chmod a-w revision.h
 
@@ -298,8 +298,8 @@ stamp-python: gpspacket.c gpsclient.c libgps.la setup.py $(PYTHONMODULES_DIST) $
 # and used for regression is wrong for VPATH builds.  regress-driver
 # should instead load from PYTHON_DISTUTILS_LIBDIR, and then this symlink
 # hack can be removed.  For now, try to be parallel.
-	@rm -f '$@' '$@.tmp'
-	@echo 'timestamp for $@' > '$@.tmp'
+	rm -f '$@' '$@.tmp'
+	echo 'timestamp for $@' > '$@.tmp'
 	(cd '$(srcdir)' && \
 	chmod +w . && \
 	env version='$(PACKAGE_VERSION)' abs_builddir='$(abs_builddir)' \
@@ -513,7 +513,7 @@ BUILT_MANPAGES = $(MANPAGES_DIST)
 gps.1 xgps.1 xgpsspeed.1 cgps.1 lcdgps.1: stamp-gps-manpages
 	+@WITNESS=stamp-gps-manpages; $(MULTIOUT_RECOVER_DELETED)
 stamp-gps-manpages: gps.xml
-	@rm -f '$@' '$@.tmp'
+	rm -f '$@' '$@.tmp'
 	echo 'timestamp for $@' > '$@.tmp' && \
 	$(XMLPROC) $(XMLPROCFLAGS) $(MANTARGET) '$(srcdir)/gps.xml' && \
 	mv -f '$@.tmp' '$@'
@@ -757,61 +757,61 @@ gps-makeregress: gpsd stamp-python
 # Regression-test the RTCM decoder.
 rtcm-regress: gpsdecode
 	@echo "Testing RTCM decoding..."
-	@mkdir -p test
-	@for f in $(srcdir)/test/*.rtcm2; do \
+	mkdir -p test
+	for f in $(srcdir)/test/*.rtcm2; do \
 		echo "Testing $${f}..."; \
 		$(srcdir)/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; \
 		diff -ub $${f}.chk /tmp/test-$$$$.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for RTCM2"
-	@$(srcdir)/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; \
+	$(srcdir)/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; \
 		grep -v '^#' test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; \
 		rm /tmp/test-$$$$.chk
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: gpsdecode
-	@for f in $(srcdir)/test/*.rtcm2; do \
+	for f in $(srcdir)/test/*.rtcm2; do \
 		$(srcdir)/gpsdecode -j < $${f} > $${f}.chk; \
 	done
 
 # Regression-test the AIVDM decoder.
 aivdm-regress: gpsdecode
 	@echo "Testing AIVDM decoding..."
-	@mkdir -p $(srcdir)/test
-	@for f in $(srcdir)/test/*.aivdm; do \
+	mkdir -p $(srcdir)/test
+	for f in $(srcdir)/test/*.aivdm; do \
 		echo "Testing $${f}..."; \
 		$(srcdir)/gpsdecode -u -c <$${f} >/tmp/test-$$$$.chk; \
 		diff -ub $${f}.chk /tmp/test-$$$$.chk; \
 	done;
 	@echo "Testing idempotency of JSON dump/decode for AIS"
-	@$(srcdir)/gpsdecode -e -j <$(srcdir)/test/synthetic-ais.json >/tmp/test-$$$$.chk; \
+	$(srcdir)/gpsdecode -e -j <$(srcdir)/test/synthetic-ais.json >/tmp/test-$$$$.chk; \
 		grep -v '^#' $(srcdir)/test/synthetic-ais.json | diff -ub - /tmp/test-$$$$.chk; \
 		rm /tmp/test-$$$$.chk
 
 # Rebuild the AIVDM regression tests.
 aivdm-makeregress: gpsdecode
-	@for f in $(srcdir)/test/*.aivdm; do \
+	for f in $(srcdir)/test/*.aivdm; do \
 		$(srcdir)/gpsdecode -u -c <$${f} > $${f}.chk; \
 	done
 
 # Regression-test the packet getter.
 packet-regress: test_packet
 	@echo "Testing detection of invalid packets..."
-	@$(srcdir)/test_packet | diff -u $(srcdir)/test/packet.test.chk -
+	$(srcdir)/test_packet | diff -u $(srcdir)/test/packet.test.chk -
 
 # Rebuild the packet-getter regression test
 packet-makeregress: test_packet
-	@mkdir -p $(srcdir)/test
+	mkdir -p $(srcdir)/test
 	$(srcdir)/test_packet >$(srcdir)/test/packet.test.chk
 
 # Regression-test the geoid tester.
 geoid-regress: test_geoid
 	@echo "Testing the geoid model..."
-	@$(srcdir)/test_geoid 37.371192 122.014965 | diff -u $(srcdir)/test/geoid.test.chk -
+	$(srcdir)/test_geoid 37.371192 122.014965 | diff -u $(srcdir)/test/geoid.test.chk -
 
 # Rebuild the packet-getter regression test
 geoid-makeregress: test_geoid
-	@mkdir -p $(srcdir)/test
+	mkdir -p $(srcdir)/test
 	$(srcdir)/test_geoid 37.371192 122.014965 >$(srcdir)/test/geoid.test.chk
 
 # Regression-test the calendar functions
