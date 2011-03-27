@@ -356,9 +356,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	gpsd_report(LOG_INF, "Garmin: Product ID: %d, SoftVer: %d.%02d\n",
 		    prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin: Product Desc: %s\n", &buf[4]);
-	mask |= DEVICEID_IS;
+	mask |= DEVICEID_SET;
 	gpsd_report(LOG_DATA, "Garmin: PRODUCT_DATA: subtype=%s mask=%s\n",
-		    session->subtype, gpsd_maskdump(mask));
+		    session->subtype, gps_maskdump(mask));
 	break;
     case GARMIN_PKTID_PVT_DATA:
 	gpsd_report(LOG_PROG, "Garmin: Appl, PVT Data Sz: %d\n", pkt_len);
@@ -478,8 +478,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	if (session->newdata.mode > MODE_NO_FIX) {
 	    /* data only valid with a fix */
 	    mask |=
-		TIME_IS | LATLON_IS | ALTITUDE_IS | STATUS_IS | MODE_IS |
-		SPEED_IS | TRACK_IS | CLIMB_IS | HERR_IS | VERR_IS | PERR_IS |
+		TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET |
+		SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_IS |
 		CLEAR_IS | REPORT_IS;
 	    /*
 	     * Garmin documentation says we should wait until four good fixes
@@ -504,7 +504,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    session->newdata.epy,
 		    session->newdata.epv,
 		    session->newdata.mode,
-		    session->gpsdata.status, gpsd_maskdump(mask));
+		    session->gpsdata.status, gps_maskdump(mask));
 	break;
     case GARMIN_PKTID_RMD_DATA:
     case GARMIN_PKTID_RMD41_DATA:
@@ -568,11 +568,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	}
 	session->gpsdata.skyview_time = NAN;
-	mask |= SATELLITE_IS | USED_IS;
+	mask |= SATELLITE_SET | USED_IS;
 	gpsd_report(LOG_DATA,
 		    "Garmin: SAT_DATA: visible=%d used=%d mask=%s\n",
 		    session->gpsdata.satellites_visible,
-		    session->gpsdata.satellites_used, gpsd_maskdump(mask));
+		    session->gpsdata.satellites_used, gps_maskdump(mask));
 	break;
     case GARMIN_PKTID_PROTOCOL_ARRAY:
 	// this packet is never requested, it just comes, in some case
@@ -593,7 +593,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
     }
     gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, ) = %s\n",
-		pkt_id, pkt_len, gpsd_maskdump(mask));
+		pkt_id, pkt_len, gps_maskdump(mask));
     return mask;
 }
 
@@ -1123,7 +1123,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     Send_ACK();
     /*@ +usedef +compdef @*/
     gpsd_report(LOG_IO, "Garmin: garmin_ser_parse( ) = %s\n",
-		gpsd_maskdump(mask));
+		gps_maskdump(mask));
     return mask;
 }
 

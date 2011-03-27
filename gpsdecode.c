@@ -381,11 +381,11 @@ static void decode(FILE *fpin, FILE*fpout)
     {
 	gps_mask_t changed = gpsd_poll(&session);
 
-	if (changed == ERROR_IS || changed == NODATA_IS)
+	if (changed == ERROR_SET || changed == NODATA_IS)
 	    break;
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
-	if ((changed & (REPORT_IS|SUBFRAME_IS|AIS_IS|RTCM2_IS|RTCM3_IS)) == 0)
+	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET)) == 0)
 	    continue;
 	else if (json) {
 	    json_data_report(changed, 
@@ -394,7 +394,7 @@ static void decode(FILE *fpin, FILE*fpout)
 	    (void)fputs(buf, fpout);	
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
-	    if ((changed & AIS_IS)!=0) {
+	    if ((changed & AIS_SET)!=0) {
 		aivdm_csv_dump(&session.gpsdata.ais, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }

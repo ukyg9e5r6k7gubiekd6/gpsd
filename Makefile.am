@@ -173,7 +173,6 @@ libgpsd_c_sources = \
 	crc24q.c \
 	gpsd_json.c \
 	isgps.c \
-	gpsd_maskdump.c \
 	timebase.c \
 	libgpsd_core.c \
 	net_dgpsip.c \
@@ -212,7 +211,7 @@ libgpsd_h_sources = \
 
 libgpsd_la_LDFLAGS = $(LIBUSB_LIBS) $(BLUEZ_LIBS)
 
-BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c gpsd_maskdump.c timebase.h
+BUILT_SOURCES = packet_names.h gpsd.h revision.h ais_json.i gps_maskdump.c timebase.h
 
 $(srcdir)/gpsutils.c $(srcdir)/gpsd.c: $(BUILT_SOURCES)
 	touch $@
@@ -244,11 +243,6 @@ gps_maskdump.c: gps.h maskaudit.py
 	rm -f gps_maskdump.c && \
 	$(PYTHON) maskaudit.py -c $(srcdir) >gps_maskdump.c && \
 	chmod a-w gps_maskdump.c
-
-gpsd_maskdump.c: gpsd.h maskaudit.py
-	rm -f gpsd_maskdump.c && \
-	$(PYTHON) maskaudit.py -d >gpsd_maskdump.c && \
-	chmod a-w gpsd_maskdump.c
 
 timebase.h: $(srcdir)/leapsecond.py $(srcdir)/leapseconds.cache
 	$(PYTHON) $(srcdir)/leapsecond.py -h $(srcdir)/leapseconds.cache >timebase.h

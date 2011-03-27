@@ -239,39 +239,17 @@ typedef enum {
     event_reactivate,
 } event_t;
 
-#define ONLINE_IS	((gps_mask_t)(1llu<<1))
-#define TIME_IS 	((gps_mask_t)(1llu<<2))
-#define TIMERR_IS	((gps_mask_t)(1llu<<3))
-#define LATLON_IS	((gps_mask_t)(1llu<<4))
-#define ALTITUDE_IS	((gps_mask_t)(1llu<<5))
-#define SPEED_IS	((gps_mask_t)(1llu<<6))
-#define TRACK_IS	((gps_mask_t)(1llu<<7))
-#define CLIMB_IS	((gps_mask_t)(1llu<<8))
-#define STATUS_IS	((gps_mask_t)(1llu<<9))
-#define MODE_IS 	((gps_mask_t)(1llu<<10))
-#define DOP_IS  	((gps_mask_t)(1llu<<11))
-#define HERR_IS 	((gps_mask_t)(1llu<<12))
-#define VERR_IS 	((gps_mask_t)(1llu<<13))
-#define PERR_IS 	((gps_mask_t)(1llu<<14))
-#define SATELLITE_IS	((gps_mask_t)(1llu<<15))
-#define RAW_IS  	((gps_mask_t)(1llu<<16))
-#define USED_IS 	((gps_mask_t)(1llu<<17))
-#define SPEEDERR_IS	((gps_mask_t)(1llu<<18))
-#define DRIVER_IS	((gps_mask_t)(1llu<<19))
-#define DEVICEID_IS	((gps_mask_t)(1llu<<20))
-#define ERROR_IS	((gps_mask_t)(1llu<<21))
-#define RTCM2_IS	((gps_mask_t)(1llu<<22))
-#define RTCM3_IS	((gps_mask_t)(1llu<<23))
-#define AIS_IS  	((gps_mask_t)(1llu<<24))
-#define ATT_IS		((gps_mask_t)(1llu<<25))
-#define SUBFRAME_IS	((gps_mask_t)(1llu<<26))
-#define PACKET_IS	((gps_mask_t)(1llu<<27))
-#define CLEAR_IS	((gps_mask_t)(1llu<<28))	/* starts a reporting cycle */
-#define REPORT_IS	((gps_mask_t)(1llu<<29))	/* ends a reporting cycle */
-#define NOISE_IS	((gps_mask_t)(1llu<<30))
-#define NODATA_IS	((gps_mask_t)(1llu<<31))	/* no data read from fd */
-#define PPSTIME_IS	((gps_mask_t)(1llu<<32))	/* precision time is available */
-#define DATA_IS	~(ONLINE_IS|PACKET_IS|CLEAR_IS|REPORT_IS)
+
+#define INTERNAL_SET(n)	((gps_mask_t)(1llu<<(SET_HIGH_BIT+(n))))
+#define RAW_IS  	INTERNAL_SET(1)	/* raw pseudorange data available */
+#define USED_IS 	INTERNAL_SET(2)	/* sat-used count available */
+#define DRIVER_IS	INTERNAL_SET(3)	/* driver type identified */
+#define CLEAR_IS	INTERNAL_SET(4)	/* starts a reporting cycle */
+#define REPORT_IS	INTERNAL_SET(5)	/* ends a reporting cycle */
+#define NODATA_IS	INTERNAL_SET(6)	/* no data read from fd */
+#define PPSTIME_IS	INTERNAL_SET(7)	/* precision time is available */
+#define PERR_IS 	INTERNAL_SET(8)	/* PDOP set */
+#define DATA_IS	~(ONLINE_SET|PACKET_SET|CLEAR_IS|REPORT_IS)
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 #define DRIVER_NOFLAGS	0x00000000u

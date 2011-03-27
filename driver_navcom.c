@@ -514,10 +514,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    mask = LATLON_IS | ALTITUDE_IS | CLIMB_IS | SPEED_IS | TRACK_IS
-	| STATUS_IS | MODE_IS | USED_IS | HERR_IS | VERR_IS
-	| TIMERR_IS | DOP_IS
-	| TIME_IS | PPSTIME_IS;
+    mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
+	| STATUS_SET | MODE_SET | USED_IS | HERR_SET | VERR_SET
+	| TIMERR_SET | DOP_SET
+	| TIME_SET | PPSTIME_IS;
     gpsd_report(LOG_DATA, "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
 		"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
 		"epx=%.2f epy=%.2f epv=%.2f "
@@ -806,7 +806,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 		"CS 0x86: visible=%d, used=%d, mask={SATELLITE|STATUS}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
-    return SATELLITE_IS | STATUS_IS;
+    return SATELLITE_SET | STATUS_SET;
 }
 
 /* Raw Meas. Data Block */
@@ -889,7 +889,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 static gps_mask_t handle_0xb5(struct gps_device_t *session)
 {
     if (sizeof(double) == 8) {
-	gps_mask_t mask = TIME_IS;
+	gps_mask_t mask = TIME_SET;
 	union long_double l_d;
 	unsigned char *buf = session->packet.outbuffer + 3;
 	uint16_t week = getleu16(buf, 3);
@@ -913,7 +913,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 #ifdef __UNUSED__
 	session->newdata.eph = hrms * 1.96;
 	session->newdata.epv = alt_sd * 1.96;
-	mask |= (HERR_IS | VERR_IS);
+	mask |= (HERR_SET | VERR_SET);
 #endif /*  __UNUSED__ */
 	session->newdata.time = gpsd_gpstime_resolve(session,
 						  (unsigned short)week,
@@ -1072,7 +1072,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 		   engconfstr, asicstr, swvermaj, swvermin, slsbn, dcser,
 		   dcclass, rfcser, rfcclass);
     /*@ +formattype @*/
-    return DEVICEID_IS;
+    return DEVICEID_SET;
     /*@+modobserver@*/
 }
 

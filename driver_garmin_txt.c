@@ -272,7 +272,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     if (session->packet.outbuflen < 54) {
 	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
 	gpsd_report(LOG_WARN, "Message is too short, rejected.\n");
-	return ONLINE_IS;
+	return ONLINE_SET;
     }
 
     session->packet.type = GARMINTXT_PACKET;
@@ -316,13 +316,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	session->newdata.time =
 	    (timestamp_t)mkgmtime(&session->driver.garmintxt.date) +
 	    session->driver.garmintxt.subseconds;
-	mask |= TIME_IS;
+	mask |= TIME_SET;
     } while (0);
 
     /* assume that possition is unknown; if the position is known we will fix status information later */
     session->newdata.mode = MODE_NO_FIX;
     session->gpsdata.status = STATUS_NO_FIX;
-    mask |= MODE_IS | STATUS_IS | CLEAR_IS | REPORT_IS;
+    mask |= MODE_SET | STATUS_SET | CLEAR_IS | REPORT_IS;
 
     /* process position */
 
@@ -384,7 +384,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	    session->newdata.mode = MODE_NO_FIX;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	}
-	mask |= MODE_IS | STATUS_IS | LATLON_IS;
+	mask |= MODE_SET | STATUS_SET | LATLON_SET;
     } while (0);
 
     /* EPH */
@@ -397,7 +397,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
 	session->newdata.epx = session->newdata.epy =
 	    eph * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	mask |= HERR_IS;
+	mask |= HERR_SET;
     } while (0);
 
     /* Altitude */
@@ -408,7 +408,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		       &alt))
 	    break;
 	session->newdata.altitude = alt;
-	mask |= ALTITUDE_IS;
+	mask |= ALTITUDE_SET;
     } while (0);
 
     /* Velocity */
@@ -428,7 +428,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	if (track < 0.0)
 	    track += 360.0;
 	session->newdata.track = track;
-	mask |= SPEED_IS | TRACK_IS;
+	mask |= SPEED_SET | TRACK_SET;
     } while (0);
 
 
@@ -440,7 +440,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		       &climb))
 	    break;
 	session->newdata.climb = climb;	/* climb in mps */
-	mask |= CLIMB_IS;
+	mask |= CLIMB_SET;
     } while (0);
 
     gpsd_report(LOG_DATA,
@@ -450,7 +450,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		session->newdata.speed, session->newdata.track,
 		session->newdata.climb, session->newdata.epx,
 		session->newdata.epy, session->newdata.mode,
-		session->gpsdata.status, gpsd_maskdump(mask));
+		session->gpsdata.status, gps_maskdump(mask));
     return mask;
 }
 

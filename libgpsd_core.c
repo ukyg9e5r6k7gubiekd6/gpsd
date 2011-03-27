@@ -551,7 +551,7 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     if (n < 4) {
 	gpsd_report(LOG_DATA + 2, "Not enough Satellites available %d < 4:\n",
 		    n);
-	return 0;		/* Is this correct return code here? or should it be ERROR_IS */
+	return 0;		/* Is this correct return code here? or should it be ERROR_SET */
     }
 
     memset(prod, 0, sizeof(prod));
@@ -642,7 +642,7 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     }
     /*@ +usedef @*/
 
-    return DOP_IS;
+    return DOP_SET;
 }
 
 static void gpsd_error_model(struct gps_device_t *session,
@@ -717,7 +717,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     gpsd_report(LOG_DATA, "modeling errors: mode=%d, masks=%s\n",
-		fix->mode, gpsd_maskdump(session->gpsdata.set));
+		fix->mode, gps_maskdump(session->gpsdata.set));
     if (fix->mode >= MODE_2D) {
 	if (isnan(fix->epx) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;
@@ -841,7 +841,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		}
 	} else if (session->getcount++ > 1 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
-	    return ERROR_IS;
+	    return ERROR_SET;
 	}
     }
 
@@ -853,7 +853,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path, newlen,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = (timestamp_t)0;
-	return ERROR_IS;
+	return ERROR_SET;
     } else if (newlen == 0) {		/* zero length read, possible EOF */
 	/*
 	 * Multiplier is 2 to avoid edge effects due to sampling at the exact
@@ -869,9 +869,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
 	gpsd_report(LOG_RAW + 3, "New data on %s, not yet a packet\n",
 		    session->gpsdata.dev.path);
-	return ONLINE_IS;
+	return ONLINE_SET;
     } else {			/* we have recognized a packet */
-	gps_mask_t received = PACKET_IS, dopmask = 0;
+	gps_mask_t received = PACKET_SET, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
 	gpsd_report(LOG_RAW + 3, "Accepted packet on %s.\n",
@@ -928,12 +928,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * These will not overwrite any DOPs reported from the packet
 	 * we just got.
 	 */
-	if ((received & SATELLITE_IS) != 0
+	if ((received & SATELLITE_SET) != 0
 	    && session->gpsdata.satellites_visible > 0) {
 	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
-	session->gpsdata.set = ONLINE_IS | dopmask | received;
+	session->gpsdata.set = ONLINE_SET | dopmask | received;
 
 	/* copy/merge device data into staging buffers */
 	/*@-nullderef -nullpass@*/
@@ -941,7 +941,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    gps_clear_fix(&session->gpsdata.fix);
 	/* don't downgrade mode if holding previous fix */
 	if (session->gpsdata.fix.mode > session->newdata.mode)
-	    session->gpsdata.set &= ~MODE_IS;
+	    session->gpsdata.set &= ~MODE_SET;
 	//gpsd_report(LOG_PROG,
 	//              "transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
 	gps_merge_fix(&session->gpsdata.fix,
@@ -961,7 +961,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * devices output fix packets on a regular basis, even when unable
 	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
-	if ((session->gpsdata.set & LATLON_IS) != 0
+	if ((session->gpsdata.set & LATLON_SET) != 0
 	    && session->gpsdata.status > STATUS_NO_FIX) {
 	    session->context->fixcnt++;
 	    session->fixcnt++;
@@ -976,7 +976,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * driver errors, including 32-vs.-64-bit problems.
 	 */
 	/*@+relaxtypes +longunsignedintegral@*/
-	if ((session->gpsdata.set & TIME_IS) != 0) {
+	if ((session->gpsdata.set & TIME_SET) != 0) {
 	    if (session->newdata.time > time(NULL) + (60 * 60 * 24 * 365))
 		gpsd_report(LOG_WARN,
 			    "date more than a year in the future!\n");

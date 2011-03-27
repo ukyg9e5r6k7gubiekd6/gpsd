@@ -821,7 +821,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	/* unknown/illegal subframe */
 	return 0;
     }
-    return SUBFRAME_IS;
+    return SUBFRAME_SET;
 }
 
 /*@ +usedef @*/

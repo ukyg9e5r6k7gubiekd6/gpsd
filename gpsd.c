@@ -1271,7 +1271,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 	char buf[MAX_PACKET_LENGTH * 3 + 2];
 
 	gpsd_report(LOG_PROG, "data mask is %s\n",
-		    gpsd_maskdump(device->gpsdata.set));
+		    gps_maskdump(device->gpsdata.set));
 
 	if ((changed & REPORT_IS) != 0) {
 	    nmea_tpv_dump(device, buf, sizeof(buf));
@@ -1280,14 +1280,14 @@ static void pseudonmea_report(struct subscriber_t *sub,
 	    (void)throttled_write(sub, buf, strlen(buf));
 	}
 
-	if ((changed & SATELLITE_IS) != 0) {
+	if ((changed & SATELLITE_SET) != 0) {
 	    nmea_sky_dump(device, buf, sizeof(buf));
 	    gpsd_report(LOG_IO, "<= GPS (binary sky) %s: %s\n",
 			device->gpsdata.dev.path, buf);
 	    (void)throttled_write(sub, buf, strlen(buf));
 	}
 
-	if ((changed & SUBFRAME_IS) != 0) {
+	if ((changed & SUBFRAME_SET) != 0) {
 	    nmea_subframe_dump(device, buf, sizeof(buf));
 	    gpsd_report(LOG_IO, "<= GPS (binary subframe) %s: %s\n",
 			device->gpsdata.dev.path, buf);
@@ -1335,11 +1335,11 @@ static void consume_packets(struct gps_device_t *device)
     for (fragments = 0; ; fragments++) {
 	changed = gpsd_poll(device);
 
-	if (changed == ERROR_IS) {
+	if (changed == ERROR_SET) {
 	    gpsd_report(LOG_WARN,
 			"device read of %s returned error or packet sniffer failed sync (flags %s)\n",
 			device->gpsdata.dev.path,
-			gpsd_maskdump(changed));
+			gps_maskdump(changed));
 	    deactivate_device(device);
 	    break;
 	} else if (changed == NODATA_IS) {
@@ -1390,13 +1390,13 @@ static void consume_packets(struct gps_device_t *device)
 	device->reawake = (timestamp_t)0;
 
 	/* must have a full packet to continue */
-	if ((changed & PACKET_IS) == 0)
+	if ((changed & PACKET_SET) == 0)
 	    break;
 
 	gpsd_report(LOG_DATA,
 		    "packet from %s with %s\n",
 		    device->gpsdata.dev.path,
-		    gpsd_maskdump(device->gpsdata.set));
+		    gps_maskdump(device->gpsdata.set));
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* add any just-identified device to watcher lists */
@@ -1415,7 +1415,7 @@ static void consume_packets(struct gps_device_t *device)
 	}
 
 	/* handle laggy response to a firmware version query */
-	if ((changed & (DEVICEID_IS | DRIVER_IS)) != 0) {
+	if ((changed & (DEVICEID_SET | DRIVER_IS)) != 0) {
 	    assert(device->device_type != NULL);
 	    {
 		char id2[GPS_JSON_RESPONSE_MAX];
@@ -1429,7 +1429,7 @@ static void consume_packets(struct gps_device_t *device)
 	 * If the device provided an RTCM packet, stash it
 	 * in the context structure for use as a future correction.
 	 */
-	if ((changed & RTCM2_IS) != 0 || (changed & RTCM3_IS) != 0) {
+	if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
 	    if (device->packet.outbuflen > RTCM_MAX) {
 		gpsd_report(LOG_ERROR,
 			    "overlong RTCM packet (%zd bytes)\n",
@@ -1458,7 +1458,7 @@ static void consume_packets(struct gps_device_t *device)
 	 */
 	if (device->context->enable_ntpshm == 0) {
 	    //gpsd_report(LOG_PROG, "NTP: off\n");
-	} else if ((changed & TIME_IS) == 0) {
+	} else if ((changed & TIME_SET) == 0) {
 	    //gpsd_report(LOG_PROG, "NTP: No time this packet\n");
 	} else if (isnan(device->newdata.time)) {
 	    //gpsd_report(LOG_PROG, "NTP: bad new time\n");
@@ -1485,7 +1485,7 @@ static void consume_packets(struct gps_device_t *device)
 	 * a sentence changes position or mode. Likely to
 	 * cause display jitter.
 	 */
-	if (!device->cycle_end_reliable && (changed & (LATLON_IS | MODE_IS))!=0)
+	if (!device->cycle_end_reliable && (changed & (LATLON_SET | MODE_SET))!=0)
 	    changed |= REPORT_IS;
 
 	/* a few things are not per-subscriber reports */
@@ -1508,8 +1508,8 @@ static void consume_packets(struct gps_device_t *device)
 	}
 
 #ifdef SHM_EXPORT_ENABLE
-	if ((changed & (REPORT_IS|NOISE_IS|SATELLITE_IS|SUBFRAME_IS|
-			ATT_IS|RTCM2_IS|RTCM3_IS|AIS_IS)) != 0)
+	if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|
+			ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET)) != 0)
 	    shm_update(&context, &device->gpsdata);
 #endif /* DBUS_EXPORT_ENABLE */
 
@@ -1528,7 +1528,7 @@ static void consume_packets(struct gps_device_t *device)
 		if (changed & DATA_IS) {
 		    gpsd_report(LOG_PROG,
 				"Changed mask: %s with %sreliable cycle detection\n",
-				gpsd_maskdump(changed),
+				gps_maskdump(changed),
 				device->cycle_end_reliable ? "" : "un");
 		    if ((changed & REPORT_IS) != 0)
 			gpsd_report(LOG_PROG, "time to report a fix\n");

@@ -2265,40 +2265,40 @@ void json_data_report(gps_mask_t changed,
 	json_tpv_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 
-    if ((changed & NOISE_IS) != 0) {
+    if ((changed & GST_SET) != 0) {
 	json_noise_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 
-    if ((changed & SATELLITE_IS) != 0) {
+    if ((changed & SATELLITE_SET) != 0) {
 	json_sky_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 
-    if ((changed & SUBFRAME_IS) != 0) {
+    if ((changed & SUBFRAME_SET) != 0) {
 	json_subframe_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 
 #ifdef COMPASS_ENABLE
-    if ((changed & ATT_IS) != 0) {
+    if ((changed & ATTITUDE_SET) != 0) {
 	json_att_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 #endif /* COMPASS_ENABLE */
 
 #ifdef RTCM104V2_ENABLE
-    if ((changed & RTCM2_IS) != 0) {
+    if ((changed & RTCM2_SET) != 0) {
 	json_rtcm2_dump(&datap->rtcm2, datap->dev.path,
 			buf+strlen(buf), buflen-strlen(buf));
     }
 #endif /* RTCM104V2_ENABLE */
 
 #ifdef RTCM104V3_ENABLE
-    if ((changed & RTCM3_IS) != 0) {
+    if ((changed & RTCM3_SET) != 0) {
 	json_rtcm3_dump(&datap->rtcm3, datap->dev.path,
 			buf+strlen(buf), buflen-strlen(buf));
     }
 #endif /* RTCM104V3_ENABLE */
 
 #ifdef AIVDM_ENABLE
-    if ((changed & AIS_IS) != 0) {
+    if ((changed & AIS_SET) != 0) {
 	json_aivdm_dump(&datap->ais, datap->dev.path,
 			policy->scaled,
 			buf+strlen(buf), buflen-strlen(buf));

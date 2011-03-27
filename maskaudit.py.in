@@ -5,27 +5,24 @@
 #
 # With -p, dump a Python status mask list translated from the C one.
 #
-# With -c, generate C code to dump client-side masks for debugging purposes.
-#
-# With -d, generate C code to dump demon-side masks for debugging purposes.
+# With -c, generate C code to dump masks for debugging purposes.
 #
 # With -t, tabulate usage of defines to find unused ones.  Requires -c or -d.
 
 import sys, commands, glob, getopt
 
 class SourceExtractor:
-    def __init__(self, sourcefile, suffix, clientside):
+    def __init__(self, sourcefile, clientside):
         self.sourcefile = sourcefile
-        self.suffix = suffix
         self.clientside = clientside
         self.daemonfiles = ["gpsd.c", "libgpsd_core.c", "pseudonmea.c", "drivers.c"] + glob.glob("driver_*.c") + ["gpsmon.c", "subframe.c"] + glob.glob("monitor_*.c")
         self.masks = []
         self.primitive_masks = []
         for line in file(self.sourcefile):
-            if line.startswith("#define") and self.suffix in line:
+            if line.startswith("#define") and ("_SET" in line or "_IS" in line):
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
-                if fields[2].startswith("(1llu<<") or fields[2].startswith("((gps_mask_t)"):
+                if fields[2].startswith("(1llu<<") or fields[2].startswith("INTERNAL_SET"):
                     self.primitive_masks.append((fields[1], fields[2]))
     
     def in_library(self, flag):
@@ -62,13 +59,13 @@ if __name__ == '__main__':
         else:
             srcdir = arguments[0]
 
+        clientside = SourceExtractor(srcdir + "/gps.h", clientside=True)
+        daemonside = SourceExtractor(srcdir + "/gpsd.h", clientside=False)
         if clientgen:
-            source = SourceExtractor(srcdir + "/gps.h", "_SET", clientside=True)
-            prefix = "gps"
+            source = clientside
             banner = "Library"
         elif daemongen:
-            source = SourceExtractor(srcdir + "/gpsd.h", "_IS", clientside=False)
-            prefix = "gpsd"
+            source = daemonside
             banner = "Daemon"
 
         if tabulate:
@@ -85,8 +82,10 @@ if __name__ == '__main__':
             for (d, v) in source.primitive_masks:
                 if source.relevant(d):
                     stem = d
-                    if stem.endswith(source.suffix):
-                        stem = stem[:-len(source.suffix)]
+                    if stem.endswith("_SET"):
+                        stem = stem[:-4]
+                    if stem.endswith("_IS"):
+                        stem = stem[:-3]
                     maxout += len(stem) + 1
             print """/* This code is generated.  Do not hand-hack it! */
 #include <stdio.h>
@@ -94,17 +93,19 @@ if __name__ == '__main__':
 
 #include \"gpsd.h\"
 
-const char *%s_maskdump(gps_mask_t set)
+const char *gps_maskdump(gps_mask_t set)
 {
     static char buf[%d];
     const struct {
 	gps_mask_t      mask;
 	const char      *name;
-    } *sp, names[] = {"""  % (prefix, maxout + 3,)
-            for (flag, value) in source.primitive_masks:
+    } *sp, names[] = {"""  % (maxout + 3,)
+            for (flag, value) in (clientside.primitive_masks + daemonside.primitive_masks):
                 stem = flag
-                if stem.endswith(source.suffix):
-                    stem = stem[:-len(source.suffix)]
+                if stem.endswith("_SET"):
+                    stem = stem[:-4]
+                if stem.endswith("_IS"):
+                    stem = stem[:-3]
                 print "\t{%s,\t\"%s\"}," % (flag, stem)
             print '''\
     };

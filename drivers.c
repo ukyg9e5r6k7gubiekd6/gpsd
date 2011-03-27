@@ -70,7 +70,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 			&& session->device_type->event_hook != NULL)
 			session->device_type->event_hook(session,
 							 event_triggermatch);
-		    st |= DEVICEID_IS;
+		    st |= DEVICEID_SET;
 		}
 	    }
 	}
@@ -895,7 +895,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 				     (session->gpsdata.rtcm2.length +
 				      2) * sizeof(isgps30bits_t), LOG_RAW));
     session->cycle_end_reliable = true;
-    return RTCM2_IS;
+    return RTCM2_SET;
 }
 
 /* *INDENT-OFF* */
@@ -944,7 +944,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 				     LOG_RAW));
     rtcm3_unpack(&session->gpsdata.rtcm3, (char *)session->packet.outbuffer);
     session->cycle_end_reliable = true;
-    return RTCM3_IS;
+    return RTCM3_SET;
 }
 
 /* *INDENT-OFF* */
@@ -1039,7 +1039,7 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
 	    (void)strlcat(session->subtype, session->driver.nmea.field[1], sizeof(session->subtype));
 	    (void)strlcat(session->subtype, "-", sizeof(session->subtype));
 	    (void)strlcat(session->subtype, session->driver.nmea.field[2], sizeof(session->subtype));
-	    return ONLINE_IS;
+	    return ONLINE_SET;
 	case 001:			/* ACK / NACK */
 	    reason = atoi(session->driver.nmea.field[2]);
 	    if (atoi(session->driver.nmea.field[1]) == -1)
@@ -1051,7 +1051,7 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
 		gpsd_report(LOG_WARN, "MTK ACK: %s\n", session->driver.nmea.field[1]);
 	    break;
 	default:
-	    return ONLINE_IS;		/* ignore */
+	    return ONLINE_SET;		/* ignore */
 	}
     }
 
@@ -1151,9 +1151,9 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 	if (aivdm_decode
 	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
 	     session->aivdm, &session->gpsdata.ais)) {
-	    return ONLINE_IS | AIS_IS;
+	    return ONLINE_SET | AIS_SET;
 	} else
-	    return ONLINE_IS;
+	    return ONLINE_SET;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	return nmea_parse((char *)session->packet.outbuffer, session);

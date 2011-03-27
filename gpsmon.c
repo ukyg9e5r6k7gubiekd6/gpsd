@@ -234,7 +234,7 @@ static ssize_t readpkt(void)
     if (changed == 0)
 	longjmp(terminate, TERM_EMPTY_READ);
 
-    if ((changed & ERROR_IS) != 0)
+    if ((changed & ERROR_SET) != 0)
 	longjmp(terminate, TERM_READ_ERROR);
 
     if (logfile != NULL && session.packet.outbuflen > 0) {

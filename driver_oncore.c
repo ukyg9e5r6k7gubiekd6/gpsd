@@ -77,7 +77,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 76)
 	return 0;
 
-    mask = ONLINE_IS;
+    mask = ONLINE_SET;
     gpsd_report(LOG_IO, "oncore NAVSOL - navigation data\n");
 
     flags = (unsigned char)getub(buf, 72);
@@ -94,7 +94,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	session->newdata.mode = MODE_NO_FIX;
 	session->gpsdata.status = STATUS_NO_FIX;
     }
-    mask |= MODE_IS;
+    mask |= MODE_SET;
     /*@ +predboolothers @*/
 
     /* Unless we have seen non-zero utc offset data, the time is GPS time
@@ -112,7 +112,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	/*@ -unrecog */
 	session->newdata.time = (timestamp_t)timegm(&unpacked_date) + nsec * 1e-9;
 	/*@ +unrecog */
-	mask |= TIME_IS;
+	mask |= TIME_SET;
 	gpsd_report(LOG_IO,
 		    "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
 		    unpacked_date.tm_year + 1900, unpacked_date.tm_mon + 1,
@@ -143,7 +143,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     session->newdata.speed = speed;
     session->newdata.track = track;
 
-    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS;
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 
     gpsd_zero_satellites(&session->gpsdata);
     /* Merge the satellite information from the Bb message. */
@@ -181,7 +181,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	    if (status & 0x02)
 		mask |= PPSTIME_IS;
 	    /*
-	     * The PPSTIME_IS mask bit exists distinctly from TIME_IS exactly
+	     * The PPSTIME_IS mask bit exists distinctly from TIME_SET exactly
 	     * so an OnCore running in time-service mode (and other GPS clocks)
 	     * can signal that it's returning time even though no position fixes
 	     * have been available.
@@ -202,7 +202,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 
-    mask |= SATELLITE_IS | USED_IS;
+    mask |= SATELLITE_SET | USED_IS;
 
     /* Some messages can only be polled.  As they are not so
      * important, would be enough to poll e.g. one message per cycle.
@@ -220,7 +220,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		session->newdata.speed, session->newdata.track,
 		session->newdata.mode, session->gpsdata.status,
 		session->gpsdata.satellites_used,
-		session->gpsdata.satellites_visible, gpsd_maskdump(mask));
+		session->gpsdata.satellites_visible, gps_maskdump(mask));
     return mask;
 }
 
@@ -310,7 +310,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
     }
 
     gpsd_report(LOG_DATA, "SVINFO: mask={SATELLITE}\n");
-    return SATELLITE_IS;
+    return SATELLITE_SET;
 }
 
 /**

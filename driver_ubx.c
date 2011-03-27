@@ -74,7 +74,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
-	mask |= TIME_IS | PPSTIME_IS;
+	mask |= TIME_SET | PPSTIME_IS;
     }
 
     epx = (double)(getles32(buf, 12) / 100.0);
@@ -85,7 +85,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     evz = (double)(getles32(buf, 36) / 100.0);
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     epx, epy, epz, evx, evy, evz);
-    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     session->newdata.epx = session->newdata.epy =
 	(double)(getles32(buf, 24) / 100.0) / sqrt(2);
     session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
@@ -113,7 +113,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     else if (session->newdata.mode != MODE_NO_FIX)
 	session->gpsdata.status = STATUS_FIX;
 
-    mask |= MODE_IS | STATUS_IS;
+    mask |= MODE_SET | STATUS_SET;
     gpsd_report(LOG_DATA,
 		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
 		session->newdata.time,
@@ -125,7 +125,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 		session->newdata.climb,
 		session->newdata.mode,
 		session->gpsdata.status,
-		session->gpsdata.satellites_used, gpsd_maskdump(mask));
+		session->gpsdata.satellites_used, gps_maskdump(mask));
     return mask;
 }
 
@@ -156,7 +156,7 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.pdop, session->gpsdata.dop.tdop);
-    return DOP_IS;
+    return DOP_SET;
 }
 
 /**
@@ -182,7 +182,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
 		session->newdata.time);
-    return TIME_IS | PPSTIME_IS;
+    return TIME_SET | PPSTIME_IS;
 }
 
 /**
@@ -234,7 +234,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
-    return SATELLITE_IS | USED_IS;
+    return SATELLITE_SET | USED_IS;
 }
 
 /*
@@ -487,7 +487,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		       "0x%04hx", msgid);
 
-    return mask | ONLINE_IS;
+    return mask | ONLINE_SET;
 }
 
 /*@ -charint @*/
@@ -508,7 +508,7 @@ static gps_mask_t parse_input(struct gps_device_t *session)
     }
 #ifdef NTPSHM_ENABLE
     if (session->context->enable_ntpshm 
-	&& 0 != (st & TIME_IS)
+	&& 0 != (st & TIME_SET)
 	&& (session->gpsdata.fix.time != session->last_fixtime)) {
 	    /* FIXME!! this needs an empirical fudge */
 	    (void)ntpshm_put(session, session->gpsdata.fix.time, 0);

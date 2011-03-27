@@ -45,31 +45,31 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 {
     if ((NULL == to) || (NULL == from))
 	return;
-    if ((transfer & TIME_IS) != 0)
+    if ((transfer & TIME_SET) != 0)
 	to->time = from->time;
-    if ((transfer & LATLON_IS) != 0) {
+    if ((transfer & LATLON_SET) != 0) {
 	to->latitude = from->latitude;
 	to->longitude = from->longitude;
     }
-    if ((transfer & MODE_IS) != 0)
+    if ((transfer & MODE_SET) != 0)
 	to->mode = from->mode;
-    if ((transfer & ALTITUDE_IS) != 0)
+    if ((transfer & ALTITUDE_SET) != 0)
 	to->altitude = from->altitude;
-    if ((transfer & TRACK_IS) != 0)
+    if ((transfer & TRACK_SET) != 0)
 	to->track = from->track;
-    if ((transfer & SPEED_IS) != 0)
+    if ((transfer & SPEED_SET) != 0)
 	to->speed = from->speed;
-    if ((transfer & CLIMB_IS) != 0)
+    if ((transfer & CLIMB_SET) != 0)
 	to->climb = from->climb;
-    if ((transfer & TIMERR_IS) != 0)
+    if ((transfer & TIMERR_SET) != 0)
 	to->ept = from->ept;
-    if ((transfer & HERR_IS) != 0) {
+    if ((transfer & HERR_SET) != 0) {
 	to->epx = from->epx;
 	to->epy = from->epy;
     }
-    if ((transfer & VERR_IS) != 0)
+    if ((transfer & VERR_SET) != 0)
 	to->epv = from->epv;
-    if ((transfer & SPEEDERR_IS) != 0)
+    if ((transfer & SPEEDERR_SET) != 0)
 	to->eps = from->eps;
 }
 

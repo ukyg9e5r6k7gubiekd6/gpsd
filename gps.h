@@ -1355,6 +1355,7 @@ struct gps_data_t {
 #define POLICY_SET	(1llu<<29)
 #define LOGMESSAGE_SET	(1llu<<30)
 #define ERROR_SET	(1llu<<31)
+#define SET_HIGH_BIT	31
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences

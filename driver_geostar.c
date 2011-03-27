@@ -204,14 +204,14 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
 	if (ul1 != 0) {
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    mask |= STATUS_IS;
+	    mask |= STATUS_SET;
 	} else {
 	    if (session->gpsdata.status < STATUS_FIX) {
 		session->gpsdata.status = STATUS_FIX;
-		mask |= STATUS_IS;
+		mask |= STATUS_SET;
 	    }
 	}
-	mask |= TIME_IS | PPSTIME_IS | LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | DOP_IS | USED_IS | REPORT_IS;
+	mask |= TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | DOP_SET | USED_IS | REPORT_IS;
 
 	gpsd_report(LOG_INF, "Geographic coordinates %f %g %g %g %g %g\n",
 		d1,
@@ -247,7 +247,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    session->newdata.mode = MODE_NO_FIX;
 	}
 
-	mask |= MODE_IS | STATUS_IS;
+	mask |= MODE_SET | STATUS_SET;
 	break;
     case 0x22:
 	ul1 = getleu32(buf, OFFSET(1));
@@ -270,7 +270,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    }
 	}
 	session->gpsdata.skyview_time = NAN;
-	mask |= SATELLITE_IS | USED_IS;
+	mask |= SATELLITE_SET | USED_IS;
 	break;
     case 0x3e:
 	ul1 = getleu32(buf, OFFSET(1));
@@ -414,7 +414,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	/*@ +formattype @*/
 	gpsd_report(LOG_INF, "Response to Request FW version command: %s\n",
 		    session->subtype);
-	mask |= DEVICEID_IS;
+	mask |= DEVICEID_SET;
 	break;
     case 0xc2:
 	gpsd_report(LOG_INF, "Response to Restart receiver command\n");

@@ -201,15 +201,15 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* clock_drift_sd              = (int)getzlong(53) * 1e-2; */
 
     mask =
-	TIME_IS | PPSTIME_IS | LATLON_IS | ALTITUDE_IS | CLIMB_IS | SPEED_IS |
-	TRACK_IS | STATUS_IS | MODE_IS;
+	TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET |
+	TRACK_SET | STATUS_SET | MODE_SET;
     gpsd_report(LOG_DATA,
 		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.track, session->newdata.speed,
 		session->newdata.climb, session->newdata.mode,
-		session->gpsdata.status, gpsd_maskdump(mask));
+		session->gpsdata.status, gps_maskdump(mask));
     return mask;
 }
 
@@ -251,7 +251,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     gpsd_report(LOG_DATA, "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
-    return SATELLITE_IS | USED_IS;
+    return SATELLITE_SET | USED_IS;
 }
 
 static gps_mask_t handle1003(struct gps_device_t *session)
@@ -300,7 +300,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.pdop, session->gpsdata.dop.tdop);
-    return SATELLITE_IS | DOP_IS;
+    return SATELLITE_SET | DOP_SET;
 }
 
 static void handle1005(struct gps_device_t *session UNUSED)
@@ -329,7 +329,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
     getstringz(session->subtype, session->packet.outbuffer, 19, 28);	/* software version field */
     gpsd_report(LOG_DATA, "1011: subtype=%s mask={DEVICEID}\n",
 		session->subtype);
-    return DEVICEID_IS;
+    return DEVICEID_SET;
 }
 
 

@@ -59,7 +59,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	 * havoc will ensue.  asm volatile("sfence") is a GCCism intended
 	 * to prevent reordering.
 	 *
-	 * This is a simple optimistic-concurrency tachnique.  We wrote
+	 * This is a simple optimistic-concurrency technique.  We wrote
 	 * the second bookend first, then the data, then the first bookend.
 	 * Reader copies what it sees in normal order; that way, if we
 	 * start to write the segment during the read, the second bookend will

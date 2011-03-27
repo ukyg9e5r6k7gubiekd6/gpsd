@@ -78,14 +78,14 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     if ((flags & _PROTO__SOLUTION_VALID) == 0)
 	return 0;
 
-    mask = ONLINE_IS;
+    mask = ONLINE_SET;
 
     /* extract ECEF navigation solution here */
     /* or extract the local tangential plane (ENU) solution */
     [Px, Py, Pz, Vx, Vy, Vz] = GET_ECEF_FIX();
     ecef_to_wgs84fix(&session->newdata,  &session->gpsdata.separation,
 		     Px, Py, Pz, Vx, Vy, Vz);
-    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS  ;
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
 
     session->newdata.epx = GET_LONGITUDE_ERROR();
     session->newdata.epy = GET_LATITUDE_ERROR();
@@ -103,7 +103,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.dop.hdop = GET_HDOP();
     session->gpsdata.dop.vdop = GET_VDOP();
     /* other DOP if available */
-    mask |= DOP_IS;
+    mask |= DOP_SET;
 
     session->newdata.mode = GET_FIX_MODE();
     session->gpsdata.status = GET_FIX_STATUS();
@@ -113,7 +113,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * information.  Mix in REPORT_IS when the sentence is reliably
      * the last in a reporting cycle.
      */
-    mask |= MODE_IS | STATUS_IS | REPORT_IS;
+    mask |= MODE_SET | STATUS_SET | REPORT_IS;
 
     /* 
      * At the end of each packet-cracking function, report at LOG_DATA level
@@ -127,7 +127,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
 		session->newdata.altitude,
 		session->newdata.mode,
 		session->gpsdata.status,
-		gpsd_maskdump(mask));
+		gps_maskdump(mask));
 
     return mask;
 }
@@ -154,7 +154,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
     session->newdata.time = gpsd_gpstime_resolve(session, gps_week, tow / 1000.0);
 
-    return TIME_IS | PPSTIME_IS | ONLINE_IS;
+    return TIME_SET | PPSTIME_IS | ONLINE_SET;
 }
 
 /**
@@ -212,7 +212,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
-    return SATELLITE_IS | USED_IS;
+    return SATELLITE_SET | USED_IS;
 }
 
 /**

@@ -206,13 +206,13 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->newdata.mode = MODE_2D;
 	else {
 	    session->newdata.mode = MODE_3D;
-	    mask |= ALTITUDE_IS | CLIMB_IS;
+	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
-	mask |= TIME_IS | PPSTIME_IS | LATLON_IS | TRACK_IS | SPEED_IS | MODE_IS;
+	mask |= TIME_SET | PPSTIME_IS | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype),
 			   "%3.2f", version);
-	    mask |= DEVICEID_IS;
+	    mask |= DEVICEID_SET;
 	}
 	gpsd_report(LOG_DATA,
 		    "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s' mask=%s\n",
@@ -220,7 +220,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 		    session->newdata.longitude, session->newdata.altitude,
 		    session->newdata.speed, session->newdata.track,
 		    session->newdata.climb, session->newdata.mode,
-		    session->gpsdata.dev.subtype, gpsd_maskdump(mask));
+		    session->gpsdata.dev.subtype, gps_maskdump(mask));
 	return mask | CLEAR_IS | REPORT_IS;
 
     case 0x04:			/* DOP Data Output */
@@ -258,7 +258,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    break;
 	}
 	/* that's all the information in this packet */
-	mask = TIME_IS | PPSTIME_IS | DOP_IS | MODE_IS | STATUS_IS;
+	mask = TIME_SET | PPSTIME_IS | DOP_SET | MODE_SET | STATUS_SET;
 	gpsd_report(LOG_DATA,
 		    "DDO 0x04: gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mode=%d, status=%d mask={TIME| DOP|MODE|STATUS}\n",
 		    session->gpsdata.dop.gdop, session->gpsdata.dop.pdop,
@@ -313,7 +313,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	}
 	session->gpsdata.satellites_visible = (int)satcnt;
 	/* that's all the information in this packet */
-	mask = SATELLITE_IS | USED_IS;
+	mask = SATELLITE_SET | USED_IS;
 	gpsd_report(LOG_DATA,
 		    "CSO 0x06: time=%.2f used=%d visible=%d mask={TIME|SATELLITE|USED}\n",
 		    session->newdata.time, session->gpsdata.satellites_used,
@@ -359,21 +359,21 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 #undef UBITS
 	gpsd_report(LOG_DATA, "MDO 0x04: time=%.2f mask={TIME|RAW}\n",
 		    session->newdata.time);
-	return TIME_IS | PPSTIME_IS | RAW_IS;
+	return TIME_SET | PPSTIME_IS | RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
 	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd: %s\n",
 		    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
-	return ONLINE_IS;
+	return ONLINE_SET;
 
     case 0x22:			/* LogData */
 	gpsd_report(LOG_IO, "LogData EverMore packet, length %zd: %s\n",
 		    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
-	return ONLINE_IS;
+	return ONLINE_SET;
 
     case 0x38:			/* ACK */
 	gpsd_report(LOG_PROG, "EverMore command %02X ACK\n", getub(buf2, 2));
-	return ONLINE_IS;
+	return ONLINE_SET;
 
     default:
 	gpsd_report(LOG_WARN,

@@ -53,7 +53,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->newdata.mode = MODE_NO_FIX;
-    mask = ONLINE_IS | MODE_IS | STATUS_IS | CLEAR_IS;
+    mask = ONLINE_SET | MODE_SET | STATUS_SET | CLEAR_IS;
 
     /* just bail out if this fix is not marked valid */
     if (0 != (pflags & FIX_FLAG_MASK_INVALID)
@@ -63,7 +63,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     session->newdata.time = gpsd_gpstime_resolve(session,
 	(unsigned short) getles16(buf, 7 + 82),
 	(unsigned int)getleu32(buf, 7 + 84) / 1000.0);
-    mask |= TIME_IS | PPSTIME_IS;
+    mask |= TIME_SET | PPSTIME_IS;
 
     epx = (double)(getles32(buf, 7 + 96) / 100.0);
     epy = (double)(getles32(buf, 7 + 100) / 100.0);
@@ -73,7 +73,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     evz = (double)(getles32(buf, 7 + 194) / 1000.0);
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     epx, epy, epz, evx, evy, evz);
-    mask |= LATLON_IS | ALTITUDE_IS | SPEED_IS | TRACK_IS | CLIMB_IS;
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     eph = (double)(getles32(buf, 7 + 252) / 100.0);
     /* eph is a circular error, sqrt(epx**2 + epy**2) */
     session->newdata.epx = session->newdata.epy = eph / sqrt(2);
@@ -90,7 +90,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 	session->gpsdata.dop.pdop = (double)(getleu16(buf, 7 + 60) / 100.0);
 	session->gpsdata.dop.vdop = (double)(getleu16(buf, 7 + 62) / 100.0);
 	session->gpsdata.dop.tdop = (double)(getleu16(buf, 7 + 64) / 100.0);
-	mask |= DOP_IS;
+	mask |= DOP_SET;
     }
 
     if ((pflags & FIX_FLAG_MASK_INVALID) == 0
@@ -115,7 +115,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 		session->gpsdata.status, session->gpsdata.dop.gdop,
 		session->gpsdata.dop.pdop, session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop, session->gpsdata.dop.tdop,
-		gpsd_maskdump(mask));
+		gps_maskdump(mask));
     return mask;
 }
 
@@ -154,7 +154,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	}
 	session->gpsdata.satellites_visible = (int)st;
 	session->gpsdata.satellites_used = (int)nsv;
-	mask = USED_IS | SATELLITE_IS;;
+	mask = USED_IS | SATELLITE_SET;;
 
 	gpsd_report(LOG_DATA,
 		    "PRN_STATUS: time=%.2f visible=%d used=%d mask={USED|SATELLITE}\n",
@@ -193,7 +193,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     gpsd_report(LOG_DATA,
 		"UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
 		session->newdata.time);
-    return TIME_IS | PPSTIME_IS;
+    return TIME_SET | PPSTIME_IS;
 }
 
 static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
@@ -368,7 +368,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		       "ITK-%02x", type);
 
-    return mask | ONLINE_IS;
+    return mask | ONLINE_SET;
 }
 
 /*@ -charint @*/

@@ -107,7 +107,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	/*@ +usedef @*/
 
 	fieldmask = gpsd_poll(session);
-	if ((fieldmask &~ ONLINE_IS)!=0)
+	if ((fieldmask &~ ONLINE_SET)!=0)
 	    return fieldmask;
     }
 }
@@ -171,7 +171,7 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	gpsd_report(LOG_PROG, "reading...\n");
 
 	(void)gps_read(gpsdata);
-	if (ERROR_IS & gpsdata->set) {
+	if (ERROR_SET & gpsdata->set) {
 	    gpsd_report(LOG_ERROR, "error '%s'\n", gpsdata->error);
 	    return false;
 	}
