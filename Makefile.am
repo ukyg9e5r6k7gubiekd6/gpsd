@@ -470,7 +470,7 @@ test_json_LDADD = $(LIBC) libgps.la $(LIBM)
 
 MANPAGES_BASE = \
 	gpsd.8 \
-	gpsd_json.8 \
+	gpsd_json.5 \
 	gps.1 \
 	cgps.1 \
 	lcdgps.1 \
