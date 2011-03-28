@@ -43,6 +43,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 	/* attach failed for sume unknown reason */
 	return -2;
     }
+    gpsdata->gps_fd = -1;
     return 0;
 }
 

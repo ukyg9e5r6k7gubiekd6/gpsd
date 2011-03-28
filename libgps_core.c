@@ -57,7 +57,7 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
 	return -1;
 
 #ifdef SHM_EXPORT_ENABLE
-    if (strcmp(port, GPSD_SHARED_MEMORY) == 0) {
+    if (host != NULL && strcmp(host, GPSD_SHARED_MEMORY) == 0) {
 	status = gps_shm_open(gpsdata);
 	if (status == -1)
 	    status = SHM_NOSHARED;

@@ -342,7 +342,7 @@ static int socket_mainloop(void)
 static int shm_mainloop(void)
 {
     int status;
-    if ((status = gps_open(&gpsdata, GPSD_SHARED_MEMORY, NULL)) != 0) {
+    if ((status = gps_open(GPSD_SHARED_MEMORY, NULL, &gpsdata)) != 0) {
 	(void)fprintf(stderr,
 		      "%s: shm open failed with status %d.\n",
 		      progname, status);
