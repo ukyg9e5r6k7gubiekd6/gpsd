@@ -470,6 +470,7 @@ test_json_LDADD = $(LIBC) libgps.la $(LIBM)
 
 MANPAGES_BASE = \
 	gpsd.8 \
+	gpsd_json.8 \
 	gps.1 \
 	cgps.1 \
 	lcdgps.1 \
@@ -533,6 +534,7 @@ endif
 
 XML = \
 	gpsd.xml \
+	gpsd_json.xml \
 	gps.xml \
 	libgps.xml \
 	libgpsmm.xml \
@@ -569,6 +571,7 @@ EXTRA_DIST = \
 	test_trig.c \
 	gpsd.php \
 	gpsd.xml \
+	gpsd_json.xml \
 	gpsd.h-head \
 	gpsd.h-tail \
 	$(XML) \

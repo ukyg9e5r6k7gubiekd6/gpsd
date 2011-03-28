@@ -439,7 +439,8 @@ The shared-memory interface is not yet available from Python.
 
 If your system supports D-Bus, gpsd broadcasts a signal with path /org/gpsd,
 interface "org.gpsd", and name "fix" whenever it received a position
-report from any device attached to it.
+report from any device attached to it.  See the gpsd(8) manual page for
+details of the binary payload layout.
 
 == C Examples ==
 
