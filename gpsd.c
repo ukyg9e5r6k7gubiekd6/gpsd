@@ -693,12 +693,12 @@ static bool add_device(const char *device_name)
 static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
 {
-    char *p, *stash, *eq;
+    char *stash, *eq;
     struct gps_device_t *devp;
 
     /*@ -sefparams @*/
     if (buf[0] == '-') {
-	p = snarfline(buf + 1, &stash);
+	snarfline(buf + 1, &stash);
 	gpsd_report(LOG_INF, "<= control(%d): removing %s\n", sfd, stash);
 	if ((devp = find_device(stash))) {
 	    deactivate_device(devp);
@@ -707,7 +707,7 @@ static void handle_control(int sfd, char *buf)
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
     } else if (buf[0] == '+') {
-	p = snarfline(buf + 1, &stash);
+	snarfline(buf + 1, &stash);
 	if (find_device(stash)) {
 	    gpsd_report(LOG_INF, "<= control(%d): %s already active \n", sfd,
 			stash);
@@ -720,7 +720,7 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	}
     } else if (buf[0] == '!') {
-	p = snarfline(buf + 1, &stash);
+	snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command \n",
@@ -751,7 +751,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (buf[0] == '&') {
-	p = snarfline(buf + 1, &stash);
+	snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command\n",
@@ -1685,7 +1685,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *device;
     sockaddr_t fsin;
     fd_set rfds, control_fds;
-    int st, i, option, msocks[2], cfd, dfd;
+    int i, option, msocks[2], cfd, dfd;
     bool go_background = true;
     struct timeval tv;
     const struct gps_type_t **dp;
@@ -1913,7 +1913,7 @@ int main(int argc, char *argv[])
 #endif /* SOCKET_EXPORT_ENABLE*/
 
     /* daemon got termination or interrupt signal */
-    if ((st = setjmp(restartbuf)) > 0) {
+    if (setjmp(restartbuf) > 0) {
 	/* try to undo all device configurations */
 	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
 	    if (allocated_device(&devices[dfd]))
