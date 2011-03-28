@@ -63,7 +63,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
     if (context->shmexport != NULL)
     {
 	static int tick;
-	struct shmexport_t *shared = (struct shmexport_t *)context->shmexport;
+	volatile struct shmexport_t *shared = (struct shmexport_t *)context->shmexport;
 
 	++tick;
 	/*

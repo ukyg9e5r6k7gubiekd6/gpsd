@@ -55,7 +55,8 @@ int gps_shm_read(struct gps_data_t *gpsdata)
     else
     {
 	int before, after;
-	struct shmexport_t *shared = (struct shmexport_t *)gpsdata->privdata;
+	void *private_save = gpsdata->privdata;
+	volatile struct shmexport_t *shared = (struct shmexport_t *)gpsdata->privdata;
 	struct gps_data_t noclobber;
 
 	/*
@@ -83,7 +84,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	    (void)memcpy((void *)gpsdata, 
 			 (void *)&noclobber, 
 			 sizeof(struct gps_data_t));
-	    /*@i1@*/gpsdata->privdata = shared;
+	    /*@i1@*/gpsdata->privdata = private_save;
 	    return (int)sizeof(struct gps_data_t);
 	}
     }

@@ -1,12 +1,12 @@
-* Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
+* Mon Mar 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
   Fix a timestamp-clobbering bug in the C library revealed by an
   obscure car-nav device, the MyGuide 3100. The DEVICE 'activated'
   attribute becomes an ISO8601 string; the client libraries will
   still backward-compatibly read a float value. gps_unpack() is
-  now a documented part of the library API. There is now an experimental
-  shared-memory export from the daemon with a working client-library
-  binding.
+  now a documented part of the library API. There is now a
+  shared-memory export from the daemon that can be accessed through 
+  the C and C++ client libraries.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
