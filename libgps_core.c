@@ -112,8 +112,7 @@ int gps_read(struct gps_data_t *gpsdata)
 
 #ifdef SHM_EXPORT_ENABLE
     if (gpsdata->gps_fd == -1) {
-	gps_shm_read(gpsdata);
-	status = 0;
+	status = gps_shm_read(gpsdata);
     }
 #endif /* SHM_EXPORT_ENABLE */
 
