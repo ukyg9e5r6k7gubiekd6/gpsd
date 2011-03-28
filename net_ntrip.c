@@ -436,7 +436,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
     char *port = NULL;
     char *stream = NULL;
     char *url = NULL;
-    int ret;
+    int ret = -1;
     char t[strlen(caster + 1)];
     char *tmp = t;
 

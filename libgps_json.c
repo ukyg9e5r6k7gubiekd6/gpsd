@@ -80,6 +80,7 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
     };
     /*@ +fullinitblock @*/
 
+    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_1, endptr);
 
     if (status == 0) {
@@ -161,6 +162,7 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     };
     /*@ +fullinitblock @*/
 
+    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_1, endptr);
     if (status != 0)
 	return status;
@@ -234,6 +236,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	usedflags[i] = false;
     }
 
+    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_2, endptr);
     if (status != 0)
 	return status;

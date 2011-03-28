@@ -269,7 +269,7 @@ static gps_mask_t processGPGLL(int count, char *field[],
 	}
     }
     if (strcmp(field[6], "A") == 0 && (count < 8 || *status != 'N')) {
-	int newstatus = session->gpsdata.status;
+	int newstatus;
 
 	do_lat_lon(&field[1], &session->newdata);
 	mask |= LATLON_SET;

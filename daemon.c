@@ -19,10 +19,9 @@ int daemon(int nochdir, int noclose)
 /* compatible with the daemon(3) found on Linuxes and BSDs */
 {
     int fd;
-    pid_t pid;
 
     /*@ -type @*//* weirdly, splint 3.1.2 is confused by fork() */
-    switch (pid = fork()) {
+    switch (fork()) {
     case -1:
 	return -1;
     case 0:			/* child side */

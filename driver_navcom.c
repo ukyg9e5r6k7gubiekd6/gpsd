@@ -1120,14 +1120,13 @@ gps_mask_t navcom_parse(struct gps_device_t * session, unsigned char *buf,
 			size_t len)
 {
     unsigned char cmd_id;
-    unsigned char *payload;
     unsigned int msg_len;
 
     if (len == 0)
 	return 0;
 
     cmd_id = (unsigned char)getub(buf, 3);
-    payload = &buf[6];
+    //payload = &buf[6];
     msg_len = (uint) getleu16(buf, 4);
 
     /*@ -usedef -compdef @*/

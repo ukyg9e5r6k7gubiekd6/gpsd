@@ -77,7 +77,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     int nfrags, ifrag, nfields = 0;
     unsigned char *field[NMEA_MAX*2];
     unsigned char fieldcopy[NMEA_MAX*2+1];
-    unsigned char *data, *cp = fieldcopy;
+    unsigned char *data, *cp;
     unsigned char ch, pad;
     struct aivdm_context_t *ais_context;
     int i;
