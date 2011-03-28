@@ -103,8 +103,12 @@ the protocol and API changes.</para></warning>
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and sets up access to
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-via either a socket or a shared-memory
-segment. <function>gps_open()</function> returns 0 on success, -1 on
+via either the socket or shared-memory export. The shared-memory
+export is faster, but does not carry information about device
+activation and deactivation events and will not allow you to monitor
+device packet traffic.</para>
+
+<para><function>gps_open()</function> returns 0 on success, -1 on
 errors and is re-entrant.  errno is set depending on the error
 returned from the socket or shared-memory interface; see
 <filename>gps.h</filename> for values and explanations; also see
