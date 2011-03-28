@@ -240,12 +240,12 @@ revision.h: Makefile
 	echo '#define' REVISION '"'`date -u +%Y-%m-%dT%H:%M:%S`'"' >revision.h && \
 	chmod a-w revision.h
 
-gps_maskdump.c: gps.h maskaudit.py
+gps_maskdump.c: gps.h maskaudit.py gpsd.h
 	rm -f gps_maskdump.c && \
 	$(PYTHON) maskaudit.py -c $(srcdir) >gps_maskdump.c && \
 	chmod a-w gps_maskdump.c
 
-timebase.h: $(srcdir)/leapsecond.py $(srcdir)/leapseconds.cache
+timebase.h: $(srcdir)/leapsecond.py $(srcdir)/leapseconds.cache gpsd.h
 	$(PYTHON) $(srcdir)/leapsecond.py -h $(srcdir)/leapseconds.cache >timebase.h
 
 # leapseconds.cache is a local cache for information on leapseconds issued
