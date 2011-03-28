@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.9, March 2011
+v1.10, March 2011
 
 This document is mastered in asciidoc format.  If you are reading it
 in HTML, you can find the original at
@@ -280,10 +280,17 @@ time in which to come back around your main loop.
 
 == Interfacing from the client side ==
 
-The GPSD project provides client-side libraries in C, C++, and Python.
-A Perl module is separately available from CPAN.  While the details of
-these libraries vary, they all have the same two purposes and the same
-limitations.
+The gpsd daemon exports data in three different ways: via a sockets 
+interface, via DBUS broadcasts, and via a shared-memory interface,
+It is possible one or more of these may be configured out in your
+installation.
+
+=== The sockets interface ===
+
+The GPSD project provides client-side libraries in C, C++, and Python
+that exercise the sockets export.  A Perl module is separately
+available from CPAN.  While the details of these libraries vary, they
+all have the same two purposes and the same limitations.
 
 One purpose of the libraries is to handle the details of unpacking
 JSON-based wire-protocol objects into whatever native structure/record
@@ -397,6 +404,42 @@ no unpack() method because it doesn't fit the gpsmm object's RAII model.
 
 All bindings will throw a recognizable error from the read entry
 point when the socket is closed from the daemon side.
+
+=== Shared-memory interface ===
+
+Whenever gpsd recognizes a packet from any attached device, it writes 
+the accumulated state from that device to a shared memory segment.  The
+C and C++ client libraries shipped with GPSD can read this segment.  
+
+The API for reading the segment uses the same gps_open(), gps_read()
+and gps_close() entry points as the sockets interface. To enable using
+shared memory instead, it is only necessary to use the macro constant
+GPSD_SHARED_MEMORY as the port argument of gps_open().
+
+The gps_stream(), gps_send(), gps_waiting(), and gps_data() entry
+points are not available with this interface. You cannot set a device
+filter on it. You will not get device activation or deactivation
+notices through it.  And, of course, it is only good for local and not
+networked access.  Its main advantage is that it is very fast and
+lightweight, especially suitable for use in low-power embedded
+deployments with a single device on a fixed port and the sockets
+interface configured out.
+
+Under the shared-memory interface, gps_read() after a successful
+gps_open() will always return with data; its return is the size of a
+struct gps_data_t in bytes. The 'gps_fd' member of the struct gpsdata
+instance handed to you will always be -1.  The PACKET_SET flag will
+always be asserted.  The other flag bits in the 'set' member will tell
+you what data is updated in the instance, just as in the sockets
+interface.
+
+The shared-memory interface is not yet available from Python.
+
+=== D-Bus broadcasts ===
+
+If your system supports D-Bus, gpsd broadcasts a signal with path /org/gpsd,
+interface "org.gpsd", and name "fix" whenever it received a position
+report from any device attached to it.
 
 == C Examples ==
 
