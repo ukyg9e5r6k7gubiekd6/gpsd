@@ -56,6 +56,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
     {
 	int before, after;
 	struct shmexport_t *shared = (struct shmexport_t *)gpsdata->privdata;
+	struct gps_data_t noclobber;
 
 	/*
 	 * Following block of instructions must not be reordered, otherwise 
@@ -70,14 +71,21 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	 */
 	before = shared->bookend1;
 	barrier();
-	(void)memcpy((void *)gpsdata, 
+	(void)memcpy((void *)&noclobber, 
 		     (void *)&shared->gpsdata, 
 		     sizeof(struct gps_data_t));
 	barrier();
 	after = shared->bookend2;
 
-	/*@i1@*/gpsdata->privdata = shared;
-	return (before == after) ? (int)sizeof(struct gps_data_t) : 0;
+	if (before != after) 
+	    return 0;
+	else {
+	    (void)memcpy((void *)gpsdata, 
+			 (void *)&noclobber, 
+			 sizeof(struct gps_data_t));
+	    /*@i1@*/gpsdata->privdata = shared;
+	    return (int)sizeof(struct gps_data_t);
+	}
     }
 }
 
