@@ -88,7 +88,7 @@ int gps_close(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
-    if (gpsdata->gps_fd == -1) {
+    if ((intptr_t)(gpsdata->gps_fd) == -1) {
 	gps_shm_close(gpsdata);
 	status = 0;
     }
@@ -111,7 +111,7 @@ int gps_read(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_read()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
-    if (gpsdata->gps_fd == -1) {
+    if ((intptr_t)(gpsdata->gps_fd) == -1) {
 	status = gps_shm_read(gpsdata);
     }
 #endif /* SHM_EXPORT_ENABLE */
