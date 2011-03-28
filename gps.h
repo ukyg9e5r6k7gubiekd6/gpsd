@@ -1447,6 +1447,8 @@ extern int gps_shm_open(/*@out@*/struct gps_data_t *);
 extern int gps_shm_read(struct gps_data_t *);
 extern void gps_shm_close(struct gps_data_t *);
 
+extern void libgps_trace(int errlevel, const char *, ...);
+
 /* dependencies on struct gpsdata_t end hrere */
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);

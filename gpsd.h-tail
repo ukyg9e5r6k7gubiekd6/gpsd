@@ -728,6 +728,20 @@ extern bool aivdm_decode(const char *, size_t,
 			 struct aivdm_context_t [], 
 			 struct ais_t *);
 
+/* debugging apparatus for the client library */
+#if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)
+#define LIBGPS_DEBUG
+#endif /* defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE) */
+#ifdef LIBGPS_DEBUG
+#define DEBUG_CALLS	1	/* shallowest debug level */
+#define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
+# define libgps_debug_trace(args) (void) libgps_trace args
+extern int libgps_debuglevel;
+extern void libgps_dump_state(struct gps_data_t *);
+#else
+# define libgps_debug_trace(args) /*@i1@*/do { } while (0)
+#endif /* LIBGPS_DEBUG */
+
 /* caller should supply this */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 __attribute__((__format__(__printf__, 2, 3))) void gpsd_report(int, const char *, ...);

@@ -43,7 +43,9 @@ struct privdata_t
     /* data buffered from the last read */
     ssize_t waiting;
     char buffer[GPS_JSON_RESPONSE_MAX * 2];
-
+#ifdef LIBGPS_DEBUG
+    int waitcount;
+#endif /* LIBGPS_DEBUG */
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
@@ -51,6 +53,8 @@ struct privdata_t
 int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 		  /*@out@*/ struct gps_data_t *gpsdata)
 {
+    libgps_debug_trace((DEBUG_CALLS, "gps_sock_open(%s, %s)\n", host, port));
+
     if (!host)
 	host = "localhost";
     if (!port)
@@ -60,11 +64,11 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 	if ((gpsdata->gps_fd =
 	    netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	    errno = gpsdata->gps_fd;
-	    //libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
+	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
 	    return -1;
         }
 	else
-	    //libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns socket on fd %d\n", gpsdata->gps_fd));
+	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns socket on fd %d\n", gpsdata->gps_fd));
 #else
 	QTcpSocket *sock = new QTcpSocket();
 	gpsdata->gps_fd = sock;
@@ -82,6 +86,9 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
     PRIVATE(gpsdata)->newstyle = false;
     PRIVATE(gpsdata)->waiting = 0;
 
+#ifdef LIBGPS_DEBUG
+    PRIVATE(gpsdata)->waitcount = 0;
+#endif /* LIBGPS_DEBUG */
     return 0;
 }
 /*@+branchstate@*/
@@ -93,7 +100,7 @@ bool gps_waiting(struct gps_data_t * gpsdata, int timeout)
     fd_set rfds;
     struct timeval tv;
 
-    //libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, waitcount++));
+    libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, PRIVATE(gpsdata)->waitcount++));
     if (PRIVATE(gpsdata)->waiting > 0)
 	return true;
 
@@ -217,17 +224,17 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
  * return an error status, it must be < 0.
  */
 {
-    //libgps_debug_trace((DEBUG_CALLS, "gps_unpack(%s)\n", buf));
+    libgps_debug_trace((DEBUG_CALLS, "gps_unpack(%s)\n", buf));
 
     /* detect and process a JSON response */
     if (buf[0] == '{') {
 	const char *jp = buf, **next = &jp;
 	while (next != NULL && *next != NULL && next[0][0] != '\0') {
-	    //libgps_debug_trace((DEBUG_CALLS,"gps_unpack() segment parse '%s'\n", *next));
+	    libgps_debug_trace((DEBUG_CALLS,"gps_unpack() segment parse '%s'\n", *next));
 	    if (libgps_json_unpack(*next, gpsdata, next) == -1)
 		break;
 #ifdef LIBGPS_DEBUG
-	    if (debuglevel >= 1)
+	    if (libgps_debuglevel >= 1)
 		libgps_dump_state(gpsdata);
 #endif /* LIBGPS_DEBUG */
 
@@ -435,7 +442,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 
 #ifdef LIBGPS_DEBUG
-		    if (debuglevel >= 1)
+		    if (libgps_debuglevel >= 1)
 			libgps_dump_state(gpsdata);
 #endif /* LIBGPS_DEBUG */
 
@@ -453,7 +460,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #endif /* OLDSTYLE_ENABLE */
 
 #ifndef USE_QT
-    //libgps_debug_trace((DEBUG_CALLS, "final flags: (0x%04x) %s\n", gpsdata->set,gps_maskdump(gpsdata->set)));
+    libgps_debug_trace((DEBUG_CALLS, "final flags: (0x%04x) %s\n", gpsdata->set,gps_maskdump(gpsdata->set)));
 #endif
     return 0;
 }
@@ -525,7 +532,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		buf[strlen(buf) - 1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	//libgps_debug_trace((DEBUG_CALLS, "gps_stream() disable command: %s\n", buf));
+	libgps_debug_trace((DEBUG_CALLS, "gps_stream() disable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     } else {			/* if ((flags & WATCH_ENABLE) != 0) */
 
@@ -556,7 +563,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		buf[strlen(buf) - 1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
-	//libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));
+	libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     }
 }

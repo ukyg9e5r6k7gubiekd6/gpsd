@@ -101,20 +101,23 @@ you recognize.  See the GPSD project website for more information on
 the protocol and API changes.</para></warning>
 
 <para>Calling <function>gps_open()</function> initializes a GPS-data
-structure to hold the data collected by the GPS, and returns a socket
-attached to
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-
-<function>gps_open()</function> returns 0 on success, -1 on errors and is
-re-entrant.  errno is set depending on the error returned from the
-socket layer; see <filename>gps.h</filename> for values and
-explanations; also see <function>gps_errstr()</function>. The host
-address may be a DNS name, an IPv4 dotted quad, or an IPV6 address;
-the library will do the right thing for any of these.</para>
+structure to hold the data collected by the GPS, and sets up access to
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+via either a socket or a shared-memory
+segment. <function>gps_open()</function> returns 0 on success, -1 on
+errors and is re-entrant.  errno is set depending on the error
+returned from the socket or shared-memory interface; see
+<filename>gps.h</filename> for values and explanations; also see
+<function>gps_errstr()</function>. The host address may be a DNS name,
+an IPv4 dotted quad, an IPV6 address, or the special value
+<constant>GPSD_SHARED_MEMORY</constant> referring to the
+shared-memory export; the library will do the right thing for any of
+these.</para>
 
 <para><function>gps_close()</function> ends the session.</para>
 
 <para><function>gps_send()</function> writes a command to the daemon.
+It is not available when using the shared-memory export.
 The second argument must be a format string containing elements from
 the command set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -127,27 +130,27 @@ cautions. See <function>gps_stream()</function> as a possible
 alternative.</para>
 
 <para><function>gps_read()</function> accepts a response, or sequence
-of responses, from the daemon and interprets it as though it were a
-query response (the return value is as for a query).  This function
-does a nonblocking read for data from the daemon; it returns a count
-of bytes read for success, -1 with errno set on a Unix-level read
-error, -1 with errno not set if the socket to the daemon has closed,
-and 0 if no data is available.</para>
+of responses, from the daemon and interprets.  This function does
+either a nonblocking read for data from the daemon or a fetch from
+shared memory; it returns a count of bytes read for success, -1 with
+errno set on a Unix-level read error, -1 with errno not set if the
+socket to the daemon has closed or if the shared-memory segment was
+unavailable, and 0 if no data is available.</para>
 
 <para><function>gps_waiting()</function> can be used to check whether
-there is data from the daemon. The second argument is the maximum
-amount of time to wait (in microseconds) on input before returning.
-It returns true if there input waiting, false on timeout (no data
-waiting) or error condition. This function is a convenience wrapper
-around a
+there is data from the daemon (it is not available when usng the
+shared-memory export). The second argument is the maximum amount of
+time to wait (in microseconds) on input before returning.  It returns
+true if there input waiting, false on timeout (no data waiting) or
+error condition. This function is a convenience wrapper around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
 error conditions. Note that choosing a wait timeout of less than twice
-the cycle time of your device will be hazardous, as the receiver probably 
-will not supply input often enough to prevent a spurious error indication.
-For the typical 1-second cycle time of GPSes this implies a minimum 2-second
-timeout.</para>
+the cycle time of your device will be hazardous, as the receiver
+probably will not supply input often enough to prevent a spurious
+error indication.  For the typical 1-second cycle time of GPSes this
+implies a minimum 2-second timeout.</para>
 
 <para><function>gps_unpack()</function> parses JSON from the argument
 buffer into the target of the session structure pointer argument.
@@ -155,19 +158,17 @@ Included in case your application wishes to manage socket I/O
 itself.</para>
 
 <para><function>gps_data()</function> returns the contents of the
-client data buffer. Use with care; this may fail to be a NUL-terminated 
-string if WATCH_RAW is enabled.</para>
+client data buffer (not available when using the shared-memory
+export). Use with care; this may fail to be a NUL-terminated string if
+WATCH_RAW is enabled.</para>
 
 <para><function>gps_stream()</function> asks
 <application>gpsd</application> to stream the reports it has at you,
-to be made available when you poll.  It is preferable to the
-older-style (pre-2.90) way of doing this,
-<function>gps_query()</function> with a "w+" argument, because it
-insulates your code from whether your client library and your
-<application>gpsd</application> are using old or new protocol.  The
-second argument is a flag mask that sets various policy bits; see the
-list below.  Calling <function>gps_stream()</function> more than once
-with different flag masks is allowed.</para>
+to be made available when you poll (not available when using the
+shared-memory export). The second argument is a flag mask that sets
+various policy bits; see the list below.  Calling
+<function>gps_stream()</function> more than once with different flag
+masks is allowed.</para>
 
 <variablelist>
 <varlistentry>
@@ -250,8 +251,9 @@ is not automatically zeroed by each <function>gps_read()</function>.
 It is up to the client to zero that field when appropriate and to keep
 an eye on the fix and sentence timestamps.</para>
 
-<para>The Python implementation supports the same facilities as the C
-library. <function>gps_open()</function> is replaced by the
+<para>The Python implementation supports the same facilities as the
+socket-export calls in the C library; there is no shared-memory
+interface. <function>gps_open()</function> is replaced by the
 initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
 However, it is simpler just to use the session object as an iterator,

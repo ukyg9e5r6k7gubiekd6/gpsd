@@ -6,67 +6,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <fcntl.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
-#include <math.h>
-#include <locale.h>
-#include <assert.h>
-#include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifndef USE_QT
-#ifndef S_SPLINT_S
-#include <sys/socket.h>
-#endif /* S_SPLINT_S */
-#else
-#include <QTcpSocket>
-#endif /* USE_QT */
 
 #include "gpsd.h"
 #include "gps_json.h"
 
-#ifdef S_SPLINT_S
-extern char *strtok_r(char *, const char *, char **);
-#endif /* S_SPLINT_S */
-
-#if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)
-#define LIBGPS_DEBUG
-#endif /* defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE) */
-
-struct privdata_t
-{
-    bool newstyle;
-    /* data buffered from the last read */
-    ssize_t waiting;
-    char buffer[GPS_JSON_RESPONSE_MAX * 2];
-
-};
-#define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
-
 #ifdef LIBGPS_DEBUG
-#define DEBUG_CALLS	1	/* shallowest debug level */
-#define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
-static int debuglevel = 0;
+int libgps_debuglevel = 0;
+
 static FILE *debugfp;
 
 void gps_enable_debug(int level, FILE * fp)
 /* control the level and destination of debug trace messages */
 {
-    debuglevel = level;
+    libgps_debuglevel = level;
     debugfp = fp;
 #ifdef CLIENTDEBUG_ENABLE
     json_enable_debug(level - DEBUG_JSON, fp);
 #endif
 }
 
-static void gps_trace(int errlevel, const char *fmt, ...)
+void libgps_trace(int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style */
 {
-    if (errlevel <= debuglevel) {
+    if (errlevel <= libgps_debuglevel) {
 	char buf[BUFSIZ];
 	va_list ap;
 
@@ -79,10 +45,6 @@ static void gps_trace(int errlevel, const char *fmt, ...)
 	(void)fputs(buf, debugfp);
     }
 }
-
-# define libgps_debug_trace(args) (void) gps_trace args
-#else
-# define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
 
 int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
@@ -93,8 +55,6 @@ int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
     /*@ -branchstate @*/
     if (!gpsdata)
 	return -1;
-
-    libgps_debug_trace((DEBUG_CALLS, "gps_open(%s, %s)\n", host, port));
 
 #ifdef SHM_EXPORT_ENABLE
     if (strcmp(port, GPSD_SHARED_MEMORY) == 0) {
@@ -181,19 +141,8 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
 #endif
 }
 
-#ifdef TESTMAIN
-/*
- * A simple command-line exerciser for the library.
- * Not really useful for anything but debugging.
- */
-
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
-#include <getopt.h>
-#include <signal.h>
-
-static void libgps_dump_state(struct gps_data_t *collect)
+#ifdef LIBGPS_DEBUG
+void libgps_dump_state(struct gps_data_t *collect)
 {
     const char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
     const char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
@@ -278,6 +227,19 @@ static void libgps_dump_state(struct gps_data_t *collect)
     }
 
 }
+#endif /* LIBGPS_DEBUG */
+
+#ifdef TESTMAIN
+/*
+ * A simple command-line exerciser for the library.
+ * Not really useful for anything but debugging.
+ */
+
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
+#include <getopt.h>
+#include <signal.h>
 
 static void onsig(int sig)
 {

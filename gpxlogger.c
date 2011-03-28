@@ -342,7 +342,7 @@ static int socket_mainloop(void)
 static int shm_mainloop(void)
 {
     int status;
-    if ((status = gps_shm_open(&gpsdata)) != 0) {
+    if ((status = gps_open(&gpsdata, GPSD_SHARED_MEMORY, NULL)) != 0) {
 	(void)fprintf(stderr,
 		      "%s: shm open failed with status %d.\n",
 		      progname, status);
@@ -351,14 +351,14 @@ static int shm_mainloop(void)
 
     print_gpx_header();
     for (;;) {
-	status = gps_shm_read(&gpsdata);
+	status = gps_read(&gpsdata);
 
 	if (status == -1)
 	    break;
 	if (status > 0)
 	    conditionally_log_fix(&gpsdata);
     }
-    (void)gps_shm_close(&gpsdata);
+    (void)gps_close(&gpsdata);
     return 0;
 }
 
