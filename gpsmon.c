@@ -328,7 +328,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 
 	if (!serial) {
 	    /* stop pretending now */
-	    session.gpsdata.gps_fd = savefd;
+	    /*@i1@*/session.gpsdata.gps_fd = savefd;
 	    /* enough room for "ERROR\r\n\0" */
 	    /*@ -sefparams @*/
 	    assert(read(controlfd, buf, 8) != -1);

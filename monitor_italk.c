@@ -72,7 +72,7 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 {
 
     unsigned int tow, tod, nsec, d, svlist;
-    unsigned short gps_week, flags, cflags, pflags, nsv;
+    unsigned short gps_week, nsv;
     unsigned short year, mon, day, hour, min, sec;
     double epx, epy, epz, evx, evy, evz;
     double latitude, longitude;
@@ -82,9 +82,11 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
     if (len != 296)
 	return;
 
-    flags = (ushort) getleu16(buf, 7 + 4);
+#ifdef __UNUSED__
+    flags = (ushort) getleu16(buf, 7 + 4); */
     cflags = (ushort) getleu16(buf, 7 + 6);
     pflags = (ushort) getleu16(buf, 7 + 8);
+#endif /* __UNUSED__ */
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     nsv = (ushort) MAX(getleu16(buf, 7 + 12), getleu16(buf, 7 + 14));

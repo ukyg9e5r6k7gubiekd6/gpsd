@@ -37,7 +37,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *, unsigned char *,
 static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
-    unsigned short flags, cflags, pflags;
+    unsigned short flags, pflags;
     gps_mask_t mask = 0;
     double epx, epy, epz, evx, evy, evz, eph;
 
@@ -48,7 +48,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     }
 
     flags = (ushort) getleu16(buf, 7 + 4);
-    cflags = (ushort) getleu16(buf, 7 + 6);
+    //cflags = (ushort) getleu16(buf, 7 + 6);
     pflags = (ushort) getleu16(buf, 7 + 8);
 
     session->gpsdata.status = STATUS_NO_FIX;

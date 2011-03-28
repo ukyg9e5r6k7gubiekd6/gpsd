@@ -50,6 +50,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 int gps_shm_read(struct gps_data_t *gpsdata)
 /* read an update from the shared-memory segment */
 {
+    /*@ -compdestroy */
     if (gpsdata->privdata == NULL)
 	return -1;
     else
@@ -88,6 +89,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	    return (int)sizeof(struct gps_data_t);
 	}
     }
+    /*@ +compdestroy */
 }
 
 void gps_shm_close(struct gps_data_t *gpsdata)

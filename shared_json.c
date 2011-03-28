@@ -59,6 +59,7 @@ int json_device_read(const char *buf,
     /*@ +fullinitblock @*/
     int status;
 
+    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_device, endptr);
     if (status != 0)
 	return status;

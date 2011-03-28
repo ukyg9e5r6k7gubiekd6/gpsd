@@ -110,6 +110,7 @@ int gps_read(struct gps_data_t *gpsdata)
 
     libgps_debug_trace((DEBUG_CALLS, "gps_read()\n"));
 
+    /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
     if ((intptr_t)(gpsdata->gps_fd) == -1) {
 	status = gps_shm_read(gpsdata);
@@ -121,6 +122,7 @@ int gps_read(struct gps_data_t *gpsdata)
         status = gps_sock_read(gpsdata);
     }
 #endif /* SOCKET_EXPORT_ENABLE */
+    /*@ +usedef +compdef +uniondef @*/
 
     return status;
 }

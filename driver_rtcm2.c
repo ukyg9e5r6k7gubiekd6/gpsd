@@ -854,7 +854,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    tp->message[n++] = (char)(msg->msg_type.type16.txt[w].byte3);
 	}
 	/*@ +boolops @*/
-	tp->message[n++] = '\0';
+	tp->message[n] = '\0';
 	break;
 
     case 31:

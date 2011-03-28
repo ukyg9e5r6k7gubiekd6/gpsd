@@ -418,7 +418,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
 	rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
 	rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
-	n = rtcm->rtcmtypes.rtcm3_1029.unicode_units = (size_t)ugrab(8);
+	rtcm->rtcmtypes.rtcm3_1029.unicode_units = (size_t)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, 
 		     buf + 12, rtcm->rtcmtypes.rtcm3_1029.unicode_units);
 	break;

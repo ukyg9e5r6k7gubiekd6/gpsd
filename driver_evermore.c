@@ -148,7 +148,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     double version;
     gps_mask_t mask = 0;
 
-    if (len == 0)
+    /* must have two leader bytes, length, and two trailer bytes minimum */
+    if (len < 5)
 	return 0;
 
     /* time to unstuff it and discard the header and footer */

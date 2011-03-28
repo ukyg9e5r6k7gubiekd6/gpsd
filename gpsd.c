@@ -698,7 +698,7 @@ static void handle_control(int sfd, char *buf)
 
     /*@ -sefparams @*/
     if (buf[0] == '-') {
-	snarfline(buf + 1, &stash);
+	(void)snarfline(buf + 1, &stash);
 	gpsd_report(LOG_INF, "<= control(%d): removing %s\n", sfd, stash);
 	if ((devp = find_device(stash))) {
 	    deactivate_device(devp);
@@ -707,7 +707,7 @@ static void handle_control(int sfd, char *buf)
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
     } else if (buf[0] == '+') {
-	snarfline(buf + 1, &stash);
+	(void)snarfline(buf + 1, &stash);
 	if (find_device(stash)) {
 	    gpsd_report(LOG_INF, "<= control(%d): %s already active \n", sfd,
 			stash);
@@ -720,7 +720,7 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	}
     } else if (buf[0] == '!') {
-	snarfline(buf + 1, &stash);
+	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command \n",
@@ -751,7 +751,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (buf[0] == '&') {
-	snarfline(buf + 1, &stash);
+	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN, "<= control(%d): ill-formed command\n",

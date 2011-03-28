@@ -373,7 +373,7 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
     gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu:%s\n",
 		(int)msg[1] & 0x7f, msglen,
 		gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-    return (i = gpsd_write(session, msg, msglen));
+    return gpsd_write(session, msg, msglen);
 }
 
 /**

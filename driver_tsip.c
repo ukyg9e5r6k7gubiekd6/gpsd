@@ -287,7 +287,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->newdata.latitude = getbef(buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbef(buf, 4) * RAD_2_DEG;
 	session->newdata.altitude = getbef(buf, 8);
-	f1 = getbef(buf, 12);	/* clock bias */
+	//f1 = getbef(buf, 12);	clock bias */
 	f2 = getbef(buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time = 
@@ -507,6 +507,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	break;
     case 0x6e:			/* Synchronized Measurements */
 	break;
+#ifdef __UNUSED__
     case 0x6f:			/* Synchronized Measurements Report */
 	/*@ +charint @*/
 	if (len < 20 || getub(buf, 0) != 1 || getub(buf, 1) != 2)
@@ -515,6 +516,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	s1 = getbes16(buf, 2);	/* number of bytes */
 	u1 = getub(buf, 20);	/* number of SVs */
 	break;
+#endif /* __UNUSED__ */
     case 0x70:			/* Filter Report */
 	break;
     case 0x7a:			/* NMEA settings */
@@ -771,7 +773,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->newdata.latitude = getbed(buf, 36) * RAD_2_DEG;
 	    session->newdata.longitude = getbed(buf, 44) * RAD_2_DEG;
 	    session->newdata.altitude = getbed(buf, 52);
-	    f1 = getbef(buf, 16);	/* clock bias */
+	    //f1 = getbef(buf, 16);    clock bias */
 
 	    u1 = getub(buf, 12);	/* GPS Decoding Status */
 	    u2 = getub(buf, 1);	/* Receiver Mode */

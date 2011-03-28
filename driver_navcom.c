@@ -708,8 +708,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 static gps_mask_t handle_0x86(struct gps_device_t *session)
 {
     size_t n, i;
-    uint8_t prn, tracking_status, ele, ca_snr, p2_snr, log_channel,
-	hw_channel, s;
+    uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
     uint16_t azm, dgps_age;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
@@ -763,7 +762,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    return 0;
 	}
 	prn = getub(buf, n);
-	tracking_status = getub(buf, n + 1);
+	/* tracking_status = getub(buf, n + 1); */
 	log_channel = getub(buf, n + 2);
 	ele = getub(buf, n + 5);
 	azm = getleu16(buf, n + 6);
