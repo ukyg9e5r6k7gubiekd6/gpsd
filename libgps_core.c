@@ -1,4 +1,6 @@
-/* libgps.c -- client interface library for the gpsd daemon
+/* libgps_core.c -- client interface library for the gpsd daemon
+ *
+ * Core portion of client library.  Cals helpers to handle different eports.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -141,6 +143,12 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
      * protocol compatibility checks
      */
 #ifndef USE_QT
+#ifdef SHM_EXPORT_ENABLE
+    if (err == SHM_NOSHARED)
+	return "no shared-memory segment or daemon not running";
+    else if (err == SHM_NOATTACH)
+	return "attach failed for unknown reason";
+#endif /* SHM_EXPORT_ENABLE */
     return netlib_errstr(err);
 #else
     static char buf[32];
@@ -157,7 +165,7 @@ void libgps_dump_state(struct gps_data_t *collect)
 
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
-    /* will fail on a 32-bit macine */
+    /* will fail on a 32-bit machine */
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n",
 		  (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
