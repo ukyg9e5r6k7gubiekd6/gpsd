@@ -139,7 +139,9 @@ static int maxfd;
 static int debuglevel;
 static bool in_background = false;
 static bool listen_global = false;
+#ifndef FORCE_NOWAIT
 static bool nowait = false;
+#endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
 
@@ -1791,10 +1793,6 @@ int main(int argc, char *argv[])
 	}
     }
 
-#ifdef FORCE_NOWAIT
-    nowait = true;
-#endif /* FORCE_NOWAIT */
-
 #ifdef CONTROL_SOCKET_ENABLE
     if (!control_socket && optind >= argc) {
 	gpsd_report(LOG_ERROR,
@@ -1876,7 +1874,11 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(LOG_INF, "NTPD Priority setting failed.\n");
     }
+#ifdef FORCE_NOWAIT
+    (void)ntpshm_init(&context, true);
+#else
     (void)ntpshm_init(&context, nowait);
+#endif /* FORCE_NOWAIT */
 #endif /* NTPSHM_ENABLE */
 
 #ifdef DBUS_EXPORT_ENABLE
