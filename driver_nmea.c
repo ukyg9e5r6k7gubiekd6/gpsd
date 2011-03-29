@@ -26,7 +26,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
     char str[20], *p;
 
     if (*(p = field[0]) != '\0') {
-	strncpy(str, p, 20);
+	(void)strlcpy(str, p, sizeof(str));
 	(void)sscanf(p, "%lf", &lat);
 	m = 100.0 * modf(lat / 100.0, &d);
 	lat = d + m / 60.0;
@@ -36,7 +36,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
 	out->latitude = lat;
     }
     if (*(p = field[2]) != '\0') {
-	strncpy(str, p, 20);
+	(void)strlcpy(str, p, sizeof(str));
 	(void)sscanf(p, "%lf", &lon);
 	m = 100.0 * modf(lon / 100.0, &d);
 	lon = d + m / 60.0;
@@ -342,7 +342,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
     } else
-	(void)strncpy(session->driver.nmea.last_gga_timestamp, 
+	(void)strlcpy(session->driver.nmea.last_gga_timestamp, 
 		       field[1],
 		       sizeof(session->driver.nmea.last_gga_timestamp));
     /* if we have a fix and the mode latch is off, go... */
@@ -1055,7 +1055,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
-    strncpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
+    (void)strlcpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
     /* discard the checksum part */
     for (p = (char *)session->driver.nmea.fieldcopy;
 	 (*p != '*') && (*p >= ' ');)
@@ -1104,7 +1104,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		    (nmea_phrase[i].decoder) (count,
 					      session->driver.nmea.field,
 					      session);
-		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
+		(void)strlcpy(session->gpsdata.tag, 
+			      nmea_phrase[i].name, 
+			      MAXTAGLEN);
 		/*
 		 * Must force this to be nz, as we're going to rely on a zero
 		 * value to mean "no previous tag" later.

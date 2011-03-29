@@ -156,7 +156,7 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
     }
 
     bzero(buf, (int)sizeof(buf));
-    (void)strncpy(buf, data, length);
+    (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
@@ -224,7 +224,7 @@ static int gar_int_decode(const char *data, const size_t length,
     }
 
     bzero(buf, (int)sizeof(buf));
-    (void)strncpy(buf, data, length);
+    (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
@@ -277,7 +277,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     session->packet.type = GARMINTXT_PACKET;
     /* TAG message as GTXT, Garmin Simple Text Message */
-    strncpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);
+    (void)strlcpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);
 
     /* only one message, set cycle start */
     session->cycle_end_reliable = true;

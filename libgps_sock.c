@@ -295,7 +295,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->dev.path[0] = '\0';
 			else {
 			    /*@ -mayaliasunique @*/
-			    strncpy(gpsdata->dev.path, sp + 2,
+			    (void)strlcpy(gpsdata->dev.path, sp + 2,
 				    sizeof(gpsdata->dev.path));
 			    /*@ +mayaliasunique @*/
 			    gpsdata->set |= DEVICE_SET;
@@ -402,7 +402,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    (void)sscanf(sp, "Y=%8s %20s %d ",
 					 tag, timestamp,
 					 &gpsdata->satellites_visible);
-			    (void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
+			    (void)strlcpy(gpsdata->tag, tag, MAXTAGLEN);
 			    if (timestamp[0] != '?') {
 				gpsdata->set |= TIME_SET;
 			    }

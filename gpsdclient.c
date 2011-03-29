@@ -32,7 +32,7 @@
     double fdsec, fsec, fdeg, fmin;
 
     if (f < 0 || f > 360) {
-	(void)strlcpy(str, "nan", 40);
+	(void)strlcpy(str, "nan", sizeof(str));
 	return str;
     }
 

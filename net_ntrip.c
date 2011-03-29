@@ -74,7 +74,7 @@ static void ntrip_str_parse(char *str, size_t len,
 
     /* <mountpoint> */
     if ((s = ntrip_field_iterate(str, NULL, eol)))
-	strncpy(hold->mountpoint, s, sizeof(hold->mountpoint) - 1);
+	(void)strlcpy(hold->mountpoint, s, sizeof(hold->mountpoint));
     /* <identifier> */
     s = ntrip_field_iterate(NULL, s, eol);
     /* <format> */
@@ -485,10 +485,18 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    port = DEFAULT_RTCM_PORT;
 	    }
 
-	    strncpy(device->ntrip.stream.mountpoint, stream, 101); /* magic numbers from struct definitions */
-	    strncpy(device->ntrip.stream.credentials, auth, 128); /* magic numbers from struct definitions */
-	    strncpy(device->ntrip.stream.url, url, 256);
-	    strncpy(device->ntrip.stream.port, port, 32);
+	    (void)strlcpy(device->ntrip.stream.mountpoint, 
+		    stream, 
+		    sizeof(device->ntrip.stream.mountpoint));
+	    (void)strlcpy(device->ntrip.stream.credentials, 
+		    auth, 
+		    sizeof(device->ntrip.stream.credentials));
+	    (void)strlcpy(device->ntrip.stream.url, 
+		    url, 
+		    sizeof(device->ntrip.stream.url));
+	    (void)strlcpy(device->ntrip.stream.port, 
+		    port, 
+		    sizeof(device->ntrip.stream.port));
 
 	    ret = ntrip_stream_req_probe(&device->ntrip.stream);
 	    if (ret == -1) {
