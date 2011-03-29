@@ -118,7 +118,6 @@
 #define FORCE_NOWAIT
 #endif /* defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE) */
 
-
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
 
@@ -676,12 +675,13 @@ static bool add_device(const char *device_name)
 #endif /* NTPSHM_ENABLE */
 	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
-	    if (nowait) {
-		ret = open_device(devp);
-	    } else {
+#ifndef FORCE_NOWAIT
+	    if (!nowait) {
 		devp->gpsdata.gps_fd = -1;
 		ret = true;
-	    }
+	    } else
+#endif /* FORCE_NOWAIT */
+		ret = open_device(devp);
 #ifdef SOCKET_EXPORT_ENABLE
 	    notify_watchers(devp,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
@@ -1773,7 +1773,9 @@ int main(int argc, char *argv[])
 #endif /* SOCKET_EXPORT_ENABLE */
 	    break;
 	case 'n':
+#ifndef FORCE_NOWAIT
 	    nowait = true;
+#endif /* FORCE_NOWAIT */
 	    break;
 	case 'P':
 	    pid_file = optarg;
