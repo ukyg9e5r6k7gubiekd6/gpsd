@@ -1413,10 +1413,16 @@ list in place) if that is not available.</dd>
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>7. Run the regression tests and other checks</dt>
-<dd>If it doesn't pass regressions, it isn't ready to ship. This is
-the time to run valgrind-audit, 'make splint', 'make xmllint', and
-'make cppcheck' as well and check that those reports are clean. Use
-flocktest to verify operation on the remote test machines.</dd>
+<dd>If it doesn't pass regressions, it isn't ready to ship.
+<ol>
+<li>make splint</li>
+<li>make cppcheck</li>
+<li>make xmllint</li>
+<li>devtools/valgrind-audit</li>
+<li>devtools/flockest</li>
+<li><a href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a></li>
+</ol>
+</dd>
 
 <dt>8. Test the build from tarball.</dt>
 <dd>Do this with 'make testbuild'.</dd>
