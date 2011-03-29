@@ -740,7 +740,6 @@ int main(int argc, char **argv)
 		    continue;
 		/*@ +usedef +compdef @*/
 
-		arg = line;
 		if (isspace(line[1])) {
 		    for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
 			arg++;

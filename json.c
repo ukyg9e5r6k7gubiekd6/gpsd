@@ -498,7 +498,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		    const char **end)
 {
     /*@-nullstate -onlytrans@*/
-    int substatus, offset;
+    int substatus, offset, arrcount;
     char *tp;
 
     if (end != NULL)
@@ -515,8 +515,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	cp++;
 
     tp = arr->arr.strings.store;
-    if (arr->count != NULL)
-	*(arr->count) = 0;
+    arrcount = 0;
     for (offset = 0; offset < arr->maxlen; offset++) {
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type) {
@@ -563,8 +562,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    json_debug_trace((1, "Invalid array subtype.\n"));
 	    return JSON_ERR_SUBTYPE;
 	}
-	if (arr->count != NULL)
-	    (*arr->count)++;
+	arrcount++;
 	if (isspace(*cp))
 	    cp++;
 	if (*cp == ']') {
@@ -580,11 +578,13 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
     json_debug_trace((1, "Too many elements in array.\n"));
     return JSON_ERR_SUBTOOLONG;
   breakout:
+    if (arr->count != NULL)
+	*(arr->count) = arrcount;
     if (end != NULL)
 	*end = cp;
     /*@ -nullderef @*/
     json_debug_trace((1, "leaving json_read_array() with %d elements\n",
-		      *arr->count));
+		      arrcount));
     /*@ +nullderef @*/
     return 0;
     /*@+nullstate +onlytrans@*/

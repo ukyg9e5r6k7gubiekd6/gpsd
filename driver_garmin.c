@@ -742,7 +742,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
     // So here goes just in case
     if (0 == (theBytesToWrite % ASYNC_DATA_SIZE)) {
 	char *n = "";
-	theBytesReturned = gpsd_write(session, n, 0);
+	(void)gpsd_write(session, n, 0);
     }
 }
 #endif /* __linux__ || S_SPLINT_S */
@@ -792,7 +792,8 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
     }
     // Add DLE, ETX
     *buffer++ = (uint8_t) DLE;
-    *buffer++ = (uint8_t) ETX;
+    /* we used to say n++ here, but scan-build complains */
+    *buffer = (uint8_t) ETX;
 
 #if 1
     gpsd_report(LOG_IO, "Garmin: SendPacket(), writing %zd bytes: %s\n",
@@ -1098,7 +1099,8 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 		    n + i);
 	return 0;
     }
-    c = buf[n + i++];
+    /* we used to say n++ here, but scan-build complains */
+    c = buf[n + i];
     if ('\x03' != c) {
 	Send_NAK();
 	gpsd_report(LOG_RAW + 1, "Garmin: Final ETX not ETX\n");

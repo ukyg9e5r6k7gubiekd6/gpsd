@@ -172,6 +172,10 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	tp++;
     }
 
+    /* bail out if no payload (scan-build throws spurious error otherwise) */
+    if (tp <= buf2)
+	return 0;
+
     type = (unsigned char)getub(buf2, 1);
     /*@ +usedef @*/
 

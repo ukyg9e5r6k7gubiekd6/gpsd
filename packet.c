@@ -1448,7 +1448,8 @@ void packet_parse(struct gps_packet_t *lexer)
 		}
 		if (lexer->inbuffer[n++] != DLE)
 		    goto not_garmin;
-		if (lexer->inbuffer[n++] != ETX)
+		/* we used to say n++ here, but scan-build complains */
+		if (lexer->inbuffer[n] != ETX)
 		    goto not_garmin;
 		/*@ +charint */
 		chksum &= 0xff;
@@ -1694,7 +1695,8 @@ void packet_parse(struct gps_packet_t *lexer)
 	    }
 	    if (lexer->inbuffer[n++] != DLE)
 		goto not_evermore;
-	    if (lexer->inbuffer[n++] != ETX)
+	    /* we used to say n++ here, but scan-build complains */
+	    if (lexer->inbuffer[n] != ETX)
 		goto not_evermore;
 	    crc &= 0xff;
 	    if (crc != checksum) {
@@ -1720,21 +1722,20 @@ void packet_parse(struct gps_packet_t *lexer)
 #define getiw(i) ((uint16_t)(((uint16_t)getib((i)+1) << 8) | (uint16_t)getib((i))))
 
 	else if (lexer->state == ITALK_RECOGNIZED) {
-	    volatile uint16_t len, n, csum, xsum, tmpw;
-	    volatile uint32_t tmpdw;
+	    volatile uint16_t len, n, csum, xsum;
 
 	    /* number of words */
 	    len = (uint16_t) (lexer->inbuffer[6] & 0xff);
 
 	    /*@ -type @*/
-	    /* initialize all my registers */
-	    csum = tmpw = tmpdw = 0;
 	    /* expected checksum */
 	    xsum = getiw(7 + 2 * len);
 
+
+	    csum = 0;
 	    for (n = 0; n < len; n++) {
-		tmpw = getiw(7 + 2 * n);
-		tmpdw = (csum + 1) * (tmpw + n);
+		volatile uint16_t tmpw = getiw(7 + 2 * n);
+		volatile uint32_t tmpdw  = (csum + 1) * (tmpw + n);
 		csum ^= (tmpdw & 0xffff) ^ ((tmpdw >> 16) & 0xffff);
 	    }
 	    /*@ +type @*/

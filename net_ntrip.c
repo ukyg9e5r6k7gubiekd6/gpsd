@@ -488,9 +488,10 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    (void)strlcpy(device->ntrip.stream.mountpoint, 
 		    stream, 
 		    sizeof(device->ntrip.stream.mountpoint));
-	    (void)strlcpy(device->ntrip.stream.credentials, 
-		    auth, 
-		    sizeof(device->ntrip.stream.credentials));
+	    if (auth != NULL)
+		(void)strlcpy(device->ntrip.stream.credentials, 
+			      auth, 
+			      sizeof(device->ntrip.stream.credentials));
 	    (void)strlcpy(device->ntrip.stream.url, 
 		    url, 
 		    sizeof(device->ntrip.stream.url));

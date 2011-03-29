@@ -71,7 +71,7 @@ static bool italk_initialize(void)
 static void display_itk_navfix(unsigned char *buf, size_t len)
 {
 
-    unsigned int tow, tod, nsec, d, svlist;
+    unsigned int tow, tod, d, svlist;
     unsigned short gps_week, nsv;
     unsigned short year, mon, day, hour, min, sec;
     double epx, epy, epz, evx, evy, evz;
@@ -95,7 +95,7 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
     hour = (ushort) getleu16(buf, 7 + 66);
     min = (ushort) getleu16(buf, 7 + 68);
     sec = (ushort) getleu16(buf, 7 + 70);
-    nsec = (ushort) getleu32(buf, 7 + 72);
+    //nsec = (ushort) getleu32(buf, 7 + 72);
     year = (ushort) getleu16(buf, 7 + 76);
     mon = (ushort) getleu16(buf, 7 + 78);
     day = (ushort) getleu16(buf, 7 + 80);

@@ -551,7 +551,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->newdata.latitude = getbed(buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbed(buf, 8) * RAD_2_DEG;
 	session->newdata.altitude = getbed(buf, 16);
-	d1 = getbed(buf, 24);	/* clock bias */
+	//d1 = getbed(buf, 24);	clock bias */
 	f1 = getbef(buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =

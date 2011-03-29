@@ -485,8 +485,8 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
-    argc -= optind;
-    argv += optind;
+    //argc -= optind;
+    //argv += optind;
 
     if (mode == doencode)
 	encode(stdin, stdout);

@@ -775,7 +775,8 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    if (m->w4.datum_sub_div_char3) {
 		tp->reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
 	    }
-	    tp->reference.datum[n++] = '\0';
+	    /* we used to say n++ here, but scan-build complains */
+	    tp->reference.datum[n] = '\0';
 	    if (len >= 4) {
 		tp->reference.dx = m->w5.dx * DXYZ_SCALE;
 		tp->reference.dy =
