@@ -465,7 +465,9 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag =
 	    session->ttyset.c_lflag = (tcflag_t) 0;
 
+#ifndef FIXED_PORT_SPEED
 	session->baudindex = 0;
+#endif /* FIXED_PORT_SPEED */
 	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
     gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_serial_open()\n",
@@ -515,14 +517,22 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 
     if (session->packet.retry_counter++ >= SNIFF_RETRIES) {
 	session->packet.retry_counter = 0;
+#ifdef FIXED_PORT_SPEED
+	return false;
+#else
 	if (session->baudindex++ >=
 	    (unsigned int)(sizeof(rates) / sizeof(rates[0])) - 1) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.dev.stopbits++ >= 2)
 		return false;	/* hunt is over, no sync */
+#endif /* FIXED_PORT_SPEED */
 	}
 	gpsd_set_speed(session,
+#ifdef FIXED_PORT_SPEED
+		       FIXED_PORT_SPEED,
+#else
 		       rates[session->baudindex],
+#endif /* FIXED_PORT_SPEED */
 		       session->gpsdata.dev.parity,
 		       session->gpsdata.dev.stopbits);
     }

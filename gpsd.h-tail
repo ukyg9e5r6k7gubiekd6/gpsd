@@ -366,7 +366,9 @@ struct gps_device_t {
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif
+#ifndef FIXED_PORT_SPEED
     unsigned int baudindex;
+#endif /* FIXED_PORT_SPEED */
     int saved_baud;
     struct gps_packet_t packet;
     int getcount;

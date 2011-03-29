@@ -63,8 +63,10 @@ sizeit("Minimalist build, stripped to NMEA only with shm interface",
        "minimalist",
        ["--disable-socket-export",
         "--disable-control-socket",
-        "--disable-ipv6"] +
-       nmea_variants+binary_gps+non_gps+time_service+debugging)
+        "--disable-ipv6",
+        "--enable-fixed-port-speed=9600",
+        "--enable-max-devices=1",
+        ] + nmea_variants+binary_gps+non_gps+time_service+debugging)
 sizeit("Normal build, configure options defaulted", "normal", [])
 os.system("size gpsd-*-build")
 os.system("rm gpsd-*-build")
