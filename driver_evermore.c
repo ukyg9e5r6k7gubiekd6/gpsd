@@ -154,7 +154,6 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     /* time to unstuff it and discard the header and footer */
     cp = buf + 2;
-    tp = buf2;
     if (*cp == 0x10)
 	cp++;
     datalen = (size_t) * cp++;
@@ -165,17 +164,14 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     datalen -= 2;
 
     /*@ -usedef @*/
+    buf2[0] = '\0';	/* prevent 'Assigned value is garbage or undefined' from scan-build */
+    tp = buf2;
     for (i = 0; i < (size_t) datalen; i++) {
 	*tp = *cp++;
 	if (*tp == 0x10)
 	    cp++;
 	tp++;
     }
-
-    /* bail out if no payload (scan-build throws spurious error otherwise) */
-    if (tp <= buf2)
-	return 0;
-
     type = (unsigned char)getub(buf2, 1);
     /*@ +usedef @*/
 
