@@ -73,6 +73,10 @@ looking for ones that break the build.
 Walk through a pair of text files looking for where they begin to differ.
 May be useful for comparing logs when regression tests break.
 
+== sizes ==
+
+Test-build interesting versions of the daemon and display their sizes.
+
 == striplog ==
 
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do
