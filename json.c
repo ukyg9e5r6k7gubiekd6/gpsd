@@ -67,6 +67,7 @@ PERMISSIONS
 #include <ctype.h>
 
 #include "gpsd_config.h"	/* for strlcpy() prototype */
+#ifdef SOCKET_EXPORT_ENABLE
 #include "json.h"
 
 #ifdef CLIENTDEBUG_ENABLE
@@ -634,3 +635,8 @@ const /*@observer@*/ char *json_error_string(int err)
     else
 	return errors[err];
 }
+
+#endif /* SOCKET_EXPORT_ENABLE */
+
+/* end */
+

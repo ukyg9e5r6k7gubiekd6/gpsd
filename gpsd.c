@@ -604,6 +604,7 @@ static void deactivate_device(struct gps_device_t *device)
     }
 }
 
+#if defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE)
 /* *INDENT-OFF* */
 /*@null@*//*@observer@*/ static struct gps_device_t *find_device(/*@null@*/const char
 								 *device_name)
@@ -620,6 +621,7 @@ static void deactivate_device(struct gps_device_t *device)
     return NULL;
 }
 /* *INDENT-ON* */
+#endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
 
 static bool open_device( /*@null@*/struct gps_device_t *device)
 {
@@ -1679,21 +1681,23 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 int main(int argc, char *argv[])
 {
     /* some of these statics suppress -W warnings due to longjmp() */
-    static char *pid_file = NULL;
 #ifdef SOCKET_EXPORT_ENABLE
     static char *gpsd_service = NULL;	/* this static pacifies splint */
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
-    struct gps_device_t *device;
-    sockaddr_t fsin;
-    fd_set rfds;
-    int i, option, msocks[2], dfd;
 #ifdef CONTROL_SOCKET_ENABLE
     static int csock = -1;
     fd_set control_fds;
     socket_t cfd;
     static char *control_socket = NULL;
 #endif /* CONTROL_SOCKET_ENABLE */
+#if defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE)
+    sockaddr_t fsin;
+#endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
+    static char *pid_file = NULL;
+    struct gps_device_t *device;
+    fd_set rfds;
+    int i, option, msocks[2], dfd;
     bool go_background = true;
     struct timeval tv;
     const struct gps_type_t **dp;
