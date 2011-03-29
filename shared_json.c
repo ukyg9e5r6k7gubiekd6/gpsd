@@ -19,6 +19,7 @@ PERMISSIONS
 #include <stdbool.h>
 
 #include "gpsd.h"
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
 int json_device_read(const char *buf,
@@ -106,5 +107,7 @@ int json_watch_read(const char *buf,
     status = json_read_object(buf, chanconfig_attrs, endptr);
     return status;
 }
+
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* shared_json.c ends here */

@@ -21,6 +21,8 @@ PERMISSIONS
 #include <ctype.h>
 
 #include "gpsd.h"
+
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 #include "revision.h"
 
@@ -2307,5 +2309,6 @@ void json_data_report(gps_mask_t changed,
 }
 
 #undef JSON_BOOL
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* gpsd_json.c ends here */

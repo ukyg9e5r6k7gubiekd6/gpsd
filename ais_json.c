@@ -15,6 +15,7 @@ representations to libgps structures.
 #include <stdlib.h>
 
 #include "gpsd.h"
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
 /*@ -mustdefine @*/
@@ -148,5 +149,6 @@ int json_ais_read(const char *buf,
     /*@+compdef +nullstate@*/
     return status;
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* ais_json.c ends here */

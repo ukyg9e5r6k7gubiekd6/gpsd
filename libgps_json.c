@@ -20,6 +20,7 @@ PERMISSIONS
 #include <stddef.h>
 
 #include "gpsd.h"
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
 /*
@@ -492,5 +493,7 @@ int libgps_json_unpack(const char *buf,
 }
 
 /*@+compdef@*/
+
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* libgps_json.c ends here */

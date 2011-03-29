@@ -19,6 +19,8 @@ PERMISSIONS
 #include <stddef.h>
 
 #include "gpsd.h"
+
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
 /* common fields in every RTCM2 message */
@@ -266,5 +268,6 @@ int json_rtcm2_read(const char *buf,
     }
     return status;
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* rtcm2_json.c ends here */

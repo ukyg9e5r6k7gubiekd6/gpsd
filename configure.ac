@@ -583,6 +583,20 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for support for control-socket support
+dnl (disable this to save space if you'll never need hotplug to work)
+AC_ARG_ENABLE(control-socket,
+  AC_HELP_STRING([--disable-control-socket],
+		 [disable the control socket for hotplug notifications]),
+  [ac_control_socket=$enableval], [ac_control_socket=yes])
+AC_MSG_CHECKING([for control-socket support])
+if test x"$ac_control_socket" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([CONTROL_SOCKET_ENABLE], 1, [control-socket support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],
@@ -1028,6 +1042,7 @@ echo "Enable BlueZ support    : $ac_bluetooth"
 echo "Enable IPv6 support     : $ac_ipv6"
 echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
+echo "Control-socket support  : $ac_control_socket"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
 echo "Squelch logging/hexdump : $ac_squelch"

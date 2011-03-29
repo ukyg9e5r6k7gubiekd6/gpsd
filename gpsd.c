@@ -251,6 +251,7 @@ The following driver types are compiled into this gpsd instance:\n",
     }
 }
 
+#ifdef CONTROL_SOCKET_ENABLE
 static int filesock(char *filename)
 {
     struct sockaddr_un addr;
@@ -271,6 +272,7 @@ static int filesock(char *filename)
     /*@ +mayaliasunique +usedef @*/
     return sock;
 }
+#endif /* CONTROL_SOCKET_ENABLE */
 
 /*
  * This hackery is intended to support SBCs that are resource-limited
@@ -673,6 +675,7 @@ static bool add_device(const char *device_name)
     return ret;
 }
 
+#ifdef CONTROL_SOCKET_ENABLE
 /*@ observer @*/ static char *snarfline(char *p, /*@out@*/ char **out)
 /* copy the rest of the command line, before CR-LF */
 {
@@ -807,6 +810,7 @@ static void handle_control(int sfd, char *buf)
     }
     /*@ +sefparams @*/
 }
+#endif /* CONTROL_SOCKET_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
 static bool awaken(struct gps_device_t *device)
@@ -1676,16 +1680,20 @@ int main(int argc, char *argv[])
 {
     /* some of these statics suppress -W warnings due to longjmp() */
     static char *pid_file = NULL;
-    static char *control_socket = NULL;
-    static int csock = -1;
 #ifdef SOCKET_EXPORT_ENABLE
     static char *gpsd_service = NULL;	/* this static pacifies splint */
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
     struct gps_device_t *device;
     sockaddr_t fsin;
-    fd_set rfds, control_fds;
-    int i, option, msocks[2], cfd, dfd;
+    fd_set rfds;
+    int i, option, msocks[2], dfd;
+#ifdef CONTROL_SOCKET_ENABLE
+    static int csock = -1;
+    fd_set control_fds;
+    socket_t cfd;
+    static char *control_socket = NULL;
+#endif /* CONTROL_SOCKET_ENABLE */
     bool go_background = true;
     struct timeval tv;
     const struct gps_type_t **dp;
@@ -1707,9 +1715,11 @@ int main(int argc, char *argv[])
 	    gps_enable_debug(debuglevel, stderr);
 #endif /* CLIENTDEBUG_ENABLE */
 	    break;
+#ifdef CONTROL_SOCKET_ENABLE
 	case 'F':
 	    control_socket = optarg;
 	    break;
+#endif /* CONTROL_SOCKET_ENABLE */
 	case 'N':
 	    go_background = false;
 	    break;
@@ -1774,6 +1784,7 @@ int main(int argc, char *argv[])
     nowait = true;
 #endif
 
+#ifdef CONTROL_SOCKET_ENABLE
     if (!control_socket && optind >= argc) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with neither control socket nor devices\n");
@@ -1800,6 +1811,13 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_PROG, "control socket opened at %s\n",
 		    control_socket);
     }
+#else
+    if (optind >= argc) {
+	gpsd_report(LOG_ERROR,
+		    "can't run with no devices specified\n");
+	exit(1);
+    }
+#endif /* CONTROL_SOCKET_ENABLE */
 
     /* might be time to daemonize */
     if (go_background) {
@@ -1935,7 +1953,9 @@ int main(int argc, char *argv[])
 	    FD_SET(msocks[i], &all_fds);
 	    adjust_max_fd(msocks[i], true);
 	}
+#ifdef CONTROL_SOCKET_ENABLE
     FD_ZERO(&control_fds);
+#endif /* CONTROL_SOCKET_ENABLE */
 
     /* initialize the GPS context's time fields */
     gpsd_time_init(&context, time(NULL));
@@ -2044,6 +2064,7 @@ int main(int argc, char *argv[])
 	}
 #endif /* SOCKET_EXPORT_ENABLE */
 
+#ifdef CONTROL_SOCKET_ENABLE
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
@@ -2078,6 +2099,7 @@ int main(int argc, char *argv[])
 		FD_CLR(cfd, &control_fds);
 		adjust_max_fd(cfd, false);
 	    }
+#endif /* CONTROL_SOCKET_ENABLE */
 
 	/* poll all active devices */
 	for (device = devices; device < devices + MAXDEVICES; device++) {
@@ -2156,7 +2178,7 @@ int main(int argc, char *argv[])
 		    && timestamp() - sub->active > COMMAND_TIMEOUT) {
 		    gpsd_report(LOG_WARN,
 				"client(%d) timed out on command wait.\n",
-				cfd);
+				sub_index(sub));
 		    detach_client(sub);
 		}
 	    }
@@ -2239,10 +2261,12 @@ int main(int argc, char *argv[])
 
 #ifdef SHM_EXPORT_ENABLE
     shm_release(&context);
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* SHM_EXPORT_ENABLE */
 
+#ifdef CONTROL_SOCKET_ENABLE
     if (control_socket)
 	(void)unlink(control_socket);
+#endif /* CONTROL_SOCKET_ENABLE */
     if (pid_file)
 	(void)unlink(pid_file);
     return 0;
