@@ -531,7 +531,7 @@ AM_CONDITIONAL([HAVE_NTRIP], [test "$ac_ntrip" = "yes"])
 dnl check for AIVDM support
 AC_ARG_ENABLE(aivdm,
   AC_HELP_STRING([--disable-aivdm],
-		 [disable Aivdm support]),
+		 [disable AIVDM support]),
   [ac_aivdm=$enableval], [ac_aivdm=yes])
 AC_MSG_CHECKING([for AIVDM support])
 if test x"$ac_aivdm" = "xyes"; then

@@ -246,10 +246,9 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#if defined(ALLOW_RECONFIGURE) && defined(BINARY_ENABLE)
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
-#ifdef BINARY_ENABLE
     /*
      * If the daemon has seen this device in a binary mode, we may
      * actually know how to switch back.
@@ -268,9 +267,8 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 	}
 	/*@+shiftnegative@*/
     }
-#endif /* BINARY_ENABLE */
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* defined(ALLOW_RECONFIGURE) && defined(BINARY_ENABLE) */
 
 /* *INDENT-OFF* */
 const struct gps_type_t nmea = {
@@ -286,7 +284,11 @@ const struct gps_type_t nmea = {
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef ALLOW_RECONFIGURE
     .speed_switcher = NULL,		/* no speed switcher */
+#ifdef BINARY_ENABLE
     .mode_switcher  = nmea_mode_switch,	/* maybe switchable if it was a SiRF */
+#else
+    .mode_switcher  = NULL,		/* no binary mode to revert to */
+#endif /* BINARY_ENABLE */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
 #endif /* ALLOW_RECONFIGURE */

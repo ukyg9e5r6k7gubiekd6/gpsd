@@ -874,18 +874,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 }
 /*@+mustfreefresh +type +unrecog@*/
 #endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
 
 void ntpd_link_deactivate(struct gps_device_t *session)
 {
-#ifdef NTPSHM_ENABLE
     (void)ntpshm_free(session->context, session->shmindex);
     session->shmindex = -1;
 # ifdef PPS_ENABLE
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
 # endif	/* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
 }
 
 void ntpd_link_activate(struct gps_device_t *session)
@@ -894,7 +891,6 @@ void ntpd_link_activate(struct gps_device_t *session)
     pthread_t pt;
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 
-#ifdef NTPSHM_ENABLE
     /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
     if (session->context->enable_ntpshm)
 	session->shmindex = ntpshm_alloc(session->context);
@@ -917,5 +913,6 @@ void ntpd_link_activate(struct gps_device_t *session)
 
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
     }
-#endif /* NTPSHM_ENABLE */
 }
+
+#endif /* NTPSHM_ENABLE */

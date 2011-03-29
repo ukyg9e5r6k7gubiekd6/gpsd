@@ -47,8 +47,15 @@ void libgps_trace(int errlevel, const char *fmt, ...)
 }
 #endif /* LIBGPS_DEBUG */
 
-int gps_open(/*@null@*/const char *host, /*@null@*/const char *port,
-	       /*@out@*/ struct gps_data_t *gpsdata)
+#ifdef SOCKET_EXPORT_ENABLE
+#define CONDITIONALLY_UNUSED
+#else
+#define CONDITIONALLY_UNUSED UNUSED
+#endif /* SOCKET_EXPORT_ENABLE */
+
+int gps_open(/*@null@*/const char *host, 
+	     /*@null@*/const char *port CONDITIONALLY_UNUSED,
+	     /*@out@*/ struct gps_data_t *gpsdata)
 {
     int status = -1;
 
