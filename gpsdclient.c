@@ -188,7 +188,7 @@ char *latlon2maidenhead(double n, double e)
     t1=(int)e/2;
     buf[2]=(char)t1+'0';
     e-=(float)t1*2;
-    buf[4]=(char)(int)(e*12.0+0.5)+'A';
+    buf[4]=(char)(int)(e*12.0+0.5)+'a';
 
     n=n+90.0;
     t1=(int)(n/10.0);
@@ -197,7 +197,7 @@ char *latlon2maidenhead(double n, double e)
     buf[3]=(char)n+'0';
     n-=(int)n;
     n*=24; // convert to 24 division
-    buf[5]=(char)(int)(n+0.5)+'A';
+    buf[5]=(char)(int)(n+0.5)+'a';
     buf[6] = '\0';
  
     return buf;
