@@ -525,8 +525,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 	    session->baudindex = 0;
 	    if (session->gpsdata.dev.stopbits++ >= 2)
 		return false;	/* hunt is over, no sync */
-#endif /* FIXED_PORT_SPEED */
 	}
+#endif /* FIXED_PORT_SPEED */
 	gpsd_set_speed(session,
 #ifdef FIXED_PORT_SPEED
 		       FIXED_PORT_SPEED,
