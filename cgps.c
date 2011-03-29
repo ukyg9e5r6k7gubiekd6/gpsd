@@ -38,7 +38,7 @@
 #define DATAWIN_GPS_FIELDS 9
 
 /* Count of optional fields that we'll display if we have the room. */
-#define DATAWIN_OPTIONAL_FIELDS 5
+#define DATAWIN_OPTIONAL_FIELDS 6
 
 /* This is how many display fields are output in the 'datawin' window
    when in COMPASS mode.  Change this value if you add or remove fields
@@ -380,7 +380,7 @@ static void windowsetup(void)
 	(void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
 	(void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
 
-	/* Note that the following four fields are exceptions to the
+	/* Note that the following fields are exceptions to the
 	 * sizing rule.  The minimum window size does not include these
 	 * fields, if the window is too small, they get excluded.  This
 	 * may or may not change if/when the output for these fields is
@@ -397,6 +397,8 @@ static void windowsetup(void)
 			    "Altitude Err:");
 	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Course Err:");
 	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Speed Err:");
+	    /* it's actually esr that thought *this* one was interesting */
+	    (void)mvwprintw(datawin, 15, DATAWIN_DESC_OFFSET, "Grid Square:");
 	}
 
 	(void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -477,7 +479,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 {
     int i, j, n;
     int newstate;
-    char scr[128];
+    char scr[128], *s;
     bool usedflags[MAXCHANNELS];
 
     /* must build bit vector of which statellites are used from list */
@@ -636,7 +638,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	   break;
     (void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[i].driver);
     (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
-    /* Note that the following four fields are exceptions to the
+    /* Note that the following fields are exceptions to the
      * sizing rule.  The minimum window size does not include these
      * fields, if the window is too small, they get excluded.  This
      * may or may not change if/when the output for these fields is
@@ -644,7 +646,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
      * there in the first place because I arbitrarily thought they
      * sounded interesting. ;^) */
 
-    if (window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
+    if (window_length >= (MIN_GPS_DATAWIN_SIZE + 5)) {
 
 	/* Fill in the estimated horizontal position error. */
 	if (isnan(gpsdata->fix.epx) == 0)
@@ -689,6 +691,14 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	    (void)snprintf(scr, sizeof(scr), "n/a");
 	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
+	/* Fill in the grid square (esr thought *this* one was interesting). */
+	/*@-branchstate@*/
+	if (isnan(gpsdata->fix.longitude)==0 && isnan(gpsdata->fix.latitude)==0)
+	    s = latlon2maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
+	else
+	    s = "n/a";
+	(void)mvwprintw(datawin, 15, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
+	/*@+branchstate@*/
     }
 
     /* Be quiet if the user requests silence. */
