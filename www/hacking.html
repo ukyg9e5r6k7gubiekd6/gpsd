@@ -1415,6 +1415,8 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <dt>7. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
 <ol>
+<li>make testbuild</li>
+<li>make testregress</li>
 <li>make splint</li>
 <li>make cppcheck</li>
 <li>make xmllint</li>
@@ -1424,24 +1426,21 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 </ol>
 </dd>
 
-<dt>8. Test the build from tarball.</dt>
-<dd>Do this with 'make testbuild'.</dd>
-
-<dt>9. Ship to Berlios</dt>
+<dt>8. Ship to Berlios</dt>
 <dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp),
 and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 
-<dt>10. Tag the release in git</dt>
+<dt>9. Tag the release in git</dt>
 <dd>Doing 'make release-tag' should accomplish this. The tag push
 will trigger mail to the announce list.</dd>
 
-<dt>11. Bump the release number and push that commit</dt>
+<dt>10. Bump the release number and push that commit</dt>
 <dd>Bump the release number in configure.ac, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>12. Announce the release</dt>
+<dt>11. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>
