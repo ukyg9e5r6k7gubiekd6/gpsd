@@ -242,6 +242,17 @@ class SkyView(gtk.DrawingArea):
         self.satellites = satellites
         self.queue_draw()
 
+class MaidenheadView:
+    "Encapsulate view object for watching Maidenhead grid location." 
+    def __init__(self):
+        self.widget = gtk.Entry()
+        self.widget.set_editable(False)
+    def update(self, tpv):
+        if tpv.mode >= gps.MODE_2D and hasattr(tpv, "lat") and hasattr(tpv, "lon"):
+            self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat, tpv.lon))
+        else:
+            return self.widget.set_text("n/a")
+
 class AISView:
     "Encapsulate store and view objects for watching AIS data." 
     AIS_ENTRIES = 10
@@ -418,6 +429,8 @@ class Base:
               'Enable Response Reports', lambda a: self.view_toggle(a)),
              ('GPS', None, '_GPS Data', '<Control>g',
               'Enable GPS Data', lambda a: self.view_toggle(a)),
+             ('Maidenhead', None, '_Maidenhead', '<Control>m',
+              'Enable Maidenhead locator', lambda a: self.view_toggle(a)),
              ('AIS', None, '_AIS Data', '<Control>a',
               'Enable AIS Data', lambda a: self.view_toggle(a)),
              ])
@@ -440,6 +453,7 @@ class Base:
         <menuitem action="Skyview"/>
         <menuitem action="Responses"/>
         <menuitem action="GPS"/>
+        <menuitem action="Maidenhead"/>
         <menuitem action="AIS"/>
       </menu>
       <menu action="Units">
@@ -453,6 +467,7 @@ class Base:
         self.uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
+        self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
         menubar = self.uimanager.get_widget('/MenuBar')
         vbox.pack_start(menubar, False)
@@ -509,17 +524,25 @@ class Base:
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
+        self.gsbox = gtk.HBox(False, 0)
+        vbox.add(self.gsbox)
+        gsframe = gtk.Frame(label="Maidenhead Grid Square")
+        self.gsbox.add(gsframe)
+        self.gsview = MaidenheadView()
+        gsframe.add(self.gsview.widget)
+
         self.aisbox = gtk.HBox(False, 0)
         vbox.add(self.aisbox)
-
         aisframe = gtk.Frame(label="AIS Data")
         self.aisbox.add(aisframe)
-
         self.aisview = AISView(self.deg_type)
         aisframe.add(self.aisview.widget)
 
         self.window.show_all()
-        # Hide the AIS window util user selects it.
+        # Hide the Maidenhead window until user selects it.
+        self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(False)
+        self.gsbox.hide()
+        # Hide the AIS window until user selects it.
         self.uimanager.get_widget('/MenuBar/View/AIS').set_active(False)
         self.aisbox.hide()
 
@@ -527,6 +550,7 @@ class Base:
                                  {"Skyview": self.satbox,
                                   "Responses": self.rawdisplay,
                                   "GPS": self.dataframe,
+                                  "Maidenhead": self.gsbox,
                                   "AIS": self.aisbox}
 
         # Discard field labels and associate data hooks with their widgets
@@ -643,6 +667,7 @@ class Base:
         for (hook, widget) in Base.gpsfields[:14]:
             if hook:	# Remove this guard when we have all hooks 
                 widget.set_text(hook(self, tpv))
+        self.gsview.update(tpv)
 
     def update_noisedata(self, noise):
         "Update the GPGST data fields."
