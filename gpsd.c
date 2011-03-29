@@ -140,9 +140,7 @@ static int maxfd;
 static int debuglevel;
 static bool in_background = false;
 static bool listen_global = false;
-#ifndef FORCE_NOWAIT
 static bool nowait = false;
-#endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
 
@@ -678,13 +676,12 @@ static bool add_device(const char *device_name)
 #endif /* NTPSHM_ENABLE */
 	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
-#ifndef FORCE_NOWAIT
 	    if (nowait) {
+		ret = open_device(devp);
+	    } else {
 		devp->gpsdata.gps_fd = -1;
 		ret = true;
-	    } else
-#endif /* FORCE_NOWAIT */
-		ret = open_device(devp);
+	    }
 #ifdef SOCKET_EXPORT_ENABLE
 	    notify_watchers(devp,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
@@ -1775,11 +1772,9 @@ int main(int argc, char *argv[])
 	    gpsd_service = optarg;
 #endif /* SOCKET_EXPORT_ENABLE */
 	    break;
-#ifndef FORCE_NOWAIT
 	case 'n':
 	    nowait = true;
 	    break;
-#endif /* FORCE_NOWAIT */
 	case 'P':
 	    pid_file = optarg;
 	    break;
@@ -1793,6 +1788,10 @@ int main(int argc, char *argv[])
 	    exit(0);
 	}
     }
+
+#ifdef FORCE_NOWAIT
+    nowait = true;
+#endif /* FORCE_NOWAIT */
 
 #ifdef CONTROL_SOCKET_ENABLE
     if (!control_socket && optind >= argc) {
@@ -1875,11 +1874,7 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(LOG_INF, "NTPD Priority setting failed.\n");
     }
-#ifdef FORCE_NOWAIT
-    (void)ntpshm_init(&context, true);
-#else
     (void)ntpshm_init(&context, nowait);
-#endif /* FORCE_NOWAIT */
 #endif /* NTPSHM_ENABLE */
 
 #ifdef DBUS_EXPORT_ENABLE
