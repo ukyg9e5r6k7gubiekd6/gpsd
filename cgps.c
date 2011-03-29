@@ -694,7 +694,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	/* Fill in the grid square (esr thought *this* one was interesting). */
 	/*@-branchstate@*/
 	if (isnan(gpsdata->fix.longitude)==0 && isnan(gpsdata->fix.latitude)==0)
-	    s = latlon2maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
+	    s = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 	else
 	    s = "n/a";
 	(void)mvwprintw(datawin, 15, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);

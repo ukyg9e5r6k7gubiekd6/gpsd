@@ -175,7 +175,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 
 /*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 
-char *latlon2maidenhead(double n, double e)
+char *maidenhead(double n, double e)
 /* lat/lon to Maidenhead (from QGrid - http://users.pandora.be/on4qz/qgrid/) */
 {
     static char buf[7];

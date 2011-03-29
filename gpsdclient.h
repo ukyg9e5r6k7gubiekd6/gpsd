@@ -26,7 +26,7 @@ extern /*@observer@*/ char *deg_to_str( enum deg_str_type type,  double f);
 extern void gpsd_source_spec(/*@null@*/const char *fromstring, 
 			     /*@out@*/struct fixsource_t *source);
 
-char *latlon2maidenhead(double n,double e);
+char *maidenhead(double n,double e);
 
 #endif /* _GPSDCLIENT_H_ */
 /* gpsdclient.h ends here */

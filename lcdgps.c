@@ -181,11 +181,11 @@ static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
   int n;
-  char *s, *maidenhead;
+  char *s, *gridsquare;
   int track;
 
   /* Get our location in Maidenhead. */
-  maidenhead = latlon2maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
+  gridsquare = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 
   /* Fill in the latitude and longitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
@@ -223,7 +223,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
     for(n=0;n<CLIMB;n++) avgclimb+=climb[n];
     avgclimb/=CLIMB;
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
-            (int)(gpsdata->fix.altitude*altfactor), altunits, maidenhead, (int)(avgclimb * METERS_TO_FEET * 60));
+            (int)(gpsdata->fix.altitude*altfactor), altunits, gridsquare, (int)(avgclimb * METERS_TO_FEET * 60));
   } else {
     snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {n/a}\n");
   }
