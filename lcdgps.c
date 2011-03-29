@@ -61,7 +61,6 @@
 #include "revision.h"
 
 /* Prototypes. */
-char *latlon2maidenhead(float n,float e);
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
 ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
 int send_lcd(char *buf);
@@ -76,35 +75,6 @@ double avgclimb, climb[CLIMB];
 
 /* Global socket descriptor for LCDd. */
 int sd;
-
-/* Convert lat/lon to Maidenhead.  Lifted from QGrid -
-   http://users.pandora.be/on4qz/qgrid/ */
-char *latlon2maidenhead(float n,float e)
-{
-    static char buf[7];
-
-    int t1;
-    e=e+180.0;
-    t1=(int)(e/20);
-    buf[0]=t1+'A';
-    e-=(float)t1*20.0;
-    t1=(int)e/2;
-    buf[2]=t1+'0';
-    e-=(float)t1*2;
-    buf[4]=(int)(e*12.0+0.5)+'A';
-
-    n=n+90.0;
-    t1=(int)(n/10.0);
-    buf[1]=t1+'A';
-    n-=(float)t1*10.0;
-    buf[3]=(int)n+'0';
-    n-=(int)n;
-    n*=24; // convert to 24 division
-    buf[5]=(int)(n+0.5)+'A';
-    buf[6] = '\0';
- 
-    return buf;
-}
 
 /*  Read a line from a socket  */
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
