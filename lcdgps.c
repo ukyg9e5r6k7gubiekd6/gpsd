@@ -21,8 +21,7 @@
   A client that passes gpsd data to lcdproc, turning your car computer
   into a very expensive feature-free GPS receiver ;^).  Currently
   assumes a 4x40 LCD and writes data formatted to fit that size
-  screen.  Also displays 4- or 6-character Maidenhead grid square
-  output for the hams among us.
+  screen.  Also displays Maidenhead grid square output for the hams among us.
 
   This program assumes that LCDd (lcdproc) is running locally on the
   default (13666) port.  The #defines LCDDHOST and LCDDPORT can be
@@ -62,7 +61,7 @@
 #include "revision.h"
 
 /* Prototypes. */
-void latlon2maidenhead(char *st,float n,float e);
+char *latlon2maidenhead(float n,float e);
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
 ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
 int send_lcd(char *buf);
@@ -80,30 +79,31 @@ int sd;
 
 /* Convert lat/lon to Maidenhead.  Lifted from QGrid -
    http://users.pandora.be/on4qz/qgrid/ */
-void latlon2maidenhead(char *st,float n,float e)
+char *latlon2maidenhead(float n,float e)
 {
-  int t1;
-  e=e+180.0;
-  t1=(int)(e/20);
-  st[0]=t1+'A';
-  e-=(float)t1*20.0;
-  t1=(int)e/2;
-  st[2]=t1+'0';
-  e-=(float)t1*2;
-#ifndef CLIMB
-  st[4]=(int)(e*12.0+0.5)+'A';
-#endif
+    static char buf[7];
 
-  n=n+90.0;
-  t1=(int)(n/10.0);
-  st[1]=t1+'A';
-  n-=(float)t1*10.0;
-  st[3]=(int)n+'0';
-  n-=(int)n;
-  n*=24; // convert to 24 division
-#ifndef CLIMB
-  st[5]=(int)(n+0.5)+'A';
-#endif
+    int t1;
+    e=e+180.0;
+    t1=(int)(e/20);
+    buf[0]=t1+'A';
+    e-=(float)t1*20.0;
+    t1=(int)e/2;
+    buf[2]=t1+'0';
+    e-=(float)t1*2;
+    buf[4]=(int)(e*12.0+0.5)+'A';
+
+    n=n+90.0;
+    t1=(int)(n/10.0);
+    buf[1]=t1+'A';
+    n-=(float)t1*10.0;
+    buf[3]=(int)n+'0';
+    n-=(int)n;
+    n*=24; // convert to 24 division
+    buf[5]=(int)(n+0.5)+'A';
+    buf[6] = '\0';
+ 
+    return buf;
 }
 
 /*  Read a line from a socket  */
@@ -174,7 +174,7 @@ int send_lcd(char *buf) {
   }
 
   /* send the command */
-  res=sockwriteline(sd,buf,outlen);
+  (void)sockwriteline(sd,buf,outlen);
 
   /* TODO:  check return status */
 
@@ -210,14 +210,12 @@ static enum deg_str_type deg_type = deg_dd;
 static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
-  char maidenhead[5];
-  maidenhead[4]=0;
   int n;
-  char *s;
+  char *s, *maidenhead;
   int track;
 
   /* Get our location in Maidenhead. */
-  latlon2maidenhead(maidenhead,gpsdata->fix.latitude,gpsdata->fix.longitude);
+  maidenhead = latlon2maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 
   /* Fill in the latitude and longitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
