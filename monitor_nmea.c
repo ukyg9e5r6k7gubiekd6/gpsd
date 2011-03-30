@@ -202,10 +202,10 @@ static void nmea_update(void)
 
 	    tick_interval = now - last_tick;
 	    if (findme != NULL) {
-		mvwchgat(nmeawin, SENTENCELINE, 1, xmax - 13, A_NORMAL, 0,
-			 NULL);
-		mvwchgat(nmeawin, SENTENCELINE, 1 + (findme - sentences),
-			 (int)strlen(fields[0]), A_BOLD, 0, NULL);
+		(void)mvwchgat(nmeawin, SENTENCELINE, 1, xmax - 13, A_NORMAL, 0,
+			       NULL);
+		(void)mvwchgat(nmeawin, SENTENCELINE, 1 + (findme - sentences),
+			       (int)strlen(fields[0]), A_BOLD, 0, NULL);
 	    }
 	}
 	last_tick = now;
@@ -267,9 +267,9 @@ static void nmea_update(void)
 	    getmaxyx(gpgsawin, ymax, xmax);
 	    (void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax - 2 - 7);
 	    if (strlen(scr) >= (size_t) (xmax - 2)) {
-		mvwaddch(gpgsawin, 2, xmax - 2 - 7, (chtype) '.');
-		mvwaddch(gpgsawin, 2, xmax - 3 - 7, (chtype) '.');
-		mvwaddch(gpgsawin, 2, xmax - 4 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, 2, xmax - 2 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, 2, xmax - 3 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, 2, xmax - 4 - 7, (chtype) '.');
 	    }
 	    monitor_fixframe(gpgsawin);
 	    (void)mvwprintw(gpgsawin, 3, 8, "%-5s", fields[16]);
