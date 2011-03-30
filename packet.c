@@ -830,7 +830,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    csum ^= lexer->inbuffer[n];
 	if (csum != c) {
 	    gpsd_report(LOG_IO,
-			"Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
+			"Navcom packet type 0x%hhx bad checksum 0x%hhx, expecting 0x%hx\n",
 			lexer->inbuffer[3], csum, c);
 	    gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
 			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
@@ -1650,7 +1650,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		packet_accept(lexer, UBX_PACKET);
 	    else {
 		gpsd_report(LOG_IO,
-			    "UBX checksum 0x%02hhx%02hhx over length %hd,"
+			    "UBX checksum 0x%02hhx%02hhx over length %d,"
 			    " expecting 0x%02hhx%02hhx (type 0x%02hhx%02hhx)\n",
 			    ck_a,
 			    ck_b,

@@ -42,19 +42,19 @@ static bool nmea_initialize(void)
     cookedwin = derwin(devicewin, 3, 80, 0, 0);
     (void)wborder(cookedwin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(cookedwin, true);
-    wattrset(cookedwin, A_BOLD);
-    mvwaddstr(cookedwin, 1, 1, "Time: ");
-    mvwaddstr(cookedwin, 1, 31, "Lat: ");
-    mvwaddstr(cookedwin, 1, 55, "Lon: ");
-    mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
-    wattrset(cookedwin, A_NORMAL);
+    (void)wattrset(cookedwin, A_BOLD);
+    (void)mvwaddstr(cookedwin, 1, 1, "Time: ");
+    (void)mvwaddstr(cookedwin, 1, 31, "Lat: ");
+    (void)mvwaddstr(cookedwin, 1, 55, "Lon: ");
+    (void)mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
+    (void)wattrset(cookedwin, A_NORMAL);
 
     nmeawin = derwin(devicewin, 3, 80, 3, 0);
     (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(nmeawin, true);
-    wattrset(nmeawin, A_BOLD);
-    mvwaddstr(nmeawin, 2, 34, " Sentences ");
-    wattrset(nmeawin, A_NORMAL);
+    (void)wattrset(nmeawin, A_BOLD);
+    (void)mvwaddstr(nmeawin, 2, 34, " Sentences ");
+    (void)wattrset(nmeawin, A_NORMAL);
 
     satwin = derwin(devicewin, MAXSATS + 3, 20, 6, 0);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0), (void)syncok(satwin, true);
@@ -188,7 +188,7 @@ static void nmea_update(void)
 		*--s_end = '.';
 		*--s_end = '.';
 	    }
-	    mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
+	    (void)mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
 	}
 
 	/*
