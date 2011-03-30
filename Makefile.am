@@ -73,38 +73,38 @@ endif
 # Build cgps
 #
 cgps_SOURCES = cgps.c
-cgps_LDADD = libgps.la $(NCURSES_LIBS) $(LIBM) $(LIBNSL) $(LIBSOCKET)
+cgps_LDADD = libgps.la $(NCURSES_LIBS) $(LIBM)
 
 #
 # Build gpxlogger
 #
 gpxlogger_SOURCES = gpxlogger.c
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la $(LIBM) $(LIBNSL) $(LIBSOCKET)
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la $(LIBM)
 
 #
 # Build gpsd
 #
 gpsd_c_sources = gpsd.c gpsd_dbus.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
-gpsd_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(DBUS_LIBS) $(LIBNSL) $(LIBSOCKET)
+gpsd_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(DBUS_LIBS) $(LIBM)
 
 #
 # Build gpsctl
 #
 gpsctl_SOURCES = gpsctl.c
-gpsctl_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBNSL) $(LIBSOCKET)
+gpsctl_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBM)
 
 #
 # Build gpspipe
 #
 gpspipe_SOURCES = gpspipe.c
-gpspipe_LDADD = libgps.la $(LIBM) $(LIBNSL) $(LIBSOCKET)
+gpspipe_LDADD = libgps.la $(LIBM)
 
 #
 # Build lcdgps
 #
 lcdgps_SOURCES = lcdgps.c
-lcdgps_LDADD = libgps.la $(LIBM) $(LIBNSL) $(LIBSOCKET)
+lcdgps_LDADD = libgps.la $(LIBM)
 
 #
 # Build gpsmon
@@ -112,14 +112,14 @@ lcdgps_LDADD = libgps.la $(LIBM) $(LIBNSL) $(LIBSOCKET)
 gpsmon_SOURCES = gpsmon.c monitor_nmea.c monitor_sirf.c \
 	monitor_italk.c monitor_ubx.c monitor_superstar2.c \
 	monitor_oncore.c monitor_tnt.c
-gpsmon_LDADD = $(NCURSES_LIBS) libgpsd.la libgps.la $(LIBM) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBNSL) $(LIBSOCKET)
+gpsmon_LDADD = $(NCURSES_LIBS) libgpsd.la libgps.la $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBM)
 
 
 #
 # Build gpsdecode
 #
 gpsdecode_SOURCES = gpsdecode.c
-gpsdecode_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBNSL) $(LIBSOCKET)
+gpsdecode_LDADD = libgpsd.la libgps.la $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(LIBM)
 
 #
 # Build shared libraries
