@@ -242,6 +242,48 @@ class SkyView(gtk.DrawingArea):
         self.satellites = satellites
         self.queue_draw()
 
+class NoiseView:
+    "Encapsulate view object for watching noise statistics." 
+    COLUMNS = 2
+    ROWS = 4
+    noisefields = (
+        # First column
+        ("Time",      "time"),
+        ("Latitude",  "lat"),
+        ("Longitude", "lon"),
+        ("Altitude",  "alt"),
+        # Second column
+        ("RMS",       "rms"),
+        ("Major",     "major"),
+        ("Minor",     "minor"),
+        ("Orient",    "orient"),
+        )
+    def __init__(self):
+        self.widget = gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
+        self.noisewidgets = []
+        for i in range(len(NoiseView.noisefields)):
+            colbase = (i / NoiseView.ROWS) * 2
+            label = gtk.Label(NoiseView.noisefields[i][0] + ": ")
+            # Wacky way to force right alignment 
+            label.set_alignment(xalign=1, yalign=0.5)
+            self.widget.attach(label, colbase, colbase+1,
+                             i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
+            entry = gtk.Entry()
+            # The right size for the ISO8601 timestamp
+            entry.set_width_chars(20)
+            entry.set_text("n/a")
+            self.widget.attach(entry, colbase+1, colbase+2,
+                             i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
+            self.noisewidgets.append((NoiseView.noisefields[i][1], entry))
+
+    def update(self, noise):
+        "Update the GPGST data fields."
+        for (attrname, widget) in self.noisewidgets:
+            if hasattr(noise, attrname):
+                widget.set_text(str(getattr(noise, attrname)))
+            else:
+                widget.set_text("n/a")
+
 class MaidenheadView:
     "Encapsulate view object for watching Maidenhead grid location." 
     def __init__(self):
@@ -385,20 +427,13 @@ class Base:
         ("EPS", lambda s, r: s.update_err(r, "eps")),
         ("EPC", lambda s, r: s.update_err(r, "epc")),
         ("EPD", lambda s, r: s.update_err(r, "epd")),
-        # third column, GPGST data
-        #("RMS",    lambda s, r: s.update_err(r, "rms")),
-        #("Major",  lambda s, r: s.update_err(r, "major")),
-        #("Minor",  lambda s, r: s.update_err(r, "minor")),
-        #("Orient", lambda s, r: s.update_err(r, "orient")),
-        #("Lat",    lambda s, r: s.update_err(r, "lat")),
-        #("Long",   lambda s, r: s.update_err(r, "longt")),
-        #("Alt",    lambda s, r: s.update_err(r, "alt")),
         )
     def __init__(self, deg_type):
         self.deg_type = deg_type
         self.conversions = unit_adjustments()
         self.saved_mode = -1
         self.ais_latch = False
+        self.noise_latch = False
   
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         if not self.window.get_display():
@@ -429,6 +464,8 @@ class Base:
               'Enable Response Reports', lambda a: self.view_toggle(a)),
              ('GPS', None, '_GPS Data', '<Control>g',
               'Enable GPS Data', lambda a: self.view_toggle(a)),
+             ('Noise', None, '_Noise Statistics', '<Control>n',
+              'Enable Noise Statistics', lambda a: self.view_toggle(a)),
              ('Maidenhead', None, '_Maidenhead', '<Control>m',
               'Enable Maidenhead locator', lambda a: self.view_toggle(a)),
              ('AIS', None, '_AIS Data', '<Control>a',
@@ -453,6 +490,7 @@ class Base:
         <menuitem action="Skyview"/>
         <menuitem action="Responses"/>
         <menuitem action="GPS"/>
+        <menuitem action="Noise"/>
         <menuitem action="Maidenhead"/>
         <menuitem action="AIS"/>
       </menu>
@@ -467,6 +505,7 @@ class Base:
         self.uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
+        self.uimanager.get_widget('/MenuBar/View/Noise').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
         menubar = self.uimanager.get_widget('/MenuBar')
@@ -505,7 +544,7 @@ class Base:
         vbox.add(self.rawdisplay)
 
         self.dataframe = gtk.Frame(label="GPS data")
-        datatable = gtk.Table(7, 4, False)
+        datatable = gtk.Table(Base.COLUMNS, Base.ROWS, False)
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
@@ -524,6 +563,13 @@ class Base:
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
+        self.noisebox = gtk.HBox(False, 0)
+        vbox.add(self.noisebox)
+        noiseframe = gtk.Frame(label="Noise Statistics")
+        self.noisebox.add(noiseframe)
+        self.noiseview = NoiseView()
+        noiseframe.add(self.noiseview.widget)
+
         self.gsbox = gtk.HBox(False, 0)
         vbox.add(self.gsbox)
         gsframe = gtk.Frame(label="Maidenhead Grid Square")
@@ -539,6 +585,9 @@ class Base:
         aisframe.add(self.aisview.widget)
 
         self.window.show_all()
+        # Hide the Noise Statistics window until user selects it.
+        self.uimanager.get_widget('/MenuBar/View/Noise').set_active(False)
+        self.noisebox.hide()
         # Hide the Maidenhead window until user selects it.
         self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(False)
         self.gsbox.hide()
@@ -550,6 +599,7 @@ class Base:
                                  {"Skyview": self.satbox,
                                   "Responses": self.rawdisplay,
                                   "GPS": self.dataframe,
+                                  "Noise": self.noisebox,
                                   "Maidenhead": self.gsbox,
                                   "AIS": self.aisbox}
 
@@ -669,13 +719,6 @@ class Base:
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
 
-    def update_noisedata(self, noise):
-        "Update the GPGST data fields."
-        # the last 7 fields are updated from GPGST data
-        for (hook, widget) in Base.gpsfields[-7:]:
-            if hook:	# Remove this guard when we have all hooks 
-                widget.set_text(hook(self, noise))
-
     def update_skyview(self, data):
         "Update the satellite list and skyview."
         if hasattr(data, 'satellites'):
@@ -729,8 +772,12 @@ class Base:
                 self.update_skyview(self.daemon.data)
             elif self.daemon.data["class"] == "TPV":
                 self.update_gpsdata(self.daemon.data)
-            #elif self.daemon.data["class"] == "GST":
-            #    self.update_noisedata(self.daemon.data)
+            elif self.daemon.data["class"] == "GST":
+                self.noiseview.update(self.daemon.data)
+                if self.noise_latch == False:
+                    self.noise_latch = True
+                    self.uimanager.get_widget('/MenuBar/View/Noise').set_active(True)
+                    self.noisebox.show()
             elif self.daemon.data["class"] == "AIS":
                 self.aisview.update(self.daemon.data)
                 if self.ais_latch == False:
