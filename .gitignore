@@ -95,6 +95,8 @@ libtool
 NEWS
 ChangeLog
 m4
+# SCons cruft
+.sconsign.dblite
 # Documentation
 www/AIVDM.html
 www/NMEA.html
