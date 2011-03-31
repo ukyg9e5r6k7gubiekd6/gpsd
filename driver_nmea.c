@@ -208,14 +208,14 @@ static gps_mask_t processGPRMC(int count, char *field[],
 
     gpsd_report(LOG_DATA,
 		"RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
-		"speed=%.2f track=%.2f mode=%d status=%d mask=%s\n",
+		"speed=%.2f track=%.2f mode=%d status=%d\n",
 		field[9], field[1],
 		session->newdata.latitude,
 		session->newdata.longitude,
 		session->newdata.speed,
 		session->newdata.track,
 		session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 
@@ -293,12 +293,12 @@ static gps_mask_t processGPGLL(int count, char *field[],
     }
 
     gpsd_report(LOG_DATA,
-		"GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d mask=%s\n",
+		"GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
 		field[5],
 		session->newdata.latitude,
 		session->newdata.longitude,
 		session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 
@@ -396,13 +396,13 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 	}
     }
     gpsd_report(LOG_DATA,
-		"GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d mask=%s\n",
+		"GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
 		field[1],
 		session->newdata.latitude,
 		session->newdata.longitude,
 		session->newdata.altitude,
 		session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 
@@ -511,12 +511,12 @@ static gps_mask_t processGPGSA(int count, char *field[],
 	}
 	mask |= DOP_SET | USED_IS;
 	gpsd_report(LOG_DATA,
-		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f mask=%s\n",
+		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f\n",
 		    session->newdata.mode,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,
-		    session->gpsdata.dop.vdop, gps_maskdump(mask));
+		    session->gpsdata.dop.vdop);
     }
     return mask;
 }
@@ -655,10 +655,10 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
 	mask = HERR_SET | VERR_SET | PERR_IS;
     }
 
-    gpsd_report(LOG_DATA, "PGRME: epx=%.2f epy=%.2f epv=%.2f mask=%s\n",
+    gpsd_report(LOG_DATA, "PGRME: epx=%.2f epy=%.2f epv=%.2f\n",
 		session->newdata.epx,
 		session->newdata.epy,
-		session->newdata.epv, gps_maskdump(mask));
+		session->newdata.epv);
     return mask;
 }
 
@@ -689,10 +689,10 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[],
 	session->newdata.epy = atof(field[2]);
 	session->newdata.epx = atof(field[3]);
 	session->newdata.epv = atof(field[4]);
-	gpsd_report(LOG_DATA, "GBS: epx=%.2f epy=%.2f epv=%.2f mask=%s\n",
+	gpsd_report(LOG_DATA, "GBS: epx=%.2f epy=%.2f epv=%.2f\n",
 		    session->newdata.epx,
 		    session->newdata.epy,
-		    session->newdata.epv, gps_maskdump(HERR_SET | VERR_SET));
+		    session->newdata.epv);
 	return HERR_SET | VERR_SET;
     } else {
 	gpsd_report(LOG_PROG,
@@ -768,7 +768,6 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	    mask = TIME_SET;
 	}
     };
-    gpsd_report(LOG_DATA, "ZDA: mask=%s\n", gps_maskdump(mask));
     return mask;
 }
 
@@ -936,14 +935,14 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
 	    gpsd_report(LOG_DATA,
-			"PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
+			"PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
 			field[4], session->newdata.latitude,
 			session->newdata.longitude, session->newdata.altitude,
 			session->newdata.speed, session->newdata.track,
 			session->newdata.climb, session->newdata.mode,
 			session->gpsdata.status, session->gpsdata.dop.pdop,
 			session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
-			session->gpsdata.dop.tdop, gps_maskdump(mask));
+			session->gpsdata.dop.tdop);
 	}
     } else if (0 == strcmp("SAT", field[1])) {	/* Satellite Status */
 	int i, n, p, u;
@@ -958,8 +957,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 		session->gpsdata.used[u++] = p;
 	}
 	session->gpsdata.satellites_used = u;
-	gpsd_report(LOG_DATA, "PASHR,SAT: used=%d mask=%s\n",
-		    session->gpsdata.satellites_used, gps_maskdump(mask));
+	gpsd_report(LOG_DATA, "PASHR,SAT: used=%d\n",
+		    session->gpsdata.satellites_used);
 	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_IS;
     }

@@ -107,15 +107,14 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     }
 
     gpsd_report(LOG_DATA,
-		"NAV_FIX: time=%.2f, lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
+		"NAV_FIX: time=%.2f, lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.speed, session->newdata.track,
 		session->newdata.climb, session->newdata.mode,
 		session->gpsdata.status, session->gpsdata.dop.gdop,
 		session->gpsdata.dop.pdop, session->gpsdata.dop.hdop,
-		session->gpsdata.dop.vdop, session->gpsdata.dop.tdop,
-		gps_maskdump(mask));
+		session->gpsdata.dop.vdop, session->gpsdata.dop.tdop);
     return mask;
 }
 

@@ -444,13 +444,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     } while (0);
 
     gpsd_report(LOG_DATA,
-		"GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d mask=%s\n",
+		"GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.speed, session->newdata.track,
 		session->newdata.climb, session->newdata.epx,
 		session->newdata.epy, session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 

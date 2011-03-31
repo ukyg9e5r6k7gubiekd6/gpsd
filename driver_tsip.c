@@ -298,11 +298,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_report(LOG_DATA, "SPPLLA 0x4a "
-		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
+		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 		    session->newdata.time,
 		    session->newdata.latitude,
 		    session->newdata.longitude,
-		    session->newdata.altitude, gps_maskdump(mask));
+		    session->newdata.altitude);
 	break;
     case 0x4b:			/* Machine/Code ID and Additional Status */
 	if (len != 3)
@@ -371,11 +371,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    f4, f5);
 	mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
 	gpsd_report(LOG_DATA, "VFENU 0x56 "
-		    "time=%.2f speed=%.2f track=%.2f climb=%.2f mask=%s\n",
+		    "time=%.2f speed=%.2f track=%.2f climb=%.2f\n",
 		    session->newdata.time,
 		    session->newdata.speed,
 		    session->newdata.track,
-		    session->newdata.climb, gps_maskdump(mask));
+		    session->newdata.climb);
 	break;
     case 0x57:			/* Information About Last Computed Fix */
 	if (len != 8)
@@ -494,15 +494,14 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	/*@ -charint @*/
 	gpsd_report(LOG_DATA, "AIVSS: 0x6d "
 		    "status=%d used=%d "
-		    "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdup=%.1f "
-		    "mask=%s\n",
+		    "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdup=%.1f\n",
 		    session->gpsdata.status,
 		    session->gpsdata.satellites_used,
 		    session->gpsdata.dop.pdop,
 		    session->gpsdata.dop.hdop,
 		    session->gpsdata.dop.vdop,
 		    session->gpsdata.dop.tdop,
-		    session->gpsdata.dop.gdop, gps_maskdump(mask));
+		    session->gpsdata.dop.gdop);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x6e:			/* Synchronized Measurements */
@@ -531,8 +530,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    mask |= STATUS_SET;
 	}
 	/*@ -charint @*/
-	gpsd_report(LOG_DATA, "DPFM 0x82 status=%d mask=%s\n",
-		    session->gpsdata.status, gps_maskdump(mask));
+	gpsd_report(LOG_DATA, "DPFM 0x82 status=%d\n", session->gpsdata.status);
 	break;
     case 0x83:			/* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36)
@@ -566,11 +564,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		    session->newdata.longitude, session->newdata.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_report(LOG_DATA, "DPPLLA 0x84 "
-		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
+		    "time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 		    session->newdata.time,
 		    session->newdata.latitude,
 		    session->newdata.longitude,
-		    session->newdata.altitude, gps_maskdump(mask));
+		    session->newdata.altitude);
 	break;
     case 0x8f:			/* Super Packet.  Well...  */
 	/*@ +charint @*/
@@ -661,12 +659,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    gpsd_report(LOG_DATA,
 			"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 			"speed=%.2f track=%.2f climb=%.2f "
-			"mode=%d status=%d mask=%s\n", session->newdata.time,
+			"mode=%d status=%d\n", 
+			session->newdata.time,
 			session->newdata.latitude, session->newdata.longitude,
 			session->newdata.altitude, session->newdata.speed,
 			session->newdata.track, session->newdata.climb,
-			session->newdata.mode, session->gpsdata.status,
-			gps_maskdump(mask));
+			session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
 	    session->driver.tsip.req_compact = 0;
@@ -731,13 +729,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		REPORT_IS;
 	    gpsd_report(LOG_DATA,
 			"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-			"speed=%.2f track=%.2f climb=%.2f "
-			"mode=%d status=%d mask=%s\n", session->newdata.time,
+			"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d\n", 
+			session->newdata.time,
 			session->newdata.latitude, session->newdata.longitude,
 			session->newdata.altitude, session->newdata.speed,
 			session->newdata.track, session->newdata.climb,
-			session->newdata.mode, session->gpsdata.status,
-			gps_maskdump(mask));
+			session->newdata.mode, session->gpsdata.status);
 	    break;
 
 	case 0xab:		/* Thunderbolt Timing Superpacket */
@@ -833,13 +830,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    gpsd_report(LOG_DATA, "SP-TPS 0xac "
-			"time=%.2f lat=%.2f lon=%.2f alt=%.2f mask=%s\n",
+			"time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 			session->newdata.time,
 			session->newdata.latitude,
 			session->newdata.longitude,
-			session->newdata.altitude, gps_maskdump(mask));
+			session->newdata.altitude);
 	    break;
-
 
 	default:
 	    gpsd_report(LOG_WARN, "Unhandled TSIP superpacket type 0x%02x\n",

@@ -107,6 +107,13 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	/*@ +usedef @*/
 
 	fieldmask = gpsd_poll(session);
+
+	/* conditional prevents mask dumper from eating CPU */
+	if (debuglevel >= LOG_DATA)
+	    gpsd_report(LOG_DATA,
+			"packet mask = %s\n",
+			gps_maskdump(session->gpsdata.set));
+
 	if ((fieldmask &~ ONLINE_SET)!=0)
 	    return fieldmask;
     }

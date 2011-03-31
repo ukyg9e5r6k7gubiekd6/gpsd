@@ -204,12 +204,12 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 	TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET |
 	TRACK_SET | STATUS_SET | MODE_SET;
     gpsd_report(LOG_DATA,
-		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d mask=%s\n",
+		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.track, session->newdata.speed,
 		session->newdata.climb, session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 

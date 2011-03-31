@@ -1294,9 +1294,6 @@ static void pseudonmea_report(struct subscriber_t *sub,
 	&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
 	char buf[MAX_PACKET_LENGTH * 3 + 2];
 
-	gpsd_report(LOG_PROG, "data mask is %s\n",
-		    gps_maskdump(device->gpsdata.set));
-
 	if ((changed & REPORT_IS) != 0) {
 	    nmea_tpv_dump(device, buf, sizeof(buf));
 	    gpsd_report(LOG_IO, "<= GPS (binary tpv) %s: %s\n",
@@ -1417,10 +1414,12 @@ static void consume_packets(struct gps_device_t *device)
 	if ((changed & PACKET_SET) == 0)
 	    break;
 
-	gpsd_report(LOG_DATA,
-		    "packet from %s with %s\n",
-		    device->gpsdata.dev.path,
-		    gps_maskdump(device->gpsdata.set));
+	/* conditional prevents mask dumper from eating CPU */
+	if (debuglevel >= LOG_DATA)
+	    gpsd_report(LOG_DATA,
+			"packet from %s with %s\n",
+			device->gpsdata.dev.path,
+			gps_maskdump(device->gpsdata.set));
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* add any just-identified device to watcher lists */
@@ -1550,10 +1549,12 @@ static void consume_packets(struct gps_device_t *device)
 	    /* some listeners may be in watcher mode */
 	    if (sub->policy.watcher) {
 		if (changed & DATA_IS) {
-		    gpsd_report(LOG_PROG,
-				"Changed mask: %s with %sreliable cycle detection\n",
-				gps_maskdump(changed),
-				device->cycle_end_reliable ? "" : "un");
+		    /* guard keeps mask dumper from eating CPU */
+		    if (debuglevel >= LOG_PROG)
+			gpsd_report(LOG_PROG,
+				    "Changed mask: %s with %sreliable cycle detection\n",
+				    gps_maskdump(changed),
+				    device->cycle_end_reliable ? "" : "un");
 		    if ((changed & REPORT_IS) != 0)
 			gpsd_report(LOG_PROG, "time to report a fix\n");
 

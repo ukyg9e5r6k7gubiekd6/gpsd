@@ -716,8 +716,6 @@ static void gpsd_error_model(struct gps_device_t *session,
     if (isnan(fix->time) == 0 && isnan(fix->ept) != 0)
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
-    gpsd_report(LOG_DATA, "modeling errors: mode=%d, masks=%s\n",
-		fix->mode, gps_maskdump(session->gpsdata.set));
     if (fix->mode >= MODE_2D) {
 	if (isnan(fix->epx) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;

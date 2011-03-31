@@ -115,7 +115,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_report(LOG_DATA,
-		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d mask=%s\n",
+		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 		session->newdata.time,
 		session->newdata.latitude,
 		session->newdata.longitude,
@@ -125,7 +125,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 		session->newdata.climb,
 		session->newdata.mode,
 		session->gpsdata.status,
-		session->gpsdata.satellites_used, gps_maskdump(mask));
+		session->gpsdata.satellites_used);
     return mask;
 }
 

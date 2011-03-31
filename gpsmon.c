@@ -229,6 +229,12 @@ static ssize_t readpkt(void)
     if (changed == 0)
 	longjmp(terminate, TERM_EMPTY_READ);
 
+    /* conditional prevents mask dumper from eating CPU */
+    if (debuglevel >= LOG_DATA)
+	gpsd_report(LOG_DATA,
+		    "packet mask = %s\n",
+		    gps_maskdump(session.gpsdata.set));
+
     if ((changed & ERROR_SET) != 0)
 	longjmp(terminate, TERM_READ_ERROR);
 

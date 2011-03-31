@@ -357,8 +357,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin: Product Desc: %s\n", &buf[4]);
 	mask |= DEVICEID_SET;
-	gpsd_report(LOG_DATA, "Garmin: PRODUCT_DATA: subtype=%s mask=%s\n",
-		    session->subtype, gps_maskdump(mask));
+	gpsd_report(LOG_DATA, "Garmin: PRODUCT_DATA: subtype=%s\n",
+		    session->subtype);
 	break;
     case GARMIN_PKTID_PVT_DATA:
 	gpsd_report(LOG_PROG, "Garmin: Appl, PVT Data Sz: %d\n", pkt_len);
@@ -493,7 +493,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		    "speed=%.2f track=%.2f climb=%.2f "
 		    "epx=%.2f epy=%.2f epv=%.2f "
-		    "mode=%d status=%d mask=%s\n",
+		    "mode=%d status=%d\n",
 		    session->newdata.time,
 		    session->newdata.latitude,
 		    session->newdata.longitude,
@@ -504,7 +504,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    session->newdata.epy,
 		    session->newdata.epv,
 		    session->newdata.mode,
-		    session->gpsdata.status, gps_maskdump(mask));
+		    session->gpsdata.status);
 	break;
     case GARMIN_PKTID_RMD_DATA:
     case GARMIN_PKTID_RMD41_DATA:
@@ -570,9 +570,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_IS;
 	gpsd_report(LOG_DATA,
-		    "Garmin: SAT_DATA: visible=%d used=%d mask=%s\n",
+		    "Garmin: SAT_DATA: visible=%d used=%d\n",
 		    session->gpsdata.satellites_visible,
-		    session->gpsdata.satellites_used, gps_maskdump(mask));
+		    session->gpsdata.satellites_used);
 	break;
     case GARMIN_PKTID_PROTOCOL_ARRAY:
 	// this packet is never requested, it just comes, in some case
@@ -592,8 +592,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 							  LOG_WARN));
 	break;
     }
-    gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, ) = %s\n",
-		pkt_id, pkt_len, gps_maskdump(mask));
+    gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, )\n",
+		pkt_id, pkt_len);
     return mask;
 }
 
@@ -1124,8 +1124,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     (void)usleep(300);
     Send_ACK();
     /*@ +usedef +compdef @*/
-    gpsd_report(LOG_IO, "Garmin: garmin_ser_parse( ) = %s\n",
-		gps_maskdump(mask));
+    gpsd_report(LOG_IO, "Garmin: garmin_ser_parse( )\n");
     return mask;
 }
 

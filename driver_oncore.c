@@ -214,13 +214,13 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     (void)oncore_control_send(session, (char *)pollEn, sizeof(pollEn));
 
     gpsd_report(LOG_DATA,
-		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f mode=%d status=%d visible=%d used=%d mask=%s\n",
+		"NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f mode=%d status=%d visible=%d used=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.speed, session->newdata.track,
 		session->newdata.mode, session->gpsdata.status,
 		session->gpsdata.satellites_used,
-		session->gpsdata.satellites_visible, gps_maskdump(mask));
+		session->gpsdata.satellites_visible);
     return mask;
 }
 

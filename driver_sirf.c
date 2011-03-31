@@ -653,13 +653,12 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	mask |= PPSTIME_IS;
     }
     gpsd_report(LOG_DATA,
-		"SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d mask=%s\n",
+		"SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.track, session->newdata.speed,
 		session->newdata.mode, session->gpsdata.status,
-		session->gpsdata.dop.hdop, session->gpsdata.satellites_used,
-		gps_maskdump(mask));
+		session->gpsdata.dop.hdop, session->gpsdata.satellites_used);
     return mask;
 }
 
@@ -812,7 +811,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	    mask |= ALTITUDE_SET | CLIMB_SET;
     }
     gpsd_report(LOG_DATA,
-		"SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d mask=%s\n",
+		"SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d\n",
 		session->newdata.time,
 		session->newdata.latitude,
 		session->newdata.longitude,
@@ -820,7 +819,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 		session->newdata.track,
 		session->newdata.speed,
 		session->newdata.mode,
-		session->gpsdata.status, gps_maskdump(mask));
+		session->gpsdata.status);
     return mask;
 }
 #endif /* __UNUSED__ */
@@ -924,15 +923,14 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
     gpsd_report(LOG_DATA,
-		"SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f mask=%s\n",
+		"SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
 		session->newdata.speed, session->newdata.track,
 		session->newdata.climb, session->newdata.mode,
 		session->gpsdata.status, session->gpsdata.dop.gdop,
 		session->gpsdata.dop.pdop, session->gpsdata.dop.hdop,
-		session->gpsdata.dop.vdop, session->gpsdata.dop.tdop,
-		gps_maskdump(mask));
+		session->gpsdata.dop.vdop, session->gpsdata.dop.tdop);
     return mask;
 }
 
