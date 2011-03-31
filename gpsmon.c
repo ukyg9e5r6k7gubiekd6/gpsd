@@ -24,11 +24,6 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
-/* Cygwin has only _timezone and not timezone unless the following is set */
-#if defined(__CYGWIN__)
-#define timezonevar
-#endif /* defined(__CYGWIN__) */
-
 #include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
 #include <bluetooth/bluetooth.h>

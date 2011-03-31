@@ -26,7 +26,7 @@ opts.AddVariables(
     BoolVariable("nmea",          "NMEA support", True),
     BoolVariable("oncore",        "Motorola OnCore chipset support", True),
     BoolVariable("sirf",          "SiRF chipset support", True),
-    BoolVariable("superstar2",    "SuperStarII chipset support", True),
+    BoolVariable("superstar2",    "Novatel SuperStarII chipset support", True),
     BoolVariable("tsip",          "Trimble TSIP support", True),
     BoolVariable("fv18",          "San Jose Navigation FV-18 support", True),
     BoolVariable("tripmate",      "DeLorme TripMate support", True),

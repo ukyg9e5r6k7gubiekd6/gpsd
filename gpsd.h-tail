@@ -28,6 +28,9 @@ typedef unsigned int speed_t;
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
 /* Some internal capabilities depend on which drivers we're compiling. */
+#if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE))
+#define NMEA_ENABLE
+#endif
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
@@ -35,7 +38,7 @@ typedef unsigned int speed_t;
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
-#define NON_NMEA_ENABLE	
+#define NON_NMEA_ENABLE
 #endif
 #if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
 #define COMPASS_ENABLE	
