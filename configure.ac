@@ -3,7 +3,7 @@ dnl BSD terms apply: see the file COPYING in the distribution root for details.
 
 AC_INIT(gpsd, 3.0~dev, [http://developer.berlios.de/bugs/?group_id=2116], ,
 	[http://gpsd.berlios.de/])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.10 foreign])
 dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
@@ -674,10 +674,10 @@ AC_ARG_ENABLE(gpsd-group,
   AC_HELP_STRING([--enable-gpsd-group=groupname],
 		 [GPSD privilege revocation group, use if /dev/ttyS0 not found]),
   [ac_group=$enableval])
-AC_MSG_CHECKING([privilege revokation group])
+AC_MSG_CHECKING([privilege revocation group])
 if test x"$ac_user" != "xnobody"; then
     AC_MSG_RESULT([$ac_group])
-	AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [GPSD privilege revokation group])
+	AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [GPSD privilege revocation group])
 fi
 
 dnl check for port speed fixed at compile-time

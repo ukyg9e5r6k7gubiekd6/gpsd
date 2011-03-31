@@ -2,8 +2,8 @@
 
 # Automakeversion
 AM_1=1
-AM_2=7
-AM_3=6
+AM_2=10
+AM_3=0
 
 # Autoconfversion
 AC_1=2
