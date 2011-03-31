@@ -387,8 +387,8 @@ AC_ARG_ENABLE(gpsd-user,
   [ac_user=$enableval], [ac_user=nobody])
 AC_MSG_CHECKING([privilege revocation user])
 if test x"$ac_user" != "xnobody"; then
-    AC_MSG_RESULT([$ac_user])
-	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [privilege revocation user])
+  AC_MSG_RESULT([$ac_user])
+  AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [privilege revocation user])
 else
   AC_MSG_RESULT([nobody])
 fi
@@ -402,6 +402,8 @@ AC_MSG_CHECKING([privilege revocation group])
 if test x"$ac_user" != "xnobody"; then
   AC_MSG_RESULT([$ac_group])
   AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [privilege revocation group])
+else
+  AC_MSG_RESULT([none])
 fi
 
 dnl configure port speed to be fixed at compile-time
@@ -842,7 +844,7 @@ AC_ARG_ENABLE(reconfigure,
   AC_HELP_STRING([--disable-reconfigure],
 		 [do not allow gpsd to change device settings]),
   [ac_reconfigure=$enableval], [ac_reconfigure=yes])
-AC_MSG_CHECKING([if device reconfiguration is allowed])
+AC_MSG_CHECKING([for device reconfiguration is allowed])
 if test x"$ac_reconfigure" != "xno"; then
   AC_MSG_RESULT([$ac_reconfigure])
   AC_DEFINE([ALLOW_RECONFIGURE], 1, [Allow gpsd to reconfigure device])
@@ -854,7 +856,7 @@ AC_ARG_ENABLE(controlsend,
   AC_HELP_STRING([--disable-controlsend],
 		 [do not allow gpsctl/gpsmon to change device settings]),
   [ac_controlsend=$enableval], [ac_controlsend=yes])
-AC_MSG_CHECKING([if control sending is allowed])
+AC_MSG_CHECKING([for control sending is allowed])
 if test x"$ac_controlsend" != "xno"; then
   AC_MSG_RESULT([$ac_controlsend])
   AC_DEFINE([ALLOW_CONTROLSEND], 1, [Allow gpsd to controlsend device])
@@ -866,7 +868,7 @@ AC_ARG_ENABLE(cheapfloats,
   AC_HELP_STRING([--disable-cheapfloats],
 		 [Float ops are cheap, compute all error estimates]),
   [ac_cheapfloats=$enableval], [ac_cheapfloats=yes])
-AC_MSG_CHECKING([if floats are considered cheap])
+AC_MSG_CHECKING([for floats are considered cheap])
 if test x"$ac_cheapfloats" != "xno"; then
   AC_MSG_RESULT([$ac_cheapfloats])
   AC_DEFINE([CHEAPFLOATS_ENABLE], 1, [compute all error estimates])
