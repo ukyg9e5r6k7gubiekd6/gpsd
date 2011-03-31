@@ -329,6 +329,13 @@ char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
+void clear_dop( /*@out@*/ struct dop_t *dop)
+{
+    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
+	dop->gdop = NAN;
+}
+
+#ifdef CHEAPFLOATS_ENABLE
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from
@@ -416,12 +423,6 @@ may have to change in the future if this code is used by a non-SiRF
 driver.
 
 ******************************************************************************/
-
-void clear_dop( /*@out@*/ struct dop_t *dop)
-{
-    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
-	dop->gdop = NAN;
-}
 
 /*@ -fixedformalarray -mustdefine @*/
 static bool invert(double mat[4][4], /*@out@*/ double inverse[4][4])
@@ -794,6 +795,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
     /*@ +mayaliasunique @*/
 }
+#endif /* CHEAPFLOATS_ENABLE */
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
@@ -869,7 +871,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path);
 	return ONLINE_SET;
     } else {			/* we have recognized a packet */
-	gps_mask_t received = PACKET_SET, dopmask = 0;
+	gps_mask_t received = PACKET_SET;
 	session->gpsdata.online = timestamp();
 
 	gpsd_report(LOG_RAW + 3, "Accepted packet on %s.\n",
@@ -921,6 +923,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		&& session->device_type->parse_packet != NULL)
 		received |= session->device_type->parse_packet(session);
 
+	session->gpsdata.set = ONLINE_SET | received;
+
+#ifdef CHEAPFLOATS_ENABLE
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite any DOPs reported from the packet
@@ -928,10 +933,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if ((received & SATELLITE_SET) != 0
 	    && session->gpsdata.satellites_visible > 0) {
-	    dopmask = fill_dop(&session->gpsdata, &session->gpsdata.dop);
+	    session->gpsdata.set |= fill_dop(&session->gpsdata, &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
-	session->gpsdata.set = ONLINE_SET | dopmask | received;
+#endif /* CHEAPFLOATS_ENABLE */
 
 	/* copy/merge device data into staging buffers */
 	/*@-nullderef -nullpass@*/
@@ -944,7 +949,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	//              "transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
+#ifdef CHEAPFLOATS_ENABLE
 	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
+#endif /* CHEAPFLOATS_ENABLE */
+
 	/*@+nullderef -nullpass@*/
 
 	/*

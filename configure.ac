@@ -862,6 +862,18 @@ else
   AC_MSG_RESULT([no])
 fi
 
+AC_ARG_ENABLE(cheapfloats,
+  AC_HELP_STRING([--disable-cheapfloats],
+		 [Float ops are cheap, compute all error estimates]),
+  [ac_cheapfloats=$enableval], [ac_cheapfloats=yes])
+AC_MSG_CHECKING([if floats are considered cheap])
+if test x"$ac_cheapfloats" != "xno"; then
+  AC_MSG_RESULT([$ac_cheapfloats])
+  AC_DEFINE([CHEAPFLOATS_ENABLE], 1, [compute all error estimates])
+else
+  AC_MSG_RESULT([no])
+fi
+
 AC_ARG_ENABLE(squelch,
   AC_HELP_STRING([--enable-squelch],
 		 [squelch gpsd_report and gpsd_hexdump to save cpu]),
@@ -964,6 +976,7 @@ echo "Limited max devices     : $ac_maxdevices"
 echo "Control-socket support  : $ac_control_socket"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Allow control send      : $ac_controlsend"
+echo "Float ops are cheap     : $ac_cheapfloats"
 echo "Squelch logging/hexdump : $ac_squelch"
 echo "libusb device discovery : $ac_libusb"
 echo "	Client Features"

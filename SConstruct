@@ -69,6 +69,7 @@ opts.AddVariables(
     ("max_devices",               "compile with maximum allowed devices", None),
     BoolVariable("reconfigure",   "allow gpsd to change device settings", True),
     BoolVariable("controlsend",   "allow gpsctl/gpsmon to change device settings", True),
+    BoolVariable("cheapfloats",   "float ops are cheap, compute all error estimates", True),
     BoolVariable("squelch",       "squelch gpsd_report/gpsd_hexdump to save cpu", False),
     ("fixed_port_speed",          "compile with fixed serial port speed", None),
     # Miscellaneous
