@@ -231,7 +231,7 @@ if test -e /etc/gentoo-release; then
 fi 
 
 dnl Automatic check for DBUS.
-dnl It's broken -- leads to bad compiles on systems with DBUS libraies
+dnl It's broken -- leads to bad compiles on systems with DBUS libraries
 dnl but no DBUS headers.
 dnl ac_dbus_export=no
 dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS
@@ -292,7 +292,7 @@ AC_ARG_ENABLE(pps,
 AC_MSG_CHECKING([for PPS time syncing support])
 if test x"$ac_pps" = "xyes"; then
     AC_MSG_RESULT([yes])
-	AC_DEFINE([PPS_ENABLE], 1, [PPS time syncing support])
+    AC_DEFINE([PPS_ENABLE], 1, [PPS time syncing support])
     AC_CHECK_HEADERS(pps.h)
     dnl sys/timepps.h needs pps.h
     AC_CHECK_HEADERS(sys/timepps.h)
@@ -322,7 +322,7 @@ else
 fi
 AM_CONDITIONAL([HAVE_BLUEZ], [test x"$ac_bluetooth" = x"yes"])
 
-dnl C++ bindings
+dnl Does a C++ compiler exist?
 if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
     ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
     (test "X$CXX" != "Xg++"))) ; then
@@ -331,6 +331,7 @@ else
   ISCXX="no"
 fi
 
+dnl Configure whether to build the C++ binding
 AC_ARG_ENABLE(libgpsmm,
   AC_HELP_STRING([--disable-libgpsmm],
 		 [don't build C++ bindings]),
@@ -379,7 +380,7 @@ else
   ac_libQgpsmm="no"
 fi
 
-dnl check for privilege revocation user at compile-time
+dnl set privilege revocation user at compile time
 AC_ARG_ENABLE(gpsd-user,
   AC_HELP_STRING([--enable-gpsd-user=username],
 		 [GPSD privilege revocation user]),
@@ -387,23 +388,23 @@ AC_ARG_ENABLE(gpsd-user,
 AC_MSG_CHECKING([privilege revocation user])
 if test x"$ac_user" != "xnobody"; then
     AC_MSG_RESULT([$ac_user])
-	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [GPSD privilege revocation user])
+	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [privilege revocation user])
 else
   AC_MSG_RESULT([nobody])
 fi
 
-dnl check for privilege revocation group at compile-time
+dnl set privilege revocation group at compile time
 AC_ARG_ENABLE(gpsd-group,
   AC_HELP_STRING([--enable-gpsd-group=groupname],
 		 [GPSD privilege revocation group, use if /dev/ttyS0 not found]),
   [ac_group=$enableval])
 AC_MSG_CHECKING([privilege revocation group])
 if test x"$ac_user" != "xnobody"; then
-    AC_MSG_RESULT([$ac_group])
-	AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [GPSD privilege revocation group])
+  AC_MSG_RESULT([$ac_group])
+  AC_DEFINE_UNQUOTED([GPSD_GROUP], "$ac_group", [privilege revocation group])
 fi
 
-dnl check for port speed fixed at compile-time
+dnl configure port speed to be fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
   AC_HELP_STRING([--enable-fixed-port-speed=nnn],
 		 [compile with fixed serial port speed]),
@@ -417,7 +418,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for limited maximum clients
+dnl configure limited maximum clients
 AC_ARG_ENABLE(max-clients,
   AC_HELP_STRING([--enable-max-clients=nnn],
 		 [compile with limited maximum clients]),
@@ -431,7 +432,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for max number of GPS devices
+dnl configure max number of GPS devices
 AC_ARG_ENABLE(max-devices,
   AC_HELP_STRING([--enable-max-devices=nnn],
 		 [compile with maximum allowed devices]),
