@@ -264,8 +264,8 @@ libgps_la_LINK = $(LIBTOOL) --tag=CC --mode=link gcc $(libgps_la_LDFLAGS) -o $@
 endif
 
 nodist_libgpsd_la_SOURCES = packet_names.h ais_json.i
-libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
-libgpsd_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) $(BLUEZ_LIBS) $(LIBRT) libgps.la
+libgps_la_LIBADD = $(LIBM)
+libgpsd_la_LIBADD = $(LIBM) $(LIBPTHREAD) $(BLUEZ_LIBS) $(LIBRT) libgps.la
 
 noinst_SCRIPTS =
 

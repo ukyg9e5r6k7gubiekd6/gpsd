@@ -113,8 +113,6 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_C_BIGENDIAN
-AC_STDC_HEADERS
-AC_C_CONST
 
 AC_MSG_CHECKING([for properly working floating point implementation])
 if test "x$build" = "x$host"; then
@@ -148,8 +146,6 @@ AC_CHECK_FUNCS(daemon)
 
 AC_CHECK_LIB(m, rint, LIBM="-lm")
 AC_SUBST(LIBM)
-AC_CHECK_LIB(c, open, LIBC="-lc")
-AC_SUBST(LIBC)
 AC_CHECK_LIB(pthread, pthread_setcancelstate,
 	[LIBPTHREAD="-lpthread"
 	AC_DEFINE([HAVE_LIBPTHREAD], [], [pthread libraries are present])])
@@ -324,7 +320,6 @@ if test x"$ac_bluetooth" = x"yes"; then
 else
     AC_MSG_RESULT([no])
 fi
-
 AM_CONDITIONAL([HAVE_BLUEZ], [test x"$ac_bluetooth" = x"yes"])
 
 dnl C++ bindings

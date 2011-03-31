@@ -149,10 +149,11 @@ env.Library(target="gpsd", source=[
 # The libraries have dependencies on system libraries 
 
 # TODO: conditionalize these properly
+pthreadlibs = ["pthreads"]
+rtlibs = ["rt"]
+dbuslibs = ["dbus"]
 usblibs = ["usb"]
 bluezlibs = ["bluez"]
-pthreadlibs = ["pthreads"]
-dbuslibs = ["dbus"]
 
 gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
@@ -160,7 +161,7 @@ gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 ## Programs to be built
 
 gpsd = env.Program('gpsd', ['gpsd.c', 'gpsd_dbus.c'],
-                   LIBS = gpsdlibs + pthreadlibs + dbuslibs)
+                   LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs)
 gpsmon = env.Program('gpsmon', ['gpsmon.c'], LIBS=gpsdlibs)
