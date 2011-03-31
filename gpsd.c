@@ -343,6 +343,7 @@ static void adjust_max_fd(int fd, bool on)
 static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
+    volatile int s = -1;   /* why gcc warned about this I don't know */
     /*
      * af = address family,
      * service = IANA protocol name or number.
@@ -353,7 +354,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
     struct protoent *ppe;	/* splint has a bug here */
     sockaddr_t sat;
     int sin_len = 0;
-    int s = -1, type, proto, one = 1;
+    int type, proto, one = 1;
     in_port_t port;
     char *af_str = "";
 
