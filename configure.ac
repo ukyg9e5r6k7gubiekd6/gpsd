@@ -810,18 +810,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(profiling,
-  AC_HELP_STRING([--enable-profiling],
-		 [enable profiling support]),
-  [ac_profiling=$enableval], [ac_profiling=no])
-AC_MSG_CHECKING([for profiling support])
-if test x"$ac_profiling" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([PROFILING], 1, [profiling support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 AC_ARG_ENABLE(ntpshm,
   AC_HELP_STRING([--disable-ntpshm],
 		 [disable NTP time hinting support]),
@@ -909,7 +897,7 @@ fi
 AC_ARG_ENABLE(ipv6,
   AC_HELP_STRING([--disable-ipv6],
 		 [don't build IPv6 support]),
-  [ac_ipv6=$enableval], [ac_ipv6=no])
+  [ac_ipv6=$enableval], [ac_ipv6=yes])
 AC_MSG_CHECKING([for IPv6 support])
 if test x"$ac_ipv6" = "xyes"; then
   AC_MSG_RESULT([yes])
