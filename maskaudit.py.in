@@ -88,6 +88,12 @@ if __name__ == '__main__':
                         stem = stem[:-3]
                     maxout += len(stem) + 1
             print """/* This code is generated.  Do not hand-hack it! */
+
+/*
+ * Also, beware that it is something of a CPU hog when called on every packet.
+ * Try to write guards so it is only called at higher log levels.
+ */
+
 #include <stdio.h>
 #include <string.h>
 
