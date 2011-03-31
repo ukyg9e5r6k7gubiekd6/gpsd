@@ -234,6 +234,35 @@ if test -e /etc/gentoo-release; then
     AC_MSG_WARN([Adjust your PYTHONPATH to see library directories under /usr/local/lib])
 fi 
 
+dnl Automatic check for DBUS.
+dnl It's broken -- leads to bad compiles on systems with DBUS libraies
+dnl but no DBUS headers.
+dnl ac_dbus_export=no
+dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS
+dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
+dnl    # Found dbus library, check for required versions and enable it
+dnl
+dnl    AC_MSG_CHECKING([for DBUS support])
+dnl    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
+dnl       [ac_dbus_export=yes],[ac_dbus_export=no])
+dnl    AC_MSG_RESULT([$ac_dbus_export])
+dnl    AC_SUBST(DBUS_CFLAGS)
+dnl    AC_SUBST(DBUS_LIBS)
+dnl
+dnl    if test x"ac_dbus_export" = x"yes" ; then
+dnl       AC_DEFINE([DBUS_EXPORT_ENABLE],1,[Found DBUS libraries])
+dnl    fi
+dnl
+dnl    # Check for glib and dbus-glib, used by gpxlogger
+dnl    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
+dnl    AC_SUBST(GLIB_CFLAGS)
+dnl    AC_SUBST(GLIB_LIBS)
+dnl
+dnl    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
+dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
+dnl    AC_SUBST(DBUS_GLIB_LIBS)
+dnl fi
+
 dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
@@ -257,6 +286,7 @@ if test x"$ac_dbus_export" = "xyes"; then
 else
     AC_MSG_RESULT([no])
 fi
+AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus_export" = x"yes"])
 
 dnl check for PPS time syncing support
 AC_ARG_ENABLE(pps,
@@ -295,37 +325,28 @@ else
     AC_MSG_RESULT([no])
 fi
 
-dnl Automatic check for DBUS.
-dnl It's broken -- leads to bad compiles on systems with DBUS libraies
-dnl but no DBUS headers.
-dnl ac_dbus_export=no
-dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS
-dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
-dnl    # Found dbus library, check for required versions and enable it
-dnl
-dnl    AC_MSG_CHECKING([for DBUS support])
-dnl    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
-dnl       [ac_dbus_export=yes],[ac_dbus_export=no])
-dnl    AC_MSG_RESULT([$ac_dbus_export])
-dnl    AC_SUBST(DBUS_CFLAGS)
-dnl    AC_SUBST(DBUS_LIBS)
-dnl
-dnl    if test x"ac_dbus_export" = x"yes" ; then
-dnl       AC_DEFINE([DBUS_EXPORT_ENABLE],1,[Found DBUS libraries])
-dnl    fi
-dnl
-dnl    # Check for glib and dbus-glib, used by gpxlogger
-dnl    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
-dnl    AC_SUBST(GLIB_CFLAGS)
-dnl    AC_SUBST(GLIB_LIBS)
-dnl
-dnl    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
-dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
-dnl    AC_SUBST(DBUS_GLIB_LIBS)
-dnl fi
-AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus_export" = x"yes"])
 AM_CONDITIONAL([HAVE_BLUEZ], [test x"$ac_bluetooth" = x"yes"])
 
+dnl C++ bindings
+if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
+    ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
+    (test "X$CXX" != "Xg++"))) ; then
+  ISCXX="yes"
+else
+  ISCXX="no"
+fi
+
+AC_ARG_ENABLE(libgpsmm,
+  AC_HELP_STRING([--disable-libgpsmm],
+		 [don't build C++ bindings]),
+  [ac_libgpsmm=$enableval], [ac_libgpsmm=$ISCXX])
+AC_MSG_CHECKING([for C++ support])
+if test x"$ac_libgpsmm" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([LIBGPSMM_ENABLE], 1, [C++ support])
+else
+  AC_MSG_RESULT([no])
+fi
 AM_CONDITIONAL([LIBGPSMM_ENABLE], [test x"$ac_libgpsmm" = x"yes"])
 
 dnl Check for QtNetwork library and qmake. Both are necessary
@@ -427,15 +448,6 @@ if test x"$ac_maxdevices" != "xno"; then
 	LIMITED_MAX_DEVICES="-DLIMITED_MAX_DEVICES=$ac_maxdevices"
 else
   AC_MSG_RESULT([no])
-fi
-
-dnl C++ bindings
-if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
-    ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
-    (test "X$CXX" != "Xg++"))) ; then
-  ISCXX="yes"
-else
-  ISCXX="no"
 fi
 
 AH_VERBATIM([_GNU_SOURCE],
@@ -898,22 +910,10 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(libgpsmm,
-  AC_HELP_STRING([--disable-libgpsmm],
-		 [don't build C++ bindings]),
-  [ac_libgpsmm=$enableval], [ac_libgpsmm=$ISCXX])
-AC_MSG_CHECKING([for C++ support])
-if test x"$ac_libgpsmm" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([LIBGPSMM_ENABLE], 1, [C++ support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 AC_ARG_ENABLE(ipv6,
   AC_HELP_STRING([--disable-ipv6],
 		 [don't build IPv6 support]),
-  [ac_ipv6=$enableval], [ac_ipv6=$ISCXX])
+  [ac_ipv6=$enableval], [ac_ipv6=no])
 AC_MSG_CHECKING([for IPv6 support])
 if test x"$ac_ipv6" = "xyes"; then
   AC_MSG_RESULT([yes])
