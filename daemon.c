@@ -7,6 +7,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
+#ifndef HAVE_DAEMON
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else
@@ -46,3 +47,7 @@ int daemon(int nochdir, int noclose)
     /*@ +nullpass @*/
     return 0;
 }
+
+#endif /* HAVE_DAEMON */
+
+// end

@@ -92,10 +92,9 @@ if GetOption("help"):
 
 ## Two shared libraries provide most of the code for the C programs
 
-# TODO: Conditionally include daemon.c whereit's not present
 env.Library(target="gps", source=[
 	"ais_json.c",
-        #"daemon.c",
+        "daemon.c",
 	"gpsutils.c",
 	"geoid.c",
 	"gpsdclient.c",

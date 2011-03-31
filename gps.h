@@ -1,15 +1,10 @@
+/* gps.h -- interface of the libgps library */
 /*
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #ifndef _GPSD_GPS_H_
 #define _GPSD_GPS_H_
-
-/* gps.h -- interface of the libgps library */
-
-#ifdef _WIN32
-#define strtok_r(s,d,p) strtok_s(s,d,p)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -1504,6 +1499,22 @@ extern double wgs84_separation(double, double);
 
 /* special host values for non-socket exports */ 
 #define GPSD_SHARED_MEMORY	"shared memory"
+
+/*
+ * Platform-specific declarations
+ */
+
+#ifdef _WIN32
+#define strtok_r(s,d,p) strtok_s(s,d,p)
+#endif
+
+/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
+#ifndef HAVE_STRLCAT
+size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
+#endif
+#ifndef HAVE_STRLCPY
+size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
+#endif
 
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */

@@ -148,6 +148,7 @@ print_libgps_VERSION:
 
 libgps_c_sources = \
 	ais_json.c \
+	daemon.c \
 	gpsutils.c \
 	geoid.c \
 	gpsdclient.c \
@@ -162,11 +163,6 @@ libgps_c_sources = \
 	rtcm2_json.c \
 	shared_json.c \
 	strl.c
-
-
-if NO_DAEMON3
-libgps_c_sources += daemon.c
-endif
 
 libgpsd_c_sources = \
 	bits.c \

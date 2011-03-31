@@ -146,8 +146,6 @@ AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(strlcat)
 AC_CHECK_FUNCS(daemon)
 
-AM_CONDITIONAL([NO_DAEMON3], [test x"ac_cv_func_daemon" != xyes])
-
 AC_HEADER_TIME
 AC_STRUCT_TIMEZONE
 
