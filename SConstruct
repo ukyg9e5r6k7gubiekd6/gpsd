@@ -72,7 +72,7 @@ opts.AddVariables(
     BoolVariable("ipv6",          "build IPv6 support", True),
     )
 
-env = Environment(tools=["tar"], options=opts)
+env = Environment(tools=["default", "tar"], options=opts)
 
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
