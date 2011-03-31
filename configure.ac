@@ -474,6 +474,8 @@ dnl Everything from her down until the final AC_OUTPUT is boilerplate setup
 dnl of boolean config options.
 dnl
 
+# Protocols
+
 AC_ARG_ENABLE(nmea,
   AC_HELP_STRING([--disable-nmea],
 		 [disable NMEA support]),
@@ -486,98 +488,14 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(oncore,
-  AC_HELP_STRING([--disable-oncore],
-		 [disable Motorola OnCore chipset support]),
-  [ac_oncore=$enableval], [ac_oncore=yes])
-AC_MSG_CHECKING([for Motorola OnCore support])
-if test x"$ac_oncore" = "xyes"; then
+AC_ARG_ENABLE(aivdm,
+  AC_HELP_STRING([--disable-aivdm],
+		 [disable AIVDM support]),
+  [ac_aivdm=$enableval], [ac_aivdm=yes])
+AC_MSG_CHECKING([for AIVDM support])
+if test x"$ac_aivdm" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([ONCORE_ENABLE], 1, [Motorola OnCore chipset support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(sirf,
-  AC_HELP_STRING([--disable-sirf],
-		 [disable SiRF chipset support]),
-  [ac_sirf=$enableval], [ac_sirf=yes])
-AC_MSG_CHECKING([for SiRF support])
-if test x"$ac_sirf" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([SIRF_ENABLE], 1, [SiRF chipset support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(superstar2,
-  AC_HELP_STRING([--disable-superstar2],
-		 [disable Novatel SuperStarII chipset support]),
-  [ac_superstar2=$enableval], [ac_superstar2=yes])
-AC_MSG_CHECKING([for SuperStarII support])
-if test x"$ac_superstar2" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([SUPERSTAR2_ENABLE], 1, [SuperStarII chipset support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(tsip,
-  AC_HELP_STRING([--disable-tsip],
-		 [disable Trimble TSIP support]),
-  [ac_tsip=$enableval], [ac_tsip=yes])
-AC_MSG_CHECKING([for Trimble TSIP support])
-if test x"$ac_tsip" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([TSIP_ENABLE], 1, [Trimble TSIP support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(fv18,
-  AC_HELP_STRING([--disable-fv18],
-		 [disable San Jose Navigation FV-18 support]),
-  [ac_fv18=$enableval], [ac_fv18=yes])
-AC_MSG_CHECKING([for FV-18 support])
-if test x"$ac_fv18" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([FV18_ENABLE], 1, [San Jose Navigation FV-18 support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(tripmate,
-  AC_HELP_STRING([--disable-tripmate],
-		 [disable DeLorme TripMate support]),
-  [ac_tripmate=$enableval], [ac_tripmate=yes])
-AC_MSG_CHECKING([for Tripmate support])
-if test x"$ac_tripmate" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([TRIPMATE_ENABLE], 1, [DeLorme TripMate support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(earthmate,
-  AC_HELP_STRING([--disable-earthmate],
-		 [disable DeLorme EarthMate Zodiac support]),
-  [ac_earthmate=$enableval], [ac_earthmate=yes])
-AC_MSG_CHECKING([for EarthMate support])
-if test x"$ac_earthmate" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([EARTHMATE_ENABLE], 1, [DeLorme EarthMate Zodiac support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(itrax,
-  AC_HELP_STRING([--disable-itrax],
-		 [disable iTrax hardware support]),
-  [ac_itrax=$enableval], [ac_itrax=yes])
-AC_MSG_CHECKING([for iTrax support])
-if test x"$ac_itrax" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([ITRAX_ENABLE], 1, [iTrax chipset support])
+  AC_DEFINE([AIVDM_ENABLE], 1, [AIVDM protocol support)])
 else
   AC_MSG_RESULT([no])
 fi
@@ -594,14 +512,50 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(navcom,
-  AC_HELP_STRING([--disable-navcom],
-		 [disable Navcom support]),
-  [ac_navcom=$enableval], [ac_navcom=yes])
-AC_MSG_CHECKING([for Navcom support])
-if test x"$ac_navcom" = "xyes"; then
+AC_ARG_ENABLE(earthmate,
+  AC_HELP_STRING([--disable-earthmate],
+		 [disable DeLorme EarthMate Zodiac support]),
+  [ac_earthmate=$enableval], [ac_earthmate=yes])
+AC_MSG_CHECKING([for EarthMate support])
+if test x"$ac_earthmate" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([NAVCOM_ENABLE], 1, [Navcom support])
+  AC_DEFINE([EARTHMATE_ENABLE], 1, [DeLorme EarthMate Zodiac support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(evermore,
+  AC_HELP_STRING([--disable-evermore],
+		 [disable EverMore binary support]),
+  [ac_evermore=$enableval], [ac_evermore=yes])
+AC_MSG_CHECKING([for EverMore support])
+if test x"$ac_evermore" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([EVERMORE_ENABLE], 1, [EverMore binary support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(gpsclock,
+  AC_HELP_STRING([--disable-gpsclock],
+		 [disable GPSClock support]),
+  [ac_gpsclock=$enableval], [ac_gpsclock=yes])
+AC_MSG_CHECKING([for GPSClock support])
+if test x"$ac_gpsclock" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([GPSCLOCK_ENABLE], 1, [GPSclock chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(fv18,
+  AC_HELP_STRING([--disable-fv18],
+		 [disable San Jose Navigation FV-18 support]),
+  [ac_fv18=$enableval], [ac_fv18=yes])
+AC_MSG_CHECKING([for FV-18 support])
+if test x"$ac_fv18" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([FV18_ENABLE], 1, [San Jose Navigation FV-18 support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -630,42 +584,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(tnt,
-  AC_HELP_STRING([--disable-tnt],
-		 [disable True North Technologies support]),
-  [ac_tnt=$enableval], [ac_tnt=yes])
-AC_MSG_CHECKING([for True North support])
-if test x"$ac_tnt" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([TNT_ENABLE], 1, [True North Technologies support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(oceanserver,
-  AC_HELP_STRING([--disable-oceanserver],
-		 [disable OceanServer support]),
-  [ac_oceanserver=$enableval], [ac_oceanserver=yes])
-AC_MSG_CHECKING([for OceanServer support])
-if test x"$ac_oceanserver" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([OCEANSERVER_ENABLE], 1, [OceanServer support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(ubx,
-  AC_HELP_STRING([--disable-ubx],
-		 [disable UBX Protocol support]),
-  [ac_ubx=$enableval], [ac_ubx=yes])
-AC_MSG_CHECKING([for UBX support])
-if test x"$ac_ubx" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([UBX_ENABLE], 1, [UBX Protocol support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 AC_ARG_ENABLE(geostar,
   AC_HELP_STRING([--disable-geostar],
 		 [disable Geostar Protocol support]),
@@ -678,14 +596,14 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(evermore,
-  AC_HELP_STRING([--disable-evermore],
-		 [disable EverMore binary support]),
-  [ac_evermore=$enableval], [ac_evermore=yes])
-AC_MSG_CHECKING([for EverMore support])
-if test x"$ac_evermore" = "xyes"; then
+AC_ARG_ENABLE(itrax,
+  AC_HELP_STRING([--disable-itrax],
+		 [disable iTrax hardware support]),
+  [ac_itrax=$enableval], [ac_itrax=yes])
+AC_MSG_CHECKING([for iTrax support])
+if test x"$ac_itrax" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([EVERMORE_ENABLE], 1, [EverMore binary support])
+  AC_DEFINE([ITRAX_ENABLE], 1, [iTrax chipset support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -702,14 +620,50 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(gpsclock,
-  AC_HELP_STRING([--disable-gpsclock],
-		 [disable GPSClock support]),
-  [ac_gpsclock=$enableval], [ac_gpsclock=yes])
-AC_MSG_CHECKING([for GPSClock support])
-if test x"$ac_gpsclock" = "xyes"; then
+AC_ARG_ENABLE(ntrip,
+  AC_HELP_STRING([--disable-ntrip],
+		 [disable NTRIP support]),
+  [ac_ntrip=$enableval], [ac_ntrip=yes])
+AC_MSG_CHECKING([for NTRIP support])
+if test x"$ac_ntrip" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([GPSCLOCK_ENABLE], 1, [GPSclock chipset support])
+  AC_DEFINE([NTRIP_ENABLE], 1, [NTRIP support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(navcom,
+  AC_HELP_STRING([--disable-navcom],
+		 [disable Navcom support]),
+  [ac_navcom=$enableval], [ac_navcom=yes])
+AC_MSG_CHECKING([for Navcom support])
+if test x"$ac_navcom" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([NAVCOM_ENABLE], 1, [Navcom support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(oceanserver,
+  AC_HELP_STRING([--disable-oceanserver],
+		 [disable OceanServer support]),
+  [ac_oceanserver=$enableval], [ac_oceanserver=yes])
+AC_MSG_CHECKING([for OceanServer support])
+if test x"$ac_oceanserver" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([OCEANSERVER_ENABLE], 1, [OceanServer support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(oncore,
+  AC_HELP_STRING([--disable-oncore],
+		 [disable Motorola OnCore chipset support]),
+  [ac_oncore=$enableval], [ac_oncore=yes])
+AC_MSG_CHECKING([for Motorola OnCore support])
+if test x"$ac_oncore" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([ONCORE_ENABLE], 1, [Motorola OnCore chipset support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -738,26 +692,100 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(ntrip,
-  AC_HELP_STRING([--disable-ntrip],
-		 [disable NTRIP support]),
-  [ac_ntrip=$enableval], [ac_ntrip=yes])
-AC_MSG_CHECKING([for NTRIP support])
-if test x"$ac_ntrip" = "xyes"; then
+AC_ARG_ENABLE(sirf,
+  AC_HELP_STRING([--disable-sirf],
+		 [disable SiRF chipset support]),
+  [ac_sirf=$enableval], [ac_sirf=yes])
+AC_MSG_CHECKING([for SiRF support])
+if test x"$ac_sirf" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([NTRIP_ENABLE], 1, [NTRIP support])
+  AC_DEFINE([SIRF_ENABLE], 1, [SiRF chipset support])
 else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(aivdm,
-  AC_HELP_STRING([--disable-aivdm],
-		 [disable AIVDM support]),
-  [ac_aivdm=$enableval], [ac_aivdm=yes])
-AC_MSG_CHECKING([for AIVDM support])
-if test x"$ac_aivdm" = "xyes"; then
+AC_ARG_ENABLE(superstar2,
+  AC_HELP_STRING([--disable-superstar2],
+		 [disable Novatel SuperStarII chipset support]),
+  [ac_superstar2=$enableval], [ac_superstar2=yes])
+AC_MSG_CHECKING([for SuperStarII support])
+if test x"$ac_superstar2" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([AIVDM_ENABLE], 1, [AIVDM protocol support)])
+  AC_DEFINE([SUPERSTAR2_ENABLE], 1, [SuperStarII chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(tripmate,
+  AC_HELP_STRING([--disable-tripmate],
+		 [disable DeLorme TripMate support]),
+  [ac_tripmate=$enableval], [ac_tripmate=yes])
+AC_MSG_CHECKING([for Tripmate support])
+if test x"$ac_tripmate" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([TRIPMATE_ENABLE], 1, [DeLorme TripMate support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(tnt,
+  AC_HELP_STRING([--disable-tnt],
+		 [disable True North Technologies support]),
+  [ac_tnt=$enableval], [ac_tnt=yes])
+AC_MSG_CHECKING([for True North support])
+if test x"$ac_tnt" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([TNT_ENABLE], 1, [True North Technologies support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(tsip,
+  AC_HELP_STRING([--disable-tsip],
+		 [disable Trimble TSIP support]),
+  [ac_tsip=$enableval], [ac_tsip=yes])
+AC_MSG_CHECKING([for Trimble TSIP support])
+if test x"$ac_tsip" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([TSIP_ENABLE], 1, [Trimble TSIP support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(ubx,
+  AC_HELP_STRING([--disable-ubx],
+		 [disable UBX Protocol support]),
+  [ac_ubx=$enableval], [ac_ubx=yes])
+AC_MSG_CHECKING([for UBX support])
+if test x"$ac_ubx" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([UBX_ENABLE], 1, [UBX Protocol support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+# Daemon features
+
+AC_ARG_ENABLE(socket-export,
+  AC_HELP_STRING([--disable-socket-export],
+		 [disable data export over sockets]),
+  [ac_socket_export=$enableval], [ac_socket_export=yes])
+AC_MSG_CHECKING([for socket-export support])
+if test x"$ac_socket_export" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([SOCKET_EXPORT_ENABLE], 1, [socket-export support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(shm-export,
+  AC_HELP_STRING([--disable-shm-export],
+		 [disable export via shared memory]),
+  [ac_shm_export=$enableval], [ac_shm_export=yes])
+AC_MSG_CHECKING([for shared-memory-export support])
+if test x"$ac_shm_export" == "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([SHM_EXPORT_ENABLE], 1, [shared-memory-export support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -770,42 +798,6 @@ AC_MSG_CHECKING([for latency timing support])
 if test x"$ac_timing" = "xyes"; then
   AC_MSG_RESULT([yes])
   AC_DEFINE([TIMING_ENABLE], 1, [latency timing support)])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(clientdebug,
-  AC_HELP_STRING([--disable-clientdebug],
-		 [disable client debugging support]),
-  [ac_clientdebug=$enableval], [ac_clientdebug=yes])
-AC_MSG_CHECKING([for client debugging support])
-if test x"$ac_clientdebug" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([CLIENTDEBUG_ENABLE], 1, [client debugging support)])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(oldstyle,
-  AC_HELP_STRING([--disable-oldstyle],
-		 [disable oldstyle (pre-JSON) protocol support]),
-  [ac_oldstyle=$enableval], [ac_oldstyle=yes])
-AC_MSG_CHECKING([for oldstyle support])
-if test x"$ac_oldstyle" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([OLDSTYLE_ENABLE], 1, [oldstyle (pre-JSON) protocol support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(control-socket,
-  AC_HELP_STRING([--disable-control-socket],
-		 [disable the control socket for hotplug notifications]),
-  [ac_control_socket=$enableval], [ac_control_socket=yes])
-AC_MSG_CHECKING([for control-socket support])
-if test x"$ac_control_socket" = "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([CONTROL_SOCKET_ENABLE], 1, [control-socket support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -834,26 +826,14 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_ARG_ENABLE(socket-export,
-  AC_HELP_STRING([--disable-socket-export],
-		 [disable data export over sockets]),
-  [ac_socket_export=$enableval], [ac_socket_export=yes])
-AC_MSG_CHECKING([for socket-export support])
-if test x"$ac_socket_export" = "xyes"; then
+AC_ARG_ENABLE(control-socket,
+  AC_HELP_STRING([--disable-control-socket],
+		 [disable the control socket for hotplug notifications]),
+  [ac_control_socket=$enableval], [ac_control_socket=yes])
+AC_MSG_CHECKING([for control-socket support])
+if test x"$ac_control_socket" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([SOCKET_EXPORT_ENABLE], 1, [socket-export support])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_ARG_ENABLE(shm-export,
-  AC_HELP_STRING([--disable-shm-export],
-		 [disable export via shared memory]),
-  [ac_shm_export=$enableval], [ac_shm_export=yes])
-AC_MSG_CHECKING([for shared-memory-export support])
-if test x"$ac_shm_export" == "xyes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([SHM_EXPORT_ENABLE], 1, [shared-memory-export support])
+  AC_DEFINE([CONTROL_SOCKET_ENABLE], 1, [control-socket support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -902,6 +882,32 @@ AC_MSG_CHECKING([for IPv6 support])
 if test x"$ac_ipv6" = "xyes"; then
   AC_MSG_RESULT([yes])
   AC_DEFINE([IPV6_ENABLE], 1, [IPv6 support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+# Client features
+
+AC_ARG_ENABLE(clientdebug,
+  AC_HELP_STRING([--disable-clientdebug],
+		 [disable client debugging support]),
+  [ac_clientdebug=$enableval], [ac_clientdebug=yes])
+AC_MSG_CHECKING([for client debugging support])
+if test x"$ac_clientdebug" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([CLIENTDEBUG_ENABLE], 1, [client debugging support)])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE(oldstyle,
+  AC_HELP_STRING([--disable-oldstyle],
+		 [disable oldstyle (pre-JSON) protocol support]),
+  [ac_oldstyle=$enableval], [ac_oldstyle=yes])
+AC_MSG_CHECKING([for oldstyle support])
+if test x"$ac_oldstyle" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([OLDSTYLE_ENABLE], 1, [oldstyle (pre-JSON) protocol support])
 else
   AC_MSG_RESULT([no])
 fi
