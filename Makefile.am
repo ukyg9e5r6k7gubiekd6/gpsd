@@ -215,7 +215,7 @@ $(srcdir)/gpsutils.c $(srcdir)/gpsd.c: $(BUILT_SOURCES)
 
 packet_names.h: packet_states.h
 	rm -f packet_names.h && \
-	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h && \
+	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' <`test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h >packet_names.h && \
 	chmod a-w packet_names.h
 
 gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
