@@ -359,7 +359,7 @@ env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 	cat $TARGET-tail >>$TARGET &&\
 	chmod a-w $TARGET""")
 Depends(target="gpsd.h", dependency="gpsd.h-head") 
-Depends(target="gpd.hc", dependency="gpsd.h-tail") 
+Depends(target="gpsd.h", dependency="gpsd.h-tail") 
 
 # TO-DO: The '.' in the command may break out-of-directory builds.
 env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
