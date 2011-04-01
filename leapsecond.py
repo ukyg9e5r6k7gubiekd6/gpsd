@@ -133,7 +133,7 @@ def save_leapseconds(outfile):
 def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
     leapsecs = []
-    for line in open(filename):
+    for line in open(str(filename)):
         leapsecs.append(float(line.strip()))
     return leapsecs
 
@@ -146,8 +146,7 @@ def make_leapsecond_include(infile):
         else:
             return str(i)
     year = time.strftime("%Y", time.localtime(time.time()))
-    sys.stdout.write("#define CENTURY_BASE\t%s00\n" % year[:2])
-    sys.stdout.write("#define LEAPSECOND_NOW\t%d\n" % (len(leapsecs)-2)) 
+    return ("#define CENTURY_BASE\t%s00\n" % year[:2]) + ("#define LEAPSECOND_NOW\t%d\n" % (len(leapsecs)-2))
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
@@ -252,7 +251,7 @@ if __name__ == '__main__':
             graph_history(val)
             raise SystemExit, 0
         elif (switch == '-h'):  # make leapsecond include
-            make_leapsecond_include(val)
+            sys.stdout.write(make_leapsecond_include(val))
             raise SystemExit, 0
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
             print rfc822_to_unix(val)
