@@ -269,7 +269,6 @@ compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"crc24q.c",
 	"gpsd_json.c",
 	"isgps.c",
-	"gpsd_maskdump.c",
 	"timebase.c",
 	"libgpsd_core.c",
 	"net_dgpsip.c",
