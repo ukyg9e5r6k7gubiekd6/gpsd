@@ -451,7 +451,7 @@ static gps_mask_t geostar_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t geostar_control_send(struct gps_device_t *session,
 				 char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
@@ -460,7 +460,7 @@ static ssize_t geostar_control_send(struct gps_device_t *session,
 				(unsigned int)buf[0],
 				(unsigned char *)buf + 1, (buflen - 1)/4);
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 static void geostar_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -509,7 +509,7 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
     /*@+shiftimplementation -ignoresigns@*/
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool geostar_speed_switch(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
@@ -559,7 +559,7 @@ static void geostar_mode(struct gps_device_t *session, int mode)
     }
     /*@+shiftimplementation@*/
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 #ifdef NTPSHM_ENABLE
 static double geostar_ntp_offset(struct gps_device_t *session UNUSED)
@@ -582,15 +582,15 @@ const struct gps_type_t geostar_binary =
     .parse_packet   = geostar_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
     .event_hook     = geostar_event_hook,	/* fire on various lifetime events */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = geostar_speed_switch,/* change baud rate */
     .mode_switcher  = geostar_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = geostar_control_send,/* how to send commands */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = geostar_ntp_offset,
 #endif /* NTPSHM_ENABLE */

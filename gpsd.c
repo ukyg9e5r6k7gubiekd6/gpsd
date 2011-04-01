@@ -868,7 +868,7 @@ static bool awaken(struct gps_device_t *device)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool privileged_user(struct gps_device_t *device)
 /* is this channel privileged to change a device's behavior? */
 {
@@ -935,7 +935,7 @@ static void set_serial(struct gps_device_t *device,
     }
     /* *INDENT-ON* */
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static void json_devicelist_dump(char *reply, size_t replylen)
 {
@@ -1048,7 +1048,7 @@ static void handle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf + 1, &devconf, &end);
 	    if (end == NULL)
@@ -1148,10 +1148,10 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	    /*@+branchstate@*/
-#else /* ALLOW_RECONFIGURE */
+#else /* RECONFIGURE_ENABLE */
 	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 			   "{\"class\":\"ERROR\",\"message\":\"Device configuration support not compiled.\"}\r\n");
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 	}
 	/* dump a response for each selected channel */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
@@ -1754,7 +1754,7 @@ int main(int argc, char *argv[])
 	    break;
 	case 'l':		/* list known device types and exit */
 	    for (dp = gpsd_drivers; *dp; dp++) {
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 		if ((*dp)->mode_switcher != NULL)
 		    (void)fputs("n\t", stdout);
 		else
@@ -1767,7 +1767,7 @@ int main(int argc, char *argv[])
 		    (void)fputs("c\t", stdout);
 		else
 		    (void)fputc('\t', stdout);
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 		(void)puts((*dp)->type_name);
 	    }
 	    exit(0);

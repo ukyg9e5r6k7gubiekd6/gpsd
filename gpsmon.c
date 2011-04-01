@@ -274,7 +274,7 @@ static void packet_dump(const char *buf, size_t buflen)
     }
 }
 
-#if defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE)
+#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
 static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 {
     if (packetwin != NULL) {
@@ -298,9 +298,9 @@ static void announce_log(/*@in@*/ const char *str)
        (void)fprintf(logfile, ">>>%s\n", str);
    }
 }
-#endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
+#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 {
     if ((controlfd == -1) || (session.gpsdata.dev.path[0] == '\0'))
@@ -368,7 +368,7 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 	return (st > 0 && (size_t) st == len);
     }
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 /*****************************************************************************
  *
@@ -459,9 +459,9 @@ static void onsig(int sig UNUSED)
 
 int main(int argc, char **argv)
 {
-#if defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE)
+#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
     unsigned int v;
-#endif /* defined(ALLOW_CONTROLSEND) || defined(ALLOW_RECONFIGURE) */
+#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
     struct fixsource_t source;
@@ -491,7 +491,7 @@ int main(int argc, char **argv)
 	    for (active = monitor_objects; *active; active++) {
 		(void)fputs("i l q ^S ^Q", stdout);
 		(void)fputc(' ', stdout);
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 		if ((*active)->driver->mode_switcher != NULL)
 		    (void)fputc('n', stdout);
 		else
@@ -507,13 +507,13 @@ int main(int argc, char **argv)
 		else
 		    (void)fputc(' ', stdout);
 		(void)fputc(' ', stdout);
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
 		if ((*active)->driver->control_send != NULL)
 		    (void)fputc('x', stdout);
 		else
 		    (void)fputc(' ', stdout);
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 		(void)fputc(' ', stdout);
 		if ((*active)->command != NULL)
 		    (void)fputc('+', stdout);
@@ -757,7 +757,7 @@ int main(int argc, char **argv)
 		    assert(status == COMMAND_UNKNOWN);
 		}
 		switch (line[0]) {
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 		case 'c':	/* change cycle time */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
@@ -797,7 +797,7 @@ int main(int argc, char **argv)
 			/*@ +sefparams @*/
 		    }
 		    break;
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 		case 'i':	/* start probing for subtype */
 		    if (active == NULL)
@@ -828,7 +828,7 @@ int main(int argc, char **argv)
 					  ">>> Logging to %s on", logfile);
 		    break;
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 		case 'n':	/* change mode */
 		    /* if argument not specified, toggle */
 		    if (strcspn(line, "01") == strlen(line)) {
@@ -876,12 +876,12 @@ int main(int argc, char **argv)
 			/*@ +sefparams @*/
 		    }
 		    break;
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 		case 'q':	/* quit */
 		    goto quit;
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 		case 's':	/* change speed */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
@@ -965,7 +965,7 @@ int main(int argc, char **argv)
 			/*@ +sefparams @*/
 		    }
 		    break;
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 		case 't':	/* force device type */
 		    if (strlen(arg) > 0) {
@@ -995,7 +995,7 @@ int main(int argc, char **argv)
 		    }
 		    break;
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 		case 'x':	/* send control packet */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
@@ -1025,7 +1025,7 @@ int main(int argc, char **argv)
 			monitor_complain("Raw send failed.");
 		    /*@ +compdef @*/
 		    break;
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 		default:
 		    monitor_complain("Unknown command");

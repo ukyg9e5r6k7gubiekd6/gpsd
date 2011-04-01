@@ -1130,7 +1130,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 
 /*@ -charint @*/
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static void settle(void)
 {
     struct timespec delay, rem;
@@ -1171,9 +1171,9 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	settle();		// wait 333mS, essential!
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t garmin_control_send(struct gps_device_t *session,
 				   char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
@@ -1184,7 +1184,7 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
     /*@ +mayaliasunique @*/
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 #ifdef NTPSHM_ENABLE
 static double garmin_ntp_offset(struct gps_device_t *session)
@@ -1348,15 +1348,15 @@ const struct gps_type_t garmin_usb_binary_old =
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .event_hook     = garmin_event_hook,/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
@@ -1377,15 +1377,15 @@ const struct gps_type_t garmin_usb_binary =
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .event_hook     = garmin_event_hook,/* lifetime ebent handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,	        /* Garmin USB Binary has no NMEA */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
@@ -1405,15 +1405,15 @@ const struct gps_type_t garmin_ser_binary =
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .event_hook     = NULL,	        /* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */

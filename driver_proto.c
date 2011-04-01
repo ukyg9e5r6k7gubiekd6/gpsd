@@ -330,7 +330,7 @@ static bool _proto__probe_detect(struct gps_device_t *session)
    return false;
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 /**
  * Write data to the device, doing any required padding or checksumming
  */
@@ -357,9 +357,9 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static void _proto__event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -468,7 +468,7 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = MODE_BINARY;
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 #ifdef NTPSHM_ENABLE
 static double _proto_ntp_offset(struct gps_device_t *session)
@@ -528,7 +528,7 @@ const struct gps_type_t _proto__binary = {
     .rtcm_writer      = pass_rtcm,
     /* fire on various lifetime events */
     .event_hook       = _proto__event_hook,
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     /* Speed (baudrate) switch */
     .speed_switcher   = _proto__set_speed,
     /* Switch to NMEA mode */
@@ -537,11 +537,11 @@ const struct gps_type_t _proto__binary = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device */
     .min_cycle        = 1,
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = _proto__control_send,
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = _proto_ntp_offset,
 #endif /* NTPSHM_ENABLE */

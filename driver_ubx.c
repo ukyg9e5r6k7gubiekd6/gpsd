@@ -570,7 +570,7 @@ bool ubx_write(struct gps_device_t * session,
     return (ok);
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 				size_t data_len)
 /* not used by gpsd, it's for gpsctl and friends */
@@ -580,7 +580,7 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 		     (unsigned short)(data_len - 2)) ? ((ssize_t) (data_len +
 								   7)) : -1;
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 static void ubx_catch_model(struct gps_device_t *session, unsigned char *buf,
 			    size_t len)
@@ -663,7 +663,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 {
     int i;
@@ -756,7 +756,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 
     return ubx_write(session, 0x06, 0x08, msg, 6);	/* CFG-RATE */
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 /* This is everything we export */
 /* *INDENT-OFF* */
@@ -771,15 +771,15 @@ const struct gps_type_t ubx_binary = {
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = gpsd_write,      /* RTCM handler (using default routine) */
     .event_hook       = ubx_event_hook,	/* Fiew in variious lifetime events */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send     = ubx_control_send,	/* no control sender yet */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

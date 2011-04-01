@@ -269,16 +269,16 @@ struct gps_type_t {
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, const char *rtcmbuf, size_t rtcmbytes);
     /*@null@*/void (*event_hook)(struct gps_device_t *session, event_t event);
-#ifdef ALLOW_RECONFIGURE 
+#ifdef RECONFIGURE_ENABLE 
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, 
 				     speed_t speed, char parity, int stopbits);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
     double min_cycle;
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     /*@null@*/double (*ntp_offset)(struct gps_device_t *session);
 #endif /* NTPSHM_ENABLE */

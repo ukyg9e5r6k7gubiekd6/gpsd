@@ -105,15 +105,15 @@ const struct gps_type_t unknown = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* write RTCM data straight */
     .event_hook     = NULL,		/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -246,7 +246,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#if defined(ALLOW_RECONFIGURE) && defined(BINARY_ENABLE)
+#if defined(RECONFIGURE_ENABLE) && defined(BINARY_ENABLE)
 static void nmea_mode_switch(struct gps_device_t *session, int mode)
 {
     /*
@@ -268,7 +268,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 	/*@+shiftnegative@*/
     }
 }
-#endif /* defined(ALLOW_RECONFIGURE) && defined(BINARY_ENABLE) */
+#endif /* defined(RECONFIGURE_ENABLE) && defined(BINARY_ENABLE) */
 
 /* *INDENT-OFF* */
 const struct gps_type_t nmea = {
@@ -282,7 +282,7 @@ const struct gps_type_t nmea = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
 #ifdef BINARY_ENABLE
     .mode_switcher  = nmea_mode_switch,	/* maybe switchable if it was a SiRF */
@@ -291,10 +291,10 @@ const struct gps_type_t nmea = {
 #endif /* BINARY_ENABLE */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -308,7 +308,7 @@ const struct gps_type_t nmea = {
  *
  **************************************************************************/
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static void garmin_mode_switch(struct gps_device_t *session, int mode)
 /* only does anything in one direction, going to Garmin binary driver */
 {
@@ -319,7 +319,7 @@ static void garmin_mode_switch(struct gps_device_t *session, int mode)
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static void garmin_nmea_event_hook(struct gps_device_t *session,
 				   event_t event)
@@ -388,15 +388,15 @@ const struct gps_type_t garmin = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
     .event_hook     = garmin_nmea_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,			/* no speed switcher */
     .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /*ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /*RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -450,15 +450,15 @@ const struct gps_type_t ashtech = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = ashtech_event_hook, /* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -501,15 +501,15 @@ const struct gps_type_t fv18 = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = fv18_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -554,15 +554,15 @@ const struct gps_type_t gpsclock = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = gpsclock_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* sample rate is fixed */
     .min_cycle      = 1,		/* sample rate is fixed */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -609,15 +609,15 @@ static const struct gps_type_t tripmate = {
     .parse_packet  = generic_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = gpsd_write,			/* send RTCM data straight */
     .event_hook    = tripmate_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .min_cycle     = 1,				/* no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -660,15 +660,15 @@ static const struct gps_type_t earthmate = {
     .parse_packet  = generic_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
     .event_hook    = earthmate_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
     .min_cycle     = 1,				/* no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -744,7 +744,7 @@ static bool tnt_send(struct gps_device_t *session, const char *fmt, ...)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool tnt_speed(struct gps_device_t *session,
 		      speed_t speed, char parity UNUSED, int stopbits UNUSED)
 {
@@ -762,7 +762,7 @@ static bool tnt_speed(struct gps_device_t *session,
     return tnt_send(session, "@B6=%d", i + 1)
 	&& tnt_send(session, "@F28.6=1");
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static void tnt_event_hook(struct gps_device_t *session, event_t event)
 /* TNT lifetime event hook */
@@ -787,15 +787,15 @@ const struct gps_type_t trueNorth = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
     .event_hook     = tnt_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = tnt_speed,	/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .min_cycle      = 0.5,		/* fixed at 20 samples per second */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = tnt_control_send,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -863,15 +863,15 @@ static const struct gps_type_t oceanServer = {
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
     .event_hook     = oceanserver_event_hook,
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -912,15 +912,15 @@ static const struct gps_type_t rtcm104v2 = {
     .parse_packet  = rtcm104v2_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .event_hook    = NULL,		/* no event_hook */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -961,15 +961,15 @@ static const struct gps_type_t rtcm104v3 = {
     .parse_packet  = rtcm104v3_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .event_hook    = NULL,		/* no event hook */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -996,15 +996,15 @@ static const struct gps_type_t garmintxt = {
     .parse_packet  = generic_parse_input,	/* how to parse one */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .event_hook    = NULL,		/* no event hook */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .min_cycle     = 1,			/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1094,7 +1094,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 {
     char buf[78];
@@ -1109,7 +1109,7 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
     (void)nmea_send(session, buf);	/* Fix interval */
     return true;
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 /* *INDENT-OFF* */
 const struct gps_type_t mtk3301 = {
@@ -1123,15 +1123,15 @@ const struct gps_type_t mtk3301 = {
     .parse_packet   = processMTK3301,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = mtk3301_rate_switcher,		/* sample rate switcher */
     .min_cycle      = 0.2,		/* max 5Hz */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1177,15 +1177,15 @@ static const struct gps_type_t aivdm = {
     .parse_packet     = aivdm_analyze,	/* how to analyze a packet */
     .rtcm_writer      = NULL,		/* don't send RTCM data,  */
     .event_hook       = NULL,		/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher   = NULL,		/* no speed switcher */
     .mode_switcher    = NULL,		/* no mode switcher */
     .rate_switcher    = NULL,		/* no rate switcher */
     .min_cycle        = 1,		/* max 1Hz */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send     = NULL,		/* no control sender */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no NTP communication */
 #endif /* NTPSHM_ ENABLE */

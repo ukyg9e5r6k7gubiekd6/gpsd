@@ -149,10 +149,10 @@ else:
     dbuslibs = ["dbus"]
     
 if not config.CheckLib('libbluez'):
-    confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
+    confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
 else:
-    confdefs.append("#define HAVE_BLUEZ 1\n\n")
+    confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     bluezlibs = ["bluez"]
 
 sys.stdout.writelines(confdefs)

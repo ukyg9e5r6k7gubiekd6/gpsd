@@ -486,7 +486,7 @@ static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t
 superstar2_control_send(struct gps_device_t *session, char *msg,
 			size_t msglen)
@@ -501,9 +501,9 @@ superstar2_control_send(struct gps_device_t *session, char *msg,
     /*@ -charint +mayaliasunique @*/
     return superstar2_write(session, session->msgbuf, session->msgbuflen);
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool superstar2_set_speed(struct gps_device_t *session,
 				 speed_t speed, char parity, int stopbits)
 {
@@ -522,7 +522,7 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 	return (superstar2_write(session, (char *)speed_msg, 7) == 7);
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
@@ -562,7 +562,7 @@ const struct gps_type_t superstar2_binary = {
     .rtcm_writer	= gpsd_write,
     /* Fire on various lifetime events */
     .event_hook		= superstar2_event_hook,
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     /* Speed (baudrate) switch */
     .speed_switcher	= superstar2_set_speed,
     /* Switch to NMEA mode */
@@ -571,11 +571,11 @@ const struct gps_type_t superstar2_binary = {
     .rate_switcher	= NULL,
     /* Minimum cycle time (not used) */
     .min_cycle	        = 1,
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and trailer */
     .control_send	= superstar2_control_send,
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

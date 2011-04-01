@@ -472,7 +472,7 @@ static double oncore_ntp_offset(struct gps_device_t *session UNUSED)
 }
 #endif /* NTPSHM_ENABLE */
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool oncore_set_speed(struct gps_device_t *session UNUSED,
 			     speed_t speed UNUSED,
 			     char parity UNUSED, int stopbits UNUSED)
@@ -505,7 +505,7 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
@@ -540,16 +540,16 @@ const struct gps_type_t oncore_binary = {
     .parse_packet     = oncore_parse_input,	/* packet parser */
     .rtcm_writer      = gpsd_write,		/* device accepts RTCM */
     .event_hook     = oncore_event_hook,	/* lifetime event hook */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher   = oncore_set_speed,	/* no speed setter */
     .mode_switcher    = oncore_set_mode,	/* no mode setter */
     .rate_switcher    = NULL,			/* no speed setter */
     .min_cycle        = 1,			/* 1Hz */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = oncore_control_send,	/* to send control strings */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset = oncore_ntp_offset,		/* NTP offset array */
 #endif /* NTPSHM_ENABLE */

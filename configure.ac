@@ -310,7 +310,7 @@ AC_ARG_ENABLE(bluetooth, AC_HELP_STRING([--enable-bluetooth], [Enable support fo
 AC_MSG_CHECKING([for BlueZ support])
 if test x"$ac_bluetooth" = x"yes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_BLUEZ,1,[Define if we have Bluez])
+    AC_DEFINE(HAVE_LIBBLUEZ,1,[Define if we have Bluez])
     # Older versions of autotools barf and die on this.
     #PKG_CHECK_MODULES(BLUEZ, bluez )
     BLUEZ_CFLAGS=`pkg-config --cflags bluez`
@@ -847,7 +847,7 @@ AC_ARG_ENABLE(reconfigure,
 AC_MSG_CHECKING([for device reconfiguration is allowed])
 if test x"$ac_reconfigure" != "xno"; then
   AC_MSG_RESULT([$ac_reconfigure])
-  AC_DEFINE([ALLOW_RECONFIGURE], 1, [Allow gpsd to reconfigure device])
+  AC_DEFINE([RECONFIGURE_ENABLE], 1, [Allow gpsd to reconfigure device])
 else
   AC_MSG_RESULT([no])
 fi
@@ -859,7 +859,7 @@ AC_ARG_ENABLE(controlsend,
 AC_MSG_CHECKING([for control sending is allowed])
 if test x"$ac_controlsend" != "xno"; then
   AC_MSG_RESULT([$ac_controlsend])
-  AC_DEFINE([ALLOW_CONTROLSEND], 1, [Allow gpsd to controlsend device])
+  AC_DEFINE([CONTROLSEND_ENABLE], 1, [Allow gpsd to controlsend device])
 else
   AC_MSG_RESULT([no])
 fi

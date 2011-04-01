@@ -155,7 +155,7 @@ static void navcom_cmd_0x1c(struct gps_device_t *session, uint8_t mode,
 		mode, length);
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 /* Serial Port Configuration */
 static void navcom_cmd_0x11(struct gps_device_t *session,
 			    uint8_t port_selection)
@@ -180,7 +180,7 @@ static void navcom_cmd_0x11(struct gps_device_t *session,
     gpsd_report(LOG_IO,
 		"Navcom: serial port selection: 0x%02x\n", port_selection);
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static void navcom_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -1190,7 +1190,7 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t navcom_control_send(struct gps_device_t *session,
 				   char *buf, size_t len)
 {
@@ -1211,9 +1211,9 @@ static ssize_t navcom_control_send(struct gps_device_t *session,
 				     LOG_RAW));
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool navcom_speed(struct gps_device_t *session,
 			 speed_t speed, char parity, int stopbits)
 {
@@ -1281,7 +1281,7 @@ static bool navcom_speed(struct gps_device_t *session,
 	return true;
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 /* this is everything we export */
 /* *INDENT-OFF* */
@@ -1297,15 +1297,15 @@ const struct gps_type_t navcom_binary =
     .parse_packet   = navcom_parse_input,	/* parse message packets */
     .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
     .event_hook     = navcom_event_hook,	/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */
     .min_cycle      = 1,			/* ignore, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = navcom_control_send,	/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

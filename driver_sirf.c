@@ -46,7 +46,7 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 /*@ +charint @*/
 /* message to enable:
  *   MID 7 Clock Status
@@ -117,7 +117,7 @@ static unsigned char enablemid52[] = {
 };
 
 /*@ -charint @*/
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 
 static gps_mask_t sirf_msg_debug(unsigned char *, size_t);
@@ -164,7 +164,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     return (ok);
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
 				 size_t len)
 {
@@ -184,9 +184,9 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
     /* *INDENT-ON* */
     /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
 {
@@ -290,7 +290,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
     session->back_to_nmea = false;
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 static ssize_t sirf_get(struct gps_device_t *session)
 {
@@ -405,12 +405,12 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     } else {
 	session->driver.sirf.driverstate |= SIRF_GE_232;
     }
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly) {
 	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
 	(void)sirf_write(session, enablemid52);
     }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
     if (strstr((char *)(buf + 1), "ES"))
 	gpsd_report(LOG_INF, "SiRF: Firmware has XTrac capability\n");
@@ -419,13 +419,13 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly && session->gpsdata.dev.baudrate >= 38400) {
         /* some USB devices are also too slow, no way to tell which ones */
 	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
 	(void)sirf_write(session, enablesubframe);
     }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
     gpsd_report(LOG_DATA, "SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);
     return DEVICEID_SET;
@@ -449,14 +449,14 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 
     gpsd_report(LOG_IO, "SiRF: NavData chan %u svid %u\n",chan,svid);
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly && session->gpsdata.dev.baudrate < 38400) {
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(LOG_WARN, 
 		"WARNING: SiRF: link too slow, disabling subframes.\n");
 	(void)sirf_write(session, disablesubframe);
     }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
     return gpsd_interpret_subframe_raw(session, svid, words);
 }
@@ -840,12 +840,12 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.degraded_timeout = (unsigned char)getub(buf, 10);
     session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly) {
 	gpsd_report(LOG_PROG, "SiRF: Setting Navigation Parameters\n");
 	(void)sirf_write(session, modecontrol);
     }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
     return 0;
 }
 
@@ -1348,15 +1348,15 @@ const struct gps_type_t sirf_binary =
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = gpsd_write,	/* send RTCM data straight */
     .event_hook     = sirfbin_event_hook,/* lifetime event handler */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switch */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = sirf_control_send,/* how to send a control string */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = sirf_ntp_offset,
 #endif /* NTP_SHM_ENABLE */

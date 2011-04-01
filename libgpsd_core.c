@@ -63,9 +63,9 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 			(*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/ session->device_type = *dp;
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 	    /* reconfiguration might be required */
 	    if (identified && session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session,
@@ -159,7 +159,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly
 	&& session->device_type != NULL
 	&& session->device_type->event_hook != NULL) {
@@ -170,7 +170,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 	    && session->device_type->mode_switcher != NULL)
 	    session->device_type->mode_switcher(session, 0);
     }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     (void)gpsd_close(session);

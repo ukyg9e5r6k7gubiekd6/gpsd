@@ -947,7 +947,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef ALLOW_CONTROLSEND
+#ifdef CONTROLSEND_ENABLE
 static ssize_t tsip_control_send(struct gps_device_t *session,
 				 char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
@@ -956,7 +956,7 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 				(unsigned int)buf[0],
 				(unsigned char *)buf + 1, buflen - 1);
 }
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
@@ -1039,7 +1039,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
 static bool tsip_speed_switch(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
@@ -1121,7 +1121,7 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 	gpsd_report(LOG_ERROR, "unknown mode %i requested\n", mode);
     }
 }
-#endif /* ALLOW_RECONFIGURE */
+#endif /* RECONFIGURE_ENABLE */
 
 #ifdef NTPSHM_ENABLE
 static double tsip_ntp_offset(struct gps_device_t *session UNUSED)
@@ -1145,15 +1145,15 @@ const struct gps_type_t tsip_binary =
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
     .event_hook     = tsip_event_hook,	/* fire on various lifetime events */
-#ifdef ALLOW_RECONFIGURE
+#ifdef RECONFIGURE_ENABLE
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = tsip_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .min_cycle      = 1,		/* not relevant, no rate switcher */
-#endif /* ALLOW_RECONFIGURE */
-#ifdef ALLOW_CONTROLSEND
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     .control_send   = tsip_control_send,/* how to send commands */
-#endif /* ALLOW_CONTROLSEND */
+#endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = tsip_ntp_offset,
 #endif /* NTPSHM_ENABLE */
