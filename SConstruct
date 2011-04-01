@@ -3,7 +3,6 @@
 EnsureSConsVersion(1,1,0)
 
 import os, sys, shutil, re, commands
-from leapsecond import save_leapseconds, make_leapsecond_include
 
 gpsd_version="3.0~dev"
 
@@ -342,27 +341,51 @@ python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
 
 #
 # Special dependencies to make generated files
+# TO-DO: Inline the Python scripts.
 #
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
-	rm -f $TARGET && \
-	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET && \
+	rm -f $TARGET &&\
+	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
 	chmod a-w $TARGET""")
 
-# This is not quite right.  It's unclear how to express the dependency
-# on gpsd.h-head and gpsd.h-tail
+env.Command(target="timebase.h", source="leapseconds.cache",
+            action='python leapsecond.py -h $SOURCE >$TARGET')
+ 
 env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
-	rm -f $TARGET && \
-	echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET && \
-	cat $TARGET-head >>$TARGET && \
-	cat gpsd_config.h >>$TARGET && \
-	cat $TARGET-tail >>$TARGET && \
+	rm -f $TARGET &&\
+	echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
+	cat $TARGET-head >>$TARGET &&\
+	cat gpsd_config.h >>$TARGET &&\
+	cat $TARGET-tail >>$TARGET &&\
 	chmod a-w $TARGET""")
+Depends(target="gpsd.h", dependency="gpsd.h-head") 
+Depends(target="gpd.hc", dependency="gpsd.h-tail") 
+
+<env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
+	rm -f $TARGET &&\
+        python $SOURCE -c $(srcdir) >$TARGET &&\
+        chmod a-w $TARGET''')
+Depends(target="gps_maskdump.c", dependency="gps.h") 
+Depends(target="gps_maskdump.c", dependency="gpsd.h") 
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
-	rm -f $TARGET && \
-	python jsongen.py --ais --target=parser >$TARGET && \
+	rm -f $TARGET &&\
+	python $SOURCE --ais --target=parser >$TARGET &&\
 	chmod a-w $TARGET''')
+
+# Under autotools this depended on Makefile. We need it to depend
+# on the state of the build-system variables.
+env.Command(target="revision.h", source="gpsd_config.h", action="""
+	rm -f $TARGET &&\
+	python -c 'from datetime import datetime; print \'#define REVISION \"%s\"\n\' % (datetime.now().isoformat())' >$TARGET &&\
+	chmod a-w revision.h""")
+
+# leapseconds.cache is a local cache for information on leapseconds issued
+# by the U.S. Naval observatory. It gets kept in the repository so we can
+# build without Internet access.
+env.Command(target="leapseconds.cache", source="leapsecond.py",
+            action='python $SOURCE -f $TARGET')
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
