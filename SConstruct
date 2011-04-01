@@ -142,7 +142,7 @@ if not config.CheckLib('libncurses'):
 else:
     ncurseslibs = ["ncurses"]
 
-# TODO: Check that this is 1.x.x, not 0.1 
+# TODO: Check that this is libusb 1.x.x, not 0.1 
 if not config.CheckLib('libusb'):
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -304,8 +304,7 @@ env.Default(compiled_gpsdlib, compiled_gpslib)
 gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
-## Programs to be built
-
+## Production programs
 gpsd = env.Program('gpsd', ['gpsd.c', 'gpsd_dbus.c'],
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs)
@@ -316,28 +315,30 @@ gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbuslibs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
 cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
 
-default_targets = [gpsd, gpsdecode, gpsctl, gpsmon, gpspipe, gpxlogger, lcdgps]
+default_targets = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
-    default_targets.append(cgps)
+    default_targets + [cgps, gpsmon]
 env.Default(*default_targets)
 
 # Test programs
 # TODO: conditionally add test_gpsmm and test_qgpsmm
-testprogs = ["test_float", "test_trig", "test_bits", "test_packet",
-             "test_mkgmtime", "test_geoid", "test_json"]
+test_float = env.Program('test_float', ['test_float.c'])
+test_geoid = env.Program('test_geoid', ['test_geoid.c'], LIBS=gpslibs)
+test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
+test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
+test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
+test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
+test_bits = env.Program('test_bits', ['test_bits.c','bits.c'], LIBS=gpslibs)
+testprogs = [test_float, test_trig, test_bits, test_packet,
+             test_mkgmtime, test_geoid, test_json]
 
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
 python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
 
-test_float = env.Program('testapps/test_float', ['test_float.c'])
-test_geoid = env.Program('testapps/test_geoid', ['test_geoid.c'], LIBS=gpslibs)
-test_json = env.Program('testapps/test_json', ['test_json.c'], LIBS=gpslibs)
-test_mkgmtime = env.Program('testapps/test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
-test_trig = env.Program('testapps/test_trig', ['test_trig.c'], LIBS=["m"])
-test_packet = env.Program('testapps/test_packet', ['test_packet.c'], LIBS=gpsdlibs)
-test_bits = env.Program('testapps/test_bits', ['test_bits.c','bits.c'], LIBS=gpslibs)
-
+#
+# Special dependencies to make generated files
+#
 
 # target = timebase.h
 # source = leapsonds.cache
