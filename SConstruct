@@ -258,6 +258,14 @@ testprogs = ["test_float", "test_trig", "test_bits", "test_packet",
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
 python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
 
+test_float = env.Program('test_float', ['test_float.c'])
+test_geoid = env.Program('test_geoid', ['test_geoid.c'], LIBS=gpslibs)
+test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
+test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
+test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
+test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
+test_bits = env.Program('test_bits', ['test_bits.c','bits.c'], LIBS=gpslibs)
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
