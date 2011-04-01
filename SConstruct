@@ -362,9 +362,10 @@ env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 Depends(target="gpsd.h", dependency="gpsd.h-head") 
 Depends(target="gpd.hc", dependency="gpsd.h-tail") 
 
+# TO-DO: The '.' in the command may break out-of-directory builds.
 env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
 	rm -f $TARGET &&\
-        python $SOURCE -c $(srcdir) >$TARGET &&\
+        python $SOURCE -c . >$TARGET &&\
         chmod a-w $TARGET''')
 Depends(target="gps_maskdump.c", dependency="gps.h") 
 Depends(target="gps_maskdump.c", dependency="gpsd.h") 
@@ -376,10 +377,10 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 
 # Under autotools this depended on Makefile. We need it to depend
 # on the state of the build-system variables.
-env.Command(target="revision.h", source="gpsd_config.h", action="""
+env.Command(target="revision.h", source="gpsd_config.h", action='''
 	rm -f $TARGET &&\
-	python -c 'from datetime import datetime; print "#define REVISION \"%s\"\n\" % (datetime.now().isoformat())' >$TARGET &&\
-	chmod a-w revision.h""")
+	python -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
+	chmod a-w revision.h''')
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
