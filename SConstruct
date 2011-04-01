@@ -141,46 +141,50 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
     
-if not config.CheckLib('libncurses'):
-    ncurseslibs = []
-else:
+if config.CheckLib('libncurses'):
     ncurseslibs = ["ncurses"]
+else:
+    ncurseslibs = []
 
-# TODO: Check that this is libusb 1.x.x, not 0.1 
-if not config.CheckLib('libusb'):
+if config.CheckLib('libusb-1.0'):
+    confdefs.append("#define HAVE_LIBUSB 1\n\n")
+    env.MergeFlags(['!pkg-config libusb-1.0 --cflags'])
+    usblibs = ["usb"]
+else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
-else:
-    confdefs.append("#define HAVE_LIBUSB 1\n\n")
-    usblibs = ["usb"]
     
-if not config.CheckLib('libpthread'):
+if config.CheckLib('libpthread'):
+    confdefs.append("#define HAVE_LIBPTHREAD 1\n\n")
+    # System library - no special flags
+    pthreadlibs = ["pthread"]
+else:
     confdefs.append("/* #undef HAVE_LIBPTHREAD */\n\n")
     pthreadlibs = []
-else:
-    confdefs.append("#define HAVE_LIBPTHREAD 1\n\n")
-    pthreadlibs = ["pthread"]
     
-if not config.CheckLib('librt'):
+if config.CheckLib('librt'):
+    confdefs.append("#define HAVE_LIBRT 1\n\n")
+    # System library - no special flags
+    rtlibs = ["rt"]
+else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
-else:
-    confdefs.append("#define HAVE_LIBRT 1\n\n")
-    rtlibs = ["rt"]
     
-if not config.CheckLib('libdbus'):
+if config.CheckLib('libdbus'):
+    confdefs.append("#define HAVE_LIBDBUS 1\n\n")
+    env.MergeFlags(['!pkg-config libdbus --cflags'])
+    dbuslibs = ["dbus"]
+else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
     dbuslibs = []
-else:
-    confdefs.append("#define HAVE_LIBDBUS 1\n\n")
-    dbuslibs = ["dbus"]
     
-if not config.CheckLib('libbluez'):
+if config.CheckLib('libbluez'):
+    confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
+    env.MergeFlags(['!pkg-config bluez --cflags'])
+    bluezlibs = ["bluez"]
+else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
-else:
-    confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
-    bluezlibs = ["bluez"]
 
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
 keys.sort()
