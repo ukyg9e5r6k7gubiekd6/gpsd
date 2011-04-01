@@ -181,7 +181,7 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
-env.Library(target="gps", source=[
+compiled_gpslib = env.Library(target="gps", source=[
 	"ais_json.c",
 	"daemon.c",
 	"gpsutils.c",
@@ -198,7 +198,7 @@ env.Library(target="gps", source=[
 	"strl.c",
 ])
 
-env.Library(target="gpsd", source=[
+compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"bits.c",
 	"bsd-base64.c",
 	"crc24q.c",
@@ -234,6 +234,8 @@ env.Library(target="gpsd", source=[
 	"driver_ubx.c",
 	"driver_zodiac.c",
 ])
+
+env.Default(compiled_gpsdlib, compiled_gpslib)
 
 # The libraries have dependencies on system libraries 
 
