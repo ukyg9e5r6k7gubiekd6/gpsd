@@ -6,6 +6,7 @@ import os, sys, shutil, re, commands
 from glob import glob
 from subprocess import Popen, PIPE, call
 from os import access, F_OK
+from leapsecond import save_leapseconds, make_leapsecond_include
 
 # Warn user of current set of build options.
 if os.path.exists('.scons-option-cache'):
@@ -169,6 +170,13 @@ for (key, value) in env.Dictionary().items():
 
 sys.stdout.writelines(confdefs)
 
+if not os.path.exists('leapseconds.cache'):
+    try:
+        print "retrieving leapseconds.cache"
+        save_leapseconds('leapseconds.cache')
+    except:
+        print "Failed to retrieve leapseconds"
+
 env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
@@ -265,6 +273,19 @@ test_mkgmtime = env.Program('testapps/test_mkgmtime', ['test_mkgmtime.c'], LIBS=
 test_trig = env.Program('testapps/test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('testapps/test_packet', ['test_packet.c'], LIBS=gpsdlibs)
 test_bits = env.Program('testapps/test_bits', ['test_bits.c','bits.c'], LIBS=gpslibs)
+
+
+# target = timebase.h
+# source = leapsonds.cache
+def build_timebase(target,source,env):
+    timebase_contents = make_leapsecond_include(source[0])
+    timebase_header = open(str(target[0]),"w")
+    timebase_header.write(timebase_contents)
+    timebase_header.close()
+
+env.Command( 'timebase.h', 'leapseconds.cache', build_timebase )
+
+env.Default('timebase.h')
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
