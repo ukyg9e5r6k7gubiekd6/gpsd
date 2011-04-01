@@ -362,7 +362,7 @@ env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 Depends(target="gpsd.h", dependency="gpsd.h-head") 
 Depends(target="gpd.hc", dependency="gpsd.h-tail") 
 
-<env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
+env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
 	rm -f $TARGET &&\
         python $SOURCE -c $(srcdir) >$TARGET &&\
         chmod a-w $TARGET''')
@@ -378,7 +378,7 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 # on the state of the build-system variables.
 env.Command(target="revision.h", source="gpsd_config.h", action="""
 	rm -f $TARGET &&\
-	python -c 'from datetime import datetime; print \'#define REVISION \"%s\"\n\' % (datetime.now().isoformat())' >$TARGET &&\
+	python -c 'from datetime import datetime; print "#define REVISION \"%s\"\n\" % (datetime.now().isoformat())' >$TARGET &&\
 	chmod a-w revision.h""")
 
 # leapseconds.cache is a local cache for information on leapseconds issued
