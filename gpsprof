@@ -75,7 +75,9 @@ class spaceplot:
         # Convert fixes to offsets from centroid in meters
         self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
         # Compute CEP(50%)
-        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
+        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.50)][:2])
+        cep95_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.95)][:2])
+        cep99_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.99)][:2])
         alt_sum = 0
         alt_num = 0
         alt_fixes = []
@@ -123,6 +125,8 @@ class spaceplot:
             fmt += 'set ytics nomirror\n'
             fmt += 'set y2tics\n'
         fmt += 'cep=%f\n' % self.d((0,0), self.recentered[len(self.fixes)/2])
+        fmt += 'cep95=%f\n' % self.d((0,0), self.recentered[int(len(self.fixes)*0.95)])
+        fmt += 'cep99=%f\n' % self.d((0,0), self.recentered[int(len(self.fixes)*0.99)])
         fmt += 'set parametric\n'
         fmt += 'set trange [0:2*pi]\n'
         fmt += 'cx(t, r) = sin(t)*r\n'
@@ -130,12 +134,15 @@ class spaceplot:
         fmt += 'chlen = cep/20\n'
         fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
         fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
-        fmt += 'plot  cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
-        fmt += ' "-" using 1:2 with points ls 3 title "%d GPS fixes" ' % (len(self.fixes))
+        if len(self.fixes) > 1000: plot_style = 'dots'
+        else: plot_style = 'points'
+        fmt += 'plot "-" using 1:2 with ' + plot_style + ' ls 3 title "%d GPS fixes" ' % (len(self.fixes))
         if not gps.isnan(alt_avg):
-            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f, EP (50%%) = %f" \n' % (lon_max +1, alt_avg, alt_num, alt_avg, alt_ep)
-        else:
-            fmt += "\n"
+            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with %s ls 2 title " %d Altitude fixes, Average = %f, EP (50%%) = %f"' % (lon_max +1, alt_avg, plot_style, alt_num, alt_avg, alt_ep)
+        fmt += ', cx(t, cep),cy(t, cep) ls 1 title "CEP (50%%) = %f meters"' % (cep_meters)
+        fmt += ', cx(t, cep95),cy(t, cep95) title "CEP (95%%) = %f meters"' % (cep95_meters)
+        fmt += ', cx(t, cep99),cy(t, cep99) title "CEP (99%%) = %f meters"' % (cep99_meters)
+        fmt += "\n"
         fmt += self.header(session)
         fmt += self.data(session)
         if not gps.isnan(alt_avg):
