@@ -3,9 +3,6 @@
 EnsureSConsVersion(1,1,0)
 
 import os, sys, shutil, re, commands
-from glob import glob
-from subprocess import Popen, PIPE, call
-from os import access, F_OK
 from leapsecond import save_leapseconds, make_leapsecond_include
 
 #
@@ -145,6 +142,7 @@ if not config.CheckLib('libncurses'):
 else:
     ncurseslibs = ["ncurses"]
 
+# TODO: Check that this is 1.x.x, not 0.1 
 if not config.CheckLib('libusb'):
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -200,7 +198,39 @@ for key in keys:
         else:
             raise ValueError
 
-sys.stdout.writelines(confdefs)
+confdefs.append('''
+/* will not handle pre-Intel Apples that can run big-endian */
+# if defined __BIG_ENDIAN__
+#  define WORDS_BIGENDIAN 1
+# else
+#  #undef WORDS_BIGENDIAN
+# endif
+
+/* Some libcs do not have strlcat/strlcpy. Local copies are provided */
+#ifndef HAVE_STRLCAT
+# ifdef __cplusplus
+extern "C" {
+# endif
+size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
+# ifdef __cplusplus
+}
+# endif
+#endif
+#ifndef HAVE_STRLCPY
+# ifdef __cplusplus
+extern "C" {
+# endif
+size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
+# ifdef __cplusplus
+}
+# endif
+#endif
+
+#define GPSD_CONFIG_H
+''')
+
+with open("gpsd_config.h", "w") as ofp:
+    ofp.writelines(confdefs)
 
 if not os.path.exists('leapseconds.cache'):
     try:
