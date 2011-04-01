@@ -81,11 +81,12 @@ for (name, default, help) in boolopts:
                   help=help)
 
 nonboolopts = (
-    ("gpsd-user",           "USER",    "privilege revocation user",   ""),
-    ("gpsd-group",          "GROUP",   "privilege revocation group",  ""),
-    ("limited-max-clients", "CLIENTS", "maximum allowed clients",     0),
-    ("limited-max-devices", "DEVICES", "maximum allowed devices",     0),
-    ("fixed-port-speed",    "SPEED",   "fixed serial port speed",     0),
+    ("gpsd-user",           "USER",     "privilege revocation user",     ""),
+    ("gpsd-group",          "GROUP",    "privilege revocation group",    ""),
+    ("sysconfdir",          "SYCONFDIR","system configuration directory","/etc"),
+    ("limited-max-clients", "CLIENTS",  "maximum allowed clients",       0),
+    ("limited-max-devices", "DEVICES",  "maximum allowed devices",       0),
+    ("fixed-port-speed",    "SPEED",    "fixed serial port speed",       0),
     )
 for (name, metavar, help, default) in nonboolopts:
         internal_name = internalize(name)
@@ -195,9 +196,9 @@ for key in keys:
         confdefs.append("/* #undef %s */\n\n" % key.upper())
     else:
         if type(value) == type(-1):
-            confdefs.append("#define %d %s\n\n" % value)
+            confdefs.append("#define %d %s\n\n" % (key.upper(), value))
         elif type(value) == type(""):
-            confdefs.append("#define %d \"%s\"\n\n" % value)
+            confdefs.append("#define %s \"%s\"\n\n" % (key.upper(), value))
         else:
             raise ValueError
 
