@@ -175,7 +175,7 @@ env = config.Finish()
 
 env.Library(target="gps", source=[
 	"ais_json.c",
-        "daemon.c",
+	"daemon.c",
 	"gpsutils.c",
 	"geoid.c",
 	"gpsdclient.c",
