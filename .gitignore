@@ -96,7 +96,6 @@ NEWS
 ChangeLog
 m4
 # SCons cruft
-.scons-option-cache
 .sconsign.dblite
 .sconf_temp
 # Documentation
