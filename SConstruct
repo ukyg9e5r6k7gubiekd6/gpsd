@@ -16,57 +16,58 @@ def internalize(s):
     return s.replace('-', '_')
 
 boolopts = (
-    ("ashtech",       "Ashtech support", True),
-    ("earthmate",     "DeLorme EarthMate Zodiac support", True),
-    ("evermore",      "EverMore binary support", True),
-    ("fv18",          "San Jose Navigation FV-18 support", True),
-    ("garmin",        "Garmin kernel driver support", True),
-    ("garmintxt",     "Garmin Simple Text support", True),
-    ("geostar",       "Geostar Protocol support", True),
-    ("itrax",         "iTrax hardware support", True),
-    ("mtk3301",       "MTK-3301 support", True),
-    ("navcom",        "Navcom support", True),
-    ("nmea",          "NMEA support", True),
-    ("oncore",        "Motorola OnCore chipset support", True),
-    ("sirf",          "SiRF chipset support", True),
-    ("superstar2",    "Novatel SuperStarII chipset support", True),
-    ("tnt",           "True North Technologies support", True),
-    ("tripmate",      "DeLorme TripMate support", True),
-    ("tsip",          "Trimble TSIP support", True),
-    ("ubx",           "UBX Protocol support", True),
-    # Non-GPS protcols
-    ("aivdm",         "AIVDM support", True),
-    ("gpsclock",      "GPSClock support", True),
-    ("ntrip",         "NTRIP support", True),
-    ("oceanserver",   "OceanServer support", True),
-    ("rtcm104v2",     "rtcm104v2 support", True),
-    ("rtcm104v3",     "rtcm104v3 support", False),
+    # GPS protocols
+    ("nmea",          True,  "NMEA support"),
+    ("ashtech",       True,  "Ashtech support"),
+    ("earthmate",     True,  "DeLorme EarthMate Zodiac support"),
+    ("evermore",      True,  "EverMore binary support"),
+    ("fv18",          True,  "San Jose Navigation FV-18 support"),
+    ("garmin",        True,  "Garmin kernel driver support"),
+    ("garmintxt",     True,  "Garmin Simple Text support"),
+    ("geostar",       True,  "Geostar Protocol support"),
+    ("itrax",         True,  "iTrax hardware support"),
+    ("mtk3301",       True,  "MTK-3301 support"),
+    ("navcom",        True,  "Navcom support"),
+    ("oncore",        True,  "Motorola OnCore chipset support"),
+    ("sirf",          True,  "SiRF chipset support"),
+    ("superstar2",    True,  "Novatel SuperStarII chipset support"),
+    ("tnt",           True,  "True North Technologies support"),
+    ("tripmate",      True,  "DeLorme TripMate support"),
+    ("tsip",          True,  "Trimble TSIP support"),
+    ("ubx",           True,  "UBX Protocol support"),
+    # Non-GPS protocols
+    ("aivdm",         True,  "AIVDM support"),
+    ("gpsclock",      True,  "GPSClock support"),
+    ("ntrip",         True,  "NTRIP support"),
+    ("oceanserver",   True,  "OceanServer support"),
+    ("rtcm104v2",     True,  "rtcm104v2 support"),
+    ("rtcm104v3",     False, "rtcm104v3 support"),
     # Time service
-    ("ntpshm",        "NTP time hinting support", True),
-    ("pps",           "PPS time syncing support", True),
-    ("pps_on_cts",    "PPS pulse on CTS rather than DCD", False),
+    ("ntpshm",        True,  "NTP time hinting support"),
+    ("pps",           True,  "PPS time syncing support"),
+    ("pps_on_cts",    False, "PPS pulse on CTS rather than DCD"),
     # Export methods
-    ("socket-export", "data export over sockets", True),
-    ("dbus-export",   "enable DBUS export support", True),
-    ("shm-export",    "export via shared memory", True),
+    ("socket-export", True,  "data export over sockets"),
+    ("dbus-export",   True,  "enable DBUS export support"),
+    ("shm-export",    True,  "export via shared memory"),
     # Communication
-    ("bluetooth",     "BlueZ support for Bluetooth devices", False),
-    ("ipv6",          "build IPv6 support", True),
+    ("bluetooth",     False, "BlueZ support for Bluetooth devices"),
+    ("ipv6",          True,  "build IPv6 support"),
     # Client-side options
-    ("clientdebug",   "client debugging support", True),
-    ("oldstyle",      "oldstyle (pre-JSON) protocol support", True),
-    ("libgpsmm",      "build C++ bindings", True),
-    ("libQgpsmm",     "build QT bindings", False),
-    ("reconfigure",   "allow gpsd to change device settings", True),
-    ("controlsend",   "allow gpsctl/gpsmon to change device settings", True),
-    ("cheapfloats",   "float ops are cheap, compute all error estimates", True),
-    ("squelch",       "squelch gpsd_report/gpsd_hexdump to save cpu", False),
+    ("clientdebug",   True,  "client debugging support"),
+    ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
+    ("libgpsmm",      True,  "build C++ bindings"),
+    ("libQgpsmm",     False, "build QT bindings"),
+    ("reconfigure",   True,  "allow gpsd to change device settings"),
+    ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
+    ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
+    ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     # Miscellaneous
-    ("profiling",     "Build with profiling enabled", True),
-    ("timing",        "latency timing support", True),
-    ("control-socket","control socket for hotplug notifications", True)
+    ("profiling",     False, "Build with profiling enabled"),
+    ("timing",        True,  "latency timing support"),
+    ("control-socket",True,  "control socket for hotplug notifications")
     )
-for (name, help, default) in boolopts:
+for (name, default, help) in boolopts:
     internal_name = internalize(name)
     if default:
         AddOption('--disable-'+ name,
@@ -104,6 +105,17 @@ for (name, metavar, help, default) in nonboolopts:
 env = Environment(tools=["default", "tar"])
 env.SConsignFile(".sconsign.dblite")
 
+# Enable all GCC warnings except uninitialized and
+# missing-field-initializers, which we can't help triggering because
+# of the way some of the JSON code is generated.
+# Also not including -Wcast-qual
+if env['CC'] == 'gcc':
+    env.Append(CFLAGS=Split('''-Wextra -Wall -Wno-uninitialized
+                            -Wno-missing-field-initializers -Wcast-align
+                            -Wmissing-declarations -Wmissing-prototypes
+                            -Wstrict-prototypes -Wpointer-arith -Wreturn-type
+                            -D_GNU_SOURCE'''))
+
 # Should we build with profiling?
 if GetOption('profiling'):
     env.Append(CCFLAGS=['-pg'])
@@ -120,10 +132,14 @@ config = Configure(env)
 
 confdefs = ["/* gpsd_config.h.  Generated by scons, do not hand-hack.  */\n\n"]
 
-if not config.CheckCXX():
-    print('!! Your compiler and/or environment is not correctly configured.')
-    Exit(0)
+cxx = config.CheckCXX()
 
+for f in ("daemon", "strlcpy", "strlcat"):
+    if config.CheckFunc(f):
+        confdefs.append("#define HAVE_%s 1\n\n" % f.upper())
+    else:
+        confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
+    
 if not config.CheckLib('libncurses'):
     ncurseslibs = []
 else:
@@ -276,9 +292,9 @@ if ncurseslibs:
 env.Default(*default_targets)
 
 # Test programs
+# TODO: conditionally add test_gpsmm and test_qgpsmm
 testprogs = ["test_float", "test_trig", "test_bits", "test_packet",
              "test_mkgmtime", "test_geoid", "test_json"]
-# TODO: conditionally add test_gpsmm and test_qgpsmm
 
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
